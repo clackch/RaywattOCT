@@ -1,0 +1,439 @@
+﻿<Window x:Class="RaywattOCT.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RaywattOCT"
+        mc:Ignorable="d"
+        WindowStyle="None"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Title="RaywattOCT" Width="1280" Height="1024">
+    <Window.Resources>
+        <Style x:Key="MenuButton" TargetType="{x:Type Button}">
+            <Setter Property="Width">
+                <Setter.Value>96</Setter.Value>
+            </Setter>
+            <Setter Property="Height">
+                <Setter.Value>96</Setter.Value>
+            </Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type local:MenuButton}">
+                        <Grid Width="96" Height="96">
+                            <Grid.Background>
+                                <ImageBrush ImageSource="/res/button/admin.png" Stretch="Fill"/>
+                            </Grid.Background>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="19"/>
+                                <RowDefinition Height="{TemplateBinding IconSize}"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="19"/>
+                            </Grid.RowDefinitions>
+                            <Image x:Name="icon" Grid.Row="1" Source="{Binding Path=Icon, RelativeSource={RelativeSource TemplatedParent}}" Margin="0,0,0,0" Stretch="Uniform"/>
+                            <TextBlock x:Name="title" Grid.Row="2" Text="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Bottom" Foreground="#b6bbd2" FontSize="12pt" FontFamily="Segoe UI"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsDefaulted" Value="true">
+                                <Setter TargetName="title" Property="Foreground" Value="#b6bbd2"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="true">
+                                <Setter TargetName="icon" Property="Source" Value="{Binding Path=IconOv, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                <Setter TargetName="title" Property="Foreground" Value="#fd7d37"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="InitializeButton" TargetType="{x:Type Button}">
+            <Setter Property="Width">
+                <Setter.Value>184</Setter.Value>
+            </Setter>
+            <Setter Property="Height">
+                <Setter.Value>48</Setter.Value>
+            </Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Grid Width="184" Height="48">
+                            <Grid.Background>
+                                <ImageBrush ImageSource="/res/button/initialize.png" Stretch="Fill"/>
+                            </Grid.Background>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="25"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="30"/>                                
+                            </Grid.ColumnDefinitions>
+                            <Image x:Name="icon" Grid.Column="1" Source="/res/icon/initialize.png" Margin="0,0,0,0" Width="25" Height="25"/>
+                            <TextBlock x:Name="title" Grid.Column="2" Text="Initialize" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#e6e6e6" FontSize="14pt" FontFamily="Segoe UI"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsDefaulted" Value="true">
+                                <Setter TargetName="icon" Property="Source" Value="/res/icon/initialize.png"/>
+                                <Setter TargetName="title" Property="Foreground" Value="#e6e6e6"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="true">
+                                <Setter TargetName="icon" Property="Source" Value="/res/icon/initialize_ov.png"/>
+                                <Setter TargetName="title" Property="Foreground" Value="#fd7d37"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ScanButton" TargetType="{x:Type Button}">
+            <Setter Property="Width">
+                <Setter.Value>168</Setter.Value>
+            </Setter>
+            <Setter Property="Height">
+                <Setter.Value>52</Setter.Value>
+            </Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Grid>
+                            <Image x:Name="background" Source="/res/button/scan.png"/>
+                            <TextBlock x:Name="title" Text="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#fcfdfe" FontSize="14pt" FontFamily="Segoe UI"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsDefaulted" Value="true">
+                                <Setter TargetName="background" Property="Source" Value="/res/button/scan.png"/>
+                                <Setter TargetName="title" Property="Foreground" Value="#fcfdfe"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="true">
+                                <Setter TargetName="background" Property="Source" Value="/res/button/scan_ov.png"/>
+                                <Setter TargetName="title" Property="Foreground" Value="#85a8ff"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="PlayButton" TargetType="{x:Type Button}">
+            <Setter Property="Width">
+                <Setter.Value>38</Setter.Value>
+            </Setter>
+            <Setter Property="Height">
+                <Setter.Value>38</Setter.Value>
+            </Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type local:PlayButton}">
+                        <Grid>
+                            <Image x:Name="icon" Source="{Binding Path=Icon, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsDefaulted" Value="true">
+                                <Setter TargetName="icon" Property="Source" Value="{Binding Path=Icon, RelativeSource={RelativeSource TemplatedParent}}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="true">
+                                <Setter TargetName="icon" Property="Source" Value="{Binding Path=IconOv, RelativeSource={RelativeSource TemplatedParent}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="CatheterButton" TargetType="{x:Type Button}">
+            <Setter Property="Width">
+                <Setter.Value>189</Setter.Value>
+            </Setter>
+            <Setter Property="Height">
+                <Setter.Value>48</Setter.Value>
+            </Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Grid>
+                            <Image Source="/res/button/catheter.png"/>
+                            <TextBlock x:Name="title" Text="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#bfbfbf" FontSize="13pt" FontFamily="Segoe UI"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsDefaulted" Value="true">
+                                <Setter TargetName="title" Property="Foreground" Value="#bfbfbf"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="true">
+                                <Setter TargetName="title" Property="Foreground" Value="#fe7124"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!-- Custom Slider Style -->
+        <SolidColorBrush x:Key="SliderForeground" Color="#DFE7F2"/>
+        <LinearGradientBrush x:Key="SliderBackground" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#8996AA" Offset="0.0"/>
+            <GradientStop Color="#828FA2" Offset="0.2"/>
+            <GradientStop Color="#788496" Offset="0.4"/>
+            <GradientStop Color="#6D788A" Offset="0.6"/>
+            <GradientStop Color="#646E7E" Offset="0.8"/>
+        </LinearGradientBrush>
+        <Style x:Key="SliderThumb" TargetType="Thumb">
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Thumb">
+                        <Ellipse Height="17" Width="17">
+                            <Ellipse.Fill>
+                                <ImageBrush ImageSource="/res/bar/circle.png"/>
+                            </Ellipse.Fill>
+                        </Ellipse>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <ControlTemplate x:Key="SliderTemplate" TargetType="{x:Type Slider}">
+            <Border Background="Transparent" SnapsToDevicePixels="True">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="20"/>
+                    </Grid.RowDefinitions>
+                    <DockPanel LastChildFill="True">
+                        <Border x:Name="PART_SelectionRange" Height="5" ClipToBounds="True" Visibility="Visible">
+                            <Rectangle Margin="0,0,-10,0" RadiusX="2" RadiusY="2" Fill="{StaticResource SliderForeground}"/>
+                        </Border>
+                        <Border ClipToBounds="True" Height="5" Visibility="Visible">
+                            <Rectangle Margin="0,0,0,0" RadiusX="2" RadiusY="2" Fill="{StaticResource SliderBackground}"/>
+                        </Border>
+                    </DockPanel>
+                    <Track x:Name="PART_Track">
+                        <Track.Thumb>
+                            <Thumb Style="{StaticResource SliderThumb}" VerticalAlignment="Center" OverridesDefaultStyle="True" Focusable="False"/>
+                        </Track.Thumb>
+                    </Track>
+                </Grid>
+            </Border>
+        </ControlTemplate>
+        <Style x:Key="SliderStyle" TargetType="{x:Type Slider}">
+            <Setter Property="Template" Value="{StaticResource SliderTemplate}"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="AutoToolTipPlacement" Value="None"/>
+            <Setter Property="IsMoveToPointEnabled" Value="True"/>
+            <Setter Property="SelectionStart" Value="0"/>
+            <Setter Property="SelectionEnd" Value="{Binding Path=Value, RelativeSource={RelativeSource Self}}"/>
+            <Setter Property="Stylus.IsPressAndHoldEnabled" Value="False"/>
+        </Style>
+        <!-- Progress Bar Style -->
+        <Style x:Key="ProgressStyle" TargetType="{x:Type ProgressBar}">
+            <!--
+            <Setter Property="Height" Value="7"/>
+            <Setter Property="Foreground" Value="#FD7B5D"/>
+            <Setter Property="Background" Value="#E2DEEC"/>
+            -->
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ProgressBar}">
+                        <Grid Height="7">
+                            <Border x:Name="PART_Track" Height="7" CornerRadius="4" BorderBrush="#E2DEEC" Background="#E2DEEC" BorderThickness="1" Margin="0,0,0,0"/>
+                            <Border x:Name="PART_Indicator" HorizontalAlignment="Left" Height="7" CornerRadius="4" BorderBrush="#FD7B5D" Background="#FD7B5D" BorderThickness="1" Margin="0,0,0,0"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Grid Background="#232331">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="390"/>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="1">
+            <StackPanel Orientation="Horizontal" Margin="0,23,0,0">
+                <Button Style="{DynamicResource InitializeButton}" HorizontalAlignment="Left" Command="{Binding CmdInitialize}"/>
+                <TextBlock Text="Press Initialize Button" Foreground="#898d98" FontSize="12pt" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="25,0,0,0"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,23,0,0">
+                <local:MenuButton Style="{DynamicResource MenuButton}" Icon="/res/icon/admin.png" IconOv="/res/icon/admin_ov.png" IconSize="32" Content="Admin" Margin="0,0,2,0"/>
+                <local:MenuButton Style="{DynamicResource MenuButton}" Icon="/res/icon/setting.png" IconOv="/res/icon/setting_ov.png" IconSize="32" Content="Setting" Margin="0,0,2,0"/>
+                <local:MenuButton Style="{DynamicResource MenuButton}" Icon="/res/icon/oct.png" IconOv="/res/icon/oct_ov.png" IconSize="32" Content="OCT FFR" Margin="0,0,2,0"/>
+                <local:MenuButton Style="{DynamicResource MenuButton}" Icon="/res/icon/exit.png" IconOv="/res/icon/exit_ov.png" IconSize="35" Content="Exit" Command="{Binding CmdExit}"/>
+            </StackPanel>
+            <Grid Width="390" Height="132" Margin="0,15,0,0">
+                <Grid.Background>
+                    <ImageBrush ImageSource="/res/bg/patient_bg.png" Stretch="Fill"/>
+                </Grid.Background>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="40"/>
+                    <ColumnDefinition Width="78"/>
+                    <ColumnDefinition Width="40"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Image Grid.Column="1" Source="/res/icon/patient.png" Stretch="Uniform"/>
+                <Grid Grid.Column="3">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="33"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="43"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="1" Text="Patient Name" Foreground="#8b92a6" FontSize="12pt" VerticalAlignment="Top" FontFamily="Segoe UI"/>
+                    <TextBlock x:Name="PatientName" Grid.Row="2" Text="HyunJun Kim" Foreground="#acb3d8" FontSize="16pt" VerticalAlignment="Bottom" FontFamily="Segoe UI Semibold"/>
+                </Grid>
+            </Grid>
+            <Grid Width="390" Height="126" Margin="0,15,0,0">
+                <Grid.Background>
+                    <ImageBrush ImageSource="/res/bg/scan_bg.png" Stretch="Fill"/>
+                </Grid.Background>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="37"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="37"/>
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="22"/>
+                        <RowDefinition Height="52"/>
+                        <RowDefinition Height="15"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="30"/>
+                    </Grid.RowDefinitions>
+                    <Button Grid.Row="1" Style="{DynamicResource ScanButton}" HorizontalAlignment="Left" Content="Scan" Command="{Binding CmdScan}"/>
+                    <ProgressBar Style="{DynamicResource ProgressStyle}" Grid.Row="3" HorizontalAlignment="Stretch" Value="{Binding ScanProgress}"/>
+                </Grid>
+            </Grid>
+            <Grid Width="390" Height="110" Margin="0,15,0,0">
+                <Grid.Background>
+                    <ImageBrush ImageSource="/res/bg/end_bg.png" Stretch="Fill"/>                        
+                </Grid.Background>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="37"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="37"/>
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="27"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="27"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal">
+                        <Button Style="{DynamicResource ScanButton}" HorizontalAlignment="Left" Content="End Review" Margin="0,2,0,2"/>
+                        <local:PlayButton Style="{DynamicResource PlayButton}" Icon="/res/icon/rew.png" IconOv="/res/icon/rew_ov.png"  Margin="8,8,0,8"/>
+                        <local:PlayButton Style="{DynamicResource PlayButton}" Icon="/res/icon/play.png" IconOv="/res/icon/play_ov.png" Margin="5,8,0,8"/>
+                        <local:PlayButton Style="{DynamicResource PlayButton}" Icon="/res/icon/fwd.png" IconOv="/res/icon/fwd_ov.png" Margin="5,8,0,8"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+            <Grid Width="390" Height="192" Margin="0,15,0,0">
+                <Grid.Background>
+                    <ImageBrush ImageSource="/res/bg/brightness_bg.png" Stretch="Fill"/>
+                </Grid.Background>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="55"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="55"/>
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Column="1">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Brightness" Foreground="#8b92a6" FontSize="12pt" Margin="0,31,0,0" FontFamily="Segoe UI"/>
+                        <Slider Style="{DynamicResource SliderStyle}" HorizontalAlignment="Stretch" Margin="0,14,0,0"/>
+                        <TextBlock Text="Contrast" Foreground="#8b92a6" FontSize="12pt" Margin="0,34,0,0" FontFamily="Segoe UI"/>
+                        <Slider Style="{DynamicResource SliderStyle}" HorizontalAlignment="Stretch" Margin="0,14,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+            <StackPanel Margin="0,22,0,0" Orientation="Horizontal">
+                <Button Style="{DynamicResource CatheterButton}" Content="Load Catheter"/>
+                <Button Style="{DynamicResource CatheterButton}" Content="Unload Catheter" Margin="11,0,0,0"/>
+            </StackPanel>
+            <Grid Margin="0,22,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="48"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="222"/>
+                    <ColumnDefinition Width="42"/>                    
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="1" Text="Motor" Foreground="#b3b6c1" FontSize="14pt" VerticalAlignment="Center" HorizontalAlignment="Left" FontFamily="Segoe UI"/>
+                <Button Grid.Column="2" Command="{Binding CmdMotorOnOff}" HorizontalAlignment="Right">
+                    <Button.Template>
+                        <ControlTemplate>
+                            <Grid>
+                                <Image x:Name="button" Source="/res/button/motor.png"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" x:Name="textOn" Text="On" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#85a8ff" FontSize="14pt" FontFamily="Segoe UI Semibold"/>
+                                    <TextBlock Grid.Column="1" x:Name="textOff" Text="Off" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#7c7f8f" FontSize="14pt" FontFamily="Segoe UI Semibold"/>
+                                </Grid>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <DataTrigger Binding="{Binding MotorOn}" Value="True">
+                                    <Setter TargetName="button" Property="Source" Value="/res/button/motor.png"/>
+                                    <Setter TargetName="textOn" Property="Foreground" Value="#85a8ff"/>
+                                    <Setter TargetName="textOff" Property="Foreground" Value="#7c7f8f"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding MotorOn}" Value="False">
+                                    <Setter TargetName="button" Property="Source" Value="/res/button/motor_ov.png"/>
+                                    <Setter TargetName="textOn" Property="Foreground" Value="#7c7f8f"/>
+                                    <Setter TargetName="textOff" Property="Foreground" Value="#85a8ff"/>
+                                </DataTrigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+            <Grid Margin="0,43,0,0">
+                <TextBlock Text="{Binding SystemDate}" Foreground="#898d98" FontSize="10pt" Margin="8,0,0,0" FontFamily="Segoe UI"/>
+                <TextBlock Text="{Binding SystemTime}" Foreground="#898d98" FontSize="10pt" Margin="126,0,0,0" FontFamily="Segoe UI"/>
+            </Grid>
+        </StackPanel>
+        <Grid Grid.Column="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="84"/>
+                <RowDefinition Height="10"/>
+                <RowDefinition Height="830"/>
+                <RowDefinition Height="10"/>
+                <RowDefinition Height="81"/>
+                <RowDefinition Height="9"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="40"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="36"/>
+                </Grid.ColumnDefinitions>
+                <Grid.Background>
+                    <ImageBrush ImageSource="/res/bg/title_bg.png" Stretch="Fill"/>
+                </Grid.Background>
+                <TextBlock Grid.Column="1" Text="OCT File" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="20pt" Foreground="#d7d8d9" FontFamily="Segoe UI Semibold"/>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock Text="0 / 0" Margin="0,0,36,0" FontSize="12pt" Foreground="#bbc1c6" FontFamily="Segoe UI"/>
+                    <TextBlock Text="Real time" FontSize="12pt" Foreground="#bbc1c6" FontFamily="Segoe UI"/>
+                </StackPanel>
+            </Grid>
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <StackPanel.Background>
+                        <ImageBrush ImageSource="/res/bg/body_bg.png" Stretch="Fill"/>
+                    </StackPanel.Background>
+                </StackPanel>
+            </Grid>
+            <Grid Grid.Row="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <StackPanel.Background>
+                        <ImageBrush ImageSource="/res/bg/bottom_bg.png" Stretch="Fill"/>
+                    </StackPanel.Background>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

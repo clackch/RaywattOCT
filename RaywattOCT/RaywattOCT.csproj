@@ -1,0 +1,139 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="res\bar\brightness_e.png" />
+    <None Remove="res\bar\brightness_e_center.png" />
+    <None Remove="res\bar\brightness_e_left.png" />
+    <None Remove="res\bar\brightness_e_right.png" />
+    <None Remove="res\bar\brightness_f.png" />
+    <None Remove="res\bar\brightness_f_center.png" />
+    <None Remove="res\bar\brightness_f_left.png" />
+    <None Remove="res\bar\brightness_f_right.png" />
+    <None Remove="res\bar\circle.png" />
+    <None Remove="res\bar\scan_e.png" />
+    <None Remove="res\bar\scan_e_center.png" />
+    <None Remove="res\bar\scan_e_left.png" />
+    <None Remove="res\bar\scan_e_right.png" />
+    <None Remove="res\bar\scan_f.png" />
+    <None Remove="res\bar\scan_f_center.png" />
+    <None Remove="res\bar\scan_f_left.png" />
+    <None Remove="res\bar\scan_f_right.png" />
+    <None Remove="res\bg\body_bg.png" />
+    <None Remove="res\bg\bottom_bg.png" />
+    <None Remove="res\bg\brightness_bg.png" />
+    <None Remove="res\bg\end_bg.png" />
+    <None Remove="res\bg\no_img.png" />
+    <None Remove="res\bg\patient_bg.png" />
+    <None Remove="res\bg\scan_bg.png" />
+    <None Remove="res\bg\title_bg.png" />
+    <None Remove="res\button\admin.png" />
+    <None Remove="res\button\admin_ov.png" />
+    <None Remove="res\button\catheter.png" />
+    <None Remove="res\button\center_initialize.png" />
+    <None Remove="res\button\center_scan.png" />
+    <None Remove="res\button\center_scan_ov.png" />
+    <None Remove="res\button\initialize.png" />
+    <None Remove="res\button\left_initialize.png" />
+    <None Remove="res\button\left_scan.png" />
+    <None Remove="res\button\left_scan_ov.png" />
+    <None Remove="res\button\motor.png" />
+    <None Remove="res\button\motor_old.png" />
+    <None Remove="res\button\motor_ov.png" />
+    <None Remove="res\button\right_initialize.png" />
+    <None Remove="res\button\right_scan.png" />
+    <None Remove="res\button\right_scan_ov.png" />
+    <None Remove="res\button\scan.png" />
+    <None Remove="res\button\scan_ov.png" />
+    <None Remove="res\icon\admin.png" />
+    <None Remove="res\icon\admin_ov.png" />
+    <None Remove="res\icon\exit.png" />
+    <None Remove="res\icon\exit_ov.png" />
+    <None Remove="res\icon\fwd.png" />
+    <None Remove="res\icon\fwd_ov.png" />
+    <None Remove="res\icon\initialize.png" />
+    <None Remove="res\icon\initialize_ov.png" />
+    <None Remove="res\icon\oct.png" />
+    <None Remove="res\icon\oct_ov.png" />
+    <None Remove="res\icon\patient.png" />
+    <None Remove="res\icon\pause.png" />
+    <None Remove="res\icon\pause_ov.png" />
+    <None Remove="res\icon\play.png" />
+    <None Remove="res\icon\play_ov.png" />
+    <None Remove="res\icon\rew.png" />
+    <None Remove="res\icon\rew_ov.png" />
+    <None Remove="res\icon\setting.png" />
+    <None Remove="res\icon\setting_ov.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="res\bar\brightness_e.png" />
+    <Resource Include="res\bar\brightness_e_center.png" />
+    <Resource Include="res\bar\brightness_e_left.png" />
+    <Resource Include="res\bar\brightness_e_right.png" />
+    <Resource Include="res\bar\brightness_f.png" />
+    <Resource Include="res\bar\brightness_f_center.png" />
+    <Resource Include="res\bar\brightness_f_left.png" />
+    <Resource Include="res\bar\brightness_f_right.png" />
+    <Resource Include="res\bar\circle.png" />
+    <Resource Include="res\bar\scan_e.png" />
+    <Resource Include="res\bar\scan_e_center.png" />
+    <Resource Include="res\bar\scan_e_left.png" />
+    <Resource Include="res\bar\scan_e_right.png" />
+    <Resource Include="res\bar\scan_f.png" />
+    <Resource Include="res\bar\scan_f_center.png" />
+    <Resource Include="res\bar\scan_f_left.png" />
+    <Resource Include="res\bar\scan_f_right.png" />
+    <Resource Include="res\bg\body_bg.png" />
+    <Resource Include="res\bg\bottom_bg.png" />
+    <Resource Include="res\bg\brightness_bg.png" />
+    <Resource Include="res\bg\end_bg.png" />
+    <Resource Include="res\bg\no_img.png" />
+    <Resource Include="res\bg\patient_bg.png" />
+    <Resource Include="res\bg\scan_bg.png" />
+    <Resource Include="res\bg\title_bg.png" />
+    <Resource Include="res\button\admin.png" />
+    <Resource Include="res\button\admin_ov.png" />
+    <Resource Include="res\button\catheter.png" />
+    <Resource Include="res\button\center_initialize.png" />
+    <Resource Include="res\button\center_scan.png" />
+    <Resource Include="res\button\center_scan_ov.png" />
+    <Resource Include="res\button\initialize.png" />
+    <Resource Include="res\button\left_initialize.png" />
+    <Resource Include="res\button\left_scan.png" />
+    <Resource Include="res\button\left_scan_ov.png" />
+    <Resource Include="res\button\motor.png" />
+    <Resource Include="res\button\motor_old.png" />
+    <Resource Include="res\button\motor_ov.png" />
+    <Resource Include="res\button\right_initialize.png" />
+    <Resource Include="res\button\right_scan.png" />
+    <Resource Include="res\button\right_scan_ov.png" />
+    <Resource Include="res\button\scan.png" />
+    <Resource Include="res\button\scan_ov.png" />
+    <Resource Include="res\icon\admin.png" />
+    <Resource Include="res\icon\admin_ov.png" />
+    <Resource Include="res\icon\exit.png" />
+    <Resource Include="res\icon\exit_ov.png" />
+    <Resource Include="res\icon\fwd.png" />
+    <Resource Include="res\icon\fwd_ov.png" />
+    <Resource Include="res\icon\initialize.png" />
+    <Resource Include="res\icon\initialize_ov.png" />
+    <Resource Include="res\icon\oct.png" />
+    <Resource Include="res\icon\oct_ov.png" />
+    <Resource Include="res\icon\patient.png" />
+    <Resource Include="res\icon\pause.png" />
+    <Resource Include="res\icon\pause_ov.png" />
+    <Resource Include="res\icon\play.png" />
+    <Resource Include="res\icon\play_ov.png" />
+    <Resource Include="res\icon\rew.png" />
+    <Resource Include="res\icon\rew_ov.png" />
+    <Resource Include="res\icon\setting.png" />
+    <Resource Include="res\icon\setting_ov.png" />
+  </ItemGroup>
+
+</Project>

@@ -30,3 +30,15 @@
 *.exe
 *.out
 *.app
+
+# Temporary Files & Directories
+.vs
+.vs/*
+*.aps
+*.bak
+*.user
+extern
+*.bin
+*.dat
+bin
+obj
