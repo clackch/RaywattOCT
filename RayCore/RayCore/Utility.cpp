@@ -3,8 +3,7 @@
 #include <sys/timeb.h>
 #include <time.h>
 
-BOOL CUtility::StartThread(THREADPROC threadFunc, CThread*& pThread, bool& flagRun, LPVOID param) {
-	flagRun = true;
+BOOL CUtility::StartThread(THREADPROC threadFunc, CThread*& pThread, LPVOID param) {
 	pThread = new CThread(threadFunc, param);
 
 	if (pThread) {
@@ -15,10 +14,10 @@ BOOL CUtility::StartThread(THREADPROC threadFunc, CThread*& pThread, bool& flagR
 	}
 }
 
-void CUtility::StopThread(CThread *&pThread, bool &flagRun) {
-	flagRun = false;
-
+void CUtility::StopThread(CThread *&pThread) {
 	if (pThread == nullptr) return;
+
+	pThread->isRun = false;
 
 	ResumeThread(pThread);
 	pThread->thread.join();
