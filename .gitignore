@@ -42,3 +42,4 @@ extern
 *.dat
 bin
 obj
+x64
