@@ -9,6 +9,8 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
+using RaywattOCT.Controller;
+using System.Runtime.InteropServices;
 
 namespace RaywattOCT.ViewModel
 {
@@ -102,6 +104,7 @@ namespace RaywattOCT.ViewModel
         }
         private void Initialize()
         {
+            RayCoreWrapper.RayInitialize(RayCoreWrapper.ConvertToFunctionPtr(TestFunction));
             Trace.WriteLine("Initialize");
             ScanProgress = 0;
         }
@@ -132,6 +135,11 @@ namespace RaywattOCT.ViewModel
             catch (Exception e) {
                 Trace.WriteLine(e.StackTrace.ToString());
             }
+        }
+
+        private void TestFunction(int a, int b) {
+            string message = String.Format("[TestFunction] called with {0} and {1}", a, b);
+            Trace.WriteLine(message);
         }
     }
 }
