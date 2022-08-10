@@ -10,11 +10,11 @@ public:
 	std::thread thread;
 	std::mutex mMutex;
 	std::condition_variable sEvent;
-	bool isPaused;
+	bool isRun;
 
 public:
 	CThread(THREADPROC threadFunc, LPVOID param) : thread(threadFunc, param) {
-		isPaused = false;
+		isRun = true;
 	}
 
 	virtual ~CThread() {}
@@ -27,8 +27,8 @@ public:
 	virtual ~CUtility() {}
 
 public:
-	static BOOL StartThread(THREADPROC threadFunc, CThread *&pThread, bool &flagRun, LPVOID param);
-	static void StopThread(CThread *&pThread, bool &flagRun);
+	static BOOL StartThread(THREADPROC threadFunc, CThread *&pThread, LPVOID param);
+	static void StopThread(CThread *&pThread);
 	static void ResumeThread(CThread* pThread);
 	static void SuspendThread(CThread* pThread);
 

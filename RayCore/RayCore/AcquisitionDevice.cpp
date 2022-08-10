@@ -6,7 +6,6 @@
 
 IAcquisitionDevice::IAcquisitionDevice() {
 	m_pThread = NULL;
-	m_runThread = false;
 	m_isInit = false;
 
 	m_pImaging = NULL;
@@ -17,13 +16,13 @@ IAcquisitionDevice::~IAcquisitionDevice() {
 int IAcquisitionDevice::StartAcquisition() {
 	BOOL result = FALSE;
 
-	result = CUtility::StartThread(threadAcquire, m_pThread, m_runThread, (LPVOID)this);
+	result = CUtility::StartThread(threadAcquire, m_pThread, (LPVOID)this);
 
 	if (result) return NOERROR;
 	else return -1;
 }
 int IAcquisitionDevice::StopAcquisition() {
-	CUtility::StopThread(m_pThread, m_runThread);
+	CUtility::StopThread(m_pThread);
 
 	return NOERROR;
 }
@@ -37,7 +36,7 @@ UINT IAcquisitionDevice::threadAcquire(LPVOID param) {
 
 	pDevice->start();
 
-	while (pDevice->m_runThread) {
+	while (pDevice->m_pThread->isRun) {
 		unsigned short *pBuffer = pDevice->acquire(nCurFrame, nTotalFrame);
 		// To-Do : need Critical Section?
 		if (pImaging != NULL && pBuffer != NULL) {

@@ -160,12 +160,14 @@
     <ClInclude Include="DataManager.h" />
     <ClInclude Include="DataReader.h" />
     <ClInclude Include="DataWriter.h" />
+    <ClInclude Include="define.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="LaserController.h" />
     <ClInclude Include="MoriaCalibration.h" />
     <ClInclude Include="MoriaConfiguration.h" />
     <ClInclude Include="MoriaImaging.h" />
     <ClInclude Include="MotorController.h" />
+    <ClInclude Include="OCTSystem.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="RaywattCore.h" />
     <ClInclude Include="SerialPort.h" />
@@ -185,6 +187,7 @@
     <ClCompile Include="MoriaConfiguration.cpp" />
     <ClCompile Include="MoriaImaging.cpp" />
     <ClCompile Include="MotorController.cpp" />
+    <ClCompile Include="OCTSystem.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

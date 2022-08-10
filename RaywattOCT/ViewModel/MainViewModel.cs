@@ -53,6 +53,12 @@ namespace RaywattOCT.ViewModel
             set { scanProgress = value; OnPropertyChanged(nameof(ScanProgress)); }
         }
 
+        private string systemMessage = "Press Initialize Button";
+        public string SystemMessage { 
+            get { return systemMessage; }
+            set { systemMessage = value; OnPropertyChanged(nameof(SystemMessage)); }
+        }
+
         private DelegateCommand cmdInitialize;
         public DelegateCommand CmdInitialize 
         {
@@ -140,6 +146,7 @@ namespace RaywattOCT.ViewModel
         private void TestFunction(int a, int b) {
             string message = String.Format("[TestFunction] called with {0} and {1}", a, b);
             Trace.WriteLine(message);
+            SystemMessage = "Initialize Done.";
         }
     }
 }

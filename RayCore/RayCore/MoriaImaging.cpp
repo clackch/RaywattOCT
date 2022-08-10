@@ -26,7 +26,6 @@ CMoriaImaging::CMoriaImaging(HWND hWnd) {
 	m_hWnd = hWnd;
 
 	m_pThread = NULL;
-	m_runThread = false;
 	m_waitForFringes = true;
 	m_pFringesBuffer = NULL;
 
@@ -135,18 +134,18 @@ void CMoriaImaging::Process(const Ipp16u* fringes) {
 
 int CMoriaImaging::Start() {
 	BOOL result = FALSE;
-	result = CUtility::StartThread(threadRender, m_pThread, m_runThread, (LPVOID)this);
+	result = CUtility::StartThread(threadRender, m_pThread, (LPVOID)this);
 
 	if (result) return NOERROR;
 	else return -1;
 }
 int CMoriaImaging::Stop() {
-	CUtility::StopThread(m_pThread, m_runThread);
+	CUtility::StopThread(m_pThread);
 
 	return NOERROR;
 }
 void CMoriaImaging::DoAsyncRender(Ipp16u* fringes) {
-	if (m_pThread == NULL || m_runThread == false) return;
+	if (m_pThread == NULL || m_pThread->isRun == false) return;
 
 	if (m_waitForFringes) {
 		m_pFringesBuffer = fringes;
@@ -548,12 +547,12 @@ UINT CMoriaImaging::threadRender(LPVOID param) {
 	CMoriaImaging* pImaging = (CMoriaImaging*)param;
 	HWND hWndView = pImaging->m_hWnd;
 
-	while(pImaging->m_runThread) {
+	while(pImaging->m_pThread->isRun) {
 		pImaging->m_waitForFringes = true;
 		CUtility::SuspendThread(pImaging->m_pThread);
 		pImaging->m_waitForFringes = false;
 
-		if (pImaging->m_runThread) {
+		if (pImaging->m_pThread->isRun) {
 			pImaging->Process(pImaging->m_pFringesBuffer);
 			// To-Do
 			// double buffering 필요?

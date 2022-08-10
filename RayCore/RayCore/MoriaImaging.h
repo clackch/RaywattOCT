@@ -13,7 +13,6 @@ private:
 	HWND m_hWnd;
 
 	CThread* m_pThread;
-	bool m_runThread;
 	bool m_waitForFringes;
 	Ipp16u* m_pFringesBuffer;
 

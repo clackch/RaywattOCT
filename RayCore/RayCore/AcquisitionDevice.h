@@ -8,7 +8,6 @@ class IAcquisitionDevice
 protected:
 	bool m_isInit;
 	CThread *m_pThread;
-	bool m_runThread;
 
 	CMoriaImaging* m_pImaging;
 	CDataWriter* m_pWriter;

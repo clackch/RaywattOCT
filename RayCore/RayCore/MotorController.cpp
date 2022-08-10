@@ -13,7 +13,6 @@ CMotorController::CMotorController() {
 	m_hUsbHandle = NULL;
 
 	m_pThread = NULL;
-	m_runThread = false;
 }
 
 CMotorController* CMotorController::GetInstance() {
@@ -50,7 +49,7 @@ bool CMotorController::Connect() {
 
 	if (m_initMotor) {
 		BOOL result = FALSE;
-		result = CUtility::StartThread(threadReadMotor, m_pThread, m_runThread, (LPVOID)this);
+		result = CUtility::StartThread(threadReadMotor, m_pThread, (LPVOID)this);
 
 		if (result == FALSE) {
 			Disconnect();
@@ -62,7 +61,7 @@ bool CMotorController::Connect() {
 }
 
 void CMotorController::Disconnect() {
-	CUtility::StopThread(m_pThread, m_runThread);
+	CUtility::StopThread(m_pThread);
 
 	if (m_hUsbHandle) {
 		libusb_close(m_hUsbHandle);
@@ -137,7 +136,7 @@ UINT CMotorController::threadReadMotor(LPVOID pParam) {
 	libusb_device_handle* hUsbHandle = pMotorController->m_hUsbHandle;
 	BYTE recvBuf[MAX_PATH];
 
-	while (pMotorController->m_runThread) {
+	while (pMotorController->m_pThread->isRun) {
 		int nRead = 0;
 		int err = libusb_bulk_transfer(hUsbHandle, USB_ENDPOINT_IN, recvBuf, sizeof(recvBuf), &nRead, USB_TIMEOUT);
 		if (err == 0) {

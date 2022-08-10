@@ -20,7 +20,6 @@ private:
 	libusb_device_handle* m_hUsbHandle;
 
 	CThread* m_pThread;
-	bool m_runThread;
 
 private:
 	static CMotorController* pInstance;
