@@ -1,10 +1,13 @@
 ﻿// dllmain.cpp : DLL 애플리케이션의 진입점을 정의합니다.
 #include "pch.h"
 #include "RaywattCore.h"
+#include "OCTSystem.h"
 #include <stdio.h>
 
+static COCTSystem octSystem;
+
 _declspec(dllexport) RayError RayInitialize(FunctionPtr cb) {
-    return RayError::OK;
+    return octSystem.Initialize(cb);
 }
 _declspec(dllexport) RayError RaySetMode(RayViewMode mode) {
     return RayError::OK;

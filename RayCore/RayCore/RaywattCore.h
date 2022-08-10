@@ -1,29 +1,10 @@
 #pragma once
-
+#include "define.h"
 /*
 * 
 * DLL Interface
 * 
 */
-typedef void (*FunctionPtr)(int, int);
-typedef void (*FunctionImgPtr)(void *, int, int, int);
-
-enum class RayError {
-	OK = 0,
-	InvalidArgument = 0xFFFF0000,
-};
-
-enum class RayProperty {
-	Unknown = 0,
-	Brightness = 1,
-	Contrast,
-};
-
-enum class RayViewMode {
-	Unknown = 0,
-	StandBy,
-	LiveView
-};
 
 extern "C" {
 	_declspec(dllexport) RayError RayInitialize(FunctionPtr cb);
