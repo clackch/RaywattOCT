@@ -2,48 +2,62 @@
 #include "pch.h"
 #include "RaywattCore.h"
 #include "OCTSystem.h"
+#include "MoriaConfiguration.h"
 #include <stdio.h>
 
 static COCTSystem octSystem;
+CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
 
-_declspec(dllexport) RayError RayInitialize(FunctionPtr cb) {
-    return octSystem.Initialize(cb);
+_declspec(dllexport) RayError RayRegisterCallback(FunctionPtr cb) {
+    return octSystem.RegisterCallback(cb);
 }
-_declspec(dllexport) RayError RaySetMode(RayViewMode mode) {
-    return RayError::OK;
+_declspec(dllexport) RayError RayInitialize() {
+    return octSystem.Initialize();
 }
-_declspec(dllexport) RayError RayPullbackScan(FunctionPtr cb) {
-    return RayError::OK;
+_declspec(dllexport) RayError RayPullbackScan() {
+    return octSystem.PullbackScan();
 }
-_declspec(dllexport) RayError RaySetProperty(RayProperty prop, int value) {
-    return RayError::OK;
+_declspec(dllexport) RayError RayLoadCatheter() {
+    return octSystem.LoadCatheter();
 }
-_declspec(dllexport) int RayGetProperty(RayProperty prop) {
-    const int brightness = 50;  // test data
-    const int contrast = 10;    // test data
-
-    switch (prop) {
-    case RayProperty::Brightness:
-        return brightness;
-    case RayProperty::Contrast:
-        return contrast;
-    default:
-        return (int)RayError::InvalidArgument;
-    }
-}
-_declspec(dllexport) RayError RayLoadCatheter(FunctionPtr cb) {
-    printf("RayLoadCatheter called.\n");
-    return RayError::OK;
-}
-_declspec(dllexport) RayError RayUnloadCatheter(FunctionPtr cb) {
-    printf("RayUnloadCatheter called.\n");
-    return RayError::OK;
+_declspec(dllexport) RayError RayUnloadCatheter() {
+    return octSystem.UnloadCatheter();
 }
 _declspec(dllexport) RayError RayRegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude) {
     printf("RayRegisterImageCallback called.\n");
     return RayError::OK;
 }
+_declspec(dllexport) RayError RaySetMode(RayViewMode mode) {
+    return RayError::OK;
+}
+_declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
 
+    switch (prop) {
+    case RayProperty::Brightness:
+        return octSystem.SetBrightnessProperty(value);
+    case RayProperty::Contrast:
+        return octSystem.SetContrastProperty(value);
+    case RayProperty::Degree:
+        return octSystem.SetDegreeProperty(value);
+    default:
+        return RayError::InvalidArgument;
+    }
+}
+_declspec(dllexport) double RayGetProperty(RayProperty prop) {
+
+    switch (prop) {
+    case RayProperty::Brightness:
+        return octSystem.GetBrightnessProperty();
+    case RayProperty::Contrast:
+        return octSystem.GetContrastProperty();
+    case RayProperty::Degree:
+        return octSystem.GetDegreeProperty();
+    case RayProperty::LoadCatheterTime:
+        return pConfig->GetLoadCatheterTimeProperty();
+    default:
+        return (int)RayError::InvalidArgument;
+    }
+}
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,

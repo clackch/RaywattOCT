@@ -7,10 +7,11 @@
 
 class CMoriaCalibration;
 class CThread;
+class CMessageService;
 class CMoriaImaging
 {
 private:
-	HWND m_hWnd;
+	CMessageService* m_msg;
 
 	CThread* m_pThread;
 	bool m_waitForFringes;
@@ -59,7 +60,7 @@ private:
 	int m_nCurFrame;
 	int m_nTotalFrame;
 public:
-	CMoriaImaging(HWND hWnd);
+	CMoriaImaging(CMessageService*);
 	virtual ~CMoriaImaging(void);
 
 	void Initialize();

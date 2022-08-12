@@ -113,6 +113,10 @@ public:
 	int getDmaXferSamples();
 	int getDmaBufferSamples();
 	int getScopeLength();
+
+	//Property
+	double GetLoadCatheterTimeProperty();
+
 private:
 	void initCircularizeMap();
 	void releaseCircularizeMap();
