@@ -125,12 +125,6 @@ void CMoriaImaging::Process(const Ipp16u* fringes) {
 	cv::convertScaleAbs(imageResultColor, imageResultColor, m_fContrast, m_fBrightness);
 
 	circularizeImage(imageResultColor, imageCircle);
-	cv::rotate(imageResultColor, imageRectangle, cv::ROTATE_90_COUNTERCLOCKWISE);
-
-	cv::imshow("image", imageResultColor);
-	cv::imshow("rectangle", imageRectangle);
-	cv::imshow("circle", imageCircle);
-	cv::waitKey(1);
 }
 
 int CMoriaImaging::Start() {
@@ -558,8 +552,8 @@ UINT CMoriaImaging::threadRender(LPVOID param) {
 			// To-Do
 			// double buffering 필요?
 			// Invert, coloring 을 View (Dialog) 쪽으로 뺄 수 없을까?
-			
-			pMsg->postMessage(WM_PROCESS_OCT_DONE, pImaging->m_nCurFrame, pImaging->m_nTotalFrame);
+
+			if(pMsg != nullptr) pMsg->postMessage(WM_PROCESS_OCT_DONE, pImaging->m_nCurFrame, pImaging->m_nTotalFrame);
 		}
 	}
 

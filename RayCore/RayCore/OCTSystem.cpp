@@ -17,6 +17,8 @@
 */
 COCTSystem::COCTSystem() {
 	m_callback = nullptr;
+	m_cbCrossSection = nullptr;
+	m_cbLongitude = nullptr;
 	m_pThreadService = nullptr;
 	m_pThreadInitialize = nullptr;
 	m_pThreadHoming = nullptr;
@@ -25,6 +27,13 @@ COCTSystem::COCTSystem() {
 	m_pThreadUpdateCutView = nullptr;
 	m_pThreadLoadCatheter = nullptr;
 	m_pThreadUnloadCatheter = nullptr;
+
+	m_curState = OCTScannerState::STATE_NONE;
+
+	//Property
+	m_fBrightness = 0.0f;
+	m_fContrast = 0.5f;
+	m_fDegree = 90;
 
 	CUtility::StartThread(threadService, m_pThreadService, this);
 
@@ -64,7 +73,10 @@ RayError COCTSystem::Initialize() {
 */
 RayError COCTSystem::PullbackScan() {
 
-	CUtility::StartThread(threadPullbackScan, m_pThreadPullbackScan, this);
+#ifdef TEST_VALUE_FILE_PATH
+	m_strFilePath = TEST_VALUE_FILE_PATH;
+#endif
+	postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)OCTScannerState::STATE_SCANNING);
 
 	return RayError::OK;
 }
@@ -85,6 +97,16 @@ RayError COCTSystem::LoadCatheter() {
 RayError COCTSystem::UnloadCatheter() {
 
 	CUtility::StartThread(threadUnloadCatheter, m_pThreadUnloadCatheter, this);
+
+	return RayError::OK;
+}
+
+/*
+* RegisterImageCallback
+*/
+RayError COCTSystem::RegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude) {
+	m_cbCrossSection = cbCrossSection;
+	m_cbLongitude = cbLongitude;
 
 	return RayError::OK;
 }
@@ -203,10 +225,10 @@ UINT COCTSystem::threadInitialize(LPVOID param) {
 	}
 
 	if (nResult == NOERROR) {
-		pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)OCTScannerState::STATE_HOMING, 0);
+		pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)OCTScannerState::STATE_HOMING);
 	}
 	else {
-		pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)OCTScannerState::STATE_INIT_FAILED, 0);
+		pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)OCTScannerState::STATE_INIT_FAILED);
 	}
 
 	while (pSystem->m_pThreadInitialize->isRun) {
@@ -240,7 +262,7 @@ UINT COCTSystem::threadHoming(LPVOID param) {
 		}
 	}
 
-	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)OCTScannerState::STATE_READY, 0);
+	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)OCTScannerState::STATE_READY);
 
 	while (pSystem->m_pThreadHoming->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
@@ -298,7 +320,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	}
 #endif
 
-	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)OCTScannerState::STATE_REVIEW, 0);
+	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)OCTScannerState::STATE_REVIEW);
 
 	while (pSystem->m_pThreadPullbackScan->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
@@ -327,7 +349,7 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 	}
 	pDataManager->StopSave();
 
-	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)OCTScannerState::STATE_SAVE_DONE, 0);
+	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)OCTScannerState::STATE_SAVE_DONE);
 
 	while (pSystem->m_pThreadSaveRaw->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
@@ -363,7 +385,7 @@ UINT COCTSystem::threadUpdateCutView(LPVOID param) {
 	delete pImaging;
 
 	if (pSystem->m_pThreadUpdateCutView->isRun) {
-		pSystem->postMessage(WM_UPDATE_CUTVIEW_DONE, 0, 0);
+		pSystem->postMessage(WM_UPDATE_CUTVIEW_DONE);
 	}
 
 	// wait for StopThread
@@ -413,7 +435,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	Sleep(pConfig->catheter.waitingTime);
 
 	// 6. Homing
-	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)OCTScannerState::STATE_READY, 0);
+	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)OCTScannerState::STATE_READY);
 
 	while (pSystem->m_pThreadLoadCatheter->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
@@ -550,6 +572,7 @@ LRESULT COCTSystem::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 	std::string strFrameInfo = "";
 
 	bool isRealTime = (nCurFrame == 0 && nTotalFrame == 0);
+	printf("%d / %d\n", nCurFrame, nTotalFrame);
 
 	if (m_curState >= OCTScannerState::STATE_REVIEW) {
 		if (isRealTime) return NOERROR;
@@ -566,16 +589,7 @@ LRESULT COCTSystem::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 		image = m_pImagingRealtime->GetCircleImage();
 	}
 
-	//TODO : display Screen
-	/*drawToPictureBox(m_pictOCTImage, image.cols, image.rows, (char*)image.data);
-
-	if (isRealTime) {
-		strFrameInfo.Format(_T("Real time"));
-	}
-	else {
-		strFrameInfo.Format(_T("%d / %d"), nCurFrame + 1, nTotalFrame);
-	}
-	setStaticText(IDC_STATIC_FRAME_INFO, strFrameInfo);*/
+	if (m_cbCrossSection != nullptr) m_cbCrossSection(image.data, image.cols, image.rows, image.channels());
 
 	return NOERROR;
 }
@@ -604,7 +618,7 @@ void COCTSystem::updateCutView(int drawSamples) {
 		cv::line(imgResize, ptStart, ptEnd, cv::Scalar(0xF5, 0xA5, 0x42), 2);
 	}
 
-	//drawToPictureBox(m_pictCutViewImage, imgResize.cols, imgResize.rows, (char*)imgResize.data);
+	if (m_cbLongitude != nullptr) m_cbLongitude(imgResize.data, imgResize.cols, imgResize.rows, imgResize.channels());
 }
 
 /*

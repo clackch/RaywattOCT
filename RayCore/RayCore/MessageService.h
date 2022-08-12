@@ -12,7 +12,7 @@ public:
 	CMessageService() {};
 	~CMessageService() {};
 
-	void postMessage(int, WPARAM, LPARAM);
+	void postMessage(int, WPARAM wParam = 0, LPARAM lParam = 0);
 	std::tuple<int, WPARAM, LPARAM> popMessage();
 
 };
