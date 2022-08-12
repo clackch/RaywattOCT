@@ -150,7 +150,11 @@
       <AdditionalLibraryDirectories>..\extern\opencv\lib;..\extern\ATS\Library\x64;..\extern\ipp\lib\intel64;..\extern\libusb\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(TargetPath)" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d</Command>
+      <Command>xcopy "$(TargetDir)*.dll" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
+xcopy "$(TargetDir)newmoria.ini" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
+xcopy "$(TargetDir)CALIBRATION.dat" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
+xcopy "$(TargetDir)BACKGROUND.bin" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
+xcopy "$(TargetDir)LUT.csv" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
