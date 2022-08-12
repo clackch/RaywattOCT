@@ -24,8 +24,7 @@ _declspec(dllexport) RayError RayUnloadCatheter() {
     return octSystem.UnloadCatheter();
 }
 _declspec(dllexport) RayError RayRegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude) {
-    printf("RayRegisterImageCallback called.\n");
-    return RayError::OK;
+    return octSystem.RegisterImageCallback(cbCrossSection, cbLongitude);
 }
 _declspec(dllexport) RayError RaySetMode(RayViewMode mode) {
     return RayError::OK;

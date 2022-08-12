@@ -12,6 +12,8 @@
 
 #define CUTVIEW_INTERPOLATION_SCALE		5.7
 
+//#define TEST_VALUE_FILE_PATH			_T("C:\\DataSave\\test\\0710_145631_6028rpm_20mms_2000Aline.bin")
+
 enum class AsyncWork {
 	Initialize = 0
 };
@@ -28,6 +30,9 @@ enum class OCTScannerState {
 	STATE_SAVE_DONE,
 };
 
+#ifdef TEST_VALUE_FILE_PATH
+class CDataReader;
+#endif
 class CThread;
 class CMoriaImaging;
 class CDataWriter;
@@ -37,6 +42,7 @@ class COCTSystem : public CMessageService
 private:
 	// Thread
 	FunctionPtr m_callback;
+	FunctionImgPtr m_cbCrossSection, m_cbLongitude;
 	
 	CThread* m_pThreadService;
 	CThread* m_pThreadInitialize;
@@ -54,6 +60,10 @@ private:
 	// Data Writer
 	CDataWriter* m_pDataWriter;
 	tstring m_strFilePath;
+
+#ifdef TEST_VALUE_FILE_PATH
+	CDataReader* m_pDataReader;
+#endif
 
 	// Cut View
 	CCutViewManager* m_pCutView;
@@ -81,6 +91,7 @@ public:
 	RayError PullbackScan();
 	RayError LoadCatheter();
 	RayError UnloadCatheter();
+	RayError RegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude);
 
 	//Property
 	double GetBrightnessProperty();
