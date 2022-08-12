@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
-using System.Windows;
-using System.Windows.Input;
 using System.Windows.Threading;
 using RaywattOCT.Controller;
 using System.Runtime.InteropServices;
+using System.Windows.Media.Imaging;
+using OpenCvSharp;
 
 namespace RaywattOCT.ViewModel
 {
@@ -59,6 +55,21 @@ namespace RaywattOCT.ViewModel
             set { systemMessage = value; OnPropertyChanged(nameof(SystemMessage)); }
         }
 
+        private BitmapSource crossSectionImage = new BitmapImage(GetResourceURI(null, "res/bg/body_bg.png"));
+        public BitmapSource CrossSectionImage { 
+            get { return crossSectionImage; }
+            set { crossSectionImage = value; OnPropertyChanged(nameof(CrossSectionImage)); }
+        }
+        private Mat imgCrossSection;
+
+        private BitmapSource longitudeImage = new BitmapImage(GetResourceURI(null, "res/bg/bottom_bg.png"));
+        public BitmapSource LongitudeImage
+        {
+            get { return longitudeImage; }
+            set { longitudeImage = value; OnPropertyChanged(nameof(LongitudeImage)); }
+        }
+        private Mat imgLongitude;
+
         private DelegateCommand cmdInitialize;
         public DelegateCommand CmdInitialize 
         {
@@ -95,12 +106,28 @@ namespace RaywattOCT.ViewModel
             }
         }
 
+        // to avoid garbage collection
+        private RayCoreWrapper.CallbackFunction cbFunction;
+        public RayCoreWrapper.CallbackFunction CBFunction => (this.cbFunction) ?? (this.cbFunction = new RayCoreWrapper.CallbackFunction(OnMsgCallback));
+
+        private RayCoreWrapper.CallbackFunctionWithImage cbCrossSection;
+        public RayCoreWrapper.CallbackFunctionWithImage CBCrossSection => (this.cbCrossSection) ?? (this.cbCrossSection = new RayCoreWrapper.CallbackFunctionWithImage(OnRecvCrossSection));
+
+        private RayCoreWrapper.CallbackFunctionWithImage cbLongitude;
+        public RayCoreWrapper.CallbackFunctionWithImage CBLongitude => (this.cbLongitude) ?? (this.cbLongitude = new RayCoreWrapper.CallbackFunctionWithImage(OnRecvLongitude));
+
         private DispatcherTimer timer = new DispatcherTimer();
+        private DispatcherTimer timerUpdateImage = new DispatcherTimer();
+
         public MainViewModel()
         {
             timer.Interval = TimeSpan.FromMilliseconds(1000);
             timer.Tick += new EventHandler(timerUpdateTime);
             timer.Start();
+
+            timerUpdateImage.Interval = TimeSpan.FromMilliseconds(5);
+            timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
+            timerUpdateImage.Start();
         }
 
         private void timerUpdateTime(object sender, EventArgs e)
@@ -108,10 +135,26 @@ namespace RaywattOCT.ViewModel
             SystemDate = DateTime.Now.ToString("yyyy-MM-dd");
             SystemTime = DateTime.Now.ToString("HH:mm:ss");
         }
+
+        private void timerFuncUpdateImage(object sender, EventArgs e)
+        {
+            if (imgCrossSection != null)
+            {
+                CrossSectionImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgCrossSection);
+            }
+            if (imgLongitude != null) { 
+                LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgLongitude);
+            }
+        }
         private void Initialize()
         {
-            RayCoreWrapper.RayInitialize(RayCoreWrapper.ConvertToFunctionPtr(TestFunction));
-            Trace.WriteLine("Initialize");
+            RayCoreWrapper.RayRegisterCallback(Marshal.GetFunctionPointerForDelegate(CBFunction));
+            RayCoreWrapper.RayRegisterImageCallback(
+                Marshal.GetFunctionPointerForDelegate(CBCrossSection),
+                Marshal.GetFunctionPointerForDelegate(CBLongitude));
+
+            RayCoreWrapper.RayInitialize();
+
             ScanProgress = 0;
         }
         private void Exit()
@@ -124,6 +167,8 @@ namespace RaywattOCT.ViewModel
             Trace.Write(((MotorOn) ? "On" : "Off"), "Motor");
         }
         private void Scan() {
+            RayCoreWrapper.RayPullbackScan();
+
             try
             {
                 var bw = new BackgroundWorker();
@@ -143,10 +188,42 @@ namespace RaywattOCT.ViewModel
             }
         }
 
-        private void TestFunction(int a, int b) {
-            string message = String.Format("[TestFunction] called with {0} and {1}", a, b);
-            Trace.WriteLine(message);
-            SystemMessage = "Initialize Done.";
+        private void OnMsgCallback(int request, int response) {
+            string message = String.Format("Request {0}, Response {1}", request, response);
+            SystemMessage = message;
+        }
+
+        private void OnRecvCrossSection(IntPtr data, int width, int height, int ch)
+        {
+            Mat imgRecv = byteMemoryToCvMat(data, width, height, ch);
+            imgCrossSection = imgRecv.Clone();
+        }
+
+        private void OnRecvLongitude(IntPtr data, int width, int height, int ch)
+        {
+            Mat imgRecv = byteMemoryToCvMat(data, width, height, ch);
+            imgLongitude = imgRecv.Clone();
+        }
+
+        private Mat byteMemoryToCvMat(IntPtr data, int width, int height, int ch)
+        {
+            int byteLength = width * height * ch;
+            byte[] imgData = new byte[byteLength];
+            Marshal.Copy(data, imgData, 0, byteLength);
+
+            return new Mat(height, width, MatType.CV_8UC3, data);
+        }
+
+        public static Uri GetResourceURI(string assemblyName, string resourcePath)
+        {
+            if (string.IsNullOrEmpty(assemblyName))
+            {
+                return new Uri(string.Format("pack://application:,,,/{0}", resourcePath));
+            }
+            else
+            {
+                return new Uri(string.Format("pack://application:,,,/{0};component/{1}", assemblyName, resourcePath));
+            }
         }
     }
 }

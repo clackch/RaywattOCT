@@ -419,7 +419,7 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
                     <StackPanel.Background>
-                        <ImageBrush ImageSource="/res/bg/body_bg.png" Stretch="Fill"/>
+                        <ImageBrush ImageSource="{Binding CrossSectionImage}" Stretch="Fill"/>
                     </StackPanel.Background>
                 </StackPanel>
             </Grid>
@@ -430,7 +430,7 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
                     <StackPanel.Background>
-                        <ImageBrush ImageSource="/res/bg/bottom_bg.png" Stretch="Fill"/>
+                        <ImageBrush ImageSource="{Binding LongitudeImage}" Stretch="Fill"/>
                     </StackPanel.Background>
                 </StackPanel>
             </Grid>
