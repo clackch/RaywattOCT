@@ -163,6 +163,7 @@
     <ClInclude Include="define.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="LaserController.h" />
+    <ClInclude Include="MessageService.h" />
     <ClInclude Include="MoriaCalibration.h" />
     <ClInclude Include="MoriaConfiguration.h" />
     <ClInclude Include="MoriaImaging.h" />
@@ -183,6 +184,7 @@
     <ClCompile Include="DataWriter.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="LaserController.cpp" />
+    <ClCompile Include="MessageService.cpp" />
     <ClCompile Include="MoriaCalibration.cpp" />
     <ClCompile Include="MoriaConfiguration.cpp" />
     <ClCompile Include="MoriaImaging.cpp" />

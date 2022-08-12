@@ -3,6 +3,7 @@
 #include "MoriaCalibration.h"
 #include "MoriaConfiguration.h"
 #include "Utility.h"
+#include "MessageService.h"
 #include <omp.h>
 #include "opencv2/opencv.hpp"
 
@@ -22,8 +23,8 @@ void ippsRelease_double_ptr(void**& ptr, int dim) {
 	}
 }
 
-CMoriaImaging::CMoriaImaging(HWND hWnd) {
-	m_hWnd = hWnd;
+CMoriaImaging::CMoriaImaging(CMessageService* pMsg) {
+	m_msg = pMsg;
 
 	m_pThread = NULL;
 	m_waitForFringes = true;
@@ -545,7 +546,7 @@ void CMoriaImaging::applyLUT(cv::Mat& image) {
 
 UINT CMoriaImaging::threadRender(LPVOID param) {
 	CMoriaImaging* pImaging = (CMoriaImaging*)param;
-	HWND hWndView = pImaging->m_hWnd;
+	CMessageService* pMsg = pImaging->m_msg;
 
 	while(pImaging->m_pThread->isRun) {
 		pImaging->m_waitForFringes = true;
@@ -557,7 +558,8 @@ UINT CMoriaImaging::threadRender(LPVOID param) {
 			// To-Do
 			// double buffering 필요?
 			// Invert, coloring 을 View (Dialog) 쪽으로 뺄 수 없을까?
-			::PostMessage(hWndView, WM_PROCESS_OCT_DONE, pImaging->m_nCurFrame, pImaging->m_nTotalFrame);
+			
+			pMsg->postMessage(WM_PROCESS_OCT_DONE, pImaging->m_nCurFrame, pImaging->m_nTotalFrame);
 		}
 	}
 
