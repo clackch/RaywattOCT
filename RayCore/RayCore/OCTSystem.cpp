@@ -463,7 +463,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	Sleep(pConfig->catheter.waitingTime);
 
 	// 6. Homing
-	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)OCTScannerState::STATE_READY);
+	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)OCTScannerState::STATE_HOMING);
 
 	while (pSystem->m_pThreadLoadCatheter->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
