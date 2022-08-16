@@ -3,8 +3,6 @@
 
 #define INI_FILE_NAME _T(".\\newmoria.ini")
 
-CMoriaConfiguration* CMoriaConfiguration::pInstance = NULL;
-
 CMoriaConfiguration::CMoriaConfiguration():
 	isInit(false),
 	nScans(0),
@@ -19,10 +17,8 @@ CMoriaConfiguration::~CMoriaConfiguration()
 	releaseCircularizeMap();
 }
 
-CMoriaConfiguration *CMoriaConfiguration::GetInstance(){
-	if(pInstance == NULL){
-		pInstance = new CMoriaConfiguration();
-	}
+CMoriaConfiguration& CMoriaConfiguration::GetInstance() {
+	static CMoriaConfiguration pInstance;
 	return pInstance;
 }
 

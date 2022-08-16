@@ -237,7 +237,7 @@ UINT COCTSystem::threadService(LPVOID param) {
 UINT COCTSystem::threadInitialize(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 
-	CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
 	int nResult = NOERROR;
 
 	nResult = pSystem->initializeAcqDevice();
@@ -272,14 +272,14 @@ UINT COCTSystem::threadInitialize(LPVOID param) {
 UINT COCTSystem::threadHoming(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CZaberController* pZaberCtrl = (CZaberController*)CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
-	CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
 
 #ifdef TEST_VALUE_FILE_PATH
 	Sleep(3000);
 #endif
 	if (pZaberCtrl->IsOpen()) {
-		pZaberCtrl->SetSpeed(pConfig->zaber.pullbackSpeed);
-		pZaberCtrl->Move(pConfig->zaber.pullbackDistance);
+		pZaberCtrl->SetSpeed(pConfig.zaber.pullbackSpeed);
+		pZaberCtrl->Move(pConfig.zaber.pullbackDistance);
 		while (pSystem->m_pThreadHoming->isRun) {
 			if (pZaberCtrl->GetZaberStatus()) {
 				break;
@@ -304,7 +304,7 @@ UINT COCTSystem::threadHoming(LPVOID param) {
 */
 UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
-	CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
 	CZaberController* pZaber = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
 
@@ -312,7 +312,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	if (pMotor->IsRun() == false) {
 		//pSystem->PostMessage(WM_COMMAND, IDC_BUTTON_MOTOR_ONOFF, 0);
 	}
-	Sleep(pConfig->motor.settleDown);
+	Sleep(pConfig.motor.settleDown);
 
 #ifndef TEST_VALUE_FILE_PATH
 	// 2. Start Recording OCT
@@ -321,7 +321,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 
 	// 3. Pullback Linear Stage
 	if (pZaber->IsOpen()) {
-		pZaber->Pull(pConfig->zaber.pullbackSpeed, pConfig->zaber.pullbackDistance);
+		pZaber->Pull(pConfig.zaber.pullbackSpeed, pConfig.zaber.pullbackDistance);
 		while (pSystem->m_pThreadPullbackScan->isRun) {
 			if (pZaber->GetZaberStatus()) {
 				break;
@@ -429,20 +429,20 @@ UINT COCTSystem::threadUpdateCutView(LPVOID param) {
 */
 UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
-	CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
 	CZaberController* pZaber = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
 
 	// 1. Motor ON
 	if (pMotor->IsRun() == false) {
-		int nVelocity = pConfig->catheter.velocity;
+		int nVelocity = pConfig.catheter.velocity;
 		pMotor->PerfomRun(nVelocity);
 	}
 
 	// 2. Set Linear Stage Position
 	if (pZaber->IsOpen()) {
-		pZaber->SetSpeed(pConfig->catheter.speed);
-		pZaber->Move(pConfig->catheter.position);
+		pZaber->SetSpeed(pConfig.catheter.speed);
+		pZaber->Move(pConfig.catheter.position);
 		while (pSystem->m_pThreadLoadCatheter->isRun) {
 			if (pZaber->GetZaberStatus()) {
 				break;
@@ -454,13 +454,13 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	}
 
 	// 3. Wait
-	Sleep(pConfig->catheter.rotationTime);
+	Sleep(pConfig.catheter.rotationTime);
 
 	// 4. Motor OFF
 	pMotor->StopMotor();
 
 	// 5. Wait
-	Sleep(pConfig->catheter.waitingTime);
+	Sleep(pConfig.catheter.waitingTime);
 
 	// 6. Homing
 	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)OCTScannerState::STATE_HOMING);
@@ -477,13 +477,13 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 */
 UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
-	CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
 	CZaberController* pZaber = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
 
 	// Set Linear Stage Position
 	if (pZaber->IsOpen()) {
-		pZaber->SetSpeed(pConfig->zaber.pullbackSpeed);
-		pZaber->Move(pConfig->catheter.position);
+		pZaber->SetSpeed(pConfig.zaber.pullbackSpeed);
+		pZaber->Move(pConfig.catheter.position);
 		while (pSystem->m_pThreadPullbackScan->isRun) {
 			if (pZaber->GetZaberStatus()) {
 				break;
@@ -507,9 +507,9 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 */
 void COCTSystem::initialize() {
 
-	CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
-	if (!pConfig->IsInit()) {
-		pConfig->Initialize();
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	if (!pConfig.IsInit()) {
+		pConfig.Initialize();
 	}
 
 	m_pImagingRealtime = createColorImaging(this);
@@ -519,7 +519,7 @@ void COCTSystem::initialize() {
 	m_pImagingSimulate->Start();
 
 	m_pDataWriter = new CDataWriter();
-	m_pDataWriter->Initialize(pConfig->nBufferSize * sizeof(unsigned short));
+	m_pDataWriter->Initialize(pConfig.nBufferSize * sizeof(unsigned short));
 
 	m_pCutView = new CCutViewManager();
 
@@ -571,14 +571,14 @@ int COCTSystem::initializeAcqDevice() {
 * initializeRotaryJunction
 */
 int COCTSystem::initializeRotaryJunction() {
-	CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
 	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
 	CZaberController* pInterferometer = CZaberController::GetInstance(ZABER_TYPE_INTERFEROMETER);
 
 	bool result = true;
-	result &= pLinearStage->Open(pConfig->zaber.pullback);
-	result &= pInterferometer->Open(pConfig->zaber.interferometer);
+	result &= pLinearStage->Open(pConfig.zaber.pullback);
+	result &= pInterferometer->Open(pConfig.zaber.interferometer);
 
 	result &= pMotor->Connect();
 	result &= pMotor->SwitchOn();
@@ -653,7 +653,7 @@ void COCTSystem::updateCutView(int drawSamples) {
 * OnMsgUpdateScannerState
 */
 LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
-	const CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
 	m_curState = (OCTScannerState)wParam;
 
 	switch (m_curState) {

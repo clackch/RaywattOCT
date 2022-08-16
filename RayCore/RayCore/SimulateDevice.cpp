@@ -29,21 +29,21 @@ int CSimulateDevice::CleanUp() {
 }
 
 void CSimulateDevice::PrevFrame() {
-	CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
 	const int nNumOfSamples = m_pDataReader->GetNumOfSamples();
 
 	m_nCurSampleIndex--;
 	m_nCurSampleIndex = (m_nCurSampleIndex < 0) ? nNumOfSamples - 1 : m_nCurSampleIndex;
 }
 void CSimulateDevice::NextFrame() {
-	CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
 	const int nNumOfSamples = m_pDataReader->GetNumOfSamples();
 
 	m_nCurSampleIndex++;
 	m_nCurSampleIndex = (m_nCurSampleIndex >= nNumOfSamples) ? 0 : m_nCurSampleIndex;
 }
 void CSimulateDevice::SetFrame(int nFrame) {
-	CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
 	const int nNumOfSamples = m_pDataReader->GetNumOfSamples();
 
 	m_nCurSampleIndex = nFrame;
@@ -60,7 +60,7 @@ int CSimulateDevice::stop() {
 	return NOERROR;
 }
 unsigned short* CSimulateDevice::acquire(int& nCurFrame, int& nTotalFrame) {
-	CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
 	const int nNumOfSamples = m_pDataReader->GetNumOfSamples();
 	bool result = true;
 

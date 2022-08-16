@@ -32,8 +32,8 @@ int CATSDevice::InitDevice() {
 	return NOERROR;
 }
 int CATSDevice::CleanUp() {
-	const CMoriaConfiguration *pConfig = CMoriaConfiguration::GetInstance();
-	const int nAcqBufCount = pConfig->nAcqBufCount;
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	const int nAcqBufCount = pConfig.nAcqBufCount;
 
 	// Free all memory allocated
 	if (m_pAcqBuffers != NULL) {
@@ -87,9 +87,9 @@ int CATSDevice::stop() {
 }
 
 unsigned short *CATSDevice::acquire(int& nCurFrame, int& nTotalFrame) {
-	const CMoriaConfiguration *pConfig = CMoriaConfiguration::GetInstance();
-	const int nBufferSize = pConfig->nBufferSize;
-	const int nAcqBufCount = pConfig->nAcqBufCount;
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	const int nBufferSize = pConfig.nBufferSize;
+	const int nAcqBufCount = pConfig.nAcqBufCount;
 	const U32 timeout_ms = 5000;
 	RETURN_CODE retCode;
 	
@@ -124,15 +124,15 @@ unsigned short *CATSDevice::acquire(int& nCurFrame, int& nTotalFrame) {
 BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 {
 	RETURN_CODE retCode;
-	const CMoriaConfiguration *pConfig = CMoriaConfiguration::GetInstance();
-	const int nNscans = pConfig->nScans;
-	const int nNscanPadding = pConfig->nScansPadding;
-	const int nAlines = pConfig->nAlines;
-	const int nLaserSpeed = pConfig->nLaserSpeed;
-	const int nBufferSize = pConfig->nBufferSize;
-	const int nDmaChannels = pConfig->nDmaChannels;
-	const int nAcqBufCount = pConfig->nAcqBufCount;
-	const double fTriggerDelay = pConfig->fTriggerDelay;
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	const int nNscans = pConfig.nScans;
+	const int nNscanPadding = pConfig.nScansPadding;
+	const int nAlines = pConfig.nAlines;
+	const int nLaserSpeed = pConfig.nLaserSpeed;
+	const int nBufferSize = pConfig.nBufferSize;
+	const int nDmaChannels = pConfig.nDmaChannels;
+	const int nAcqBufCount = pConfig.nAcqBufCount;
+	const double fTriggerDelay = pConfig.fTriggerDelay;
 
 	// TODO: Specify the sample rate (see sample rate id below)
 	m_dSamplePerSec = nNscans * nLaserSpeed;

@@ -67,11 +67,11 @@ CMoriaImaging::~CMoriaImaging() {
 }
 
 void CMoriaImaging::Initialize() {
-	CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
-	const int nScans = pConfig->nScans;
-	const int nAlines = pConfig->nAlines;
-	const int nBufferSize = pConfig->nBufferSize;
-	const int nDmaChannels = pConfig->nDmaChannels;
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	const int nScans = pConfig.nScans;
+	const int nAlines = pConfig.nAlines;
+	const int nBufferSize = pConfig.nBufferSize;
+	const int nDmaChannels = pConfig.nDmaChannels;
 
 	releaseMemory();
 	allocateMemory();
@@ -81,7 +81,7 @@ void CMoriaImaging::Initialize() {
 	FILE* fp = fopen("BACKGROUND.bin", "rb");
 	if (fp) {
 		size_t readSize = fread(backgroundImage, sizeof(Ipp16u), nBufferSize, fp);
-		if (readSize != pConfig->nBufferSize) {
+		if (readSize != pConfig.nBufferSize) {
 			memset(backgroundImage, 0x00, sizeof(Ipp16u) * nBufferSize);
 		}
 		fclose(fp);
@@ -96,9 +96,9 @@ void CMoriaImaging::Initialize() {
 	loadLUT("LUT.csv");
 }
 void CMoriaImaging::Process(const Ipp16u* fringes) {
-	CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
-	const int nAlines = pConfig->nAlines;
-	const int nFFTLength = pConfig->nFftLength;
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	const int nAlines = pConfig.nAlines;
+	const int nFFTLength = pConfig.nFftLength;
 	const bool bInvert = m_bInvert;
 	const bool bColor = m_bColor;
 
@@ -149,9 +149,9 @@ void CMoriaImaging::DoAsyncRender(Ipp16u* fringes) {
 }
 
 void CMoriaImaging::CalculateAxialResolution(Ipp16u* fftData, Ipp16u& nPeakValue, int& nPeakIndex, int& nLineWidth) {
-	CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
-	const int nFFTLength = pConfig->nFftLength;
-	const float fScaleFactor = pConfig->measurementValues.fAxialResolutionScale;
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	const int nFFTLength = pConfig.nFftLength;
+	const float fScaleFactor = pConfig.measurementValues.fAxialResolutionScale;
 	const int nFindRange = 40;
 
 	// get peak and index
@@ -193,10 +193,10 @@ void CMoriaImaging::CalculateAxialResolution(Ipp16u* fftData, Ipp16u& nPeakValue
 	nLineWidth = ((fRightWidth + nRightIndex) - (fLeftWidth + nLeftIndex)) * fScaleFactor;
 }
 void CMoriaImaging::CalculateNoisePower(Ipp16u* fftData, int nPeakIndex, Ipp16u& nNoisePower) {
-	CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
-	const int nFFTLength = pConfig->nFftLength;
-	const int nNoiseSkip = pConfig->measurementValues.nNoiseSkip;
-	const int nNoiseAverage = pConfig->measurementValues.nNoiseAverage;
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	const int nFFTLength = pConfig.nFftLength;
+	const int nNoiseSkip = pConfig.measurementValues.nNoiseSkip;
+	const int nNoiseAverage = pConfig.measurementValues.nNoiseAverage;
 
 	int nStart, nEnd;
 	unsigned int nSum = 0;
@@ -230,25 +230,25 @@ void CMoriaImaging::CalculateNoisePower(Ipp16u* fftData, int nPeakIndex, Ipp16u&
 void CMoriaImaging::allocateMemory() {
 	// ORDER = 11, nScans2n = 2^11
 	// nScans 보다 큰 2^n 중에서 제일 작은 수
-	CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
-	const int order = pConfig->constantValues.Order;
-	const int zoom = pConfig->constantValues.Zoom;
-	const int nScans = pConfig->nScans;
-	const int nScansWithPadding = pConfig->nScans + pConfig->nScansPadding;
-	const int nAlines = pConfig->nAlines;
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	const int order = pConfig.constantValues.Order;
+	const int zoom = pConfig.constantValues.Zoom;
+	const int nScans = pConfig.nScans;
+	const int nScansWithPadding = pConfig.nScans + pConfig.nScansPadding;
+	const int nAlines = pConfig.nAlines;
 	const int nScans2n = (1 << order);
 	const int nScansOver2 = nScans2n / 2;
-	const int nBufferSize = pConfig->nBufferSize;
-	const int nDmaChannels = pConfig->nDmaChannels;
-	const int nScopeLength = pConfig->getScopeLength();
-	const int nFftLength = pConfig->nFftLength;
+	const int nBufferSize = pConfig.nBufferSize;
+	const int nDmaChannels = pConfig.nDmaChannels;
+	const int nScopeLength = pConfig.getScopeLength();
+	const int nFftLength = pConfig.nFftLength;
 
 	fringes32f = ippsMalloc_32f(nDmaChannels * nScans);
 	fringes32fSum = ippsMalloc_32f(nDmaChannels * nScans);
 	ref_fringe = (Ipp16u*)ippsMalloc_16s(nScans * nDmaChannels);
 	ippsSet_16s(32768, (Ipp16s*)ref_fringe, nScans * nDmaChannels);
 	backgroundImage = (Ipp16u*)ippsMalloc_16s(nBufferSize);
-	memset(backgroundImage, 0x00, sizeof(Ipp16u) * pConfig->nBufferSize);
+	memset(backgroundImage, 0x00, sizeof(Ipp16u) * pConfig.nBufferSize);
 
 	imageResult.create(nAlines, nFftLength, CV_8UC1);
 	imageResultColor.create(nAlines, nFftLength, CV_8UC3);
@@ -284,8 +284,8 @@ void CMoriaImaging::allocateMemory() {
 	ippsFFTGetBufSize_C_32fc(specComp32FFT, &nSizeSpecComp32FFT);
 }
 void CMoriaImaging::releaseMemory() {
-	const CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
-	const int nDmaChannels = pConfig->nDmaChannels;
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	const int nDmaChannels = pConfig.nDmaChannels;
 
 	if (fringes32f) { ippsFree(fringes32f); fringes32f = NULL; }
 	if (fringes32fSum) { ippsFree(fringes32fSum); fringes32fSum = NULL; }
@@ -315,10 +315,10 @@ void CMoriaImaging::releaseMemory() {
 
 //fringes는 2*nScans*nAlines signal data, 결과:ref_fringe
 void CMoriaImaging::generateBackground(Ipp16u* fringes) {
-	CMoriaConfiguration *pConfig = CMoriaConfiguration::GetInstance();
-	const int nScans = pConfig->nScans;
-	const int nAlines = pConfig->nAlines;
-	const int nDmaChannels = pConfig->nDmaChannels;
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	const int nScans = pConfig.nScans;
+	const int nAlines = pConfig.nAlines;
+	const int nDmaChannels = pConfig.nDmaChannels;
 	const int nWidth = nScans * nDmaChannels;
 
 	// 모든 fringe의 평균으로 background를 계산한다. 
@@ -335,18 +335,18 @@ void CMoriaImaging::generateBackground(Ipp16u* fringes) {
 }
 
 void CMoriaImaging::generateImage(const Ipp16u *fringes, bool bInvert){
-	CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
-	const int nScans = pConfig->nScans, nAlines = pConfig->nAlines;
-	const int nScansPadding = pConfig->nScansPadding;
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	const int nScans = pConfig.nScans, nAlines = pConfig.nAlines;
+	const int nScansPadding = pConfig.nScansPadding;
 	const int nScansWithPadding = (nScans + nScansPadding);
-	const int nDmaChannels = pConfig->nDmaChannels;
-	const float fHighLevel = (bInvert) ? pConfig->invert.highLevel : 0.0f;
-	const float fLowLevel = (bInvert) ? pConfig->invert.lowLevel : 0.0f;
-	const int order = pConfig->constantValues.Order;
-	const int zoom = pConfig->constantValues.Zoom;
-	const int numDynamic = pConfig->settingsOpenMP.numDynamic;
-	const int numThreads = pConfig->settingsOpenMP.numThread;
-	const int nScopeLength = pConfig->getScopeLength();
+	const int nDmaChannels = pConfig.nDmaChannels;
+	const float fHighLevel = (bInvert) ? pConfig.invert.highLevel : 0.0f;
+	const float fLowLevel = (bInvert) ? pConfig.invert.lowLevel : 0.0f;
+	const int order = pConfig.constantValues.Order;
+	const int zoom = pConfig.constantValues.Zoom;
+	const int numDynamic = pConfig.settingsOpenMP.numDynamic;
+	const int numThreads = pConfig.settingsOpenMP.numThread;
+	const int nScopeLength = pConfig.getScopeLength();
 	const int X = 0;
 	const int Y = 1;
 	int i, j;
@@ -440,8 +440,8 @@ void CMoriaImaging::generateImage(const Ipp16u *fringes, bool bInvert){
 	} // end parallel region
 }
 void CMoriaImaging::generateScopeData(Ipp32f* output, Ipp16u* scope) {
-	const CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
-	const int order = pConfig->constantValues.Order;
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	const int order = pConfig.constantValues.Order;
 	const int nScans2n = (1 << order);
 	const int nScansOver2 = nScans2n / 2;
 	Ipp32f temp[1024];
@@ -455,10 +455,10 @@ void CMoriaImaging::generateScopeData(Ipp32f* output, Ipp16u* scope) {
 
 void CMoriaImaging::circularizeImage(cv::Mat& src, cv::Mat& dst)
 {
-	CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
-	CMoriaConfiguration* conf = CMoriaConfiguration::GetInstance();
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	CMoriaConfiguration& conf = CMoriaConfiguration::GetInstance();
 
-	cv::remap(src, dst, conf->pXMap, conf->pYMap, cv::INTER_LINEAR);
+	cv::remap(src, dst, conf.pXMap, conf.pYMap, cv::INTER_LINEAR);
 }
 
 void CMoriaImaging::applyHotColor(cv::Mat& image) {

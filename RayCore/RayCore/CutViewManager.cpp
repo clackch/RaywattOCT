@@ -15,8 +15,8 @@ void CCutViewManager::Initialize(int nNumOfSamples) {
 	m_imgCutView.setTo(cv::Scalar(0, 0, 0));
 }
 void CCutViewManager::GenerateCutView(CMoriaImaging* pImaging, unsigned short* pBuffer, int nFrameIndex, double degree) {
-	CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
-	const int nBufferSize = pConfig->nBufferSize;
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	const int nBufferSize = pConfig.nBufferSize;
 	const int centerX = 1024 / 2;
 	const int centerY = 1024 / 2;
 

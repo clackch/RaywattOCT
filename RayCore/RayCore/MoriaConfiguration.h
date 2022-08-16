@@ -70,8 +70,11 @@ class CMoriaConfiguration
 		int waitingTime;
 	};
 private:
-	static CMoriaConfiguration *pInstance;
+	//static CMoriaConfiguration *pInstance;
 	CMoriaConfiguration();
+	CMoriaConfiguration(const CMoriaConfiguration& ref) {};
+	CMoriaConfiguration& operator=(const CMoriaConfiguration& ref) {};
+	~CMoriaConfiguration();
 	
 public:
 	bool isInit;
@@ -101,8 +104,9 @@ public:
 	Catheter catheter;
 	int shutterSerial;
 public:
-	static CMoriaConfiguration *GetInstance();
-	~CMoriaConfiguration(void);
+	//static CMoriaConfiguration *GetInstance();
+	//~CMoriaConfiguration(void);
+	static CMoriaConfiguration& GetInstance();
 
 	bool IsInit(){ return isInit; }
 	void Initialize(int nScans=-1, int nScansPaddin=-1, int nAlines=-1);

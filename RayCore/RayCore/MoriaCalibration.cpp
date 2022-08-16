@@ -30,8 +30,8 @@ BOOL CMoriaCalibration::Initialize()
 }
 
 BOOL CMoriaCalibration::loadCalibration(LPCTSTR calibrationFileName){
-	const CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
-	const int nScans = pConfig->nScans;
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	const int nScans = pConfig.nScans;
 
 	// open calibration file
 	HANDLE hCalibFile = CreateFile(calibrationFileName, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
@@ -65,9 +65,9 @@ BOOL CMoriaCalibration::loadCalibration(LPCTSTR calibrationFileName){
 
 void CMoriaCalibration::setWindow(enum Windows eWindow)
 {
-	const CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
-	const int nScans = pConfig->nScans;
-	const int order = pConfig->constantValues.Order;
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	const int nScans = pConfig.nScans;
+	const int order = pConfig.constantValues.Order;
 	const int nScans2n = 1 << order;
 
 	ippsSet_32f(1.0f, window, nScans2n);
@@ -95,9 +95,9 @@ void CMoriaCalibration::setWindow(enum Windows eWindow)
 }
 
 void CMoriaCalibration::allocateMemory() {
-	const CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
-	const int nScans = pConfig->nScans;
-	const int order = pConfig->constantValues.Order;
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	const int nScans = pConfig.nScans;
+	const int order = pConfig.constantValues.Order;
 	const int nScans2n = 1 << order;
 
 	// memory allocate
