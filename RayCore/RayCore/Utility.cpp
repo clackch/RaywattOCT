@@ -4,6 +4,9 @@
 #include <time.h>
 
 BOOL CUtility::StartThread(THREADPROC threadFunc, CThread*& pThread, LPVOID param) {
+	if (pThread != nullptr)
+		return FALSE;
+
 	pThread = new CThread(threadFunc, param);
 
 	if (pThread) {

@@ -12,7 +12,7 @@
 
 #define CUTVIEW_INTERPOLATION_SCALE		5.7
 
-//#define TEST_VALUE_FILE_PATH			_T("C:\\DataSave\\test\\0710_145631_6028rpm_20mms_2000Aline.bin")
+//#define TEST_VALUE_FILE_PATH			_T("C:\\Development\\source\\OCT_TEST_FILE\\0710_145117_6028rpm_20mms_2000Aline.bin")
 
 enum class AsyncWork {
 	Initialize = 0
@@ -94,12 +94,12 @@ public:
 	RayError RegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude);
 
 	//Property
-	double GetBrightnessProperty();
-	RayError SetBrightnessProperty(double value);
-	double GetContrastProperty();
-	RayError SetContrastProperty(double value);
-	double GetDegreeProperty();
-	RayError SetDegreeProperty(double value);
+	double GetBrightness();
+	RayError SetBrightness(double value);
+	double GetContrast();
+	RayError SetContrast(double value);
+	double GetDegree();
+	RayError SetDegree(double value);
 
 private:
 	// Thread

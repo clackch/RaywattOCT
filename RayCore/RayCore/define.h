@@ -8,6 +8,7 @@ typedef void (*FunctionImgPtr)(void*, int, int, int);
 enum class RayError {
 	OK = 0,
 	InvalidArgument = -1000,
+	WrongOCTScannerState,
 };
 
 enum class RayProperty {

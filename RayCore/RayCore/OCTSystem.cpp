@@ -63,9 +63,13 @@ RayError COCTSystem::RegisterCallback(FunctionPtr cb) {
 */
 RayError COCTSystem::Initialize() {
 
-	CUtility::StartThread(threadInitialize, m_pThreadInitialize, this);
+	if (m_curState == OCTScannerState::STATE_NONE || m_curState == OCTScannerState::STATE_INIT_FAILED) {
+		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)OCTScannerState::STATE_INITIALIZING);
 
-	return RayError::OK;
+		return RayError::OK;
+	}
+
+	return RayError::WrongOCTScannerState;
 }
 
 /*
@@ -73,12 +77,28 @@ RayError COCTSystem::Initialize() {
 */
 RayError COCTSystem::PullbackScan() {
 
-#ifdef TEST_VALUE_FILE_PATH
-	m_strFilePath = TEST_VALUE_FILE_PATH;
-#endif
-	postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)OCTScannerState::STATE_SCANNING);
+	if (m_curState == OCTScannerState::STATE_READY) {
 
-	return RayError::OK;
+#ifdef TEST_VALUE_FILE_PATH
+			m_strFilePath = TEST_VALUE_FILE_PATH;
+#endif
+
+		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)OCTScannerState::STATE_SCANNING);
+
+		return RayError::OK;
+		
+	}
+	else if (m_curState == OCTScannerState::STATE_INIT_FAILED || m_curState == OCTScannerState::STATE_NONE) {
+		printf("Please initialize OCT device.");
+	}
+	else if (m_curState == OCTScannerState::STATE_REVIEW) {
+		printf("Please wait for saving TIF.");
+	}
+	else if (m_curState == OCTScannerState::STATE_SAVE_DONE) {
+		printf("Please reset OCT device.");
+	}
+
+	return RayError::WrongOCTScannerState;
 }
 
 /*
@@ -86,9 +106,13 @@ RayError COCTSystem::PullbackScan() {
 */
 RayError COCTSystem::LoadCatheter() {
 
-	CUtility::StartThread(threadLoadCatheter, m_pThreadLoadCatheter, this);
+	if (m_curState == OCTScannerState::STATE_READY) {
+		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)OCTScannerState::STATE_LOAD_CATHETER);
 
-	return RayError::OK;
+		return RayError::OK;
+	}
+
+	return RayError::WrongOCTScannerState;
 }
 
 /*
@@ -96,9 +120,13 @@ RayError COCTSystem::LoadCatheter() {
 */
 RayError COCTSystem::UnloadCatheter() {
 
-	CUtility::StartThread(threadUnloadCatheter, m_pThreadUnloadCatheter, this);
+	if (m_curState == OCTScannerState::STATE_REVIEW || m_curState == OCTScannerState::STATE_SAVE_DONE) {
+		CUtility::StartThread(threadUnloadCatheter, m_pThreadUnloadCatheter, this);
 
-	return RayError::OK;
+		return RayError::OK;
+	}
+
+	return RayError::WrongOCTScannerState;
 }
 
 /*
@@ -112,48 +140,48 @@ RayError COCTSystem::RegisterImageCallback(FunctionImgPtr cbCrossSection, Functi
 }
 
 /*
-* GetBrightnessProperty
+* GetBrightness
 */
-double COCTSystem::GetBrightnessProperty() {
+double COCTSystem::GetBrightness() {
 	return m_fBrightness;
 }
 
 /*
-* SetBrightnessProperty
+* SetBrightness
 */
-RayError COCTSystem::SetBrightnessProperty(double value) {
+RayError COCTSystem::SetBrightness(double value) {
 	m_fBrightness = value;
 	
 	return RayError::OK;
 }
 
 /*
-* GetContrastProperty
+* GetContrast
 */
-double COCTSystem::GetContrastProperty() {
+double COCTSystem::GetContrast() {
 	return m_fContrast;
 }
 
 /*
-* SetContrastProperty
+* SetContrast
 */
-RayError COCTSystem::SetContrastProperty(double value) {
+RayError COCTSystem::SetContrast(double value) {
 	m_fContrast = value;
 
 	return RayError::OK;
 }
 
 /*
-* GetDegreeProperty
+* GetDegree
 */
-double COCTSystem::GetDegreeProperty() {
+double COCTSystem::GetDegree() {
 	return m_fDegree;
 }
 
 /*
-* SetDegreeProperty
+* SetDegree
 */
-RayError COCTSystem::SetDegreeProperty(double value) {
+RayError COCTSystem::SetDegree(double value) {
 	m_fDegree = value;
 
 	return RayError::OK;
@@ -197,7 +225,7 @@ UINT COCTSystem::threadService(LPVOID param) {
 			break;
 		}
 	
-		Sleep(DELAY_FOR_STOP_THREAD);
+		Sleep(5);
 	}
 
 	return (UINT)RayError::OK;

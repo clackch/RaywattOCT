@@ -33,11 +33,11 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
 
     switch (prop) {
     case RayProperty::Brightness:
-        return octSystem.SetBrightnessProperty(value);
+        return octSystem.SetBrightness(value);
     case RayProperty::Contrast:
-        return octSystem.SetContrastProperty(value);
+        return octSystem.SetContrast(value);
     case RayProperty::Degree:
-        return octSystem.SetDegreeProperty(value);
+        return octSystem.SetDegree(value);
     default:
         return RayError::InvalidArgument;
     }
@@ -46,11 +46,11 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
 
     switch (prop) {
     case RayProperty::Brightness:
-        return octSystem.GetBrightnessProperty();
+        return octSystem.GetBrightness();
     case RayProperty::Contrast:
-        return octSystem.GetContrastProperty();
+        return octSystem.GetContrast();
     case RayProperty::Degree:
-        return octSystem.GetDegreeProperty();
+        return octSystem.GetDegree();
     case RayProperty::LoadCatheterTime:
         return pConfig->GetLoadCatheterTimeProperty();
     default:
