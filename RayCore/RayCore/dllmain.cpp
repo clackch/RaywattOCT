@@ -6,7 +6,7 @@
 #include <stdio.h>
 
 static COCTSystem octSystem;
-CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
+CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
 
 _declspec(dllexport) RayError RayRegisterCallback(FunctionPtr cb) {
     return octSystem.RegisterCallback(cb);
@@ -52,7 +52,7 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
     case RayProperty::Degree:
         return octSystem.GetDegree();
     case RayProperty::LoadCatheterTime:
-        return pConfig->GetLoadCatheterTimeProperty();
+        return pConfig.GetLoadCatheterTimeProperty();
     default:
         return (int)RayError::InvalidArgument;
     }

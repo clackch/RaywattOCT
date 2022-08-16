@@ -16,8 +16,8 @@ CDataReader::~CDataReader() {
 }
 
 int CDataReader::Initialize(tstring strDataFilePath) {
-	CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
-	const int nBufferSize = pConfig->nBufferSize;
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	const int nBufferSize = pConfig.nBufferSize;
 
 	if (strDataFilePath.empty()) return 0;
 
@@ -70,8 +70,8 @@ void CDataReader::finalize() {
 	}
 }
 bool CDataReader::readFrame(int nIndex) {
-	CMoriaConfiguration* pConfig = CMoriaConfiguration::GetInstance();
-	const int nBufferSize = pConfig->nBufferSize;
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	const int nBufferSize = pConfig.nBufferSize;
 	DWORD dwBytesRead = 0;
 	bool result = true;
 
