@@ -32,11 +32,11 @@ _declspec(dllexport) RayError RayMotorOnOff(bool mode) {
 _declspec(dllexport) RayError RayPlayPause() {
     return octSystem.PlayPause();
 }
-_declspec(dllexport) RayError RayPrevOctFrame() {
-    return octSystem.PrevOctFrame();
+_declspec(dllexport) RayError RayPrevFrame() {
+    return octSystem.PrevFrame();
 }
-_declspec(dllexport) RayError RayNextOctFrame() {
-    return octSystem.NextOctFrame();
+_declspec(dllexport) RayError RayNextFrame() {
+    return octSystem.NextFrame();
 }
 _declspec(dllexport) RayError RayRegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude) {
     return octSystem.RegisterImageCallback(cbCrossSection, cbLongitude);
