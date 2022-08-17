@@ -9,6 +9,8 @@ namespace RaywattOCT.Controller
         {
             OK = 0,
 	        InvalidArgument = -1000,
+            WrongOCTScannerState,
+            NotPausedState
         };
 
         public enum Property : int
@@ -17,6 +19,8 @@ namespace RaywattOCT.Controller
 	        Brightness = 1,
 	        Contrast,
             Degree,
+            MoterOnOff,
+            PlayPause,
             LoadCatheterTime
         }
 
