@@ -66,9 +66,9 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return octSystem.GetContrast();
     case RayProperty::Degree:
         return octSystem.GetDegree();
-    case RayProperty::MoterOnOff:
+    case RayProperty::MotorOnOff:
         return octSystem.GetMotorOnOff();
-    case RayProperty::PlayPause:
+    case RayProperty::IsPaused:
         return octSystem.GetIsPaused();
     case RayProperty::LoadCatheterTime:
         return pConfig.GetLoadCatheterTime();

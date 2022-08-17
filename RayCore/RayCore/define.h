@@ -17,8 +17,8 @@ enum class RayProperty {
 	Brightness = 1,
 	Contrast,
 	Degree,
-	MoterOnOff,
-	PlayPause,
+	MotorOnOff,
+	IsPaused,
 	LoadCatheterTime
 };
 

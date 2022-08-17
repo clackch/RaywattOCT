@@ -19,8 +19,8 @@ namespace RaywattOCT.Controller
 	        Brightness = 1,
 	        Contrast,
             Degree,
-            MoterOnOff,
-            PlayPause,
+            MotorOnOff,
+            IsPaused,
             LoadCatheterTime
         }
 
@@ -31,7 +31,7 @@ namespace RaywattOCT.Controller
 	        LiveView
         }
 
-        public enum RayCallbackRequest
+        public enum RayCallbackRequest : int
         {
             Unkown = 0,
 	        State
@@ -69,9 +69,9 @@ namespace RaywattOCT.Controller
         [DllImport("RayCore.dll")]
         public static extern int RayPlayPause();
         [DllImport("RayCore.dll")]
-        public static extern int RayPrevOctFrame();
+        public static extern int RayPrevFrame();
         [DllImport("RayCore.dll")]
-        public static extern int RayNextOctFrame();
+        public static extern int RayNextFrame();
         [DllImport("RayCore.dll")]
         public static extern int RayRegisterImageCallback(IntPtr cbCrossSection, IntPtr cbLongitude);
         [DllImport("RayCore.dll")]
