@@ -70,7 +70,6 @@ class CMoriaConfiguration
 		int waitingTime;
 	};
 private:
-	//static CMoriaConfiguration *pInstance;
 	CMoriaConfiguration();
 	CMoriaConfiguration(const CMoriaConfiguration& ref) {};
 	CMoriaConfiguration& operator=(const CMoriaConfiguration& ref) {};
@@ -104,8 +103,6 @@ public:
 	Catheter catheter;
 	int shutterSerial;
 public:
-	//static CMoriaConfiguration *GetInstance();
-	//~CMoriaConfiguration(void);
 	static CMoriaConfiguration& GetInstance();
 
 	bool IsInit(){ return isInit; }
@@ -119,7 +116,7 @@ public:
 	int getScopeLength();
 
 	//Property
-	double GetLoadCatheterTimeProperty();
+	double GetLoadCatheterTime();
 
 private:
 	void initCircularizeMap();

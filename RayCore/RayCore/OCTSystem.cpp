@@ -29,6 +29,7 @@ COCTSystem::COCTSystem() {
 	m_pThreadUnloadCatheter = nullptr;
 
 	m_curState = OCTScannerState::STATE_NONE;
+	m_bMoterOnOff = false;
 
 	//Property
 	m_fBrightness = 0.0f;
@@ -130,6 +131,94 @@ RayError COCTSystem::UnloadCatheter() {
 }
 
 /*
+* EndReview
+*/
+RayError COCTSystem::EndReview()
+{
+	if (m_curState == OCTScannerState::STATE_SAVE_DONE) {
+		if (m_bMoterOnOff) {
+			((CSimulateDevice*)m_pSimDevice)->SetPause(true);
+		}
+
+		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)OCTScannerState::STATE_HOMING);
+
+		return RayError::OK;
+	}
+
+	return RayError::WrongOCTScannerState;
+}
+
+/*
+* MotorOnOff
+*/
+RayError COCTSystem::MotorOnOff(bool mode)
+{
+	if (m_curState >= OCTScannerState::STATE_READY) {
+		m_bMoterOnOff = mode;
+		CMotorController* pMotorCtrl = CMotorController::GetInstance();
+		CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+
+		if (m_bMoterOnOff) {
+			pMotorCtrl->StopMotor();
+		}
+		else {
+			pMotorCtrl->PerfomRun(pConfig.motor.velocity);
+		}
+
+		return RayError::OK;
+	}
+	return RayError::WrongOCTScannerState;
+}
+
+/*
+* PlayPause
+*/
+RayError COCTSystem::PlayPause()
+{
+	if (m_curState >= OCTScannerState::STATE_REVIEW) {
+		bool isPaused = ((CSimulateDevice*)m_pSimDevice)->IsPaused();
+		((CSimulateDevice*)m_pSimDevice)->SetPause(!isPaused);
+
+		return RayError::OK;
+	}
+	return RayError::WrongOCTScannerState;
+}
+
+/*
+* PrevOctFrame
+*/
+RayError COCTSystem::PrevOctFrame()
+{
+	if (m_curState >= OCTScannerState::STATE_REVIEW) {
+		bool isPaused = ((CSimulateDevice*)m_pSimDevice)->IsPaused();
+		if (!isPaused)
+			return RayError::NotPausedState;
+
+		((CSimulateDevice*)m_pSimDevice)->PrevFrame();
+
+		return RayError::OK;
+	}
+	return RayError::WrongOCTScannerState;
+}
+
+/*
+* NextOctFrame
+*/
+RayError COCTSystem::NextOctFrame()
+{
+	if (m_curState >= OCTScannerState::STATE_REVIEW) {
+		bool isPaused = ((CSimulateDevice*)m_pSimDevice)->IsPaused();
+		if (!isPaused)
+			return RayError::NotPausedState;
+
+		((CSimulateDevice*)m_pSimDevice)->NextFrame();
+
+		return RayError::OK;
+	}
+	return RayError::WrongOCTScannerState;
+}
+
+/*
 * RegisterImageCallback
 */
 RayError COCTSystem::RegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude) {
@@ -188,6 +277,22 @@ RayError COCTSystem::SetDegree(double value) {
 }
 
 /*
+* GetMotorOnOff
+*/
+bool COCTSystem::GetMotorOnOff()
+{
+	return m_bMoterOnOff;
+}
+
+/*
+* GetPlayPause
+*/
+bool COCTSystem::GetPlayPause()
+{
+	return ((CSimulateDevice*)m_pSimDevice)->IsPaused();
+}
+
+/*
 * threadService
 */
 UINT COCTSystem::threadService(LPVOID param) {
@@ -236,8 +341,6 @@ UINT COCTSystem::threadService(LPVOID param) {
 */
 UINT COCTSystem::threadInitialize(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
-
-	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
 	int nResult = NOERROR;
 
 	nResult = pSystem->initializeAcqDevice();
