@@ -2,6 +2,7 @@
 #include <vector>
 #include <thread>
 #include <mutex>
+#include <locale>
 
 typedef UINT(_cdecl* THREADPROC)(LPVOID);
 
@@ -34,5 +35,6 @@ public:
 
 	static std::vector<tstring> findSerialPort();
 	static void GetCurTime(char* strTime);
+	static std::wstring StringToWstring(const std::string& var);
 };
 

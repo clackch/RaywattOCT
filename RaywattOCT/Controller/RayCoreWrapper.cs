@@ -5,7 +5,7 @@ namespace RaywattOCT.Controller
 {
     public class RayCoreWrapper
     {
-        enum RayError
+        public enum RayError : int
         {
             OK = 0,
 	        InvalidArgument = -1000,
@@ -16,8 +16,9 @@ namespace RaywattOCT.Controller
         public enum Property : int
         {
             Unknown = 0,
-	        Brightness = 1,
-	        Contrast,
+            CurrentState = 1,
+            Brightness,
+            Contrast,
             Degree,
             MotorOnOff,
             IsPaused,
@@ -33,31 +34,39 @@ namespace RaywattOCT.Controller
 
         public enum RayCallbackRequest : int
         {
-            Unkown = 0,
-	        State
+            Unknown = 0,
+            State,
+            Progress
         };
 
-        public enum RayCallbackResponse
+        public enum RayScannerState : int
         {
-            Unkown = 0,
-	        IntitializeFailed,
-	        Initializing,
-	        Homing,
-	        Ready,
-	        LoadCatheter,
-	        Scanning,
-	        ScanDone
+            None = 0,
+            Initializing,
+            IntitializeFailed,
+            Homing,
+            Ready,
+            LoadCatheter,
+            Scanning,
+            Review,
+            SaveDone
         };
+
+        public static string ConfigFilePath = "./newmoria.ini";
+        public static double BrightnessMin = 0.0f;
+        public static double BrightnessMax = 100.0f;
+        public static double ContrastMin = 0.5f;
+        public static double ContrastMax = 3.0f;
 
         public delegate void CallbackFunction(int request, int response);
-        public delegate void CallbackFunctionWithImage(IntPtr data, int width, int height, int channel);
+        public delegate void CallbackFunctionWithImage(IntPtr data, int width, int height, int channel, int frameInfo);
 
         [DllImport("RayCore.dll")]
         public static extern int RayRegisterCallback(IntPtr cb);
         [DllImport("RayCore.dll")]
         public static extern int RayInitialize();
         [DllImport("RayCore.dll")]
-        public static extern int RayPullbackScan();
+        public static extern int RayPullbackScan(string filePath);
         [DllImport("RayCore.dll")]
         public static extern int RayLoadCatheter();
         [DllImport("RayCore.dll")]

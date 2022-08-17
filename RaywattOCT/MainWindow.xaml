@@ -275,7 +275,30 @@
                         <RowDefinition Height="43"/>
                     </Grid.RowDefinitions>
                     <TextBlock Grid.Row="1" Text="Patient Name" Foreground="#8b92a6" FontSize="12pt" VerticalAlignment="Top" FontFamily="Segoe UI"/>
-                    <TextBlock x:Name="PatientName" Grid.Row="2" Text="HyunJun Kim" Foreground="#acb3d8" FontSize="16pt" VerticalAlignment="Bottom" FontFamily="Segoe UI Semibold"/>
+                    <Grid Grid.Row="2">
+                        <TextBox x:Name="PatientName" Text="{Binding PatientName}" Foreground="#acb3d8" Background="Transparent" BorderThickness="0" CaretBrush="#fe7124" FontSize="16pt" VerticalAlignment="Bottom" FontFamily="Segoe UI Semibold">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding RequirePatientName}" Value="True">
+                                            <Setter Property="FocusManager.FocusedElement" Value="{Binding ElementName=PatientName}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
+                        <TextBlock Text="Input Name" IsHitTestVisible="False" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="Gray" FontSize="16pt" FontFamily="Segoe UI" FontStyle="Italic" Visibility="Hidden">                            
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Text, ElementName=PatientName}" Value="">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
                 </Grid>
             </Grid>
             <Grid Width="390" Height="126" Margin="0,15,0,0">
@@ -315,10 +338,10 @@
                         <RowDefinition Height="27"/>
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="1" Orientation="Horizontal">
-                        <Button Style="{DynamicResource ScanButton}" HorizontalAlignment="Left" Content="End Review" Margin="0,2,0,2"/>
-                        <local:PlayButton Style="{DynamicResource PlayButton}" Icon="/res/icon/rew.png" IconOv="/res/icon/rew_ov.png"  Margin="8,8,0,8"/>
-                        <local:PlayButton Style="{DynamicResource PlayButton}" Icon="/res/icon/play.png" IconOv="/res/icon/play_ov.png" Margin="5,8,0,8"/>
-                        <local:PlayButton Style="{DynamicResource PlayButton}" Icon="/res/icon/fwd.png" IconOv="/res/icon/fwd_ov.png" Margin="5,8,0,8"/>
+                        <Button Style="{DynamicResource ScanButton}" Command="{Binding CmdEndReview}" HorizontalAlignment="Left" Content="End Review" Margin="0,2,0,2"/>
+                        <local:PlayButton Style="{DynamicResource PlayButton}" Command="{Binding CmdPlayback}" CommandParameter="prev" Icon="/res/icon/rew.png" IconOv="/res/icon/rew_ov.png" Margin="8,8,0,8"/>
+                        <local:PlayButton Style="{DynamicResource PlayButton}" Command="{Binding CmdPlayback}" CommandParameter="play" Icon="{Binding PlayIcon}" IconOv="{Binding PlayIconOv}" Margin="5,8,0,8"/>
+                        <local:PlayButton Style="{DynamicResource PlayButton}" Command="{Binding CmdPlayback}" CommandParameter="next" Icon="/res/icon/fwd.png" IconOv="/res/icon/fwd_ov.png" Margin="5,8,0,8"/>
                     </StackPanel>
                 </Grid>
             </Grid>
@@ -334,15 +357,15 @@
                 <Grid Grid.Column="1">
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="Brightness" Foreground="#8b92a6" FontSize="12pt" Margin="0,31,0,0" FontFamily="Segoe UI"/>
-                        <Slider Style="{DynamicResource SliderStyle}" HorizontalAlignment="Stretch" Margin="0,14,0,0"/>
+                        <Slider Style="{DynamicResource SliderStyle}" Maximum="100" Value="{Binding Brightness}" HorizontalAlignment="Stretch" Margin="0,14,0,0"/>
                         <TextBlock Text="Contrast" Foreground="#8b92a6" FontSize="12pt" Margin="0,34,0,0" FontFamily="Segoe UI"/>
-                        <Slider Style="{DynamicResource SliderStyle}" HorizontalAlignment="Stretch" Margin="0,14,0,0"/>
+                        <Slider Style="{DynamicResource SliderStyle}" Maximum="100" Value="{Binding Contrast}" HorizontalAlignment="Stretch" Margin="0,14,0,0"/>
                     </StackPanel>
                 </Grid>
             </Grid>
             <StackPanel Margin="0,22,0,0" Orientation="Horizontal">
-                <Button Style="{DynamicResource CatheterButton}" Content="Load Catheter"/>
-                <Button Style="{DynamicResource CatheterButton}" Content="Unload Catheter" Margin="11,0,0,0"/>
+                <Button Style="{DynamicResource CatheterButton}" Command="{Binding CmdLoadCatheter}" Content="Load Catheter"/>
+                <Button Style="{DynamicResource CatheterButton}" Command="{Binding CmdUnloadCatheter}" Content="Unload Catheter" Margin="11,0,0,0"/>
             </StackPanel>
             <Grid Margin="0,22,0,0">
                 <Grid.ColumnDefinitions>
@@ -399,17 +422,17 @@
             <Grid Grid.Row="0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="40"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="2*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="36"/>
                 </Grid.ColumnDefinitions>
                 <Grid.Background>
                     <ImageBrush ImageSource="/res/bg/title_bg.png" Stretch="Fill"/>
                 </Grid.Background>
-                <TextBlock Grid.Column="1" Text="OCT File" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="20pt" Foreground="#d7d8d9" FontFamily="Segoe UI Semibold"/>
+                <TextBlock Grid.Column="1" Text="{Binding ReviewFileName}" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="20pt" Foreground="#d7d8d9" FontFamily="Segoe UI Semibold"/>
                 <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <TextBlock Text="0 / 0" Margin="0,0,36,0" FontSize="12pt" Foreground="#bbc1c6" FontFamily="Segoe UI"/>
-                    <TextBlock Text="Real time" FontSize="12pt" Foreground="#bbc1c6" FontFamily="Segoe UI"/>
+                    <TextBlock Text="{Binding FrameInfo}" Margin="0,0,36,0" FontSize="12pt" Foreground="#bbc1c6" FontFamily="Segoe UI"/>
+                    <TextBlock Text="{Binding ViewMode}" FontSize="12pt" Foreground="#bbc1c6" FontFamily="Segoe UI"/>
                 </StackPanel>
             </Grid>
             <Grid Grid.Row="2">
