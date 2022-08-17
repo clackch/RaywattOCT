@@ -69,7 +69,7 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
     case RayProperty::MoterOnOff:
         return octSystem.GetMotorOnOff();
     case RayProperty::PlayPause:
-        return octSystem.GetPlayPause();
+        return octSystem.GetIsPaused();
     case RayProperty::LoadCatheterTime:
         return pConfig.GetLoadCatheterTime();
     default:
