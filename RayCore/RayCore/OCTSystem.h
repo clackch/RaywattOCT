@@ -12,7 +12,7 @@
 
 #define CUTVIEW_INTERPOLATION_SCALE		5.7
 
-#define TEST_VALUE_FILE_PATH			_T("C:\\Development\\source\\OCT_TEST_FILE\\0710_145117_6028rpm_20mms_2000Aline.bin")
+//#define TEST_VALUE_FILE_PATH			_T("C:\\Development\\source\\OCT_TEST_FILE\\0710_145117_6028rpm_20mms_2000Aline.bin")
 
 enum class AsyncWork {
 	Initialize = 0
@@ -96,8 +96,8 @@ public:
 	RayError EndReview();
 	RayError MotorOnOff(bool mode);
 	RayError PlayPause();
-	RayError PrevOctFrame();
-	RayError NextOctFrame();
+	RayError PrevFrame();
+	RayError NextFrame();
 	RayError RegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude);
 
 	//Property
@@ -108,7 +108,7 @@ public:
 	double GetDegree();
 	RayError SetDegree(double value);
 	bool GetMotorOnOff();
-	bool GetPlayPause();
+	bool GetIsPaused();
 
 private:
 	// Thread

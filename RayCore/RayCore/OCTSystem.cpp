@@ -185,9 +185,9 @@ RayError COCTSystem::PlayPause()
 }
 
 /*
-* PrevOctFrame
+* PrevFrame
 */
-RayError COCTSystem::PrevOctFrame()
+RayError COCTSystem::PrevFrame()
 {
 	if (m_curState >= OCTScannerState::STATE_REVIEW) {
 		bool isPaused = ((CSimulateDevice*)m_pSimDevice)->IsPaused();
@@ -202,9 +202,9 @@ RayError COCTSystem::PrevOctFrame()
 }
 
 /*
-* NextOctFrame
+* NextFrame
 */
-RayError COCTSystem::NextOctFrame()
+RayError COCTSystem::NextFrame()
 {
 	if (m_curState >= OCTScannerState::STATE_REVIEW) {
 		bool isPaused = ((CSimulateDevice*)m_pSimDevice)->IsPaused();
@@ -285,9 +285,9 @@ bool COCTSystem::GetMotorOnOff()
 }
 
 /*
-* GetPlayPause
+* GetIsPaused
 */
-bool COCTSystem::GetPlayPause()
+bool COCTSystem::GetIsPaused()
 {
 	return ((CSimulateDevice*)m_pSimDevice)->IsPaused();
 }
