@@ -23,6 +23,21 @@ _declspec(dllexport) RayError RayLoadCatheter() {
 _declspec(dllexport) RayError RayUnloadCatheter() {
     return octSystem.UnloadCatheter();
 }
+_declspec(dllexport) RayError RayEndReview() {
+    return octSystem.EndReview();
+}
+_declspec(dllexport) RayError RayMotorOnOff(bool mode) {
+    return octSystem.MotorOnOff(mode);
+}
+_declspec(dllexport) RayError RayPlayPause() {
+    return octSystem.PlayPause();
+}
+_declspec(dllexport) RayError RayPrevOctFrame() {
+    return octSystem.PrevOctFrame();
+}
+_declspec(dllexport) RayError RayNextOctFrame() {
+    return octSystem.NextOctFrame();
+}
 _declspec(dllexport) RayError RayRegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude) {
     return octSystem.RegisterImageCallback(cbCrossSection, cbLongitude);
 }
@@ -51,8 +66,12 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return octSystem.GetContrast();
     case RayProperty::Degree:
         return octSystem.GetDegree();
+    case RayProperty::MoterOnOff:
+        return octSystem.GetMotorOnOff();
+    case RayProperty::PlayPause:
+        return octSystem.GetPlayPause();
     case RayProperty::LoadCatheterTime:
-        return pConfig.GetLoadCatheterTimeProperty();
+        return pConfig.GetLoadCatheterTime();
     default:
         return (int)RayError::InvalidArgument;
     }

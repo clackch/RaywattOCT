@@ -177,6 +177,6 @@ int CMoriaConfiguration::getScopeLength()
 	return this->nScans + this->nScansPadding;
 }
 
-double CMoriaConfiguration::GetLoadCatheterTimeProperty() {
+double CMoriaConfiguration::GetLoadCatheterTime() {
 	return (catheter.rotationTime + catheter.waitingTime) / 1000;
 }

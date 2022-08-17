@@ -9,6 +9,7 @@ enum class RayError {
 	OK = 0,
 	InvalidArgument = -1000,
 	WrongOCTScannerState,
+	NotPausedState
 };
 
 enum class RayProperty {
@@ -16,6 +17,8 @@ enum class RayProperty {
 	Brightness = 1,
 	Contrast,
 	Degree,
+	MoterOnOff,
+	PlayPause,
 	LoadCatheterTime
 };
 

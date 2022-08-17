@@ -59,6 +59,16 @@ namespace RaywattOCT.Controller
         [DllImport("RayCore.dll")]
         public static extern int RayUnloadCatheter();
         [DllImport("RayCore.dll")]
+        public static extern int RayEndReview();
+        [DllImport("RayCore.dll")]
+        public static extern int RayMotorOnOff(bool mode);
+        [DllImport("RayCore.dll")]
+        public static extern int RayPlayPause();
+        [DllImport("RayCore.dll")]
+        public static extern int RayPrevOctFrame();
+        [DllImport("RayCore.dll")]
+        public static extern int RayNextOctFrame();
+        [DllImport("RayCore.dll")]
         public static extern int RayRegisterImageCallback(IntPtr cbCrossSection, IntPtr cbLongitude);
         [DllImport("RayCore.dll")]
         public static extern int RaySetMode(ViewMode mode);
