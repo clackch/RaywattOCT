@@ -50,9 +50,7 @@ void CMoriaConfiguration::Initialize(int nScans, int nScansPadding, int nAlines)
 	this->nDmaChannels = ::GetPrivateProfileInt(_T("Imaging"), _T("DmaChannels"), 2, INI_FILE_NAME);
 	this->nBufferSize = (this->nDmaChannels * this->nAlines * (this->nScans + this->nScansPadding));
 	this->nAcqBufCount = ::GetPrivateProfileInt(_T("Alazar"), _T("AcqBufferCount"), 4, INI_FILE_NAME);
-	::GetPrivateProfileString(_T("Alazar"), _T("TriggerDelaySec"), _T("0.00000005"), sIniValueString, sizeof(sIniValueString), INI_FILE_NAME);
-	wcstombs(converted, sIniValueString, wcslen(sIniValueString) + 1);
-	this->fTriggerDelay = ::atof(converted);
+	this->nTriggerDelaySample = ::GetPrivateProfileInt(_T("Alazar"), _T("TriggerDelaySample"), 0, INI_FILE_NAME);
 
 	::GetPrivateProfileString(_T("Patient"), _T("RootPath"), _T("D:\\DataSave\\"), sIniValueString, sizeof(sIniValueString), INI_FILE_NAME);
 	this->patientFileRootPath = sIniValueString;
