@@ -276,7 +276,7 @@
                     </Grid.RowDefinitions>
                     <TextBlock Grid.Row="1" Text="Patient Name" Foreground="#8b92a6" FontSize="12pt" VerticalAlignment="Top" FontFamily="Segoe UI"/>
                     <Grid Grid.Row="2">
-                        <TextBox x:Name="PatientName" Text="{Binding PatientName}" Foreground="#acb3d8" Background="Transparent" BorderThickness="0" CaretBrush="#fe7124" FontSize="16pt" VerticalAlignment="Bottom" FontFamily="Segoe UI Semibold">
+                        <TextBox x:Name="PatientName" Text="{Binding PatientName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Foreground="#acb3d8" Background="Transparent" BorderThickness="0" CaretBrush="#fe7124" FontSize="16pt" VerticalAlignment="Bottom" FontFamily="Segoe UI Semibold">
                             <TextBox.Style>
                                 <Style TargetType="TextBox">
                                     <Style.Triggers>
@@ -287,9 +287,10 @@
                                 </Style>
                             </TextBox.Style>
                         </TextBox>
-                        <TextBlock Text="Input Name" IsHitTestVisible="False" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="Gray" FontSize="16pt" FontFamily="Segoe UI" FontStyle="Italic" Visibility="Hidden">                            
+                        <TextBlock Text="Input Name" IsHitTestVisible="False" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="Gray" FontSize="16pt" FontFamily="Segoe UI" FontStyle="Italic">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Hidden"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding Text, ElementName=PatientName}" Value="">
                                             <Setter Property="Visibility" Value="Visible"/>
