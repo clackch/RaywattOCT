@@ -86,7 +86,7 @@ public:
 	int nFftLength;
 	int nCircleSize;
 	int nAcqBufCount;
-	double fTriggerDelay;
+	int nTriggerDelaySample;
 	// circularize map
 	cv::Mat pXMap;
 	cv::Mat pYMap;

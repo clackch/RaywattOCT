@@ -132,7 +132,7 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	const int nBufferSize = pConfig.nBufferSize;
 	const int nDmaChannels = pConfig.nDmaChannels;
 	const int nAcqBufCount = pConfig.nAcqBufCount;
-	const double fTriggerDelay = pConfig.fTriggerDelay;
+	const int nTriggerDelaySample = pConfig.nTriggerDelaySample;
 
 	// TODO: Specify the sample rate (see sample rate id below)
 	m_dSamplePerSec = nNscans * nLaserSpeed;
@@ -215,8 +215,7 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 
 	// TODO: Set trigger delay as required.
 
-	double triggerDelay_sec = fTriggerDelay;
-	U32 triggerDelay_samples = (U32)(triggerDelay_sec * m_dSamplePerSec + 0.5);
+	U32 triggerDelay_samples = nNscans - nTriggerDelaySample;
 	retCode = AlazarSetTriggerDelay(boardHandle, triggerDelay_samples);
 	if (retCode != ApiSuccess)
 	{
