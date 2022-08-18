@@ -11,12 +11,21 @@ namespace RaywattOCT.ViewModel
     {
         private readonly Func<bool> canExecute;
         private readonly Action execute;
+        private readonly Action<object> executeWithParam;
 
         public DelegateCommand(Action execute) : this(execute, null) { }
+
+        public DelegateCommand(Action<object> executeWithParam) : this(executeWithParam, null) { }
 
         public DelegateCommand(Action execute, Func<bool> canExecute) 
         {
             this.execute = execute;
+            this.canExecute = canExecute;
+        }
+
+        public DelegateCommand(Action<object> executeWithParam, Func<bool> canExecute)
+        {
+            this.executeWithParam = executeWithParam;
             this.canExecute = canExecute;
         }
 
@@ -30,7 +39,8 @@ namespace RaywattOCT.ViewModel
 
         public void Execute(object parameter)
         {
-            execute();
+            if (parameter == null) execute();
+            else executeWithParam(parameter);
         }
 
         public void RaiseCanExecuteChanged() 

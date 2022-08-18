@@ -14,8 +14,8 @@ _declspec(dllexport) RayError RayRegisterCallback(FunctionPtr cb) {
 _declspec(dllexport) RayError RayInitialize() {
     return octSystem.Initialize();
 }
-_declspec(dllexport) RayError RayPullbackScan() {
-    return octSystem.PullbackScan();
+_declspec(dllexport) RayError RayPullbackScan(char* strFilePath) {
+    return octSystem.PullbackScan(strFilePath);
 }
 _declspec(dllexport) RayError RayLoadCatheter() {
     return octSystem.LoadCatheter();
@@ -60,15 +60,17 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
 _declspec(dllexport) double RayGetProperty(RayProperty prop) {
 
     switch (prop) {
+    case RayProperty::CurrentState:
+        return (double) octSystem.GetCurrentState();
     case RayProperty::Brightness:
         return octSystem.GetBrightness();
     case RayProperty::Contrast:
         return octSystem.GetContrast();
     case RayProperty::Degree:
         return octSystem.GetDegree();
-    case RayProperty::MoterOnOff:
+    case RayProperty::MotorOnOff:
         return octSystem.GetMotorOnOff();
-    case RayProperty::PlayPause:
+    case RayProperty::IsPaused:
         return octSystem.GetIsPaused();
     case RayProperty::LoadCatheterTime:
         return pConfig.GetLoadCatheterTime();

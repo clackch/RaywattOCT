@@ -12,22 +12,11 @@
 
 #define CUTVIEW_INTERPOLATION_SCALE		5.7
 
+//#define TEST_VALUE_FILE_PATH			_T("C:\\DataSave\\test\\0710_145117_6028rpm_20mms_2000Aline.bin")
 //#define TEST_VALUE_FILE_PATH			_T("C:\\Development\\source\\OCT_TEST_FILE\\0710_145117_6028rpm_20mms_2000Aline.bin")
 
 enum class AsyncWork {
 	Initialize = 0
-};
-
-enum class OCTScannerState {
-	STATE_NONE = 0,
-	STATE_INITIALIZING,
-	STATE_INIT_FAILED,
-	STATE_HOMING,
-	STATE_READY,
-	STATE_LOAD_CATHETER,
-	STATE_SCANNING,
-	STATE_REVIEW,
-	STATE_SAVE_DONE,
 };
 
 #ifdef TEST_VALUE_FILE_PATH
@@ -75,9 +64,9 @@ private:
 	// Simulation
 	IAcquisitionDevice* m_pSimDevice;
 
-	OCTScannerState m_curState;
+	RayScannerState m_curState;
 
-	bool m_bMoterOnOff;
+	bool m_bMotorOnOff;
 
 	//Property
 	double m_fBrightness;
@@ -90,7 +79,7 @@ public:
 	
 	RayError RegisterCallback(FunctionPtr cb);
 	RayError Initialize();
-	RayError PullbackScan();
+	RayError PullbackScan(char *strFilePath);
 	RayError LoadCatheter();
 	RayError UnloadCatheter();
 	RayError EndReview();
@@ -101,6 +90,7 @@ public:
 	RayError RegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude);
 
 	//Property
+	RayScannerState GetCurrentState() { return m_curState; }
 	double GetBrightness();
 	RayError SetBrightness(double value);
 	double GetContrast();

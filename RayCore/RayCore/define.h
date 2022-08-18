@@ -3,7 +3,7 @@
 #define DELAY_FOR_STOP_THREAD			50
 
 typedef void (*FunctionPtr)(int, int);
-typedef void (*FunctionImgPtr)(void*, int, int, int);
+typedef void (*FunctionImgPtr)(void*, int, int, int, int);
 
 enum class RayError {
 	OK = 0,
@@ -14,11 +14,12 @@ enum class RayError {
 
 enum class RayProperty {
 	Unknown = 0,
-	Brightness = 1,
+	CurrentState = 1,
+	Brightness,
 	Contrast,
 	Degree,
-	MoterOnOff,
-	PlayPause,
+	MotorOnOff,
+	IsPaused,
 	LoadCatheterTime
 };
 
@@ -29,17 +30,19 @@ enum class RayViewMode {
 };
 
 enum class RayCallbackRequest {
-	Unkown = 0,
-	State
+	Unknown = 0,
+	State,
+	Progress
 };
 
-enum class RayCallbackResponse {
-	Unkown = 0,
-	IntitializeFailed,
+enum class RayScannerState {
+	None = 0,
 	Initializing,
+	IntitializeFailed,
 	Homing,
 	Ready,
 	LoadCatheter,
 	Scanning,
-	ScanDone
+	Review,
+	SaveDone
 };

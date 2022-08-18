@@ -77,3 +77,9 @@ void CUtility::GetCurTime(char* strTime) {
 	now = localtime(&ltime);
 	sprintf(strTime, "%d:%d:%d:%d", now->tm_hour, now->tm_min, now->tm_sec, msec);
 }
+std::wstring CUtility::StringToWstring(const std::string& var)
+{
+	static std::locale loc("");
+	auto& facet = std::use_facet<std::codecvt<wchar_t, char, std::mbstate_t>>(loc);
+	return std::wstring_convert<std::remove_reference<decltype(facet)>::type, wchar_t>(&facet).from_bytes(var);
+}

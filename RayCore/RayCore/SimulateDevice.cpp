@@ -16,7 +16,7 @@ int CSimulateDevice::InitDevice() {
 	CleanUp();
 
 	m_nCurSampleIndex = 0;
-	m_bPause = true;
+	m_bPause = false;
 	m_isInit = true;
 
 	return NOERROR;
