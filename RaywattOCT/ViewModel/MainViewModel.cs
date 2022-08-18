@@ -1,7 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Threading;
 using System.Windows.Threading;
 using RaywattOCT.Controller;
 using System.Runtime.InteropServices;
@@ -107,7 +105,7 @@ namespace RaywattOCT.ViewModel
         private string patientName = "";
         public string PatientName {
             get { return patientName; }
-            set { patientName = value; OnPropertyChanged(nameof(PatientName)); }
+            set { if (!CommonUtil.ValidateInput(value)) return; patientName = value; OnPropertyChanged(nameof(PatientName)); }
         }
 
         private bool requirePatientName = false;
@@ -286,6 +284,7 @@ namespace RaywattOCT.ViewModel
         }
         private void Scan()
         {
+            PatientName = PatientName.Trim();
             if (PatientName.Length == 0) {
                 RequirePatientName = true;
                 RequirePatientName = false;
@@ -456,6 +455,7 @@ namespace RaywattOCT.ViewModel
             double motorState = RayCoreWrapper.RayGetProperty(RayCoreWrapper.Property.MotorOnOff);
             MotorOn = (bool)(motorState != 0);
         }
+
         private void updatePlayPauseState()
         {
             double pauseState = RayCoreWrapper.RayGetProperty(RayCoreWrapper.Property.IsPaused);
