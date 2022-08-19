@@ -29,8 +29,7 @@ private:
 
 	// using in GenerateBackground
 	Ipp32f *fringes32f;
-	Ipp32f *fringes32fSum;
-	Ipp16u *ref_fringe;
+	Ipp32f *fringes32fAverage;
 	Ipp16u *backgroundImage;
 	Ipp16u **backgroundImage_Deinterlaced;
 	Ipp32f **backgroundImage32f_Deinterlaced;
@@ -42,7 +41,6 @@ private:
 	Ipp32f **fBuffer_BackgroundFringes;
 	Ipp16u **uDataFringes_Deinterlaced;
 	Ipp16u **uDataFingees_DeinterlacedwithPadding;
-	Ipp16u **uBackgroundFringe_Deinterlaced;
 	Ipp32f **fOutput;
 	IppsFFTSpec_R_32f *specReal32FFT;
 	IppsFFTSpec_C_32fc *specComp32FFT, *specComp32ZoomFFT;
