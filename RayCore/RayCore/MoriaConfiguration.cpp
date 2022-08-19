@@ -5,9 +5,9 @@
 
 CMoriaConfiguration::CMoriaConfiguration():
 	isInit(false),
-	nScans(0),
-	nScansPadding(0),
-	nAlines(0),
+	nAScan(0),
+	nAScanPadding(0),
+	nBScan(0),
 	nBufferSize(0)
 {
 }
@@ -22,33 +22,18 @@ CMoriaConfiguration& CMoriaConfiguration::GetInstance() {
 	return pInstance;
 }
 
-void CMoriaConfiguration::Initialize(int nScans, int nScansPadding, int nAlines)
+void CMoriaConfiguration::Initialize()
 {
-	if (-1 == nScans) {
-		this->nScans = ::GetPrivateProfileInt(_T("Imaging"), _T("Scan"), 1920, INI_FILE_NAME);
-	}
-	else {
-		this->nScans = nScans;
-	}
-	if (-1 == nScansPadding) {
-		this->nScansPadding = ::GetPrivateProfileInt(_T("Imaging"), _T("ScansPadding"), 0, INI_FILE_NAME);
-	}
-	else {
-		this->nScansPadding = nScansPadding;
-	}
-	if (-1 == nAlines) {
-		this->nAlines = ::GetPrivateProfileInt(_T("Imaging"), _T("ALines"), 500, INI_FILE_NAME);
-	}
-	else {
-		this->nAlines = nAlines;
-	}
+	this->nAScan = ::GetPrivateProfileInt(_T("Imaging"), _T("AScan"), 1920, INI_FILE_NAME);
+	this->nAScanPadding = ::GetPrivateProfileInt(_T("Imaging"), _T("AScanPadding"), 0, INI_FILE_NAME);
+	this->nBScan = ::GetPrivateProfileInt(_T("Imaging"), _T("BScan"), 500, INI_FILE_NAME);
 
 	TCHAR sIniValueString[2048] = _T("");
 	int nIniValueInt = -1;
 	char converted[2048];
 
 	this->nDmaChannels = ::GetPrivateProfileInt(_T("Imaging"), _T("DmaChannels"), 2, INI_FILE_NAME);
-	this->nBufferSize = (this->nDmaChannels * this->nAlines * (this->nScans + this->nScansPadding));
+	this->nBufferSize = (this->nDmaChannels * this->nBScan * (this->nAScan + this->nAScanPadding));
 	this->nAcqBufCount = ::GetPrivateProfileInt(_T("Alazar"), _T("AcqBufferCount"), 4, INI_FILE_NAME);
 	this->nTriggerDelaySample = ::GetPrivateProfileInt(_T("Alazar"), _T("TriggerDelaySample"), 0, INI_FILE_NAME);
 
@@ -131,7 +116,6 @@ void CMoriaConfiguration::SaveMotorSettings() {
 	::WritePrivateProfileString(_T("Motor"), _T("SettleDown"), strValue.c_str(), INI_FILE_NAME);
 }
 void CMoriaConfiguration::initCircularizeMap(){
-	const float nalines2 = (float)(nAlines - 4) / 2.0F;
 	int circOffset = 0;
 	
 	pXMap.create(1024, 1024, CV_32FC1);
@@ -150,7 +134,7 @@ void CMoriaConfiguration::initCircularizeMap(){
 			float rvalue = (float) (1024.0 - 2.0f * sqrt( (fi-511.5)*(fi-511.5) + (fj-511.5)*(fj-511.5))) + (float)circOffset;
 
 			pXMap.at<float>(i+j*1024) = rvalue;
-			pYMap.at<float>(i+j*1024) = (float) ( ((atan2((fi-511.5),(fj-511.5))/this->constantValues.Pi)+1.0)*0.5*(nAlines-1) );
+			pYMap.at<float>(i+j*1024) = (float) ( ((atan2((fi-511.5),(fj-511.5))/this->constantValues.Pi)+1.0)*0.5*(nBScan-1) );
 		}
 	}
 }
@@ -161,7 +145,7 @@ void CMoriaConfiguration::releaseCircularizeMap(){
 }
 
 int CMoriaConfiguration::getDmaXferSamples() {
-	int nSamples = this->nDmaChannels * this->nAlines * (this->nScans + nScansPadding);
+	int nSamples = nDmaChannels * nBScan * (nAScan + nAScanPadding);
 	return nSamples;
 }
 
@@ -172,7 +156,7 @@ int CMoriaConfiguration::getDmaBufferSamples()
 
 int CMoriaConfiguration::getScopeLength()
 {
-	return this->nScans + this->nScansPadding;
+	return nAScan + nAScanPadding;
 }
 
 double CMoriaConfiguration::GetLoadCatheterTime() {

@@ -125,9 +125,9 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 {
 	RETURN_CODE retCode;
 	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
-	const int nNscans = pConfig.nScans;
-	const int nNscanPadding = pConfig.nScansPadding;
-	const int nAlines = pConfig.nAlines;
+	const int nAScan = pConfig.nAScan;
+	const int nAScanPadding = pConfig.nAScanPadding;
+	const int nBScan = pConfig.nBScan;
 	const int nLaserSpeed = pConfig.nLaserSpeed;
 	const int nBufferSize = pConfig.nBufferSize;
 	const int nDmaChannels = pConfig.nDmaChannels;
@@ -135,7 +135,7 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	const int nTriggerDelaySample = pConfig.nTriggerDelaySample;
 
 	// TODO: Specify the sample rate (see sample rate id below)
-	m_dSamplePerSec = nNscans * nLaserSpeed;
+	m_dSamplePerSec = nAScan * nLaserSpeed;
 	m_dSamplePerSec = ceil((m_dSamplePerSec / 1000000.f)) * 1000000.f;
 
 	printf("sample per sec : %.2f\n", m_dSamplePerSec);
@@ -215,7 +215,7 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 
 	// TODO: Set trigger delay as required.
 
-	U32 triggerDelay_samples = nNscans - nTriggerDelaySample;
+	U32 triggerDelay_samples = nAScan - nTriggerDelaySample;
 	retCode = AlazarSetTriggerDelay(boardHandle, triggerDelay_samples);
 	if (retCode != ApiSuccess)
 	{
@@ -265,10 +265,10 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	U32 preTriggerSamples = 0;
 
 	// TODO: Select the number of post-trigger samples per record
-	U32 postTriggerSamples = nNscans + nNscanPadding;
+	U32 postTriggerSamples = nAScan + nAScanPadding;
 
 	// TODO: Specify the number of records per DMA buffer
-	U32 recordsPerBuffer = nAlines;
+	U32 recordsPerBuffer = nBScan;
 
 	// TODO: Specify the total number of buffers to capture
 	U32 buffersPerAcquisition = nAcqBufCount;

@@ -31,7 +31,7 @@ BOOL CMoriaCalibration::Initialize()
 
 BOOL CMoriaCalibration::loadCalibration(LPCTSTR calibrationFileName){
 	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
-	const int nScans = pConfig.nScans;
+	const int nAScan = pConfig.nAScan;
 
 	// open calibration file
 	HANDLE hCalibFile = CreateFile(calibrationFileName, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
@@ -41,15 +41,15 @@ BOOL CMoriaCalibration::loadCalibration(LPCTSTR calibrationFileName){
 
 	int fileSize =0;
 	DWORD dwIgnored;
-	Ipp32f *dispersionReal = ippsMalloc_32f(nScans);
+	Ipp32f *dispersionReal = ippsMalloc_32f(nAScan);
 
-	ReadFile(hCalibFile, indexMap, sizeof(Ipp32s) * nScans/2, &dwIgnored, NULL); fileSize += dwIgnored;
-	ReadFile(hCalibFile, weightMap, sizeof(Ipp32f) * nScans/2, &dwIgnored, NULL); fileSize += dwIgnored;
-	ReadFile(hCalibFile, dispersionReal, sizeof(Ipp32f) * nScans, &dwIgnored, NULL); fileSize += dwIgnored;
+	ReadFile(hCalibFile, indexMap, sizeof(Ipp32s) * nAScan /2, &dwIgnored, NULL); fileSize += dwIgnored;
+	ReadFile(hCalibFile, weightMap, sizeof(Ipp32f) * nAScan /2, &dwIgnored, NULL); fileSize += dwIgnored;
+	ReadFile(hCalibFile, dispersionReal, sizeof(Ipp32f) * nAScan, &dwIgnored, NULL); fileSize += dwIgnored;
 
 	CloseHandle(hCalibFile);
 
-	if (fileSize != 2 * nScans * sizeof(Ipp32s))
+	if (fileSize != 2 * nAScan * sizeof(Ipp32s))
 	{
 		::MessageBox(NULL, _T("Calibration file has wrong size.") ,_T( "Error"), MB_OK|MB_ICONSTOP);
 		ippsFree(dispersionReal);
@@ -57,7 +57,7 @@ BOOL CMoriaCalibration::loadCalibration(LPCTSTR calibrationFileName){
 	}
 
 	// 실수 허수부를 복합하여 리턴
-	ippsRealToCplx_32f(dispersionReal, dispersionReal + nScans/2, dispersion, nScans / 2);
+	ippsRealToCplx_32f(dispersionReal, dispersionReal + nAScan /2, dispersion, nAScan / 2);
 	ippsFree(dispersionReal);
 
 	return true;
@@ -66,7 +66,8 @@ BOOL CMoriaCalibration::loadCalibration(LPCTSTR calibrationFileName){
 void CMoriaCalibration::setWindow(enum Windows eWindow)
 {
 	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
-	const int nScans = pConfig.nScans;
+	const int nAScan = pConfig.nAScan;
+	const float fAScan = (float) nAScan;
 	const int order = pConfig.constantValues.Order;
 	const int nScans2n = 1 << order;
 
@@ -78,32 +79,32 @@ void CMoriaCalibration::setWindow(enum Windows eWindow)
 		break;
 
 	case Hanning:
-		ippsWinHann_32f_I(window, nScans);
+		ippsWinHann_32f_I(window, nAScan);
 		break;
 
 	case Hamming:
-		ippsWinHamming_32f_I(window, nScans);
+		ippsWinHamming_32f_I(window, nAScan);
 		break;
 
 	case Gauss1:
-		for (int i = 0; i < nScans; i++)
-			window[i] = exp(-(2.0f/((float) nScans))*(2.0f/((float) nScans))*(i-((float) nScans)/2.0f)*(i-((float) nScans)/2.0f));
+		for (int i = 0; i < nAScan; i++)
+			window[i] = exp(-(2.0f / fAScan) * (2.0f / fAScan) * (i - fAScan /2.0f) * (i- fAScan /2.0f));
 		break;
 	}
 
-	ippsZero_32f(window + nScans, nScans2n - nScans);
+	ippsZero_32f(window + nAScan, nScans2n - nAScan);
 }
 
 void CMoriaCalibration::allocateMemory() {
 	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
-	const int nScans = pConfig.nScans;
+	const int nAScan = pConfig.nAScan;
 	const int order = pConfig.constantValues.Order;
 	const int nScans2n = 1 << order;
 
 	// memory allocate
-	indexMap = ippsMalloc_32s(nScans / 2);
-	weightMap = ippsMalloc_32f(nScans / 2);
-	dispersion = ippsMalloc_32fc(nScans / 2);
+	indexMap = ippsMalloc_32s(nAScan / 2);
+	weightMap = ippsMalloc_32f(nAScan / 2);
+	dispersion = ippsMalloc_32fc(nAScan / 2);
 	window = ippsMalloc_32f(nScans2n);
 }
 void CMoriaCalibration::releaseMemory(){
