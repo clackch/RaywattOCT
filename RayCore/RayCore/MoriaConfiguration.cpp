@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "MoriaConfiguration.h"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #define INI_FILE_NAME _T(".\\newmoria.ini")
 
 CMoriaConfiguration::CMoriaConfiguration():
@@ -92,7 +95,7 @@ void CMoriaConfiguration::Initialize()
 	this->catheter.waitingTime = ::GetPrivateProfileInt(_T("Catheter"), _T("WaitingTime"), 10000, INI_FILE_NAME);
 
 	releaseCircularizeMap();
-	initCircularizeMap();
+	initCircularizeMap(nFftLength, nBScan, nFftLength, nCircleSize, nCircleSize, 2.0f);
 
 	isInit = true;
 }
@@ -115,26 +118,28 @@ void CMoriaConfiguration::SaveMotorSettings() {
 	strValue = this->motor.settleDown;
 	::WritePrivateProfileString(_T("Motor"), _T("SettleDown"), strValue.c_str(), INI_FILE_NAME);
 }
-void CMoriaConfiguration::initCircularizeMap(){
+
+void CMoriaConfiguration::initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale) {
 	int circOffset = 0;
-	
-	pXMap.create(1024, 1024, CV_32FC1);
-	pYMap.create(1024, 1024, CV_32FC1);
+	double radius = (diameter / 2) - 0.5f;
+
+	pXMap.create(dstHeight, dstWidth, CV_32FC1);
+	pYMap.create(dstHeight, dstWidth, CV_32FC1);
 
 	pXMap.setTo(cv::Scalar::all(0));
 	pYMap.setTo(cv::Scalar::all(0));
 
-	for (int i = 0; i < 1024; i++)
+	for (int y = 0; y < dstHeight; y++)
 	{
-		for (int j = 0; j < 1024; j++)
+		for (int x = 0; x < dstWidth; x++)
 		{
-			double fi = (double) i;
-			double fj = (double) j;
+			double fy = (double)y - radius;
+			double fx = (double)x - radius;
 
-			float rvalue = (float) (1024.0 - 2.0f * sqrt( (fi-511.5)*(fi-511.5) + (fj-511.5)*(fj-511.5))) + (float)circOffset;
+			float rvalue = (float)(srcWidth - scale * sqrt(pow(fy, 2) + pow(fx, 2))) + (float)circOffset;
 
-			pXMap.at<float>(i+j*1024) = rvalue;
-			pYMap.at<float>(i+j*1024) = (float) ( ((atan2((fi-511.5),(fj-511.5))/this->constantValues.Pi)+1.0)*0.5*(nBScan-1) );
+			pXMap.at<float>(x * dstHeight + y) = rvalue;
+			pYMap.at<float>(x * dstHeight + y) = (float)(((atan2(fy, fx) / M_PI) + 1.0) * 0.5 * (srcHeight - 1));
 		}
 	}
 }

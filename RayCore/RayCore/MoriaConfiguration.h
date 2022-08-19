@@ -119,6 +119,6 @@ public:
 	double GetLoadCatheterTime();
 
 private:
-	void initCircularizeMap();
+	void initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale);
 	void releaseCircularizeMap();
 };
