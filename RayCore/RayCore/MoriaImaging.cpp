@@ -264,7 +264,7 @@ void CMoriaImaging::allocateMemory() {
 	uBackgroundFringe_Deinterlaced = new Ipp16u * [nDmaChannels];
 	fOutput = new Ipp32f * [nDmaChannels];
 	for (int ch = 0; ch < nDmaChannels; ch++) {
-		fBuffer_BackgroundFringes[ch] = ippsMalloc_32f(2048);
+		fBuffer_BackgroundFringes[ch] = ippsMalloc_32f(nAScan);
 		backgroundImage_Deinterlaced[ch] = ippsMalloc_16u(nAScan * nBScan);
 		backgroundImage32f_Deinterlaced[ch] = ippsMalloc_32f(nAScan * nBScan);
 		uDataFringes_Deinterlaced[ch] = ippsMalloc_16u(nAScan * nBScan);
