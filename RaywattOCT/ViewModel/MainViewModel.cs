@@ -143,6 +143,19 @@ namespace RaywattOCT.ViewModel
         }
         private Mat imgLongitude;
 
+        private double pointerX;
+        public double PointerX
+        {
+            get { return pointerX; }
+            set { pointerX = value; OnPropertyChanged(nameof(PointerX)); }
+        }
+        private double pointerY;
+        public double PointerY
+        {
+            get { return pointerY; }
+            set { pointerY = value; OnPropertyChanged(nameof(PointerY)); }
+        }
+
         private DelegateCommand cmdInitialize;
         public DelegateCommand CmdInitialize
         {
