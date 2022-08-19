@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:inter="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:local="clr-namespace:RaywattOCT"
         mc:Ignorable="d"
         WindowStyle="None"
@@ -440,6 +441,9 @@
                     <StackPanel.Background>
                         <ImageBrush ImageSource="{Binding CrossSectionImage}" Stretch="Fill"/>
                     </StackPanel.Background>
+                    <inter:Interaction.Behaviors>
+                        <local:MouseBehavior MouseX="{Binding PointerX, Mode=OneWayToSource}" MouseY="{Binding PointerY, Mode=OneWayToSource}" />
+                    </inter:Interaction.Behaviors>
                 </StackPanel>
             </Grid>
             <Grid Grid.Row="4">
