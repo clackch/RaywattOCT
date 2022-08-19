@@ -238,6 +238,7 @@ void CMoriaImaging::allocateMemory() {
 	const int nDmaChannels = pConfig.nDmaChannels;
 	const int nScopeLength = pConfig.getScopeLength();
 	const int nFftLength = pConfig.nFftLength;
+	const int nCircleSize = pConfig.nCircleSize;
 
 	fringes32f = ippsMalloc_32f(nDmaChannels * nAScan);
 	fringes32fAverage = ippsMalloc_32f(nDmaChannels * nAScan);
@@ -247,7 +248,7 @@ void CMoriaImaging::allocateMemory() {
 	imageResult.create(nBScan, nFftLength, CV_8UC1);
 	imageResultColor.create(nBScan, nFftLength, CV_8UC3);
 	imageRectangle.create(nFftLength, nBScan, CV_8UC3);
-	imageCircle.create(1024, 1024, CV_8UC3);
+	imageCircle.create(nCircleSize, nCircleSize, CV_8UC3);
 
 	scopeData = ippsMalloc_16u(nScopeLength * nDmaChannels);
 	scopeFFTData = ippsMalloc_16u(nFftLength * nDmaChannels);
