@@ -153,7 +153,6 @@
       <Command>xcopy "$(TargetDir)*.dll" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
 xcopy "$(TargetDir)newmoria.ini" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
 xcopy "$(TargetDir)CALIBRATION.dat" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
-xcopy "$(TargetDir)BACKGROUND.bin" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
 xcopy "$(TargetDir)LUT.csv" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

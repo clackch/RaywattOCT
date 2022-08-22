@@ -37,9 +37,6 @@ CMoriaImaging::CMoriaImaging(CMessageService* pMsg) {
 
 	fringes32f = NULL;
 	fringes32fAverage = NULL;
-	backgroundImage = NULL;
-	backgroundImage_Deinterlaced = NULL;
-	backgroundImage32f_Deinterlaced = NULL;
 
 	fBuffer_BackgroundFringes = NULL;
 	uDataFringes_Deinterlaced = NULL;
@@ -74,22 +71,6 @@ void CMoriaImaging::Initialize() {
 	releaseMemory();
 	allocateMemory();
 	calibration->Initialize();
-
-	// load Background image from file
-	FILE* fp = fopen("BACKGROUND.bin", "rb");
-	if (fp) {
-		size_t readSize = fread(backgroundImage, sizeof(Ipp16u), nBufferSize, fp);
-		if (readSize != pConfig.nBufferSize) {
-			memset(backgroundImage, 0x00, sizeof(Ipp16u) * nBufferSize);
-		}
-		fclose(fp);
-
-		// interleave background
-		ippsDeinterleave_16s((Ipp16s*)backgroundImage, nDmaChannels, nAScan * nBScan, (Ipp16s**)backgroundImage_Deinterlaced);
-		for (int ch = 0; ch < nDmaChannels; ch++) {
-			ippsConvert_16u32f(backgroundImage_Deinterlaced[ch], backgroundImage32f_Deinterlaced[ch], nAScan * nBScan);
-		}
-	}
 
 	loadLUT("LUT.csv");
 }
@@ -242,8 +223,6 @@ void CMoriaImaging::allocateMemory() {
 
 	fringes32f = ippsMalloc_32f(nDmaChannels * nAScan);
 	fringes32fAverage = ippsMalloc_32f(nDmaChannels * nAScan);
-	backgroundImage = (Ipp16u*)ippsMalloc_16s(nBufferSize);
-	memset(backgroundImage, 0x00, sizeof(Ipp16u) * pConfig.nBufferSize);
 
 	imageResult.create(nBScan, nFftLength, CV_8UC1);
 	imageResultColor.create(nBScan, nFftLength, CV_8UC3);
@@ -253,16 +232,12 @@ void CMoriaImaging::allocateMemory() {
 	scopeData = ippsMalloc_16u(nScopeLength * nDmaChannels);
 	scopeFFTData = ippsMalloc_16u(nFftLength * nDmaChannels);
 
-	backgroundImage_Deinterlaced = new Ipp16u * [nDmaChannels];
-	backgroundImage32f_Deinterlaced = new Ipp32f * [nDmaChannels];
 	fBuffer_BackgroundFringes = new Ipp32f * [nDmaChannels];
 	uDataFringes_Deinterlaced = new Ipp16u * [nDmaChannels];
 	uDataFingees_DeinterlacedwithPadding = new Ipp16u * [nDmaChannels];
 	fOutput = new Ipp32f * [nDmaChannels];
 	for (int ch = 0; ch < nDmaChannels; ch++) {
 		fBuffer_BackgroundFringes[ch] = ippsMalloc_32f(nAScan);
-		backgroundImage_Deinterlaced[ch] = ippsMalloc_16u(nAScan * nBScan);
-		backgroundImage32f_Deinterlaced[ch] = ippsMalloc_32f(nAScan * nBScan);
 		uDataFringes_Deinterlaced[ch] = ippsMalloc_16u(nAScan * nBScan);
 		uDataFingees_DeinterlacedwithPadding[ch] = ippsMalloc_16u(nAScanWithPadding * nBScan);
 		fOutput[ch] = ippsMalloc_32f(nScansOver2 * nBScan);
@@ -282,7 +257,6 @@ void CMoriaImaging::releaseMemory() {
 
 	if (fringes32f) { ippsFree(fringes32f); fringes32f = NULL; }
 	if (fringes32fAverage) { ippsFree(fringes32fAverage); fringes32fAverage = NULL; }
-	if (backgroundImage) { ippsFree(backgroundImage); backgroundImage = NULL; }
 
 	imageResult.release();
 	imageResultColor.release();
@@ -293,8 +267,6 @@ void CMoriaImaging::releaseMemory() {
 	ippsRelease((void*&)scopeFFTData);
 
 	ippsRelease_double_ptr((void**&)fBuffer_BackgroundFringes, nDmaChannels);
-	ippsRelease_double_ptr((void**&)backgroundImage_Deinterlaced, nDmaChannels);
-	ippsRelease_double_ptr((void**&)backgroundImage32f_Deinterlaced, nDmaChannels);
 	ippsRelease_double_ptr((void**&)uDataFringes_Deinterlaced, nDmaChannels);
 	ippsRelease_double_ptr((void**&)uDataFingees_DeinterlacedwithPadding, nDmaChannels);
 	ippsRelease_double_ptr((void**&)fOutput, nDmaChannels);

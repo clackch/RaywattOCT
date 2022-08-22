@@ -30,9 +30,6 @@ private:
 	// using in GenerateBackground
 	Ipp32f *fringes32f;
 	Ipp32f *fringes32fAverage;
-	Ipp16u *backgroundImage;
-	Ipp16u **backgroundImage_Deinterlaced;
-	Ipp32f **backgroundImage32f_Deinterlaced;
 
 	// using in Gen_8bit_Image
 	Ipp32f fBuffer_Fringes[2048];
