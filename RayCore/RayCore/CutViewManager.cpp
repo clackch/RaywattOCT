@@ -6,26 +6,36 @@
 CCutViewManager::CCutViewManager() {
 }
 CCutViewManager::~CCutViewManager() {
+	for (int i = 0; i < m_vRecords.size(); i++) {
+		m_vRecords.at(i).release();
+	}
 	m_imgCutView.release();
 }
 
 void CCutViewManager::Initialize(int nNumOfSamples) {
+	for (int i = 0; i < m_vRecords.size(); i++) {
+		m_vRecords.at(i).release();
+	}
+	m_vRecords.resize(nNumOfSamples);
+
 	m_imgCutView.release();
 	m_imgCutView.create(1024, nNumOfSamples, CV_8UC3);
 	m_imgCutView.setTo(cv::Scalar(0, 0, 0));
 }
-void CCutViewManager::GenerateCutView(CMoriaImaging* pImaging, unsigned short* pBuffer, int nFrameIndex, double degree) {
+void CCutViewManager::GenerateCutView(double degree) {
+	for (int i = 0; i < m_vRecords.size(); i++) {
+		GenerateCutView(i, degree);
+	}
+}
+void CCutViewManager::GenerateCutView(int nFrameIndex, double degree) {
 	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
-	const int nBufferSize = pConfig.nBufferSize;
-	const int centerX = 1024 / 2;
-	const int centerY = 1024 / 2;
+	const int centerX = pConfig.nCircleSize / 2;
+	const int centerY = pConfig.nCircleSize / 2;
 
-	pImaging->Process(pBuffer);
-
-	cv::Mat imageCircle = pImaging->GetCircleImage();
 	// generate cut view
-	{
-		int radius = imageCircle.rows / 2;
+	cv::Mat imgCircle = m_vRecords.at(nFrameIndex);
+	if(!imgCircle.empty()) {
+		int radius = imgCircle.rows / 2;
 		double xDirection = cos(degree * CV_PI / 180.0f);
 		double yDirection = sin(degree * CV_PI / 180.0f);
 		for (int r = 0; r < radius; r++) {
@@ -34,7 +44,7 @@ void CCutViewManager::GenerateCutView(CMoriaImaging* pImaging, unsigned short* p
 			point.y = (int)round(centerY + r * yDirection);
 			int y = centerY - r;
 
-			m_imgCutView.at<cv::Vec3b>(y, nFrameIndex) = imageCircle.at<cv::Vec3b>(point);
+			m_imgCutView.at<cv::Vec3b>(y, nFrameIndex) = imgCircle.at<cv::Vec3b>(point);
 		}
 		xDirection = cos((180 + degree) * CV_PI / 180.0f);
 		yDirection = sin((180 + degree) * CV_PI / 180.0f);
@@ -44,9 +54,15 @@ void CCutViewManager::GenerateCutView(CMoriaImaging* pImaging, unsigned short* p
 			point.y = (int)round(centerY + r * yDirection);
 			int y = centerY + r;
 
-			m_imgCutView.at<cv::Vec3b>(y, nFrameIndex) = imageCircle.at<cv::Vec3b>(point);
+			m_imgCutView.at<cv::Vec3b>(y, nFrameIndex) = imgCircle.at<cv::Vec3b>(point);
 		}
 	}
+}
+void CCutViewManager::AddRecord(unsigned short* pBuffer, CMoriaImaging* pImaging, int nFrameIndex) {
+	pImaging->Process(pBuffer);
+	cv::Mat imgCircle = pImaging->GetCircleImage().clone();
+
+	m_vRecords.at(nFrameIndex) = imgCircle;
 }
 cv::Mat CCutViewManager::GetCutViewROI(int length) {
 	cv::Rect rectROI;
