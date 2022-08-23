@@ -439,12 +439,71 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
                     <StackPanel.Background>
-                        <ImageBrush ImageSource="{Binding CrossSectionImage}" Stretch="Fill"/>
+                        <ImageBrush ImageSource="res/bg/body_bg.png" Stretch="Fill"/>
                     </StackPanel.Background>
-                    <inter:Interaction.Behaviors>
-                        <local:MouseBehavior MouseX="{Binding PointerX, Mode=OneWayToSource}" MouseY="{Binding PointerY, Mode=OneWayToSource}" />
-                    </inter:Interaction.Behaviors>
                 </StackPanel>
+
+                <DockPanel x:Name="crossSection">
+                    <Canvas x:Name="LayoutRoot" Height="800" Width="800">
+
+                        <inter:Interaction.Behaviors>
+                            <local:MouseBehavior MouseX="{Binding PointerX, Mode=OneWayToSource}" MouseY="{Binding PointerY, Mode=OneWayToSource}" />
+                        </inter:Interaction.Behaviors>
+                        
+                        <!-- Remain to check a new image in the future -->
+                        <!--
+                        <Ellipse Height="800" Width="800" Stretch="Fill" StrokeThickness="1" Stroke="Beige"/>
+                        <Ellipse Height="40" Width="40" Canvas.Left="380" Canvas.Top="380" Stretch="Fill" StrokeThickness="1" Stroke="Yellow" />
+                        -->
+
+                        <Rectangle Height="800" Width="800">
+                            <Rectangle.Fill>
+                                <ImageBrush ImageSource="{Binding CrossSectionImage}" Stretch="Fill"/>
+                            </Rectangle.Fill>
+                            <inter:Interaction.Triggers>
+                                <inter:EventTrigger EventName="MouseLeave" >
+                                    <inter:InvokeCommandAction Command="{Binding CaptureFalseCommand}"/>
+                                </inter:EventTrigger>
+                            </inter:Interaction.Triggers>
+                        </Rectangle>
+
+                        <Ellipse x:Name="IndicatorBackground" Height="800" Width="800" Canvas.Left="0" Canvas.Top="0" Stroke="Transparent" Fill="Transparent">
+                            <Ellipse.RenderTransform>
+                                <RotateTransform CenterX="400" CenterY="400" Angle="{Binding Degree}"/>
+                            </Ellipse.RenderTransform>
+
+                            <inter:Interaction.Triggers>
+                                <inter:EventTrigger EventName="PreviewMouseUp" >
+                                    <inter:InvokeCommandAction Command="{Binding CaptureFalseCommand}"/>
+                                </inter:EventTrigger>
+
+                                <inter:EventTrigger EventName="PreviewMouseMove" >
+                                    <inter:InvokeCommandAction Command="{Binding MoveIndicatorCommand}"/>
+                                </inter:EventTrigger>
+                            </inter:Interaction.Triggers>
+                        </Ellipse>
+
+                        <Image x:Name="Indicator" Source="/res/bar/brightness_e.png" Height="800" Width="800" Cursor="Hand" Stretch="Uniform" >
+                            <Image.RenderTransform>
+                                <RotateTransform CenterX="400" CenterY="7" Angle="{Binding Degree}"/>
+                            </Image.RenderTransform>
+
+                            <inter:Interaction.Triggers>
+                                <inter:EventTrigger EventName="PreviewMouseDown" >
+                                    <inter:InvokeCommandAction Command="{Binding CaptureTrueCommand}"/>
+                                </inter:EventTrigger>
+
+                                <inter:EventTrigger EventName="PreviewMouseUp" >
+                                    <inter:InvokeCommandAction Command="{Binding CaptureFalseCommand}"/>
+                                </inter:EventTrigger>
+
+                                <inter:EventTrigger EventName="PreviewMouseMove" >
+                                    <inter:InvokeCommandAction Command="{Binding MoveIndicatorCommand}"/>
+                                </inter:EventTrigger>
+                            </inter:Interaction.Triggers>
+                        </Image>
+                    </Canvas>
+                </DockPanel>
             </Grid>
             <Grid Grid.Row="4">
                 <Grid.ColumnDefinitions>
