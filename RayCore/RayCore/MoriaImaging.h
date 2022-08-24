@@ -39,11 +39,8 @@ private:
 	Ipp16u **uDataFringes_Deinterlaced;
 	Ipp16u **uDataFingees_DeinterlacedwithPadding;
 	Ipp32f **fOutput;
-	IppsFFTSpec_R_32f *specReal32FFT;
-	IppsFFTSpec_C_32fc *specComp32FFT, *specComp32ZoomFFT;
-	int nSizeSpecReal32FFT;
-	int nSizeSpecComp32FFT;
-	int nSizeSpecComp32ZoomFFT;
+	IppsFFTSpec_R_32f *specReal32FFT;	// first FFT
+	IppsFFTSpec_C_32fc *specComp32FFT, *specComp32ZoomFFT;	// Inverse, second FFT
 
 	bool m_bInvert;
 	bool m_bColor;

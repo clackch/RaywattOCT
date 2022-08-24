@@ -245,11 +245,8 @@ void CMoriaImaging::allocateMemory() {
 
 	// Prepare FFT
 	ippsFFTInitAlloc_R_32f(&specReal32FFT, order, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
-	ippsFFTGetBufSize_R_32f(specReal32FFT, &nSizeSpecReal32FFT);
 	ippsFFTInitAlloc_C_32fc(&specComp32ZoomFFT, order + zoom - 2, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
-	ippsFFTGetBufSize_C_32fc(specComp32ZoomFFT, &nSizeSpecComp32ZoomFFT);
 	ippsFFTInitAlloc_C_32fc(&specComp32FFT, order + zoom - 3, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
-	ippsFFTGetBufSize_C_32fc(specComp32FFT, &nSizeSpecComp32FFT);
 }
 void CMoriaImaging::releaseMemory() {
 	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
