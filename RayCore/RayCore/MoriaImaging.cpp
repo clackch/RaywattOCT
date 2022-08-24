@@ -102,6 +102,8 @@ void CMoriaImaging::Process(const Ipp16u* fringes) {
 	cv::convertScaleAbs(imageResultColor, imageResultColor, m_fContrast, m_fBrightness);
 
 	circularizeImage(imageResultColor, imageCircle);
+
+	cv::copyTo(imageBackground, imageCircle, imageMask);
 }
 
 int CMoriaImaging::Start() {
@@ -228,6 +230,8 @@ void CMoriaImaging::allocateMemory() {
 	imageResultColor.create(nBScan, nFftLength, CV_8UC3);
 	imageRectangle.create(nFftLength, nBScan, CV_8UC3);
 	imageCircle.create(nCircleSize, nCircleSize, CV_8UC3);
+	imageMask.create(nCircleSize, nCircleSize, CV_8UC3);
+	imageBackground.create(nCircleSize, nCircleSize, CV_8UC3);
 
 	scopeData = ippsMalloc_16u(nScopeLength * nDmaChannels);
 	scopeFFTData = ippsMalloc_16u(nFftLength * nDmaChannels);
@@ -247,6 +251,9 @@ void CMoriaImaging::allocateMemory() {
 	ippsFFTInitAlloc_R_32f(&specReal32FFT, order, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
 	ippsFFTInitAlloc_C_32fc(&specComp32ZoomFFT, order + zoom - 2, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
 	ippsFFTInitAlloc_C_32fc(&specComp32FFT, order + zoom - 3, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
+
+	generateMask(imageMask);
+	imageBackground.setTo(cv::Scalar(0x18, 0x15, 0x16));
 }
 void CMoriaImaging::releaseMemory() {
 	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
@@ -259,6 +266,7 @@ void CMoriaImaging::releaseMemory() {
 	imageResultColor.release();
 	imageRectangle.release();
 	imageCircle.release();
+	imageMask.release();
 
 	ippsRelease((void*&)scopeData);
 	ippsRelease((void*&)scopeFFTData);
@@ -487,6 +495,17 @@ void CMoriaImaging::applyLUT(cv::Mat& image) {
 			image.at<cv::Vec3b>(y, x) = cvtColor;
 		}
 	}
+}
+void CMoriaImaging::generateMask(cv::Mat& image) {
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	const int nBScan = pConfig.nBScan;
+	const int nFftLength = pConfig.nFftLength;
+	
+	cv::Mat imgTemp(nBScan, nFftLength, CV_8UC3);
+
+	imgTemp.setTo(cv::Scalar(255, 255, 255));
+	circularizeImage(imgTemp, image);
+	cv::bitwise_not(image, image);
 }
 
 UINT CMoriaImaging::threadRender(LPVOID param) {

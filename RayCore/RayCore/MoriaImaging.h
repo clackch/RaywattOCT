@@ -23,6 +23,8 @@ private:
 	cv::Mat imageResultColor;
 	cv::Mat imageRectangle;
 	cv::Mat imageCircle;
+	cv::Mat imageMask;
+	cv::Mat imageBackground;
 
 	Ipp16u* scopeData;
 	Ipp16u* scopeFFTData;
@@ -92,6 +94,7 @@ private:
 	void applyHotColor(cv::Mat& image);
 	void loadLUT(const char* strLUTPath);
 	void applyLUT(cv::Mat& image);
+	void generateMask(cv::Mat& image);
 
 	static UINT threadRender(LPVOID param);
 };
