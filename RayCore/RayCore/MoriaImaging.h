@@ -23,17 +23,15 @@ private:
 	cv::Mat imageResultColor;
 	cv::Mat imageRectangle;
 	cv::Mat imageCircle;
+	cv::Mat imageMask;
+	cv::Mat imageBackground;
 
 	Ipp16u* scopeData;
 	Ipp16u* scopeFFTData;
 
 	// using in GenerateBackground
 	Ipp32f *fringes32f;
-	Ipp32f *fringes32fSum;
-	Ipp16u *ref_fringe;
-	Ipp16u *backgroundImage;
-	Ipp16u **backgroundImage_Deinterlaced;
-	Ipp32f **backgroundImage32f_Deinterlaced;
+	Ipp32f *fringes32fAverage;
 
 	// using in Gen_8bit_Image
 	Ipp32f fBuffer_Fringes[2048];
@@ -42,13 +40,9 @@ private:
 	Ipp32f **fBuffer_BackgroundFringes;
 	Ipp16u **uDataFringes_Deinterlaced;
 	Ipp16u **uDataFingees_DeinterlacedwithPadding;
-	Ipp16u **uBackgroundFringe_Deinterlaced;
 	Ipp32f **fOutput;
-	IppsFFTSpec_R_32f *specReal32FFT;
-	IppsFFTSpec_C_32fc *specComp32FFT, *specComp32ZoomFFT;
-	int nSizeSpecReal32FFT;
-	int nSizeSpecComp32FFT;
-	int nSizeSpecComp32ZoomFFT;
+	IppsFFTSpec_R_32f *specReal32FFT;	// first FFT
+	IppsFFTSpec_C_32fc *specComp32FFT, *specComp32ZoomFFT;	// Inverse, second FFT
 
 	bool m_bInvert;
 	bool m_bColor;
@@ -100,6 +94,7 @@ private:
 	void applyHotColor(cv::Mat& image);
 	void loadLUT(const char* strLUTPath);
 	void applyLUT(cv::Mat& image);
+	void generateMask(cv::Mat& image);
 
 	static UINT threadRender(LPVOID param);
 };

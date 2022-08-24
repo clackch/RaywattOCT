@@ -265,6 +265,9 @@ double COCTSystem::GetDegree() {
 */
 RayError COCTSystem::SetDegree(double value) {
 	m_fDegree = value;
+	if (m_pCutView != nullptr) {
+		m_pCutView->GenerateCutView(m_fDegree);
+	}
 
 	return RayError::OK;
 }
@@ -503,7 +506,8 @@ UINT COCTSystem::threadUpdateCutView(LPVOID param) {
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadUpdateCutView->isRun; nFrame++) {
 		unsigned short* pBuffer = pDataManager->GetSample(nFrame);
 
-		pCutView->GenerateCutView(pImaging, pBuffer, nFrame, fDegree);
+		pCutView->AddRecord(pBuffer, pImaging, nFrame);
+		pCutView->GenerateCutView(nFrame, fDegree);
 		pSystem->updateCutView(nFrame);
 	}
 	delete pImaging;

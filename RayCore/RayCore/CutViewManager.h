@@ -5,13 +5,16 @@ class CMoriaImaging;
 class CCutViewManager
 {
 private:
+	std::vector<cv::Mat> m_vRecords;
 	cv::Mat m_imgCutView;
 public:
 	CCutViewManager();
 	virtual ~CCutViewManager();
 
 	void Initialize(int nNumOfSamples);
-	void GenerateCutView(CMoriaImaging *pImaging, unsigned short *pBuffer, int nFrameIndex, double degree);
+	void GenerateCutView(double degree);
+	void GenerateCutView(int nFrameIndex, double degree);
+	void AddRecord(unsigned short* pBuffer, CMoriaImaging* pImaging, int nFrameIndex);
 	cv::Mat GetCutView() { return m_imgCutView; }
 	cv::Mat GetCutViewROI(int length);
 	void DrawCutViewGuideLine(cv::Mat& img, double degree);

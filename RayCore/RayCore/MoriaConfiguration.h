@@ -77,9 +77,9 @@ private:
 	
 public:
 	bool isInit;
-	int nScans;
-	int nScansPadding;
-	int nAlines;
+	int nAScan;		// Axial Scan (z-Depth)
+	int nAScanPadding;
+	int nBScan;		// Number of A-Scan (Transverse)
 	int nBufferSize;
 	int nLaserSpeed;
 	int nDmaChannels;
@@ -106,7 +106,7 @@ public:
 	static CMoriaConfiguration& GetInstance();
 
 	bool IsInit(){ return isInit; }
-	void Initialize(int nScans=-1, int nScansPaddin=-1, int nAlines=-1);
+	void Initialize();
 
 	void SaveZaberSettings();
 	void SaveMotorSettings();
@@ -119,6 +119,6 @@ public:
 	double GetLoadCatheterTime();
 
 private:
-	void initCircularizeMap();
+	void initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale);
 	void releaseCircularizeMap();
 };

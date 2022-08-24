@@ -36,16 +36,11 @@ CMoriaImaging::CMoriaImaging(CMessageService* pMsg) {
 	scopeFFTData = NULL;
 
 	fringes32f = NULL;
-	fringes32fSum = NULL;
-	ref_fringe = NULL;
-	backgroundImage = NULL;
-	backgroundImage_Deinterlaced = NULL;
-	backgroundImage32f_Deinterlaced = NULL;
+	fringes32fAverage = NULL;
 
 	fBuffer_BackgroundFringes = NULL;
 	uDataFringes_Deinterlaced = NULL;
 	uDataFingees_DeinterlacedwithPadding = NULL;
-	uBackgroundFringe_Deinterlaced = NULL;
 	fOutput = NULL;
 
 	specReal32FFT = NULL;
@@ -68,8 +63,8 @@ CMoriaImaging::~CMoriaImaging() {
 
 void CMoriaImaging::Initialize() {
 	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
-	const int nScans = pConfig.nScans;
-	const int nAlines = pConfig.nAlines;
+	const int nAScan = pConfig.nAScan;
+	const int nBScan = pConfig.nBScan;
 	const int nBufferSize = pConfig.nBufferSize;
 	const int nDmaChannels = pConfig.nDmaChannels;
 
@@ -77,28 +72,10 @@ void CMoriaImaging::Initialize() {
 	allocateMemory();
 	calibration->Initialize();
 
-	// load Background image from file
-	FILE* fp = fopen("BACKGROUND.bin", "rb");
-	if (fp) {
-		size_t readSize = fread(backgroundImage, sizeof(Ipp16u), nBufferSize, fp);
-		if (readSize != pConfig.nBufferSize) {
-			memset(backgroundImage, 0x00, sizeof(Ipp16u) * nBufferSize);
-		}
-		fclose(fp);
-
-		// interleave background
-		ippsDeinterleave_16s((Ipp16s*)backgroundImage, nDmaChannels, nScans * nAlines, (Ipp16s**)backgroundImage_Deinterlaced);
-		for (int ch = 0; ch < nDmaChannels; ch++) {
-			ippsConvert_16u32f(backgroundImage_Deinterlaced[ch], backgroundImage32f_Deinterlaced[ch], nScans * nAlines);
-		}
-	}
-
 	loadLUT("LUT.csv");
 }
 void CMoriaImaging::Process(const Ipp16u* fringes) {
 	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
-	const int nAlines = pConfig.nAlines;
-	const int nFFTLength = pConfig.nFftLength;
 	const bool bInvert = m_bInvert;
 	const bool bColor = m_bColor;
 
@@ -125,6 +102,8 @@ void CMoriaImaging::Process(const Ipp16u* fringes) {
 	cv::convertScaleAbs(imageResultColor, imageResultColor, m_fContrast, m_fBrightness);
 
 	circularizeImage(imageResultColor, imageCircle);
+
+	cv::copyTo(imageBackground, imageCircle, imageMask);
 }
 
 int CMoriaImaging::Start() {
@@ -233,79 +212,68 @@ void CMoriaImaging::allocateMemory() {
 	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
 	const int order = pConfig.constantValues.Order;
 	const int zoom = pConfig.constantValues.Zoom;
-	const int nScans = pConfig.nScans;
-	const int nScansWithPadding = pConfig.nScans + pConfig.nScansPadding;
-	const int nAlines = pConfig.nAlines;
+	const int nAScan = pConfig.nAScan;
+	const int nAScanWithPadding = pConfig.nAScan + pConfig.nAScanPadding;
+	const int nBScan = pConfig.nBScan;
 	const int nScans2n = (1 << order);
 	const int nScansOver2 = nScans2n / 2;
 	const int nBufferSize = pConfig.nBufferSize;
 	const int nDmaChannels = pConfig.nDmaChannels;
 	const int nScopeLength = pConfig.getScopeLength();
 	const int nFftLength = pConfig.nFftLength;
+	const int nCircleSize = pConfig.nCircleSize;
 
-	fringes32f = ippsMalloc_32f(nDmaChannels * nScans);
-	fringes32fSum = ippsMalloc_32f(nDmaChannels * nScans);
-	ref_fringe = (Ipp16u*)ippsMalloc_16s(nScans * nDmaChannels);
-	ippsSet_16s(32768, (Ipp16s*)ref_fringe, nScans * nDmaChannels);
-	backgroundImage = (Ipp16u*)ippsMalloc_16s(nBufferSize);
-	memset(backgroundImage, 0x00, sizeof(Ipp16u) * pConfig.nBufferSize);
+	fringes32f = ippsMalloc_32f(nDmaChannels * nAScan);
+	fringes32fAverage = ippsMalloc_32f(nDmaChannels * nAScan);
 
-	imageResult.create(nAlines, nFftLength, CV_8UC1);
-	imageResultColor.create(nAlines, nFftLength, CV_8UC3);
-	imageRectangle.create(nFftLength, nAlines, CV_8UC3);
-	imageCircle.create(1024, 1024, CV_8UC3);
+	imageResult.create(nBScan, nFftLength, CV_8UC1);
+	imageResultColor.create(nBScan, nFftLength, CV_8UC3);
+	imageRectangle.create(nFftLength, nBScan, CV_8UC3);
+	imageCircle.create(nCircleSize, nCircleSize, CV_8UC3);
+	imageMask.create(nCircleSize, nCircleSize, CV_8UC3);
+	imageBackground.create(nCircleSize, nCircleSize, CV_8UC3);
 
 	scopeData = ippsMalloc_16u(nScopeLength * nDmaChannels);
 	scopeFFTData = ippsMalloc_16u(nFftLength * nDmaChannels);
 
-	backgroundImage_Deinterlaced = new Ipp16u * [nDmaChannels];
-	backgroundImage32f_Deinterlaced = new Ipp32f * [nDmaChannels];
 	fBuffer_BackgroundFringes = new Ipp32f * [nDmaChannels];
 	uDataFringes_Deinterlaced = new Ipp16u * [nDmaChannels];
 	uDataFingees_DeinterlacedwithPadding = new Ipp16u * [nDmaChannels];
-	uBackgroundFringe_Deinterlaced = new Ipp16u * [nDmaChannels];
 	fOutput = new Ipp32f * [nDmaChannels];
 	for (int ch = 0; ch < nDmaChannels; ch++) {
-		fBuffer_BackgroundFringes[ch] = ippsMalloc_32f(2048);
-		backgroundImage_Deinterlaced[ch] = ippsMalloc_16u(nScans * nAlines);
-		backgroundImage32f_Deinterlaced[ch] = ippsMalloc_32f(nScans * nAlines);
-		uDataFringes_Deinterlaced[ch] = ippsMalloc_16u(nScans * nAlines);
-		uDataFingees_DeinterlacedwithPadding[ch] = ippsMalloc_16u(nScansWithPadding * nAlines);
-		uBackgroundFringe_Deinterlaced[ch] = ippsMalloc_16u(nScans);
-		fOutput[ch] = ippsMalloc_32f(nScansOver2 * nAlines);
+		fBuffer_BackgroundFringes[ch] = ippsMalloc_32f(nAScan);
+		uDataFringes_Deinterlaced[ch] = ippsMalloc_16u(nAScan * nBScan);
+		uDataFingees_DeinterlacedwithPadding[ch] = ippsMalloc_16u(nAScanWithPadding * nBScan);
+		fOutput[ch] = ippsMalloc_32f(nScansOver2 * nBScan);
 	}
 
 	// Prepare FFT
 	ippsFFTInitAlloc_R_32f(&specReal32FFT, order, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
-	ippsFFTGetBufSize_R_32f(specReal32FFT, &nSizeSpecReal32FFT);
 	ippsFFTInitAlloc_C_32fc(&specComp32ZoomFFT, order + zoom - 2, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
-	ippsFFTGetBufSize_C_32fc(specComp32ZoomFFT, &nSizeSpecComp32ZoomFFT);
 	ippsFFTInitAlloc_C_32fc(&specComp32FFT, order + zoom - 3, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
-	ippsFFTGetBufSize_C_32fc(specComp32FFT, &nSizeSpecComp32FFT);
+
+	generateMask(imageMask);
+	imageBackground.setTo(cv::Scalar(0x18, 0x15, 0x16));
 }
 void CMoriaImaging::releaseMemory() {
 	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
 	const int nDmaChannels = pConfig.nDmaChannels;
 
 	if (fringes32f) { ippsFree(fringes32f); fringes32f = NULL; }
-	if (fringes32fSum) { ippsFree(fringes32fSum); fringes32fSum = NULL; }
-	if (ref_fringe) { ippsFree(ref_fringe); ref_fringe = NULL; }
-	if (backgroundImage) { ippsFree(backgroundImage); backgroundImage = NULL; }
+	if (fringes32fAverage) { ippsFree(fringes32fAverage); fringes32fAverage = NULL; }
 
 	imageResult.release();
 	imageResultColor.release();
 	imageRectangle.release();
 	imageCircle.release();
+	imageMask.release();
 
 	ippsRelease((void*&)scopeData);
 	ippsRelease((void*&)scopeFFTData);
 
 	ippsRelease_double_ptr((void**&)fBuffer_BackgroundFringes, nDmaChannels);
-	ippsRelease_double_ptr((void**&)backgroundImage_Deinterlaced, nDmaChannels);
-	ippsRelease_double_ptr((void**&)backgroundImage32f_Deinterlaced, nDmaChannels);
 	ippsRelease_double_ptr((void**&)uDataFringes_Deinterlaced, nDmaChannels);
 	ippsRelease_double_ptr((void**&)uDataFingees_DeinterlacedwithPadding, nDmaChannels);
-	ippsRelease_double_ptr((void**&)uBackgroundFringe_Deinterlaced, nDmaChannels);
 	ippsRelease_double_ptr((void**&)fOutput, nDmaChannels);
 
 	if (specReal32FFT) { ippsFFTFree_R_32f(specReal32FFT); specReal32FFT = NULL; }
@@ -316,29 +284,24 @@ void CMoriaImaging::releaseMemory() {
 //fringes는 2*nScans*nAlines signal data, 결과:ref_fringe
 void CMoriaImaging::generateBackground(Ipp16u* fringes) {
 	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
-	const int nScans = pConfig.nScans;
-	const int nAlines = pConfig.nAlines;
-	const int nDmaChannels = pConfig.nDmaChannels;
-	const int nWidth = nScans * nDmaChannels;
+	const int nWidth = pConfig.nAScan * pConfig.nDmaChannels;
+	const int nHeight = pConfig.nBScan;
 
 	// 모든 fringe의 평균으로 background를 계산한다. 
-	ippsZero_32f(fringes32fSum, nWidth);
+	ippsZero_32f(fringes32fAverage, nWidth);
 
-	for (int i = 0; i < nAlines; i++)
+	for (int y = 0; y < nHeight; y++)
 	{
-		ippsConvert_16u32f(fringes + i * nWidth, fringes32f, nWidth);
-		ippsAdd_32f_I(fringes32f, fringes32fSum, nWidth);
+		ippsConvert_16u32f(fringes + y * nWidth, fringes32f, nWidth);
+		ippsAdd_32f_I(fringes32f, fringes32fAverage, nWidth);
 	}
 
-	ippsMulC_32f_I(1.0f / ((float)nAlines), fringes32fSum, nWidth);
-	ippsConvert_32f16u_Sfs(fringes32fSum, ref_fringe, nWidth, ippRndNear, 0);
+	ippsMulC_32f_I(1.0f / ((float)nHeight), fringes32fAverage, nWidth);
 }
 
 void CMoriaImaging::generateImage(const Ipp16u *fringes, bool bInvert){
 	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
-	const int nScans = pConfig.nScans, nAlines = pConfig.nAlines;
-	const int nScansPadding = pConfig.nScansPadding;
-	const int nScansWithPadding = (nScans + nScansPadding);
+	const int nAScan = pConfig.nAScan, nBScan = pConfig.nBScan;
 	const int nDmaChannels = pConfig.nDmaChannels;
 	const float fHighLevel = (bInvert) ? pConfig.invert.highLevel : 0.0f;
 	const float fLowLevel = (bInvert) ? pConfig.invert.lowLevel : 0.0f;
@@ -349,7 +312,6 @@ void CMoriaImaging::generateImage(const Ipp16u *fringes, bool bInvert){
 	const int nScopeLength = pConfig.getScopeLength();
 	const int X = 0;
 	const int Y = 1;
-	int i, j;
 
 	// ORDER = 11, nScans2n = 2^11
 	// nScans 보다 큰 2^n 중에서 제일 작은 수
@@ -359,17 +321,14 @@ void CMoriaImaging::generateImage(const Ipp16u *fringes, bool bInvert){
 	const int nScansZoom = (1 << (order + zoom - 2));
 
 	// Deinterlace fringe
-	ippsDeinterleave_16s((Ipp16s*)fringes, nDmaChannels, nAlines * nScans, (Ipp16s**)uDataFringes_Deinterlaced);
+	ippsDeinterleave_16s((Ipp16s*)fringes, nDmaChannels, nBScan * nAScan, (Ipp16s**)uDataFringes_Deinterlaced);
 	
 	// copy first line to display scope
 	ippsCopy_16s((Ipp16s*)uDataFringes_Deinterlaced[0], (Ipp16s*)scopeData, nScopeLength);
 	ippsCopy_16s((Ipp16s*)uDataFringes_Deinterlaced[1], (Ipp16s*)scopeData + nScopeLength, nScopeLength);
 
 	// Deinterlace uBackgroundFringes
-	ippsDeinterleave_16s((Ipp16s*)ref_fringe, nDmaChannels, nScans, (Ipp16s**)uBackgroundFringe_Deinterlaced);
-	for (int ch = 0; ch < nDmaChannels; ch++) {
-		ippsConvert_16u32f(uBackgroundFringe_Deinterlaced[ch], fBuffer_BackgroundFringes[ch], nScans);
-	}
+	ippsDeinterleave_32f(fringes32fAverage, nDmaChannels, nAScan, fBuffer_BackgroundFringes);
 
 	// Process Frame
 	// To-Do : enable openmp, check shared variables
@@ -378,15 +337,15 @@ void CMoriaImaging::generateImage(const Ipp16u *fringes, bool bInvert){
 //#pragma omp parallel
 	{
 //#pragma omp for firstprivate(fBuffer_Fringes,fBuffer_BackgroundFringes,fBuffer_Complex,fBuffer_DFT,j)
-		for (i = 0; i < nAlines; i++)
+		for (int i = 0; i < nBScan; i++)
 		{
 			// Process X, Y Polarization
 			for (int ch = 0; ch < nDmaChannels; ch++)
 			{
 				// 1. Background Subtract
-				ippsConvert_16u32f(uDataFringes_Deinterlaced[ch] + i * nScans, fBuffer_Fringes, nScans);
+				ippsConvert_16u32f(uDataFringes_Deinterlaced[ch] + i * nAScan, fBuffer_Fringes, nAScan);
 
-				ippsSub_32f_I(fBuffer_BackgroundFringes[ch], fBuffer_Fringes, nScans);  // I의 의미:자기 자신에 이처리를 해서, 결과를 얻는다.
+				ippsSub_32f_I(fBuffer_BackgroundFringes[ch], fBuffer_Fringes, nAScan);  // I의 의미:자기 자신에 이처리를 해서, 결과를 얻는다.
 
 				// 2. Apply Window
 				ippsMul_32f_I(calibration->window, fBuffer_Fringes, nScans2n);
@@ -405,13 +364,13 @@ void CMoriaImaging::generateImage(const Ipp16u *fringes, bool bInvert){
 
 				// 6. Interpolation
 				ippsZero_32fc(fBuffer_Complex, nScansOver2);
-				for (j = 0; j < nScans / 2; j++){
+				for (int j = 0; j < nAScan / 2; j++){
 					fBuffer_Complex[j].re = (calibration->weightMap[j] * fBuffer_DFT[calibration->indexMap[j]].re + (1.0f - calibration->weightMap[j]) * fBuffer_DFT[calibration->indexMap[j] + 1].re);
 					fBuffer_Complex[j].im = (calibration->weightMap[j] * fBuffer_DFT[calibration->indexMap[j]].im + (1.0f - calibration->weightMap[j]) * fBuffer_DFT[calibration->indexMap[j] + 1].im);
 				}
 
 				// 7. Numerical Dispersion Compensation
-				ippsMul_32fc_I(calibration->dispersion, fBuffer_Complex, nScans / 2);
+				ippsMul_32fc_I(calibration->dispersion, fBuffer_Complex, nAScan / 2);
 
 				// 8. FFT Again
 				ippsFFTFwd_CToC_32fc_I(fBuffer_Complex, specComp32FFT, NULL);
@@ -425,7 +384,7 @@ void CMoriaImaging::generateImage(const Ipp16u *fringes, bool bInvert){
 			if (scopeFFTData && i == 0)
 			{
 				generateScopeData(fOutput[X], scopeFFTData);
-				generateScopeData(fOutput[Y], scopeFFTData + 1024);
+				generateScopeData(fOutput[Y], scopeFFTData + pConfig.nFftLength);
 			}
 
 			// Last. X축, Y축 데이터를 더해 이미지를 만든다. Polarization 데이터를 더해서, 최종이미지 생성
@@ -536,6 +495,17 @@ void CMoriaImaging::applyLUT(cv::Mat& image) {
 			image.at<cv::Vec3b>(y, x) = cvtColor;
 		}
 	}
+}
+void CMoriaImaging::generateMask(cv::Mat& image) {
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	const int nBScan = pConfig.nBScan;
+	const int nFftLength = pConfig.nFftLength;
+	
+	cv::Mat imgTemp(nBScan, nFftLength, CV_8UC3);
+
+	imgTemp.setTo(cv::Scalar(255, 255, 255));
+	circularizeImage(imgTemp, image);
+	cv::bitwise_not(image, image);
 }
 
 UINT CMoriaImaging::threadRender(LPVOID param) {
