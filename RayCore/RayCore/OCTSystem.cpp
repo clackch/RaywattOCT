@@ -206,6 +206,22 @@ RayError COCTSystem::NextFrame()
 }
 
 /*
+* NextFrame
+*/
+RayError COCTSystem::MoveToFrame(int nFrame) {
+	if (m_curState >= RayScannerState::Review) {
+		bool isPaused = ((CSimulateDevice*)m_pSimDevice)->IsPaused();
+		if (!isPaused)
+			return RayError::NotPausedState;
+
+		((CSimulateDevice*)m_pSimDevice)->SetFrame(nFrame);
+
+		return RayError::OK;
+	}
+	return RayError::WrongOCTScannerState;
+}
+
+/*
 * RegisterImageCallback
 */
 RayError COCTSystem::RegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude) {
@@ -704,7 +720,6 @@ LRESULT COCTSystem::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 		if (isRealTime) return NOERROR;
 
 		image = m_pImagingSimulate->GetCircleImage();
-		m_pCutView->DrawCutViewGuideLine(image, m_fDegree);
 		m_nOffsetNavigation = nCurFrame;
 
 		if (m_pThreadUpdateCutView == NULL) {
@@ -728,23 +743,16 @@ void COCTSystem::updateCutView(int drawSamples) {
 	cv::Mat imgResize;
 	cv::Size sizeInterpolation = cv::Size(imgCutView.cols * CUTVIEW_INTERPOLATION_SCALE, imgCutView.rows);
 
+	int nCurFrame = drawSamples;
+	int nTotalFrame = m_pCutView->GetNumOfSamples();
+	int nFrameInfo = (nCurFrame << 16) | (nTotalFrame);	
+
 	if (sizeInterpolation.width % 4 != 0) {
 		sizeInterpolation.width -= (sizeInterpolation.width % 4);
 	}
 	cv::resize(imgCutView, imgResize, sizeInterpolation);
 
-	if (m_nOffsetNavigation < drawSamples) {
-		int offset = m_nOffsetNavigation * CUTVIEW_INTERPOLATION_SCALE;
-		cv::Point ptStart, ptEnd;
-
-		ptStart.x = offset;
-		ptStart.y = 0;
-		ptEnd.x = offset;
-		ptEnd.y = imgResize.rows;
-		cv::line(imgResize, ptStart, ptEnd, cv::Scalar(0xF5, 0xA5, 0x42), 2);
-	}
-
-	if (m_cbLongitude != nullptr) m_cbLongitude(imgResize.data, imgResize.cols, imgResize.rows, imgResize.channels(), 0);
+	if (m_cbLongitude != nullptr) m_cbLongitude(imgResize.data, imgResize.cols, imgResize.rows, imgResize.channels(), nFrameInfo);
 }
 
 /*

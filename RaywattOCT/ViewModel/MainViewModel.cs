@@ -27,7 +27,7 @@ namespace RaywattOCT.ViewModel
 
         private const int nCrossSectionHeight = 800;
         private const int nCrossSectionWidth = 860;
-        private const int nLModeWidth = 860;
+        private const int nLModeWidth = 820;
         private const int nLModeIndicatorWidth = 3;
 
         private string playIcon = ICON_RESOURCE_PLAY;
@@ -102,7 +102,7 @@ namespace RaywattOCT.ViewModel
         public double Degree
         {
             get { return degree; }
-            set { degree = value; OnPropertyChanged(nameof(Degree)); }
+            set { degree = value; OnPropertyChanged(nameof(Degree)); RayCoreWrapper.RaySetProperty(RayCoreWrapper.Property.Degree, degree); }
         }
 
         private string systemMessage = "Press Initialize Button";
@@ -154,9 +154,11 @@ namespace RaywattOCT.ViewModel
             set { crossSectionImage = value; OnPropertyChanged(nameof(CrossSectionImage)); }
         }
         private Mat imgCrossSection;
-        private int frameInformation;
 
-        private BitmapSource longitudeImage = new BitmapImage(GetResourceURI(null, "res/bg/bottom_bg.png"));
+        private RayCoreWrapper.FrameInfo crossSectionFrameInfo;
+        private RayCoreWrapper.FrameInfo longitudeFrameInfo;
+
+        private BitmapSource longitudeImage = null;
         public BitmapSource LongitudeImage
         {
             get { return longitudeImage; }
@@ -193,7 +195,7 @@ namespace RaywattOCT.ViewModel
         public double LModeLocationX
         {
             get { return lModeLocationX; }
-            set { if (value.Equals(lModeLocationX)) return; lModeLocationX = value; OnPropertyChanged(nameof(lModeLocationX)); }
+            set { if (value.Equals(lModeLocationX)) return; lModeLocationX = value; OnPropertyChanged(nameof(lModeLocationX)); setCurrentFrame(lModeLocationX); }
         }
 
         private string isVisibleIndicator = "Hidden";
@@ -201,6 +203,13 @@ namespace RaywattOCT.ViewModel
         {
             get { return isVisibleIndicator; }
             set { isVisibleIndicator = value; OnPropertyChanged(nameof(isVisibleIndicator)); }
+        }
+
+        private string isVisibleNavigator = "Hidden";
+        public string IsVisibleNavigator
+        { 
+            get { return isVisibleNavigator; }
+            set { isVisibleNavigator = value; OnPropertyChanged(nameof(isVisibleNavigator)); }
         }
 
         public DelegateCommand moveIndicator;
@@ -229,12 +238,12 @@ namespace RaywattOCT.ViewModel
             }
         }
 
-        public DelegateCommand lModeMoveIndicator;
-        public DelegateCommand LModeMoveIndicator
+        public DelegateCommand moveNavigator;
+        public DelegateCommand MoveNavigator
         {
             get
             {
-                return (this.lModeMoveIndicator) ?? (this.lModeMoveIndicator = new DelegateCommand(lModeModeIndicator));
+                return (this.moveNavigator) ?? (this.moveNavigator = new DelegateCommand(calculateNavigatorPosition));
             }
         }
 
@@ -334,9 +343,6 @@ namespace RaywattOCT.ViewModel
 
         public MainViewModel()
         {
-            getBrightnessContrast();
-            updateMotorState();
-
             timer.Interval = TimeSpan.FromMilliseconds(1000);
             timer.Tick += new EventHandler(timerUpdateTime);
             timer.Start();
@@ -358,22 +364,31 @@ namespace RaywattOCT.ViewModel
             {
                 CrossSectionImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgCrossSection);
 
-                if (frameInformation == 0)
+                if (crossSectionFrameInfo.totalFrame == 0)
                 {
                     FrameInfo = "";
                     ViewMode = "Live View";
                 }
                 else
                 {
-                    int curFrame = (frameInformation >> 16) & 0x00FFFF;
-                    int totalFrame = (frameInformation) & 0x00FFFF;
-                    FrameInfo = String.Format("{0} / {1}", curFrame + 1, totalFrame);
+                    FrameInfo = String.Format("{0} / {1}", crossSectionFrameInfo.curFrame + 1, crossSectionFrameInfo.totalFrame);                    
                     ViewMode = "Review";
+
+                    if(!bLModeCaptured) updateNavigator(crossSectionFrameInfo.curFrame, crossSectionFrameInfo.totalFrame);
                 }
             }
             if (imgLongitude != null)
             {
-                LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgLongitude);
+                RayCoreWrapper.RayScannerState state = (RayCoreWrapper.RayScannerState)RayCoreWrapper.RayGetProperty(RayCoreWrapper.Property.CurrentState);
+
+                if (state >= RayCoreWrapper.RayScannerState.Review)
+                {
+                    LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgLongitude);
+                    if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame) updateNavigatorVisibility(true);
+                }
+                else { 
+                    LongitudeImage = new BitmapImage(GetResourceURI(null, "res/bg/bottom_bg.png"));
+                }
             }
         }
         private void Initialize()
@@ -384,6 +399,9 @@ namespace RaywattOCT.ViewModel
                 Marshal.GetFunctionPointerForDelegate(CBLongitude));
 
             RayCoreWrapper.RayInitialize();
+
+            getBrightnessContrast();
+            updateMotorState();
 
             ScanProgress = 0;
         }
@@ -477,13 +495,14 @@ namespace RaywattOCT.ViewModel
         {
             Mat imgRecv = byteMemoryToCvMat(data, width, height, ch);
             imgCrossSection = imgRecv.Clone();
-            frameInformation = frameInfo;
+            crossSectionFrameInfo = new RayCoreWrapper.FrameInfo(frameInfo);
         }
 
         private void OnRecvLongitude(IntPtr data, int width, int height, int ch, int frameInfo)
         {
             Mat imgRecv = byteMemoryToCvMat(data, width, height, ch);
             imgLongitude = imgRecv.Clone();
+            longitudeFrameInfo = new RayCoreWrapper.FrameInfo(frameInfo);
         }
 
         private void handleState(RayCoreWrapper.RayCallbackRequest request, RayCoreWrapper.RayScannerState response)
@@ -491,6 +510,7 @@ namespace RaywattOCT.ViewModel
             if (request != RayCoreWrapper.RayCallbackRequest.State) return;
 
             updateIndicatorVisibility(false);
+            updateNavigatorVisibility(false);
 
             switch (response)
             {
@@ -595,6 +615,29 @@ namespace RaywattOCT.ViewModel
                 IsVisibleIndicator = "Hidden";                
         }
 
+        private void updateNavigatorVisibility(bool onOff)
+        {
+            if (onOff)
+                IsVisibleNavigator = "Visible";
+            else
+                IsVisibleNavigator = "Hidden";
+        }
+
+        private void updateNavigator(int curFrame, int totalFrame) {
+            double curPosition = (double)curFrame / totalFrame;
+            curPosition *= nLModeWidth;
+            LModeLocationX = curPosition + nLModeIndicatorWidth / 2;
+        }
+
+        private void setCurrentFrame(double navigatorPosition) {
+            double curPosition = (navigatorPosition + nLModeIndicatorWidth / 2) / (double)nLModeWidth;
+
+            if (longitudeFrameInfo != null) {
+                curPosition *= longitudeFrameInfo.totalFrame;
+                RayCoreWrapper.RayMoveToFrame((int) curPosition);
+            }
+        }
+
         private Mat byteMemoryToCvMat(IntPtr data, int width, int height, int ch)
         {
             int byteLength = width * height * ch;
@@ -639,18 +682,20 @@ namespace RaywattOCT.ViewModel
 
         private void lModeCaptureSetTrue()
         {
-            bLModeCaptured = true;
+            if (IsPaused)
+            {
+                bLModeCaptured = true;
+            }
         }
 
         private void lModeCaptureSetFalse()
         {
-            if (bLModeCaptured)
-                bLModeCaptured = false;
+            bLModeCaptured = false;
         }
 
-        private void lModeModeIndicator()
+        private void calculateNavigatorPosition()
         {
-            if (bLModeCaptured)
+            if (bLModeCaptured && LModePointerX >= 0)
             {
                 //indicator bar width(3), add 1.5
                 LModeLocationX = LModePointerX + nLModeIndicatorWidth/2;

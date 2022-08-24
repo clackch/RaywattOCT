@@ -32,23 +32,32 @@ void CSimulateDevice::PrevFrame() {
 	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
 	const int nNumOfSamples = m_pDataReader->GetNumOfSamples();
 
-	m_nCurSampleIndex--;
-	m_nCurSampleIndex = (m_nCurSampleIndex < 0) ? nNumOfSamples - 1 : m_nCurSampleIndex;
+	int nFrameIndex = m_nCurSampleIndex;
+	nFrameIndex--;
+	nFrameIndex = (nFrameIndex < 0) ? nNumOfSamples - 1 : nFrameIndex;
+
+	m_nCurSampleIndex = nFrameIndex;
 }
 void CSimulateDevice::NextFrame() {
 	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
 	const int nNumOfSamples = m_pDataReader->GetNumOfSamples();
 
-	m_nCurSampleIndex++;
-	m_nCurSampleIndex = (m_nCurSampleIndex >= nNumOfSamples) ? 0 : m_nCurSampleIndex;
+	int nFrameIndex = m_nCurSampleIndex;
+	nFrameIndex++;
+	nFrameIndex = (nFrameIndex >= nNumOfSamples) ? 0 : nFrameIndex;
+
+	m_nCurSampleIndex = nFrameIndex;
 }
 void CSimulateDevice::SetFrame(int nFrame) {
 	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
 	const int nNumOfSamples = m_pDataReader->GetNumOfSamples();
 
-	m_nCurSampleIndex = nFrame;
-	m_nCurSampleIndex = (m_nCurSampleIndex < 0) ? 0 : m_nCurSampleIndex;
-	m_nCurSampleIndex = (m_nCurSampleIndex >= nNumOfSamples) ? nNumOfSamples - 1 : m_nCurSampleIndex;
+	int nFrameIndex = m_nCurSampleIndex;
+	nFrameIndex = nFrame;
+	nFrameIndex = (nFrameIndex < 0) ? 0 : nFrameIndex;
+	nFrameIndex = (nFrameIndex >= nNumOfSamples) ? nNumOfSamples - 1 : nFrameIndex;
+
+	m_nCurSampleIndex = nFrameIndex;
 }
 
 int CSimulateDevice::start() {

@@ -86,6 +86,7 @@ public:
 	RayError PlayPause();
 	RayError PrevFrame();
 	RayError NextFrame();
+	RayError MoveToFrame(int nFrame);
 	RayError RegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude);
 
 	//Property

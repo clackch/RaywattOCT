@@ -17,6 +17,7 @@ public:
 	void AddRecord(unsigned short* pBuffer, CMoriaImaging* pImaging, int nFrameIndex);
 	cv::Mat GetCutView() { return m_imgCutView; }
 	cv::Mat GetCutViewROI(int length);
+	int GetNumOfSamples() { return m_vRecords.size(); }
 	void DrawCutViewGuideLine(cv::Mat& img, double degree);
 };
 
