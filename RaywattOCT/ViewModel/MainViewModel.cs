@@ -374,7 +374,7 @@ namespace RaywattOCT.ViewModel
                     FrameInfo = String.Format("{0} / {1}", crossSectionFrameInfo.curFrame + 1, crossSectionFrameInfo.totalFrame);                    
                     ViewMode = "Review";
 
-                    if (!IsPaused) updateNavigator(crossSectionFrameInfo.curFrame, crossSectionFrameInfo.totalFrame);
+                    if(!bLModeCaptured) updateNavigator(crossSectionFrameInfo.curFrame, crossSectionFrameInfo.totalFrame);
                 }
             }
             if (imgLongitude != null)
@@ -674,18 +674,20 @@ namespace RaywattOCT.ViewModel
 
         private void lModeCaptureSetTrue()
         {
-            bLModeCaptured = true;
+            if (IsPaused)
+            {
+                bLModeCaptured = true;
+            }
         }
 
         private void lModeCaptureSetFalse()
         {
-            if (bLModeCaptured)
-                bLModeCaptured = false;
+            bLModeCaptured = false;
         }
 
         private void calculateNavigatorPosition()
         {
-            if (bLModeCaptured)
+            if (bLModeCaptured && LModePointerX >= 0)
             {
                 //indicator bar width(3), add 1.5
                 LModeLocationX = LModePointerX + nLModeIndicatorWidth/2;
