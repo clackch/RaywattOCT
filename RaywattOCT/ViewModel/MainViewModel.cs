@@ -379,8 +379,16 @@ namespace RaywattOCT.ViewModel
             }
             if (imgLongitude != null)
             {
-                LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgLongitude);
-                if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame) updateNavigatorVisibility(true);
+                RayCoreWrapper.RayScannerState state = (RayCoreWrapper.RayScannerState)RayCoreWrapper.RayGetProperty(RayCoreWrapper.Property.CurrentState);
+
+                if (state >= RayCoreWrapper.RayScannerState.Review)
+                {
+                    LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgLongitude);
+                    if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame) updateNavigatorVisibility(true);
+                }
+                else { 
+                    LongitudeImage = new BitmapImage(GetResourceURI(null, "res/bg/bottom_bg.png"));
+                }
             }
         }
         private void Initialize()
