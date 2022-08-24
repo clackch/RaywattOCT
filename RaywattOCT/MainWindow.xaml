@@ -437,11 +437,12 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="10"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel x:Name="crossSection">
-                    <StackPanel.Background>
+                <Grid x:Name="crossSection">
+                    <Grid.Background>
                         <ImageBrush ImageSource="res/bg/body_bg.png" Stretch="Fill"/>
-                    </StackPanel.Background>
+                    </Grid.Background>
 
+                    <Image Source="{Binding CrossSectionImage}" Height="800" Width="800" Stretch="Fill"/>
                     <!-- Indicator 및 Event 처리 영역 -->
                     <StackPanel Background="Transparent" Width="860" Height="830"  Visibility="{Binding IsVisibleIndicator}">
                         <inter:Interaction.Behaviors>
@@ -460,8 +461,8 @@
                             </inter:EventTrigger>
                         </inter:Interaction.Triggers>
 
+                        <StackPanel Height="15"/>
                         <Canvas Height="800" Width="800">
-                            <Image Source="{Binding CrossSectionImage}" Height="800" Width="800"/>
 
                             <!-- Remain to check a new image in the future -->
                             <!--
@@ -489,7 +490,7 @@
                             </Image>
                         </Canvas>
                     </StackPanel>
-                </StackPanel>
+                </Grid>
             </Grid>
             <Grid Grid.Row="4">
                 <Grid.ColumnDefinitions>
