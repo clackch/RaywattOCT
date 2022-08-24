@@ -25,22 +25,31 @@ namespace RaywattOCT.ViewModel
         private const string ICON_RESOURCE_PAUSE = "/res/icon/pause.png";
         private const string ICON_RESOURCE_PAUSE_OV = "/res/icon/pause_ov.png";
 
+        private const int nCrossSectionHeight = 800;
+        private const int nCrossSectionWidth = 860;
+        private const int nLModeWidth = 860;
+        private const int nLModeIndicatorWidth = 3;
+
         private string playIcon = ICON_RESOURCE_PLAY;
-        public string PlayIcon {
+        public string PlayIcon
+        {
             get { return playIcon; }
             set { playIcon = value; OnPropertyChanged(nameof(PlayIcon)); }
         }
 
         private string playIconOv = ICON_RESOURCE_PLAY_OV;
-        public string PlayIconOv {
+        public string PlayIconOv
+        {
             get { return playIconOv; }
             set { playIconOv = value; OnPropertyChanged(nameof(PlayIconOv)); }
         }
 
         private bool isPaused;
-        public bool IsPaused {
+        public bool IsPaused
+        {
             get { return isPaused; }
-            set {
+            set
+            {
                 isPaused = value;
                 PlayIcon = (isPaused) ? ICON_RESOURCE_PLAY : ICON_RESOURCE_PAUSE;
                 PlayIconOv = (isPaused) ? ICON_RESOURCE_PLAY_OV : ICON_RESOURCE_PAUSE_OV;
@@ -89,33 +98,44 @@ namespace RaywattOCT.ViewModel
             set { contrast = value; OnPropertyChanged(nameof(Contrast)); setBrightnessContrast(); }
         }
 
+        private double degree = 90;
+        public double Degree
+        {
+            get { return degree; }
+            set { degree = value; OnPropertyChanged(nameof(Degree)); }
+        }
+
         private string systemMessage = "Press Initialize Button";
-        public string SystemMessage {
+        public string SystemMessage
+        {
             get { return systemMessage; }
             set { systemMessage = value; OnPropertyChanged(nameof(SystemMessage)); }
         }
 
         private string reviewFileName = "OCT File";
-        public string ReviewFileName 
-        { 
+        public string ReviewFileName
+        {
             get { return reviewFileName; }
             set { reviewFileName = value; OnPropertyChanged(nameof(ReviewFileName)); }
         }
 
         private string patientName = "";
-        public string PatientName {
+        public string PatientName
+        {
             get { return patientName; }
             set { if (!CommonUtil.ValidateInput(value)) return; patientName = value; OnPropertyChanged(nameof(PatientName)); }
         }
 
         private bool requirePatientName = false;
-        public bool RequirePatientName {
+        public bool RequirePatientName
+        {
             get => requirePatientName;
             set { requirePatientName = value; OnPropertyChanged(nameof(RequirePatientName)); }
         }
 
         private string frameInfo = "";
-        public string FrameInfo {
+        public string FrameInfo
+        {
             get { return frameInfo; }
             set { frameInfo = value; OnPropertyChanged(nameof(FrameInfo)); }
         }
@@ -127,8 +147,9 @@ namespace RaywattOCT.ViewModel
             set { viewMode = value; OnPropertyChanged(nameof(ViewMode)); }
         }
 
-        private BitmapSource crossSectionImage = new BitmapImage(GetResourceURI(null, "res/bg/body_bg.png"));
-        public BitmapSource CrossSectionImage {
+        private BitmapSource crossSectionImage = null;
+        public BitmapSource CrossSectionImage
+        {
             get { return crossSectionImage; }
             set { crossSectionImage = value; OnPropertyChanged(nameof(CrossSectionImage)); }
         }
@@ -143,17 +164,96 @@ namespace RaywattOCT.ViewModel
         }
         private Mat imgLongitude;
 
+        private bool bCaptured = false;
+
         private double pointerX;
         public double PointerX
         {
             get { return pointerX; }
-            set { pointerX = value; OnPropertyChanged(nameof(PointerX)); }
+            set { if (value.Equals(pointerX)) return; pointerX = value; OnPropertyChanged(nameof(PointerX)); }
         }
         private double pointerY;
         public double PointerY
         {
             get { return pointerY; }
-            set { pointerY = value; OnPropertyChanged(nameof(PointerY)); }
+            set { if (value.Equals(pointerY)) return; pointerY = value; OnPropertyChanged(nameof(PointerY)); }
+        }
+
+
+        private bool bLModeCaptured = false;
+
+        private double lModePointerX;
+        public double LModePointerX
+        {
+            get { return lModePointerX; }
+            set { if (value.Equals(lModePointerX)) return; lModePointerX = value; OnPropertyChanged(nameof(lModePointerX)); }
+        }
+
+        private double lModeLocationX;
+        public double LModeLocationX
+        {
+            get { return lModeLocationX; }
+            set { if (value.Equals(lModeLocationX)) return; lModeLocationX = value; OnPropertyChanged(nameof(lModeLocationX)); }
+        }
+
+        private string isVisibleIndicator = "Hidden";
+        public string IsVisibleIndicator
+        {
+            get { return isVisibleIndicator; }
+            set { isVisibleIndicator = value; OnPropertyChanged(nameof(isVisibleIndicator)); }
+        }
+
+        public DelegateCommand moveIndicator;
+        public DelegateCommand MoveIndicator
+        {
+            get
+            {
+                return (this.moveIndicator) ?? (this.moveIndicator = new DelegateCommand(calculateDegree));
+            }
+        }
+        public DelegateCommand captureTrue;
+        public DelegateCommand CaptureTrue
+        {
+            get
+            {
+                return (this.captureTrue) ?? (this.captureTrue = new DelegateCommand(captureSetTrue));
+            }
+        }
+
+        public DelegateCommand captureFalse;
+        public DelegateCommand CaptureFalse
+        {
+            get
+            {
+                return (this.captureFalse) ?? (this.captureFalse = new DelegateCommand(captureSetFalse));
+            }
+        }
+
+        public DelegateCommand lModeMoveIndicator;
+        public DelegateCommand LModeMoveIndicator
+        {
+            get
+            {
+                return (this.lModeMoveIndicator) ?? (this.lModeMoveIndicator = new DelegateCommand(lModeModeIndicator));
+            }
+        }
+
+        public DelegateCommand lModeCaptureTrue;
+        public DelegateCommand LModeCaptureTrue
+        {
+            get
+            {
+                return (this.lModeCaptureTrue) ?? (this.lModeCaptureTrue = new DelegateCommand(lModeCaptureSetTrue));
+            }
+        }
+
+        public DelegateCommand lModeCaptureFalse;
+        public DelegateCommand LModeCaptureFalse
+        {
+            get
+            {
+                return (this.lModeCaptureFalse) ?? (this.lModeCaptureFalse = new DelegateCommand(lModeCaptureSetFalse));
+            }
         }
 
         private DelegateCommand cmdInitialize;
@@ -271,7 +371,8 @@ namespace RaywattOCT.ViewModel
                     ViewMode = "Review";
                 }
             }
-            if (imgLongitude != null) {
+            if (imgLongitude != null)
+            {
                 LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgLongitude);
             }
         }
@@ -298,14 +399,15 @@ namespace RaywattOCT.ViewModel
         private void Scan()
         {
             PatientName = PatientName.Trim();
-            if (PatientName.Length == 0) {
+            if (PatientName.Length == 0)
+            {
                 RequirePatientName = true;
                 RequirePatientName = false;
                 return;
             }
 
             string filename = generateFileName("bin");
-            RayCoreWrapper.RayError result = (RayCoreWrapper.RayError) RayCoreWrapper.RayPullbackScan(filename);
+            RayCoreWrapper.RayError result = (RayCoreWrapper.RayError)RayCoreWrapper.RayPullbackScan(filename);
 
             if (result == RayCoreWrapper.RayError.OK)
             {
@@ -313,10 +415,12 @@ namespace RaywattOCT.ViewModel
             }
         }
 
-        private void EndReview() {
-            RayCoreWrapper.RayScannerState state = (RayCoreWrapper.RayScannerState) RayCoreWrapper.RayGetProperty(RayCoreWrapper.Property.CurrentState);
+        private void EndReview()
+        {
+            RayCoreWrapper.RayScannerState state = (RayCoreWrapper.RayScannerState)RayCoreWrapper.RayGetProperty(RayCoreWrapper.Property.CurrentState);
 
-            if (state == RayCoreWrapper.RayScannerState.SaveDone) {
+            if (state == RayCoreWrapper.RayScannerState.SaveDone)
+            {
                 if (!IsPaused)
                 {
                     RayCoreWrapper.RayPlayPause();
@@ -324,14 +428,15 @@ namespace RaywattOCT.ViewModel
                 }
             }
 
-            RayCoreWrapper.RayError result = (RayCoreWrapper.RayError) RayCoreWrapper.RayEndReview();
+            RayCoreWrapper.RayError result = (RayCoreWrapper.RayError)RayCoreWrapper.RayEndReview();
             if (result == RayCoreWrapper.RayError.OK)
             {
                 ReviewFileName = "OCT File";
             }
         }
 
-        private void LoadCatheter() {
+        private void LoadCatheter()
+        {
             RayCoreWrapper.RayLoadCatheter();
         }
         private void UnloadCatheter()
@@ -339,7 +444,8 @@ namespace RaywattOCT.ViewModel
             RayCoreWrapper.RayUnloadCatheter();
         }
 
-        private void Playback(object param) {
+        private void Playback(object param)
+        {
             string action = (string)param;
             RayCoreWrapper.RayError result = RayCoreWrapper.RayError.OK;
 
@@ -361,7 +467,8 @@ namespace RaywattOCT.ViewModel
             }
         }
 
-        private void OnMsgCallback(int request, int response) {
+        private void OnMsgCallback(int request, int response)
+        {
             handleState((RayCoreWrapper.RayCallbackRequest)request, (RayCoreWrapper.RayScannerState)response);
             handleProgress((RayCoreWrapper.RayCallbackRequest)request, response);
         }
@@ -379,8 +486,11 @@ namespace RaywattOCT.ViewModel
             imgLongitude = imgRecv.Clone();
         }
 
-        private void handleState(RayCoreWrapper.RayCallbackRequest request, RayCoreWrapper.RayScannerState response) {
+        private void handleState(RayCoreWrapper.RayCallbackRequest request, RayCoreWrapper.RayScannerState response)
+        {
             if (request != RayCoreWrapper.RayCallbackRequest.State) return;
+
+            updateIndicatorVisibility(false);
 
             switch (response)
             {
@@ -408,6 +518,7 @@ namespace RaywattOCT.ViewModel
                 case RayCoreWrapper.RayScannerState.Review:
                     {
                         updatePlayPauseState();
+                        updateIndicatorVisibility(true);
                         SystemMessage = "Scan Done";
                     }
                     break;
@@ -424,7 +535,7 @@ namespace RaywattOCT.ViewModel
             int curFrame = (response >> 16) & 0x00FFFF;
             int totalFrame = (response) & 0x00FFFF;
 
-            ScanProgress = (int) ((double) curFrame / (double) totalFrame) * 100;
+            ScanProgress = (int)((double)curFrame / (double)totalFrame) * 100;
         }
 
         private string generateFileName(string ext)
@@ -464,7 +575,8 @@ namespace RaywattOCT.ViewModel
             RayCoreWrapper.RaySetProperty(RayCoreWrapper.Property.Contrast, propContrast);
         }
 
-        private void updateMotorState() {
+        private void updateMotorState()
+        {
             double motorState = RayCoreWrapper.RayGetProperty(RayCoreWrapper.Property.MotorOnOff);
             MotorOn = (bool)(motorState != 0);
         }
@@ -473,6 +585,14 @@ namespace RaywattOCT.ViewModel
         {
             double pauseState = RayCoreWrapper.RayGetProperty(RayCoreWrapper.Property.IsPaused);
             IsPaused = (bool)(pauseState != 0);
+        }
+
+        private void updateIndicatorVisibility(bool onOff)
+        {
+            if (onOff)
+                IsVisibleIndicator = "Visible";
+            else
+                IsVisibleIndicator = "Hidden";                
         }
 
         private Mat byteMemoryToCvMat(IntPtr data, int width, int height, int ch)
@@ -493,6 +613,47 @@ namespace RaywattOCT.ViewModel
             else
             {
                 return new Uri(string.Format("pack://application:,,,/{0};component/{1}", assemblyName, resourcePath));
+            }
+        }
+
+        private void captureSetTrue()
+        {
+            bCaptured = true;
+        }
+
+        private void captureSetFalse()
+        {
+            if (bCaptured)
+                bCaptured = false;
+        }
+
+        private void calculateDegree()
+        {
+            if (bCaptured)
+            {
+                double pointX = nCrossSectionWidth/2 - PointerX;
+                double pointY = nCrossSectionHeight/2 - PointerY;
+                Degree = (int)(Math.Atan2(pointY, pointX) * 180 / Math.PI);
+            }
+        }
+
+        private void lModeCaptureSetTrue()
+        {
+            bLModeCaptured = true;
+        }
+
+        private void lModeCaptureSetFalse()
+        {
+            if (bLModeCaptured)
+                bLModeCaptured = false;
+        }
+
+        private void lModeModeIndicator()
+        {
+            if (bLModeCaptured)
+            {
+                //indicator bar width(3), add 1.5
+                LModeLocationX = LModePointerX + nLModeIndicatorWidth/2;
             }
         }
     }

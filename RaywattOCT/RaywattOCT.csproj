@@ -16,6 +16,7 @@
     <None Remove="res\bar\brightness_f_left.png" />
     <None Remove="res\bar\brightness_f_right.png" />
     <None Remove="res\bar\circle.png" />
+    <None Remove="res\bar\indicator.png" />
     <None Remove="res\bar\scan_e.png" />
     <None Remove="res\bar\scan_e_center.png" />
     <None Remove="res\bar\scan_e_left.png" />
@@ -91,6 +92,7 @@
     <Resource Include="res\bar\brightness_f_left.png" />
     <Resource Include="res\bar\brightness_f_right.png" />
     <Resource Include="res\bar\circle.png" />
+    <Resource Include="res\bar\indicator.png" />
     <Resource Include="res\bar\scan_e.png" />
     <Resource Include="res\bar\scan_e_center.png" />
     <Resource Include="res\bar\scan_e_left.png" />
