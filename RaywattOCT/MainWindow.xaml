@@ -502,7 +502,7 @@
                     </Grid.Background>
                     <Image Source="{Binding LongitudeImage}" Width="820" Height="78" Stretch="Fill"/>
                     <!-- Indicator 및 Event 처리 영역 -->
-                    <StackPanel Background="White" Width="820" Height="81" Visibility="{Binding IsVisibleNavigator}">
+                    <StackPanel Background="Transparent" Width="820" Height="81" Visibility="{Binding IsVisibleNavigator}">
                         <!-- L-Mode Mouse Pointer X -->
                         <inter:Interaction.Behaviors>
                             <local:MouseBehavior MouseX="{Binding LModePointerX, Mode=OneWayToSource}"/>
