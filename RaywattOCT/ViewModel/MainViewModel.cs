@@ -625,6 +625,7 @@ namespace RaywattOCT.ViewModel
 
         private void updateNavigator(int curFrame, int totalFrame) {
             double curPosition = (double)curFrame / totalFrame;
+            curPosition = (curFrame == totalFrame - 1) ? 1 : curPosition;
             curPosition *= nLModeWidth;
             LModeLocationX = curPosition + nLModeIndicatorWidth / 2;
         }
