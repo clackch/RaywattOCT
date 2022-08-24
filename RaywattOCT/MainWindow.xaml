@@ -469,7 +469,7 @@
                             <Ellipse Height="40" Width="40" Canvas.Left="380" Canvas.Top="380" Stretch="Fill" StrokeThickness="1" Stroke="Yellow" />
                             -->
 
-                            <Image Source="/res/bar/indicator.png" Height="800" Width="800" Cursor="Hand">
+                            <Image Source="/res/bar/indicator.png" Height="800" Width="800" Cursor="Hand" Opacity="0.25">
                                 <Image.RenderTransform>
                                     <!-- Image Indicator bar width(about 7) => CenterY 3.5 -->
                                     <RotateTransform CenterX="400" CenterY="3.5" Angle="{Binding Degree}"/>
@@ -496,13 +496,13 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="10"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel x:Name="lMode">
-                    <StackPanel.Background>
-                        <ImageBrush ImageSource="{Binding LongitudeImage}" Stretch="Fill"/>
-                    </StackPanel.Background>
-
+                <Grid x:Name="lMode">
+                    <Grid.Background>
+                        <ImageBrush ImageSource="res/bg/bottom_bg.png" Stretch="Fill"/>
+                    </Grid.Background>
+                    <Image Source="{Binding LongitudeImage}" Width="820" Height="78" Stretch="Fill"/>
                     <!-- Indicator 및 Event 처리 영역 -->
-                    <StackPanel Background="Transparent" Width="860" Height="81" Visibility="{Binding IsVisibleIndicator}">
+                    <StackPanel Background="White" Width="820" Height="81" Visibility="{Binding IsVisibleNavigator}">
                         <!-- L-Mode Mouse Pointer X -->
                         <inter:Interaction.Behaviors>
                             <local:MouseBehavior MouseX="{Binding LModePointerX, Mode=OneWayToSource}"/>
@@ -519,12 +519,12 @@
                             </inter:EventTrigger>
                             <!--PreviewMouseMove : StackPanel 영역에서 MouseMove 할 경우, Indicaotr 동작(단, Indicaotr가 동작 가능 상태 일때) -->
                             <inter:EventTrigger EventName="PreviewMouseMove" >
-                                <inter:InvokeCommandAction Command="{Binding LModeMoveIndicator}"/>
+                                <inter:InvokeCommandAction Command="{Binding MoveNavigator}"/>
                             </inter:EventTrigger>
                         </inter:Interaction.Triggers>
 
                         <Canvas>
-                            <Image Source="/res/bar/indicator.png" Cursor="Hand" Stretch="None" Width="77" Canvas.Left="{Binding LModeLocationX}" Canvas.Top="2">
+                            <Image Source="/res/bar/indicator.png" Cursor="Hand" Stretch="None" Width="77" Canvas.Left="{Binding LModeLocationX}" Canvas.Top="2" Opacity="0.25">
                                 <!-- 가로 Image 90도 회전 -->
                                 <Image.RenderTransform>
                                     <RotateTransform CenterX="0" CenterY="0" Angle="90"/>
@@ -541,13 +541,13 @@
                                     </inter:EventTrigger>
                                     <!--PreviewMouseMove : Image 영역에서 MouseMove 할 경우, Indicaotr 동작(단, Indicaotr가 동작 가능 상태 일때) -->
                                     <inter:EventTrigger EventName="PreviewMouseMove" >
-                                        <inter:InvokeCommandAction Command="{Binding LModeMoveIndicator}"/>
+                                        <inter:InvokeCommandAction Command="{Binding MoveNavigator}"/>
                                     </inter:EventTrigger>
                                 </inter:Interaction.Triggers>
                             </Image>
                         </Canvas>
                     </StackPanel>
-                </StackPanel>
+                </Grid>
             </Grid>
         </Grid>
     </Grid>
