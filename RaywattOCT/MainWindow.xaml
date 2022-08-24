@@ -437,83 +437,116 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="10"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0">
+                <StackPanel x:Name="crossSection">
                     <StackPanel.Background>
                         <ImageBrush ImageSource="res/bg/body_bg.png" Stretch="Fill"/>
                     </StackPanel.Background>
-                </StackPanel>
 
-                <DockPanel x:Name="crossSection">
-                    <Canvas x:Name="LayoutRoot" Height="800" Width="800">
-
+                    <!-- Indicator 및 Event 처리 영역 -->
+                    <StackPanel Background="Transparent" Width="860" Height="830"  Visibility="{Binding IsVisibleIndicator}">
                         <inter:Interaction.Behaviors>
                             <local:MouseBehavior MouseX="{Binding PointerX, Mode=OneWayToSource}" MouseY="{Binding PointerY, Mode=OneWayToSource}" />
                         </inter:Interaction.Behaviors>
-                        
-                        <!-- Remain to check a new image in the future -->
-                        <!--
-                        <Ellipse Height="800" Width="800" Stretch="Fill" StrokeThickness="1" Stroke="Beige"/>
-                        <Ellipse Height="40" Width="40" Canvas.Left="380" Canvas.Top="380" Stretch="Fill" StrokeThickness="1" Stroke="Yellow" />
-                        -->
 
-                        <Rectangle Height="800" Width="800">
-                            <Rectangle.Fill>
-                                <ImageBrush ImageSource="{Binding CrossSectionImage}" Stretch="Fill"/>
-                            </Rectangle.Fill>
-                            <inter:Interaction.Triggers>
-                                <inter:EventTrigger EventName="MouseLeave" >
-                                    <inter:InvokeCommandAction Command="{Binding CaptureFalseCommand}"/>
-                                </inter:EventTrigger>
-                            </inter:Interaction.Triggers>
-                        </Rectangle>
+                        <inter:Interaction.Triggers>
+                            <inter:EventTrigger EventName="MouseLeave" >
+                                <inter:InvokeCommandAction Command="{Binding CaptureFalse}"/>
+                            </inter:EventTrigger>
+                            <inter:EventTrigger EventName="PreviewMouseUp" >
+                                <inter:InvokeCommandAction Command="{Binding CaptureFalse}"/>
+                            </inter:EventTrigger>
+                            <inter:EventTrigger EventName="PreviewMouseMove" >
+                                <inter:InvokeCommandAction Command="{Binding MoveIndicator}"/>
+                            </inter:EventTrigger>
+                        </inter:Interaction.Triggers>
 
-                        <Ellipse x:Name="IndicatorBackground" Height="800" Width="800" Canvas.Left="0" Canvas.Top="0" Stroke="Transparent" Fill="Transparent">
-                            <Ellipse.RenderTransform>
-                                <RotateTransform CenterX="400" CenterY="400" Angle="{Binding Degree}"/>
-                            </Ellipse.RenderTransform>
+                        <Canvas Height="800" Width="800">
+                            <Image Source="{Binding CrossSectionImage}" Height="800" Width="800"/>
 
-                            <inter:Interaction.Triggers>
-                                <inter:EventTrigger EventName="PreviewMouseUp" >
-                                    <inter:InvokeCommandAction Command="{Binding CaptureFalseCommand}"/>
-                                </inter:EventTrigger>
+                            <!-- Remain to check a new image in the future -->
+                            <!--
+                            <Ellipse Height="800" Width="800" Stretch="Fill" StrokeThickness="1" Stroke="Beige"/>
+                            <Ellipse Height="40" Width="40" Canvas.Left="380" Canvas.Top="380" Stretch="Fill" StrokeThickness="1" Stroke="Yellow" />
+                            -->
 
-                                <inter:EventTrigger EventName="PreviewMouseMove" >
-                                    <inter:InvokeCommandAction Command="{Binding MoveIndicatorCommand}"/>
-                                </inter:EventTrigger>
-                            </inter:Interaction.Triggers>
-                        </Ellipse>
+                            <Image Source="/res/bar/indicator.png" Height="800" Width="800" Cursor="Hand">
+                                <Image.RenderTransform>
+                                    <!-- Image Indicator bar width(about 7) => CenterY 3.5 -->
+                                    <RotateTransform CenterX="400" CenterY="3.5" Angle="{Binding Degree}"/>
+                                </Image.RenderTransform>
 
-                        <Image x:Name="Indicator" Source="/res/bar/brightness_e.png" Height="800" Width="800" Cursor="Hand" Stretch="Uniform" >
-                            <Image.RenderTransform>
-                                <RotateTransform CenterX="400" CenterY="7" Angle="{Binding Degree}"/>
-                            </Image.RenderTransform>
-
-                            <inter:Interaction.Triggers>
-                                <inter:EventTrigger EventName="PreviewMouseDown" >
-                                    <inter:InvokeCommandAction Command="{Binding CaptureTrueCommand}"/>
-                                </inter:EventTrigger>
-
-                                <inter:EventTrigger EventName="PreviewMouseUp" >
-                                    <inter:InvokeCommandAction Command="{Binding CaptureFalseCommand}"/>
-                                </inter:EventTrigger>
-
-                                <inter:EventTrigger EventName="PreviewMouseMove" >
-                                    <inter:InvokeCommandAction Command="{Binding MoveIndicatorCommand}"/>
-                                </inter:EventTrigger>
-                            </inter:Interaction.Triggers>
-                        </Image>
-                    </Canvas>
-                </DockPanel>
+                                <inter:Interaction.Triggers>
+                                    <inter:EventTrigger EventName="PreviewMouseDown" >
+                                        <inter:InvokeCommandAction Command="{Binding CaptureTrue}"/>
+                                    </inter:EventTrigger>
+                                    <inter:EventTrigger EventName="PreviewMouseUp" >
+                                        <inter:InvokeCommandAction Command="{Binding CaptureFalse}"/>
+                                    </inter:EventTrigger>
+                                    <inter:EventTrigger EventName="PreviewMouseMove" >
+                                        <inter:InvokeCommandAction Command="{Binding MoveIndicator}"/>
+                                    </inter:EventTrigger>
+                                </inter:Interaction.Triggers>
+                            </Image>
+                        </Canvas>
+                    </StackPanel>
+                </StackPanel>
             </Grid>
             <Grid Grid.Row="4">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="10"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0">
+                <StackPanel x:Name="lMode">
                     <StackPanel.Background>
                         <ImageBrush ImageSource="{Binding LongitudeImage}" Stretch="Fill"/>
                     </StackPanel.Background>
+
+                    <!-- Indicator 및 Event 처리 영역 -->
+                    <StackPanel Background="Transparent" Width="860" Height="81" Visibility="{Binding IsVisibleIndicator}">
+                        <!-- L-Mode Mouse Pointer X -->
+                        <inter:Interaction.Behaviors>
+                            <local:MouseBehavior MouseX="{Binding LModePointerX, Mode=OneWayToSource}"/>
+                        </inter:Interaction.Behaviors>
+                        <!-- Trigger -->
+                        <inter:Interaction.Triggers>
+                            <!--MouseLeave : StackPanel 영역 벗어날 경우, Indicaotr 멈춤 -->
+                            <inter:EventTrigger EventName="MouseLeave" >
+                                <inter:InvokeCommandAction Command="{Binding LModeCaptureFalse}"/>
+                            </inter:EventTrigger>
+                            <!--PreviewMouseUp : StackPanel 영역에서 MouseUp 할 경우, Indicaotr 멈춤  -->
+                            <inter:EventTrigger EventName="PreviewMouseUp" >
+                                <inter:InvokeCommandAction Command="{Binding LModeCaptureFalse}"/>
+                            </inter:EventTrigger>
+                            <!--PreviewMouseMove : StackPanel 영역에서 MouseMove 할 경우, Indicaotr 동작(단, Indicaotr가 동작 가능 상태 일때) -->
+                            <inter:EventTrigger EventName="PreviewMouseMove" >
+                                <inter:InvokeCommandAction Command="{Binding LModeMoveIndicator}"/>
+                            </inter:EventTrigger>
+                        </inter:Interaction.Triggers>
+
+                        <Canvas>
+                            <Image Source="/res/bar/indicator.png" Cursor="Hand" Stretch="None" Width="77" Canvas.Left="{Binding LModeLocationX}" Canvas.Top="2">
+                                <!-- 가로 Image 90도 회전 -->
+                                <Image.RenderTransform>
+                                    <RotateTransform CenterX="0" CenterY="0" Angle="90"/>
+                                </Image.RenderTransform>
+                                <!-- Trigger -->
+                                <inter:Interaction.Triggers>
+                                    <!--PreviewMouseDown : Image 영역에서 MouseDown 할 경우, Indicaotr 동작 가능 상태로 변경 -->
+                                    <inter:EventTrigger EventName="PreviewMouseDown" >
+                                        <inter:InvokeCommandAction Command="{Binding LModeCaptureTrue}"/>
+                                    </inter:EventTrigger>
+                                    <!--PreviewMouseUp : Image 영역에서 MouseUp 할 경우, Indicaotr 멈춤 -->
+                                    <inter:EventTrigger EventName="PreviewMouseUp" >
+                                        <inter:InvokeCommandAction Command="{Binding LModeCaptureFalse}"/>
+                                    </inter:EventTrigger>
+                                    <!--PreviewMouseMove : Image 영역에서 MouseMove 할 경우, Indicaotr 동작(단, Indicaotr가 동작 가능 상태 일때) -->
+                                    <inter:EventTrigger EventName="PreviewMouseMove" >
+                                        <inter:InvokeCommandAction Command="{Binding LModeMoveIndicator}"/>
+                                    </inter:EventTrigger>
+                                </inter:Interaction.Triggers>
+                            </Image>
+                        </Canvas>
+                    </StackPanel>
                 </StackPanel>
             </Grid>
         </Grid>

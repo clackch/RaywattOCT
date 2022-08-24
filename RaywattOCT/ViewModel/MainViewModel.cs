@@ -25,6 +25,11 @@ namespace RaywattOCT.ViewModel
         private const string ICON_RESOURCE_PAUSE = "/res/icon/pause.png";
         private const string ICON_RESOURCE_PAUSE_OV = "/res/icon/pause_ov.png";
 
+        private const int nCrossSectionHeight = 800;
+        private const int nCrossSectionWidth = 860;
+        private const int nLModeWidth = 860;
+        private const int nLModeIndicatorWidth = 3;
+
         private string playIcon = ICON_RESOURCE_PLAY;
         public string PlayIcon
         {
@@ -159,6 +164,8 @@ namespace RaywattOCT.ViewModel
         }
         private Mat imgLongitude;
 
+        private bool bCaptured = false;
+
         private double pointerX;
         public double PointerX
         {
@@ -172,20 +179,40 @@ namespace RaywattOCT.ViewModel
             set { if (value.Equals(pointerY)) return; pointerY = value; OnPropertyChanged(nameof(PointerY)); }
         }
 
-        private bool captured = false;
-        public DelegateCommand moveIndicator;
-        public DelegateCommand captureTrue;
-        public DelegateCommand captureFalse;
 
-        public DelegateCommand MoveIndicatorCommand
+        private bool bLModeCaptured = false;
+
+        private double lModePointerX;
+        public double LModePointerX
+        {
+            get { return lModePointerX; }
+            set { if (value.Equals(lModePointerX)) return; lModePointerX = value; OnPropertyChanged(nameof(lModePointerX)); }
+        }
+
+        private double lModeLocationX;
+        public double LModeLocationX
+        {
+            get { return lModeLocationX; }
+            set { if (value.Equals(lModeLocationX)) return; lModeLocationX = value; OnPropertyChanged(nameof(lModeLocationX)); }
+        }
+
+        private string isVisibleIndicator = "Hidden";
+        public string IsVisibleIndicator
+        {
+            get { return isVisibleIndicator; }
+            set { isVisibleIndicator = value; OnPropertyChanged(nameof(isVisibleIndicator)); }
+        }
+
+        public DelegateCommand moveIndicator;
+        public DelegateCommand MoveIndicator
         {
             get
             {
                 return (this.moveIndicator) ?? (this.moveIndicator = new DelegateCommand(calculateDegree));
             }
         }
-
-        public DelegateCommand CaptureTrueCommand
+        public DelegateCommand captureTrue;
+        public DelegateCommand CaptureTrue
         {
             get
             {
@@ -193,11 +220,39 @@ namespace RaywattOCT.ViewModel
             }
         }
 
-        public DelegateCommand CaptureFalseCommand
+        public DelegateCommand captureFalse;
+        public DelegateCommand CaptureFalse
         {
             get
             {
                 return (this.captureFalse) ?? (this.captureFalse = new DelegateCommand(captureSetFalse));
+            }
+        }
+
+        public DelegateCommand lModeMoveIndicator;
+        public DelegateCommand LModeMoveIndicator
+        {
+            get
+            {
+                return (this.lModeMoveIndicator) ?? (this.lModeMoveIndicator = new DelegateCommand(lModeModeIndicator));
+            }
+        }
+
+        public DelegateCommand lModeCaptureTrue;
+        public DelegateCommand LModeCaptureTrue
+        {
+            get
+            {
+                return (this.lModeCaptureTrue) ?? (this.lModeCaptureTrue = new DelegateCommand(lModeCaptureSetTrue));
+            }
+        }
+
+        public DelegateCommand lModeCaptureFalse;
+        public DelegateCommand LModeCaptureFalse
+        {
+            get
+            {
+                return (this.lModeCaptureFalse) ?? (this.lModeCaptureFalse = new DelegateCommand(lModeCaptureSetFalse));
             }
         }
 
@@ -435,6 +490,8 @@ namespace RaywattOCT.ViewModel
         {
             if (request != RayCoreWrapper.RayCallbackRequest.State) return;
 
+            updateIndicatorVisibility(false);
+
             switch (response)
             {
                 case RayCoreWrapper.RayScannerState.IntitializeFailed:
@@ -461,6 +518,7 @@ namespace RaywattOCT.ViewModel
                 case RayCoreWrapper.RayScannerState.Review:
                     {
                         updatePlayPauseState();
+                        updateIndicatorVisibility(true);
                         SystemMessage = "Scan Done";
                     }
                     break;
@@ -529,6 +587,14 @@ namespace RaywattOCT.ViewModel
             IsPaused = (bool)(pauseState != 0);
         }
 
+        private void updateIndicatorVisibility(bool onOff)
+        {
+            if (onOff)
+                IsVisibleIndicator = "Visible";
+            else
+                IsVisibleIndicator = "Hidden";                
+        }
+
         private Mat byteMemoryToCvMat(IntPtr data, int width, int height, int ch)
         {
             int byteLength = width * height * ch;
@@ -552,22 +618,42 @@ namespace RaywattOCT.ViewModel
 
         private void captureSetTrue()
         {
-            captured = true;
+            bCaptured = true;
         }
 
         private void captureSetFalse()
         {
-            if (captured)
-                captured = false;
+            if (bCaptured)
+                bCaptured = false;
         }
 
         private void calculateDegree()
         {
-            if (captured)
+            if (bCaptured)
             {
-                double pointY = 400 - PointerY;
-                double pointX = 400 - PointerX;
+                double pointX = nCrossSectionWidth/2 - PointerX;
+                double pointY = nCrossSectionHeight/2 - PointerY;
                 Degree = (int)(Math.Atan2(pointY, pointX) * 180 / Math.PI);
+            }
+        }
+
+        private void lModeCaptureSetTrue()
+        {
+            bLModeCaptured = true;
+        }
+
+        private void lModeCaptureSetFalse()
+        {
+            if (bLModeCaptured)
+                bLModeCaptured = false;
+        }
+
+        private void lModeModeIndicator()
+        {
+            if (bLModeCaptured)
+            {
+                //indicator bar width(3), add 1.5
+                LModeLocationX = LModePointerX + nLModeIndicatorWidth/2;
             }
         }
     }
