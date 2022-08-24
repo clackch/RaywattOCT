@@ -20,7 +20,7 @@ void CCutViewManager::Initialize(int nNumOfSamples) {
 
 	m_imgCutView.release();
 	m_imgCutView.create(1024, nNumOfSamples, CV_8UC3);
-	m_imgCutView.setTo(cv::Scalar(0, 0, 0));
+	m_imgCutView.setTo(cv::Scalar(0x18, 0x15, 0x16));
 }
 void CCutViewManager::GenerateCutView(double degree) {
 	for (int i = 0; i < m_vRecords.size(); i++) {
