@@ -52,6 +52,16 @@ namespace RaywattOCT.Controller
             SaveDone
         };
 
+        public class FrameInfo {
+            public int curFrame;
+            public int totalFrame;
+            public FrameInfo(int frameInformation)
+            {
+                curFrame = (frameInformation >> 16) & 0x00FFFF;
+                totalFrame = (frameInformation) & 0x00FFFF;
+            }
+        };
+
         public static string ConfigFilePath = "./newmoria.ini";
         public static double BrightnessMin = 0.0f;
         public static double BrightnessMax = 100.0f;
@@ -81,6 +91,8 @@ namespace RaywattOCT.Controller
         public static extern int RayPrevFrame();
         [DllImport("RayCore.dll")]
         public static extern int RayNextFrame();
+        [DllImport("RayCore.dll")]
+        public static extern int RayMoveToFrame(int frame);
         [DllImport("RayCore.dll")]
         public static extern int RayRegisterImageCallback(IntPtr cbCrossSection, IntPtr cbLongitude);
         [DllImport("RayCore.dll")]

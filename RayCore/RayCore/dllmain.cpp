@@ -38,6 +38,9 @@ _declspec(dllexport) RayError RayPrevFrame() {
 _declspec(dllexport) RayError RayNextFrame() {
     return octSystem.NextFrame();
 }
+_declspec(dllexport) RayError RayMoveToFrame(int nFrame) {
+    return octSystem.MoveToFrame(nFrame);
+}
 _declspec(dllexport) RayError RayRegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude) {
     return octSystem.RegisterImageCallback(cbCrossSection, cbLongitude);
 }
