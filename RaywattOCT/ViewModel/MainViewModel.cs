@@ -543,6 +543,7 @@ namespace RaywattOCT.ViewModel
                     }
                     break;
                 case RayCoreWrapper.RayScannerState.SaveDone:
+                    updateIndicatorVisibility(true);
                     break;
                 default:
                     break;
