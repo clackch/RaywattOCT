@@ -76,6 +76,8 @@ namespace RaywattOCT.Controller
         [DllImport("RayCore.dll")]
         public static extern int RayInitialize();
         [DllImport("RayCore.dll")]
+        public static extern int RayFinalize();
+        [DllImport("RayCore.dll")]
         public static extern int RayPullbackScan(string filePath);
         [DllImport("RayCore.dll")]
         public static extern int RayLoadCatheter();

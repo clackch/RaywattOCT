@@ -45,35 +45,7 @@ COCTSystem::COCTSystem() {
 * ~COCTSystem
 */
 COCTSystem::~COCTSystem() {
-	CUtility::StopThread(m_pThreadService);
-
-	// stop threads
-	if (m_pAcqDevice != NULL) {
-		m_pAcqDevice->StopAcquisition();
-	}
-	if (m_pSimDevice != NULL) {
-		m_pSimDevice->StopAcquisition();
-	}
-	if (m_pImagingRealtime != NULL) {
-		m_pImagingRealtime->Stop();
-	}
-	if (m_pImagingSimulate != NULL) {
-		m_pImagingSimulate->Stop();
-	}
-	if (m_pDataWriter != NULL) {
-		m_pDataWriter->StopRecording();
-	}
-
-	CMotorController* pMotor = CMotorController::GetInstance();
-	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
-	CZaberController* pInterferometer = CZaberController::GetInstance(ZABER_TYPE_INTERFEROMETER);
-
-	pMotor->StopMotor();
-	pMotor->SwitchOff();
-	pMotor->Disconnect();
-
-	pLinearStage->Close();
-	pInterferometer->Close();
+	Finalize();
 }
 
 /*
@@ -98,6 +70,60 @@ RayError COCTSystem::Initialize() {
 	}
 
 	return RayError::WrongOCTScannerState;
+}
+
+/*
+* Finalize
+*/
+RayError COCTSystem::Finalize() {
+	CUtility::StopThread(m_pThreadService);
+	CUtility::StopThread(m_pThreadInitialize);
+	CUtility::StopThread(m_pThreadHoming);
+	CUtility::StopThread(m_pThreadPullbackScan);
+	CUtility::StopThread(m_pThreadSaveRaw);
+	CUtility::StopThread(m_pThreadUpdateCutView);
+	CUtility::StopThread(m_pThreadLoadCatheter);
+	CUtility::StopThread(m_pThreadUnloadCatheter);
+
+	// stop threads
+	if (m_pAcqDevice != nullptr) {
+		m_pAcqDevice->StopAcquisition();
+		delete m_pAcqDevice;
+		m_pAcqDevice = nullptr;
+	}
+	if (m_pSimDevice != nullptr) {
+		m_pSimDevice->StopAcquisition();
+		delete m_pSimDevice;
+		m_pSimDevice = nullptr;
+	}
+	if (m_pImagingRealtime != nullptr) {
+		m_pImagingRealtime->Stop();
+		delete m_pImagingRealtime;
+		m_pImagingRealtime = nullptr;
+	}
+	if (m_pImagingSimulate != nullptr) {
+		m_pImagingSimulate->Stop();
+		delete m_pImagingSimulate;
+		m_pImagingSimulate = nullptr;
+	}
+	if (m_pDataWriter != nullptr) {
+		m_pDataWriter->StopRecording();
+		delete m_pDataWriter;
+		m_pDataWriter = nullptr;
+	}
+
+	CMotorController* pMotor = CMotorController::GetInstance();
+	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
+	CZaberController* pInterferometer = CZaberController::GetInstance(ZABER_TYPE_INTERFEROMETER);
+
+	pMotor->StopMotor();
+	pMotor->SwitchOff();
+	pMotor->Disconnect();
+
+	pLinearStage->Close();
+	pInterferometer->Close();
+
+	return RayError::OK;
 }
 
 /*

@@ -407,6 +407,7 @@ namespace RaywattOCT.ViewModel
         }
         private void Exit()
         {
+            RayCoreWrapper.RayFinalize();
             Environment.Exit(0);
         }
         private void MotorOnOff()

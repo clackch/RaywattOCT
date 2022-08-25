@@ -14,10 +14,6 @@
 
 //#define TEST_VALUE_FILE_PATH			_T("C:\\DataSave\\test\\0710_145631_6028rpm_20mms_2000Aline.bin")
 
-enum class AsyncWork {
-	Initialize = 0
-};
-
 #ifdef TEST_VALUE_FILE_PATH
 class CDataReader;
 #endif
@@ -76,6 +72,7 @@ public:
 	
 	RayError RegisterCallback(FunctionPtr cb);
 	RayError Initialize();
+	RayError Finalize();
 	RayError PullbackScan(char *strFilePath);
 	RayError LoadCatheter();
 	RayError UnloadCatheter();
