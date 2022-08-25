@@ -29,7 +29,6 @@ COCTSystem::COCTSystem() {
 	m_pThreadUnloadCatheter = nullptr;
 
 	m_curState = RayScannerState::None;
-	m_bMotorOnOff = false;
 
 	//Property
 	m_fBrightness = 0.0f;
@@ -47,6 +46,34 @@ COCTSystem::COCTSystem() {
 */
 COCTSystem::~COCTSystem() {
 	CUtility::StopThread(m_pThreadService);
+
+	// stop threads
+	if (m_pAcqDevice != NULL) {
+		m_pAcqDevice->StopAcquisition();
+	}
+	if (m_pSimDevice != NULL) {
+		m_pSimDevice->StopAcquisition();
+	}
+	if (m_pImagingRealtime != NULL) {
+		m_pImagingRealtime->Stop();
+	}
+	if (m_pImagingSimulate != NULL) {
+		m_pImagingSimulate->Stop();
+	}
+	if (m_pDataWriter != NULL) {
+		m_pDataWriter->StopRecording();
+	}
+
+	CMotorController* pMotor = CMotorController::GetInstance();
+	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
+	CZaberController* pInterferometer = CZaberController::GetInstance(ZABER_TYPE_INTERFEROMETER);
+
+	pMotor->StopMotor();
+	pMotor->SwitchOff();
+	pMotor->Disconnect();
+
+	pLinearStage->Close();
+	pInterferometer->Close();
 }
 
 /*
@@ -141,16 +168,7 @@ RayError COCTSystem::EndReview()
 RayError COCTSystem::MotorOnOff(bool mode)
 {
 	if (m_curState >= RayScannerState::Ready) {
-		m_bMotorOnOff = mode;
-		CMotorController* pMotorCtrl = CMotorController::GetInstance();
-		CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
-
-		if (m_bMotorOnOff) {
-			pMotorCtrl->StopMotor();
-		}
-		else {
-			pMotorCtrl->PerfomRun(pConfig.motor.velocity);
-		}
+		setMotorOnOff(mode);
 
 		return RayError::OK;
 	}
@@ -293,7 +311,7 @@ RayError COCTSystem::SetDegree(double value) {
 */
 bool COCTSystem::GetMotorOnOff()
 {
-	return m_bMotorOnOff;
+	return CMotorController::GetInstance()->IsRun();
 }
 
 /*
@@ -424,9 +442,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	CZaberController* pZaber = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
 
 	// 1. Motor ON
-	if (pMotor->IsRun() == false) {
-		//pSystem->PostMessage(WM_COMMAND, IDC_BUTTON_MOTOR_ONOFF, 0);
-	}
+	pSystem->setMotorOnOff(true);
 	Sleep(pConfig.motor.settleDown);
 
 #ifndef TEST_VALUE_FILE_PATH
@@ -451,7 +467,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	}
 
 	// 4. Motor OFF
-	//pSystem->PostMessage(WM_COMMAND, IDC_BUTTON_MOTOR_ONOFF, 0);
+	pSystem->setMotorOnOff(false);
 
 #ifndef TEST_VALUE_FILE_PATH
 	// 5. Stop Recording OCT
@@ -550,10 +566,8 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	CZaberController* pZaber = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
 
 	// 1. Motor ON
-	if (pMotor->IsRun() == false) {
-		int nVelocity = pConfig.catheter.velocity;
-		pMotor->PerfomRun(nVelocity);
-	}
+	int nVelocity = pConfig.catheter.velocity;
+	pMotor->PerfomRun(nVelocity);
 
 	// 2. Set Linear Stage Position
 	if (pZaber->IsOpen()) {
@@ -733,6 +747,21 @@ LRESULT COCTSystem::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 	if (m_cbCrossSection != nullptr) m_cbCrossSection(image.data, image.cols, image.rows, image.channels(), nFrameInfo);
 
 	return NOERROR;
+}
+
+/*
+* setMotorOnOff
+*/
+void COCTSystem::setMotorOnOff(bool on) {
+	CMotorController* pMotorCtrl = CMotorController::GetInstance();
+	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+
+	if (on) {
+		pMotorCtrl->PerfomRun(pConfig.motor.velocity);
+	}
+	else {
+		pMotorCtrl->StopMotor();
+	}
 }
 
 /*

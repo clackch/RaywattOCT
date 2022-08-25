@@ -65,8 +65,6 @@ private:
 
 	RayScannerState m_curState;
 
-	bool m_bMotorOnOff;
-
 	//Property
 	double m_fBrightness;
 	double m_fContrast;
@@ -116,6 +114,7 @@ private:
 	CMoriaImaging* createColorImaging(CMessageService*);
 	int initializeAcqDevice();
 	int initializeRotaryJunction();
+	void setMotorOnOff(bool on);
 	void updateCutView(int drawSamples);
 
 protected:
