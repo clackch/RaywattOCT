@@ -35,8 +35,7 @@ void CMoriaConfiguration::Initialize()
 	int nIniValueInt = -1;
 	char converted[2048];
 
-	this->nDmaChannels = ::GetPrivateProfileInt(_T("Imaging"), _T("DmaChannels"), 2, INI_FILE_NAME);
-	this->nBufferSize = (this->nDmaChannels * this->nBScan * (this->nAScan + this->nAScanPadding));
+	this->nBufferSize = (this->nBScan * (this->nAScan + this->nAScanPadding));
 	this->nAcqBufCount = ::GetPrivateProfileInt(_T("Alazar"), _T("AcqBufferCount"), 4, INI_FILE_NAME);
 	this->nTriggerDelaySample = ::GetPrivateProfileInt(_T("Alazar"), _T("TriggerDelaySample"), 0, INI_FILE_NAME);
 
@@ -150,7 +149,7 @@ void CMoriaConfiguration::releaseCircularizeMap(){
 }
 
 int CMoriaConfiguration::getDmaXferSamples() {
-	int nSamples = nDmaChannels * nBScan * (nAScan + nAScanPadding);
+	int nSamples = nBScan * (nAScan + nAScanPadding);
 	return nSamples;
 }
 

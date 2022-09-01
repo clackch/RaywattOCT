@@ -130,7 +130,6 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	const int nBScan = pConfig.nBScan;
 	const int nLaserSpeed = pConfig.nLaserSpeed;
 	const int nBufferSize = pConfig.nBufferSize;
-	const int nDmaChannels = pConfig.nDmaChannels;
 	const int nAcqBufCount = pConfig.nAcqBufCount;
 	const int nTriggerDelaySample = pConfig.nTriggerDelaySample;
 
@@ -275,7 +274,6 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 
 	// TODO: Select which channels to capture (A, B, or both)
 	U32 channelMask = CHANNEL_A; // | CHANNEL_B;
-	if (nDmaChannels == 2) channelMask |= CHANNEL_B;
 
 	// TODO: Select if you wish to save the sample data to a file
 	BOOL saveData = true;
