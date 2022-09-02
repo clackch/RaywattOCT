@@ -37,10 +37,7 @@ private:
 	Ipp32f fBuffer_Fringes[2048];
 	Ipp32fc fBuffer_Complex[2048];
 	Ipp32fc fBuffer_DFT[2048];
-	Ipp32f **fBuffer_BackgroundFringes;
-	Ipp16u **uDataFringes_Deinterlaced;
-	Ipp16u **uDataFingees_DeinterlacedwithPadding;
-	Ipp32f **fOutput;
+	Ipp32f *fOutput;
 	IppsFFTSpec_R_32f *specReal32FFT;	// first FFT
 	IppsFFTSpec_C_32fc *specComp32FFT, *specComp32ZoomFFT;	// Inverse, second FFT
 

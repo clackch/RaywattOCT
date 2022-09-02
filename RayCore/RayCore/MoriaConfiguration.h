@@ -82,7 +82,6 @@ public:
 	int nBScan;		// Number of A-Scan (Transverse)
 	int nBufferSize;
 	int nLaserSpeed;
-	int nDmaChannels;
 	int nFftLength;
 	int nCircleSize;
 	int nAcqBufCount;
