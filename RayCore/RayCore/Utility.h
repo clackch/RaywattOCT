@@ -3,6 +3,7 @@
 #include <thread>
 #include <mutex>
 #include <locale>
+#include <opencv2/opencv.hpp>
 
 typedef UINT(_cdecl* THREADPROC)(LPVOID);
 
@@ -19,6 +20,22 @@ public:
 	}
 
 	virtual ~CThread() {}
+};
+
+class StopWatch {
+private:
+	std::string moduleName;
+	double start = (double)cv::getTickCount();
+
+public:
+	StopWatch(std::string moduleName) {
+		this->moduleName = moduleName;
+		this->start = (double)cv::getTickCount();
+	}
+	virtual ~StopWatch() {
+		double total_time = ((double)cv::getTickCount() - start) / cv::getTickFrequency();
+		std::cout << moduleName << " : " << total_time * 1000 << " ms" << std::endl;
+	}
 };
 
 class CUtility
