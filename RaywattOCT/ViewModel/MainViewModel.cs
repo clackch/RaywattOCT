@@ -515,7 +515,7 @@ namespace RaywattOCT.ViewModel
 
             switch (response)
             {
-                case RayCoreWrapper.RayScannerState.IntitializeFailed:
+                case RayCoreWrapper.RayScannerState.InitializeFailed:
                     SystemMessage = "Initialize Failed";
                     break;
                 case RayCoreWrapper.RayScannerState.Initializing:

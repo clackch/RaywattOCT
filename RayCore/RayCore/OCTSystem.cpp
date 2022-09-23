@@ -63,7 +63,7 @@ RayError COCTSystem::RegisterCallback(FunctionPtr cb) {
 */
 RayError COCTSystem::Initialize() {
 
-	if (m_curState == RayScannerState::None || m_curState == RayScannerState::IntitializeFailed) {
+	if (m_curState == RayScannerState::None || m_curState == RayScannerState::InitializeFailed) {
 		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Initializing);
 
 		return RayError::OK;
@@ -415,7 +415,7 @@ UINT COCTSystem::threadInitialize(LPVOID param) {
 		pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Homing);
 	}
 	else {
-		pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::IntitializeFailed);
+		pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::InitializeFailed);
 	}
 
 	while (pSystem->m_pThreadInitialize->isRun) {
@@ -820,7 +820,7 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 	m_callback((int)RayCallbackRequest::State, (int)m_curState);
 
 	switch (m_curState) {
-	case RayScannerState::IntitializeFailed:
+	case RayScannerState::InitializeFailed:
 		CUtility::StopThread(m_pThreadInitialize);
 		break;
 	case RayScannerState::Initializing:

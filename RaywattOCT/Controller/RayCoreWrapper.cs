@@ -43,7 +43,7 @@ namespace RaywattOCT.Controller
         {
             None = 0,
             Initializing,
-            IntitializeFailed,
+            InitializeFailed,
             Homing,
             Ready,
             LoadCatheter,
