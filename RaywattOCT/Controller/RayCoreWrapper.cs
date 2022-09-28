@@ -8,7 +8,8 @@ namespace RaywattOCT.Controller
         public enum RayError : int
         {
             OK = 0,
-	        InvalidArgument = -1000,
+            SystemRunning = -1000,
+            InvalidArgument,
             WrongOCTScannerState,
             NotPausedState
         };
@@ -62,7 +63,7 @@ namespace RaywattOCT.Controller
             }
         };
 
-        public static string ConfigFilePath = "./newmoria.ini";
+        public static string ConfigFilePath = "./raycore.ini";
         public static double BrightnessMin = 0.0f;
         public static double BrightnessMax = 100.0f;
         public static double ContrastMin = 0.5f;
@@ -72,11 +73,13 @@ namespace RaywattOCT.Controller
         public delegate void CallbackFunctionWithImage(IntPtr data, int width, int height, int channel, int frameInfo);
 
         [DllImport("RayCore.dll")]
+        public static extern int RayStartSystem();
+        [DllImport("RayCore.dll")]
+        public static extern int RayStopSystem();
+        [DllImport("RayCore.dll")]
         public static extern int RayRegisterCallback(IntPtr cb);
         [DllImport("RayCore.dll")]
         public static extern int RayInitialize();
-        [DllImport("RayCore.dll")]
-        public static extern int RayFinalize();
         [DllImport("RayCore.dll")]
         public static extern int RayPullbackScan(string filePath);
         [DllImport("RayCore.dll")]

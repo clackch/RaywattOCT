@@ -393,6 +393,7 @@ namespace RaywattOCT.ViewModel
         }
         private void Initialize()
         {
+            RayCoreWrapper.RayStartSystem();
             RayCoreWrapper.RayRegisterCallback(Marshal.GetFunctionPointerForDelegate(CBFunction));
             RayCoreWrapper.RayRegisterImageCallback(
                 Marshal.GetFunctionPointerForDelegate(CBCrossSection),
@@ -407,7 +408,7 @@ namespace RaywattOCT.ViewModel
         }
         private void Exit()
         {
-            RayCoreWrapper.RayFinalize();
+            RayCoreWrapper.RayStopSystem();
             Environment.Exit(0);
         }
         private void MotorOnOff()
