@@ -1,5 +1,8 @@
 #pragma once
 
+#import "C:\\Program Files\\Axsun\\Axsun OCT Control\\AxsunOCTControl.tlb"
+using namespace AxsunOCTControl;
+
 #define AXSUN_MAX_DEVICES		5
 #define AXSUN_LASER_DEVICE		40
 

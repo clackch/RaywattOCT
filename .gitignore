@@ -37,9 +37,11 @@
 *.aps
 *.bak
 *.user
+*.pdb
 extern
 *.bin
 *.dat
 bin
 obj
 x64
+RayCore/lib

@@ -1,5 +1,5 @@
-#include "pch.h"
 #include "LaserController.h"
+#include "Config.h"
 
 CLaserController* CLaserController::pInstance = NULL;
 

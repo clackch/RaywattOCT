@@ -1,12 +1,10 @@
 #pragma once
 
-#include "AlazarApi.h"
-#include "ipp.h"
-#include <opencv2/opencv.hpp>
+#include "Config.h"
 
-class CMoriaConfiguration
+class CConfiguration
 {
-	friend class CMoriaConfiguration;
+	friend class CConfiguration;
 	class SettingsOpenMP {
 	public:
 		int numThread;
@@ -16,8 +14,8 @@ class CMoriaConfiguration
 	class SettingsAlazar {
 	public:
 		int nAcqBufferCount;
-		bool bUserMoriaImaging;
-		U32 msAtsTimeOut;
+		bool bUserRayImaging;
+		unsigned int msAtsTimeOut;
 	};
 
 	class Measurement {
@@ -70,10 +68,10 @@ class CMoriaConfiguration
 		int waitingTime;
 	};
 private:
-	CMoriaConfiguration();
-	CMoriaConfiguration(const CMoriaConfiguration& ref) {};
-	CMoriaConfiguration& operator=(const CMoriaConfiguration& ref) {};
-	~CMoriaConfiguration();
+	CConfiguration();
+	CConfiguration(const CConfiguration& ref) {};
+	CConfiguration& operator=(const CConfiguration& ref) {};
+	~CConfiguration();
 	
 public:
 	bool isInit;
@@ -86,9 +84,6 @@ public:
 	int nCircleSize;
 	int nAcqBufCount;
 	int nTriggerDelaySample;
-	// circularize map
-	cv::Mat pXMap;
-	cv::Mat pYMap;
 	std::wstring patientFileRootPath;
 
 	SettingsOpenMP settingsOpenMP;
@@ -102,7 +97,7 @@ public:
 	Catheter catheter;
 	int shutterSerial;
 public:
-	static CMoriaConfiguration& GetInstance();
+	static CConfiguration& GetInstance();
 
 	bool IsInit(){ return isInit; }
 	void Initialize();
@@ -116,8 +111,4 @@ public:
 
 	//Property
 	double GetLoadCatheterTime();
-
-private:
-	void initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale);
-	void releaseCircularizeMap();
 };

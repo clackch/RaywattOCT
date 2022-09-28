@@ -1,4 +1,3 @@
-#include "pch.h" 
 #include "SerialPort.h" 
 
 CSerialPort::CSerialPort() { 

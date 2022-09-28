@@ -1,9 +1,11 @@
 #pragma once
+#include "Config.h"
 #include <vector>
 #include <thread>
 #include <mutex>
 #include <locale>
-#include <opencv2/opencv.hpp>
+#include <chrono>
+#include <iostream>
 
 typedef UINT(_cdecl* THREADPROC)(LPVOID);
 
@@ -25,16 +27,17 @@ public:
 class StopWatch {
 private:
 	std::string moduleName;
-	double start = (double)cv::getTickCount();
+	std::chrono::system_clock::time_point start;
 
 public:
 	StopWatch(std::string moduleName) {
 		this->moduleName = moduleName;
-		this->start = (double)cv::getTickCount();
+		this->start = std::chrono::system_clock::now();
 	}
 	virtual ~StopWatch() {
-		double total_time = ((double)cv::getTickCount() - start) / cv::getTickFrequency();
-		std::cout << moduleName << " : " << total_time * 1000 << " ms" << std::endl;
+		std::chrono::system_clock::time_point end = std::chrono::system_clock::now();
+		std::chrono::milliseconds total_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+		std::cout << moduleName << " : " << total_time.count() << " ms" << std::endl;
 	}
 };
 

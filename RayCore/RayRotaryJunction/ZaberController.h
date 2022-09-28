@@ -1,6 +1,5 @@
 #pragma once
-
-#include <string>
+#include "Config.h"
 
 #define INTERFEROMETER_BACKWARD_POSITION	(-1)
 #define INTERFEROMETER_FORWARD_POSITION		(1)

@@ -1,6 +1,6 @@
 #pragma once
 
-class CMoriaImaging;
+class CImaging;
 class CDataWriter;
 class CThread;
 class IAcquisitionDevice
@@ -9,14 +9,14 @@ protected:
 	bool m_isInit;
 	CThread *m_pThread;
 
-	CMoriaImaging* m_pImaging;
+	CImaging* m_pImaging;
 	CDataWriter* m_pWriter;
 public:
 	IAcquisitionDevice();
 	virtual ~IAcquisitionDevice();
 
 	bool IsInit() { return m_isInit; }
-	void SetImaging(CMoriaImaging* pImaging) { m_pImaging = pImaging; }
+	void SetImaging(CImaging* pImaging) { m_pImaging = pImaging; }
 	void SetWriter(CDataWriter* pWriter) { m_pWriter = pWriter; }
 
 	virtual int InitDevice() = 0;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <opencv2/opencv.hpp>
-class CMoriaImaging;
+class CImaging;
 class CCutViewManager
 {
 private:
@@ -14,7 +14,7 @@ public:
 	void Initialize(int nNumOfSamples);
 	void GenerateCutView(double degree);
 	void GenerateCutView(int nFrameIndex, double degree);
-	void AddRecord(unsigned short* pBuffer, CMoriaImaging* pImaging, int nFrameIndex);
+	void AddRecord(unsigned short* pBuffer, CImaging* pImaging, int nFrameIndex);
 	cv::Mat GetCutView() { return m_imgCutView; }
 	cv::Mat GetCutViewROI(int length);
 	int GetNumOfSamples() { return m_vRecords.size(); }

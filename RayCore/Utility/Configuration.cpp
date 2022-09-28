@@ -1,12 +1,11 @@
-#include "pch.h"
-#include "MoriaConfiguration.h"
+#include "Configuration.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-#define INI_FILE_NAME _T(".\\newmoria.ini")
+#define INI_FILE_NAME _T(".\\raycore.ini")
 
-CMoriaConfiguration::CMoriaConfiguration():
+CConfiguration::CConfiguration():
 	isInit(false),
 	nAScan(0),
 	nAScanPadding(0),
@@ -15,17 +14,16 @@ CMoriaConfiguration::CMoriaConfiguration():
 {
 }
 
-CMoriaConfiguration::~CMoriaConfiguration() 
+CConfiguration::~CConfiguration() 
 {
-	releaseCircularizeMap();
 }
 
-CMoriaConfiguration& CMoriaConfiguration::GetInstance() {
-	static CMoriaConfiguration pInstance;
+CConfiguration& CConfiguration::GetInstance() {
+	static CConfiguration pInstance;
 	return pInstance;
 }
 
-void CMoriaConfiguration::Initialize()
+void CConfiguration::Initialize()
 {
 	this->nAScan = ::GetPrivateProfileInt(_T("Imaging"), _T("AScan"), 1920, INI_FILE_NAME);
 	this->nAScanPadding = ::GetPrivateProfileInt(_T("Imaging"), _T("AScanPadding"), 0, INI_FILE_NAME);
@@ -57,8 +55,8 @@ void CMoriaConfiguration::Initialize()
 	this->settingsOpenMP.numDynamic = ::GetPrivateProfileInt(_T("OpenMP"), _T("NumDynamic"), 1, INI_FILE_NAME);
 
 	this->settingsAlazar.nAcqBufferCount = ::GetPrivateProfileInt(_T("Alazar"), _T("AcqBufferCount"), 4, INI_FILE_NAME);
-	this->settingsAlazar.bUserMoriaImaging = ::GetPrivateProfileInt(_T("Alazar"), _T("UseMoriaImaging"), 1, INI_FILE_NAME);
-	this->settingsAlazar.msAtsTimeOut = (U32)::GetPrivateProfileInt(_T("Alazar"), _T("TimeOutInMilliSecond"), 5000, INI_FILE_NAME);
+	this->settingsAlazar.bUserRayImaging = ::GetPrivateProfileInt(_T("Alazar"), _T("UseRayImaging"), 1, INI_FILE_NAME);
+	this->settingsAlazar.msAtsTimeOut = ::GetPrivateProfileInt(_T("Alazar"), _T("TimeOutInMilliSecond"), 5000, INI_FILE_NAME);
 
 	::GetPrivateProfileString(_T("Coloring"), _T("R"), _T("255.f"), sIniValueString, sizeof(sIniValueString), INI_FILE_NAME);
 	wcstombs(converted, sIniValueString, wcslen(sIniValueString) + 1);
@@ -93,13 +91,10 @@ void CMoriaConfiguration::Initialize()
 	this->catheter.rotationTime = ::GetPrivateProfileInt(_T("Catheter"), _T("RotationTime"), 10000, INI_FILE_NAME);
 	this->catheter.waitingTime = ::GetPrivateProfileInt(_T("Catheter"), _T("WaitingTime"), 10000, INI_FILE_NAME);
 
-	releaseCircularizeMap();
-	initCircularizeMap(nFftLength, nBScan, nFftLength, nCircleSize, nCircleSize, 2.0f);
-
 	isInit = true;
 }
 
-void CMoriaConfiguration::SaveZaberSettings() {
+void CConfiguration::SaveZaberSettings() {
 	tstring strValue = _T("");
 
 	strValue = this->zaber.pullbackDistance;
@@ -108,7 +103,7 @@ void CMoriaConfiguration::SaveZaberSettings() {
 	strValue = this->zaber.pullbackSpeed;
 	::WritePrivateProfileString(_T("Zaber"), _T("PullbackSpeed"), strValue.c_str(), INI_FILE_NAME);
 }
-void CMoriaConfiguration::SaveMotorSettings() {
+void CConfiguration::SaveMotorSettings() {
 	tstring strValue = _T("");
 
 	strValue = this->motor.velocity;
@@ -118,51 +113,21 @@ void CMoriaConfiguration::SaveMotorSettings() {
 	::WritePrivateProfileString(_T("Motor"), _T("SettleDown"), strValue.c_str(), INI_FILE_NAME);
 }
 
-void CMoriaConfiguration::initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale) {
-	int circOffset = 0;
-	double radius = (diameter / 2) - 0.5f;
-
-	pXMap.create(dstHeight, dstWidth, CV_32FC1);
-	pYMap.create(dstHeight, dstWidth, CV_32FC1);
-
-	pXMap.setTo(cv::Scalar::all(0));
-	pYMap.setTo(cv::Scalar::all(0));
-
-	for (int y = 0; y < dstHeight; y++)
-	{
-		for (int x = 0; x < dstWidth; x++)
-		{
-			double fy = (double)y - radius;
-			double fx = (double)x - radius;
-
-			float rvalue = (float)(srcWidth - scale * sqrt(pow(fy, 2) + pow(fx, 2))) + (float)circOffset;
-
-			pXMap.at<float>(x * dstHeight + y) = rvalue;
-			pYMap.at<float>(x * dstHeight + y) = (float)(((atan2(fy, fx) / M_PI) + 1.0) * 0.5 * (srcHeight - 1));
-		}
-	}
-}
-
-void CMoriaConfiguration::releaseCircularizeMap(){
-	pXMap.release();
-	pYMap.release();
-}
-
-int CMoriaConfiguration::getDmaXferSamples() {
+int CConfiguration::getDmaXferSamples() {
 	int nSamples = nBScan * (nAScan + nAScanPadding);
 	return nSamples;
 }
 
-int CMoriaConfiguration::getDmaBufferSamples()
+int CConfiguration::getDmaBufferSamples()
 {
 	return 2 * getDmaXferSamples();
 }
 
-int CMoriaConfiguration::getScopeLength()
+int CConfiguration::getScopeLength()
 {
 	return nAScan + nAScanPadding;
 }
 
-double CMoriaConfiguration::GetLoadCatheterTime() {
+double CConfiguration::GetLoadCatheterTime() {
 	return (catheter.rotationTime + catheter.waitingTime) / 1000;
 }

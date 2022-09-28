@@ -1,6 +1,6 @@
-#include "pch.h"
+#include "Config.h"
 #include "ATSDevice.h"
-#include "MoriaConfiguration.h"
+#include "Configuration.h"
 
 CATSDevice::CATSDevice() {
 	m_hATSBoard = NULL;
@@ -32,8 +32,8 @@ int CATSDevice::InitDevice() {
 	return NOERROR;
 }
 int CATSDevice::CleanUp() {
-	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
-	const int nAcqBufCount = pConfig.nAcqBufCount;
+	CConfiguration& config = CConfiguration::GetInstance();
+	const int nAcqBufCount = config.nAcqBufCount;
 
 	// Free all memory allocated
 	if (m_pAcqBuffers != NULL) {
@@ -87,9 +87,9 @@ int CATSDevice::stop() {
 }
 
 unsigned short *CATSDevice::acquire(int& nCurFrame, int& nTotalFrame) {
-	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
-	const int nBufferSize = pConfig.nBufferSize;
-	const int nAcqBufCount = pConfig.nAcqBufCount;
+	CConfiguration& config = CConfiguration::GetInstance();
+	const int nBufferSize = config.nBufferSize;
+	const int nAcqBufCount = config.nAcqBufCount;
 	const U32 timeout_ms = 5000;
 	RETURN_CODE retCode;
 	
@@ -124,14 +124,14 @@ unsigned short *CATSDevice::acquire(int& nCurFrame, int& nTotalFrame) {
 BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 {
 	RETURN_CODE retCode;
-	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
-	const int nAScan = pConfig.nAScan;
-	const int nAScanPadding = pConfig.nAScanPadding;
-	const int nBScan = pConfig.nBScan;
-	const int nLaserSpeed = pConfig.nLaserSpeed;
-	const int nBufferSize = pConfig.nBufferSize;
-	const int nAcqBufCount = pConfig.nAcqBufCount;
-	const int nTriggerDelaySample = pConfig.nTriggerDelaySample;
+	CConfiguration& config = CConfiguration::GetInstance();
+	const int nAScan = config.nAScan;
+	const int nAScanPadding = config.nAScanPadding;
+	const int nBScan = config.nBScan;
+	const int nLaserSpeed = config.nLaserSpeed;
+	const int nBufferSize = config.nBufferSize;
+	const int nAcqBufCount = config.nAcqBufCount;
+	const int nTriggerDelaySample = config.nTriggerDelaySample;
 
 	// TODO: Specify the sample rate (see sample rate id below)
 	m_dSamplePerSec = nAScan * nLaserSpeed;

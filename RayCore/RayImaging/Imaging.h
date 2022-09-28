@@ -1,14 +1,15 @@
 ﻿#pragma once
+#include <Windows.h>
 #include <ipp.h>
 #include <opencv2/opencv.hpp>
 #include <vector>
 
 #define WM_PROCESS_OCT_DONE		(WM_USER + 0x0001)
 
-class CMoriaCalibration;
+class CCalibration;
 class CThread;
 class CMessageService;
-class CMoriaImaging
+class CImaging
 {
 private:
 	CMessageService* m_msg;
@@ -17,7 +18,9 @@ private:
 	bool m_waitForFringes;
 	Ipp16u* m_pFringesBuffer;
 
-	CMoriaCalibration* calibration;
+	CCalibration* calibration;
+	cv::Mat matXMap;
+	cv::Mat matYMap;
 
 	cv::Mat imageResult;
 	cv::Mat imageResultColor;
@@ -34,6 +37,8 @@ private:
 	Ipp32f *fringes32fAverage;
 
 	// using in Gen_8bit_Image
+	// dispersion compensation 적용하면 1920 개 데이터가 960 개가 되므로, 2nd FFT 는 1st FFT (2048) 보다 1/2 인 1024 적용한다. fBuffer_Fringes 크기도 1024 면 충분.
+	// dispersion compensation : Map size 는 960 개 인데, 적용할 때 보면 data[index] 와 data[index+1] 에 weight, 1-weight 를 적용해서 하나로 만들기 때문에 dc 를 적용하면 1920 -> 960 이 됨.
 	Ipp32f fBuffer_Fringes[2048];
 	Ipp32fc fBuffer_Complex[2048];
 	Ipp32fc fBuffer_DFT[2048];
@@ -51,8 +56,8 @@ private:
 	int m_nCurFrame;
 	int m_nTotalFrame;
 public:
-	CMoriaImaging(CMessageService*);
-	virtual ~CMoriaImaging(void);
+	CImaging(CMessageService*);
+	virtual ~CImaging(void);
 
 	void Initialize();
 	void Process(const Ipp16u* fringes);
@@ -83,6 +88,8 @@ public:
 private:
 	void allocateMemory();
 	void releaseMemory();
+	void initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale);
+	void releaseCircularizeMap();
 
 	void generateBackground(Ipp16u *fringes);
 	void generateImage(const Ipp16u* fringes, bool bInvert);
@@ -95,4 +102,3 @@ private:
 
 	static UINT threadRender(LPVOID param);
 };
-

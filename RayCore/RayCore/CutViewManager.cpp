@@ -1,7 +1,7 @@
-#include "pch.h"
+#include "Config.h"
 #include "CutViewManager.h"
-#include "MoriaImaging.h"
-#include "MoriaConfiguration.h"
+#include "Imaging.h"
+#include "Configuration.h"
 
 CCutViewManager::CCutViewManager() {
 }
@@ -30,9 +30,9 @@ void CCutViewManager::GenerateCutView(double degree) {
 	}
 }
 void CCutViewManager::GenerateCutView(int nFrameIndex, double degree) {
-	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
-	const int centerX = pConfig.nCircleSize / 2;
-	const int centerY = pConfig.nCircleSize / 2;
+	CConfiguration& config = CConfiguration::GetInstance();
+	const int centerX = config.nCircleSize / 2;
+	const int centerY = config.nCircleSize / 2;
 
 	// generate cut view
 	cv::Mat imgCircle = m_vRecords.at(nFrameIndex);
@@ -60,7 +60,7 @@ void CCutViewManager::GenerateCutView(int nFrameIndex, double degree) {
 		}
 	}
 }
-void CCutViewManager::AddRecord(unsigned short* pBuffer, CMoriaImaging* pImaging, int nFrameIndex) {
+void CCutViewManager::AddRecord(unsigned short* pBuffer, CImaging* pImaging, int nFrameIndex) {
 	pImaging->Process(pBuffer);
 	cv::Mat imgCircle = pImaging->GetCircleImage().clone();
 

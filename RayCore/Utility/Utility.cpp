@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "Utility.h"
 #include <sys/timeb.h>
 #include <time.h>

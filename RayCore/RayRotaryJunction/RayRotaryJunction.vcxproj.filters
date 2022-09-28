@@ -13,66 +13,57 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{46ddccb9-29c1-4295-8270-0d1882a45e72}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="import.h">
+    <ClInclude Include="LaserController.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="RaywattCore.h">
+    <ClInclude Include="MotorController.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="AcquisitionDevice.h">
+    <ClInclude Include="SerialPort.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="ATSDevice.h">
+    <ClInclude Include="ZaberController.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="DataWriter.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="..\Utility\Config.h">
+      <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="DataReader.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="..\Utility\Configuration.h">
+      <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="DataManager.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="..\Utility\MessageService.h">
+      <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="CutViewManager.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="SimulateDevice.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="OCTSystem.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="define.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="..\Utility\Utility.h">
+      <Filter>Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dllmain.cpp">
+    <ClCompile Include="LaserController.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="AcquisitionDevice.cpp">
+    <ClCompile Include="MotorController.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="ATSDevice.cpp">
+    <ClCompile Include="SerialPort.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="DataReader.cpp">
+    <ClCompile Include="ZaberController.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="DataWriter.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="..\Utility\Configuration.cpp">
+      <Filter>Utility</Filter>
     </ClCompile>
-    <ClCompile Include="CutViewManager.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="..\Utility\MessageService.cpp">
+      <Filter>Utility</Filter>
     </ClCompile>
-    <ClCompile Include="SimulateDevice.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="OCTSystem.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="..\Utility\Utility.cpp">
+      <Filter>Utility</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

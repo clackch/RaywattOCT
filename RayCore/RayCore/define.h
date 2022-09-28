@@ -1,4 +1,5 @@
 #pragma once
+#include "import.h"
 
 #define DELAY_FOR_STOP_THREAD			50
 
@@ -7,7 +8,8 @@ typedef void (*FunctionImgPtr)(void*, int, int, int, int);
 
 enum class RayError {
 	OK = 0,
-	InvalidArgument = -1000,
+	SystemRunning = -1000,
+	InvalidArgument,
 	WrongOCTScannerState,
 	NotPausedState
 };

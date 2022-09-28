@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "MessageService.h"
 
 void CMessageService::postMessage(int msg, WPARAM wParam, LPARAM lParam) {
