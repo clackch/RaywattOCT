@@ -12,7 +12,7 @@
 
 #define CUTVIEW_INTERPOLATION_SCALE		5.7
 
-#define TEST_VALUE_FILE_PATH			_T("C:\\DataSave\\test\\0710_145631_6028rpm_20mms_2000Aline_ch1.bin")
+//#define TEST_VALUE_FILE_PATH			_T("C:\\DataSave\\test\\0710_145631_6028rpm_20mms_2000Aline_ch1.bin")
 
 #ifdef TEST_VALUE_FILE_PATH
 class CDataReader;
