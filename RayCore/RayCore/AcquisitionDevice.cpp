@@ -1,6 +1,6 @@
-#include "pch.h"
+#include "Config.h"
 #include "AcquisitionDevice.h"
-#include "MoriaImaging.h"
+#include "Imaging.h"
 #include "DataWriter.h"
 #include "Utility.h"
 
@@ -29,7 +29,7 @@ int IAcquisitionDevice::StopAcquisition() {
 
 UINT IAcquisitionDevice::threadAcquire(LPVOID param) {
 	IAcquisitionDevice *pDevice = (IAcquisitionDevice *)param;
-	CMoriaImaging* pImaging = pDevice->m_pImaging;
+	CImaging* pImaging = pDevice->m_pImaging;
 	CDataWriter* pWriter = pDevice->m_pWriter;
 	int nCurFrame = 0;
 	int nTotalFrame = 0;

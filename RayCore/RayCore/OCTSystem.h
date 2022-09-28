@@ -12,13 +12,12 @@
 
 #define CUTVIEW_INTERPOLATION_SCALE		5.7
 
-//#define TEST_VALUE_FILE_PATH			_T("C:\\DataSave\\test\\0710_145631_6028rpm_20mms_2000Aline_ch1.bin")
+#define TEST_VALUE_FILE_PATH			_T("C:\\DataSave\\test\\0710_145631_6028rpm_20mms_2000Aline_ch1.bin")
 
 #ifdef TEST_VALUE_FILE_PATH
 class CDataReader;
 #endif
 class CThread;
-class CMoriaImaging;
 class CDataWriter;
 class CCutViewManager;
 class COCTSystem : public CMessageService
@@ -38,8 +37,8 @@ private:
 	CThread* m_pThreadUnloadCatheter;
 	
 	// Imaging
-	CMoriaImaging* m_pImagingRealtime;
-	CMoriaImaging* m_pImagingSimulate;
+	CImaging* m_pImagingRealtime;
+	CImaging* m_pImagingSimulate;
 
 	// Data Writer
 	CDataWriter* m_pDataWriter;
@@ -69,10 +68,11 @@ private:
 public:
 	COCTSystem();
 	virtual ~COCTSystem();
-	
+
+	RayError Start();
+	RayError Stop();
 	RayError RegisterCallback(FunctionPtr cb);
 	RayError Initialize();
-	RayError Finalize();
 	RayError PullbackScan(char *strFilePath);
 	RayError LoadCatheter();
 	RayError UnloadCatheter();
@@ -107,8 +107,7 @@ private:
 	static UINT threadUnloadCatheter(LPVOID param);
 
 	// Imaging
-	void initialize();
-	CMoriaImaging* createColorImaging(CMessageService*);
+	CImaging* createColorImaging(CMessageService*);
 	int initializeAcqDevice();
 	int initializeRotaryJunction();
 	void setMotorOnOff(bool on);

@@ -1,21 +1,24 @@
 ﻿// dllmain.cpp : DLL 애플리케이션의 진입점을 정의합니다.
-#include "pch.h"
+#include "Config.h"
 #include "RaywattCore.h"
 #include "OCTSystem.h"
-#include "MoriaConfiguration.h"
+#include "Configuration.h"
 #include <stdio.h>
 
 static COCTSystem octSystem;
-CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+CConfiguration& config = CConfiguration::GetInstance();
 
+_declspec(dllexport) RayError RayStartSystem() {
+    return octSystem.Start();
+}
+_declspec(dllexport) RayError RayStopSystem() {
+    return octSystem.Stop();
+}
 _declspec(dllexport) RayError RayRegisterCallback(FunctionPtr cb) {
     return octSystem.RegisterCallback(cb);
 }
 _declspec(dllexport) RayError RayInitialize() {
     return octSystem.Initialize();
-}
-_declspec(dllexport) RayError RayFinalize() {
-    return octSystem.Finalize();
 }
 _declspec(dllexport) RayError RayPullbackScan(char* strFilePath) {
     return octSystem.PullbackScan(strFilePath);
@@ -79,7 +82,7 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
     case RayProperty::IsPaused:
         return octSystem.GetIsPaused();
     case RayProperty::LoadCatheterTime:
-        return pConfig.GetLoadCatheterTime();
+        return config.GetLoadCatheterTime();
     default:
         return (int)RayError::InvalidArgument;
     }

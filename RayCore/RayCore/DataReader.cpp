@@ -1,6 +1,6 @@
-#include "pch.h"
+#include "Config.h"
 #include "DataReader.h"
-#include "MoriaConfiguration.h"
+#include "Configuration.h"
 #include <fstream>
 
 CDataReader::CDataReader() {
@@ -16,8 +16,8 @@ CDataReader::~CDataReader() {
 }
 
 int CDataReader::Initialize(tstring strDataFilePath) {
-	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
-	const int nBufferSize = pConfig.nBufferSize;
+	CConfiguration& config = CConfiguration::GetInstance();
+	const int nBufferSize = config.nBufferSize;
 
 	if (strDataFilePath.empty()) return 0;
 
@@ -70,8 +70,8 @@ void CDataReader::finalize() {
 	}
 }
 bool CDataReader::readFrame(int nIndex) {
-	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
-	const int nBufferSize = pConfig.nBufferSize;
+	CConfiguration& config = CConfiguration::GetInstance();
+	const int nBufferSize = config.nBufferSize;
 	DWORD dwBytesRead = 0;
 	bool result = true;
 

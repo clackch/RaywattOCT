@@ -15,34 +15,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="pch.h">
+    <ClInclude Include="import.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="RaywattCore.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Utility.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="MotorController.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="AcquisitionDevice.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="ATSDevice.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="MoriaImaging.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="MoriaConfiguration.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="MoriaCalibration.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="DataWriter.h">
@@ -57,16 +39,7 @@
     <ClInclude Include="CutViewManager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="SerialPort.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="LaserController.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="SimulateDevice.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ZaberController.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="OCTSystem.h">
@@ -75,36 +48,15 @@
     <ClInclude Include="define.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="MessageService.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="pch.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="MotorController.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Utility.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="AcquisitionDevice.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="ATSDevice.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="MoriaImaging.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="MoriaConfiguration.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="MoriaCalibration.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="DataReader.cpp">
@@ -116,22 +68,10 @@
     <ClCompile Include="CutViewManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SerialPort.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="ZaberController.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="LaserController.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="SimulateDevice.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="OCTSystem.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="MessageService.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

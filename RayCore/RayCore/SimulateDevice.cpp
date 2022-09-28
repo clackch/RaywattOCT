@@ -1,6 +1,6 @@
-#include "pch.h"
+#include "Config.h"
 #include "SimulateDevice.h"
-#include "MoriaConfiguration.h"
+#include "Configuration.h"
 #include "DataManager.h"
 
 CSimulateDevice::CSimulateDevice(IDataManager* pDataReader)
@@ -29,7 +29,7 @@ int CSimulateDevice::CleanUp() {
 }
 
 void CSimulateDevice::PrevFrame() {
-	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	CConfiguration& config = CConfiguration::GetInstance();
 	const int nNumOfSamples = m_pDataReader->GetNumOfSamples();
 
 	int nFrameIndex = m_nCurSampleIndex;
@@ -39,7 +39,7 @@ void CSimulateDevice::PrevFrame() {
 	m_nCurSampleIndex = nFrameIndex;
 }
 void CSimulateDevice::NextFrame() {
-	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	CConfiguration& config = CConfiguration::GetInstance();
 	const int nNumOfSamples = m_pDataReader->GetNumOfSamples();
 
 	int nFrameIndex = m_nCurSampleIndex;
@@ -49,7 +49,7 @@ void CSimulateDevice::NextFrame() {
 	m_nCurSampleIndex = nFrameIndex;
 }
 void CSimulateDevice::SetFrame(int nFrame) {
-	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	CConfiguration& config = CConfiguration::GetInstance();
 	const int nNumOfSamples = m_pDataReader->GetNumOfSamples();
 
 	int nFrameIndex = m_nCurSampleIndex;
@@ -69,7 +69,7 @@ int CSimulateDevice::stop() {
 	return NOERROR;
 }
 unsigned short* CSimulateDevice::acquire(int& nCurFrame, int& nTotalFrame) {
-	CMoriaConfiguration& pConfig = CMoriaConfiguration::GetInstance();
+	CConfiguration& config = CConfiguration::GetInstance();
 	const int nNumOfSamples = m_pDataReader->GetNumOfSamples();
 	bool result = true;
 
