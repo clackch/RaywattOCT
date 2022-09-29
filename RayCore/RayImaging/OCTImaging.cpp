@@ -34,12 +34,10 @@ COCTImaging::COCTImaging(CMessageService* pMsg) {
 
 	calibration = new CCalibration();
 
-	scopeData = NULL;
-	scopeFFTData = NULL;
-
 	fringes32f = NULL;
 	fringes32fAverage = NULL;
 
+	fFFTResult = NULL;
 	fOutput = NULL;
 
 	specReal32FFT = NULL;
@@ -60,12 +58,12 @@ COCTImaging::~COCTImaging() {
 	if (calibration != NULL) delete calibration;
 }
 
-void COCTImaging::Initialize() {
+void COCTImaging::Initialize(tstring calibFile) {
 	CConfiguration& config = CConfiguration::GetInstance();
 
 	releaseMemory();
 	allocateMemory();
-	calibration->Initialize();
+	calibration->Initialize(calibFile);
 
 	releaseCircularizeMap();
 	initCircularizeMap(config.nFftLength, config.nBScan, config.nFftLength, config.nCircleSize, config.nCircleSize, 2.0f);
@@ -73,36 +71,16 @@ void COCTImaging::Initialize() {
 
 	loadLUT("LUT.csv");
 }
-void COCTImaging::Process(const USHORT* fringes) {
+void COCTImaging::Process(USHORT* fringes) {
 	CConfiguration& config = CConfiguration::GetInstance();
-	const bool bInvert = m_bInvert;
-	const bool bColor = m_bColor;
 
 	if (fringes == NULL) return;
 
 	generateBackground((Ipp16u*)fringes);
-	generateImage(fringes, bInvert);
+	fftProcessing(fringes32f);
+	generateImage(false);
 
-	cv::cvtColor(imageResult, imageResultColor, cv::COLOR_GRAY2RGB);
-	cv::flip(imageResultColor, imageResultColor, 1);
-
-	if(!bInvert && !bColor){
-		for (int i = 0; i < imageResultColor.rows * imageResultColor.cols; i++) {
-			int nChannels = imageResultColor.channels();
-			for (int ch = 0; ch < nChannels; ch++) {
-				imageResultColor.data[i * nChannels + ch] = 255 - imageResultColor.data[i * nChannels + ch];
-			}
-		}
-	}
-
-	if (bInvert) cv::bitwise_not(imageResultColor, imageResultColor);
-	if (bColor) applyLUT(imageResultColor);
-
-	cv::convertScaleAbs(imageResultColor, imageResultColor, m_fContrast, m_fBrightness);
-
-	circularizeImage(imageResultColor, imageCircle);
-
-	cv::copyTo(imageBackground, imageCircle, imageMask);
+	postProcessing();
 }
 
 int COCTImaging::Start() {
@@ -204,7 +182,6 @@ void COCTImaging::CalculateNoisePower(USHORT* fftData, int nPeakIndex, USHORT& n
 }
 
 
-
 void COCTImaging::allocateMemory() {
 	// ORDER = 11, nScans2n = 2^11
 	// nScans 보다 큰 2^n 중에서 제일 작은 수
@@ -221,19 +198,16 @@ void COCTImaging::allocateMemory() {
 	const int nFftLength = config.nFftLength;
 	const int nCircleSize = config.nCircleSize;
 
-	fringes32f = ippsMalloc_32f(nAScan);
+	fringes32f = ippsMalloc_32f(nAScan * nBScan);
 	fringes32fAverage = ippsMalloc_32f(nAScan);
 
 	imageResult.create(nBScan, nFftLength, CV_8UC1);
 	imageResultColor.create(nBScan, nFftLength, CV_8UC3);
-	imageRectangle.create(nFftLength, nBScan, CV_8UC3);
 	imageCircle.create(nCircleSize, nCircleSize, CV_8UC3);
 	imageMask.create(nCircleSize, nCircleSize, CV_8UC3);
 	imageBackground.create(nCircleSize, nCircleSize, CV_8UC3);
 
-	scopeData = ippsMalloc_16u(nScopeLength);
-	scopeFFTData = ippsMalloc_16u(nFftLength);
-
+	fFFTResult = ippsMalloc_32f(nScansOver2 * nBScan);
 	fOutput = ippsMalloc_32f(nScansOver2 * nBScan);
 
 	// Prepare FFT
@@ -251,14 +225,11 @@ void COCTImaging::releaseMemory() {
 
 	imageResult.release();
 	imageResultColor.release();
-	imageRectangle.release();
 	imageCircle.release();
 	imageMask.release();
 	imageBackground.release();
 
-	ippsRelease((void*&)scopeData);
-	ippsRelease((void*&)scopeFFTData);
-
+	ippsRelease((void*&)fFFTResult);
 	ippsRelease((void*&)fOutput);
 
 	if (specReal32FFT) { ippsFFTFree_R_32f(specReal32FFT); specReal32FFT = NULL; }
@@ -289,12 +260,10 @@ void COCTImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth, 
 		}
 	}
 }
-
 void COCTImaging::releaseCircularizeMap() {
 	matXMap.release();
 	matYMap.release();
 }
-
 
 void COCTImaging::generateBackground(Ipp16u* fringes) {
 	CConfiguration& config = CConfiguration::GetInstance();
@@ -306,46 +275,38 @@ void COCTImaging::generateBackground(Ipp16u* fringes) {
 
 	for (int y = 0; y < nHeight; y++)
 	{
-		ippsConvert_16u32f(fringes + y * nWidth, fringes32f, nWidth);
-		ippsAdd_32f_I(fringes32f, fringes32fAverage, nWidth);
+		ippsConvert_16u32f(fringes + y * nWidth, fringes32f + y * nWidth, nWidth);
+		ippsAdd_32f_I(fringes32f + y * nWidth, fringes32fAverage, nWidth);
 	}
 
 	ippsMulC_32f_I(1.0f / ((float)nHeight), fringes32fAverage, nWidth);
 }
-
-void COCTImaging::generateImage(const Ipp16u *fringes, bool bInvert){
+void COCTImaging::fftProcessing(const Ipp32f* fringes32f) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int nAScan = config.nAScan, nBScan = config.nBScan;
-	const float fHighLevel = (bInvert) ? config.invert.highLevel : 0.0f;
-	const float fLowLevel = (bInvert) ? config.invert.lowLevel : 0.0f;
 	const int order = config.constantValues.Order;
 	const int zoom = config.constantValues.Zoom;
 	const int numDynamic = config.settingsOpenMP.numDynamic;
 	const int numThreads = config.settingsOpenMP.numThread;
-	const int nScopeLength = config.getScopeLength();
 
 	// AScan 보다 큰 2^n 중에서 제일 작은 수
 	const int nScans2n = (1 << order);
 	const int nScansOver2 = nScans2n / 2;
 	const int nScansOver4 = nScans2n / 4;
 	const int nScansZoom = (1 << (order + zoom - 2));
-		
-	// copy first line to display scope
-	ippsCopy_16s((Ipp16s*)fringes, (Ipp16s*)scopeData, nScopeLength);
 
 	// Process Frame
 	// To-Do : enable openmp, check shared variables
 	omp_set_dynamic(numDynamic);
 	omp_set_num_threads(numThreads);
-//#pragma omp parallel
+	//#pragma omp parallel
 	{
-//#pragma omp for firstprivate(fBuffer_Fringes,fBuffer_BackgroundFringes,fBuffer_Complex,fBuffer_DFT,j)
+		//#pragma omp for firstprivate(fBuffer_Fringes,fBuffer_BackgroundFringes,fBuffer_Complex,fBuffer_DFT,j)
 		for (int i = 0; i < nBScan; i++)
 		{
 			{
 				// 1. Background Subtract
-				ippsConvert_16u32f(fringes + i * nAScan, fBuffer_Fringes, nAScan);
-
+				ippsCopy_32f(fringes32f + i * nAScan, fBuffer_Fringes, nAScan);
 				ippsSub_32f_I(fringes32fAverage, fBuffer_Fringes, nAScan);  // I의 의미:자기 자신에 이처리를 해서, 결과를 얻는다.
 
 				// 2. Apply Window
@@ -371,42 +332,52 @@ void COCTImaging::generateImage(const Ipp16u *fringes, bool bInvert){
 				}
 
 				// 7. Numerical Dispersion Compensation
-				ippsMul_32fc_I((Ipp32fc *) calibration->dispersion, fBuffer_Complex, nAScan / 2);
+				ippsMul_32fc_I((Ipp32fc*)calibration->dispersion, fBuffer_Complex, nAScan / 2);
 
 				// 8. FFT Again
 				ippsFFTFwd_CToC_32fc_I(fBuffer_Complex, specComp32FFT, NULL);
 
 				// 9. Extract Magnitude
-				ippsPowerSpectr_32fc(fBuffer_Complex, fOutput + i * nScansOver2 + nScansOver4, nScansOver4);
-				ippsPowerSpectr_32fc(fBuffer_Complex + nScansOver4, fOutput + i * nScansOver2, nScansOver4);
+				ippsPowerSpectr_32fc(fBuffer_Complex, fFFTResult + i * nScansOver2 + nScansOver4, nScansOver4);
+				ippsPowerSpectr_32fc(fBuffer_Complex + nScansOver4, fFFTResult + i * nScansOver2, nScansOver4);
 			}
-
-			// Calculate data for scope control
-			if (scopeFFTData && i == 0)
-			{
-				generateScopeData(fOutput, scopeFFTData);
-			}
-
-			ippsLn_32f_I(fOutput + i * nScansOver2, nScansOver2);
-			ippsMulC_32f(fOutput + i * nScansOver2, log10(exp(1)) * 10, fOutput + i * nScansOver2, nScansOver2);
-			ippsSubC_32f_I((calibration->lowLevel + fLowLevel), fOutput + i * nScansOver2, nScansOver2);
-			ippsMulC_32f_I(255.0f / (calibration->highLevel - fHighLevel), fOutput + i * nScansOver2, nScansOver2);
-			ippsConvert_32f8u_Sfs(fOutput + i * nScansOver2, imageResult.data + i * nScansOver2 /*stepBytes*/, nScansOver2, ippRndNear, 0);
 		}
 	} // end parallel region
+
 }
-void COCTImaging::generateScopeData(Ipp32f* output, Ipp16u* scope) {
+void COCTImaging::generateImage(bool bInvert){
 	CConfiguration& config = CConfiguration::GetInstance();
+	const int nBScan = config.nBScan;
+	const float fHighLevel = (bInvert) ? config.invert.highLevel : 0.0f;
+	const float fLowLevel = (bInvert) ? config.invert.lowLevel : 0.0f;
 	const int order = config.constantValues.Order;
 	const int nScans2n = (1 << order);
 	const int nScansOver2 = nScans2n / 2;
-	Ipp32f temp[1024];
-		
-	ippsLn_32f(output, temp, nScansOver2);
-	ippsMulC_32f_I(log10(exp(1)) * 10, temp, nScansOver2);
-	ippsSubC_32f_I(calibration->lowLevel, temp, nScansOver2);
-	ippsMulC_32f_I(65535 / (calibration->highLevel), temp, nScansOver2);
-	ippsConvert_32f16u_Sfs(temp, scope, nScansOver2, ippRndNear, 0);
+
+	for (int i = 0; i < nBScan; i++)
+	{
+		ippsLn_32f(fFFTResult + i * nScansOver2, fOutput + i * nScansOver2, nScansOver2);
+		ippsMulC_32f(fOutput + i * nScansOver2, log10(exp(1)) * 10, fOutput + i * nScansOver2, nScansOver2);
+		ippsSubC_32f_I((calibration->lowLevel + fLowLevel), fOutput + i * nScansOver2, nScansOver2);
+		ippsMulC_32f_I(255.0f / (calibration->highLevel - fHighLevel), fOutput + i * nScansOver2, nScansOver2);
+		ippsConvert_32f8u_Sfs(fOutput + i * nScansOver2, imageResult.data + i * nScansOver2 /*stepBytes*/, nScansOver2, ippRndNear, 0);
+	}
+}
+void COCTImaging::postProcessing() {
+	const bool bInvert = m_bInvert;
+	const bool bColor = m_bColor;
+
+	cv::cvtColor(imageResult, imageResultColor, cv::COLOR_GRAY2RGB);
+	cv::flip(imageResultColor, imageResultColor, 1);
+
+	if (bInvert) cv::bitwise_not(imageResultColor, imageResultColor);
+	if (bColor) applyLUT(imageResultColor);
+
+	cv::convertScaleAbs(imageResultColor, imageResultColor, m_fContrast, m_fBrightness);
+
+	circularizeImage(imageResultColor, imageCircle);
+
+	cv::copyTo(imageBackground, imageCircle, imageMask);
 }
 
 void COCTImaging::circularizeImage(cv::Mat& src, cv::Mat& dst)

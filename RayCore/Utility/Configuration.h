@@ -84,7 +84,8 @@ public:
 	int nCircleSize;
 	int nAcqBufCount;
 	int nTriggerDelaySample;
-	std::wstring patientFileRootPath;
+	tstring configFilePath;
+	tstring patientFileRootPath;
 
 	SettingsOpenMP settingsOpenMP;
 	SettingsAlazar settingsAlazar;
@@ -100,7 +101,7 @@ public:
 	static CConfiguration& GetInstance();
 
 	bool IsInit(){ return isInit; }
-	void Initialize();
+	void Initialize(tstring configFile);
 
 	void SaveZaberSettings();
 	void SaveMotorSettings();

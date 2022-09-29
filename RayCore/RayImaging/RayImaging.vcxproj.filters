@@ -39,6 +39,9 @@
     <ClInclude Include="Imaging.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="LabImaging.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="OCTImaging.cpp">
@@ -55,6 +58,9 @@
     </ClCompile>
     <ClCompile Include="..\Utility\Utility.cpp">
       <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="LabImaging.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

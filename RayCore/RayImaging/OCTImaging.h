@@ -4,13 +4,14 @@
 #include <opencv2/opencv.hpp>
 #include <vector>
 #include "Imaging.h"
+#include "Config.h"
 
 class CCalibration;
 class CThread;
 class CMessageService;
 class COCTImaging : public IImaging
 {
-private:
+protected:
 	CMessageService* m_msg;
 
 	CThread* m_pThread;
@@ -23,13 +24,9 @@ private:
 
 	cv::Mat imageResult;
 	cv::Mat imageResultColor;
-	cv::Mat imageRectangle;
 	cv::Mat imageCircle;
 	cv::Mat imageMask;
 	cv::Mat imageBackground;
-
-	Ipp16u* scopeData;
-	Ipp16u* scopeFFTData;
 
 	// using in GenerateBackground
 	Ipp32f *fringes32f;
@@ -41,6 +38,7 @@ private:
 	Ipp32f fBuffer_Fringes[2048];
 	Ipp32fc fBuffer_Complex[2048];
 	Ipp32fc fBuffer_DFT[2048];
+	Ipp32f *fFFTResult;
 	Ipp32f *fOutput;
 	IppsFFTSpec_R_32f *specReal32FFT;	// first FFT
 	IppsFFTSpec_C_32fc *specComp32FFT, *specComp32ZoomFFT;	// Inverse, second FFT
@@ -58,8 +56,8 @@ public:
 	COCTImaging(CMessageService*);
 	virtual ~COCTImaging(void);
 
-	void Initialize();
-	void Process(const USHORT* fringes);
+	virtual void Initialize(tstring calibFile);
+	virtual void Process(USHORT* fringes);
 
 	int Start();
 	int Stop();
@@ -75,24 +73,22 @@ public:
 		m_nTotalFrame = nTotalFrame;
 	}
 
-	cv::Mat GetRectangleImage() { return imageRectangle; }
 	cv::Mat GetCircleImage() { return imageCircle; }
-	USHORT* GetScopeData() { return scopeData; }
-	USHORT* GetScopeFFTData() { return scopeFFTData; }
 	USHORT* GetFringesBuffer() { return m_pFringesBuffer; }
 
 	void CalculateAxialResolution(USHORT* fftData, USHORT& nPeakValue, int& nPeakIndex, int& nLineWidth);
 	void CalculateNoisePower(USHORT* fftData, int nPeakIndex, USHORT& nNoisePower);
 
-private:
+protected:
 	void allocateMemory();
 	void releaseMemory();
 	void initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale);
 	void releaseCircularizeMap();
 
 	void generateBackground(Ipp16u *fringes);
-	void generateImage(const Ipp16u* fringes, bool bInvert);
-	void generateScopeData(Ipp32f* output, Ipp16u* scope);
+	void fftProcessing(const Ipp32f* fringes32f);
+	void generateImage(bool bInvert);
+	void postProcessing();
 	void circularizeImage(cv::Mat& src, cv::Mat& dst);
 	void applyHotColor(cv::Mat& image);
 	void loadLUT(const char* strLUTPath);
