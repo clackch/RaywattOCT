@@ -39,15 +39,6 @@ void CDataWriter::StopRecording() {
 	m_isRecording = false;
 }
 
-void CDataWriter::PushToBuffer(void* pFrame) {
-	if (m_isRecording == false) return;
-	if (m_nNumOfSamples >= m_nBufferSize) return;
-
-	unsigned long long ulOffset = (unsigned long long) m_nNumOfSamples * (unsigned long long) m_nElementSize;
-	memcpy(m_pRecordBuffer + ulOffset, pFrame, m_nElementSize);
-	m_nNumOfSamples++;
-}
-
 void CDataWriter::StartSave(tstring strFilePath) {
 	// create file
 	m_hRecordingFile = CreateFile(
@@ -78,6 +69,15 @@ unsigned short* CDataWriter::GetSample(int nFrame) {
 
 	unsigned long long ulOffset = nFrame * (unsigned long long) m_nElementSize;
 	return (unsigned short *)(m_pRecordBuffer + ulOffset);
+}
+
+void CDataWriter::AddFrame(void* pFrame) {
+	if (m_isRecording == false) return;
+	if (m_nNumOfSamples >= m_nBufferSize) return;
+
+	unsigned long long ulOffset = (unsigned long long) m_nNumOfSamples * (unsigned long long) m_nElementSize;
+	memcpy(m_pRecordBuffer + ulOffset, pFrame, m_nElementSize);
+	m_nNumOfSamples++;
 }
 
 void CDataWriter::finalize() {

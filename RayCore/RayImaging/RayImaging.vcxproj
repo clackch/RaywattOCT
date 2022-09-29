@@ -120,7 +120,7 @@
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <OpenMPSupport>true</OpenMPSupport>
-      <AdditionalIncludeDirectories>.\;..\Utility;..\extern\opencv\include;..\extern\ipp\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Utility;..\extern\opencv\include;..\extern\ipp\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -165,13 +165,14 @@ xcopy "$(ProjectDir)*.h" "$(TargetDir)include\" /y /d</Command>
     <ClInclude Include="..\Utility\Utility.h" />
     <ClInclude Include="Calibration.h" />
     <ClInclude Include="Imaging.h" />
+    <ClInclude Include="OCTImaging.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Utility\MessageService.cpp" />
     <ClCompile Include="..\Utility\Configuration.cpp" />
     <ClCompile Include="..\Utility\Utility.cpp" />
     <ClCompile Include="Calibration.cpp" />
-    <ClCompile Include="Imaging.cpp" />
+    <ClCompile Include="OCTImaging.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

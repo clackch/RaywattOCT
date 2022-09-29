@@ -9,5 +9,6 @@ public:
 
 	int GetNumOfSamples() { return m_nNumOfSamples; }
 	virtual unsigned short* GetSample(int nIndex) = 0;
+	virtual void AddFrame(void* pFrame) = 0;
 };
 

@@ -18,7 +18,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Imaging.h">
+    <ClInclude Include="OCTImaging.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Calibration.h">
@@ -36,9 +36,12 @@
     <ClInclude Include="..\Utility\MessageService.h">
       <Filter>Utility</Filter>
     </ClInclude>
+    <ClInclude Include="Imaging.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Imaging.cpp">
+    <ClCompile Include="OCTImaging.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Calibration.cpp">

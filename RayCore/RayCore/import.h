@@ -19,4 +19,5 @@
 #pragma comment(lib, "ippvm.lib")
 #pragma comment(lib, "libusb-1.0.lib")
 #pragma comment(lib, "RayImaging.lib")
+#pragma comment(lib, "RayAcquisition.lib")
 #pragma comment(lib, "RayRotaryJunction.lib")

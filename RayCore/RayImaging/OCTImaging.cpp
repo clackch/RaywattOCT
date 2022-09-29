@@ -1,4 +1,4 @@
-﻿#include "Imaging.h"
+﻿#include "OCTImaging.h"
 #include "Calibration.h"
 #include "Configuration.h"
 #include "Utility.h"
@@ -25,7 +25,7 @@ void ippsRelease_double_ptr(void**& ptr, int dim) {
 	}
 }
 
-CImaging::CImaging(CMessageService* pMsg) {
+COCTImaging::COCTImaging(CMessageService* pMsg) {
 	m_msg = pMsg;
 
 	m_pThread = NULL;
@@ -55,12 +55,12 @@ CImaging::CImaging(CMessageService* pMsg) {
 	m_nTotalFrame = 0;
 }
 
-CImaging::~CImaging() {
+COCTImaging::~COCTImaging() {
 	releaseMemory();
 	if (calibration != NULL) delete calibration;
 }
 
-void CImaging::Initialize() {
+void COCTImaging::Initialize() {
 	CConfiguration& config = CConfiguration::GetInstance();
 
 	releaseMemory();
@@ -73,7 +73,7 @@ void CImaging::Initialize() {
 
 	loadLUT("LUT.csv");
 }
-void CImaging::Process(const Ipp16u* fringes) {
+void COCTImaging::Process(const USHORT* fringes) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	const bool bInvert = m_bInvert;
 	const bool bColor = m_bColor;
@@ -105,19 +105,19 @@ void CImaging::Process(const Ipp16u* fringes) {
 	cv::copyTo(imageBackground, imageCircle, imageMask);
 }
 
-int CImaging::Start() {
+int COCTImaging::Start() {
 	BOOL result = FALSE;
 	result = CUtility::StartThread(threadRender, m_pThread, (LPVOID)this);
 
 	if (result) return NOERROR;
 	else return -1;
 }
-int CImaging::Stop() {
+int COCTImaging::Stop() {
 	CUtility::StopThread(m_pThread);
 
 	return NOERROR;
 }
-void CImaging::DoAsyncRender(Ipp16u* fringes) {
+void COCTImaging::DoAsyncRender(USHORT* fringes) {
 	if (m_pThread == NULL || m_pThread->isRun == false) return;
 
 	if (m_waitForFringes) {
@@ -126,7 +126,7 @@ void CImaging::DoAsyncRender(Ipp16u* fringes) {
 	}
 }
 
-void CImaging::CalculateAxialResolution(Ipp16u* fftData, Ipp16u& nPeakValue, int& nPeakIndex, int& nLineWidth) {
+void COCTImaging::CalculateAxialResolution(USHORT* fftData, USHORT& nPeakValue, int& nPeakIndex, int& nLineWidth) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int nFFTLength = config.nFftLength;
 	const float fScaleFactor = config.measurementValues.fAxialResolutionScale;
@@ -170,7 +170,7 @@ void CImaging::CalculateAxialResolution(Ipp16u* fftData, Ipp16u& nPeakValue, int
 
 	nLineWidth = ((fRightWidth + nRightIndex) - (fLeftWidth + nLeftIndex)) * fScaleFactor;
 }
-void CImaging::CalculateNoisePower(Ipp16u* fftData, int nPeakIndex, Ipp16u& nNoisePower) {
+void COCTImaging::CalculateNoisePower(USHORT* fftData, int nPeakIndex, USHORT& nNoisePower) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int nFFTLength = config.nFftLength;
 	const int nNoiseSkip = config.measurementValues.nNoiseSkip;
@@ -205,7 +205,7 @@ void CImaging::CalculateNoisePower(Ipp16u* fftData, int nPeakIndex, Ipp16u& nNoi
 
 
 
-void CImaging::allocateMemory() {
+void COCTImaging::allocateMemory() {
 	// ORDER = 11, nScans2n = 2^11
 	// nScans 보다 큰 2^n 중에서 제일 작은 수
 	CConfiguration& config = CConfiguration::GetInstance();
@@ -243,7 +243,7 @@ void CImaging::allocateMemory() {
 
 	imageBackground.setTo(cv::Scalar(0x18, 0x15, 0x16));
 }
-void CImaging::releaseMemory() {
+void COCTImaging::releaseMemory() {
 	CConfiguration& config = CConfiguration::GetInstance();
 
 	if (fringes32f) { ippsFree(fringes32f); fringes32f = NULL; }
@@ -265,7 +265,7 @@ void CImaging::releaseMemory() {
 	if (specComp32ZoomFFT) { ippsFFTFree_C_32fc(specComp32ZoomFFT); specComp32ZoomFFT = NULL; }
 	if (specComp32FFT) { ippsFFTFree_C_32fc(specComp32FFT); specComp32FFT = NULL; }
 }
-void CImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale) {
+void COCTImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale) {
 	int circOffset = 0;
 	double radius = (diameter / 2) - 0.5f;
 
@@ -290,13 +290,13 @@ void CImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth, int
 	}
 }
 
-void CImaging::releaseCircularizeMap() {
+void COCTImaging::releaseCircularizeMap() {
 	matXMap.release();
 	matYMap.release();
 }
 
 
-void CImaging::generateBackground(Ipp16u* fringes) {
+void COCTImaging::generateBackground(Ipp16u* fringes) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int nWidth = config.nAScan;
 	const int nHeight = config.nBScan;
@@ -313,7 +313,7 @@ void CImaging::generateBackground(Ipp16u* fringes) {
 	ippsMulC_32f_I(1.0f / ((float)nHeight), fringes32fAverage, nWidth);
 }
 
-void CImaging::generateImage(const Ipp16u *fringes, bool bInvert){
+void COCTImaging::generateImage(const Ipp16u *fringes, bool bInvert){
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int nAScan = config.nAScan, nBScan = config.nBScan;
 	const float fHighLevel = (bInvert) ? config.invert.highLevel : 0.0f;
@@ -395,7 +395,7 @@ void CImaging::generateImage(const Ipp16u *fringes, bool bInvert){
 		}
 	} // end parallel region
 }
-void CImaging::generateScopeData(Ipp32f* output, Ipp16u* scope) {
+void COCTImaging::generateScopeData(Ipp32f* output, Ipp16u* scope) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int order = config.constantValues.Order;
 	const int nScans2n = (1 << order);
@@ -409,14 +409,14 @@ void CImaging::generateScopeData(Ipp32f* output, Ipp16u* scope) {
 	ippsConvert_32f16u_Sfs(temp, scope, nScansOver2, ippRndNear, 0);
 }
 
-void CImaging::circularizeImage(cv::Mat& src, cv::Mat& dst)
+void COCTImaging::circularizeImage(cv::Mat& src, cv::Mat& dst)
 {
 	CConfiguration& config = CConfiguration::GetInstance();
 
 	cv::remap(src, dst, matXMap, matYMap, cv::INTER_LINEAR);
 }
 
-void CImaging::applyHotColor(cv::Mat& image) {
+void COCTImaging::applyHotColor(cv::Mat& image) {
 	const int colorMapLength = 254;
 	int nn = 90;
 
@@ -450,7 +450,7 @@ void CImaging::applyHotColor(cv::Mat& image) {
 	}
 }
 
-void CImaging::loadLUT(const char* strLUTPath) {
+void COCTImaging::loadLUT(const char* strLUTPath) {
 	m_vLUT.clear();
 	FILE* fpLUT = fopen(strLUTPath, "r");
 	if (fpLUT) {
@@ -476,7 +476,7 @@ void CImaging::loadLUT(const char* strLUTPath) {
 		}
 	}
 }
-void CImaging::applyLUT(cv::Mat& image) {
+void COCTImaging::applyLUT(cv::Mat& image) {
 
 	for (int y = 0; y < image.rows; y++) {
 		for (int x = 0; x < image.cols; x++) {
@@ -492,7 +492,7 @@ void CImaging::applyLUT(cv::Mat& image) {
 		}
 	}
 }
-void CImaging::generateMask(cv::Mat& image) {
+void COCTImaging::generateMask(cv::Mat& image) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int nBScan = config.nBScan;
 	const int nFftLength = config.nFftLength;
@@ -504,8 +504,8 @@ void CImaging::generateMask(cv::Mat& image) {
 	cv::bitwise_not(image, image);
 }
 
-UINT CImaging::threadRender(LPVOID param) {
-	CImaging* pImaging = (CImaging*)param;
+UINT COCTImaging::threadRender(LPVOID param) {
+	COCTImaging* pImaging = (COCTImaging*)param;
 	CMessageService* pMsg = pImaging->m_msg;
 
 	while(pImaging->m_pThread->isRun) {
