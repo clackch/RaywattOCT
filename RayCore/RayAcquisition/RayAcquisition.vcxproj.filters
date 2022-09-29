@@ -15,30 +15,39 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="import.h">
+    <ClInclude Include="AcquisitionDevice.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="RaywattCore.h">
+    <ClInclude Include="ATSDevice.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="CutViewManager.h">
+    <ClInclude Include="DataManager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="OCTSystem.h">
+    <ClInclude Include="DataReader.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="define.h">
+    <ClInclude Include="DataWriter.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="SimulateDevice.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dllmain.cpp">
+    <ClCompile Include="AcquisitionDevice.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="CutViewManager.cpp">
+    <ClCompile Include="ATSDevice.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="OCTSystem.cpp">
+    <ClCompile Include="DataReader.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="DataWriter.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="SimulateDevice.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

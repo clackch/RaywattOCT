@@ -1,7 +1,7 @@
 #pragma once
 
-class CImaging;
-class CDataWriter;
+class IImaging;
+class IDataManager;
 class CThread;
 class IAcquisitionDevice
 {
@@ -9,15 +9,15 @@ protected:
 	bool m_isInit;
 	CThread *m_pThread;
 
-	CImaging* m_pImaging;
-	CDataWriter* m_pWriter;
+	IImaging* m_pImaging;
+	IDataManager* m_pWriter;
 public:
 	IAcquisitionDevice();
 	virtual ~IAcquisitionDevice();
 
 	bool IsInit() { return m_isInit; }
-	void SetImaging(CImaging* pImaging) { m_pImaging = pImaging; }
-	void SetWriter(CDataWriter* pWriter) { m_pWriter = pWriter; }
+	void SetImaging(IImaging* pImaging) { m_pImaging = pImaging; }
+	void SetWriter(IDataManager* pWriter) { m_pWriter = pWriter; }
 
 	virtual int InitDevice() = 0;
 	virtual int CleanUp() = 0;

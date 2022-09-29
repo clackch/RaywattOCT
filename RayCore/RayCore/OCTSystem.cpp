@@ -2,7 +2,7 @@
 #include "OCTSystem.h"
 #include "Utility.h"
 #include "Configuration.h"
-#include "Imaging.h"
+#include "OCTImaging.h"
 #include "DataWriter.h"
 #include "DataReader.h"
 #include "CutViewManager.h"
@@ -587,7 +587,7 @@ UINT COCTSystem::threadUpdateCutView(LPVOID param) {
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
 	// prepare imaging
-	CImaging* pImaging = pSystem->createColorImaging(NULL);
+	COCTImaging* pImaging = pSystem->createColorImaging(NULL);
 
 	pCutView->Initialize(nNumOfSamples);
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadUpdateCutView->isRun; nFrame++) {
@@ -690,8 +690,8 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 /*
 * createColorImaging
 */
-CImaging* COCTSystem::createColorImaging(CMessageService* msg) {
-	CImaging* pImaging = new CImaging(msg);
+COCTImaging* COCTSystem::createColorImaging(CMessageService* msg) {
+	COCTImaging* pImaging = new COCTImaging(msg);
 
 	pImaging->Initialize();
 	pImaging->SetColor(true);

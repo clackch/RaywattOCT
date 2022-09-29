@@ -18,6 +18,7 @@
 class CDataReader;
 #endif
 class CThread;
+class COCTImaging;
 class CDataWriter;
 class CCutViewManager;
 class COCTSystem : public CMessageService
@@ -37,8 +38,8 @@ private:
 	CThread* m_pThreadUnloadCatheter;
 	
 	// Imaging
-	CImaging* m_pImagingRealtime;
-	CImaging* m_pImagingSimulate;
+	COCTImaging* m_pImagingRealtime;
+	COCTImaging* m_pImagingSimulate;
 
 	// Data Writer
 	CDataWriter* m_pDataWriter;
@@ -107,7 +108,7 @@ private:
 	static UINT threadUnloadCatheter(LPVOID param);
 
 	// Imaging
-	CImaging* createColorImaging(CMessageService*);
+	COCTImaging* createColorImaging(CMessageService*);
 	int initializeAcqDevice();
 	int initializeRotaryJunction();
 	void setMotorOnOff(bool on);

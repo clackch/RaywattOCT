@@ -1,7 +1,7 @@
 #include "Config.h"
 #include "AcquisitionDevice.h"
 #include "Imaging.h"
-#include "DataWriter.h"
+#include "DataManager.h"
 #include "Utility.h"
 
 IAcquisitionDevice::IAcquisitionDevice() {
@@ -29,8 +29,8 @@ int IAcquisitionDevice::StopAcquisition() {
 
 UINT IAcquisitionDevice::threadAcquire(LPVOID param) {
 	IAcquisitionDevice *pDevice = (IAcquisitionDevice *)param;
-	CImaging* pImaging = pDevice->m_pImaging;
-	CDataWriter* pWriter = pDevice->m_pWriter;
+	IImaging* pImaging = pDevice->m_pImaging;
+	IDataManager* pWriter = pDevice->m_pWriter;
 	int nCurFrame = 0;
 	int nTotalFrame = 0;
 
@@ -45,7 +45,7 @@ UINT IAcquisitionDevice::threadAcquire(LPVOID param) {
 		}
 
 		if (pWriter != NULL) {
-			pWriter->PushToBuffer(pBuffer);
+			pWriter->AddFrame(pBuffer);
 		}
 	}
 

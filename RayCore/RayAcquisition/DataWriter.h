@@ -21,13 +21,13 @@ public:
 	int StartRecording();
 	void StopRecording();
 	bool IsRecording() { return m_isRecording; }
-	void PushToBuffer(void* pFrame);
 
 	void StartSave(tstring strFilePath);
 	bool WriteFrame(int nFrame);
 	void StopSave();
 
 	virtual unsigned short* GetSample(int nFrame);
+	virtual void AddFrame(void* pFrame);
 
 private:
 	void finalize();

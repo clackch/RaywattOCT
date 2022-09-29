@@ -14,6 +14,7 @@ public:
 
 	int Initialize(tstring strDataFilePath);
 	virtual unsigned short* GetSample(int nIndex);
+	virtual void AddFrame(void* pFrame) {}
 
 private:
 	void finalize();

@@ -1,6 +1,6 @@
 #include "Config.h"
 #include "CutViewManager.h"
-#include "Imaging.h"
+#include "OCTImaging.h"
 #include "Configuration.h"
 
 CCutViewManager::CCutViewManager() {
@@ -60,7 +60,7 @@ void CCutViewManager::GenerateCutView(int nFrameIndex, double degree) {
 		}
 	}
 }
-void CCutViewManager::AddRecord(unsigned short* pBuffer, CImaging* pImaging, int nFrameIndex) {
+void CCutViewManager::AddRecord(unsigned short* pBuffer, COCTImaging* pImaging, int nFrameIndex) {
 	pImaging->Process(pBuffer);
 	cv::Mat imgCircle = pImaging->GetCircleImage().clone();
 
