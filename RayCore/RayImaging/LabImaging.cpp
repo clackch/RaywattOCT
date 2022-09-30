@@ -1,0 +1,148 @@
+#include "LabImaging.h"
+#include "Configuration.h"
+#include "Calibration.h"
+
+CLabImaging::CLabImaging(CMessageService* pMsg) 
+	: COCTImaging(pMsg) {
+	fringesSubtracted = nullptr;
+	backgroundData = nullptr;
+	backgroundFFT = nullptr;
+
+	scopeData = nullptr;
+	scopeFFTData = nullptr;
+
+	subtract = false;
+	subtractFFT = false;
+
+	newCalibration = nullptr;
+	hasNewCalibration = false;
+}
+CLabImaging::~CLabImaging() {
+	if (fringesSubtracted != nullptr) delete[] fringesSubtracted;
+	if(backgroundData != nullptr) delete[] backgroundData;
+	if(backgroundFFT != nullptr) delete[] backgroundFFT;
+
+	if(scopeData != nullptr) delete[] scopeData;
+	if (scopeFFTData != nullptr) delete[] scopeFFTData;
+
+	imageRectangle.release();
+}
+
+void CLabImaging::Initialize(tstring calibFile, const char* strBgFile) {
+	COCTImaging::Initialize(calibFile);
+
+	CConfiguration& config = CConfiguration::GetInstance();
+	const int nBScan = config.nBScan;
+	const int nBufferSize = config.nBufferSize;
+	const int order = config.constantValues.Order;
+	const int nScans2n = (1 << order);
+	const int nScansOver2 = nScans2n / 2;
+	const int nScopeLength = config.getScopeLength();
+	const int nFftLength = config.nFftLength;
+
+	fringesSubtracted = new USHORT[nBufferSize];
+	backgroundData = new USHORT[nBufferSize];
+	backgroundFFT = new float[nScansOver2 * nBScan];
+
+	memset(backgroundData, 0x00, sizeof(USHORT) * nBufferSize);
+	FILE* fp = fopen(strBgFile, "rb");
+	if (fp != nullptr) {
+		if (fp) {
+			size_t readSize = fread(backgroundData, sizeof(USHORT), nBufferSize, fp);
+			if (readSize != nBufferSize) {
+				memset(backgroundData, 0x00, sizeof(USHORT) * nBufferSize);
+			}
+			fclose(fp);
+		}
+	}
+
+	generateBackground((Ipp16u*)backgroundData);
+	fftProcessing(fringes32f);
+
+	ippsCopy_32f(fFFTResult, backgroundFFT, nScansOver2 * nBScan);
+
+	scopeData = new USHORT[nScopeLength * 2];
+	scopeFFTData = new USHORT[nFftLength * 2];
+
+	imageRectangle.create(nFftLength, nBScan, CV_8UC3);
+}
+void CLabImaging::Process(USHORT* fringes) {
+	CConfiguration& config = CConfiguration::GetInstance();
+	const bool bInvert = m_bInvert;
+	const int nBScan = config.nBScan;
+	const int nScopeLength = config.getScopeLength();
+	const int nFftLength = config.nFftLength;
+	const int order = config.constantValues.Order;
+	const int nScans2n = (1 << order);
+	const int nScansOver2 = nScans2n / 2;
+
+	if (fringes == nullptr) return;
+
+	if (hasNewCalibration) {
+		delete calibration;
+		calibration = newCalibration;
+
+		hasNewCalibration = false;
+	}
+
+	// copy first line to display scope
+	ippsCopy_16s((Ipp16s*)fringes, (Ipp16s*)scopeData, nScopeLength);
+
+	ippsCopy_16s((Ipp16s*)fringes, (Ipp16s*)fringesSubtracted, config.nBufferSize);
+	if (!subtract) {
+		memset(scopeData + nScopeLength, 0x00, sizeof(USHORT) * nScopeLength);
+	}
+	else {
+		subtractBackground<USHORT>(fringesSubtracted, backgroundData, config.nBufferSize);
+		ippsCopy_16s((Ipp16s*)backgroundData, (Ipp16s*)scopeData + nScopeLength, nScopeLength);
+	}
+
+	generateBackground((Ipp16u*)fringesSubtracted);
+
+	fftProcessing(fringes32f);
+
+	generateScopeData(fFFTResult, scopeFFTData);
+
+	if (!subtractFFT) {
+		memset(scopeFFTData + nFftLength, 0x00, sizeof(USHORT) * nFftLength);
+	}
+	else {
+		subtractBackground<float>(this->fFFTResult, backgroundFFT, nScansOver2 * nBScan);
+		generateScopeData(backgroundFFT, scopeFFTData + nFftLength);
+	}
+	
+	generateImage(false);
+
+	postProcessing();
+	;
+	cv::rotate(imageResultColor, imageRectangle, cv::ROTATE_90_COUNTERCLOCKWISE);
+}
+
+void CLabImaging::ChangeCalibration(CCalibration* pNewCalib) {
+	newCalibration = pNewCalib;
+	hasNewCalibration = true;
+}
+
+template <typename T>
+void CLabImaging::subtractBackground(T* fringes, T* background, int size) {
+	if (fringes == nullptr || background == nullptr) return;
+
+#pragma omp parallel for
+	for (int i = 0; i < size; i++) {
+		fringes[i] = fringes[i] - background[i];
+	}
+}
+
+void CLabImaging::generateScopeData(Ipp32f* output, Ipp16u* scope) {
+	CConfiguration& config = CConfiguration::GetInstance();
+	const int order = config.constantValues.Order;
+	const int nScans2n = (1 << order);
+	const int nScansOver2 = nScans2n / 2;
+	Ipp32f temp[1024];
+
+	ippsLn_32f(output, temp, nScansOver2);
+	ippsMulC_32f_I(log10(exp(1)) * 10, temp, nScansOver2);
+	ippsSubC_32f_I(calibration->lowLevel, temp, nScansOver2);
+	ippsMulC_32f_I(65535 / (calibration->highLevel), temp, nScansOver2);
+	ippsConvert_32f16u_Sfs(temp, scope, nScansOver2, ippRndNear, 0);
+}

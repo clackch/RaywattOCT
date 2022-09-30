@@ -51,7 +51,7 @@ RayError COCTSystem::Start() {
 
 	CConfiguration& config = CConfiguration::GetInstance();
 	if (!config.IsInit()) {
-		config.Initialize();
+		config.Initialize(_T(".\\raycore.ini"));
 	}
 
 	CUtility::StartThread(threadService, m_pThreadService, this);
@@ -693,7 +693,7 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 COCTImaging* COCTSystem::createColorImaging(CMessageService* msg) {
 	COCTImaging* pImaging = new COCTImaging(msg);
 
-	pImaging->Initialize();
+	pImaging->Initialize(_T("CALIBRATION.DAT"));
 	pImaging->SetColor(true);
 	pImaging->SetBrightnessContrast(m_fBrightness, m_fContrast);
 

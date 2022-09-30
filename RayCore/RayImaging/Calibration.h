@@ -1,5 +1,6 @@
 #pragma once
 #include <ipp.h>
+#include "Config.h"
 
 enum Windows { None, Hanning, Hamming, Gauss1 };
 
@@ -23,7 +24,7 @@ public:
 	CCalibration();
 	~CCalibration(void);
 
-	bool Initialize();
+	bool Initialize(tstring calibFile);
 private:
 	void allocateMemory();
 	void releaseMemory();

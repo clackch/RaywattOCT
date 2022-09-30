@@ -16,7 +16,7 @@ CCalibration::~CCalibration()
 	releaseMemory();
 }
 
-bool CCalibration::Initialize()
+bool CCalibration::Initialize(tstring calibFile)
 {
 	releaseMemory();
 	allocateMemory();
@@ -27,7 +27,7 @@ bool CCalibration::Initialize()
 	
 	// Setup options
 	setWindow(Hanning);
-	return loadCalibration(_T("CALIBRATION.DAT"));
+	return loadCalibration(calibFile.c_str());
 }
 
 bool CCalibration::loadCalibration(LPCTSTR calibrationFileName){
