@@ -4,6 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>RaywattOCT.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -70,6 +71,10 @@
     <None Remove="res\icon\rew_ov.png" />
     <None Remove="res\icon\setting.png" />
     <None Remove="res\icon\setting_ov.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="RaywattOCT.ico" />
   </ItemGroup>
 
   <ItemGroup>

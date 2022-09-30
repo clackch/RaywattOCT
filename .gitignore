@@ -41,6 +41,12 @@
 extern
 *.bin
 *.dat
+dlldata.c
+vc*.h
+vc*_i.c
+vc*_p.c
+*.idl
+*.tlb
 bin
 obj
 x64
