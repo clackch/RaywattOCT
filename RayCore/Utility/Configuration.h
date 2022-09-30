@@ -13,9 +13,12 @@ class CConfiguration
 
 	class SettingsAlazar {
 	public:
-		int nAcqBufferCount;
-		bool bUserRayImaging;
-		unsigned int msAtsTimeOut;
+		unsigned int nAcqBufferCount;
+		unsigned int msTimeOut;
+		unsigned int nTriggerDelaySample;
+		bool bUseKClock;
+		double usGoodClockDuration;
+		double usBadClockDuration;
 	};
 
 	class Measurement {
@@ -23,20 +26,6 @@ class CConfiguration
 		double fAxialResolutionScale;
 		int nNoiseSkip;
 		int nNoiseAverage;
-	};
-
-	class ConstantValues {
-	public:
-		const double Pi = 3.141592;
-		const int Order = 11;
-		const int Zoom = 2;
-	};
-
-	class Coloring {
-	public:
-		float R;
-		float G;
-		float B;
 	};
 
 	class Invert {
@@ -80,18 +69,16 @@ public:
 	int nBScan;		// Number of A-Scan (Transverse)
 	int nBufferSize;
 	int nLaserSpeed;
-	int nFftLength;
 	int nCircleSize;
-	int nAcqBufCount;
-	int nTriggerDelaySample;
+	int nFFTOrder;
+	int nFFTLength;
+	int nOutputLength;
 	tstring configFilePath;
 	tstring patientFileRootPath;
 
 	SettingsOpenMP settingsOpenMP;
 	SettingsAlazar settingsAlazar;
 	Measurement measurementValues;
-	ConstantValues constantValues;
-	Coloring coloring;
 	Invert invert;
 	Zaber zaber;
 	Motor motor;

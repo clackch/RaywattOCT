@@ -4,7 +4,6 @@
 
 CATSDevice::CATSDevice() {
 	m_hATSBoard = NULL;
-	m_dSamplePerSec = 0.0;
 	m_nBufferIndex = 0;
 	m_pAcqBuffers = NULL;
 	m_pCurBuffer = NULL;
@@ -33,7 +32,7 @@ int CATSDevice::InitDevice() {
 }
 int CATSDevice::CleanUp() {
 	CConfiguration& config = CConfiguration::GetInstance();
-	const int nAcqBufCount = config.nAcqBufCount;
+	const int nAcqBufCount = config.settingsAlazar.nAcqBufferCount;
 
 	// Free all memory allocated
 	if (m_pAcqBuffers != NULL) {
@@ -89,7 +88,7 @@ int CATSDevice::stop() {
 unsigned short *CATSDevice::acquire(int& nCurFrame, int& nTotalFrame) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int nBufferSize = config.nBufferSize;
-	const int nAcqBufCount = config.nAcqBufCount;
+	const int nAcqBufCount = config.settingsAlazar.nAcqBufferCount;
 	const U32 timeout_ms = 5000;
 	RETURN_CODE retCode;
 	
@@ -130,16 +129,19 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	const int nBScan = config.nBScan;
 	const int nLaserSpeed = config.nLaserSpeed;
 	const int nBufferSize = config.nBufferSize;
-	const int nAcqBufCount = config.nAcqBufCount;
-	const int nTriggerDelaySample = config.nTriggerDelaySample;
+	const int nAcqBufCount = config.settingsAlazar.nAcqBufferCount;
+	const int nTriggerDelaySample = config.settingsAlazar.nTriggerDelaySample;
+	const bool useKClock = config.settingsAlazar.bUseKClock;
+	const double secGoodClkDuration = config.settingsAlazar.usGoodClockDuration * 1e-6;
+	const double secBadClkDuration = config.settingsAlazar.usBadClockDuration * 1e-6;
 
 	// TODO: Specify the sample rate (see sample rate id below)
-	m_dSamplePerSec = nAScan * nLaserSpeed;
-	m_dSamplePerSec = ceil((m_dSamplePerSec / 1000000.f)) * 1000000.f;
+	double dSamplePerSec = nAScan * nLaserSpeed;
+	dSamplePerSec = ceil((dSamplePerSec / 1000000.f)) * 1000000.f;
 
-	printf("sample per sec : %.2f\n", m_dSamplePerSec);
+	printf("sample per sec : %.2f\n", dSamplePerSec);
 	printf("sample per frame : %d\n", nBufferSize);
-	printf("frame per sec : %.2f\n", m_dSamplePerSec / nBufferSize);
+	printf("frame per sec : %.2f\n", dSamplePerSec / nBufferSize);
 	// TODO: Select clock parameters as required to generate this sample rate.
 	//
 	// For example: if samplesPerSec is 100.e6 (100 MS/s), then:
@@ -147,14 +149,12 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	// - select clock source FAST_EXTERNAL_CLOCK, sample rate SAMPLE_RATE_USER_DEF, and connect a
 	//   100 MHz signal to the EXT CLK BNC connector.
 
+	U32 srcClock = (useKClock) ? FAST_EXTERNAL_CLOCK : INTERNAL_CLOCK_10MHz_REF;
 	retCode = AlazarSetCaptureClock(boardHandle,
-		/*INTERNAL_CLOCK,
-		SAMPLE_RATE_800MSPS,*/
-		INTERNAL_CLOCK_10MHz_REF,
-		m_dSamplePerSec,
+		srcClock,
+		dSamplePerSec,
 		CLOCK_EDGE_RISING,
 		0);
-	//1.100260416666667
 	if (retCode != ApiSuccess)
 	{
 		printf("Error: AlazarSetCaptureClock failed -- %s\n", AlazarErrorToText(retCode));
@@ -175,18 +175,6 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 		return FALSE;
 	}
 
-	// TODO: Select channel B input parameters as required
-
-	retCode = AlazarInputControlEx(boardHandle,
-		CHANNEL_B,
-		DC_COUPLING,
-		INPUT_RANGE_PM_400_MV,
-		IMPEDANCE_50_OHM);
-	if (retCode != ApiSuccess)
-	{
-		printf("Error: AlazarInputControlEx failed -- %s\n", AlazarErrorToText(retCode));
-		return FALSE;
-	}
 
 	// TODO: Select trigger inputs and levels as required
 
@@ -214,8 +202,7 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 
 	// TODO: Set trigger delay as required.
 
-	U32 triggerDelay_samples = nAScan - nTriggerDelaySample;
-	retCode = AlazarSetTriggerDelay(boardHandle, triggerDelay_samples);
+	retCode = AlazarSetTriggerDelay(boardHandle, nTriggerDelaySample);
 	if (retCode != ApiSuccess)
 	{
 		printf("Error: AlazarSetTriggerDelay failed -- %s\n", AlazarErrorToText(retCode));
@@ -254,6 +241,14 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	{
 		printf("Error: AlazarConfigureAuxIO failed -- %s\n", AlazarErrorToText(retCode));
 		return FALSE;
+	}
+
+	// Ignore Bad Clock when using K-Clock
+	if (useKClock) {
+		// (goodClock + badClock) <= triggerCycleTime(=0.000010)
+		double triggerCycleTime, triggerPulseWidth;
+		retCode = AlazarOCTIgnoreBadClock(m_hATSBoard, TRUE, secGoodClkDuration, secBadClkDuration, &triggerCycleTime, &triggerPulseWidth);
+		printf("AlazarOCTIgnoreBadClock : %s, cycleTime : %lf, pulseWidth : %lf\n", AlazarErrorToText(retCode), triggerCycleTime, triggerPulseWidth);
 	}
 
 	//==========================================================================================================

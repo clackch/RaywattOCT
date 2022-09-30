@@ -23,51 +23,51 @@ CConfiguration& CConfiguration::GetInstance() {
 
 void CConfiguration::Initialize(tstring configFile)
 {
+	TCHAR sIniValueString[MAX_PATH] = _T("");
+	int nIniValueInt = -1;
+	char converted[MAX_PATH];
+
 	configFilePath = configFile;
 
+	// [Imaging]
 	this->nAScan = ::GetPrivateProfileInt(_T("Imaging"), _T("AScan"), 1920, configFilePath.c_str());
 	this->nAScanPadding = ::GetPrivateProfileInt(_T("Imaging"), _T("AScanPadding"), 0, configFilePath.c_str());
 	this->nBScan = ::GetPrivateProfileInt(_T("Imaging"), _T("BScan"), 500, configFilePath.c_str());
-
-	TCHAR sIniValueString[2048] = _T("");
-	int nIniValueInt = -1;
-	char converted[2048];
-
-	this->nBufferSize = (this->nBScan * (this->nAScan + this->nAScanPadding));
-	this->nAcqBufCount = ::GetPrivateProfileInt(_T("Alazar"), _T("AcqBufferCount"), 4, configFilePath.c_str());
-	this->nTriggerDelaySample = ::GetPrivateProfileInt(_T("Alazar"), _T("TriggerDelaySample"), 0, configFilePath.c_str());
-
-	::GetPrivateProfileString(_T("Patient"), _T("RootPath"), _T("D:\\DataSave\\"), sIniValueString, sizeof(sIniValueString), configFilePath.c_str());
-	this->patientFileRootPath = sIniValueString;
-	_tmkdir(this->patientFileRootPath.c_str());
-
-	this->nFftLength = ::GetPrivateProfileInt(_T("Imaging"), _T("FFTLength"), 1024, configFilePath.c_str());
 	this->nLaserSpeed = ::GetPrivateProfileInt(_T("Imaging"), _T("LaserSpeed"), 200000, configFilePath.c_str());
 	this->nCircleSize = ::GetPrivateProfileInt(_T("Imaging"), _T("CircleSize"), 1024, configFilePath.c_str());
+	this->nBufferSize = (this->nBScan * (this->nAScan + this->nAScanPadding));
+	this->nFFTOrder = 1;
+	this->nFFTLength = 1 << this->nFFTOrder;
+	while (this->nFFTLength < this->nAScan) { // AScan 보다 큰 2^n 중에서 제일 작은 수
+		this->nFFTOrder++;
+		this->nFFTLength = 1 << this->nFFTOrder;		
+	}
+	this->nOutputLength = this->nFFTLength / 2;
 
+	// [Measurement]
 	::GetPrivateProfileString(_T("Measurement"), _T("AxialResolutionScale"), _T("8.3"), sIniValueString, sizeof(sIniValueString), configFilePath.c_str());
 	wcstombs(converted, sIniValueString, wcslen(sIniValueString) + 1);
 	this->measurementValues.fAxialResolutionScale = ::atof(converted);
 	this->measurementValues.nNoiseSkip = ::GetPrivateProfileInt(_T("Measurement"), _T("NoiseSkip"), 300, configFilePath.c_str());
 	this->measurementValues.nNoiseAverage = ::GetPrivateProfileInt(_T("Measurement"), _T("NoiseAverage"), 100, configFilePath.c_str());
 
+	// [OpenMP]
 	this->settingsOpenMP.numThread = ::GetPrivateProfileInt(_T("OpenMP"), _T("NumThread"), 8, configFilePath.c_str());
 	this->settingsOpenMP.numDynamic = ::GetPrivateProfileInt(_T("OpenMP"), _T("NumDynamic"), 1, configFilePath.c_str());
 
+	// [Alazar]
 	this->settingsAlazar.nAcqBufferCount = ::GetPrivateProfileInt(_T("Alazar"), _T("AcqBufferCount"), 4, configFilePath.c_str());
-	this->settingsAlazar.bUserRayImaging = ::GetPrivateProfileInt(_T("Alazar"), _T("UseRayImaging"), 1, configFilePath.c_str());
-	this->settingsAlazar.msAtsTimeOut = ::GetPrivateProfileInt(_T("Alazar"), _T("TimeOutInMilliSecond"), 5000, configFilePath.c_str());
+	this->settingsAlazar.msTimeOut = ::GetPrivateProfileInt(_T("Alazar"), _T("TimeOutInMilliSecond"), 5000, configFilePath.c_str());
+	this->settingsAlazar.nTriggerDelaySample = ::GetPrivateProfileInt(_T("Alazar"), _T("TriggerDelaySample"), 0, configFilePath.c_str());
+	this->settingsAlazar.bUseKClock = ::GetPrivateProfileInt(_T("Alazar"), _T("UseKClock"), 1, configFilePath.c_str());
+	::GetPrivateProfileString(_T("Alazar"), _T("GoodClockInMicroSecond"), _T("5.0"), sIniValueString, sizeof(sIniValueString), configFilePath.c_str());
+	wcstombs(converted, sIniValueString, wcslen(sIniValueString) + 1);
+	this->settingsAlazar.usGoodClockDuration = ::atof(converted);
+	::GetPrivateProfileString(_T("Alazar"), _T("BadClockInMicroSecond"), _T("4.0"), sIniValueString, sizeof(sIniValueString), configFilePath.c_str());
+	wcstombs(converted, sIniValueString, wcslen(sIniValueString) + 1);
+	this->settingsAlazar.usBadClockDuration = ::atof(converted);
 
-	::GetPrivateProfileString(_T("Coloring"), _T("R"), _T("255.f"), sIniValueString, sizeof(sIniValueString), configFilePath.c_str());
-	wcstombs(converted, sIniValueString, wcslen(sIniValueString) + 1);
-	this->coloring.R = ::atof(converted);
-	::GetPrivateProfileString(_T("Coloring"), _T("G"), _T("255.f"), sIniValueString, sizeof(sIniValueString), configFilePath.c_str());
-	wcstombs(converted, sIniValueString, wcslen(sIniValueString) + 1);
-	this->coloring.G = ::atof(converted);
-	::GetPrivateProfileString(_T("Coloring"), _T("B"), _T("255.f"), sIniValueString, sizeof(sIniValueString), configFilePath.c_str());
-	wcstombs(converted, sIniValueString, wcslen(sIniValueString) + 1);
-	this->coloring.B = ::atof(converted);
-
+	// [Invert]
 	::GetPrivateProfileString(_T("Invert"), _T("LowLevel"), _T("40.0f"), sIniValueString, sizeof(sIniValueString), configFilePath.c_str());
 	wcstombs(converted, sIniValueString, wcslen(sIniValueString) + 1);
 	this->invert.lowLevel = ::atof(converted);
@@ -75,16 +75,25 @@ void CConfiguration::Initialize(tstring configFile)
 	wcstombs(converted, sIniValueString, wcslen(sIniValueString) + 1);
 	this->invert.highLevel = ::atof(converted);
 
+	// [Patient]
+	::GetPrivateProfileString(_T("Patient"), _T("RootPath"), _T("D:\\DataSave\\"), sIniValueString, sizeof(sIniValueString), configFilePath.c_str());
+	this->patientFileRootPath = sIniValueString;
+	_tmkdir(this->patientFileRootPath.c_str());
+
+	// [Zaber]
 	::GetPrivateProfileString(_T("Zaber"), _T("Pullback"), _T(""), this->zaber.pullback, sizeof(this->zaber.pullback), configFilePath.c_str());
 	::GetPrivateProfileString(_T("Zaber"), _T("Interferometer"), _T(""), this->zaber.interferometer, sizeof(this->zaber.interferometer), configFilePath.c_str());
 	this->zaber.pullbackDistance = ::GetPrivateProfileInt(_T("Zaber"), _T("PullbackDistance"), 10, configFilePath.c_str());
 	this->zaber.pullbackSpeed = ::GetPrivateProfileInt(_T("Zaber"), _T("PullbackSpeed"), 10, configFilePath.c_str());
 
+	// [Motor]
 	this->motor.velocity = ::GetPrivateProfileInt(_T("Motor"), _T("Velocity"), 800, configFilePath.c_str());
 	this->motor.settleDown = ::GetPrivateProfileInt(_T("Motor"), _T("SettleDown"), 1000, configFilePath.c_str());
 
+	// [Shutter]
 	this->shutterSerial = ::GetPrivateProfileInt(_T("Shutter"), _T("Serial"), 478, configFilePath.c_str());
 
+	// [Catheter]
 	this->catheter.position = ::GetPrivateProfileInt(_T("Catheter"), _T("Position"), 75, configFilePath.c_str());
 	this->catheter.speed = ::GetPrivateProfileInt(_T("Catheter"), _T("Speed"), 5, configFilePath.c_str());
 	this->catheter.velocity = ::GetPrivateProfileInt(_T("Catheter"), _T("MotorVelocity"), 50, configFilePath.c_str());

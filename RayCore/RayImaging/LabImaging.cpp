@@ -34,15 +34,13 @@ void CLabImaging::Initialize(tstring calibFile, const char* strBgFile) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int nBScan = config.nBScan;
 	const int nBufferSize = config.nBufferSize;
-	const int order = config.constantValues.Order;
-	const int nScans2n = (1 << order);
-	const int nScansOver2 = nScans2n / 2;
+	const int nFFTLength = config.nFFTLength;
+	const int nOutputLength = config.nOutputLength;
 	const int nScopeLength = config.getScopeLength();
-	const int nFftLength = config.nFftLength;
 
 	fringesSubtracted = new USHORT[nBufferSize];
 	backgroundData = new USHORT[nBufferSize];
-	backgroundFFT = new float[nScansOver2 * nBScan];
+	backgroundFFT = new float[nOutputLength * nBScan];
 
 	memset(backgroundData, 0x00, sizeof(USHORT) * nBufferSize);
 	FILE* fp = fopen(strBgFile, "rb");
@@ -59,22 +57,20 @@ void CLabImaging::Initialize(tstring calibFile, const char* strBgFile) {
 	generateBackground((Ipp16u*)backgroundData);
 	fftProcessing(fringes32f);
 
-	ippsCopy_32f(fFFTResult, backgroundFFT, nScansOver2 * nBScan);
+	ippsCopy_32f(fFFTResult, backgroundFFT, nOutputLength * nBScan);
 
 	scopeData = new USHORT[nScopeLength * 2];
-	scopeFFTData = new USHORT[nFftLength * 2];
+	scopeFFTData = new USHORT[nOutputLength * 2];
 
-	imageRectangle.create(nFftLength, nBScan, CV_8UC3);
+	imageRectangle.create(nOutputLength, nBScan, CV_8UC3);
 }
 void CLabImaging::Process(USHORT* fringes) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	const bool bInvert = m_bInvert;
 	const int nBScan = config.nBScan;
 	const int nScopeLength = config.getScopeLength();
-	const int nFftLength = config.nFftLength;
-	const int order = config.constantValues.Order;
-	const int nScans2n = (1 << order);
-	const int nScansOver2 = nScans2n / 2;
+	const int nOutputLength = config.nOutputLength;
+	const int nFFTLength = config.nFFTLength;
 
 	if (fringes == nullptr) return;
 
@@ -104,11 +100,11 @@ void CLabImaging::Process(USHORT* fringes) {
 	generateScopeData(fFFTResult, scopeFFTData);
 
 	if (!subtractFFT) {
-		memset(scopeFFTData + nFftLength, 0x00, sizeof(USHORT) * nFftLength);
+		memset(scopeFFTData + nOutputLength, 0x00, sizeof(USHORT) * nOutputLength);
 	}
 	else {
-		subtractBackground<float>(this->fFFTResult, backgroundFFT, nScansOver2 * nBScan);
-		generateScopeData(backgroundFFT, scopeFFTData + nFftLength);
+		subtractBackground<float>(this->fFFTResult, backgroundFFT, nOutputLength * nBScan);
+		generateScopeData(backgroundFFT, scopeFFTData + nOutputLength);
 	}
 	
 	generateImage(false);
@@ -135,14 +131,13 @@ void CLabImaging::subtractBackground(T* fringes, T* background, int size) {
 
 void CLabImaging::generateScopeData(Ipp32f* output, Ipp16u* scope) {
 	CConfiguration& config = CConfiguration::GetInstance();
-	const int order = config.constantValues.Order;
-	const int nScans2n = (1 << order);
-	const int nScansOver2 = nScans2n / 2;
+	const int nFFTLength = config.nFFTLength;
+	const int nOutputLength = nFFTLength / 2;
 	Ipp32f temp[1024];
 
-	ippsLn_32f(output, temp, nScansOver2);
-	ippsMulC_32f_I(log10(exp(1)) * 10, temp, nScansOver2);
-	ippsSubC_32f_I(calibration->lowLevel, temp, nScansOver2);
-	ippsMulC_32f_I(65535 / (calibration->highLevel), temp, nScansOver2);
-	ippsConvert_32f16u_Sfs(temp, scope, nScansOver2, ippRndNear, 0);
+	ippsLn_32f(output, temp, nOutputLength);
+	ippsMulC_32f_I(log10(exp(1)) * 10, temp, nOutputLength);
+	ippsSubC_32f_I(calibration->lowLevel, temp, nOutputLength);
+	ippsMulC_32f_I(65535 / (calibration->highLevel), temp, nOutputLength);
+	ippsConvert_32f16u_Sfs(temp, scope, nOutputLength, ippRndNear, 0);
 }
