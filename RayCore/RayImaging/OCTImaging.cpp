@@ -12,7 +12,7 @@
 void ippsRelease(void *&ptr) {
 	if (ptr) {
 		ippsFree(ptr);
-		ptr = NULL;
+		ptr = nullptr;
 	}
 }
 void ippsRelease_double_ptr(void**& ptr, int dim) {
@@ -21,28 +21,31 @@ void ippsRelease_double_ptr(void**& ptr, int dim) {
 			ippsRelease(ptr[i]);
 		}
 		delete[] ptr;
-		ptr = NULL;
+		ptr = nullptr;
 	}
 }
 
 COCTImaging::COCTImaging(CMessageService* pMsg) {
 	m_msg = pMsg;
 
-	m_pThread = NULL;
+	m_pThread = nullptr;
 	m_waitForFringes = true;
-	m_pFringesBuffer = NULL;
+	m_pFringesBuffer = nullptr;
 
 	calibration = new CCalibration();
 
-	fringes32f = NULL;
-	fringes32fAverage = NULL;
+	fringes32f = nullptr;
+	fringes32fAverage = nullptr;
 
-	fFFTResult = NULL;
-	fOutput = NULL;
+	fBuffer_Window = nullptr;
+	fcBuffer_FFT = nullptr;
+	fcBuffer_IFFT = nullptr;
+	fFFTResult = nullptr;
+	fOutput = nullptr;
 
-	specReal32FFT = NULL;
-	specComp32FFT = NULL;
-	specComp32ZoomFFT = NULL;
+	fftSpecFirst = nullptr;
+	fftSpecSecond = nullptr;
+	ifftSpec = nullptr;
 
 	m_bInvert = false;
 	m_bColor = false;
@@ -55,7 +58,7 @@ COCTImaging::COCTImaging(CMessageService* pMsg) {
 
 COCTImaging::~COCTImaging() {
 	releaseMemory();
-	if (calibration != NULL) delete calibration;
+	if (calibration != nullptr) delete calibration;
 }
 
 void COCTImaging::Initialize(tstring calibFile) {
@@ -66,7 +69,7 @@ void COCTImaging::Initialize(tstring calibFile) {
 	calibration->Initialize(calibFile);
 
 	releaseCircularizeMap();
-	initCircularizeMap(config.nFftLength, config.nBScan, config.nFftLength, config.nCircleSize, config.nCircleSize, 2.0f);
+	initCircularizeMap(config.nOutputLength, config.nBScan, config.nOutputLength, config.nCircleSize, config.nCircleSize, 2.0f);
 	generateMask(imageMask);
 
 	loadLUT("LUT.csv");
@@ -74,7 +77,7 @@ void COCTImaging::Initialize(tstring calibFile) {
 void COCTImaging::Process(USHORT* fringes) {
 	CConfiguration& config = CConfiguration::GetInstance();
 
-	if (fringes == NULL) return;
+	if (fringes == nullptr) return;
 
 	generateBackground((Ipp16u*)fringes);
 	fftProcessing(fringes32f);
@@ -96,7 +99,7 @@ int COCTImaging::Stop() {
 	return NOERROR;
 }
 void COCTImaging::DoAsyncRender(USHORT* fringes) {
-	if (m_pThread == NULL || m_pThread->isRun == false) return;
+	if (m_pThread == nullptr || m_pThread->isRun == false) return;
 
 	if (m_waitForFringes) {
 		m_pFringesBuffer = fringes;
@@ -106,14 +109,14 @@ void COCTImaging::DoAsyncRender(USHORT* fringes) {
 
 void COCTImaging::CalculateAxialResolution(USHORT* fftData, USHORT& nPeakValue, int& nPeakIndex, int& nLineWidth) {
 	CConfiguration& config = CConfiguration::GetInstance();
-	const int nFFTLength = config.nFftLength;
+	const int nOutputLength = config.nOutputLength;
 	const float fScaleFactor = config.measurementValues.fAxialResolutionScale;
 	const int nFindRange = 40;
 
 	// get peak and index
 	nPeakIndex = 0;
 	nPeakValue = 0;
-	for (int i = 0; i < nFFTLength; i++) {
+	for (int i = 0; i < nOutputLength; i++) {
 		if (fftData[i] > nPeakValue) {
 			nPeakIndex = i;
 			nPeakValue = fftData[i];
@@ -135,7 +138,7 @@ void COCTImaging::CalculateAxialResolution(USHORT* fftData, USHORT& nPeakValue, 
 	// find right 3db
 	int nRightIndex = 0;
 	int nEnd = nPeakIndex + nFindRange;
-	nEnd = (nEnd >= nFFTLength) ? nFFTLength - 1 : nEnd;
+	nEnd = (nEnd >= nOutputLength) ? nOutputLength - 1 : nEnd;
 	for (int i = nPeakIndex; i <= nEnd; i++) {
 		if (fftData[i] < nFWHM) {
 			nRightIndex = i;
@@ -150,7 +153,7 @@ void COCTImaging::CalculateAxialResolution(USHORT* fftData, USHORT& nPeakValue, 
 }
 void COCTImaging::CalculateNoisePower(USHORT* fftData, int nPeakIndex, USHORT& nNoisePower) {
 	CConfiguration& config = CConfiguration::GetInstance();
-	const int nFFTLength = config.nFftLength;
+	const int nOutputLength = config.nOutputLength;
 	const int nNoiseSkip = config.measurementValues.nNoiseSkip;
 	const int nNoiseAverage = config.measurementValues.nNoiseAverage;
 
@@ -169,9 +172,9 @@ void COCTImaging::CalculateNoisePower(USHORT* fftData, int nPeakIndex, USHORT& n
 	}
 
 	nStart = nPeakIndex + nNoiseSkip;
-	nStart = (nStart >= nFFTLength) ? nFFTLength - 1 : nStart;
+	nStart = (nStart >= nOutputLength) ? nOutputLength - 1 : nStart;
 	nEnd = nPeakIndex + nNoiseSkip + nNoiseAverage;
-	nEnd = (nEnd >= nFFTLength) ? nFFTLength - 1 : nEnd;
+	nEnd = (nEnd >= nOutputLength) ? nOutputLength - 1 : nEnd;
 
 	for (int i = nStart; i <= nEnd; i++) {
 		nSum += fftData[i];
@@ -183,45 +186,46 @@ void COCTImaging::CalculateNoisePower(USHORT* fftData, int nPeakIndex, USHORT& n
 
 
 void COCTImaging::allocateMemory() {
-	// ORDER = 11, nScans2n = 2^11
+	// ORDER = 11, nFFTLength = 2^11
 	// nScans 보다 큰 2^n 중에서 제일 작은 수
 	CConfiguration& config = CConfiguration::GetInstance();
-	const int order = config.constantValues.Order;
-	const int zoom = config.constantValues.Zoom;
 	const int nAScan = config.nAScan;
 	const int nAScanWithPadding = config.nAScan + config.nAScanPadding;
 	const int nBScan = config.nBScan;
-	const int nScans2n = (1 << order);
-	const int nScansOver2 = nScans2n / 2;
+	const int nFFTOrder = config.nFFTOrder;
+	const int nFFTLength = config.nFFTLength;
+	const int nOutputLength = config.nOutputLength;
 	const int nBufferSize = config.nBufferSize;
 	const int nScopeLength = config.getScopeLength();
-	const int nFftLength = config.nFftLength;
 	const int nCircleSize = config.nCircleSize;
 
 	fringes32f = ippsMalloc_32f(nAScan * nBScan);
 	fringes32fAverage = ippsMalloc_32f(nAScan);
 
-	imageResult.create(nBScan, nFftLength, CV_8UC1);
-	imageResultColor.create(nBScan, nFftLength, CV_8UC3);
+	imageResult.create(nBScan, nOutputLength, CV_8UC1);
+	imageResultColor.create(nBScan, nOutputLength, CV_8UC3);
 	imageCircle.create(nCircleSize, nCircleSize, CV_8UC3);
 	imageMask.create(nCircleSize, nCircleSize, CV_8UC3);
 	imageBackground.create(nCircleSize, nCircleSize, CV_8UC3);
 
-	fFFTResult = ippsMalloc_32f(nScansOver2 * nBScan);
-	fOutput = ippsMalloc_32f(nScansOver2 * nBScan);
+	fBuffer_Window = ippsMalloc_32f(nFFTLength);
+	fcBuffer_FFT = ippsMalloc_32fc(nFFTLength);
+	fcBuffer_IFFT = ippsMalloc_32fc(nFFTLength);
+	fFFTResult = ippsMalloc_32f(nOutputLength * nBScan);
+	fOutput = ippsMalloc_32f(nOutputLength * nBScan);
 
 	// Prepare FFT
-	ippsFFTInitAlloc_R_32f(&specReal32FFT, order, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
-	ippsFFTInitAlloc_C_32fc(&specComp32ZoomFFT, order + zoom - 2, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
-	ippsFFTInitAlloc_C_32fc(&specComp32FFT, order + zoom - 3, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
+	ippsFFTInitAlloc_R_32f(&fftSpecFirst, nFFTOrder, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
+	ippsFFTInitAlloc_C_32fc(&ifftSpec, nFFTOrder, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
+	ippsFFTInitAlloc_C_32fc(&fftSpecSecond, nFFTOrder - 1, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
 
 	imageBackground.setTo(cv::Scalar(0x18, 0x15, 0x16));
 }
 void COCTImaging::releaseMemory() {
 	CConfiguration& config = CConfiguration::GetInstance();
 
-	if (fringes32f) { ippsFree(fringes32f); fringes32f = NULL; }
-	if (fringes32fAverage) { ippsFree(fringes32fAverage); fringes32fAverage = NULL; }
+	if (fringes32f) { ippsFree(fringes32f); fringes32f = nullptr; }
+	if (fringes32fAverage) { ippsFree(fringes32fAverage); fringes32fAverage = nullptr; }
 
 	imageResult.release();
 	imageResultColor.release();
@@ -229,12 +233,15 @@ void COCTImaging::releaseMemory() {
 	imageMask.release();
 	imageBackground.release();
 
+	ippsRelease((void*&)fBuffer_Window);
+	ippsRelease((void*&)fcBuffer_FFT);
+	ippsRelease((void*&)fcBuffer_IFFT);
 	ippsRelease((void*&)fFFTResult);
 	ippsRelease((void*&)fOutput);
 
-	if (specReal32FFT) { ippsFFTFree_R_32f(specReal32FFT); specReal32FFT = NULL; }
-	if (specComp32ZoomFFT) { ippsFFTFree_C_32fc(specComp32ZoomFFT); specComp32ZoomFFT = NULL; }
-	if (specComp32FFT) { ippsFFTFree_C_32fc(specComp32FFT); specComp32FFT = NULL; }
+	if (fftSpecFirst) { ippsFFTFree_R_32f(fftSpecFirst); fftSpecFirst = nullptr; }
+	if (ifftSpec) { ippsFFTFree_C_32fc(ifftSpec); ifftSpec = nullptr; }
+	if (fftSpecSecond) { ippsFFTFree_C_32fc(fftSpecSecond); fftSpecSecond = nullptr; }
 }
 void COCTImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale) {
 	int circOffset = 0;
@@ -284,16 +291,10 @@ void COCTImaging::generateBackground(Ipp16u* fringes) {
 void COCTImaging::fftProcessing(const Ipp32f* fringes32f) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int nAScan = config.nAScan, nBScan = config.nBScan;
-	const int order = config.constantValues.Order;
-	const int zoom = config.constantValues.Zoom;
 	const int numDynamic = config.settingsOpenMP.numDynamic;
 	const int numThreads = config.settingsOpenMP.numThread;
-
-	// AScan 보다 큰 2^n 중에서 제일 작은 수
-	const int nScans2n = (1 << order);
-	const int nScansOver2 = nScans2n / 2;
-	const int nScansOver4 = nScans2n / 4;
-	const int nScansZoom = (1 << (order + zoom - 2));
+	const int nFFTLength = config.nFFTLength;
+	const int nOutputLength = config.nOutputLength;
 
 	// Process Frame
 	// To-Do : enable openmp, check shared variables
@@ -301,45 +302,43 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f) {
 	omp_set_num_threads(numThreads);
 	//#pragma omp parallel
 	{
-		//#pragma omp for firstprivate(fBuffer_Fringes,fBuffer_BackgroundFringes,fBuffer_Complex,fBuffer_DFT,j)
+		//#pragma omp for firstprivate(fBuffer_Window,fBuffer_BackgroundFringes,fcBuffer_FFT,fcBuffer_IFFT,j)
 		for (int i = 0; i < nBScan; i++)
 		{
 			{
 				// 1. Background Subtract
-				ippsCopy_32f(fringes32f + i * nAScan, fBuffer_Fringes, nAScan);
-				ippsSub_32f_I(fringes32fAverage, fBuffer_Fringes, nAScan);  // I의 의미:자기 자신에 이처리를 해서, 결과를 얻는다.
+				ippsCopy_32f(fringes32f + i * nAScan, fBuffer_Window, nAScan);
+				ippsSub_32f_I(fringes32fAverage, fBuffer_Window, nAScan);  // I의 의미:자기 자신에 이처리를 해서, 결과를 얻는다.
 
 				// 2. Apply Window
-				ippsMul_32f_I(calibration->window, fBuffer_Fringes, nScans2n);
+				ippsMul_32f_I(calibration->window, fBuffer_Window, nFFTLength);
 
 				// 3. First FFT
-				ippsFFTFwd_RToPerm_32f_I(fBuffer_Fringes, specReal32FFT, NULL); // http://software.intel.com/sites/products/documentation/hpc/ipp/ipps/ipps_ch7/ch7_packed_formats.html#Perm
-				ippsConjPerm_32fc(fBuffer_Fringes, fBuffer_Complex, nScans2n);
+				ippsFFTFwd_RToPerm_32f_I(fBuffer_Window, fftSpecFirst, nullptr); // http://software.intel.com/sites/products/documentation/hpc/ipp/ipps/ipps_ch7/ch7_packed_formats.html#Perm
+				ippsConjPerm_32fc(fBuffer_Window, fcBuffer_FFT, nFFTLength);
 
-				// 4. Zero Pad & Reorder (2 | 0 | 0 | 1)
-				ippsZero_32fc(fBuffer_DFT, nScansZoom);
-				ippsCopy_32fc(fBuffer_Complex + nScansOver4, fBuffer_DFT, nScansOver4);
-				ippsCopy_32fc(fBuffer_Complex, fBuffer_DFT + nScansZoom - nScansOver4, nScansOver4);
+				// 4. Zero Pad & Reorder (1 | 2 | 0 | 0)
+				ippsZero_32fc(fcBuffer_IFFT, nFFTLength);
+				ippsCopy_32fc(fcBuffer_FFT, fcBuffer_IFFT, nOutputLength);
 
 				// 5. Inverse FFT
-				ippsFFTInv_CToC_32fc_I(fBuffer_DFT, specComp32ZoomFFT, NULL);
+				ippsFFTInv_CToC_32fc_I(fcBuffer_IFFT, ifftSpec, nullptr);
 
 				// 6. Interpolation
-				ippsZero_32fc(fBuffer_Complex, nScansOver2);
+				ippsZero_32fc(fcBuffer_FFT, nOutputLength);
 				for (int j = 0; j < nAScan / 2; j++) {
-					fBuffer_Complex[j].re = (calibration->weightMap[j] * fBuffer_DFT[calibration->indexMap[j]].re + (1.0f - calibration->weightMap[j]) * fBuffer_DFT[calibration->indexMap[j] + 1].re);
-					fBuffer_Complex[j].im = (calibration->weightMap[j] * fBuffer_DFT[calibration->indexMap[j]].im + (1.0f - calibration->weightMap[j]) * fBuffer_DFT[calibration->indexMap[j] + 1].im);
+					fcBuffer_FFT[j].re = (calibration->weightMap[j] * fcBuffer_IFFT[calibration->indexMap[j]].re + (1.0f - calibration->weightMap[j]) * fcBuffer_IFFT[calibration->indexMap[j] + 1].re);
+					fcBuffer_FFT[j].im = (calibration->weightMap[j] * fcBuffer_IFFT[calibration->indexMap[j]].im + (1.0f - calibration->weightMap[j]) * fcBuffer_IFFT[calibration->indexMap[j] + 1].im);
 				}
 
 				// 7. Numerical Dispersion Compensation
-				ippsMul_32fc_I((Ipp32fc*)calibration->dispersion, fBuffer_Complex, nAScan / 2);
+				ippsMul_32fc_I((Ipp32fc*)calibration->dispersion, fcBuffer_FFT, nAScan / 2);
 
 				// 8. FFT Again
-				ippsFFTFwd_CToC_32fc_I(fBuffer_Complex, specComp32FFT, NULL);
+				ippsFFTFwd_CToC_32fc_I(fcBuffer_FFT, fftSpecSecond, nullptr);
 
 				// 9. Extract Magnitude
-				ippsPowerSpectr_32fc(fBuffer_Complex, fFFTResult + i * nScansOver2 + nScansOver4, nScansOver4);
-				ippsPowerSpectr_32fc(fBuffer_Complex + nScansOver4, fFFTResult + i * nScansOver2, nScansOver4);
+				ippsPowerSpectr_32fc(fcBuffer_FFT, fFFTResult + i * nOutputLength, nOutputLength);
 			}
 		}
 	} // end parallel region
@@ -350,17 +349,16 @@ void COCTImaging::generateImage(bool bInvert){
 	const int nBScan = config.nBScan;
 	const float fHighLevel = (bInvert) ? config.invert.highLevel : 0.0f;
 	const float fLowLevel = (bInvert) ? config.invert.lowLevel : 0.0f;
-	const int order = config.constantValues.Order;
-	const int nScans2n = (1 << order);
-	const int nScansOver2 = nScans2n / 2;
+	const int nFFTLength = config.nFFTLength;
+	const int nOutputLength = config.nOutputLength;
 
 	for (int i = 0; i < nBScan; i++)
 	{
-		ippsLn_32f(fFFTResult + i * nScansOver2, fOutput + i * nScansOver2, nScansOver2);
-		ippsMulC_32f(fOutput + i * nScansOver2, log10(exp(1)) * 10, fOutput + i * nScansOver2, nScansOver2);
-		ippsSubC_32f_I((calibration->lowLevel + fLowLevel), fOutput + i * nScansOver2, nScansOver2);
-		ippsMulC_32f_I(255.0f / (calibration->highLevel - fHighLevel), fOutput + i * nScansOver2, nScansOver2);
-		ippsConvert_32f8u_Sfs(fOutput + i * nScansOver2, imageResult.data + i * nScansOver2 /*stepBytes*/, nScansOver2, ippRndNear, 0);
+		ippsLn_32f(fFFTResult + i * nOutputLength, fOutput + i * nOutputLength, nOutputLength);
+		ippsMulC_32f(fOutput + i * nOutputLength, log10(exp(1)) * 10, fOutput + i * nOutputLength, nOutputLength);
+		ippsSubC_32f_I((calibration->lowLevel + fLowLevel), fOutput + i * nOutputLength, nOutputLength);
+		ippsMulC_32f_I(255.0f / (calibration->highLevel - fHighLevel), fOutput + i * nOutputLength, nOutputLength);
+		ippsConvert_32f8u_Sfs(fOutput + i * nOutputLength, imageResult.data + i * nOutputLength /*stepBytes*/, nOutputLength, ippRndNear, 0);
 	}
 }
 void COCTImaging::postProcessing() {
@@ -466,9 +464,9 @@ void COCTImaging::applyLUT(cv::Mat& image) {
 void COCTImaging::generateMask(cv::Mat& image) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int nBScan = config.nBScan;
-	const int nFftLength = config.nFftLength;
+	const int nOutputLength = config.nOutputLength;
 	
-	cv::Mat imgTemp(nBScan, nFftLength, CV_8UC3);
+	cv::Mat imgTemp(nBScan, nOutputLength, CV_8UC3);
 
 	imgTemp.setTo(cv::Scalar(255, 255, 255));
 	circularizeImage(imgTemp, image);

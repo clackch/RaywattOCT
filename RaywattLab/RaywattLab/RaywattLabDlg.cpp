@@ -292,19 +292,19 @@ LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int nScopeLength = config.getScopeLength();
-	const int nFFTLength = config.nFftLength;
+	const int nOutputLength = config.nOutputLength;
 
 	drawToPictureBox(m_pictOCTImage, image.cols, image.rows, (char*)image.data);
 
 	m_scopeView.SetChannelBuffer(0, scopeData, nScopeLength);
 	m_scopeView.SetChannelBuffer(1, scopeData + nScopeLength, nScopeLength);
-	m_scopeViewFFT.SetChannelBuffer(0, scopeFFTData, nFFTLength);
-	m_scopeViewFFT.SetChannelBuffer(1, scopeFFTData + nFFTLength, nFFTLength);
+	m_scopeViewFFT.SetChannelBuffer(0, scopeFFTData, nOutputLength);
+	m_scopeViewFFT.SetChannelBuffer(1, scopeFFTData + nOutputLength, nOutputLength);
 
 	if (m_pVideoWriter != nullptr) m_pVideoWriter->PushToBuffer(image);
 	if (m_pDataWriter->IsRecording()) {
-		Ipp16u* pFFTBuffer = new Ipp16u[nFFTLength];
-		memcpy(pFFTBuffer, scopeFFTData, sizeof(Ipp16u) * nFFTLength);
+		Ipp16u* pFFTBuffer = new Ipp16u[nOutputLength];
+		memcpy(pFFTBuffer, scopeFFTData, sizeof(Ipp16u) * nOutputLength);
 		m_vFFTData.push_back(pFFTBuffer);
 	}
 
@@ -382,10 +382,10 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	m_scopeView.AddChannel(_T("Data 1"), nScopeLength);
 	m_scopeView.AddChannel(_T("Data 2"), nScopeLength);
 
-	int nFFTLength = config.nFftLength;
+	int nOutputLength = config.nOutputLength;
 	m_scopeViewFFT.Create(this, 0);
-	m_scopeViewFFT.AddChannel(_T("FFT Data 1"), nFFTLength);
-	m_scopeViewFFT.AddChannel(_T("FFT Data 2"), nFFTLength);
+	m_scopeViewFFT.AddChannel(_T("FFT Data 1"), nOutputLength);
+	m_scopeViewFFT.AddChannel(_T("FFT Data 2"), nOutputLength);
 
 	initScopeViewLayout();
 
@@ -690,7 +690,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveData()
 	bool dataPlayed = m_btnPlayData.pushed;
 
 	CConfiguration& config = CConfiguration::GetInstance();
-	const int nFFTLength = config.nFftLength;
+	const int nOutputLength = config.nOutputLength;
 
 	if (dataSaving) {
 		CString strPrefix = _T("");
@@ -723,7 +723,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveData()
 				m_pImagingRealtime->CalculateNoisePower(pFFTData, nPeakIndex, nNoisePower);
 			}
 			if (m_pFFTFile != nullptr) {
-				for (int i = 0; i < nFFTLength; i++) {
+				for (int i = 0; i < nOutputLength; i++) {
 					fprintf(m_pFFTFile, "%d,", pFFTData[i]);
 				}
 				fprintf(m_pFFTFile, "\n");

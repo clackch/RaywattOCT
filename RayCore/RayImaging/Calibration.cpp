@@ -69,10 +69,9 @@ void CCalibration::setWindow(enum Windows eWindow)
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int nAScan = config.nAScan;
 	const float fAScan = (float) nAScan;
-	const int order = config.constantValues.Order;
-	const int nScans2n = 1 << order;
+	const int nFFTLength = config.nFFTLength;
 
-	ippsSet_32f(1.0f, window, nScans2n);
+	ippsSet_32f(1.0f, window, nFFTLength);
 
 	switch (eWindow)
 	{
@@ -93,20 +92,19 @@ void CCalibration::setWindow(enum Windows eWindow)
 		break;
 	}
 
-	ippsZero_32f(window + nAScan, nScans2n - nAScan);
+	ippsZero_32f(window + nAScan, nFFTLength - nAScan);
 }
 
 void CCalibration::allocateMemory() {
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int nAScan = config.nAScan;
-	const int order = config.constantValues.Order;
-	const int nScans2n = 1 << order;
+	const int nFFTLength = config.nFFTLength;
 
 	// memory allocate
 	indexMap = new int[nAScan / 2];
 	weightMap = new float[nAScan / 2];
 	dispersion = new complex_t[nAScan / 2];
-	window = new float[nScans2n];
+	window = new float[nFFTLength];
 }
 
 void CCalibration::releaseMemory(){
