@@ -404,12 +404,12 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	m_sliderContrast.SetPos(contrast);
 
 	m_pImagingRealtime = new CLabImaging(this);
-	m_pImagingRealtime->Initialize(_T("CALIBRATION.dat"), ".\\BACKGROUND.bin");
+	m_pImagingRealtime->Initialize(_T(".\\CALIBRATION.dat"), ".\\BACKGROUND.bin");
 	m_pImagingRealtime->SetColor(m_chkImageHotColor);
 	m_pImagingRealtime->Start();
 
 	m_pImagingSimulate = new CLabImaging(this);
-	m_pImagingSimulate->Initialize(_T("CALIBRATION.dat"), ".\\BACKGROUND.bin");
+	m_pImagingSimulate->Initialize(_T(".\\CALIBRATION.dat"), ".\\BACKGROUND.bin");
 	m_pImagingSimulate->SetColor(m_chkImageHotColor);
 	m_pImagingSimulate->Start();
 
@@ -443,9 +443,6 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	findFileByExtension(m_strCalibPath, _T("dat"), m_vCalibList);
 
 	CUtility::StartThread(threadService, m_pThreadService, this);
-
-	//AllocConsole();
-	//freopen("CONOUT$", "w", stdout);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
