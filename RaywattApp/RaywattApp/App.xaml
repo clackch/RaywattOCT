@@ -1,0 +1,15 @@
+﻿<Application x:Class="RaywattApp.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:RaywattApp"
+             xmlns:localization="clr-namespace:RaywattApp.Common.Localization"
+             StartupUri="/Views/MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Common/Styles/ConverterRd.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <localization:DynamicResource x:Key="L10N"/>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

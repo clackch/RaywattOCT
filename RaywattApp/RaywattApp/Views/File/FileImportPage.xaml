@@ -1,0 +1,30 @@
+﻿<Page x:Class="RaywattApp.Views.File.FileImportPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:RaywattApp.Views.File"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="FileImportPage">
+
+    <Grid Height="800">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Background="Gray">
+            <Label Content="{Binding [Test], Source={StaticResource L10N}}"></Label>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1">
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" >
+            <Button Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+            <Button Width="50" Background="Black" Foreground="White" Command="{Binding ImportCommand}" Content="{Binding [Import], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+        </StackPanel>
+    </Grid>
+</Page>
