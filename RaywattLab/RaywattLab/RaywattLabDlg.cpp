@@ -15,6 +15,7 @@
 #include "DataWriter.h"
 #include "DataReader.h"
 #include "VideoWriter.h"
+#include "TIFFWriter.h"
 #include "ZaberController.h"
 #include "MotorController.h"
 #include "PiUsb.h"
@@ -282,6 +283,7 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_CHECK_BACKGROUND_SUBTRACT, &CRaywattLabDlg::OnBnClickedCheckBackgroundSubtract)
 	ON_BN_CLICKED(IDC_CHECK_BACKGROUND_FFT_SUBTRACT, &CRaywattLabDlg::OnBnClickedCheckBackgroundImageSubtract)
 	ON_BN_CLICKED(IDC_BUTTON_OPEN_CALIB_FOLDER, &CRaywattLabDlg::OnBnClickedButtonOpenCalibFolder)
+	ON_BN_CLICKED(IDC_BUTTON_SAVE_TIF, &CRaywattLabDlg::OnBnClickedButtonSaveTif)
 END_MESSAGE_MAP()
 
 LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
@@ -650,6 +652,7 @@ void CRaywattLabDlg::OnBnClickedButtonLoadSelectedData()
 			toggleButton(this, m_btnSaveVideo);
 		}
 		GetDlgItem(IDC_BUTTON_SAVE_VIDEO)->EnableWindow(TRUE);
+		GetDlgItem(IDC_BUTTON_SAVE_TIF)->EnableWindow(dataLoaded);
 	}
 }
 
@@ -788,6 +791,40 @@ void CRaywattLabDlg::OnBnClickedButtonSaveVideo()
 
 		GetDlgItem(IDC_BUTTON_SAVE_DATA)->EnableWindow(!videoSaving);
 	}
+}
+
+
+void CRaywattLabDlg::OnBnClickedButtonSaveTif()
+{
+	if (!m_btnLoadData.pushed || m_btnPlayData.pushed) return;
+
+	GetDlgItem(IDC_BUTTON_SAVE_TIF)->SetWindowText(_T("Saving.."));
+
+	CString strFilePath = generateFileName(m_strPatientPath, _T(".tif"));
+	CTIFFWriter tiffWriter(strFilePath);
+
+	CLabImaging* pImaging = new CLabImaging(this);
+	pImaging->Initialize(_T(".\\CALIBRATION.dat"), ".\\BACKGROUND.bin");
+	pImaging->SetColor(m_chkImageHotColor);
+
+	CString strDataPath = _T("");
+	CString strDataFile = _T("");
+	int nSelected = m_listPatientData.GetCurSel();
+	m_listPatientData.GetText(nSelected, strDataFile);
+	strDataPath.Format(_T("%s/%s"), m_strPatientPath, strDataFile);
+	m_pDataReader->Initialize(strDataPath.GetBuffer());
+
+	for (int i = 0; i < m_pDataReader->GetNumOfSamples(); i++) {
+		tiffWriter.SaveFrame(pImaging, m_pDataReader->GetSample(i));
+	}
+
+	delete pImaging;
+
+	CString strMessage = _T("");
+	CString strFileName = strFilePath.Right(strFilePath.GetLength() - strFilePath.ReverseFind('\\') - 1);
+	strMessage.Format(_T("%s saved."), strFileName);
+	AfxMessageBox(strMessage);
+	GetDlgItem(IDC_BUTTON_SAVE_TIF)->SetWindowText(_T("Save TIF"));
 }
 
 

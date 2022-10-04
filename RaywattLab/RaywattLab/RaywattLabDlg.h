@@ -129,6 +129,7 @@ public:
 	afx_msg void OnBnClickedButtonPlayLoadedData();
 	afx_msg void OnBnClickedButtonSaveData();
 	afx_msg void OnBnClickedButtonSaveVideo();
+	afx_msg void OnBnClickedButtonSaveTif();
 	afx_msg void OnBnClickedRadioImageCircle();
 	afx_msg void OnBnClickedRadioImageRectangle();
 	afx_msg void OnBnClickedRadioColorBlack();
