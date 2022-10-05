@@ -149,6 +149,13 @@ namespace RaywattApp.Common.Paging
             PagingPageSize.Add(30);
             PagingPageSize.Add(50);
             PagingSelectedPageSize = 10;
+
+            //Paging No Indicator
+            PagingVisibilityNo1 = Visibility.Collapsed;
+            PagingVisibilityNo2 = Visibility.Collapsed;
+            PagingVisibilityNo3 = Visibility.Collapsed;
+            PagingVisibilityNo4 = Visibility.Collapsed;
+            PagingVisibilityNo5 = Visibility.Collapsed;
         }
 
         virtual protected void Search() { }
