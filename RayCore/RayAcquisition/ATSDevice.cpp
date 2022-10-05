@@ -3,11 +3,11 @@
 #include "Configuration.h"
 
 CATSDevice::CATSDevice() {
-	m_hATSBoard = NULL;
+	m_hATSBoard = nullptr;
 	m_nBufferIndex = 0;
-	m_pAcqBuffers = NULL;
-	m_pCurBuffer = NULL;
-	m_pPrevBuffer = NULL;
+	m_pAcqBuffers = nullptr;
+	m_pCurBuffer = nullptr;
+	m_pPrevBuffer = nullptr;
 }
 CATSDevice::~CATSDevice() {}
 
@@ -18,7 +18,7 @@ int CATSDevice::InitDevice() {
 	U32 boardId = 1;
 
 	m_hATSBoard = AlazarGetBoardBySystemID(systemId, boardId);
-	if (m_hATSBoard == NULL)
+	if (m_hATSBoard == nullptr)
 	{
 		printf("Error: Unable to open board system Id %u board Id %u\n", systemId, boardId);
 		return E_FAIL;
@@ -35,16 +35,12 @@ int CATSDevice::CleanUp() {
 	const int nAcqBufCount = config.settingsAlazar.nAcqBufferCount;
 
 	// Free all memory allocated
-	if (m_pAcqBuffers != NULL) {
+	if (m_pAcqBuffers != nullptr) {
 		for (int bufferIndex = 0; bufferIndex < nAcqBufCount; bufferIndex++)
 		{
-			if (m_pAcqBuffers[bufferIndex] != NULL)
+			if (m_pAcqBuffers[bufferIndex] != nullptr)
 			{
-#ifdef _WIN32
 				VirtualFree(m_pAcqBuffers[bufferIndex], 0, MEM_RELEASE);
-#else
-				free(BufferArray[bufferIndex]);
-#endif
 			}
 		}
 		delete[] m_pAcqBuffers;
@@ -63,7 +59,7 @@ int CATSDevice::start() {
 	if (retCode != ApiSuccess)
 	{
 		printf("Error: AlazarStartCapture failed -- %s\n", AlazarErrorToText(retCode));
-		MessageBox((HWND)"AlazarStartCapture failed", NULL, L"Error", MB_OK);
+		MessageBox((HWND)"AlazarStartCapture failed", nullptr, L"Error", MB_OK);
 
 		return retCode;
 	}
@@ -98,7 +94,7 @@ unsigned short *CATSDevice::acquire(int& nCurFrame, int& nTotalFrame) {
 	m_pCurBuffer = m_pAcqBuffers[m_nBufferIndex];
 	{
 		// Add the buffer to the end of the list of available buffers.
-		if (m_pPrevBuffer != NULL) {
+		if (m_pPrevBuffer != nullptr) {
 			retCode = AlazarPostAsyncBuffer(m_hATSBoard, m_pPrevBuffer, nBufferSize * sizeof(U16));
 		}
 
@@ -108,7 +104,7 @@ unsigned short *CATSDevice::acquire(int& nCurFrame, int& nTotalFrame) {
 		if (retCode != ApiSuccess)
 		{
 			printf("Error: AlazarWaitAsyncBufferComplete failed -- %s\n", AlazarErrorToText(retCode));
-			return NULL;
+			return nullptr;
 		}
 
 		m_pPrevBuffer = m_pCurBuffer;
@@ -125,7 +121,6 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	RETURN_CODE retCode;
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int nAScan = config.nAScan;
-	const int nAScanPadding = config.nAScanPadding;
 	const int nBScan = config.nBScan;
 	const int nLaserSpeed = config.nLaserSpeed;
 	const int nBufferSize = config.nBufferSize;
@@ -252,54 +247,20 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	}
 
 	//==========================================================================================================
+	// FPGA Setting
+	//==========================================================================================================
+	configureFPGA(boardHandle);
+
+	//==========================================================================================================
 	// Acquisition Setting
 	//==========================================================================================================
 
-	// There are no pre-trigger samples in NPT mode
-	U32 preTriggerSamples = 0;
-
-	// TODO: Select the number of post-trigger samples per record
-	U32 postTriggerSamples = nAScan + nAScanPadding;
-
-	// TODO: Specify the number of records per DMA buffer
-	U32 recordsPerBuffer = nBScan;
-
-	// TODO: Specify the total number of buffers to capture
-	U32 buffersPerAcquisition = nAcqBufCount;
-
 	// TODO: Select which channels to capture (A, B, or both)
 	U32 channelMask = CHANNEL_A; // | CHANNEL_B;
-
-	// TODO: Select if you wish to save the sample data to a file
-	BOOL saveData = true;
-
-	// Calculate the number of enabled channels from the channel mask
-	int channelCount = 0;
-	int channelsPerBoard = 2;
-	for (int channel = 0; channel < channelsPerBoard; channel++)
-	{
-		U32 channelId = 1U << channel;
-		if (channelMask & channelId)
-			channelCount++;
-	}
-
-	// Get the sample size in bits, and the on-board memory size in samples per channel
-	U8 bitsPerSample;
-	U32 maxSamplesPerChannel;
-	retCode = AlazarGetChannelInfo(boardHandle, &maxSamplesPerChannel, &bitsPerSample);
-	if (retCode != ApiSuccess)
-	{
-		printf("Error: AlazarGetChannelInfo failed -- %s\n", AlazarErrorToText(retCode));
-		return FALSE;
-	}
-
-	// Calculate the size of each DMA buffer in bytes
-	float bytesPerSample = (float)((bitsPerSample + 7) / 8);
-	U32 samplesPerRecord = preTriggerSamples + postTriggerSamples;
-	U32 bytesPerRecord = (U32)(bytesPerSample * samplesPerRecord +
-		0.5); // 0.5 compensates for double to integer conversion 
-	U32 bytesPerBuffer = bytesPerRecord * recordsPerBuffer * channelCount;
-	printf("samplesPerRecord : %d, recordsPerBuffer : %d, channelCount : %d\n", samplesPerRecord, recordsPerBuffer, channelCount);
+	U32 recordsPerBuffer = nBScan;
+	U32 samplesPerRecord = 0;
+	U32 bytesPerBuffer = 0;
+	calculateMemorySize(boardHandle, channelMask, nBScan, samplesPerRecord, bytesPerBuffer);
 
 	// Allocate memory for DMA buffers
 	m_pAcqBuffers = new U16*[nAcqBufCount];
@@ -307,37 +268,24 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	U32 bufferIndex;
 	for (bufferIndex = 0; (bufferIndex < nAcqBufCount) && success; bufferIndex++)
 	{
-#ifdef _WIN32 // Allocate page aligned memory
-		m_pAcqBuffers[bufferIndex] =
-			(U16 *)VirtualAlloc(NULL, bytesPerBuffer, MEM_COMMIT, PAGE_READWRITE);
-#else
-		BufferArray[bufferIndex] = (U16 *)valloc(bytesPerBuffer);
-#endif
-		if (m_pAcqBuffers[bufferIndex] == NULL)
+		// Allocate page aligned memory
+		m_pAcqBuffers[bufferIndex] = (U16 *)VirtualAlloc(nullptr, bytesPerBuffer, MEM_COMMIT, PAGE_READWRITE);
+
+		if (m_pAcqBuffers[bufferIndex] == nullptr)
 		{
 			printf("Error: Alloc %u bytes failed\n", bytesPerBuffer);
 			success = FALSE;
 		}
 	}
 
-	// Configure the record size
 	if (success)
 	{
-		retCode = AlazarSetRecordSize(boardHandle, preTriggerSamples, postTriggerSamples);
-		if (retCode != ApiSuccess)
-		{
-			printf("Error: AlazarSetRecordSize failed -- %s\n", AlazarErrorToText(retCode));
-			success = FALSE;
-		}
-	}
-
-	if (success)
-	{
-		U32 recordsPerAcquisition = 0x7FFFFFFF; // recordsPerBuffer * buffersPerAcquisition;
+		U32 recordsPerAcquisition = 0x7FFFFFFF; // Set to 0x7fffffff to acquire indefinitely until the acquisition is aborted.
 
 		U32 admaFlags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_NPT | ADMA_FIFO_ONLY_STREAMING | ADMA_INTERLEAVE_SAMPLES;
 
-		retCode = AlazarBeforeAsyncRead(boardHandle, channelMask, -(long)preTriggerSamples,
+		// There are no pre-trigger samples in NPT mode
+		retCode = AlazarBeforeAsyncRead(boardHandle, channelMask, 0,
 			samplesPerRecord, recordsPerBuffer, recordsPerAcquisition,
 			admaFlags);
 
@@ -362,6 +310,52 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	}
 
 	m_nBufferIndex = 0;
+
+	return TRUE;
+}
+BOOL CATSDevice::calculateMemorySize(HANDLE boardHandle, U16 channelMask, U32 recordsPerBuffer, U32& samplesPerRecord, U32& bytesPerBuffer) {
+	RETURN_CODE retCode = ApiSuccess;
+	CConfiguration& config = CConfiguration::GetInstance();
+	const int nAScan = config.nAScan;
+	const int nAScanPadding = config.nAScanPadding;
+
+	// Calculate the number of enabled channels from the channel mask
+	int channelCount = 0;
+	int channelsPerBoard = 2;
+	for (int channel = 0; channel < channelsPerBoard; channel++)
+	{
+		U32 channelId = 1U << channel;
+		if (channelMask & channelId)
+			channelCount++;
+	}
+
+	// Get the sample size in bits, and the on-board memory size in samples per channel
+	U8 bitsPerSample;
+	U32 maxSamplesPerChannel;
+	retCode = AlazarGetChannelInfo(boardHandle, &maxSamplesPerChannel, &bitsPerSample);
+	if (retCode != ApiSuccess)
+	{
+		printf("Error: AlazarGetChannelInfo failed -- %s\n", AlazarErrorToText(retCode));
+		return FALSE;
+	}
+
+	// TODO: Select the number of post-trigger samples per record
+	samplesPerRecord = nAScan + nAScanPadding;
+
+	// Calculate the size of each DMA buffer in bytes
+	float bytesPerSample = (float)((bitsPerSample + 7) / 8);
+	U32 bytesPerRecord = (U32)(bytesPerSample * samplesPerRecord + 0.5); // 0.5 compensates for double to integer conversion 
+
+	bytesPerBuffer = bytesPerRecord * recordsPerBuffer * channelCount;
+	printf("samplesPerRecord : %d, recordsPerBuffer : %d, channelCount : %d\n", samplesPerRecord, recordsPerBuffer, channelCount);
+
+	// Configure the record size
+	retCode = AlazarSetRecordSize(boardHandle, 0, samplesPerRecord);
+	if (retCode != ApiSuccess)
+	{
+		printf("Error: AlazarSetRecordSize failed -- %s\n", AlazarErrorToText(retCode));
+		return FALSE;
+	}
 
 	return TRUE;
 }

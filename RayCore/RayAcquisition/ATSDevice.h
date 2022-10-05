@@ -5,7 +5,7 @@
 class CATSDevice :
 	public IAcquisitionDevice
 {
-private:
+protected:
 	HANDLE	m_hATSBoard;
 	double	m_dSamplePerSec;
 	U32		m_nBufferIndex;
@@ -28,5 +28,9 @@ protected:
 
 private:
 	BOOL configureBoard(HANDLE boardHandle);
+
+protected:
+	virtual BOOL configureFPGA(HANDLE boardHandle) { return TRUE; }
+	virtual BOOL calculateMemorySize(HANDLE boardHandle, U16 channelMask, U32 recordsPerBuffer, U32 &samplesPerRecord, U32& bytesPerBuffer);
 };
 

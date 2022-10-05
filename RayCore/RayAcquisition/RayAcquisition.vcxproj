@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="AcquisitionDevice.h" />
     <ClInclude Include="ATSDevice.h" />
+    <ClInclude Include="ATSDSPDevice.h" />
     <ClInclude Include="DataManager.h" />
     <ClInclude Include="DataReader.h" />
     <ClInclude Include="DataWriter.h" />
@@ -29,6 +30,7 @@
   <ItemGroup>
     <ClCompile Include="AcquisitionDevice.cpp" />
     <ClCompile Include="ATSDevice.cpp" />
+    <ClCompile Include="ATSDSPDevice.cpp" />
     <ClCompile Include="DataReader.cpp" />
     <ClCompile Include="DataWriter.cpp" />
     <ClCompile Include="SimulateDevice.cpp" />
