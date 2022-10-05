@@ -100,6 +100,7 @@ private:
 	void updateBrightnessContrast();
 	CString generateFileName(CString strPath, CString strExtension, CString strPrefix = _T(""));
 	void findFileByExtension(CString strFolder, CString strExt, std::vector<CString>& vList);
+	void updateMeasurement(USHORT nPeakValue, int nPeakIndex, int nLineWidth, USHORT nNoisePower);
 
 	/*
 	* threadService
@@ -144,4 +145,5 @@ public:
 	afx_msg void OnBnClickedCheckBackgroundSubtract();
 	afx_msg void OnBnClickedCheckBackgroundImageSubtract();
 	afx_msg void OnBnClickedButtonOpenCalibFolder();
+	afx_msg void OnBnClickedButtonMeasure();
 };

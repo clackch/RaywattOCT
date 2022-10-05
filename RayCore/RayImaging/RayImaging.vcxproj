@@ -167,6 +167,7 @@ xcopy "$(ProjectDir)*.h" "$(TargetDir)include\" /y /d</Command>
     <ClInclude Include="Calibration.h" />
     <ClInclude Include="Imaging.h" />
     <ClInclude Include="OCTImaging.h" />
+    <ClInclude Include="OCTMeasurement.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Utility\MessageService.cpp" />
@@ -175,6 +176,7 @@ xcopy "$(ProjectDir)*.h" "$(TargetDir)include\" /y /d</Command>
     <ClCompile Include="LabImaging.cpp" />
     <ClCompile Include="Calibration.cpp" />
     <ClCompile Include="OCTImaging.cpp" />
+    <ClCompile Include="OCTMeasurement.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
