@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Common\Controls\MessagePopupControl.xaml.cs">
+    <Compile Update="Views\Controls\MessagePopupControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Common\Localization\Resources\Resource.Designer.cs">
@@ -40,7 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="Common\Controls\MessagePopupControl.xaml">
+    <Page Update="Views\Controls\MessagePopupControl.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
@@ -48,6 +48,13 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DICOM\" />
+    <Folder Include="OCT\Imaging\" />
+    <Folder Include="OCT\3D\" />
+    <Folder Include="OCT\Core\" />
   </ItemGroup>
 
 </Project>

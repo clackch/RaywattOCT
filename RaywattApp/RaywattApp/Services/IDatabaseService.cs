@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace RaywattApp.Common.Services
+namespace RaywattApp.Services
 {
     /// <summary>
     /// IDatabaseService

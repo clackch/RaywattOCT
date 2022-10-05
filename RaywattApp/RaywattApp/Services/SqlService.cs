@@ -1,6 +1,6 @@
 ﻿using Npgsql;
 
-namespace RaywattApp.Common.Services
+namespace RaywattApp.Services
 {
     /// <summary>
     /// PostgresQL 전용 서비스

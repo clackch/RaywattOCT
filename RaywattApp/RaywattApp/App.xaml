@@ -7,7 +7,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/Common/Styles/ConverterRd.xaml" />
+                <ResourceDictionary Source="/Styles/ConverterRd.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <localization:DynamicResource x:Key="L10N"/>
         </ResourceDictionary>

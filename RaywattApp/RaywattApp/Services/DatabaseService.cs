@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using log4net;
 using Npgsql;
 
-namespace RaywattApp.Common.Services
+namespace RaywattApp.Services
 {
     /// <summary>
     /// DatabaseService 

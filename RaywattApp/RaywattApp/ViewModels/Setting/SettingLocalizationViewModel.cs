@@ -1,13 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Messages;
 using RaywattApp.Common.Setting;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Windows.Input;
 
 namespace RaywattApp.ViewModels.Setting
 {
@@ -64,6 +61,8 @@ namespace RaywattApp.ViewModels.Setting
             _log.Debug("Apply");
 
             ApplyChange();
+
+            WeakReferenceMessenger.Default.Send(new PopupNavigationMessage("Refresh"));
         }
 
         private void ApplyChange()
