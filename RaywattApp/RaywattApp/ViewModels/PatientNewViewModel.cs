@@ -136,6 +136,7 @@ namespace RaywattApp.ViewModels
 
             if(nRows == 1)
             {
+                Patient.Gender = Patient.Gender == "M" ? "Male" : "Female";
                 WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/RecordingPage.xaml") { Parameter = Patient });
             }           
         }
