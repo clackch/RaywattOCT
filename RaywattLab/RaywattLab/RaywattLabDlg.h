@@ -60,6 +60,8 @@ private:
 	BOOL m_chkImageHotColor;
 	CSliderCtrl m_sliderBrightness;
 	CSliderCtrl m_sliderContrast;
+	BOOL m_chkInitMotor;
+	BOOL m_chkInitStage;
 
 	// Patient Data
 	CString m_strPatientPath;
@@ -146,4 +148,6 @@ public:
 	afx_msg void OnBnClickedCheckBackgroundImageSubtract();
 	afx_msg void OnBnClickedButtonOpenCalibFolder();
 	afx_msg void OnBnClickedButtonMeasure();
+	afx_msg void OnBnClickedCheckInitMotor();
+	afx_msg void OnBnClickedCheckInitStage();
 };

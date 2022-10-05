@@ -64,6 +64,8 @@ void CRaywattLabDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_CHECK_HOT_COLOR, m_chkImageHotColor);
 	DDX_Control(pDX, IDC_SLIDER_BRIGHTNESS, m_sliderBrightness);
 	DDX_Control(pDX, IDC_SLIDER_CONTRAST, m_sliderContrast);
+	DDX_Check(pDX, IDC_CHECK_INIT_MOTOR, m_chkInitMotor);
+	DDX_Check(pDX, IDC_CHECK_INIT_STAGE, m_chkInitStage);
 }
 
 // private methods
@@ -85,27 +87,31 @@ int CRaywattLabDlg::initializeDevices() {
 		return E_FAIL;
 	}
 
-	if (pLinearStage->Open(config.zaber.pullback) == false) {
-		m_pAcqDevice->CleanUp();
-		return E_FAIL;
+	if (m_chkInitStage) {
+		if (pLinearStage->Open(config.zaber.pullback) == false) {
+			m_pAcqDevice->CleanUp();
+			return E_FAIL;
+		}
+
+		if (pInterferometer->Open(config.zaber.interferometer) == false) {
+			pLinearStage->Close();
+			m_pAcqDevice->CleanUp();
+			return E_FAIL;
+		}
 	}
 
-	if (pInterferometer->Open(config.zaber.interferometer) == false) {
-		pLinearStage->Close();
-		m_pAcqDevice->CleanUp();
-		return E_FAIL;
-	}
-
-	if (pMotor->Connect() == false) {
-		pInterferometer->Close();
-		pLinearStage->Close();
-		m_pAcqDevice->CleanUp();
-		return E_FAIL;
+	if (m_chkInitMotor) {
+		if (pMotor->Connect() == false) {
+			pInterferometer->Close();
+			pLinearStage->Close();
+			m_pAcqDevice->CleanUp();
+			return E_FAIL;
+		}
+		pMotor->SwitchOn();
 	}
 
 	CLaserController::GetInstance()->LaserOnOff(true);
 	m_pAcqDevice->StartAcquisition();
-	pMotor->SwitchOn();
 
 	return NOERROR;
 }
@@ -298,6 +304,8 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_OPEN_CALIB_FOLDER, &CRaywattLabDlg::OnBnClickedButtonOpenCalibFolder)
 	ON_BN_CLICKED(IDC_BUTTON_SAVE_TIF, &CRaywattLabDlg::OnBnClickedButtonSaveTif)
 	ON_BN_CLICKED(IDC_BUTTON_MEASURE, &CRaywattLabDlg::OnBnClickedButtonMeasure)
+	ON_BN_CLICKED(IDC_CHECK_INIT_MOTOR, &CRaywattLabDlg::OnBnClickedCheckInitMotor)
+	ON_BN_CLICKED(IDC_CHECK_INIT_STAGE, &CRaywattLabDlg::OnBnClickedCheckInitStage)
 END_MESSAGE_MAP()
 
 LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
@@ -408,6 +416,9 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	m_radioImageShape = 0;
 	m_radioImageColor = 0;
 	m_chkImageHotColor = TRUE;
+	m_chkInitMotor = AfxGetApp()->GetProfileInt(_T("RECENT_SETTING"), _T("INIT_MOTOR"), TRUE);
+	m_chkInitStage = AfxGetApp()->GetProfileInt(_T("RECENT_SETTING"), _T("INIT_STAGE"), TRUE);
+	
 	UpdateData(FALSE);
 
 	int brightness = AfxGetApp()->GetProfileInt(_T("RECENT_SETTING"), _T("BRIGHTNESS"), 0);
@@ -586,6 +597,9 @@ BOOL CRaywattLabDlg::PreTranslateMessage(MSG* pMsg) {
 void CRaywattLabDlg::OnBnClickedButtonAdminInitialize()
 {
 	int result = initializeDevices();
+
+	AfxGetApp()->WriteProfileInt(_T("RECENT_SETTING"), _T("INIT_MOTOR"), m_chkInitMotor);
+	AfxGetApp()->WriteProfileInt(_T("RECENT_SETTING"), _T("INIT_STAGE"), m_chkInitStage);
 
 	if (result == NOERROR) {
 		GetDlgItem(IDC_BUTTON_ADMIN_INITIALIZE)->EnableWindow(FALSE);
@@ -1022,4 +1036,16 @@ void CRaywattLabDlg::OnBnClickedButtonMeasure()
 	measurement.CalculateNoisePower(pFFTData, nPeakIndex, nNoisePower);
 
 	updateMeasurement(nPeakValue, nPeakIndex, nLineWidth, nNoisePower);
+}
+
+
+void CRaywattLabDlg::OnBnClickedCheckInitMotor()
+{
+	UpdateData(TRUE);
+}
+
+
+void CRaywattLabDlg::OnBnClickedCheckInitStage()
+{
+	UpdateData(TRUE);
 }
