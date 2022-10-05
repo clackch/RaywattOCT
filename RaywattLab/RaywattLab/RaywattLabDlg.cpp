@@ -11,6 +11,7 @@
 #include "ATSDevice.h"
 #include "SimulateDevice.h"
 #include "LabImaging.h"
+#include "OCTMeasurement.h"
 #include "Calibration.h"
 #include "DataWriter.h"
 #include "DataReader.h"
@@ -63,6 +64,8 @@ void CRaywattLabDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_CHECK_HOT_COLOR, m_chkImageHotColor);
 	DDX_Control(pDX, IDC_SLIDER_BRIGHTNESS, m_sliderBrightness);
 	DDX_Control(pDX, IDC_SLIDER_CONTRAST, m_sliderContrast);
+	DDX_Check(pDX, IDC_CHECK_INIT_MOTOR, m_chkInitMotor);
+	DDX_Check(pDX, IDC_CHECK_INIT_STAGE, m_chkInitStage);
 }
 
 // private methods
@@ -84,27 +87,31 @@ int CRaywattLabDlg::initializeDevices() {
 		return E_FAIL;
 	}
 
-	if (pLinearStage->Open(config.zaber.pullback) == false) {
-		m_pAcqDevice->CleanUp();
-		return E_FAIL;
+	if (m_chkInitStage) {
+		if (pLinearStage->Open(config.zaber.pullback) == false) {
+			m_pAcqDevice->CleanUp();
+			return E_FAIL;
+		}
+
+		if (pInterferometer->Open(config.zaber.interferometer) == false) {
+			pLinearStage->Close();
+			m_pAcqDevice->CleanUp();
+			return E_FAIL;
+		}
 	}
 
-	if (pInterferometer->Open(config.zaber.interferometer) == false) {
-		pLinearStage->Close();
-		m_pAcqDevice->CleanUp();
-		return E_FAIL;
-	}
-
-	if (pMotor->Connect() == false) {
-		pInterferometer->Close();
-		pLinearStage->Close();
-		m_pAcqDevice->CleanUp();
-		return E_FAIL;
+	if (m_chkInitMotor) {
+		if (pMotor->Connect() == false) {
+			pInterferometer->Close();
+			pLinearStage->Close();
+			m_pAcqDevice->CleanUp();
+			return E_FAIL;
+		}
+		pMotor->SwitchOn();
 	}
 
 	CLaserController::GetInstance()->LaserOnOff(true);
 	m_pAcqDevice->StartAcquisition();
-	pMotor->SwitchOn();
 
 	return NOERROR;
 }
@@ -193,6 +200,18 @@ void CRaywattLabDlg::findFileByExtension(CString strFolder, CString strExt, std:
 		vList.push_back(fileFind.GetFilePath());
 	}
 	std::sort(vList.begin(), vList.end());
+}
+void CRaywattLabDlg::updateMeasurement(USHORT nPeakValue, int nPeakIndex, int nLineWidth, USHORT nNoisePower) {
+	CString strBuffer = _T("");
+
+	strBuffer.Format(_T("%d"), nPeakValue);
+	GetDlgItem(IDC_EDIT_PEAK)->SetWindowText(strBuffer);
+	strBuffer.Format(_T("%d"), nPeakIndex);
+	GetDlgItem(IDC_EDIT_PEAK_INDEX)->SetWindowText(strBuffer);
+	strBuffer.Format(_T("%d"), nLineWidth);
+	GetDlgItem(IDC_EDIT_LINEWIDTH)->SetWindowText(strBuffer);
+	strBuffer.Format(_T("%d"), nNoisePower);
+	GetDlgItem(IDC_EDIT_NOISE)->SetWindowText(strBuffer);
 }
 
 
@@ -284,6 +303,9 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_CHECK_BACKGROUND_FFT_SUBTRACT, &CRaywattLabDlg::OnBnClickedCheckBackgroundImageSubtract)
 	ON_BN_CLICKED(IDC_BUTTON_OPEN_CALIB_FOLDER, &CRaywattLabDlg::OnBnClickedButtonOpenCalibFolder)
 	ON_BN_CLICKED(IDC_BUTTON_SAVE_TIF, &CRaywattLabDlg::OnBnClickedButtonSaveTif)
+	ON_BN_CLICKED(IDC_BUTTON_MEASURE, &CRaywattLabDlg::OnBnClickedButtonMeasure)
+	ON_BN_CLICKED(IDC_CHECK_INIT_MOTOR, &CRaywattLabDlg::OnBnClickedCheckInitMotor)
+	ON_BN_CLICKED(IDC_CHECK_INIT_STAGE, &CRaywattLabDlg::OnBnClickedCheckInitStage)
 END_MESSAGE_MAP()
 
 LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
@@ -394,6 +416,9 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	m_radioImageShape = 0;
 	m_radioImageColor = 0;
 	m_chkImageHotColor = TRUE;
+	m_chkInitMotor = AfxGetApp()->GetProfileInt(_T("RECENT_SETTING"), _T("INIT_MOTOR"), TRUE);
+	m_chkInitStage = AfxGetApp()->GetProfileInt(_T("RECENT_SETTING"), _T("INIT_STAGE"), TRUE);
+	
 	UpdateData(FALSE);
 
 	int brightness = AfxGetApp()->GetProfileInt(_T("RECENT_SETTING"), _T("BRIGHTNESS"), 0);
@@ -573,6 +598,9 @@ void CRaywattLabDlg::OnBnClickedButtonAdminInitialize()
 {
 	int result = initializeDevices();
 
+	AfxGetApp()->WriteProfileInt(_T("RECENT_SETTING"), _T("INIT_MOTOR"), m_chkInitMotor);
+	AfxGetApp()->WriteProfileInt(_T("RECENT_SETTING"), _T("INIT_STAGE"), m_chkInitStage);
+
 	if (result == NOERROR) {
 		GetDlgItem(IDC_BUTTON_ADMIN_INITIALIZE)->EnableWindow(FALSE);
 		GetDlgItem(IDC_BUTTON_SAVE_DATA)->EnableWindow(TRUE);
@@ -706,21 +734,23 @@ void CRaywattLabDlg::OnBnClickedButtonSaveData()
 		strFileName.Replace(_T(".bin"), _T(".csv"));
 		CStringA fftName(strFileName);
 		m_pFFTFile = fopen(fftName, "w+");
-		Ipp16u nMaxPeak = 0, nNoisePower = 0;
+
+		COCTMeasurement measurement;
+		USHORT nMaxPeak = 0, nNoisePower = 0;
 		int nMaxIndex, nMaxWidth = 0;
 		for (int idx = 0; idx < nNumOfSamples; idx++) {
 			m_pDataWriter->WriteFrame(idx);
 			m_pImagingRealtime->Process(m_pDataWriter->GetSample(idx));
 
-			Ipp16u* pFFTData = m_pImagingRealtime->GetScopeFFTData();
-			Ipp16u nPeakValue;
+			USHORT* pFFTData = m_pImagingRealtime->GetScopeFFTData();
+			USHORT nPeakValue;
 			int nPeakIndex, nLineWidth;
-			m_pImagingRealtime->CalculateAxialResolution(pFFTData, nPeakValue, nPeakIndex, nLineWidth);
+			measurement.CalculateAxialResolution(pFFTData, nPeakValue, nPeakIndex, nLineWidth);
 			if (nPeakValue > nMaxPeak) {
 				nMaxPeak = nPeakValue;
 				nMaxIndex = nPeakIndex;
 				nMaxWidth = nLineWidth;
-				m_pImagingRealtime->CalculateNoisePower(pFFTData, nPeakIndex, nNoisePower);
+				measurement.CalculateNoisePower(pFFTData, nPeakIndex, nNoisePower);
 			}
 			if (m_pFFTFile != nullptr) {
 				for (int i = 0; i < nOutputLength; i++) {
@@ -736,17 +766,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveData()
 			m_pFFTFile = nullptr;
 		}
 
-		CString strBuffer = _T("");
-
-		strBuffer.Format(_T("%d"), nMaxPeak);
-		GetDlgItem(IDC_EDIT_PEAK)->SetWindowText(strBuffer);
-		strBuffer.Format(_T("%d"), nMaxIndex);
-		GetDlgItem(IDC_EDIT_PEAK_INDEX)->SetWindowText(strBuffer);
-		strBuffer.Format(_T("%d"), nMaxWidth);
-		GetDlgItem(IDC_EDIT_LINEWIDTH)->SetWindowText(strBuffer);
-		strBuffer.Format(_T("%d"), nNoisePower);
-		GetDlgItem(IDC_EDIT_NOISE)->SetWindowText(strBuffer);
-
+		updateMeasurement(nMaxPeak, nMaxIndex, nMaxWidth, nNoisePower);
 		updatePatientDataList();
 	}
 	else {
@@ -999,4 +1019,33 @@ void CRaywattLabDlg::OnBnClickedButtonOpenCalibFolder()
 	m_vCalibList.clear();
 	m_nCurCalibIndex = 0;
 	findFileByExtension(m_strCalibPath, _T("dat"), m_vCalibList);
+}
+
+
+void CRaywattLabDlg::OnBnClickedButtonMeasure()
+{
+	CLabImaging* pImaging = (m_btnLoadData.pushed) ? m_pImagingSimulate : m_pImagingRealtime;
+
+	COCTMeasurement measurement;
+	USHORT* pFFTData = pImaging->GetScopeFFTData();
+
+	USHORT nPeakValue, nNoisePower;
+	int nPeakIndex, nLineWidth;
+
+	measurement.CalculateAxialResolution(pFFTData, nPeakValue, nPeakIndex, nLineWidth);
+	measurement.CalculateNoisePower(pFFTData, nPeakIndex, nNoisePower);
+
+	updateMeasurement(nPeakValue, nPeakIndex, nLineWidth, nNoisePower);
+}
+
+
+void CRaywattLabDlg::OnBnClickedCheckInitMotor()
+{
+	UpdateData(TRUE);
+}
+
+
+void CRaywattLabDlg::OnBnClickedCheckInitStage()
+{
+	UpdateData(TRUE);
 }

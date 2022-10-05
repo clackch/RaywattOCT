@@ -1,10 +1,9 @@
 ﻿#pragma once
-#include <Windows.h>
 #include <ipp.h>
 #include <opencv2/opencv.hpp>
 #include <vector>
-#include "Imaging.h"
 #include "Config.h"
+#include "Imaging.h"
 
 class CCalibration;
 class CThread;
@@ -73,9 +72,6 @@ public:
 
 	cv::Mat GetCircleImage() { return imageCircle; }
 	USHORT* GetFringesBuffer() { return m_pFringesBuffer; }
-
-	void CalculateAxialResolution(USHORT* fftData, USHORT& nPeakValue, int& nPeakIndex, int& nLineWidth);
-	void CalculateNoisePower(USHORT* fftData, int nPeakIndex, USHORT& nNoisePower);
 
 protected:
 	void allocateMemory();

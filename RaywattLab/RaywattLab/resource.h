@@ -79,6 +79,8 @@
 #define IDC_CHECK_BACKGROUND_FFT_SUBTRACT 1078
 #define IDC_EDIT_CUR_CALIBRATION        1079
 #define IDC_BUTTON_SAVE_TIF             1080
+#define IDC_CHECK_INIT_MOTOR            1081
+#define IDC_CHECK_INIT_STAGE            1082
 
 // Next default values for new objects
 // 
@@ -86,7 +88,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        107
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1081
+#define _APS_NEXT_CONTROL_VALUE         1083
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
