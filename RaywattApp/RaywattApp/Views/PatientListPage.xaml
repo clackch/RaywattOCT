@@ -1,0 +1,121 @@
+﻿<Page x:Class="RaywattApp.Views.PatientListPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:RaywattApp.Views"
+      xmlns:inter="http://schemas.microsoft.com/xaml/behaviors"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="PatientListPage">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Background="Gray">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal" >
+                <Label Content="{Binding [Patient List], Source={StaticResource L10N}}"></Label>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" >
+                <Button Width="50" Command="{Binding ImportCommand}" Content="{Binding [Import], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+                <Button Width="50" Command="{Binding ExportCommand}" Content="{Binding [Export], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+            </StackPanel>
+        </Grid>
+
+        <StackPanel Grid.Row="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="200" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="600"/>
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Column="0"/>
+
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <Label Content="{Binding [Total], Source={StaticResource L10N}}"></Label>
+                        <Label>:</Label>
+                        <Label Content="{Binding PagingTotalCnt}"></Label>
+                    </StackPanel>
+                    <StackPanel  Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <TextBox Width="120" Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}" Margin="5,5,5,5">
+                            <TextBox.InputBindings>
+                                <KeyBinding Command="{Binding SearchCommand}" Key="Enter"/>
+                            </TextBox.InputBindings>
+                        </TextBox>
+                        <Button Width="50" Command="{Binding SearchCommand}" Content="{Binding [Search], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- DataGrid에서 Binding을 사용하기 위한 설정(DataContext, Source 사용 필요) -->
+                <FrameworkElement x:Name="ProxyElement" Visibility="Collapsed"/>
+
+                <DataGrid Grid.Row="2" Name="patientListGrid" ItemsSource="{Binding PatientList}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="All" RowHeaderWidth="0" Background="White">
+                    <DataGrid.InputBindings>
+                        <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding GridDoubleClickCommand}" CommandParameter="{Binding ElementName=patientListGrid, Path=CurrentItem}"/>
+                    </DataGrid.InputBindings>
+                    <inter:Interaction.Triggers>
+                        <inter:EventTrigger EventName="Sorting">
+                            <inter:InvokeCommandAction Command="{Binding ColumOrderCommand}" PassEventArgsToCommand="True"/>
+                        </inter:EventTrigger>
+                    </inter:Interaction.Triggers>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Width="*" Binding="{Binding Id}" Header="{Binding DataContext.HeaderId, Source={x:Reference ProxyElement}}"/>
+                        <DataGridTextColumn Width="*" Binding="{Binding Lastname}" Header="{Binding DataContext.HeaderLastname, Source={x:Reference ProxyElement}}"/>
+                        <DataGridTextColumn Width="*" Binding="{Binding Firstname}" Header="{Binding DataContext.HeaderFirstname, Source={x:Reference ProxyElement}}"/>
+                        <DataGridTextColumn Width="*" Binding="{Binding Birthdate, StringFormat='yyyy-MM-dd'}" Header="{Binding DataContext.HeaderBirthdate, Source={x:Reference ProxyElement}}"/>
+                        <DataGridTextColumn Width="*" Binding="{Binding Gender}" Header="{Binding DataContext.HeaderGender, Source={x:Reference ProxyElement}}"/>
+                        <DataGridTextColumn Width="*" Binding="{Binding CreateDate}" Header="{Binding DataContext.HeaderCreateDate, Source={x:Reference ProxyElement}}"/>
+                        <DataGridTextColumn Width="*" Binding="{Binding UpdateDate}" Header="{Binding DataContext.HeaderUpdateDate, Source={x:Reference ProxyElement}}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <Grid Grid.Row="3" Background="Black">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="120"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" />
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" >
+                        <Button Content="≪" Command="{Binding PagingFirstCommand}" Margin="5,5,5,5" />
+                        <Button Content="＜" Command="{Binding PagingPreviousCommand}" Margin="5,5,5,5" />
+                        <Button Content="{Binding PagingNo1}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo1" Visibility="{Binding PagingVisibilityNo1, Converter={StaticResource PagingNoIndicatorConverter}}" Foreground="{Binding PagingNoIdx, Converter={StaticResource PagingNoCheckedConverter}, ConverterParameter=0}" Margin="5,5,5,5" />
+                        <Button Content="{Binding PagingNo2}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo2" Visibility="{Binding PagingVisibilityNo2, Converter={StaticResource PagingNoIndicatorConverter}}" Foreground="{Binding PagingNoIdx, Converter={StaticResource PagingNoCheckedConverter}, ConverterParameter=1}" Margin="5,5,5,5" />
+                        <Button Content="{Binding PagingNo3}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo3" Visibility="{Binding PagingVisibilityNo3, Converter={StaticResource PagingNoIndicatorConverter}}" Foreground="{Binding PagingNoIdx, Converter={StaticResource PagingNoCheckedConverter}, ConverterParameter=2}" Margin="5,5,5,5" />
+                        <Button Content="{Binding PagingNo4}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo4" Visibility="{Binding PagingVisibilityNo4, Converter={StaticResource PagingNoIndicatorConverter}}" Foreground="{Binding PagingNoIdx, Converter={StaticResource PagingNoCheckedConverter}, ConverterParameter=3}" Margin="5,5,5,5" />
+                        <Button Content="{Binding PagingNo5}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo5" Visibility="{Binding PagingVisibilityNo5, Converter={StaticResource PagingNoIndicatorConverter}}" Foreground="{Binding PagingNoIdx, Converter={StaticResource PagingNoCheckedConverter}, ConverterParameter=4}" Margin="5,5,5,5" />
+                        <Button Content="＞" Command="{Binding PagingNextCommand}" Margin="5,5,5,5" />
+                        <Button Content="≫" Command="{Binding PagingLastCommand}" Margin="5,5,5,5" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" >
+                        <Label Foreground="White">Page Size</Label>
+                        <ComboBox ItemsSource="{Binding PagingPageSize}" SelectedItem="{Binding PagingSelectedPageSize}" Width="50" Margin="5,5,5,5" />
+                    </StackPanel>
+                </Grid>
+
+            </Grid>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" HorizontalAlignment="Right" >
+            <Button Width="100" Command="{Binding NewPatientCommand}" Content="{Binding [New Patient], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+        </StackPanel>
+    </Grid>
+
+    
+    
+</Page>
