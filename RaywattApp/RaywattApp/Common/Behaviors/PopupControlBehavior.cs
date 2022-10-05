@@ -48,7 +48,7 @@ namespace RaywattApp.Common.Behaviors
                 //GetType을 이용하기 위해서 AssemblyQualifiedName이 필요합니다.
                 //예) typeof(AboutControl).AssemblyQualifiedName
                 //다른 클래스라이브러리에 있는 컨트롤도 이름만 알면 만들 수 있습니다.
-                var type = Type.GetType($"RaywattApp.Common.Controls.{Control}, RaywattApp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
+                var type = Type.GetType($"RaywattApp.Views.Controls.{Control}, RaywattApp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
                 if (type == null)
                 {
                     return;

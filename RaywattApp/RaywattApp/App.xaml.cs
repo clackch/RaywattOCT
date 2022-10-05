@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using RaywattApp.Common.Controls;
-using RaywattApp.Common.Services;
+using RaywattApp.Views.Controls;
+using RaywattApp.Services;
 using RaywattApp.ViewModels;
 using RaywattApp.ViewModels.File;
 using RaywattApp.ViewModels.Setting;
