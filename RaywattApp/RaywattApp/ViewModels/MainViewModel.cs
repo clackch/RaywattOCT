@@ -162,9 +162,6 @@ namespace RaywattApp.ViewModels
             //PopupMessage 수신 등록
             WeakReferenceMessenger.Default.Register<PopupMessage>(this, OnLayerPopupMessage);
 
-            //PatientMessage 수신 등록
-            WeakReferenceMessenger.Default.Register<PatientMessage>(this, OnPatientMessage);
-
             Patient = new Patient();
         }
 
@@ -192,7 +189,7 @@ namespace RaywattApp.ViewModels
             _log.Debug("OnNavigationMessage : " + message.Value);
 
             string pageUri = message.Value;
-            ShowPatientInfo(pageUri);
+            ShowPatientInfo(pageUri, (Patient)message.Parameter);
             //순서 중요 - NavigationParameter 먼저 입력 후, NavigationSource 입력 필요
             NavigationParameter = message.Parameter;
             NavigationSource = pageUri;
@@ -301,17 +298,6 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private void OnPatientMessage(object recipient, PatientMessage message)
-        {
-            _log.Debug("OnPatientMessage : " + message.Id);
-
-            Patient.Id = message.Id;
-            Patient.Lastname =  message.Lastname;
-            Patient.Firstname = message.Firstname;
-            Patient.Birthdate = message.Birthdate;
-            Patient.Gender = message.Gender;
-        }
-
         private void Setting()
         {
             _log.Debug("Setting");
@@ -320,7 +306,7 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "SettingPopupControl", Type = (int)CommonDefinition.PopupType.Setting });
         }
 
-        private void ShowPatientInfo(string pageUri)
+        private void ShowPatientInfo(string pageUri, Patient patient)
         {
             _log.Debug("ShowPatientInfo : " + pageUri);
 
@@ -328,16 +314,35 @@ namespace RaywattApp.ViewModels
             {
                 IsShowPatient = Visibility.Visible;
                 IsShowPatientEdit = Visibility.Visible;
+                SetPatientInfo(patient);
             }
             else if (pageUri.IndexOf("RecordingPage") > 0)
             {
                 IsShowPatient = Visibility.Visible;
                 IsShowPatientEdit = Visibility.Collapsed;
+                SetPatientInfo(patient);
             }
             else
             {
                 IsShowPatient = Visibility.Collapsed;
             }
+        }
+
+        private void SetPatientInfo(Patient patient)
+        {
+            _log.Debug("SetPatientInfo");
+
+            if (patient == null)
+            {
+                _log.Info("Patient is null");
+                return;
+            }
+
+            Patient.Id = patient.Id;
+            Patient.Lastname = patient.Lastname;
+            Patient.Firstname = patient.Firstname;
+            Patient.Birthdate = patient.Birthdate;
+            Patient.Gender = patient.Gender;
         }
 
         private void EditPatientInfo()

@@ -39,8 +39,6 @@ namespace RaywattApp.ViewModels
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
             _log.Debug("OnNavigated");
-
-            SetPatientInfo(((NavigationEventArgs)navigatedEventArgs).ExtraData);
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -53,15 +51,6 @@ namespace RaywattApp.ViewModels
             _log.Debug("Cancel");
 
             WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = Patient});
-        }
-
-        private void SetPatientInfo(object patient)
-        {
-            _log.Debug("SetPatientInfo");
-
-            Patient = (Patient)patient;
-
-            WeakReferenceMessenger.Default.Send(new PatientMessage(true) { Id = Patient.Id, Lastname = Patient.Lastname, Firstname = Patient.Firstname, Birthdate = Patient.Birthdate, Gender = Patient.Gender });
         }
     }
 }
