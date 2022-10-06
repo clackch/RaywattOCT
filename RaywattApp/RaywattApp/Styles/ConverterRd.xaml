@@ -16,4 +16,7 @@
     <!-- Paging No Checked Converter -->
     <converters:PagingNoCheckedConverter x:Key="PagingNoCheckedConverter" />
 
+    <!-- L10N Converter -->
+    <converters:L10NConverter x:Key="L10NConverter" /> 
+
 </ResourceDictionary>

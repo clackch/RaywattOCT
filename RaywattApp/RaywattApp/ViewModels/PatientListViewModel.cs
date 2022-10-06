@@ -129,7 +129,7 @@ namespace RaywattApp.ViewModels
             commandParameters["lastname"] = "%" + SearchKeyword + "%";
             commandParameters["firstname"] = "%" + SearchKeyword + "%";
             string commandText =
-                $"SELECT id, lastname, firstname, birthdate, gender, to_char(create_date,'YYYY-MM-DD HH24:MI:SS') createdate, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') updatedate " +
+                $"SELECT id, lastname, firstname, birthdate, rv_schema.fn_code('GEND', gender) gender, to_char(create_date,'YYYY-MM-DD HH24:MI:SS') createdate, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') updatedate " +
                 $"FROM rv_schema.patient " +
                 $"WHERE id LIKE @id OR lastname LIKE @lastname OR firstname LIKE @firstname";
 

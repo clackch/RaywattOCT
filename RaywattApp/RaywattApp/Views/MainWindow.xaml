@@ -37,7 +37,7 @@
                     <Label Foreground="White">]</Label>
                     <Label Foreground="White" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
                     <Label Foreground="White">[</Label>
-                    <Label Foreground="White" Content="{Binding Patient.Gender}"/>
+                    <Label Foreground="White" Content="{Binding Patient.Gender, Converter={StaticResource L10NConverter}}"/>
                     <Label Foreground="White">]</Label>
                     <Button Command="{Binding PatientEditCommand}" Content="{Binding [Edit], Source={StaticResource L10N}}" Visibility="{Binding IsShowPatientEdit}" Margin="5,5,5,5" />
                 </StackPanel>
