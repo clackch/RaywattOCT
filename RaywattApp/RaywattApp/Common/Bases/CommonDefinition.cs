@@ -16,7 +16,9 @@
         {
             Message = 0,
             Setting,
-            File
+            File,
+            PatientEdit,
+            CaseEdit
         }
 
         public enum PopupLevel : int
