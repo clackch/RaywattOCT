@@ -5,6 +5,7 @@ using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
+using RaywattApp.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -145,9 +146,13 @@ namespace RaywattApp.ViewModels
         /// <summary>
         /// 생성자
         /// </summary>
-        public MainViewModel()
+        public MainViewModel(IDatabaseService databaseService)
         {
             _log.Debug("MainViewModel");
+
+            // Code 정의
+            CodeDefinition codeDefinition = new CodeDefinition(databaseService);
+            codeDefinition.GetCode();
 
             //시작 페이지 설정
             NavigationSource = "Views/PatientListPage.xaml";

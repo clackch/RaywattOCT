@@ -125,7 +125,7 @@ namespace RaywattApp.ViewModels
             if (GenderCode != null)
             {
                 commandParameters["gender"] = GenderCode;
-                Patient.Gender = GenderCode == "M" ? "Male" : "Female";
+                Patient.Gender = CodeDefinition.Codes["GEND"][GenderCode];
             }
             else
             {

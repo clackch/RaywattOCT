@@ -42,7 +42,7 @@ ALTER SEQUENCE rv_schema.physician_index_seq
 
 CREATE TABLE IF NOT EXISTS rv_schema.code
 (
-    class character varying(4) COLLATE pg_catalog."default" NOT NULL,
+    classification character varying(4) COLLATE pg_catalog."default" NOT NULL,
     key character varying(4) COLLATE pg_catalog."default" NOT NULL,
     value character varying(50) COLLATE pg_catalog."default",
     buffer1 character varying(50) COLLATE pg_catalog."default",
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS rv_schema.code
     description character varying(100) COLLATE pg_catalog."default",
     create_date timestamp without time zone,
     update_date timestamp without time zone,
-    CONSTRAINT code_pkey PRIMARY KEY (class, key)
+    CONSTRAINT code_pkey PRIMARY KEY (classification, key)
 )
 
 TABLESPACE rv_tablespace;
@@ -66,7 +66,7 @@ ALTER TABLE IF EXISTS rv_schema.code
 CREATE TABLE IF NOT EXISTS rv_schema.log_file
 (
     index integer NOT NULL DEFAULT nextval('rv_schema.log_file_index_seq'::regclass),
-    class character varying(4) COLLATE pg_catalog."default",
+    classification character varying(4) COLLATE pg_catalog."default",
     name character varying(200) COLLATE pg_catalog."default",
     create_date timestamp without time zone,
     update_date timestamp without time zone,
@@ -173,7 +173,7 @@ ALTER TABLE IF EXISTS rv_schema.physician
 -- DROP FUNCTION IF EXISTS rv_schema.fn_code(character varying, character varying);
 
 CREATE OR REPLACE FUNCTION rv_schema.fn_code(
-	arg_group character varying,
+	arg_classification character varying,
 	arg_key character varying)
     RETURNS character varying
     LANGUAGE 'plpgsql'
@@ -185,7 +185,7 @@ AS $BODY$
 	BEGIN
 		SELECT "value" into res_value
 		FROM rv_schema.code
-		WHERE "group" = arg_group AND "key" = arg_key;
+		WHERE "classification" = arg_classification AND "key" = arg_key;
 	RETURN res_value;
 	END;
 $BODY$;
