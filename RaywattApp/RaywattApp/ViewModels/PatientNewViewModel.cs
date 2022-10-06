@@ -21,6 +21,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private Patient _patient;
 
+        [ObservableProperty]
+        private string _genderCode;
+
         private ICommand _cancelCommand;
         public ICommand CancelCommand
         {
@@ -119,14 +122,16 @@ namespace RaywattApp.ViewModels
             commandParameters["lastname"] = Patient.Lastname;
             commandParameters["firstname"] = Patient.Firstname;
             commandParameters["birthdate"] = Patient.Birthdate;
-            if (Patient.Gender != null)
+            if (GenderCode != null)
             {
-                commandParameters["gender"] = Patient.Gender;
+                commandParameters["gender"] = GenderCode;
+                Patient.Gender = GenderCode == "M" ? "Male" : "Female";
             }
             else
             {
                 commandParameters["gender"] = "";
-            }
+            }              
+
             commandText =
                 $"INSERT INTO rv_schema.patient(id, lastname, firstname, birthdate, gender, create_date, update_date) " +
                 $"VALUES (@id, @lastname, @firstname, @birthdate, @gender, now(), now())";
@@ -136,9 +141,6 @@ namespace RaywattApp.ViewModels
 
             if(nRows == 1)
             {
-                if(Patient.Gender != null)
-                    Patient.Gender = Patient.Gender == "M" ? "Male" : "Female";
-
                 WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/RecordingPage.xaml") { Parameter = Patient });
             }           
         }
