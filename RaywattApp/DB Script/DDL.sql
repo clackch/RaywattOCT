@@ -42,7 +42,7 @@ ALTER SEQUENCE rv_schema.physician_index_seq
 
 CREATE TABLE IF NOT EXISTS rv_schema.code
 (
-    "group" character varying(4) COLLATE pg_catalog."default" NOT NULL,
+    class character varying(4) COLLATE pg_catalog."default" NOT NULL,
     key character varying(4) COLLATE pg_catalog."default" NOT NULL,
     value character varying(50) COLLATE pg_catalog."default",
     buffer1 character varying(50) COLLATE pg_catalog."default",
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS rv_schema.code
     description character varying(100) COLLATE pg_catalog."default",
     create_date timestamp without time zone,
     update_date timestamp without time zone,
-    CONSTRAINT code_pkey PRIMARY KEY (key, "group")
+    CONSTRAINT code_pkey PRIMARY KEY (class, key)
 )
 
 TABLESPACE rv_tablespace;
@@ -66,7 +66,7 @@ ALTER TABLE IF EXISTS rv_schema.code
 CREATE TABLE IF NOT EXISTS rv_schema.log_file
 (
     index integer NOT NULL DEFAULT nextval('rv_schema.log_file_index_seq'::regclass),
-    "group" character varying(4) COLLATE pg_catalog."default",
+    class character varying(4) COLLATE pg_catalog."default",
     name character varying(200) COLLATE pg_catalog."default",
     create_date timestamp without time zone,
     update_date timestamp without time zone,
