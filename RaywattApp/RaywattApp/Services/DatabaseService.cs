@@ -64,9 +64,12 @@ namespace RaywattApp.Services
                 Command.CommandText = commandText;
                 //Parameter 입력
                 Command.Parameters.Clear();
-                foreach (KeyValuePair<string, Object> parameter in commandParameters)
+                if(commandParameters != null)
                 {
-                    Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                    foreach (KeyValuePair<string, Object> parameter in commandParameters)
+                    {
+                        Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                    }
                 }
                 //Connection 입력
                 Command.Connection = Connection;
@@ -102,6 +105,8 @@ namespace RaywattApp.Services
             {
                 //Connection 닫기
                 await Connection.CloseAsync();
+
+                PrintLog(commandText, commandParameters);
             }
             //결과 반환
             return returnDatas;
@@ -130,9 +135,12 @@ namespace RaywattApp.Services
                 Command.CommandText = commandText;
                 //Parameter 입력
                 Command.Parameters.Clear();
-                foreach (KeyValuePair<string, Object> parameter in commandParameters)
+                if(commandParameters != null)
                 {
-                    Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                    foreach (KeyValuePair<string, Object> parameter in commandParameters)
+                    {
+                        Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                    }
                 }
                 //Connection 입력
                 Command.Connection = Connection;
@@ -169,11 +177,7 @@ namespace RaywattApp.Services
                 //Connection 닫기
                 Connection.Close();
 
-                _log.Debug(commandText);
-                foreach (var param in commandParameters)
-                {
-                    _log.Debug(param.Key + " = " + param.Value);
-                }
+                PrintLog(commandText, commandParameters);
             }
             //결과 반환
             return returnDatas;
@@ -199,9 +203,12 @@ namespace RaywattApp.Services
                 Command.CommandText = commandText;
                 //Parameter 입력
                 Command.Parameters.Clear();
-                foreach (KeyValuePair<string, Object> parameter in commandParameters)
+                if (commandParameters != null)
                 {
-                    Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                    foreach (KeyValuePair<string, Object> parameter in commandParameters)
+                    {
+                        Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                    }
                 }
                 //Connection 입력
                 Command.Connection = Connection;
@@ -222,11 +229,7 @@ namespace RaywattApp.Services
                 //Connection 닫기
                 Connection.Close();
 
-                _log.Debug(commandText);
-                foreach (var param in commandParameters)
-                {
-                    _log.Debug(param.Key + " = " + param.Value);
-                }
+                PrintLog(commandText, commandParameters);
             }
             //결과 반환
             return cnt;
@@ -252,9 +255,12 @@ namespace RaywattApp.Services
                 Command.CommandText = commandText;
                 //Parameter 입력
                 Command.Parameters.Clear();
-                foreach (KeyValuePair<string, Object> parameter in commandParameters)
+                if (commandParameters != null)
                 {
-                    Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                    foreach (KeyValuePair<string, Object> parameter in commandParameters)
+                    {
+                        Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                    }
                 }
                 //Connection 입력
                 Command.Connection = Connection;
@@ -270,11 +276,7 @@ namespace RaywattApp.Services
                 //Connection 닫기
                 Connection.Close();
 
-                _log.Debug(commandText);
-                foreach (var param in commandParameters)
-                {
-                    _log.Debug(param.Key + " = " + param.Value);
-                }
+                PrintLog(commandText, commandParameters);
             }
             //결과 반환
             return nRows;
@@ -300,9 +302,12 @@ namespace RaywattApp.Services
                 Command.CommandText = commandText;
                 //Parameter 입력
                 Command.Parameters.Clear();
-                foreach (KeyValuePair<string, Object> parameter in commandParameters)
+                if (commandParameters != null)
                 {
-                    Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                    foreach (KeyValuePair<string, Object> parameter in commandParameters)
+                    {
+                        Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                    }
                 }
                 //Connection 입력
                 Command.Connection = Connection;
@@ -318,28 +323,24 @@ namespace RaywattApp.Services
                 //Connection 닫기
                 Connection.Close();
 
-                _log.Debug(commandText);
-                foreach (var param in commandParameters)
-                {
-                    _log.Debug(param.Key + " = " + param.Value);
-                }
+                PrintLog(commandText, commandParameters);
             }
             //결과 반환
             return nRows;
         }
 
-        /// <summary>
-        /// Order by, Limit, Offset 생성 함수
-        /// </summary>
-        public virtual string getAddtionalCondition(string order, int limit, int offset)
+        private void PrintLog(string commandText, Dictionary<string, Object> commandParameters)
         {
-            _log.Debug("getAddtionalCondition");
-
-            string orderCommand = order == "" ? "" : " ORDER BY " + order;
-            string limitCommand = limit > 0 ? " LIMIT " + limit : "";
-            string offsetCommand = offset > 0 ? " OFFSET " + offset : "";
-
-            return orderCommand + limitCommand + offsetCommand;
+            _log.Debug("Query : " + commandText);
+            if (commandParameters != null)
+            {
+                string str = "Parameters : ";
+                foreach (var param in commandParameters)
+                {
+                    str += param.Key + " = " + param.Value + ", ";
+                }
+                _log.Debug(str);
+            }
         }
     }
 }

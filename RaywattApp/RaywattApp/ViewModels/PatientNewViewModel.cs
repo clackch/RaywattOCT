@@ -16,7 +16,7 @@ namespace RaywattApp.ViewModels
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(PatientNewViewModel));
 
-        private readonly IDatabaseService _databaseService;
+        private readonly SqlManager _sqlManager;
 
         [ObservableProperty]
         private Patient _patient;
@@ -42,13 +42,13 @@ namespace RaywattApp.ViewModels
             get { return this._newRecordingCommand ?? (this._newRecordingCommand = new RelayCommand(NewRecording, CanNewRecording)); }
         }
 
-        public PatientNewViewModel(IDatabaseService databaseService)
+        public PatientNewViewModel(SqlManager sqlManager)
         {
             _log.Debug("PatientNewViewModel");
 
             CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.PatientNewPage;
 
-            _databaseService = databaseService;
+            _sqlManager = sqlManager;
 
             Patient = new Patient();
             Patient.Id = "";
@@ -102,14 +102,10 @@ namespace RaywattApp.ViewModels
             _log.Debug("NewRecording");
 
             //Check ID for Duplication
-            Dictionary<string, Object> commandParameters = new Dictionary<string, Object>();
-            commandParameters["id"] = Patient.Id.Trim();
-            string commandText =
-                $"SELECT count(*) " +
-                $"FROM rv_schema.patient " +
-                $"WHERE id = @id ";
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = Patient.Id.Trim();
 
-            int nCnt = _databaseService.GetDataCount(commandText, commandParameters);
+            int nCnt = _sqlManager.CountPatient(sqlParameters);
 
             if(nCnt > 0)
             {
@@ -119,26 +115,22 @@ namespace RaywattApp.ViewModels
             }
 
             //Save New Patient Info
-            commandParameters.Clear();
-            commandParameters["id"] = Patient.Id.Trim();
-            commandParameters["lastname"] = Patient.Lastname.Trim();
-            commandParameters["firstname"] = Patient.Firstname.Trim();
-            commandParameters["birthdate"] = Patient.Birthdate;
+            sqlParameters.Clear();
+            sqlParameters["id"] = Patient.Id.Trim();
+            sqlParameters["lastname"] = Patient.Lastname.Trim();
+            sqlParameters["firstname"] = Patient.Firstname.Trim();
+            sqlParameters["birthdate"] = Patient.Birthdate;
             if (GenderCode != null)
             {
-                commandParameters["gender"] = GenderCode;
+                sqlParameters["gender"] = GenderCode;
                 Patient.Gender = CodeDefinition.Codes["GEND"][GenderCode];
             }
             else
             {
-                commandParameters["gender"] = "";
+                sqlParameters["gender"] = "";
             }              
 
-            commandText =
-                $"INSERT INTO rv_schema.patient(id, lastname, firstname, birthdate, gender, create_date, update_date) " +
-                $"VALUES (@id, @lastname, @firstname, @birthdate, @gender, now(), now())";
-
-            int nRows = _databaseService.InsertData(commandText, commandParameters);
+            int nRows = _sqlManager.InsertPatient(sqlParameters);
 
             if(nRows == 1)
             {

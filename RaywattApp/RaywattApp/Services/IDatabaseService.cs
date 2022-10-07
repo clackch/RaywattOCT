@@ -17,28 +17,23 @@ namespace RaywattApp.Services
         /// <summary>
         /// 비동기화 Select Query
         /// </summary>
-        Task<IList<T>> GetDatasAsync<T>(string commandText, Dictionary<string, Object> commandParameters) where T : class;
+        Task<IList<T>> GetDatasAsync<T>(string commandText, Dictionary<string, Object> commandParameters = null) where T : class;
 
         /// <summary>
         /// 동기화 Select Query
         /// </summary>
-        IList<T> GetDatas<T>(string commandText, Dictionary<string, Object> commandParameters) where T : class;
+        IList<T> GetDatas<T>(string commandText, Dictionary<string, Object> commandParameters = null) where T : class;
 
-        int GetDataCount(string commandText, Dictionary<string, Object> commandParameters);
+        int GetDataCount(string commandText, Dictionary<string, Object> commandParameters = null);
 
         /// <summary>
         /// Data Insert
         /// </summary>
-        int InsertData(string commandText, Dictionary<string, Object> commandParameters);
+        int InsertData(string commandText, Dictionary<string, Object> commandParameters = null);
 
         /// <summary>
         /// Data Update
         /// </summary>
-        int UpdateData(string commandText, Dictionary<string, Object> commandParameters);
-
-        /// <summary>
-        /// Order by, Limit, Offset 생성 함수
-        /// </summary>
-        string getAddtionalCondition(string order, int limit, int offset);
+        int UpdateData(string commandText, Dictionary<string, Object> commandParameters = null);
     }
 }
