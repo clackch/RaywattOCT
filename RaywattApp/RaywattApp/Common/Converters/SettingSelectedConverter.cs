@@ -4,22 +4,23 @@ using System.Windows.Data;
 
 namespace RaywattApp.Common.Converters
 {
-    public class RadioButtonConverter : IValueConverter
+    public class SettingSelectedConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null)
-                return false;
-
-            if (value.ToString() == parameter.ToString())
-                return true;
+            if(value.Equals(parameter))
+            {
+                return "Red";
+            }
             else
-                return false;
+            {
+                return "White";
+            }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return parameter;
+            throw new NotImplementedException();
         }
     }
 }

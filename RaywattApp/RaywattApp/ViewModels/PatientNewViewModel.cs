@@ -50,9 +50,11 @@ namespace RaywattApp.ViewModels
 
             _databaseService = databaseService;
 
-            var newPatient = new Patient();
-            newPatient.Birthdate = System.DateTime.Today;
-            Patient = newPatient;
+            Patient = new Patient();
+            Patient.Id = "";
+            Patient.Lastname = "";
+            Patient.Firstname = "";
+            Patient.Birthdate = System.DateTime.Today;
 
             Patient.PropertyChanged += Patient_PropertyChanged;
         }
@@ -101,7 +103,7 @@ namespace RaywattApp.ViewModels
 
             //Check ID for Duplication
             Dictionary<string, Object> commandParameters = new Dictionary<string, Object>();
-            commandParameters["id"] = Patient.Id;
+            commandParameters["id"] = Patient.Id.Trim();
             string commandText =
                 $"SELECT count(*) " +
                 $"FROM rv_schema.patient " +
@@ -118,14 +120,14 @@ namespace RaywattApp.ViewModels
 
             //Save New Patient Info
             commandParameters.Clear();
-            commandParameters["id"] = Patient.Id;
-            commandParameters["lastname"] = Patient.Lastname;
-            commandParameters["firstname"] = Patient.Firstname;
+            commandParameters["id"] = Patient.Id.Trim();
+            commandParameters["lastname"] = Patient.Lastname.Trim();
+            commandParameters["firstname"] = Patient.Firstname.Trim();
             commandParameters["birthdate"] = Patient.Birthdate;
             if (GenderCode != null)
             {
                 commandParameters["gender"] = GenderCode;
-                Patient.Gender = GenderCode == "M" ? "Male" : "Female";
+                Patient.Gender = CodeDefinition.Codes["GEND"][GenderCode];
             }
             else
             {
@@ -138,7 +140,6 @@ namespace RaywattApp.ViewModels
 
             int nRows = _databaseService.InsertData(commandText, commandParameters);
 
-
             if(nRows == 1)
             {
                 WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/RecordingPage.xaml") { Parameter = Patient });
@@ -149,13 +150,13 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Validate");
 
-            if (string.IsNullOrEmpty(Patient.Id))
+            if (string.IsNullOrEmpty(Patient.Id.Trim()))
                 return false;
 
-            if (string.IsNullOrEmpty(Patient.Lastname))
+            if (string.IsNullOrEmpty(Patient.Lastname.Trim()))
                 return false;
 
-            if (string.IsNullOrEmpty(Patient.Firstname))
+            if (string.IsNullOrEmpty(Patient.Firstname.Trim()))
                 return false;
 
             return true;

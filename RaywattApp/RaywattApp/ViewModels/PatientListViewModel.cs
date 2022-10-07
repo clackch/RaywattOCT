@@ -139,8 +139,7 @@ namespace RaywattApp.ViewModels
             //Ordering & Paging
             commandText += $"{_databaseService.getAddtionalCondition(strColumnOrder, PagingSelectedPageSize, PagingOffset)}";
 
-            var datas = _databaseService.GetDatas<Patient>(commandText, commandParameters);
-            PatientList = datas;            
+            PatientList = _databaseService.GetDatas<Patient>(commandText, commandParameters);
         }
 
         override protected void SetHeaderNameInit()

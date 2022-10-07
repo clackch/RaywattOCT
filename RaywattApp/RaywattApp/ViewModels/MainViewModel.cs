@@ -5,6 +5,7 @@ using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
+using RaywattApp.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -18,6 +19,8 @@ namespace RaywattApp.ViewModels
     public partial class MainViewModel : ViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(MainViewModel));
+
+        private readonly IDatabaseService _databaseService;
 
         /// <summary>
         /// Busy 목록
@@ -108,7 +111,7 @@ namespace RaywattApp.ViewModels
         private string _filePopupType;
 
         [ObservableProperty]
-        private Patient _patient; 
+        private Patient _patient;
 
         [ObservableProperty]
         private Visibility _isShowPatient = Visibility.Collapsed;
@@ -130,24 +133,18 @@ namespace RaywattApp.ViewModels
             get { return this._popupNavigateCommand ?? (this._popupNavigateCommand = new RelayCommand<string>(OnPopupNavigate)); }
         }
 
-        private ICommand _settingCommand;
-        public ICommand SettingCommand
-        {
-            get { return this._settingCommand ?? (this._settingCommand = new RelayCommand(Setting)); }
-        }
-
-        private ICommand _patiendEditCommand;
-        public ICommand PatientEditCommand
-        {
-            get { return this._patiendEditCommand ?? (this._patiendEditCommand = new RelayCommand(EditPatientInfo)); }
-        }
-
         /// <summary>
         /// 생성자
         /// </summary>
-        public MainViewModel()
+        public MainViewModel(IDatabaseService databaseService)
         {
             _log.Debug("MainViewModel");
+
+            _databaseService = databaseService;
+
+            // Code 정의
+            CodeDefinition codeDefinition = new CodeDefinition(_databaseService);
+            codeDefinition.GetCode();
 
             //시작 페이지 설정
             NavigationSource = "Views/PatientListPage.xaml";
@@ -293,17 +290,15 @@ namespace RaywattApp.ViewModels
                     }
 
                     break;
+                case (int)CommonDefinition.PopupType.PatientEdit:
+
+                    ShowViewLayerPopup = message.Value;
+                    ViewControlName = message.ControlName;
+
+                    break;
                 default:
                     break;
             }
-        }
-
-        private void Setting()
-        {
-            _log.Debug("Setting");
-
-            PopupNavigationSource = "Views/Setting/SettingAcquisitionPage.xaml";
-            WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "SettingPopupControl", Type = (int)CommonDefinition.PopupType.Setting });
         }
 
         private void ShowPatientInfo(string pageUri, Patient patient)
@@ -338,16 +333,16 @@ namespace RaywattApp.ViewModels
                 return;
             }
 
-            Patient.Id = patient.Id;
-            Patient.Lastname = patient.Lastname;
-            Patient.Firstname = patient.Firstname;
-            Patient.Birthdate = patient.Birthdate;
-            Patient.Gender = patient.Gender;
+            CopyPatient(patient, Patient);
         }
 
-        private void EditPatientInfo()
+        private void CopyPatient(Patient src, Patient dest)
         {
-            _log.Debug("EditPatientInfo");
+            dest.Id = src.Id.Trim();
+            dest.Lastname = src.Lastname.Trim();
+            dest.Firstname = src.Firstname.Trim();
+            dest.Birthdate = src.Birthdate;
+            dest.Gender = src.Gender;
         }
     }
 }

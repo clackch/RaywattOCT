@@ -17,6 +17,9 @@
     <converters:PagingNoCheckedConverter x:Key="PagingNoCheckedConverter" />
 
     <!-- L10N Converter -->
-    <converters:L10NConverter x:Key="L10NConverter" /> 
+    <converters:L10NConverter x:Key="L10NConverter" />
+
+    <!-- Setting Selected Converter -->
+    <converters:SettingSelectedConverter x:Key="SettingSelectedConverter" /> 
 
 </ResourceDictionary>
