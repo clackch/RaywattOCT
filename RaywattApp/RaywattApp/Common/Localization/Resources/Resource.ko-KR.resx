@@ -138,6 +138,9 @@
   <data name="Create Date" xml:space="preserve">
     <value>생성일</value>
   </data>
+  <data name="Database" xml:space="preserve">
+    <value>데이터베이스</value>
+  </data>
   <data name="Edit" xml:space="preserve">
     <value>수정</value>
   </data>

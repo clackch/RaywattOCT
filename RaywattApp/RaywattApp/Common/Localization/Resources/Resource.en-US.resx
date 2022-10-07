@@ -138,6 +138,9 @@
   <data name="Create Date" xml:space="preserve">
     <value>Create Date</value>
   </data>
+  <data name="Database" xml:space="preserve">
+    <value>Database</value>
+  </data>
   <data name="Edit" xml:space="preserve">
     <value>Edit</value>
   </data>

@@ -50,6 +50,7 @@ namespace RaywattApp
             //Setting
             services.AddTransient(typeof(SettingAcquisitionViewModel));
             services.AddTransient(typeof(SettingLocalizationViewModel));
+            services.AddTransient(typeof(SettingDatabaseViewModel));
 
             //File
             services.AddTransient(typeof(FileExportStep1ViewModel));
