@@ -17,7 +17,7 @@ namespace RaywattApp.ViewModels
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(PatientListViewModel));
 
-        private readonly IDatabaseService _databaseService;
+        private readonly SqlManager _sqlManager;
 
         [ObservableProperty]
         private IList<Patient> _patientList;
@@ -76,13 +76,13 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private string _headerUpdateDate;
 
-        public PatientListViewModel(IDatabaseService databaseService)
+        public PatientListViewModel(SqlManager sqlManager)
         {
             _log.Debug("PatientListViewModel");
 
             CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.PatientListPage;
 
-            _databaseService = databaseService;
+            _sqlManager = sqlManager;
 
             //Header Name
             SetHeaderNameInit();
@@ -97,6 +97,9 @@ namespace RaywattApp.ViewModels
 
             //Initialize Complete
             bCheckInit = true;
+
+            //Initialize SearchKeyword
+            SearchKeyword = "";
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -111,35 +114,22 @@ namespace RaywattApp.ViewModels
             _log.Debug("OnNavigating");
         }
 
-        private void GetTotalCnt(string commandText, Dictionary<string, Object> commandParameters)
-        {
-            _log.Debug("GetTotalCnt");
-
-            commandText = $"SELECT count(*) FROM (" + commandText + ") t";
-
-            PagingTotalCnt = _databaseService.GetDataCount(commandText, commandParameters);
-        }
-
         override protected void Search()
         {
             _log.Debug("Search");
 
-            Dictionary<string, Object> commandParameters = new Dictionary<string, Object>();
-            commandParameters["id"] = "%" + SearchKeyword + "%";
-            commandParameters["lastname"] = "%" + SearchKeyword + "%";
-            commandParameters["firstname"] = "%" + SearchKeyword + "%";
-            string commandText =
-                $"SELECT id, lastname, firstname, birthdate, rv_schema.fn_code('GEND', gender) gender, to_char(create_date,'YYYY-MM-DD HH24:MI:SS') createdate, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') updatedate " +
-                $"FROM rv_schema.patient " +
-                $"WHERE id LIKE @id OR lastname LIKE @lastname OR firstname LIKE @firstname";
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["SearchKeyword"] = SearchKeyword.Trim();
+
+            Dictionary<string, Object> sqlAdditionalCondition = new Dictionary<string, Object>();
+            sqlAdditionalCondition["ORDER"] = strColumnOrder;
+            sqlAdditionalCondition["LIMIT"] = PagingSelectedPageSize;
+            sqlAdditionalCondition["OFFSET"] = PagingOffset;
 
             //Paging을 위한 전체 Row 수 Count
-            GetTotalCnt(commandText, commandParameters);
+            PagingTotalCnt = _sqlManager.PageCountPatientList(sqlParameters);
 
-            //Ordering & Paging
-            commandText += $"{_databaseService.getAddtionalCondition(strColumnOrder, PagingSelectedPageSize, PagingOffset)}";
-
-            PatientList = _databaseService.GetDatas<Patient>(commandText, commandParameters);
+            PatientList = _sqlManager.PageSelectPatientList(sqlParameters, sqlAdditionalCondition);
         }
 
         override protected void SetHeaderNameInit()

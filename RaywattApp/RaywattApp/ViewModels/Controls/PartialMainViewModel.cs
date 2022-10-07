@@ -70,20 +70,14 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("SavePatientEdit");
 
-            Dictionary<string, Object> commandParameters = new Dictionary<string, Object>();
-            string commandText;
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
 
             if (!Patient.Id.Equals(PatientEdit.Id.Trim()))
             {
                 //Check ID for Duplication
-                commandParameters["id"] = Patient.Id;
+                sqlParameters["id"] = Patient.Id.Trim();
 
-                commandText =
-                    $"SELECT count(*) " +
-                    $"FROM rv_schema.patient " +
-                    $"WHERE id = @id ";
-
-                int nCnt = _databaseService.GetDataCount(commandText, commandParameters);
+                int nCnt = _sqlManager.CountPatient(sqlParameters);
 
                 if (nCnt > 0)
                 {
@@ -93,27 +87,22 @@ namespace RaywattApp.ViewModels
             }
 
             //Save New Patient Info
-            commandParameters.Clear();
-            commandParameters["id"] = PatientEdit.Id.Trim();
-            commandParameters["lastname"] = PatientEdit.Lastname.Trim();
-            commandParameters["firstname"] = PatientEdit.Firstname.Trim();
-            commandParameters["birthdate"] = PatientEdit.Birthdate;
+            sqlParameters.Clear();
+            sqlParameters["id"] = PatientEdit.Id.Trim();
+            sqlParameters["lastname"] = PatientEdit.Lastname.Trim();
+            sqlParameters["firstname"] = PatientEdit.Firstname.Trim();
+            sqlParameters["birthdate"] = PatientEdit.Birthdate;
             if (GenderCodeEdit != null)
             {
-                commandParameters["gender"] = GenderCodeEdit;
+                sqlParameters["gender"] = GenderCodeEdit;
                 PatientEdit.Gender = CodeDefinition.Codes["GEND"][GenderCodeEdit];
             }
             else
             {
-                commandParameters["gender"] = "";
+                sqlParameters["gender"] = "";
             }
 
-            commandText =
-                $"UPDATE rv_schema.patient " +
-                $"SET id=@id, lastname=@lastname, firstname=@firstname, birthdate=@birthdate, gender=@gender, update_date=now() " +
-                $"WHERE id=@id";
-
-            int nRows = _databaseService.UpdateData(commandText, commandParameters);
+            int nRows = _sqlManager.UpdatePatient(sqlParameters);
 
             if (nRows == 1)
             {

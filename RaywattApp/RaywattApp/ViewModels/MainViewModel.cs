@@ -20,7 +20,7 @@ namespace RaywattApp.ViewModels
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(MainViewModel));
 
-        private readonly IDatabaseService _databaseService;
+        private readonly SqlManager _sqlManager;
 
         /// <summary>
         /// Busy 목록
@@ -136,14 +136,14 @@ namespace RaywattApp.ViewModels
         /// <summary>
         /// 생성자
         /// </summary>
-        public MainViewModel(IDatabaseService databaseService)
+        public MainViewModel(SqlManager sqlManager)
         {
             _log.Debug("MainViewModel");
 
-            _databaseService = databaseService;
+            _sqlManager = sqlManager;
 
             // Code 정의
-            CodeDefinition codeDefinition = new CodeDefinition(_databaseService);
+            CodeDefinition codeDefinition = new CodeDefinition(_sqlManager);
             codeDefinition.GetCode();
 
             //시작 페이지 설정

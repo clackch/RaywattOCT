@@ -14,7 +14,7 @@ namespace RaywattApp.ViewModels
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(RecordingViewModel));
 
-        private readonly IDatabaseService _databaseService;
+        private readonly SqlManager _sqlManager;
 
         [ObservableProperty]
         private Patient _patient;
@@ -25,13 +25,13 @@ namespace RaywattApp.ViewModels
             get { return this._cancelCommand ?? (this._cancelCommand = new RelayCommand(Cancel)); }
         }
 
-        public RecordingViewModel(IDatabaseService databaseService)
+        public RecordingViewModel(SqlManager sqlManager)
         {
             _log.Debug("RecordingViewModel");
 
             CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.RecordingPage;
 
-            _databaseService = databaseService;
+            _sqlManager = sqlManager;
         }
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
