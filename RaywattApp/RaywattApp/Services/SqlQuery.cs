@@ -54,7 +54,7 @@ namespace RaywattApp.Services
             _query["SelectCodeList"] =
                 $"SELECT classification, key, value, buffer1, buffer2 " +
                 $"FROM rv_schema.code " +
-                $"ORDER BY classification, key";
+                $"ORDER BY classification, sort_order, key";
 
             //SelectPatientCaseByDate - create_data 기준
             _query["SelectPatientCaseByDate"] =

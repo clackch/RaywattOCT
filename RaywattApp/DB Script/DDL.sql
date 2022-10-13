@@ -47,10 +47,12 @@ CREATE TABLE IF NOT EXISTS rv_schema.code
     value character varying(50) COLLATE pg_catalog."default",
     buffer1 character varying(50) COLLATE pg_catalog."default",
     buffer2 character varying(50) COLLATE pg_catalog."default",
+    sort_order integer,
     description character varying(100) COLLATE pg_catalog."default",
     create_date timestamp without time zone,
     update_date timestamp without time zone,
     CONSTRAINT code_pkey PRIMARY KEY (classification, key)
+        USING INDEX TABLESPACE rv_tablespace
 )
 
 TABLESPACE rv_tablespace;
