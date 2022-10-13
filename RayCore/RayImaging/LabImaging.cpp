@@ -110,7 +110,7 @@ void CLabImaging::Process(USHORT* fringes) {
 	generateImage(false);
 
 	postProcessing();
-	;
+
 	cv::rotate(imageResultColor, imageRectangle, cv::ROTATE_90_COUNTERCLOCKWISE);
 }
 
