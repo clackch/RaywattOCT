@@ -2,39 +2,16 @@
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Messages;
-using RaywattApp.Models;
-using System.Collections.Generic;
-using System.Linq;
-using System;
 using System.Windows.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace RaywattApp.ViewModels
 {
     public partial class MainViewModel
     {
-        [ObservableProperty]
-        private Patient _patientEdit;
-
-        [ObservableProperty]
-        private string _genderCodeEdit;
-
         private ICommand _settingCommand;
         public ICommand SettingCommand
         {
             get { return this._settingCommand ?? (this._settingCommand = new RelayCommand(Setting, CanButtonClick)); }
-        }
-
-        private ICommand _patiendEditCommand;
-        public ICommand PatientEditCommand
-        {
-            get { return this._patiendEditCommand ?? (this._patiendEditCommand = new RelayCommand(ShowPatientEdit, CanButtonClick)); }
-        }
-
-        private ICommand _patiendEditSaveCommand;
-        public ICommand PatientEditSaveCommand
-        {
-            get { return this._patiendEditSaveCommand ?? (this._patiendEditSaveCommand = new RelayCommand(SavePatientEdit, CanSavePatient)); }
         }
 
         private bool CanButtonClick()
@@ -57,88 +34,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ShowPatientEdit");
 
-            PatientEdit = new Patient();
-            CopyPatient(Patient, PatientEdit);
-            GenderCodeEdit = CodeDefinition.Codes["GEND"].FirstOrDefault(x => x.Value == Patient.Gender).Key;
-
-            PatientEdit.PropertyChanged += PatientEdit_PropertyChanged;
-
-            WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "PatientEditPopupControl", Type = (int)CommonDefinition.PopupType.PatientEdit });
-        }
-
-        private void SavePatientEdit()
-        {
-            _log.Debug("SavePatientEdit");
-
-            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-
-            if (!Patient.Id.Equals(PatientEdit.Id.Trim()))
-            {
-                //Check ID for Duplication
-                sqlParameters["id"] = Patient.Id.Trim();
-
-                int nCnt = _sqlManager.CountPatient(sqlParameters);
-
-                if (nCnt > 0)
-                {
-                    WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "MessagePopupControl", Type = (int)CommonDefinition.PopupType.Message, Level = (int)CommonDefinition.PopupLevel.Info, Parameter = _l10n["ID is duplicated."] });
-                    return;
-                }
-            }
-
-            //Save New Patient Info
-            sqlParameters.Clear();
-            sqlParameters["id"] = PatientEdit.Id.Trim();
-            sqlParameters["lastname"] = PatientEdit.Lastname.Trim();
-            sqlParameters["firstname"] = PatientEdit.Firstname.Trim();
-            sqlParameters["birthdate"] = PatientEdit.Birthdate;
-            if (GenderCodeEdit != null)
-            {
-                sqlParameters["gender"] = GenderCodeEdit;
-                PatientEdit.Gender = CodeDefinition.Codes["GEND"][GenderCodeEdit];
-            }
-            else
-            {
-                sqlParameters["gender"] = "";
-            }
-
-            int nRows = _sqlManager.UpdatePatient(sqlParameters);
-
-            if (nRows == 1)
-            {
-                CopyPatient(PatientEdit, Patient);
-                WeakReferenceMessenger.Default.Send(new PopupMessage(false) { Type = (int)CommonDefinition.PopupType.PatientEdit });
-            }
-        }
-
-        private bool CanSavePatient()
-        {
-            _log.Debug("CanNewRecording");
-
-            return ValidatePatient();
-        }
-
-        private void PatientEdit_PropertyChanged(object sender, EventArgs e)
-        {
-            _log.Debug("PatientEdit_PropertyChanged");
-
-            (PatientEditSaveCommand as RelayCommand).NotifyCanExecuteChanged();
-        }
-
-        private bool ValidatePatient()
-        {
-            _log.Debug("ValidatePatient");
-
-            if (string.IsNullOrEmpty(PatientEdit.Id.Trim()))
-                return false;
-
-            if (string.IsNullOrEmpty(PatientEdit.Lastname.Trim()))
-                return false;
-
-            if (string.IsNullOrEmpty(PatientEdit.Firstname.Trim()))
-                return false;
-
-            return true;
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientEditPage.xaml") { Parameter = Patient });
         }
     }
 }

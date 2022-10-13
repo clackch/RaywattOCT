@@ -83,6 +83,24 @@ namespace RaywattApp.Services
             return _databaseService.GetDatas<Code>(commandText);
         }
 
+        public IList<CustomExpander> SelectPatientCaseByDate(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("SelectPatientCaseByDate");
+
+            string commandText = SqlQuery.GetQuery("SelectPatientCaseByDate");
+
+            return _databaseService.GetDatas<CustomExpander>(commandText, sqlParameters);
+        }
+
+        public IList<PatientCase> SelectPatientCaseList(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("SelectPatientCaseList");
+
+            string commandText = SqlQuery.GetQuery("SelectPatientCaseList");
+
+            return _databaseService.GetDatas<PatientCase>(commandText, sqlParameters);
+        }
+
         private string getAdditionalCondition(Dictionary<string, Object> sqlAdditionalCondition)
         {
             _log.Debug("getAddtionalCondition");

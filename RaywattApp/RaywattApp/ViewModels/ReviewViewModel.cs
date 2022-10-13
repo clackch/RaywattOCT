@@ -1,24 +1,29 @@
-﻿using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
-using System.Windows.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
 using RaywattApp.Services;
+using System.Collections.Generic;
+using System;
+using System.Windows.Input;
 using System.Windows.Navigation;
 
 namespace RaywattApp.ViewModels
 {
-    public partial class RecordingViewModel : ViewModelBase
+    public partial class ReviewViewModel : ViewModelBase
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(RecordingViewModel));
+        private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewViewModel));
 
         private readonly SqlManager _sqlManager;
 
         [ObservableProperty]
         private Patient _patient;
+
+        [ObservableProperty]
+        private PatientCase _patientCase;
 
         private ICommand _cancelCommand;
         public ICommand CancelCommand
@@ -26,14 +31,15 @@ namespace RaywattApp.ViewModels
             get { return this._cancelCommand ?? (this._cancelCommand = new RelayCommand(Cancel)); }
         }
 
-        public RecordingViewModel(SqlManager sqlManager)
+        public ReviewViewModel(SqlManager sqlManager)
         {
-            _log.Debug("RecordingViewModel");
+            _log.Debug("ReviewViewModel");
 
-            CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.RecordingPage;
+            CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.ReviewPage;
 
             _sqlManager = sqlManager;
         }
+
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
             _log.Debug("OnNavigated");
@@ -42,7 +48,9 @@ namespace RaywattApp.ViewModels
 
             if (extraData != null)
             {
-                Patient = (Patient)extraData;
+                Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
+                Patient = (Patient)data["patient"];
+                PatientCase = (PatientCase)data["patientCase"];
             }
         }
 
@@ -55,7 +63,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Cancel");
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = Patient});
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = Patient });
         }
     }
 }

@@ -127,7 +127,7 @@ ALTER TABLE IF EXISTS rv_schema.patient
 CREATE TABLE IF NOT EXISTS rv_schema.patient_case
 (
     id character varying(24) COLLATE pg_catalog."default" NOT NULL,
-    patient_name character varying(9) COLLATE pg_catalog."default",
+    patient_id character varying(9) COLLATE pg_catalog."default",
     physician_id character varying(9) COLLATE pg_catalog."default",
     accession_number character varying(6) COLLATE pg_catalog."default",
     accession_name character varying(40) COLLATE pg_catalog."default",
@@ -140,6 +140,12 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case
     create_date timestamp without time zone,
     update_date timestamp without time zone,
     CONSTRAINT patient_case_pkey PRIMARY KEY (id)
+        USING INDEX TABLESPACE rv_tablespace,
+    CONSTRAINT patient_case_patient_id_fkey FOREIGN KEY (patient_id)
+        REFERENCES rv_schema.patient (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE SET NULL
+        NOT VALID
 )
 
 TABLESPACE rv_tablespace;
@@ -191,4 +197,54 @@ AS $BODY$
 $BODY$;
 
 ALTER FUNCTION rv_schema.fn_code(character varying, character varying)
+    OWNER TO rv_user;
+	
+
+-- FUNCTION: rv_schema.fn_patient(character varying)
+
+-- DROP FUNCTION IF EXISTS rv_schema.fn_patient(character varying);
+
+CREATE OR REPLACE FUNCTION rv_schema.fn_patient(
+	arg_id character varying)
+    RETURNS character varying
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+AS $BODY$
+	DECLARE
+	res_value character varying;
+	BEGIN
+		SELECT concat("lastname", ', ', "firstname") into res_value
+		FROM rv_schema.patient
+		WHERE "id" = arg_id;
+	RETURN res_value;
+	END;
+$BODY$;
+
+ALTER FUNCTION rv_schema.fn_patient(character varying)
+    OWNER TO rv_user;
+
+
+-- FUNCTION: rv_schema.fn_physician(character varying)
+
+-- DROP FUNCTION IF EXISTS rv_schema.fn_physician(character varying);
+
+CREATE OR REPLACE FUNCTION rv_schema.fn_physician(
+	arg_id character varying)
+    RETURNS character varying
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+AS $BODY$
+	DECLARE
+	res_value character varying;
+	BEGIN
+		SELECT "name" into res_value
+		FROM rv_schema.physician
+		WHERE "id" = arg_id;
+	RETURN res_value;
+	END;
+$BODY$;
+
+ALTER FUNCTION rv_schema.fn_physician(character varying)
     OWNER TO rv_user;

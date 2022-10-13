@@ -9,7 +9,9 @@
             PatientListPage = 0,
             PatientDetailPage,
             PatientNewPage,
-            RecordingPage
+            PatientEditPage,
+            RecordingPage,
+            ReviewPage
         }
 
         public enum PopupType : int

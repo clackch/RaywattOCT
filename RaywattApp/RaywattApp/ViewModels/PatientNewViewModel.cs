@@ -116,9 +116,9 @@ namespace RaywattApp.ViewModels
 
             //Save New Patient Info
             sqlParameters.Clear();
-            sqlParameters["id"] = Patient.Id.Trim();
-            sqlParameters["lastname"] = Patient.Lastname.Trim();
-            sqlParameters["firstname"] = Patient.Firstname.Trim();
+            sqlParameters["id"] = Patient.Id = Patient.Id.Trim();
+            sqlParameters["lastname"] = Patient.Lastname = Patient.Lastname.Trim();
+            sqlParameters["firstname"] = Patient.Firstname = Patient.Firstname.Trim();
             sqlParameters["birthdate"] = Patient.Birthdate;
             if (GenderCode != null)
             {

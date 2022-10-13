@@ -8,6 +8,8 @@ using RaywattApp.Models;
 using System.Collections.Generic;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
+using System;
+using System.Windows.Navigation;
 
 namespace RaywattApp.ViewModels
 {
@@ -19,6 +21,12 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private Patient _patient;
+
+        [ObservableProperty]
+        private IList<CustomExpander> _patientCaseByDate;
+
+        [ObservableProperty]
+        private IList<PatientCase> _patientCaseList;
 
         private ICommand _exportCommand;
         public ICommand ExportCommand
@@ -32,10 +40,34 @@ namespace RaywattApp.ViewModels
             get { return this._backCommand ?? (this._backCommand = new RelayCommand(Back)); }
         }
 
+        private ICommand _patiendEditCommand;
+        public ICommand PatientEditCommand
+        {
+            get { return this._patiendEditCommand ?? (this._patiendEditCommand = new RelayCommand(GoPatientEdit)); }
+        }
+
         private ICommand _newRecordingCommand;
         public ICommand NewRecordingCommand
         {
             get { return this._newRecordingCommand ?? (this._newRecordingCommand = new RelayCommand(NewRecording)); }
+        }
+
+        private ICommand _showPatientCaseCommand;
+        public ICommand ShowPatientCaseCommand
+        {
+            get { return this._showPatientCaseCommand ?? (this._showPatientCaseCommand = new RelayCommand<CustomExpander>(ShowPatientCase)); }
+        }
+
+        private ICommand _hidePatientCaseCommand;
+        public ICommand HidePatientCaseCommand
+        {
+            get { return this._hidePatientCaseCommand ?? (this._hidePatientCaseCommand = new RelayCommand<CustomExpander>(HidePatientCase)); }
+        }
+
+        private ICommand _goReviewCommand;
+        public ICommand GoReviewCommand
+        {
+            get { return this._goReviewCommand ?? (this._goReviewCommand = new RelayCommand<PatientCase>(GoReview)); }
         }
 
         public PatientDetailViewModel(SqlManager sqlManager)
@@ -50,6 +82,15 @@ namespace RaywattApp.ViewModels
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
             _log.Debug("OnNavigated");
+
+            var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
+
+            if (extraData != null)
+            {
+                Patient = (Patient)extraData;
+            }
+
+            SetPatientCaseByDate();
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -62,6 +103,13 @@ namespace RaywattApp.ViewModels
             _log.Debug("Back");
 
             WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientListPage.xaml"));
+        }
+
+        private void GoPatientEdit()
+        {
+            _log.Debug("GoPatientEdit");
+
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientEditPage.xaml") { Parameter = Patient });
         }
 
         private void NewRecording()
@@ -85,6 +133,54 @@ namespace RaywattApp.ViewModels
 
             //항목 선택된 건 Parameter로 넘기도록
             WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "FilePopupControl", Type = (int)CommonDefinition.PopupType.File, FileType = (int)CommonDefinition.FileType.Export, Parameter = fileExportData });
+        }
+
+        private void SetPatientCaseByDate()
+        {
+            _log.Debug("SetPatientCaseByDate");
+
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = Patient.Id;
+
+            PatientCaseByDate = _sqlManager.SelectPatientCaseByDate(sqlParameters);
+
+            if(PatientCaseByDate.Count > 0)
+            {
+                ShowPatientCase(PatientCaseByDate[0]);
+            }
+        }
+
+        private void ShowPatientCase(CustomExpander patientCase)
+        {
+            _log.Debug("ShowPatientCase");
+
+            foreach (CustomExpander keyValue in PatientCaseByDate)
+            {
+                keyValue.IsSelected = false;
+            }
+            patientCase.IsSelected = true;
+
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = Patient.Id;
+            sqlParameters["date"] = patientCase.Key;
+
+            PatientCaseList = _sqlManager.SelectPatientCaseList(sqlParameters);
+        }
+
+        private void HidePatientCase(CustomExpander patientCase)
+        {
+            _log.Debug("HidePatientCase");
+
+            patientCase.IsSelected = false;
+        }
+
+        private void GoReview(PatientCase patientCase)
+        {
+            Dictionary<string, Object> parameters = new Dictionary<string, Object>();
+            parameters["patient"] = Patient;
+            parameters["patientCase"] = patientCase;
+
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/ReviewPage.xaml") { Parameter = parameters });
         }
     }
 }

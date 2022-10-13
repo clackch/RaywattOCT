@@ -6,6 +6,7 @@ using RaywattApp.Common.Bases;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -116,9 +117,6 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private Visibility _isShowPatient = Visibility.Collapsed;
 
-        [ObservableProperty]
-        private Visibility _isShowPatientEdit = Visibility.Collapsed;
-
         private ICommand _navigateCommand;
 
         public ICommand NavigateCommand
@@ -131,6 +129,12 @@ namespace RaywattApp.ViewModels
         public ICommand PopupNavigateCommand
         {
             get { return this._popupNavigateCommand ?? (this._popupNavigateCommand = new RelayCommand<string>(OnPopupNavigate)); }
+        }
+
+        private ICommand _exitCommand;
+        public ICommand ExitCommand
+        {
+            get { return this._exitCommand ?? (this._exitCommand = new RelayCommand(Exit)); }
         }
 
         /// <summary>
@@ -186,7 +190,7 @@ namespace RaywattApp.ViewModels
             _log.Debug("OnNavigationMessage : " + message.Value);
 
             string pageUri = message.Value;
-            ShowPatientInfo(pageUri, (Patient)message.Parameter);
+            ShowPatientInfo(pageUri, message.Parameter);
             //순서 중요 - NavigationParameter 먼저 입력 후, NavigationSource 입력 필요
             NavigationParameter = message.Parameter;
             NavigationSource = pageUri;
@@ -301,21 +305,20 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private void ShowPatientInfo(string pageUri, Patient patient)
+        private void ShowPatientInfo(string pageUri, object parameter)
         {
             _log.Debug("ShowPatientInfo : " + pageUri);
 
-            if (pageUri.IndexOf("PatientDetailPage") > 0)
+            if (pageUri.IndexOf("PatientDetailPage") > 0 || pageUri.IndexOf("RecordingPage") > 0)
             {
                 IsShowPatient = Visibility.Visible;
-                IsShowPatientEdit = Visibility.Visible;
-                SetPatientInfo(patient);
+                SetPatientInfo((Patient)parameter);
             }
-            else if (pageUri.IndexOf("RecordingPage") > 0)
+            else if (pageUri.IndexOf("ReviewPage") > 0)
             {
                 IsShowPatient = Visibility.Visible;
-                IsShowPatientEdit = Visibility.Collapsed;
-                SetPatientInfo(patient);
+                Dictionary<string, Object> data = (Dictionary<string, Object>)parameter;
+                SetPatientInfo((Patient)data["patient"]);
             }
             else
             {
@@ -338,11 +341,20 @@ namespace RaywattApp.ViewModels
 
         private void CopyPatient(Patient src, Patient dest)
         {
+            _log.Debug("CopyPatient");
+
             dest.Id = src.Id.Trim();
             dest.Lastname = src.Lastname.Trim();
             dest.Firstname = src.Firstname.Trim();
             dest.Birthdate = src.Birthdate;
             dest.Gender = src.Gender;
+        }
+
+        private void Exit()
+        {
+            _log.Debug("Exit");
+
+            Application.Current.MainWindow.Close();
         }
     }
 }

@@ -316,7 +316,7 @@ namespace RaywattApp.Common.Paging
 
             SetHeaderNameInit();
             //Header 필드명은 Header + Binding Field가 되도록 작성해야 속성 값을 읽을 수 있음
-            PropertyInfo piHeaderName = GetType().GetProperty("Header" + e.Column.SortMemberPath);
+            PropertyInfo piHeaderName = GetType().GetProperty("Header" + e.Column.SortMemberPath.Replace("_", ""));
 
             if (ColumOrderField.Equals(e.Column.SortMemberPath.ToLower()))
             {

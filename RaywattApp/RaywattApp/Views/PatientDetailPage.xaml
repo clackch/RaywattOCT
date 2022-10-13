@@ -3,6 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
       xmlns:local="clr-namespace:RaywattApp.Views"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
@@ -20,12 +21,62 @@
             <Button Width="50" Command="{Binding ExportCommand}" Content="{Binding [Export], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="1">
-        </StackPanel>
+        <FrameworkElement x:Name="ProxyElement" Visibility="Collapsed"/>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" >
-            <Button Width="50" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-            <Button Background="Black" Foreground="White" Command="{Binding NewRecordingCommand}" Content="{Binding [New Recording], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-        </StackPanel>
+        <DataGrid Grid.Row="1" Name="patientCaseByDate" ItemsSource="{Binding PatientCaseByDate}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="None" SelectionMode="Single">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Expander Header="{Binding Value}" IsExpanded="{Binding IsSelected}" Background="{Binding IsSelected, Converter={StaticResource ExpanderSelectedConverter}}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Expanded">
+                                        <i:InvokeCommandAction Command="{Binding DataContext.ShowPatientCaseCommand, Source={x:Reference ProxyElement}}" CommandParameter="{Binding ElementName=patientCaseByDate, Path=CurrentItem}"/>
+                                    </i:EventTrigger>
+                                    <i:EventTrigger EventName="Collapsed">
+                                        <i:InvokeCommandAction Command="{Binding DataContext.HidePatientCaseCommand, Source={x:Reference ProxyElement}}" CommandParameter="{Binding ElementName=patientCaseByDate, Path=CurrentItem}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                                <DataGrid Name="patientCase" ItemsSource="{Binding DataContext.PatientCaseList, Source={x:Reference ProxyElement}}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="All" CanUserSortColumns="False">
+                                    <DataGrid.InputBindings>
+                                        <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding DataContext.GoReviewCommand, Source={x:Reference ProxyElement}}" CommandParameter="{Binding ElementName=patientCase, Path=CurrentItem}"/>
+                                    </DataGrid.InputBindings>
+                                    <DataGrid.Columns>
+                                        <DataGridCheckBoxColumn/>
+                                        <DataGridTextColumn Width="*" Binding="{Binding Id}" Visibility="Collapsed"/>
+                                        <DataGridTextColumn Width="*" Binding="{Binding PatientId}"  Visibility="Collapsed"/>
+                                        <DataGridTextColumn Width="*" Binding="{Binding PatientName}"  Visibility="Collapsed"/>
+                                        <DataGridTextColumn Width="*" Binding="{Binding PhysicianId}" Header="{Binding [Physician ID], Source={StaticResource L10N}}"/>
+                                        <DataGridTextColumn Width="*" Binding="{Binding PhysicianName}" Header="{Binding [Physician Name], Source={StaticResource L10N}}"/>
+                                        <DataGridTextColumn Width="*" Binding="{Binding AccessionNumber}" Header="{Binding [Accession Number], Source={StaticResource L10N}}"/>
+                                        <DataGridTextColumn Width="*" Binding="{Binding AccessionName}" Header="{Binding [Accession Name], Source={StaticResource L10N}}"/>
+                                        <DataGridTextColumn Width="*" Binding="{Binding Comment}" Header="{Binding [Comment], Source={StaticResource L10N}}"/>
+                                        <DataGridTextColumn Width="*" Binding="{Binding Vessel}" Header="{Binding [Vessel], Source={StaticResource L10N}}"/>
+                                        <DataGridTextColumn Width="*" Binding="{Binding Procedure}" Header="{Binding [Procedure], Source={StaticResource L10N}}"/>
+                                        <DataGridTextColumn Width="*" Binding="{Binding CreateDate, StringFormat='yyyy-MM-dd'}" Header="{Binding [Create Date], Source={StaticResource L10N}}"/>
+                                        <DataGridTextColumn Width="*" Binding="{Binding UpdateDate, StringFormat='yyyy-MM-dd'}" Header="{Binding [Update Date], Source={StaticResource L10N}}"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Expander>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" HorizontalAlignment="Left">
+                <Button Width="80" Command="{Binding PatientEditCommand}" Content="{Binding [Edit Patient], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Width="50" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+                <Button Background="Black" Foreground="White" Command="{Binding NewRecordingCommand}" Content="{Binding [New Recording], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+            </StackPanel>
+        </Grid>
+
     </Grid>
 </Page>
