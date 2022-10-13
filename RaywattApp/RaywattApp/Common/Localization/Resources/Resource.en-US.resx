@@ -201,6 +201,9 @@
   <data name="Language" xml:space="preserve">
     <value>Language</value>
   </data>
+  <data name="Last Case (total)" xml:space="preserve">
+    <value>Last Case (total)</value>
+  </data>
   <data name="Last Name" xml:space="preserve">
     <value>Last Name</value>
   </data>

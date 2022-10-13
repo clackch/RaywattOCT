@@ -46,6 +46,10 @@ namespace RaywattApp.ViewModels.File
         {
             _log.Debug("SetCondition");
 
+            foreach(var item in _fileExportData.SelectedItem)
+            {
+                _log.Debug(item.ToString());
+            }
             //Step1 -> Step2 -> Step1 인 경우, 기존 Step1 일때 선택한 내용 화면에 표시
         }
     }

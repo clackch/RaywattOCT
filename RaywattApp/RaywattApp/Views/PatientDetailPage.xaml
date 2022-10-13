@@ -18,59 +18,133 @@
 
         <StackPanel Grid.Row="0" Background="Gray" Orientation="Horizontal">
             <Label Content="{Binding [Patient Summary], Source={StaticResource L10N}}"></Label>
-            <Button Width="50" Command="{Binding ExportCommand}" Content="{Binding [Export], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
         </StackPanel>
 
-        <FrameworkElement x:Name="ProxyElement" Visibility="Collapsed"/>
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="200" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="600"/>
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-        <DataGrid Grid.Row="1" Name="patientCaseByDate" ItemsSource="{Binding PatientCaseByDate}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="None" SelectionMode="Single">
-            <DataGrid.Columns>
-                <DataGridTemplateColumn Width="*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Expander Header="{Binding Value}" IsExpanded="{Binding IsSelected}" Background="{Binding IsSelected, Converter={StaticResource ExpanderSelectedConverter}}">
-                                <i:Interaction.Triggers>
-                                    <i:EventTrigger EventName="Expanded">
-                                        <i:InvokeCommandAction Command="{Binding DataContext.ShowPatientCaseCommand, Source={x:Reference ProxyElement}}" CommandParameter="{Binding ElementName=patientCaseByDate, Path=CurrentItem}"/>
-                                    </i:EventTrigger>
-                                    <i:EventTrigger EventName="Collapsed">
-                                        <i:InvokeCommandAction Command="{Binding DataContext.HidePatientCaseCommand, Source={x:Reference ProxyElement}}" CommandParameter="{Binding ElementName=patientCaseByDate, Path=CurrentItem}"/>
-                                    </i:EventTrigger>
-                                </i:Interaction.Triggers>
-                                <DataGrid Name="patientCase" ItemsSource="{Binding DataContext.PatientCaseList, Source={x:Reference ProxyElement}}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="All" CanUserSortColumns="False">
-                                    <DataGrid.InputBindings>
-                                        <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding DataContext.GoReviewCommand, Source={x:Reference ProxyElement}}" CommandParameter="{Binding ElementName=patientCase, Path=CurrentItem}"/>
-                                    </DataGrid.InputBindings>
-                                    <DataGrid.Columns>
-                                        <DataGridCheckBoxColumn/>
-                                        <DataGridTextColumn Width="*" Binding="{Binding Id}" Visibility="Collapsed"/>
-                                        <DataGridTextColumn Width="*" Binding="{Binding PatientId}"  Visibility="Collapsed"/>
-                                        <DataGridTextColumn Width="*" Binding="{Binding PatientName}"  Visibility="Collapsed"/>
-                                        <DataGridTextColumn Width="*" Binding="{Binding PhysicianId}" Header="{Binding [Physician ID], Source={StaticResource L10N}}"/>
-                                        <DataGridTextColumn Width="*" Binding="{Binding PhysicianName}" Header="{Binding [Physician Name], Source={StaticResource L10N}}"/>
-                                        <DataGridTextColumn Width="*" Binding="{Binding AccessionNumber}" Header="{Binding [Accession Number], Source={StaticResource L10N}}"/>
-                                        <DataGridTextColumn Width="*" Binding="{Binding AccessionName}" Header="{Binding [Accession Name], Source={StaticResource L10N}}"/>
-                                        <DataGridTextColumn Width="*" Binding="{Binding Comment}" Header="{Binding [Comment], Source={StaticResource L10N}}"/>
-                                        <DataGridTextColumn Width="*" Binding="{Binding Vessel}" Header="{Binding [Vessel], Source={StaticResource L10N}}"/>
-                                        <DataGridTextColumn Width="*" Binding="{Binding Procedure}" Header="{Binding [Procedure], Source={StaticResource L10N}}"/>
-                                        <DataGridTextColumn Width="*" Binding="{Binding CreateDate, StringFormat='yyyy-MM-dd'}" Header="{Binding [Create Date], Source={StaticResource L10N}}"/>
-                                        <DataGridTextColumn Width="*" Binding="{Binding UpdateDate, StringFormat='yyyy-MM-dd'}" Header="{Binding [Update Date], Source={StaticResource L10N}}"/>
-                                    </DataGrid.Columns>
-                                </DataGrid>
-                            </Expander>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </DataGrid>
+            <StackPanel Grid.Row="0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Margin="5,5,5,5"><TextBlock Text="{Binding [ID], Source={StaticResource L10N}}"/></TextBlock>
+                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Patient.Id}" IsReadOnly="True" Margin="5,5,5,5"/>
+                    <TextBlock Grid.Row="1" Margin="5,5,5,5"><TextBlock Text="{Binding [Last Name], Source={StaticResource L10N}}"/></TextBlock>
+                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Patient.Lastname}" IsReadOnly="True" Margin="5,5,5,5"/>
+                    <TextBlock Grid.Row="2" Margin="5,5,5,5"><TextBlock Text="{Binding [First Name], Source={StaticResource L10N}}"/></TextBlock>
+                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Patient.Firstname}" IsReadOnly="True" Margin="5,5,5,5"/>
+                    <TextBlock Grid.Row="3" Margin="5,5,5,5"><TextBlock Text="{Binding [Birth Date], Source={StaticResource L10N}}"/></TextBlock>
+                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Patient.Birthdate, StringFormat='yyyy-MM-dd'}" IsReadOnly="True" Margin="5,5,5,5"/>
+                    <TextBlock Grid.Row="4" Text="{Binding [Gender], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Patient.Gender, Converter={StaticResource L10NConverter}}" IsReadOnly="True" Margin="5,5,5,5"/>
+                </Grid>
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Orientation="Horizontal">
+                <Label Content="{Binding [Total], Source={StaticResource L10N}}"></Label>
+                <Label>:</Label>
+                <Label Content="{Binding PagingTotalCnt}"></Label>
+            </StackPanel>
+
+            <!-- DataGrid에서 Binding을 사용하기 위한 설정(DataContext, Source 사용 필요) -->
+            <FrameworkElement x:Name="ProxyElement" Visibility="Collapsed"/>
+
+            <DataGrid Grid.Row="2"  Name="patientCaseByDate" ItemsSource="{Binding PatientCaseByDate}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="None" SelectionMode="Single">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Expander Header="{Binding Value}" IsExpanded="{Binding IsSelected}" Background="{Binding IsSelected, Converter={StaticResource ExpanderSelectedConverter}}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="Expanded">
+                                            <i:InvokeCommandAction Command="{Binding DataContext.ShowPatientCaseCommand, Source={x:Reference ProxyElement}}" CommandParameter="{Binding ElementName=patientCaseByDate, Path=CurrentItem}"/>
+                                        </i:EventTrigger>
+                                        <i:EventTrigger EventName="Collapsed">
+                                            <i:InvokeCommandAction Command="{Binding DataContext.HidePatientCaseCommand, Source={x:Reference ProxyElement}}" CommandParameter="{Binding ElementName=patientCaseByDate, Path=CurrentItem}"/>
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                    <DataGrid Height="460" Name="patientCase" ItemsSource="{Binding PatientCaseList}" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column" CanUserSortColumns="False">
+                                        <DataGrid.InputBindings>
+                                            <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding DataContext.GoReviewCommand, Source={x:Reference ProxyElement}}" CommandParameter="{Binding ElementName=patientCase, Path=CurrentItem}"/>
+                                        </DataGrid.InputBindings>
+                                        <DataGrid.Columns>
+                                            <DataGridTemplateColumn>
+                                                <DataGridTemplateColumn.HeaderTemplate>
+                                                    <DataTemplate>
+                                                        <CheckBox Command="{Binding DataContext.CheckBoxToggleCommand, Source={x:Reference ProxyElement}}" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" IsChecked="{Binding DataContext.CheckBoxAllSelected, Source={x:Reference ProxyElement}}"/>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.HeaderTemplate>
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <CheckBox IsChecked="{Binding IsChecked, UpdateSourceTrigger=PropertyChanged}" Command="{Binding DataContext.CheckBoxClickCommand, Source={x:Reference ProxyElement}}"/>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+                                            <DataGridTextColumn Width="*" Binding="{Binding Id}" Visibility="Collapsed"/>
+                                            <DataGridTextColumn Width="*" Binding="{Binding PatientId}"  Visibility="Collapsed"/>
+                                            <DataGridTextColumn Width="*" Binding="{Binding PatientName}"  Visibility="Collapsed"/>
+                                            <DataGridTextColumn Width="*" Binding="{Binding PhysicianId}" Header="{Binding [Physician ID], Source={StaticResource L10N}}" IsReadOnly="True"/>
+                                            <DataGridTextColumn Width="*" Binding="{Binding PhysicianName}" Header="{Binding [Physician Name], Source={StaticResource L10N}}" IsReadOnly="True"/>
+                                            <DataGridTextColumn Width="*" Binding="{Binding AccessionNumber}" Header="{Binding [Accession Number], Source={StaticResource L10N}}" IsReadOnly="True"/>
+                                            <DataGridTextColumn Width="*" Binding="{Binding AccessionName}" Header="{Binding [Accession Name], Source={StaticResource L10N}}" IsReadOnly="True"/>
+                                            <DataGridTextColumn Width="*" Binding="{Binding Comment}" Header="{Binding [Comment], Source={StaticResource L10N}}" IsReadOnly="True"/>
+                                            <DataGridTextColumn Width="*" Binding="{Binding Vessel}" Header="{Binding [Vessel], Source={StaticResource L10N}}" IsReadOnly="True"/>
+                                            <DataGridTextColumn Width="*" Binding="{Binding Procedure}" Header="{Binding [Procedure], Source={StaticResource L10N}}" IsReadOnly="True"/>
+                                            <DataGridTextColumn Width="*" Binding="{Binding CreateDate, StringFormat='yyyy-MM-dd'}" Header="{Binding [Create Date], Source={StaticResource L10N}}" IsReadOnly="True"/>
+                                            <DataGridTextColumn Width="*" Binding="{Binding UpdateDate, StringFormat='yyyy-MM-dd'}" Header="{Binding [Update Date], Source={StaticResource L10N}}" IsReadOnly="True"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </Expander>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <Grid Grid.Row="3" Background="Black">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="120"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" >
+                    <Button Content="≪" Command="{Binding PagingFirstCommand}" Margin="5,5,5,5" />
+                    <Button Content="＜" Command="{Binding PagingPreviousCommand}" Margin="5,5,5,5" />
+                    <Button Content="{Binding PagingNo1}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo1" Visibility="{Binding PagingVisibilityNo1, Converter={StaticResource PagingNoIndicatorConverter}}" Foreground="{Binding PagingNoIdx, Converter={StaticResource PagingNoCheckedConverter}, ConverterParameter=0}" Margin="5,5,5,5" />
+                    <Button Content="{Binding PagingNo2}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo2" Visibility="{Binding PagingVisibilityNo2, Converter={StaticResource PagingNoIndicatorConverter}}" Foreground="{Binding PagingNoIdx, Converter={StaticResource PagingNoCheckedConverter}, ConverterParameter=1}" Margin="5,5,5,5" />
+                    <Button Content="{Binding PagingNo3}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo3" Visibility="{Binding PagingVisibilityNo3, Converter={StaticResource PagingNoIndicatorConverter}}" Foreground="{Binding PagingNoIdx, Converter={StaticResource PagingNoCheckedConverter}, ConverterParameter=2}" Margin="5,5,5,5" />
+                    <Button Content="{Binding PagingNo4}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo4" Visibility="{Binding PagingVisibilityNo4, Converter={StaticResource PagingNoIndicatorConverter}}" Foreground="{Binding PagingNoIdx, Converter={StaticResource PagingNoCheckedConverter}, ConverterParameter=3}" Margin="5,5,5,5" />
+                    <Button Content="{Binding PagingNo5}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo5" Visibility="{Binding PagingVisibilityNo5, Converter={StaticResource PagingNoIndicatorConverter}}" Foreground="{Binding PagingNoIdx, Converter={StaticResource PagingNoCheckedConverter}, ConverterParameter=4}" Margin="5,5,5,5" />
+                    <Button Content="＞" Command="{Binding PagingNextCommand}" Margin="5,5,5,5" />
+                    <Button Content="≫" Command="{Binding PagingLastCommand}" Margin="5,5,5,5" />
+                </StackPanel>
+            </Grid>
+        </Grid>
 
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" HorizontalAlignment="Left">
+            <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
                 <Button Width="80" Command="{Binding PatientEditCommand}" Content="{Binding [Edit Patient], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+                <Button Width="50" Command="{Binding ExportCommand}" Content="{Binding [Export], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Width="50" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}" Margin="5,5,5,5"/>

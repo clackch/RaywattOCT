@@ -47,12 +47,6 @@
                     <RadioButton IsChecked="{Binding GenderCodeEdit, Converter={StaticResource RadioButtonConverter}, ConverterParameter='M'}" Content="{Binding [Male], Source={StaticResource L10N}}"></RadioButton>
                     <RadioButton IsChecked="{Binding GenderCodeEdit, Converter={StaticResource RadioButtonConverter}, ConverterParameter='F'}" Content="{Binding [Female], Source={StaticResource L10N}}"></RadioButton>
                 </StackPanel>
-                <!--
-                <TextBlock Grid.Row="5" Text="Physicain Name" Margin="5,5,5,5"/>
-                <ListBox Grid.Row="5" Grid.Column="1" Margin="5,5,5,5"/>
-                <TextBlock Grid.Row="6" Text="Accession Number" Margin="5,5,5,5"/>
-                <TextBox Grid.Row="6" Grid.Column="1" Margin="5,5,5,5"/>
-                -->
             </Grid>
         </StackPanel>
 

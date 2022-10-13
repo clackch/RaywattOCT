@@ -10,10 +10,12 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Windows.Navigation;
+using RaywattApp.Common.Paging;
+using System.Windows.Controls;
 
 namespace RaywattApp.ViewModels
 {
-    public partial class PatientDetailViewModel : ViewModelBase
+    public partial class PatientDetailViewModel : PagingBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(PatientDetailViewModel));
 
@@ -23,10 +25,13 @@ namespace RaywattApp.ViewModels
         private Patient _patient;
 
         [ObservableProperty]
-        private IList<CustomExpander> _patientCaseByDate;
+        private IList<PatientCaseByDate> _patientCaseByDate;
 
         [ObservableProperty]
         private IList<PatientCase> _patientCaseList;
+
+        [ObservableProperty]
+        private bool? _checkBoxAllSelected;
 
         private ICommand _exportCommand;
         public ICommand ExportCommand
@@ -55,13 +60,25 @@ namespace RaywattApp.ViewModels
         private ICommand _showPatientCaseCommand;
         public ICommand ShowPatientCaseCommand
         {
-            get { return this._showPatientCaseCommand ?? (this._showPatientCaseCommand = new RelayCommand<CustomExpander>(ShowPatientCase)); }
+            get { return this._showPatientCaseCommand ?? (this._showPatientCaseCommand = new RelayCommand<PatientCaseByDate>(ShowPatientCase)); }
         }
 
         private ICommand _hidePatientCaseCommand;
         public ICommand HidePatientCaseCommand
         {
-            get { return this._hidePatientCaseCommand ?? (this._hidePatientCaseCommand = new RelayCommand<CustomExpander>(HidePatientCase)); }
+            get { return this._hidePatientCaseCommand ?? (this._hidePatientCaseCommand = new RelayCommand<PatientCaseByDate>(HidePatientCase)); }
+        }
+
+        private ICommand _checkBoxToggleCommand;
+        public ICommand CheckBoxToggleCommand
+        {
+            get { return this._checkBoxToggleCommand ?? (this._checkBoxToggleCommand = new RelayCommand<CheckBox>(ToggleCheckBox)); }
+        }
+
+        private ICommand _checkBoxClickCommand;
+        public ICommand CheckBoxClickCommand
+        {
+            get { return this._checkBoxClickCommand ?? (this._checkBoxClickCommand = new RelayCommand(ChangeCheckBoxHeader)); }
         }
 
         private ICommand _goReviewCommand;
@@ -77,6 +94,11 @@ namespace RaywattApp.ViewModels
             CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.PatientDetailPage;
 
             _sqlManager = sqlManager;
+
+            PagingSelectedPageSize = 5;
+
+            //Initialize Complete
+            bCheckInit = true;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -88,14 +110,36 @@ namespace RaywattApp.ViewModels
             if (extraData != null)
             {
                 Patient = (Patient)extraData;
+                Search();
             }
-
-            SetPatientCaseByDate();
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
             _log.Debug("OnNavigating");
+        }
+
+        override protected void Search()
+        {
+            _log.Debug("Search");
+
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = Patient.Id;
+
+            Dictionary<string, Object> sqlAdditionalCondition = new Dictionary<string, Object>();
+            sqlAdditionalCondition["ORDER"] = "key DESC";
+            sqlAdditionalCondition["LIMIT"] = PagingSelectedPageSize;
+            sqlAdditionalCondition["OFFSET"] = PagingOffset;
+
+            //Paging을 위한 전체 Row 수 Count
+            PagingTotalCnt = _sqlManager.PageCountPatientCaseByDate(sqlParameters);
+
+            PatientCaseByDate = _sqlManager.PageSelectPatientCaseByDate(sqlParameters, sqlAdditionalCondition);
+
+            if (PatientCaseByDate.Count > 0)
+            {
+                ShowPatientCase(PatientCaseByDate[0]);
+            }
         }
 
         private void Back()
@@ -125,53 +169,97 @@ namespace RaywattApp.ViewModels
 
             FileExport fileExportData = new FileExport();
             List<string> selectedItem = new List<string>();
-            selectedItem.Add("TEST111");
-            selectedItem.Add("TEST222");
-            selectedItem.Add("TEST333");
 
+            if(PatientCaseList != null)
+            {
+                foreach (PatientCase patientCase in PatientCaseList)
+                {
+                    if (patientCase.IsChecked)
+                        selectedItem.Add(patientCase.Id);
+                }
+            }
             fileExportData.SelectedItem = selectedItem;
 
-            //항목 선택된 건 Parameter로 넘기도록
             WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "FilePopupControl", Type = (int)CommonDefinition.PopupType.File, FileType = (int)CommonDefinition.FileType.Export, Parameter = fileExportData });
         }
 
-        private void SetPatientCaseByDate()
-        {
-            _log.Debug("SetPatientCaseByDate");
-
-            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-            sqlParameters["id"] = Patient.Id;
-
-            PatientCaseByDate = _sqlManager.SelectPatientCaseByDate(sqlParameters);
-
-            if(PatientCaseByDate.Count > 0)
-            {
-                ShowPatientCase(PatientCaseByDate[0]);
-            }
-        }
-
-        private void ShowPatientCase(CustomExpander patientCase)
+        private void ShowPatientCase(PatientCaseByDate patientCaseByDate)
         {
             _log.Debug("ShowPatientCase");
 
-            foreach (CustomExpander keyValue in PatientCaseByDate)
+            if (patientCaseByDate == null)
+                return;
+            
+            foreach (PatientCaseByDate keyValue in PatientCaseByDate)
             {
                 keyValue.IsSelected = false;
             }
-            patientCase.IsSelected = true;
+            patientCaseByDate.IsSelected = true;
 
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = Patient.Id;
-            sqlParameters["date"] = patientCase.Key;
+            sqlParameters["date"] = patientCaseByDate.Key;
 
-            PatientCaseList = _sqlManager.SelectPatientCaseList(sqlParameters);
+            if (patientCaseByDate.PatientCaseList == null)
+                patientCaseByDate.PatientCaseList = _sqlManager.SelectPatientCaseList(sqlParameters);
+
+            PatientCaseList = patientCaseByDate.PatientCaseList;
+
+            ChangeCheckBoxHeader();
         }
 
-        private void HidePatientCase(CustomExpander patientCase)
+        private void HidePatientCase(PatientCaseByDate patientCaseByDate)
         {
             _log.Debug("HidePatientCase");
 
-            patientCase.IsSelected = false;
+            if(patientCaseByDate != null)
+                patientCaseByDate.IsSelected = false;
+        }
+
+        private void ToggleCheckBox(CheckBox checkBox)
+        {
+            if(checkBox.IsChecked == true)
+            {
+                foreach (PatientCase patientCase in PatientCaseList)
+                {
+                    patientCase.IsChecked = true;
+                }
+            }
+            else if(checkBox.IsChecked == false)
+            {
+                foreach (PatientCase patientCase in PatientCaseList)
+                {
+                    patientCase.IsChecked = false;
+                }
+            }
+        }
+
+        private void ChangeCheckBoxHeader()
+        {
+            bool isChecked = false;
+            bool isNotChecked = false;
+
+            foreach (PatientCase patientCase in PatientCaseList)
+            {
+                if (patientCase.IsChecked == true)
+                    isChecked = true;
+
+                if (patientCase.IsChecked == false)
+                    isNotChecked = true;
+            }
+
+            if (isChecked && isNotChecked)
+            {
+                CheckBoxAllSelected = null;
+            }
+            else if(isChecked && !isNotChecked)
+            {
+                CheckBoxAllSelected = true;
+            }
+            else if(!isChecked && isNotChecked)
+            {
+                CheckBoxAllSelected = false;
+            }
         }
 
         private void GoReview(PatientCase patientCase)

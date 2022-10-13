@@ -16,19 +16,9 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Background="Gray">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" Orientation="Horizontal" >
-                <Label Content="{Binding [Patient List], Source={StaticResource L10N}}"></Label>
-            </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" >
-                <Button Width="50" Command="{Binding ImportCommand}" Content="{Binding [Import], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-                <Button Width="50" Command="{Binding ExportCommand}" Content="{Binding [Export], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-            </StackPanel>
-        </Grid>
+        <StackPanel Grid.Row="0" Background="Gray" Orientation="Horizontal">
+            <Label Content="{Binding [Patient List], Source={StaticResource L10N}}"></Label>
+        </StackPanel>
 
         <StackPanel Grid.Row="1">
             <Grid>
@@ -39,7 +29,7 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <StackPanel Grid.Column="0"/>
+                <StackPanel Grid.Row="0"/>
 
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
@@ -79,6 +69,7 @@
                         <DataGridTextColumn Width="*" Binding="{Binding Firstname}" Header="{Binding DataContext.HeaderFirstname, Source={x:Reference ProxyElement}}" SortMemberPath="Firstname"/>
                         <DataGridTextColumn Width="*" Binding="{Binding Birthdate, StringFormat='yyyy-MM-dd'}" Header="{Binding DataContext.HeaderBirthdate, Source={x:Reference ProxyElement}}" SortMemberPath="Birthdate"/>
                         <DataGridTextColumn Width="*" Binding="{Binding Gender, Converter={StaticResource L10NConverter}}" Header="{Binding DataContext.HeaderGender, Source={x:Reference ProxyElement}}" SortMemberPath="Gender"/>
+                        <DataGridTextColumn Width="*" Binding="{Binding LastCase}" Header="{Binding DataContext.HeaderLastCase, Source={x:Reference ProxyElement}}" SortMemberPath="Last_Case"/>
                         <DataGridTextColumn Width="*" Binding="{Binding CreateDate}" Header="{Binding DataContext.HeaderCreateDate, Source={x:Reference ProxyElement}}" SortMemberPath="Create_Date"/>
                         <DataGridTextColumn Width="*" Binding="{Binding UpdateDate}" Header="{Binding DataContext.HeaderUpdateDate, Source={x:Reference ProxyElement}}" SortMemberPath="Update_Date"/>
                     </DataGrid.Columns>
@@ -111,11 +102,20 @@
             </Grid>
         </StackPanel>
 
-        <StackPanel Grid.Row="2" HorizontalAlignment="Right" >
-            <Button Width="100" Command="{Binding NewPatientCommand}" Content="{Binding [New Patient], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-        </StackPanel>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
+                <Button Width="50" Command="{Binding ImportCommand}" Content="{Binding [Import], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+                <Button Width="50" Command="{Binding ExportCommand}" Content="{Binding [Export], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Width="100" Command="{Binding NewPatientCommand}" Content="{Binding [New Patient], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+            </StackPanel>
+        </Grid>
+        
     </Grid>
 
-    
-    
 </Page>

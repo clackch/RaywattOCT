@@ -201,6 +201,9 @@
   <data name="Language" xml:space="preserve">
     <value>언어</value>
   </data>
+  <data name="Last Case (total)" xml:space="preserve">
+    <value>최신 케이스 (전체)</value>
+  </data>
   <data name="Last Name" xml:space="preserve">
     <value>성</value>
   </data>

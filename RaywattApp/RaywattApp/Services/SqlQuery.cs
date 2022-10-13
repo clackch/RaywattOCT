@@ -40,7 +40,8 @@ namespace RaywattApp.Services
             //SelectPatientList
             _query["SelectPatientList"] =
                 $"SELECT id, lastname, firstname, birthdate, rv_schema.fn_code('GEND', gender) gender, to_char(create_date,'YYYY-MM-DD HH24:MI:SS') create_date, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') update_date " +
-                $"FROM rv_schema.patient " +
+                        $", concat((SELECT to_char(create_date, 'yyyy-MM-dd') FROM rv_schema.patient_case c WHERE c.patient_id = p.id ORDER BY create_date DESC LIMIT 1), ' (',(SELECT count(*) FROM rv_schema.patient_case c WHERE c.patient_id = p.id), ')') last_case " +
+                $"FROM rv_schema.patient p " +
                 $"WHERE id LIKE @id OR lastname LIKE @lastname OR firstname LIKE @firstname";
 
             //SelectPatient
@@ -60,8 +61,7 @@ namespace RaywattApp.Services
                 $"SELECT to_char(create_date, 'YYYY-MM-DD') key, concat(to_char(create_date, 'YYYY-MM-DD'), ' (', count(*), ')' ) value " +
                 $"FROM rv_schema.patient_case " +
                 $"WHERE patient_id = @id " +
-                $"GROUP BY key " +
-                $"ORDER BY key DESC";
+                $"GROUP BY key ";
 
             //SelectPatientCaseList - create_data 기준
             _query["SelectPatientCaseList"] =

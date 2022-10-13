@@ -48,5 +48,8 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private string updateDate;
+
+        [ObservableProperty]
+        private bool isChecked;
     }
 }

@@ -1,8 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.Collections.Generic;
 
 namespace RaywattApp.Models
 {
-    public partial class CustomExpander : ObservableValidator
+    public partial class PatientCaseByDate : ObservableValidator
     {
         [ObservableProperty]
         private string key;
@@ -12,5 +13,8 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private bool isSelected;
+
+        [ObservableProperty]
+        private IList<PatientCase> patientCaseList;
     }
 }
