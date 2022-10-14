@@ -11,6 +11,19 @@ CATSDSPDevice::CATSDSPDevice() {
 }
 CATSDSPDevice::~CATSDSPDevice() {}
 
+int CATSDSPDevice::stop() {
+	// Abort the acquisition
+	RETURN_CODE retCode = AlazarDSPAbortCapture(m_hATSBoard);
+
+	if (retCode != ApiSuccess)
+	{
+		printf("Error: AlazarDSPAbortCapture failed -- %s\n", AlazarErrorToText(retCode));
+
+		return retCode;
+	}
+
+	return NOERROR;
+}
 unsigned short* CATSDSPDevice::acquire(int& nCurFrame, int& nTotalFrame) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int nAcqBufCount = config.settingsAlazar.nAcqBufferCount;
