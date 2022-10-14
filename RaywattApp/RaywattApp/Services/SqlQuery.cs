@@ -85,6 +85,11 @@ namespace RaywattApp.Services
             _query["InsertPatient"] =
                 $"INSERT INTO rv_schema.patient(id, lastname, firstname, birthdate, gender, create_date, update_date) " +
                 $"VALUES (@id, @lastname, @firstname, @birthdate, @gender, now(), now())";
+
+            //InsertPatientCase
+            _query["InsertPatientCase"] =
+                $"INSERT INTO rv_schema.patient_case(id, patient_id, physician_id, accession_number, accession_name, comment, vessel, procedure, thumbnail_no, still_image_yn, create_date, update_date) " +
+                $"VALUES (@id, @patient_id, @physician_id, @accession_number, @accession_name, @comment, @vessel, @procedure, @thumbnail_no, @still_image_yn, now(), now())";
         }
 
         private static void SetUpdateQuery()

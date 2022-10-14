@@ -135,7 +135,11 @@ namespace RaywattApp.ViewModels
             if(nRows == 1)
             {
                 WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/RecordingPage.xaml") { Parameter = Patient });
-            }           
+            }
+            else
+            {
+                _log.Error("Insert Error");
+            }
         }
 
         private bool Validate()

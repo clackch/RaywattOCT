@@ -120,6 +120,15 @@ namespace RaywattApp.Services
             return _databaseService.DeleteData(commandText, sqlParameters);
         }
 
+        public int InsertPatientCase(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("InsertPatientCase");
+
+            string commandText = SqlQuery.GetQuery("InsertPatientCase");
+
+            return _databaseService.InsertData(commandText, sqlParameters);
+        }
+
         private string getAdditionalCondition(Dictionary<string, Object> sqlAdditionalCondition)
         {
             _log.Debug("getAddtionalCondition");
