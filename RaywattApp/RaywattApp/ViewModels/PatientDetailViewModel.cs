@@ -197,7 +197,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Delete");
 
-            if(PatientCaseList == null || CheckBoxAllSelected == false)
+            if(PagingTotalCnt == 0 || CheckBoxAllSelected == false)
             {
                 WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "MessagePopupControl", Type = (int)CommonDefinition.PopupType.Message, Level = (int)CommonDefinition.PopupLevel.Info, Parameter = _l10n["There are no items selected."] });
                 return;
