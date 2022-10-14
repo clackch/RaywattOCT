@@ -10,6 +10,7 @@ protected:
 	double	m_dSamplePerSec;
 	U32		m_nBufferIndex;
 	U16 **	m_pAcqBuffers;
+	U32		m_nAdmaFlags;
 
 	U16 *	m_pCurBuffer;
 	U16 *	m_pPrevBuffer;

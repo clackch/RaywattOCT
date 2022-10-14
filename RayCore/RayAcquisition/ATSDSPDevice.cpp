@@ -8,6 +8,7 @@ CATSDSPDevice::CATSDSPDevice() {
 	m_fftHandle = nullptr;
 	m_bytesPerBuffer = 0;
 	m_pBackgroundFringes = nullptr;
+	m_nAdmaFlags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_NPT | ADMA_FIFO_ONLY_STREAMING | ADMA_DSP;
 }
 CATSDSPDevice::~CATSDSPDevice() {}
 

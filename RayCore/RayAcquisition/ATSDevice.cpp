@@ -8,6 +8,7 @@ CATSDevice::CATSDevice() {
 	m_pAcqBuffers = nullptr;
 	m_pCurBuffer = nullptr;
 	m_pPrevBuffer = nullptr;
+	m_nAdmaFlags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_NPT | ADMA_FIFO_ONLY_STREAMING;
 }
 CATSDevice::~CATSDevice() {}
 
@@ -282,12 +283,10 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	{
 		U32 recordsPerAcquisition = 0x7FFFFFFF; // Set to 0x7fffffff to acquire indefinitely until the acquisition is aborted.
 
-		U32 admaFlags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_NPT | ADMA_FIFO_ONLY_STREAMING | ADMA_INTERLEAVE_SAMPLES;
-
 		// There are no pre-trigger samples in NPT mode
 		retCode = AlazarBeforeAsyncRead(boardHandle, channelMask, 0,
 			samplesPerRecord, recordsPerBuffer, recordsPerAcquisition,
-			admaFlags);
+			m_nAdmaFlags);
 
 		if (retCode != ApiSuccess)
 		{
