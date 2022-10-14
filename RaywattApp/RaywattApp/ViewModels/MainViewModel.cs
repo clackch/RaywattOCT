@@ -109,6 +109,15 @@ namespace RaywattApp.ViewModels
         private string _messagePopupContent;
 
         [ObservableProperty]
+        private string _questionPopupContent;
+
+        [ObservableProperty]
+        private int _questionPopupId;
+
+        [ObservableProperty]
+        private object _questionPopupParent;
+
+        [ObservableProperty]
         private string _filePopupType;
 
         [ObservableProperty]
@@ -270,6 +279,21 @@ namespace RaywattApp.ViewModels
                         MessagePopupContent = message.Parameter.ToString();
 
                     break;
+                case (int)CommonDefinition.PopupType.Question:
+
+                    ShowLayerPopup = message.Value;
+                    ControlName = message.ControlName;
+
+                    QuestionPopupId = message.QuestionId;
+
+                    if (message.ParentObject != null)
+                        QuestionPopupParent = message.ParentObject;
+
+                    //Popup Message
+                    if (message.Parameter != null)
+                        QuestionPopupContent = message.Parameter.ToString();
+
+                    break;
                 case (int)CommonDefinition.PopupType.Setting:
 
                     ShowViewLayerPopup = message.Value;
@@ -292,12 +316,6 @@ namespace RaywattApp.ViewModels
                         FilePopupType = _l10n["Export"];
                         PopupNavigationSource = "Views/File/FileExportStep1Page.xaml";                        
                     }
-
-                    break;
-                case (int)CommonDefinition.PopupType.PatientEdit:
-
-                    ShowViewLayerPopup = message.Value;
-                    ViewControlName = message.ControlName;
 
                     break;
                 default:

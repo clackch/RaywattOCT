@@ -330,6 +330,53 @@ namespace RaywattApp.Services
             return nRows;
         }
 
+        public int DeleteData(string commandText, Dictionary<string, Object> commandParameters)
+        {
+            _log.Debug("DeleteData");
+
+            //null 체크
+            if (Connection == null || Command == null || string.IsNullOrEmpty(commandText))
+            {
+                return -1;
+            }
+
+            int nRows = 0;
+
+            try
+            {
+                //Connection 열기
+                Connection.Open();
+                //Query 입력
+                Command.CommandText = commandText;
+                //Parameter 입력
+                Command.Parameters.Clear();
+                if (commandParameters != null)
+                {
+                    foreach (KeyValuePair<string, Object> parameter in commandParameters)
+                    {
+                        Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                    }
+                }
+                //Connection 입력
+                Command.Connection = Connection;
+                //Execute Query
+                nRows = Command.ExecuteNonQuery();
+            }
+            catch (Exception e)
+            {
+                _log.Error(e.ToString());
+            }
+            finally
+            {
+                //Connection 닫기
+                Connection.Close();
+
+                PrintLog(commandText, commandParameters);
+            }
+            //결과 반환
+            return nRows;
+        }
+
         private object GetDbValue(string field, IDataReader row)
         {
             for (int i = 0; i < row.FieldCount; i++)

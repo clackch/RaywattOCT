@@ -250,3 +250,34 @@ $BODY$;
 
 ALTER FUNCTION rv_schema.fn_physician(character varying)
     OWNER TO rv_user;
+
+
+-- FUNCTION: rv_schema.fn_lastcase(character varying)
+
+-- DROP FUNCTION IF EXISTS rv_schema.fn_lastcase(character varying);
+
+CREATE OR REPLACE FUNCTION rv_schema.fn_lastcase(
+	arg_id character varying)
+    RETURNS character varying
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+AS $BODY$
+	DECLARE
+	res_value character varying;
+	BEGIN
+		SELECT 
+			concat(
+			(SELECT to_char("create_date", 'yyyy-MM-dd') FROM rv_schema.patient_case WHERE "patient_id" = arg_id ORDER BY "create_date" DESC LIMIT 1)
+			, ' ('
+			,(SELECT count(*) FROM rv_schema.patient_case WHERE "patient_id" = arg_id)
+			, ')'
+			) 
+			into res_value;
+	RETURN res_value;
+	END;
+$BODY$;
+
+ALTER FUNCTION rv_schema.fn_lastcase(character varying)
+    OWNER TO rv_user;
+

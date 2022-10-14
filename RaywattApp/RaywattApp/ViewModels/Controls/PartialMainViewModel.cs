@@ -2,6 +2,10 @@
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Messages;
+using RaywattApp.Models;
+using System;
+using System.Reflection;
+using System.Windows;
 using System.Windows.Input;
 
 namespace RaywattApp.ViewModels
@@ -14,12 +18,24 @@ namespace RaywattApp.ViewModels
             get { return this._settingCommand ?? (this._settingCommand = new RelayCommand(Setting, CanButtonClick)); }
         }
 
+        private ICommand _questionPopupResponseCommand;
+        public ICommand QuestionPopupResponseCommand
+        {
+            get { return this._questionPopupResponseCommand ?? (this._questionPopupResponseCommand = new RelayCommand<string>(ResponseQuestionPopup)); }
+        }
+
+        private ICommand _messagePopupCloseCommand;
+        public ICommand MessagePopupCloseCommand
+        {
+            get { return this._messagePopupCloseCommand ?? (this._messagePopupCloseCommand = new RelayCommand(CloseMessagePopup)); }
+        }
+
         private bool CanButtonClick()
         {
             _log.Debug("CanButtonClick");
 
-            //View Layer Popup이 열려있는 경우, 다시 열리지 않도록 처리
-            return !ShowViewLayerPopup;
+            //Layer Popup이 열려있는 경우, 다시 열리지 않도록 처리
+            return !ShowViewLayerPopup && !ShowLayerPopup;
         }
 
         private void Setting()
@@ -30,11 +46,23 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "SettingPopupControl", Type = (int)CommonDefinition.PopupType.Setting });
         }
 
-        private void ShowPatientEdit()
+        private void ResponseQuestionPopup(string response)
         {
-            _log.Debug("ShowPatientEdit");
+            QuestionPopupResponse res = new QuestionPopupResponse();
+            res.QuestionId = QuestionPopupId;
+            res.QuestionResponse = response == "Y" ? true : false;
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientEditPage.xaml") { Parameter = Patient });
+            Type? type = QuestionPopupParent.GetType();
+            PropertyInfo questionPopupResponse = type.GetProperty("QuestionPopupRes");
+            if(questionPopupResponse != null)
+                questionPopupResponse.SetValue(QuestionPopupParent, res);
+
+            WeakReferenceMessenger.Default.Send(new PopupMessage(false) { Type = (int)CommonDefinition.PopupType.Question });
+        }
+
+        private void CloseMessagePopup()
+        {
+            WeakReferenceMessenger.Default.Send(new PopupMessage(false) { Type = (int)CommonDefinition.PopupType.Message });
         }
     }
 }

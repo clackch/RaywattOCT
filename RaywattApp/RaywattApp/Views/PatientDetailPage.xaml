@@ -65,7 +65,7 @@
             <!-- DataGrid에서 Binding을 사용하기 위한 설정(DataContext, Source 사용 필요) -->
             <FrameworkElement x:Name="ProxyElement" Visibility="Collapsed"/>
 
-            <DataGrid Grid.Row="2"  Name="patientCaseByDate" ItemsSource="{Binding PatientCaseByDate}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="None" SelectionMode="Single">
+            <DataGrid Grid.Row="2"  Name="patientCaseByDate" ItemsSource="{Binding PatientCaseByDateList}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="None" SelectionMode="Single">
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Width="*">
                         <DataGridTemplateColumn.CellTemplate>
@@ -121,6 +121,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="120"/>
                     <ColumnDefinition/>
+                    <ColumnDefinition Width="120"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" />
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" >
@@ -134,6 +135,7 @@
                     <Button Content="＞" Command="{Binding PagingNextCommand}" Margin="5,5,5,5" />
                     <Button Content="≫" Command="{Binding PagingLastCommand}" Margin="5,5,5,5" />
                 </StackPanel>
+                <StackPanel Grid.Column="2" />
             </Grid>
         </Grid>
 
@@ -145,6 +147,7 @@
             <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
                 <Button Width="80" Command="{Binding PatientEditCommand}" Content="{Binding [Edit Patient], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
                 <Button Width="50" Command="{Binding ExportCommand}" Content="{Binding [Export], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+                <Button Width="50" Command="{Binding DeleteCommand}" Content="{Binding [Delete], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Width="50" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}" Margin="5,5,5,5"/>

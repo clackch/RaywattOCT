@@ -25,7 +25,10 @@ namespace RaywattApp.ViewModels
         private Patient _patient;
 
         [ObservableProperty]
-        private IList<PatientCaseByDate> _patientCaseByDate;
+        private IList<PatientCaseByDate> _patientCaseByDateList;
+
+        [ObservableProperty]
+        private PatientCaseByDate _curPatientCaseByDate;
 
         [ObservableProperty]
         private IList<PatientCase> _patientCaseList;
@@ -37,6 +40,12 @@ namespace RaywattApp.ViewModels
         public ICommand ExportCommand
         {
             get { return this._exportCommand ?? (this._exportCommand = new RelayCommand(Export)); }
+        }
+
+        private ICommand _deleteCommand;
+        public ICommand DeleteCommand
+        {
+            get { return this._deleteCommand ?? (this._deleteCommand = new RelayCommand(Delete)); }
         }
 
         private ICommand _backCommand;
@@ -119,7 +128,7 @@ namespace RaywattApp.ViewModels
             _log.Debug("OnNavigating");
         }
 
-        override protected void Search()
+        protected override void Search()
         {
             _log.Debug("Search");
 
@@ -134,11 +143,12 @@ namespace RaywattApp.ViewModels
             //Paging을 위한 전체 Row 수 Count
             PagingTotalCnt = _sqlManager.PageCountPatientCaseByDate(sqlParameters);
 
-            PatientCaseByDate = _sqlManager.PageSelectPatientCaseByDate(sqlParameters, sqlAdditionalCondition);
+            PatientCaseByDateList = _sqlManager.PageSelectPatientCaseByDate(sqlParameters, sqlAdditionalCondition);
 
-            if (PatientCaseByDate.Count > 0)
+            //목록이 있을 경우, 첫 건 Expand 처리
+            if (PatientCaseByDateList.Count > 0)
             {
-                ShowPatientCase(PatientCaseByDate[0]);
+                ShowPatientCase(PatientCaseByDateList[0]);
             }
         }
 
@@ -183,14 +193,92 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "FilePopupControl", Type = (int)CommonDefinition.PopupType.File, FileType = (int)CommonDefinition.FileType.Export, Parameter = fileExportData });
         }
 
+        private void Delete()
+        {
+            _log.Debug("Delete");
+
+            if(PatientCaseList == null || CheckBoxAllSelected == false)
+            {
+                WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "MessagePopupControl", Type = (int)CommonDefinition.PopupType.Message, Level = (int)CommonDefinition.PopupLevel.Info, Parameter = _l10n["There are no items selected."] });
+                return;
+            }
+
+            WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "QuestionPopupControl", Type = (int)CommonDefinition.PopupType.Question, QuestionId = (int)CommonDefinition.QuestionList.PatientCaseDelete, ParentObject = this, Parameter = _l10n["Are you sure to delete selected patient case?"] });
+        }
+
+        public override void QuestionPopupCallback()
+        {
+            _log.Debug("QuestionPopupCallback : " + QuestionPopupRes.QuestionId + "/" + QuestionPopupRes.QuestionResponse);
+
+            if (QuestionPopupRes != null)
+            {
+                if (QuestionPopupRes.QuestionId == (int)CommonDefinition.QuestionList.PatientCaseDelete)
+                {
+                    if(QuestionPopupRes.QuestionResponse)
+                        DeletePatientCase();
+                }
+            }
+        }
+
+        private void DeletePatientCase()
+        {
+            int cntDel = 0;
+            int resDel = 0;
+
+            foreach (PatientCase patientCase in PatientCaseList)
+            {
+                if (patientCase.IsChecked)
+                {
+                    cntDel++;
+                    Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+                    sqlParameters["id"] = patientCase.Id;
+
+                    resDel += _sqlManager.DeletePatientCase(sqlParameters);
+                }
+            }
+
+            if (cntDel == resDel)
+            {
+                //Group 전체가 삭제되었을 경우, 첫화면으로 Page 이동
+                if(CheckBoxAllSelected == true)
+                {
+                    PagingOffset = 0;
+                    Search();
+                }
+                else // Group 중 일부만 삭제되었을 경우, 해당 Page 유지(삭제된 Group 부분만 갱신)
+                {
+                    Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+                    sqlParameters["id"] = Patient.Id;
+                    sqlParameters["date"] = CurPatientCaseByDate.Key;
+
+                    string value = CurPatientCaseByDate.Value;
+                    string[] splitValue = value.Split(")");
+                    string[] splitValue2 = splitValue[0].Split("(");
+                    int cnt = int.Parse(splitValue2[1]) - cntDel;
+
+                    CurPatientCaseByDate.Value = splitValue2[0] + "(" + cnt + ")";
+                    CurPatientCaseByDate.PatientCaseList = _sqlManager.SelectPatientCaseList(sqlParameters);
+                    PatientCaseList = CurPatientCaseByDate.PatientCaseList;
+
+                    CheckBoxAllSelected = false;
+                }
+            }
+            else
+            {
+                _log.Error("Delete Error - Total : " + cntDel + " Deleted Cnt : " + resDel);
+            }
+        }
+
         private void ShowPatientCase(PatientCaseByDate patientCaseByDate)
         {
             _log.Debug("ShowPatientCase");
 
             if (patientCaseByDate == null)
                 return;
-            
-            foreach (PatientCaseByDate keyValue in PatientCaseByDate)
+
+            CurPatientCaseByDate = patientCaseByDate;
+
+            foreach (PatientCaseByDate keyValue in PatientCaseByDateList)
             {
                 keyValue.IsSelected = false;
             }

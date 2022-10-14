@@ -61,6 +61,7 @@ namespace RaywattApp
 
             //Control 등록
             services.AddTransient(typeof(MessagePopupControl));
+            services.AddTransient(typeof(QuestionPopupControl));
             services.AddTransient(typeof(SettingPopupControl));
             services.AddTransient(typeof(FilePopupControl));
 

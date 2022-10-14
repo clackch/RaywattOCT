@@ -39,14 +39,16 @@ namespace RaywattApp.Services
 
             //SelectPatientList
             _query["SelectPatientList"] =
-                $"SELECT id, lastname, firstname, birthdate, rv_schema.fn_code('GEND', gender) gender, to_char(create_date,'YYYY-MM-DD HH24:MI:SS') create_date, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') update_date " +
-                        $", concat((SELECT to_char(create_date, 'yyyy-MM-dd') FROM rv_schema.patient_case c WHERE c.patient_id = p.id ORDER BY create_date DESC LIMIT 1), ' (',(SELECT count(*) FROM rv_schema.patient_case c WHERE c.patient_id = p.id), ')') last_case " +
-                $"FROM rv_schema.patient p " +
+                $"SELECT id, lastname, firstname, birthdate, rv_schema.fn_code('GEND', gender) gender" +
+                        $", to_char(create_date,'YYYY-MM-DD HH24:MI:SS') create_date, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') update_date " +
+                        $", rv_schema.fn_lastcase(id) last_case " +
+                $"FROM rv_schema.patient " +
                 $"WHERE id LIKE @id OR lastname LIKE @lastname OR firstname LIKE @firstname";
 
             //SelectPatient
             _query["SelectPatient"] = 
-                $"SELECT id, lastname, firstname, birthdate, rv_schema.fn_code('GEND', gender) gender, to_char(create_date,'YYYY-MM-DD HH24:MI:SS') create_date, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') update_date " +
+                $"SELECT id, lastname, firstname, birthdate, rv_schema.fn_code('GEND', gender) gender" +
+                        $", to_char(create_date,'YYYY-MM-DD HH24:MI:SS') create_date, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') update_date " +
                 $"FROM rv_schema.patient " +
                 $"WHERE id = @id ";
 
@@ -66,7 +68,9 @@ namespace RaywattApp.Services
             //SelectPatientCaseList - create_data 기준
             _query["SelectPatientCaseList"] =
                 $"SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name , physician_id, rv_schema.fn_physician(physician_id) physician_name, " +
-                        $"accession_number, accession_name, comment, vessel, procedure, thumbnail_no, still_image_yn, image, " +
+                        $"accession_number, accession_name, comment, " +
+                        $"rv_schema.fn_code('VESS', vessel) vessel, rv_schema.fn_code('PROC', procedure) procedure, " +
+                        $"thumbnail_no, still_image_yn, image, " +
                         $"to_char(create_date,'YYYY-MM-DD HH24:MI:SS') create_date, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') update_date " +
                 $"FROM rv_schema.patient_case " +
                 $"WHERE patient_id = @id AND to_char(create_date, 'YYYY-MM-DD') = @date " +
@@ -97,6 +101,11 @@ namespace RaywattApp.Services
         private static void SetDeleteQuery()
         {
             _log.Debug("SetDeleteQuery");
+
+            //UpdatePatient
+            _query["DeletePatientCase"] =
+                $"DELETE FROM rv_schema.patient_case " +
+                $"WHERE id=@id";
         }
     }
 }
