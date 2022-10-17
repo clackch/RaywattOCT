@@ -3,46 +3,39 @@ using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
-using System.Collections.Generic;
-using System.Linq;
 using System;
+using System.Reflection;
+using System.Windows;
 using System.Windows.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace RaywattApp.ViewModels
 {
     public partial class MainViewModel
     {
-        [ObservableProperty]
-        private Patient _patientEdit;
-
-        [ObservableProperty]
-        private string _genderCodeEdit;
-
         private ICommand _settingCommand;
         public ICommand SettingCommand
         {
             get { return this._settingCommand ?? (this._settingCommand = new RelayCommand(Setting, CanButtonClick)); }
         }
 
-        private ICommand _patiendEditCommand;
-        public ICommand PatientEditCommand
+        private ICommand _questionPopupResponseCommand;
+        public ICommand QuestionPopupResponseCommand
         {
-            get { return this._patiendEditCommand ?? (this._patiendEditCommand = new RelayCommand(ShowPatientEdit, CanButtonClick)); }
+            get { return this._questionPopupResponseCommand ?? (this._questionPopupResponseCommand = new RelayCommand<string>(ResponseQuestionPopup)); }
         }
 
-        private ICommand _patiendEditSaveCommand;
-        public ICommand PatientEditSaveCommand
+        private ICommand _messagePopupCloseCommand;
+        public ICommand MessagePopupCloseCommand
         {
-            get { return this._patiendEditSaveCommand ?? (this._patiendEditSaveCommand = new RelayCommand(SavePatientEdit, CanSavePatient)); }
+            get { return this._messagePopupCloseCommand ?? (this._messagePopupCloseCommand = new RelayCommand(CloseMessagePopup)); }
         }
 
         private bool CanButtonClick()
         {
             _log.Debug("CanButtonClick");
 
-            //View Layer Popup이 열려있는 경우, 다시 열리지 않도록 처리
-            return !ShowViewLayerPopup;
+            //Layer Popup이 열려있는 경우, 다시 열리지 않도록 처리
+            return !ShowViewLayerPopup && !ShowLayerPopup;
         }
 
         private void Setting()
@@ -53,92 +46,23 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "SettingPopupControl", Type = (int)CommonDefinition.PopupType.Setting });
         }
 
-        private void ShowPatientEdit()
+        private void ResponseQuestionPopup(string response)
         {
-            _log.Debug("ShowPatientEdit");
+            QuestionPopupResponse res = new QuestionPopupResponse();
+            res.QuestionId = QuestionPopupId;
+            res.QuestionResponse = response == "Y" ? true : false;
 
-            PatientEdit = new Patient();
-            CopyPatient(Patient, PatientEdit);
-            GenderCodeEdit = CodeDefinition.Codes["GEND"].FirstOrDefault(x => x.Value == Patient.Gender).Key;
+            Type? type = QuestionPopupParent.GetType();
+            PropertyInfo questionPopupResponse = type.GetProperty("QuestionPopupRes");
+            if(questionPopupResponse != null)
+                questionPopupResponse.SetValue(QuestionPopupParent, res);
 
-            PatientEdit.PropertyChanged += PatientEdit_PropertyChanged;
-
-            WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "PatientEditPopupControl", Type = (int)CommonDefinition.PopupType.PatientEdit });
+            WeakReferenceMessenger.Default.Send(new PopupMessage(false) { Type = (int)CommonDefinition.PopupType.Question });
         }
 
-        private void SavePatientEdit()
+        private void CloseMessagePopup()
         {
-            _log.Debug("SavePatientEdit");
-
-            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-
-            if (!Patient.Id.Equals(PatientEdit.Id.Trim()))
-            {
-                //Check ID for Duplication
-                sqlParameters["id"] = Patient.Id.Trim();
-
-                int nCnt = _sqlManager.CountPatient(sqlParameters);
-
-                if (nCnt > 0)
-                {
-                    WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "MessagePopupControl", Type = (int)CommonDefinition.PopupType.Message, Level = (int)CommonDefinition.PopupLevel.Info, Parameter = _l10n["ID is duplicated."] });
-                    return;
-                }
-            }
-
-            //Save New Patient Info
-            sqlParameters.Clear();
-            sqlParameters["id"] = PatientEdit.Id.Trim();
-            sqlParameters["lastname"] = PatientEdit.Lastname.Trim();
-            sqlParameters["firstname"] = PatientEdit.Firstname.Trim();
-            sqlParameters["birthdate"] = PatientEdit.Birthdate;
-            if (GenderCodeEdit != null)
-            {
-                sqlParameters["gender"] = GenderCodeEdit;
-                PatientEdit.Gender = CodeDefinition.Codes["GEND"][GenderCodeEdit];
-            }
-            else
-            {
-                sqlParameters["gender"] = "";
-            }
-
-            int nRows = _sqlManager.UpdatePatient(sqlParameters);
-
-            if (nRows == 1)
-            {
-                CopyPatient(PatientEdit, Patient);
-                WeakReferenceMessenger.Default.Send(new PopupMessage(false) { Type = (int)CommonDefinition.PopupType.PatientEdit });
-            }
-        }
-
-        private bool CanSavePatient()
-        {
-            _log.Debug("CanNewRecording");
-
-            return ValidatePatient();
-        }
-
-        private void PatientEdit_PropertyChanged(object sender, EventArgs e)
-        {
-            _log.Debug("PatientEdit_PropertyChanged");
-
-            (PatientEditSaveCommand as RelayCommand).NotifyCanExecuteChanged();
-        }
-
-        private bool ValidatePatient()
-        {
-            _log.Debug("ValidatePatient");
-
-            if (string.IsNullOrEmpty(PatientEdit.Id.Trim()))
-                return false;
-
-            if (string.IsNullOrEmpty(PatientEdit.Lastname.Trim()))
-                return false;
-
-            if (string.IsNullOrEmpty(PatientEdit.Firstname.Trim()))
-                return false;
-
-            return true;
+            WeakReferenceMessenger.Default.Send(new PopupMessage(false) { Type = (int)CommonDefinition.PopupType.Message });
         }
     }
 }

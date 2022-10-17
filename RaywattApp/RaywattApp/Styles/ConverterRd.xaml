@@ -20,6 +20,9 @@
     <converters:L10NConverter x:Key="L10NConverter" />
 
     <!-- Setting Selected Converter -->
-    <converters:SettingSelectedConverter x:Key="SettingSelectedConverter" /> 
+    <converters:SettingSelectedConverter x:Key="SettingSelectedConverter" />
 
+    <!-- Expander Selected Converter -->
+    <converters:ExpanderSelectedConverter x:Key="ExpanderSelectedConverter" />
+    
 </ResourceDictionary>

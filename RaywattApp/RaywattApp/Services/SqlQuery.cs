@@ -39,21 +39,42 @@ namespace RaywattApp.Services
 
             //SelectPatientList
             _query["SelectPatientList"] =
-                $"SELECT id, lastname, firstname, birthdate, rv_schema.fn_code('GEND', gender) gender, to_char(create_date,'YYYY-MM-DD HH24:MI:SS') createdate, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') updatedate " +
+                $"SELECT id, lastname, firstname, birthdate, rv_schema.fn_code('GEND', gender) gender" +
+                        $", to_char(create_date,'YYYY-MM-DD HH24:MI:SS') create_date, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') update_date " +
+                        $", rv_schema.fn_lastcase(id) last_case " +
                 $"FROM rv_schema.patient " +
                 $"WHERE id LIKE @id OR lastname LIKE @lastname OR firstname LIKE @firstname";
 
             //SelectPatient
             _query["SelectPatient"] = 
-                $"SELECT id, lastname, firstname, birthdate, rv_schema.fn_code('GEND', gender) gender, to_char(create_date,'YYYY-MM-DD HH24:MI:SS') createdate, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') updatedate " +
+                $"SELECT id, lastname, firstname, birthdate, rv_schema.fn_code('GEND', gender) gender" +
+                        $", to_char(create_date,'YYYY-MM-DD HH24:MI:SS') create_date, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') update_date " +
                 $"FROM rv_schema.patient " +
-                $"WHERE id = @id "; ;
+                $"WHERE id = @id ";
 
             //SelectCodeList
             _query["SelectCodeList"] =
                 $"SELECT classification, key, value, buffer1, buffer2 " +
                 $"FROM rv_schema.code " +
-                $"ORDER BY classification, key";
+                $"ORDER BY classification, sort_order, key";
+
+            //SelectPatientCaseByDate - create_data 기준
+            _query["SelectPatientCaseByDate"] =
+                $"SELECT to_char(create_date, 'YYYY-MM-DD') key, concat(to_char(create_date, 'YYYY-MM-DD'), ' (', count(*), ')' ) value " +
+                $"FROM rv_schema.patient_case " +
+                $"WHERE patient_id = @id " +
+                $"GROUP BY key ";
+
+            //SelectPatientCaseList - create_data 기준
+            _query["SelectPatientCaseList"] =
+                $"SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name , physician_id, rv_schema.fn_physician(physician_id) physician_name, " +
+                        $"accession_number, accession_name, comment, " +
+                        $"rv_schema.fn_code('VESS', vessel) vessel, rv_schema.fn_code('PROC', procedure) procedure, " +
+                        $"thumbnail_no, still_image_yn, image, " +
+                        $"to_char(create_date,'YYYY-MM-DD HH24:MI:SS') create_date, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') update_date " +
+                $"FROM rv_schema.patient_case " +
+                $"WHERE patient_id = @id AND to_char(create_date, 'YYYY-MM-DD') = @date " +
+                $"ORDER BY create_date DESC";
         }
 
         private static void SetInsertQuery()
@@ -64,6 +85,11 @@ namespace RaywattApp.Services
             _query["InsertPatient"] =
                 $"INSERT INTO rv_schema.patient(id, lastname, firstname, birthdate, gender, create_date, update_date) " +
                 $"VALUES (@id, @lastname, @firstname, @birthdate, @gender, now(), now())";
+
+            //InsertPatientCase
+            _query["InsertPatientCase"] =
+                $"INSERT INTO rv_schema.patient_case(id, patient_id, physician_id, accession_number, accession_name, comment, vessel, procedure, thumbnail_no, still_image_yn, create_date, update_date) " +
+                $"VALUES (@id, @patient_id, @physician_id, @accession_number, @accession_name, @comment, @vessel, @procedure, @thumbnail_no, @still_image_yn, now(), now())";
         }
 
         private static void SetUpdateQuery()
@@ -74,12 +100,17 @@ namespace RaywattApp.Services
             _query["UpdatePatient"] =
                 $"UPDATE rv_schema.patient " +
                 $"SET id=@id, lastname=@lastname, firstname=@firstname, birthdate=@birthdate, gender=@gender, update_date=now() " +
-                $"WHERE id=@id";
+                $"WHERE id=@originId";
         }
 
         private static void SetDeleteQuery()
         {
             _log.Debug("SetDeleteQuery");
+
+            //UpdatePatient
+            _query["DeletePatientCase"] =
+                $"DELETE FROM rv_schema.patient_case " +
+                $"WHERE id=@id";
         }
     }
 }

@@ -76,6 +76,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private string _headerUpdateDate;
 
+        [ObservableProperty]
+        private string _headerLastCase;
+
         public PatientListViewModel(SqlManager sqlManager)
         {
             _log.Debug("PatientListViewModel");
@@ -88,12 +91,12 @@ namespace RaywattApp.ViewModels
             SetHeaderNameInit();
 
             //Order
-            ColumOrderField = "update_date";
+            ColumOrderField = "last_case";
             bColumnOrderBy = false;
             strColumnOrder = ColumOrderField + " DESC";
 
             //Initial Order Field
-            HeaderUpdateDate = HeaderUpdateDate + " ▼";
+            HeaderLastCase = HeaderLastCase + " ▼";
 
             //Initialize Complete
             bCheckInit = true;
@@ -143,6 +146,7 @@ namespace RaywattApp.ViewModels
             HeaderGender = _l10n["Gender"];
             HeaderCreateDate = _l10n["Create Date"];
             HeaderUpdateDate = _l10n["Update Date"];
+            HeaderLastCase = _l10n["Last Case (total)"];
         }
 
         private void Import()

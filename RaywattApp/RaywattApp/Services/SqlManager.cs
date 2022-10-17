@@ -83,6 +83,52 @@ namespace RaywattApp.Services
             return _databaseService.GetDatas<Code>(commandText);
         }
 
+        public int PageCountPatientCaseByDate(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("PageCountPatientCaseByDate");
+
+            string commandText = SqlQuery.GetCountQuery("SelectPatientCaseByDate");
+
+            return _databaseService.GetDataCount(commandText, sqlParameters);
+        }
+
+        public IList<PatientCaseByDate> PageSelectPatientCaseByDate(Dictionary<string, Object> sqlParameters, Dictionary<string, Object> sqlAdditionalCondition)
+        {
+            _log.Debug("PageSelectPatientList");
+
+            string commandText = SqlQuery.GetQuery("SelectPatientCaseByDate");
+            commandText += getAdditionalCondition(sqlAdditionalCondition);
+
+            return _databaseService.GetDatas<PatientCaseByDate>(commandText, sqlParameters);
+        }
+
+        public IList<PatientCase> SelectPatientCaseList(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("SelectPatientCaseList");
+
+            string commandText = SqlQuery.GetQuery("SelectPatientCaseList");
+
+            return _databaseService.GetDatas<PatientCase>(commandText, sqlParameters);
+        }
+
+        public int DeletePatientCase(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("DeletePatientCase");
+
+            string commandText = SqlQuery.GetQuery("DeletePatientCase");
+
+            return _databaseService.DeleteData(commandText, sqlParameters);
+        }
+
+        public int InsertPatientCase(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("InsertPatientCase");
+
+            string commandText = SqlQuery.GetQuery("InsertPatientCase");
+
+            return _databaseService.InsertData(commandText, sqlParameters);
+        }
+
         private string getAdditionalCondition(Dictionary<string, Object> sqlAdditionalCondition)
         {
             _log.Debug("getAddtionalCondition");

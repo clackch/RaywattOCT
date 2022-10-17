@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using RaywattApp.Common.Localization;
+using RaywattApp.Models;
 
 namespace RaywattApp.Common.Bases
 {
@@ -28,6 +29,14 @@ namespace RaywattApp.Common.Bases
             set { SetProperty(ref _message, value); }
         }
 
+        private QuestionPopupResponse _questionPopupRes;
+
+        public QuestionPopupResponse QuestionPopupRes
+        {
+            get { return this._questionPopupRes; }
+            set { this._questionPopupRes = value; QuestionPopupCallback(); }
+        }
+
         protected readonly DynamicResource _l10n;
 
         public ViewModelBase()
@@ -51,6 +60,11 @@ namespace RaywattApp.Common.Bases
         /// <param name="navigatedEventArgs"></param>
         public virtual void OnNavigated(object sender, object navigatedEventArgs)
         {
+        }
+
+        public virtual void QuestionPopupCallback()
+        {
+
         }
     }
 }

@@ -25,5 +25,8 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private string updateDate;
+
+        [ObservableProperty]
+        private string lastCase;
     }
 }

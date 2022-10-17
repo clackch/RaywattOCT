@@ -9,15 +9,17 @@
             PatientListPage = 0,
             PatientDetailPage,
             PatientNewPage,
-            RecordingPage
+            PatientEditPage,
+            RecordingPage,
+            ReviewPage
         }
 
         public enum PopupType : int
         {
             Message = 0,
+            Question,
             Setting,
             File,
-            PatientEdit,
             CaseEdit
         }
 
@@ -32,6 +34,11 @@
         {
             Export = 0,
             Import
+        }
+
+        public enum QuestionList : int
+        {
+            PatientCaseDelete = 0,
         }
     }
 }

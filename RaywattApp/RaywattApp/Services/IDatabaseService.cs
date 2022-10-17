@@ -35,5 +35,10 @@ namespace RaywattApp.Services
         /// Data Update
         /// </summary>
         int UpdateData(string commandText, Dictionary<string, Object> commandParameters = null);
+
+        /// <summary>
+        /// Data Delete
+        /// </summary>
+        int DeleteData(string commandText, Dictionary<string, Object> commandParameters = null);
     }
 }
