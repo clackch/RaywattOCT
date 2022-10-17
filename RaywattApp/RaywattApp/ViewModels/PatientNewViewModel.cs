@@ -147,6 +147,7 @@ namespace RaywattApp.ViewModels
             {
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["patient"] = Patient;
+                SetListStatusInit();
                 parameter["prevStatus"] = PrevStatus;
                 WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/RecordingPage.xaml") { Parameter = parameter });
             }
@@ -154,6 +155,18 @@ namespace RaywattApp.ViewModels
             {
                 _log.Error("Insert Error");
             }
+        }
+
+        private void SetListStatusInit()
+        {
+            PrevStatus.ListKeyword = "";
+            PrevStatus.ListSortField = "LastCase";
+            PrevStatus.ListSortDirection = false;
+            PrevStatus.ListSort = "last_case DESC";
+            PrevStatus.ListPageOffset = 0;
+            PrevStatus.ListPageSize = 10;
+            PrevStatus.ListPageGroup = 1;
+            PrevStatus.ListPageNumber = 0;
         }
 
         private bool Validate()
