@@ -47,9 +47,12 @@ int CDataReader::Initialize(tstring strDataFilePath) {
 }
 unsigned short* CDataReader::GetSample(int nIndex) {
 	if (nIndex < 0 || nIndex >= m_nNumOfSamples) return NULL;
+
+	EnterCriticalSection(&m_csReadFrame);
 	if (m_pReadSamples[nIndex] == NULL) {
 		readFrame(nIndex);
 	}
+	LeaveCriticalSection(&m_csReadFrame);
 
 	return m_pReadSamples[nIndex];
 }
@@ -76,8 +79,9 @@ bool CDataReader::readFrame(int nIndex) {
 	bool result = true;
 
 	if (nIndex < 0 || nIndex >= m_nNumOfSamples) return false;
+
+	EnterCriticalSection(&m_csReadFrame);
 	if (m_pReadSamples[nIndex] == NULL) {
-		EnterCriticalSection(&m_csReadFrame);
 		if(m_pReadSamples[nIndex] == NULL){
 			m_pReadSamples[nIndex] = new unsigned short[nBufferSize];
 
@@ -87,8 +91,8 @@ bool CDataReader::readFrame(int nIndex) {
 			SetFilePointer(m_hFile, offsetL, &offsetH, FILE_BEGIN);
 			result = ReadFile(m_hFile, m_pReadSamples[nIndex], nBufferSize * sizeof(unsigned short), &dwBytesRead, NULL);
 		}
-		LeaveCriticalSection(&m_csReadFrame);
 	}
+	LeaveCriticalSection(&m_csReadFrame);
 
 	return result;
 }
