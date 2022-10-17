@@ -22,6 +22,9 @@ namespace RaywattApp.ViewModels
         private readonly SqlManager _sqlManager;
 
         [ObservableProperty]
+        private PrevStatus _prevStatus;
+
+        [ObservableProperty]
         private Patient _patient;
 
         [ObservableProperty]
@@ -118,8 +121,12 @@ namespace RaywattApp.ViewModels
 
             if (extraData != null)
             {
-                Patient = (Patient)extraData;
+                Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
+                Patient = (Patient)data["patient"];
+                PrevStatus = (PrevStatus)data["prevStatus"];
+
                 Search();
+                SetPrevStatus();
             }
         }
 
@@ -152,25 +159,56 @@ namespace RaywattApp.ViewModels
             }
         }
 
+        private void SetPrevStatus()
+        {
+            PagingOffset = PrevStatus.DetailPageOffset;
+
+            if (PrevStatus.DetailPageGroup == 0)
+                PrevStatus.DetailPageGroup = 1;
+
+            ShowPageNo(PrevStatus.DetailPageGroup);
+            MovePageNo((PrevStatus.DetailPageNumber + 1).ToString());
+
+            if(PrevStatus.DetailSelectedGroup != null)
+            {
+                foreach (PatientCaseByDate keyValue in PatientCaseByDateList)
+                {
+                    if (keyValue.Key.Equals(PrevStatus.DetailSelectedGroup))
+                    {
+                        ShowPatientCase(keyValue);
+                        break;
+                    }
+                }
+            }
+        }
+
         private void Back()
         {
             _log.Debug("Back");
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientListPage.xaml"));
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientListPage.xaml") { Parameter = PrevStatus});
         }
 
         private void GoPatientEdit()
         {
             _log.Debug("GoPatientEdit");
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientEditPage.xaml") { Parameter = Patient });
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = Patient;
+            GetDetailStatus();
+            parameter["prevStatus"] = PrevStatus;
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientEditPage.xaml") { Parameter = parameter });
         }
 
         private void NewRecording()
         {
             _log.Debug("NewRecording");
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/RecordingPage.xaml") { Parameter = Patient });
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = Patient;
+            GetDetailStatus();
+            parameter["prevStatus"] = PrevStatus;
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/RecordingPage.xaml") { Parameter = parameter });
         }
 
         private void Export()
@@ -352,11 +390,21 @@ namespace RaywattApp.ViewModels
 
         private void GoReview(PatientCase patientCase)
         {
-            Dictionary<string, Object> parameters = new Dictionary<string, Object>();
-            parameters["patient"] = Patient;
-            parameters["patientCase"] = patientCase;
+            Dictionary<string, Object> parameter = new Dictionary<string, Object>();
+            parameter["patient"] = Patient;
+            parameter["patientCase"] = patientCase;
+            GetDetailStatus();
+            parameter["prevStatus"] = PrevStatus;
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/ReviewPage.xaml") { Parameter = parameter });
+        }
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/ReviewPage.xaml") { Parameter = parameters });
+        private void GetDetailStatus()
+        {
+            PrevStatus.DetailPageGroup = ((PagingNoIdx - 1) / 5) * 5 + 1;
+            PrevStatus.DetailPageNumber = PagingNoIdx;
+            PrevStatus.DetailPageOffset = PagingOffset;
+            if(CurPatientCaseByDate != null)
+                PrevStatus.DetailSelectedGroup = CurPatientCaseByDate.Key;
         }
     }
 }

@@ -96,6 +96,7 @@ namespace RaywattApp.Common.Paging
 
         protected bool bColumnOrderBy;
         protected string strColumnOrder;
+        protected string strColumnHeaderColumn;
 
         private ICommand _pagingNoCommand;
         public ICommand PagingNoCommand
@@ -231,7 +232,7 @@ namespace RaywattApp.Common.Paging
             MovePageNo("PagingNo" + (PagingNoCnt % 5 + 1));
         }
 
-        private void MovePageNo(string param)
+        protected void MovePageNo(string param)
         {
             _log.Debug("MovePageNo : " + param);
 
@@ -239,7 +240,13 @@ namespace RaywattApp.Common.Paging
 
             PropertyInfo piPagingNoName = GetType().GetProperty(param);
             if (piPagingNoName != null)
+            {
                 pagingIndex = int.Parse(piPagingNoName.GetValue(this).ToString());
+            }
+            else
+            {
+                pagingIndex = int.Parse(param);
+            }
 
             PagingOffset = (pagingIndex - 1) * PagingSelectedPageSize;
             PagingNoIdx = pagingIndex - 1;
@@ -316,7 +323,8 @@ namespace RaywattApp.Common.Paging
 
             SetHeaderNameInit();
             //Header 필드명은 Header + Binding Field가 되도록 작성해야 속성 값을 읽을 수 있음
-            PropertyInfo piHeaderName = GetType().GetProperty("Header" + e.Column.SortMemberPath.Replace("_", ""));
+            string headerColumn = e.Column.SortMemberPath.Replace("_", "");
+            PropertyInfo piHeaderName = GetType().GetProperty("Header" + headerColumn);
 
             if (ColumOrderField.Equals(e.Column.SortMemberPath.ToLower()))
             {
@@ -325,14 +333,21 @@ namespace RaywattApp.Common.Paging
                     bColumnOrderBy = false;
                     strColumnOrder = ColumOrderField + " DESC";
                     if (piHeaderName != null)
+                    {
                         piHeaderName.SetValue(this, piHeaderName.GetValue(this) + " ▼");
+                        strColumnHeaderColumn = headerColumn;
+                    }
                 } 
                 else
                 {
                     bColumnOrderBy = true;
                     strColumnOrder = ColumOrderField + " ASC";
                     if (piHeaderName != null)
+                    {
                         piHeaderName.SetValue(this, piHeaderName.GetValue(this) + " ▲");
+                        strColumnHeaderColumn = headerColumn;
+                    }
+                        
                 }
             }
             else
@@ -341,7 +356,10 @@ namespace RaywattApp.Common.Paging
                 bColumnOrderBy = true;
                 strColumnOrder = ColumOrderField + " ASC";
                 if (piHeaderName != null)
+                {
                     piHeaderName.SetValue(this, piHeaderName.GetValue(this) + " ▲");
+                    strColumnHeaderColumn = headerColumn;
+                }
             }
 
             Search();

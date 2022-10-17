@@ -165,6 +165,9 @@
   <data name="en-US" xml:space="preserve">
     <value>English</value>
   </data>
+  <data name="End Review" xml:space="preserve">
+    <value>End Review</value>
+  </data>
   <data name="English" xml:space="preserve">
     <value>English</value>
   </data>

@@ -20,15 +20,18 @@ namespace RaywattApp.ViewModels
         private readonly SqlManager _sqlManager;
 
         [ObservableProperty]
+        private PrevStatus _prevStatus;
+
+        [ObservableProperty]
         private Patient _patient;
 
         [ObservableProperty]
         private PatientCase _patientCase;
 
-        private ICommand _cancelCommand;
-        public ICommand CancelCommand
+        private ICommand _endReviewCommand;
+        public ICommand EndReviewCommand
         {
-            get { return this._cancelCommand ?? (this._cancelCommand = new RelayCommand(Cancel)); }
+            get { return this._endReviewCommand ?? (this._endReviewCommand = new RelayCommand(EndReview)); }
         }
 
         public ReviewViewModel(SqlManager sqlManager)
@@ -51,6 +54,7 @@ namespace RaywattApp.ViewModels
                 Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
                 Patient = (Patient)data["patient"];
                 PatientCase = (PatientCase)data["patientCase"];
+                PrevStatus = (PrevStatus)data["prevStatus"];
             }
         }
 
@@ -59,11 +63,14 @@ namespace RaywattApp.ViewModels
             _log.Debug("OnNavigating");
         }
 
-        private void Cancel()
+        private void EndReview()
         {
-            _log.Debug("Cancel");
+            _log.Debug("EndReview");
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = Patient });
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = Patient;
+            parameter["prevStatus"] = PrevStatus;
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = parameter });
         }
     }
 }

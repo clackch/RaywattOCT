@@ -21,6 +21,9 @@ namespace RaywattApp.ViewModels
         private readonly SqlManager _sqlManager;
 
         [ObservableProperty]
+        private PrevStatus _prevStatus;
+
+        [ObservableProperty]
         private Patient _patient;
 
         [ObservableProperty]
@@ -58,7 +61,9 @@ namespace RaywattApp.ViewModels
 
             if (extraData != null)
             {
-                Patient = (Patient)extraData;
+                Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
+                Patient = (Patient)data["patient"];
+                PrevStatus = (PrevStatus)data["prevStatus"];
 
                 PatientEdit = new Patient();
                 CopyPatient(Patient, PatientEdit);
@@ -78,7 +83,10 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Cancel");
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = Patient });
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = Patient;
+            parameter["prevStatus"] = PrevStatus;
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = parameter });
         }
 
         private void SavePatientEdit()
@@ -122,8 +130,20 @@ namespace RaywattApp.ViewModels
 
             if (nRows == 1)
             {
-                WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = PatientEdit });
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["patient"] = PatientEdit;
+                SetDetailStatusInit();
+                parameter["prevStatus"] = PrevStatus;
+                WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = parameter });
             }
+        }
+
+        private void SetDetailStatusInit()
+        {
+            PrevStatus.DetailSelectedGroup = null;
+            PrevStatus.DetailPageOffset = 0;
+            PrevStatus.DetailPageGroup = 1;
+            PrevStatus.DetailPageNumber = 0;
         }
 
         private bool CanSavePatient()

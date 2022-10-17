@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System;
 using System.Windows.Input;
 using log4net;
+using System.Windows.Navigation;
 
 namespace RaywattApp.ViewModels
 {
@@ -17,6 +18,9 @@ namespace RaywattApp.ViewModels
         private static readonly ILog _log = LogManager.GetLogger(typeof(PatientNewViewModel));
 
         private readonly SqlManager _sqlManager;
+
+        [ObservableProperty]
+        private PrevStatus _prevStatus;
 
         [ObservableProperty]
         private Patient _patient;
@@ -62,6 +66,13 @@ namespace RaywattApp.ViewModels
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
             _log.Debug("OnNavigated");
+
+            var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
+
+            if (extraData != null)
+            {
+                PrevStatus = (PrevStatus)extraData;
+            }
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -80,7 +91,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Back");
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("GoBack"));
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientListPage.xaml") { Parameter = PrevStatus });
         }
 
         private bool CanNewRecording()
@@ -134,7 +145,10 @@ namespace RaywattApp.ViewModels
 
             if(nRows == 1)
             {
-                WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/RecordingPage.xaml") { Parameter = Patient });
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["patient"] = Patient;
+                parameter["prevStatus"] = PrevStatus;
+                WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/RecordingPage.xaml") { Parameter = parameter });
             }
             else
             {
