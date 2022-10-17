@@ -10,6 +10,8 @@ using System.Windows.Input;
 using RaywattApp.Common.Paging;
 using log4net;
 using RaywattApp.Common.Bases;
+using System.Windows.Navigation;
+using System.Reflection;
 
 namespace RaywattApp.ViewModels
 {
@@ -18,6 +20,9 @@ namespace RaywattApp.ViewModels
         private static readonly ILog _log = LogManager.GetLogger(typeof(PatientListViewModel));
 
         private readonly SqlManager _sqlManager;
+
+        [ObservableProperty]
+        private PrevStatus _prevStatus;
 
         [ObservableProperty]
         private IList<Patient> _patientList;
@@ -97,6 +102,7 @@ namespace RaywattApp.ViewModels
 
             //Initial Order Field
             HeaderLastCase = HeaderLastCase + " ▼";
+            strColumnHeaderColumn = "LastCase";
 
             //Initialize Complete
             bCheckInit = true;
@@ -109,7 +115,18 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("OnNavigated");
 
-            Search();
+            var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
+
+            if (extraData != null)
+            {
+                PrevStatus = (PrevStatus)extraData;
+
+                SetPrevStatus();
+            }
+            else
+            {
+                Search();
+            }
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -124,13 +141,13 @@ namespace RaywattApp.ViewModels
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["SearchKeyword"] = SearchKeyword.Trim();
 
+            //Paging을 위한 전체 Row 수 Count
+            PagingTotalCnt = _sqlManager.PageCountPatientList(sqlParameters);
+
             Dictionary<string, Object> sqlAdditionalCondition = new Dictionary<string, Object>();
             sqlAdditionalCondition["ORDER"] = strColumnOrder;
             sqlAdditionalCondition["LIMIT"] = PagingSelectedPageSize;
             sqlAdditionalCondition["OFFSET"] = PagingOffset;
-
-            //Paging을 위한 전체 Row 수 Count
-            PagingTotalCnt = _sqlManager.PageCountPatientList(sqlParameters);
 
             PatientList = _sqlManager.PageSelectPatientList(sqlParameters, sqlAdditionalCondition);
         }
@@ -149,6 +166,33 @@ namespace RaywattApp.ViewModels
             HeaderLastCase = _l10n["Last Case (total)"];
         }
 
+        private void SetPrevStatus()
+        {
+            SearchKeyword = PrevStatus.ListKeyword;
+            strColumnOrder = PrevStatus.ListSort;
+            strColumnHeaderColumn = PrevStatus.ListSortField;
+            bColumnOrderBy = PrevStatus.ListSortDirection;
+            PagingSelectedPageSize = PrevStatus.ListPageSize;
+            PagingOffset = PrevStatus.ListPageOffset;
+
+            ShowPageNo(PrevStatus.ListPageGroup);
+            MovePageNo((PrevStatus.ListPageNumber + 1).ToString());
+            SetHeaderNameInit();
+            PropertyInfo piHeaderName = GetType().GetProperty("Header" + PrevStatus.ListSortField);
+
+            if (piHeaderName != null)
+            {
+                if (PrevStatus.ListSortDirection)
+                {
+                    piHeaderName.SetValue(this, piHeaderName.GetValue(this) + " ▲");
+                }
+                else
+                {
+                    piHeaderName.SetValue(this, piHeaderName.GetValue(this) + " ▼");
+                }
+            }
+        }
+
         private void Import()
         {
             _log.Debug("Import");
@@ -163,18 +207,39 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "FilePopupControl", Type = (int)CommonDefinition.PopupType.File, FileType = (int)CommonDefinition.FileType.Export });
         }
 
-        private void MovePatientDetail(Patient param)
+        private void MovePatientDetail(Patient patient)
         {
             _log.Debug("MovePatientDetail");
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = param});
+            if (patient == null)
+                return;
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = patient;
+            parameter["prevStatus"] = GetListStatus();
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = parameter });
         }
 
         private void MovePatientNew()
         {
             _log.Debug("MovePatientNew");
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientNewPage.xaml"));
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientNewPage.xaml") {  Parameter = GetListStatus() });
+        }
+
+        private PrevStatus GetListStatus()
+        {
+            PrevStatus prevStatus = new PrevStatus();
+            prevStatus.ListKeyword = SearchKeyword;
+            prevStatus.ListSortField = strColumnHeaderColumn;
+            prevStatus.ListSortDirection = bColumnOrderBy;
+            prevStatus.ListSort = strColumnOrder;
+            prevStatus.ListPageOffset = PagingOffset;
+            prevStatus.ListPageSize = PagingSelectedPageSize;
+            prevStatus.ListPageGroup = ((PagingNoIdx - 1) / 5) * 5 + 1;
+            prevStatus.ListPageNumber = PagingNoIdx;
+
+            return prevStatus;
         }
     }
 }

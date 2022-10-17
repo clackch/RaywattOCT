@@ -327,12 +327,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ShowPatientInfo : " + pageUri);
 
-            if (pageUri.IndexOf("RecordingPage") > 0)
-            {
-                IsShowPatient = Visibility.Visible;
-                SetPatientInfo((Patient)parameter);
-            }
-            else if (pageUri.IndexOf("ReviewPage") > 0)
+            if (pageUri.IndexOf("RecordingPage") > 0 || pageUri.IndexOf("ReviewPage") > 0)
             {
                 IsShowPatient = Visibility.Visible;
                 Dictionary<string, Object> data = (Dictionary<string, Object>)parameter;
