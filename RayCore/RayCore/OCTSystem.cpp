@@ -794,8 +794,11 @@ void COCTSystem::setMotorOnOff(bool on) {
 */
 void COCTSystem::updateCutView(int drawSamples) {
 	cv::Mat imgCutView = m_pCutView->GetCutViewROI(512);
+	cv::Mat imgDisplay = imgCutView.clone();
+	cv::Mat imgEdit, imgMask;
 	cv::Mat imgResize;
 	cv::Size sizeInterpolation = cv::Size(imgCutView.cols * CUTVIEW_INTERPOLATION_SCALE, imgCutView.rows);
+	cv::Rect rectMask;
 
 	int nCurFrame = drawSamples;
 	int nTotalFrame = m_pCutView->GetNumOfSamples();
@@ -804,7 +807,15 @@ void COCTSystem::updateCutView(int drawSamples) {
 	if (sizeInterpolation.width % 4 != 0) {
 		sizeInterpolation.width -= (sizeInterpolation.width % 4);
 	}
-	cv::resize(imgCutView, imgResize, sizeInterpolation);
+
+	cv::convertScaleAbs(imgCutView, imgEdit, m_fContrast, m_fBrightness);
+
+	imgMask = cv::Mat(imgCutView.rows, imgCutView.cols, CV_8UC1);
+	rectMask = cv::Rect(0, 0, drawSamples, imgMask.rows);
+	memset(imgMask.data, 0x00, imgMask.cols * imgMask.rows);
+	imgMask(rectMask) = 0x01;
+	cv::copyTo(imgEdit, imgDisplay, imgMask);
+	cv::resize(imgDisplay, imgResize, sizeInterpolation);
 
 	if (m_cbLongitude != nullptr) m_cbLongitude(imgResize.data, imgResize.cols, imgResize.rows, imgResize.channels(), nFrameInfo);
 }
