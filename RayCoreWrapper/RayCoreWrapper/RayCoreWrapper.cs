@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace RaywattOCT.Controller
+namespace RaywattOCT
 {
     public class RayCoreWrapper
     {

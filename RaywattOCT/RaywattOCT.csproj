@@ -88,6 +88,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\RayCoreWrapper\RayCoreWrapper\RayCoreWrapper.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="res\bar\brightness_e.png" />
     <Resource Include="res\bar\brightness_e_center.png" />
     <Resource Include="res\bar\brightness_e_left.png" />
