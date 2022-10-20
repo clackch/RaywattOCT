@@ -89,7 +89,7 @@ namespace RaywattApp.ViewModels
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
             sqlParameters["patient_id"] = PatientCase.PatientId;
-            sqlParameters["physician_id"] = "";
+            sqlParameters["physician_name"] = "";
             sqlParameters["accession_number"] = "";
             sqlParameters["accession_name"] = "";
             sqlParameters["comment"] = "comment";

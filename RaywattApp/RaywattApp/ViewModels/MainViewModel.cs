@@ -103,6 +103,9 @@ namespace RaywattApp.ViewModels
         private object _popupNavigationParameter;
 
         [ObservableProperty]
+        private int _messagePopupType;
+
+        [ObservableProperty]
         private string _messagePopupLevel;
 
         [ObservableProperty]
@@ -112,10 +115,16 @@ namespace RaywattApp.ViewModels
         private string _questionPopupContent;
 
         [ObservableProperty]
-        private int _questionPopupId;
+        private int _popupId;
 
         [ObservableProperty]
-        private object _questionPopupParent;
+        private object _popupParent;
+
+        [ObservableProperty]
+        private string _editPopupType;
+
+        [ObservableProperty]
+        private string _editPopupText;
 
         [ObservableProperty]
         private string _filePopupType;
@@ -251,7 +260,9 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("OnLayerPopupMessage : " + message.Type + "/" + message.Value + "/" + message.ControlName);
 
-            switch (message.Type)
+            MessagePopupType = message.Type;
+
+            switch (MessagePopupType)
             {
                 case (int)CommonDefinition.PopupType.Message:
 
@@ -284,14 +295,53 @@ namespace RaywattApp.ViewModels
                     ShowLayerPopup = message.Value;
                     ControlName = message.ControlName;
 
-                    QuestionPopupId = message.QuestionId;
+                    PopupId = message.PopupId;
 
                     if (message.ParentObject != null)
-                        QuestionPopupParent = message.ParentObject;
+                        PopupParent = message.ParentObject;
 
                     //Popup Message
                     if (message.Parameter != null)
                         QuestionPopupContent = message.Parameter.ToString();
+
+                    break;
+                case (int)CommonDefinition.PopupType.Edit:
+
+                    ShowLayerPopup = message.Value;
+                    ControlName = message.ControlName;
+
+                    PopupId = message.PopupId;
+
+                    if (message.ParentObject != null)
+                        PopupParent = message.ParentObject;
+
+                    if(PopupId == (int)CommonDefinition.EditList.Vessel)
+                    {
+                        EditPopupType = _l10n["Vessel"];
+
+                        if (message.Parameter != null)
+                        {
+                            EditPopupText = message.Parameter.ToString().Trim();
+                        }
+                        else
+                        {
+                            EditPopupText = "";
+                        }
+                            
+                    }
+                    else if(PopupId == (int)CommonDefinition.EditList.Procedure)
+                    {
+                        EditPopupType = _l10n["Procedure"];
+
+                        if (message.Parameter != null)
+                        {
+                            EditPopupText = message.Parameter.ToString().Trim();
+                        }
+                        else
+                        {
+                            EditPopupText = "";
+                        }
+                    }
 
                     break;
                 case (int)CommonDefinition.PopupType.Setting:

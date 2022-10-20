@@ -46,7 +46,7 @@ namespace RaywattApp.ViewModels.Setting
             _log.Debug("OnNavigating");
         }
 
-        override protected void Okay()
+        protected override void Okay()
         {
             _log.Debug("Okay");
 
@@ -56,7 +56,7 @@ namespace RaywattApp.ViewModels.Setting
             WeakReferenceMessenger.Default.Send(new PopupMessage(false) { Type = (int)CommonDefinition.PopupType.Setting });
         }
 
-        override protected void Apply()
+        protected override void Apply()
         {
             _log.Debug("Apply");
 

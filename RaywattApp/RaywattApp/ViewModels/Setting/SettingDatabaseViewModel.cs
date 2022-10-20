@@ -17,12 +17,12 @@ namespace RaywattApp.ViewModels.Setting
             _log.Debug("OnNavigating");
         }
 
-        override protected void Okay()
+        protected override void Okay()
         {
             _log.Debug("Okay");
         }
 
-        override protected void Apply()
+        protected override void Apply()
         {
             _log.Debug("Apply");
         }

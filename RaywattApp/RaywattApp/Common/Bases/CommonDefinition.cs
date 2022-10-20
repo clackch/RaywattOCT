@@ -18,6 +18,7 @@
         {
             Message = 0,
             Question,
+            Edit,
             Setting,
             File,
             CaseEdit
@@ -39,6 +40,12 @@
         public enum QuestionList : int
         {
             PatientCaseDelete = 0,
+        }
+
+        public enum EditList : int
+        {
+            Vessel = 0,
+            Procedure
         }
     }
 }
