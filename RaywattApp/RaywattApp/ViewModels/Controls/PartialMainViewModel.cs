@@ -84,6 +84,9 @@ namespace RaywattApp.ViewModels
         private Dictionary<string, string> _physicianComboBox = new Dictionary<string, string>();
 
         [ObservableProperty]
+        private PatientCase _patientCase;
+
+        [ObservableProperty]
         private string _editAccessionNumber;
 
         [ObservableProperty]
@@ -210,9 +213,9 @@ namespace RaywattApp.ViewModels
                         if (message.Parameter != null)
                         {
                             Dictionary<string, Object> data = (Dictionary<string, Object>)message.Parameter;
-                            EditPhysicianName = data["physicianName"].ToString();
-                            EditAccessionNumber = data["accessionNumber"].ToString();
-                            EditComment = data["comment"].ToString();
+                            PatientCase.PhysicianName = data["physicianName"].ToString();
+                            PatientCase.AccessionNumber = data["accessionNumber"].ToString();
+                            PatientCase.Comment = data["comment"].ToString();
                         }
                     }
 
@@ -292,9 +295,9 @@ namespace RaywattApp.ViewModels
                     else if(PopupId == (int)CommonDefinition.EditList.Case)
                     {
                         Dictionary<string, object> parameter = new Dictionary<string, object>();
-                        parameter["physicianName"] = EditPhysicianName;
-                        parameter["accessionNumber"] = EditAccessionNumber;
-                        parameter["comment"] = EditComment;
+                        parameter["physicianName"] = PatientCase.PhysicianName;
+                        parameter["accessionNumber"] = PatientCase.AccessionNumber;
+                        parameter["comment"] = PatientCase.Comment;
                         popupResponse.PopupParameter = parameter;
                     }                    
 

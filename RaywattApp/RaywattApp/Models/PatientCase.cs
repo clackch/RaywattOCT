@@ -16,14 +16,36 @@ namespace RaywattApp.Models
         [ObservableProperty]
         private string physicianName;
 
-        [ObservableProperty]
-        private string accessionNumber;
+        private string _accessionNumber;
+        public string AccessionNumber
+        {
+            get { return _accessionNumber; }
+            set
+            {
+                if (value.Length <= 6)
+                {
+                    _accessionNumber = value;
+                    OnPropertyChanged(nameof(AccessionNumber));
+                }
+            }
+        }
 
         [ObservableProperty]
         private string accessionName;
 
-        [ObservableProperty]
-        private string comment;
+        private string _comment;
+        public string Comment
+        {
+            get { return _comment; }
+            set
+            {
+                if (value.Length <= 200)
+                {
+                    _comment = value;
+                    OnPropertyChanged(nameof(Comment));
+                }
+            }
+        }
 
         [ObservableProperty]
         private string vessel;
