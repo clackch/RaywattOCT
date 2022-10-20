@@ -53,6 +53,7 @@ namespace RaywattApp
             services.AddTransient(typeof(SettingAcquisitionViewModel));
             services.AddTransient(typeof(SettingLocalizationViewModel));
             services.AddTransient(typeof(SettingDatabaseViewModel));
+            services.AddTransient(typeof(SettingPhysicianViewModel));
 
             //File
             services.AddTransient(typeof(FileExportStep1ViewModel));
@@ -64,6 +65,7 @@ namespace RaywattApp
             services.AddTransient(typeof(QuestionPopupControl));
             services.AddTransient(typeof(SettingPopupControl));
             services.AddTransient(typeof(FilePopupControl));
+            services.AddTransient(typeof(EditVessProcPopupControl));
 
             //IDatabaseService 등록 (Singleton 사용 안함 => Connection Pooling을 Default로 사용)
             services.AddTransient<IDatabaseService, SqlService>(obj => new SqlService(connectionString));

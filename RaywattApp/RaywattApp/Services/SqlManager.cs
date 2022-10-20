@@ -129,6 +129,42 @@ namespace RaywattApp.Services
             return _databaseService.InsertData(commandText, sqlParameters);
         }
 
+        public int UpdatePatientCase(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpdatePatientCase");
+
+            string commandText = SqlQuery.GetQuery("UpdatePatientCase");
+
+            return _databaseService.UpdateData(commandText, sqlParameters);
+        }
+
+        public IList<Physician> SelectPhysicianList()
+        {
+            _log.Debug("SelectPhysicianList");
+
+            string commandText = SqlQuery.GetQuery("SelectPhysicianList");
+
+            return _databaseService.GetDatas<Physician>(commandText);
+        }
+
+        public int InsertPhysician(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("InsertPhysician");
+
+            string commandText = SqlQuery.GetQuery("InsertPhysician");
+
+            return _databaseService.InsertData(commandText, sqlParameters);
+        }
+
+        public int DeletePhysician()
+        {
+            _log.Debug("DeletePhysician");
+
+            string commandText = SqlQuery.GetQuery("DeletePhysician");
+
+            return _databaseService.DeleteData(commandText);
+        }
+
         private string getAdditionalCondition(Dictionary<string, Object> sqlAdditionalCondition)
         {
             _log.Debug("getAddtionalCondition");

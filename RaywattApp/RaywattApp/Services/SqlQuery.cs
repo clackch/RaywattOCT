@@ -67,7 +67,7 @@ namespace RaywattApp.Services
 
             //SelectPatientCaseList - create_data 기준
             _query["SelectPatientCaseList"] =
-                $"SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name , physician_id, rv_schema.fn_physician(physician_id) physician_name, " +
+                $"SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name , physician_name, " +
                         $"accession_number, accession_name, comment, " +
                         $"rv_schema.fn_code('VESS', vessel) vessel, rv_schema.fn_code('PROC', procedure) procedure, " +
                         $"thumbnail_no, still_image_yn, image, " +
@@ -75,6 +75,12 @@ namespace RaywattApp.Services
                 $"FROM rv_schema.patient_case " +
                 $"WHERE patient_id = @id AND to_char(create_date, 'YYYY-MM-DD') = @date " +
                 $"ORDER BY create_date DESC";
+
+            //SelectPhysicianList
+            _query["SelectPhysicianList"] =
+                $"SELECT name, to_char(create_date,'YYYY-MM-DD HH24:MI:SS') create_date " +
+                $"FROM rv_schema.physician " +
+                $"ORDER BY name";
         }
 
         private static void SetInsertQuery()
@@ -88,8 +94,13 @@ namespace RaywattApp.Services
 
             //InsertPatientCase
             _query["InsertPatientCase"] =
-                $"INSERT INTO rv_schema.patient_case(id, patient_id, physician_id, accession_number, accession_name, comment, vessel, procedure, thumbnail_no, still_image_yn, create_date, update_date) " +
-                $"VALUES (@id, @patient_id, @physician_id, @accession_number, @accession_name, @comment, @vessel, @procedure, @thumbnail_no, @still_image_yn, now(), now())";
+                $"INSERT INTO rv_schema.patient_case(id, patient_id, physician_name, accession_number, accession_name, comment, vessel, procedure, thumbnail_no, still_image_yn, create_date, update_date) " +
+                $"VALUES (@id, @patient_id, @physician_name, @accession_number, @accession_name, @comment, @vessel, @procedure, @thumbnail_no, @still_image_yn, now(), now())";
+
+            //InsertPhysician
+            _query["InsertPhysician"] =
+                $"INSERT INTO rv_schema.physician(name, create_date) " +
+                $"VALUES (@name, now())";
         }
 
         private static void SetUpdateQuery()
@@ -101,16 +112,26 @@ namespace RaywattApp.Services
                 $"UPDATE rv_schema.patient " +
                 $"SET id=@id, lastname=@lastname, firstname=@firstname, birthdate=@birthdate, gender=@gender, update_date=now() " +
                 $"WHERE id=@originId";
+
+            //UpdatePatientCase
+            _query["UpdatePatientCase"] =
+                $"UPDATE rv_schema.patient_case " +
+                $"SET physician_name=@physician_name, accession_number=@accession_number, comment=@comment, vessel=@vessel, procedure=@procedure, update_date=now() " +
+                $"WHERE id=@id";
         }
 
         private static void SetDeleteQuery()
         {
             _log.Debug("SetDeleteQuery");
 
-            //UpdatePatient
+            //DeletePatientCase
             _query["DeletePatientCase"] =
                 $"DELETE FROM rv_schema.patient_case " +
                 $"WHERE id=@id";
+
+            //DeletePhysician
+            _query["DeletePhysician"] =
+                $"DELETE FROM rv_schema.physician";
         }
     }
 }
