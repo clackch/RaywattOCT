@@ -26,7 +26,7 @@
             <Button Width="20" Command="{Binding RowDeleteCommand}" CommandParameter="{Binding ElementName=physicianList, Path=SelectedItem}" Content="-" Margin="5,5,5,5"/>
         </StackPanel>
 
-        <DataGrid Grid.Row="2" Name="physicianList" ItemsSource="{Binding PhysicianList, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="All" SelectionMode="Single" RowHeaderWidth="0">
+        <DataGrid Grid.Row="2" Name="physicianList" ItemsSource="{Binding PhysicianList, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="All" SelectionMode="Single" RowHeaderWidth="0" CanUserSortColumns="False">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginningEdit">
                     <i:InvokeCommandAction Command="{Binding BeginningEditCommand}" CommandParameter="{Binding ElementName=physicianList}"/>

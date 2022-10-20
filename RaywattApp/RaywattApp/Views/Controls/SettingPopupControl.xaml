@@ -16,7 +16,6 @@
 
         <StackPanel Grid.Row="0" Background="Black" Orientation="Horizontal">
             <Label Content="{Binding [Setting], Source={StaticResource L10N}}" Foreground="White"></Label>
-            <Button Content="Message popup Test" Grid.Row="1" HorizontalAlignment="Right" Margin="5" Click="Button_Click"/>
         </StackPanel>
 
         <Grid Grid.Row="1">

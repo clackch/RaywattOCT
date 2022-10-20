@@ -5,14 +5,48 @@ namespace RaywattApp.Models
 {
     public partial class Patient : ObservableValidator
     {
-        [ObservableProperty]
-        private string id;
+        private string _id;
+        public string Id
+        {
+            get { return _id; }
+            set
+            {
+                if(value.Length <= 9)
+                {
+                    _id = value;
+                    OnPropertyChanged(nameof(Id));
+                }
+                    
+            }
+        }
 
-        [ObservableProperty]
-        private string lastname;
+        private string _lastname;
+        public string Lastname
+        {
+            get { return _lastname; }
+            set
+            {
+                if (value.Length <= 20)
+                {
+                    _lastname = value;
+                    OnPropertyChanged(nameof(Lastname));
+                }
+            }
+        }
 
-        [ObservableProperty]
-        private string firstname;
+        private string _firstname;
+        public string Firstname
+        {
+            get { return _firstname; }
+            set
+            {
+                if (value.Length <= 20)
+                {
+                    _firstname = value;
+                    OnPropertyChanged(nameof(Firstname));
+                }
+            }
+        }
 
         [ObservableProperty]
         private DateTime birthdate;
