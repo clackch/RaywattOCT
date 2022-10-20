@@ -78,19 +78,10 @@ namespace RaywattApp.ViewModels
         private string _editPopupText;
 
         [ObservableProperty]
-        private string _editPhysicianName;
-
-        [ObservableProperty]
         private Dictionary<string, string> _physicianComboBox = new Dictionary<string, string>();
 
         [ObservableProperty]
         private PatientCase _patientCase;
-
-        [ObservableProperty]
-        private string _editAccessionNumber;
-
-        [ObservableProperty]
-        private string _editComment;
 
         [ObservableProperty]
         private string _filePopupType;
