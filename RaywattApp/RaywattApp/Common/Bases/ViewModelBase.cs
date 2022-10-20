@@ -29,12 +29,12 @@ namespace RaywattApp.Common.Bases
             set { SetProperty(ref _message, value); }
         }
 
-        private QuestionPopupResponse _questionPopupRes;
+        private PopupResponse _popupCallback;
 
-        public QuestionPopupResponse QuestionPopupRes
+        public PopupResponse PopupCallback
         {
-            get { return this._questionPopupRes; }
-            set { this._questionPopupRes = value; QuestionPopupCallback(); }
+            get { return this._popupCallback; }
+            set { this._popupCallback = value; CallbackPopup(); }
         }
 
         protected readonly DynamicResource _l10n;
@@ -62,7 +62,7 @@ namespace RaywattApp.Common.Bases
         {
         }
 
-        public virtual void QuestionPopupCallback()
+        public virtual void CallbackPopup()
         {
 
         }

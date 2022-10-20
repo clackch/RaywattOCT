@@ -241,18 +241,18 @@ namespace RaywattApp.ViewModels
                 return;
             }
 
-            WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "QuestionPopupControl", Type = (int)CommonDefinition.PopupType.Question, QuestionId = (int)CommonDefinition.QuestionList.PatientCaseDelete, ParentObject = this, Parameter = _l10n["Are you sure to delete selected patient case?"] });
+            WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "QuestionPopupControl", Type = (int)CommonDefinition.PopupType.Question, PopupId = (int)CommonDefinition.QuestionList.PatientCaseDelete, ParentObject = this, Parameter = _l10n["Are you sure to delete selected patient case?"] });
         }
 
-        public override void QuestionPopupCallback()
+        public override void CallbackPopup()
         {
-            _log.Debug("QuestionPopupCallback : " + QuestionPopupRes.QuestionId + "/" + QuestionPopupRes.QuestionResponse);
+            _log.Debug("CallbackPopup : " + PopupCallback.PopupId + "/" + PopupCallback.PopupAnswer);
 
-            if (QuestionPopupRes != null)
+            if (PopupCallback != null)
             {
-                if (QuestionPopupRes.QuestionId == (int)CommonDefinition.QuestionList.PatientCaseDelete)
+                if (PopupCallback.PopupId == (int)CommonDefinition.QuestionList.PatientCaseDelete)
                 {
-                    if(QuestionPopupRes.QuestionResponse)
+                    if(PopupCallback.PopupAnswer)
                         DeletePatientCase();
                 }
             }
@@ -390,6 +390,11 @@ namespace RaywattApp.ViewModels
 
         private void GoReview(PatientCase patientCase)
         {
+            _log.Debug("GoReview");
+
+            if (patientCase == null)
+                return;
+
             Dictionary<string, Object> parameter = new Dictionary<string, Object>();
             parameter["patient"] = Patient;
             parameter["patientCase"] = patientCase;

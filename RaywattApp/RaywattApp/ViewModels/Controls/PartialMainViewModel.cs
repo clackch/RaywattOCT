@@ -18,10 +18,10 @@ namespace RaywattApp.ViewModels
             get { return this._settingCommand ?? (this._settingCommand = new RelayCommand(Setting, CanButtonClick)); }
         }
 
-        private ICommand _questionPopupResponseCommand;
-        public ICommand QuestionPopupResponseCommand
+        private ICommand _popupResponseCommand;
+        public ICommand PopupResponseCommand
         {
-            get { return this._questionPopupResponseCommand ?? (this._questionPopupResponseCommand = new RelayCommand<string>(ResponseQuestionPopup)); }
+            get { return this._popupResponseCommand ?? (this._popupResponseCommand = new RelayCommand<string>(ResponsePopup)); }
         }
 
         private ICommand _messagePopupCloseCommand;
@@ -46,18 +46,40 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "SettingPopupControl", Type = (int)CommonDefinition.PopupType.Setting });
         }
 
-        private void ResponseQuestionPopup(string response)
+        private void ResponsePopup(string response)
         {
-            QuestionPopupResponse res = new QuestionPopupResponse();
-            res.QuestionId = QuestionPopupId;
-            res.QuestionResponse = response == "Y" ? true : false;
+            Type? type = PopupParent.GetType();
+            PropertyInfo popupCallback = type.GetProperty("PopupCallback");
+            PopupResponse popupResponse = new PopupResponse();
+            popupResponse.PopupId = PopupId;
+            popupResponse.PopupAnswer = response == "Y" ? true : false;
 
-            Type? type = QuestionPopupParent.GetType();
-            PropertyInfo questionPopupResponse = type.GetProperty("QuestionPopupRes");
-            if(questionPopupResponse != null)
-                questionPopupResponse.SetValue(QuestionPopupParent, res);
 
-            WeakReferenceMessenger.Default.Send(new PopupMessage(false) { Type = (int)CommonDefinition.PopupType.Question });
+            switch (MessagePopupType)
+            {
+                case (int)CommonDefinition.PopupType.Question:
+
+
+                    if (popupCallback != null)
+                        popupCallback.SetValue(PopupParent, popupResponse);
+
+                    WeakReferenceMessenger.Default.Send(new PopupMessage(false) { Type = (int)CommonDefinition.PopupType.Question });
+
+                    break;
+                case (int)CommonDefinition.PopupType.Edit:
+
+                    popupResponse.PopupParameter = EditPopupText;
+
+                    if (popupCallback != null)
+                        popupCallback.SetValue(PopupParent, popupResponse);
+
+                    WeakReferenceMessenger.Default.Send(new PopupMessage(false) { Type = (int)CommonDefinition.PopupType.Edit });
+
+                    break;
+                default:
+                    break;
+            }
+
         }
 
         private void CloseMessagePopup()
