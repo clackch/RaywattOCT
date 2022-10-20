@@ -21,21 +21,6 @@ ALTER SEQUENCE rv_schema.log_file_index_seq
     OWNER TO rv_user;
 
 
--- SEQUENCE: rv_schema.physician_index_seq
-
--- DROP SEQUENCE IF EXISTS rv_schema.physician_index_seq;
-
-CREATE SEQUENCE IF NOT EXISTS rv_schema.physician_index_seq
-    INCREMENT 1
-    START 1
-    MINVALUE 1
-    MAXVALUE 2147483647
-    CACHE 1;
-
-ALTER SEQUENCE rv_schema.physician_index_seq
-    OWNER TO rv_user;
-
-
 -- Table: rv_schema.code
 
 -- DROP TABLE IF EXISTS rv_schema.code;
@@ -130,15 +115,15 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case
 (
     id character varying(24) COLLATE pg_catalog."default" NOT NULL,
     patient_id character varying(9) COLLATE pg_catalog."default",
-    physician_id character varying(9) COLLATE pg_catalog."default",
+    physician_name character varying(40) COLLATE pg_catalog."default",
     accession_number character varying(6) COLLATE pg_catalog."default",
     accession_name character varying(40) COLLATE pg_catalog."default",
     comment character varying(200) COLLATE pg_catalog."default",
-    vessel character varying(4) COLLATE pg_catalog."default",
-    procedure character varying(4) COLLATE pg_catalog."default",
+    vessel character varying(20) COLLATE pg_catalog."default",
+    procedure character varying(20) COLLATE pg_catalog."default",
     thumbnail_no integer,
     still_image_yn character varying(1) COLLATE pg_catalog."default",
-    image oid,
+    image character varying(200) COLLATE pg_catalog."default",
     create_date timestamp without time zone,
     update_date timestamp without time zone,
     CONSTRAINT patient_case_pkey PRIMARY KEY (id)
@@ -147,7 +132,6 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case
         REFERENCES rv_schema.patient (id) MATCH SIMPLE
         ON UPDATE CASCADE
         ON DELETE SET NULL
-        NOT VALID
 )
 
 TABLESPACE rv_tablespace;
@@ -162,12 +146,10 @@ ALTER TABLE IF EXISTS rv_schema.patient_case
 
 CREATE TABLE IF NOT EXISTS rv_schema.physician
 (
-    index integer NOT NULL DEFAULT nextval('rv_schema.physician_index_seq'::regclass),
-    id character varying(9) COLLATE pg_catalog."default",
-    name character varying(40) COLLATE pg_catalog."default",
+    name character varying(40) COLLATE pg_catalog."default" NOT NULL,
     create_date timestamp without time zone,
-    update_date timestamp without time zone,
-    CONSTRAINT physician_pkey PRIMARY KEY (index)
+    CONSTRAINT physician_pkey PRIMARY KEY (name)
+        USING INDEX TABLESPACE rv_tablespace
 )
 
 TABLESPACE rv_tablespace;
@@ -194,7 +176,7 @@ AS $BODY$
 		SELECT "value" into res_value
 		FROM rv_schema.code
 		WHERE "classification" = arg_classification AND "key" = arg_key;
-	RETURN res_value;
+	RETURN COALESCE(res_value, arg_key);
 	END;
 $BODY$;
 
@@ -224,31 +206,6 @@ AS $BODY$
 $BODY$;
 
 ALTER FUNCTION rv_schema.fn_patient(character varying)
-    OWNER TO rv_user;
-
-
--- FUNCTION: rv_schema.fn_physician(character varying)
-
--- DROP FUNCTION IF EXISTS rv_schema.fn_physician(character varying);
-
-CREATE OR REPLACE FUNCTION rv_schema.fn_physician(
-	arg_id character varying)
-    RETURNS character varying
-    LANGUAGE 'plpgsql'
-    COST 100
-    VOLATILE PARALLEL UNSAFE
-AS $BODY$
-	DECLARE
-	res_value character varying;
-	BEGIN
-		SELECT "name" into res_value
-		FROM rv_schema.physician
-		WHERE "id" = arg_id;
-	RETURN res_value;
-	END;
-$BODY$;
-
-ALTER FUNCTION rv_schema.fn_physician(character varying)
     OWNER TO rv_user;
 
 
