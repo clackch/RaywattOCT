@@ -14,9 +14,6 @@ namespace RaywattApp.Models
         private string patientName;
 
         [ObservableProperty]
-        private string physicianId;
-
-        [ObservableProperty]
         private string physicianName;
 
         [ObservableProperty]

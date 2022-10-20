@@ -144,6 +144,9 @@
   <data name="Cancel" xml:space="preserve">
     <value>취소</value>
   </data>
+  <data name="Case" xml:space="preserve">
+    <value>케이스</value>
+  </data>
   <data name="Comment" xml:space="preserve">
     <value>코멘트</value>
   </data>
@@ -158,6 +161,9 @@
   </data>
   <data name="Edit" xml:space="preserve">
     <value>수정</value>
+  </data>
+  <data name="Edit Case" xml:space="preserve">
+    <value>케이스 수정</value>
   </data>
   <data name="Edit Patient" xml:space="preserve">
     <value>환자 수정</value>
@@ -225,6 +231,9 @@
   <data name="Name" xml:space="preserve">
     <value>이름</value>
   </data>
+  <data name="Name is duplicated." xml:space="preserve">
+    <value>이름이 중복되었습니다.</value>
+  </data>
   <data name="New Patient" xml:space="preserve">
     <value>신규 환자</value>
   </data>
@@ -245,6 +254,9 @@
   </data>
   <data name="Patient Summary" xml:space="preserve">
     <value>환자 요약</value>
+  </data>
+  <data name="Physician" xml:space="preserve">
+    <value>의사</value>
   </data>
   <data name="Physician ID" xml:space="preserve">
     <value>의사 아이디</value>

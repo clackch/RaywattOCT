@@ -99,7 +99,6 @@
                                             <DataGridTextColumn Width="*" Binding="{Binding Id}" Visibility="Collapsed"/>
                                             <DataGridTextColumn Width="*" Binding="{Binding PatientId}"  Visibility="Collapsed"/>
                                             <DataGridTextColumn Width="*" Binding="{Binding PatientName}"  Visibility="Collapsed"/>
-                                            <DataGridTextColumn Width="*" Binding="{Binding PhysicianId}" Header="{Binding [Physician ID], Source={StaticResource L10N}}" IsReadOnly="True"/>
                                             <DataGridTextColumn Width="*" Binding="{Binding PhysicianName}" Header="{Binding [Physician Name], Source={StaticResource L10N}}" IsReadOnly="True"/>
                                             <DataGridTextColumn Width="*" Binding="{Binding AccessionNumber}" Header="{Binding [Accession Number], Source={StaticResource L10N}}" IsReadOnly="True"/>
                                             <DataGridTextColumn Width="*" Binding="{Binding AccessionName}" Header="{Binding [Accession Name], Source={StaticResource L10N}}" IsReadOnly="True"/>

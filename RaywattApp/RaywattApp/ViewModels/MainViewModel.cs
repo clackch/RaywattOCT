@@ -56,69 +56,11 @@ namespace RaywattApp.ViewModels
             set { SetProperty(ref _popupNavigationSource, value); }
         }
 
-        private bool _showLayerPopup;
-        /// <summary>
-        /// 레이어 팝업 출력여부
-        /// </summary>
-        public bool ShowLayerPopup
-        {
-            get { return _showLayerPopup; }
-            set { SetProperty(ref _showLayerPopup, value); }
-        }
-
-        private string _controlName;
-        /// <summary>
-        /// 레이어 팝업 내부 컨트롤 이름
-        /// </summary>
-        public string ControlName
-        {
-            get { return _controlName; }
-            set { SetProperty(ref _controlName, value); }
-        }
-
-        private bool _showViewLayerPopup;
-        /// <summary>
-        /// 레이어 팝업 출력여부
-        /// </summary>
-        public bool ShowViewLayerPopup
-        {
-            get { return _showViewLayerPopup; }
-            set { SetProperty(ref _showViewLayerPopup, value); }
-        }
-
-        private string _viewControlName;
-        /// <summary>
-        /// 레이어 팝업 내부 컨트롤 이름
-        /// </summary>
-        public string ViewControlName
-        {
-            get { return _viewControlName; }
-            set { SetProperty(ref _viewControlName, value); }
-        }
-
         [ObservableProperty]
         private object _navigationParameter;
 
         [ObservableProperty]
         private object _popupNavigationParameter;
-
-        [ObservableProperty]
-        private string _messagePopupLevel;
-
-        [ObservableProperty]
-        private string _messagePopupContent;
-
-        [ObservableProperty]
-        private string _questionPopupContent;
-
-        [ObservableProperty]
-        private int _questionPopupId;
-
-        [ObservableProperty]
-        private object _questionPopupParent;
-
-        [ObservableProperty]
-        private string _filePopupType;
 
         [ObservableProperty]
         private Patient _patient;
@@ -245,82 +187,6 @@ namespace RaywattApp.ViewModels
             }
             //_busys에 아이템이 있으면 true, 없으면 false
             IsBusy = _busys.Any();
-        }
-
-        private void OnLayerPopupMessage(object recipient, PopupMessage message)
-        {
-            _log.Debug("OnLayerPopupMessage : " + message.Type + "/" + message.Value + "/" + message.ControlName);
-
-            switch (message.Type)
-            {
-                case (int)CommonDefinition.PopupType.Message:
-
-                    ShowLayerPopup = message.Value;
-                    ControlName = message.ControlName;
-
-                    //Popup Level
-                    switch (message.Level)
-                    {
-                        case (int)CommonDefinition.PopupLevel.Info:
-                            MessagePopupLevel = _l10n["Information"];
-                            break;
-                        case (int)CommonDefinition.PopupLevel.Warn:
-                            MessagePopupLevel = _l10n["Warning"];
-                            break;
-                        case (int)CommonDefinition.PopupLevel.Error:
-                            MessagePopupLevel = _l10n["Error"];
-                            break;
-                        default:
-                            break;
-                    }
-
-                    //Popup Message
-                    if (message.Parameter != null)
-                        MessagePopupContent = message.Parameter.ToString();
-
-                    break;
-                case (int)CommonDefinition.PopupType.Question:
-
-                    ShowLayerPopup = message.Value;
-                    ControlName = message.ControlName;
-
-                    QuestionPopupId = message.QuestionId;
-
-                    if (message.ParentObject != null)
-                        QuestionPopupParent = message.ParentObject;
-
-                    //Popup Message
-                    if (message.Parameter != null)
-                        QuestionPopupContent = message.Parameter.ToString();
-
-                    break;
-                case (int)CommonDefinition.PopupType.Setting:
-
-                    ShowViewLayerPopup = message.Value;
-                    ViewControlName = message.ControlName;
-
-                    break;
-                case (int)CommonDefinition.PopupType.File:
-
-                    ShowViewLayerPopup = message.Value;
-                    ViewControlName = message.ControlName;
-                    PopupNavigationParameter = message.Parameter;
-
-                    if (message.FileType == (int)CommonDefinition.FileType.Import)
-                    {
-                        FilePopupType = _l10n["Import"];
-                        PopupNavigationSource = "Views/File/FileImportPage.xaml";
-                    }
-                    else
-                    {
-                        FilePopupType = _l10n["Export"];
-                        PopupNavigationSource = "Views/File/FileExportStep1Page.xaml";                        
-                    }
-
-                    break;
-                default:
-                    break;
-            }
         }
 
         private void ShowPatientInfo(string pageUri, object parameter)

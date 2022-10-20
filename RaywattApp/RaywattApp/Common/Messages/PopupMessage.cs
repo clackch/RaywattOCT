@@ -16,7 +16,7 @@ namespace RaywattApp.Common.Messages
 
         public int Level { get; set; }
 
-        public int QuestionId { get; set; }
+        public int PopupId { get; set; }
 
         public int FileType { get; set; }
         

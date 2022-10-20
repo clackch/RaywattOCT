@@ -4,19 +4,22 @@ namespace RaywattApp.Models
 {
     public partial class Physician : ObservableValidator
     {
-        [ObservableProperty]
-        public int index;
+        private string _name;
 
-        [ObservableProperty]
-        private string id;
-
-        [ObservableProperty]
-        private string name;
+        public string Name
+        {
+            get { return _name; }
+            set 
+            { 
+                if(value.Length <= 20)
+                {
+                    _name = value;
+                    OnPropertyChanged(nameof(Name));
+                }
+            }
+        }
 
         [ObservableProperty]
         private string createDate;
-
-        [ObservableProperty]
-        private string updateDate;
     }
 }

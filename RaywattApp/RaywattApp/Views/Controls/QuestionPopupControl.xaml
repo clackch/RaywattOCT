@@ -17,8 +17,8 @@
                 <Label Content="{Binding QuestionPopupContent}"></Label>
             </StackPanel>
             <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Command="{Binding QuestionPopupResponseCommand}" CommandParameter="N" Content="{Binding [No], Source={StaticResource L10N}}" Grid.Row="1" Width="50" Margin="5"/>
-                <Button Command="{Binding QuestionPopupResponseCommand}" CommandParameter="Y" Content="{Binding [Yes], Source={StaticResource L10N}}" Grid.Row="1" Width="50" Margin="5" Background="Black" Foreground="White"/>
+                <Button Command="{Binding PopupResponseCommand}" CommandParameter="N" Content="{Binding [No], Source={StaticResource L10N}}" Grid.Row="1" Width="50" Margin="5"/>
+                <Button Command="{Binding PopupResponseCommand}" CommandParameter="Y" Content="{Binding [Yes], Source={StaticResource L10N}}" Grid.Row="1" Width="50" Margin="5" Background="Black" Foreground="White"/>
             </StackPanel>
         </Grid>
     </Border>
