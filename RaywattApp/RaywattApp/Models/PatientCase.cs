@@ -1,4 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using RaywattApp.Common.Bases;
+using RaywattApp.Common.Util;
 
 namespace RaywattApp.Models
 {
@@ -22,8 +24,11 @@ namespace RaywattApp.Models
             get { return _accessionNumber; }
             set
             {
-                if (value.Length <= 6)
+                if (value.Length <= Constants.MaxPatientCaseAccessionNumber)
                 {
+                    if (!CommonUtil.ValidateNumber(value))
+                        return;
+
                     _accessionNumber = value;
                     OnPropertyChanged(nameof(AccessionNumber));
                 }
@@ -39,7 +44,7 @@ namespace RaywattApp.Models
             get { return _comment; }
             set
             {
-                if (value.Length <= 200)
+                if (value.Length <= Constants.MaxPatientCaseComment)
                 {
                     _comment = value;
                     OnPropertyChanged(nameof(Comment));

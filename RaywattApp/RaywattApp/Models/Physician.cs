@@ -1,4 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using RaywattApp.Common.Bases;
+using RaywattApp.Common.Util;
 
 namespace RaywattApp.Models
 {
@@ -10,8 +12,11 @@ namespace RaywattApp.Models
             get { return _name; }
             set 
             { 
-                if(value.Length <= 20)
+                if(value.Length <= Constants.MaxPhysicianName)
                 {
+                    if (!CommonUtil.ValidateText(value))
+                        return;
+
                     _name = value;
                     OnPropertyChanged(nameof(Name));
                 }
