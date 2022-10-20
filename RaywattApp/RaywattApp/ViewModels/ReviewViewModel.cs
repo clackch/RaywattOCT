@@ -66,6 +66,12 @@ namespace RaywattApp.ViewModels
             get { return this._endReviewCommand ?? (this._endReviewCommand = new RelayCommand(EndReview)); }
         }
 
+        private ICommand _editCaseCommand;
+        public ICommand EditCaseCommand
+        {
+            get { return this._editCaseCommand ?? (this._editCaseCommand = new RelayCommand(EditCase)); }
+        }
+
         private ICommand _vesselChangedCommand;
         public ICommand VesselChangedCommand
         {
@@ -241,9 +247,20 @@ namespace RaywattApp.ViewModels
                         CurrentVessel = previousVesselKey;
                     }
                         
-                }else if(PopupCallback.PopupId == (int)CommonDefinition.EditList.Procedure)
+                }
+                else if(PopupCallback.PopupId == (int)CommonDefinition.EditList.Procedure)
                 {
 
+                }
+                else if(PopupCallback.PopupId == (int)CommonDefinition.EditList.Case)
+                {
+                    if (PopupCallback.PopupAnswer)
+                    {
+                        Dictionary<string, Object> data = (Dictionary<string, Object>)PopupCallback.PopupParameter;
+                        PatientCase.PhysicianName = data["physicianName"].ToString();
+                        PatientCase.AccessionNumber = data["accessionNumber"].ToString();
+                        PatientCase.Comment = data["comment"].ToString();
+                    }
                 }
             }
         }
@@ -278,6 +295,18 @@ namespace RaywattApp.ViewModels
                 parameter["prevStatus"] = PrevStatus;
                 WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = parameter });
             }
+        }
+
+        private void EditCase()
+        {
+            _log.Debug("EditCase");
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["physicianName"] = PatientCase.PhysicianName;
+            parameter["accessionNumber"] = PatientCase.AccessionNumber;
+            parameter["comment"] = PatientCase.Comment;
+
+            WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "EditCasePopupControl", Type = (int)CommonDefinition.PopupType.Edit, PopupId = (int)CommonDefinition.EditList.Case, ParentObject = this, Parameter = parameter });
         }
     }
 }

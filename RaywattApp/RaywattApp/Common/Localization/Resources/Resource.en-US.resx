@@ -144,6 +144,9 @@
   <data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
+  <data name="Case" xml:space="preserve">
+    <value>Case</value>
+  </data>
   <data name="Comment" xml:space="preserve">
     <value>Comment</value>
   </data>
@@ -158,6 +161,9 @@
   </data>
   <data name="Edit" xml:space="preserve">
     <value>Edit</value>
+  </data>
+  <data name="Edit Case" xml:space="preserve">
+    <value>Edit Case</value>
   </data>
   <data name="Edit Patient" xml:space="preserve">
     <value>Edit Patient</value>

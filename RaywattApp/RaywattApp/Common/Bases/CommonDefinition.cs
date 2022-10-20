@@ -45,7 +45,8 @@
         public enum EditList : int
         {
             Vessel = 0,
-            Procedure
+            Procedure,
+            Case
         }
     }
 }

@@ -31,6 +31,9 @@
 
             <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" >
                 <StackPanel Orientation="Horizontal">
+                    <Button Width="80" Command="{Binding EditCaseCommand}" Content="{Binding [Edit Case], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
                     <Label Content="{Binding [Vessel], Source={StaticResource L10N}}"></Label>
                     <ComboBox Width="100" Name="vesselComboBox" ItemsSource="{Binding VesselComboBox}" SelectedValue="{Binding CurrentVessel, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" Margin="5,5,5,5">
                         <i:Interaction.Triggers>
@@ -49,12 +52,6 @@
                 <StackPanel Orientation="Horizontal">
                     <Label Content="{Binding [Procedure], Source={StaticResource L10N}}"></Label>
                     <ComboBox Width="100" ItemsSource="{Binding ProcedureComboBox}" SelectedValue="{Binding CurrentProcedure, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" Margin="5,5,5,5"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="{Binding [Accession Number], Source={StaticResource L10N}}"></Label>
-                    <TextBox Text="{Binding PatientCase.AccessionNumber, UpdateSourceTrigger=PropertyChanged}" Width="50" Margin="5,5,5,5"/>
-                    <Label Content="{Binding [Comment], Source={StaticResource L10N}}"></Label>
-                    <TextBox Text="{Binding PatientCase.Comment, UpdateSourceTrigger=PropertyChanged}" Width="100" Margin="5,5,5,5"/>
                 </StackPanel>
             </StackPanel>
 
