@@ -1,4 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using RaywattApp.Common.Bases;
+using RaywattApp.Common.Util;
 using System;
 
 namespace RaywattApp.Models
@@ -11,8 +13,11 @@ namespace RaywattApp.Models
             get { return _id; }
             set
             {
-                if(value.Length <= 9)
+                if(value.Length <= Constants.MaxPatientId)
                 {
+                    if(!CommonUtil.ValidateId(value))
+                        return;
+
                     _id = value;
                     OnPropertyChanged(nameof(Id));
                 }
@@ -26,8 +31,11 @@ namespace RaywattApp.Models
             get { return _lastname; }
             set
             {
-                if (value.Length <= 20)
+                if (value.Length <= Constants.MaxPatientLastname)
                 {
+                    if (!CommonUtil.ValidateText(value))
+                        return;
+
                     _lastname = value;
                     OnPropertyChanged(nameof(Lastname));
                 }
@@ -40,8 +48,11 @@ namespace RaywattApp.Models
             get { return _firstname; }
             set
             {
-                if (value.Length <= 20)
+                if (value.Length <= Constants.MaxPatientFirstname)
                 {
+                    if (!CommonUtil.ValidateText(value))
+                        return;
+
                     _firstname = value;
                     OnPropertyChanged(nameof(Firstname));
                 }
