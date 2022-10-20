@@ -196,7 +196,8 @@ namespace RaywattApp.ViewModels
                         EditPopupType = _l10n["Case"];
 
                         IList<Physician> physicianList = _sqlManager.SelectPhysicianList();
-                        foreach(Physician physician in physicianList)
+                        PhysicianComboBox.Clear();
+                        foreach (Physician physician in physicianList)
                         {
                             PhysicianComboBox[physician.Name] = physician.Name;
                         }
