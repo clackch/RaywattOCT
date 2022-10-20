@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "RaywattApp": {
+      "commandName": "Project",
+      "workingDirectory": ".\\bin\\"
+    }
+  }
+}
