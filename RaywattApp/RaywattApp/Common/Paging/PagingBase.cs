@@ -198,7 +198,7 @@ namespace RaywattApp.Common.Paging
 
         private void PagingNext()
         {
-            if (PagingNoIdx/5 >= PagingTotalCnt/PagingSelectedPageSize/5)
+            if (PagingNoIdx/5 >= (PagingTotalCnt-1)/PagingSelectedPageSize/5)
             {
                 _log.Debug("PagingNoIdx/5 >= PagingTotalCnt/PagingSelectedPageSize/5");
                 return;

@@ -39,6 +39,8 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private bool? _checkBoxAllSelected;
 
+        private List<string> selectedItem;
+
         private ICommand _exportCommand;
         public ICommand ExportCommand
         {
@@ -111,6 +113,8 @@ namespace RaywattApp.ViewModels
 
             //Initialize Complete
             bCheckInit = true;
+
+            selectedItem = new List<string>();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -142,13 +146,13 @@ namespace RaywattApp.ViewModels
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = Patient.Id;
 
+            //Paging을 위한 전체 Row 수 Count
+            PagingTotalCnt = _sqlManager.PageCountPatientCaseByDate(sqlParameters);
+
             Dictionary<string, Object> sqlAdditionalCondition = new Dictionary<string, Object>();
             sqlAdditionalCondition["ORDER"] = "key DESC";
             sqlAdditionalCondition["LIMIT"] = PagingSelectedPageSize;
             sqlAdditionalCondition["OFFSET"] = PagingOffset;
-
-            //Paging을 위한 전체 Row 수 Count
-            PagingTotalCnt = _sqlManager.PageCountPatientCaseByDate(sqlParameters);
 
             PatientCaseByDateList = _sqlManager.PageSelectPatientCaseByDate(sqlParameters, sqlAdditionalCondition);
 
@@ -169,7 +173,25 @@ namespace RaywattApp.ViewModels
             ShowPageNo(PrevStatus.DetailPageGroup);
             MovePageNo((PrevStatus.DetailPageNumber + 1).ToString());
 
-            if(PrevStatus.DetailSelectedGroup != null)
+            //조회한 Page의 List가 없을 경우, 이전 Page 조회
+            if (PatientCaseByDateList.Count == 0)
+            {
+                if (PrevStatus.DetailPageNumber % 5 == 0)
+                {
+                    PrevStatus.DetailPageGroup -= 5;
+                }
+
+                PrevStatus.DetailPageNumber--;
+
+                if (PrevStatus.DetailPageNumber < 0)
+                    return;
+
+                ShowPageNo(PrevStatus.DetailPageGroup);
+                MovePageNo((PrevStatus.DetailPageNumber + 1).ToString());
+            }
+
+            //기존에 선택한 Group이 있을 경우, 해당 Group 표시(Expand)
+            if (PrevStatus.DetailSelectedGroup != null)
             {
                 foreach (PatientCaseByDate keyValue in PatientCaseByDateList)
                 {
@@ -211,21 +233,30 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/RecordingPage.xaml") { Parameter = parameter });
         }
 
-        private void Export()
+        private void GetSelectedItem()
         {
-            _log.Debug("Export");
+            selectedItem.Clear();
 
-            FileExport fileExportData = new FileExport();
-            List<string> selectedItem = new List<string>();
-
-            if(PatientCaseList != null)
+            foreach (PatientCaseByDate patientCaseByDate in PatientCaseByDateList)
             {
-                foreach (PatientCase patientCase in PatientCaseList)
+                if (patientCaseByDate.PatientCaseList == null)
+                    continue;
+
+                foreach (PatientCase patientCase in patientCaseByDate.PatientCaseList)
                 {
                     if (patientCase.IsChecked)
                         selectedItem.Add(patientCase.Id);
                 }
             }
+        }
+
+        private void Export()
+        {
+            _log.Debug("Export");
+
+            FileExport fileExportData = new FileExport();
+
+            GetSelectedItem();
             fileExportData.SelectedItem = selectedItem;
 
             WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "FilePopupControl", Type = (int)CommonDefinition.PopupType.File, FileType = (int)CommonDefinition.FileType.Export, Parameter = fileExportData });
@@ -235,12 +266,15 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Delete");
 
-            if(PagingTotalCnt == 0 || CheckBoxAllSelected == false)
+            GetSelectedItem();
+
+            if (PagingTotalCnt == 0 || selectedItem.Count == 0)
             {
                 WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "MessagePopupControl", Type = (int)CommonDefinition.PopupType.Message, Level = (int)CommonDefinition.PopupLevel.Info, Parameter = _l10n["There are no items selected."] });
                 return;
             }
 
+            GetDetailStatus();
             WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "QuestionPopupControl", Type = (int)CommonDefinition.PopupType.Question, PopupId = (int)CommonDefinition.QuestionList.PatientCaseDelete, ParentObject = this, Parameter = _l10n["Are you sure to delete selected patient case?"] });
         }
 
@@ -263,43 +297,19 @@ namespace RaywattApp.ViewModels
             int cntDel = 0;
             int resDel = 0;
 
-            foreach (PatientCase patientCase in PatientCaseList)
+            foreach(string id in selectedItem)
             {
-                if (patientCase.IsChecked)
-                {
-                    cntDel++;
-                    Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-                    sqlParameters["id"] = patientCase.Id;
+                cntDel++;
+                Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+                sqlParameters["id"] = id;
 
-                    resDel += _sqlManager.DeletePatientCase(sqlParameters);
-                }
+                resDel += _sqlManager.DeletePatientCase(sqlParameters);
             }
 
             if (cntDel == resDel)
             {
-                //Group 전체가 삭제되었을 경우, 첫화면으로 Page 이동
-                if(CheckBoxAllSelected == true)
-                {
-                    PagingOffset = 0;
-                    Search();
-                }
-                else // Group 중 일부만 삭제되었을 경우, 해당 Page 유지(삭제된 Group 부분만 갱신)
-                {
-                    Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-                    sqlParameters["id"] = Patient.Id;
-                    sqlParameters["date"] = CurPatientCaseByDate.Key;
-
-                    string value = CurPatientCaseByDate.Value;
-                    string[] splitValue = value.Split(")");
-                    string[] splitValue2 = splitValue[0].Split("(");
-                    int cnt = int.Parse(splitValue2[1]) - cntDel;
-
-                    CurPatientCaseByDate.Value = splitValue2[0] + "(" + cnt + ")";
-                    CurPatientCaseByDate.PatientCaseList = _sqlManager.SelectPatientCaseList(sqlParameters);
-                    PatientCaseList = CurPatientCaseByDate.PatientCaseList;
-
-                    CheckBoxAllSelected = false;
-                }
+                Search();
+                SetPrevStatus();
             }
             else
             {
@@ -405,7 +415,7 @@ namespace RaywattApp.ViewModels
 
         private void GetDetailStatus()
         {
-            PrevStatus.DetailPageGroup = ((PagingNoIdx - 1) / 5) * 5 + 1;
+            PrevStatus.DetailPageGroup = (PagingNoIdx / 5) * 5 + 1;
             PrevStatus.DetailPageNumber = PagingNoIdx;
             PrevStatus.DetailPageOffset = PagingOffset;
             if(CurPatientCaseByDate != null)
