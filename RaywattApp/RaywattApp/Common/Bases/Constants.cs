@@ -11,9 +11,9 @@
 
         public static int PageNumberMax = 5;
         public static int PageSizeList = 10;
-        public static int PageSizeList1 = 10;
-        public static int PageSizeList2 = 30;
-        public static int PageSizeList3 = 50;
+        public static int PageSizeListChoice1 = 10;
+        public static int PageSizeListChoice2 = 30;
+        public static int PageSizeListChoice3 = 50;
         public static int PageSizeDetail = 5;
     }
 }
