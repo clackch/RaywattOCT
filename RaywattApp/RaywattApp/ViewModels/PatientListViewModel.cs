@@ -236,7 +236,7 @@ namespace RaywattApp.ViewModels
             prevStatus.ListSort = strColumnOrder;
             prevStatus.ListPageOffset = PagingOffset;
             prevStatus.ListPageSize = PagingSelectedPageSize;
-            prevStatus.ListPageGroup = ((PagingNoIdx - 1) / 5) * 5 + 1;
+            prevStatus.ListPageGroup = ((PagingNoIdx - 1) / Constants.PageNumberMax) * Constants.PageNumberMax + 1;
             prevStatus.ListPageNumber = PagingNoIdx;
 
             return prevStatus;

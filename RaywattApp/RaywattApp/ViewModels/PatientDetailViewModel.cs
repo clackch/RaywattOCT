@@ -109,7 +109,7 @@ namespace RaywattApp.ViewModels
 
             _sqlManager = sqlManager;
 
-            PagingSelectedPageSize = 5;
+            PagingSelectedPageSize = Constants.PageSizeDetail;
 
             //Initialize Complete
             bCheckInit = true;
@@ -176,9 +176,9 @@ namespace RaywattApp.ViewModels
             //조회한 Page의 List가 없을 경우, 이전 Page 조회
             if (PatientCaseByDateList.Count == 0)
             {
-                if (PrevStatus.DetailPageNumber % 5 == 0)
+                if (PrevStatus.DetailPageNumber % Constants.PageNumberMax == 0)
                 {
-                    PrevStatus.DetailPageGroup -= 5;
+                    PrevStatus.DetailPageGroup -= Constants.PageNumberMax;
                 }
 
                 PrevStatus.DetailPageNumber--;
@@ -415,7 +415,7 @@ namespace RaywattApp.ViewModels
 
         private void GetDetailStatus()
         {
-            PrevStatus.DetailPageGroup = (PagingNoIdx / 5) * 5 + 1;
+            PrevStatus.DetailPageGroup = (PagingNoIdx / Constants.PageNumberMax) * Constants.PageNumberMax + 1;
             PrevStatus.DetailPageNumber = PagingNoIdx;
             PrevStatus.DetailPageOffset = PagingOffset;
             if(CurPatientCaseByDate != null)

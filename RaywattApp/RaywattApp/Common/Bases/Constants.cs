@@ -8,5 +8,12 @@
         public static int MaxPatientCaseAccessionNumber = 6;
         public static int MaxPatientCaseComment = 200;
         public static int MaxPhysicianName = 40;
+
+        public static int PageNumberMax = 5;
+        public static int PageSizeList = 10;
+        public static int PageSizeList1 = 10;
+        public static int PageSizeList2 = 30;
+        public static int PageSizeList3 = 50;
+        public static int PageSizeDetail = 5;
     }
 }

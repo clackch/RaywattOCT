@@ -146,10 +146,10 @@ namespace RaywattApp.Common.Paging
 
             //Page Size
             PagingPageSize = new List<int>();
-            PagingPageSize.Add(10);
-            PagingPageSize.Add(30);
-            PagingPageSize.Add(50);
-            PagingSelectedPageSize = 10;
+            PagingPageSize.Add(Constants.PageSizeListChoice1);
+            PagingPageSize.Add(Constants.PageSizeListChoice2);
+            PagingPageSize.Add(Constants.PageSizeListChoice3);
+            PagingSelectedPageSize = Constants.PageSizeList;
 
             //Paging No Indicator
             PagingVisibilityNo1 = Visibility.Collapsed;
@@ -180,16 +180,16 @@ namespace RaywattApp.Common.Paging
 
         private void PagingPrevious()
         {
-            if (PagingNoIdx < 5)
+            if (PagingNoIdx < Constants.PageNumberMax)
             {
-                _log.Debug("PagingNoIdx < 5");
+                _log.Debug("PagingNoIdx < Constants.PageNumberMax");
                 return;
             }
 
             _log.Debug("PagingPrevious");
 
-            int nCurrPageGroup = PagingNoIdx / 5;
-            int nPagePrevGroupNo = int.Parse(PagingNo1) - 5 * nCurrPageGroup;
+            int nCurrPageGroup = PagingNoIdx / Constants.PageNumberMax;
+            int nPagePrevGroupNo = int.Parse(PagingNo1) - Constants.PageNumberMax * nCurrPageGroup;
 
             ShowPageNo(nPagePrevGroupNo);
 
@@ -198,16 +198,16 @@ namespace RaywattApp.Common.Paging
 
         private void PagingNext()
         {
-            if (PagingNoIdx/5 >= (PagingTotalCnt-1)/PagingSelectedPageSize/5)
+            if (PagingNoIdx/Constants.PageNumberMax >= (PagingTotalCnt-1)/PagingSelectedPageSize/Constants.PageNumberMax)
             {
-                _log.Debug("PagingNoIdx/5 >= PagingTotalCnt/PagingSelectedPageSize/5");
+                _log.Debug("PagingNoIdx/Constants.PageNumberMax >= PagingTotalCnt/PagingSelectedPageSize/Constants.PageNumberMax");
                 return;
             }
 
             _log.Debug("PagingNext");
 
-            int nCurrPageGroup = PagingNoIdx / 5;
-            int nPageNextGroupNo = int.Parse(PagingNo1) + 5 * (nCurrPageGroup + 1);
+            int nCurrPageGroup = PagingNoIdx / Constants.PageNumberMax;
+            int nPageNextGroupNo = int.Parse(PagingNo1) + Constants.PageNumberMax * (nCurrPageGroup + 1);
 
             ShowPageNo(nPageNextGroupNo);
 
@@ -224,12 +224,12 @@ namespace RaywattApp.Common.Paging
 
             _log.Debug("PagingLast");
 
-            int nTotalPageGroup = PagingNoCnt / 5;
-            int nPageLastGroupNo = 1 + 5 * nTotalPageGroup;
+            int nTotalPageGroup = PagingNoCnt / Constants.PageNumberMax;
+            int nPageLastGroupNo = 1 + Constants.PageNumberMax * nTotalPageGroup;
 
             ShowPageNo(nPageLastGroupNo);
 
-            MovePageNo("PagingNo" + (PagingNoCnt % 5 + 1));
+            MovePageNo("PagingNo" + (PagingNoCnt % Constants.PageNumberMax + 1));
         }
 
         protected void MovePageNo(string param)
@@ -259,9 +259,9 @@ namespace RaywattApp.Common.Paging
             _log.Debug("ShowPageNo : " + nPageGroupNo);
 
             PagingNoCnt = PagingTotalCnt / PagingSelectedPageSize + (PagingTotalCnt % PagingSelectedPageSize == 0 ? -1 : 0);
-            int nShowEndNo = PagingNoCnt % 5;
+            int nShowEndNo = PagingNoCnt % Constants.PageNumberMax;
 
-            if (PagingNoCnt / 5 == nPageGroupNo / 5)
+            if (PagingNoCnt / Constants.PageNumberMax == nPageGroupNo / Constants.PageNumberMax)
             {
                 PagingVisibilityNo1 = Visibility.Collapsed;
                 PagingVisibilityNo2 = Visibility.Collapsed;
