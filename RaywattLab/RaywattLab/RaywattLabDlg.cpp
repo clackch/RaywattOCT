@@ -489,14 +489,19 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	m_sliderContrast.SetRange(0, 100);
 	m_sliderContrast.SetPos(contrast);
 
+	int goodClockStart = 0;
+	int goodClockEnd = config.nAScan;
+
 	m_pImagingRealtime = new CLabImaging(this);
 	m_pImagingRealtime->Initialize(_T(".\\CALIBRATION.dat"), ".\\BACKGROUND.bin");
 	m_pImagingRealtime->SetColor(m_chkImageHotColor);
+	m_pImagingRealtime->SetGoodClockRange(goodClockStart, goodClockEnd);
 	m_pImagingRealtime->Start();
 
 	m_pImagingSimulate = new CLabImaging(this);
 	m_pImagingSimulate->Initialize(_T(".\\CALIBRATION.dat"), ".\\BACKGROUND.bin");
 	m_pImagingSimulate->SetColor(m_chkImageHotColor);
+	m_pImagingRealtime->SetGoodClockRange(goodClockStart, goodClockEnd);
 	m_pImagingSimulate->Start();
 
 	m_pDataWriter = new CDataWriter();

@@ -18,6 +18,9 @@ private:
 	CCalibration* newCalibration;
 	bool hasNewCalibration;
 
+	int goodClockStart;
+	int goodClockEnd;
+
 public:
 	CLabImaging(CMessageService*);
 	virtual ~CLabImaging();
@@ -32,10 +35,12 @@ public:
 	void SetBackgroundSubtract(bool subtract) { this->subtract = subtract; }
 	void SetBackgroundFFTSubtract(bool subtract) { this->subtractFFT = subtract; }
 	void ChangeCalibration(CCalibration* pNewCalib);
+	void SetGoodClockRange(int start, int end) { goodClockStart = start; goodClockEnd = end; }
 
 private:
 	template <typename T>
 	void subtractBackground(T* fringes, T* background, int size);
 	void generateScopeData(Ipp32f* output, Ipp16u* scope);
+	void cropSignalData(USHORT* fringes, int start, int end);
 };
 
