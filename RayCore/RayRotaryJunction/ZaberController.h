@@ -1,10 +1,18 @@
 #pragma once
 #include "Config.h"
 
+/*
+* Linear Stage Model : A-LSQ075B-E01
+* Reference : https://www.zaber.com/protocol-manual?device=X-LSQ075B-E01&peripheral=N%2FA&version=7.29&protocol=ASCII#topic_physical_units
+*/
+
 #define INTERFEROMETER_BACKWARD_POSITION	(-1)
 #define INTERFEROMETER_FORWARD_POSITION		(1)
 #define ZABER_SCALE_MM_TO_POSITION			2015.74f
 #define ZABER_SCALE_MMS_TO_VELOCITY			3302.6f
+#define ZABER_MICROSTEP_SIZE				0.49609375f							// um
+#define ZABER_SCALE_MM_TO_POSITION			(1000.f / ZABER_MICROSTEP_SIZE)		// 1000um = 1mm
+#define ZABER_SCALE_MMS_TO_VELOCITY			(ZABER_SCALE_MM_TO_POSITION / 1.6384f)
 #define ZABER_SCALE_MM_TO_ROTATE			12800
 
 typedef enum {
