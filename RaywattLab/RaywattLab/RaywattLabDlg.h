@@ -42,9 +42,6 @@ private:
 	// Data Reader
 	CDataReader* m_pDataReader;
 
-	// Video Writer
-	CVideoWriter* m_pVideoWriter;
-
 	// UI Components
 	CListBox m_listPatientData;
 	ToggleButton m_btnLoadData;
@@ -82,6 +79,7 @@ private:
 	CString m_strCalibPath;
 	std::vector<CString> m_vCalibList;
 	int m_nCurCalibIndex;
+	tstring m_strCurCalibration;
 
 // 생성입니다.
 public:
