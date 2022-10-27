@@ -11,7 +11,10 @@ namespace RaywattOCT
             SystemRunning = -1000,
             InvalidArgument,
             WrongOCTScannerState,
-            NotPausedState
+            NotPausedState,
+            DeviceNotConnected,
+            InitializeFailed,
+            WrongFilePath
         };
 
         public enum Property : int
@@ -37,20 +40,21 @@ namespace RaywattOCT
         {
             Unknown = 0,
             State,
-            Progress
+            Progress,
+            Error
         };
 
         public enum RayScannerState : int
         {
             None = 0,
             Initializing,
-            InitializeFailed,
+            LiveView,
+            AutoCalibration,
             Homing,
             Ready,
             LoadCatheter,
             Scanning,
-            Review,
-            SaveDone
+            Review
         };
 
         public class FrameInfo {
@@ -79,13 +83,19 @@ namespace RaywattOCT
         [DllImport("RayCore.dll")]
         public static extern int RayRegisterCallback(IntPtr cb);
         [DllImport("RayCore.dll")]
+        public static extern int RayConnectDevices();
+        [DllImport("RayCore.dll")]
         public static extern int RayInitialize();
+        [DllImport("RayCore.dll")]
+        public static extern int RayPreparePullback();
         [DllImport("RayCore.dll")]
         public static extern int RayPullbackScan(string filePath);
         [DllImport("RayCore.dll")]
         public static extern int RayLoadCatheter();
         [DllImport("RayCore.dll")]
         public static extern int RayUnloadCatheter();
+        [DllImport("RayCore.dll")]
+        public static extern int RayStartReview(string filePath);
         [DllImport("RayCore.dll")]
         public static extern int RayEndReview();
         [DllImport("RayCore.dll")]
