@@ -12,7 +12,6 @@ using System.Windows.Input;
 using System.Windows.Navigation;
 using System.IO;
 using System.Windows.Threading;
-using RaywattApp.Common.Util;
 
 namespace RaywattApp.ViewModels.File
 {

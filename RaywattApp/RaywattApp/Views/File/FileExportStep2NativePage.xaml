@@ -50,9 +50,15 @@
                         <RowDefinition/>
                         <RowDefinition/>
                     </Grid.RowDefinitions>
-                    <RadioButton Grid.Row="0" IsChecked="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Archive'}" Content="{Binding [Archive], Source={StaticResource L10N}}"  VerticalAlignment="Center" Margin="50,0,0,0"/>
-                    <RadioButton Grid.Row="1" IsChecked="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Share'}" Content="{Binding [Share], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
-                    <RadioButton Grid.Row="2" IsChecked="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Report'}" Content="{Binding [Report a Problem], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
+                    <StackPanel Grid.Row="0" VerticalAlignment="Center" Margin="50,0,0,0">
+                        <RadioButton Grid.Row="0" IsChecked="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Archive'}" Content="{Binding [Archive], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="50,0,0,0">
+                        <RadioButton Grid.Row="1" IsChecked="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Share'}" Content="{Binding [Share], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="2" VerticalAlignment="Center" Margin="50,0,0,0">
+                        <RadioButton Grid.Row="2" IsChecked="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Report'}" Content="{Binding [Report a Problem], Source={StaticResource L10N}}"/>
+                    </StackPanel>
                     <Button Grid.Row="0" Grid.Column="1" Command="{Binding PasswordCommand}" Content="{Binding [Password Protected], Source={StaticResource L10N}}" IsEnabled="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Archive'}" Width="150" Height="20" HorizontalAlignment="Left"/>
                     <Button Grid.Row="1" Grid.Column="1" Command="{Binding AlternateCommand}" Content="{Binding [Alternate Patient IDs], Source={StaticResource L10N}}" IsEnabled="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Share'}" Width="150" Height="20" HorizontalAlignment="Left"/>
                 </Grid>
@@ -68,9 +74,15 @@
                         <RowDefinition/>
                         <RowDefinition/>
                     </Grid.RowDefinitions>
-                    <RadioButton Grid.Row="0" IsChecked="{Binding FileExport.FileOption, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Leave'}" Content="{Binding [Leave Unchanged], Source={StaticResource L10N}}"  VerticalAlignment="Center" Margin="50,0,0,0"/>
-                    <RadioButton Grid.Row="1" IsChecked="{Binding FileExport.FileOption, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Mark'}" Content="{Binding [Mark as Archived], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
-                    <RadioButton Grid.Row="2" IsChecked="{Binding FileExport.FileOption, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Remove'}" Content="{Binding [Remove when Complete], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
+                    <StackPanel Grid.Row="0" VerticalAlignment="Center" Margin="50,0,0,0">
+                        <RadioButton IsChecked="{Binding FileExport.FileOption, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Leave'}" Content="{Binding [Leave Unchanged], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="50,0,0,0">
+                        <RadioButton Grid.Row="1" IsChecked="{Binding FileExport.FileOption, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Mark'}" Content="{Binding [Mark as Archived], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="2" VerticalAlignment="Center" Margin="50,0,0,0">
+                        <RadioButton Grid.Row="2" IsChecked="{Binding FileExport.FileOption, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Remove'}" Content="{Binding [Remove when Complete], Source={StaticResource L10N}}"/>
+                    </StackPanel>
                 </Grid>
             </Border>
 

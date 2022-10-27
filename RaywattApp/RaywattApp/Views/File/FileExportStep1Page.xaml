@@ -29,9 +29,15 @@
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    <RadioButton Grid.Column="0" IsChecked="{Binding FileExportData.Type, Converter={StaticResource RadioButtonConverter}, ConverterParameter='N'}" Content="{Binding [Native(Raw)], Source={StaticResource L10N}}"  VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                    <RadioButton Grid.Column="1" IsChecked="{Binding FileExportData.Type, Converter={StaticResource RadioButtonConverter}, ConverterParameter='D'}" Content="{Binding [DICOM], Source={StaticResource L10N}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                    <RadioButton Grid.Column="2" IsChecked="{Binding FileExportData.Type, Converter={StaticResource RadioButtonConverter}, ConverterParameter='S'}" Content="{Binding [Standard], Source={StaticResource L10N}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <StackPanel Grid.Column="0"  VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <RadioButton IsChecked="{Binding FileExportData.Type, Converter={StaticResource RadioButtonConverter}, ConverterParameter='N'}" Content="{Binding [Native(Raw)], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <RadioButton IsChecked="{Binding FileExportData.Type, Converter={StaticResource RadioButtonConverter}, ConverterParameter='D'}" Content="{Binding [DICOM], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <RadioButton IsChecked="{Binding FileExportData.Type, Converter={StaticResource RadioButtonConverter}, ConverterParameter='S'}" Content="{Binding [Standard], Source={StaticResource L10N}}"/>
+                    </StackPanel>
                 </Grid>
             </StackPanel>
         </Border>
