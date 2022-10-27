@@ -17,8 +17,14 @@ _declspec(dllexport) RayError RayStopSystem() {
 _declspec(dllexport) RayError RayRegisterCallback(FunctionPtr cb) {
     return octSystem.RegisterCallback(cb);
 }
+_declspec(dllexport) RayError RayConnectDevices() {
+    return octSystem.ConnectDevices();
+}
 _declspec(dllexport) RayError RayInitialize() {
     return octSystem.Initialize();
+}
+_declspec(dllexport) RayError RayPreparePullback() {
+    return octSystem.PreparePullback();
 }
 _declspec(dllexport) RayError RayPullbackScan(char* strFilePath) {
     return octSystem.PullbackScan(strFilePath);
@@ -28,6 +34,9 @@ _declspec(dllexport) RayError RayLoadCatheter() {
 }
 _declspec(dllexport) RayError RayUnloadCatheter() {
     return octSystem.UnloadCatheter();
+}
+_declspec(dllexport) RayError RayStartReview(char* strFilePath) {
+    return octSystem.StartReview(strFilePath);
 }
 _declspec(dllexport) RayError RayEndReview() {
     return octSystem.EndReview();

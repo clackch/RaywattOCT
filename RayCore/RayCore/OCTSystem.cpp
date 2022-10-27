@@ -28,6 +28,17 @@ COCTSystem::COCTSystem() {
 	m_pThreadLoadCatheter = nullptr;
 	m_pThreadUnloadCatheter = nullptr;
 
+	m_pImagingRealtime = nullptr;
+	m_pImagingSimulate = nullptr;
+
+	m_pSimulationData = nullptr;
+
+	m_pCutView = nullptr;
+
+	m_pAcqDevice = nullptr;	
+	m_pSimDevice = nullptr;
+
+	m_prevState = RayScannerState::None;
 	m_curState = RayScannerState::None;
 
 	//Property
@@ -62,17 +73,10 @@ RayError COCTSystem::Start() {
 	m_pImagingSimulate = createColorImaging(this);
 	m_pImagingSimulate->Start();
 
-	m_pDataWriter = new CDataWriter();
-	m_pDataWriter->Initialize(config.nBufferSize * sizeof(unsigned short));
-
 	m_pCutView = new CCutViewManager();
 
 	m_pAcqDevice = new CATSDevice();
 	m_pAcqDevice->SetImaging(m_pImagingRealtime);
-	m_pAcqDevice->SetWriter(m_pDataWriter);
-
-	m_pSimDevice = new CSimulateDevice(m_pDataWriter);
-	m_pSimDevice->SetImaging(m_pImagingSimulate);
 
 	return RayError::OK;
 }
@@ -90,16 +94,12 @@ RayError COCTSystem::Stop() {
 	CUtility::StopThread(m_pThreadLoadCatheter);
 	CUtility::StopThread(m_pThreadUnloadCatheter);
 
-	// stop threads
+	terminateSimulation();
+
 	if (m_pAcqDevice != nullptr) {
 		m_pAcqDevice->StopAcquisition();
 		delete m_pAcqDevice;
 		m_pAcqDevice = nullptr;
-	}
-	if (m_pSimDevice != nullptr) {
-		m_pSimDevice->StopAcquisition();
-		delete m_pSimDevice;
-		m_pSimDevice = nullptr;
 	}
 	if (m_pImagingRealtime != nullptr) {
 		m_pImagingRealtime->Stop();
@@ -111,22 +111,19 @@ RayError COCTSystem::Stop() {
 		delete m_pImagingSimulate;
 		m_pImagingSimulate = nullptr;
 	}
-	if (m_pDataWriter != nullptr) {
-		m_pDataWriter->StopRecording();
-		delete m_pDataWriter;
-		m_pDataWriter = nullptr;
+	if (m_pSimulationData != nullptr) {
+		delete m_pSimulationData;
+		m_pSimulationData = nullptr;
 	}
 
 	CMotorController* pMotor = CMotorController::GetInstance();
 	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
-	CZaberController* pInterferometer = CZaberController::GetInstance(ZABER_TYPE_INTERFEROMETER);
 
 	pMotor->StopMotor();
 	pMotor->SwitchOff();
 	pMotor->Disconnect();
 
 	pLinearStage->Close();
-	pInterferometer->Close();
 
 	return RayError::OK;
 }
@@ -141,13 +138,38 @@ RayError COCTSystem::RegisterCallback(FunctionPtr cb) {
 	return RayError::OK;
 }
 
+RayError COCTSystem::ConnectDevices() {
+	int result = NOERROR;
+
+	if (m_curState == RayScannerState::None) {
+		result |= connectAcqDevice();
+		result |= connectRotaryJunction();
+
+		return (result == NOERROR) ? RayError::OK : RayError::DeviceNotConnected;
+	}
+
+	return RayError::WrongOCTScannerState;
+}
+
 /*
 * Initialize
 */
 RayError COCTSystem::Initialize() {
-
-	if (m_curState == RayScannerState::None || m_curState == RayScannerState::InitializeFailed) {
+	if (m_curState == RayScannerState::None) {
 		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Initializing);
+
+		return RayError::OK;
+	}
+
+	return RayError::WrongOCTScannerState;
+}
+
+/*
+* PreparePullback
+*/
+RayError COCTSystem::PreparePullback() {
+	if (m_curState == RayScannerState::LiveView) {
+		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Homing);
 
 		return RayError::OK;
 	}
@@ -160,12 +182,7 @@ RayError COCTSystem::Initialize() {
 */
 RayError COCTSystem::PullbackScan(char *strFilePath) {
 	if (m_curState == RayScannerState::Ready) {
-
-#ifdef TEST_VALUE_FILE_PATH
-		m_strFilePath = TEST_VALUE_FILE_PATH;
-#else
 		m_strFilePath = CUtility::StringToWstring(strFilePath);
-#endif
 
 		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Scanning);
 
@@ -195,9 +212,28 @@ RayError COCTSystem::LoadCatheter() {
 */
 RayError COCTSystem::UnloadCatheter() {
 
-	if (m_curState == RayScannerState::Review || m_curState == RayScannerState::SaveDone) {
+	if (m_curState == RayScannerState::Review) {
 		CUtility::StartThread(threadUnloadCatheter, m_pThreadUnloadCatheter, this);
 
+		return RayError::OK;
+	}
+
+	return RayError::WrongOCTScannerState;
+}
+
+/*
+* StartReview
+*/
+RayError COCTSystem::StartReview(char* strFilePath) {
+	if (m_curState == RayScannerState::None) {
+		CDataReader* pReader = new CDataReader();
+		int nNumOfSamples = pReader->Initialize(CUtility::StringToWstring(strFilePath));
+
+		if (nNumOfSamples <= 0) return RayError::WrongFilePath;
+
+		prepareSimulation(pReader);
+		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
+	
 		return RayError::OK;
 	}
 
@@ -209,8 +245,19 @@ RayError COCTSystem::UnloadCatheter() {
 */
 RayError COCTSystem::EndReview()
 {
-	if (m_curState == RayScannerState::SaveDone) {
-		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Homing);
+	if (m_curState == RayScannerState::Review) {
+		m_pSimDevice->StopAcquisition();
+
+		if (m_prevState == RayScannerState::Scanning) {
+			postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::LiveView);
+		}
+		else if (m_prevState == RayScannerState::None) {
+			postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::None);		
+		}
+		else {
+			return RayError::WrongOCTScannerState;
+		}
+
 		return RayError::OK;
 	}
 
@@ -235,7 +282,7 @@ RayError COCTSystem::MotorOnOff(bool mode)
 */
 RayError COCTSystem::PlayPause()
 {
-	if (m_curState >= RayScannerState::Review) {
+	if (m_curState == RayScannerState::Review) {
 		bool isPaused = ((CSimulateDevice*)m_pSimDevice)->IsPaused();
 		((CSimulateDevice*)m_pSimDevice)->SetPause(!isPaused);
 
@@ -249,7 +296,7 @@ RayError COCTSystem::PlayPause()
 */
 RayError COCTSystem::PrevFrame()
 {
-	if (m_curState >= RayScannerState::Review) {
+	if (m_curState == RayScannerState::Review) {
 		bool isPaused = ((CSimulateDevice*)m_pSimDevice)->IsPaused();
 		if (!isPaused)
 			return RayError::NotPausedState;
@@ -266,7 +313,7 @@ RayError COCTSystem::PrevFrame()
 */
 RayError COCTSystem::NextFrame()
 {
-	if (m_curState >= RayScannerState::Review) {
+	if (m_curState == RayScannerState::Review) {
 		bool isPaused = ((CSimulateDevice*)m_pSimDevice)->IsPaused();
 		if (!isPaused)
 			return RayError::NotPausedState;
@@ -282,7 +329,7 @@ RayError COCTSystem::NextFrame()
 * NextFrame
 */
 RayError COCTSystem::MoveToFrame(int nFrame) {
-	if (m_curState >= RayScannerState::Review) {
+	if (m_curState == RayScannerState::Review) {
 		bool isPaused = ((CSimulateDevice*)m_pSimDevice)->IsPaused();
 		if (!isPaused)
 			return RayError::NotPausedState;
@@ -383,6 +430,9 @@ bool COCTSystem::GetIsPaused()
 UINT COCTSystem::threadService(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CThread* pThread = pSystem->m_pThreadService;
+
+	bool dispCutView = false;
+	cv::namedWindow("LongCutView");
 	
 	while (pThread->isRun) {
 		std::tuple<int, WPARAM, LPARAM> popMsgThread = pSystem->popMessage();
@@ -401,14 +451,29 @@ UINT COCTSystem::threadService(LPVOID param) {
 			pSystem->OnMsgUpdateSaveRaw(wParam, lParam);
 			break;
 		}
-		case WM_UPDATE_CUTVIEW_DONE :
+		case WM_NOTIFY_SAVE_DONE:
 		{
-			pSystem->OnMsgUpdateCutViewDone(wParam, lParam);
+			pSystem->OnMsgNotifySaveDone(wParam, lParam);
 			break;
+		}
+		case WM_NOTIFY_CUTVIEW_DONE:
+		{
+			pSystem->OnMsgNotifyCutViewDone(wParam, lParam);
+			dispCutView = true;
+			break;
+		}
+		case WM_NOTIFY_ERROR_OCCURED:
+		{
+			pSystem->OnMsgNotifyErrorOccured(wParam, lParam);
 		}
 		case WM_PROCESS_OCT_DONE:
 		{
 			pSystem->OnMsgProcessOCTDone(wParam, lParam);
+			if (dispCutView) {
+				cv::Mat imgCutView = pSystem->m_pCutView->GetCutViewROI(512);
+				cv::imshow("LongCutView", imgCutView);
+				cv::waitKey(1);
+			}
 			break;
 		}
 		default:
@@ -441,10 +506,13 @@ UINT COCTSystem::threadInitialize(LPVOID param) {
 	}
 
 	if (nResult == NOERROR) {
-		pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Homing);
+		pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::LiveView);
 	}
 	else {
-		pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::InitializeFailed);
+		pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::None);
+
+		RayError errorCode = (pSystem->checkConnection()) ? RayError::InitializeFailed : RayError::DeviceNotConnected;
+		pSystem->postMessage(WM_NOTIFY_ERROR_OCCURED, (WPARAM)errorCode);
 	}
 
 	while (pSystem->m_pThreadInitialize->isRun) {
@@ -462,9 +530,6 @@ UINT COCTSystem::threadHoming(LPVOID param) {
 	CZaberController* pZaberCtrl = (CZaberController*)CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
 	CConfiguration& config = CConfiguration::GetInstance();
 
-#ifdef TEST_VALUE_FILE_PATH
-	Sleep(3000);
-#endif
 	if (pZaberCtrl->IsOpen()) {
 		pZaberCtrl->SetSpeed(config.zaber.pullbackSpeed);
 		pZaberCtrl->Move(config.zaber.pullbackDistance);
@@ -496,14 +561,16 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	CMotorController* pMotor = CMotorController::GetInstance();
 	CZaberController* pZaber = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
 
+	CDataWriter *pDataWriter = new CDataWriter();
+	pDataWriter->Initialize(config.nBufferSize * sizeof(unsigned short));
+	pSystem->m_pAcqDevice->SetWriter(pDataWriter);
+
 	// 1. Motor ON
 	pSystem->setMotorOnOff(true);
 	Sleep(config.motor.settleDown);
 
-#ifndef TEST_VALUE_FILE_PATH
 	// 2. Start Recording OCT
-	pSystem->m_pDataWriter->StartRecording();
-#endif
+	pDataWriter->StartRecording();
 
 	// 3. Pullback Linear Stage
 	if (pZaber->IsOpen()) {
@@ -521,18 +588,13 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 		Sleep(3000);
 	}
 
-	// 4. Motor OFF
+	// 4. Stop Recording OCT
+	pDataWriter->StopRecording();
+
+	// 5. Motor OFF
 	pSystem->setMotorOnOff(false);
 
-#ifndef TEST_VALUE_FILE_PATH
-	// 5. Stop Recording OCT
-	pSystem->m_pDataWriter->StopRecording();
-#else
-	if (pSystem->m_pDataReader != NULL) {
-		delete pSystem->m_pDataReader;
-		pSystem->m_pDataReader = NULL;
-	}
-#endif
+	pSystem->prepareSimulation(pDataWriter);
 
 	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
 
@@ -549,21 +611,21 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 UINT COCTSystem::threadSaveRaw(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	tstring strSaveFilePath = pSystem->m_strFilePath;
-	CDataWriter* pDataManager = pSystem->m_pDataWriter;
-	const int nNumOfSamples = pDataManager->GetNumOfSamples();
+	CDataWriter* pDataWriter = (CDataWriter *)pSystem->m_pSimulationData;
+	const int nNumOfSamples = pDataWriter->GetNumOfSamples();
 
 	int nFrame = 0;
 	pSystem->postMessage(WM_UPDATE_SAVE_RAW, 0, nNumOfSamples);
 
-	pDataManager->StartSave(strSaveFilePath);
+	pDataWriter->StartSave(strSaveFilePath);
 	for (nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadSaveRaw->isRun; nFrame++) {
-		pDataManager->WriteFrame(nFrame);
+		pDataWriter->WriteFrame(nFrame);
 
 		pSystem->postMessage(WM_UPDATE_SAVE_RAW, nFrame + 1, nNumOfSamples);
 	}
-	pDataManager->StopSave();
+	pDataWriter->StopSave();
 
-	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::SaveDone);
+	pSystem->postMessage(WM_NOTIFY_SAVE_DONE);
 
 	while (pSystem->m_pThreadSaveRaw->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
@@ -577,11 +639,8 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 */
 UINT COCTSystem::threadUpdateCutView(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
-#ifdef TEST_VALUE_FILE_PATH
-	IDataManager* pDataManager = pSystem->m_pDataReader;
-#else
-	IDataManager* pDataManager = pSystem->m_pDataWriter;
-#endif
+	IDataManager* pDataManager = pSystem->m_pSimulationData;
+
 	CCutViewManager* pCutView = pSystem->m_pCutView;
 	double fDegree = pSystem->m_fDegree;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
@@ -599,8 +658,14 @@ UINT COCTSystem::threadUpdateCutView(LPVOID param) {
 	}
 	delete pImaging;
 
+	cv::Mat imgCutView = pCutView->GetCutViewROI(512);
+	cv::Mat imgResize;
+	cv::Size sizeInterpolation = cv::Size(imgCutView.cols * CUTVIEW_INTERPOLATION_SCALE, imgCutView.rows);
+	cv::resize(imgCutView, imgResize, sizeInterpolation);
+	cv::imwrite("LongCutView.png", imgResize);
+
 	if (pSystem->m_pThreadUpdateCutView->isRun) {
-		pSystem->postMessage(WM_UPDATE_CUTVIEW_DONE);
+		pSystem->postMessage(WM_NOTIFY_CUTVIEW_DONE);
 	}
 
 	// wait for StopThread
@@ -701,6 +766,31 @@ COCTImaging* COCTSystem::createColorImaging(CMessageService* msg) {
 }
 
 /*
+* createColorImaging
+*/
+bool COCTSystem::checkConnection() {
+	bool result = true;
+	CConfiguration& config = CConfiguration::GetInstance();
+	CMotorController* pMotor = CMotorController::GetInstance();
+	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
+	
+	result &= m_pAcqDevice->IsInit();
+	result &= pLinearStage->IsOpen();
+	result &= pMotor->IsConnected();
+
+	return result;
+}
+
+/*
+* initializeAcqDevice
+*/
+int COCTSystem::connectAcqDevice() {
+	if (m_pAcqDevice->IsInit()) return NOERROR;
+
+	return m_pAcqDevice->InitDevice();
+}
+
+/*
 * initializeAcqDevice
 */
 int COCTSystem::initializeAcqDevice() {
@@ -709,40 +799,45 @@ int COCTSystem::initializeAcqDevice() {
 		m_pAcqDevice->CleanUp();
 	}
 
-	int result = m_pAcqDevice->InitDevice();
+	int result = connectAcqDevice();
 	if (result == NOERROR) {
 		m_pAcqDevice->StartAcquisition();
 		CLaserController::GetInstance()->LaserOnOff(true);
 	}
 
-#ifdef TEST_VALUE_FILE_PATH
-	return NOERROR;
-#else
 	return result;
-#endif
+}
+
+/*
+* connectRotaryJunction
+*/
+int COCTSystem::connectRotaryJunction() {
+	CConfiguration& config = CConfiguration::GetInstance();
+	CMotorController* pMotor = CMotorController::GetInstance();
+	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
+
+	bool result = true;
+	
+	if (!pLinearStage->IsOpen()) {
+		result &= pLinearStage->Open(config.zaber.pullback);
+	}
+
+	if (!pMotor->IsConnected()) {
+		result &= pMotor->Connect();
+	}
+
+	return (result) ? NOERROR : E_FAIL;
 }
 
 /*
 * initializeRotaryJunction
 */
 int COCTSystem::initializeRotaryJunction() {
-	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
-	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
-	CZaberController* pInterferometer = CZaberController::GetInstance(ZABER_TYPE_INTERFEROMETER);
 
-	bool result = true;
-	result &= pLinearStage->Open(config.zaber.pullback);
-	result &= pInterferometer->Open(config.zaber.interferometer);
+	bool result = pMotor->SwitchOn();
 
-	result &= pMotor->Connect();
-	result &= pMotor->SwitchOn();
-
-#ifdef TEST_VALUE_FILE_PATH
-	return NOERROR;
-#else
 	return (result) ? NOERROR : E_FAIL;
-#endif
 }
 
 /*
@@ -755,7 +850,7 @@ LRESULT COCTSystem::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 	int nFrameInfo = (nCurFrame << 16) | (nTotalFrame);
 	bool isRealTime = (nFrameInfo == 0);
 
-	if (m_curState >= RayScannerState::Review) {
+	if (m_curState == RayScannerState::Review) {
 		if (isRealTime) return NOERROR;
 
 		image = m_pImagingSimulate->GetCircleImage();
@@ -821,25 +916,56 @@ void COCTSystem::updateCutView(int drawSamples) {
 }
 
 /*
+* prepareSimulation
+*/
+void COCTSystem::prepareSimulation(IDataManager* pDataManager) {
+	terminateSimulation();
+
+	m_pSimulationData = pDataManager;
+
+	m_pSimDevice = new CSimulateDevice(m_pSimulationData);
+	m_pSimDevice->SetImaging(m_pImagingSimulate);
+	m_pSimDevice->InitDevice();
+}
+
+/*
+* terminateSimulation
+*/
+void COCTSystem::terminateSimulation() {
+	if (m_pSimDevice != nullptr) {
+		m_pSimDevice->StopAcquisition();
+		delete m_pSimDevice;
+		m_pSimDevice = nullptr;
+	}
+	if (m_pSimulationData != nullptr) {
+		delete m_pSimulationData;
+		m_pSimulationData = nullptr;
+	}
+}
+
+/*
 * OnMsgUpdateScannerState
 */
 LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 	CConfiguration& config = CConfiguration::GetInstance();
+	m_prevState = m_curState;
 	m_curState = (RayScannerState)wParam;
 
 	m_callback((int)RayCallbackRequest::State, (int)m_curState);
 
 	switch (m_curState) {
-	case RayScannerState::InitializeFailed:
+	case RayScannerState::None:
 		CUtility::StopThread(m_pThreadInitialize);
+		CUtility::StopThread(m_pThreadUpdateCutView);
 		break;
 	case RayScannerState::Initializing:
 		CUtility::StartThread(threadInitialize, m_pThreadInitialize, this);
 		break;
-	case RayScannerState::Homing:
-		m_pSimDevice->StopAcquisition();
+	case RayScannerState::LiveView:
 		CUtility::StopThread(m_pThreadInitialize);
 		CUtility::StopThread(m_pThreadUpdateCutView);
+		break;
+	case RayScannerState::Homing:
 		CUtility::StopThread(m_pThreadLoadCatheter);
 		CUtility::StopThread(m_pThreadUnloadCatheter);
 		CUtility::StartThread(threadHoming, m_pThreadHoming, this);
@@ -855,25 +981,14 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 		break;
 	case RayScannerState::Review:
 		CUtility::StopThread(m_pThreadPullbackScan);
-#ifdef TEST_VALUE_FILE_PATH
-		delete m_pSimDevice;
-		{
-			m_pDataReader = new CDataReader();
-			m_pDataReader->Initialize(m_strFilePath);
-			m_pSimDevice = new CSimulateDevice(m_pDataReader);
-			m_pSimDevice->SetImaging(m_pImagingSimulate);
+		
+		if (m_prevState == RayScannerState::Scanning) {
+			CUtility::StartThread(threadSaveRaw, m_pThreadSaveRaw, this);
 		}
-		m_curState = RayScannerState::SaveDone;
-#else
-		CUtility::StartThread(threadSaveRaw, m_pThreadSaveRaw, this);
-#endif
+
 		CUtility::StartThread(threadUpdateCutView, m_pThreadUpdateCutView, this);
 
-		m_pSimDevice->InitDevice();
 		m_pSimDevice->StartAcquisition();
-		break;
-	case RayScannerState::SaveDone:
-		CUtility::StopThread(m_pThreadSaveRaw);
 		break;
 	default:
 		break;
@@ -896,10 +1011,28 @@ LRESULT COCTSystem::OnMsgUpdateSaveRaw(WPARAM wParam, LPARAM lParam) {
 }
 
 /*
+* OnMsgNotifySaveDone
+*/
+LRESULT COCTSystem::OnMsgNotifySaveDone(WPARAM wParam, LPARAM lParam) {
+	CUtility::StopThread(m_pThreadSaveRaw);
+
+	return NOERROR;
+}
+
+/*
 * OnMsgUpdateCutViewDone
 */
-LRESULT COCTSystem::OnMsgUpdateCutViewDone(WPARAM wParam, LPARAM lParam) {
+LRESULT COCTSystem::OnMsgNotifyCutViewDone(WPARAM wParam, LPARAM lParam) {
 	CUtility::StopThread(m_pThreadUpdateCutView);
+
+	return NOERROR;
+}
+
+/*
+* OnMsgUpdateCutViewDone
+*/
+LRESULT COCTSystem::OnMsgNotifyErrorOccured(WPARAM wParam, LPARAM lParam) {
+	if (m_callback != nullptr) m_callback((int)RayCallbackRequest::Error, wParam);
 
 	return NOERROR;
 }
