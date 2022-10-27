@@ -649,12 +649,6 @@ UINT COCTSystem::threadUpdateCutView(LPVOID param) {
 	}
 	delete pImaging;
 
-	cv::Mat imgCutView = pCutView->GetCutViewROI(512);
-	cv::Mat imgResize;
-	cv::Size sizeInterpolation = cv::Size(imgCutView.cols * CUTVIEW_INTERPOLATION_SCALE, imgCutView.rows);
-	cv::resize(imgCutView, imgResize, sizeInterpolation);
-	cv::imwrite("LongCutView.png", imgResize);
-
 	if (pSystem->m_pThreadUpdateCutView->isRun) {
 		pSystem->postMessage(WM_NOTIFY_CUTVIEW_DONE);
 	}
