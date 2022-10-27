@@ -8,7 +8,7 @@
     <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityReverseConverter" FalseValue="Visible" TrueValue="Collapsed" />
 
     <!-- Radio Button Converter -->
-    <converters:RadioButtonConverter x:Key="RadioButtonConverter" />
+    <converters:RadioButtonConverter x:Key="RadioButtonConverter" /> 
 
     <!-- Paging No Indicator Converter -->
     <converters:PagingNoIndicatorConverter x:Key="PagingNoIndicatorConverter" />
@@ -24,5 +24,14 @@
 
     <!-- Expander Selected Converter -->
     <converters:ExpanderSelectedConverter x:Key="ExpanderSelectedConverter" />
-    
+
+    <!-- Radio Button Visibility Converter -->
+    <converters:RadioButtonVisibilityConverter x:Key="RadioButtonVisibilityConverter" />
+
+    <!-- Not Null To Enable Converter -->
+    <converters:NotNullToEnableConverter x:Key="NotNullToEnableConverter" />
+
+    <!-- Not Empty String To Enable Converter -->
+    <converters:NotEmptyStringToEnableConverter x:Key="NotEmptyStringToEnableConverter" /> 
+
 </ResourceDictionary>

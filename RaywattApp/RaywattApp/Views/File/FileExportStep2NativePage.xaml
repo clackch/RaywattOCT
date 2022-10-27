@@ -1,0 +1,178 @@
+﻿<Page x:Class="RaywattApp.Views.File.FileExportStep2NativePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:RaywattApp.Views.File"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="FileExportStep2NativePage">
+
+    <Grid Height="800">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Background="Gray">
+            <Label Content="{Binding [Step2], Source={StaticResource L10N}}"></Label>
+        </StackPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0">
+                <Label Content="{Binding [Purpose], Source={StaticResource L10N}}"/>
+            </StackPanel>
+            <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Margin="10">
+                <Grid >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <RadioButton Grid.Row="0" IsChecked="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Archive'}" Content="{Binding [Archive], Source={StaticResource L10N}}"  VerticalAlignment="Center" Margin="50,0,0,0"/>
+                    <RadioButton Grid.Row="1" IsChecked="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Share'}" Content="{Binding [Share], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
+                    <RadioButton Grid.Row="2" IsChecked="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Report'}" Content="{Binding [Report a Problem], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
+                    <Button Grid.Row="0" Grid.Column="1" Command="{Binding PasswordCommand}" Content="{Binding [Password Protected], Source={StaticResource L10N}}" IsEnabled="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Archive'}" Width="150" Height="20" HorizontalAlignment="Left"/>
+                    <Button Grid.Row="1" Grid.Column="1" Command="{Binding AlternateCommand}" Content="{Binding [Alternate Patient IDs], Source={StaticResource L10N}}" IsEnabled="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Share'}" Width="150" Height="20" HorizontalAlignment="Left"/>
+                </Grid>
+            </Border>
+
+            <StackPanel Grid.Row="0" Grid.Column="1">
+                <Label Content="{Binding [System File Options], Source={StaticResource L10N}}"/>
+            </StackPanel>
+            <Border Grid.Row="1" Grid.Column="1" BorderBrush="Black" BorderThickness="1" Margin="10">
+                <Grid >
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <RadioButton Grid.Row="0" IsChecked="{Binding FileExport.FileOption, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Leave'}" Content="{Binding [Leave Unchanged], Source={StaticResource L10N}}"  VerticalAlignment="Center" Margin="50,0,0,0"/>
+                    <RadioButton Grid.Row="1" IsChecked="{Binding FileExport.FileOption, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Mark'}" Content="{Binding [Mark as Archived], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
+                    <RadioButton Grid.Row="2" IsChecked="{Binding FileExport.FileOption, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Remove'}" Content="{Binding [Remove when Complete], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
+                </Grid>
+            </Border>
+
+            <StackPanel Grid.Row="6">
+                <Label Content="{Binding [Export Size], Source={StaticResource L10N}}"/>
+            </StackPanel>
+            <Border Grid.Row="7" Grid.ColumnSpan="2" BorderBrush="Black" BorderThickness="1" Margin="10">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <Label Content="{Binding [Total Export Size], Source={StaticResource L10N}}"/>
+                    <Label>:</Label>
+                    <Label>3333</Label>
+                </StackPanel>
+            </Border>
+
+            <StackPanel Grid.Row="8">
+                <Label Content="{Binding [Destination], Source={StaticResource L10N}}"/>
+            </StackPanel>
+            <Border Grid.Row="9" Grid.ColumnSpan="2" BorderBrush="Black" BorderThickness="1" Margin="10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0" >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <RadioButton Grid.Column="0" IsChecked="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter='CD'}" Content="{Binding [CD/DVD], Source={StaticResource L10N}}"  VerticalAlignment="Center" Margin="50,0,0,0"/>
+                        <CheckBox Grid.Column="1" IsChecked="{Binding FileExport.EjectWhenComplete}" Content="{Binding [Eject when Complete], Source={StaticResource L10N}}" Visibility="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter='CD'}" VerticalAlignment="Center" Margin="50,0,0,0"/>
+                    </Grid>
+                    <RadioButton Grid.Row="1" IsChecked="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter='External'}" Content="{Binding [External Drive], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
+                    <Border Grid.Column="1" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1" Margin="5" Visibility="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter='CD'}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0">
+                                <Label Content="{Binding [Disk Type], Source={StaticResource L10N}}"/>
+                                <Label>no disc</Label>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" >
+                                <Label Content="{Binding [Volume Label], Source={StaticResource L10N}}"/>
+                                <Label>TEST</Label>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    <Border Grid.Column="1" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1" Margin="5" Visibility="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter='External'}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" HorizontalAlignment="Left">
+                                <Label Content="{Binding [Select Drive], Source={StaticResource L10N}}"/>
+                                <ComboBox Width="300" ItemsSource="{Binding ExternalDriveComboBox}" SelectedValue="{Binding SelectedExternalDrive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectedValuePath="Key" DisplayMemberPath="Value" IsEnabled="{Binding IsEnableExternalDrive}"  Margin="5,5,5,5"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" >
+                                <Label Content="{Binding [Path], Source={StaticResource L10N}}"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBox Text="{Binding FileExport.ExternalDrivePath}" IsReadOnly="True" Width="300" Margin="5,5,5,5"/>
+                                    <Button Width="50" Command="{Binding ExternalDrivePathCommand}" Content="{Binding [Path], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    <Border Grid.Column="2" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1" Margin="5">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0">
+                                <Label Content="{Binding [Total], Source={StaticResource L10N}}"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="{Binding ExternalDriveTotalSize}"/>
+                                    <Label Content="{Binding [bytes], Source={StaticResource L10N}}"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" >
+                                <Label Content="{Binding [Free], Source={StaticResource L10N}}"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="{Binding ExternalDriveAvailableFreeSpace}"/>
+                                    <Label Content="{Binding [bytes], Source={StaticResource L10N}}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" >
+            <Button Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+            <Button Width="50" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+            <Button Width="50" Background="Black" Foreground="White" Command="{Binding NextCommand}" Content="{Binding [Next], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+        </StackPanel>
+    </Grid>
+</Page>

@@ -256,6 +256,7 @@ namespace RaywattApp.ViewModels
 
             FileExport fileExportData = new FileExport();
 
+            fileExportData.PatientId = Patient.Id;
             GetSelectedItem();
             fileExportData.SelectedItem = selectedItem;
 
@@ -275,7 +276,7 @@ namespace RaywattApp.ViewModels
             }
 
             GetDetailStatus();
-            WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "QuestionPopupControl", Type = (int)CommonDefinition.PopupType.Question, PopupId = (int)CommonDefinition.QuestionList.PatientCaseDelete, ParentObject = this, Parameter = _l10n["Are you sure to delete selected patient case?"] });
+            WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "QuestionPopupControl", Type = (int)CommonDefinition.PopupType.Question, PopupId = (int)CommonDefinition.CallbackQuestion.PatientCaseDelete, ParentObject = this, Parameter = _l10n["Are you sure to delete selected patient case?"] });
         }
 
         public override void CallbackPopup()
@@ -284,7 +285,7 @@ namespace RaywattApp.ViewModels
 
             if (PopupCallback != null)
             {
-                if (PopupCallback.PopupId == (int)CommonDefinition.QuestionList.PatientCaseDelete)
+                if (PopupCallback.PopupId == (int)CommonDefinition.CallbackQuestion.PatientCaseDelete)
                 {
                     if(PopupCallback.PopupAnswer)
                         DeletePatientCase();
@@ -337,7 +338,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["date"] = patientCaseByDate.Key;
 
             if (patientCaseByDate.PatientCaseList == null)
-                patientCaseByDate.PatientCaseList = _sqlManager.SelectPatientCaseList(sqlParameters);
+                patientCaseByDate.PatientCaseList = _sqlManager.SelectPatientCaseListByDate(sqlParameters);
 
             PatientCaseList = patientCaseByDate.PatientCaseList;
 

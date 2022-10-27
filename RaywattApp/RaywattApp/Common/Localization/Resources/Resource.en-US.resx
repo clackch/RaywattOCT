@@ -129,8 +129,17 @@
   <data name="Add Patient" xml:space="preserve">
     <value>Add Patient</value>
   </data>
+  <data name="Alternate ID" xml:space="preserve">
+    <value>Alternate ID</value>
+  </data>
+  <data name="Alternate Patient IDs" xml:space="preserve">
+    <value>Alternate Patient IDs</value>
+  </data>
   <data name="Apply" xml:space="preserve">
     <value>Apply</value>
+  </data>
+  <data name="Archive" xml:space="preserve">
+    <value>Archive</value>
   </data>
   <data name="Are you sure to delete selected patient case?" xml:space="preserve">
     <value>Are you sure to delete selected patient case?</value>
@@ -141,23 +150,56 @@
   <data name="Birth Date" xml:space="preserve">
     <value>Birth Date</value>
   </data>
+  <data name="Browser for Folder" xml:space="preserve">
+    <value>Browser for Folder</value>
+  </data>
+  <data name="bytes" xml:space="preserve">
+    <value>bytes</value>
+  </data>
   <data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
   <data name="Case" xml:space="preserve">
     <value>Case</value>
   </data>
+  <data name="CD/DVD" xml:space="preserve">
+    <value>CD/DVD</value>
+  </data>
   <data name="Comment" xml:space="preserve">
     <value>Comment</value>
+  </data>
+  <data name="Confirm Password" xml:space="preserve">
+    <value>Confirm Password</value>
   </data>
   <data name="Create Date" xml:space="preserve">
     <value>Create Date</value>
   </data>
+  <data name="Create New Folder" xml:space="preserve">
+    <value>Create New Folder</value>
+  </data>
+  <data name="Current Folder" xml:space="preserve">
+    <value>Current Folder</value>
+  </data>
   <data name="Database" xml:space="preserve">
     <value>Database</value>
   </data>
+  <data name="Define Alternate Patient ID" xml:space="preserve">
+    <value>Define Alternate Patient ID</value>
+  </data>
   <data name="Delete" xml:space="preserve">
     <value>Delete</value>
+  </data>
+  <data name="Destination" xml:space="preserve">
+    <value>Destination</value>
+  </data>
+  <data name="DICOM" xml:space="preserve">
+    <value>DICOM</value>
+  </data>
+  <data name="Disk Type" xml:space="preserve">
+    <value>Disk Type</value>
+  </data>
+  <data name="Duplicated Folder Name" xml:space="preserve">
+    <value>Duplicated Folder Name</value>
   </data>
   <data name="Edit" xml:space="preserve">
     <value>Edit</value>
@@ -168,6 +210,9 @@
   <data name="Edit Patient" xml:space="preserve">
     <value>Edit Patient</value>
   </data>
+  <data name="Eject when Complete" xml:space="preserve">
+    <value>Eject when Complete</value>
+  </data>
   <data name="en-US" xml:space="preserve">
     <value>English</value>
   </data>
@@ -176,6 +221,9 @@
   </data>
   <data name="English" xml:space="preserve">
     <value>English</value>
+  </data>
+  <data name="Enter Dataset Password" xml:space="preserve">
+    <value>Enter Dataset Password</value>
   </data>
   <data name="Error" xml:space="preserve">
     <value>Error</value>
@@ -186,11 +234,23 @@
   <data name="Export" xml:space="preserve">
     <value>Export</value>
   </data>
+  <data name="Export Size" xml:space="preserve">
+    <value>Export Size</value>
+  </data>
+  <data name="External Drive" xml:space="preserve">
+    <value>External Drive</value>
+  </data>
   <data name="Female" xml:space="preserve">
     <value>Female</value>
   </data>
   <data name="First Name" xml:space="preserve">
     <value>First Name</value>
+  </data>
+  <data name="Folder" xml:space="preserve">
+    <value>Folder</value>
+  </data>
+  <data name="Free" xml:space="preserve">
+    <value>Free</value>
   </data>
   <data name="Gender" xml:space="preserve">
     <value>Gender</value>
@@ -222,17 +282,32 @@
   <data name="Last Name" xml:space="preserve">
     <value>Last Name</value>
   </data>
+  <data name="Leave Unchanged" xml:space="preserve">
+    <value>Leave Unchanged</value>
+  </data>
   <data name="Localization" xml:space="preserve">
     <value>Localization</value>
   </data>
   <data name="Male" xml:space="preserve">
     <value>Male</value>
   </data>
+  <data name="Mark as Archived" xml:space="preserve">
+    <value>Mark as Archived</value>
+  </data>
   <data name="Name" xml:space="preserve">
     <value>Name</value>
   </data>
   <data name="Name is duplicated." xml:space="preserve">
     <value>Name is duplicated.</value>
+  </data>
+  <data name="Native(Raw)" xml:space="preserve">
+    <value>Native(Raw)</value>
+  </data>
+  <data name="New Folder" xml:space="preserve">
+    <value>New Folder</value>
+  </data>
+  <data name="New Folder Name" xml:space="preserve">
+    <value>New Folder Name</value>
   </data>
   <data name="New Patient" xml:space="preserve">
     <value>New Patient</value>
@@ -248,6 +323,21 @@
   </data>
   <data name="OK" xml:space="preserve">
     <value>OK</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Password Protected" xml:space="preserve">
+    <value>Password Protected</value>
+  </data>
+  <data name="Path" xml:space="preserve">
+    <value>Path</value>
+  </data>
+  <data name="Patient" xml:space="preserve">
+    <value>Patient</value>
+  </data>
+  <data name="Patient Case" xml:space="preserve">
+    <value>Patient Case</value>
   </data>
   <data name="Patient List" xml:space="preserve">
     <value>Patient List</value>
@@ -267,6 +357,9 @@
   <data name="Procedure" xml:space="preserve">
     <value>Procedure</value>
   </data>
+  <data name="Purpose" xml:space="preserve">
+    <value>Purpose</value>
+  </data>
   <data name="Raywatt" xml:space="preserve">
     <value>Raywatt</value>
   </data>
@@ -275,6 +368,21 @@
   </data>
   <data name="Refresh" xml:space="preserve">
     <value>Refresh</value>
+  </data>
+  <data name="Remove when Complete" xml:space="preserve">
+    <value>Remove when Complete</value>
+  </data>
+  <data name="Rename" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="Rename Folder" xml:space="preserve">
+    <value>Rename Folder</value>
+  </data>
+  <data name="Report a Problem" xml:space="preserve">
+    <value>Report a Problem</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Reset</value>
   </data>
   <data name="Review" xml:space="preserve">
     <value>Review</value>
@@ -285,8 +393,23 @@
   <data name="Search" xml:space="preserve">
     <value>Search</value>
   </data>
+  <data name="Select Drive" xml:space="preserve">
+    <value>Select Drive</value>
+  </data>
   <data name="Setting" xml:space="preserve">
     <value>Setting</value>
+  </data>
+  <data name="Share" xml:space="preserve">
+    <value>Share</value>
+  </data>
+  <data name="Standard" xml:space="preserve">
+    <value>Standard</value>
+  </data>
+  <data name="System File Options" xml:space="preserve">
+    <value>System File Options</value>
+  </data>
+  <data name="The password you entered is not valid" xml:space="preserve">
+    <value>The password you entered is not valid</value>
   </data>
   <data name="There are no items selected." xml:space="preserve">
     <value>There are no items selected.</value>
@@ -294,11 +417,17 @@
   <data name="Total" xml:space="preserve">
     <value>Total</value>
   </data>
+  <data name="Total Export Size" xml:space="preserve">
+    <value>Total Export Size</value>
+  </data>
   <data name="Update Date" xml:space="preserve">
     <value>Update Date</value>
   </data>
   <data name="Vessel" xml:space="preserve">
     <value>Vessel</value>
+  </data>
+  <data name="Volume Label" xml:space="preserve">
+    <value>Volume Label</value>
   </data>
   <data name="Warning" xml:space="preserve">
     <value>Warning</value>

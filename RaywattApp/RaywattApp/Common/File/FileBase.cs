@@ -41,13 +41,7 @@ namespace RaywattApp.Common.File
             get { return this._importCommand ?? (this._importCommand = new RelayCommand(Export)); }
         }
 
-        private void Back()
-        {
-            _log.Debug("Back");
-            WeakReferenceMessenger.Default.Send(new PopupNavigationMessage("GoBack"));
-        }
-
-        private void Cancel()
+        virtual protected void Cancel()
         {
             _log.Debug("Cancel");
             WeakReferenceMessenger.Default.Send(new PopupMessage(false) { Type = (int)CommonDefinition.PopupType.File });
@@ -58,5 +52,7 @@ namespace RaywattApp.Common.File
         virtual protected void Export() { }
 
         virtual protected void Import() { }
+
+        virtual protected void Back() { }
     }
 }

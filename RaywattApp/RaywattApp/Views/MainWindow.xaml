@@ -77,6 +77,18 @@
                         </ContentControl>
                     </Border>
                 </Border>
+                <Border Background="#66000000" Visibility="{Binding ShowLayerExtraPopup, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Border HorizontalAlignment="Center" VerticalAlignment="Center" Background="White" CornerRadius="5">
+                        <Border.Effect>
+                            <DropShadowEffect />
+                        </Border.Effect>
+                        <ContentControl Width="400" MinHeight="200">
+                            <b:Interaction.Behaviors>
+                                <behaviors:PopupControlBehavior Control="{Binding ControlExtraName}" LayerPopup="{Binding ShowLayerExtraPopup}"/>
+                            </b:Interaction.Behaviors>
+                        </ContentControl>
+                    </Border>
+                </Border>
                 <Border Background="#66000000" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}">
                     <Border HorizontalAlignment="Center" VerticalAlignment="Center" Background="White" CornerRadius="5">
                         <StackPanel Width="100" Margin="10">

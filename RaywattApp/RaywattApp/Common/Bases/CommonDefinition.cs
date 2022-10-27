@@ -21,7 +21,8 @@
             Edit,
             Setting,
             File,
-            CaseEdit
+            Lookup,
+            Extra
         }
 
         public enum PopupLevel : int
@@ -37,16 +38,23 @@
             Import
         }
 
-        public enum QuestionList : int
+        public enum CallbackQuestion : int
         {
-            PatientCaseDelete = 0,
+            PatientCaseDelete = 0
         }
 
-        public enum EditList : int
+        public enum CallbackEdit : int
         {
-            Vessel = 0,
+            Vessel = 100,
             Procedure,
-            Case
+            Case,
+            Password,
+            AlternateId
+        }
+
+        public enum CallbackLookup : int
+        {
+            FolderBrowser = 200
         }
     }
 }
