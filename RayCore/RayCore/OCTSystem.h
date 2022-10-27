@@ -8,18 +8,14 @@
 
 #define WM_UPDATE_SCANNER_STATE		(WM_USER + 0x1001)
 #define WM_UPDATE_SAVE_RAW			(WM_USER + 0x1002)
-#define WM_UPDATE_CUTVIEW_DONE		(WM_USER + 0x1003)
+#define WM_NOTIFY_SAVE_DONE			(WM_USER + 0x1003)
+#define WM_NOTIFY_CUTVIEW_DONE		(WM_USER + 0x1004)
+#define WM_NOTIFY_ERROR_OCCURED		(WM_USER + 0x1005)
 
 #define CUTVIEW_INTERPOLATION_SCALE		5.7
 
-//#define TEST_VALUE_FILE_PATH			_T("C:\\DataSave\\test\\0710_145631_6028rpm_20mms_2000Aline_ch1.bin")
-
-#ifdef TEST_VALUE_FILE_PATH
-class CDataReader;
-#endif
 class CThread;
 class COCTImaging;
-class CDataWriter;
 class CCutViewManager;
 class COCTSystem : public CMessageService
 {
@@ -41,13 +37,9 @@ private:
 	COCTImaging* m_pImagingRealtime;
 	COCTImaging* m_pImagingSimulate;
 
-	// Data Writer
-	CDataWriter* m_pDataWriter;
+	// Data Manager
+	IDataManager* m_pSimulationData;
 	tstring m_strFilePath;
-
-#ifdef TEST_VALUE_FILE_PATH
-	CDataReader* m_pDataReader;
-#endif
 
 	// Cut View
 	CCutViewManager* m_pCutView;
@@ -59,6 +51,7 @@ private:
 	// Simulation
 	IAcquisitionDevice* m_pSimDevice;
 
+	RayScannerState m_prevState;
 	RayScannerState m_curState;
 
 	//Property
@@ -73,10 +66,13 @@ public:
 	RayError Start();
 	RayError Stop();
 	RayError RegisterCallback(FunctionPtr cb);
+	RayError ConnectDevices();
 	RayError Initialize();
+	RayError PreparePullback();
 	RayError PullbackScan(char *strFilePath);
 	RayError LoadCatheter();
 	RayError UnloadCatheter();
+	RayError StartReview(char* strFilePath);
 	RayError EndReview();
 	RayError MotorOnOff(bool mode);
 	RayError PlayPause();
@@ -107,17 +103,24 @@ private:
 	static UINT threadLoadCatheter(LPVOID param);
 	static UINT threadUnloadCatheter(LPVOID param);
 
-	// Imaging
+	// Imaging & Device
 	COCTImaging* createColorImaging(CMessageService*);
+	bool checkConnection();
+	int connectAcqDevice();
 	int initializeAcqDevice();
+	int connectRotaryJunction();
 	int initializeRotaryJunction();
 	void setMotorOnOff(bool on);
 	void updateCutView(int drawSamples);
+	void prepareSimulation(IDataManager* pDataManager);
+	void terminateSimulation();
 
 protected:
 	LRESULT OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgUpdateSaveRaw(WPARAM wParam, LPARAM lParam);
-	LRESULT OnMsgUpdateCutViewDone(WPARAM wParam, LPARAM lParam);
+	LRESULT OnMsgNotifySaveDone(WPARAM wParam, LPARAM lParam);
+	LRESULT OnMsgNotifyCutViewDone(WPARAM wParam, LPARAM lParam);
+	LRESULT OnMsgNotifyErrorOccured(WPARAM wParam, LPARAM lParam);
 };
 

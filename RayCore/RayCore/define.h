@@ -11,7 +11,10 @@ enum class RayError {
 	SystemRunning = -1000,
 	InvalidArgument,
 	WrongOCTScannerState,
-	NotPausedState
+	NotPausedState,
+	DeviceNotConnected,
+	InitializeFailed,
+	WrongFilePath
 };
 
 enum class RayProperty {
@@ -34,17 +37,18 @@ enum class RayViewMode {
 enum class RayCallbackRequest {
 	Unknown = 0,
 	State,
-	Progress
+	Progress,
+	Error
 };
 
 enum class RayScannerState {
 	None = 0,
 	Initializing,
-	InitializeFailed,
+	LiveView,
+	AutoCalibration,
 	Homing,
 	Ready,
 	LoadCatheter,
 	Scanning,
-	Review,
-	SaveDone
+	Review
 };
