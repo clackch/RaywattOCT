@@ -431,9 +431,6 @@ UINT COCTSystem::threadService(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CThread* pThread = pSystem->m_pThreadService;
 
-	bool dispCutView = false;
-	cv::namedWindow("LongCutView");
-	
 	while (pThread->isRun) {
 		std::tuple<int, WPARAM, LPARAM> popMsgThread = pSystem->popMessage();
 		int popMsg = std::get<0>(popMsgThread);
@@ -459,7 +456,6 @@ UINT COCTSystem::threadService(LPVOID param) {
 		case WM_NOTIFY_CUTVIEW_DONE:
 		{
 			pSystem->OnMsgNotifyCutViewDone(wParam, lParam);
-			dispCutView = true;
 			break;
 		}
 		case WM_NOTIFY_ERROR_OCCURED:
@@ -469,11 +465,6 @@ UINT COCTSystem::threadService(LPVOID param) {
 		case WM_PROCESS_OCT_DONE:
 		{
 			pSystem->OnMsgProcessOCTDone(wParam, lParam);
-			if (dispCutView) {
-				cv::Mat imgCutView = pSystem->m_pCutView->GetCutViewROI(512);
-				cv::imshow("LongCutView", imgCutView);
-				cv::waitKey(1);
-			}
 			break;
 		}
 		default:
