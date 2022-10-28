@@ -39,18 +39,33 @@ namespace RaywattApp.Services
 
             //SelectPatientList
             _query["SelectPatientList"] =
-                $"SELECT id, lastname, firstname, birthdate, rv_schema.fn_code('GEND', gender) gender" +
+                $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, rv_schema.fn_code('GEND', gender) gender" +
                         $", to_char(create_date,'YYYY-MM-DD HH24:MI:SS') create_date, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') update_date " +
                         $", rv_schema.fn_lastcase(id) last_case " +
                 $"FROM rv_schema.patient " +
                 $"WHERE id LIKE @id OR lastname LIKE @lastname OR firstname LIKE @firstname";
 
+            //SelectPatientListByCase
+            _query["SelectPatientListByCase"] =
+                $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, rv_schema.fn_code('GEND', gender) gender" +
+                        $", to_char(create_date,'YYYY-MM-DD HH24:MI:SS') create_date, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') update_date " +
+                        $", rv_schema.fn_lastcase(id) last_case " +
+                $"FROM rv_schema.patient p " +
+                $"WHERE (SELECT count(*) FROM rv_schema.patient_case WHERE patient_id = p.id) > 0 " +
+                $"ORDER BY id";
+
             //SelectPatient
             _query["SelectPatient"] = 
-                $"SELECT id, lastname, firstname, birthdate, rv_schema.fn_code('GEND', gender) gender" +
+                $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, rv_schema.fn_code('GEND', gender) gender" +
                         $", to_char(create_date,'YYYY-MM-DD HH24:MI:SS') create_date, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') update_date " +
                 $"FROM rv_schema.patient " +
                 $"WHERE id = @id ";
+
+            //SelectPatientByList
+            _query["SelectPatientByList"] =
+                $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, rv_schema.fn_code('GEND', gender) gender" +
+                        $", to_char(create_date,'YYYY-MM-DD HH24:MI:SS') create_date, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') update_date " +
+                $"FROM rv_schema.patient ";
 
             //SelectCodeList
             _query["SelectCodeList"] =
@@ -65,6 +80,17 @@ namespace RaywattApp.Services
                 $"WHERE patient_id = @id " +
                 $"GROUP BY key ";
 
+            //SelectPatientCaseListByDate - create_data 기준
+            _query["SelectPatientCaseListByDate"] =
+                $"SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name , physician_name, " +
+                        $"accession_number, accession_name, comment, " +
+                        $"rv_schema.fn_code('VESS', vessel) vessel, rv_schema.fn_code('PROC', procedure) procedure, " +
+                        $"thumbnail_no, still_image_yn, image, " +
+                        $"to_char(create_date,'YYYY-MM-DD HH24:MI:SS') create_date, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') update_date " +
+                $"FROM rv_schema.patient_case " +
+                $"WHERE patient_id = @id AND to_char(create_date, 'YYYY-MM-DD') = @date " +
+                $"ORDER BY create_date DESC";
+
             //SelectPatientCaseList - create_data 기준
             _query["SelectPatientCaseList"] =
                 $"SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name , physician_name, " +
@@ -73,7 +99,7 @@ namespace RaywattApp.Services
                         $"thumbnail_no, still_image_yn, image, " +
                         $"to_char(create_date,'YYYY-MM-DD HH24:MI:SS') create_date, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') update_date " +
                 $"FROM rv_schema.patient_case " +
-                $"WHERE patient_id = @id AND to_char(create_date, 'YYYY-MM-DD') = @date " +
+                $"WHERE patient_id = @id " +
                 $"ORDER BY create_date DESC";
 
             //SelectPhysicianList

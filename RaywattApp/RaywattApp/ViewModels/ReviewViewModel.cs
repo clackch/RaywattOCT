@@ -41,13 +41,13 @@ namespace RaywattApp.ViewModels
         private PatientCase _patientCase;
 
         [ObservableProperty]
-        private Dictionary<string, string> _vesselComboBox = new Dictionary<string, string>();
+        private Dictionary<string, string> _vesselComboBox;
 
         [ObservableProperty]
-        private Dictionary<string, string> _procedureComboBox = new Dictionary<string, string>();
+        private Dictionary<string, string> _procedureComboBox;
 
         [ObservableProperty]
-        private Dictionary<string, string> _physicianComboBox = new Dictionary<string, string>();
+        private Dictionary<string, string> _physicianComboBox;
 
         [ObservableProperty]
         private string _currentVessel;
@@ -149,6 +149,12 @@ namespace RaywattApp.ViewModels
 
             _sqlManager = sqlManager;
 
+            VesselComboBox = new Dictionary<string, string>();
+
+            ProcedureComboBox = new Dictionary<string, string>();
+
+            PhysicianComboBox = new Dictionary<string, string>();
+
             vesselOpened = false;
 
             RayCoreWrapper.RayRegisterImageCallback(
@@ -246,7 +252,7 @@ namespace RaywattApp.ViewModels
 
             if (selectedVessel.Key == "$OTH")
             {
-                WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "EditVessProcPopupControl", Type = (int)CommonDefinition.PopupType.Edit, PopupId = (int)CommonDefinition.EditList.Vessel, ParentObject = this, Parameter = vesselOther });
+                WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "EditVessProcPopupControl", Type = (int)CommonDefinition.PopupType.Edit, PopupId = (int)CommonDefinition.CallbackEdit.Vessel, ParentObject = this, Parameter = vesselOther });
             }
             else if(previousVesselKey == "$OTH")
             {
@@ -331,7 +337,7 @@ namespace RaywattApp.ViewModels
 
             if (PopupCallback != null)
             {
-                if (PopupCallback.PopupId == (int)CommonDefinition.EditList.Vessel)
+                if (PopupCallback.PopupId == (int)CommonDefinition.CallbackEdit.Vessel)
                 {
                     if (PopupCallback.PopupAnswer)
                     {
@@ -351,11 +357,11 @@ namespace RaywattApp.ViewModels
                     }
                         
                 }
-                else if(PopupCallback.PopupId == (int)CommonDefinition.EditList.Procedure)
+                else if(PopupCallback.PopupId == (int)CommonDefinition.CallbackEdit.Procedure)
                 {
 
                 }
-                else if(PopupCallback.PopupId == (int)CommonDefinition.EditList.Case)
+                else if(PopupCallback.PopupId == (int)CommonDefinition.CallbackEdit.Case)
                 {
                     if (PopupCallback.PopupAnswer)
                     {
@@ -409,7 +415,7 @@ namespace RaywattApp.ViewModels
             parameter["accessionNumber"] = PatientCase.AccessionNumber;
             parameter["comment"] = PatientCase.Comment;
 
-            WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "EditCasePopupControl", Type = (int)CommonDefinition.PopupType.Edit, PopupId = (int)CommonDefinition.EditList.Case, ParentObject = this, Parameter = parameter });
+            WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "EditCasePopupControl", Type = (int)CommonDefinition.PopupType.Edit, PopupId = (int)CommonDefinition.CallbackEdit.Case, ParentObject = this, Parameter = parameter });
         }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
