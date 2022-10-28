@@ -47,6 +47,46 @@ namespace RaywattApp.Services
             return _databaseService.GetDatas<Patient>(commandText, commandParameters);
         }
 
+        public IList<Patient> SelectPatientListByCase(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("SelectPatientListByCase");
+
+            string commandText;
+
+            if (sqlParameters == null)
+            {
+                commandText = SqlQuery.GetQuery("SelectPatientListByCase");
+            }
+            else
+            {
+                commandText = SqlQuery.GetQuery("SelectPatient");
+            }
+            
+
+            return _databaseService.GetDatas<Patient>(commandText, sqlParameters);
+        }
+
+        public IList<Patient> SelectPatientByList(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("SelectPatientByList");
+
+            string commandText;
+            
+            commandText = SqlQuery.GetQuery("SelectPatientByList");
+
+            List<string> ids = (List<string>)sqlParameters["ids"];
+            string commandTextExtra = "WHERE id IN (''";
+            for (int i=0; i<ids.Count; i++)
+            {
+                commandTextExtra += ", '" + ids[i] + "'";
+            }
+            commandTextExtra += ")";
+            
+            commandText = commandText + commandTextExtra;
+
+            return _databaseService.GetDatas<Patient>(commandText, sqlParameters);
+        }
+
         public int CountPatient(Dictionary<string, Object> sqlParameters)
         {
             _log.Debug("CountPatient");
@@ -94,12 +134,21 @@ namespace RaywattApp.Services
 
         public IList<PatientCaseByDate> PageSelectPatientCaseByDate(Dictionary<string, Object> sqlParameters, Dictionary<string, Object> sqlAdditionalCondition)
         {
-            _log.Debug("PageSelectPatientList");
+            _log.Debug("PageSelectPatientCaseByDate");
 
             string commandText = SqlQuery.GetQuery("SelectPatientCaseByDate");
             commandText += getAdditionalCondition(sqlAdditionalCondition);
 
             return _databaseService.GetDatas<PatientCaseByDate>(commandText, sqlParameters);
+        }
+
+        public IList<PatientCase> SelectPatientCaseListByDate(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("SelectPatientCaseListByDate");
+
+            string commandText = SqlQuery.GetQuery("SelectPatientCaseListByDate");
+
+            return _databaseService.GetDatas<PatientCase>(commandText, sqlParameters);
         }
 
         public IList<PatientCase> SelectPatientCaseList(Dictionary<string, Object> sqlParameters)

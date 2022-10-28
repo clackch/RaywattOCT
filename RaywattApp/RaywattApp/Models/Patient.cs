@@ -2,6 +2,7 @@
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Util;
 using System;
+using System.Collections.Generic;
 
 namespace RaywattApp.Models
 {
@@ -21,7 +22,6 @@ namespace RaywattApp.Models
                     _id = value;
                     OnPropertyChanged(nameof(Id));
                 }
-                    
             }
         }
 
@@ -59,6 +59,29 @@ namespace RaywattApp.Models
             }
         }
 
+        private string _alternateId;
+        public string AlternateId
+        {
+            get { return _alternateId; }
+            set
+            {
+                if (value == null)
+                    return;
+
+                if (value.Length <= Constants.MaxPatientId)
+                {
+                    if (!CommonUtil.ValidateId(value))
+                        return;
+
+                    _alternateId = value;
+                    OnPropertyChanged(nameof(AlternateId));
+                }
+            }
+        }
+
+        [ObservableProperty]
+        private string name;
+
         [ObservableProperty]
         private DateTime birthdate;
 
@@ -73,5 +96,8 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private string lastCase;
+
+        [ObservableProperty]
+        private IList<PatientCase> patientCaseList;
     }
 }
