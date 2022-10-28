@@ -115,7 +115,8 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Register<PopupMessage>(this, OnLayerPopupMessage);
 
             Patient = new Patient();
-            PatientCase = new PatientCase();
+
+            RaywattOCT.RayCoreWrapper.RayStartSystem();
         }
 
         private void OnNavigate(string pageUri)

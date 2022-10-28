@@ -12,7 +12,8 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
@@ -21,9 +22,22 @@
         </StackPanel>
 
         <StackPanel Grid.Row="1">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Height="10"/>
+                <Image Source="{Binding CrossSectionImage}" Width="720" Height="720" Stretch="Fill"/>
+                <StackPanel Height="10"/>
+                <Image Source="{Binding LongitudeImage}" Height="180" Stretch="Fill"/>
+            </StackPanel>
         </StackPanel>
 
-        <Grid Grid.Row="2">
+        <StackPanel Grid.Row="2" Orientation="Vertical" Background="LightGray">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="◀|" Command="{Binding CmdPlayback}" CommandParameter="prev" Margin="10,10,10,10"/>
+                <Button Content="{Binding PlayPauseState}" Command="{Binding CmdPlayback}" CommandParameter="play" Width="70" Margin="10,10,10,10"/>
+                <Button Content="|▶" Command="{Binding CmdPlayback}" CommandParameter="next" Margin="10,10,10,10"/>
+            </StackPanel>
+        </StackPanel>
+        <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition Width="100"/>
