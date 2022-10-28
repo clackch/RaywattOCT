@@ -637,7 +637,7 @@ namespace RaywattApp.ViewModels
 
                 if (isRenameFolder)
                 {
-                    if (SelectedDir.Name.ToLower().Equals(CreateRenameFolderName.Trim().ToLower()))
+                    if (SelectedDir.Name.Equals(CreateRenameFolderName.Trim()))
                     {
                         WeakReferenceMessenger.Default.Send(new PopupMessage(false) { Type = (int)CommonDefinition.PopupType.Extra });
                         return;

@@ -87,10 +87,13 @@ namespace RaywattApp.Common.Util
 
         public string RenameDirectory(string originPath, string orginName, string name)
         {
-            string newPath = originPath.Substring(0, originPath.ToLower().LastIndexOf(orginName.ToLower()) - 1) + "\\" + name;
+            string newPath = originPath.Substring(0, originPath.LastIndexOf(orginName) - 1) + "\\" + name;
             
             if (Directory.Exists(newPath))
-                return "D";
+            {
+                if(!name.ToLower().Equals(orginName.ToLower()))
+                    return "D";
+            }
 
             Directory.Move(originPath, newPath);
 
