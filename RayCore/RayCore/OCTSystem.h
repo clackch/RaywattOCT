@@ -5,6 +5,7 @@
 #include <vector>
 #include <mutex>
 #include <tuple>
+#include <opencv2/opencv.hpp>
 
 #define WM_UPDATE_SCANNER_STATE		(WM_USER + 0x1001)
 #define WM_UPDATE_SAVE_RAW			(WM_USER + 0x1002)
@@ -58,6 +59,7 @@ private:
 	double m_fBrightness;
 	double m_fContrast;
 	double m_fDegree;
+	cv::Scalar m_backgroundColor;
 
 public:
 	COCTSystem();
@@ -89,6 +91,8 @@ public:
 	RayError SetContrast(double value);
 	double GetDegree();
 	RayError SetDegree(double value);
+	UINT GetBackgroundColor();
+	RayError SetBackgroundColor(UINT value);
 	bool GetMotorOnOff();
 	bool GetIsPaused();
 

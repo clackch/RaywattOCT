@@ -24,6 +24,7 @@ namespace RaywattOCT.ViewModel
         private const string ICON_RESOURCE_PLAY_OV = "/res/icon/play_ov.png";
         private const string ICON_RESOURCE_PAUSE = "/res/icon/pause.png";
         private const string ICON_RESOURCE_PAUSE_OV = "/res/icon/pause_ov.png";
+        private const int IMAGE_BACKGROUND_COLOR = 0x161518;
 
         private const string TEST_FILE_PATH = "C:\\DataSave\\test\\0710_145631_6028rpm_20mms_2000Aline_ch1.bin";
 
@@ -361,6 +362,14 @@ namespace RaywattOCT.ViewModel
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(5);
             timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
             timerUpdateImage.Start();
+
+            RayCoreWrapper.RayStartSystem();
+            RayCoreWrapper.RayRegisterCallback(Marshal.GetFunctionPointerForDelegate(CBFunction));
+            RayCoreWrapper.RayRegisterImageCallback(
+                Marshal.GetFunctionPointerForDelegate(CBCrossSection),
+                Marshal.GetFunctionPointerForDelegate(CBLongitude));
+
+            RayCoreWrapper.RaySetProperty(RayCoreWrapper.Property.BackgroundColor, IMAGE_BACKGROUND_COLOR);
         }
 
         private void timerUpdateTime(object sender, EventArgs e)
@@ -404,12 +413,6 @@ namespace RaywattOCT.ViewModel
         }
         private void Initialize()
         {
-            RayCoreWrapper.RayStartSystem();
-            RayCoreWrapper.RayRegisterCallback(Marshal.GetFunctionPointerForDelegate(CBFunction));
-            RayCoreWrapper.RayRegisterImageCallback(
-                Marshal.GetFunctionPointerForDelegate(CBCrossSection),
-                Marshal.GetFunctionPointerForDelegate(CBLongitude));
-
             RayCoreWrapper.RayConnectDevices();
             RayCoreWrapper.RayInitialize();
 
@@ -420,12 +423,6 @@ namespace RaywattOCT.ViewModel
         }
         private void Admin()
         {
-            RayCoreWrapper.RayStartSystem();
-            RayCoreWrapper.RayRegisterCallback(Marshal.GetFunctionPointerForDelegate(CBFunction));
-            RayCoreWrapper.RayRegisterImageCallback(
-                Marshal.GetFunctionPointerForDelegate(CBCrossSection),
-                Marshal.GetFunctionPointerForDelegate(CBLongitude));
-
             RayCoreWrapper.RayStartReview(TEST_FILE_PATH);
         }
         private void Exit()
