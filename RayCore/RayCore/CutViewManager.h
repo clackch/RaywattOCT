@@ -11,7 +11,7 @@ public:
 	CCutViewManager();
 	virtual ~CCutViewManager();
 
-	void Initialize(int nNumOfSamples);
+	void Initialize(int nNumOfSamples, cv::Scalar backgroundColor);
 	void GenerateCutView(double degree);
 	void GenerateCutView(int nFrameIndex, double degree);
 	void AddRecord(unsigned short* pBuffer, COCTImaging* pImaging, int nFrameIndex);

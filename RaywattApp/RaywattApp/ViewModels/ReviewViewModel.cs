@@ -12,6 +12,13 @@ using System.Windows.Input;
 using System.Windows.Navigation;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using OpenCvSharp;
+using System.Windows.Media.Imaging;
+using RaywattOCT;
+using RaywattApp.Common.Util;
+using System.Windows.Threading;
+using static RaywattOCT.RayCoreWrapper;
+using System.Runtime.InteropServices;
 
 namespace RaywattApp.ViewModels
 {
@@ -20,6 +27,9 @@ namespace RaywattApp.ViewModels
         private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewViewModel));
 
         private readonly SqlManager _sqlManager;
+
+        private static readonly string PLAY = "PLAY";
+        private static readonly string PAUSE = "PAUSE";
 
         [ObservableProperty]
         private PrevStatus _prevStatus;
@@ -60,6 +70,31 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private string _currentPhysician;
 
+        [ObservableProperty]
+        private string _playPauseState = PAUSE;
+
+        private BitmapSource crossSectionImage;
+        public BitmapSource CrossSectionImage
+        {
+            get { return crossSectionImage; }
+            set { crossSectionImage = value; OnPropertyChanged(nameof(CrossSectionImage)); }
+        }
+        private Mat imgCrossSection;
+
+        private RayCoreWrapper.FrameInfo crossSectionFrameInfo;
+        private RayCoreWrapper.FrameInfo longitudeFrameInfo;
+
+        private BitmapSource longitudeImage = null;
+        public BitmapSource LongitudeImage
+        {
+            get { return longitudeImage; }
+            set { longitudeImage = value; OnPropertyChanged(nameof(LongitudeImage)); }
+        }
+        private Mat imgLongitude;
+
+        private DispatcherTimer timer = new DispatcherTimer();
+        private DispatcherTimer timerUpdateImage = new DispatcherTimer();
+
         private ICommand _endReviewCommand;
         public ICommand EndReviewCommand
         {
@@ -90,6 +125,22 @@ namespace RaywattApp.ViewModels
             get { return this._vesselClosedCommand ?? (this._vesselClosedCommand = new RelayCommand<KeyValuePair<string, string>>(CloseVessel)); }
         }
 
+        private ICommand _cmdPlayback;
+        public ICommand CmdPlayback
+        { 
+            get { return this._cmdPlayback ?? (this._cmdPlayback = new RelayCommand<object>(Playback)); }
+        }
+
+        // to avoid garbage collection
+        private RayCoreWrapper.CallbackFunction cbFunction;
+        public RayCoreWrapper.CallbackFunction CBFunction => (this.cbFunction) ?? (this.cbFunction = new RayCoreWrapper.CallbackFunction(OnMsgCallback));
+
+        private RayCoreWrapper.CallbackFunctionWithImage cbCrossSection;
+        public RayCoreWrapper.CallbackFunctionWithImage CBCrossSection => (this.cbCrossSection) ?? (this.cbCrossSection = new RayCoreWrapper.CallbackFunctionWithImage(OnRecvCrossSection));
+
+        private RayCoreWrapper.CallbackFunctionWithImage cbLongitude;
+        public RayCoreWrapper.CallbackFunctionWithImage CBLongitude => (this.cbLongitude) ?? (this.cbLongitude = new RayCoreWrapper.CallbackFunctionWithImage(OnRecvLongitude));
+
         public ReviewViewModel(SqlManager sqlManager)
         {
             _log.Debug("ReviewViewModel");
@@ -105,6 +156,10 @@ namespace RaywattApp.ViewModels
             PhysicianComboBox = new Dictionary<string, string>();
 
             vesselOpened = false;
+
+            RayCoreWrapper.RayRegisterImageCallback(
+                Marshal.GetFunctionPointerForDelegate(CBCrossSection),
+                Marshal.GetFunctionPointerForDelegate(CBLongitude));
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -121,12 +176,37 @@ namespace RaywattApp.ViewModels
                 PrevStatus = (PrevStatus)data["prevStatus"];
 
                 SetInit();
+
+                RayCoreWrapper.RaySetProperty(RayCoreWrapper.Property.BackgroundColor, 0xFFFFFF);
+                RayCoreWrapper.RayStartReview(PatientCase.Image);
             }
+
+            timerUpdateImage.Interval = TimeSpan.FromMilliseconds(5);
+            timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
+            timerUpdateImage.Start();
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
             _log.Debug("OnNavigating");
+            RayCoreWrapper.RayEndReview();
+        }
+
+        private void OnMsgCallback(int request, int response)
+        {
+            // To-Do : Handle State, Error event
+        }
+        private void OnRecvCrossSection(IntPtr data, int width, int height, int ch, int frameInfo)
+        {
+            Mat imgRecv = CommonUtil.byteMemoryToCvMat(data, width, height, ch);
+            imgCrossSection = imgRecv.Clone();
+            crossSectionFrameInfo = new RayCoreWrapper.FrameInfo(frameInfo);
+        }
+        private void OnRecvLongitude(IntPtr data, int width, int height, int ch, int frameInfo)
+        {
+            Mat imgRecv = CommonUtil.byteMemoryToCvMat(data, width, height, ch);
+            imgLongitude = imgRecv.Clone();
+            longitudeFrameInfo = new RayCoreWrapper.FrameInfo(frameInfo);
         }
 
         private void SetInit()
@@ -208,6 +288,29 @@ namespace RaywattApp.ViewModels
                 vesselOpened = true;
                 CurrentVessel = "$OTH";
                 vesselOpened = false;
+            }
+        }
+
+        private void Playback(object param)
+        {
+            string action = (string)param;
+            RayCoreWrapper.RayError result = RayCoreWrapper.RayError.OK;
+
+            if (action.ToLower().Equals("prev"))
+            {
+                result = (RayCoreWrapper.RayError)RayCoreWrapper.RayPrevFrame();
+            }
+            else if (action.ToLower().Equals("next"))
+            {
+                result = (RayCoreWrapper.RayError)RayCoreWrapper.RayNextFrame();
+            }
+            else if (action.ToLower().Equals("play"))
+            {
+                result = (RayCoreWrapper.RayError)RayCoreWrapper.RayPlayPause();
+                if (result == RayCoreWrapper.RayError.OK)
+                {
+                    updatePlayPauseState();
+                }
             }
         }
 
@@ -313,6 +416,35 @@ namespace RaywattApp.ViewModels
             parameter["comment"] = PatientCase.Comment;
 
             WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "EditCasePopupControl", Type = (int)CommonDefinition.PopupType.Edit, PopupId = (int)CommonDefinition.CallbackEdit.Case, ParentObject = this, Parameter = parameter });
+        }
+
+        private void timerFuncUpdateImage(object sender, EventArgs e)
+        {
+            if (imgCrossSection != null)
+            {
+                CrossSectionImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgCrossSection);
+            }
+            if (imgLongitude != null)
+            {
+                RayCoreWrapper.RayScannerState state = (RayCoreWrapper.RayScannerState)RayCoreWrapper.RayGetProperty(RayCoreWrapper.Property.CurrentState);
+
+                if (state == RayCoreWrapper.RayScannerState.Review)
+                {
+                    LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgLongitude);
+                }
+            }
+        }
+        private void updatePlayPauseState()
+        {
+            double pauseState = RayCoreWrapper.RayGetProperty(RayCoreWrapper.Property.IsPaused);
+
+            if (pauseState != 0)
+            {
+                PlayPauseState = PLAY;
+            }
+            else {
+                PlayPauseState = PAUSE;
+            }
         }
     }
 }

@@ -12,7 +12,7 @@ CCutViewManager::~CCutViewManager() {
 	m_imgCutView.release();
 }
 
-void CCutViewManager::Initialize(int nNumOfSamples) {
+void CCutViewManager::Initialize(int nNumOfSamples, cv::Scalar backgroundColor) {
 	for (int i = 0; i < m_vRecords.size(); i++) {
 		m_vRecords.at(i).release();
 	}
@@ -20,7 +20,7 @@ void CCutViewManager::Initialize(int nNumOfSamples) {
 
 	m_imgCutView.release();
 	m_imgCutView.create(1024, nNumOfSamples, CV_8UC3);
-	m_imgCutView.setTo(cv::Scalar(0x18, 0x15, 0x16));
+	m_imgCutView.setTo(backgroundColor);
 }
 void CCutViewManager::GenerateCutView(double degree) {
 

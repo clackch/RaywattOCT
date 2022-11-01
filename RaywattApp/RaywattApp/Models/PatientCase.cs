@@ -65,7 +65,7 @@ namespace RaywattApp.Models
         private string stillImageYn;
 
         [ObservableProperty]
-        private uint image;
+        private string image;
 
         [ObservableProperty]
         private string createDate;

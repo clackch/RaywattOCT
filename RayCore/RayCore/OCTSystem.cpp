@@ -68,9 +68,11 @@ RayError COCTSystem::Start() {
 	CUtility::StartThread(threadService, m_pThreadService, this);
 
 	m_pImagingRealtime = createColorImaging(this);
+	m_pImagingRealtime->SetBackgroundColor(m_backgroundColor);
 	m_pImagingRealtime->Start();
 
 	m_pImagingSimulate = createColorImaging(this);
+	m_pImagingSimulate->SetBackgroundColor(m_backgroundColor);
 	m_pImagingSimulate->Start();
 
 	m_pCutView = new CCutViewManager();
@@ -409,6 +411,40 @@ RayError COCTSystem::SetDegree(double value) {
 }
 
 /*
+* GetDegree
+*/
+UINT COCTSystem::GetBackgroundColor() {
+	UINT nValue = 0x00;
+
+	UINT b = m_backgroundColor[0];
+	UINT g = m_backgroundColor[1];
+	UINT r = m_backgroundColor[2];
+
+	nValue = (b & 0xff);
+	nValue |= ((g & 0xff) << 8);
+	nValue |= ((r & 0xff) << 16);
+
+	return nValue;
+}
+
+/*
+* GetDegree
+*/
+RayError COCTSystem::SetBackgroundColor(UINT value) {
+	cv::Scalar color;
+	color[0] = 0xff & value;
+	color[1] = 0xff & (value >> 8);
+	color[2] = 0xff & (value >> 16);
+
+	m_backgroundColor = color;
+
+	m_pImagingRealtime->SetBackgroundColor(m_backgroundColor);
+	m_pImagingSimulate->SetBackgroundColor(m_backgroundColor);
+
+	return RayError::OK;
+}
+
+/*
 * GetMotorOnOff
 */
 bool COCTSystem::GetMotorOnOff()
@@ -461,6 +497,7 @@ UINT COCTSystem::threadService(LPVOID param) {
 		case WM_NOTIFY_ERROR_OCCURED:
 		{
 			pSystem->OnMsgNotifyErrorOccured(wParam, lParam);
+			break;
 		}
 		case WM_PROCESS_OCT_DONE:
 		{
@@ -639,7 +676,7 @@ UINT COCTSystem::threadUpdateCutView(LPVOID param) {
 	// prepare imaging
 	COCTImaging* pImaging = pSystem->createColorImaging(NULL);
 
-	pCutView->Initialize(nNumOfSamples);
+	pCutView->Initialize(nNumOfSamples, pSystem->m_backgroundColor);
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadUpdateCutView->isRun; nFrame++) {
 		unsigned short* pBuffer = pDataManager->GetSample(nFrame);
 
@@ -936,7 +973,7 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 	m_prevState = m_curState;
 	m_curState = (RayScannerState)wParam;
 
-	m_callback((int)RayCallbackRequest::State, (int)m_curState);
+	if(m_callback != nullptr) m_callback((int)RayCallbackRequest::State, (int)m_curState);
 
 	switch (m_curState) {
 	case RayScannerState::None:

@@ -23,6 +23,7 @@ namespace RaywattOCT
             CurrentState = 1,
             Brightness,
             Contrast,
+            BackgroundColor,
             Degree,
             MotorOnOff,
             IsPaused,
