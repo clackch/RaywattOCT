@@ -51,6 +51,7 @@ CRaywattLabDlg::CRaywattLabDlg(CWnd* pParent /*=nullptr*/)
 
 	m_strCalibPath = _T("");
 	m_nCurCalibIndex = 0;
+	m_pThreadPullback = nullptr;
 	m_strCurCalibration = _T(".\\CALIBRATION.dat");
 }
 
@@ -272,6 +273,54 @@ UINT CRaywattLabDlg::threadSaveCalibration(LPVOID param) {
 
 	return NOERROR;
 }
+UINT CRaywattLabDlg::threadPullback(LPVOID param) {
+	CRaywattLabDlg* pDlg = (CRaywattLabDlg*)param;
+	CConfiguration& config = CConfiguration::GetInstance();
+	CZaberController* pZaber = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
+
+	if (pZaber->IsOpen()) {
+		pZaber->SetSpeed(config.zaber.pullbackSpeed);
+
+		// Start Recording OCT
+		pDlg->m_pDataWriter->StartRecording();
+
+		// Pullback Linear Stage
+		pZaber->MoveRelative(config.zaber.pullbackDistance * -1);
+		while (pDlg->m_pThreadPullback->isRun) {
+			if (pZaber->GetZaberStatus()) {
+				break;
+			}
+			else {
+				Sleep(DELAY_FOR_STOP_THREAD);
+			}
+		}
+
+		// Stop Recording OCT
+		pDlg->m_pDataWriter->StopRecording();
+
+		CString strPrefix = _T("");
+		strPrefix.Format(_T("%dalines_%drpm_%dmm_%dmms"), config.nBScan, config.motor.velocity, config.zaber.pullbackDistance, config.zaber.pullbackSpeed);
+		CString strFileName = pDlg->generateFileName(pDlg->m_strPatientPath, _T(".bin"), strPrefix);
+
+		CDataWriter* pDataManager = pDlg->m_pDataWriter;
+		const int nNumOfSamples = pDataManager->GetNumOfSamples();
+
+		pDataManager->StartSave(strFileName.GetBuffer());
+		for (int nFrame = 0; nFrame < nNumOfSamples && pDlg->m_pThreadPullback->isRun; nFrame++) {
+			pDataManager->WriteFrame(nFrame);
+		}
+		pDataManager->StopSave();
+	}
+
+	pDlg->PostMessage(WM_PULLBACK_DONE);
+
+	// wait for StopThread
+	while (pDlg->m_pThreadPullback->isRun) {
+		Sleep(DELAY_FOR_STOP_THREAD);
+	}
+
+	return NOERROR;
+}
 
 
 BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
@@ -282,6 +331,7 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_MESSAGE(WM_PROCESS_OCT_DONE, &CRaywattLabDlg::OnMsgProcessOCTDone)
 	ON_MESSAGE(WM_SAVE_CALIBRATION_FRAME, &CRaywattLabDlg::OnMsgSaveCalibrationFrame)
 	ON_MESSAGE(WM_SAVE_CALIBRATION_DONE, &CRaywattLabDlg::OnMsgSaveCalibrationDone)
+	ON_MESSAGE(WM_PULLBACK_DONE, &CRaywattLabDlg::OnMsgPullbackDone)
 	ON_BN_CLICKED(IDC_BUTTON_OPEN_DATA_FOLDER, &CRaywattLabDlg::OnBnClickedButtonOpenDataFolder)
 	ON_BN_CLICKED(IDC_BUTTON_LOAD_SELECTED_DATA, &CRaywattLabDlg::OnBnClickedButtonLoadSelectedData)
 	ON_BN_CLICKED(IDC_BUTTON_PLAY_LOADED_DATA, &CRaywattLabDlg::OnBnClickedButtonPlayLoadedData)
@@ -306,6 +356,7 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_MEASURE, &CRaywattLabDlg::OnBnClickedButtonMeasure)
 	ON_BN_CLICKED(IDC_CHECK_INIT_MOTOR, &CRaywattLabDlg::OnBnClickedCheckInitMotor)
 	ON_BN_CLICKED(IDC_CHECK_INIT_STAGE, &CRaywattLabDlg::OnBnClickedCheckInitStage)
+	ON_BN_CLICKED(IDC_BUTTON_PULLBACK, &CRaywattLabDlg::OnBnClickedButtonPullback)
 END_MESSAGE_MAP()
 
 LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
@@ -371,6 +422,13 @@ LRESULT CRaywattLabDlg::OnMsgSaveCalibrationDone(WPARAM wParam, LPARAM lParam) {
 
 	return NOERROR;
 }
+LRESULT CRaywattLabDlg::OnMsgPullbackDone(WPARAM wParam, LPARAM lParam) {
+	CUtility::StopThread(m_pThreadPullback);
+	GetDlgItem(IDC_BUTTON_PULLBACK)->EnableWindow(TRUE);
+	updatePatientDataList();
+
+	return NOERROR;
+}
 
 
 
@@ -429,14 +487,19 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	m_sliderContrast.SetRange(0, 100);
 	m_sliderContrast.SetPos(contrast);
 
+	int goodClockStart = 0;
+	int goodClockEnd = config.nAScan;
+
 	m_pImagingRealtime = new CLabImaging(this);
 	m_pImagingRealtime->Initialize(m_strCurCalibration, ".\\BACKGROUND.bin");
 	m_pImagingRealtime->SetColor(m_chkImageHotColor);
+	m_pImagingRealtime->SetGoodClockRange(goodClockStart, goodClockEnd);
 	m_pImagingRealtime->Start();
 
 	m_pImagingSimulate = new CLabImaging(this);
 	m_pImagingSimulate->Initialize(m_strCurCalibration, ".\\BACKGROUND.bin");
 	m_pImagingSimulate->SetColor(m_chkImageHotColor);
+	m_pImagingRealtime->SetGoodClockRange(goodClockStart, goodClockEnd);
 	m_pImagingSimulate->Start();
 
 	m_pDataWriter = new CDataWriter();
@@ -522,6 +585,7 @@ void CRaywattLabDlg::OnDestroy() {
 		m_pDataWriter->StopRecording();
 	}
 	CUtility::StopThread(m_pThreadCalibration);
+	CUtility::StopThread(m_pThreadPullback);
 	CUtility::StopThread(m_pThreadService);
 
 	// free memories
@@ -1057,4 +1121,11 @@ void CRaywattLabDlg::OnBnClickedCheckInitMotor()
 void CRaywattLabDlg::OnBnClickedCheckInitStage()
 {
 	UpdateData(TRUE);
+}
+
+
+void CRaywattLabDlg::OnBnClickedButtonPullback()
+{
+	GetDlgItem(IDC_BUTTON_PULLBACK)->EnableWindow(FALSE);
+	CUtility::StartThread(threadPullback, m_pThreadPullback, this);
 }

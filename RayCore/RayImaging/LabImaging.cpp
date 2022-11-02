@@ -32,6 +32,7 @@ void CLabImaging::Initialize(tstring calibFile, const char* strBgFile) {
 	COCTImaging::Initialize(calibFile);
 
 	CConfiguration& config = CConfiguration::GetInstance();
+	const int nAScan = config.nAScan;
 	const int nBScan = config.nBScan;
 	const int nBufferSize = config.nBufferSize;
 	const int nFFTLength = config.nFFTLength;
@@ -63,6 +64,9 @@ void CLabImaging::Initialize(tstring calibFile, const char* strBgFile) {
 	scopeFFTData = new USHORT[nOutputLength * 2];
 
 	imageRectangle.create(nOutputLength, nBScan, CV_8UC3);
+
+	goodClockStart = 0;
+	goodClockEnd = nAScan;
 }
 void CLabImaging::Process(USHORT* fringes) {
 	CConfiguration& config = CConfiguration::GetInstance();
@@ -80,6 +84,8 @@ void CLabImaging::Process(USHORT* fringes) {
 
 		hasNewCalibration = false;
 	}
+
+	cropSignalData(fringes, goodClockStart, goodClockEnd);
 
 	// copy first line to display scope
 	ippsCopy_16s((Ipp16s*)fringes, (Ipp16s*)scopeData, nScopeLength);
@@ -140,4 +146,16 @@ void CLabImaging::generateScopeData(Ipp32f* output, Ipp16u* scope) {
 	ippsSubC_32f_I(calibration->lowLevel, temp, nOutputLength);
 	ippsMulC_32f_I(65535 / (calibration->highLevel), temp, nOutputLength);
 	ippsConvert_32f16u_Sfs(temp, scope, nOutputLength, ippRndNear, 0);
+}
+
+void CLabImaging::cropSignalData(USHORT* fringes, int start, int end) {
+	CConfiguration& config = CConfiguration::GetInstance();
+	const int nAScan = config.nAScan;
+	const int nBScan = config.nBScan;
+
+	for (int i = 0; i < nBScan; i++) {
+		USHORT* buffer = fringes + i * nAScan;
+		memset(buffer, 0x00, sizeof(USHORT) * start);
+		memset(buffer + end - 1, 0x00, sizeof(USHORT) * (nAScan - end));
+	}
 }

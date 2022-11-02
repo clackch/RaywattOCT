@@ -11,6 +11,7 @@
 
 #define WM_SAVE_CALIBRATION_FRAME		(WM_USER + 0x2001)
 #define WM_SAVE_CALIBRATION_DONE		(WM_USER + 0x2002)
+#define WM_PULLBACK_DONE				(WM_USER + 0x2003)
 
 class CLabImaging;
 class CDataWriter;
@@ -81,6 +82,9 @@ private:
 	int m_nCurCalibIndex;
 	tstring m_strCurCalibration;
 
+	// Pullback
+	CThread* m_pThreadPullback;
+
 // 생성입니다.
 public:
 	CRaywattLabDlg(CWnd* pParent = nullptr);	// 표준 생성자입니다.
@@ -107,6 +111,7 @@ private:
 	*/
 	static UINT threadService(LPVOID param);
 	static UINT threadSaveCalibration(LPVOID param);
+	static UINT threadPullback(LPVOID param);
 
 // 구현입니다.
 protected:
@@ -122,6 +127,7 @@ protected:
 	LRESULT OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgSaveCalibrationFrame(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgSaveCalibrationDone(WPARAM wParam, LPARAM lParam);
+	LRESULT OnMsgPullbackDone(WPARAM wParam, LPARAM lParam);
 public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	afx_msg void OnBnClickedButtonAdminInitialize();
@@ -148,4 +154,5 @@ public:
 	afx_msg void OnBnClickedButtonMeasure();
 	afx_msg void OnBnClickedCheckInitMotor();
 	afx_msg void OnBnClickedCheckInitStage();
+	afx_msg void OnBnClickedButtonPullback();
 };
