@@ -150,8 +150,8 @@
   <data name="Birth Date" xml:space="preserve">
     <value>Birth Date</value>
   </data>
-  <data name="Browser for Folder" xml:space="preserve">
-    <value>Browser for Folder</value>
+  <data name="Browse for Folder" xml:space="preserve">
+    <value>Browse for Folder</value>
   </data>
   <data name="bytes" xml:space="preserve">
     <value>bytes</value>
@@ -266,6 +266,9 @@
   </data>
   <data name="Information" xml:space="preserve">
     <value>Information</value>
+  </data>
+  <data name="Input Password" xml:space="preserve">
+    <value>Input Password</value>
   </data>
   <data name="ko-KR" xml:space="preserve">
     <value>Korean</value>

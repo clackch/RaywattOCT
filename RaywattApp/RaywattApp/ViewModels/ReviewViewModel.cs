@@ -11,14 +11,14 @@ using System;
 using System.Windows.Input;
 using System.Windows.Navigation;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using OpenCvSharp;
 using System.Windows.Media.Imaging;
 using RaywattOCT;
 using RaywattApp.Common.Util;
 using System.Windows.Threading;
-using static RaywattOCT.RayCoreWrapper;
 using System.Runtime.InteropServices;
+using RaywattApp.Common.Dialog;
+using RaywattApp.Views.Dialog;
 
 namespace RaywattApp.ViewModels
 {
@@ -27,6 +27,8 @@ namespace RaywattApp.ViewModels
         private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewViewModel));
 
         private readonly SqlManager _sqlManager;
+
+        private IDialogService _dialogService;
 
         private static readonly string PLAY = "PLAY";
         private static readonly string PAUSE = "PAUSE";
@@ -57,6 +59,8 @@ namespace RaywattApp.ViewModels
         private string vesselOther;
 
         private bool vesselOpened;
+
+        private bool vesselDialogOpened;
 
         [ObservableProperty]
         private string _currentProcedure;
@@ -141,13 +145,14 @@ namespace RaywattApp.ViewModels
         private RayCoreWrapper.CallbackFunctionWithImage cbLongitude;
         public RayCoreWrapper.CallbackFunctionWithImage CBLongitude => (this.cbLongitude) ?? (this.cbLongitude = new RayCoreWrapper.CallbackFunctionWithImage(OnRecvLongitude));
 
-        public ReviewViewModel(SqlManager sqlManager)
+        public ReviewViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
             _log.Debug("ReviewViewModel");
 
             CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.ReviewPage;
 
             _sqlManager = sqlManager;
+            _dialogService = dialogService;
 
             VesselComboBox = new Dictionary<string, string>();
 
@@ -178,7 +183,8 @@ namespace RaywattApp.ViewModels
                 SetInit();
 
                 RayCoreWrapper.RaySetProperty(RayCoreWrapper.Property.BackgroundColor, 0xFFFFFF);
-                RayCoreWrapper.RayStartReview(PatientCase.Image);
+                if(PatientCase.Image != null)//TEST용
+                    RayCoreWrapper.RayStartReview(PatientCase.Image);
             }
 
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(5);
@@ -247,12 +253,37 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ChangedVessel");
 
-            if (vesselOpened)
+            if (vesselOpened || vesselDialogOpened)
                 return;
 
             if (selectedVessel.Key == "$OTH")
             {
-                WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "EditVessProcPopupControl", Type = (int)CommonDefinition.PopupType.Edit, PopupId = (int)CommonDefinition.CallbackEdit.Vessel, ParentObject = this, Parameter = vesselOther });
+                vesselDialogOpened = true;
+
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["title"] = _l10n["Vessel"];
+                parameter["other"] = vesselOther;
+                var result = _dialogService.OpenDialog(new EditOctInfoDialogControl(), parameter);
+
+                if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
+                {
+                    Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
+                    vesselOther = data["other"].ToString();
+
+                    if (vesselOther != "")
+                    {
+                        VesselComboBox = GetVesselList(vesselOther);
+                        CurrentVessel = "$OTH";
+                        previousVesselKey = CurrentVessel;
+                    }
+                }
+                else
+                {
+                    VesselComboBox = GetVesselList();
+                    CurrentVessel = previousVesselKey;
+                }
+
+                vesselDialogOpened = false;
             }
             else if(previousVesselKey == "$OTH")
             {
@@ -331,49 +362,6 @@ namespace RaywattApp.ViewModels
             return vesselComboBox;
         }
 
-        public override void CallbackPopup()
-        {
-            _log.Debug("CallbackPopup : " + PopupCallback.PopupId + "/" + PopupCallback.PopupAnswer);
-
-            if (PopupCallback != null)
-            {
-                if (PopupCallback.PopupId == (int)CommonDefinition.CallbackEdit.Vessel)
-                {
-                    if (PopupCallback.PopupAnswer)
-                    {
-                        vesselOther = PopupCallback.PopupParameter.ToString();
-
-                        if(vesselOther != "")
-                        {
-                            VesselComboBox = GetVesselList(vesselOther);
-                            CurrentVessel = "$OTH";
-                            previousVesselKey = CurrentVessel;
-                        }
-                    }
-                    else
-                    {
-                        VesselComboBox = GetVesselList();
-                        CurrentVessel = previousVesselKey;
-                    }
-                        
-                }
-                else if(PopupCallback.PopupId == (int)CommonDefinition.CallbackEdit.Procedure)
-                {
-
-                }
-                else if(PopupCallback.PopupId == (int)CommonDefinition.CallbackEdit.Case)
-                {
-                    if (PopupCallback.PopupAnswer)
-                    {
-                        Dictionary<string, Object> data = (Dictionary<string, Object>)PopupCallback.PopupParameter;
-                        PatientCase.PhysicianName = data["physicianName"].ToString();
-                        PatientCase.AccessionNumber = data["accessionNumber"].ToString();
-                        PatientCase.Comment = data["comment"].ToString();
-                    }
-                }
-            }
-        }
-
         private void EndReview()
         {
             _log.Debug("EndReview");
@@ -414,8 +402,15 @@ namespace RaywattApp.ViewModels
             parameter["physicianName"] = PatientCase.PhysicianName;
             parameter["accessionNumber"] = PatientCase.AccessionNumber;
             parameter["comment"] = PatientCase.Comment;
+            var result = _dialogService.OpenDialog(new EditCaseInfoDialogControl(), parameter);
 
-            WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "EditCasePopupControl", Type = (int)CommonDefinition.PopupType.Edit, PopupId = (int)CommonDefinition.CallbackEdit.Case, ParentObject = this, Parameter = parameter });
+            if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
+            {
+                Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
+                PatientCase.PhysicianName = data["physicianName"].ToString();
+                PatientCase.AccessionNumber = data["accessionNumber"].ToString();
+                PatientCase.Comment = data["comment"].ToString();
+            }
         }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)

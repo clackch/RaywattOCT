@@ -1,0 +1,16 @@
+﻿namespace RaywattApp.Models
+{
+    public class DialogResults
+    {
+        public enum Answer
+        {
+            Undefined,
+            Yes,
+            No
+        }
+
+        public Answer DialogAnswer { get; set; }
+
+        public object? DialogReturn;
+    }
+}

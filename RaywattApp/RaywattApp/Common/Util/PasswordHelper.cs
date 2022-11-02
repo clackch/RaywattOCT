@@ -1,27 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using System.Windows;
 
 namespace RaywattApp.Common.Util
 {
     public static class PasswordHelper
     {
-        public static readonly DependencyProperty PasswordProperty =
-            DependencyProperty.RegisterAttached("Password",
-            typeof(string), typeof(PasswordHelper),
-            new FrameworkPropertyMetadata(string.Empty, OnPasswordPropertyChanged));
+        public static readonly DependencyProperty PasswordProperty = DependencyProperty.RegisterAttached("Password", typeof(string), typeof(PasswordHelper), new FrameworkPropertyMetadata(string.Empty, OnPasswordPropertyChanged));
 
-        public static readonly DependencyProperty AttachProperty =
-            DependencyProperty.RegisterAttached("Attach",
-            typeof(bool), typeof(PasswordHelper), new PropertyMetadata(false, Attach));
+        public static readonly DependencyProperty AttachProperty = DependencyProperty.RegisterAttached("Attach", typeof(bool), typeof(PasswordHelper), new PropertyMetadata(false, Attach));
 
-        private static readonly DependencyProperty IsUpdatingProperty =
-           DependencyProperty.RegisterAttached("IsUpdating", typeof(bool),
-           typeof(PasswordHelper));
+        private static readonly DependencyProperty IsUpdatingProperty = DependencyProperty.RegisterAttached("IsUpdating", typeof(bool), typeof(PasswordHelper));
 
 
         public static void SetAttach(DependencyObject dp, bool value)
@@ -54,8 +42,7 @@ namespace RaywattApp.Common.Util
             dp.SetValue(IsUpdatingProperty, value);
         }
 
-        private static void OnPasswordPropertyChanged(DependencyObject sender,
-            DependencyPropertyChangedEventArgs e)
+        private static void OnPasswordPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             PasswordBox passwordBox = sender as PasswordBox;
             passwordBox.PasswordChanged -= PasswordChanged;
@@ -67,8 +54,7 @@ namespace RaywattApp.Common.Util
             passwordBox.PasswordChanged += PasswordChanged;
         }
 
-        private static void Attach(DependencyObject sender,
-            DependencyPropertyChangedEventArgs e)
+        private static void Attach(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             PasswordBox passwordBox = sender as PasswordBox;
 

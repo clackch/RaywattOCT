@@ -2,7 +2,6 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
-using RaywattApp.Common.Bases;
 using RaywattApp.Common.File;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
@@ -12,12 +11,16 @@ using System.Windows.Input;
 using System.Windows.Navigation;
 using System.IO;
 using System.Windows.Threading;
+using RaywattApp.Common.Dialog;
+using RaywattApp.Views.Dialog;
 
 namespace RaywattApp.ViewModels.File
 {
     public partial class FileExportStep2NativeViewModel : FileBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(FileExportStep2NativeViewModel));
+
+        private IDialogService _dialogService;
 
         [ObservableProperty]
         private FileExport _fileExport;
@@ -97,8 +100,10 @@ namespace RaywattApp.ViewModels.File
             get { return this._externalDrivePathCommand ?? (this._externalDrivePathCommand = new RelayCommand(ExternalDrivePath)); }
         }
 
-        public FileExportStep2NativeViewModel()
+        public FileExportStep2NativeViewModel(IDialogService dialogService)
         {
+            _dialogService = dialogService;
+
             ExternalDriveComboBox = new Dictionary<string, string>();
             ExternalDriveList = new Dictionary<string, object>();
 
@@ -140,46 +145,8 @@ namespace RaywattApp.ViewModels.File
             _log.Debug("Cancel");
 
             timer.Stop();
-            WeakReferenceMessenger.Default.Send(new PopupMessage(false) { Type = (int)CommonDefinition.PopupType.File });
-        }
 
-        public override void CallbackPopup()
-        {
-            _log.Debug("CallbackPopup : " + PopupCallback.PopupId + "/" + PopupCallback.PopupAnswer);
-
-            if (PopupCallback != null)
-            {
-                if (PopupCallback.PopupId == (int)CommonDefinition.CallbackEdit.Password)
-                {
-                    if (PopupCallback.PopupAnswer)
-                    {
-                        Dictionary<string, Object> data = (Dictionary<string, Object>)PopupCallback.PopupParameter;
-                        FileExport.PasswordProtected = (bool)data["passwordProtected"];
-                        FileExport.Password = data["password"].ToString();
-                        FileExport.ConfirmPassword = data["confirmPassword"].ToString();
-                    }
-                }
-                else if (PopupCallback.PopupId == (int)CommonDefinition.CallbackEdit.AlternateId)
-                {
-                    if (PopupCallback.PopupAnswer)
-                    {
-                        Dictionary<string, Object> data = (Dictionary<string, Object>)PopupCallback.PopupParameter;
-                        FileExport.AlternatePatientId.Clear();
-                        foreach (KeyValuePair<string, string> item in (Dictionary<string, string>)data["alternatePatientId"])
-                        {
-                            FileExport.AlternatePatientId.Add(item.Key, item.Value);
-                        }
-                    }
-                }
-                else if (PopupCallback.PopupId == (int)CommonDefinition.CallbackLookup.FolderBrowser)
-                {
-                    if (PopupCallback.PopupAnswer)
-                    {
-                        Dictionary<string, Object> data = (Dictionary<string, Object>)PopupCallback.PopupParameter;
-                        FileExport.ExternalDrivePath = data["externalDrivePath"].ToString();
-                    }
-                }
-            }
+            CloseDialog();
         }
 
         private void CheckDrive(object sender, EventArgs e)
@@ -277,7 +244,15 @@ namespace RaywattApp.ViewModels.File
             parameter["password"] = FileExport.Password;
             parameter["confirmPassword"] = FileExport.ConfirmPassword;
 
-            WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "PasswordProtectedPopupControl", Type = (int)CommonDefinition.PopupType.Edit, PopupId = (int)CommonDefinition.CallbackEdit.Password, ParentObject = this, Parameter = parameter });
+            var result = _dialogService.OpenDialog(new FilePasswordDialogControl(), parameter);
+
+            if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
+            {
+                Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
+                FileExport.PasswordProtected = (bool)data["passwordProtected"];
+                FileExport.Password = data["password"].ToString();
+                FileExport.ConfirmPassword = data["confirmPassword"].ToString();
+            }
         }
 
         private void AlternatePatientId()
@@ -290,7 +265,17 @@ namespace RaywattApp.ViewModels.File
             parameter["patientList"] = FileExport.PatientList;
             parameter["alternatePatientId"] = FileExport.AlternatePatientId;
 
-            WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "AlternatedPatientIdPopupControl", Type = (int)CommonDefinition.PopupType.Edit, PopupId = (int)CommonDefinition.CallbackEdit.AlternateId, ParentObject = this, Parameter = parameter });
+            var result = _dialogService.OpenDialog(new FileAlternateIdDialogControl(), parameter);
+
+            if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
+            {
+                Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
+                FileExport.AlternatePatientId.Clear();
+                foreach (KeyValuePair<string, string> item in (Dictionary<string, string>)data["alternatePatientId"])
+                {
+                    FileExport.AlternatePatientId.Add(item.Key, item.Value);
+                }
+            }
         }
 
         private void ExternalDrivePath()
@@ -299,7 +284,23 @@ namespace RaywattApp.ViewModels.File
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["externalDrive"] = FileExport.ExternalDrive;
-            WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "FolderBrowserPopupControl", Type = (int)CommonDefinition.PopupType.Lookup, PopupId = (int)CommonDefinition.CallbackLookup.FolderBrowser, ParentObject = this, Parameter = parameter });
+            parameter["externalDrivePath"] = FileExport.ExternalDrivePath;
+            var result = _dialogService.OpenDialog(new FileFolderBrowseDialogControl(), parameter);
+
+            if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
+            {
+                Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
+                FileExport.ExternalDrivePath = data["externalDrivePath"].ToString();
+            }
+            else if (result != null && result.DialogAnswer == DialogResults.Answer.No)
+            {
+                //기존에 선택되어 있는 폴더의 경로(or 폴더명)이 변경이 되었는데, Folder 선택 Dialog에서 Cancel을 클릭했을 경우
+                Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
+                if ((bool)data["isSelectedPathChanged"])
+                {
+                    FileExport.ExternalDrivePath = "";
+                }
+            }
         }
     }
 }

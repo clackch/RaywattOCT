@@ -10,6 +10,8 @@ using System;
 using System.Windows.Input;
 using log4net;
 using System.Windows.Navigation;
+using RaywattApp.Common.Dialog;
+using RaywattApp.Views.Dialog;
 
 namespace RaywattApp.ViewModels
 {
@@ -18,6 +20,8 @@ namespace RaywattApp.ViewModels
         private static readonly ILog _log = LogManager.GetLogger(typeof(PatientNewViewModel));
 
         private readonly SqlManager _sqlManager;
+
+        private IDialogService _dialogService;
 
         [ObservableProperty]
         private PrevStatus _prevStatus;
@@ -46,13 +50,14 @@ namespace RaywattApp.ViewModels
             get { return this._newRecordingCommand ?? (this._newRecordingCommand = new RelayCommand(NewRecording, CanNewRecording)); }
         }
 
-        public PatientNewViewModel(SqlManager sqlManager)
+        public PatientNewViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
             _log.Debug("PatientNewViewModel");
 
             CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.PatientNewPage;
 
             _sqlManager = sqlManager;
+            _dialogService = dialogService;
 
             Patient = new Patient();
             Patient.Id = "";
@@ -120,8 +125,11 @@ namespace RaywattApp.ViewModels
 
             if(nCnt > 0)
             {
-                //Sample로 넣어봄 -> popup으로 할지, 화면에서 표시할지 결정 필요
-                WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "MessagePopupControl", Type = (int)CommonDefinition.PopupType.Message, Level = (int)CommonDefinition.PopupLevel.Info, Parameter = _l10n["ID is duplicated."] });
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["title"] = _l10n["Information"];
+                parameter["message"] = _l10n["ID is duplicated."];
+                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+                
                 return;
             }
 
