@@ -467,7 +467,7 @@ UINT COCTSystem::threadHoming(LPVOID param) {
 #endif
 	if (pZaberCtrl->IsOpen()) {
 		pZaberCtrl->SetSpeed(config.zaber.pullbackSpeed);
-		pZaberCtrl->Move(config.zaber.pullbackDistance);
+		pZaberCtrl->Move(config.catheter.position);
 		while (pSystem->m_pThreadHoming->isRun) {
 			if (pZaberCtrl->GetZaberStatus()) {
 				break;
@@ -496,18 +496,19 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	CMotorController* pMotor = CMotorController::GetInstance();
 	CZaberController* pZaber = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
 
+#ifndef TEST_VALUE_FILE_PATH
 	// 1. Motor ON
 	pSystem->setMotorOnOff(true);
 	Sleep(config.motor.settleDown);
 
-#ifndef TEST_VALUE_FILE_PATH
+	pZaber->SetSpeed(config.zaber.pullbackSpeed);
+
 	// 2. Start Recording OCT
 	pSystem->m_pDataWriter->StartRecording();
-#endif
 
 	// 3. Pullback Linear Stage
 	if (pZaber->IsOpen()) {
-		pZaber->Pull(config.zaber.pullbackSpeed, config.zaber.pullbackDistance);
+		pZaber->MoveRelative(config.zaber.pullbackDistance * -1);
 		while (pSystem->m_pThreadPullbackScan->isRun) {
 			if (pZaber->GetZaberStatus()) {
 				break;
@@ -524,7 +525,6 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	// 4. Motor OFF
 	pSystem->setMotorOnOff(false);
 
-#ifndef TEST_VALUE_FILE_PATH
 	// 5. Stop Recording OCT
 	pSystem->m_pDataWriter->StopRecording();
 #else
@@ -845,6 +845,7 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 	case RayScannerState::Review:
 		CUtility::StopThread(m_pThreadPullbackScan);
 #ifdef TEST_VALUE_FILE_PATH
+		m_pSimDevice->StopAcquisition();
 		delete m_pSimDevice;
 		{
 			m_pDataReader = new CDataReader();
