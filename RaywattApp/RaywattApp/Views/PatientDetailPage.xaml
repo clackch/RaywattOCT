@@ -97,16 +97,14 @@
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
                                             <DataGridTextColumn Width="*" Binding="{Binding Id}" Visibility="Collapsed"/>
-                                            <DataGridTextColumn Width="*" Binding="{Binding PatientId}"  Visibility="Collapsed"/>
-                                            <DataGridTextColumn Width="*" Binding="{Binding PatientName}"  Visibility="Collapsed"/>
-                                            <DataGridTextColumn Width="*" Binding="{Binding PhysicianName}" Header="{Binding [Physician Name], Source={StaticResource L10N}}" IsReadOnly="True"/>
-                                            <DataGridTextColumn Width="*" Binding="{Binding AccessionNumber}" Header="{Binding [Accession Number], Source={StaticResource L10N}}" IsReadOnly="True"/>
-                                            <DataGridTextColumn Width="*" Binding="{Binding AccessionName}" Header="{Binding [Accession Name], Source={StaticResource L10N}}" IsReadOnly="True"/>
-                                            <DataGridTextColumn Width="*" Binding="{Binding Comment}" Header="{Binding [Comment], Source={StaticResource L10N}}" IsReadOnly="True"/>
+                                            <DataGridTextColumn Width="*" Binding="{Binding PatientId}" Visibility="Collapsed"/>
+                                            <DataGridTextColumn Width="*" Binding="{Binding PatientName}" Visibility="Collapsed"/>
+                                            <DataGridTextColumn Width="*" Binding="{Binding CreateDate, StringFormat='yyyy-MM-dd'}" Header="{Binding [Create Date], Source={StaticResource L10N}}" IsReadOnly="True"/>
                                             <DataGridTextColumn Width="*" Binding="{Binding Vessel}" Header="{Binding [Vessel], Source={StaticResource L10N}}" IsReadOnly="True"/>
                                             <DataGridTextColumn Width="*" Binding="{Binding Procedure}" Header="{Binding [Procedure], Source={StaticResource L10N}}" IsReadOnly="True"/>
-                                            <DataGridTextColumn Width="*" Binding="{Binding CreateDate, StringFormat='yyyy-MM-dd'}" Header="{Binding [Create Date], Source={StaticResource L10N}}" IsReadOnly="True"/>
-                                            <DataGridTextColumn Width="*" Binding="{Binding UpdateDate, StringFormat='yyyy-MM-dd'}" Header="{Binding [Update Date], Source={StaticResource L10N}}" IsReadOnly="True"/>
+                                            <DataGridTextColumn Width="*" Binding="{Binding PhysicianName}" Header="{Binding [Physician Name], Source={StaticResource L10N}}" IsReadOnly="True"/>
+                                            <DataGridTextColumn Width="*" Binding="{Binding AccessionNumber}" Header="{Binding [Accession Number], Source={StaticResource L10N}}" IsReadOnly="True"/>
+                                            <DataGridTextColumn Width="*" Binding="{Binding Comment}" Header="{Binding [Comment], Source={StaticResource L10N}}" IsReadOnly="True"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </Expander>
