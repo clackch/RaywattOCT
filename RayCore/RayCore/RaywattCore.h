@@ -27,4 +27,5 @@ extern "C" {
 	_declspec(dllexport) RayError RaySetMode(RayViewMode mode);
 	_declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value);
 	_declspec(dllexport) double RayGetProperty(RayProperty prop);
+	_declspec(dllexport) void *RayGetVolumeData();
 }

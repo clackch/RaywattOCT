@@ -11,13 +11,15 @@
 #define WM_UPDATE_SAVE_RAW			(WM_USER + 0x1002)
 #define WM_NOTIFY_SAVE_DONE			(WM_USER + 0x1003)
 #define WM_NOTIFY_CUTVIEW_DONE		(WM_USER + 0x1004)
-#define WM_NOTIFY_ERROR_OCCURED		(WM_USER + 0x1005)
+#define WM_NOTIFY_VOLUME_DONE		(WM_USER + 0x1005)
+#define WM_NOTIFY_ERROR_OCCURED		(WM_USER + 0x1006)
 
 #define CUTVIEW_INTERPOLATION_SCALE		5.7
 
 class CThread;
 class COCTImaging;
 class CCutViewManager;
+class CVolumeGenerator;
 class COCTSystem : public CMessageService
 {
 private:
@@ -31,6 +33,7 @@ private:
 	CThread* m_pThreadPullbackScan;
 	CThread* m_pThreadSaveRaw;
 	CThread* m_pThreadUpdateCutView;
+	CThread* m_pThreadGenerateVolume;
 	CThread* m_pThreadLoadCatheter;
 	CThread* m_pThreadUnloadCatheter;
 	
@@ -45,6 +48,9 @@ private:
 	// Cut View
 	CCutViewManager* m_pCutView;
 	int m_nOffsetNavigation;
+
+	// 3D Volume
+	CVolumeGenerator* m_pVolume;
 
 	// Acquisition
 	IAcquisitionDevice* m_pAcqDevice;
@@ -93,6 +99,8 @@ public:
 	RayError SetDegree(double value);
 	UINT GetBackgroundColor();
 	RayError SetBackgroundColor(UINT value);
+	UINT GetVolumeDepth();
+	void* GetVolumeData();
 	bool GetMotorOnOff();
 	bool GetIsPaused();
 
@@ -104,6 +112,7 @@ private:
 	static UINT threadPullbackScan(LPVOID param);
 	static UINT threadSaveRaw(LPVOID param);
 	static UINT threadUpdateCutView(LPVOID param);
+	static UINT threadGenerateVolume(LPVOID param);
 	static UINT threadLoadCatheter(LPVOID param);
 	static UINT threadUnloadCatheter(LPVOID param);
 
@@ -125,6 +134,7 @@ protected:
 	LRESULT OnMsgUpdateSaveRaw(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgNotifySaveDone(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgNotifyCutViewDone(WPARAM wParam, LPARAM lParam);
+	LRESULT OnMsgNotifyVolumeDone(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgNotifyErrorOccured(WPARAM wParam, LPARAM lParam);
 };
 

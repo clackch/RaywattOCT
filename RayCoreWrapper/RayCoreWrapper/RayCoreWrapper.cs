@@ -27,7 +27,10 @@ namespace RaywattOCT
             Degree,
             MotorOnOff,
             IsPaused,
-            LoadCatheterTime
+            LoadCatheterTime,
+            VolumeWidth,
+            VolumeHeight,
+            VolumeDepth
         }
 
         public enum ViewMode : int
@@ -42,7 +45,8 @@ namespace RaywattOCT
             Unknown = 0,
             State,
             Progress,
-            Error
+            Error,
+            WorkDone
         };
 
         public enum RayScannerState : int
@@ -56,6 +60,12 @@ namespace RaywattOCT
             LoadCatheter,
             Scanning,
             Review
+        };
+
+        public enum RayWorkItem : int
+        {
+            Unknown = 0,
+            GenerateVolume
         };
 
         public class FrameInfo {
@@ -117,5 +127,7 @@ namespace RaywattOCT
         public static extern int RaySetProperty(Property property, double value);
         [DllImport("RayCore.dll")]
         public static extern double RayGetProperty(Property property);
+        [DllImport("RayCore.dll")]
+        public static extern IntPtr RayGetVolumeData();
     }
 }

@@ -26,7 +26,10 @@ enum class RayProperty {
 	Degree,
 	MotorOnOff,
 	IsPaused,
-	LoadCatheterTime
+	LoadCatheterTime,
+	VolumeWidth,
+	VolumeHeight,
+	VolumeDepth
 };
 
 enum class RayViewMode {
@@ -39,7 +42,8 @@ enum class RayCallbackRequest {
 	Unknown = 0,
 	State,
 	Progress,
-	Error
+	Error,
+	WorkDone
 };
 
 enum class RayScannerState {
@@ -52,4 +56,9 @@ enum class RayScannerState {
 	LoadCatheter,
 	Scanning,
 	Review
+};
+
+enum class RayWorkItem {
+	Unknown = 0,
+	GenerateVolume
 };

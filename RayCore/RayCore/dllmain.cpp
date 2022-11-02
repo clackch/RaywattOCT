@@ -96,9 +96,19 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return octSystem.GetIsPaused();
     case RayProperty::LoadCatheterTime:
         return config.GetLoadCatheterTime();
+    case RayProperty::VolumeWidth:
+        return config.nCircleSize;
+    case RayProperty::VolumeHeight:
+        return config.nCircleSize;
+    case RayProperty::VolumeDepth:
+        return octSystem.GetVolumeDepth();
     default:
         return (int)RayError::InvalidArgument;
     }
+}
+
+_declspec(dllexport) void* RayGetVolumeData() {
+    return octSystem.GetVolumeData();
 }
 
 BOOL APIENTRY DllMain( HMODULE hModule,
