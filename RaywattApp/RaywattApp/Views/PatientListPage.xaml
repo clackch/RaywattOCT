@@ -67,7 +67,7 @@
                         <DataGridTextColumn Width="*" Binding="{Binding Id}" Header="{Binding DataContext.HeaderId, Source={x:Reference ProxyElement}}" SortMemberPath="Id"/>
                         <DataGridTextColumn Width="*" Binding="{Binding Lastname}" Header="{Binding DataContext.HeaderLastname, Source={x:Reference ProxyElement}}" SortMemberPath="Lastname"/>
                         <DataGridTextColumn Width="*" Binding="{Binding Firstname}" Header="{Binding DataContext.HeaderFirstname, Source={x:Reference ProxyElement}}" SortMemberPath="Firstname"/>
-                        <DataGridTextColumn Width="*" Binding="{Binding Birthdate, StringFormat='yyyy-MM-dd'}" Header="{Binding DataContext.HeaderBirthdate, Source={x:Reference ProxyElement}}" SortMemberPath="Birthdate"/>
+                        <DataGridTextColumn Width="*" Binding="{Binding StrBirthdate}" Header="{Binding DataContext.HeaderBirthdate, Source={x:Reference ProxyElement}}" SortMemberPath="Birthdate"/>
                         <DataGridTextColumn Width="*" Binding="{Binding Gender, Converter={StaticResource L10NConverter}}" Header="{Binding DataContext.HeaderGender, Source={x:Reference ProxyElement}}" SortMemberPath="Gender"/>
                         <DataGridTextColumn Width="*" Binding="{Binding LastCase}" Header="{Binding DataContext.HeaderLastCase, Source={x:Reference ProxyElement}}" SortMemberPath="Last_Case"/>
                         <DataGridTextColumn Width="*" Binding="{Binding CreateDate}" Header="{Binding DataContext.HeaderCreateDate, Source={x:Reference ProxyElement}}" SortMemberPath="Create_Date"/>

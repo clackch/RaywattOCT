@@ -39,7 +39,8 @@ namespace RaywattApp.Services
 
             //SelectPatientList
             _query["SelectPatientList"] =
-                $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, rv_schema.fn_code('GEND', gender) gender" +
+                $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name" +
+                        $", birthdate, to_char(birthdate,'YYYY-MM-DD') strbirthdate, rv_schema.fn_code('GEND', gender) gender" +
                         $", to_char(create_date,'YYYY-MM-DD HH24:MI:SS') create_date, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') update_date " +
                         $", rv_schema.fn_lastcase(id) last_case " +
                 $"FROM rv_schema.patient " +

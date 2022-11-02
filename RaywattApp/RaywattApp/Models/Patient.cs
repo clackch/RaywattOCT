@@ -86,6 +86,9 @@ namespace RaywattApp.Models
         private DateTime birthdate;
 
         [ObservableProperty]
+        private string strBirthdate;
+
+        [ObservableProperty]
         private string gender;
 
         [ObservableProperty]
