@@ -22,6 +22,10 @@ _declspec(dllexport) void InitializeDevice(void* pDevice, void* pContext, void* 
 	DXUTPause(false, false);
 }
 
+_declspec(dllexport) void FinalizeDevice() {
+	DXUTDestroyState();
+}
+
 _declspec(dllexport) void CreateVolumeData(int width, int height, int frames, char* data) {
 	printf("CreateVolumeData : %d %d %d\n", width, height, frames);
 	InitVolumeData(width, height, frames, (BYTE*)data);

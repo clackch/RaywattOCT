@@ -10,15 +10,15 @@ namespace RayCoreWrapper
     public class Raywatt3DRenderer
     {
         // Declare the device and swapChain vars
-        private Device device;
-        private SwapChain swapChain;
-        private Texture2D backBuffer;
-        private RenderTargetView renderTargetView;
+        private Device? device;
+        private SwapChain? swapChain;
+        private Texture2D? backBuffer;
+        private RenderTargetView? renderTargetView;
 
         [DllImport("Raywatt3DRenderer.dll")]
-        public static extern void Start();
-        [DllImport("Raywatt3DRenderer.dll")]
         public static extern void InitializeDevice(IntPtr ptrDevice, IntPtr ptrContext, IntPtr hWnd, int widht, int height);
+        [DllImport("Raywatt3DRenderer.dll")]
+        public static extern void FinalizeDevice();
         [DllImport("Raywatt3DRenderer.dll")]
         public static extern void RenderVolumeData(IntPtr ptrDevice, IntPtr ptrContext, IntPtr ptrRenderTargetView);
         [DllImport("Raywatt3DRenderer.dll")]
@@ -67,14 +67,20 @@ namespace RayCoreWrapper
         public void Render()
         { 
             // Execute rendering commands here...
-            RenderVolumeData(((IntPtr)device), ((IntPtr)device.ImmediateContext), ((IntPtr)renderTargetView));
+            RenderVolumeData(((IntPtr)device), ((IntPtr)device?.ImmediateContext), ((IntPtr)renderTargetView));
 
             // Present the frame
-            swapChain.Present(0, PresentFlags.None);
+            swapChain?.Present(0, PresentFlags.None);
         }
 
-        public void Dispose() {
-            device.Dispose();
+        public void Dispose()
+        {
+            renderTargetView?.Dispose();
+            backBuffer?.Dispose();
+            swapChain?.Dispose();
+            device?.Dispose();
+
+            FinalizeDevice();
         }
     }
 }
