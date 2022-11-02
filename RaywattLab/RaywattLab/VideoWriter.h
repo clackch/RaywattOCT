@@ -11,10 +11,8 @@ private:
 	int m_nVideoWidth;
 	int m_nVideoHeight;
 
-	cv::Mat* m_pFrameQueue;
-	unsigned int m_nQueueCount;
-	unsigned int m_nQueueStart;
-	unsigned int m_nQueueEnd;
+	std::vector<cv::Mat> m_vFrameQueue;
+	unsigned int m_nSavedFrame;
 public:
 	CVideoWriter();
 	virtual ~CVideoWriter();
@@ -24,7 +22,6 @@ public:
 	void PushToBuffer(cv::Mat image);
 
 private:
-	void initialize();
 	void finalize();
 	bool popFromBuffer(int& nPopIndex);
 	static UINT threadWriteVideo(LPVOID param);

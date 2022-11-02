@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System;
 using System.Windows.Input;
 using log4net;
+using System.Windows.Navigation;
 
 namespace RaywattApp.ViewModels
 {
@@ -16,7 +17,10 @@ namespace RaywattApp.ViewModels
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(PatientNewViewModel));
 
-        private readonly IDatabaseService _databaseService;
+        private readonly SqlManager _sqlManager;
+
+        [ObservableProperty]
+        private PrevStatus _prevStatus;
 
         [ObservableProperty]
         private Patient _patient;
@@ -42,17 +46,19 @@ namespace RaywattApp.ViewModels
             get { return this._newRecordingCommand ?? (this._newRecordingCommand = new RelayCommand(NewRecording, CanNewRecording)); }
         }
 
-        public PatientNewViewModel(IDatabaseService databaseService)
+        public PatientNewViewModel(SqlManager sqlManager)
         {
             _log.Debug("PatientNewViewModel");
 
             CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.PatientNewPage;
 
-            _databaseService = databaseService;
+            _sqlManager = sqlManager;
 
-            var newPatient = new Patient();
-            newPatient.Birthdate = System.DateTime.Today;
-            Patient = newPatient;
+            Patient = new Patient();
+            Patient.Id = "";
+            Patient.Lastname = "";
+            Patient.Firstname = "";
+            Patient.Birthdate = System.DateTime.Today;
 
             Patient.PropertyChanged += Patient_PropertyChanged;
         }
@@ -60,6 +66,13 @@ namespace RaywattApp.ViewModels
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
             _log.Debug("OnNavigated");
+
+            var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
+
+            if (extraData != null)
+            {
+                PrevStatus = (PrevStatus)extraData;
+            }
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -78,7 +91,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Back");
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("GoBack"));
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientListPage.xaml") { Parameter = PrevStatus });
         }
 
         private bool CanNewRecording()
@@ -100,14 +113,10 @@ namespace RaywattApp.ViewModels
             _log.Debug("NewRecording");
 
             //Check ID for Duplication
-            Dictionary<string, Object> commandParameters = new Dictionary<string, Object>();
-            commandParameters["id"] = Patient.Id;
-            string commandText =
-                $"SELECT count(*) " +
-                $"FROM rv_schema.patient " +
-                $"WHERE id = @id ";
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = Patient.Id.Trim();
 
-            int nCnt = _databaseService.GetDataCount(commandText, commandParameters);
+            int nCnt = _sqlManager.CountPatient(sqlParameters);
 
             if(nCnt > 0)
             {
@@ -117,45 +126,60 @@ namespace RaywattApp.ViewModels
             }
 
             //Save New Patient Info
-            commandParameters.Clear();
-            commandParameters["id"] = Patient.Id;
-            commandParameters["lastname"] = Patient.Lastname;
-            commandParameters["firstname"] = Patient.Firstname;
-            commandParameters["birthdate"] = Patient.Birthdate;
+            sqlParameters.Clear();
+            sqlParameters["id"] = Patient.Id = Patient.Id.Trim();
+            sqlParameters["lastname"] = Patient.Lastname = Patient.Lastname.Trim();
+            sqlParameters["firstname"] = Patient.Firstname = Patient.Firstname.Trim();
+            sqlParameters["birthdate"] = Patient.Birthdate;
             if (GenderCode != null)
             {
-                commandParameters["gender"] = GenderCode;
-                Patient.Gender = GenderCode == "M" ? "Male" : "Female";
+                sqlParameters["gender"] = GenderCode;
+                Patient.Gender = CodeDefinition.Codes["GEND"][GenderCode];
             }
             else
             {
-                commandParameters["gender"] = "";
+                sqlParameters["gender"] = "";
             }              
 
-            commandText =
-                $"INSERT INTO rv_schema.patient(id, lastname, firstname, birthdate, gender, create_date, update_date) " +
-                $"VALUES (@id, @lastname, @firstname, @birthdate, @gender, now(), now())";
-
-            int nRows = _databaseService.InsertData(commandText, commandParameters);
-
+            int nRows = _sqlManager.InsertPatient(sqlParameters);
 
             if(nRows == 1)
             {
-                WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/RecordingPage.xaml") { Parameter = Patient });
-            }           
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["patient"] = Patient;
+                SetListStatusInit();
+                parameter["prevStatus"] = PrevStatus;
+                WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/RecordingPage.xaml") { Parameter = parameter });
+            }
+            else
+            {
+                _log.Error("Insert Error");
+            }
+        }
+
+        private void SetListStatusInit()
+        {
+            PrevStatus.ListKeyword = "";
+            PrevStatus.ListSortField = "LastCase";
+            PrevStatus.ListSortDirection = false;
+            PrevStatus.ListSort = "last_case DESC";
+            PrevStatus.ListPageOffset = 0;
+            PrevStatus.ListPageSize = 10;
+            PrevStatus.ListPageGroup = 1;
+            PrevStatus.ListPageNumber = 0;
         }
 
         private bool Validate()
         {
             _log.Debug("Validate");
 
-            if (string.IsNullOrEmpty(Patient.Id))
+            if (string.IsNullOrEmpty(Patient.Id.Trim()))
                 return false;
 
-            if (string.IsNullOrEmpty(Patient.Lastname))
+            if (string.IsNullOrEmpty(Patient.Lastname.Trim()))
                 return false;
 
-            if (string.IsNullOrEmpty(Patient.Firstname))
+            if (string.IsNullOrEmpty(Patient.Firstname.Trim()))
                 return false;
 
             return true;

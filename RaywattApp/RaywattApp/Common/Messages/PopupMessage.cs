@@ -16,12 +16,16 @@ namespace RaywattApp.Common.Messages
 
         public int Level { get; set; }
 
+        public int PopupId { get; set; }
+
         public int FileType { get; set; }
         
         /// <summary>
         /// 컨트롤에 전달할 파라메터
         /// </summary>
         public object? Parameter { get; set; } = null;
+
+        public object? ParentObject { get; set; } = null;
 
         /// <summary>
         /// 생성자

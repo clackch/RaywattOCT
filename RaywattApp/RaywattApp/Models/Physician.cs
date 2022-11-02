@@ -1,23 +1,29 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+using RaywattApp.Common.Bases;
+using RaywattApp.Common.Util;
 
 namespace RaywattApp.Models
 {
     public partial class Physician : ObservableValidator
     {
-        [ObservableProperty]
-        public int index;
+        private string _name;
+        public string Name
+        {
+            get { return _name; }
+            set 
+            { 
+                if(value.Length <= Constants.MaxPhysicianName)
+                {
+                    if (!CommonUtil.ValidateText(value))
+                        return;
 
-        [ObservableProperty]
-        private string id;
-
-        [ObservableProperty]
-        private string name;
+                    _name = value;
+                    OnPropertyChanged(nameof(Name));
+                }
+            }
+        }
 
         [ObservableProperty]
         private string createDate;
-
-        [ObservableProperty]
-        private string updateDate;
     }
 }

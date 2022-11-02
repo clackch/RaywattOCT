@@ -15,7 +15,7 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Background="Black" Orientation="Horizontal">
-            <Label Content="{Binding FilePopupType}" Foreground="White"></Label>
+            <Label Content="{Binding ViewLayerPopupTitle}" Foreground="White"></Label>
         </StackPanel>
 
         <Grid Grid.Row="1">

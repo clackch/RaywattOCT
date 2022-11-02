@@ -44,7 +44,6 @@ CRaywattLabDlg::CRaywattLabDlg(CWnd* pParent /*=nullptr*/)
 	m_pDataWriter = nullptr;
 	m_pFFTFile = nullptr;
 	m_pDataReader = nullptr;
-	m_pVideoWriter = nullptr;
 	m_pShutter = nullptr;
 
 	m_pThreadCalibration = nullptr;
@@ -52,8 +51,8 @@ CRaywattLabDlg::CRaywattLabDlg(CWnd* pParent /*=nullptr*/)
 
 	m_strCalibPath = _T("");
 	m_nCurCalibIndex = 0;
-
 	m_pThreadPullback = nullptr;
+	m_strCurCalibration = _T(".\\CALIBRATION.dat");
 }
 
 void CRaywattLabDlg::DoDataExchange(CDataExchange* pDX)
@@ -377,7 +376,6 @@ LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 	m_scopeViewFFT.SetChannelBuffer(0, scopeFFTData, nOutputLength);
 	m_scopeViewFFT.SetChannelBuffer(1, scopeFFTData + nOutputLength, nOutputLength);
 
-	if (m_pVideoWriter != nullptr) m_pVideoWriter->PushToBuffer(image);
 	if (m_pDataWriter->IsRecording()) {
 		Ipp16u* pFFTBuffer = new Ipp16u[nOutputLength];
 		memcpy(pFFTBuffer, scopeFFTData, sizeof(Ipp16u) * nOutputLength);
@@ -493,13 +491,13 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	int goodClockEnd = config.nAScan;
 
 	m_pImagingRealtime = new CLabImaging(this);
-	m_pImagingRealtime->Initialize(_T(".\\CALIBRATION.dat"), ".\\BACKGROUND.bin");
+	m_pImagingRealtime->Initialize(m_strCurCalibration, ".\\BACKGROUND.bin");
 	m_pImagingRealtime->SetColor(m_chkImageHotColor);
 	m_pImagingRealtime->SetGoodClockRange(goodClockStart, goodClockEnd);
 	m_pImagingRealtime->Start();
 
 	m_pImagingSimulate = new CLabImaging(this);
-	m_pImagingSimulate->Initialize(_T(".\\CALIBRATION.dat"), ".\\BACKGROUND.bin");
+	m_pImagingSimulate->Initialize(m_strCurCalibration, ".\\BACKGROUND.bin");
 	m_pImagingSimulate->SetColor(m_chkImageHotColor);
 	m_pImagingRealtime->SetGoodClockRange(goodClockStart, goodClockEnd);
 	m_pImagingSimulate->Start();
@@ -508,8 +506,6 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	m_pDataWriter->Initialize(config.nBufferSize * sizeof(unsigned short));
 
 	m_pDataReader = new CDataReader();
-
-	m_pVideoWriter = new CVideoWriter();
 
 	m_pFrameBuffer = new char[config.nBufferSize * sizeof(unsigned short)];
 
@@ -588,9 +584,6 @@ void CRaywattLabDlg::OnDestroy() {
 	if (m_pDataWriter != nullptr) {
 		m_pDataWriter->StopRecording();
 	}
-	if (m_pVideoWriter != nullptr) {
-		m_pVideoWriter->StopRecording();
-	}
 	CUtility::StopThread(m_pThreadCalibration);
 	CUtility::StopThread(m_pThreadPullback);
 	CUtility::StopThread(m_pThreadService);
@@ -613,9 +606,6 @@ void CRaywattLabDlg::OnDestroy() {
 	}
 	if (m_pDataReader != nullptr) {
 		delete m_pDataReader;
-	}
-	if (m_pVideoWriter != nullptr) {
-		delete m_pVideoWriter;
 	}
 	if (m_pFrameBuffer != nullptr) {
 		delete[] m_pFrameBuffer;
@@ -741,7 +731,6 @@ void CRaywattLabDlg::OnBnClickedButtonLoadSelectedData()
 		}
 
 		if (videoSaving) {
-			m_pVideoWriter->StopRecording();
 			toggleButton(this, m_btnSaveVideo);
 		}
 		GetDlgItem(IDC_BUTTON_SAVE_VIDEO)->EnableWindow(TRUE);
@@ -853,29 +842,43 @@ void CRaywattLabDlg::OnBnClickedButtonSaveData()
 
 void CRaywattLabDlg::OnBnClickedButtonSaveVideo()
 {
-	int result = NOERROR;
-	bool videoSaving = m_btnSaveVideo.pushed;
+	if (!m_btnLoadData.pushed || m_btnPlayData.pushed) return;
 
-	if (videoSaving) {
-		m_pVideoWriter->StopRecording();
-	}
-	else {
-		// To-do : generate file name from selected file?
-		// read frameRate, size from configuration file?
-		CString strFileName = generateFileName(m_strPatientPath, _T(".avi"));
-		result = m_pVideoWriter->StartRecording(strFileName, 1024, 1024);
-		if (result != NOERROR) {
-			AfxMessageBox(_T("Failed to save video file"));
-			return;
-		}
-	}
+	GetDlgItem(IDC_BUTTON_SAVE_VIDEO)->SetWindowText(_T("Saving.."));
 
-	if (result == NOERROR) {
-		toggleButton(this, m_btnSaveVideo);
-		videoSaving = m_btnSaveVideo.pushed;
+	CString strDataPath = _T("");
+	CString strDataFile = _T("");
+	int nSelected = m_listPatientData.GetCurSel();
+	m_listPatientData.GetText(nSelected, strDataFile);
+	strDataPath.Format(_T("%s/%s"), m_strPatientPath, strDataFile);
 
-		GetDlgItem(IDC_BUTTON_SAVE_DATA)->EnableWindow(!videoSaving);
+	CString strAviPath = strDataPath;
+	strAviPath.Replace(_T(".bin"), _T(".avi"));
+
+	CLabImaging* pImaging = new CLabImaging(this);
+	pImaging->Initialize(m_strCurCalibration, ".\\BACKGROUND.bin");
+	pImaging->SetColor(m_chkImageHotColor);
+
+	CDataReader* pReader = new CDataReader();
+	pReader->Initialize(strDataPath.GetBuffer());
+
+	CConfiguration& config = CConfiguration::GetInstance();
+	CVideoWriter videoWriter;
+	videoWriter.StartRecording(strAviPath, config.nCircleSize, config.nCircleSize);
+	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
+		pImaging->Process(pReader->GetSample(i));
+		videoWriter.PushToBuffer(pImaging->GetCircleImage());
 	}
+	videoWriter.StopRecording();
+
+	delete pReader;
+	delete pImaging;
+
+	CString strMessage = _T("");
+	CString strFileName = strAviPath.Right(strAviPath.GetLength() - strAviPath.ReverseFind('\\') - 1);
+	strMessage.Format(_T("%s saved."), strFileName);
+	AfxMessageBox(strMessage);
+	GetDlgItem(IDC_BUTTON_SAVE_VIDEO)->SetWindowText(_T("Save Video"));
 }
 
 
@@ -885,28 +888,32 @@ void CRaywattLabDlg::OnBnClickedButtonSaveTif()
 
 	GetDlgItem(IDC_BUTTON_SAVE_TIF)->SetWindowText(_T("Saving.."));
 
-	CString strFilePath = generateFileName(m_strPatientPath, _T(".tif"));
-	CTIFFWriter tiffWriter(strFilePath);
-
-	CLabImaging* pImaging = new CLabImaging(this);
-	pImaging->Initialize(_T(".\\CALIBRATION.dat"), ".\\BACKGROUND.bin");
-	pImaging->SetColor(m_chkImageHotColor);
-
 	CString strDataPath = _T("");
 	CString strDataFile = _T("");
 	int nSelected = m_listPatientData.GetCurSel();
 	m_listPatientData.GetText(nSelected, strDataFile);
 	strDataPath.Format(_T("%s/%s"), m_strPatientPath, strDataFile);
-	m_pDataReader->Initialize(strDataPath.GetBuffer());
 
-	for (int i = 0; i < m_pDataReader->GetNumOfSamples(); i++) {
-		tiffWriter.SaveFrame(pImaging, m_pDataReader->GetSample(i));
+	CString strTifPath = strDataPath;
+	strTifPath.Replace(_T(".bin"), _T(".tif"));
+	CTIFFWriter tiffWriter(strTifPath);
+
+	CLabImaging* pImaging = new CLabImaging(this);
+	pImaging->Initialize(m_strCurCalibration, ".\\BACKGROUND.bin");
+	pImaging->SetColor(m_chkImageHotColor);
+
+	CDataReader* pReader = new CDataReader();
+	pReader->Initialize(strDataPath.GetBuffer());
+
+	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
+		tiffWriter.SaveFrame(pImaging, pReader->GetSample(i));
 	}
 
+	delete pReader;
 	delete pImaging;
 
 	CString strMessage = _T("");
-	CString strFileName = strFilePath.Right(strFilePath.GetLength() - strFilePath.ReverseFind('\\') - 1);
+	CString strFileName = strTifPath.Right(strTifPath.GetLength() - strTifPath.ReverseFind('\\') - 1);
 	strMessage.Format(_T("%s saved."), strFileName);
 	AfxMessageBox(strMessage);
 	GetDlgItem(IDC_BUTTON_SAVE_TIF)->SetWindowText(_T("Save TIF"));
@@ -1035,6 +1042,7 @@ void CRaywattLabDlg::OnBnClickedButtonChangeCalibration()
 	calibration->Initialize(strCurFile.GetBuffer());
 	m_pImagingRealtime->ChangeCalibration(calibration);
 	m_pImagingSimulate->ChangeCalibration(calibration);
+	m_strCurCalibration = strCurFile.GetBuffer();
 
 	GetDlgItem(IDC_EDIT_CUR_CALIBRATION)->SetWindowText(strCurFile.Right(strCurFile.GetLength() - m_strCalibPath.GetLength() - 1));
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace RaywattOCT.Controller
+namespace RaywattOCT
 {
     public class RayCoreWrapper
     {
@@ -11,7 +11,10 @@ namespace RaywattOCT.Controller
             SystemRunning = -1000,
             InvalidArgument,
             WrongOCTScannerState,
-            NotPausedState
+            NotPausedState,
+            DeviceNotConnected,
+            InitializeFailed,
+            WrongFilePath
         };
 
         public enum Property : int
@@ -20,6 +23,7 @@ namespace RaywattOCT.Controller
             CurrentState = 1,
             Brightness,
             Contrast,
+            BackgroundColor,
             Degree,
             MotorOnOff,
             IsPaused,
@@ -37,20 +41,21 @@ namespace RaywattOCT.Controller
         {
             Unknown = 0,
             State,
-            Progress
+            Progress,
+            Error
         };
 
         public enum RayScannerState : int
         {
             None = 0,
             Initializing,
-            InitializeFailed,
+            LiveView,
+            AutoCalibration,
             Homing,
             Ready,
             LoadCatheter,
             Scanning,
-            Review,
-            SaveDone
+            Review
         };
 
         public class FrameInfo {
@@ -79,13 +84,19 @@ namespace RaywattOCT.Controller
         [DllImport("RayCore.dll")]
         public static extern int RayRegisterCallback(IntPtr cb);
         [DllImport("RayCore.dll")]
+        public static extern int RayConnectDevices();
+        [DllImport("RayCore.dll")]
         public static extern int RayInitialize();
+        [DllImport("RayCore.dll")]
+        public static extern int RayPreparePullback();
         [DllImport("RayCore.dll")]
         public static extern int RayPullbackScan(string filePath);
         [DllImport("RayCore.dll")]
         public static extern int RayLoadCatheter();
         [DllImport("RayCore.dll")]
         public static extern int RayUnloadCatheter();
+        [DllImport("RayCore.dll")]
+        public static extern int RayStartReview(string filePath);
         [DllImport("RayCore.dll")]
         public static extern int RayEndReview();
         [DllImport("RayCore.dll")]

@@ -64,9 +64,12 @@ namespace RaywattApp.Services
                 Command.CommandText = commandText;
                 //Parameter 입력
                 Command.Parameters.Clear();
-                foreach (KeyValuePair<string, Object> parameter in commandParameters)
+                if(commandParameters != null)
                 {
-                    Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                    foreach (KeyValuePair<string, Object> parameter in commandParameters)
+                    {
+                        Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                    }
                 }
                 //Connection 입력
                 Command.Connection = Connection;
@@ -75,7 +78,7 @@ namespace RaywattApp.Services
                 //Reader를 이용해서 한줄 읽음
                 while (await reader.ReadAsync())
                 {
-                    var row = (IDataRecord)reader;
+                    IDataReader row = reader;
                     //T를 이용해서 인스턴스 생성
                     var model = Activator.CreateInstance(typeof(T));
                     //결과 목록에 추가
@@ -86,7 +89,7 @@ namespace RaywattApp.Services
                     //프로퍼티 중 HasErrors라는 이름의 프로퍼티 빼고 나머지 데이터 입력
                     foreach (var prop in properties.Where(p => p.Name != "HasErrors"))
                     {
-                        var value = row[prop.Name];
+                        var value = GetDbValue(prop.Name, row);
                         if (value is DBNull == false)
                         {
                             prop.SetValue(model, value);
@@ -102,6 +105,8 @@ namespace RaywattApp.Services
             {
                 //Connection 닫기
                 await Connection.CloseAsync();
+
+                PrintLog(commandText, commandParameters);
             }
             //결과 반환
             return returnDatas;
@@ -130,9 +135,12 @@ namespace RaywattApp.Services
                 Command.CommandText = commandText;
                 //Parameter 입력
                 Command.Parameters.Clear();
-                foreach (KeyValuePair<string, Object> parameter in commandParameters)
+                if(commandParameters != null)
                 {
-                    Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                    foreach (KeyValuePair<string, Object> parameter in commandParameters)
+                    {
+                        Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                    }
                 }
                 //Connection 입력
                 Command.Connection = Connection;
@@ -141,7 +149,7 @@ namespace RaywattApp.Services
                 //Reader를 이용해서 한줄 읽음
                 while (reader.Read())
                 {
-                    var row = (IDataRecord)reader;
+                    IDataReader row = reader;
                     //T를 이용해서 인스턴스 생성
                     var model = Activator.CreateInstance(typeof(T));
                     //결과 목록에 추가
@@ -149,10 +157,11 @@ namespace RaywattApp.Services
                     //이 아래 부분은 프로퍼티 한개씩 하드코딩 하지 않고, 값을 입력하기 위해서 사용하는 부분입니다.
                     //모델에서 프로퍼티 추출
                     var properties = model.GetType().GetProperties();
+
                     //프로퍼티 중 HasErrors라는 이름의 프로퍼티 빼고 나머지 데이터 입력
                     foreach (var prop in properties.Where(p => p.Name != "HasErrors"))
                     {
-                        var value = row[prop.Name];
+                        var value = GetDbValue(prop.Name, row);
                         if (value is DBNull == false)
                         {
                             prop.SetValue(model, value);
@@ -169,11 +178,7 @@ namespace RaywattApp.Services
                 //Connection 닫기
                 Connection.Close();
 
-                _log.Debug(commandText);
-                foreach (var param in commandParameters)
-                {
-                    _log.Debug(param.Key + " = " + param.Value);
-                }
+                PrintLog(commandText, commandParameters);
             }
             //결과 반환
             return returnDatas;
@@ -199,9 +204,12 @@ namespace RaywattApp.Services
                 Command.CommandText = commandText;
                 //Parameter 입력
                 Command.Parameters.Clear();
-                foreach (KeyValuePair<string, Object> parameter in commandParameters)
+                if (commandParameters != null)
                 {
-                    Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                    foreach (KeyValuePair<string, Object> parameter in commandParameters)
+                    {
+                        Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                    }
                 }
                 //Connection 입력
                 Command.Connection = Connection;
@@ -222,11 +230,7 @@ namespace RaywattApp.Services
                 //Connection 닫기
                 Connection.Close();
 
-                _log.Debug(commandText);
-                foreach (var param in commandParameters)
-                {
-                    _log.Debug(param.Key + " = " + param.Value);
-                }
+                PrintLog(commandText, commandParameters);
             }
             //결과 반환
             return cnt;
@@ -252,9 +256,12 @@ namespace RaywattApp.Services
                 Command.CommandText = commandText;
                 //Parameter 입력
                 Command.Parameters.Clear();
-                foreach (KeyValuePair<string, Object> parameter in commandParameters)
+                if (commandParameters != null)
                 {
-                    Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                    foreach (KeyValuePair<string, Object> parameter in commandParameters)
+                    {
+                        Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                    }
                 }
                 //Connection 입력
                 Command.Connection = Connection;
@@ -270,11 +277,7 @@ namespace RaywattApp.Services
                 //Connection 닫기
                 Connection.Close();
 
-                _log.Debug(commandText);
-                foreach (var param in commandParameters)
-                {
-                    _log.Debug(param.Key + " = " + param.Value);
-                }
+                PrintLog(commandText, commandParameters);
             }
             //결과 반환
             return nRows;
@@ -300,9 +303,12 @@ namespace RaywattApp.Services
                 Command.CommandText = commandText;
                 //Parameter 입력
                 Command.Parameters.Clear();
-                foreach (KeyValuePair<string, Object> parameter in commandParameters)
+                if (commandParameters != null)
                 {
-                    Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                    foreach (KeyValuePair<string, Object> parameter in commandParameters)
+                    {
+                        Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                    }
                 }
                 //Connection 입력
                 Command.Connection = Connection;
@@ -318,28 +324,82 @@ namespace RaywattApp.Services
                 //Connection 닫기
                 Connection.Close();
 
-                _log.Debug(commandText);
-                foreach (var param in commandParameters)
-                {
-                    _log.Debug(param.Key + " = " + param.Value);
-                }
+                PrintLog(commandText, commandParameters);
             }
             //결과 반환
             return nRows;
         }
 
-        /// <summary>
-        /// Order by, Limit, Offset 생성 함수
-        /// </summary>
-        public virtual string getAddtionalCondition(string order, int limit, int offset)
+        public int DeleteData(string commandText, Dictionary<string, Object> commandParameters)
         {
-            _log.Debug("getAddtionalCondition");
+            _log.Debug("DeleteData");
 
-            string orderCommand = order == "" ? "" : " ORDER BY " + order;
-            string limitCommand = limit > 0 ? " LIMIT " + limit : "";
-            string offsetCommand = offset > 0 ? " OFFSET " + offset : "";
+            //null 체크
+            if (Connection == null || Command == null || string.IsNullOrEmpty(commandText))
+            {
+                return -1;
+            }
 
-            return orderCommand + limitCommand + offsetCommand;
+            int nRows = 0;
+
+            try
+            {
+                //Connection 열기
+                Connection.Open();
+                //Query 입력
+                Command.CommandText = commandText;
+                //Parameter 입력
+                Command.Parameters.Clear();
+                if (commandParameters != null)
+                {
+                    foreach (KeyValuePair<string, Object> parameter in commandParameters)
+                    {
+                        Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                    }
+                }
+                //Connection 입력
+                Command.Connection = Connection;
+                //Execute Query
+                nRows = Command.ExecuteNonQuery();
+            }
+            catch (Exception e)
+            {
+                _log.Error(e.ToString());
+            }
+            finally
+            {
+                //Connection 닫기
+                Connection.Close();
+
+                PrintLog(commandText, commandParameters);
+            }
+            //결과 반환
+            return nRows;
+        }
+
+        private object GetDbValue(string field, IDataReader row)
+        {
+            for (int i = 0; i < row.FieldCount; i++)
+            {
+                string dbField = row.GetName(i);
+                if (dbField.ToLower().Replace("_", "").Equals(field.ToLower()))
+                    return row[dbField];
+            }
+            return null;
+        }
+
+        private void PrintLog(string commandText, Dictionary<string, Object> commandParameters)
+        {
+            _log.Debug("Query : " + commandText);
+            if (commandParameters != null)
+            {
+                string str = "Parameters : ";
+                foreach (var param in commandParameters)
+                {
+                    str += param.Key + " = " + param.Value + ", ";
+                }
+                _log.Debug(str);
+            }
         }
     }
 }

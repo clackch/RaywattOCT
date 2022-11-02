@@ -247,7 +247,7 @@
                 <TextBlock Text="{Binding SystemMessage}" Foreground="#898d98" FontSize="12pt" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="25,0,0,0"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,23,0,0">
-                <local:MenuButton Style="{DynamicResource MenuButton}" Icon="/res/icon/admin.png" IconOv="/res/icon/admin_ov.png" IconSize="32" Content="Admin" Margin="0,0,2,0"/>
+                <local:MenuButton Style="{DynamicResource MenuButton}" Icon="/res/icon/admin.png" IconOv="/res/icon/admin_ov.png" IconSize="32" Content="Admin" Command="{Binding CmdAdmin}" Margin="0,0,2,0"/>
                 <local:MenuButton Style="{DynamicResource MenuButton}" Icon="/res/icon/setting.png" IconOv="/res/icon/setting_ov.png" IconSize="32" Content="Setting" Margin="0,0,2,0"/>
                 <local:MenuButton Style="{DynamicResource MenuButton}" Icon="/res/icon/oct.png" IconOv="/res/icon/oct_ov.png" IconSize="32" Content="OCT FFR" Margin="0,0,2,0"/>
                 <local:MenuButton Style="{DynamicResource MenuButton}" Icon="/res/icon/exit.png" IconOv="/res/icon/exit_ov.png" IconSize="35" Content="Exit" Command="{Binding CmdExit}"/>

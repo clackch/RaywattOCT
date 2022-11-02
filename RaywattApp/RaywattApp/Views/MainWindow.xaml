@@ -39,10 +39,10 @@
                     <Label Foreground="White">[</Label>
                     <Label Foreground="White" Content="{Binding Patient.Gender, Converter={StaticResource L10NConverter}}"/>
                     <Label Foreground="White">]</Label>
-                    <Button Command="{Binding PatientEditCommand}" Content="{Binding [Edit], Source={StaticResource L10N}}" Visibility="{Binding IsShowPatientEdit}" Margin="5,5,5,5" />
                 </StackPanel>
                 <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Width="80" Command="{Binding SettingCommand}" Content="{Binding [Setting], Source={StaticResource L10N}}" Margin="5,5,5,5" />
+                    <Button Width="50" Command="{Binding SettingCommand}" Content="{Binding [Setting], Source={StaticResource L10N}}" Margin="5,5,5,5" />
+                    <Button Width="50" Command="{Binding ExitCommand}" Content="{Binding [Exit], Source={StaticResource L10N}}" Margin="5,5,5,5" />
                 </StackPanel>
             </Grid>
         </StackPanel>
@@ -73,6 +73,18 @@
                         <ContentControl Width="400" MinHeight="200">
                             <b:Interaction.Behaviors>
                                 <behaviors:PopupControlBehavior Control="{Binding ControlName}" LayerPopup="{Binding ShowLayerPopup}"/>
+                            </b:Interaction.Behaviors>
+                        </ContentControl>
+                    </Border>
+                </Border>
+                <Border Background="#66000000" Visibility="{Binding ShowLayerExtraPopup, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Border HorizontalAlignment="Center" VerticalAlignment="Center" Background="White" CornerRadius="5">
+                        <Border.Effect>
+                            <DropShadowEffect />
+                        </Border.Effect>
+                        <ContentControl Width="400" MinHeight="200">
+                            <b:Interaction.Behaviors>
+                                <behaviors:PopupControlBehavior Control="{Binding ControlExtraName}" LayerPopup="{Binding ShowLayerExtraPopup}"/>
                             </b:Interaction.Behaviors>
                         </ContentControl>
                     </Border>

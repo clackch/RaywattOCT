@@ -24,6 +24,9 @@ namespace RaywattOCT.ViewModel
         private const string ICON_RESOURCE_PLAY_OV = "/res/icon/play_ov.png";
         private const string ICON_RESOURCE_PAUSE = "/res/icon/pause.png";
         private const string ICON_RESOURCE_PAUSE_OV = "/res/icon/pause_ov.png";
+        private const int IMAGE_BACKGROUND_COLOR = 0x161518;
+
+        private const string TEST_FILE_PATH = "C:\\DataSave\\test\\0710_145631_6028rpm_20mms_2000Aline_ch1.bin";
 
         private const int nCrossSectionHeight = 800;
         private const int nCrossSectionWidth = 860;
@@ -274,6 +277,15 @@ namespace RaywattOCT.ViewModel
             }
         }
 
+        private DelegateCommand cmdAdmin;
+        public DelegateCommand CmdAdmin
+        {
+            get
+            {
+                return (this.cmdAdmin) ?? (this.cmdAdmin = new DelegateCommand(Admin));
+            }
+        }
+
         private DelegateCommand cmdExit;
         public DelegateCommand CmdExit
         {
@@ -350,6 +362,14 @@ namespace RaywattOCT.ViewModel
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(5);
             timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
             timerUpdateImage.Start();
+
+            RayCoreWrapper.RayStartSystem();
+            RayCoreWrapper.RayRegisterCallback(Marshal.GetFunctionPointerForDelegate(CBFunction));
+            RayCoreWrapper.RayRegisterImageCallback(
+                Marshal.GetFunctionPointerForDelegate(CBCrossSection),
+                Marshal.GetFunctionPointerForDelegate(CBLongitude));
+
+            RayCoreWrapper.RaySetProperty(RayCoreWrapper.Property.BackgroundColor, IMAGE_BACKGROUND_COLOR);
         }
 
         private void timerUpdateTime(object sender, EventArgs e)
@@ -381,7 +401,7 @@ namespace RaywattOCT.ViewModel
             {
                 RayCoreWrapper.RayScannerState state = (RayCoreWrapper.RayScannerState)RayCoreWrapper.RayGetProperty(RayCoreWrapper.Property.CurrentState);
 
-                if (state >= RayCoreWrapper.RayScannerState.Review)
+                if (state == RayCoreWrapper.RayScannerState.Review)
                 {
                     LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgLongitude);
                     if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame) updateNavigatorVisibility(true);
@@ -393,18 +413,17 @@ namespace RaywattOCT.ViewModel
         }
         private void Initialize()
         {
-            RayCoreWrapper.RayStartSystem();
-            RayCoreWrapper.RayRegisterCallback(Marshal.GetFunctionPointerForDelegate(CBFunction));
-            RayCoreWrapper.RayRegisterImageCallback(
-                Marshal.GetFunctionPointerForDelegate(CBCrossSection),
-                Marshal.GetFunctionPointerForDelegate(CBLongitude));
-
+            RayCoreWrapper.RayConnectDevices();
             RayCoreWrapper.RayInitialize();
 
             getBrightnessContrast();
             updateMotorState();
 
             ScanProgress = 0;
+        }
+        private void Admin()
+        {
+            RayCoreWrapper.RayStartReview(TEST_FILE_PATH);
         }
         private void Exit()
         {
@@ -439,7 +458,7 @@ namespace RaywattOCT.ViewModel
         {
             RayCoreWrapper.RayScannerState state = (RayCoreWrapper.RayScannerState)RayCoreWrapper.RayGetProperty(RayCoreWrapper.Property.CurrentState);
 
-            if (state == RayCoreWrapper.RayScannerState.SaveDone)
+            if (state == RayCoreWrapper.RayScannerState.Review)
             {
                 if (!IsPaused)
                 {
@@ -491,6 +510,7 @@ namespace RaywattOCT.ViewModel
         {
             handleState((RayCoreWrapper.RayCallbackRequest)request, (RayCoreWrapper.RayScannerState)response);
             handleProgress((RayCoreWrapper.RayCallbackRequest)request, response);
+            handleError((RayCoreWrapper.RayCallbackRequest)request, (RayCoreWrapper.RayError)response);
         }
 
         private void OnRecvCrossSection(IntPtr data, int width, int height, int ch, int frameInfo)
@@ -516,11 +536,13 @@ namespace RaywattOCT.ViewModel
 
             switch (response)
             {
-                case RayCoreWrapper.RayScannerState.InitializeFailed:
-                    SystemMessage = "Initialize Failed";
+                case RayCoreWrapper.RayScannerState.None:
                     break;
                 case RayCoreWrapper.RayScannerState.Initializing:
                     SystemMessage = "Initializing..";
+                    break;
+                case RayCoreWrapper.RayScannerState.LiveView:
+                    RayCoreWrapper.RayPreparePullback();    // Bypassing
                     break;
                 case RayCoreWrapper.RayScannerState.Homing:
                     SystemMessage = "Homing..";
@@ -541,11 +563,8 @@ namespace RaywattOCT.ViewModel
                     {
                         updatePlayPauseState();
                         updateIndicatorVisibility(true);
-                        SystemMessage = "Scan Done";
+                        SystemMessage = "Review";
                     }
-                    break;
-                case RayCoreWrapper.RayScannerState.SaveDone:
-                    updateIndicatorVisibility(true);
                     break;
                 default:
                     break;
@@ -559,6 +578,22 @@ namespace RaywattOCT.ViewModel
             int totalFrame = (response) & 0x00FFFF;
 
             ScanProgress = (int)((double)curFrame / (double)totalFrame) * 100;
+        }
+
+        private void handleError(RayCoreWrapper.RayCallbackRequest request, RayCoreWrapper.RayError response) 
+        {
+            if (request != RayCoreWrapper.RayCallbackRequest.Error) return;
+
+            switch (response) {
+                case RayCoreWrapper.RayError.DeviceNotConnected:
+                    SystemMessage = "Devices Not Connected";
+                    break;
+                case RayCoreWrapper.RayError.InitializeFailed:
+                    SystemMessage = "Initialize Failed";
+                    break;
+                default:
+                    break;
+            }
         }
 
         private string generateFileName(string ext)

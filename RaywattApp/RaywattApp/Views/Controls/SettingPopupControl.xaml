@@ -16,7 +16,6 @@
 
         <StackPanel Grid.Row="0" Background="Black" Orientation="Horizontal">
             <Label Content="{Binding [Setting], Source={StaticResource L10N}}" Foreground="White"></Label>
-            <Button Content="Message popup Test" Grid.Row="1" HorizontalAlignment="Right" Margin="5" Click="Button_Click"/>
         </StackPanel>
 
         <Grid Grid.Row="1">
@@ -25,8 +24,10 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0">
-                <Button Width="100" Command="{Binding PopupNavigateCommand}" CommandParameter="Views/Setting/SettingAcquisitionPage.xaml" Content="{Binding [Acquisition], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-                <Button Width="100" Command="{Binding PopupNavigateCommand}" CommandParameter="Views/Setting/SettingLocalizationPage.xaml" Content="{Binding [Localization], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+                <Button Width="100" Command="{Binding PopupNavigateCommand}" CommandParameter="Views/Setting/SettingAcquisitionPage.xaml" Content="{Binding [Acquisition], Source={StaticResource L10N}}" Margin="5,5,5,5" Background="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter=Views/Setting/SettingAcquisitionPage.xaml}"/>
+                <Button Width="100" Command="{Binding PopupNavigateCommand}" CommandParameter="Views/Setting/SettingLocalizationPage.xaml" Content="{Binding [Localization], Source={StaticResource L10N}}" Margin="5,5,5,5" Background="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter=Views/Setting/SettingLocalizationPage.xaml}"/>
+                <Button Width="100" Command="{Binding PopupNavigateCommand}" CommandParameter="Views/Setting/SettingDatabasePage.xaml" Content="{Binding [Database], Source={StaticResource L10N}}" Margin="5,5,5,5" Background="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter=Views/Setting/SettingDatabasePage.xaml}"/>
+                <Button Width="100" Command="{Binding PopupNavigateCommand}" CommandParameter="Views/Setting/SettingPhysicianPage.xaml" Content="{Binding [Physician], Source={StaticResource L10N}}" Margin="5,5,5,5" Background="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter=Views/Setting/SettingPhysicianPage.xaml}"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Height="800">
                 <Frame NavigationUIVisibility="Hidden">

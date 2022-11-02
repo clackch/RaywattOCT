@@ -10,6 +10,8 @@ using System.Windows.Input;
 using RaywattApp.Common.Paging;
 using log4net;
 using RaywattApp.Common.Bases;
+using System.Windows.Navigation;
+using System.Reflection;
 
 namespace RaywattApp.ViewModels
 {
@@ -17,7 +19,10 @@ namespace RaywattApp.ViewModels
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(PatientListViewModel));
 
-        private readonly IDatabaseService _databaseService;
+        private readonly SqlManager _sqlManager;
+
+        [ObservableProperty]
+        private PrevStatus _prevStatus;
 
         [ObservableProperty]
         private IList<Patient> _patientList;
@@ -76,34 +81,52 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private string _headerUpdateDate;
 
-        public PatientListViewModel(IDatabaseService databaseService)
+        [ObservableProperty]
+        private string _headerLastCase;
+
+        public PatientListViewModel(SqlManager sqlManager)
         {
             _log.Debug("PatientListViewModel");
 
             CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.PatientListPage;
 
-            _databaseService = databaseService;
+            _sqlManager = sqlManager;
 
             //Header Name
             SetHeaderNameInit();
 
             //Order
-            ColumOrderField = "update_date";
+            ColumOrderField = "last_case";
             bColumnOrderBy = false;
             strColumnOrder = ColumOrderField + " DESC";
 
             //Initial Order Field
-            HeaderUpdateDate = HeaderUpdateDate + " ▼";
+            HeaderLastCase = HeaderLastCase + " ▼";
+            strColumnHeaderColumn = "LastCase";
 
             //Initialize Complete
             bCheckInit = true;
+
+            //Initialize SearchKeyword
+            SearchKeyword = "";
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
             _log.Debug("OnNavigated");
 
-            Search();
+            var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
+
+            if (extraData != null)
+            {
+                PrevStatus = (PrevStatus)extraData;
+
+                SetPrevStatus();
+            }
+            else
+            {
+                Search();
+            }
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -111,36 +134,22 @@ namespace RaywattApp.ViewModels
             _log.Debug("OnNavigating");
         }
 
-        private void GetTotalCnt(string commandText, Dictionary<string, Object> commandParameters)
-        {
-            _log.Debug("GetTotalCnt");
-
-            commandText = $"SELECT count(*) FROM (" + commandText + ") t";
-
-            PagingTotalCnt = _databaseService.GetDataCount(commandText, commandParameters);
-        }
-
         override protected void Search()
         {
             _log.Debug("Search");
 
-            Dictionary<string, Object> commandParameters = new Dictionary<string, Object>();
-            commandParameters["id"] = "%" + SearchKeyword + "%";
-            commandParameters["lastname"] = "%" + SearchKeyword + "%";
-            commandParameters["firstname"] = "%" + SearchKeyword + "%";
-            string commandText =
-                $"SELECT id, lastname, firstname, birthdate, rv_schema.fn_code('GEND', gender) gender, to_char(create_date,'YYYY-MM-DD HH24:MI:SS') createdate, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') updatedate " +
-                $"FROM rv_schema.patient " +
-                $"WHERE id LIKE @id OR lastname LIKE @lastname OR firstname LIKE @firstname";
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["SearchKeyword"] = SearchKeyword.Trim();
 
             //Paging을 위한 전체 Row 수 Count
-            GetTotalCnt(commandText, commandParameters);
+            PagingTotalCnt = _sqlManager.PageCountPatientList(sqlParameters);
 
-            //Ordering & Paging
-            commandText += $"{_databaseService.getAddtionalCondition(strColumnOrder, PagingSelectedPageSize, PagingOffset)}";
+            Dictionary<string, Object> sqlAdditionalCondition = new Dictionary<string, Object>();
+            sqlAdditionalCondition["ORDER"] = strColumnOrder;
+            sqlAdditionalCondition["LIMIT"] = PagingSelectedPageSize;
+            sqlAdditionalCondition["OFFSET"] = PagingOffset;
 
-            var datas = _databaseService.GetDatas<Patient>(commandText, commandParameters);
-            PatientList = datas;            
+            PatientList = _sqlManager.PageSelectPatientList(sqlParameters, sqlAdditionalCondition);
         }
 
         override protected void SetHeaderNameInit()
@@ -154,6 +163,34 @@ namespace RaywattApp.ViewModels
             HeaderGender = _l10n["Gender"];
             HeaderCreateDate = _l10n["Create Date"];
             HeaderUpdateDate = _l10n["Update Date"];
+            HeaderLastCase = _l10n["Last Case (total)"];
+        }
+
+        private void SetPrevStatus()
+        {
+            SearchKeyword = PrevStatus.ListKeyword;
+            strColumnOrder = PrevStatus.ListSort;
+            strColumnHeaderColumn = PrevStatus.ListSortField;
+            bColumnOrderBy = PrevStatus.ListSortDirection;
+            PagingSelectedPageSize = PrevStatus.ListPageSize;
+            PagingOffset = PrevStatus.ListPageOffset;
+
+            ShowPageNo(PrevStatus.ListPageGroup);
+            MovePageNo((PrevStatus.ListPageNumber + 1).ToString());
+            SetHeaderNameInit();
+            PropertyInfo piHeaderName = GetType().GetProperty("Header" + PrevStatus.ListSortField);
+
+            if (piHeaderName != null)
+            {
+                if (PrevStatus.ListSortDirection)
+                {
+                    piHeaderName.SetValue(this, piHeaderName.GetValue(this) + " ▲");
+                }
+                else
+                {
+                    piHeaderName.SetValue(this, piHeaderName.GetValue(this) + " ▼");
+                }
+            }
         }
 
         private void Import()
@@ -170,18 +207,39 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "FilePopupControl", Type = (int)CommonDefinition.PopupType.File, FileType = (int)CommonDefinition.FileType.Export });
         }
 
-        private void MovePatientDetail(Patient param)
+        private void MovePatientDetail(Patient patient)
         {
             _log.Debug("MovePatientDetail");
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = param});
+            if (patient == null)
+                return;
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = patient;
+            parameter["prevStatus"] = GetListStatus();
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = parameter });
         }
 
         private void MovePatientNew()
         {
             _log.Debug("MovePatientNew");
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientNewPage.xaml"));
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientNewPage.xaml") {  Parameter = GetListStatus() });
+        }
+
+        private PrevStatus GetListStatus()
+        {
+            PrevStatus prevStatus = new PrevStatus();
+            prevStatus.ListKeyword = SearchKeyword;
+            prevStatus.ListSortField = strColumnHeaderColumn;
+            prevStatus.ListSortDirection = bColumnOrderBy;
+            prevStatus.ListSort = strColumnOrder;
+            prevStatus.ListPageOffset = PagingOffset;
+            prevStatus.ListPageSize = PagingSelectedPageSize;
+            prevStatus.ListPageGroup = ((PagingNoIdx - 1) / Constants.PageNumberMax) * Constants.PageNumberMax + 1;
+            prevStatus.ListPageNumber = PagingNoIdx;
+
+            return prevStatus;
         }
     }
 }

@@ -51,6 +51,7 @@ COCTImaging::COCTImaging(CMessageService* pMsg) {
 	m_bColor = false;
 	m_fBrightness = 0.0f;
 	m_fContrast = 1.0f;
+	m_backgroundColor = cv::Scalar(0x00, 0x00, 0x00);
 
 	m_nCurFrame = 0;
 	m_nTotalFrame = 0;
@@ -140,8 +141,6 @@ void COCTImaging::allocateMemory() {
 	ippsFFTInitAlloc_R_32f(&fftSpecFirst, nFFTOrder, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
 	ippsFFTInitAlloc_C_32fc(&ifftSpec, nFFTOrder, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
 	ippsFFTInitAlloc_C_32fc(&fftSpecSecond, nFFTOrder - 1, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
-
-	imageBackground.setTo(cv::Scalar(0x18, 0x15, 0x16));
 }
 void COCTImaging::releaseMemory() {
 	CConfiguration& config = CConfiguration::GetInstance();
@@ -297,6 +296,7 @@ void COCTImaging::postProcessing() {
 
 	circularizeImage(imageResultColor, imageCircle);
 
+	imageBackground.setTo(m_backgroundColor);
 	cv::copyTo(imageBackground, imageCircle, imageMask);
 }
 

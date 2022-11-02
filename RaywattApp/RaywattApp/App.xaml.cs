@@ -44,25 +44,38 @@ namespace RaywattApp
             services.AddTransient(typeof(MainViewModel));
             services.AddTransient(typeof(PatientListViewModel));
             services.AddTransient(typeof(PatientNewViewModel));
+            services.AddTransient(typeof(PatientEditViewModel));
             services.AddTransient(typeof(PatientDetailViewModel));
             services.AddTransient(typeof(RecordingViewModel));
+            services.AddTransient(typeof(ReviewViewModel));
 
             //Setting
             services.AddTransient(typeof(SettingAcquisitionViewModel));
             services.AddTransient(typeof(SettingLocalizationViewModel));
+            services.AddTransient(typeof(SettingDatabaseViewModel));
+            services.AddTransient(typeof(SettingPhysicianViewModel));
 
             //File
             services.AddTransient(typeof(FileExportStep1ViewModel));
             services.AddTransient(typeof(FileExportStep2ViewModel));
+            services.AddTransient(typeof(FileExportStep2NativeViewModel));
             services.AddTransient(typeof(FileImportViewModel));
 
             //Control 등록
             services.AddTransient(typeof(MessagePopupControl));
+            services.AddTransient(typeof(QuestionPopupControl));
             services.AddTransient(typeof(SettingPopupControl));
             services.AddTransient(typeof(FilePopupControl));
+            services.AddTransient(typeof(EditVessProcPopupControl)); 
+            services.AddTransient(typeof(EditCasePopupControl));
+            services.AddTransient(typeof(PasswordProtectedPopupControl));
+            services.AddTransient(typeof(AlternatedPatientIdPopupControl)); 
+            services.AddTransient(typeof(FolderBrowserPopupControl)); 
+            services.AddTransient(typeof(CreateRenameFolderPopupControl));
 
             //IDatabaseService 등록 (Singleton 사용 안함 => Connection Pooling을 Default로 사용)
             services.AddTransient<IDatabaseService, SqlService>(obj => new SqlService(connectionString));
+            services.AddTransient(typeof(SqlManager));
 
             return services.BuildServiceProvider();
         }

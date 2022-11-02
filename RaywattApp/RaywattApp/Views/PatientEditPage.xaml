@@ -1,0 +1,59 @@
+﻿<Page x:Class="RaywattApp.Views.PatientEditPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:RaywattApp.Views"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="PatientEditPage">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Background="Gray">
+            <Label Content="{Binding [Edit Patient], Source={StaticResource L10N}}"></Label>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="120"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Margin="5,5,5,5"><TextBlock Text="{Binding [ID], Source={StaticResource L10N}}"/><TextBlock Text=" (*)" Foreground="Red"/></TextBlock>
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding PatientEdit.Id, UpdateSourceTrigger=PropertyChanged}" Margin="5,5,5,5"/>
+                <TextBlock Grid.Row="1" Margin="5,5,5,5"><TextBlock Text="{Binding [Last Name], Source={StaticResource L10N}}"/><TextBlock Text=" (*)" Foreground="Red"/></TextBlock>
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding PatientEdit.Lastname, UpdateSourceTrigger=PropertyChanged}" Margin="5,5,5,5"/>
+                <TextBlock Grid.Row="2" Margin="5,5,5,5"><TextBlock Text="{Binding [First Name], Source={StaticResource L10N}}"/><TextBlock Text=" (*)" Foreground="Red"/></TextBlock>
+                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding PatientEdit.Firstname, UpdateSourceTrigger=PropertyChanged}" Margin="5,5,5,5"/>
+                <TextBlock Grid.Row="3" Margin="5,5,5,5"><TextBlock Text="{Binding [Birth Date], Source={StaticResource L10N}}"/><TextBlock Text=" (*)" Foreground="Red"/></TextBlock>
+                <DatePicker Grid.Row="3" Grid.Column="1" SelectedDate="{Binding PatientEdit.Birthdate, UpdateSourceTrigger=PropertyChanged}" Margin="5,5,5,5"/>
+                <TextBlock Grid.Row="4" Text="{Binding [Gender], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+                <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Margin="5,5,5,5">
+                    <RadioButton IsChecked="{Binding GenderCodeEdit, Converter={StaticResource RadioButtonConverter}, ConverterParameter='M'}" Content="{Binding [Male], Source={StaticResource L10N}}"></RadioButton>
+                    <RadioButton IsChecked="{Binding GenderCodeEdit, Converter={StaticResource RadioButtonConverter}, ConverterParameter='F'}" Content="{Binding [Female], Source={StaticResource L10N}}"></RadioButton>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" >
+            <Button Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+            <Button Command="{Binding PatientEditSaveCommand}" Content="{Binding [OK], Source={StaticResource L10N}}" Grid.Row="1" HorizontalAlignment="Right" Width="50" Margin="5" Background="Black" Foreground="White" />
+        </StackPanel>
+
+    </Grid>
+</Page>

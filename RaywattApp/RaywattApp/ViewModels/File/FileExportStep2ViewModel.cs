@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.File;
+using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using System.Windows.Navigation;
 
@@ -31,10 +33,14 @@ namespace RaywattApp.ViewModels.File
             _log.Debug("OnNavigating");
         }
 
-        protected override void Import()
+        protected override void Back()
         {
-            _log.Debug("Import");
+            _log.Debug("Back");
+
+            WeakReferenceMessenger.Default.Send(new PopupNavigationMessage("Views/File/FileExportStep1Page.xaml") { Parameter = FileExportData });
         }
+
+        //protected override void 
 
         private void SetCondition(FileExport fileExportData)
         {

@@ -9,14 +9,20 @@
             PatientListPage = 0,
             PatientDetailPage,
             PatientNewPage,
-            RecordingPage
+            PatientEditPage,
+            RecordingPage,
+            ReviewPage
         }
 
         public enum PopupType : int
         {
             Message = 0,
+            Question,
+            Edit,
             Setting,
-            File
+            File,
+            Lookup,
+            Extra
         }
 
         public enum PopupLevel : int
@@ -30,6 +36,25 @@
         {
             Export = 0,
             Import
+        }
+
+        public enum CallbackQuestion : int
+        {
+            PatientCaseDelete = 0
+        }
+
+        public enum CallbackEdit : int
+        {
+            Vessel = 100,
+            Procedure,
+            Case,
+            Password,
+            AlternateId
+        }
+
+        public enum CallbackLookup : int
+        {
+            FolderBrowser = 200
         }
     }
 }
