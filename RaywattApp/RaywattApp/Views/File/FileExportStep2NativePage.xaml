@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:RaywattApp.Views.File"
+      xmlns:const="clr-namespace:RaywattApp.Common.Bases"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="FileExportStep2NativePage">
@@ -51,16 +52,16 @@
                         <RowDefinition/>
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" VerticalAlignment="Center" Margin="50,0,0,0">
-                        <RadioButton Grid.Row="0" IsChecked="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Archive'}" Content="{Binding [Archive], Source={StaticResource L10N}}"/>
+                        <RadioButton Grid.Row="0" IsChecked="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportPurposeArchive}}" Content="{Binding [Archive], Source={StaticResource L10N}}"/>
                     </StackPanel>
                     <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="50,0,0,0">
-                        <RadioButton Grid.Row="1" IsChecked="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Share'}" Content="{Binding [Share], Source={StaticResource L10N}}"/>
+                        <RadioButton Grid.Row="1" IsChecked="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportPurposeShare}}" Content="{Binding [Share], Source={StaticResource L10N}}"/>
                     </StackPanel>
                     <StackPanel Grid.Row="2" VerticalAlignment="Center" Margin="50,0,0,0">
-                        <RadioButton Grid.Row="2" IsChecked="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Report'}" Content="{Binding [Report a Problem], Source={StaticResource L10N}}"/>
+                        <RadioButton Grid.Row="2" IsChecked="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportPurposeReport}}" Content="{Binding [Report a Problem], Source={StaticResource L10N}}"/>
                     </StackPanel>
-                    <Button Grid.Row="0" Grid.Column="1" Command="{Binding PasswordCommand}" Content="{Binding [Password Protected], Source={StaticResource L10N}}" IsEnabled="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Archive'}" Width="150" Height="20" HorizontalAlignment="Left"/>
-                    <Button Grid.Row="1" Grid.Column="1" Command="{Binding AlternateCommand}" Content="{Binding [Alternate Patient IDs], Source={StaticResource L10N}}" IsEnabled="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Share'}" Width="150" Height="20" HorizontalAlignment="Left"/>
+                    <Button Grid.Row="0" Grid.Column="1" Command="{Binding PasswordCommand}" Content="{Binding [Password Protected], Source={StaticResource L10N}}" IsEnabled="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportPurposeArchive}}" Width="150" Height="20" HorizontalAlignment="Left"/>
+                    <Button Grid.Row="1" Grid.Column="1" Command="{Binding AlternateCommand}" Content="{Binding [Alternate Patient IDs], Source={StaticResource L10N}}" IsEnabled="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportPurposeShare}}" Width="150" Height="20" HorizontalAlignment="Left"/>
                 </Grid>
             </Border>
 
@@ -75,13 +76,13 @@
                         <RowDefinition/>
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" VerticalAlignment="Center" Margin="50,0,0,0">
-                        <RadioButton IsChecked="{Binding FileExport.FileOption, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Leave'}" Content="{Binding [Leave Unchanged], Source={StaticResource L10N}}"/>
+                        <RadioButton IsChecked="{Binding FileExport.FileOption, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportOptionUnchanged}}" Content="{Binding [Leave Unchanged], Source={StaticResource L10N}}"/>
                     </StackPanel>
                     <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="50,0,0,0">
-                        <RadioButton Grid.Row="1" IsChecked="{Binding FileExport.FileOption, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Mark'}" Content="{Binding [Mark as Archived], Source={StaticResource L10N}}"/>
+                        <RadioButton Grid.Row="1" IsChecked="{Binding FileExport.FileOption, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportOptionArchived}}" Content="{Binding [Mark as Archived], Source={StaticResource L10N}}"/>
                     </StackPanel>
                     <StackPanel Grid.Row="2" VerticalAlignment="Center" Margin="50,0,0,0">
-                        <RadioButton Grid.Row="2" IsChecked="{Binding FileExport.FileOption, Converter={StaticResource RadioButtonConverter}, ConverterParameter='Remove'}" Content="{Binding [Remove when Complete], Source={StaticResource L10N}}"/>
+                        <RadioButton Grid.Row="2" IsChecked="{Binding FileExport.FileOption, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportOptionRemove}}" Content="{Binding [Remove when Complete], Source={StaticResource L10N}}"/>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -116,11 +117,11 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <RadioButton Grid.Column="0" IsChecked="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter='CD'}" Content="{Binding [CD/DVD], Source={StaticResource L10N}}"  VerticalAlignment="Center" Margin="50,0,0,0"/>
-                        <CheckBox Grid.Column="1" IsChecked="{Binding FileExport.EjectWhenComplete}" Content="{Binding [Eject when Complete], Source={StaticResource L10N}}" Visibility="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter='CD'}" VerticalAlignment="Center" Margin="50,0,0,0"/>
+                        <RadioButton Grid.Column="0" IsChecked="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportDiskCd}}" Content="{Binding [CD/DVD], Source={StaticResource L10N}}"  VerticalAlignment="Center" Margin="50,0,0,0"/>
+                        <CheckBox Grid.Column="1" IsChecked="{Binding FileExport.EjectWhenComplete}" Content="{Binding [Eject when Complete], Source={StaticResource L10N}}" Visibility="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.ExportDiskCd}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
                     </Grid>
-                    <RadioButton Grid.Row="1" IsChecked="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter='External'}" Content="{Binding [External Drive], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
-                    <Border Grid.Column="1" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1" Margin="5" Visibility="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter='CD'}">
+                    <RadioButton Grid.Row="1" IsChecked="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportDiskExternal}}" Content="{Binding [External Drive], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
+                    <Border Grid.Column="1" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1" Margin="5" Visibility="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.ExportDiskCd}}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition/>
@@ -136,7 +137,7 @@
                             </StackPanel>
                         </Grid>
                     </Border>
-                    <Border Grid.Column="1" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1" Margin="5" Visibility="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter='External'}">
+                    <Border Grid.Column="1" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1" Margin="5" Visibility="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.ExportDiskExternal}}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition/>

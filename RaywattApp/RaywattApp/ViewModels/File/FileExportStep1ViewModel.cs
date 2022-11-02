@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
+using RaywattApp.Common.Bases;
 using RaywattApp.Common.File;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
@@ -73,7 +74,7 @@ namespace RaywattApp.ViewModels.File
                 }
                 else
                 {
-                    FileExport.Type = "N";
+                    FileExport.Type = Constants.ExportTypeNative;
 
                     SetPatientList(null);
                 }
@@ -118,12 +119,12 @@ namespace RaywattApp.ViewModels.File
 
             switch (FileExport.Type)
             {
-                case "N":
+                case Constants.ExportTypeNative :
                     WeakReferenceMessenger.Default.Send(new PopupNavigationMessage("Views/File/FileExportStep2NativePage.xaml") { Parameter = FileExport });
                     break;
-                case "D":
+                case Constants.ExportTypeDicom:
                     break;
-                case "S":
+                case Constants.ExportTypeStandard:
                     break;
                 default:
                     break;
@@ -141,7 +142,7 @@ namespace RaywattApp.ViewModels.File
             }
 
             if (FileExport.Type == null)
-                FileExport.Type = "N";
+                FileExport.Type = Constants.ExportTypeNative;
 
             SetPatientList(FileExport.PatientId);
         }

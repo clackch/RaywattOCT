@@ -13,6 +13,7 @@ using System.IO;
 using System.Windows.Threading;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Views.Dialog;
+using RaywattApp.Common.Bases;
 
 namespace RaywattApp.ViewModels.File
 {
@@ -218,13 +219,13 @@ namespace RaywattApp.ViewModels.File
             _log.Debug("SetCondition");
 
             if (FileExport.Purpose == null)
-                FileExport.Purpose = "Archive";//Archive
+                FileExport.Purpose = Constants.ExportPurposeArchive;
 
             if (FileExport.FileOption == null)
-                FileExport.FileOption = "Leave";//Leave Unchanged
+                FileExport.FileOption = Constants.ExportOptionUnchanged;
 
             if (FileExport.DiskType == null)
-                FileExport.DiskType = "CD";//CD/DVD
+                FileExport.DiskType = Constants.ExportDiskCd;
 
             if (FileExport.Password == null)
                 FileExport.Password = "";
