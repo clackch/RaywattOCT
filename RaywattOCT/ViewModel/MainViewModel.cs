@@ -433,13 +433,6 @@ namespace RaywattOCT.ViewModel
         private void Admin()
         {
             RayCoreWrapper.RayStartReview(TEST_FILE_PATH);
-
-            if (window3D == null)
-            {
-                window3D = new Window3DRender();
-                window3D.Show();
-                hWnd3D = new System.Windows.Interop.WindowInteropHelper(window3D).Handle;
-            }
         }
         private void Exit()
         {
@@ -628,16 +621,26 @@ namespace RaywattOCT.ViewModel
             switch (response)
             {
                 case RayCoreWrapper.RayWorkItem.GenerateVolume:
-                    {                        
-                        int volumeWidth = (int) RayCoreWrapper.RayGetProperty(RayCoreWrapper.Property.VolumeWidth);
-                        int volumeHeight = (int) RayCoreWrapper.RayGetProperty(RayCoreWrapper.Property.VolumeHeight);
-                        int volumeDepth = (int) RayCoreWrapper.RayGetProperty(RayCoreWrapper.Property.VolumeDepth);
+                    {
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                            if (window3D == null)
+                            {
+                                window3D = new Window3DRender();
+                                window3D.Show();
+                                hWnd3D = new System.Windows.Interop.WindowInteropHelper(window3D).Handle;
+                            }
 
-                        Raywatt3DRenderer _3drenderer = new Raywatt3DRenderer();
-                        _3drenderer.Init((int)window3D.RenderSize.Width, (int)window3D.RenderSize.Height, hWnd3D);
+                            int volumeWidth = (int)RayCoreWrapper.RayGetProperty(RayCoreWrapper.Property.VolumeWidth);
+                            int volumeHeight = (int)RayCoreWrapper.RayGetProperty(RayCoreWrapper.Property.VolumeHeight);
+                            int volumeDepth = (int)RayCoreWrapper.RayGetProperty(RayCoreWrapper.Property.VolumeDepth);
 
-                        Raywatt3DRenderer.CreateVolumeData(volumeWidth, volumeHeight, volumeDepth, RayCoreWrapper.RayGetVolumeData());
-                        renderer = _3drenderer;
+                            Raywatt3DRenderer _3drenderer = new Raywatt3DRenderer();
+                            _3drenderer.Init((int)window3D.RenderSize.Width, (int)window3D.RenderSize.Height, hWnd3D);
+
+                            Raywatt3DRenderer.CreateVolumeData(volumeWidth, volumeHeight, volumeDepth, RayCoreWrapper.RayGetVolumeData());
+                            renderer = _3drenderer;
+                        }));                        
                     }
                     break;
                 default:
