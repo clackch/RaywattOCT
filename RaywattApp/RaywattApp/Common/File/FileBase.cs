@@ -1,8 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
-using RaywattApp.Common.Messages;
+using RaywattApp.Common.Dialog;
+using RaywattApp.Views.Dialog;
+using System.Windows;
 using System.Windows.Input;
 
 namespace RaywattApp.Common.File
@@ -41,18 +42,35 @@ namespace RaywattApp.Common.File
             get { return this._importCommand ?? (this._importCommand = new RelayCommand(Export)); }
         }
 
-        virtual protected void Cancel()
+        protected virtual void Cancel()
         {
             _log.Debug("Cancel");
-            WeakReferenceMessenger.Default.Send(new PopupMessage(false) { Type = (int)CommonDefinition.PopupType.File });
+
+            CloseDialog();
         }
 
-        virtual protected void Next() { }
+        protected void CloseDialog()
+        {
+            foreach (var winCollection in Application.Current.Windows)
+            {
+                if (winCollection.GetType() == typeof(DialogWindow))
+                {
+                    if ("fileDialogControl".Equals(((winCollection as DialogWindow).Content as FileDialogControl).Name))
+                    {
+                        var dialog = (DialogWindow)winCollection;
+                        dialog.DialogResult = true;
+                        break;
+                    }
+                }
+            }
+        }
 
-        virtual protected void Export() { }
+        protected virtual void Next() { }
 
-        virtual protected void Import() { }
+        protected virtual void Export() { }
 
-        virtual protected void Back() { }
+        protected virtual void Import() { }
+
+        protected virtual void Back() { }
     }
 }

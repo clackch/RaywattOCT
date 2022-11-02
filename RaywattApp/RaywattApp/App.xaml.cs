@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using RaywattApp.Views.Controls;
 using RaywattApp.Services;
 using RaywattApp.ViewModels;
 using RaywattApp.ViewModels.File;
@@ -7,6 +6,8 @@ using RaywattApp.ViewModels.Setting;
 using System;
 using System.Configuration;
 using System.Windows;
+using RaywattApp.ViewModels.Dialog;
+using RaywattApp.Common.Dialog;
 
 namespace RaywattApp
 {
@@ -61,17 +62,19 @@ namespace RaywattApp
             services.AddTransient(typeof(FileExportStep2NativeViewModel));
             services.AddTransient(typeof(FileImportViewModel));
 
-            //Control 등록
-            services.AddTransient(typeof(MessagePopupControl));
-            services.AddTransient(typeof(QuestionPopupControl));
-            services.AddTransient(typeof(SettingPopupControl));
-            services.AddTransient(typeof(FilePopupControl));
-            services.AddTransient(typeof(EditVessProcPopupControl)); 
-            services.AddTransient(typeof(EditCasePopupControl));
-            services.AddTransient(typeof(PasswordProtectedPopupControl));
-            services.AddTransient(typeof(AlternatedPatientIdPopupControl)); 
-            services.AddTransient(typeof(FolderBrowserPopupControl)); 
-            services.AddTransient(typeof(CreateRenameFolderPopupControl));
+            //Dialog 등록
+            services.AddTransient<IDialogService, DialogService>();
+            services.AddTransient(typeof(AlertDialogViewModel));
+            services.AddTransient(typeof(ConfirmDialogViewModel));
+            services.AddTransient(typeof(EditOctInfoDialogViewModel));
+            services.AddTransient(typeof(EditCaseInfoDialogViewModel));
+            services.AddTransient(typeof(SettingDialogViewModel));
+            services.AddTransient(typeof(FileDialogViewModel));
+            services.AddTransient(typeof(FilePasswordDialogViewModel));
+            services.AddTransient(typeof(FileAlternateIdDialogViewModel));
+            services.AddTransient(typeof(FileFolderBrowseDialogViewModel));
+            services.AddTransient(typeof(FileFolderActionDialogViewModel));          
+            
 
             //IDatabaseService 등록 (Singleton 사용 안함 => Connection Pooling을 Default로 사용)
             services.AddTransient<IDatabaseService, SqlService>(obj => new SqlService(connectionString));

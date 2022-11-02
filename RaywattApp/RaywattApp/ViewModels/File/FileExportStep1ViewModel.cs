@@ -21,7 +21,7 @@ namespace RaywattApp.ViewModels.File
         private readonly SqlManager _sqlManager;
 
         [ObservableProperty]
-        FileExport _fileExportData;
+        FileExport _fileExport;
 
         [ObservableProperty]
         IList<Patient> _patientList;
@@ -65,15 +65,18 @@ namespace RaywattApp.ViewModels.File
 
             if (extraData != null)
             {
-                FileExportData = (FileExport)extraData;
-                SetCondition();
-            }
-            else
-            {
-                FileExportData = new FileExport();
-                FileExportData.Type = "N";
+                FileExport = (FileExport)extraData;
 
-                SetPatientList(null);
+                if(FileExport.SelectedItem !=  null)
+                {
+                    SetCondition();
+                }
+                else
+                {
+                    FileExport.Type = "N";
+
+                    SetPatientList(null);
+                }
             }
         }
 
@@ -86,15 +89,15 @@ namespace RaywattApp.ViewModels.File
         {
             _log.Debug("Next");
 
-            if (FileExportData.SelectedItem == null)
-                FileExportData.SelectedItem = new List<string>();
+            if (FileExport.SelectedItem == null)
+                FileExport.SelectedItem = new List<string>();
             else
-                FileExportData.SelectedItem.Clear();
+                FileExport.SelectedItem.Clear();
 
-            if (FileExportData.PatientList == null)
-                FileExportData.PatientList = new List<string>();
+            if (FileExport.PatientList == null)
+                FileExport.PatientList = new List<string>();
             else
-                FileExportData.PatientList.Clear();
+                FileExport.PatientList.Clear();
 
             foreach (Patient patient in PatientList)
             {
@@ -106,17 +109,17 @@ namespace RaywattApp.ViewModels.File
                     if (patientCase.IsChecked)
                     {
                         _log.Debug(patientCase.Id);
-                        if(!FileExportData.PatientList.Contains(patient.Id))
-                            FileExportData.PatientList.Add(patient.Id);
-                        FileExportData.SelectedItem.Add(patientCase.Id);
+                        if(!FileExport.PatientList.Contains(patient.Id))
+                            FileExport.PatientList.Add(patient.Id);
+                        FileExport.SelectedItem.Add(patientCase.Id);
                     }
                 }
             }
 
-            switch (FileExportData.Type)
+            switch (FileExport.Type)
             {
                 case "N":
-                    WeakReferenceMessenger.Default.Send(new PopupNavigationMessage("Views/File/FileExportStep2NativePage.xaml") { Parameter = FileExportData });
+                    WeakReferenceMessenger.Default.Send(new PopupNavigationMessage("Views/File/FileExportStep2NativePage.xaml") { Parameter = FileExport });
                     break;
                 case "D":
                     break;
@@ -132,15 +135,15 @@ namespace RaywattApp.ViewModels.File
         {
             _log.Debug("SetCondition");
 
-            foreach(var item in FileExportData.SelectedItem)
+            foreach(var item in FileExport.SelectedItem)
             {
                 _log.Debug(item.ToString());
             }
 
-            if (FileExportData.Type == null)
-                FileExportData.Type = "N";
+            if (FileExport.Type == null)
+                FileExport.Type = "N";
 
-            SetPatientList(FileExportData.PatientId);
+            SetPatientList(FileExport.PatientId);
         }
 
         private void SetPatientList(string patientId)
@@ -175,12 +178,12 @@ namespace RaywattApp.ViewModels.File
         {
             _log.Debug("SetPatientCase");
 
-            if (FileExportData.PatientList == null || FileExportData.PatientList.Count == 0)
+            if (FileExport.PatientList == null || FileExport.PatientList.Count == 0)
                 return;
 
             foreach (Patient patient in PatientList)
             {
-                foreach (string pId in FileExportData.PatientList)
+                foreach (string pId in FileExport.PatientList)
                 {
                     if (patient.Id == pId)
                     {
@@ -199,7 +202,7 @@ namespace RaywattApp.ViewModels.File
         {
             _log.Debug("SetSelectedCase");
 
-            if (FileExportData.SelectedItem == null || FileExportData.SelectedItem.Count == 0)
+            if (FileExport.SelectedItem == null || FileExport.SelectedItem.Count == 0)
                 return;
 
             foreach (Patient patient in PatientList)
@@ -209,7 +212,7 @@ namespace RaywattApp.ViewModels.File
 
                 foreach (PatientCase patientCase in patient.PatientCaseList)
                 {
-                    foreach (string item in FileExportData.SelectedItem)
+                    foreach (string item in FileExport.SelectedItem)
                     {
                         if (patientCase.Id == item)
                         {

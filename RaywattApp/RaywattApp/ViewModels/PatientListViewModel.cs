@@ -12,6 +12,8 @@ using log4net;
 using RaywattApp.Common.Bases;
 using System.Windows.Navigation;
 using System.Reflection;
+using RaywattApp.Common.Dialog;
+using RaywattApp.Views.Dialog;
 
 namespace RaywattApp.ViewModels
 {
@@ -20,6 +22,8 @@ namespace RaywattApp.ViewModels
         private static readonly ILog _log = LogManager.GetLogger(typeof(PatientListViewModel));
 
         private readonly SqlManager _sqlManager;
+
+        private IDialogService _dialogService;
 
         [ObservableProperty]
         private PrevStatus _prevStatus;
@@ -84,13 +88,14 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private string _headerLastCase;
 
-        public PatientListViewModel(SqlManager sqlManager)
+        public PatientListViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
             _log.Debug("PatientListViewModel");
 
             CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.PatientListPage;
 
             _sqlManager = sqlManager;
+            _dialogService = dialogService;
 
             //Header Name
             SetHeaderNameInit();
@@ -197,14 +202,20 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Import");
 
-            WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "FilePopupControl", Type = (int)CommonDefinition.PopupType.File, FileType = (int)CommonDefinition.FileType.Import });
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["fileType"] = CommonDefinition.FileType.Import;
+
+            var result = _dialogService.OpenDialog(new FileDialogControl(), parameter);
         }
 
         private void Export()
         {
             _log.Debug("Export");
 
-            WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "FilePopupControl", Type = (int)CommonDefinition.PopupType.File, FileType = (int)CommonDefinition.FileType.Export });
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["fileType"] = CommonDefinition.FileType.Export;
+
+            var result = _dialogService.OpenDialog(new FileDialogControl(), parameter);
         }
 
         private void MovePatientDetail(Patient patient)

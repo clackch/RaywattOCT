@@ -1,7 +1,6 @@
 ﻿using log4net;
 using RaywattApp.Models;
 using RaywattApp.Services;
-using System;
 using System.Collections.Generic;
 
 namespace RaywattApp.Common.Bases

@@ -14,47 +14,16 @@
             ReviewPage
         }
 
-        public enum PopupType : int
-        {
-            Message = 0,
-            Question,
-            Edit,
-            Setting,
-            File,
-            Lookup,
-            Extra
-        }
-
-        public enum PopupLevel : int
-        {
-            Info = 0,
-            Warn,
-            Error
-        }
-
         public enum FileType : int
         {
             Export = 0,
             Import
         }
 
-        public enum CallbackQuestion : int
+        public enum FolderAction : int
         {
-            PatientCaseDelete = 0
-        }
-
-        public enum CallbackEdit : int
-        {
-            Vessel = 100,
-            Procedure,
-            Case,
-            Password,
-            AlternateId
-        }
-
-        public enum CallbackLookup : int
-        {
-            FolderBrowser = 200
+            Create = 0,
+            Rename
         }
     }
 }

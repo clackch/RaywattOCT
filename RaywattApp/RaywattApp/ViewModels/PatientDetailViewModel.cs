@@ -12,6 +12,8 @@ using System;
 using System.Windows.Navigation;
 using RaywattApp.Common.Paging;
 using System.Windows.Controls;
+using RaywattApp.Views.Dialog;
+using RaywattApp.Common.Dialog;
 
 namespace RaywattApp.ViewModels
 {
@@ -20,6 +22,8 @@ namespace RaywattApp.ViewModels
         private static readonly ILog _log = LogManager.GetLogger(typeof(PatientDetailViewModel));
 
         private readonly SqlManager _sqlManager;
+
+        private IDialogService _dialogService;
 
         [ObservableProperty]
         private PrevStatus _prevStatus;
@@ -101,13 +105,14 @@ namespace RaywattApp.ViewModels
             get { return this._goReviewCommand ?? (this._goReviewCommand = new RelayCommand<PatientCase>(GoReview)); }
         }
 
-        public PatientDetailViewModel(SqlManager sqlManager)
+        public PatientDetailViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
             _log.Debug("PatientDetailViewModel");
 
             CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.PatientDetailPage;
 
             _sqlManager = sqlManager;
+            _dialogService = dialogService;
 
             PagingSelectedPageSize = Constants.PageSizeDetail;
 
@@ -254,42 +259,46 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Export");
 
-            FileExport fileExportData = new FileExport();
-
-            fileExportData.PatientId = Patient.Id;
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["fileType"] = CommonDefinition.FileType.Export;
+            FileExport fileExport = new FileExport();
+            fileExport.PatientId = Patient.Id;
             GetSelectedItem();
-            fileExportData.SelectedItem = selectedItem;
+            fileExport.SelectedItem = selectedItem;
+            parameter["fileExport"] = fileExport;
 
-            WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "FilePopupControl", Type = (int)CommonDefinition.PopupType.File, FileType = (int)CommonDefinition.FileType.Export, Parameter = fileExportData });
+            var result = _dialogService.OpenDialog(new FileDialogControl(), parameter);
         }
 
         private void Delete()
         {
             _log.Debug("Delete");
 
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            DialogResults? result = null;
+
             GetSelectedItem();
 
             if (PagingTotalCnt == 0 || selectedItem.Count == 0)
             {
-                WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "MessagePopupControl", Type = (int)CommonDefinition.PopupType.Message, Level = (int)CommonDefinition.PopupLevel.Info, Parameter = _l10n["There are no items selected."] });
+                parameter.Clear();
+                parameter["title"] = _l10n["Information"];
+                parameter["message"] = _l10n["There are no items selected."];
+                result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+
                 return;
             }
 
             GetDetailStatus();
-            WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "QuestionPopupControl", Type = (int)CommonDefinition.PopupType.Question, PopupId = (int)CommonDefinition.CallbackQuestion.PatientCaseDelete, ParentObject = this, Parameter = _l10n["Are you sure to delete selected patient case?"] });
-        }
 
-        public override void CallbackPopup()
-        {
-            _log.Debug("CallbackPopup : " + PopupCallback.PopupId + "/" + PopupCallback.PopupAnswer);
+            parameter.Clear();
+            parameter["title"] = _l10n["Information"];
+            parameter["message"] = _l10n["Are you sure to delete selected patient case?"];
+            result = _dialogService.OpenDialog(new ConfirmDialogControl(), parameter);
 
-            if (PopupCallback != null)
+            if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
             {
-                if (PopupCallback.PopupId == (int)CommonDefinition.CallbackQuestion.PatientCaseDelete)
-                {
-                    if(PopupCallback.PopupAnswer)
-                        DeletePatientCase();
-                }
+                DeletePatientCase();
             }
         }
 

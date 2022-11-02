@@ -3,9 +3,11 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
+using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Services;
+using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +21,8 @@ namespace RaywattApp.ViewModels
         private static readonly ILog _log = LogManager.GetLogger(typeof(PatientEditViewModel));
 
         private readonly SqlManager _sqlManager;
+
+        private IDialogService _dialogService;
 
         [ObservableProperty]
         private PrevStatus _prevStatus;
@@ -44,13 +48,14 @@ namespace RaywattApp.ViewModels
             get { return this._patiendEditSaveCommand ?? (this._patiendEditSaveCommand = new RelayCommand(SavePatientEdit, CanSavePatient)); }
         }
 
-        public PatientEditViewModel(SqlManager sqlManager)
+        public PatientEditViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
             _log.Debug("PatientEditViewModel");
 
             CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.PatientEditPage;
 
             _sqlManager = sqlManager;
+            _dialogService = dialogService;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -104,7 +109,11 @@ namespace RaywattApp.ViewModels
 
                 if (nCnt > 0)
                 {
-                    WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "MessagePopupControl", Type = (int)CommonDefinition.PopupType.Message, Level = (int)CommonDefinition.PopupLevel.Info, Parameter = _l10n["ID is duplicated."] });
+                    Dictionary<string, object> parameter = new Dictionary<string, object>();
+                    parameter["title"] = _l10n["Information"];
+                    parameter["message"] = _l10n["ID is duplicated."];
+                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+
                     return;
                 }
             }

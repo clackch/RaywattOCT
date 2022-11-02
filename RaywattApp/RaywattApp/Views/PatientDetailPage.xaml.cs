@@ -1,5 +1,4 @@
 ﻿using RaywattApp.ViewModels;
-using System.Windows;
 using System.Windows.Controls;
 
 namespace RaywattApp.Views

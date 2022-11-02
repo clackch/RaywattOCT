@@ -144,13 +144,13 @@
                             </Grid.RowDefinitions>
                             <StackPanel Grid.Row="0" HorizontalAlignment="Left">
                                 <Label Content="{Binding [Select Drive], Source={StaticResource L10N}}"/>
-                                <ComboBox Width="300" ItemsSource="{Binding ExternalDriveComboBox}" SelectedValue="{Binding SelectedExternalDrive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectedValuePath="Key" DisplayMemberPath="Value" IsEnabled="{Binding IsEnableExternalDrive}"  Margin="5,5,5,5"/>
+                                <ComboBox Width="250" ItemsSource="{Binding ExternalDriveComboBox}" SelectedValue="{Binding SelectedExternalDrive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectedValuePath="Key" DisplayMemberPath="Value" IsEnabled="{Binding IsEnableExternalDrive}"  Margin="5,5,5,5"/>
                             </StackPanel>
                             <StackPanel Grid.Row="1" >
                                 <Label Content="{Binding [Path], Source={StaticResource L10N}}"/>
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBox Text="{Binding FileExport.ExternalDrivePath}" IsReadOnly="True" Width="300" Margin="5,5,5,5"/>
-                                    <Button Width="50" Command="{Binding ExternalDrivePathCommand}" Content="{Binding [Path], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+                                    <TextBox Text="{Binding FileExport.ExternalDrivePath}" IsReadOnly="True" Width="250" Margin="5,5,5,5"/>
+                                    <Button Width="40" Command="{Binding ExternalDrivePathCommand}" Content="{Binding [Path], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
                                 </StackPanel>
                             </StackPanel>
                         </Grid>

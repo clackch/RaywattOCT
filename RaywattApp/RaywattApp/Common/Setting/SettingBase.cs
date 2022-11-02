@@ -2,7 +2,10 @@
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
+using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
+using RaywattApp.Views.Dialog;
+using System.Windows;
 using System.Windows.Input;
 
 namespace RaywattApp.Common.Setting
@@ -38,17 +41,35 @@ namespace RaywattApp.Common.Setting
         private void Refresh()
         {
             _log.Debug("Refresh");
+
             WeakReferenceMessenger.Default.Send(new PopupNavigationMessage("Refresh"));
         }
 
         private void Cancel()
         {
             _log.Debug("Cancel");
-            WeakReferenceMessenger.Default.Send(new PopupMessage(false) { Type = (int)CommonDefinition.PopupType.Setting });
+
+            CloseDialog();
         }
 
-        virtual protected void Okay() { }
+        protected void CloseDialog()
+        {
+            foreach (var winCollection in Application.Current.Windows)
+            {
+                if (winCollection.GetType() == typeof(DialogWindow))
+                {
+                    if ("settingDialogControl".Equals(((winCollection as DialogWindow).Content as SettingDialogControl).Name))
+                    {
+                        var dialog = (DialogWindow)winCollection;
+                        dialog.DialogResult = true;
+                        break;
+                    }
+                }
+            }
+        }
 
-        virtual protected void Apply() { }
+        protected virtual void Okay() { }
+
+        protected virtual void Apply() { }
     }
 }

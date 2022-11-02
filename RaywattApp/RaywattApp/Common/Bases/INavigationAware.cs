@@ -6,6 +6,7 @@
     public interface INavigationAware
     {
         void OnNavigating(object sender, object navigationEventArgs);
+
         void OnNavigated(object sender, object navigatedEventArgs);
     }
 }

@@ -2,9 +2,17 @@
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
+using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
 using RaywattApp.Common.Setting;
+using RaywattApp.Models;
+using RaywattApp.Views.Dialog;
+using System;
 using System.Collections.Generic;
+using System.Reflection.Metadata;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Navigation;
 
 namespace RaywattApp.ViewModels.Setting
 {
@@ -39,6 +47,13 @@ namespace RaywattApp.ViewModels.Setting
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
             _log.Debug("OnNavigated");
+
+            var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
+
+            if (extraData != null)
+            {
+            }
+
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -53,7 +68,7 @@ namespace RaywattApp.ViewModels.Setting
             ApplyChange();
 
             //Close Popup
-            WeakReferenceMessenger.Default.Send(new PopupMessage(false) { Type = (int)CommonDefinition.PopupType.Setting });
+            CloseDialog();
         }
 
         protected override void Apply()

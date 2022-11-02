@@ -30,13 +30,13 @@
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0"  VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <RadioButton IsChecked="{Binding FileExportData.Type, Converter={StaticResource RadioButtonConverter}, ConverterParameter='N'}" Content="{Binding [Native(Raw)], Source={StaticResource L10N}}"/>
+                        <RadioButton IsChecked="{Binding FileExport.Type, Converter={StaticResource RadioButtonConverter}, ConverterParameter='N'}" Content="{Binding [Native(Raw)], Source={StaticResource L10N}}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <RadioButton IsChecked="{Binding FileExportData.Type, Converter={StaticResource RadioButtonConverter}, ConverterParameter='D'}" Content="{Binding [DICOM], Source={StaticResource L10N}}"/>
+                        <RadioButton IsChecked="{Binding FileExport.Type, Converter={StaticResource RadioButtonConverter}, ConverterParameter='D'}" Content="{Binding [DICOM], Source={StaticResource L10N}}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <RadioButton IsChecked="{Binding FileExportData.Type, Converter={StaticResource RadioButtonConverter}, ConverterParameter='S'}" Content="{Binding [Standard], Source={StaticResource L10N}}"/>
+                        <RadioButton IsChecked="{Binding FileExport.Type, Converter={StaticResource RadioButtonConverter}, ConverterParameter='S'}" Content="{Binding [Standard], Source={StaticResource L10N}}"/>
                     </StackPanel>
                 </Grid>
             </StackPanel>

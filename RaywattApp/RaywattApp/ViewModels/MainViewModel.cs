@@ -3,9 +3,11 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
+using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Services;
+using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,44 +25,18 @@ namespace RaywattApp.ViewModels
 
         private readonly SqlManager _sqlManager;
 
-        /// <summary>
-        /// Busy 목록
-        /// </summary>
+        private IDialogService _dialogService;
+
         private IList<BusyMessage> _busys = new List<BusyMessage>();
 
+        [ObservableProperty]
         private bool _isBusy;
-        /// <summary>
-        /// IsBusy
-        /// </summary>
-        public bool IsBusy
-        {
-            get { return _isBusy; }
-            set { SetProperty(ref _isBusy, value); }
-        }
 
+        [ObservableProperty]
         private string _navigationSource;
-        /// <summary>
-        /// 네비게이션 소스
-        /// </summary>
-        public string NavigationSource
-        {
-            get { return _navigationSource; }
-            set { SetProperty(ref _navigationSource, value); }
-        }
-
-        private string _popupNavigationSource;
-
-        public string PopupNavigationSource
-        {
-            get { return _popupNavigationSource; }
-            set { SetProperty(ref _popupNavigationSource, value); }
-        }
 
         [ObservableProperty]
         private object _navigationParameter;
-
-        [ObservableProperty]
-        private object _popupNavigationParameter;
 
         [ObservableProperty]
         private Patient _patient;
@@ -75,11 +51,10 @@ namespace RaywattApp.ViewModels
             get { return this._navigateCommand ?? (this._navigateCommand = new RelayCommand<string>(OnNavigate)); }
         }
 
-        private ICommand _popupNavigateCommand;
-
-        public ICommand PopupNavigateCommand
+        private ICommand _settingCommand;
+        public ICommand SettingCommand
         {
-            get { return this._popupNavigateCommand ?? (this._popupNavigateCommand = new RelayCommand<string>(OnPopupNavigate)); }
+            get { return this._settingCommand ?? (this._settingCommand = new RelayCommand(Setting)); }
         }
 
         private ICommand _exitCommand;
@@ -91,11 +66,12 @@ namespace RaywattApp.ViewModels
         /// <summary>
         /// 생성자
         /// </summary>
-        public MainViewModel(SqlManager sqlManager)
+        public MainViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
             _log.Debug("MainViewModel");
 
             _sqlManager = sqlManager;
+            _dialogService = dialogService;
 
             // Code 정의
             CodeDefinition codeDefinition = new CodeDefinition(_sqlManager);
@@ -106,13 +82,9 @@ namespace RaywattApp.ViewModels
 
             //네비게이션 메시지 수신 등록
             WeakReferenceMessenger.Default.Register<NavigationMessage>(this, OnNavigationMessage);
-            WeakReferenceMessenger.Default.Register<PopupNavigationMessage>(this, OnPopupNavigationMessage);
 
             //BusyMessage 수신 등록
             WeakReferenceMessenger.Default.Register<BusyMessage>(this, OnBusyMessage);
-
-            //PopupMessage 수신 등록
-            WeakReferenceMessenger.Default.Register<PopupMessage>(this, OnLayerPopupMessage);
 
             Patient = new Patient();
             
@@ -126,18 +98,6 @@ namespace RaywattApp.ViewModels
             NavigationSource = pageUri;
         }
 
-        private void OnPopupNavigate(string pageUri)
-        {
-            _log.Debug("OnPopupNavigate : " + pageUri);
-
-            PopupNavigationSource = pageUri;
-        }
-
-        /// <summary>
-        /// 네비게이션 메시지 수신 처리
-        /// </summary>
-        /// <param name="recipient"></param>
-        /// <param name="message"></param>
         private void OnNavigationMessage(object recipient, NavigationMessage message)
         {
             _log.Debug("OnNavigationMessage : " + message.Value);
@@ -149,20 +109,6 @@ namespace RaywattApp.ViewModels
             NavigationSource = pageUri;
         }
 
-        private void OnPopupNavigationMessage(object recipient, PopupNavigationMessage message)
-        {
-            _log.Debug("OnNavigationMessage : " + message.Value);
-
-            string pageUri = message.Value;
-            PopupNavigationParameter = message.Parameter;
-            PopupNavigationSource = pageUri;
-        }
-
-        /// <summary>
-        /// 비지 메시지 수신 처리
-        /// </summary>
-        /// <param name="recipient"></param>
-        /// <param name="message"></param>
         private void OnBusyMessage(object recipient, BusyMessage message)
         {
             _log.Debug("OnBusyMessage : " + message.Value);
@@ -229,6 +175,13 @@ namespace RaywattApp.ViewModels
             dest.Firstname = src.Firstname.Trim();
             dest.Birthdate = src.Birthdate;
             dest.Gender = src.Gender;
+        }
+
+        private void Setting()
+        {
+            _log.Debug("Setting");
+
+            var result = _dialogService.OpenDialog(new SettingDialogControl());
         }
 
         private void Exit()

@@ -3,15 +3,18 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
+using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
 using RaywattApp.Common.Setting;
 using RaywattApp.Models;
 using RaywattApp.Services;
+using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Navigation;
 
 namespace RaywattApp.ViewModels.Setting
 {
@@ -20,6 +23,8 @@ namespace RaywattApp.ViewModels.Setting
         private static readonly ILog _log = LogManager.GetLogger(typeof(SettingPhysicianViewModel));
 
         private readonly SqlManager _sqlManager;
+
+        private IDialogService _dialogService;
 
         [ObservableProperty]
         private ObservableCollection<Physician> _physicianList;
@@ -58,11 +63,12 @@ namespace RaywattApp.ViewModels.Setting
             get { return this._rowEditEndingCommand ?? (this._rowEditEndingCommand = new RelayCommand<DataGrid>(RowEditEnding)); }
         }
 
-        public SettingPhysicianViewModel(SqlManager sqlManager)
+        public SettingPhysicianViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
             _log.Debug("SettingPhysicianViewModel");
 
             _sqlManager = sqlManager;
+            _dialogService = dialogService;
 
             PhysicianList = new ObservableCollection<Physician>();
 
@@ -72,6 +78,12 @@ namespace RaywattApp.ViewModels.Setting
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
             _log.Debug("OnNavigated");
+
+            var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
+
+            if (extraData != null)
+            {
+            }
 
             Search();
         }
@@ -86,7 +98,7 @@ namespace RaywattApp.ViewModels.Setting
             _log.Debug("Okay");
 
             Save();
-            WeakReferenceMessenger.Default.Send(new PopupMessage(false) { Type = (int)CommonDefinition.PopupType.Setting });
+            CloseDialog();
         }
 
         protected override void Apply()
@@ -196,7 +208,10 @@ namespace RaywattApp.ViewModels.Setting
                         PhysicianList[PhysicianList.IndexOf(physician)] = selectedPhysician;
                     }
 
-                    WeakReferenceMessenger.Default.Send(new PopupMessage(true) { ControlName = "MessagePopupControl", Type = (int)CommonDefinition.PopupType.Message, Level = (int)CommonDefinition.PopupLevel.Info, Parameter = _l10n["Name is duplicated."] });
+                    Dictionary<string, object> parameter = new Dictionary<string, object>();
+                    parameter["title"] = _l10n["Information"];
+                    parameter["message"] = _l10n["Name is duplicated."];
+                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
                     break;
                 }
             }
