@@ -30,8 +30,6 @@ HRESULT VolumeTexture::Initialize(ID3D11Device* pDevice, VolumeDataInfo& info, B
 	ID3D11Texture3D* pTex;
 	pDevice->CreateTexture3D(&texDesc, &subRes, &pTex);
 
-	SAFE_DELETE(pData)
-
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	srvDesc.Format = texDesc.Format;
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE3D;
