@@ -106,19 +106,19 @@ void CConfiguration::Initialize(tstring configFile)
 void CConfiguration::SaveZaberSettings() {
 	tstring strValue = _T("");
 
-	strValue = this->zaber.pullbackDistance;
+	strValue = std::to_wstring(this->zaber.pullbackDistance);
 	::WritePrivateProfileString(_T("Zaber"), _T("PullbackDistance"), strValue.c_str(), configFilePath.c_str());
 
-	strValue = this->zaber.pullbackSpeed;
+	strValue = std::to_wstring(this->zaber.pullbackSpeed);
 	::WritePrivateProfileString(_T("Zaber"), _T("PullbackSpeed"), strValue.c_str(), configFilePath.c_str());
 }
 void CConfiguration::SaveMotorSettings() {
 	tstring strValue = _T("");
 
-	strValue = this->motor.velocity;
+	strValue = std::to_wstring(this->motor.velocity);
 	::WritePrivateProfileString(_T("Motor"), _T("Velocity"), strValue.c_str(), configFilePath.c_str());
 
-	strValue = this->motor.settleDown;
+	strValue = std::to_wstring(this->motor.settleDown);
 	::WritePrivateProfileString(_T("Motor"), _T("SettleDown"), strValue.c_str(), configFilePath.c_str());
 }
 

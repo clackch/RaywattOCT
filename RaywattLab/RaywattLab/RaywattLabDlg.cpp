@@ -244,11 +244,11 @@ UINT CRaywattLabDlg::threadSaveCalibration(LPVOID param) {
 
 	CString strValue = _T("");
 	pDlg->GetDlgItem(IDC_EDIT_CALIBRATION_FROM)->GetWindowText(strValue);
-	from = _wtoi(strValue);
+	from = _ttoi(strValue);
 	pDlg->GetDlgItem(IDC_EDIT_CALIBRATION_STEP)->GetWindowText(strValue);
-	step = _wtoi(strValue);
+	step = _ttoi(strValue);
 	pDlg->GetDlgItem(IDC_EDIT_CALIBRATION_COUNT)->GetWindowText(strValue);
-	count = _wtoi(strValue);
+	count = _ttoi(strValue);
 
 	pLinearStage->Move(from);
 	while (pDlg->m_pThreadCalibration->isRun && !pLinearStage->GetZaberStatus()) {

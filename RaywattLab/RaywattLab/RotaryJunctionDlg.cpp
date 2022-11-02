@@ -217,13 +217,13 @@ void CRotaryJunctionDlg::OnBnClickedButtonSaveSettings()
 	CString strBuffer = _T("");
 
 	GetDlgItem(IDC_EDIT_ZABER_DISTANCE)->GetWindowText(strBuffer);
-	config.zaber.pullbackDistance = _wtoi(strBuffer);
+	config.zaber.pullbackDistance = _ttoi(strBuffer);
 
 	GetDlgItem(IDC_EDIT_ZABER_VELOCITY)->GetWindowText(strBuffer);
-	config.zaber.pullbackSpeed = _wtoi(strBuffer);
+	config.zaber.pullbackSpeed = _ttoi(strBuffer);
 
 	GetDlgItem(IDC_EDIT_MOTOR_VELOCITY)->GetWindowText(strBuffer);
-	config.motor.velocity = _wtoi(strBuffer);
+	config.motor.velocity = _ttoi(strBuffer);
 
 	config.SaveZaberSettings();
 	config.SaveMotorSettings();
