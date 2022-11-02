@@ -168,11 +168,13 @@ xcopy "$(TargetDir)LUT.csv" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /
     <ClInclude Include="OCTSystem.h" />
     <ClInclude Include="import.h" />
     <ClInclude Include="RaywattCore.h" />
+    <ClInclude Include="VolumeGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CutViewManager.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="OCTSystem.cpp" />
+    <ClCompile Include="VolumeGenerator.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
