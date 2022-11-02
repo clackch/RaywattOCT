@@ -6,6 +6,8 @@ using System.Runtime.InteropServices;
 using System.Windows.Media.Imaging;
 using OpenCvSharp;
 using System.IO;
+using RayCoreWrapper;
+using System.Windows;
 
 namespace RaywattOCT.ViewModel
 {
@@ -353,6 +355,10 @@ namespace RaywattOCT.ViewModel
         private DispatcherTimer timer = new DispatcherTimer();
         private DispatcherTimer timerUpdateImage = new DispatcherTimer();
 
+        private Window3DRender window3D;
+        private Raywatt3DRenderer renderer;
+        private IntPtr hWnd3D;
+
         public MainViewModel()
         {
             timer.Interval = TimeSpan.FromMilliseconds(1000);
@@ -410,6 +416,9 @@ namespace RaywattOCT.ViewModel
                     LongitudeImage = new BitmapImage(GetResourceURI(null, "res/bg/bottom_bg.png"));
                 }
             }
+            if (renderer != null) {
+                renderer.Render();
+            }
         }
         private void Initialize()
         {
@@ -424,10 +433,25 @@ namespace RaywattOCT.ViewModel
         private void Admin()
         {
             RayCoreWrapper.RayStartReview(TEST_FILE_PATH);
+
+            if (window3D == null)
+            {
+                window3D = new Window3DRender();
+                window3D.Show();
+                hWnd3D = new System.Windows.Interop.WindowInteropHelper(window3D).Handle;
+            }
         }
         private void Exit()
         {
             RayCoreWrapper.RayStopSystem();
+            if (window3D != null)
+            {
+                window3D.Close();
+            }
+            if (renderer != null)
+            {
+                renderer.Dispose();
+            }
             Environment.Exit(0);
         }
         private void MotorOnOff()
@@ -511,6 +535,7 @@ namespace RaywattOCT.ViewModel
             handleState((RayCoreWrapper.RayCallbackRequest)request, (RayCoreWrapper.RayScannerState)response);
             handleProgress((RayCoreWrapper.RayCallbackRequest)request, response);
             handleError((RayCoreWrapper.RayCallbackRequest)request, (RayCoreWrapper.RayError)response);
+            handleWorkDone((RayCoreWrapper.RayCallbackRequest)request, (RayCoreWrapper.RayWorkItem)response);
         }
 
         private void OnRecvCrossSection(IntPtr data, int width, int height, int ch, int frameInfo)
@@ -590,6 +615,30 @@ namespace RaywattOCT.ViewModel
                     break;
                 case RayCoreWrapper.RayError.InitializeFailed:
                     SystemMessage = "Initialize Failed";
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void handleWorkDone(RayCoreWrapper.RayCallbackRequest request, RayCoreWrapper.RayWorkItem response)
+        {
+            if (request != RayCoreWrapper.RayCallbackRequest.WorkDone) return;
+
+            switch (response)
+            {
+                case RayCoreWrapper.RayWorkItem.GenerateVolume:
+                    {                        
+                        int volumeWidth = (int) RayCoreWrapper.RayGetProperty(RayCoreWrapper.Property.VolumeWidth);
+                        int volumeHeight = (int) RayCoreWrapper.RayGetProperty(RayCoreWrapper.Property.VolumeHeight);
+                        int volumeDepth = (int) RayCoreWrapper.RayGetProperty(RayCoreWrapper.Property.VolumeDepth);
+
+                        Raywatt3DRenderer _3drenderer = new Raywatt3DRenderer();
+                        _3drenderer.Init((int)window3D.RenderSize.Width, (int)window3D.RenderSize.Height, hWnd3D);
+
+                        Raywatt3DRenderer.CreateVolumeData(volumeWidth, volumeHeight, volumeDepth, RayCoreWrapper.RayGetVolumeData());
+                        renderer = _3drenderer;
+                    }
                     break;
                 default:
                     break;
