@@ -63,9 +63,6 @@
     <ClInclude Include="CppGetSetMacros.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Constants.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="D3D11VolumeRenderer.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>

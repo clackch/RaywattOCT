@@ -40,8 +40,6 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH:
-		AllocConsole();
-		freopen("CONOUT$", "w", stdout);
 		// Set general DXUT callbacks
 		DXUTSetCallbackFrameMove(OnFrameMove);
 		DXUTSetCallbackKeyboard(OnKeyboard);

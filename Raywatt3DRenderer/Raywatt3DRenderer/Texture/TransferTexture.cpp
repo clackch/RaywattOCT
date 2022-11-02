@@ -1,5 +1,4 @@
 #include "TransferTexture.h"
-#include "Constants.h"
 
 TransferTexture::TransferTexture()
 {

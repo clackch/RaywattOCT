@@ -127,6 +127,10 @@
       <AdditionalLibraryDirectories>$(TargetDir);$(DXSDK_DIR)Lib\x64</AdditionalLibraryDirectories>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(TargetDir)*.dll" "$(SolutionDir)..\RaywattOCT\bin\" /y /d
+xcopy "$(ProjectDir)Shaders\*.fx" "$(SolutionDir)..\RaywattOCT\bin\" /y /d</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -150,11 +154,11 @@
       <AdditionalLibraryDirectories>$(TargetDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(TargetDir)*.dll" "$(SolutionDir)..\..\..\Git Repo\RaywattOCT\RaywattOCT\bin\" /y /d</Command>
+      <Command>xcopy "$(TargetDir)*.dll" "$(SolutionDir)..\RaywattOCT\bin\" /y /d
+xcopy "$(ProjectDir)Shaders\*.fx" "$(SolutionDir)..\RaywattOCT\bin\" /y /d</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Constants.h" />
     <ClInclude Include="CppGetSetMacros.h" />
     <ClInclude Include="Effect\BackgroundRenderingEffect.h" />
     <ClInclude Include="Effect\BaseEffect.h" />

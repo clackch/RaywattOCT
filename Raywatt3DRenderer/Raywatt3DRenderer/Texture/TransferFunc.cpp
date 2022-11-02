@@ -1,5 +1,4 @@
 #include "TransferFunc.h"
-#include "Constants.h"
 #include "Utility.h"
 
 ControlNode::ControlNode() 

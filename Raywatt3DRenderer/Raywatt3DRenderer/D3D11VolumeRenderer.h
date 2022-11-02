@@ -12,7 +12,6 @@
 #include "ScreenPlaneObject.h"
 #include "RaycastVolumeRenderingEffect.h"
 #include "BackgroundRenderingEffect.h"
-#include "Constants.h"
 #include "TransferFunc.h"
 
 #include <d3dx11effect.h>

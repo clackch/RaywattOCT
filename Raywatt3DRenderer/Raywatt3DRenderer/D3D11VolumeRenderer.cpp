@@ -20,18 +20,9 @@ void InitVolumeData(int width, int height, int frames, BYTE* data) {
 	HRESULT hr;
 
 	// 볼륨 데이터 정보 입력 부분
-#if 0
-	// Volume Data from File
-	datainfo.pDataPath = new char[MAX_PATH];
-	sprintf(datainfo.pDataPath, "%s", VOLUME_FILE_PATH);
-	datainfo.width = VOLUME_W;
-	datainfo.height = VOLUME_H;
-	datainfo.depth = VOLUME_D;
-#else
 	datainfo.width = width;
 	datainfo.height = height;
 	datainfo.depth = frames;
-#endif
 
 	g_pCubeObject = std::make_shared<CubeObject>();
 	hr = g_pCubeObject->Initialize(g_pD3D11Device, datainfo, &g_Camera);
