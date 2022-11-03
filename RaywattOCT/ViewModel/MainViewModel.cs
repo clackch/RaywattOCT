@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 using System.Windows.Media.Imaging;
 using OpenCvSharp;
 using System.IO;
-using RayCoreWrapper;
 using System.Windows;
 
 namespace RaywattOCT.ViewModel

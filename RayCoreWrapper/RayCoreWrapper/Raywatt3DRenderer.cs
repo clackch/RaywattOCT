@@ -5,7 +5,7 @@ using SharpDX.DXGI;
 using SharpDX.Mathematics.Interop;
 using Device = SharpDX.Direct3D11.Device;
 
-namespace RayCoreWrapper
+namespace RaywattOCT
 {
     public class Raywatt3DRenderer
     {
