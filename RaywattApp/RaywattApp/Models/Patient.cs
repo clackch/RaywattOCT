@@ -86,19 +86,19 @@ namespace RaywattApp.Models
         private DateTime birthdate;
 
         [ObservableProperty]
-        private string strBirthdate;
-
-        [ObservableProperty]
         private string gender;
 
         [ObservableProperty]
-        private string createDate;
+        private DateTime createDate;
 
         [ObservableProperty]
-        private string updateDate;
+        private DateTime updateDate;
 
         [ObservableProperty]
         private string lastCase;
+
+        [ObservableProperty]
+        private string displayLastCase;
 
         [ObservableProperty]
         private IList<PatientCase> patientCaseList;

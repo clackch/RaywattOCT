@@ -6,6 +6,7 @@
       xmlns:local="clr-namespace:RaywattApp.Views.File"
       xmlns:const="clr-namespace:RaywattApp.Common.Bases"
       xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+      xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="FileExportStep1Page">
@@ -105,7 +106,7 @@
                             <DataGridTextColumn Width="*" Binding="{Binding Comment}" Header="{Binding [Comment], Source={StaticResource L10N}}" />
                             <DataGridTextColumn Width="*" Binding="{Binding Vessel}" Header="{Binding [Vessel], Source={StaticResource L10N}}" />
                             <DataGridTextColumn Width="*" Binding="{Binding Procedure}" Header="{Binding [Procedure], Source={StaticResource L10N}}" />
-                            <DataGridTextColumn Width="*" Binding="{Binding CreateDate, StringFormat='yyyy-MM-dd'}" Header="{Binding [Create Date], Source={StaticResource L10N}}" />
+                            <DataGridTextColumn Width="*" Binding="{Binding CreateDate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Create Date], Source={StaticResource L10N}}" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </StackPanel>

@@ -158,6 +158,24 @@ ALTER TABLE IF EXISTS rv_schema.physician
     OWNER to rv_user;
 
 
+-- Table: rv_schema.l10n
+
+-- DROP TABLE IF EXISTS rv_schema.l10n;
+
+CREATE TABLE IF NOT EXISTS rv_schema.l10n
+(
+    lang character varying(10) COLLATE pg_catalog."default" NOT NULL,
+    choice character varying(1) COLLATE pg_catalog."default",
+    CONSTRAINT language_pkey PRIMARY KEY (lang)
+        USING INDEX TABLESPACE rv_tablespace
+)
+
+TABLESPACE rv_tablespace;
+
+ALTER TABLE IF EXISTS rv_schema.l10n
+    OWNER to rv_user;
+	
+
 -- FUNCTION: rv_schema.fn_code(character varying, character varying)
 
 -- DROP FUNCTION IF EXISTS rv_schema.fn_code(character varying, character varying);
@@ -209,6 +227,39 @@ ALTER FUNCTION rv_schema.fn_patient(character varying)
     OWNER TO rv_user;
 
 
+-- FUNCTION: rv_schema.fn_datel10n(timestamp without time zone)
+
+-- DROP FUNCTION IF EXISTS rv_schema.fn_datel10n(timestamp without time zone);
+
+CREATE OR REPLACE FUNCTION rv_schema.fn_datel10n(
+	arg_date timestamp without time zone)
+    RETURNS character varying
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+AS $BODY$
+DECLARE
+res_value character varying;
+lang_code character varying;
+BEGIN
+	SELECT lang INTO lang_code
+	FROM rv_schema.l10n
+	WHERE choice = 'O';
+	
+	CASE lang_code
+	WHEN 'en-US' THEN RETURN TO_CHAR(arg_date, 'MM/dd/yyyy');
+	WHEN 'ko-KR' THEN RETURN TO_CHAR(arg_date, 'yyyy-MM-dd');
+	ELSE RETURN TO_CHAR(arg_date, 'MM/dd/yyyy');
+	END CASE;
+	
+RETURN res_value;
+END;
+$BODY$;
+
+ALTER FUNCTION rv_schema.fn_datel10n(timestamp without time zone)
+    OWNER TO rv_user;
+
+
 -- FUNCTION: rv_schema.fn_lastcase(character varying)
 
 -- DROP FUNCTION IF EXISTS rv_schema.fn_lastcase(character varying);
@@ -238,3 +289,33 @@ $BODY$;
 ALTER FUNCTION rv_schema.fn_lastcase(character varying)
     OWNER TO rv_user;
 
+
+-- FUNCTION: rv_schema.fn_displaylastcase(character varying)
+
+-- DROP FUNCTION IF EXISTS rv_schema.fn_displaylastcase(character varying);
+
+CREATE OR REPLACE FUNCTION rv_schema.fn_displaylastcase(
+	arg_id character varying)
+    RETURNS character varying
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+AS $BODY$
+	DECLARE
+	res_value character varying;
+	BEGIN
+		SELECT 
+			concat(
+			(SELECT rv_schema.fn_dateL10n("create_date") FROM rv_schema.patient_case WHERE "patient_id" = arg_id ORDER BY "create_date" DESC LIMIT 1)
+			, ' ('
+			,(SELECT count(*) FROM rv_schema.patient_case WHERE "patient_id" = arg_id)
+			, ')'
+			) 
+			into res_value;
+	RETURN res_value;
+	END;
+$BODY$;
+
+ALTER FUNCTION rv_schema.fn_displaylastcase(character varying)
+    OWNER TO rv_user;
+	

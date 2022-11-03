@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Util;
+using System;
 
 namespace RaywattApp.Models
 {
@@ -68,10 +69,10 @@ namespace RaywattApp.Models
         private string image;
 
         [ObservableProperty]
-        private string createDate;
+        private DateTime createDate;
 
         [ObservableProperty]
-        private string updateDate;
+        private DateTime updateDate;
 
         [ObservableProperty]
         private bool isChecked;
