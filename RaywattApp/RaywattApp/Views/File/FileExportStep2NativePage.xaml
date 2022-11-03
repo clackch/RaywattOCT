@@ -165,14 +165,16 @@
                             <StackPanel Grid.Row="0">
                                 <Label Content="{Binding [Total], Source={StaticResource L10N}}"/>
                                 <StackPanel Orientation="Horizontal">
-                                    <Label Content="{Binding ExternalDriveTotalSize}"/>
+                                    <Label Content="{Binding ExternalDriveTotalSize}" Visibility="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.ExportDiskExternal}}"/>
+                                    <Label Content="{Binding CdTotalSize}" Visibility="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.ExportDiskCd}}"/>
                                     <Label Content="{Binding [bytes], Source={StaticResource L10N}}"/>
                                 </StackPanel>
                             </StackPanel>
                             <StackPanel Grid.Row="1" >
                                 <Label Content="{Binding [Free], Source={StaticResource L10N}}"/>
                                 <StackPanel Orientation="Horizontal">
-                                    <Label Content="{Binding ExternalDriveAvailableFreeSpace}"/>
+                                    <Label Content="{Binding ExternalDriveAvailableFreeSpace}" Visibility="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.ExportDiskExternal}}"/>
+                                    <Label Content="{Binding CdAvailableFreeSpace}" Visibility="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.ExportDiskCd}}"/>
                                     <Label Content="{Binding [bytes], Source={StaticResource L10N}}"/>
                                 </StackPanel>
                             </StackPanel>

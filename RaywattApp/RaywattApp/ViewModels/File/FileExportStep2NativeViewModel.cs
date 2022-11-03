@@ -83,6 +83,12 @@ namespace RaywattApp.ViewModels.File
         [ObservableProperty]
         private long _externalDriveAvailableFreeSpace;
 
+        [ObservableProperty]
+        private long _cdTotalSize;
+
+        [ObservableProperty]
+        private long _cdAvailableFreeSpace;
+
         private ICommand _passwordCommand;
         public ICommand PasswordCommand
         {
