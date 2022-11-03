@@ -233,6 +233,9 @@ namespace RaywattApp.ViewModels.File
             if (FileExport.ConfirmPassword == null)
                 FileExport.ConfirmPassword = "";
 
+            if(FileExport.ExternalDrivePath == null)
+                FileExport.ExternalDrivePath = "";
+
             GetDrive();
         }
 
