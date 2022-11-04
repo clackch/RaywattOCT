@@ -11,7 +11,6 @@ using log4net;
 using RaywattApp.Services;
 using RaywattApp.Models;
 using System;
-using System.Configuration;
 using System.ComponentModel;
 
 namespace RaywattApp.Common.Localization
@@ -51,7 +50,7 @@ namespace RaywattApp.Common.Localization
 
             if (!IsInDesignMode)
             {
-                _sqlManager = new SqlManager(new SqlService(ConfigurationManager.ConnectionStrings["postgres"].ConnectionString));
+                _sqlManager = (SqlManager)App.Current.Services.GetService(typeof(SqlManager));
 
                 string languageCode = null;
 
