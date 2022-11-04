@@ -21,11 +21,13 @@
         </StackPanel>
 
         <Grid Grid.Row="1">
-            <Frame NavigationUIVisibility="Hidden">
-                <b:Interaction.Behaviors>
-                    <behaviors:FrameBehavior Parameter="{Binding PopupNavigationParameter, Mode=TwoWay}" Navigation="{Binding PopupNavigationSource, Mode=TwoWay}"  />
-                </b:Interaction.Behaviors>
-            </Frame>
+            <StackPanel>
+                <Frame NavigationUIVisibility="Hidden">
+                    <b:Interaction.Behaviors>
+                        <behaviors:FrameBehavior Parameter="{Binding PopupNavigationParameter, Mode=TwoWay}" Navigation="{Binding PopupNavigationSource, Mode=TwoWay}"  />
+                    </b:Interaction.Behaviors>
+                </Frame>
+            </StackPanel>
         </Grid>
     </Grid>
 </UserControl>
