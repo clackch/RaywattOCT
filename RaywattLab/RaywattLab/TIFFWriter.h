@@ -1,6 +1,7 @@
 #pragma once
 
 #include <tiffio.h>
+#include <opencv2/opencv.hpp>
 
 class COCTImaging;
 class CTIFFWriter
@@ -11,6 +12,6 @@ public:
 	CTIFFWriter(CString strTIFPath);
 	virtual ~CTIFFWriter();
 
-	bool SaveFrame(COCTImaging*pImaging, unsigned short* pBuffer);
+	bool SaveFrame(cv::Mat image);
 };
 
