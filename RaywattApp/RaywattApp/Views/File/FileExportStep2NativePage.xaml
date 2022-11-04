@@ -151,7 +151,7 @@
                                 <Label Content="{Binding [Path], Source={StaticResource L10N}}"/>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBox Text="{Binding FileExport.ExternalDrivePath}" IsReadOnly="True" Width="250" Margin="5,5,5,5"/>
-                                    <Button Width="40" Command="{Binding ExternalDrivePathCommand}" Content="{Binding [Path], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+                                    <Button Width="40" Command="{Binding ExternalDrivePathCommand}" Content="{Binding [Path], Source={StaticResource L10N}}" IsEnabled="{Binding IsEnableExternalDrive}" Margin="5,5,5,5"/>
                                 </StackPanel>
                             </StackPanel>
                         </Grid>
