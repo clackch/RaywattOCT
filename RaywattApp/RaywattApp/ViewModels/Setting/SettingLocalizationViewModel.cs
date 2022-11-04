@@ -2,16 +2,11 @@
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
-using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
 using RaywattApp.Common.Setting;
 using RaywattApp.Models;
-using RaywattApp.Views.Dialog;
-using System;
+using RaywattApp.Services;
 using System.Collections.Generic;
-using System.Reflection.Metadata;
-using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Navigation;
 
 namespace RaywattApp.ViewModels.Setting
@@ -19,6 +14,8 @@ namespace RaywattApp.ViewModels.Setting
     public partial class SettingLocalizationViewModel : SettingBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(SettingLocalizationViewModel));
+
+        private readonly SqlManager _sqlManager;
 
         [ObservableProperty]
         private Dictionary<string, string> _languageComboBox = new Dictionary<string, string>();
@@ -28,19 +25,21 @@ namespace RaywattApp.ViewModels.Setting
 
         private string OriginLanguage;
 
-        public SettingLocalizationViewModel()
+        public SettingLocalizationViewModel(SqlManager sqlManager)
         {
             _log.Debug("SettingLocalizationViewModel");
 
-            string l10n_language_list = _l10n.ReadSetting("l10n_language_list"); 
-            string[] languageList = l10n_language_list.Split(";");
+            _sqlManager = sqlManager;
 
-            for(int i = 0; i < languageList.Length; i++)
+            IList<L10n> l10Ns = _sqlManager.SelectL10nList();
+
+            foreach(L10n l10n in l10Ns)
             {
-                LanguageComboBox[languageList[i]] = _l10n[languageList[i]];
+                LanguageComboBox[l10n.Lang] = _l10n[l10n.Lang];
+                if (l10n.Choice)
+                    CurrentLanguage = l10n.Lang;
             }
-
-            CurrentLanguage = _l10n.ReadSetting("l10n_current_language");
+            
             OriginLanguage = CurrentLanguage;
         }
 

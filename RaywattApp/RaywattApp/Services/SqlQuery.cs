@@ -37,18 +37,30 @@ namespace RaywattApp.Services
         {
             _log.Debug("SetSelectQuery");
 
+            //SelectL10n
+            _query["SelectL10n"] =
+                $"SELECT lang, choice " +
+                $"FROM rv_schema.l10n " +
+                $"WHERE choice = TRUE";
+
+            //SelectL10nList
+            _query["SelectL10nList"] =
+                $"SELECT lang, choice " +
+                $"FROM rv_schema.l10n " +
+                $"ORDER BY lang";
+
             //SelectPatientList
             _query["SelectPatientList"] =
-                $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, rv_schema.fn_code('GEND', gender) gender" +
-                        $", to_char(create_date,'YYYY-MM-DD HH24:MI:SS') create_date, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') update_date " +
-                        $", rv_schema.fn_lastcase(id) last_case " +
+                $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, rv_schema.fn_code('GEND', gender) gender" +
+                        $", birthdate, create_date, update_date " +
+                        $", rv_schema.fn_lastcase(id) last_case, rv_schema.fn_displayLastcase(id) display_last_case " +
                 $"FROM rv_schema.patient " +
                 $"WHERE id LIKE @id OR lastname LIKE @lastname OR firstname LIKE @firstname";
 
             //SelectPatientListByCase
             _query["SelectPatientListByCase"] =
                 $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, rv_schema.fn_code('GEND', gender) gender" +
-                        $", to_char(create_date,'YYYY-MM-DD HH24:MI:SS') create_date, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') update_date " +
+                        $", create_date, update_date " +
                         $", rv_schema.fn_lastcase(id) last_case " +
                 $"FROM rv_schema.patient p " +
                 $"WHERE (SELECT count(*) FROM rv_schema.patient_case WHERE patient_id = p.id) > 0 " +
@@ -57,14 +69,14 @@ namespace RaywattApp.Services
             //SelectPatient
             _query["SelectPatient"] = 
                 $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, rv_schema.fn_code('GEND', gender) gender" +
-                        $", to_char(create_date,'YYYY-MM-DD HH24:MI:SS') create_date, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') update_date " +
+                        $", create_date, update_date " +
                 $"FROM rv_schema.patient " +
                 $"WHERE id = @id ";
 
             //SelectPatientByList
             _query["SelectPatientByList"] =
                 $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, rv_schema.fn_code('GEND', gender) gender" +
-                        $", to_char(create_date,'YYYY-MM-DD HH24:MI:SS') create_date, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') update_date " +
+                        $", create_date, update_date " +
                 $"FROM rv_schema.patient ";
 
             //SelectCodeList
@@ -75,36 +87,37 @@ namespace RaywattApp.Services
 
             //SelectPatientCaseByDate - create_data 기준
             _query["SelectPatientCaseByDate"] =
-                $"SELECT to_char(create_date, 'YYYY-MM-DD') key, concat(to_char(create_date, 'YYYY-MM-DD'), ' (', count(*), ')' ) value " +
+                $"SELECT to_char(create_date, 'YYYY-MM-DD') key" +
+                $", concat(rv_schema.fn_datel10n(TO_DATE(to_char(create_date, 'YYYY-MM-DD'), 'YYYY-MM-DD')), ' (', count(*), ')' ) value " +
                 $"FROM rv_schema.patient_case " +
                 $"WHERE patient_id = @id " +
                 $"GROUP BY key ";
 
             //SelectPatientCaseListByDate - create_data 기준
             _query["SelectPatientCaseListByDate"] =
-                $"SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name , physician_name, " +
-                        $"accession_number, accession_name, comment, " +
-                        $"rv_schema.fn_code('VESS', vessel) vessel, rv_schema.fn_code('PROC', procedure) procedure, " +
-                        $"thumbnail_no, still_image_yn, image, " +
-                        $"to_char(create_date,'YYYY-MM-DD HH24:MI:SS') create_date, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') update_date " +
+                $"SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name , physician_name" +
+                        $", accession_number, accession_name, comment" +
+                        $", rv_schema.fn_code('VESS', vessel) vessel, rv_schema.fn_code('PROC', procedure) procedure" +
+                        $", thumbnail_no, still_image_yn, image" +
+                        $", create_date, update_date " +
                 $"FROM rv_schema.patient_case " +
                 $"WHERE patient_id = @id AND to_char(create_date, 'YYYY-MM-DD') = @date " +
                 $"ORDER BY create_date DESC";
 
             //SelectPatientCaseList - create_data 기준
             _query["SelectPatientCaseList"] =
-                $"SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name , physician_name, " +
-                        $"accession_number, accession_name, comment, " +
-                        $"rv_schema.fn_code('VESS', vessel) vessel, rv_schema.fn_code('PROC', procedure) procedure, " +
-                        $"thumbnail_no, still_image_yn, image, " +
-                        $"to_char(create_date,'YYYY-MM-DD HH24:MI:SS') create_date, to_char(update_date,'YYYY-MM-DD HH24:MI:SS') update_date " +
+                $"SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name , physician_name" +
+                        $", accession_number, accession_name, comment" +
+                        $", rv_schema.fn_code('VESS', vessel) vessel, rv_schema.fn_code('PROC', procedure) procedure" +
+                        $", thumbnail_no, still_image_yn, image" +
+                        $", create_date, update_date " +
                 $"FROM rv_schema.patient_case " +
                 $"WHERE patient_id = @id " +
                 $"ORDER BY create_date DESC";
 
             //SelectPhysicianList
             _query["SelectPhysicianList"] =
-                $"SELECT name, to_char(create_date,'YYYY-MM-DD HH24:MI:SS') create_date " +
+                $"SELECT name, create_date " +
                 $"FROM rv_schema.physician " +
                 $"ORDER BY name";
         }
@@ -132,6 +145,11 @@ namespace RaywattApp.Services
         private static void SetUpdateQuery()
         {
             _log.Debug("SetUpdateQuery");
+
+            //UpdateL10n
+            _query["UpdateL10n"] =
+                $"UPDATE rv_schema.l10n " +
+                $"SET choice = CASE WHEN lang = @lang THEN TRUE ELSE FALSE END";
 
             //UpdatePatient
             _query["UpdatePatient"] =

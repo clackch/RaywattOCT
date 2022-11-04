@@ -18,6 +18,33 @@ namespace RaywattApp.Services
             _databaseService = databaseService;
         }
 
+        public IList<L10n> SelectL10n()
+        {
+            _log.Debug("SelectL10n");
+
+            string commandText = SqlQuery.GetQuery("SelectL10n");
+
+            return _databaseService.GetDatas<L10n>(commandText);
+        }
+
+        public IList<L10n> SelectL10nList()
+        {
+            _log.Debug("SelectL10nList");
+
+            string commandText = SqlQuery.GetQuery("SelectL10nList");
+
+            return _databaseService.GetDatas<L10n>(commandText);
+        }
+
+        public int UpdateL10n(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpdateL10n");
+
+            string commandText = SqlQuery.GetQuery("UpdateL10n");
+
+            return _databaseService.UpdateData(commandText, sqlParameters);
+        }
+
         public int PageCountPatientList(Dictionary<string, Object> sqlParameters)
         {
             _log.Debug("PageCountPatientList");

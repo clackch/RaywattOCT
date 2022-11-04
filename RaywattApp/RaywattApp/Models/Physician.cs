@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Util;
+using System;
 
 namespace RaywattApp.Models
 {
@@ -24,6 +25,6 @@ namespace RaywattApp.Models
         }
 
         [ObservableProperty]
-        private string createDate;
+        private DateTime createDate;
     }
 }

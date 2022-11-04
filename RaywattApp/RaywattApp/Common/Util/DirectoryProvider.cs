@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 
 namespace RaywattApp.Common.Util
 {
@@ -92,6 +93,7 @@ namespace RaywattApp.Common.Util
             DirectoryItem findDirPosition = FindDirectory((DirectoryItem)DirItems[0], path);
             DirectoryItem newFolder = new DirectoryItem { Name = name, Path = fullPath };
             findDirPosition.AddDirItem(newFolder);
+            findDirPosition.Items = new ObservableCollection<DirectoryItem>(findDirPosition.Items.OrderBy(x => x.Name));
 
             return true;
         }
@@ -119,6 +121,10 @@ namespace RaywattApp.Common.Util
             dirPosition.Path = newPath;
             dirPosition.Name = name;
             ChangeSubPath(dirPosition, originPath, newPath);
+
+            string parentPath = originPath.Substring(0, originPath.LastIndexOf(orginName) - 1);
+            DirectoryItem parentPosition = FindDirectory((DirectoryItem)DirItems[0], parentPath);
+            parentPosition.Items = new ObservableCollection<DirectoryItem>(parentPosition.Items.OrderBy(x => x.Name));
 
             return true;
         }
@@ -155,7 +161,7 @@ namespace RaywattApp.Common.Util
         {
             DirectoryItem directoryItme = new DirectoryItem { Name = directoryInfo.Name, Path = directoryInfo.FullName };
 
-            foreach (var directory in directoryInfo.GetDirectories())
+            foreach (var directory in directoryInfo.GetDirectories().OrderBy(f => f.Name))
             {
                 if(directory.Attributes == FileAttributes.Directory)
                     directoryItme.AddDirItem(CreateDirectoryNode(directory));

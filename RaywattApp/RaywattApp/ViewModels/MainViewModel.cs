@@ -51,6 +51,12 @@ namespace RaywattApp.ViewModels
             get { return this._navigateCommand ?? (this._navigateCommand = new RelayCommand<string>(OnNavigate)); }
         }
 
+        private ICommand _homeCommand;
+        public ICommand HomeCommand
+        {
+            get { return this._homeCommand ?? (this._homeCommand = new RelayCommand(Home)); }
+        }
+
         private ICommand _settingCommand;
         public ICommand SettingCommand
         {
@@ -175,6 +181,12 @@ namespace RaywattApp.ViewModels
             dest.Firstname = src.Firstname.Trim();
             dest.Birthdate = src.Birthdate;
             dest.Gender = src.Gender;
+        }
+        private void Home()
+        {
+            _log.Debug("Home");
+
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientListPage.xaml"));
         }
 
         private void Setting()

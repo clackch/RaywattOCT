@@ -7,8 +7,11 @@ using System.Threading;
 using System.Windows.Markup;
 using System.Windows;
 using RaywattApp.Common.Localization.Resources;
-using System.Configuration;
 using log4net;
+using RaywattApp.Services;
+using RaywattApp.Models;
+using System;
+using System.ComponentModel;
 
 namespace RaywattApp.Common.Localization
 {
@@ -19,11 +22,22 @@ namespace RaywattApp.Common.Localization
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(DynamicResource));
 
+        private SqlManager _sqlManager;
+
         /// <summary>
         /// 윈도우 리소스로더
         /// </summary>
         private readonly ResourceManager _resourceManager;
         private CultureInfo _clutureInfo;
+
+        private bool IsInDesignMode
+        {
+            get
+            {
+                var prop = DesignerProperties.IsInDesignModeProperty;
+                return (bool)DependencyPropertyDescriptor.FromProperty(prop, typeof(FrameworkElement)).Metadata.DefaultValue;
+            }
+        }
 
         /// <summary>
         /// 생성자
@@ -34,14 +48,22 @@ namespace RaywattApp.Common.Localization
 
             _resourceManager = new ResourceManager(typeof(Resource));
 
-            //App.config에서 l10n_current_language 가져오기
-            string languageCode = ReadSetting("l10n_current_language");
+            if (!IsInDesignMode)
+            {
+                _sqlManager = (SqlManager)App.Current.Services.GetService(typeof(SqlManager));
 
-            //l10n_current_language 없을 경우, Default로 en-US 사용
-            if (languageCode == null)
-                languageCode = "en-US";
+                string languageCode = null;
 
-            SetLanguage(languageCode);
+                IList<L10n> l10Ns = _sqlManager.SelectL10n();
+                if (l10Ns != null && l10Ns.Count == 1)
+                    languageCode = l10Ns[0].Lang;
+
+                //l10n_current_language 없을 경우, Default로 en-US 사용
+                if (languageCode == null)
+                    languageCode = "en-US";
+
+                SetLanguage(languageCode);
+            }
         }
 
         #region 기본 기능
@@ -116,9 +138,6 @@ namespace RaywattApp.Common.Localization
             return returnValues;
         }
 
-        /// <summary>
-        /// 런타임 언어 변경
-        /// </summary>
         public void ChangeLanguage(string languageCode)
         {
             if (languageCode.Equals(Thread.CurrentThread.CurrentCulture.ToString()))
@@ -126,7 +145,7 @@ namespace RaywattApp.Common.Localization
 
             _log.Debug("ChangeLanguage : " + Thread.CurrentThread.CurrentCulture.ToString() + " -> " + languageCode);
 
-            AddUpdateAppSettings("l10n_current_language", languageCode);          
+            UpdateL10n(languageCode);
 
             SetLanguage(languageCode);
         }
@@ -150,48 +169,11 @@ namespace RaywattApp.Common.Localization
             }
         }
 
-        public string ReadSetting(string key)
+        private void UpdateL10n(string languageCode)
         {
-            _log.Debug("ReadSetting : " + key);
-
-            string value = null;
-
-            try
-            {
-                var appSettings = ConfigurationManager.AppSettings;
-                value = appSettings[key];
-            }
-            catch (ConfigurationErrorsException e)
-            {
-                _log.Error("Error reading app settings : " + e.ToString());
-            }
-
-            return value;
-        }
-
-        public void AddUpdateAppSettings(string key, string value)
-        {
-            _log.Debug("AddUpdateAppSettings : " + key + "/" + value);
-
-            try
-            {
-                var configFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                var settings = configFile.AppSettings.Settings;
-                if (settings[key] == null)
-                {
-                    settings.Add(key, value);
-                }
-                else
-                {
-                    settings[key].Value = value;
-                }
-                configFile.Save(ConfigurationSaveMode.Modified);
-                ConfigurationManager.RefreshSection(configFile.AppSettings.SectionInformation.Name);
-            }
-            catch (ConfigurationErrorsException e)
-            {
-                _log.Error("Error writing app settings : " + e.ToString());
-            }
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["lang"] = languageCode;
+            int nRows = _sqlManager.UpdateL10n(sqlParameters);
         }
     }
 }

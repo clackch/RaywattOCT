@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:RaywattApp.Views"
+      xmlns:const="clr-namespace:RaywattApp.Common.Bases"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="PatientNewPage">
@@ -44,8 +45,8 @@
                 <DatePicker Grid.Row="3" Grid.Column="1" SelectedDate="{Binding Patient.Birthdate, UpdateSourceTrigger=PropertyChanged}" Margin="5,5,5,5"/>
                 <TextBlock Grid.Row="4" Text="{Binding [Gender], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
                 <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Margin="5,5,5,5">
-                    <RadioButton IsChecked="{Binding GenderCode, Converter={StaticResource RadioButtonConverter}, ConverterParameter='M'}" Content="{Binding [Male], Source={StaticResource L10N}}"></RadioButton>
-                    <RadioButton IsChecked="{Binding GenderCode, Converter={StaticResource RadioButtonConverter}, ConverterParameter='F'}" Content="{Binding [Female], Source={StaticResource L10N}}"></RadioButton>
+                    <RadioButton IsChecked="{Binding GenderCode, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.GenderMale}}" Content="{Binding [Male], Source={StaticResource L10N}}"></RadioButton>
+                    <RadioButton IsChecked="{Binding GenderCode, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.GenderFemale}}" Content="{Binding [Female], Source={StaticResource L10N}}"></RadioButton>
                 </StackPanel>
             </Grid>
         </StackPanel>

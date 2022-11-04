@@ -183,8 +183,7 @@ namespace RaywattApp.ViewModels
                 SetInit();
 
                 RayCoreWrapper.RaySetProperty(RayCoreWrapper.Property.BackgroundColor, 0xFFFFFF);
-                if(PatientCase.Image != null)//TEST용
-                    RayCoreWrapper.RayStartReview(PatientCase.Image);
+                RayCoreWrapper.RayStartReview(PatientCase.Image);
             }
 
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(5);

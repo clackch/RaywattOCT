@@ -6,6 +6,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RaywattApp"
+        xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
         mc:Ignorable="d"
         Width="1280" Height="1080">
 
@@ -17,8 +18,8 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="200"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0">
-                    <Label Foreground="White" Content="{Binding [Raywatt], Source={StaticResource L10N}}"></Label>
+                <StackPanel Grid.Column="0" HorizontalAlignment="Left">
+                    <Button Width="50" Command="{Binding HomeCommand}" Content="{Binding [Raywatt], Source={StaticResource L10N}}" Foreground="White" Background="Black" Margin="5,5,5,5" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" Visibility="{Binding IsShowPatient}">
                     <Label Foreground="White" Content="{Binding [ID], Source={StaticResource L10N}}"/>
@@ -33,7 +34,7 @@
                     <Label Foreground="White">]</Label>
                     <Label Foreground="White" Content="{Binding [Birth Date], Source={StaticResource L10N}}"/>
                     <Label Foreground="White">[</Label>
-                    <Label Foreground="White" Content="{Binding Patient.Birthdate}"/>
+                    <Label Foreground="White" Content="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}"/>
                     <Label Foreground="White">]</Label>
                     <Label Foreground="White" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
                     <Label Foreground="White">[</Label>
