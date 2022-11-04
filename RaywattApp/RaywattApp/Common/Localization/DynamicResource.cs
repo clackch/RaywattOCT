@@ -145,7 +145,6 @@ namespace RaywattApp.Common.Localization
 
             _log.Debug("ChangeLanguage : " + Thread.CurrentThread.CurrentCulture.ToString() + " -> " + languageCode);
 
-            //AddUpdateAppSettings("l10n_current_language", languageCode);          
             UpdateL10n(languageCode);
 
             SetLanguage(languageCode);

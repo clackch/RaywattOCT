@@ -41,7 +41,7 @@ namespace RaywattApp.Services
             _query["SelectL10n"] =
                 $"SELECT lang, choice " +
                 $"FROM rv_schema.l10n " +
-                $"WHERE choice = 'O'";
+                $"WHERE choice = TRUE";
 
             //SelectL10nList
             _query["SelectL10nList"] =
@@ -149,7 +149,7 @@ namespace RaywattApp.Services
             //UpdateL10n
             _query["UpdateL10n"] =
                 $"UPDATE rv_schema.l10n " +
-                $"SET choice = CASE WHEN lang = @lang THEN 'O' ELSE '' END";
+                $"SET choice = CASE WHEN lang = @lang THEN TRUE ELSE FALSE END";
 
             //UpdatePatient
             _query["UpdatePatient"] =

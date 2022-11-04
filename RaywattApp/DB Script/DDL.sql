@@ -165,7 +165,7 @@ ALTER TABLE IF EXISTS rv_schema.physician
 CREATE TABLE IF NOT EXISTS rv_schema.l10n
 (
     lang character varying(10) COLLATE pg_catalog."default" NOT NULL,
-    choice character varying(1) COLLATE pg_catalog."default",
+    choice boolean,
     CONSTRAINT language_pkey PRIMARY KEY (lang)
         USING INDEX TABLESPACE rv_tablespace
 )
@@ -244,7 +244,7 @@ lang_code character varying;
 BEGIN
 	SELECT lang INTO lang_code
 	FROM rv_schema.l10n
-	WHERE choice = 'O';
+	WHERE choice = TRUE;
 	
 	CASE lang_code
 	WHEN 'en-US' THEN RETURN TO_CHAR(arg_date, 'MM/dd/yyyy');

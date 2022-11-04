@@ -8,6 +8,6 @@ namespace RaywattApp.Models
         private string lang;
 
         [ObservableProperty]
-        private string choice;
+        private bool choice;
     }
 }

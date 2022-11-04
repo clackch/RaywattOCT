@@ -29,5 +29,5 @@ INSERT INTO rv_schema.code( classification, key, value, sort_order, description,
 
 -- rv_schema.l10n
 DELETE FROM rv_schema.l10n;
-INSERT INTO rv_schema.l10n(lang, choice) VALUES ('en-US', 'O');
-INSERT INTO rv_schema.l10n(lang, choice) VALUES ('ko-KR', '');
+INSERT INTO rv_schema.l10n(lang, choice) VALUES ('en-US', TRUE);
+INSERT INTO rv_schema.l10n(lang, choice) VALUES ('ko-KR', FALSE);

@@ -36,7 +36,7 @@ namespace RaywattApp.ViewModels.Setting
             foreach(L10n l10n in l10Ns)
             {
                 LanguageComboBox[l10n.Lang] = _l10n[l10n.Lang];
-                if (l10n.Choice != null && l10n.Choice.Equals("O"))
+                if (l10n.Choice)
                     CurrentLanguage = l10n.Lang;
             }
             
