@@ -8,66 +8,64 @@
         xmlns:local="clr-namespace:RaywattApp"
         xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
         mc:Ignorable="d"
-        Width="1280" Height="1080">
+        Width="1280" Height="1024">
 
-    <StackPanel>
-        <StackPanel Height="30" Background="Black">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="200"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="200"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" HorizontalAlignment="Left">
-                    <Button Width="50" Command="{Binding HomeCommand}" Content="{Binding [Raywatt], Source={StaticResource L10N}}" Foreground="White" Background="Black" Margin="5,5,5,5" />
-                </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" Visibility="{Binding IsShowPatient}">
-                    <Label Foreground="White" Content="{Binding [ID], Source={StaticResource L10N}}"/>
-                    <Label Foreground="White">[</Label>
-                    <Label Foreground="White" Content="{Binding Patient.Id}"/>
-                    <Label Foreground="White">]</Label>
-                    <Label Foreground="White" Content="{Binding [Name], Source={StaticResource L10N}}"/>
-                    <Label Foreground="White">[</Label>
-                    <Label Foreground="White" Content="{Binding Patient.Firstname}"/>
-                    <Label Foreground="White">, </Label>
-                    <Label Foreground="White" Content="{Binding Patient.Lastname}"/>
-                    <Label Foreground="White">]</Label>
-                    <Label Foreground="White" Content="{Binding [Birth Date], Source={StaticResource L10N}}"/>
-                    <Label Foreground="White">[</Label>
-                    <Label Foreground="White" Content="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}"/>
-                    <Label Foreground="White">]</Label>
-                    <Label Foreground="White" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
-                    <Label Foreground="White">[</Label>
-                    <Label Foreground="White" Content="{Binding Patient.Gender, Converter={StaticResource L10NConverter}}"/>
-                    <Label Foreground="White">]</Label>
-                </StackPanel>
-                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Width="50" Command="{Binding SettingCommand}" Content="{Binding [Setting], Source={StaticResource L10N}}" Margin="5,5,5,5" />
-                    <Button Width="50" Command="{Binding ExitCommand}" Content="{Binding [Exit], Source={StaticResource L10N}}" Margin="5,5,5,5" />
-                </StackPanel>
-            </Grid>
-        </StackPanel>
-        <StackPanel>
-            <Grid Height="1000">
-                <Frame NavigationUIVisibility="Hidden">
-                    <b:Interaction.Behaviors>
-                        <behaviors:FrameBehavior Parameter="{Binding NavigationParameter, Mode=TwoWay}" Navigation="{Binding NavigationSource, Mode=TwoWay}" />
-                    </b:Interaction.Behaviors>
-                </Frame>
-                <Border Background="#66000000" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <Border HorizontalAlignment="Center" VerticalAlignment="Center" Background="White" CornerRadius="5">
-                        <StackPanel Width="100" Margin="10">
-                            <ProgressBar Height="10" IsIndeterminate="True" />
-                            <TextBlock Margin="0,5,0,0" HorizontalAlignment="Center" Text="Busy..." />
-                        </StackPanel>
-                        <Border.Effect>
-                            <DropShadowEffect />
-                        </Border.Effect>
-                    </Border>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Background="Black">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="200"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" HorizontalAlignment="Left">
+                <Button Width="50" Command="{Binding HomeCommand}" Content="{Binding [Raywatt], Source={StaticResource L10N}}" Foreground="White" Background="Black" Margin="5,5,5,5" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" Visibility="{Binding IsShowPatient}">
+                <Label Foreground="White" Content="{Binding [ID], Source={StaticResource L10N}}"/>
+                <Label Foreground="White">[</Label>
+                <Label Foreground="White" Content="{Binding Patient.Id}"/>
+                <Label Foreground="White">]</Label>
+                <Label Foreground="White" Content="{Binding [Name], Source={StaticResource L10N}}"/>
+                <Label Foreground="White">[</Label>
+                <Label Foreground="White" Content="{Binding Patient.Firstname}"/>
+                <Label Foreground="White">,</Label>
+                <Label Foreground="White" Content="{Binding Patient.Lastname}"/>
+                <Label Foreground="White">]</Label>
+                <Label Foreground="White" Content="{Binding [Birth Date], Source={StaticResource L10N}}"/>
+                <Label Foreground="White">[</Label>
+                <Label Foreground="White" Content="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}"/>
+                <Label Foreground="White">]</Label>
+                <Label Foreground="White" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
+                <Label Foreground="White">[</Label>
+                <Label Foreground="White" Content="{Binding Patient.Gender, Converter={StaticResource L10NConverter}}"/>
+                <Label Foreground="White">]</Label>
+            </StackPanel>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Width="50" Command="{Binding SettingCommand}" Content="{Binding [Setting], Source={StaticResource L10N}}" Margin="5,5,5,5" />
+                <Button Width="50" Command="{Binding ExitCommand}" Content="{Binding [Exit], Source={StaticResource L10N}}" Margin="5,5,5,5" />
+            </StackPanel>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Frame NavigationUIVisibility="Hidden">
+                <b:Interaction.Behaviors>
+                    <behaviors:FrameBehavior Parameter="{Binding NavigationParameter, Mode=TwoWay}" Navigation="{Binding NavigationSource, Mode=TwoWay}" />
+                </b:Interaction.Behaviors>
+            </Frame>
+            <Border Background="#66000000" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Border HorizontalAlignment="Center" VerticalAlignment="Center" Background="White" CornerRadius="5">
+                    <StackPanel Width="100" Margin="10">
+                        <ProgressBar Height="10" IsIndeterminate="True" />
+                        <TextBlock Margin="0,5,0,0" HorizontalAlignment="Center" Text="Busy..." />
+                    </StackPanel>
+                    <Border.Effect>
+                        <DropShadowEffect />
+                    </Border.Effect>
                 </Border>
-            </Grid>
-        </StackPanel>
-    </StackPanel>
-    
-    
+            </Border>
+        </Grid>
+    </Grid>
 </Window>
