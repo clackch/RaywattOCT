@@ -75,11 +75,10 @@
 
             <Grid Grid.Row="3" Background="Black">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="120"/>
+                    <ColumnDefinition Width="150"/>
                     <ColumnDefinition/>
-                    <ColumnDefinition Width="120"/>
+                    <ColumnDefinition Width="150"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" />
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" >
                     <Button Content="≪" Command="{Binding PagingFirstCommand}" Margin="5,5,5,5" />
                     <Button Content="＜" Command="{Binding PagingPreviousCommand}" Margin="5,5,5,5" />
@@ -91,8 +90,8 @@
                     <Button Content="＞" Command="{Binding PagingNextCommand}" Margin="5,5,5,5" />
                     <Button Content="≫" Command="{Binding PagingLastCommand}" Margin="5,5,5,5" />
                 </StackPanel>
-                <StackPanel Grid.Column="2" Orientation="Horizontal" >
-                    <Label Foreground="White">Page Size</Label>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Label Foreground="White" Content="{Binding [Page Size], Source={StaticResource L10N}}"/>
                     <ComboBox ItemsSource="{Binding PagingPageSize}" SelectedItem="{Binding PagingSelectedPageSize}" Width="50" Margin="5,5,5,5" />
                 </StackPanel>
             </Grid>

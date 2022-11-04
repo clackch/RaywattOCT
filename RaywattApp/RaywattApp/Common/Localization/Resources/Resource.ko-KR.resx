@@ -327,6 +327,9 @@
   <data name="OK" xml:space="preserve">
     <value>오케이</value>
   </data>
+  <data name="Page Size" xml:space="preserve">
+    <value>페이지 사이즈</value>
+  </data>
   <data name="Password" xml:space="preserve">
     <value>비밀번호</value>
   </data>

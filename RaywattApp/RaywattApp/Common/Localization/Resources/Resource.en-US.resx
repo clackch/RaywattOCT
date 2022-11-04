@@ -327,6 +327,9 @@
   <data name="OK" xml:space="preserve">
     <value>OK</value>
   </data>
+  <data name="Page Size" xml:space="preserve">
+    <value>Page Size</value>
+  </data>
   <data name="Password" xml:space="preserve">
     <value>Password</value>
   </data>
