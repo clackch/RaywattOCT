@@ -488,6 +488,8 @@ bool COCTSystem::GetMotorOnOff()
 */
 bool COCTSystem::GetIsPaused()
 {
+	if (m_pSimDevice == nullptr) return true;	// default state is paused
+
 	return ((CSimulateDevice*)m_pSimDevice)->IsPaused();
 }
 
