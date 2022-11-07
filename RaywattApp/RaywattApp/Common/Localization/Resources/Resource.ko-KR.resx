@@ -150,6 +150,9 @@
   <data name="Birth Date" xml:space="preserve">
     <value>생년월일</value>
   </data>
+  <data name="Brightness" xml:space="preserve">
+    <value>밝기</value>
+  </data>
   <data name="Browse for Folder" xml:space="preserve">
     <value>폴더 검색</value>
   </data>
@@ -170,6 +173,9 @@
   </data>
   <data name="Confirm Password" xml:space="preserve">
     <value>비밀번호 재입력</value>
+  </data>
+  <data name="Contrast" xml:space="preserve">
+    <value>채도</value>
   </data>
   <data name="Create Date" xml:space="preserve">
     <value>생성일</value>
@@ -348,6 +354,9 @@
   <data name="Patient Summary" xml:space="preserve">
     <value>환자 요약</value>
   </data>
+  <data name="Pause" xml:space="preserve">
+    <value>일시정지</value>
+  </data>
   <data name="Physician" xml:space="preserve">
     <value>의사</value>
   </data>
@@ -356,6 +365,9 @@
   </data>
   <data name="Physician Name" xml:space="preserve">
     <value>의사명</value>
+  </data>
+  <data name="Play" xml:space="preserve">
+    <value>재생</value>
   </data>
   <data name="Procedure" xml:space="preserve">
     <value>프로시저</value>

@@ -21,6 +21,7 @@ using RaywattApp.Common.Dialog;
 using RaywattApp.Views.Dialog;
 using RaywattApp.Common.Converters;
 using System.Reflection;
+using System.Diagnostics.Contracts;
 
 namespace RaywattApp.ViewModels
 {
@@ -55,14 +56,6 @@ namespace RaywattApp.ViewModels
 
         private IDialogService _dialogService;
 
-        private static readonly string PLAY = "PLAY";
-        private static readonly string PAUSE = "PAUSE";
-
-        private static readonly int crossSectionHeight = 720;
-        private static readonly int crossSectionWidth = 720;
-        private static readonly int longitudeWidth = 800;
-        private static readonly int longitudeIndicatorWidth = 3;
-
         private double degree = 90;
         public double Degree
         {
@@ -70,11 +63,34 @@ namespace RaywattApp.ViewModels
             set { degree = value; OnPropertyChanged(nameof(Degree)); RayCoreWrapper.RaySetProperty(RayCoreWrapper.Property.Degree, degree); }
         }
 
+        private int brightness;
+        public int Brightness
+        { 
+            get { return brightness; }
+            set { brightness = value; OnPropertyChanged(nameof(Brightness)); setBrightnessContrast(); }
+        }
+
+        private int contrast;
+        public int Contrast
+        {
+            get { return contrast; }
+            set { contrast = value; OnPropertyChanged(nameof(Contrast)); setBrightnessContrast(); }
+        }
+
+        // size from view
+        private double crossSectionWidth;
+        private double crossSectionHeight;
+        private double longitudeWidth;
+        private double longitudeIndicatorWidth;
+
         [ObservableProperty]
         private Indicator _indicatorCrossSection;
 
         [ObservableProperty]
         private Indicator _indicatorLongitude;
+
+        [ObservableProperty]
+        private double _pointLongitudeX;
 
         [ObservableProperty]
         private PrevStatus _prevStatus;
@@ -118,7 +134,7 @@ namespace RaywattApp.ViewModels
         private string _currentPhysician;
 
         [ObservableProperty]
-        private string _playPauseState = PAUSE;
+        private string _playPauseState;
 
         [ObservableProperty]
         private BitmapSource _crossSectionImage;
@@ -182,6 +198,12 @@ namespace RaywattApp.ViewModels
             get { return this._cmdMoveIndicator ?? (this._cmdMoveIndicator = new RelayCommand<object>(MoveIndicator)); }
         }
 
+        private ICommand _cmdViewSizeChanged;
+        public ICommand CmdViewSizeChanged
+        { 
+            get { return this._cmdViewSizeChanged ?? (this._cmdViewSizeChanged = new RelayCommand<object[]>(ViewSizeChanged)); }
+        }
+
         // to avoid garbage collection
         private RayCoreWrapper.CallbackFunction cbFunction;
         public RayCoreWrapper.CallbackFunction CBFunction => (this.cbFunction) ?? (this.cbFunction = new RayCoreWrapper.CallbackFunction(OnMsgCallback));
@@ -213,11 +235,15 @@ namespace RaywattApp.ViewModels
             IndicatorCrossSection.IsVisible = "Visible";
 
             IndicatorLongitude = new Indicator();
-            IndicatorLongitude.IsVisible = "Visible";
+            IndicatorLongitude.IsVisible = "Hidden";
+            IndicatorLongitude.PropertyChanged += OnIndicatorLongitudeMoved;
 
+            RayCoreWrapper.RayRegisterCallback(Marshal.GetFunctionPointerForDelegate(CBFunction));
             RayCoreWrapper.RayRegisterImageCallback(
                 Marshal.GetFunctionPointerForDelegate(CBCrossSection),
                 Marshal.GetFunctionPointerForDelegate(CBLongitude));
+            
+            updatePlayPauseState();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -249,10 +275,14 @@ namespace RaywattApp.ViewModels
             _log.Debug("OnNavigating");
             RayCoreWrapper.RayEndReview();
         }
+        private void OnIndicatorLongitudeMoved(object sender, EventArgs e)
+        {
+            setCurrentFrame(IndicatorLongitude.X);
+        }
 
         private void OnMsgCallback(int request, int response)
         {
-            // To-Do : Handle State, Error event
+            handleState((RayCoreWrapper.RayCallbackRequest)request, (RayCoreWrapper.RayScannerState)response);
         }
         private void OnRecvCrossSection(IntPtr data, int width, int height, int ch, int frameInfo)
         {
@@ -412,9 +442,31 @@ namespace RaywattApp.ViewModels
         {
             Indicator indicator = (Indicator)param;
 
-            if (indicator.isCaptured && indicator.X >= 0)
+            if (indicator.isCaptured && PointLongitudeX >= 0)
             {
-                IndicatorLongitude.X = indicator.X + longitudeIndicatorWidth / 2;
+                indicator.X = PointLongitudeX + longitudeIndicatorWidth / 2;
+            }
+        }
+        private void ViewSizeChanged(object[] param)
+        {
+            if (param != null && param.Length == 3) {
+                string viewName = (string)param[0];
+                double actualWidth = (double)param[1];
+                double actualHeight = (double)param[2];
+
+                if (viewName.Equals("crossSectionImage"))
+                {
+                    crossSectionWidth = actualWidth;
+                    crossSectionHeight = actualHeight;
+                }
+                else if (viewName.Equals("longitudeImage"))
+                {
+                    longitudeWidth = actualWidth;
+                }
+                else if (viewName.Equals("longitudeIndicatorImage")) 
+                {
+                    longitudeIndicatorWidth = actualHeight; // 90 degree rotated
+                }
             }
         }
 
@@ -501,6 +553,8 @@ namespace RaywattApp.ViewModels
                 if (state == RayCoreWrapper.RayScannerState.Review)
                 {
                     LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgLongitude);
+                    if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame) IndicatorLongitude.IsVisible = "Visible";
+
                 }
             }
         }
@@ -510,10 +564,10 @@ namespace RaywattApp.ViewModels
 
             if (pauseState != 0)
             {
-                PlayPauseState = PLAY;
+                PlayPauseState = _l10n["Play"];
             }
             else {
-                PlayPauseState = PAUSE;
+                PlayPauseState = _l10n["Pause"];
             }
         }
         private void updateNavigator(int curFrame, int totalFrame)
@@ -522,6 +576,37 @@ namespace RaywattApp.ViewModels
             curPosition = (curFrame == totalFrame - 1) ? 1 : curPosition;
             curPosition *= longitudeWidth;
             IndicatorLongitude.X = curPosition + longitudeIndicatorWidth / 2;
+        }
+        private void setCurrentFrame(double navigatorPosition)
+        {
+            double curPosition = (navigatorPosition + longitudeIndicatorWidth / 2) / (double)longitudeWidth;
+
+            if (longitudeFrameInfo != null)
+            {
+                curPosition *= longitudeFrameInfo.totalFrame;
+                RayCoreWrapper.RayMoveToFrame((int)curPosition);
+            }
+        }
+        private void setBrightnessContrast()
+        {
+            double propBrightness = ((double)Brightness / 100) * (RayCoreWrapper.BrightnessMax - RayCoreWrapper.BrightnessMin) + RayCoreWrapper.BrightnessMin;
+            double propContrast = ((double)Contrast / 100) * (RayCoreWrapper.ContrastMax - RayCoreWrapper.ContrastMin) + RayCoreWrapper.ContrastMin;
+
+            RayCoreWrapper.RaySetProperty(RayCoreWrapper.Property.Brightness, propBrightness);
+            RayCoreWrapper.RaySetProperty(RayCoreWrapper.Property.Contrast, propContrast);
+        }
+        private void handleState(RayCoreWrapper.RayCallbackRequest request, RayCoreWrapper.RayScannerState response)
+        {
+            if (request != RayCoreWrapper.RayCallbackRequest.State) return;
+
+            switch (response)
+            {
+                case RayCoreWrapper.RayScannerState.Review:
+                    updatePlayPauseState();
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
