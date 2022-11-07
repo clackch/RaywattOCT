@@ -19,9 +19,34 @@ using System.Windows.Threading;
 using System.Runtime.InteropServices;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Views.Dialog;
+using RaywattApp.Common.Converters;
+using System.Reflection;
 
 namespace RaywattApp.ViewModels
 {
+    public partial class Indicator : ObservableObject
+    {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(Indicator));
+
+        public bool isCaptured = false;
+        [ObservableProperty]
+        public string _isVisible;
+        [ObservableProperty]
+        public double _x;
+        [ObservableProperty]
+        public double _y;
+
+        private ICommand _cmdSetCaptured;
+        public ICommand CmdSetCaptured
+        { 
+            get {return _cmdSetCaptured ?? (this._cmdSetCaptured = new RelayCommand<bool>(SetCaptured)); }
+        }
+
+        private void SetCaptured(bool isCaptured) {
+            this.isCaptured = isCaptured;
+        }
+    }
+
     public partial class ReviewViewModel : ViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewViewModel));
@@ -32,6 +57,24 @@ namespace RaywattApp.ViewModels
 
         private static readonly string PLAY = "PLAY";
         private static readonly string PAUSE = "PAUSE";
+
+        private static readonly int crossSectionHeight = 720;
+        private static readonly int crossSectionWidth = 720;
+        private static readonly int longitudeWidth = 800;
+        private static readonly int longitudeIndicatorWidth = 3;
+
+        private double degree = 90;
+        public double Degree
+        {
+            get { return degree; }
+            set { degree = value; OnPropertyChanged(nameof(Degree)); RayCoreWrapper.RaySetProperty(RayCoreWrapper.Property.Degree, degree); }
+        }
+
+        [ObservableProperty]
+        private Indicator _indicatorCrossSection;
+
+        [ObservableProperty]
+        private Indicator _indicatorLongitude;
 
         [ObservableProperty]
         private PrevStatus _prevStatus;
@@ -77,23 +120,15 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private string _playPauseState = PAUSE;
 
-        private BitmapSource crossSectionImage;
-        public BitmapSource CrossSectionImage
-        {
-            get { return crossSectionImage; }
-            set { crossSectionImage = value; OnPropertyChanged(nameof(CrossSectionImage)); }
-        }
+        [ObservableProperty]
+        private BitmapSource _crossSectionImage;
         private Mat imgCrossSection;
 
         private RayCoreWrapper.FrameInfo crossSectionFrameInfo;
         private RayCoreWrapper.FrameInfo longitudeFrameInfo;
 
-        private BitmapSource longitudeImage = null;
-        public BitmapSource LongitudeImage
-        {
-            get { return longitudeImage; }
-            set { longitudeImage = value; OnPropertyChanged(nameof(LongitudeImage)); }
-        }
+        [ObservableProperty]
+        private BitmapSource _longitudeImage;
         private Mat imgLongitude;
 
         private DispatcherTimer timer = new DispatcherTimer();
@@ -135,6 +170,18 @@ namespace RaywattApp.ViewModels
             get { return this._cmdPlayback ?? (this._cmdPlayback = new RelayCommand<object>(Playback)); }
         }
 
+        private ICommand _cmdRotateIndicator;
+        public ICommand CmdRotateIndicator
+        {
+            get { return this._cmdRotateIndicator ?? (this._cmdRotateIndicator = new RelayCommand<object>(RotateIndicator)); }
+        }
+
+        private ICommand _cmdMoveIndicator;
+        public ICommand CmdMoveIndicator
+        {
+            get { return this._cmdMoveIndicator ?? (this._cmdMoveIndicator = new RelayCommand<object>(MoveIndicator)); }
+        }
+
         // to avoid garbage collection
         private RayCoreWrapper.CallbackFunction cbFunction;
         public RayCoreWrapper.CallbackFunction CBFunction => (this.cbFunction) ?? (this.cbFunction = new RayCoreWrapper.CallbackFunction(OnMsgCallback));
@@ -161,6 +208,12 @@ namespace RaywattApp.ViewModels
             PhysicianComboBox = new Dictionary<string, string>();
 
             vesselOpened = false;
+
+            IndicatorCrossSection = new Indicator();
+            IndicatorCrossSection.IsVisible = "Visible";
+
+            IndicatorLongitude = new Indicator();
+            IndicatorLongitude.IsVisible = "Visible";
 
             RayCoreWrapper.RayRegisterImageCallback(
                 Marshal.GetFunctionPointerForDelegate(CBCrossSection),
@@ -344,6 +397,27 @@ namespace RaywattApp.ViewModels
             }
         }
 
+        private void RotateIndicator(object param)
+        {
+            Indicator indicator = (Indicator)param;
+
+            if (indicator.isCaptured)
+            {
+                double pointX = crossSectionWidth / 2 - indicator.X;
+                double pointY = crossSectionHeight / 2 - indicator.Y;
+                Degree = (int)(Math.Atan2(pointY, pointX) * 180 / Math.PI);
+            }
+        }
+        private void MoveIndicator(object param)
+        {
+            Indicator indicator = (Indicator)param;
+
+            if (indicator.isCaptured && indicator.X >= 0)
+            {
+                IndicatorLongitude.X = indicator.X + longitudeIndicatorWidth / 2;
+            }
+        }
+
         public Dictionary<string, string> GetVesselList(string? other = null)
         {
             Dictionary<string, string> vessel = CodeDefinition.Codes["VESS"];
@@ -417,6 +491,8 @@ namespace RaywattApp.ViewModels
             if (imgCrossSection != null)
             {
                 CrossSectionImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgCrossSection);
+
+                if (!IndicatorLongitude.isCaptured) updateNavigator(crossSectionFrameInfo.curFrame, crossSectionFrameInfo.totalFrame);
             }
             if (imgLongitude != null)
             {
@@ -439,6 +515,13 @@ namespace RaywattApp.ViewModels
             else {
                 PlayPauseState = PAUSE;
             }
+        }
+        private void updateNavigator(int curFrame, int totalFrame)
+        {
+            double curPosition = (double)curFrame / totalFrame;
+            curPosition = (curFrame == totalFrame - 1) ? 1 : curPosition;
+            curPosition *= longitudeWidth;
+            IndicatorLongitude.X = curPosition + longitudeIndicatorWidth / 2;
         }
     }
 }

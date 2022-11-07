@@ -5,9 +5,15 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
       xmlns:local="clr-namespace:RaywattApp.Views"
+      xmlns:behaviors="clr-namespace:RaywattApp.Common.Behaviors"
+      xmlns:System="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="ReviewPage">
+    <Page.Resources>
+        <System:Boolean x:Key="TrueValue">True</System:Boolean>
+        <System:Boolean x:Key="FalseValue">False</System:Boolean>
+    </Page.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -24,17 +30,111 @@
         <StackPanel Grid.Row="1">
             <StackPanel Orientation="Vertical">
                 <StackPanel Height="10"/>
-                <Image Source="{Binding CrossSectionImage}" Width="720" Height="720" Stretch="Fill"/>
+                <Grid x:Name="crossSection">
+                    <Image Source="{Binding CrossSectionImage}" Width="720" Height="720" Stretch="Fill"/>
+                    <StackPanel Background="Transparent" Width="720" Height="720"  Visibility="{Binding IndicatorCrossSection.IsVisible}">
+                        <i:Interaction.Behaviors>
+                            <behaviors:MouseBehavior MouseX="{Binding IndicatorCrossSection.X, Mode=OneWayToSource}" MouseY="{Binding IndicatorCrossSection.Y, Mode=OneWayToSource}" />
+                        </i:Interaction.Behaviors>
+
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseLeave" >
+                                <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                            </i:EventTrigger>
+                            <i:EventTrigger EventName="PreviewMouseUp" >
+                                <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                            </i:EventTrigger>
+                            <i:EventTrigger EventName="PreviewMouseMove" >
+                                <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    
+                        <Canvas Height="720" Width="720">
+                            <!-- Remain to check a new image in the future -->
+                            <!--
+                                <Ellipse Height="800" Width="800" Stretch="Fill" StrokeThickness="1" Stroke="Beige"/>
+                                <Ellipse Height="40" Width="40" Canvas.Left="380" Canvas.Top="380" Stretch="Fill" StrokeThickness="1" Stroke="Yellow" />
+                                -->
+
+                            <Image Source="/res/bar/indicator.png" Height="720" Width="720" Cursor="Hand" Opacity="0.25">
+                                <Image.RenderTransform>
+                                    <!-- Image Indicator bar width(about 7) => CenterY 3.5 -->
+                                    <RotateTransform CenterX="360" CenterY="3.5" Angle="{Binding Degree}"/>
+                                </Image.RenderTransform>
+
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="PreviewMouseDown" >
+                                        <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
+                                    </i:EventTrigger>
+                                    <i:EventTrigger EventName="PreviewMouseUp" >
+                                        <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                                    </i:EventTrigger>
+                                    <i:EventTrigger EventName="PreviewMouseMove" >
+                                        <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </Image>
+                        </Canvas>
+                    </StackPanel>
+                </Grid>
                 <StackPanel Height="10"/>
-                <Image Source="{Binding LongitudeImage}" Height="180" Stretch="Fill"/>
+                <Grid x:Name="longitude">
+                    <Image Source="{Binding LongitudeImage}" Height="180" Stretch="Fill"/>
+                    <StackPanel Background="Transparent" Height="180" Visibility="{Binding IsVisibleNavigator}">
+                        <!-- L-Mode Mouse Pointer X -->
+                        <i:Interaction.Behaviors>
+                            <behaviors:MouseBehavior MouseX="{Binding IndicatorLongitude.X, Mode=OneWayToSource}"/>
+                        </i:Interaction.Behaviors>
+                        <!-- Trigger -->
+                        <i:Interaction.Triggers>
+                            <!--MouseLeave : StackPanel 영역 벗어날 경우, Indicaotr 멈춤 -->
+                            <i:EventTrigger EventName="MouseLeave" >
+                                <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                            </i:EventTrigger>
+                            <!--PreviewMouseUp : StackPanel 영역에서 MouseUp 할 경우, Indicaotr 멈춤  -->
+                            <i:EventTrigger EventName="PreviewMouseUp" >
+                                <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                            </i:EventTrigger>
+                            <!--PreviewMouseMove : StackPanel 영역에서 MouseMove 할 경우, Indicaotr 동작(단, Indicaotr가 동작 가능 상태 일때) -->
+                            <i:EventTrigger EventName="PreviewMouseMove" >
+                                <i:InvokeCommandAction Command="{Binding CmdMoveIndicator}" CommandParameter="{Binding IndicatorLongitude}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+
+                        <Canvas>
+                            <Image Source="/res/bar/indicator.png" Cursor="Hand" Stretch="None" Width="180" Canvas.Left="{Binding LongitudeIndicatorX}" Canvas.Top="2" Opacity="0.25">
+                                <!-- 가로 Image 90도 회전 -->
+                                <Image.RenderTransform>
+                                    <RotateTransform CenterX="0" CenterY="0" Angle="90"/>
+                                </Image.RenderTransform>
+                                <!-- Trigger -->
+                                <i:Interaction.Triggers>
+                                    <!--PreviewMouseDown : Image 영역에서 MouseDown 할 경우, Indicaotr 동작 가능 상태로 변경 -->
+                                    <i:EventTrigger EventName="PreviewMouseDown" >
+                                        <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
+                                    </i:EventTrigger>
+                                    <!--PreviewMouseUp : Image 영역에서 MouseUp 할 경우, Indicaotr 멈춤 -->
+                                    <i:EventTrigger EventName="PreviewMouseUp" >
+                                        <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                                    </i:EventTrigger>
+                                    <!--PreviewMouseMove : Image 영역에서 MouseMove 할 경우, Indicaotr 동작(단, Indicaotr가 동작 가능 상태 일때) -->
+                                    <i:EventTrigger EventName="PreviewMouseMove" >
+                                        <i:InvokeCommandAction Command="{Binding CmdMoveIndicator}" CommandParameter="{Binding IndicatorLongitude}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </Image>
+                        </Canvas>
+                    </StackPanel>
+
+                </Grid>
             </StackPanel>
         </StackPanel>
 
         <StackPanel Grid.Row="2" Orientation="Vertical" Background="LightGray">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Content="◀|" Command="{Binding CmdPlayback}" CommandParameter="prev" Margin="10,10,10,10"/>
+                <RepeatButton Content="◀|" Command="{Binding CmdPlayback}" CommandParameter="prev" Margin="10,10,10,10"/>
                 <Button Content="{Binding PlayPauseState}" Command="{Binding CmdPlayback}" CommandParameter="play" Width="70" Margin="10,10,10,10"/>
-                <Button Content="|▶" Command="{Binding CmdPlayback}" CommandParameter="next" Margin="10,10,10,10"/>
+                <RepeatButton Content="|▶" Command="{Binding CmdPlayback}" CommandParameter="next" Margin="10,10,10,10"/>
             </StackPanel>
         </StackPanel>
         <Grid Grid.Row="3">
