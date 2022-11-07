@@ -21,7 +21,7 @@
         </StackPanel>
 
         <Grid Grid.Row="1">
-            <StackPanel Grid.Column="1">
+            <StackPanel>
                 <Frame NavigationUIVisibility="Hidden">
                     <b:Interaction.Behaviors>
                         <behaviors:FrameBehavior Parameter="{Binding PopupNavigationParameter, Mode=TwoWay}" Navigation="{Binding PopupNavigationSource, Mode=TwoWay}"  />

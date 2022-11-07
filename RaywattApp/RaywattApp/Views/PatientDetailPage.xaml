@@ -7,7 +7,7 @@
       xmlns:local="clr-namespace:RaywattApp.Views"
       xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      d:DesignHeight="994" d:DesignWidth="1280"
       Title="PatientDetailPage">
 
     <Grid>
@@ -23,39 +23,37 @@
 
         <Grid Grid.Row="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="200" />
+                <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="600"/>
+                <RowDefinition Height="3*"/>
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="0">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="120"/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Margin="5,5,5,5"><TextBlock Text="{Binding [ID], Source={StaticResource L10N}}"/></TextBlock>
-                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Patient.Id}" IsReadOnly="True" Margin="5,5,5,5"/>
-                    <TextBlock Grid.Row="1" Margin="5,5,5,5"><TextBlock Text="{Binding [Last Name], Source={StaticResource L10N}}"/></TextBlock>
-                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Patient.Lastname}" IsReadOnly="True" Margin="5,5,5,5"/>
-                    <TextBlock Grid.Row="2" Margin="5,5,5,5"><TextBlock Text="{Binding [First Name], Source={StaticResource L10N}}"/></TextBlock>
-                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Patient.Firstname}" IsReadOnly="True" Margin="5,5,5,5"/>
-                    <TextBlock Grid.Row="3" Margin="5,5,5,5"><TextBlock Text="{Binding [Birth Date], Source={StaticResource L10N}}"/></TextBlock>
-                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" IsReadOnly="True" Margin="5,5,5,5"/>
-                    <TextBlock Grid.Row="4" Text="{Binding [Gender], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Patient.Gender, Converter={StaticResource L10NConverter}}" IsReadOnly="True" Margin="5,5,5,5"/>
-                </Grid>
-            </StackPanel>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="120"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Margin="5,5,5,5"><TextBlock Text="{Binding [ID], Source={StaticResource L10N}}"/></TextBlock>
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Patient.Id}" IsReadOnly="True" Margin="5,5,5,5"/>
+                <TextBlock Grid.Row="1" Margin="5,5,5,5"><TextBlock Text="{Binding [Last Name], Source={StaticResource L10N}}"/></TextBlock>
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Patient.Lastname}" IsReadOnly="True" Margin="5,5,5,5"/>
+                <TextBlock Grid.Row="2" Margin="5,5,5,5"><TextBlock Text="{Binding [First Name], Source={StaticResource L10N}}"/></TextBlock>
+                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Patient.Firstname}" IsReadOnly="True" Margin="5,5,5,5"/>
+                <TextBlock Grid.Row="3" Margin="5,5,5,5"><TextBlock Text="{Binding [Birth Date], Source={StaticResource L10N}}"/></TextBlock>
+                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" IsReadOnly="True" Margin="5,5,5,5"/>
+                <TextBlock Grid.Row="4" Text="{Binding [Gender], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Patient.Gender, Converter={StaticResource L10NConverter}}" IsReadOnly="True" Margin="5,5,5,5"/>
+            </Grid>
 
             <StackPanel Grid.Row="1" Orientation="Horizontal">
                 <Label Content="{Binding [Total], Source={StaticResource L10N}}"></Label>
@@ -66,7 +64,7 @@
             <!-- DataGrid에서 Binding을 사용하기 위한 설정(DataContext, Source 사용 필요) -->
             <FrameworkElement x:Name="ProxyElement" Visibility="Collapsed"/>
 
-            <DataGrid Grid.Row="2"  Name="patientCaseByDate" ItemsSource="{Binding PatientCaseByDateList}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="None" SelectionMode="Single">
+            <DataGrid Grid.Row="2" Name="patientCaseByDate" ItemsSource="{Binding PatientCaseByDateList}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="None" SelectionMode="Single" MinHeight="600">
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Width="*">
                         <DataGridTemplateColumn.CellTemplate>
@@ -152,6 +150,5 @@
                 <Button Background="Black" Foreground="White" Command="{Binding NewRecordingCommand}" Content="{Binding [New Recording], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
             </StackPanel>
         </Grid>
-
     </Grid>
 </Page>

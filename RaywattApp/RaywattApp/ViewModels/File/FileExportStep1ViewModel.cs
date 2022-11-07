@@ -3,10 +3,12 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
+using RaywattApp.Common.Dialog;
 using RaywattApp.Common.File;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Services;
+using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
 using System.Windows.Controls;
@@ -21,8 +23,13 @@ namespace RaywattApp.ViewModels.File
 
         private readonly SqlManager _sqlManager;
 
+        private IDialogService _dialogService;
+
         [ObservableProperty]
         FileExport _fileExport;
+
+        [ObservableProperty]
+        Patient _patientChecked;
 
         [ObservableProperty]
         IList<Patient> _patientList;
@@ -51,11 +58,12 @@ namespace RaywattApp.ViewModels.File
             get { return this._checkBoxClickCommand ?? (this._checkBoxClickCommand = new RelayCommand(ChangeCheckBoxHeader)); }
         }
 
-        public FileExportStep1ViewModel(SqlManager sqlManager)
+        public FileExportStep1ViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
             _log.Debug("FileExportStep1ViewModel");
 
             _sqlManager = sqlManager;
+            _dialogService = dialogService;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -115,6 +123,16 @@ namespace RaywattApp.ViewModels.File
                         FileExport.SelectedItem.Add(patientCase.Id);
                     }
                 }
+            }
+
+            if(FileExport.SelectedItem.Count == 0)
+            {
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["title"] = _l10n["Information"];
+                parameter["message"] = _l10n["There are no items selected."];
+                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+
+                return;
             }
 
             switch (FileExport.Type)
@@ -218,6 +236,7 @@ namespace RaywattApp.ViewModels.File
                         if (patientCase.Id == item)
                         {
                             patientCase.IsChecked = true;
+                            patient.IsChecked = true;
                             break;
                         }
                     }
@@ -235,6 +254,7 @@ namespace RaywattApp.ViewModels.File
             if (patient.PatientCaseList == null)
                 patient.PatientCaseList = _sqlManager.SelectPatientCaseList(sqlParameters);
 
+            PatientChecked = patient;
             PatientCaseList = patient.PatientCaseList;
             ChangeCheckBoxHeader();
         }
@@ -247,6 +267,7 @@ namespace RaywattApp.ViewModels.File
                 {
                     patientCase.IsChecked = true;
                 }
+                PatientChecked.IsChecked = true;
             }
             else if (checkBox.IsChecked == false)
             {
@@ -254,6 +275,7 @@ namespace RaywattApp.ViewModels.File
                 {
                     patientCase.IsChecked = false;
                 }
+                PatientChecked.IsChecked = false;
             }
         }
 
@@ -274,14 +296,17 @@ namespace RaywattApp.ViewModels.File
             if (isChecked && isNotChecked)
             {
                 CheckBoxAllSelected = null;
+                PatientChecked.IsChecked = true;
             }
             else if (isChecked && !isNotChecked)
             {
                 CheckBoxAllSelected = true;
+                PatientChecked.IsChecked = true;
             }
             else if (!isChecked && isNotChecked)
             {
                 CheckBoxAllSelected = false;
+                PatientChecked.IsChecked = false;
             }
         }
     }
