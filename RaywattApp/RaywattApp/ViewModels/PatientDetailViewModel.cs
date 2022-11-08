@@ -235,7 +235,7 @@ namespace RaywattApp.ViewModels
             parameter["patient"] = Patient;
             GetDetailStatus();
             parameter["prevStatus"] = PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/RecordingPage.xaml") { Parameter = parameter });
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/LiveViewPage.xaml") { Parameter = parameter });
         }
 
         private void GetSelectedItem()
