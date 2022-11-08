@@ -48,7 +48,7 @@ namespace RaywattApp.ViewModels
         }
     }
 
-    public partial class ReviewViewModel : ViewModelBase
+    public partial class ReviewViewModel : OCTViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewViewModel));
 
@@ -136,17 +136,6 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private string _playPauseState;
 
-        [ObservableProperty]
-        private BitmapSource _crossSectionImage;
-        private Mat imgCrossSection;
-
-        private RayCoreWrapper.FrameInfo crossSectionFrameInfo;
-        private RayCoreWrapper.FrameInfo longitudeFrameInfo;
-
-        [ObservableProperty]
-        private BitmapSource _longitudeImage;
-        private Mat imgLongitude;
-
         private DispatcherTimer timer = new DispatcherTimer();
         private DispatcherTimer timerUpdateImage = new DispatcherTimer();
 
@@ -204,16 +193,6 @@ namespace RaywattApp.ViewModels
             get { return this._cmdViewSizeChanged ?? (this._cmdViewSizeChanged = new RelayCommand<object[]>(ViewSizeChanged)); }
         }
 
-        // to avoid garbage collection
-        private RayCoreWrapper.CallbackFunction cbFunction;
-        public RayCoreWrapper.CallbackFunction CBFunction => (this.cbFunction) ?? (this.cbFunction = new RayCoreWrapper.CallbackFunction(OnMsgCallback));
-
-        private RayCoreWrapper.CallbackFunctionWithImage cbCrossSection;
-        public RayCoreWrapper.CallbackFunctionWithImage CBCrossSection => (this.cbCrossSection) ?? (this.cbCrossSection = new RayCoreWrapper.CallbackFunctionWithImage(OnRecvCrossSection));
-
-        private RayCoreWrapper.CallbackFunctionWithImage cbLongitude;
-        public RayCoreWrapper.CallbackFunctionWithImage CBLongitude => (this.cbLongitude) ?? (this.cbLongitude = new RayCoreWrapper.CallbackFunctionWithImage(OnRecvLongitude));
-
         public ReviewViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
             _log.Debug("ReviewViewModel");
@@ -238,11 +217,6 @@ namespace RaywattApp.ViewModels
             IndicatorLongitude.IsVisible = "Hidden";
             IndicatorLongitude.PropertyChanged += OnIndicatorLongitudeMoved;
 
-            RayCoreWrapper.RayRegisterCallback(Marshal.GetFunctionPointerForDelegate(CBFunction));
-            RayCoreWrapper.RayRegisterImageCallback(
-                Marshal.GetFunctionPointerForDelegate(CBCrossSection),
-                Marshal.GetFunctionPointerForDelegate(CBLongitude));
-            
             updatePlayPauseState();
         }
 
@@ -278,23 +252,6 @@ namespace RaywattApp.ViewModels
         private void OnIndicatorLongitudeMoved(object sender, EventArgs e)
         {
             setCurrentFrame(IndicatorLongitude.X);
-        }
-
-        private void OnMsgCallback(int request, int response)
-        {
-            handleState((RayCoreWrapper.RayCallbackRequest)request, (RayCoreWrapper.RayScannerState)response);
-        }
-        private void OnRecvCrossSection(IntPtr data, int width, int height, int ch, int frameInfo)
-        {
-            Mat imgRecv = CommonUtil.byteMemoryToCvMat(data, width, height, ch);
-            imgCrossSection = imgRecv.Clone();
-            crossSectionFrameInfo = new RayCoreWrapper.FrameInfo(frameInfo);
-        }
-        private void OnRecvLongitude(IntPtr data, int width, int height, int ch, int frameInfo)
-        {
-            Mat imgRecv = CommonUtil.byteMemoryToCvMat(data, width, height, ch);
-            imgLongitude = imgRecv.Clone();
-            longitudeFrameInfo = new RayCoreWrapper.FrameInfo(frameInfo);
         }
 
         private void SetInit()
@@ -595,11 +552,11 @@ namespace RaywattApp.ViewModels
             RayCoreWrapper.RaySetProperty(RayCoreWrapper.Property.Brightness, propBrightness);
             RayCoreWrapper.RaySetProperty(RayCoreWrapper.Property.Contrast, propContrast);
         }
-        private void handleState(RayCoreWrapper.RayCallbackRequest request, RayCoreWrapper.RayScannerState response)
-        {
-            if (request != RayCoreWrapper.RayCallbackRequest.State) return;
 
-            switch (response)
+
+        protected override void handleState(RayCoreWrapper.RayCallbackRequest request, RayCoreWrapper.RayScannerState state)
+        {
+            switch (state)
             {
                 case RayCoreWrapper.RayScannerState.Review:
                     updatePlayPauseState();
@@ -607,6 +564,18 @@ namespace RaywattApp.ViewModels
                 default:
                     break;
             }
+        }
+
+        protected override void handleProgress(RayCoreWrapper.RayCallbackRequest request, int progress)
+        {
+        }
+
+        protected override void handleError(RayCoreWrapper.RayCallbackRequest request, RayCoreWrapper.RayError error)
+        {
+        }
+
+        protected override void handleWorkDone(RayCoreWrapper.RayCallbackRequest request, RayCoreWrapper.RayWorkItem work)
+        {
         }
     }
 }
