@@ -1,0 +1,61 @@
+﻿<Page x:Class="RaywattApp.Views.LiveViewPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:RaywattApp.Views"
+      xmlns:const="clr-namespace:RaywattApp.Common.Bases"
+      xmlns:System="clr-namespace:System;assembly=mscorlib"
+      mc:Ignorable="d" 
+      d:DesignHeight="994" d:DesignWidth="1280"
+      Title="LiveViewPage">
+    <Page.Resources>
+        <System:Boolean x:Key="TrueValue">True</System:Boolean>
+        <System:Boolean x:Key="FalseValue">False</System:Boolean>
+        <System:Double x:Key="CrossSectionSize">640</System:Double>
+        <System:Double x:Key="CrossSectionCenter">320</System:Double>
+        <System:Double x:Key="LongitudeHeight">180</System:Double>
+    </Page.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Background="Gray">
+            <Label Content="{Binding [Live View], Source={StaticResource L10N}}"></Label>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Background="LightGray">
+            <StackPanel Orientation="Horizontal" Margin="5,5,5,5">
+                <Label Content="{Binding Patient.Name}"></Label>
+            </StackPanel>
+        </StackPanel>
+        <Image Grid.Row="2" x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill"/>
+
+        <Grid Grid.Row="3" Background="LightGray">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <RadioButton Grid.Column="0" Content="{Binding [Stand By], Source={StaticResource L10N}}" Command="{Binding CmdChangeViewMode}" IsChecked="{Binding ViewMode, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ViewModeStandBy}}" IsEnabled="{Binding IsInitialized}" Margin="5,5,5,5" HorizontalAlignment="Center"/>
+                <RadioButton Grid.Column="1" Content="{Binding [Live View], Source={StaticResource L10N}}" Command="{Binding CmdChangeViewMode}" IsChecked="{Binding ViewMode, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ViewModeLiveView}}" IsEnabled="{Binding IsInitialized}" Margin="5,5,5,5" HorizontalAlignment="Center"/>
+            </Grid>
+            <Button Grid.Column="2" Command="{Binding CmdCalibration}" IsEnabled="{Binding IsInitialized}" Width="100" Content="{Binding [Calibration], Source={StaticResource L10N}}" Margin="5,5,5,5"/>            
+            <Button Grid.Column="3" Command="{Binding CmdStartRecording}" IsEnabled="{Binding IsInitialized}" Width="100" Content="{Binding [Start Recording], Source={StaticResource L10N}}" Margin="5,5,5,5"/>            
+        </Grid>
+
+        <StackPanel Grid.Row="4">
+            <Button Command="{Binding CmdBack}" Width="80" Content="{Binding [Back], Source={StaticResource L10N}}" Margin="5,5,5,5" HorizontalAlignment="Right"/>
+        </StackPanel>
+    </Grid>
+</Page>

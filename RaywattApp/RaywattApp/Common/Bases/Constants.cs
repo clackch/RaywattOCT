@@ -40,5 +40,9 @@
         //Disk Type - CD/DVD, External Drive
         public const string ExportDiskCd = "C";
         public const string ExportDiskExternal = "E";
+
+        //View Mode - Live View, Stand By
+        public const string ViewModeLiveView = "LiveView";
+        public const string ViewModeStandBy = "StandBy";
     }
 }

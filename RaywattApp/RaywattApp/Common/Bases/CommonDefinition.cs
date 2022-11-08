@@ -10,6 +10,7 @@
             PatientDetailPage,
             PatientNewPage,
             PatientEditPage,
+            LiveViewPage,
             RecordingPage,
             ReviewPage
         }
