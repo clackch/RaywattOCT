@@ -33,6 +33,9 @@
     <converters:NotNullToEnableConverter x:Key="NotNullToEnableConverter" />
 
     <!-- Not Empty String To Enable Converter -->
-    <converters:NotEmptyStringToEnableConverter x:Key="NotEmptyStringToEnableConverter" /> 
+    <converters:NotEmptyStringToEnableConverter x:Key="NotEmptyStringToEnableConverter" />
+
+    <!-- Multi Parameter Converter -->
+    <converters:MultiParamConverter x:Key="MultiParamConverter" />
 
 </ResourceDictionary>

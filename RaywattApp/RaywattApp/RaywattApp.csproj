@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="res\bar\indicator.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0" />
     <PackageReference Include="log4net" Version="2.0.15" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
@@ -56,6 +60,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\RayCoreWrapper\RayCoreWrapper\RayCoreWrapper.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="res\bar\indicator.png" />
   </ItemGroup>
 
 </Project>
