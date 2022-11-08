@@ -159,6 +159,9 @@
   <data name="bytes" xml:space="preserve">
     <value>바이트</value>
   </data>
+  <data name="Calibration" xml:space="preserve">
+    <value>영상 조정</value>
+  </data>
   <data name="Cancel" xml:space="preserve">
     <value>취소</value>
   </data>
@@ -294,6 +297,9 @@
   <data name="Leave Unchanged" xml:space="preserve">
     <value>변경 없음</value>
   </data>
+  <data name="Live View" xml:space="preserve">
+    <value>실시간 영상</value>
+  </data>
   <data name="Localization" xml:space="preserve">
     <value>현지화</value>
   </data>
@@ -420,8 +426,14 @@
   <data name="Share" xml:space="preserve">
     <value>쉐어</value>
   </data>
+  <data name="Stand By" xml:space="preserve">
+    <value>대기</value>
+  </data>
   <data name="Standard" xml:space="preserve">
     <value>스탠다드</value>
+  </data>
+  <data name="Start Recording" xml:space="preserve">
+    <value>촬영 시작</value>
   </data>
   <data name="System File Options" xml:space="preserve">
     <value>시스템 파일 옵션</value>
