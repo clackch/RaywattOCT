@@ -1,7 +1,5 @@
 #include "pch.h"
 #include "TIFFWriter.h"
-#include "OCTImaging.h"
-#include "Configuration.h"
 
 CTIFFWriter::CTIFFWriter(CString strTIFPath) {
 	m_pImageTIFF = TIFFOpen(CStringA(strTIFPath), "w+");
@@ -10,13 +8,9 @@ CTIFFWriter::~CTIFFWriter() {
 	if (m_pImageTIFF != NULL) TIFFClose(m_pImageTIFF);
 }
 
-bool CTIFFWriter::SaveFrame(COCTImaging* pImaging, unsigned short *pBuffer) {
-	if (pImaging == NULL || pBuffer == NULL) return false;
-
-	pImaging->Process(pBuffer);
-				
-	cv::Mat image = pImaging->GetCircleImage();
+bool CTIFFWriter::SaveFrame(cv::Mat image) {
 	cv::Mat imageConvert;
+
 	cv::cvtColor(image, imageConvert, cv::COLOR_RGB2BGR);
 	TIFFSetField(m_pImageTIFF, TIFFTAG_IMAGEWIDTH, imageConvert.cols);
 	TIFFSetField(m_pImageTIFF, TIFFTAG_IMAGELENGTH, imageConvert.rows);

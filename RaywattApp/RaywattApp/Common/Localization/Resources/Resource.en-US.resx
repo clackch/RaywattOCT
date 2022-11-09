@@ -159,6 +159,9 @@
   <data name="Birth Date" xml:space="preserve">
     <value>Birth Date</value>
   </data>
+  <data name="Brightness" xml:space="preserve">
+    <value>Brightness</value>
+  </data>
   <data name="Browse for Folder" xml:space="preserve">
     <value>Browse for Folder</value>
   </data>
@@ -179,6 +182,9 @@
   </data>
   <data name="Confirm Password" xml:space="preserve">
     <value>Confirm Password</value>
+  </data>
+  <data name="Contrast" xml:space="preserve">
+    <value>Contrast</value>
   </data>
   <data name="Create Date" xml:space="preserve">
     <value>Create Date</value>
@@ -370,6 +376,9 @@ Do you want to import data?</value>
   <data name="Patient Summary" xml:space="preserve">
     <value>Patient Summary</value>
   </data>
+  <data name="Pause" xml:space="preserve">
+    <value>Pause</value>
+  </data>
   <data name="Physician" xml:space="preserve">
     <value>Physician</value>
   </data>
@@ -378,6 +387,9 @@ Do you want to import data?</value>
   </data>
   <data name="Physician Name" xml:space="preserve">
     <value>Physician Name</value>
+  </data>
+  <data name="Play" xml:space="preserve">
+    <value>Play</value>
   </data>
   <data name="Procedure" xml:space="preserve">
     <value>Procedure</value>

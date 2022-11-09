@@ -190,6 +190,25 @@ CString CRaywattLabDlg::generateFileName(CString strPath, CString strExtension, 
 	}
 	return strFilePath;
 }
+CString CRaywattLabDlg::getLoadedFilePath() {
+	CString strDataPath = _T("");
+	CString strDataFile = _T("");
+	int nSelected = m_listPatientData.GetCurSel();
+	m_listPatientData.GetText(nSelected, strDataFile);
+	strDataPath.Format(_T("%s/%s"), m_strPatientPath, strDataFile);
+
+	return strDataPath;
+}
+CString CRaywattLabDlg::splitFileName(CString strFilePath) {
+	return strFilePath.Right(strFilePath.GetLength() - strFilePath.ReverseFind('\\') - 1);
+}
+CLabImaging* CRaywattLabDlg::createImaging() {
+	CLabImaging* pImaging = new CLabImaging(this);
+	pImaging->Initialize(m_strCurCalibration, ".\\BACKGROUND.bin");
+	pImaging->SetColor(m_chkImageHotColor);
+	
+	return pImaging;
+}
 void CRaywattLabDlg::findFileByExtension(CString strFolder, CString strExt, std::vector<CString>& vList) {
 	CString strQuery = _T("");
 	strQuery.Format(_T("%s\\*.%s"), strFolder, strExt);
@@ -336,6 +355,8 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_LOAD_SELECTED_DATA, &CRaywattLabDlg::OnBnClickedButtonLoadSelectedData)
 	ON_BN_CLICKED(IDC_BUTTON_PLAY_LOADED_DATA, &CRaywattLabDlg::OnBnClickedButtonPlayLoadedData)
 	ON_BN_CLICKED(IDC_BUTTON_SAVE_VIDEO, &CRaywattLabDlg::OnBnClickedButtonSaveVideo)
+	ON_BN_CLICKED(IDC_BUTTON_SAVE_TIF, &CRaywattLabDlg::OnBnClickedButtonSaveTif)
+	ON_BN_CLICKED(IDC_BUTTON_SAVE_PNG, &CRaywattLabDlg::OnBnClickedButtonSavePng)
 	ON_BN_CLICKED(IDC_RADIO_IMAGE_CIRCLE, &CRaywattLabDlg::OnBnClickedRadioImageCircle)
 	ON_BN_CLICKED(IDC_RADIO_IMAGE_RECTANGLE, &CRaywattLabDlg::OnBnClickedRadioImageRectangle)
 	ON_BN_CLICKED(IDC_RADIO_COLOR_BLACK, &CRaywattLabDlg::OnBnClickedRadioColorBlack)
@@ -352,7 +373,6 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_CHECK_BACKGROUND_SUBTRACT, &CRaywattLabDlg::OnBnClickedCheckBackgroundSubtract)
 	ON_BN_CLICKED(IDC_CHECK_BACKGROUND_FFT_SUBTRACT, &CRaywattLabDlg::OnBnClickedCheckBackgroundImageSubtract)
 	ON_BN_CLICKED(IDC_BUTTON_OPEN_CALIB_FOLDER, &CRaywattLabDlg::OnBnClickedButtonOpenCalibFolder)
-	ON_BN_CLICKED(IDC_BUTTON_SAVE_TIF, &CRaywattLabDlg::OnBnClickedButtonSaveTif)
 	ON_BN_CLICKED(IDC_BUTTON_MEASURE, &CRaywattLabDlg::OnBnClickedButtonMeasure)
 	ON_BN_CLICKED(IDC_CHECK_INIT_MOTOR, &CRaywattLabDlg::OnBnClickedCheckInitMotor)
 	ON_BN_CLICKED(IDC_CHECK_INIT_STAGE, &CRaywattLabDlg::OnBnClickedCheckInitStage)
@@ -452,7 +472,6 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	initToggleButton(m_btnLoadData, IDC_BUTTON_LOAD_SELECTED_DATA, _T("Load"), _T("Unload"));
 	initToggleButton(m_btnPlayData, IDC_BUTTON_PLAY_LOADED_DATA, _T("Play"), _T("Pause"));
 	initToggleButton(m_btnSaveData, IDC_BUTTON_SAVE_DATA, _T("Save Data"), _T("Done"));
-	initToggleButton(m_btnSaveVideo, IDC_BUTTON_SAVE_VIDEO, _T("Save AVI"), _T("Done"));
 	initToggleButton(m_btnOpenRotaryJunction, IDC_BUTTON_OPEN_ROTARY_JUNCTION, _T("Open"), _T("Close"));
 
 	m_strPatientPath = AfxGetApp()->GetProfileString(_T("RECENT_SETTING"), _T("PATIENT_PATH"), _T(""));
@@ -691,7 +710,6 @@ void CRaywattLabDlg::OnBnClickedButtonLoadSelectedData()
 	int result = NOERROR;
 	bool dataLoaded = m_btnLoadData.pushed;
 	bool dataPlayed = m_btnPlayData.pushed;
-	bool videoSaving = m_btnSaveVideo.pushed;
 
 	if (dataLoaded) {
 		result = m_pSimDevice->StopAcquisition();
@@ -730,11 +748,9 @@ void CRaywattLabDlg::OnBnClickedButtonLoadSelectedData()
 			toggleButton(this, m_btnPlayData);
 		}
 
-		if (videoSaving) {
-			toggleButton(this, m_btnSaveVideo);
-		}
-		GetDlgItem(IDC_BUTTON_SAVE_VIDEO)->EnableWindow(TRUE);
+		GetDlgItem(IDC_BUTTON_SAVE_VIDEO)->EnableWindow(dataLoaded);
 		GetDlgItem(IDC_BUTTON_SAVE_TIF)->EnableWindow(dataLoaded);
+		GetDlgItem(IDC_BUTTON_SAVE_PNG)->EnableWindow(dataLoaded);
 	}
 }
 
@@ -759,8 +775,6 @@ void CRaywattLabDlg::OnBnClickedButtonPlayLoadedData()
 	if (result == NOERROR) {
 		toggleButton(this, m_btnPlayData);
 		dataPlayed = m_btnPlayData.pushed;
-
-		GetDlgItem(IDC_BUTTON_SAVE_VIDEO)->EnableWindow(TRUE);
 	}
 }
 
@@ -843,42 +857,38 @@ void CRaywattLabDlg::OnBnClickedButtonSaveData()
 void CRaywattLabDlg::OnBnClickedButtonSaveVideo()
 {
 	if (!m_btnLoadData.pushed || m_btnPlayData.pushed) return;
+	CConfiguration& config = CConfiguration::GetInstance();
 
-	GetDlgItem(IDC_BUTTON_SAVE_VIDEO)->SetWindowText(_T("Saving.."));
+	GetDlgItem(IDC_BUTTON_SAVE_VIDEO)->SetWindowText(_T("Saving"));
 
-	CString strDataPath = _T("");
-	CString strDataFile = _T("");
-	int nSelected = m_listPatientData.GetCurSel();
-	m_listPatientData.GetText(nSelected, strDataFile);
-	strDataPath.Format(_T("%s/%s"), m_strPatientPath, strDataFile);
-
+	CString strDataPath = getLoadedFilePath();
 	CString strAviPath = strDataPath;
 	strAviPath.Replace(_T(".bin"), _T(".avi"));
 
-	CLabImaging* pImaging = new CLabImaging(this);
-	pImaging->Initialize(m_strCurCalibration, ".\\BACKGROUND.bin");
-	pImaging->SetColor(m_chkImageHotColor);
+	CLabImaging* pImaging = createImaging();
 
 	CDataReader* pReader = new CDataReader();
 	pReader->Initialize(strDataPath.GetBuffer());
 
-	CConfiguration& config = CConfiguration::GetInstance();
 	CVideoWriter videoWriter;
-	videoWriter.StartRecording(strAviPath, config.nCircleSize, config.nCircleSize);
+	bool isCircle = (m_radioImageShape == 0);
+	int width = (isCircle) ? config.nCircleSize : config.nBScan;
+	int height = (isCircle) ? config.nCircleSize : config.nOutputLength;
+	videoWriter.StartRecording(strAviPath, width, height);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
 		pImaging->Process(pReader->GetSample(i));
-		videoWriter.PushToBuffer(pImaging->GetCircleImage());
+		videoWriter.PushToBuffer(((isCircle) ? pImaging->GetCircleImage() : pImaging->GetRectangleImage()));
 	}
 	videoWriter.StopRecording();
 
-	delete pReader;
-	delete pImaging;
-
 	CString strMessage = _T("");
-	CString strFileName = strAviPath.Right(strAviPath.GetLength() - strAviPath.ReverseFind('\\') - 1);
+	CString strFileName = splitFileName(strAviPath);
 	strMessage.Format(_T("%s saved."), strFileName);
 	AfxMessageBox(strMessage);
-	GetDlgItem(IDC_BUTTON_SAVE_VIDEO)->SetWindowText(_T("Save Video"));
+	GetDlgItem(IDC_BUTTON_SAVE_VIDEO)->SetWindowText(_T("AVI"));
+
+	delete pReader;
+	delete pImaging;
 }
 
 
@@ -886,38 +896,71 @@ void CRaywattLabDlg::OnBnClickedButtonSaveTif()
 {
 	if (!m_btnLoadData.pushed || m_btnPlayData.pushed) return;
 
-	GetDlgItem(IDC_BUTTON_SAVE_TIF)->SetWindowText(_T("Saving.."));
+	GetDlgItem(IDC_BUTTON_SAVE_TIF)->SetWindowText(_T("Saving"));
 
-	CString strDataPath = _T("");
-	CString strDataFile = _T("");
-	int nSelected = m_listPatientData.GetCurSel();
-	m_listPatientData.GetText(nSelected, strDataFile);
-	strDataPath.Format(_T("%s/%s"), m_strPatientPath, strDataFile);
-
+	CString strDataPath = getLoadedFilePath();
 	CString strTifPath = strDataPath;
 	strTifPath.Replace(_T(".bin"), _T(".tif"));
-	CTIFFWriter tiffWriter(strTifPath);
 
-	CLabImaging* pImaging = new CLabImaging(this);
-	pImaging->Initialize(m_strCurCalibration, ".\\BACKGROUND.bin");
-	pImaging->SetColor(m_chkImageHotColor);
+	CLabImaging* pImaging = createImaging();
 
 	CDataReader* pReader = new CDataReader();
 	pReader->Initialize(strDataPath.GetBuffer());
 
+	CTIFFWriter tiffWriter(strTifPath);
+	bool isCircle = (m_radioImageShape == 0);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
-		tiffWriter.SaveFrame(pImaging, pReader->GetSample(i));
+		pImaging->Process(pReader->GetSample(i));
+
+		tiffWriter.SaveFrame(((isCircle) ? pImaging->GetCircleImage() : pImaging->GetRectangleImage()));
 	}
+
+	CString strMessage = _T("");
+	CString strFileName = splitFileName(strTifPath);
+	strMessage.Format(_T("%s saved."), strFileName);
+	AfxMessageBox(strMessage);
+	GetDlgItem(IDC_BUTTON_SAVE_TIF)->SetWindowText(_T("TIF"));
 
 	delete pReader;
 	delete pImaging;
+}
+
+
+void CRaywattLabDlg::OnBnClickedButtonSavePng()
+{
+	if (!m_btnLoadData.pushed || m_btnPlayData.pushed) return;
+
+	GetDlgItem(IDC_BUTTON_SAVE_PNG)->SetWindowText(_T("Saving"));
+
+	CString strDataPath = getLoadedFilePath();
+
+	CString strPngDirectoryW = strDataPath.Left(strDataPath.GetLength() - 4);
+	_tmkdir(strPngDirectoryW.GetBuffer());
+
+	CLabImaging* pImaging = createImaging();
+
+	CDataReader* pReader = new CDataReader();
+	pReader->Initialize(strDataPath.GetBuffer());
+
+	bool isCircle = (m_radioImageShape == 0);
+	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
+		pImaging->Process(pReader->GetSample(i));
+
+		CStringA strPngDirectory(strPngDirectoryW);
+		char strPngName[MAX_PATH];
+		sprintf(strPngName, "%s\\%03d.png", strPngDirectory.GetBuffer(), i);
+		cv::imwrite(strPngName, ((isCircle) ? pImaging->GetCircleImage() : pImaging->GetRectangleImage()));
+	}
 
 	CString strMessage = _T("");
-	CString strFileName = strTifPath.Right(strTifPath.GetLength() - strTifPath.ReverseFind('\\') - 1);
-	strMessage.Format(_T("%s saved."), strFileName);
+	strMessage.Format(_T("%d frames saved."), pReader->GetNumOfSamples());
 	AfxMessageBox(strMessage);
-	GetDlgItem(IDC_BUTTON_SAVE_TIF)->SetWindowText(_T("Save TIF"));
+	GetDlgItem(IDC_BUTTON_SAVE_PNG)->SetWindowText(_T("PNG"));
+
+	delete pReader;
+	delete pImaging;
 }
+
 
 
 void CRaywattLabDlg::OnBnClickedRadioImageCircle()
