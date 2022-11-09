@@ -39,7 +39,7 @@ namespace RaywattApp.Common.File
         private ICommand _importCommand;
         public ICommand ImportCommand
         {
-            get { return this._importCommand ?? (this._importCommand = new RelayCommand(Export)); }
+            get { return this._importCommand ?? (this._importCommand = new RelayCommand(Import)); }
         }
 
         protected virtual void Cancel()

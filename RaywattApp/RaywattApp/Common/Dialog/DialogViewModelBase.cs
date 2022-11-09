@@ -39,6 +39,12 @@ namespace RaywattApp.Common.Dialog
             get { return this._okCommand ?? (this._okCommand = new RelayCommand<IDialogWindow>(AnswerOK)); }
         }
 
+        private ICommand _extraCommand;
+        public ICommand ExtraCommand
+        {
+            get { return this._extraCommand ?? (this._extraCommand = new RelayCommand<IDialogWindow>(AnswerExtra)); }
+        }
+
         public DialogViewModelBase()
         {
             _l10n = (DynamicResource)App.Current.Resources["L10N"];
@@ -73,6 +79,16 @@ namespace RaywattApp.Common.Dialog
 
             DialogResults dialogResults = new();
             dialogResults.DialogAnswer = DialogResults.Answer.Undefined;
+
+            CloseDialogWithResult(dialog, dialogResults);
+        }
+
+        protected void AnswerExtra(IDialogWindow dialog)
+        {
+            _log.Debug("AnswerExtra");
+
+            DialogResults dialogResults = new();
+            dialogResults.DialogAnswer = DialogResults.Answer.Extra;
 
             CloseDialogWithResult(dialog, dialogResults);
         }

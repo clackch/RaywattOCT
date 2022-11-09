@@ -4,8 +4,13 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:RaywattApp.Views.File"
+      xmlns:model="clr-namespace:RaywattApp.Common.Util"
+      xmlns:const="clr-namespace:RaywattApp.Common.Bases"
+      xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
+      xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+      xmlns:behaviors="clr-namespace:RaywattApp.Common.Behaviors"
       mc:Ignorable="d"
-      d:DesignHeight="820" d:DesignWidth="1000"
+      Height="800" d:DesignWidth="1000"
       Title="FileImportPage">
 
     <Grid>
@@ -16,11 +21,115 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Background="Gray">
-            <Label Content="{Binding [Test], Source={StaticResource L10N}}"></Label>
+            <Label Content="{Binding [Import], Source={StaticResource L10N}}"></Label>
         </StackPanel>
 
-        <StackPanel Grid.Row="1">
-        </StackPanel>
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="2*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0">
+                <Label Content="{Binding [Source], Source={StaticResource L10N}}"/>
+            </StackPanel>
+            <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Margin="10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Center">
+                        <RadioButton IsChecked="{Binding DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}" Content="{Binding [CD/DVD], Source={StaticResource L10N}}"  VerticalAlignment="Center" Margin="50,0,0,0"/>
+                        <RadioButton IsChecked="{Binding DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.FileDiskExternal}}" Content="{Binding [External Drive], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
+                    </StackPanel>
+                    
+                    <Border Grid.Column="1" BorderBrush="Black" BorderThickness="1" Margin="5" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                            <Label Content="{Binding [Disk Type], Source={StaticResource L10N}}"  Margin="5,5,5,5"/>
+                            <Label Content="no disc" Margin="5,5,5,5"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="1" BorderBrush="Black" BorderThickness="1" Margin="5" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskExternal}}">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                            <Label Content="{Binding [Select Drive], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+                            <ComboBox Width="250" ItemsSource="{Binding ExternalDriveComboBox}" SelectedValue="{Binding SelectedExternalDrive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectedValuePath="Key" DisplayMemberPath="Value" IsEnabled="{Binding IsEnableExternalDrive}" Margin="5,5,5,5"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+            <Border Grid.Row="2" BorderBrush="Black" BorderThickness="1" Margin="10">
+                <TreeView ItemsSource="{Binding DirItems}">
+                    <TreeView.Resources>
+                        <HierarchicalDataTemplate DataType="{x:Type model:DirectoryItem}" ItemsSource="{Binding Path=Items, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <TextBlock Text="{Binding Path=Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="2,2,2,2"/>
+                        </HierarchicalDataTemplate>
+                    </TreeView.Resources>
+                    <i:Interaction.Behaviors>
+                        <behaviors:BindableSelectedItemBehavior SelectedItem="{Binding SelectedDir, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </i:Interaction.Behaviors>
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="{x:Type TreeViewItem}">
+                            <Setter Property="IsExpanded" Value="True" />
+                        </Style>
+                    </TreeView.ItemContainerStyle>
+                </TreeView>
+            </Border>
+            
+            <Grid Grid.Row="3" Margin="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="3*"/>
+                </Grid.ColumnDefinitions>
+                <DataGrid Grid.Column="0" Name="patientList" ItemsSource="{Binding PatientList}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="All" RowHeaderWidth="0" CanUserSortColumns="False" >
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="SelectionChanged">
+                            <i:InvokeCommandAction Command="{Binding ShowCaseCommand}" CommandParameter="{Binding ElementName=patientList, Path=CurrentItem}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Width="*" Binding="{Binding Id}" Header="{Binding [ID], Source={StaticResource L10N}}"/>
+                        <DataGridTextColumn Width="*" Binding="{Binding Name}" Header="{Binding [Name], Source={StaticResource L10N}}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <DataGrid Grid.Column="2" ItemsSource="{Binding PatientCaseList}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="All" RowHeaderWidth="0" CanUserSortColumns="False" >
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Width="*" Binding="{Binding PhysicianName}" Header="{Binding [Physician Name], Source={StaticResource L10N}}" />
+                        <DataGridTextColumn Width="*" Binding="{Binding AccessionNumber}" Header="{Binding [Accession Number], Source={StaticResource L10N}}" />
+                        <DataGridTextColumn Width="*" Binding="{Binding Comment}" Header="{Binding [Comment], Source={StaticResource L10N}}" />
+                        <DataGridTextColumn Width="*" Binding="{Binding Vessel, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}" Header="{Binding [Vessel], Source={StaticResource L10N}}" />
+                        <DataGridTextColumn Width="*" Binding="{Binding Procedure, Converter={StaticResource CodeConverter}, ConverterParameter='PROC'}" Header="{Binding [Procedure], Source={StaticResource L10N}}" />
+                        <DataGridTextColumn Width="*" Binding="{Binding CreateDate, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Create Date], Source={StaticResource L10N}}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+            
+            <Border Grid.Row="4" BorderBrush="Black" BorderThickness="1" Margin="10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <Label Content="{Binding [Available Space], Source={StaticResource L10N}}"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="{Binding AvailableSpace}"/>
+                            <Label Content="GB"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1">
+                        <Label Content="{Binding [Approximate Import Size], Source={StaticResource L10N}}"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="{Binding ApproximateImportSize}"/>
+                            <Label Content="MB"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" >
             <Button Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}" Margin="5,5,5,5"/>

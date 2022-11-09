@@ -38,7 +38,11 @@
         public const string ExportOptionRemove = "R";
 
         //Disk Type - CD/DVD, External Drive
-        public const string ExportDiskCd = "C";
-        public const string ExportDiskExternal = "E";
+        public const string FileDiskCd = "C";
+        public const string FileDiskExternal = "E";
+
+        //File Import
+        public const string FileExtension = "dbf";
+        public const string FileNamePrefix = "Export_";
     }
 }
