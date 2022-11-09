@@ -61,6 +61,7 @@ void CRaywattLabDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Radio(pDX, IDC_RADIO_IMAGE_CIRCLE, m_radioImageShape);
 	DDX_Radio(pDX, IDC_RADIO_COLOR_BLACK, m_radioImageColor);
 	DDX_Check(pDX, IDC_CHECK_HOT_COLOR, m_chkImageHotColor);
+	DDX_Check(pDX, IDC_CHECK_SHOW_GUIDE, m_chkShowGuide);
 	DDX_Control(pDX, IDC_SLIDER_BRIGHTNESS, m_sliderBrightness);
 	DDX_Control(pDX, IDC_SLIDER_CONTRAST, m_sliderContrast);
 	DDX_Check(pDX, IDC_CHECK_INIT_MOTOR, m_chkInitMotor);
@@ -360,6 +361,7 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_RADIO_COLOR_BLACK, &CRaywattLabDlg::OnBnClickedRadioColorBlack)
 	ON_BN_CLICKED(IDC_RADIO_COLOR_WHITE, &CRaywattLabDlg::OnBnClickedRadioColorWhite)
 	ON_BN_CLICKED(IDC_CHECK_HOT_COLOR, &CRaywattLabDlg::OnBnClickedCheckHotColor)
+	ON_BN_CLICKED(IDC_CHECK_SHOW_GUIDE, &CRaywattLabDlg::OnBnClickedCheckShowGuide)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_BRIGHTNESS, &CRaywattLabDlg::OnNMCustomdrawSliderBrightness)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_CONTRAST, &CRaywattLabDlg::OnNMCustomdrawSliderContrast)
 	ON_BN_CLICKED(IDC_BUTTON_SAVE_DATA, &CRaywattLabDlg::OnBnClickedButtonSaveData)
@@ -489,6 +491,7 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	m_radioImageShape = 0;
 	m_radioImageColor = 0;
 	m_chkImageHotColor = TRUE;
+	m_chkShowGuide = FALSE;
 	m_chkInitMotor = AfxGetApp()->GetProfileInt(_T("RECENT_SETTING"), _T("INIT_MOTOR"), TRUE);
 	m_chkInitStage = AfxGetApp()->GetProfileInt(_T("RECENT_SETTING"), _T("INIT_STAGE"), TRUE);
 	
@@ -984,6 +987,14 @@ void CRaywattLabDlg::OnBnClickedCheckHotColor()
 	if (m_pImagingRealtime != nullptr) m_pImagingRealtime->SetColor(m_chkImageHotColor);
 	if (m_pImagingSimulate != nullptr) m_pImagingSimulate->SetColor(m_chkImageHotColor);
 }
+
+void CRaywattLabDlg::OnBnClickedCheckShowGuide()
+{
+	UpdateData(TRUE);
+	if (m_pImagingRealtime != nullptr) m_pImagingRealtime->ShowCalibGuide(m_chkShowGuide);
+	if (m_pImagingSimulate != nullptr) m_pImagingSimulate->ShowCalibGuide(m_chkShowGuide);
+}
+
 
 
 void CRaywattLabDlg::OnNMCustomdrawSliderBrightness(NMHDR* pNMHDR, LRESULT* pResult)

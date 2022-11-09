@@ -55,6 +55,7 @@ private:
 	int m_radioImageShape;
 	int m_radioImageColor;
 	BOOL m_chkImageHotColor;
+	BOOL m_chkShowGuide;
 	CSliderCtrl m_sliderBrightness;
 	CSliderCtrl m_sliderContrast;
 	BOOL m_chkInitMotor;
@@ -142,6 +143,7 @@ public:
 	afx_msg void OnBnClickedRadioColorBlack();
 	afx_msg void OnBnClickedRadioColorWhite();
 	afx_msg void OnBnClickedCheckHotColor();
+	afx_msg void OnBnClickedCheckShowGuide();
 	afx_msg void OnNMCustomdrawSliderBrightness(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNMCustomdrawSliderContrast(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBnClickedButtonOpenRotaryJunction();
