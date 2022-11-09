@@ -11,6 +11,7 @@
             PatientNewPage,
             PatientEditPage,
             LiveViewPage,
+            CalibrationPage,
             RecordingPage,
             ReviewPage
         }

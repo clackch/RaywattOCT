@@ -144,6 +144,9 @@
   <data name="Are you sure to delete selected patient case?" xml:space="preserve">
     <value>Are you sure to delete selected patient case?</value>
   </data>
+  <data name="Auto Calibration" xml:space="preserve">
+    <value>Auto Calibration</value>
+  </data>
   <data name="Back" xml:space="preserve">
     <value>Back</value>
   </data>
@@ -464,5 +467,11 @@
   </data>
   <data name="Yes" xml:space="preserve">
     <value>Yes</value>
+  </data>
+  <data name="Zoom In" xml:space="preserve">
+    <value>Zoom In</value>
+  </data>
+  <data name="Zoom Out" xml:space="preserve">
+    <value>Zoom Out</value>
   </data>
 </root>

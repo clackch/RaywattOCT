@@ -10,14 +10,10 @@ using RaywattApp.Services;
 using RaywattOCT;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Navigation;
 using System.Windows.Threading;
+using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels
 {
@@ -75,8 +71,6 @@ namespace RaywattApp.ViewModels
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;
-
-            ViewMode = Constants.ViewModeStandBy;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -91,10 +85,10 @@ namespace RaywattApp.ViewModels
                 this.Patient = (Patient)data["patient"];
                 this.PrevStatus = (PrevStatus)data["prevStatus"];
 
-                this.IsInitialized = false;
+                RayInitialize();
+                RaySetProperty(Property.BackgroundColor, 0xFFFFFF);
 
-                RayCoreWrapper.RaySetProperty(RayCoreWrapper.Property.BackgroundColor, 0xFFFFFF);
-                RayCoreWrapper.RayInitialize();
+                syncWithCoreSystem();
 
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(5);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
@@ -105,17 +99,15 @@ namespace RaywattApp.ViewModels
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
             _log.Debug("OnNavigating");
-            // To-Do : Finalize
         }
 
         private void Back()
         {
             _log.Debug("Back");
+            
+            RayFinalize();
 
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["patient"] = this.Patient;
-            parameter["prevStatus"] = this.PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = parameter });
+            leaveToPage("Views/PatientDetailPage.xaml");
         }
 
         private void ChangeViewMode()
@@ -124,11 +116,11 @@ namespace RaywattApp.ViewModels
 
             if (Constants.ViewModeLiveView.Equals(ViewMode))
             {
-                RayCoreWrapper.RayMotorOnOff(true);
+                RayMotorOnOff(true);
             }
             else if (Constants.ViewModeStandBy.Equals(ViewMode))
             {
-                RayCoreWrapper.RayMotorOnOff(false);
+                RayMotorOnOff(false);
             }
         }
 
@@ -136,23 +128,17 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Calibration");
 
-            if (Constants.ViewModeStandBy.Equals(ViewMode))
-            {
-                // Select LiveView First
-            }
-            else { 
-                // Do Calibration (Manual + Auto)
-            }
+            ViewMode = Constants.ViewModeLiveView;
+            ChangeViewMode();
+
+            leaveToPage("Views/CalibrationPage.xaml");
         }
 
         private void StartRecording()
         {
             _log.Debug("StartRecording");
 
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["patient"] = this.Patient;
-            parameter["prevStatus"] = this.PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/RecordingPage.xaml") { Parameter = parameter });
+            leaveToPage("Views/RecordingPage.xaml");
         }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
@@ -163,44 +149,50 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        protected override void handleError(RayCoreWrapper.RayCallbackRequest request, RayCoreWrapper.RayError error)
+        private void leaveToPage(string viewPage)
+        {
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = this.Patient;
+            parameter["prevStatus"] = this.PrevStatus;
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(viewPage) { Parameter = parameter });
+        }
+
+        private void syncWithCoreSystem()
+        {
+            RayScannerState curState = (RayScannerState)RayGetProperty(Property.CurrentState);
+            bool isLiveView = (bool)(RayGetProperty(Property.MotorOnOff) != 0);
+
+            this.IsInitialized = (curState == RayScannerState.LiveView) ? true : false;
+            this.ViewMode = (isLiveView) ? Constants.ViewModeLiveView : Constants.ViewModeStandBy;
+        }
+
+        protected override void handleError(RayCallbackRequest request, RayError error)
         {
             _log.Debug("handleError : " + ((int)error).ToString());
+
             switch (error)
             {
-            case RayCoreWrapper.RayError.InitializeFailed:
+            case RayError.InitializeFailed:
                 break;
-            case RayCoreWrapper.RayError.WrongOCTScannerState:
+            case RayError.WrongOCTScannerState:
                  break;
             default:
                 break;
             }
         }
 
-        protected override void handleProgress(RayCoreWrapper.RayCallbackRequest request, int progress)
+        protected override void handleProgress(RayCallbackRequest request, int progress)
         {
         }
 
-        protected override void handleState(RayCoreWrapper.RayCallbackRequest request, RayCoreWrapper.RayScannerState state)
+        protected override void handleState(RayCallbackRequest request, RayScannerState state)
         {
-            switch (state) 
-            {
-            case RayCoreWrapper.RayScannerState.None:
-                break;
-                case RayCoreWrapper.RayScannerState.Initializing:
-                break;
-                case RayCoreWrapper.RayScannerState.LiveView:
-                    IsInitialized = true;
-                break;
-                case RayCoreWrapper.RayScannerState.Homing:
-                case RayCoreWrapper.RayScannerState.Ready:
-                case RayCoreWrapper.RayScannerState.Scanning:
-                    break;
-            }
+            syncWithCoreSystem();
         }
 
-        protected override void handleWorkDone(RayCoreWrapper.RayCallbackRequest request, RayCoreWrapper.RayWorkItem work)
+        protected override void handleWorkDone(RayCallbackRequest request, RayWorkItem work)
         {
         }
     }
 }
+ 

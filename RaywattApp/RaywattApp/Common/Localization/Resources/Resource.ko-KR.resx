@@ -144,6 +144,9 @@
   <data name="Are you sure to delete selected patient case?" xml:space="preserve">
     <value>선택된 환자 케이스를 삭제하겠습니까?</value>
   </data>
+  <data name="Auto Calibration" xml:space="preserve">
+    <value>자동 영상 조정</value>
+  </data>
   <data name="Back" xml:space="preserve">
     <value>뒤로</value>
   </data>
@@ -464,5 +467,11 @@
   </data>
   <data name="Yes" xml:space="preserve">
     <value>예</value>
+  </data>
+  <data name="Zoom In" xml:space="preserve">
+    <value>확대</value>
+  </data>
+  <data name="Zoom Out" xml:space="preserve">
+    <value>축소</value>
   </data>
 </root>
