@@ -26,6 +26,7 @@ class CConfiguration
 		double fAxialResolutionScale;
 		int nNoiseSkip;
 		int nNoiseAverage;
+		double fSheathRadius;
 	};
 
 	class Invert {

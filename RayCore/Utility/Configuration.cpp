@@ -46,6 +46,7 @@ void CConfiguration::Initialize(tstring configFile)
 	this->measurementValues.fAxialResolutionScale = getPrivateProfileFloat(_T("Measurement"), _T("AxialResolutionScale"), 8.3, configFilePath.c_str());
 	this->measurementValues.nNoiseSkip = ::GetPrivateProfileInt(_T("Measurement"), _T("NoiseSkip"), 300, configFilePath.c_str());
 	this->measurementValues.nNoiseAverage = ::GetPrivateProfileInt(_T("Measurement"), _T("NoiseAverage"), 100, configFilePath.c_str());
+	this->measurementValues.fSheathRadius = getPrivateProfileFloat(_T("Measurement"), _T("SheathRadius"), 0.4, configFilePath.c_str());
 
 	// [OpenMP]
 	this->settingsOpenMP.numThread = ::GetPrivateProfileInt(_T("OpenMP"), _T("NumThread"), 8, configFilePath.c_str());
