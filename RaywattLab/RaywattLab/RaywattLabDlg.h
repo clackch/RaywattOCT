@@ -64,9 +64,6 @@ private:
 	CString m_strPatientPath;
 	CString m_strPatientName;
 
-	// Shutter
-	void* m_pShutter;
-
 	// Rotary Junction
 	CRotaryJunctionDlg m_dlgRotaryJunction;
 
@@ -145,7 +142,6 @@ public:
 	afx_msg void OnBnClickedRadioColorBlack();
 	afx_msg void OnBnClickedRadioColorWhite();
 	afx_msg void OnBnClickedCheckHotColor();
-	afx_msg void OnBnClickedCheckCloseShutter();
 	afx_msg void OnNMCustomdrawSliderBrightness(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNMCustomdrawSliderContrast(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBnClickedButtonOpenRotaryJunction();

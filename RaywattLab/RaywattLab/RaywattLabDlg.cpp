@@ -19,7 +19,6 @@
 #include "TIFFWriter.h"
 #include "ZaberController.h"
 #include "MotorController.h"
-#include "PiUsb.h"
 #include "LaserController.h"
 #include "Utility.h"
 #include <opencv2/opencv.hpp>
@@ -44,7 +43,6 @@ CRaywattLabDlg::CRaywattLabDlg(CWnd* pParent /*=nullptr*/)
 	m_pDataWriter = nullptr;
 	m_pFFTFile = nullptr;
 	m_pDataReader = nullptr;
-	m_pShutter = nullptr;
 
 	m_pThreadCalibration = nullptr;
 	m_pFrameBuffer = nullptr;
@@ -362,7 +360,6 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_RADIO_COLOR_BLACK, &CRaywattLabDlg::OnBnClickedRadioColorBlack)
 	ON_BN_CLICKED(IDC_RADIO_COLOR_WHITE, &CRaywattLabDlg::OnBnClickedRadioColorWhite)
 	ON_BN_CLICKED(IDC_CHECK_HOT_COLOR, &CRaywattLabDlg::OnBnClickedCheckHotColor)
-	ON_BN_CLICKED(IDC_CHECK_CLOSE_SHUTTER, &CRaywattLabDlg::OnBnClickedCheckCloseShutter)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_BRIGHTNESS, &CRaywattLabDlg::OnNMCustomdrawSliderBrightness)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_CONTRAST, &CRaywattLabDlg::OnNMCustomdrawSliderContrast)
 	ON_BN_CLICKED(IDC_BUTTON_SAVE_DATA, &CRaywattLabDlg::OnBnClickedButtonSaveData)
@@ -472,7 +469,7 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	initToggleButton(m_btnLoadData, IDC_BUTTON_LOAD_SELECTED_DATA, _T("Load"), _T("Unload"));
 	initToggleButton(m_btnPlayData, IDC_BUTTON_PLAY_LOADED_DATA, _T("Play"), _T("Pause"));
 	initToggleButton(m_btnSaveData, IDC_BUTTON_SAVE_DATA, _T("Save Data"), _T("Done"));
-	initToggleButton(m_btnOpenRotaryJunction, IDC_BUTTON_OPEN_ROTARY_JUNCTION, _T("Open"), _T("Close"));
+	initToggleButton(m_btnOpenRotaryJunction, IDC_BUTTON_OPEN_ROTARY_JUNCTION, _T("Setting"), _T("Close"));
 
 	m_strPatientPath = AfxGetApp()->GetProfileString(_T("RECENT_SETTING"), _T("PATIENT_PATH"), _T(""));
 	updatePatientDataList();
@@ -529,13 +526,6 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	m_pFrameBuffer = new char[config.nBufferSize * sizeof(unsigned short)];
 
 	updateBrightnessContrast();
-
-	int result = 0;
-	m_pShutter = piConnectShutter(&result, config.shutterSerial);
-	if (result == PI_NO_ERROR) {
-		piSetShutterState(PI_SHUTTER_OPEN, m_pShutter);
-		GetDlgItem(IDC_CHECK_CLOSE_SHUTTER)->EnableWindow(TRUE);
-	}
 
 	m_dlgRotaryJunction.Create(IDD_ROTARY_JUNCTION_DIALOG);
 
@@ -640,11 +630,6 @@ void CRaywattLabDlg::OnDestroy() {
 
 	pLinearStage->Close();
 	pInterferometer->Close();
-
-	if (m_pShutter != nullptr) {
-		piDisconnectShutter(m_pShutter);
-		m_pShutter = nullptr;
-	}
 }
 
 
@@ -998,20 +983,6 @@ void CRaywattLabDlg::OnBnClickedCheckHotColor()
 	UpdateData(TRUE);
 	if (m_pImagingRealtime != nullptr) m_pImagingRealtime->SetColor(m_chkImageHotColor);
 	if (m_pImagingSimulate != nullptr) m_pImagingSimulate->SetColor(m_chkImageHotColor);
-}
-
-
-void CRaywattLabDlg::OnBnClickedCheckCloseShutter()
-{
-	if (m_pShutter == nullptr) return;
-
-	int closeShutter = ((CButton*)GetDlgItem(IDC_CHECK_CLOSE_SHUTTER))->GetCheck();
-	if (closeShutter) {
-		piSetShutterState(PI_SHUTTER_CLOSED, m_pShutter);
-	}
-	else {
-		piSetShutterState(PI_SHUTTER_OPEN, m_pShutter);
-	}
 }
 
 

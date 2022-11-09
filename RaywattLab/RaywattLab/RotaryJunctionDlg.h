@@ -14,6 +14,11 @@ private:
 	bool m_isClickedForward;
 
 	CThread* m_pThreadInterferometer;
+
+	// Shutter
+	void* m_pShutter;
+	bool m_isShutterOpened;
+
 public:
 	CRotaryJunctionDlg(CWnd* pParent = nullptr);   // standard constructor
 	virtual ~CRotaryJunctionDlg();
@@ -40,4 +45,5 @@ public:
 	afx_msg void OnBnClickedButtonMotorStop();
 	afx_msg void OnBnClickedButtonSaveSettings();
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+	afx_msg void OnBnClickedButtonCloseShutter();
 };
