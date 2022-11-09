@@ -38,4 +38,7 @@
     <!-- Code Converter -->
     <converters:CodeConverter x:Key="CodeConverter" />
 
+    <!-- Multi Parameter Converter -->
+    <converters:MultiParamConverter x:Key="MultiParamConverter" />
+
 </ResourceDictionary>

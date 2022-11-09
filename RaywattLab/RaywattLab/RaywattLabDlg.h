@@ -48,7 +48,6 @@ private:
 	ToggleButton m_btnLoadData;
 	ToggleButton m_btnPlayData;
 	ToggleButton m_btnSaveData;
-	ToggleButton m_btnSaveVideo;
 	ToggleButton m_btnOpenRotaryJunction;
 	CStatic m_pictOCTImage;
 	ScopeView m_scopeView;
@@ -103,6 +102,9 @@ private:
 	void initScopeViewLayout();
 	void updateBrightnessContrast();
 	CString generateFileName(CString strPath, CString strExtension, CString strPrefix = _T(""));
+	CString getLoadedFilePath();
+	CString splitFileName(CString strFilePath);
+	CLabImaging* createImaging();
 	void findFileByExtension(CString strFolder, CString strExt, std::vector<CString>& vList);
 	void updateMeasurement(USHORT nPeakValue, int nPeakIndex, int nLineWidth, USHORT nNoisePower);
 
@@ -137,6 +139,7 @@ public:
 	afx_msg void OnBnClickedButtonSaveData();
 	afx_msg void OnBnClickedButtonSaveVideo();
 	afx_msg void OnBnClickedButtonSaveTif();
+	afx_msg void OnBnClickedButtonSavePng();
 	afx_msg void OnBnClickedRadioImageCircle();
 	afx_msg void OnBnClickedRadioImageRectangle();
 	afx_msg void OnBnClickedRadioColorBlack();
