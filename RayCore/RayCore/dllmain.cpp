@@ -23,6 +23,9 @@ _declspec(dllexport) RayError RayConnectDevices() {
 _declspec(dllexport) RayError RayInitialize() {
     return octSystem.Initialize();
 }
+_declspec(dllexport) RayError RayShowCalibrationGuide(bool show) {
+    return octSystem.ShowCalibrationGuide(show);
+}
 _declspec(dllexport) RayError RayPreparePullback() {
     return octSystem.PreparePullback();
 }

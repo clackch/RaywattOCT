@@ -42,6 +42,7 @@ protected:
 
 	bool m_bInvert;
 	bool m_bColor;
+	bool m_bShowCalibGuide;
 	double m_fBrightness;
 	double m_fContrast;
 	cv::Scalar m_backgroundColor;
@@ -62,6 +63,7 @@ public:
 	virtual void DoAsyncRender(USHORT* fringes);
 	void SetInvert(bool bInvert) { m_bInvert = bInvert; }
 	void SetColor(bool bColor) { m_bColor = bColor; }
+	void ShowCalibGuide(bool bShow) { m_bShowCalibGuide = bShow; }
 	void SetBrightnessContrast(double brightness, double contrast) {
 		m_fBrightness = brightness;
 		m_fContrast = contrast;

@@ -41,6 +41,8 @@ COCTSystem::COCTSystem() {
 	m_pAcqDevice = nullptr;	
 	m_pSimDevice = nullptr;
 
+	m_showCalibGuide = false;
+
 	m_prevState = RayScannerState::None;
 	m_curState = RayScannerState::None;
 
@@ -176,6 +178,20 @@ RayError COCTSystem::Initialize() {
 		return RayError::OK;
 	}
 
+	return RayError::WrongOCTScannerState;
+}
+
+/*
+* ShowCalibrationGuide
+*/
+RayError COCTSystem::ShowCalibrationGuide(bool show) {
+	if (m_curState == RayScannerState::LiveView || m_curState == RayScannerState::AutoCalibration || m_curState == RayScannerState::Review) {
+		m_pImagingRealtime->ShowCalibGuide(show);
+		m_pImagingSimulate->ShowCalibGuide(show);
+		m_showCalibGuide = show;
+
+		return RayError::OK;
+	}
 	return RayError::WrongOCTScannerState;
 }
 

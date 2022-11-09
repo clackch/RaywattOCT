@@ -23,9 +23,11 @@ class CConfiguration
 
 	class Measurement {
 	public:
-		double fAxialResolutionScale;
+		double fAxialResolutionScale;	// um per pixel
 		int nNoiseSkip;
 		int nNoiseAverage;
+		double fSheathRadius;	// mm
+		int nSheathPosition;	// pixel
 	};
 
 	class Invert {
@@ -96,6 +98,8 @@ public:
 	int getDmaXferSamples();
 	int getDmaBufferSamples();
 	int getScopeLength();
+
+	double getPrivateProfileFloat(LPCWSTR lpAppName, LPCWSTR lpKeyName, double fDefault, LPCWSTR lpFileName);
 
 	//Property
 	double GetLoadCatheterTime();

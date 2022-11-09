@@ -12,6 +12,7 @@ extern "C" {
 	_declspec(dllexport) RayError RayRegisterCallback(FunctionPtr cb);
 	_declspec(dllexport) RayError RayConnectDevices();
 	_declspec(dllexport) RayError RayInitialize();
+	_declspec(dllexport) RayError RayShowCalibrationGuide(bool show);
 	_declspec(dllexport) RayError RayPreparePullback();
 	_declspec(dllexport) RayError RayPullbackScan(char *strFilePath);
 	_declspec(dllexport) RayError RayLoadCatheter();
