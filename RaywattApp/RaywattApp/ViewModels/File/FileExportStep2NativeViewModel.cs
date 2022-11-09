@@ -14,12 +14,16 @@ using System.Windows.Threading;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Views.Dialog;
 using RaywattApp.Common.Bases;
+using Newtonsoft.Json;
+using RaywattApp.Services;
 
 namespace RaywattApp.ViewModels.File
 {
     public partial class FileExportStep2NativeViewModel : FileBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(FileExportStep2NativeViewModel));
+
+        private readonly SqlManager _sqlManager;
 
         private IDialogService _dialogService;
 
@@ -28,16 +32,39 @@ namespace RaywattApp.ViewModels.File
 
         private DispatcherTimer timer = new DispatcherTimer();
 
+        private string _diskType; //CD/DVD, External Drive
+        public string DiskType
+        {
+            get { return _diskType; }
+            set
+            {
+                _diskType = value;
+                FileExport.DiskType = _diskType;
+
+                if (_diskType.Equals(Constants.FileDiskCd))
+                {
+                    if (timer.IsEnabled)
+                        timer.Stop();
+                }
+                else
+                {
+                    GetDrive();
+                    timer.Start();
+                }
+
+                OnPropertyChanged(nameof(DiskType));
+            }
+        }
+
         [ObservableProperty]
         private Dictionary<string, string> _externalDriveComboBox;
 
         [ObservableProperty]
         private bool isEnableExternalDrive;
 
-        private string _selectedExternalDrive;
-
         private bool isExternalDriveInit;
 
+        private string _selectedExternalDrive;
         public string SelectedExternalDrive
         {
             get { return _selectedExternalDrive; }
@@ -107,8 +134,11 @@ namespace RaywattApp.ViewModels.File
             get { return this._externalDrivePathCommand ?? (this._externalDrivePathCommand = new RelayCommand(ExternalDrivePath)); }
         }
 
-        public FileExportStep2NativeViewModel(IDialogService dialogService)
+        public FileExportStep2NativeViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
+            _log.Debug("FileExportStep2NativeViewModel");
+
+            _sqlManager = sqlManager;
             _dialogService = dialogService;
 
             ExternalDriveComboBox = new Dictionary<string, string>();
@@ -117,7 +147,6 @@ namespace RaywattApp.ViewModels.File
             isExternalDriveInit = true;
             timer.Interval = TimeSpan.FromMilliseconds(1000);
             timer.Tick += new EventHandler(CheckDrive);
-            timer.Start();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -137,7 +166,8 @@ namespace RaywattApp.ViewModels.File
         {
             _log.Debug("OnNavigating");
 
-            timer.Stop();
+            if (timer.IsEnabled)
+                timer.Stop();
         }
 
         protected override void Back()
@@ -151,9 +181,96 @@ namespace RaywattApp.ViewModels.File
         {
             _log.Debug("Cancel");
 
-            timer.Stop();
+            Close();
+        }
+
+        private void Close()
+        {
+            if (timer.IsEnabled)
+                timer.Stop();
 
             CloseDialog();
+        }
+
+        protected override void Export()
+        {
+            _log.Debug("Export");
+
+            //TO-DO : CD 일 경우, Path 부분 추가
+            if (String.IsNullOrEmpty(FileExport.ExternalDrivePath))
+            {
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["title"] = _l10n["Information"];
+                parameter["message"] = _l10n["Path is required"];
+                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+            }
+            else
+            {
+                FileSave();
+
+                //TO-DO : Copy Image
+
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["title"] = _l10n["Information"];
+                parameter["message"] = _l10n["Done"];
+                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+                Close();
+            }
+        }
+
+        private void FileSave()
+        {
+            string contents = MakeContents();
+            string fileName = Constants.FileNamePrefix + DateTime.Now.ToString("yyyyMMddHHmmss");
+            string filePath = FileExport.ExternalDrivePath + "\\" + fileName + "." + Constants.FileExtension;
+
+            int cnt = 1;
+            while (true)
+            {
+                if (!System.IO.File.Exists(filePath))
+                {
+                    break;
+                }
+
+                fileName = Constants.FileNamePrefix + DateTime.Now.ToString("yyyyMMddHHmmss") + "(" + ++cnt + ")";
+                filePath = FileExport.ExternalDrivePath + "\\" + fileName + "." + Constants.FileExtension;
+            }
+
+            using (StreamWriter sw = new StreamWriter(filePath))
+            {
+                sw.WriteLine(contents);
+            }
+        }
+
+        private string MakeContents()
+        {
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["ids"] = FileExport.PatientList;
+
+            FileFormat fileFormat = new FileFormat();
+
+            //TO-DO : 파일 사이즈 가져오도록 구현 필요
+            fileFormat.Size = 76543210;
+            fileFormat.PatientList = _sqlManager.SelectPatientByList(sqlParameters);
+
+            sqlParameters.Clear();
+            sqlParameters["ids"] = FileExport.SelectedItem;
+            IList<PatientCase> patientCases = _sqlManager.SelectPatientCaseByList(sqlParameters);
+
+            foreach (Patient patient in fileFormat.PatientList)
+            {
+                patient.PatientCaseList = new List<PatientCase>();
+
+                foreach (PatientCase patientCase in patientCases)
+                {
+                    if (patient.Id == patientCase.PatientId)
+                    {
+                        patient.PatientCaseList.Add(patientCase);
+                    }
+                }
+            }
+
+            return JsonConvert.SerializeObject(fileFormat, Formatting.Indented);
         }
 
         private void CheckDrive(object sender, EventArgs e)
@@ -178,7 +295,7 @@ namespace RaywattApp.ViewModels.File
                 {
                     if (d.DriveType == DriveType.CDRom)
                     {
-
+                        //TO-DO : CD 기능 구현 필요
                     }
                     else if (d.DriveType == DriveType.Removable)
                     {
@@ -218,6 +335,14 @@ namespace RaywattApp.ViewModels.File
                     IsEnableExternalDrive = false;
                 }
             }
+
+            if (ExternalDriveComboBox.Count == 1)
+            {
+                if (!ExternalDriveComboBox.ContainsKey(SelectedExternalDrive))
+                {
+                    SelectedExternalDrive = firstExternalDrive;
+                }
+            }
         }
 
         private void SetCondition()
@@ -231,7 +356,9 @@ namespace RaywattApp.ViewModels.File
                 FileExport.FileOption = Constants.ExportOptionUnchanged;
 
             if (FileExport.DiskType == null)
-                FileExport.DiskType = Constants.ExportDiskCd;
+                DiskType = Constants.FileDiskCd;
+            else
+                DiskType = FileExport.DiskType;
 
             if (FileExport.Password == null)
                 FileExport.Password = "";

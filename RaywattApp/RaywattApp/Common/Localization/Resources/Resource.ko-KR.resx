@@ -138,11 +138,20 @@
   <data name="Apply" xml:space="preserve">
     <value>적용</value>
   </data>
+  <data name="Approximate Import Size" xml:space="preserve">
+    <value>임포트 사이즈</value>
+  </data>
   <data name="Archive" xml:space="preserve">
     <value>아카이브</value>
   </data>
   <data name="Are you sure to delete selected patient case?" xml:space="preserve">
     <value>선택된 환자 케이스를 삭제하겠습니까?</value>
+  </data>
+  <data name="Are you sure to import selected file?" xml:space="preserve">
+    <value>선택한 파일을 임포트하겠습니까?</value>
+  </data>
+  <data name="Available Space" xml:space="preserve">
+    <value>가용 공간</value>
   </data>
   <data name="Back" xml:space="preserve">
     <value>뒤로</value>
@@ -186,6 +195,10 @@
   <data name="Current Folder" xml:space="preserve">
     <value>현재 폴더</value>
   </data>
+  <data name="Data already exists.&#xD;&#xA;Do you want to import data?" xml:space="preserve">
+    <value>이미 존재하는 데이터가 있습니다.
+데이터를 임포트 하시겠습니까?</value>
+  </data>
   <data name="Database" xml:space="preserve">
     <value>데이터베이스</value>
   </data>
@@ -203,6 +216,9 @@
   </data>
   <data name="Disk Type" xml:space="preserve">
     <value>디스크 종류</value>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>완료</value>
   </data>
   <data name="Duplicated Folder Name" xml:space="preserve">
     <value>폴더명 중복</value>
@@ -345,6 +361,9 @@
   <data name="Path" xml:space="preserve">
     <value>경로</value>
   </data>
+  <data name="Path is required" xml:space="preserve">
+    <value>경로가 필요합니다</value>
+  </data>
   <data name="Patient" xml:space="preserve">
     <value>환자</value>
   </data>
@@ -419,6 +438,12 @@
   </data>
   <data name="Share" xml:space="preserve">
     <value>쉐어</value>
+  </data>
+  <data name="SKIP" xml:space="preserve">
+    <value>건너뛰기</value>
+  </data>
+  <data name="Source" xml:space="preserve">
+    <value>소스</value>
   </data>
   <data name="Standard" xml:space="preserve">
     <value>스탠다드</value>

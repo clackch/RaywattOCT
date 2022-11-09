@@ -107,8 +107,9 @@ namespace RaywattApp.Services
             {
                 commandTextExtra += ", '" + ids[i] + "'";
             }
-            commandTextExtra += ")";
-            
+            commandTextExtra += ") ";
+            commandTextExtra += "ORDER BY id";
+
             commandText = commandText + commandTextExtra;
 
             return _databaseService.GetDatas<Patient>(commandText, sqlParameters);
@@ -187,6 +188,28 @@ namespace RaywattApp.Services
             return _databaseService.GetDatas<PatientCase>(commandText, sqlParameters);
         }
 
+        public IList<PatientCase> SelectPatientCaseByList(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("SelectPatientCaseByList");
+
+            string commandText;
+
+            commandText = SqlQuery.GetQuery("SelectPatientCaseByList");
+
+            List<string> ids = (List<string>)sqlParameters["ids"];
+            string commandTextExtra = "WHERE id IN (''";
+            for (int i = 0; i < ids.Count; i++)
+            {
+                commandTextExtra += ", '" + ids[i] + "'";
+            }
+            commandTextExtra += ") ";
+            commandTextExtra += "ORDER BY patient_id, create_date DESC";
+
+            commandText = commandText + commandTextExtra;
+
+            return _databaseService.GetDatas<PatientCase>(commandText, sqlParameters);
+        }
+
         public int DeletePatientCase(Dictionary<string, Object> sqlParameters)
         {
             _log.Debug("DeletePatientCase");
@@ -239,6 +262,24 @@ namespace RaywattApp.Services
             string commandText = SqlQuery.GetQuery("DeletePhysician");
 
             return _databaseService.DeleteData(commandText);
+        }
+
+        public int UpsertPatient(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpsertPatient");
+
+            string commandText = SqlQuery.GetQuery("UpsertPatient");
+
+            return _databaseService.InsertData(commandText, sqlParameters);
+        }
+
+        public int UpsertPatientCase(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpsertPatientCase");
+
+            string commandText = SqlQuery.GetQuery("UpsertPatientCase");
+
+            return _databaseService.InsertData(commandText, sqlParameters);
         }
 
         private string getAdditionalCondition(Dictionary<string, Object> sqlAdditionalCondition)

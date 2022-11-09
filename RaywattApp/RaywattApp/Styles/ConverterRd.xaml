@@ -35,6 +35,9 @@
     <!-- Not Empty String To Enable Converter -->
     <converters:NotEmptyStringToEnableConverter x:Key="NotEmptyStringToEnableConverter" />
 
+    <!-- Code Converter -->
+    <converters:CodeConverter x:Key="CodeConverter" />
+
     <!-- Multi Parameter Converter -->
     <converters:MultiParamConverter x:Key="MultiParamConverter" />
 
