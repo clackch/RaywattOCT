@@ -198,7 +198,7 @@ namespace RaywattApp.ViewModels.File
         {
             _log.Debug("Import");
 
-            if (PatientList != null)
+            if (PatientList != null && PatientList.Count > 0)
             {
                 List<string> patientCases = new List<string>();
                 IList<PatientCase> existPatientCases = new List<PatientCase>();
