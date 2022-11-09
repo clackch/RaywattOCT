@@ -518,7 +518,7 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	m_pImagingSimulate = new CLabImaging(this);
 	m_pImagingSimulate->Initialize(m_strCurCalibration, ".\\BACKGROUND.bin");
 	m_pImagingSimulate->SetColor(m_chkImageHotColor);
-	m_pImagingRealtime->SetGoodClockRange(goodClockStart, goodClockEnd);
+	m_pImagingSimulate->SetGoodClockRange(goodClockStart, goodClockEnd);
 	m_pImagingSimulate->Start();
 
 	m_pDataWriter = new CDataWriter();
