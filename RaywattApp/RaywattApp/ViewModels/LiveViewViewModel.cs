@@ -94,8 +94,7 @@ namespace RaywattApp.ViewModels
                 this.IsInitialized = false;
 
                 RayCoreWrapper.RaySetProperty(RayCoreWrapper.Property.BackgroundColor, 0xFFFFFF);
-                //RayCoreWrapper.RayInitialize();
-                RayCoreWrapper.RayStartReview("C:\\DataSave\\test\\0710_145631_6028rpm_20mms_2000Aline_ch1.bin");
+                RayCoreWrapper.RayInitialize();
 
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(5);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
