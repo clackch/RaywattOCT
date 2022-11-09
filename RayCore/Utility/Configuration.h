@@ -97,6 +97,8 @@ public:
 	int getDmaBufferSamples();
 	int getScopeLength();
 
+	double getPrivateProfileFloat(LPCWSTR lpAppName, LPCWSTR lpKeyName, double fDefault, LPCWSTR lpFileName);
+
 	//Property
 	double GetLoadCatheterTime();
 };
