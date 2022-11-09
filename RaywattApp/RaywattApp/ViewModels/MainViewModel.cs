@@ -95,6 +95,7 @@ namespace RaywattApp.ViewModels
             Patient = new Patient();
             
             RaywattOCT.RayCoreWrapper.RayStartSystem();
+            RaywattOCT.RayCoreWrapper.RayConnectDevices();
         }
 
         private void OnNavigate(string pageUri)
