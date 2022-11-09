@@ -23,10 +23,11 @@ class CConfiguration
 
 	class Measurement {
 	public:
-		double fAxialResolutionScale;
+		double fAxialResolutionScale;	// um per pixel
 		int nNoiseSkip;
 		int nNoiseAverage;
-		double fSheathRadius;
+		double fSheathRadius;	// mm
+		int nSheathPosition;	// pixel
 	};
 
 	class Invert {
