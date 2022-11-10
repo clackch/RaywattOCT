@@ -74,7 +74,7 @@ int CRaywattLabDlg::initializeDevices() {
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
 	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
-	CZaberController* pInterferometer = CZaberController::GetInstance(ZABER_TYPE_INTERFEROMETER);
+	CZaberController* pInterferometer = CZaberController::GetInstance(ZABER_TYPE_DELAYLINE);
 
 	if (m_pAcqDevice == nullptr) {
 		m_pAcqDevice = new CATSDevice();
@@ -625,7 +625,7 @@ void CRaywattLabDlg::OnDestroy() {
 
 	CMotorController* pMotor = CMotorController::GetInstance();
 	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
-	CZaberController* pInterferometer = CZaberController::GetInstance(ZABER_TYPE_INTERFEROMETER);
+	CZaberController* pInterferometer = CZaberController::GetInstance(ZABER_TYPE_DELAYLINE);
 
 	pMotor->StopMotor();
 	pMotor->SwitchOff();

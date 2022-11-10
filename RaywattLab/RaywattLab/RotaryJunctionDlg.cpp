@@ -31,14 +31,14 @@ CRotaryJunctionDlg::~CRotaryJunctionDlg()
 
 UINT CRotaryJunctionDlg::threadInterferometer(LPVOID param) {
 	CRotaryJunctionDlg* pDlg = (CRotaryJunctionDlg*)param;
-	CZaberController* pZaberCtrl = (CZaberController*)CZaberController::GetInstance(ZABER_TYPE_INTERFEROMETER);
+	CZaberController* pZaberCtrl = (CZaberController*)CZaberController::GetInstance(ZABER_TYPE_DELAYLINE);
 
 	while (pDlg->m_pThreadInterferometer->isRun) {
 		if (pDlg->m_isClickedBackward) {
-			pZaberCtrl->RotateRelative(INTERFEROMETER_BACKWARD_POSITION);
+			pZaberCtrl->RotateRelative(DELAYLINE_BACKWARD_POSITION);
 		}
 		else if (pDlg->m_isClickedForward) {
-			pZaberCtrl->RotateRelative(INTERFEROMETER_FORWARD_POSITION);
+			pZaberCtrl->RotateRelative(DELAYLINE_FORWARD_POSITION);
 		}
 		Sleep(30);
 	}
@@ -112,7 +112,7 @@ void CRotaryJunctionDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 
 	if (bShow) {
 		CZaberController* pZaberCtrl = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
-		CZaberController* pInterferometerCtrl = CZaberController::GetInstance(ZABER_TYPE_INTERFEROMETER);
+		CZaberController* pInterferometerCtrl = CZaberController::GetInstance(ZABER_TYPE_DELAYLINE);
 		CMotorController* pMotorCtrl = CMotorController::GetInstance();
 
 		bool zaberConnected = pZaberCtrl->IsOpen();
