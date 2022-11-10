@@ -150,6 +150,9 @@
   <data name="Are you sure to import selected file?" xml:space="preserve">
     <value>Are you sure to import selected file?</value>
   </data>
+  <data name="Auto Calibration" xml:space="preserve">
+    <value>Auto Calibration</value>
+  </data>
   <data name="Available Space" xml:space="preserve">
     <value>Available Space</value>
   </data>
@@ -167,6 +170,9 @@
   </data>
   <data name="bytes" xml:space="preserve">
     <value>bytes</value>
+  </data>
+  <data name="Calibration" xml:space="preserve">
+    <value>Calibration</value>
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
@@ -310,6 +316,9 @@ Do you want to import data?</value>
   <data name="Leave Unchanged" xml:space="preserve">
     <value>Leave Unchanged</value>
   </data>
+  <data name="Live View" xml:space="preserve">
+    <value>Live View</value>
+  </data>
   <data name="Localization" xml:space="preserve">
     <value>Localization</value>
   </data>
@@ -441,12 +450,18 @@ Do you want to import data?</value>
   </data>
   <data name="SKIP" xml:space="preserve">
     <value>SKIP</value>
-  </data>
+  </data> 
   <data name="Source" xml:space="preserve">
     <value>Source</value>
   </data>
+  <data name="Stand By" xml:space="preserve">
+    <value>Stand By</value>
+  </data>
   <data name="Standard" xml:space="preserve">
     <value>Standard</value>
+  </data>
+  <data name="Start Recording" xml:space="preserve">
+    <value>Start Recording</value>
   </data>
   <data name="System File Options" xml:space="preserve">
     <value>System File Options</value>
@@ -477,5 +492,11 @@ Do you want to import data?</value>
   </data>
   <data name="Yes" xml:space="preserve">
     <value>Yes</value>
+  </data>
+  <data name="Zoom In" xml:space="preserve">
+    <value>Zoom In</value>
+  </data>
+  <data name="Zoom Out" xml:space="preserve">
+    <value>Zoom Out</value>
   </data>
 </root>

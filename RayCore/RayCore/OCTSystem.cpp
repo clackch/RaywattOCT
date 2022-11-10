@@ -22,6 +22,7 @@ COCTSystem::COCTSystem() {
 	m_cbLongitude = nullptr;
 	m_pThreadService = nullptr;
 	m_pThreadInitialize = nullptr;
+	m_pThreadAutoCalibration = nullptr;
 	m_pThreadHoming = nullptr;
 	m_pThreadPullbackScan = nullptr;
 	m_pThreadSaveRaw = nullptr;
@@ -95,6 +96,7 @@ RayError COCTSystem::Start() {
 RayError COCTSystem::Stop() {
 	CUtility::StopThread(m_pThreadService);
 	CUtility::StopThread(m_pThreadInitialize);
+	CUtility::StopThread(m_pThreadAutoCalibration);
 	CUtility::StopThread(m_pThreadHoming);
 	CUtility::StopThread(m_pThreadPullbackScan);
 	CUtility::StopThread(m_pThreadSaveRaw);
@@ -155,6 +157,9 @@ RayError COCTSystem::RegisterCallback(FunctionPtr cb) {
 	return RayError::OK;
 }
 
+/*
+* ConnectDevices
+*/
 RayError COCTSystem::ConnectDevices() {
 	int result = NOERROR;
 
@@ -180,6 +185,49 @@ RayError COCTSystem::Initialize() {
 
 	return RayError::WrongOCTScannerState;
 }
+
+/*
+* Finalize
+*/
+RayError COCTSystem::Finalize() {
+	if (m_curState == RayScannerState::LiveView || m_curState == RayScannerState::Review) {
+		finalizeAcqDevice();
+		finalizeRotaryJunction();
+
+		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::None);
+
+		return RayError::OK;
+	}
+
+	return RayError::WrongOCTScannerState;
+}
+
+/*
+* AutoCalibration
+*/
+RayError COCTSystem::AutoCalibration() {
+	if (m_curState == RayScannerState::LiveView) {
+		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::AutoCalibration);
+
+		return RayError::OK;
+	}
+
+	return RayError::WrongOCTScannerState;
+}
+
+/*
+* ManualCalibration
+*/
+RayError COCTSystem::ManualCalibration(bool forward) {
+	if (m_curState == RayScannerState::LiveView) {
+		CZaberController* pDelayLine = CZaberController::GetInstance(ZABER_TYPE_DELAYLINE);
+
+		if (pDelayLine->IsOpen() == false) return RayError::DeviceNotConnected;
+		
+		pDelayLine->RotateRelative((forward ? DELAYLINE_FORWARD_POSITION : DELAYLINE_BACKWARD_POSITION));
+
+		return RayError::OK;	
+	}
 
 /*
 * ShowCalibrationGuide
@@ -300,7 +348,7 @@ RayError COCTSystem::EndReview()
 */
 RayError COCTSystem::MotorOnOff(bool mode)
 {
-	if (m_curState >= RayScannerState::Ready) {
+	if (m_curState == RayScannerState::LiveView || m_curState == RayScannerState::AutoCalibration) {
 		setMotorOnOff(mode);
 
 		return RayError::OK;
@@ -598,6 +646,23 @@ UINT COCTSystem::threadInitialize(LPVOID param) {
 	}
 
 	while (pSystem->m_pThreadInitialize->isRun) {
+		Sleep(DELAY_FOR_STOP_THREAD);
+	}
+
+	return NOERROR;
+}
+
+/*
+* threadAutoCalibration
+*/
+UINT COCTSystem::threadAutoCalibration(LPVOID param) {
+	COCTSystem* pSystem = (COCTSystem*)param;
+
+	Sleep(5000);
+
+	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::LiveView);
+
+	while (pSystem->m_pThreadAutoCalibration->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
 	}
 
@@ -919,6 +984,19 @@ int COCTSystem::initializeAcqDevice() {
 }
 
 /*
+* finalizeAcqDevice
+*/
+int COCTSystem::finalizeAcqDevice() {
+	if (m_pAcqDevice->IsInit()) {
+		m_pAcqDevice->StopAcquisition();
+		m_pAcqDevice->CleanUp();
+	}
+
+	CLaserController::GetInstance()->LaserOnOff(false);
+
+	return NOERROR;
+}
+/*
 * connectRotaryJunction
 */
 int COCTSystem::connectRotaryJunction() {
@@ -946,6 +1024,17 @@ int COCTSystem::initializeRotaryJunction() {
 	CMotorController* pMotor = CMotorController::GetInstance();
 
 	bool result = pMotor->SwitchOn();
+
+	return (result) ? NOERROR : E_FAIL;
+}
+
+/*
+* finalizeRotaryJunction
+*/
+int COCTSystem::finalizeRotaryJunction() {
+	CMotorController* pMotor = CMotorController::GetInstance();
+
+	bool result = pMotor->SwitchOff();
 
 	return (result) ? NOERROR : E_FAIL;
 }
@@ -1076,6 +1165,10 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 		CUtility::StopThread(m_pThreadInitialize);
 		CUtility::StopThread(m_pThreadUpdateCutView);
 		CUtility::StopThread(m_pThreadGenerateVolume);
+		CUtility::StopThread(m_pThreadAutoCalibration);
+		break;
+	case RayScannerState::AutoCalibration:
+		CUtility::StartThread(threadAutoCalibration, m_pThreadAutoCalibration, this);
 		break;
 	case RayScannerState::Homing:
 		CUtility::StopThread(m_pThreadLoadCatheter);

@@ -37,12 +37,16 @@
         public const string ExportOptionArchived = "A";
         public const string ExportOptionRemove = "R";
 
-        //Disk Type - CD/DVD, External Drive
+        //Disk Type - CD/DVD, External Drive        
         public const string FileDiskCd = "C";
         public const string FileDiskExternal = "E";
-
+        
         //File Import
         public const string FileExtension = "dbf";
         public const string FileNamePrefix = "Export_";
+        
+        //View Mode - Live View, Stand By
+        public const string ViewModeLiveView = "LiveView";
+        public const string ViewModeStandBy = "StandBy";
     }
 }

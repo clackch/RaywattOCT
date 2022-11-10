@@ -29,6 +29,7 @@ private:
 	
 	CThread* m_pThreadService;
 	CThread* m_pThreadInitialize;
+	CThread* m_pThreadAutoCalibration;
 	CThread* m_pThreadHoming;
 	CThread* m_pThreadPullbackScan;
 	CThread* m_pThreadSaveRaw;
@@ -79,6 +80,9 @@ public:
 	RayError RegisterCallback(FunctionPtr cb);
 	RayError ConnectDevices();
 	RayError Initialize();
+	RayError Finalize();
+	RayError AutoCalibration();
+	RayError ManualCalibration(bool forward);
 	RayError ShowCalibrationGuide(bool enable);
 	RayError PreparePullback();
 	RayError PullbackScan(char *strFilePath);
@@ -112,6 +116,7 @@ private:
 	// Thread
 	static UINT threadService(LPVOID param);
 	static UINT threadInitialize(LPVOID param);
+	static UINT threadAutoCalibration(LPVOID param);
 	static UINT threadHoming(LPVOID param);
 	static UINT threadPullbackScan(LPVOID param);
 	static UINT threadSaveRaw(LPVOID param);
@@ -125,8 +130,10 @@ private:
 	bool checkConnection();
 	int connectAcqDevice();
 	int initializeAcqDevice();
+	int finalizeAcqDevice();
 	int connectRotaryJunction();
 	int initializeRotaryJunction();
+	int finalizeRotaryJunction();
 	void setMotorOnOff(bool on);
 	void updateCutView(int drawSamples);
 	void prepareSimulation(IDataManager* pDataManager);
