@@ -11,7 +11,6 @@ using System;
 using System.Windows.Input;
 using System.Windows.Navigation;
 using System.Linq;
-using RaywattOCT;
 using System.Windows.Threading;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Views.Dialog;
