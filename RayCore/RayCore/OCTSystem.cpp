@@ -223,11 +223,12 @@ RayError COCTSystem::ManualCalibration(bool forward) {
 		CZaberController* pDelayLine = CZaberController::GetInstance(ZABER_TYPE_DELAYLINE);
 
 		if (pDelayLine->IsOpen() == false) return RayError::DeviceNotConnected;
-		
+
 		pDelayLine->RotateRelative((forward ? DELAYLINE_FORWARD_POSITION : DELAYLINE_BACKWARD_POSITION));
 
-		return RayError::OK;	
+		return RayError::OK;
 	}
+}
 
 /*
 * ShowCalibrationGuide
