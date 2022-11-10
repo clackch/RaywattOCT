@@ -1,4 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using RaywattApp.Common.Bases;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -70,6 +72,16 @@ namespace RaywattApp.Common.Util
 
             ObservableCollection<DirectoryItem> directoryItems = new ObservableCollection<DirectoryItem>();
             directoryItems.Add(CreateDirectoryNode(new DirectoryInfo(drive)));
+
+            _rootDirectoryItem.Items = directoryItems;
+        }
+
+        public void GetDirectoryWithExtension(string drive)
+        {
+            _rootDirectoryItem.Items.Clear();
+
+            ObservableCollection<DirectoryItem> directoryItems = new ObservableCollection<DirectoryItem>();
+            directoryItems.Add(CreateDirectoryNodeWithExtension(new DirectoryInfo(drive)));
 
             _rootDirectoryItem.Items = directoryItems;
         }
@@ -165,6 +177,32 @@ namespace RaywattApp.Common.Util
             {
                 if(directory.Attributes == FileAttributes.Directory)
                     directoryItme.AddDirItem(CreateDirectoryNode(directory));
+            }
+
+            return directoryItme;
+        }
+
+        private DirectoryItem CreateDirectoryNodeWithExtension(DirectoryInfo directoryInfo)
+        {
+            DirectoryItem directoryItme = new DirectoryItem { Name = directoryInfo.Name, Path = directoryInfo.FullName };
+
+            foreach (var directory in directoryInfo.GetDirectories().OrderBy(f => f.Name))
+            {
+                if (directory.Attributes == FileAttributes.Directory)
+                {
+                    string[] check = Directory.GetFiles(directory.FullName, "*." + Constants.FileExtension , SearchOption.AllDirectories);
+
+                    if(check.Length > 0)
+                        directoryItme.AddDirItem(CreateDirectoryNodeWithExtension(directory));
+                }
+            }
+
+            string[] files = Directory.GetFiles(directoryInfo.FullName, "*." + Constants.FileExtension, SearchOption.TopDirectoryOnly);
+            foreach (string file in files)
+            {
+                string name = file.Replace(directoryInfo.FullName, "").Replace("\\","");
+                DirectoryItem temp = new DirectoryItem { Name = name, Path = file };
+                directoryItme.AddDirItem(temp);
             }
 
             return directoryItme;

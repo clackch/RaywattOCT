@@ -6,7 +6,8 @@
         {
             Undefined,
             Yes,
-            No
+            No,
+            Extra
         }
 
         public Answer DialogAnswer { get; set; }

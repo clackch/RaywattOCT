@@ -17,6 +17,7 @@ namespace RaywattApp.Services
             SetInsertQuery();
             SetUpdateQuery();
             SetDeleteQuery();
+            SetUpsertQuery();
         }
 
         public static string GetQuery(string key)
@@ -51,8 +52,8 @@ namespace RaywattApp.Services
 
             //SelectPatientList
             _query["SelectPatientList"] =
-                $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, rv_schema.fn_code('GEND', gender) gender" +
-                        $", birthdate, create_date, update_date " +
+                $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, rv_schema.fn_code('GEND', gender) gender" +
+                        $", create_date, update_date " +
                         $", rv_schema.fn_lastcase(id) last_case, rv_schema.fn_displayLastcase(id) display_last_case " +
                 $"FROM rv_schema.patient " +
                 $"WHERE id LIKE @id OR lastname LIKE @lastname OR firstname LIKE @firstname";
@@ -75,7 +76,7 @@ namespace RaywattApp.Services
 
             //SelectPatientByList
             _query["SelectPatientByList"] =
-                $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, rv_schema.fn_code('GEND', gender) gender" +
+                $"SELECT id, lastname, firstname, birthdate, gender" +
                         $", create_date, update_date " +
                 $"FROM rv_schema.patient ";
 
@@ -95,7 +96,7 @@ namespace RaywattApp.Services
 
             //SelectPatientCaseListByDate - create_data 기준
             _query["SelectPatientCaseListByDate"] =
-                $"SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name , physician_name" +
+                $"SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name, physician_name" +
                         $", accession_number, accession_name, comment" +
                         $", rv_schema.fn_code('VESS', vessel) vessel, rv_schema.fn_code('PROC', procedure) procedure" +
                         $", thumbnail_no, still_image_yn, image" +
@@ -106,7 +107,7 @@ namespace RaywattApp.Services
 
             //SelectPatientCaseList - create_data 기준
             _query["SelectPatientCaseList"] =
-                $"SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name , physician_name" +
+                $"SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name, physician_name" +
                         $", accession_number, accession_name, comment" +
                         $", rv_schema.fn_code('VESS', vessel) vessel, rv_schema.fn_code('PROC', procedure) procedure" +
                         $", thumbnail_no, still_image_yn, image" +
@@ -114,6 +115,13 @@ namespace RaywattApp.Services
                 $"FROM rv_schema.patient_case " +
                 $"WHERE patient_id = @id " +
                 $"ORDER BY create_date DESC";
+
+            //SelectPatientCaseByList
+            _query["SelectPatientCaseByList"] =
+                $"SELECT id, patient_id, physician_name, accession_number, accession_name, comment, vessel, procedure, thumbnail_no, still_image_yn, image" +
+                        $", rv_schema.fn_patient(patient_id) patient_name" +
+                        $", create_date, update_date " +
+                $"FROM rv_schema.patient_case ";
 
             //SelectPhysicianList
             _query["SelectPhysicianList"] =
@@ -176,6 +184,27 @@ namespace RaywattApp.Services
             //DeletePhysician
             _query["DeletePhysician"] =
                 $"DELETE FROM rv_schema.physician";
+        }
+
+        private static void SetUpsertQuery()
+        {
+            _log.Debug("SetUpsertQuery");
+
+            //UpsertPatient
+            _query["UpsertPatient"] =
+                $"INSERT INTO rv_schema.patient(id, lastname, firstname, birthdate, gender, create_date, update_date) " +
+                $"VALUES (@id, @lastname, @firstname, @birthdate, @gender, @create_date, @update_date) " +
+                $"ON CONFLICT (id) " +
+                $"DO UPDATE " +
+                $"SET lastname=@lastname, firstname=@firstname, birthdate=@birthdate, gender=@gender, create_date=@create_date, update_date=@update_date";
+
+            //UpsertPatientCase
+            _query["UpsertPatientCase"] =
+                $"INSERT INTO rv_schema.patient_case(id, patient_id, physician_name, accession_number, accession_name, comment, vessel, procedure, thumbnail_no, still_image_yn, image, create_date, update_date) " +
+                $"VALUES (@id, @patient_id, @physician_name, @accession_number, @accession_name, @comment, @vessel, @procedure, @thumbnail_no, @still_image_yn, @image, @create_date, @update_date) " +
+                $"ON CONFLICT (id) " +
+                $"DO UPDATE " +
+                $"SET patient_id=@patient_id, physician_name=@physician_name, accession_number=@accession_number, comment=@comment, vessel=@vessel, procedure=@procedure, thumbnail_no=@thumbnail_no, still_image_yn=@still_image_yn, image=@image, create_date=@create_date, update_date=@update_date";
         }
     }
 }

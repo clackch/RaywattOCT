@@ -138,14 +138,23 @@
   <data name="Apply" xml:space="preserve">
     <value>Apply</value>
   </data>
+  <data name="Approximate Import Size" xml:space="preserve">
+    <value>Approximate Import Size</value>
+  </data>
   <data name="Archive" xml:space="preserve">
     <value>Archive</value>
   </data>
   <data name="Are you sure to delete selected patient case?" xml:space="preserve">
     <value>Are you sure to delete selected patient case?</value>
   </data>
+  <data name="Are you sure to import selected file?" xml:space="preserve">
+    <value>Are you sure to import selected file?</value>
+  </data>
   <data name="Auto Calibration" xml:space="preserve">
     <value>Auto Calibration</value>
+  </data>
+  <data name="Available Space" xml:space="preserve">
+    <value>Available Space</value>
   </data>
   <data name="Back" xml:space="preserve">
     <value>Back</value>
@@ -192,6 +201,10 @@
   <data name="Current Folder" xml:space="preserve">
     <value>Current Folder</value>
   </data>
+  <data name="Data already exists.&#xD;&#xA;Do you want to import data?" xml:space="preserve">
+    <value>Data already exists.
+Do you want to import data?</value>
+  </data>
   <data name="Database" xml:space="preserve">
     <value>Database</value>
   </data>
@@ -209,6 +222,9 @@
   </data>
   <data name="Disk Type" xml:space="preserve">
     <value>Disk Type</value>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>Done</value>
   </data>
   <data name="Duplicated Folder Name" xml:space="preserve">
     <value>Duplicated Folder Name</value>
@@ -354,6 +370,9 @@
   <data name="Path" xml:space="preserve">
     <value>Path</value>
   </data>
+  <data name="Path is required" xml:space="preserve">
+    <value>Path is required</value>
+  </data>
   <data name="Patient" xml:space="preserve">
     <value>Patient</value>
   </data>
@@ -428,6 +447,12 @@
   </data>
   <data name="Share" xml:space="preserve">
     <value>Share</value>
+  </data>
+  <data name="SKIP" xml:space="preserve">
+    <value>SKIP</value>
+  </data> 
+  <data name="Source" xml:space="preserve">
+    <value>Source</value>
   </data>
   <data name="Stand By" xml:space="preserve">
     <value>Stand By</value>

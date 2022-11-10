@@ -559,6 +559,7 @@ namespace RaywattOCT.ViewModel
                     SystemMessage = "Initializing..";
                     break;
                 case RayCoreWrapper.RayScannerState.LiveView:
+                    RayCoreWrapper.RayShowCalibrationGuide(true);
                     RayCoreWrapper.RayPreparePullback();    // Bypassing
                     break;
                 case RayCoreWrapper.RayScannerState.Homing:
@@ -577,11 +578,10 @@ namespace RaywattOCT.ViewModel
                     SystemMessage = "Scanning..";
                     break;
                 case RayCoreWrapper.RayScannerState.Review:
-                    {
-                        updatePlayPauseState();
-                        updateIndicatorVisibility(true);
-                        SystemMessage = "Review";
-                    }
+                    RayCoreWrapper.RayShowCalibrationGuide(true);
+                    updatePlayPauseState();
+                    updateIndicatorVisibility(true);
+                    SystemMessage = "Review";
                     break;
                 default:
                     break;

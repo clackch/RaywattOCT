@@ -49,6 +49,7 @@ COCTImaging::COCTImaging(CMessageService* pMsg) {
 
 	m_bInvert = false;
 	m_bColor = false;
+	m_bShowCalibGuide = false;
 	m_fBrightness = 0.0f;
 	m_fContrast = 1.0f;
 	m_backgroundColor = cv::Scalar(0x00, 0x00, 0x00);
@@ -293,6 +294,24 @@ void COCTImaging::postProcessing() {
 	if (bColor) applyLUT(imageResultColor);
 
 	cv::convertScaleAbs(imageResultColor, imageResultColor, m_fContrast, m_fBrightness);
+
+	if (m_bShowCalibGuide) {
+		CConfiguration& config = CConfiguration::GetInstance();
+		cv::Scalar lineColor = cv::Scalar(0xff, 0xcc, 0x33);
+		int posSheath = imageResultColor.cols - config.measurementValues.nSheathPosition - 1;
+
+		int lineSize = imageResult.rows / 8;
+		int lineStart = 0;
+
+		cv::line(imageResultColor, cv::Point(posSheath, lineStart), cv::Point(posSheath, (lineStart + lineSize / 2) - 1), lineColor, 2);
+		lineStart += (lineSize / 2);
+		lineStart += (lineSize);
+		for (int i = 0; i < 3; i++) {
+			cv::line(imageResultColor, cv::Point(posSheath, lineStart), cv::Point(posSheath, (lineStart + lineSize) - 1), lineColor, 2);
+			lineStart += (lineSize * 2);
+		}
+		cv::line(imageResultColor, cv::Point(posSheath, lineStart), cv::Point(posSheath, (lineStart + lineSize / 2) - 1), lineColor, 2);
+	}
 
 	circularizeImage(imageResultColor, imageCircle);
 

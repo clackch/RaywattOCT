@@ -75,8 +75,8 @@ namespace RaywattApp
             services.AddTransient(typeof(FilePasswordDialogViewModel));
             services.AddTransient(typeof(FileAlternateIdDialogViewModel));
             services.AddTransient(typeof(FileFolderBrowseDialogViewModel));
-            services.AddTransient(typeof(FileFolderActionDialogViewModel));          
-            
+            services.AddTransient(typeof(FileFolderActionDialogViewModel));
+            services.AddTransient(typeof(FileImportDialogViewModel));
 
             //IDatabaseService 등록 (Singleton 사용 안함 => Connection Pooling을 Default로 사용)
             services.AddTransient<IDatabaseService, SqlService>(obj => new SqlService(connectionString));

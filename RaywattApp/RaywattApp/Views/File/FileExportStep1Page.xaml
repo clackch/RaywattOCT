@@ -8,10 +8,10 @@
       xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
       xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
       mc:Ignorable="d" 
-      d:DesignHeight="820" d:DesignWidth="1000"
+      Height="800" d:DesignWidth="1000"
       Title="FileExportStep1Page">
 
-    <Grid Height="800">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -61,29 +61,25 @@
                 <StackPanel Grid.Row="0">
                     <Label Content="{Binding [Patient], Source={StaticResource L10N}}"></Label>
                 </StackPanel>
-                <StackPanel Grid.Row="1">
-                    <DataGrid Name="patientList" ItemsSource="{Binding PatientList}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="All" RowHeaderWidth="0" CanUserSortColumns="False" SelectionMode="Single" Height="600" >
-                        <i:Interaction.Triggers>
-                            <i:EventTrigger EventName="SelectionChanged">
-                                <i:InvokeCommandAction Command="{Binding ShowCaseCommand}" CommandParameter="{Binding ElementName=patientList, Path=CurrentItem}"/>
-                            </i:EventTrigger>
-                        </i:Interaction.Triggers>
-                        <DataGrid.Columns>
-                            <DataGridTemplateColumn>
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <CheckBox IsChecked="{Binding IsChecked}" IsEnabled="False"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTextColumn Width="*" Binding="{Binding Id}" Header="{Binding [ID], Source={StaticResource L10N}}" />
-                            <DataGridTextColumn Width="*" Binding="{Binding Name}" Header="{Binding [Name], Source={StaticResource L10N}}" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </StackPanel>
+                <DataGrid Grid.Row="1" Name="patientList" ItemsSource="{Binding PatientList}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="All" RowHeaderWidth="0" CanUserSortColumns="False" SelectionMode="Single">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="SelectionChanged">
+                            <i:InvokeCommandAction Command="{Binding ShowCaseCommand}" CommandParameter="{Binding ElementName=patientList, Path=CurrentItem}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding IsChecked}" IsEnabled="False"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Width="*" Binding="{Binding Id}" Header="{Binding [ID], Source={StaticResource L10N}}" />
+                        <DataGridTextColumn Width="*" Binding="{Binding Name}" Header="{Binding [Name], Source={StaticResource L10N}}" />
+                    </DataGrid.Columns>
+                </DataGrid>
             </Grid>
-
-            <FrameworkElement x:Name="ProxyElement" Visibility="Collapsed"/>
 
             <Grid Grid.Column="3">
                 <Grid.RowDefinitions>
@@ -93,30 +89,31 @@
                 <StackPanel Grid.Row="0">
                     <Label Content="{Binding [Patient Case], Source={StaticResource L10N}}"></Label>
                 </StackPanel>
-                <StackPanel Grid.Row="1">
-                    <DataGrid Name="patientCaseList" ItemsSource="{Binding PatientCaseList}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="All" RowHeaderWidth="0" CanUserSortColumns="False" Height="600">
-                        <DataGrid.Columns>
-                            <DataGridTemplateColumn>
-                                <DataGridTemplateColumn.HeaderTemplate>
-                                    <DataTemplate>
-                                        <CheckBox Command="{Binding DataContext.CheckBoxToggleCommand, Source={x:Reference ProxyElement}}" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" IsChecked="{Binding DataContext.CheckBoxAllSelected, Source={x:Reference ProxyElement}}"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.HeaderTemplate>
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <CheckBox IsChecked="{Binding IsChecked, UpdateSourceTrigger=PropertyChanged}" Command="{Binding DataContext.CheckBoxClickCommand, Source={x:Reference ProxyElement}}"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTextColumn Width="*" Binding="{Binding PhysicianName}" Header="{Binding [Physician Name], Source={StaticResource L10N}}" />
-                            <DataGridTextColumn Width="*" Binding="{Binding AccessionNumber}" Header="{Binding [Accession Number], Source={StaticResource L10N}}" />
-                            <DataGridTextColumn Width="*" Binding="{Binding Comment}" Header="{Binding [Comment], Source={StaticResource L10N}}" />
-                            <DataGridTextColumn Width="*" Binding="{Binding Vessel}" Header="{Binding [Vessel], Source={StaticResource L10N}}" />
-                            <DataGridTextColumn Width="*" Binding="{Binding Procedure}" Header="{Binding [Procedure], Source={StaticResource L10N}}" />
-                            <DataGridTextColumn Width="*" Binding="{Binding CreateDate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Create Date], Source={StaticResource L10N}}" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </StackPanel>
+
+                <FrameworkElement x:Name="ProxyElement" Visibility="Collapsed"/>
+
+                <DataGrid Grid.Row="1" Name="patientCaseList" ItemsSource="{Binding PatientCaseList}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="All" RowHeaderWidth="0" CanUserSortColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn>
+                            <DataGridTemplateColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <CheckBox Command="{Binding DataContext.CheckBoxToggleCommand, Source={x:Reference ProxyElement}}" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" IsChecked="{Binding DataContext.CheckBoxAllSelected, Source={x:Reference ProxyElement}}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.HeaderTemplate>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding IsChecked, UpdateSourceTrigger=PropertyChanged}" Command="{Binding DataContext.CheckBoxClickCommand, Source={x:Reference ProxyElement}}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Width="*" Binding="{Binding PhysicianName}" Header="{Binding [Physician Name], Source={StaticResource L10N}}" />
+                        <DataGridTextColumn Width="*" Binding="{Binding AccessionNumber}" Header="{Binding [Accession Number], Source={StaticResource L10N}}" />
+                        <DataGridTextColumn Width="*" Binding="{Binding Comment}" Header="{Binding [Comment], Source={StaticResource L10N}}" />
+                        <DataGridTextColumn Width="*" Binding="{Binding Vessel}" Header="{Binding [Vessel], Source={StaticResource L10N}}" />
+                        <DataGridTextColumn Width="*" Binding="{Binding Procedure}" Header="{Binding [Procedure], Source={StaticResource L10N}}" />
+                        <DataGridTextColumn Width="*" Binding="{Binding CreateDate, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Create Date], Source={StaticResource L10N}}" />
+                    </DataGrid.Columns>
+                </DataGrid>
             </Grid>
         </Grid>
 

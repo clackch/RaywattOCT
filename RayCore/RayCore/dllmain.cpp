@@ -32,6 +32,9 @@ _declspec(dllexport) RayError RayAutoCalibration() {
 _declspec(dllexport) RayError RayManualCalibration(bool moveForward) {
     return octSystem.ManualCalibration(moveForward);
 }
+_declspec(dllexport) RayError RayShowCalibrationGuide(bool show) {
+    return octSystem.ShowCalibrationGuide(show);
+}
 _declspec(dllexport) RayError RayPreparePullback() {
     return octSystem.PreparePullback();
 }

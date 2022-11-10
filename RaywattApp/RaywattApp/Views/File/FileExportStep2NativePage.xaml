@@ -117,11 +117,11 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <RadioButton Grid.Column="0" IsChecked="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportDiskCd}}" Content="{Binding [CD/DVD], Source={StaticResource L10N}}"  VerticalAlignment="Center" Margin="50,0,0,0"/>
-                        <CheckBox Grid.Column="1" IsChecked="{Binding FileExport.EjectWhenComplete}" Content="{Binding [Eject when Complete], Source={StaticResource L10N}}" Visibility="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.ExportDiskCd}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
+                        <RadioButton Grid.Column="0" IsChecked="{Binding DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}" Content="{Binding [CD/DVD], Source={StaticResource L10N}}"  VerticalAlignment="Center" Margin="50,0,0,0"/>
+                        <CheckBox Grid.Column="1" IsChecked="{Binding FileExport.EjectWhenComplete}" Content="{Binding [Eject when Complete], Source={StaticResource L10N}}" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
                     </Grid>
-                    <RadioButton Grid.Row="1" IsChecked="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportDiskExternal}}" Content="{Binding [External Drive], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
-                    <Border Grid.Column="1" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1" Margin="5" Visibility="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.ExportDiskCd}}">
+                    <RadioButton Grid.Row="1" IsChecked="{Binding DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.FileDiskExternal}}" Content="{Binding [External Drive], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
+                    <Border Grid.Column="1" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1" Margin="5" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition/>
@@ -137,7 +137,7 @@
                             </StackPanel>
                         </Grid>
                     </Border>
-                    <Border Grid.Column="1" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1" Margin="5" Visibility="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.ExportDiskExternal}}">
+                    <Border Grid.Column="1" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1" Margin="5" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskExternal}}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition/>
@@ -165,16 +165,16 @@
                             <StackPanel Grid.Row="0">
                                 <Label Content="{Binding [Total], Source={StaticResource L10N}}"/>
                                 <StackPanel Orientation="Horizontal">
-                                    <Label Content="{Binding ExternalDriveTotalSize}" Visibility="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.ExportDiskExternal}}"/>
-                                    <Label Content="{Binding CdTotalSize}" Visibility="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.ExportDiskCd}}"/>
+                                    <Label Content="{Binding ExternalDriveTotalSize}" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskExternal}}"/>
+                                    <Label Content="{Binding CdTotalSize}" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}"/>
                                     <Label Content="{Binding [bytes], Source={StaticResource L10N}}"/>
                                 </StackPanel>
                             </StackPanel>
                             <StackPanel Grid.Row="1" >
                                 <Label Content="{Binding [Free], Source={StaticResource L10N}}"/>
                                 <StackPanel Orientation="Horizontal">
-                                    <Label Content="{Binding ExternalDriveAvailableFreeSpace}" Visibility="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.ExportDiskExternal}}"/>
-                                    <Label Content="{Binding CdAvailableFreeSpace}" Visibility="{Binding FileExport.DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.ExportDiskCd}}"/>
+                                    <Label Content="{Binding ExternalDriveAvailableFreeSpace}" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskExternal}}"/>
+                                    <Label Content="{Binding CdAvailableFreeSpace}" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}"/>
                                     <Label Content="{Binding [bytes], Source={StaticResource L10N}}"/>
                                 </StackPanel>
                             </StackPanel>
@@ -187,7 +187,7 @@
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" >
             <Button Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
             <Button Width="50" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-            <Button Width="50" Background="Black" Foreground="White" Command="{Binding NextCommand}" Content="{Binding [Next], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+            <Button Width="50" Background="Black" Foreground="White" Command="{Binding ExportCommand}" Content="{Binding [Export], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
         </StackPanel>
     </Grid>
 </Page>

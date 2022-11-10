@@ -24,8 +24,6 @@ CConfiguration& CConfiguration::GetInstance() {
 void CConfiguration::Initialize(tstring configFile)
 {
 	TCHAR sIniValueString[MAX_PATH] = _T("");
-	int nIniValueInt = -1;
-	char converted[MAX_PATH];
 
 	configFilePath = configFile;
 
@@ -45,11 +43,11 @@ void CConfiguration::Initialize(tstring configFile)
 	this->nOutputLength = this->nFFTLength / 2;
 
 	// [Measurement]
-	::GetPrivateProfileString(_T("Measurement"), _T("AxialResolutionScale"), _T("8.3"), sIniValueString, sizeof(sIniValueString), configFilePath.c_str());
-	wcstombs(converted, sIniValueString, wcslen(sIniValueString) + 1);
-	this->measurementValues.fAxialResolutionScale = ::atof(converted);
+	this->measurementValues.fAxialResolutionScale = getPrivateProfileFloat(_T("Measurement"), _T("AxialResolutionScale"), 8.3, configFilePath.c_str());
 	this->measurementValues.nNoiseSkip = ::GetPrivateProfileInt(_T("Measurement"), _T("NoiseSkip"), 300, configFilePath.c_str());
 	this->measurementValues.nNoiseAverage = ::GetPrivateProfileInt(_T("Measurement"), _T("NoiseAverage"), 100, configFilePath.c_str());
+	this->measurementValues.fSheathRadius = getPrivateProfileFloat(_T("Measurement"), _T("SheathRadius"), 0.4, configFilePath.c_str());
+	this->measurementValues.nSheathPosition = measurementValues.fSheathRadius * 1000.f / measurementValues.fAxialResolutionScale;
 
 	// [OpenMP]
 	this->settingsOpenMP.numThread = ::GetPrivateProfileInt(_T("OpenMP"), _T("NumThread"), 8, configFilePath.c_str());
@@ -60,20 +58,12 @@ void CConfiguration::Initialize(tstring configFile)
 	this->settingsAlazar.msTimeOut = ::GetPrivateProfileInt(_T("Alazar"), _T("TimeOutInMilliSecond"), 5000, configFilePath.c_str());
 	this->settingsAlazar.nTriggerDelaySample = ::GetPrivateProfileInt(_T("Alazar"), _T("TriggerDelaySample"), 0, configFilePath.c_str());
 	this->settingsAlazar.bUseKClock = ::GetPrivateProfileInt(_T("Alazar"), _T("UseKClock"), 1, configFilePath.c_str());
-	::GetPrivateProfileString(_T("Alazar"), _T("GoodClockInMicroSecond"), _T("5.0"), sIniValueString, sizeof(sIniValueString), configFilePath.c_str());
-	wcstombs(converted, sIniValueString, wcslen(sIniValueString) + 1);
-	this->settingsAlazar.usGoodClockDuration = ::atof(converted);
-	::GetPrivateProfileString(_T("Alazar"), _T("BadClockInMicroSecond"), _T("4.0"), sIniValueString, sizeof(sIniValueString), configFilePath.c_str());
-	wcstombs(converted, sIniValueString, wcslen(sIniValueString) + 1);
-	this->settingsAlazar.usBadClockDuration = ::atof(converted);
+	this->settingsAlazar.usGoodClockDuration = getPrivateProfileFloat(_T("Alazar"), _T("GoodClockInMicroSecond"), 5.0, configFilePath.c_str());
+	this->settingsAlazar.usBadClockDuration = getPrivateProfileFloat(_T("Alazar"), _T("BadClockInMicroSecond"), 4.0, configFilePath.c_str());
 
-	// [Invert]
-	::GetPrivateProfileString(_T("Invert"), _T("LowLevel"), _T("40.0f"), sIniValueString, sizeof(sIniValueString), configFilePath.c_str());
-	wcstombs(converted, sIniValueString, wcslen(sIniValueString) + 1);
-	this->invert.lowLevel = ::atof(converted);
-	::GetPrivateProfileString(_T("Invert"), _T("HighLevel"), _T("65.0f"), sIniValueString, sizeof(sIniValueString), configFilePath.c_str());
-	wcstombs(converted, sIniValueString, wcslen(sIniValueString) + 1);
-	this->invert.highLevel = ::atof(converted);
+	// [Invert]	
+	this->invert.lowLevel = getPrivateProfileFloat(_T("Invert"), _T("LowLevel"), 40.0f, configFilePath.c_str());
+	this->invert.highLevel = getPrivateProfileFloat(_T("Invert"), _T("HighLevel"), 65.0f, configFilePath.c_str());
 
 	// [Patient]
 	::GetPrivateProfileString(_T("Patient"), _T("RootPath"), _T("D:\\DataSave\\"), sIniValueString, sizeof(sIniValueString), configFilePath.c_str());
@@ -135,6 +125,19 @@ int CConfiguration::getDmaBufferSamples()
 int CConfiguration::getScopeLength()
 {
 	return nAScan + nAScanPadding;
+}
+
+double CConfiguration::getPrivateProfileFloat(LPCWSTR lpAppName, LPCWSTR lpKeyName, double fDefault, LPCWSTR lpFileName) 
+{
+	TCHAR sIniValueString[MAX_PATH] = _T("");
+	TCHAR sDefaultString[MAX_PATH] = _T("");
+	char converted[MAX_PATH];
+
+	wsprintf(sDefaultString, _T("%lf"), fDefault);
+	::GetPrivateProfileString(lpAppName, lpKeyName, sDefaultString, sIniValueString, sizeof(sIniValueString), lpFileName);
+	wcstombs(converted, sIniValueString, wcslen(sIniValueString) + 1);
+	
+	return ::atof(converted);
 }
 
 double CConfiguration::GetLoadCatheterTime() {

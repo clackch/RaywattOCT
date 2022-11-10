@@ -15,6 +15,7 @@ extern "C" {
 	_declspec(dllexport) RayError RayFinalize();
 	_declspec(dllexport) RayError RayAutoCalibration();
 	_declspec(dllexport) RayError RayManualCalibration(bool moveForward);
+	_declspec(dllexport) RayError RayShowCalibrationGuide(bool show);
 	_declspec(dllexport) RayError RayPreparePullback();
 	_declspec(dllexport) RayError RayPullbackScan(char *strFilePath);
 	_declspec(dllexport) RayError RayLoadCatheter();

@@ -102,7 +102,9 @@ namespace RaywattOCT
         [DllImport("RayCore.dll")]
         public static extern int RayAutoCalibration();
         [DllImport("RayCore.dll")]
-        public static extern int RayManualCalibration(bool moveForward);
+        public static extern int RayManualCalibration(bool moveForward);        
+        [DllImport("RayCore.dll")]
+        public static extern int RayShowCalibrationGuide(bool show);
         [DllImport("RayCore.dll")]
         public static extern int RayPreparePullback();
         [DllImport("RayCore.dll")]

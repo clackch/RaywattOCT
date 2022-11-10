@@ -59,6 +59,9 @@ private:
 	// Simulation
 	IAcquisitionDevice* m_pSimDevice;
 
+	// Calibration
+	bool m_showCalibGuide;
+
 	RayScannerState m_prevState;
 	RayScannerState m_curState;
 
@@ -80,6 +83,7 @@ public:
 	RayError Finalize();
 	RayError AutoCalibration();
 	RayError ManualCalibration(bool forward);
+	RayError ShowCalibrationGuide(bool enable);
 	RayError PreparePullback();
 	RayError PullbackScan(char *strFilePath);
 	RayError LoadCatheter();

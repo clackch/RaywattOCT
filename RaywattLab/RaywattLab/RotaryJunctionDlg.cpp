@@ -8,6 +8,7 @@
 #include "ZaberController.h"
 #include "MotorController.h"
 #include "Configuration.h"
+#include "PiUsb.h"
 
 
 // CRotaryJunctionDlg dialog
@@ -20,6 +21,8 @@ CRotaryJunctionDlg::CRotaryJunctionDlg(CWnd* pParent /*=nullptr*/)
 	m_isClickedBackward = false;
 	m_isClickedForward = false;
 	m_pThreadInterferometer = NULL;
+	m_pShutter = nullptr;
+	m_isShutterOpened = true;
 }
 
 CRotaryJunctionDlg::~CRotaryJunctionDlg()
@@ -51,6 +54,15 @@ void CRotaryJunctionDlg::DoDataExchange(CDataExchange* pDX)
 BOOL CRotaryJunctionDlg::OnInitDialog() {
 	CDialogEx::OnInitDialog();
 
+	CConfiguration& config = CConfiguration::GetInstance();
+	int result = 0;
+	m_pShutter = piConnectShutter(&result, config.shutterSerial);
+	if (result == PI_NO_ERROR) {
+		piSetShutterState(PI_SHUTTER_OPEN, m_pShutter);
+		m_isShutterOpened = true;
+		GetDlgItem(IDC_BUTTON_CLOSE_SHUTTER)->EnableWindow(TRUE);
+	}
+
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -63,6 +75,7 @@ BEGIN_MESSAGE_MAP(CRotaryJunctionDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_SAVE_SETTINGS, &CRotaryJunctionDlg::OnBnClickedButtonSaveSettings)
 	ON_WM_DESTROY()
 	ON_WM_SHOWWINDOW()
+	ON_BN_CLICKED(IDC_BUTTON_CLOSE_SHUTTER, &CRotaryJunctionDlg::OnBnClickedButtonCloseShutter)
 END_MESSAGE_MAP()
 
 
@@ -146,6 +159,11 @@ void CRotaryJunctionDlg::OnDestroy()
 	__super::OnDestroy();
 
 	CUtility::StopThread(m_pThreadInterferometer);
+
+	if (m_pShutter != nullptr) {
+		piDisconnectShutter(m_pShutter);
+		m_pShutter = nullptr;
+	}
 }
 
 
@@ -227,4 +245,21 @@ void CRotaryJunctionDlg::OnBnClickedButtonSaveSettings()
 
 	config.SaveZaberSettings();
 	config.SaveMotorSettings();
+}
+
+
+void CRotaryJunctionDlg::OnBnClickedButtonCloseShutter()
+{
+	if (m_pShutter == nullptr) return;
+
+	m_isShutterOpened = true;
+	if (m_isShutterOpened) {
+		piSetShutterState(PI_SHUTTER_CLOSED, m_pShutter);
+		GetDlgItem(IDC_BUTTON_CLOSE_SHUTTER)->SetWindowText(_T("Open"));
+	}
+	else {
+		piSetShutterState(PI_SHUTTER_OPEN, m_pShutter);
+		GetDlgItem(IDC_BUTTON_CLOSE_SHUTTER)->SetWindowText(_T("Close"));
+	}
+	m_isShutterOpened = !m_isShutterOpened;
 }

@@ -25,7 +25,7 @@
 #define IDC_RADIO_COLOR_BLACK           1019
 #define IDC_RADIO_COLOR_WHITE           1020
 #define IDC_CHECK_HOT_COLOR             1021
-#define IDC_CHECK_CLOSE_SHUTTER         1022
+#define IDC_BUTTON_CLOSE_SHUTTER        1022
 #define IDC_SLIDER_BRIGHTNESS           1023
 #define IDC_SLIDER_CONTRAST             1024
 #define IDC_BUTTON_ZABER_IDLE           1027
@@ -83,6 +83,7 @@
 #define IDC_CHECK_INIT_STAGE            1082
 #define IDC_BUTTON_PULLBACK             1083
 #define IDC_BUTTON_SAVE_PNG             1084
+#define IDC_CHECK_SHOW_GUIDE            1085
 
 // Next default values for new objects
 // 
@@ -90,7 +91,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        107
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1085
+#define _APS_NEXT_CONTROL_VALUE         1086
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

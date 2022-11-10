@@ -1,0 +1,35 @@
+﻿<UserControl x:Class="RaywattApp.Views.Dialog.FileImportDialogControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:RaywattApp.Views.Dialog"
+             xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
+             mc:Ignorable="d" 
+             Width="400" Height="300">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Background="Black" Orientation="Horizontal">
+            <Label Content="{Binding Title}" Foreground="White"/>
+        </StackPanel>
+        <Label Grid.Row="1" Content="{Binding Message}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        
+        <DataGrid Grid.Row="2" ItemsSource="{Binding PatientCaseList}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="All" RowHeaderWidth="0" CanUserSortColumns="False" >
+            <DataGrid.Columns>
+                <DataGridTextColumn Width="2*" Binding="{Binding PatientId}" Header="{Binding [ID], Source={StaticResource L10N}}" />
+                <DataGridTextColumn Width="3*" Binding="{Binding PatientName}" Header="{Binding [Name], Source={StaticResource L10N}}" />
+                <DataGridTextColumn Width="5*" Binding="{Binding CreateDate, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Create Date], Source={StaticResource L10N}}" />
+            </DataGrid.Columns>
+        </DataGrid>
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [No], Source={StaticResource L10N}}" Grid.Row="1" Width="50" Margin="5"/>
+            <Button Command="{Binding ExtraCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [SKIP], Source={StaticResource L10N}}" Grid.Row="1" Width="50" Margin="5"/>
+            <Button Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Yes], Source={StaticResource L10N}}" Grid.Row="1" Width="50" Margin="5" Background="Black" Foreground="White"/>
+        </StackPanel>
+    </Grid>
+</UserControl>
