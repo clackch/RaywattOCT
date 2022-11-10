@@ -31,8 +31,6 @@ CREATE DATABASE rv_database
     WITH
     OWNER = rv_user
     ENCODING = 'UTF8'
-    LC_COLLATE = 'Korean_Korea.949'
-    LC_CTYPE = 'Korean_Korea.949'
     TABLESPACE = rv_tablespace
     CONNECTION LIMIT = -1
     IS_TEMPLATE = False;
