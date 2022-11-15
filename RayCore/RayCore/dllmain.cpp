@@ -109,9 +109,9 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
     case RayProperty::LoadCatheterTime:
         return config.GetLoadCatheterTime();
     case RayProperty::VolumeWidth:
-        return config.nCircleSize;
+        return config.volume.size;
     case RayProperty::VolumeHeight:
-        return config.nCircleSize;
+        return config.volume.size;
     case RayProperty::VolumeDepth:
         return octSystem.GetVolumeDepth();
     default:

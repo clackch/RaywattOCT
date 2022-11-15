@@ -58,6 +58,12 @@ class CConfiguration
 		int rotationTime;
 		int waitingTime;
 	};
+
+	class Volume {
+	public:
+		int size;
+		int threshold;
+	};
 private:
 	CConfiguration();
 	CConfiguration(const CConfiguration& ref) {};
@@ -85,6 +91,7 @@ public:
 	Zaber zaber;
 	Motor motor;
 	Catheter catheter;
+	Volume volume;
 	int shutterSerial;
 public:
 	static CConfiguration& GetInstance();

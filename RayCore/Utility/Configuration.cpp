@@ -46,7 +46,7 @@ void CConfiguration::Initialize(tstring configFile)
 	this->measurementValues.fAxialResolutionScale = getPrivateProfileFloat(_T("Measurement"), _T("AxialResolutionScale"), 8.3, configFilePath.c_str());
 	this->measurementValues.nNoiseSkip = ::GetPrivateProfileInt(_T("Measurement"), _T("NoiseSkip"), 300, configFilePath.c_str());
 	this->measurementValues.nNoiseAverage = ::GetPrivateProfileInt(_T("Measurement"), _T("NoiseAverage"), 100, configFilePath.c_str());
-	this->measurementValues.fSheathRadius = getPrivateProfileFloat(_T("Measurement"), _T("SheathRadius"), 0.4, configFilePath.c_str());
+	this->measurementValues.fSheathRadius = getPrivateProfileFloat(_T("Measurement"), _T("SheathRadius"), 0.43, configFilePath.c_str());
 	this->measurementValues.nSheathPosition = measurementValues.fSheathRadius * 1000.f / measurementValues.fAxialResolutionScale;
 
 	// [OpenMP]
@@ -89,6 +89,10 @@ void CConfiguration::Initialize(tstring configFile)
 	this->catheter.velocity = ::GetPrivateProfileInt(_T("Catheter"), _T("MotorVelocity"), 50, configFilePath.c_str());
 	this->catheter.rotationTime = ::GetPrivateProfileInt(_T("Catheter"), _T("RotationTime"), 10000, configFilePath.c_str());
 	this->catheter.waitingTime = ::GetPrivateProfileInt(_T("Catheter"), _T("WaitingTime"), 10000, configFilePath.c_str());
+
+	// [Volume]
+	this->volume.size = ::GetPrivateProfileInt(_T("Volume"), _T("Size"), 600, configFilePath.c_str());
+	this->volume.threshold = ::GetPrivateProfileInt(_T("Volume"), _T("Threshold"), 50, configFilePath.c_str());
 
 	isInit = true;
 }

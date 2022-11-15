@@ -129,7 +129,9 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(TargetDir)*.dll" "$(SolutionDir)..\RaywattOCT\bin\" /y /d
-xcopy "$(ProjectDir)Shaders\*.fx" "$(SolutionDir)..\RaywattOCT\bin\" /y /d</Command>
+xcopy "$(ProjectDir)Shaders\*.fx" "$(SolutionDir)..\RaywattOCT\bin\" /y /d
+xcopy "$(TargetDir)*.dll" "$(SolutionDir)..\RaywattApp\RaywattApp\bin\" /y /d
+xcopy "$(ProjectDir)Shaders\*.fx" "$(SolutionDir)..\RaywattApp\RaywattApp\bin\" /y /d</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -155,7 +157,9 @@ xcopy "$(ProjectDir)Shaders\*.fx" "$(SolutionDir)..\RaywattOCT\bin\" /y /d</Comm
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(TargetDir)*.dll" "$(SolutionDir)..\RaywattOCT\bin\" /y /d
-xcopy "$(ProjectDir)Shaders\*.fx" "$(SolutionDir)..\RaywattOCT\bin\" /y /d</Command>
+xcopy "$(ProjectDir)Shaders\*.fx" "$(SolutionDir)..\RaywattOCT\bin\" /y /d
+xcopy "$(TargetDir)*.dll" "$(SolutionDir)..\RaywattApp\RaywattApp\bin\" /y /d
+xcopy "$(ProjectDir)Shaders\*.fx" "$(SolutionDir)..\RaywattApp\RaywattApp\bin\" /y /d</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
