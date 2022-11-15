@@ -1,5 +1,6 @@
 #include "VolumeGenerator.h"
 #include "OCTImaging.h"
+#include "Configuration.h"
 
 
 CVolumeGenerator::CVolumeGenerator() {
@@ -14,15 +15,25 @@ CVolumeGenerator::~CVolumeGenerator() {
 	}
 }
 
+void CVolumeGenerator::Initialize(int srcWidth, int srcHeight, int roiWidth, int roiHeight) {
+	int x = (srcWidth - roiWidth) / 2;
+	int y = (srcHeight - roiHeight) / 2;
+	
+	m_rectROI = cv::Rect(x, y, roiWidth, roiHeight);
+}
+
 void CVolumeGenerator::AddRecord(unsigned short* pBuffer, COCTImaging* pImaging, int nFrameIndex) {
+	CConfiguration& config = CConfiguration::GetInstance();
+	const int sizeCatheter = (int)((double)config.measurementValues.nSheathPosition * 1.1f);
+
 	pImaging->SetBackgroundColor(cv::Scalar(0, 0, 0));
 	pImaging->Process(pBuffer);
 	
 	cv::Mat imgCircle = pImaging->GetCircleImage();
 	cv::Mat imgGray;
 
-	cv::cvtColor(imgCircle, imgGray, cv::COLOR_BGR2GRAY);
-	processing(imgGray, 68);
+	cv::cvtColor(imgCircle(m_rectROI), imgGray, cv::COLOR_BGR2GRAY);
+	processing(imgGray, sizeCatheter);
 
 	m_vRecords.push_back(imgGray);
 }
@@ -50,6 +61,7 @@ unsigned char* CVolumeGenerator::GetVolumeData() {
 }
 
 void CVolumeGenerator::processing(cv::Mat& image, int sizeCatheter) {
+	CConfiguration& config = CConfiguration::GetInstance();
 	const int width = image.cols;
 	const int height = image.rows;
 	const int centerX = width / 2 - 1;
@@ -57,4 +69,9 @@ void CVolumeGenerator::processing(cv::Mat& image, int sizeCatheter) {
 
 	cv::circle(image, cv::Point(centerX, centerY), sizeCatheter, cv::Scalar(0, 0, 0), cv::FILLED); // remove catheter
 	cv::rectangle(image, cv::Rect(0, 0, centerX, height-1), cv::Scalar(0, 0, 0), cv::FILLED); // cut longitude
+	
+#pragma omp parallel for
+	for (int i = 0; i < image.cols * image.rows; i++) {
+		image.data[i] = image.data[i] < config.volume.threshold ? 0 : image.data[i];
+	}
 }

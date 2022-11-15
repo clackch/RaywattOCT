@@ -83,6 +83,7 @@ RayError COCTSystem::Start() {
 
 	m_pCutView = new CCutViewManager();
 	m_pVolume = new CVolumeGenerator();
+	m_pVolume->Initialize(config.nCircleSize, config.nCircleSize, config.volume.size, config.volume.size);
 
 	m_pAcqDevice = new CATSDevice();
 	m_pAcqDevice->SetImaging(m_pImagingRealtime);
