@@ -48,5 +48,7 @@
         //View Mode - Live View, Stand By
         public const string ViewModeLiveView = "LiveView";
         public const string ViewModeStandBy = "StandBy";
+
+        public const string NotSelected = "Not Selected";
     }
 }

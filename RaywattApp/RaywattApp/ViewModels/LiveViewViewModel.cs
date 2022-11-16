@@ -162,7 +162,7 @@ namespace RaywattApp.ViewModels
             RayScannerState curState = (RayScannerState)RayGetProperty(Property.CurrentState);
             bool isLiveView = (bool)(RayGetProperty(Property.MotorOnOff) != 0);
 
-            this.IsInitialized = (curState == RayScannerState.LiveView) ? true : false;
+            this.IsInitialized = true;// (curState == RayScannerState.LiveView) ? true : false;
             this.ViewMode = (isLiveView) ? Constants.ViewModeLiveView : Constants.ViewModeStandBy;
         }
 
