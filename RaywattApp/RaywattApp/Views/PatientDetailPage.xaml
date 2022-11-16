@@ -52,7 +52,7 @@
                 <TextBlock Grid.Row="3" Margin="5,5,5,5"><TextBlock Text="{Binding [Birth Date], Source={StaticResource L10N}}"/></TextBlock>
                 <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" IsReadOnly="True" Margin="5,5,5,5"/>
                 <TextBlock Grid.Row="4" Text="{Binding [Gender], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Patient.Gender, Converter={StaticResource L10NConverter}}" IsReadOnly="True" Margin="5,5,5,5"/>
+                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}" IsReadOnly="True" Margin="5,5,5,5"/>
             </Grid>
 
             <StackPanel Grid.Row="1" Orientation="Horizontal">
@@ -99,8 +99,8 @@
                                             <DataGridTextColumn Width="*" Binding="{Binding PatientId}" Visibility="Collapsed"/>
                                             <DataGridTextColumn Width="*" Binding="{Binding PatientName}" Visibility="Collapsed"/>
                                             <DataGridTextColumn Width="*" Binding="{Binding CreateDate, StringFormat=t, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Create Date], Source={StaticResource L10N}}" IsReadOnly="True"/>
-                                            <DataGridTextColumn Width="*" Binding="{Binding Vessel}" Header="{Binding [Vessel], Source={StaticResource L10N}}" IsReadOnly="True"/>
-                                            <DataGridTextColumn Width="*" Binding="{Binding Procedure}" Header="{Binding [Procedure], Source={StaticResource L10N}}" IsReadOnly="True"/>
+                                            <DataGridTextColumn Width="*" Binding="{Binding Vessel, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}" Header="{Binding [Vessel], Source={StaticResource L10N}}" IsReadOnly="True"/>
+                                            <DataGridTextColumn Width="*" Binding="{Binding Procedure, Converter={StaticResource CodeConverter}, ConverterParameter='PROC'}" Header="{Binding [Procedure], Source={StaticResource L10N}}" IsReadOnly="True"/>
                                             <DataGridTextColumn Width="*" Binding="{Binding PhysicianName}" Header="{Binding [Physician Name], Source={StaticResource L10N}}" IsReadOnly="True"/>
                                             <DataGridTextColumn Width="*" Binding="{Binding AccessionNumber}" Header="{Binding [Accession Number], Source={StaticResource L10N}}" IsReadOnly="True"/>
                                             <DataGridTextColumn Width="*" Binding="{Binding Comment}" Header="{Binding [Comment], Source={StaticResource L10N}}" IsReadOnly="True"/>

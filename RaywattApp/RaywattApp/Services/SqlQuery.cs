@@ -52,7 +52,7 @@ namespace RaywattApp.Services
 
             //SelectPatientList
             _query["SelectPatientList"] =
-                $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, rv_schema.fn_code('GEND', gender) gender" +
+                $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, gender" +
                         $", create_date, update_date " +
                         $", rv_schema.fn_lastcase(id) last_case, rv_schema.fn_displayLastcase(id) display_last_case " +
                 $"FROM rv_schema.patient " +
@@ -60,7 +60,7 @@ namespace RaywattApp.Services
 
             //SelectPatientListByCase
             _query["SelectPatientListByCase"] =
-                $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, rv_schema.fn_code('GEND', gender) gender" +
+                $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, gender" +
                         $", create_date, update_date " +
                         $", rv_schema.fn_lastcase(id) last_case " +
                 $"FROM rv_schema.patient p " +
@@ -69,7 +69,7 @@ namespace RaywattApp.Services
 
             //SelectPatient
             _query["SelectPatient"] = 
-                $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, rv_schema.fn_code('GEND', gender) gender" +
+                $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, gender" +
                         $", create_date, update_date " +
                 $"FROM rv_schema.patient " +
                 $"WHERE id = @id ";
@@ -98,7 +98,7 @@ namespace RaywattApp.Services
             _query["SelectPatientCaseListByDate"] =
                 $"SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name, physician_name" +
                         $", accession_number, accession_name, comment" +
-                        $", rv_schema.fn_code('VESS', vessel) vessel, rv_schema.fn_code('PROC', procedure) procedure" +
+                        $", vessel, procedure" +
                         $", thumbnail_no, still_image_yn, image" +
                         $", create_date, update_date " +
                 $"FROM rv_schema.patient_case " +
@@ -109,7 +109,7 @@ namespace RaywattApp.Services
             _query["SelectPatientCaseList"] =
                 $"SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name, physician_name" +
                         $", accession_number, accession_name, comment" +
-                        $", rv_schema.fn_code('VESS', vessel) vessel, rv_schema.fn_code('PROC', procedure) procedure" +
+                        $", vessel, procedure" +
                         $", thumbnail_no, still_image_yn, image" +
                         $", create_date, update_date " +
                 $"FROM rv_schema.patient_case " +

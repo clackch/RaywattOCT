@@ -41,7 +41,7 @@
                 <Label Foreground="White">]</Label>
                 <Label Foreground="White" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
                 <Label Foreground="White">[</Label>
-                <Label Foreground="White" Content="{Binding Patient.Gender, Converter={StaticResource L10NConverter}}"/>
+                <Label Foreground="White" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
                 <Label Foreground="White">]</Label>
             </StackPanel>
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">

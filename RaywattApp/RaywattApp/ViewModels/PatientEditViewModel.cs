@@ -73,7 +73,7 @@ namespace RaywattApp.ViewModels
                 PatientEdit = new Patient();
                 CopyPatient(Patient, PatientEdit);
 
-                GenderCodeEdit = CodeDefinition.Codes["GEND"].FirstOrDefault(x => x.Value == Patient.Gender).Key;
+                GenderCodeEdit = Patient.Gender;
 
                 PatientEdit.PropertyChanged += PatientEdit_PropertyChanged;
             }
