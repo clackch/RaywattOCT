@@ -195,6 +195,9 @@
   <data name="Comment" xml:space="preserve">
     <value>코멘트</value>
   </data>
+  <data name="Confirm" xml:space="preserve">
+    <value>확인</value>
+  </data>
   <data name="Confirm Password" xml:space="preserve">
     <value>비밀번호 재입력</value>
   </data>

@@ -195,6 +195,9 @@
   <data name="Comment" xml:space="preserve">
     <value>Comment</value>
   </data>
+  <data name="Confirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
   <data name="Confirm Password" xml:space="preserve">
     <value>Confirm Password</value>
   </data>
