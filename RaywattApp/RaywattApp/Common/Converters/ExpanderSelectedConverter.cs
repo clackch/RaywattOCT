@@ -10,7 +10,7 @@ namespace RaywattApp.Common.Converters
         {
             if ((bool)value == true)
             {
-                return "Red";
+                return "Gray";
             }
             else
             {

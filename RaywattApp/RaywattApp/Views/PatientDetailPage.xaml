@@ -147,7 +147,7 @@
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Width="50" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-                <Button Background="Black" Foreground="White" Command="{Binding NewRecordingCommand}" Content="{Binding [New Recording], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+                <Button Style="{StaticResource Important}" Command="{Binding NewRecordingCommand}" Content="{Binding [New Recording], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
             </StackPanel>
         </Grid>
     </Grid>

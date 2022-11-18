@@ -26,7 +26,7 @@
             <Button Width="50" Command="{Binding RefreshCommand}" Content="{Binding [Refresh], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
             <Button Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
             <Button Width="50" Command="{Binding OkayCommand}" Content="{Binding [OK], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-            <Button Width="50" Background="Black" Foreground="White" Command="{Binding ApplyCommand}" Content="{Binding [Apply], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+            <Button Width="50" Style="{StaticResource Important}" Command="{Binding ApplyCommand}" Content="{Binding [Apply], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
         </StackPanel>
     </Grid>
 </Page>

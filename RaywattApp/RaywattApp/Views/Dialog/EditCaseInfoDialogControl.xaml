@@ -33,48 +33,18 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding [Vessel], Source={StaticResource L10N}}" Margin="5"/>
                 <DataGrid Grid.Row="1" Grid.Column="0" Margin="5" ItemsSource="{Binding VesselList}" SelectedItem="{Binding CurrentVessel}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="None" SelectionMode="Single" RowHeaderWidth="0" CanUserSortColumns="False">
-                    <DataGrid.Resources>
-                        <Style TargetType="{x:Type DataGridCell}">
-                            <Style.Triggers>
-                                <Trigger Property="DataGridCell.IsSelected" Value="True">
-                                    <Setter Property="Background" Value="Yellow" />
-                                    <Setter Property="Foreground" Value="Black" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </DataGrid.Resources>
                     <DataGrid.Columns>
                         <DataGridTextColumn Width="*" Binding="{Binding Value}"/>
                     </DataGrid.Columns>
                 </DataGrid>
                 <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding [Procedure], Source={StaticResource L10N}}" Margin="5"/>
                 <DataGrid Grid.Row="1" Grid.Column="1" Margin="5" ItemsSource="{Binding ProcedureList}" SelectedItem="{Binding CurrentProcedure}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="None" SelectionMode="Single" RowHeaderWidth="0" CanUserSortColumns="False">
-                    <DataGrid.Resources>
-                        <Style TargetType="{x:Type DataGridCell}">
-                            <Style.Triggers>
-                                <Trigger Property="DataGridCell.IsSelected" Value="True">
-                                    <Setter Property="Background" Value="Yellow" />
-                                    <Setter Property="Foreground" Value="Black" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </DataGrid.Resources>
                     <DataGrid.Columns>
                         <DataGridTextColumn Width="*" Binding="{Binding Value}"/>
                     </DataGrid.Columns>
                 </DataGrid>
                 <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding [Physician], Source={StaticResource L10N}}" Margin="5"/>
                 <DataGrid Grid.Row="1" Grid.Column="2" Margin="5" ItemsSource="{Binding PhysicianList}" SelectedItem="{Binding CurrentPhysician}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="None" SelectionMode="Single" RowHeaderWidth="0" CanUserSortColumns="False">
-                    <DataGrid.Resources>
-                        <Style TargetType="{x:Type DataGridCell}">
-                            <Style.Triggers>
-                                <Trigger Property="DataGridCell.IsSelected" Value="True">
-                                    <Setter Property="Background" Value="Yellow" />
-                                    <Setter Property="Foreground" Value="Black" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </DataGrid.Resources>
                     <DataGrid.Columns>
                         <DataGridTextColumn Width="*" Binding="{Binding Name}"/>
                     </DataGrid.Columns>
@@ -98,7 +68,7 @@
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Cancel], Source={StaticResource L10N}}" Grid.Row="1" Width="50" Margin="5"/>
-            <Button Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}" Grid.Row="1" Width="50" Margin="5" Background="Black" Foreground="White"/>
+            <Button Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}" Grid.Row="1" Width="50" Margin="5" Style="{StaticResource Important}"/>
         </StackPanel>
     </Grid>
 </UserControl>

@@ -62,16 +62,6 @@
                     <Label Content="{Binding [Patient], Source={StaticResource L10N}}"></Label>
                 </StackPanel>
                 <DataGrid Grid.Row="1" Name="patientList" ItemsSource="{Binding PatientList}" SelectedIndex="0" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="All" RowHeaderWidth="0" CanUserSortColumns="False" SelectionMode="Single">
-                    <DataGrid.Resources>
-                        <Style TargetType="{x:Type DataGridCell}">
-                            <Style.Triggers>
-                                <Trigger Property="DataGridCell.IsSelected" Value="True">
-                                    <Setter Property="Background" Value="Yellow" />
-                                    <Setter Property="Foreground" Value="Black" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </DataGrid.Resources>
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="SelectionChanged">
                             <i:InvokeCommandAction Command="{Binding ShowCaseCommand}" CommandParameter="{Binding ElementName=patientList, Path=CurrentItem}"/>
@@ -103,16 +93,6 @@
                 <FrameworkElement x:Name="ProxyElement" Visibility="Collapsed"/>
 
                 <DataGrid Grid.Row="1" Name="patientCaseList" ItemsSource="{Binding PatientCaseList}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="All" RowHeaderWidth="0" CanUserSortColumns="False">
-                    <DataGrid.Resources>
-                        <Style TargetType="{x:Type DataGridCell}">
-                            <Style.Triggers>
-                                <Trigger Property="DataGridCell.IsSelected" Value="True">
-                                    <Setter Property="Background" Value="Yellow" />
-                                    <Setter Property="Foreground" Value="Black" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </DataGrid.Resources>
                     <DataGrid.Columns>
                         <DataGridTemplateColumn>
                             <DataGridTemplateColumn.HeaderTemplate>
@@ -139,7 +119,7 @@
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" >
             <Button Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-            <Button Width="50" Background="Black" Foreground="White" Command="{Binding NextCommand}" Content="{Binding [Next], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+            <Button Width="50" Style="{StaticResource Important}" Command="{Binding NextCommand}" Content="{Binding [Next], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
         </StackPanel>
     </Grid>
 </Page>

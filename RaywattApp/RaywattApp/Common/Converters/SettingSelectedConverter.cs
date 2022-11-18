@@ -10,11 +10,11 @@ namespace RaywattApp.Common.Converters
         {
             if(value.Equals(parameter))
             {
-                return "Red";
+                return "Black";
             }
             else
             {
-                return "White";
+                return "DarkGray";
             }
         }
 
