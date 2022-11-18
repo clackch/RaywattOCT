@@ -135,7 +135,7 @@
                 <Button Width="50" Command="{Binding DeleteCommand}" Content="{Binding [Delete], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Width="50" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+                <Button Width="50" Visibility="{Binding NotPresetMode}" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
                 <Button Width="50" Background="Black" Foreground="White" Command="{Binding OkCommand}" Content="{Binding [OK], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
             </StackPanel>
         </Grid>

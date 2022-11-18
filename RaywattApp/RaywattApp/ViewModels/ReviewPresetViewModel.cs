@@ -41,7 +41,10 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private PatientCasePreset _patientCasePreset;
 
-        private bool _presetMode;
+        private bool _isPreset;
+
+        [ObservableProperty]
+        private Visibility _notPresetMode;
 
         [ObservableProperty]
         private Visibility _modifyMode;
@@ -152,7 +155,8 @@ namespace RaywattApp.ViewModels
                 {
                     PatientCasePresetList = _sqlManager.SelectPatientCasePresetList();
 
-                    _presetMode = true;
+                    _isPreset = true;
+                    NotPresetMode = Visibility.Collapsed;
                     ModifyMode = Visibility.Collapsed;
                     SelectionMode = Visibility.Visible;
                 }
@@ -168,13 +172,14 @@ namespace RaywattApp.ViewModels
                     patientCasePreset.AppositionThreshold = PatientCase.AppositionThreshold;
                     PatientCasePresetList.Add(patientCasePreset);
 
-                    _presetMode = false;
+                    _isPreset = false;
+                    NotPresetMode = Visibility.Visible;
                     ModifyMode = Visibility.Visible;
                     SelectionMode = Visibility.Collapsed;
                 }
 
                 PresetIndex = 0;
-                ShowPreset(PatientCasePresetList[PresetIndex]);
+                PatientCasePreset = PatientCasePresetList[PresetIndex];
             }
         }
 
@@ -295,7 +300,7 @@ namespace RaywattApp.ViewModels
                     {
                         PatientCasePresetList = _sqlManager.SelectPatientCasePresetList();
                         PresetIndex = 0;
-                        ShowPreset(PatientCasePresetList[PresetIndex]);
+                        PatientCasePreset = PatientCasePresetList[PresetIndex];
                     }
                     else
                     {
@@ -309,7 +314,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Cancel");
 
-            if (_presetMode)
+            if (_isPreset)
             {
                 ModifyMode = Visibility.Collapsed;
                 SelectionMode = Visibility.Visible;
@@ -317,7 +322,7 @@ namespace RaywattApp.ViewModels
                 if (String.IsNullOrEmpty(PatientCasePreset.Id))
                 {
                     PresetIndex = 0;
-                    ShowPreset(PatientCasePresetList[PresetIndex]);
+                    PatientCasePreset = PatientCasePresetList[PresetIndex];
                 }
             }
             else
@@ -334,7 +339,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Save");
 
-            if (_presetMode)
+            if (_isPreset)
             {
                 if (String.IsNullOrEmpty(PatientCasePreset.Id))
                 {
@@ -357,7 +362,7 @@ namespace RaywattApp.ViewModels
                             if (PatientCasePresetList[i].Id.Equals(sqlParameters["id"].ToString()))
                             {
                                 PresetIndex = i;
-                                ShowPreset(PatientCasePresetList[PresetIndex]);
+                                PatientCasePreset = PatientCasePresetList[PresetIndex];
                                 break;
                             }
                         }
@@ -388,7 +393,7 @@ namespace RaywattApp.ViewModels
                             if (PatientCasePresetList[i].Id.Equals(sqlParameters["id"].ToString()))
                             {
                                 PresetIndex = i;
-                                ShowPreset(PatientCasePresetList[PresetIndex]);
+                                PatientCasePreset = PatientCasePresetList[PresetIndex];
                                 break;
                             }
                         }
