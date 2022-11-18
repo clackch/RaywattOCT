@@ -49,6 +49,23 @@
         public const string ViewModeLiveView = "LiveView";
         public const string ViewModeStandBy = "StandBy";
 
+        //Not Selected
         public const string NotSelected = "Not Selected";
+
+        //Preset
+        public const int MaxPatientCasePresetName = 40;
+        public const int DefaultCalciumThreshold = 180;
+        public const int MaxCalciumThreshold = 360;
+        public const int MinCalciumThreshold = 0;
+        public const int DefaultExpansionThreshold = 90;
+        public const int MaxExpansionThreshold = 100;
+        public const int MinExpansionThreshold = 0;
+        public const double DefaultAppositionThreshold = 0.3;
+        public const double MaxAppositionThreshold = 1.0;
+        public const double MinAppositionThreshold = 0.0;
+
+        //Expansion calculation
+        public const string PresetTapered = "TAPE";
+        public const string PresetOther = "OTHE";
     }
 }

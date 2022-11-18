@@ -51,6 +51,7 @@ namespace RaywattApp
             services.AddTransient(typeof(CalibrationViewModel));
             services.AddTransient(typeof(RecordingViewModel));
             services.AddTransient(typeof(ReviewViewModel));
+            services.AddTransient(typeof(ReviewPresetViewModel));
 
             //Setting
             services.AddTransient(typeof(SettingAcquisitionViewModel));
@@ -68,7 +69,6 @@ namespace RaywattApp
             services.AddTransient<IDialogService, DialogService>();
             services.AddTransient(typeof(AlertDialogViewModel));
             services.AddTransient(typeof(ConfirmDialogViewModel));
-            services.AddTransient(typeof(EditOctInfoDialogViewModel));
             services.AddTransient(typeof(EditCaseInfoDialogViewModel));
             services.AddTransient(typeof(SettingDialogViewModel));
             services.AddTransient(typeof(FileDialogViewModel));

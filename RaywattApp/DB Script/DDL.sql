@@ -124,6 +124,15 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case
     thumbnail_no integer,
     still_image_yn character varying(1) COLLATE pg_catalog."default",
     image character varying(200) COLLATE pg_catalog."default",
+    pullback_type character varying(4) COLLATE pg_catalog."default",
+    brightness integer,
+    contrast integer,
+	angio_co_registration boolean,
+	preset_name character varying(40) COLLATE pg_catalog."default",
+    calcium_threshold integer,
+    expansion_calculation character varying(4) COLLATE pg_catalog."default",
+    expansion_threshold integer,
+    apposition_threshold real,
     create_date timestamp without time zone,
     update_date timestamp without time zone,
     CONSTRAINT patient_case_pkey PRIMARY KEY (id)
@@ -173,6 +182,31 @@ CREATE TABLE IF NOT EXISTS rv_schema.l10n
 TABLESPACE rv_tablespace;
 
 ALTER TABLE IF EXISTS rv_schema.l10n
+    OWNER to rv_user;
+	
+
+-- Table: rv_schema.patient_case_preset
+
+-- DROP TABLE IF EXISTS rv_schema.patient_case_preset;
+
+CREATE TABLE IF NOT EXISTS rv_schema.patient_case_preset
+(
+    id character varying(24) COLLATE pg_catalog."default" NOT NULL,
+    preset_name character varying(40) COLLATE pg_catalog."default",
+    calcium_threshold integer,
+    expansion_calculation character varying(4) COLLATE pg_catalog."default",
+    expansion_threshold integer,
+    apposition_threshold real,
+    default_set boolean,
+	create_date timestamp without time zone,
+    update_date timestamp without time zone,
+    CONSTRAINT patient_case_set_pkey PRIMARY KEY (id)
+        USING INDEX TABLESPACE rv_tablespace
+)
+
+TABLESPACE rv_tablespace;
+
+ALTER TABLE IF EXISTS rv_schema.patient_case_preset
     OWNER to rv_user;
 	
 

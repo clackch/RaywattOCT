@@ -237,11 +237,12 @@
         <Grid Grid.Row="4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
-                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="200"/>
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" >
                 <StackPanel Orientation="Horizontal">
+                    <Button Width="80" Command="{Binding EditPresetCommand}" Content="{Binding [Edit Preset], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
                     <Button Width="80" Command="{Binding EditCaseCommand}" Content="{Binding [Edit Case], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
@@ -265,6 +266,7 @@
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" >
+                <Button Width="80" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
                 <Button Width="80" Command="{Binding EndReviewCommand}" Content="{Binding [End Review], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
             </StackPanel>
         </Grid>

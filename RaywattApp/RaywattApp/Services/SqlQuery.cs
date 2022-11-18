@@ -100,6 +100,8 @@ namespace RaywattApp.Services
                         $", accession_number, accession_name, comment" +
                         $", vessel, procedure" +
                         $", thumbnail_no, still_image_yn, image" +
+                        $", pullback_type, brightness, contrast, angio_co_registration" +
+                        $", preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold" +
                         $", create_date, update_date " +
                 $"FROM rv_schema.patient_case " +
                 $"WHERE patient_id = @id AND to_char(create_date, 'YYYY-MM-DD') = @date " +
@@ -111,6 +113,8 @@ namespace RaywattApp.Services
                         $", accession_number, accession_name, comment" +
                         $", vessel, procedure" +
                         $", thumbnail_no, still_image_yn, image" +
+                        $", pullback_type, brightness, contrast, angio_co_registration" +
+                        $", preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold" +
                         $", create_date, update_date " +
                 $"FROM rv_schema.patient_case " +
                 $"WHERE patient_id = @id " +
@@ -120,6 +124,8 @@ namespace RaywattApp.Services
             _query["SelectPatientCaseByList"] =
                 $"SELECT id, patient_id, physician_name, accession_number, accession_name, comment, vessel, procedure, thumbnail_no, still_image_yn, image" +
                         $", rv_schema.fn_patient(patient_id) patient_name" +
+                        $", pullback_type, brightness, contrast, angio_co_registration" +
+                        $", preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold" +
                         $", create_date, update_date " +
                 $"FROM rv_schema.patient_case ";
 
@@ -128,6 +134,12 @@ namespace RaywattApp.Services
                 $"SELECT name, create_date " +
                 $"FROM rv_schema.physician " +
                 $"ORDER BY name";
+
+            //SelectPatientCasePresetList
+            _query["SelectPatientCasePresetList"] =
+                $"SELECT id, preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold, default_set, create_date, update_date " +
+                $"FROM rv_schema.patient_case_preset " +
+                $"ORDER BY default_set DESC, preset_name";
         }
 
         private static void SetInsertQuery()
@@ -141,13 +153,27 @@ namespace RaywattApp.Services
 
             //InsertPatientCase
             _query["InsertPatientCase"] =
-                $"INSERT INTO rv_schema.patient_case(id, patient_id, physician_name, accession_number, accession_name, comment, vessel, procedure, thumbnail_no, still_image_yn, create_date, update_date) " +
-                $"VALUES (@id, @patient_id, @physician_name, @accession_number, @accession_name, @comment, @vessel, @procedure, @thumbnail_no, @still_image_yn, now(), now())";
+                $"INSERT INTO rv_schema.patient_case(id, patient_id, physician_name, accession_number, accession_name" +
+                                                    $", comment, vessel, procedure, thumbnail_no, still_image_yn, image" +
+                                                    $", pullback_type, brightness, contrast, angio_co_registration" +
+                                                    $", preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold" +
+                                                    $", create_date, update_date) " +
+                $"VALUES (@id, @patient_id, @physician_name, @accession_number, @accession_name" +
+                        $", @comment, @vessel, @procedure, @thumbnail_no, @still_image_yn, @image" +
+                        $", @pullback_type, @brightness, @contrast, @angio_co_registration" +
+                        $", @preset_name, @calcium_threshold, @expansion_calculation, @expansion_threshold, @apposition_threshold" +
+                        $", now(), now())";
 
             //InsertPhysician
             _query["InsertPhysician"] =
                 $"INSERT INTO rv_schema.physician(name, create_date) " +
                 $"VALUES (@name, now())";
+
+            //InsertPatientCasePreset
+            _query["InsertPatientCasePreset"] =
+                $"INSERT INTO rv_schema.patient_case_preset(id, preset_name, calcium_threshold, expansion_calculation, expansion_threshold" +
+                                                        $", apposition_threshold, default_set, create_date, update_date) " +
+                $"VALUES (@id, @preset_name, @calcium_threshold, @expansion_calculation, @expansion_threshold, @apposition_threshold, FALSE, now(), now())";
         }
 
         private static void SetUpdateQuery()
@@ -168,7 +194,19 @@ namespace RaywattApp.Services
             //UpdatePatientCase
             _query["UpdatePatientCase"] =
                 $"UPDATE rv_schema.patient_case " +
-                $"SET physician_name=@physician_name, accession_number=@accession_number, comment=@comment, vessel=@vessel, procedure=@procedure, update_date=now() " +
+                $"SET physician_name=@physician_name, accession_number=@accession_number" +
+                    $", comment=@comment, vessel=@vessel, procedure=@procedure" +
+                    $", brightness=@brightness, contrast=@contrast, angio_co_registration=@angio_co_registration" +
+                    $", preset_name=@preset_name, calcium_threshold=@calcium_threshold, expansion_calculation=@expansion_calculation" +
+                    $", expansion_threshold=@expansion_threshold, apposition_threshold=@apposition_threshold" +
+                    $", update_date=now() " +
+                $"WHERE id=@id";
+
+            //UpdatePatientCasePreset
+            _query["UpdatePatientCasePreset"] =
+                $"UPDATE rv_schema.patient_case_preset " +
+                $"SET preset_name=@preset_name, calcium_threshold=@calcium_threshold, expansion_calculation=@expansion_calculation" +
+                $", expansion_threshold=@expansion_threshold, apposition_threshold=@apposition_threshold, update_date=now() " +
                 $"WHERE id=@id";
         }
 
@@ -184,6 +222,11 @@ namespace RaywattApp.Services
             //DeletePhysician
             _query["DeletePhysician"] =
                 $"DELETE FROM rv_schema.physician";
+
+            //DeletePatientCasePreset
+            _query["DeletePatientCasePreset"] =
+                $"DELETE FROM rv_schema.patient_case_preset " +
+                $"WHERE id=@id";
         }
 
         private static void SetUpsertQuery()

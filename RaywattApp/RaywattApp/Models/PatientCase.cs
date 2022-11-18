@@ -69,6 +69,44 @@ namespace RaywattApp.Models
         private string image;
 
         [ObservableProperty]
+        private string? _pullbackType;
+
+        [ObservableProperty]
+        private int _brightness;
+
+        [ObservableProperty]
+        private int _contrast;
+
+        [ObservableProperty]
+        private bool _angioCoRegistration;
+
+        private string? _presetName;
+        public string PresetName
+        {
+            get { return _presetName; }
+            set
+            {
+                if (value.Length <= Constants.MaxPatientCasePresetName)
+                {
+                    _presetName = value;
+                    OnPropertyChanged(nameof(PresetName));
+                }
+            }
+        }
+
+        [ObservableProperty]
+        private int _calciumThreshold;
+
+        [ObservableProperty]
+        private string? _expansionCalculation;
+
+        [ObservableProperty]
+        private int _expansionThreshold;
+
+        [ObservableProperty]
+        private double _appositionThreshold;
+
+        [ObservableProperty]
         private DateTime createDate;
 
         [ObservableProperty]

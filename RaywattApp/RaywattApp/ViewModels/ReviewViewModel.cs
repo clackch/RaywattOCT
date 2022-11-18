@@ -15,6 +15,9 @@ using System.Windows.Threading;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Views.Dialog;
 using static RaywattOCT.RayCoreWrapper;
+using System.Reflection.Metadata;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace RaywattApp.ViewModels
 {
@@ -106,10 +109,22 @@ namespace RaywattApp.ViewModels
             get { return this._endReviewCommand ?? (this._endReviewCommand = new RelayCommand(EndReview)); }
         }
 
+        private ICommand _backCommand;
+        public ICommand BackCommand
+        {
+            get { return this._backCommand ?? (this._backCommand = new RelayCommand(Back)); }
+        }
+
         private ICommand _editCaseCommand;
         public ICommand EditCaseCommand
         {
             get { return this._editCaseCommand ?? (this._editCaseCommand = new RelayCommand(EditCase)); }
+        }
+
+        private ICommand _editPresetCommand;
+        public ICommand EditPresetCommand
+        {
+            get { return this._editPresetCommand ?? (this._editPresetCommand = new RelayCommand(EditPreset)); }
         }
 
         private ICommand _cmdPlayback;
@@ -268,6 +283,14 @@ namespace RaywattApp.ViewModels
             sqlParameters["comment"] = PatientCase.Comment;
             sqlParameters["vessel"] = PatientCase.Vessel;
             sqlParameters["procedure"] = PatientCase.Procedure;
+            sqlParameters["brightness"] = PatientCase.Brightness;
+            sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
+            sqlParameters["contrast"] = PatientCase.Contrast;
+            sqlParameters["preset_name"] = PatientCase.PresetName;
+            sqlParameters["calcium_threshold"] = PatientCase.CalciumThreshold;
+            sqlParameters["expansion_calculation"] = PatientCase.ExpansionCalculation;
+            sqlParameters["expansion_threshold"] = PatientCase.ExpansionThreshold;
+            sqlParameters["apposition_threshold"] = PatientCase.AppositionThreshold;
 
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
 
@@ -278,6 +301,18 @@ namespace RaywattApp.ViewModels
                 parameter["prevStatus"] = PrevStatus;
                 WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = parameter });
             }
+        }
+
+        private void Back()
+        {
+            _log.Debug("Back");
+
+            RayFinalize();
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = Patient;
+            parameter["prevStatus"] = PrevStatus;
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = parameter });
         }
 
         private void EditCase()
@@ -301,6 +336,17 @@ namespace RaywattApp.ViewModels
                 PatientCase.AccessionNumber = data["accessionNumber"].ToString();
                 PatientCase.Comment = data["comment"].ToString();
             }
+        }
+
+        private void EditPreset()
+        {
+            _log.Debug("EditPreset");
+            
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patientCase"] = PatientCase;
+            parameter["patient"] = Patient;
+            parameter["prevStatus"] = PrevStatus;
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/ReviewPresetPage.xaml") { Parameter = parameter });
         }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
