@@ -61,7 +61,17 @@
                 <StackPanel Grid.Row="0">
                     <Label Content="{Binding [Patient], Source={StaticResource L10N}}"></Label>
                 </StackPanel>
-                <DataGrid Grid.Row="1" Name="patientList" ItemsSource="{Binding PatientList}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="All" RowHeaderWidth="0" CanUserSortColumns="False" SelectionMode="Single">
+                <DataGrid Grid.Row="1" Name="patientList" ItemsSource="{Binding PatientList}" SelectedIndex="0" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="All" RowHeaderWidth="0" CanUserSortColumns="False" SelectionMode="Single">
+                    <DataGrid.Resources>
+                        <Style TargetType="{x:Type DataGridCell}">
+                            <Style.Triggers>
+                                <Trigger Property="DataGridCell.IsSelected" Value="True">
+                                    <Setter Property="Background" Value="Yellow" />
+                                    <Setter Property="Foreground" Value="Black" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.Resources>
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="SelectionChanged">
                             <i:InvokeCommandAction Command="{Binding ShowCaseCommand}" CommandParameter="{Binding ElementName=patientList, Path=CurrentItem}"/>
@@ -93,6 +103,16 @@
                 <FrameworkElement x:Name="ProxyElement" Visibility="Collapsed"/>
 
                 <DataGrid Grid.Row="1" Name="patientCaseList" ItemsSource="{Binding PatientCaseList}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="All" RowHeaderWidth="0" CanUserSortColumns="False">
+                    <DataGrid.Resources>
+                        <Style TargetType="{x:Type DataGridCell}">
+                            <Style.Triggers>
+                                <Trigger Property="DataGridCell.IsSelected" Value="True">
+                                    <Setter Property="Background" Value="Yellow" />
+                                    <Setter Property="Foreground" Value="Black" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.Resources>
                     <DataGrid.Columns>
                         <DataGridTemplateColumn>
                             <DataGridTemplateColumn.HeaderTemplate>
@@ -106,12 +126,12 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
+                        <DataGridTextColumn Width="1.2*" Binding="{Binding CreateDate, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Create Date], Source={StaticResource L10N}}" />
+                        <DataGridTextColumn Width="*" Binding="{Binding Vessel, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}" Header="{Binding [Vessel], Source={StaticResource L10N}}" />
+                        <DataGridTextColumn Width="*" Binding="{Binding Procedure, Converter={StaticResource CodeConverter}, ConverterParameter='PROC'}" Header="{Binding [Procedure], Source={StaticResource L10N}}" />
                         <DataGridTextColumn Width="*" Binding="{Binding PhysicianName}" Header="{Binding [Physician Name], Source={StaticResource L10N}}" />
                         <DataGridTextColumn Width="*" Binding="{Binding AccessionNumber}" Header="{Binding [Accession Number], Source={StaticResource L10N}}" />
                         <DataGridTextColumn Width="*" Binding="{Binding Comment}" Header="{Binding [Comment], Source={StaticResource L10N}}" />
-                        <DataGridTextColumn Width="*" Binding="{Binding Vessel}" Header="{Binding [Vessel], Source={StaticResource L10N}}" />
-                        <DataGridTextColumn Width="*" Binding="{Binding Procedure}" Header="{Binding [Procedure], Source={StaticResource L10N}}" />
-                        <DataGridTextColumn Width="*" Binding="{Binding CreateDate, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Create Date], Source={StaticResource L10N}}" />
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>

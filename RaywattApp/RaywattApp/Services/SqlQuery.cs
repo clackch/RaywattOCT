@@ -76,7 +76,7 @@ namespace RaywattApp.Services
 
             //SelectPatientByList
             _query["SelectPatientByList"] =
-                $"SELECT id, lastname, firstname, birthdate, gender" +
+                $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, gender" +
                         $", create_date, update_date " +
                 $"FROM rv_schema.patient ";
 
