@@ -18,8 +18,6 @@ public:
 	complex_t *dispersion;
 	
 	float *window;
-	float lowLevel;
-	float highLevel;
 public:
 	CCalibration();
 	~CCalibration(void);

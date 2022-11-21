@@ -70,6 +70,8 @@ private:
 	double m_fContrast;
 	double m_fDegree;
 	cv::Scalar m_backgroundColor;
+	double m_fLowLevel;
+	double m_fHighLevel;
 
 public:
 	COCTSystem();
@@ -108,6 +110,10 @@ public:
 	UINT GetBackgroundColor();
 	RayError SetBackgroundColor(UINT value);
 	UINT GetVolumeDepth();
+	double GetLowLevel();
+	RayError SetLowLevel(double value);
+	double GetHighLevel();
+	RayError SetHighLevel(double value);
 	void* GetVolumeData();
 	bool GetMotorOnOff();
 	bool GetIsPaused();

@@ -45,6 +45,8 @@ protected:
 	bool m_bShowCalibGuide;
 	double m_fBrightness;
 	double m_fContrast;
+	double m_fLowLevel;
+	double m_fHighLevel;
 	cv::Scalar m_backgroundColor;
 
 	std::vector<cv::Vec3b> m_vLUT;
@@ -67,6 +69,10 @@ public:
 	void SetBrightnessContrast(double brightness, double contrast) {
 		m_fBrightness = brightness;
 		m_fContrast = contrast;
+	}
+	void SetLevel(double low, double high) {
+		m_fLowLevel = low;
+		m_fHighLevel = high;
 	}
 	void SetBackgroundColor(cv::Scalar color) { m_backgroundColor = color; }
 	virtual void SetFrameInfo(int nCurFrame, int nTotalFrame) {
