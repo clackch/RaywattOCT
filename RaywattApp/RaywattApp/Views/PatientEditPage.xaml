@@ -51,7 +51,7 @@
         
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" >
             <Button Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-            <Button Command="{Binding PatientEditSaveCommand}" Content="{Binding [OK], Source={StaticResource L10N}}" Grid.Row="1" HorizontalAlignment="Right" Width="50" Margin="5" Background="Black" Foreground="White" />
+            <Button Command="{Binding PatientEditSaveCommand}" Content="{Binding [OK], Source={StaticResource L10N}}" Grid.Row="1" HorizontalAlignment="Right" Width="50" Margin="5" Style="{StaticResource Important}" />
         </StackPanel>
 
     </Grid>

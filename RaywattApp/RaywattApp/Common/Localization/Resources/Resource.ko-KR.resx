@@ -138,6 +138,9 @@
   <data name="Apply" xml:space="preserve">
     <value>적용</value>
   </data>
+  <data name="Apposition threshold" xml:space="preserve">
+    <value>어포지션 임계치</value>
+  </data>
   <data name="Approximate Import Size" xml:space="preserve">
     <value>임포트 사이즈</value>
   </data>
@@ -147,9 +150,12 @@
   <data name="Are you sure to delete selected patient case?" xml:space="preserve">
     <value>선택된 환자 케이스를 삭제하겠습니까?</value>
   </data>
+  <data name="Are you sure to delete selected Preset?" xml:space="preserve">
+    <value>선택한 사전설정을 삭제하시겠습니까?</value>
+  </data>
   <data name="Are you sure to import selected file?" xml:space="preserve">
     <value>선택한 파일을 임포트하겠습니까?</value>
-  </data>  
+  </data>
   <data name="Auto Calibration" xml:space="preserve">
     <value>자동 영상 조정</value>
   </data>
@@ -171,6 +177,9 @@
   <data name="bytes" xml:space="preserve">
     <value>바이트</value>
   </data>
+  <data name="Calcium threshold" xml:space="preserve">
+    <value>칼슘 임계치</value>
+  </data>
   <data name="Calibration" xml:space="preserve">
     <value>영상 조정</value>
   </data>
@@ -185,6 +194,9 @@
   </data>
   <data name="Comment" xml:space="preserve">
     <value>코멘트</value>
+  </data>
+  <data name="Confirm" xml:space="preserve">
+    <value>확인</value>
   </data>
   <data name="Confirm Password" xml:space="preserve">
     <value>비밀번호 재입력</value>
@@ -207,6 +219,12 @@
   </data>
   <data name="Database" xml:space="preserve">
     <value>데이터베이스</value>
+  </data>
+  <data name="Default Preset can not be deleted" xml:space="preserve">
+    <value>디폴트 설정은 삭제 불가합니다</value>
+  </data>
+  <data name="Default Preset can not be modified" xml:space="preserve">
+    <value>디폴트 설정은 수정 불가합니다</value>
   </data>
   <data name="Define Alternate Patient ID" xml:space="preserve">
     <value>환자 아이디 대체</value>
@@ -258,6 +276,12 @@
   </data>
   <data name="Exit" xml:space="preserve">
     <value>종료</value>
+  </data>
+  <data name="Expansion calculation" xml:space="preserve">
+    <value>팽창 계산</value>
+  </data>
+  <data name="Expansion threshold" xml:space="preserve">
+    <value>팽창 임계치</value>
   </data>
   <data name="Export" xml:space="preserve">
     <value>익스포트</value>
@@ -337,6 +361,9 @@
   <data name="Native(Raw)" xml:space="preserve">
     <value>네이티브(로우)</value>
   </data>
+  <data name="New" xml:space="preserve">
+    <value>신규</value>
+  </data>
   <data name="New Folder" xml:space="preserve">
     <value>새폴더</value>
   </data>
@@ -400,6 +427,12 @@
   <data name="Play" xml:space="preserve">
     <value>재생</value>
   </data>
+  <data name="Preset" xml:space="preserve">
+    <value>사전설정</value>
+  </data>
+  <data name="Preset Name" xml:space="preserve">
+    <value>사전설정명</value>
+  </data>
   <data name="Procedure" xml:space="preserve">
     <value>프로시저</value>
   </data>
@@ -433,6 +466,9 @@
   <data name="Review" xml:space="preserve">
     <value>리뷰</value>
   </data>
+  <data name="Review Preset" xml:space="preserve">
+    <value>리뷰 사전설정</value>
+  </data>
   <data name="Save" xml:space="preserve">
     <value>저장</value>
   </data>
@@ -455,7 +491,7 @@
     <value>소스</value>
   </data>
   <data name="Stand By" xml:space="preserve">
-    <value>대기</value>    
+    <value>대기</value>
   </data>
   <data name="Standard" xml:space="preserve">
     <value>스탠다드</value>

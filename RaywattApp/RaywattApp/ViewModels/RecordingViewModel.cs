@@ -34,10 +34,10 @@ namespace RaywattApp.ViewModels
             get { return this._cancelCommand ?? (this._cancelCommand = new RelayCommand(Cancel)); }
         }
 
-        private ICommand _saveCommand;
-        public ICommand SaveCommand
+        private ICommand _confirmCommand;
+        public ICommand ConfirmCommand
         {
-            get { return this._saveCommand ?? (this._saveCommand = new RelayCommand(Save)); }
+            get { return this._confirmCommand ?? (this._confirmCommand = new RelayCommand(Confirm)); }
         }
 
         public RecordingViewModel(SqlManager sqlManager)
@@ -79,39 +79,30 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = parameter });
         }
 
-        private void Save()
+        private void Confirm()
         {
-            _log.Debug("Save");
+            _log.Debug("Confirm");
 
-            PatientCase.Id = Patient.Id + "_" + DateTime.Now.ToString("yyyyMMddHHmmss");
-            PatientCase.PatientId = Patient.Id;
+            PatientCase.PhysicianName = Constants.NotSelected;
+            PatientCase.AccessionNumber = "";
+            PatientCase.AccessionName = "";
+            PatientCase.Comment = "";
+            PatientCase.Vessel = "$000";
+            PatientCase.Procedure = "$000";
+            PatientCase.ThumbnailNo = 1;
+            PatientCase.StillImageYn = "N";
+            PatientCase.Image = "";
+            PatientCase.PullbackType = "LONG";
+            PatientCase.Brightness = 30;
+            PatientCase.Contrast = 10;
+            PatientCase.AngioCoRegistration = false;
 
-            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-            sqlParameters["id"] = PatientCase.Id;
-            sqlParameters["patient_id"] = PatientCase.PatientId;
-            sqlParameters["physician_name"] = "";
-            sqlParameters["accession_number"] = "";
-            sqlParameters["accession_name"] = "";
-            sqlParameters["comment"] = "comment";
-            sqlParameters["vessel"] = "V001";
-            sqlParameters["procedure"] = "P001";
-            sqlParameters["thumbnail_no"] = 1;
-            sqlParameters["still_image_yn"] = "N";
-
-            int nRows = _sqlManager.InsertPatientCase(sqlParameters);
-
-            if (nRows == 1)
-            {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["patient"] = Patient;
-                SetDetailStatusInit();
-                parameter["prevStatus"] = PrevStatus;
-                WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = parameter });
-            }
-            else
-            {
-                _log.Error("Insert Error");
-            }
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = Patient;
+            parameter["patientCase"] = PatientCase;
+            SetDetailStatusInit();
+            parameter["prevStatus"] = PrevStatus;
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/ReviewPresetPage.xaml") { Parameter = parameter });
         }
 
         private void SetDetailStatusInit()

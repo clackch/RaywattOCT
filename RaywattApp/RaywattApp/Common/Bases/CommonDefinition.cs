@@ -13,7 +13,8 @@
             LiveViewPage,
             CalibrationPage,
             RecordingPage,
-            ReviewPage
+            ReviewPage,
+            ReviewPresetPage
         }
 
         public enum FileType : int

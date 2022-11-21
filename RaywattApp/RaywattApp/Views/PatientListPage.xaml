@@ -66,7 +66,7 @@
                     <DataGridTextColumn Width="*" Binding="{Binding Lastname}" Header="{Binding DataContext.HeaderLastname, Source={x:Reference ProxyElement}}" SortMemberPath="Lastname"/>
                     <DataGridTextColumn Width="*" Binding="{Binding Firstname}" Header="{Binding DataContext.HeaderFirstname, Source={x:Reference ProxyElement}}" SortMemberPath="Firstname"/>
                     <DataGridTextColumn Width="*" Binding="{Binding Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding DataContext.HeaderBirthdate, Source={x:Reference ProxyElement}}" SortMemberPath="Birthdate"/>
-                    <DataGridTextColumn Width="*" Binding="{Binding Gender, Converter={StaticResource L10NConverter}}" Header="{Binding DataContext.HeaderGender, Source={x:Reference ProxyElement}}" SortMemberPath="Gender"/>
+                    <DataGridTextColumn Width="*" Binding="{Binding Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}" Header="{Binding DataContext.HeaderGender, Source={x:Reference ProxyElement}}" SortMemberPath="Gender"/>
                     <DataGridTextColumn Width="*" Binding="{Binding DisplayLastCase}" Header="{Binding DataContext.HeaderLastCase, Source={x:Reference ProxyElement}}" SortMemberPath="Last_Case"/>
                     <DataGridTextColumn Width="*" Binding="{Binding CreateDate, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding DataContext.HeaderCreateDate, Source={x:Reference ProxyElement}}" SortMemberPath="Create_Date"/>
                     <DataGridTextColumn Width="*" Binding="{Binding UpdateDate, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding DataContext.HeaderUpdateDate, Source={x:Reference ProxyElement}}" SortMemberPath="Update_Date"/>
@@ -80,19 +80,19 @@
                     <ColumnDefinition Width="150"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" >
-                    <Button Content="≪" Command="{Binding PagingFirstCommand}" Margin="5,5,5,5" />
-                    <Button Content="＜" Command="{Binding PagingPreviousCommand}" Margin="5,5,5,5" />
-                    <Button Content="{Binding PagingNo1}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo1" Visibility="{Binding PagingVisibilityNo1, Converter={StaticResource PagingNoIndicatorConverter}}" Foreground="{Binding PagingNoIdx, Converter={StaticResource PagingNoCheckedConverter}, ConverterParameter=0}" Margin="5,5,5,5" />
-                    <Button Content="{Binding PagingNo2}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo2" Visibility="{Binding PagingVisibilityNo2, Converter={StaticResource PagingNoIndicatorConverter}}" Foreground="{Binding PagingNoIdx, Converter={StaticResource PagingNoCheckedConverter}, ConverterParameter=1}" Margin="5,5,5,5" />
-                    <Button Content="{Binding PagingNo3}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo3" Visibility="{Binding PagingVisibilityNo3, Converter={StaticResource PagingNoIndicatorConverter}}" Foreground="{Binding PagingNoIdx, Converter={StaticResource PagingNoCheckedConverter}, ConverterParameter=2}" Margin="5,5,5,5" />
-                    <Button Content="{Binding PagingNo4}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo4" Visibility="{Binding PagingVisibilityNo4, Converter={StaticResource PagingNoIndicatorConverter}}" Foreground="{Binding PagingNoIdx, Converter={StaticResource PagingNoCheckedConverter}, ConverterParameter=3}" Margin="5,5,5,5" />
-                    <Button Content="{Binding PagingNo5}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo5" Visibility="{Binding PagingVisibilityNo5, Converter={StaticResource PagingNoIndicatorConverter}}" Foreground="{Binding PagingNoIdx, Converter={StaticResource PagingNoCheckedConverter}, ConverterParameter=4}" Margin="5,5,5,5" />
-                    <Button Content="＞" Command="{Binding PagingNextCommand}" Margin="5,5,5,5" />
-                    <Button Content="≫" Command="{Binding PagingLastCommand}" Margin="5,5,5,5" />
+                    <Button Width="20" Content="≪" Command="{Binding PagingFirstCommand}" Margin="5,5,5,5" />
+                    <Button Width="20" Content="＜" Command="{Binding PagingPreviousCommand}" Margin="5,5,5,5" />
+                    <Button Width="20" Content="{Binding PagingNo1}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo1" Visibility="{Binding PagingVisibilityNo1, Converter={StaticResource PagingNoIndicatorConverter}}" Foreground="{Binding PagingNoIdx, Converter={StaticResource PagingNoCheckedConverter}, ConverterParameter=0}" Margin="5,5,5,5" />
+                    <Button Width="20" Content="{Binding PagingNo2}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo2" Visibility="{Binding PagingVisibilityNo2, Converter={StaticResource PagingNoIndicatorConverter}}" Foreground="{Binding PagingNoIdx, Converter={StaticResource PagingNoCheckedConverter}, ConverterParameter=1}" Margin="5,5,5,5" />
+                    <Button Width="20" Content="{Binding PagingNo3}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo3" Visibility="{Binding PagingVisibilityNo3, Converter={StaticResource PagingNoIndicatorConverter}}" Foreground="{Binding PagingNoIdx, Converter={StaticResource PagingNoCheckedConverter}, ConverterParameter=2}" Margin="5,5,5,5" />
+                    <Button Width="20" Content="{Binding PagingNo4}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo4" Visibility="{Binding PagingVisibilityNo4, Converter={StaticResource PagingNoIndicatorConverter}}" Foreground="{Binding PagingNoIdx, Converter={StaticResource PagingNoCheckedConverter}, ConverterParameter=3}" Margin="5,5,5,5" />
+                    <Button Width="20" Content="{Binding PagingNo5}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo5" Visibility="{Binding PagingVisibilityNo5, Converter={StaticResource PagingNoIndicatorConverter}}" Foreground="{Binding PagingNoIdx, Converter={StaticResource PagingNoCheckedConverter}, ConverterParameter=4}" Margin="5,5,5,5" />
+                    <Button Width="20" Content="＞" Command="{Binding PagingNextCommand}" Margin="5,5,5,5" />
+                    <Button Width="20" Content="≫" Command="{Binding PagingLastCommand}" Margin="5,5,5,5" />
                 </StackPanel>
                 <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
                     <Label Foreground="White" Content="{Binding [Page Size], Source={StaticResource L10N}}"/>
-                    <ComboBox ItemsSource="{Binding PagingPageSize}" SelectedItem="{Binding PagingSelectedPageSize}" Width="50" Margin="5,5,5,5" />
+                    <ComboBox ItemsSource="{Binding PagingPageSize}" SelectedItem="{Binding PagingSelectedPageSize}" Width="50" Margin="5,3,5,3" />
                 </StackPanel>
             </Grid>
         </Grid>

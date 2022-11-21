@@ -18,6 +18,21 @@ namespace RaywattApp.Services
             _databaseService = databaseService;
         }
 
+        /**
+         * Code
+         */
+        public IList<Code> SelectCodeList()
+        {
+            _log.Debug("SelectCodeList");
+
+            string commandText = SqlQuery.GetQuery("SelectCodeList");
+
+            return _databaseService.GetDatas<Code>(commandText);
+        }
+
+        /**
+         * L10n
+         */
         public IList<L10n> SelectL10n()
         {
             _log.Debug("SelectL10n");
@@ -45,6 +60,9 @@ namespace RaywattApp.Services
             return _databaseService.UpdateData(commandText, sqlParameters);
         }
 
+        /**
+         * Patient
+         */
         public int PageCountPatientList(Dictionary<string, Object> sqlParameters)
         {
             _log.Debug("PageCountPatientList");
@@ -142,15 +160,9 @@ namespace RaywattApp.Services
             return _databaseService.UpdateData(commandText, sqlParameters);
         }
 
-        public IList<Code> SelectCodeList()
-        {
-            _log.Debug("SelectCodeList");
-
-            string commandText = SqlQuery.GetQuery("SelectCodeList");
-
-            return _databaseService.GetDatas<Code>(commandText);
-        }
-
+        /**
+         * Patient Case
+         */
         public int PageCountPatientCaseByDate(Dictionary<string, Object> sqlParameters)
         {
             _log.Debug("PageCountPatientCaseByDate");
@@ -237,6 +249,57 @@ namespace RaywattApp.Services
             return _databaseService.UpdateData(commandText, sqlParameters);
         }
 
+        public int UpsertPatientCase(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpsertPatientCase");
+
+            string commandText = SqlQuery.GetQuery("UpsertPatientCase");
+
+            return _databaseService.InsertData(commandText, sqlParameters);
+        }
+
+        /**
+         * Patient Case Preset
+         */
+        public IList<PatientCasePreset> SelectPatientCasePresetList()
+        {
+            _log.Debug("SelectPatientCasePresetList");
+
+            string commandText = SqlQuery.GetQuery("SelectPatientCasePresetList");
+
+            return _databaseService.GetDatas<PatientCasePreset>(commandText);
+        }
+
+        public int DeletePatientCasePreset(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("DeletePatientCasePreset");
+
+            string commandText = SqlQuery.GetQuery("DeletePatientCasePreset");
+
+            return _databaseService.DeleteData(commandText, sqlParameters);
+        }
+
+        public int InsertPatientCasePreset(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("InsertPatientCasePreset");
+
+            string commandText = SqlQuery.GetQuery("InsertPatientCasePreset");
+
+            return _databaseService.InsertData(commandText, sqlParameters);
+        }
+
+        public int UpdatePatientCasePreset(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpdatePatientCasePreset");
+
+            string commandText = SqlQuery.GetQuery("UpdatePatientCasePreset");
+
+            return _databaseService.InsertData(commandText, sqlParameters);
+        }
+
+        /**
+         * Pysician
+         */
         public IList<Physician> SelectPhysicianList()
         {
             _log.Debug("SelectPhysicianList");
@@ -273,15 +336,9 @@ namespace RaywattApp.Services
             return _databaseService.InsertData(commandText, sqlParameters);
         }
 
-        public int UpsertPatientCase(Dictionary<string, Object> sqlParameters)
-        {
-            _log.Debug("UpsertPatientCase");
-
-            string commandText = SqlQuery.GetQuery("UpsertPatientCase");
-
-            return _databaseService.InsertData(commandText, sqlParameters);
-        }
-
+        /**
+         * Extra
+         */
         private string getAdditionalCondition(Dictionary<string, Object> sqlAdditionalCondition)
         {
             _log.Debug("getAddtionalCondition");

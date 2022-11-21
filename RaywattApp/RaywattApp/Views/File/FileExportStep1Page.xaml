@@ -61,7 +61,7 @@
                 <StackPanel Grid.Row="0">
                     <Label Content="{Binding [Patient], Source={StaticResource L10N}}"></Label>
                 </StackPanel>
-                <DataGrid Grid.Row="1" Name="patientList" ItemsSource="{Binding PatientList}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="All" RowHeaderWidth="0" CanUserSortColumns="False" SelectionMode="Single">
+                <DataGrid Grid.Row="1" Name="patientList" ItemsSource="{Binding PatientList}" SelectedIndex="0" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="All" RowHeaderWidth="0" CanUserSortColumns="False" SelectionMode="Single">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="SelectionChanged">
                             <i:InvokeCommandAction Command="{Binding ShowCaseCommand}" CommandParameter="{Binding ElementName=patientList, Path=CurrentItem}"/>
@@ -106,12 +106,12 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
+                        <DataGridTextColumn Width="1.2*" Binding="{Binding CreateDate, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Create Date], Source={StaticResource L10N}}" />
+                        <DataGridTextColumn Width="*" Binding="{Binding Vessel, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}" Header="{Binding [Vessel], Source={StaticResource L10N}}" />
+                        <DataGridTextColumn Width="*" Binding="{Binding Procedure, Converter={StaticResource CodeConverter}, ConverterParameter='PROC'}" Header="{Binding [Procedure], Source={StaticResource L10N}}" />
                         <DataGridTextColumn Width="*" Binding="{Binding PhysicianName}" Header="{Binding [Physician Name], Source={StaticResource L10N}}" />
                         <DataGridTextColumn Width="*" Binding="{Binding AccessionNumber}" Header="{Binding [Accession Number], Source={StaticResource L10N}}" />
                         <DataGridTextColumn Width="*" Binding="{Binding Comment}" Header="{Binding [Comment], Source={StaticResource L10N}}" />
-                        <DataGridTextColumn Width="*" Binding="{Binding Vessel}" Header="{Binding [Vessel], Source={StaticResource L10N}}" />
-                        <DataGridTextColumn Width="*" Binding="{Binding Procedure}" Header="{Binding [Procedure], Source={StaticResource L10N}}" />
-                        <DataGridTextColumn Width="*" Binding="{Binding CreateDate, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Create Date], Source={StaticResource L10N}}" />
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
@@ -119,7 +119,7 @@
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" >
             <Button Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-            <Button Width="50" Background="Black" Foreground="White" Command="{Binding NextCommand}" Content="{Binding [Next], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+            <Button Width="50" Style="{StaticResource Important}" Command="{Binding NextCommand}" Content="{Binding [Next], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
         </StackPanel>
     </Grid>
 </Page>

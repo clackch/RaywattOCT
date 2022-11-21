@@ -22,7 +22,7 @@
                 <ColumnDefinition Width="200"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" HorizontalAlignment="Left">
-                <Button Width="50" Command="{Binding HomeCommand}" Content="{Binding [Raywatt], Source={StaticResource L10N}}" Foreground="White" Background="Black" Margin="5,5,5,5" />
+                <Button Width="50" Command="{Binding HomeCommand}" Content="{Binding [Raywatt], Source={StaticResource L10N}}" Style="{StaticResource Important}" Margin="5,5,5,5" />
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" Visibility="{Binding IsShowPatient}">
                 <Label Foreground="White" Content="{Binding [ID], Source={StaticResource L10N}}"/>
@@ -41,7 +41,7 @@
                 <Label Foreground="White">]</Label>
                 <Label Foreground="White" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
                 <Label Foreground="White">[</Label>
-                <Label Foreground="White" Content="{Binding Patient.Gender, Converter={StaticResource L10NConverter}}"/>
+                <Label Foreground="White" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
                 <Label Foreground="White">]</Label>
             </StackPanel>
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">

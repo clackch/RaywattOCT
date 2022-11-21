@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System;
 using System.Windows.Input;
 using System.Windows.Navigation;
-using System.Linq;
 using System.Windows.Threading;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Views.Dialog;
@@ -95,38 +94,6 @@ namespace RaywattApp.ViewModels
         private PatientCase _patientCase;
 
         [ObservableProperty]
-        private Dictionary<string, string> _vesselComboBox;
-
-        [ObservableProperty]
-        private Dictionary<string, string> _procedureComboBox;
-
-        [ObservableProperty]
-        private Dictionary<string, string> _physicianComboBox;
-
-        [ObservableProperty]
-        private string _currentVessel;
-
-        private string previousVesselKey;
-
-        private string vesselOther;
-
-        private bool vesselOpened;
-
-        private bool vesselDialogOpened;
-
-        [ObservableProperty]
-        private string _currentProcedure;
-
-        private string previousProcedureKey;
-
-        private string procedureOther;
-
-        private bool proceduereOpened;
-
-        [ObservableProperty]
-        private string _currentPhysician;
-
-        [ObservableProperty]
         private string _playPauseState;
 
         private DispatcherTimer timer = new DispatcherTimer();
@@ -138,28 +105,22 @@ namespace RaywattApp.ViewModels
             get { return this._endReviewCommand ?? (this._endReviewCommand = new RelayCommand(EndReview)); }
         }
 
+        private ICommand _backCommand;
+        public ICommand BackCommand
+        {
+            get { return this._backCommand ?? (this._backCommand = new RelayCommand(Back)); }
+        }
+
         private ICommand _editCaseCommand;
         public ICommand EditCaseCommand
         {
             get { return this._editCaseCommand ?? (this._editCaseCommand = new RelayCommand(EditCase)); }
         }
 
-        private ICommand _vesselChangedCommand;
-        public ICommand VesselChangedCommand
+        private ICommand _editPresetCommand;
+        public ICommand EditPresetCommand
         {
-            get { return this._vesselChangedCommand ?? (this._vesselChangedCommand = new RelayCommand<KeyValuePair<string, string>>(ChangedVessel)); }
-        }
-
-        private ICommand _vesselOpenedCommand;
-        public ICommand VesselOpenedCommand
-        {
-            get { return this._vesselOpenedCommand ?? (this._vesselOpenedCommand = new RelayCommand<KeyValuePair<string, string>>(OpenVessel)); }
-        }
-
-        private ICommand _vesselClosedCommand;
-        public ICommand VesselClosedCommand
-        {
-            get { return this._vesselClosedCommand ?? (this._vesselClosedCommand = new RelayCommand<KeyValuePair<string, string>>(CloseVessel)); }
+            get { return this._editPresetCommand ?? (this._editPresetCommand = new RelayCommand(EditPreset)); }
         }
 
         private ICommand _cmdPlayback;
@@ -195,14 +156,6 @@ namespace RaywattApp.ViewModels
             _sqlManager = sqlManager;
             _dialogService = dialogService;
 
-            VesselComboBox = new Dictionary<string, string>();
-
-            ProcedureComboBox = new Dictionary<string, string>();
-
-            PhysicianComboBox = new Dictionary<string, string>();
-
-            vesselOpened = false;
-
             IndicatorCrossSection = new Indicator();
             IndicatorCrossSection.IsVisible = "Visible";
 
@@ -226,8 +179,6 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
 
-                SetInit();
-
                 RaySetProperty(Property.BackgroundColor, 0xFFFFFF);
                 RayStartReview(PatientCase.Image);
 
@@ -247,113 +198,6 @@ namespace RaywattApp.ViewModels
         private void OnIndicatorLongitudeMoved(object sender, EventArgs e)
         {
             setCurrentFrame(IndicatorLongitude.X);
-        }
-
-        private void SetInit()
-        {
-            Dictionary<string, string> procedure = CodeDefinition.Codes["PROC"];
-
-            CurrentVessel = CodeDefinition.Codes["VESS"].FirstOrDefault(x => x.Value == PatientCase.Vessel).Key;
-            
-            if (CurrentVessel == null)
-            {
-                VesselComboBox = GetVesselList(PatientCase.Vessel);
-                CurrentVessel = "$OTH";
-                vesselOther = PatientCase.Vessel;
-            }
-            else
-            {
-                VesselComboBox = GetVesselList();
-            }
-            
-            previousVesselKey = CurrentVessel;
-
-            foreach (var item in procedure)
-            {
-                ProcedureComboBox[item.Key] = item.Value;
-            }
-            CurrentProcedure = CodeDefinition.Codes["PROC"].FirstOrDefault(x => x.Value == PatientCase.Procedure).Key;
-
-            if (CurrentProcedure == null)
-            {
-                ProcedureComboBox["$OTH"] = PatientCase.Procedure;
-                CurrentProcedure = "$OTH";
-            }
-
-            previousProcedureKey = CurrentProcedure;
-        }
-
-        private void ChangedVessel(KeyValuePair<string, string> selectedVessel)
-        {
-            _log.Debug("ChangedVessel");
-
-            if (vesselOpened || vesselDialogOpened)
-                return;
-
-            if (selectedVessel.Key == "$OTH")
-            {
-                vesselDialogOpened = true;
-
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["title"] = _l10n["Vessel"];
-                parameter["other"] = vesselOther;
-                var result = _dialogService.OpenDialog(new EditOctInfoDialogControl(), parameter);
-
-                if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
-                {
-                    Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
-                    vesselOther = data["other"].ToString();
-
-                    if (vesselOther != "")
-                    {
-                        VesselComboBox = GetVesselList(vesselOther);
-                        CurrentVessel = "$OTH";
-                        previousVesselKey = CurrentVessel;
-                    }
-                }
-                else
-                {
-                    VesselComboBox = GetVesselList();
-                    CurrentVessel = previousVesselKey;
-                }
-
-                vesselDialogOpened = false;
-            }
-            else if(previousVesselKey == "$OTH")
-            {
-                VesselComboBox = GetVesselList();
-                previousVesselKey = selectedVessel.Key;
-            }
-            else
-            {
-                previousVesselKey = selectedVessel.Key;
-            }
-        }
-
-        private void OpenVessel(KeyValuePair<string, string> selectedVessel)
-        {
-            _log.Debug("OpenVessel");
-
-            if (selectedVessel.Key == "$OTH")
-            {
-                VesselComboBox = GetVesselList();
-                vesselOpened = true;
-                CurrentVessel = "$OTH";
-                vesselOpened = false;
-            }
-        }
-
-        private void CloseVessel(KeyValuePair<string, string> selectedVessel)
-        {
-            _log.Debug("CloseVessel");
-
-            if (selectedVessel.Key == "$OTH")
-            {
-                VesselComboBox = GetVesselList(vesselOther);
-                vesselOpened = true;
-                CurrentVessel = "$OTH";
-                vesselOpened = false;
-            }
         }
 
         private void Playback(object param)
@@ -422,23 +266,6 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        public Dictionary<string, string> GetVesselList(string? other = null)
-        {
-            Dictionary<string, string> vessel = CodeDefinition.Codes["VESS"];
-            Dictionary<string, string> vesselComboBox = new Dictionary<string, string>();
-            foreach (var item in vessel)
-            {
-                vesselComboBox[item.Key] = item.Value;
-            }
-
-            if(other != null)
-            {
-                vesselComboBox["$OTH"] = other;
-            }
-
-            return vesselComboBox;
-        }
-
         private void EndReview()
         {
             _log.Debug("EndReview");
@@ -450,17 +277,16 @@ namespace RaywattApp.ViewModels
             sqlParameters["physician_name"] = PatientCase.PhysicianName;
             sqlParameters["accession_number"] = PatientCase.AccessionNumber;
             sqlParameters["comment"] = PatientCase.Comment;
-
-            if(CurrentVessel == "$OTH")
-            {
-                sqlParameters["vessel"] = vesselOther;
-            }
-            else
-            {
-                sqlParameters["vessel"] = CurrentVessel;
-            }
-            
-            sqlParameters["procedure"] = CurrentProcedure;
+            sqlParameters["vessel"] = PatientCase.Vessel;
+            sqlParameters["procedure"] = PatientCase.Procedure;
+            sqlParameters["brightness"] = PatientCase.Brightness;
+            sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
+            sqlParameters["contrast"] = PatientCase.Contrast;
+            sqlParameters["preset_name"] = PatientCase.PresetName;
+            sqlParameters["calcium_threshold"] = PatientCase.CalciumThreshold;
+            sqlParameters["expansion_calculation"] = PatientCase.ExpansionCalculation;
+            sqlParameters["expansion_threshold"] = PatientCase.ExpansionThreshold;
+            sqlParameters["apposition_threshold"] = PatientCase.AppositionThreshold;
 
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
 
@@ -473,11 +299,25 @@ namespace RaywattApp.ViewModels
             }
         }
 
+        private void Back()
+        {
+            _log.Debug("Back");
+
+            RayFinalize();
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = Patient;
+            parameter["prevStatus"] = PrevStatus;
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = parameter });
+        }
+
         private void EditCase()
         {
             _log.Debug("EditCase");
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["vessel"] = PatientCase.Vessel;
+            parameter["procedure"] = PatientCase.Procedure;
             parameter["physicianName"] = PatientCase.PhysicianName;
             parameter["accessionNumber"] = PatientCase.AccessionNumber;
             parameter["comment"] = PatientCase.Comment;
@@ -486,10 +326,23 @@ namespace RaywattApp.ViewModels
             if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
             {
                 Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
+                PatientCase.Vessel = data["vessel"].ToString();
+                PatientCase.Procedure = data["procedure"].ToString();
                 PatientCase.PhysicianName = data["physicianName"].ToString();
                 PatientCase.AccessionNumber = data["accessionNumber"].ToString();
                 PatientCase.Comment = data["comment"].ToString();
             }
+        }
+
+        private void EditPreset()
+        {
+            _log.Debug("EditPreset");
+            
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patientCase"] = PatientCase;
+            parameter["patient"] = Patient;
+            parameter["prevStatus"] = PrevStatus;
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/ReviewPresetPage.xaml") { Parameter = parameter });
         }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
