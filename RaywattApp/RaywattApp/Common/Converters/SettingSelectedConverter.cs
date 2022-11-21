@@ -8,13 +8,16 @@ namespace RaywattApp.Common.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if(value.Equals(parameter))
+            var ButtonImportant = App.Current.Resources["Important"];
+            var ButtonBasic = App.Current.Resources["Basic"];
+
+            if (value.Equals(parameter))
             {
-                return "Black";
+                return ButtonImportant;
             }
             else
             {
-                return "DarkGray";
+                return ButtonBasic;
             }
         }
 
