@@ -92,7 +92,7 @@
                 </StackPanel>
                 <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
                     <Label Foreground="White" Content="{Binding [Page Size], Source={StaticResource L10N}}"/>
-                    <ComboBox ItemsSource="{Binding PagingPageSize}" SelectedItem="{Binding PagingSelectedPageSize}" Width="50" Margin="5,5,5,5" />
+                    <ComboBox ItemsSource="{Binding PagingPageSize}" SelectedItem="{Binding PagingSelectedPageSize}" Width="50" Margin="5,3,5,3" />
                 </StackPanel>
             </Grid>
         </Grid>
