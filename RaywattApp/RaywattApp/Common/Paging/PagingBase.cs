@@ -135,6 +135,18 @@ namespace RaywattApp.Common.Paging
         private Visibility _pagingVisibilityNo5;
 
         [ObservableProperty]
+        private bool _pagingEnableFirst;
+
+        [ObservableProperty]
+        private bool _pagingEnablePrevious;
+
+        [ObservableProperty]
+        private bool _pagingEnableNext;
+
+        [ObservableProperty]
+        private bool _pagingEnableLast;
+
+        [ObservableProperty]
         private int _pagingNoCnt;
 
         [ObservableProperty]
@@ -149,7 +161,7 @@ namespace RaywattApp.Common.Paging
             PagingPageSize.Add(Constants.PageSizeListChoice1);
             PagingPageSize.Add(Constants.PageSizeListChoice2);
             PagingPageSize.Add(Constants.PageSizeListChoice3);
-            PagingSelectedPageSize = Constants.PageSizeList;
+            PagingSelectedPageSize = 3;// Constants.PageSizeList;
 
             //Paging No Indicator
             PagingVisibilityNo1 = Visibility.Collapsed;
@@ -159,9 +171,9 @@ namespace RaywattApp.Common.Paging
             PagingVisibilityNo5 = Visibility.Collapsed;
         }
 
-        virtual protected void Search() { }
+        protected virtual void Search() { }
 
-        virtual protected void SetHeaderNameInit() { }
+        protected virtual void SetHeaderNameInit() { }
 
         private void PagingFirst()
         {
@@ -188,8 +200,7 @@ namespace RaywattApp.Common.Paging
 
             _log.Debug("PagingPrevious");
 
-            int nCurrPageGroup = PagingNoIdx / Constants.PageNumberMax;
-            int nPagePrevGroupNo = int.Parse(PagingNo1) - Constants.PageNumberMax * nCurrPageGroup;
+            int nPagePrevGroupNo = int.Parse(PagingNo1) - Constants.PageNumberMax;
 
             ShowPageNo(nPagePrevGroupNo);
 
@@ -206,8 +217,7 @@ namespace RaywattApp.Common.Paging
 
             _log.Debug("PagingNext");
 
-            int nCurrPageGroup = PagingNoIdx / Constants.PageNumberMax;
-            int nPageNextGroupNo = int.Parse(PagingNo1) + Constants.PageNumberMax * (nCurrPageGroup + 1);
+            int nPageNextGroupNo = int.Parse(PagingNo1) + Constants.PageNumberMax;
 
             ShowPageNo(nPageNextGroupNo);
 
@@ -252,6 +262,7 @@ namespace RaywattApp.Common.Paging
             PagingNoIdx = pagingIndex - 1;
 
             Search();
+            ShowFirstLast();
         }
 
         protected void ShowPageNo(int nPageGroupNo)
@@ -313,7 +324,51 @@ namespace RaywattApp.Common.Paging
                 PagingVisibilityNo4 = Visibility.Visible;
                 PagingVisibilityNo5 = Visibility.Visible;
             }
-        }     
+
+            ShowPreviousNext(nPageGroupNo);
+        }
+
+        protected void ShowFirstLast()
+        {
+            if (PagingNoIdx == 0)
+            {
+                PagingEnableFirst = false;
+            }
+            else
+            {
+                PagingEnableFirst = true;
+            }
+
+            if (PagingNoIdx == PagingNoCnt || PagingTotalCnt == 0)
+            {
+                PagingEnableLast = false;
+            }
+            else
+            {
+                PagingEnableLast = true;
+            }
+        }
+
+        private void ShowPreviousNext(int nPageGroupNo)
+        {
+            if (nPageGroupNo == 1)
+            {
+                PagingEnablePrevious = false;
+            }
+            else
+            {
+                PagingEnablePrevious = true;
+            }
+
+            if (PagingNoCnt / Constants.PageNumberMax == nPageGroupNo / Constants.PageNumberMax)
+            {
+                PagingEnableNext = false;
+            }
+            else
+            {
+                PagingEnableNext = true;
+            }
+        }
 
         private void ColumnOrder(DataGridSortingEventArgs e)
         {

@@ -131,6 +131,7 @@ namespace RaywattApp.ViewModels
             else
             {
                 Search();
+                ShowFirstLast();
             }
         }
 
@@ -139,7 +140,7 @@ namespace RaywattApp.ViewModels
             _log.Debug("OnNavigating");
         }
 
-        override protected void Search()
+        protected override void Search()
         {
             _log.Debug("Search");
 
@@ -157,7 +158,7 @@ namespace RaywattApp.ViewModels
             PatientList = _sqlManager.PageSelectPatientList(sqlParameters, sqlAdditionalCondition);
         }
 
-        override protected void SetHeaderNameInit()
+        protected override void SetHeaderNameInit()
         {
             _log.Debug("SetHeaderNameInit");
 

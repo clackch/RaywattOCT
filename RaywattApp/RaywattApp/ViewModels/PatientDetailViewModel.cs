@@ -135,6 +135,7 @@ namespace RaywattApp.ViewModels
                 PrevStatus = (PrevStatus)data["prevStatus"];
 
                 Search();
+                ShowFirstLast();
                 SetPrevStatus();
             }
         }
