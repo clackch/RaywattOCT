@@ -29,7 +29,9 @@ enum class RayProperty {
 	LoadCatheterTime,
 	VolumeWidth,
 	VolumeHeight,
-	VolumeDepth
+	VolumeDepth,
+	LowLevel,
+	HighLevel
 };
 
 enum class RayViewMode {

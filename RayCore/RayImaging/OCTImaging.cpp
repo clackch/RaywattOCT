@@ -52,6 +52,8 @@ COCTImaging::COCTImaging(CMessageService* pMsg) {
 	m_bShowCalibGuide = false;
 	m_fBrightness = 0.0f;
 	m_fContrast = 1.0f;
+	m_fLowLevel = 108.0f;
+	m_fHighLevel = 109.0f;
 	m_backgroundColor = cv::Scalar(0x00, 0x00, 0x00);
 
 	m_nCurFrame = 0;
@@ -278,8 +280,8 @@ void COCTImaging::generateImage(bool bInvert){
 	{
 		ippsLn_32f(fFFTResult + i * nOutputLength, fOutput + i * nOutputLength, nOutputLength);
 		ippsMulC_32f(fOutput + i * nOutputLength, log10(exp(1)) * 10, fOutput + i * nOutputLength, nOutputLength);
-		ippsSubC_32f_I((calibration->lowLevel + fLowLevel), fOutput + i * nOutputLength, nOutputLength);
-		ippsMulC_32f_I(255.0f / (calibration->highLevel - fHighLevel), fOutput + i * nOutputLength, nOutputLength);
+		ippsSubC_32f_I((m_fLowLevel + fLowLevel), fOutput + i * nOutputLength, nOutputLength);
+		ippsMulC_32f_I(255.0f / (m_fHighLevel - fHighLevel), fOutput + i * nOutputLength, nOutputLength);
 		ippsConvert_32f8u_Sfs(fOutput + i * nOutputLength, imageResult.data + i * nOutputLength /*stepBytes*/, nOutputLength, ippRndNear, 0);
 	}
 }
@@ -312,6 +314,8 @@ void COCTImaging::postProcessing() {
 		}
 		cv::line(imageResultColor, cv::Point(posSheath, lineStart), cv::Point(posSheath, (lineStart + lineSize / 2) - 1), lineColor, 2);
 	}
+
+	cv::rectangle(imageResultColor, cv::Rect(0, 0, 100, imageResultColor.rows), m_backgroundColor, cv::FILLED);
 
 	circularizeImage(imageResultColor, imageCircle);
 

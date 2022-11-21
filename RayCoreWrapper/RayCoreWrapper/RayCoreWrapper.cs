@@ -30,7 +30,9 @@ namespace RaywattOCT
             LoadCatheterTime,
             VolumeWidth,
             VolumeHeight,
-            VolumeDepth
+            VolumeDepth,
+            LowLevel,
+            HighLevel
         }
 
         public enum ViewMode : int

@@ -58,6 +58,8 @@ private:
 	BOOL m_chkShowGuide;
 	CSliderCtrl m_sliderBrightness;
 	CSliderCtrl m_sliderContrast;
+	CSliderCtrl m_sliderLowLevel;
+	CSliderCtrl m_sliderHighLevel;
 	BOOL m_chkInitMotor;
 	BOOL m_chkInitStage;
 
@@ -98,7 +100,8 @@ private:
 	int initializeDevices();
 	void updatePatientDataList();
 	void initScopeViewLayout();
-	void updateBrightnessContrast();
+	void updateBrightnessContrast(CLabImaging *pImaging);
+	void updateLevel(CLabImaging* pImaging);
 	CString generateFileName(CString strPath, CString strExtension, CString strPrefix = _T(""));
 	CString getLoadedFilePath();
 	CString splitFileName(CString strFilePath);
@@ -146,6 +149,8 @@ public:
 	afx_msg void OnBnClickedCheckShowGuide();
 	afx_msg void OnNMCustomdrawSliderBrightness(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNMCustomdrawSliderContrast(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnNMCustomdrawSliderLowlevel(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnNMCustomdrawSliderHighlevel(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBnClickedButtonOpenRotaryJunction();
 	afx_msg void OnBnClickedButtonSaveCalibration();
 	afx_msg void OnBnClickedButtonChangeCalibration();

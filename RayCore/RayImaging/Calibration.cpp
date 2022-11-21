@@ -20,10 +20,6 @@ bool CCalibration::Initialize(tstring calibFile)
 {
 	releaseMemory();
 	allocateMemory();
-
-	// level param
-	lowLevel = 108.0f;
-	highLevel = 109.0f;
 	
 	// Setup options
 	setWindow(Hanning);

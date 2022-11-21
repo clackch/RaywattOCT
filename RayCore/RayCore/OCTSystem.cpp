@@ -51,6 +51,8 @@ COCTSystem::COCTSystem() {
 	m_fBrightness = 0.0f;
 	m_fContrast = 0.5f;
 	m_fDegree = 90;
+	m_fLowLevel = 108.f;
+	m_fHighLevel = 109.f;
 }
 
 /*
@@ -533,6 +535,41 @@ UINT COCTSystem::GetVolumeDepth() {
 }
 
 /*
+* GetVolumeDepth
+*/
+double COCTSystem::GetLowLevel() {
+	return m_fLowLevel;
+}
+/*
+* SetLowLevel
+*/
+RayError COCTSystem::SetLowLevel(double value) {
+	m_fLowLevel = value;
+
+	m_pImagingRealtime->SetLevel(m_fLowLevel, m_fHighLevel);
+	m_pImagingSimulate->SetLevel(m_fLowLevel, m_fHighLevel);
+
+	return RayError::OK;
+}
+/*
+* GetHighLevel
+*/
+double COCTSystem::GetHighLevel() {
+	return m_fHighLevel;
+}
+/*
+* SetHighLevel
+*/
+RayError COCTSystem::SetHighLevel(double value) {
+	m_fHighLevel = value;
+
+	m_pImagingRealtime->SetLevel(m_fLowLevel, m_fHighLevel);
+	m_pImagingSimulate->SetLevel(m_fLowLevel, m_fHighLevel);
+
+	return RayError::OK;
+}
+
+/*
 * GetVolumeData
 */
 void *COCTSystem::GetVolumeData() {
@@ -565,6 +602,9 @@ bool COCTSystem::GetIsPaused()
 UINT COCTSystem::threadService(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CThread* pThread = pSystem->m_pThreadService;
+
+	// Connect to COM Interface first time asynchronous
+	CLaserController::GetInstance();
 
 	while (pThread->isRun) {
 		std::tuple<int, WPARAM, LPARAM> popMsgThread = pSystem->popMessage();
