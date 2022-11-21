@@ -14,8 +14,8 @@
     <!-- Paging No Indicator Converter -->
     <converters:PagingNoIndicatorConverter x:Key="PagingNoIndicatorConverter" />
 
-    <!-- Paging No Checked Converter -->
-    <converters:PagingNoCheckedConverter x:Key="PagingNoCheckedConverter" />
+    <!-- Paging No Style Converter -->
+    <converters:PagingNoStyleConverter x:Key="PagingNoStyleConverter" />
 
     <!-- L10N Converter -->
     <converters:L10NConverter x:Key="L10NConverter" />
