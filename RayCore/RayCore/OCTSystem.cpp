@@ -603,6 +603,9 @@ UINT COCTSystem::threadService(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CThread* pThread = pSystem->m_pThreadService;
 
+	// Connect to COM Interface first time asynchronous
+	CLaserController::GetInstance();
+
 	while (pThread->isRun) {
 		std::tuple<int, WPARAM, LPARAM> popMsgThread = pSystem->popMessage();
 		int popMsg = std::get<0>(popMsgThread);
