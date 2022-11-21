@@ -39,7 +39,7 @@
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
                 <Setter Property="Background" Value="White"/>
-                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="Foreground" Value="Gray"/>
                 <Setter Property="BorderBrush" Value="White"/>
             </Trigger>
         </Style.Triggers>
