@@ -85,6 +85,10 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
         return octSystem.SetBackgroundColor(value);
     case RayProperty::Degree:
         return octSystem.SetDegree(value);
+    case RayProperty::LowLevel:
+        return octSystem.SetLowLevel(value);
+    case RayProperty::HighLevel:
+        return octSystem.SetHighLevel(value);
     default:
         return RayError::InvalidArgument;
     }
@@ -114,6 +118,10 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return config.volume.size;
     case RayProperty::VolumeDepth:
         return octSystem.GetVolumeDepth();
+    case RayProperty::LowLevel:
+        return octSystem.GetLowLevel();
+    case RayProperty::HighLevel:
+        return octSystem.GetHighLevel();
     default:
         return (int)RayError::InvalidArgument;
     }
