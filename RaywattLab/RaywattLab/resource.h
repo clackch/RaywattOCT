@@ -28,6 +28,8 @@
 #define IDC_BUTTON_CLOSE_SHUTTER        1022
 #define IDC_SLIDER_BRIGHTNESS           1023
 #define IDC_SLIDER_CONTRAST             1024
+#define IDC_SLIDER_LOWLEVEL             1025
+#define IDC_SLIDER_HIGHLEVEL            1026
 #define IDC_BUTTON_ZABER_IDLE           1027
 #define IDC_EDIT_ZABER_POSITION         1028
 #define IDC_BUTTON_ZABER_MOVE           1029
@@ -84,6 +86,10 @@
 #define IDC_BUTTON_PULLBACK             1083
 #define IDC_BUTTON_SAVE_PNG             1084
 #define IDC_CHECK_SHOW_GUIDE            1085
+#define IDC_EDIT_LOWLEVEL               1087
+#define IDC_EDIT_HIGHLEVEL              1088
+#define IDC_EDIT_BRIGHTNESS             1089
+#define IDC_EDIT_CONTRAST               1090
 
 // Next default values for new objects
 // 
@@ -91,7 +97,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        107
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1086
+#define _APS_NEXT_CONTROL_VALUE         1088
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

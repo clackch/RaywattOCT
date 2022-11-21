@@ -64,6 +64,8 @@ void CRaywattLabDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_CHECK_SHOW_GUIDE, m_chkShowGuide);
 	DDX_Control(pDX, IDC_SLIDER_BRIGHTNESS, m_sliderBrightness);
 	DDX_Control(pDX, IDC_SLIDER_CONTRAST, m_sliderContrast);
+	DDX_Control(pDX, IDC_SLIDER_LOWLEVEL, m_sliderLowLevel);
+	DDX_Control(pDX, IDC_SLIDER_HIGHLEVEL, m_sliderHighLevel);
 	DDX_Check(pDX, IDC_CHECK_INIT_MOTOR, m_chkInitMotor);
 	DDX_Check(pDX, IDC_CHECK_INIT_STAGE, m_chkInitStage);
 }
@@ -160,7 +162,7 @@ void CRaywattLabDlg::initScopeViewLayout() {
 	m_scopeView.ShowWindow(SW_SHOW);
 	m_scopeViewFFT.ShowWindow(SW_SHOW);
 }
-void CRaywattLabDlg::updateBrightnessContrast() {
+void CRaywattLabDlg::updateBrightnessContrast(CLabImaging* pImaging) {
 	const double rangeB[] = { 0.0f, 100.0f };
 	const double rangeC[] = { 0.5f, 3.0f };
 	const double rangeSliderB[] = { m_sliderBrightness.GetRangeMin(), m_sliderBrightness.GetRangeMax() };
@@ -171,11 +173,31 @@ void CRaywattLabDlg::updateBrightnessContrast() {
 	double brightness = ((double)posB / rangeSliderB[1]) * (rangeB[1] - rangeB[0]) + rangeB[0];
 	double contrast = ((double)posC / rangeSliderC[1]) * (rangeC[1] - rangeC[0]) + rangeC[0];
 
-	m_pImagingRealtime->SetBrightnessContrast(brightness, contrast);
-	m_pImagingSimulate->SetBrightnessContrast(brightness, contrast);
+	pImaging->SetBrightnessContrast(brightness, contrast);
 
 	AfxGetApp()->WriteProfileInt(_T("RECENT_SETTING"), _T("BRIGHTNESS"), posB);
 	AfxGetApp()->WriteProfileInt(_T("RECENT_SETTING"), _T("CONTRAST"), posC);
+
+	CString strBuffer = _T("");
+	strBuffer.Format(_T("%d"), posB);
+	GetDlgItem(IDC_EDIT_BRIGHTNESS)->SetWindowText(strBuffer);
+	strBuffer.Format(_T("%d"), posC);
+	GetDlgItem(IDC_EDIT_CONTRAST)->SetWindowText(strBuffer);
+}
+void CRaywattLabDlg::updateLevel(CLabImaging* pImaging) {
+	const int low = m_sliderLowLevel.GetPos();
+	const int high = m_sliderHighLevel.GetPos();
+
+	pImaging->SetLevel(low, high);
+
+	AfxGetApp()->WriteProfileInt(_T("RECENT_SETTING"), _T("LOWLEVEL"), low);
+	AfxGetApp()->WriteProfileInt(_T("RECENT_SETTING"), _T("HIGHLEVEL"), high);
+
+	CString strBuffer = _T("");
+	strBuffer.Format(_T("%d"), low);
+	GetDlgItem(IDC_EDIT_LOWLEVEL)->SetWindowText(strBuffer);
+	strBuffer.Format(_T("%d"), high);
+	GetDlgItem(IDC_EDIT_HIGHLEVEL)->SetWindowText(strBuffer);
 }
 CString CRaywattLabDlg::generateFileName(CString strPath, CString strExtension, CString strPrefix) {
 	CTime currentTime = CTime::GetCurrentTime();
@@ -205,6 +227,15 @@ CLabImaging* CRaywattLabDlg::createImaging() {
 	CLabImaging* pImaging = new CLabImaging(this);
 	pImaging->Initialize(m_strCurCalibration, ".\\BACKGROUND.bin");
 	pImaging->SetColor(m_chkImageHotColor);
+
+	int subtract = ((CButton*)GetDlgItem(IDC_CHECK_BACKGROUND_SUBTRACT))->GetCheck();
+	int subtractFFT = ((CButton*)GetDlgItem(IDC_CHECK_BACKGROUND_FFT_SUBTRACT))->GetCheck();
+
+	pImaging->SetBackgroundSubtract(subtract);
+	pImaging->SetBackgroundFFTSubtract(subtractFFT);
+	
+	updateBrightnessContrast(pImaging);
+	updateLevel(pImaging);
 	
 	return pImaging;
 }
@@ -364,6 +395,8 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_CHECK_SHOW_GUIDE, &CRaywattLabDlg::OnBnClickedCheckShowGuide)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_BRIGHTNESS, &CRaywattLabDlg::OnNMCustomdrawSliderBrightness)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_CONTRAST, &CRaywattLabDlg::OnNMCustomdrawSliderContrast)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_LOWLEVEL, &CRaywattLabDlg::OnNMCustomdrawSliderLowlevel)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_HIGHLEVEL, &CRaywattLabDlg::OnNMCustomdrawSliderHighlevel)
 	ON_BN_CLICKED(IDC_BUTTON_SAVE_DATA, &CRaywattLabDlg::OnBnClickedButtonSaveData)
 	ON_BN_CLICKED(IDC_BUTTON_OPEN_ROTARY_JUNCTION, &CRaywattLabDlg::OnBnClickedButtonOpenRotaryJunction)
 	ON_BN_CLICKED(IDC_BUTTON_ADMIN_INITIALIZE, &CRaywattLabDlg::OnBnClickedButtonAdminInitialize)
@@ -506,18 +539,29 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	m_sliderContrast.SetRange(0, 100);
 	m_sliderContrast.SetPos(contrast);
 
+	int lowLevel = AfxGetApp()->GetProfileInt(_T("RECENT_SETTING"), _T("LOWLEVEL"), 50);
+	int highLevel = AfxGetApp()->GetProfileInt(_T("RECENT_SETTING"), _T("HIGHLEVEL"), 51);
+
+	m_sliderLowLevel.SetRange(50, 199);
+	m_sliderLowLevel.SetPos(lowLevel);
+
+	m_sliderHighLevel.SetRange(51, 200);
+	m_sliderHighLevel.SetPos(highLevel);
+
 	int goodClockStart = 0;
 	int goodClockEnd = config.nAScan;
 
 	m_pImagingRealtime = new CLabImaging(this);
 	m_pImagingRealtime->Initialize(m_strCurCalibration, ".\\BACKGROUND.bin");
 	m_pImagingRealtime->SetColor(m_chkImageHotColor);
+	m_pImagingRealtime->SetBackgroundColor(cv::Scalar(0, 0, 0));
 	m_pImagingRealtime->SetGoodClockRange(goodClockStart, goodClockEnd);
 	m_pImagingRealtime->Start();
 
 	m_pImagingSimulate = new CLabImaging(this);
 	m_pImagingSimulate->Initialize(m_strCurCalibration, ".\\BACKGROUND.bin");
 	m_pImagingSimulate->SetColor(m_chkImageHotColor);
+	m_pImagingSimulate->SetBackgroundColor(cv::Scalar(0, 0, 0));
 	m_pImagingSimulate->SetGoodClockRange(goodClockStart, goodClockEnd);
 	m_pImagingSimulate->Start();
 
@@ -528,7 +572,10 @@ BOOL CRaywattLabDlg::OnInitDialog()
 
 	m_pFrameBuffer = new char[config.nBufferSize * sizeof(unsigned short)];
 
-	updateBrightnessContrast();
+	updateBrightnessContrast(m_pImagingRealtime);
+	updateBrightnessContrast(m_pImagingSimulate);
+	updateLevel(m_pImagingRealtime);
+	updateLevel(m_pImagingSimulate);
 
 	m_dlgRotaryJunction.Create(IDD_ROTARY_JUNCTION_DIALOG);
 
@@ -1001,7 +1048,8 @@ void CRaywattLabDlg::OnNMCustomdrawSliderBrightness(NMHDR* pNMHDR, LRESULT* pRes
 {
 	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	UpdateData(TRUE);
-	updateBrightnessContrast();
+	updateBrightnessContrast(m_pImagingRealtime);
+	updateBrightnessContrast(m_pImagingSimulate);
 	*pResult = 0;
 }
 
@@ -1010,9 +1058,30 @@ void CRaywattLabDlg::OnNMCustomdrawSliderContrast(NMHDR* pNMHDR, LRESULT* pResul
 {
 	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	UpdateData(TRUE);
-	updateBrightnessContrast();
+	updateBrightnessContrast(m_pImagingRealtime);
+	updateBrightnessContrast(m_pImagingSimulate);
 	*pResult = 0;
 }
+
+void CRaywattLabDlg::OnNMCustomdrawSliderLowlevel(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	UpdateData(TRUE);
+	updateLevel(m_pImagingRealtime);
+	updateLevel(m_pImagingSimulate);
+	*pResult = 0;
+}
+
+
+void CRaywattLabDlg::OnNMCustomdrawSliderHighlevel(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	UpdateData(TRUE);
+	updateLevel(m_pImagingRealtime);
+	updateLevel(m_pImagingSimulate);
+	*pResult = 0;
+}
+
 
 
 void CRaywattLabDlg::OnBnClickedButtonOpenRotaryJunction()
