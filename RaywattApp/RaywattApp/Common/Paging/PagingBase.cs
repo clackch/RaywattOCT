@@ -161,7 +161,7 @@ namespace RaywattApp.Common.Paging
             PagingPageSize.Add(Constants.PageSizeListChoice1);
             PagingPageSize.Add(Constants.PageSizeListChoice2);
             PagingPageSize.Add(Constants.PageSizeListChoice3);
-            PagingSelectedPageSize = 3;// Constants.PageSizeList;
+            PagingSelectedPageSize = Constants.PageSizeList;
 
             //Paging No Indicator
             PagingVisibilityNo1 = Visibility.Collapsed;
