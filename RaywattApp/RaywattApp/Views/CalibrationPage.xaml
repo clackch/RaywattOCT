@@ -44,7 +44,7 @@
         </Grid>
 
         <StackPanel Grid.Row="3">
-            <Button Style="{StaticResource ButtonBasic}" Command="{Binding CmdBack}" IsEnabled="{Binding IsLiveViewState}" Width="80" Content="{Binding [Back], Source={StaticResource L10N}}" HorizontalAlignment="Right"/>
+            <Button Style="{StaticResource ButtonBasic}" Command="{Binding CmdBack}" Width="80" Content="{Binding [Back], Source={StaticResource L10N}}" HorizontalAlignment="Right"/>
         </StackPanel>
     </Grid>
 </Page>

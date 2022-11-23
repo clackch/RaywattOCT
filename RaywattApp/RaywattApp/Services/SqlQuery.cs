@@ -72,7 +72,7 @@ namespace RaywattApp.Services
                 $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, gender" +
                         $", create_date, update_date " +
                 $"FROM rv_schema.patient " +
-                $"WHERE id = @id ";
+                $"WHERE LOWER(id) = LOWER(@id) ";
 
             //SelectPatientByList
             _query["SelectPatientByList"] =
