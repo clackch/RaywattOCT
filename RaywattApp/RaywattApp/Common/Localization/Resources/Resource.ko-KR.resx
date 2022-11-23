@@ -442,6 +442,9 @@
   <data name="Raywatt" xml:space="preserve">
     <value>레이와트</value>
   </data>
+  <data name="Re-do Pullback" xml:space="preserve">
+    <value>풀백 다시</value>
+  </data>
   <data name="Recording" xml:space="preserve">
     <value>촬영</value>
   </data>

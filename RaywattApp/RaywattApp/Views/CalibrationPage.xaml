@@ -8,7 +8,7 @@
       xmlns:System="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d" 
       d:DesignHeight="994" d:DesignWidth="1280"
-      Title="LiveViewPage">
+      Title="CalibrationPage">
     <Page.Resources>
         <System:Boolean x:Key="TrueValue">True</System:Boolean>
         <System:Boolean x:Key="FalseValue">False</System:Boolean>
