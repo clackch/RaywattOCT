@@ -23,9 +23,9 @@
         </StackPanel>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" >
-            <Button Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-            <Button Width="50" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-            <Button Width="50" Style="{StaticResource Important}" Command="{Binding NextCommand}" Content="{Binding [Next], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+            <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+            <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}"/>
+            <Button Style="{StaticResource ButtonImportant}" Width="50" Command="{Binding NextCommand}" Content="{Binding [Next], Source={StaticResource L10N}}"/>
         </StackPanel>
     </Grid>
 </Page>

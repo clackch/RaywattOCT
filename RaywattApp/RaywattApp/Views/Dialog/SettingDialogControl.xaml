@@ -7,7 +7,7 @@
              xmlns:behaviors="clr-namespace:RaywattApp.Common.Behaviors"
              xmlns:local="clr-namespace:RaywattApp.Views.Dialog"
              mc:Ignorable="d" 
-             Height="830" Width="1000"
+             Height="830" Width="1200"
              Name="settingDialogControl">
     <Grid>
         <Grid.RowDefinitions>
@@ -25,10 +25,10 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0">
-                <Button Width="100" Command="{Binding PopupNavigateCommand}" CommandParameter="Views/Setting/SettingAcquisitionPage.xaml" Content="{Binding [Acquisition], Source={StaticResource L10N}}" Margin="5,5,5,5" Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter=Views/Setting/SettingAcquisitionPage.xaml}"/>
-                <Button Width="100" Command="{Binding PopupNavigateCommand}" CommandParameter="Views/Setting/SettingLocalizationPage.xaml" Content="{Binding [Localization], Source={StaticResource L10N}}" Margin="5,5,5,5" Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter=Views/Setting/SettingLocalizationPage.xaml}"/>
-                <Button Width="100" Command="{Binding PopupNavigateCommand}" CommandParameter="Views/Setting/SettingDatabasePage.xaml" Content="{Binding [Database], Source={StaticResource L10N}}" Margin="5,5,5,5" Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter=Views/Setting/SettingDatabasePage.xaml}"/>
-                <Button Width="100" Command="{Binding PopupNavigateCommand}" CommandParameter="Views/Setting/SettingPhysicianPage.xaml" Content="{Binding [Physician], Source={StaticResource L10N}}" Margin="5,5,5,5" Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter=Views/Setting/SettingPhysicianPage.xaml}"/>
+                <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter=Views/Setting/SettingAcquisitionPage.xaml}" Width="100" Command="{Binding PopupNavigateCommand}" CommandParameter="Views/Setting/SettingAcquisitionPage.xaml" Content="{Binding [Acquisition], Source={StaticResource L10N}}"/>
+                <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter=Views/Setting/SettingLocalizationPage.xaml}" Width="100" Command="{Binding PopupNavigateCommand}" CommandParameter="Views/Setting/SettingLocalizationPage.xaml" Content="{Binding [Localization], Source={StaticResource L10N}}"/>
+                <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter=Views/Setting/SettingDatabasePage.xaml}" Width="100" Command="{Binding PopupNavigateCommand}" CommandParameter="Views/Setting/SettingDatabasePage.xaml" Content="{Binding [Database], Source={StaticResource L10N}}"/>
+                <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter=Views/Setting/SettingPhysicianPage.xaml}" Width="100" Command="{Binding PopupNavigateCommand}" CommandParameter="Views/Setting/SettingPhysicianPage.xaml" Content="{Binding [Physician], Source={StaticResource L10N}}" />
             </StackPanel>
             <StackPanel Grid.Column="1">
                 <Frame NavigationUIVisibility="Hidden">

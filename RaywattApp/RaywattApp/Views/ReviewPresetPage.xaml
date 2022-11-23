@@ -26,7 +26,7 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
-            <DataGrid Grid.Column="0" Margin="5" Name="patientCasePresetList" ItemsSource="{Binding PatientCasePresetList}" SelectedIndex="{Binding PresetIndex}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="All" RowHeaderWidth="0" CanUserSortColumns="False">
+            <DataGrid Grid.Column="0" Margin="5" Name="patientCasePresetList" ItemsSource="{Binding PatientCasePresetList}" SelectedIndex="{Binding PresetIndex}" Style="{StaticResource DataGridBasic}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectionChanged">
                         <i:InvokeCommandAction Command="{Binding ShowPresetCommand}" CommandParameter="{Binding ElementName=patientCasePresetList, Path=CurrentItem}"/>
@@ -120,19 +120,19 @@
                 <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Width="50" Command="{Binding NewCommand}" Content="{Binding [New], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-                <Button Width="50" Command="{Binding EditCommand}" Content="{Binding [Edit], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-                <Button Width="50" Command="{Binding DeleteCommand}" Content="{Binding [Delete], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+                <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding NewCommand}" Content="{Binding [New], Source={StaticResource L10N}}"/>
+                <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding EditCommand}" Content="{Binding [Edit], Source={StaticResource L10N}}"/>
+                <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding DeleteCommand}" Content="{Binding [Delete], Source={StaticResource L10N}}"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Width="50" Visibility="{Binding NotPresetMode}" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-                <Button Width="50" Style="{StaticResource Important}" Command="{Binding OkCommand}" Content="{Binding [OK], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+                <Button Style="{StaticResource ButtonBasic}" Width="50" Visibility="{Binding NotPresetMode}" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}"/>
+                <Button Style="{StaticResource ButtonImportant}" Command="{Binding OkCommand}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
             </StackPanel>
         </Grid>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Visibility="{Binding ModifyMode}">
-            <Button Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-            <Button Width="50" Style="{StaticResource Important}" Command="{Binding SaveCommand}" Content="{Binding [Save], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+            <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+            <Button Style="{StaticResource ButtonImportant}" Width="50" Command="{Binding SaveCommand}" Content="{Binding [Save], Source={StaticResource L10N}}"/>
         </StackPanel>
     </Grid>
 </Page>

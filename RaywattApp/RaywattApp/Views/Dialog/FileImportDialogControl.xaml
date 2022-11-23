@@ -18,8 +18,8 @@
             <Label Content="{Binding Title}" Foreground="White"/>
         </StackPanel>
         <Label Grid.Row="1" Content="{Binding Message}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        
-        <DataGrid Grid.Row="2" ItemsSource="{Binding PatientCaseList}" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="All" RowHeaderWidth="0" CanUserSortColumns="False" >
+
+        <DataGrid Grid.Row="2" ItemsSource="{Binding PatientCaseList}" Style="{StaticResource DataGridBasic}">
             <DataGrid.Columns>
                 <DataGridTextColumn Width="2*" Binding="{Binding PatientId}" Header="{Binding [ID], Source={StaticResource L10N}}" />
                 <DataGridTextColumn Width="3*" Binding="{Binding PatientName}" Header="{Binding [Name], Source={StaticResource L10N}}" />
@@ -27,9 +27,9 @@
             </DataGrid.Columns>
         </DataGrid>
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [No], Source={StaticResource L10N}}" Grid.Row="1" Width="50" Margin="5"/>
-            <Button Command="{Binding ExtraCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [SKIP], Source={StaticResource L10N}}" Grid.Row="1" Width="50" Margin="5"/>
-            <Button Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Yes], Source={StaticResource L10N}}" Grid.Row="1" Width="50" Margin="5" Style="{StaticResource Important}"/>
+            <Button Style="{StaticResource ButtonBasic}" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [No], Source={StaticResource L10N}}" Width="50"/>
+            <Button Style="{StaticResource ButtonBasic}" Command="{Binding ExtraCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [SKIP], Source={StaticResource L10N}}" Width="50"/>
+            <Button Style="{StaticResource ButtonImportant}" Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Yes], Source={StaticResource L10N}}" Width="50"/>
         </StackPanel>
     </Grid>
 </UserControl>

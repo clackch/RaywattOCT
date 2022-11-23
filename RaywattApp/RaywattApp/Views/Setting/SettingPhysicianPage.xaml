@@ -22,11 +22,11 @@
         </StackPanel>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Width="20" Command="{Binding RowAddCommand}" CommandParameter="{Binding ElementName=physicianList}" Content="+" Margin="5,5,5,5"/>
-            <Button Width="20" Command="{Binding RowDeleteCommand}" CommandParameter="{Binding ElementName=physicianList, Path=SelectedItem}" Content="-" Margin="5,5,5,5"/>
+            <Button Style="{StaticResource ButtonBasic}" Width="20" Command="{Binding RowAddCommand}" CommandParameter="{Binding ElementName=physicianList}" Content="+"/>
+            <Button Style="{StaticResource ButtonBasic}" Width="20" Command="{Binding RowDeleteCommand}" CommandParameter="{Binding ElementName=physicianList, Path=SelectedItem}" Content="-"/>
         </StackPanel>
 
-        <DataGrid Grid.Row="2" Name="physicianList" ItemsSource="{Binding PhysicianList, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="All" SelectionMode="Single" RowHeaderWidth="0" CanUserSortColumns="False">
+        <DataGrid Grid.Row="2" Name="physicianList" ItemsSource="{Binding PhysicianList, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"  Style="{StaticResource DataGridBasic}" SelectionMode="Single" IsReadOnly="False">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginningEdit">
                     <i:InvokeCommandAction Command="{Binding BeginningEditCommand}" CommandParameter="{Binding ElementName=physicianList}"/>
@@ -41,10 +41,10 @@
         </DataGrid>
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" >
-            <Button Width="50" Command="{Binding RefreshCommand}" Content="{Binding [Refresh], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-            <Button Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-            <Button Width="50" Command="{Binding OkayCommand}" Content="{Binding [OK], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-            <Button Width="50" Style="{StaticResource Important}" Command="{Binding ApplyCommand}" Content="{Binding [Apply], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+            <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding RefreshCommand}" Content="{Binding [Refresh], Source={StaticResource L10N}}"/>
+            <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+            <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding OkayCommand}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
+            <Button Style="{StaticResource ButtonImportant}" Width="50" Command="{Binding ApplyCommand}" Content="{Binding [Apply], Source={StaticResource L10N}}"/>
         </StackPanel>
     </Grid>
 </Page>
