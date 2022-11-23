@@ -50,12 +50,12 @@
                 <RadioButton Grid.Column="0" Content="{Binding [Stand By], Source={StaticResource L10N}}" Command="{Binding CmdChangeViewMode}" IsChecked="{Binding ViewMode, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ViewModeStandBy}}" IsEnabled="{Binding IsInitialized}" Margin="5,5,5,5" HorizontalAlignment="Center"/>
                 <RadioButton Grid.Column="1" Content="{Binding [Live View], Source={StaticResource L10N}}" Command="{Binding CmdChangeViewMode}" IsChecked="{Binding ViewMode, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ViewModeLiveView}}" IsEnabled="{Binding IsInitialized}" Margin="5,5,5,5" HorizontalAlignment="Center"/>
             </Grid>
-            <Button Grid.Column="2" Command="{Binding CmdCalibration}" IsEnabled="{Binding IsInitialized}" Width="100" Content="{Binding [Calibration], Source={StaticResource L10N}}" Margin="5,5,5,5"/>            
-            <Button Grid.Column="3" Command="{Binding CmdStartRecording}" IsEnabled="{Binding IsInitialized}" Width="100" Content="{Binding [Start Recording], Source={StaticResource L10N}}" Margin="5,5,5,5"/>            
+            <Button Style="{StaticResource ButtonBasic}" Grid.Column="2" Command="{Binding CmdCalibration}" IsEnabled="{Binding IsInitialized}" Width="100" Content="{Binding [Calibration], Source={StaticResource L10N}}"/>
+            <Button Style="{StaticResource ButtonBasic}" Grid.Column="3" Command="{Binding CmdStartRecording}" IsEnabled="{Binding IsInitialized}" Width="100" Content="{Binding [Start Recording], Source={StaticResource L10N}}"/>            
         </Grid>
 
         <StackPanel Grid.Row="4">
-            <Button Command="{Binding CmdBack}" Width="80" Content="{Binding [Back], Source={StaticResource L10N}}" Margin="5,5,5,5" HorizontalAlignment="Right"/>
+            <Button Style="{StaticResource ButtonBasic}" Command="{Binding CmdBack}" Width="80" Content="{Binding [Back], Source={StaticResource L10N}}" HorizontalAlignment="Right"/>
         </StackPanel>
     </Grid>
 </Page>

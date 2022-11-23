@@ -7,7 +7,7 @@
       xmlns:behaviors="clr-namespace:RaywattApp.Common.Behaviors"  
       xmlns:local="clr-namespace:RaywattApp.Views.Dialog"
       mc:Ignorable="d" 
-      Height="830" Width="1000"
+      Height="830" Width="1200"
       Name="fileDialogControl">
 
     <Grid>

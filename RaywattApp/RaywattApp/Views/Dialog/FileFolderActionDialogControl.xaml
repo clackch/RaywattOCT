@@ -37,8 +37,8 @@
         </Grid>
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Cancel], Source={StaticResource L10N}}" Grid.Row="1" Width="50" Margin="5"/>
-            <Button Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}" IsEnabled="{Binding CreateRenameFolderName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NotEmptyStringToEnableConverter}}" Grid.Row="1" Width="50" Margin="5" Style="{StaticResource Important}"/>
+            <Button Style="{StaticResource ButtonBasic}" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Cancel], Source={StaticResource L10N}}" Width="50"/>
+            <Button Style="{StaticResource ButtonImportant}" Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}" IsEnabled="{Binding CreateRenameFolderName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NotEmptyStringToEnableConverter}}" Width="50"/>
         </StackPanel>
     </Grid>
 </UserControl>

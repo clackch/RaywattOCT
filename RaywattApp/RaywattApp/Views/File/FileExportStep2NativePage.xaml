@@ -60,8 +60,8 @@
                     <StackPanel Grid.Row="2" VerticalAlignment="Center" Margin="50,0,0,0">
                         <RadioButton Grid.Row="2" IsChecked="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportPurposeReport}}" Content="{Binding [Report a Problem], Source={StaticResource L10N}}"/>
                     </StackPanel>
-                    <Button Grid.Row="0" Grid.Column="1" Command="{Binding PasswordCommand}" Content="{Binding [Password Protected], Source={StaticResource L10N}}" IsEnabled="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportPurposeArchive}}" Width="150" Height="20" HorizontalAlignment="Left"/>
-                    <Button Grid.Row="1" Grid.Column="1" Command="{Binding AlternateCommand}" Content="{Binding [Alternate Patient IDs], Source={StaticResource L10N}}" IsEnabled="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportPurposeShare}}" Width="150" Height="20" HorizontalAlignment="Left"/>
+                    <Button Style="{StaticResource ButtonBasic}" Grid.Row="0" Grid.Column="1" Command="{Binding PasswordCommand}" Content="{Binding [Password Protected], Source={StaticResource L10N}}" IsEnabled="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportPurposeArchive}}" Width="150" HorizontalAlignment="Left"/>
+                    <Button Style="{StaticResource ButtonBasic}" Grid.Row="1" Grid.Column="1" Command="{Binding AlternateCommand}" Content="{Binding [Alternate Patient IDs], Source={StaticResource L10N}}" IsEnabled="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportPurposeShare}}" Width="150" HorizontalAlignment="Left"/>
                 </Grid>
             </Border>
 
@@ -151,7 +151,7 @@
                                 <Label Content="{Binding [Path], Source={StaticResource L10N}}"/>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBox Text="{Binding FileExport.ExternalDrivePath}" IsReadOnly="True" Width="250" Margin="5,5,5,5"/>
-                                    <Button Width="40" Command="{Binding ExternalDrivePathCommand}" Content="{Binding [Path], Source={StaticResource L10N}}" IsEnabled="{Binding IsEnableExternalDrive}" Margin="5,5,5,5"/>
+                                    <Button Style="{StaticResource ButtonBasic}" Width="40" Command="{Binding ExternalDrivePathCommand}" Content="{Binding [Path], Source={StaticResource L10N}}" IsEnabled="{Binding IsEnableExternalDrive}"/>
                                 </StackPanel>
                             </StackPanel>
                         </Grid>
@@ -185,9 +185,9 @@
         </Grid>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" >
-            <Button Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-            <Button Width="50" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-            <Button Width="50" Style="{StaticResource Important}" Command="{Binding ExportCommand}" Content="{Binding [Export], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+            <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+            <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}"/>
+            <Button Style="{StaticResource ButtonImportant}" Width="50" Command="{Binding ExportCommand}" Content="{Binding [Export], Source={StaticResource L10N}}"/>
         </StackPanel>
     </Grid>
 </Page>

@@ -21,8 +21,8 @@
 
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" >
-            <Button Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-            <Button Width="50" Command="{Binding ConfirmCommand}" Content="{Binding [Confirm], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
+            <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+            <Button Style="{StaticResource ButtonImportant}" Width="50" Command="{Binding ConfirmCommand}" Content="{Binding [Confirm], Source={StaticResource L10N}}"/>
         </StackPanel>
     </Grid>
 </Page>

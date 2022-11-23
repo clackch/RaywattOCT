@@ -10,8 +10,8 @@ namespace RaywattApp.Common.Converters
         {
             int nPagingNoIdx = (int)value;
             int nParameter = int.Parse(parameter.ToString());
-            var ButtonImportant = App.Current.Resources["Important"];
-            var ButtonBasic = App.Current.Resources["Basic"];
+            var ButtonImportant = App.Current.Resources["ButtonImportant"];
+            var ButtonBasic = App.Current.Resources["ButtonBasic"];
 
             if (nPagingNoIdx % 5 == nParameter)
                 return ButtonImportant;
