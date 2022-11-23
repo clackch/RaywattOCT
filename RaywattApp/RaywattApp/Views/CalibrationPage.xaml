@@ -22,29 +22,26 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Background="Gray">
             <Label Content="{Binding [Live View], Source={StaticResource L10N}}"></Label>
         </StackPanel>
+        
         <Image Grid.Row="1" x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill"/>
 
-        <Grid Grid.Row="2" Background="LightGray">
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center">
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <Button Style="{StaticResource ButtonImportant}" Command="{Binding CmdAutoCalibration}" IsEnabled="{Binding IsLiveViewState}" Width="150" Content="{Binding [Auto Calibration], Source={StaticResource L10N}}"/>
                 <RepeatButton Command="{Binding CmdManualZoomIn}" CommandParameter="{StaticResource FalseValue}" IsEnabled="{Binding IsLiveViewState}" Width="100" Content="{Binding [Zoom Out], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
                 <RepeatButton Command="{Binding CmdManualZoomIn}" CommandParameter="{StaticResource TrueValue}" IsEnabled="{Binding IsLiveViewState}" Width="100" Content="{Binding [Zoom In], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
             </StackPanel>
-            <Button Style="{StaticResource ButtonBasic}" Grid.Column="3" Command="{Binding CmdAutoCalibration}" IsEnabled="{Binding IsLiveViewState}" Width="150" Content="{Binding [Auto Calibration], Source={StaticResource L10N}}"/>            
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Style="{StaticResource ButtonBasic}" Command="{Binding CmdBack}" Width="80" Content="{Binding [Back], Source={StaticResource L10N}}" HorizontalAlignment="Right"/>
+            </StackPanel>
         </Grid>
-
-        <StackPanel Grid.Row="3">
-            <Button Style="{StaticResource ButtonBasic}" Command="{Binding CmdBack}" Width="80" Content="{Binding [Back], Source={StaticResource L10N}}" HorizontalAlignment="Right"/>
-        </StackPanel>
     </Grid>
 </Page>
