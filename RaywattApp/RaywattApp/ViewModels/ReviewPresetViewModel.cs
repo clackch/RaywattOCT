@@ -44,9 +44,6 @@ namespace RaywattApp.ViewModels
         private bool _isPreset;
 
         [ObservableProperty]
-        private Visibility _notPresetMode;
-
-        [ObservableProperty]
         private Visibility _modifyMode;
 
         [ObservableProperty]
@@ -156,7 +153,6 @@ namespace RaywattApp.ViewModels
                     PatientCasePresetList = _sqlManager.SelectPatientCasePresetList();
 
                     _isPreset = true;
-                    NotPresetMode = Visibility.Collapsed;
                     ModifyMode = Visibility.Collapsed;
                     SelectionMode = Visibility.Visible;
                 }
@@ -173,7 +169,6 @@ namespace RaywattApp.ViewModels
                     PatientCasePresetList.Add(patientCasePreset);
 
                     _isPreset = false;
-                    NotPresetMode = Visibility.Visible;
                     ModifyMode = Visibility.Visible;
                     SelectionMode = Visibility.Collapsed;
                 }
@@ -237,7 +232,15 @@ namespace RaywattApp.ViewModels
             parameter["patient"] = Patient;
             parameter["patientCase"] = PatientCase;
             parameter["prevStatus"] = PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/ReviewPage.xaml") { Parameter = parameter });
+
+            if (_isPreset)
+            {
+                WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/RecordingPage.xaml") { Parameter = parameter });
+            }
+            else
+            {
+                WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/ReviewPage.xaml") { Parameter = parameter });
+            }
         }
 
         private void New()

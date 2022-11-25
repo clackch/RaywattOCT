@@ -7,6 +7,7 @@ using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Services;
+using RaywattApp.Views;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
@@ -148,7 +149,8 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ShowPatientInfo : " + pageUri);
 
-            if (pageUri.IndexOf("RecordingPage") > 0 || pageUri.IndexOf("ReviewPage") > 0)
+            if (pageUri.IndexOf("RecordingPage") > 0 || pageUri.IndexOf("ReviewPage") > 0 
+                || pageUri.IndexOf("LiveViewPage") > 0 || pageUri.IndexOf("ReviewPresetPage") > 0 || pageUri.IndexOf("CalibrationPage") > 0)
             {
                 IsShowPatient = Visibility.Visible;
                 Dictionary<string, Object> data = (Dictionary<string, Object>)parameter;

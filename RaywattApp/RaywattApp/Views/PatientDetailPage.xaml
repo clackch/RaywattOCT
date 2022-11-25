@@ -40,19 +40,17 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Margin="5,5,5,5"><TextBlock Text="{Binding [ID], Source={StaticResource L10N}}"/></TextBlock>
-                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Patient.Id}" IsReadOnly="True" Margin="5,5,5,5"/>
-                <TextBlock Grid.Row="1" Margin="5,5,5,5"><TextBlock Text="{Binding [Last Name], Source={StaticResource L10N}}"/></TextBlock>
-                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Patient.Lastname}" IsReadOnly="True" Margin="5,5,5,5"/>
-                <TextBlock Grid.Row="2" Margin="5,5,5,5"><TextBlock Text="{Binding [First Name], Source={StaticResource L10N}}"/></TextBlock>
-                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Patient.Firstname}" IsReadOnly="True" Margin="5,5,5,5"/>
-                <TextBlock Grid.Row="3" Margin="5,5,5,5"><TextBlock Text="{Binding [Birth Date], Source={StaticResource L10N}}"/></TextBlock>
-                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" IsReadOnly="True" Margin="5,5,5,5"/>
-                <TextBlock Grid.Row="4" Text="{Binding [Gender], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}" IsReadOnly="True" Margin="5,5,5,5"/>
+                <Label Grid.Row="0" Content="{Binding [ID], Source={StaticResource L10N}}"/>
+                <Label Grid.Row="0" Grid.Column="1" Content="{Binding Patient.Id}"/>
+                <Label Grid.Row="1" Content="{Binding [Last Name], Source={StaticResource L10N}}"/>
+                <Label Grid.Row="1" Grid.Column="1" Content="{Binding Patient.Lastname}"/>
+                <Label Grid.Row="2" Content="{Binding [First Name], Source={StaticResource L10N}}"/>
+                <Label Grid.Row="2" Grid.Column="1" Content="{Binding Patient.Firstname}"/>
+                <Label Grid.Row="3" Content="{Binding [Birth Date], Source={StaticResource L10N}}"/>
+                <Label Grid.Row="3" Grid.Column="1" Content="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}"/>
+                <Label Grid.Row="4" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
+                <Label Grid.Row="4" Grid.Column="1" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
             </Grid>
 
             <StackPanel Grid.Row="1" Orientation="Horizontal">

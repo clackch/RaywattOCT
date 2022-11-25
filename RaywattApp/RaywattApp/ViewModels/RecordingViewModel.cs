@@ -28,10 +28,10 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private PatientCase _patientCase;
 
-        private ICommand _cancelCommand;
-        public ICommand CancelCommand
+        private ICommand _redoPullbackCommand;
+        public ICommand RedoPullbackCommand
         {
-            get { return this._cancelCommand ?? (this._cancelCommand = new RelayCommand(Cancel)); }
+            get { return this._redoPullbackCommand ?? (this._redoPullbackCommand = new RelayCommand(RedoPullback)); }
         }
 
         private ICommand _confirmCommand;
@@ -61,6 +61,10 @@ namespace RaywattApp.ViewModels
                 Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
                 Patient = (Patient)data["patient"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
+
+                //Preset 화면으로 갔다가, Back 한 경우
+                if (data.ContainsKey("patientCase"))
+                    PatientCase = (PatientCase)data["patientCase"];
             }
         }
 
@@ -69,20 +73,21 @@ namespace RaywattApp.ViewModels
             _log.Debug("OnNavigating");
         }
 
-        private void Cancel()
+        private void RedoPullback()
         {
-            _log.Debug("Cancel");
+            _log.Debug("RedoPullback");
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = parameter });
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/LiveViewPage.xaml") { Parameter = parameter });
         }
 
         private void Confirm()
         {
             _log.Debug("Confirm");
 
+            //TO-DO 초기값 정의 및 Preset 화면에서 Back해서 돌아온 경우에 대한 처리 필요
             PatientCase.PhysicianName = Constants.NotSelected;
             PatientCase.AccessionNumber = "";
             PatientCase.AccessionName = "";

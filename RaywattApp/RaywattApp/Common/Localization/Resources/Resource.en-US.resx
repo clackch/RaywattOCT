@@ -201,6 +201,9 @@
   <data name="Confirm Password" xml:space="preserve">
     <value>Confirm Password</value>
   </data>
+  <data name="Connect Catheter to the DOC" xml:space="preserve">
+    <value>Connect Catheter to the DOC</value>
+  </data>
   <data name="Contrast" xml:space="preserve">
     <value>Contrast</value>
   </data>
@@ -441,6 +444,9 @@ Do you want to import data?</value>
   </data>
   <data name="Raywatt" xml:space="preserve">
     <value>Raywatt</value>
+  </data>
+  <data name="Re-do Pullback" xml:space="preserve">
+    <value>Re-do Pullback</value>
   </data>
   <data name="Recording" xml:space="preserve">
     <value>Recording</value>

@@ -20,27 +20,20 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+        
         <StackPanel Grid.Row="0" Background="Gray">
             <Label Content="{Binding [Live View], Source={StaticResource L10N}}"></Label>
         </StackPanel>
-        <StackPanel Grid.Row="1" Background="LightGray">
-            <StackPanel Orientation="Horizontal" Margin="5,5,5,5">
-                <Label Content="{Binding Patient.Name}"></Label>
-            </StackPanel>
-        </StackPanel>
-        <Image Grid.Row="2" x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill"/>
 
-        <Grid Grid.Row="3" Background="LightGray">
+        <Image Grid.Row="1" x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill"/>
+
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="300"/>
+                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="0">
                 <Grid.ColumnDefinitions>
@@ -50,12 +43,13 @@
                 <RadioButton Grid.Column="0" Content="{Binding [Stand By], Source={StaticResource L10N}}" Command="{Binding CmdChangeViewMode}" IsChecked="{Binding ViewMode, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ViewModeStandBy}}" IsEnabled="{Binding IsInitialized}" Margin="5,5,5,5" HorizontalAlignment="Center"/>
                 <RadioButton Grid.Column="1" Content="{Binding [Live View], Source={StaticResource L10N}}" Command="{Binding CmdChangeViewMode}" IsChecked="{Binding ViewMode, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ViewModeLiveView}}" IsEnabled="{Binding IsInitialized}" Margin="5,5,5,5" HorizontalAlignment="Center"/>
             </Grid>
-            <Button Style="{StaticResource ButtonBasic}" Grid.Column="2" Command="{Binding CmdCalibration}" IsEnabled="{Binding IsInitialized}" Width="100" Content="{Binding [Calibration], Source={StaticResource L10N}}"/>
-            <Button Style="{StaticResource ButtonBasic}" Grid.Column="3" Command="{Binding CmdStartRecording}" IsEnabled="{Binding IsInitialized}" Width="100" Content="{Binding [Start Recording], Source={StaticResource L10N}}"/>            
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Style="{StaticResource ButtonBasic}" Command="{Binding CmdBack}" Width="80" Content="{Binding [Cancel], Source={StaticResource L10N}}" HorizontalAlignment="Right"/>
+                <Button Style="{StaticResource ButtonBasic}" Command="{Binding CmdCalibration}" IsEnabled="{Binding IsInitialized}" Width="100" Content="{Binding [Calibration], Source={StaticResource L10N}}"/>
+                <Button Style="{StaticResource ButtonImportant}" Command="{Binding CmdStartRecording}" IsEnabled="{Binding IsInitialized}" Width="100" Content="{Binding [Start Recording], Source={StaticResource L10N}}"/>
+            </StackPanel>
         </Grid>
 
-        <StackPanel Grid.Row="4">
-            <Button Style="{StaticResource ButtonBasic}" Command="{Binding CmdBack}" Width="80" Content="{Binding [Back], Source={StaticResource L10N}}" HorizontalAlignment="Right"/>
-        </StackPanel>
+
     </Grid>
 </Page>
