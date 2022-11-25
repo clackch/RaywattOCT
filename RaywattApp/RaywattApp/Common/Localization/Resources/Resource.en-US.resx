@@ -201,6 +201,9 @@
   <data name="Confirm Password" xml:space="preserve">
     <value>Confirm Password</value>
   </data>
+  <data name="Connect Catheter to the DOC" xml:space="preserve">
+    <value>Connect Catheter to the DOC</value>
+  </data>
   <data name="Contrast" xml:space="preserve">
     <value>Contrast</value>
   </data>

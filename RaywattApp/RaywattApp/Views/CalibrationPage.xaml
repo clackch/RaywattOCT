@@ -24,7 +24,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Background="Gray">
-            <Label Content="{Binding [Live View], Source={StaticResource L10N}}"></Label>
+            <Label Content="{Binding [Calibration], Source={StaticResource L10N}}"/>
         </StackPanel>
         
         <Image Grid.Row="1" x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill"/>

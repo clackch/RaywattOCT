@@ -50,6 +50,7 @@ namespace RaywattApp
             services.AddTransient(typeof(LiveViewViewModel));
             services.AddTransient(typeof(CalibrationViewModel));
             services.AddTransient(typeof(RecordingViewModel));
+            services.AddTransient(typeof(RecordingSetupViewModel));
             services.AddTransient(typeof(ReviewViewModel));
             services.AddTransient(typeof(ReviewPresetViewModel));
 
