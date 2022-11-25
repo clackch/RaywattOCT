@@ -228,20 +228,17 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Back");
 
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = Patient;
+            parameter["patientCase"] = PatientCase;
+            parameter["prevStatus"] = PrevStatus;
+
             if (_isPreset)
             {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["patient"] = Patient;
-                parameter["patientCase"] = PatientCase;
-                parameter["prevStatus"] = PrevStatus;
                 WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/RecordingPage.xaml") { Parameter = parameter });
             }
             else
             {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["patient"] = Patient;
-                parameter["patientCase"] = PatientCase;
-                parameter["prevStatus"] = PrevStatus;
                 WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/ReviewPage.xaml") { Parameter = parameter });
             }
         }
