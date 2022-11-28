@@ -20,16 +20,12 @@ COCTSystem::COCTSystem() {
 	m_callback = nullptr;
 	m_cbCrossSection = nullptr;
 	m_cbLongitude = nullptr;
+
 	m_pThreadService = nullptr;
-	m_pThreadInitialize = nullptr;
-	m_pThreadAutoCalibration = nullptr;
-	m_pThreadHoming = nullptr;
-	m_pThreadPullbackScan = nullptr;
 	m_pThreadSaveRaw = nullptr;
 	m_pThreadUpdateCutView = nullptr;
 	m_pThreadGenerateVolume = nullptr;
-	m_pThreadLoadCatheter = nullptr;
-	m_pThreadUnloadCatheter = nullptr;
+	m_pThreadRotaryJunction = nullptr;
 
 	m_pImagingRealtime = nullptr;
 	m_pImagingSimulate = nullptr;
@@ -42,10 +38,9 @@ COCTSystem::COCTSystem() {
 	m_pAcqDevice = nullptr;	
 	m_pSimDevice = nullptr;
 
-	m_showCalibGuide = false;
-
-	m_prevState = RayScannerState::None;
-	m_curState = RayScannerState::None;
+	m_prevState = RayScannerState::Initial;
+	m_curState = RayScannerState::Initial;
+	m_cathState = CatheterState::Unloaded;
 
 	//Property
 	m_fBrightness = 0.0f;
@@ -98,15 +93,10 @@ RayError COCTSystem::Start() {
 */
 RayError COCTSystem::Stop() {
 	CUtility::StopThread(m_pThreadService);
-	CUtility::StopThread(m_pThreadInitialize);
-	CUtility::StopThread(m_pThreadAutoCalibration);
-	CUtility::StopThread(m_pThreadHoming);
-	CUtility::StopThread(m_pThreadPullbackScan);
 	CUtility::StopThread(m_pThreadSaveRaw);
 	CUtility::StopThread(m_pThreadUpdateCutView);
 	CUtility::StopThread(m_pThreadGenerateVolume);
-	CUtility::StopThread(m_pThreadLoadCatheter);
-	CUtility::StopThread(m_pThreadUnloadCatheter);
+	CUtility::StopThread(m_pThreadRotaryJunction);
 
 	terminateSimulation();
 
@@ -166,63 +156,60 @@ RayError COCTSystem::RegisterCallback(FunctionPtr cb) {
 RayError COCTSystem::ConnectDevices() {
 	int result = NOERROR;
 
-	if (m_curState == RayScannerState::None) {
+	if (m_curState == RayScannerState::Initial) {
 		result |= connectAcqDevice();
 		result |= connectRotaryJunction();
 
-		return (result == NOERROR) ? RayError::OK : RayError::DeviceNotConnected;
+		if (result == NOERROR) {
+			postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Default);
+			return RayError::OK;
+		}
+		else {
+			return RayError::DeviceNotConnected;
+		}
 	}
 
-	return RayError::WrongOCTScannerState;
+	return RayError::WrongState;
 }
 
 /*
-* Initialize
+* DisconnectDevices
 */
-RayError COCTSystem::Initialize() {
-	if (m_curState == RayScannerState::None) {
-		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Initializing);
+RayError COCTSystem::DisconnectDevices() {
+	int result = NOERROR;
 
-		return RayError::OK;
-	}
+	// To-Do: stop all threads
+	// disconnectAcqDevice();
+	// disconnectRotaryJunction();
 
-	return RayError::WrongOCTScannerState;
+	postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Initial);
+
+	return RayError::OK;
 }
 
-/*
-* Finalize
-*/
-RayError COCTSystem::Finalize() {
-	if (m_curState == RayScannerState::LiveView || m_curState == RayScannerState::Review) {
-		finalizeAcqDevice();
-		finalizeRotaryJunction();
-
-		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::None);
-
-		return RayError::OK;
-	}
-
-	return RayError::WrongOCTScannerState;
-}
 
 /*
 * AutoCalibration
 */
 RayError COCTSystem::AutoCalibration() {
-	if (m_curState == RayScannerState::LiveView) {
-		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::AutoCalibration);
+	if (m_curState == RayScannerState::Default || m_curState == RayScannerState::Review) {
+		//To-Do: check Catheter
+
+		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
+
+		CUtility::StartThread(threadAutoCalibration, m_pThreadRotaryJunction, this);
 
 		return RayError::OK;
 	}
 
-	return RayError::WrongOCTScannerState;
+	return RayError::WrongState;
 }
 
 /*
 * ManualCalibration
 */
 RayError COCTSystem::ManualCalibration(bool forward) {
-	if (m_curState == RayScannerState::LiveView) {
+	if (m_curState == RayScannerState::Default) {
 		CZaberController* pDelayLine = CZaberController::GetInstance(ZABER_TYPE_DELAYLINE);
 
 		if (pDelayLine->IsOpen() == false) return RayError::DeviceNotConnected;
@@ -237,34 +224,19 @@ RayError COCTSystem::ManualCalibration(bool forward) {
 * ShowCalibrationGuide
 */
 RayError COCTSystem::ShowCalibrationGuide(bool show) {
-	if (m_curState == RayScannerState::LiveView || m_curState == RayScannerState::AutoCalibration || m_curState == RayScannerState::Review) {
-		m_pImagingRealtime->ShowCalibGuide(show);
-		m_pImagingSimulate->ShowCalibGuide(show);
-		m_showCalibGuide = show;
+	if (m_pThreadService == nullptr) return RayError::SystemNotRunning;
 
-		return RayError::OK;
-	}
-	return RayError::WrongOCTScannerState;
-}
+	m_pImagingRealtime->ShowCalibGuide(show);
+	m_pImagingSimulate->ShowCalibGuide(show);
 
-/*
-* PreparePullback
-*/
-RayError COCTSystem::PreparePullback() {
-	if (m_curState == RayScannerState::LiveView) {
-		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Homing);
-
-		return RayError::OK;
-	}
-
-	return RayError::WrongOCTScannerState;
+	return RayError::OK;
 }
 
 /*
 * PullbackScan
 */
 RayError COCTSystem::PullbackScan(char *strFilePath) {
-	if (m_curState == RayScannerState::Ready) {
+	if (m_curState == RayScannerState::Default) {
 		m_strFilePath = CUtility::StringToWstring(strFilePath);
 
 		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Scanning);
@@ -273,46 +245,51 @@ RayError COCTSystem::PullbackScan(char *strFilePath) {
 		
 	}
 
-	return RayError::WrongOCTScannerState;
+	return RayError::WrongState;
 }
 
 /*
 * LoadCatheter
 */
 RayError COCTSystem::LoadCatheter() {
+	if (m_curState == RayScannerState::Default || m_curState == RayScannerState::Review) {
+		//To-Do: check catheter
 
-	if (m_curState == RayScannerState::Ready) {
-		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::LoadCatheter);
+		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
+
+		CUtility::StartThread(threadLoadCatheter, m_pThreadRotaryJunction, this);
 
 		return RayError::OK;
 	}
 
-	return RayError::WrongOCTScannerState;
+	return RayError::WrongState;
 }
 
 /*
 * UnloadCatheter
 */
 RayError COCTSystem::UnloadCatheter() {
+	if (m_curState == RayScannerState::Default || m_curState == RayScannerState::Review) {
 
-	if (m_curState == RayScannerState::Review) {
-		CUtility::StartThread(threadUnloadCatheter, m_pThreadUnloadCatheter, this);
+		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
+
+		CUtility::StartThread(threadUnloadCatheter, m_pThreadRotaryJunction, this);
 
 		return RayError::OK;
 	}
 
-	return RayError::WrongOCTScannerState;
+	return RayError::WrongState;
 }
 
 /*
 * StartReview
 */
 RayError COCTSystem::StartReview(char* strFilePath) {
-	if (m_curState == RayScannerState::None) {
+	if (m_curState == RayScannerState::Initial || m_curState == RayScannerState::Default) {
 		CDataReader* pReader = new CDataReader();
 		int nNumOfSamples = pReader->Initialize(CUtility::StringToWstring(strFilePath));
 
-		if (nNumOfSamples <= 0) return RayError::WrongFilePath;
+		if (nNumOfSamples <= 0) return RayError::InvalidArgument;
 
 		prepareSimulation(pReader);
 		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
@@ -320,7 +297,7 @@ RayError COCTSystem::StartReview(char* strFilePath) {
 		return RayError::OK;
 	}
 
-	return RayError::WrongOCTScannerState;
+	return RayError::WrongState;
 }
 
 /*
@@ -331,33 +308,61 @@ RayError COCTSystem::EndReview()
 	if (m_curState == RayScannerState::Review) {
 		m_pSimDevice->StopAcquisition();
 
-		if (m_prevState == RayScannerState::Scanning) {
-			postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::LiveView);
-		}
-		else if (m_prevState == RayScannerState::None) {
-			postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::None);		
-		}
-		else {
-			return RayError::WrongOCTScannerState;
+		switch (m_prevState) {
+		case RayScannerState::Initial:
+		case RayScannerState::Default:
+			postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)m_prevState);
+			break;
+		case RayScannerState::Scanning:
+			postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Default);
+			break;
+		default:
+			break;
 		}
 
 		return RayError::OK;
 	}
 
-	return RayError::WrongOCTScannerState;
+	return RayError::WrongState;
 }
 
 /*
-* MotorOnOff
+* StartLiveView
 */
-RayError COCTSystem::MotorOnOff(bool mode)
+RayError COCTSystem::StartLiveView()
 {
-	if (m_curState == RayScannerState::LiveView || m_curState == RayScannerState::AutoCalibration) {
-		setMotorOnOff(mode);
+	if (m_curState == RayScannerState::Default) {
+		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
+
+		CLaserController* pLaser = CLaserController::GetInstance();
+		CMotorController* pMotorCtrl = CMotorController::GetInstance();
+		CConfiguration& config = CConfiguration::GetInstance();
+
+		pLaser->LaserOnOff(true);
+		pMotorCtrl->PerfomRun(config.motor.velocityLiveView);
 
 		return RayError::OK;
 	}
-	return RayError::WrongOCTScannerState;
+	return RayError::WrongState;
+}
+
+/*
+* StopLiveView
+*/
+RayError COCTSystem::StopLiveView()
+{
+	if (m_curState == RayScannerState::Default) {
+		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
+
+		CLaserController* pLaser = CLaserController::GetInstance();
+		CMotorController* pMotorCtrl = CMotorController::GetInstance();
+
+		pLaser->LaserOnOff(false);
+		pMotorCtrl->StopMotor();
+
+		return RayError::OK;
+	}
+	return RayError::WrongState;
 }
 
 /*
@@ -371,7 +376,7 @@ RayError COCTSystem::PlayPause()
 
 		return RayError::OK;
 	}
-	return RayError::WrongOCTScannerState;
+	return RayError::WrongState;
 }
 
 /*
@@ -382,13 +387,13 @@ RayError COCTSystem::PrevFrame()
 	if (m_curState == RayScannerState::Review) {
 		bool isPaused = ((CSimulateDevice*)m_pSimDevice)->IsPaused();
 		if (!isPaused)
-			return RayError::NotPausedState;
+			return RayError::NotPaused;
 
 		((CSimulateDevice*)m_pSimDevice)->PrevFrame();
 
 		return RayError::OK;
 	}
-	return RayError::WrongOCTScannerState;
+	return RayError::WrongState;
 }
 
 /*
@@ -399,13 +404,13 @@ RayError COCTSystem::NextFrame()
 	if (m_curState == RayScannerState::Review) {
 		bool isPaused = ((CSimulateDevice*)m_pSimDevice)->IsPaused();
 		if (!isPaused)
-			return RayError::NotPausedState;
+			return RayError::NotPaused;
 
 		((CSimulateDevice*)m_pSimDevice)->NextFrame();
 
 		return RayError::OK;
 	}
-	return RayError::WrongOCTScannerState;
+	return RayError::WrongState;
 }
 
 /*
@@ -415,13 +420,13 @@ RayError COCTSystem::MoveToFrame(int nFrame) {
 	if (m_curState == RayScannerState::Review) {
 		bool isPaused = ((CSimulateDevice*)m_pSimDevice)->IsPaused();
 		if (!isPaused)
-			return RayError::NotPausedState;
+			return RayError::NotPaused;
 
 		((CSimulateDevice*)m_pSimDevice)->SetFrame(nFrame);
 
 		return RayError::OK;
 	}
-	return RayError::WrongOCTScannerState;
+	return RayError::WrongState;
 }
 
 /*
@@ -445,6 +450,8 @@ double COCTSystem::GetBrightness() {
 * SetBrightness
 */
 RayError COCTSystem::SetBrightness(double value) {
+	if (m_pThreadService == nullptr) return RayError::SystemNotRunning;
+
 	m_fBrightness = value;
 
 	m_pImagingRealtime->SetBrightnessContrast(m_fBrightness, m_fContrast);
@@ -464,6 +471,8 @@ double COCTSystem::GetContrast() {
 * SetContrast
 */
 RayError COCTSystem::SetContrast(double value) {
+	if (m_pThreadService == nullptr) return RayError::SystemNotRunning;
+
 	m_fContrast = value;
 
 	m_pImagingRealtime->SetBrightnessContrast(m_fBrightness, m_fContrast);
@@ -483,10 +492,10 @@ double COCTSystem::GetDegree() {
 * SetDegree
 */
 RayError COCTSystem::SetDegree(double value) {
+	if (m_pThreadService == nullptr) return RayError::SystemNotRunning;
+
 	m_fDegree = value;
-	if (m_pCutView != nullptr) {
-		m_pCutView->GenerateCutView(m_fDegree);
-	}
+	m_pCutView->GenerateCutView(m_fDegree);
 
 	return RayError::OK;
 }
@@ -512,6 +521,8 @@ UINT COCTSystem::GetBackgroundColor() {
 * GetDegree
 */
 RayError COCTSystem::SetBackgroundColor(UINT value) {
+	if (m_pThreadService == nullptr) return RayError::SystemNotRunning;
+
 	cv::Scalar color;
 	color[0] = 0xff & value;
 	color[1] = 0xff & (value >> 8);
@@ -544,6 +555,8 @@ double COCTSystem::GetLowLevel() {
 * SetLowLevel
 */
 RayError COCTSystem::SetLowLevel(double value) {
+	if (m_pThreadService == nullptr) return RayError::SystemNotRunning;
+
 	m_fLowLevel = value;
 
 	m_pImagingRealtime->SetLevel(m_fLowLevel, m_fHighLevel);
@@ -561,6 +574,8 @@ double COCTSystem::GetHighLevel() {
 * SetHighLevel
 */
 RayError COCTSystem::SetHighLevel(double value) {
+	if (m_pThreadService == nullptr) return RayError::SystemNotRunning;
+
 	m_fHighLevel = value;
 
 	m_pImagingRealtime->SetLevel(m_fLowLevel, m_fHighLevel);
@@ -623,19 +638,14 @@ UINT COCTSystem::threadService(LPVOID param) {
 			pSystem->OnMsgUpdateSaveRaw(wParam, lParam);
 			break;
 		}
-		case WM_NOTIFY_SAVE_DONE:
+		case WM_NOTIFY_PROCESS_DONE:
 		{
-			pSystem->OnMsgNotifySaveDone(wParam, lParam);
+			pSystem->OnMsgNotifyProcessDone(wParam, lParam);
 			break;
 		}
-		case WM_NOTIFY_CUTVIEW_DONE:
+		case WM_NOTIFY_DEVICE_WORK_DONE:
 		{
-			pSystem->OnMsgNotifyCutViewDone(wParam, lParam);
-			break;
-		}
-		case WM_NOTIFY_VOLUME_DONE:
-		{
-			pSystem->OnMsgNotifyVolumeDone(wParam, lParam);
+			pSystem->OnMsgDeviceWorkDone(wParam, lParam);
 			break;
 		}
 		case WM_NOTIFY_ERROR_OCCURED:
@@ -646,6 +656,11 @@ UINT COCTSystem::threadService(LPVOID param) {
 		case WM_PROCESS_OCT_DONE:
 		{
 			pSystem->OnMsgProcessOCTDone(wParam, lParam);
+			break;
+		}
+		case WM_UPDATE_CATHETER_STATE:
+		{
+			pSystem->OnMsgUpdateCatheterState(wParam, lParam);
 			break;
 		}
 		default:
@@ -659,150 +674,12 @@ UINT COCTSystem::threadService(LPVOID param) {
 }
 
 /*
-* threadInitialize
-*/
-UINT COCTSystem::threadInitialize(LPVOID param) {
-	COCTSystem* pSystem = (COCTSystem*)param;
-	int nResult = NOERROR;
-
-	nResult = pSystem->initializeAcqDevice();
-	if (nResult != NOERROR) {
-		//TODO : logging
-		printf("Failed to connect acquisition device");
-	}
-
-	nResult = pSystem->initializeRotaryJunction();
-	if (nResult != NOERROR) {
-		//TODO : logging
-		printf("Failed to connect rotary junction devices");
-	}
-
-	if (nResult == NOERROR) {
-		pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::LiveView);
-	}
-	else {
-		pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::None);
-
-		RayError errorCode = (pSystem->checkConnection()) ? RayError::InitializeFailed : RayError::DeviceNotConnected;
-		pSystem->postMessage(WM_NOTIFY_ERROR_OCCURED, (WPARAM)errorCode);
-	}
-
-	while (pSystem->m_pThreadInitialize->isRun) {
-		Sleep(DELAY_FOR_STOP_THREAD);
-	}
-
-	return NOERROR;
-}
-
-/*
-* threadAutoCalibration
-*/
-UINT COCTSystem::threadAutoCalibration(LPVOID param) {
-	COCTSystem* pSystem = (COCTSystem*)param;
-
-	Sleep(5000);
-
-	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::LiveView);
-
-	while (pSystem->m_pThreadAutoCalibration->isRun) {
-		Sleep(DELAY_FOR_STOP_THREAD);
-	}
-
-	return NOERROR;
-}
-
-/*
-* threadHoming
-*/
-UINT COCTSystem::threadHoming(LPVOID param) {
-	COCTSystem* pSystem = (COCTSystem*)param;
-	CZaberController* pZaberCtrl = (CZaberController*)CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
-	CConfiguration& config = CConfiguration::GetInstance();
-
-	if (pZaberCtrl->IsOpen()) {
-		pZaberCtrl->SetSpeed(config.zaber.pullbackSpeed);
-		pZaberCtrl->Move(config.catheter.position);
-		while (pSystem->m_pThreadHoming->isRun) {
-			if (pZaberCtrl->GetZaberStatus()) {
-				break;
-			}
-			else {
-				Sleep(DELAY_FOR_STOP_THREAD);
-			}
-		}
-	}
-
-	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Ready);
-
-	while (pSystem->m_pThreadHoming->isRun) {
-		Sleep(DELAY_FOR_STOP_THREAD);
-	}
-
-	return NOERROR;
-}
-
-/*
-* threadPullbackScan
-*/
-UINT COCTSystem::threadPullbackScan(LPVOID param) {
-	COCTSystem* pSystem = (COCTSystem*)param;
-	CConfiguration& config = CConfiguration::GetInstance();
-	CMotorController* pMotor = CMotorController::GetInstance();
-	CZaberController* pZaber = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
-
-	CDataWriter *pDataWriter = new CDataWriter();
-	pDataWriter->Initialize(config.nBufferSize * sizeof(unsigned short));
-	pSystem->m_pAcqDevice->SetWriter(pDataWriter);
-
-	// 1. Motor ON
-	pSystem->setMotorOnOff(true);
-	Sleep(config.motor.settleDown);
-
-	pZaber->SetSpeed(config.zaber.pullbackSpeed);
-
-	// 2. Start Recording OCT
-	pDataWriter->StartRecording();
-
-	// 3. Pullback Linear Stage
-	if (pZaber->IsOpen()) {
-		pZaber->MoveRelative(config.zaber.pullbackDistance * -1);
-		while (pSystem->m_pThreadPullbackScan->isRun) {
-			if (pZaber->GetZaberStatus()) {
-				break;
-			}
-			else {
-				Sleep(DELAY_FOR_STOP_THREAD);
-			}
-		}
-	}
-	else {
-		Sleep(3000);
-	}
-
-	// 4. Stop Recording OCT
-	pDataWriter->StopRecording();
-
-	// 5. Motor OFF
-	pSystem->setMotorOnOff(false);
-
-	pSystem->prepareSimulation(pDataWriter);
-
-	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
-
-	while (pSystem->m_pThreadPullbackScan->isRun) {
-		Sleep(DELAY_FOR_STOP_THREAD);
-	}
-
-	return NOERROR;
-}
-
-/*
 * threadSaveRaw
 */
 UINT COCTSystem::threadSaveRaw(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	tstring strSaveFilePath = pSystem->m_strFilePath;
-	CDataWriter* pDataWriter = (CDataWriter *)pSystem->m_pSimulationData;
+	CDataWriter* pDataWriter = (CDataWriter*)pSystem->m_pSimulationData;
 	const int nNumOfSamples = pDataWriter->GetNumOfSamples();
 
 	int nFrame = 0;
@@ -816,7 +693,7 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 	}
 	pDataWriter->StopSave();
 
-	pSystem->postMessage(WM_NOTIFY_SAVE_DONE);
+	pSystem->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::SaveRawData);
 
 	while (pSystem->m_pThreadSaveRaw->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
@@ -849,9 +726,7 @@ UINT COCTSystem::threadUpdateCutView(LPVOID param) {
 	}
 	delete pImaging;
 
-	if (pSystem->m_pThreadUpdateCutView->isRun) {
-		pSystem->postMessage(WM_NOTIFY_CUTVIEW_DONE);
-	}
+	pSystem->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::UpdateCutView);
 
 	// wait for StopThread
 	while (pSystem->m_pThreadUpdateCutView->isRun) {
@@ -881,12 +756,85 @@ UINT COCTSystem::threadGenerateVolume(LPVOID param) {
 	}
 	delete pImaging;
 
-	if (pSystem->m_pThreadGenerateVolume->isRun) {
-		pSystem->postMessage(WM_NOTIFY_VOLUME_DONE);
-	}
+	pSystem->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::GenerateVolume);
 
 	// wait for StopThread
 	while (pSystem->m_pThreadGenerateVolume->isRun) {
+		Sleep(DELAY_FOR_STOP_THREAD);
+	}
+
+	return NOERROR;
+}
+
+/*
+* threadAutoCalibration
+*/
+UINT COCTSystem::threadAutoCalibration(LPVOID param) {
+	COCTSystem* pSystem = (COCTSystem*)param;
+
+	//To-Do: implement auto calibration
+	Sleep(5000);
+
+	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Calibrated);
+	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::AutoCalibration);
+
+	while (pSystem->m_pThreadRotaryJunction->isRun) {
+		Sleep(DELAY_FOR_STOP_THREAD);
+	}
+
+	return NOERROR;
+}
+
+/*
+* threadPullbackScan
+*/
+UINT COCTSystem::threadPullbackScan(LPVOID param) {
+	COCTSystem* pSystem = (COCTSystem*)param;
+	CConfiguration& config = CConfiguration::GetInstance();
+	CMotorController* pMotor = CMotorController::GetInstance();
+	CZaberController* pZaber = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
+
+	CDataWriter *pDataWriter = new CDataWriter();
+	pDataWriter->Initialize(config.nBufferSize * sizeof(unsigned short));
+	pSystem->m_pAcqDevice->SetWriter(pDataWriter);
+
+	// 1. Motor ON
+	pMotor->PerfomRun(config.motor.velocityPullback);
+	Sleep(config.motor.settleDown);
+
+	pZaber->SetSpeed(config.zaber.pullbackSpeed);
+
+	// 2. Start Recording OCT
+	pDataWriter->StartRecording();
+
+	// 3. Pullback Linear Stage
+	if (pZaber->IsOpen()) {
+		pZaber->MoveRelative(config.zaber.pullbackDistance * -1);
+		while (pSystem->m_pThreadRotaryJunction->isRun) {
+			if (pZaber->GetZaberStatus()) {
+				break;
+			}
+			else {
+				Sleep(DELAY_FOR_STOP_THREAD);
+			}
+		}
+	}
+	else {
+		Sleep(3000);
+	}
+
+	// 4. Stop Recording OCT
+	pDataWriter->StopRecording();
+
+	// 5. Motor OFF
+	pMotor->StopMotor();
+
+	pSystem->prepareSimulation(pDataWriter);
+
+	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
+	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::Pullback);
+
+	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
 	}
 
@@ -910,7 +858,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	if (pZaber->IsOpen()) {
 		pZaber->SetSpeed(config.catheter.speed);
 		pZaber->Move(config.catheter.position);
-		while (pSystem->m_pThreadLoadCatheter->isRun) {
+		while (pSystem->m_pThreadRotaryJunction->isRun) {
 			if (pZaber->GetZaberStatus()) {
 				break;
 			}
@@ -923,16 +871,19 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	// 3. Wait
 	Sleep(config.catheter.rotationTime);
 
-	// 4. Motor OFF
-	pMotor->StopMotor();
+	// To-Do: Check Catheter Connection
+	bool loaded = true;
+		
+	if (loaded) {
+		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loaded);
+	}
+	else {
+		pMotor->StopMotor();
+		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Unloaded);
+	}
+	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::LoadCatheter);
 
-	// 5. Wait
-	Sleep(config.catheter.waitingTime);
-
-	// 6. Homing
-	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Homing);
-
-	while (pSystem->m_pThreadLoadCatheter->isRun) {
+	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
 	}
 
@@ -947,11 +898,11 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	CZaberController* pZaber = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
 
-	// Set Linear Stage Position
+	// Set Linear Stage Position to Zero
 	if (pZaber->IsOpen()) {
-		pZaber->SetSpeed(config.zaber.pullbackSpeed);
-		pZaber->Move(config.catheter.position);
-		while (pSystem->m_pThreadPullbackScan->isRun) {
+		pZaber->SetSpeed(config.catheter.speed);
+		pZaber->Move(0);
+		while (pSystem->m_pThreadRotaryJunction->isRun) {
 			if (pZaber->GetZaberStatus()) {
 				break;
 			}
@@ -961,8 +912,45 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 		}
 	}
 
-	// wait for StopThread
-	while (pSystem->m_pThreadUnloadCatheter->isRun) {
+	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Unloaded);
+	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::UnloadCatheter);
+
+	while (pSystem->m_pThreadRotaryJunction->isRun) {
+		Sleep(DELAY_FOR_STOP_THREAD);
+	}
+
+	return NOERROR;
+}
+
+/*
+* threadValidateCatheter
+*/
+UINT COCTSystem::threadValidateCatheter(LPVOID param) {
+	COCTSystem* pSystem = (COCTSystem*)param;
+	CConfiguration& config = CConfiguration::GetInstance();
+	CMotorController* pMotor = CMotorController::GetInstance();
+	CLaserController* pLaser = CLaserController::GetInstance();
+
+	pSystem->startAcqDevice();
+	pLaser->LaserOnOff(true);
+	pMotor->PerfomRun(config.motor.velocityLiveView);
+
+	// To-Do: determine image verification
+	bool verified = true;
+
+	pMotor->StopMotor();
+	pLaser->LaserOnOff(false);
+
+	if (verified) {
+		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Enable);
+	}
+	else {
+		pSystem->postMessage(WM_NOTIFY_ERROR_OCCURED, (WPARAM)RayError::CatheterNotValid);
+	}
+
+	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::ValidateCatheter);
+
+	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
 	}
 
@@ -999,7 +987,7 @@ bool COCTSystem::checkConnection() {
 }
 
 /*
-* initializeAcqDevice
+* connectAcqDevice
 */
 int COCTSystem::connectAcqDevice() {
 	if (m_pAcqDevice->IsInit()) return NOERROR;
@@ -1008,33 +996,36 @@ int COCTSystem::connectAcqDevice() {
 }
 
 /*
-* initializeAcqDevice
+* disconnectAcqDevice
 */
-int COCTSystem::initializeAcqDevice() {
+int COCTSystem::disconnectAcqDevice() {
+	stopAcqDevice();
+
 	if (m_pAcqDevice->IsInit()) {
-		m_pAcqDevice->StopAcquisition();
 		m_pAcqDevice->CleanUp();
 	}
 
-	int result = connectAcqDevice();
-	if (result == NOERROR) {
-		m_pAcqDevice->StartAcquisition();
-		CLaserController::GetInstance()->LaserOnOff(true);
+	return NOERROR;
+}
+
+/*
+* startAcqDevice
+*/
+int COCTSystem::startAcqDevice() {
+	if (!m_pAcqDevice->IsInit()) {
+		return E_FAIL;
 	}
+
+	int result = m_pAcqDevice->StartAcquisition();
 
 	return result;
 }
 
 /*
-* finalizeAcqDevice
+* stopAcqDevice
 */
-int COCTSystem::finalizeAcqDevice() {
-	if (m_pAcqDevice->IsInit()) {
-		m_pAcqDevice->StopAcquisition();
-		m_pAcqDevice->CleanUp();
-	}
-
-	CLaserController::GetInstance()->LaserOnOff(false);
+int COCTSystem::stopAcqDevice() {
+	m_pAcqDevice->StopAcquisition();
 
 	return NOERROR;
 }
@@ -1054,29 +1045,28 @@ int COCTSystem::connectRotaryJunction() {
 
 	if (!pMotor->IsConnected()) {
 		result &= pMotor->Connect();
+		result &= pMotor->SwitchOn();
 	}
 
 	return (result) ? NOERROR : E_FAIL;
 }
 
 /*
-* initializeRotaryJunction
+* disconnectRotaryJunction
 */
-int COCTSystem::initializeRotaryJunction() {
+int COCTSystem::disconnectRotaryJunction() {
 	CMotorController* pMotor = CMotorController::GetInstance();
+	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
 
-	bool result = pMotor->SwitchOn();
+	bool result = true;
+	
+	if (pMotor->IsConnected()) {
+		result &= pMotor->SwitchOff();
+	}
 
-	return (result) ? NOERROR : E_FAIL;
-}
-
-/*
-* finalizeRotaryJunction
-*/
-int COCTSystem::finalizeRotaryJunction() {
-	CMotorController* pMotor = CMotorController::GetInstance();
-
-	bool result = pMotor->SwitchOff();
+	if (pLinearStage->IsOpen()) {
+		pLinearStage->Close();
+	}
 
 	return (result) ? NOERROR : E_FAIL;
 }
@@ -1102,27 +1092,14 @@ LRESULT COCTSystem::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 		}
 	}
 	else {
+		if (isRealTime == false) return NOERROR;
+
 		image = m_pImagingRealtime->GetCircleImage();
 	}
 
 	if (m_cbCrossSection != nullptr) m_cbCrossSection(image.data, image.cols, image.rows, image.channels(), nFrameInfo);
 
 	return NOERROR;
-}
-
-/*
-* setMotorOnOff
-*/
-void COCTSystem::setMotorOnOff(bool on) {
-	CMotorController* pMotorCtrl = CMotorController::GetInstance();
-	CConfiguration& config = CConfiguration::GetInstance();
-
-	if (on) {
-		pMotorCtrl->PerfomRun(config.motor.velocity);
-	}
-	else {
-		pMotorCtrl->StopMotor();
-	}
 }
 
 /*
@@ -1195,40 +1172,19 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 	if(m_callback != nullptr) m_callback((int)RayCallbackRequest::State, (int)m_curState);
 
 	switch (m_curState) {
-	case RayScannerState::None:
-		CUtility::StopThread(m_pThreadInitialize);
+	case RayScannerState::Initial:
 		CUtility::StopThread(m_pThreadUpdateCutView);
 		CUtility::StopThread(m_pThreadGenerateVolume);
+		// To-Do: unload catheter
 		break;
-	case RayScannerState::Initializing:
-		CUtility::StartThread(threadInitialize, m_pThreadInitialize, this);
-		break;
-	case RayScannerState::LiveView:
-		CUtility::StopThread(m_pThreadInitialize);
+	case RayScannerState::Default:
 		CUtility::StopThread(m_pThreadUpdateCutView);
 		CUtility::StopThread(m_pThreadGenerateVolume);
-		CUtility::StopThread(m_pThreadAutoCalibration);
-		break;
-	case RayScannerState::AutoCalibration:
-		CUtility::StartThread(threadAutoCalibration, m_pThreadAutoCalibration, this);
-		break;
-	case RayScannerState::Homing:
-		CUtility::StopThread(m_pThreadLoadCatheter);
-		CUtility::StopThread(m_pThreadUnloadCatheter);
-		CUtility::StartThread(threadHoming, m_pThreadHoming, this);
-		break;
-	case RayScannerState::Ready:
-		CUtility::StopThread(m_pThreadHoming);
-		break;
-	case RayScannerState::LoadCatheter:
-		CUtility::StartThread(threadLoadCatheter, m_pThreadLoadCatheter, this);
 		break;
 	case RayScannerState::Scanning:
-		CUtility::StartThread(threadPullbackScan, m_pThreadPullbackScan, this);
+		CUtility::StartThread(threadPullbackScan, m_pThreadRotaryJunction, this);
 		break;
-	case RayScannerState::Review:
-		CUtility::StopThread(m_pThreadPullbackScan);
-		
+	case RayScannerState::Review:		
 		if (m_prevState == RayScannerState::Scanning) {
 			CUtility::StartThread(threadSaveRaw, m_pThreadSaveRaw, this);
 		}
@@ -1259,36 +1215,72 @@ LRESULT COCTSystem::OnMsgUpdateSaveRaw(WPARAM wParam, LPARAM lParam) {
 }
 
 /*
-* OnMsgNotifySaveDone
+* OnMsgUpdateSaveRaw
 */
-LRESULT COCTSystem::OnMsgNotifySaveDone(WPARAM wParam, LPARAM lParam) {
-	CUtility::StopThread(m_pThreadSaveRaw);
+LRESULT COCTSystem::OnMsgUpdateCatheterState(WPARAM wParam, LPARAM lParam) {
+	CConfiguration& config = CConfiguration::GetInstance();
+	m_cathState = (CatheterState)wParam;
+
+	CUtility::StopThread(m_pThreadRotaryJunction);
+
+	switch (m_cathState) {
+	case CatheterState::Unloaded:
+		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Default);
+		break;
+	case CatheterState::Loaded:
+		CUtility::StartThread(threadValidateCatheter, m_pThreadRotaryJunction, this);
+		break;
+	case CatheterState::Enable:
+		break;
+	case CatheterState::Calibrated:
+		break;
+	default:
+		break;
+	}
 
 	return NOERROR;
 }
 
 /*
-* OnMsgUpdateCutViewDone
+* OnMsgNotifyProcessDone
 */
-LRESULT COCTSystem::OnMsgNotifyCutViewDone(WPARAM wParam, LPARAM lParam) {
-	CUtility::StopThread(m_pThreadUpdateCutView);
+LRESULT COCTSystem::OnMsgNotifyProcessDone(WPARAM wParam, LPARAM lParam) {
+	RayWorkItem workItem = (RayWorkItem)wParam;
+
+	switch (workItem) {
+	case RayWorkItem::SaveRawData:
+		CUtility::StopThread(m_pThreadSaveRaw);
+		break;
+	case RayWorkItem::UpdateCutView:
+		CUtility::StopThread(m_pThreadUpdateCutView);
+		break;
+	case RayWorkItem::GenerateVolume:
+		CUtility::StopThread(m_pThreadGenerateVolume);
+		break;
+	default:
+		return NOERROR;
+	}
+
+	if (m_callback != nullptr) {
+		m_callback((int)RayCallbackRequest::WorkDone, (int)workItem);
+	}
 
 	return NOERROR;
 }
 
 /*
-* OnMsgNotifyVolumeDone
+* OnMsgDeviceWorkDone
 */
-LRESULT COCTSystem::OnMsgNotifyVolumeDone(WPARAM wParam, LPARAM lParam) {
-	CUtility::StopThread(m_pThreadGenerateVolume);
+LRESULT COCTSystem::OnMsgDeviceWorkDone(WPARAM wParam, LPARAM lParam) {
+	CUtility::StopThread(m_pThreadRotaryJunction);
 
-	if (m_callback != nullptr) m_callback((int)RayCallbackRequest::WorkDone, (int)RayWorkItem::GenerateVolume);
+	if (m_callback != nullptr) m_callback((int)RayCallbackRequest::WorkDone, (int)wParam);
 
 	return NOERROR;
 }
 
 /*
-* OnMsgUpdateCutViewDone
+* OnMsgNotifyErrorOccured
 */
 LRESULT COCTSystem::OnMsgNotifyErrorOccured(WPARAM wParam, LPARAM lParam) {
 	if (m_callback != nullptr) m_callback((int)RayCallbackRequest::Error, wParam);

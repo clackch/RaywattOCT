@@ -46,7 +46,8 @@ class CConfiguration
 
 	class Motor {
 	public:
-		int velocity;
+		int velocityPullback;
+		int velocityLiveView;
 		int settleDown;
 	};
 
@@ -56,7 +57,6 @@ class CConfiguration
 		int speed;			// move to position with speed
 		int velocity;		// motor rotation velocity
 		int rotationTime;
-		int waitingTime;
 	};
 
 	class Volume {

@@ -77,7 +77,8 @@ void CConfiguration::Initialize(tstring configFile)
 	this->zaber.pullbackSpeed = ::GetPrivateProfileInt(_T("Zaber"), _T("PullbackSpeed"), 10, configFilePath.c_str());
 
 	// [Motor]
-	this->motor.velocity = ::GetPrivateProfileInt(_T("Motor"), _T("Velocity"), 800, configFilePath.c_str());
+	this->motor.velocityPullback = ::GetPrivateProfileInt(_T("Motor"), _T("VelocityPullback"), 3005, configFilePath.c_str());
+	this->motor.velocityLiveView = ::GetPrivateProfileInt(_T("Motor"), _T("VelocityLiveView"), 3005, configFilePath.c_str());
 	this->motor.settleDown = ::GetPrivateProfileInt(_T("Motor"), _T("SettleDown"), 1000, configFilePath.c_str());
 
 	// [Shutter]
@@ -88,7 +89,6 @@ void CConfiguration::Initialize(tstring configFile)
 	this->catheter.speed = ::GetPrivateProfileInt(_T("Catheter"), _T("Speed"), 5, configFilePath.c_str());
 	this->catheter.velocity = ::GetPrivateProfileInt(_T("Catheter"), _T("MotorVelocity"), 50, configFilePath.c_str());
 	this->catheter.rotationTime = ::GetPrivateProfileInt(_T("Catheter"), _T("RotationTime"), 10000, configFilePath.c_str());
-	this->catheter.waitingTime = ::GetPrivateProfileInt(_T("Catheter"), _T("WaitingTime"), 10000, configFilePath.c_str());
 
 	// [Volume]
 	this->volume.size = ::GetPrivateProfileInt(_T("Volume"), _T("Size"), 600, configFilePath.c_str());
@@ -109,8 +109,11 @@ void CConfiguration::SaveZaberSettings() {
 void CConfiguration::SaveMotorSettings() {
 	tstring strValue = _T("");
 
-	strValue = std::to_wstring(this->motor.velocity);
-	::WritePrivateProfileString(_T("Motor"), _T("Velocity"), strValue.c_str(), configFilePath.c_str());
+	strValue = std::to_wstring(this->motor.velocityPullback);
+	::WritePrivateProfileString(_T("Motor"), _T("VelocityPullback"), strValue.c_str(), configFilePath.c_str());
+
+	strValue = std::to_wstring(this->motor.velocityLiveView);
+	::WritePrivateProfileString(_T("Motor"), _T("VelocityLiveView"), strValue.c_str(), configFilePath.c_str());
 
 	strValue = std::to_wstring(this->motor.settleDown);
 	::WritePrivateProfileString(_T("Motor"), _T("SettleDown"), strValue.c_str(), configFilePath.c_str());
@@ -145,5 +148,5 @@ double CConfiguration::getPrivateProfileFloat(LPCWSTR lpAppName, LPCWSTR lpKeyNa
 }
 
 double CConfiguration::GetLoadCatheterTime() {
-	return (catheter.rotationTime + catheter.waitingTime) / 1000;
+	return (catheter.rotationTime) / 1000;
 }

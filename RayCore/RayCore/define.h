@@ -9,12 +9,15 @@ typedef void (*FunctionImgPtr)(void*, int, int, int, int);
 enum class RayError {
 	OK = 0,
 	SystemRunning = -1000,
-	InvalidArgument,
-	WrongOCTScannerState,
-	NotPausedState,
+	SystemNotRunning,
 	DeviceNotConnected,
-	InitializeFailed,
-	WrongFilePath
+	DeviceDisconnected,
+	DeviceBusy,
+	CatheterUnloaded,
+	CatheterNotValid,
+	InvalidArgument,
+	WrongState,
+	NotPaused,
 };
 
 enum class RayProperty {
@@ -49,18 +52,20 @@ enum class RayCallbackRequest {
 };
 
 enum class RayScannerState {
-	None = 0,
-	Initializing,
-	LiveView,
-	AutoCalibration,
-	Homing,
-	Ready,
-	LoadCatheter,
+	Initial = 0,
+	Default,
 	Scanning,
 	Review
 };
 
 enum class RayWorkItem {
 	Unknown = 0,
-	GenerateVolume
+	SaveRawData,
+	UpdateCutView,
+	GenerateVolume,
+	AutoCalibration,
+	Pullback,
+	LoadCatheter,
+	UnloadCatheter,
+	ValidateCatheter
 };

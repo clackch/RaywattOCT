@@ -348,7 +348,7 @@ UINT CRaywattLabDlg::threadPullback(LPVOID param) {
 		pDlg->m_pDataWriter->StopRecording();
 
 		CString strPrefix = _T("");
-		strPrefix.Format(_T("%dalines_%drpm_%dmm_%dmms"), config.nBScan, config.motor.velocity, config.zaber.pullbackDistance, config.zaber.pullbackSpeed);
+		strPrefix.Format(_T("%dalines_%drpm_%dmm_%dmms"), config.nBScan, config.motor.velocityPullback, config.zaber.pullbackDistance, config.zaber.pullbackSpeed);
 		CString strFileName = pDlg->generateFileName(pDlg->m_strPatientPath, _T(".bin"), strPrefix);
 
 		CDataWriter* pDataManager = pDlg->m_pDataWriter;
