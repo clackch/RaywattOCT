@@ -340,9 +340,9 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	{
 		U32 recordsPerAcquisition = 0x7FFFFFFF; // recordsPerBuffer * buffersPerAcquisition;
 
-		U32 admaFlags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_NPT | ADMA_FIFO_ONLY_STREAMING | ADMA_INTERLEAVE_SAMPLES;
+		U32 admaFlags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_NPT | ADMA_FIFO_ONLY_STREAMING;
 
-		retCode = AlazarBeforeAsyncRead(boardHandle, channelMask, -(long)preTriggerSamples,
+		retCode = AlazarBeforeAsyncRead(boardHandle, channelMask, (long)preTriggerSamples,
 			samplesPerRecord, recordsPerBuffer, recordsPerAcquisition,
 			admaFlags);
 
