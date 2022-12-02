@@ -13,6 +13,8 @@
 #define WM_SAVE_CALIBRATION_DONE		(WM_USER + 0x2002)
 #define WM_PULLBACK_DONE				(WM_USER + 0x2003)
 
+#define BACKGROUND_FILEPATH		".\\BACKGROUND.bin"
+
 class CLabImaging;
 class CDataWriter;
 class CDataReader;

@@ -94,12 +94,7 @@ int CRaywattLabDlg::initializeDevices() {
 			m_pAcqDevice->CleanUp();
 			return E_FAIL;
 		}
-
-		if (pInterferometer->Open(config.zaber.interferometer) == false) {
-			pLinearStage->Close();
-			m_pAcqDevice->CleanUp();
-			return E_FAIL;
-		}
+		pLinearStage->SetSpeed(config.zaber.pullbackSpeed);
 	}
 
 	if (m_chkInitMotor) {
@@ -225,7 +220,7 @@ CString CRaywattLabDlg::splitFileName(CString strFilePath) {
 }
 CLabImaging* CRaywattLabDlg::createImaging() {
 	CLabImaging* pImaging = new CLabImaging(this);
-	pImaging->Initialize(m_strCurCalibration, ".\\BACKGROUND.bin");
+	pImaging->Initialize(m_strCurCalibration, BACKGROUND_FILEPATH);
 	pImaging->SetColor(m_chkImageHotColor);
 
 	int subtract = ((CButton*)GetDlgItem(IDC_CHECK_BACKGROUND_SUBTRACT))->GetCheck();
@@ -416,12 +411,18 @@ LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 	cv::Mat image = (m_radioImageShape == 0) ? pImaging->GetCircleImage() : pImaging->GetRectangleImage();
 	Ipp16u* scopeData = pImaging->GetScopeData();
 	Ipp16u* scopeFFTData = pImaging->GetScopeFFTData();
+	CString strFrameRate = _T("");
+	
+	if (m_isRealtime && m_pAcqDevice != nullptr) {
+		strFrameRate.Format(_T("%.2lf"), m_pAcqDevice->GetFPS());
+	}
 
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int nScopeLength = config.getScopeLength();
 	const int nOutputLength = config.nOutputLength;
 
 	drawToPictureBox(m_pictOCTImage, image.cols, image.rows, (char*)image.data);
+	GetDlgItem(IDC_EDIT_FRAME_RATE)->SetWindowText(strFrameRate);
 
 	m_scopeView.SetChannelBuffer(0, scopeData, nScopeLength);
 	m_scopeView.SetChannelBuffer(1, scopeData + nScopeLength, nScopeLength);
@@ -552,14 +553,14 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	int goodClockEnd = config.nAScan;
 
 	m_pImagingRealtime = new CLabImaging(this);
-	m_pImagingRealtime->Initialize(m_strCurCalibration, ".\\BACKGROUND.bin");
+	m_pImagingRealtime->Initialize(m_strCurCalibration, BACKGROUND_FILEPATH);
 	m_pImagingRealtime->SetColor(m_chkImageHotColor);
 	m_pImagingRealtime->SetBackgroundColor(cv::Scalar(0, 0, 0));
 	m_pImagingRealtime->SetGoodClockRange(goodClockStart, goodClockEnd);
 	m_pImagingRealtime->Start();
 
 	m_pImagingSimulate = new CLabImaging(this);
-	m_pImagingSimulate->Initialize(m_strCurCalibration, ".\\BACKGROUND.bin");
+	m_pImagingSimulate->Initialize(m_strCurCalibration, BACKGROUND_FILEPATH);
 	m_pImagingSimulate->SetColor(m_chkImageHotColor);
 	m_pImagingSimulate->SetBackgroundColor(cv::Scalar(0, 0, 0));
 	m_pImagingSimulate->SetGoodClockRange(goodClockStart, goodClockEnd);
@@ -829,6 +830,9 @@ void CRaywattLabDlg::OnBnClickedButtonSaveData()
 		CString strFileName = generateFileName(m_strPatientPath, _T(".bin"), strPrefix);
 		m_pDataWriter->StopRecording();
 		GetDlgItem(IDC_BUTTON_SAVE_DATA)->SetWindowText(_T("Saving"));
+
+		CMotorController* pMotorCtrl = CMotorController::GetInstance();
+		pMotorCtrl->StopMotor();
 
 		// Write Raw, FFT Data
 		m_pImagingRealtime->Stop();
