@@ -1,5 +1,8 @@
 #pragma once
 
+#include <chrono>
+#include <locale>
+
 class IImaging;
 class IDataManager;
 class CThread;
@@ -11,6 +14,9 @@ protected:
 
 	IImaging* m_pImaging;
 	IDataManager* m_pWriter;
+
+	std::chrono::system_clock::time_point m_start, m_end;
+	double m_fps;
 public:
 	IAcquisitionDevice();
 	virtual ~IAcquisitionDevice();
@@ -24,6 +30,8 @@ public:
 
 	int StartAcquisition();
 	int StopAcquisition();
+
+	double GetFPS() { return m_fps; }
 
 protected:
 	virtual int start() = 0;

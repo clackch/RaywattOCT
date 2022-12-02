@@ -95,6 +95,11 @@ unsigned short *CATSDevice::acquire(int& nCurFrame, int& nTotalFrame) {
 	nCurFrame = 0;
 	nTotalFrame = 0;
 
+	m_end = std::chrono::system_clock::now();
+	std::chrono::milliseconds total_time = std::chrono::duration_cast<std::chrono::milliseconds>(m_end - m_start);
+	m_fps = 1000.f / total_time.count();
+	m_start = m_end;
+
 	m_pCurBuffer = m_pAcqBuffers[m_nBufferIndex];
 	{
 		// Add the buffer to the end of the list of available buffers.
