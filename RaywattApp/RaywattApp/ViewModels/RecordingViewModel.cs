@@ -80,10 +80,6 @@ namespace RaywattApp.ViewModels
                     PatientCase = (PatientCase)data["patientCase"];
 
                 RaySetProperty(Property.BackgroundColor, Constants.BackgroundColor);
-                RayStartReview("C:\\DataSave\\jeansu\\221116 straw pullback\\2000alines_3005rpm_50mm_30mms_1116_174726.bin");
-
-                generateFileName("bin");
-
             }
 
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
