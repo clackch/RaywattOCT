@@ -9,12 +9,15 @@ namespace RaywattOCT
         {
             OK = 0,
             SystemRunning = -1000,
-            InvalidArgument,
-            WrongOCTScannerState,
-            NotPausedState,
+            SystemNotRunning,
             DeviceNotConnected,
-            InitializeFailed,
-            WrongFilePath
+            DeviceDisconnected,
+            DeviceBusy,
+            CatheterUnloaded,
+            CatheterNotValid,
+            InvalidArgument,
+            WrongState,
+            NotPaused
         };
 
         public enum Property : int
@@ -53,13 +56,8 @@ namespace RaywattOCT
 
         public enum RayScannerState : int
         {
-            None = 0,
-            Initializing,
-            LiveView,
-            AutoCalibration,
-            Homing,
-            Ready,
-            LoadCatheter,
+            Initial = 0,
+            Default,
             Scanning,
             Review
         };
@@ -67,7 +65,14 @@ namespace RaywattOCT
         public enum RayWorkItem : int
         {
             Unknown = 0,
-            GenerateVolume
+            SaveRawData,
+            UpdateCutView,
+            GenerateVolume,
+            AutoCalibration,
+            Pullback,
+            LoadCatheter,
+            UnloadCatheter,
+            ValidateCatheter
         };
 
         public class FrameInfo {
@@ -98,17 +103,13 @@ namespace RaywattOCT
         [DllImport("RayCore.dll")]
         public static extern int RayConnectDevices();
         [DllImport("RayCore.dll")]
-        public static extern int RayInitialize();
-        [DllImport("RayCore.dll")]
-        public static extern int RayFinalize();
+        public static extern int RayDisconnectDevices();
         [DllImport("RayCore.dll")]
         public static extern int RayAutoCalibration();
         [DllImport("RayCore.dll")]
         public static extern int RayManualCalibration(bool moveForward);        
         [DllImport("RayCore.dll")]
         public static extern int RayShowCalibrationGuide(bool show);
-        [DllImport("RayCore.dll")]
-        public static extern int RayPreparePullback();
         [DllImport("RayCore.dll")]
         public static extern int RayPullbackScan(string filePath);
         [DllImport("RayCore.dll")]
@@ -120,7 +121,9 @@ namespace RaywattOCT
         [DllImport("RayCore.dll")]
         public static extern int RayEndReview();
         [DllImport("RayCore.dll")]
-        public static extern int RayMotorOnOff(bool mode);
+        public static extern int RayStartLiveView();
+        [DllImport("RayCore.dll")]
+        public static extern int RayStopLiveView();
         [DllImport("RayCore.dll")]
         public static extern int RayPlayPause();
         [DllImport("RayCore.dll")]

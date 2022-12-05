@@ -149,7 +149,7 @@ void CRotaryJunctionDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 		strBuffer.Format(_T("%d"), config.zaber.pullbackSpeed);
 		GetDlgItem(IDC_EDIT_ZABER_VELOCITY)->SetWindowText(strBuffer);
 
-		strBuffer.Format(_T("%d"), config.motor.velocity);
+		strBuffer.Format(_T("%d"), config.motor.velocityPullback);
 		GetDlgItem(IDC_EDIT_MOTOR_VELOCITY)->SetWindowText(strBuffer);
 	}
 }
@@ -241,7 +241,7 @@ void CRotaryJunctionDlg::OnBnClickedButtonSaveSettings()
 	config.zaber.pullbackSpeed = _ttoi(strBuffer);
 
 	GetDlgItem(IDC_EDIT_MOTOR_VELOCITY)->GetWindowText(strBuffer);
-	config.motor.velocity = _ttoi(strBuffer);
+	config.motor.velocityPullback = _ttoi(strBuffer);
 
 	config.SaveZaberSettings();
 	config.SaveMotorSettings();

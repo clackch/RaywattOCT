@@ -85,12 +85,12 @@ namespace RaywattApp.ViewModels
                 this.Patient = (Patient)data["patient"];
                 this.PrevStatus = (PrevStatus)data["prevStatus"];
 
-                RayInitialize();
-                RaySetProperty(Property.BackgroundColor, 0xFFFFFF);
+                RayShowCalibrationGuide(true);
+                RaySetProperty(Property.BackgroundColor, Constants.BackgroundColor);
 
                 syncWithCoreSystem();
 
-                timerUpdateImage.Interval = TimeSpan.FromMilliseconds(5);
+                timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
                 timerUpdateImage.Start();
             }
@@ -104,8 +104,6 @@ namespace RaywattApp.ViewModels
         private void Back()
         {
             _log.Debug("Back");
-            
-            RayFinalize();
 
             leaveToPage("Views/PatientDetailPage.xaml");
         }
@@ -116,11 +114,11 @@ namespace RaywattApp.ViewModels
 
             if (Constants.ViewModeLiveView.Equals(ViewMode))
             {
-                RayMotorOnOff(true);
+                RayStartLiveView();
             }
             else if (Constants.ViewModeStandBy.Equals(ViewMode))
             {
-                RayMotorOnOff(false);
+                RayStopLiveView();
             }
         }
 
@@ -157,28 +155,19 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Send(new NavigationMessage(viewPage) { Parameter = parameter });
         }
 
-        private void syncWithCoreSystem()
+        protected override void syncWithCoreSystem()
         {
+            base.syncWithCoreSystem();
+
             RayScannerState curState = (RayScannerState)RayGetProperty(Property.CurrentState);
             bool isLiveView = (bool)(RayGetProperty(Property.MotorOnOff) != 0);
 
-            this.IsInitialized = (curState == RayScannerState.LiveView) ? true : false;
+            this.IsInitialized = (curState == RayScannerState.Default) ? true : false;
             this.ViewMode = (isLiveView) ? Constants.ViewModeLiveView : Constants.ViewModeStandBy;
         }
 
         protected override void handleError(RayCallbackRequest request, RayError error)
         {
-            _log.Debug("handleError : " + ((int)error).ToString());
-
-            switch (error)
-            {
-            case RayError.InitializeFailed:
-                break;
-            case RayError.WrongOCTScannerState:
-                 break;
-            default:
-                break;
-            }
         }
 
         protected override void handleProgress(RayCallbackRequest request, int progress)

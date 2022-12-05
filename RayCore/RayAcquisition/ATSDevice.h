@@ -28,5 +28,6 @@ protected:
 
 private:
 	BOOL configureBoard(HANDLE boardHandle);
+	BOOL configureAcquisition(HANDLE boardHandle);
 };
 

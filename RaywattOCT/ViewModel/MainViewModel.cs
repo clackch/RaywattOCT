@@ -422,7 +422,6 @@ namespace RaywattOCT.ViewModel
         private void Initialize()
         {
             RayCoreWrapper.RayConnectDevices();
-            RayCoreWrapper.RayInitialize();
 
             getBrightnessContrast();
             updateMotorState();
@@ -436,6 +435,7 @@ namespace RaywattOCT.ViewModel
         private void Exit()
         {
             RayCoreWrapper.RayStopSystem();
+            RayCoreWrapper.RayDisconnectDevices();
             if (window3D != null)
             {
                 window3D.Close();
@@ -448,7 +448,13 @@ namespace RaywattOCT.ViewModel
         }
         private void MotorOnOff()
         {
-            RayCoreWrapper.RayMotorOnOff(!MotorOn);
+            if (MotorOn)
+            {
+                RayCoreWrapper.RayStopLiveView();
+            }
+            else {
+                RayCoreWrapper.RayStartLiveView();
+            }
             updateMotorState();
         }
         private void Scan()
@@ -553,26 +559,9 @@ namespace RaywattOCT.ViewModel
 
             switch (response)
             {
-                case RayCoreWrapper.RayScannerState.None:
+                case RayCoreWrapper.RayScannerState.Initial:
                     break;
-                case RayCoreWrapper.RayScannerState.Initializing:
-                    SystemMessage = "Initializing..";
-                    break;
-                case RayCoreWrapper.RayScannerState.LiveView:
-                    RayCoreWrapper.RayShowCalibrationGuide(true);
-                    RayCoreWrapper.RayPreparePullback();    // Bypassing
-                    break;
-                case RayCoreWrapper.RayScannerState.Homing:
-                    SystemMessage = "Homing..";
-                    break;
-                case RayCoreWrapper.RayScannerState.Ready:
-                    SystemMessage = "Ready";
-                    break;
-                case RayCoreWrapper.RayScannerState.LoadCatheter:
-                    {
-                        double loadCatheterTime = RayCoreWrapper.RayGetProperty(RayCoreWrapper.Property.LoadCatheterTime);
-                        SystemMessage = String.Format("Load Catheter in {0} sec", (int)loadCatheterTime);
-                    }
+                case RayCoreWrapper.RayScannerState.Default:
                     break;
                 case RayCoreWrapper.RayScannerState.Scanning:
                     SystemMessage = "Scanning..";
@@ -604,9 +593,6 @@ namespace RaywattOCT.ViewModel
             switch (response) {
                 case RayCoreWrapper.RayError.DeviceNotConnected:
                     SystemMessage = "Devices Not Connected";
-                    break;
-                case RayCoreWrapper.RayError.InitializeFailed:
-                    SystemMessage = "Initialize Failed";
                     break;
                 default:
                     break;

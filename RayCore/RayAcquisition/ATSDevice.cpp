@@ -57,6 +57,8 @@ int CATSDevice::CleanUp() {
 }
 
 int CATSDevice::start() {
+	configureAcquisition(m_hATSBoard);
+
 	// Arm the board system to wait for a trigger event to begin the acquisition
 	RETURN_CODE retCode = AlazarStartCapture(m_hATSBoard);
 
@@ -94,6 +96,11 @@ unsigned short *CATSDevice::acquire(int& nCurFrame, int& nTotalFrame) {
 	
 	nCurFrame = 0;
 	nTotalFrame = 0;
+
+	m_end = std::chrono::system_clock::now();
+	std::chrono::milliseconds total_time = std::chrono::duration_cast<std::chrono::milliseconds>(m_end - m_start);
+	m_fps = 1000.f / total_time.count();
+	m_start = m_end;
 
 	m_pCurBuffer = m_pAcqBuffers[m_nBufferIndex];
 	{
@@ -251,6 +258,18 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 		printf("AlazarOCTIgnoreBadClock : %s, cycleTime : %lf, pulseWidth : %lf\n", AlazarErrorToText(retCode), triggerCycleTime, triggerPulseWidth);
 	}
 
+	return TRUE;
+}
+
+BOOL CATSDevice::configureAcquisition(HANDLE boardHandle) {
+	RETURN_CODE retCode;
+	CConfiguration& config = CConfiguration::GetInstance();
+	const int nAScan = config.nAScan;
+	const int nAScanPadding = config.nAScanPadding;
+	const int nBScan = config.nBScan;
+	const int nAcqBufCount = config.settingsAlazar.nAcqBufferCount;
+	BOOL success = TRUE;
+
 	//==========================================================================================================
 	// Acquisition Setting
 	//==========================================================================================================
@@ -302,21 +321,21 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	printf("samplesPerRecord : %d, recordsPerBuffer : %d, channelCount : %d\n", samplesPerRecord, recordsPerBuffer, channelCount);
 
 	// Allocate memory for DMA buffers
-	m_pAcqBuffers = new U16*[nAcqBufCount];
-	BOOL success = TRUE;
-	U32 bufferIndex;
-	for (bufferIndex = 0; (bufferIndex < nAcqBufCount) && success; bufferIndex++)
-	{
-#ifdef _WIN32 // Allocate page aligned memory
-		m_pAcqBuffers[bufferIndex] =
-			(U16 *)VirtualAlloc(NULL, bytesPerBuffer, MEM_COMMIT, PAGE_READWRITE);
-#else
-		BufferArray[bufferIndex] = (U16 *)valloc(bytesPerBuffer);
-#endif
-		if (m_pAcqBuffers[bufferIndex] == NULL)
+	if (m_pAcqBuffers == nullptr) {
+		m_pAcqBuffers = new U16 * [nAcqBufCount];
+		for (int bufferIndex = 0; (bufferIndex < nAcqBufCount) && success; bufferIndex++)
 		{
-			printf("Error: Alloc %u bytes failed\n", bytesPerBuffer);
-			success = FALSE;
+#ifdef _WIN32 // Allocate page aligned memory
+			m_pAcqBuffers[bufferIndex] =
+				(U16*)VirtualAlloc(NULL, bytesPerBuffer, MEM_COMMIT, PAGE_READWRITE);
+#else
+			BufferArray[bufferIndex] = (U16*)valloc(bytesPerBuffer);
+#endif
+			if (m_pAcqBuffers[bufferIndex] == NULL)
+			{
+				printf("Error: Alloc %u bytes failed\n", bytesPerBuffer);
+				success = FALSE;
+			}
 		}
 	}
 
@@ -335,9 +354,9 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	{
 		U32 recordsPerAcquisition = 0x7FFFFFFF; // recordsPerBuffer * buffersPerAcquisition;
 
-		U32 admaFlags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_NPT | ADMA_FIFO_ONLY_STREAMING | ADMA_INTERLEAVE_SAMPLES;
+		U32 admaFlags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_NPT | ADMA_FIFO_ONLY_STREAMING;
 
-		retCode = AlazarBeforeAsyncRead(boardHandle, channelMask, -(long)preTriggerSamples,
+		retCode = AlazarBeforeAsyncRead(boardHandle, channelMask, (long)preTriggerSamples,
 			samplesPerRecord, recordsPerBuffer, recordsPerAcquisition,
 			admaFlags);
 
@@ -349,9 +368,9 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	}
 
 	// Add the buffers to a list of buffers available to be filled by the board
-	for (bufferIndex = 0; (bufferIndex < nAcqBufCount) && success; bufferIndex++)
+	for (int bufferIndex = 0; (bufferIndex < nAcqBufCount) && success; bufferIndex++)
 	{
-		U16 *pBuffer = m_pAcqBuffers[bufferIndex];
+		U16* pBuffer = m_pAcqBuffers[bufferIndex];
 		retCode = AlazarPostAsyncBuffer(m_hATSBoard, pBuffer, bytesPerBuffer);
 		if (retCode != ApiSuccess)
 		{
@@ -363,5 +382,5 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 
 	m_nBufferIndex = 0;
 
-	return TRUE;
+	return success;
 }

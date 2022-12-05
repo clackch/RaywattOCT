@@ -20,11 +20,8 @@ _declspec(dllexport) RayError RayRegisterCallback(FunctionPtr cb) {
 _declspec(dllexport) RayError RayConnectDevices() {
     return octSystem.ConnectDevices();
 }
-_declspec(dllexport) RayError RayInitialize() {
-    return octSystem.Initialize();
-}
-_declspec(dllexport) RayError RayFinalize() {
-    return octSystem.Finalize();
+_declspec(dllexport) RayError RayDisconnectDevices() {
+    return octSystem.DisconnectDevices();
 }
 _declspec(dllexport) RayError RayAutoCalibration() {
     return octSystem.AutoCalibration();
@@ -34,9 +31,6 @@ _declspec(dllexport) RayError RayManualCalibration(bool moveForward) {
 }
 _declspec(dllexport) RayError RayShowCalibrationGuide(bool show) {
     return octSystem.ShowCalibrationGuide(show);
-}
-_declspec(dllexport) RayError RayPreparePullback() {
-    return octSystem.PreparePullback();
 }
 _declspec(dllexport) RayError RayPullbackScan(char* strFilePath) {
     return octSystem.PullbackScan(strFilePath);
@@ -53,8 +47,11 @@ _declspec(dllexport) RayError RayStartReview(char* strFilePath) {
 _declspec(dllexport) RayError RayEndReview() {
     return octSystem.EndReview();
 }
-_declspec(dllexport) RayError RayMotorOnOff(bool mode) {
-    return octSystem.MotorOnOff(mode);
+_declspec(dllexport) RayError RayStartLiveView() {
+    return octSystem.StartLiveView();
+}
+_declspec(dllexport) RayError RayStopLiveView() {
+    return octSystem.StopLiveView();
 }
 _declspec(dllexport) RayError RayPlayPause() {
     return octSystem.PlayPause();

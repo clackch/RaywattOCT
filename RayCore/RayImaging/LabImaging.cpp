@@ -35,7 +35,6 @@ void CLabImaging::Initialize(tstring calibFile, const char* strBgFile) {
 	const int nAScan = config.nAScan;
 	const int nBScan = config.nBScan;
 	const int nBufferSize = config.nBufferSize;
-	const int nFFTLength = config.nFFTLength;
 	const int nOutputLength = config.nOutputLength;
 	const int nScopeLength = config.getScopeLength();
 
@@ -116,7 +115,7 @@ void CLabImaging::Process(USHORT* fringes) {
 	generateImage(false);
 
 	postProcessing();
-	;
+	
 	cv::rotate(imageResultColor, imageRectangle, cv::ROTATE_90_COUNTERCLOCKWISE);
 }
 

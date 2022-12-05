@@ -366,12 +366,12 @@
             </StackPanel>
             <Grid Margin="0,22,0,0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="48"/>
+                    <ColumnDefinition Width="24"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="222"/>
                     <ColumnDefinition Width="42"/>                    
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="1" Text="Motor" Foreground="#b3b6c1" FontSize="14pt" VerticalAlignment="Center" HorizontalAlignment="Left" FontFamily="Segoe UI"/>
+                <TextBlock Grid.Column="1" Text="Live View" Foreground="#b3b6c1" FontSize="14pt" VerticalAlignment="Center" HorizontalAlignment="Left" FontFamily="Segoe UI"/>
                 <Button Grid.Column="2" Command="{Binding CmdMotorOnOff}" HorizontalAlignment="Right">
                     <Button.Template>
                         <ControlTemplate>

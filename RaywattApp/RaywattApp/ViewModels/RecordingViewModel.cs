@@ -10,10 +10,20 @@ using RaywattApp.Services;
 using System.Windows.Navigation;
 using System;
 using System.Collections.Generic;
+using RaywattOCT;
+using static RaywattOCT.RayCoreWrapper;
+using System.Windows.Threading;
+using System.IO;
+using System.Security.Cryptography;
+using SharpDX.Text;
+using Newtonsoft.Json.Linq;
+using System.Text;
+using System.IO.Packaging;
+using RaywattApp.Common.Util;
 
 namespace RaywattApp.ViewModels
 {
-    public partial class RecordingViewModel : ViewModelBase
+    public partial class RecordingViewModel : OCTViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(RecordingViewModel));
 
@@ -27,6 +37,9 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private PatientCase _patientCase;
+
+        private DispatcherTimer timer = new DispatcherTimer();
+        private DispatcherTimer timerUpdateImage = new DispatcherTimer();
 
         private ICommand _redoPullbackCommand;
         public ICommand RedoPullbackCommand
@@ -65,7 +78,14 @@ namespace RaywattApp.ViewModels
                 //Preset 화면으로 갔다가, Back 한 경우
                 if (data.ContainsKey("patientCase"))
                     PatientCase = (PatientCase)data["patientCase"];
+
+                RaySetProperty(Property.BackgroundColor, Constants.BackgroundColor);
             }
+
+            timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
+            timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
+            timerUpdateImage.Start();
+
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -116,6 +136,53 @@ namespace RaywattApp.ViewModels
             PrevStatus.DetailPageOffset = 0;
             PrevStatus.DetailPageGroup = 1;
             PrevStatus.DetailPageNumber = 0;
+        }
+        
+        private void timerFuncUpdateImage(object sender, EventArgs e)
+        {
+            if (imgCrossSection != null)
+            {
+                CrossSectionImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgCrossSection);
+            }
+            if (imgLongitude != null)
+            {
+                RayScannerState state = (RayScannerState)RayGetProperty(Property.CurrentState);
+
+                if (state == RayScannerState.Review)
+                {
+                    LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgLongitude);
+                }
+            }
+        }
+        private string generateFileName(string ext)
+        {
+            string filename = "{" + 
+                CommonUtil.GetRandomText(8) + "-" + 
+                CommonUtil.GetRandomText(4) + "-" + 
+                CommonUtil.GetRandomText(4) + "-" + 
+                CommonUtil.GetRandomText(4) + "-" + 
+                CommonUtil.GetRandomText(12) + 
+                "}."+ext;
+
+            _log.Debug("generateFileName : " + filename);
+
+            return filename;
+        }
+
+        protected override void handleState(RayCoreWrapper.RayCallbackRequest request, RayCoreWrapper.RayScannerState state)
+        {
+        }
+
+        protected override void handleProgress(RayCoreWrapper.RayCallbackRequest request, int progress)
+        {
+        }
+
+        protected override void handleError(RayCoreWrapper.RayCallbackRequest request, RayCoreWrapper.RayError error)
+        {
+        }
+
+        protected override void handleWorkDone(RayCoreWrapper.RayCallbackRequest request, RayCoreWrapper.RayWorkItem work)
+        {
         }
     }
 }

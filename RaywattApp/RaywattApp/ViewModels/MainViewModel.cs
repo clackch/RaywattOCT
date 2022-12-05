@@ -11,6 +11,7 @@ using RaywattApp.Views;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
@@ -97,6 +98,8 @@ namespace RaywattApp.ViewModels
             
             RaywattOCT.RayCoreWrapper.RayStartSystem();
             RaywattOCT.RayCoreWrapper.RayConnectDevices();
+
+            Directory.CreateDirectory(Constants.DataRootPath);
         }
 
         private void OnNavigate(string pageUri)
