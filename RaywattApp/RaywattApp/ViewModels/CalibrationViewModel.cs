@@ -26,7 +26,7 @@ namespace RaywattApp.ViewModels
         private PrevStatus _prevStatus;
 
         [ObservableProperty]
-        private bool _isLiveViewState;
+        private bool _canExecuteCalibration;
 
         [ObservableProperty]
         private bool _isNotLiveViewState;
@@ -70,12 +70,12 @@ namespace RaywattApp.ViewModels
                 this.Patient = (Patient)data["patient"];
                 this.PrevStatus = (PrevStatus)data["prevStatus"];
 
-                RaySetProperty(Property.BackgroundColor, 0xFFFFFF);
+                RaySetProperty(Property.BackgroundColor, Constants.BackgroundColor);
 
                 RayScannerState curState = (RayScannerState)RayGetProperty(Property.CurrentState);
-                this.IsLiveViewState = (curState == RayScannerState.LiveView) ? true : false;
+                CanExecuteCalibration = true;
 
-                timerUpdateImage.Interval = TimeSpan.FromMilliseconds(5);
+                timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
                 timerUpdateImage.Start();
             }
@@ -106,6 +106,7 @@ namespace RaywattApp.ViewModels
 
         private void AutoCalibration() {
             RayAutoCalibration();
+            CanExecuteCalibration = false;
         }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
@@ -127,19 +128,13 @@ namespace RaywattApp.ViewModels
 
         protected override void handleState(RayCallbackRequest request, RayScannerState state)
         {
-            switch (state) {
-                case RayScannerState.LiveView:
-                    this.IsLiveViewState = true;
-                    break;
-                case RayScannerState.AutoCalibration:
-                default:
-                    this.IsLiveViewState = false;
-                    break;            
-            }
         }
 
         protected override void handleWorkDone(RayCallbackRequest request, RayWorkItem work)
         {
+            if (work == RayWorkItem.AutoCalibration) {
+                CanExecuteCalibration = true;
+            }
         }
     }
 }

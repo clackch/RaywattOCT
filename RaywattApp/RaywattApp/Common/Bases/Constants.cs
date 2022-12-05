@@ -67,5 +67,14 @@
         //Expansion calculation
         public const string PresetTapered = "TAPE";
         public const string PresetOther = "OTHE";
+
+        //Image Background Color
+        public const int BackgroundColor = 0xFFFFFF;
+
+        //Update Image Interval (msec)
+        public const double UpdateImageInterval = 5;
+
+        //Data File Root Path (OCT raw files)
+        public const string DataRootPath = "C:\\DataSave";
     }
 }

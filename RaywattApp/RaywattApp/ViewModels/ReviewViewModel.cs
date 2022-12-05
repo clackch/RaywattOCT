@@ -55,20 +55,6 @@ namespace RaywattApp.ViewModels
             set { degree = value; OnPropertyChanged(nameof(Degree)); RaySetProperty(Property.Degree, degree); }
         }
 
-        private int brightness;
-        public int Brightness
-        { 
-            get { return brightness; }
-            set { brightness = value; OnPropertyChanged(nameof(Brightness)); setBrightnessContrast(); }
-        }
-
-        private int contrast;
-        public int Contrast
-        {
-            get { return contrast; }
-            set { contrast = value; OnPropertyChanged(nameof(Contrast)); setBrightnessContrast(); }
-        }
-
         // size from view
         private double crossSectionWidth;
         private double crossSectionHeight;
@@ -185,7 +171,7 @@ namespace RaywattApp.ViewModels
                 syncWithCoreSystem();
             }
 
-            timerUpdateImage.Interval = TimeSpan.FromMilliseconds(5);
+            timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
             timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
             timerUpdateImage.Start();
         }
@@ -270,8 +256,6 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("EndReview");
 
-            RayFinalize();
-
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
             sqlParameters["physician_name"] = PatientCase.PhysicianName;
@@ -302,8 +286,6 @@ namespace RaywattApp.ViewModels
         private void Back()
         {
             _log.Debug("Back");
-
-            RayFinalize();
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
@@ -393,22 +375,6 @@ namespace RaywattApp.ViewModels
                 curPosition *= longitudeFrameInfo.totalFrame;
                 RayMoveToFrame((int)curPosition);
             }
-        }
-        private void setBrightnessContrast()
-        {
-            double propBrightness = ((double)Brightness / 100) * (BrightnessMax - BrightnessMin) + BrightnessMin;
-            double propContrast = ((double)Contrast / 100) * (ContrastMax - ContrastMin) + ContrastMin;
-
-            RaySetProperty(Property.Brightness, propBrightness);
-            RaySetProperty(Property.Contrast, propContrast);
-        }
-        private void syncWithCoreSystem()
-        {
-            double propBrightness = RayGetProperty(Property.Brightness);
-            double propContrast = RayGetProperty(Property.Contrast);
-
-            this.Brightness = (int)(((propBrightness - BrightnessMin) / (BrightnessMax - BrightnessMin)) * 100);
-            this.Contrast = (int)(((propContrast - ContrastMin) / (ContrastMax - ContrastMin)) * 100);
         }
 
 
