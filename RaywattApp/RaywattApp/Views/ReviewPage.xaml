@@ -23,13 +23,28 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Background="Gray">
-            <Label Content="{Binding [Review], Source={StaticResource L10N}}"></Label>
-        </StackPanel>
-
+        <Grid Grid.Row="0" Background="Gray">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <Label Content="{Binding [Review], Source={StaticResource L10N}}"></Label>
+                <Button Style="{StaticResource ButtonImportant}" Width="80" Content="2D"/>
+                <Button Style="{StaticResource ButtonImportant}" Width="80" Content="3D"/>
+                <Button Style="{StaticResource ButtonImportant}" Width="80" Content="Compare"/>
+                <Button Style="{StaticResource ButtonImportant}" Width="80" Content="AI FFR"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Style="{StaticResource ButtonBasic}" Width="80" Content="Measurement"/>
+                <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding EditCaseCommand}" Content="{Binding [Edit Case], Source={StaticResource L10N}}"/>
+                <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding EditPresetCommand}" Content="{Binding [Edit Preset], Source={StaticResource L10N}}"/>
+                <Button Style="{StaticResource ButtonBasic}" Width="80" Content="Save"/>
+            </StackPanel>
+        </Grid>
+        
         <StackPanel Grid.Row="1">
             <StackPanel Orientation="Vertical">
                 <StackPanel Height="10"/>
@@ -198,57 +213,24 @@
                 </Grid>
             </StackPanel>
         </StackPanel>
-
-        <StackPanel Grid.Row="2" Orientation="Vertical" Background="LightGray">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Grid Grid.Column="0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="2*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Grid.Column="0" Grid.Row="0" Text="{Binding [Brightness], Source={StaticResource L10N}}" HorizontalAlignment="Right" Margin="0,0,10,0"/>
-                    <Slider Grid.Column="1" Grid.Row="0" Maximum="100" Value="{Binding Brightness}" HorizontalAlignment="Stretch"/>
-                    <TextBlock Grid.Column="0" Grid.Row="1" Text="{Binding [Contrast], Source={StaticResource L10N}}" HorizontalAlignment="Right" Margin="0,0,10,0"/>
-                    <Slider Grid.Column="1" Grid.Row="1" Maximum="100" Value="{Binding Contrast}" HorizontalAlignment="Stretch"/>
-                </Grid>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
-                    <RepeatButton Content="◀|" Command="{Binding CmdPlayback}" CommandParameter="prev" Margin="10,10,10,10"/>
-                    <Button Content="{Binding PlayPauseState}" Command="{Binding CmdPlayback}" CommandParameter="play" Width="70" Margin="10,10,10,10"/>
-                    <RepeatButton Content="|▶" Command="{Binding CmdPlayback}" CommandParameter="next" Margin="10,10,10,10"/>
-                </StackPanel>
-            </Grid>
-        </StackPanel>
-        
-        <Grid Grid.Row="3">
+       
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
-
             <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" >
                 <StackPanel Orientation="Horizontal">
-                    <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding EditPresetCommand}" Content="{Binding [Edit Preset], Source={StaticResource L10N}}"/>
-                    <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding EditCaseCommand}" Content="{Binding [Edit Case], Source={StaticResource L10N}}"/>
+                    <Label Content="{Binding [Procedure], Source={StaticResource L10N}}"></Label>
+                    <Label Content="["></Label>
+                    <Label Content="{Binding PatientCase.Procedure, Converter={StaticResource CodeConverter}, ConverterParameter='PROC'}"></Label>
+                    <Label Content="]"></Label>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Label Content="{Binding [Vessel], Source={StaticResource L10N}}"></Label>
                     <Label Content="["></Label>
                     <Label Content="{Binding PatientCase.Vessel, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}"></Label>
-                    <Label Content="]"></Label>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="{Binding [Procedure], Source={StaticResource L10N}}"></Label>
-                    <Label Content="["></Label>
-                    <Label Content="{Binding PatientCase.Procedure, Converter={StaticResource CodeConverter}, ConverterParameter='PROC'}"></Label>
                     <Label Content="]"></Label>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
@@ -259,9 +241,16 @@
                 </StackPanel>
             </StackPanel>
 
-            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" >
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                <RepeatButton Content="◀|" Command="{Binding CmdPlayback}" CommandParameter="prev" Margin="5"/>
+                <Button Content="{Binding PlayPauseState}" Command="{Binding CmdPlayback}" CommandParameter="play" Width="70" Margin="5"/>
+                <RepeatButton Content="|▶" Command="{Binding CmdPlayback}" CommandParameter="next" Margin="5"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" >
                 <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}"/>
                 <Button Style="{StaticResource ButtonImportant}" Width="80" Command="{Binding EndReviewCommand}" Content="{Binding [End Review], Source={StaticResource L10N}}"/>
+                <Button Style="{StaticResource ButtonImportant}" Width="100" Content="{Binding [New Recording], Source={StaticResource L10N}}"/>
             </StackPanel>
         </Grid>
     </Grid>

@@ -68,6 +68,9 @@ namespace RaywattApp.ViewModels
         private string _headerId;
 
         [ObservableProperty]
+        private string _headerName;
+
+        [ObservableProperty]
         private string _headerLastname;
 
         [ObservableProperty]
@@ -163,6 +166,7 @@ namespace RaywattApp.ViewModels
             _log.Debug("SetHeaderNameInit");
 
             HeaderId = _l10n["ID"];
+            HeaderName = _l10n["Name"];
             HeaderLastname = _l10n["Last Name"];
             HeaderFirstname = _l10n["First Name"];
             HeaderBirthdate = _l10n["Birth Date"];
