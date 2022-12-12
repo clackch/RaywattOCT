@@ -107,6 +107,9 @@ namespace RaywattApp.Models
         private double _appositionThreshold;
 
         [ObservableProperty]
+        private string? _measurements;
+
+        [ObservableProperty]
         private DateTime createDate;
 
         [ObservableProperty]

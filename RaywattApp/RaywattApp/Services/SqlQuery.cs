@@ -140,6 +140,12 @@ namespace RaywattApp.Services
                 $"SELECT id, preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold, default_set, create_date, update_date " +
                 $"FROM rv_schema.patient_case_preset " +
                 $"ORDER BY default_set DESC, preset_name";
+
+            //SelectPatientCaseMeasurements
+            _query["SelectPatientCaseMeasurements"] =
+                $"SELECT measurements return_string " +
+                $"FROM rv_schema.patient_case " +
+                $"WHERE id = @id ";
         }
 
         private static void SetInsertQuery()
@@ -199,6 +205,7 @@ namespace RaywattApp.Services
                     $", brightness=@brightness, contrast=@contrast, angio_co_registration=@angio_co_registration" +
                     $", preset_name=@preset_name, calcium_threshold=@calcium_threshold, expansion_calculation=@expansion_calculation" +
                     $", expansion_threshold=@expansion_threshold, apposition_threshold=@apposition_threshold" +
+                    $", measurements=@measurements" +
                     $", update_date=now() " +
                 $"WHERE id=@id";
 
