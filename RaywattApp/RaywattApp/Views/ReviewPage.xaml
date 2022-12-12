@@ -114,7 +114,7 @@
                                 </i:Interaction.Triggers>
                             </Image>
                         </Canvas>
-                        <Label Content="{Binding FrameNumber}" VerticalAlignment="Bottom"/>
+                        <Label Content="{Binding FrameNumber}" VerticalAlignment="Bottom" Foreground="White"/>
                         <annotation:DrawUtil Visibility="{Binding VisibleMeasurement}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" Height="{StaticResource MeasurementSize}" Width="{StaticResource MeasurementSize}" VerticalAlignment="Center"/>
                     </Grid>
                 </Grid>

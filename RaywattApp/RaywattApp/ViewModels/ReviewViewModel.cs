@@ -210,7 +210,7 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
 
-                RaySetProperty(Property.BackgroundColor, 0xFFFFFF);
+                RaySetProperty(Property.BackgroundColor, 0x333333);
                 RayStartReview(PatientCase.Image);
 
                 SetMeasurements(PatientCase.Id);
