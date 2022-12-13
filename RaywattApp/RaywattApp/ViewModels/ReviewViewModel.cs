@@ -14,6 +14,12 @@ using System.Windows.Threading;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Views.Dialog;
 using static RaywattOCT.RayCoreWrapper;
+using static System.Net.Mime.MediaTypeNames;
+using RaywattApp.Common.Annotation.Models;
+using System.Windows;
+using SharpDX;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace RaywattApp.ViewModels
 {
@@ -85,6 +91,37 @@ namespace RaywattApp.ViewModels
         private DispatcherTimer timer = new DispatcherTimer();
         private DispatcherTimer timerUpdateImage = new DispatcherTimer();
 
+        [ObservableProperty]
+        private Visibility _visibleMeasurement;
+
+        private int measurementFrameNumber = -1;
+        public int MeasurementFrameNumber { 
+            get { return measurementFrameNumber; } 
+            set 
+            { 
+                if(VisibleMeasurement == Visibility.Visible)
+                {
+                    measurementFrameNumber = value; 
+                    OnPropertyChanged(nameof(MeasurementFrameNumber));
+                }
+            } 
+        }
+
+        private int frameNumber = 0;
+        public int FrameNumber
+        {
+            get { return frameNumber; }
+            set
+            {
+                frameNumber = value;
+                OnPropertyChanged(nameof(FrameNumber));
+            }
+        }
+
+        private List<Measurement> measurements;
+        public List<Measurement> Measurements { get { return measurements; } set { measurements = value; OnPropertyChanged(nameof(Measurements)); } }
+
+
         private ICommand _endReviewCommand;
         public ICommand EndReviewCommand
         {
@@ -95,6 +132,12 @@ namespace RaywattApp.ViewModels
         public ICommand BackCommand
         {
             get { return this._backCommand ?? (this._backCommand = new RelayCommand(Back)); }
+        }
+
+        private ICommand _measurementCommand;
+        public ICommand MeasurementCommand
+        {
+            get { return this._measurementCommand ?? (this._measurementCommand = new RelayCommand(ToggleMeasurement)); }
         }
 
         private ICommand _editCaseCommand;
@@ -149,6 +192,8 @@ namespace RaywattApp.ViewModels
             IndicatorLongitude.IsVisible = "Hidden";
             IndicatorLongitude.PropertyChanged += OnIndicatorLongitudeMoved;
 
+            VisibleMeasurement = Visibility.Collapsed;
+
             updatePlayPauseState();
         }
 
@@ -165,8 +210,10 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
 
-                RaySetProperty(Property.BackgroundColor, 0xFFFFFF);
+                RaySetProperty(Property.BackgroundColor, 0x333333);
                 RayStartReview(PatientCase.Image);
+
+                SetMeasurements(PatientCase.Id);
 
                 syncWithCoreSystem();
             }
@@ -201,6 +248,10 @@ namespace RaywattApp.ViewModels
             }
             else if (action.ToLower().Equals("play"))
             {
+                double pauseState = RayGetProperty(Property.IsPaused);
+                if(pauseState == 1)
+                    VisibleMeasurement = Visibility.Collapsed;
+
                 result = (RayError)RayPlayPause();
                 if (result == RayError.OK)
                 {
@@ -271,6 +322,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["expansion_calculation"] = PatientCase.ExpansionCalculation;
             sqlParameters["expansion_threshold"] = PatientCase.ExpansionThreshold;
             sqlParameters["apposition_threshold"] = PatientCase.AppositionThreshold;
+            sqlParameters["measurements"] = ConvertMeasurementsToJson();
 
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
 
@@ -292,6 +344,60 @@ namespace RaywattApp.ViewModels
             parameter["prevStatus"] = PrevStatus;
             WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = parameter });
         }
+
+        private void ToggleMeasurement()
+        {
+            double pauseState = RayGetProperty(Property.IsPaused);
+
+            if(pauseState == 0)
+            {
+                var result = (RayError)RayPlayPause();
+                if (result == RayError.OK)
+                {
+                    updatePlayPauseState();
+                }
+            }
+
+            if (VisibleMeasurement == Visibility.Collapsed)
+            {
+                VisibleMeasurement = Visibility.Visible;
+            }
+            else
+            {
+                VisibleMeasurement = Visibility.Collapsed;
+            }
+        }
+
+        private void SetMeasurements(string id)
+        {
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = PatientCase.Id;
+            IList<StringModel> jsonMeasurements = _sqlManager.SelectPatientCaseMeasurements(sqlParameters);
+            if(jsonMeasurements == null || jsonMeasurements.Count != 1 || jsonMeasurements[0].ReturnString == null)
+            {
+                Measurements = new List<Measurement>();
+            }
+            else
+            {
+                Measurements = JsonConvert.DeserializeObject<List<Measurement>>(jsonMeasurements[0].ReturnString);   
+            }
+        }
+
+        private string ConvertMeasurementsToJson()
+        {
+            List<Measurement> measurements = new List<Measurement>();
+
+            foreach(Measurement measurement in Measurements)
+            {
+                if(measurement.AreaGeometrys.Count > 0 || measurement.LengthGeometries.Count > 0 || measurement.TextGeometries.Count > 0)
+                {
+                    measurements.Add(measurement);
+                }
+            }
+
+            return JsonConvert.SerializeObject(measurements, Formatting.Indented);
+        }
+
 
         private void EditCase()
         {
@@ -334,6 +440,10 @@ namespace RaywattApp.ViewModels
                 CrossSectionImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgCrossSection);
 
                 if (!IndicatorLongitude.isCaptured) updateNavigator(crossSectionFrameInfo.curFrame, crossSectionFrameInfo.totalFrame);
+
+                FrameNumber = crossSectionFrameInfo.curFrame;
+                MeasurementFrameNumber = FrameNumber;
+
             }
             if (imgLongitude != null)
             {

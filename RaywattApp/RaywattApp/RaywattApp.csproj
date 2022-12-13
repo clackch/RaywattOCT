@@ -23,6 +23,9 @@
     <PackageReference Include="OpenCvSharp4.Extensions" Version="4.6.0.20220608" />
     <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.6.0.20220608" />
     <PackageReference Include="OpenCvSharp4.WpfExtensions" Version="4.6.0.20220608" />
+    <PackageReference Include="Rulyotano.Math" Version="2.0.0" />
+    <PackageReference Include="Rulyotano.Math.Geometry" Version="2.0.0" />
+    <PackageReference Include="Rulyotano.Math.Interpolation.Bezier" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>
