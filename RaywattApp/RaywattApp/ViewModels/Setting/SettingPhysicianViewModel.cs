@@ -160,6 +160,9 @@ namespace RaywattApp.ViewModels.Setting
             isModified = true;
 
             selectedPhysician = (Physician)dataGrid.SelectedItem;
+            if(selectedPhysician == null)
+                selectedPhysician = (Physician)dataGrid.CurrentItem;
+
             selectedPhysicianName = selectedPhysician.Name.Trim();
         }
 
@@ -168,6 +171,10 @@ namespace RaywattApp.ViewModels.Setting
             _log.Debug("RowEditEnding");
 
             Physician physician = (Physician)dataGrid.SelectedItem;
+            if (physician == null)
+                physician = (Physician)dataGrid.CurrentItem;
+            if (physician == null)
+                physician = (dataGrid.DataContext as SettingPhysicianViewModel).selectedPhysician;
 
             if (physician.Name.Trim() == "")
             {
