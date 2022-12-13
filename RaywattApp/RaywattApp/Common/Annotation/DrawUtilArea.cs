@@ -402,6 +402,10 @@ namespace RaywattApp.Common.Annotation
             label.Content = "[" + (group + 1) + "] " + (Math.Round(this.area, 3)).ToString();
 
             Point centerdPoint = GetCenterPoint(pointList);
+
+            if (centerdPoint.X > this.canvas.ActualWidth || centerdPoint.X < 0 || centerdPoint.Y > this.canvas.ActualHeight || centerdPoint.Y < 0)
+                return;
+
             Canvas.SetLeft(label, centerdPoint.X - 40);
             Canvas.SetTop(label, centerdPoint.Y - 10);
             this.canvas.Children.Add(label);
