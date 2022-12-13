@@ -402,8 +402,8 @@ namespace RaywattApp.Common.Annotation
             label.Content = "[" + (group + 1) + "] " + (Math.Round(this.area, 3)).ToString();
 
             Point centerdPoint = GetCenterPoint(pointList);
-            Canvas.SetLeft(label, centerdPoint.X);
-            Canvas.SetTop(label, centerdPoint.Y);
+            Canvas.SetLeft(label, centerdPoint.X - 40);
+            Canvas.SetTop(label, centerdPoint.Y - 10);
             this.canvas.Children.Add(label);
         }
 
@@ -466,20 +466,19 @@ namespace RaywattApp.Common.Annotation
 
         private Point GetCenterPoint(List<Point> pointList)
         {
-            int cnt = pointList.Count;
-            double centeredX = 0;
-            double centeredY = 0;
+            double cx = 0, cy = 0, area = 0;
 
-            foreach (Point point in pointList)
+            for(int i = 0, j = pointList.Count - 1; i < pointList.Count; j = i++)
             {
-                centeredX += point.X;
-                centeredY += point.Y;
+                double tri_area = pointList[i].X * pointList[j].Y - pointList[i].Y * pointList[j].X;
+                cx += (pointList[i].X + pointList[j].X) * tri_area;
+                cy += (pointList[i].Y + pointList[j].Y) * tri_area;
+                area += tri_area;
             }
+            cx /= 3 * area;
+            cy /= 3 * area;
 
-            centeredX = centeredX / cnt - 30;
-            centeredY = centeredY / cnt - 10;
-
-            return new Point(centeredX, centeredY);
+            return new Point(cx, cy);
         }
 
         //---------------------------------------------------------------------------------------------------- Function (Bezier Curve)
