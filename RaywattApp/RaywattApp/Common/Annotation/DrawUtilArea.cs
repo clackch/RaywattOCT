@@ -33,6 +33,8 @@ namespace RaywattApp.Common.Annotation
 
         private double lastY;
 
+        private PathGeometry overlayPathGeometry;
+
         private void AreaInit()
         {
             this.isRectClicked = false;
@@ -403,7 +405,7 @@ namespace RaywattApp.Common.Annotation
 
             Point centerdPoint = GetCenterPoint(pointList);
 
-            if (centerdPoint.X > this.canvas.ActualWidth || centerdPoint.X < 0 || centerdPoint.Y > this.canvas.ActualHeight || centerdPoint.Y < 0)
+            if (IsOverlayed(pointList, group, centerdPoint))
                 return;
 
             Canvas.SetLeft(label, centerdPoint.X - 40);
@@ -485,6 +487,49 @@ namespace RaywattApp.Common.Annotation
             return new Point(cx, cy);
         }
 
+        private bool IsOverlayed(List<Point> pointList, int group, Point point)
+        {
+            if(this.areaGeometrys.Count <= group)
+                return false;
+
+            PathFigureCollection pathFigures = this.overlayPathGeometry.Figures;
+            PathFigure pathFigure = pathFigures[0];
+            bool isFind = false;
+            int segmentCnt = pathFigure.Segments.Count;
+
+            for (int i=0; i< segmentCnt; i++)
+            {
+                var myPathFigure = new PathFigure { StartPoint = this.areaGeometrys[group].Points[i] };
+                var myPathSegmentCollection = new PathSegmentCollection();
+                myPathSegmentCollection.Add(pathFigure.Segments[i]);
+                myPathFigure.Segments = myPathSegmentCollection;
+                var myPathFigureCollection = new PathFigureCollection { myPathFigure };
+                var myPathGeometry = new PathGeometry { Figures = myPathFigureCollection };
+
+                for (int j=0; j< segmentCnt; j++)
+                {
+                    //인접한 라인은 비교 대상에서 제외
+                    if (i == j || i - 1 == j || i + 1 == j || (i == 0 && j == segmentCnt - 1) || (i == segmentCnt - 1 && j == 0))
+                        continue;
+
+                    var pathFigureCompare = new PathFigure { StartPoint = this.areaGeometrys[group].Points[j] };
+                    var pathSegmentCollectionCompare = new PathSegmentCollection();
+                    pathSegmentCollectionCompare.Add(pathFigure.Segments[j]);
+                    pathFigureCompare.Segments = pathSegmentCollectionCompare;
+                    var pathFigureCollectionCompare = new PathFigureCollection { pathFigureCompare };
+                    var pathGeometryCompare = new PathGeometry { Figures = pathFigureCollectionCompare };
+
+                    isFind = myPathGeometry.FillContainsWithDetail(pathGeometryCompare) == IntersectionDetail.Intersects ? true : false;
+                    if (isFind)
+                        break;
+                }
+                if (isFind)
+                    break;
+            }
+
+            return isFind;
+        }
+
         //---------------------------------------------------------------------------------------------------- Function (Bezier Curve)
         private PathGeometry? SetPathData(List<Point> pointList, bool isClosed)
         {
@@ -531,6 +576,8 @@ namespace RaywattApp.Common.Annotation
             myPathFigure.Segments = myPathSegmentCollection;
             var myPathFigureCollection = new PathFigureCollection { myPathFigure };
             var myPathGeometry = new PathGeometry { Figures = myPathFigureCollection };
+
+            this.overlayPathGeometry = myPathGeometry;
 
             return myPathGeometry;
         }
