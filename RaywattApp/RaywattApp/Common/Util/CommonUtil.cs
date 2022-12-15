@@ -4,11 +4,16 @@ using System;
 using System.Text.RegularExpressions;
 using System.Security.Cryptography;
 using log4net;
+using System.IO;
+using System.Text;
+using RaywattApp.Common.Bases;
 
 namespace RaywattApp.Common.Util
 {
     public class CommonUtil
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(CommonUtil));
+
         public static bool ValidateText(string input)
         {
             var regex = new Regex(@"^[a-zA-Z0-9ㄱ-ㅎ가-힣\s,.]+$");
@@ -70,6 +75,94 @@ namespace RaywattApp.Common.Util
                 }
             }
             return System.Text.Encoding.ASCII.GetString(rndNumbers);
+        }
+
+        public static bool Encryptor(string filePath, string contents)
+        {
+            try
+            {
+                using (FileStream fileStream = new(filePath, FileMode.Create))
+                {
+                    using (Aes aes = Aes.Create())
+                    {
+                        byte[] key = Encoding.UTF8.GetBytes(Constants.PublicKey);
+                        aes.Key = key;
+
+                        byte[] iv = aes.IV;
+                        fileStream.Write(iv, 0, iv.Length);
+
+                        using (CryptoStream cryptoStream = new(fileStream, aes.CreateEncryptor(), CryptoStreamMode.Write))
+                        {
+                            // By default, the StreamWriter uses UTF-8 encoding.
+                            // To change the text encoding, pass the desired encoding as the second parameter.
+                            // For example, new StreamWriter(cryptoStream, Encoding.Unicode).
+                            using (StreamWriter encryptWriter = new(cryptoStream))
+                            {
+                                encryptWriter.WriteLine(contents);
+                            }
+                        }
+                    }
+                }
+                _log.Debug("The file was encrypted.");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"The encryption failed. {ex}");
+                return false;
+            }
+        }
+
+        public static string[] Decryptor(string filePath)
+        {
+            string[] result = new string[2];
+
+            try
+            {
+                string contents = "";
+
+                using (FileStream fileStream = new(filePath, FileMode.Open))
+                {
+                    using (Aes aes = Aes.Create())
+                    {
+                        byte[] iv = new byte[aes.IV.Length];
+                        int numBytesToRead = aes.IV.Length;
+                        int numBytesRead = 0;
+                        while (numBytesToRead > 0)
+                        {
+                            int n = fileStream.Read(iv, numBytesRead, numBytesToRead);
+                            if (n == 0) break;
+
+                            numBytesRead += n;
+                            numBytesToRead -= n;
+                        }
+
+                        byte[] key = Encoding.UTF8.GetBytes(Constants.PublicKey);
+
+                        using (CryptoStream cryptoStream = new(fileStream, aes.CreateDecryptor(key, iv), CryptoStreamMode.Read))
+                        {
+                            // By default, the StreamReader uses UTF-8 encoding.
+                            // To change the text encoding, pass the desired encoding as the second parameter.
+                            // For example, new StreamReader(cryptoStream, Encoding.Unicode).
+                            using (StreamReader decryptReader = new(cryptoStream))
+                            {
+                                contents = decryptReader.ReadToEnd();
+                                _log.Debug($"The decrypted original message: {contents}");
+                            }
+                        }
+                    }
+                }
+                result[0] = "1";
+                result[1] = contents;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"The decryption failed. {ex}");
+                result[0] = "0";
+                result[1] = ex.ToString();
+                return result;
+            }
         }
     }
 }

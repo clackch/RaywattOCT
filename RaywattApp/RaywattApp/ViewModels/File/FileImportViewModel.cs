@@ -413,65 +413,65 @@ namespace RaywattApp.ViewModels.File
                 PatientCaseList = null;
                 return;
             }
+  
+            string[] result = CommonUtil.Decryptor(path);
 
-            try
+            if (result[0].Equals("1"))
             {
-                using (var sr = new StreamReader(path))
+                IList<Patient> patients = new List<Patient>();
+
+                string json = result[1];
+                if (!String.IsNullOrEmpty(json))
                 {
-                    IList<Patient> patients = new List<Patient>();
+                    JObject obj = JObject.Parse(json);
 
-                    string json = sr.ReadToEnd().ToString();
-                    if (!String.IsNullOrEmpty(json))
+                    ApproximateImportSize = Math.Round(GetLongValue(obj, "Size") / 1000.0 / 1000.0, 3);
+
+                    JArray patientArray = JArray.Parse(GetStrValue(obj, "PatientList"));
+                    foreach (JObject patientObj in patientArray)
                     {
-                        JObject obj = JObject.Parse(json);
+                        Patient patient = new Patient();
+                        patient.Id = GetStrValue(patientObj, "Id");
+                        patient.Lastname = GetStrValue(patientObj, "Lastname");
+                        patient.Firstname = GetStrValue(patientObj, "Firstname");
+                        patient.Name = patient.Firstname + ", " + patient.Lastname;
+                        patient.Birthdate = GetDateValue(patientObj, "Birthdate");
+                        patient.Gender = GetStrValue(patientObj, "Gender");
+                        patient.CreateDate = GetDateValue(patientObj, "CreateDate");
+                        patient.UpdateDate = GetDateValue(patientObj, "UpdateDate");
 
-                        ApproximateImportSize = Math.Round(GetLongValue(obj, "Size") /1000.0/1000.0, 3);
-
-                        JArray patientArray = JArray.Parse(GetStrValue(obj, "PatientList"));
-                        foreach (JObject patientObj in patientArray)
+                        JArray caseArray = JArray.Parse(GetStrValue(patientObj, "PatientCaseList"));
+                        patient.PatientCaseList = new List<PatientCase>();
+                        foreach (JObject caseObj in caseArray)
                         {
-                            Patient patient = new Patient();
-                            patient.Id = GetStrValue(patientObj, "Id");
-                            patient.Lastname = GetStrValue(patientObj, "Lastname");
-                            patient.Firstname = GetStrValue(patientObj, "Firstname");
-                            patient.Name = patient.Firstname + ", " + patient.Lastname;
-                            patient.Birthdate = GetDateValue(patientObj, "Birthdate");
-                            patient.Gender = GetStrValue(patientObj, "Gender");
-                            patient.CreateDate = GetDateValue(patientObj, "CreateDate");
-                            patient.UpdateDate = GetDateValue(patientObj, "UpdateDate");
+                            PatientCase patientCase = new PatientCase();
+                            patientCase.Id = GetStrValue(caseObj, "Id");
+                            patientCase.PatientId = GetStrValue(caseObj, "PatientId");
+                            patientCase.PhysicianName = GetStrValue(caseObj, "PhysicianName");
+                            patientCase.AccessionNumber = GetStrValue(caseObj, "AccessionNumber");
+                            patientCase.AccessionName = GetStrValue(caseObj, "AccessionName");
+                            patientCase.Comment = GetStrValue(caseObj, "Comment");
+                            patientCase.Vessel = GetStrValue(caseObj, "Vessel");
+                            patientCase.Procedure = GetStrValue(caseObj, "Procedure");
+                            patientCase.ThumbnailNo = GetIntValue(caseObj, "ThumbnailNo");
+                            patientCase.StillImageYn = GetStrValue(caseObj, "StillImageYn");
+                            patientCase.Image = GetStrValue(caseObj, "Image");
+                            patientCase.CreateDate = GetDateValue(caseObj, "CreateDate");
+                            patientCase.UpdateDate = GetDateValue(caseObj, "UpdateDate");
 
-                            JArray caseArray = JArray.Parse(GetStrValue(patientObj, "PatientCaseList"));
-                            patient.PatientCaseList = new List<PatientCase>();
-                            foreach (JObject caseObj in caseArray)
-                            {
-                                PatientCase patientCase = new PatientCase();
-                                patientCase.Id = GetStrValue(caseObj, "Id");
-                                patientCase.PatientId = GetStrValue(caseObj, "PatientId");
-                                patientCase.PhysicianName = GetStrValue(caseObj, "PhysicianName");
-                                patientCase.AccessionNumber = GetStrValue(caseObj, "AccessionNumber");
-                                patientCase.AccessionName = GetStrValue(caseObj, "AccessionName");
-                                patientCase.Comment = GetStrValue(caseObj, "Comment");
-                                patientCase.Vessel = GetStrValue(caseObj, "Vessel");
-                                patientCase.Procedure = GetStrValue(caseObj, "Procedure");
-                                patientCase.ThumbnailNo = GetIntValue(caseObj, "ThumbnailNo");
-                                patientCase.StillImageYn = GetStrValue(caseObj, "StillImageYn");
-                                patientCase.Image = GetStrValue(caseObj, "Image");
-                                patientCase.CreateDate = GetDateValue(caseObj, "CreateDate");
-                                patientCase.UpdateDate = GetDateValue(caseObj, "UpdateDate");
-
-                                patient.PatientCaseList.Add(patientCase);
-                            }
-                            patients.Add(patient);
+                            patient.PatientCaseList.Add(patientCase);
                         }
+                        patients.Add(patient);
                     }
-                    PatientList = patients;
                 }
+                PatientList = patients;
             }
-            catch (IOException e)
+            else
             {
-                _log.Error("The file could not be read:");
-                _log.Error(e.Message);
+                _log.Error("File Decrypt Error : " + result[1]);
             }
+            
+
         }
 
         private void ShowCase(Patient patient)

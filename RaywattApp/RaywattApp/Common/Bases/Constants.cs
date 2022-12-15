@@ -76,5 +76,8 @@
 
         //Data File Root Path (OCT raw files)
         public const string DataRootPath = "C:\\DataSave";
+
+        //Encrypt, Decrypt Public Key
+        public const string PublicKey = "raywatt07_hwjckklls_298-87-01441";
     }
 }
