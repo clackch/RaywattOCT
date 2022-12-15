@@ -16,6 +16,7 @@ using RaywattApp.Views.Dialog;
 using RaywattApp.Common.Bases;
 using Newtonsoft.Json;
 using RaywattApp.Services;
+using RaywattApp.Common.Util;
 
 namespace RaywattApp.ViewModels.File
 {
@@ -236,10 +237,7 @@ namespace RaywattApp.ViewModels.File
                 filePath = FileExport.ExternalDrivePath + "\\" + fileName + "." + Constants.FileExtension;
             }
 
-            using (StreamWriter sw = new StreamWriter(filePath))
-            {
-                sw.WriteLine(contents);
-            }
+            bool res = CommonUtil.Encryptor(filePath, contents);
         }
 
         private string MakeContents()
