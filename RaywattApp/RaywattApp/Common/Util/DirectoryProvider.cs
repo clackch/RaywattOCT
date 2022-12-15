@@ -105,9 +105,23 @@ namespace RaywattApp.Common.Util
             DirectoryItem findDirPosition = FindDirectory((DirectoryItem)DirItems[0], path);
             DirectoryItem newFolder = new DirectoryItem { Name = name, Path = fullPath };
             findDirPosition.AddDirItem(newFolder);
-            findDirPosition.Items = new ObservableCollection<DirectoryItem>(findDirPosition.Items.OrderBy(x => x.Name));
+            findDirPosition.Items = SortDirectoryItem(findDirPosition.Items);
+
 
             return true;
+        }
+
+        private ObservableCollection<DirectoryItem> SortDirectoryItem(ObservableCollection<DirectoryItem> items)
+        {
+            var tempObservableCollection = items.OrderBy(x => x.Name).ToList();
+            foreach (var temp in tempObservableCollection)
+            {
+                int oldIndex = items.IndexOf(temp);
+                int newIndex = tempObservableCollection.IndexOf(temp);
+                items.Move(oldIndex, newIndex);
+            }
+
+            return items;
         }
 
         public bool DuplicateCheckRename(string originPath, string orginName, string name)
