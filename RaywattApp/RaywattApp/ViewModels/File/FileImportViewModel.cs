@@ -468,6 +468,9 @@ namespace RaywattApp.ViewModels.File
             }
             else
             {
+                PatientList = null;
+                PatientCaseList = null;
+
                 _log.Error("File Decrypt Error");
             }
             
