@@ -103,7 +103,6 @@ namespace RaywattApp.Common.Util
                         }
                     }
                 }
-                _log.Debug("The file was encrypted.");
                 return true;
             }
             catch (Exception ex)
@@ -147,7 +146,6 @@ namespace RaywattApp.Common.Util
                             using (StreamReader decryptReader = new(cryptoStream))
                             {
                                 contents = decryptReader.ReadToEnd();
-                                _log.Debug($"The decrypted original message: {contents}");
                             }
                         }
                     }
@@ -158,7 +156,7 @@ namespace RaywattApp.Common.Util
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"The decryption failed. {ex}");
+                _log.Error($"The decryption failed. {ex}");
                 result[0] = "0";
                 result[1] = ex.ToString();
                 return result;

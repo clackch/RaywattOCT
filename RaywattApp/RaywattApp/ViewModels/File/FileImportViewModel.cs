@@ -468,7 +468,7 @@ namespace RaywattApp.ViewModels.File
             }
             else
             {
-                _log.Error("File Decrypt Error : " + result[1]);
+                _log.Error("File Decrypt Error");
             }
             
 
