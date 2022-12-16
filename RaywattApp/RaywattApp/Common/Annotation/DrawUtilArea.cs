@@ -409,7 +409,7 @@ namespace RaywattApp.Common.Annotation
 
             Point centerdPoint = GetCenterPoint(pointList);
             
-            if (IsOverlayed(pointList, group, centerdPoint))
+            if (IsOverlayed(pointList, group))
                 return;
             
             Canvas.SetLeft(label, centerdPoint.X - 40);
@@ -491,12 +491,52 @@ namespace RaywattApp.Common.Annotation
             return new Point(cx, cy);
         }
 
-        private bool IsOverlayed(List<Point> pointList, int group, Point point)
+        private bool IsOverlayedComplete(List<Point> pointList, int group)
         {
-            if (this.movingPointIndex == -1)
+            if (this.areaGeometrys.Count <= group)
                 return false;
 
-            if(this.areaGeometrys.Count <= group)
+            PathFigureCollection pathFigures = this.overlayPathGeometry.Figures;
+            PathFigure pathFigure = pathFigures[0];
+
+            bool isFind = false;
+            int segmentCnt = pathFigure.Segments.Count;
+
+            for (int i = 0; i < segmentCnt; i++)
+            {
+                var myPathFigure = new PathFigure { StartPoint = this.areaGeometrys[group].Points[i] };
+                var myPathSegmentCollection = new PathSegmentCollection();
+                myPathSegmentCollection.Add(pathFigure.Segments[i]);
+                myPathFigure.Segments = myPathSegmentCollection;
+                var myPathFigureCollection = new PathFigureCollection { myPathFigure };
+                var myPathGeometry = new PathGeometry { Figures = myPathFigureCollection };
+                for (int j = 0; j < segmentCnt; j++)
+                {
+                    //인접한 라인은 비교 대상에서 제외
+                    if (i == j)
+                        continue;
+                    var pathFigureCompare = new PathFigure { StartPoint = this.areaGeometrys[group].Points[j] };
+                    var pathSegmentCollectionCompare = new PathSegmentCollection();
+                    pathSegmentCollectionCompare.Add(pathFigure.Segments[j]);
+                    pathFigureCompare.Segments = pathSegmentCollectionCompare;
+                    var pathFigureCollectionCompare = new PathFigureCollection { pathFigureCompare };
+                    var pathGeometryCompare = new PathGeometry { Figures = pathFigureCollectionCompare };
+                    isFind = myPathGeometry.FillContainsWithDetail(pathGeometryCompare) == IntersectionDetail.Intersects ? true : false;
+                    if (isFind)
+                        break;
+                }
+                if (isFind)
+                    break;
+            }
+            return isFind;
+        }
+
+        private bool IsOverlayed(List<Point> pointList, int group)
+        {
+            if (this.movingPointIndex == -1)
+                return IsOverlayedComplete(pointList, group);
+
+            if (this.areaGeometrys.Count <= group)
                 return false;
 
             PathFigureCollection pathFigures = this.overlayPathGeometry.Figures;
