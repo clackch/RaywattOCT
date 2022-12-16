@@ -297,13 +297,15 @@ namespace RaywattApp.ViewModels.File
                     }
                     else if (d.DriveType == DriveType.Removable)
                     {
-                        currExternalDrive[d.Name] = d.Name;
+                        string driveName = d.Name.Replace("\\", "");
+
+                        currExternalDrive[driveName] = driveName;
                         long[] data = { d.TotalSize, d.AvailableFreeSpace };
-                        ExternalDriveList.Add(d.Name, data);
+                        ExternalDriveList.Add(driveName, data);
 
                         if (isFirstExternalDrive)
                         {
-                            firstExternalDrive = d.Name;
+                            firstExternalDrive = driveName;
                             isFirstExternalDrive = false;
                         }
                     }

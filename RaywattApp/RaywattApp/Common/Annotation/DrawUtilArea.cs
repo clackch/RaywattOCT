@@ -33,11 +33,14 @@ namespace RaywattApp.Common.Annotation
 
         private double lastY;
 
+        private int movingPointIndex;
+
         private PathGeometry overlayPathGeometry;
 
         private void AreaInit()
         {
             this.isRectClicked = false;
+            this.movingPointIndex = -1;
         }
 
         //---------------------------------------------------------------------------------------------------- Event
@@ -168,6 +171,7 @@ namespace RaywattApp.Common.Annotation
                 string[] tempArr = rectangle.Name.Split('_');
                 int group = int.Parse(tempArr[1]);
                 int index = int.Parse(tempArr[2]);
+                movingPointIndex = index;
                 AreaGeometry areaGeometry = this.areaGeometrys[group];
                 Point rectPoint = areaGeometry.Points[index];
 
@@ -404,10 +408,10 @@ namespace RaywattApp.Common.Annotation
             label.Content = "[" + (group + 1) + "] " + (Math.Round(this.area, 3)).ToString();
 
             Point centerdPoint = GetCenterPoint(pointList);
-
+            
             if (IsOverlayed(pointList, group, centerdPoint))
                 return;
-
+            
             Canvas.SetLeft(label, centerdPoint.X - 40);
             Canvas.SetTop(label, centerdPoint.Y - 10);
             this.canvas.Children.Add(label);
@@ -489,6 +493,9 @@ namespace RaywattApp.Common.Annotation
 
         private bool IsOverlayed(List<Point> pointList, int group, Point point)
         {
+            if (this.movingPointIndex == -1)
+                return false;
+
             if(this.areaGeometrys.Count <= group)
                 return false;
 
@@ -497,8 +504,30 @@ namespace RaywattApp.Common.Annotation
             bool isFind = false;
             int segmentCnt = pathFigure.Segments.Count;
 
-            for (int i=0; i< segmentCnt; i++)
+            var pathFigureFirst = new PathFigure { StartPoint = this.areaGeometrys[group].Points[this.movingPointIndex] };
+            var pathSegmentCollectionFirst = new PathSegmentCollection();
+            pathSegmentCollectionFirst.Add(pathFigure.Segments[this.movingPointIndex]);
+            pathFigureFirst.Segments = pathSegmentCollectionFirst;
+            var pathFigureCollectionFirst = new PathFigureCollection { pathFigureFirst };
+            var pathGeometryFirst = new PathGeometry { Figures = pathFigureCollectionFirst };
+
+            int movingPointIndexSecond = 0;
+            if (movingPointIndex == 0)
+                movingPointIndexSecond = pointList.Count - 1;
+            else
+                movingPointIndexSecond = this.movingPointIndex - 1;
+            var pathFigureSecond = new PathFigure { StartPoint = this.areaGeometrys[group].Points[movingPointIndexSecond] };
+            var pathSegmentCollectionSecond = new PathSegmentCollection();
+            pathSegmentCollectionSecond.Add(pathFigure.Segments[movingPointIndexSecond]);
+            pathFigureSecond.Segments = pathSegmentCollectionSecond;
+            var pathFigureCollectionSecond = new PathFigureCollection { pathFigureSecond };
+            var pathGeometrySecond = new PathGeometry { Figures = pathFigureCollectionSecond };
+
+            for (int i = 0; i < segmentCnt; i++)
             {
+                if (i == this.movingPointIndex || i == movingPointIndexSecond)
+                    continue;
+
                 var myPathFigure = new PathFigure { StartPoint = this.areaGeometrys[group].Points[i] };
                 var myPathSegmentCollection = new PathSegmentCollection();
                 myPathSegmentCollection.Add(pathFigure.Segments[i]);
@@ -506,27 +535,16 @@ namespace RaywattApp.Common.Annotation
                 var myPathFigureCollection = new PathFigureCollection { myPathFigure };
                 var myPathGeometry = new PathGeometry { Figures = myPathFigureCollection };
 
-                for (int j=0; j< segmentCnt; j++)
-                {
-                    //인접한 라인은 비교 대상에서 제외
-                    if (i == j || i - 1 == j || i + 1 == j || (i == 0 && j == segmentCnt - 1) || (i == segmentCnt - 1 && j == 0))
-                        continue;
+                isFind = myPathGeometry.FillContainsWithDetail(pathGeometryFirst) == IntersectionDetail.Intersects ? true : false;
+                if (isFind)
+                    break;
 
-                    var pathFigureCompare = new PathFigure { StartPoint = this.areaGeometrys[group].Points[j] };
-                    var pathSegmentCollectionCompare = new PathSegmentCollection();
-                    pathSegmentCollectionCompare.Add(pathFigure.Segments[j]);
-                    pathFigureCompare.Segments = pathSegmentCollectionCompare;
-                    var pathFigureCollectionCompare = new PathFigureCollection { pathFigureCompare };
-                    var pathGeometryCompare = new PathGeometry { Figures = pathFigureCollectionCompare };
-
-                    isFind = myPathGeometry.FillContainsWithDetail(pathGeometryCompare) == IntersectionDetail.Intersects ? true : false;
-                    if (isFind)
-                        break;
-                }
+                isFind = myPathGeometry.FillContainsWithDetail(pathGeometrySecond) == IntersectionDetail.Intersects ? true : false;
                 if (isFind)
                     break;
             }
 
+            this.movingPointIndex = -1;
             return isFind;
         }
 
