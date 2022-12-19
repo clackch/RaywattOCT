@@ -68,6 +68,7 @@ namespace RaywattOCT
             SaveRawData,
             UpdateCutView,
             GenerateVolume,
+            LumenDetection,
             AutoCalibration,
             Pullback,
             LoadCatheter,

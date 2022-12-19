@@ -12,6 +12,7 @@
 #include "LaserController.h"
 #include "MotorController.h"
 #include "ZaberController.h"
+#include "RayLearning.h"
 
 /*
 * COCTSystem
@@ -25,6 +26,7 @@ COCTSystem::COCTSystem() {
 	m_pThreadSaveRaw = nullptr;
 	m_pThreadUpdateCutView = nullptr;
 	m_pThreadGenerateVolume = nullptr;
+	m_pThreadLumenDetection = nullptr;
 	m_pThreadRotaryJunction = nullptr;
 
 	m_pImagingRealtime = nullptr;
@@ -37,6 +39,7 @@ COCTSystem::COCTSystem() {
 
 	m_pAcqDevice = nullptr;	
 	m_pSimDevice = nullptr;
+	m_pLearning = nullptr;
 
 	m_prevState = RayScannerState::Initial;
 	m_curState = RayScannerState::Initial;
@@ -96,6 +99,7 @@ RayError COCTSystem::Stop() {
 	CUtility::StopThread(m_pThreadSaveRaw);
 	CUtility::StopThread(m_pThreadUpdateCutView);
 	CUtility::StopThread(m_pThreadGenerateVolume);
+	CUtility::StopThread(m_pThreadLumenDetection);
 	CUtility::StopThread(m_pThreadRotaryJunction);
 
 	terminateSimulation();
@@ -104,6 +108,11 @@ RayError COCTSystem::Stop() {
 		m_pAcqDevice->StopAcquisition();
 		delete m_pAcqDevice;
 		m_pAcqDevice = nullptr;
+	}
+	if (m_pSimDevice != nullptr) {
+		m_pSimDevice->StopAcquisition();
+		delete m_pSimDevice;
+		m_pSimDevice = nullptr;
 	}
 	if (m_pImagingRealtime != nullptr) {
 		m_pImagingRealtime->Stop();
@@ -126,6 +135,10 @@ RayError COCTSystem::Stop() {
 	if (m_pVolume != nullptr) {
 		delete m_pVolume;
 		m_pVolume = nullptr;
+	}
+	if (m_pLearning != nullptr) {
+		delete m_pLearning;
+		m_pLearning = nullptr;
 	}
 
 	CMotorController* pMotor = CMotorController::GetInstance();
@@ -621,6 +634,12 @@ UINT COCTSystem::threadService(LPVOID param) {
 	// Connect to COM Interface first time asynchronous
 	CLaserController::GetInstance();
 
+	// Initialize (first prediction)
+	cv::Mat imgSample = cv::imread(".\\oct_sample.png");
+	pSystem->m_pLearning = new CRayLearning();
+	pSystem->m_pLearning->Initialize(true);
+	pSystem->m_pLearning->FindLumen(imgSample);
+
 	while (pThread->isRun) {
 		std::tuple<int, WPARAM, LPARAM> popMsgThread = pSystem->popMessage();
 		int popMsg = std::get<0>(popMsgThread);
@@ -760,6 +779,39 @@ UINT COCTSystem::threadGenerateVolume(LPVOID param) {
 
 	// wait for StopThread
 	while (pSystem->m_pThreadGenerateVolume->isRun) {
+		Sleep(DELAY_FOR_STOP_THREAD);
+	}
+
+	return NOERROR;
+}
+
+/*
+* threadLumenDetection
+*/
+UINT COCTSystem::threadLumenDetection(LPVOID param) {
+	COCTSystem* pSystem = (COCTSystem*)param;
+	IDataManager* pDataManager = pSystem->m_pSimulationData;
+	std::vector<std::vector<std::vector<cv::Point>>>& vLumen = pSystem->m_vLumen;
+
+	CRayLearning* pLearning = pSystem->m_pLearning;
+	const int nNumOfSamples = pDataManager->GetNumOfSamples();
+
+	// prepare imaging
+	COCTImaging* pImaging = pSystem->createColorImaging(NULL);
+
+	vLumen.clear();
+	for (int nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadLumenDetection->isRun; nFrame++) {
+		unsigned short* pBuffer = pDataManager->GetSample(nFrame);
+
+		pImaging->Process(pBuffer);
+		vLumen.push_back(pLearning->FindLumen(pImaging->GetCircleImage()));
+	}
+	delete pImaging;
+
+	pSystem->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::LumenDetection);
+
+	// wait for StopThread
+	while (pSystem->m_pThreadLumenDetection->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
 	}
 
@@ -1087,7 +1139,7 @@ LRESULT COCTSystem::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 		image = m_pImagingSimulate->GetCircleImage();
 		m_nOffsetNavigation = nCurFrame;
 
-		if (m_pThreadUpdateCutView == NULL) {
+		if (m_pThreadUpdateCutView == nullptr) {
 			updateCutView(nTotalFrame);
 		}
 	}
@@ -1175,11 +1227,13 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 	case RayScannerState::Initial:
 		CUtility::StopThread(m_pThreadUpdateCutView);
 		CUtility::StopThread(m_pThreadGenerateVolume);
+		CUtility::StopThread(m_pThreadLumenDetection);
 		// To-Do: unload catheter
 		break;
 	case RayScannerState::Default:
 		CUtility::StopThread(m_pThreadUpdateCutView);
 		CUtility::StopThread(m_pThreadGenerateVolume);
+		CUtility::StopThread(m_pThreadLumenDetection);
 		break;
 	case RayScannerState::Scanning:
 		CUtility::StartThread(threadPullbackScan, m_pThreadRotaryJunction, this);
@@ -1191,6 +1245,7 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 
 		CUtility::StartThread(threadUpdateCutView, m_pThreadUpdateCutView, this);
 		CUtility::StartThread(threadGenerateVolume, m_pThreadGenerateVolume, this);
+		CUtility::StartThread(threadLumenDetection, m_pThreadLumenDetection, this);
 
 		m_pSimDevice->StartAcquisition();
 		break;
@@ -1256,6 +1311,9 @@ LRESULT COCTSystem::OnMsgNotifyProcessDone(WPARAM wParam, LPARAM lParam) {
 		break;
 	case RayWorkItem::GenerateVolume:
 		CUtility::StopThread(m_pThreadGenerateVolume);
+		break;
+	case RayWorkItem::LumenDetection:
+		CUtility::StopThread(m_pThreadLumenDetection);
 		break;
 	default:
 		return NOERROR;
