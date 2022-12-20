@@ -119,15 +119,31 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\Utility;..\lib\include;..\extern\opencv\include;..\extern\ATS\include;..\extern\ipp\include;..\extern\libusb\include\libusb-1.0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Utility;..\lib\include;..\extern\opencv\include;..\extern\ATS\include;..\extern\ipp\include;..\extern\libusb\include\libusb-1.0;..\extern\libtorch\include;..\extern\libtorch\include\torch\csrc\api\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>..\lib;..\extern\opencv\lib;..\extern\ATS\Library\x64;..\extern\ipp\lib\intel64;..\extern\libusb\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib;..\extern\opencv\lib;..\extern\ATS\Library\x64;..\extern\ipp\lib\intel64;..\extern\libusb\lib\x64;..\extern\libtorch\lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(TargetDir)*.dll" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
+xcopy "$(TargetDir)raycore.ini" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
+xcopy "$(TargetDir)CALIBRATION.dat" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
+xcopy "$(TargetDir)LUT.csv" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
+xcopy "$(SolutionDir)extern\libtorch\model\*.pt" "$(ProjectDir)..\..\RaywattOCT\bin\" /y
+xcopy "$(SolutionDir)extern\libtorch\lib\debug\*.dll" "$(ProjectDir)..\..\RaywattOCT\bin\" /y
+xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
+xcopy "$(TargetDir)*.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
+xcopy "$(TargetDir)raycore.ini" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
+xcopy "$(TargetDir)CALIBRATION.dat" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
+xcopy "$(TargetDir)LUT.csv" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
+xcopy "$(SolutionDir)extern\libtorch\model\*.pt" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y
+xcopy "$(SolutionDir)extern\libtorch\lib\debug\*.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y
+xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -140,7 +156,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\Utility;..\lib\include;..\extern\opencv\include;..\extern\ATS\include;..\extern\ipp\include;..\extern\libusb\include\libusb-1.0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Utility;..\lib\include;..\extern\opencv\include;..\extern\ATS\include;..\extern\ipp\include;..\extern\libusb\include\libusb-1.0;..\extern\libtorch\include;..\extern\libtorch\include\torch\csrc\api\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
@@ -149,17 +165,23 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>..\lib;..\extern\opencv\lib;..\extern\ATS\Library\x64;..\extern\ipp\lib\intel64;..\extern\libusb\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib;..\extern\opencv\lib;..\extern\ATS\Library\x64;..\extern\ipp\lib\intel64;..\extern\libusb\lib\x64;..\extern\libtorch\lib\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(TargetDir)*.dll" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
 xcopy "$(TargetDir)raycore.ini" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
 xcopy "$(TargetDir)CALIBRATION.dat" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
 xcopy "$(TargetDir)LUT.csv" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
+xcopy "$(SolutionDir)extern\libtorch\model\*.pt" "$(ProjectDir)..\..\RaywattOCT\bin\" /y
+xcopy "$(SolutionDir)extern\libtorch\lib\release\*.dll" "$(ProjectDir)..\..\RaywattOCT\bin\" /y
+xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
 xcopy "$(TargetDir)*.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(TargetDir)raycore.ini" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(TargetDir)CALIBRATION.dat" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
-xcopy "$(TargetDir)LUT.csv" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d</Command>
+xcopy "$(TargetDir)LUT.csv" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
+xcopy "$(SolutionDir)extern\libtorch\model\*.pt" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y
+xcopy "$(SolutionDir)extern\libtorch\lib\release\*.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y
+xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

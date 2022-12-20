@@ -63,6 +63,7 @@ enum class RayWorkItem {
 	SaveRawData,
 	UpdateCutView,
 	GenerateVolume,
+	LumenDetection,
 	AutoCalibration,
 	Pullback,
 	LoadCatheter,

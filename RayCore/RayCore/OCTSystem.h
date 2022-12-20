@@ -21,6 +21,7 @@ class CThread;
 class COCTImaging;
 class CCutViewManager;
 class CVolumeGenerator;
+class CRayLearning;
 class COCTSystem : public CMessageService
 {
 private:
@@ -39,6 +40,7 @@ private:
 	CThread* m_pThreadSaveRaw;
 	CThread* m_pThreadUpdateCutView;
 	CThread* m_pThreadGenerateVolume;
+	CThread* m_pThreadLumenDetection;
 	CThread* m_pThreadRotaryJunction;
 	
 	// Imaging
@@ -61,6 +63,10 @@ private:
 
 	// Simulation
 	IAcquisitionDevice* m_pSimDevice;
+
+	// Machine Learning
+	CRayLearning* m_pLearning;
+	std::vector<std::vector<std::vector<cv::Point>>> m_vLumen;
 
 	RayScannerState m_prevState;
 	RayScannerState m_curState;
@@ -126,6 +132,7 @@ private:
 	static UINT threadSaveRaw(LPVOID param);
 	static UINT threadUpdateCutView(LPVOID param);
 	static UINT threadGenerateVolume(LPVOID param);
+	static UINT threadLumenDetection(LPVOID param);
 	
 	// Rotary Junction Thread (stop in OnMsgDeviceWorkDone func)
 	static UINT threadAutoCalibration(LPVOID param);
