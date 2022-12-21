@@ -148,6 +148,7 @@ namespace RaywattApp.Common.Annotation
                 return;
 
             this.canvas.Children.Clear();
+            this.canvasBackground.Children.Clear();
             this.areaGeometrys.Clear();
             this.lengthGeometries.Clear();
             this.textGeometries.Clear();

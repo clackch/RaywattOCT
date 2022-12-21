@@ -91,6 +91,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
+        <Canvas Grid.RowSpan="2" Name="canvasBackground" Background="Transparent"/>
         <Canvas Grid.RowSpan="2" Name="canvas" Background="Transparent"/>
         <StackPanel Grid.Row="0" Orientation="Horizontal">
             <Button Height="20" Content="Area" Click="area_Add"/>
