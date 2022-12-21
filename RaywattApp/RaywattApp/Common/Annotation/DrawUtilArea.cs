@@ -455,7 +455,10 @@ namespace RaywattApp.Common.Annotation
             path.Data = GetLine(firstPoint, secondPoint);
             path.Stroke = brushes[group % brushes.Length];
             path.Name = prefix + "_" + group;
-            path.StrokeDashArray.Add(2);
+            if (prefix.Equals(constMinDiameter))
+                path.StrokeDashArray.Add(2);
+            else
+                path.StrokeDashArray.Add(4);
 
             this.canvas.Children.Add(path);
         }

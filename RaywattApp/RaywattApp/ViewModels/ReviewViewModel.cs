@@ -391,6 +391,14 @@ namespace RaywattApp.ViewModels
             {
                 if(measurement.AreaGeometrys.Count > 0 || measurement.LengthGeometries.Count > 0 || measurement.TextGeometries.Count > 0)
                 {
+                    if (measurement.AreaGeometrys.Count > 0)
+                    {
+                        foreach (AreaGeometry geometry in measurement.AreaGeometrys)
+                        {
+                            geometry.PointsAll = null;
+                            geometry.Path = null;
+                        }
+                    }
                     measurements.Add(measurement);
                 }
             }
