@@ -536,23 +536,6 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
-        private Point GetCenterPoint(List<Point> pointList)
-        {
-            double cx = 0, cy = 0, area = 0;
-
-            for (int i = 0, j = pointList.Count - 1; i < pointList.Count; j = i++)
-            {
-                double tri_area = pointList[i].X * pointList[j].Y - pointList[i].Y * pointList[j].X;
-                cx += (pointList[i].X + pointList[j].X) * tri_area;
-                cy += (pointList[i].Y + pointList[j].Y) * tri_area;
-                area += tri_area;
-            }
-            cx /= 3 * area;
-            cy /= 3 * area;
-
-            return new Point(cx, cy);
-        }
-
         private bool IsOverlayedComplete(List<Point> pointList, int group)
         {
             if (this.areaGeometrys.Count <= group)
