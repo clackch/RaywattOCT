@@ -635,7 +635,7 @@ namespace RaywattApp.Common.Annotation
 
         private void UpdateGeometry(AreaGeometry areaGeometry)
         {
-            areaGeometry.CenterOfMass = CalulateMassCenter();
+            areaGeometry.CenterOfMass = CalculateMassCenter();
             areaGeometry.PointsAll = FindAllPoints();
         }
 
@@ -678,7 +678,7 @@ namespace RaywattApp.Common.Annotation
             this.canvasBackground.UpdateLayout();
         }
 
-        private Point CalulateMassCenter() {
+        private Point CalculateMassCenter() {
             OpenCvSharp.Point[][] contours;
             HierarchyIndex[] hierarchy;
             Cv2.FindContours(imageContour, out contours, out hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
