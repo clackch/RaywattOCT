@@ -352,7 +352,7 @@ namespace RaywattApp.ViewModels.File
             {
                 if (drive.Name.Equals(configDrive))
                 {
-                    AvailableSpace = Math.Round(drive.AvailableFreeSpace/1024.0/1024.0/1024.0, 3); //GB
+                    AvailableSpace = CommonUtil.ByteToGB(drive.AvailableFreeSpace);
                     break;
                 }
             }
@@ -438,7 +438,7 @@ namespace RaywattApp.ViewModels.File
                 {
                     JObject obj = JObject.Parse(json);
 
-                    ApproximateImportSize = Math.Round(GetLongValue(obj, "Size") / 1024.0 / 1024.0 / 1024.0, 3); //GB
+                    ApproximateImportSize = CommonUtil.ByteToGB(GetLongValue(obj, "Size"));
 
                     JArray patientArray = JArray.Parse(GetStrValue(obj, "PatientList"));
                     foreach (JObject patientObj in patientArray)

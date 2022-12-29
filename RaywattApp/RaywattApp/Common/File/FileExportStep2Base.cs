@@ -5,6 +5,7 @@ using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
+using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.Views.Dialog;
 using System;
@@ -85,8 +86,8 @@ namespace RaywattApp.Common.File
                         {
                             if (value.Equals(item.Key))
                             {
-                                ExternalDriveTotalSize = Math.Round(((long[])item.Value)[0] / 1024.0 / 1024.0 / 1024.0, 3);
-                                ExternalDriveAvailableFreeSpace = Math.Round(((long[])item.Value)[1] / 1024.0 / 1024.0 / 1024.0, 3);
+                                ExternalDriveTotalSize = CommonUtil.ByteToGB(((long[])item.Value)[0]);
+                                ExternalDriveAvailableFreeSpace = CommonUtil.ByteToGB(((long[])item.Value)[1]);
                                 break;
                             }
                         }

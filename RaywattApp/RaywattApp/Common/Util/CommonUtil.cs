@@ -259,5 +259,11 @@ namespace RaywattApp.Common.Util
                 progress(total_read);
             }
         }
+
+        public static double ByteToGB(double bytes)
+        {
+            double div = 1024.0;
+            return Math.Round(bytes / div / div / div, 3);
+        }
     }
 }

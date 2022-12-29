@@ -67,7 +67,7 @@ namespace RaywattApp.ViewModels.File
                 ExportSize += CommonUtil.GetFileSize(patientCase.Image);
             }
 
-            ExportSize = Math.Round(ExportSize / 1024.0 / 1024.0 / 1024.0, 3);
+            ExportSize = CommonUtil.ByteToGB(ExportSize);
         }
 
         protected override void Export()
