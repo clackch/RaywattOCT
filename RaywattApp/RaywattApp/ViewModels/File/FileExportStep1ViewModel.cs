@@ -76,6 +76,9 @@ namespace RaywattApp.ViewModels.File
             {
                 FileExport = (FileExport)extraData;
 
+                if (FileExport.Material == null)
+                    FileExport.Material = Constants.ExportMaterialPullback;
+
                 if(FileExport.SelectedItem !=  null)
                 {
                     SetCondition();
@@ -141,8 +144,10 @@ namespace RaywattApp.ViewModels.File
                     WeakReferenceMessenger.Default.Send(new PopupNavigationMessage("Views/File/FileExportStep2NativePage.xaml") { Parameter = FileExport });
                     break;
                 case Constants.ExportTypeDicom:
+                    WeakReferenceMessenger.Default.Send(new PopupNavigationMessage("Views/File/FileExportStep2DicomPage.xaml") { Parameter = FileExport });
                     break;
                 case Constants.ExportTypeStandard:
+                    WeakReferenceMessenger.Default.Send(new PopupNavigationMessage("Views/File/FileExportStep2StandardPage.xaml") { Parameter = FileExport });
                     break;
                 default:
                     break;

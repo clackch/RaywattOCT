@@ -152,6 +152,12 @@ namespace RaywattApp.ViewModels
             get { return this._editPresetCommand ?? (this._editPresetCommand = new RelayCommand(EditPreset)); }
         }
 
+        private ICommand _exportCommand;
+        public ICommand ExportCommand
+        {
+            get { return this._exportCommand ?? (this._exportCommand = new RelayCommand(Export)); }
+        }
+
         private ICommand _cmdPlayback;
         public ICommand CmdPlayback
         { 
@@ -439,6 +445,25 @@ namespace RaywattApp.ViewModels
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
             WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/ReviewPresetPage.xaml") { Parameter = parameter });
+        }
+
+        private void Export()
+        {
+            _log.Debug("Export");
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["fileType"] = CommonDefinition.FileType.Export;
+            FileExport fileExport = new FileExport();
+            fileExport.PatientId = Patient.Id;
+            fileExport.SelectedItem = new List<string>();
+            fileExport.SelectedItem.Add(PatientCase.Id);
+            fileExport.IsFromReview = true;
+            fileExport.CurrentFrame = FrameNumber;
+            fileExport.BookmarkedFrames = new List<int>();
+            //TO-DO : Bookmark 기능 추가 후, bookmark 된 내역 전달 필요
+            parameter["fileExport"] = fileExport;
+
+            var result = _dialogService.OpenDialog(new FileDialogControl(), parameter);
         }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)

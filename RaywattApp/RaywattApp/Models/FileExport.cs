@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using RaywattApp.Common.Bases;
 using System.Collections.Generic;
 
 namespace RaywattApp.Models
@@ -15,28 +16,22 @@ namespace RaywattApp.Models
         private List<string> selectedItem;
 
         [ObservableProperty]
+        private bool isFromReview;
+
+        [ObservableProperty]
+        private int currentFrame;
+
+        [ObservableProperty]
+        private List<int> bookmarkedFrames;
+
+        [ObservableProperty]
         private string type; //Native, DICOM, Standard
 
         [ObservableProperty]
         private string material; //Pullback, Current Frame, Bookmarked Frames
 
         [ObservableProperty]
-        private string purpose; //Archive, Share, Report a Problem
-
-        [ObservableProperty]
-        private bool passwordProtected;
-
-        [ObservableProperty]
-        private string password;
-
-        [ObservableProperty]
-        private string confirmPassword;
-
-        [ObservableProperty]
-        private Dictionary<string, string> alternatePatientId; //key=id, value=alternate id. value가 빈 값이면, 대체 ID 설정이 안된 상태
-
-        [ObservableProperty]
-        private string fileOption; //Leave Unchanged, Mark as Archived, Remove when Complete
+        private bool removeWhenComplete; //Remove when Complete
 
         [ObservableProperty]
         private string diskType; //CD/DVD, External Drive
@@ -52,5 +47,51 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private bool ejectWhenComplete;
+
+        [ObservableProperty]
+        private string imageType; //Multi-frame True Color Secondary Capture, Secondary Capture, Ultrasound Multi-frame, Intravascular OCT - For Presentation
+
+        [ObservableProperty]
+        private string format; //RGB, Palette
+
+        [ObservableProperty]
+        private string measurements; //Show All, Hide Lumen Contour, Hide All
+
+        [ObservableProperty]
+        private string modality; //OCT, Other(OT), Ultrasound(US)
+
+        private int frameWidth; //Frame Resolution Width
+        public int FrameWidth
+        {
+            get { return frameWidth; }
+            set 
+            { 
+                frameWidth = value;
+                frameHeight = (int)(value * Constants.FrameWidthHeight);
+                OnPropertyChanged(nameof(FrameWidth));
+                OnPropertyChanged(nameof(FrameHeight));
+            }
+        }
+
+        [ObservableProperty]
+        private int frameHeight; //Frame Resolution Height
+
+        [ObservableProperty]
+        private bool patientInfoAnonymize; //Patient Information Anonymize
+
+        [ObservableProperty]
+        private bool includeRegionCalibration; // Include Region Calibration(Calibrated images only)
+
+        [ObservableProperty]
+        private string pullback; //AVI, TIFF
+
+        [ObservableProperty]
+        private string compressor; //None, MS-MPEG4 V2, Microsoft Video 1
+
+        [ObservableProperty]
+        private string stillFrame; //JPEG, Bitmap, TIFF
+
+        [ObservableProperty]
+        private bool angioView; //Advanced View - Angio Co-Registration
     }
 }

@@ -27,21 +27,61 @@
         public const string ExportTypeDicom = "D";
         public const string ExportTypeStandard = "S";
 
-        //Export Purpose - Archive, Share, Report a Problem
-        public const string ExportPurposeArchive = "A";
-        public const string ExportPurposeShare = "S";
-        public const string ExportPurposeReport = "R";
-
-        //Export File Option - Leave Unchanged, Mark as Archived, Remove when Complete
-        public const string ExportOptionUnchanged = "U";
-        public const string ExportOptionArchived = "A";
-        public const string ExportOptionRemove = "R";
+        //Export Material - Pullback, Current Frame, Bookmarked Frames
+        public const string ExportMaterialPullback = "P";
+        public const string ExportMaterialCurrent = "C";
+        public const string ExportMaterialBookmarked = "B";
 
         //Disk Type - CD/DVD, External Drive        
         public const string FileDiskCd = "C";
         public const string FileDiskExternal = "E";
-        
-        //File Import
+
+        //Export(Raw) File Option - Leave Unchanged, Remove when Complete
+        public const string ExportOptionUnchanged = "U";
+        public const string ExportOptionRemove = "R";
+
+        //Export(DICOM) Image Type - Multi-frame True Color Secondary Capture, Secondary Capture, Ultrasound Multi-frame, Intravascular OCT - For Presentation
+        public const string ExportImageTypeMultiframe = "M";
+        public const string ExportImageTypeSecondary = "S";
+        public const string ExportImageTypeUltrasound = "U";
+        public const string ExportImageTypeIntravascular = "I";
+
+        //Export(DICOM) Format - RGB, Palette
+        public const string ExportFormatRGB = "R";
+        public const string ExportFormatPalette = "P";
+
+        //Export(DICOM) Measurements - Show All, Hide Lumen Contour, Hide All
+        public const string ExportMeasurementShowAll = "S";
+        public const string ExportMeasurementHideLumen = "L";
+        public const string ExportMeasurementHideAll = "H";
+
+        //Export(DICOM) Modality - OCT, Other(OT), Ultrasound(US)
+        public const string ExportModalityOCT = "O";
+        public const string ExportModalityOther = "T";
+        public const string ExportModalityUltrasound = "U";
+
+        //Export(Standard) Pullback - AVI, TIFF
+        public const string ExportPullbackAVI = "A";
+        public const string ExportPullbackTIFF = "T";
+
+        //Export(Standard) Compressor - None, MS-MPEG4 V2, Microsoft Video 1
+        public const string ExportCompressorNone = "N";
+        public const string ExportCompressorMPEG4 = "M";
+        public const string ExportCompressorVideo = "V";
+
+        //Export(Standard) Still Frame - JPEG, Bitmap, TIFF
+        public const string ExportStillFrameJPEG = "J";
+        public const string ExportStillFrameBitmap = "B";
+        public const string ExportStillFrameTIFF = "T";
+
+        //Export(DICOM, Standard) Frame Resolution
+        public const int MaxFrameWidth = 1024;
+        public const int MinFrameWidth = 704;
+        public const double FrameWidthHeight = 1.5;
+        public const int FrameTickFrequency = 20;
+
+        //File Import/Export
+        public const string FileImageExtension = "bin";
         public const string FileExtension = "dbf";
         public const string FileNamePrefix = "Export_";
         
@@ -74,7 +114,7 @@
         //Update Image Interval (msec)
         public const double UpdateImageInterval = 5;
 
-        //Data File Root Path (OCT raw files)
+        //Data File Root Path (OCT raw files) - ※ Patient Folder (DataRootPath + Patient ID)
         public const string DataRootPath = "C:\\DataSave";
 
         //Encrypt, Decrypt Public Key

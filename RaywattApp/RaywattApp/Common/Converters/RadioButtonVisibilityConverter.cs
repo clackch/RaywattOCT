@@ -11,15 +11,19 @@ namespace RaywattApp.Common.Converters
 {
     public class RadioButtonVisibilityConverter : IValueConverter
     {
+        public Visibility TrueValue { get; set; } = Visibility.Visible;
+
+        public Visibility FalseValue { get; set; } = Visibility.Collapsed;
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value == null)
-                return Visibility.Collapsed;
+                return FalseValue;
 
             if (value.ToString() == parameter.ToString())
-                return Visibility.Visible;
+                return TrueValue;
             else
-                return Visibility.Collapsed;
+                return FalseValue;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

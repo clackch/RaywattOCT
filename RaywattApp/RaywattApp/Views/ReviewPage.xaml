@@ -43,7 +43,7 @@
                 <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding MeasurementCommand}" Content="Measurement"/>
                 <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding EditCaseCommand}" Content="{Binding [Edit Case], Source={StaticResource L10N}}"/>
                 <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding EditPresetCommand}" Content="{Binding [Edit Preset], Source={StaticResource L10N}}"/>
-                <Button Style="{StaticResource ButtonBasic}" Width="80" Content="Save"/>
+                <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding ExportCommand}" Content="{Binding [Export], Source={StaticResource L10N}}"/>
             </StackPanel>
         </Grid>
 
