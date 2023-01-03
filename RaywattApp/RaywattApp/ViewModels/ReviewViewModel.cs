@@ -128,12 +128,6 @@ namespace RaywattApp.ViewModels
             get { return this._endReviewCommand ?? (this._endReviewCommand = new RelayCommand(EndReview)); }
         }
 
-        private ICommand _backCommand;
-        public ICommand BackCommand
-        {
-            get { return this._backCommand ?? (this._backCommand = new RelayCommand(Back)); }
-        }
-
         private ICommand _measurementCommand;
         public ICommand MeasurementCommand
         {
@@ -232,6 +226,7 @@ namespace RaywattApp.ViewModels
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
             _log.Debug("OnNavigating");
+            Save();
             RayEndReview();
         }
         private void OnIndicatorLongitudeMoved(object sender, EventArgs e)
@@ -309,9 +304,9 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private void EndReview()
+        private void Save()
         {
-            _log.Debug("EndReview");
+            _log.Debug("Save");
 
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
@@ -331,19 +326,13 @@ namespace RaywattApp.ViewModels
             sqlParameters["measurements"] = ConvertMeasurementsToJson();
 
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
-
-            if (nRows == 1)
-            {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["patient"] = Patient;
-                parameter["prevStatus"] = PrevStatus;
-                WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = parameter });
-            }
+            if (nRows == 0)
+                _log.Error("Update Error");
         }
 
-        private void Back()
+        private void EndReview()
         {
-            _log.Debug("Back");
+            _log.Debug("EndReview");
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;

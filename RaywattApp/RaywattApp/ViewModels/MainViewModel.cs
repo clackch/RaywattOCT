@@ -206,6 +206,8 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Exit");
 
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientListPage.xaml"));
+
             Application.Current.MainWindow.Close();
         }
     }
