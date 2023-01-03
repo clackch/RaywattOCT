@@ -14,12 +14,9 @@ using System.Windows.Threading;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Views.Dialog;
 using static RaywattOCT.RayCoreWrapper;
-using static System.Net.Mime.MediaTypeNames;
 using RaywattApp.Common.Annotation.Models;
 using System.Windows;
-using SharpDX;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace RaywattApp.ViewModels
 {
@@ -126,6 +123,12 @@ namespace RaywattApp.ViewModels
         public ICommand EndReviewCommand
         {
             get { return this._endReviewCommand ?? (this._endReviewCommand = new RelayCommand(EndReview)); }
+        }
+
+        private ICommand _newRecordingCommand;
+        public ICommand NewRecordingCommand
+        {
+            get { return this._newRecordingCommand ?? (this._newRecordingCommand = new RelayCommand(NewRecording)); }
         }
 
         private ICommand _measurementCommand;
@@ -338,6 +341,16 @@ namespace RaywattApp.ViewModels
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
             WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = parameter });
+        }
+
+        private void NewRecording()
+        {
+            _log.Debug("NewRecording");
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = Patient;
+            parameter["prevStatus"] = PrevStatus;
+            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/RecordingSetupPage.xaml") { Parameter = parameter });
         }
 
         private void ToggleMeasurement()

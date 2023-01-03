@@ -253,7 +253,7 @@
 
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" >
                 <Button Style="{StaticResource ButtonImportant}" Width="80" Command="{Binding EndReviewCommand}" Content="{Binding [End Review], Source={StaticResource L10N}}"/>
-                <Button Style="{StaticResource ButtonImportant}" Width="100" Content="{Binding [New Recording], Source={StaticResource L10N}}"/>
+                <Button Style="{StaticResource ButtonImportant}" Width="100" Command="{Binding NewRecordingCommand}" Content="{Binding [New Recording], Source={StaticResource L10N}}"/>
             </StackPanel>
         </Grid>
     </Grid>
