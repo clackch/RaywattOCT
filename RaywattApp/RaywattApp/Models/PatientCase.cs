@@ -69,6 +69,9 @@ namespace RaywattApp.Models
         private string image;
 
         [ObservableProperty]
+        private long imageSize;
+
+        [ObservableProperty]
         private string? _pullbackType;
 
         [ObservableProperty]

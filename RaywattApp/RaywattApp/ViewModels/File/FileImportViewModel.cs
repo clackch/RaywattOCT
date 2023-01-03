@@ -16,6 +16,7 @@ using System.Windows.Input;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
+using Newtonsoft.Json;
 
 namespace RaywattApp.ViewModels.File
 {
@@ -267,7 +268,7 @@ namespace RaywattApp.ViewModels.File
         {
             _log.Debug("InsertData");
 
-
+            Dictionary<string, string> importfiles = new Dictionary<string, string>();
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
 
             foreach (Patient patient in PatientList)
@@ -312,20 +313,32 @@ namespace RaywattApp.ViewModels.File
                         sqlParameters["procedure"] = patientCase.Procedure;
                         sqlParameters["thumbnail_no"] = patientCase.ThumbnailNo;
                         sqlParameters["still_image_yn"] = patientCase.StillImageYn;
-                        sqlParameters["image"] = patientCase.Image;
                         sqlParameters["create_date"] = patientCase.CreateDate;
                         sqlParameters["update_date"] = patientCase.UpdateDate;
+
+                        //image
+                        string srcPath = CommonUtil.GetDirectoryPath(SelectedDir.Path) + "\\" + patientCase.Image;
+                        if (System.IO.File.Exists(srcPath))
+                        {
+                            string destPath = CommonUtil.CreateFolder(Constants.DataRootPath + "\\" + patientCase.PatientId) + "\\" + patientCase.Image;
+
+                            importfiles.Add(srcPath, destPath);
+                            sqlParameters["image"] = destPath;
+                        }
+                        else
+                        {
+                            sqlParameters["image"] = "";
+                        }
+
                         _sqlManager.UpsertPatientCase(sqlParameters);
                     }
                 }
             }
 
-            //TO-DO image 파일 복사
-
             Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["title"] = _l10n["Information"];
-            parameter["message"] = _l10n["Done"];
-            var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+            parameter["title"] = _l10n["File Import"];
+            parameter["files"] = importfiles;
+            var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter);
             Close();
         }
 
@@ -339,7 +352,7 @@ namespace RaywattApp.ViewModels.File
             {
                 if (drive.Name.Equals(configDrive))
                 {
-                    AvailableSpace = Math.Round(drive.AvailableFreeSpace/1000.0/1000.0/1000.0, 3);
+                    AvailableSpace = CommonUtil.ByteToGB(drive.AvailableFreeSpace);
                     break;
                 }
             }
@@ -425,7 +438,7 @@ namespace RaywattApp.ViewModels.File
                 {
                     JObject obj = JObject.Parse(json);
 
-                    ApproximateImportSize = Math.Round(GetLongValue(obj, "Size") / 1000.0 / 1000.0, 3);
+                    ApproximateImportSize = CommonUtil.ByteToGB(GetLongValue(obj, "Size"));
 
                     JArray patientArray = JArray.Parse(GetStrValue(obj, "PatientList"));
                     foreach (JObject patientObj in patientArray)

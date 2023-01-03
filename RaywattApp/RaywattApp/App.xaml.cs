@@ -62,8 +62,9 @@ namespace RaywattApp
 
             //File
             services.AddTransient(typeof(FileExportStep1ViewModel));
-            services.AddTransient(typeof(FileExportStep2ViewModel));
             services.AddTransient(typeof(FileExportStep2NativeViewModel));
+            services.AddTransient(typeof(FileExportStep2DicomViewModel));
+            services.AddTransient(typeof(FileExportStep2StandardViewModel));
             services.AddTransient(typeof(FileImportViewModel));
 
             //Dialog 등록
@@ -73,11 +74,10 @@ namespace RaywattApp
             services.AddTransient(typeof(EditCaseInfoDialogViewModel));
             services.AddTransient(typeof(SettingDialogViewModel));
             services.AddTransient(typeof(FileDialogViewModel));
-            services.AddTransient(typeof(FilePasswordDialogViewModel));
-            services.AddTransient(typeof(FileAlternateIdDialogViewModel));
             services.AddTransient(typeof(FileFolderBrowseDialogViewModel));
             services.AddTransient(typeof(FileFolderActionDialogViewModel));
             services.AddTransient(typeof(FileImportDialogViewModel));
+            services.AddTransient(typeof(FileCopyDialogViewModel));
 
             //IDatabaseService 등록 (Singleton 사용 안함 => Connection Pooling을 Default로 사용)
             services.AddTransient<IDatabaseService, SqlService>(obj => new SqlService(connectionString));

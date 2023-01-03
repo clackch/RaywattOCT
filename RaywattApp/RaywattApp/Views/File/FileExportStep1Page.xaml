@@ -44,7 +44,34 @@
             </StackPanel>
         </Border>
 
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="2" Visibility="{Binding FileExport.IsFromReview, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" Margin="10" Visibility="{Binding FileExport.Type, Converter={StaticResource RadioButtonVisibilityReverseConverter}, ConverterParameter={x:Static const:Constants.ExportTypeNative}}">
+                <StackPanel Height="80">
+                    <Grid Height="80">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0"  VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <RadioButton IsChecked="{Binding FileExport.Material, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportMaterialPullback}}" Content="{Binding [Pullback], Source={StaticResource L10N}}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <RadioButton IsChecked="{Binding FileExport.Material, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportMaterialCurrent}}" Content="{Binding [Current Frame], Source={StaticResource L10N}}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <RadioButton IsChecked="{Binding FileExport.Material, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportMaterialBookmarked}}" Content="{Binding [Bookmarked Frames], Source={StaticResource L10N}}"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="2" Visibility="{Binding FileExport.IsFromReview, Converter={StaticResource BoolToVisibilityReverseConverter}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="10"/>
                 <ColumnDefinition Width="300"/>

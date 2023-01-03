@@ -129,6 +129,9 @@
   <data name="Add Patient" xml:space="preserve">
     <value>Add Patient</value>
   </data>
+  <data name="Additional" xml:space="preserve">
+    <value>Additional</value>
+  </data>
   <data name="Alternate ID" xml:space="preserve">
     <value>Alternate ID</value>
   </data>
@@ -304,11 +307,23 @@ Do you want to import data?</value>
   <data name="Folder" xml:space="preserve">
     <value>Folder</value>
   </data>
+  <data name="Format" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="Frame Resolution" xml:space="preserve">
+    <value>Frame Resolution</value>
+  </data>
   <data name="Free" xml:space="preserve">
     <value>Free</value>
   </data>
   <data name="Gender" xml:space="preserve">
     <value>Gender</value>
+  </data>
+  <data name="Hide All" xml:space="preserve">
+    <value>Hide All</value>
+  </data>
+  <data name="Hide Lumen Contour" xml:space="preserve">
+    <value>Hide Lumen Contour</value>
   </data>
   <data name="ID" xml:space="preserve">
     <value>ID</value>
@@ -316,14 +331,23 @@ Do you want to import data?</value>
   <data name="ID is duplicated." xml:space="preserve">
     <value>ID is duplicated.</value>
   </data>
+  <data name="Image Type" xml:space="preserve">
+    <value>Image Type</value>
+  </data>
   <data name="Import" xml:space="preserve">
     <value>Import</value>
+  </data>
+  <data name="Include region calibration (calibrated images only)" xml:space="preserve">
+    <value>Include region calibration (calibrated images only)</value>
   </data>
   <data name="Information" xml:space="preserve">
     <value>Information</value>
   </data>
   <data name="Input Password" xml:space="preserve">
     <value>Input Password</value>
+  </data>
+  <data name="Intravascular OCT - For Presentation" xml:space="preserve">
+    <value>Intravascular OCT - For Presentation</value>
   </data>
   <data name="ko-KR" xml:space="preserve">
     <value>Korean</value>
@@ -355,6 +379,15 @@ Do you want to import data?</value>
   <data name="Mark as Archived" xml:space="preserve">
     <value>Mark as Archived</value>
   </data>
+  <data name="Measurements" xml:space="preserve">
+    <value>Measurements</value>
+  </data>
+  <data name="Modality" xml:space="preserve">
+    <value>Modality</value>
+  </data>
+  <data name="Multi-frame True Color Secondary Capture" xml:space="preserve">
+    <value>Multi-frame True Color Secondary Capture</value>
+  </data>
   <data name="Name" xml:space="preserve">
     <value>Name</value>
   </data>
@@ -385,11 +418,20 @@ Do you want to import data?</value>
   <data name="No" xml:space="preserve">
     <value>No</value>
   </data>
+  <data name="OCT" xml:space="preserve">
+    <value>OCT</value>
+  </data>
   <data name="OK" xml:space="preserve">
     <value>OK</value>
   </data>
+  <data name="Other (OT)" xml:space="preserve">
+    <value>Other (OT)</value>
+  </data>
   <data name="Page Size" xml:space="preserve">
     <value>Page Size</value>
+  </data>
+  <data name="Palette" xml:space="preserve">
+    <value>Palette</value>
   </data>
   <data name="Password" xml:space="preserve">
     <value>Password</value>
@@ -408,6 +450,9 @@ Do you want to import data?</value>
   </data>
   <data name="Patient Case" xml:space="preserve">
     <value>Patient Case</value>
+  </data>
+  <data name="Patient Information Anonymize" xml:space="preserve">
+    <value>Patient Information Anonymize</value>
   </data>
   <data name="Patient List" xml:space="preserve">
     <value>Patient List</value>
@@ -475,11 +520,17 @@ Do you want to import data?</value>
   <data name="Review Preset" xml:space="preserve">
     <value>Review Preset</value>
   </data>
+  <data name="RGB" xml:space="preserve">
+    <value>RGB</value>
+  </data>
   <data name="Save" xml:space="preserve">
     <value>Save</value>
   </data>
   <data name="Search" xml:space="preserve">
     <value>Search</value>
+  </data>
+  <data name="Secondary Capture" xml:space="preserve">
+    <value>Secondary Capture</value>
   </data>
   <data name="Select Drive" xml:space="preserve">
     <value>Select Drive</value>
@@ -489,6 +540,9 @@ Do you want to import data?</value>
   </data>
   <data name="Share" xml:space="preserve">
     <value>Share</value>
+  </data>
+  <data name="Show All" xml:space="preserve">
+    <value>Show All</value>
   </data>
   <data name="SKIP" xml:space="preserve">
     <value>SKIP</value>
@@ -519,6 +573,12 @@ Do you want to import data?</value>
   </data>
   <data name="Total Export Size" xml:space="preserve">
     <value>Total Export Size</value>
+  </data>
+  <data name="Ultrasound (US)" xml:space="preserve">
+    <value>Ultrasound (US)</value>
+  </data>
+  <data name="Ultrasound Multi-frame" xml:space="preserve">
+    <value>Ultrasound Multi-frame</value>
   </data>
   <data name="Update Date" xml:space="preserve">
     <value>Update Date</value>

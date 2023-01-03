@@ -21,87 +21,44 @@
         </StackPanel>
 
         <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="1.5*"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="2.5*"/>
             </Grid.RowDefinitions>
-            <StackPanel Grid.Row="0">
-                <Label Content="{Binding [Purpose], Source={StaticResource L10N}}"/>
-            </StackPanel>
-            <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Margin="10">
-                <Grid >
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <StackPanel Grid.Row="0" VerticalAlignment="Center" Margin="50,0,0,0">
-                        <RadioButton Grid.Row="0" IsChecked="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportPurposeArchive}}" Content="{Binding [Archive], Source={StaticResource L10N}}"/>
-                    </StackPanel>
-                    <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="50,0,0,0">
-                        <RadioButton Grid.Row="1" IsChecked="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportPurposeShare}}" Content="{Binding [Share], Source={StaticResource L10N}}"/>
-                    </StackPanel>
-                    <StackPanel Grid.Row="2" VerticalAlignment="Center" Margin="50,0,0,0">
-                        <RadioButton Grid.Row="2" IsChecked="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportPurposeReport}}" Content="{Binding [Report a Problem], Source={StaticResource L10N}}"/>
-                    </StackPanel>
-                    <Button Style="{StaticResource ButtonBasic}" Grid.Row="0" Grid.Column="1" Command="{Binding PasswordCommand}" Content="{Binding [Password Protected], Source={StaticResource L10N}}" IsEnabled="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportPurposeArchive}}" Width="150" HorizontalAlignment="Left"/>
-                    <Button Style="{StaticResource ButtonBasic}" Grid.Row="1" Grid.Column="1" Command="{Binding AlternateCommand}" Content="{Binding [Alternate Patient IDs], Source={StaticResource L10N}}" IsEnabled="{Binding FileExport.Purpose, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportPurposeShare}}" Width="150" HorizontalAlignment="Left"/>
-                </Grid>
-            </Border>
 
-            <StackPanel Grid.Row="0" Grid.Column="1">
+            <StackPanel Grid.Row="0" Grid.ColumnSpan="2">
                 <Label Content="{Binding [System File Options], Source={StaticResource L10N}}"/>
             </StackPanel>
-            <Border Grid.Row="1" Grid.Column="1" BorderBrush="Black" BorderThickness="1" Margin="10">
-                <Grid >
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <StackPanel Grid.Row="0" VerticalAlignment="Center" Margin="50,0,0,0">
-                        <RadioButton IsChecked="{Binding FileExport.FileOption, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportOptionUnchanged}}" Content="{Binding [Leave Unchanged], Source={StaticResource L10N}}"/>
-                    </StackPanel>
-                    <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="50,0,0,0">
-                        <RadioButton Grid.Row="1" IsChecked="{Binding FileExport.FileOption, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportOptionArchived}}" Content="{Binding [Mark as Archived], Source={StaticResource L10N}}"/>
-                    </StackPanel>
-                    <StackPanel Grid.Row="2" VerticalAlignment="Center" Margin="50,0,0,0">
-                        <RadioButton Grid.Row="2" IsChecked="{Binding FileExport.FileOption, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportOptionRemove}}" Content="{Binding [Remove when Complete], Source={StaticResource L10N}}"/>
-                    </StackPanel>
-                </Grid>
+            <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Margin="10">
+                <CheckBox Grid.Column="1" IsChecked="{Binding FileExport.RemoveWhenComplete}" Content="{Binding [Remove when Complete], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
             </Border>
 
-            <StackPanel Grid.Row="6">
+            <StackPanel Grid.Row="10">
                 <Label Content="{Binding [Export Size], Source={StaticResource L10N}}"/>
             </StackPanel>
-            <Border Grid.Row="7" Grid.ColumnSpan="2" BorderBrush="Black" BorderThickness="1" Margin="10">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
-                    <Label Content="{Binding [Total Export Size], Source={StaticResource L10N}}"/>
-                    <Label>:</Label>
-                    <Label>3333</Label>
+            <Border Grid.Row="11" BorderBrush="Black" BorderThickness="1" Margin="10">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="50,0,0,0">
+                    <Label Content="{Binding ExportSize}"/>
+                    <Label Content="{Binding [GB], Source={StaticResource L10N}}"/>
                 </StackPanel>
             </Border>
 
-            <StackPanel Grid.Row="8">
+            <StackPanel Grid.Row="12">
                 <Label Content="{Binding [Destination], Source={StaticResource L10N}}"/>
             </StackPanel>
-            <Border Grid.Row="9" Grid.ColumnSpan="2" BorderBrush="Black" BorderThickness="1" Margin="10">
+            <Border Grid.Row="13" BorderBrush="Black" BorderThickness="1" Margin="10">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
@@ -167,7 +124,7 @@
                                 <StackPanel Orientation="Horizontal">
                                     <Label Content="{Binding ExternalDriveTotalSize}" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskExternal}}"/>
                                     <Label Content="{Binding CdTotalSize}" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}"/>
-                                    <Label Content="{Binding [bytes], Source={StaticResource L10N}}"/>
+                                    <Label Content="{Binding [GB], Source={StaticResource L10N}}"/>
                                 </StackPanel>
                             </StackPanel>
                             <StackPanel Grid.Row="1" >
@@ -175,7 +132,7 @@
                                 <StackPanel Orientation="Horizontal">
                                     <Label Content="{Binding ExternalDriveAvailableFreeSpace}" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskExternal}}"/>
                                     <Label Content="{Binding CdAvailableFreeSpace}" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}"/>
-                                    <Label Content="{Binding [bytes], Source={StaticResource L10N}}"/>
+                                    <Label Content="{Binding [GB], Source={StaticResource L10N}}"/>
                                 </StackPanel>
                             </StackPanel>
                         </Grid>

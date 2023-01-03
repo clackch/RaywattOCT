@@ -29,6 +29,9 @@
     <!-- Radio Button Visibility Converter -->
     <converters:RadioButtonVisibilityConverter x:Key="RadioButtonVisibilityConverter" />
 
+    <!-- Radio Button Visibility Reverse Converter -->
+    <converters:RadioButtonVisibilityConverter x:Key="RadioButtonVisibilityReverseConverter" FalseValue="Visible" TrueValue="Collapsed"/>
+
     <!-- Not Null To Enable Converter -->
     <converters:NotNullToEnableConverter x:Key="NotNullToEnableConverter" />
 
