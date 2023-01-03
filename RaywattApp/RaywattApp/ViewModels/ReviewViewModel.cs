@@ -440,6 +440,9 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Export");
 
+            //화면 변경 사항에 대해서도 Export 하기 위해서, Save 처리
+            Save();
+
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["fileType"] = CommonDefinition.FileType.Export;
             FileExport fileExport = new FileExport();
