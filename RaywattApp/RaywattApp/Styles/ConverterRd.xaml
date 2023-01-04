@@ -44,4 +44,7 @@
     <!-- Multi Parameter Converter -->
     <converters:MultiParamConverter x:Key="MultiParamConverter" />
 
+    <!-- Group Name Converter -->
+    <converters:GroupNameConverter x:Key="GroupNameConverter" />
+
 </ResourceDictionary>

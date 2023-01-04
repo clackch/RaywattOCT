@@ -1,6 +1,7 @@
 ﻿using RaywattApp.Common.Annotation.Models;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -17,7 +18,7 @@ namespace RaywattApp.Common.Annotation
 
         private const string constLength = "Length";
 
-        private List<LengthGeometry> lengthGeometries;
+        private ObservableCollection<LengthGeometry> lengthGeometries;
 
         private Point firstPoint;
 
@@ -267,6 +268,8 @@ namespace RaywattApp.Common.Annotation
             //Length
             double length = Math.Sqrt(Math.Pow(firstPoint.X - secondPoint.X, 2) + Math.Pow(firstPoint.Y - secondPoint.Y, 2));
             this.length = length;
+            if(this.lengthGeometries.Count > group)
+                this.lengthGeometries[group].Length = this.length;
 
             DeleteLabel(constLength, group);
             Label label = new Label();

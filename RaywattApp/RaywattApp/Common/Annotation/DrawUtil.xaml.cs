@@ -1,6 +1,7 @@
 ﻿using log4net;
 using RaywattApp.Common.Annotation.Models;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -49,6 +50,24 @@ namespace RaywattApp.Common.Annotation
         private static readonly DependencyProperty MouseCursorProperty =
             DependencyProperty.Register("MouseCursor", typeof(int), typeof(DrawUtil), new PropertyMetadata(default(int)));
 
+        public ObservableCollection<AreaGeometry> CurrAreaGeometries
+        {
+            get { return (ObservableCollection<AreaGeometry>)GetValue(CurrAreaGeometriesProperty); }
+            set { SetValue(CurrAreaGeometriesProperty, value); }
+        }
+
+        public static readonly DependencyProperty CurrAreaGeometriesProperty =
+            DependencyProperty.Register("CurrAreaGeometries", typeof(ObservableCollection<AreaGeometry>), typeof(DrawUtil), new PropertyMetadata(null));
+
+        public ObservableCollection<LengthGeometry> CurrLengthGeometries
+        {
+            get { return (ObservableCollection<LengthGeometry>)GetValue(CurrLengthGeometriesProperty); }
+            set { SetValue(CurrLengthGeometriesProperty, value); }
+        }
+
+        public static readonly DependencyProperty CurrLengthGeometriesProperty =
+            DependencyProperty.Register("CurrLengthGeometries", typeof(ObservableCollection<LengthGeometry>), typeof(DrawUtil), new PropertyMetadata(null));
+
         //---------------------------------------------------------------------------------------------------- Constructor
         public DrawUtil()
         {
@@ -84,20 +103,20 @@ namespace RaywattApp.Common.Annotation
                 if (drawUtil.Measurements[i].FrameNumber == frameNumber)
                 {
                     //Area
-                    if (drawUtil.Measurements[i].AreaGeometrys == null)
+                    if (drawUtil.Measurements[i].AreaGeometries == null)
                     {
-                        drawUtil.areaGeometrys = new List<AreaGeometry>();
-                        drawUtil.Measurements[i].AreaGeometrys = drawUtil.areaGeometrys;
+                        drawUtil.areaGeometrys = new ObservableCollection<AreaGeometry>();
+                        drawUtil.Measurements[i].AreaGeometries = drawUtil.areaGeometrys;
                     }
                     else
                     {
-                        drawUtil.areaGeometrys = drawUtil.Measurements[i].AreaGeometrys;
+                        drawUtil.areaGeometrys = drawUtil.Measurements[i].AreaGeometries;
                     }
 
                     //Length
                     if (drawUtil.Measurements[i].LengthGeometries == null)
                     {
-                        drawUtil.lengthGeometries = new List<LengthGeometry>();
+                        drawUtil.lengthGeometries = new ObservableCollection<LengthGeometry>();
                         drawUtil.Measurements[i].LengthGeometries = drawUtil.lengthGeometries;
                     }
                     else
@@ -123,17 +142,19 @@ namespace RaywattApp.Common.Annotation
 
             if (!isFind)
             {
-                drawUtil.areaGeometrys = new List<AreaGeometry>();
-                drawUtil.lengthGeometries = new List<LengthGeometry>();
+                drawUtil.areaGeometrys = new ObservableCollection<AreaGeometry>();
+                drawUtil.lengthGeometries = new ObservableCollection<LengthGeometry>();
                 drawUtil.textGeometries = new List<TextGeometry>();
 
                 Measurement measurement = new Measurement();
                 measurement.FrameNumber = frameNumber;
-                measurement.AreaGeometrys = drawUtil.areaGeometrys;
+                measurement.AreaGeometries = drawUtil.areaGeometrys;
                 measurement.LengthGeometries = drawUtil.lengthGeometries;
                 measurement.TextGeometries = drawUtil.textGeometries;
                 drawUtil.Measurements.Add(measurement);
             }
+
+            drawUtil.SetMeasurements(drawUtil);
 
             drawUtil.DrawAll();
         }
@@ -181,5 +202,42 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
+        private void SetMeasurements(DrawUtil drawUtil)
+        {
+            CurrAreaGeometries = drawUtil.areaGeometrys;
+            CurrLengthGeometries = drawUtil.lengthGeometries;
+        }
+
+        private void delete_Area(object sender, RoutedEventArgs e)
+        {
+            DeleteAreaAll();
+
+            Button button = (Button)sender;
+            AreaGeometry areaGeometry = button.CommandParameter as AreaGeometry;
+            
+            for (int i = areaGeometry.Group + 1; i < this.areaGeometrys.Count; i++)
+            {
+                this.areaGeometrys[i].Group--;
+            }
+            this.areaGeometrys.Remove(areaGeometry);
+            
+            DrawAreaAll();
+        }
+
+        private void delete_Length(object sender, RoutedEventArgs e)
+        {
+            DeleteLengthAll();
+
+            Button button = (Button)sender;
+            LengthGeometry lengthGeometry = button.CommandParameter as LengthGeometry;
+
+            for (int i = lengthGeometry.Group + 1; i < this.lengthGeometries.Count; i++)
+            {
+                this.lengthGeometries[i].Group--;
+            }
+            this.lengthGeometries.Remove(lengthGeometry);
+
+            DrawLengthAll();
+        }
     }
 }

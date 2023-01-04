@@ -98,7 +98,7 @@ namespace RaywattApp.ViewModels
             { 
                 if(VisibleMeasurement == Visibility.Visible)
                 {
-                    measurementFrameNumber = value; 
+                    measurementFrameNumber = value;
                     OnPropertyChanged(nameof(MeasurementFrameNumber));
                 }
             } 
@@ -117,7 +117,6 @@ namespace RaywattApp.ViewModels
 
         private List<Measurement> measurements;
         public List<Measurement> Measurements { get { return measurements; } set { measurements = value; OnPropertyChanged(nameof(Measurements)); } }
-
 
         private ICommand _endReviewCommand;
         public ICommand EndReviewCommand
@@ -397,11 +396,11 @@ namespace RaywattApp.ViewModels
 
             foreach(Measurement measurement in Measurements)
             {
-                if(measurement.AreaGeometrys.Count > 0 || measurement.LengthGeometries.Count > 0 || measurement.TextGeometries.Count > 0)
+                if(measurement.AreaGeometries.Count > 0 || measurement.LengthGeometries.Count > 0 || measurement.TextGeometries.Count > 0)
                 {
-                    if (measurement.AreaGeometrys.Count > 0)
+                    if (measurement.AreaGeometries.Count > 0)
                     {
-                        foreach (AreaGeometry geometry in measurement.AreaGeometrys)
+                        foreach (AreaGeometry geometry in measurement.AreaGeometries)
                         {
                             geometry.PointsAll = null;
                             geometry.Path = null;

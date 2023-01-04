@@ -11,6 +11,7 @@ using System.Windows.Shapes;
 using Point = System.Windows.Point;
 using Path = System.Windows.Shapes.Path;
 using OpenCvSharp;
+using System.Collections.ObjectModel;
 
 namespace RaywattApp.Common.Annotation
 {
@@ -26,7 +27,7 @@ namespace RaywattApp.Common.Annotation
 
         private const string constMaxDiameter = "MaxDiameter";
 
-        private List<AreaGeometry> areaGeometrys;
+        private ObservableCollection<AreaGeometry> areaGeometrys;
 
         private List<Point> pointList;
 
@@ -384,13 +385,14 @@ namespace RaywattApp.Common.Annotation
             return path;
         }
 
-        private void DrawRectangle(AreaGeometry areaGeometry) {
-            DrawRectangle(areaGeometry.Points, areaGeometry.IsClosed, areaGeometry.Group);
-
+        private void DrawRectangle(AreaGeometry areaGeometry) 
+        {
             if (areaGeometry.IsClosed)
             {
                 DrawLabel(areaGeometry);
             }
+
+            DrawRectangle(areaGeometry.Points, areaGeometry.IsClosed, areaGeometry.Group);
         }
 
         private void DrawRectangle(List<Point> pointList, bool isClosed, int group)
