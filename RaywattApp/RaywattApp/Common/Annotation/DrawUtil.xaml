@@ -87,17 +87,64 @@
     </UserControl.Resources>
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
-        <Canvas Grid.RowSpan="2" Name="canvasBackground" Background="Transparent"/>
-        <Canvas Grid.RowSpan="2" Name="canvas" Background="Transparent"/>
-        <StackPanel Grid.Row="0" Orientation="Horizontal">
-            <Button Height="20" Content="Area" Click="area_Add"/>
-            <Button Height="20" Content="Length" Click="length_Add"/>
-            <Button Height="20" Content="Text" Click="text_Add"/>
-            <Button Height="20" Content="Delete All" Click="delete_All"/>
-        </StackPanel>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Canvas Grid.RowSpan="2" Name="canvasBackground" Background="Transparent"/>
+            <Canvas Grid.RowSpan="2" Name="canvas" Background="Transparent"/>
+            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                <Button Height="20" Content="Area" Click="area_Add"/>
+                <Button Height="20" Content="Length" Click="length_Add"/>
+                <Button Height="20" Content="Text" Click="text_Add"/>
+                <Button Height="20" Content="Delete All" Click="delete_All"/>
+            </StackPanel>
+        </Grid>
+        <Grid Grid.Column="1" Background="Gray">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Label Grid.Row="0" Content="{Binding [Area], Source={StaticResource L10N}}"/>
+            <DataGrid Grid.Row="1" ItemsSource="{Binding CurrAreaGeometries, ElementName=UserControl}" Style="{StaticResource DataGridBasic}" Height="294">
+                <DataGrid.Columns>
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Group, Converter={StaticResource GroupNameConverter}}" Header="{Binding [Name], Source={StaticResource L10N}}"/>
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Area, StringFormat={}{0:N3}}" Header="{Binding [Area(㎟)], Source={StaticResource L10N}}"/>
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding MeanDiameter, StringFormat={}{0:N3}}" Header="{Binding [Mean Diameter(㎜)], Source={StaticResource L10N}}"/>
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding MinDiameter.diameter, StringFormat={}{0:N3}}" Header="{Binding [Min Diameter(㎜)], Source={StaticResource L10N}}"/>
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding MaxDiameter.diameter, StringFormat={}{0:N3}}" Header="{Binding [Max Diameter(㎜)], Source={StaticResource L10N}}"/>
+                    <DataGridTemplateColumn Header="Delete">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Click="delete_Area" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}, Path=CurrentItem}" Content="X"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+            <Label Grid.Row="2" Content="{Binding [Length], Source={StaticResource L10N}}"/>
+            <DataGrid Grid.Row="3" ItemsSource="{Binding CurrLengthGeometries, ElementName=UserControl}" Style="{StaticResource DataGridBasic}" Height="294">
+                <DataGrid.Columns>
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Group, Converter={StaticResource GroupNameConverter}}" Header="{Binding [Name], Source={StaticResource L10N}}"/>
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Length, StringFormat={}{0:N3}}" Header="{Binding [Length(㎜)], Source={StaticResource L10N}}"/>
+                    <DataGridTemplateColumn Header="Delete">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Click="delete_Length" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}, Path=CurrentItem}" Content="X"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
     </Grid>
+    
+
 </UserControl>

@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace RaywattApp.Common.Annotation.Models
 {
@@ -8,11 +9,11 @@ namespace RaywattApp.Common.Annotation.Models
         private int frameNumber;
         public int FrameNumber { get { return frameNumber; } set { frameNumber = value; } }
 
-        private List<AreaGeometry> areaGeometries;
-        public List<AreaGeometry> AreaGeometrys { get { return areaGeometries; } set { areaGeometries = value; OnPropertyChanged(nameof(AreaGeometrys)); } }
+        private ObservableCollection<AreaGeometry> areaGeometries;
+        public ObservableCollection<AreaGeometry> AreaGeometries { get { return areaGeometries; } set { areaGeometries = value; OnPropertyChanged(nameof(AreaGeometries)); } }
 
-        private List<LengthGeometry> lengthGeometries;
-        public List<LengthGeometry> LengthGeometries { get { return lengthGeometries; } set { lengthGeometries = value; OnPropertyChanged(nameof(LengthGeometries)); } }
+        private ObservableCollection<LengthGeometry> lengthGeometries;
+        public ObservableCollection<LengthGeometry> LengthGeometries { get { return lengthGeometries; } set { lengthGeometries = value; OnPropertyChanged(nameof(LengthGeometries)); } }
 
         private List<TextGeometry> textGeometries;
         public List<TextGeometry> TextGeometries { get { return textGeometries; } set { textGeometries = value; OnPropertyChanged(nameof(TextGeometries)); } }

@@ -51,7 +51,12 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel Height="10"/>
                 <Grid x:Name="crossSection">
-                    <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill" HorizontalAlignment="Left">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <Image Grid.Column="0" x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill">
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="Loaded">
                                 <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}">
@@ -77,7 +82,7 @@
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
                     </Image>
-                    <Grid Background="Transparent" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Visibility="{Binding IndicatorCrossSection.IsVisible}" HorizontalAlignment="Left">
+                    <Grid Grid.Column="0" Background="Transparent" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Visibility="{Binding IndicatorCrossSection.IsVisible}">
                         <i:Interaction.Behaviors>
                             <behaviors:MouseBehavior MouseX="{Binding IndicatorCrossSection.X, Mode=OneWayToSource}" MouseY="{Binding IndicatorCrossSection.Y, Mode=OneWayToSource}" />
                         </i:Interaction.Behaviors>
@@ -115,8 +120,25 @@
                             </Image>
                         </Canvas>
                         <Label Content="{Binding FrameNumber}" VerticalAlignment="Bottom" Foreground="White"/>
-                        <annotation:DrawUtil Visibility="{Binding VisibleMeasurement}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" Height="{StaticResource MeasurementSize}" Width="{StaticResource MeasurementSize}" VerticalAlignment="Center"/>
                     </Grid>
+
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="0" Content="{Binding [Lumen], Source={StaticResource L10N}}"/>
+
+                        <Label Grid.Row="2" Content="{Binding [Calcium], Source={StaticResource L10N}}"/>
+
+                    </Grid>
+
+                    <Grid Grid.ColumnSpan="2">
+                        <annotation:DrawUtil Visibility="{Binding VisibleMeasurement}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" VerticalAlignment="Center"/>
+                    </Grid>
+                    
                 </Grid>
                 <StackPanel Height="10"/>
                 <Grid x:Name="longitude" Margin="5,0,5,0">
