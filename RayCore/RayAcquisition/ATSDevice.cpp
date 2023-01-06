@@ -243,7 +243,7 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 
 	// TODO: Configure AUX I/O connector as required
 	
-	retCode = AlazarConfigureAuxIO(boardHandle, AUX_OUT_TRIGGER, 0);
+	retCode = AlazarConfigureAuxIO(boardHandle, AUX_OUT_TRIGGER, AUX_OUT_TRIGGER);
 	if (retCode != ApiSuccess)
 	{
 		printf("Error: AlazarConfigureAuxIO failed -- %s\n", AlazarErrorToText(retCode));

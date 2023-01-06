@@ -85,6 +85,7 @@ void COCTImaging::Process(USHORT* fringes) {
 
 	generateBackground((Ipp16u*)fringes);
 	fftProcessing(fringes32f);
+	findSheath();
 	generateImage(false);
 
 	postProcessing();
@@ -263,11 +264,65 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f) {
 
 				// 9. Extract Magnitude
 				ippsPowerSpectr_32fc(fcBuffer_FFT, fFFTResult + i * nOutputLength, nOutputLength);
+
+				// 10. Compute Logarithm
+				ippsLn_32f(fFFTResult + i * nOutputLength, fFFTResult + i * nOutputLength, nOutputLength);
+				ippsMulC_32f(fFFTResult + i * nOutputLength, log10(exp(1)) * 10, fFFTResult + i * nOutputLength, nOutputLength);
 			}
 		}
 	} // end parallel region
 
 }
+
+void COCTImaging::findSheath() {
+	CConfiguration& config = CConfiguration::GetInstance();
+	const int nBScan = config.nBScan;
+	const int nFFTLength = config.nFFTLength;
+	const int nOutputLength = config.nOutputLength;
+	const int minPeakHeight = 1500.f;
+	const int distBetweenLayer = 24;
+
+	Ipp32f* fScope = new Ipp32f[nOutputLength];
+	std::vector<int> sheathPoints;
+	int sheathPointSum = 0;
+	for (int n = 0; n < nBScan; n++) {
+		ippsSubC_32f(fFFTResult + n * nOutputLength, m_fLowLevel, fScope, nOutputLength);
+		ippsMulC_32f_I(USHRT_MAX / m_fHighLevel, fScope, nOutputLength);
+		ippsDivC_32f_I(1000.f, fScope, nOutputLength);	// db scale
+
+		// linearize
+		for (int i = 0; i < nOutputLength; i++) {
+			fScope[i] = pow((fScope[i] / 10.f), 10.f);
+		}
+
+		// find peak
+		std::vector<int> peakPoints;
+		for (int i = 1; i < nOutputLength - 1; i++) {
+			if (fScope[i] > fScope[i - 1] && fScope[i] > fScope[i + 1] && fScope[i] > minPeakHeight) {
+				peakPoints.push_back(i);
+			}
+		}
+
+		if (peakPoints.size() > 2) {
+			int firstPeak = peakPoints.at(0);
+			for (int peak = firstPeak + (distBetweenLayer - 10); peak < firstPeak + (distBetweenLayer + 10); peak++) {
+				for (int idx = 2; idx < peakPoints.size(); idx++) {
+					if (peakPoints.at(idx) == peak) {
+						sheathPoints.push_back(peak);
+						sheathPointSum += peak;
+					}
+				}
+			}
+		}
+	}
+	delete[] fScope;
+
+	m_nSheathPosition = 0;
+	if (sheathPoints.size() > 0) {
+		m_nSheathPosition = sheathPointSum / sheathPoints.size();
+	}
+}
+
 void COCTImaging::generateImage(bool bInvert){
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int nBScan = config.nBScan;
@@ -278,10 +333,8 @@ void COCTImaging::generateImage(bool bInvert){
 
 	for (int i = 0; i < nBScan; i++)
 	{
-		ippsLn_32f(fFFTResult + i * nOutputLength, fOutput + i * nOutputLength, nOutputLength);
-		ippsMulC_32f(fOutput + i * nOutputLength, log10(exp(1)) * 10, fOutput + i * nOutputLength, nOutputLength);
-		ippsSubC_32f_I((m_fLowLevel + fLowLevel), fOutput + i * nOutputLength, nOutputLength);
-		ippsMulC_32f_I(255.0f / (m_fHighLevel - fHighLevel), fOutput + i * nOutputLength, nOutputLength);
+		ippsSubC_32f(fFFTResult + i * nOutputLength, (m_fLowLevel + fLowLevel), fOutput + i * nOutputLength, nOutputLength);
+		ippsMulC_32f_I(UCHAR_MAX / (m_fHighLevel - fHighLevel), fOutput + i * nOutputLength, nOutputLength);
 		ippsConvert_32f8u_Sfs(fOutput + i * nOutputLength, imageResult.data + i * nOutputLength /*stepBytes*/, nOutputLength, ippRndNear, 0);
 	}
 }
@@ -299,20 +352,8 @@ void COCTImaging::postProcessing() {
 
 	if (m_bShowCalibGuide) {
 		CConfiguration& config = CConfiguration::GetInstance();
-		cv::Scalar lineColor = cv::Scalar(0xff, 0xcc, 0x33);
-		int posSheath = imageResultColor.cols - config.measurementValues.nSheathPosition - 1;
-
-		int lineSize = imageResult.rows / 8;
-		int lineStart = 0;
-
-		cv::line(imageResultColor, cv::Point(posSheath, lineStart), cv::Point(posSheath, (lineStart + lineSize / 2) - 1), lineColor, 2);
-		lineStart += (lineSize / 2);
-		lineStart += (lineSize);
-		for (int i = 0; i < 3; i++) {
-			cv::line(imageResultColor, cv::Point(posSheath, lineStart), cv::Point(posSheath, (lineStart + lineSize) - 1), lineColor, 2);
-			lineStart += (lineSize * 2);
-		}
-		cv::line(imageResultColor, cv::Point(posSheath, lineStart), cv::Point(posSheath, (lineStart + lineSize / 2) - 1), lineColor, 2);
+		drawGuideLine(imageResultColor, config.measurementValues.nSheathPosition, cv::Scalar(0xff, 0xcc, 0x33));
+		drawGuideLine(imageResultColor, m_nSheathPosition, cv::Scalar(0xff, 0xff, 0xff));
 	}
 
 	cv::rectangle(imageResultColor, cv::Rect(0, 0, 100, imageResultColor.rows), m_backgroundColor, cv::FILLED);
@@ -416,6 +457,21 @@ void COCTImaging::generateMask(cv::Mat& image) {
 	imgTemp.setTo(cv::Scalar(255, 255, 255));
 	circularizeImage(imgTemp, image);
 	cv::bitwise_not(image, image);
+}
+void COCTImaging::drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color) {
+	int posDraw = image.cols - nPosition - 1;
+
+	int lineSize = image.rows / 8;
+	int lineStart = 0;
+
+	cv::line(image, cv::Point(posDraw, lineStart), cv::Point(posDraw, (lineStart + lineSize / 2) - 1), color, 2);
+	lineStart += (lineSize / 2);
+	lineStart += (lineSize);
+	for (int i = 0; i < 3; i++) {
+		cv::line(image, cv::Point(posDraw, lineStart), cv::Point(posDraw, (lineStart + lineSize) - 1), color, 2);
+		lineStart += (lineSize * 2);
+	}
+	cv::line(image, cv::Point(posDraw, lineStart), cv::Point(posDraw, (lineStart + lineSize / 2) - 1), color, 2);
 }
 
 UINT COCTImaging::threadRender(LPVOID param) {
