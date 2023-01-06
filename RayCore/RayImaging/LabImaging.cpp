@@ -102,6 +102,8 @@ void CLabImaging::Process(USHORT* fringes) {
 
 	fftProcessing(fringes32f);
 
+	findSheath();
+
 	generateScopeData(fFFTResult, scopeFFTData);
 
 	if (!subtractFFT) {
@@ -138,13 +140,13 @@ void CLabImaging::generateScopeData(Ipp32f* output, Ipp16u* scope) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int nFFTLength = config.nFFTLength;
 	const int nOutputLength = nFFTLength / 2;
-	Ipp32f temp[1024];
-
-	ippsLn_32f(output, temp, nOutputLength);
-	ippsMulC_32f_I(log10(exp(1)) * 10, temp, nOutputLength);
-	ippsSubC_32f_I(m_fLowLevel, temp, nOutputLength);
-	ippsMulC_32f_I(65535 / m_fHighLevel, temp, nOutputLength);
+	Ipp32f* temp = new Ipp32f[nOutputLength];
+	
+	ippsSubC_32f(output,m_fLowLevel, temp, nOutputLength);
+	ippsMulC_32f_I(USHRT_MAX / m_fHighLevel, temp, nOutputLength);
 	ippsConvert_32f16u_Sfs(temp, scope, nOutputLength, ippRndNear, 0);
+
+	delete[] temp;
 }
 
 void CLabImaging::cropSignalData(USHORT* fringes, int start, int end) {

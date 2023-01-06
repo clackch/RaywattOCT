@@ -53,6 +53,8 @@ protected:
 
 	int m_nCurFrame;
 	int m_nTotalFrame;
+
+	int m_nSheathPosition;
 public:
 	COCTImaging(CMessageService*);
 	virtual ~COCTImaging(void);
@@ -93,11 +95,13 @@ protected:
 	void fftProcessing(const Ipp32f* fringes32f);
 	void generateImage(bool bInvert);
 	void postProcessing();
+	void findSheath();
 	void circularizeImage(cv::Mat& src, cv::Mat& dst);
 	void applyHotColor(cv::Mat& image);
 	void loadLUT(const char* strLUTPath);
 	void applyLUT(cv::Mat& image);
 	void generateMask(cv::Mat& image);
+	void drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color);
 
 	static UINT threadRender(LPVOID param);
 };
