@@ -85,6 +85,7 @@ void COCTImaging::Process(USHORT* fringes) {
 
 	generateBackground((Ipp16u*)fringes);
 	fftProcessing(fringes32f);
+	computeLogarithm();
 	findSheath();
 	generateImage(false);
 
@@ -264,14 +265,18 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f) {
 
 				// 9. Extract Magnitude
 				ippsPowerSpectr_32fc(fcBuffer_FFT, fFFTResult + i * nOutputLength, nOutputLength);
-
-				// 10. Compute Logarithm
-				ippsLn_32f(fFFTResult + i * nOutputLength, fFFTResult + i * nOutputLength, nOutputLength);
-				ippsMulC_32f(fFFTResult + i * nOutputLength, log10(exp(1)) * 10, fFFTResult + i * nOutputLength, nOutputLength);
 			}
 		}
 	} // end parallel region
 
+}
+void COCTImaging::computeLogarithm() {
+	CConfiguration& config = CConfiguration::GetInstance();
+	const int nBScan = config.nBScan;
+	const int nOutputLength = config.nOutputLength;
+
+	ippsLn_32f(fFFTResult, fFFTResult, nOutputLength * nBScan);
+	ippsMulC_32f(fFFTResult, log10(exp(1)) * 10, fFFTResult, nOutputLength * nBScan);
 }
 
 void COCTImaging::findSheath() {
