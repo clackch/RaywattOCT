@@ -101,6 +101,11 @@ void CLabImaging::Process(USHORT* fringes) {
 	generateBackground((Ipp16u*)fringesSubtracted);
 
 	fftProcessing(fringes32f);
+	if (subtractFFT) {
+		subtractBackground<float>(this->fFFTResult, backgroundFFT, nOutputLength * nBScan);
+	}
+	
+	computeLogarithm();
 
 	findSheath();
 
@@ -110,7 +115,6 @@ void CLabImaging::Process(USHORT* fringes) {
 		memset(scopeFFTData + nOutputLength, 0x00, sizeof(USHORT) * nOutputLength);
 	}
 	else {
-		subtractBackground<float>(this->fFFTResult, backgroundFFT, nOutputLength * nBScan);
 		generateScopeData(backgroundFFT, scopeFFTData + nOutputLength);
 	}
 	

@@ -93,6 +93,7 @@ protected:
 
 	void generateBackground(Ipp16u *fringes);
 	void fftProcessing(const Ipp32f* fringes32f);
+	void computeLogarithm();
 	void generateImage(bool bInvert);
 	void postProcessing();
 	void findSheath();
