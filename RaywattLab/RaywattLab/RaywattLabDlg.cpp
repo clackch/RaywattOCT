@@ -21,7 +21,6 @@
 #include "MotorController.h"
 #include "LaserController.h"
 #include "Utility.h"
-#include <opencv2/opencv.hpp>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -258,6 +257,33 @@ void CRaywattLabDlg::updateMeasurement(USHORT nPeakValue, int nPeakIndex, int nL
 	strBuffer.Format(_T("%d"), nNoisePower);
 	GetDlgItem(IDC_EDIT_NOISE)->SetWindowText(strBuffer);
 }
+void CRaywattLabDlg::drawGuideLine(cv::Mat image) {
+	CConfiguration& config = CConfiguration::GetInstance();
+
+	const cv::Scalar lineColor = cv::Scalar(0xff, 0xff, 0xff);
+	const int lineThickness = 1;
+	const int centerX = image.cols / 2;
+	const int centerY = image.rows / 2;
+	const int markerSize = 10;
+	const double umPerPixel = config.measurementValues.fAxialResolutionScale * 2;	// fft signal scale -> circle image scale
+
+	// horizontal line
+	cv::line(image, cv::Point(0, centerY), cv::Point(image.cols - 1, centerY), lineColor, lineThickness);
+
+	// distance marking
+	int markerFrom = centerY - markerSize / 2;
+	int markerTo = centerY + markerSize / 2;
+	cv::line(image, cv::Point(centerX, markerFrom), cv::Point(centerX, markerTo), lineColor, lineThickness);
+	for (int dist = 1; dist <= 9; dist += 2) {	// 1, 3, 5, 7, 9mm
+		int actualDist = dist * 1000 / umPerPixel;
+		cv::line(image,
+			cv::Point(centerX - actualDist / 2, markerFrom),
+			cv::Point(centerX - actualDist / 2, markerTo), lineColor, lineThickness);
+		cv::line(image,
+			cv::Point(centerX + actualDist / 2, markerFrom),
+			cv::Point(centerX + actualDist / 2, markerTo), lineColor, lineThickness);
+	}
+}
 
 
 /*
@@ -408,7 +434,7 @@ END_MESSAGE_MAP()
 
 LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 	CLabImaging* pImaging = (m_isRealtime) ? m_pImagingRealtime : m_pImagingSimulate;
-	cv::Mat image = (m_radioImageShape == 0) ? pImaging->GetCircleImage() : pImaging->GetRectangleImage();
+	cv::Mat image = (m_radioImageShape == 0) ? pImaging->GetCircleImage().clone() : pImaging->GetRectangleImage().clone();
 	Ipp16u* scopeData = pImaging->GetScopeData();
 	Ipp16u* scopeFFTData = pImaging->GetScopeFFTData();
 	CString strFrameRate = _T("");
@@ -420,6 +446,10 @@ LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int nScopeLength = config.getScopeLength();
 	const int nOutputLength = config.nOutputLength;
+
+	if (m_chkShowGuide && m_radioImageShape == 0) {
+		drawGuideLine(image);
+	}
 
 	drawToPictureBox(m_pictOCTImage, image.cols, image.rows, (char*)image.data);
 	GetDlgItem(IDC_EDIT_FRAME_RATE)->SetWindowText(strFrameRate);
