@@ -159,7 +159,6 @@ public:
 	afx_msg void OnBnClickedButtonSaveCalibration();
 	afx_msg void OnBnClickedButtonChangeCalibration();
 	afx_msg void OnBnClickedCheckBackgroundSubtract();
-	afx_msg void OnBnClickedCheckBackgroundImageSubtract();
 	afx_msg void OnBnClickedButtonOpenCalibFolder();
 	afx_msg void OnBnClickedButtonMeasure();
 	afx_msg void OnBnClickedCheckInitMotor();

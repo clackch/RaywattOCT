@@ -93,10 +93,10 @@ protected:
 
 	void generateBackground(Ipp16u *fringes);
 	void fftProcessing(const Ipp32f* fringes32f);
-	void computeLogarithm();
-	void generateImage(bool bInvert);
+	void computeLogarithm(Ipp32f* src, Ipp32f* dst);
+	void generateImage(Ipp32f* logaritihmData, bool bInvert);
 	void postProcessing();
-	void findSheath();
+	void findSheath(Ipp32f* logaritihmData);
 	void circularizeImage(cv::Mat& src, cv::Mat& dst);
 	void applyHotColor(cv::Mat& image);
 	void loadLUT(const char* strLUTPath);

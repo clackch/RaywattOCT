@@ -223,10 +223,7 @@ CLabImaging* CRaywattLabDlg::createImaging() {
 	pImaging->SetColor(m_chkImageHotColor);
 
 	int subtract = ((CButton*)GetDlgItem(IDC_CHECK_BACKGROUND_SUBTRACT))->GetCheck();
-	int subtractFFT = ((CButton*)GetDlgItem(IDC_CHECK_BACKGROUND_FFT_SUBTRACT))->GetCheck();
-
 	pImaging->SetBackgroundSubtract(subtract);
-	pImaging->SetBackgroundFFTSubtract(subtractFFT);
 	
 	updateBrightnessContrast(pImaging);
 	updateLevel(pImaging);
@@ -424,7 +421,6 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_SAVE_CALIBRATION, &CRaywattLabDlg::OnBnClickedButtonSaveCalibration)
 	ON_BN_CLICKED(IDC_BUTTON_NEXT_CALIB, &CRaywattLabDlg::OnBnClickedButtonChangeCalibration)
 	ON_BN_CLICKED(IDC_CHECK_BACKGROUND_SUBTRACT, &CRaywattLabDlg::OnBnClickedCheckBackgroundSubtract)
-	ON_BN_CLICKED(IDC_CHECK_BACKGROUND_FFT_SUBTRACT, &CRaywattLabDlg::OnBnClickedCheckBackgroundImageSubtract)
 	ON_BN_CLICKED(IDC_BUTTON_OPEN_CALIB_FOLDER, &CRaywattLabDlg::OnBnClickedButtonOpenCalibFolder)
 	ON_BN_CLICKED(IDC_BUTTON_MEASURE, &CRaywattLabDlg::OnBnClickedButtonMeasure)
 	ON_BN_CLICKED(IDC_CHECK_INIT_MOTOR, &CRaywattLabDlg::OnBnClickedCheckInitMotor)
@@ -1189,14 +1185,6 @@ void CRaywattLabDlg::OnBnClickedCheckBackgroundSubtract()
 	m_pImagingSimulate->SetBackgroundSubtract(subtract);
 }
 
-
-void CRaywattLabDlg::OnBnClickedCheckBackgroundImageSubtract()
-{
-	int subtract = ((CButton*)GetDlgItem(IDC_CHECK_BACKGROUND_FFT_SUBTRACT))->GetCheck();
-
-	m_pImagingRealtime->SetBackgroundFFTSubtract(subtract);
-	m_pImagingSimulate->SetBackgroundFFTSubtract(subtract);
-}
 
 void CRaywattLabDlg::OnBnClickedButtonOpenCalibFolder()
 {
