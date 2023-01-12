@@ -85,9 +85,9 @@ void COCTImaging::Process(USHORT* fringes) {
 
 	generateBackground((Ipp16u*)fringes);
 	fftProcessing(fringes32f);
-	computeLogarithm();
-	findSheath();
-	generateImage(false);
+	computeLogarithm(fFFTResult, fFFTResult);
+	findSheath(fFFTResult);
+	generateImage(fFFTResult, false);
 
 	postProcessing();
 }
@@ -270,16 +270,16 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f) {
 	} // end parallel region
 
 }
-void COCTImaging::computeLogarithm() {
+void COCTImaging::computeLogarithm(Ipp32f* src, Ipp32f* dst) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int nBScan = config.nBScan;
 	const int nOutputLength = config.nOutputLength;
 
-	ippsLn_32f(fFFTResult, fFFTResult, nOutputLength * nBScan);
-	ippsMulC_32f(fFFTResult, log10(exp(1)) * 10, fFFTResult, nOutputLength * nBScan);
+	ippsLn_32f(src, dst, nOutputLength * nBScan);
+	ippsMulC_32f(dst, log10(exp(1)) * 10, dst, nOutputLength * nBScan);
 }
 
-void COCTImaging::findSheath() {
+void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int nBScan = config.nBScan;
 	const int nFFTLength = config.nFFTLength;
@@ -291,7 +291,7 @@ void COCTImaging::findSheath() {
 	std::vector<int> sheathPoints;
 	int sheathPointSum = 0;
 	for (int n = 0; n < nBScan; n++) {
-		ippsSubC_32f(fFFTResult + n * nOutputLength, m_fLowLevel, fScope, nOutputLength);
+		ippsSubC_32f(logaritihmData + n * nOutputLength, m_fLowLevel, fScope, nOutputLength);
 		ippsMulC_32f_I(USHRT_MAX / m_fHighLevel, fScope, nOutputLength);
 		ippsDivC_32f_I(1000.f, fScope, nOutputLength);	// db scale
 
@@ -311,7 +311,7 @@ void COCTImaging::findSheath() {
 		if (peakPoints.size() > 2) {
 			int firstPeak = peakPoints.at(0);
 			for (int peak = firstPeak + (distBetweenLayer - 10); peak < firstPeak + (distBetweenLayer + 10); peak++) {
-				for (int idx = 2; idx < peakPoints.size(); idx++) {
+				for (int idx = 1; idx < peakPoints.size(); idx++) {
 					if (peakPoints.at(idx) == peak) {
 						sheathPoints.push_back(peak);
 						sheathPointSum += peak;
@@ -328,7 +328,7 @@ void COCTImaging::findSheath() {
 	}
 }
 
-void COCTImaging::generateImage(bool bInvert){
+void COCTImaging::generateImage(Ipp32f* logaritihmData, bool bInvert){
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int nBScan = config.nBScan;
 	const float fHighLevel = (bInvert) ? config.invert.highLevel : 0.0f;
@@ -338,7 +338,7 @@ void COCTImaging::generateImage(bool bInvert){
 
 	for (int i = 0; i < nBScan; i++)
 	{
-		ippsSubC_32f(fFFTResult + i * nOutputLength, (m_fLowLevel + fLowLevel), fOutput + i * nOutputLength, nOutputLength);
+		ippsSubC_32f(logaritihmData + i * nOutputLength, (m_fLowLevel + fLowLevel), fOutput + i * nOutputLength, nOutputLength);
 		ippsMulC_32f_I(UCHAR_MAX / (m_fHighLevel - fHighLevel), fOutput + i * nOutputLength, nOutputLength);
 		ippsConvert_32f8u_Sfs(fOutput + i * nOutputLength, imageResult.data + i * nOutputLength /*stepBytes*/, nOutputLength, ippRndNear, 0);
 	}
@@ -361,7 +361,7 @@ void COCTImaging::postProcessing() {
 		drawGuideLine(imageResultColor, m_nSheathPosition, cv::Scalar(0xff, 0xff, 0xff));
 	}
 
-	cv::rectangle(imageResultColor, cv::Rect(0, 0, 100, imageResultColor.rows), m_backgroundColor, cv::FILLED);
+	//cv::rectangle(imageResultColor, cv::Rect(0, 0, 100, imageResultColor.rows), m_backgroundColor, cv::FILLED);
 
 	circularizeImage(imageResultColor, imageCircle);
 

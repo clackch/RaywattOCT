@@ -4,16 +4,16 @@
 class CLabImaging : public COCTImaging
 {
 private:
-	USHORT* fringesSubtracted;
 	USHORT* backgroundData;
 	float* backgroundFFT;
+	float* backgroundSubtracted;
+	float* logData;
 
 	cv::Mat imageRectangle;
 	USHORT* scopeData;
 	USHORT* scopeFFTData;
 	
 	bool subtract;
-	bool subtractFFT;
 
 	CCalibration* newCalibration;
 	bool hasNewCalibration;
@@ -33,13 +33,12 @@ public:
 	USHORT* GetScopeFFTData() { return scopeFFTData; }
 
 	void SetBackgroundSubtract(bool subtract) { this->subtract = subtract; }
-	void SetBackgroundFFTSubtract(bool subtract) { this->subtractFFT = subtract; }
 	void ChangeCalibration(CCalibration* pNewCalib);
 	void SetGoodClockRange(int start, int end) { goodClockStart = start; goodClockEnd = end; }
 
 private:
 	template <typename T>
-	void subtractBackground(T* fringes, T* background, int size);
+	void subtractBackground(T* fringes, T* background, T* dst, int size);
 	void generateScopeData(Ipp32f* output, Ipp16u* scope);
 	void cropSignalData(USHORT* fringes, int start, int end);
 };

@@ -8,6 +8,7 @@
 #include "ScopeView.h"
 #include "RotaryJunctionDlg.h"
 #include "MessageService.h"
+#include <opencv2/opencv.hpp>
 
 #define WM_SAVE_CALIBRATION_FRAME		(WM_USER + 0x2001)
 #define WM_SAVE_CALIBRATION_DONE		(WM_USER + 0x2002)
@@ -110,6 +111,7 @@ private:
 	CLabImaging* createImaging();
 	void findFileByExtension(CString strFolder, CString strExt, std::vector<CString>& vList);
 	void updateMeasurement(USHORT nPeakValue, int nPeakIndex, int nLineWidth, USHORT nNoisePower);
+	void drawGuideLine(cv::Mat image);
 
 	/*
 	* threadService
@@ -157,7 +159,6 @@ public:
 	afx_msg void OnBnClickedButtonSaveCalibration();
 	afx_msg void OnBnClickedButtonChangeCalibration();
 	afx_msg void OnBnClickedCheckBackgroundSubtract();
-	afx_msg void OnBnClickedCheckBackgroundImageSubtract();
 	afx_msg void OnBnClickedButtonOpenCalibFolder();
 	afx_msg void OnBnClickedButtonMeasure();
 	afx_msg void OnBnClickedCheckInitMotor();

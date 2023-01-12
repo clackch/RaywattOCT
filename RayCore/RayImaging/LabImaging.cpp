@@ -4,23 +4,24 @@
 
 CLabImaging::CLabImaging(CMessageService* pMsg) 
 	: COCTImaging(pMsg) {
-	fringesSubtracted = nullptr;
 	backgroundData = nullptr;
 	backgroundFFT = nullptr;
+	backgroundSubtracted = nullptr;
+	logData = nullptr;
 
 	scopeData = nullptr;
 	scopeFFTData = nullptr;
 
 	subtract = false;
-	subtractFFT = false;
 
 	newCalibration = nullptr;
 	hasNewCalibration = false;
 }
 CLabImaging::~CLabImaging() {
-	if (fringesSubtracted != nullptr) delete[] fringesSubtracted;
 	if(backgroundData != nullptr) delete[] backgroundData;
 	if(backgroundFFT != nullptr) delete[] backgroundFFT;
+	if(backgroundSubtracted != nullptr) delete[] backgroundSubtracted;
+	if(logData != nullptr) delete[] logData;
 
 	if(scopeData != nullptr) delete[] scopeData;
 	if (scopeFFTData != nullptr) delete[] scopeFFTData;
@@ -38,9 +39,10 @@ void CLabImaging::Initialize(tstring calibFile, const char* strBgFile) {
 	const int nOutputLength = config.nOutputLength;
 	const int nScopeLength = config.getScopeLength();
 
-	fringesSubtracted = new USHORT[nBufferSize];
 	backgroundData = new USHORT[nBufferSize];
 	backgroundFFT = new float[nOutputLength * nBScan];
+	backgroundSubtracted = new float[nOutputLength * nBScan];
+	logData = new float[nOutputLength * nBScan];
 
 	memset(backgroundData, 0x00, sizeof(USHORT) * nBufferSize);
 	FILE* fp = fopen(strBgFile, "rb");
@@ -89,36 +91,27 @@ void CLabImaging::Process(USHORT* fringes) {
 	// copy first line to display scope
 	ippsCopy_16s((Ipp16s*)fringes, (Ipp16s*)scopeData, nScopeLength);
 
-	ippsCopy_16s((Ipp16s*)fringes, (Ipp16s*)fringesSubtracted, config.nBufferSize);
-	if (!subtract) {
-		memset(scopeData + nScopeLength, 0x00, sizeof(USHORT) * nScopeLength);
-	}
-	else {
-		subtractBackground<USHORT>(fringesSubtracted, backgroundData, config.nBufferSize);
-		ippsCopy_16s((Ipp16s*)backgroundData, (Ipp16s*)scopeData + nScopeLength, nScopeLength);
-	}
-
-	generateBackground((Ipp16u*)fringesSubtracted);
+	generateBackground((Ipp16u*)fringes);
 
 	fftProcessing(fringes32f);
-	if (subtractFFT) {
-		subtractBackground<float>(this->fFFTResult, backgroundFFT, nOutputLength * nBScan);
+	computeLogarithm(fFFTResult, logData);
+	findSheath(logData);
+
+	if (subtract) {
+		subtractBackground<float>(fFFTResult, backgroundFFT, backgroundSubtracted, nOutputLength * nBScan);
+		computeLogarithm(backgroundSubtracted, logData);
 	}
-	
-	computeLogarithm();
 
-	findSheath();
+	generateScopeData(logData, scopeFFTData);
 
-	generateScopeData(fFFTResult, scopeFFTData);
-
-	if (!subtractFFT) {
+	if (!subtract) {
 		memset(scopeFFTData + nOutputLength, 0x00, sizeof(USHORT) * nOutputLength);
 	}
 	else {
 		generateScopeData(backgroundFFT, scopeFFTData + nOutputLength);
 	}
 	
-	generateImage(false);
+	generateImage(logData, false);
 
 	postProcessing();
 	
@@ -131,12 +124,12 @@ void CLabImaging::ChangeCalibration(CCalibration* pNewCalib) {
 }
 
 template <typename T>
-void CLabImaging::subtractBackground(T* fringes, T* background, int size) {
-	if (fringes == nullptr || background == nullptr) return;
+void CLabImaging::subtractBackground(T* fringes, T* background, T* dst, int size) {
+	if (fringes == nullptr || background == nullptr || dst == nullptr) return;
 
 #pragma omp parallel for
 	for (int i = 0; i < size; i++) {
-		fringes[i] = fringes[i] - background[i];
+		dst[i] = fringes[i] - background[i];
 	}
 }
 
