@@ -25,10 +25,13 @@ namespace RaywattApp.ViewModels
         private static readonly ILog _log = LogManager.GetLogger(typeof(Indicator));
 
         public bool isCaptured = false;
+
         [ObservableProperty]
-        public string _isVisible;
+        public Visibility _isVisible;
+
         [ObservableProperty]
         public double _x;
+
         [ObservableProperty]
         public double _y;
 
@@ -38,7 +41,8 @@ namespace RaywattApp.ViewModels
             get {return _cmdSetCaptured ?? (this._cmdSetCaptured = new RelayCommand<bool>(SetCaptured)); }
         }
 
-        private void SetCaptured(bool isCaptured) {
+        private void SetCaptured(bool isCaptured) 
+        {
             this.isCaptured = isCaptured;
         }
     }
@@ -61,6 +65,10 @@ namespace RaywattApp.ViewModels
         // size from view
         private double crossSectionWidth;
         private double crossSectionHeight;
+        private double crossSectionBigWidth;
+        private double crossSectionBigHeight;
+        private double crossSectionSmallWidth;
+        private double crossSectionSmallHeight;
         private double longitudeWidth;
         private double longitudeIndicatorWidth;
 
@@ -85,14 +93,39 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private string _playPauseState;
 
-        private DispatcherTimer timer = new DispatcherTimer();
+        [ObservableProperty]
+        private bool _expandViewOption;
+
+        [ObservableProperty]
+        private bool _expandPatientInfo;
+
+        [ObservableProperty]
+        private bool _expandValueInfo;
+
+        [ObservableProperty]
+        private bool _isLumenProfile;
+
+        [ObservableProperty]
+        private bool _isContourOn;
+
+        [ObservableProperty]
+        private bool _isAngioOn;
+
+        private double _rightSideBarExpand;
+        public double RightSideBarExpand
+        {
+            get { return _rightSideBarExpand; }
+            set { _rightSideBarExpand = value; OnPropertyChanged(nameof(RightSideBarExpand)); }
+        }
+
         private DispatcherTimer timerUpdateImage = new DispatcherTimer();
 
         [ObservableProperty]
         private Visibility _visibleMeasurement;
 
         private int measurementFrameNumber = -1;
-        public int MeasurementFrameNumber { 
+        public int MeasurementFrameNumber 
+        { 
             get { return measurementFrameNumber; } 
             set 
             { 
@@ -133,7 +166,7 @@ namespace RaywattApp.ViewModels
         private ICommand _measurementCommand;
         public ICommand MeasurementCommand
         {
-            get { return this._measurementCommand ?? (this._measurementCommand = new RelayCommand(ToggleMeasurement)); }
+            get { return this._measurementCommand ?? (this._measurementCommand = new RelayCommand(ToggleMeasurement, CanToggleMeasurement)); }
         }
 
         private ICommand _editCaseCommand;
@@ -178,6 +211,36 @@ namespace RaywattApp.ViewModels
             get { return this._cmdViewSizeChanged ?? (this._cmdViewSizeChanged = new RelayCommand<object[]>(ViewSizeChanged)); }
         }
 
+        private ICommand _expandCollapseCommand;
+        public ICommand ExpandCollapseCommand
+        {
+            get { return this._expandCollapseCommand ?? (this._expandCollapseCommand = new RelayCommand<string>(ExpandCollapseMenu)); }
+        }
+
+        private ICommand _toggleLongitudeCommand;
+        public ICommand ToggleLongitudeCommand
+        {
+            get { return this._toggleLongitudeCommand ?? (this._toggleLongitudeCommand = new RelayCommand<string>(ToggleLongitude)); }
+        }
+
+        private ICommand _coRegistrationCommand;
+        public ICommand CoRegistrationCommand
+        {
+            get { return this._coRegistrationCommand ?? (this._coRegistrationCommand = new RelayCommand(CoRegistration, CanCoRegistration)); }
+        }
+
+        private ICommand _toggleContourCommand;
+        public ICommand ToggleContourCommand
+        {
+            get { return this._toggleContourCommand ?? (this._toggleContourCommand = new RelayCommand(ToggleContour)); }
+        }
+
+        private ICommand _toggleAngioCommand;
+        public ICommand ToggleAngioCommand
+        {
+            get { return this._toggleAngioCommand ?? (this._toggleAngioCommand = new RelayCommand(ToggleAngio)); }
+        }
+
         public ReviewViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
             _log.Debug("ReviewViewModel");
@@ -188,13 +251,20 @@ namespace RaywattApp.ViewModels
             _dialogService = dialogService;
 
             IndicatorCrossSection = new Indicator();
-            IndicatorCrossSection.IsVisible = "Visible";
+            IndicatorCrossSection.IsVisible = Visibility.Collapsed;
 
             IndicatorLongitude = new Indicator();
-            IndicatorLongitude.IsVisible = "Hidden";
+            IndicatorLongitude.IsVisible = Visibility.Collapsed;
             IndicatorLongitude.PropertyChanged += OnIndicatorLongitudeMoved;
 
             VisibleMeasurement = Visibility.Collapsed;
+            ExpandViewOption = true;
+            ExpandPatientInfo = true;
+            ExpandValueInfo = true;
+            IsLumenProfile = true;
+            IsContourOn = false;
+            IsAngioOn = false;
+            RightSideBarExpand = Constants.RightSideBarExpandDefaultSize;
 
             updatePlayPauseState();
         }
@@ -230,7 +300,11 @@ namespace RaywattApp.ViewModels
             _log.Debug("OnNavigating");
             Save();
             RayEndReview();
+
+            if (timerUpdateImage.IsEnabled)
+                timerUpdateImage.Stop();
         }
+
         private void OnIndicatorLongitudeMoved(object sender, EventArgs e)
         {
             setCurrentFrame(IndicatorLongitude.X);
@@ -269,11 +343,23 @@ namespace RaywattApp.ViewModels
 
             if (indicator.isCaptured)
             {
+                if (IsAngioOn)
+                {
+                    crossSectionWidth = crossSectionSmallWidth;
+                    crossSectionHeight = crossSectionSmallHeight;
+                }
+                else
+                {
+                    crossSectionWidth = crossSectionBigWidth;
+                    crossSectionHeight = crossSectionBigHeight;
+                }
+
                 double pointX = crossSectionWidth / 2 - indicator.X;
                 double pointY = crossSectionHeight / 2 - indicator.Y;
                 Degree = (int)(Math.Atan2(pointY, pointX) * 180 / Math.PI);
             }
         }
+
         private void MoveIndicator(object param)
         {
             Indicator indicator = (Indicator)param;
@@ -283,6 +369,7 @@ namespace RaywattApp.ViewModels
                 indicator.X = PointLongitudeX + longitudeIndicatorWidth / 2;
             }
         }
+
         private void ViewSizeChanged(object[] param)
         {
             if (param != null && param.Length == 3) {
@@ -292,10 +379,15 @@ namespace RaywattApp.ViewModels
 
                 if (viewName.Equals("crossSectionImage"))
                 {
-                    crossSectionWidth = actualWidth;
-                    crossSectionHeight = actualHeight;
+                    crossSectionBigWidth = actualWidth;
+                    crossSectionBigHeight = actualHeight;
                 }
-                else if (viewName.Equals("longitudeImage"))
+                else if (viewName.Equals("crossSectionImageSmall"))
+                {
+                    crossSectionSmallWidth = actualWidth;
+                    crossSectionSmallHeight = actualHeight;
+                }
+                else if (viewName.Equals("longitude"))
                 {
                     longitudeWidth = actualWidth;
                 }
@@ -350,6 +442,11 @@ namespace RaywattApp.ViewModels
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
             WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/RecordingSetupPage.xaml") { Parameter = parameter });
+        }
+
+        private bool CanToggleMeasurement()
+        {
+            return !IsAngioOn;
         }
 
         private void ToggleMeasurement()
@@ -470,6 +567,77 @@ namespace RaywattApp.ViewModels
             var result = _dialogService.OpenDialog(new FileDialogControl(), parameter);
         }
 
+        private void ExpandCollapseMenu(string param)
+        {
+            switch (param)
+            {
+                case Constants.ViewOption:
+                    ExpandViewOption = !ExpandViewOption;
+                    break;
+                case Constants.PatientInfo:
+                    ExpandPatientInfo = !ExpandPatientInfo;
+                    break;
+                case Constants.ValueInfo:
+                    ExpandValueInfo = !ExpandValueInfo;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void ToggleLongitude(string param)
+        {
+            if (param.Equals(Constants.LongitudeProfile))
+            {
+                if(IsLumenProfile)
+                    return;
+
+                IndicatorCrossSection.IsVisible = Visibility.Collapsed;
+                IsLumenProfile = true;
+            }
+            else
+            {
+                if (!IsLumenProfile)
+                    return;
+
+                IndicatorCrossSection.IsVisible = Visibility.Visible;
+                IsLumenProfile = false;
+            }
+        }
+
+        private bool CanCoRegistration()
+        {
+            return IsAngioOn;
+        }
+
+        private void CoRegistration()
+        {
+            _log.Debug("CoRegistration");
+        }
+
+        private void ToggleContour()
+        {
+            IsContourOn = !IsContourOn;
+        }
+
+        private void ToggleAngio()
+        {
+            IsAngioOn = !IsAngioOn;
+
+            if (IsAngioOn)
+            {
+                RightSideBarExpand = Constants.RightSideBarExpandAngioSize;
+                VisibleMeasurement = Visibility.Collapsed;
+            }
+            else
+            {
+                RightSideBarExpand = Constants.RightSideBarExpandDefaultSize;
+            }
+
+            (CoRegistrationCommand as RelayCommand).NotifyCanExecuteChanged();
+            (MeasurementCommand as RelayCommand).NotifyCanExecuteChanged();
+        }
+
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {
             if (imgCrossSection != null)
@@ -489,11 +657,12 @@ namespace RaywattApp.ViewModels
                 if (state == RayScannerState.Review)
                 {
                     LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgLongitude);
-                    if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame) IndicatorLongitude.IsVisible = "Visible";
+                    if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame) IndicatorLongitude.IsVisible = Visibility.Visible;
 
                 }
             }
         }
+
         private void updatePlayPauseState()
         {
             double pauseState = RayGetProperty(Property.IsPaused);
@@ -502,10 +671,12 @@ namespace RaywattApp.ViewModels
             {
                 PlayPauseState = _l10n["Play"];
             }
-            else {
+            else 
+            {
                 PlayPauseState = _l10n["Pause"];
             }
         }
+
         private void updateNavigator(int curFrame, int totalFrame)
         {
             double curPosition = (double)curFrame / totalFrame;
@@ -513,6 +684,7 @@ namespace RaywattApp.ViewModels
             curPosition *= longitudeWidth;
             IndicatorLongitude.X = curPosition + longitudeIndicatorWidth / 2;
         }
+
         private void setCurrentFrame(double navigatorPosition)
         {
             double curPosition = (navigatorPosition + longitudeIndicatorWidth / 2) / (double)longitudeWidth;
@@ -523,7 +695,6 @@ namespace RaywattApp.ViewModels
                 RayMoveToFrame((int)curPosition);
             }
         }
-
 
         protected override void handleState(RayCallbackRequest request, RayScannerState state)
         {

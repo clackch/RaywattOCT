@@ -7,9 +7,7 @@ using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Services;
-using RaywattApp.Views;
 using RaywattApp.Views.Dialog;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -42,9 +40,6 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private Patient _patient;
-
-        [ObservableProperty]
-        private Visibility _isShowPatient = Visibility.Collapsed;
 
         private ICommand _navigateCommand;
 
@@ -114,7 +109,6 @@ namespace RaywattApp.ViewModels
             _log.Debug("OnNavigationMessage : " + message.Value);
 
             string pageUri = message.Value;
-            ShowPatientInfo(pageUri, message.Parameter);
             //순서 중요 - NavigationParameter 먼저 입력 후, NavigationSource 입력 필요
             NavigationParameter = message.Parameter;
             NavigationSource = pageUri;
@@ -148,46 +142,6 @@ namespace RaywattApp.ViewModels
             IsBusy = _busys.Any();
         }
 
-        private void ShowPatientInfo(string pageUri, object parameter)
-        {
-            _log.Debug("ShowPatientInfo : " + pageUri);
-
-            if (pageUri.IndexOf("RecordingPage") > 0 || pageUri.IndexOf("ReviewPage") > 0 
-                || pageUri.IndexOf("LiveViewPage") > 0 || pageUri.IndexOf("ReviewPresetPage") > 0 || pageUri.IndexOf("CalibrationPage") > 0)
-            {
-                IsShowPatient = Visibility.Visible;
-                Dictionary<string, Object> data = (Dictionary<string, Object>)parameter;
-                SetPatientInfo((Patient)data["patient"]);
-            }
-            else
-            {
-                IsShowPatient = Visibility.Collapsed;
-            }
-        }
-
-        private void SetPatientInfo(Patient patient)
-        {
-            _log.Debug("SetPatientInfo");
-
-            if (patient == null)
-            {
-                _log.Info("Patient is null");
-                return;
-            }
-
-            CopyPatient(patient, Patient);
-        }
-
-        private void CopyPatient(Patient src, Patient dest)
-        {
-            _log.Debug("CopyPatient");
-
-            dest.Id = src.Id.Trim();
-            dest.Lastname = src.Lastname.Trim();
-            dest.Firstname = src.Firstname.Trim();
-            dest.Birthdate = src.Birthdate;
-            dest.Gender = src.Gender;
-        }
         private void Home()
         {
             _log.Debug("Home");

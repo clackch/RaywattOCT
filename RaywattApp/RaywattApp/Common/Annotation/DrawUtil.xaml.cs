@@ -50,6 +50,15 @@ namespace RaywattApp.Common.Annotation
         private static readonly DependencyProperty MouseCursorProperty =
             DependencyProperty.Register("MouseCursor", typeof(int), typeof(DrawUtil), new PropertyMetadata(default(int)));
 
+        public bool MeasurementExpand
+        {
+            get { return (bool)GetValue(MeasurementExpandProperty); }
+            set { this.SetValue(MeasurementExpandProperty, value); }
+        }
+
+        private static readonly DependencyProperty MeasurementExpandProperty =
+            DependencyProperty.Register("MeasurementExpand", typeof(bool), typeof(DrawUtil), new PropertyMetadata(default(bool)));
+
         public ObservableCollection<AreaGeometry> CurrAreaGeometries
         {
             get { return (ObservableCollection<AreaGeometry>)GetValue(CurrAreaGeometriesProperty); }
@@ -76,6 +85,7 @@ namespace RaywattApp.Common.Annotation
             //Default Setting
             isDrawing = false;
             isCanvasClicked = false;
+            MeasurementExpand = true;
 
             AreaInit();
             LengthInit();
@@ -238,6 +248,11 @@ namespace RaywattApp.Common.Annotation
             this.lengthGeometries.Remove(lengthGeometry);
 
             DrawLengthAll();
+        }
+
+        private void toggle_Measurement(object sender, RoutedEventArgs e)
+        {
+            MeasurementExpand = !MeasurementExpand;
         }
     }
 }

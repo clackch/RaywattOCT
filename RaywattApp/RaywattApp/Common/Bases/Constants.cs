@@ -119,5 +119,16 @@
 
         //Encrypt, Decrypt Public Key
         public const string PublicKey = "raywatt07_hwjckklls_298-87-01441";
+
+        //Review - 2D - Side Menu
+        public const string ViewOption = "View";
+        public const string PatientInfo = "Patient";
+        public const string ValueInfo = "Value";
+        public const double RightSideBarExpandAngioSize = 350;
+        public const double RightSideBarExpandDefaultSize = 250;
+
+        //Review - 2D - Longitude
+        public const string LongitudeProfile = "Profile";
+        public const string LongitudeLMode = "LMode";
     }
 }

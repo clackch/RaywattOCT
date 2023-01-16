@@ -8,16 +8,22 @@
       xmlns:annotation="clr-namespace:RaywattApp.Common.Annotation"
       xmlns:behaviors="clr-namespace:RaywattApp.Common.Behaviors"
       xmlns:System="clr-namespace:System;assembly=mscorlib"
+      xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
+      xmlns:const="clr-namespace:RaywattApp.Common.Bases"
       mc:Ignorable="d" 
-      d:DesignHeight="994" d:DesignWidth="1280"
+      d:DesignHeight="1024" d:DesignWidth="1280"
       Title="ReviewPage">
     <Page.Resources>
         <System:Boolean x:Key="TrueValue">True</System:Boolean>
         <System:Boolean x:Key="FalseValue">False</System:Boolean>
         <System:Double x:Key="CrossSectionSize">640</System:Double>
-        <System:Double x:Key="MeasurementSize">600</System:Double>
         <System:Double x:Key="CrossSectionCenter">320</System:Double>
+        <System:Double x:Key="CrossSectionSmallSize">350</System:Double>
+        <System:Double x:Key="CrossSectionSmallCenter">175</System:Double>
         <System:Double x:Key="LongitudeHeight">180</System:Double>
+        <System:Double x:Key="LeftSideBarExpand">250</System:Double>
+        <System:Double x:Key="SideBarCollapse">50</System:Double>
+        <System:Double x:Key="AngioSize">640</System:Double>
     </Page.Resources>
 
     <Grid>
@@ -33,124 +39,400 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Orientation="Horizontal">
-                <Label Content="{Binding [Review], Source={StaticResource L10N}}"></Label>
+                <StackPanel Width="60"/>
                 <Button Style="{StaticResource ButtonImportant}" Width="80" Content="2D"/>
                 <Button Style="{StaticResource ButtonImportant}" Width="80" Content="3D"/>
                 <Button Style="{StaticResource ButtonImportant}" Width="80" Content="Compare"/>
                 <Button Style="{StaticResource ButtonImportant}" Width="80" Content="AI FFR"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding MeasurementCommand}" Content="Measurement"/>
-                <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding EditCaseCommand}" Content="{Binding [Edit Case], Source={StaticResource L10N}}"/>
                 <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding EditPresetCommand}" Content="{Binding [Edit Preset], Source={StaticResource L10N}}"/>
                 <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding ExportCommand}" Content="{Binding [Export], Source={StaticResource L10N}}"/>
+                <StackPanel Width="120"/>
             </StackPanel>
         </Grid>
 
         <StackPanel Grid.Row="1">
             <StackPanel Orientation="Vertical">
                 <StackPanel Height="10"/>
+                <!-- Cross Section -->
                 <Grid x:Name="crossSection">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     
-                    <Image Grid.Column="0" x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill">
-                        <i:Interaction.Triggers>
-                            <i:EventTrigger EventName="Loaded">
-                                <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}">
-                                    <i:InvokeCommandAction.CommandParameter>
-                                        <MultiBinding Converter="{StaticResource MultiParamConverter}">
-                                            <Binding Path="Name" ElementName="crossSectionImage"/>
-                                            <Binding Path="ActualWidth" ElementName="crossSectionImage"/>
-                                            <Binding Path="ActualHeight" ElementName="crossSectionImage"/>
-                                        </MultiBinding>
-                                    </i:InvokeCommandAction.CommandParameter>
-                                </i:InvokeCommandAction>
-                            </i:EventTrigger>
-                            <i:EventTrigger EventName="SizeChanged">
-                                <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}">
-                                    <i:InvokeCommandAction.CommandParameter>
-                                        <MultiBinding Converter="{StaticResource MultiParamConverter}">
-                                            <Binding Path="Name" ElementName="crossSectionImage"/>
-                                            <Binding Path="ActualWidth" ElementName="crossSectionImage"/>
-                                            <Binding Path="ActualHeight" ElementName="crossSectionImage"/>
-                                        </MultiBinding>
-                                    </i:InvokeCommandAction.CommandParameter>
-                                </i:InvokeCommandAction>
-                            </i:EventTrigger>
-                        </i:Interaction.Triggers>
-                    </Image>
-                    <Grid Grid.Column="0" Background="Transparent" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Visibility="{Binding IndicatorCrossSection.IsVisible}">
-                        <i:Interaction.Behaviors>
-                            <behaviors:MouseBehavior MouseX="{Binding IndicatorCrossSection.X, Mode=OneWayToSource}" MouseY="{Binding IndicatorCrossSection.Y, Mode=OneWayToSource}" />
-                        </i:Interaction.Behaviors>
+                    <!-- Center : Cross Section -->
+                    <Grid Grid.Column="2" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Visibility="{Binding IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                        <!-- Cross Seciton Image -->
+                        <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="Loaded">
+                                    <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}">
+                                        <i:InvokeCommandAction.CommandParameter>
+                                            <MultiBinding Converter="{StaticResource MultiParamConverter}">
+                                                <Binding Path="Name" ElementName="crossSectionImage"/>
+                                                <Binding Path="ActualWidth" ElementName="crossSectionImage"/>
+                                                <Binding Path="ActualHeight" ElementName="crossSectionImage"/>
+                                            </MultiBinding>
+                                        </i:InvokeCommandAction.CommandParameter>
+                                    </i:InvokeCommandAction>
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="SizeChanged">
+                                    <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}">
+                                        <i:InvokeCommandAction.CommandParameter>
+                                            <MultiBinding Converter="{StaticResource MultiParamConverter}">
+                                                <Binding Path="Name" ElementName="crossSectionImage"/>
+                                                <Binding Path="ActualWidth" ElementName="crossSectionImage"/>
+                                                <Binding Path="ActualHeight" ElementName="crossSectionImage"/>
+                                            </MultiBinding>
+                                        </i:InvokeCommandAction.CommandParameter>
+                                    </i:InvokeCommandAction>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </Image>
+                        <!-- Indicator  -->
+                        <Grid Background="Transparent" Visibility="{Binding IndicatorCrossSection.IsVisible}">
+                            <i:Interaction.Behaviors>
+                                <behaviors:MouseBehavior MouseX="{Binding IndicatorCrossSection.X, Mode=OneWayToSource}" MouseY="{Binding IndicatorCrossSection.Y, Mode=OneWayToSource}" />
+                            </i:Interaction.Behaviors>
 
-                        <i:Interaction.Triggers>
-                            <i:EventTrigger EventName="MouseLeave" >
-                                <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
-                            </i:EventTrigger>
-                            <i:EventTrigger EventName="PreviewMouseUp" >
-                                <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
-                            </i:EventTrigger>
-                            <i:EventTrigger EventName="PreviewMouseMove" >
-                                <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
-                            </i:EventTrigger>
-                        </i:Interaction.Triggers>
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="MouseLeave" >
+                                    <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="PreviewMouseUp" >
+                                    <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="PreviewMouseMove" >
+                                    <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
 
-                        <Canvas Height="{StaticResource CrossSectionSize}" Width="{StaticResource CrossSectionSize}">
-                            <Image Source="/res/bar/indicator.png" Height="{StaticResource CrossSectionSize}" Width="{StaticResource CrossSectionSize}" Cursor="Hand" Opacity="0.25">
-                                <Image.RenderTransform>
-                                    <!-- Image Indicator bar width(about 7) => CenterY 3.5 -->
-                                    <RotateTransform CenterX="{StaticResource CrossSectionCenter}" CenterY="3.5" Angle="{Binding Degree}"/>
-                                </Image.RenderTransform>
+                            <Canvas>
+                                <Image Source="/res/bar/indicator.png" Height="{StaticResource CrossSectionSize}" Width="{StaticResource CrossSectionSize}" Cursor="Hand" Opacity="0.25">
+                                    <Image.RenderTransform>
+                                        <!-- Image Indicator bar width(about 7) => CenterY 3.5 -->
+                                        <RotateTransform CenterX="{StaticResource CrossSectionCenter}" CenterY="3.5" Angle="{Binding Degree}"/>
+                                    </Image.RenderTransform>
 
-                                <i:Interaction.Triggers>
-                                    <i:EventTrigger EventName="PreviewMouseDown" >
-                                        <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
-                                    </i:EventTrigger>
-                                    <i:EventTrigger EventName="PreviewMouseUp" >
-                                        <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
-                                    </i:EventTrigger>
-                                    <i:EventTrigger EventName="PreviewMouseMove" >
-                                        <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
-                                    </i:EventTrigger>
-                                </i:Interaction.Triggers>
-                            </Image>
-                        </Canvas>
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="PreviewMouseDown" >
+                                            <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
+                                        </i:EventTrigger>
+                                        <i:EventTrigger EventName="PreviewMouseUp" >
+                                            <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                                        </i:EventTrigger>
+                                        <i:EventTrigger EventName="PreviewMouseMove" >
+                                            <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </Image>
+                            </Canvas>
+                        </Grid>
                         <Label Content="{Binding FrameNumber}" VerticalAlignment="Bottom" Foreground="White"/>
                     </Grid>
+                    <!-- Center : Angio -->
+                    <Grid Grid.Column="2" Width="{StaticResource AngioSize}" Height="{StaticResource AngioSize}" Visibility="{Binding IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Background="Beige">
+                        
+                    </Grid>
 
-                    <Grid Grid.Column="1">
+                    <!-- Left Menu  -->
+                    <Grid Grid.Column="0" Width="{StaticResource LeftSideBarExpand}">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
                             <RowDefinition/>
-                            <RowDefinition Height="Auto"/>
                             <RowDefinition/>
                         </Grid.RowDefinitions>
-                        <Label Grid.Row="0" Content="{Binding [Lumen], Source={StaticResource L10N}}"/>
+                        <!-- View Option  -->
+                        <Grid Grid.Row="0" HorizontalAlignment="Left" Width="{StaticResource LeftSideBarExpand}" Visibility="{Binding ExpandViewOption, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0">
+                                <Button Content="≪ View Option" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.ViewOption}" />
+                                <Separator/>
+                            </StackPanel>
+                            <Grid Grid.Row="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Label Grid.Row="0" Grid.ColumnSpan="2" Content="{Binding [2D], Source={StaticResource L10N}}" FontSize="20"/>
+                                <Label Grid.Row="1" Grid.Column="0" Content="{Binding [Contour], Source={StaticResource L10N}}"/>
+                                <Button Grid.Row="1" Grid.Column="1" Command="{Binding ToggleContourCommand}"/>
 
-                        <Label Grid.Row="2" Content="{Binding [Calcium], Source={StaticResource L10N}}"/>
+                                <Label Grid.Row="2" Grid.Column="0" Content="{Binding [Measurement], Source={StaticResource L10N}}"/>
+                                <Button Grid.Row="2" Grid.Column="1" Command="{Binding MeasurementCommand}"/>
 
+                                <Label Grid.Row="3" Grid.Column="0" Content="{Binding [Angio], Source={StaticResource L10N}}"/>
+                                <Button Grid.Row="3" Grid.Column="1" Command="{Binding ToggleAngioCommand}"/>
+                                <Button Grid.Row="4" Grid.ColumnSpan="2" Style="{StaticResource ButtonBasic}" Width="200" Command="{Binding CoRegistrationCommand}" Content="{Binding [Co-Registration], Source={StaticResource L10N}}"/>
+                            </Grid>
+                        </Grid>
+                        <Grid Grid.Row="0" HorizontalAlignment="Left" Width="{StaticResource SideBarCollapse}" Visibility="{Binding ExpandViewOption, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" >
+                                <Button Content="≫" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.ViewOption}"/>
+                                <Separator/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1">
+
+                            </StackPanel>
+                        </Grid>
+                        <!-- Patient Info  -->
+                        <Grid Grid.Row="1" HorizontalAlignment="Left" Width="{StaticResource LeftSideBarExpand}" Visibility="{Binding ExpandPatientInfo, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" >
+                                <Button Content="≪ Patient Info." Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.PatientInfo}"/>
+                                <Separator/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1">
+                                <Grid>
+                                    <Label Content="{Binding PatientCase.Procedure, Converter={StaticResource CodeConverter}, ConverterParameter='PROC'}"/>
+                                    <Button HorizontalAlignment="Right" Style="{StaticResource ButtonBasic}" Width="40" Command="{Binding EditCaseCommand}" Content="{Binding [Edit], Source={StaticResource L10N}}"/>
+                                </Grid>
+                                <Label Content="{Binding Patient.Name}"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="{Binding [ID], Source={StaticResource L10N}}"/>
+                                    <Label Content="["/>
+                                    <Label Content="{Binding Patient.Id}"/>
+                                    <Label Content="]"/>
+                                </StackPanel>
+                                <Separator Margin="10,0,10,0"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Label Grid.Column="0" Grid.Row="0" Content="{Binding [Birth], Source={StaticResource L10N}}"/>
+                                    <Label Grid.Column="1" Grid.Row="0" Content="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}"/>
+                                    <Label Grid.Column="0" Grid.Row="1" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
+                                    <Label Grid.Column="1" Grid.Row="1" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
+                                    <Label Grid.Column="0" Grid.Row="2" Content="{Binding [Vessel], Source={StaticResource L10N}}"/>
+                                    <Label Grid.Column="1" Grid.Row="2" Content="{Binding PatientCase.Vessel, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}"/>
+                                    <Label Grid.Column="0" Grid.Row="3" Content="{Binding [Physician], Source={StaticResource L10N}}"/>
+                                    <Label Grid.Column="1" Grid.Row="3" Content="{Binding PatientCase.PhysicianName}"/>
+                                    <Label Grid.Column="0" Grid.Row="4" Content="{Binding [Accession Number], Source={StaticResource L10N}}"/>
+                                    <Label Grid.Column="1" Grid.Row="4" Content="{Binding PatientCase.AccessionNumber}"/>
+                                    <Label Grid.Column="0" Grid.Row="5" Content="{Binding [Comment], Source={StaticResource L10N}}"/>
+                                    <TextBlock Grid.Column="1" Grid.Row="5" Text="{Binding PatientCase.Comment}" TextWrapping="Wrap" Padding="5,5,0,0"/>
+                                </Grid>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Grid.Row="1" HorizontalAlignment="Left" Width="{StaticResource SideBarCollapse}" Visibility="{Binding ExpandPatientInfo, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" >
+                                <Button Content="≫" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.PatientInfo}"/>
+                                <Separator/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1">
+
+                            </StackPanel>
+                        </Grid>
                     </Grid>
 
-                    <Grid Grid.ColumnSpan="2">
-                        <annotation:DrawUtil Visibility="{Binding VisibleMeasurement}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" VerticalAlignment="Center"/>
+                    <!-- Right Menu  -->
+                    <Grid Grid.Column="4" Width="{Binding RightSideBarExpand}">
+                        <!-- Value Info -->
+                        <Grid HorizontalAlignment="Right" Width="{Binding RightSideBarExpand}" Visibility="{Binding ExpandValueInfo, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" >
+                                <Button Content="Value Info. ≫" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.ValueInfo}"/>
+                                <Separator/>
+                            </StackPanel>
+
+                            <!-- Default -->
+                            <Grid Grid.Row="1" Visibility="{Binding IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <!-- Lumen -->
+                                <Grid Grid.Row="0">
+                                    <Label>Lumen</Label>
+                                </Grid>
+                                <Separator Grid.Row="1" Margin="10,0,10,0"/>
+                                <!-- Calcium -->
+                                <Grid Grid.Row="2">
+                                    <Label>Calcium</Label>
+                                </Grid>
+                            </Grid>
+                            <!-- Angio -->
+                            <Grid Grid.Row="1" Visibility="{Binding IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <!-- Cross-section -->
+                                <Grid Grid.Row="0">
+                                    <!-- Cross Seciton Image -->
+                                    <Image x:Name="crossSectionImageSmall" Source="{Binding CrossSectionImage}">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="Loaded">
+                                                <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}">
+                                                    <i:InvokeCommandAction.CommandParameter>
+                                                        <MultiBinding Converter="{StaticResource MultiParamConverter}">
+                                                            <Binding Path="Name" ElementName="crossSectionImageSmall"/>
+                                                            <Binding Path="ActualWidth" ElementName="crossSectionImageSmall"/>
+                                                            <Binding Path="ActualHeight" ElementName="crossSectionImageSmall"/>
+                                                        </MultiBinding>
+                                                    </i:InvokeCommandAction.CommandParameter>
+                                                </i:InvokeCommandAction>
+                                            </i:EventTrigger>
+                                            <i:EventTrigger EventName="SizeChanged">
+                                                <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}">
+                                                    <i:InvokeCommandAction.CommandParameter>
+                                                        <MultiBinding Converter="{StaticResource MultiParamConverter}">
+                                                            <Binding Path="Name" ElementName="crossSectionImageSmall"/>
+                                                            <Binding Path="ActualWidth" ElementName="crossSectionImageSmall"/>
+                                                            <Binding Path="ActualHeight" ElementName="crossSectionImageSmall"/>
+                                                        </MultiBinding>
+                                                    </i:InvokeCommandAction.CommandParameter>
+                                                </i:InvokeCommandAction>
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                    </Image>
+                                    <!-- Indicator  -->
+                                    <Grid Background="Transparent" Visibility="{Binding IndicatorCrossSection.IsVisible}">
+                                        <i:Interaction.Behaviors>
+                                            <behaviors:MouseBehavior MouseX="{Binding IndicatorCrossSection.X, Mode=OneWayToSource}" MouseY="{Binding IndicatorCrossSection.Y, Mode=OneWayToSource}" />
+                                        </i:Interaction.Behaviors>
+
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="MouseLeave" >
+                                                <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                                            </i:EventTrigger>
+                                            <i:EventTrigger EventName="PreviewMouseUp" >
+                                                <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                                            </i:EventTrigger>
+                                            <i:EventTrigger EventName="PreviewMouseMove" >
+                                                <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+
+                                        <Canvas>
+                                            <Image Source="/res/bar/indicator.png" Height="{StaticResource CrossSectionSmallSize}" Width="{StaticResource CrossSectionSmallSize}" Cursor="Hand" Opacity="0.25">
+                                                <Image.RenderTransform>
+                                                    <!-- Image Indicator bar width(about 7) => CenterY 3.5 -->
+                                                    <RotateTransform CenterX="{StaticResource CrossSectionSmallCenter}" CenterY="3.5" Angle="{Binding Degree}"/>
+                                                </Image.RenderTransform>
+
+                                                <i:Interaction.Triggers>
+                                                    <i:EventTrigger EventName="PreviewMouseDown" >
+                                                        <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
+                                                    </i:EventTrigger>
+                                                    <i:EventTrigger EventName="PreviewMouseUp" >
+                                                        <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                                                    </i:EventTrigger>
+                                                    <i:EventTrigger EventName="PreviewMouseMove" >
+                                                        <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
+                                                    </i:EventTrigger>
+                                                </i:Interaction.Triggers>
+                                            </Image>
+                                        </Canvas>
+                                    </Grid>
+                                    <Label Content="{Binding FrameNumber}" VerticalAlignment="Bottom" Foreground="White"/>
+                                </Grid>
+                                <!-- Info -->
+                                <Grid Grid.Row="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0">Lumen</Label>
+                                    <Label Grid.Column="1">Calcium</Label>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                        <Grid Grid.Row="1" HorizontalAlignment="Right" Width="{StaticResource SideBarCollapse}" Visibility="{Binding ExpandValueInfo, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" >
+                                <Button Content="≪" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.ValueInfo}"/>
+                                <Separator/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1">
+
+                            </StackPanel>
+                        </Grid>
                     </Grid>
+
+                    <!-- Measurement -->
+                    <annotation:DrawUtil Grid.Column="2" Grid.ColumnSpan="3" Visibility="{Binding VisibleMeasurement}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" VerticalAlignment="Center"/>
                     
                 </Grid>
-                <StackPanel Height="10"/>
-                <Grid x:Name="longitude" Margin="5,0,5,0">
-                    <Image x:Name="longitudeImage" Source="{Binding LongitudeImage}" Height="{StaticResource LongitudeHeight}" Stretch="Fill">
+
+                <!-- Play/Pause/Prev/Next, Lumen Profile/L-Mode -->
+                <Grid>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <RepeatButton Content="◀|" Command="{Binding CmdPlayback}" CommandParameter="prev" Margin="5"/>
+                        <Button Content="{Binding PlayPauseState}" Command="{Binding CmdPlayback}" CommandParameter="play" Width="70" Margin="5"/>
+                        <RepeatButton Content="|▶" Command="{Binding CmdPlayback}" CommandParameter="next" Margin="5"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                        <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding ToggleLongitudeCommand}" CommandParameter="{x:Static const:Constants.LongitudeProfile}" Content="{Binding [Lumen Profile], Source={StaticResource L10N}}"/>
+                        <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding ToggleLongitudeCommand}" CommandParameter="{x:Static const:Constants.LongitudeLMode}" Content="{Binding [L-Mode], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Longitude -->
+                <Grid Margin="5,0,5,0" Background="DarkGray">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="50"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Column="0" Content="P" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Label Grid.Column="2" Content="D" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                    <!-- Longitude Image -->
+                    <Grid x:Name="longitude" Grid.Column="1">
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="Loaded">
                                 <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}">
                                     <i:InvokeCommandAction.CommandParameter>
                                         <MultiBinding Converter="{StaticResource MultiParamConverter}">
-                                            <Binding Path="Name" ElementName="longitudeImage"/>
-                                            <Binding Path="ActualWidth" ElementName="longitudeImage"/>
-                                            <Binding Path="ActualHeight" ElementName="longitudeImage"/>
+                                            <Binding Path="Name" ElementName="longitude"/>
+                                            <Binding Path="ActualWidth" ElementName="longitude"/>
+                                            <Binding Path="ActualHeight" ElementName="longitude"/>
                                         </MultiBinding>
                                     </i:InvokeCommandAction.CommandParameter>
                                 </i:InvokeCommandAction>
@@ -159,83 +441,89 @@
                                 <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}">
                                     <i:InvokeCommandAction.CommandParameter>
                                         <MultiBinding Converter="{StaticResource MultiParamConverter}">
-                                            <Binding Path="Name" ElementName="longitudeImage"/>
-                                            <Binding Path="ActualWidth" ElementName="longitudeImage"/>
-                                            <Binding Path="ActualHeight" ElementName="longitudeImage"/>
+                                            <Binding Path="Name" ElementName="longitude"/>
+                                            <Binding Path="ActualWidth" ElementName="longitude"/>
+                                            <Binding Path="ActualHeight" ElementName="longitude"/>
                                         </MultiBinding>
                                     </i:InvokeCommandAction.CommandParameter>
                                 </i:InvokeCommandAction>
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
-                    </Image>
-                    <StackPanel Background="Transparent" Height="{StaticResource LongitudeHeight}" Visibility="{Binding IndicatorLongitude.IsVisible}">
-                        <!-- L-Mode Mouse Pointer X -->
-                        <i:Interaction.Behaviors>
-                            <behaviors:MouseBehavior MouseX="{Binding PointLongitudeX, Mode=OneWayToSource}"/>
-                        </i:Interaction.Behaviors>
-                        <!-- Trigger -->
-                        <i:Interaction.Triggers>
-                            <!--MouseLeave : StackPanel 영역 벗어날 경우, Indicator 멈춤 -->
-                            <i:EventTrigger EventName="MouseLeave" >
-                                <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
-                            </i:EventTrigger>
-                            <!--PreviewMouseUp : StackPanel 영역에서 MouseUp 할 경우, Indicator 멈춤  -->
-                            <i:EventTrigger EventName="PreviewMouseUp" >
-                                <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
-                            </i:EventTrigger>
-                            <!--PreviewMouseMove : StackPanel 영역에서 MouseMove 할 경우, Indicator 동작(단, Indicator가 동작 가능 상태 일때) -->
-                            <i:EventTrigger EventName="PreviewMouseMove" >
-                                <i:InvokeCommandAction Command="{Binding CmdMoveIndicator}" CommandParameter="{Binding IndicatorLongitude}"/>
-                            </i:EventTrigger>
-                        </i:Interaction.Triggers>
 
-                        <Canvas>
-                            <Image x:Name="longitudeIndicatorImage" Source="/res/bar/indicator.png" Cursor="Hand" Stretch="None" Width="{StaticResource LongitudeHeight}" Canvas.Left="{Binding IndicatorLongitude.X}" Canvas.Top="2" Opacity="0.25">
-                                <!-- 가로 Image 90도 회전 -->
-                                <Image.RenderTransform>
-                                    <RotateTransform CenterX="0" CenterY="0" Angle="90"/>
-                                </Image.RenderTransform>
-                                <!-- Trigger -->
-                                <i:Interaction.Triggers>
-                                    <!--PreviewMouseDown : Image 영역에서 MouseDown 할 경우, Indicator 동작 가능 상태로 변경 -->
-                                    <i:EventTrigger EventName="PreviewMouseDown" >
-                                        <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
-                                    </i:EventTrigger>
-                                    <!--PreviewMouseUp : Image 영역에서 MouseUp 할 경우, Indicator 멈춤 -->
-                                    <i:EventTrigger EventName="PreviewMouseUp" >
-                                        <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
-                                    </i:EventTrigger>
-                                    <!--PreviewMouseMove : Image 영역에서 MouseMove 할 경우, Indicator 동작(단, Indicator가 동작 가능 상태 일때) -->
-                                    <i:EventTrigger EventName="PreviewMouseMove" >
-                                        <i:InvokeCommandAction Command="{Binding CmdMoveIndicator}" CommandParameter="{Binding IndicatorLongitude}"/>
-                                    </i:EventTrigger>
-                                    <i:EventTrigger EventName="Loaded">
-                                        <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}">
-                                            <i:InvokeCommandAction.CommandParameter>
-                                                <MultiBinding Converter="{StaticResource MultiParamConverter}">
-                                                    <Binding Path="Name" ElementName="longitudeIndicatorImage"/>
-                                                    <Binding Path="ActualWidth" ElementName="longitudeIndicatorImage"/>
-                                                    <Binding Path="ActualHeight" ElementName="longitudeIndicatorImage"/>
-                                                </MultiBinding>
-                                            </i:InvokeCommandAction.CommandParameter>
-                                        </i:InvokeCommandAction>
-                                    </i:EventTrigger>
-                                    <i:EventTrigger EventName="SizeChanged">
-                                        <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}">
-                                            <i:InvokeCommandAction.CommandParameter>
-                                                <MultiBinding Converter="{StaticResource MultiParamConverter}">
-                                                    <Binding Path="Name" ElementName="longitudeIndicatorImage"/>
-                                                    <Binding Path="ActualWidth" ElementName="longitudeIndicatorImage"/>
-                                                    <Binding Path="ActualHeight" ElementName="longitudeIndicatorImage"/>
-                                                </MultiBinding>
-                                            </i:InvokeCommandAction.CommandParameter>
-                                        </i:InvokeCommandAction>
-                                    </i:EventTrigger>
-                                </i:Interaction.Triggers>
-                            </Image>
-                        </Canvas>
-                    </StackPanel>
+                        <!-- Lumen Profile -->
+                        <Image x:Name="lumenProfile" Height="{StaticResource LongitudeHeight}" Stretch="Fill" Visibility="{Binding IsLumenProfile, Converter={StaticResource BoolToVisibilityConverter}}">
+                        </Image>
+                        <!-- L-Mode -->
+                        <Image x:Name="lMode" Source="{Binding LongitudeImage}" Height="{StaticResource LongitudeHeight}" Stretch="Fill" Visibility="{Binding IsLumenProfile, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                        </Image>
+                        <StackPanel Background="Transparent" Height="{StaticResource LongitudeHeight}" Visibility="{Binding IndicatorLongitude.IsVisible}">
+                            <!-- L-Mode Mouse Pointer X -->
+                            <i:Interaction.Behaviors>
+                                <behaviors:MouseBehavior MouseX="{Binding PointLongitudeX, Mode=OneWayToSource}"/>
+                            </i:Interaction.Behaviors>
+                            <!-- Trigger -->
+                            <i:Interaction.Triggers>
+                                <!--MouseLeave : StackPanel 영역 벗어날 경우, Indicator 멈춤 -->
+                                <i:EventTrigger EventName="MouseLeave" >
+                                    <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                                </i:EventTrigger>
+                                <!--PreviewMouseUp : StackPanel 영역에서 MouseUp 할 경우, Indicator 멈춤  -->
+                                <i:EventTrigger EventName="PreviewMouseUp" >
+                                    <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                                </i:EventTrigger>
+                                <!--PreviewMouseMove : StackPanel 영역에서 MouseMove 할 경우, Indicator 동작(단, Indicator가 동작 가능 상태 일때) -->
+                                <i:EventTrigger EventName="PreviewMouseMove" >
+                                    <i:InvokeCommandAction Command="{Binding CmdMoveIndicator}" CommandParameter="{Binding IndicatorLongitude}"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
 
+                            <Canvas>
+                                <Image x:Name="longitudeIndicatorImage" Source="/res/bar/indicator.png" Cursor="Hand" Stretch="None" Width="{StaticResource LongitudeHeight}" Canvas.Left="{Binding IndicatorLongitude.X}" Canvas.Top="2" Opacity="0.25">
+                                    <!-- 가로 Image 90도 회전 -->
+                                    <Image.RenderTransform>
+                                        <RotateTransform CenterX="0" CenterY="0" Angle="90"/>
+                                    </Image.RenderTransform>
+                                    <!-- Trigger -->
+                                    <i:Interaction.Triggers>
+                                        <!--PreviewMouseDown : Image 영역에서 MouseDown 할 경우, Indicator 동작 가능 상태로 변경 -->
+                                        <i:EventTrigger EventName="PreviewMouseDown" >
+                                            <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
+                                        </i:EventTrigger>
+                                        <!--PreviewMouseUp : Image 영역에서 MouseUp 할 경우, Indicator 멈춤 -->
+                                        <i:EventTrigger EventName="PreviewMouseUp" >
+                                            <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                                        </i:EventTrigger>
+                                        <!--PreviewMouseMove : Image 영역에서 MouseMove 할 경우, Indicator 동작(단, Indicator가 동작 가능 상태 일때) -->
+                                        <i:EventTrigger EventName="PreviewMouseMove" >
+                                            <i:InvokeCommandAction Command="{Binding CmdMoveIndicator}" CommandParameter="{Binding IndicatorLongitude}"/>
+                                        </i:EventTrigger>
+                                        <i:EventTrigger EventName="Loaded">
+                                            <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}">
+                                                <i:InvokeCommandAction.CommandParameter>
+                                                    <MultiBinding Converter="{StaticResource MultiParamConverter}">
+                                                        <Binding Path="Name" ElementName="longitudeIndicatorImage"/>
+                                                        <Binding Path="ActualWidth" ElementName="longitudeIndicatorImage"/>
+                                                        <Binding Path="ActualHeight" ElementName="longitudeIndicatorImage"/>
+                                                    </MultiBinding>
+                                                </i:InvokeCommandAction.CommandParameter>
+                                            </i:InvokeCommandAction>
+                                        </i:EventTrigger>
+                                        <i:EventTrigger EventName="SizeChanged">
+                                            <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}">
+                                                <i:InvokeCommandAction.CommandParameter>
+                                                    <MultiBinding Converter="{StaticResource MultiParamConverter}">
+                                                        <Binding Path="Name" ElementName="longitudeIndicatorImage"/>
+                                                        <Binding Path="ActualWidth" ElementName="longitudeIndicatorImage"/>
+                                                        <Binding Path="ActualHeight" ElementName="longitudeIndicatorImage"/>
+                                                    </MultiBinding>
+                                                </i:InvokeCommandAction.CommandParameter>
+                                            </i:InvokeCommandAction>
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </Image>
+                            </Canvas>
+                        </StackPanel>
+                    </Grid>
                 </Grid>
             </StackPanel>
         </StackPanel>
@@ -246,36 +534,10 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" >
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="{Binding [Procedure], Source={StaticResource L10N}}"></Label>
-                    <Label Content="["></Label>
-                    <Label Content="{Binding PatientCase.Procedure, Converter={StaticResource CodeConverter}, ConverterParameter='PROC'}"></Label>
-                    <Label Content="]"></Label>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="{Binding [Vessel], Source={StaticResource L10N}}"></Label>
-                    <Label Content="["></Label>
-                    <Label Content="{Binding PatientCase.Vessel, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}"></Label>
-                    <Label Content="]"></Label>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="{Binding [Physician], Source={StaticResource L10N}}"></Label>
-                    <Label Content="["></Label>
-                    <Label Content="{Binding PatientCase.PhysicianName}"></Label>
-                    <Label Content="]"></Label>
-                </StackPanel>
-            </StackPanel>
-
-            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
-                <RepeatButton Content="◀|" Command="{Binding CmdPlayback}" CommandParameter="prev" Margin="5"/>
-                <Button Content="{Binding PlayPauseState}" Command="{Binding CmdPlayback}" CommandParameter="play" Width="70" Margin="5"/>
-                <RepeatButton Content="|▶" Command="{Binding CmdPlayback}" CommandParameter="next" Margin="5"/>
-            </StackPanel>
 
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" >
-                <Button Style="{StaticResource ButtonImportant}" Width="80" Command="{Binding EndReviewCommand}" Content="{Binding [End Review], Source={StaticResource L10N}}"/>
                 <Button Style="{StaticResource ButtonImportant}" Width="100" Command="{Binding NewRecordingCommand}" Content="{Binding [New Recording], Source={StaticResource L10N}}"/>
+                <Button Style="{StaticResource ButtonImportant}" Width="80" Command="{Binding EndReviewCommand}" Content="{Binding [End Review], Source={StaticResource L10N}}"/>
             </StackPanel>
         </Grid>
     </Grid>

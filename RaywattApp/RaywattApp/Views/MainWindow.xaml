@@ -11,61 +11,38 @@
         Width="1280" Height="1024">
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
-        <Grid Grid.Row="0" Background="Black">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="200"/>
-            </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" HorizontalAlignment="Left">
-                <Button Style="{StaticResource ButtonImportant}" Width="50" Command="{Binding HomeCommand}" Content="{Binding [Raywatt], Source={StaticResource L10N}}"/>
+        <Frame NavigationUIVisibility="Hidden">
+            <b:Interaction.Behaviors>
+                <behaviors:FrameBehavior Parameter="{Binding NavigationParameter, Mode=TwoWay}" Navigation="{Binding NavigationSource, Mode=TwoWay}" />
+            </b:Interaction.Behaviors>
+        </Frame>
+        <Border Background="#66000000" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Border HorizontalAlignment="Center" VerticalAlignment="Center" Background="White" CornerRadius="5">
+                <StackPanel Width="100" Margin="10">
+                    <ProgressBar Height="10" IsIndeterminate="True" />
+                    <TextBlock Margin="0,5,0,0" HorizontalAlignment="Center" Text="Busy..." />
+                </StackPanel>
+                <Border.Effect>
+                    <DropShadowEffect />
+                </Border.Effect>
+            </Border>
+        </Border>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0" HorizontalAlignment="Left">
+                <Button Style="{StaticResource ButtonImportant}" Width="50" Command="{Binding HomeCommand}" Content="{Binding [Home], Source={StaticResource L10N}}"/>
             </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" Visibility="{Binding IsShowPatient}">
-                <Label Foreground="White" Content="{Binding [ID], Source={StaticResource L10N}}"/>
-                <Label Foreground="White">[</Label>
-                <Label Foreground="White" Content="{Binding Patient.Id}"/>
-                <Label Foreground="White">]</Label>
-                <Label Foreground="White" Content="{Binding [Name], Source={StaticResource L10N}}"/>
-                <Label Foreground="White">[</Label>
-                <Label Foreground="White" Content="{Binding Patient.Firstname}"/>
-                <Label Foreground="White">,</Label>
-                <Label Foreground="White" Content="{Binding Patient.Lastname}"/>
-                <Label Foreground="White">]</Label>
-                <Label Foreground="White" Content="{Binding [Birth Date], Source={StaticResource L10N}}"/>
-                <Label Foreground="White">[</Label>
-                <Label Foreground="White" Content="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}"/>
-                <Label Foreground="White">]</Label>
-                <Label Foreground="White" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
-                <Label Foreground="White">[</Label>
-                <Label Foreground="White" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
-                <Label Foreground="White">]</Label>
-            </StackPanel>
-            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding SettingCommand}" Content="{Binding [Setting], Source={StaticResource L10N}}"/>
                 <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding ExitCommand}" Content="{Binding [Exit], Source={StaticResource L10N}}"/>
             </StackPanel>
-        </Grid>
-        <Grid Grid.Row="1">
-            <Frame NavigationUIVisibility="Hidden">
-                <b:Interaction.Behaviors>
-                    <behaviors:FrameBehavior Parameter="{Binding NavigationParameter, Mode=TwoWay}" Navigation="{Binding NavigationSource, Mode=TwoWay}" />
-                </b:Interaction.Behaviors>
-            </Frame>
-            <Border Background="#66000000" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}">
-                <Border HorizontalAlignment="Center" VerticalAlignment="Center" Background="White" CornerRadius="5">
-                    <StackPanel Width="100" Margin="10">
-                        <ProgressBar Height="10" IsIndeterminate="True" />
-                        <TextBlock Margin="0,5,0,0" HorizontalAlignment="Center" Text="Busy..." />
-                    </StackPanel>
-                    <Border.Effect>
-                        <DropShadowEffect />
-                    </Border.Effect>
-                </Border>
-            </Border>
+            <StackPanel Grid.Row="2" HorizontalAlignment="Left">
+                <Label Content="{Binding [Raywatt], Source={StaticResource L10N}}"/>
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>
