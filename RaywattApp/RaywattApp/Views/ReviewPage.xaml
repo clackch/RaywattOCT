@@ -399,7 +399,7 @@
                 </Grid>
 
                 <!-- Measurement -->
-                <annotation:DrawUtil Grid.Column="2" Grid.ColumnSpan="3" Visibility="{Binding VisibleMeasurement}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" VerticalAlignment="Center"/>
+                <annotation:DrawUtil Grid.Column="2" Grid.ColumnSpan="3" Visibility="{Binding VisibleMeasurement}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" OutFrameNumber="{Binding MeasurementOutFrameNumber, Mode=TwoWay}" VerticalAlignment="Center"/>
 
             </Grid>
 

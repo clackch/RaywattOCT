@@ -108,10 +108,19 @@ namespace RaywattApp.ViewModels
                 {
                     measurementFrameNumber = value;
                     OnPropertyChanged(nameof(MeasurementFrameNumber));
-
-                    syncWithCoreSystem();
                 }
             } 
+        }
+
+        private int measurementOutFrameNumber;
+        public int MeasurementOutFrameNumber
+        {
+            get { return measurementOutFrameNumber; }
+            set
+            {
+                measurementOutFrameNumber = value;
+                RayMoveToFrame(value);
+            }
         }
 
         private List<Measurement> measurements;

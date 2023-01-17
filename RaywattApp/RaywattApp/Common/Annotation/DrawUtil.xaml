@@ -118,6 +118,8 @@
                     <RowDefinition/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <StackPanel Grid.Row="0" >
                     <Button Content="Measurment ≫" Click="toggle_Measurement"/>
@@ -154,6 +156,11 @@
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
+                <Separator Grid.Row="5"/>
+                <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button Content="◀" Click="move_Frame" CommandParameter="prev"/>
+                    <Button Content="▶" Click="move_Frame" CommandParameter="next"/>
+                </StackPanel>
             </Grid>
             <Grid HorizontalAlignment="Right" Width="{StaticResource SideBarCollapse}" Visibility="{Binding MeasurementExpand, ElementName=UserControl, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                 <Grid.RowDefinitions>

@@ -2,6 +2,7 @@
 using RaywattApp.Common.Annotation.Models;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -40,6 +41,15 @@ namespace RaywattApp.Common.Annotation
 
         private static readonly DependencyProperty FrameNumberProperty =
             DependencyProperty.Register("FrameNumber", typeof(int), typeof(DrawUtil), new PropertyMetadata(-1, OnPropertyChanged));
+
+        public int OutFrameNumber
+        {
+            get { return (int)GetValue(OutFrameNumberProperty); }
+            set { this.SetValue(OutFrameNumberProperty, value); }
+        }
+
+        private static readonly DependencyProperty OutFrameNumberProperty =
+            DependencyProperty.Register("OutFrameNumber", typeof(int), typeof(DrawUtil), new PropertyMetadata(default(int)));
 
         public int MouseCursor
         {
@@ -253,6 +263,63 @@ namespace RaywattApp.Common.Annotation
         private void toggle_Measurement(object sender, RoutedEventArgs e)
         {
             MeasurementExpand = !MeasurementExpand;
+        }
+
+        private void move_Frame(object sender, RoutedEventArgs e)
+        {
+            if(this.Measurements == null || this.Measurements.Count == 0)
+                return;
+
+            List<Measurement> orderedMeasurements = this.Measurements.OrderBy(x => x.FrameNumber).ToList();
+            List<Measurement> notEmptyMeasurments = new List<Measurement>();
+
+            foreach (Measurement measurement in orderedMeasurements)
+            {
+                if(measurement.AreaGeometries.Count + measurement.LengthGeometries.Count + measurement.TextGeometries.Count > 0)
+                    notEmptyMeasurments.Add(measurement);
+            }
+
+            if (notEmptyMeasurments.Count == 0)
+                return;
+
+            int currPosition = 0, nextPosition = 0;
+
+            for(int i=0; i< notEmptyMeasurments.Count; i++)
+            {
+                if(this.FrameNumber == notEmptyMeasurments[i].FrameNumber)
+                {
+                    currPosition = i;
+                    break;
+                }
+            }
+
+            Button button = (Button)sender;
+            string param = button.CommandParameter.ToString();
+
+            if ("prev".Equals(param))
+            {
+                if(currPosition == 0)
+                {
+                    nextPosition = notEmptyMeasurments.Count - 1;
+                }
+                else
+                {
+                    nextPosition = currPosition - 1;
+                }
+            }
+            else
+            {
+                if(currPosition == notEmptyMeasurments.Count - 1)
+                {
+                    nextPosition = 0;
+                }
+                else
+                {
+                    nextPosition = currPosition + 1;
+                }
+            }
+
+            OutFrameNumber = notEmptyMeasurments[nextPosition].FrameNumber;
         }
     }
 }
