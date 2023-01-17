@@ -23,9 +23,9 @@
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Orientation="Horizontal">
                 <StackPanel Width="60"/>
-                <Button Style="{StaticResource ButtonImportant}" Width="80" Content="2D" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="Views/ReviewPage.xaml"/>
-                <Button Style="{StaticResource ButtonImportant}" Width="80" Content="3D" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="Views/Review3dPage.xaml"/>
-                <Button Style="{StaticResource ButtonImportant}" Width="80" Content="Compare" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="Views/ReviewComparePage.xaml"/>
+                <Button Style="{StaticResource ButtonImportant}" Width="80" Content="2D" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewPage}"/>
+                <Button Style="{StaticResource ButtonImportant}" Width="80" Content="3D" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.Review3dPage}"/>
+                <Button Style="{StaticResource ButtonImportant}" Width="80" Content="Compare" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewComparePage}"/>
                 <Button Style="{StaticResource ButtonImportant}" Width="80" Content="AI FFR"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">

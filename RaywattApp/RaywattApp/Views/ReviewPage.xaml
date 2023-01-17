@@ -41,9 +41,9 @@
             <StackPanel Grid.Column="0" Orientation="Horizontal">
                 <StackPanel Width="60"/>
                 <Button Style="{StaticResource ButtonImportant}" Width="80" Content="2D"/>
-                <Button Style="{StaticResource ButtonImportant}" Width="80" Content="3D" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="Views/Review3dPage.xaml"/>
-                <Button Style="{StaticResource ButtonImportant}" Width="80" Content="Compare" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="Views/ReviewComparePage.xaml"/>
-                <Button Style="{StaticResource ButtonImportant}" Width="80" Content="AI FFR" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="Views/ReviewFfrPage.xaml"/>
+                <Button Style="{StaticResource ButtonImportant}" Width="80" Content="3D" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.Review3dPage}"/>
+                <Button Style="{StaticResource ButtonImportant}" Width="80" Content="Compare" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewComparePage}"/>
+                <Button Style="{StaticResource ButtonImportant}" Width="80" Content="AI FFR" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrPage}"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding EditPresetCommand}" Content="{Binding [Edit Preset], Source={StaticResource L10N}}"/>
