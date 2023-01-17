@@ -54,7 +54,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("PatientNewViewModel");
 
-            CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.PatientNewPage;
+            Constants.CurrentPage = Constants.PatientNewPage;
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;

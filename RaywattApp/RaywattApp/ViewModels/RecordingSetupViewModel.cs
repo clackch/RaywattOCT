@@ -38,7 +38,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("RecordingSetupViewModel");
 
-            CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.RecordingSetupPage;
+            Constants.CurrentPage = Constants.RecordingSetupPage;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)

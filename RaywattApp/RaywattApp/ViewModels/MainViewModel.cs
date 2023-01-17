@@ -42,9 +42,7 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private Patient _patient;
 
-        private List<int> currReviewPages;
-
-        private List<string> nextReviewPages;
+        private List<string> reviewPages;
 
         private ICommand _homeCommand;
         public ICommand HomeCommand
@@ -94,19 +92,12 @@ namespace RaywattApp.ViewModels
 
             Directory.CreateDirectory(Constants.DataRootPath);
 
-            currReviewPages = new List<int>();
-            currReviewPages.Add((int)CommonDefinition.PageList.ReviewPage);
-            currReviewPages.Add((int)CommonDefinition.PageList.Review3dPage);
-            currReviewPages.Add((int)CommonDefinition.PageList.ReviewComparePage);
-            currReviewPages.Add((int)CommonDefinition.PageList.ReviewFfrPage);
-            currReviewPages.Add((int)CommonDefinition.PageList.ReviewPresetPage);
-
-            nextReviewPages = new List<string>();
-            nextReviewPages.Add("Views/ReviewPage.xaml");
-            nextReviewPages.Add("Views/Review3dPage.xaml");
-            nextReviewPages.Add("Views/ReviewComparePage.xaml");
-            nextReviewPages.Add("Views/ReviewFfrPage.xaml");
-            nextReviewPages.Add("Views/ReviewPresetPage.xaml");
+            reviewPages = new List<string>();
+            reviewPages.Add(Constants.ReviewPage);
+            reviewPages.Add(Constants.Review3dPage);
+            reviewPages.Add(Constants.ReviewComparePage);
+            reviewPages.Add(Constants.ReviewFfrPage);
+            reviewPages.Add(Constants.ReviewPresetPage);
         }
 
         private void OnNavigationMessage(object recipient, NavigationMessage message)
@@ -119,15 +110,15 @@ namespace RaywattApp.ViewModels
             NavigationSource = pageUri;
 
             //Review 화면에서 나가는 경우, RayEndReivew 호출
-            if (currReviewPages.Contains(CommonDefinition.CurrentPage))
+            if (reviewPages.Contains(Constants.CurrentPage))
             {
-                if (!nextReviewPages.Contains(pageUri))
+                if (!reviewPages.Contains(pageUri))
                     RayEndReview();
             }
             //Recording(Confirm) 화면에서 나가는 경우, RayEndReivew 호출
-            if (CommonDefinition.CurrentPage == (int)CommonDefinition.PageList.RecordingPage)
+            if (Constants.CurrentPage == Constants.RecordingPage)
             {
-                if (!pageUri.Equals("Views/ReviewPresetPage.xaml"))
+                if (!pageUri.Equals(Constants.ReviewPresetPage))
                     RayEndReview();
             }
         }

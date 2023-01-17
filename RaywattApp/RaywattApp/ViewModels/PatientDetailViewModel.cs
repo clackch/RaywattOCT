@@ -110,7 +110,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("PatientDetailViewModel");
 
-            CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.PatientDetailPage;
+            Constants.CurrentPage = Constants.PatientDetailPage;
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;
@@ -262,7 +262,7 @@ namespace RaywattApp.ViewModels
             _log.Debug("Export");
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["fileType"] = CommonDefinition.FileType.Export;
+            parameter["fileType"] = Constants.FileTypeExport;
             FileExport fileExport = new FileExport();
             fileExport.PatientId = Patient.Id;
             GetSelectedItem();

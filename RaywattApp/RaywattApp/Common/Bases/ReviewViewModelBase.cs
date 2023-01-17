@@ -158,7 +158,7 @@ namespace RaywattApp.Common.Bases
             Save();
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["fileType"] = CommonDefinition.FileType.Export;
+            parameter["fileType"] = Constants.FileTypeExport;
             FileExport fileExport = new FileExport();
             fileExport.PatientId = Patient.Id;
             fileExport.SelectedItem = new List<string>();

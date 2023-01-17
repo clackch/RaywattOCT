@@ -51,7 +51,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("RecordingViewModel");
 
-            CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.RecordingPage;
+            Constants.CurrentPage = Constants.RecordingPage;
 
             _sqlManager = sqlManager;
 

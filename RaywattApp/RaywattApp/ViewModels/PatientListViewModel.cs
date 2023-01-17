@@ -95,7 +95,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("PatientListViewModel");
 
-            CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.PatientListPage;
+            Constants.CurrentPage = Constants.PatientListPage;
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;
@@ -208,7 +208,7 @@ namespace RaywattApp.ViewModels
             _log.Debug("Import");
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["fileType"] = CommonDefinition.FileType.Import;
+            parameter["fileType"] = Constants.FileTypeImport;
 
             var result = _dialogService.OpenDialog(new FileDialogControl(), parameter);
         }
@@ -218,7 +218,7 @@ namespace RaywattApp.ViewModels
             _log.Debug("Export");
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["fileType"] = CommonDefinition.FileType.Export;
+            parameter["fileType"] = Constants.FileTypeExport;
 
             var result = _dialogService.OpenDialog(new FileDialogControl(), parameter);
         }

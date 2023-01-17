@@ -19,7 +19,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ReviewFfrViewModel");
 
-            CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.ReviewFfrPage;
+            Constants.CurrentPage = Constants.ReviewFfrPage;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)

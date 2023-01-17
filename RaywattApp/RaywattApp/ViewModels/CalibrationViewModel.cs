@@ -55,7 +55,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("CalibrationViewModel");
 
-            CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.CalibrationPage;
+            Constants.CurrentPage = Constants.CalibrationPage;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)

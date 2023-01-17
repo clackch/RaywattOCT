@@ -116,7 +116,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ReviewPresetViewModel");
 
-            CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.ReviewPresetPage;
+            Constants.CurrentPage = Constants.ReviewPresetPage;
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;

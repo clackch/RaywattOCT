@@ -100,13 +100,13 @@ namespace RaywattApp.ViewModels.Dialog
             if (SelectedDir == null)
                 return;
 
-            if (int.Parse(action) == (int)CommonDefinition.FolderAction.Rename)
+            if (action == Constants.FolderActionRename)
             {
                 if (DirItems[0].Path == SelectedDir.Path)
                     return;
 
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["folderAction"] = CommonDefinition.FolderAction.Rename;
+                parameter["folderAction"] = Constants.FolderActionRename;
                 parameter["selectedDir"] = SelectedDir;
 
                 var result = _dialogService.OpenDialog(new FileFolderActionDialogControl(), parameter);
@@ -123,7 +123,7 @@ namespace RaywattApp.ViewModels.Dialog
             else
             {
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["folderAction"] = CommonDefinition.FolderAction.Create;
+                parameter["folderAction"] = Constants.FolderActionCreate;
                 parameter["selectedDir"] = SelectedDir;
 
                 var result = _dialogService.OpenDialog(new FileFolderActionDialogControl(), parameter);

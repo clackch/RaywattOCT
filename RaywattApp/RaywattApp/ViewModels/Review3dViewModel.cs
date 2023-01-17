@@ -19,7 +19,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Review3dViewModel");
 
-            CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.Review3dPage;
+            Constants.CurrentPage = Constants.Review3dPage;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)

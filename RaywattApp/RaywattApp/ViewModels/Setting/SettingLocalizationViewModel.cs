@@ -92,13 +92,13 @@ namespace RaywattApp.ViewModels.Setting
                 _l10n.ChangeLanguage(CurrentLanguage);
 
                 //Home 이동 or Refresh
-                if (CommonDefinition.CurrentPage == (int)CommonDefinition.PageList.PatientListPage)
+                if (Constants.CurrentPage == Constants.PatientListPage)
                 {
                     WeakReferenceMessenger.Default.Send(new NavigationMessage("Refresh"));
                 }
                 else
                 {
-                    WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientListPage.xaml"));
+                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
                 }
             }
         }

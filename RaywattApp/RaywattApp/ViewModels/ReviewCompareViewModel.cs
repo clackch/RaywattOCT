@@ -18,7 +18,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ReviewCompareViewModel");
 
-            CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.ReviewComparePage;
+            Constants.CurrentPage = Constants.ReviewComparePage;
 
             ExpandLeftUpMenu = false;
             ExpandLeftDownMenu = false;

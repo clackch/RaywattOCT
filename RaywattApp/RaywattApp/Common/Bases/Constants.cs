@@ -2,6 +2,32 @@
 {
     public class Constants
     {
+        //Current Page
+        public static string CurrentPage = "";
+
+        //Page List
+        public const string PatientListPage = "Views/PatientListPage.xaml";
+        public const string PatientDetailPage = "Views/PatientDetailPage.xaml";
+        public const string PatientNewPage = "Views/PatientNewPage.xaml";
+        public const string PatientEditPage = "Views/PatientEditPage.xaml";
+        public const string RecordingSetupPage = "Views/RecordingSetupPage.xaml";
+        public const string LiveViewPage = "Views/LiveViewPage.xaml";
+        public const string CalibrationPage = "Views/CalibrationPage.xaml";
+        public const string RecordingPage = "Views/RecordingPage.xaml";
+        public const string ReviewPage = "Views/ReviewPage.xaml";
+        public const string Review3dPage = "Views/Review3dPage.xaml";
+        public const string ReviewComparePage = "Views/ReviewComparePage.xaml";
+        public const string ReviewFfrPage = "Views/ReviewFfrPage.xaml";
+        public const string ReviewPresetPage = "Views/ReviewPresetPage.xaml";
+
+        //File Type
+        public const string FileTypeExport = "E";
+        public const string FileTypeImport = "I";
+
+        //Folder Action
+        public const string FolderActionCreate = "C";
+        public const string FolderActionRename = "R";
+
         //Max Length
         public const int MaxPatientId = 9;
         public const int MaxPatientLastname = 20;

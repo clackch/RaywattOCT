@@ -188,7 +188,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ReviewViewModel");
 
-            CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.ReviewPage;
+            Constants.CurrentPage = Constants.ReviewPage;
 
             IndicatorCrossSection = new Indicator();
             IndicatorCrossSection.IsVisible = Visibility.Collapsed;
