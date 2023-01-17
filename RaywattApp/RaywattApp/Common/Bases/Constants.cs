@@ -28,14 +28,6 @@
         public const string SettingDatabasePage = "Views/Setting/SettingDatabasePage.xaml";
         public const string SettingPhysicianPage = "Views/Setting/SettingPhysicianPage.xaml";
 
-        //File Type
-        public const string FileTypeExport = "E";
-        public const string FileTypeImport = "I";
-
-        //Folder Action
-        public const string FolderActionCreate = "C";
-        public const string FolderActionRename = "R";
-
         //Max Length
         public const int MaxPatientId = 9;
         public const int MaxPatientLastname = 20;
@@ -55,6 +47,14 @@
         //Gender
         public const string GenderMale = "M";
         public const string GenderFemale = "F";
+
+        //File Type
+        public const string FileTypeExport = "E";
+        public const string FileTypeImport = "I";
+
+        //Folder Action
+        public const string FolderActionCreate = "C";
+        public const string FolderActionRename = "R";
 
         //Export Type - Native, DICOM, Standard
         public const string ExportTypeNative = "N";
