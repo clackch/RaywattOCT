@@ -138,7 +138,7 @@
                             </Image>
                         </Canvas>
                     </Grid>
-                    <Label Content="{Binding FrameNumber}" VerticalAlignment="Bottom" Foreground="White"/>
+                    <Label Content="{Binding FrameNumber}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Foreground="White" Width="50"/>
                 </Grid>
                 <!-- Center : Angio -->
                 <Grid Grid.Column="2" Width="{StaticResource AngioSize}" Height="{StaticResource AngioSize}" Visibility="{Binding IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Background="Beige">
