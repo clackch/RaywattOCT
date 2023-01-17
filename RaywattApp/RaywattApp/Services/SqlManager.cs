@@ -258,11 +258,11 @@ namespace RaywattApp.Services
             return _databaseService.InsertData(commandText, sqlParameters);
         }
 
-        public IList<StringModel> SelectPatientCaseMeasurements(Dictionary<string, Object> sqlParameters)
+        public IList<StringModel> SelectPatientCaseAnnotation(Dictionary<string, Object> sqlParameters)
         {
-            _log.Debug("SelectPatientCaseMeasurements");
+            _log.Debug("SelectPatientCaseAnnotation");
 
-            string commandText = SqlQuery.GetQuery("SelectPatientCaseMeasurements");
+            string commandText = SqlQuery.GetQuery("SelectPatientCaseAnnotation");
 
             return _databaseService.GetDatas<StringModel>(commandText, sqlParameters);
         }

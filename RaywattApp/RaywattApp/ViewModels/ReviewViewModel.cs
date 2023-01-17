@@ -14,6 +14,7 @@ using static RaywattOCT.RayCoreWrapper;
 using RaywattApp.Common.Annotation.Models;
 using System.Windows;
 using Newtonsoft.Json;
+using System.Collections.ObjectModel;
 
 namespace RaywattApp.ViewModels
 {
@@ -112,19 +113,22 @@ namespace RaywattApp.ViewModels
             } 
         }
 
-        private int measurementOutFrameNumber;
-        public int MeasurementOutFrameNumber
+        private int outFrameNumber;
+        public int OutFrameNumber
         {
-            get { return measurementOutFrameNumber; }
+            get { return outFrameNumber; }
             set
             {
-                measurementOutFrameNumber = value;
+                outFrameNumber = value;
                 RayMoveToFrame(value);
             }
         }
 
         private List<Measurement> measurements;
         public List<Measurement> Measurements { get { return measurements; } set { measurements = value; OnPropertyChanged(nameof(Measurements)); } }
+
+        [ObservableProperty]
+        private ObservableCollection<Bookmark> bookmarks;
 
         private ICommand _measurementCommand;
         public ICommand MeasurementCommand
@@ -349,6 +353,8 @@ namespace RaywattApp.ViewModels
             sqlParameters["apposition_threshold"] = PatientCase.AppositionThreshold;
             PatientCase.Measurements = ConvertMeasurementsToJson();
             sqlParameters["measurements"] = PatientCase.Measurements;
+            PatientCase.Bookmarks = JsonConvert.SerializeObject(Bookmarks, Formatting.Indented);
+            sqlParameters["bookmarks"] = PatientCase.Bookmarks;
 
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
             if (nRows == 0)
@@ -387,15 +393,24 @@ namespace RaywattApp.ViewModels
         {
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
-            IList<StringModel> jsonMeasurements = _sqlManager.SelectPatientCaseMeasurements(sqlParameters);
-            if(jsonMeasurements == null || jsonMeasurements.Count != 1 || jsonMeasurements[0].ReturnString == null)
+            IList<StringModel> jsonAnnotation = _sqlManager.SelectPatientCaseAnnotation(sqlParameters);
+            if(jsonAnnotation == null || jsonAnnotation.Count != 1 || jsonAnnotation[0].ReturnString == null)
             {
                 Measurements = new List<Measurement>();
             }
             else
             {
-                Measurements = JsonConvert.DeserializeObject<List<Measurement>>(jsonMeasurements[0].ReturnString);   
+                Measurements = JsonConvert.DeserializeObject<List<Measurement>>(jsonAnnotation[0].ReturnString);   
             }
+
+            if (jsonAnnotation == null || jsonAnnotation.Count != 1 || jsonAnnotation[0].ReturnString2 == null)
+            {
+                Bookmarks = new ObservableCollection<Bookmark>();
+            }
+            else
+            {
+                Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(jsonAnnotation[0].ReturnString2);
+            }            
         }
 
         private string ConvertMeasurementsToJson()
@@ -515,8 +530,7 @@ namespace RaywattApp.ViewModels
 
         private void updateNavigator(int curFrame, int totalFrame)
         {
-            double curPosition = (double)curFrame / totalFrame;
-            curPosition = (curFrame == totalFrame - 1) ? 1 : curPosition;
+            double curPosition = (double)curFrame / (totalFrame - 1);
             curPosition *= longitudeWidth;
             IndicatorLongitude.X = curPosition + longitudeIndicatorWidth / 2;
         }
@@ -527,7 +541,7 @@ namespace RaywattApp.ViewModels
 
             if (longitudeFrameInfo != null)
             {
-                curPosition *= longitudeFrameInfo.totalFrame;
+                curPosition *= (longitudeFrameInfo.totalFrame - 1);
                 RayMoveToFrame((int)curPosition);
             }
         }

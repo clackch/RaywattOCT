@@ -141,9 +141,9 @@ namespace RaywattApp.Services
                 $"FROM rv_schema.patient_case_preset " +
                 $"ORDER BY default_set DESC, preset_name";
 
-            //SelectPatientCaseMeasurements
-            _query["SelectPatientCaseMeasurements"] =
-                $"SELECT measurements return_string " +
+            //SelectPatientCaseAnnotation
+            _query["SelectPatientCaseAnnotation"] =
+                $"SELECT measurements return_string, bookmarks return_string2 " +
                 $"FROM rv_schema.patient_case " +
                 $"WHERE id = @id ";
         }
@@ -206,6 +206,7 @@ namespace RaywattApp.Services
                     $", preset_name=@preset_name, calcium_threshold=@calcium_threshold, expansion_calculation=@expansion_calculation" +
                     $", expansion_threshold=@expansion_threshold, apposition_threshold=@apposition_threshold" +
                     $", measurements=@measurements" +
+                    $", bookmarks=@bookmarks" +
                     $", update_date=now() " +
                 $"WHERE id=@id";
 

@@ -399,7 +399,7 @@
                 </Grid>
 
                 <!-- Measurement -->
-                <annotation:DrawUtil Grid.Column="2" Grid.ColumnSpan="3" Visibility="{Binding VisibleMeasurement}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" OutFrameNumber="{Binding MeasurementOutFrameNumber, Mode=TwoWay}" VerticalAlignment="Center"/>
+                <annotation:DrawUtil Grid.Column="2" Grid.ColumnSpan="3" Visibility="{Binding VisibleMeasurement}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" MeasurementOutFrameNumber="{Binding OutFrameNumber, Mode=TwoWay}" VerticalAlignment="Center"/>
 
             </Grid>
 
@@ -546,12 +546,17 @@
                             </StackPanel>
                         </Grid>
                         
-                        <!-- Scale Image -->
-                        <Grid Grid.Row="2" Height="10" Background="AntiqueWhite">
+                        <!-- Bookmark Scale Image -->
+                        <Grid Grid.Row="2" Height="10">
 
                         </Grid>
                         
                     </Grid>
+                </Grid>
+
+                <!-- Bookmark -->
+                <Grid Grid.Row="0" Grid.RowSpan="3">
+                    <annotation:BookmarkUtil Bookmarks="{Binding Bookmarks}" BookmarkFrameNumber="{Binding FrameNumber}" BookmarkLongitudeX="{Binding IndicatorLongitude.X}" BookmarkOutFrameNumber="{Binding OutFrameNumber, Mode=TwoWay}"/>
                 </Grid>
             </Grid>
         </Grid>
