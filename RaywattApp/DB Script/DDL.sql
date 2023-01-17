@@ -134,6 +134,7 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case
     expansion_threshold integer,
     apposition_threshold real,
 	measurements text COLLATE pg_catalog."default",
+	bookmarks text COLLATE pg_catalog."default",
     create_date timestamp without time zone,
     update_date timestamp without time zone,
     CONSTRAINT patient_case_pkey PRIMARY KEY (id)
