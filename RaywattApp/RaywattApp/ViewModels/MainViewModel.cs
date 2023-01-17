@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels
 {
@@ -41,12 +42,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private Patient _patient;
 
-        private ICommand _navigateCommand;
+        private List<int> currReviewPages;
 
-        public ICommand NavigateCommand
-        {
-            get { return this._navigateCommand ?? (this._navigateCommand = new RelayCommand<string>(OnNavigate)); }
-        }
+        private List<string> nextReviewPages;
 
         private ICommand _homeCommand;
         public ICommand HomeCommand
@@ -95,13 +93,20 @@ namespace RaywattApp.ViewModels
             RaywattOCT.RayCoreWrapper.RayConnectDevices();
 
             Directory.CreateDirectory(Constants.DataRootPath);
-        }
 
-        private void OnNavigate(string pageUri)
-        {
-            _log.Debug("OnNavigate : " + pageUri);
+            currReviewPages = new List<int>();
+            currReviewPages.Add((int)CommonDefinition.PageList.ReviewPage);
+            currReviewPages.Add((int)CommonDefinition.PageList.Review3dPage);
+            currReviewPages.Add((int)CommonDefinition.PageList.ReviewComparePage);
+            currReviewPages.Add((int)CommonDefinition.PageList.ReviewFfrPage);
+            currReviewPages.Add((int)CommonDefinition.PageList.ReviewPresetPage);
 
-            NavigationSource = pageUri;
+            nextReviewPages = new List<string>();
+            nextReviewPages.Add("Views/ReviewPage.xaml");
+            nextReviewPages.Add("Views/Review3dPage.xaml");
+            nextReviewPages.Add("Views/ReviewComparePage.xaml");
+            nextReviewPages.Add("Views/ReviewFfrPage.xaml");
+            nextReviewPages.Add("Views/ReviewPresetPage.xaml");
         }
 
         private void OnNavigationMessage(object recipient, NavigationMessage message)
@@ -112,6 +117,19 @@ namespace RaywattApp.ViewModels
             //순서 중요 - NavigationParameter 먼저 입력 후, NavigationSource 입력 필요
             NavigationParameter = message.Parameter;
             NavigationSource = pageUri;
+
+            //Review 화면에서 나가는 경우, RayEndReivew 호출
+            if (currReviewPages.Contains(CommonDefinition.CurrentPage))
+            {
+                if (!nextReviewPages.Contains(pageUri))
+                    RayEndReview();
+            }
+            //Recording(Confirm) 화면에서 나가는 경우, RayEndReivew 호출
+            if (CommonDefinition.CurrentPage == (int)CommonDefinition.PageList.RecordingPage)
+            {
+                if (!pageUri.Equals("Views/ReviewPresetPage.xaml"))
+                    RayEndReview();
+            }
         }
 
         private void OnBusyMessage(object recipient, BusyMessage message)
@@ -152,7 +170,6 @@ namespace RaywattApp.ViewModels
         private void Setting()
         {
             _log.Debug("Setting");
-
             var result = _dialogService.OpenDialog(new SettingDialogControl());
         }
 

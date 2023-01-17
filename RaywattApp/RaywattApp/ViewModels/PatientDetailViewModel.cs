@@ -14,6 +14,7 @@ using RaywattApp.Common.Paging;
 using System.Windows.Controls;
 using RaywattApp.Views.Dialog;
 using RaywattApp.Common.Dialog;
+using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels
 {
@@ -415,6 +416,9 @@ namespace RaywattApp.ViewModels
 
             if (patientCase == null)
                 return;
+
+            RaySetProperty(Property.BackgroundColor, 0x333333);
+            RayStartReview(patientCase.Image);
 
             Dictionary<string, Object> parameter = new Dictionary<string, Object>();
             parameter["patient"] = Patient;

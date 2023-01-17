@@ -1,0 +1,52 @@
+﻿<Page x:Class="RaywattApp.Views.ReviewFfrPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:RaywattApp.Views"
+      xmlns:const="clr-namespace:RaywattApp.Common.Bases"
+      mc:Ignorable="d" 
+      d:DesignHeight="1024" d:DesignWidth="1280"
+      Title="ReviewFfrPage">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Background="Gray">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <StackPanel Width="60"/>
+                <Button Style="{StaticResource ButtonImportant}" Width="80" Content="2D" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="Views/ReviewPage.xaml"/>
+                <Button Style="{StaticResource ButtonImportant}" Width="80" Content="3D" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="Views/Review3dPage.xaml"/>
+                <Button Style="{StaticResource ButtonImportant}" Width="80" Content="Compare" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="Views/ReviewComparePage.xaml"/>
+                <Button Style="{StaticResource ButtonImportant}" Width="80" Content="AI FFR"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding EditPresetCommand}" Content="{Binding [Edit Preset], Source={StaticResource L10N}}"/>
+                <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding ExportCommand}" Content="{Binding [Export], Source={StaticResource L10N}}"/>
+                <StackPanel Width="120"/>
+            </StackPanel>
+        </Grid>
+
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" >
+                <Button Style="{StaticResource ButtonImportant}" Width="100" Command="{Binding NewRecordingCommand}" Content="{Binding [New Recording], Source={StaticResource L10N}}"/>
+                <Button Style="{StaticResource ButtonImportant}" Width="80" Command="{Binding EndReviewCommand}" Content="{Binding [End Review], Source={StaticResource L10N}}"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Page>

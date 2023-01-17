@@ -76,12 +76,6 @@ namespace RaywattApp.ViewModels
             get { return this._okCommand ?? (this._okCommand = new RelayCommand(Ok)); }
         }
 
-        private ICommand _backCommand;
-        public ICommand BackCommand
-        {
-            get { return this._backCommand ?? (this._backCommand = new RelayCommand(Back)); }
-        }
-
         private ICommand _newCommand;
         public ICommand NewCommand
         {
@@ -221,25 +215,6 @@ namespace RaywattApp.ViewModels
             else
             {
                 _log.Error("Insert Error");
-            }
-        }
-
-        private void Back()
-        {
-            _log.Debug("Back");
-
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["patient"] = Patient;
-            parameter["patientCase"] = PatientCase;
-            parameter["prevStatus"] = PrevStatus;
-
-            if (_isPreset)
-            {
-                WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/RecordingPage.xaml") { Parameter = parameter });
-            }
-            else
-            {
-                WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/ReviewPage.xaml") { Parameter = parameter });
             }
         }
 

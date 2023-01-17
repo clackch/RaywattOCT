@@ -121,9 +121,11 @@
         public const string PublicKey = "raywatt07_hwjckklls_298-87-01441";
 
         //Review - 2D - Side Menu
-        public const string ViewOption = "View";
-        public const string PatientInfo = "Patient";
-        public const string ValueInfo = "Value";
+        public const string LeftUpMenu = "LeftUpMenu";
+        public const string LeftDownMenu = "LeftDownMenu";
+        public const string RightMenu = "RightMenu";
+        public const double SideBarCollapseSize = 50;
+        public const double LeftSideBarExpandSize = 250;
         public const double RightSideBarExpandAngioSize = 350;
         public const double RightSideBarExpandDefaultSize = 250;
 

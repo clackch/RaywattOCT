@@ -15,6 +15,9 @@
             CalibrationPage,
             RecordingPage,
             ReviewPage,
+            Review3dPage,
+            ReviewComparePage,
+            ReviewFfrPage,
             ReviewPresetPage
         }
 
