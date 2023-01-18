@@ -6,7 +6,7 @@
 CSimulateDevice::CSimulateDevice(IDataManager* pDataReader)
 	:m_pDataReader(pDataReader){
 	m_nCurSampleIndex = 0;
-	m_bPause = false;
+	m_bPause = true;
 }
 CSimulateDevice::~CSimulateDevice() {
 	CleanUp();
@@ -16,7 +16,7 @@ int CSimulateDevice::InitDevice() {
 	CleanUp();
 
 	m_nCurSampleIndex = 0;
-	m_bPause = false;
+	m_bPause = true;
 	m_isInit = true;
 
 	return NOERROR;
