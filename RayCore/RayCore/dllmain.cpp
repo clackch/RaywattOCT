@@ -44,6 +44,9 @@ _declspec(dllexport) RayError RayUnloadCatheter() {
 _declspec(dllexport) RayError RayStartReview(char* strFilePath) {
     return octSystem.StartReview(strFilePath);
 }
+_declspec(dllexport) RayError AddReviewSession(char* strFilePath) {
+    return octSystem.AddReviewSession(strFilePath);
+}
 _declspec(dllexport) RayError RayEndReview() {
     return octSystem.EndReview();
 }
