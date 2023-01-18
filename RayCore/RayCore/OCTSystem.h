@@ -16,12 +16,18 @@
 
 #define CUTVIEW_INTERPOLATION_SCALE		5.7
 
+typedef enum {
+	SESSION_REVIEW = 0,
+	SESSION_COMPARE,
+	MAX_SESSION_NUM
+}SessionType;
 
 class CThread;
 class COCTImaging;
 class CCutViewManager;
 class CVolumeGenerator;
 class CRayLearning;
+class CImagingSession;
 class COCTSystem : public CMessageService
 {
 private:
@@ -45,15 +51,13 @@ private:
 	
 	// Imaging
 	COCTImaging* m_pImagingRealtime;
-	COCTImaging* m_pImagingSimulate;
 
 	// Data Manager
-	IDataManager* m_pSimulationData;
+	IDataManager* m_pDataWriter;
 	tstring m_strFilePath;
 
 	// Cut View
 	CCutViewManager* m_pCutView;
-	int m_nOffsetNavigation;
 
 	// 3D Volume
 	CVolumeGenerator* m_pVolume;
@@ -61,8 +65,8 @@ private:
 	// Acquisition
 	IAcquisitionDevice* m_pAcqDevice;
 
-	// Simulation
-	IAcquisitionDevice* m_pSimDevice;
+	// Imaging Session (Review)
+	CImagingSession* m_reviewSession[MAX_SESSION_NUM];
 
 	// Machine Learning
 	CRayLearning* m_pLearning;
@@ -97,6 +101,7 @@ public:
 	RayError LoadCatheter();
 	RayError UnloadCatheter();
 	RayError StartReview(char* strFilePath);
+	RayError AddReviewSession(char* strFilePath);
 	RayError EndReview();
 	RayError StartLiveView();
 	RayError StopLiveView();
@@ -117,10 +122,6 @@ public:
 	UINT GetBackgroundColor();
 	RayError SetBackgroundColor(UINT value);
 	UINT GetVolumeDepth();
-	double GetLowLevel();
-	RayError SetLowLevel(double value);
-	double GetHighLevel();
-	RayError SetHighLevel(double value);
 	void* GetVolumeData();
 	bool GetMotorOnOff();
 	bool GetIsPaused();
@@ -143,7 +144,6 @@ private:
 	static UINT threadValidateCatheter(LPVOID param);
 
 	// Imaging & Device
-	COCTImaging* createColorImaging(CMessageService*);
 	bool checkConnection();
 	int connectAcqDevice();
 	int disconnectAcqDevice();
@@ -152,8 +152,7 @@ private:
 	int connectRotaryJunction();
 	int disconnectRotaryJunction();
 	void updateCutView(int drawSamples);
-	void prepareSimulation(IDataManager* pDataManager);
-	void terminateSimulation();
+	void closeAllSessions();
 
 protected:
 	LRESULT OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam);

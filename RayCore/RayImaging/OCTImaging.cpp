@@ -494,7 +494,10 @@ UINT COCTImaging::threadRender(LPVOID param) {
 			// double buffering 필요?
 			// Invert, coloring 을 View (Dialog) 쪽으로 뺄 수 없을까?
 
-			if(pMsg != nullptr) pMsg->postMessage(WM_PROCESS_OCT_DONE, pImaging->m_nCurFrame, pImaging->m_nTotalFrame);
+			if (pMsg != nullptr) {
+				int nFrameInfo = (pImaging->m_nCurFrame << 16) | (pImaging->m_nTotalFrame);
+				pMsg->postMessage(WM_PROCESS_OCT_DONE, (WPARAM) pImaging, nFrameInfo);
+			}
 		}
 	}
 
