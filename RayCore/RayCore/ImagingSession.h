@@ -38,7 +38,7 @@ public:
 	void MoveToFrame(int nFrame);
 
 private:
-	static CImagingSession* createSession(CMessageService* pMsg, int nSession, IDataManager* pData);
+	static CImagingSession* createSession(CMessageService* pMsg, int nSession, IDataManager* pData, bool deleteData);
 	
 };
 
