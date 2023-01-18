@@ -30,8 +30,10 @@ class CConfiguration
 		int nSheathPosition;	// pixel
 	};
 
-	class Invert {
+	class Imaging {
 	public:
+		float brightness;
+		float contrast;
 		float lowLevel;
 		float highLevel;
 	};
@@ -87,7 +89,7 @@ public:
 	SettingsOpenMP settingsOpenMP;
 	SettingsAlazar settingsAlazar;
 	Measurement measurementValues;
-	Invert invert;
+	Imaging imaging;
 	Zaber zaber;
 	Motor motor;
 	Catheter catheter;
@@ -102,8 +104,6 @@ public:
 	void SaveZaberSettings();
 	void SaveMotorSettings();
 
-	int getDmaXferSamples();
-	int getDmaBufferSamples();
 	int getScopeLength();
 
 	double getPrivateProfileFloat(LPCWSTR lpAppName, LPCWSTR lpKeyName, double fDefault, LPCWSTR lpFileName);
