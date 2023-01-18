@@ -199,7 +199,7 @@ namespace RaywattOCT.ViewModel
         public double LModeLocationX
         {
             get { return lModeLocationX; }
-            set { if (value.Equals(lModeLocationX)) return; lModeLocationX = value; OnPropertyChanged(nameof(lModeLocationX)); setCurrentFrame(lModeLocationX); }
+            set { if (value.Equals(lModeLocationX)) return; lModeLocationX = value; OnPropertyChanged(nameof(lModeLocationX)); }
         }
 
         private string isVisibleIndicator = "Hidden";
@@ -284,6 +284,15 @@ namespace RaywattOCT.ViewModel
             get
             {
                 return (this.cmdAdmin) ?? (this.cmdAdmin = new DelegateCommand(Admin));
+            }
+        }
+
+        private DelegateCommand cmdFFR;
+        public DelegateCommand CmdFFR
+        {
+            get 
+            {
+                return (this.cmdFFR) ?? (this.cmdFFR = new DelegateCommand(FFR));
             }
         }
 
@@ -432,6 +441,11 @@ namespace RaywattOCT.ViewModel
         {
             RayCoreWrapper.RayStartReview(TEST_FILE_PATH);
         }
+
+        private void FFR() { 
+            
+        }
+
         private void Exit()
         {
             RayCoreWrapper.RayStopSystem();
@@ -775,6 +789,7 @@ namespace RaywattOCT.ViewModel
             {
                 //indicator bar width(3), add 1.5
                 LModeLocationX = LModePointerX + nLModeIndicatorWidth/2;
+                setCurrentFrame(LModeLocationX);
             }
         }
     }
