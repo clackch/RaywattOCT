@@ -344,8 +344,8 @@ namespace RaywattApp.ViewModels
             sqlParameters["vessel"] = PatientCase.Vessel;
             sqlParameters["procedure"] = PatientCase.Procedure;
             sqlParameters["brightness"] = PatientCase.Brightness;
-            sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
             sqlParameters["contrast"] = PatientCase.Contrast;
+            sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
             sqlParameters["preset_name"] = PatientCase.PresetName;
             sqlParameters["calcium_threshold"] = PatientCase.CalciumThreshold;
             sqlParameters["expansion_calculation"] = PatientCase.ExpansionCalculation;
@@ -394,7 +394,7 @@ namespace RaywattApp.ViewModels
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
             IList<StringModel> jsonAnnotation = _sqlManager.SelectPatientCaseAnnotation(sqlParameters);
-            if(jsonAnnotation == null || jsonAnnotation.Count != 1 || jsonAnnotation[0].ReturnString == null)
+            if(jsonAnnotation == null || jsonAnnotation.Count != 1 || String.IsNullOrEmpty(jsonAnnotation[0].ReturnString))
             {
                 Measurements = new List<Measurement>();
             }
@@ -403,7 +403,7 @@ namespace RaywattApp.ViewModels
                 Measurements = JsonConvert.DeserializeObject<List<Measurement>>(jsonAnnotation[0].ReturnString);   
             }
 
-            if (jsonAnnotation == null || jsonAnnotation.Count != 1 || jsonAnnotation[0].ReturnString2 == null)
+            if (jsonAnnotation == null || jsonAnnotation.Count != 1 || String.IsNullOrEmpty(jsonAnnotation[0].ReturnString2))
             {
                 Bookmarks = new ObservableCollection<Bookmark>();
             }

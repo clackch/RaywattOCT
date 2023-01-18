@@ -57,8 +57,8 @@ namespace RaywattApp.ViewModels
             sqlParameters["vessel"] = PatientCase.Vessel;
             sqlParameters["procedure"] = PatientCase.Procedure;
             sqlParameters["brightness"] = PatientCase.Brightness;
-            sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
             sqlParameters["contrast"] = PatientCase.Contrast;
+            sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
             sqlParameters["preset_name"] = PatientCase.PresetName;
             sqlParameters["calcium_threshold"] = PatientCase.CalciumThreshold;
             sqlParameters["expansion_calculation"] = PatientCase.ExpansionCalculation;
