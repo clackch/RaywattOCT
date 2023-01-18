@@ -10,6 +10,7 @@ extern "C" {
 	_declspec(dllexport) RayError RayStartSystem();
 	_declspec(dllexport) RayError RayStopSystem();
 	_declspec(dllexport) RayError RayRegisterCallback(FunctionPtr cb);
+	_declspec(dllexport) RayError RayUnregisterCallback();
 	_declspec(dllexport) RayError RayConnectDevices();
 	_declspec(dllexport) RayError RayDisconnectDevices();
 	_declspec(dllexport) RayError RayAutoCalibration();
@@ -29,6 +30,7 @@ extern "C" {
 	_declspec(dllexport) RayError RayNextFrame();
 	_declspec(dllexport) RayError RayMoveToFrame(int nFrame);
 	_declspec(dllexport) RayError RayRegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude);
+	_declspec(dllexport) RayError RayUnregisterImageCallback();
 	_declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value);
 	_declspec(dllexport) double RayGetProperty(RayProperty prop);
 

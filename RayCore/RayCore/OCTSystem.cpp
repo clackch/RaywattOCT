@@ -145,8 +145,16 @@ RayError COCTSystem::Stop() {
 * RegisterCallback
 */
 RayError COCTSystem::RegisterCallback(FunctionPtr cb) {
-
 	m_callback = cb;
+
+	return RayError::OK;
+}
+
+/*
+* UnregisterCallback
+*/
+RayError COCTSystem::UnregisterCallback() {
+	m_callback = nullptr;
 
 	return RayError::OK;
 }
@@ -452,6 +460,16 @@ RayError COCTSystem::MoveToFrame(int nFrame) {
 RayError COCTSystem::RegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude) {
 	m_cbCrossSection = cbCrossSection;
 	m_cbLongitude = cbLongitude;
+
+	return RayError::OK;
+}
+
+/*
+* UnregisterImageCallback
+*/
+RayError COCTSystem::UnregisterImageCallback() {
+	m_cbCrossSection = nullptr;
+	m_cbLongitude = nullptr;
 
 	return RayError::OK;
 }
