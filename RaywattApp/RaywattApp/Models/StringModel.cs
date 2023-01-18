@@ -6,5 +6,8 @@ namespace RaywattApp.Models
     {
         [ObservableProperty]
         string _returnString;
+
+        [ObservableProperty]
+        string _returnString2;
     }
 }

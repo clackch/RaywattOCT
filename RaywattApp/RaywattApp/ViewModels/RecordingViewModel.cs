@@ -13,12 +13,6 @@ using System.Collections.Generic;
 using RaywattOCT;
 using static RaywattOCT.RayCoreWrapper;
 using System.Windows.Threading;
-using System.IO;
-using System.Security.Cryptography;
-using SharpDX.Text;
-using Newtonsoft.Json.Linq;
-using System.Text;
-using System.IO.Packaging;
 using RaywattApp.Common.Util;
 
 namespace RaywattApp.ViewModels
@@ -57,7 +51,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("RecordingViewModel");
 
-            CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.RecordingPage;
+            Constants.CurrentPage = Constants.RecordingPage;
 
             _sqlManager = sqlManager;
 

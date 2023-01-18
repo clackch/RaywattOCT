@@ -67,7 +67,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("LiveViewViewModel");
 
-            CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.LiveViewPage;
+            Constants.CurrentPage = Constants.LiveViewPage;
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;

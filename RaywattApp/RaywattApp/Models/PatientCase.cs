@@ -111,6 +111,9 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private string? _measurements;
+        
+        [ObservableProperty]
+        private string? _bookmarks;
 
         [ObservableProperty]
         private DateTime createDate;

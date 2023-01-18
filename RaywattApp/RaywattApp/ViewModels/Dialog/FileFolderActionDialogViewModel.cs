@@ -20,7 +20,7 @@ namespace RaywattApp.ViewModels.Dialog
         [ObservableProperty]
         private Visibility _isErrorMessage;
 
-        private int folderAction;
+        private string folderAction;
 
         private string _createRenameFolderName;
         public string CreateRenameFolderName
@@ -32,10 +32,10 @@ namespace RaywattApp.ViewModels.Dialog
         public override void SetParameter(object parameter)
         {
             Dictionary<string, Object> data = (Dictionary<string, Object>)parameter;
-            folderAction = (int)data["folderAction"];
+            folderAction = data["folderAction"].ToString(); ;
             SelectedDir = (DirectoryItem)data["selectedDir"];
 
-            if (folderAction == (int)CommonDefinition.FolderAction.Rename)
+            if (folderAction == Constants.FolderActionRename)
             {
                 Title = _l10n["Rename Folder"];
                 CreateRenameFolderName = SelectedDir.Name;
@@ -51,7 +51,7 @@ namespace RaywattApp.ViewModels.Dialog
         {
             DirectoryProvider directoryProvider = new DirectoryProvider();
 
-            if (folderAction == (int)CommonDefinition.FolderAction.Rename)
+            if (folderAction == Constants.FolderActionRename)
             {
                 if (SelectedDir.Name.Equals(CreateRenameFolderName.Trim()))
                 {

@@ -2,6 +2,32 @@
 {
     public class Constants
     {
+        //Current Page
+        public static string CurrentPage = "";
+
+        //[Page List]
+        //Patient
+        public const string PatientListPage = "Views/PatientListPage.xaml";
+        public const string PatientDetailPage = "Views/PatientDetailPage.xaml";
+        public const string PatientNewPage = "Views/PatientNewPage.xaml";
+        public const string PatientEditPage = "Views/PatientEditPage.xaml";
+        //Recording
+        public const string RecordingSetupPage = "Views/RecordingSetupPage.xaml";
+        public const string LiveViewPage = "Views/LiveViewPage.xaml";
+        public const string CalibrationPage = "Views/CalibrationPage.xaml";
+        public const string RecordingPage = "Views/RecordingPage.xaml";
+        //Review
+        public const string ReviewPage = "Views/ReviewPage.xaml";
+        public const string Review3dPage = "Views/Review3dPage.xaml";
+        public const string ReviewComparePage = "Views/ReviewComparePage.xaml";
+        public const string ReviewFfrPage = "Views/ReviewFfrPage.xaml";
+        public const string ReviewPresetPage = "Views/ReviewPresetPage.xaml";
+        //Setting
+        public const string SettingAcquisitionPage = "Views/Setting/SettingAcquisitionPage.xaml";
+        public const string SettingLocalizationPage = "Views/Setting/SettingLocalizationPage.xaml";
+        public const string SettingDatabasePage = "Views/Setting/SettingDatabasePage.xaml";
+        public const string SettingPhysicianPage = "Views/Setting/SettingPhysicianPage.xaml";
+
         //Max Length
         public const int MaxPatientId = 9;
         public const int MaxPatientLastname = 20;
@@ -21,6 +47,14 @@
         //Gender
         public const string GenderMale = "M";
         public const string GenderFemale = "F";
+
+        //File Type
+        public const string FileTypeExport = "E";
+        public const string FileTypeImport = "I";
+
+        //Folder Action
+        public const string FolderActionCreate = "C";
+        public const string FolderActionRename = "R";
 
         //Export Type - Native, DICOM, Standard
         public const string ExportTypeNative = "N";
@@ -121,9 +155,11 @@
         public const string PublicKey = "raywatt07_hwjckklls_298-87-01441";
 
         //Review - 2D - Side Menu
-        public const string ViewOption = "View";
-        public const string PatientInfo = "Patient";
-        public const string ValueInfo = "Value";
+        public const string LeftUpMenu = "LeftUpMenu";
+        public const string LeftDownMenu = "LeftDownMenu";
+        public const string RightMenu = "RightMenu";
+        public const double SideBarCollapseSize = 50;
+        public const double LeftSideBarExpandSize = 250;
         public const double RightSideBarExpandAngioSize = 350;
         public const double RightSideBarExpandDefaultSize = 250;
 

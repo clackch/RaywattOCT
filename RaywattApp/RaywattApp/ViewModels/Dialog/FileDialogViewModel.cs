@@ -37,9 +37,9 @@ namespace RaywattApp.ViewModels.Dialog
         public override void SetParameter(object parameter)
         {
             Dictionary<string, Object> data = (Dictionary<string, Object>)parameter;
-            int fileType = (int)data["fileType"];
+            string fileType = data["fileType"].ToString();
 
-            if (fileType == (int)CommonDefinition.FileType.Export)
+            if (fileType == Constants.FileTypeExport)
             {
                 Title = _l10n["Export"];
                 PopupNavigationSource = "Views/File/FileExportStep1Page.xaml";

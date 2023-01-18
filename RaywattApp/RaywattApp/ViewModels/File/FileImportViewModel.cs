@@ -311,6 +311,15 @@ namespace RaywattApp.ViewModels.File
                         sqlParameters["comment"] = patientCase.Comment;
                         sqlParameters["vessel"] = patientCase.Vessel;
                         sqlParameters["procedure"] = patientCase.Procedure;
+                        sqlParameters["pullback_type"] = patientCase.PullbackType;
+                        sqlParameters["angio_co_registration"] = patientCase.AngioCoRegistration;
+                        sqlParameters["preset_name"] = patientCase.PresetName;
+                        sqlParameters["calcium_threshold"] = patientCase.CalciumThreshold;
+                        sqlParameters["expansion_calculation"] = patientCase.ExpansionCalculation;
+                        sqlParameters["expansion_threshold"] = patientCase.ExpansionThreshold;
+                        sqlParameters["apposition_threshold"] = patientCase.AppositionThreshold;
+                        sqlParameters["measurements"] = patientCase.Measurements;
+                        sqlParameters["bookmarks"] = patientCase.Bookmarks;
                         sqlParameters["thumbnail_no"] = patientCase.ThumbnailNo;
                         sqlParameters["still_image_yn"] = patientCase.StillImageYn;
                         sqlParameters["create_date"] = patientCase.CreateDate;
@@ -469,6 +478,15 @@ namespace RaywattApp.ViewModels.File
                             patientCase.ThumbnailNo = GetIntValue(caseObj, "ThumbnailNo");
                             patientCase.StillImageYn = GetStrValue(caseObj, "StillImageYn");
                             patientCase.Image = GetStrValue(caseObj, "Image");
+                            patientCase.PullbackType = GetStrValue(caseObj, "PullbackType");
+                            patientCase.AngioCoRegistration = GetBoolValue(caseObj, "AngioCoRegistration");
+                            patientCase.PresetName = GetStrValue(caseObj, "PresetName");
+                            patientCase.CalciumThreshold = GetIntValue(caseObj, "CalciumThreshold");
+                            patientCase.ExpansionCalculation = GetStrValue(caseObj, "ExpansionCalculation");
+                            patientCase.ExpansionThreshold = GetIntValue(caseObj, "ExpansionThreshold");
+                            patientCase.AppositionThreshold = GetDoubleValue(caseObj, "AppositionThreshold");
+                            patientCase.Measurements = GetStrValue(caseObj, "Measurements");
+                            patientCase.Bookmarks = GetStrValue(caseObj, "Bookmarks");
                             patientCase.CreateDate = GetDateValue(caseObj, "CreateDate");
                             patientCase.UpdateDate = GetDateValue(caseObj, "UpdateDate");
 
@@ -528,12 +546,28 @@ namespace RaywattApp.ViewModels.File
             return (long)obj[key];
         }
 
+        private double GetDoubleValue(JObject obj, string key)
+        {
+            if (!obj.ContainsKey(key))
+                return 0;
+
+            return (double)obj[key];
+        }
+
         private int GetIntValue(JObject obj, string key)
         {
             if (!obj.ContainsKey(key))
                 return 0;
 
             return (int)obj[key];
+        }
+
+        private bool GetBoolValue(JObject obj, string key)
+        {
+            if (!obj.ContainsKey(key))
+                return false;
+
+            return (bool)obj[key];
         }
     }
 }

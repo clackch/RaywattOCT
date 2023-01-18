@@ -14,6 +14,7 @@ using RaywattApp.Common.Paging;
 using System.Windows.Controls;
 using RaywattApp.Views.Dialog;
 using RaywattApp.Common.Dialog;
+using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels
 {
@@ -109,7 +110,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("PatientDetailViewModel");
 
-            CommonDefinition.CurrentPage = (int)CommonDefinition.PageList.PatientDetailPage;
+            Constants.CurrentPage = Constants.PatientDetailPage;
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;
@@ -261,7 +262,7 @@ namespace RaywattApp.ViewModels
             _log.Debug("Export");
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["fileType"] = CommonDefinition.FileType.Export;
+            parameter["fileType"] = Constants.FileTypeExport;
             FileExport fileExport = new FileExport();
             fileExport.PatientId = Patient.Id;
             GetSelectedItem();
@@ -415,6 +416,9 @@ namespace RaywattApp.ViewModels
 
             if (patientCase == null)
                 return;
+
+            RaySetProperty(Property.BackgroundColor, 0x333333);
+            RayStartReview(patientCase.Image);
 
             Dictionary<string, Object> parameter = new Dictionary<string, Object>();
             parameter["patient"] = Patient;

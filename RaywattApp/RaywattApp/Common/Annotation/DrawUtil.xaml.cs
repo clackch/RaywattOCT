@@ -2,6 +2,7 @@
 using RaywattApp.Common.Annotation.Models;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -40,6 +41,15 @@ namespace RaywattApp.Common.Annotation
 
         private static readonly DependencyProperty FrameNumberProperty =
             DependencyProperty.Register("FrameNumber", typeof(int), typeof(DrawUtil), new PropertyMetadata(-1, OnPropertyChanged));
+
+        public int MeasurementOutFrameNumber
+        {
+            get { return (int)GetValue(MeasurementOutFrameNumberProperty); }
+            set { this.SetValue(MeasurementOutFrameNumberProperty, value); }
+        }
+
+        private static readonly DependencyProperty MeasurementOutFrameNumberProperty =
+            DependencyProperty.Register("MeasurementOutFrameNumber", typeof(int), typeof(DrawUtil), new PropertyMetadata(default(int)));
 
         public int MouseCursor
         {
@@ -169,8 +179,6 @@ namespace RaywattApp.Common.Annotation
             drawUtil.DrawAll();
         }
 
-        //---------------------------------------------------------------------------------------------------- Function
-
         private void delete_All(object sender, RoutedEventArgs e)
         {
             _log.Debug("delete_All");
@@ -185,6 +193,101 @@ namespace RaywattApp.Common.Annotation
             this.textGeometries.Clear();
         }
 
+        private void delete_Area(object sender, RoutedEventArgs e)
+        {
+            DeleteAreaAll();
+
+            Button button = (Button)sender;
+            AreaGeometry areaGeometry = button.CommandParameter as AreaGeometry;
+
+            for (int i = areaGeometry.Group + 1; i < this.areaGeometrys.Count; i++)
+            {
+                this.areaGeometrys[i].Group--;
+            }
+            this.areaGeometrys.Remove(areaGeometry);
+
+            DrawAreaAll();
+        }
+
+        private void delete_Length(object sender, RoutedEventArgs e)
+        {
+            DeleteLengthAll();
+
+            Button button = (Button)sender;
+            LengthGeometry lengthGeometry = button.CommandParameter as LengthGeometry;
+
+            for (int i = lengthGeometry.Group + 1; i < this.lengthGeometries.Count; i++)
+            {
+                this.lengthGeometries[i].Group--;
+            }
+            this.lengthGeometries.Remove(lengthGeometry);
+
+            DrawLengthAll();
+        }
+
+        private void toggle_Measurement(object sender, RoutedEventArgs e)
+        {
+            MeasurementExpand = !MeasurementExpand;
+        }
+
+        private void move_Frame(object sender, RoutedEventArgs e)
+        {
+            if (this.Measurements == null || this.Measurements.Count == 0)
+                return;
+
+            List<Measurement> orderedMeasurements = this.Measurements.OrderBy(x => x.FrameNumber).ToList();
+            List<Measurement> notEmptyMeasurments = new List<Measurement>();
+
+            foreach (Measurement measurement in orderedMeasurements)
+            {
+                if (measurement.AreaGeometries.Count + measurement.LengthGeometries.Count + measurement.TextGeometries.Count > 0)
+                    notEmptyMeasurments.Add(measurement);
+            }
+
+            if (notEmptyMeasurments.Count == 0)
+                return;
+
+            int currPosition = 0, nextPosition = 0;
+
+            for (int i = 0; i < notEmptyMeasurments.Count; i++)
+            {
+                if (this.FrameNumber == notEmptyMeasurments[i].FrameNumber)
+                {
+                    currPosition = i;
+                    break;
+                }
+            }
+
+            Button button = (Button)sender;
+            string param = button.CommandParameter.ToString();
+
+            if ("prev".Equals(param))
+            {
+                if (currPosition == 0)
+                {
+                    nextPosition = notEmptyMeasurments.Count - 1;
+                }
+                else
+                {
+                    nextPosition = currPosition - 1;
+                }
+            }
+            else
+            {
+                if (currPosition == notEmptyMeasurments.Count - 1)
+                {
+                    nextPosition = 0;
+                }
+                else
+                {
+                    nextPosition = currPosition + 1;
+                }
+            }
+
+            MeasurementOutFrameNumber = notEmptyMeasurments[nextPosition].FrameNumber;
+        }
+
+        //---------------------------------------------------------------------------------------------------- Function
         private void DrawAll()
         {
             _log.Debug("DrawAll");
@@ -216,43 +319,6 @@ namespace RaywattApp.Common.Annotation
         {
             CurrAreaGeometries = drawUtil.areaGeometrys;
             CurrLengthGeometries = drawUtil.lengthGeometries;
-        }
-
-        private void delete_Area(object sender, RoutedEventArgs e)
-        {
-            DeleteAreaAll();
-
-            Button button = (Button)sender;
-            AreaGeometry areaGeometry = button.CommandParameter as AreaGeometry;
-            
-            for (int i = areaGeometry.Group + 1; i < this.areaGeometrys.Count; i++)
-            {
-                this.areaGeometrys[i].Group--;
-            }
-            this.areaGeometrys.Remove(areaGeometry);
-            
-            DrawAreaAll();
-        }
-
-        private void delete_Length(object sender, RoutedEventArgs e)
-        {
-            DeleteLengthAll();
-
-            Button button = (Button)sender;
-            LengthGeometry lengthGeometry = button.CommandParameter as LengthGeometry;
-
-            for (int i = lengthGeometry.Group + 1; i < this.lengthGeometries.Count; i++)
-            {
-                this.lengthGeometries[i].Group--;
-            }
-            this.lengthGeometries.Remove(lengthGeometry);
-
-            DrawLengthAll();
-        }
-
-        private void toggle_Measurement(object sender, RoutedEventArgs e)
-        {
-            MeasurementExpand = !MeasurementExpand;
-        }
+        }        
     }
 }

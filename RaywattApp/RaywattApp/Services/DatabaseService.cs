@@ -68,7 +68,7 @@ namespace RaywattApp.Services
                 {
                     foreach (KeyValuePair<string, Object> parameter in commandParameters)
                     {
-                        Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                        Command.Parameters.AddWithValue(parameter.Key, (parameter.Value == null ? "" : parameter.Value));
                     }
                 }
                 //Connection 입력
@@ -139,7 +139,7 @@ namespace RaywattApp.Services
                 {
                     foreach (KeyValuePair<string, Object> parameter in commandParameters)
                     {
-                        Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                        Command.Parameters.AddWithValue(parameter.Key, (parameter.Value == null ? "" : parameter.Value));
                     }
                 }
                 //Connection 입력
@@ -208,7 +208,7 @@ namespace RaywattApp.Services
                 {
                     foreach (KeyValuePair<string, Object> parameter in commandParameters)
                     {
-                        Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                        Command.Parameters.AddWithValue(parameter.Key, (parameter.Value == null ? "" : parameter.Value));
                     }
                 }
                 //Connection 입력
@@ -260,7 +260,7 @@ namespace RaywattApp.Services
                 {
                     foreach (KeyValuePair<string, Object> parameter in commandParameters)
                     {
-                        Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                        Command.Parameters.AddWithValue(parameter.Key, (parameter.Value == null? "" : parameter.Value));
                     }
                 }
                 //Connection 입력
@@ -307,7 +307,7 @@ namespace RaywattApp.Services
                 {
                     foreach (KeyValuePair<string, Object> parameter in commandParameters)
                     {
-                        Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                        Command.Parameters.AddWithValue(parameter.Key, (parameter.Value == null ? "" : parameter.Value));
                     }
                 }
                 //Connection 입력
@@ -354,7 +354,7 @@ namespace RaywattApp.Services
                 {
                     foreach (KeyValuePair<string, Object> parameter in commandParameters)
                     {
-                        Command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+                        Command.Parameters.AddWithValue(parameter.Key, (parameter.Value == null ? "" : parameter.Value));
                     }
                 }
                 //Connection 입력

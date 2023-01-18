@@ -6,6 +6,7 @@
              xmlns:model="clr-namespace:RaywattApp.Common.Util"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:behaviors="clr-namespace:RaywattApp.Common.Behaviors"
+             xmlns:const="clr-namespace:RaywattApp.Common.Bases"
              xmlns:local="clr-namespace:RaywattApp.Views.Dialog"
              mc:Ignorable="d" 
              Width="500" Height="400">
@@ -22,8 +23,8 @@
         </StackPanel>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding FolderActionCommand}" CommandParameter="0" Content="{Binding [New Folder], Source={StaticResource L10N}}" IsEnabled="{Binding SelectedDir, Converter={StaticResource NotNullToEnableConverter}}"/>
-            <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding FolderActionCommand}" CommandParameter="1" Content="{Binding [Rename], Source={StaticResource L10N}}" IsEnabled="{Binding SelectedDir, Converter={StaticResource NotNullToEnableConverter}}"/>
+            <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding FolderActionCommand}" CommandParameter="{x:Static const:Constants.FolderActionCreate}" Content="{Binding [New Folder], Source={StaticResource L10N}}" IsEnabled="{Binding SelectedDir, Converter={StaticResource NotNullToEnableConverter}}"/>
+            <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding FolderActionCommand}" CommandParameter="{x:Static const:Constants.FolderActionRename}" Content="{Binding [Rename], Source={StaticResource L10N}}" IsEnabled="{Binding SelectedDir, Converter={StaticResource NotNullToEnableConverter}}"/>
         </StackPanel>
 
         <TreeView Grid.Row="2" ItemsSource="{Binding DirItems}">
