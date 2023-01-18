@@ -61,9 +61,11 @@ void CConfiguration::Initialize(tstring configFile)
 	this->settingsAlazar.usGoodClockDuration = getPrivateProfileFloat(_T("Alazar"), _T("GoodClockInMicroSecond"), 5.0, configFilePath.c_str());
 	this->settingsAlazar.usBadClockDuration = getPrivateProfileFloat(_T("Alazar"), _T("BadClockInMicroSecond"), 4.0, configFilePath.c_str());
 
-	// [Invert]	
-	this->invert.lowLevel = getPrivateProfileFloat(_T("Invert"), _T("LowLevel"), 40.0f, configFilePath.c_str());
-	this->invert.highLevel = getPrivateProfileFloat(_T("Invert"), _T("HighLevel"), 65.0f, configFilePath.c_str());
+	// [Imaging]	
+	this->imaging.lowLevel = getPrivateProfileFloat(_T("Imaging"), _T("LowLevel"), 40.0f, configFilePath.c_str());
+	this->imaging.highLevel = getPrivateProfileFloat(_T("Imaging"), _T("HighLevel"), 65.0f, configFilePath.c_str());
+	this->imaging.brightness = getPrivateProfileFloat(_T("Imaging"), _T("Brightness"), 0.f, configFilePath.c_str());
+	this->imaging.contrast = getPrivateProfileFloat(_T("Imaging"), _T("Contrast"), 0.875f, configFilePath.c_str());
 
 	// [Patient]
 	::GetPrivateProfileString(_T("Patient"), _T("RootPath"), _T("D:\\DataSave\\"), sIniValueString, sizeof(sIniValueString), configFilePath.c_str());
@@ -117,16 +119,6 @@ void CConfiguration::SaveMotorSettings() {
 
 	strValue = std::to_wstring(this->motor.settleDown);
 	::WritePrivateProfileString(_T("Motor"), _T("SettleDown"), strValue.c_str(), configFilePath.c_str());
-}
-
-int CConfiguration::getDmaXferSamples() {
-	int nSamples = nBScan * (nAScan + nAScanPadding);
-	return nSamples;
-}
-
-int CConfiguration::getDmaBufferSamples()
-{
-	return 2 * getDmaXferSamples();
 }
 
 int CConfiguration::getScopeLength()

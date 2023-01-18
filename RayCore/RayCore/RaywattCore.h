@@ -14,21 +14,23 @@ extern "C" {
 	_declspec(dllexport) RayError RayDisconnectDevices();
 	_declspec(dllexport) RayError RayAutoCalibration();
 	_declspec(dllexport) RayError RayManualCalibration(bool moveForward);
-	_declspec(dllexport) RayError RayShowCalibrationGuide(bool show);
 	_declspec(dllexport) RayError RayPullbackScan(char *strFilePath);
 	_declspec(dllexport) RayError RayLoadCatheter();
 	_declspec(dllexport) RayError RayUnloadCatheter();
-	_declspec(dllexport) RayError RayStartReview(char *strFilePath);
-	_declspec(dllexport) RayError RayEndReview();
 	_declspec(dllexport) RayError RayStartLiveView();
 	_declspec(dllexport) RayError RayStopLiveView();
+
+	_declspec(dllexport) RayError RayShowCalibrationGuide(bool show);
+	_declspec(dllexport) RayError RayStartReview(char *strFilePath);
+	_declspec(dllexport) RayError AddReviewSession(char* strFilePath);
+	_declspec(dllexport) RayError RayEndReview();
 	_declspec(dllexport) RayError RayPlayPause();
 	_declspec(dllexport) RayError RayPrevFrame();
 	_declspec(dllexport) RayError RayNextFrame();
 	_declspec(dllexport) RayError RayMoveToFrame(int nFrame);
 	_declspec(dllexport) RayError RayRegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude);
-	_declspec(dllexport) RayError RaySetMode(RayViewMode mode);
 	_declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value);
 	_declspec(dllexport) double RayGetProperty(RayProperty prop);
+
 	_declspec(dllexport) void *RayGetVolumeData();
 }

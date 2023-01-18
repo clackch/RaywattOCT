@@ -187,6 +187,7 @@ xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattAp
   <ItemGroup>
     <ClInclude Include="CutViewManager.h" />
     <ClInclude Include="define.h" />
+    <ClInclude Include="ImagingSession.h" />
     <ClInclude Include="OCTSystem.h" />
     <ClInclude Include="import.h" />
     <ClInclude Include="RaywattCore.h" />
@@ -195,6 +196,7 @@ xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattAp
   <ItemGroup>
     <ClCompile Include="CutViewManager.cpp" />
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="ImagingSession.cpp" />
     <ClCompile Include="OCTSystem.cpp" />
     <ClCompile Include="VolumeGenerator.cpp" />
   </ItemGroup>

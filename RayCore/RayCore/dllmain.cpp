@@ -44,6 +44,9 @@ _declspec(dllexport) RayError RayUnloadCatheter() {
 _declspec(dllexport) RayError RayStartReview(char* strFilePath) {
     return octSystem.StartReview(strFilePath);
 }
+_declspec(dllexport) RayError AddReviewSession(char* strFilePath) {
+    return octSystem.AddReviewSession(strFilePath);
+}
 _declspec(dllexport) RayError RayEndReview() {
     return octSystem.EndReview();
 }
@@ -68,9 +71,6 @@ _declspec(dllexport) RayError RayMoveToFrame(int nFrame) {
 _declspec(dllexport) RayError RayRegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude) {
     return octSystem.RegisterImageCallback(cbCrossSection, cbLongitude);
 }
-_declspec(dllexport) RayError RaySetMode(RayViewMode mode) {
-    return RayError::OK;
-}
 _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
 
     switch (prop) {
@@ -82,10 +82,6 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
         return octSystem.SetBackgroundColor(value);
     case RayProperty::Degree:
         return octSystem.SetDegree(value);
-    case RayProperty::LowLevel:
-        return octSystem.SetLowLevel(value);
-    case RayProperty::HighLevel:
-        return octSystem.SetHighLevel(value);
     default:
         return RayError::InvalidArgument;
     }
@@ -115,10 +111,6 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return config.volume.size;
     case RayProperty::VolumeDepth:
         return octSystem.GetVolumeDepth();
-    case RayProperty::LowLevel:
-        return octSystem.GetLowLevel();
-    case RayProperty::HighLevel:
-        return octSystem.GetHighLevel();
     default:
         return (int)RayError::InvalidArgument;
     }

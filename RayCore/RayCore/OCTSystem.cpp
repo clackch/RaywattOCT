@@ -4,7 +4,6 @@
 #include "Configuration.h"
 #include "OCTImaging.h"
 #include "DataWriter.h"
-#include "DataReader.h"
 #include "CutViewManager.h"
 #include "VolumeGenerator.h"
 #include "ATSDevice.h"
@@ -13,6 +12,7 @@
 #include "MotorController.h"
 #include "ZaberController.h"
 #include "RayLearning.h"
+#include "ImagingSession.h"
 
 /*
 * COCTSystem
@@ -30,16 +30,18 @@ COCTSystem::COCTSystem() {
 	m_pThreadRotaryJunction = nullptr;
 
 	m_pImagingRealtime = nullptr;
-	m_pImagingSimulate = nullptr;
 
-	m_pSimulationData = nullptr;
+	m_pDataWriter = nullptr;
 
 	m_pCutView = nullptr;
 	m_pVolume = nullptr;
 
 	m_pAcqDevice = nullptr;	
-	m_pSimDevice = nullptr;
 	m_pLearning = nullptr;
+
+	for (int i = 0; i < MAX_SESSION_NUM; i++) {
+		m_reviewSession[i] = nullptr;
+	}
 
 	m_prevState = RayScannerState::Initial;
 	m_curState = RayScannerState::Initial;
@@ -73,13 +75,9 @@ RayError COCTSystem::Start() {
 
 	CUtility::StartThread(threadService, m_pThreadService, this);
 
-	m_pImagingRealtime = createColorImaging(this);
+	m_pImagingRealtime = CImagingSession::CreateColorImaging(this);
 	m_pImagingRealtime->SetBackgroundColor(m_backgroundColor);
 	m_pImagingRealtime->Start();
-
-	m_pImagingSimulate = createColorImaging(this);
-	m_pImagingSimulate->SetBackgroundColor(m_backgroundColor);
-	m_pImagingSimulate->Start();
 
 	m_pCutView = new CCutViewManager();
 	m_pVolume = new CVolumeGenerator();
@@ -102,31 +100,21 @@ RayError COCTSystem::Stop() {
 	CUtility::StopThread(m_pThreadLumenDetection);
 	CUtility::StopThread(m_pThreadRotaryJunction);
 
-	terminateSimulation();
+	closeAllSessions();
 
 	if (m_pAcqDevice != nullptr) {
 		m_pAcqDevice->StopAcquisition();
 		delete m_pAcqDevice;
 		m_pAcqDevice = nullptr;
 	}
-	if (m_pSimDevice != nullptr) {
-		m_pSimDevice->StopAcquisition();
-		delete m_pSimDevice;
-		m_pSimDevice = nullptr;
-	}
 	if (m_pImagingRealtime != nullptr) {
 		m_pImagingRealtime->Stop();
 		delete m_pImagingRealtime;
 		m_pImagingRealtime = nullptr;
 	}
-	if (m_pImagingSimulate != nullptr) {
-		m_pImagingSimulate->Stop();
-		delete m_pImagingSimulate;
-		m_pImagingSimulate = nullptr;
-	}
-	if (m_pSimulationData != nullptr) {
-		delete m_pSimulationData;
-		m_pSimulationData = nullptr;
+	if (m_pDataWriter != nullptr) {
+		delete m_pDataWriter;
+		m_pDataWriter = nullptr;
 	}
 	if (m_pCutView != nullptr) {
 		delete m_pCutView;
@@ -240,7 +228,6 @@ RayError COCTSystem::ShowCalibrationGuide(bool show) {
 	if (m_pThreadService == nullptr) return RayError::SystemNotRunning;
 
 	m_pImagingRealtime->ShowCalibGuide(show);
-	m_pImagingSimulate->ShowCalibGuide(show);
 
 	return RayError::OK;
 }
@@ -299,12 +286,12 @@ RayError COCTSystem::UnloadCatheter() {
 */
 RayError COCTSystem::StartReview(char* strFilePath) {
 	if (m_curState == RayScannerState::Initial || m_curState == RayScannerState::Default) {
-		CDataReader* pReader = new CDataReader();
-		int nNumOfSamples = pReader->Initialize(CUtility::StringToWstring(strFilePath));
+		CImagingSession *pSession = CImagingSession::CreateSession(this, SESSION_REVIEW, strFilePath);
+		if (pSession == nullptr) {
+			return RayError::InvalidArgument;
+		}
 
-		if (nNumOfSamples <= 0) return RayError::InvalidArgument;
-
-		prepareSimulation(pReader);
+		m_reviewSession[SESSION_REVIEW] = pSession;
 		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
 	
 		return RayError::OK;
@@ -314,13 +301,33 @@ RayError COCTSystem::StartReview(char* strFilePath) {
 }
 
 /*
+* AddReviewSession
+*/
+RayError COCTSystem::AddReviewSession(char* strFilePath) {
+	if (m_curState != RayScannerState::Review) return RayError::WrongState;
+
+	if (m_reviewSession[SESSION_COMPARE] != nullptr) {
+		delete m_reviewSession[SESSION_COMPARE];
+		m_reviewSession[SESSION_COMPARE] = nullptr;
+	}
+
+	CImagingSession* pSession = CImagingSession::CreateSession(this, SESSION_COMPARE, strFilePath);
+	if (pSession == nullptr) {
+		return RayError::InvalidArgument;
+	}
+
+	m_reviewSession[SESSION_COMPARE] = pSession;
+	m_reviewSession[SESSION_COMPARE]->Start();
+
+	return RayError::OK;
+}
+
+/*
 * EndReview
 */
 RayError COCTSystem::EndReview()
 {
 	if (m_curState == RayScannerState::Review) {
-		m_pSimDevice->StopAcquisition();
-
 		switch (m_prevState) {
 		case RayScannerState::Initial:
 		case RayScannerState::Default:
@@ -384,8 +391,8 @@ RayError COCTSystem::StopLiveView()
 RayError COCTSystem::PlayPause()
 {
 	if (m_curState == RayScannerState::Review) {
-		bool isPaused = ((CSimulateDevice*)m_pSimDevice)->IsPaused();
-		((CSimulateDevice*)m_pSimDevice)->SetPause(!isPaused);
+		bool isPaused = GetIsPaused();
+		m_reviewSession[SESSION_REVIEW]->SetPause(!isPaused);
 
 		return RayError::OK;
 	}
@@ -398,11 +405,10 @@ RayError COCTSystem::PlayPause()
 RayError COCTSystem::PrevFrame()
 {
 	if (m_curState == RayScannerState::Review) {
-		bool isPaused = ((CSimulateDevice*)m_pSimDevice)->IsPaused();
-		if (!isPaused)
+		if (!GetIsPaused())
 			return RayError::NotPaused;
 
-		((CSimulateDevice*)m_pSimDevice)->PrevFrame();
+		m_reviewSession[SESSION_REVIEW]->PrevFrame();
 
 		return RayError::OK;
 	}
@@ -415,11 +421,10 @@ RayError COCTSystem::PrevFrame()
 RayError COCTSystem::NextFrame()
 {
 	if (m_curState == RayScannerState::Review) {
-		bool isPaused = ((CSimulateDevice*)m_pSimDevice)->IsPaused();
-		if (!isPaused)
+		if (!GetIsPaused())
 			return RayError::NotPaused;
 
-		((CSimulateDevice*)m_pSimDevice)->NextFrame();
+		m_reviewSession[SESSION_REVIEW]->NextFrame();
 
 		return RayError::OK;
 	}
@@ -431,11 +436,10 @@ RayError COCTSystem::NextFrame()
 */
 RayError COCTSystem::MoveToFrame(int nFrame) {
 	if (m_curState == RayScannerState::Review) {
-		bool isPaused = ((CSimulateDevice*)m_pSimDevice)->IsPaused();
-		if (!isPaused)
+		if (!GetIsPaused())
 			return RayError::NotPaused;
 
-		((CSimulateDevice*)m_pSimDevice)->SetFrame(nFrame);
+		m_reviewSession[SESSION_REVIEW]->MoveToFrame(nFrame);
 
 		return RayError::OK;
 	}
@@ -468,7 +472,6 @@ RayError COCTSystem::SetBrightness(double value) {
 	m_fBrightness = value;
 
 	m_pImagingRealtime->SetBrightnessContrast(m_fBrightness, m_fContrast);
-	m_pImagingSimulate->SetBrightnessContrast(m_fBrightness, m_fContrast);
 	
 	return RayError::OK;
 }
@@ -489,7 +492,6 @@ RayError COCTSystem::SetContrast(double value) {
 	m_fContrast = value;
 
 	m_pImagingRealtime->SetBrightnessContrast(m_fBrightness, m_fContrast);
-	m_pImagingSimulate->SetBrightnessContrast(m_fBrightness, m_fContrast);
 
 	return RayError::OK;
 }
@@ -544,7 +546,6 @@ RayError COCTSystem::SetBackgroundColor(UINT value) {
 	m_backgroundColor = color;
 
 	m_pImagingRealtime->SetBackgroundColor(m_backgroundColor);
-	m_pImagingSimulate->SetBackgroundColor(m_backgroundColor);
 
 	return RayError::OK;
 }
@@ -553,48 +554,9 @@ RayError COCTSystem::SetBackgroundColor(UINT value) {
 * GetVolumeDepth
 */
 UINT COCTSystem::GetVolumeDepth() {
-	if (m_pSimulationData == nullptr) return 0;
+	if (m_pDataWriter == nullptr) return 0;
 
-	return m_pSimulationData->GetNumOfSamples();
-}
-
-/*
-* GetVolumeDepth
-*/
-double COCTSystem::GetLowLevel() {
-	return m_fLowLevel;
-}
-/*
-* SetLowLevel
-*/
-RayError COCTSystem::SetLowLevel(double value) {
-	if (m_pThreadService == nullptr) return RayError::SystemNotRunning;
-
-	m_fLowLevel = value;
-
-	m_pImagingRealtime->SetLevel(m_fLowLevel, m_fHighLevel);
-	m_pImagingSimulate->SetLevel(m_fLowLevel, m_fHighLevel);
-
-	return RayError::OK;
-}
-/*
-* GetHighLevel
-*/
-double COCTSystem::GetHighLevel() {
-	return m_fHighLevel;
-}
-/*
-* SetHighLevel
-*/
-RayError COCTSystem::SetHighLevel(double value) {
-	if (m_pThreadService == nullptr) return RayError::SystemNotRunning;
-
-	m_fHighLevel = value;
-
-	m_pImagingRealtime->SetLevel(m_fLowLevel, m_fHighLevel);
-	m_pImagingSimulate->SetLevel(m_fLowLevel, m_fHighLevel);
-
-	return RayError::OK;
+	return m_pDataWriter->GetNumOfSamples();
 }
 
 /*
@@ -619,9 +581,9 @@ bool COCTSystem::GetMotorOnOff()
 */
 bool COCTSystem::GetIsPaused()
 {
-	if (m_pSimDevice == nullptr) return true;	// default state is paused
+	if (m_reviewSession[SESSION_REVIEW] == nullptr) return true;	// default state is paused
 
-	return ((CSimulateDevice*)m_pSimDevice)->IsPaused();
+	return m_reviewSession[SESSION_REVIEW]->IsPaused();
 }
 
 /*
@@ -698,7 +660,7 @@ UINT COCTSystem::threadService(LPVOID param) {
 UINT COCTSystem::threadSaveRaw(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	tstring strSaveFilePath = pSystem->m_strFilePath;
-	CDataWriter* pDataWriter = (CDataWriter*)pSystem->m_pSimulationData;
+	CDataWriter* pDataWriter = (CDataWriter*)pSystem->m_reviewSession[SESSION_REVIEW]->GetDataManager();
 	const int nNumOfSamples = pDataWriter->GetNumOfSamples();
 
 	int nFrame = 0;
@@ -726,14 +688,14 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 */
 UINT COCTSystem::threadUpdateCutView(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
-	IDataManager* pDataManager = pSystem->m_pSimulationData;
+	IDataManager* pDataManager = pSystem->m_reviewSession[SESSION_REVIEW]->GetDataManager();
 
 	CCutViewManager* pCutView = pSystem->m_pCutView;
 	double fDegree = pSystem->m_fDegree;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
 	// prepare imaging
-	COCTImaging* pImaging = pSystem->createColorImaging(NULL);
+	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr);
 
 	pCutView->Initialize(nNumOfSamples, pSystem->m_backgroundColor);
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadUpdateCutView->isRun; nFrame++) {
@@ -760,13 +722,13 @@ UINT COCTSystem::threadUpdateCutView(LPVOID param) {
 */
 UINT COCTSystem::threadGenerateVolume(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
-	IDataManager* pDataManager = pSystem->m_pSimulationData;
+	IDataManager* pDataManager = pSystem->m_reviewSession[SESSION_REVIEW]->GetDataManager();
 
 	CVolumeGenerator* pVolume = pSystem->m_pVolume;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
 	// prepare imaging
-	COCTImaging* pImaging = pSystem->createColorImaging(NULL);
+	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr);
 
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadGenerateVolume->isRun; nFrame++) {
 		unsigned short* pBuffer = pDataManager->GetSample(nFrame);
@@ -790,14 +752,14 @@ UINT COCTSystem::threadGenerateVolume(LPVOID param) {
 */
 UINT COCTSystem::threadLumenDetection(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
-	IDataManager* pDataManager = pSystem->m_pSimulationData;
+	IDataManager* pDataManager = pSystem->m_reviewSession[SESSION_REVIEW]->GetDataManager();
 	std::vector<std::vector<std::vector<cv::Point>>>& vLumen = pSystem->m_vLumen;
 
 	CRayLearning* pLearning = pSystem->m_pLearning;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
 	// prepare imaging
-	COCTImaging* pImaging = pSystem->createColorImaging(NULL);
+	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr);
 
 	vLumen.clear();
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadLumenDetection->isRun; nFrame++) {
@@ -881,7 +843,8 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	// 5. Motor OFF
 	pMotor->StopMotor();
 
-	pSystem->prepareSimulation(pDataWriter);
+	CImagingSession* pSession = CImagingSession::CreateSession(pSystem, SESSION_REVIEW, pDataWriter);
+	pSystem->m_reviewSession[SESSION_REVIEW] = pSession;
 
 	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
 	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::Pullback);
@@ -1012,19 +975,6 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 /*
 * createColorImaging
 */
-COCTImaging* COCTSystem::createColorImaging(CMessageService* msg) {
-	COCTImaging* pImaging = new COCTImaging(msg);
-
-	pImaging->Initialize(_T("CALIBRATION.DAT"));
-	pImaging->SetColor(true);
-	pImaging->SetBrightnessContrast(m_fBrightness, m_fContrast);
-
-	return pImaging;
-}
-
-/*
-* createColorImaging
-*/
 bool COCTSystem::checkConnection() {
 	bool result = true;
 	CConfiguration& config = CConfiguration::GetInstance();
@@ -1128,25 +1078,25 @@ int COCTSystem::disconnectRotaryJunction() {
 */
 LRESULT COCTSystem::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 	cv::Mat image;
-	int nCurFrame = wParam;
-	int nTotalFrame = lParam;
-	int nFrameInfo = (nCurFrame << 16) | (nTotalFrame);
+	COCTImaging* pImaging = (COCTImaging*)wParam;
+	int nFrameInfo = lParam;	// 0 if real time frame
+	int nCurFrame = (nFrameInfo >> 16) & 0xFFFF;
+	int nTotalFrame = nFrameInfo & 0xFFFF;
 	bool isRealTime = (nFrameInfo == 0);
 
 	if (m_curState == RayScannerState::Review) {
 		if (isRealTime) return NOERROR;
 
-		image = m_pImagingSimulate->GetCircleImage();
-		m_nOffsetNavigation = nCurFrame;
+		image = pImaging->GetCircleImage();
 
 		if (m_pThreadUpdateCutView == nullptr) {
-			updateCutView(nTotalFrame);
+			//updateCutView(nTotalFrame);
 		}
 	}
 	else {
 		if (isRealTime == false) return NOERROR;
 
-		image = m_pImagingRealtime->GetCircleImage();
+		image = pImaging->GetCircleImage();
 	}
 
 	if (m_cbCrossSection != nullptr) m_cbCrossSection(image.data, image.cols, image.rows, image.channels(), nFrameInfo);
@@ -1185,34 +1135,14 @@ void COCTSystem::updateCutView(int drawSamples) {
 	if (m_cbLongitude != nullptr) m_cbLongitude(imgResize.data, imgResize.cols, imgResize.rows, imgResize.channels(), nFrameInfo);
 }
 
-/*
-* prepareSimulation
-*/
-void COCTSystem::prepareSimulation(IDataManager* pDataManager) {
-	terminateSimulation();
-
-	m_pSimulationData = pDataManager;
-
-	m_pSimDevice = new CSimulateDevice(m_pSimulationData);
-	m_pSimDevice->SetImaging(m_pImagingSimulate);
-	m_pSimDevice->InitDevice();
-}
-
-/*
-* terminateSimulation
-*/
-void COCTSystem::terminateSimulation() {
-	if (m_pSimDevice != nullptr) {
-		m_pSimDevice->StopAcquisition();
-		delete m_pSimDevice;
-		m_pSimDevice = nullptr;
-	}
-	if (m_pSimulationData != nullptr) {
-		delete m_pSimulationData;
-		m_pSimulationData = nullptr;
+void COCTSystem::closeAllSessions() {
+	for (int i = 0; i < MAX_SESSION_NUM; i++) {
+		if (m_reviewSession[i] != nullptr) {
+			delete m_reviewSession[i];
+			m_reviewSession[i] = nullptr;
+		}
 	}
 }
-
 /*
 * OnMsgUpdateScannerState
 */
@@ -1228,12 +1158,14 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 		CUtility::StopThread(m_pThreadUpdateCutView);
 		CUtility::StopThread(m_pThreadGenerateVolume);
 		CUtility::StopThread(m_pThreadLumenDetection);
+		closeAllSessions();
 		// To-Do: unload catheter
 		break;
 	case RayScannerState::Default:
 		CUtility::StopThread(m_pThreadUpdateCutView);
 		CUtility::StopThread(m_pThreadGenerateVolume);
 		CUtility::StopThread(m_pThreadLumenDetection);
+		closeAllSessions();
 		break;
 	case RayScannerState::Scanning:
 		CUtility::StartThread(threadPullbackScan, m_pThreadRotaryJunction, this);
@@ -1246,8 +1178,10 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 		CUtility::StartThread(threadUpdateCutView, m_pThreadUpdateCutView, this);
 		CUtility::StartThread(threadGenerateVolume, m_pThreadGenerateVolume, this);
 		CUtility::StartThread(threadLumenDetection, m_pThreadLumenDetection, this);
-
-		m_pSimDevice->StartAcquisition();
+		
+		if (m_reviewSession[SESSION_REVIEW] != nullptr) {
+			m_reviewSession[SESSION_REVIEW]->Start();
+		}
 		break;
 	default:
 		break;

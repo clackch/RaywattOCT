@@ -33,16 +33,7 @@ namespace RaywattOCT
             LoadCatheterTime,
             VolumeWidth,
             VolumeHeight,
-            VolumeDepth,
-            LowLevel,
-            HighLevel
-        }
-
-        public enum ViewMode : int
-        {
-            Unknown = 0,
-	        StandBy,
-	        LiveView
+            VolumeDepth
         }
 
         public enum RayCallbackRequest : int
@@ -120,6 +111,8 @@ namespace RaywattOCT
         [DllImport("RayCore.dll")]
         public static extern int RayStartReview(string filePath);
         [DllImport("RayCore.dll")]
+        public static extern int RayAddReviewSession(string filePath);
+        [DllImport("RayCore.dll")]
         public static extern int RayEndReview();
         [DllImport("RayCore.dll")]
         public static extern int RayStartLiveView();
@@ -135,8 +128,6 @@ namespace RaywattOCT
         public static extern int RayMoveToFrame(int frame);
         [DllImport("RayCore.dll")]
         public static extern int RayRegisterImageCallback(IntPtr cbCrossSection, IntPtr cbLongitude);
-        [DllImport("RayCore.dll")]
-        public static extern int RaySetMode(ViewMode mode);
         [DllImport("RayCore.dll")]
         public static extern int RaySetProperty(Property property, double value);
         [DllImport("RayCore.dll")]

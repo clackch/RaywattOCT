@@ -136,7 +136,7 @@ void CLabImaging::subtractBackground(T* fringes, T* background, T* dst, int size
 void CLabImaging::generateScopeData(Ipp32f* output, Ipp16u* scope) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int nFFTLength = config.nFFTLength;
-	const int nOutputLength = nFFTLength / 2;
+	const int nOutputLength = config.nOutputLength;
 	Ipp32f* temp = new Ipp32f[nOutputLength];
 	
 	ippsSubC_32f(output,m_fLowLevel, temp, nOutputLength);
