@@ -331,8 +331,8 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 void COCTImaging::generateImage(Ipp32f* logaritihmData, bool bInvert){
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int nBScan = config.nBScan;
-	const float fHighLevel = (bInvert) ? config.invert.highLevel : 0.0f;
-	const float fLowLevel = (bInvert) ? config.invert.lowLevel : 0.0f;
+	const float fHighLevel = (bInvert) ? config.imaging.highLevel : 0.0f;
+	const float fLowLevel = (bInvert) ? config.imaging.lowLevel : 0.0f;
 	const int nFFTLength = config.nFFTLength;
 	const int nOutputLength = config.nOutputLength;
 
