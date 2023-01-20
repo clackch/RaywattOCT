@@ -1,14 +1,18 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using RaywattApp.Common.Localization;
+using RaywattApp.Models;
 
 namespace RaywattApp.Common.Bases
 {
     /// <summary>
     /// ViewModelBase
     /// </summary>
-    public abstract class ViewModelBase : ObservableObject, INavigationAware
+    public abstract partial class ViewModelBase : ObservableObject, INavigationAware
     {
         protected readonly DynamicResource _l10n;
+
+        [ObservableProperty]
+        protected DeviceStatus _deviceStatus = new DeviceStatus();
 
         public ViewModelBase()
         {

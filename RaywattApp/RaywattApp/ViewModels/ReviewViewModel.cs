@@ -211,6 +211,7 @@ namespace RaywattApp.ViewModels
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
+            base.OnNavigated(sender, navigatedEventArgs);
             _log.Debug("OnNavigated");
 
             var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
@@ -232,6 +233,7 @@ namespace RaywattApp.ViewModels
 
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
+            base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
             Save();
 
@@ -544,30 +546,6 @@ namespace RaywattApp.ViewModels
                 curPosition *= (longitudeFrameInfo.totalFrame - 1);
                 RayMoveToFrame((int)curPosition);
             }
-        }
-
-        protected override void handleState(RayCallbackRequest request, RayScannerState state)
-        {
-            switch (state)
-            {
-                case RayScannerState.Review:
-                    updatePlayPauseState();
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        protected override void handleProgress(RayCallbackRequest request, int progress)
-        {
-        }
-
-        protected override void handleError(RayCallbackRequest request, RayError error)
-        {
-        }
-
-        protected override void handleWorkDone(RayCallbackRequest request, RayWorkItem work)
-        {
         }
     }
 }

@@ -47,8 +47,6 @@ namespace RaywattApp.Common.Bases
             {
                 frameNumber = value;
                 OnPropertyChanged(nameof(FrameNumber));
-
-                syncWithCoreSystem();
             }
         }
 

@@ -59,6 +59,7 @@ namespace RaywattApp.ViewModels
         }
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
+            base.OnNavigated(sender, navigatedEventArgs);
             _log.Debug("OnNavigated");
 
             var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
@@ -84,6 +85,7 @@ namespace RaywattApp.ViewModels
 
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
+            base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
         }
 
@@ -161,22 +163,6 @@ namespace RaywattApp.ViewModels
             _log.Debug("generateFileName : " + filename);
 
             return filename;
-        }
-
-        protected override void handleState(RayCoreWrapper.RayCallbackRequest request, RayCoreWrapper.RayScannerState state)
-        {
-        }
-
-        protected override void handleProgress(RayCoreWrapper.RayCallbackRequest request, int progress)
-        {
-        }
-
-        protected override void handleError(RayCoreWrapper.RayCallbackRequest request, RayCoreWrapper.RayError error)
-        {
-        }
-
-        protected override void handleWorkDone(RayCoreWrapper.RayCallbackRequest request, RayCoreWrapper.RayWorkItem work)
-        {
         }
     }
 }
