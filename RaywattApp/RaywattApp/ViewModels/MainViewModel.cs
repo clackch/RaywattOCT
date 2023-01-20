@@ -168,7 +168,6 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Setting");
             var result = _dialogService.OpenDialog(new SettingDialogControl());
-            DeviceStatus.IsInitialized = !DeviceStatus.IsInitialized;
         }
 
         private void Exit()
