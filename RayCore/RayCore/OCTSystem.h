@@ -92,6 +92,7 @@ public:
 	RayError Start();
 	RayError Stop();
 	RayError RegisterCallback(FunctionPtr cb);
+	RayError UnregisterCallback();
 	RayError ConnectDevices();
 	RayError DisconnectDevices();
 	RayError AutoCalibration();
@@ -110,6 +111,7 @@ public:
 	RayError NextFrame();
 	RayError MoveToFrame(int nFrame);
 	RayError RegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude);
+	RayError UnregisterImageCallback();
 
 	//Property
 	RayScannerState GetCurrentState() { return m_curState; }

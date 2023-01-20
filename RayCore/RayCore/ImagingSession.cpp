@@ -25,7 +25,7 @@ CImagingSession::~CImagingSession() {
 CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSession, IDataManager* pWriter) {
 	if (pMsg == nullptr || pWriter == nullptr) return nullptr;
 
-	return createSession(pMsg, nSession, pWriter);
+	return createSession(pMsg, nSession, pWriter, false);
 }
 
 CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSession, const char* strFilePath) {
@@ -37,7 +37,7 @@ CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSess
 		return nullptr;
 	}
 
-	return createSession(pMsg, nSession, pReader);
+	return createSession(pMsg, nSession, pReader, true);
 }
 
 void CImagingSession::EnableWorkItem(RayWorkItem item, bool enable) {
@@ -81,8 +81,8 @@ void CImagingSession::MoveToFrame(int nFrame) {
 	if (m_pSimDevice != nullptr) m_pSimDevice->SetFrame(nFrame);
 }
 
-CImagingSession* CImagingSession::createSession(CMessageService* pMsg, int nSession, IDataManager* pData) {
-	CImagingSession* pSession = new CImagingSession(pMsg, nSession);
+CImagingSession* CImagingSession::createSession(CMessageService* pMsg, int nSession, IDataManager* pData, bool deleteData) {
+	CImagingSession* pSession = new CImagingSession(pMsg, nSession, deleteData);
 
 	pSession->m_pDataManager = pData;
 	pSession->m_pImaging = CreateColorImaging(pMsg);

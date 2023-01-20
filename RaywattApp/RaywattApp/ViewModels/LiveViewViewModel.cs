@@ -31,12 +31,6 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private PrevStatus _prevStatus;
 
-        [ObservableProperty]
-        private string? _viewMode;
-
-        [ObservableProperty]
-        private bool? _isInitialized;
-
         private DispatcherTimer timerUpdateImage = new DispatcherTimer();
 
         private ICommand _cmdBack;
@@ -75,6 +69,7 @@ namespace RaywattApp.ViewModels
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
+            base.OnNavigated(sender, navigatedEventArgs);
             _log.Debug("OnNavigated");
 
             var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
@@ -88,8 +83,6 @@ namespace RaywattApp.ViewModels
                 RayShowCalibrationGuide(true);
                 RaySetProperty(Property.BackgroundColor, Constants.BackgroundColor);
 
-                syncWithCoreSystem();
-
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
                 timerUpdateImage.Start();
@@ -98,6 +91,7 @@ namespace RaywattApp.ViewModels
 
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
+            base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
         }
 
@@ -110,13 +104,13 @@ namespace RaywattApp.ViewModels
 
         private void ChangeViewMode()
         {
-            _log.Debug("ChangeViewMode : " + ViewMode);
+            _log.Debug("ChangeViewMode : " + DeviceStatus.ViewMode);
 
-            if (Constants.ViewModeLiveView.Equals(ViewMode))
+            if (Constants.ViewModeLiveView.Equals(DeviceStatus.ViewMode))
             {
                 RayStartLiveView();
             }
-            else if (Constants.ViewModeStandBy.Equals(ViewMode))
+            else if (Constants.ViewModeStandBy.Equals(DeviceStatus.ViewMode))
             {
                 RayStopLiveView();
             }
@@ -126,7 +120,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Calibration");
 
-            ViewMode = Constants.ViewModeLiveView;
+            DeviceStatus.ViewMode = Constants.ViewModeLiveView;
             ChangeViewMode();
 
             leaveToPage("Views/CalibrationPage.xaml");
@@ -153,34 +147,6 @@ namespace RaywattApp.ViewModels
             parameter["patient"] = this.Patient;
             parameter["prevStatus"] = this.PrevStatus;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(viewPage) { Parameter = parameter });
-        }
-
-        protected override void syncWithCoreSystem()
-        {
-            base.syncWithCoreSystem();
-
-            RayScannerState curState = (RayScannerState)RayGetProperty(Property.CurrentState);
-            bool isLiveView = (bool)(RayGetProperty(Property.MotorOnOff) != 0);
-
-            this.IsInitialized = (curState == RayScannerState.Default) ? true : false;
-            this.ViewMode = (isLiveView) ? Constants.ViewModeLiveView : Constants.ViewModeStandBy;
-        }
-
-        protected override void handleError(RayCallbackRequest request, RayError error)
-        {
-        }
-
-        protected override void handleProgress(RayCallbackRequest request, int progress)
-        {
-        }
-
-        protected override void handleState(RayCallbackRequest request, RayScannerState state)
-        {
-            syncWithCoreSystem();
-        }
-
-        protected override void handleWorkDone(RayCallbackRequest request, RayWorkItem work)
-        {
         }
     }
 }

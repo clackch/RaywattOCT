@@ -93,6 +93,8 @@ namespace RaywattOCT
         [DllImport("RayCore.dll")]
         public static extern int RayRegisterCallback(IntPtr cb);
         [DllImport("RayCore.dll")]
+        public static extern int RayUnregisterCallback();
+        [DllImport("RayCore.dll")]
         public static extern int RayConnectDevices();
         [DllImport("RayCore.dll")]
         public static extern int RayDisconnectDevices();
@@ -128,6 +130,8 @@ namespace RaywattOCT
         public static extern int RayMoveToFrame(int frame);
         [DllImport("RayCore.dll")]
         public static extern int RayRegisterImageCallback(IntPtr cbCrossSection, IntPtr cbLongitude);
+        [DllImport("RayCore.dll")]
+        public static extern int RayUnregisterImageCallback();
         [DllImport("RayCore.dll")]
         public static extern int RaySetProperty(Property property, double value);
         [DllImport("RayCore.dll")]

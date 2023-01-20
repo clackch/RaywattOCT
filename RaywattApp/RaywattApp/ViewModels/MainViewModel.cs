@@ -11,6 +11,7 @@ using RaywattApp.Views.Dialog;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using static RaywattOCT.RayCoreWrapper;
@@ -62,6 +63,10 @@ namespace RaywattApp.ViewModels
             get { return this._exitCommand ?? (this._exitCommand = new RelayCommand(Exit)); }
         }
 
+        // to avoid garbage collection
+        private CallbackFunction cbFunction;
+        public CallbackFunction CBFunction => (this.cbFunction) ?? (this.cbFunction = new CallbackFunction(OnMsgCallback));
+
         /// <summary>
         /// 생성자
         /// </summary>
@@ -86,9 +91,10 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Register<BusyMessage>(this, OnBusyMessage);
 
             Patient = new Patient();
-            
-            RaywattOCT.RayCoreWrapper.RayStartSystem();
-            RaywattOCT.RayCoreWrapper.RayConnectDevices();
+
+            RayRegisterCallback(Marshal.GetFunctionPointerForDelegate(CBFunction));
+            RayStartSystem();
+            RayConnectDevices();
 
             Directory.CreateDirectory(Constants.DataRootPath);
 
@@ -162,6 +168,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Setting");
             var result = _dialogService.OpenDialog(new SettingDialogControl());
+            DeviceStatus.IsInitialized = !DeviceStatus.IsInitialized;
         }
 
         private void Exit()
@@ -171,6 +178,45 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientListPage.xaml"));
 
             Application.Current.MainWindow.Close();
+        }
+
+        private void OnMsgCallback(int request, int response)
+        {
+            switch ((RayCallbackRequest)request)
+            {
+                case RayCallbackRequest.State:
+                    handleState((RayCallbackRequest)request, (RayScannerState)response);
+                    break;
+                case RayCallbackRequest.Progress:
+                    handleProgress((RayCallbackRequest)request, response);
+                    break;
+                case RayCallbackRequest.Error:
+                    handleError((RayCallbackRequest)request, (RayError)response);
+                    break;
+                case RayCallbackRequest.WorkDone:
+                    handleWorkDone((RayCallbackRequest)request, (RayWorkItem)response);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void handleState(RayCallbackRequest request, RayScannerState state)
+        {
+            RayScannerState curState = (RayScannerState)RayGetProperty(Property.CurrentState);
+            bool isLiveView = (bool)(RayGetProperty(Property.MotorOnOff) != 0);
+
+            DeviceStatus.IsInitialized = (curState == RayScannerState.Default) ? true : false;
+            DeviceStatus.ViewMode = (isLiveView) ? Constants.ViewModeLiveView : Constants.ViewModeStandBy;
+        }
+        protected void handleProgress(RayCallbackRequest request, int progress) { }
+        protected void handleError(RayCallbackRequest request, RayError error) { }
+        protected void handleWorkDone(RayCallbackRequest request, RayWorkItem work)
+        {
+            if (work == RayWorkItem.AutoCalibration)
+            {
+                DeviceStatus.CanExecuteCalibration = true;
+            }
         }
     }
 }

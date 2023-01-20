@@ -5,7 +5,6 @@ using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
-using RaywattOCT;
 using System;
 using System.Collections.Generic;
 using System.Windows.Input;
@@ -24,12 +23,6 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private PrevStatus _prevStatus;
-
-        [ObservableProperty]
-        private bool _canExecuteCalibration;
-
-        [ObservableProperty]
-        private bool _isNotLiveViewState;
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer();
 
@@ -60,6 +53,7 @@ namespace RaywattApp.ViewModels
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
+            base.OnNavigated(sender, navigatedEventArgs);
             _log.Debug("OnNavigated");
 
             var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
@@ -72,9 +66,6 @@ namespace RaywattApp.ViewModels
 
                 RaySetProperty(Property.BackgroundColor, Constants.BackgroundColor);
 
-                RayScannerState curState = (RayScannerState)RayGetProperty(Property.CurrentState);
-                CanExecuteCalibration = true;
-
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
                 timerUpdateImage.Start();
@@ -83,6 +74,7 @@ namespace RaywattApp.ViewModels
 
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
+            base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
         }
 
@@ -106,7 +98,7 @@ namespace RaywattApp.ViewModels
 
         private void AutoCalibration() {
             RayAutoCalibration();
-            CanExecuteCalibration = false;
+            DeviceStatus.CanExecuteCalibration = false;
         }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
@@ -114,26 +106,6 @@ namespace RaywattApp.ViewModels
             if (imgCrossSection != null)
             {
                 CrossSectionImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgCrossSection);
-            }
-        }
-
-
-        protected override void handleError(RayCallbackRequest request, RayError error)
-        {
-        }
-
-        protected override void handleProgress(RayCallbackRequest request, int progress)
-        {
-        }
-
-        protected override void handleState(RayCallbackRequest request, RayScannerState state)
-        {
-        }
-
-        protected override void handleWorkDone(RayCallbackRequest request, RayWorkItem work)
-        {
-            if (work == RayWorkItem.AutoCalibration) {
-                CanExecuteCalibration = true;
             }
         }
     }

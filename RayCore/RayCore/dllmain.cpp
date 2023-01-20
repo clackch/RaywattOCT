@@ -17,6 +17,9 @@ _declspec(dllexport) RayError RayStopSystem() {
 _declspec(dllexport) RayError RayRegisterCallback(FunctionPtr cb) {
     return octSystem.RegisterCallback(cb);
 }
+_declspec(dllexport) RayError RayUnregisterCallback() {
+    return octSystem.UnregisterCallback();
+}
 _declspec(dllexport) RayError RayConnectDevices() {
     return octSystem.ConnectDevices();
 }
@@ -70,6 +73,9 @@ _declspec(dllexport) RayError RayMoveToFrame(int nFrame) {
 }
 _declspec(dllexport) RayError RayRegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude) {
     return octSystem.RegisterImageCallback(cbCrossSection, cbLongitude);
+}
+_declspec(dllexport) RayError RayUnregisterImageCallback() {
+    return octSystem.UnregisterImageCallback();
 }
 _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
 

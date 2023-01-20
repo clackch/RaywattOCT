@@ -23,24 +23,7 @@ namespace RaywattApp.Common.Bases
         protected Mat imgLongitude;
         protected FrameInfo longitudeFrameInfo;
 
-        private int brightness;
-        public int Brightness
-        {
-            get { return brightness; }
-            set { brightness = value; OnPropertyChanged(nameof(Brightness)); setBrightnessContrast(); }
-        }
-
-        private int contrast;
-        public int Contrast
-        {
-            get { return contrast; }
-            set { contrast = value; OnPropertyChanged(nameof(Contrast)); setBrightnessContrast(); }
-        }
-
         // to avoid garbage collection
-        private CallbackFunction cbFunction;
-        public CallbackFunction CBFunction => (this.cbFunction) ?? (this.cbFunction = new CallbackFunction(OnMsgCallback));
-
         private CallbackFunctionWithImage cbCrossSection;
         public CallbackFunctionWithImage CBCrossSection => (this.cbCrossSection) ?? (this.cbCrossSection = new CallbackFunctionWithImage(OnRecvCrossSection));
 
@@ -50,51 +33,24 @@ namespace RaywattApp.Common.Bases
 
         public OCTViewModelBase()
         {
-            RayRegisterCallback(Marshal.GetFunctionPointerForDelegate(CBFunction));
+        }
+
+        /// <summary>
+        /// Navigation 시작시 - 이동 시작하는 화면에서 발생
+        /// </summary>
+        public override void OnNavigating(object sender, object navigationEventArgs)
+        {
+            RayUnregisterImageCallback();
+        }
+
+        /// <summary>
+        /// Navigation 완료시 - 이동 완료된 화면에서 발생
+        /// </summary>
+        public override void OnNavigated(object sender, object navigatedEventArgs)
+        {
             RayRegisterImageCallback(
                 Marshal.GetFunctionPointerForDelegate(CBCrossSection),
                 Marshal.GetFunctionPointerForDelegate(CBLongitude));
-        }
-
-        protected abstract void handleState(RayCallbackRequest request, RayScannerState state);
-        protected abstract void handleProgress(RayCallbackRequest request, int progress);
-        protected abstract void handleError(RayCallbackRequest request, RayError error);
-        protected abstract void handleWorkDone(RayCallbackRequest request, RayWorkItem work);
-        protected void setBrightnessContrast()
-        {
-            double propBrightness = ((double)Brightness / 100) * (BrightnessMax - BrightnessMin) + BrightnessMin;
-            double propContrast = ((double)Contrast / 100) * (ContrastMax - ContrastMin) + ContrastMin;
-
-            RaySetProperty(Property.Brightness, propBrightness);
-            RaySetProperty(Property.Contrast, propContrast);
-        }
-        protected virtual void syncWithCoreSystem()
-        {
-            double propBrightness = RayGetProperty(Property.Brightness);
-            double propContrast = RayGetProperty(Property.Contrast);
-
-            this.Brightness = (int)(((propBrightness - BrightnessMin) / (BrightnessMax - BrightnessMin)) * 100);
-            this.Contrast = (int)(((propContrast - ContrastMin) / (ContrastMax - ContrastMin)) * 100);
-        }
-
-        private void OnMsgCallback(int request, int response)
-        {
-            switch ((RayCallbackRequest)request) {
-                case RayCallbackRequest.State:
-                    handleState((RayCallbackRequest)request, (RayScannerState)response);
-                    break;
-                case RayCallbackRequest.Progress:
-                    handleProgress((RayCallbackRequest)request, response);
-                    break;
-                case RayCallbackRequest.Error:
-                    handleError((RayCallbackRequest)request, (RayError)response);
-                    break;
-                case RayCallbackRequest.WorkDone:
-                    handleWorkDone((RayCallbackRequest)request, (RayWorkItem)response);
-                    break;
-                default:
-                    break;
-            }
         }
 
         private void OnRecvCrossSection(IntPtr data, int width, int height, int ch, int frameInfo)
