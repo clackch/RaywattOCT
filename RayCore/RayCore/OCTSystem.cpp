@@ -330,6 +330,19 @@ RayError COCTSystem::AddReviewSession(char* strFilePath) {
 }
 
 /*
+* EndReviewSession
+*/
+RayError COCTSystem::EndReviewSession(unsigned int nSession) {
+	if (nSession >= MAX_SESSION_NUM || m_reviewSession[nSession] == nullptr) return RayError::InvalidArgument;
+	
+	m_reviewSession[nSession]->Stop();
+	delete m_reviewSession[nSession];
+	m_reviewSession[nSession] = nullptr;
+
+	return RayError::OK;
+}
+
+/*
 * EndReview
 */
 RayError COCTSystem::EndReview()

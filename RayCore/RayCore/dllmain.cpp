@@ -50,6 +50,9 @@ _declspec(dllexport) RayError RayStartReview(char* strFilePath) {
 _declspec(dllexport) RayError AddReviewSession(char* strFilePath) {
     return octSystem.AddReviewSession(strFilePath);
 }
+_declspec(dllexport) RayError EndReviewSession(int nSession) {
+    return octSystem.EndReviewSession(nSession);
+}
 _declspec(dllexport) RayError RayEndReview() {
     return octSystem.EndReview();
 }

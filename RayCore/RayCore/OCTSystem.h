@@ -103,6 +103,7 @@ public:
 	RayError UnloadCatheter();
 	RayError StartReview(char* strFilePath);
 	RayError AddReviewSession(char* strFilePath);
+	RayError EndReviewSession(unsigned int nSession);
 	RayError EndReview();
 	RayError StartLiveView();
 	RayError StopLiveView();
