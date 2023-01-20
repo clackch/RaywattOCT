@@ -101,10 +101,7 @@ namespace RaywattApp.ViewModels
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {
-            if (imgCrossSection != null)
-            {
-                CrossSectionImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgCrossSection);
-            }
+            DrawCrossSectionImage();
         }
     }
 }

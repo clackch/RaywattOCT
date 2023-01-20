@@ -67,5 +67,22 @@ namespace RaywattApp.Common.Bases
             longitudeFrameInfo = new FrameInfo(frameInfo);
         }
 
+        protected bool DrawCrossSectionImage()
+        {
+            if (imgCrossSection == null) return false;
+
+            CrossSectionImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgCrossSection);
+            return true;
+        }
+        protected bool DrawLongitudeImage()
+        {
+            if (imgLongitude == null) return false;
+
+            RayScannerState state = (RayScannerState)RayGetProperty(Property.CurrentState);
+            if (state != RayScannerState.Review) return false;
+
+            LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgLongitude);
+            return true;
+        }
     }
 }

@@ -142,8 +142,9 @@
         public const string PresetTapered = "TAPE";
         public const string PresetOther = "OTHE";
 
-        //Longitude Image Background Color
-        public const int LongitudeBackgroundColor = 0xFFFFFF;
+        //Background Color
+        public const int BackgroundColor = 0x0D0D0D;
+        public const int CardBackgroundColor = 0x161616;
 
         //Update Image Interval (msec)
         public const double UpdateImageInterval = 5;

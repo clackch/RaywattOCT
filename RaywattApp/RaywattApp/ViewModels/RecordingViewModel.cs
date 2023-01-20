@@ -74,7 +74,7 @@ namespace RaywattApp.ViewModels
                 if (data.ContainsKey("patientCase"))
                     PatientCase = (PatientCase)data["patientCase"];
 
-                RaySetProperty(Property.LongitudeBackgroundColor, Constants.LongitudeBackgroundColor);
+                RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
             }
 
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
@@ -136,10 +136,7 @@ namespace RaywattApp.ViewModels
         
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {
-            if (imgCrossSection != null)
-            {
-                CrossSectionImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgCrossSection);
-            }
+            DrawCrossSectionImage();
             if (imgLongitude != null)
             {
                 RayScannerState state = (RayScannerState)RayGetProperty(Property.CurrentState);
