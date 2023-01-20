@@ -24,8 +24,6 @@ protected:
 	cv::Mat imageResult;
 	cv::Mat imageResultColor;
 	cv::Mat imageCircle;
-	cv::Mat imageMask;
-	cv::Mat imageBackground;
 
 	// using in GenerateBackground
 	Ipp32f *fringes32f;
@@ -47,7 +45,6 @@ protected:
 	double m_fContrast;
 	double m_fLowLevel;
 	double m_fHighLevel;
-	cv::Scalar m_backgroundColor;
 
 	std::vector<cv::Vec3b> m_vLUT;
 
@@ -76,7 +73,6 @@ public:
 		m_fLowLevel = low;
 		m_fHighLevel = high;
 	}
-	void SetBackgroundColor(cv::Scalar color) { m_backgroundColor = color; }
 	virtual void SetFrameInfo(int nCurFrame, int nTotalFrame) {
 		m_nCurFrame = nCurFrame;
 		m_nTotalFrame = nTotalFrame;

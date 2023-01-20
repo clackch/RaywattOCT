@@ -80,7 +80,7 @@ private:
 	double m_fBrightness;
 	double m_fContrast;
 	double m_fDegree;
-	cv::Scalar m_backgroundColor;
+	cv::Scalar m_backgroundColor;	// for longitude image
 	double m_fLowLevel;
 	double m_fHighLevel;
 
@@ -121,8 +121,8 @@ public:
 	RayError SetContrast(double value);
 	double GetDegree();
 	RayError SetDegree(double value);
-	UINT GetBackgroundColor();
-	RayError SetBackgroundColor(UINT value);
+	UINT GetLongitudeBackgroundColor();
+	RayError SetLongitudeBackgroundColor(UINT value);
 	UINT GetVolumeDepth();
 	void* GetVolumeData();
 	bool GetMotorOnOff();

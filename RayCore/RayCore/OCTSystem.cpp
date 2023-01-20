@@ -76,7 +76,6 @@ RayError COCTSystem::Start() {
 	CUtility::StartThread(threadService, m_pThreadService, this);
 
 	m_pImagingRealtime = CImagingSession::CreateColorImaging(this);
-	m_pImagingRealtime->SetBackgroundColor(m_backgroundColor);
 	m_pImagingRealtime->Start();
 
 	m_pCutView = new CCutViewManager();
@@ -534,9 +533,9 @@ RayError COCTSystem::SetDegree(double value) {
 }
 
 /*
-* GetDegree
+* GetLongitudeBackgroundColor
 */
-UINT COCTSystem::GetBackgroundColor() {
+UINT COCTSystem::GetLongitudeBackgroundColor() {
 	UINT nValue = 0x00;
 
 	UINT b = m_backgroundColor[0];
@@ -551,9 +550,9 @@ UINT COCTSystem::GetBackgroundColor() {
 }
 
 /*
-* GetDegree
+* SetLongitudeBackgroundColor
 */
-RayError COCTSystem::SetBackgroundColor(UINT value) {
+RayError COCTSystem::SetLongitudeBackgroundColor(UINT value) {
 	if (m_pThreadService == nullptr) return RayError::SystemNotRunning;
 
 	cv::Scalar color;
@@ -562,8 +561,6 @@ RayError COCTSystem::SetBackgroundColor(UINT value) {
 	color[2] = 0xff & (value >> 16);
 
 	m_backgroundColor = color;
-
-	m_pImagingRealtime->SetBackgroundColor(m_backgroundColor);
 
 	return RayError::OK;
 }

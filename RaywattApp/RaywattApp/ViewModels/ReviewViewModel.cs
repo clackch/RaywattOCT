@@ -224,6 +224,7 @@ namespace RaywattApp.ViewModels
                 PrevStatus = (PrevStatus)data["prevStatus"];
 
                 SetMeasurements(PatientCase.Id);
+                RaySetProperty(Property.LongitudeBackgroundColor, Constants.LongitudeBackgroundColor);
             }
 
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);

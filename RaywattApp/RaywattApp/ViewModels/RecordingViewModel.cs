@@ -74,7 +74,7 @@ namespace RaywattApp.ViewModels
                 if (data.ContainsKey("patientCase"))
                     PatientCase = (PatientCase)data["patientCase"];
 
-                RaySetProperty(Property.BackgroundColor, Constants.BackgroundColor);
+                RaySetProperty(Property.LongitudeBackgroundColor, Constants.LongitudeBackgroundColor);
             }
 
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);

@@ -81,7 +81,6 @@ namespace RaywattApp.ViewModels
                 this.PrevStatus = (PrevStatus)data["prevStatus"];
 
                 RayShowCalibrationGuide(true);
-                RaySetProperty(Property.BackgroundColor, Constants.BackgroundColor);
 
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
