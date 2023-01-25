@@ -20,9 +20,6 @@ namespace RaywattApp.ViewModels
         private IList<PatientCase> _patientCases;
 
         [ObservableProperty]
-        private PatientCase _selectedPatientCase;
-
-        [ObservableProperty]
         private PatientCase _displayPatientCase;
 
         private ICommand _caseSelectCancelCommand;
@@ -60,8 +57,13 @@ namespace RaywattApp.ViewModels
                 Patient = (Patient)data["patient"];
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
+                ReviewStatus = (ReviewStatus)data["reviewStatus"];
+                ReviewStatus.CurrentPage = Constants.ReviewComparePage;
 
-                GetPatientCase();
+                if (ReviewStatus.SelectedPatientCase == null)
+                    GetPatientCase(true);
+                else
+                    GetPatientCase(false);
             }
         }
 
@@ -103,7 +105,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("CaseSelectCancel");
 
-            DisplayPatientCase = SelectedPatientCase;
+            DisplayPatientCase = ReviewStatus.SelectedPatientCase;
             ExpandLeftUpMenu = false;
         }
 
@@ -111,12 +113,12 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("CaseSelectOk");
 
-            SelectedPatientCase = patientCase;
+            ReviewStatus.SelectedPatientCase = patientCase;
             DisplayPatientCase = patientCase;
             ExpandLeftUpMenu = false;
         }
 
-        private void GetPatientCase()
+        private void GetPatientCase(bool isNullPatientCase)
         {
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = Patient.Id;
@@ -125,8 +127,23 @@ namespace RaywattApp.ViewModels
             PatientCases = _sqlManager.SelectPatientCaseList(sqlParameters);
             if(PatientCases != null && PatientCases.Count > 1)
             {
-                SelectedPatientCase = PatientCases[0];
-                DisplayPatientCase = PatientCases[0];
+                if(isNullPatientCase)
+                {
+                    ReviewStatus.SelectedPatientCase = PatientCases[0];
+                }
+                else
+                {
+                    foreach (PatientCase patientCase in PatientCases)
+                    {
+                        if (patientCase.Id == ReviewStatus.SelectedPatientCase.Id)
+                        {
+                            ReviewStatus.SelectedPatientCase = patientCase;
+                            break;
+                        }
+                    }
+                }
+
+                DisplayPatientCase = ReviewStatus.SelectedPatientCase;
             }
         }
     }

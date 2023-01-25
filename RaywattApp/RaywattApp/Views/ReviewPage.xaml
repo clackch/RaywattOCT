@@ -69,7 +69,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Cross Section -->
-                <Grid Grid.Column="2" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Visibility="{Binding IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                <Grid Grid.Column="2" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                     <!-- Cross Seciton Image -->
                     <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}">
                         <i:Interaction.Triggers>
@@ -142,7 +142,7 @@
                     </StackPanel>
                 </Grid>
                 <!-- Angio -->
-                <Grid Grid.Column="2" Width="{StaticResource AngioSize}" Height="{StaticResource AngioSize}" Visibility="{Binding IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Background="Beige">
+                <Grid Grid.Column="2" Width="{StaticResource AngioSize}" Height="{StaticResource AngioSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Background="Beige">
                     <Button Style="{StaticResource ButtonBasic}" Height="20" Width="100" VerticalAlignment="Top" HorizontalAlignment="Right" Command="{Binding CoRegistrationCommand}" Content="{Binding [Co-Registration], Source={StaticResource L10N}}"/>
                 </Grid>
 
@@ -284,7 +284,7 @@
                         </StackPanel>
 
                         <!-- Default -->
-                        <Grid Grid.Row="1" Visibility="{Binding IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                        <Grid Grid.Row="1" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                             <Grid.RowDefinitions>
                                 <RowDefinition/>
                                 <RowDefinition Height="Auto"/>
@@ -301,7 +301,7 @@
                             </Grid>
                         </Grid>
                         <!-- Angio -->
-                        <Grid Grid.Row="1" Visibility="{Binding IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Grid Grid.Row="1" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
                             <Grid.RowDefinitions>
                                 <RowDefinition/>
                                 <RowDefinition/>
@@ -479,10 +479,10 @@
                             </i:Interaction.Triggers>
 
                             <!-- Lumen Profile -->
-                            <Image x:Name="lumenProfile" Height="{StaticResource LongitudeHeight}" Stretch="Fill" Visibility="{Binding IsLumenProfile, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Image x:Name="lumenProfile" Height="{StaticResource LongitudeHeight}" Stretch="Fill" Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityConverter}}">
                             </Image>
                             <!-- L-Mode -->
-                            <Image x:Name="lMode" Source="{Binding LongitudeImage}" Height="{StaticResource LongitudeHeight}" Stretch="Fill" Visibility="{Binding IsLumenProfile, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                            <Image x:Name="lMode" Source="{Binding LongitudeImage}" Height="{StaticResource LongitudeHeight}" Stretch="Fill" Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                             </Image>
                             <StackPanel Background="Transparent" Height="{StaticResource LongitudeHeight}" Visibility="{Binding IndicatorLongitude.IsVisible}">
                                 <!-- L-Mode Mouse Pointer X -->

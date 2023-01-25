@@ -78,15 +78,6 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private string _playPauseState;
 
-        [ObservableProperty]
-        private bool _isLumenProfile;
-
-        [ObservableProperty]
-        private bool _isContourStentOn;
-
-        [ObservableProperty]
-        private bool _isAngioOn;
-
         private double _rightSideBarExpand;
         public double RightSideBarExpand
         {
@@ -126,9 +117,6 @@ namespace RaywattApp.ViewModels
 
         private List<Measurement> measurements;
         public List<Measurement> Measurements { get { return measurements; } set { measurements = value; OnPropertyChanged(nameof(Measurements)); } }
-
-        [ObservableProperty]
-        private ObservableCollection<Bookmark> bookmarks;
 
         private ICommand _toggleMeasurementCommand;
         public ICommand ToggleMeasurementCommand
@@ -201,9 +189,6 @@ namespace RaywattApp.ViewModels
             ExpandLeftUpMenu = true;
             ExpandLeftDownMenu = true;
             ExpandRightMenu = true;
-            IsLumenProfile = true;
-            IsContourStentOn = true;
-            IsAngioOn = false;
             RightSideBarExpand = Constants.RightSideBarExpandDefaultSize;
 
             updatePlayPauseState();
@@ -222,6 +207,20 @@ namespace RaywattApp.ViewModels
                 Patient = (Patient)data["patient"];
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
+                if (data.ContainsKey("reviewStatus"))
+                {
+                    ReviewStatus = (ReviewStatus)data["reviewStatus"];
+                    ToggleAngio(ReviewStatus.IsAngioOn);
+                    if (ReviewStatus.IsLumenProfile)
+                        IndicatorCrossSection.IsVisible = Visibility.Collapsed;
+                    else
+                        IndicatorCrossSection.IsVisible = Visibility.Visible;
+                }
+                else
+                {
+                    ReviewStatus = new ReviewStatus();
+                }
+                ReviewStatus.CurrentPage = Constants.ReviewPage;
 
                 SetMeasurements(PatientCase.Id);
             }
@@ -279,7 +278,7 @@ namespace RaywattApp.ViewModels
 
             if (indicator.isCaptured)
             {
-                if (IsAngioOn)
+                if (ReviewStatus.IsAngioOn)
                 {
                     crossSectionWidth = crossSectionSmallWidth;
                     crossSectionHeight = crossSectionSmallHeight;
@@ -365,7 +364,7 @@ namespace RaywattApp.ViewModels
 
         private bool CanToggleMeasurement()
         {
-            return !IsAngioOn;
+            return !ReviewStatus.IsAngioOn;
         }
 
         private void ToggleMeasurement()
@@ -442,19 +441,19 @@ namespace RaywattApp.ViewModels
         {
             if (param.Equals(Constants.LongitudeProfile))
             {
-                if(IsLumenProfile)
+                if(ReviewStatus.IsLumenProfile)
                     return;
 
                 IndicatorCrossSection.IsVisible = Visibility.Collapsed;
-                IsLumenProfile = true;
+                ReviewStatus.IsLumenProfile = true;
             }
             else
             {
-                if (!IsLumenProfile)
+                if (!ReviewStatus.IsLumenProfile)
                     return;
 
                 IndicatorCrossSection.IsVisible = Visibility.Visible;
-                IsLumenProfile = false;
+                ReviewStatus.IsLumenProfile = false;
             }
         }
 
@@ -465,14 +464,14 @@ namespace RaywattApp.ViewModels
 
         private void ToggleContourStent()
         {
-            IsContourStentOn = !IsContourStentOn;
+            ReviewStatus.IsContourStentOn = !ReviewStatus.IsContourStentOn;
         }
 
         private void ToggleAngio(bool isAngioOn)
         {
-            IsAngioOn = isAngioOn;
+            ReviewStatus.IsAngioOn = isAngioOn;
 
-            if (IsAngioOn)
+            if (ReviewStatus.IsAngioOn)
             {
                 RightSideBarExpand = Constants.RightSideBarExpandAngioSize;
                 VisibleMeasurement = Visibility.Collapsed;

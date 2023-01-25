@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
+using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
@@ -9,6 +10,7 @@ using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 
 namespace RaywattApp.Common.Bases
@@ -23,6 +25,9 @@ namespace RaywattApp.Common.Bases
 
         [ObservableProperty]
         private PrevStatus _prevStatus;
+
+        [ObservableProperty]
+        private ReviewStatus _reviewStatus;
 
         [ObservableProperty]
         private Patient _patient;
@@ -53,6 +58,9 @@ namespace RaywattApp.Common.Bases
 
         [ObservableProperty]
         private int displayFrameNumber;
+
+        [ObservableProperty]
+        private ObservableCollection<Bookmark> bookmarks;
 
         private ICommand _reviewTypeSwitchCommand;
         public ICommand ReviewTypeSwitchCommand
@@ -115,6 +123,7 @@ namespace RaywattApp.Common.Bases
             parameter["patient"] = Patient;
             parameter["patientCase"] = PatientCase;
             parameter["prevStatus"] = PrevStatus;
+            parameter["reviewStatus"] = ReviewStatus;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(url) { Parameter = parameter });
         }
 
@@ -146,9 +155,10 @@ namespace RaywattApp.Common.Bases
             _log.Debug("EditPreset");
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["patientCase"] = PatientCase;
             parameter["patient"] = Patient;
+            parameter["patientCase"] = PatientCase;
             parameter["prevStatus"] = PrevStatus;
+            parameter["reviewStatus"] = ReviewStatus;
             WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/ReviewPresetPage.xaml") { Parameter = parameter });
         }
 
@@ -167,11 +177,24 @@ namespace RaywattApp.Common.Bases
             fileExport.SelectedItem.Add(PatientCase.Id);
             fileExport.IsFromReview = true;
             fileExport.CurrentFrame = FrameNumber;
-            fileExport.BookmarkedFrames = new List<int>();
-            //TO-DO : Bookmark 기능 추가 후, bookmark 된 내역 전달 필요
+            fileExport.BookmarkedFrames = GetBookmarks();
             parameter["fileExport"] = fileExport;
 
             var result = _dialogService.OpenDialog(new FileDialogControl(), parameter);
+        }
+
+        private List<int> GetBookmarks()
+        {
+            List<int> bookmarks = new List<int>();
+
+            foreach(Bookmark bookmark in Bookmarks)
+            {
+                bookmarks.Add(bookmark.FrameNumber);
+            }
+
+            bookmarks.Sort();
+
+            return bookmarks;
         }
 
         protected virtual void Save() { }

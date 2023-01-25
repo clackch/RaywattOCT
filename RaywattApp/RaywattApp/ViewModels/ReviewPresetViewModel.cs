@@ -8,10 +8,8 @@ using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
-using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Reflection.Metadata;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Navigation;
@@ -28,6 +26,9 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private PrevStatus _prevStatus;
+
+        [ObservableProperty]
+        private ReviewStatus _reviewStatus;
 
         [ObservableProperty]
         private Patient _patient;
@@ -144,6 +145,7 @@ namespace RaywattApp.ViewModels
 
                 if (String.IsNullOrEmpty(PatientCase.Id))
                 {
+                    ReviewStatus = new ReviewStatus();
                     PatientCasePresetList = _sqlManager.SelectPatientCasePresetList();
 
                     _isPreset = true;
@@ -152,6 +154,8 @@ namespace RaywattApp.ViewModels
                 }
                 else
                 {
+                    ReviewStatus = (ReviewStatus)data["reviewStatus"];
+
                     PatientCasePresetList = new List<PatientCasePreset>();
                     PatientCasePreset patientCasePreset = new PatientCasePreset();
                     patientCasePreset.Id = PatientCase.Id;
@@ -309,7 +313,8 @@ namespace RaywattApp.ViewModels
                 parameter["patient"] = Patient;
                 parameter["patientCase"] = PatientCase;
                 parameter["prevStatus"] = PrevStatus;
-                WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/ReviewPage.xaml") { Parameter = parameter });
+                parameter["reviewStatus"] = ReviewStatus;
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(ReviewStatus.CurrentPage) { Parameter = parameter });
             }
         }
 
@@ -405,7 +410,8 @@ namespace RaywattApp.ViewModels
             parameter["patient"] = Patient;
             parameter["patientCase"] = PatientCase;
             parameter["prevStatus"] = PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/ReviewPage.xaml") { Parameter = parameter });
+            parameter["reviewStatus"] = ReviewStatus;
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(ReviewStatus.CurrentPage == null ? Constants.ReviewPage : ReviewStatus.CurrentPage) { Parameter = parameter });
         }
 
         private void ShowPreset(PatientCasePreset patientCasePreset)
