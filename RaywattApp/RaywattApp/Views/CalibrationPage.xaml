@@ -7,7 +7,7 @@
       xmlns:const="clr-namespace:RaywattApp.Common.Bases"
       xmlns:System="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d" 
-      d:DesignHeight="994" d:DesignWidth="1280"
+      d:DesignHeight="1024" d:DesignWidth="1280"
       Title="CalibrationPage">
     <Page.Resources>
         <System:Boolean x:Key="TrueValue">True</System:Boolean>
