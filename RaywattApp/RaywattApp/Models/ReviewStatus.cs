@@ -18,6 +18,9 @@ namespace RaywattApp.Models
         [ObservableProperty]
         private bool _isContourStentOn = true;
 
+        [ObservableProperty]
+        private bool _isMeasurementOn = false;
+
         //3D
 
 

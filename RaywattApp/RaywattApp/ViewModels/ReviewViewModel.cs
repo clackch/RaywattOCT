@@ -87,16 +87,13 @@ namespace RaywattApp.ViewModels
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer();
 
-        [ObservableProperty]
-        private Visibility _visibleMeasurement;
-
         private int measurementFrameNumber = -1;
         public int MeasurementFrameNumber 
         { 
             get { return measurementFrameNumber; } 
             set 
             { 
-                if(VisibleMeasurement == Visibility.Visible)
+                if(ReviewStatus.IsMeasurementOn)
                 {
                     measurementFrameNumber = value;
                     OnPropertyChanged(nameof(MeasurementFrameNumber));
@@ -185,7 +182,6 @@ namespace RaywattApp.ViewModels
             IndicatorLongitude.IsVisible = Visibility.Collapsed;
             IndicatorLongitude.PropertyChanged += OnIndicatorLongitudeMoved;
 
-            VisibleMeasurement = Visibility.Collapsed;
             ExpandLeftUpMenu = true;
             ExpandLeftDownMenu = true;
             ExpandRightMenu = true;
@@ -262,7 +258,7 @@ namespace RaywattApp.ViewModels
             {
                 double pauseState = RayGetProperty(Property.IsPaused);
                 if(pauseState == 1)
-                    VisibleMeasurement = Visibility.Collapsed;
+                    ReviewStatus.IsMeasurementOn = false;
 
                 result = (RayError)RayPlayPause();
                 if (result == RayError.OK)
@@ -380,14 +376,7 @@ namespace RaywattApp.ViewModels
                 }
             }
 
-            if (VisibleMeasurement == Visibility.Collapsed)
-            {
-                VisibleMeasurement = Visibility.Visible;
-            }
-            else
-            {
-                VisibleMeasurement = Visibility.Collapsed;
-            }
+            ReviewStatus.IsMeasurementOn = !ReviewStatus.IsMeasurementOn;
         }
 
         private void SetMeasurements(string id)
@@ -474,7 +463,7 @@ namespace RaywattApp.ViewModels
             if (ReviewStatus.IsAngioOn)
             {
                 RightSideBarExpand = Constants.RightSideBarExpandAngioSize;
-                VisibleMeasurement = Visibility.Collapsed;
+                ReviewStatus.IsMeasurementOn = false;
             }
             else
             {
