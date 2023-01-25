@@ -82,7 +82,7 @@ namespace RaywattApp.ViewModels
         private bool _isLumenProfile;
 
         [ObservableProperty]
-        private bool _isContourOn;
+        private bool _isContourStentOn;
 
         [ObservableProperty]
         private bool _isAngioOn;
@@ -130,10 +130,10 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private ObservableCollection<Bookmark> bookmarks;
 
-        private ICommand _measurementCommand;
-        public ICommand MeasurementCommand
+        private ICommand _toggleMeasurementCommand;
+        public ICommand ToggleMeasurementCommand
         {
-            get { return this._measurementCommand ?? (this._measurementCommand = new RelayCommand(ToggleMeasurement, CanToggleMeasurement)); }
+            get { return this._toggleMeasurementCommand ?? (this._toggleMeasurementCommand = new RelayCommand(ToggleMeasurement, CanToggleMeasurement)); }
         }
 
         private ICommand _cmdPlayback;
@@ -169,19 +169,19 @@ namespace RaywattApp.ViewModels
         private ICommand _coRegistrationCommand;
         public ICommand CoRegistrationCommand
         {
-            get { return this._coRegistrationCommand ?? (this._coRegistrationCommand = new RelayCommand(CoRegistration, CanCoRegistration)); }
+            get { return this._coRegistrationCommand ?? (this._coRegistrationCommand = new RelayCommand(CoRegistration)); }
         }
 
-        private ICommand _toggleContourCommand;
-        public ICommand ToggleContourCommand
+        private ICommand _toggleContourStentCommand;
+        public ICommand ToggleContourStentCommand
         {
-            get { return this._toggleContourCommand ?? (this._toggleContourCommand = new RelayCommand(ToggleContour)); }
+            get { return this._toggleContourStentCommand ?? (this._toggleContourStentCommand = new RelayCommand(ToggleContourStent)); }
         }
 
         private ICommand _toggleAngioCommand;
         public ICommand ToggleAngioCommand
         {
-            get { return this._toggleAngioCommand ?? (this._toggleAngioCommand = new RelayCommand(ToggleAngio)); }
+            get { return this._toggleAngioCommand ?? (this._toggleAngioCommand = new RelayCommand<bool>(ToggleAngio)); }
         }
 
         public ReviewViewModel(SqlManager sqlManager, IDialogService dialogService) : base(sqlManager, dialogService)
@@ -202,7 +202,7 @@ namespace RaywattApp.ViewModels
             ExpandLeftDownMenu = true;
             ExpandRightMenu = true;
             IsLumenProfile = true;
-            IsContourOn = false;
+            IsContourStentOn = true;
             IsAngioOn = false;
             RightSideBarExpand = Constants.RightSideBarExpandDefaultSize;
 
@@ -458,24 +458,19 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private bool CanCoRegistration()
-        {
-            return IsAngioOn;
-        }
-
         private void CoRegistration()
         {
             _log.Debug("CoRegistration");
         }
 
-        private void ToggleContour()
+        private void ToggleContourStent()
         {
-            IsContourOn = !IsContourOn;
+            IsContourStentOn = !IsContourStentOn;
         }
 
-        private void ToggleAngio()
+        private void ToggleAngio(bool isAngioOn)
         {
-            IsAngioOn = !IsAngioOn;
+            IsAngioOn = isAngioOn;
 
             if (IsAngioOn)
             {
@@ -487,8 +482,7 @@ namespace RaywattApp.ViewModels
                 RightSideBarExpand = Constants.RightSideBarExpandDefaultSize;
             }
 
-            (CoRegistrationCommand as RelayCommand).NotifyCanExecuteChanged();
-            (MeasurementCommand as RelayCommand).NotifyCanExecuteChanged();
+            (ToggleMeasurementCommand as RelayCommand).NotifyCanExecuteChanged();
         }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
