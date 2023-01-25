@@ -2,7 +2,7 @@
 
 namespace RaywattApp.Models
 {
-    public partial class StringModel : ObservableValidator
+    public partial class StringModel : ObservableObject
     {
         [ObservableProperty]
         string _returnString;

@@ -5,7 +5,7 @@ using System;
 
 namespace RaywattApp.Models
 {
-    public partial class PatientCasePreset : ObservableValidator
+    public partial class PatientCasePreset : ObservableObject
     {
         [ObservableProperty]
         private string? id;

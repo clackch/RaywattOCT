@@ -2,7 +2,7 @@
 
 namespace RaywattApp.Models
 {
-    public partial class ReviewStatus : ObservableValidator
+    public partial class ReviewStatus : ObservableObject
     {
         //Common
         [ObservableProperty]

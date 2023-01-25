@@ -2,7 +2,7 @@
 
 namespace RaywattApp.Models
 {
-    public partial class PrevStatus : ObservableValidator
+    public partial class PrevStatus : ObservableObject
     {
         [ObservableProperty]
         private string listKeyword;

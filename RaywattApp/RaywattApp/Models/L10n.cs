@@ -2,7 +2,7 @@
 
 namespace RaywattApp.Models
 {
-    public partial class L10n : ObservableValidator
+    public partial class L10n : ObservableObject
     {
         [ObservableProperty]
         private string lang;
