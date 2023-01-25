@@ -159,7 +159,7 @@ namespace RaywattApp.Common.Bases
             parameter["patientCase"] = PatientCase;
             parameter["prevStatus"] = PrevStatus;
             parameter["reviewStatus"] = ReviewStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/ReviewPresetPage.xaml") { Parameter = parameter });
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewPresetPage) { Parameter = parameter });
         }
 
         private void Export()
@@ -206,7 +206,7 @@ namespace RaywattApp.Common.Bases
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = parameter });
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientDetailPage) { Parameter = parameter });
         }
 
         private void NewRecording()
@@ -216,7 +216,7 @@ namespace RaywattApp.Common.Bases
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/RecordingSetupPage.xaml") { Parameter = parameter });
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
         }
 
         private void ExpandCollapseMenu(string param)
