@@ -40,9 +40,11 @@
                 <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding SettingCommand}" Content="{Binding [Setting], Source={StaticResource L10N}}"/>
                 <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding ExitCommand}" Content="{Binding [Exit], Source={StaticResource L10N}}"/>
             </StackPanel>
+            <!--
             <StackPanel Grid.Row="2" HorizontalAlignment="Left">
                 <Label Content="{Binding [Raywatt], Source={StaticResource L10N}}"/>
             </StackPanel>
+            -->
         </Grid>
     </Grid>
 </Window>

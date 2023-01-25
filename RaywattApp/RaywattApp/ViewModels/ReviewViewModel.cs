@@ -15,6 +15,8 @@ using RaywattApp.Common.Annotation.Models;
 using System.Windows;
 using Newtonsoft.Json;
 using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.Messaging;
+using RaywattApp.Common.Messages;
 
 namespace RaywattApp.ViewModels
 {
@@ -449,6 +451,13 @@ namespace RaywattApp.ViewModels
         private void CoRegistration()
         {
             _log.Debug("CoRegistration");
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = Patient;
+            parameter["patientCase"] = PatientCase;
+            parameter["prevStatus"] = PrevStatus;
+            parameter["reviewStatus"] = ReviewStatus;
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewAngioCoRegPage) { Parameter = parameter });
         }
 
         private void ToggleContourStent()
