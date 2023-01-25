@@ -75,12 +75,6 @@ namespace RaywattApp.Models
         private string? _pullbackType;
 
         [ObservableProperty]
-        private int _brightness;
-
-        [ObservableProperty]
-        private int _contrast;
-
-        [ObservableProperty]
         private bool _angioCoRegistration;
 
         private string? _presetName;

@@ -114,8 +114,6 @@ namespace RaywattApp.ViewModels
             PatientCase.StillImageYn = "N";
             PatientCase.Image = "";
             PatientCase.PullbackType = "LONG";
-            PatientCase.Brightness = 30;
-            PatientCase.Contrast = 10;
             PatientCase.AngioCoRegistration = false;
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
