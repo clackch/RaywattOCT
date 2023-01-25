@@ -1,11 +1,13 @@
-﻿using log4net;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Models;
 using RaywattApp.Services;
-using RaywattOCT;
 using System;
 using System.Collections.Generic;
+using System.Windows.Input;
 using System.Windows.Navigation;
 
 namespace RaywattApp.ViewModels
@@ -13,6 +15,27 @@ namespace RaywattApp.ViewModels
     public partial class ReviewCompareViewModel : ReviewViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewCompareViewModel));
+
+        [ObservableProperty]
+        private IList<PatientCase> _patientCases;
+
+        [ObservableProperty]
+        private PatientCase _selectedPatientCase;
+
+        [ObservableProperty]
+        private PatientCase _displayPatientCase;
+
+        private ICommand _caseSelectCancelCommand;
+        public ICommand CaseSelectCancelCommand
+        {
+            get { return this._caseSelectCancelCommand ?? (this._caseSelectCancelCommand = new RelayCommand(CaseSelectCancel)); }
+        }
+
+        private ICommand _caseSelectOkCommand;
+        public ICommand CaseSelectOkCommand
+        {
+            get { return this._caseSelectOkCommand ?? (this._caseSelectOkCommand = new RelayCommand<PatientCase>(CaseSelectOk)); }
+        }
 
         public ReviewCompareViewModel(SqlManager sqlManager, IDialogService dialogService) : base(sqlManager, dialogService)
         {
@@ -37,6 +60,8 @@ namespace RaywattApp.ViewModels
                 Patient = (Patient)data["patient"];
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
+
+                GetPatientCase();
             }
         }
 
@@ -72,6 +97,37 @@ namespace RaywattApp.ViewModels
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
             if (nRows == 0)
                 _log.Error("Update Error");
+        }
+
+        private void CaseSelectCancel()
+        {
+            _log.Debug("CaseSelectCancel");
+
+            DisplayPatientCase = SelectedPatientCase;
+            ExpandLeftUpMenu = false;
+        }
+
+        private void CaseSelectOk(PatientCase patientCase)
+        {
+            _log.Debug("CaseSelectOk");
+
+            SelectedPatientCase = patientCase;
+            DisplayPatientCase = patientCase;
+            ExpandLeftUpMenu = false;
+        }
+
+        private void GetPatientCase()
+        {
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = Patient.Id;
+            sqlParameters["procedure"] = "$001";//Pre-PCI
+
+            PatientCases = _sqlManager.SelectPatientCaseList(sqlParameters);
+            if(PatientCases != null && PatientCases.Count > 1)
+            {
+                SelectedPatientCase = PatientCases[0];
+                DisplayPatientCase = PatientCases[0];
+            }
         }
     }
 }

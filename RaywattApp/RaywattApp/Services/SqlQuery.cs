@@ -117,8 +117,7 @@ namespace RaywattApp.Services
                         $", preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold" +
                         $", create_date, update_date " +
                 $"FROM rv_schema.patient_case " +
-                $"WHERE patient_id = @id " +
-                $"ORDER BY create_date DESC";
+                $"WHERE patient_id = @id ";                
 
             //SelectPatientCaseByList
             _query["SelectPatientCaseByList"] =
