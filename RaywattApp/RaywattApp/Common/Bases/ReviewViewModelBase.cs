@@ -47,8 +47,12 @@ namespace RaywattApp.Common.Bases
             {
                 frameNumber = value;
                 OnPropertyChanged(nameof(FrameNumber));
+                DisplayFrameNumber = FrameNumber + 1;
             }
         }
+
+        [ObservableProperty]
+        private int displayFrameNumber;
 
         private ICommand _reviewTypeSwitchCommand;
         public ICommand ReviewTypeSwitchCommand
