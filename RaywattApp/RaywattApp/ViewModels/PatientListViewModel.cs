@@ -233,14 +233,14 @@ namespace RaywattApp.ViewModels
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = patient;
             parameter["prevStatus"] = GetListStatus();
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = parameter });
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientDetailPage) { Parameter = parameter });
         }
 
         private void MovePatientNew()
         {
             _log.Debug("MovePatientNew");
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientNewPage.xaml") {  Parameter = GetListStatus() });
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientNewPage) {  Parameter = GetListStatus() });
         }
 
         private PrevStatus GetListStatus()

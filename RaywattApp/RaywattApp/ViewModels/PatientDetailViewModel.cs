@@ -215,7 +215,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Back");
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientListPage.xaml") { Parameter = PrevStatus});
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage) { Parameter = PrevStatus});
         }
 
         private void GoPatientEdit()
@@ -226,7 +226,7 @@ namespace RaywattApp.ViewModels
             parameter["patient"] = Patient;
             GetDetailStatus();
             parameter["prevStatus"] = PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientEditPage.xaml") { Parameter = parameter });
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientEditPage) { Parameter = parameter });
         }
 
         private void NewRecording()
@@ -237,7 +237,7 @@ namespace RaywattApp.ViewModels
             parameter["patient"] = Patient;
             GetDetailStatus();
             parameter["prevStatus"] = PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/RecordingSetupPage.xaml") { Parameter = parameter });
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
         }
 
         private void GetSelectedItem()
@@ -425,7 +425,7 @@ namespace RaywattApp.ViewModels
             parameter["patientCase"] = patientCase;
             GetDetailStatus();
             parameter["prevStatus"] = PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/ReviewPage.xaml") { Parameter = parameter });
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewPage) { Parameter = parameter });
         }
 
         private void GetDetailStatus()

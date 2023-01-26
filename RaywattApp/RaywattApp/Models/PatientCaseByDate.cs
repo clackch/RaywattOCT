@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace RaywattApp.Models
 {
-    public partial class PatientCaseByDate : ObservableValidator
+    public partial class PatientCaseByDate : ObservableObject
     {
         [ObservableProperty]
         private string key;

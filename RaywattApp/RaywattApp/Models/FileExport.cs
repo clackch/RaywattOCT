@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace RaywattApp.Models
 {
-    public partial class FileExport : ObservableValidator
+    public partial class FileExport : ObservableObject
     {
         [ObservableProperty]
         private string patientId;

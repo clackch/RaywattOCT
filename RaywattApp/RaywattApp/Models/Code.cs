@@ -2,7 +2,7 @@
 
 namespace RaywattApp.Models
 {
-    public partial class Code : ObservableValidator
+    public partial class Code : ObservableObject
     {
         [ObservableProperty]
         private string classification;

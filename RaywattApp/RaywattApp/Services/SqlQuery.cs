@@ -100,7 +100,7 @@ namespace RaywattApp.Services
                         $", accession_number, accession_name, comment" +
                         $", vessel, procedure" +
                         $", thumbnail_no, still_image_yn, image" +
-                        $", pullback_type, brightness, contrast, angio_co_registration" +
+                        $", pullback_type, angio_co_registration" +
                         $", preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold" +
                         $", create_date, update_date " +
                 $"FROM rv_schema.patient_case " +
@@ -113,18 +113,17 @@ namespace RaywattApp.Services
                         $", accession_number, accession_name, comment" +
                         $", vessel, procedure" +
                         $", thumbnail_no, still_image_yn, image" +
-                        $", pullback_type, brightness, contrast, angio_co_registration" +
+                        $", pullback_type, angio_co_registration" +
                         $", preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold" +
                         $", create_date, update_date " +
                 $"FROM rv_schema.patient_case " +
-                $"WHERE patient_id = @id " +
-                $"ORDER BY create_date DESC";
+                $"WHERE patient_id = @id ";                
 
             //SelectPatientCaseByList
             _query["SelectPatientCaseByList"] =
                 $"SELECT id, patient_id, physician_name, accession_number, accession_name, comment, vessel, procedure, thumbnail_no, still_image_yn, image" +
                         $", rv_schema.fn_patient(patient_id) patient_name" +
-                        $", pullback_type, brightness, contrast, angio_co_registration" +
+                        $", pullback_type, angio_co_registration" +
                         $", preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold, measurements, bookmarks" +
                         $", create_date, update_date " +
                 $"FROM rv_schema.patient_case ";
@@ -161,12 +160,12 @@ namespace RaywattApp.Services
             _query["InsertPatientCase"] =
                 $"INSERT INTO rv_schema.patient_case(id, patient_id, physician_name, accession_number, accession_name" +
                                                     $", comment, vessel, procedure, thumbnail_no, still_image_yn, image" +
-                                                    $", pullback_type, brightness, contrast, angio_co_registration" +
+                                                    $", pullback_type, angio_co_registration" +
                                                     $", preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold" +
                                                     $", create_date, update_date) " +
                 $"VALUES (@id, @patient_id, @physician_name, @accession_number, @accession_name" +
                         $", @comment, @vessel, @procedure, @thumbnail_no, @still_image_yn, @image" +
-                        $", @pullback_type, @brightness, @contrast, @angio_co_registration" +
+                        $", @pullback_type, @angio_co_registration" +
                         $", @preset_name, @calcium_threshold, @expansion_calculation, @expansion_threshold, @apposition_threshold" +
                         $", now(), now())";
 
@@ -202,7 +201,7 @@ namespace RaywattApp.Services
                 $"UPDATE rv_schema.patient_case " +
                 $"SET physician_name=@physician_name, accession_number=@accession_number" +
                     $", comment=@comment, vessel=@vessel, procedure=@procedure" +
-                    $", brightness=@brightness, contrast=@contrast, angio_co_registration=@angio_co_registration" +
+                    $", angio_co_registration=@angio_co_registration" +
                     $", preset_name=@preset_name, calcium_threshold=@calcium_threshold, expansion_calculation=@expansion_calculation" +
                     $", expansion_threshold=@expansion_threshold, apposition_threshold=@apposition_threshold" +
                     $", measurements=@measurements" +

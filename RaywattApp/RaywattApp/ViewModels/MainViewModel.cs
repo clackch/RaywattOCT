@@ -104,6 +104,7 @@ namespace RaywattApp.ViewModels
             reviewPages.Add(Constants.ReviewComparePage);
             reviewPages.Add(Constants.ReviewFfrPage);
             reviewPages.Add(Constants.ReviewPresetPage);
+            reviewPages.Add(Constants.ReviewAngioCoRegPage);
         }
 
         private void OnNavigationMessage(object recipient, NavigationMessage message)
@@ -161,7 +162,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Home");
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientListPage.xaml"));
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
         }
 
         private void Setting()
@@ -174,7 +175,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Exit");
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientListPage.xaml"));
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
 
             Application.Current.MainWindow.Close();
         }

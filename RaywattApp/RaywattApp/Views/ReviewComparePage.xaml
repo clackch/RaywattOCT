@@ -47,6 +47,7 @@
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition/>
+                <RowDefinition Height="10"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
 
@@ -58,12 +59,12 @@
             <StackPanel Grid.Row="0" Grid.Column="2" Background="GreenYellow" Width="400"/>
 
             <!-- After : Lumen Profile -->
-            <StackPanel Grid.Row="1" Grid.Column="1" Background="AliceBlue"/>
+            <StackPanel Grid.Row="2" Grid.Column="1" Background="AliceBlue"/>
             <!-- After : Cross-section -->
-            <StackPanel Grid.Row="1" Grid.Column="2" Background="DarkGreen" Width="400"/>
+            <StackPanel Grid.Row="2" Grid.Column="2" Background="DarkGreen" Width="400"/>
 
             <!-- Left Up Menu : Select Pre-Case -->
-            <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Left" Width="880" Visibility="{Binding ExpandLeftUpMenu, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Left" Visibility="{Binding ExpandLeftUpMenu, Converter={StaticResource BoolToVisibilityConverter}}" Background="White">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition/>
@@ -72,9 +73,26 @@
                     <Button Content="≪ Select Pre-Case" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftUpMenu}" />
                     <Separator/>
                 </StackPanel>
-                <StackPanel Grid.Row="1">
-
-                </StackPanel>
+                <Grid Grid.Row="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="20"/>
+                        <RowDefinition/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <DataGrid Grid.Row="1" Name="patientCaseList" ItemsSource="{Binding PatientCases}" Style="{StaticResource DataGridBasic}" SelectionMode="Single" SelectedItem="{Binding DisplayPatientCase}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="1.2*" Binding="{Binding CreateDate, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Create Date], Source={StaticResource L10N}}" />
+                            <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Vessel, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}" Header="{Binding [Vessel], Source={StaticResource L10N}}" />
+                            <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding PhysicianName}" Header="{Binding [Physician Name], Source={StaticResource L10N}}" />
+                            <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding AccessionNumber}" Header="{Binding [Accession Number], Source={StaticResource L10N}}" />
+                            <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Comment}" Header="{Binding [Comment], Source={StaticResource L10N}}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding CaseSelectCancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+                        <Button Style="{StaticResource ButtonImportant}" Width="80" Command="{Binding CaseSelectOkCommand}" CommandParameter="{Binding ElementName=patientCaseList, Path=SelectedItem}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+                </Grid>
             </Grid>
             <Grid Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" Width="{x:Static const:Constants.SideBarCollapseSize}" Visibility="{Binding ExpandLeftUpMenu, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                 <Grid.RowDefinitions>
@@ -90,7 +108,7 @@
                 </StackPanel>
             </Grid>
             <!-- Left Down Menu : Patient Info -->
-            <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Left" Width="{x:Static const:Constants.LeftSideBarExpandSize}" Visibility="{Binding ExpandLeftDownMenu, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Left" Width="{x:Static const:Constants.LeftSideBarExpandSize}" Visibility="{Binding ExpandLeftDownMenu, Converter={StaticResource BoolToVisibilityConverter}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition/>
@@ -125,6 +143,11 @@
                             <RowDefinition/>
                             <RowDefinition/>
                             <RowDefinition/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
                         </Grid.RowDefinitions>
                         <Label Grid.Column="0" Grid.Row="0" Content="{Binding [Birth], Source={StaticResource L10N}}"/>
                         <Label Grid.Column="1" Grid.Row="0" Content="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}"/>
@@ -138,10 +161,19 @@
                         <Label Grid.Column="1" Grid.Row="4" Content="{Binding PatientCase.AccessionNumber}"/>
                         <Label Grid.Column="0" Grid.Row="5" Content="{Binding [Comment], Source={StaticResource L10N}}"/>
                         <TextBlock Grid.Column="1" Grid.Row="5" Text="{Binding PatientCase.Comment}" TextWrapping="Wrap" Padding="5,5,0,0"/>
+                        <Separator Grid.ColumnSpan="2" Grid.Row="6"/>
+                        <Label Grid.Column="0" Grid.Row="7" Content="{Binding [Vessel], Source={StaticResource L10N}}"/>
+                        <Label Grid.Column="1" Grid.Row="7" Content="{Binding ReviewStatus.SelectedPatientCase.Vessel, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}"/>
+                        <Label Grid.Column="0" Grid.Row="8" Content="{Binding [Physician], Source={StaticResource L10N}}"/>
+                        <Label Grid.Column="1" Grid.Row="8" Content="{Binding ReviewStatus.SelectedPatientCase.PhysicianName}"/>
+                        <Label Grid.Column="0" Grid.Row="9" Content="{Binding [Accession Number], Source={StaticResource L10N}}"/>
+                        <Label Grid.Column="1" Grid.Row="9" Content="{Binding ReviewStatus.SelectedPatientCase.AccessionNumber}"/>
+                        <Label Grid.Column="0" Grid.Row="10" Content="{Binding [Comment], Source={StaticResource L10N}}"/>
+                        <TextBlock Grid.Column="1" Grid.Row="10" Text="{Binding ReviewStatus.SelectedPatientCase.Comment}" TextWrapping="Wrap" Padding="5,5,0,0"/>
                     </Grid>
                 </StackPanel>
             </Grid>
-            <Grid Grid.Row="1" HorizontalAlignment="Left" Width="{x:Static const:Constants.SideBarCollapseSize}" Visibility="{Binding ExpandLeftDownMenu, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+            <Grid Grid.Row="2" HorizontalAlignment="Left" Width="{x:Static const:Constants.SideBarCollapseSize}" Visibility="{Binding ExpandLeftDownMenu, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition/>

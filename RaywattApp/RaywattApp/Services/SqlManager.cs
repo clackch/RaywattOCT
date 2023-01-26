@@ -197,6 +197,12 @@ namespace RaywattApp.Services
 
             string commandText = SqlQuery.GetQuery("SelectPatientCaseList");
 
+            if (sqlParameters.ContainsKey("procedure"))
+            {
+                commandText += "AND procedure=@procedure ";
+            }
+            commandText += "ORDER BY create_date DESC";
+
             return _databaseService.GetDatas<PatientCase>(commandText, sqlParameters);
         }
 

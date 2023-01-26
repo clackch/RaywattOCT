@@ -5,7 +5,7 @@ using System;
 
 namespace RaywattApp.Models
 {
-    public partial class PatientCase : ObservableValidator
+    public partial class PatientCase : ObservableObject
     {
         [ObservableProperty]
         private string id;
@@ -73,12 +73,6 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private string? _pullbackType;
-
-        [ObservableProperty]
-        private int _brightness;
-
-        [ObservableProperty]
-        private int _contrast;
 
         [ObservableProperty]
         private bool _angioCoRegistration;
