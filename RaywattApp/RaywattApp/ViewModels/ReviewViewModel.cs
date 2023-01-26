@@ -225,6 +225,7 @@ namespace RaywattApp.ViewModels
 
                 SetMeasurements(PatientCase.Id);
                 RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+                SetCrossSectionBackground(0, Constants.BackgroundColor);
             }
 
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
@@ -477,6 +478,8 @@ namespace RaywattApp.ViewModels
         private void ToggleAngio()
         {
             IsAngioOn = !IsAngioOn;
+
+            SetCrossSectionBackground(0, (IsAngioOn) ? Constants.CardBackgroundColor : Constants.BackgroundColor);
 
             if (IsAngioOn)
             {
