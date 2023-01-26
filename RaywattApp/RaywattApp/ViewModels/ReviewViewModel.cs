@@ -51,7 +51,7 @@ namespace RaywattApp.ViewModels
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewViewModel));
 
-        private double degree = 90;
+        private double degree;
         public double Degree
         {
             get { return degree; }
@@ -219,8 +219,9 @@ namespace RaywattApp.ViewModels
                     ReviewStatus = new ReviewStatus();
                 }
                 ReviewStatus.CurrentPage = Constants.ReviewPage;
+                Degree = PatientCase.IndicatorDegree;
 
-                SetMeasurements(PatientCase.Id);
+                SetAnnotation(PatientCase.Id);
             }
 
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
@@ -343,6 +344,8 @@ namespace RaywattApp.ViewModels
             sqlParameters["vessel"] = PatientCase.Vessel;
             sqlParameters["procedure"] = PatientCase.Procedure;
             sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
+            PatientCase.IndicatorDegree = Degree;
+            sqlParameters["indicator_degree"] = PatientCase.IndicatorDegree;
             sqlParameters["preset_name"] = PatientCase.PresetName;
             sqlParameters["calcium_threshold"] = PatientCase.CalciumThreshold;
             sqlParameters["expansion_calculation"] = PatientCase.ExpansionCalculation;
@@ -379,7 +382,7 @@ namespace RaywattApp.ViewModels
             ReviewStatus.IsMeasurementOn = !ReviewStatus.IsMeasurementOn;
         }
 
-        private void SetMeasurements(string id)
+        private void SetAnnotation(string id)
         {
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
