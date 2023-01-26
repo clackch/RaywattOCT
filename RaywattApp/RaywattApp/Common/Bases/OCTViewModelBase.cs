@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Media.Imaging;
 using static RaywattOCT.RayCoreWrapper;
+using Point = OpenCvSharp.Point;
 
 namespace RaywattApp.Common.Bases
 {
@@ -20,6 +21,9 @@ namespace RaywattApp.Common.Bases
 
         protected Mat[] imgCrossSection = new Mat[2];
         protected FrameInfo[] crossSectionFrameInfo = new FrameInfo[2];
+        protected Scalar[] crossSectionBackground = new Scalar[2];
+        protected Mat imgCrossSectionBackground;
+        protected Mat imgCrossSectionMask;
 
         [ObservableProperty]
         private BitmapSource _longitudeImage;
@@ -37,6 +41,9 @@ namespace RaywattApp.Common.Bases
 
         public OCTViewModelBase()
         {
+            for (int i = 0; i < crossSectionBackground.Length; i++) {
+                crossSectionBackground[i] = new Scalar(0, 0, 0);
+            }
         }
 
         /// <summary>
@@ -60,6 +67,11 @@ namespace RaywattApp.Common.Bases
         private void OnRecvCrossSection(int session, IntPtr data, int width, int height, int ch, int frameInfo)
         {
             Mat imgRecv = CommonUtil.ByteMemoryToCvMat(data, width, height, ch);
+
+            // Allocate at first
+            imgCrossSectionMask = (imgCrossSectionMask == null) ? GenerateMask(imgRecv) : imgCrossSectionMask;
+            imgCrossSectionBackground = (imgCrossSectionBackground == null) ? imgRecv.EmptyClone() : imgCrossSectionBackground;
+
             imgCrossSection[session] = imgRecv.Clone();
             crossSectionFrameInfo[session] = new FrameInfo(frameInfo);
         }
@@ -73,19 +85,24 @@ namespace RaywattApp.Common.Bases
 
         protected bool DrawCrossSectionImage()
         {
-            if (imgCrossSection[0] == null) return false;
+            if (imgCrossSection[0] == null || imgCrossSectionBackground == null || imgCrossSectionMask == null) return false;
 
-            CrossSectionImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgCrossSection[0]);
+            CrossSectionImage = DrawCrossSectionWithBackground(imgCrossSection[0], crossSectionBackground[0]);
 
             return true;
         }
         protected bool DrawCrossSectionForCompare()
         {
-            if (imgCrossSection[1] == null) return false;
+            if (imgCrossSection[1] == null || imgCrossSectionBackground == null || imgCrossSectionMask == null) return false;
 
-            CrossSectionForCompare = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgCrossSection[1]);
+            CrossSectionForCompare = DrawCrossSectionWithBackground(imgCrossSection[1], crossSectionBackground[1]);
 
             return true;
+        }
+        protected void SetCrossSectionBackground(uint session, int rgbCode) {
+            if (session >= crossSectionBackground.Length) return;
+
+            crossSectionBackground[session] = new Scalar(rgbCode & 0xFF, (rgbCode >> 8) & 0xFF, (rgbCode >> 16) & 0xFF);
         }
         protected bool DrawLongitudeImage()
         {
@@ -96,6 +113,28 @@ namespace RaywattApp.Common.Bases
 
             LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgLongitude);
             return true;
+        }
+
+        private BitmapSource DrawCrossSectionWithBackground(Mat image, Scalar background)
+        {
+            // Background Masking
+            imgCrossSectionBackground.SetTo(background);
+            Cv2.CopyTo(imgCrossSectionBackground, image, imgCrossSectionMask);
+
+            BitmapSource bitmap = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(image);
+
+            return bitmap;
+        }
+
+        private Mat GenerateMask(Mat image)
+        {
+            Mat mask = image.EmptyClone();
+            Point center = new Point(mask.Width / 2, mask.Height / 2);
+
+            mask.SetTo(Scalar.White);
+            Cv2.Circle(mask, center, mask.Width / 2, Scalar.Black, -1);
+
+            return mask;
         }
     }
 }
