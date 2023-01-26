@@ -1118,7 +1118,7 @@ LRESULT COCTSystem::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 
 		image = pImaging->GetCircleImage();
 
-		if (m_pThreadUpdateCutView == nullptr) {
+		if (m_pThreadUpdateCutView == nullptr && pImaging->GetSession() == SESSION_REVIEW) {
 			updateCutView(nTotalFrame);
 		}
 	}
