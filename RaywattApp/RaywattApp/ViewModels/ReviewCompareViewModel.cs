@@ -6,13 +6,17 @@ using RaywattApp.Services;
 using RaywattOCT;
 using System;
 using System.Collections.Generic;
+using System.Windows;
 using System.Windows.Navigation;
+using System.Windows.Threading;
 
 namespace RaywattApp.ViewModels
 {
     public partial class ReviewCompareViewModel : ReviewViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewCompareViewModel));
+
+        private DispatcherTimer timerUpdateImage = new DispatcherTimer();
 
         public ReviewCompareViewModel(SqlManager sqlManager, IDialogService dialogService) : base(sqlManager, dialogService)
         {
@@ -37,7 +41,14 @@ namespace RaywattApp.ViewModels
                 Patient = (Patient)data["patient"];
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
+
+                SetCrossSectionBackground(0, Constants.CardBackgroundColor);
+                SetCrossSectionBackground(1, Constants.BackgroundColor);
             }
+
+            timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
+            timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
+            timerUpdateImage.Start();
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -45,6 +56,9 @@ namespace RaywattApp.ViewModels
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
             Save();
+
+            if (timerUpdateImage.IsEnabled)
+                timerUpdateImage.Stop();
         }
 
         protected override void Save()
@@ -72,6 +86,11 @@ namespace RaywattApp.ViewModels
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
             if (nRows == 0)
                 _log.Error("Update Error");
+        }
+        private void timerFuncUpdateImage(object sender, EventArgs e)
+        {
+            DrawCrossSectionImage();
+            DrawCrossSectionForCompare();
         }
     }
 }
