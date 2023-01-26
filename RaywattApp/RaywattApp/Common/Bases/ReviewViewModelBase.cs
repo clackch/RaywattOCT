@@ -44,7 +44,7 @@ namespace RaywattApp.Common.Bases
         [ObservableProperty]
         private bool _expandRightMenu;
 
-        private int frameNumber = 0;
+        private int frameNumber = -1;
         public int FrameNumber
         {
             get { return frameNumber; }
