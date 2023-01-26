@@ -496,9 +496,9 @@ namespace RaywattApp.ViewModels
         {
             if (DrawCrossSectionImage())
             {
-                if (!IndicatorLongitude.isCaptured) updateNavigator(crossSectionFrameInfo.curFrame, crossSectionFrameInfo.totalFrame);
+                if (!IndicatorLongitude.isCaptured) updateNavigator(crossSectionFrameInfo[0].curFrame, crossSectionFrameInfo[0].totalFrame);
 
-                FrameNumber = crossSectionFrameInfo.curFrame;
+                FrameNumber = crossSectionFrameInfo[0].curFrame;
                 MeasurementFrameNumber = FrameNumber;
             }
             if (DrawLongitudeImage())

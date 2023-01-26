@@ -76,6 +76,7 @@ RayError COCTSystem::Start() {
 	CUtility::StartThread(threadService, m_pThreadService, this);
 
 	m_pImagingRealtime = CImagingSession::CreateColorImaging(this);
+	m_pImagingRealtime->SetSession(SESSION_REVIEW);
 	m_pImagingRealtime->Start();
 
 	m_pCutView = new CCutViewManager();
@@ -1127,7 +1128,7 @@ LRESULT COCTSystem::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 		image = pImaging->GetCircleImage();
 	}
 
-	if (m_cbCrossSection != nullptr) m_cbCrossSection(image.data, image.cols, image.rows, image.channels(), nFrameInfo);
+	if (m_cbCrossSection != nullptr) m_cbCrossSection(pImaging->GetSession(), image.data, image.cols, image.rows, image.channels(), nFrameInfo);
 
 	return NOERROR;
 }
@@ -1160,7 +1161,7 @@ void COCTSystem::updateCutView(int drawSamples) {
 	cv::copyTo(imgEdit, imgDisplay, imgMask);
 	cv::resize(imgDisplay, imgResize, sizeInterpolation);
 
-	if (m_cbLongitude != nullptr) m_cbLongitude(imgResize.data, imgResize.cols, imgResize.rows, imgResize.channels(), nFrameInfo);
+	if (m_cbLongitude != nullptr) m_cbLongitude(SESSION_REVIEW, imgResize.data, imgResize.cols, imgResize.rows, imgResize.channels(), nFrameInfo);
 }
 
 void COCTSystem::closeAllSessions() {

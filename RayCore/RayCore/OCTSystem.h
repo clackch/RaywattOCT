@@ -17,7 +17,7 @@
 #define CUTVIEW_INTERPOLATION_SCALE		5.7
 
 typedef enum {
-	SESSION_REVIEW = 0,
+	SESSION_REVIEW = 0,	// RealTime, Review
 	SESSION_COMPARE,
 	MAX_SESSION_NUM
 }SessionType;

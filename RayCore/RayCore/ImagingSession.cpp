@@ -86,6 +86,7 @@ CImagingSession* CImagingSession::createSession(CMessageService* pMsg, int nSess
 
 	pSession->m_pDataManager = pData;
 	pSession->m_pImaging = CreateColorImaging(pMsg);
+	pSession->m_pImaging->SetSession(nSession);
 	pSession->m_pSimDevice = new CSimulateDevice(pData);
 	pSession->m_pSimDevice->InitDevice();
 	pSession->m_pSimDevice->SetImaging(pSession->m_pImaging);

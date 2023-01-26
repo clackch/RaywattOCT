@@ -2,6 +2,7 @@
 using OpenCvSharp;
 using RaywattApp.Common.Util;
 using System;
+using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Media.Imaging;
 using static RaywattOCT.RayCoreWrapper;
@@ -14,8 +15,11 @@ namespace RaywattApp.Common.Bases
         [ObservableProperty]
         private BitmapSource _crossSectionImage;
 
-        protected Mat imgCrossSection;
-        protected FrameInfo crossSectionFrameInfo;
+        [ObservableProperty]
+        private BitmapSource _crossSectionForCompare;
+
+        protected Mat[] imgCrossSection = new Mat[2];
+        protected FrameInfo[] crossSectionFrameInfo = new FrameInfo[2];
 
         [ObservableProperty]
         private BitmapSource _longitudeImage;
@@ -53,14 +57,14 @@ namespace RaywattApp.Common.Bases
                 Marshal.GetFunctionPointerForDelegate(CBLongitude));
         }
 
-        private void OnRecvCrossSection(IntPtr data, int width, int height, int ch, int frameInfo)
+        private void OnRecvCrossSection(int session, IntPtr data, int width, int height, int ch, int frameInfo)
         {
             Mat imgRecv = CommonUtil.ByteMemoryToCvMat(data, width, height, ch);
-            imgCrossSection = imgRecv.Clone();
-            crossSectionFrameInfo = new FrameInfo(frameInfo);
+            imgCrossSection[session] = imgRecv.Clone();
+            crossSectionFrameInfo[session] = new FrameInfo(frameInfo);
         }
 
-        private void OnRecvLongitude(IntPtr data, int width, int height, int ch, int frameInfo)
+        private void OnRecvLongitude(int session, IntPtr data, int width, int height, int ch, int frameInfo)
         {
             Mat imgRecv = CommonUtil.ByteMemoryToCvMat(data, width, height, ch);
             imgLongitude = imgRecv.Clone();
@@ -69,9 +73,18 @@ namespace RaywattApp.Common.Bases
 
         protected bool DrawCrossSectionImage()
         {
-            if (imgCrossSection == null) return false;
+            if (imgCrossSection[0] == null) return false;
 
-            CrossSectionImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgCrossSection);
+            CrossSectionImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgCrossSection[0]);
+
+            return true;
+        }
+        protected bool DrawCrossSectionForCompare()
+        {
+            if (imgCrossSection[1] == null) return false;
+
+            CrossSectionForCompare = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgCrossSection[1]);
+
             return true;
         }
         protected bool DrawLongitudeImage()
