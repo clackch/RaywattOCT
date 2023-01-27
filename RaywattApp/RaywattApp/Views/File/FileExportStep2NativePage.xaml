@@ -42,7 +42,7 @@
                 <Label Content="{Binding [System File Options], Source={StaticResource L10N}}"/>
             </StackPanel>
             <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Margin="10">
-                <CheckBox Grid.Column="1" IsChecked="{Binding FileExport.RemoveWhenComplete}" Content="{Binding [Remove when Complete], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
+                <CheckBox Grid.Column="1" IsChecked="{Binding FileExport.RemoveWhenComplete}" IsEnabled="{Binding FileExport.IsFromReview, Converter={StaticResource InverseBooleanConverter}}" Content="{Binding [Remove when Complete], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
             </Border>
 
             <StackPanel Grid.Row="10">

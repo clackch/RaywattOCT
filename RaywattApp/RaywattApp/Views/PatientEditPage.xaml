@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:RaywattApp.Views"
       xmlns:const="clr-namespace:RaywattApp.Common.Bases"
       mc:Ignorable="d" 
-      d:DesignHeight="994" d:DesignWidth="1280"
+      d:DesignHeight="1024" d:DesignWidth="1280"
       Title="PatientEditPage">
 
     <Grid>

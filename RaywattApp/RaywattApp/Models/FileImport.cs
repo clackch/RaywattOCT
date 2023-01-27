@@ -2,7 +2,7 @@
 
 namespace RaywattApp.Models
 {
-    public partial class FileImport : ObservableValidator
+    public partial class FileImport : ObservableObject
     {
 
     }

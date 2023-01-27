@@ -22,6 +22,7 @@
         public const string ReviewComparePage = "Views/ReviewComparePage.xaml";
         public const string ReviewFfrPage = "Views/ReviewFfrPage.xaml";
         public const string ReviewPresetPage = "Views/ReviewPresetPage.xaml";
+        public const string ReviewAngioCoRegPage = "Views/ReviewAngioCoRegPage.xaml";
         //Setting
         public const string SettingAcquisitionPage = "Views/Setting/SettingAcquisitionPage.xaml";
         public const string SettingLocalizationPage = "Views/Setting/SettingLocalizationPage.xaml";

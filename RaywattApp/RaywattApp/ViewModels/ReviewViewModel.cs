@@ -15,6 +15,8 @@ using RaywattApp.Common.Annotation.Models;
 using System.Windows;
 using Newtonsoft.Json;
 using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.Messaging;
+using RaywattApp.Common.Messages;
 
 namespace RaywattApp.ViewModels
 {
@@ -49,7 +51,7 @@ namespace RaywattApp.ViewModels
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewViewModel));
 
-        private double degree = 90;
+        private double degree;
         public double Degree
         {
             get { return degree; }
@@ -78,15 +80,6 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private string _playPauseState;
 
-        [ObservableProperty]
-        private bool _isLumenProfile;
-
-        [ObservableProperty]
-        private bool _isContourOn;
-
-        [ObservableProperty]
-        private bool _isAngioOn;
-
         private double _rightSideBarExpand;
         public double RightSideBarExpand
         {
@@ -96,16 +89,13 @@ namespace RaywattApp.ViewModels
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer();
 
-        [ObservableProperty]
-        private Visibility _visibleMeasurement;
-
         private int measurementFrameNumber = -1;
         public int MeasurementFrameNumber 
         { 
             get { return measurementFrameNumber; } 
             set 
             { 
-                if(VisibleMeasurement == Visibility.Visible)
+                if(ReviewStatus.IsMeasurementOn)
                 {
                     measurementFrameNumber = value;
                     OnPropertyChanged(nameof(MeasurementFrameNumber));
@@ -127,13 +117,10 @@ namespace RaywattApp.ViewModels
         private List<Measurement> measurements;
         public List<Measurement> Measurements { get { return measurements; } set { measurements = value; OnPropertyChanged(nameof(Measurements)); } }
 
-        [ObservableProperty]
-        private ObservableCollection<Bookmark> bookmarks;
-
-        private ICommand _measurementCommand;
-        public ICommand MeasurementCommand
+        private ICommand _toggleMeasurementCommand;
+        public ICommand ToggleMeasurementCommand
         {
-            get { return this._measurementCommand ?? (this._measurementCommand = new RelayCommand(ToggleMeasurement, CanToggleMeasurement)); }
+            get { return this._toggleMeasurementCommand ?? (this._toggleMeasurementCommand = new RelayCommand(ToggleMeasurement, CanToggleMeasurement)); }
         }
 
         private ICommand _cmdPlayback;
@@ -169,19 +156,19 @@ namespace RaywattApp.ViewModels
         private ICommand _coRegistrationCommand;
         public ICommand CoRegistrationCommand
         {
-            get { return this._coRegistrationCommand ?? (this._coRegistrationCommand = new RelayCommand(CoRegistration, CanCoRegistration)); }
+            get { return this._coRegistrationCommand ?? (this._coRegistrationCommand = new RelayCommand(CoRegistration)); }
         }
 
-        private ICommand _toggleContourCommand;
-        public ICommand ToggleContourCommand
+        private ICommand _toggleContourStentCommand;
+        public ICommand ToggleContourStentCommand
         {
-            get { return this._toggleContourCommand ?? (this._toggleContourCommand = new RelayCommand(ToggleContour)); }
+            get { return this._toggleContourStentCommand ?? (this._toggleContourStentCommand = new RelayCommand(ToggleContourStent)); }
         }
 
         private ICommand _toggleAngioCommand;
         public ICommand ToggleAngioCommand
         {
-            get { return this._toggleAngioCommand ?? (this._toggleAngioCommand = new RelayCommand(ToggleAngio)); }
+            get { return this._toggleAngioCommand ?? (this._toggleAngioCommand = new RelayCommand<bool>(ToggleAngio)); }
         }
 
         public ReviewViewModel(SqlManager sqlManager, IDialogService dialogService) : base(sqlManager, dialogService)
@@ -197,13 +184,9 @@ namespace RaywattApp.ViewModels
             IndicatorLongitude.IsVisible = Visibility.Collapsed;
             IndicatorLongitude.PropertyChanged += OnIndicatorLongitudeMoved;
 
-            VisibleMeasurement = Visibility.Collapsed;
             ExpandLeftUpMenu = true;
             ExpandLeftDownMenu = true;
             ExpandRightMenu = true;
-            IsLumenProfile = true;
-            IsContourOn = false;
-            IsAngioOn = false;
             RightSideBarExpand = Constants.RightSideBarExpandDefaultSize;
 
             updatePlayPauseState();
@@ -222,10 +205,26 @@ namespace RaywattApp.ViewModels
                 Patient = (Patient)data["patient"];
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
+                if (data.ContainsKey("reviewStatus"))
+                {
+                    ReviewStatus = (ReviewStatus)data["reviewStatus"];
+                    ToggleAngio(ReviewStatus.IsAngioOn);
+                    if (ReviewStatus.IsLumenProfile)
+                        IndicatorCrossSection.IsVisible = Visibility.Collapsed;
+                    else
+                        IndicatorCrossSection.IsVisible = Visibility.Visible;
+                }
+                else
+                {
+                    ReviewStatus = new ReviewStatus();
+                }
+                ReviewStatus.CurrentPage = Constants.ReviewPage;
+                Degree = PatientCase.IndicatorDegree;
 
-                SetMeasurements(PatientCase.Id);
-                RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
-                SetCrossSectionBackground(0, Constants.BackgroundColor);
+                SetAnnotation(PatientCase.Id);
+                
+                RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);              
+                SetCrossSectionBackground(0, (ReviewStatus.IsAngioOn) ? Constants.CardBackgroundColor : Constants.BackgroundColor);
             }
 
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
@@ -265,7 +264,7 @@ namespace RaywattApp.ViewModels
             {
                 double pauseState = RayGetProperty(Property.IsPaused);
                 if(pauseState == 1)
-                    VisibleMeasurement = Visibility.Collapsed;
+                    ReviewStatus.IsMeasurementOn = false;
 
                 result = (RayError)RayPlayPause();
                 if (result == RayError.OK)
@@ -281,7 +280,7 @@ namespace RaywattApp.ViewModels
 
             if (indicator.isCaptured)
             {
-                if (IsAngioOn)
+                if (ReviewStatus.IsAngioOn)
                 {
                     crossSectionWidth = crossSectionSmallWidth;
                     crossSectionHeight = crossSectionSmallHeight;
@@ -347,9 +346,9 @@ namespace RaywattApp.ViewModels
             sqlParameters["comment"] = PatientCase.Comment;
             sqlParameters["vessel"] = PatientCase.Vessel;
             sqlParameters["procedure"] = PatientCase.Procedure;
-            sqlParameters["brightness"] = PatientCase.Brightness;
-            sqlParameters["contrast"] = PatientCase.Contrast;
             sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
+            PatientCase.IndicatorDegree = Degree;
+            sqlParameters["indicator_degree"] = PatientCase.IndicatorDegree;
             sqlParameters["preset_name"] = PatientCase.PresetName;
             sqlParameters["calcium_threshold"] = PatientCase.CalciumThreshold;
             sqlParameters["expansion_calculation"] = PatientCase.ExpansionCalculation;
@@ -367,7 +366,7 @@ namespace RaywattApp.ViewModels
 
         private bool CanToggleMeasurement()
         {
-            return !IsAngioOn;
+            return !ReviewStatus.IsAngioOn;
         }
 
         private void ToggleMeasurement()
@@ -383,17 +382,10 @@ namespace RaywattApp.ViewModels
                 }
             }
 
-            if (VisibleMeasurement == Visibility.Collapsed)
-            {
-                VisibleMeasurement = Visibility.Visible;
-            }
-            else
-            {
-                VisibleMeasurement = Visibility.Collapsed;
-            }
+            ReviewStatus.IsMeasurementOn = !ReviewStatus.IsMeasurementOn;
         }
 
-        private void SetMeasurements(string id)
+        private void SetAnnotation(string id)
         {
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
@@ -444,55 +436,56 @@ namespace RaywattApp.ViewModels
         {
             if (param.Equals(Constants.LongitudeProfile))
             {
-                if(IsLumenProfile)
+                if(ReviewStatus.IsLumenProfile)
                     return;
 
                 IndicatorCrossSection.IsVisible = Visibility.Collapsed;
-                IsLumenProfile = true;
+                ReviewStatus.IsLumenProfile = true;
             }
             else
             {
-                if (!IsLumenProfile)
+                if (!ReviewStatus.IsLumenProfile)
                     return;
 
                 IndicatorCrossSection.IsVisible = Visibility.Visible;
-                IsLumenProfile = false;
+                ReviewStatus.IsLumenProfile = false;
             }
-        }
-
-        private bool CanCoRegistration()
-        {
-            return IsAngioOn;
         }
 
         private void CoRegistration()
         {
             _log.Debug("CoRegistration");
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = Patient;
+            parameter["patientCase"] = PatientCase;
+            parameter["prevStatus"] = PrevStatus;
+            parameter["reviewStatus"] = ReviewStatus;
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewAngioCoRegPage) { Parameter = parameter });
         }
 
-        private void ToggleContour()
+        private void ToggleContourStent()
         {
-            IsContourOn = !IsContourOn;
+            ReviewStatus.IsContourStentOn = !ReviewStatus.IsContourStentOn;
         }
 
-        private void ToggleAngio()
+        private void ToggleAngio(bool isAngioOn)
         {
-            IsAngioOn = !IsAngioOn;
+            ReviewStatus.IsAngioOn = isAngioOn;
 
-            SetCrossSectionBackground(0, (IsAngioOn) ? Constants.CardBackgroundColor : Constants.BackgroundColor);
+            SetCrossSectionBackground(0, (ReviewStatus.IsAngioOn) ? Constants.CardBackgroundColor : Constants.BackgroundColor);
 
-            if (IsAngioOn)
+            if (ReviewStatus.IsAngioOn)
             {
                 RightSideBarExpand = Constants.RightSideBarExpandAngioSize;
-                VisibleMeasurement = Visibility.Collapsed;
+                ReviewStatus.IsMeasurementOn = false;
             }
             else
             {
                 RightSideBarExpand = Constants.RightSideBarExpandDefaultSize;
             }
 
-            (CoRegistrationCommand as RelayCommand).NotifyCanExecuteChanged();
-            (MeasurementCommand as RelayCommand).NotifyCanExecuteChanged();
+            (ToggleMeasurementCommand as RelayCommand).NotifyCanExecuteChanged();
         }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)

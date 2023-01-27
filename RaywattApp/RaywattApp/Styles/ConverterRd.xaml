@@ -47,4 +47,7 @@
     <!-- Group Name Converter -->
     <converters:GroupNameConverter x:Key="GroupNameConverter" />
 
+    <!-- Inverse Boolean Converter -->
+    <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" /> 
+
 </ResourceDictionary>

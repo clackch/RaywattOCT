@@ -84,7 +84,7 @@ namespace RaywattApp.ViewModels
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = this.Patient;
             parameter["prevStatus"] = this.PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/LiveViewPage.xaml") { Parameter = parameter });
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.LiveViewPage) { Parameter = parameter });
         }
 
         private void ManualZoomIn(bool zoomIn)

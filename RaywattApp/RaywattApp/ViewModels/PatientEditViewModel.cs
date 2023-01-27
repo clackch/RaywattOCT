@@ -91,7 +91,7 @@ namespace RaywattApp.ViewModels
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = parameter });
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientDetailPage) { Parameter = parameter });
         }
 
         private void SavePatientEdit()
@@ -143,7 +143,7 @@ namespace RaywattApp.ViewModels
                 parameter["patient"] = PatientEdit;
                 SetDetailStatusInit();
                 parameter["prevStatus"] = PrevStatus;
-                WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientDetailPage.xaml") { Parameter = parameter });
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientDetailPage) { Parameter = parameter });
             }
         }
 

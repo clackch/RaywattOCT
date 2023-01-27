@@ -35,6 +35,8 @@ namespace RaywattApp.ViewModels
                 Patient = (Patient)data["patient"];
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
+                ReviewStatus = (ReviewStatus)data["reviewStatus"];
+                ReviewStatus.CurrentPage = Constants.Review3dPage;
             }
         }
 

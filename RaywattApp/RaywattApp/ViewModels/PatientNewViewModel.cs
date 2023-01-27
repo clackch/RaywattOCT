@@ -89,14 +89,14 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Cancel");
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientListPage.xaml"));
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
         }
 
         private void Back()
         {
             _log.Debug("Back");
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/PatientListPage.xaml") { Parameter = PrevStatus });
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage) { Parameter = PrevStatus });
         }
 
         private bool CanNewRecording()
@@ -157,7 +157,7 @@ namespace RaywattApp.ViewModels
                 parameter["patient"] = Patient;
                 SetListStatusInit();
                 parameter["prevStatus"] = PrevStatus;
-                WeakReferenceMessenger.Default.Send(new NavigationMessage("Views/RecordingSetupPage.xaml") { Parameter = parameter });
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
             }
             else
             {

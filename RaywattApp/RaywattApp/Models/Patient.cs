@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace RaywattApp.Models
 {
-    public partial class Patient : ObservableValidator
+    public partial class Patient : ObservableObject
     {
         private string _id;
         public string Id

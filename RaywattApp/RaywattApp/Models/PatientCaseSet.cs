@@ -1,11 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using RaywattApp.Common.Bases;
-using RaywattApp.Common.Util;
 using System;
 
 namespace RaywattApp.Models
 {
-    public partial class PatientCasePreset : ObservableValidator
+    public partial class PatientCasePreset : ObservableObject
     {
         [ObservableProperty]
         private string? id;
