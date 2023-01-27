@@ -77,6 +77,9 @@ namespace RaywattApp.Models
         [ObservableProperty]
         private bool _angioCoRegistration;
 
+        [ObservableProperty]
+        private double _indicatorDegree;
+
         private string? _presetName;
         public string PresetName
         {

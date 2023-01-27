@@ -202,6 +202,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["image"] = PatientCase.Image;
             sqlParameters["pullback_type"] = PatientCase.PullbackType;
             sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
+            sqlParameters["indicator_degree"] = PatientCase.IndicatorDegree;
             sqlParameters["preset_name"] = PatientCasePreset.PresetName;
             sqlParameters["calcium_threshold"] = PatientCasePreset.CalciumThreshold;
             sqlParameters["expansion_calculation"] = PatientCasePreset.ExpansionCalculation;

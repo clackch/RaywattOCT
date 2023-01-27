@@ -115,6 +115,7 @@ namespace RaywattApp.ViewModels
             PatientCase.Image = "";
             PatientCase.PullbackType = "LONG";
             PatientCase.AngioCoRegistration = false;
+            PatientCase.IndicatorDegree = 90;
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;

@@ -313,6 +313,7 @@ namespace RaywattApp.ViewModels.File
                         sqlParameters["procedure"] = patientCase.Procedure;
                         sqlParameters["pullback_type"] = patientCase.PullbackType;
                         sqlParameters["angio_co_registration"] = patientCase.AngioCoRegistration;
+                        sqlParameters["indicator_degree"] = patientCase.IndicatorDegree;
                         sqlParameters["preset_name"] = patientCase.PresetName;
                         sqlParameters["calcium_threshold"] = patientCase.CalciumThreshold;
                         sqlParameters["expansion_calculation"] = patientCase.ExpansionCalculation;
@@ -480,6 +481,7 @@ namespace RaywattApp.ViewModels.File
                             patientCase.Image = GetStrValue(caseObj, "Image");
                             patientCase.PullbackType = GetStrValue(caseObj, "PullbackType");
                             patientCase.AngioCoRegistration = GetBoolValue(caseObj, "AngioCoRegistration");
+                            patientCase.IndicatorDegree = GetDoubleValue(caseObj, "IndicatorDegree");
                             patientCase.PresetName = GetStrValue(caseObj, "PresetName");
                             patientCase.CalciumThreshold = GetIntValue(caseObj, "CalciumThreshold");
                             patientCase.ExpansionCalculation = GetStrValue(caseObj, "ExpansionCalculation");
