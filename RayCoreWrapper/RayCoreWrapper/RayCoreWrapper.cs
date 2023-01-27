@@ -113,9 +113,7 @@ namespace RaywattOCT
         [DllImport("RayCore.dll")]
         public static extern int RayStartReview(string filePath);
         [DllImport("RayCore.dll")]
-        public static extern int RayAddReviewSession(string filePath);
-        [DllImport("RayCore.dll")]
-        public static extern int RayEndReviewSession(int session);
+        public static extern int RayStartCompare(string filePath);
         [DllImport("RayCore.dll")]
         public static extern int RayEndReview();
         [DllImport("RayCore.dll")]

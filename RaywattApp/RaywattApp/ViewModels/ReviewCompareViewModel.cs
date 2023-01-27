@@ -7,10 +7,10 @@ using RaywattApp.Models;
 using RaywattApp.Services;
 using System;
 using System.Collections.Generic;
-using System.Windows;
 using System.Windows.Input;
 using System.Windows.Navigation;
 using System.Windows.Threading;
+using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels
 {
@@ -65,10 +65,19 @@ namespace RaywattApp.ViewModels
                 ReviewStatus.CurrentPage = Constants.ReviewComparePage;
 
                 if (ReviewStatus.SelectedPatientCase == null)
+                {
                     GetPatientCase(true);
+
+                    if (ReviewStatus.SelectedPatientCase != null)
+                    {
+                        RayStartCompare(ReviewStatus.SelectedPatientCase.Image);
+                    }
+                }
                 else
+                {
                     GetPatientCase(false);
-                    
+                }
+
                 SetCrossSectionBackground(0, Constants.CardBackgroundColor);
                 SetCrossSectionBackground(1, Constants.BackgroundColor);
             }
@@ -132,9 +141,19 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("CaseSelectOk");
 
+            // avoid duplication
+            if (ReviewStatus.SelectedPatientCase != null && patientCase != null)
+            {
+                if (ReviewStatus.SelectedPatientCase.Id == patientCase.Id) return;
+            }
+
             ReviewStatus.SelectedPatientCase = patientCase;
             DisplayPatientCase = patientCase;
             ExpandLeftUpMenu = false;
+
+            if (ReviewStatus.SelectedPatientCase != null) {
+                RayStartCompare(ReviewStatus.SelectedPatientCase.Image);                
+            }
         }
 
         private void GetPatientCase(bool isNullPatientCase)
@@ -144,7 +163,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["procedure"] = "$001";//Pre-PCI
 
             PatientCases = _sqlManager.SelectPatientCaseList(sqlParameters);
-            if(PatientCases != null && PatientCases.Count > 1)
+            if(PatientCases != null && PatientCases.Count > 0)
             {
                 if(isNullPatientCase)
                 {
