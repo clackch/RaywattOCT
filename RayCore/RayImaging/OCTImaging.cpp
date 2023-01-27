@@ -476,7 +476,7 @@ UINT COCTImaging::threadRender(LPVOID param) {
 
 			if (pMsg != nullptr) {
 				int nFrameInfo = (pImaging->m_nCurFrame << 16) | (pImaging->m_nTotalFrame);
-				pMsg->postMessage(WM_PROCESS_OCT_DONE, (WPARAM) pImaging, nFrameInfo);
+				pMsg->postMessage(WM_PROCESS_OCT_DONE, pImaging->GetSession(), nFrameInfo);
 			}
 		}
 	}
