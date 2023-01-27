@@ -26,7 +26,7 @@ namespace RaywattOCT
             CurrentState = 1,
             Brightness,
             Contrast,
-            BackgroundColor,
+            LongitudeBackgroundColor,
             Degree,
             MotorOnOff,
             IsPaused,
@@ -84,7 +84,7 @@ namespace RaywattOCT
         public static double ContrastMax = 3.0f;
 
         public delegate void CallbackFunction(int request, int response);
-        public delegate void CallbackFunctionWithImage(IntPtr data, int width, int height, int channel, int frameInfo);
+        public delegate void CallbackFunctionWithImage(int session, IntPtr data, int width, int height, int channel, int frameInfo);
 
         [DllImport("RayCore.dll")]
         public static extern int RayStartSystem();
@@ -114,6 +114,8 @@ namespace RaywattOCT
         public static extern int RayStartReview(string filePath);
         [DllImport("RayCore.dll")]
         public static extern int RayAddReviewSession(string filePath);
+        [DllImport("RayCore.dll")]
+        public static extern int RayEndReviewSession(int session);
         [DllImport("RayCore.dll")]
         public static extern int RayEndReview();
         [DllImport("RayCore.dll")]

@@ -81,7 +81,6 @@ namespace RaywattApp.ViewModels
                 this.PrevStatus = (PrevStatus)data["prevStatus"];
 
                 RayShowCalibrationGuide(true);
-                RaySetProperty(Property.BackgroundColor, Constants.BackgroundColor);
 
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
@@ -135,10 +134,7 @@ namespace RaywattApp.ViewModels
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {
-            if (imgCrossSection != null)
-            {
-                CrossSectionImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgCrossSection);
-            }
+            DrawCrossSectionImage();
         }
 
         private void leaveToPage(string viewPage)

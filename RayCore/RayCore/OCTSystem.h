@@ -17,7 +17,7 @@
 #define CUTVIEW_INTERPOLATION_SCALE		5.7
 
 typedef enum {
-	SESSION_REVIEW = 0,
+	SESSION_REVIEW = 0,	// RealTime, Review
 	SESSION_COMPARE,
 	MAX_SESSION_NUM
 }SessionType;
@@ -80,7 +80,7 @@ private:
 	double m_fBrightness;
 	double m_fContrast;
 	double m_fDegree;
-	cv::Scalar m_backgroundColor;
+	cv::Scalar m_backgroundColor;	// for longitude image
 	double m_fLowLevel;
 	double m_fHighLevel;
 
@@ -103,6 +103,7 @@ public:
 	RayError UnloadCatheter();
 	RayError StartReview(char* strFilePath);
 	RayError AddReviewSession(char* strFilePath);
+	RayError EndReviewSession(unsigned int nSession);
 	RayError EndReview();
 	RayError StartLiveView();
 	RayError StopLiveView();
@@ -121,8 +122,8 @@ public:
 	RayError SetContrast(double value);
 	double GetDegree();
 	RayError SetDegree(double value);
-	UINT GetBackgroundColor();
-	RayError SetBackgroundColor(UINT value);
+	UINT GetLongitudeBackgroundColor();
+	RayError SetLongitudeBackgroundColor(UINT value);
 	UINT GetVolumeDepth();
 	void* GetVolumeData();
 	bool GetMotorOnOff();

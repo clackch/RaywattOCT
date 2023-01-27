@@ -23,7 +23,8 @@ extern "C" {
 
 	_declspec(dllexport) RayError RayShowCalibrationGuide(bool show);
 	_declspec(dllexport) RayError RayStartReview(char *strFilePath);
-	_declspec(dllexport) RayError AddReviewSession(char* strFilePath);
+	_declspec(dllexport) RayError RayAddReviewSession(char* strFilePath);
+	_declspec(dllexport) RayError RayEndReviewSession(int nSession);
 	_declspec(dllexport) RayError RayEndReview();
 	_declspec(dllexport) RayError RayPlayPause();
 	_declspec(dllexport) RayError RayPrevFrame();

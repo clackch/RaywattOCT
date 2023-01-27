@@ -7,8 +7,10 @@ using RaywattApp.Models;
 using RaywattApp.Services;
 using System;
 using System.Collections.Generic;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Navigation;
+using System.Windows.Threading;
 
 namespace RaywattApp.ViewModels
 {
@@ -16,6 +18,8 @@ namespace RaywattApp.ViewModels
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewCompareViewModel));
 
+        private DispatcherTimer timerUpdateImage = new DispatcherTimer();
+        
         [ObservableProperty]
         private IList<PatientCase> _patientCases;
 
@@ -56,7 +60,7 @@ namespace RaywattApp.ViewModels
                 Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
                 Patient = (Patient)data["patient"];
                 PatientCase = (PatientCase)data["patientCase"];
-                PrevStatus = (PrevStatus)data["prevStatus"];
+                PrevStatus = (PrevStatus)data["prevStatus"];                
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
                 ReviewStatus.CurrentPage = Constants.ReviewComparePage;
 
@@ -64,7 +68,14 @@ namespace RaywattApp.ViewModels
                     GetPatientCase(true);
                 else
                     GetPatientCase(false);
+                    
+                SetCrossSectionBackground(0, Constants.CardBackgroundColor);
+                SetCrossSectionBackground(1, Constants.BackgroundColor);
             }
+
+            timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
+            timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
+            timerUpdateImage.Start();
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -72,6 +83,9 @@ namespace RaywattApp.ViewModels
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
             Save();
+
+            if (timerUpdateImage.IsEnabled)
+                timerUpdateImage.Stop();
         }
 
         protected override void Save()
@@ -98,6 +112,12 @@ namespace RaywattApp.ViewModels
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
             if (nRows == 0)
                 _log.Error("Update Error");
+        }
+        
+        private void timerFuncUpdateImage(object sender, EventArgs e)
+        {
+            DrawCrossSectionImage();
+            DrawCrossSectionForCompare();
         }
 
         private void CaseSelectCancel()

@@ -56,12 +56,16 @@
             <!-- Before : Lumen Profile -->
             <StackPanel Grid.Row="0" Grid.Column="1" Background="Beige"/>
             <!-- Before : Cross-section -->
-            <StackPanel Grid.Row="0" Grid.Column="2" Background="GreenYellow" Width="400"/>
+            <StackPanel Grid.Row="0" Grid.Column="2" Background="GreenYellow" Width="400" VerticalAlignment="Center">
+                <Image x:Name="crossSectionForCompare" Source="{Binding CrossSectionForCompare}"/>
+            </StackPanel>
 
             <!-- After : Lumen Profile -->
             <StackPanel Grid.Row="2" Grid.Column="1" Background="AliceBlue"/>
             <!-- After : Cross-section -->
-            <StackPanel Grid.Row="2" Grid.Column="2" Background="DarkGreen" Width="400"/>
+            <StackPanel Grid.Row="2" Grid.Column="2" Background="DarkGreen" Width="400" VerticalAlignment="Center">
+                <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}"/>
+            </StackPanel>
 
             <!-- Left Up Menu : Select Pre-Case -->
             <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Left" Visibility="{Binding ExpandLeftUpMenu, Converter={StaticResource BoolToVisibilityConverter}}" Background="White">

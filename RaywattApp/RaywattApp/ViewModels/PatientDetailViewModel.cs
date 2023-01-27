@@ -417,7 +417,6 @@ namespace RaywattApp.ViewModels
             if (patientCase == null)
                 return;
 
-            RaySetProperty(Property.BackgroundColor, 0x333333);
             RayStartReview(patientCase.Image);
 
             Dictionary<string, Object> parameter = new Dictionary<string, Object>();

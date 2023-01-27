@@ -54,7 +54,6 @@ COCTImaging::COCTImaging(CMessageService* pMsg) {
 	m_fContrast = 1.0f;
 	m_fLowLevel = 108.0f;
 	m_fHighLevel = 109.0f;
-	m_backgroundColor = cv::Scalar(0x00, 0x00, 0x00);
 
 	m_nCurFrame = 0;
 	m_nTotalFrame = 0;
@@ -74,7 +73,6 @@ void COCTImaging::Initialize(tstring calibFile) {
 
 	releaseCircularizeMap();
 	initCircularizeMap(config.nOutputLength, config.nBScan, config.nOutputLength, config.nCircleSize, config.nCircleSize, 2.0f);
-	generateMask(imageMask);
 
 	loadLUT("LUT.csv");
 }
@@ -133,8 +131,6 @@ void COCTImaging::allocateMemory() {
 	imageResult.create(nBScan, nOutputLength, CV_8UC1);
 	imageResultColor.create(nBScan, nOutputLength, CV_8UC3);
 	imageCircle.create(nCircleSize, nCircleSize, CV_8UC3);
-	imageMask.create(nCircleSize, nCircleSize, CV_8UC3);
-	imageBackground.create(nCircleSize, nCircleSize, CV_8UC3);
 
 	fBuffer_Window = ippsMalloc_32f(nFFTLength);
 	fcBuffer_FFT = ippsMalloc_32fc(nFFTLength);
@@ -156,8 +152,6 @@ void COCTImaging::releaseMemory() {
 	imageResult.release();
 	imageResultColor.release();
 	imageCircle.release();
-	imageMask.release();
-	imageBackground.release();
 
 	ippsRelease((void*&)fBuffer_Window);
 	ippsRelease((void*&)fcBuffer_FFT);
@@ -364,9 +358,6 @@ void COCTImaging::postProcessing() {
 	//cv::rectangle(imageResultColor, cv::Rect(0, 0, 100, imageResultColor.rows), m_backgroundColor, cv::FILLED);
 
 	circularizeImage(imageResultColor, imageCircle);
-
-	imageBackground.setTo(m_backgroundColor);
-	cv::copyTo(imageBackground, imageCircle, imageMask);
 }
 
 void COCTImaging::circularizeImage(cv::Mat& src, cv::Mat& dst)
@@ -451,17 +442,6 @@ void COCTImaging::applyLUT(cv::Mat& image) {
 			image.at<cv::Vec3b>(y, x) = cvtColor;
 		}
 	}
-}
-void COCTImaging::generateMask(cv::Mat& image) {
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nBScan = config.nBScan;
-	const int nOutputLength = config.nOutputLength;
-	
-	cv::Mat imgTemp(nBScan, nOutputLength, CV_8UC3);
-
-	imgTemp.setTo(cv::Scalar(255, 255, 255));
-	circularizeImage(imgTemp, image);
-	cv::bitwise_not(image, image);
 }
 void COCTImaging::drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color) {
 	int posDraw = image.cols - nPosition - 1;

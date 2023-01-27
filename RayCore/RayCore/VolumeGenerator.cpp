@@ -26,7 +26,6 @@ void CVolumeGenerator::AddRecord(unsigned short* pBuffer, COCTImaging* pImaging,
 	CConfiguration& config = CConfiguration::GetInstance();
 	const int sizeCatheter = (int)((double)config.measurementValues.nSheathPosition * 1.1f);
 
-	pImaging->SetBackgroundColor(cv::Scalar(0, 0, 0));
 	pImaging->Process(pBuffer);
 	
 	cv::Mat imgCircle = pImaging->GetCircleImage();

@@ -47,8 +47,11 @@ _declspec(dllexport) RayError RayUnloadCatheter() {
 _declspec(dllexport) RayError RayStartReview(char* strFilePath) {
     return octSystem.StartReview(strFilePath);
 }
-_declspec(dllexport) RayError AddReviewSession(char* strFilePath) {
+_declspec(dllexport) RayError RayAddReviewSession(char* strFilePath) {
     return octSystem.AddReviewSession(strFilePath);
+}
+_declspec(dllexport) RayError RayEndReviewSession(int nSession) {
+    return octSystem.EndReviewSession(nSession);
 }
 _declspec(dllexport) RayError RayEndReview() {
     return octSystem.EndReview();
@@ -84,8 +87,8 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
         return octSystem.SetBrightness(value);
     case RayProperty::Contrast:
         return octSystem.SetContrast(value);
-    case RayProperty::BackgroundColor:
-        return octSystem.SetBackgroundColor(value);
+    case RayProperty::LongitudeBackgroundColor:
+        return octSystem.SetLongitudeBackgroundColor(value);
     case RayProperty::Degree:
         return octSystem.SetDegree(value);
     default:
@@ -101,8 +104,8 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return octSystem.GetBrightness();
     case RayProperty::Contrast:
         return octSystem.GetContrast();
-    case RayProperty::BackgroundColor:
-        return octSystem.GetBackgroundColor();
+    case RayProperty::LongitudeBackgroundColor:
+        return octSystem.GetLongitudeBackgroundColor();
     case RayProperty::Degree:
         return octSystem.GetDegree();
     case RayProperty::MotorOnOff:

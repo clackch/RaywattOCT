@@ -222,6 +222,9 @@ namespace RaywattApp.ViewModels
                 Degree = PatientCase.IndicatorDegree;
 
                 SetAnnotation(PatientCase.Id);
+                
+                RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);              
+                SetCrossSectionBackground(0, (ReviewStatus.IsAngioOn) ? Constants.CardBackgroundColor : Constants.BackgroundColor);
             }
 
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
@@ -470,6 +473,8 @@ namespace RaywattApp.ViewModels
         {
             ReviewStatus.IsAngioOn = isAngioOn;
 
+            SetCrossSectionBackground(0, (ReviewStatus.IsAngioOn) ? Constants.CardBackgroundColor : Constants.BackgroundColor);
+
             if (ReviewStatus.IsAngioOn)
             {
                 RightSideBarExpand = Constants.RightSideBarExpandAngioSize;
@@ -485,25 +490,19 @@ namespace RaywattApp.ViewModels
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {
-            if (imgCrossSection != null)
+            if (DrawCrossSectionImage())
             {
-                CrossSectionImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgCrossSection);
+                if (!IndicatorLongitude.isCaptured) updateNavigator(crossSectionFrameInfo[0].curFrame, crossSectionFrameInfo[0].totalFrame);
 
-                if (!IndicatorLongitude.isCaptured) updateNavigator(crossSectionFrameInfo.curFrame, crossSectionFrameInfo.totalFrame);
-
-                FrameNumber = crossSectionFrameInfo.curFrame;
+                FrameNumber = crossSectionFrameInfo[0].curFrame;
                 MeasurementFrameNumber = FrameNumber;
-
             }
-            if (imgLongitude != null)
+            if (DrawLongitudeImage())
             {
-                RayScannerState state = (RayScannerState)RayGetProperty(Property.CurrentState);
-
-                if (state == RayScannerState.Review)
+                // when generating longitude image is completed
+                if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame)
                 {
-                    LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgLongitude);
-                    if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame) IndicatorLongitude.IsVisible = Visibility.Visible;
-
+                    IndicatorLongitude.IsVisible = Visibility.Visible;
                 }
             }
         }

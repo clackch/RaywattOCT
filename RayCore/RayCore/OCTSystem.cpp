@@ -76,7 +76,7 @@ RayError COCTSystem::Start() {
 	CUtility::StartThread(threadService, m_pThreadService, this);
 
 	m_pImagingRealtime = CImagingSession::CreateColorImaging(this);
-	m_pImagingRealtime->SetBackgroundColor(m_backgroundColor);
+	m_pImagingRealtime->SetSession(SESSION_REVIEW);
 	m_pImagingRealtime->Start();
 
 	m_pCutView = new CCutViewManager();
@@ -331,6 +331,19 @@ RayError COCTSystem::AddReviewSession(char* strFilePath) {
 }
 
 /*
+* EndReviewSession
+*/
+RayError COCTSystem::EndReviewSession(unsigned int nSession) {
+	if (nSession >= MAX_SESSION_NUM || m_reviewSession[nSession] == nullptr) return RayError::InvalidArgument;
+	
+	m_reviewSession[nSession]->Stop();
+	delete m_reviewSession[nSession];
+	m_reviewSession[nSession] = nullptr;
+
+	return RayError::OK;
+}
+
+/*
 * EndReview
 */
 RayError COCTSystem::EndReview()
@@ -534,9 +547,9 @@ RayError COCTSystem::SetDegree(double value) {
 }
 
 /*
-* GetDegree
+* GetLongitudeBackgroundColor
 */
-UINT COCTSystem::GetBackgroundColor() {
+UINT COCTSystem::GetLongitudeBackgroundColor() {
 	UINT nValue = 0x00;
 
 	UINT b = m_backgroundColor[0];
@@ -551,9 +564,9 @@ UINT COCTSystem::GetBackgroundColor() {
 }
 
 /*
-* GetDegree
+* SetLongitudeBackgroundColor
 */
-RayError COCTSystem::SetBackgroundColor(UINT value) {
+RayError COCTSystem::SetLongitudeBackgroundColor(UINT value) {
 	if (m_pThreadService == nullptr) return RayError::SystemNotRunning;
 
 	cv::Scalar color;
@@ -562,8 +575,6 @@ RayError COCTSystem::SetBackgroundColor(UINT value) {
 	color[2] = 0xff & (value >> 16);
 
 	m_backgroundColor = color;
-
-	m_pImagingRealtime->SetBackgroundColor(m_backgroundColor);
 
 	return RayError::OK;
 }
@@ -1107,7 +1118,7 @@ LRESULT COCTSystem::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 
 		image = pImaging->GetCircleImage();
 
-		if (m_pThreadUpdateCutView == nullptr) {
+		if (m_pThreadUpdateCutView == nullptr && pImaging->GetSession() == SESSION_REVIEW) {
 			updateCutView(nTotalFrame);
 		}
 	}
@@ -1117,7 +1128,7 @@ LRESULT COCTSystem::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 		image = pImaging->GetCircleImage();
 	}
 
-	if (m_cbCrossSection != nullptr) m_cbCrossSection(image.data, image.cols, image.rows, image.channels(), nFrameInfo);
+	if (m_cbCrossSection != nullptr) m_cbCrossSection(pImaging->GetSession(), image.data, image.cols, image.rows, image.channels(), nFrameInfo);
 
 	return NOERROR;
 }
@@ -1150,7 +1161,7 @@ void COCTSystem::updateCutView(int drawSamples) {
 	cv::copyTo(imgEdit, imgDisplay, imgMask);
 	cv::resize(imgDisplay, imgResize, sizeInterpolation);
 
-	if (m_cbLongitude != nullptr) m_cbLongitude(imgResize.data, imgResize.cols, imgResize.rows, imgResize.channels(), nFrameInfo);
+	if (m_cbLongitude != nullptr) m_cbLongitude(SESSION_REVIEW, imgResize.data, imgResize.cols, imgResize.rows, imgResize.channels(), nFrameInfo);
 }
 
 void COCTSystem::closeAllSessions() {
