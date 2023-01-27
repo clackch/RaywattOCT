@@ -270,6 +270,9 @@ namespace RaywattApp.ViewModels
             parameter["fileExport"] = fileExport;
 
             var result = _dialogService.OpenDialog(new FileDialogControl(), parameter);
+
+            Search();
+            SetPrevStatus();
         }
 
         private void Delete()
@@ -306,20 +309,27 @@ namespace RaywattApp.ViewModels
 
         private void DeletePatientCase()
         {
-            int cntDel = 0;
-            int resDel = 0;
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["ids"] = selectedItem;
+            IList<PatientCase> patientCases = _sqlManager.SelectPatientCaseByList(sqlParameters);
+
+            int cntDel = 0, resDel = 0;
 
             foreach(string id in selectedItem)
             {
                 cntDel++;
-                Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+                sqlParameters.Clear();
                 sqlParameters["id"] = id;
-
                 resDel += _sqlManager.DeletePatientCase(sqlParameters);
             }
 
             if (cntDel == resDel)
             {
+                foreach (PatientCase patientCase in patientCases)
+                {
+                    System.IO.File.Delete(patientCase.Image);
+                }
+
                 Search();
                 SetPrevStatus();
             }

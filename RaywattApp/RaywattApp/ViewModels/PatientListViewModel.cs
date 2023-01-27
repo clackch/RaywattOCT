@@ -211,6 +211,8 @@ namespace RaywattApp.ViewModels
             parameter["fileType"] = Constants.FileTypeImport;
 
             var result = _dialogService.OpenDialog(new FileDialogControl(), parameter);
+
+            Search();
         }
 
         private void Export()
@@ -221,6 +223,8 @@ namespace RaywattApp.ViewModels
             parameter["fileType"] = Constants.FileTypeExport;
 
             var result = _dialogService.OpenDialog(new FileDialogControl(), parameter);
+
+            Search();
         }
 
         private void MovePatientDetail(Patient patient)
