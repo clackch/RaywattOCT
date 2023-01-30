@@ -270,6 +270,9 @@ namespace RaywattApp.ViewModels
             parameter["fileExport"] = fileExport;
 
             var result = _dialogService.OpenDialog(new FileDialogControl(), parameter);
+
+            Search();
+            SetPrevStatus();
         }
 
         private void Delete()
@@ -306,27 +309,35 @@ namespace RaywattApp.ViewModels
 
         private void DeletePatientCase()
         {
-            int cntDel = 0;
-            int resDel = 0;
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["ids"] = selectedItem;
+            IList<PatientCase> patientCases = _sqlManager.SelectPatientCaseByList(sqlParameters);
 
             foreach(string id in selectedItem)
             {
-                cntDel++;
-                Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+                sqlParameters.Clear();
                 sqlParameters["id"] = id;
+                int resDel = _sqlManager.DeletePatientCase(sqlParameters);
 
-                resDel += _sqlManager.DeletePatientCase(sqlParameters);
+                if(resDel == 1)
+                {
+                    foreach (PatientCase patientCase in patientCases)
+                    {
+                        if(patientCase.Id == id)
+                        {
+                            System.IO.File.Delete(patientCase.Image);
+                            break;
+                        }                            
+                    }
+                }
+                else
+                {
+                    _log.Error("Delete Error : id=" + id);
+                }
             }
 
-            if (cntDel == resDel)
-            {
-                Search();
-                SetPrevStatus();
-            }
-            else
-            {
-                _log.Error("Delete Error - Total : " + cntDel + " Deleted Cnt : " + resDel);
-            }
+            Search();
+            SetPrevStatus();
         }
 
         private void ShowPatientCase(PatientCaseByDate patientCaseByDate)
