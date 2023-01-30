@@ -319,6 +319,10 @@ RayError COCTSystem::StartCompare(char* strFilePath) {
 		return RayError::InvalidArgument;
 	}
 
+	if (m_reviewSession[SESSION_COMPARE] != nullptr) {
+		m_reviewSession[SESSION_COMPARE]->Stop();
+	}
+
 	postMessage(WM_START_REVIEW_SESSION, SESSION_COMPARE, (LPARAM)pSession);
 
 	return RayError::OK;
