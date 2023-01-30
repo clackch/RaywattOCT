@@ -313,30 +313,31 @@ namespace RaywattApp.ViewModels
             sqlParameters["ids"] = selectedItem;
             IList<PatientCase> patientCases = _sqlManager.SelectPatientCaseByList(sqlParameters);
 
-            int cntDel = 0, resDel = 0;
-
             foreach(string id in selectedItem)
             {
-                cntDel++;
                 sqlParameters.Clear();
                 sqlParameters["id"] = id;
-                resDel += _sqlManager.DeletePatientCase(sqlParameters);
-            }
+                int resDel = _sqlManager.DeletePatientCase(sqlParameters);
 
-            if (cntDel == resDel)
-            {
-                foreach (PatientCase patientCase in patientCases)
+                if(resDel == 1)
                 {
-                    System.IO.File.Delete(patientCase.Image);
+                    foreach (PatientCase patientCase in patientCases)
+                    {
+                        if(patientCase.Id == id)
+                        {
+                            System.IO.File.Delete(patientCase.Image);
+                            break;
+                        }                            
+                    }
                 }
+                else
+                {
+                    _log.Error("Delete Error : id=" + id);
+                }
+            }
 
-                Search();
-                SetPrevStatus();
-            }
-            else
-            {
-                _log.Error("Delete Error - Total : " + cntDel + " Deleted Cnt : " + resDel);
-            }
+            Search();
+            SetPrevStatus();
         }
 
         private void ShowPatientCase(PatientCaseByDate patientCaseByDate)
