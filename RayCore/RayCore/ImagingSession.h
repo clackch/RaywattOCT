@@ -28,6 +28,7 @@ public:
 	static COCTImaging* CreateColorImaging(CMessageService* msg);
 
 	IDataManager* GetDataManager() { return m_pDataManager; }
+	COCTImaging* GetImaging() { return m_pImaging; }
 	void EnableWorkItem(RayWorkItem item, bool enable);
 	int Start();
 	int Stop();

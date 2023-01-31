@@ -299,7 +299,7 @@ RayError COCTSystem::StartReview(char* strFilePath) {
 			return RayError::InvalidArgument;
 		}
 
-		m_reviewSession[SESSION_REVIEW] = pSession;
+		postMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
 		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
 	
 		return RayError::OK;
@@ -309,36 +309,21 @@ RayError COCTSystem::StartReview(char* strFilePath) {
 }
 
 /*
-* AddReviewSession
+* StartCompare
 */
-RayError COCTSystem::AddReviewSession(char* strFilePath) {
+RayError COCTSystem::StartCompare(char* strFilePath) {
 	if (m_curState != RayScannerState::Review) return RayError::WrongState;
-
-	if (m_reviewSession[SESSION_COMPARE] != nullptr) {
-		delete m_reviewSession[SESSION_COMPARE];
-		m_reviewSession[SESSION_COMPARE] = nullptr;
-	}
 
 	CImagingSession* pSession = CImagingSession::CreateSession(this, SESSION_COMPARE, strFilePath);
 	if (pSession == nullptr) {
 		return RayError::InvalidArgument;
 	}
 
-	m_reviewSession[SESSION_COMPARE] = pSession;
-	m_reviewSession[SESSION_COMPARE]->Start();
+	if (m_reviewSession[SESSION_COMPARE] != nullptr) {
+		m_reviewSession[SESSION_COMPARE]->Stop();
+	}
 
-	return RayError::OK;
-}
-
-/*
-* EndReviewSession
-*/
-RayError COCTSystem::EndReviewSession(unsigned int nSession) {
-	if (nSession >= MAX_SESSION_NUM || m_reviewSession[nSession] == nullptr) return RayError::InvalidArgument;
-	
-	m_reviewSession[nSession]->Stop();
-	delete m_reviewSession[nSession];
-	m_reviewSession[nSession] = nullptr;
+	postMessage(WM_START_REVIEW_SESSION, SESSION_COMPARE, (LPARAM)pSession);
 
 	return RayError::OK;
 }
@@ -671,6 +656,11 @@ UINT COCTSystem::threadService(LPVOID param) {
 		case WM_UPDATE_CATHETER_STATE:
 		{
 			pSystem->OnMsgUpdateCatheterState(wParam, lParam);
+			break;
+		}
+		case WM_START_REVIEW_SESSION:
+		{
+			pSystem->OnMsgStartReviewSession(wParam, lParam);
 			break;
 		}
 		default:
@@ -1107,7 +1097,7 @@ int COCTSystem::disconnectRotaryJunction() {
 */
 LRESULT COCTSystem::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 	cv::Mat image;
-	COCTImaging* pImaging = (COCTImaging*)wParam;
+	int nSession = wParam;
 	int nFrameInfo = lParam;	// 0 if real time frame
 	int nCurFrame = (nFrameInfo >> 16) & 0xFFFF;
 	int nTotalFrame = nFrameInfo & 0xFFFF;
@@ -1116,19 +1106,19 @@ LRESULT COCTSystem::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 	if (m_curState == RayScannerState::Review) {
 		if (isRealTime) return NOERROR;
 
-		image = pImaging->GetCircleImage();
+		image = m_reviewSession[nSession]->GetImaging()->GetCircleImage();
 
-		if (m_pThreadUpdateCutView == nullptr && pImaging->GetSession() == SESSION_REVIEW) {
+		if (m_pThreadUpdateCutView == nullptr && nSession == SESSION_REVIEW) {
 			updateCutView(nTotalFrame);
 		}
 	}
 	else {
 		if (isRealTime == false) return NOERROR;
 
-		image = pImaging->GetCircleImage();
+		image = m_pImagingRealtime->GetCircleImage();
 	}
 
-	if (m_cbCrossSection != nullptr) m_cbCrossSection(pImaging->GetSession(), image.data, image.cols, image.rows, image.channels(), nFrameInfo);
+	if (m_cbCrossSection != nullptr) m_cbCrossSection(nSession, image.data, image.cols, image.rows, image.channels(), nFrameInfo);
 
 	return NOERROR;
 }
@@ -1207,10 +1197,6 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 		CUtility::StartThread(threadUpdateCutView, m_pThreadUpdateCutView, this);
 		CUtility::StartThread(threadGenerateVolume, m_pThreadGenerateVolume, this);
 		CUtility::StartThread(threadLumenDetection, m_pThreadLumenDetection, this);
-		
-		if (m_reviewSession[SESSION_REVIEW] != nullptr) {
-			m_reviewSession[SESSION_REVIEW]->Start();
-		}
 		break;
 	default:
 		break;
@@ -1233,7 +1219,7 @@ LRESULT COCTSystem::OnMsgUpdateSaveRaw(WPARAM wParam, LPARAM lParam) {
 }
 
 /*
-* OnMsgUpdateSaveRaw
+* OnMsgUpdateCatheterState
 */
 LRESULT COCTSystem::OnMsgUpdateCatheterState(WPARAM wParam, LPARAM lParam) {
 	CConfiguration& config = CConfiguration::GetInstance();
@@ -1255,6 +1241,25 @@ LRESULT COCTSystem::OnMsgUpdateCatheterState(WPARAM wParam, LPARAM lParam) {
 	default:
 		break;
 	}
+
+	return NOERROR;
+}
+
+/*
+* OnMsgStartReviewSession
+*/
+LRESULT COCTSystem::OnMsgStartReviewSession(WPARAM wParam, LPARAM lParam) {
+	int nSession = wParam;
+	CImagingSession* pSession = (CImagingSession*)lParam;
+
+	if (m_reviewSession[nSession] != nullptr) {
+		m_reviewSession[nSession]->Stop();
+		delete m_reviewSession[nSession];
+		m_reviewSession[nSession] = nullptr;
+	}
+
+	m_reviewSession[nSession] = pSession;
+	m_reviewSession[nSession]->Start();
 
 	return NOERROR;
 }

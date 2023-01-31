@@ -13,6 +13,7 @@
 #define WM_NOTIFY_DEVICE_WORK_DONE	(WM_USER + 0x1004)
 #define WM_NOTIFY_ERROR_OCCURED		(WM_USER + 0x1005)
 #define WM_UPDATE_CATHETER_STATE	(WM_USER + 0x1006)
+#define WM_START_REVIEW_SESSION		(WM_USER + 0x1007)
 
 #define CUTVIEW_INTERPOLATION_SCALE		5.7
 
@@ -102,8 +103,7 @@ public:
 	RayError LoadCatheter();
 	RayError UnloadCatheter();
 	RayError StartReview(char* strFilePath);
-	RayError AddReviewSession(char* strFilePath);
-	RayError EndReviewSession(unsigned int nSession);
+	RayError StartCompare(char* strFilePath);
 	RayError EndReview();
 	RayError StartLiveView();
 	RayError StopLiveView();
@@ -162,6 +162,7 @@ protected:
 	LRESULT OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgUpdateSaveRaw(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgUpdateCatheterState(WPARAM wParam, LPARAM lParam);
+	LRESULT OnMsgStartReviewSession(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgNotifyProcessDone(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgDeviceWorkDone(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgNotifyErrorOccured(WPARAM wParam, LPARAM lParam);
