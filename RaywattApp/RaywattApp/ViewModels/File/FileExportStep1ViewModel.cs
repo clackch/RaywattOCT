@@ -141,13 +141,13 @@ namespace RaywattApp.ViewModels.File
             switch (FileExport.Type)
             {
                 case Constants.ExportTypeNative :
-                    WeakReferenceMessenger.Default.Send(new PopupNavigationMessage("Views/File/FileExportStep2NativePage.xaml") { Parameter = FileExport });
+                    WeakReferenceMessenger.Default.Send(new PopupNavigationMessage(Constants.FileExportStep2NativePage) { Parameter = FileExport });
                     break;
                 case Constants.ExportTypeDicom:
-                    WeakReferenceMessenger.Default.Send(new PopupNavigationMessage("Views/File/FileExportStep2DicomPage.xaml") { Parameter = FileExport });
+                    WeakReferenceMessenger.Default.Send(new PopupNavigationMessage(Constants.FileExportStep2DicomPage) { Parameter = FileExport });
                     break;
                 case Constants.ExportTypeStandard:
-                    WeakReferenceMessenger.Default.Send(new PopupNavigationMessage("Views/File/FileExportStep2StandardPage.xaml") { Parameter = FileExport });
+                    WeakReferenceMessenger.Default.Send(new PopupNavigationMessage(Constants.FileExportStep2StandardPage) { Parameter = FileExport });
                     break;
                 default:
                     break;
