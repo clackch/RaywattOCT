@@ -23,6 +23,12 @@
         public const string ReviewFfrPage = "Views/ReviewFfrPage.xaml";
         public const string ReviewPresetPage = "Views/ReviewPresetPage.xaml";
         public const string ReviewAngioCoRegPage = "Views/ReviewAngioCoRegPage.xaml";
+        //File
+        public const string FileExportStep1Page = "Views/File/FileExportStep1Page.xaml";
+        public const string FileExportStep2DicomPage = "Views/File/FileExportStep2DicomPage.xaml";
+        public const string FileExportStep2NativePage = "Views/File/FileExportStep2NativePage.xaml";
+        public const string FileExportStep2StandardPage = "Views/File/FileExportStep2StandardPage.xaml";
+        public const string FileImportPage = "Views/File/FileImportPage.xaml";
         //Setting
         public const string SettingAcquisitionPage = "Views/Setting/SettingAcquisitionPage.xaml";
         public const string SettingLocalizationPage = "Views/Setting/SettingLocalizationPage.xaml";

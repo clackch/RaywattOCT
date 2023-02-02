@@ -38,18 +38,6 @@ namespace RaywattApp.Common.File
             {
                 _diskType = value;
                 FileExport.DiskType = _diskType;
-
-                if (_diskType.Equals(Constants.FileDiskCd))
-                {
-                    if (timer.IsEnabled)
-                        timer.Stop();
-                }
-                else
-                {
-                    GetDrive();
-                    timer.Start();
-                }
-
                 OnPropertyChanged(nameof(DiskType));
             }
         }
@@ -108,6 +96,9 @@ namespace RaywattApp.Common.File
         private double _externalDriveAvailableFreeSpace;
 
         [ObservableProperty]
+        private string _cdDiskType;
+
+        [ObservableProperty]
         private double _cdTotalSize;
 
         [ObservableProperty]
@@ -131,6 +122,7 @@ namespace RaywattApp.Common.File
             isExternalDriveInit = true;
             timer.Interval = TimeSpan.FromMilliseconds(1000);
             timer.Tick += new EventHandler(CheckDrive);
+            timer.Start();
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -145,7 +137,7 @@ namespace RaywattApp.Common.File
         {
             _log.Debug("Back");
 
-            WeakReferenceMessenger.Default.Send(new PopupNavigationMessage("Views/File/FileExportStep1Page.xaml") { Parameter = FileExport });
+            WeakReferenceMessenger.Default.Send(new PopupNavigationMessage(Constants.FileExportStep1Page) { Parameter = FileExport });
         }
 
         protected override void Cancel()
@@ -172,69 +164,78 @@ namespace RaywattApp.Common.File
         {
             DriveInfo[] allDrives = DriveInfo.GetDrives();
 
-            Dictionary<string, string> currExternalDrive = new Dictionary<string, string>();
-
-            string firstExternalDrive = "";
-            bool isFirstExternalDrive = true;
-
-            ExternalDriveList.Clear();
-
-            foreach (DriveInfo d in allDrives)
+            if (FileExport.DiskType.Equals(Constants.FileDiskCd))
             {
-                if (d.IsReady == true)
+                foreach (DriveInfo d in allDrives)
                 {
                     if (d.DriveType == DriveType.CDRom)
                     {
                         //TO-DO : CD 기능 구현 필요
                     }
-                    else if (d.DriveType == DriveType.Removable)
+                }
+            }
+            else
+            {
+                Dictionary<string, string> currExternalDrive = new Dictionary<string, string>();
+
+                string firstExternalDrive = "";
+                bool isFirstExternalDrive = true;
+
+                ExternalDriveList.Clear();
+
+                foreach (DriveInfo d in allDrives)
+                {
+                    if (d.IsReady == true)
                     {
-                        string driveName = d.Name.Replace("\\", "");
-
-                        currExternalDrive[driveName] = driveName;
-                        long[] data = { d.TotalSize, d.AvailableFreeSpace };
-                        ExternalDriveList.Add(driveName, data);
-
-                        if (isFirstExternalDrive)
+                        if (d.DriveType == DriveType.Removable)
                         {
-                            firstExternalDrive = driveName;
-                            isFirstExternalDrive = false;
+                            string driveName = d.Name.Replace("\\", "");
+
+                            currExternalDrive[driveName] = driveName;
+                            long[] data = { d.TotalSize, d.AvailableFreeSpace };
+                            ExternalDriveList.Add(driveName, data);
+
+                            if (isFirstExternalDrive)
+                            {
+                                firstExternalDrive = driveName;
+                                isFirstExternalDrive = false;
+                            }
                         }
                     }
                 }
-            }
 
-            if (ExternalDriveComboBox.Count != currExternalDrive.Count)
-            {
-                ExternalDriveComboBox = currExternalDrive;
-
-                if (ExternalDriveComboBox.Count > 0)
+                if (ExternalDriveComboBox.Count != currExternalDrive.Count)
                 {
-                    IsEnableExternalDrive = true;
+                    ExternalDriveComboBox = currExternalDrive;
 
-                    if (String.IsNullOrEmpty(FileExport.ExternalDrive))
+                    if (ExternalDriveComboBox.Count > 0)
                     {
-                        SelectedExternalDrive = firstExternalDrive;
+                        IsEnableExternalDrive = true;
+
+                        if (String.IsNullOrEmpty(FileExport.ExternalDrive))
+                        {
+                            SelectedExternalDrive = firstExternalDrive;
+                        }
+                        else
+                        {
+                            SelectedExternalDrive = FileExport.ExternalDrive;
+                        }
+                        isExternalDriveInit = false;
                     }
                     else
                     {
-                        SelectedExternalDrive = FileExport.ExternalDrive;
+                        IsEnableExternalDrive = false;
                     }
-                    isExternalDriveInit = false;
                 }
-                else
-                {
-                    IsEnableExternalDrive = false;
-                }
-            }
 
-            if (ExternalDriveComboBox.Count == 1)
-            {
-                if (!ExternalDriveComboBox.ContainsKey(SelectedExternalDrive))
+                if (ExternalDriveComboBox.Count == 1)
                 {
-                    SelectedExternalDrive = firstExternalDrive;
+                    if (!ExternalDriveComboBox.ContainsKey(SelectedExternalDrive))
+                    {
+                        SelectedExternalDrive = firstExternalDrive;
+                    }
                 }
-            }
+            }            
         }
 
         private void ExternalDrivePath()

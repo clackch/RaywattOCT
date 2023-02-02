@@ -42,7 +42,7 @@ namespace RaywattApp.ViewModels.Dialog
             if (fileType == Constants.FileTypeExport)
             {
                 Title = _l10n["Export"];
-                PopupNavigationSource = "Views/File/FileExportStep1Page.xaml";
+                PopupNavigationSource = Constants.FileExportStep1Page;
                 FileExport fileExport = null;
 
                 if (data.ContainsKey("fileExport"))
@@ -56,7 +56,7 @@ namespace RaywattApp.ViewModels.Dialog
             else
             {
                 Title = _l10n["Import"];
-                PopupNavigationSource = "Views/File/FileImportPage.xaml";
+                PopupNavigationSource = Constants.FileImportPage;
                 FileImport fileImport = new();
                 PopupNavigationParameter = fileImport;
             }
