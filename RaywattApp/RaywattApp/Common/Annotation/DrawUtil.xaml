@@ -91,92 +91,12 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Height="{StaticResource CrossSectionSize}">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
-        <Grid Grid.Column="0" Width="{StaticResource CrossSectionSize}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
-            <Canvas Grid.RowSpan="2" Name="canvasBackground" Background="Transparent"/>
-            <Canvas Grid.RowSpan="2" Name="canvas" Background="Transparent"/>
-            <StackPanel Grid.Row="0" Orientation="Horizontal">
-                <Button Height="20" Content="Area" Click="area_Add"/>
-                <Button Height="20" Content="Length" Click="length_Add"/>
-                <Button Height="20" Content="Text" Click="text_Add"/>
-                <Button Height="20" Content="Delete All" Click="delete_All"/>
-            </StackPanel>
-        </Grid>
-        <Grid Grid.Column="1" HorizontalAlignment="Right" Background="White" Width="{StaticResource SideBarExpand}">
-            <Grid HorizontalAlignment="Right" Width="{StaticResource SideBarExpand}" Visibility="{Binding MeasurementExpand, ElementName=UserControl, Converter={StaticResource BoolToVisibilityConverter}}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <StackPanel Grid.Row="0" >
-                    <Button Content="Measurment ≫" Click="toggle_Measurement"/>
-                    <Separator/>
-                </StackPanel>
-                <Label Grid.Row="1" Content="{Binding [Area], Source={StaticResource L10N}}"/>
-                <DataGrid Grid.Row="2" ItemsSource="{Binding CurrAreaGeometries, ElementName=UserControl}" Style="{StaticResource DataGridBasic}">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Group, Converter={StaticResource GroupNameConverter}}" Header="{Binding [Name], Source={StaticResource L10N}}"/>
-                        <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Area, StringFormat={}{0:N3}}" Header="{Binding [Area(㎟)], Source={StaticResource L10N}}"/>
-                        <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding MeanDiameter, StringFormat={}{0:N3}}" Header="{Binding [Mean Diameter(㎜)], Source={StaticResource L10N}}"/>
-                        <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding MinDiameter.diameter, StringFormat={}{0:N3}}" Header="{Binding [Min Diameter(㎜)], Source={StaticResource L10N}}"/>
-                        <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding MaxDiameter.diameter, StringFormat={}{0:N3}}" Header="{Binding [Max Diameter(㎜)], Source={StaticResource L10N}}"/>
-                        <DataGridTemplateColumn Header="Delete">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button Click="delete_Area" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}, Path=CurrentItem}" Content="X"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-                <Label Grid.Row="3" Content="{Binding [Length], Source={StaticResource L10N}}"/>
-                <DataGrid Grid.Row="4" ItemsSource="{Binding CurrLengthGeometries, ElementName=UserControl}" Style="{StaticResource DataGridBasic}">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Group, Converter={StaticResource GroupNameConverter}}" Header="{Binding [Name], Source={StaticResource L10N}}"/>
-                        <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Length, StringFormat={}{0:N3}}" Header="{Binding [Length(㎜)], Source={StaticResource L10N}}"/>
-                        <DataGridTemplateColumn Header="Delete">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button Click="delete_Length" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}, Path=CurrentItem}" Content="X"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-                <Separator Grid.Row="5"/>
-                <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button Content="◀" Click="move_Frame" CommandParameter="prev"/>
-                    <Button Content="▶" Click="move_Frame" CommandParameter="next"/>
-                </StackPanel>
-            </Grid>
-            <Grid HorizontalAlignment="Right" Width="{StaticResource SideBarCollapse}" Visibility="{Binding MeasurementExpand, ElementName=UserControl, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
-                <StackPanel Grid.Row="0" >
-                    <Button Content="≪"  Click="toggle_Measurement"/>
-                    <Separator/>
-                </StackPanel>
-                <StackPanel Grid.Row="1">
-
-                </StackPanel>
-            </Grid>
-        </Grid>
+    <Grid Height="{StaticResource CrossSectionSize}" Width="{StaticResource CrossSectionSize}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Canvas Grid.RowSpan="2" Name="canvasBackground"/>
+        <Canvas Grid.RowSpan="2" Name="canvas"/>
     </Grid>
-    
-
 </UserControl>

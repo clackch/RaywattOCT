@@ -35,6 +35,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         public double _y;
 
+        [ObservableProperty]
+        public bool isMoving = true;
+
         private ICommand _cmdSetCaptured;
         public ICommand CmdSetCaptured
         { 
@@ -44,6 +47,7 @@ namespace RaywattApp.ViewModels
         private void SetCaptured(bool isCaptured) 
         {
             this.isCaptured = isCaptured;
+            IsMoving = !isCaptured;
         }
     }
 
@@ -113,6 +117,9 @@ namespace RaywattApp.ViewModels
                 RayMoveToFrame(value);
             }
         }
+    
+        private string _measurementCommand;
+        public string MeasurementCommand { get { return _measurementCommand; } set { _measurementCommand = value; OnPropertyChanged(nameof(MeasurementCommand)); } }
 
         private List<Measurement> measurements;
         public List<Measurement> Measurements { get { return measurements; } set { measurements = value; OnPropertyChanged(nameof(Measurements)); } }

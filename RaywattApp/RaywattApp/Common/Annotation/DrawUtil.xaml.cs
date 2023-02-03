@@ -1,5 +1,6 @@
 ﻿using log4net;
 using RaywattApp.Common.Annotation.Models;
+using RaywattApp.Common.Bases;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -24,6 +25,15 @@ namespace RaywattApp.Common.Annotation
 
         private bool isCanvasClicked;
 
+        public string InCommand
+        {
+            get { return (string)GetValue(InCommandProperty); }
+            set { this.SetValue(InCommandProperty, value); }
+        }
+
+        private static readonly DependencyProperty InCommandProperty =
+            DependencyProperty.Register("InCommand", typeof(string), typeof(DrawUtil), new PropertyMetadata(ReceiveCommand));
+
         public List<Measurement> Measurements
         {
             get { return (List<Measurement>)GetValue(MeasurementsProperty); }
@@ -42,15 +52,6 @@ namespace RaywattApp.Common.Annotation
         private static readonly DependencyProperty FrameNumberProperty =
             DependencyProperty.Register("FrameNumber", typeof(int), typeof(DrawUtil), new PropertyMetadata(-1, OnPropertyChanged));
 
-        public int MeasurementOutFrameNumber
-        {
-            get { return (int)GetValue(MeasurementOutFrameNumberProperty); }
-            set { this.SetValue(MeasurementOutFrameNumberProperty, value); }
-        }
-
-        private static readonly DependencyProperty MeasurementOutFrameNumberProperty =
-            DependencyProperty.Register("MeasurementOutFrameNumber", typeof(int), typeof(DrawUtil), new PropertyMetadata(default(int)));
-
         public int MouseCursor
         {
             get { return (int)GetValue(MouseCursorProperty); }
@@ -60,33 +61,6 @@ namespace RaywattApp.Common.Annotation
         private static readonly DependencyProperty MouseCursorProperty =
             DependencyProperty.Register("MouseCursor", typeof(int), typeof(DrawUtil), new PropertyMetadata(default(int)));
 
-        public bool MeasurementExpand
-        {
-            get { return (bool)GetValue(MeasurementExpandProperty); }
-            set { this.SetValue(MeasurementExpandProperty, value); }
-        }
-
-        private static readonly DependencyProperty MeasurementExpandProperty =
-            DependencyProperty.Register("MeasurementExpand", typeof(bool), typeof(DrawUtil), new PropertyMetadata(default(bool)));
-
-        public ObservableCollection<AreaGeometry> CurrAreaGeometries
-        {
-            get { return (ObservableCollection<AreaGeometry>)GetValue(CurrAreaGeometriesProperty); }
-            set { SetValue(CurrAreaGeometriesProperty, value); }
-        }
-
-        public static readonly DependencyProperty CurrAreaGeometriesProperty =
-            DependencyProperty.Register("CurrAreaGeometries", typeof(ObservableCollection<AreaGeometry>), typeof(DrawUtil), new PropertyMetadata(null));
-
-        public ObservableCollection<LengthGeometry> CurrLengthGeometries
-        {
-            get { return (ObservableCollection<LengthGeometry>)GetValue(CurrLengthGeometriesProperty); }
-            set { SetValue(CurrLengthGeometriesProperty, value); }
-        }
-
-        public static readonly DependencyProperty CurrLengthGeometriesProperty =
-            DependencyProperty.Register("CurrLengthGeometries", typeof(ObservableCollection<LengthGeometry>), typeof(DrawUtil), new PropertyMetadata(null));
-
         //---------------------------------------------------------------------------------------------------- Constructor
         public DrawUtil()
         {
@@ -95,7 +69,6 @@ namespace RaywattApp.Common.Annotation
             //Default Setting
             isDrawing = false;
             isCanvasClicked = false;
-            MeasurementExpand = true;
 
             AreaInit();
             LengthInit();
@@ -103,6 +76,39 @@ namespace RaywattApp.Common.Annotation
         }
 
         //---------------------------------------------------------------------------------------------------- Event
+        private static void ReceiveCommand(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
+        {
+            var drawUtil = dependencyObject as DrawUtil;
+            if (drawUtil == null || drawUtil.InCommand == null)
+                return;
+
+            switch (drawUtil.InCommand.Substring(0, 2))
+            {
+                case Constants.MeasureAddArea:
+                    drawUtil.AddArea();
+                    break;
+                case Constants.MeasureAddLeng:
+                    drawUtil.AddLength();
+                    break;
+                case Constants.MeasureAddText:
+                    drawUtil.AddText();
+                    break;
+                case Constants.MeasureDeleAll:
+                    drawUtil.DeleteAll();
+                    break;
+                case Constants.MeasureDelArea:
+                    drawUtil.DeleteArea(drawUtil.InCommand);
+                    break;
+                case Constants.MeasureDelLeng:
+                    drawUtil.DeleteLength(drawUtil.InCommand);
+                    break;
+                default:
+                    break;
+            }
+
+            drawUtil.InCommand = null;
+        }
+
         private static void OnPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
             int frameNumber = (int)dependencyPropertyChangedEventArgs.NewValue;
@@ -174,117 +180,7 @@ namespace RaywattApp.Common.Annotation
                 drawUtil.Measurements.Add(measurement);
             }
 
-            drawUtil.SetMeasurements(drawUtil);
-
             drawUtil.DrawAll();
-        }
-
-        private void delete_All(object sender, RoutedEventArgs e)
-        {
-            _log.Debug("delete_All");
-
-            if (this.isDrawing)
-                return;
-
-            this.canvas.Children.Clear();
-            this.canvasBackground.Children.Clear();
-            this.areaGeometrys.Clear();
-            this.lengthGeometries.Clear();
-            this.textGeometries.Clear();
-        }
-
-        private void delete_Area(object sender, RoutedEventArgs e)
-        {
-            DeleteAreaAll();
-
-            Button button = (Button)sender;
-            AreaGeometry areaGeometry = button.CommandParameter as AreaGeometry;
-
-            for (int i = areaGeometry.Group + 1; i < this.areaGeometrys.Count; i++)
-            {
-                this.areaGeometrys[i].Group--;
-            }
-            this.areaGeometrys.Remove(areaGeometry);
-
-            DrawAreaAll();
-        }
-
-        private void delete_Length(object sender, RoutedEventArgs e)
-        {
-            DeleteLengthAll();
-
-            Button button = (Button)sender;
-            LengthGeometry lengthGeometry = button.CommandParameter as LengthGeometry;
-
-            for (int i = lengthGeometry.Group + 1; i < this.lengthGeometries.Count; i++)
-            {
-                this.lengthGeometries[i].Group--;
-            }
-            this.lengthGeometries.Remove(lengthGeometry);
-
-            DrawLengthAll();
-        }
-
-        private void toggle_Measurement(object sender, RoutedEventArgs e)
-        {
-            MeasurementExpand = !MeasurementExpand;
-        }
-
-        private void move_Frame(object sender, RoutedEventArgs e)
-        {
-            if (this.Measurements == null || this.Measurements.Count == 0)
-                return;
-
-            List<Measurement> orderedMeasurements = this.Measurements.OrderBy(x => x.FrameNumber).ToList();
-            List<Measurement> notEmptyMeasurments = new List<Measurement>();
-
-            foreach (Measurement measurement in orderedMeasurements)
-            {
-                if (measurement.AreaGeometries.Count + measurement.LengthGeometries.Count + measurement.TextGeometries.Count > 0)
-                    notEmptyMeasurments.Add(measurement);
-            }
-
-            if (notEmptyMeasurments.Count == 0)
-                return;
-
-            int currPosition = 0, nextPosition = 0;
-
-            for (int i = 0; i < notEmptyMeasurments.Count; i++)
-            {
-                if (this.FrameNumber == notEmptyMeasurments[i].FrameNumber)
-                {
-                    currPosition = i;
-                    break;
-                }
-            }
-
-            Button button = (Button)sender;
-            string param = button.CommandParameter.ToString();
-
-            if ("prev".Equals(param))
-            {
-                if (currPosition == 0)
-                {
-                    nextPosition = notEmptyMeasurments.Count - 1;
-                }
-                else
-                {
-                    nextPosition = currPosition - 1;
-                }
-            }
-            else
-            {
-                if (currPosition == notEmptyMeasurments.Count - 1)
-                {
-                    nextPosition = 0;
-                }
-                else
-                {
-                    nextPosition = currPosition + 1;
-                }
-            }
-
-            MeasurementOutFrameNumber = notEmptyMeasurments[nextPosition].FrameNumber;
         }
 
         //---------------------------------------------------------------------------------------------------- Function
@@ -296,6 +192,50 @@ namespace RaywattApp.Common.Annotation
             DrawAreaAll();
             DrawLengthAll();
             DrawTextAll();
+        }
+
+        private void DeleteAll()
+        {
+            _log.Debug("DeleteAll");
+
+            if (this.isDrawing)
+                return;
+
+            this.canvas.Children.Clear();
+            this.canvasBackground.Children.Clear();
+            this.areaGeometrys.Clear();
+            this.lengthGeometries.Clear();
+            this.textGeometries.Clear();
+        }
+
+        private void DeleteArea(string param)
+        {
+            DeleteAreaAll();
+
+            int groupIdx = int.Parse(param.Substring(2, 1));
+
+            for (int i = groupIdx + 1; i < this.areaGeometrys.Count; i++)
+            {
+                this.areaGeometrys[i].Group--;
+            }
+            this.areaGeometrys.RemoveAt(groupIdx);
+
+            DrawAreaAll();
+        }
+
+        private void DeleteLength(string param)
+        {
+            DeleteLengthAll();
+
+            int groupIdx = int.Parse(param.Substring(2, 1));
+
+            for (int i = groupIdx + 1; i < this.lengthGeometries.Count; i++)
+            {
+                this.lengthGeometries[i].Group--;
+            }
+            this.lengthGeometries.RemoveAt(groupIdx);
+
+            DrawLengthAll();
         }
 
         private void DeleteLabel(string classfication, int group)
@@ -314,11 +254,5 @@ namespace RaywattApp.Common.Annotation
                 }
             }
         }
-
-        private void SetMeasurements(DrawUtil drawUtil)
-        {
-            CurrAreaGeometries = drawUtil.areaGeometrys;
-            CurrLengthGeometries = drawUtil.lengthGeometries;
-        }        
     }
 }

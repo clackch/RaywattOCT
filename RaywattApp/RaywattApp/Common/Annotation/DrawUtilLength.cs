@@ -1,6 +1,5 @@
 ﻿using RaywattApp.Common.Annotation.Models;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -37,24 +36,6 @@ namespace RaywattApp.Common.Annotation
         }
 
         //---------------------------------------------------------------------------------------------------- Event
-        private void length_Add(object sender, RoutedEventArgs e)
-        {
-            _log.Debug("length_Add");
-
-            if (!this.isDrawing)
-            {
-                this.isDrawing = true;
-                this.isFisrtPoint = true;
-
-                //Canvas 마우스 이벤트 활성화
-                this.canvas.MouseLeftButtonDown += length_canvas_MouseLeftButtonDown;
-                this.canvas.MouseMove += length_canvas_MouseMove;
-                this.canvas.MouseLeave += length_canvas_MouseLeave;
-
-                MouseCursor = 2;
-            }
-        }
-
         private void length_canvas_MouseLeave(object sender, MouseEventArgs e)
         {
             _log.Debug("length_canvas_MouseLeave");
@@ -77,6 +58,7 @@ namespace RaywattApp.Common.Annotation
                 this.canvas.MouseMove -= length_canvas_MouseMove;
                 this.canvas.MouseLeave -= length_canvas_MouseLeave;
 
+                this.canvas.Background = null;
                 MouseCursor = 0;
             }
         }
@@ -121,6 +103,7 @@ namespace RaywattApp.Common.Annotation
                     this.canvas.MouseMove -= length_canvas_MouseMove;
                     this.canvas.MouseLeave -= length_canvas_MouseLeave;
 
+                    this.canvas.Background = null;
                     MouseCursor = 0;
                 }
             }
@@ -238,6 +221,25 @@ namespace RaywattApp.Common.Annotation
         }
 
         //---------------------------------------------------------------------------------------------------- Function
+        private void AddLength()
+        {
+            _log.Debug("AddLength");
+
+            if (!this.isDrawing)
+            {
+                this.isDrawing = true;
+                this.isFisrtPoint = true;
+
+                //Canvas 마우스 이벤트 활성화
+                this.canvas.MouseLeftButtonDown += length_canvas_MouseLeftButtonDown;
+                this.canvas.MouseMove += length_canvas_MouseMove;
+                this.canvas.MouseLeave += length_canvas_MouseLeave;
+
+                this.canvas.Background = Brushes.Transparent;
+                MouseCursor = 2;
+            }
+        }
+
         private void DrawLengthAll()
         {
             _log.Debug("DrawLengthAll");

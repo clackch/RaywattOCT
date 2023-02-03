@@ -55,25 +55,6 @@ namespace RaywattApp.Common.Annotation
         }
 
         //---------------------------------------------------------------------------------------------------- Event
-        private void area_Add(object sender, RoutedEventArgs e)
-        {
-            _log.Debug("area_Add");
-
-            if (!this.isDrawing)
-            {
-                this.pointList = new List<Point>();
-                this.isDrawing = true;
-                this.groupFirst = true;
-
-                //Canvas 마우스 이벤트 활성화
-                this.canvas.MouseLeftButtonDown += area_canvas_MouseLeftButtonDown;
-                this.canvas.MouseMove += area_canvas_MouseMove;
-                this.canvas.MouseLeave += area_canvas_MouseLeave;
-
-                MouseCursor = 1;
-            }
-        }
-
         private void area_canvas_MouseLeave(object sender, MouseEventArgs e)
         {
             _log.Debug("area_canvas_MouseLeave");
@@ -96,6 +77,7 @@ namespace RaywattApp.Common.Annotation
                 this.canvas.MouseMove -= area_canvas_MouseMove;
                 this.canvas.MouseLeave -= area_canvas_MouseLeave;
 
+                this.canvas.Background = null;
                 MouseCursor = 0;
             }
         }
@@ -233,6 +215,7 @@ namespace RaywattApp.Common.Annotation
             this.canvas.MouseMove -= area_canvas_MouseMove;
             this.canvas.MouseLeave -= area_canvas_MouseLeave;
 
+            this.canvas.Background = null;
             MouseCursor = 0;
         }
 
@@ -312,6 +295,26 @@ namespace RaywattApp.Common.Annotation
         }
 
         //---------------------------------------------------------------------------------------------------- Function
+        private void AddArea()
+        {
+            _log.Debug("AddArea");
+
+            if (!this.isDrawing)
+            {
+                this.pointList = new List<Point>();
+                this.isDrawing = true;
+                this.groupFirst = true;
+
+                //Canvas 마우스 이벤트 활성화
+                this.canvas.MouseLeftButtonDown += area_canvas_MouseLeftButtonDown;
+                this.canvas.MouseMove += area_canvas_MouseMove;
+                this.canvas.MouseLeave += area_canvas_MouseLeave;
+
+                this.canvas.Background = Brushes.Transparent;
+                MouseCursor = 1;
+            }
+        }
+
         private void DrawAreaAll()
         {
             _log.Debug("DrawAreaAll");

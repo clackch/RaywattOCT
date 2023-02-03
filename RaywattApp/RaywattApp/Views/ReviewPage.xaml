@@ -136,10 +136,14 @@
                             </Image>
                         </Canvas>
                     </Grid>
+
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="50">
                         <Label Content="F :" Foreground="White"/>
                         <Label Content="{Binding DisplayFrameNumber}" Foreground="White" />
                     </StackPanel>
+
+                    <!-- Measurement -->
+                    <annotation:DrawUtil Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorCrossSection.IsMoving}" IsEnabled="{Binding IndicatorCrossSection.IsMoving}"/>
                 </Grid>
                 <!-- Angio -->
                 <Grid Grid.Column="2" Width="{StaticResource AngioSize}" Height="{StaticResource AngioSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Background="Beige">
@@ -279,7 +283,8 @@
                             <RowDefinition/>
                         </Grid.RowDefinitions>
                         <StackPanel Grid.Row="0" >
-                            <Button Content="Value Info. ≫" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.RightMenu}"/>
+                            <Button Content="{Binding [Value Info. ≫], Source={StaticResource L10N}}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.RightMenu}" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                            <Button Content="{Binding [Measurement ≫], Source={StaticResource L10N}}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.RightMenu}" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}"/>
                             <Separator/>
                         </StackPanel>
 
@@ -300,6 +305,11 @@
                                 <Label>Calcium</Label>
                             </Grid>
                         </Grid>
+
+                        <Grid Grid.Row="1" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                            <annotation:DrawListUtil Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" OutFrameNumber="{Binding OutFrameNumber, Mode=TwoWay}" OutCommand="{Binding MeasurementCommand, Mode=TwoWay}"/>
+                        </Grid>
+
                         <!-- Angio -->
                         <Grid Grid.Row="1" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
                             <Grid.RowDefinitions>
@@ -404,9 +414,6 @@
                         </StackPanel>
                     </Grid>
                 </Grid>
-
-                <!-- Measurement -->
-                <annotation:DrawUtil Grid.Column="2" Grid.ColumnSpan="3" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" MeasurementOutFrameNumber="{Binding OutFrameNumber, Mode=TwoWay}" VerticalAlignment="Center"/>
 
             </Grid>
 

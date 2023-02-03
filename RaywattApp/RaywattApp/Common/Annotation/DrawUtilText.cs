@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Shapes;
 
 namespace RaywattApp.Common.Annotation
@@ -43,21 +44,6 @@ namespace RaywattApp.Common.Annotation
         }
 
         //---------------------------------------------------------------------------------------------------- Event
-        private void text_Add(object sender, RoutedEventArgs e)
-        {
-            _log.Debug("text_Add");
-
-            if (!this.isDrawing)
-            {
-                this.isDrawing = true;
-
-                //Canvas 마우스 이벤트 활성화
-                this.canvas.MouseLeftButtonDown += text_canvas_MouseLeftButtonDown;
-
-                MouseCursor = 3;
-            }
-        }
-
         private void text_canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             _log.Debug("text_canvas_MouseLeftButtonDown");
@@ -277,6 +263,7 @@ namespace RaywattApp.Common.Annotation
 
             this.canvas.MouseLeftButtonDown -= textbox_canvas_MouseLeftButtonDown;
             this.canvas.MouseLeave -= textbox_canvas_MouseLeave;
+            this.canvas.Background = null;
 
             DeleteTextInput(group);
             DrawText(this.textGeometries[group].TextPoint, group, textBox.Text);
@@ -338,6 +325,21 @@ namespace RaywattApp.Common.Annotation
         }
 
         //---------------------------------------------------------------------------------------------------- Function
+        private void AddText()
+        {
+            _log.Debug("AddText");
+
+            if (!this.isDrawing)
+            {
+                this.isDrawing = true;
+
+                //Canvas 마우스 이벤트 활성화
+                this.canvas.MouseLeftButtonDown += text_canvas_MouseLeftButtonDown;
+
+                this.canvas.Background = Brushes.Transparent;
+                MouseCursor = 3;
+            }
+        }
 
         private void DrawTextAll()
         {
@@ -404,6 +406,7 @@ namespace RaywattApp.Common.Annotation
             textBox.KeyDown += textBox_KeyDown;
             this.canvas.MouseLeftButtonDown += textbox_canvas_MouseLeftButtonDown;
             this.canvas.MouseLeave += textbox_canvas_MouseLeave;
+            this.canvas.Background = Brushes.Transparent;
 
             //TextBox Keyboard Focus 처리
             textBox.Focus();
