@@ -147,7 +147,7 @@
                 </Grid>
                 <!-- Angio -->
                 <Grid Grid.Column="2" Width="{StaticResource AngioSize}" Height="{StaticResource AngioSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Background="Beige">
-                    <Button Style="{StaticResource ButtonBasic}" Height="20" Width="100" VerticalAlignment="Top" HorizontalAlignment="Right" Command="{Binding CoRegistrationCommand}" Content="{Binding [Co-Registration], Source={StaticResource L10N}}"/>
+                    
                 </Grid>
 
                 <!-- Left Menu  -->
@@ -196,6 +196,7 @@
                         </Grid>
                         <Grid Grid.Row="3">
                             <annotation:DrawCommandUtil Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" OutCommand="{Binding MeasurementCommand, Mode=TwoWay}"/>
+                            <Button Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Style="{StaticResource ButtonBasic}" Height="20" Width="100" VerticalAlignment="Top" HorizontalAlignment="Left" Command="{Binding CoRegistrationCommand}" Content="{Binding [Co-Registration], Source={StaticResource L10N}}"/>
                         </Grid>
                     </Grid>
                     <Grid Grid.Row="0" HorizontalAlignment="Left" Width="{x:Static const:Constants.SideBarCollapseSize}" Visibility="{Binding ExpandLeftUpMenu, Converter={StaticResource BoolToVisibilityReverseConverter}}">
@@ -317,7 +318,7 @@
                         <!-- Angio -->
                         <Grid Grid.Row="1" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
                             <Grid.RowDefinitions>
-                                <RowDefinition/>
+                                <RowDefinition Height="Auto"/>
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
                             <!-- Cross-section -->
