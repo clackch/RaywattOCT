@@ -97,7 +97,6 @@ protected:
 	void applyHotColor(cv::Mat& image);
 	void loadLUT(const char* strLUTPath);
 	void applyLUT(cv::Mat& image);
-	void generateMask(cv::Mat& image);
 	void drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color);
 
 	static UINT threadRender(LPVOID param);
