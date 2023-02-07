@@ -40,6 +40,7 @@ COCTSystem::COCTSystem() {
 	for (int i = 0; i < MAX_SESSION_NUM; i++) {
 		m_reviewSession[i] = nullptr;
 	}
+	m_openedSession = nullptr;
 
 	m_prevState = RayScannerState::Initial;
 	m_curState = RayScannerState::Initial;
@@ -97,6 +98,10 @@ RayError COCTSystem::Stop() {
 	CUtility::StopThread(m_pThreadRotaryJunction);
 
 	closeAllSessions();
+	if (m_openedSession != nullptr) {
+		delete m_openedSession;
+		m_openedSession = nullptr;
+	}
 
 	if (m_pAcqDevice != nullptr) {
 		m_pAcqDevice->StopAcquisition();
@@ -467,6 +472,53 @@ RayError COCTSystem::UnregisterImageCallback() {
 }
 
 /*
+* GetVolumeData
+*/
+void* COCTSystem::GetVolumeData() {
+	if (m_pVolume == nullptr) return nullptr;
+
+	return m_pVolume->GetVolumeData();
+}
+
+/*
+* OpenImage
+*/
+RayError COCTSystem::OpenImage(char* strFilePath) {
+	CloseImage();
+
+	CImagingSession *pSession = CImagingSession::CreateSession(nullptr, SESSION_UNKNOWN, strFilePath);
+	if (pSession == nullptr) {
+		return RayError::InvalidArgument;
+	}
+
+	m_openedSession = pSession;
+
+	return RayError::OK;
+}
+
+/*
+* CloseImage
+*/
+RayError COCTSystem::CloseImage() {
+	if (m_openedSession != nullptr) {
+		delete m_openedSession;
+		m_openedSession = nullptr;
+	}
+
+	return RayError::OK;
+}
+
+/*
+* GetImageData
+*/
+void* COCTSystem::GetImageData(int nFrame) {
+	if (m_openedSession == nullptr) return nullptr;
+
+	return m_openedSession->GetImageData(nFrame);
+}
+
+
+/*
 * GetBrightness
 */
 double COCTSystem::GetBrightness() {
@@ -577,15 +629,6 @@ UINT COCTSystem::GetVolumeDepth() {
 }
 
 /*
-* GetVolumeData
-*/
-void *COCTSystem::GetVolumeData() {
-	if (m_pVolume == nullptr) return nullptr;
-
-	return m_pVolume->GetVolumeData();
-}
-
-/*
 * GetMotorOnOff
 */
 bool COCTSystem::GetMotorOnOff()
@@ -601,6 +644,42 @@ bool COCTSystem::GetIsPaused()
 	if (m_reviewSession[SESSION_REVIEW] == nullptr) return true;	// default state is paused
 
 	return m_reviewSession[SESSION_REVIEW]->IsPaused();
+}
+
+/*
+* GetImageWidth
+*/
+UINT COCTSystem::GetImageWidth() 
+{
+	if (m_openedSession == nullptr) return 0;
+	return m_openedSession->GetImageWidth();
+}
+
+/*
+* GetImageHeight
+*/
+UINT COCTSystem::GetImageHeight() 
+{
+	if (m_openedSession == nullptr) return 0;
+	return m_openedSession->GetImageHeight();
+}
+
+/*
+* GetImageChannels
+*/
+UINT COCTSystem::GetImageChannels() 
+{
+	if (m_openedSession == nullptr) return 0;
+	return m_openedSession->GetImageChannels();
+}
+
+/*
+* GetImageDepth
+*/
+UINT COCTSystem::GetImageDepth()
+{
+	if (m_openedSession == nullptr) return 0;
+	return m_openedSession->GetImageDepth();
 }
 
 /*

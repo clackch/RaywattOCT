@@ -10,6 +10,7 @@
 #define CUTVIEW_INTERPOLATION_SCALE		5.7
 
 typedef enum {
+	SESSION_UNKNOWN = -1,
 	SESSION_REVIEW = 0,	// RealTime, Review
 	SESSION_COMPARE,
 	MAX_SESSION_NUM
@@ -55,6 +56,7 @@ private:
 
 	// Imaging Session (Review)
 	CImagingSession* m_reviewSession[MAX_SESSION_NUM];
+	CImagingSession* m_openedSession;
 
 	// Machine Learning
 	CRayLearning* m_pLearning;
@@ -100,7 +102,11 @@ public:
 	RayError MoveToFrame(int nFrame);
 	RayError RegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude);
 	RayError UnregisterImageCallback();
-
+	void* GetVolumeData();
+	RayError OpenImage(char* strFilePath);
+	RayError CloseImage();
+	void* GetImageData(int nFrame);
+	
 	//Property
 	RayScannerState GetCurrentState() { return m_curState; }
 	double GetBrightness();
@@ -112,9 +118,12 @@ public:
 	UINT GetLongitudeBackgroundColor();
 	RayError SetLongitudeBackgroundColor(UINT value);
 	UINT GetVolumeDepth();
-	void* GetVolumeData();
 	bool GetMotorOnOff();
 	bool GetIsPaused();
+	UINT GetImageWidth();
+	UINT GetImageHeight();
+	UINT GetImageChannels();
+	UINT GetImageDepth();
 
 private:
 	// Main Thread

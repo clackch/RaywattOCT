@@ -26,13 +26,17 @@ enum class RayProperty {
 	Brightness,
 	Contrast,
 	LongitudeBackgroundColor,
-	Degree,
+	LongitudeDegree,
 	MotorOnOff,
 	IsPaused,
 	LoadCatheterTime,
 	VolumeWidth,
 	VolumeHeight,
-	VolumeDepth
+	VolumeDepth,
+	ImageWidth,
+	ImageHeight,
+	ImageChannels,
+	ImageDepth
 };
 
 enum class RayCallbackRequest {

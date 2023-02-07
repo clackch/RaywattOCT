@@ -101,6 +101,35 @@ void CImagingSession::NextFrame() {
 void CImagingSession::MoveToFrame(int nFrame) {
 	if (m_pSimDevice != nullptr) m_pSimDevice->SetFrame(nFrame);
 }
+UINT CImagingSession::GetImageWidth() {
+	if (m_pImaging != nullptr) return m_pImaging->GetImageWidth();
+	return 0;
+}
+UINT CImagingSession::GetImageHeight() {
+	if (m_pImaging != nullptr) return m_pImaging->GetImageHeight();
+	return 0;
+}
+UINT CImagingSession::GetImageChannels() {
+	if (m_pImaging != nullptr) return m_pImaging->GetImageChannels();
+	return 0;
+}
+UINT CImagingSession::GetImageDepth() {
+	if (m_pDataManager != nullptr) return m_pDataManager->GetNumOfSamples();
+	return 0;
+}
+void* CImagingSession::GetImageData(int nFrame) {
+	if (m_pImaging == nullptr || m_pDataManager == nullptr) return nullptr;
+	if (nFrame < 0 || nFrame >= m_pDataManager->GetNumOfSamples()) return nullptr;
+
+	unsigned short* pBuffer = m_pDataManager->GetSample(nFrame);
+	m_pImaging->Process(pBuffer);
+	
+	if (m_pCutView != nullptr) {
+		m_pCutView->AddRecord(m_pImaging->GetCircleImage(), nFrame);
+	}
+
+	return m_pImaging->GetCircleImage().data;
+}
 
 CImagingSession* CImagingSession::createSession(CMessageService* pMsg, int nSession, IDataManager* pData, bool deleteData) {
 	CImagingSession* pSession = new CImagingSession(pMsg, nSession, deleteData);
@@ -128,8 +157,9 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 	pCutView->Initialize(nNumOfSamples, pSession->m_backgroundColor);
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadUpdateCutView->isRun; nFrame++) {
 		unsigned short* pBuffer = pDataManager->GetSample(nFrame);
+		pImaging->Process(pBuffer);
 
-		pCutView->AddRecord(pBuffer, pImaging, nFrame);
+		pCutView->AddRecord(pImaging->GetCircleImage(), nFrame);
 		pSession->m_pMsg->postMessage(WM_PROCESS_CUTVIEW, nSession, nFrame + 1);
 	}
 	delete pImaging;

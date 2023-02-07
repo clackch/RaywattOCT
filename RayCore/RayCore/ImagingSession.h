@@ -40,6 +40,8 @@ public:
 	IDataManager* GetDataManager() { return m_pDataManager; }
 	COCTImaging* GetImaging() { return m_pImaging; }
 	CCutViewManager* GetCutView() { return m_pCutView; }
+
+	// Asynchronous functions
 	int Start();
 	int Stop();
 	bool IsPaused();
@@ -47,6 +49,13 @@ public:
 	void PrevFrame();
 	void NextFrame();
 	void MoveToFrame(int nFrame);
+
+	// Synchronous functions
+	UINT GetImageWidth();
+	UINT GetImageHeight();
+	UINT GetImageChannels();
+	UINT GetImageDepth();
+	void* GetImageData(int nFrame);
 
 private:
 	static CImagingSession* createSession(CMessageService* pMsg, int nSession, IDataManager* pData, bool deleteData);
