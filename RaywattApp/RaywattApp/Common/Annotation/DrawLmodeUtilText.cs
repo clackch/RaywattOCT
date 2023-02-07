@@ -9,7 +9,7 @@ using System.Windows.Shapes;
 
 namespace RaywattApp.Common.Annotation
 {
-    public partial class DrawUtil
+    public partial class DrawLmodeUtil
     {
         private const string constText = "Text";
 

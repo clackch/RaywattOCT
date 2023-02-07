@@ -110,26 +110,6 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
-        private void area_Add(object sender, RoutedEventArgs e)
-        {
-            OutCommand = Constants.MeasureAddArea;
-        }
-
-        private void length_Add(object sender, RoutedEventArgs e)
-        {
-            OutCommand = Constants.MeasureAddLeng;
-        }
-
-        private void text_Add(object sender, RoutedEventArgs e)
-        {
-            OutCommand = Constants.MeasureAddText;
-        }
-
-        private void delete_All(object sender, RoutedEventArgs e)
-        {
-            OutCommand = Constants.MeasureDeleAll;
-        }
-
         private void delete_Area(object sender, RoutedEventArgs e)
         {
             Button button = (Button)sender;
@@ -148,7 +128,10 @@ namespace RaywattApp.Common.Annotation
 
         private void delete_LModeLength(object sender, RoutedEventArgs e)
         {
+            Button button = (Button)sender;
+            LengthGeometry lengthGeometry = button.CommandParameter as LengthGeometry;
 
+            OutCommand = Constants.MeasureDelLMod + lengthGeometry.Group;
         }
 
         private void move_Frame(object sender, RoutedEventArgs e)

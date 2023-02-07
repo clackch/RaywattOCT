@@ -66,17 +66,7 @@
         </DataGrid>
         <Separator Grid.Row="6"/>
         <Grid Grid.Row="7">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
-                <Button Height="20" Content="Area" Click="area_Add"/>
-                <Button Height="20" Content="Length" Click="length_Add"/>
-                <Button Height="20" Content="Text" Click="text_Add"/>
-                <Button Height="20" Content="Delete All" Click="delete_All"/>
-            </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Content="◀" Click="move_Frame" CommandParameter="prev"/>
                 <Button Content="▶" Click="move_Frame" CommandParameter="next"/>
             </StackPanel>

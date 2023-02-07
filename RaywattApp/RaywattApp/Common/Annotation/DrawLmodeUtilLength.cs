@@ -10,7 +10,7 @@ using System.Windows.Shapes;
 
 namespace RaywattApp.Common.Annotation
 {
-    public partial class DrawUtil
+    public partial class DrawLmodeUtil
     {
         private const string constEllipse = "Ellipse";
 
@@ -29,6 +29,10 @@ namespace RaywattApp.Common.Annotation
         private bool isFisrtPoint;
 
         private bool isEllipseClicked;
+
+        private double lastX;
+
+        private double lastY;
 
         private void LengthInit()
         {
@@ -80,7 +84,7 @@ namespace RaywattApp.Common.Annotation
 
                     DrawEllipse(this.firstPoint, this.lengthGeometries.Count, true);
 
-                    InCommand = Constants.MeasureDsbLLen;
+                    InCommand = Constants.MeasureDsbCLen;
                 }
                 else
                 {
@@ -127,8 +131,13 @@ namespace RaywattApp.Common.Annotation
 
                 this.secondPoint = e.GetPosition(this.canvas);
 
+                this.firstPoint = new Point(this.firstPoint.X, this.secondPoint.Y);
+                DeleteEllipse(this.lengthGeometries.Count, true);
+                DrawEllipse(this.firstPoint, this.lengthGeometries.Count, true);
                 DeleteLine(this.lengthGeometries.Count);
                 DrawLine(this.firstPoint, this.secondPoint, this.lengthGeometries.Count);
+
+                LModeIndicatorX = this.secondPoint.X;
             }
         }
 
@@ -184,6 +193,10 @@ namespace RaywattApp.Common.Annotation
                         point.Y = lengthGeometry.FirstPoint.Y;
 
                     lengthGeometry.FirstPoint = point;
+
+                    lengthGeometry.SecondPoint = new Point(lengthGeometry.SecondPoint.X, point.Y);
+                    DeleteEllipse(group, false);
+                    DrawEllipse(lengthGeometry.SecondPoint, group, false);
                 }
                 else
                 {
@@ -194,6 +207,10 @@ namespace RaywattApp.Common.Annotation
                         point.Y = lengthGeometry.SecondPoint.Y;
 
                     lengthGeometry.SecondPoint = point;
+
+                    lengthGeometry.FirstPoint = new Point(lengthGeometry.FirstPoint.X, point.Y);
+                    DeleteEllipse(group, true);
+                    DrawEllipse(lengthGeometry.FirstPoint, group, true);
                 }
 
                 Canvas.SetLeft(ellipse, point.X - ellipse.Width / 2);
@@ -201,6 +218,8 @@ namespace RaywattApp.Common.Annotation
 
                 DeleteLine(group);
                 DrawLine(lengthGeometry.FirstPoint, lengthGeometry.SecondPoint, group);
+
+                LModeIndicatorX = point.X;
             }
         }
 

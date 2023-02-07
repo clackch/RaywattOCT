@@ -102,6 +102,12 @@ namespace RaywattApp.Common.Annotation
                 case Constants.MeasureDelLeng:
                     drawUtil.DeleteLength(drawUtil.InCommand);
                     break;
+                case Constants.MeasureDsbCLen:
+                    drawUtil.length_canvas_MouseLeave(null, null);
+                    break;
+                case Constants.MeasureDsbText:
+                    drawUtil.text_canvas_MouseLeave(null, null);
+                    break;
                 default:
                     break;
             }
