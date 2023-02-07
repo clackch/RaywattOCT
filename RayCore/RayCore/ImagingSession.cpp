@@ -5,6 +5,7 @@
 #include "SimulateDevice.h"
 #include "DataReader.h"
 #include "Configuration.h"
+#include "CutViewManager.h"
 
 CImagingSession::CImagingSession(CMessageService* pMsg, int nSession, bool deleteData) :
 	m_pMsg(pMsg),
@@ -14,12 +15,18 @@ CImagingSession::CImagingSession(CMessageService* pMsg, int nSession, bool delet
 	m_pImaging = nullptr;
 	m_pSimDevice = nullptr;
 	m_pDataManager = nullptr;
+
+	m_pThreadUpdateCutView = nullptr;
+	m_pCutView = nullptr;
+	m_backgroundColor = cv::Scalar(0, 0, 0);
 }
 CImagingSession::~CImagingSession() {
 	Stop();
 	if (m_pImaging != nullptr) delete m_pImaging;
 	if (m_pSimDevice != nullptr) delete m_pSimDevice;
 	if (m_deleteData && m_pDataManager != nullptr) delete m_pDataManager;
+	if (m_pThreadUpdateCutView != nullptr) delete m_pThreadUpdateCutView;
+	if (m_pCutView != nullptr) delete m_pCutView;
 }
 
 CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSession, IDataManager* pWriter) {
@@ -40,26 +47,40 @@ CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSess
 	return createSession(pMsg, nSession, pReader, true);
 }
 
-void CImagingSession::EnableWorkItem(RayWorkItem item, bool enable) {
-	switch (item) {
-	case RayWorkItem::UpdateCutView:
-		break;
-	case RayWorkItem::GenerateVolume:
-		break;
-	default:
-		break;
-	}
+COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg) {
+	COCTImaging* pImaging = new COCTImaging(msg);
+	CConfiguration& config = CConfiguration::GetInstance();
+
+	pImaging->Initialize(_T("CALIBRATION.DAT"));
+	pImaging->SetColor(true);
+	pImaging->SetBrightnessContrast(config.imaging.brightness, config.imaging.contrast);
+
+	return pImaging;
 }
+
+void CImagingSession::EnableCutView(cv::Scalar backgroundColor) {
+	CUtility::StopThread(m_pThreadUpdateCutView);
+	if (m_pCutView != nullptr) delete m_pCutView;
+
+	m_pCutView = new CCutViewManager();
+	m_backgroundColor = backgroundColor;
+}
+
 int CImagingSession::Start() {
 	if (m_pSimDevice == nullptr || m_pImaging == nullptr) return -1;
+
+	if (m_pCutView != nullptr) {
+		CUtility::StartThread(threadUpdateCutView, m_pThreadUpdateCutView, this);
+	}
 
 	m_pImaging->Start();
 	return m_pSimDevice->StartAcquisition();
 }
 
 int CImagingSession::Stop() {
-	if(m_pImaging != nullptr) m_pImaging->Stop();
-	if(m_pSimDevice != nullptr) m_pSimDevice->StopAcquisition();
+	if (m_pImaging != nullptr) m_pImaging->Stop();
+	if (m_pSimDevice != nullptr) m_pSimDevice->StopAcquisition();
+	if (m_pThreadUpdateCutView != nullptr) CUtility::StopThread(m_pThreadUpdateCutView);
 
 	return NOERROR;
 }
@@ -93,13 +114,30 @@ CImagingSession* CImagingSession::createSession(CMessageService* pMsg, int nSess
 
 	return pSession;
 }
-COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg) {
-	COCTImaging* pImaging = new COCTImaging(msg);
-	CConfiguration& config = CConfiguration::GetInstance();
+UINT CImagingSession::threadUpdateCutView(LPVOID param) {
+	CImagingSession* pSession = (CImagingSession*)param;
+	IDataManager* pDataManager = pSession->m_pDataManager;
+	int nSession = pSession->m_nSession;
 
-	pImaging->Initialize(_T("CALIBRATION.DAT"));
-	pImaging->SetColor(true);
-	pImaging->SetBrightnessContrast(config.imaging.brightness, config.imaging.contrast);
+	CCutViewManager* pCutView = pSession->m_pCutView;
+	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
-	return pImaging;
+	// prepare imaging (without message)
+	COCTImaging* pImaging = CreateColorImaging(nullptr);
+
+	pCutView->Initialize(nNumOfSamples, pSession->m_backgroundColor);
+	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadUpdateCutView->isRun; nFrame++) {
+		unsigned short* pBuffer = pDataManager->GetSample(nFrame);
+
+		pCutView->AddRecord(pBuffer, pImaging, nFrame);
+		pSession->m_pMsg->postMessage(WM_PROCESS_CUTVIEW, nSession, nFrame + 1);
+	}
+	delete pImaging;
+
+	// wait for StopThread
+	while (pSession->m_pThreadUpdateCutView->isRun) {
+		Sleep(DELAY_FOR_STOP_THREAD);
+	}
+
+	return NOERROR;
 }

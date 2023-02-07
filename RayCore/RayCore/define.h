@@ -53,7 +53,6 @@ enum class RayScannerState {
 enum class RayWorkItem {
 	Unknown = 0,
 	SaveRawData,
-	UpdateCutView,
 	GenerateVolume,
 	LumenDetection,
 	AutoCalibration,

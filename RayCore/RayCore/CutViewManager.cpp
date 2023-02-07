@@ -75,6 +75,15 @@ cv::Mat CCutViewManager::GetCutViewROI(int length) {
 	
 	return m_imgCutView(rectROI);
 }
+int CCutViewManager::GetNumOfGeneratedSamples() {
+	int nFrames = 0;
+
+	for (nFrames = 0; nFrames < m_vRecords.size(); nFrames++) {
+		if (m_vRecords.at(nFrames).empty()) return nFrames;
+	}
+
+	return nFrames;
+}
 void CCutViewManager::DrawCutViewGuideLine(cv::Mat& img, double degree) {
 	double xDirection;
 	double yDirection;

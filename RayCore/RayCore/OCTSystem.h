@@ -7,14 +7,6 @@
 #include <tuple>
 #include <opencv2/opencv.hpp>
 
-#define WM_UPDATE_SCANNER_STATE		(WM_USER + 0x1001)
-#define WM_UPDATE_SAVE_RAW			(WM_USER + 0x1002)
-#define WM_NOTIFY_PROCESS_DONE		(WM_USER + 0x1003)
-#define WM_NOTIFY_DEVICE_WORK_DONE	(WM_USER + 0x1004)
-#define WM_NOTIFY_ERROR_OCCURED		(WM_USER + 0x1005)
-#define WM_UPDATE_CATHETER_STATE	(WM_USER + 0x1006)
-#define WM_START_REVIEW_SESSION		(WM_USER + 0x1007)
-
 #define CUTVIEW_INTERPOLATION_SCALE		5.7
 
 typedef enum {
@@ -25,7 +17,6 @@ typedef enum {
 
 class CThread;
 class COCTImaging;
-class CCutViewManager;
 class CVolumeGenerator;
 class CRayLearning;
 class CImagingSession;
@@ -45,7 +36,6 @@ private:
 	
 	CThread* m_pThreadService;
 	CThread* m_pThreadSaveRaw;
-	CThread* m_pThreadUpdateCutView;
 	CThread* m_pThreadGenerateVolume;
 	CThread* m_pThreadLumenDetection;
 	CThread* m_pThreadRotaryJunction;
@@ -56,9 +46,6 @@ private:
 	// Data Manager
 	IDataManager* m_pDataWriter;
 	tstring m_strFilePath;
-
-	// Cut View
-	CCutViewManager* m_pCutView;
 
 	// 3D Volume
 	CVolumeGenerator* m_pVolume;
@@ -134,7 +121,6 @@ private:
 	static UINT threadService(LPVOID param);
 	// Work Thread (stop in OnMsgNotifyProcessDone, OnMsgUpdateScannerState)
 	static UINT threadSaveRaw(LPVOID param);
-	static UINT threadUpdateCutView(LPVOID param);
 	static UINT threadGenerateVolume(LPVOID param);
 	static UINT threadLumenDetection(LPVOID param);
 	
@@ -154,11 +140,12 @@ private:
 	int stopAcqDevice();
 	int connectRotaryJunction();
 	int disconnectRotaryJunction();
-	void updateCutView(int drawSamples);
+	void stopAllSessions();
 	void closeAllSessions();
 
 protected:
 	LRESULT OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam);
+	LRESULT OnMsgProcessCutView(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgUpdateSaveRaw(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgUpdateCatheterState(WPARAM wParam, LPARAM lParam);

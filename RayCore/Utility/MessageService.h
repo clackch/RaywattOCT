@@ -3,6 +3,17 @@
 #include <mutex>
 #include <vector>
 
+#define WM_PROCESS_OCT_DONE		(WM_USER + 0x0001)
+#define WM_PROCESS_CUTVIEW		(WM_USER + 0x0002)
+
+#define WM_UPDATE_SCANNER_STATE		(WM_USER + 0x1001)
+#define WM_UPDATE_SAVE_RAW			(WM_USER + 0x1002)
+#define WM_NOTIFY_PROCESS_DONE		(WM_USER + 0x1003)
+#define WM_NOTIFY_DEVICE_WORK_DONE	(WM_USER + 0x1004)
+#define WM_NOTIFY_ERROR_OCCURED		(WM_USER + 0x1005)
+#define WM_UPDATE_CATHETER_STATE	(WM_USER + 0x1006)
+#define WM_START_REVIEW_SESSION		(WM_USER + 0x1007)
+
 class CMessageService
 {
 private:

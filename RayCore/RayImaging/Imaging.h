@@ -1,7 +1,5 @@
 #pragma once
 
-#define WM_PROCESS_OCT_DONE		(WM_USER + 0x0001)
-
 class IImaging {
 private:
 	unsigned int m_nSession;

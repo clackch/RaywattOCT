@@ -18,6 +18,7 @@ public:
 	cv::Mat GetCutView() { return m_imgCutView; }
 	cv::Mat GetCutViewROI(int length);
 	int GetNumOfSamples() { return m_vRecords.size(); }
+	int GetNumOfGeneratedSamples();
 	void DrawCutViewGuideLine(cv::Mat& img, double degree);
 };
 

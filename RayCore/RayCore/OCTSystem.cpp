@@ -24,7 +24,6 @@ COCTSystem::COCTSystem() {
 
 	m_pThreadService = nullptr;
 	m_pThreadSaveRaw = nullptr;
-	m_pThreadUpdateCutView = nullptr;
 	m_pThreadGenerateVolume = nullptr;
 	m_pThreadLumenDetection = nullptr;
 	m_pThreadRotaryJunction = nullptr;
@@ -33,7 +32,6 @@ COCTSystem::COCTSystem() {
 
 	m_pDataWriter = nullptr;
 
-	m_pCutView = nullptr;
 	m_pVolume = nullptr;
 
 	m_pAcqDevice = nullptr;	
@@ -79,7 +77,6 @@ RayError COCTSystem::Start() {
 	m_pImagingRealtime->SetSession(SESSION_REVIEW);
 	m_pImagingRealtime->Start();
 
-	m_pCutView = new CCutViewManager();
 	m_pVolume = new CVolumeGenerator();
 	m_pVolume->Initialize(config.nCircleSize, config.nCircleSize, config.volume.size, config.volume.size);
 
@@ -95,7 +92,6 @@ RayError COCTSystem::Start() {
 RayError COCTSystem::Stop() {
 	CUtility::StopThread(m_pThreadService);
 	CUtility::StopThread(m_pThreadSaveRaw);
-	CUtility::StopThread(m_pThreadUpdateCutView);
 	CUtility::StopThread(m_pThreadGenerateVolume);
 	CUtility::StopThread(m_pThreadLumenDetection);
 	CUtility::StopThread(m_pThreadRotaryJunction);
@@ -115,10 +111,6 @@ RayError COCTSystem::Stop() {
 	if (m_pDataWriter != nullptr) {
 		delete m_pDataWriter;
 		m_pDataWriter = nullptr;
-	}
-	if (m_pCutView != nullptr) {
-		delete m_pCutView;
-		m_pCutView = nullptr;
 	}
 	if (m_pVolume != nullptr) {
 		delete m_pVolume;
@@ -334,6 +326,8 @@ RayError COCTSystem::StartCompare(char* strFilePath) {
 RayError COCTSystem::EndReview()
 {
 	if (m_curState == RayScannerState::Review) {
+		stopAllSessions();
+
 		switch (m_prevState) {
 		case RayScannerState::Initial:
 		case RayScannerState::Default:
@@ -526,7 +520,16 @@ RayError COCTSystem::SetDegree(double value) {
 	if (m_pThreadService == nullptr) return RayError::SystemNotRunning;
 
 	m_fDegree = value;
-	m_pCutView->GenerateCutView(m_fDegree);
+
+	if (m_reviewSession[SESSION_REVIEW] != nullptr) {
+		CCutViewManager *pCutView = m_reviewSession[SESSION_REVIEW]->GetCutView();
+		if (pCutView != nullptr) {
+			int nFrames = pCutView->GetNumOfGeneratedSamples();
+			if (nFrames > 0) {
+				this->postMessage(WM_PROCESS_CUTVIEW, SESSION_REVIEW, nFrames);
+			}
+		}
+	}
 
 	return RayError::OK;
 }
@@ -653,6 +656,11 @@ UINT COCTSystem::threadService(LPVOID param) {
 			pSystem->OnMsgProcessOCTDone(wParam, lParam);
 			break;
 		}
+		case WM_PROCESS_CUTVIEW:
+		{
+			pSystem->OnMsgProcessCutView(wParam, lParam);
+			break;
+		}
 		case WM_UPDATE_CATHETER_STATE:
 		{
 			pSystem->OnMsgUpdateCatheterState(wParam, lParam);
@@ -696,40 +704,6 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 	pSystem->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::SaveRawData);
 
 	while (pSystem->m_pThreadSaveRaw->isRun) {
-		Sleep(DELAY_FOR_STOP_THREAD);
-	}
-
-	return NOERROR;
-}
-
-/*
-* threadUpdateCutView
-*/
-UINT COCTSystem::threadUpdateCutView(LPVOID param) {
-	COCTSystem* pSystem = (COCTSystem*)param;
-	IDataManager* pDataManager = pSystem->m_reviewSession[SESSION_REVIEW]->GetDataManager();
-
-	CCutViewManager* pCutView = pSystem->m_pCutView;
-	double fDegree = pSystem->m_fDegree;
-	const int nNumOfSamples = pDataManager->GetNumOfSamples();
-
-	// prepare imaging
-	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr);
-
-	pCutView->Initialize(nNumOfSamples, pSystem->m_backgroundColor);
-	for (int nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadUpdateCutView->isRun; nFrame++) {
-		unsigned short* pBuffer = pDataManager->GetSample(nFrame);
-
-		pCutView->AddRecord(pBuffer, pImaging, nFrame);
-		pCutView->GenerateCutView(nFrame, fDegree);
-		pSystem->updateCutView(nFrame);
-	}
-	delete pImaging;
-
-	pSystem->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::UpdateCutView);
-
-	// wait for StopThread
-	while (pSystem->m_pThreadUpdateCutView->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
 	}
 
@@ -863,8 +837,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pMotor->StopMotor();
 
 	CImagingSession* pSession = CImagingSession::CreateSession(pSystem, SESSION_REVIEW, pDataWriter);
-	pSystem->m_reviewSession[SESSION_REVIEW] = pSession;
-
+	pSystem->postMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
 	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
 	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::Pullback);
 
@@ -1107,10 +1080,6 @@ LRESULT COCTSystem::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 		if (isRealTime) return NOERROR;
 
 		image = m_reviewSession[nSession]->GetImaging()->GetCircleImage();
-
-		if (m_pThreadUpdateCutView == nullptr && nSession == SESSION_REVIEW) {
-			updateCutView(nTotalFrame);
-		}
 	}
 	else {
 		if (isRealTime == false) return NOERROR;
@@ -1124,36 +1093,48 @@ LRESULT COCTSystem::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 }
 
 /*
-* updateCutView
+* OnMsgProcessCutView
 */
-void COCTSystem::updateCutView(int drawSamples) {
-	cv::Mat imgCutView = m_pCutView->GetCutViewROI(512);
+LRESULT COCTSystem::OnMsgProcessCutView(WPARAM wParam, LPARAM lParam) {
+	int nSession = wParam;
+	int nDrawSamples = lParam;
+
+	CCutViewManager* pCutView = m_reviewSession[nSession]->GetCutView();
+	pCutView->GenerateCutView(m_fDegree);
+
+	cv::Mat imgCutView = pCutView->GetCutViewROI(512);
 	cv::Mat imgDisplay = imgCutView.clone();
-	cv::Mat imgEdit, imgMask;
+	cv::Mat imgMask;
 	cv::Mat imgResize;
 	cv::Size sizeInterpolation = cv::Size(imgCutView.cols * CUTVIEW_INTERPOLATION_SCALE, imgCutView.rows);
 	cv::Rect rectMask;
 
-	int nCurFrame = drawSamples;
-	int nTotalFrame = m_pCutView->GetNumOfSamples();
-	int nFrameInfo = (nCurFrame << 16) | (nTotalFrame);	
+	int nCurFrame = nDrawSamples + 1;
+	int nTotalFrame = pCutView->GetNumOfSamples();
+	int nFrameInfo = (nCurFrame << 16) | (nTotalFrame);
 
 	if (sizeInterpolation.width % 4 != 0) {
 		sizeInterpolation.width -= (sizeInterpolation.width % 4);
 	}
 
-	cv::convertScaleAbs(imgCutView, imgEdit, m_fContrast, m_fBrightness);
-
 	imgMask = cv::Mat(imgCutView.rows, imgCutView.cols, CV_8UC1);
-	rectMask = cv::Rect(0, 0, drawSamples, imgMask.rows);
+	rectMask = cv::Rect(0, 0, nDrawSamples, imgMask.rows);
 	memset(imgMask.data, 0x00, imgMask.cols * imgMask.rows);
 	imgMask(rectMask) = 0x01;
-	cv::copyTo(imgEdit, imgDisplay, imgMask);
+	cv::copyTo(imgCutView, imgDisplay, imgMask);
 	cv::resize(imgDisplay, imgResize, sizeInterpolation);
 
-	if (m_cbLongitude != nullptr) m_cbLongitude(SESSION_REVIEW, imgResize.data, imgResize.cols, imgResize.rows, imgResize.channels(), nFrameInfo);
-}
+	if (m_cbLongitude != nullptr) m_cbLongitude(nSession, imgResize.data, imgResize.cols, imgResize.rows, imgResize.channels(), nFrameInfo);
 
+	return NOERROR;
+}
+void COCTSystem::stopAllSessions() {
+	for (int i = 0; i < MAX_SESSION_NUM; i++) {
+		if (m_reviewSession[i] != nullptr) {
+			m_reviewSession[i]->Stop();
+		}
+	}
+}
 void COCTSystem::closeAllSessions() {
 	for (int i = 0; i < MAX_SESSION_NUM; i++) {
 		if (m_reviewSession[i] != nullptr) {
@@ -1174,14 +1155,12 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 
 	switch (m_curState) {
 	case RayScannerState::Initial:
-		CUtility::StopThread(m_pThreadUpdateCutView);
 		CUtility::StopThread(m_pThreadGenerateVolume);
 		CUtility::StopThread(m_pThreadLumenDetection);
 		closeAllSessions();
 		// To-Do: unload catheter
 		break;
 	case RayScannerState::Default:
-		CUtility::StopThread(m_pThreadUpdateCutView);
 		CUtility::StopThread(m_pThreadGenerateVolume);
 		CUtility::StopThread(m_pThreadLumenDetection);
 		closeAllSessions();
@@ -1194,7 +1173,6 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 			CUtility::StartThread(threadSaveRaw, m_pThreadSaveRaw, this);
 		}
 
-		CUtility::StartThread(threadUpdateCutView, m_pThreadUpdateCutView, this);
 		CUtility::StartThread(threadGenerateVolume, m_pThreadGenerateVolume, this);
 		CUtility::StartThread(threadLumenDetection, m_pThreadLumenDetection, this);
 		break;
@@ -1258,6 +1236,10 @@ LRESULT COCTSystem::OnMsgStartReviewSession(WPARAM wParam, LPARAM lParam) {
 		m_reviewSession[nSession] = nullptr;
 	}
 
+	if (nSession == SESSION_REVIEW) {
+		pSession->EnableCutView(m_backgroundColor);
+	}
+
 	m_reviewSession[nSession] = pSession;
 	m_reviewSession[nSession]->Start();
 
@@ -1273,9 +1255,6 @@ LRESULT COCTSystem::OnMsgNotifyProcessDone(WPARAM wParam, LPARAM lParam) {
 	switch (workItem) {
 	case RayWorkItem::SaveRawData:
 		CUtility::StopThread(m_pThreadSaveRaw);
-		break;
-	case RayWorkItem::UpdateCutView:
-		CUtility::StopThread(m_pThreadUpdateCutView);
 		break;
 	case RayWorkItem::GenerateVolume:
 		CUtility::StopThread(m_pThreadGenerateVolume);

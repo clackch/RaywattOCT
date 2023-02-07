@@ -1,11 +1,15 @@
 #pragma once
 
 #include "define.h"
+#include "Config.h"
+#include <opencv2/opencv.hpp>
 
 class CMessageService;
 class COCTImaging;
 class CSimulateDevice;
 class IDataManager;
+class CThread;
+class CCutViewManager;
 class CImagingSession
 {
 private:
@@ -18,6 +22,10 @@ private:
 
 	bool m_deleteData;
 
+	CThread* m_pThreadUpdateCutView;
+	CCutViewManager* m_pCutView;
+	cv::Scalar m_backgroundColor;
+
 private:
 	CImagingSession(CMessageService* pMsg, int nSession, bool deleteData = true);
 public:
@@ -27,9 +35,11 @@ public:
 	static CImagingSession* CreateSession(CMessageService* pMsg, int nSession, const char* strFilePath);
 	static COCTImaging* CreateColorImaging(CMessageService* msg);
 
+	void EnableCutView(cv::Scalar backgroundColor);
+
 	IDataManager* GetDataManager() { return m_pDataManager; }
 	COCTImaging* GetImaging() { return m_pImaging; }
-	void EnableWorkItem(RayWorkItem item, bool enable);
+	CCutViewManager* GetCutView() { return m_pCutView; }
 	int Start();
 	int Stop();
 	bool IsPaused();
@@ -40,6 +50,6 @@ public:
 
 private:
 	static CImagingSession* createSession(CMessageService* pMsg, int nSession, IDataManager* pData, bool deleteData);
-	
+	static UINT threadUpdateCutView(LPVOID param);	
 };
 

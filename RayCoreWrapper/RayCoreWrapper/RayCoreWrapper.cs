@@ -57,7 +57,6 @@ namespace RaywattOCT
         {
             Unknown = 0,
             SaveRawData,
-            UpdateCutView,
             GenerateVolume,
             LumenDetection,
             AutoCalibration,
