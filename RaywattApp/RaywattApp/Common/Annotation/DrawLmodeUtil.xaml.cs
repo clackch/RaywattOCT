@@ -106,9 +106,6 @@ namespace RaywattApp.Common.Annotation
                 case Constants.MeasureAddText:
                     drawLmodeUtil.AddText();
                     break;
-                case Constants.MeasureDeleAll:
-                    drawLmodeUtil.DeleteAll();
-                    break;
                 case Constants.MeasureDelLMod:
                     drawLmodeUtil.DeleteLength(drawLmodeUtil.InCommand);
                     break;
@@ -133,12 +130,6 @@ namespace RaywattApp.Common.Annotation
             this.canvas.Children.Clear();
             DrawLengthAll();
             DrawTextAll();
-        }
-
-        private void DeleteAll()
-        {
-            _log.Debug("DeleteAll");
-
         }
 
         private void DeleteLength(string param)
