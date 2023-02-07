@@ -486,7 +486,7 @@ void* COCTSystem::GetVolumeData() {
 RayError COCTSystem::OpenImage(char* strFilePath) {
 	CloseImage();
 
-	CImagingSession *pSession = CImagingSession::CreateSession(nullptr, SESSION_UNKNOWN, strFilePath);
+	CImagingSession *pSession = CImagingSession::CreateSession(this, SESSION_UNKNOWN, strFilePath);
 	if (pSession == nullptr) {
 		return RayError::InvalidArgument;
 	}
