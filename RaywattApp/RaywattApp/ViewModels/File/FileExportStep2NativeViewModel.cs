@@ -62,7 +62,7 @@ namespace RaywattApp.ViewModels.File
             sqlParameters["ids"] = FileExport.SelectedItem;
             IList<PatientCase> patientCases = _sqlManager.SelectPatientCaseByList(sqlParameters);
 
-            foreach(PatientCase patientCase in patientCases)
+            foreach (PatientCase patientCase in patientCases)
             {
                 ExportSize += CommonUtil.GetFileSize(patientCase.Image);
             }
@@ -96,15 +96,11 @@ namespace RaywattApp.ViewModels.File
             Dictionary<string, string> exportfiles = new Dictionary<string, string>();
 
             int cnt = 1;
-            while (true)
+            while (System.IO.File.Exists(filePath))
             {
-                if (!System.IO.File.Exists(filePath))
-                {
-                    break;
-                }
-
-                fileName = exportPrefix + "(" + ++cnt + ")";
+                fileName = exportPrefix + "(" + cnt + ")";
                 filePath = FileExport.ExternalDrivePath + "\\" + fileName + "." + Constants.FileExtension;
+                cnt++;
             }
 
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
@@ -141,6 +137,7 @@ namespace RaywattApp.ViewModels.File
             
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["title"] = _l10n["File Export"];
+            parameter["fileExport"] = FileExport;
             parameter["files"] = exportfiles;
             parameter["filePath"] = filePath;
             parameter["contents"] = JsonConvert.SerializeObject(fileFormat, Formatting.Indented);
