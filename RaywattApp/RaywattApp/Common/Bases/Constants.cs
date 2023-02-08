@@ -174,5 +174,18 @@
         //Review - 2D - Longitude
         public const string LongitudeProfile = "Profile";
         public const string LongitudeLMode = "LMode";
+
+        //Measurement
+        public const string MeasureDrawAll = "DR";
+        public const string MeasureDeleAll = "DE";
+        public const string MeasureAddArea = "AA";
+        public const string MeasureAddLeng = "AL";
+        public const string MeasureAddText = "AT";
+        public const string MeasureDelArea = "A_";
+        public const string MeasureDelLeng = "L_";
+        public const string MeasureDelLMod = "M_";
+        public const string MeasureDsbCLen = "DC";
+        public const string MeasureDsbLLen = "DL";
+        public const string MeasureDsbText = "DT";
     }
 }

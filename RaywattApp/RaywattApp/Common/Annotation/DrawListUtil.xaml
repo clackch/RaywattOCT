@@ -1,0 +1,76 @@
+﻿<UserControl x:Class="RaywattApp.Common.Annotation.DrawListUtil"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:RaywattApp.Common.Annotation"
+             mc:Ignorable="d" 
+             x:Name="UserControl"
+             d:DesignHeight="640" d:DesignWidth="250">
+
+    <Grid Background="White">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Label Grid.Row="0" Content="{Binding [Area], Source={StaticResource L10N}}"/>
+        <DataGrid Grid.Row="1" ItemsSource="{Binding CurrAreaGeometries, ElementName=UserControl}" Style="{StaticResource DataGridBase}">
+            <DataGrid.Columns>
+                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Group, Converter={StaticResource GroupNameConverter}}" Header="{Binding [Name], Source={StaticResource L10N}}"/>
+                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Area, StringFormat={}{0:N3}}" Header="{Binding [Area(㎟)], Source={StaticResource L10N}}"/>
+                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding MeanDiameter, StringFormat={}{0:N3}}" Header="{Binding [Mean Diameter(㎜)], Source={StaticResource L10N}}"/>
+                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding MinDiameter.diameter, StringFormat={}{0:N3}}" Header="{Binding [Min Diameter(㎜)], Source={StaticResource L10N}}"/>
+                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding MaxDiameter.diameter, StringFormat={}{0:N3}}" Header="{Binding [Max Diameter(㎜)], Source={StaticResource L10N}}"/>
+                <DataGridTemplateColumn Header="Delete">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Click="delete_Area" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}, Path=CurrentItem}" Content="X"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Label Grid.Row="2" Content="{Binding [Length], Source={StaticResource L10N}}"/>
+        <DataGrid Grid.Row="3" ItemsSource="{Binding CurrLengthGeometries, ElementName=UserControl}" Style="{StaticResource DataGridBase}">
+            <DataGrid.Columns>
+                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Group, Converter={StaticResource GroupNameConverter}}" Header="{Binding [Name], Source={StaticResource L10N}}"/>
+                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Length, StringFormat={}{0:N3}}" Header="{Binding [Length(㎜)], Source={StaticResource L10N}}"/>
+                <DataGridTemplateColumn Header="Delete">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Click="delete_Length" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}, Path=CurrentItem}" Content="X"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Label Grid.Row="4" Content="{Binding [L-mode Length], Source={StaticResource L10N}}"/>
+        <DataGrid Grid.Row="5" ItemsSource="{Binding LModeLengthGeometries, ElementName=UserControl}" Style="{StaticResource DataGridBase}">
+            <DataGrid.Columns>
+                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Group, Converter={StaticResource GroupNameConverter}}" Header="{Binding [Name], Source={StaticResource L10N}}"/>
+                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Length, StringFormat={}{0:N3}}" Header="{Binding [Length(㎜)], Source={StaticResource L10N}}"/>
+                <DataGridTemplateColumn Header="Delete">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Click="delete_LModeLength" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}, Path=CurrentItem}" Content="X"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Separator Grid.Row="6"/>
+        <Grid Grid.Row="7">
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="◀" Click="move_Frame" CommandParameter="prev"/>
+                <Button Content="▶" Click="move_Frame" CommandParameter="next"/>
+            </StackPanel>
+        </Grid>
+
+    </Grid>
+</UserControl>

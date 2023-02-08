@@ -35,6 +35,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         public double _y;
 
+        [ObservableProperty]
+        public bool isMoving = true;
+
         private ICommand _cmdSetCaptured;
         public ICommand CmdSetCaptured
         { 
@@ -44,6 +47,7 @@ namespace RaywattApp.ViewModels
         private void SetCaptured(bool isCaptured) 
         {
             this.isCaptured = isCaptured;
+            IsMoving = !isCaptured;
         }
     }
 
@@ -113,9 +117,27 @@ namespace RaywattApp.ViewModels
                 RayMoveToFrame(value);
             }
         }
+    
+        private string _measurementCommand;
+        public string MeasurementCommand { get { return _measurementCommand; } set { _measurementCommand = value; OnPropertyChanged(nameof(MeasurementCommand)); } }
 
         private List<Measurement> measurements;
         public List<Measurement> Measurements { get { return measurements; } set { measurements = value; OnPropertyChanged(nameof(Measurements)); } }
+
+        private bool isLongitudeMeasurementInit;
+
+        private ObservableCollection<LengthGeometry> _lModeLengthGeometries;
+        public ObservableCollection<LengthGeometry> LModeLengthGeometries { get { return _lModeLengthGeometries; } set { _lModeLengthGeometries = value; OnPropertyChanged(nameof(LModeLengthGeometries)); } }
+
+        private List<TextGeometry> _lModeTextGeometries;
+        public List<TextGeometry> LModeTextGeometries { get { return _lModeTextGeometries; } set { _lModeTextGeometries = value; OnPropertyChanged(nameof(LModeTextGeometries)); } }
+
+        private double _lModeIndicatorX;
+        public double LModeIndicatorX 
+        { 
+            get { return _lModeIndicatorX; } 
+            set { _lModeIndicatorX = value; OnPropertyChanged(nameof(LModeIndicatorX)); setCurrentFrame(value); } 
+        }
 
         private ICommand _toggleMeasurementCommand;
         public ICommand ToggleMeasurementCommand
@@ -188,6 +210,8 @@ namespace RaywattApp.ViewModels
             ExpandLeftDownMenu = true;
             ExpandRightMenu = true;
             RightSideBarExpand = Constants.RightSideBarExpandDefaultSize;
+
+            isLongitudeMeasurementInit = false;
 
             updatePlayPauseState();
         }
@@ -396,8 +420,26 @@ namespace RaywattApp.ViewModels
             }
             else
             {
-                Measurements = JsonConvert.DeserializeObject<List<Measurement>>(jsonAnnotation[0].ReturnString);   
+                Measurements = JsonConvert.DeserializeObject<List<Measurement>>(jsonAnnotation[0].ReturnString);
+
+                foreach (var measurement in Measurements)
+                {
+                    //Longitude Measurement
+                    if (measurement.FrameNumber == -1)
+                    {
+                        LModeLengthGeometries = measurement.LengthGeometries;
+                        LModeTextGeometries = measurement.TextGeometries;
+                        Measurements.Remove(measurement);
+                        break;
+                    }
+                }
             }
+
+            if(LModeLengthGeometries == null)
+                LModeLengthGeometries = new ObservableCollection<LengthGeometry>();
+
+            if (LModeTextGeometries == null)
+                LModeTextGeometries = new List<TextGeometry>();
 
             if (jsonAnnotation == null || jsonAnnotation.Count != 1 || String.IsNullOrEmpty(jsonAnnotation[0].ReturnString2))
             {
@@ -406,13 +448,14 @@ namespace RaywattApp.ViewModels
             else
             {
                 Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(jsonAnnotation[0].ReturnString2);
-            }            
+            }
         }
 
         private string ConvertMeasurementsToJson()
         {
             List<Measurement> measurements = new List<Measurement>();
 
+            //Cross-section
             foreach(Measurement measurement in Measurements)
             {
                 if(measurement.AreaGeometries.Count > 0 || measurement.LengthGeometries.Count > 0 || measurement.TextGeometries.Count > 0)
@@ -428,6 +471,13 @@ namespace RaywattApp.ViewModels
                     measurements.Add(measurement);
                 }
             }
+
+            //Longitude
+            Measurement longitudeMeasurement = new Measurement();
+            longitudeMeasurement.FrameNumber = -1;
+            longitudeMeasurement.LengthGeometries = LModeLengthGeometries;
+            longitudeMeasurement.TextGeometries = LModeTextGeometries;
+            measurements.Add(longitudeMeasurement);
 
             return JsonConvert.SerializeObject(measurements, Formatting.Indented);
         }
@@ -503,6 +553,12 @@ namespace RaywattApp.ViewModels
                 if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame)
                 {
                     IndicatorLongitude.IsVisible = Visibility.Visible;
+
+                    if (!isLongitudeMeasurementInit)
+                    {
+                        MeasurementCommand = Constants.MeasureDrawAll;
+                        isLongitudeMeasurementInit = true;
+                    }
                 }
             }
         }

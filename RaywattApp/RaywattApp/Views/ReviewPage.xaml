@@ -136,14 +136,18 @@
                             </Image>
                         </Canvas>
                     </Grid>
+
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="50">
                         <Label Content="F :" Foreground="White"/>
                         <Label Content="{Binding DisplayFrameNumber}" Foreground="White" />
                     </StackPanel>
+
+                    <!-- Measurement -->
+                    <annotation:DrawUtil Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorCrossSection.IsMoving}" IsEnabled="{Binding IndicatorCrossSection.IsMoving}"/>
                 </Grid>
                 <!-- Angio -->
                 <Grid Grid.Column="2" Width="{StaticResource AngioSize}" Height="{StaticResource AngioSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Background="Beige">
-                    <Button Style="{StaticResource ButtonBasic}" Height="20" Width="100" VerticalAlignment="Top" HorizontalAlignment="Right" Command="{Binding CoRegistrationCommand}" Content="{Binding [Co-Registration], Source={StaticResource L10N}}"/>
+                    
                 </Grid>
 
                 <!-- Left Menu  -->
@@ -158,7 +162,8 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition/>
-                            <RowDefinition Height="Auto"/>
+                            <RowDefinition/>
+                            <RowDefinition/>
                         </Grid.RowDefinitions>
                         <StackPanel Grid.Row="0">
                             <Button Content="≪ View Option" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftUpMenu}" />
@@ -188,6 +193,10 @@
                             <Button Grid.Row="1" Grid.Column="1" Command="{Binding ToggleContourStentCommand}"/>
                             <Label Grid.Row="2" Grid.Column="0" Content="{Binding [Manual], Source={StaticResource L10N}}"/>
                             <Button Grid.Row="2" Grid.Column="1" Command="{Binding ToggleMeasurementCommand}"/>
+                        </Grid>
+                        <Grid Grid.Row="3">
+                            <annotation:DrawCommandUtil Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" OutCommand="{Binding MeasurementCommand, Mode=TwoWay}"/>
+                            <Button Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Style="{StaticResource ButtonBasic}" Height="20" Width="100" VerticalAlignment="Top" HorizontalAlignment="Left" Command="{Binding CoRegistrationCommand}" Content="{Binding [Co-Registration], Source={StaticResource L10N}}"/>
                         </Grid>
                     </Grid>
                     <Grid Grid.Row="0" HorizontalAlignment="Left" Width="{x:Static const:Constants.SideBarCollapseSize}" Visibility="{Binding ExpandLeftUpMenu, Converter={StaticResource BoolToVisibilityReverseConverter}}">
@@ -271,7 +280,7 @@
                 </Grid>
 
                 <!-- Right Menu  -->
-                <Grid Grid.Column="4" Width="{Binding RightSideBarExpand}">
+                <Grid Grid.Column="4" Width="{Binding RightSideBarExpand}" Height="{StaticResource CrossSectionSize}">
                     <!-- Value Info -->
                     <Grid HorizontalAlignment="Right" Width="{Binding RightSideBarExpand}" Visibility="{Binding ExpandRightMenu, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid.RowDefinitions>
@@ -279,7 +288,8 @@
                             <RowDefinition/>
                         </Grid.RowDefinitions>
                         <StackPanel Grid.Row="0" >
-                            <Button Content="Value Info. ≫" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.RightMenu}"/>
+                            <Button Content="{Binding [Value Info. ≫], Source={StaticResource L10N}}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.RightMenu}" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                            <Button Content="{Binding [Measurement ≫], Source={StaticResource L10N}}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.RightMenu}" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}"/>
                             <Separator/>
                         </StackPanel>
 
@@ -300,10 +310,15 @@
                                 <Label>Calcium</Label>
                             </Grid>
                         </Grid>
+
+                        <Grid Grid.Row="1" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                            <annotation:DrawListUtil Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" Measurements="{Binding Measurements}"  LModeLengthGeometries="{Binding LModeLengthGeometries}" FrameNumber="{Binding MeasurementFrameNumber}" OutFrameNumber="{Binding OutFrameNumber, Mode=TwoWay}" OutCommand="{Binding MeasurementCommand, Mode=TwoWay}"/>
+                        </Grid>
+
                         <!-- Angio -->
                         <Grid Grid.Row="1" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
                             <Grid.RowDefinitions>
-                                <RowDefinition/>
+                                <RowDefinition Height="Auto"/>
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
                             <!-- Cross-section -->
@@ -404,9 +419,6 @@
                         </StackPanel>
                     </Grid>
                 </Grid>
-
-                <!-- Measurement -->
-                <annotation:DrawUtil Grid.Column="2" Grid.ColumnSpan="3" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" MeasurementOutFrameNumber="{Binding OutFrameNumber, Mode=TwoWay}" VerticalAlignment="Center"/>
 
             </Grid>
 
@@ -551,6 +563,11 @@
                                     </Image>
                                 </Canvas>
                             </StackPanel>
+
+                            <!-- Measurement -->
+                            <Grid>
+                                <annotation:DrawLmodeUtil Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" LModeLengthGeometries="{Binding LModeLengthGeometries}" LModeTextGeometries="{Binding LModeTextGeometries}" LModeIndicatorX="{Binding LModeIndicatorX, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorLongitude.IsMoving}" IsEnabled="{Binding IndicatorLongitude.IsMoving}"/>
+                            </Grid>
                         </Grid>
                         
                         <!-- Bookmark Scale Image -->
