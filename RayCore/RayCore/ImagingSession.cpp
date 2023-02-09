@@ -18,7 +18,6 @@ CImagingSession::CImagingSession(CMessageService* pMsg, int nSession, bool delet
 
 	m_pThreadUpdateCutView = nullptr;
 	m_pCutView = nullptr;
-	m_backgroundColor = cv::Scalar(0, 0, 0);
 }
 CImagingSession::~CImagingSession() {
 	Stop();
@@ -63,7 +62,7 @@ void CImagingSession::EnableCutView(cv::Scalar backgroundColor) {
 	if (m_pCutView != nullptr) delete m_pCutView;
 
 	m_pCutView = new CCutViewManager();
-	m_backgroundColor = backgroundColor;
+	m_pCutView->Initialize(m_pDataManager->GetNumOfSamples(), backgroundColor);
 }
 
 int CImagingSession::Start() {
@@ -133,12 +132,12 @@ void* CImagingSession::GetImageData(int nFrame) {
 UINT CImagingSession::GetCutViewWidth() {
 	if (m_pCutView == nullptr) return 0;
 
-	return m_pCutView->GetLongitudeSize().width;
+	return m_pCutView->GetCutView().cols;
 }
 UINT CImagingSession::GetCutViewHeight() {
 	if (m_pCutView == nullptr) return 0;
 
-	return m_pCutView->GetLongitudeSize().height;
+	return m_pCutView->GetCutView().rows;
 }
 UINT CImagingSession::GetCutViewChannels() {
 	if (m_pCutView == nullptr) return 0;
@@ -169,7 +168,6 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 	// prepare imaging (without message)
 	COCTImaging* pImaging = CreateColorImaging(nullptr);
 
-	pCutView->Initialize(nNumOfSamples, pSession->m_backgroundColor, CUTVIEW_INTERPOLATION_SCALE);
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadUpdateCutView->isRun; nFrame++) {
 		unsigned short* pBuffer = pDataManager->GetSample(nFrame);
 		pImaging->Process(pBuffer);

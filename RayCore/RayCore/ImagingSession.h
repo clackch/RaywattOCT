@@ -4,8 +4,6 @@
 #include "Config.h"
 #include <opencv2/opencv.hpp>
 
-#define CUTVIEW_INTERPOLATION_SCALE		5.7
-
 class CMessageService;
 class COCTImaging;
 class CSimulateDevice;
@@ -26,7 +24,6 @@ private:
 
 	CThread* m_pThreadUpdateCutView;
 	CCutViewManager* m_pCutView;
-	cv::Scalar m_backgroundColor;
 
 private:
 	CImagingSession(CMessageService* pMsg, int nSession, bool deleteData = true);

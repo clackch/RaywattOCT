@@ -491,6 +491,7 @@ RayError COCTSystem::OpenImage(char* strFilePath) {
 		return RayError::InvalidArgument;
 	}
 
+	pSession->EnableCutView(cv::Scalar(0x00, 0x00, 0x00));
 	m_openedSession = pSession;
 
 	return RayError::OK;

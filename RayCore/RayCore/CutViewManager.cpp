@@ -9,6 +9,7 @@ CCutViewManager::~CCutViewManager() {
 		m_vRecords.at(i).release();
 	}
 	m_imgCutView.release();
+	m_imgLongitude.release();
 }
 
 void CCutViewManager::Initialize(int nNumOfSamples, cv::Scalar backgroundColor) {
@@ -20,6 +21,7 @@ void CCutViewManager::Initialize(int nNumOfSamples, cv::Scalar backgroundColor) 
 	m_imgCutView.release();
 	m_imgCutView.create(1024, nNumOfSamples, CV_8UC3);
 	m_imgCutView.setTo(backgroundColor);
+	m_imgLongitude = m_imgCutView.clone();
 }
 void CCutViewManager::GenerateCutView(double degree) {
 
@@ -63,6 +65,19 @@ void CCutViewManager::AddRecord(cv::Mat imgCircle, int nFrameIndex) {
 	if (nFrameIndex >= 0 && nFrameIndex < m_vRecords.size()) {
 		m_vRecords.at(nFrameIndex) = imgCircle.clone();
 	}
+}
+cv::Mat CCutViewManager::DrawLongitudeImage(int nDrawSamples, int pxFOV) {
+	cv::Mat imgCutView = GetCutViewROI(pxFOV);
+	cv::Mat imgDisplay = imgCutView.clone();
+
+	cv::Mat imgMask = cv::Mat(imgCutView.rows, imgCutView.cols, CV_8UC1);
+	cv::Rect rectMask = cv::Rect(0, 0, nDrawSamples, imgMask.rows);
+	memset(imgMask.data, 0x00, imgMask.cols * imgMask.rows);
+	imgMask(rectMask) = 0x01;
+
+	cv::copyTo(imgCutView, m_imgLongitude, imgMask);
+	
+	return m_imgLongitude;
 }
 cv::Mat CCutViewManager::GetCutViewROI(int length) {
 	cv::Rect rectROI;
