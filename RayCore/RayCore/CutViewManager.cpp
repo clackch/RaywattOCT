@@ -68,7 +68,6 @@ void CCutViewManager::AddRecord(cv::Mat imgCircle, int nFrameIndex) {
 }
 cv::Mat CCutViewManager::DrawLongitudeImage(int nDrawSamples, int pxFOV) {
 	cv::Mat imgCutView = GetCutViewROI(pxFOV);
-	cv::Mat imgDisplay = imgCutView.clone();
 
 	cv::Mat imgMask = cv::Mat(imgCutView.rows, imgCutView.cols, CV_8UC1);
 	cv::Rect rectMask = cv::Rect(0, 0, nDrawSamples, imgMask.rows);
