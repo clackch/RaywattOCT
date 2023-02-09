@@ -517,6 +517,21 @@ void* COCTSystem::GetImageData(int nFrame) {
 	return m_openedSession->GetImageData(nFrame);
 }
 
+/*
+* GetLongitudeData
+*/
+void* COCTSystem::GetLongitudeData(double fDegree) {
+	if (m_openedSession == nullptr) return nullptr;
+
+	CCutViewManager* pCutView = m_openedSession->GetCutView();
+	if (pCutView == nullptr) return nullptr;
+
+	pCutView->GenerateCutView(fDegree);
+	cv::Mat imgLongitude = pCutView->DrawLongitudeImage(pCutView->GetNumOfSamples(), 512);
+
+	return imgLongitude.data;
+}
+
 
 /*
 * GetBrightness
@@ -680,6 +695,33 @@ UINT COCTSystem::GetImageDepth()
 {
 	if (m_openedSession == nullptr) return 0;
 	return m_openedSession->GetImageDepth();
+}
+
+/*
+* GetLongitudeImageWidth
+*/
+UINT COCTSystem::GetLongitudeImageWidth()
+{
+	if (m_openedSession == nullptr) return 0;
+	return m_openedSession->GetCutViewWidth();
+}
+
+/*
+* GetLongitudeImageHeight
+*/
+UINT COCTSystem::GetLongitudeImageHeight()
+{
+	if (m_openedSession == nullptr) return 0;
+	return m_openedSession->GetCutViewHeight();
+}
+
+/*
+* GetLongitudeImageChannels
+*/
+UINT COCTSystem::GetLongitudeImageChannels()
+{
+	if (m_openedSession == nullptr) return 0;
+	return m_openedSession->GetCutViewChannels();
 }
 
 /*
@@ -1179,31 +1221,15 @@ LRESULT COCTSystem::OnMsgProcessCutView(WPARAM wParam, LPARAM lParam) {
 	int nDrawSamples = lParam;
 
 	CCutViewManager* pCutView = m_reviewSession[nSession]->GetCutView();
-	pCutView->GenerateCutView(m_fDegree);
 
-	cv::Mat imgCutView = pCutView->GetCutViewROI(512);
-	cv::Mat imgDisplay = imgCutView.clone();
-	cv::Mat imgMask;
-	cv::Mat imgResize;
-	cv::Size sizeInterpolation = cv::Size(imgCutView.cols * CUTVIEW_INTERPOLATION_SCALE, imgCutView.rows);
-	cv::Rect rectMask;
+	pCutView->GenerateCutView(m_fDegree);
+	cv::Mat imgCutView = pCutView->DrawLongitudeImage(nDrawSamples, 512);
 
 	int nCurFrame = nDrawSamples + 1;
 	int nTotalFrame = pCutView->GetNumOfSamples();
 	int nFrameInfo = (nCurFrame << 16) | (nTotalFrame);
 
-	if (sizeInterpolation.width % 4 != 0) {
-		sizeInterpolation.width -= (sizeInterpolation.width % 4);
-	}
-
-	imgMask = cv::Mat(imgCutView.rows, imgCutView.cols, CV_8UC1);
-	rectMask = cv::Rect(0, 0, nDrawSamples, imgMask.rows);
-	memset(imgMask.data, 0x00, imgMask.cols * imgMask.rows);
-	imgMask(rectMask) = 0x01;
-	cv::copyTo(imgCutView, imgDisplay, imgMask);
-	cv::resize(imgDisplay, imgResize, sizeInterpolation);
-
-	if (m_cbLongitude != nullptr) m_cbLongitude(nSession, imgResize.data, imgResize.cols, imgResize.rows, imgResize.channels(), nFrameInfo);
+	if (m_cbLongitude != nullptr) m_cbLongitude(nSession, imgCutView.data, imgCutView.cols, imgCutView.rows, imgCutView.channels(), nFrameInfo);
 
 	return NOERROR;
 }

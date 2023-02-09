@@ -37,7 +37,10 @@ namespace RaywattOCT
             ImageWidth,
             ImageHeight,
             ImageChannels,
-            ImageDepth
+            ImageDepth,
+            LongitudeImageWidth,
+            LongitudeImageHeight,
+            LongitudeImageChannels
         }
 
         public enum RayCallbackRequest : int
@@ -147,5 +150,7 @@ namespace RaywattOCT
         public static extern int RayCloseImage();
         [DllImport("RayCore.dll")]
         public static extern IntPtr RayGetImageData(int frame);
+        [DllImport("RayCore.dll")]
+        public static extern IntPtr RayGetLongitudeData(double degree);
     }
 }

@@ -4,6 +4,8 @@
 #include "Config.h"
 #include <opencv2/opencv.hpp>
 
+#define CUTVIEW_INTERPOLATION_SCALE		5.7
+
 class CMessageService;
 class COCTImaging;
 class CSimulateDevice;
@@ -56,6 +58,9 @@ public:
 	UINT GetImageChannels();
 	UINT GetImageDepth();
 	void* GetImageData(int nFrame);
+	UINT GetCutViewWidth();
+	UINT GetCutViewHeight();
+	UINT GetCutViewChannels();
 
 private:
 	static CImagingSession* createSession(CMessageService* pMsg, int nSession, IDataManager* pData, bool deleteData);

@@ -7,8 +7,6 @@
 #include <tuple>
 #include <opencv2/opencv.hpp>
 
-#define CUTVIEW_INTERPOLATION_SCALE		5.7
-
 typedef enum {
 	SESSION_UNKNOWN = -1,
 	SESSION_REVIEW = 0,	// RealTime, Review
@@ -106,6 +104,7 @@ public:
 	RayError OpenImage(char* strFilePath);
 	RayError CloseImage();
 	void* GetImageData(int nFrame);
+	void* GetLongitudeData(double fDegree);
 	
 	//Property
 	RayScannerState GetCurrentState() { return m_curState; }
@@ -124,6 +123,9 @@ public:
 	UINT GetImageHeight();
 	UINT GetImageChannels();
 	UINT GetImageDepth();
+	UINT GetLongitudeImageWidth();
+	UINT GetLongitudeImageHeight();
+	UINT GetLongitudeImageChannels();
 
 private:
 	// Main Thread

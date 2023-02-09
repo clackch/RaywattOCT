@@ -38,4 +38,5 @@ extern "C" {
 	_declspec(dllexport) RayError RayOpenImage(char* strFilePath);
 	_declspec(dllexport) RayError RayCloseImage();
 	_declspec(dllexport) void *RayGetImageData(int nFrame);
+	_declspec(dllexport) void *RayGetLongitudeData(double fDegree);
 }

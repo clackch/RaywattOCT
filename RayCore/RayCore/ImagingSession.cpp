@@ -130,6 +130,21 @@ void* CImagingSession::GetImageData(int nFrame) {
 
 	return m_pImaging->GetCircleImage().data;
 }
+UINT CImagingSession::GetCutViewWidth() {
+	if (m_pCutView == nullptr) return 0;
+
+	return m_pCutView->GetLongitudeSize().width;
+}
+UINT CImagingSession::GetCutViewHeight() {
+	if (m_pCutView == nullptr) return 0;
+
+	return m_pCutView->GetLongitudeSize().height;
+}
+UINT CImagingSession::GetCutViewChannels() {
+	if (m_pCutView == nullptr) return 0;
+
+	return m_pCutView->GetCutView().channels();
+}
 
 CImagingSession* CImagingSession::createSession(CMessageService* pMsg, int nSession, IDataManager* pData, bool deleteData) {
 	CImagingSession* pSession = new CImagingSession(pMsg, nSession, deleteData);
@@ -154,7 +169,7 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 	// prepare imaging (without message)
 	COCTImaging* pImaging = CreateColorImaging(nullptr);
 
-	pCutView->Initialize(nNumOfSamples, pSession->m_backgroundColor);
+	pCutView->Initialize(nNumOfSamples, pSession->m_backgroundColor, CUTVIEW_INTERPOLATION_SCALE);
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadUpdateCutView->isRun; nFrame++) {
 		unsigned short* pBuffer = pDataManager->GetSample(nFrame);
 		pImaging->Process(pBuffer);

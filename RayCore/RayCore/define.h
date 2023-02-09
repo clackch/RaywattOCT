@@ -36,7 +36,10 @@ enum class RayProperty {
 	ImageWidth,
 	ImageHeight,
 	ImageChannels,
-	ImageDepth
+	ImageDepth,
+	LongitudeImageWidth,
+	LongitudeImageHeight,
+	LongitudeImageChannels
 };
 
 enum class RayCallbackRequest {
