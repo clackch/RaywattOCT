@@ -25,8 +25,6 @@
                 <RowDefinition Height="25"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="25"/>
-                <RowDefinition Height="1.5*"/>
-                <RowDefinition Height="25"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="25"/>
                 <RowDefinition Height="*"/>
@@ -35,7 +33,9 @@
                 <RowDefinition Height="25"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="25"/>
-                <RowDefinition Height="2.5*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="2*"/>
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="0" Grid.ColumnSpan="2">
@@ -43,6 +43,22 @@
             </StackPanel>
             <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Margin="10">
                 <CheckBox Grid.Column="1" IsChecked="{Binding FileExport.RemoveWhenComplete}" IsEnabled="{Binding FileExport.IsFromReview, Converter={StaticResource InverseBooleanConverter}}" Content="{Binding [Remove when Complete], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
+            </Border>
+
+            <StackPanel Grid.Row="2">
+                <Label Content="{Binding [Additional], Source={StaticResource L10N}}"/>
+            </StackPanel>
+            <Border Grid.Row="3" BorderBrush="Black" BorderThickness="1" Margin="10">
+                <Grid >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="50,0,0,0">
+                        <CheckBox IsChecked="{Binding FileExport.PatientInfoAnonymize}" Content="{Binding [Patient Information Anonymize], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+                    <Button Style="{StaticResource ButtonBasic}" Grid.Column="1" Command="{Binding AlternateCommand}" Content="{Binding [Alternate Patient IDs], Source={StaticResource L10N}}" IsEnabled="{Binding FileExport.PatientInfoAnonymize}" Width="150" HorizontalAlignment="Left"/>
+                </Grid>
             </Border>
 
             <StackPanel Grid.Row="10">
@@ -69,7 +85,8 @@
                         <RowDefinition/>
                         <RowDefinition/>
                     </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" >
+                    <RadioButton Grid.Row="0" IsChecked="{Binding DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.FileDiskExternal}}" Content="{Binding [External Drive], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
+                    <Grid Grid.Row="1" >
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition/>
@@ -77,7 +94,6 @@
                         <RadioButton Grid.Column="0" IsChecked="{Binding DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}" Content="{Binding [CD/DVD], Source={StaticResource L10N}}"  VerticalAlignment="Center" Margin="50,0,0,0"/>
                         <CheckBox Grid.Column="1" IsChecked="{Binding FileExport.EjectWhenComplete}" Content="{Binding [Eject when Complete], Source={StaticResource L10N}}" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
                     </Grid>
-                    <RadioButton Grid.Row="1" IsChecked="{Binding DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.FileDiskExternal}}" Content="{Binding [External Drive], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
                     <Border Grid.Column="1" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1" Margin="5" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}">
                         <Grid>
                             <Grid.RowDefinitions>

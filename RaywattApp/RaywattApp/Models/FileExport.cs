@@ -34,6 +34,9 @@ namespace RaywattApp.Models
         private bool removeWhenComplete; //Remove when Complete
 
         [ObservableProperty]
+        private Dictionary<string, string> alternatePatientId; //key=id, value=alternate id. value가 빈 값이면, 대체 ID 설정이 안된 상태
+
+        [ObservableProperty]
         private string diskType; //CD/DVD, External Drive
 
         [ObservableProperty]
@@ -49,32 +52,7 @@ namespace RaywattApp.Models
         private bool ejectWhenComplete;
 
         [ObservableProperty]
-        private string imageType; //Multi-frame True Color Secondary Capture, Secondary Capture, Ultrasound Multi-frame, Intravascular OCT - For Presentation
-
-        [ObservableProperty]
-        private string format; //RGB, Palette
-
-        [ObservableProperty]
         private string measurements; //Show All, Hide Lumen Contour, Hide All
-
-        [ObservableProperty]
-        private string modality; //OCT, Other(OT), Ultrasound(US)
-
-        private int frameWidth; //Frame Resolution Width
-        public int FrameWidth
-        {
-            get { return frameWidth; }
-            set 
-            { 
-                frameWidth = value;
-                frameHeight = (int)(value * Constants.FrameWidthHeight);
-                OnPropertyChanged(nameof(FrameWidth));
-                OnPropertyChanged(nameof(FrameHeight));
-            }
-        }
-
-        [ObservableProperty]
-        private int frameHeight; //Frame Resolution Height
 
         [ObservableProperty]
         private bool patientInfoAnonymize; //Patient Information Anonymize
@@ -86,12 +64,15 @@ namespace RaywattApp.Models
         private string pullback; //AVI, TIFF
 
         [ObservableProperty]
-        private string compressor; //None, MS-MPEG4 V2, Microsoft Video 1
-
-        [ObservableProperty]
         private string stillFrame; //JPEG, Bitmap, TIFF
 
         [ObservableProperty]
         private bool angioView; //Advanced View - Angio Co-Registration
+
+        [ObservableProperty]
+        private bool lumenProfileView; //Advanced View - Lumen Profile
+
+        [ObservableProperty]
+        private bool lModeView; //Advanced View - L-Mode
     }
 }

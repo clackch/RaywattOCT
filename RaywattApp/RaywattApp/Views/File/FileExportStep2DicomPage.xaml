@@ -25,8 +25,6 @@
                 <RowDefinition Height="25"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="25"/>
-                <RowDefinition Height="1.5*"/>
-                <RowDefinition Height="25"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="25"/>
                 <RowDefinition Height="*"/>
@@ -35,7 +33,9 @@
                 <RowDefinition Height="25"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="25"/>
-                <RowDefinition Height="2.5*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="2*"/>
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="0">
@@ -60,105 +60,28 @@
                 </Grid>
             </Border>
 
-            <StackPanel Grid.Row="2" >
-                <Label Content="{Binding [Image Type], Source={StaticResource L10N}}"/>
+            <StackPanel Grid.Row="2" Grid.ColumnSpan="2">
+                <Label Content="{Binding [Additional], Source={StaticResource L10N}}"/>
             </StackPanel>
-            <Border Grid.Row="3" BorderBrush="Black" BorderThickness="1" Margin="10">
+            <Border Grid.Row="3" Grid.ColumnSpan="2" BorderBrush="Black" BorderThickness="1" Margin="10">
                 <Grid >
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="50,0,0,0">
-                        <RadioButton IsChecked="{Binding FileExport.ImageType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportImageTypeMultiframe}}" Content="{Binding [Multi-frame True Color Secondary Capture], Source={StaticResource L10N}}"/>
-                    </StackPanel>
-                    <StackPanel Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Margin="50,0,0,0">
-                        <RadioButton IsChecked="{Binding FileExport.ImageType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportImageTypeSecondary}}" Content="{Binding [Secondary Capture], Source={StaticResource L10N}}"/>
-                    </StackPanel>
-                    <StackPanel Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Margin="50,0,0,0">
-                        <RadioButton IsChecked="{Binding FileExport.ImageType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportImageTypeUltrasound}}" Content="{Binding [Ultrasound Multi-frame], Source={StaticResource L10N}}"/>
-                    </StackPanel>
-                    <StackPanel Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Margin="50,0,0,0">
-                        <RadioButton IsChecked="{Binding FileExport.ImageType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportImageTypeIntravascular}}" Content="{Binding [Intravascular OCT - For Presentation], Source={StaticResource L10N}}"/>
-                    </StackPanel>
+                    <CheckBox IsChecked="{Binding FileExport.PatientInfoAnonymize}" Content="{Binding [Patient Information Anonymize], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
                 </Grid>
             </Border>
 
             <StackPanel Grid.Row="4">
-                <Label Content="{Binding [Modality], Source={StaticResource L10N}}"/>
+                <Label Content="{Binding [Advanced View], Source={StaticResource L10N}}"/>
             </StackPanel>
             <Border Grid.Row="5" BorderBrush="Black" BorderThickness="1" Margin="10">
-                <Grid >
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="50,0,0,0">
-                        <RadioButton IsChecked="{Binding FileExport.Modality, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportModalityOCT}}" Content="{Binding [OCT], Source={StaticResource L10N}}"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="50,0,0,0">
-                        <RadioButton IsChecked="{Binding FileExport.Modality, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportModalityOther}}" Content="{Binding [Other (OT)], Source={StaticResource L10N}}"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="50,0,0,0">
-                        <RadioButton IsChecked="{Binding FileExport.Modality, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportModalityUltrasound}}" Content="{Binding [Ultrasound (US)], Source={StaticResource L10N}}"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
-
-            <StackPanel Grid.Row="6" Grid.ColumnSpan="2">
-                <Label Content="{Binding [Additional], Source={StaticResource L10N}}"/>
-            </StackPanel>
-            <Border Grid.Row="7" Grid.ColumnSpan="2" BorderBrush="Black" BorderThickness="1" Margin="10">
-                <Grid >
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <CheckBox Grid.Column="0" IsChecked="{Binding FileExport.PatientInfoAnonymize}" Content="{Binding [Patient Information Anonymize], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
-                    <CheckBox Grid.Column="1" IsChecked="{Binding FileExport.IncludeRegionCalibration}" Content="{Binding [Include region calibration (calibrated images only)], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
-                </Grid>
-            </Border>
-
-            <StackPanel Grid.Row="8" Grid.ColumnSpan="2">
-                <Label Content="{Binding [Image], Source={StaticResource L10N}}"/>
-            </StackPanel>
-            <Border Grid.Row="9" Grid.ColumnSpan="2" BorderBrush="Black" BorderThickness="1" Margin="10">
-                <Grid >
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <Grid Grid.Column="0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="50,0,0,0">
-                            <Label Content="{Binding [Frame Resolution], Source={StaticResource L10N}}"/>
-                            <Label>:</Label>
-                            <Label Content="{Binding FileExport.FrameWidth}"/>
-                            <Label>X</Label>
-                            <Label Content="{Binding FileExport.FrameHeight}"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <Slider Value="{Binding FileExport.FrameWidth}" Maximum="{Binding MaxFrameWidth}" Minimum="{Binding MinFrameWidth}" TickPlacement="BottomRight" TickFrequency="{Binding FrameTickFrequency}" IsSnapToTickEnabled="True"/>
-                        </StackPanel>
-                    </Grid>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="50,0,0,0">
-                        <Label Content="{Binding [Format], Source={StaticResource L10N}}"/>
-                        <Label>:</Label>
-                        <StackPanel VerticalAlignment="Center" Margin="50,0,0,0">
-                            <RadioButton IsChecked="{Binding FileExport.Format, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportFormatRGB}}" Content="{Binding [RGB], Source={StaticResource L10N}}"/>
-                        </StackPanel>
-                        <StackPanel VerticalAlignment="Center" Margin="50,0,0,0">
-                            <RadioButton IsChecked="{Binding FileExport.Format, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportFormatPalette}}" Content="{Binding [Palette], Source={StaticResource L10N}}"/>
-                        </StackPanel>
-                    </StackPanel>
+                    <CheckBox Grid.Column="0" IsChecked="{Binding FileExport.AngioView}" Content="{Binding [Angio Co-Registration], Source={StaticResource L10N}}"  VerticalAlignment="Center" Margin="50,0,0,0"/>
+                    <CheckBox Grid.Column="1" IsChecked="{Binding FileExport.LumenProfileView}" Content="{Binding [Lumen Profile], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
+                    <CheckBox Grid.Column="2" IsChecked="{Binding FileExport.LModeView}" Content="{Binding [L-Mode], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
                 </Grid>
             </Border>
 
@@ -186,7 +109,8 @@
                         <RowDefinition/>
                         <RowDefinition/>
                     </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" >
+                    <RadioButton Grid.Row="0" IsChecked="{Binding DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.FileDiskExternal}}" Content="{Binding [External Drive], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
+                    <Grid Grid.Row="1" >
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition/>
@@ -194,7 +118,6 @@
                         <RadioButton Grid.Column="0" IsChecked="{Binding DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}" Content="{Binding [CD/DVD], Source={StaticResource L10N}}"  VerticalAlignment="Center" Margin="50,0,0,0"/>
                         <CheckBox Grid.Column="1" IsChecked="{Binding FileExport.EjectWhenComplete}" Content="{Binding [Eject when Complete], Source={StaticResource L10N}}" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
                     </Grid>
-                    <RadioButton Grid.Row="1" IsChecked="{Binding DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.FileDiskExternal}}" Content="{Binding [External Drive], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
                     <Border Grid.Column="1" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1" Margin="5" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}">
                         <Grid>
                             <Grid.RowDefinitions>

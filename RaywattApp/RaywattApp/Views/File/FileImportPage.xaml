@@ -42,8 +42,8 @@
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Center">
-                        <RadioButton IsChecked="{Binding DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}" Content="{Binding [CD/DVD], Source={StaticResource L10N}}"  VerticalAlignment="Center" Margin="50,0,0,0"/>
                         <RadioButton IsChecked="{Binding DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.FileDiskExternal}}" Content="{Binding [External Drive], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
+                        <RadioButton IsChecked="{Binding DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}" Content="{Binding [CD/DVD], Source={StaticResource L10N}}"  VerticalAlignment="Center" Margin="50,0,0,0"/>
                     </StackPanel>
                     
                     <Border Grid.Column="1" BorderBrush="Black" BorderThickness="1" Margin="5" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}">

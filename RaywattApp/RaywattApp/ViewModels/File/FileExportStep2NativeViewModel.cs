@@ -10,6 +10,8 @@ using RaywattApp.Common.Bases;
 using Newtonsoft.Json;
 using RaywattApp.Services;
 using RaywattApp.Common.Util;
+using CommunityToolkit.Mvvm.Input;
+using System.Windows.Input;
 
 namespace RaywattApp.ViewModels.File
 {
@@ -18,6 +20,12 @@ namespace RaywattApp.ViewModels.File
         private static readonly ILog _log = LogManager.GetLogger(typeof(FileExportStep2NativeViewModel));
 
         private readonly SqlManager _sqlManager;
+
+        private ICommand _alternateCommand;
+        public ICommand AlternateCommand
+        {
+            get { return this._alternateCommand ?? (this._alternateCommand = new RelayCommand(AlternatePatientId)); }
+        }
 
         public FileExportStep2NativeViewModel(SqlManager sqlManager, IDialogService dialogService) : base(dialogService)
         {
@@ -45,7 +53,7 @@ namespace RaywattApp.ViewModels.File
             _log.Debug("SetCondition");
 
             if (FileExport.DiskType == null)
-                DiskType = Constants.FileDiskCd;
+                DiskType = Constants.FileDiskExternal;
             else
                 DiskType = FileExport.DiskType;
 
@@ -64,7 +72,7 @@ namespace RaywattApp.ViewModels.File
 
             foreach(PatientCase patientCase in patientCases)
             {
-                ExportSize += CommonUtil.GetFileSize(patientCase.Image);
+                ExportSize += CommonUtil.GetFileSize(patientCase.ImageFullPath);
             }
 
             ExportSize = CommonUtil.ByteToGB(ExportSize);
@@ -118,21 +126,52 @@ namespace RaywattApp.ViewModels.File
             sqlParameters["ids"] = FileExport.SelectedItem;
             IList<PatientCase> patientCases = _sqlManager.SelectPatientCaseByList(sqlParameters);
 
+            string alternateId = "";
+            string originId = "";
+
             foreach (Patient patient in fileFormat.PatientList)
             {
                 patient.PatientCaseList = new List<PatientCase>();
+                originId = patient.Id;
+
+                if (FileExport.PatientInfoAnonymize)
+                {
+                    if (FileExport.AlternatePatientId == null || !FileExport.AlternatePatientId.ContainsKey(patient.Id) || String.IsNullOrEmpty(FileExport.AlternatePatientId[patient.Id].Trim()))
+                    {
+                        alternateId = CommonUtil.GetRandomText(9);
+                        patient.Id = alternateId;
+                    }
+                    else
+                    {
+                        patient.Id = FileExport.AlternatePatientId[patient.Id].Trim();
+                    }
+                    patient.Lastname = Constants.ExportAnonymous;
+                    patient.Firstname = Constants.ExportAnonymous;
+                    patient.Birthdate = new DateTime(1900, 1, 1);
+                }
 
                 foreach (PatientCase patientCase in patientCases)
                 {
-                    if (patient.Id == patientCase.PatientId)
+                    if (originId == patientCase.PatientId)
                     {
-                        patientCase.ImageSize = CommonUtil.GetFileSize(patientCase.Image);
+                        patientCase.ImageSize = CommonUtil.GetFileSize(patientCase.ImageFullPath);
                         fileFormat.Size += patientCase.ImageSize;
+                        exportfiles.Add(patientCase.ImageFullPath, FileExport.ExternalDrivePath + "\\" + patientCase.Image);
 
-                        string imageFileName = CommonUtil.GetFileName(patientCase.Image);
-                        string imageFilePath = FileExport.ExternalDrivePath + "\\" + imageFileName;
-                        exportfiles.Add(patientCase.Image, imageFilePath);
-                        patientCase.Image = imageFileName;
+                        if (FileExport.PatientInfoAnonymize)
+                        {
+                            if (!String.IsNullOrEmpty(alternateId))
+                            {
+                                patientCase.Id = alternateId + "_" + patientCase.Id.Split("_")[1];
+                                patientCase.PatientId = alternateId;
+                            }
+                            else
+                            {
+                                patientCase.Id = FileExport.AlternatePatientId[originId].Trim() + "_" + patientCase.Id.Split("_")[1];
+                                patientCase.PatientId = FileExport.AlternatePatientId[originId].Trim();
+                            }
+                            patientCase.PatientName = Constants.ExportAnonymous;
+                        }
 
                         patient.PatientCaseList.Add(patientCase);
                     }
@@ -175,6 +214,29 @@ namespace RaywattApp.ViewModels.File
             else
             {
                 _log.Error("Delete Error - Total : " + totalCnt + " Deleted Cnt : " + cnt);
+            }
+        }
+
+        private void AlternatePatientId()
+        {
+            _log.Debug("AlternatePatientId");
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            if (FileExport.AlternatePatientId == null)
+                FileExport.AlternatePatientId = new Dictionary<string, string>();
+            parameter["patientList"] = FileExport.PatientList;
+            parameter["alternatePatientId"] = FileExport.AlternatePatientId;
+
+            var result = _dialogService.OpenDialog(new FileAlternateIdDialogControl(), parameter);
+
+            if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
+            {
+                Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
+                FileExport.AlternatePatientId.Clear();
+                foreach (KeyValuePair<string, string> item in (Dictionary<string, string>)data["alternatePatientId"])
+                {
+                    FileExport.AlternatePatientId.Add(item.Key, item.Value);
+                }
             }
         }
     }
