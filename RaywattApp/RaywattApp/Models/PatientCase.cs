@@ -68,6 +68,13 @@ namespace RaywattApp.Models
         [ObservableProperty]
         private string image;
 
+        private string imageFullPath;
+        public string ImageFullPath
+        {
+            get { return Constants.DataRootPath + "\\" + PatientId + "\\" + Image; }
+            set { imageFullPath = value; }
+        }
+
         [ObservableProperty]
         private long imageSize;
 

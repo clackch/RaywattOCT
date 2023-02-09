@@ -81,45 +81,22 @@
         public const string ExportOptionUnchanged = "U";
         public const string ExportOptionRemove = "R";
 
-        //Export(DICOM) Image Type - Multi-frame True Color Secondary Capture, Secondary Capture, Ultrasound Multi-frame, Intravascular OCT - For Presentation
-        public const string ExportImageTypeMultiframe = "M";
-        public const string ExportImageTypeSecondary = "S";
-        public const string ExportImageTypeUltrasound = "U";
-        public const string ExportImageTypeIntravascular = "I";
-
-        //Export(DICOM) Format - RGB, Palette
-        public const string ExportFormatRGB = "R";
-        public const string ExportFormatPalette = "P";
-
         //Export(DICOM) Measurements - Show All, Hide Lumen Contour, Hide All
         public const string ExportMeasurementShowAll = "S";
         public const string ExportMeasurementHideLumen = "L";
         public const string ExportMeasurementHideAll = "H";
 
-        //Export(DICOM) Modality - OCT, Other(OT), Ultrasound(US)
-        public const string ExportModalityOCT = "O";
-        public const string ExportModalityOther = "T";
-        public const string ExportModalityUltrasound = "U";
-
         //Export(Standard) Pullback - AVI, TIFF
         public const string ExportPullbackAVI = "A";
         public const string ExportPullbackTIFF = "T";
-
-        //Export(Standard) Compressor - None, MS-MPEG4 V2, Microsoft Video 1
-        public const string ExportCompressorNone = "N";
-        public const string ExportCompressorMPEG4 = "M";
-        public const string ExportCompressorVideo = "V";
 
         //Export(Standard) Still Frame - JPEG, Bitmap, TIFF
         public const string ExportStillFrameJPEG = "J";
         public const string ExportStillFrameBitmap = "B";
         public const string ExportStillFrameTIFF = "T";
 
-        //Export(DICOM, Standard) Frame Resolution
-        public const int MaxFrameWidth = 1024;
-        public const int MinFrameWidth = 704;
-        public const double FrameWidthHeight = 1.5;
-        public const int FrameTickFrequency = 20;
+        //Export Anonymous
+        public const string ExportAnonymous = "Anonymous";
 
         //File Import/Export
         public const string FileImageExtension = "bin";
@@ -156,8 +133,11 @@
         //Update Image Interval (msec)
         public const double UpdateImageInterval = 5;
 
+        //System File Root Path
+        public const string SystemRootPath = "C:";
+
         //Data File Root Path (OCT raw files) - ※ Patient Folder (DataRootPath + Patient ID)
-        public const string DataRootPath = "C:\\DataSave";
+        public const string DataRootPath = SystemRootPath + "\\DataSave";
 
         //Encrypt, Decrypt Public Key
         public const string PublicKey = "raywatt07_hwjckklls_298-87-01441";

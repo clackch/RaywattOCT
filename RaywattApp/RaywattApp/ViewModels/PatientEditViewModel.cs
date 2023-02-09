@@ -5,12 +5,12 @@ using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
+using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Input;
 using System.Windows.Navigation;
 
@@ -139,6 +139,8 @@ namespace RaywattApp.ViewModels
 
             if (nRows == 1)
             {
+                CommonUtil.RenameFolder(Constants.DataRootPath + "\\" + Patient.Id.Trim(), Constants.DataRootPath + "\\" + PatientEdit.Id);
+
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["patient"] = PatientEdit;
                 SetDetailStatusInit();
