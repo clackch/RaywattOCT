@@ -42,6 +42,12 @@ namespace RaywattApp.ViewModels
             get { return this._cancelCommand ?? (this._cancelCommand = new RelayCommand(Cancel)); }
         }
 
+        private ICommand _deleteCommand;
+        public ICommand DeleteCommand
+        {
+            get { return this._deleteCommand ?? (this._deleteCommand = new RelayCommand(Delete)); }
+        }
+
         private ICommand _patiendEditSaveCommand;
         public ICommand PatientEditSaveCommand
         {
@@ -196,6 +202,33 @@ namespace RaywattApp.ViewModels
             dest.Firstname = src.Firstname.Trim();
             dest.Birthdate = src.Birthdate;
             dest.Gender = src.Gender;
+        }
+
+        private void Delete()
+        {
+            _log.Debug("Delete Patient");
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["title"] = _l10n["Information"];
+            parameter["message"] = _l10n["Are you sure to delete patient?"];
+            var result = _dialogService.OpenDialog(new ConfirmDialogControl(), parameter);
+
+            if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
+            {
+                Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+                sqlParameters["id"] = Patient.Id;
+                int res = _sqlManager.DeletePatient(sqlParameters);
+
+                if(res == 1)
+                {
+                    CommonUtil.DeleteFolder(Constants.DataRootPath + "\\" + Patient.Id);
+                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
+                }
+                else
+                {
+                    _log.Error("Delete Error : id=" + Patient.Id);
+                }
+            }
         }
     }
 }

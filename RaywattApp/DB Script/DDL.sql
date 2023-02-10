@@ -141,7 +141,7 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case
     CONSTRAINT patient_case_patient_id_fkey FOREIGN KEY (patient_id)
         REFERENCES rv_schema.patient (id) MATCH SIMPLE
         ON UPDATE CASCADE
-        ON DELETE SET NULL
+        ON DELETE CASCADE
 )
 
 TABLESPACE rv_tablespace;

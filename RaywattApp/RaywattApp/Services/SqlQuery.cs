@@ -221,6 +221,11 @@ namespace RaywattApp.Services
         {
             _log.Debug("SetDeleteQuery");
 
+            //DeletePatient
+            _query["DeletePatient"] =
+                $"DELETE FROM rv_schema.patient " +
+                $"WHERE id=@id";
+
             //DeletePatientCase
             _query["DeletePatientCase"] =
                 $"DELETE FROM rv_schema.patient_case " +
