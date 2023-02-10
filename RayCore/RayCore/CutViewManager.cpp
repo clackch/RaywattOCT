@@ -66,26 +66,15 @@ void CCutViewManager::AddRecord(cv::Mat imgCircle, int nFrameIndex) {
 		m_vRecords.at(nFrameIndex) = imgCircle.clone();
 	}
 }
-cv::Mat CCutViewManager::DrawLongitudeImage(int nDrawSamples, int pxFOV) {
-	cv::Mat imgCutView = GetCutViewROI(pxFOV);
-
-	cv::Mat imgMask = cv::Mat(imgCutView.rows, imgCutView.cols, CV_8UC1);
+cv::Mat CCutViewManager::DrawLongitudeImage(int nDrawSamples) {
+	cv::Mat imgMask = cv::Mat(m_imgCutView.rows, m_imgCutView.cols, CV_8UC1);
 	cv::Rect rectMask = cv::Rect(0, 0, nDrawSamples, imgMask.rows);
 	memset(imgMask.data, 0x00, imgMask.cols * imgMask.rows);
 	imgMask(rectMask) = 0x01;
 
-	cv::copyTo(imgCutView, m_imgLongitude, imgMask);
+	cv::copyTo(m_imgCutView, m_imgLongitude, imgMask);
 	
 	return m_imgLongitude;
-}
-cv::Mat CCutViewManager::GetCutViewROI(int length) {
-	cv::Rect rectROI;
-	rectROI.x = 0;
-	rectROI.width = m_imgCutView.cols;
-	rectROI.height = length;
-	rectROI.y = rectROI.height / 2;
-	
-	return m_imgCutView(rectROI);
 }
 int CCutViewManager::GetNumOfGeneratedSamples() {
 	int nFrames = 0;

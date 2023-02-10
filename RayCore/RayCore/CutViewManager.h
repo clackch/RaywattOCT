@@ -18,9 +18,8 @@ public:
 	void GenerateCutView(int nFrameIndex, double degree);
 	void AddRecord(cv::Mat imgCircle, int nFrameIndex);
 
-	cv::Mat DrawLongitudeImage(int nDrawSamples, int pxFOV);
+	cv::Mat DrawLongitudeImage(int nDrawSamples);
 	cv::Mat GetCutView() { return m_imgCutView; }
-	cv::Mat GetCutViewROI(int length);
 	
 	int GetNumOfSamples() { return m_vRecords.size(); }
 	int GetNumOfGeneratedSamples();

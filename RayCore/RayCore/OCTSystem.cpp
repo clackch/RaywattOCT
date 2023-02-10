@@ -528,7 +528,7 @@ void* COCTSystem::GetLongitudeData(double fDegree) {
 	if (pCutView == nullptr) return nullptr;
 
 	pCutView->GenerateCutView(fDegree);
-	cv::Mat imgLongitude = pCutView->DrawLongitudeImage(pCutView->GetNumOfSamples(), 512);
+	cv::Mat imgLongitude = pCutView->DrawLongitudeImage(pCutView->GetNumOfSamples());
 
 	return imgLongitude.data;
 }
@@ -1224,7 +1224,7 @@ LRESULT COCTSystem::OnMsgProcessCutView(WPARAM wParam, LPARAM lParam) {
 	CCutViewManager* pCutView = m_reviewSession[nSession]->GetCutView();
 
 	pCutView->GenerateCutView(m_fDegree);
-	cv::Mat imgCutView = pCutView->DrawLongitudeImage(nDrawSamples, 512);
+	cv::Mat imgCutView = pCutView->DrawLongitudeImage(nDrawSamples);
 
 	int nCurFrame = nDrawSamples + 1;
 	int nTotalFrame = pCutView->GetNumOfSamples();
