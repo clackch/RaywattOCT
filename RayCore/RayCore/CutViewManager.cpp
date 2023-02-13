@@ -1,6 +1,5 @@
 #include "Config.h"
 #include "CutViewManager.h"
-#include "OCTImaging.h"
 #include "Configuration.h"
 
 CCutViewManager::CCutViewManager() {
@@ -10,6 +9,7 @@ CCutViewManager::~CCutViewManager() {
 		m_vRecords.at(i).release();
 	}
 	m_imgCutView.release();
+	m_imgLongitude.release();
 }
 
 void CCutViewManager::Initialize(int nNumOfSamples, cv::Scalar backgroundColor) {
@@ -21,6 +21,7 @@ void CCutViewManager::Initialize(int nNumOfSamples, cv::Scalar backgroundColor) 
 	m_imgCutView.release();
 	m_imgCutView.create(1024, nNumOfSamples, CV_8UC3);
 	m_imgCutView.setTo(backgroundColor);
+	m_imgLongitude = m_imgCutView.clone();
 }
 void CCutViewManager::GenerateCutView(double degree) {
 
@@ -60,20 +61,29 @@ void CCutViewManager::GenerateCutView(int nFrameIndex, double degree) {
 		}
 	}
 }
-void CCutViewManager::AddRecord(unsigned short* pBuffer, COCTImaging* pImaging, int nFrameIndex) {
-	pImaging->Process(pBuffer);
-	cv::Mat imgCircle = pImaging->GetCircleImage().clone();
-
-	m_vRecords.at(nFrameIndex) = imgCircle;
+void CCutViewManager::AddRecord(cv::Mat imgCircle, int nFrameIndex) {
+	if (nFrameIndex >= 0 && nFrameIndex < m_vRecords.size()) {
+		m_vRecords.at(nFrameIndex) = imgCircle.clone();
+	}
 }
-cv::Mat CCutViewManager::GetCutViewROI(int length) {
-	cv::Rect rectROI;
-	rectROI.x = 0;
-	rectROI.width = m_imgCutView.cols;
-	rectROI.height = length;
-	rectROI.y = rectROI.height / 2;
+cv::Mat CCutViewManager::DrawLongitudeImage(int nDrawSamples) {
+	cv::Mat imgMask = cv::Mat(m_imgCutView.rows, m_imgCutView.cols, CV_8UC1);
+	cv::Rect rectMask = cv::Rect(0, 0, nDrawSamples, imgMask.rows);
+	memset(imgMask.data, 0x00, imgMask.cols * imgMask.rows);
+	imgMask(rectMask) = 0x01;
+
+	cv::copyTo(m_imgCutView, m_imgLongitude, imgMask);
 	
-	return m_imgCutView(rectROI);
+	return m_imgLongitude;
+}
+int CCutViewManager::GetNumOfGeneratedSamples() {
+	int nFrames = 0;
+
+	for (nFrames = 0; nFrames < m_vRecords.size(); nFrames++) {
+		if (m_vRecords.at(nFrames).empty()) return nFrames;
+	}
+
+	return nFrames;
 }
 void CCutViewManager::DrawCutViewGuideLine(cv::Mat& img, double degree) {
 	double xDirection;

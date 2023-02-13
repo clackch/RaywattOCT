@@ -106,7 +106,7 @@ namespace RaywattOCT.ViewModel
         public double Degree
         {
             get { return degree; }
-            set { degree = value; OnPropertyChanged(nameof(Degree)); RayCoreWrapper.RaySetProperty(RayCoreWrapper.Property.Degree, degree); }
+            set { degree = value; OnPropertyChanged(nameof(Degree)); RayCoreWrapper.RaySetProperty(RayCoreWrapper.Property.LongitudeDegree, degree); }
         }
 
         private string systemMessage = "Press Initialize Button";
@@ -383,7 +383,7 @@ namespace RaywattOCT.ViewModel
                 Marshal.GetFunctionPointerForDelegate(CBCrossSection),
                 Marshal.GetFunctionPointerForDelegate(CBLongitude));
 
-            RayCoreWrapper.RaySetProperty(RayCoreWrapper.Property.BackgroundColor, IMAGE_BACKGROUND_COLOR);
+            RayCoreWrapper.RaySetProperty(RayCoreWrapper.Property.LongitudeBackgroundColor, IMAGE_BACKGROUND_COLOR);
         }
 
         private void timerUpdateTime(object sender, EventArgs e)
@@ -550,14 +550,14 @@ namespace RaywattOCT.ViewModel
             handleWorkDone((RayCoreWrapper.RayCallbackRequest)request, (RayCoreWrapper.RayWorkItem)response);
         }
 
-        private void OnRecvCrossSection(IntPtr data, int width, int height, int ch, int frameInfo)
+        private void OnRecvCrossSection(int session, IntPtr data, int width, int height, int ch, int frameInfo)
         {
             Mat imgRecv = byteMemoryToCvMat(data, width, height, ch);
             imgCrossSection = imgRecv.Clone();
             crossSectionFrameInfo = new RayCoreWrapper.FrameInfo(frameInfo);
         }
 
-        private void OnRecvLongitude(IntPtr data, int width, int height, int ch, int frameInfo)
+        private void OnRecvLongitude(int session, IntPtr data, int width, int height, int ch, int frameInfo)
         {
             Mat imgRecv = byteMemoryToCvMat(data, width, height, ch);
             imgLongitude = imgRecv.Clone();

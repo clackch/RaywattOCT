@@ -92,11 +92,9 @@ namespace RaywattApp.ViewModels.File
 
         private void FileSave()
         {
-
-
-
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["title"] = _l10n["Information"];
+            parameter["fileExport"] = FileExport;
             parameter["message"] = _l10n["Done"];
             var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
             Close();

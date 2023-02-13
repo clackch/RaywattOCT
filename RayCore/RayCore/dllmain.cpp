@@ -86,7 +86,7 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
         return octSystem.SetContrast(value);
     case RayProperty::LongitudeBackgroundColor:
         return octSystem.SetLongitudeBackgroundColor(value);
-    case RayProperty::Degree:
+    case RayProperty::LongitudeDegree:
         return octSystem.SetDegree(value);
     default:
         return RayError::InvalidArgument;
@@ -103,7 +103,7 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return octSystem.GetContrast();
     case RayProperty::LongitudeBackgroundColor:
         return octSystem.GetLongitudeBackgroundColor();
-    case RayProperty::Degree:
+    case RayProperty::LongitudeDegree:
         return octSystem.GetDegree();
     case RayProperty::MotorOnOff:
         return octSystem.GetMotorOnOff();
@@ -117,6 +117,20 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return config.volume.size;
     case RayProperty::VolumeDepth:
         return octSystem.GetVolumeDepth();
+    case RayProperty::ImageWidth:
+        return octSystem.GetImageWidth();
+    case RayProperty::ImageHeight:
+        return octSystem.GetImageHeight();
+    case RayProperty::ImageChannels:
+        return octSystem.GetImageChannels();
+    case RayProperty::ImageDepth:
+        return octSystem.GetImageDepth();
+    case RayProperty::LongitudeImageWidth:
+        return octSystem.GetLongitudeImageWidth();
+    case RayProperty::LongitudeImageHeight:
+        return octSystem.GetLongitudeImageHeight();
+    case RayProperty::LongitudeImageChannels:
+        return octSystem.GetLongitudeImageChannels();
     default:
         return (int)RayError::InvalidArgument;
     }
@@ -124,6 +138,19 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
 
 _declspec(dllexport) void* RayGetVolumeData() {
     return octSystem.GetVolumeData();
+}
+
+_declspec(dllexport) RayError RayOpenImage(char* strFilePath) {
+    return octSystem.OpenImage(strFilePath);
+}
+_declspec(dllexport) RayError RayCloseImage() {
+    return octSystem.CloseImage();
+}
+_declspec(dllexport) void* RayGetImageData(int nFrame) {
+    return octSystem.GetImageData(nFrame);
+}
+_declspec(dllexport) void* RayGetLongitudeData(double fDegree) {
+    return octSystem.GetLongitudeData(fDegree);
 }
 
 BOOL APIENTRY DllMain( HMODULE hModule,

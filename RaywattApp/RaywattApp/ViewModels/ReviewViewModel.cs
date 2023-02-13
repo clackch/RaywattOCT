@@ -59,7 +59,7 @@ namespace RaywattApp.ViewModels
         public double Degree
         {
             get { return degree; }
-            set { degree = value; OnPropertyChanged(nameof(Degree)); RaySetProperty(Property.Degree, degree); }
+            set { degree = value; OnPropertyChanged(nameof(Degree)); RaySetProperty(Property.LongitudeDegree, degree); }
         }
 
         // size from view

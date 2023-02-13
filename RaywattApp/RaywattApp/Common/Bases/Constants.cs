@@ -35,6 +35,10 @@
         public const string SettingDatabasePage = "Views/Setting/SettingDatabasePage.xaml";
         public const string SettingPhysicianPage = "Views/Setting/SettingPhysicianPage.xaml";
 
+        //Resolution
+        public const int ApplicationWidth = 1280;
+        public const int ApplicationHeight = 1024;
+
         //Max Length
         public const int MaxPatientId = 9;
         public const int MaxPatientLastname = 20;

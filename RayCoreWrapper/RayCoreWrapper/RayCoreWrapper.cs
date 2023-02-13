@@ -27,13 +27,20 @@ namespace RaywattOCT
             Brightness,
             Contrast,
             LongitudeBackgroundColor,
-            Degree,
+            LongitudeDegree,
             MotorOnOff,
             IsPaused,
             LoadCatheterTime,
             VolumeWidth,
             VolumeHeight,
-            VolumeDepth
+            VolumeDepth,
+            ImageWidth,
+            ImageHeight,
+            ImageChannels,
+            ImageDepth,
+            LongitudeImageWidth,
+            LongitudeImageHeight,
+            LongitudeImageChannels
         }
 
         public enum RayCallbackRequest : int
@@ -57,7 +64,6 @@ namespace RaywattOCT
         {
             Unknown = 0,
             SaveRawData,
-            UpdateCutView,
             GenerateVolume,
             LumenDetection,
             AutoCalibration,
@@ -138,5 +144,13 @@ namespace RaywattOCT
         public static extern double RayGetProperty(Property property);
         [DllImport("RayCore.dll")]
         public static extern IntPtr RayGetVolumeData();
+        [DllImport("RayCore.dll")]
+        public static extern int RayOpenImage(string filePath);
+        [DllImport("RayCore.dll")]
+        public static extern int RayCloseImage();
+        [DllImport("RayCore.dll")]
+        public static extern IntPtr RayGetImageData(int frame);
+        [DllImport("RayCore.dll")]
+        public static extern IntPtr RayGetLongitudeData(double degree);
     }
 }

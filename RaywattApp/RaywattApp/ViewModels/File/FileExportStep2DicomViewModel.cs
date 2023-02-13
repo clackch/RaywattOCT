@@ -70,29 +70,22 @@ namespace RaywattApp.ViewModels.File
         {
             _log.Debug("Export");
 
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["title"] = _l10n["Information"];
+            parameter["fileExport"] = FileExport;
+
             //TO-DO : CD 일 경우, Path 부분 추가
             if (String.IsNullOrEmpty(FileExport.ExternalDrivePath))
             {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["title"] = _l10n["Information"];
                 parameter["message"] = _l10n["Path is required"];
                 var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
             }
             else
             {
-                DicomFileSave();
-
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["title"] = _l10n["Information"];
                 parameter["message"] = _l10n["Done"];
                 var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
                 Close();
             }
-        }
-
-        private void DicomFileSave()
-        {
-
         }
     }
 }

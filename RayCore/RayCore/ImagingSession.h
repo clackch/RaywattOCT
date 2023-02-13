@@ -1,11 +1,15 @@
 #pragma once
 
 #include "define.h"
+#include "Config.h"
+#include <opencv2/opencv.hpp>
 
 class CMessageService;
 class COCTImaging;
 class CSimulateDevice;
 class IDataManager;
+class CThread;
+class CCutViewManager;
 class CImagingSession
 {
 private:
@@ -18,6 +22,9 @@ private:
 
 	bool m_deleteData;
 
+	CThread* m_pThreadUpdateCutView;
+	CCutViewManager* m_pCutView;
+
 private:
 	CImagingSession(CMessageService* pMsg, int nSession, bool deleteData = true);
 public:
@@ -27,9 +34,13 @@ public:
 	static CImagingSession* CreateSession(CMessageService* pMsg, int nSession, const char* strFilePath);
 	static COCTImaging* CreateColorImaging(CMessageService* msg);
 
+	void EnableCutView(cv::Scalar backgroundColor);
+
 	IDataManager* GetDataManager() { return m_pDataManager; }
 	COCTImaging* GetImaging() { return m_pImaging; }
-	void EnableWorkItem(RayWorkItem item, bool enable);
+	CCutViewManager* GetCutView() { return m_pCutView; }
+
+	// Asynchronous functions
 	int Start();
 	int Stop();
 	bool IsPaused();
@@ -38,8 +49,18 @@ public:
 	void NextFrame();
 	void MoveToFrame(int nFrame);
 
+	// Synchronous functions
+	UINT GetImageWidth();
+	UINT GetImageHeight();
+	UINT GetImageChannels();
+	UINT GetImageDepth();
+	void* GetImageData(int nFrame);
+	UINT GetCutViewWidth();
+	UINT GetCutViewHeight();
+	UINT GetCutViewChannels();
+
 private:
 	static CImagingSession* createSession(CMessageService* pMsg, int nSession, IDataManager* pData, bool deleteData);
-	
+	static UINT threadUpdateCutView(LPVOID param);	
 };
 

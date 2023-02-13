@@ -1,9 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using log4net;
+using OpenCvSharp;
+using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Util;
+using RaywattApp.Models;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace RaywattApp.ViewModels.Dialog
 {
@@ -15,13 +19,16 @@ namespace RaywattApp.ViewModels.Dialog
         private double _progress;
 
         [ObservableProperty]
-        Dictionary<string, string> _files;
+        List<string> _files;
 
         [ObservableProperty]
-        private string? _filePath;
+        private string? _dbFilePath;
 
         [ObservableProperty]
         private string? _contents;
+
+        [ObservableProperty]
+        private FileExport _fileExport;
 
         [ObservableProperty]
         private bool enableDone = false;
@@ -30,26 +37,86 @@ namespace RaywattApp.ViewModels.Dialog
         {
             Dictionary<string, Object> data = (Dictionary<string, Object>)parameter;
             Title = data["title"].ToString();
-            Files = (Dictionary<string,string>)data["files"];
+            Files = (List<string>)data["files"];
 
-            if (data.ContainsKey("filePath"))
-                FilePath = data["filePath"].ToString();
-            if (data.ContainsKey("contents"))
-                Contents = data["contents"].ToString();
+            if (data.ContainsKey("fileExport"))
+                FileExport = (FileExport) data["fileExport"];
 
-            FileCopy();
+            if (Files.Count == 0)
+            {
+                Progress = 100;
+                EnableDone = true;
+                return;
+            }
+
+            if (FileExport != null) {
+                if (FileExport.Type == Constants.ExportTypeNative)
+                {
+                    if (data.ContainsKey("dbFilePath"))
+                        DbFilePath = data["dbFilePath"].ToString();
+                    if (data.ContainsKey("contents"))
+                        Contents = data["contents"].ToString();
+                    FileCopyNative();
+                }
+                else if (FileExport.Type == Constants.ExportTypeDicom)
+                {
+                    FileSaveDicom();
+                }
+                else if (FileExport.Type == Constants.ExportTypeStandard) 
+                {
+                }
+            }
         }
 
-        private async void FileCopy()
+        private async void FileCopyNative()
         {
-            if (Files.Count == 0)
-                Progress = 100;
-            else
-                await CommonUtil.CopyFiles(Files, prog => Progress = prog);
+            Dictionary<string, string> fileCopyInfo = new Dictionary<string, string>();
+            foreach (string file in Files)
+            {
+                string fileName = CommonUtil.GetFileName(file);
+                string dstFilePath = FileExport.ExternalDrivePath + "\\" + fileName;
+                fileCopyInfo.Add(file, dstFilePath);
+            }
 
-            if(!String.IsNullOrEmpty(FilePath) && !String.IsNullOrEmpty(Contents))
-                CommonUtil.Encryptor(FilePath, Contents);
+            await CommonUtil.CopyFiles(fileCopyInfo, prog => Progress = prog);
 
+            if (!String.IsNullOrEmpty(DbFilePath) && !String.IsNullOrEmpty(Contents))
+                CommonUtil.Encryptor(DbFilePath, Contents);
+
+            EnableDone = true;
+        }
+
+        private async void FileSaveDicom()
+        {
+            // DICOMDIRInputFolder();
+            for (int i=0; i<Files.Count; i++)
+            {
+                const string dicomPrefix = "IMG";
+
+                List<Mat> convertedImages = new List<Mat>();
+                Mat imgLongitude = await CommonUtil.ConvertImage(Files[i], FileExport.BookmarkedFrames, convertedImages);
+                Progress = (i + 1) / (double)Files.Count * 100.0;
+
+                List<Mat> exportedImages = new List<Mat>(convertedImages.Count);
+                // DicomStart();
+                // DicomImageStart(convertedImages.Count);
+                for (int j = 0; j < convertedImages.Count; j++)
+                {
+                    Mat imgExport = CommonUtil.MakeImageForExport(convertedImages[0], imgLongitude, imgLongitude);
+                    exportedImages.Add(imgExport);
+                    // DicomAddImage(imgExport.Cols, imgExport.Rows, imgExport.Data);
+                }
+                // DicomImageFinish();
+
+                // SetProperty();
+                // SetSequenceProperty();
+
+                string filePath = dicomPrefix + string.Format("{0:0000}", i);
+                // DicomSave(filePath);
+
+                // DICOMDIRInputFile(filePath);
+            }
+            // DICOMDIRWrite();
             EnableDone = true;
         }
     }

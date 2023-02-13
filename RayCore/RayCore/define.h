@@ -26,13 +26,20 @@ enum class RayProperty {
 	Brightness,
 	Contrast,
 	LongitudeBackgroundColor,
-	Degree,
+	LongitudeDegree,
 	MotorOnOff,
 	IsPaused,
 	LoadCatheterTime,
 	VolumeWidth,
 	VolumeHeight,
-	VolumeDepth
+	VolumeDepth,
+	ImageWidth,
+	ImageHeight,
+	ImageChannels,
+	ImageDepth,
+	LongitudeImageWidth,
+	LongitudeImageHeight,
+	LongitudeImageChannels
 };
 
 enum class RayCallbackRequest {
@@ -53,7 +60,6 @@ enum class RayScannerState {
 enum class RayWorkItem {
 	Unknown = 0,
 	SaveRawData,
-	UpdateCutView,
 	GenerateVolume,
 	LumenDetection,
 	AutoCalibration,

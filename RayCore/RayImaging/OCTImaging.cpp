@@ -74,6 +74,10 @@ void COCTImaging::Initialize(tstring calibFile) {
 	releaseCircularizeMap();
 	initCircularizeMap(config.nOutputLength, config.nBScan, config.nOutputLength, config.nCircleSize, config.nCircleSize, 2.0f);
 
+	m_nWidth = config.nCircleSize;
+	m_nHeight = config.nCircleSize;
+	m_nChannels = 3;	// RGB
+
 	loadLUT("LUT.csv");
 }
 void COCTImaging::Process(USHORT* fringes) {
