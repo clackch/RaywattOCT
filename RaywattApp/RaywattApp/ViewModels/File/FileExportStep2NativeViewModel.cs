@@ -99,15 +99,13 @@ namespace RaywattApp.ViewModels.File
         private void FileSave()
         {
             string exportPrefix = Constants.FileNamePrefix + DateTime.Now.ToString("yyyyMMddHHmmss");
-            string fileName = exportPrefix;
-            string filePath = FileExport.ExternalDrivePath + "\\" + fileName + "." + Constants.FileExtension;
-            Dictionary<string, string> exportfiles = new Dictionary<string, string>();
+            string dbFilePath = FileExport.ExternalDrivePath + "\\" + exportPrefix + "." + Constants.FileExtension;
+            List<string> exportfiles = new List<string>();
 
             int cnt = 1;
-            while (System.IO.File.Exists(filePath))
+            while (System.IO.File.Exists(dbFilePath))
             {
-                fileName = exportPrefix + "(" + cnt + ")";
-                filePath = FileExport.ExternalDrivePath + "\\" + fileName + "." + Constants.FileExtension;
+                dbFilePath = FileExport.ExternalDrivePath + "\\" + exportPrefix + "(" + cnt + ")" + "." + Constants.FileExtension;
                 cnt++;
             }
 
@@ -152,7 +150,7 @@ namespace RaywattApp.ViewModels.File
                     {
                         patientCase.ImageSize = CommonUtil.GetFileSize(patientCase.ImageFullPath);
                         fileFormat.Size += patientCase.ImageSize;
-                        exportfiles.Add(patientCase.ImageFullPath, FileExport.ExternalDrivePath + "\\" + patientCase.Image);
+                        exportfiles.Add(patientCase.ImageFullPath);
 
                         if (FileExport.PatientInfoAnonymize)
                         {
@@ -178,7 +176,7 @@ namespace RaywattApp.ViewModels.File
             parameter["title"] = _l10n["File Export"];
             parameter["fileExport"] = FileExport;
             parameter["files"] = exportfiles;
-            parameter["filePath"] = filePath;
+            parameter["dbFilePath"] = dbFilePath;
             parameter["contents"] = JsonConvert.SerializeObject(fileFormat, Formatting.Indented);
             var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter);
 
@@ -189,7 +187,7 @@ namespace RaywattApp.ViewModels.File
             
         }
 
-        private void RemoveData(Dictionary<string, string> exportfiles)
+        private void RemoveData(List<string> exportfiles)
         {
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             int cnt = 0, totalCnt = FileExport.SelectedItem.Count;
@@ -205,7 +203,7 @@ namespace RaywattApp.ViewModels.File
             {
                 foreach (var file in exportfiles)
                 {
-                    System.IO.File.Delete(file.Key);
+                    System.IO.File.Delete(file);
                 }
             }
             else
