@@ -10,6 +10,8 @@ using RaywattApp.Common.Bases;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using RaywattApp.Models;
+using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.Common.Util
 {
@@ -238,6 +240,81 @@ namespace RaywattApp.Common.Util
 
                 total_read += total_read_for_file;
             }
+        }
+
+        public static async Task<Mat> ConvertImage(string filePath, List<int> bookmarkedIndices, List<Mat> convertedImages)
+        {
+            RayOpenImage(filePath);
+
+            int numOfFrames = (int)RayGetProperty(Property.ImageDepth);
+            int width = (int)RayGetProperty(Property.ImageWidth);
+            int height = (int)RayGetProperty(Property.ImageHeight);
+            int channels = (int)RayGetProperty(Property.ImageChannels);
+
+            // convert all frames
+            for (int index = 0; index < numOfFrames; index++)
+            {
+                await Task.Run(() => {
+                    IntPtr data = RayGetImageData(index);
+                    Mat img = CommonUtil.ByteMemoryToCvMat(data, width, height, channels).Clone();
+                    if (convertedImages != null)
+                    {
+                        if (bookmarkedIndices == null || bookmarkedIndices.Contains(index))
+                        {
+                            convertedImages.Add(img);
+                        }
+                    }
+                });
+            }
+
+            // get longitude from core
+            width = (int)RayGetProperty(Property.LongitudeImageWidth);
+            height = (int)RayGetProperty(Property.LongitudeImageHeight);
+            channels = (int)RayGetProperty(Property.LongitudeImageChannels);
+            IntPtr data = RayGetLongitudeData(45);
+            Mat imgLongitude = CommonUtil.ByteMemoryToCvMat(data, width, height, channels).Clone();
+
+            RayCloseImage();
+
+            return imgLongitude;
+        }
+
+        public static Mat MakeImageForExport(Mat crossSection, Mat longitude, Mat lumenProfile) {
+            Mat imgExport = new Mat();
+            imgExport.Create(Constants.ApplicationHeight, Constants.ApplicationWidth, MatType.CV_8UC3);
+            imgExport.SetTo(0x00);
+
+            if (crossSection == null) return imgExport;
+
+            Size szRemain = new Size(imgExport.Width, imgExport.Height);
+            Size szLongitudeInfo = new Size(imgExport.Width, 30);
+            Size szLongitude = new Size(imgExport.Width, (imgExport.Height / 2 - szLongitudeInfo.Height) / 2);
+            if (longitude != null)
+            {
+                Mat imgLongitude = new Mat();
+                Cv2.Resize(longitude, imgLongitude, szLongitude);
+                Cv2.CopyTo(imgLongitude, imgExport[new Rect(0, szRemain.Height - szLongitude.Height, szLongitude.Width, szLongitude.Height)]);
+                szRemain.Height -= szLongitude.Height;
+
+                // draw longitude info
+                szRemain.Height -= szLongitudeInfo.Height;
+            }
+            if (lumenProfile != null)
+            {
+                Mat imgLumenProfile = new Mat();
+                Cv2.Resize(lumenProfile, imgLumenProfile, szLongitude);
+                Cv2.CopyTo(imgLumenProfile, imgExport[new Rect(0, szRemain.Height - szLongitude.Height, szLongitude.Width, szLongitude.Height)]);
+
+                szRemain.Height -= szLongitude.Height;
+            }
+
+            int diameter = Math.Min(szRemain.Width, szRemain.Height);
+
+            Mat imgCrossSection = new Mat();
+            Cv2.Resize(crossSection, imgCrossSection, new Size(diameter, diameter));
+            Cv2.CopyTo(imgCrossSection, imgExport[new Rect((szRemain.Width - diameter) / 2, 0, diameter, diameter)]);
+
+            return imgExport;
         }
 
         public static async Task CopyStream(Stream from, Stream to, Action<long> progress)
