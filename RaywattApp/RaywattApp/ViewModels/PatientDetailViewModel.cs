@@ -321,7 +321,7 @@ namespace RaywattApp.ViewModels
 
                 if(resDel == 1)
                 {
-                    System.IO.File.Delete(patientCase.Image);
+                    System.IO.File.Delete(patientCase.ImageFullPath);
                 }
                 else
                 {
@@ -421,7 +421,7 @@ namespace RaywattApp.ViewModels
             if (patientCase == null)
                 return;
 
-            RayStartReview(patientCase.Image);
+            RayStartReview(patientCase.ImageFullPath);
 
             Dictionary<string, Object> parameter = new Dictionary<string, Object>();
             parameter["patient"] = Patient;

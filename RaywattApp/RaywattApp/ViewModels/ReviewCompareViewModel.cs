@@ -70,7 +70,7 @@ namespace RaywattApp.ViewModels
 
                     if (ReviewStatus.SelectedPatientCase != null)
                     {
-                        RayStartCompare(ReviewStatus.SelectedPatientCase.Image);
+                        RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath);
                     }
                 }
                 else
@@ -152,7 +152,7 @@ namespace RaywattApp.ViewModels
             ExpandLeftUpMenu = false;
 
             if (ReviewStatus.SelectedPatientCase != null) {
-                RayStartCompare(ReviewStatus.SelectedPatientCase.Image);                
+                RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath);                
             }
         }
 

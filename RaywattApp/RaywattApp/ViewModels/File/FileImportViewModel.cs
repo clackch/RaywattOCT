@@ -333,7 +333,7 @@ namespace RaywattApp.ViewModels.File
                             string destPath = CommonUtil.CreateFolder(Constants.DataRootPath + "\\" + patientCase.PatientId) + "\\" + patientCase.Image;
 
                             importfiles.Add(srcPath, destPath);
-                            sqlParameters["image"] = destPath;
+                            sqlParameters["image"] = patientCase.Image;
                         }
                         else
                         {
@@ -355,7 +355,7 @@ namespace RaywattApp.ViewModels.File
         private void SetCondition()
         {
             //TO-DO 설치할 때, 설치하는 경로의 드라이브 정보 가져오도록 처리 필요
-            string configDrive = "C:\\";
+            string configDrive = Constants.SystemRootPath + "\\";
 
             DriveInfo[] allDrives = DriveInfo.GetDrives();
             foreach (DriveInfo drive in allDrives)
@@ -368,7 +368,7 @@ namespace RaywattApp.ViewModels.File
             }
 
             if (DiskType == null)
-                DiskType = Constants.FileDiskCd;
+                DiskType = Constants.FileDiskExternal;
         }
 
         private void CheckDrive(object sender, EventArgs e)

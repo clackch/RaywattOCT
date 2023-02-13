@@ -33,10 +33,6 @@ namespace RaywattApp.ViewModels.File
         {
             _sqlManager = sqlManager;
             _dialogService = dialogService;
-
-            MaxFrameWidth = Constants.MaxFrameWidth;
-            MinFrameWidth = Constants.MinFrameWidth;
-            FrameTickFrequency = Constants.FrameTickFrequency;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -56,23 +52,11 @@ namespace RaywattApp.ViewModels.File
         {
             _log.Debug("SetCondition");
 
-            if (FileExport.ImageType == null)
-                FileExport.ImageType = Constants.ExportImageTypeMultiframe;
-
-            if (FileExport.Modality == null)
-                FileExport.Modality = Constants.ExportModalityOCT;
-
             if (FileExport.Measurements == null)
                 FileExport.Measurements = Constants.ExportMeasurementShowAll;
 
-            if (FileExport.Format == null)
-                FileExport.Format = Constants.ExportFormatRGB;
-
-            if (FileExport.FrameWidth == 0)
-                FileExport.FrameWidth = Constants.MinFrameWidth;
-
             if (FileExport.DiskType == null)
-                DiskType = Constants.FileDiskCd;
+                DiskType = Constants.FileDiskExternal;
             else
                 DiskType = FileExport.DiskType;
 

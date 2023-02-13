@@ -209,6 +209,16 @@ namespace RaywattApp.Common.Util
             return directoryInfo.FullName;
         }
 
+        public static void RenameFolder(string oldPath, string newPath)
+        {
+            Directory.Move(oldPath, newPath);
+        }
+
+        public static void DeleteFolder(string path)
+        {
+            Directory.Delete(path, true);
+        }
+
         public static async Task CopyFiles(Dictionary<string, string> files, Action<double> progressCallback)
         {
             long total_size = files.Keys.Select(x => new FileInfo(x).Length).Sum();

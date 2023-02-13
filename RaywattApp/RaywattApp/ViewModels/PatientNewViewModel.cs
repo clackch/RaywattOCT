@@ -12,6 +12,7 @@ using log4net;
 using System.Windows.Navigation;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Views.Dialog;
+using RaywattApp.Common.Util;
 
 namespace RaywattApp.ViewModels
 {
@@ -153,6 +154,8 @@ namespace RaywattApp.ViewModels
 
             if(nRows == 1)
             {
+                CommonUtil.CreateFolder(Constants.DataRootPath + "\\" + Patient.Id);
+
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["patient"] = Patient;
                 SetListStatusInit();

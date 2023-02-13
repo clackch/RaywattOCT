@@ -48,11 +48,19 @@
                 <RadioButton IsChecked="{Binding GenderCodeEdit, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.GenderFemale}}" Content="{Binding [Female], Source={StaticResource L10N}}"></RadioButton>
             </StackPanel>
         </Grid>
-        
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" >
-            <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
-            <Button Style="{StaticResource ButtonImportant}" Command="{Binding PatientEditSaveCommand}" Content="{Binding [OK], Source={StaticResource L10N}}" Width="50"/>
-        </StackPanel>
 
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" HorizontalAlignment="Left" >
+                <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding DeleteCommand}" Content="{Binding [Delete], Source={StaticResource L10N}}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" >
+                <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+                <Button Style="{StaticResource ButtonImportant}" Command="{Binding PatientEditSaveCommand}" Content="{Binding [OK], Source={StaticResource L10N}}" Width="50"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Page>

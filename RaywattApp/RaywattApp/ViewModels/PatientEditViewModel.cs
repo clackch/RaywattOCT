@@ -5,12 +5,12 @@ using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
+using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Input;
 using System.Windows.Navigation;
 
@@ -40,6 +40,12 @@ namespace RaywattApp.ViewModels
         public ICommand CancelCommand
         {
             get { return this._cancelCommand ?? (this._cancelCommand = new RelayCommand(Cancel)); }
+        }
+
+        private ICommand _deleteCommand;
+        public ICommand DeleteCommand
+        {
+            get { return this._deleteCommand ?? (this._deleteCommand = new RelayCommand(Delete)); }
         }
 
         private ICommand _patiendEditSaveCommand;
@@ -139,6 +145,8 @@ namespace RaywattApp.ViewModels
 
             if (nRows == 1)
             {
+                CommonUtil.RenameFolder(Constants.DataRootPath + "\\" + Patient.Id.Trim(), Constants.DataRootPath + "\\" + PatientEdit.Id);
+
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["patient"] = PatientEdit;
                 SetDetailStatusInit();
@@ -194,6 +202,33 @@ namespace RaywattApp.ViewModels
             dest.Firstname = src.Firstname.Trim();
             dest.Birthdate = src.Birthdate;
             dest.Gender = src.Gender;
+        }
+
+        private void Delete()
+        {
+            _log.Debug("Delete Patient");
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["title"] = _l10n["Information"];
+            parameter["message"] = _l10n["Are you sure to delete patient?"];
+            var result = _dialogService.OpenDialog(new ConfirmDialogControl(), parameter);
+
+            if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
+            {
+                Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+                sqlParameters["id"] = Patient.Id;
+                int res = _sqlManager.DeletePatient(sqlParameters);
+
+                if(res == 1)
+                {
+                    CommonUtil.DeleteFolder(Constants.DataRootPath + "\\" + Patient.Id);
+                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
+                }
+                else
+                {
+                    _log.Error("Delete Error : id=" + Patient.Id);
+                }
+            }
         }
     }
 }
