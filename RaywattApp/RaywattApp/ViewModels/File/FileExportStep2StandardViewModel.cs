@@ -52,11 +52,8 @@ namespace RaywattApp.ViewModels.File
         {
             _log.Debug("SetCondition");
 
-            if (FileExport.Pullback == null)
-                FileExport.Pullback = Constants.ExportPullbackAVI;
-
-            if (FileExport.StillFrame == null)
-                FileExport.StillFrame = Constants.ExportStillFrameJPEG;
+            if (FileExport.StandardFormat == null)
+                FileExport.StandardFormat = Constants.ExportStandardFormatAVI;
 
             if (FileExport.Measurements == null)
                 FileExport.Measurements = Constants.ExportMeasurementShowAll;
@@ -100,7 +97,7 @@ namespace RaywattApp.ViewModels.File
             parameter["title"] = _l10n["Information"];
             parameter["fileExport"] = FileExport;
             parameter["patientCases"] = patientCases;
-            var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+            var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter);
             Close();
         }
     }

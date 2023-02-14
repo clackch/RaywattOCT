@@ -61,10 +61,7 @@ namespace RaywattApp.Models
         private bool includeRegionCalibration; // Include Region Calibration(Calibrated images only)
 
         [ObservableProperty]
-        private string pullback; //AVI, TIFF
-
-        [ObservableProperty]
-        private string stillFrame; //JPEG, Bitmap, TIFF
+        private string standardFormat; //AVI, JPEG, Bitmap, TIFF
 
         [ObservableProperty]
         private bool angioView; //Advanced View - Angio Co-Registration

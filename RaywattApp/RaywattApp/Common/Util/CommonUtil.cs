@@ -328,6 +328,16 @@ namespace RaywattApp.Common.Util
             return imgExport;
         }
 
+        public static void SaveStillFrame(Mat image, string rootPath, string fileName, string format) 
+        {
+            string extension = ".bmp";
+            if (format == Constants.ExportStandardFormatJPEG) extension = ".jpg";
+
+            string filePath = rootPath + "\\" + fileName + extension;
+
+            Cv2.ImWrite(filePath, image);
+        }
+
         public static async Task CopyStream(Stream from, Stream to, Action<long> progress)
         {
             int buffer_size = 1024 * 1024; // 1MB buffer

@@ -8,6 +8,7 @@ using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using System;
 using System.Collections.Generic;
+using RaywattApp.Common.File;
 
 namespace RaywattApp.ViewModels.Dialog
 {
@@ -59,6 +60,7 @@ namespace RaywattApp.ViewModels.Dialog
                 }
                 else if (FileExport.Type == Constants.ExportTypeStandard) 
                 {
+                    FileSaveStandard();
                 }
 
                 if (FileExport.DiskType == Constants.FileDiskCd)
@@ -95,21 +97,29 @@ namespace RaywattApp.ViewModels.Dialog
                 const string dicomPrefix = "IMG";
                 double progressConvert = 100 / PatientCases.Count;
 
-                List<Mat> convertedImages = new List<Mat>();
-                Mat imgLongitude = await CommonUtil.ConvertImage(PatientCases[i].ImageFullPath, FileExport.BookmarkedFrames, convertedImages, prog => Progress += prog, progressConvert);
+                List<int> exportIndices = null;
+                if (FileExport.Material == Constants.ExportMaterialCurrent)
+                {
+                    exportIndices = new List<int>();
+                    exportIndices.Add(FileExport.CurrentFrame);
+                }
+                else if (FileExport.Material == Constants.ExportMaterialBookmarked)
+                {
+                    exportIndices = FileExport.BookmarkedFrames;
+                }
 
-                List<Mat> exportedImages = new List<Mat>(convertedImages.Count);
+                List<Mat> convertedImages = new List<Mat>();
+                Mat imgLongitude = await CommonUtil.ConvertImage(PatientCases[i].ImageFullPath, exportIndices, convertedImages, prog => Progress += prog, progressConvert);
 
                 //Start
                 RayExportWrapper.DicomStart();
 
                 //Image
                 RayExportWrapper.DicomImageStart(convertedImages.Count);
-                for (int j = 0; j < convertedImages.Count; j++)
+                for (int frame = 0; frame < convertedImages.Count; frame++)
                 {
-                    Mat imgExport = CommonUtil.MakeImageForExport(convertedImages[j], imgLongitude, imgLongitude);
+                    Mat imgExport = CommonUtil.MakeImageForExport(convertedImages[frame], imgLongitude, imgLongitude);
                     Cv2.CvtColor(imgExport, imgExport, ColorConversionCodes.RGB2BGR);
-                    exportedImages.Add(imgExport);
                     RayExportWrapper.DicomAddImage(imgExport.Cols, imgExport.Rows, imgExport.Data);
                 }
                 RayExportWrapper.DicomImageFinish();
@@ -126,6 +136,49 @@ namespace RaywattApp.ViewModels.Dialog
             }
 
             DICOMDIRWrite(dicomDirFolder);
+
+            Progress = 100;
+            EnableDone = true;
+        }
+
+        private async void FileSaveStandard()
+        {
+            for (int i = 0; i < PatientCases.Count; i++)
+            {
+                double progressConvert = 100 / PatientCases.Count;
+
+                List<int> exportIndices = null;
+                if (FileExport.Material == Constants.ExportMaterialCurrent)
+                {
+                    exportIndices = new List<int>();
+                    exportIndices.Add(FileExport.CurrentFrame);
+                }
+                else if (FileExport.Material == Constants.ExportMaterialBookmarked)
+                {
+                    exportIndices = FileExport.BookmarkedFrames;
+                }
+
+                List<Mat> convertedImages = new List<Mat>();
+                Mat imgLongitude = await CommonUtil.ConvertImage(PatientCases[i].ImageFullPath, exportIndices, convertedImages, prog => Progress += prog, progressConvert);
+                for (int frame = 0; frame < convertedImages.Count; frame++)
+                {
+                    convertedImages[frame] = CommonUtil.MakeImageForExport(convertedImages[frame], imgLongitude, imgLongitude);
+                }
+
+                if (FileExport.StandardFormat != Constants.ExportStandardFormatAVI && FileExport.StandardFormat != Constants.ExportStandardFormatTIFF)
+                {
+                    string imageFolder = CreateStandardFolder(SaveFolder, PatientCases[i]);
+                    for (int frame = 0; frame < convertedImages.Count; frame++)
+                    {
+                        CommonUtil.SaveStillFrame(convertedImages[frame], imageFolder, string.Format("{0:0000}", exportIndices[frame]), FileExport.StandardFormat);
+                    }
+                }
+                else
+                {
+                    string extension = (FileExport.StandardFormat == Constants.ExportStandardFormatAVI) ? ".avi" : ".tiff";
+                    string fileName = SaveFolder + "\\" + CreateStandardUniqueName(PatientCases[i]) + extension;
+                }
+            }
 
             Progress = 100;
             EnableDone = true;
@@ -298,6 +351,16 @@ namespace RaywattApp.ViewModels.Dialog
         private void DICOMDIRWrite(string fullPath)
         {
 
+        }
+        
+        private string CreateStandardFolder(string rootPath, PatientCase patientCase)
+        {            
+            return CommonUtil.CreateFolder(rootPath + "\\" + CreateStandardUniqueName(patientCase));
+        }
+
+        private string CreateStandardUniqueName(PatientCase patientCase)
+        {
+            return "oct-" + patientCase.CreateDate.ToString("yyyy MM dd HH-mm-ss");
         }
     }
 }
