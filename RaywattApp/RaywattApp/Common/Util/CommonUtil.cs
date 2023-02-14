@@ -249,7 +249,7 @@ namespace RaywattApp.Common.Util
             }
         }
 
-        public static async Task<Mat> ConvertImage(string filePath, List<int> bookmarkedIndices, List<Mat> convertedImages)
+        public static async Task<Mat> ConvertImage(string filePath, List<int> bookmarkedIndices, List<Mat> convertedImages, Action<double> progressCallback, double progress)
         {
             RayOpenImage(filePath);
 
@@ -257,6 +257,8 @@ namespace RaywattApp.Common.Util
             int width = (int)RayGetProperty(Property.ImageWidth);
             int height = (int)RayGetProperty(Property.ImageHeight);
             int channels = (int)RayGetProperty(Property.ImageChannels);
+
+            int totalNum = (bookmarkedIndices == null) ? numOfFrames : bookmarkedIndices.Count;
 
             // convert all frames
             for (int index = 0; index < numOfFrames; index++)
@@ -269,6 +271,8 @@ namespace RaywattApp.Common.Util
                         {
                             Mat img = CommonUtil.ByteMemoryToCvMat(data, width, height, channels);
                             convertedImages.Add(img);
+
+                            progressCallback(progress / totalNum);
                         }
                     }
                 });

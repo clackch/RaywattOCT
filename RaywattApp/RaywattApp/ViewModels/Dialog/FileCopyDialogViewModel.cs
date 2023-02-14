@@ -88,10 +88,10 @@ namespace RaywattApp.ViewModels.Dialog
             for (int i=0; i< PatientCases.Count; i++)
             {
                 const string dicomPrefix = "IMG";
+                double progressConvert = 100 / PatientCases.Count;
 
                 List<Mat> convertedImages = new List<Mat>();
-                Mat imgLongitude = await CommonUtil.ConvertImage(PatientCases[i].ImageFullPath, FileExport.BookmarkedFrames, convertedImages);
-                Progress = (i + 1) / (double)PatientCases.Count * 100.0;
+                Mat imgLongitude = await CommonUtil.ConvertImage(PatientCases[i].ImageFullPath, FileExport.BookmarkedFrames, convertedImages, prog => Progress += prog, progressConvert);
 
                 List<Mat> exportedImages = new List<Mat>(convertedImages.Count);
 
@@ -102,7 +102,7 @@ namespace RaywattApp.ViewModels.Dialog
                 RayExportWrapper.DicomImageStart(convertedImages.Count);
                 for (int j = 0; j < convertedImages.Count; j++)
                 {
-                    Mat imgExport = CommonUtil.MakeImageForExport(convertedImages[0], imgLongitude, imgLongitude);
+                    Mat imgExport = CommonUtil.MakeImageForExport(convertedImages[j], imgLongitude, imgLongitude);
                     exportedImages.Add(imgExport);
                     RayExportWrapper.DicomAddImage(imgExport.Cols, imgExport.Rows, imgExport.Data);
                 }
@@ -117,12 +117,11 @@ namespace RaywattApp.ViewModels.Dialog
                 //Save
                 string filePath = dicomPrefix + string.Format("{0:0000}", i);
                 RayExportWrapper.DicomSave(dicomDirFolder + "\\" + filePath);
-
-
             }
 
             DICOMDIRWrite(dicomDirFolder);
 
+            Progress = 100;
             EnableDone = true;
         }
 
