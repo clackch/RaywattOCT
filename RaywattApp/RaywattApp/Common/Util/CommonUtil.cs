@@ -51,11 +51,8 @@ namespace RaywattApp.Common.Util
 
         public static Mat ByteMemoryToCvMat(IntPtr data, int width, int height, int ch)
         {
-            int byteLength = width * height * ch;
-            byte[] imgData = new byte[byteLength];
-            Marshal.Copy(data, imgData, 0, byteLength);
-
-            return new Mat(height, width, MatType.CV_8UC3, data);
+            MatType type = ch == 3 ? MatType.CV_8UC3 : MatType.CV_8UC1;
+            return new Mat(height, width, type, data).Clone();
         }
 
         public static string GetRandomText(int length)
@@ -266,11 +263,11 @@ namespace RaywattApp.Common.Util
             {
                 await Task.Run(() => {
                     IntPtr data = RayGetImageData(index);
-                    Mat img = CommonUtil.ByteMemoryToCvMat(data, width, height, channels).Clone();
                     if (convertedImages != null)
                     {
                         if (bookmarkedIndices == null || bookmarkedIndices.Contains(index))
                         {
+                            Mat img = CommonUtil.ByteMemoryToCvMat(data, width, height, channels);
                             convertedImages.Add(img);
                         }
                     }
@@ -282,7 +279,7 @@ namespace RaywattApp.Common.Util
             height = (int)RayGetProperty(Property.LongitudeImageHeight);
             channels = (int)RayGetProperty(Property.LongitudeImageChannels);
             IntPtr data = RayGetLongitudeData(45);
-            Mat imgLongitude = CommonUtil.ByteMemoryToCvMat(data, width, height, channels).Clone();
+            Mat imgLongitude = CommonUtil.ByteMemoryToCvMat(data, width, height, channels);
 
             RayCloseImage();
 

@@ -72,14 +72,14 @@ namespace RaywattApp.Common.Bases
             imgCrossSectionMask = (imgCrossSectionMask == null) ? GenerateMask(imgRecv) : imgCrossSectionMask;
             imgCrossSectionBackground = (imgCrossSectionBackground == null) ? imgRecv.EmptyClone() : imgCrossSectionBackground;
 
-            imgCrossSection[session] = imgRecv.Clone();
+            imgCrossSection[session] = imgRecv;
             crossSectionFrameInfo[session] = new FrameInfo(frameInfo);
         }
 
         private void OnRecvLongitude(int session, IntPtr data, int width, int height, int ch, int frameInfo)
         {
             Mat imgRecv = CommonUtil.ByteMemoryToCvMat(data, width, height, ch);
-            imgLongitude = imgRecv.Clone();
+            imgLongitude = imgRecv;
             longitudeFrameInfo = new FrameInfo(frameInfo);
         }
 
