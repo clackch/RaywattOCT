@@ -103,6 +103,7 @@ namespace RaywattApp.ViewModels.Dialog
                 for (int j = 0; j < convertedImages.Count; j++)
                 {
                     Mat imgExport = CommonUtil.MakeImageForExport(convertedImages[j], imgLongitude, imgLongitude);
+                    Cv2.CvtColor(imgExport, imgExport, ColorConversionCodes.RGB2BGR);
                     exportedImages.Add(imgExport);
                     RayExportWrapper.DicomAddImage(imgExport.Cols, imgExport.Rows, imgExport.Data);
                 }
