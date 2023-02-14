@@ -95,6 +95,9 @@ namespace RaywattApp.ViewModels.Dialog
 
                 List<Mat> exportedImages = new List<Mat>(convertedImages.Count);
 
+                //Start
+                RayExportWrapper.DicomStart();
+
                 //Image
                 RayExportWrapper.DicomImageStart(convertedImages.Count);
                 for (int j = 0; j < convertedImages.Count; j++)
@@ -113,12 +116,12 @@ namespace RaywattApp.ViewModels.Dialog
 
                 //Save
                 string filePath = dicomPrefix + string.Format("{0:0000}", i);
-                RayExportWrapper.DicomSave(FileExport.ExternalDrivePath + "\\" + dicomDirFolder + "\\" + filePath);
+                RayExportWrapper.DicomSave(dicomDirFolder + "\\" + filePath);
 
 
             }
 
-            DICOMDIRWrite(FileExport.ExternalDrivePath + "\\" + dicomDirFolder);
+            DICOMDIRWrite(dicomDirFolder);
 
             EnableDone = true;
         }
@@ -284,7 +287,7 @@ namespace RaywattApp.ViewModels.Dialog
 
         private string DICOMDIRInputFolder()
         {
-            return DateTime.Now.ToString("yyyyMMddHHmmss");
+            return CommonUtil.CreateFolder(FileExport.ExternalDrivePath + "\\" + DateTime.Now.ToString("yyyyMMddHHmmss"));
         }
 
         private void DICOMDIRWrite(string fullPath)

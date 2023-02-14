@@ -24,6 +24,8 @@ namespace RayCoreWrapper
         }
 
         [DllImport("makedcmDLL.dll")]
+        public static extern int DicomStart();
+        [DllImport("makedcmDLL.dll")]
         public static extern int DicomImageStart(int numberOfFrames);
         [DllImport("makedcmDLL.dll")]
         public static extern int DicomAddImage(int width, int height, IntPtr pixelData);
