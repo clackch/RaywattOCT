@@ -16,10 +16,10 @@ namespace RaywattApp.ViewModels.Dialog
         private static readonly ILog _log = LogManager.GetLogger(typeof(FileCopyDialogViewModel));
 
         [ObservableProperty]
-        private FileExport _fileExport;
+        private FileExport? _fileExport;
 
         [ObservableProperty]
-        private IList<PatientCase> _patientCases;
+        private IList<PatientCase>? _patientCases;
 
         [ObservableProperty]
         private double _progress;
@@ -29,6 +29,9 @@ namespace RaywattApp.ViewModels.Dialog
 
         [ObservableProperty]
         private string? _contents;
+
+        [ObservableProperty]
+        private string? _saveFolder;
 
         [ObservableProperty]
         private bool enableDone = false;
@@ -41,6 +44,8 @@ namespace RaywattApp.ViewModels.Dialog
             PatientCases = (IList<PatientCase>)data["patientCases"];
 
             if (FileExport != null) {
+                SaveFolder = (FileExport.DiskType == Constants.FileDiskCd) ? Constants.TempFolderPath : FileExport.ExternalDrivePath;
+
                 if (FileExport.Type == Constants.ExportTypeNative)
                 {
                     DbFilePath = data["dbFilePath"].ToString();
@@ -55,6 +60,11 @@ namespace RaywattApp.ViewModels.Dialog
                 else if (FileExport.Type == Constants.ExportTypeStandard) 
                 {
                 }
+
+                if (FileExport.DiskType == Constants.FileDiskCd)
+                { 
+                    // RayExportWrapper.BurningCD();
+                }
             }
         }
 
@@ -64,7 +74,7 @@ namespace RaywattApp.ViewModels.Dialog
             foreach (PatientCase patientCase in PatientCases)
             {
                 string fileName = CommonUtil.GetFileName(patientCase.ImageFullPath);
-                string dstFilePath = FileExport.ExternalDrivePath + "\\" + fileName;
+                string dstFilePath = SaveFolder + "\\" + fileName;
                 fileCopyInfo.Add(patientCase.ImageFullPath, dstFilePath);
             }
 
@@ -78,7 +88,7 @@ namespace RaywattApp.ViewModels.Dialog
 
         private async void FileSaveDicom()
         {
-            string dicomDirFolder = DICOMDIRInputFolder((FileExport.DiskType == Constants.FileDiskExternal) ? FileExport.ExternalDrivePath : Constants.TempFolderPath);
+            string dicomDirFolder = DICOMDIRInputFolder(SaveFolder);
 
             for (int i=0; i< PatientCases.Count; i++)
             {
