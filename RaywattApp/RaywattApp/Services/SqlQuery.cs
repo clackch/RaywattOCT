@@ -123,6 +123,7 @@ namespace RaywattApp.Services
             _query["SelectPatientCaseByList"] =
                 $"SELECT id, patient_id, physician_name, accession_number, accession_name, comment, vessel, procedure, thumbnail_no, still_image_yn, image" +
                         $", rv_schema.fn_patient(patient_id) patient_name" +
+                        $", rv_schema.fn_patient_gender(patient_id) gender, rv_schema.fn_patient_birth(patient_id) birthdate" +
                         $", pullback_type, angio_co_registration, indicator_degree" +
                         $", preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold, measurements, bookmarks" +
                         $", create_date, update_date " +

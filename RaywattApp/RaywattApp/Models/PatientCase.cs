@@ -17,6 +17,12 @@ namespace RaywattApp.Models
         private string patientName;
 
         [ObservableProperty]
+        private DateTime birthdate;
+
+        [ObservableProperty]
+        private string gender;
+
+        [ObservableProperty]
         private string physicianName;
 
         private string _accessionNumber;

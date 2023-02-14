@@ -262,6 +262,56 @@ ALTER FUNCTION rv_schema.fn_patient(character varying)
     OWNER TO rv_user;
 
 
+-- FUNCTION: rv_schema.fn_patient_birth(character varying)
+
+-- DROP FUNCTION IF EXISTS rv_schema.fn_patient_birth(character varying);
+
+CREATE OR REPLACE FUNCTION rv_schema.fn_patient_birth(
+	arg_id character varying)
+    RETURNS date
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+AS $BODY$
+	DECLARE
+	res_value date;
+	BEGIN
+		SELECT birthdate into res_value
+		FROM rv_schema.patient
+		WHERE "id" = arg_id;
+	RETURN res_value;
+	END;
+$BODY$;
+
+ALTER FUNCTION rv_schema.fn_patient_birth(character varying)
+    OWNER TO rv_user;
+
+
+-- FUNCTION: rv_schema.fn_patient_gender(character varying)
+
+-- DROP FUNCTION IF EXISTS rv_schema.fn_patient_gender(character varying);
+
+CREATE OR REPLACE FUNCTION rv_schema.fn_patient_gender(
+	arg_id character varying)
+    RETURNS character varying
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+AS $BODY$
+	DECLARE
+	res_value character varying;
+	BEGIN
+		SELECT gender into res_value
+		FROM rv_schema.patient
+		WHERE "id" = arg_id;
+	RETURN res_value;
+	END;
+$BODY$;
+
+ALTER FUNCTION rv_schema.fn_patient_gender(character varying)
+    OWNER TO rv_user;
+
+
 -- FUNCTION: rv_schema.fn_datel10n(timestamp without time zone)
 
 -- DROP FUNCTION IF EXISTS rv_schema.fn_datel10n(timestamp without time zone);
@@ -353,4 +403,3 @@ $BODY$;
 
 ALTER FUNCTION rv_schema.fn_displaylastcase(character varying)
     OWNER TO rv_user;
-	

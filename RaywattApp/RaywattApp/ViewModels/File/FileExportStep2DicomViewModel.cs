@@ -9,6 +9,7 @@ using RaywattApp.Views.Dialog;
 using System.Collections.Generic;
 using System;
 using System.Windows.Navigation;
+using Newtonsoft.Json;
 
 namespace RaywattApp.ViewModels.File
 {
@@ -70,22 +71,39 @@ namespace RaywattApp.ViewModels.File
         {
             _log.Debug("Export");
 
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["title"] = _l10n["Information"];
-            parameter["fileExport"] = FileExport;
-
             //TO-DO : CD 일 경우, Path 부분 추가
             if (String.IsNullOrEmpty(FileExport.ExternalDrivePath))
             {
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["message"] = _l10n["Path is required"];
                 var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
             }
             else
             {
-                parameter["message"] = _l10n["Done"];
-                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
-                Close();
+                FileSave();
             }
+        }
+
+        private void FileSave()
+        {
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["ids"] = FileExport.SelectedItem;
+            IList<PatientCase> patientCases = _sqlManager.SelectPatientCaseByList(sqlParameters);
+
+            List<string> exportfiles = new List<string>();
+            foreach (PatientCase patientCase in patientCases)
+            {
+                exportfiles.Add(patientCase.ImageFullPath);
+            }
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["title"] = _l10n["File Export"];
+            parameter["fileExport"] = FileExport;
+            parameter["files"] = exportfiles;
+            parameter["patientCases"] = patientCases;
+            var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter);
+
+            Close();
         }
     }
 }
