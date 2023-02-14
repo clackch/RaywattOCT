@@ -143,6 +143,9 @@
         //Data File Root Path (OCT raw files) - ※ Patient Folder (DataRootPath + Patient ID)
         public const string DataRootPath = SystemRootPath + "\\DataSave";
 
+        //Temporary Folder (CD/DVD Write)
+        public const string TempFolderPath = SystemRootPath + "\\Temp";
+
         //Encrypt, Decrypt Public Key
         public const string PublicKey = "raywatt07_hwjckklls_298-87-01441";
 

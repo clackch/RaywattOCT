@@ -83,7 +83,7 @@ namespace RaywattApp.ViewModels.Dialog
 
         private async void FileSaveDicom()
         {
-            string dicomDirFolder = DICOMDIRInputFolder();
+            string dicomDirFolder = DICOMDIRInputFolder((FileExport.DiskType == Constants.FileDiskExternal) ? FileExport.ExternalDrivePath : Constants.TempFolderPath);
 
             for (int i=0; i< PatientCases.Count; i++)
             {
@@ -285,9 +285,9 @@ namespace RaywattApp.ViewModels.Dialog
             }
         }
 
-        private string DICOMDIRInputFolder()
+        private string DICOMDIRInputFolder(string rootPath)
         {
-            return CommonUtil.CreateFolder(FileExport.ExternalDrivePath + "\\" + DateTime.Now.ToString("yyyyMMddHHmmss"));
+            return CommonUtil.CreateFolder(rootPath + "\\" + DateTime.Now.ToString("yyyyMMddHHmmss"));
         }
 
         private void DICOMDIRWrite(string fullPath)
