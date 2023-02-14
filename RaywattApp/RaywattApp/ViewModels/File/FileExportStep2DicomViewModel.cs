@@ -90,16 +90,9 @@ namespace RaywattApp.ViewModels.File
             sqlParameters["ids"] = FileExport.SelectedItem;
             IList<PatientCase> patientCases = _sqlManager.SelectPatientCaseByList(sqlParameters);
 
-            List<string> exportfiles = new List<string>();
-            foreach (PatientCase patientCase in patientCases)
-            {
-                exportfiles.Add(patientCase.ImageFullPath);
-            }
-
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["title"] = _l10n["File Export"];
             parameter["fileExport"] = FileExport;
-            parameter["files"] = exportfiles;
             parameter["patientCases"] = patientCases;
             var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter);
 

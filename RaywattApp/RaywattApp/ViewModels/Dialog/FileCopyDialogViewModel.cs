@@ -25,9 +25,6 @@ namespace RaywattApp.ViewModels.Dialog
         private double _progress;
 
         [ObservableProperty]
-        List<string> _files;
-
-        [ObservableProperty]
         private string? _dbFilePath;
 
         [ObservableProperty]
@@ -41,11 +38,11 @@ namespace RaywattApp.ViewModels.Dialog
             Dictionary<string, Object> data = (Dictionary<string, Object>)parameter;
             Title = data["title"].ToString();
             FileExport = (FileExport)data["fileExport"];
+            PatientCases = (IList<PatientCase>)data["patientCases"];
 
             if (FileExport != null) {
                 if (FileExport.Type == Constants.ExportTypeNative)
                 {
-                    Files = (List<string>)data["files"];
                     DbFilePath = data["dbFilePath"].ToString();
                     Contents = data["contents"].ToString();
 
@@ -53,8 +50,6 @@ namespace RaywattApp.ViewModels.Dialog
                 }
                 else if (FileExport.Type == Constants.ExportTypeDicom)
                 {
-                    PatientCases = (IList<PatientCase>)data["patientCases"];
-
                     FileSaveDicom();
                 }
                 else if (FileExport.Type == Constants.ExportTypeStandard) 
@@ -66,11 +61,11 @@ namespace RaywattApp.ViewModels.Dialog
         private async void FileCopyNative()
         {
             Dictionary<string, string> fileCopyInfo = new Dictionary<string, string>();
-            foreach (string file in Files)
+            foreach (PatientCase patientCase in PatientCases)
             {
-                string fileName = CommonUtil.GetFileName(file);
+                string fileName = CommonUtil.GetFileName(patientCase.ImageFullPath);
                 string dstFilePath = FileExport.ExternalDrivePath + "\\" + fileName;
-                fileCopyInfo.Add(file, dstFilePath);
+                fileCopyInfo.Add(patientCase.ImageFullPath, dstFilePath);
             }
 
             await CommonUtil.CopyFiles(fileCopyInfo, prog => Progress = prog);
