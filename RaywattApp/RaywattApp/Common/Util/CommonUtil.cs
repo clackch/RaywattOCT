@@ -335,7 +335,7 @@ namespace RaywattApp.Common.Util
             Cv2.ImWrite(filePath, image);
         }
 
-        public static void SaveVideo(List<Mat> images, string rootPath, string fileName, string format, double fps)
+        public static async Task SaveVideo(List<Mat> images, string rootPath, string fileName, string format, double fps, Action<double> progressCallback, double progress)
         {
             string filePath = rootPath + "\\" + fileName + "." + format.ToLower();
 
@@ -346,15 +346,20 @@ namespace RaywattApp.Common.Util
             VideoWriter videoWriter = new VideoWriter(filePath, FourCC.H264, fps, szVideo);
             if (videoWriter != null)
             {
+                int totalNum = images.Count;
                 foreach (Mat img in images)
                 {
-                    videoWriter.Write(img);
+                    await Task.Run(() =>
+                    {
+                        videoWriter.Write(img);
+                        progressCallback(progress / totalNum);
+                    });
                 }
                 videoWriter.Release();
             }
         }
 
-        public static void SaveMultipleFrames(List<Mat> images, string rootPath, string fileName, string format)
+        public static async Task SaveMultipleFrames(List<Mat> images, string rootPath, string fileName, string format, Action<double> progressCallback, double progress)
         {
             string filePath = rootPath + "\\" + fileName + "." + format.ToLower();
 
@@ -364,26 +369,31 @@ namespace RaywattApp.Common.Util
             {
                 if (tiff != null)
                 {
-
+                    int totalNum = images.Count;
                     for (int i = 0; i < images.Count; i++)
                     {
-                        Mat img = images[i];
-                        int size = img.Rows * img.Cols * img.Channels();
-                        Cv2.CvtColor(img, img, ColorConversionCodes.RGB2BGR);
+                        await Task.Run(() =>
+                        {
+                            Mat img = images[i];
+                            int size = img.Rows * img.Cols * img.Channels();
+                            Cv2.CvtColor(img, img, ColorConversionCodes.RGB2BGR);
 
-                        byte[] managedArray = new byte[size];
-                        Marshal.Copy(img.Data, managedArray, 0, size);
+                            byte[] managedArray = new byte[size];
+                            Marshal.Copy(img.Data, managedArray, 0, size);
 
-                        tiff.SetField(TiffTag.IMAGEWIDTH, img.Cols);
-                        tiff.SetField(TiffTag.IMAGELENGTH, img.Rows);
-                        tiff.SetField(TiffTag.SAMPLESPERPIXEL, img.Channels());
-                        tiff.SetField(TiffTag.BITSPERSAMPLE, 8);
-                        tiff.SetField(TiffTag.ROWSPERSTRIP, img.Rows);
-                        tiff.SetField(TiffTag.COMPRESSION, Compression.NONE);
-                        tiff.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
+                            tiff.SetField(TiffTag.IMAGEWIDTH, img.Cols);
+                            tiff.SetField(TiffTag.IMAGELENGTH, img.Rows);
+                            tiff.SetField(TiffTag.SAMPLESPERPIXEL, img.Channels());
+                            tiff.SetField(TiffTag.BITSPERSAMPLE, 8);
+                            tiff.SetField(TiffTag.ROWSPERSTRIP, img.Rows);
+                            tiff.SetField(TiffTag.COMPRESSION, Compression.NONE);
+                            tiff.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
 
-                        tiff.WriteEncodedStrip(0, managedArray, managedArray.Length);
-                        tiff.WriteDirectory();
+                            tiff.WriteEncodedStrip(0, managedArray, managedArray.Length);
+                            tiff.WriteDirectory();
+
+                            progressCallback(progress / totalNum);
+                        });
                     }
 
                     tiff.Close();

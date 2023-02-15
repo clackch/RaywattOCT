@@ -146,7 +146,9 @@ namespace RaywattApp.ViewModels.Dialog
 
             for (int i = 0; i < PatientCases.Count; i++)
             {
-                double progressConvert = 100 / PatientCases.Count;
+                double progressPerCase = 100 / PatientCases.Count;
+                double progressConvert = progressPerCase / 2;
+                double progressSave = progressPerCase / 2;
 
                 List<int> exportIndices = null;
                 if (FileExport.Material == Constants.ExportMaterialCurrent)
@@ -169,12 +171,12 @@ namespace RaywattApp.ViewModels.Dialog
                 if (format == Constants.ExportPullbackAVI)
                 {
                     string fileName = CreateStandardUniqueName(PatientCases[i]);
-                    CommonUtil.SaveVideo(convertedImages, SaveFolder, fileName, format, 10);
+                    await CommonUtil.SaveVideo(convertedImages, SaveFolder, fileName, format, 10, prog => Progress += prog, progressSave);
                 }
                 else if (format == Constants.ExportPullbackTIFF)
                 {
                     string fileName = CreateStandardUniqueName(PatientCases[i]);
-                    CommonUtil.SaveMultipleFrames(convertedImages, SaveFolder, fileName, format);
+                    await CommonUtil.SaveMultipleFrames(convertedImages, SaveFolder, fileName, format, prog => Progress += prog, progressSave);
                 }
                 else
                 {
@@ -182,6 +184,7 @@ namespace RaywattApp.ViewModels.Dialog
                     {
                         string fileName = CreateStandardUniqueName(PatientCases[i]) + string.Format("-{0:0000}", exportIndices[frame]);
                         CommonUtil.SaveStillFrame(convertedImages[frame], SaveFolder, fileName, format);
+                        Progress += (progressSave / convertedImages.Count);
                     }
                 }
             }
