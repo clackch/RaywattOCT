@@ -389,8 +389,6 @@ namespace RaywattApp.Common.Util
                     tiff.Close();
                 }
             }
-
-
         }
 
         public static async Task CopyStream(Stream from, Stream to, Action<long> progress)
