@@ -9,6 +9,7 @@ using RaywattApp.Models;
 using System;
 using System.Collections.Generic;
 using RaywattApp.Common.File;
+using System.Windows.Controls;
 
 namespace RaywattApp.ViewModels.Dialog
 {
@@ -167,8 +168,14 @@ namespace RaywattApp.ViewModels.Dialog
                     convertedImages[frame] = CommonUtil.MakeImageForExport(convertedImages[frame], imgLongitude, imgLongitude);
                 }
 
-                if (format == Constants.ExportPullbackAVI || format == Constants.ExportPullbackTIFF)
+                if (format == Constants.ExportPullbackAVI)
                 {
+                    string fileName = CreateStandardUniqueName(PatientCases[i]);
+                    CommonUtil.SaveVideo(convertedImages, SaveFolder, fileName, format, 10);
+                }
+                else if (format == Constants.ExportPullbackTIFF)
+                {
+                    string fileName = CreateStandardUniqueName(PatientCases[i]);
                 }
                 else
                 {

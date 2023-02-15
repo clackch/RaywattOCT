@@ -91,7 +91,7 @@
         public const string ExportMeasurementHideAll = "H";
 
         //Export(Standard) Pullback - AVI, TIFF
-        public const string ExportPullbackAVI = "AVI";
+        public const string ExportPullbackAVI = "MP4";
         public const string ExportPullbackTIFF = "TIFF";
 
         //Export(Standard) Still Frame - JPEG, Bitmap, TIFF

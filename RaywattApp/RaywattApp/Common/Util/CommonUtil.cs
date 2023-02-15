@@ -335,6 +335,25 @@ namespace RaywattApp.Common.Util
             Cv2.ImWrite(filePath, image);
         }
 
+        public static void SaveVideo(List<Mat> images, string rootPath, string fileName, string format, double fps)
+        {
+            string filePath = rootPath + "\\" + fileName + "." + format.ToLower();
+
+            if (images == null || images.Count == 0) return;
+
+            Size szVideo = images[0].Size();
+
+            VideoWriter videoWriter = new VideoWriter(filePath, FourCC.H264, fps, szVideo);
+            if (videoWriter != null)
+            {
+                foreach (Mat img in images)
+                {
+                    videoWriter.Write(img);
+                }
+                videoWriter.Release();
+            }
+        }
+
         public static async Task CopyStream(Stream from, Stream to, Action<long> progress)
         {
             int buffer_size = 1024 * 1024; // 1MB buffer
