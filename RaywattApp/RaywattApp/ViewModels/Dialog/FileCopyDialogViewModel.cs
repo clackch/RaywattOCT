@@ -8,8 +8,6 @@ using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using System;
 using System.Collections.Generic;
-using RaywattApp.Common.File;
-using System.Windows.Controls;
 
 namespace RaywattApp.ViewModels.Dialog
 {
@@ -176,6 +174,7 @@ namespace RaywattApp.ViewModels.Dialog
                 else if (format == Constants.ExportPullbackTIFF)
                 {
                     string fileName = CreateStandardUniqueName(PatientCases[i]);
+                    CommonUtil.SaveMultipleFrames(convertedImages, SaveFolder, fileName, format);
                 }
                 else
                 {

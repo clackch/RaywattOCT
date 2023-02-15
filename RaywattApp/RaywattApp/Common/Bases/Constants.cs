@@ -92,12 +92,12 @@
 
         //Export(Standard) Pullback - AVI, TIFF
         public const string ExportPullbackAVI = "MP4";
-        public const string ExportPullbackTIFF = "TIFF";
+        public const string ExportPullbackTIFF = "TIF";
 
         //Export(Standard) Still Frame - JPEG, Bitmap, TIFF
         public const string ExportStillFrameJPEG = "JPG";
         public const string ExportStillFrameBitmap = "BMP";
-        public const string ExportStillFrameTIFF = "TIFF";
+        public const string ExportStillFrameTIFF = "TIF";
 
         //Export Anonymous
         public const string ExportAnonymous = "Anonymous";

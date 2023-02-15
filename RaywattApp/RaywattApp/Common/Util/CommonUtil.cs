@@ -1,16 +1,16 @@
 ﻿using OpenCvSharp;
-using System.Runtime.InteropServices;
+using BitMiracle.LibTiff.Classic;
+using log4net;
 using System;
 using System.Text.RegularExpressions;
 using System.Security.Cryptography;
-using log4net;
 using System.IO;
 using System.Text;
 using RaywattApp.Common.Bases;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
-using RaywattApp.Models;
+using System.Runtime.InteropServices;
 using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.Common.Util
@@ -352,6 +352,45 @@ namespace RaywattApp.Common.Util
                 }
                 videoWriter.Release();
             }
+        }
+
+        public static void SaveMultipleFrames(List<Mat> images, string rootPath, string fileName, string format)
+        {
+            string filePath = rootPath + "\\" + fileName + "." + format.ToLower();
+
+            if (images == null || images.Count == 0) return;
+
+            using (var tiff = Tiff.Open(filePath, "w"))
+            {
+                if (tiff != null)
+                {
+
+                    for (int i = 0; i < images.Count; i++)
+                    {
+                        Mat img = images[i];
+                        int size = img.Rows * img.Cols * img.Channels();
+                        Cv2.CvtColor(img, img, ColorConversionCodes.RGB2BGR);
+
+                        byte[] managedArray = new byte[size];
+                        Marshal.Copy(img.Data, managedArray, 0, size);
+
+                        tiff.SetField(TiffTag.IMAGEWIDTH, img.Cols);
+                        tiff.SetField(TiffTag.IMAGELENGTH, img.Rows);
+                        tiff.SetField(TiffTag.SAMPLESPERPIXEL, img.Channels());
+                        tiff.SetField(TiffTag.BITSPERSAMPLE, 8);
+                        tiff.SetField(TiffTag.ROWSPERSTRIP, img.Rows);
+                        tiff.SetField(TiffTag.COMPRESSION, Compression.NONE);
+                        tiff.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
+
+                        tiff.WriteEncodedStrip(0, managedArray, managedArray.Length);
+                        tiff.WriteDirectory();
+                    }
+
+                    tiff.Close();
+                }
+            }
+
+
         }
 
         public static async Task CopyStream(Stream from, Stream to, Action<long> progress)
