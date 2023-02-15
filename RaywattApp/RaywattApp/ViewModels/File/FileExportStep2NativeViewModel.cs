@@ -175,7 +175,7 @@ namespace RaywattApp.ViewModels.File
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["title"] = _l10n["File Export"];
             parameter["fileExport"] = FileExport;
-            parameter["files"] = exportfiles;
+            parameter["patientCases"] = patientCases;
             parameter["dbFilePath"] = dbFilePath;
             parameter["contents"] = JsonConvert.SerializeObject(fileFormat, Formatting.Indented);
             var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter);

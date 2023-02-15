@@ -92,11 +92,15 @@ namespace RaywattApp.ViewModels.File
 
         private void FileSave()
         {
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["ids"] = FileExport.SelectedItem;
+            IList<PatientCase> patientCases = _sqlManager.SelectPatientCaseByList(sqlParameters);
+
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["title"] = _l10n["Information"];
             parameter["fileExport"] = FileExport;
-            parameter["message"] = _l10n["Done"];
-            var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+            parameter["patientCases"] = patientCases;
+            var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter);
             Close();
         }
     }

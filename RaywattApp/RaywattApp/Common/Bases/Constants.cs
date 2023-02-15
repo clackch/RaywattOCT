@@ -91,13 +91,13 @@
         public const string ExportMeasurementHideAll = "H";
 
         //Export(Standard) Pullback - AVI, TIFF
-        public const string ExportPullbackAVI = "A";
-        public const string ExportPullbackTIFF = "T";
+        public const string ExportPullbackAVI = "MP4";
+        public const string ExportPullbackTIFF = "TIF";
 
         //Export(Standard) Still Frame - JPEG, Bitmap, TIFF
-        public const string ExportStillFrameJPEG = "J";
-        public const string ExportStillFrameBitmap = "B";
-        public const string ExportStillFrameTIFF = "T";
+        public const string ExportStillFrameJPEG = "JPG";
+        public const string ExportStillFrameBitmap = "BMP";
+        public const string ExportStillFrameTIFF = "TIF";
 
         //Export Anonymous
         public const string ExportAnonymous = "Anonymous";
@@ -142,6 +142,9 @@
 
         //Data File Root Path (OCT raw files) - ※ Patient Folder (DataRootPath + Patient ID)
         public const string DataRootPath = SystemRootPath + "\\DataSave";
+
+        //Temporary Folder (CD/DVD Write)
+        public const string TempFolderPath = SystemRootPath + "\\Temp";
 
         //Encrypt, Decrypt Public Key
         public const string PublicKey = "raywatt07_hwjckklls_298-87-01441";

@@ -1,16 +1,16 @@
 ﻿using OpenCvSharp;
-using System.Runtime.InteropServices;
+using BitMiracle.LibTiff.Classic;
+using log4net;
 using System;
 using System.Text.RegularExpressions;
 using System.Security.Cryptography;
-using log4net;
 using System.IO;
 using System.Text;
 using RaywattApp.Common.Bases;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
-using RaywattApp.Models;
+using System.Runtime.InteropServices;
 using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.Common.Util
@@ -51,11 +51,8 @@ namespace RaywattApp.Common.Util
 
         public static Mat ByteMemoryToCvMat(IntPtr data, int width, int height, int ch)
         {
-            int byteLength = width * height * ch;
-            byte[] imgData = new byte[byteLength];
-            Marshal.Copy(data, imgData, 0, byteLength);
-
-            return new Mat(height, width, MatType.CV_8UC3, data);
+            MatType type = ch == 3 ? MatType.CV_8UC3 : MatType.CV_8UC1;
+            return new Mat(height, width, type, data).Clone();
         }
 
         public static string GetRandomText(int length)
@@ -252,7 +249,7 @@ namespace RaywattApp.Common.Util
             }
         }
 
-        public static async Task<Mat> ConvertImage(string filePath, List<int> bookmarkedIndices, List<Mat> convertedImages)
+        public static async Task<Mat> ConvertImage(string filePath, List<int> bookmarkedIndices, List<Mat> convertedImages, Action<double> progressCallback, double progress)
         {
             RayOpenImage(filePath);
 
@@ -261,17 +258,21 @@ namespace RaywattApp.Common.Util
             int height = (int)RayGetProperty(Property.ImageHeight);
             int channels = (int)RayGetProperty(Property.ImageChannels);
 
+            int totalNum = (bookmarkedIndices == null) ? numOfFrames : bookmarkedIndices.Count;
+
             // convert all frames
             for (int index = 0; index < numOfFrames; index++)
             {
                 await Task.Run(() => {
                     IntPtr data = RayGetImageData(index);
-                    Mat img = CommonUtil.ByteMemoryToCvMat(data, width, height, channels).Clone();
                     if (convertedImages != null)
                     {
                         if (bookmarkedIndices == null || bookmarkedIndices.Contains(index))
                         {
+                            Mat img = CommonUtil.ByteMemoryToCvMat(data, width, height, channels);
                             convertedImages.Add(img);
+
+                            progressCallback(progress / totalNum);
                         }
                     }
                 });
@@ -282,7 +283,7 @@ namespace RaywattApp.Common.Util
             height = (int)RayGetProperty(Property.LongitudeImageHeight);
             channels = (int)RayGetProperty(Property.LongitudeImageChannels);
             IntPtr data = RayGetLongitudeData(45);
-            Mat imgLongitude = CommonUtil.ByteMemoryToCvMat(data, width, height, channels).Clone();
+            Mat imgLongitude = CommonUtil.ByteMemoryToCvMat(data, width, height, channels);
 
             RayCloseImage();
 
@@ -325,6 +326,79 @@ namespace RaywattApp.Common.Util
             Cv2.CopyTo(imgCrossSection, imgExport[new Rect((szRemain.Width - diameter) / 2, 0, diameter, diameter)]);
 
             return imgExport;
+        }
+
+        public static void SaveStillFrame(Mat image, string rootPath, string fileName, string format) 
+        {
+            string filePath = rootPath + "\\" + fileName + "." + format.ToLower();
+
+            Cv2.ImWrite(filePath, image);
+        }
+
+        public static async Task SaveVideo(List<Mat> images, string rootPath, string fileName, string format, double fps, Action<double> progressCallback, double progress)
+        {
+            string filePath = rootPath + "\\" + fileName + "." + format.ToLower();
+
+            if (images == null || images.Count == 0) return;
+
+            Size szVideo = images[0].Size();
+
+            VideoWriter videoWriter = new VideoWriter(filePath, FourCC.H264, fps, szVideo);
+            if (videoWriter != null)
+            {
+                int totalNum = images.Count;
+                foreach (Mat img in images)
+                {
+                    await Task.Run(() =>
+                    {
+                        videoWriter.Write(img);
+                        progressCallback(progress / totalNum);
+                    });
+                }
+                videoWriter.Release();
+            }
+        }
+
+        public static async Task SaveMultipleFrames(List<Mat> images, string rootPath, string fileName, string format, Action<double> progressCallback, double progress)
+        {
+            string filePath = rootPath + "\\" + fileName + "." + format.ToLower();
+
+            if (images == null || images.Count == 0) return;
+
+            using (var tiff = Tiff.Open(filePath, "w"))
+            {
+                if (tiff != null)
+                {
+                    int totalNum = images.Count;
+                    for (int i = 0; i < images.Count; i++)
+                    {
+                        await Task.Run(() =>
+                        {
+                            Mat img = images[i];
+                            int size = img.Rows * img.Cols * img.Channels();
+                            Cv2.CvtColor(img, img, ColorConversionCodes.RGB2BGR);
+
+                            byte[] managedArray = new byte[size];
+                            Marshal.Copy(img.Data, managedArray, 0, size);
+
+                            tiff.SetField(TiffTag.IMAGEWIDTH, img.Cols);
+                            tiff.SetField(TiffTag.IMAGELENGTH, img.Rows);
+                            tiff.SetField(TiffTag.SAMPLESPERPIXEL, img.Channels());
+                            tiff.SetField(TiffTag.BITSPERSAMPLE, 8);
+                            tiff.SetField(TiffTag.ROWSPERSTRIP, img.Rows);
+                            tiff.SetField(TiffTag.COMPRESSION, Compression.NONE);
+                            tiff.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
+
+                            tiff.WriteEncodedStrip(0, managedArray, managedArray.Length);
+                            tiff.WriteDirectory();
+
+                            progressCallback(progress / totalNum);
+                        });
+                    }
+
+                    tiff.Close();
+                }
+            }
         }
 
         public static async Task CopyStream(Stream from, Stream to, Action<long> progress)
