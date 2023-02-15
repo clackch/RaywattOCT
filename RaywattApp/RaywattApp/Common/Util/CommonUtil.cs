@@ -330,10 +330,7 @@ namespace RaywattApp.Common.Util
 
         public static void SaveStillFrame(Mat image, string rootPath, string fileName, string format) 
         {
-            string extension = ".bmp";
-            if (format == Constants.ExportStandardFormatJPEG) extension = ".jpg";
-
-            string filePath = rootPath + "\\" + fileName + extension;
+            string filePath = rootPath + "\\" + fileName + "." + format.ToLower();
 
             Cv2.ImWrite(filePath, image);
         }

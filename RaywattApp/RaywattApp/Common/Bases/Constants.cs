@@ -90,11 +90,14 @@
         public const string ExportMeasurementHideLumen = "L";
         public const string ExportMeasurementHideAll = "H";
 
-        //Export(Standard) Format - AVI, JPEG, Bitmap, TIFF
-        public const string ExportStandardFormatAVI = "A";
-        public const string ExportStandardFormatJPEG = "J";
-        public const string ExportStandardFormatBitmap = "B";
-        public const string ExportStandardFormatTIFF = "T";
+        //Export(Standard) Pullback - AVI, TIFF
+        public const string ExportPullbackAVI = "AVI";
+        public const string ExportPullbackTIFF = "TIFF";
+
+        //Export(Standard) Still Frame - JPEG, Bitmap, TIFF
+        public const string ExportStillFrameJPEG = "JPG";
+        public const string ExportStillFrameBitmap = "BMP";
+        public const string ExportStillFrameTIFF = "TIFF";
 
         //Export Anonymous
         public const string ExportAnonymous = "Anonymous";

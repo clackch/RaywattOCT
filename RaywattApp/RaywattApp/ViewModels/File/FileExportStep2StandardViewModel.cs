@@ -52,8 +52,11 @@ namespace RaywattApp.ViewModels.File
         {
             _log.Debug("SetCondition");
 
-            if (FileExport.StandardFormat == null)
-                FileExport.StandardFormat = Constants.ExportStandardFormatAVI;
+            if (FileExport.Pullback == null)
+                FileExport.Pullback = Constants.ExportPullbackAVI;
+
+            if (FileExport.StillFrame == null)
+                FileExport.StillFrame = Constants.ExportStillFrameJPEG;
 
             if (FileExport.Measurements == null)
                 FileExport.Measurements = Constants.ExportMeasurementShowAll;

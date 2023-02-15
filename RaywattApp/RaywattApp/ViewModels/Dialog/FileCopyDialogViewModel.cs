@@ -143,6 +143,8 @@ namespace RaywattApp.ViewModels.Dialog
 
         private async void FileSaveStandard()
         {
+            string format = (FileExport.Material == Constants.ExportMaterialPullback) ? FileExport.Pullback : FileExport.StillFrame;
+
             for (int i = 0; i < PatientCases.Count; i++)
             {
                 double progressConvert = 100 / PatientCases.Count;
@@ -165,18 +167,16 @@ namespace RaywattApp.ViewModels.Dialog
                     convertedImages[frame] = CommonUtil.MakeImageForExport(convertedImages[frame], imgLongitude, imgLongitude);
                 }
 
-                if (FileExport.StandardFormat != Constants.ExportStandardFormatAVI && FileExport.StandardFormat != Constants.ExportStandardFormatTIFF)
+                if (format == Constants.ExportPullbackAVI || format == Constants.ExportPullbackTIFF)
                 {
-                    string imageFolder = CreateStandardFolder(SaveFolder, PatientCases[i]);
-                    for (int frame = 0; frame < convertedImages.Count; frame++)
-                    {
-                        CommonUtil.SaveStillFrame(convertedImages[frame], imageFolder, string.Format("{0:0000}", exportIndices[frame]), FileExport.StandardFormat);
-                    }
                 }
                 else
                 {
-                    string extension = (FileExport.StandardFormat == Constants.ExportStandardFormatAVI) ? ".avi" : ".tiff";
-                    string fileName = SaveFolder + "\\" + CreateStandardUniqueName(PatientCases[i]) + extension;
+                    for (int frame = 0; frame < convertedImages.Count; frame++)
+                    {
+                        string fileName = CreateStandardUniqueName(PatientCases[i]) + string.Format("-{0:0000}", exportIndices[frame]);
+                        CommonUtil.SaveStillFrame(convertedImages[frame], SaveFolder, fileName, format);
+                    }
                 }
             }
 
@@ -351,11 +351,6 @@ namespace RaywattApp.ViewModels.Dialog
         private void DICOMDIRWrite(string fullPath)
         {
 
-        }
-        
-        private string CreateStandardFolder(string rootPath, PatientCase patientCase)
-        {            
-            return CommonUtil.CreateFolder(rootPath + "\\" + CreateStandardUniqueName(patientCase));
         }
 
         private string CreateStandardUniqueName(PatientCase patientCase)
