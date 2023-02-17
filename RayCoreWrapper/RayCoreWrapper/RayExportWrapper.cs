@@ -34,12 +34,18 @@ namespace RayCoreWrapper
         [DllImport("makedcmDLL.dll")]
         public static extern int DicomStartProperty();
         [DllImport("makedcmDLL.dll")]
-        public static extern int DicomAddProperty(int tag, char[] value, int bufLen = 0);
+        public static extern int DicomAddProperty(int tag, string value, int bufLen = 0);
         [DllImport("makedcmDLL.dll")]
         public static extern int DicomStartSequenceProperty(int numberOfItems);
         [DllImport("makedcmDLL.dll")]
-        public static extern int DicomAddSequenceProperty(int itemnum, int tag, char[] value);
+        public static extern int DicomAddSequenceProperty(int itemnum, int tag, string value);
         [DllImport("makedcmDLL.dll")]
         public static extern int DicomSave(string path);
+        [DllImport("makedcmDLL.dll")]
+        public static extern int DICOMDIRInputFolder(string path);
+        [DllImport("makedcmDLL.dll")]
+        public static extern int DICOMDIRInputFile(string path);
+        [DllImport("makedcmDLL.dll")]
+        public static extern int DICOMDIRWrite();
     }
 }

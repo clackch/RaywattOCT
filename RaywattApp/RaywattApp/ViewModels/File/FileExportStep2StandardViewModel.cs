@@ -3,6 +3,7 @@ using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.File;
+using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
@@ -69,7 +70,19 @@ namespace RaywattApp.ViewModels.File
             if (FileExport.ExternalDrivePath == null)
                 FileExport.ExternalDrivePath = "";
 
+            GetExportSize();
             GetDrive();
+        }
+
+        private void GetExportSize()
+        {
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["ids"] = FileExport.SelectedItem;
+            PatientCases = _sqlManager.SelectPatientCaseByList(sqlParameters);
+
+            //계산로직 필요 및 추출 항목에 따른 변경 기능 필요
+
+            ExportSize = CommonUtil.ByteToGB(ExportSize);
         }
 
         protected override void Export()
@@ -92,14 +105,10 @@ namespace RaywattApp.ViewModels.File
 
         private void FileSave()
         {
-            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-            sqlParameters["ids"] = FileExport.SelectedItem;
-            IList<PatientCase> patientCases = _sqlManager.SelectPatientCaseByList(sqlParameters);
-
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["title"] = _l10n["Information"];
             parameter["fileExport"] = FileExport;
-            parameter["patientCases"] = patientCases;
+            parameter["patientCases"] = PatientCases;
             var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter);
             Close();
         }

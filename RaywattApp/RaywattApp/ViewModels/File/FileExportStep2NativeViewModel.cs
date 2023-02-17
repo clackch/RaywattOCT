@@ -68,9 +68,9 @@ namespace RaywattApp.ViewModels.File
         {
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["ids"] = FileExport.SelectedItem;
-            IList<PatientCase> patientCases = _sqlManager.SelectPatientCaseByList(sqlParameters);
+            PatientCases = _sqlManager.SelectPatientCaseByList(sqlParameters);
 
-            foreach (PatientCase patientCase in patientCases)
+            foreach (PatientCase patientCase in PatientCases)
             {
                 ExportSize += CommonUtil.GetFileSize(patientCase.ImageFullPath);
             }
@@ -116,10 +116,6 @@ namespace RaywattApp.ViewModels.File
             fileFormat.Size = 0;
             fileFormat.PatientList = _sqlManager.SelectPatientByList(sqlParameters);
 
-            sqlParameters.Clear();
-            sqlParameters["ids"] = FileExport.SelectedItem;
-            IList<PatientCase> patientCases = _sqlManager.SelectPatientCaseByList(sqlParameters);
-
             string alternateId = "";
             string originId = "";
 
@@ -144,7 +140,7 @@ namespace RaywattApp.ViewModels.File
                     patient.Birthdate = new DateTime(1900, 1, 1);
                 }
 
-                foreach (PatientCase patientCase in patientCases)
+                foreach (PatientCase patientCase in PatientCases)
                 {
                     if (originId == patientCase.PatientId)
                     {
@@ -175,7 +171,7 @@ namespace RaywattApp.ViewModels.File
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["title"] = _l10n["File Export"];
             parameter["fileExport"] = FileExport;
-            parameter["patientCases"] = patientCases;
+            parameter["patientCases"] = PatientCases;
             parameter["dbFilePath"] = dbFilePath;
             parameter["contents"] = JsonConvert.SerializeObject(fileFormat, Formatting.Indented);
             var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter);
