@@ -96,7 +96,7 @@ namespace RaywattApp.ViewModels.Dialog
                 const string dicomPrefix = "IMG";
                 double progressConvert = 100 / PatientCases.Count;
 
-                List<int> exportIndices = null;
+                List<int>? exportIndices = null;
                 if (FileExport.Material == Constants.ExportMaterialCurrent)
                 {
                     exportIndices = new List<int>();
@@ -108,7 +108,10 @@ namespace RaywattApp.ViewModels.Dialog
                 }
 
                 List<Mat> convertedImages = new List<Mat>();
-                Mat imgLongitude = await CommonUtil.ConvertImage(PatientCases[i].ImageFullPath, exportIndices, convertedImages, prog => Progress += prog, progressConvert);
+                Mat? imgLongitude = await CommonUtil.ConvertImage(PatientCases[i].ImageFullPath, exportIndices, convertedImages, prog => Progress += prog, progressConvert);
+                Mat? imgLumeProfile = null;
+
+                imgLongitude = FileExport.LModeView ? imgLongitude : null;
 
                 //Start
                 RayExportWrapper.DicomStart();
@@ -117,7 +120,7 @@ namespace RaywattApp.ViewModels.Dialog
                 RayExportWrapper.DicomImageStart(convertedImages.Count);
                 for (int frame = 0; frame < convertedImages.Count; frame++)
                 {
-                    Mat imgExport = CommonUtil.MakeImageForExport(convertedImages[frame], imgLongitude, imgLongitude);
+                    Mat imgExport = CommonUtil.MakeImageForExport(convertedImages[frame], imgLongitude, imgLumeProfile);
                     Cv2.CvtColor(imgExport, imgExport, ColorConversionCodes.RGB2BGR);
                     RayExportWrapper.DicomAddImage(imgExport.Cols, imgExport.Rows, imgExport.Data);
                 }
@@ -150,7 +153,7 @@ namespace RaywattApp.ViewModels.Dialog
                 double progressConvert = progressPerCase / 2;
                 double progressSave = progressPerCase / 2;
 
-                List<int> exportIndices = null;
+                List<int>? exportIndices = null;
                 if (FileExport.Material == Constants.ExportMaterialCurrent)
                 {
                     exportIndices = new List<int>();
@@ -162,10 +165,14 @@ namespace RaywattApp.ViewModels.Dialog
                 }
 
                 List<Mat> convertedImages = new List<Mat>();
-                Mat imgLongitude = await CommonUtil.ConvertImage(PatientCases[i].ImageFullPath, exportIndices, convertedImages, prog => Progress += prog, progressConvert);
+                Mat? imgLongitude = await CommonUtil.ConvertImage(PatientCases[i].ImageFullPath, exportIndices, convertedImages, prog => Progress += prog, progressConvert);
+                Mat? imgLumeProfile = null;
+
+                imgLongitude = FileExport.LModeView ? imgLongitude : null;
+
                 for (int frame = 0; frame < convertedImages.Count; frame++)
                 {
-                    convertedImages[frame] = CommonUtil.MakeImageForExport(convertedImages[frame], imgLongitude, imgLongitude);
+                    convertedImages[frame] = CommonUtil.MakeImageForExport(convertedImages[frame], imgLongitude, imgLumeProfile);
                 }
 
                 if (format == Constants.ExportPullbackAVI)

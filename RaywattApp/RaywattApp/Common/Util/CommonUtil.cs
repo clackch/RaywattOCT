@@ -249,7 +249,7 @@ namespace RaywattApp.Common.Util
             }
         }
 
-        public static async Task<Mat> ConvertImage(string filePath, List<int> bookmarkedIndices, List<Mat> convertedImages, Action<double> progressCallback, double progress)
+        public static async Task<Mat> ConvertImage(string filePath, List<int>? bookmarkedIndices, List<Mat> convertedImages, Action<double> progressCallback, double progress)
         {
             RayOpenImage(filePath);
 
@@ -290,7 +290,7 @@ namespace RaywattApp.Common.Util
             return imgLongitude;
         }
 
-        public static Mat MakeImageForExport(Mat crossSection, Mat longitude, Mat lumenProfile) {
+        public static Mat MakeImageForExport(Mat crossSection, Mat? longitude, Mat? lumenProfile) {
             Mat imgExport = new Mat();
             imgExport.Create(Constants.ApplicationHeight, Constants.ApplicationWidth, MatType.CV_8UC3);
             imgExport.SetTo(0x00);
