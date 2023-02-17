@@ -290,11 +290,12 @@ namespace RaywattApp.Common.Util
             return imgLongitude;
         }
 
-        public static Mat MakeImageForExport(Mat crossSection, Mat? longitude, Mat? lumenProfile) {
+        public static Mat MakeImageForExport(Mat crossSection, Mat? longitude, Mat? lumenProfile, Mat? angio, out List<Tuple<Rect, Size2f>> region) {
             Mat imgExport = new Mat();
             imgExport.Create(Constants.ApplicationHeight, Constants.ApplicationWidth, MatType.CV_8UC3);
             imgExport.SetTo(0x00);
 
+            region = new List<Tuple<Rect, Size2f>>();
             if (crossSection == null) return imgExport;
 
             Size szRemain = new Size(imgExport.Width, imgExport.Height);
@@ -303,27 +304,55 @@ namespace RaywattApp.Common.Util
             if (longitude != null)
             {
                 Mat imgLongitude = new Mat();
+                Rect rectLongitude = new Rect(0, szRemain.Height - szLongitude.Height, szLongitude.Width, szLongitude.Height);
+                Size2f scaleLongitude = new Size2f(1, 1);
                 Cv2.Resize(longitude, imgLongitude, szLongitude);
-                Cv2.CopyTo(imgLongitude, imgExport[new Rect(0, szRemain.Height - szLongitude.Height, szLongitude.Width, szLongitude.Height)]);
+                Cv2.CopyTo(imgLongitude, imgExport[rectLongitude]);
                 szRemain.Height -= szLongitude.Height;
 
+                Tuple<Rect, Size2f> regionLongitude = new Tuple<Rect, Size2f>(rectLongitude, scaleLongitude);
+                region.Add(regionLongitude);
+
                 // draw longitude info
+                Rect rectLongitudeInfo = new Rect(0, szRemain.Height - szLongitude.Height, szLongitudeInfo.Width, szLongitudeInfo.Height);
+                Size2f scaleLongitudeInfo = new Size2f(1, 1);
                 szRemain.Height -= szLongitudeInfo.Height;
+
+                Tuple<Rect, Size2f> regionLongitudeInfo = new Tuple<Rect, Size2f>(rectLongitudeInfo, scaleLongitudeInfo);
+                region.Add(regionLongitudeInfo);
             }
             if (lumenProfile != null)
             {
                 Mat imgLumenProfile = new Mat();
+                Rect rectLumenProfile = new Rect(0, szRemain.Height - szLongitude.Height, szLongitude.Width, szLongitude.Height);
+                Size2f scaleLumenProfile = new Size2f(1, 1);
                 Cv2.Resize(lumenProfile, imgLumenProfile, szLongitude);
-                Cv2.CopyTo(imgLumenProfile, imgExport[new Rect(0, szRemain.Height - szLongitude.Height, szLongitude.Width, szLongitude.Height)]);
-
+                Cv2.CopyTo(imgLumenProfile, imgExport[rectLumenProfile]);
                 szRemain.Height -= szLongitude.Height;
+
+                Tuple<Rect, Size2f> regionLumenProfile = new Tuple<Rect, Size2f>(rectLumenProfile, scaleLumenProfile);
+                region.Add(regionLumenProfile);
             }
 
-            int diameter = Math.Min(szRemain.Width, szRemain.Height);
+            int diameterCrossSection = Math.Min(szRemain.Width, szRemain.Height);
 
+            if (angio != null)
+            {
+                Rect rectAngio = new Rect(0, 0, szRemain.Width - diameterCrossSection, szRemain.Height);
+                Mat imgAngio = new Mat();
+                Cv2.Resize(angio, imgAngio, rectAngio.Size);
+                Cv2.CopyTo(imgAngio, imgExport[rectAngio]);
+                szRemain.Width -= rectAngio.Width;
+            }
+
+            Rect rectCrossSection = new Rect(imgExport.Width - szRemain.Width, 0, diameterCrossSection, diameterCrossSection);
+            Size2f scaleCrossSection = new Size2f(1, 1);
             Mat imgCrossSection = new Mat();
-            Cv2.Resize(crossSection, imgCrossSection, new Size(diameter, diameter));
-            Cv2.CopyTo(imgCrossSection, imgExport[new Rect((szRemain.Width - diameter) / 2, 0, diameter, diameter)]);
+            Cv2.Resize(crossSection, imgCrossSection, rectCrossSection.Size);
+            Cv2.CopyTo(imgCrossSection, imgExport[rectCrossSection]);
+
+            Tuple<Rect, Size2f> regionCrossSection = new Tuple<Rect, Size2f>(rectCrossSection, scaleCrossSection);
+            region.Add(regionCrossSection);
 
             return imgExport;
         }

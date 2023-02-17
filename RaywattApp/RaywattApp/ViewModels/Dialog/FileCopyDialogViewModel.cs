@@ -89,6 +89,12 @@ namespace RaywattApp.ViewModels.Dialog
 
         private async void FileSaveDicom()
         {
+            // test data
+            Mat lumenProfile = new Mat(100, 100, MatType.CV_8UC3);
+            Mat angio = new Mat(100, 100, MatType.CV_8UC3);
+            lumenProfile.SetTo(new Scalar(0xfe, 0xfe, 0xfe));
+            angio.SetTo(new Scalar(0xee, 0xee, 0xee));
+
             string dicomDirFolder = DICOMDIRInputFolder(SaveFolder);
 
             for (int i=0; i< PatientCases.Count; i++)
@@ -109,9 +115,10 @@ namespace RaywattApp.ViewModels.Dialog
 
                 List<Mat> convertedImages = new List<Mat>();
                 Mat? imgLongitude = await CommonUtil.ConvertImage(PatientCases[i].ImageFullPath, exportIndices, convertedImages, prog => Progress += prog, progressConvert);
-                Mat? imgLumeProfile = null;
-
+                
                 imgLongitude = FileExport.LModeView ? imgLongitude : null;
+                Mat? imgLumeProfile = FileExport.LumenProfileView ? lumenProfile : null;
+                Mat? imgAngio = FileExport.AngioView ? angio : null;
 
                 //Start
                 RayExportWrapper.DicomStart();
@@ -120,7 +127,8 @@ namespace RaywattApp.ViewModels.Dialog
                 RayExportWrapper.DicomImageStart(convertedImages.Count);
                 for (int frame = 0; frame < convertedImages.Count; frame++)
                 {
-                    Mat imgExport = CommonUtil.MakeImageForExport(convertedImages[frame], imgLongitude, imgLumeProfile);
+                    List<Tuple<Rect, Size2f>>? region = null;
+                    Mat imgExport = CommonUtil.MakeImageForExport(convertedImages[frame], imgLongitude, imgLumeProfile, imgAngio, out region);
                     Cv2.CvtColor(imgExport, imgExport, ColorConversionCodes.RGB2BGR);
                     RayExportWrapper.DicomAddImage(imgExport.Cols, imgExport.Rows, imgExport.Data);
                 }
@@ -145,6 +153,12 @@ namespace RaywattApp.ViewModels.Dialog
 
         private async void FileSaveStandard()
         {
+            // test data
+            Mat lumenProfile = new Mat(100, 100, MatType.CV_8UC3);
+            Mat angio = new Mat(100, 100, MatType.CV_8UC3);
+            lumenProfile.SetTo(new Scalar(0xfe, 0xfe, 0xfe));
+            angio.SetTo(new Scalar(0xee, 0xee, 0xee));
+
             string format = (FileExport.Material == Constants.ExportMaterialPullback) ? FileExport.Pullback : FileExport.StillFrame;
 
             for (int i = 0; i < PatientCases.Count; i++)
@@ -166,13 +180,15 @@ namespace RaywattApp.ViewModels.Dialog
 
                 List<Mat> convertedImages = new List<Mat>();
                 Mat? imgLongitude = await CommonUtil.ConvertImage(PatientCases[i].ImageFullPath, exportIndices, convertedImages, prog => Progress += prog, progressConvert);
-                Mat? imgLumeProfile = null;
 
                 imgLongitude = FileExport.LModeView ? imgLongitude : null;
+                Mat? imgLumeProfile = FileExport.LumenProfileView ? lumenProfile : null;
+                Mat? imgAngio = FileExport.AngioView ? angio : null;
 
                 for (int frame = 0; frame < convertedImages.Count; frame++)
                 {
-                    convertedImages[frame] = CommonUtil.MakeImageForExport(convertedImages[frame], imgLongitude, imgLumeProfile);
+                    List<Tuple<Rect, Size2f>>? region = null;
+                    convertedImages[frame] = CommonUtil.MakeImageForExport(convertedImages[frame], imgLongitude, imgLumeProfile, imgAngio, out region);
                 }
 
                 if (format == Constants.ExportPullbackAVI)
