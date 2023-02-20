@@ -74,27 +74,29 @@ namespace RaywattApp.ViewModels.File
             sqlParameters["ids"] = FileExport.SelectedItem;
             PatientCases = _sqlManager.SelectPatientCaseByList(sqlParameters);
 
-            if(FileExport.Material == Constants.ExportMaterialPullback)
+            const double frameSize = Constants.ApplicationWidth * Constants.ApplicationHeight * 3.0;
+
+            if (FileExport.Material == Constants.ExportMaterialPullback)
             {
                 foreach (PatientCase patientCase in PatientCases)
                 {
                     if (patientCase.PullbackType == Constants.PullbackTypeLong)
                     {
-                        ExportSize += Constants.ApplicationWidth * Constants.ApplicationHeight * 3.0 * Constants.PullbackLongFrameCnt;
+                        ExportSize += frameSize * Constants.PullbackLongFrameCnt;
                     }
                     else
                     {
-                        ExportSize += Constants.ApplicationWidth * Constants.ApplicationHeight * 3.0 * Constants.PullbackShortFrameCnt;
+                        ExportSize += frameSize * Constants.PullbackShortFrameCnt;
                     }
                 }
             }
             else if(FileExport.Material == Constants.ExportMaterialBookmarked)
             {
-                ExportSize = Constants.ApplicationWidth * Constants.ApplicationHeight * 3.0 * FileExport.BookmarkedFrames.Count;
+                ExportSize = frameSize * FileExport.BookmarkedFrames.Count;
             }
             else
             {
-                ExportSize = Constants.ApplicationWidth * Constants.ApplicationHeight * 3.0;
+                ExportSize = frameSize;
             }
 
             ExportSize = CommonUtil.ByteToGB(ExportSize);
