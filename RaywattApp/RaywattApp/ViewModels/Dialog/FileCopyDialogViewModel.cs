@@ -92,7 +92,7 @@ namespace RaywattApp.ViewModels.Dialog
         private async void FileSaveDicom()
         {
             //DICOMDIR Input Folder
-            string dicomDirFolder = CommonUtil.CreateFolder(FileExport.ExternalDrivePath + "\\" + DateTime.Now.ToString("yyyyMMddHHmmss"));
+            string dicomDirFolder = CommonUtil.CreateFolder(SaveFolder + "\\" + DateTime.Now.ToString("yyyyMMddHHmmss"));
             RayExportWrapper.DICOMDIRInputFolder(dicomDirFolder);
 
             //Group by Patient
