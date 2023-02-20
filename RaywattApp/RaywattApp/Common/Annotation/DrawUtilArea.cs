@@ -12,6 +12,7 @@ using Point = System.Windows.Point;
 using Path = System.Windows.Shapes.Path;
 using OpenCvSharp;
 using System.Collections.ObjectModel;
+using RaywattApp.Common.Util;
 
 namespace RaywattApp.Common.Annotation
 {
@@ -352,9 +353,12 @@ namespace RaywattApp.Common.Annotation
 
             if (pointList.Count > 1)
             {
+                PathGeometry pathGeometry = CommonUtil.SetPathData(pointList, isClosed);
+                this.overlayPathGeometry = pathGeometry;
+
                 path = new Path();
                 path.Style = (Style)this.Resources["StylePath"];
-                path.Data = SetPathData(pointList, isClosed);
+                path.Data = pathGeometry;
                 path.Stroke = brushes[group % brushes.Length];
                 path.Name = constCurve + "_" + group;
 
@@ -812,63 +816,6 @@ namespace RaywattApp.Common.Annotation
             }
 
             areaGeometry.MeanDiameter = (numOfDiameter == 0) ? 0 : sumDiameter / numOfDiameter;
-        }
-
-        //---------------------------------------------------------------------------------------------------- Function (Bezier Curve)
-        private PathGeometry? SetPathData(List<Point> pointList, bool isClosed)
-        {
-            if (pointList == null)
-                return null;
-
-            var points = new List<Rulyotano.Math.Geometry.Point>();
-
-            foreach (var point in pointList)
-            {
-                points.Add(new Rulyotano.Math.Geometry.Point(point.X, point.Y));
-            }
-
-            if (points.Count <= 1)
-                return null;
-
-            var myPathFigure = new PathFigure { StartPoint = ConvertToVisualPoint(points.FirstOrDefault()) };
-            var myPathSegmentCollection = new PathSegmentCollection();
-            var bezierSegments = Rulyotano.Math.Interpolation.Bezier.BezierInterpolation.PointsToBezierCurves(points, isClosed);
-
-            if (bezierSegments == null || bezierSegments.Count < 1)
-            {
-                //Add a line segment <this is generic for more than one line>
-                foreach (var point in points.GetRange(1, points.Count - 1))
-                {
-                    var myLineSegment = new LineSegment { Point = ConvertToVisualPoint(point) };
-                    myPathSegmentCollection.Add(myLineSegment);
-                }
-            }
-            else
-            {
-                foreach (var bezierCurveSegment in bezierSegments)
-                {
-                    var segment = new BezierSegment
-                    {
-                        Point1 = ConvertToVisualPoint(bezierCurveSegment.FirstControlPoint),
-                        Point2 = ConvertToVisualPoint(bezierCurveSegment.SecondControlPoint),
-                        Point3 = ConvertToVisualPoint(bezierCurveSegment.EndPoint)
-                    };
-                    myPathSegmentCollection.Add(segment);
-                }
-            }
-
-            myPathFigure.Segments = myPathSegmentCollection;
-            var myPathFigureCollection = new PathFigureCollection { myPathFigure };
-            var myPathGeometry = new PathGeometry { Figures = myPathFigureCollection };
-
-            this.overlayPathGeometry = myPathGeometry;
-
-            return myPathGeometry;
-        }
-
-        private Point ConvertToVisualPoint(Rulyotano.Math.Geometry.Point p)
-        {
-            return new Point(p.X, p.Y);
         }
     }
 }

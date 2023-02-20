@@ -18,7 +18,7 @@ namespace RaywattApp.Common.Annotation
 
         //---------------------------------------------------------------------------------------------------- Field
 
-        private Brush[] brushes = { Brushes.Red, Brushes.Orange, Brushes.Yellow, Brushes.Green, Brushes.Blue, Brushes.Navy, Brushes.Purple };
+        private Brush[] brushes = Constants.AnnotationBrushes;
 
         private bool isDrawing;
 

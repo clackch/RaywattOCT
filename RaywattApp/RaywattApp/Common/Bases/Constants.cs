@@ -1,4 +1,7 @@
-﻿namespace RaywattApp.Common.Bases
+﻿
+using System.Windows.Media;
+
+namespace RaywattApp.Common.Bases
 {
     public class Constants
     {
@@ -174,5 +177,8 @@
         public const string MeasureDsbCLen = "DC";
         public const string MeasureDsbLLen = "DL";
         public const string MeasureDsbText = "DT";
+
+        //Draw Annotation
+        public static Brush[] AnnotationBrushes = { Brushes.Red, Brushes.Orange, Brushes.Yellow, Brushes.Green, Brushes.Blue, Brushes.Navy, Brushes.Purple };
     }
 }
