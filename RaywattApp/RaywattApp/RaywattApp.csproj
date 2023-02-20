@@ -27,6 +27,7 @@
     <PackageReference Include="Rulyotano.Math" Version="2.0.0" />
     <PackageReference Include="Rulyotano.Math.Geometry" Version="2.0.0" />
     <PackageReference Include="Rulyotano.Math.Interpolation.Bezier" Version="2.0.0" />
+    <PackageReference Include="SharpVectors.Wpf" Version="1.8.1" />
   </ItemGroup>
 
   <ItemGroup>

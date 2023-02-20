@@ -102,6 +102,9 @@
         //Export Anonymous
         public const string ExportAnonymous = "Anonymous";
 
+        //Export DICOM Prefic
+        public const string ExportDicomPrefix = "IMG";
+
         //File Import/Export
         public const string FileImageExtension = "bin";
         public const string FileExtension = "dbf";
@@ -110,6 +113,12 @@
         //View Mode - Live View, Stand By
         public const string ViewModeLiveView = "LiveView";
         public const string ViewModeStandBy = "StandBy";
+
+        //Pullback Type
+        public const string PullbackTypeLong = "LONG";
+        public const string PullbackTypeShort = "SHOR";
+        public const int PullbackLongFrameCnt = 1000;
+        public const int PullbackShortFrameCnt = 500;
 
         //Not Selected
         public const string NotSelected = "Not Selected";

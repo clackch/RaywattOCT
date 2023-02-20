@@ -26,6 +26,9 @@ namespace RaywattApp.Common.File
         protected FileExport _fileExport;
 
         [ObservableProperty]
+        protected IList<PatientCase> _patientCases;
+
+        [ObservableProperty]
         private double _exportSize;
 
         protected DispatcherTimer timer = new DispatcherTimer();

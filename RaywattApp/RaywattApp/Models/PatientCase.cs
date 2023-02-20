@@ -77,9 +77,12 @@ namespace RaywattApp.Models
         private string imageFullPath;
         public string ImageFullPath
         {
-            get { return Constants.DataRootPath + "\\" + PatientId + "\\" + Image; }
+            get { return IsAnonymize ? imageFullPath : Constants.DataRootPath + "\\" + PatientId + "\\" + Image; }
             set { imageFullPath = value; }
         }
+
+        [ObservableProperty]
+        private bool isAnonymize;
 
         [ObservableProperty]
         private long imageSize;
