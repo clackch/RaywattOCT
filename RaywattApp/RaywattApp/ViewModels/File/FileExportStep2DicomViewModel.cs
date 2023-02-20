@@ -123,11 +123,14 @@ namespace RaywattApp.ViewModels.File
             {
                 foreach (PatientCase patientCase in PatientCases)
                 {
+                    patientCase.ImageFullPath = patientCase.ImageFullPath;
+                    patientCase.IsAnonymize = true;
+
                     string alternateId = CommonUtil.GetRandomText(9);
                     patientCase.Id = alternateId + "_" + patientCase.Id.Split("_")[1];
                     patientCase.PatientId = alternateId;
                     patientCase.PatientName = Constants.ExportAnonymous;
-                    patientCase.Birthdate = new DateTime(1900, 1, 1);
+                    patientCase.Birthdate = new DateTime(1900, 1, 1);                    
                 }
             }
 

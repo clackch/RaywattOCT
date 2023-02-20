@@ -44,7 +44,8 @@ namespace RaywattApp.ViewModels.Dialog
             FileExport = (FileExport)data["fileExport"];
             PatientCases = (IList<PatientCase>)data["patientCases"];
 
-            if (FileExport != null) {
+            if (FileExport != null)
+            {
                 SaveFolder = (FileExport.DiskType == Constants.FileDiskCd) ? Constants.TempFolderPath : FileExport.ExternalDrivePath;
 
                 if (FileExport.Type == Constants.ExportTypeNative)
@@ -58,13 +59,13 @@ namespace RaywattApp.ViewModels.Dialog
                 {
                     FileSaveDicom();
                 }
-                else if (FileExport.Type == Constants.ExportTypeStandard) 
+                else if (FileExport.Type == Constants.ExportTypeStandard)
                 {
                     FileSaveStandard();
                 }
 
                 if (FileExport.DiskType == Constants.FileDiskCd)
-                { 
+                {
                     // RayExportWrapper.BurningCD();
                 }
             }
@@ -92,7 +93,7 @@ namespace RaywattApp.ViewModels.Dialog
         {
             //DICOMDIR Input Folder
             string dicomDirFolder = CommonUtil.CreateFolder(FileExport.ExternalDrivePath + "\\" + DateTime.Now.ToString("yyyyMMddHHmmss"));
-            RayExportWrapper.DICOMDIRInputFolder(dicomDirFolder);             
+            RayExportWrapper.DICOMDIRInputFolder(dicomDirFolder);
 
             //Group by Patient
             var patientGrp = from arr in PatientCases
@@ -170,7 +171,8 @@ namespace RaywattApp.ViewModels.Dialog
 
             //DICOMDIR Write
             RayExportWrapper.DICOMDIRWrite();
-            
+
+            Progress = 100;
             EnableDone = true;
         }
 
@@ -353,13 +355,13 @@ namespace RaywattApp.ViewModels.Dialog
         {
             int age = 0;
 
-            if(birthDate.Month < createDate.Month)
+            if (birthDate.Month < createDate.Month)
             {
                 age = createDate.Year - birthDate.Year;
             }
-            else if(birthDate.Month == createDate.Month)
+            else if (birthDate.Month == createDate.Month)
             {
-                if(birthDate.Day <= createDate.Day)
+                if (birthDate.Day <= createDate.Day)
                 {
                     age = createDate.Year - birthDate.Year;
                 }

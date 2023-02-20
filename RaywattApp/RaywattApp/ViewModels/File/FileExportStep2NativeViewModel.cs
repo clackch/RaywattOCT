@@ -150,6 +150,9 @@ namespace RaywattApp.ViewModels.File
 
                         if (FileExport.PatientInfoAnonymize)
                         {
+                            patientCase.ImageFullPath = patientCase.ImageFullPath;
+                            patientCase.IsAnonymize = true;
+
                             if (!String.IsNullOrEmpty(alternateId))
                             {
                                 patientCase.Id = alternateId + "_" + patientCase.Id.Split("_")[1];
