@@ -8,6 +8,14 @@ using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using System;
 using System.Collections.Generic;
+using System.Windows.Controls;
+using RaywattApp.Common.Annotation.Models;
+using System.Collections.ObjectModel;
+using Newtonsoft.Json;
+using System.Windows.Shapes;
+using System.Windows.Media.Imaging;
+using System.Windows.Media;
+using System.Windows.Annotations;
 
 namespace RaywattApp.ViewModels.Dialog
 {
@@ -161,7 +169,7 @@ namespace RaywattApp.ViewModels.Dialog
 
             string format = (FileExport.Material == Constants.ExportMaterialPullback) ? FileExport.Pullback : FileExport.StillFrame;
 
-            for (int i = 0; i < PatientCases.Count; i++)
+            foreach(PatientCase patientCase in PatientCases)
             {
                 double progressPerCase = 100 / PatientCases.Count;
                 double progressConvert = progressPerCase / 2;
@@ -179,33 +187,48 @@ namespace RaywattApp.ViewModels.Dialog
                 }
 
                 List<Mat> convertedImages = new List<Mat>();
-                Mat? imgLongitude = await CommonUtil.ConvertImage(PatientCases[i].ImageFullPath, exportIndices, convertedImages, prog => Progress += prog, progressConvert);
+                Mat? imgLongitude = await CommonUtil.ConvertImage(patientCase.ImageFullPath, exportIndices, convertedImages, prog => Progress += prog, progressConvert);
 
                 imgLongitude = FileExport.LModeView ? imgLongitude : null;
                 Mat? imgLumeProfile = FileExport.LumenProfileView ? lumenProfile : null;
                 Mat? imgAngio = FileExport.AngioView ? angio : null;
 
+                List<Measurement>? Annotations = null;
+                ObservableCollection<LengthGeometry>? lModeLengths = null;
+                List<TextGeometry>? lModeTexts = null;
+                if (FileExport.Measurements != Constants.ExportMeasurementHideAll)
+                {
+                    GetAnnotation(patientCase.Measurements, out Annotations, out lModeLengths, out lModeTexts);                    
+                    foreach (Measurement annotation in Annotations)
+                    {
+                        if (annotation.FrameNumber < convertedImages.Count)
+                        {
+                        }
+                    }
+                }
+
                 for (int frame = 0; frame < convertedImages.Count; frame++)
                 {
                     List<Tuple<Rect, Size2f>>? region = null;
+                    DrawAnnotation(convertedImages[frame], frame, Annotations);
                     convertedImages[frame] = CommonUtil.MakeImageForExport(convertedImages[frame], imgLongitude, imgLumeProfile, imgAngio, out region);
                 }
 
                 if (format == Constants.ExportPullbackAVI)
                 {
-                    string fileName = CreateStandardUniqueName(PatientCases[i]);
+                    string fileName = CreateStandardUniqueName(patientCase);
                     await CommonUtil.SaveVideo(convertedImages, SaveFolder, fileName, format, 10, prog => Progress += prog, progressSave);
                 }
                 else if (format == Constants.ExportPullbackTIFF)
                 {
-                    string fileName = CreateStandardUniqueName(PatientCases[i]);
+                    string fileName = CreateStandardUniqueName(patientCase);
                     await CommonUtil.SaveMultipleFrames(convertedImages, SaveFolder, fileName, format, prog => Progress += prog, progressSave);
                 }
                 else
                 {
                     for (int frame = 0; frame < convertedImages.Count; frame++)
                     {
-                        string fileName = CreateStandardUniqueName(PatientCases[i]) + string.Format("-{0:0000}", exportIndices[frame]);
+                        string fileName = CreateStandardUniqueName(patientCase) + string.Format("-{0:0000}", exportIndices[frame]);
                         CommonUtil.SaveStillFrame(convertedImages[frame], SaveFolder, fileName, format);
                         Progress += (progressSave / convertedImages.Count);
                     }
@@ -214,6 +237,83 @@ namespace RaywattApp.ViewModels.Dialog
 
             Progress = 100;
             EnableDone = true;
+        }
+
+        private void GetAnnotation(string annotation, out List<Measurement>? annotations, out ObservableCollection<LengthGeometry>? lModeLengths, out List<TextGeometry>? lModeTexts)
+        {
+            annotations = new List<Measurement>();
+            lModeLengths = new ObservableCollection<LengthGeometry>();
+            lModeTexts = new List<TextGeometry>();
+
+            if (annotation != null && !string.IsNullOrEmpty(annotation))
+            {
+                annotations = JsonConvert.DeserializeObject<List<Measurement>>(annotation);
+
+                foreach (var measurement in annotations)
+                {
+                    //Longitude Measurement
+                    if (measurement.FrameNumber == -1)
+                    {
+                        lModeLengths = measurement.LengthGeometries;
+                        lModeTexts = measurement.TextGeometries;
+                        annotations.Remove(measurement);
+                        break;
+                    }
+                }
+            }
+        }
+        private void DrawAnnotation(Mat image, int frame, List<Measurement>? Annotations) {
+            if (Annotations == null) return;
+
+            const int crossSectionWidth = 640;
+            const int crossSectionHeight = 640;
+
+            foreach (Measurement annotation in Annotations)
+            {
+                if (frame == annotation.FrameNumber)
+                {
+                    foreach (AreaGeometry area in annotation.AreaGeometries)
+                    {
+                        for (int i = 0; i < area.Points.Count; i++)
+                        {
+                            System.Windows.Point ptScaled = new System.Windows.Point();
+                            ptScaled.X = area.Points[i].X * (image.Width / (double)crossSectionWidth);
+                            ptScaled.Y = area.Points[i].Y * (image.Height / (double)crossSectionHeight);
+                            area.Points[i] = ptScaled;
+                        }
+                        PathGeometry path = CommonUtil.SetPathData(area.Points, true);
+                        Brush brush = Constants.AnnotationBrushes[area.Group % Constants.AnnotationBrushes.Length];
+                        {
+                            RenderTargetBitmap bitmap = new RenderTargetBitmap((int)image.Cols, (int)image.Height, 96, 96, PixelFormats.Pbgra32);
+
+                            DrawingVisual visual = new DrawingVisual();
+                            DrawingContext context = visual.RenderOpen();
+                            context.DrawGeometry(null, new Pen(brush, 2.0), path);
+                            context.Close();
+                            bitmap.Render(visual);
+
+                            PngBitmapEncoder encoder = new PngBitmapEncoder();
+                            encoder.Frames.Add(BitmapFrame.Create(bitmap));
+
+                            var bitmapImage = new BitmapImage();
+                            using (var stream = new System.IO.MemoryStream())
+                            {
+                                encoder.Save(stream);
+                                stream.Seek(0, System.IO.SeekOrigin.Begin);
+
+                                bitmapImage.BeginInit();
+                                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                                bitmapImage.StreamSource = stream;
+                                bitmapImage.EndInit();
+                            }
+                            Mat imgArea = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToMat(bitmapImage);
+                            Cv2.CvtColor(imgArea, imgArea, ColorConversionCodes.RGBA2RGB);
+                            Cv2.CopyTo(imgArea, image, imgArea);
+                        }
+                    }
+                    break;
+                }
+            }
         }
 
         private void SetProperty(PatientCase patientCase)
