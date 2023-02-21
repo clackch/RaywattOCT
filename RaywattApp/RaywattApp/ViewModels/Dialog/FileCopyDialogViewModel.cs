@@ -287,6 +287,15 @@ namespace RaywattApp.ViewModels.Dialog
                         {
                             context.DrawLine(new Pen(brush, 0.5), CommonUtil.GetScaledPoint(area.MinDiameter.point1, xScale, yScale), CommonUtil.GetScaledPoint(area.MinDiameter.point2, xScale, yScale));
                             context.DrawLine(new Pen(brush, 0.5), CommonUtil.GetScaledPoint(area.MaxDiameter.point1, xScale, yScale), CommonUtil.GetScaledPoint(area.MaxDiameter.point2, xScale, yScale));
+
+                            FormattedText label = new FormattedText("[" + (area.Group + 1) + "] " + (Math.Round(area.Area, 3)).ToString(),
+                                System.Globalization.CultureInfo.GetCultureInfo("en-us"),
+                                System.Windows.FlowDirection.LeftToRight,
+                                new Typeface("Pretendard"), 14, Brushes.White);
+                            System.Windows.Point ptLabel = CommonUtil.GetScaledPoint(area.CenterOfMass, xScale, yScale);
+                            ptLabel.X -= 40;
+                            ptLabel.Y -= 10;
+                            context.DrawText(label, ptLabel);
                         }
                     }
                     context.Close();
