@@ -650,6 +650,9 @@ namespace RaywattApp.Common.Annotation
         {
             areaGeometry.CenterOfMass = CalculateMassCenter();
             areaGeometry.PointsAll = FindAllPoints();
+            areaGeometry.MaxDiameter = new DiameterInfo();
+            areaGeometry.MinDiameter = new DiameterInfo();
+            areaGeometry.MeanDiameter = 0.0f;
         }
 
         private void DrawContourToBackBuffer(Path path)
