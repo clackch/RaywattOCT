@@ -193,24 +193,18 @@ namespace RaywattApp.ViewModels.Dialog
                 Mat? imgLumeProfile = FileExport.LumenProfileView ? lumenProfile : null;
                 Mat? imgAngio = FileExport.AngioView ? angio : null;
 
-                List<Measurement>? Annotations = null;
+                List<Measurement>? Measurements = null;
                 ObservableCollection<LengthGeometry>? lModeLengths = null;
                 List<TextGeometry>? lModeTexts = null;
                 if (FileExport.Measurements != Constants.ExportMeasurementHideAll)
                 {
-                    GetAnnotation(patientCase.Measurements, out Annotations, out lModeLengths, out lModeTexts);                    
-                    foreach (Measurement annotation in Annotations)
-                    {
-                        if (annotation.FrameNumber < convertedImages.Count)
-                        {
-                        }
-                    }
+                    GetAnnotation(patientCase.Measurements, out Measurements, out lModeLengths, out lModeTexts);
                 }
 
                 for (int frame = 0; frame < convertedImages.Count; frame++)
                 {
                     List<Tuple<Rect, Size2f>>? region = null;
-                    DrawAnnotation(convertedImages[frame], frame, Annotations);
+                    DrawAnnotation(convertedImages[frame], frame, Measurements);
                     convertedImages[frame] = CommonUtil.MakeImageForExport(convertedImages[frame], imgLongitude, imgLumeProfile, imgAngio, out region);
                 }
 
@@ -239,24 +233,24 @@ namespace RaywattApp.ViewModels.Dialog
             EnableDone = true;
         }
 
-        private void GetAnnotation(string annotation, out List<Measurement>? annotations, out ObservableCollection<LengthGeometry>? lModeLengths, out List<TextGeometry>? lModeTexts)
+        private void GetAnnotation(string annotation, out List<Measurement>? measurements, out ObservableCollection<LengthGeometry>? lModeLengths, out List<TextGeometry>? lModeTexts)
         {
-            annotations = new List<Measurement>();
+            measurements = new List<Measurement>();
             lModeLengths = new ObservableCollection<LengthGeometry>();
             lModeTexts = new List<TextGeometry>();
 
             if (annotation != null && !string.IsNullOrEmpty(annotation))
             {
-                annotations = JsonConvert.DeserializeObject<List<Measurement>>(annotation);
+                measurements = JsonConvert.DeserializeObject<List<Measurement>>(annotation);
 
-                foreach (var measurement in annotations)
+                foreach (var measurement in measurements)
                 {
                     //Longitude Measurement
                     if (measurement.FrameNumber == -1)
                     {
                         lModeLengths = measurement.LengthGeometries;
                         lModeTexts = measurement.TextGeometries;
-                        annotations.Remove(measurement);
+                        measurements.Remove(measurement);
                         break;
                     }
                 }
@@ -267,50 +261,54 @@ namespace RaywattApp.ViewModels.Dialog
 
             const int crossSectionWidth = 640;
             const int crossSectionHeight = 640;
+            double xScale = image.Width / (double) crossSectionWidth;
+            double yScale = image.Height / (double)crossSectionHeight;
 
             foreach (Measurement annotation in Annotations)
             {
                 if (frame == annotation.FrameNumber)
                 {
+                    RenderTargetBitmap bitmap = new RenderTargetBitmap((int)image.Cols, (int)image.Height, 96, 96, PixelFormats.Pbgra32);
+
+                    DrawingVisual visual = new DrawingVisual();
+                    DrawingContext context = visual.RenderOpen();
                     foreach (AreaGeometry area in annotation.AreaGeometries)
                     {
+                        Brush brush = Constants.AnnotationBrushes[area.Group % Constants.AnnotationBrushes.Length];
+
                         for (int i = 0; i < area.Points.Count; i++)
                         {
-                            System.Windows.Point ptScaled = new System.Windows.Point();
-                            ptScaled.X = area.Points[i].X * (image.Width / (double)crossSectionWidth);
-                            ptScaled.Y = area.Points[i].Y * (image.Height / (double)crossSectionHeight);
-                            area.Points[i] = ptScaled;
+                            area.Points[i] = CommonUtil.GetScaledPoint(area.Points[i], xScale, yScale);
                         }
-                        PathGeometry path = CommonUtil.SetPathData(area.Points, true);
-                        Brush brush = Constants.AnnotationBrushes[area.Group % Constants.AnnotationBrushes.Length];
+
+                        PathGeometry path = CommonUtil.GetBezierCurve(area.Points, true);
+                        context.DrawGeometry(null, new Pen(brush, 2.0), path);
+                        if (area.Valid)
                         {
-                            RenderTargetBitmap bitmap = new RenderTargetBitmap((int)image.Cols, (int)image.Height, 96, 96, PixelFormats.Pbgra32);
-
-                            DrawingVisual visual = new DrawingVisual();
-                            DrawingContext context = visual.RenderOpen();
-                            context.DrawGeometry(null, new Pen(brush, 2.0), path);
-                            context.Close();
-                            bitmap.Render(visual);
-
-                            PngBitmapEncoder encoder = new PngBitmapEncoder();
-                            encoder.Frames.Add(BitmapFrame.Create(bitmap));
-
-                            var bitmapImage = new BitmapImage();
-                            using (var stream = new System.IO.MemoryStream())
-                            {
-                                encoder.Save(stream);
-                                stream.Seek(0, System.IO.SeekOrigin.Begin);
-
-                                bitmapImage.BeginInit();
-                                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                                bitmapImage.StreamSource = stream;
-                                bitmapImage.EndInit();
-                            }
-                            Mat imgArea = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToMat(bitmapImage);
-                            Cv2.CvtColor(imgArea, imgArea, ColorConversionCodes.RGBA2RGB);
-                            Cv2.CopyTo(imgArea, image, imgArea);
+                            context.DrawLine(new Pen(brush, 0.5), CommonUtil.GetScaledPoint(area.MinDiameter.point1, xScale, yScale), CommonUtil.GetScaledPoint(area.MinDiameter.point2, xScale, yScale));
+                            context.DrawLine(new Pen(brush, 0.5), CommonUtil.GetScaledPoint(area.MaxDiameter.point1, xScale, yScale), CommonUtil.GetScaledPoint(area.MaxDiameter.point2, xScale, yScale));
                         }
                     }
+                    context.Close();
+                    bitmap.Render(visual);
+
+                    PngBitmapEncoder encoder = new PngBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(bitmap));
+
+                    var bitmapImage = new BitmapImage();
+                    using (var stream = new System.IO.MemoryStream())
+                    {
+                        encoder.Save(stream);
+                        stream.Seek(0, System.IO.SeekOrigin.Begin);
+
+                        bitmapImage.BeginInit();
+                        bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                        bitmapImage.StreamSource = stream;
+                        bitmapImage.EndInit();
+                    }
+                    Mat imgArea = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToMat(bitmapImage);
+                    Cv2.CvtColor(imgArea, imgArea, ColorConversionCodes.RGBA2RGB);
+                    Cv2.CopyTo(imgArea, image, imgArea);
                     break;
                 }
             }

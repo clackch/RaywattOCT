@@ -457,9 +457,20 @@ namespace RaywattApp.Common.Util
             return Math.Round(bytes / div / div / div, 3);
         }
 
+        public static PathGeometry? GetLine(System.Windows.Point firstPoint, System.Windows.Point secondPoint)
+        {
+            var myPathFigure = new PathFigure { StartPoint = firstPoint };
+            var myPathSegmentCollection = new PathSegmentCollection();
+            var myLineSegment = new LineSegment { Point = secondPoint };
+            myPathSegmentCollection.Add(myLineSegment);
+            myPathFigure.Segments = myPathSegmentCollection;
+            var myPathFigureCollection = new PathFigureCollection { myPathFigure };
+            var myPathGeometry = new PathGeometry { Figures = myPathFigureCollection };
 
-        //---------------------------------------------------------------------------------------------------- Function (Bezier Curve)
-        public static PathGeometry? SetPathData(List<System.Windows.Point> pointList, bool isClosed)
+            return myPathGeometry;
+        }
+
+        public static PathGeometry? GetBezierCurve(List<System.Windows.Point> pointList, bool isClosed)
         {
             if (pointList == null)
                 return null;
@@ -508,6 +519,14 @@ namespace RaywattApp.Common.Util
             return myPathGeometry;
         }
 
+        public static System.Windows.Point GetScaledPoint(System.Windows.Point point, double xScale, double yScale)
+        {
+            System.Windows.Point ptScaled = new System.Windows.Point();
+            ptScaled.X = point.X * xScale;
+            ptScaled.Y = point.Y * yScale;
+
+            return ptScaled;
+        }
         private static System.Windows.Point ConvertToVisualPoint(Rulyotano.Math.Geometry.Point p)
         {
             return new System.Windows.Point(p.X, p.Y);

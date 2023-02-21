@@ -1,5 +1,6 @@
 ﻿using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
+using RaywattApp.Common.Util;
 using System;
 using System.Collections.ObjectModel;
 using System.Windows;
@@ -259,7 +260,7 @@ namespace RaywattApp.Common.Annotation
         {
             Path path = new Path();
             path.Style = (Style)this.Resources["StylePath"];
-            path.Data = GetLine(firstPoint, secondPoint);
+            path.Data = CommonUtil.GetLine(firstPoint, secondPoint);
             path.Stroke = brushes[group % brushes.Length];
             path.Name = constLine + "_" + group;
 
@@ -286,18 +287,6 @@ namespace RaywattApp.Common.Annotation
             this.canvas.Children.Add(label);
         }
 
-        private PathGeometry? GetLine(Point firstPoint, Point secondPoint)
-        {
-            var myPathFigure = new PathFigure { StartPoint = firstPoint };
-            var myPathSegmentCollection = new PathSegmentCollection();
-            var myLineSegment = new LineSegment { Point = secondPoint };
-            myPathSegmentCollection.Add(myLineSegment);
-            myPathFigure.Segments = myPathSegmentCollection;
-            var myPathFigureCollection = new PathFigureCollection { myPathFigure };
-            var myPathGeometry = new PathGeometry { Figures = myPathFigureCollection };
-
-            return myPathGeometry;
-        }
 
         private void DrawEllipse(Point point, int group, bool isFirst)
         {

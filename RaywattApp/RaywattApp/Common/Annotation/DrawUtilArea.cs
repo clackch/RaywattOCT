@@ -333,12 +333,13 @@ namespace RaywattApp.Common.Annotation
             if (areaGeometry.IsClosed)
             {
                 UpdateGeometry(areaGeometry);
+                ValidateGeometry(areaGeometry);
 
-                if (IsValidGeometry(areaGeometry))
+                if (areaGeometry.Valid)
                 {
                     CalculateDiameter(areaGeometry);
 
-                    if (areaGeometry.ValidDiameter)
+                    if (areaGeometry.Valid)
                     {
                         DrawDiameter(areaGeometry.MinDiameter.point1, areaGeometry.MinDiameter.point2, areaGeometry.Group, constMinDiameter);
                         DrawDiameter(areaGeometry.MaxDiameter.point1, areaGeometry.MaxDiameter.point2, areaGeometry.Group, constMaxDiameter);
@@ -353,7 +354,7 @@ namespace RaywattApp.Common.Annotation
 
             if (pointList.Count > 1)
             {
-                PathGeometry pathGeometry = CommonUtil.SetPathData(pointList, isClosed);
+                PathGeometry pathGeometry = CommonUtil.GetBezierCurve(pointList, isClosed);
                 this.overlayPathGeometry = pathGeometry;
 
                 path = new Path();
@@ -442,7 +443,7 @@ namespace RaywattApp.Common.Annotation
             //Label 삭제
             DeleteLabel(constArea, areaGeometry.Group);
 
-            if (IsValidGeometry(areaGeometry))
+            if (areaGeometry.Valid)
             {
                 Label label = new Label();
                 label.Style = (Style)this.Resources["StyleLabel"];
@@ -461,7 +462,7 @@ namespace RaywattApp.Common.Annotation
         {
             Path path = new Path();
             path.Style = (Style)this.Resources["StylePath"];
-            path.Data = GetLine(firstPoint, secondPoint);
+            path.Data = CommonUtil.GetLine(firstPoint, secondPoint);
             path.Stroke = brushes[group % brushes.Length];
             path.Name = prefix + "_" + group;
             if (prefix.Equals(constMinDiameter))
@@ -472,12 +473,12 @@ namespace RaywattApp.Common.Annotation
             this.canvas.Children.Add(path);
         }
 
-        private bool IsValidGeometry(AreaGeometry areaGeometry)
+        private void ValidateGeometry(AreaGeometry areaGeometry)
         {
-            if (!areaGeometry.Path.Data.FillContains(areaGeometry.CenterOfMass)) return false;
-            if (IsOverlayed(areaGeometry.Points, areaGeometry.Group)) return false;
+            areaGeometry.Valid = true;
 
-            return true;
+            if (!areaGeometry.Path.Data.FillContains(areaGeometry.CenterOfMass)) areaGeometry.Valid = false;
+            if (IsOverlayed(areaGeometry.Points, areaGeometry.Group)) areaGeometry.Valid = false;
         }
 
         private void DeleteAreaAll()
@@ -774,7 +775,7 @@ namespace RaywattApp.Common.Annotation
 
         private void CalculateDiameter(AreaGeometry areaGeometry)
         {
-            areaGeometry.ValidDiameter = false;
+            areaGeometry.Valid = false;
 
             OpenCvSharp.Point ptFrom = new OpenCvSharp.Point(areaGeometry.CenterOfMass.X - contourBounds.X, areaGeometry.CenterOfMass.Y - contourBounds.Y);
 
@@ -799,7 +800,7 @@ namespace RaywattApp.Common.Annotation
                 diameterInfo.point1 = new Point(point1.X, point1.Y);
                 diameterInfo.point2 = new Point(point2.X, point2.Y);
                 diameterInfo.diameter = diameter;
-                areaGeometry.ValidDiameter = true;
+                areaGeometry.Valid = true;
 
                 sumDiameter += diameterInfo.diameter;
                 numOfDiameter++;
