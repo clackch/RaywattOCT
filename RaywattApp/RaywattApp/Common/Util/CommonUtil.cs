@@ -361,8 +361,8 @@ namespace RaywattApp.Common.Util
         public static void SaveStillFrame(Mat image, string rootPath, string fileName, string format) 
         {
             string filePath = rootPath + "\\" + fileName + "." + format.ToLower();
-
-            Cv2.ImWrite(filePath, image);
+            ImageEncodingParam encodingParam = new ImageEncodingParam(ImwriteFlags.JpegQuality, 100);
+            Cv2.ImWrite(filePath, image, encodingParam);
         }
 
         public static async Task SaveVideo(List<Mat> images, string rootPath, string fileName, string format, double fps, Action<double> progressCallback, double progress)
