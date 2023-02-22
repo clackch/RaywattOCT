@@ -13,6 +13,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using static RaywattOCT.RayCoreWrapper;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using Size = OpenCvSharp.Size;
 
 namespace RaywattApp.Common.Util
 {
@@ -54,6 +56,30 @@ namespace RaywattApp.Common.Util
         {
             MatType type = ch == 3 ? MatType.CV_8UC3 : MatType.CV_8UC1;
             return new Mat(height, width, type, data).Clone();
+        }
+
+        public static void RenderVisualToMat(DrawingVisual visual, Mat image)
+        {
+            RenderTargetBitmap bitmap = new RenderTargetBitmap((int)image.Cols, (int)image.Height, 96, 96, PixelFormats.Pbgra32);
+            bitmap.Render(visual);
+
+            PngBitmapEncoder encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bitmap));
+
+            var bitmapImage = new BitmapImage();
+            using (var stream = new System.IO.MemoryStream())
+            {
+                encoder.Save(stream);
+                stream.Seek(0, System.IO.SeekOrigin.Begin);
+
+                bitmapImage.BeginInit();
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.StreamSource = stream;
+                bitmapImage.EndInit();
+            }
+            Mat imgDraw = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToMat(bitmapImage);
+            Cv2.CvtColor(imgDraw, imgDraw, ColorConversionCodes.RGBA2RGB);
+            Cv2.CopyTo(imgDraw, image, imgDraw);
         }
 
         public static string GetRandomText(int length)
@@ -346,7 +372,8 @@ namespace RaywattApp.Common.Util
                 szRemain.Width -= rectAngio.Width;
             }
 
-            Rect rectCrossSection = new Rect(imgExport.Width - szRemain.Width, 0, diameterCrossSection, diameterCrossSection);
+            int offsetCrossSection = imgExport.Width - szRemain.Width;
+            Rect rectCrossSection = new Rect(offsetCrossSection + (szRemain.Width - diameterCrossSection) / 2, 0, diameterCrossSection, diameterCrossSection);
             Size2f scaleCrossSection = new Size2f(1, 1);
             Mat imgCrossSection = new Mat();
             Cv2.Resize(crossSection, imgCrossSection, rectCrossSection.Size);
