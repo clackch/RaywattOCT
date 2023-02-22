@@ -152,6 +152,10 @@ namespace RaywattApp.Common.Bases
         //Encrypt, Decrypt Public Key
         public const string PublicKey = "raywatt07_hwjckklls_298-87-01441";
 
+        //Review - 2D - Cross Section
+        public const double CrossSectionSize = 640;
+        public const double CrossSectionCenter = 320;
+
         //Review - 2D - Side Menu
         public const string LeftUpMenu = "LeftUpMenu";
         public const string LeftDownMenu = "LeftDownMenu";
