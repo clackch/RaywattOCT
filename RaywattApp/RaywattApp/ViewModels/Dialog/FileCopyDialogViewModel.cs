@@ -65,13 +65,13 @@ namespace RaywattApp.ViewModels.Dialog
                 {
                     FileSaveDicom();
                 }
-                else if (FileExport.Type == Constants.ExportTypeStandard) 
+                else if (FileExport.Type == Constants.ExportTypeStandard)
                 {
                     FileSaveStandard();
                 }
 
                 if (FileExport.DiskType == Constants.FileDiskCd)
-                { 
+                {
                     // RayExportWrapper.BurningCD();
                 }
             }
@@ -105,7 +105,7 @@ namespace RaywattApp.ViewModels.Dialog
 
             string dicomDirFolder = DICOMDIRInputFolder(SaveFolder);
 
-            for (int i=0; i< PatientCases.Count; i++)
+            for (int i = 0; i < PatientCases.Count; i++)
             {
                 const string dicomPrefix = "IMG";
                 double progressConvert = 100 / PatientCases.Count;
@@ -123,7 +123,7 @@ namespace RaywattApp.ViewModels.Dialog
 
                 List<Mat> convertedImages = new List<Mat>();
                 Mat? imgLongitude = await CommonUtil.ConvertImage(PatientCases[i].ImageFullPath, exportIndices, convertedImages, prog => Progress += prog, progressConvert);
-                
+
                 imgLongitude = FileExport.LModeView ? imgLongitude : null;
                 Mat? imgLumeProfile = FileExport.LumenProfileView ? lumenProfile : null;
                 Mat? imgAngio = FileExport.AngioView ? angio : null;
@@ -169,7 +169,7 @@ namespace RaywattApp.ViewModels.Dialog
 
             string format = (FileExport.Material == Constants.ExportMaterialPullback) ? FileExport.Pullback : FileExport.StillFrame;
 
-            foreach(PatientCase patientCase in PatientCases)
+            foreach (PatientCase patientCase in PatientCases)
             {
                 double progressPerCase = 100 / PatientCases.Count;
                 double progressConvert = progressPerCase / 2;
@@ -261,7 +261,7 @@ namespace RaywattApp.ViewModels.Dialog
 
             const int crossSectionWidth = 640;
             const int crossSectionHeight = 640;
-            double xScale = image.Width / (double) crossSectionWidth;
+            double xScale = image.Width / (double)crossSectionWidth;
             double yScale = image.Height / (double)crossSectionHeight;
 
             foreach (Measurement annotation in Annotations)
@@ -292,15 +292,11 @@ namespace RaywattApp.ViewModels.Dialog
                             Pen penMax = new Pen(brush, 1.0);
                             penMax.DashStyle = new DashStyle(new double[] { 7, 7 }, 0);
                             context.DrawLine(penMax, CommonUtil.GetScaledPoint(area.MaxDiameter.point1, xScale, yScale), CommonUtil.GetScaledPoint(area.MaxDiameter.point2, xScale, yScale));
-                            
-                            FormattedText label = new FormattedText("[" + (area.Group + 1) + "] " + (Math.Round(area.Area, 3)).ToString(),
-                                System.Globalization.CultureInfo.GetCultureInfo("en-us"),
-                                System.Windows.FlowDirection.LeftToRight,
-                                new Typeface("Arial"), 16, Brushes.White, 0.5f);
+
                             System.Windows.Point ptLabel = CommonUtil.GetScaledPoint(area.CenterOfMass, xScale, yScale);
                             ptLabel.X -= 40;
                             ptLabel.Y -= 10;
-                            context.DrawText(label, ptLabel);
+                            DrawLabel(context, ptLabel, area.Group, area.Area);
                         }
                     }
                     context.Close();
@@ -326,6 +322,14 @@ namespace RaywattApp.ViewModels.Dialog
                     break;
                 }
             }
+        }
+        private void DrawLabel(DrawingContext context, System.Windows.Point point, int group, double value)
+        {
+            FormattedText label = new FormattedText("[" + (group + 1) + "] " + (Math.Round(value, 3)).ToString(),
+                System.Globalization.CultureInfo.GetCultureInfo("en-us"),
+                System.Windows.FlowDirection.LeftToRight,
+                new Typeface("Arial"), 16, Brushes.White, 0.5f);
+            context.DrawText(label, point);
         }
 
         private void SetProperty(PatientCase patientCase)
