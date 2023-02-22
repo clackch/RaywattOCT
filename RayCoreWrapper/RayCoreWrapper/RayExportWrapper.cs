@@ -112,18 +112,6 @@ namespace RayCoreWrapper
             ImapiOtherError = 10000
         };
 
-        public enum ProgressStatus : int
-        {
-            IMAPI_FORMAT2_DATA_WRITE_ACTION_VALIDATING_MEDIA = 0,
-            IMAPI_FORMAT2_DATA_WRITE_ACTION_FORMATTING_MEDIA = 0x1,
-            IMAPI_FORMAT2_DATA_WRITE_ACTION_INITIALIZING_HARDWARE = 0x2,
-            IMAPI_FORMAT2_DATA_WRITE_ACTION_CALIBRATING_POWER = 0x3,
-            IMAPI_FORMAT2_DATA_WRITE_ACTION_WRITING_DATA = 0x4,
-            IMAPI_FORMAT2_DATA_WRITE_ACTION_FINALIZATION = 0x5,
-            IMAPI_FORMAT2_DATA_WRITE_ACTION_COMPLETED = 0x6,
-            IMAPI_FORMAT2_DATA_WRITE_ACTION_VERIFYING = 0x7
-        };
-
         public enum MediaType : int
         {
             InitDeviceFuncNeed = -5,
