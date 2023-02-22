@@ -282,16 +282,21 @@ namespace RaywattApp.ViewModels.Dialog
                         }
 
                         PathGeometry path = CommonUtil.GetBezierCurve(area.Points, true);
-                        context.DrawGeometry(null, new Pen(brush, 2.0), path);
+                        context.DrawGeometry(null, new Pen(brush, 1.0), path);
                         if (area.Valid)
                         {
-                            context.DrawLine(new Pen(brush, 0.5), CommonUtil.GetScaledPoint(area.MinDiameter.point1, xScale, yScale), CommonUtil.GetScaledPoint(area.MinDiameter.point2, xScale, yScale));
-                            context.DrawLine(new Pen(brush, 0.5), CommonUtil.GetScaledPoint(area.MaxDiameter.point1, xScale, yScale), CommonUtil.GetScaledPoint(area.MaxDiameter.point2, xScale, yScale));
+                            Pen penMin = new Pen(brush, 1.0);
+                            penMin.DashStyle = new DashStyle(new double[] { 2, 5 }, 0);
+                            context.DrawLine(penMin, CommonUtil.GetScaledPoint(area.MinDiameter.point1, xScale, yScale), CommonUtil.GetScaledPoint(area.MinDiameter.point2, xScale, yScale));
 
+                            Pen penMax = new Pen(brush, 1.0);
+                            penMax.DashStyle = new DashStyle(new double[] { 7, 7 }, 0);
+                            context.DrawLine(penMax, CommonUtil.GetScaledPoint(area.MaxDiameter.point1, xScale, yScale), CommonUtil.GetScaledPoint(area.MaxDiameter.point2, xScale, yScale));
+                            
                             FormattedText label = new FormattedText("[" + (area.Group + 1) + "] " + (Math.Round(area.Area, 3)).ToString(),
                                 System.Globalization.CultureInfo.GetCultureInfo("en-us"),
                                 System.Windows.FlowDirection.LeftToRight,
-                                new Typeface("Pretendard"), 14, Brushes.White);
+                                new Typeface("Arial"), 16, Brushes.White, 0.5f);
                             System.Windows.Point ptLabel = CommonUtil.GetScaledPoint(area.CenterOfMass, xScale, yScale);
                             ptLabel.X -= 40;
                             ptLabel.Y -= 10;
