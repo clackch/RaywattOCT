@@ -229,7 +229,7 @@ namespace RaywattApp.ViewModels.Dialog
 
             for (int i = 0; i < PatientCases.Count; i++)
             {
-                double progressPerCase = 100 / PatientCases.Count / progressDivide;
+                double progressPerCase = 100.0 / PatientCases.Count / progressDivide;
                 double progressConvert = progressPerCase / 2;
                 double progressSave = progressPerCase / 2;
 
