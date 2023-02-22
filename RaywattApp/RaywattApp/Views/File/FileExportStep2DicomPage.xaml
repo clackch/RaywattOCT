@@ -126,11 +126,11 @@
                             </Grid.RowDefinitions>
                             <StackPanel Grid.Row="0">
                                 <Label Content="{Binding [Disk Type], Source={StaticResource L10N}}"/>
-                                <Label>no disc</Label>
+                                <Label Content="{Binding FileExport.MediaType}"/>
                             </StackPanel>
                             <StackPanel Grid.Row="1" >
                                 <Label Content="{Binding [Volume Label], Source={StaticResource L10N}}"/>
-                                <Label>TEST</Label>
+                                <TextBox Text="{Binding FileExport.VolumeLabel}" Width="350" Margin="5,5,5,5" HorizontalAlignment="Left"/>
                             </StackPanel>
                         </Grid>
                     </Border>

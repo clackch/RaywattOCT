@@ -9,6 +9,9 @@ using RaywattApp.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static RayCoreWrapper.RayExportWrapper;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace RaywattApp.ViewModels.Dialog
 {
@@ -23,7 +26,12 @@ namespace RaywattApp.ViewModels.Dialog
         private IList<PatientCase>? _patientCases;
 
         [ObservableProperty]
+        private string? _progressText;
+
+        [ObservableProperty]
         private double _progress;
+
+        private int progressDivide;
 
         [ObservableProperty]
         private string? _dbFilePath;
@@ -37,6 +45,12 @@ namespace RaywattApp.ViewModels.Dialog
         [ObservableProperty]
         private bool enableDone = false;
 
+        private FormatCallbackFunction formatCallbackFunction;
+        public FormatCallbackFunction FormatCallbackFunction => this.formatCallbackFunction ?? (this.formatCallbackFunction = new FormatCallbackFunction(FormatCallback));
+
+        private WriteCallbackFunction writeCallbackFunction;
+        public WriteCallbackFunction WriteCallbackFunction => this.writeCallbackFunction ?? (this.writeCallbackFunction = new WriteCallbackFunction(WriteCallback));
+
         public override void SetParameter(object parameter)
         {
             Dictionary<string, Object> data = (Dictionary<string, Object>)parameter;
@@ -44,35 +58,72 @@ namespace RaywattApp.ViewModels.Dialog
             FileExport = (FileExport)data["fileExport"];
             PatientCases = (IList<PatientCase>)data["patientCases"];
 
-            if (FileExport != null)
+            if (FileExport.Type == Constants.ExportTypeNative)
             {
-                SaveFolder = (FileExport.DiskType == Constants.FileDiskCd) ? Constants.TempFolderPath : FileExport.ExternalDrivePath;
-
-                if (FileExport.Type == Constants.ExportTypeNative)
-                {
-                    DbFilePath = data["dbFilePath"].ToString();
-                    Contents = data["contents"].ToString();
-
-                    FileCopyNative();
-                }
-                else if (FileExport.Type == Constants.ExportTypeDicom)
-                {
-                    FileSaveDicom();
-                }
-                else if (FileExport.Type == Constants.ExportTypeStandard)
-                {
-                    FileSaveStandard();
-                }
-
-                if (FileExport.DiskType == Constants.FileDiskCd)
-                {
-                    // RayExportWrapper.BurningCD();
-                }
+                DbFilePath = data["dbFilePath"].ToString();
+                Contents = data["contents"].ToString();
             }
+
+            if (FileExport != null)
+                FileCopyAction();
         }
 
-        private async void FileCopyNative()
+        private async void FileCopyAction()
         {
+            if (FileExport.DiskType == Constants.FileDiskCd)
+            {
+                //CD,DVD - Writing
+                progressDivide = 2;
+
+                SaveFolder = Constants.TempFolderPath;
+                CommonUtil.CreateFolder(SaveFolder);
+
+                if (FileExport.IsDiskFormat)
+                {
+                    //CD,DVD - Format
+                    progressDivide = 3;
+                    RayExportWrapper.registerFormatCallback(Marshal.GetFunctionPointerForDelegate(FormatCallbackFunction));
+                }
+
+                RayExportWrapper.registerWritingCallback(Marshal.GetFunctionPointerForDelegate(WriteCallbackFunction));
+            }
+            else
+            {
+                //External Drive
+                progressDivide = 1;
+
+                SaveFolder = FileExport.ExternalDrivePath;
+            }
+
+            if (FileExport.Type == Constants.ExportTypeNative)
+            {
+                await FileCopyNative();
+            }
+            else if (FileExport.Type == Constants.ExportTypeDicom)
+            {
+                await FileSaveDicom();
+            }
+            else if (FileExport.Type == Constants.ExportTypeStandard)
+            {
+                await FileSaveStandard();
+            }
+
+            if (FileExport.DiskType == Constants.FileDiskCd)
+            {
+                await CdBurning();
+
+                CommonUtil.DeleteFolder(SaveFolder);
+            }
+
+            ProgressText = Constants.ExportStatusCompleted;
+            EnableDone = true;
+        }
+
+
+        private async Task FileCopyNative()
+        {
+            double progressSize = 100.0 / progressDivide;
+
             Dictionary<string, string> fileCopyInfo = new Dictionary<string, string>();
             foreach (PatientCase patientCase in PatientCases)
             {
@@ -81,15 +132,13 @@ namespace RaywattApp.ViewModels.Dialog
                 fileCopyInfo.Add(patientCase.ImageFullPath, dstFilePath);
             }
 
-            await CommonUtil.CopyFiles(fileCopyInfo, prog => Progress = prog);
+            await CommonUtil.CopyFiles(fileCopyInfo, prog => Progress = prog, progressSize, progText => ProgressText = progText);
 
             if (!String.IsNullOrEmpty(DbFilePath) && !String.IsNullOrEmpty(Contents))
-                CommonUtil.Encryptor(DbFilePath, Contents);
-
-            EnableDone = true;
+                CommonUtil.Encryptor(SaveFolder + "\\" + DbFilePath, Contents);
         }
 
-        private async void FileSaveDicom()
+        private async Task FileSaveDicom()
         {
             //DICOMDIR Input Folder
             string dicomDirFolder = CommonUtil.CreateFolder(SaveFolder + "\\" + DateTime.Now.ToString("yyyyMMddHHmmss"));
@@ -102,7 +151,7 @@ namespace RaywattApp.ViewModels.Dialog
                              select g;
 
             int index = 0, studyId, seriesNumber;
-            double progressConvert = 100 / PatientCases.Count;
+            double progressConvert = 100.0 / PatientCases.Count / progressDivide;
 
             foreach (var patient in patientGrp)
             {
@@ -134,7 +183,7 @@ namespace RaywattApp.ViewModels.Dialog
                         }
 
                         List<Mat> convertedImages = new List<Mat>();
-                        Mat imgLongitude = await CommonUtil.ConvertImage(patientCase.ImageFullPath, exportIndices, convertedImages, prog => Progress += prog, progressConvert);
+                        Mat imgLongitude = await CommonUtil.ConvertImage(patientCase.ImageFullPath, exportIndices, convertedImages, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
 
                         //Start
                         RayExportWrapper.DicomStart();
@@ -158,6 +207,7 @@ namespace RaywattApp.ViewModels.Dialog
                         //Save
                         string filePath = Constants.ExportDicomPrefix + string.Format("{0:0000}", index);
                         RayExportWrapper.DicomSave(dicomDirFolder + "\\" + filePath);
+                        //TO-DO : dicom save check progress
 
                         //DICOMDIR Input File
                         RayExportWrapper.DICOMDIRInputFile(filePath);
@@ -171,18 +221,15 @@ namespace RaywattApp.ViewModels.Dialog
 
             //DICOMDIR Write
             RayExportWrapper.DICOMDIRWrite();
-
-            Progress = 100;
-            EnableDone = true;
         }
 
-        private async void FileSaveStandard()
+        private async Task FileSaveStandard()
         {
             string format = (FileExport.Material == Constants.ExportMaterialPullback) ? FileExport.Pullback : FileExport.StillFrame;
 
             for (int i = 0; i < PatientCases.Count; i++)
             {
-                double progressPerCase = 100 / PatientCases.Count;
+                double progressPerCase = 100 / PatientCases.Count / progressDivide;
                 double progressConvert = progressPerCase / 2;
                 double progressSave = progressPerCase / 2;
 
@@ -198,7 +245,7 @@ namespace RaywattApp.ViewModels.Dialog
                 }
 
                 List<Mat> convertedImages = new List<Mat>();
-                Mat imgLongitude = await CommonUtil.ConvertImage(PatientCases[i].ImageFullPath, exportIndices, convertedImages, prog => Progress += prog, progressConvert);
+                Mat imgLongitude = await CommonUtil.ConvertImage(PatientCases[i].ImageFullPath, exportIndices, convertedImages, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
                 for (int frame = 0; frame < convertedImages.Count; frame++)
                 {
                     convertedImages[frame] = CommonUtil.MakeImageForExport(convertedImages[frame], imgLongitude, imgLongitude);
@@ -207,12 +254,12 @@ namespace RaywattApp.ViewModels.Dialog
                 if (format == Constants.ExportPullbackAVI)
                 {
                     string fileName = CreateStandardUniqueName(PatientCases[i]);
-                    await CommonUtil.SaveVideo(convertedImages, SaveFolder, fileName, format, 10, prog => Progress += prog, progressSave);
+                    await CommonUtil.SaveVideo(convertedImages, SaveFolder, fileName, format, 10, prog => Progress += prog, progressSave, progText => ProgressText = progText);
                 }
                 else if (format == Constants.ExportPullbackTIFF)
                 {
                     string fileName = CreateStandardUniqueName(PatientCases[i]);
-                    await CommonUtil.SaveMultipleFrames(convertedImages, SaveFolder, fileName, format, prog => Progress += prog, progressSave);
+                    await CommonUtil.SaveMultipleFrames(convertedImages, SaveFolder, fileName, format, prog => Progress += prog, progressSave, progText => ProgressText = progText);
                 }
                 else
                 {
@@ -224,9 +271,44 @@ namespace RaywattApp.ViewModels.Dialog
                     }
                 }
             }
+        }
 
-            Progress = 100;
-            EnableDone = true;
+        private async Task CdBurning()
+        {
+            await Task.Run(() =>
+            {
+                RayExportWrapper.CDBurnError cDBurnError;
+
+                if (FileExport.IsDiskFormat)
+                {
+                    cDBurnError = RayExportWrapper.initDevice();
+                    _log.Debug("discFormat initDevice : " + cDBurnError);
+                    cDBurnError = RayExportWrapper.discFormat("discFormat", false);
+                    _log.Debug("discFormat : " + cDBurnError);
+                }
+
+                cDBurnError = RayExportWrapper.initDevice();
+                _log.Debug("burningCD initDevice : " + cDBurnError);
+                cDBurnError = RayExportWrapper.burningCD(SaveFolder, FileExport.EjectWhenComplete, FileExport.VolumeLabel, "burningCD");
+                _log.Debug("burningCD : " + cDBurnError);
+
+                cDBurnError = RayExportWrapper.releaseCD();
+                _log.Debug("releaseCD : " + cDBurnError);
+            });
+        }
+
+        private void FormatCallback(int percent)
+        {
+            //_log.Debug("percent : " + percent);
+            ProgressText = Constants.CdWrtingStatus[1];
+            Progress = 100.0 / progressDivide + percent / progressDivide;
+        }
+
+        private void WriteCallback(int percent, int status)
+        {
+            //_log.Debug("percent : " + percent + " / status : " + status);
+            ProgressText = Constants.CdWrtingStatus[status];
+            Progress = progressDivide == 3 ? 100.0 / progressDivide * 2 + percent / progressDivide : 100.0 / progressDivide + percent / progressDivide;
         }
 
         private void SetProperty(PatientCase patientCase, int studyId, int seriesNumber, int instanceNumber)

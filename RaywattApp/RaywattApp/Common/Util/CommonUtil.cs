@@ -218,13 +218,11 @@ namespace RaywattApp.Common.Util
             Directory.Delete(path, true);
         }
 
-        public static async Task CopyFiles(Dictionary<string, string> files, Action<double> progressCallback)
+        public static async Task CopyFiles(Dictionary<string, string> files, Action<double> progressCallback, double progressSize, Action<string> progressTextCallback)
         {
             long total_size = files.Keys.Select(x => new FileInfo(x).Length).Sum();
 
             long total_read = 0;
-
-            double progress_size = 100.0;
 
             foreach (var item in files)
             {
@@ -240,7 +238,8 @@ namespace RaywattApp.Common.Util
                         await CopyStream(inStream, outStream, x =>
                         {
                             total_read_for_file = x;
-                            progressCallback(((total_read + total_read_for_file) / (double)total_size) * progress_size);
+                            progressCallback(((total_read + total_read_for_file) / (double)total_size) * progressSize);
+                            progressTextCallback(Constants.ExportStatusCopyFile);
                         });
                     }
                 }
@@ -249,7 +248,7 @@ namespace RaywattApp.Common.Util
             }
         }
 
-        public static async Task<Mat> ConvertImage(string filePath, List<int> bookmarkedIndices, List<Mat> convertedImages, Action<double> progressCallback, double progress)
+        public static async Task<Mat> ConvertImage(string filePath, List<int> bookmarkedIndices, List<Mat> convertedImages, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
         {
             RayOpenImage(filePath);
 
@@ -275,6 +274,7 @@ namespace RaywattApp.Common.Util
                             progressCallback(progress / totalNum);
                         }
                     }
+                    progressTextCallback(Constants.ExportStatusConvertImage);
                 });
             }
 
@@ -335,7 +335,7 @@ namespace RaywattApp.Common.Util
             Cv2.ImWrite(filePath, image);
         }
 
-        public static async Task SaveVideo(List<Mat> images, string rootPath, string fileName, string format, double fps, Action<double> progressCallback, double progress)
+        public static async Task SaveVideo(List<Mat> images, string rootPath, string fileName, string format, double fps, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
         {
             string filePath = rootPath + "\\" + fileName + "." + format.ToLower();
 
@@ -353,13 +353,14 @@ namespace RaywattApp.Common.Util
                     {
                         videoWriter.Write(img);
                         progressCallback(progress / totalNum);
+                        progressTextCallback(Constants.ExportStatusSaveVideo);
                     });
                 }
                 videoWriter.Release();
             }
         }
 
-        public static async Task SaveMultipleFrames(List<Mat> images, string rootPath, string fileName, string format, Action<double> progressCallback, double progress)
+        public static async Task SaveMultipleFrames(List<Mat> images, string rootPath, string fileName, string format, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
         {
             string filePath = rootPath + "\\" + fileName + "." + format.ToLower();
 
@@ -393,6 +394,7 @@ namespace RaywattApp.Common.Util
                             tiff.WriteDirectory();
 
                             progressCallback(progress / totalNum);
+                            progressTextCallback(Constants.ExportStatusSaveMultipleFrames);
                         });
                     }
 
