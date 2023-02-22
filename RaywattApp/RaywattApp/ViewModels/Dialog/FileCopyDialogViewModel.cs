@@ -204,8 +204,13 @@ namespace RaywattApp.ViewModels.Dialog
                 for (int frame = 0; frame < convertedImages.Count; frame++)
                 {
                     List<Tuple<Rect, Size2f>>? region = null;
-                    DrawAnnotation(convertedImages[frame], frame, Measurements);
                     convertedImages[frame] = CommonUtil.MakeImageForExport(convertedImages[frame], imgLongitude, imgLumeProfile, imgAngio, out region);
+
+                    if (region != null && region.Count > 0)
+                    {
+                        Rect rectCrossSection = region[region.Count - 1].Item1;
+                        DrawAnnotation(convertedImages[frame][rectCrossSection], frame, Measurements);
+                    }
                 }
 
                 if (format == Constants.ExportPullbackAVI)
@@ -259,10 +264,8 @@ namespace RaywattApp.ViewModels.Dialog
         private void DrawAnnotation(Mat image, int frame, List<Measurement>? Annotations) {
             if (Annotations == null) return;
 
-            const int crossSectionWidth = 640;
-            const int crossSectionHeight = 640;
-            double xScale = image.Width / (double)crossSectionWidth;
-            double yScale = image.Height / (double)crossSectionHeight;
+            double xScale = image.Width / Constants.CrossSectionSize;
+            double yScale = image.Height / Constants.CrossSectionSize;
 
             foreach (Measurement annotation in Annotations)
             {
@@ -296,7 +299,7 @@ namespace RaywattApp.ViewModels.Dialog
                             System.Windows.Point ptLabel = CommonUtil.GetScaledPoint(area.CenterOfMass, xScale, yScale);
                             ptLabel.X -= 40;
                             ptLabel.Y -= 10;
-                            DrawLabel(context, ptLabel, area.Group, area.Area);
+                            DrawLabel(context, ptLabel, area.Group, area.Area, (int) (Constants.ExportAnnotationFontSize * xScale));
                         }
                     }
                     context.Close();
@@ -323,12 +326,12 @@ namespace RaywattApp.ViewModels.Dialog
                 }
             }
         }
-        private void DrawLabel(DrawingContext context, System.Windows.Point point, int group, double value)
+        private void DrawLabel(DrawingContext context, System.Windows.Point point, int group, double value, int fontSize)
         {
             FormattedText label = new FormattedText("[" + (group + 1) + "] " + (Math.Round(value, 3)).ToString(),
                 System.Globalization.CultureInfo.GetCultureInfo("en-us"),
                 System.Windows.FlowDirection.LeftToRight,
-                new Typeface("Arial"), 16, Brushes.White, 0.5f);
+                new Typeface("Arial"), fontSize, Brushes.White, 0.5f);
             context.DrawText(label, point);
         }
 

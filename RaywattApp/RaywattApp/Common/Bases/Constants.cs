@@ -105,6 +105,9 @@ namespace RaywattApp.Common.Bases
         //Export Anonymous
         public const string ExportAnonymous = "Anonymous";
 
+        //Export Image
+        public const int ExportAnnotationFontSize = 16;
+
         //File Import/Export
         public const string FileImageExtension = "bin";
         public const string FileExtension = "dbf";
