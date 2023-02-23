@@ -10,8 +10,7 @@ using System;
 using System.Collections.Generic;
 using RaywattApp.Common.Annotation.Models;
 using System.Collections.ObjectModel;
-using Newtonsoft.Json;
-using System.Windows.Media;
+using RaywattApp.Common.Annotation.Util;
 
 namespace RaywattApp.ViewModels.Dialog
 {
@@ -194,7 +193,7 @@ namespace RaywattApp.ViewModels.Dialog
                 List<TextGeometry>? lModeTexts = null;
                 if (FileExport.Measurements != Constants.ExportMeasurementHideAll)
                 {
-                    GetAnnotation(patientCase.Measurements, out Measurements, out lModeLengths, out lModeTexts);
+                    AnnotationConverter.ConvertFromJsonString(patientCase.Measurements, out Measurements, out lModeLengths, out lModeTexts);
                 }
 
                 for (int frame = 0; frame < convertedImages.Count; frame++)
@@ -205,7 +204,7 @@ namespace RaywattApp.ViewModels.Dialog
                     if (region != null && region.Count > 0)
                     {
                         Rect rectCrossSection = region[region.Count - 1].Item1;
-                        DrawAnnotation(convertedImages[frame][rectCrossSection], frame, Measurements);
+                        DrawAnnotation.DrawMeasurements(convertedImages[frame][rectCrossSection], frame, Measurements);
                     }
                 }
 
@@ -232,147 +231,6 @@ namespace RaywattApp.ViewModels.Dialog
 
             Progress = 100;
             EnableDone = true;
-        }
-
-        private void GetAnnotation(string annotation, out List<Measurement>? measurements, out ObservableCollection<LengthGeometry>? lModeLengths, out List<TextGeometry>? lModeTexts)
-        {
-            measurements = new List<Measurement>();
-            lModeLengths = new ObservableCollection<LengthGeometry>();
-            lModeTexts = new List<TextGeometry>();
-
-            if (annotation != null && !string.IsNullOrEmpty(annotation))
-            {
-                measurements = JsonConvert.DeserializeObject<List<Measurement>>(annotation);
-
-                foreach (var measurement in measurements)
-                {
-                    //Longitude Measurement
-                    if (measurement.FrameNumber == -1)
-                    {
-                        lModeLengths = measurement.LengthGeometries;
-                        lModeTexts = measurement.TextGeometries;
-                        measurements.Remove(measurement);
-                        break;
-                    }
-                }
-            }
-        }
-        private void DrawAnnotation(Mat image, int frame, List<Measurement>? Annotations) {
-            if (Annotations == null) return;
-
-            double xScale = image.Width / Constants.CrossSectionSize;
-            double yScale = image.Height / Constants.CrossSectionSize;
-
-            foreach (Measurement annotation in Annotations)
-            {
-                if (frame == annotation.FrameNumber)
-                {
-                    DrawingVisual visual = new DrawingVisual();
-                    DrawingContext context = visual.RenderOpen();
-
-                    foreach (AreaGeometry area in annotation.AreaGeometries)
-                    {
-                        DrawAreaGeometry(context, area, xScale, yScale);
-                    }
-
-                    foreach (LengthGeometry length in annotation.LengthGeometries)
-                    {
-                        DrawLengthGeometry(context, length, xScale, yScale);
-                    }
-
-                    foreach (TextGeometry text in annotation.TextGeometries)
-                    {
-                        System.Windows.Rect rect = DrawText(context, text.TextPoint, text.Text, xScale);
-                        System.Windows.Rect boundingBox = DrawBoundingBox(context, text.Group, rect, 8, 8);
-
-                        System.Windows.Point point = CommonUtil.GetScaledPoint(text.PointerPoint, xScale, yScale);
-                        const double ellipseSize = 6;
-                        Brush brush = Constants.AnnotationBrushes[text.Group % Constants.AnnotationBrushes.Length];
-                        Pen pen = new Pen(brush, 1.0);
-                        pen.DashStyle = new DashStyle(new double[] { 7, 7 }, 0);
-                        point.X -= (ellipseSize / 2);
-                        point.Y -= (ellipseSize / 2);
-                        context.DrawLine(pen, point, boundingBox.TopLeft);
-                        context.DrawEllipse(Brushes.White, new Pen(brush, 1.0), point, ellipseSize, ellipseSize);
-                    }
-
-                    context.Close();
-                    CommonUtil.RenderVisualToMat(visual, image);
-                    break;
-                }
-            }
-        }
-
-        private void DrawAreaGeometry(DrawingContext context, AreaGeometry area, double xScale, double yScale)
-        {
-            Brush brush = Constants.AnnotationBrushes[area.Group % Constants.AnnotationBrushes.Length];
-
-            for (int i = 0; i < area.Points.Count; i++)
-            {
-                area.Points[i] = CommonUtil.GetScaledPoint(area.Points[i], xScale, yScale);
-            }
-
-            PathGeometry path = CommonUtil.GetBezierCurve(area.Points, true);
-            context.DrawGeometry(null, new Pen(brush, 1.0), path);
-            if (area.Valid)
-            {
-                Pen penMin = new Pen(brush, 1.0);
-                penMin.DashStyle = new DashStyle(new double[] { 2, 5 }, 0);
-                context.DrawLine(penMin, CommonUtil.GetScaledPoint(area.MinDiameter.point1, xScale, yScale), CommonUtil.GetScaledPoint(area.MinDiameter.point2, xScale, yScale));
-
-                Pen penMax = new Pen(brush, 1.0);
-                penMax.DashStyle = new DashStyle(new double[] { 7, 7 }, 0);
-                context.DrawLine(penMax, CommonUtil.GetScaledPoint(area.MaxDiameter.point1, xScale, yScale), CommonUtil.GetScaledPoint(area.MaxDiameter.point2, xScale, yScale));
-
-                System.Windows.Point ptLabel = new System.Windows.Point();
-                ptLabel.X = area.CenterOfMass.X - 40;
-                ptLabel.Y = area.CenterOfMass.Y - 10;
-                DrawLabel(context, ptLabel, area.Group, area.Area, xScale);
-            }
-        }
-        private void DrawLengthGeometry(DrawingContext context, LengthGeometry length, double xScale, double yScale)
-        {
-            Brush brush = Constants.AnnotationBrushes[length.Group % Constants.AnnotationBrushes.Length];
-
-            context.DrawLine(new Pen(brush, 1.0), CommonUtil.GetScaledPoint(length.FirstPoint, xScale, yScale), CommonUtil.GetScaledPoint(length.SecondPoint, xScale, yScale));
-
-            DrawLabel(context, length.SecondPoint, length.Group, length.Length, xScale);
-        }
-
-        private void DrawLabel(DrawingContext context, System.Windows.Point point, int group, double value, double scale)
-        {
-            DrawText(context, point, "[" + (group + 1) + "] " + (Math.Round(value, 3)).ToString(), scale);
-        }
-
-        private System.Windows.Rect DrawBoundingBox(DrawingContext context, int group, System.Windows.Rect rect, int paddingX, int paddingY)
-        {
-            Brush brush = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
-            System.Windows.Rect box = new System.Windows.Rect(rect.X, rect.Y, rect.Width, rect.Height);
-
-            box.X -= paddingX;
-            box.Y -= paddingY;
-            box.Width += (paddingX * 2);
-            box.Height += (paddingY * 2);
-
-            context.DrawRectangle(null, new Pen(brush, 1.0), box);
-
-            return box;
-        }
-
-        private System.Windows.Rect DrawText(DrawingContext context, System.Windows.Point point, string value, double scale)
-        {
-            System.Drawing.Font font = System.Drawing.SystemFonts.DefaultFont;
-            int scaledFontSize = (int)(Constants.ExportAnnotationFontSize * scale);
-
-            FormattedText label = new FormattedText(value,
-                System.Globalization.CultureInfo.GetCultureInfo("en-us"),
-                System.Windows.FlowDirection.LeftToRight,
-                new Typeface(font.Name), scaledFontSize, Brushes.White, 1.0f);
-
-            System.Windows.Point scaledPoint = CommonUtil.GetScaledPoint(point, scale, scale);
-            context.DrawText(label, scaledPoint);
-
-            return new System.Windows.Rect(scaledPoint, new System.Windows.Size(label.Width, label.Height));
         }
 
         private void SetProperty(PatientCase patientCase)
