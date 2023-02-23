@@ -47,6 +47,8 @@ namespace RaywattApp.ViewModels.Dialog
 
         Dictionary<string, string> importfiles;
 
+        Dictionary<string, string> dicomProperty;
+
         private FormatCallbackFunction formatCallbackFunction;
         public FormatCallbackFunction FormatCallbackFunction => this.formatCallbackFunction ?? (this.formatCallbackFunction = new FormatCallbackFunction(FormatCallback));
 
@@ -68,6 +70,10 @@ namespace RaywattApp.ViewModels.Dialog
                 {
                     DbFilePath = data["dbFilePath"].ToString();
                     Contents = data["contents"].ToString();
+                }
+                else if(FileExport.Type == Constants.ExportTypeDicom)
+                {
+                    dicomProperty = (Dictionary<string, string>)data["dicomProperty"];
                 }
 
                 if (FileExport != null)
@@ -236,6 +242,10 @@ namespace RaywattApp.ViewModels.Dialog
                         //Sequence Property
                         SetSequenceProperty();
 
+                        //File Size
+                        //long size = RayExportWrapper.DicomApprSize();
+                        //_log.Debug(size);
+
                         //Save
                         string filePath = Constants.ExportDicomPrefix + string.Format("{0:0000}", index);
                         RayExportWrapper.DicomSave(dicomDirFolder + "\\" + filePath);
@@ -358,9 +368,9 @@ namespace RaywattApp.ViewModels.Dialog
             //(0002, 0012)	Implementation Class UID	-	M	UI
             //Auto Assigned
             //(0002, 0013)	Implementation Version Name	-	C	SH
-            RayExportWrapper.DicomAddProperty(0x00020013, "Raywatt Version Name", 0);
+            RayExportWrapper.DicomAddProperty(0x00020013, dicomProperty["00020013"], 0);
             //(0002, 0016)	Source Application Entity Title	-	M	AE
-            RayExportWrapper.DicomAddProperty(0x00020016, "Raywatt Title", 0);
+            RayExportWrapper.DicomAddProperty(0x00020016, dicomProperty["00020016"], 0);
             //(0008, 0005)	Specific Character Set	-	C	CS
             //(0008, 0008)	Image Type	-	M	CS
             //(0008, 0012)	Instance Creation Date	-	M	DA
@@ -388,13 +398,13 @@ namespace RaywattApp.ViewModels.Dialog
             //(0008, 0050)	Accession Number	-	M	SH
             RayExportWrapper.DicomAddProperty(0x00080050, patientCase.AccessionNumber, 0);
             //(0008, 0060)	Modality	-	M	CS
-            RayExportWrapper.DicomAddProperty(0x00080060, "OCT", 0);
+            RayExportWrapper.DicomAddProperty(0x00080060, dicomProperty["00080060"], 0);
             //(0008, 0064)	Conversion Type	-	U	CS
-            RayExportWrapper.DicomAddProperty(0x00080064, "SI", 0);
+            RayExportWrapper.DicomAddProperty(0x00080064, dicomProperty["00080064"], 0);
             //(0008, 0070)	Manufacturer	-	M, C, U	LO
-            RayExportWrapper.DicomAddProperty(0x00080070, "Raywatt Manufacturer", 0);
+            RayExportWrapper.DicomAddProperty(0x00080070, dicomProperty["00080070"], 0);
             //(0008, 0080)	Institution Name	-	M	LO
-            RayExportWrapper.DicomAddProperty(0x00080080, "XXX Hospital", 0);
+            RayExportWrapper.DicomAddProperty(0x00080080, dicomProperty["00080080"], 0);
             //(0008, 0090)	Referring Physician's Name	-	C	PN
             RayExportWrapper.DicomAddProperty(0x00080090, patientCase.PhysicianName, 0);
             //(0008, 0201)	Timezone Offset From UTC	-	C	SH
@@ -402,7 +412,7 @@ namespace RaywattApp.ViewModels.Dialog
             //(0008, 1050)	Performing Physician's Name	-	C	PN
             RayExportWrapper.DicomAddProperty(0x00081050, patientCase.PhysicianName, 0);
             //(0008, 1090)	Manufacturer's Model Name	-	M	LO
-            RayExportWrapper.DicomAddProperty(0x00081090, "Raywatt Model Name", 0);
+            RayExportWrapper.DicomAddProperty(0x00081090, dicomProperty["00081090"], 0);
             //(0008, 2144)	Recommended Display Frame Rate	-	U	IS
             //(0010, 0010)	Patient's Name	-	M	PN
             RayExportWrapper.DicomAddProperty(0x00100010, patientCase.PatientName, 0);
@@ -419,15 +429,15 @@ namespace RaywattApp.ViewModels.Dialog
             //(0010, 4000)	Patient Comments	-	M	LT
             RayExportWrapper.DicomAddProperty(0x00104000, patientCase.Comment, 0);
             //(0018, 0015)	Body Part Examined	-	M	CS
-            RayExportWrapper.DicomAddProperty(0x00180015, "HEART", 0);
+            RayExportWrapper.DicomAddProperty(0x00180015, dicomProperty["00180015"], 0);
             //(0018, 1016)	Secondary Capture Device Manufacturer	-	U	LO
-            RayExportWrapper.DicomAddProperty(0x00181016, "Raywatt SC Device Manufacturer", 0);
+            RayExportWrapper.DicomAddProperty(0x00181016, dicomProperty["00181016"], 0);
             //(0018, 1018)	Secondary Capture Device Manufacturer's Model Name	-	U	LO
-            RayExportWrapper.DicomAddProperty(0x00181018, "Raywatt SC Device Manufacturer Model Name", 0);
+            RayExportWrapper.DicomAddProperty(0x00181018, dicomProperty["00181018"], 0);
             //(0018, 1019)	Secondary Capture Device Software Versions	-	U	LO
-            RayExportWrapper.DicomAddProperty(0x00181019, "Raywatt SC Device SW Version", 0);
+            RayExportWrapper.DicomAddProperty(0x00181019, dicomProperty["00181019"], 0);
             //(0018, 1020)	Software Version(s)	-	C	LO
-            RayExportWrapper.DicomAddProperty(0x00181020, "Raywatt SW Version", 0);
+            RayExportWrapper.DicomAddProperty(0x00181020, dicomProperty["00181020"], 0);
             //(0018, 1063)	Frame Time	-	U	DS
             //(0018, 3101)	IVUS Pullback Rate	-	U	DS
             //(0020, 000d)	Study Instance UID	-	M	UI

@@ -61,6 +61,18 @@ namespace RaywattApp.Services
         }
 
         /**
+         * Dicom Property
+         */
+        public IList<StringModel> SelectDicomPropertyList()
+        {
+            _log.Debug("SelectDicomPropertyList");
+
+            string commandText = SqlQuery.GetQuery("SelectDicomPropertyList");
+
+            return _databaseService.GetDatas<StringModel>(commandText);
+        }
+
+        /**
          * Patient
          */
         public int PageCountPatientList(Dictionary<string, Object> sqlParameters)

@@ -123,9 +123,24 @@ namespace RaywattApp.ViewModels.File
             parameter["title"] = _l10n["File Export"];
             parameter["fileExport"] = FileExport;
             parameter["patientCases"] = PatientCases;
+            parameter["dicomProperty"] = GetDicomProperty();
             var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter);
 
             Close();
+        }
+
+        private Dictionary<string, string> GetDicomProperty()
+        {
+            IList<StringModel> dicomPropertyList = _sqlManager.SelectDicomPropertyList();
+
+            Dictionary<string, string> dicomProperty = new Dictionary<string, string>();
+
+            foreach(StringModel temp in dicomPropertyList)
+            {
+                dicomProperty.Add(temp.ReturnString, temp.ReturnString2);
+            }
+
+            return dicomProperty;
         }
     }
 }

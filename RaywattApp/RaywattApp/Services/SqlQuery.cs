@@ -38,6 +38,12 @@ namespace RaywattApp.Services
         {
             _log.Debug("SetSelectQuery");
 
+            //SelectCodeList
+            _query["SelectCodeList"] =
+                $"SELECT classification, key, value, buffer1, buffer2 " +
+                $"FROM rv_schema.code " +
+                $"ORDER BY classification, sort_order, key";
+
             //SelectL10n
             _query["SelectL10n"] =
                 $"SELECT lang, choice " +
@@ -49,6 +55,12 @@ namespace RaywattApp.Services
                 $"SELECT lang, choice " +
                 $"FROM rv_schema.l10n " +
                 $"ORDER BY lang";
+
+            //SelectDicomPropertyList
+            _query["SelectDicomPropertyList"] =
+                $"SELECT tag return_string, value return_string2 " +
+                $"FROM rv_schema.dicom_property " +
+                $"ORDER BY tag";
 
             //SelectPatientList
             _query["SelectPatientList"] =
@@ -79,12 +91,6 @@ namespace RaywattApp.Services
                 $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, gender" +
                         $", create_date, update_date " +
                 $"FROM rv_schema.patient ";
-
-            //SelectCodeList
-            _query["SelectCodeList"] =
-                $"SELECT classification, key, value, buffer1, buffer2 " +
-                $"FROM rv_schema.code " +
-                $"ORDER BY classification, sort_order, key";
 
             //SelectPatientCaseByDate - create_data 기준
             _query["SelectPatientCaseByDate"] =
