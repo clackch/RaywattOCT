@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Runtime.InteropServices;
 using static RaywattOCT.RayCoreWrapper;
+using RayCoreWrapper;
 
 namespace RaywattApp.Common.Util
 {
@@ -114,15 +115,20 @@ namespace RaywattApp.Common.Util
             }
         }
 
-        public static string[] Decryptor(string filePath)
+        public static string[] Decryptor(string filePath, string diskType)
         {
             string[] result = new string[2];
 
             try
             {
+                Microsoft.Win32.SafeHandles.SafeFileHandle handle = null;
+
+                if (diskType == Constants.FileDiskCd)                    
+                    handle = RayExportWrapper.CreateFile(filePath, FileAccess.Read, FileShare.Read, 0, FileMode.Open, 0x80/*FILE_ATTRIBUTE_NORMAL*/, 0);
+
                 string contents = "";
 
-                using (FileStream fileStream = new(filePath, FileMode.Open))
+                using (FileStream fileStream = diskType == Constants.FileDiskCd ? new(handle, FileAccess.Read) : new(filePath, FileMode.Open))
                 {
                     using (Aes aes = Aes.Create())
                     {
@@ -210,7 +216,8 @@ namespace RaywattApp.Common.Util
 
         public static void RenameFolder(string oldPath, string newPath)
         {
-            Directory.Move(oldPath, newPath);
+            if(oldPath != newPath)
+                Directory.Move(oldPath, newPath);
         }
 
         public static void DeleteFolder(string path)
@@ -405,21 +412,28 @@ namespace RaywattApp.Common.Util
 
         public static async Task CopyStream(Stream from, Stream to, Action<long> progress)
         {
-            int buffer_size = 1024 * 1024; // 1MB buffer
-
-            byte[] buffer = new byte[buffer_size];
-
-            long total_read = 0;
-
-            while (total_read < from.Length)
+            try
             {
-                int read = await from.ReadAsync(buffer, 0, buffer_size);
+                int buffer_size = 1024 * 1024; // 1MB buffer
 
-                await to.WriteAsync(buffer, 0, read);
+                byte[] buffer = new byte[buffer_size];
 
-                total_read += read;
+                long total_read = 0;
 
-                progress(total_read);
+                while (total_read < from.Length)
+                {
+                    int read = await from.ReadAsync(buffer, 0, buffer_size);
+
+                    await to.WriteAsync(buffer, 0, read);
+
+                    total_read += read;
+
+                    progress(total_read);
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ex);
             }
         }
 

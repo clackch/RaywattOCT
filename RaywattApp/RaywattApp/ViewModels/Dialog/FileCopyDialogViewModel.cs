@@ -45,6 +45,8 @@ namespace RaywattApp.ViewModels.Dialog
         [ObservableProperty]
         private bool enableDone = false;
 
+        Dictionary<string, string> importfiles;
+
         private FormatCallbackFunction formatCallbackFunction;
         public FormatCallbackFunction FormatCallbackFunction => this.formatCallbackFunction ?? (this.formatCallbackFunction = new FormatCallbackFunction(FormatCallback));
 
@@ -55,20 +57,32 @@ namespace RaywattApp.ViewModels.Dialog
         {
             Dictionary<string, Object> data = (Dictionary<string, Object>)parameter;
             Title = data["title"].ToString();
-            FileExport = (FileExport)data["fileExport"];
-            PatientCases = (IList<PatientCase>)data["patientCases"];
 
-            if (FileExport.Type == Constants.ExportTypeNative)
+            //Export
+            if (data.ContainsKey("fileExport"))
             {
-                DbFilePath = data["dbFilePath"].ToString();
-                Contents = data["contents"].ToString();
-            }
+                FileExport = (FileExport)data["fileExport"];
+                PatientCases = (IList<PatientCase>)data["patientCases"];
 
-            if (FileExport != null)
-                FileCopyAction();
+                if (FileExport.Type == Constants.ExportTypeNative)
+                {
+                    DbFilePath = data["dbFilePath"].ToString();
+                    Contents = data["contents"].ToString();
+                }
+
+                if (FileExport != null)
+                    FileExportAction();
+            }
+            else if (data.ContainsKey("fileImport"))//Import
+            {
+                importfiles = (Dictionary<string, string>)data["fileImport"];
+
+                if(importfiles != null)
+                    FileImportAction();
+            }
         }
 
-        private async void FileCopyAction()
+        private async void FileExportAction()
         {
             if (FileExport.DiskType == Constants.FileDiskCd)
             {
@@ -97,7 +111,7 @@ namespace RaywattApp.ViewModels.Dialog
 
             if (FileExport.Type == Constants.ExportTypeNative)
             {
-                await FileCopyNative();
+                await FileCopyNative(Constants.FileTypeExport);
             }
             else if (FileExport.Type == Constants.ExportTypeDicom)
             {
@@ -119,17 +133,35 @@ namespace RaywattApp.ViewModels.Dialog
             EnableDone = true;
         }
 
-
-        private async Task FileCopyNative()
+        private async void FileImportAction()
         {
-            double progressSize = 100.0 / progressDivide;
+            await FileCopyNative(Constants.FileTypeImport);
 
-            Dictionary<string, string> fileCopyInfo = new Dictionary<string, string>();
-            foreach (PatientCase patientCase in PatientCases)
+            ProgressText = Constants.ExportStatusCompleted;
+            EnableDone = true;
+        }
+
+
+        private async Task FileCopyNative(string fileType)
+        {
+            double progressSize = 100.0;
+            Dictionary<string, string> fileCopyInfo;
+
+            if (fileType == Constants.FileTypeExport)
             {
-                string fileName = CommonUtil.GetFileName(patientCase.ImageFullPath);
-                string dstFilePath = SaveFolder + "\\" + fileName;
-                fileCopyInfo.Add(patientCase.ImageFullPath, dstFilePath);
+                progressSize = progressSize / progressDivide;
+
+                fileCopyInfo = new Dictionary<string, string>();
+                foreach (PatientCase patientCase in PatientCases)
+                {
+                    string fileName = CommonUtil.GetFileName(patientCase.ImageFullPath);
+                    string dstFilePath = SaveFolder + "\\" + fileName;
+                    fileCopyInfo.Add(patientCase.ImageFullPath, dstFilePath);
+                }
+            }
+            else
+            {
+                fileCopyInfo = importfiles;
             }
 
             await CommonUtil.CopyFiles(fileCopyInfo, prog => Progress = prog, progressSize, progText => ProgressText = progText);

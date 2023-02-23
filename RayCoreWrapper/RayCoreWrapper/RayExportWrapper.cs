@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using Microsoft.Win32.SafeHandles;
+using System.Runtime.InteropServices;
 
 namespace RayCoreWrapper
 {
@@ -149,5 +150,7 @@ namespace RayCoreWrapper
         public static extern void registerWritingCallback(IntPtr cb);
         [DllImport("CDBurndll.dll")]
         public static extern CDBurnError releaseCD();
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern SafeFileHandle CreateFile(string lpFileName, FileAccess dwDesiredAccess, FileShare dwShareMode, uint lpSecurityAttributes, FileMode dwCreationDisposition, int flagsAndAttributes, uint hTemplateFile);
     }
 }

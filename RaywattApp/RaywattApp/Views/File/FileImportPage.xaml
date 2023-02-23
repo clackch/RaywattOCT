@@ -49,7 +49,7 @@
                     <Border Grid.Column="1" BorderBrush="Black" BorderThickness="1" Margin="5" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                             <Label Content="{Binding [Disk Type], Source={StaticResource L10N}}"  Margin="5,5,5,5"/>
-                            <Label Content="no disc" Margin="5,5,5,5"/>
+                            <Label Content="{Binding MediaType}" Margin="5,5,5,5"/>
                         </StackPanel>
                     </Border>
                     <Border Grid.Column="1" BorderBrush="Black" BorderThickness="1" Margin="5" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskExternal}}">

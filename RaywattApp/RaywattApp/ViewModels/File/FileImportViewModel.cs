@@ -16,7 +16,7 @@ using System.Windows.Input;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
-using Newtonsoft.Json;
+using RayCoreWrapper;
 
 namespace RaywattApp.ViewModels.File
 {
@@ -45,33 +45,7 @@ namespace RaywattApp.ViewModels.File
             set 
             { 
                 _diskType = value;
-
-                if (_diskType.Equals(Constants.FileDiskCd))
-                {
-                    if (timer.IsEnabled)
-                        timer.Stop();
-
-                    //TO-DO : CD 기능 구현 필요
-                    curPath = "C:\\DataSave\\";//TEST용 경로
-                    directoryProvider.GetDirectoryWithExtension(curPath);
-                    DirItems = directoryProvider.DirItems;
-                }
-                else
-                {
-                    GetDrive();
-                    timer.Start();
-
-                    if (!curPath.Equals(SelectedExternalDrive) && SelectedExternalDrive != null)
-                    {
-                        directoryProvider.GetDirectoryWithExtension(SelectedExternalDrive);
-                        DirItems = directoryProvider.DirItems;
-                    }
-                    else if(SelectedExternalDrive == null)
-                    {
-                        DirItems = null;
-                    }
-                }
-
+                GetDrive();
                 OnPropertyChanged(nameof(DiskType));
             }
         }
@@ -97,15 +71,22 @@ namespace RaywattApp.ViewModels.File
             get { return _selectedExternalDrive; }
             set
             {
-                if (_selectedExternalDrive != value)
+                if (_selectedExternalDrive != value || !externDriveInit)
                 {
                     _selectedExternalDrive = value;
+                    externalDrive = _selectedExternalDrive;
 
                     if (_selectedExternalDrive != null)
                     {
                         curPath = _selectedExternalDrive;
                         directoryProvider.GetDirectoryWithExtension(curPath);
                         DirItems = directoryProvider.DirItems;
+
+                        externDriveInit = true;
+                    }
+                    else
+                    {
+                        DirItems = null;
                     }
 
                     OnPropertyChanged(nameof(SelectedExternalDrive));
@@ -113,8 +94,17 @@ namespace RaywattApp.ViewModels.File
             }
         }
 
+        private string externalDrive;
+
         [ObservableProperty]
         private Dictionary<string, object> _externalDriveList;
+
+        [ObservableProperty]
+        private string _mediaType;
+
+        private bool cdInit = false;
+
+        private bool externDriveInit = false;
 
         private DirectoryProvider directoryProvider;
 
@@ -125,6 +115,14 @@ namespace RaywattApp.ViewModels.File
             set
             {
                 _dirItems = value;
+
+                if (_dirItems == null)
+                {
+                    PatientList = null;
+                    PatientCaseList = null;
+                    ApproximateImportSize = 0;
+                }
+
                 OnPropertyChanged(nameof(DirItems));
             }
         }
@@ -135,9 +133,12 @@ namespace RaywattApp.ViewModels.File
             get { return _selectedDir; }
             set 
             { 
-                _selectedDir = value;
-                ReadFile(_selectedDir.Path);
-                OnPropertyChanged(nameof(SelectedDir));
+                if(value != null)
+                {
+                    _selectedDir = value;
+                    ReadFile(_selectedDir.Path);
+                    OnPropertyChanged(nameof(SelectedDir));
+                }
             }
         }
 
@@ -158,8 +159,13 @@ namespace RaywattApp.ViewModels.File
             ExternalDriveComboBox = new Dictionary<string, string>();
             ExternalDriveList = new Dictionary<string, object>();
 
+            RayExportWrapper.CDBurnError cDBurnError;
+            cDBurnError = RayExportWrapper.initDevice();
+            _log.Debug("initDevice : " + cDBurnError);
+
             timer.Interval = TimeSpan.FromMilliseconds(1000);
             timer.Tick += new EventHandler(CheckDrive);
+            timer.Start();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -268,93 +274,127 @@ namespace RaywattApp.ViewModels.File
         {
             _log.Debug("InsertData");
 
-            Dictionary<string, string> importfiles = new Dictionary<string, string>();
-            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            if (timer.IsEnabled)
+                timer.Stop();
 
-            foreach (Patient patient in PatientList)
+            try
             {
-                sqlParameters.Clear();
-                sqlParameters["id"] = patient.Id;
-                sqlParameters["lastname"] = patient.Lastname;
-                sqlParameters["firstname"] = patient.Firstname;
-                sqlParameters["birthdate"] = patient.Birthdate;
-                sqlParameters["gender"] = patient.Gender;
-                sqlParameters["create_date"] = patient.CreateDate;
-                sqlParameters["update_date"] = patient.UpdateDate;
-                _sqlManager.UpsertPatient(sqlParameters);
+                Dictionary<string, string> importfiles = new Dictionary<string, string>();
 
-                if (patient.PatientCaseList != null)
+                foreach (Patient patient in PatientList)
                 {
-                    foreach (PatientCase patientCase in patient.PatientCaseList)
+                    if (patient.PatientCaseList != null)
                     {
-                        if(existPatientCases != null)
+                        foreach (PatientCase patientCase in patient.PatientCaseList)
                         {
-                            bool exist = false;
-                            foreach(PatientCase pc in existPatientCases)
+                            if (existPatientCases != null)
                             {
-                                if (patientCase.Id.Equals(pc.Id))
+                                bool exist = false;
+                                foreach (PatientCase pc in existPatientCases)
                                 {
-                                    exist = true; 
-                                    break;
+                                    if (patientCase.Id.Equals(pc.Id))
+                                    {
+                                        exist = true;
+                                        break;
+                                    }
                                 }
+                                if (exist)
+                                    continue;
                             }
-                            if (exist)
-                                continue;
+
+                            //image
+                            string srcPath = CommonUtil.GetDirectoryPath(SelectedDir.Path) + "\\" + patientCase.Image;
+                            if (System.IO.File.Exists(srcPath))
+                            {
+                                string destPath = CommonUtil.CreateFolder(Constants.DataRootPath + "\\" + patientCase.PatientId) + "\\" + patientCase.Image;
+                                importfiles.Add(srcPath, destPath);
+                            }
                         }
-
-                        sqlParameters.Clear();
-                        sqlParameters["id"] = patientCase.Id;
-                        sqlParameters["patient_id"] = patientCase.PatientId;
-                        sqlParameters["physician_name"] = patientCase.PhysicianName;
-                        sqlParameters["accession_number"] = patientCase.AccessionNumber;
-                        sqlParameters["accession_name"] = patientCase.AccessionName;
-                        sqlParameters["comment"] = patientCase.Comment;
-                        sqlParameters["vessel"] = patientCase.Vessel;
-                        sqlParameters["procedure"] = patientCase.Procedure;
-                        sqlParameters["pullback_type"] = patientCase.PullbackType;
-                        sqlParameters["angio_co_registration"] = patientCase.AngioCoRegistration;
-                        sqlParameters["indicator_degree"] = patientCase.IndicatorDegree;
-                        sqlParameters["preset_name"] = patientCase.PresetName;
-                        sqlParameters["calcium_threshold"] = patientCase.CalciumThreshold;
-                        sqlParameters["expansion_calculation"] = patientCase.ExpansionCalculation;
-                        sqlParameters["expansion_threshold"] = patientCase.ExpansionThreshold;
-                        sqlParameters["apposition_threshold"] = patientCase.AppositionThreshold;
-                        sqlParameters["measurements"] = patientCase.Measurements;
-                        sqlParameters["bookmarks"] = patientCase.Bookmarks;
-                        sqlParameters["thumbnail_no"] = patientCase.ThumbnailNo;
-                        sqlParameters["still_image_yn"] = patientCase.StillImageYn;
-                        sqlParameters["create_date"] = patientCase.CreateDate;
-                        sqlParameters["update_date"] = patientCase.UpdateDate;
-
-                        //image
-                        string srcPath = CommonUtil.GetDirectoryPath(SelectedDir.Path) + "\\" + patientCase.Image;
-                        if (System.IO.File.Exists(srcPath))
-                        {
-                            string destPath = CommonUtil.CreateFolder(Constants.DataRootPath + "\\" + patientCase.PatientId) + "\\" + patientCase.Image;
-
-                            importfiles.Add(srcPath, destPath);
-                            sqlParameters["image"] = patientCase.Image;
-                        }
-                        else
-                        {
-                            sqlParameters["image"] = "";
-                        }
-
-                        _sqlManager.UpsertPatientCase(sqlParameters);
                     }
                 }
-            }
 
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["title"] = _l10n["File Import"];
-            parameter["files"] = importfiles;
-            var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter);
-            Close();
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["title"] = _l10n["File Import"];
+                parameter["fileImport"] = importfiles;
+                var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter);
+
+                if (result != null && result.DialogAnswer == DialogResults.Answer.Undefined)
+                {
+                    Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+
+                    foreach (Patient patient in PatientList)
+                    {
+                        sqlParameters.Clear();
+                        sqlParameters["id"] = patient.Id;
+                        sqlParameters["lastname"] = patient.Lastname;
+                        sqlParameters["firstname"] = patient.Firstname;
+                        sqlParameters["birthdate"] = patient.Birthdate;
+                        sqlParameters["gender"] = patient.Gender;
+                        sqlParameters["create_date"] = patient.CreateDate;
+                        sqlParameters["update_date"] = patient.UpdateDate;
+                        _sqlManager.UpsertPatient(sqlParameters);
+
+                        if (patient.PatientCaseList != null)
+                        {
+                            foreach (PatientCase patientCase in patient.PatientCaseList)
+                            {
+                                if (existPatientCases != null)
+                                {
+                                    bool exist = false;
+                                    foreach (PatientCase pc in existPatientCases)
+                                    {
+                                        if (patientCase.Id.Equals(pc.Id))
+                                        {
+                                            exist = true;
+                                            break;
+                                        }
+                                    }
+                                    if (exist)
+                                        continue;
+                                }
+
+                                sqlParameters.Clear();
+                                sqlParameters["id"] = patientCase.Id;
+                                sqlParameters["patient_id"] = patientCase.PatientId;
+                                sqlParameters["physician_name"] = patientCase.PhysicianName;
+                                sqlParameters["accession_number"] = patientCase.AccessionNumber;
+                                sqlParameters["accession_name"] = patientCase.AccessionName;
+                                sqlParameters["comment"] = patientCase.Comment;
+                                sqlParameters["vessel"] = patientCase.Vessel;
+                                sqlParameters["procedure"] = patientCase.Procedure;
+                                sqlParameters["pullback_type"] = patientCase.PullbackType;
+                                sqlParameters["angio_co_registration"] = patientCase.AngioCoRegistration;
+                                sqlParameters["indicator_degree"] = patientCase.IndicatorDegree;
+                                sqlParameters["preset_name"] = patientCase.PresetName;
+                                sqlParameters["calcium_threshold"] = patientCase.CalciumThreshold;
+                                sqlParameters["expansion_calculation"] = patientCase.ExpansionCalculation;
+                                sqlParameters["expansion_threshold"] = patientCase.ExpansionThreshold;
+                                sqlParameters["apposition_threshold"] = patientCase.AppositionThreshold;
+                                sqlParameters["measurements"] = patientCase.Measurements;
+                                sqlParameters["bookmarks"] = patientCase.Bookmarks;
+                                sqlParameters["thumbnail_no"] = patientCase.ThumbnailNo;
+                                sqlParameters["still_image_yn"] = patientCase.StillImageYn;
+                                sqlParameters["create_date"] = patientCase.CreateDate;
+                                sqlParameters["update_date"] = patientCase.UpdateDate;
+                                string srcPath = CommonUtil.GetDirectoryPath(SelectedDir.Path) + "\\" + patientCase.Image;
+                                sqlParameters["image"] = System.IO.File.Exists(srcPath) ? patientCase.Image : "";
+
+                                _sqlManager.UpsertPatientCase(sqlParameters);
+                            }
+                        }
+                    }
+
+                    Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ex);
+            }
         }
 
         private void SetCondition()
         {
-            //TO-DO 설치할 때, 설치하는 경로의 드라이브 정보 가져오도록 처리 필요
             string configDrive = Constants.SystemRootPath + "\\";
 
             DriveInfo[] allDrives = DriveInfo.GetDrives();
@@ -378,50 +418,121 @@ namespace RaywattApp.ViewModels.File
 
         private void GetDrive()
         {
-            DriveInfo[] allDrives = DriveInfo.GetDrives();
-
-            Dictionary<string, string> currExternalDrive = new Dictionary<string, string>();
-
-            string firstExternalDrive = "";
-            bool isFirstExternalDrive = true;
-
-            ExternalDriveList.Clear();
-
-            foreach (DriveInfo d in allDrives)
+            if (DiskType.Equals(Constants.FileDiskCd))
             {
-                if (d.IsReady == true)
-                {
-                    if (d.DriveType == DriveType.CDRom)
-                    {
-                        //TO-DO : CD 기능 구현 필요
-                    }
-                    else if (d.DriveType == DriveType.Removable)
-                    {
-                        currExternalDrive[d.Name] = d.Name;
-                        long[] data = { d.TotalSize, d.AvailableFreeSpace };
-                        ExternalDriveList.Add(d.Name, data);
+                externDriveInit = false;
 
-                        if (isFirstExternalDrive)
+                RayExportWrapper.CDBurnError cDBurnError;
+                cDBurnError = RayExportWrapper.checkDiskOnDrive();
+                _log.Debug("checkDiskOnDrive : " + cDBurnError);
+
+                if (cDBurnError == RayExportWrapper.CDBurnError.OK)
+                {
+                    if (!cdInit)
+                    {
+                        DriveInfo[] allDrives = DriveInfo.GetDrives();
+                        foreach (DriveInfo d in allDrives)
                         {
-                            firstExternalDrive = d.Name;
-                            isFirstExternalDrive = false;
+                            if(d.DriveType == DriveType.CDRom)
+                            {
+                                curPath = d.Name;
+                                break;
+                            }
+                        }
+
+                        RayExportWrapper.MediaType mediaType;
+                        mediaType = RayExportWrapper.getDiskType();
+                        _log.Debug("getDiskType : " + mediaType);
+                        if (SetMediaType(mediaType))
+                        {
+                            directoryProvider.GetDirectoryWithExtension(curPath);
+                            DirItems = directoryProvider.DirItems;
+                        }
+                        else
+                        {
+                            DirItems = null;
+                        }
+
+                        cdInit = true;
+                    }
+                }
+                else
+                {
+                    MediaType = Constants.MediaTypeNoDisc;
+
+                    cdInit = false;
+
+                    DirItems = null;
+                }
+            }
+            else
+            {
+                cdInit = false;
+
+                Dictionary<string, string> currExternalDrive = new Dictionary<string, string>();
+
+                string firstExternalDrive = "";
+                bool isFirstExternalDrive = true;
+
+                ExternalDriveList.Clear();
+
+                DriveInfo[] allDrives = DriveInfo.GetDrives();
+
+                foreach (DriveInfo d in allDrives)
+                {
+                    if (d.IsReady == true)
+                    {
+                        if (d.DriveType == DriveType.Removable)
+                        {
+                            currExternalDrive[d.Name] = d.Name;
+                            long[] data = { d.TotalSize, d.AvailableFreeSpace };
+                            ExternalDriveList.Add(d.Name, data);
+
+                            if (isFirstExternalDrive)
+                            {
+                                firstExternalDrive = d.Name;
+                                isFirstExternalDrive = false;
+                            }
                         }
                     }
                 }
-            }
 
-            if(currExternalDrive.Count == 0)
-            {
-                ExternalDriveComboBox.Clear();
-                SelectedExternalDrive = null;
-                IsEnableExternalDrive = false;
-            }
-            else if (ExternalDriveComboBox.Count != currExternalDrive.Count)
-            {
-                ExternalDriveComboBox = currExternalDrive;
-                SelectedExternalDrive = firstExternalDrive;
-                IsEnableExternalDrive = true;
-            }
+                if (ExternalDriveComboBox.Count != currExternalDrive.Count)
+                {
+                    ExternalDriveComboBox = currExternalDrive;
+
+                    if (ExternalDriveComboBox.Count > 0)
+                    {
+                        IsEnableExternalDrive = true;
+
+                        if (String.IsNullOrEmpty(externalDrive))
+                        {
+                            SelectedExternalDrive = firstExternalDrive;
+                        }
+                        else
+                        {
+                            SelectedExternalDrive = externalDrive;
+                        }
+                    }
+                    else
+                    {
+                        IsEnableExternalDrive = false;
+                        DirItems = null;
+                    }
+                }
+
+                if (ExternalDriveComboBox.Count == 1)
+                {
+                    if (!externDriveInit || !ExternalDriveComboBox.ContainsKey(SelectedExternalDrive))
+                    {
+                        SelectedExternalDrive = firstExternalDrive;
+                    }
+                }
+                else if(ExternalDriveComboBox.Count == 0)
+                {
+                    DirItems = null;
+                }
+            }            
         }
 
         private void ReadFile(string path)
@@ -437,7 +548,7 @@ namespace RaywattApp.ViewModels.File
                 return;
             }
   
-            string[] result = CommonUtil.Decryptor(path);
+            string[] result = CommonUtil.Decryptor(path, DiskType);
 
             if (result[0].Equals("1"))
             {
@@ -506,8 +617,6 @@ namespace RaywattApp.ViewModels.File
 
                 _log.Error("File Decrypt Error");
             }
-            
-
         }
 
         private void ShowCase(Patient patient)
@@ -570,6 +679,57 @@ namespace RaywattApp.ViewModels.File
                 return false;
 
             return (bool)obj[key];
+        }
+
+        private bool SetMediaType(RayExportWrapper.MediaType mediaType)
+        {
+            bool res;
+
+            switch (mediaType)
+            {
+                case RayExportWrapper.MediaType.NotSupportDisc:
+                    MediaType = Constants.MediaTypeNotSupportDisc;
+                    res = false;
+                    break;
+                case RayExportWrapper.MediaType.TYPE_CDR:
+                    MediaType = Constants.MediaTypeCDR;
+                    res = true;
+                    break;
+                case RayExportWrapper.MediaType.TYPE_CDRW:
+                    MediaType = Constants.MediaTypeCDRW;
+                    res = true;
+                    break;
+                case RayExportWrapper.MediaType.TYPE_DVDDASHR:
+                    MediaType = Constants.MediaTypeDVDDASHR;
+                    res = true;
+                    break;
+                case RayExportWrapper.MediaType.TYPE_DVDDASHRW:
+                    MediaType = Constants.MediaTypeDVDDASHRW;
+                    res = true;
+                    break;
+                case RayExportWrapper.MediaType.TYPE_DVDPLUSR:
+                    MediaType = Constants.MediaTypeDVDPLUSR;
+                    res = true;
+                    break;
+                case RayExportWrapper.MediaType.TYPE_DVDPLUSRW:
+                    MediaType = Constants.MediaTypeDVDPLUSRW;
+                    res = true;
+                    break;
+                case RayExportWrapper.MediaType.TYPE_BDR:
+                    MediaType = Constants.MediaTypeBDR;
+                    res = true;
+                    break;
+                case RayExportWrapper.MediaType.TYPE_BDRE:
+                    MediaType = Constants.MediaTypeBDRE;
+                    res = true;
+                    break;
+                default:
+                    MediaType = Constants.MediaTypeNotSupportDisc;
+                    res = false;
+                    break;
+            }
+
+            return res;
         }
     }
 }

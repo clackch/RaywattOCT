@@ -173,8 +173,6 @@ namespace RaywattApp.Common.File
 
         protected void GetDrive()
         {
-            DriveInfo[] allDrives = DriveInfo.GetDrives();
-
             if (FileExport.DiskType.Equals(Constants.FileDiskCd))
             {
                 RayExportWrapper.CDBurnError cDBurnError;
@@ -208,6 +206,8 @@ namespace RaywattApp.Common.File
                 bool isFirstExternalDrive = true;
 
                 ExternalDriveList.Clear();
+
+                DriveInfo[] allDrives = DriveInfo.GetDrives();
 
                 foreach (DriveInfo d in allDrives)
                 {
