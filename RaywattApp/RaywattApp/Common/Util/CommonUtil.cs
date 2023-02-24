@@ -78,8 +78,13 @@ namespace RaywattApp.Common.Util
                 bitmapImage.EndInit();
             }
             Mat imgDraw = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToMat(bitmapImage);
+            Mat imgDrawGray = new Mat();
+            Mat imgBW = new Mat();
+            Cv2.CvtColor(imgDraw, imgDrawGray, ColorConversionCodes.RGBA2GRAY);
+            Cv2.Threshold(imgDrawGray, imgBW, 1, 255, ThresholdTypes.Binary);
+
             Cv2.CvtColor(imgDraw, imgDraw, ColorConversionCodes.RGBA2RGB);
-            Cv2.CopyTo(imgDraw, image, imgDraw);
+            Cv2.CopyTo(imgDraw, image, imgBW);
         }
 
         public static string GetRandomText(int length)
