@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Runtime.InteropServices;
 using static RaywattOCT.RayCoreWrapper;
-using RayCoreWrapper;
 
 namespace RaywattApp.Common.Util
 {
@@ -115,20 +114,15 @@ namespace RaywattApp.Common.Util
             }
         }
 
-        public static string[] Decryptor(string filePath, string diskType)
+        public static string[] Decryptor(string filePath)
         {
             string[] result = new string[2];
 
             try
             {
-                Microsoft.Win32.SafeHandles.SafeFileHandle handle = null;
-
-                if (diskType == Constants.FileDiskCd)                    
-                    handle = RayExportWrapper.CreateFile(filePath, FileAccess.Read, FileShare.Read, 0, FileMode.Open, 0x80/*FILE_ATTRIBUTE_NORMAL*/, 0);
-
                 string contents = "";
 
-                using (FileStream fileStream = diskType == Constants.FileDiskCd ? new(handle, FileAccess.Read) : new(filePath, FileMode.Open))
+                using (FileStream fileStream = System.IO.File.OpenRead(filePath))
                 {
                     using (Aes aes = Aes.Create())
                     {

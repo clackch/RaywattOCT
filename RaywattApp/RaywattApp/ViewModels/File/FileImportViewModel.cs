@@ -548,7 +548,7 @@ namespace RaywattApp.ViewModels.File
                 return;
             }
   
-            string[] result = CommonUtil.Decryptor(path, DiskType);
+            string[] result = CommonUtil.Decryptor(path);
 
             if (result[0].Equals("1"))
             {
