@@ -442,5 +442,27 @@ namespace RaywattApp.Common.Util
             double div = 1024.0;
             return Math.Round(bytes / div / div / div, 3);
         }
+
+        public static async void CheckFileSaveDone(string filePath, long totalFileSize, Action<double> progressCallback, double progressStart, double progress, Action<string> progressTextCallback)
+        {
+            long curFileSize = 0;
+
+            while (true)
+            {
+                await Task.Run(() =>
+                {
+                    curFileSize = GetFileSize(filePath);
+
+                    if (curFileSize != 0)
+                    {
+                        progressCallback(progressStart + progress * (1.0 * curFileSize / totalFileSize));
+                        progressTextCallback(Constants.ExportStatusSaveFile);
+                    }
+                });
+
+                if (totalFileSize == curFileSize)
+                    break;
+            }
+        }
     }
 }

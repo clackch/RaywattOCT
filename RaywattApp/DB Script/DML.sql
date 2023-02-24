@@ -42,6 +42,9 @@ INSERT INTO rv_schema.l10n(lang, choice) VALUES ('ko-KR', FALSE);
 INSERT INTO rv_schema.patient_case_preset(id, preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold, default_set, create_date, update_date) VALUES ('Default', 'Default', 180, 'TAPE', 90, 0.3, TRUE, now(), now());
 
 -- rv_schema.dicom_property
+INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('ORG_RT', 'Organization Root', '1.2.410.99999');
+INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('APP_ID', 'Application ID', '1');
+INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('APP_VR', 'Application Version', '1');
 INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00020013', 'Implementation Version Name', 'Raywatt Version Name');
 INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00020016', 'Source Application Entity Title', 'Raywatt Title');
 INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00080060', 'Modality', 'OCT');

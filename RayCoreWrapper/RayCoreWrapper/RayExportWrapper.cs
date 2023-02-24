@@ -63,6 +63,8 @@ namespace RayCoreWrapper
         public static extern DICOMDIRRWError DICOMDIRInputFile(string path);
         [DllImport("makedcmDLL.dll")]
         public static extern DICOMDIRRWError DICOMDIRWrite();
+        [DllImport("makedcmDLL.dll")]
+        public static extern long DicomApprSize();
 
         //CD
         public enum CDBurnError : int

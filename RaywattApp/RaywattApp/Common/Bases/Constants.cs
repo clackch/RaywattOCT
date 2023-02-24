@@ -101,6 +101,7 @@
         public const string ExportStatusConvertImage = "Convert Image(s)";
         public const string ExportStatusSaveVideo = "Save Video";
         public const string ExportStatusSaveMultipleFrames = "Save Multiple Frames";
+        public const string ExportStatusSaveFile = "Save File";
         public const string ExportStatusCompleted = "Completed";
 
         //Export(Raw) File Option - Leave Unchanged, Remove when Complete
