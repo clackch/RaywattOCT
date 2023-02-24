@@ -122,7 +122,7 @@ namespace RaywattApp.Common.Util
             {
                 string contents = "";
 
-                using (FileStream fileStream = new(filePath, FileMode.Open))
+                using (FileStream fileStream = System.IO.File.OpenRead(filePath))
                 {
                     using (Aes aes = Aes.Create())
                     {
@@ -210,7 +210,8 @@ namespace RaywattApp.Common.Util
 
         public static void RenameFolder(string oldPath, string newPath)
         {
-            Directory.Move(oldPath, newPath);
+            if(oldPath != newPath)
+                Directory.Move(oldPath, newPath);
         }
 
         public static void DeleteFolder(string path)
@@ -218,13 +219,11 @@ namespace RaywattApp.Common.Util
             Directory.Delete(path, true);
         }
 
-        public static async Task CopyFiles(Dictionary<string, string> files, Action<double> progressCallback)
+        public static async Task CopyFiles(Dictionary<string, string> files, Action<double> progressCallback, double progressSize, Action<string> progressTextCallback)
         {
             long total_size = files.Keys.Select(x => new FileInfo(x).Length).Sum();
 
             long total_read = 0;
-
-            double progress_size = 100.0;
 
             foreach (var item in files)
             {
@@ -240,7 +239,8 @@ namespace RaywattApp.Common.Util
                         await CopyStream(inStream, outStream, x =>
                         {
                             total_read_for_file = x;
-                            progressCallback(((total_read + total_read_for_file) / (double)total_size) * progress_size);
+                            progressCallback(((total_read + total_read_for_file) / (double)total_size) * progressSize);
+                            progressTextCallback(Constants.ExportStatusCopyFile);
                         });
                     }
                 }
@@ -249,7 +249,7 @@ namespace RaywattApp.Common.Util
             }
         }
 
-        public static async Task<Mat> ConvertImage(string filePath, List<int> bookmarkedIndices, List<Mat> convertedImages, Action<double> progressCallback, double progress)
+        public static async Task<Mat> ConvertImage(string filePath, List<int> bookmarkedIndices, List<Mat> convertedImages, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
         {
             RayOpenImage(filePath);
 
@@ -275,6 +275,7 @@ namespace RaywattApp.Common.Util
                             progressCallback(progress / totalNum);
                         }
                     }
+                    progressTextCallback(Constants.ExportStatusConvertImage);
                 });
             }
 
@@ -335,7 +336,7 @@ namespace RaywattApp.Common.Util
             Cv2.ImWrite(filePath, image);
         }
 
-        public static async Task SaveVideo(List<Mat> images, string rootPath, string fileName, string format, double fps, Action<double> progressCallback, double progress)
+        public static async Task SaveVideo(List<Mat> images, string rootPath, string fileName, string format, double fps, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
         {
             string filePath = rootPath + "\\" + fileName + "." + format.ToLower();
 
@@ -353,13 +354,14 @@ namespace RaywattApp.Common.Util
                     {
                         videoWriter.Write(img);
                         progressCallback(progress / totalNum);
+                        progressTextCallback(Constants.ExportStatusSaveVideo);
                     });
                 }
                 videoWriter.Release();
             }
         }
 
-        public static async Task SaveMultipleFrames(List<Mat> images, string rootPath, string fileName, string format, Action<double> progressCallback, double progress)
+        public static async Task SaveMultipleFrames(List<Mat> images, string rootPath, string fileName, string format, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
         {
             string filePath = rootPath + "\\" + fileName + "." + format.ToLower();
 
@@ -393,6 +395,7 @@ namespace RaywattApp.Common.Util
                             tiff.WriteDirectory();
 
                             progressCallback(progress / totalNum);
+                            progressTextCallback(Constants.ExportStatusSaveMultipleFrames);
                         });
                     }
 
@@ -403,21 +406,28 @@ namespace RaywattApp.Common.Util
 
         public static async Task CopyStream(Stream from, Stream to, Action<long> progress)
         {
-            int buffer_size = 1024 * 1024; // 1MB buffer
-
-            byte[] buffer = new byte[buffer_size];
-
-            long total_read = 0;
-
-            while (total_read < from.Length)
+            try
             {
-                int read = await from.ReadAsync(buffer, 0, buffer_size);
+                int buffer_size = 1024 * 1024; // 1MB buffer
 
-                await to.WriteAsync(buffer, 0, read);
+                byte[] buffer = new byte[buffer_size];
 
-                total_read += read;
+                long total_read = 0;
 
-                progress(total_read);
+                while (total_read < from.Length)
+                {
+                    int read = await from.ReadAsync(buffer, 0, buffer_size);
+
+                    await to.WriteAsync(buffer, 0, read);
+
+                    total_read += read;
+
+                    progress(total_read);
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ex);
             }
         }
 
@@ -425,6 +435,28 @@ namespace RaywattApp.Common.Util
         {
             double div = 1024.0;
             return Math.Round(bytes / div / div / div, 3);
+        }
+
+        public static async void CheckFileSaveDone(string filePath, long totalFileSize, Action<double> progressCallback, double progressStart, double progress, Action<string> progressTextCallback)
+        {
+            long curFileSize = 0;
+
+            while (true)
+            {
+                await Task.Run(() =>
+                {
+                    curFileSize = GetFileSize(filePath);
+
+                    if (curFileSize != 0)
+                    {
+                        progressCallback(progressStart + progress * (1.0 * curFileSize / totalFileSize));
+                        progressTextCallback(Constants.ExportStatusSaveFile);
+                    }
+                });
+
+                if (totalFileSize == curFileSize)
+                    break;
+            }
         }
     }
 }
