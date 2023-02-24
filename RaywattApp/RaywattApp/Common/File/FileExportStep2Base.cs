@@ -371,6 +371,13 @@ namespace RaywattApp.Common.File
                     parameter["message"] = _l10n["Path is required"];
                     var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
                 }
+                else if (ExternalDriveAvailableFreeSpace <= ExportSize)
+                {
+                    Dictionary<string, object> parameter = new Dictionary<string, object>();
+                    parameter["title"] = _l10n["Information"];
+                    parameter["message"] = _l10n["There is not enough space on the storage device to store."];
+                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+                }
                 else
                 {
                     if (timer.IsEnabled)
@@ -399,6 +406,13 @@ namespace RaywattApp.Common.File
                     Dictionary<string, object> parameter = new Dictionary<string, object>();
                     parameter["title"] = _l10n["Information"];
                     parameter["message"] = _l10n["Volume Label is required"];
+                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+                }
+                else if (CdTotalSize <= ExportSize)
+                {
+                    Dictionary<string, object> parameter = new Dictionary<string, object>();
+                    parameter["title"] = _l10n["Information"];
+                    parameter["message"] = _l10n["There is not enough space on the storage device to store."];
                     var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
                 }
                 else
