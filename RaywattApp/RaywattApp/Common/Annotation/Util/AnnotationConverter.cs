@@ -2,16 +2,16 @@
 using RaywattApp.Common.Annotation.Models;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace RaywattApp.Common.Annotation.Util
 {
     public class AnnotationConverter
     {
-        public static void ConvertFromJsonString(string jsonString, out List<Measurement>? measurements, out ObservableCollection<LengthGeometry>? lModeLengths, out List<TextGeometry>? lModeTexts)
+        public static void ConvertFromJsonString(string jsonString, out List<Measurement>? measurements, out Measurement? lModeMeasurement)
         {
             measurements = new List<Measurement>();
-            lModeLengths = new ObservableCollection<LengthGeometry>();
-            lModeTexts = new List<TextGeometry>();
+            lModeMeasurement = new Measurement();
 
             if (jsonString != null && !string.IsNullOrEmpty(jsonString))
             {
@@ -22,8 +22,7 @@ namespace RaywattApp.Common.Annotation.Util
                     //Longitude Measurement
                     if (measurement.FrameNumber == -1)
                     {
-                        lModeLengths = measurement.LengthGeometries;
-                        lModeTexts = measurement.TextGeometries;
+                        lModeMeasurement = measurement;
                         measurements.Remove(measurement);
                         break;
                     }

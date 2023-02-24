@@ -159,6 +159,10 @@ namespace RaywattApp.Common.Bases
         public const double CrossSectionSize = 640;
         public const double CrossSectionCenter = 320;
 
+        //Review - 2D - Longitude
+        public const double LongitudeWidth = 1180;
+        public const double LongitudeHeight = 180;
+
         //Review - 2D - Side Menu
         public const string LeftUpMenu = "LeftUpMenu";
         public const string LeftDownMenu = "LeftDownMenu";
@@ -187,5 +191,8 @@ namespace RaywattApp.Common.Bases
 
         //Draw Annotation
         public static Brush[] AnnotationBrushes = { Brushes.Red, Brushes.Orange, Brushes.Yellow, Brushes.Green, Brushes.Blue, Brushes.Navy, Brushes.Purple };
+        public static DashStyle AnnotationDashLarge = new DashStyle(new double[] { 7, 7 }, 0);
+        public static DashStyle AnnotationDashSmall = new DashStyle(new double[] { 2, 5 }, 0);
+        public const double AnnotationTextPointSize = 6;
     }
 }

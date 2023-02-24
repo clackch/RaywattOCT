@@ -189,11 +189,10 @@ namespace RaywattApp.ViewModels.Dialog
                 Mat? imgAngio = FileExport.AngioView ? angio : null;
 
                 List<Measurement>? Measurements = null;
-                ObservableCollection<LengthGeometry>? lModeLengths = null;
-                List<TextGeometry>? lModeTexts = null;
+                Measurement? LMeasurement = null;
                 if (FileExport.Measurements != Constants.ExportMeasurementHideAll)
                 {
-                    AnnotationConverter.ConvertFromJsonString(patientCase.Measurements, out Measurements, out lModeLengths, out lModeTexts);
+                    AnnotationConverter.ConvertFromJsonString(patientCase.Measurements, out Measurements, out LMeasurement);
                 }
 
                 for (int frame = 0; frame < convertedImages.Count; frame++)
@@ -204,7 +203,13 @@ namespace RaywattApp.ViewModels.Dialog
                     if (region != null && region.Count > 0)
                     {
                         Rect rectCrossSection = region[region.Count - 1].Item1;
-                        DrawAnnotation.DrawMeasurements(convertedImages[frame][rectCrossSection], frame, Measurements);
+                        DrawAnnotation.DrawMeasurements(convertedImages[frame][rectCrossSection], frame, new System.Windows.Size(Constants.CrossSectionSize, Constants.CrossSectionSize), Measurements);
+
+                        if (imgLongitude != null && region.Count > 1)
+                        {
+                            Rect rectLongitude = region[0].Item1;
+                            DrawAnnotation.DrawMeasurement(convertedImages[frame][rectLongitude], new System.Windows.Size(Constants.LongitudeWidth, Constants.LongitudeHeight), LMeasurement);
+                        }
                     }
                 }
 

@@ -1,7 +1,6 @@
 ﻿using RaywattApp.Common.Annotation.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -13,6 +12,7 @@ using Path = System.Windows.Shapes.Path;
 using OpenCvSharp;
 using System.Collections.ObjectModel;
 using RaywattApp.Common.Util;
+using RaywattApp.Common.Annotation.Util;
 
 namespace RaywattApp.Common.Annotation
 {
@@ -448,7 +448,7 @@ namespace RaywattApp.Common.Annotation
                 Label label = new Label();
                 label.Style = (Style)this.Resources["StyleLabel"];
                 label.Name = constArea + "_" + areaGeometry.Group;
-                label.Content = "[" + (areaGeometry.Group + 1) + "] " + (Math.Round(this.area, 3)).ToString();
+                label.Content = DrawAnnotation.GetLabelText(areaGeometry.Group, this.area);
 
                 Point centerdPoint = areaGeometry.CenterOfMass;
 

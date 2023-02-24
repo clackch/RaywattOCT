@@ -1,4 +1,5 @@
 ﻿using RaywattApp.Common.Annotation.Models;
+using RaywattApp.Common.Annotation.Util;
 using RaywattApp.Common.Bases;
 using System;
 using System.Collections.ObjectModel;
@@ -290,18 +291,38 @@ namespace RaywattApp.Common.Annotation
             this.canvas.Children.Add(path);
 
             //Length
-            double length = Math.Sqrt(Math.Pow(firstPoint.X - secondPoint.X, 2) + Math.Pow(firstPoint.Y - secondPoint.Y, 2));
+            double deltaX = secondPoint.X - firstPoint.X;
+            double deltaY = secondPoint.Y - firstPoint.Y;
+            double length = Math.Sqrt(Math.Pow(deltaX, 2) + Math.Pow(deltaY, 2));
             this.length = length;
             if(this.lengthGeometries.Count > group)
                 this.lengthGeometries[group].Length = this.length;
 
             DeleteLabel(constLength, group);
+
+            // find center
+            Point ptLabel = new Point();
+            ptLabel.X = firstPoint.X + (secondPoint.X - firstPoint.X) / 2;
+            ptLabel.Y = firstPoint.Y + (secondPoint.Y - firstPoint.Y) / 2;
+
+            // rotate
+            bool flip;
+            double angle = DrawAnnotation.GetLabelAngle(firstPoint, secondPoint, out flip);
+
+            // move label point along the line
+            double unitX = deltaX / length;
+            double unitY = deltaY / length;
+            ptLabel.X += (unitX * 40 * (flip ? 1 : -1));
+            ptLabel.Y += (unitY * 40 * (flip ? 1 : -1));
+
             Label label = new Label();
             label.Style = (Style)this.Resources["StyleLabel"];
             label.Name = constLength + "_" + group;
-            label.Content = "[" + (group + 1) + "] " + (Math.Round(length, 3)).ToString();
-            Canvas.SetLeft(label, secondPoint.X);
-            Canvas.SetTop(label, secondPoint.Y);
+            label.Content = DrawAnnotation.GetLabelText(group, length);
+            label.RenderTransform = new RotateTransform(angle);
+
+            Canvas.SetLeft(label, ptLabel.X);
+            Canvas.SetTop(label, ptLabel.Y);
             this.canvas.Children.Add(label);
         }
 

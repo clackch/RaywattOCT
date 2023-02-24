@@ -419,13 +419,12 @@ namespace RaywattApp.ViewModels
             if (jsonAnnotation != null && jsonAnnotation.Count == 1)
             {
                 List<Measurement>? measurements = new List<Measurement>();
-                ObservableCollection<LengthGeometry>? lModeLengths = new ObservableCollection<LengthGeometry>();
-                List<TextGeometry>? lModeTexts = new List<TextGeometry>();
-                AnnotationConverter.ConvertFromJsonString(jsonAnnotation[0].ReturnString, out measurements, out lModeLengths, out lModeTexts);
+                Measurement lModeMeasurement = new Measurement();
+                AnnotationConverter.ConvertFromJsonString(jsonAnnotation[0].ReturnString, out measurements, out lModeMeasurement);
 
                 Measurements = measurements;
-                LModeLengthGeometries = lModeLengths;
-                LModeTextGeometries = lModeTexts;
+                LModeLengthGeometries = lModeMeasurement.LengthGeometries;
+                LModeTextGeometries = lModeMeasurement.TextGeometries;
             }
 
             if (jsonAnnotation == null || jsonAnnotation.Count != 1 || String.IsNullOrEmpty(jsonAnnotation[0].ReturnString2))
