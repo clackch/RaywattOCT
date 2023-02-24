@@ -1,5 +1,6 @@
 ﻿using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
+using RaywattApp.Common.Util;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -437,7 +438,7 @@ namespace RaywattApp.Common.Annotation
         {
             Path path = new Path();
             path.Style = (Style)this.Resources["StylePath"];
-            path.Data = GetLine(pointerPoint, textPoint);
+            path.Data = CommonUtil.GetLine(pointerPoint, textPoint);
             path.Stroke = brushes[group % brushes.Length];
             path.Name = constTextLine + "_" + group;
             path.StrokeDashArray.Add(5);
