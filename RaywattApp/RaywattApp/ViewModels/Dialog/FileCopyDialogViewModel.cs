@@ -123,6 +123,13 @@ namespace RaywattApp.ViewModels.Dialog
                 Mat? imgLumeProfile = FileExport.LumenProfileView ? lumenProfile : null;
                 Mat? imgAngio = FileExport.AngioView ? angio : null;
 
+                List<Measurement>? Measurements = null;
+                Measurement? LMeasurement = null;
+                if (FileExport.Measurements != Constants.ExportMeasurementHideAll)
+                {
+                    AnnotationConverter.ConvertFromJsonString(PatientCases[i].Measurements, out Measurements, out LMeasurement);
+                }
+
                 //Start
                 RayExportWrapper.DicomStart();
 
@@ -132,6 +139,19 @@ namespace RaywattApp.ViewModels.Dialog
                 {
                     List<Tuple<Rect, Size2f>>? region = null;
                     Mat imgExport = CommonUtil.MakeImageForExport(convertedImages[frame], imgLongitude, imgLumeProfile, imgAngio, out region);
+
+                    if (region != null && region.Count > 0)
+                    {
+                        Rect rectCrossSection = region[region.Count - 1].Item1;
+                        DrawAnnotation.DrawMeasurements(imgExport[rectCrossSection], frame, new System.Windows.Size(Constants.CrossSectionSize, Constants.CrossSectionSize), Measurements);
+
+                        if (imgLongitude != null && region.Count > 1)
+                        {
+                            Rect rectLongitude = region[0].Item1;
+                            DrawAnnotation.DrawMeasurement(imgExport[rectLongitude], new System.Windows.Size(Constants.LongitudeWidth, Constants.LongitudeHeight), LMeasurement);
+                        }
+                    }
+
                     Cv2.CvtColor(imgExport, imgExport, ColorConversionCodes.RGB2BGR);
                     RayExportWrapper.DicomAddImage(imgExport.Cols, imgExport.Rows, imgExport.Data);
                 }
