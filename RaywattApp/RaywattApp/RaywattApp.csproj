@@ -70,6 +70,11 @@
     <Folder Include="OCT\Imaging\" />
     <Folder Include="OCT\3D\" />
     <Folder Include="OCT\Core\" />
+    <Folder Include="res\button\check\" />
+    <Folder Include="res\button\radio\" />
+    <Folder Include="res\icon\" />
+    <Folder Include="res\indicator\" />
+    <Folder Include="res\button\toggle\" />
   </ItemGroup>
 
   <ItemGroup>
