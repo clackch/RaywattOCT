@@ -239,7 +239,7 @@ namespace RaywattApp.ViewModels.Dialog
                         Measurement? LMeasurement = null;
                         if (FileExport.Measurements != Constants.ExportMeasurementHideAll)
                         {
-                            AnnotationConverter.ConvertFromJsonString(PatientCases[i].Measurements, out Measurements, out LMeasurement);
+                            AnnotationConverter.ConvertFromJsonString(patientCase.Measurements, out Measurements, out LMeasurement);
                         }
                 
                         await Task.Run(() =>
@@ -334,7 +334,7 @@ namespace RaywattApp.ViewModels.Dialog
                 }
 
                 List<Mat> convertedImages = new List<Mat>();
-                Mat? imgLongitude = await CommonUtil.ConvertImage(PatientCases[i].ImageFullPath, exportIndices, convertedImages, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
+                Mat? imgLongitude = await CommonUtil.ConvertImage(patientCase.ImageFullPath, exportIndices, convertedImages, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
 
                 imgLongitude = FileExport.LModeView ? imgLongitude : null;
                 Mat? imgLumeProfile = FileExport.LumenProfileView ? lumenProfile : null;
@@ -367,12 +367,12 @@ namespace RaywattApp.ViewModels.Dialog
 
                 if (format == Constants.ExportPullbackAVI)
                 {
-                    string fileName = CreateStandardUniqueName(PatientCases[i]);
+                    string fileName = CreateStandardUniqueName(patientCase);
                     await CommonUtil.SaveVideo(convertedImages, SaveFolder, fileName, format, 10, prog => Progress += prog, progressSave, progText => ProgressText = progText);
                 }
                 else if (format == Constants.ExportPullbackTIFF)
                 {
-                    string fileName = CreateStandardUniqueName(PatientCases[i]);
+                    string fileName = CreateStandardUniqueName(patientCase);
                     await CommonUtil.SaveMultipleFrames(convertedImages, SaveFolder, fileName, format, prog => Progress += prog, progressSave, progText => ProgressText = progText);
                 }
                 else
