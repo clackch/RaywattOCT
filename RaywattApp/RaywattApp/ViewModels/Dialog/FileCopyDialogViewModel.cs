@@ -377,10 +377,11 @@ namespace RaywattApp.ViewModels.Dialog
                 }
                 else
                 {
+                    double progressIncrease = progressSave / convertedImages.Count;
                     for (int frame = 0; frame < convertedImages.Count; frame++)
                     {
                         string fileName = CreateStandardUniqueName(patientCase) + string.Format("-{0:0000}", exportIndices[frame]);
-                        CommonUtil.SaveStillFrame(convertedImages[frame], SaveFolder, fileName, format);
+                        await CommonUtil.SaveStillFrame(convertedImages[frame], SaveFolder, fileName, format, prog => Progress += prog, progressIncrease, progText => ProgressText = progText);
                         Progress += (progressSave / convertedImages.Count);
                     }
                 }

@@ -104,6 +104,7 @@ namespace RaywattApp.Common.Bases
         public const string ExportStatusConvertImage = "Convert Image(s)";
         public const string ExportStatusSaveVideo = "Save Video";
         public const string ExportStatusSaveMultipleFrames = "Save Multiple Frames";
+        public const string ExportStatusSaveMultipleFiles = "Save Multiple Image Files";
         public const string ExportStatusSaveFile = "Save File";
         public const string ExportStatusCompleted = "Completed";
 

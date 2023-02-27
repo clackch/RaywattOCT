@@ -303,10 +303,9 @@ namespace RaywattApp.Common.Util
                         {
                             Mat img = CommonUtil.ByteMemoryToCvMat(data, width, height, channels);
                             convertedImages.Add(img);
-
-                            progressCallback(progress / totalNum);
                         }
                     }
+                    progressCallback(progress / numOfFrames);
                     progressTextCallback(Constants.ExportStatusConvertImage);
                 });
             }
@@ -391,11 +390,17 @@ namespace RaywattApp.Common.Util
             return imgExport;
         }
 
-        public static void SaveStillFrame(Mat image, string rootPath, string fileName, string format) 
+        public static async Task SaveStillFrame(Mat image, string rootPath, string fileName, string format, Action<double> progressCallback, double progressIncrease, Action<string> progressTextCallback)
         {
             string filePath = rootPath + "\\" + fileName + "." + format.ToLower();
             ImageEncodingParam encodingParam = new ImageEncodingParam(ImwriteFlags.JpegQuality, 100);
-            Cv2.ImWrite(filePath, image, encodingParam);
+
+            await Task.Run(() =>
+            {
+                Cv2.ImWrite(filePath, image, encodingParam);
+                progressCallback(progressIncrease);
+                progressTextCallback(Constants.ExportStatusSaveMultipleFiles);
+            });
         }
 
         public static async Task SaveVideo(List<Mat> images, string rootPath, string fileName, string format, double fps, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
