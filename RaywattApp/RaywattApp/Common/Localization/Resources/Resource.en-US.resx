@@ -177,6 +177,9 @@
   <data name="Browse for Folder" xml:space="preserve">
     <value>Browse for Folder</value>
   </data>
+  <data name="Byte" xml:space="preserve">
+    <value>Byte</value>
+  </data>
   <data name="bytes" xml:space="preserve">
     <value>bytes</value>
   </data>
@@ -316,6 +319,9 @@ Do you want to import data?</value>
   <data name="Free" xml:space="preserve">
     <value>Free</value>
   </data>
+  <data name="GB" xml:space="preserve">
+    <value>GB</value>
+  </data>
   <data name="Gender" xml:space="preserve">
     <value>Gender</value>
   </data>
@@ -349,6 +355,9 @@ Do you want to import data?</value>
   <data name="Intravascular OCT - For Presentation" xml:space="preserve">
     <value>Intravascular OCT - For Presentation</value>
   </data>
+  <data name="KB" xml:space="preserve">
+    <value>KB</value>
+  </data>
   <data name="ko-KR" xml:space="preserve">
     <value>Korean</value>
   </data>
@@ -378,6 +387,9 @@ Do you want to import data?</value>
   </data>
   <data name="Mark as Archived" xml:space="preserve">
     <value>Mark as Archived</value>
+  </data>
+  <data name="MB" xml:space="preserve">
+    <value>MB</value>
   </data>
   <data name="Measurements" xml:space="preserve">
     <value>Measurements</value>

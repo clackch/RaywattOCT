@@ -117,14 +117,14 @@
                         <Label Content="{Binding [Available Space], Source={StaticResource L10N}}"/>
                         <StackPanel Orientation="Horizontal">
                             <Label Content="{Binding AvailableSpace}"/>
-                            <Label Content="GB"/>
+                            <Label Content="{Binding [GB], Source={StaticResource L10N}}"/>
                         </StackPanel>
                     </StackPanel>
                     <StackPanel Grid.Column="1">
                         <Label Content="{Binding [Approximate Import Size], Source={StaticResource L10N}}"/>
                         <StackPanel Orientation="Horizontal">
                             <Label Content="{Binding ApproximateImportSize}"/>
-                            <Label Content="GB"/>
+                            <Label Content="{Binding [GB], Source={StaticResource L10N}}"/>
                         </StackPanel>
                     </StackPanel>
                 </Grid>

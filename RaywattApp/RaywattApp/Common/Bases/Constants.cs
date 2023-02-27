@@ -129,6 +129,9 @@ namespace RaywattApp.Common.Bases
         //Export Anonymous
         public const string ExportAnonymous = "Anonymous";
 
+        //Export Size (Standard)
+        public const double ExportJpegCompression = 0.1f;
+
         //Export Image
         public const int ExportAnnotationFontSize = 12;
         
