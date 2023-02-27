@@ -46,7 +46,13 @@ namespace RaywattApp.Models
         private string externalDrivePath;
 
         [ObservableProperty]
+        private string mediaType;
+
+        [ObservableProperty]
         private string volumeLabel;
+
+        [ObservableProperty]
+        private bool isDiskFormat;
 
         [ObservableProperty]
         private bool ejectWhenComplete;

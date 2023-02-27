@@ -82,7 +82,7 @@ namespace RaywattApp.ViewModels
             codeDefinition.GetCode();
 
             //시작 페이지 설정
-            NavigationSource = "Views/PatientListPage.xaml";
+            NavigationSource = Constants.PatientListPage;
 
             //네비게이션 메시지 수신 등록
             WeakReferenceMessenger.Default.Register<NavigationMessage>(this, OnNavigationMessage);

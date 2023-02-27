@@ -68,9 +68,9 @@ namespace RaywattApp.ViewModels.File
         {
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["ids"] = FileExport.SelectedItem;
-            IList<PatientCase> patientCases = _sqlManager.SelectPatientCaseByList(sqlParameters);
+            PatientCases = _sqlManager.SelectPatientCaseByList(sqlParameters);
 
-            foreach (PatientCase patientCase in patientCases)
+            foreach (PatientCase patientCase in PatientCases)
             {
                 ExportSize += CommonUtil.GetFileSize(patientCase.ImageFullPath);
             }
@@ -78,34 +78,17 @@ namespace RaywattApp.ViewModels.File
             ExportSize = CommonUtil.ByteToGB(ExportSize);
         }
 
-        protected override void Export()
-        {
-            _log.Debug("Export");
 
-            //TO-DO : CD 일 경우, Path 부분 추가
-            if (String.IsNullOrEmpty(FileExport.ExternalDrivePath))
-            {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["title"] = _l10n["Information"];
-                parameter["message"] = _l10n["Path is required"];
-                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
-            }
-            else
-            {
-                FileSave();
-            }
-        }
-
-        private void FileSave()
+        protected override void FileSave()
         {
             string exportPrefix = Constants.FileNamePrefix + DateTime.Now.ToString("yyyyMMddHHmmss");
-            string dbFilePath = FileExport.ExternalDrivePath + "\\" + exportPrefix + "." + Constants.FileExtension;
+            string dbFilePath = exportPrefix + "." + Constants.FileExtension;
             List<string> exportfiles = new List<string>();
 
             int cnt = 1;
             while (System.IO.File.Exists(dbFilePath))
             {
-                dbFilePath = FileExport.ExternalDrivePath + "\\" + exportPrefix + "(" + cnt + ")" + "." + Constants.FileExtension;
+                dbFilePath = exportPrefix + "(" + cnt + ")" + "." + Constants.FileExtension;
                 cnt++;
             }
 
@@ -115,10 +98,6 @@ namespace RaywattApp.ViewModels.File
             FileFormat fileFormat = new FileFormat();
             fileFormat.Size = 0;
             fileFormat.PatientList = _sqlManager.SelectPatientByList(sqlParameters);
-
-            sqlParameters.Clear();
-            sqlParameters["ids"] = FileExport.SelectedItem;
-            IList<PatientCase> patientCases = _sqlManager.SelectPatientCaseByList(sqlParameters);
 
             string alternateId = "";
             string originId = "";
@@ -144,7 +123,7 @@ namespace RaywattApp.ViewModels.File
                     patient.Birthdate = new DateTime(1900, 1, 1);
                 }
 
-                foreach (PatientCase patientCase in patientCases)
+                foreach (PatientCase patientCase in PatientCases)
                 {
                     if (originId == patientCase.PatientId)
                     {
@@ -154,6 +133,9 @@ namespace RaywattApp.ViewModels.File
 
                         if (FileExport.PatientInfoAnonymize)
                         {
+                            patientCase.ImageFullPath = patientCase.ImageFullPath;
+                            patientCase.IsAnonymize = true;
+
                             if (!String.IsNullOrEmpty(alternateId))
                             {
                                 patientCase.Id = alternateId + "_" + patientCase.Id.Split("_")[1];
@@ -175,7 +157,7 @@ namespace RaywattApp.ViewModels.File
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["title"] = _l10n["File Export"];
             parameter["fileExport"] = FileExport;
-            parameter["patientCases"] = patientCases;
+            parameter["patientCases"] = PatientCases;
             parameter["dbFilePath"] = dbFilePath;
             parameter["contents"] = JsonConvert.SerializeObject(fileFormat, Formatting.Indented);
             var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter);

@@ -84,6 +84,29 @@ namespace RaywattApp.Common.Bases
         public const string FileDiskCd = "C";
         public const string FileDiskExternal = "E";
 
+        //CD
+        public const string MediaTypeNoDisc = "No Disc";
+        public const string MediaTypeNotSupportDisc = "Not Support Disc";
+        public const string MediaTypeCDR = "CD-R";
+        public const string MediaTypeCDRW = "CD-RW";
+        public const string MediaTypeDVDDASHR = "DVD-R";
+        public const string MediaTypeDVDDASHRW = "DVD-RW";
+        public const string MediaTypeDVDPLUSR = "DVD+R";
+        public const string MediaTypeDVDPLUSRW = "DVD+RW";
+        public const string MediaTypeBDR = "Blu-ray Recordable";
+        public const string MediaTypeBDRE = "Blu-ray Recordable Erasable";
+
+        //CD Writing Status -  validating(0), formatting(1), initializing(2), calibrating(3), writing(4), finalizing(5), completed(6)
+        public static string[] CdWrtingStatus = {"Validating", "Formatting", "Initializing", "Calibrating", "Writing", "Finalizing", "Completed" };
+
+        //Export Status
+        public const string ExportStatusCopyFile = "Copy file(s)";
+        public const string ExportStatusConvertImage = "Convert Image(s)";
+        public const string ExportStatusSaveVideo = "Save Video";
+        public const string ExportStatusSaveMultipleFrames = "Save Multiple Frames";
+        public const string ExportStatusSaveFile = "Save File";
+        public const string ExportStatusCompleted = "Completed";
+
         //Export(Raw) File Option - Leave Unchanged, Remove when Complete
         public const string ExportOptionUnchanged = "U";
         public const string ExportOptionRemove = "R";
@@ -107,6 +130,9 @@ namespace RaywattApp.Common.Bases
 
         //Export Image
         public const int ExportAnnotationFontSize = 12;
+        
+        //Export DICOM Prefic
+        public const string ExportDicomPrefix = "IMG";
 
         //File Import/Export
         public const string FileImageExtension = "bin";
@@ -116,6 +142,12 @@ namespace RaywattApp.Common.Bases
         //View Mode - Live View, Stand By
         public const string ViewModeLiveView = "LiveView";
         public const string ViewModeStandBy = "StandBy";
+
+        //Pullback Type
+        public const string PullbackTypeLong = "LONG";
+        public const string PullbackTypeShort = "SHOR";
+        public const int PullbackLongFrameCnt = 1000;
+        public const int PullbackShortFrameCnt = 500;
 
         //Not Selected
         public const string NotSelected = "Not Selected";
@@ -150,7 +182,7 @@ namespace RaywattApp.Common.Bases
         public const string DataRootPath = SystemRootPath + "\\DataSave";
 
         //Temporary Folder (CD/DVD Write)
-        public const string TempFolderPath = SystemRootPath + "\\Temp";
+        public const string TempFolderPath = SystemRootPath + "\\Raywatt\\Temp";
 
         //Encrypt, Decrypt Public Key
         public const string PublicKey = "raywatt07_hwjckklls_298-87-01441";

@@ -211,6 +211,25 @@ ALTER TABLE IF EXISTS rv_schema.patient_case_preset
     OWNER to rv_user;
 	
 
+-- Table: rv_schema.dicom_property
+
+-- DROP TABLE IF EXISTS rv_schema.dicom_property;
+
+CREATE TABLE IF NOT EXISTS rv_schema.dicom_property
+(
+    tag character varying(8) COLLATE pg_catalog."default" NOT NULL,
+    tag_name character varying(200) COLLATE pg_catalog."default" NOT NULL,
+    value character varying(200) COLLATE pg_catalog."default",
+    CONSTRAINT dicom_property_pkey PRIMARY KEY (tag_name)
+        USING INDEX TABLESPACE rv_tablespace
+)
+
+TABLESPACE rv_tablespace;
+
+ALTER TABLE IF EXISTS rv_schema.dicom_property
+    OWNER to rv_user;
+
+
 -- FUNCTION: rv_schema.fn_code(character varying, character varying)
 
 -- DROP FUNCTION IF EXISTS rv_schema.fn_code(character varying, character varying);

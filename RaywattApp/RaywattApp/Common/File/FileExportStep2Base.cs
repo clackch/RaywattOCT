@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
+using RayCoreWrapper;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
@@ -11,6 +12,7 @@ using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Threading;
 
@@ -24,6 +26,9 @@ namespace RaywattApp.Common.File
 
         [ObservableProperty]
         protected FileExport _fileExport;
+
+        [ObservableProperty]
+        protected IList<PatientCase> _patientCases;
 
         [ObservableProperty]
         private double _exportSize;
@@ -98,6 +103,8 @@ namespace RaywattApp.Common.File
         [ObservableProperty]
         private string _cdDiskType;
 
+        private bool cdInit = false;
+
         [ObservableProperty]
         private double _cdTotalSize;
 
@@ -118,6 +125,10 @@ namespace RaywattApp.Common.File
 
             ExternalDriveComboBox = new Dictionary<string, string>();
             ExternalDriveList = new Dictionary<string, object>();
+
+            RayExportWrapper.CDBurnError cDBurnError;
+            cDBurnError = RayExportWrapper.initDevice();
+            _log.Debug("initDevice : " + cDBurnError);
 
             isExternalDriveInit = true;
             timer.Interval = TimeSpan.FromMilliseconds(1000);
@@ -162,16 +173,29 @@ namespace RaywattApp.Common.File
 
         protected void GetDrive()
         {
-            DriveInfo[] allDrives = DriveInfo.GetDrives();
-
             if (FileExport.DiskType.Equals(Constants.FileDiskCd))
             {
-                foreach (DriveInfo d in allDrives)
+                RayExportWrapper.CDBurnError cDBurnError;
+                cDBurnError = RayExportWrapper.checkDiskOnDrive();
+                _log.Debug("checkDiskOnDrive : " + cDBurnError);
+
+                if (cDBurnError == RayExportWrapper.CDBurnError.OK)
                 {
-                    if (d.DriveType == DriveType.CDRom)
+                    if (!cdInit)
                     {
-                        //TO-DO : CD 기능 구현 필요
+                        GetCdInfo();
+
+                        cdInit = true;
                     }
+                }
+                else
+                {
+                    FileExport.MediaType = Constants.MediaTypeNoDisc;
+                    FileExport.IsDiskFormat = false;
+                    CdTotalSize = 0;
+                    CdAvailableFreeSpace = 0;
+
+                    cdInit = false;
                 }
             }
             else
@@ -182,6 +206,8 @@ namespace RaywattApp.Common.File
                 bool isFirstExternalDrive = true;
 
                 ExternalDriveList.Clear();
+
+                DriveInfo[] allDrives = DriveInfo.GetDrives();
 
                 foreach (DriveInfo d in allDrives)
                 {
@@ -238,6 +264,75 @@ namespace RaywattApp.Common.File
             }            
         }
 
+        private async void GetCdInfo()
+        {
+            await Task.Run(() =>
+            {
+                RayExportWrapper.CDBurnError cDBurnError;
+                cDBurnError = RayExportWrapper.initDevice();
+                _log.Debug("initDevice : " + cDBurnError);
+
+                RayExportWrapper.MediaType mediaType;
+                mediaType = RayExportWrapper.getDiskType();
+                _log.Debug("getDiskType : " + mediaType);
+                SetMediaType(mediaType);
+
+                CdTotalSize = CommonUtil.ByteToGB(RayExportWrapper.checkTotalBlock());
+                CdAvailableFreeSpace = CommonUtil.ByteToGB(RayExportWrapper.checkFreeBlock());
+            });
+        }
+
+        private void SetMediaType(RayExportWrapper.MediaType mediaType)
+        {
+            FileExport.VolumeLabel = DateTime.Now.ToString("yyyy.MM.dd");
+
+            switch (mediaType)
+            {
+                case RayExportWrapper.MediaType.NotSupportDisc:
+                    FileExport.MediaType = Constants.MediaTypeNotSupportDisc;
+                    FileExport.IsDiskFormat = false;
+                    FileExport.VolumeLabel = "";
+                    break;
+                case RayExportWrapper.MediaType.TYPE_CDR:
+                    FileExport.MediaType = Constants.MediaTypeCDR;
+                    FileExport.IsDiskFormat = false;
+                    break;
+                case RayExportWrapper.MediaType.TYPE_CDRW:
+                    FileExport.MediaType = Constants.MediaTypeCDRW;
+                    FileExport.IsDiskFormat = true;
+                    break;
+                case RayExportWrapper.MediaType.TYPE_DVDDASHR:
+                    FileExport.MediaType = Constants.MediaTypeDVDDASHR;
+                    FileExport.IsDiskFormat = false;
+                    break;
+                case RayExportWrapper.MediaType.TYPE_DVDDASHRW:
+                    FileExport.MediaType = Constants.MediaTypeDVDDASHRW;
+                    FileExport.IsDiskFormat = true;
+                    break;
+                case RayExportWrapper.MediaType.TYPE_DVDPLUSR:
+                    FileExport.MediaType = Constants.MediaTypeDVDPLUSR;
+                    FileExport.IsDiskFormat = false;
+                    break;
+                case RayExportWrapper.MediaType.TYPE_DVDPLUSRW:
+                    FileExport.MediaType = Constants.MediaTypeDVDPLUSRW;
+                    FileExport.IsDiskFormat = true;
+                    break;
+                case RayExportWrapper.MediaType.TYPE_BDR:
+                    FileExport.MediaType = Constants.MediaTypeBDR;
+                    FileExport.IsDiskFormat = false;
+                    break;
+                case RayExportWrapper.MediaType.TYPE_BDRE:
+                    FileExport.MediaType = Constants.MediaTypeBDRE;
+                    FileExport.IsDiskFormat = true;
+                    break;
+                default:
+                    FileExport.MediaType = Constants.MediaTypeNotSupportDisc;
+                    FileExport.IsDiskFormat = false;
+                    FileExport.VolumeLabel = "";
+                    break;
+            }
+        }
+
         private void ExternalDrivePath()
         {
             _log.Debug("ExternalDrivePath");
@@ -262,5 +357,73 @@ namespace RaywattApp.Common.File
                 }
             }
         }
+
+        protected override void Export()
+        {
+            _log.Debug("Export");
+
+            if (FileExport.DiskType.Equals(Constants.FileDiskExternal))
+            {
+                if (String.IsNullOrEmpty(FileExport.ExternalDrivePath))
+                {
+                    Dictionary<string, object> parameter = new Dictionary<string, object>();
+                    parameter["title"] = _l10n["Information"];
+                    parameter["message"] = _l10n["Path is required"];
+                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+                }
+                else if (ExternalDriveAvailableFreeSpace <= ExportSize)
+                {
+                    Dictionary<string, object> parameter = new Dictionary<string, object>();
+                    parameter["title"] = _l10n["Information"];
+                    parameter["message"] = _l10n["There is not enough space on the storage device to store."];
+                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+                }
+                else
+                {
+                    if (timer.IsEnabled)
+                        timer.Stop();
+                    FileSave();
+                }
+            }
+            else if (FileExport.DiskType.Equals(Constants.FileDiskCd))
+            {
+                if (FileExport.MediaType == Constants.MediaTypeNoDisc)
+                {
+                    Dictionary<string, object> parameter = new Dictionary<string, object>();
+                    parameter["title"] = _l10n["Information"];
+                    parameter["message"] = _l10n["CD/DVD is required"];
+                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+                }
+                else if (FileExport.MediaType == Constants.MediaTypeNotSupportDisc)
+                {
+                    Dictionary<string, object> parameter = new Dictionary<string, object>();
+                    parameter["title"] = _l10n["Information"];
+                    parameter["message"] = _l10n["Media Type is not supported"];
+                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+                }
+                else if (FileExport.VolumeLabel == null || String.IsNullOrEmpty(FileExport.VolumeLabel.Trim()))
+                {
+                    Dictionary<string, object> parameter = new Dictionary<string, object>();
+                    parameter["title"] = _l10n["Information"];
+                    parameter["message"] = _l10n["Volume Label is required"];
+                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+                }
+                else if (CdTotalSize <= ExportSize)
+                {
+                    Dictionary<string, object> parameter = new Dictionary<string, object>();
+                    parameter["title"] = _l10n["Information"];
+                    parameter["message"] = _l10n["There is not enough space on the storage device to store."];
+                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+                }
+                else
+                {
+                    if (timer.IsEnabled)
+                        timer.Stop();
+                    FileSave();
+                }
+            }
+        }
+
+        protected virtual void FileSave() { }
     }
 }

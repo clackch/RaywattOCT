@@ -39,9 +39,25 @@
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="0">
-                <Label Content="{Binding [Measurements], Source={StaticResource L10N}}"/>
+                <Label Content="{Binding [View], Source={StaticResource L10N}}"/>
             </StackPanel>
             <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Margin="10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <CheckBox Grid.Column="0" IsChecked="{Binding FileExport.AngioView}" Content="{Binding [Angio Co-Registration], Source={StaticResource L10N}}"  VerticalAlignment="Center" Margin="50,0,0,0"/>
+                    <CheckBox Grid.Column="1" IsChecked="{Binding FileExport.LumenProfileView}" Content="{Binding [Lumen Profile], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
+                    <CheckBox Grid.Column="2" IsChecked="{Binding FileExport.LModeView}" Content="{Binding [L-Mode], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
+                </Grid>
+            </Border>
+
+            <StackPanel Grid.Row="2">
+                <Label Content="{Binding [Measurements], Source={StaticResource L10N}}"/>
+            </StackPanel>
+            <Border Grid.Row="3" BorderBrush="Black" BorderThickness="1" Margin="10">
                 <Grid >
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
@@ -60,28 +76,12 @@
                 </Grid>
             </Border>
 
-            <StackPanel Grid.Row="2" Grid.ColumnSpan="2">
+            <StackPanel Grid.Row="4" Grid.ColumnSpan="2">
                 <Label Content="{Binding [Additional], Source={StaticResource L10N}}"/>
             </StackPanel>
-            <Border Grid.Row="3" Grid.ColumnSpan="2" BorderBrush="Black" BorderThickness="1" Margin="10">
+            <Border Grid.Row="5" Grid.ColumnSpan="2" BorderBrush="Black" BorderThickness="1" Margin="10">
                 <Grid >
                     <CheckBox IsChecked="{Binding FileExport.PatientInfoAnonymize}" Content="{Binding [Patient Information Anonymize], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
-                </Grid>
-            </Border>
-
-            <StackPanel Grid.Row="4">
-                <Label Content="{Binding [Advanced View], Source={StaticResource L10N}}"/>
-            </StackPanel>
-            <Border Grid.Row="5" BorderBrush="Black" BorderThickness="1" Margin="10">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <CheckBox Grid.Column="0" IsChecked="{Binding FileExport.AngioView}" Content="{Binding [Angio Co-Registration], Source={StaticResource L10N}}"  VerticalAlignment="Center" Margin="50,0,0,0"/>
-                    <CheckBox Grid.Column="1" IsChecked="{Binding FileExport.LumenProfileView}" Content="{Binding [Lumen Profile], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
-                    <CheckBox Grid.Column="2" IsChecked="{Binding FileExport.LModeView}" Content="{Binding [L-Mode], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
                 </Grid>
             </Border>
 
@@ -126,11 +126,11 @@
                             </Grid.RowDefinitions>
                             <StackPanel Grid.Row="0">
                                 <Label Content="{Binding [Disk Type], Source={StaticResource L10N}}"/>
-                                <Label>no disc</Label>
+                                <Label Content="{Binding FileExport.MediaType}"/>
                             </StackPanel>
                             <StackPanel Grid.Row="1" >
                                 <Label Content="{Binding [Volume Label], Source={StaticResource L10N}}"/>
-                                <Label>TEST</Label>
+                                <TextBox Text="{Binding FileExport.VolumeLabel}" Width="350" Margin="5,5,5,5" HorizontalAlignment="Left"/>
                             </StackPanel>
                         </Grid>
                     </Border>

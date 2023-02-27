@@ -17,6 +17,7 @@
         </StackPanel>
 
         <StackPanel Grid.Row="1" VerticalAlignment="Center">
+            <Label Content="{Binding ProgressText}" Height="30"/>
             <ProgressBar Value="{Binding Progress}" Height="20"/>
         </StackPanel>
         
