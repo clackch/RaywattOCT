@@ -5,6 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
       xmlns:local="clr-namespace:RaywattApp.Views"
+      xmlns:const="clr-namespace:RaywattApp.Common.Bases"
       xmlns:behaviors="clr-namespace:RaywattApp.Common.Behaviors"
       xmlns:System="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d" 
@@ -13,9 +14,6 @@
     <Page.Resources>
         <System:Boolean x:Key="TrueValue">True</System:Boolean>
         <System:Boolean x:Key="FalseValue">False</System:Boolean>
-        <System:Double x:Key="CrossSectionSize">640</System:Double>
-        <System:Double x:Key="CrossSectionCenter">320</System:Double>
-        <System:Double x:Key="LongitudeHeight">180</System:Double>
     </Page.Resources>
     
     <Grid>
@@ -33,7 +31,7 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel Height="10"/>
                 <Grid x:Name="crossSection">
-                    <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill">
+                    <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Stretch="Fill">
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="Loaded">
                                 <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}">
@@ -59,7 +57,7 @@
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
                     </Image>
-                    <StackPanel Background="Transparent" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}"  Visibility="{Binding IndicatorCrossSection.IsVisible}">
+                    <StackPanel Background="Transparent" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}"  Visibility="{Binding IndicatorCrossSection.IsVisible}">
                         <i:Interaction.Behaviors>
                             <behaviors:MouseBehavior MouseX="{Binding IndicatorCrossSection.X, Mode=OneWayToSource}" MouseY="{Binding IndicatorCrossSection.Y, Mode=OneWayToSource}" />
                         </i:Interaction.Behaviors>
@@ -76,11 +74,11 @@
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
 
-                        <Canvas Height="{StaticResource CrossSectionSize}" Width="{StaticResource CrossSectionSize}">
-                            <Image Source="/res/bar/indicator.png" Height="{StaticResource CrossSectionSize}" Width="{StaticResource CrossSectionSize}" Cursor="Hand" Opacity="0.25">
+                        <Canvas Height="{x:Static const:Constants.CrossSectionSize}" Width="{x:Static const:Constants.CrossSectionSize}">
+                            <Image Source="/res/bar/indicator.png" Height="{x:Static const:Constants.CrossSectionSize}" Width="{x:Static const:Constants.CrossSectionSize}" Cursor="Hand" Opacity="0.25">
                                 <Image.RenderTransform>
                                     <!-- Image Indicator bar width(about 7) => CenterY 3.5 -->
-                                    <RotateTransform CenterX="{StaticResource CrossSectionCenter}" CenterY="3.5" Angle="{Binding Degree}"/>
+                                    <RotateTransform CenterX="{x:Static const:Constants.CrossSectionCenter}" CenterY="3.5" Angle="{Binding Degree}"/>
                                 </Image.RenderTransform>
 
                                 <i:Interaction.Triggers>
@@ -100,7 +98,7 @@
                 </Grid>
                 <StackPanel Height="10"/>
                 <Grid x:Name="longitude" Margin="5,0,5,0">
-                    <Image x:Name="longitudeImage" Source="{Binding LongitudeImage}" Height="{StaticResource LongitudeHeight}" Stretch="Fill">
+                    <Image x:Name="longitudeImage" Source="{Binding LongitudeImage}" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" Stretch="Fill">
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="Loaded">
                                 <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}">
@@ -126,7 +124,7 @@
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
                     </Image>
-                    <StackPanel Background="Transparent" Height="{StaticResource LongitudeHeight}" Visibility="{Binding IndicatorLongitude.IsVisible}">
+                    <StackPanel Background="Transparent" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" Visibility="{Binding IndicatorLongitude.IsVisible}">
                         <!-- L-Mode Mouse Pointer X -->
                         <i:Interaction.Behaviors>
                             <behaviors:MouseBehavior MouseX="{Binding PointLongitudeX, Mode=OneWayToSource}"/>
@@ -148,7 +146,7 @@
                         </i:Interaction.Triggers>
 
                         <Canvas>
-                            <Image x:Name="longitudeIndicatorImage" Source="/res/bar/indicator.png" Cursor="Hand" Stretch="None" Width="{StaticResource LongitudeHeight}" Canvas.Left="{Binding IndicatorLongitude.X}" Canvas.Top="2" Opacity="0.25">
+                            <Image x:Name="longitudeIndicatorImage" Source="/res/bar/indicator.png" Cursor="Hand" Stretch="None" Width="{x:Static const:Constants.LongitudeHeight}" Canvas.Left="{Binding IndicatorLongitude.X}" Canvas.Top="2" Opacity="0.25">
                                 <!-- 가로 Image 90도 회전 -->
                                 <Image.RenderTransform>
                                     <RotateTransform CenterX="0" CenterY="0" Angle="90"/>

@@ -13,8 +13,6 @@
         <System:Boolean x:Key="TrueValue">True</System:Boolean>
         <System:Boolean x:Key="FalseValue">False</System:Boolean>
         <System:Double x:Key="CrossSectionSize">720</System:Double>
-        <System:Double x:Key="CrossSectionCenter">360</System:Double>
-        <System:Double x:Key="LongitudeHeight">180</System:Double>
     </Page.Resources>
 
     <Grid>

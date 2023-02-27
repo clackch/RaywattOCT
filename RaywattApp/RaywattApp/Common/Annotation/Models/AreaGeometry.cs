@@ -39,8 +39,8 @@ namespace RaywattApp.Common.Annotation.Models
         private double meanDiameter;
         public double MeanDiameter { get { return meanDiameter; } set { meanDiameter = value; OnPropertyChanged(nameof(MeanDiameter)); } }
 
-        private bool validDiameter;
-        public bool ValidDiameter { get { return validDiameter; } set { validDiameter = value; } }
+        private bool valid = false;
+        public bool Valid { get { return valid; } set { valid = value; } }
 
         private Path path;
         public Path Path { get { return path; } set { path = value; } }

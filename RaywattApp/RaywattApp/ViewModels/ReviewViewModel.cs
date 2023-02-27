@@ -17,6 +17,7 @@ using Newtonsoft.Json;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
+using RaywattApp.Common.Annotation.Util;
 
 namespace RaywattApp.ViewModels
 {
@@ -414,32 +415,17 @@ namespace RaywattApp.ViewModels
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
             IList<StringModel> jsonAnnotation = _sqlManager.SelectPatientCaseAnnotation(sqlParameters);
-            if(jsonAnnotation == null || jsonAnnotation.Count != 1 || String.IsNullOrEmpty(jsonAnnotation[0].ReturnString))
+
+            if (jsonAnnotation != null && jsonAnnotation.Count == 1)
             {
-                Measurements = new List<Measurement>();
+                List<Measurement>? measurements = new List<Measurement>();
+                Measurement lModeMeasurement = new Measurement();
+                AnnotationConverter.ConvertFromJsonString(jsonAnnotation[0].ReturnString, out measurements, out lModeMeasurement);
+
+                Measurements = measurements;
+                LModeLengthGeometries = lModeMeasurement.LengthGeometries;
+                LModeTextGeometries = lModeMeasurement.TextGeometries;
             }
-            else
-            {
-                Measurements = JsonConvert.DeserializeObject<List<Measurement>>(jsonAnnotation[0].ReturnString);
-
-                foreach (var measurement in Measurements)
-                {
-                    //Longitude Measurement
-                    if (measurement.FrameNumber == -1)
-                    {
-                        LModeLengthGeometries = measurement.LengthGeometries;
-                        LModeTextGeometries = measurement.TextGeometries;
-                        Measurements.Remove(measurement);
-                        break;
-                    }
-                }
-            }
-
-            if(LModeLengthGeometries == null)
-                LModeLengthGeometries = new ObservableCollection<LengthGeometry>();
-
-            if (LModeTextGeometries == null)
-                LModeTextGeometries = new List<TextGeometry>();
 
             if (jsonAnnotation == null || jsonAnnotation.Count != 1 || String.IsNullOrEmpty(jsonAnnotation[0].ReturnString2))
             {

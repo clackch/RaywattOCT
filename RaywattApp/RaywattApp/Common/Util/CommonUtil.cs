@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Runtime.InteropServices;
 using static RaywattOCT.RayCoreWrapper;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using Size = OpenCvSharp.Size;
 
 namespace RaywattApp.Common.Util
 {
@@ -53,6 +56,35 @@ namespace RaywattApp.Common.Util
         {
             MatType type = ch == 3 ? MatType.CV_8UC3 : MatType.CV_8UC1;
             return new Mat(height, width, type, data).Clone();
+        }
+
+        public static void RenderVisualToMat(DrawingVisual visual, Mat image)
+        {
+            RenderTargetBitmap bitmap = new RenderTargetBitmap((int)image.Cols, (int)image.Height, 96, 96, PixelFormats.Pbgra32);
+            bitmap.Render(visual);
+
+            PngBitmapEncoder encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bitmap));
+
+            var bitmapImage = new BitmapImage();
+            using (var stream = new System.IO.MemoryStream())
+            {
+                encoder.Save(stream);
+                stream.Seek(0, System.IO.SeekOrigin.Begin);
+
+                bitmapImage.BeginInit();
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.StreamSource = stream;
+                bitmapImage.EndInit();
+            }
+            Mat imgDraw = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToMat(bitmapImage);
+            Mat imgDrawGray = new Mat();
+            Mat imgBW = new Mat();
+            Cv2.CvtColor(imgDraw, imgDrawGray, ColorConversionCodes.RGBA2GRAY);
+            Cv2.Threshold(imgDrawGray, imgBW, 1, 255, ThresholdTypes.Binary);
+
+            Cv2.CvtColor(imgDraw, imgDraw, ColorConversionCodes.RGBA2RGB);
+            Cv2.CopyTo(imgDraw, image, imgBW);
         }
 
         public static string GetRandomText(int length)
@@ -291,11 +323,12 @@ namespace RaywattApp.Common.Util
             return imgLongitude;
         }
 
-        public static Mat MakeImageForExport(Mat crossSection, Mat longitude, Mat lumenProfile) {
+        public static Mat MakeImageForExport(Mat crossSection, Mat? longitude, Mat? lumenProfile, Mat? angio, out List<Tuple<Rect, Size2f>> region) {
             Mat imgExport = new Mat();
             imgExport.Create(Constants.ApplicationHeight, Constants.ApplicationWidth, MatType.CV_8UC3);
             imgExport.SetTo(0x00);
 
+            region = new List<Tuple<Rect, Size2f>>();
             if (crossSection == null) return imgExport;
 
             Size szRemain = new Size(imgExport.Width, imgExport.Height);
@@ -304,27 +337,56 @@ namespace RaywattApp.Common.Util
             if (longitude != null)
             {
                 Mat imgLongitude = new Mat();
+                Rect rectLongitude = new Rect(0, szRemain.Height - szLongitude.Height, szLongitude.Width, szLongitude.Height);
+                Size2f scaleLongitude = new Size2f(1, 1);
                 Cv2.Resize(longitude, imgLongitude, szLongitude);
-                Cv2.CopyTo(imgLongitude, imgExport[new Rect(0, szRemain.Height - szLongitude.Height, szLongitude.Width, szLongitude.Height)]);
+                Cv2.CopyTo(imgLongitude, imgExport[rectLongitude]);
                 szRemain.Height -= szLongitude.Height;
 
+                Tuple<Rect, Size2f> regionLongitude = new Tuple<Rect, Size2f>(rectLongitude, scaleLongitude);
+                region.Add(regionLongitude);
+
                 // draw longitude info
+                Rect rectLongitudeInfo = new Rect(0, szRemain.Height - szLongitude.Height, szLongitudeInfo.Width, szLongitudeInfo.Height);
+                Size2f scaleLongitudeInfo = new Size2f(1, 1);
                 szRemain.Height -= szLongitudeInfo.Height;
+
+                Tuple<Rect, Size2f> regionLongitudeInfo = new Tuple<Rect, Size2f>(rectLongitudeInfo, scaleLongitudeInfo);
+                region.Add(regionLongitudeInfo);
             }
             if (lumenProfile != null)
             {
                 Mat imgLumenProfile = new Mat();
+                Rect rectLumenProfile = new Rect(0, szRemain.Height - szLongitude.Height, szLongitude.Width, szLongitude.Height);
+                Size2f scaleLumenProfile = new Size2f(1, 1);
                 Cv2.Resize(lumenProfile, imgLumenProfile, szLongitude);
-                Cv2.CopyTo(imgLumenProfile, imgExport[new Rect(0, szRemain.Height - szLongitude.Height, szLongitude.Width, szLongitude.Height)]);
-
+                Cv2.CopyTo(imgLumenProfile, imgExport[rectLumenProfile]);
                 szRemain.Height -= szLongitude.Height;
+
+                Tuple<Rect, Size2f> regionLumenProfile = new Tuple<Rect, Size2f>(rectLumenProfile, scaleLumenProfile);
+                region.Add(regionLumenProfile);
             }
 
-            int diameter = Math.Min(szRemain.Width, szRemain.Height);
+            int diameterCrossSection = Math.Min(szRemain.Width, szRemain.Height);
 
+            if (angio != null)
+            {
+                Rect rectAngio = new Rect(0, 0, szRemain.Width - diameterCrossSection, szRemain.Height);
+                Mat imgAngio = new Mat();
+                Cv2.Resize(angio, imgAngio, rectAngio.Size);
+                Cv2.CopyTo(imgAngio, imgExport[rectAngio]);
+                szRemain.Width -= rectAngio.Width;
+            }
+
+            int offsetCrossSection = imgExport.Width - szRemain.Width;
+            Rect rectCrossSection = new Rect(offsetCrossSection + (szRemain.Width - diameterCrossSection) / 2, 0, diameterCrossSection, diameterCrossSection);
+            Size2f scaleCrossSection = new Size2f(1, 1);
             Mat imgCrossSection = new Mat();
-            Cv2.Resize(crossSection, imgCrossSection, new Size(diameter, diameter));
-            Cv2.CopyTo(imgCrossSection, imgExport[new Rect((szRemain.Width - diameter) / 2, 0, diameter, diameter)]);
+            Cv2.Resize(crossSection, imgCrossSection, rectCrossSection.Size);
+            Cv2.CopyTo(imgCrossSection, imgExport[rectCrossSection]);
+
+            Tuple<Rect, Size2f> regionCrossSection = new Tuple<Rect, Size2f>(rectCrossSection, scaleCrossSection);
+            region.Add(regionCrossSection);
 
             return imgExport;
         }
@@ -332,8 +394,8 @@ namespace RaywattApp.Common.Util
         public static void SaveStillFrame(Mat image, string rootPath, string fileName, string format) 
         {
             string filePath = rootPath + "\\" + fileName + "." + format.ToLower();
-
-            Cv2.ImWrite(filePath, image);
+            ImageEncodingParam encodingParam = new ImageEncodingParam(ImwriteFlags.JpegQuality, 100);
+            Cv2.ImWrite(filePath, image, encodingParam);
         }
 
         public static async Task SaveVideo(List<Mat> images, string rootPath, string fileName, string format, double fps, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
@@ -437,6 +499,80 @@ namespace RaywattApp.Common.Util
             return Math.Round(bytes / div / div / div, 3);
         }
 
+        public static PathGeometry? GetLine(System.Windows.Point firstPoint, System.Windows.Point secondPoint)
+        {
+            var myPathFigure = new PathFigure { StartPoint = firstPoint };
+            var myPathSegmentCollection = new PathSegmentCollection();
+            var myLineSegment = new LineSegment { Point = secondPoint };
+            myPathSegmentCollection.Add(myLineSegment);
+            myPathFigure.Segments = myPathSegmentCollection;
+            var myPathFigureCollection = new PathFigureCollection { myPathFigure };
+            var myPathGeometry = new PathGeometry { Figures = myPathFigureCollection };
+
+            return myPathGeometry;
+        }
+
+        public static PathGeometry? GetBezierCurve(List<System.Windows.Point> pointList, bool isClosed)
+        {
+            if (pointList == null)
+                return null;
+
+            var points = new List<Rulyotano.Math.Geometry.Point>();
+
+            foreach (var point in pointList)
+            {
+                points.Add(new Rulyotano.Math.Geometry.Point(point.X, point.Y));
+            }
+
+            if (points.Count <= 1)
+                return null;
+
+            var myPathFigure = new PathFigure { StartPoint = ConvertToVisualPoint(points.FirstOrDefault()) };
+            var myPathSegmentCollection = new PathSegmentCollection();
+            var bezierSegments = Rulyotano.Math.Interpolation.Bezier.BezierInterpolation.PointsToBezierCurves(points, isClosed);
+
+            if (bezierSegments == null || bezierSegments.Count < 1)
+            {
+                //Add a line segment <this is generic for more than one line>
+                foreach (var point in points.GetRange(1, points.Count - 1))
+                {
+                    var myLineSegment = new LineSegment { Point = ConvertToVisualPoint(point) };
+                    myPathSegmentCollection.Add(myLineSegment);
+                }
+            }
+            else
+            {
+                foreach (var bezierCurveSegment in bezierSegments)
+                {
+                    var segment = new BezierSegment
+                    {
+                        Point1 = ConvertToVisualPoint(bezierCurveSegment.FirstControlPoint),
+                        Point2 = ConvertToVisualPoint(bezierCurveSegment.SecondControlPoint),
+                        Point3 = ConvertToVisualPoint(bezierCurveSegment.EndPoint)
+                    };
+                    myPathSegmentCollection.Add(segment);
+                }
+            }
+
+            myPathFigure.Segments = myPathSegmentCollection;
+            var myPathFigureCollection = new PathFigureCollection { myPathFigure };
+            var myPathGeometry = new PathGeometry { Figures = myPathFigureCollection };
+
+            return myPathGeometry;
+        }
+
+        public static System.Windows.Point GetScaledPoint(System.Windows.Point point, double xScale, double yScale)
+        {
+            System.Windows.Point ptScaled = new System.Windows.Point();
+            ptScaled.X = point.X * xScale;
+            ptScaled.Y = point.Y * yScale;
+
+            return ptScaled;
+        }
+        private static System.Windows.Point ConvertToVisualPoint(Rulyotano.Math.Geometry.Point p)
+        {
+            return new System.Windows.Point(p.X, p.Y);
+        }
         public static async void CheckFileSaveDone(string filePath, long totalFileSize, Action<double> progressCallback, double progressStart, double progress, Action<string> progressTextCallback)
         {
             long curFileSize = 0;

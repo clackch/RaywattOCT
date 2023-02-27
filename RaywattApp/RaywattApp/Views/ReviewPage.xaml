@@ -16,11 +16,8 @@
     <Page.Resources>
         <System:Boolean x:Key="TrueValue">True</System:Boolean>
         <System:Boolean x:Key="FalseValue">False</System:Boolean>
-        <System:Double x:Key="CrossSectionSize">640</System:Double>
-        <System:Double x:Key="CrossSectionCenter">320</System:Double>
         <System:Double x:Key="CrossSectionSmallSize">350</System:Double>
         <System:Double x:Key="CrossSectionSmallCenter">175</System:Double>
-        <System:Double x:Key="LongitudeHeight">180</System:Double>
         <System:Double x:Key="AngioSize">640</System:Double>
     </Page.Resources>
 
@@ -69,7 +66,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Cross Section -->
-                <Grid Grid.Column="2" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                <Grid Grid.Column="2" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                     <!-- Cross Seciton Image -->
                     <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}">
                         <i:Interaction.Triggers>
@@ -116,10 +113,10 @@
                         </i:Interaction.Triggers>
 
                         <Canvas>
-                            <Image Source="/res/bar/indicator.png" Height="{StaticResource CrossSectionSize}" Width="{StaticResource CrossSectionSize}" Cursor="Hand" Opacity="0.25">
+                            <Image Source="/res/bar/indicator.png" Height="{x:Static const:Constants.CrossSectionSize}" Width="{x:Static const:Constants.CrossSectionSize}" Cursor="Hand" Opacity="0.25">
                                 <Image.RenderTransform>
                                     <!-- Image Indicator bar width(about 7) => CenterY 3.5 -->
-                                    <RotateTransform CenterX="{StaticResource CrossSectionCenter}" CenterY="3.5" Angle="{Binding Degree}"/>
+                                    <RotateTransform CenterX="{x:Static const:Constants.CrossSectionCenter}" CenterY="3.5" Angle="{Binding Degree}"/>
                                 </Image.RenderTransform>
 
                                 <i:Interaction.Triggers>
@@ -280,7 +277,7 @@
                 </Grid>
 
                 <!-- Right Menu  -->
-                <Grid Grid.Column="4" Width="{Binding RightSideBarExpand}" Height="{StaticResource CrossSectionSize}">
+                <Grid Grid.Column="4" Width="{Binding RightSideBarExpand}" Height="{x:Static const:Constants.CrossSectionSize}">
                     <!-- Value Info -->
                     <Grid HorizontalAlignment="Right" Width="{Binding RightSideBarExpand}" Visibility="{Binding ExpandRightMenu, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid.RowDefinitions>
@@ -491,12 +488,12 @@
                             </i:Interaction.Triggers>
 
                             <!-- Lumen Profile -->
-                            <Image x:Name="lumenProfile" Height="{StaticResource LongitudeHeight}" Stretch="Fill" Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Image x:Name="lumenProfile" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" Stretch="Fill" Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityConverter}}">
                             </Image>
                             <!-- L-Mode -->
-                            <Image x:Name="lMode" Source="{Binding LongitudeImage}" Height="{StaticResource LongitudeHeight}" Stretch="Fill" Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                            <Image x:Name="lMode" Source="{Binding LongitudeImage}" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" Stretch="Fill" Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                             </Image>
-                            <StackPanel Background="Transparent" Height="{StaticResource LongitudeHeight}" Visibility="{Binding IndicatorLongitude.IsVisible}">
+                            <StackPanel Background="Transparent" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" Visibility="{Binding IndicatorLongitude.IsVisible}">
                                 <!-- L-Mode Mouse Pointer X -->
                                 <i:Interaction.Behaviors>
                                     <behaviors:MouseBehavior MouseX="{Binding PointLongitudeX, Mode=OneWayToSource}"/>
@@ -518,7 +515,7 @@
                                 </i:Interaction.Triggers>
 
                                 <Canvas>
-                                    <Image x:Name="longitudeIndicatorImage" Source="/res/bar/indicator.png" Cursor="Hand" Stretch="None" Width="{StaticResource LongitudeHeight}" Canvas.Left="{Binding IndicatorLongitude.X}" Canvas.Top="2" Opacity="0.25">
+                                    <Image x:Name="longitudeIndicatorImage" Source="/res/bar/indicator.png" Cursor="Hand" Stretch="None" Width="{x:Static const:Constants.LongitudeHeight}" Canvas.Left="{Binding IndicatorLongitude.X}" Canvas.Top="2" Opacity="0.25">
                                         <!-- 가로 Image 90도 회전 -->
                                         <Image.RenderTransform>
                                             <RotateTransform CenterX="0" CenterY="0" Angle="90"/>

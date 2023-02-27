@@ -1,7 +1,6 @@
 ﻿using RaywattApp.Common.Annotation.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -12,6 +11,8 @@ using Point = System.Windows.Point;
 using Path = System.Windows.Shapes.Path;
 using OpenCvSharp;
 using System.Collections.ObjectModel;
+using RaywattApp.Common.Util;
+using RaywattApp.Common.Annotation.Util;
 
 namespace RaywattApp.Common.Annotation
 {
@@ -332,12 +333,13 @@ namespace RaywattApp.Common.Annotation
             if (areaGeometry.IsClosed)
             {
                 UpdateGeometry(areaGeometry);
+                ValidateGeometry(areaGeometry);
 
-                if (IsValidGeometry(areaGeometry))
+                if (areaGeometry.Valid)
                 {
                     CalculateDiameter(areaGeometry);
 
-                    if (areaGeometry.ValidDiameter)
+                    if (areaGeometry.Valid)
                     {
                         DrawDiameter(areaGeometry.MinDiameter.point1, areaGeometry.MinDiameter.point2, areaGeometry.Group, constMinDiameter);
                         DrawDiameter(areaGeometry.MaxDiameter.point1, areaGeometry.MaxDiameter.point2, areaGeometry.Group, constMaxDiameter);
@@ -352,9 +354,12 @@ namespace RaywattApp.Common.Annotation
 
             if (pointList.Count > 1)
             {
+                PathGeometry pathGeometry = CommonUtil.GetBezierCurve(pointList, isClosed);
+                this.overlayPathGeometry = pathGeometry;
+
                 path = new Path();
                 path.Style = (Style)this.Resources["StylePath"];
-                path.Data = SetPathData(pointList, isClosed);
+                path.Data = pathGeometry;
                 path.Stroke = brushes[group % brushes.Length];
                 path.Name = constCurve + "_" + group;
 
@@ -438,12 +443,12 @@ namespace RaywattApp.Common.Annotation
             //Label 삭제
             DeleteLabel(constArea, areaGeometry.Group);
 
-            if (IsValidGeometry(areaGeometry))
+            if (areaGeometry.Valid)
             {
                 Label label = new Label();
                 label.Style = (Style)this.Resources["StyleLabel"];
                 label.Name = constArea + "_" + areaGeometry.Group;
-                label.Content = "[" + (areaGeometry.Group + 1) + "] " + (Math.Round(this.area, 3)).ToString();
+                label.Content = DrawAnnotation.GetLabelText(areaGeometry.Group, this.area);
 
                 Point centerdPoint = areaGeometry.CenterOfMass;
 
@@ -457,7 +462,7 @@ namespace RaywattApp.Common.Annotation
         {
             Path path = new Path();
             path.Style = (Style)this.Resources["StylePath"];
-            path.Data = GetLine(firstPoint, secondPoint);
+            path.Data = CommonUtil.GetLine(firstPoint, secondPoint);
             path.Stroke = brushes[group % brushes.Length];
             path.Name = prefix + "_" + group;
             if (prefix.Equals(constMinDiameter))
@@ -468,12 +473,12 @@ namespace RaywattApp.Common.Annotation
             this.canvas.Children.Add(path);
         }
 
-        private bool IsValidGeometry(AreaGeometry areaGeometry)
+        private void ValidateGeometry(AreaGeometry areaGeometry)
         {
-            if (!areaGeometry.Path.Data.FillContains(areaGeometry.CenterOfMass)) return false;
-            if (IsOverlayed(areaGeometry.Points, areaGeometry.Group)) return false;
+            areaGeometry.Valid = true;
 
-            return true;
+            if (!areaGeometry.Path.Data.FillContains(areaGeometry.CenterOfMass)) areaGeometry.Valid = false;
+            if (IsOverlayed(areaGeometry.Points, areaGeometry.Group)) areaGeometry.Valid = false;
         }
 
         private void DeleteAreaAll()
@@ -645,6 +650,9 @@ namespace RaywattApp.Common.Annotation
         {
             areaGeometry.CenterOfMass = CalculateMassCenter();
             areaGeometry.PointsAll = FindAllPoints();
+            areaGeometry.MaxDiameter = new DiameterInfo();
+            areaGeometry.MinDiameter = new DiameterInfo();
+            areaGeometry.MeanDiameter = 0.0f;
         }
 
         private void DrawContourToBackBuffer(Path path)
@@ -770,7 +778,7 @@ namespace RaywattApp.Common.Annotation
 
         private void CalculateDiameter(AreaGeometry areaGeometry)
         {
-            areaGeometry.ValidDiameter = false;
+            areaGeometry.Valid = false;
 
             OpenCvSharp.Point ptFrom = new OpenCvSharp.Point(areaGeometry.CenterOfMass.X - contourBounds.X, areaGeometry.CenterOfMass.Y - contourBounds.Y);
 
@@ -795,7 +803,7 @@ namespace RaywattApp.Common.Annotation
                 diameterInfo.point1 = new Point(point1.X, point1.Y);
                 diameterInfo.point2 = new Point(point2.X, point2.Y);
                 diameterInfo.diameter = diameter;
-                areaGeometry.ValidDiameter = true;
+                areaGeometry.Valid = true;
 
                 sumDiameter += diameterInfo.diameter;
                 numOfDiameter++;
@@ -812,63 +820,6 @@ namespace RaywattApp.Common.Annotation
             }
 
             areaGeometry.MeanDiameter = (numOfDiameter == 0) ? 0 : sumDiameter / numOfDiameter;
-        }
-
-        //---------------------------------------------------------------------------------------------------- Function (Bezier Curve)
-        private PathGeometry? SetPathData(List<Point> pointList, bool isClosed)
-        {
-            if (pointList == null)
-                return null;
-
-            var points = new List<Rulyotano.Math.Geometry.Point>();
-
-            foreach (var point in pointList)
-            {
-                points.Add(new Rulyotano.Math.Geometry.Point(point.X, point.Y));
-            }
-
-            if (points.Count <= 1)
-                return null;
-
-            var myPathFigure = new PathFigure { StartPoint = ConvertToVisualPoint(points.FirstOrDefault()) };
-            var myPathSegmentCollection = new PathSegmentCollection();
-            var bezierSegments = Rulyotano.Math.Interpolation.Bezier.BezierInterpolation.PointsToBezierCurves(points, isClosed);
-
-            if (bezierSegments == null || bezierSegments.Count < 1)
-            {
-                //Add a line segment <this is generic for more than one line>
-                foreach (var point in points.GetRange(1, points.Count - 1))
-                {
-                    var myLineSegment = new LineSegment { Point = ConvertToVisualPoint(point) };
-                    myPathSegmentCollection.Add(myLineSegment);
-                }
-            }
-            else
-            {
-                foreach (var bezierCurveSegment in bezierSegments)
-                {
-                    var segment = new BezierSegment
-                    {
-                        Point1 = ConvertToVisualPoint(bezierCurveSegment.FirstControlPoint),
-                        Point2 = ConvertToVisualPoint(bezierCurveSegment.SecondControlPoint),
-                        Point3 = ConvertToVisualPoint(bezierCurveSegment.EndPoint)
-                    };
-                    myPathSegmentCollection.Add(segment);
-                }
-            }
-
-            myPathFigure.Segments = myPathSegmentCollection;
-            var myPathFigureCollection = new PathFigureCollection { myPathFigure };
-            var myPathGeometry = new PathGeometry { Figures = myPathFigureCollection };
-
-            this.overlayPathGeometry = myPathGeometry;
-
-            return myPathGeometry;
-        }
-
-        private Point ConvertToVisualPoint(Rulyotano.Math.Geometry.Point p)
-        {
-            return new Point(p.X, p.Y);
         }
     }
 }

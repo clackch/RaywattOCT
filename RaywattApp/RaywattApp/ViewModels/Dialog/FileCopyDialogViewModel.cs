@@ -8,6 +8,9 @@ using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using System;
 using System.Collections.Generic;
+using RaywattApp.Common.Annotation.Models;
+using System.Collections.ObjectModel;
+using RaywattApp.Common.Annotation.Util;
 using System.Linq;
 using static RayCoreWrapper.RayExportWrapper;
 using System.Runtime.InteropServices;
@@ -169,7 +172,6 @@ namespace RaywattApp.ViewModels.Dialog
             {
                 fileCopyInfo = importfiles;
             }
-
             await CommonUtil.CopyFiles(fileCopyInfo, prog => Progress = prog, progressSize, progText => ProgressText = progText);
 
             if (!String.IsNullOrEmpty(DbFilePath) && !String.IsNullOrEmpty(Contents))
@@ -177,7 +179,13 @@ namespace RaywattApp.ViewModels.Dialog
         }
 
         private async Task FileSaveDicom()
-        {
+        {        
+            // test data
+            Mat lumenProfile = new Mat(100, 100, MatType.CV_8UC3);
+            Mat angio = new Mat(100, 100, MatType.CV_8UC3);
+            lumenProfile.SetTo(new Scalar(0xfe, 0xfe, 0xfe));
+            angio.SetTo(new Scalar(0xee, 0xee, 0xee));
+            
             //DICOMDIR Input Folder
             string dicomDirFolder = CommonUtil.CreateFolder(SaveFolder + "\\" + DateTime.Now.ToString("yyyyMMddHHmmss"));
             RayExportWrapper.DICOMDIRInputFolder(dicomDirFolder);
@@ -223,6 +231,17 @@ namespace RaywattApp.ViewModels.Dialog
                         List<Mat> convertedImages = new List<Mat>();
                         Mat imgLongitude = await CommonUtil.ConvertImage(patientCase.ImageFullPath, exportIndices, convertedImages, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
 
+                        imgLongitude = FileExport.LModeView ? imgLongitude : null;
+                        Mat? imgLumeProfile = FileExport.LumenProfileView ? lumenProfile : null;
+                        Mat? imgAngio = FileExport.AngioView ? angio : null;
+
+                        List<Measurement>? Measurements = null;
+                        Measurement? LMeasurement = null;
+                        if (FileExport.Measurements != Constants.ExportMeasurementHideAll)
+                        {
+                            AnnotationConverter.ConvertFromJsonString(PatientCases[i].Measurements, out Measurements, out LMeasurement);
+                        }
+                
                         await Task.Run(() =>
                         {
                             //Start
@@ -232,7 +251,20 @@ namespace RaywattApp.ViewModels.Dialog
                             RayExportWrapper.DicomImageStart(convertedImages.Count);
                             for (int frame = 0; frame < convertedImages.Count; frame++)
                             {
-                                Mat imgExport = CommonUtil.MakeImageForExport(convertedImages[frame], imgLongitude, imgLongitude);
+                                List<Tuple<Rect, Size2f>>? region = null;
+                                Mat imgExport = CommonUtil.MakeImageForExport(convertedImages[frame], imgLongitude, imgLumeProfile, imgAngio, out region);
+
+                                if (region != null && region.Count > 0)
+                                {
+                                    Rect rectCrossSection = region[region.Count - 1].Item1;
+                                    DrawAnnotation.DrawMeasurements(imgExport[rectCrossSection], frame, new System.Windows.Size(Constants.CrossSectionSize, Constants.CrossSectionSize), Measurements);
+
+                                    if (imgLongitude != null && region.Count > 1)
+                                    {
+                                        Rect rectLongitude = region[0].Item1;
+                                        DrawAnnotation.DrawMeasurement(imgExport[rectLongitude], new System.Windows.Size(Constants.LongitudeWidth, Constants.LongitudeHeight), LMeasurement);
+                                    }
+                                }
                                 Cv2.CvtColor(imgExport, imgExport, ColorConversionCodes.RGB2BGR);
                                 RayExportWrapper.DicomAddImage(imgExport.Cols, imgExport.Rows, imgExport.Data);
                             }
@@ -276,15 +308,21 @@ namespace RaywattApp.ViewModels.Dialog
 
         private async Task FileSaveStandard()
         {
+            // test data
+            Mat lumenProfile = new Mat(100, 100, MatType.CV_8UC3);
+            Mat angio = new Mat(100, 100, MatType.CV_8UC3);
+            lumenProfile.SetTo(new Scalar(0xfe, 0xfe, 0xfe));
+            angio.SetTo(new Scalar(0xee, 0xee, 0xee));
+
             string format = (FileExport.Material == Constants.ExportMaterialPullback) ? FileExport.Pullback : FileExport.StillFrame;
 
-            for (int i = 0; i < PatientCases.Count; i++)
+            foreach (PatientCase patientCase in PatientCases)
             {
                 double progressPerCase = 100.0 / PatientCases.Count / progressDivide;
                 double progressConvert = progressPerCase / 2;
                 double progressSave = progressPerCase / 2;
 
-                List<int> exportIndices = null;
+                List<int>? exportIndices = null;
                 if (FileExport.Material == Constants.ExportMaterialCurrent)
                 {
                     exportIndices = new List<int>();
@@ -296,10 +334,35 @@ namespace RaywattApp.ViewModels.Dialog
                 }
 
                 List<Mat> convertedImages = new List<Mat>();
-                Mat imgLongitude = await CommonUtil.ConvertImage(PatientCases[i].ImageFullPath, exportIndices, convertedImages, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
+                Mat? imgLongitude = await CommonUtil.ConvertImage(PatientCases[i].ImageFullPath, exportIndices, convertedImages, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
+
+                imgLongitude = FileExport.LModeView ? imgLongitude : null;
+                Mat? imgLumeProfile = FileExport.LumenProfileView ? lumenProfile : null;
+                Mat? imgAngio = FileExport.AngioView ? angio : null;
+
+                List<Measurement>? Measurements = null;
+                Measurement? LMeasurement = null;
+                if (FileExport.Measurements != Constants.ExportMeasurementHideAll)
+                {
+                    AnnotationConverter.ConvertFromJsonString(patientCase.Measurements, out Measurements, out LMeasurement);
+                }
+
                 for (int frame = 0; frame < convertedImages.Count; frame++)
                 {
-                    convertedImages[frame] = CommonUtil.MakeImageForExport(convertedImages[frame], imgLongitude, imgLongitude);
+                    List<Tuple<Rect, Size2f>>? region = null;
+                    convertedImages[frame] = CommonUtil.MakeImageForExport(convertedImages[frame], imgLongitude, imgLumeProfile, imgAngio, out region);
+
+                    if (region != null && region.Count > 0)
+                    {
+                        Rect rectCrossSection = region[region.Count - 1].Item1;
+                        DrawAnnotation.DrawMeasurements(convertedImages[frame][rectCrossSection], frame, new System.Windows.Size(Constants.CrossSectionSize, Constants.CrossSectionSize), Measurements);
+
+                        if (imgLongitude != null && region.Count > 1)
+                        {
+                            Rect rectLongitude = region[0].Item1;
+                            DrawAnnotation.DrawMeasurement(convertedImages[frame][rectLongitude], new System.Windows.Size(Constants.LongitudeWidth, Constants.LongitudeHeight), LMeasurement);
+                        }
+                    }
                 }
 
                 if (format == Constants.ExportPullbackAVI)
@@ -316,7 +379,7 @@ namespace RaywattApp.ViewModels.Dialog
                 {
                     for (int frame = 0; frame < convertedImages.Count; frame++)
                     {
-                        string fileName = CreateStandardUniqueName(PatientCases[i]) + string.Format("-{0:0000}", exportIndices[frame]);
+                        string fileName = CreateStandardUniqueName(patientCase) + string.Format("-{0:0000}", exportIndices[frame]);
                         CommonUtil.SaveStillFrame(convertedImages[frame], SaveFolder, fileName, format);
                         Progress += (progressSave / convertedImages.Count);
                     }
