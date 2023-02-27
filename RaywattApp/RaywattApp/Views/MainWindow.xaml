@@ -6,7 +6,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RaywattApp"
-        xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
         mc:Ignorable="d"
         Width="1280" Height="1024">
 
@@ -16,35 +15,22 @@
                 <behaviors:FrameBehavior Parameter="{Binding NavigationParameter, Mode=TwoWay}" Navigation="{Binding NavigationSource, Mode=TwoWay}" />
             </b:Interaction.Behaviors>
         </Frame>
-        <Border Background="#66000000" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}">
-            <Border HorizontalAlignment="Center" VerticalAlignment="Center" Background="White" CornerRadius="5">
-                <StackPanel Width="100" Margin="10">
-                    <ProgressBar Height="10" IsIndeterminate="True" />
-                    <TextBlock Margin="0,5,0,0" HorizontalAlignment="Center" Text="Busy..." />
-                </StackPanel>
-                <Border.Effect>
-                    <DropShadowEffect />
-                </Border.Effect>
-            </Border>
-        </Border>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <StackPanel Grid.Row="0" HorizontalAlignment="Left">
-                <Button Style="{StaticResource ButtonImportant}" Width="50" Command="{Binding HomeCommand}" Content="{Binding [Home], Source={StaticResource L10N}}"/>
-            </StackPanel>
+            <Grid Grid.Row="0" Width="1280" Height="60" Background="#232323">
+                <Button Style="{DynamicResource Home_Icon}" Command="{Binding HomeCommand}" HorizontalAlignment="Left"/>
+            </Grid>
             <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding SettingCommand}" Content="{Binding [Setting], Source={StaticResource L10N}}"/>
                 <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding ExitCommand}" Content="{Binding [Exit], Source={StaticResource L10N}}"/>
             </StackPanel>
-            <!--
-            <StackPanel Grid.Row="2" HorizontalAlignment="Left">
-                <Label Content="{Binding [Raywatt], Source={StaticResource L10N}}"/>
-            </StackPanel>
-            -->
+            <Grid Grid.Row="2" Width="1280" Height="40" Background="#0d0d0d">
+                <Image Style="{DynamicResource RaywattSmall_Icon}"/>
+            </Grid>
         </Grid>
     </Grid>
 </Window>
