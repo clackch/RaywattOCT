@@ -471,6 +471,24 @@ namespace RaywattApp.Common.Util
             }
         }
 
+        /*
+         * https://github.com/Raywatt/Sejong/issues/27
+         */
+        public static double GetVideoSize(int width, int height, double frameRate, double targetMbps, double frameNum)
+        {
+            int numOfChannel = 3;
+            int bytesPerRow = width * numOfChannel;
+            double totalBytes = bytesPerRow * height * frameNum;
+
+            double eachImageSize = totalBytes / frameNum;
+            double needBitrate = eachImageSize * frameRate * 8 / (1024 * 1024) /* MB */;
+            double compressionRatio = needBitrate / targetMbps;
+            double compressedImages = totalBytes / compressionRatio;
+            double fileSize = compressedImages;
+
+            return fileSize;
+        }
+
         public static async Task CopyStream(Stream from, Stream to, Action<long> progress)
         {
             try
@@ -502,6 +520,17 @@ namespace RaywattApp.Common.Util
         {
             double div = 1024.0;
             return Math.Round(bytes / div / div / div, 3);
+        }
+        public static double ByteToMB(double bytes)
+        {
+            double div = 1024.0;
+            return Math.Round(bytes / div / div, 3);
+        }
+
+        public static double ByteToKB(double bytes)
+        {
+            double div = 1024.0;
+            return Math.Round(bytes / div, 3);
         }
 
         public static PathGeometry? GetLine(System.Windows.Point firstPoint, System.Windows.Point secondPoint)
@@ -578,6 +607,7 @@ namespace RaywattApp.Common.Util
         {
             return new System.Windows.Point(p.X, p.Y);
         }
+
         public static async void CheckFileSaveDone(string filePath, long totalFileSize, Action<double> progressCallback, double progressStart, double progress, Action<string> progressTextCallback)
         {
             long curFileSize = 0;

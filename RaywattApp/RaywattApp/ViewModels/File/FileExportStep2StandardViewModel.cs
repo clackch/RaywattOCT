@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
@@ -9,6 +10,7 @@ using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
+using System.Windows.Input;
 using System.Windows.Navigation;
 
 namespace RaywattApp.ViewModels.File
@@ -29,6 +31,12 @@ namespace RaywattApp.ViewModels.File
 
         [ObservableProperty]
         private int _frameTickFrequency;
+
+        private ICommand _cmdFormatChanged;
+        public ICommand CmdFormatChanged
+        {
+            get { return _cmdFormatChanged ?? (this._cmdFormatChanged = new RelayCommand(GetExportSize)); }
+        }
 
         public FileExportStep2StandardViewModel(SqlManager sqlManager, IDialogService dialogService) : base(dialogService)
         {
@@ -80,9 +88,30 @@ namespace RaywattApp.ViewModels.File
             sqlParameters["ids"] = FileExport.SelectedItem;
             PatientCases = _sqlManager.SelectPatientCaseByList(sqlParameters);
 
-            //계산로직 필요 및 추출 항목에 따른 변경 기능 필요
+            const double frameSize = Constants.ApplicationWidth * Constants.ApplicationHeight * 3.0;
+            if (FileExport.Material == Constants.ExportMaterialPullback)
+            {
+                foreach (PatientCase patientCase in PatientCases)
+                {
+                    int numOfFrames = (patientCase.PullbackType == Constants.PullbackTypeLong) ? Constants.PullbackLongFrameCnt : Constants.PullbackShortFrameCnt;
+                    if (FileExport.Pullback == Constants.ExportPullbackAVI)
+                    {
+                        ExportSize = CommonUtil.GetVideoSize(Constants.ApplicationWidth, Constants.ApplicationHeight, 10, 12, numOfFrames);
+                    }
+                    else
+                    {
+                        ExportSize = frameSize * numOfFrames;
+                    }
+                }
+            }
+            else
+            {
+                int numOfFrames = (FileExport.Material == Constants.ExportMaterialBookmarked) ? FileExport.BookmarkedFrames.Count : 1;
+                double compression = (FileExport.StillFrame == Constants.ExportStillFrameJPEG) ? Constants.ExportJpegCompression : 1;
+                ExportSize = frameSize * numOfFrames * compression;
+            }
 
-            ExportSize = CommonUtil.ByteToGB(ExportSize);
+            UpdateFileSize(ExportSize);
         }
 
         protected override void FileSave()

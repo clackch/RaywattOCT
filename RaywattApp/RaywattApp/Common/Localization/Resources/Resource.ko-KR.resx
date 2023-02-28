@@ -177,6 +177,9 @@
   <data name="Browse for Folder" xml:space="preserve">
     <value>폴더 검색</value>
   </data>
+  <data name="Byte" xml:space="preserve">
+    <value>Byte</value>
+  </data>
   <data name="bytes" xml:space="preserve">
     <value>바이트</value>
   </data>
@@ -316,6 +319,9 @@
   <data name="Free" xml:space="preserve">
     <value>여유공간</value>
   </data>
+  <data name="GB" xml:space="preserve">
+    <value>GB</value>
+  </data>
   <data name="Gender" xml:space="preserve">
     <value>성별</value>
   </data>
@@ -349,6 +355,9 @@
   <data name="Intravascular OCT - For Presentation" xml:space="preserve">
     <value>인트라배스큘라 OCT</value>
   </data>
+  <data name="KB" xml:space="preserve">
+    <value>KB</value>
+  </data>
   <data name="ko-KR" xml:space="preserve">
     <value>한국어</value>
   </data>
@@ -378,6 +387,9 @@
   </data>
   <data name="Mark as Archived" xml:space="preserve">
     <value>아카이브 마크</value>
+  </data>
+  <data name="MB" xml:space="preserve">
+    <value>MB</value>
   </data>
   <data name="Measurements" xml:space="preserve">
     <value>측정</value>

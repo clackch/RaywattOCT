@@ -33,6 +33,9 @@ namespace RaywattApp.Common.File
         [ObservableProperty]
         private double _exportSize;
 
+        [ObservableProperty]
+        private string _exportSizeUnit;
+
         protected DispatcherTimer timer = new DispatcherTimer();
 
         private string _diskType; //CD/DVD, External Drive
@@ -422,6 +425,33 @@ namespace RaywattApp.Common.File
                     FileSave();
                 }
             }
+        }
+
+        protected void UpdateFileSize(double bytes)
+        {
+            double unit = 1024;
+
+            if (bytes >= unit * unit * unit)
+            {
+                ExportSize = CommonUtil.ByteToGB(bytes);
+                ExportSizeUnit = _l10n["GB"];
+            }
+            else if (bytes >= unit * unit)
+            {
+                ExportSize = CommonUtil.ByteToMB(bytes);
+                ExportSizeUnit = _l10n["MB"];
+            }
+            else if (bytes >= unit)
+            {
+                ExportSize = CommonUtil.ByteToKB(bytes);
+                ExportSizeUnit = _l10n["KB"];
+            }
+            else 
+            {
+                ExportSize = bytes;
+                ExportSizeUnit = _l10n["Byte"];
+            }
+
         }
 
         protected virtual void FileSave() { }

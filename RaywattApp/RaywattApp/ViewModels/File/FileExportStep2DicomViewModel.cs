@@ -99,7 +99,7 @@ namespace RaywattApp.ViewModels.File
                 ExportSize = frameSize;
             }
 
-            ExportSize = CommonUtil.ByteToGB(ExportSize);
+            UpdateFileSize(ExportSize);
         }
 
         protected override void FileSave()
