@@ -128,6 +128,7 @@
     <Style TargetType="Button" x:Key="Home_Icon">
         <Setter Property="Width" Value="42"/>
         <Setter Property="Height" Value="42"/>
+        <Setter Property="Margin" Value="14,9,0,9"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -146,6 +147,122 @@
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/home_disabled.svg}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Button" x:Key="Power_Icon">
+        <Setter Property="Width" Value="42"/>
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="Margin" Value="0,9,12,9"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Image x:Name="img" Source="{svgc:SvgImage Source=/res/icon/power.svg}"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsDefault" Value="True">
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/power.svg}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/power_hover.svg}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/power_active.svg}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/power_disabled.svg}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Button" x:Key="Setting_Icon">
+        <Setter Property="Width" Value="42"/>
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="Margin" Value="0,9,6,9"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Image x:Name="img" Source="{svgc:SvgImage Source=/res/icon/setting.svg}"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsDefault" Value="True">
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/setting.svg}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/setting_hover.svg}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/setting_active.svg}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/setting_disabled.svg}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Button" x:Key="Export_Icon">
+        <Setter Property="Width" Value="42"/>
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="Margin" Value="0,9,118,9"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Image x:Name="img" Source="{svgc:SvgImage Source=/res/icon/export.svg}"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsDefault" Value="True">
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/export.svg}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/export_hover.svg}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/export_active.svg}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/export_disabled.svg}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Button" x:Key="Import_Icon">
+        <Setter Property="Width" Value="42"/>
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="Margin" Value="0,9,6,9"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Image x:Name="img" Source="{svgc:SvgImage Source=/res/icon/import.svg}"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsDefault" Value="True">
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/import.svg}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/import_hover.svg}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/import_active.svg}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/import_disabled.svg}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
