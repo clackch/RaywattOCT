@@ -8,18 +8,22 @@
       xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
       mc:Ignorable="d" 
       d:DesignHeight="1024" d:DesignWidth="1280"
+      Background="#161616"
       Title="PatientListPage">
 
-    <Grid>
+    <Grid Width="1280">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Background="Gray" Orientation="Horizontal">
-            <Label Content="{Binding [Patient List], Source={StaticResource L10N}}"></Label>
-        </StackPanel>
+        <Grid Grid.Row="0" Height="60" Background="#232323">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Style="{StaticResource Import_Icon}" Command="{Binding ImportCommand}"/>
+                <Button Style="{StaticResource Export_Icon}" Command="{Binding ExportCommand}"/>
+            </StackPanel>
+        </Grid>
         
         <Grid Grid.Row="1">
             <Grid.RowDefinitions>
@@ -98,15 +102,11 @@
             </Grid>
         </Grid>
 
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="2" Height="40">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
-                <Button Style="{StaticResource ButtonBasic}" Command="{Binding ImportCommand}" Content="{Binding [Import], Source={StaticResource L10N}}"/>
-                <Button Style="{StaticResource ButtonBasic}" Command="{Binding ExportCommand}" Content="{Binding [Export], Source={StaticResource L10N}}"/>
-            </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Style="{StaticResource ButtonImportant}" Command="{Binding NewPatientCommand}" Content="{Binding [New Patient], Source={StaticResource L10N}}"/>
             </StackPanel>
