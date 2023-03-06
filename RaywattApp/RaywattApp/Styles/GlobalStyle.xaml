@@ -582,20 +582,20 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Grid>
-                        <Image x:Name="img" Source="{svgc:SvgImage Source=/res/icon/pagingPrev.svg}"/>
+                        <Image x:Name="img" Source="{svgc:SvgImage Source=/res/icon/pagingFirst.svg}"/>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsDefault" Value="True">
-                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/pagingPrev.svg}"/>
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/pagingFirst.svg}"/>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/pagingPrev_hover.svg}"/>
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/pagingFirst_hover.svg}"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/pagingPrev_active.svg}"/>
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/pagingFirst_active.svg}"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/pagingPrev_disabled.svg}"/>
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/pagingFirst_disabled.svg}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -669,20 +669,20 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Grid>
-                        <Image x:Name="img" Source="{svgc:SvgImage Source=/res/icon/pagingNext.svg}"/>
+                        <Image x:Name="img" Source="{svgc:SvgImage Source=/res/icon/pagingLast.svg}"/>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsDefault" Value="True">
-                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/pagingNext.svg}"/>
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/pagingLast.svg}"/>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/pagingNext_hover.svg}"/>
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/pagingLast_hover.svg}"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/pagingNext_active.svg}"/>
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/pagingLast_active.svg}"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/pagingNext_disabled.svg}"/>
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/pagingLast_disabled.svg}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

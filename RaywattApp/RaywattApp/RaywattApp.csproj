@@ -92,6 +92,30 @@
     <None Update="res\icon\import_hover.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="res\icon\pagingFirst.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="res\icon\pagingFirst_active.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="res\icon\pagingFirst_disabled.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="res\icon\pagingFirst_hover.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="res\icon\pagingLast.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="res\icon\pagingLast_active.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="res\icon\pagingLast_disabled.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="res\icon\pagingLast_hover.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="res\icon\pagingNext.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
