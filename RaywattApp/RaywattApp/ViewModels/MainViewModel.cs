@@ -35,13 +35,13 @@ namespace RaywattApp.ViewModels
         private bool _isBusy;
 
         [ObservableProperty]
+        private Visibility _isHome;
+
+        [ObservableProperty]
         private string _navigationSource;
 
         [ObservableProperty]
         private object _navigationParameter;
-
-        [ObservableProperty]
-        private Patient _patient;
 
         private List<string> reviewPages;
 
@@ -90,8 +90,6 @@ namespace RaywattApp.ViewModels
             //BusyMessage 수신 등록
             WeakReferenceMessenger.Default.Register<BusyMessage>(this, OnBusyMessage);
 
-            Patient = new Patient();
-
             RayRegisterCallback(Marshal.GetFunctionPointerForDelegate(CBFunction));
             RayStartSystem();
             RayConnectDevices();
@@ -105,6 +103,8 @@ namespace RaywattApp.ViewModels
             reviewPages.Add(Constants.ReviewFfrPage);
             reviewPages.Add(Constants.ReviewPresetPage);
             reviewPages.Add(Constants.ReviewAngioCoRegPage);
+
+            IsHome = Visibility.Hidden;
         }
 
         private void OnNavigationMessage(object recipient, NavigationMessage message)
@@ -128,6 +128,11 @@ namespace RaywattApp.ViewModels
                 if (!pageUri.Equals(Constants.ReviewPresetPage))
                     RayEndReview();
             }
+
+            if (NavigationSource == Constants.PatientListPage)
+                IsHome = Visibility.Hidden;
+            else
+                IsHome = Visibility.Visible;
         }
 
         private void OnBusyMessage(object recipient, BusyMessage message)

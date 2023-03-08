@@ -109,7 +109,7 @@ namespace RaywattApp.ViewModels
             strColumnOrder = ColumOrderField + " DESC";
 
             //Initial Order Field
-            HeaderLastCase = HeaderLastCase + " ▼";
+            HeaderLastCase = HeaderLastCase + " ▾";
             strColumnHeaderColumn = "LastCase";
 
             //Initialize Complete
@@ -194,11 +194,11 @@ namespace RaywattApp.ViewModels
             {
                 if (PrevStatus.ListSortDirection)
                 {
-                    piHeaderName.SetValue(this, piHeaderName.GetValue(this) + " ▲");
+                    piHeaderName.SetValue(this, piHeaderName.GetValue(this) + " ▴");
                 }
                 else
                 {
-                    piHeaderName.SetValue(this, piHeaderName.GetValue(this) + " ▼");
+                    piHeaderName.SetValue(this, piHeaderName.GetValue(this) + " ▾");
                 }
             }
         }

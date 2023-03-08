@@ -25,14 +25,14 @@
             </Grid.RowDefinitions>
             <Grid Grid.Row="0" Width="1280" Height="60">
                 <StackPanel HorizontalAlignment="Left">
-                    <Button Style="{DynamicResource Home_Icon}" Command="{Binding HomeCommand}"/>
+                    <Button Style="{DynamicResource Home_Icon}" Command="{Binding HomeCommand}" Visibility="{Binding IsHome}"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Style="{DynamicResource Setting_Icon}" Command="{Binding SettingCommand}"/>
                     <Button Style="{DynamicResource Power_Icon}" Command="{Binding ExitCommand}"/>
                 </StackPanel>
             </Grid>
-            <Grid Grid.Row="2" Width="1280" Height="40" Background="#0d0d0d">
+            <Grid Grid.Row="2" Width="1280" Height="40">
                 <Image Style="{DynamicResource RaywattSmall_Icon}"/>
             </Grid>
         </Grid>

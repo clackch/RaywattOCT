@@ -389,7 +389,7 @@ namespace RaywattApp.Common.Paging
                     strColumnOrder = ColumOrderField + " DESC";
                     if (piHeaderName != null)
                     {
-                        piHeaderName.SetValue(this, piHeaderName.GetValue(this) + " ▼");
+                        piHeaderName.SetValue(this, piHeaderName.GetValue(this) + " ▾");
                         strColumnHeaderColumn = headerColumn;
                     }
                 } 
@@ -399,7 +399,7 @@ namespace RaywattApp.Common.Paging
                     strColumnOrder = ColumOrderField + " ASC";
                     if (piHeaderName != null)
                     {
-                        piHeaderName.SetValue(this, piHeaderName.GetValue(this) + " ▲");
+                        piHeaderName.SetValue(this, piHeaderName.GetValue(this) + " ▴");
                         strColumnHeaderColumn = headerColumn;
                     }
                         
@@ -412,7 +412,7 @@ namespace RaywattApp.Common.Paging
                 strColumnOrder = ColumOrderField + " ASC";
                 if (piHeaderName != null)
                 {
-                    piHeaderName.SetValue(this, piHeaderName.GetValue(this) + " ▲");
+                    piHeaderName.SetValue(this, piHeaderName.GetValue(this) + " ▴");
                     strColumnHeaderColumn = headerColumn;
                 }
             }
