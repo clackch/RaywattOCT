@@ -55,7 +55,7 @@ namespace RaywattApp.ViewModels
         private ICommand _deleteCommand;
         public ICommand DeleteCommand
         {
-            get { return this._deleteCommand ?? (this._deleteCommand = new RelayCommand(Delete)); }
+            get { return this._deleteCommand ?? (this._deleteCommand = new RelayCommand<PatientCase>(Delete)); }
         }
 
         private ICommand _backCommand;
@@ -88,16 +88,10 @@ namespace RaywattApp.ViewModels
             get { return this._hidePatientCaseCommand ?? (this._hidePatientCaseCommand = new RelayCommand<PatientCaseByDate>(HidePatientCase)); }
         }
 
-        private ICommand _checkBoxToggleCommand;
-        public ICommand CheckBoxToggleCommand
+        private ICommand _clearSelectedRowCommand;
+        public ICommand ClearSelectedRowCommand
         {
-            get { return this._checkBoxToggleCommand ?? (this._checkBoxToggleCommand = new RelayCommand<CheckBox>(ToggleCheckBox)); }
-        }
-
-        private ICommand _checkBoxClickCommand;
-        public ICommand CheckBoxClickCommand
-        {
-            get { return this._checkBoxClickCommand ?? (this._checkBoxClickCommand = new RelayCommand(ChangeCheckBoxHeader)); }
+            get { return this._clearSelectedRowCommand ?? (this._clearSelectedRowCommand = new RelayCommand<DataGrid>(ClearSelectedRow)); }
         }
 
         private ICommand _goReviewCommand;
@@ -240,23 +234,6 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
         }
 
-        private void GetSelectedItem()
-        {
-            selectedItem.Clear();
-
-            foreach (PatientCaseByDate patientCaseByDate in PatientCaseByDateList)
-            {
-                if (patientCaseByDate.PatientCaseList == null)
-                    continue;
-
-                foreach (PatientCase patientCase in patientCaseByDate.PatientCaseList)
-                {
-                    if (patientCase.IsChecked)
-                        selectedItem.Add(patientCase.Id);
-                }
-            }
-        }
-
         private void Export()
         {
             _log.Debug("Export");
@@ -265,7 +242,6 @@ namespace RaywattApp.ViewModels
             parameter["fileType"] = Constants.FileTypeExport;
             FileExport fileExport = new FileExport();
             fileExport.PatientId = Patient.Id;
-            GetSelectedItem();
             fileExport.SelectedItem = selectedItem;
             parameter["fileExport"] = fileExport;
 
@@ -275,24 +251,15 @@ namespace RaywattApp.ViewModels
             SetPrevStatus();
         }
 
-        private void Delete()
+        private void Delete(PatientCase patientCase)
         {
             _log.Debug("Delete");
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             DialogResults? result = null;
 
-            GetSelectedItem();
-
-            if (PagingTotalCnt == 0 || selectedItem.Count == 0)
-            {
-                parameter.Clear();
-                parameter["title"] = _l10n["Information"];
-                parameter["message"] = _l10n["There are no items selected."];
-                result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
-
-                return;
-            }
+            selectedItem.Clear();
+            selectedItem.Add(patientCase.Id);
 
             GetDetailStatus();
 
@@ -356,8 +323,6 @@ namespace RaywattApp.ViewModels
                 patientCaseByDate.PatientCaseList = _sqlManager.SelectPatientCaseListByDate(sqlParameters);
 
             PatientCaseList = patientCaseByDate.PatientCaseList;
-
-            ChangeCheckBoxHeader();
         }
 
         private void HidePatientCase(PatientCaseByDate patientCaseByDate)
@@ -368,50 +333,9 @@ namespace RaywattApp.ViewModels
                 patientCaseByDate.IsSelected = false;
         }
 
-        private void ToggleCheckBox(CheckBox checkBox)
+        private void ClearSelectedRow(DataGrid dataGrid)
         {
-            if(checkBox.IsChecked == true)
-            {
-                foreach (PatientCase patientCase in PatientCaseList)
-                {
-                    patientCase.IsChecked = true;
-                }
-            }
-            else if(checkBox.IsChecked == false)
-            {
-                foreach (PatientCase patientCase in PatientCaseList)
-                {
-                    patientCase.IsChecked = false;
-                }
-            }
-        }
-
-        private void ChangeCheckBoxHeader()
-        {
-            bool isChecked = false;
-            bool isNotChecked = false;
-
-            foreach (PatientCase patientCase in PatientCaseList)
-            {
-                if (patientCase.IsChecked == true)
-                    isChecked = true;
-
-                if (patientCase.IsChecked == false)
-                    isNotChecked = true;
-            }
-
-            if (isChecked && isNotChecked)
-            {
-                CheckBoxAllSelected = null;
-            }
-            else if(isChecked && !isNotChecked)
-            {
-                CheckBoxAllSelected = true;
-            }
-            else if(!isChecked && isNotChecked)
-            {
-                CheckBoxAllSelected = false;
-            }
+            dataGrid.UnselectAll();
         }
 
         private void GoReview(PatientCase patientCase)
