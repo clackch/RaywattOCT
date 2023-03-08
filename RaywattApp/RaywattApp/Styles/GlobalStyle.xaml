@@ -374,9 +374,6 @@
                     <Grid>
                         <Border x:Name="Border" CornerRadius="8" Background="#232323" SnapsToDevicePixels="True"/>
                         <ScrollViewer x:Name="DG_ScrollViewer" Focusable="false">
-                            <ScrollViewer.OpacityMask>
-                                <VisualBrush Visual="{Binding ElementName=Border}"/>
-                            </ScrollViewer.OpacityMask>
                             <ScrollViewer.Template>
                                 <ControlTemplate TargetType="{x:Type ScrollViewer}">
                                     <Grid>
