@@ -143,7 +143,7 @@ namespace RaywattApp.ViewModels
         private ICommand _toggleMeasurementCommand;
         public ICommand ToggleMeasurementCommand
         {
-            get { return this._toggleMeasurementCommand ?? (this._toggleMeasurementCommand = new RelayCommand(ToggleMeasurement, CanToggleMeasurement)); }
+            get { return this._toggleMeasurementCommand ?? (this._toggleMeasurementCommand = new RelayCommand(ToggleMeasurement)); }
         }
 
         private ICommand _cmdPlayback;
@@ -387,11 +387,6 @@ namespace RaywattApp.ViewModels
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
             if (nRows == 0)
                 _log.Error("Update Error");
-        }
-
-        private bool CanToggleMeasurement()
-        {
-            return !ReviewStatus.IsAngioOn;
         }
 
         private void ToggleMeasurement()
