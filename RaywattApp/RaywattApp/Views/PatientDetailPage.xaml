@@ -8,6 +8,7 @@
       xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
       mc:Ignorable="d" 
       d:DesignHeight="1024" d:DesignWidth="1280"
+      Background="#161616"
       Title="PatientDetailPage">
 
     <Grid>
@@ -17,82 +18,105 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Background="Gray" Orientation="Horizontal">
-            <Label Content="{Binding [Patient Summary], Source={StaticResource L10N}}"></Label>
-        </StackPanel>
+        <Grid Grid.Row="0" Height="60" Background="#232323">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Style="{StaticResource ExportSelected_Icon}" Command="{Binding ExportCommand}"/>
+            </StackPanel>
+        </Grid>
 
         <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="60"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="60"/>
+            </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+                <RowDefinition Height="104" />
+                <RowDefinition Height="40" />
+                <RowDefinition Height="21" />
+                <RowDefinition Height="10" />
                 <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="Auto" />
+                <RowDefinition Height="28"/>
+                <RowDefinition Height="26"/>
+                <RowDefinition Height="56"/>
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0">
+            <Border Grid.Row="1" Grid.Column="1" CornerRadius="10" Background="#232323">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="227"/>
+                        <ColumnDefinition Width="1"/>
+                        <ColumnDefinition Width="112"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <StackPanel Orientation="Horizontal" Margin="32,28,0,0">
+                            <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="#ffffff" Content="{Binding [ID], Source={StaticResource L10N}}"/>
+                            <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="#ffffff" Content=" ["/>
+                            <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="#ffffff" Content="{Binding Patient.Id}"/>
+                            <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="#ffffff" Content="]"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="32,4,0,0">
+                            <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="#ffffff" Content="{Binding Patient.Firstname}"/>
+                            <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="#ffffff" Content=", "/>
+                            <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="#ffffff" Content="{Binding Patient.Lastname}"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1">
+                        <Image Style="{DynamicResource VerticalLine_Icon}" Margin="0,32,0,0"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="#8d8d8d" Margin="44,33,0,0" Content="{Binding [Birth], Source={StaticResource L10N}}"/>
+                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="#8d8d8d" Margin="44,6,0,0" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="3">
+                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="#ffffff" Margin="0,33,0,0" Content="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}"/>
+                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="#ffffff" Margin="0,6,0,0" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="4">
+                        <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding PatientEditCommand}" Content="{Binding [Edit Patient], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="3" Grid.Column="1">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="120"/>
+                    <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <Label Grid.Row="0" Content="{Binding [ID], Source={StaticResource L10N}}"/>
-                <Label Grid.Row="0" Grid.Column="1" Content="{Binding Patient.Id}"/>
-                <Label Grid.Row="1" Content="{Binding [Last Name], Source={StaticResource L10N}}"/>
-                <Label Grid.Row="1" Grid.Column="1" Content="{Binding Patient.Lastname}"/>
-                <Label Grid.Row="2" Content="{Binding [First Name], Source={StaticResource L10N}}"/>
-                <Label Grid.Row="2" Grid.Column="1" Content="{Binding Patient.Firstname}"/>
-                <Label Grid.Row="3" Content="{Binding [Birth Date], Source={StaticResource L10N}}"/>
-                <Label Grid.Row="3" Grid.Column="1" Content="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}"/>
-                <Label Grid.Row="4" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
-                <Label Grid.Row="4" Grid.Column="1" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
+                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="#b1b1b1" Grid.Column="0" Content="{Binding [Case List], Source={StaticResource L10N}}"></Label>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,2,0,0">
+                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="#b1b1b1" Content="{Binding [Total], Source={StaticResource L10N}}"></Label>
+                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="#b1b1b1" Content=" : "/>
+                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="#b1b1b1" Content="{Binding PagingTotalCnt}"></Label>
+                </StackPanel>
             </Grid>
-
-            <StackPanel Grid.Row="1" Orientation="Horizontal">
-                <Label Content="{Binding [Total], Source={StaticResource L10N}}"></Label>
-                <Label>:</Label>
-                <Label Content="{Binding PagingTotalCnt}"></Label>
-            </StackPanel>
 
             <!-- DataGrid에서 Binding을 사용하기 위한 설정(DataContext, Source 사용 필요) -->
             <FrameworkElement x:Name="ProxyElement" Visibility="Collapsed"/>
 
-            <DataGrid Grid.Row="2" Name="patientCaseByDate" ItemsSource="{Binding PatientCaseByDateList}" Style="{StaticResource DataGridBase}" HeadersVisibility="None" SelectionMode="Single" MinHeight="600">
+            <DataGrid Grid.Row="5" Grid.Column="1" Name="patientCaseByDate" ItemsSource="{Binding PatientCaseByDateList}" Style="{StaticResource DataGridExpand}" RowStyle="{DynamicResource DataGridRowExpand}" CellStyle="{StaticResource DataGridCellExpander}" MinHeight="700">
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Expander Header="{Binding Value}" IsExpanded="{Binding IsSelected}" Background="{Binding IsSelected, Converter={StaticResource ExpanderSelectedConverter}}">
+                                <Expander Header="{Binding Value}" IsExpanded="{Binding IsSelected}">
                                     <i:Interaction.Triggers>
                                         <i:EventTrigger EventName="Expanded">
                                             <i:InvokeCommandAction Command="{Binding DataContext.ShowPatientCaseCommand, Source={x:Reference ProxyElement}}" CommandParameter="{Binding ElementName=patientCaseByDate, Path=CurrentItem}"/>
                                         </i:EventTrigger>
                                         <i:EventTrigger EventName="Collapsed">
                                             <i:InvokeCommandAction Command="{Binding DataContext.HidePatientCaseCommand, Source={x:Reference ProxyElement}}" CommandParameter="{Binding ElementName=patientCaseByDate, Path=CurrentItem}"/>
+                                            <i:InvokeCommandAction Command="{Binding DataContext.ClearSelectedRowCommand, Source={x:Reference ProxyElement}}" CommandParameter="{Binding ElementName=patientCase}"/>
                                         </i:EventTrigger>
                                     </i:Interaction.Triggers>
-                                    <DataGrid Height="460" Name="patientCase" ItemsSource="{Binding PatientCaseList}" Style="{StaticResource DataGridBasic}">
+                                    <DataGrid Height="300" Name="patientCase" ItemsSource="{Binding PatientCaseList}" Style="{StaticResource DataGridExpandInner}" RowStyle="{DynamicResource DataGridRow}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderExpand}">
                                         <DataGrid.InputBindings>
                                             <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding DataContext.GoReviewCommand, Source={x:Reference ProxyElement}}" CommandParameter="{Binding ElementName=patientCase, Path=CurrentItem}"/>
                                         </DataGrid.InputBindings>
                                         <DataGrid.Columns>
-                                            <DataGridTemplateColumn>
-                                                <DataGridTemplateColumn.HeaderTemplate>
-                                                    <DataTemplate>
-                                                        <CheckBox Command="{Binding DataContext.CheckBoxToggleCommand, Source={x:Reference ProxyElement}}" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" IsChecked="{Binding DataContext.CheckBoxAllSelected, Source={x:Reference ProxyElement}}"/>
-                                                    </DataTemplate>
-                                                </DataGridTemplateColumn.HeaderTemplate>
-                                                <DataGridTemplateColumn.CellTemplate>
-                                                    <DataTemplate>
-                                                        <CheckBox Style="{StaticResource DataGridCheckBox}" IsChecked="{Binding IsChecked, UpdateSourceTrigger=PropertyChanged}" Command="{Binding DataContext.CheckBoxClickCommand, Source={x:Reference ProxyElement}}"/>
-                                                    </DataTemplate>
-                                                </DataGridTemplateColumn.CellTemplate>
-                                            </DataGridTemplateColumn>
                                             <DataGridTextColumn Width="*" Binding="{Binding Id}" Visibility="Collapsed"/>
                                             <DataGridTextColumn Width="*" Binding="{Binding PatientId}" Visibility="Collapsed"/>
                                             <DataGridTextColumn Width="*" Binding="{Binding PatientName}" Visibility="Collapsed"/>
@@ -102,6 +126,13 @@
                                             <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding PhysicianName}" Header="{Binding [Physician Name], Source={StaticResource L10N}}"/>
                                             <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding AccessionNumber}" Header="{Binding [Accession Number], Source={StaticResource L10N}}"/>
                                             <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Comment}" Header="{Binding [Comment], Source={StaticResource L10N}}"/>
+                                            <DataGridTemplateColumn CellStyle="{StaticResource DataGridCellDelete}">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <Button Style="{DynamicResource DataGridDelete}" Command="{Binding DataContext.DeleteCommand, Source={x:Reference ProxyElement}}" CommandParameter="{Binding ElementName=patientCase, Path=CurrentItem}"/>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </Expander>
@@ -111,41 +142,30 @@
                 </DataGrid.Columns>
             </DataGrid>
 
-            <Grid Grid.Row="3" Background="Black">
+            <Grid Grid.Row="7" Grid.Column="1">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="120"/>
+                    <ColumnDefinition Width="150"/>
                     <ColumnDefinition/>
-                    <ColumnDefinition Width="120"/>
+                    <ColumnDefinition Width="150"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" />
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" >
-                    <Button Style="{StaticResource ButtonBasic}" Width="20" Content="≪" Command="{Binding PagingFirstCommand}" IsEnabled="{Binding PagingEnableFirst}"/>
-                    <Button Style="{StaticResource ButtonBasic}" Width="20" Content="＜" Command="{Binding PagingPreviousCommand}" IsEnabled="{Binding PagingEnablePrevious}"/>
+                    <Button Style="{StaticResource PagingFirst_Icon}" Command="{Binding PagingFirstCommand}" IsEnabled="{Binding PagingEnableFirst}"/>
+                    <Button Style="{StaticResource PagingPrev_Icon}" Command="{Binding PagingPreviousCommand}" IsEnabled="{Binding PagingEnablePrevious}"/>
                     <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=0}" Width="20" Content="{Binding PagingNo1}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo1" Visibility="{Binding PagingVisibilityNo1, Converter={StaticResource PagingNoIndicatorConverter}}"/>
                     <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=1}" Width="20" Content="{Binding PagingNo2}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo2" Visibility="{Binding PagingVisibilityNo2, Converter={StaticResource PagingNoIndicatorConverter}}"/>
                     <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=2}" Width="20" Content="{Binding PagingNo3}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo3" Visibility="{Binding PagingVisibilityNo3, Converter={StaticResource PagingNoIndicatorConverter}}"/>
                     <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=3}" Width="20" Content="{Binding PagingNo4}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo4" Visibility="{Binding PagingVisibilityNo4, Converter={StaticResource PagingNoIndicatorConverter}}"/>
                     <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=4}" Width="20" Content="{Binding PagingNo5}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo5" Visibility="{Binding PagingVisibilityNo5, Converter={StaticResource PagingNoIndicatorConverter}}"/>
-                    <Button Style="{StaticResource ButtonBasic}" Width="20" Content="＞" Command="{Binding PagingNextCommand}" IsEnabled="{Binding PagingEnableNext}"/>
-                    <Button Style="{StaticResource ButtonBasic}" Width="20" Content="≫" Command="{Binding PagingLastCommand}" IsEnabled="{Binding PagingEnableLast}"/>
+                    <Button Style="{StaticResource PagingNext_Icon}" Command="{Binding PagingNextCommand}" IsEnabled="{Binding PagingEnableNext}"/>
+                    <Button Style="{StaticResource PagingLast_Icon}" Command="{Binding PagingLastCommand}" IsEnabled="{Binding PagingEnableLast}"/>
                 </StackPanel>
-                <StackPanel Grid.Column="2" />
             </Grid>
         </Grid>
 
-        <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
-                <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding PatientEditCommand}" Content="{Binding [Edit Patient], Source={StaticResource L10N}}"/>
-                <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding ExportCommand}" Content="{Binding [Export], Source={StaticResource L10N}}"/>
-                <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding DeleteCommand}" Content="{Binding [Delete], Source={StaticResource L10N}}"/>
-            </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}"/>
-                <Button Style="{StaticResource ButtonImportant}" Command="{Binding NewRecordingCommand}" Content="{Binding [New Recording], Source={StaticResource L10N}}"/>
+        <Grid Grid.Row="2" Height="40" Background="#0d0d0d">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Style="{StaticResource OutlinedBtnType1-Small-Short}" Margin="0,7,16,7" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}"/>
+                <Button Style="{StaticResource OutlinedBtnType1-Small-Wide}" Margin="0,7,16,7" Command="{Binding NewRecordingCommand}" Content="{Binding [New Recording], Source={StaticResource L10N}}"/>
             </StackPanel>
         </Grid>
     </Grid>
