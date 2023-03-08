@@ -4,14 +4,22 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RaywattApp.Common.Annotation"
+             xmlns:component="clr-namespace:RaywattApp.Views.Component"
              mc:Ignorable="d" 
-             d:DesignHeight="50" d:DesignWidth="250">
+             d:DesignHeight="68" d:DesignWidth="192">
     <Grid>
-        <StackPanel Orientation="Horizontal">
-            <Button Height="20" Content="Area" Click="area_Add"/>
-            <Button Height="20" Content="Length" Click="length_Add"/>
-            <Button Height="20" Content="Text" Click="text_Add"/>
-            <Button Height="20" Content="Delete All" Click="delete_All"/>
+        <StackPanel Orientation="Vertical">
+            <Label Content="{Binding [Measurement Tool], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="Medium" FontSize="12" Foreground="{DynamicResource SideMenuTitleBrush}"/>
+            <Grid Height="12"/>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
+                <component:IconButton Style="{DynamicResource IconButton}" Icon="area" Click="area_Add"/>
+                <Grid Width="6"/>
+                <component:IconButton Style="{DynamicResource IconButton}" Icon="length" Click="length_Add"/>
+                <Grid Width="6"/>
+                <component:IconButton Style="{DynamicResource IconButton}" Icon="text" Click="text_Add"/>
+                <Grid Width="6"/>
+                <component:IconButton Style="{DynamicResource IconButton}" Icon="deleteAll" Click="delete_All"/>
+            </StackPanel>
         </StackPanel>
     </Grid>
 </UserControl>

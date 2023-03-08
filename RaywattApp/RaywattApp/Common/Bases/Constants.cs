@@ -173,8 +173,8 @@ namespace RaywattApp.Common.Bases
         public const string PresetOther = "OTHE";
 
         //Background Color
-        public const int BackgroundColor = 0x0D0D0D;
-        public const int CardBackgroundColor = 0x161616;
+        public const int BackgroundColor = 0x161616;
+        public const int CardBackgroundColor = 0x252525;
 
         //Update Image Interval (msec)
         public const double UpdateImageInterval = 5;
@@ -203,10 +203,10 @@ namespace RaywattApp.Common.Bases
         public const string LeftUpMenu = "LeftUpMenu";
         public const string LeftDownMenu = "LeftDownMenu";
         public const string RightMenu = "RightMenu";
-        public const double SideBarCollapseSize = 50;
-        public const double LeftSideBarExpandSize = 250;
-        public const double RightSideBarExpandAngioSize = 350;
-        public const double RightSideBarExpandDefaultSize = 250;
+        public const double SideBarCollapseSize = 70;
+        public const double LeftSideBarExpandSize = 240;
+        public const double RightSideBarExpandAngioSize = 340;
+        public const double RightSideBarExpandDefaultSize = 240;
 
         //Review - 2D - Longitude
         public const string LongitudeProfile = "Profile";
