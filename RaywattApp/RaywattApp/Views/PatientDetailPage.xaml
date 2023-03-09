@@ -6,6 +6,7 @@
       xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
       xmlns:local="clr-namespace:RaywattApp.Views"
       xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
+      xmlns:component="clr-namespace:RaywattApp.Views.Component"
       mc:Ignorable="d" 
       d:DesignHeight="1024" d:DesignWidth="1280"
       Background="#161616"
@@ -19,8 +20,9 @@
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0" Height="60" Background="#232323">
+            <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="#b1b1b1" Margin="75,20,0,19" Content="{Binding [Patient Summary], Source={StaticResource L10N}}"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource ExportSelected_Icon}" Command="{Binding ExportCommand}"/>
+                <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="exportSimple" Margin="0,9,118,9" Command="{Binding ExportCommand}"/>
             </StackPanel>
         </Grid>
 
@@ -76,7 +78,7 @@
                         <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="#ffffff" Margin="0,6,0,0" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="4">
-                        <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding PatientEditCommand}" Content="{Binding [Edit Patient], Source={StaticResource L10N}}"/>
+                        <component:IconButton Style="{DynamicResource IconButton}" Icon="editSimple" HorizontalAlignment="Right" Margin="0,58,20,20" Command="{Binding PatientEditCommand}"/>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -149,22 +151,22 @@
                     <ColumnDefinition Width="150"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" >
-                    <Button Style="{StaticResource PagingFirst_Icon}" Command="{Binding PagingFirstCommand}" IsEnabled="{Binding PagingEnableFirst}"/>
-                    <Button Style="{StaticResource PagingPrev_Icon}" Command="{Binding PagingPreviousCommand}" IsEnabled="{Binding PagingEnablePrevious}"/>
-                    <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=0}" Width="20" Content="{Binding PagingNo1}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo1" Visibility="{Binding PagingVisibilityNo1, Converter={StaticResource PagingNoIndicatorConverter}}"/>
-                    <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=1}" Width="20" Content="{Binding PagingNo2}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo2" Visibility="{Binding PagingVisibilityNo2, Converter={StaticResource PagingNoIndicatorConverter}}"/>
-                    <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=2}" Width="20" Content="{Binding PagingNo3}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo3" Visibility="{Binding PagingVisibilityNo3, Converter={StaticResource PagingNoIndicatorConverter}}"/>
-                    <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=3}" Width="20" Content="{Binding PagingNo4}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo4" Visibility="{Binding PagingVisibilityNo4, Converter={StaticResource PagingNoIndicatorConverter}}"/>
-                    <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=4}" Width="20" Content="{Binding PagingNo5}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo5" Visibility="{Binding PagingVisibilityNo5, Converter={StaticResource PagingNoIndicatorConverter}}"/>
-                    <Button Style="{StaticResource PagingNext_Icon}" Command="{Binding PagingNextCommand}" IsEnabled="{Binding PagingEnableNext}"/>
-                    <Button Style="{StaticResource PagingLast_Icon}" Command="{Binding PagingLastCommand}" IsEnabled="{Binding PagingEnableLast}"/>
+                    <component:IconButton Style="{DynamicResource IconButton}" Icon="pagingFirst" Margin="0,0,6,0" Command="{Binding PagingFirstCommand}" IsEnabled="{Binding PagingEnableFirst}"/>
+                    <component:IconButton Style="{DynamicResource IconButton}" Icon="pagingPrev" Margin="0,0,16,0" Command="{Binding PagingPreviousCommand}" IsEnabled="{Binding PagingEnablePrevious}"/>
+                    <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=0}" Content="{Binding PagingNo1}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo1" Visibility="{Binding PagingVisibilityNo1, Converter={StaticResource PagingNoIndicatorConverter}}"/>
+                    <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=1}" Content="{Binding PagingNo2}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo2" Visibility="{Binding PagingVisibilityNo2, Converter={StaticResource PagingNoIndicatorConverter}}"/>
+                    <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=2}" Content="{Binding PagingNo3}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo3" Visibility="{Binding PagingVisibilityNo3, Converter={StaticResource PagingNoIndicatorConverter}}"/>
+                    <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=3}" Content="{Binding PagingNo4}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo4" Visibility="{Binding PagingVisibilityNo4, Converter={StaticResource PagingNoIndicatorConverter}}"/>
+                    <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=4}" Content="{Binding PagingNo5}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo5" Visibility="{Binding PagingVisibilityNo5, Converter={StaticResource PagingNoIndicatorConverter}}"/>
+                    <component:IconButton Style="{DynamicResource IconButton}" Icon="pagingNext" Margin="16,0,0,0" Command="{Binding PagingNextCommand}" IsEnabled="{Binding PagingEnableNext}"/>
+                    <component:IconButton Style="{DynamicResource IconButton}" Icon="pagingLast" Margin="6,0,0,0" Command="{Binding PagingLastCommand}" IsEnabled="{Binding PagingEnableLast}"/>
                 </StackPanel>
             </Grid>
         </Grid>
 
         <Grid Grid.Row="2" Height="40" Background="#0d0d0d">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource OutlinedBtnType1-Small-Short}" Margin="0,7,16,7" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}"/>
+                <Button Style="{StaticResource OutlinedBtnType1-Small-Short}" Margin="0,7,8,7" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}"/>
                 <Button Style="{StaticResource OutlinedBtnType1-Small-Wide}" Margin="0,7,16,7" Command="{Binding NewRecordingCommand}" Content="{Binding [New Recording], Source={StaticResource L10N}}"/>
             </StackPanel>
         </Grid>

@@ -39,12 +39,6 @@ namespace RaywattApp.ViewModels
             get { return this._cancelCommand ?? (this._cancelCommand = new RelayCommand(Cancel)); }
         }
 
-        private ICommand _backCommand;
-        public ICommand BackCommand
-        {
-            get { return this._backCommand ?? (this._backCommand = new RelayCommand(Back)); }
-        }
-
         private ICommand _newRecordingCommand;
         public ICommand NewRecordingCommand
         {
@@ -89,13 +83,6 @@ namespace RaywattApp.ViewModels
         private void Cancel()
         {
             _log.Debug("Cancel");
-
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
-        }
-
-        private void Back()
-        {
-            _log.Debug("Back");
 
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage) { Parameter = PrevStatus });
         }

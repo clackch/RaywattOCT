@@ -6,6 +6,7 @@
       xmlns:local="clr-namespace:RaywattApp.Views"
       xmlns:inter="http://schemas.microsoft.com/xaml/behaviors"
       xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
+      xmlns:component="clr-namespace:RaywattApp.Views.Component"
       mc:Ignorable="d" 
       d:DesignHeight="1024" d:DesignWidth="1280"
       Background="#161616"
@@ -20,8 +21,8 @@
 
         <Grid Grid.Row="0" Height="60">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource Import_Icon}" Command="{Binding ImportCommand}"/>
-                <Button Style="{StaticResource Export_Icon}" Command="{Binding ExportCommand}"/>
+                <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="import" Margin="0,9,6,9" Command="{Binding ImportCommand}"/>
+                <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="export" Margin="0,9,118,9" Command="{Binding ExportCommand}"/>
             </StackPanel>
         </Grid>
         
@@ -79,11 +80,11 @@
                     </inter:EventTrigger>
                 </inter:Interaction.Triggers>
                 <DataGrid.Columns>
-                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Id}" Header="{Binding DataContext.HeaderId, Source={x:Reference ProxyElement}}" SortMemberPath="Id"/>
-                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Name}" Header="{Binding DataContext.HeaderName, Source={x:Reference ProxyElement}}" SortMemberPath="Name"/>
-                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding DataContext.HeaderBirthdate, Source={x:Reference ProxyElement}}" SortMemberPath="Birthdate"/>
-                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}" Header="{Binding DataContext.HeaderGender, Source={x:Reference ProxyElement}}" SortMemberPath="Gender"/>
-                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding DisplayLastCase}" Header="{Binding DataContext.HeaderLastCase, Source={x:Reference ProxyElement}}" SortMemberPath="Last_Case"/>
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" HeaderStyle="{Binding DataContext.HeaderId, Source={x:Reference ProxyElement}, Converter={StaticResource DataGridSortIconConverter}}" Width="*" Binding="{Binding Id}" Header="{Binding DataContext.HeaderId, Source={x:Reference ProxyElement}, Converter={StaticResource DataGridSortTextConverter}}" SortMemberPath="Id"/>
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" HeaderStyle="{Binding DataContext.HeaderName, Source={x:Reference ProxyElement}, Converter={StaticResource DataGridSortIconConverter}}" Width="*" Binding="{Binding Name}" Header="{Binding DataContext.HeaderName, Source={x:Reference ProxyElement}, Converter={StaticResource DataGridSortTextConverter}}" SortMemberPath="Name"/>
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" HeaderStyle="{Binding DataContext.HeaderBirthdate, Source={x:Reference ProxyElement}, Converter={StaticResource DataGridSortIconConverter}}" Width="*" Binding="{Binding Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding DataContext.HeaderBirthdate, Source={x:Reference ProxyElement}, Converter={StaticResource DataGridSortTextConverter}}" SortMemberPath="Birthdate"/>
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" HeaderStyle="{Binding DataContext.HeaderGender, Source={x:Reference ProxyElement}, Converter={StaticResource DataGridSortIconConverter}}" Width="*" Binding="{Binding Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}" Header="{Binding DataContext.HeaderGender, Source={x:Reference ProxyElement}, Converter={StaticResource DataGridSortTextConverter}}" SortMemberPath="Gender"/>
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" HeaderStyle="{Binding DataContext.HeaderLastCase, Source={x:Reference ProxyElement}, Converter={StaticResource DataGridSortIconConverter}}" Width="*" Binding="{Binding DisplayLastCase}" Header="{Binding DataContext.HeaderLastCase, Source={x:Reference ProxyElement}, Converter={StaticResource DataGridSortTextConverter}}" SortMemberPath="Last_Case"/>
                     <!--
                     <DataGridTextColumn Width="*" Binding="{Binding CreateDate, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding DataContext.HeaderCreateDate, Source={x:Reference ProxyElement}}" SortMemberPath="Create_Date"/>
                     <DataGridTextColumn Width="*" Binding="{Binding UpdateDate, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding DataContext.HeaderUpdateDate, Source={x:Reference ProxyElement}}" SortMemberPath="Update_Date"/>
@@ -98,15 +99,15 @@
                     <ColumnDefinition Width="150"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" >
-                    <Button Style="{DynamicResource PagingFirst_Icon}" Command="{Binding PagingFirstCommand}" IsEnabled="{Binding PagingEnableFirst}"/>
-                    <Button Style="{DynamicResource PagingPrev_Icon}" Command="{Binding PagingPreviousCommand}" IsEnabled="{Binding PagingEnablePrevious}"/>
+                    <component:IconButton Style="{DynamicResource IconButton}" Icon="pagingFirst" Margin="0,0,6,0" Command="{Binding PagingFirstCommand}" IsEnabled="{Binding PagingEnableFirst}"/>
+                    <component:IconButton Style="{DynamicResource IconButton}" Icon="pagingPrev" Margin="0,0,16,0" Command="{Binding PagingPreviousCommand}" IsEnabled="{Binding PagingEnablePrevious}"/>
                     <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=0}" Content="{Binding PagingNo1}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo1" Visibility="{Binding PagingVisibilityNo1, Converter={StaticResource PagingNoIndicatorConverter}}"/>
                     <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=1}" Content="{Binding PagingNo2}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo2" Visibility="{Binding PagingVisibilityNo2, Converter={StaticResource PagingNoIndicatorConverter}}"/>
                     <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=2}" Content="{Binding PagingNo3}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo3" Visibility="{Binding PagingVisibilityNo3, Converter={StaticResource PagingNoIndicatorConverter}}"/>
                     <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=3}" Content="{Binding PagingNo4}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo4" Visibility="{Binding PagingVisibilityNo4, Converter={StaticResource PagingNoIndicatorConverter}}"/>
                     <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=4}" Content="{Binding PagingNo5}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo5" Visibility="{Binding PagingVisibilityNo5, Converter={StaticResource PagingNoIndicatorConverter}}"/>
-                    <Button Style="{DynamicResource PagingNext_Icon}" Command="{Binding PagingNextCommand}" IsEnabled="{Binding PagingEnableNext}"/>
-                    <Button Style="{DynamicResource PagingLast_Icon}" Command="{Binding PagingLastCommand}" IsEnabled="{Binding PagingEnableLast}"/>
+                    <component:IconButton Style="{DynamicResource IconButton}" Icon="pagingNext" Margin="16,0,0,0" Command="{Binding PagingNextCommand}" IsEnabled="{Binding PagingEnableNext}"/>
+                    <component:IconButton Style="{DynamicResource IconButton}" Icon="pagingLast" Margin="6,0,0,0" Command="{Binding PagingLastCommand}" IsEnabled="{Binding PagingEnableLast}"/>
                 </StackPanel>
                 <!--
                 <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">

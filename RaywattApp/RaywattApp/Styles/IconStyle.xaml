@@ -1,0 +1,54 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+                    xmlns:component="clr-namespace:RaywattApp.Views.Component">
+
+    <!-- Icon -->
+    <Style TargetType="Image" x:Key="RaywattSmall_Icon">
+        <Setter Property="Width" Value="91.1"/>
+        <Setter Property="Height" Value="20"/>
+        <Setter Property="Margin" Value="16, 10, 0, 10"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="Source" Value="{svgc:SvgImage Source=/res/icon/raywattSmall.svg}"/>
+    </Style>
+
+    <Style TargetType="{x:Type component:IconButton}" x:Key="IconButton">
+        <Setter Property="Width" Value="26"/>
+        <Setter Property="Height" Value="26"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type component:IconButton}">
+                    <Grid Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Background="Transparent">
+                        <Image x:Name="icon" Source="{Binding IconDefault, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="True">
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconDefault, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconOver, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconPressed, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconDisabled, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type component:IconButton}" x:Key="IconButtonLarge" BasedOn="{StaticResource IconButton}">
+        <Setter Property="Width" Value="42"/>
+        <Setter Property="Height" Value="42"/>
+    </Style>
+
+    <Style TargetType="Image" x:Key="VerticalLine_Icon">
+        <Setter Property="Source" Value="{svgc:SvgImage Source=/res/icon/verticalLine.svg}"/>
+        <Setter Property="Width" Value="1"/>
+        <Setter Property="Height" Value="49"/>
+    </Style>
+
+</ResourceDictionary>
