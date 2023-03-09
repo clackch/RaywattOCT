@@ -7,6 +7,7 @@
       xmlns:const="clr-namespace:RaywattApp.Common.Bases"
       mc:Ignorable="d" 
       d:DesignHeight="1024" d:DesignWidth="1280"
+      Background="{DynamicResource GrayscaleGray8Brush}"
       Title="PatientNewPage">
 
     <Grid>

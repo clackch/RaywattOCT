@@ -9,7 +9,7 @@
       xmlns:component="clr-namespace:RaywattApp.Views.Component"
       mc:Ignorable="d" 
       d:DesignHeight="1024" d:DesignWidth="1280"
-      Background="#161616"
+      Background="{DynamicResource GrayscaleGray8Brush}"
       Title="PatientListPage">
 
     <Grid Width="1280">
@@ -41,6 +41,8 @@
                 <RowDefinition Height="56"/>
             </Grid.RowDefinitions>
 
+            <Image Grid.Row="0" Grid.Column="1" Style="{DynamicResource RaywattSmall_Icon}" Width="437.3" Height="96" Margin="361,80,361.7,60"/>
+            
             <Grid Grid.Row="1" Grid.Column="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="200"/>
@@ -48,12 +50,12 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
                     <StackPanel Grid.Column="0" Orientation="Horizontal">
-                        <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="#ffffff" Content="{Binding [Patient List], Source={StaticResource L10N}}"/>
+                        <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Patient List], Source={StaticResource L10N}}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="0" Orientation="Horizontal" Height="19" Margin="0,2,0,0">
-                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="#b1b1b1" Content="{Binding [Total], Source={StaticResource L10N}}"/>
-                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="#b1b1b1" Content=" : "/>
-                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="#b1b1b1" Content="{Binding PagingTotalCnt}"/>
+                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Total], Source={StaticResource L10N}}"/>
+                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content=" : "/>
+                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding PagingTotalCnt}"/>
                     </StackPanel>
                 </StackPanel>
                 <Grid Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top">

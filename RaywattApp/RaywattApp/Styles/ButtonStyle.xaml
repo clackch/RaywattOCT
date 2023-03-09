@@ -128,26 +128,26 @@
         <Setter Property="FontWeight" Value="Medium"/>
         <Setter Property="FontStyle" Value="Normal"/>
         <Setter Property="FontSize" Value="14"/>
-        <Setter Property="Foreground" Value="#ffffff"/>
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Grid>
-                        <Border x:Name="btn" CornerRadius="4" BorderThickness="1" BorderBrush="#4f4f4f" Background="Transparent"/>
+                        <Border x:Name="btn" CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray5Brush}" Background="Transparent"/>
                         <ContentPresenter x:Name="content" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="btn" Property="Background" Value="#343434"/>
+                            <Setter TargetName="btn" Property="Background" Value="{DynamicResource AdditionalColor1Brush}"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="btn" Property="BorderBrush" Value="#1ed760"/>
+                            <Setter TargetName="btn" Property="BorderBrush" Value="{DynamicResource MainThemeBrush}"/>
                             <Setter TargetName="btn" Property="Background" Value="Transparent"/>
-                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="#1ed760"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource MainThemeBrush}"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="btn" Property="BorderBrush" Value="#FF333333"/>
-                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="#FF333333"/>
+                            <Setter TargetName="btn" Property="BorderBrush" Value="{DynamicResource GrayscaleGray6Brush}"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource GrayscaleGray6Brush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -214,16 +214,6 @@
         </Setter>
     </Style>
 
-    <Style TargetType="Button" x:Key="IconBtn">
-        <Setter Property="Width" Value="26"/>
-        <Setter Property="Height" Value="26"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
 
     <!-- Toggle Button -->
     <Style TargetType="ToggleButton" x:Key="ContainedToggleBtnType2">
@@ -236,7 +226,7 @@
                         <Border x:Name="border" CornerRadius="6" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" BorderThickness="1" BorderBrush="Transparent">
                             <Grid Background="Transparent"/>
                         </Border>
-                        <TextBlock x:Name="title" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{TemplateBinding Content}" Foreground="#4f4f4f" FontFamily="Pretendard" FontWeight="Medium" FontSize="14px"/>
+                        <TextBlock x:Name="title" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{TemplateBinding Content}" Foreground="{DynamicResource GrayscaleGray5Brush}" FontFamily="Pretendard" FontWeight="Medium" FontSize="14px"/>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsEnabled" Value="True">

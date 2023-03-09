@@ -5,8 +5,8 @@
     <!-- DataGrid -->
     <Style TargetType="DataGrid" x:Key="DataGridBase">
         <Style.Resources>
-            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#1ed760"/>
-            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#1ed760"/>
+            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="{DynamicResource MainPrimaryColor}"/>
+            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="{DynamicResource MainPrimaryColor}"/>
         </Style.Resources>
         <Setter Property="AutoGenerateColumns" Value="False"/>
         <Setter Property="IsReadOnly" Value="True"/>
@@ -14,12 +14,12 @@
         <Setter Property="CanUserSortColumns" Value="False"/>
         <Setter Property="HeadersVisibility" Value="All"/>
         <Setter Property="RowHeaderWidth" Value="0"/>
-        <Setter Property="Foreground" Value="#b1b1b1"/>
-        <Setter Property="Background" Value="#232323"/>
-        <Setter Property="RowBackground" Value="#232323"/>
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleGray3Brush}"/>
+        <Setter Property="Background" Value="{DynamicResource GrayscaleGray7Brush}"/>
+        <Setter Property="RowBackground" Value="{DynamicResource GrayscaleGray7Brush}"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="VerticalGridLinesBrush" Value="Transparent"/>
-        <Setter Property="HorizontalGridLinesBrush" Value="#4f4f4f"/>
+        <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource GrayscaleGray5Brush}"/>
         <Setter Property="TextBlock.FontFamily" Value="Pretendard"/>
         <Setter Property="TextBlock.FontWeight" Value="Medium"/>
         <Setter Property="TextBlock.FontStyle" Value="Normal"/>
@@ -29,7 +29,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type DataGrid}">
                     <Grid>
-                        <Border x:Name="Border" CornerRadius="8" Background="#232323" SnapsToDevicePixels="True"/>
+                        <Border x:Name="Border" CornerRadius="8" Background="{DynamicResource GrayscaleGray7Brush}" SnapsToDevicePixels="True"/>
                         <ScrollViewer x:Name="DG_ScrollViewer" Focusable="false">
                             <ScrollViewer.OpacityMask>
                                 <VisualBrush Visual="{Binding ElementName=Border}"/>
@@ -76,8 +76,8 @@
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Background" Value="#333333"/>
-        <Setter Property="Foreground" Value="#ffffff"/>
+        <Setter Property="Background" Value="{DynamicResource GrayscaleGray6Brush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
         <Setter Property="Height" Value="48"/>
     </Style>
 
@@ -95,8 +95,8 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsSelected}" Value="true">
-                            <Setter TargetName="border" Property="Background" Value="#1ed760"/>
-                            <Setter TargetName="border" Property="BorderBrush" Value="#1ed760"/>
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource MainPrimaryColorBrush}"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MainPrimaryColorBrush}"/>
                             <Setter TargetName="border" Property="Opacity" Value="0.08"/>
                         </DataTrigger>
                     </ControlTemplate.Triggers>
@@ -165,12 +165,12 @@
         <Setter Property="FontWeight" Value="Medium"/>
         <Setter Property="FontStyle" Value="Normal"/>
         <Setter Property="FontSize" Value="12"/>
-        <Setter Property="Background" Value="#0d0d0d"/>
-        <Setter Property="Foreground" Value="#ffffff"/>
+        <Setter Property="Background" Value="{DynamicResource GrayscaleBlackBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToolTip">
-                    <Border Background="#0d0d0d" CornerRadius="4" Height="24" Padding="14,5,14,5">
+                    <Border Background="{DynamicResource GrayscaleBlackBrush}" CornerRadius="4" Height="24" Padding="14,5,14,5">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                 </ControlTemplate>
@@ -226,9 +226,9 @@
                             <ColumnDefinition Width="4" />
                             <ColumnDefinition Width="4" />
                         </Grid.ColumnDefinitions>
-                        <Ellipse Grid.Column="0" Grid.ColumnSpan="2" Fill="#4f4f4f" />
-                        <Rectangle Grid.Column="1" Grid.ColumnSpan="3" Fill="#4f4f4f" />
-                        <Ellipse Grid.Column="3" Grid.ColumnSpan="2" Fill="#4f4f4f" />
+                        <Ellipse Grid.Column="0" Grid.ColumnSpan="2" Fill="{DynamicResource GrayscaleGray5Brush}" />
+                        <Rectangle Grid.Column="1" Grid.ColumnSpan="3" Fill="{DynamicResource GrayscaleGray5Brush}" />
+                        <Ellipse Grid.Column="3" Grid.ColumnSpan="2" Fill="{DynamicResource GrayscaleGray5Brush}" />
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
@@ -247,9 +247,9 @@
                             <RowDefinition Height="4" />
                             <RowDefinition Height="4" />
                         </Grid.RowDefinitions>
-                        <Ellipse Grid.Row="0" Grid.RowSpan="2" Fill="#4f4f4f"/>
-                        <Rectangle Grid.Row="1" Grid.RowSpan="3" Fill="#4f4f4f" />
-                        <Ellipse Grid.Row="3" Grid.RowSpan="2" Fill="#4f4f4f" />
+                        <Ellipse Grid.Row="0" Grid.RowSpan="2" Fill="{DynamicResource GrayscaleGray5Brush}"/>
+                        <Rectangle Grid.Row="1" Grid.RowSpan="3" Fill="{DynamicResource GrayscaleGray5Brush}" />
+                        <Ellipse Grid.Row="3" Grid.RowSpan="2" Fill="{DynamicResource GrayscaleGray5Brush}" />
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
@@ -293,7 +293,7 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type ScrollBar}">
-                            <Grid x:Name="Bg" SnapsToDevicePixels="true" Background="#7FA7A7A7">
+                            <Grid x:Name="Bg" SnapsToDevicePixels="true" Background="Transparent">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="0.00001*"/>
                                 </Grid.ColumnDefinitions>
@@ -321,7 +321,7 @@
         <Setter Property="FontWeight" Value="Medium"/>
         <Setter Property="FontStyle" Value="Normal"/>
         <Setter Property="FontSize" Value="16"/>
-        <Setter Property="Foreground" Value="#ffffff"/>
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Expander">
@@ -330,7 +330,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Name="ContentRow" Height="0"/>
                         </Grid.RowDefinitions>
-                        <Border x:Name="border" Background="#333333" CornerRadius="10"  Width="1160" Height="48">
+                        <Border x:Name="border" Background="{DynamicResource GrayscaleGray6Brush}" CornerRadius="10"  Width="1160" Height="48">
                             <Grid>
                                 <ContentPresenter ContentSource="Header" Margin="35,15,14,0"/>
                                 <ToggleButton IsChecked="{Binding Path=IsExpanded,Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" Background="Transparent">
@@ -377,8 +377,8 @@
         <Setter Property="SelectionMode" Value="Single"/>
         <Setter Property="RowHeaderWidth" Value="0"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Background" Value="#161616"/>
-        <Setter Property="RowBackground" Value="#161616"/>
+        <Setter Property="Background" Value="{DynamicResource GrayscaleGray8Brush}"/>
+        <Setter Property="RowBackground" Value="{DynamicResource GrayscaleGray8Brush}"/>
         <Setter Property="VerticalGridLinesBrush" Value="Transparent"/>
         <Setter Property="HorizontalGridLinesBrush" Value="Transparent"/>
         <Setter Property="SelectionUnit" Value="FullRow"/>
@@ -386,8 +386,8 @@
 
     <Style TargetType="DataGrid" x:Key="DataGridExpandInner">
         <Style.Resources>
-            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#1ed760"/>
-            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#1ed760"/>
+            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="{DynamicResource MainPrimaryColor}"/>
+            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="{DynamicResource MainPrimaryColor}"/>
         </Style.Resources>
         <Setter Property="AutoGenerateColumns" Value="False"/>
         <Setter Property="IsReadOnly" Value="True"/>
@@ -395,12 +395,12 @@
         <Setter Property="CanUserSortColumns" Value="False"/>
         <Setter Property="HeadersVisibility" Value="All"/>
         <Setter Property="RowHeaderWidth" Value="0"/>
-        <Setter Property="Foreground" Value="#b1b1b1"/>
-        <Setter Property="Background" Value="#232323"/>
-        <Setter Property="RowBackground" Value="#232323"/>
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleGray3Brush}"/>
+        <Setter Property="Background" Value="{DynamicResource GrayscaleGray7Brush}"/>
+        <Setter Property="RowBackground" Value="{DynamicResource GrayscaleGray7Brush}"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="VerticalGridLinesBrush" Value="Transparent"/>
-        <Setter Property="HorizontalGridLinesBrush" Value="#4f4f4f"/>
+        <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource GrayscaleGray5Brush}"/>
         <Setter Property="TextBlock.FontFamily" Value="Pretendard"/>
         <Setter Property="TextBlock.FontWeight" Value="Medium"/>
         <Setter Property="TextBlock.FontStyle" Value="Normal"/>
@@ -411,7 +411,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type DataGrid}">
                     <Grid>
-                        <Border x:Name="Border" CornerRadius="0 0 10 10" Background="#232323" SnapsToDevicePixels="True"/>
+                        <Border x:Name="Border" CornerRadius="0 0 10 10" Background="{DynamicResource GrayscaleGray7Brush}" SnapsToDevicePixels="True"/>
                         <ScrollViewer x:Name="DG_ScrollViewer" Focusable="false">
                             <ScrollViewer.Template>
                                 <ControlTemplate TargetType="{x:Type ScrollViewer}">
@@ -451,8 +451,8 @@
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Background" Value="#232323"/>
-        <Setter Property="Foreground" Value="#ffffff"/>
+        <Setter Property="Background" Value="{DynamicResource GrayscaleGray7Brush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
         <Setter Property="Height" Value="51"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -463,7 +463,7 @@
                             <RowDefinition Height="1"/>
                         </Grid.RowDefinitions>
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        <Separator Grid.Row="1" Margin="0,0,0,0" Background="#4f4f4f"/>
+                        <Separator Grid.Row="1" Margin="0,0,0,0" Background="{DynamicResource GrayscaleGray5Brush}"/>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
@@ -500,12 +500,12 @@
     <Style TargetType="Button" x:Key="PagingSelectedNo" BasedOn="{StaticResource Pretendard-Medium-14}">
         <Setter Property="Width" Value="26"/>
         <Setter Property="Height" Value="26"/>
-        <Setter Property="Foreground" Value="#1ed760"/>
+        <Setter Property="Foreground" Value="{DynamicResource MainPrimaryColorBrush}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Grid>
-                        <Border x:Name="border" CornerRadius="4" BorderThickness="0" Background="#1ed760" Opacity="0.08"/>
+                        <Border x:Name="border" CornerRadius="4" BorderThickness="0" Background="{DynamicResource MainPrimaryColorBrush}" Opacity="0.08"/>
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Grid>
                 </ControlTemplate>
@@ -516,7 +516,7 @@
     <Style TargetType="Button" x:Key="PagingNotSelectedNo" BasedOn="{StaticResource Pretendard-Medium-14}">
         <Setter Property="Width" Value="26"/>
         <Setter Property="Height" Value="26"/>
-        <Setter Property="Foreground" Value="#ffffff"/>
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -526,7 +526,7 @@
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" TargetName="border" Value="#343434"/>
+                            <Setter Property="Background" TargetName="border" Value="{DynamicResource AdditionalColor1Brush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -543,7 +543,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type TextBox}">
-                    <Border x:Name="border" CornerRadius="8" BorderBrush="#4f4f4f" BorderThickness="1" Background="Transparent">
+                    <Border x:Name="border" CornerRadius="8" BorderBrush="{DynamicResource GrayscaleGray5Brush}" BorderThickness="1" Background="Transparent">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="58"/>
@@ -556,13 +556,13 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsFocused" Value="True">
                             <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/search_active.svg}"/>
-                            <Setter Property="BorderBrush" TargetName="border" Value="#1ed760"/>
-                            <Setter Property="Foreground" Value="#ffffff"/>
+                            <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource MainPrimaryColorBrush}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
                         </Trigger>
                         <Trigger Property="IsFocused" Value="False">
                             <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/search.svg}"/>
-                            <Setter Property="BorderBrush" TargetName="border" Value="#4f4f4f"/>
-                            <Setter Property="Foreground" Value="#b1b1b1"/>
+                            <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource GrayscaleGray5Brush}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource GrayscaleGray3Brush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -595,7 +595,7 @@
 
     <Style TargetType="Label" x:Key="PatientSearchPlaceholder" BasedOn="{StaticResource Pretendard-Medium-18}">
         <Setter Property="Content" Value="Search ID or Name"/>
-        <Setter Property="Foreground" Value="#b1b1b1"/>
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleGray3Brush}"/>
         <Setter Property="IsHitTestVisible" Value="False"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="HorizontalAlignment" Value="Left"/>

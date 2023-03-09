@@ -10,6 +10,42 @@
     <SolidColorBrush x:Key="MainThemeBrush" Color="#1ed760"/>
     <SolidColorBrush x:Key="MainThemePressedBrush" Color="#26a353"/>
 
+    <Color x:Key="GrayscaleWhite">#ffffff</Color>
+    <Color x:Key="GrayscaleGray1">#f2f2f2</Color>
+    <Color x:Key="GrayscaleGray2">#e4e4e4</Color>
+    <Color x:Key="GrayscaleGray3">#b1b1b1</Color>
+    <Color x:Key="GrayscaleGray4">#8d8d8d</Color>
+    <Color x:Key="GrayscaleGray5">#4f4f4f</Color>
+    <Color x:Key="GrayscaleGray6">#333333</Color>
+    <Color x:Key="GrayscaleGray7">#232323</Color>
+    <Color x:Key="GrayscaleGray8">#161616</Color>
+    <Color x:Key="GrayscaleBlack">#0d0d0d</Color>
+
+    <Color x:Key="MainPrimaryColor"     >#1ed760</Color>
+    <Color x:Key="MainSecondaryColor"   >#1ebe57</Color>
+    <Color x:Key="MainTertiaryColor"    >#26a353</Color>
+    <Color x:Key="MainBackgroundColor"  >#c7efd5</Color>
+
+    <Color x:Key="AdditionalColor1">#343434</Color>
+
+    <SolidColorBrush x:Key="GrayscaleWhiteBrush" Color="{StaticResource GrayscaleWhite}"/>
+    <SolidColorBrush x:Key="GrayscaleGray1Brush" Color="{StaticResource GrayscaleGray1}"/>
+    <SolidColorBrush x:Key="GrayscaleGray2Brush" Color="{StaticResource GrayscaleGray2}"/>
+    <SolidColorBrush x:Key="GrayscaleGray3Brush" Color="{StaticResource GrayscaleGray3}"/>
+    <SolidColorBrush x:Key="GrayscaleGray4Brush" Color="{StaticResource GrayscaleGray4}"/>
+    <SolidColorBrush x:Key="GrayscaleGray5Brush" Color="{StaticResource GrayscaleGray5}"/>
+    <SolidColorBrush x:Key="GrayscaleGray6Brush" Color="{StaticResource GrayscaleGray6}"/>
+    <SolidColorBrush x:Key="GrayscaleGray7Brush" Color="{StaticResource GrayscaleGray7}"/>
+    <SolidColorBrush x:Key="GrayscaleGray8Brush" Color="{StaticResource GrayscaleGray8}"/>
+    <SolidColorBrush x:Key="GrayscaleBlackBrush" Color="{StaticResource GrayscaleBlack}"/>
+
+    <SolidColorBrush x:Key="MainPrimaryColorBrush"      Color="{StaticResource MainPrimaryColor}"/>
+    <SolidColorBrush x:Key="MainSecondaryColorBrush"    Color="{StaticResource MainSecondaryColor}"/>
+    <SolidColorBrush x:Key="MainTertiaryColorBrush"     Color="{StaticResource MainTertiaryColor}"/>
+    <SolidColorBrush x:Key="MainBackgroundColorBrush"   Color="{StaticResource MainBackgroundColor}"/>
+
+    <SolidColorBrush x:Key="AdditionalColor1Brush" Color="{StaticResource AdditionalColor1}"/>
+
     <!-- font -->
     <Style TargetType="Control" x:Key="Pretendard-Bold-54">
         <Setter Property="Padding" Value="0,0,0,0"/>
