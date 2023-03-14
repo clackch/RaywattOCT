@@ -163,6 +163,11 @@ namespace RaywattApp.Services
                 $"INSERT INTO rv_schema.patient(id, lastname, firstname, birthdate, gender, create_date, update_date) " +
                 $"VALUES (@id, @lastname, @firstname, @birthdate, @gender, now(), now())";
 
+            //InsertPatientWithoutBirth
+            _query["InsertPatientWithoutBirth"] =
+                $"INSERT INTO rv_schema.patient(id, lastname, firstname, gender, create_date, update_date) " +
+                $"VALUES (@id, @lastname, @firstname, @gender, now(), now())";
+
             //InsertPatientCase
             _query["InsertPatientCase"] =
                 $"INSERT INTO rv_schema.patient_case(id, patient_id, physician_name, accession_number, accession_name" +
@@ -201,6 +206,12 @@ namespace RaywattApp.Services
             _query["UpdatePatient"] =
                 $"UPDATE rv_schema.patient " +
                 $"SET id=@id, lastname=@lastname, firstname=@firstname, birthdate=@birthdate, gender=@gender, update_date=now() " +
+                $"WHERE id=@originId";
+
+            //UpdatePatientWithoutBirth
+            _query["UpdatePatientWithoutBirth"] =
+                $"UPDATE rv_schema.patient " +
+                $"SET id=@id, lastname=@lastname, firstname=@firstname, gender=@gender, update_date=now() " +
                 $"WHERE id=@originId";
 
             //UpdatePatientCase

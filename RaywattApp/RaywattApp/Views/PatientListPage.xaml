@@ -41,7 +41,7 @@
                 <RowDefinition Height="56"/>
             </Grid.RowDefinitions>
 
-            <Image Grid.Row="0" Grid.Column="1" Style="{DynamicResource RaywattSmall_Icon}" Width="437.3" Height="96" Margin="361,80,361.7,60"/>
+            <Image Grid.Row="0" Grid.Column="1" Style="{DynamicResource Raywatt}" Width="437.3" Height="96" Margin="361,80,361.7,60"/>
             
             <Grid Grid.Row="1" Grid.Column="1">
                 <Grid.ColumnDefinitions>
@@ -64,7 +64,7 @@
                             <KeyBinding Command="{Binding SearchCommand}" Key="Enter"/>
                         </TextBox.InputBindings>
                     </TextBox>
-                    <Label Style="{DynamicResource PatientSearchPlaceholder}"/>
+                    <Label Style="{DynamicResource PatientSearchPlaceholder}" Content="{Binding [Search ID or Name], Source={StaticResource L10N}}"/>
                     <Button Style="{DynamicResource SearchOpacity_Icon}" Command="{Binding SearchCommand}"/>
                 </Grid>
             </Grid>

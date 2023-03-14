@@ -11,6 +11,7 @@ using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Windows.Input;
 using System.Windows.Navigation;
 
@@ -34,7 +35,13 @@ namespace RaywattApp.ViewModels
         private Patient _patientEdit;
 
         [ObservableProperty]
-        private string _genderCodeEdit;
+        private Dictionary<string, string> _genderComboBox;
+
+        [ObservableProperty]
+        private string _selectedGender;
+
+        [ObservableProperty]
+        private string _idValidator;
 
         private ICommand _cancelCommand;
         public ICommand CancelCommand
@@ -79,7 +86,12 @@ namespace RaywattApp.ViewModels
                 PatientEdit = new Patient();
                 CopyPatient(Patient, PatientEdit);
 
-                GenderCodeEdit = Patient.Gender;
+                SelectedGender = Patient.Gender;
+                GenderComboBox = new Dictionary<string, string>();
+                foreach (var gender in CodeDefinition.Codes["GEND"])
+                {
+                    GenderComboBox.Add(gender.Key, _l10n[gender.Value]);
+                }
 
                 PatientEdit.PropertyChanged += PatientEdit_PropertyChanged;
             }
@@ -115,10 +127,7 @@ namespace RaywattApp.ViewModels
 
                 if (nCnt > 0)
                 {
-                    Dictionary<string, object> parameter = new Dictionary<string, object>();
-                    parameter["title"] = _l10n["Information"];
-                    parameter["message"] = _l10n["ID is duplicated."];
-                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+                    IdValidator = _l10n["ID is duplicated."];
 
                     return;
                 }
@@ -131,10 +140,10 @@ namespace RaywattApp.ViewModels
             sqlParameters["lastname"] = PatientEdit.Lastname = PatientEdit.Lastname.Trim();
             sqlParameters["firstname"] = PatientEdit.Firstname = PatientEdit.Firstname.Trim();
             sqlParameters["birthdate"] = PatientEdit.Birthdate;
-            if (GenderCodeEdit != null)
+            if (!String.IsNullOrEmpty(SelectedGender))
             {
-                sqlParameters["gender"] = GenderCodeEdit;
-                PatientEdit.Gender = CodeDefinition.Codes["GEND"][GenderCodeEdit];
+                sqlParameters["gender"] = SelectedGender;
+                PatientEdit.Gender = CodeDefinition.Codes["GEND"][SelectedGender];
             }
             else
             {
@@ -170,9 +179,12 @@ namespace RaywattApp.ViewModels
             return ValidatePatient();
         }
 
-        private void PatientEdit_PropertyChanged(object sender, EventArgs e)
+        private void PatientEdit_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             _log.Debug("PatientEdit_PropertyChanged");
+
+            if (e != null && e.PropertyName.ToString().Equals("Id") && !String.IsNullOrEmpty(IdValidator))
+                IdValidator = "";
 
             (PatientEditSaveCommand as RelayCommand).NotifyCanExecuteChanged();
         }

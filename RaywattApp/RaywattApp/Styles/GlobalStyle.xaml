@@ -28,6 +28,7 @@
 
     <Color x:Key="AdditionalColor1">#343434</Color>
     <Color x:Key="AdditionalColor2">#385042</Color>
+    <Color x:Key="AdditionalColor3">#ff4d8b</Color>
 
     <SolidColorBrush x:Key="GrayscaleWhiteBrush" Color="{StaticResource GrayscaleWhite}"/>
     <SolidColorBrush x:Key="GrayscaleGray1Brush" Color="{StaticResource GrayscaleGray1}"/>
@@ -47,6 +48,7 @@
 
     <SolidColorBrush x:Key="AdditionalColor1Brush" Color="{StaticResource AdditionalColor1}"/>
     <SolidColorBrush x:Key="AdditionalColor2Brush" Color="{StaticResource AdditionalColor2}"/>
+    <SolidColorBrush x:Key="AdditionalColor3Brush" Color="{StaticResource AdditionalColor3}"/>
 
     <!-- font -->
     <Style TargetType="Control" x:Key="Pretendard-Bold-54">

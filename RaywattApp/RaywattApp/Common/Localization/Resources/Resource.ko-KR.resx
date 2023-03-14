@@ -487,6 +487,21 @@
   <data name="Play" xml:space="preserve">
     <value>재생</value>
   </data>
+  <data name="Please choose gender" xml:space="preserve">
+    <value>성별을 선택하세요</value>
+  </data>
+  <data name="Please enter date of birth" xml:space="preserve">
+    <value>생년월일을 입력하세요</value>
+  </data>
+  <data name="Please enter first name" xml:space="preserve">
+    <value>이름을 입력하세요</value>
+  </data>
+  <data name="Please enter ID" xml:space="preserve">
+    <value>ID를 입력하세요</value>
+  </data>
+  <data name="Please enter last name" xml:space="preserve">
+    <value>성을 입력하세요</value>
+  </data>
   <data name="Preset" xml:space="preserve">
     <value>사전설정</value>
   </data>
@@ -540,6 +555,9 @@
   </data>
   <data name="Search" xml:space="preserve">
     <value>검색</value>
+  </data>
+  <data name="Search ID or Name" xml:space="preserve">
+    <value>ID/이름 검색</value>
   </data>
   <data name="Secondary Capture" xml:space="preserve">
     <value>세컨더리 캡처</value>
