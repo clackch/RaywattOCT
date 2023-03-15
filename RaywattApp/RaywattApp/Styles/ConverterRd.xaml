@@ -53,4 +53,10 @@
     <!-- Grid Length Converter -->
     <converters:GridLengthConverter x:Key="GridLengthConverter"/>
 
+    <!-- DataGrid Sort Icon Converter -->
+    <converters:DataGridSortIconConverter x:Key="DataGridSortIconConverter" />
+
+    <!-- DataGrid Sort Text Converter -->
+    <converters:DataGridSortTextConverter x:Key="DataGridSortTextConverter" />
+
 </ResourceDictionary>

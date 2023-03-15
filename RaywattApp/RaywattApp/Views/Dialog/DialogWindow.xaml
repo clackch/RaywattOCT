@@ -6,7 +6,15 @@
         xmlns:local="clr-namespace:RaywattApp.Views.Dialog"
         mc:Ignorable="d"
         ResizeMode="NoResize"
+        WindowStyle="None"
         Title="{Binding Title}"
+        AllowsTransparency="True"
         SizeToContent="WidthAndHeight">
-    <ContentControl x:Name="ContentPresenter" Content="{Binding}"/>
+    <Window.Background>
+        <SolidColorBrush Color="#0d0d0d" Opacity="0.8"/>
+    </Window.Background>
+    <StackPanel>
+        <ContentControl x:Name="ContentPresenter" Content="{Binding}"/>
+    </StackPanel>
+    
 </Window>

@@ -210,7 +210,7 @@ namespace RaywattApp.ViewModels
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["fileType"] = Constants.FileTypeImport;
 
-            var result = _dialogService.OpenDialog(new FileDialogControl(), parameter);
+            var result = _dialogService.OpenDialog(new FileDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
             Search();
         }
@@ -222,7 +222,7 @@ namespace RaywattApp.ViewModels
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["fileType"] = Constants.FileTypeExport;
 
-            var result = _dialogService.OpenDialog(new FileDialogControl(), parameter);
+            var result = _dialogService.OpenDialog(new FileDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
             Search();
         }
@@ -256,7 +256,7 @@ namespace RaywattApp.ViewModels
             prevStatus.ListSort = strColumnOrder;
             prevStatus.ListPageOffset = PagingOffset;
             prevStatus.ListPageSize = PagingSelectedPageSize;
-            prevStatus.ListPageGroup = ((PagingNoIdx - 1) / Constants.PageNumberMax) * Constants.PageNumberMax + 1;
+            prevStatus.ListPageGroup = (PagingNoIdx / Constants.PageNumberMax) * Constants.PageNumberMax + 1;
             prevStatus.ListPageNumber = PagingNoIdx;
 
             return prevStatus;

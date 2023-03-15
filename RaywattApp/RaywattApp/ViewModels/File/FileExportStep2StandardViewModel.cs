@@ -96,7 +96,7 @@ namespace RaywattApp.ViewModels.File
                     int numOfFrames = (patientCase.PullbackType == Constants.PullbackTypeLong) ? Constants.PullbackLongFrameCnt : Constants.PullbackShortFrameCnt;
                     if (FileExport.Pullback == Constants.ExportPullbackAVI)
                     {
-                        ExportSize = CommonUtil.GetVideoSize(Constants.ApplicationWidth, Constants.ApplicationHeight, 10, 12, numOfFrames);
+                        ExportSize = CommonUtil.GetVideoSize((int)Constants.ApplicationWidth, (int)Constants.ApplicationHeight, 10, 12, numOfFrames);
                     }
                     else
                     {

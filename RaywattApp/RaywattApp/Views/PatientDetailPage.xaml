@@ -6,9 +6,10 @@
       xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
       xmlns:local="clr-namespace:RaywattApp.Views"
       xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
+      xmlns:component="clr-namespace:RaywattApp.Views.Component"
       mc:Ignorable="d" 
       d:DesignHeight="1024" d:DesignWidth="1280"
-      Background="#161616"
+      Background="{DynamicResource GrayscaleGray8Brush}"
       Title="PatientDetailPage">
 
     <Grid>
@@ -18,9 +19,10 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Height="60" Background="#232323">
+        <Grid Grid.Row="0" Height="60" Background="{DynamicResource GrayscaleGray7Brush}">
+            <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Margin="75,20,0,19" Content="{Binding [Patient Summary], Source={StaticResource L10N}}"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource ExportSelected_Icon}" Command="{Binding ExportCommand}"/>
+                <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="exportSimple" Margin="0,9,118,9" Command="{Binding ExportCommand}"/>
             </StackPanel>
         </Grid>
 
@@ -42,41 +44,39 @@
                 <RowDefinition Height="56"/>
             </Grid.RowDefinitions>
 
-            <Border Grid.Row="1" Grid.Column="1" CornerRadius="10" Background="#232323">
+            <Border Grid.Row="1" Grid.Column="1" CornerRadius="10" Background="{DynamicResource GrayscaleGray7Brush}">
                 <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="55"/>
+                        <RowDefinition Height="49"/>
+                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="227"/>
-                        <ColumnDefinition Width="1"/>
+                        <ColumnDefinition Width="174"/>
+                        <ColumnDefinition Width="136"/>
                         <ColumnDefinition Width="112"/>
                         <ColumnDefinition/>
-                        <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
-                        <StackPanel Orientation="Horizontal" Margin="32,28,0,0">
-                            <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="#ffffff" Content="{Binding [ID], Source={StaticResource L10N}}"/>
-                            <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="#ffffff" Content=" ["/>
-                            <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="#ffffff" Content="{Binding Patient.Id}"/>
-                            <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="#ffffff" Content="]"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="32,4,0,0">
-                            <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="#ffffff" Content="{Binding Patient.Firstname}"/>
-                            <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="#ffffff" Content=", "/>
-                            <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="#ffffff" Content="{Binding Patient.Lastname}"/>
-                        </StackPanel>
+                    <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="32,26,0,0">
+                        <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Patient.Firstname}"/>
+                        <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content=", "/>
+                        <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Patient.Lastname}"/>
                     </StackPanel>
-                    <StackPanel Grid.Column="1">
-                        <Image Style="{DynamicResource VerticalLine_Icon}" Margin="0,32,0,0"/>
+                    <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="32,13,0,0">
+                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [ID], Source={StaticResource L10N}}"/>
+                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content=" [ "/>
+                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Patient.Id}"/>
+                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content=" ]"/>
                     </StackPanel>
-                    <StackPanel Grid.Column="2">
-                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="#8d8d8d" Margin="44,33,0,0" Content="{Binding [Birth], Source={StaticResource L10N}}"/>
-                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="#8d8d8d" Margin="44,6,0,0" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
+                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="0,13,0,0">
+                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Birth], Source={StaticResource L10N}}"/>
+                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="8,0,0,0" Content="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}"/>
                     </StackPanel>
-                    <StackPanel Grid.Column="3">
-                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="#ffffff" Margin="0,33,0,0" Content="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}"/>
-                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="#ffffff" Margin="0,6,0,0" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
+                    <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal" Margin="0,13,0,0">
+                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
+                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="8,0,0,0" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
                     </StackPanel>
-                    <StackPanel Grid.Column="4">
-                        <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding PatientEditCommand}" Content="{Binding [Edit Patient], Source={StaticResource L10N}}"/>
+                    <StackPanel Grid.Row="1" Grid.Column="3" HorizontalAlignment="Right">
+                        <component:IconButton Style="{DynamicResource IconButton}" Icon="editSimple" HorizontalAlignment="Right" Margin="0,0,20,20" Command="{Binding PatientEditCommand}"/>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -86,11 +86,11 @@
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="#b1b1b1" Grid.Column="0" Content="{Binding [Case List], Source={StaticResource L10N}}"></Label>
+                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Grid.Column="0" Content="{Binding [Case List], Source={StaticResource L10N}}"></Label>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,2,0,0">
-                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="#b1b1b1" Content="{Binding [Total], Source={StaticResource L10N}}"></Label>
-                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="#b1b1b1" Content=" : "/>
-                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="#b1b1b1" Content="{Binding PagingTotalCnt}"></Label>
+                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Total], Source={StaticResource L10N}}"></Label>
+                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content=" : "/>
+                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding PagingTotalCnt}"></Label>
                 </StackPanel>
             </Grid>
 
@@ -149,22 +149,22 @@
                     <ColumnDefinition Width="150"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" >
-                    <Button Style="{StaticResource PagingFirst_Icon}" Command="{Binding PagingFirstCommand}" IsEnabled="{Binding PagingEnableFirst}"/>
-                    <Button Style="{StaticResource PagingPrev_Icon}" Command="{Binding PagingPreviousCommand}" IsEnabled="{Binding PagingEnablePrevious}"/>
-                    <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=0}" Width="20" Content="{Binding PagingNo1}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo1" Visibility="{Binding PagingVisibilityNo1, Converter={StaticResource PagingNoIndicatorConverter}}"/>
-                    <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=1}" Width="20" Content="{Binding PagingNo2}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo2" Visibility="{Binding PagingVisibilityNo2, Converter={StaticResource PagingNoIndicatorConverter}}"/>
-                    <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=2}" Width="20" Content="{Binding PagingNo3}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo3" Visibility="{Binding PagingVisibilityNo3, Converter={StaticResource PagingNoIndicatorConverter}}"/>
-                    <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=3}" Width="20" Content="{Binding PagingNo4}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo4" Visibility="{Binding PagingVisibilityNo4, Converter={StaticResource PagingNoIndicatorConverter}}"/>
-                    <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=4}" Width="20" Content="{Binding PagingNo5}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo5" Visibility="{Binding PagingVisibilityNo5, Converter={StaticResource PagingNoIndicatorConverter}}"/>
-                    <Button Style="{StaticResource PagingNext_Icon}" Command="{Binding PagingNextCommand}" IsEnabled="{Binding PagingEnableNext}"/>
-                    <Button Style="{StaticResource PagingLast_Icon}" Command="{Binding PagingLastCommand}" IsEnabled="{Binding PagingEnableLast}"/>
+                    <component:IconButton Style="{DynamicResource IconButton}" Icon="pagingFirst" Margin="0,0,6,0" Command="{Binding PagingFirstCommand}" IsEnabled="{Binding PagingEnableFirst}"/>
+                    <component:IconButton Style="{DynamicResource IconButton}" Icon="pagingPrev" Margin="0,0,16,0" Command="{Binding PagingPreviousCommand}" IsEnabled="{Binding PagingEnablePrevious}"/>
+                    <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=0}" Content="{Binding PagingNo1}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo1" Visibility="{Binding PagingVisibilityNo1, Converter={StaticResource PagingNoIndicatorConverter}}"/>
+                    <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=1}" Content="{Binding PagingNo2}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo2" Visibility="{Binding PagingVisibilityNo2, Converter={StaticResource PagingNoIndicatorConverter}}"/>
+                    <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=2}" Content="{Binding PagingNo3}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo3" Visibility="{Binding PagingVisibilityNo3, Converter={StaticResource PagingNoIndicatorConverter}}"/>
+                    <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=3}" Content="{Binding PagingNo4}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo4" Visibility="{Binding PagingVisibilityNo4, Converter={StaticResource PagingNoIndicatorConverter}}"/>
+                    <Button Style="{Binding PagingNoIdx, Converter={StaticResource PagingNoStyleConverter}, ConverterParameter=4}" Content="{Binding PagingNo5}" Command="{Binding PagingNoCommand}" CommandParameter="PagingNo5" Visibility="{Binding PagingVisibilityNo5, Converter={StaticResource PagingNoIndicatorConverter}}"/>
+                    <component:IconButton Style="{DynamicResource IconButton}" Icon="pagingNext" Margin="16,0,0,0" Command="{Binding PagingNextCommand}" IsEnabled="{Binding PagingEnableNext}"/>
+                    <component:IconButton Style="{DynamicResource IconButton}" Icon="pagingLast" Margin="6,0,0,0" Command="{Binding PagingLastCommand}" IsEnabled="{Binding PagingEnableLast}"/>
                 </StackPanel>
             </Grid>
         </Grid>
 
-        <Grid Grid.Row="2" Height="40" Background="#0d0d0d">
+        <Grid Grid.Row="2" Height="40" Background="{DynamicResource GrayscaleBlackBrush}">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource OutlinedBtnType1-Small-Short}" Margin="0,7,16,7" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}"/>
+                <Button Style="{StaticResource OutlinedBtnType1-Small-Short}" Margin="0,7,8,7" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}"/>
                 <Button Style="{StaticResource OutlinedBtnType1-Small-Wide}" Margin="0,7,16,7" Command="{Binding NewRecordingCommand}" Content="{Binding [New Recording], Source={StaticResource L10N}}"/>
             </StackPanel>
         </Grid>
