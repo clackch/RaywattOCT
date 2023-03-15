@@ -293,6 +293,12 @@
     <None Update="res\icon\power_hover.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="res\button\radio\radio.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="res\button\radio\radio_active.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="res\icon\raywatt.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -357,7 +363,6 @@
     <Folder Include="OCT\3D\" />
     <Folder Include="OCT\Core\" />
     <Folder Include="res\button\check\" />
-    <Folder Include="res\button\radio\" />
     <Folder Include="res\indicator\" />
   </ItemGroup>
 

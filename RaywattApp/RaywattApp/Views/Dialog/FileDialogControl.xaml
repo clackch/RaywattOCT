@@ -7,27 +7,12 @@
       xmlns:behaviors="clr-namespace:RaywattApp.Common.Behaviors"  
       xmlns:local="clr-namespace:RaywattApp.Views.Dialog"
       mc:Ignorable="d" 
-      Height="830" Width="1200"
+      Width="{Binding DialogWidth}" Height="{Binding DialogHeight}"
       Name="fileDialogControl">
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition />
-        </Grid.RowDefinitions>
-
-        <StackPanel Grid.Row="0" Background="Black" Orientation="Horizontal">
-            <Label Content="{Binding Title}" Foreground="White"></Label>
-        </StackPanel>
-
-        <Grid Grid.Row="1">
-            <StackPanel>
-                <Frame NavigationUIVisibility="Hidden">
-                    <b:Interaction.Behaviors>
-                        <behaviors:FrameBehavior Parameter="{Binding PopupNavigationParameter, Mode=TwoWay}" Navigation="{Binding PopupNavigationSource, Mode=TwoWay}"  />
-                    </b:Interaction.Behaviors>
-                </Frame>
-            </StackPanel>
-        </Grid>
-    </Grid>
+    <Frame NavigationUIVisibility="Hidden">
+        <b:Interaction.Behaviors>
+            <behaviors:FrameBehavior Parameter="{Binding PopupNavigationParameter, Mode=TwoWay}" Navigation="{Binding PopupNavigationSource, Mode=TwoWay}"  />
+        </b:Interaction.Behaviors>
+    </Frame>
 </UserControl>

@@ -324,7 +324,7 @@ namespace RaywattApp.Common.Util
 
         public static Mat MakeImageForExport(Mat crossSection, Mat? longitude, Mat? lumenProfile, Mat? angio, out List<Tuple<Rect, Size2f>> region) {
             Mat imgExport = new Mat();
-            imgExport.Create(Constants.ApplicationHeight, Constants.ApplicationWidth, MatType.CV_8UC3);
+            imgExport.Create((int)Constants.ApplicationHeight, (int)Constants.ApplicationWidth, MatType.CV_8UC3);
             imgExport.SetTo(0x00);
 
             region = new List<Tuple<Rect, Size2f>>();

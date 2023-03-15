@@ -19,6 +19,10 @@ namespace RaywattApp.Common.Dialog
 
         public object? Parameter { get; set; }
 
+        public double DialogWidth { get; set; }
+
+        public double DialogHeight { get; set; }
+
         public DialogResults? DialogResult { get; set; }
 
         private ICommand _yesCommand;

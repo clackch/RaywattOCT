@@ -7,8 +7,40 @@
     </Style>
 
     <!-- Radio Button -->
-    <Style TargetType="RadioButton">
-
+    <Style TargetType="RadioButton" BasedOn="{StaticResource Pretendard-Medium-18}">
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Ellipse x:Name="hover" Width="30" Height="30" Fill="Transparent"/>
+                        <Image Source="{svgc:SvgImage Source=/res/button/radio/radio.svg}" Width="20" Height="20"/>
+                        <Image x:Name="icon" Source="{svgc:SvgImage Source=/res/button/radio/radio_active.svg}" Width="10" Height="10" Visibility="Collapsed"/>
+                        <ContentPresenter Grid.Column="1" Margin="5,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="True">
+                            <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource GrayscaleGray5Brush}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="hover" Property="Fill" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+                            <Setter TargetName="hover" Property="Opacity" Value="0.08"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="icon" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <!-- Combo Box -->
