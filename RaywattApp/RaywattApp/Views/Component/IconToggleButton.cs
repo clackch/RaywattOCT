@@ -1,13 +1,13 @@
 ﻿using System.Windows;
-using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 
 namespace RaywattApp.Views.Component
 {
-    public class IconButton : Button, SvgComponentBase
+    internal class IconToggleButton : ToggleButton, SvgComponentBase
     {
         private const string resPath = "/res/icon/";
 
-        public static DependencyProperty IconProperty = DependencyProperty.Register("Icon", typeof(string), typeof(IconButton), new PropertyMetadata(null, SvgComponentBase.OnIconPropertyChanged));
+        public static DependencyProperty IconProperty = DependencyProperty.Register("Icon", typeof(string), typeof(IconToggleButton), new PropertyMetadata(null, SvgComponentBase.OnIconPropertyChanged));
         public string Icon { get => (string)GetValue(IconProperty); set => SetValue(IconProperty, value); }
 
         public void InitializeIconPath(string iconName)
@@ -18,10 +18,10 @@ namespace RaywattApp.Views.Component
             IconDisabled = SvgComponentBase.GetPath(resPath, iconName, "_disabled");
         }
 
-        public static readonly DependencyProperty IconDefaultProperty = DependencyProperty.Register(nameof(IconDefault), typeof(string), typeof(IconButton));
-        public static readonly DependencyProperty IconOverProperty = DependencyProperty.Register(nameof(IconOver), typeof(string), typeof(IconButton));
-        public static readonly DependencyProperty IconPressedProperty = DependencyProperty.Register(nameof(IconPressed), typeof(string), typeof(IconButton));
-        public static readonly DependencyProperty IconDisabledProperty = DependencyProperty.Register(nameof(IconDisabled), typeof(string), typeof(IconButton));
+        public static readonly DependencyProperty IconDefaultProperty = DependencyProperty.Register(nameof(IconDefault), typeof(string), typeof(IconToggleButton));
+        public static readonly DependencyProperty IconOverProperty = DependencyProperty.Register(nameof(IconOver), typeof(string), typeof(IconToggleButton));
+        public static readonly DependencyProperty IconPressedProperty = DependencyProperty.Register(nameof(IconPressed), typeof(string), typeof(IconToggleButton));
+        public static readonly DependencyProperty IconDisabledProperty = DependencyProperty.Register(nameof(IconDisabled), typeof(string), typeof(IconToggleButton));
 
         public string IconDefault { get => (string)GetValue(IconDefaultProperty); set => SetValue(IconDefaultProperty, value); }
         public string IconOver { get => (string)GetValue(IconOverProperty); set => SetValue(IconOverProperty, value); }

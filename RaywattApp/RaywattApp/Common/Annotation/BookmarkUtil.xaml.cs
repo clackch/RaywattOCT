@@ -75,14 +75,7 @@ namespace RaywattApp.Common.Annotation
                 }
             }
 
-            if (isExist)
-            {
-                bookmarkUtil.MarkBtn.Content = "Marked";
-            }
-            else
-            {
-                bookmarkUtil.MarkBtn.Content = "Unmarked";
-            }
+            bookmarkUtil.MarkBtn.IsChecked = isExist;
         }
 
         private void toggle_Bookmark(object sender, RoutedEventArgs e)
@@ -101,24 +94,25 @@ namespace RaywattApp.Common.Annotation
             if (existIndex > -1)
             {
                 Bookmarks.RemoveAt(existIndex);
-                this.MarkBtn.Content = "Unmarked";
+                MarkBtn.IsChecked = false;
             }
             else
             {
                 Bookmarks.Add(new Bookmark { FrameNumber = this.BookmarkFrameNumber, LongitudeX = this.BookmarkLongitudeX });
-                this.MarkBtn.Content = "Marked";
+                MarkBtn.IsChecked = true;
             }            
         }
 
         private void delete_All(object sender, RoutedEventArgs e)
         {
             Bookmarks.Clear();
+            MarkBtn.IsChecked = false;
         }
 
         private void click_bookmark(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            Rectangle rectangle = (Rectangle)sender;
-            Bookmark bookmark = (Bookmark)rectangle.DataContext;
+            Image indicator = (Image)sender;
+            Bookmark bookmark = (Bookmark)indicator.DataContext;
 
             BookmarkOutFrameNumber = bookmark.FrameNumber;
         }

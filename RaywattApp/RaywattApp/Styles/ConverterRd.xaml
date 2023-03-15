@@ -48,7 +48,10 @@
     <converters:GroupNameConverter x:Key="GroupNameConverter" />
 
     <!-- Inverse Boolean Converter -->
-    <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+    <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" /> 
+    
+    <!-- Grid Length Converter -->
+    <converters:GridLengthConverter x:Key="GridLengthConverter"/>
 
     <!-- DataGrid Sort Icon Converter -->
     <converters:DataGridSortIconConverter x:Key="DataGridSortIconConverter" />

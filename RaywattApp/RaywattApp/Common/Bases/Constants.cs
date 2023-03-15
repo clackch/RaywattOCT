@@ -182,7 +182,7 @@ namespace RaywattApp.Common.Bases
 
         //Background Color
         public const int BackgroundColor = 0x161616;
-        public const int CardBackgroundColor = 0x252525;
+        public const int CardBackgroundColor = 0x232323;
 
         //Update Image Interval (msec)
         public const double UpdateImageInterval = 5;
@@ -200,12 +200,15 @@ namespace RaywattApp.Common.Bases
         public const string PublicKey = "raywatt07_hwjckklls_298-87-01441";
 
         //Review - 2D - Cross Section
-        public const double CrossSectionSize = 640;
-        public const double CrossSectionCenter = 320;
+        public const double CrossSectionSize = 620;
+        public const double CrossSectionCenter = CrossSectionSize / 2;
 
         //Review - 2D - Longitude
-        public const double LongitudeWidth = 1180;
-        public const double LongitudeHeight = 180;
+        public const double LongitudeWidth = 1140;
+        public const double LongitudeHeight = 105;
+        public const double LongitudeScale = LongitudeWidth / 10;
+        public const double LongitudeIndicatorWidth = 22;
+        public const double LongitudeIndicatorHeight = 116;
 
         //Review - 2D - Side Menu
         public const string LeftUpMenu = "LeftUpMenu";
