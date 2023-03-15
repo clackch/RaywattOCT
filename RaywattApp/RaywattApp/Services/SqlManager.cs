@@ -158,7 +158,16 @@ namespace RaywattApp.Services
         {
             _log.Debug("InsertPatient");
 
-            string commandText = SqlQuery.GetQuery("InsertPatient");
+            string commandText;
+
+            if (sqlParameters["birthdate"] == null)
+            {
+                commandText = SqlQuery.GetQuery("InsertPatientWithoutBirth");
+            }
+            else
+            {
+                commandText = SqlQuery.GetQuery("InsertPatient");
+            }            
 
             return _databaseService.InsertData(commandText, sqlParameters);
         }
@@ -167,7 +176,16 @@ namespace RaywattApp.Services
         {
             _log.Debug("UpdatePatient");
 
-            string commandText = SqlQuery.GetQuery("UpdatePatient");
+            string commandText;
+
+            if (sqlParameters["birthdate"] == null)
+            {
+                commandText = SqlQuery.GetQuery("UpdatePatientWithoutBirth");
+            }
+            else
+            {
+                commandText = SqlQuery.GetQuery("UpdatePatient");
+            }
 
             return _databaseService.UpdateData(commandText, sqlParameters);
         }

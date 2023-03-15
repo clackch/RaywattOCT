@@ -5,8 +5,10 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:RaywattApp.Views"
       xmlns:const="clr-namespace:RaywattApp.Common.Bases"
+      xmlns:component="clr-namespace:RaywattApp.Views.Component"
       mc:Ignorable="d" 
       d:DesignHeight="1024" d:DesignWidth="1280"
+      Background="{DynamicResource GrayscaleGray8Brush}"
       Title="PatientEditPage">
 
     <Grid>
@@ -16,51 +18,51 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Background="Gray">
-            <Label Content="{Binding [Edit Patient], Source={StaticResource L10N}}"></Label>
-        </StackPanel>
+        <Grid Grid.Row="0" Height="60" Background="{DynamicResource GrayscaleGray7Brush}">
+            <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Margin="75,20,0,19" Content="{Binding [Edit Patient], Source={StaticResource L10N}}"/>
+        </Grid>
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="436"/>
                 <ColumnDefinition/>
+                <ColumnDefinition Width="436"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="90"/>
+                <RowDefinition Height="70"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="78"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="78"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="78"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="78"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="78"/>
+                <RowDefinition Height="42"/>
+                <RowDefinition Height="237"/>
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Margin="5,5,5,5"><TextBlock Text="{Binding [ID], Source={StaticResource L10N}}"/><TextBlock Text=" (*)" Foreground="Red"/></TextBlock>
-            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding PatientEdit.Id, UpdateSourceTrigger=PropertyChanged}" Margin="5,5,5,5"/>
-            <TextBlock Grid.Row="1" Margin="5,5,5,5"><TextBlock Text="{Binding [Last Name], Source={StaticResource L10N}}"/><TextBlock Text=" (*)" Foreground="Red"/></TextBlock>
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding PatientEdit.Lastname, UpdateSourceTrigger=PropertyChanged}" Margin="5,5,5,5"/>
-            <TextBlock Grid.Row="2" Margin="5,5,5,5"><TextBlock Text="{Binding [First Name], Source={StaticResource L10N}}"/><TextBlock Text=" (*)" Foreground="Red"/></TextBlock>
-            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding PatientEdit.Firstname, UpdateSourceTrigger=PropertyChanged}" Margin="5,5,5,5"/>
-            <TextBlock Grid.Row="3" Margin="5,5,5,5"><TextBlock Text="{Binding [Birth Date], Source={StaticResource L10N}}"/><TextBlock Text=" (*)" Foreground="Red"/></TextBlock>
-            <DatePicker Grid.Row="3" Grid.Column="1" SelectedDate="{Binding PatientEdit.Birthdate, UpdateSourceTrigger=PropertyChanged}" Margin="5,5,5,5"/>
-            <TextBlock Grid.Row="4" Text="{Binding [Gender], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-            <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Margin="5,5,5,5">
-                <RadioButton IsChecked="{Binding GenderCodeEdit, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.GenderMale}}" Content="{Binding [Male], Source={StaticResource L10N}}"></RadioButton>
-                <RadioButton IsChecked="{Binding GenderCodeEdit, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.GenderFemale}}" Content="{Binding [Female], Source={StaticResource L10N}}"></RadioButton>
+            <Label Grid.Row="1" Grid.Column="1" Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Edit Patient], Source={StaticResource L10N}}"/>
+            <component:IconButton Grid.Row="1" Grid.Column="1" Style="{DynamicResource IconButton}" Icon="delete" Command="{Binding DeleteCommand}" HorizontalAlignment="Right" Margin="0,12,0,32"/>
+            <Label Grid.Row="2" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [ID], Source={StaticResource L10N}}"/>
+            <TextBox Grid.Row="3" Grid.Column="1" Style="{DynamicResource TextBoxValidator}" Text="{Binding PatientEdit.Id, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Please enter ID], Source={StaticResource L10N}}" ToolTip="{Binding IdValidator}" Margin="0,0,0,8"/>
+            <Label Grid.Row="4" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Last Name], Source={StaticResource L10N}}"/>
+            <TextBox Grid.Row="5" Grid.Column="1" Style="{DynamicResource TextBoxBase}" Text="{Binding PatientEdit.Lastname, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Please enter last name], Source={StaticResource L10N}}" Margin="0,0,0,8"/>
+            <Label Grid.Row="6" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [First Name], Source={StaticResource L10N}}"/>
+            <TextBox Grid.Row="7" Grid.Column="1" Style="{DynamicResource TextBoxBase}" Text="{Binding PatientEdit.Firstname, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Please enter first name], Source={StaticResource L10N}}" Margin="0,0,0,8"/>
+            <Label Grid.Row="8" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Birth Date], Source={StaticResource L10N}}"/>
+            <DatePicker Grid.Row="9" Grid.Column="1" Style="{DynamicResource DatePickerStyle}" SelectedDate="{Binding PatientEdit.Birthdate, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Please enter date of birth], Source={StaticResource L10N}}" Margin="0,0,0,24"/>
+            <Label Grid.Row="10" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
+            <ComboBox Grid.Row="11" Grid.Column="1" ItemsSource="{Binding GenderComboBox}" SelectedValue="{Binding SelectedGender, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" Margin="0,0,0,24" Tag="{Binding [Please choose gender], Source={StaticResource L10N}}"/>
+            <StackPanel Grid.Row="12" Grid.Column="1" Orientation="Horizontal">
+                <Button Style="{StaticResource OutlinedBtnType1-Large}" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+                <StackPanel Width="8"/>
+                <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding PatientEditSaveCommand}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" HorizontalAlignment="Left" >
-                <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding DeleteCommand}" Content="{Binding [Delete], Source={StaticResource L10N}}"/>
-            </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" >
-                <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
-                <Button Style="{StaticResource ButtonImportant}" Command="{Binding PatientEditSaveCommand}" Content="{Binding [OK], Source={StaticResource L10N}}" Width="50"/>
-            </StackPanel>
-        </Grid>
+        <Grid Grid.Row="2" Height="40" Background="{DynamicResource GrayscaleBlackBrush}"/>
     </Grid>
 </Page>

@@ -487,6 +487,21 @@ Do you want to import data?</value>
   <data name="Play" xml:space="preserve">
     <value>Play</value>
   </data>
+  <data name="Please choose gender" xml:space="preserve">
+    <value>Please choose gender</value>
+  </data>
+  <data name="Please enter date of birth" xml:space="preserve">
+    <value>Please enter date of birth</value>
+  </data>
+  <data name="Please enter first name" xml:space="preserve">
+    <value>Please enter first name</value>
+  </data>
+  <data name="Please enter ID" xml:space="preserve">
+    <value>Please enter ID</value>
+  </data>
+  <data name="Please enter last name" xml:space="preserve">
+    <value>Please enter last name</value>
+  </data>
   <data name="Preset" xml:space="preserve">
     <value>Preset</value>
   </data>
@@ -540,6 +555,9 @@ Do you want to import data?</value>
   </data>
   <data name="Search" xml:space="preserve">
     <value>Search</value>
+  </data>
+  <data name="Search ID or Name" xml:space="preserve">
+    <value>Search ID or Name</value>
   </data>
   <data name="Secondary Capture" xml:space="preserve">
     <value>Secondary Capture</value>

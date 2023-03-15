@@ -11,8 +11,8 @@ using System.Windows.Input;
 using log4net;
 using System.Windows.Navigation;
 using RaywattApp.Common.Dialog;
-using RaywattApp.Views.Dialog;
 using RaywattApp.Common.Util;
+using System.ComponentModel;
 
 namespace RaywattApp.ViewModels
 {
@@ -31,18 +31,18 @@ namespace RaywattApp.ViewModels
         private Patient _patient;
 
         [ObservableProperty]
-        private string _genderCode;
+        private Dictionary<string, string> _genderComboBox;
+
+        [ObservableProperty]
+        private string _selectedGender;
+
+        [ObservableProperty]
+        private string _idValidator;
 
         private ICommand _cancelCommand;
         public ICommand CancelCommand
         {
             get { return this._cancelCommand ?? (this._cancelCommand = new RelayCommand(Cancel)); }
-        }
-
-        private ICommand _backCommand;
-        public ICommand BackCommand
-        {
-            get { return this._backCommand ?? (this._backCommand = new RelayCommand(Back)); }
         }
 
         private ICommand _newRecordingCommand;
@@ -64,7 +64,12 @@ namespace RaywattApp.ViewModels
             Patient.Id = "";
             Patient.Lastname = "";
             Patient.Firstname = "";
-            Patient.Birthdate = System.DateTime.Today;
+            Patient.Birthdate = null;
+            GenderComboBox = new Dictionary<string, string>();
+            foreach(var gender in CodeDefinition.Codes["GEND"])
+            {
+                GenderComboBox.Add(gender.Key, _l10n[gender.Value]);
+            }
 
             Patient.PropertyChanged += Patient_PropertyChanged;
         }
@@ -90,13 +95,6 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Cancel");
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
-        }
-
-        private void Back()
-        {
-            _log.Debug("Back");
-
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage) { Parameter = PrevStatus });
         }
 
@@ -107,9 +105,12 @@ namespace RaywattApp.ViewModels
             return Validate();
         }
 
-        private void Patient_PropertyChanged(object sender, EventArgs e)
+        private void Patient_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             _log.Debug("Patient_PropertyChanged");
+
+            if(e != null && e.PropertyName.ToString().Equals("Id") && !String.IsNullOrEmpty(IdValidator))
+                IdValidator = "";
 
             (NewRecordingCommand as RelayCommand).NotifyCanExecuteChanged();
         }
@@ -126,11 +127,8 @@ namespace RaywattApp.ViewModels
 
             if(nCnt > 0)
             {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["title"] = _l10n["Information"];
-                parameter["message"] = _l10n["ID is duplicated."];
-                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
-                
+                IdValidator = _l10n["ID is duplicated."];
+
                 return;
             }
 
@@ -140,10 +138,10 @@ namespace RaywattApp.ViewModels
             sqlParameters["lastname"] = Patient.Lastname = Patient.Lastname.Trim();
             sqlParameters["firstname"] = Patient.Firstname = Patient.Firstname.Trim();
             sqlParameters["birthdate"] = Patient.Birthdate;
-            if (GenderCode != null)
+            if (SelectedGender != null)
             {
-                sqlParameters["gender"] = GenderCode;
-                Patient.Gender = CodeDefinition.Codes["GEND"][GenderCode];
+                sqlParameters["gender"] = SelectedGender;
+                Patient.Gender = CodeDefinition.Codes["GEND"][SelectedGender];
             }
             else
             {

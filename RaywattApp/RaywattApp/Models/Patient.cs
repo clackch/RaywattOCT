@@ -83,7 +83,7 @@ namespace RaywattApp.Models
         private string name;
 
         [ObservableProperty]
-        private DateTime birthdate;
+        private DateTime? birthdate;
 
         [ObservableProperty]
         private string gender;
