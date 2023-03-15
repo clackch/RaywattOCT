@@ -50,7 +50,120 @@
         <Setter Property="Width" Value="42"/>
         <Setter Property="Height" Value="42"/>
     </Style>
+    
+    <Style TargetType="{x:Type component:IconRepeatButton}" x:Key="IconRepeatButton">
+        <Setter Property="Width" Value="26"/>
+        <Setter Property="Height" Value="26"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type component:IconRepeatButton}">
+                    <Grid Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Background="Transparent">
+                        <Image x:Name="icon" Source="{Binding IconDefault, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="True">
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconDefault, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconOver, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconPressed, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconDisabled, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
+    <Style TargetType="{x:Type component:IconToggleButton}" x:Key="IconToggleButton">
+        <Setter Property="Width" Value="26"/>
+        <Setter Property="Height" Value="26"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type component:IconToggleButton}">
+                    <Grid Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Background="Transparent">
+                        <Image x:Name="icon" Source="{Binding IconDefault, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="True">
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconDefault, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconOver, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconPressed, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconDisabled, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type component:IconMultiToggleButton}" x:Key="IconMultiToggleButton">
+        <Setter Property="Width" Value="26"/>
+        <Setter Property="Height" Value="26"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type component:IconMultiToggleButton}">
+                    <Grid Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Background="Transparent">
+                        <Image x:Name="icon" Source="{Binding IconDefault, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="False"/>
+                                <Condition Property="IsMouseOver" Value="False"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconDefault, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="False"/>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconOver, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="True"/>
+                                <Condition Property="IsMouseOver" Value="False"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="icon" Property="Source" Value="{Binding CheckedIconDefault, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="True"/>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="icon" Property="Source" Value="{Binding CheckedIconOver, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </MultiTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Indicator -->
+    <Style TargetType="{x:Type component:IndicatorImage}" x:Key="IndicatorImage">
+        <Setter Property="Source" Value="{Binding IconDefault, Converter={svgc:SvgImageConverter}}"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="False">
+                <Setter Property="Source" Value="{Binding IconDefault, Converter={svgc:SvgImageConverter}, RelativeSource={x:Static RelativeSource.Self}}"/>
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Source" Value="{Binding IconOver, Converter={svgc:SvgImageConverter}, RelativeSource={x:Static RelativeSource.Self}}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    
     <Style TargetType="Image" x:Key="VerticalLine_Icon">
         <Setter Property="Source" Value="{svgc:SvgImage Source=/res/icon/verticalLine.svg}"/>
         <Setter Property="Width" Value="1"/>

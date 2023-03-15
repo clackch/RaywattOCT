@@ -123,7 +123,7 @@
 
     <!-- OutlinedBtnType1 -->
     <Style TargetType="Button" x:Key="OutlinedBtnType1" BasedOn="{StaticResource Pretendard-Medium-14}">
-        <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleGray3Brush}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -386,6 +386,11 @@
         </Setter>
     </Style>
 
+    <Style TargetType="ToggleButton" x:Key="ContainedToggleBtnType2-Small" BasedOn="{StaticResource ContainedToggleBtnType2}">
+        <Setter Property="Width" Value="120"/>
+        <Setter Property="Height" Value="26"/>
+    </Style>
+
     <Style TargetType="ToggleButton" x:Key="IconToggleBtn-Large">
         <Setter Property="Width" Value="56"/>
         <Setter Property="Height" Value="32"/>
@@ -415,6 +420,37 @@
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/button/toggle/large_active.svg}"/>
                             <Setter TargetName="icon" Property="HorizontalAlignment" Value="Right"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
+    <Style TargetType="ToggleButton" x:Key="TabToggleBtn">
+        <Setter Property="Width" Value="92"/>
+        <Setter Property="Height" Value="60"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="21"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock x:Name="text" Grid.Row="1" Text="{TemplateBinding Content}" HorizontalAlignment="Center" FontFamily="Pretendard" FontWeight="Medium" FontSize="18" Foreground="{DynamicResource TabMenuDefaultBrush}"/>
+                        <Separator x:Name="separator" Grid.Row="2" Height="4" VerticalAlignment="Bottom" Background="Transparent"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="True">
+                            <Setter TargetName="text" Property="Foreground" Value="{DynamicResource TabMenuDefaultBrush}"/>
+                            <Setter TargetName="separator" Property="Background" Value="Transparent"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="text" Property="Foreground" Value="White"/>
+                            <Setter TargetName="separator" Property="Background" Value="{DynamicResource MainThemeBrush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

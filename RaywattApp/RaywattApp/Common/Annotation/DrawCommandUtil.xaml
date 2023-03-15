@@ -9,7 +9,7 @@
              d:DesignHeight="68" d:DesignWidth="192">
     <Grid>
         <StackPanel Orientation="Vertical">
-            <Label Content="{Binding [Measurement Tool], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="Medium" FontSize="12" Foreground="{DynamicResource SideMenuTitleBrush}"/>
+            <Label Content="{Binding [Measurement Tool], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource SideMenuTitleBrush}"/>
             <Grid Height="12"/>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
                 <component:IconButton Style="{DynamicResource IconButton}" Icon="area" Click="area_Add"/>
