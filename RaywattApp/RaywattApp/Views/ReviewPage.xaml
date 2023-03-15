@@ -138,8 +138,8 @@
                     </Grid>
 
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="50">
-                        <Label Content="F : " FontFamily="Pretendard" FontWeight="Medium" FontSize="14" Foreground="{DynamicResource SideMenuTitleBrush}"/>
-                        <Label Content="{Binding DisplayFrameNumber}" FontFamily="Pretendard" FontWeight="Medium" FontSize="14" Foreground="{DynamicResource SideMenuTitleBrush}" />
+                        <Label Content="F : " Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}"/>
+                        <Label Content="{Binding DisplayFrameNumber}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" />
                     </StackPanel>
 
                     <!-- Measurement -->
@@ -186,7 +186,7 @@
                                     <ToggleButton Grid.Row="1" IsChecked="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource InverseBooleanConverter}}" Style="{DynamicResource ContainedToggleBtnType2}" Command="{Binding ToggleAngioCommand}" CommandParameter="{StaticResource FalseValue}" Content="{Binding [OCT], Source={StaticResource L10N}}"/>
                                     <ToggleButton Grid.Row="2" IsChecked="{Binding ReviewStatus.IsAngioOn}" Style="{DynamicResource ContainedToggleBtnType2}" Command="{Binding ToggleAngioCommand}" CommandParameter="{StaticResource TrueValue}" Content="{Binding [OCT + Angio], Source={StaticResource L10N}}"/>
                                     <Separator Grid.Row="4" Margin="0,0,0,0" Background="{DynamicResource SeparatorBrush}"/>
-                                    <Label Grid.Row="6" Content="{Binding [Measure], Source={StaticResource L10N}}" Foreground="{DynamicResource SideMenuTitleBrush}" FontFamily="Pretendard" FontWeight="Medium" FontSize="12"/>
+                                    <Label Grid.Row="6" Content="{Binding [Measure], Source={StaticResource L10N}}" Foreground="{DynamicResource SideMenuTitleBrush}" Style="{DynamicResource Pretendard-Medium-12}"/>
                                     <Grid Grid.Row="8">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition/>
@@ -196,9 +196,9 @@
                                             <RowDefinition Height="Auto"/>
                                             <RowDefinition Height="Auto"/>
                                         </Grid.RowDefinitions>
-                                        <Label Grid.Row="0" Grid.Column="0" Content="{Binding [Auto], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="Medium" FontSize="14" Foreground="White" VerticalAlignment="Center"/>
+                                        <Label Grid.Row="0" Grid.Column="0" Content="{Binding [Auto], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="White" VerticalAlignment="Center"/>
                                         <ToggleButton Style="{DynamicResource IconToggleBtn-Large}" IsChecked="{Binding ReviewStatus.IsContourStentOn, Mode=OneWay}" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Command="{Binding ToggleContourStentCommand}"/>
-                                        <Label Grid.Row="1" Grid.Column="0" Content="{Binding [Manual], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="Medium" FontSize="14" Foreground="White" VerticalAlignment="Center"/>
+                                        <Label Grid.Row="1" Grid.Column="0" Content="{Binding [Manual], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="White" VerticalAlignment="Center"/>
                                         <ToggleButton Style="{DynamicResource IconToggleBtn-Large}" IsChecked="{Binding ReviewStatus.IsMeasurementOn, Mode=OneWay}" IsEnabled="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource InverseBooleanConverter}}" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Command="{Binding ToggleMeasurementCommand}" Margin="0,-2,0,0"/>
                                     </Grid>
                                     <Separator Grid.Row="10" Margin="0,0,0,0" Background="{DynamicResource SeparatorBrush}" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}"/>
@@ -261,13 +261,13 @@
                                         <component:IconButton Style="{DynamicResource IconButton}" Icon="editSimple" Command="{Binding EditCaseCommand}" Content="{Binding [Edit], Source={StaticResource L10N}}" HorizontalAlignment="Right"/>
                                     </Grid>
                                     <StackPanel Grid.Row="3">
-                                        <Label Content="{Binding Patient.Name}" FontFamily="Pretendard" FontWeight="Medium" FontSize="22" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
+                                        <Label Content="{Binding Patient.Name}" Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
                                         <StackPanel Height="2"/>
                                         <StackPanel Orientation="Horizontal">
-                                            <Label Content="{Binding [ID], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="Medium" FontSize="12" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
-                                            <Label Content=" [ " FontFamily="Pretendard" FontWeight="Medium" FontSize="12" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
-                                            <Label Content="{Binding Patient.Id}" FontFamily="Pretendard" FontWeight="Medium" FontSize="12" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
-                                            <Label Content=" ]" FontFamily="Pretendard" FontWeight="Medium" FontSize="12" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
+                                            <Label Content="{Binding [ID], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
+                                            <Label Content=" [ " Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
+                                            <Label Content="{Binding Patient.Id}" Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
+                                            <Label Content=" ]" Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
                                         </StackPanel>
                                         <StackPanel Height="9"/> <!-- design guide : 12px -->
                                         <Separator Height="1" Background="{DynamicResource SeparatorBrush}"/>
@@ -356,13 +356,13 @@
                                         <RowDefinition/>
                                     </Grid.RowDefinitions>
                                     <StackPanel x:Name="LumenInfo" Grid.Row="1" Orientation="Vertical">
-                                        <Label Content="{Binding [Lumen], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="Bold" FontSize="20" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                        <Label Content="{Binding [Lumen], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-20}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                         <StackPanel Height="16"/>
-                                        <Label Content="{Binding [Diameter], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                        <Label Content="{Binding [Diameter], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                         <StackPanel Height="64" Orientation="Horizontal">
-                                            <Label Content="1.54" FontFamily="Pretendard" FontWeight="Bold" FontSize="54" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
+                                            <Label Content="1.54" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
                                             <StackPanel Width="10"/>
-                                            <Label Content="{Binding [mm], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="Medium" FontSize="30" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom"/>
+                                            <Label Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-30}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom"/>
                                         </StackPanel>
                                         <Grid>
                                             <Grid.RowDefinitions>
@@ -378,21 +378,21 @@
                                                 <ColumnDefinition Width="4"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
-                                            <Label Grid.Row="0" Grid.Column="0" Content="{Binding [Min], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
-                                            <Label Grid.Row="0" Grid.Column="1" Content="00.00" FontFamily="Pretendard" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
-                                            <Label Grid.Row="0" Grid.Column="3" Content="{Binding [mm], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="Medium" FontSize="14" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="{Binding [Min], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                            <Label Grid.Row="0" Grid.Column="1" Content="00.00" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
+                                            <Label Grid.Row="0" Grid.Column="3" Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                             <Label Grid.Row="2" Grid.Column="0" Content="{Binding [Max], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
-                                            <Label Grid.Row="2" Grid.Column="1" Content="00.00" FontFamily="Pretendard" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
-                                            <Label Grid.Row="2" Grid.Column="3" Content="{Binding [mm], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="Medium" FontSize="14" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                            <Label Grid.Row="2" Grid.Column="1" Content="00.00" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
+                                            <Label Grid.Row="2" Grid.Column="3" Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                             <Label Grid.Row="4" Grid.Column="0" Content="{Binding [%DS], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
-                                            <Label Grid.Row="4" Grid.Column="1" Content="00.00" FontFamily="Pretendard" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
+                                            <Label Grid.Row="4" Grid.Column="1" Content="00.00" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
                                         </Grid>
                                         <StackPanel Height="20"/>
-                                        <Label Content="{Binding [Area], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                        <Label Content="{Binding [Area], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                         <StackPanel Height="64" Orientation="Horizontal">
-                                            <Label Content="1.89" FontFamily="Pretendard" FontWeight="Bold" FontSize="54" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
+                                            <Label Content="1.89" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
                                             <StackPanel Width="10"/>
-                                            <Label Content="{Binding [㎟], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="Medium" FontSize="30" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom"/>
+                                            <Label Content="{Binding [㎟], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-30}"  Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom"/>
                                         </StackPanel>
                                         <StackPanel Height="4"/>
                                         <Grid>
@@ -402,24 +402,24 @@
                                                 <ColumnDefinition Width="4"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
-                                            <Label Grid.Column="0" Content="{Binding [%AS], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
-                                            <Label Grid.Column="1" Content="00.00" FontFamily="Pretendard" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
+                                            <Label Grid.Column="0" Content="{Binding [%AS], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                            <Label Grid.Column="1" Content="00.00" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
                                         </Grid>
                                     </StackPanel>
                                     <Separator Grid.Row="3" Height="1" Margin="0,0,0,0" Background="{DynamicResource SeparatorBrush}"/>
                                     <StackPanel x:Name="CalciumInfo" Grid.Row="5" Orientation="Vertical">
-                                        <Label Content="{Binding [Calcium], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="Bold" FontSize="20" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                        <Label Content="{Binding [Calcium], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-20}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                         <StackPanel Height="16"/>
-                                        <Label Content="{Binding [Total Angle], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                        <Label Content="{Binding [Total Angle], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                         <StackPanel Height="64">
-                                            <Label Content="200º" FontFamily="Pretendard" FontWeight="Bold" FontSize="54" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
+                                            <Label Content="200º" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
                                         </StackPanel>
                                         <StackPanel Height="12"/>
-                                        <Label Content="{Binding [Max Thickness], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                        <Label Content="{Binding [Max Thickness], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                         <StackPanel Height="64">
-                                            <Label Content="0.73" FontFamily="Pretendard" FontWeight="Bold" FontSize="54" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
+                                            <Label Content="0.73" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
                                             <StackPanel Width="10"/>
-                                            <Label Content="{Binding [mm], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="Medium" FontSize="30" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom"/>
+                                            <Label Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-30}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom"/>
                                         </StackPanel>                                        
                                     </StackPanel>
                                 </Grid>
@@ -504,8 +504,8 @@
                                         </Canvas>
                                     </Grid>
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="50">
-                                        <Label Content="F :" FontFamily="Pretendard" FontWeight="Medium" FontSize="14" Foreground="{DynamicResource SideMenuTitleBrush}"/>
-                                        <Label Content="{Binding DisplayFrameNumber}" FontFamily="Pretendard" FontWeight="Medium" FontSize="14" Foreground="{DynamicResource SideMenuTitleBrush}" />
+                                        <Label Content="F :" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}"/>
+                                        <Label Content="{Binding DisplayFrameNumber}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" />
                                     </StackPanel>
                                 </Grid>
                                 <!-- Info -->
@@ -583,11 +583,11 @@
 
                     <StackPanel Grid.Column="0" Orientation="Vertical">
                         <StackPanel Height="76"/>
-                        <Label Content="P" HorizontalAlignment="Center" FontFamily="Pretendard" FontWeight="SemiBold" FontSize="20" Foreground="#fcfcfc" Opacity="0.5"/>
+                        <Label Content="P" Style="{DynamicResource Pretendard-Semibold-20}" HorizontalAlignment="Center" Foreground="#fcfcfc" Opacity="0.5"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2" Orientation="Vertical">
                         <StackPanel Height="76"/>
-                        <Label Content="D" HorizontalAlignment="Center" FontFamily="Pretendard" FontWeight="SemiBold" FontSize="20" Foreground="#fcfcfc" Opacity="0.5"/>
+                        <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" HorizontalAlignment="Center" Foreground="#fcfcfc" Opacity="0.5"/>
                     </StackPanel>
 
                     <Grid Grid.Column="1">
