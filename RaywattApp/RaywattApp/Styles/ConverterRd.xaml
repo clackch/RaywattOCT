@@ -49,5 +49,8 @@
 
     <!-- Inverse Boolean Converter -->
     <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" /> 
+    
+    <!-- Grid Length Converter -->
+    <converters:GridLengthConverter x:Key="GridLengthConverter"/>
 
 </ResourceDictionary>

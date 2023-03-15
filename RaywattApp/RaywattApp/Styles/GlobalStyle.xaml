@@ -35,6 +35,11 @@
 
     </Style>
 
+    <Style TargetType="Separator">
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="Padding" Value="0"/>
+    </Style>
+
     <Style TargetType="ToolTip">
         <Setter Property="Padding" Value="0,0,0,0"/>
         <Setter Property="FontFamily" Value="Pretendard"/>
@@ -57,11 +62,25 @@
     <!-- Color -->
     <SolidColorBrush x:Key="BackgroundBrush" Color="#161616"/>
     <SolidColorBrush x:Key="SideCardBackgroundBrush" Color="#232323"/>
-    <SolidColorBrush x:Key="BottomCardBackgroundBrush" Color="#252525"/>
+    <SolidColorBrush x:Key="BottomCardBackgroundBrush" Color="#232323"/>
     <SolidColorBrush x:Key="SideMenuTitleBrush" Color="#b1b1b1"/>
     <SolidColorBrush x:Key="SeparatorBrush" Color="#494949"/>
+    <SolidColorBrush x:Key="VerticalSeparatorBrush" Color="#4f4f4f"/>
     <SolidColorBrush x:Key="MainThemeBrush" Color="#1ed760"/>
     <SolidColorBrush x:Key="MainThemePressedBrush" Color="#26a353"/>
+    <SolidColorBrush x:Key="TabMenuDefaultBrush" Color="#4f4f4f"/>    
+    <SolidColorBrush x:Key="CaseInfoFirstBrush" Color="#fcfcfc"/>    
+    <SolidColorBrush x:Key="CaseInfoSecondBrush" Color="#8d8d8d"/>    
+    <SolidColorBrush x:Key="CaseValueBrush" Color="#b1b1b1"/>
+    <SolidColorBrush x:Key="ValueInfoLabelBrush" Color="#a3a3a3"/>
+    <SolidColorBrush x:Key="ValueInfoValueBrush" Color="#ffffff"/>
+    <SolidColorBrush x:Key="PreLabelBackgroundBrush" Color="#b1b1b1"/>
+    <SolidColorBrush x:Key="PreLabelForegroundBrush" Color="#232323"/>
+    <SolidColorBrush x:Key="PostLabelBackgroundBrush" Color="#4f4f4f"/>
+    <SolidColorBrush x:Key="PostLabelForegroundBrush" Color="#fcfcfc"/>
+    <SolidColorBrush x:Key="FULabelBackgroundBrush" Color="#333333"/>
+    <SolidColorBrush x:Key="FULabelForegroundBrush" Color="#fcfcfc"/>
+
 
     <!-- Button -->
     <Style TargetType="Button" x:Key="ButtonBase">
@@ -189,7 +208,7 @@
         <Setter Property="FontWeight" Value="Medium"/>
         <Setter Property="FontStyle" Value="Normal"/>
         <Setter Property="FontSize" Value="14"/>
-        <Setter Property="Foreground" Value="#ffffff"/>
+        <Setter Property="Foreground" Value="#b1b1b1"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -276,7 +295,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-
+    
     <!-- Toggle Button -->
     <Style TargetType="ToggleButton" x:Key="ContainedToggleBtnType2">
         <Setter Property="Width" Value="192"/>
@@ -286,6 +305,37 @@
                 <ControlTemplate TargetType="ToggleButton">
                     <Grid>
                         <Border x:Name="border" CornerRadius="6" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" BorderThickness="1" BorderBrush="Transparent">
+                            <Grid Background="Transparent"/>
+                        </Border>
+                        <TextBlock x:Name="title" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{TemplateBinding Content}" Foreground="#4f4f4f" FontFamily="Pretendard" FontWeight="Medium" FontSize="14px"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="Transparent"/>
+                            <Setter TargetName="border" Property="Opacity" Value="1.0"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="title" Property="Foreground" Value="{DynamicResource MainThemeBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="border" Property="Opacity" Value="0.08"/>
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource MainThemeBrush}"/>
+                            <Setter TargetName="title" Property="Foreground" Value="{DynamicResource MainThemeBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="ToggleButton" x:Key="ContainedToggleBtnType2-Small">
+        <Setter Property="Width" Value="120"/>
+        <Setter Property="Height" Value="26"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Grid>
+                        <Border x:Name="border" CornerRadius="4" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" BorderThickness="1" BorderBrush="Transparent">
                             <Grid Background="Transparent"/>
                         </Border>
                         <TextBlock x:Name="title" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{TemplateBinding Content}" Foreground="#4f4f4f" FontFamily="Pretendard" FontWeight="Medium" FontSize="14px"/>
@@ -338,6 +388,36 @@
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/button/toggle/large_active.svg}"/>
                             <Setter TargetName="icon" Property="HorizontalAlignment" Value="Right"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="ToggleButton" x:Key="TabToggleBtn">
+        <Setter Property="Width" Value="92"/>
+        <Setter Property="Height" Value="60"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="21"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock x:Name="text" Grid.Row="1" Text="{TemplateBinding Content}" HorizontalAlignment="Center" FontFamily="Pretendard" FontWeight="Medium" FontSize="18" Foreground="{DynamicResource TabMenuDefaultBrush}"/>
+                        <Separator x:Name="separator" Grid.Row="2" Height="4" VerticalAlignment="Bottom" Background="Transparent"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="True">
+                            <Setter TargetName="text" Property="Foreground" Value="{DynamicResource TabMenuDefaultBrush}"/>
+                            <Setter TargetName="separator" Property="Background" Value="Transparent"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="text" Property="Foreground" Value="White"/>
+                            <Setter TargetName="separator" Property="Background" Value="{DynamicResource MainThemeBrush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -1156,7 +1236,107 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
+    <Style TargetType="{x:Type component:IconRepeatButton}" x:Key="IconRepeatButton">
+        <Setter Property="Width" Value="26"/>
+        <Setter Property="Height" Value="26"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type component:IconRepeatButton}">
+                    <Grid Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Background="Transparent">
+                        <Image x:Name="icon" Source="{Binding IconDefault, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="True">
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconDefault, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconOver, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconPressed, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconDisabled, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type component:IconToggleButton}" x:Key="IconToggleButton">
+        <Setter Property="Width" Value="26"/>
+        <Setter Property="Height" Value="26"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type component:IconToggleButton}">
+                    <Grid Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Background="Transparent">
+                        <Image x:Name="icon" Source="{Binding IconDefault, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="True">
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconDefault, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconOver, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconPressed, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconDisabled, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type component:IconMultiToggleButton}" x:Key="IconMultiToggleButton">
+        <Setter Property="Width" Value="26"/>
+        <Setter Property="Height" Value="26"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type component:IconMultiToggleButton}">
+                    <Grid Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Background="Transparent">
+                        <Image x:Name="icon" Source="{Binding IconDefault, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="False"/>
+                                <Condition Property="IsMouseOver" Value="False"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconDefault, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="False"/>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconOver, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="True"/>
+                                <Condition Property="IsMouseOver" Value="False"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="icon" Property="Source" Value="{Binding CheckedIconDefault, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="True"/>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="icon" Property="Source" Value="{Binding CheckedIconOver, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </MultiTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style TargetType="Image" x:Key="VerticalLine_Icon">
         <Setter Property="Source" Value="{svgc:SvgImage Source=/res/icon/verticalLine.svg}"/>
         <Setter Property="Width" Value="1"/>
@@ -1315,6 +1495,68 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <!-- Label -->
+    <Style TargetType="Label" x:Key="ProcedureLabel">
+        <Setter Property="Width" Value="79"/>
+        <Setter Property="Height" Value="26"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Label">
+                    <Grid>
+                        <Border x:Name="border" CornerRadius="13" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Background="{DynamicResource PreLabelBackgroundBrush}">
+                            <Grid Background="Transparent"/>
+                        </Border>
+                        <TextBlock x:Name="text" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{TemplateBinding Content}" Foreground="{DynamicResource PreLabelForegroundBrush}" FontFamily="Pretendard" FontWeight="Medium" FontSize="14px"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=text, Path=Text}" Value="Pre-PCI">
+                            <Setter Property="Width" Value="79"/>
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource PreLabelBackgroundBrush}"/>
+                            <Setter TargetName="text" Property="Foreground" Value="{DynamicResource PreLabelForegroundBrush}"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding ElementName=text, Path=Text}" Value="Post-PCI">
+                            <Setter Property="Width" Value="86"/>
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource PostLabelBackgroundBrush}"/>
+                            <Setter TargetName="text" Property="Foreground" Value="{DynamicResource PostLabelForegroundBrush}"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding ElementName=text, Path=Text}" Value="Follow-Up">
+                            <Setter Property="Width" Value="93"/>
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource FULabelBackgroundBrush}"/>
+                            <Setter TargetName="text" Property="Foreground" Value="{DynamicResource FULabelForegroundBrush}"/>
+                        </DataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style TargetType="Label" x:Key="InfoTitleLabel">
+        <Setter Property="Width" Value="80"/>
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="FontFamily" Value="Pretendard"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="{DynamicResource CaseInfoSecondBrush}"/>
+    </Style>
+    <Style TargetType="Label" x:Key="InfoValueLabel" BasedOn="{StaticResource InfoTitleLabel}">
+        <Setter Property="Width" Value="112"/>
+        <Setter Property="Foreground" Value="{DynamicResource CaseValueBrush}"/>
+    </Style>
+    
+    <!-- Indicator -->
+    <Style TargetType="{x:Type component:IndicatorImage}" x:Key="IndicatorImage">
+        <Setter Property="Source" Value="{Binding IconDefault, Converter={svgc:SvgImageConverter}}"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="False">
+                <Setter Property="Source" Value="{Binding IconDefault, Converter={svgc:SvgImageConverter}, RelativeSource={x:Static RelativeSource.Self}}"/>
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Source" Value="{Binding IconOver, Converter={svgc:SvgImageConverter}, RelativeSource={x:Static RelativeSource.Self}}"/>
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
 </ResourceDictionary>

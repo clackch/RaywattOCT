@@ -3,10 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:RaywattApp.Common.Annotation"
+             xmlns:component="clr-namespace:RaywattApp.Views.Component"
+             xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
              mc:Ignorable="d" 
              x:Name="UserControl"
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignWidth="1280">
 
     <UserControl.Resources>
         <Style TargetType="Rectangle" x:Key="StyleRectangle">
@@ -20,51 +21,55 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="51"/>
             <RowDefinition Height="1"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="184"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Height="29.96" HorizontalAlignment="Right" Orientation="Horizontal">
-            <Button x:Name="MarkBtn" Click="toggle_Bookmark"/>
-            <Button Content="Delete" Click="delete_All"/>
+        <StackPanel Grid.Row="0" HorizontalAlignment="Right" Orientation="Horizontal">
+            <component:IconToggleButton Style="{DynamicResource IconToggleButton}" Icon="bookmarkSimple" x:Name="MarkBtn" Click="toggle_Bookmark"/>
+            <StackPanel Width="6"/>
+            <component:IconButton Style="{DynamicResource IconButton}" Icon="deleteAllSimple" Click="delete_All"/>
+            <StackPanel Width="20"/>
         </StackPanel>
 
-        <Grid Grid.Row="2" Height="230">
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="70"/>
                 <ColumnDefinition/>
-                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="70"/>
             </Grid.ColumnDefinitions>
 
-            <Grid Grid.Column="1" Height="230">
+            <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="30"/>
-                    <RowDefinition/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="35"/>
+                    <RowDefinition Height="105"/>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="24"/>
                 </Grid.RowDefinitions>
 
                 <!-- Scale Image -->
-                <Grid Grid.Row="2" Height="10" Background="AliceBlue">
-                    <ItemsControl ItemsSource="{Binding Bookmarks, ElementName=UserControl}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <Canvas/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemContainerStyle>
-                            <Style TargetType="ContentPresenter">
-                                <Setter Property="Canvas.Left" Value="{Binding LongitudeX}"/>
-                            </Style>
-                        </ItemsControl.ItemContainerStyle>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Rectangle Width="2" Height="10" Fill="Black" MouseDown="click_bookmark" Style="{StaticResource StyleRectangle}"/>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </Grid>
+                <Border Grid.Row="2">
+                    <Grid>
+                        <ItemsControl ItemsSource="{Binding Bookmarks, ElementName=UserControl}" Margin="0,12,0,0">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <Canvas/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemContainerStyle>
+                                <Style TargetType="ContentPresenter">
+                                    <Setter Property="Canvas.Left" Value="{Binding LongitudeX}"/>
+                                </Style>
+                            </ItemsControl.ItemContainerStyle>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Image Margin="-5,0,0,0" Width="10" Height="8" Source="{svgc:SvgImage Source=/res/indicator/bookmark.svg}" MouseDown="click_bookmark"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
+                </Border>
             </Grid>
         </Grid>
     </Grid>

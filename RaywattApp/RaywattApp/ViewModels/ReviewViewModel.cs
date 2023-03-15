@@ -37,6 +37,9 @@ namespace RaywattApp.ViewModels
         public double _y;
 
         [ObservableProperty]
+        public double _centerX;
+
+        [ObservableProperty]
         public bool isMoving = true;
 
         private ICommand _cmdSetCaptured;
@@ -70,8 +73,6 @@ namespace RaywattApp.ViewModels
         private double crossSectionBigHeight;
         private double crossSectionSmallWidth;
         private double crossSectionSmallHeight;
-        private double longitudeWidth;
-        private double longitudeIndicatorWidth;
 
         [ObservableProperty]
         private Indicator _indicatorCrossSection;
@@ -83,7 +84,7 @@ namespace RaywattApp.ViewModels
         private double _pointLongitudeX;
 
         [ObservableProperty]
-        private string _playPauseState;
+        private bool _isPaused;
 
         private double _rightSideBarExpand;
         public double RightSideBarExpand
@@ -173,7 +174,7 @@ namespace RaywattApp.ViewModels
         private ICommand _toggleLongitudeCommand;
         public ICommand ToggleLongitudeCommand
         {
-            get { return this._toggleLongitudeCommand ?? (this._toggleLongitudeCommand = new RelayCommand<string>(ToggleLongitude)); }
+            get { return this._toggleLongitudeCommand ?? (this._toggleLongitudeCommand = new RelayCommand<bool>(ToggleLongitude)); }
         }
 
         private ICommand _coRegistrationCommand;
@@ -204,6 +205,8 @@ namespace RaywattApp.ViewModels
             IndicatorCrossSection.IsVisible = Visibility.Collapsed;
 
             IndicatorLongitude = new Indicator();
+            IndicatorLongitude.X = -7;
+
             IndicatorLongitude.IsVisible = Visibility.Collapsed;
             IndicatorLongitude.PropertyChanged += OnIndicatorLongitudeMoved;
 
@@ -328,7 +331,7 @@ namespace RaywattApp.ViewModels
 
             if (indicator.isCaptured && PointLongitudeX >= 0)
             {
-                indicator.X = PointLongitudeX + longitudeIndicatorWidth / 2;
+                indicator.X = PointLongitudeX + Constants.LongitudeIndicatorWidth / 2;
             }
         }
 
@@ -348,14 +351,6 @@ namespace RaywattApp.ViewModels
                 {
                     crossSectionSmallWidth = actualWidth;
                     crossSectionSmallHeight = actualHeight;
-                }
-                else if (viewName.Equals("longitude"))
-                {
-                    longitudeWidth = actualWidth;
-                }
-                else if (viewName.Equals("longitudeIndicatorImage")) 
-                {
-                    longitudeIndicatorWidth = actualHeight; // 90 degree rotated
                 }
             }
         }
@@ -463,24 +458,10 @@ namespace RaywattApp.ViewModels
             return JsonConvert.SerializeObject(measurements, Formatting.Indented);
         }
 
-        private void ToggleLongitude(string param)
+        private void ToggleLongitude(bool isLumenProfile)
         {
-            if (param.Equals(Constants.LongitudeProfile))
-            {
-                if(ReviewStatus.IsLumenProfile)
-                    return;
-
-                IndicatorCrossSection.IsVisible = Visibility.Collapsed;
-                ReviewStatus.IsLumenProfile = true;
-            }
-            else
-            {
-                if (!ReviewStatus.IsLumenProfile)
-                    return;
-
-                IndicatorCrossSection.IsVisible = Visibility.Visible;
-                ReviewStatus.IsLumenProfile = false;
-            }
+            ReviewStatus.IsLumenProfile = isLumenProfile;
+            IndicatorCrossSection.IsVisible = (isLumenProfile) ? Visibility.Collapsed : Visibility.Visible;
         }
 
         private void CoRegistration()
@@ -548,26 +529,22 @@ namespace RaywattApp.ViewModels
         {
             double pauseState = RayGetProperty(Property.IsPaused);
 
-            if (pauseState != 0)
-            {
-                PlayPauseState = _l10n["Play"];
-            }
-            else 
-            {
-                PlayPauseState = _l10n["Pause"];
-            }
+            IsPaused = (pauseState == 0);
         }
 
         private void updateNavigator(int curFrame, int totalFrame)
         {
             double curPosition = (double)curFrame / (totalFrame - 1);
-            curPosition *= longitudeWidth;
-            IndicatorLongitude.X = curPosition + longitudeIndicatorWidth / 2;
+            curPosition *= Constants.LongitudeWidth;
+            IndicatorLongitude.X = curPosition - Constants.LongitudeIndicatorWidth / 2;
+            IndicatorLongitude.CenterX = curPosition;
         }
 
         private void setCurrentFrame(double navigatorPosition)
         {
-            double curPosition = (navigatorPosition + longitudeIndicatorWidth / 2) / (double)longitudeWidth;
+            if (IndicatorLongitude.isCaptured == false) return;
+
+            double curPosition = (navigatorPosition + Constants.LongitudeIndicatorWidth / 2) / Constants.LongitudeWidth;
 
             if (longitudeFrameInfo != null)
             {
