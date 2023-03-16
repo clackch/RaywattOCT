@@ -203,6 +203,11 @@ namespace RaywattApp.Common.Bases
         public const double CrossSectionSize = 620;
         public const double CrossSectionCenter = CrossSectionSize / 2;
 
+        //Review - 2D - Angio
+        public const double AngioSize = 580;
+        public const double CrossSectionAngio = 292;
+        public const double CrossSectionAngioCenter = CrossSectionAngio / 2;
+
         //Review - 2D - Longitude
         public const double LongitudeWidth = 1140;
         public const double LongitudeHeight = 105;

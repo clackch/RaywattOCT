@@ -167,7 +167,15 @@
         <Setter Property="FontStyle" Value="Normal"/>
         <Setter Property="FontSize" Value="30"/>
     </Style>
-    
+
+    <Style TargetType="Control" x:Key="Pretendard-Medium-24">
+        <Setter Property="Padding" Value="0,0,0,0"/>
+        <Setter Property="FontFamily" Value="Pretendard"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="FontStyle" Value="Normal"/>
+        <Setter Property="FontSize" Value="24"/>
+    </Style>
+
     <Style TargetType="Control" x:Key="Pretendard-Medium-22">
         <Setter Property="Padding" Value="0,0,0,0"/>
         <Setter Property="FontFamily" Value="Pretendard"/>
