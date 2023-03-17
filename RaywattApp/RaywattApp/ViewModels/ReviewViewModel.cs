@@ -18,6 +18,11 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
 using RaywattApp.Common.Annotation.Util;
+using System.Windows.Controls;
+using System.Drawing;
+using Point = System.Windows.Point;
+using System.Windows.Media;
+using System.Diagnostics;
 
 namespace RaywattApp.ViewModels
 {
@@ -25,7 +30,8 @@ namespace RaywattApp.ViewModels
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(Indicator));
 
-        public bool isCaptured = false;
+        [ObservableProperty]
+        public bool _isCaptured = false;
 
         [ObservableProperty]
         public Visibility _isVisible;
@@ -50,7 +56,7 @@ namespace RaywattApp.ViewModels
 
         private void SetCaptured(bool isCaptured) 
         {
-            this.isCaptured = isCaptured;
+            IsCaptured = isCaptured;
             IsMoving = !isCaptured;
         }
     }
@@ -67,12 +73,9 @@ namespace RaywattApp.ViewModels
         }
 
         // size from view
-        private double crossSectionWidth;
-        private double crossSectionHeight;
-        private double crossSectionBigWidth;
-        private double crossSectionBigHeight;
-        private double crossSectionSmallWidth;
-        private double crossSectionSmallHeight;
+        private Point crossSectionCenterBig = new Point();
+        private Point crossSectionCenterSmall = new Point();
+        private Point longitudeCoordinate = new Point();
 
         [ObservableProperty]
         private Indicator _indicatorCrossSection;
@@ -168,7 +171,7 @@ namespace RaywattApp.ViewModels
         private ICommand _cmdViewSizeChanged;
         public ICommand CmdViewSizeChanged
         { 
-            get { return this._cmdViewSizeChanged ?? (this._cmdViewSizeChanged = new RelayCommand<object[]>(ViewSizeChanged)); }
+            get { return this._cmdViewSizeChanged ?? (this._cmdViewSizeChanged = new RelayCommand<object>(ViewSizeChanged)); }
         }
 
         private ICommand _toggleLongitudeCommand;
@@ -306,21 +309,20 @@ namespace RaywattApp.ViewModels
         {
             Indicator indicator = (Indicator)param;
 
-            if (indicator.isCaptured)
+            if (indicator.IsCaptured)
             {
+                Point crossSectionCenter = new Point();
                 if (ReviewStatus.IsAngioOn)
                 {
-                    crossSectionWidth = crossSectionSmallWidth;
-                    crossSectionHeight = crossSectionSmallHeight;
+                    crossSectionCenter = crossSectionCenterSmall;
                 }
                 else
                 {
-                    crossSectionWidth = crossSectionBigWidth;
-                    crossSectionHeight = crossSectionBigHeight;
+                    crossSectionCenter = crossSectionCenterBig;
                 }
 
-                double pointX = crossSectionWidth / 2 - indicator.X;
-                double pointY = crossSectionHeight / 2 - indicator.Y;
+                double pointX = crossSectionCenter.X - indicator.X;
+                double pointY = crossSectionCenter.Y - indicator.Y;
                 Degree = (int)(Math.Atan2(pointY, pointX) * 180 / Math.PI);
             }
         }
@@ -329,28 +331,41 @@ namespace RaywattApp.ViewModels
         {
             Indicator indicator = (Indicator)param;
 
-            if (indicator.isCaptured && PointLongitudeX >= 0)
+            if (indicator.IsCaptured)
             {
-                indicator.X = PointLongitudeX + Constants.LongitudeIndicatorWidth / 2;
+                double x = PointLongitudeX - longitudeCoordinate.X;
+
+                if (x >= 0 && x < Constants.LongitudeWidth)
+                {
+                    indicator.X = x - Constants.LongitudeIndicatorWidth / 2;
+                }
             }
         }
 
-        private void ViewSizeChanged(object[] param)
+        private void ViewSizeChanged(object param)
         {
-            if (param != null && param.Length == 3) {
-                string viewName = (string)param[0];
-                double actualWidth = (double)param[1];
-                double actualHeight = (double)param[2];
+            if (param != null)
+            {
+                FrameworkElement frameworkElement = (FrameworkElement)param;
 
-                if (viewName.Equals("crossSectionImage"))
+                Point pointWindow = Application.Current.MainWindow.PointToScreen(new Point(0, 0));
+                Point point = frameworkElement.PointToScreen(new Point(0, 0));
+                point.X -= pointWindow.X;
+                point.Y -= pointWindow.Y;
+
+                if (frameworkElement.Name.Equals("crossSectionImage"))
                 {
-                    crossSectionBigWidth = actualWidth;
-                    crossSectionBigHeight = actualHeight;
+                    crossSectionCenterBig.X = point.X + (frameworkElement.ActualWidth / 2);
+                    crossSectionCenterBig.Y = point.Y + (frameworkElement.ActualHeight / 2);
                 }
-                else if (viewName.Equals("crossSectionImageSmall"))
+                else if (frameworkElement.Name.Equals("crossSectionImageSmall"))
                 {
-                    crossSectionSmallWidth = actualWidth;
-                    crossSectionSmallHeight = actualHeight;
+                    crossSectionCenterSmall.X = point.X + (frameworkElement.ActualWidth / 2);
+                    crossSectionCenterSmall.Y = point.Y + (frameworkElement.ActualHeight / 2);
+                }
+                else if (frameworkElement.Name.Equals("lumenProfile") || frameworkElement.Name.Equals("lMode"))
+                {
+                    longitudeCoordinate = point;
                 }
             }
         }
@@ -504,7 +519,7 @@ namespace RaywattApp.ViewModels
         {
             if (DrawCrossSectionImage())
             {
-                if (!IndicatorLongitude.isCaptured) updateNavigator(crossSectionFrameInfo[0].curFrame, crossSectionFrameInfo[0].totalFrame);
+                if (!IndicatorLongitude.IsCaptured) updateNavigator(crossSectionFrameInfo[0].curFrame, crossSectionFrameInfo[0].totalFrame);
 
                 FrameNumber = crossSectionFrameInfo[0].curFrame;
                 MeasurementFrameNumber = FrameNumber;
@@ -542,7 +557,7 @@ namespace RaywattApp.ViewModels
 
         private void setCurrentFrame(double navigatorPosition)
         {
-            if (IndicatorLongitude.isCaptured == false) return;
+            if (IndicatorLongitude.IsCaptured == false) return;
 
             double curPosition = (navigatorPosition + Constants.LongitudeIndicatorWidth / 2) / Constants.LongitudeWidth;
 

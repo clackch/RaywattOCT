@@ -1,6 +1,20 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:svgc="http://sharpvectors.codeplex.com/svgc/">
+                    xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+                    xmlns:component="clr-namespace:RaywattApp.Views.Component">
+    
+    <!-- Grid -->
+    <Style TargetType="{x:Type component:IndicatorAreaGrid}" x:Key="IndicatorAreaGrid">
+        <Setter Property="Background" Value="{x:Null}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsCaptured}" Value="true">
+                <Setter Property="Background" Value="Transparent"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsCaptured}" Value="false">
+                <Setter Property="Background" Value="{x:Null}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
 
     <!-- DataGrid -->
     <Style TargetType="DataGrid" x:Key="DataGridBase" BasedOn="{StaticResource Pretendard-Medium-16}">

@@ -59,4 +59,7 @@
     <!-- DataGrid Sort Text Converter -->
     <converters:DataGridSortTextConverter x:Key="DataGridSortTextConverter" />
 
+    <!-- Bool to Tranparent Converter -->
+    <converters:DataGridSortTextConverter x:Key="TransparentConverter" />
+
 </ResourceDictionary>
