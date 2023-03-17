@@ -301,7 +301,7 @@ namespace RaywattApp.ViewModels.File
             if (isChecked && isNotChecked)
             {
                 CheckBoxAllSelected = null;
-                PatientChecked.IsChecked = true;
+                PatientChecked.IsChecked = null;
             }
             else if (isChecked && !isNotChecked)
             {

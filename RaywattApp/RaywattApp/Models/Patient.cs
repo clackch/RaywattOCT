@@ -104,6 +104,6 @@ namespace RaywattApp.Models
         private IList<PatientCase> patientCaseList;
 
         [ObservableProperty]
-        private bool isChecked;
+        private bool? isChecked;
     }
 }

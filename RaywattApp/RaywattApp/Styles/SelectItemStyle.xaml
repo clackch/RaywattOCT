@@ -3,7 +3,39 @@
                     xmlns:svgc="http://sharpvectors.codeplex.com/svgc/">
 
     <!-- Check Box -->
-    <Style TargetType="CheckBox">
+    <Style TargetType="CheckBox" x:Key="CheckBoxBase">
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Rectangle x:Name="hover" Width="28" Height="28" Fill="Transparent"/>
+                        <Image x:Name="icon" Source="{svgc:SvgImage Source=/res/button/check/checkboxUnchecked.svg}" Width="18" Height="18"/>
+                        <ContentPresenter Grid.Column="1" Margin="7,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="True">
+                            <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource GrayscaleGray5Brush}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="hover" Property="Fill" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+                            <Setter TargetName="hover" Property="Opacity" Value="0.08"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/button/check/checkboxChecked.svg}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <!-- Radio Button -->
@@ -12,7 +44,7 @@
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="ToggleButton">
+                <ControlTemplate TargetType="RadioButton">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>

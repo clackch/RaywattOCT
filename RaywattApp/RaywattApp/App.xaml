@@ -10,10 +10,10 @@
                 <ResourceDictionary Source="/Styles/ConverterRd.xaml" />
                 <ResourceDictionary Source="/Styles/GlobalStyle.xaml" />
                 <ResourceDictionary Source="/Styles/ButtonStyle.xaml" />
-                <ResourceDictionary Source="/Styles/GridStyle.xaml" />
                 <ResourceDictionary Source="/Styles/IconStyle.xaml" />
                 <ResourceDictionary Source="/Styles/SelectItemStyle.xaml" />
                 <ResourceDictionary Source="/Styles/TextStyle.xaml" />
+                <ResourceDictionary Source="/Styles/GridStyle.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <localization:DynamicResource x:Key="L10N"/>
         </ResourceDictionary>
