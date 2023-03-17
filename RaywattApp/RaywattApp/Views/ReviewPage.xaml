@@ -112,26 +112,24 @@
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
 
-                        <Canvas>
-                            <Image Source="/res/bar/indicator.png" Height="{x:Static const:Constants.CrossSectionSize}" Width="{x:Static const:Constants.CrossSectionSize}" Cursor="Hand" Opacity="0.25">
-                                <Image.RenderTransform>
-                                    <!-- Image Indicator bar width(about 7) => CenterY 3.5 -->
-                                    <RotateTransform CenterX="{x:Static const:Constants.CrossSectionCenter}" CenterY="3.5" Angle="{Binding Degree}"/>
-                                </Image.RenderTransform>
+                        <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="crossSection" Height="{x:Static const:Constants.CrossSectionSize}" Width="{x:Static const:Constants.CrossSectionSize}" Cursor="Hand">
+                            <Image.RenderTransform>
+                                <!-- Image Indicator bar width(18) => CenterY 9 -->
+                                <RotateTransform CenterX="{x:Static const:Constants.CrossSectionCenter}" CenterY="9" Angle="{Binding Degree}"/>
+                            </Image.RenderTransform>
 
-                                <i:Interaction.Triggers>
-                                    <i:EventTrigger EventName="PreviewMouseDown" >
-                                        <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
-                                    </i:EventTrigger>
-                                    <i:EventTrigger EventName="PreviewMouseUp" >
-                                        <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
-                                    </i:EventTrigger>
-                                    <i:EventTrigger EventName="PreviewMouseMove" >
-                                        <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
-                                    </i:EventTrigger>
-                                </i:Interaction.Triggers>
-                            </Image>
-                        </Canvas>
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="PreviewMouseDown" >
+                                    <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="PreviewMouseUp" >
+                                    <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="PreviewMouseMove" >
+                                    <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </component:IndicatorImage>
                     </Grid>
 
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="50">
@@ -148,7 +146,7 @@
                     <annotation:DrawUtil Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorCrossSection.IsMoving}" IsEnabled="{Binding IndicatorCrossSection.IsMoving}"/>
                 </Grid>
                 <!-- Angio -->
-                <Grid Grid.Column="2" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Background="Beige">
+                <Grid Grid.Column="2" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Background="LightGray">
                     
                 </Grid>
 

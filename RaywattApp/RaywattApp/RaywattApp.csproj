@@ -12,6 +12,8 @@
     <None Remove="res\bar\indicator.png" />
     <None Remove="res\bar\indicator2.png" />
     <None Remove="res\icon\test.png" />
+    <None Remove="res\indicator\crossSection.svg" />
+    <None Remove="res\indicator\crossSection_hover.svg" />
   </ItemGroup>
 
   <ItemGroup>
@@ -485,7 +487,6 @@
     <Folder Include="OCT\Core\" />
     <Folder Include="res\button\check\" />
     <Folder Include="res\button\radio\" />
-    <Folder Include="res\indicator\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -494,6 +495,12 @@
 
   <ItemGroup>
     <Resource Include="res\bar\indicator.png" />
+    <Resource Include="res\indicator\crossSection.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="res\indicator\crossSection_hover.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="res\indicator\longitude_hover.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
