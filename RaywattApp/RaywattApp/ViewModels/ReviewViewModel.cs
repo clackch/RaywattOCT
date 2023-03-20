@@ -208,10 +208,8 @@ namespace RaywattApp.ViewModels
             IndicatorCrossSection.IsVisible = Visibility.Collapsed;
 
             IndicatorLongitude = new Indicator();
-            IndicatorLongitude.X = -7;
-
+            IndicatorLongitude.X = Constants.LongitudeIndicatorWidth / 2;
             IndicatorLongitude.IsVisible = Visibility.Collapsed;
-            IndicatorLongitude.PropertyChanged += OnIndicatorLongitudeMoved;
 
             ExpandLeftUpMenu = true;
             ExpandLeftDownMenu = true;
@@ -271,11 +269,6 @@ namespace RaywattApp.ViewModels
 
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
-        }
-
-        private void OnIndicatorLongitudeMoved(object sender, EventArgs e)
-        {
-            setCurrentFrame(IndicatorLongitude.X);
         }
 
         private void Playback(object param)
@@ -338,6 +331,7 @@ namespace RaywattApp.ViewModels
                 if (x >= 0 && x < Constants.LongitudeWidth)
                 {
                     indicator.X = x - Constants.LongitudeIndicatorWidth / 2;
+                    setCurrentFrame(x);
                 }
             }
         }
@@ -557,13 +551,12 @@ namespace RaywattApp.ViewModels
 
         private void setCurrentFrame(double navigatorPosition)
         {
-            if (IndicatorLongitude.IsCaptured == false) return;
-
-            double curPosition = (navigatorPosition + Constants.LongitudeIndicatorWidth / 2) / Constants.LongitudeWidth;
+            double curPosition = navigatorPosition / Constants.LongitudeWidth;
 
             if (longitudeFrameInfo != null)
             {
                 curPosition *= (longitudeFrameInfo.totalFrame - 1);
+                curPosition = Math.Round(curPosition);
                 RayMoveToFrame((int)curPosition);
             }
         }
