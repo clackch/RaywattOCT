@@ -89,9 +89,6 @@
                             <StackPanel Height="4"/>
                             <Label Content="1 mm" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
                         </StackPanel>
-
-                        <!-- Measurement -->
-                        <annotation:DrawUtil Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorCrossSection.IsMoving}" IsEnabled="{Binding IndicatorCrossSection.IsMoving}"/>
                     </Grid>
                     <!-- Angio -->
                     <Grid Grid.Column="2" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Background="LightGray">
@@ -594,6 +591,9 @@
                         </i:Interaction.Triggers>
                     </component:IndicatorImage>
                 </Grid>
+
+                <!-- Measurement -->
+                <annotation:DrawUtil Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorCrossSection.IsMoving}" IsEnabled="{Binding IndicatorCrossSection.IsMoving}"/>
 
                 <!-- Longitude Part -->
                 <Grid Grid.Row="3" Background="{StaticResource BottomCardBackgroundBrush}">
