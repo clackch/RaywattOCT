@@ -161,6 +161,9 @@
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Source" Value="{Binding IconOver, Converter={svgc:SvgImageConverter}, RelativeSource={x:Static RelativeSource.Self}}"/>
             </Trigger>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsCaptured}" Value="true">
+                <Setter Property="Source" Value="{Binding IconOver, Converter={svgc:SvgImageConverter}, RelativeSource={x:Static RelativeSource.Self}}"/>
+            </DataTrigger>
         </Style.Triggers>
     </Style>
     

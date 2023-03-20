@@ -304,7 +304,7 @@ namespace RaywattApp.ViewModels
 
             if (indicator.IsCaptured)
             {
-                Point crossSectionCenter = new Point();
+                Point crossSectionCenter;
                 if (ReviewStatus.IsAngioOn)
                 {
                     crossSectionCenter = crossSectionCenterSmall;
