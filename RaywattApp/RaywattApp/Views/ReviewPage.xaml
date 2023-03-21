@@ -618,10 +618,23 @@
                             <StackPanel Height="76"/>
                             <Label Content="P" Style="{DynamicResource Pretendard-Semibold-20}" HorizontalAlignment="Center" Foreground="#fcfcfc" Opacity="0.5"/>
                         </StackPanel>
-                        <StackPanel Grid.Column="2" Orientation="Vertical">
-                            <StackPanel Height="76"/>
-                            <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" HorizontalAlignment="Center" Foreground="#fcfcfc" Opacity="0.5"/>
-                        </StackPanel>
+                        <Grid Grid.Column="2">
+                            <StackPanel Orientation="Vertical">
+                                <StackPanel Height="76"/>
+                                <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" HorizontalAlignment="Center" Foreground="#fcfcfc" Opacity="0.5"/>
+                            </StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="9"/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="35"/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Image Grid.Column="1" Grid.Row="1" Width="12" Height="105" Source="{svgc:SvgImage Source=/res/icon/indicator.svg}" Visibility="{Binding IndicatorCrossSection.IsVisible}" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                            </Grid>
+                        </Grid>
 
                         <Grid Grid.Column="1">
                             <Grid.RowDefinitions>
