@@ -41,8 +41,8 @@ namespace RaywattApp.Common.Bases
         //Resolution
         public const double ApplicationWidth = 1280;
         public const double ApplicationHeight = 1024;
-        public const double FileDialogWidth = 860;
-        public const double FileDialogHeight = 848;
+        public const double FileExportDialogWidth = 860;
+        public const double FileExportDialogHeight = 741;
         public const double SettingDialogWidth = 860;
         public const double SettingDialogHeight = 714;
         public const double ConfirmDialogWidth = 360;

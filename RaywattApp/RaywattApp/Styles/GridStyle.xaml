@@ -219,7 +219,7 @@
 
     <Style TargetType="TextBox" x:Key="DataGridCellEditTextBox" BasedOn="{StaticResource Pretendard-Medium-14}">
         <Setter Property="Margin" Value="8"/>
-        <Setter Property="Width" Value="103"/>
+        <Setter Property="Width" Value="133"/>
         <Setter Property="Height" Value="41"/>
         <Setter Property="CaretBrush" Value="{DynamicResource GrayscaleWhiteBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>

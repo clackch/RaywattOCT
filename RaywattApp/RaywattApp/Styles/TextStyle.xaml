@@ -114,6 +114,52 @@
         </Setter>
     </Style>
 
+    <Style TargetType="TextBox" x:Key="TextBoxWithCorner" BasedOn="{StaticResource Pretendard-Medium-18}">
+        <Setter Property="SelectionBrush" Value="{DynamicResource MainPrimaryColorBrush}"/>
+        <Setter Property="SelectionOpacity" Value="0.08"/>
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleGray3Brush}"/>
+        <Setter Property="Height" Value="54"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type TextBox}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Border x:Name="border" Height="54" CornerRadius="8" BorderBrush="{DynamicResource GrayscaleGray5Brush}" BorderThickness="1" Background="Transparent">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="1" x:Name="placeholder" Content="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Tag}" Foreground="{DynamicResource GrayscaleGray3Brush}" Visibility="Collapsed" Focusable="false" VerticalAlignment="Center"/>
+                                <ScrollViewer Grid.Column="1" x:Name="PART_ContentHost" Focusable="false" VerticalAlignment="Center" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Text" Value=""/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="placeholder" Property="Visibility" Value="Visible"/>
+                        </MultiTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="TextBox" x:Key="TextBoxReadOnly" BasedOn="{StaticResource Pretendard-Medium-16}">
+        <Setter Property="IsReadOnly" Value="True"/>
+        <Setter Property="SelectionBrush" Value="{DynamicResource MainPrimaryColorBrush}"/>
+        <Setter Property="SelectionOpacity" Value="0.08"/>
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+
     <Style TargetType="TextBox" x:Key="TextBoxValidator" BasedOn="{StaticResource TextBoxBase}">
         <Setter Property="ToolTipService.IsEnabled" Value="False"/>
         <Setter Property="Height" Value="72"/>

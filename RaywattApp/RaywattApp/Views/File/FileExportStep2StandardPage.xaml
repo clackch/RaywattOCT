@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:RaywattApp.Views.File"
       xmlns:const="clr-namespace:RaywattApp.Common.Bases"
       mc:Ignorable="d" 
-      Width="{x:Static const:Constants.FileDialogWidth}" Height="{x:Static const:Constants.FileDialogHeight}"
+      Width="{x:Static const:Constants.FileExportDialogWidth}" Height="{x:Static const:Constants.FileExportDialogHeight}"
       Title="FileExportStep2StandardPage">
 
     <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}">

@@ -460,9 +460,6 @@
   <data name="Path" xml:space="preserve">
     <value>경로</value>
   </data>
-  <data name="Path is required" xml:space="preserve">
-    <value>경로가 필요합니다</value>
-  </data>
   <data name="Patient" xml:space="preserve">
     <value>환자</value>
   </data>
@@ -567,6 +564,9 @@
   </data>
   <data name="Secondary Capture" xml:space="preserve">
     <value>세컨더리 캡처</value>
+  </data>
+  <data name="Select destination path" xml:space="preserve">
+    <value>목적지 경로를 선택하세요</value>
   </data>
   <data name="Select Drive" xml:space="preserve">
     <value>드라이브 선택</value>

@@ -460,9 +460,6 @@ Do you want to import data?</value>
   <data name="Path" xml:space="preserve">
     <value>Path</value>
   </data>
-  <data name="Path is required" xml:space="preserve">
-    <value>Path is required</value>
-  </data>
   <data name="Patient" xml:space="preserve">
     <value>Patient</value>
   </data>
@@ -567,6 +564,9 @@ Do you want to import data?</value>
   </data>
   <data name="Secondary Capture" xml:space="preserve">
     <value>Secondary Capture</value>
+  </data>
+  <data name="Select destination path" xml:space="preserve">
+    <value>Select destination path</value>
   </data>
   <data name="Select Drive" xml:space="preserve">
     <value>Select Drive</value>

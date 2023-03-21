@@ -160,7 +160,7 @@ namespace RaywattApp.ViewModels.File
             parameter["patientCases"] = PatientCases;
             parameter["dbFilePath"] = dbFilePath;
             parameter["contents"] = JsonConvert.SerializeObject(fileFormat, Formatting.Indented);
-            var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter, Constants.FileDialogWidth, Constants.FileDialogHeight);
+            var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter, Constants.FileExportDialogWidth, Constants.FileExportDialogHeight);
 
             if(FileExport.RemoveWhenComplete)
                 RemoveData(exportfiles);
@@ -204,7 +204,7 @@ namespace RaywattApp.ViewModels.File
             parameter["patientList"] = FileExport.PatientList;
             parameter["alternatePatientId"] = FileExport.AlternatePatientId;
 
-            var result = _dialogService.OpenDialog(new FileAlternateIdDialogControl(), parameter, Constants.FileDialogWidth, Constants.FileDialogHeight);
+            var result = _dialogService.OpenDialog(new FileAlternateIdDialogControl(), parameter, Constants.FileExportDialogWidth, Constants.FileExportDialogHeight);
 
             if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
             {

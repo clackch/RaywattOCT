@@ -57,11 +57,15 @@
                 </i:Interaction.Behaviors>
             </TreeView>
 
-            <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal">
-                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Folder], Source={StaticResource L10N}}"/>
-                <StackPanel Width="10"/>
-                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding SelectedDir.Path, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-            </StackPanel>
+            <Grid Grid.Row="6" Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Folder], Source={StaticResource L10N}}"/>
+                <TextBox Grid.Column="2" Style="{DynamicResource TextBoxReadOnly}" Text="{Binding SelectedDir.Path, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            </Grid>
 
             <StackPanel Grid.Row="7" Grid.Column="1" Orientation="Horizontal"  VerticalAlignment="Top">
                 <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>

@@ -8,7 +8,7 @@
       xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
       xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
       mc:Ignorable="d" 
-      Width="{x:Static const:Constants.FileDialogWidth}" Height="{x:Static const:Constants.FileDialogHeight}"
+      Width="{x:Static const:Constants.FileExportDialogWidth}" Height="{x:Static const:Constants.FileExportDialogHeight}"
       Title="FileExportStep1Page">
 
     <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}">
@@ -23,7 +23,7 @@
                 <RowDefinition Height="62"/>
                 <RowDefinition Height="64"/>
                 <RowDefinition Height="29"/>
-                <RowDefinition Height="558"/>
+                <RowDefinition Height="451"/>
                 <RowDefinition Height="28"/>
                 <RowDefinition Height="71" />
             </Grid.RowDefinitions>
