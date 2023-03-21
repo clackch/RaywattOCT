@@ -55,12 +55,10 @@ namespace RaywattApp.ViewModels
         private void SetCaptured(bool isCaptured) 
         {
             IsCaptured = isCaptured;
-            if (!IsCaptured)
-            {
-                X = double.NaN;
-                Y = double.NaN;
-                IsValid = false;
-            }
+
+            X = double.NaN;
+            Y = double.NaN;
+            IsValid = false;
         }
 
         public void SetDirection(Point center, double degree)
