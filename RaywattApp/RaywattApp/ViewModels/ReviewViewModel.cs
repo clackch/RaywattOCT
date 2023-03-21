@@ -18,11 +18,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
 using RaywattApp.Common.Annotation.Util;
-using System.Windows.Controls;
-using System.Drawing;
 using Point = System.Windows.Point;
-using System.Windows.Media;
-using System.Diagnostics;
 
 namespace RaywattApp.ViewModels
 {
@@ -37,16 +33,18 @@ namespace RaywattApp.ViewModels
         public Visibility _isVisible;
 
         [ObservableProperty]
-        public double _x;
+        public double _x = double.NaN;
 
         [ObservableProperty]
-        public double _y;
+        public double _y = double.NaN;
+
+        [ObservableProperty]
+        public bool _isValid = false;
 
         [ObservableProperty]
         public double _centerX;
 
-        [ObservableProperty]
-        public bool isMoving = true;
+        public bool OppositeCaptured = false;
 
         private ICommand _cmdSetCaptured;
         public ICommand CmdSetCaptured
@@ -57,7 +55,28 @@ namespace RaywattApp.ViewModels
         private void SetCaptured(bool isCaptured) 
         {
             IsCaptured = isCaptured;
-            IsMoving = !isCaptured;
+            if (!IsCaptured)
+            {
+                X = double.NaN;
+                Y = double.NaN;
+                IsValid = false;
+            }
+        }
+
+        public void SetDirection(Point center, double degree)
+        {
+            if (double.IsNaN(X) || double.IsNaN(Y) || IsValid) return;
+
+            double yOffset = Y - center.Y;
+            if ((yOffset * degree) >= 0)
+            {
+                OppositeCaptured = true;
+            }
+            else
+            {
+                OppositeCaptured = false;
+            }
+            IsValid = true;
         }
     }
 
@@ -314,8 +333,21 @@ namespace RaywattApp.ViewModels
                     crossSectionCenter = crossSectionCenterBig;
                 }
 
-                double pointX = crossSectionCenter.X - indicator.X;
-                double pointY = crossSectionCenter.Y - indicator.Y;
+                indicator.SetDirection(crossSectionCenter, Degree);
+                if (!indicator.IsValid) return;
+
+                Point headerSidePoint = new Point(indicator.X, indicator.Y);
+                if (indicator.OppositeCaptured)
+                {
+                    double xOffset = indicator.X - crossSectionCenter.X;
+                    double yOffset = indicator.Y - crossSectionCenter.Y;
+
+                    headerSidePoint.X = crossSectionCenter.X - xOffset;
+                    headerSidePoint.Y = crossSectionCenter.Y - yOffset;
+                }
+
+                double pointX = crossSectionCenter.X - headerSidePoint.X;
+                double pointY = crossSectionCenter.Y - headerSidePoint.Y;
                 Degree = (int)(Math.Atan2(pointY, pointX) * 180 / Math.PI);
             }
         }

@@ -285,8 +285,7 @@
                                     <RowDefinition/>
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0" >
-                                    <Button Style="{DynamicResource SideMenuTitleRight}" Content="Value Info." Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.RightMenu}" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
-                                    <Button Style="{DynamicResource SideMenuTitleRight}" Content="Measurement" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.RightMenu}" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                    <Button Style="{DynamicResource SideMenuTitleRight}" Content="Value Info." Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.RightMenu}"/>
                                 </StackPanel>
 
                                 <!-- Default -->
@@ -399,10 +398,6 @@
                                             </Image>
                                             <!-- Indicator  -->
                                             <Grid Background="Transparent" Visibility="{Binding IndicatorCrossSection.IsVisible}">
-                                                <i:Interaction.Behaviors>
-                                                    <behaviors:MouseBehavior MouseX="{Binding IndicatorCrossSection.X, Mode=OneWayToSource}" MouseY="{Binding IndicatorCrossSection.Y, Mode=OneWayToSource}" />
-                                                </i:Interaction.Behaviors>
-
                                                 <i:Interaction.Triggers>
                                                     <i:EventTrigger EventName="MouseLeave" >
                                                         <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
@@ -573,7 +568,7 @@
 
                 <!-- Indicator  -->
                 <Grid Grid.Row="1" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                    <component:IndicatorImage Grid.Row="1" Style="{DynamicResource IndicatorImage}" Width="640" Height="18" Icon="crossSection" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Cursor="Hand" Visibility="{Binding IndicatorCrossSection.IsVisible}">
+                    <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Width="640" Height="18" Icon="crossSection" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Cursor="Hand" Visibility="{Binding IndicatorCrossSection.IsVisible}">
                         <Image.RenderTransform>
                             <RotateTransform CenterX="319" CenterY="9" Angle="{Binding Degree}"/>
                         </Image.RenderTransform>
@@ -593,7 +588,7 @@
                 </Grid>
 
                 <!-- Measurement -->
-                <annotation:DrawUtil Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorCrossSection.IsMoving}" IsEnabled="{Binding IndicatorCrossSection.IsMoving}"/>
+                <annotation:DrawUtil Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}"/>
 
                 <!-- Longitude Part -->
                 <Grid Grid.Row="3" Background="{StaticResource BottomCardBackgroundBrush}">
@@ -695,7 +690,7 @@
 
                                 <!-- Measurement -->
                                 <Grid>
-                                    <annotation:DrawLmodeUtil Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" LModeLengthGeometries="{Binding LModeLengthGeometries}" LModeTextGeometries="{Binding LModeTextGeometries}" LModeIndicatorX="{Binding LModeIndicatorX, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorLongitude.IsMoving}" IsEnabled="{Binding IndicatorLongitude.IsMoving}"/>
+                                    <annotation:DrawLmodeUtil Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" LModeLengthGeometries="{Binding LModeLengthGeometries}" LModeTextGeometries="{Binding LModeTextGeometries}" LModeIndicatorX="{Binding LModeIndicatorX, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorLongitude.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorLongitude.IsCaptured, Converter={StaticResource InverseBooleanConverter}}"/>
                                 </Grid>
                             </Grid>
 
