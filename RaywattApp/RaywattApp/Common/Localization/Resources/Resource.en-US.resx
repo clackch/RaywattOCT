@@ -129,8 +129,8 @@
   <data name="Add Patient" xml:space="preserve">
     <value>Add Patient</value>
   </data>
-  <data name="Additional" xml:space="preserve">
-    <value>Additional</value>
+  <data name="Additional Option" xml:space="preserve">
+    <value>Additional Option</value>
   </data>
   <data name="Alternate ID" xml:space="preserve">
     <value>Alternate ID</value>
@@ -295,6 +295,9 @@ Do you want to import data?</value>
   <data name="Export" xml:space="preserve">
     <value>Export</value>
   </data>
+  <data name="Export Option" xml:space="preserve">
+    <value>Export Option</value>
+  </data>
   <data name="Export Size" xml:space="preserve">
     <value>Export Size</value>
   </data>
@@ -438,6 +441,9 @@ Do you want to import data?</value>
   </data>
   <data name="Other (OT)" xml:space="preserve">
     <value>Other (OT)</value>
+  </data>
+  <data name="Output Option" xml:space="preserve">
+    <value>Output Option</value>
   </data>
   <data name="Page Size" xml:space="preserve">
     <value>Page Size</value>
@@ -589,8 +595,8 @@ Do you want to import data?</value>
   <data name="Start Recording" xml:space="preserve">
     <value>Start Recording</value>
   </data>
-  <data name="System File Options" xml:space="preserve">
-    <value>System File Options</value>
+  <data name="System File Option" xml:space="preserve">
+    <value>System File Option</value>
   </data>
   <data name="The password you entered is not valid" xml:space="preserve">
     <value>The password you entered is not valid</value>

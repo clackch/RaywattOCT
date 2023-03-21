@@ -36,9 +36,6 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private string _selectedGender;
 
-        [ObservableProperty]
-        private string _idValidator;
-
         private ICommand _cancelCommand;
         public ICommand CancelCommand
         {
@@ -109,9 +106,6 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Patient_PropertyChanged");
 
-            if(e != null && e.PropertyName.ToString().Equals("Id") && !String.IsNullOrEmpty(IdValidator))
-                IdValidator = "";
-
             (NewRecordingCommand as RelayCommand).NotifyCanExecuteChanged();
         }
 
@@ -127,7 +121,7 @@ namespace RaywattApp.ViewModels
 
             if(nCnt > 0)
             {
-                IdValidator = _l10n["ID is duplicated."];
+                Patient.ValidateId = _l10n["ID is duplicated."];
 
                 return;
             }

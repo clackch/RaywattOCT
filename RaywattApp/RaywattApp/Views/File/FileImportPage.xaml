@@ -10,6 +10,7 @@
       xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
       xmlns:behaviors="clr-namespace:RaywattApp.Common.Behaviors"
       mc:Ignorable="d"
+      Background="Gray"
       Height="800" d:DesignWidth="1000"
       Title="FileImportPage">
 

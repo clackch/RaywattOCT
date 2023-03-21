@@ -6,161 +6,168 @@
       xmlns:local="clr-namespace:RaywattApp.Views.File"
       xmlns:const="clr-namespace:RaywattApp.Common.Bases"
       mc:Ignorable="d" 
-      d:DesignHeight="820" d:DesignWidth="1000"
+      Width="{x:Static const:Constants.FileDialogWidth}" Height="{x:Static const:Constants.FileDialogHeight}"
       Title="FileExportStep2NativePage">
 
-    <Grid Height="800">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-
-        <StackPanel Grid.Row="0" Background="Gray">
-            <Label Content="{Binding [Step2], Source={StaticResource L10N}}"></Label>
-        </StackPanel>
-
-        <Grid Grid.Row="1">
+    <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="29"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="29"/>
+            </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="25"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="25"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="25"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="25"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="25"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="25"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="25"/>
-                <RowDefinition Height="2*"/>
+                <RowDefinition Height="34"/>
+                <RowDefinition Height="66"/>
+                <RowDefinition Height="29"/>
+                <RowDefinition Height="136"/>
+                <RowDefinition Height="104"/>
+                <RowDefinition Height="29"/>
+                <RowDefinition Height="349"/>
+                <RowDefinition Height="28"/>
+                <RowDefinition Height="71" />
             </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="0" Grid.ColumnSpan="2">
-                <Label Content="{Binding [System File Options], Source={StaticResource L10N}}"/>
+            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+                <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Export], Source={StaticResource L10N}}"/>
+                <Label Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="0,12,0,0" Content=" - "/>
+                <Label Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="0,12,0,0" Content="{Binding [Step 2.], Source={StaticResource L10N}}"/>
+                <Label Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="0,12,0,0" Content=" ("/>
+                <Label Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="0,12,0,0" Content="{Binding [Native], Source={StaticResource L10N}}"/>
+                <Label Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="0,12,0,0" Content=")"/>
             </StackPanel>
-            <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Margin="10">
-                <CheckBox Grid.Column="1" IsChecked="{Binding FileExport.RemoveWhenComplete}" IsEnabled="{Binding FileExport.IsFromReview, Converter={StaticResource InverseBooleanConverter}}" Content="{Binding [Remove when Complete], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
-            </Border>
 
-            <StackPanel Grid.Row="2">
-                <Label Content="{Binding [Additional], Source={StaticResource L10N}}"/>
+            <StackPanel Grid.Row="2" Grid.Column="1">
+                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Export Option], Source={StaticResource L10N}}"/>
             </StackPanel>
-            <Border Grid.Row="3" BorderBrush="Black" BorderThickness="1" Margin="10">
-                <Grid >
+
+            <Border Grid.Row="3" Grid.Column="1" CornerRadius="10" Background="{DynamicResource GrayscaleGray7Brush}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="191"/>
                         <ColumnDefinition/>
-                        <ColumnDefinition/>
+                        <ColumnDefinition Width="180"/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="50,0,0,0">
-                        <CheckBox IsChecked="{Binding FileExport.PatientInfoAnonymize}" Content="{Binding [Patient Information Anonymize], Source={StaticResource L10N}}"/>
-                    </StackPanel>
-                    <Button Style="{StaticResource ButtonBasic}" Grid.Column="1" Command="{Binding AlternateCommand}" Content="{Binding [Alternate Patient IDs], Source={StaticResource L10N}}" IsEnabled="{Binding FileExport.PatientInfoAnonymize}" Width="150" HorizontalAlignment="Left"/>
+                    <Label Grid.Row="0" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Margin="20,28,0,20" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [System File Option], Source={StaticResource L10N}}"/>
+                    <CheckBox Grid.Row="0" Grid.Column="1" Margin="0,23,0,16" IsChecked="{Binding FileExport.RemoveWhenComplete}" IsEnabled="{Binding FileExport.IsFromReview, Converter={StaticResource InverseBooleanConverter}}" Content="{Binding [Remove when Complete], Source={StaticResource L10N}}"/>
+                    <Separator Grid.Row="1" Grid.ColumnSpan="3" Background="{DynamicResource GrayscaleGray5Brush}" Width="760" Height="1"/>
+                    <Label Grid.Row="2" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Margin="20,21,0,28" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Additional Option], Source={StaticResource L10N}}"/>
+                    <CheckBox Grid.Row="2" Grid.Column="1" Margin="0,16,0,25" IsChecked="{Binding FileExport.PatientInfoAnonymize}" Content="{Binding [Patient Information Anonymize], Source={StaticResource L10N}}"/>
+                    <Button Grid.Row="2" Grid.Column="2" Style="{StaticResource OutlinedBtnType1-Small-Extra}" Margin="0,16,0,24" Command="{Binding AlternateCommand}" Content="{Binding [Alternate Patient IDs], Source={StaticResource L10N}}" IsEnabled="{Binding FileExport.PatientInfoAnonymize}" HorizontalAlignment="Left"/>
                 </Grid>
             </Border>
 
-            <StackPanel Grid.Row="10">
-                <Label Content="{Binding [Export Size], Source={StaticResource L10N}}"/>
+            <StackPanel Grid.Row="5" Grid.Column="1">
+                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Output Option], Source={StaticResource L10N}}"/>
             </StackPanel>
-            <Border Grid.Row="11" BorderBrush="Black" BorderThickness="1" Margin="10">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="50,0,0,0">
-                    <Label Content="{Binding ExportSize}"/>
-                    <Label Content="{Binding ExportSizeUnit}"/>
-                </StackPanel>
-            </Border>
 
-            <StackPanel Grid.Row="12">
-                <Label Content="{Binding [Destination], Source={StaticResource L10N}}"/>
-            </StackPanel>
-            <Border Grid.Row="13" BorderBrush="Black" BorderThickness="1" Margin="10">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
+            <Border Grid.Row="6" Grid.Column="1" CornerRadius="10" Background="{DynamicResource GrayscaleGray7Brush}">
+                <Grid >
                     <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
+                        <RowDefinition Height="55"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="63"/>
+                        <RowDefinition Height="27"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="64"/>
+                        <RowDefinition Height="27"/>
+                        <RowDefinition Height="54"/>
+                        <RowDefinition Height="57"/>
                     </Grid.RowDefinitions>
-                    <RadioButton Grid.Row="0" IsChecked="{Binding DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.FileDiskExternal}}" Content="{Binding [External Drive], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
-                    <Grid Grid.Row="1" >
+                    <Label Grid.Row="0" Style="{DynamicResource Pretendard-Medium-16}" Margin="20,28,0,8" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Export Size], Source={StaticResource L10N}}"/>
+                    <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}" Width="760" Height="1"/>
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="20,16,0,28" >
+                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding ExportSize}"/>
+                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding ExportSizeUnit}" Margin="5,0,0,0"/>
+                    </StackPanel>
+                    <Label Grid.Row="3" Style="{DynamicResource Pretendard-Medium-16}" Margin="20,0,0,8" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Destination], Source={StaticResource L10N}}"/>
+                    <Separator Grid.Row="4" Background="{DynamicResource GrayscaleGray5Brush}" Width="760" Height="1"/>
+                    <Grid Grid.Row="5">
                         <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="191"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <RadioButton Grid.Column="0" IsChecked="{Binding DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.FileDiskExternal}}" Content="{Binding [External Drive], Source={StaticResource L10N}}" Margin="15,0,0,0"/>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <RadioButton IsChecked="{Binding DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}" Content="{Binding [CD/DVD], Source={StaticResource L10N}}"/>
+                            <CheckBox IsChecked="{Binding FileExport.EjectWhenComplete}" Content="{Binding [Eject when Complete], Source={StaticResource L10N}}" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}" Margin="15,0,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                    <StackPanel Grid.Row="6" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskExternal}}">
+                        <Label Style="{DynamicResource Pretendard-Medium-16}" Margin="20,0,0,8" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Select Drive], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+                    <Grid Grid.Row="6" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="312"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Margin="20,0,0,8" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Disk Type], Source={StaticResource L10N}}"/>
+                        <Label Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Margin="0,0,0,8" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Volume Label], Source={StaticResource L10N}}"/>
+                    </Grid>
+                    <Grid Grid.Row="7" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskExternal}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <RadioButton Grid.Column="0" IsChecked="{Binding DiskType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}" Content="{Binding [CD/DVD], Source={StaticResource L10N}}"  VerticalAlignment="Center" Margin="50,0,0,0"/>
-                        <CheckBox Grid.Column="1" IsChecked="{Binding FileExport.EjectWhenComplete}" Content="{Binding [Eject when Complete], Source={StaticResource L10N}}" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}" VerticalAlignment="Center" Margin="50,0,0,0"/>
+                        <ComboBox Grid.Column="0" Style="{DynamicResource ComboBoxDialog}" Width="280" ItemsSource="{Binding ExternalDriveComboBox}" SelectedValue="{Binding SelectedExternalDrive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectedValuePath="Key" DisplayMemberPath="Value" IsEnabled="{Binding IsEnableExternalDrive}" Margin="20,0,0,0"/>
+                        <Label Grid.Column="1" Style="{StaticResource LabelWithCorner}" Width="386" Content="{Binding FileExport.ExternalDrivePath}" Margin="12,0,0,0"/>
+                        <Button Grid.Column="2" Style="{StaticResource OutlinedBtnType1}" Width="72" Height="54" Command="{Binding ExternalDrivePathCommand}" Content="{Binding [Path], Source={StaticResource L10N}}" IsEnabled="{Binding IsEnableExternalDrive}" HorizontalAlignment="Left" Margin="10,0,0,0"/>
                     </Grid>
-                    <Border Grid.Column="1" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1" Margin="5" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                            </Grid.RowDefinitions>
-                            <StackPanel Grid.Row="0">
-                                <Label Content="{Binding [Disk Type], Source={StaticResource L10N}}"/>
-                                <Label Content="{Binding FileExport.MediaType}"/>
+                    <Grid Grid.Row="7" Grid.RowSpan="2" VerticalAlignment="Top" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" Style="{StaticResource LabelWithCorner}" Width="280" Height="54" VerticalAlignment="Top" Content="{Binding FileExport.MediaType}" Margin="20,0,0,0"/>
+                        <TextBox Grid.Column="1" Style="{DynamicResource TextBoxValidator}" Width="468" Text="{Binding FileExport.VolumeLabel, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Volume Label is required], Source={StaticResource L10N}}" ToolTip="{Binding FileExport.ValidateVolumeLabel}" Margin="12,0,0,0"/>
+                    </Grid>
+                    <Grid Grid.Row="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="160"/>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="20,10,0,28" >
+                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Total], Source={StaticResource L10N}}"/>
+                            <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+                                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding ExternalDriveTotalSize}" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskExternal}}"/>
+                                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding CdTotalSize}" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}"/>
+                                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [GB], Source={StaticResource L10N}}" Margin="5,0,0,0"/>
                             </StackPanel>
-                            <StackPanel Grid.Row="1" >
-                                <Label Content="{Binding [Volume Label], Source={StaticResource L10N}}"/>
-                                <TextBox Text="{Binding FileExport.VolumeLabel}" Width="350" Margin="5,5,5,5" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,10,0,28" HorizontalAlignment="Right">
+                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Free], Source={StaticResource L10N}}"/>
+                            <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+                                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding ExternalDriveAvailableFreeSpace}" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskExternal}}"/>
+                                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding CdAvailableFreeSpace}" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}"/>
+                                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [GB], Source={StaticResource L10N}}" Margin="5,0,0,0"/>
                             </StackPanel>
-                        </Grid>
-                    </Border>
-                    <Border Grid.Column="1" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1" Margin="5" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskExternal}}">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                            </Grid.RowDefinitions>
-                            <StackPanel Grid.Row="0" HorizontalAlignment="Left">
-                                <Label Content="{Binding [Select Drive], Source={StaticResource L10N}}"/>
-                                <ComboBox Width="250" ItemsSource="{Binding ExternalDriveComboBox}" SelectedValue="{Binding SelectedExternalDrive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectedValuePath="Key" DisplayMemberPath="Value" IsEnabled="{Binding IsEnableExternalDrive}"  Margin="5,5,5,5"/>
-                            </StackPanel>
-                            <StackPanel Grid.Row="1" >
-                                <Label Content="{Binding [Path], Source={StaticResource L10N}}"/>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBox Text="{Binding FileExport.ExternalDrivePath}" IsReadOnly="True" Width="250" Margin="5,5,5,5"/>
-                                    <Button Style="{StaticResource ButtonBasic}" Width="40" Command="{Binding ExternalDrivePathCommand}" Content="{Binding [Path], Source={StaticResource L10N}}" IsEnabled="{Binding IsEnableExternalDrive}"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-                    <Border Grid.Column="2" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1" Margin="5">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                            </Grid.RowDefinitions>
-                            <StackPanel Grid.Row="0">
-                                <Label Content="{Binding [Total], Source={StaticResource L10N}}"/>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Content="{Binding ExternalDriveTotalSize}" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskExternal}}"/>
-                                    <Label Content="{Binding CdTotalSize}" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}"/>
-                                    <Label Content="{Binding [GB], Source={StaticResource L10N}}"/>
-                                </StackPanel>
-                            </StackPanel>
-                            <StackPanel Grid.Row="1" >
-                                <Label Content="{Binding [Free], Source={StaticResource L10N}}"/>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Content="{Binding ExternalDriveAvailableFreeSpace}" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskExternal}}"/>
-                                    <Label Content="{Binding CdAvailableFreeSpace}" Visibility="{Binding DiskType, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FileDiskCd}}"/>
-                                    <Label Content="{Binding [GB], Source={StaticResource L10N}}"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
+                        </StackPanel>
+                    </Grid>
                 </Grid>
             </Border>
-        </Grid>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" >
-            <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
-            <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}"/>
-            <Button Style="{StaticResource ButtonImportant}" Width="50" Command="{Binding ExportCommand}" Content="{Binding [Export], Source={StaticResource L10N}}"/>
-        </StackPanel>
-    </Grid>
+            <Grid Grid.Row="8" Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" HorizontalAlignment="Left">
+                    <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                    <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}"/>
+                    <StackPanel Width="12"/>
+                    <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding ExportCommand}" Content="{Binding [Export], Source={StaticResource L10N}}"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
 </Page>

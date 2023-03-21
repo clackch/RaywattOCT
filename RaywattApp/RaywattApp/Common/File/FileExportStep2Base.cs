@@ -343,7 +343,7 @@ namespace RaywattApp.Common.File
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["externalDrive"] = FileExport.ExternalDrive;
             parameter["externalDrivePath"] = FileExport.ExternalDrivePath;
-            var result = _dialogService.OpenDialog(new FileFolderBrowseDialogControl(), parameter);
+            var result = _dialogService.OpenDialog(new FileFolderBrowseDialogControl(), parameter, Constants.FileDialogWidth, Constants.FileDialogHeight);
 
             if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
             {
@@ -372,14 +372,14 @@ namespace RaywattApp.Common.File
                     Dictionary<string, object> parameter = new Dictionary<string, object>();
                     parameter["title"] = _l10n["Information"];
                     parameter["message"] = _l10n["Path is required"];
-                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.FileDialogWidth, Constants.FileDialogHeight);
                 }
                 else if (ExternalDriveAvailableFreeSpace <= ExportSize)
                 {
                     Dictionary<string, object> parameter = new Dictionary<string, object>();
                     parameter["title"] = _l10n["Information"];
                     parameter["message"] = _l10n["There is not enough space on the storage device to store."];
-                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.FileDialogWidth, Constants.FileDialogHeight);
                 }
                 else
                 {
@@ -395,28 +395,25 @@ namespace RaywattApp.Common.File
                     Dictionary<string, object> parameter = new Dictionary<string, object>();
                     parameter["title"] = _l10n["Information"];
                     parameter["message"] = _l10n["CD/DVD is required"];
-                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.FileDialogWidth, Constants.FileDialogHeight);
                 }
                 else if (FileExport.MediaType == Constants.MediaTypeNotSupportDisc)
                 {
                     Dictionary<string, object> parameter = new Dictionary<string, object>();
                     parameter["title"] = _l10n["Information"];
                     parameter["message"] = _l10n["Media Type is not supported"];
-                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.FileDialogWidth, Constants.FileDialogHeight);
                 }
                 else if (FileExport.VolumeLabel == null || String.IsNullOrEmpty(FileExport.VolumeLabel.Trim()))
                 {
-                    Dictionary<string, object> parameter = new Dictionary<string, object>();
-                    parameter["title"] = _l10n["Information"];
-                    parameter["message"] = _l10n["Volume Label is required"];
-                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+                    FileExport.ValidateVolumeLabel = _l10n["Volume Label is required"];
                 }
                 else if (CdTotalSize <= ExportSize)
                 {
                     Dictionary<string, object> parameter = new Dictionary<string, object>();
                     parameter["title"] = _l10n["Information"];
                     parameter["message"] = _l10n["There is not enough space on the storage device to store."];
-                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.FileDialogWidth, Constants.FileDialogHeight);
                 }
                 else
                 {

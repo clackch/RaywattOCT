@@ -14,18 +14,18 @@
     <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="29"/>
                 <ColumnDefinition/>
-                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="29"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="35"/>
+                <RowDefinition Height="34"/>
                 <RowDefinition Height="62"/>
-                <RowDefinition Height="54"/>
+                <RowDefinition Height="64"/>
                 <RowDefinition Height="29"/>
                 <RowDefinition Height="558"/>
                 <RowDefinition Height="28"/>
-                <RowDefinition Height="72" />
+                <RowDefinition Height="71" />
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
@@ -120,8 +120,8 @@
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <Button Grid.Column="0" Style="{StaticResource OutlinedBtnType3-Large}" HorizontalAlignment="Left" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
-                <Button Grid.Column="1" Style="{StaticResource ContainedBtnType1-Large-Wide}" HorizontalAlignment="Right" Command="{Binding NextCommand}" Content="{Binding [Next], Source={StaticResource L10N}}"/>
+                <Button Grid.Column="0" Style="{StaticResource OutlinedBtnType3-Large}" HorizontalAlignment="Left" VerticalAlignment="Top" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+                <Button Grid.Column="1" Style="{StaticResource ContainedBtnType1-Large-Wide}" HorizontalAlignment="Right" VerticalAlignment="Top" Command="{Binding NextCommand}" Content="{Binding [Next], Source={StaticResource L10N}}"/>
             </Grid>
         </Grid>
     </Border>

@@ -76,9 +76,6 @@
                     <Grid>
                         <Border x:Name="Border" CornerRadius="8" Background="{DynamicResource GrayscaleGray8Brush}" SnapsToDevicePixels="True"/>
                         <ScrollViewer x:Name="DG_ScrollViewer" Focusable="false">
-                            <ScrollViewer.OpacityMask>
-                                <VisualBrush Visual="{Binding ElementName=Border}"/>
-                            </ScrollViewer.OpacityMask>
                             <ScrollViewer.Template>
                                 <ControlTemplate TargetType="{x:Type ScrollViewer}">
                                     <Grid Background="Transparent">
@@ -202,6 +199,50 @@
                     <Grid Background="Transparent">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Content.Text}"/>
                     </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="DataGridCell" x:Key="DataGridCellEdit">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridCell">
+                    <Grid>
+                        <Border CornerRadius="6" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray5Brush}" Background="Transparent" Margin="8"/>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="TextBox" x:Key="DataGridCellEditTextBox" BasedOn="{StaticResource Pretendard-Medium-14}">
+        <Setter Property="Margin" Value="8"/>
+        <Setter Property="Width" Value="103"/>
+        <Setter Property="Height" Value="41"/>
+        <Setter Property="CaretBrush" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type TextBox}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Border x:Name="border" Height="41" CornerRadius="6" BorderBrush="{DynamicResource GrayscaleGray5Brush}" BorderThickness="1" Background="Transparent">
+                            <ScrollViewer x:Name="PART_ContentHost" Focusable="false" VerticalAlignment="Center" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
+                        </Border>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsFocused" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MainPrimaryColorBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsFocused" Value="False">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource GrayscaleGray5Brush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -527,7 +568,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ScrollBar}">
-                    <Grid x:Name="Bg" SnapsToDevicePixels="true" >
+                    <Grid x:Name="Bg" SnapsToDevicePixels="true" Background="Transparent">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="0.00001*"/>
                         </Grid.RowDefinitions>

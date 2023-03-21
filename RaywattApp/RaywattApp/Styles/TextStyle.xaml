@@ -39,7 +39,21 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
+    <Style TargetType="Label" x:Key="LabelWithCorner" BasedOn="{StaticResource Pretendard-Medium-18}">
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleGray3Brush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Label">
+                    <Border x:Name="border" CornerRadius="8" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray5Brush}">
+                        <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" Margin="20,0,0,0"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style TargetType="Label" x:Key="InfoTitleLabel">
         <Setter Property="Width" Value="80"/>
         <Setter Property="Margin" Value="0"/>
@@ -102,13 +116,14 @@
 
     <Style TargetType="TextBox" x:Key="TextBoxValidator" BasedOn="{StaticResource TextBoxBase}">
         <Setter Property="ToolTipService.IsEnabled" Value="False"/>
+        <Setter Property="Height" Value="72"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type TextBox}">
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition/>
+                            <RowDefinition Height="54"/>
+                            <RowDefinition Height="18"/>
                         </Grid.RowDefinitions>
                         <Border x:Name="border" Height="54" CornerRadius="8" BorderBrush="{DynamicResource GrayscaleGray5Brush}" BorderThickness="1" Background="Transparent">
                             <Grid>
@@ -120,7 +135,10 @@
                                 <ScrollViewer Grid.Column="1" x:Name="PART_ContentHost" Focusable="false" VerticalAlignment="Center" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
                             </Grid>
                         </Border>
-                        <Label Grid.Row="1" x:Name="validator" Content="{TemplateBinding ToolTip}" Visibility="Collapsed" Foreground="{DynamicResource AdditionalColor3Brush}" FontSize="16"/>
+                        <StackPanel Grid.Row="1" x:Name="validator" Orientation="Horizontal" Visibility="Collapsed" Margin="0,4,0,0">
+                            <Label Content="* " Foreground="{DynamicResource AdditionalColor3Brush}" FontSize="12"/>
+                            <Label Content="{TemplateBinding ToolTip}" Foreground="{DynamicResource AdditionalColor3Brush}" FontSize="12"/>
+                        </StackPanel>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <MultiTrigger>

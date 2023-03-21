@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using RaywattApp.Common.Bases;
+using RaywattApp.Common.Util;
 using System.Collections.Generic;
 
 namespace RaywattApp.Models
@@ -48,8 +49,28 @@ namespace RaywattApp.Models
         [ObservableProperty]
         private string mediaType;
 
-        [ObservableProperty]
         private string volumeLabel;
+        public string VolumeLabel
+        {
+            get { return volumeLabel; }
+            set 
+            {
+                if (value.Length <= Constants.MaxVolumeLabel)
+                {
+                    if (!CommonUtil.ValidatevolumeLabel(value))
+                        return;
+
+                    volumeLabel = value;
+                    OnPropertyChanged(nameof(VolumeLabel));
+
+                    validateVolumeLabel = "";
+                    OnPropertyChanged(nameof(ValidateVolumeLabel));
+                }
+            }
+        }
+
+        [ObservableProperty]
+        private string validateVolumeLabel;
 
         [ObservableProperty]
         private bool isDiskFormat;

@@ -49,6 +49,12 @@ namespace RaywattApp.Common.Bases
         public const double ConfirmDialogHeight = 219;
         public const double AlertDialogWidth = 360;
         public const double AlertDialogHeight = 219;
+        public const double FileAlternateIdDialogWidth = 472;
+        public const double FileAlternateIdDialogHeight = 472;
+        public const double FileFolderBrowseDialogWidth = 472;
+        public const double FileFolderBrowseDialogHeight = 659;
+        public const double FileFolderActionDialogWidth = 472;
+        public const double FileFolderActionDialogHeight = 370;
 
         //Max Length
         public const int MaxPatientId = 9;
@@ -57,6 +63,7 @@ namespace RaywattApp.Common.Bases
         public const int MaxPatientCaseAccessionNumber = 6;
         public const int MaxPatientCaseComment = 200;
         public const int MaxPhysicianName = 40;
+        public const int MaxVolumeLabel = 15;
 
         //Page
         public const int PageNumberMax = 5;
@@ -150,7 +157,12 @@ namespace RaywattApp.Common.Bases
         public const string FileImageExtension = "bin";
         public const string FileExtension = "dbf";
         public const string FileNamePrefix = "Export_";
-        
+
+        //File Icon
+        public const string FileIconDrive = "drive";
+        public const string FileIconFolder = "folder";
+        public const string FileIconFile = "file";
+
         //View Mode - Live View, Stand By
         public const string ViewModeLiveView = "LiveView";
         public const string ViewModeStandBy = "StandBy";

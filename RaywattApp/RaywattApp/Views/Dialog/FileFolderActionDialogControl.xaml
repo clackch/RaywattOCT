@@ -4,41 +4,57 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RaywattApp.Views.Dialog"
+             xmlns:const="clr-namespace:RaywattApp.Common.Bases"
              mc:Ignorable="d" 
-             Width="300" Height="300">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Background="Black" Orientation="Horizontal">
-            <Label Content="{Binding Title}" Foreground="White"/>
-        </StackPanel>
+             Width="{Binding DialogWidth}" Height="{Binding DialogHeight}">
 
-        <Grid Grid.Row="1">
+    <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Width="{x:Static const:Constants.FileFolderActionDialogWidth}" Height="{x:Static const:Constants.FileFolderActionDialogHeight}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="31"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="31"/>
+            </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition/>
+                <RowDefinition Height="35"/>
+                <RowDefinition Height="68"/>
+                <RowDefinition Height="27"/>
+                <RowDefinition Height="31"/>
+                <RowDefinition Height="1"/>
+                <RowDefinition Height="22"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="72"/>
+                <RowDefinition Height="10"/>
+                <RowDefinition Height="77"/>
             </Grid.RowDefinitions>
-            <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" Margin="10">
-                <StackPanel>
-                    <Label Content="{Binding [Current Folder], Source={StaticResource L10N}}"/>
-                    <Label Content="{Binding SelectedDir.Path}"/>
-                </StackPanel>
-            </Border>
-            <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Margin="10">
-                <StackPanel>
-                    <Label Content="{Binding [New Folder Name], Source={StaticResource L10N}}"/>
-                    <TextBox Text="{Binding CreateRenameFolderName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="5,5,5,5"/>
-                    <TextBlock Text="{Binding [Duplicated Folder Name], Source={StaticResource L10N}}" Visibility="{Binding IsErrorMessage}" Foreground="Red" Margin="5,5,5,5"/>
-                </StackPanel>
-            </Border>
-        </Grid>
+            
+            <StackPanel Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center">
+                <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Title}"/>
+            </StackPanel>
 
-        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource ButtonBasic}" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Cancel], Source={StaticResource L10N}}" Width="50"/>
-            <Button Style="{StaticResource ButtonImportant}" Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}" IsEnabled="{Binding CreateRenameFolderName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NotEmptyStringToEnableConverter}}" Width="50"/>
-        </StackPanel>
-    </Grid>
+            <StackPanel Grid.Row="2" Grid.Column="1">
+                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Current Folder], Source={StaticResource L10N}}"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="3" Grid.Column="1">
+                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding SelectedDir.Path}"/>
+            </StackPanel>
+
+            <Separator Grid.Row="4" Grid.Column="1" Background="{DynamicResource GrayscaleGray5Brush}" Height="1"/>
+
+            <StackPanel Grid.Row="6" Grid.Column="1">
+                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Folder Name], Source={StaticResource L10N}}"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="7" Grid.Column="1">
+                <TextBox Style="{DynamicResource TextBoxValidator}" Text="{Binding CreateRenameFolderName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Input Folder Name], Source={StaticResource L10N}}" ToolTip="{Binding ValidateCreateRenameFolderName}"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="9" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+                <StackPanel Width="8"/>
+                <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}" IsEnabled="{Binding CreateRenameFolderName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NotEmptyStringToEnableConverter}}"/>
+            </StackPanel>
+        </Grid>
+    </Border>
 </UserControl>
