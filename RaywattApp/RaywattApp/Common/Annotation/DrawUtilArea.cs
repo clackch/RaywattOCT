@@ -13,6 +13,7 @@ using OpenCvSharp;
 using System.Collections.ObjectModel;
 using RaywattApp.Common.Util;
 using RaywattApp.Common.Annotation.Util;
+using RaywattApp.Common.Bases;
 
 namespace RaywattApp.Common.Annotation
 {
@@ -360,7 +361,7 @@ namespace RaywattApp.Common.Annotation
                 path = new Path();
                 path.Style = (Style)this.Resources["StylePath"];
                 path.Data = pathGeometry;
-                path.Stroke = brushes[group % brushes.Length];
+                path.Stroke = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
                 path.Name = constCurve + "_" + group;
 
                 if (this.isDrawing)
@@ -413,7 +414,7 @@ namespace RaywattApp.Common.Annotation
             {
                 Rectangle rectangle = new Rectangle();
                 rectangle.Style = (Style)this.Resources["StyleRectangle"];
-                rectangle.Stroke = brushes[group % brushes.Length];
+                rectangle.Stroke = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
                 rectangle.Name = constRectangle + "_" + group + "_" + i;
                 Canvas.SetLeft(rectangle, pointList[i].X - rectangle.Width / 2);
                 Canvas.SetTop(rectangle, pointList[i].Y - rectangle.Height / 2);
@@ -421,8 +422,8 @@ namespace RaywattApp.Common.Annotation
                 if (i == 0 && !isClosed)
                 {
                     rectangle.Style = (Style)this.Resources["StyleRectangleFirst"];
-                    rectangle.Stroke = brushes[group % brushes.Length];
-                    rectangle.Fill = brushes[group % brushes.Length];
+                    rectangle.Stroke = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
+                    rectangle.Fill = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
                     rectangle.MouseLeftButtonDown += rectangle_Connect;
                 }
                 else if (isClosed)
@@ -463,7 +464,7 @@ namespace RaywattApp.Common.Annotation
             Path path = new Path();
             path.Style = (Style)this.Resources["StylePath"];
             path.Data = CommonUtil.GetLine(firstPoint, secondPoint);
-            path.Stroke = brushes[group % brushes.Length];
+            path.Stroke = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
             path.Name = prefix + "_" + group;
             if (prefix.Equals(constMinDiameter))
                 path.StrokeDashArray.Add(2);

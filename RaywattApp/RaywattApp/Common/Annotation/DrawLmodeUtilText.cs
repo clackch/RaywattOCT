@@ -378,7 +378,7 @@ namespace RaywattApp.Common.Annotation
             Ellipse ellipse = new Ellipse();
             ellipse.Name = constPointer + "_" + group;
             ellipse.Style = (Style)this.Resources["StyleEllipse"];
-            ellipse.Stroke = brushes[group % brushes.Length];
+            ellipse.Stroke = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
             Canvas.SetLeft(ellipse, point.X - ellipse.Width / 2);
             Canvas.SetTop(ellipse, point.Y - ellipse.Height / 2);
 
@@ -397,7 +397,7 @@ namespace RaywattApp.Common.Annotation
             label.Style = (Style)this.Resources["StyleLabelText"];
             label.Name = constText + "_" + group;
             label.Content = text;
-            label.BorderBrush = brushes[group % brushes.Length];
+            label.BorderBrush = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
             Canvas.SetLeft(label, point.X);
             Canvas.SetTop(label, point.Y);
             label.MouseDoubleClick += text_MouseDoubleClick;
@@ -414,7 +414,7 @@ namespace RaywattApp.Common.Annotation
             TextBox textBox = new TextBox();
             textBox.Style = (Style)this.Resources["StyleTextBox"];
             textBox.Name = constTextBox + "_" + group;
-            textBox.BorderBrush = brushes[group % brushes.Length];
+            textBox.BorderBrush = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
             textBox.Text = text;
             Canvas.SetLeft(textBox, point.X);
             Canvas.SetTop(textBox, point.Y);
@@ -439,7 +439,7 @@ namespace RaywattApp.Common.Annotation
             Path path = new Path();
             path.Style = (Style)this.Resources["StylePath"];
             path.Data = CommonUtil.GetLine(pointerPoint, textPoint);
-            path.Stroke = brushes[group % brushes.Length];
+            path.Stroke = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
             path.Name = constTextLine + "_" + group;
             path.StrokeDashArray.Add(5);
             this.canvas.Children.Add(path);
