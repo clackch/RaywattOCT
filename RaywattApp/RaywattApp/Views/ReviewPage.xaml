@@ -396,41 +396,7 @@
                                                     </i:EventTrigger>
                                                 </i:Interaction.Triggers>
                                             </Image>
-                                            <!-- Indicator  -->
-                                            <Grid Background="Transparent" Visibility="{Binding IndicatorCrossSection.IsVisible}">
-                                                <i:Interaction.Triggers>
-                                                    <i:EventTrigger EventName="MouseLeave" >
-                                                        <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
-                                                    </i:EventTrigger>
-                                                    <i:EventTrigger EventName="PreviewMouseUp" >
-                                                        <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
-                                                    </i:EventTrigger>
-                                                    <i:EventTrigger EventName="PreviewMouseMove" >
-                                                        <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
-                                                    </i:EventTrigger>
-                                                </i:Interaction.Triggers>
 
-                                                <Canvas>
-                                                    <Image Source="/res/bar/indicator.png" Height="{x:Static const:Constants.CrossSectionAngio}" Width="{x:Static const:Constants.CrossSectionAngio}" Cursor="Hand" Opacity="0.25">
-                                                        <Image.RenderTransform>
-                                                            <!-- Image Indicator bar width(about 7) => CenterY 3.5 -->
-                                                            <RotateTransform CenterX="{x:Static const:Constants.CrossSectionAngioCenter}" CenterY="3.5" Angle="{Binding Degree}"/>
-                                                        </Image.RenderTransform>
-
-                                                        <i:Interaction.Triggers>
-                                                            <i:EventTrigger EventName="PreviewMouseDown" >
-                                                                <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
-                                                            </i:EventTrigger>
-                                                            <i:EventTrigger EventName="PreviewMouseUp" >
-                                                                <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
-                                                            </i:EventTrigger>
-                                                            <i:EventTrigger EventName="PreviewMouseMove" >
-                                                                <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
-                                                            </i:EventTrigger>
-                                                        </i:Interaction.Triggers>
-                                                    </Image>
-                                                </Canvas>
-                                            </Grid>
                                             <StackPanel Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Left">
                                                 <StackPanel Height="3"/>
                                                 <StackPanel Orientation="Horizontal" Width="50">
@@ -537,6 +503,29 @@
                                             </StackPanel>
                                         </Grid>
                                     </Grid>
+                                    <StackPanel Orientation="Vertical">
+                                        <StackPanel Height="24"/>
+                                        <Grid Width="300" Height="300" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                            <!-- Indicator  -->
+                                            <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Width="300" Height="18" Icon="crossSectionAngio" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Cursor="Hand" Visibility="{Binding IndicatorCrossSection.IsVisible}">
+                                                <Image.RenderTransform>
+                                                    <RotateTransform CenterX="150" CenterY="9" Angle="{Binding Degree}"/>
+                                                </Image.RenderTransform>
+
+                                                <i:Interaction.Triggers>
+                                                    <i:EventTrigger EventName="PreviewMouseDown" >
+                                                        <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
+                                                    </i:EventTrigger>
+                                                    <i:EventTrigger EventName="PreviewMouseUp" >
+                                                        <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                                                    </i:EventTrigger>
+                                                    <i:EventTrigger EventName="PreviewMouseMove" >
+                                                        <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
+                                                    </i:EventTrigger>
+                                                </i:Interaction.Triggers>
+                                            </component:IndicatorImage>
+                                        </Grid>
+                                    </StackPanel>
                                 </Grid>
                             </Grid>
                         </Border>

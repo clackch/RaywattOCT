@@ -13,6 +13,8 @@
     <None Remove="res\bar\indicator2.png" />
     <None Remove="res\icon\test.png" />
     <None Remove="res\indicator\crossSection.svg" />
+    <None Remove="res\indicator\crossSectionAngio.svg" />
+    <None Remove="res\indicator\crossSectionAngio_hover.svg" />
     <None Remove="res\indicator\crossSection_hover.svg" />
   </ItemGroup>
 
@@ -496,6 +498,12 @@
   <ItemGroup>
     <Resource Include="res\bar\indicator.png" />
     <Resource Include="res\indicator\crossSection.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="res\indicator\crossSectionAngio.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="res\indicator\crossSectionAngio_hover.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
     <Resource Include="res\indicator\crossSection_hover.svg">
