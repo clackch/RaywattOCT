@@ -73,6 +73,8 @@
     <Style TargetType="TextBox" x:Key="TextBoxBase" BasedOn="{StaticResource Pretendard-Medium-18}">
         <Setter Property="Width" Value="408"/>
         <Setter Property="Height" Value="70"/>
+        <Setter Property="SelectionBrush" Value="{DynamicResource MainPrimaryColorBrush}"/>
+        <Setter Property="SelectionOpacity" Value="0.30"/>
         <Setter Property="CaretBrush" Value="{DynamicResource GrayscaleWhiteBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
         <Setter Property="Template">
@@ -116,7 +118,7 @@
 
     <Style TargetType="TextBox" x:Key="TextBoxWithCorner" BasedOn="{StaticResource Pretendard-Medium-18}">
         <Setter Property="SelectionBrush" Value="{DynamicResource MainPrimaryColorBrush}"/>
-        <Setter Property="SelectionOpacity" Value="0.08"/>
+        <Setter Property="SelectionOpacity" Value="0.30"/>
         <Setter Property="Foreground" Value="{DynamicResource GrayscaleGray3Brush}"/>
         <Setter Property="Height" Value="54"/>
         <Setter Property="Template">
@@ -154,7 +156,7 @@
     <Style TargetType="TextBox" x:Key="TextBoxReadOnly" BasedOn="{StaticResource Pretendard-Medium-16}">
         <Setter Property="IsReadOnly" Value="True"/>
         <Setter Property="SelectionBrush" Value="{DynamicResource MainPrimaryColorBrush}"/>
-        <Setter Property="SelectionOpacity" Value="0.08"/>
+        <Setter Property="SelectionOpacity" Value="0.30"/>
         <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
@@ -163,6 +165,8 @@
     <Style TargetType="TextBox" x:Key="TextBoxValidator" BasedOn="{StaticResource TextBoxBase}">
         <Setter Property="ToolTipService.IsEnabled" Value="False"/>
         <Setter Property="Height" Value="72"/>
+        <Setter Property="SelectionBrush" Value="{DynamicResource MainPrimaryColorBrush}"/>
+        <Setter Property="SelectionOpacity" Value="0.30"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type TextBox}">
