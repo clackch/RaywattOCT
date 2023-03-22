@@ -57,7 +57,7 @@
                     <CheckBox Grid.Row="0" Grid.Column="1" Margin="0,23,0,16" IsChecked="{Binding FileExport.RemoveWhenComplete}" IsEnabled="{Binding FileExport.IsFromReview, Converter={StaticResource InverseBooleanConverter}}" Content="{Binding [Remove when Complete], Source={StaticResource L10N}}"/>
                     <Separator Grid.Row="1" Grid.ColumnSpan="3" Background="{DynamicResource GrayscaleGray5Brush}" Width="760" Height="1"/>
                     <Label Grid.Row="2" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Margin="20,21,0,28" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Additional Option], Source={StaticResource L10N}}"/>
-                    <CheckBox Grid.Row="2" Grid.Column="1" Margin="0,16,0,25" IsChecked="{Binding FileExport.PatientInfoAnonymize}" Content="{Binding [Patient Information Anonymize], Source={StaticResource L10N}}"/>
+                    <CheckBox Grid.Row="2" Grid.Column="1" Margin="0,15,0,24" IsChecked="{Binding FileExport.PatientInfoAnonymize}" Content="{Binding [Patient Information Anonymize], Source={StaticResource L10N}}"/>
                     <Button Grid.Row="2" Grid.Column="2" Style="{StaticResource OutlinedBtnType1-Small-Extra}" Margin="0,16,0,24" Command="{Binding AlternateCommand}" Content="{Binding [Alternate Patient IDs], Source={StaticResource L10N}}" IsEnabled="{Binding FileExport.PatientInfoAnonymize}" HorizontalAlignment="Left"/>
                 </Grid>
             </Border>

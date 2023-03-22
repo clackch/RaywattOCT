@@ -75,6 +75,7 @@ namespace RaywattApp.Common.File
                     {
                         ExternalDriveTotalSize = 0;
                         ExternalDriveAvailableFreeSpace = 0;
+                        _externalDriveAvailableFreeSpaceByte = 0;
                     }
                     else
                     {
@@ -84,6 +85,7 @@ namespace RaywattApp.Common.File
                             {
                                 ExternalDriveTotalSize = CommonUtil.ByteToGB(((long[])item.Value)[0]);
                                 ExternalDriveAvailableFreeSpace = CommonUtil.ByteToGB(((long[])item.Value)[1]);
+                                _externalDriveAvailableFreeSpaceByte = ((long[])item.Value)[1];
                                 break;
                             }
                         }
@@ -113,6 +115,9 @@ namespace RaywattApp.Common.File
 
         [ObservableProperty]
         private double _cdAvailableFreeSpace;
+
+        private double _exportSizeByte;
+        private double _externalDriveAvailableFreeSpaceByte;
 
         private ICommand _externalDrivePathCommand;
         public ICommand ExternalDrivePathCommand
@@ -381,7 +386,7 @@ namespace RaywattApp.Common.File
                     parameter["message"] = _l10n["Select destination path"];
                     var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.FileExportDialogWidth, Constants.FileExportDialogHeight);
                 }
-                else if (ExternalDriveAvailableFreeSpace <= ExportSize)
+                else if (_externalDriveAvailableFreeSpaceByte <= _exportSizeByte)
                 {
                     Dictionary<string, object> parameter = new Dictionary<string, object>();
                     parameter["title"] = _l10n["Information"];
@@ -456,6 +461,7 @@ namespace RaywattApp.Common.File
                 ExportSizeUnit = _l10n["Byte"];
             }
 
+            _exportSizeByte = bytes;
         }
 
         protected virtual void FileSave() { }

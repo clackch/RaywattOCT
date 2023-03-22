@@ -10,7 +10,6 @@
       Title="FileExportStep2DicomPage">
 
     <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}">
-
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="29"/>
@@ -64,13 +63,19 @@
                     <Separator Grid.Row="1" Grid.ColumnSpan="3" Background="{DynamicResource GrayscaleGray5Brush}" Width="760" Height="1"/>
                     <Label Grid.Row="2" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Margin="20,21,0,20" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Measurements], Source={StaticResource L10N}}"/>
                     <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,16,0,15" >
-                        <RadioButton IsChecked="{Binding FileExport.Measurements, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportMeasurementShowAll}}" Content="{Binding [Show All], Source={StaticResource L10N}}"/>
-                        <RadioButton IsChecked="{Binding FileExport.Measurements, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportMeasurementHideLumen}}" Content="{Binding [Hide Lumen Contour], Source={StaticResource L10N}}" Margin="35,0,0,0"/>
-                        <RadioButton IsChecked="{Binding FileExport.Measurements, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportMeasurementHideAll}}" Content="{Binding [Hide All], Source={StaticResource L10N}}" Margin="35,0,0,0"/>
+                        <StackPanel>
+                            <RadioButton IsChecked="{Binding FileExport.Measurements, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportMeasurementShowAll}}" Content="{Binding [Show All], Source={StaticResource L10N}}"/>
+                        </StackPanel>
+                        <StackPanel Margin="35,0,0,0">
+                            <RadioButton IsChecked="{Binding FileExport.Measurements, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportMeasurementHideLumen}}" Content="{Binding [Hide Lumen Contour], Source={StaticResource L10N}}"/>
+                        </StackPanel>
+                        <StackPanel Margin="35,0,0,0">
+                            <RadioButton IsChecked="{Binding FileExport.Measurements, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportMeasurementHideAll}}" Content="{Binding [Hide All], Source={StaticResource L10N}}"/>
+                        </StackPanel>
                     </StackPanel>
                     <Separator Grid.Row="3" Grid.ColumnSpan="3" Background="{DynamicResource GrayscaleGray5Brush}" Width="760" Height="1"/>
                     <Label Grid.Row="4" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Margin="20,20,0,28" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Additional Option], Source={StaticResource L10N}}"/>
-                    <CheckBox Grid.Row="4" Grid.Column="1" IsChecked="{Binding FileExport.PatientInfoAnonymize}" Margin="0,15,0,23" Content="{Binding [Patient Information Anonymize], Source={StaticResource L10N}}"/>
+                    <CheckBox Grid.Row="4" Grid.Column="1" IsChecked="{Binding FileExport.PatientInfoAnonymize}" Margin="0,15,0,22" Content="{Binding [Patient Information Anonymize], Source={StaticResource L10N}}"/>
                 </Grid>
             </Border>
 

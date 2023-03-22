@@ -40,12 +40,10 @@
                 <StackPanel>
                     <RadioButton IsChecked="{Binding FileExport.Type, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportTypeNative}}" Content="{Binding [Native(Raw)], Source={StaticResource L10N}}"/>
                 </StackPanel>
-                <StackPanel Width="27"/>
-                <StackPanel>
+                <StackPanel Margin="27,0,0,0">
                     <RadioButton IsChecked="{Binding FileExport.Type, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportTypeDicom}}" Content="{Binding [DICOM], Source={StaticResource L10N}}"/>
                 </StackPanel>
-                <StackPanel Width="27"/>
-                <StackPanel>
+                <StackPanel Margin="27,0,0,0">
                     <RadioButton IsChecked="{Binding FileExport.Type, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportTypeStandard}}" Content="{Binding [Standard], Source={StaticResource L10N}}"/>
                 </StackPanel>
             </StackPanel>
