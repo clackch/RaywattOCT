@@ -120,7 +120,7 @@ namespace RaywattApp.ViewModels.File
             parameter["title"] = _l10n["Information"];
             parameter["fileExport"] = FileExport;
             parameter["patientCases"] = PatientCases;
-            var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter);
+            var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter, Constants.FileExportDialogWidth, Constants.FileExportDialogHeight);
             Close();
         }
     }

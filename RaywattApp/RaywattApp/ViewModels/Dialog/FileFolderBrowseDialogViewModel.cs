@@ -109,7 +109,7 @@ namespace RaywattApp.ViewModels.Dialog
                 parameter["folderAction"] = Constants.FolderActionRename;
                 parameter["selectedDir"] = SelectedDir;
 
-                var result = _dialogService.OpenDialog(new FileFolderActionDialogControl(), parameter);
+                var result = _dialogService.OpenDialog(new FileFolderActionDialogControl(), parameter, Constants.FileFolderBrowseDialogWidth, Constants.FileFolderBrowseDialogHeight);
 
                 if (result != null && result.DialogAnswer == DialogResults.Answer.Yes && result.DialogReturn != null)
                 {
@@ -126,7 +126,7 @@ namespace RaywattApp.ViewModels.Dialog
                 parameter["folderAction"] = Constants.FolderActionCreate;
                 parameter["selectedDir"] = SelectedDir;
 
-                var result = _dialogService.OpenDialog(new FileFolderActionDialogControl(), parameter);
+                var result = _dialogService.OpenDialog(new FileFolderActionDialogControl(), parameter, Constants.FileFolderBrowseDialogWidth, Constants.FileFolderBrowseDialogHeight);
 
                 if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
                 {

@@ -1,18 +1,53 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:const="clr-namespace:RaywattApp.Common.Bases"
                     xmlns:svgc="http://sharpvectors.codeplex.com/svgc/">
 
     <!-- Check Box -->
-    <Style TargetType="CheckBox">
-    </Style>
-
-    <!-- Radio Button -->
-    <Style TargetType="RadioButton" BasedOn="{StaticResource Pretendard-Medium-18}">
+    <Style TargetType="CheckBox" BasedOn="{StaticResource Pretendard-Medium-16}">
+        <Setter Property="Height" Value="28"/>
         <Setter Property="Margin" Value="0"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="ToggleButton">
+                <ControlTemplate TargetType="CheckBox">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Rectangle x:Name="hover" Width="28" Height="28" Fill="Transparent"/>
+                        <Image x:Name="icon" Source="{svgc:SvgImage Source=/res/button/check/checkboxUnchecked.svg}" Width="18" Height="18"/>
+                        <ContentPresenter Grid.Column="1" Margin="5,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="True">
+                            <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource GrayscaleGray5Brush}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="hover" Property="Fill" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+                            <Setter TargetName="hover" Property="Opacity" Value="0.08"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/button/check/checkboxChecked.svg}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Radio Button -->
+    <Style TargetType="RadioButton" BasedOn="{StaticResource Pretendard-Medium-16}">
+        <Setter Property="Height" Value="30"/>
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -62,6 +97,9 @@
     </ControlTemplate>
 
     <Style x:Key="{x:Type ComboBox}" TargetType="{x:Type ComboBox}" BasedOn="{StaticResource Pretendard-Medium-18}">
+        <Style.Resources>
+            <SolidColorBrush x:Key="popupBackground" Color="{DynamicResource GrayscaleGray6}" />
+        </Style.Resources>
         <Setter Property="Width" Value="408" />
         <Setter Property="Height" Value="54" />
         <Setter Property="Template">
@@ -75,9 +113,9 @@
                                           Margin="20,17,0,16" TextBlock.Foreground="{DynamicResource GrayscaleGray3Brush}" />
                         <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Slide" VerticalOffset="6">
                             <Grid x:Name="DropDown" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="{TemplateBinding MaxDropDownHeight}">
-                                <Border x:Name="DropDownBorder" CornerRadius="4" BorderThickness="0" Background="{DynamicResource GrayscaleGray6Brush}"/>
+                                <Border x:Name="DropDownBorder" CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray5Brush}" Background="{DynamicResource popupBackground}"/>
                                 <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
-                                    <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
+                                    <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
                                 </ScrollViewer>
                             </Grid>
                         </Popup>
@@ -95,43 +133,208 @@
         </Setter>
     </Style>
 
+    <Style x:Key="ComboBoxDialog" TargetType="{x:Type ComboBox}" BasedOn="{StaticResource {x:Type ComboBox}}">
+        <Style.Resources>
+            <SolidColorBrush x:Key="popupBackground" Color="{DynamicResource GrayscaleGray7}" />
+        </Style.Resources>
+        <Setter Property="ItemContainerStyle" Value="{DynamicResource ComboBoxItemDialog}"/>
+    </Style>
+
     <Style x:Key="{x:Type ComboBoxItem}" TargetType="{x:Type ComboBoxItem}" BasedOn="{StaticResource Pretendard-Medium-18}">
+        <Style.Resources>
+            <SolidColorBrush x:Key="selectedBackground" Color="{DynamicResource GrayscaleGray5}" />
+        </Style.Resources>
         <Setter Property="Height" Value="42" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ComboBoxItem}">
-                    <Border x:Name="Border" CornerRadius="4" Background="{DynamicResource GrayscaleGray6Brush}">
-                        <VisualStateManager.VisualStateGroups>
-                            <VisualStateGroup x:Name="CommonStates">
-                                <VisualState x:Name="Normal" />
-                                <VisualState x:Name="MouseOver">
-                                    <Storyboard>
-                                        <ColorAnimation Duration="0" Storyboard.TargetName="NormalTextOverlay" Storyboard.TargetProperty="(TextElement.Foreground).(SolidColorBrush.Color)" To="{DynamicResource GrayscaleWhite}" />
-                                    </Storyboard>
-                                </VisualState>
-                            </VisualStateGroup>
-                            <VisualStateGroup x:Name="SelectionStates">
-                                <VisualState x:Name="Unselected" />
-                                <VisualState x:Name="Selected">
-                                    <Storyboard>
-                                        <ColorAnimationUsingKeyFrames Storyboard.TargetName="Border" Storyboard.TargetProperty="(Panel.Background).(SolidColorBrush.Color)">
-                                            <EasingColorKeyFrame KeyTime="0" Value="{DynamicResource GrayscaleGray5}" />
-                                        </ColorAnimationUsingKeyFrames>
-                                        <ColorAnimation Duration="0" Storyboard.TargetName="NormalText" Storyboard.TargetProperty="(TextElement.Foreground).(SolidColorBrush.Color)" To="{DynamicResource GrayscaleWhite}" />
-                                    </Storyboard>
-                                </VisualState>
-                                <VisualState x:Name="SelectedUnfocused"/>
-                            </VisualStateGroup>
-                        </VisualStateManager.VisualStateGroups>
+                    <Border x:Name="Border" CornerRadius="4">
                         <Grid Margin="15,0,0,0" VerticalAlignment="Center">
                             <ContentPresenter x:Name="NormalText" VerticalAlignment="Center" TextBlock.Foreground="{DynamicResource GrayscaleGray4Brush}" />
-                            <ContentPresenter x:Name="NormalTextOverlay" VerticalAlignment="Center" TextBlock.Foreground="Transparent" />
                         </Grid>
                     </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="NormalText" Property="TextBlock.Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource selectedBackground}"/>
+                            <Setter TargetName="NormalText" Property="TextBlock.Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
+
+    <Style x:Key="ComboBoxItemDialog" TargetType="{x:Type ComboBoxItem}" BasedOn="{StaticResource {x:Type ComboBoxItem}}">
+        <Style.Resources>
+            <SolidColorBrush x:Key="selectedBackground" Color="{DynamicResource GrayscaleGray6}" />
+        </Style.Resources>
+    </Style>
+
+    <!-- TreeView -->
+    <Style TargetType="TreeView" BasedOn="{StaticResource Pretendard-Medium-16}">
+        <Style.Resources>
+            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent" />
+            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Transparent" />
+            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="{DynamicResource MainPrimaryColor}" />
+            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="{DynamicResource MainPrimaryColor}" />
+        </Style.Resources>
+        <Setter Property="Foreground" Value="{StaticResource GrayscaleWhiteBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type TreeView}">
+                    <Grid>
+                        <Border x:Name="Border" CornerRadius="0, 0, 8, 8" Background="{DynamicResource GrayscaleGray8Brush}" SnapsToDevicePixels="True"/>
+                        <ScrollViewer x:Name="DG_ScrollViewer" Focusable="false">
+                            <ScrollViewer.Template>
+                                <ControlTemplate TargetType="{x:Type ScrollViewer}">
+                                    <Grid Background="Transparent">
+                                        <ScrollContentPresenter x:Name="PART_ScrollContentPresenter" CanContentScroll="{TemplateBinding CanContentScroll}" Margin="8"/>
+                                        <ScrollBar x:Name="PART_VerticalScrollBar" Maximum="{TemplateBinding ScrollableHeight}" Orientation="Vertical" HorizontalAlignment="Right" Margin="0,4,4,4" Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" Value="{Binding VerticalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" ViewportSize="{TemplateBinding ViewportHeight}"/>
+                                        <ScrollBar x:Name="PART_HorizontalScrollBar" Maximum="{TemplateBinding ScrollableWidth}" Orientation="Horizontal" VerticalAlignment="Bottom" Margin="4,0,4,4" Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}" Value="{Binding HorizontalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" ViewportSize="{TemplateBinding ViewportWidth}"/>
+                                    </Grid>
+                                </ControlTemplate>
+                            </ScrollViewer.Template>
+                            <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                        </ScrollViewer>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ExpandCollapseToggleStyle" TargetType="{x:Type ToggleButton}">
+        <Setter Property="Focusable" Value="False"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                    <Border Background="Transparent">
+                        <Image x:Name="PART_Image" Source="{svgc:SvgImage Source=/res/icon/expanderFold.svg}" Width="12" Height="12"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter Property="Source" TargetName="PART_Image" Value="{svgc:SvgImage Source=/res/icon/expanderUnfold_hover.svg}"/>
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="True"/>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Source" TargetName="PART_Image" Value="{svgc:SvgImage Source=/res/icon/expanderUnfold_active.svg}"/>
+                        </MultiTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" Value="True"/>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type TreeViewItem}}, Path=IsSelected}" Value="True"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Source" TargetName="PART_Image" Value="{svgc:SvgImage Source=/res/icon/expanderUnfold_active.svg}"/>
+                        </MultiDataTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="False"/>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Source" TargetName="PART_Image" Value="{svgc:SvgImage Source=/res/icon/expanderFold_active.svg}"/>
+                        </MultiTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" Value="False"/>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type TreeViewItem}}, Path=IsSelected}" Value="True"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Source" TargetName="PART_Image" Value="{svgc:SvgImage Source=/res/icon/expanderFold_active.svg}"/>
+                        </MultiDataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type TreeViewItem}">
+        <Setter Property="Foreground" Value="{StaticResource GrayscaleGray3Brush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type TreeViewItem}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Border Grid.ColumnSpan="4" x:Name="Bd" CornerRadius="4" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="true"/>
+                        <ToggleButton x:Name="Expander" ClickMode="Press" IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}" Style="{StaticResource ExpandCollapseToggleStyle}" Margin="10,0,2,0"/>
+                        <Image Grid.Column="1" x:Name="icon" Source="{svgc:SvgImage Source=/res/icon/folder_fold.svg}" Width="20" Height="16" Margin="10,0,0,0"/>
+                        <ContentPresenter Grid.Column="2" x:Name="PART_Header" ContentSource="Header" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                        <ItemsPresenter Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" x:Name="ItemsHost"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsExpanded" Value="false">
+                            <Setter Property="Visibility" TargetName="ItemsHost" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="IsExpanded" Value="True">
+                            <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/icon/folder_unfold.svg}"/>
+                        </Trigger>
+                        <Trigger Property="HasItems" Value="false">
+                            <Setter Property="Visibility" TargetName="Expander" Value="Hidden"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="true">
+                            <Setter Property="Background" TargetName="Bd" Value="{DynamicResource MainPrimaryColorBrush}"/>
+                            <Setter Property="Opacity" TargetName="Bd" Value="0.08"/>
+                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"/>
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/icon/folder_selected.svg}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"/>
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/icon/folder_selected.svg}"/>
+                        </Trigger>
+                        <DataTrigger Binding="{Binding ElementName=PART_Header, Path=Content, Converter={StaticResource FileIconConverter}}" Value="{x:Static const:Constants.FileIconDrive}">
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/icon/drive_fold.svg}"/>
+                        </DataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ElementName=PART_Header, Path=Content, Converter={StaticResource FileIconConverter}}" Value="{x:Static const:Constants.FileIconDrive}"/>
+                                <Condition Binding="{Binding RelativeSource={ RelativeSource Mode=Self}, Path=IsExpanded}" Value="True"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/icon/drive_unfold.svg}"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ElementName=PART_Header, Path=Content, Converter={StaticResource FileIconConverter}}" Value="{x:Static const:Constants.FileIconDrive}"/>
+                                <Condition Binding="{Binding RelativeSource={ RelativeSource Mode=Self}, Path=IsMouseOver}" Value="True"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/icon/drive_selected.svg}"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ElementName=PART_Header, Path=Content, Converter={StaticResource FileIconConverter}}" Value="{x:Static const:Constants.FileIconDrive}"/>
+                                <Condition Binding="{Binding RelativeSource={ RelativeSource Mode=Self}, Path=IsSelected}" Value="True"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/icon/drive_selected.svg}"/>
+                        </MultiDataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="VirtualizingStackPanel.IsVirtualizing" Value="true">
+                <Setter Property="ItemsPanel">
+                    <Setter.Value>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel/>
+                        </ItemsPanelTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
 
     <!-- DatePicker -->
     <!--The template for the button that displays the calendar.-->

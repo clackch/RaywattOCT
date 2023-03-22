@@ -10,6 +10,8 @@
         </Style.Resources>
         <Setter Property="AutoGenerateColumns" Value="False"/>
         <Setter Property="IsReadOnly" Value="True"/>
+        <Setter Property="CanUserResizeColumns" Value="False"/>
+        <Setter Property="CanUserReorderColumns" Value="False"/>
         <Setter Property="CanUserAddRows" Value="False"/>
         <Setter Property="CanUserSortColumns" Value="False"/>
         <Setter Property="HeadersVisibility" Value="All"/>
@@ -27,12 +29,9 @@
                     <Grid>
                         <Border x:Name="Border" CornerRadius="8" Background="{DynamicResource GrayscaleGray7Brush}" SnapsToDevicePixels="True"/>
                         <ScrollViewer x:Name="DG_ScrollViewer" Focusable="false">
-                            <ScrollViewer.OpacityMask>
-                                <VisualBrush Visual="{Binding ElementName=Border}"/>
-                            </ScrollViewer.OpacityMask>
                             <ScrollViewer.Template>
                                 <ControlTemplate TargetType="{x:Type ScrollViewer}">
-                                    <Grid>
+                                    <Grid Background="Transparent">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="*"/>
@@ -65,7 +64,7 @@
     </Style>
 
     <Style TargetType="DataGrid" x:Key="DataGridBasic" BasedOn="{StaticResource DataGridBase}">
-        <Setter Property="RowHeight" Value="44.7"/>
+        <Setter Property="RowHeight" Value="44"/>
     </Style>
 
     <Style TargetType="DataGrid" x:Key="DataGridDialog" BasedOn="{StaticResource DataGridBase}">
@@ -77,12 +76,9 @@
                     <Grid>
                         <Border x:Name="Border" CornerRadius="8" Background="{DynamicResource GrayscaleGray8Brush}" SnapsToDevicePixels="True"/>
                         <ScrollViewer x:Name="DG_ScrollViewer" Focusable="false">
-                            <ScrollViewer.OpacityMask>
-                                <VisualBrush Visual="{Binding ElementName=Border}"/>
-                            </ScrollViewer.OpacityMask>
                             <ScrollViewer.Template>
                                 <ControlTemplate TargetType="{x:Type ScrollViewer}">
-                                    <Grid>
+                                    <Grid Background="Transparent">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="*"/>
@@ -114,22 +110,38 @@
         </Setter>
     </Style>
 
+    <DataTemplate x:Key="DataGridColumnHeaderWrap">
+        <TextBlock Text="{Binding RelativeSource={RelativeSource AncestorType=ContentPresenter}, Path=Content}" TextAlignment="Center" TextWrapping="WrapWithOverflow" MaxHeight="48"/>
+    </DataTemplate>
+
     <Style TargetType="DataGridColumnHeader">
-        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Background" Value="{DynamicResource GrayscaleGray6Brush}"/>
         <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
         <Setter Property="Height" Value="48"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridColumnHeader">
+                    <Border CornerRadius="8, 8, 0, 0" Background="{DynamicResource GrayscaleGray6Brush}">
+                        <ContentPresenter Content="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center" ContentTemplate="{StaticResource DataGridColumnHeaderWrap}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <Style TargetType="DataGridColumnHeader" x:Key="DataGridColumnHeaderDialog">
-        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Background" Value="{DynamicResource GrayscaleGray7Brush}"/>
         <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
         <Setter Property="Height" Value="48"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridColumnHeader">
+                    <Border CornerRadius="8, 8, 0, 0" Background="{DynamicResource GrayscaleGray7Brush}">
+                        <ContentPresenter Content="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center" ContentTemplate="{StaticResource DataGridColumnHeaderWrap}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <Style TargetType="DataGridRow" x:Key="DataGridRow">
@@ -138,7 +150,31 @@
                 <ControlTemplate TargetType="DataGridRow">
                     <Border Background="Transparent">
                         <Grid>
-                            <Border Height="32" x:Name="border" BorderBrush="Transparent" BorderThickness="0" CornerRadius="6" Margin="7,0,7,0"/>
+                            <Border Height="32" x:Name="border" BorderBrush="Transparent" BorderThickness="0" CornerRadius="6" Margin="7,0,7,2"/>
+                            <Border>
+                                <DataGridCellsPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsSelected}" Value="true">
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource MainPrimaryColorBrush}"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MainPrimaryColorBrush}"/>
+                            <Setter TargetName="border" Property="Opacity" Value="0.08"/>
+                        </DataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="DataGridRow" x:Key="DataGridRowDialog">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridRow">
+                    <Border Background="Transparent">
+                        <Grid>
+                            <Border Height="34" x:Name="border" BorderBrush="Transparent" BorderThickness="0" CornerRadius="4" Margin="4,0,4,2"/>
                             <Border>
                                 <DataGridCellsPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
@@ -162,6 +198,68 @@
                 <ControlTemplate TargetType="DataGridCell">
                     <Grid Background="Transparent">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Content.Text}"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="DataGridCell" x:Key="DataGridCellEdit">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridCell">
+                    <Grid>
+                        <Border CornerRadius="6" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray5Brush}" Background="Transparent" Margin="8"/>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="TextBox" x:Key="DataGridCellEditTextBox" BasedOn="{StaticResource Pretendard-Medium-14}">
+        <Setter Property="Margin" Value="8"/>
+        <Setter Property="Width" Value="133"/>
+        <Setter Property="Height" Value="41"/>
+        <Setter Property="SelectionBrush" Value="{DynamicResource MainPrimaryColorBrush}"/>
+        <Setter Property="SelectionOpacity" Value="0.30"/>
+        <Setter Property="CaretBrush" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type TextBox}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Border x:Name="border" Height="41" CornerRadius="6" BorderBrush="{DynamicResource GrayscaleGray5Brush}" BorderThickness="1" Background="Transparent">
+                            <ScrollViewer x:Name="PART_ContentHost" Focusable="false" VerticalAlignment="Center" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
+                        </Border>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsFocused" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MainPrimaryColorBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsFocused" Value="False">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource GrayscaleGray5Brush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <DataTemplate x:Key="TextContentTemplate">
+        <TextBlock Text="{Binding RelativeSource={RelativeSource AncestorType=ContentPresenter}, Path=Content.Text}" TextAlignment="Center" TextWrapping="WrapWithOverflow" MaxHeight="34" ToolTip="{Binding RelativeSource={RelativeSource AncestorType=ContentPresenter}, Path=Content.Text}"/>
+    </DataTemplate>
+
+    <Style TargetType="DataGridCell" x:Key="DataGridCellTooltipWrap">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridCell">
+                    <Grid Background="Transparent">
+                        <ContentPresenter Content="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center" ContentTemplate="{StaticResource TextContentTemplate}"/>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
@@ -229,9 +327,165 @@
         </Setter>
     </Style>
 
+    <Style TargetType="CheckBox" x:Key="DataGridCheckBoxHeader">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <Grid>
+                        <Image x:Name="img" Source="{svgc:SvgImage Source=/res/button/check/checkboxUnchecked.svg}" Width="18" Height="18"/>
+                        <ContentPresenter/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled}" Value="True"/>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" Value="true"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/button/check/checkboxChecked.svg}"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled}" Value="True"/>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" Value="{x:Null}"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/button/check/checkboxNull.svg}"/>
+                        </MultiDataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style TargetType="CheckBox" x:Key="DataGridCheckBox">
-        <Setter Property="Height" Value="26.5"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <Grid>
+                        <Image x:Name="img" Source="{svgc:SvgImage Source=/res/button/check/checkboxUnchecked.svg}" Width="18" Height="18"/>
+                        <ContentPresenter/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled}" Value="False"/>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" Value="False"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/button/check/checkboxUnchecked_disabled.svg}"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled}" Value="False"/>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" Value="True"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/button/check/checkboxChecked_disabled.svg}"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled}" Value="False"/>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" Value="{x:Null}"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/button/check/checkboxNull_disabled.svg}"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled}" Value="True"/>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" Value="true"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/button/check/checkboxChecked.svg}"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled}" Value="True"/>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" Value="False"/>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridCell}, Path=IsSelected}" Value="true"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/button/check/checkboxUnChecked_active.svg}"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled}" Value="True"/>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" Value="{x:Null}"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/button/check/checkboxNull.svg}"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled}" Value="True"/>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" Value="true"/>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridCell}, Path=IsSelected}" Value="true"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/button/check/checkboxChecked_active.svg}"/>
+                        </MultiDataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="CheckBox" x:Key="DataGridCheckList">
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Right"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <Grid>
+                        <Image x:Name="img" Source="{svgc:SvgImage Source=/res/button/check/checkList.svg}" Width="18" Height="13.2" Visibility="Collapsed"/>
+                        <ContentPresenter/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled}" Value="False"/>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" Value="False"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="img" Property="Visibility" Value="Collapsed"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled}" Value="False"/>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" Value="True"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="img" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/button/check/checkList.svg}"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled}" Value="False"/>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" Value="{x:Null}"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="img" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/button/check/checkList.svg}"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" Value="true"/>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridCell}, Path=IsSelected}" Value="true"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/button/check/checkList_active.svg}"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" Value="{x:Null}"/>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridCell}, Path=IsSelected}" Value="true"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/button/check/checkList_active.svg}"/>
+                        </MultiDataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="DataGridCell" x:Key="DataGridCellCheckbox">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridCell">
+                    <Grid>
+                        <ContentPresenter/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <Style TargetType="Button" x:Key="DataGridDelete">
@@ -316,7 +570,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ScrollBar}">
-                    <Grid x:Name="Bg" SnapsToDevicePixels="true" >
+                    <Grid x:Name="Bg" SnapsToDevicePixels="true" Background="Transparent">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="0.00001*"/>
                         </Grid.RowDefinitions>
@@ -422,6 +676,8 @@
         </Style.Resources>
         <Setter Property="AutoGenerateColumns" Value="False"/>
         <Setter Property="IsReadOnly" Value="True"/>
+        <Setter Property="CanUserResizeColumns" Value="False"/>
+        <Setter Property="CanUserReorderColumns" Value="False"/>
         <Setter Property="CanUserAddRows" Value="False"/>
         <Setter Property="CanUserSortColumns" Value="False"/>
         <Setter Property="HeadersVisibility" Value="None"/>
@@ -442,6 +698,8 @@
         </Style.Resources>
         <Setter Property="AutoGenerateColumns" Value="False"/>
         <Setter Property="IsReadOnly" Value="True"/>
+        <Setter Property="CanUserResizeColumns" Value="False"/>
+        <Setter Property="CanUserReorderColumns" Value="False"/>
         <Setter Property="CanUserAddRows" Value="False"/>
         <Setter Property="CanUserSortColumns" Value="False"/>
         <Setter Property="HeadersVisibility" Value="All"/>
@@ -466,7 +724,7 @@
                         <ScrollViewer x:Name="DG_ScrollViewer" Focusable="false">
                             <ScrollViewer.Template>
                                 <ControlTemplate TargetType="{x:Type ScrollViewer}">
-                                    <Grid>
+                                    <Grid Background="Transparent">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="*"/>
@@ -589,6 +847,8 @@
     <Style TargetType="TextBox" x:Key="PatientSearch" BasedOn="{StaticResource Pretendard-Medium-18}">
         <Setter Property="Width" Value="260"/>
         <Setter Property="Height" Value="54"/>
+        <Setter Property="SelectionBrush" Value="{DynamicResource MainPrimaryColorBrush}"/>
+        <Setter Property="SelectionOpacity" Value="0.30"/>
         <Setter Property="CaretBrush" Value="{DynamicResource GrayscaleWhiteBrush}"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Template">

@@ -124,7 +124,7 @@ namespace RaywattApp.ViewModels.File
             parameter["fileExport"] = FileExport;
             parameter["patientCases"] = PatientCases;
             parameter["dicomProperty"] = GetDicomProperty();
-            var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter);
+            var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter, Constants.FileExportDialogWidth, Constants.FileExportDialogHeight);
 
             Close();
         }

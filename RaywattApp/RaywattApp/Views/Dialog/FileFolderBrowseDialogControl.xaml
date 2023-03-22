@@ -9,44 +9,69 @@
              xmlns:const="clr-namespace:RaywattApp.Common.Bases"
              xmlns:local="clr-namespace:RaywattApp.Views.Dialog"
              mc:Ignorable="d" 
-             Width="500" Height="400">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Background="Black" Orientation="Horizontal">
-            <Label Content="{Binding [Browse for Folder], Source={StaticResource L10N}}" Foreground="White"/>
-        </StackPanel>
+             Width="{Binding DialogWidth}" Height="{Binding DialogHeight}">
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding FolderActionCommand}" CommandParameter="{x:Static const:Constants.FolderActionCreate}" Content="{Binding [New Folder], Source={StaticResource L10N}}" IsEnabled="{Binding SelectedDir, Converter={StaticResource NotNullToEnableConverter}}"/>
-            <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding FolderActionCommand}" CommandParameter="{x:Static const:Constants.FolderActionRename}" Content="{Binding [Rename], Source={StaticResource L10N}}" IsEnabled="{Binding SelectedDir, Converter={StaticResource NotNullToEnableConverter}}"/>
-        </StackPanel>
+    <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Width="{x:Static const:Constants.FileFolderBrowseDialogWidth}" Height="{x:Static const:Constants.FileFolderBrowseDialogHeight}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="31"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="31"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="35"/>
+                <RowDefinition Height="58"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="1"/>
+                <RowDefinition Height="375"/>
+                <RowDefinition Height="16"/>
+                <RowDefinition Height="45"/>
+                <RowDefinition Height="77"/>
+            </Grid.RowDefinitions>
+            
+            <StackPanel Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center">
+                <Label Style="{DynamicResource Pretendard-Bold-32}" Content="{Binding [Browse for Folder], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleWhiteBrush}"/>
+            </StackPanel>
 
-        <TreeView Grid.Row="2" ItemsSource="{Binding DirItems}">
-            <TreeView.Resources>
-                <HierarchicalDataTemplate DataType="{x:Type model:DirectoryItem}" ItemsSource="{Binding Path=Items, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                    <TextBlock Text="{Binding Path=Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="2,2,2,2"/>
-                </HierarchicalDataTemplate>
-            </TreeView.Resources>
-            <i:Interaction.Behaviors>
-                <behaviors:BindableSelectedItemBehavior SelectedItem="{Binding SelectedDir, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            </i:Interaction.Behaviors>
-        </TreeView>
+            <Border Grid.Row="2" Grid.Column="1" CornerRadius="8,8,0,0" Background="{DynamicResource GrayscaleGray8Brush}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Style="{StaticResource OutlinedBtnType1-Small-Medium}" HorizontalAlignment="Left" Margin="12,0,0,0" Foreground="{DynamicResource GrayscaleWhiteBrush}" Command="{Binding FolderActionCommand}" CommandParameter="{x:Static const:Constants.FolderActionCreate}" Content="{Binding [New Folder], Source={StaticResource L10N}}" IsEnabled="{Binding SelectedDir, Converter={StaticResource NotNullToEnableConverter}}"/>
+                    <Button Grid.Column="1" Style="{StaticResource OutlinedBtnType1-Small-Short}" HorizontalAlignment="Right" Margin="0,0,12,0" Foreground="{DynamicResource GrayscaleWhiteBrush}" Command="{Binding FolderActionCommand}" CommandParameter="{x:Static const:Constants.FolderActionRename}" Content="{Binding [Rename], Source={StaticResource L10N}}" IsEnabled="{Binding SelectedDir, Converter={StaticResource NotNullToEnableConverter}, ConverterParameter=Rename}"/>
+                </Grid>
+            </Border>
 
-        <StackPanel Grid.Row="3" Orientation="Horizontal">
-            <Label Content="{Binding [Folder], Source={StaticResource L10N}}"/>
-            <Label>:</Label>
-            <Label Content="{Binding SelectedDir.Path, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-        </StackPanel>
+            <Separator Grid.Row="3" Grid.ColumnSpan="3" Background="{DynamicResource GrayscaleGray5Brush}" Width="408" Height="1"/>
+            
+            <TreeView Grid.Row="4" Grid.Column="1" ItemsSource="{Binding DirItems}">
+                <TreeView.Resources>
+                    <HierarchicalDataTemplate DataType="{x:Type model:DirectoryItem}" ItemsSource="{Binding Path=Items, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <TextBlock Text="{Binding Path=Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10,6,10,6"/>
+                    </HierarchicalDataTemplate>
+                </TreeView.Resources>
+                <i:Interaction.Behaviors>
+                    <behaviors:BindableSelectedItemBehavior SelectedItem="{Binding SelectedDir, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </i:Interaction.Behaviors>
+            </TreeView>
 
-        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource ButtonBasic}" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Cancel], Source={StaticResource L10N}}" Width="50"/>
-            <Button Style="{StaticResource ButtonImportant}" Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}" Width="50"/>
-        </StackPanel>
-    </Grid>
+            <Grid Grid.Row="6" Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Folder], Source={StaticResource L10N}}"/>
+                <TextBox Grid.Column="2" Style="{DynamicResource TextBoxReadOnly}" Text="{Binding SelectedDir.Path, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            </Grid>
+
+            <StackPanel Grid.Row="7" Grid.Column="1" Orientation="Horizontal"  VerticalAlignment="Top">
+                <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+                <StackPanel Width="8"/>
+                <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
+            </StackPanel>
+        </Grid>
+    </Border>
 </UserControl>

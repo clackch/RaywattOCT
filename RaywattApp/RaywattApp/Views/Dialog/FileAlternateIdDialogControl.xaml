@@ -4,34 +4,47 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RaywattApp.Views.Dialog"
+             xmlns:const="clr-namespace:RaywattApp.Common.Bases"
              mc:Ignorable="d" 
-             Width="500" Height="400">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Background="Black" Orientation="Horizontal">
-            <Label Content="{Binding [Define Alternate Patient ID], Source={StaticResource L10N}}" Foreground="White"/>
-        </StackPanel>
+             Width="{Binding DialogWidth}" Height="{Binding DialogHeight}">
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding ResetCommand}" CommandParameter="{Binding ElementName=patientList, Path=SelectedItem}" Content="{Binding [Reset], Source={StaticResource L10N}}"/>
-        </StackPanel>
+    <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Width="{x:Static const:Constants.FileAlternateIdDialogWidth}" Height="{x:Static const:Constants.FileAlternateIdDialogHeight}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="31"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="31"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="35"/>
+                <RowDefinition Height="70"/>
+                <RowDefinition Height="224"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="71"/>
+            </Grid.RowDefinitions>
 
-        <DataGrid Grid.Row="2" Name="patientList" ItemsSource="{Binding PatientList, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" Style="{StaticResource DataGridBasic}" SelectionMode="Single" IsReadOnly="False" MaxHeight="200">
-            <DataGrid.Columns>
-                <DataGridTextColumn Width="*" Binding="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="{Binding [Name], Source={StaticResource L10N}}" IsReadOnly="True" />
-                <DataGridTextColumn Width="*" Binding="{Binding Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="{Binding [ID], Source={StaticResource L10N}}" IsReadOnly="True" />
-                <DataGridTextColumn Width="*" Binding="{Binding AlternateId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="{Binding [Alternate ID], Source={StaticResource L10N}}" />
-            </DataGrid.Columns>
-        </DataGrid>
+            <StackPanel Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center">
+                <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Define Alternate Patient ID], Source={StaticResource L10N}}"/>
+            </StackPanel>
 
-        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource ButtonBasic}" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Cancel], Source={StaticResource L10N}}" Width="50"/>
-            <Button Style="{StaticResource ButtonImportant}" Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}" Width="50"/>
-        </StackPanel>
-    </Grid>
+            <DataGrid Grid.Row="2" Grid.Column="1" Name="patientList" ItemsSource="{Binding PatientList, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" Style="{StaticResource DataGridDialog}" RowHeight="58" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" IsReadOnly="False" Height="224">
+                <DataGrid.Columns>
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="{Binding [Name], Source={StaticResource L10N}}" IsReadOnly="True" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="100" Binding="{Binding Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="{Binding [ID], Source={StaticResource L10N}}" IsReadOnly="True" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellEdit}" EditingElementStyle="{StaticResource DataGridCellEditTextBox}" Width="150" Binding="{Binding AlternateId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="{Binding [Alternate ID], Source={StaticResource L10N}}" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+                <StackPanel Width="8"/>
+                <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding ResetCommand}" CommandParameter="{Binding ElementName=patientList, Path=SelectedItem}" Content="{Binding [Reset], Source={StaticResource L10N}}"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="5" Grid.Column="1" VerticalAlignment="Top">
+                <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Width="408" Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
+            </StackPanel>
+        </Grid>
+    </Border>
 </UserControl>

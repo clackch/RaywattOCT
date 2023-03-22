@@ -72,7 +72,7 @@ namespace RaywattApp.Services
 
             //SelectPatientListByCase
             _query["SelectPatientListByCase"] =
-                $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, gender" +
+                $"SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, gender, FALSE is_checked" +
                         $", create_date, update_date " +
                         $", rv_schema.fn_lastcase(id) last_case " +
                 $"FROM rv_schema.patient p " +
