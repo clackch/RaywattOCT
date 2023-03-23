@@ -164,6 +164,9 @@ namespace RaywattApp.ViewModels.Setting
 
         private void EditPhysician(Physician physician)
         {
+            if (physician == null)
+                return;
+
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["physician"] = physician;
             parameter["physicianList"] = PhysicianList;
