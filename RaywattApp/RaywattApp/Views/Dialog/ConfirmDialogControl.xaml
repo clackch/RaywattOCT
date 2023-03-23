@@ -17,14 +17,14 @@
                 <RowDefinition Height="70"/>
             </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel Grid.Row="1" HorizontalAlignment="Center">
                 <Label Style="{DynamicResource Pretendard-Medium-12}" Content="{Binding Title}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
             </StackPanel>
             <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Label Style="{DynamicResource Pretendard-Medium-22}" Content="{Binding Message}" Foreground="{DynamicResource GrayscaleWhiteBrush}"/>
             </StackPanel>
             <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top">
-                <Button Style="{StaticResource OutlinedBtnType1-Large}" Width="150" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [No], Source={StaticResource L10N}}"/>
+                <Button Style="{StaticResource OutlinedBtnType3-Large}" Width="150" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [No], Source={StaticResource L10N}}"/>
                 <StackPanel Width="8"/>
                 <Button Style="{StaticResource ContainedBtnType1-Large-Short}" Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Yes], Source={StaticResource L10N}}"/>
             </StackPanel>

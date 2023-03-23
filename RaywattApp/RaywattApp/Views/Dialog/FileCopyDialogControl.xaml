@@ -4,25 +4,35 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RaywattApp.Views.Dialog"
+             xmlns:const="clr-namespace:RaywattApp.Common.Bases"
              mc:Ignorable="d" 
-             Width="600" Height="150">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Background="Black" Orientation="Horizontal">
-            <Label Content="{Binding Title}" Foreground="White"/>
-        </StackPanel>
+             Width="{Binding DialogWidth}" Height="{Binding DialogHeight}">
 
-        <StackPanel Grid.Row="1" VerticalAlignment="Center">
-            <Label Content="{Binding ProgressText}" Height="30"/>
-            <ProgressBar Value="{Binding Progress}" Height="20"/>
-        </StackPanel>
-        
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource ButtonImportant}" IsEnabled="{Binding EnableDone}" Command="{Binding OKCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Done], Source={StaticResource L10N}}" Width="50"/>
-        </StackPanel>
-    </Grid>
+    <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" BorderThickness="0" Width="{x:Static const:Constants.FileCopyDialogWidth}" Height="{x:Static const:Constants.FileCopyDialogHeight}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="21"/>
+                <RowDefinition Height="42"/>
+                <RowDefinition Height="42"/>
+                <RowDefinition Height="24"/>
+                <RowDefinition Height="24"/>
+                <RowDefinition Height="66"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="1" HorizontalAlignment="Center">
+                <Label Style="{DynamicResource Pretendard-Medium-12}" Content="{Binding Title}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+            </StackPanel>
+            <StackPanel Grid.Row="2" HorizontalAlignment="Center">
+                <Label Style="{DynamicResource Pretendard-Medium-22}" Content="{Binding ProgressText}" Foreground="{DynamicResource GrayscaleWhiteBrush}"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="3" VerticalAlignment="Center">
+                <ProgressBar Value="{Binding Progress}" Width="412" Height="24"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="5">
+                <Button Style="{StaticResource ContainedBtnType1-Large-Short}" IsEnabled="{Binding EnableDone}" Command="{Binding OKCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Done], Source={StaticResource L10N}}"/>
+            </StackPanel>
+        </Grid>
+    </Border>
 </UserControl>

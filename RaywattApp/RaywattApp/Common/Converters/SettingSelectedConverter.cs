@@ -8,16 +8,16 @@ namespace RaywattApp.Common.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var ButtonImportant = App.Current.Resources["ButtonImportant"];
-            var ButtonBasic = App.Current.Resources["ButtonBasic"];
+            var SettingSelected = App.Current.Resources["SettingSelected"];
+            var SettingNotSelected = App.Current.Resources["SettingNotSelected"];
 
             if (value.Equals(parameter))
             {
-                return ButtonImportant;
+                return SettingSelected;
             }
             else
             {
-                return ButtonBasic;
+                return SettingNotSelected;
             }
         }
 

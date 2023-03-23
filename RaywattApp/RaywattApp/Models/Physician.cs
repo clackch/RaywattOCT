@@ -20,9 +20,15 @@ namespace RaywattApp.Models
 
                     _name = value;
                     OnPropertyChanged(nameof(Name));
+
+                    _validateName = "";
+                    OnPropertyChanged(nameof(ValidateName));
                 }
             }
         }
+
+        [ObservableProperty]
+        private string _validateName;
 
         [ObservableProperty]
         private DateTime createDate;

@@ -169,5 +169,20 @@
         <Setter Property="Width" Value="1"/>
         <Setter Property="Height" Value="49"/>
     </Style>
+    
+    <!-- Progress Bar -->
+    <Style TargetType="{x:Type ProgressBar}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ProgressBar">
+                    <Grid>
+                        <Border BorderThickness="0" CornerRadius="4" Background="{DynamicResource GrayscaleGray7Brush}"/>
+                        <Rectangle Name="PART_Track"/>
+                        <Border Name="PART_Indicator" CornerRadius="4" Background="{DynamicResource MainPrimaryColorBrush}" HorizontalAlignment="Left"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
 </ResourceDictionary>

@@ -1,10 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
-using RaywattApp.Common.Messages;
 using RaywattApp.Common.Setting;
 using RaywattApp.Models;
 using RaywattApp.Services;
@@ -12,7 +10,7 @@ using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Windows.Controls;
+using System.ComponentModel;
 using System.Windows.Input;
 using System.Windows.Navigation;
 
@@ -31,18 +29,13 @@ namespace RaywattApp.ViewModels.Setting
 
         private IList<Physician> originPhysicianList;
 
-        private bool isModified;
-
-        private bool isNewRow;
-
-        private Physician selectedPhysician;
-
-        private string selectedPhysicianName;
+        [ObservableProperty]
+        private Physician _newPhysician;
 
         private ICommand _rowAddCommand;
         public ICommand RowAddCommand
         {
-            get { return this._rowAddCommand ?? (this._rowAddCommand = new RelayCommand<DataGrid>(AddRow)); }
+            get { return this._rowAddCommand ?? (this._rowAddCommand = new RelayCommand(AddRow, CanAddPhysician)); }
         }
 
         private ICommand _rowDeleteCommand;
@@ -51,16 +44,10 @@ namespace RaywattApp.ViewModels.Setting
             get { return this._rowDeleteCommand ?? (this._rowDeleteCommand = new RelayCommand<Physician>(DeleteRow)); }
         }
 
-        private ICommand _beginningEditCommand;
-        public ICommand BeginningEditCommand
+        private ICommand _gridDoubleClickCommand;
+        public ICommand GridDoubleClickCommand
         {
-            get { return this._beginningEditCommand ?? (this._beginningEditCommand = new RelayCommand<DataGrid>(BeginningEdit)); }
-        }
-
-        private ICommand _rowEditEndingCommand;
-        public ICommand RowEditEndingCommand
-        {
-            get { return this._rowEditEndingCommand ?? (this._rowEditEndingCommand = new RelayCommand<DataGrid>(RowEditEnding)); }
+            get { return this._gridDoubleClickCommand ?? (this._gridDoubleClickCommand = new RelayCommand<Physician>(EditPhysician)); }
         }
 
         public SettingPhysicianViewModel(SqlManager sqlManager, IDialogService dialogService)
@@ -71,8 +58,9 @@ namespace RaywattApp.ViewModels.Setting
             _dialogService = dialogService;
 
             PhysicianList = new ObservableCollection<Physician>();
-
-            isNewRow = false;
+            NewPhysician = new Physician();
+            NewPhysician.Name = "";
+            NewPhysician.PropertyChanged += NewPhysician_PropertyChanged;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -125,20 +113,43 @@ namespace RaywattApp.ViewModels.Setting
             }
         }
 
-        private void AddRow(DataGrid dataGrid)
+        private void NewPhysician_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            _log.Debug("NewPhysician_PropertyChanged");
+
+            (RowAddCommand as RelayCommand).NotifyCanExecuteChanged();
+        }
+
+        private bool CanAddPhysician()
+        {
+            _log.Debug("CanAddPhysician");
+
+            if (string.IsNullOrEmpty(NewPhysician.Name.Trim()))
+                return false;
+
+            return true;
+        }
+
+        private void AddRow()
         {
             _log.Debug("AddRow");
 
+            foreach(Physician item in PhysicianList)
+            {
+                if (item.Name.Equals(NewPhysician.Name.Trim()))
+                {
+                    NewPhysician.ValidateName = _l10n["Name is duplicated."];
+                    return;
+                }
+            }
+
+            NewPhysician.ValidateName = "";
+
             Physician physician = new Physician();
-            physician.Name = "";
+            physician.Name = NewPhysician.Name;
             PhysicianList.Add(physician);
 
-            dataGrid.Focus();
-            dataGrid.SelectedIndex = PhysicianList.Count - 1;
-            dataGrid.CurrentCell = new DataGridCellInfo(PhysicianList[PhysicianList.Count - 1], dataGrid.Columns[0]); // set current cell    
-            dataGrid.BeginEdit();
-
-            isNewRow = true;
+            NewPhysician.Name = "";
         }
 
         private void DeleteRow(Physician physician)
@@ -149,95 +160,19 @@ namespace RaywattApp.ViewModels.Setting
                 return;
 
             PhysicianList.Remove(physician);
-
-            CopyPhysicianList();
         }
 
-        private void BeginningEdit(DataGrid dataGrid)
+        private void EditPhysician(Physician physician)
         {
-            _log.Debug("BeginningEdit");
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["physician"] = physician;
+            parameter["physicianList"] = PhysicianList;
+            var result = _dialogService.OpenDialog(new SettingEditPhysicianDialogControl(), parameter, Constants.SettingDialogWidth, Constants.SettingDialogHeight);
 
-            isModified = true;
-
-            selectedPhysician = (Physician)dataGrid.SelectedItem;
-            if(selectedPhysician == null)
-                selectedPhysician = (Physician)dataGrid.CurrentItem;
-
-            selectedPhysicianName = selectedPhysician.Name.Trim();
-        }
-
-        private void RowEditEnding(DataGrid dataGrid)
-        {
-            _log.Debug("RowEditEnding");
-
-            Physician physician = (Physician)dataGrid.SelectedItem;
-            if (physician == null)
-                physician = (Physician)dataGrid.CurrentItem;
-            if (physician == null)
-                physician = (dataGrid.DataContext as SettingPhysicianViewModel).selectedPhysician;
-
-            if (physician.Name.Trim() == "")
+            if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
             {
-                if (isNewRow)
-                {
-                    PhysicianList.Remove(physician);
-                    CopyPhysicianList();
-                    isNewRow = false;
-                }
-                else
-                {
-                    selectedPhysician.Name = selectedPhysicianName;
-                    PhysicianList[PhysicianList.IndexOf(physician)] = selectedPhysician;
-                }
-                return;
-            }
-
-            if (physician.Name.Trim().Equals(selectedPhysicianName))
-            {
-                return;
-            }
-
-            foreach (Physician item in originPhysicianList)
-            {
-                if (item.Name.Equals(physician.Name.Trim()))
-                {
-                    isModified = false;
-
-                    if (isNewRow)
-                    {
-                        PhysicianList.Remove(physician);
-                        CopyPhysicianList();
-                        isNewRow = false;
-                    }
-                    else
-                    {
-                        selectedPhysician.Name = selectedPhysicianName;
-                        PhysicianList[PhysicianList.IndexOf(physician)] = selectedPhysician;
-                    }
-
-                    Dictionary<string, object> parameter = new Dictionary<string, object>();
-                    parameter["title"] = _l10n["Information"];
-                    parameter["message"] = _l10n["Name is duplicated."];
-                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
-                    break;
-                }
-            }
-
-            if (isModified)
-            {
-                CopyPhysicianList();
-            }
-        }
-
-        private void CopyPhysicianList()
-        {
-            originPhysicianList.Clear();
-
-            foreach (Physician physician in PhysicianList)
-            {
-                Physician newPhysician = new Physician();
-                newPhysician.Name = physician.Name.Trim();
-                originPhysicianList.Add(newPhysician);
+                Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
+                physician.Name = data["physicianName"].ToString();
             }
         }
 

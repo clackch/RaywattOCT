@@ -79,7 +79,7 @@ namespace RaywattApp.ViewModels.File
                     if (_selectedExternalDrive != null)
                     {
                         curPath = _selectedExternalDrive;
-                        directoryProvider.GetDirectoryWithExtension(curPath);
+                        directoryProvider.GetDirectoryWithExtension(curPath.Replace("\\", ""));
                         DirItems = directoryProvider.DirItems;
 
                         externDriveInit = true;
@@ -234,7 +234,7 @@ namespace RaywattApp.ViewModels.File
                     parameter["title"] = _l10n["Information"];
                     parameter["message"] = _l10n["Data already exists.\r\nDo you want to import data?"];
                     parameter["patientCaseList"] = existPatientCases;
-                    var result = _dialogService.OpenDialog(new FileImportDialogControl(), parameter);
+                    var result = _dialogService.OpenDialog(new FileImportDialogControl(), parameter, Constants.FileImportDialogWidth, Constants.FileImportDialogHeight);
 
                     if (result != null)
                     {
@@ -253,7 +253,7 @@ namespace RaywattApp.ViewModels.File
                     Dictionary<string, object> parameter = new Dictionary<string, object>();
                     parameter["title"] = _l10n["Information"];
                     parameter["message"] = _l10n["Are you sure to import selected file?"];
-                    var result = _dialogService.OpenDialog(new ConfirmDialogControl(), parameter);
+                    var result = _dialogService.OpenDialog(new ConfirmDialogControl(), parameter, Constants.FileImportDialogWidth, Constants.FileImportDialogHeight);
 
                     if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
                     {
@@ -266,7 +266,7 @@ namespace RaywattApp.ViewModels.File
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["title"] = _l10n["Information"];
                 parameter["message"] = _l10n["There are no items selected."];
-                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.FileImportDialogWidth, Constants.FileImportDialogHeight);
             }
         }
 
@@ -316,7 +316,7 @@ namespace RaywattApp.ViewModels.File
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["title"] = _l10n["File Import"];
                 parameter["fileImport"] = importfiles;
-                var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter);
+                var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter, Constants.FileImportDialogWidth, Constants.FileImportDialogHeight);
 
                 if (result != null && result.DialogAnswer == DialogResults.Answer.Undefined)
                 {
@@ -484,13 +484,15 @@ namespace RaywattApp.ViewModels.File
                     {
                         if (d.DriveType == DriveType.Removable)
                         {
-                            currExternalDrive[d.Name] = d.Name;
+                            string driveName = d.Name.Replace("\\", "");
+
+                            currExternalDrive[driveName] = driveName;
                             long[] data = { d.TotalSize, d.AvailableFreeSpace };
-                            ExternalDriveList.Add(d.Name, data);
+                            ExternalDriveList.Add(driveName, data);
 
                             if (isFirstExternalDrive)
                             {
-                                firstExternalDrive = d.Name;
+                                firstExternalDrive = driveName;
                                 isFirstExternalDrive = false;
                             }
                         }

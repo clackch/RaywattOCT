@@ -207,7 +207,16 @@ namespace RaywattApp.Common.Util
 
         private DirectoryItem CreateDirectoryNodeWithExtension(DirectoryInfo directoryInfo)
         {
-            DirectoryItem directoryItme = new DirectoryItem { Name = directoryInfo.Name, Path = directoryInfo.FullName };
+            string dirName = directoryInfo.Name;
+            string dirFullName = directoryInfo.FullName;
+
+            if (directoryInfo.Parent == null)
+            {
+                dirName = dirName.Replace("\\", "");
+                dirFullName = directoryInfo.FullName.Replace("\\", "");
+            }
+
+            DirectoryItem directoryItme = new DirectoryItem { Name = dirName, Path = dirFullName };
 
             foreach (var directory in directoryInfo.GetDirectories().OrderBy(f => f.Name))
             {

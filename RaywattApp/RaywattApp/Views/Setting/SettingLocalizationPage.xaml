@@ -4,31 +4,44 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:RaywattApp.Views.Setting"
+      xmlns:const="clr-namespace:RaywattApp.Common.Bases"
       mc:Ignorable="d" 
-      d:DesignHeight="820" d:DesignWidth="1000"
+      Width="{x:Static const:Constants.SettingInsideDialogWidth}" Height="{x:Static const:Constants.SettingInsideDialogHeight}"
       Title="SettingLocalizationPage">
 
-    <Grid Height="800">
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="500"/>
+            <RowDefinition Height="41"/>
+            <RowDefinition Height="42"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Background="Gray">
-            <Label Content="{Binding [Localization], Source={StaticResource L10N}}"></Label>
-        </StackPanel>
+        <Border Grid.Row="0" CornerRadius="10" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray8Brush}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="149"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="54"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Margin="28,0,28,0">
+                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}">
+                        <Label.Content>
+                            <AccessText TextWrapping="Wrap" Text="{Binding [Select Language], Source={StaticResource L10N}}"/>
+                        </Label.Content>
+                    </Label>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left">
+                    <ComboBox ItemsSource="{Binding LanguageComboBox}" SelectedValue="{Binding CurrentLanguage, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" />
+                </StackPanel>
+            </Grid>
+        </Border>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-            <Label Content="{Binding [Language], Source={StaticResource L10N}}"></Label>
-            <ComboBox Width="100" ItemsSource="{Binding LanguageComboBox}" SelectedValue="{Binding CurrentLanguage, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" />
-        </StackPanel>
-
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" >
-            <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding RefreshCommand}" Content="{Binding [Refresh], Source={StaticResource L10N}}"/>
-            <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
-            <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding OkayCommand}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
-            <Button Style="{StaticResource ButtonImportant}" Width="50" Command="{Binding ApplyCommand}" Content="{Binding [Apply], Source={StaticResource L10N}}"/>
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding OkayCommand}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
         </StackPanel>
     </Grid>
 </Page>

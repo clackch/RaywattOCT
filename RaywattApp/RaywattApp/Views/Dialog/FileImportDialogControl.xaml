@@ -5,31 +5,51 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RaywattApp.Views.Dialog"
              xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:const="clr-namespace:RaywattApp.Common.Bases"
              mc:Ignorable="d" 
-             Width="400" Height="300">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Background="Black" Orientation="Horizontal">
-            <Label Content="{Binding Title}" Foreground="White"/>
-        </StackPanel>
-        <Label Grid.Row="1" Content="{Binding Message}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+             Width="{Binding DialogWidth}" Height="{Binding DialogHeight}">
 
-        <DataGrid Grid.Row="2" ItemsSource="{Binding PatientCaseList}" Style="{StaticResource DataGridBasic}">
-            <DataGrid.Columns>
-                <DataGridTextColumn Width="2*" Binding="{Binding PatientId}" Header="{Binding [ID], Source={StaticResource L10N}}" />
-                <DataGridTextColumn Width="3*" Binding="{Binding PatientName}" Header="{Binding [Name], Source={StaticResource L10N}}" />
-                <DataGridTextColumn Width="5*" Binding="{Binding CreateDate, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Create Date], Source={StaticResource L10N}}" />
-            </DataGrid.Columns>
-        </DataGrid>
-        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource ButtonBasic}" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [No], Source={StaticResource L10N}}" Width="50"/>
-            <Button Style="{StaticResource ButtonBasic}" Command="{Binding ExtraCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [SKIP], Source={StaticResource L10N}}" Width="50"/>
-            <Button Style="{StaticResource ButtonImportant}" Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Yes], Source={StaticResource L10N}}" Width="50"/>
-        </StackPanel>
-    </Grid>
+    <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Width="{x:Static const:Constants.FileImportActionDialogWidth}" Height="{x:Static const:Constants.FileImportActionDialogHeight}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="31"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="31"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="19"/>
+                <RowDefinition Height="46"/>
+                <RowDefinition Height="84"/>
+                <RowDefinition Height="194"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="77"/>
+            </Grid.RowDefinitions>
+            
+            <StackPanel Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Label Style="{DynamicResource Pretendard-Medium-12}" Content="{Binding Title}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+            </StackPanel>
+            <StackPanel Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Label Style="{DynamicResource Pretendard-Medium-22}" Content="{Binding Message}" Foreground="{DynamicResource GrayscaleWhiteBrush}"/>
+            </StackPanel>
+
+            <DataGrid Grid.Row="3" Grid.Column="1" ItemsSource="{Binding PatientCaseList}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="2*" Binding="{Binding PatientId}" Header="{Binding [ID], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="3*" Binding="{Binding PatientName}" Header="{Binding [Name], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="5*" Binding="{Binding CreateDate, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Create Date], Source={StaticResource L10N}}" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [No], Source={StaticResource L10N}}"/>
+                <StackPanel Width="8"/>
+                <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding ExtraCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [SKIP], Source={StaticResource L10N}}"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="6" Grid.Column="1" VerticalAlignment="Top">
+                <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Width="408" Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Yes], Source={StaticResource L10N}}"/>
+            </StackPanel>
+        </Grid>
+    </Border>
 </UserControl>

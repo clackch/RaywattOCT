@@ -43,6 +43,8 @@ namespace RaywattApp.Common.Bases
         public const double ApplicationHeight = 1024;
         public const double FileExportDialogWidth = 860;
         public const double FileExportDialogHeight = 741;
+        public const double FileImportDialogWidth = 860;
+        public const double FileImportDialogHeight = 870;
         public const double SettingDialogWidth = 860;
         public const double SettingDialogHeight = 714;
         public const double ConfirmDialogWidth = 360;
@@ -55,6 +57,14 @@ namespace RaywattApp.Common.Bases
         public const double FileFolderBrowseDialogHeight = 659;
         public const double FileFolderActionDialogWidth = 472;
         public const double FileFolderActionDialogHeight = 370;
+        public const double FileImportActionDialogWidth = 472;
+        public const double FileImportActionDialogHeight = 492;
+        public const double FileCopyDialogWidth = 460;
+        public const double FileCopyDialogHeight = 219;
+        public const double SettingInsideDialogWidth = 584;
+        public const double SettingInsideDialogHeight = 583;
+        public const double SettingEditPhysicianDialogWidth = 472;
+        public const double SettingEditPhysicianDialogHeight = 279;
 
         //Max Length
         public const int MaxPatientId = 9;

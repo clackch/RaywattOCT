@@ -129,7 +129,7 @@ namespace RaywattApp.ViewModels
                     RayEndReview();
             }
 
-            if (NavigationSource == Constants.PatientListPage)
+            if (NavigationSource == Constants.PatientListPage || Constants.CurrentPage == Constants.PatientListPage)
                 IsHome = Visibility.Hidden;
             else
                 IsHome = Visibility.Visible;
@@ -173,7 +173,7 @@ namespace RaywattApp.ViewModels
         private void Setting()
         {
             _log.Debug("Setting");
-            var result = _dialogService.OpenDialog(new SettingDialogControl());
+            var result = _dialogService.OpenDialog(new SettingDialogControl(), null, Constants.ApplicationWidth, Constants.ApplicationHeight);
         }
 
         private void Exit()

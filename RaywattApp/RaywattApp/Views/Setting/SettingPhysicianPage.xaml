@@ -4,47 +4,67 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:RaywattApp.Views.Setting"
-      xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+      xmlns:const="clr-namespace:RaywattApp.Common.Bases"
       mc:Ignorable="d" 
-      d:DesignHeight="820" d:DesignWidth="1000"
+      Width="{x:Static const:Constants.SettingInsideDialogWidth}" Height="{x:Static const:Constants.SettingInsideDialogHeight}"
       Title="SettingPhysicianPage">
 
-    <Grid Height="800">
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="413"/>
+            <RowDefinition Height="15"/>
+            <RowDefinition Height="113"/>
+            <RowDefinition Height="42"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Background="Gray">
-            <Label Content="{Binding [Physician], Source={StaticResource L10N}}"></Label>
-        </StackPanel>
+        <FrameworkElement x:Name="ProxyElement" Visibility="Collapsed"/>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource ButtonBasic}" Width="20" Command="{Binding RowAddCommand}" CommandParameter="{Binding ElementName=physicianList}" Content="+"/>
-            <Button Style="{StaticResource ButtonBasic}" Width="20" Command="{Binding RowDeleteCommand}" CommandParameter="{Binding ElementName=physicianList, Path=SelectedItem}" Content="-"/>
-        </StackPanel>
-
-        <DataGrid Grid.Row="2" Name="physicianList" ItemsSource="{Binding PhysicianList, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"  Style="{StaticResource DataGridBasic}" SelectionMode="Single" IsReadOnly="False">
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="BeginningEdit">
-                    <i:InvokeCommandAction Command="{Binding BeginningEditCommand}" CommandParameter="{Binding ElementName=physicianList}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="RowEditEnding">
-                    <i:InvokeCommandAction Command="{Binding RowEditEndingCommand}" CommandParameter="{Binding ElementName=physicianList}"/>
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
+        <DataGrid Grid.Row="0" Name="physicianList" ItemsSource="{Binding PhysicianList}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialogLeft}" SelectionMode="Single">
+            <DataGrid.InputBindings>
+                <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding GridDoubleClickCommand}" CommandParameter="{Binding ElementName=physicianList, Path=CurrentItem}"/>
+            </DataGrid.InputBindings>
             <DataGrid.Columns>
-                <DataGridTextColumn Width="*" Binding="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="{Binding [Name], Source={StaticResource L10N}}" />
+                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipLeft}" Width="*" Binding="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="{Binding [Name], Source={StaticResource L10N}}" />
+                <DataGridTemplateColumn CellStyle="{StaticResource DataGridCellDelete}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Style="{DynamicResource DataGridDelete}" Command="{Binding DataContext.RowDeleteCommand, Source={x:Reference ProxyElement}}" CommandParameter="{Binding ElementName=physicianList, Path=CurrentItem}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
 
-        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" >
-            <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding RefreshCommand}" Content="{Binding [Refresh], Source={StaticResource L10N}}"/>
-            <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
-            <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding OkayCommand}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
-            <Button Style="{StaticResource ButtonImportant}" Width="50" Command="{Binding ApplyCommand}" Content="{Binding [Apply], Source={StaticResource L10N}}"/>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="54"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">
+                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}">
+                    <Label.Content>
+                        <AccessText TextWrapping="Wrap" Text="{Binding [Add Physician], Source={StaticResource L10N}}"/>
+                    </Label.Content>
+                </Label>
+            </StackPanel>
+            <StackPanel Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                <TextBox Style="{DynamicResource TextBoxValidator}" Width="360" Text="{Binding NewPhysician.Name, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Write Physician Name], Source={StaticResource L10N}}" ToolTip="{Binding NewPhysician.ValidateName}"/>
+                <StackPanel Width="10"/>
+            </StackPanel>
+            <StackPanel Grid.Row="0" Grid.Column="2">
+                <Button Style="{StaticResource OutlinedBtnType3-Large}" Width="72" Height="54" Command="{Binding RowAddCommand}" Content="{Binding [Add], Source={StaticResource L10N}}"/>
+            </StackPanel>
+        </Grid>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding ApplyCommand}" Content="{Binding [Apply], Source={StaticResource L10N}}"/>
+            <StackPanel Width="16"/>
+            <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding OkayCommand}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
         </StackPanel>
     </Grid>
 </Page>
