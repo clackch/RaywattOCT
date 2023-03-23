@@ -202,6 +202,10 @@ namespace RaywattApp.Common.Bases
         //Review - 2D - Cross Section
         public const double CrossSectionSize = 620;
         public const double CrossSectionCenter = CrossSectionSize / 2;
+        public const double CalciumIndicatorSize = 645;
+        public const double CalciumThicknessIndicatorSize = 681;
+        public const double CalciumThicknessIndicatorCenter = CalciumThicknessIndicatorSize / 2;
+        public const int CalciumIndicatorColor = 0x57FEEB;
 
         //Review - 2D - Angio
         public const double AngioSize = 580;
