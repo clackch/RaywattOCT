@@ -42,13 +42,30 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private PatientCasePreset _patientCasePreset;
 
+        [ObservableProperty]
         private bool _isPreset;
+
+        [ObservableProperty]
+        private bool _isNew;
 
         [ObservableProperty]
         private Visibility _modifyMode;
 
-        [ObservableProperty]
         private Visibility _selectionMode;
+        public Visibility SelectionMode
+        {
+            get { return _selectionMode; }
+            set 
+            { 
+                _selectionMode = value; 
+                OnPropertyChanged(nameof(SelectionMode));
+
+                if (value == Visibility.Visible)
+                {
+                    IsNew = false;
+                }
+            }
+        }
 
         [ObservableProperty]
         private int _presetIndex;
@@ -148,9 +165,11 @@ namespace RaywattApp.ViewModels
                     ReviewStatus = new ReviewStatus();
                     PatientCasePresetList = _sqlManager.SelectPatientCasePresetList();
 
-                    _isPreset = true;
+                    IsPreset = true;
                     ModifyMode = Visibility.Collapsed;
                     SelectionMode = Visibility.Visible;
+                    PresetIndex = 0;
+                    ShowPreset(PatientCasePresetList[PresetIndex]);
                 }
                 else
                 {
@@ -166,13 +185,12 @@ namespace RaywattApp.ViewModels
                     patientCasePreset.AppositionThreshold = PatientCase.AppositionThreshold;
                     PatientCasePresetList.Add(patientCasePreset);
 
-                    _isPreset = false;
+                    IsPreset = false;
                     ModifyMode = Visibility.Visible;
                     SelectionMode = Visibility.Collapsed;
+                    PresetIndex = 0;
+                    PatientCasePreset = PatientCasePresetList[PresetIndex];
                 }
-
-                PresetIndex = 0;
-                PatientCasePreset = PatientCasePresetList[PresetIndex];
             }
         }
 
@@ -203,7 +221,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["pullback_type"] = PatientCase.PullbackType;
             sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
             sqlParameters["indicator_degree"] = PatientCase.IndicatorDegree;
-            sqlParameters["preset_name"] = PatientCasePreset.PresetName;
+            sqlParameters["preset_name"] = PatientCasePreset.PresetName.Trim();
             sqlParameters["calcium_threshold"] = PatientCasePreset.CalciumThreshold;
             sqlParameters["expansion_calculation"] = PatientCasePreset.ExpansionCalculation;
             sqlParameters["expansion_threshold"] = PatientCasePreset.ExpansionThreshold;
@@ -227,8 +245,10 @@ namespace RaywattApp.ViewModels
 
             ModifyMode = Visibility.Visible;
             SelectionMode = Visibility.Collapsed;
+            IsNew = true;
 
             PatientCasePreset = new PatientCasePreset();
+            PatientCasePreset.PresetName = "";
             PatientCasePreset.CalciumThreshold = Constants.DefaultCalciumThreshold;
             PatientCasePreset.ExpansionCalculation = Constants.PresetTapered;
             PatientCasePreset.ExpansionThreshold = Constants.DefaultExpansionThreshold;
@@ -239,54 +259,43 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Edit");
 
-            if (PatientCasePreset.DefaultSet)
-            {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["title"] = _l10n["Information"];
-                parameter["message"] = _l10n["Default Preset can not be modified"];
-                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
-            }
-            else
-            {
-                ModifyMode = Visibility.Visible;
-                SelectionMode = Visibility.Collapsed;
-            }
+            PatientCasePreset temp = new PatientCasePreset();
+            temp.Id = PatientCasePreset.Id;
+            temp.PresetName = PatientCasePreset.PresetName;
+            temp.CalciumThreshold = PatientCasePreset.CalciumThreshold;
+            temp.ExpansionCalculation = PatientCasePreset.ExpansionCalculation;
+            temp.ExpansionThreshold = PatientCasePreset.ExpansionThreshold;
+            temp.AppositionThreshold = PatientCasePreset.AppositionThreshold;
+            PatientCasePreset = temp;
+
+            ModifyMode = Visibility.Visible;
+            SelectionMode = Visibility.Collapsed;
         }
 
         private void Delete()
         {
             _log.Debug("Delete");
 
-            if (PatientCasePreset.DefaultSet)
-            {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["title"] = _l10n["Information"];
-                parameter["message"] = _l10n["Default Preset can not be deleted"];
-                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
-            }
-            else
-            {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["title"] = _l10n["Information"];
-                parameter["message"] = _l10n["Are you sure to delete selected Preset?"];
-                var result = _dialogService.OpenDialog(new ConfirmDialogControl(), parameter);
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["title"] = _l10n["Information"];
+            parameter["message"] = _l10n["Are you sure to delete selected Preset?"];
+            var result = _dialogService.OpenDialog(new ConfirmDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
-                if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
+            if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
+            {
+                Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+                sqlParameters["id"] = PatientCasePreset.Id;
+                int cntDel = _sqlManager.DeletePatientCasePreset(sqlParameters);
+
+                if (cntDel == 1)
                 {
-                    Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-                    sqlParameters["id"] = PatientCasePreset.Id;
-                    int cntDel = _sqlManager.DeletePatientCasePreset(sqlParameters);
-
-                    if (cntDel == 1)
-                    {
-                        PatientCasePresetList = _sqlManager.SelectPatientCasePresetList();
-                        PresetIndex = 0;
-                        PatientCasePreset = PatientCasePresetList[PresetIndex];
-                    }
-                    else
-                    {
-                        _log.Error("Delete Error");
-                    }
+                    PatientCasePresetList = _sqlManager.SelectPatientCasePresetList();
+                    PresetIndex = 0;
+                    ShowPreset(PatientCasePresetList[PresetIndex]);
+                }
+                else
+                {
+                    _log.Error("Delete Error");
                 }
             }
         }
@@ -295,7 +304,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Cancel");
 
-            if (_isPreset)
+            if (IsPreset)
             {
                 ModifyMode = Visibility.Collapsed;
                 SelectionMode = Visibility.Visible;
@@ -303,7 +312,11 @@ namespace RaywattApp.ViewModels
                 if (String.IsNullOrEmpty(PatientCasePreset.Id))
                 {
                     PresetIndex = 0;
-                    PatientCasePreset = PatientCasePresetList[PresetIndex];
+                    ShowPreset(PatientCasePresetList[PresetIndex]);
+                }
+                else
+                {
+                    ShowPreset(PatientCasePresetList[PresetIndex]);
                 }
             }
             else
@@ -321,73 +334,54 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Save");
 
-            if (_isPreset)
+            if (String.IsNullOrEmpty(PatientCasePreset.PresetName.Trim()))
             {
+                PatientCasePreset.ValidatePresetName = _l10n["Write Preset Name"];
+                return;
+            }
+
+            if (IsPreset)
+            {
+                Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+                sqlParameters["preset_name"] = PatientCasePreset.PresetName.Trim();
+                sqlParameters["calcium_threshold"] = PatientCasePreset.CalciumThreshold;
+                sqlParameters["expansion_calculation"] = PatientCasePreset.ExpansionCalculation;
+                sqlParameters["expansion_threshold"] = PatientCasePreset.ExpansionThreshold;
+                sqlParameters["apposition_threshold"] = PatientCasePreset.AppositionThreshold;
+
+                int nRows = 0;
+
                 if (String.IsNullOrEmpty(PatientCasePreset.Id))
                 {
-                    Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
                     sqlParameters["id"] = "Custom_" + DateTime.Now.ToString("yyyyMMddHHmmss");
-                    sqlParameters["preset_name"] = PatientCasePreset.PresetName.Trim();
-                    sqlParameters["calcium_threshold"] = PatientCasePreset.CalciumThreshold;
-                    sqlParameters["expansion_calculation"] = PatientCasePreset.ExpansionCalculation;
-                    sqlParameters["expansion_threshold"] = PatientCasePreset.ExpansionThreshold;
-                    sqlParameters["apposition_threshold"] = PatientCasePreset.AppositionThreshold;
 
-                    int nRows = _sqlManager.InsertPatientCasePreset(sqlParameters);
+                    nRows = _sqlManager.InsertPatientCasePreset(sqlParameters);
+                }
+                else
+                {
+                    sqlParameters["id"] = PatientCasePreset.Id;
 
-                    if(nRows == 1)
+                    nRows = _sqlManager.UpdatePatientCasePreset(sqlParameters);
+                }
+
+                if (nRows == 1)
+                {
+                    PatientCasePresetList = _sqlManager.SelectPatientCasePresetList();
+
+                    for (int i = 0; i < PatientCasePresetList.Count; i++)
                     {
-                        PatientCasePresetList = _sqlManager.SelectPatientCasePresetList();
-
-                        for(int i=0; i<PatientCasePresetList.Count; i++)
+                        if (PatientCasePresetList[i].Id.Equals(sqlParameters["id"].ToString()))
                         {
-                            if (PatientCasePresetList[i].Id.Equals(sqlParameters["id"].ToString()))
-                            {
-                                PresetIndex = i;
-                                PatientCasePreset = PatientCasePresetList[PresetIndex];
-                                break;
-                            }
+                            PresetIndex = i;
+                            ShowPreset(PatientCasePresetList[PresetIndex]);
+                            break;
                         }
-                    }
-                    else
-                    {
-                        _log.Error("Insert Error");
                     }
                 }
                 else
                 {
-                    Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-                    sqlParameters["id"] = PatientCasePreset.Id;
-                    sqlParameters["preset_name"] = PatientCasePreset.PresetName.Trim();
-                    sqlParameters["calcium_threshold"] = PatientCasePreset.CalciumThreshold;
-                    sqlParameters["expansion_calculation"] = PatientCasePreset.ExpansionCalculation;
-                    sqlParameters["expansion_threshold"] = PatientCasePreset.ExpansionThreshold;
-                    sqlParameters["apposition_threshold"] = PatientCasePreset.AppositionThreshold;
-
-                    int nRows = _sqlManager.UpdatePatientCasePreset(sqlParameters);
-
-                    if (nRows == 1)
-                    {
-                        PatientCasePresetList = _sqlManager.SelectPatientCasePresetList();
-
-                        for (int i = 0; i < PatientCasePresetList.Count; i++)
-                        {
-                            if (PatientCasePresetList[i].Id.Equals(sqlParameters["id"].ToString()))
-                            {
-                                PresetIndex = i;
-                                PatientCasePreset = PatientCasePresetList[PresetIndex];
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        _log.Error("Update Error");
-                    }
+                    _log.Error(String.IsNullOrEmpty(PatientCasePreset.Id) ? "Insert Error" : "Update Error");
                 }
-
-                ModifyMode = Visibility.Collapsed;
-                SelectionMode = Visibility.Visible;
             }
             else
             {
@@ -399,7 +393,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("GoToReview");
 
-            PatientCase.PresetName = PatientCasePreset.PresetName;
+            PatientCase.PresetName = PatientCasePreset.PresetName.Trim();
             PatientCase.CalciumThreshold = PatientCasePreset.CalciumThreshold;
             PatientCase.ExpansionCalculation = PatientCasePreset.ExpansionCalculation;
             PatientCase.ExpansionThreshold = PatientCasePreset.ExpansionThreshold;
@@ -415,6 +409,9 @@ namespace RaywattApp.ViewModels
 
         private void ShowPreset(PatientCasePreset patientCasePreset)
         {
+            if (patientCasePreset == null)
+                return;
+
             ModifyMode = Visibility.Collapsed;
             SelectionMode = Visibility.Visible;
 

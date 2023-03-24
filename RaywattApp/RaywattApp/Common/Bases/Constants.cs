@@ -187,7 +187,7 @@ namespace RaywattApp.Common.Bases
         public const string NotSelected = "Not Selected";
 
         //Preset
-        public const int MaxPatientCasePresetName = 40;
+        public const int MaxPatientCasePresetName = 30;
         public const int DefaultCalciumThreshold = 180;
         public const int MaxCalciumThreshold = 360;
         public const int MinCalciumThreshold = 0;

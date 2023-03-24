@@ -567,6 +567,12 @@
     <None Update="res\indicator\bookmark.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="res\indicator\slider_hover.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="res\indicator\slider.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -587,7 +593,6 @@
     <Folder Include="OCT\Core\" />
     <Folder Include="res\button\check\" />
     <Folder Include="res\button\radio\" />
-    <Folder Include="res\indicator\" />
   </ItemGroup>
 
   <ItemGroup>
