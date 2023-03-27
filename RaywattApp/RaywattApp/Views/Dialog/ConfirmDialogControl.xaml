@@ -21,7 +21,11 @@
                 <Label Style="{DynamicResource Pretendard-Medium-12}" Content="{Binding Title}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
             </StackPanel>
             <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Label Style="{DynamicResource Pretendard-Medium-22}" Content="{Binding Message}" Foreground="{DynamicResource GrayscaleWhiteBrush}"/>
+                <Label Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource GrayscaleWhiteBrush}">
+                    <Label.Content>
+                        <AccessText TextWrapping="Wrap" Text="{Binding Message}"/>
+                    </Label.Content>
+                </Label>
             </StackPanel>
             <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top">
                 <Button Style="{StaticResource OutlinedBtnType3-Large}" Width="150" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [No], Source={StaticResource L10N}}"/>
