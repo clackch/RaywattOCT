@@ -7,12 +7,14 @@
       xmlns:const="clr-namespace:RaywattApp.Common.Bases"
       xmlns:System="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d" 
+      xmlns:component="clr-namespace:RaywattApp.Views.Component"
       d:DesignHeight="1024" d:DesignWidth="1280"
+      Background="{DynamicResource GrayscaleGray8Brush}"
       Title="CalibrationPage">
     <Page.Resources>
         <System:Boolean x:Key="TrueValue">True</System:Boolean>
         <System:Boolean x:Key="FalseValue">False</System:Boolean>
-        <System:Double x:Key="CrossSectionSize">720</System:Double>
+        <System:Double x:Key="CrossSectionSize">553</System:Double>
     </Page.Resources>
 
     <Grid>
@@ -21,25 +23,61 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Background="Gray">
-            <Label Content="{Binding [Calibration], Source={StaticResource L10N}}"/>
-        </StackPanel>
-        
-        <Image Grid.Row="1" x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill"/>
 
-        <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" Orientation="Horizontal">
-                <Button Style="{StaticResource ButtonImportant}" Command="{Binding CmdAutoCalibration}" IsEnabled="{Binding DeviceStatus.CanExecuteCalibration}" Width="150" Content="{Binding [Auto Calibration], Source={StaticResource L10N}}"/>
-                <RepeatButton Command="{Binding CmdManualZoomIn}" CommandParameter="{StaticResource FalseValue}" IsEnabled="{Binding DeviceStatus.CanExecuteCalibration}" Width="100" Content="{Binding [Zoom Out], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-                <RepeatButton Command="{Binding CmdManualZoomIn}" CommandParameter="{StaticResource TrueValue}" IsEnabled="{Binding DeviceStatus.CanExecuteCalibration}" Width="100" Content="{Binding [Zoom In], Source={StaticResource L10N}}" Margin="5,5,5,5"/>
-            </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource ButtonBasic}" Command="{Binding CmdBack}" Width="80" Content="{Binding [Back], Source={StaticResource L10N}}" HorizontalAlignment="Right"/>
-            </StackPanel>
+        <Grid Grid.Row="0" Height="60" Background="{DynamicResource GrayscaleGray7Brush}">
+            <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Margin="75,20,0,19" Content="{Binding [New Recording], Source={StaticResource L10N}}"/>
         </Grid>
+
+        <Grid Grid.Row="1" Margin="160,62,160,62">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="725"/>
+                <RowDefinition Height="1"/>
+                <RowDefinition Height="74"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" CornerRadius="10,10,0,0" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray6Brush}">
+                <Grid Margin="49,69,49,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="62"/>
+                        <RowDefinition Height="553"/>
+                        <RowDefinition Height="40"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Calibration], Source={StaticResource L10N}}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                            <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="calibrationZoomIn" Width="42" Height="42" Command="{Binding CmdManualZoomIn}" CommandParameter="{StaticResource TrueValue}" IsEnabled="{Binding DeviceStatus.CanExecuteCalibration}"/>
+                            <StackPanel Width="10"/>
+                            <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="calibrationZoomOut" Width="42" Height="42" Command="{Binding CmdManualZoomIn}" CommandParameter="{StaticResource FalseValue}" IsEnabled="{Binding DeviceStatus.CanExecuteCalibration}"/>
+                            <StackPanel Width="10"/>
+                            <Button Style="{StaticResource OutlinedBtnType3-Large}" Width="174" Command="{Binding CmdAutoCalibration}" IsEnabled="{Binding DeviceStatus.CanExecuteCalibration}" Content="{Binding [Auto Calibration], Source={StaticResource L10N}}"/>
+                        </StackPanel>
+                    </Grid>
+                    <Border Grid.Row="1" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
+                        <Image Grid.Row="1" x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill"/>
+                    </Border>
+                </Grid>
+            </Border>
+            <Separator Grid.Row="1" Foreground="{DynamicResource GrayscaleGray5Brush}"/>
+            <Border Grid.Row="2" CornerRadius="0,0,10,10" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray6Brush}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" HorizontalAlignment="Left" Margin="16,16,0,0">
+                        <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding CmdBack}" Content="{Binding [Back], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" HorizontalAlignment="Right" Margin="0,16,16,0">
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="2" Height="40" Background="{DynamicResource GrayscaleBlackBrush}"/>
     </Grid>
 </Page>

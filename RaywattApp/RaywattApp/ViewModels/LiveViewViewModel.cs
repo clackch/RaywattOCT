@@ -7,7 +7,7 @@ using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Services;
-using RaywattOCT;
+using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
 using System.Windows.Input;
@@ -29,7 +29,13 @@ namespace RaywattApp.ViewModels
         private Patient _patient;
 
         [ObservableProperty]
+        private PatientCase _patientCase;
+
+        [ObservableProperty]
         private PrevStatus _prevStatus;
+
+        [ObservableProperty]
+        private Dictionary<string, string> _procedureList;
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer();
 
@@ -65,6 +71,10 @@ namespace RaywattApp.ViewModels
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;
+
+            PatientCase = new PatientCase();
+
+            ProcedureList = CodeDefinition.Codes["PROC"];
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -80,11 +90,16 @@ namespace RaywattApp.ViewModels
                 this.Patient = (Patient)data["patient"];
                 this.PrevStatus = (PrevStatus)data["prevStatus"];
 
+                if (data.ContainsKey("patientCase"))
+                    PatientCase = (PatientCase)data["patientCase"];
+
                 RayShowCalibrationGuide(true);
 
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
                 timerUpdateImage.Start();
+
+                SetCondition();
             }
         }
 
@@ -94,22 +109,30 @@ namespace RaywattApp.ViewModels
             _log.Debug("OnNavigating");
         }
 
+        private void SetCondition()
+        {
+            _log.Debug("SetCondition");          
+
+            if (PatientCase.PullbackType == null)
+                PatientCase.PullbackType = Constants.PullbackTypeShort;
+        }
+
         private void Back()
         {
             _log.Debug("Back");
 
-            leaveToPage("Views/PatientDetailPage.xaml");
+            leaveToPage(Constants.PatientDetailPage);
         }
 
         private void ChangeViewMode()
         {
-            _log.Debug("ChangeViewMode : " + DeviceStatus.ViewMode);
+            _log.Debug("ChangeViewMode : " + DeviceStatus.IsLiveView);
 
-            if (Constants.ViewModeLiveView.Equals(DeviceStatus.ViewMode))
+            if (DeviceStatus.IsLiveView)
             {
                 RayStartLiveView();
             }
-            else if (Constants.ViewModeStandBy.Equals(DeviceStatus.ViewMode))
+            else
             {
                 RayStopLiveView();
             }
@@ -119,17 +142,27 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Calibration");
 
-            DeviceStatus.ViewMode = Constants.ViewModeLiveView;
+            DeviceStatus.IsLiveView = true;
             ChangeViewMode();
 
-            leaveToPage("Views/CalibrationPage.xaml");
+            leaveToPage(Constants.CalibrationPage);
         }
 
         private void StartRecording()
         {
             _log.Debug("StartRecording");
 
-            leaveToPage("Views/RecordingPage.xaml");
+            if (String.IsNullOrEmpty(PatientCase.Procedure))
+            {
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["title"] = _l10n["Information"];
+                parameter["message"] = _l10n["Select Procedure"];
+                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+                return;
+            }
+
+            leaveToPage(Constants.RecordingPage);
         }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
@@ -142,6 +175,7 @@ namespace RaywattApp.ViewModels
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = this.Patient;
             parameter["prevStatus"] = this.PrevStatus;
+            parameter["patientCase"] = PatientCase;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(viewPage) { Parameter = parameter });
         }
     }

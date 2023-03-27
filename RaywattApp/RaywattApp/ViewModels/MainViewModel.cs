@@ -209,10 +209,9 @@ namespace RaywattApp.ViewModels
         private void handleState(RayCallbackRequest request, RayScannerState state)
         {
             RayScannerState curState = (RayScannerState)RayGetProperty(Property.CurrentState);
-            bool isLiveView = (bool)(RayGetProperty(Property.MotorOnOff) != 0);
-
             DeviceStatus.IsInitialized = (curState == RayScannerState.Default) ? true : false;
-            DeviceStatus.ViewMode = (isLiveView) ? Constants.ViewModeLiveView : Constants.ViewModeStandBy;
+            DeviceStatus.IsLiveView = (bool)(RayGetProperty(Property.MotorOnOff) != 0);
+            DeviceStatus.IsAngioConnected = true;
         }
         protected void handleProgress(RayCallbackRequest request, int progress) { }
         protected void handleError(RayCallbackRequest request, RayError error) { }

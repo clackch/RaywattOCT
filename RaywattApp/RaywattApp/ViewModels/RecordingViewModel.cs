@@ -54,9 +54,8 @@ namespace RaywattApp.ViewModels
             Constants.CurrentPage = Constants.RecordingPage;
 
             _sqlManager = sqlManager;
-
-            PatientCase = new PatientCase();
         }
+
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
             base.OnNavigated(sender, navigatedEventArgs);
@@ -69,18 +68,14 @@ namespace RaywattApp.ViewModels
                 Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
                 Patient = (Patient)data["patient"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
-
-                //Preset 화면으로 갔다가, Back 한 경우
-                if (data.ContainsKey("patientCase"))
-                    PatientCase = (PatientCase)data["patientCase"];
+                PatientCase = (PatientCase)data["patientCase"];
 
                 RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+
+                timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
+                timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
+                timerUpdateImage.Start();
             }
-
-            timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
-            timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
-            timerUpdateImage.Start();
-
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -96,6 +91,7 @@ namespace RaywattApp.ViewModels
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
+            parameter["patientCase"] = PatientCase;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.LiveViewPage) { Parameter = parameter });
         }
 
