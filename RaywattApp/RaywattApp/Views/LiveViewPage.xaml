@@ -121,17 +121,6 @@
                                 <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Procedure], Source={StaticResource L10N}}"/>
                             </StackPanel>
                             <StackPanel Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal">
-                                <!-- 
-                                <StackPanel>
-                                    <RadioButton Content="{Binding [Pre-PCI], Source={StaticResource L10N}}" />
-                                </StackPanel>
-                                <StackPanel Margin="10,0,0,0">
-                                    <RadioButton Content="{Binding [Post-PCI], Source={StaticResource L10N}}" />
-                                </StackPanel>
-                                <StackPanel Margin="10,0,0,0">
-                                    <RadioButton Content="{Binding [Follow-Up], Source={StaticResource L10N}}" />
-                                </StackPanel>
-                                -->
                                 <ComboBox Grid.Column="0" Style="{DynamicResource ComboBoxDialog}" Width="404" ItemsSource="{Binding ProcedureList}" SelectedValue="{Binding PatientCase.Procedure}" SelectedValuePath="Key" DisplayMemberPath="Value" Tag="{Binding [Select Procedure], Source={StaticResource L10N}}"/>
                             </StackPanel>
                         </Grid>
