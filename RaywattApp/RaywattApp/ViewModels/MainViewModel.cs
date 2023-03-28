@@ -218,7 +218,7 @@ namespace RaywattApp.ViewModels
             _log.Debug("CatheterFailReceiver");
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["title"] = _l10n["Information"];
+            parameter["title"] = _l10n["Error"];
             parameter["message"] = _l10n["The imaging catheter has failed. It must be removed from the patient before continuing."];
             parameter["error"] = true;
             var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
