@@ -61,5 +61,8 @@
 
     <!-- File Icon Converter -->
     <converters:FileIconConverter x:Key="FileIconConverter" />
-    
+
+    <!-- Opacity Converter -->
+    <converters:OpacityConverter x:Key="OpacityConverter" />
+
 </ResourceDictionary>

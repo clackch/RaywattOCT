@@ -35,6 +35,7 @@
             </Grid>
             <Grid Grid.Row="2" Width="1280" Height="40">
                 <Image Style="{DynamicResource RaywattSmall_Icon}"/>
+                <Button Command="{Binding CatheterFailTestCommmand}" Width="120" Height="20" Content="Catheter Fail Test"/>
             </Grid>
         </Grid>
     </Grid>

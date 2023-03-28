@@ -8,6 +8,7 @@ using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -45,6 +46,15 @@ namespace RaywattApp.ViewModels
 
         private List<string> reviewPages;
 
+        [ObservableProperty]
+        private PrevStatus _prevStatus;
+
+        [ObservableProperty]
+        private Patient _patient;
+
+        [ObservableProperty]
+        private PatientCase _patientCase;
+
         private ICommand _homeCommand;
         public ICommand HomeCommand
         {
@@ -61,6 +71,13 @@ namespace RaywattApp.ViewModels
         public ICommand ExitCommand
         {
             get { return this._exitCommand ?? (this._exitCommand = new RelayCommand(Exit)); }
+        }
+
+        //Test
+        private ICommand _catheterFailTest;
+        public ICommand CatheterFailTestCommmand
+        {
+            get { return this._catheterFailTest ?? (this._catheterFailTest = new RelayCommand(CatheterFailReceiver)); }
         }
 
         // to avoid garbage collection
@@ -115,6 +132,17 @@ namespace RaywattApp.ViewModels
             //순서 중요 - NavigationParameter 먼저 입력 후, NavigationSource 입력 필요
             NavigationParameter = message.Parameter;
             NavigationSource = pageUri;
+
+            if(message.Parameter != null)
+            {
+                Dictionary<string, Object> data = (Dictionary<string, Object>)message.Parameter;
+                if(data.ContainsKey("prevStatus"))
+                    PrevStatus = (PrevStatus)data["prevStatus"];
+                if (data.ContainsKey("patient"))
+                    Patient = (Patient)data["patient"];
+                if (data.ContainsKey("patientCase"))
+                    PatientCase = (PatientCase)data["patientCase"];
+            }
 
             //Review 화면에서 나가는 경우, RayEndReivew 호출
             if (reviewPages.Contains(Constants.CurrentPage))
@@ -183,6 +211,27 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
 
             Application.Current.MainWindow.Close();
+        }
+
+        private void CatheterFailReceiver()
+        {
+            _log.Debug("CatheterFailReceiver");
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["title"] = _l10n["Information"];
+            parameter["message"] = _l10n["The imaging catheter has failed. It must be removed from the patient before continuing."];
+            parameter["error"] = true;
+            var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+            if (result != null && result.DialogAnswer == DialogResults.Answer.Undefined)
+            {
+                DeviceStatus.CatheterStatus = Constants.CatheterStatusRemove;
+                parameter.Clear();
+                parameter["patient"] = Patient;
+                parameter["prevStatus"] = PrevStatus;
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingCatheterFailPage) { Parameter = parameter });
+            }
+
         }
 
         private void OnMsgCallback(int request, int response)

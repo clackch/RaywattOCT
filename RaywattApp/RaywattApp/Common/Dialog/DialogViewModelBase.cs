@@ -17,6 +17,8 @@ namespace RaywattApp.Common.Dialog
 
         public string? Message { get; set; }
 
+        public bool IsError { get; set; }
+
         public object? Parameter { get; set; }
 
         public double DialogWidth { get; set; }

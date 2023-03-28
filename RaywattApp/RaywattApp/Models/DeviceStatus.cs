@@ -16,6 +16,9 @@ namespace RaywattApp.Models
         [ObservableProperty]
         private bool _isAngioConnected = false;
 
+        [ObservableProperty]
+        private string? _catheterStatus;
+
         public DeviceStatus()
         {
         }

@@ -20,6 +20,7 @@ namespace RaywattApp.Common.Bases
         public const string CalibrationPage = "Views/CalibrationPage.xaml";
         public const string RecordingPage = "Views/RecordingPage.xaml";
         public const string RecordingConfirmPage = "Views/RecordingConfirmPage.xaml";
+        public const string RecordingCatheterFailPage = "Views/RecordingCatheterFailPage.xaml";
         //Review
         public const string ReviewPage = "Views/ReviewPage.xaml";
         public const string Review3dPage = "Views/Review3dPage.xaml";
@@ -265,5 +266,12 @@ namespace RaywattApp.Common.Bases
         public static DashStyle AnnotationDashLarge = new DashStyle(new double[] { 7, 7 }, 0);
         public static DashStyle AnnotationDashSmall = new DashStyle(new double[] { 2, 5 }, 0);
         public const double AnnotationTextPointSize = 6;
+
+        //Catheter Status
+        public const string CatheterStatusRemove = "Remove";
+        public const string CatheterStatusUnlock = "Unlock";
+        public const string CatheterStatusUnload = "Unload";
+        public const string CatheterStatusDisconnect = "Disconnect";
+        public const string CatheterStatusDone = "Done";
     }
 }
