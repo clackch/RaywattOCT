@@ -48,6 +48,7 @@
     <Color x:Key="AdditionalColor4">#434343</Color>
     <Color x:Key="AdditionalColor5">#000000</Color>
     <Color x:Key="AdditionalColor6">#545454</Color>
+    <Color x:Key="AdditionalColor7">#fcfcfc</Color>
 
     <SolidColorBrush x:Key="GrayscaleWhiteBrush" Color="{StaticResource GrayscaleWhite}"/>
     <SolidColorBrush x:Key="GrayscaleGray1Brush" Color="{StaticResource GrayscaleGray1}"/>
@@ -71,6 +72,7 @@
     <SolidColorBrush x:Key="AdditionalColor4Brush" Color="{StaticResource AdditionalColor4}"/>
     <SolidColorBrush x:Key="AdditionalColor5Brush" Color="{StaticResource AdditionalColor5}"/>
     <SolidColorBrush x:Key="AdditionalColor6Brush" Color="{StaticResource AdditionalColor6}"/>
+    <SolidColorBrush x:Key="AdditionalColor7Brush" Color="{StaticResource AdditionalColor7}"/>
 
     <SolidColorBrush x:Key="BackgroundBrush" Color="#161616"/>
     <SolidColorBrush x:Key="SideCardBackgroundBrush" Color="#232323"/>

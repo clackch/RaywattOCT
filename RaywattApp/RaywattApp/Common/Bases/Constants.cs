@@ -19,6 +19,7 @@ namespace RaywattApp.Common.Bases
         public const string LiveViewPage = "Views/LiveViewPage.xaml";
         public const string CalibrationPage = "Views/CalibrationPage.xaml";
         public const string RecordingPage = "Views/RecordingPage.xaml";
+        public const string RecordingConfirmPage = "Views/RecordingConfirmPage.xaml";
         //Review
         public const string ReviewPage = "Views/ReviewPage.xaml";
         public const string Review3dPage = "Views/Review3dPage.xaml";
@@ -185,6 +186,7 @@ namespace RaywattApp.Common.Bases
 
         //Not Selected
         public const string NotSelected = "Not Selected";
+        public const string NotSelectedCode = "$000";
 
         //Preset
         public const int MaxPatientCasePresetName = 30;
