@@ -216,7 +216,7 @@ namespace RaywattApp.Common.Bases
         public const string SystemRootPath = "C:";
 
         //Data File Root Path (OCT raw files) - ※ Patient Folder (DataRootPath + Patient ID)
-        public const string DataRootPath = SystemRootPath + "\\DataSave";
+        public const string DataRootPath = SystemRootPath + "\\Raywatt\\DataSave";
 
         //Temporary Folder (CD/DVD Write)
         public const string TempFolderPath = SystemRootPath + "\\Raywatt\\Temp";
