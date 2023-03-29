@@ -157,7 +157,7 @@ namespace RaywattApp.ViewModels
                     RayEndReview();
             }
 
-            if (NavigationSource == Constants.PatientListPage || Constants.CurrentPage == Constants.PatientListPage)
+            if (NavigationSource == Constants.PatientListPage)
                 IsHome = Visibility.Hidden;
             else
                 IsHome = Visibility.Visible;

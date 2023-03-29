@@ -79,7 +79,8 @@ namespace RaywattApp.ViewModels
 
             if (extraData != null)
             {
-                PrevStatus = (PrevStatus)extraData;
+                Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
+                PrevStatus = (PrevStatus)data["prevStatus"];
             }
         }
 
@@ -92,7 +93,9 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Cancel");
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage) { Parameter = PrevStatus });
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["prevStatus"] = PrevStatus;
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage) { Parameter = parameter });
         }
 
         private bool CanNewRecording()
