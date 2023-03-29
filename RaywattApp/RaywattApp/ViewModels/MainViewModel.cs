@@ -11,7 +11,6 @@ using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
@@ -29,11 +28,6 @@ namespace RaywattApp.ViewModels
         private readonly SqlManager _sqlManager;
 
         private IDialogService _dialogService;
-
-        private IList<BusyMessage> _busys = new List<BusyMessage>();
-
-        [ObservableProperty]
-        private bool _isBusy;
 
         [ObservableProperty]
         private Visibility _isHome;
@@ -104,9 +98,6 @@ namespace RaywattApp.ViewModels
             //네비게이션 메시지 수신 등록
             WeakReferenceMessenger.Default.Register<NavigationMessage>(this, OnNavigationMessage);
 
-            //BusyMessage 수신 등록
-            WeakReferenceMessenger.Default.Register<BusyMessage>(this, OnBusyMessage);
-
             RayRegisterCallback(Marshal.GetFunctionPointerForDelegate(CBFunction));
             RayStartSystem();
             RayConnectDevices();
@@ -161,34 +152,6 @@ namespace RaywattApp.ViewModels
                 IsHome = Visibility.Hidden;
             else
                 IsHome = Visibility.Visible;
-        }
-
-        private void OnBusyMessage(object recipient, BusyMessage message)
-        {
-            _log.Debug("OnBusyMessage : " + message.Value);
-
-            if (message.Value)
-            {
-                var existBusy = _busys.FirstOrDefault(b => b.BusyId == message.BusyId);
-                if (existBusy != null)
-                {
-                    //이미 추가된 녀석이기 때문에 추가하지 않음
-                    return;
-                }
-                _busys.Add(message);
-            }
-            else
-            {
-                var existBusy = _busys.FirstOrDefault(b => b.BusyId == message.BusyId);
-                if (existBusy == null)
-                {
-                    //없기 때문에 나감
-                    return;
-                }
-                _busys.Remove(existBusy);
-            }
-            //_busys에 아이템이 있으면 true, 없으면 false
-            IsBusy = _busys.Any();
         }
 
         private void Home()
