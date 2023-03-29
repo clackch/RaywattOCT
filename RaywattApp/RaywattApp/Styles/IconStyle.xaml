@@ -185,4 +185,19 @@
         </Setter>
     </Style>
 
+    <Style TargetType="{x:Type ProgressBar}" x:Key="CatheterProgressBar">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ProgressBar">
+                    <Grid>
+                        <Border BorderThickness="0" CornerRadius="4" Background="{DynamicResource GrayscaleGray7Brush}"/>
+                        <Rectangle Name="PART_Track"/>
+                        <Border Name="PART_Indicator" CornerRadius="4" Background="{DynamicResource MainPrimaryColorBrush}" HorizontalAlignment="Left"/>
+                        <Image x:Name="img" Source="{svgc:SvgImage Source=/res/icon/catheterConnect.svg}"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>

@@ -12,8 +12,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels
@@ -41,13 +43,16 @@ namespace RaywattApp.ViewModels
         private List<string> reviewPages;
 
         [ObservableProperty]
-        private PrevStatus _prevStatus;
+        private PrevStatus? _prevStatus;
 
         [ObservableProperty]
-        private Patient _patient;
+        private Patient? _patient;
 
         [ObservableProperty]
-        private PatientCase _patientCase;
+        private PatientCase? _patientCase;
+
+        [ObservableProperty]
+        private double _catheterProgress;
 
         private ICommand _homeCommand;
         public ICommand HomeCommand
@@ -72,6 +77,13 @@ namespace RaywattApp.ViewModels
         public ICommand CatheterFailTestCommmand
         {
             get { return this._catheterFailTest ?? (this._catheterFailTest = new RelayCommand(CatheterFailReceiver)); }
+        }
+
+        //Test
+        private ICommand _catheterConnectTest;
+        public ICommand CatheterConnectTestCommmand
+        {
+            get { return this._catheterConnectTest ?? (this._catheterConnectTest = new RelayCommand(CatheterConnectReceiver)); }
         }
 
         // to avoid garbage collection
@@ -113,6 +125,10 @@ namespace RaywattApp.ViewModels
             reviewPages.Add(Constants.ReviewAngioCoRegPage);
 
             IsHome = Visibility.Hidden;
+
+            //Test
+            timer.Interval = TimeSpan.FromMilliseconds(500);
+            timer.Tick += new EventHandler(ProgressTest);
         }
 
         private void OnNavigationMessage(object recipient, NavigationMessage message)
@@ -127,12 +143,18 @@ namespace RaywattApp.ViewModels
             if(message.Parameter != null)
             {
                 Dictionary<string, Object> data = (Dictionary<string, Object>)message.Parameter;
-                if(data.ContainsKey("prevStatus"))
+                if (data.ContainsKey("prevStatus"))
                     PrevStatus = (PrevStatus)data["prevStatus"];
+                else
+                    PrevStatus = null;
                 if (data.ContainsKey("patient"))
                     Patient = (Patient)data["patient"];
+                else
+                    Patient = null;
                 if (data.ContainsKey("patientCase"))
                     PatientCase = (PatientCase)data["patientCase"];
+                else
+                    PatientCase = null;
             }
 
             //Review 화면에서 나가는 경우, RayEndReivew 호출
@@ -179,6 +201,7 @@ namespace RaywattApp.ViewModels
         private void CatheterFailReceiver()
         {
             _log.Debug("CatheterFailReceiver");
+            DeviceStatus.CatheterStatus = Constants.CatheterStatusFailed;//Fail Receive
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["title"] = _l10n["Error"];
@@ -188,13 +211,37 @@ namespace RaywattApp.ViewModels
 
             if (result != null && result.DialogAnswer == DialogResults.Answer.Undefined)
             {
-                DeviceStatus.CatheterStatus = Constants.CatheterStatusRemove;
                 parameter.Clear();
                 parameter["patient"] = Patient;
                 parameter["prevStatus"] = PrevStatus;
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingCatheterFailPage) { Parameter = parameter });
             }
+        }
 
+        private void CatheterConnectReceiver()
+        {
+            _log.Debug("CatheterConnectReceiver");
+            DeviceStatus.CatheterStatus = Constants.CatheterStatusLocked;//Locked Receive
+
+            CatheterProgress = 0;
+
+            //Test
+            timer.Start();
+        }
+
+        //Test
+        private DispatcherTimer timer = new DispatcherTimer();
+        private void ProgressTest(object sender, EventArgs e)
+        {
+            if (CatheterProgress == 100)
+            {
+                timer.Stop();
+
+                Thread.Sleep(1000);
+                DeviceStatus.CatheterStatus = Constants.CatheterStatusLoaded;
+            }
+
+            CatheterProgress += 10;
         }
 
         private void OnMsgCallback(int request, int response)

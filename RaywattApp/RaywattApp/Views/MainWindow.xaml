@@ -7,6 +7,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RaywattApp"
         xmlns:component="clr-namespace:RaywattApp.Views.Component"
+        xmlns:const="clr-namespace:RaywattApp.Common.Bases"
         ResizeMode="NoResize"
         WindowStyle="None"
         mc:Ignorable="d"
@@ -33,10 +34,18 @@
                     <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="power" Margin="0,9,12,9" Command="{Binding ExitCommand}"/>
                 </StackPanel>
             </Grid>
-            <Grid Grid.Row="2" Width="1280" Height="40">
+            <StackPanel Grid.Row="2" Width="1280" Height="40" Orientation="Horizontal">
                 <Image Style="{DynamicResource RaywattSmall_Icon}"/>
-                <Button Command="{Binding CatheterFailTestCommmand}" Width="120" Height="20" Content="Catheter Fail Test"/>
-            </Grid>
+                <StackPanel MinWidth="130" Margin="25,0,0,0" VerticalAlignment="Center" Orientation="Horizontal" Visibility="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusLocked}}">
+                    <ProgressBar Style="{DynamicResource CatheterProgressBar}" Value="{Binding CatheterProgress}" Width="70" Height="18.8"/>
+                    <StackPanel Width="8"/>
+                    <Label Style="{DynamicResource Pretendard-Medium-14}" MinWidth="52" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [Loading], Source={StaticResource L10N}}"/>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Center" Margin="200,0,0,0">
+                    <Button Command="{Binding CatheterFailTestCommmand}" Width="100" Height="15" FontSize="9" Content="Catheter Fail"/>
+                    <Button Command="{Binding CatheterConnectTestCommmand}" Width="100" Height="15" FontSize="9" Content="Catheter Connect"/>
+                </StackPanel>
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>

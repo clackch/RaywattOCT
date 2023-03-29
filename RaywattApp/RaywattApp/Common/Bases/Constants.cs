@@ -268,10 +268,12 @@ namespace RaywattApp.Common.Bases
         public const double AnnotationTextPointSize = 6;
 
         //Catheter Status
-        public const string CatheterStatusRemove = "Remove";
-        public const string CatheterStatusUnlock = "Unlock";
-        public const string CatheterStatusUnload = "Unload";
-        public const string CatheterStatusDisconnect = "Disconnect";
-        public const string CatheterStatusDone = "Done";
+        public const string CatheterStatusConnected = "Connected";
+        public const string CatheterStatusLocked = "Locked";
+        public const string CatheterStatusLoaded = "Loaded";
+        public const string CatheterStatusFailed = "Failed";
+        public const string CatheterStatusUnlocked = "Unlocked";
+        public const string CatheterStatusUnloaded = "Unloaded";
+        public const string CatheterStatusDisconnected = "Disconnected";
     }
 }

@@ -76,10 +76,17 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Cancel");
 
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["patient"] = this.Patient;
-            parameter["prevStatus"] = this.PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientDetailPage) { Parameter = parameter });
+            if(Patient == null || PrevStatus == null)
+            {
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
+            }
+            else
+            {
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["patient"] = this.Patient;
+                parameter["prevStatus"] = this.PrevStatus;
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientDetailPage) { Parameter = parameter });
+            }
         }
 
         private DispatcherTimer timer = new DispatcherTimer();//Test
@@ -88,11 +95,10 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("NextStep");
 
-            DeviceStatus.CatheterStatus = Constants.CatheterStatusUnlock;
             IsStep1 = false;
 
             //Test
-            timer.Interval = TimeSpan.FromMilliseconds(5000);
+            timer.Interval = TimeSpan.FromMilliseconds(2000);
             timer.Tick += new EventHandler(StepChange);
             timer.Start();
         }
@@ -102,17 +108,17 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("StepChange : " + DeviceStatus.CatheterStatus);
 
-            if (DeviceStatus.CatheterStatus == Constants.CatheterStatusUnlock)
+            if (DeviceStatus.CatheterStatus == Constants.CatheterStatusFailed)
             {
-                DeviceStatus.CatheterStatus = Constants.CatheterStatusUnload;
+                DeviceStatus.CatheterStatus = Constants.CatheterStatusUnlocked;
             }
-            else if(DeviceStatus.CatheterStatus == Constants.CatheterStatusUnload)
+            else if(DeviceStatus.CatheterStatus == Constants.CatheterStatusUnlocked)
             {
-                DeviceStatus.CatheterStatus = Constants.CatheterStatusDisconnect;
+                DeviceStatus.CatheterStatus = Constants.CatheterStatusUnloaded;
             }
-            else if (DeviceStatus.CatheterStatus == Constants.CatheterStatusDisconnect)
+            else if (DeviceStatus.CatheterStatus == Constants.CatheterStatusUnloaded)
             {
-                DeviceStatus.CatheterStatus = Constants.CatheterStatusDone;
+                DeviceStatus.CatheterStatus = Constants.CatheterStatusDisconnected;
                 timer.Stop();
             }
         }
@@ -121,11 +127,17 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Next");
 
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["patient"] = this.Patient;
-            parameter["prevStatus"] = this.PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
+            if (Patient == null || PrevStatus == null)
+            {
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
+            }
+            else
+            {
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["patient"] = this.Patient;
+                parameter["prevStatus"] = this.PrevStatus;
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
+            }
         }
-
     }
 }
