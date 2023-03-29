@@ -8,6 +8,8 @@ using System.Configuration;
 using System.Windows;
 using RaywattApp.ViewModels.Dialog;
 using RaywattApp.Common.Dialog;
+using System.Threading.Tasks;
+using log4net;
 
 namespace RaywattApp
 {
@@ -16,10 +18,14 @@ namespace RaywattApp
     /// </summary>
     public partial class App : Application
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(App));
+
         public App()
         {
             Services = ConfigureServices();
             this.InitializeComponent();
+
+            SetupExceptionHandling();
         }
 
         /// <summary>
@@ -92,6 +98,41 @@ namespace RaywattApp
             services.AddTransient(typeof(SqlManager));
 
             return services.BuildServiceProvider();
+        }
+
+        private void SetupExceptionHandling()
+        {
+            AppDomain.CurrentDomain.UnhandledException += (s, e) => LogUnhandledException((Exception)e.ExceptionObject, "AppDomain.CurrentDomain.UnhandledException");
+
+            DispatcherUnhandledException += (s, e) =>
+            {
+                LogUnhandledException(e.Exception, "Application.Current.DispatcherUnhandledException");
+                e.Handled = true;
+            };
+
+            TaskScheduler.UnobservedTaskException += (s, e) =>
+            {
+                LogUnhandledException(e.Exception, "TaskScheduler.UnobservedTaskException");
+                e.SetObserved();
+            };
+        }
+
+        private void LogUnhandledException(Exception exception, string source)
+        {
+            string message = $"Unhandled exception ({source})";
+            try
+            {
+                System.Reflection.AssemblyName assemblyName = System.Reflection.Assembly.GetExecutingAssembly().GetName();
+                message = string.Format("{0} in {1} v{2}", message, assemblyName.Name, assemblyName.Version);
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ex + "Exception in LogUnhandledException");
+            }
+            finally
+            {
+                _log.Error(exception + "\n" + message);
+            }
         }
     }
 }
