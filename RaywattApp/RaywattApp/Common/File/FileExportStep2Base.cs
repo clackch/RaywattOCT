@@ -75,6 +75,7 @@ namespace RaywattApp.Common.File
                     {
                         ExternalDriveTotalSize = 0;
                         ExternalDriveAvailableFreeSpace = 0;
+                        _externalDriveAvailableFreeSpaceByte = 0;
                     }
                     else
                     {
@@ -84,6 +85,7 @@ namespace RaywattApp.Common.File
                             {
                                 ExternalDriveTotalSize = CommonUtil.ByteToGB(((long[])item.Value)[0]);
                                 ExternalDriveAvailableFreeSpace = CommonUtil.ByteToGB(((long[])item.Value)[1]);
+                                _externalDriveAvailableFreeSpaceByte = ((long[])item.Value)[1];
                                 break;
                             }
                         }
@@ -113,6 +115,9 @@ namespace RaywattApp.Common.File
 
         [ObservableProperty]
         private double _cdAvailableFreeSpace;
+
+        private double _exportSizeByte;
+        private double _externalDriveAvailableFreeSpaceByte;
 
         private ICommand _externalDrivePathCommand;
         public ICommand ExternalDrivePathCommand
@@ -343,7 +348,7 @@ namespace RaywattApp.Common.File
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["externalDrive"] = FileExport.ExternalDrive;
             parameter["externalDrivePath"] = FileExport.ExternalDrivePath;
-            var result = _dialogService.OpenDialog(new FileFolderBrowseDialogControl(), parameter);
+            var result = _dialogService.OpenDialog(new FileFolderBrowseDialogControl(), parameter, Constants.FileExportDialogWidth, Constants.FileExportDialogHeight);
 
             if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
             {
@@ -367,19 +372,26 @@ namespace RaywattApp.Common.File
 
             if (FileExport.DiskType.Equals(Constants.FileDiskExternal))
             {
-                if (String.IsNullOrEmpty(FileExport.ExternalDrivePath))
+                if (String.IsNullOrEmpty(FileExport.ExternalDrive))
                 {
                     Dictionary<string, object> parameter = new Dictionary<string, object>();
                     parameter["title"] = _l10n["Information"];
-                    parameter["message"] = _l10n["Path is required"];
-                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+                    parameter["message"] = _l10n["Enter an external device"];
+                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.FileExportDialogWidth, Constants.FileExportDialogHeight);
                 }
-                else if (ExternalDriveAvailableFreeSpace <= ExportSize)
+                else if (String.IsNullOrEmpty(FileExport.ExternalDrivePath))
+                {
+                    Dictionary<string, object> parameter = new Dictionary<string, object>();
+                    parameter["title"] = _l10n["Information"];
+                    parameter["message"] = _l10n["Select destination path"];
+                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.FileExportDialogWidth, Constants.FileExportDialogHeight);
+                }
+                else if (_externalDriveAvailableFreeSpaceByte <= _exportSizeByte)
                 {
                     Dictionary<string, object> parameter = new Dictionary<string, object>();
                     parameter["title"] = _l10n["Information"];
                     parameter["message"] = _l10n["There is not enough space on the storage device to store."];
-                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.FileExportDialogWidth, Constants.FileExportDialogHeight);
                 }
                 else
                 {
@@ -395,28 +407,25 @@ namespace RaywattApp.Common.File
                     Dictionary<string, object> parameter = new Dictionary<string, object>();
                     parameter["title"] = _l10n["Information"];
                     parameter["message"] = _l10n["CD/DVD is required"];
-                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.FileExportDialogWidth, Constants.FileExportDialogHeight);
                 }
                 else if (FileExport.MediaType == Constants.MediaTypeNotSupportDisc)
                 {
                     Dictionary<string, object> parameter = new Dictionary<string, object>();
                     parameter["title"] = _l10n["Information"];
                     parameter["message"] = _l10n["Media Type is not supported"];
-                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.FileExportDialogWidth, Constants.FileExportDialogHeight);
                 }
                 else if (FileExport.VolumeLabel == null || String.IsNullOrEmpty(FileExport.VolumeLabel.Trim()))
                 {
-                    Dictionary<string, object> parameter = new Dictionary<string, object>();
-                    parameter["title"] = _l10n["Information"];
-                    parameter["message"] = _l10n["Volume Label is required"];
-                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+                    FileExport.ValidateVolumeLabel = _l10n["Volume Label is required"];
                 }
                 else if (CdTotalSize <= ExportSize)
                 {
                     Dictionary<string, object> parameter = new Dictionary<string, object>();
                     parameter["title"] = _l10n["Information"];
                     parameter["message"] = _l10n["There is not enough space on the storage device to store."];
-                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter);
+                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.FileExportDialogWidth, Constants.FileExportDialogHeight);
                 }
                 else
                 {
@@ -452,6 +461,7 @@ namespace RaywattApp.Common.File
                 ExportSizeUnit = _l10n["Byte"];
             }
 
+            _exportSizeByte = bytes;
         }
 
         protected virtual void FileSave() { }

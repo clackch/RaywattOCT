@@ -45,7 +45,7 @@
             </Grid.RowDefinitions>
             <Label Grid.Row="1" Grid.Column="1" Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Add Patient], Source={StaticResource L10N}}"/>
             <Label Grid.Row="2" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [ID], Source={StaticResource L10N}}"/>
-            <TextBox Grid.Row="3" Grid.Column="1" Style="{DynamicResource TextBoxValidator}" Text="{Binding Patient.Id, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Please enter ID], Source={StaticResource L10N}}" ToolTip="{Binding IdValidator}" Margin="0,0,0,8"/>
+            <TextBox Grid.Row="3" Grid.Column="1" Style="{DynamicResource TextBoxValidator}" Text="{Binding Patient.Id, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Please enter ID], Source={StaticResource L10N}}" ToolTip="{Binding Patient.ValidateId}" Margin="0,0,0,8"/>
             <Label Grid.Row="4" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Last Name], Source={StaticResource L10N}}"/>
             <TextBox Grid.Row="5" Grid.Column="1" Style="{DynamicResource TextBoxBase}" Text="{Binding Patient.Lastname, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Please enter last name], Source={StaticResource L10N}}" Margin="0,0,0,8"/>
             <Label Grid.Row="6" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [First Name], Source={StaticResource L10N}}"/>

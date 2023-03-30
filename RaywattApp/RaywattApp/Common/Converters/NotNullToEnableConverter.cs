@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RaywattApp.Common.Util;
+using System;
 using System.Globalization;
 using System.Windows.Data;
 
@@ -9,9 +10,24 @@ namespace RaywattApp.Common.Converters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value != null)
-                return true;
+            {
+                if(parameter == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    var item = value as DirectoryItem;
+                    if (item.Path.Length == 2)
+                        return false;
+
+                    return true;
+                }
+            }
             else
+            {
                 return false;
+            }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

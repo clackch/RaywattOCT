@@ -11,8 +11,8 @@
     <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" BorderThickness="0" Width="{x:Static const:Constants.ConfirmDialogWidth}" Height="{x:Static const:Constants.ConfirmDialogHeight}">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="19"/>
-                <RowDefinition Height="18"/>
+                <RowDefinition Height="21"/>
+                <RowDefinition Height="14"/>
                 <RowDefinition/>
                 <RowDefinition Height="70"/>
             </Grid.RowDefinitions>
@@ -23,7 +23,7 @@
             <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Label Style="{DynamicResource Pretendard-Medium-22}" Content="{Binding Message}" Foreground="{DynamicResource GrayscaleWhiteBrush}"/>
             </StackPanel>
-            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top">
                 <Button Style="{StaticResource OutlinedBtnType1-Large}" Width="150" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [No], Source={StaticResource L10N}}"/>
                 <StackPanel Width="8"/>
                 <Button Style="{StaticResource ContainedBtnType1-Large-Short}" Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Yes], Source={StaticResource L10N}}"/>

@@ -11,8 +11,8 @@
     <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" BorderThickness="0" Width="{x:Static const:Constants.AlertDialogWidth}" Height="{x:Static const:Constants.AlertDialogHeight}">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="19"/>
-                <RowDefinition Height="18"/>
+                <RowDefinition Height="21"/>
+                <RowDefinition Height="14"/>
                 <RowDefinition/>
                 <RowDefinition Height="70"/>
             </Grid.RowDefinitions>

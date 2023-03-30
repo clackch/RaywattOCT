@@ -234,6 +234,69 @@
         <Setter Property="Height" Value="26"/>
     </Style>
 
+    <!-- OutlinedBtnType3 -->
+    <Style TargetType="Button" x:Key="OutlinedBtnType3" BasedOn="{StaticResource Pretendard-Medium-14}">
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="border" CornerRadius="6" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray5Brush}" Background="Transparent"/>
+                        <ContentPresenter x:Name="content" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Height" Value="26">
+                            <Setter TargetName="border" Property="CornerRadius" Value="4"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource AdditionalColor4Brush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MainThemeBrush}"/>
+                            <Setter TargetName="border" Property="Background" Value="Transparent"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource MainThemeBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource GrayscaleGray6Brush}"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource GrayscaleGray6Brush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType3-Large" BasedOn="{StaticResource OutlinedBtnType3}">
+        <Setter Property="Width" Value="200"/>
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="FontSize" Value="18"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType3-Medium" BasedOn="{StaticResource OutlinedBtnType3}">
+        <Setter Property="Width" Value="192"/>
+        <Setter Property="Height" Value="32"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType3-Small-Extra" BasedOn="{StaticResource OutlinedBtnType3}">
+        <Setter Property="Width" Value="160"/>
+        <Setter Property="Height" Value="26"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType3-Small-Wide" BasedOn="{StaticResource OutlinedBtnType3}">
+        <Setter Property="Width" Value="120"/>
+        <Setter Property="Height" Value="26"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType3-Small-Medium" BasedOn="{StaticResource OutlinedBtnType3}">
+        <Setter Property="Width" Value="96"/>
+        <Setter Property="Height" Value="26"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType3-Small-Short" BasedOn="{StaticResource OutlinedBtnType3}">
+        <Setter Property="Width" Value="74"/>
+        <Setter Property="Height" Value="26"/>
+    </Style>
+
     <!-- ContainedBtnType1 -->
     <Style TargetType="Button" x:Key="ContainedBtnType1" BasedOn="{StaticResource Pretendard-Medium-14}">
         <Setter Property="Foreground" Value="{DynamicResource GrayscaleGray7Brush}"/>

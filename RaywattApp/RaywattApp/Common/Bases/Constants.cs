@@ -41,14 +41,20 @@ namespace RaywattApp.Common.Bases
         //Resolution
         public const double ApplicationWidth = 1280;
         public const double ApplicationHeight = 1024;
-        public const double FileDialogWidth = 860;
-        public const double FileDialogHeight = 848;
+        public const double FileExportDialogWidth = 860;
+        public const double FileExportDialogHeight = 741;
         public const double SettingDialogWidth = 860;
         public const double SettingDialogHeight = 714;
         public const double ConfirmDialogWidth = 360;
         public const double ConfirmDialogHeight = 219;
         public const double AlertDialogWidth = 360;
         public const double AlertDialogHeight = 219;
+        public const double FileAlternateIdDialogWidth = 472;
+        public const double FileAlternateIdDialogHeight = 472;
+        public const double FileFolderBrowseDialogWidth = 472;
+        public const double FileFolderBrowseDialogHeight = 659;
+        public const double FileFolderActionDialogWidth = 472;
+        public const double FileFolderActionDialogHeight = 370;
 
         //Max Length
         public const int MaxPatientId = 9;
@@ -57,6 +63,7 @@ namespace RaywattApp.Common.Bases
         public const int MaxPatientCaseAccessionNumber = 6;
         public const int MaxPatientCaseComment = 200;
         public const int MaxPhysicianName = 40;
+        public const int MaxVolumeLabel = 15;
 
         //Page
         public const int PageNumberMax = 5;
@@ -150,7 +157,12 @@ namespace RaywattApp.Common.Bases
         public const string FileImageExtension = "bin";
         public const string FileExtension = "dbf";
         public const string FileNamePrefix = "Export_";
-        
+
+        //File Icon
+        public const string FileIconDrive = "drive";
+        public const string FileIconFolder = "folder";
+        public const string FileIconFile = "file";
+
         //View Mode - Live View, Stand By
         public const string ViewModeLiveView = "LiveView";
         public const string ViewModeStandBy = "StandBy";

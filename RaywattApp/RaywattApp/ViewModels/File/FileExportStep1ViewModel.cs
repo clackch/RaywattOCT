@@ -133,7 +133,7 @@ namespace RaywattApp.ViewModels.File
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["title"] = _l10n["Information"];
                 parameter["message"] = _l10n["There are no items selected."];
-                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.FileDialogWidth, Constants.FileDialogHeight);
+                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.FileExportDialogWidth, Constants.FileExportDialogHeight);
 
                 return;
             }
@@ -301,7 +301,7 @@ namespace RaywattApp.ViewModels.File
             if (isChecked && isNotChecked)
             {
                 CheckBoxAllSelected = null;
-                PatientChecked.IsChecked = true;
+                PatientChecked.IsChecked = null;
             }
             else if (isChecked && !isNotChecked)
             {

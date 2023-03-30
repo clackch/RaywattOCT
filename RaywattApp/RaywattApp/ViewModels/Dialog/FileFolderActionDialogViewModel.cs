@@ -17,17 +17,24 @@ namespace RaywattApp.ViewModels.Dialog
         [ObservableProperty]
         private DirectoryItem _selectedDir;
 
-        [ObservableProperty]
-        private Visibility _isErrorMessage;
-
         private string folderAction;
 
         private string _createRenameFolderName;
         public string CreateRenameFolderName
         {
             get { return _createRenameFolderName; }
-            set { _createRenameFolderName = value; IsErrorMessage = Visibility.Collapsed; OnPropertyChanged(nameof(CreateRenameFolderName)); }
+            set 
+            { 
+                _createRenameFolderName = value; 
+                OnPropertyChanged(nameof(CreateRenameFolderName));
+
+                ValidateCreateRenameFolderName = "";
+                OnPropertyChanged(nameof(ValidateCreateRenameFolderName));
+            }
         }
+
+        [ObservableProperty]
+        private string validateCreateRenameFolderName;
 
         public override void SetParameter(object parameter)
         {
@@ -62,7 +69,7 @@ namespace RaywattApp.ViewModels.Dialog
                 bool result = directoryProvider.DuplicateCheckRename(SelectedDir.Path, SelectedDir.Name, CreateRenameFolderName.Trim());
                 if (!result)
                 {
-                    IsErrorMessage = Visibility.Visible;
+                    ValidateCreateRenameFolderName = _l10n["Duplicated Folder Name"];
                     return;
                 }
             }
@@ -71,7 +78,7 @@ namespace RaywattApp.ViewModels.Dialog
                 bool result = directoryProvider.DuplicateCheck(SelectedDir.Path, CreateRenameFolderName.Trim());
                 if (!result)
                 {
-                    IsErrorMessage = Visibility.Visible;
+                    ValidateCreateRenameFolderName = _l10n["Duplicated Folder Name"];
                     return;
                 }
             }

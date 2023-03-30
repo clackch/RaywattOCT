@@ -21,9 +21,15 @@ namespace RaywattApp.Models
 
                     _id = value;
                     OnPropertyChanged(nameof(Id));
+
+                    validateId = "";
+                    OnPropertyChanged(nameof(ValidateId));
                 }
             }
         }
+
+        [ObservableProperty]
+        private string validateId;
 
         private string _lastname;
         public string Lastname
@@ -104,6 +110,6 @@ namespace RaywattApp.Models
         private IList<PatientCase> patientCaseList;
 
         [ObservableProperty]
-        private bool isChecked;
+        private bool? isChecked;
     }
 }

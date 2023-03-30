@@ -129,7 +129,7 @@
   <data name="Add Patient" xml:space="preserve">
     <value>환자 추가</value>
   </data>
-  <data name="Additional" xml:space="preserve">
+  <data name="Additional Option" xml:space="preserve">
     <value>추가 옵션</value>
   </data>
   <data name="Alternate ID" xml:space="preserve">
@@ -295,6 +295,9 @@
   <data name="Export" xml:space="preserve">
     <value>익스포트</value>
   </data>
+  <data name="Export Option" xml:space="preserve">
+    <value>익스포트 옵션</value>
+  </data>
   <data name="Export Size" xml:space="preserve">
     <value>추출 크기</value>
   </data>
@@ -439,6 +442,9 @@
   <data name="Other (OT)" xml:space="preserve">
     <value>Other (OT)</value>
   </data>
+  <data name="Output Option" xml:space="preserve">
+    <value>아웃풋 옵션</value>
+  </data>
   <data name="Page Size" xml:space="preserve">
     <value>페이지 사이즈</value>
   </data>
@@ -453,9 +459,6 @@
   </data>
   <data name="Path" xml:space="preserve">
     <value>경로</value>
-  </data>
-  <data name="Path is required" xml:space="preserve">
-    <value>경로가 필요합니다</value>
   </data>
   <data name="Patient" xml:space="preserve">
     <value>환자</value>
@@ -562,6 +565,9 @@
   <data name="Secondary Capture" xml:space="preserve">
     <value>세컨더리 캡처</value>
   </data>
+  <data name="Select destination path" xml:space="preserve">
+    <value>목적지 경로를 선택하세요</value>
+  </data>
   <data name="Select Drive" xml:space="preserve">
     <value>드라이브 선택</value>
   </data>
@@ -589,7 +595,7 @@
   <data name="Start Recording" xml:space="preserve">
     <value>촬영 시작</value>
   </data>
-  <data name="System File Options" xml:space="preserve">
+  <data name="System File Option" xml:space="preserve">
     <value>시스템 파일 옵션</value>
   </data>
   <data name="The password you entered is not valid" xml:space="preserve">

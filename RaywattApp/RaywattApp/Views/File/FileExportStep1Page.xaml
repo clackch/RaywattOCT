@@ -8,24 +8,24 @@
       xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
       xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
       mc:Ignorable="d" 
-      Width="{x:Static const:Constants.FileDialogWidth}" Height="{x:Static const:Constants.FileDialogHeight}"
+      Width="{x:Static const:Constants.FileExportDialogWidth}" Height="{x:Static const:Constants.FileExportDialogHeight}"
       Title="FileExportStep1Page">
 
     <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="29"/>
                 <ColumnDefinition/>
-                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="29"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="35"/>
+                <RowDefinition Height="34"/>
                 <RowDefinition Height="62"/>
-                <RowDefinition Height="54"/>
+                <RowDefinition Height="64"/>
                 <RowDefinition Height="29"/>
-                <RowDefinition Height="558"/>
+                <RowDefinition Height="451"/>
                 <RowDefinition Height="28"/>
-                <RowDefinition Height="72" />
+                <RowDefinition Height="71" />
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
@@ -40,12 +40,10 @@
                 <StackPanel>
                     <RadioButton IsChecked="{Binding FileExport.Type, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportTypeNative}}" Content="{Binding [Native(Raw)], Source={StaticResource L10N}}"/>
                 </StackPanel>
-                <StackPanel Width="27"/>
-                <StackPanel>
+                <StackPanel Margin="27,0,0,0">
                     <RadioButton IsChecked="{Binding FileExport.Type, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportTypeDicom}}" Content="{Binding [DICOM], Source={StaticResource L10N}}"/>
                 </StackPanel>
-                <StackPanel Width="27"/>
-                <StackPanel>
+                <StackPanel Margin="27,0,0,0">
                     <RadioButton IsChecked="{Binding FileExport.Type, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportTypeStandard}}" Content="{Binding [Standard], Source={StaticResource L10N}}"/>
                 </StackPanel>
             </StackPanel>
@@ -62,27 +60,27 @@
             <Grid Grid.Row="4" Grid.Column="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="220"/>
-                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition/>
                     <ColumnDefinition Width="570"/>
                 </Grid.ColumnDefinitions>
 
                 <Grid Grid.Column="0">
-                    <DataGrid Name="patientList" ItemsSource="{Binding PatientList}" SelectedIndex="0" Style="{StaticResource DataGridDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single">
+                    <DataGrid Name="patientList" ItemsSource="{Binding PatientList}" SelectedIndex="0" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single">
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="SelectionChanged">
                                 <i:InvokeCommandAction Command="{Binding ShowCaseCommand}" CommandParameter="{Binding ElementName=patientList, Path=CurrentItem}"/>
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn>
+                            <DataGridTemplateColumn CellStyle="{StaticResource DataGridCellCheckbox}" Width="30">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <CheckBox Style="{StaticResource DataGridCheckBox}" IsChecked="{Binding IsChecked}" IsEnabled="False"/>
+                                        <CheckBox Style="{StaticResource DataGridCheckList}" IsChecked="{Binding IsChecked}" IsEnabled="False"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Id}" Header="{Binding [ID], Source={StaticResource L10N}}" />
-                            <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Name}" Header="{Binding [Name], Source={StaticResource L10N}}" />
+                            <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipWrap}" Width="*" Binding="{Binding Name}" Header="{Binding [Name], Source={StaticResource L10N}}" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
@@ -90,12 +88,12 @@
                 <Grid Grid.Column="2">
                     <FrameworkElement x:Name="ProxyElement" Visibility="Collapsed"/>
 
-                    <DataGrid Name="patientCaseList" ItemsSource="{Binding PatientCaseList}" Style="{StaticResource DataGridDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}">
+                    <DataGrid Name="patientCaseList" ItemsSource="{Binding PatientCaseList}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn>
+                            <DataGridTemplateColumn CellStyle="{StaticResource DataGridCellCheckbox}" Width="42">
                                 <DataGridTemplateColumn.HeaderTemplate>
                                     <DataTemplate>
-                                        <CheckBox Command="{Binding DataContext.CheckBoxToggleCommand, Source={x:Reference ProxyElement}}" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" IsChecked="{Binding DataContext.CheckBoxAllSelected, Source={x:Reference ProxyElement}}"/>
+                                        <CheckBox Style="{StaticResource DataGridCheckBoxHeader}" Command="{Binding DataContext.CheckBoxToggleCommand, Source={x:Reference ProxyElement}}" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" IsChecked="{Binding DataContext.CheckBoxAllSelected, Source={x:Reference ProxyElement}}"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.HeaderTemplate>
                                 <DataGridTemplateColumn.CellTemplate>
@@ -104,10 +102,10 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="1.2*" Binding="{Binding CreateDate, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Create Date], Source={StaticResource L10N}}" />
+                            <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipWrap}" Width="*" Binding="{Binding CreateDate, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Create Date], Source={StaticResource L10N}}" />
                             <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Vessel, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}" Header="{Binding [Vessel], Source={StaticResource L10N}}" />
                             <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Procedure, Converter={StaticResource CodeConverter}, ConverterParameter='PROC'}" Header="{Binding [Procedure], Source={StaticResource L10N}}" />
-                            <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding PhysicianName}" Header="{Binding [Physician Name], Source={StaticResource L10N}}" />
+                            <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipWrap}" Width="*" Binding="{Binding PhysicianName}" Header="{Binding [Physician Name], Source={StaticResource L10N}}" />
                             <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding AccessionNumber}" Header="{Binding [Accession Number], Source={StaticResource L10N}}" />
                             <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Comment}" Header="{Binding [Comment], Source={StaticResource L10N}}" />
                         </DataGrid.Columns>
@@ -115,10 +113,14 @@
                 </Grid>
             </Grid>
 
-            <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" >
-                <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
-                <Button Style="{StaticResource ButtonImportant}" Width="50" Command="{Binding NextCommand}" Content="{Binding [Next], Source={StaticResource L10N}}"/>
-            </StackPanel>
+            <Grid Grid.Row="6" Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Style="{StaticResource OutlinedBtnType3-Large}" HorizontalAlignment="Left" VerticalAlignment="Top" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+                <Button Grid.Column="1" Style="{StaticResource ContainedBtnType1-Large-Wide}" HorizontalAlignment="Right" VerticalAlignment="Top" Command="{Binding NextCommand}" Content="{Binding [Next], Source={StaticResource L10N}}"/>
+            </Grid>
         </Grid>
     </Border>
 </Page>
