@@ -257,8 +257,8 @@
                             <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource MainThemeBrush}"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource GrayscaleGray6Brush}"/>
-                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource GrayscaleGray6Brush}"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource GrayscaleGray7Brush}"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource GrayscaleGray7Brush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -417,6 +417,44 @@
         <Setter Property="Height" Value="26"/>
     </Style>
 
+    <!-- Setting -->
+    <Style TargetType="Button" x:Key="SettingSelected" BasedOn="{StaticResource Pretendard-Medium-18}">
+        <Setter Property="Width" Value="200"/>
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="Foreground" Value="{DynamicResource MainPrimaryColorBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid Background="Transparent">
+                        <Border x:Name="border" CornerRadius="6" BorderThickness="0" Background="{DynamicResource MainPrimaryColorBrush}" Opacity="0.08"/>
+                        <ContentPresenter x:Name="content" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Button" x:Key="SettingNotSelected" BasedOn="{StaticResource Pretendard-Medium-18}">
+        <Setter Property="Width" Value="200"/>
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleGray5Brush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid Background="Transparent">
+                        <ContentPresenter x:Name="content" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource MainPrimaryColorBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    
+
     <!-- Toggle Button -->
     <Style TargetType="ToggleButton" x:Key="ContainedToggleBtnType2">
         <Setter Property="Width" Value="192"/>
@@ -515,6 +553,54 @@
                             <Setter TargetName="text" Property="Foreground" Value="White"/>
                             <Setter TargetName="separator" Property="Background" Value="{DynamicResource MainThemeBrush}"/>
                         </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="ToggleButton" x:Key="LiveToggleBtn" BasedOn="{StaticResource Pretendard-Medium-14}">
+        <Setter Property="Width" Value="79"/>
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Grid>
+                        <Border x:Name="hoverBorder" CornerRadius="12" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Background="Transparent" BorderThickness="4" BorderBrush="Transparent"/>
+                        <Border x:Name="outsideBorder" CornerRadius="12" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Background="{DynamicResource AdditionalColor6Brush}" BorderThickness="4" BorderBrush="Transparent"/>
+                        <Grid Margin="4">
+                            <Label x:Name="text" Content="Live" VerticalAlignment="Center" Margin="8,0,0,0" Foreground="{DynamicResource GrayscaleBlackBrush}"/>
+                            <Border x:Name="border" CornerRadius="8" Width="28" Height="16" Background="{DynamicResource GrayscaleGray8Brush}" BorderThickness="0" Margin="39,4,4,4">
+                                <Image x:Name="icon" Source="{svgc:SvgImage Source=/res/button/toggle/live.svg}" Width="12" Height="12" HorizontalAlignment="Left" Margin="2"/>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="outsideBorder" Property="Opacity" Value="0.5"/>
+                            <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                            <Setter TargetName="text" Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="outsideBorder" Property="Background" Value="{DynamicResource MainPrimaryColorBrush}"/>
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/button/toggle/live_active.svg}"/>
+                            <Setter TargetName="icon" Property="HorizontalAlignment" Value="Right"/>
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="False"/>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="hoverBorder" Property="BorderBrush" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+                            <Setter TargetName="hoverBorder" Property="Opacity" Value="0.08"/>
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="True"/>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="hoverBorder" Property="BorderBrush" Value="{DynamicResource AdditionalColor2Brush}"/>
+                        </MultiTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>

@@ -4,29 +4,26 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:RaywattApp.Views.Setting"
+      xmlns:const="clr-namespace:RaywattApp.Common.Bases"
       mc:Ignorable="d" 
-      d:DesignHeight="820" d:DesignWidth="1000"
+      Width="{x:Static const:Constants.SettingInsideDialogWidth}" Height="{x:Static const:Constants.SettingInsideDialogHeight}"
       Title="SettingAcquisitionPage">
 
-    <Grid Height="800">
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="500"/>
+            <RowDefinition Height="41"/>
+            <RowDefinition Height="42"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Background="Gray">
-            <Label Content="{Binding [Acquisition], Source={StaticResource L10N}}"></Label>
-        </StackPanel>
+        <Border Grid.Row="0" CornerRadius="10" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray8Brush}">
+            
+        </Border>
 
-        <StackPanel Grid.Row="1">
-        </StackPanel>
-
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" >
-            <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding RefreshCommand}" Content="{Binding [Refresh], Source={StaticResource L10N}}"/>
-            <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
-            <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding OkayCommand}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
-            <Button Style="{StaticResource ButtonImportant}" Width="50" Command="{Binding ApplyCommand}" Content="{Binding [Apply], Source={StaticResource L10N}}"/>
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding ApplyCommand}" Content="{Binding [Apply], Source={StaticResource L10N}}"/>
+            <StackPanel Width="16"/>
+            <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding OkayCommand}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
         </StackPanel>
     </Grid>
 </Page>

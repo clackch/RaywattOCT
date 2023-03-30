@@ -4,49 +4,164 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:RaywattApp.Views"
+      xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
       xmlns:const="clr-namespace:RaywattApp.Common.Bases"
       xmlns:System="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d" 
       d:DesignHeight="1024" d:DesignWidth="1280"
+      Background="{DynamicResource GrayscaleGray8Brush}"
       Title="LiveViewPage">
     <Page.Resources>
-        <System:Boolean x:Key="TrueValue">True</System:Boolean>
-        <System:Boolean x:Key="FalseValue">False</System:Boolean>
+        <System:Double x:Key="CrossSectionSize">420</System:Double>
     </Page.Resources>
-
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        
-        <StackPanel Grid.Row="0" Background="Gray">
-            <Label Content="{Binding [Live View], Source={StaticResource L10N}}"></Label>
-        </StackPanel>
 
-        <Image Grid.Row="1" x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Stretch="Fill"/>
-
-        <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="300"/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <Grid Grid.Column="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <RadioButton Grid.Column="0" Content="{Binding [Stand By], Source={StaticResource L10N}}" Command="{Binding CmdChangeViewMode}" IsChecked="{Binding ViewMode, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ViewModeStandBy}}" IsEnabled="{Binding DeviceStatus.IsInitialized}" Margin="5,5,5,5" HorizontalAlignment="Center"/>
-                <RadioButton Grid.Column="1" Content="{Binding [Live View], Source={StaticResource L10N}}" Command="{Binding CmdChangeViewMode}" IsChecked="{Binding ViewMode, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ViewModeLiveView}}" IsEnabled="{Binding DeviceStatus.IsInitialized}" Margin="5,5,5,5" HorizontalAlignment="Center"/>
-            </Grid>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource ButtonBasic}" Command="{Binding CmdBack}" Width="80" Content="{Binding [Cancel], Source={StaticResource L10N}}" HorizontalAlignment="Right"/>
-                <Button Style="{StaticResource ButtonBasic}" Command="{Binding CmdCalibration}" IsEnabled="{Binding DeviceStatus.IsInitialized}" Width="100" Content="{Binding [Calibration], Source={StaticResource L10N}}"/>
-                <Button Style="{StaticResource ButtonImportant}" Command="{Binding CmdStartRecording}" IsEnabled="{Binding DeviceStatus.IsInitialized}" Width="100" Content="{Binding [Start Recording], Source={StaticResource L10N}}"/>
-            </StackPanel>
+        <Grid Grid.Row="0" Height="60" Background="{DynamicResource GrayscaleGray7Brush}">
+            <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Margin="75,20,0,19" Content="{Binding [New Recording], Source={StaticResource L10N}}"/>
         </Grid>
 
+        <Grid Grid.Row="1" Margin="160,62,160,62">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="725"/>
+                <RowDefinition Height="1"/>
+                <RowDefinition Height="74"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" CornerRadius="10,10,0,0" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray6Brush}">
+                <Grid Margin="49,69,49,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="38"/>
+                        <RowDefinition Height="14"/>
+                        <RowDefinition Height="1"/>
+                        <RowDefinition Height="138"/>
+                        <RowDefinition Height="420"/>
+                        <RowDefinition Height="44"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal">
+                            <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Live View], Source={StaticResource L10N}}"/>
+                            <StackPanel Margin="11,0,0,0" Orientation="Horizontal">
+                                <ToggleButton Style="{DynamicResource LiveToggleBtn}" IsChecked="{Binding DeviceStatus.IsLiveView}" Command="{Binding CmdChangeViewMode}" IsEnabled="{Binding DeviceStatus.IsInitialized}"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <Button Style="{StaticResource OutlinedBtnType3-Medium}" Command="{Binding CmdCalibration}" IsEnabled="{Binding DeviceStatus.IsInitialized}" Width="104" Content="{Binding [Calibration], Source={StaticResource L10N}}"/>
+                        </StackPanel>
+                    </Grid>
+                    <Separator Grid.Row="2" Foreground="{DynamicResource GrayscaleGray5Brush}"/>
+                    <Grid Grid.Row="3" Margin="0,20,0,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="280"/>
+                            <ColumnDefinition Width="1"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="22"/>
+                                <RowDefinition Height="39"/>
+                                <RowDefinition Height="16"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [ID], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content=" [ "/>
+                                <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Patient.Id}"/>
+                                <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content=" ]"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Orientation="Horizontal">
+                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Patient.Firstname}"/>
+                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content=", "/>
+                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Patient.Lastname}"/>
+                            </StackPanel>
+                            <Grid Grid.Row="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                    <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Birth], Source={StaticResource L10N}}"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="12,0,0,0" Content="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="12,0,0,0" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                        <Separator Grid.Column="1" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Foreground="{DynamicResource GrayscaleGray5Brush}" Margin="0"/>
+                        <Grid Grid.Column="2" Margin="48,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="127"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">
+                                <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Pullback Setting], Source={StaticResource L10N}}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal">
+                                <StackPanel>
+                                    <RadioButton IsChecked="{Binding PatientCase.PullbackType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.PullbackTypeShort}}" Content="{Binding [Survey (54㎜)], Source={StaticResource L10N}}" />
+                                </StackPanel>
+                                <StackPanel Margin="18,0,0,0">
+                                    <RadioButton IsChecked="{Binding PatientCase.PullbackType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.PullbackTypeLong}}" Content="{Binding [Hi-Res (100㎜)], Source={StaticResource L10N}}" />
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">
+                                <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Procedure], Source={StaticResource L10N}}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal">
+                                <ComboBox Grid.Column="0" Style="{DynamicResource ComboBoxDialog}" Width="404" ItemsSource="{Binding ProcedureList}" SelectedValue="{Binding PatientCase.Procedure}" SelectedValuePath="Key" DisplayMemberPath="Value" Tag="{Binding [Select Procedure], Source={StaticResource L10N}}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                    <!-- Without Angio -->
+                    <Border Grid.Row="4" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}" Visibility="{Binding DeviceStatus.IsAngioConnected, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                        <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill"/>
+                    </Border>
+                    <!-- With Angio -->
+                    <Grid Grid.Row="4" Visibility="{Binding DeviceStatus.IsAngioConnected, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
+                            
+                        </Border>
+                        <Border Grid.Column="2" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
+                            <Image Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill"/>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+            <Separator Grid.Row="1" Foreground="{DynamicResource GrayscaleGray5Brush}"/>
+            <Border Grid.Row="2" CornerRadius="0,0,10,10" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray6Brush}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" HorizontalAlignment="Left" Margin="16,16,0,0">
+                        <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding CmdBack}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" HorizontalAlignment="Right" Margin="0,16,16,0">
+                        <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding CmdStartRecording}" IsEnabled="{Binding DeviceStatus.IsInitialized}" Content="{Binding [Start Recording], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
 
+        <Grid Grid.Row="2" Height="40" Background="{DynamicResource GrayscaleBlackBrush}"/>
     </Grid>
 </Page>

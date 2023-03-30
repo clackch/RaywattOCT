@@ -19,6 +19,8 @@ namespace RaywattApp.Common.Bases
         public const string LiveViewPage = "Views/LiveViewPage.xaml";
         public const string CalibrationPage = "Views/CalibrationPage.xaml";
         public const string RecordingPage = "Views/RecordingPage.xaml";
+        public const string RecordingConfirmPage = "Views/RecordingConfirmPage.xaml";
+        public const string RecordingCatheterFailPage = "Views/RecordingCatheterFailPage.xaml";
         //Review
         public const string ReviewPage = "Views/ReviewPage.xaml";
         public const string Review3dPage = "Views/Review3dPage.xaml";
@@ -43,6 +45,8 @@ namespace RaywattApp.Common.Bases
         public const double ApplicationHeight = 1024;
         public const double FileExportDialogWidth = 860;
         public const double FileExportDialogHeight = 741;
+        public const double FileImportDialogWidth = 860;
+        public const double FileImportDialogHeight = 870;
         public const double SettingDialogWidth = 860;
         public const double SettingDialogHeight = 714;
         public const double ConfirmDialogWidth = 360;
@@ -55,6 +59,14 @@ namespace RaywattApp.Common.Bases
         public const double FileFolderBrowseDialogHeight = 659;
         public const double FileFolderActionDialogWidth = 472;
         public const double FileFolderActionDialogHeight = 370;
+        public const double FileImportActionDialogWidth = 472;
+        public const double FileImportActionDialogHeight = 492;
+        public const double FileCopyDialogWidth = 460;
+        public const double FileCopyDialogHeight = 219;
+        public const double SettingInsideDialogWidth = 584;
+        public const double SettingInsideDialogHeight = 583;
+        public const double SettingEditPhysicianDialogWidth = 472;
+        public const double SettingEditPhysicianDialogHeight = 279;
 
         //Max Length
         public const int MaxPatientId = 9;
@@ -175,9 +187,10 @@ namespace RaywattApp.Common.Bases
 
         //Not Selected
         public const string NotSelected = "Not Selected";
+        public const string NotSelectedCode = "$000";
 
         //Preset
-        public const int MaxPatientCasePresetName = 40;
+        public const int MaxPatientCasePresetName = 30;
         public const int DefaultCalciumThreshold = 180;
         public const int MaxCalciumThreshold = 360;
         public const int MinCalciumThreshold = 0;
@@ -203,7 +216,7 @@ namespace RaywattApp.Common.Bases
         public const string SystemRootPath = "C:";
 
         //Data File Root Path (OCT raw files) - ※ Patient Folder (DataRootPath + Patient ID)
-        public const string DataRootPath = SystemRootPath + "\\DataSave";
+        public const string DataRootPath = SystemRootPath + "\\Raywatt\\DataSave";
 
         //Temporary Folder (CD/DVD Write)
         public const string TempFolderPath = SystemRootPath + "\\Raywatt\\Temp";
@@ -253,5 +266,14 @@ namespace RaywattApp.Common.Bases
         public static DashStyle AnnotationDashLarge = new DashStyle(new double[] { 7, 7 }, 0);
         public static DashStyle AnnotationDashSmall = new DashStyle(new double[] { 2, 5 }, 0);
         public const double AnnotationTextPointSize = 6;
+
+        //Catheter Status
+        public const string CatheterStatusConnected = "Connected";
+        public const string CatheterStatusLocked = "Locked";
+        public const string CatheterStatusLoaded = "Loaded";
+        public const string CatheterStatusFailed = "Failed";
+        public const string CatheterStatusUnlocked = "Unlocked";
+        public const string CatheterStatusUnloaded = "Unloaded";
+        public const string CatheterStatusDisconnected = "Disconnected";
     }
 }

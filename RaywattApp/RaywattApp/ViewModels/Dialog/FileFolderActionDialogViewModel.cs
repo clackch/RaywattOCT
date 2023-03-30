@@ -3,7 +3,6 @@ using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Util;
 using System.Collections.Generic;
 using System;
-using System.Windows;
 using RaywattApp.Common.Bases;
 using RaywattApp.Models;
 using log4net;
@@ -39,7 +38,7 @@ namespace RaywattApp.ViewModels.Dialog
         public override void SetParameter(object parameter)
         {
             Dictionary<string, Object> data = (Dictionary<string, Object>)parameter;
-            folderAction = data["folderAction"].ToString(); ;
+            folderAction = data["folderAction"].ToString();
             SelectedDir = (DirectoryItem)data["selectedDir"];
 
             if (folderAction == Constants.FolderActionRename)

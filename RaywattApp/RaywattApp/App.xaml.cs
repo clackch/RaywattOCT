@@ -8,6 +8,8 @@ using System.Configuration;
 using System.Windows;
 using RaywattApp.ViewModels.Dialog;
 using RaywattApp.Common.Dialog;
+using System.Threading.Tasks;
+using log4net;
 
 namespace RaywattApp
 {
@@ -16,10 +18,14 @@ namespace RaywattApp
     /// </summary>
     public partial class App : Application
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(App));
+
         public App()
         {
             Services = ConfigureServices();
             this.InitializeComponent();
+
+            SetupExceptionHandling();
         }
 
         /// <summary>
@@ -50,7 +56,9 @@ namespace RaywattApp
             services.AddTransient(typeof(LiveViewViewModel));
             services.AddTransient(typeof(CalibrationViewModel));
             services.AddTransient(typeof(RecordingViewModel));
+            services.AddTransient(typeof(RecordingConfirmViewModel));
             services.AddTransient(typeof(RecordingSetupViewModel));
+            services.AddTransient(typeof(RecordingCatheterFailViewModel));
             services.AddTransient(typeof(ReviewViewModel));
             services.AddTransient(typeof(Review3dViewModel));
             services.AddTransient(typeof(ReviewCompareViewModel));
@@ -83,12 +91,48 @@ namespace RaywattApp
             services.AddTransient(typeof(FileImportDialogViewModel));
             services.AddTransient(typeof(FileCopyDialogViewModel));
             services.AddTransient(typeof(FileAlternateIdDialogViewModel));
+            services.AddTransient(typeof(SettingEditPhysicianDialogViewModel));
 
             //IDatabaseService 등록 (Singleton 사용 안함 => Connection Pooling을 Default로 사용)
             services.AddTransient<IDatabaseService, SqlService>(obj => new SqlService(connectionString));
             services.AddTransient(typeof(SqlManager));
 
             return services.BuildServiceProvider();
+        }
+
+        private void SetupExceptionHandling()
+        {
+            AppDomain.CurrentDomain.UnhandledException += (s, e) => LogUnhandledException((Exception)e.ExceptionObject, "AppDomain.CurrentDomain.UnhandledException");
+
+            DispatcherUnhandledException += (s, e) =>
+            {
+                LogUnhandledException(e.Exception, "Application.Current.DispatcherUnhandledException");
+                e.Handled = true;
+            };
+
+            TaskScheduler.UnobservedTaskException += (s, e) =>
+            {
+                LogUnhandledException(e.Exception, "TaskScheduler.UnobservedTaskException");
+                e.SetObserved();
+            };
+        }
+
+        private void LogUnhandledException(Exception exception, string source)
+        {
+            string message = $"Unhandled exception ({source})";
+            try
+            {
+                System.Reflection.AssemblyName assemblyName = System.Reflection.Assembly.GetExecutingAssembly().GetName();
+                message = string.Format("{0} in {1} v{2}", message, assemblyName.Name, assemblyName.Version);
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ex + "Exception in LogUnhandledException");
+            }
+            finally
+            {
+                _log.Error(exception + "\n" + message);
+            }
         }
     }
 }

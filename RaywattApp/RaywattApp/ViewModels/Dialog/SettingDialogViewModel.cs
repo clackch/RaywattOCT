@@ -5,6 +5,9 @@ using CommunityToolkit.Mvvm.Input;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
+using RaywattApp.Common.Bases;
+using RaywattApp.Views.Dialog;
+using System.Windows;
 
 namespace RaywattApp.ViewModels.Dialog
 {
@@ -25,9 +28,21 @@ namespace RaywattApp.ViewModels.Dialog
             get { return this._popupNavigateCommand ?? (this._popupNavigateCommand = new RelayCommand<string>(OnPopupNavigate)); }
         }
 
+        private ICommand _refreshCommand;
+        public ICommand RefreshCommand
+        {
+            get { return this._refreshCommand ?? (this._refreshCommand = new RelayCommand(Refresh)); }
+        }
+
+        private ICommand _cancelCommand;
+        public ICommand CancelCommand
+        {
+            get { return this._cancelCommand ?? (this._cancelCommand = new RelayCommand(Cancel)); }
+        }
+
         public SettingDialogViewModel()
         {
-            PopupNavigationSource = "Views/Setting/SettingAcquisitionPage.xaml";
+            PopupNavigationSource = Constants.SettingAcquisitionPage;
 
             WeakReferenceMessenger.Default.Register<PopupNavigationMessage>(this, OnPopupNavigationMessage);
         }
@@ -46,6 +61,36 @@ namespace RaywattApp.ViewModels.Dialog
             _log.Debug("OnPopupNavigate : " + pageUri);
 
             PopupNavigationSource = pageUri;
+        }
+
+        private void Refresh()
+        {
+            _log.Debug("Refresh");
+
+            WeakReferenceMessenger.Default.Send(new PopupNavigationMessage("Refresh"));
+        }
+
+        private void Cancel()
+        {
+            _log.Debug("Cancel");
+
+            CloseDialog();
+        }
+
+        protected void CloseDialog()
+        {
+            foreach (var winCollection in Application.Current.Windows)
+            {
+                if (winCollection.GetType() == typeof(DialogWindow))
+                {
+                    if ("settingDialogControl".Equals(((winCollection as DialogWindow).Content as SettingDialogControl).Name))
+                    {
+                        var dialog = (DialogWindow)winCollection;
+                        dialog.DialogResult = true;
+                        break;
+                    }
+                }
+            }
         }
     }
 }

@@ -1,11 +1,7 @@
 ﻿using RaywattApp.Common.Bases;
 using RaywattApp.Common.Util;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 
 namespace RaywattApp.Common.Converters
@@ -18,6 +14,9 @@ namespace RaywattApp.Common.Converters
                 return null;
 
             var item = value as DirectoryItem;
+
+            if (item == null)
+                return null;
 
             if (item.Path.Length == 2)
                 return Constants.FileIconDrive;

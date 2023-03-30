@@ -19,9 +19,15 @@ namespace RaywattApp.Models
                 {
                     _presetName = value;
                     OnPropertyChanged(nameof(PresetName));
+
+                    validatePresetName = "";
+                    OnPropertyChanged(nameof(ValidatePresetName));
                 }
             }
         }
+
+        [ObservableProperty]
+        private string validatePresetName;
 
         [ObservableProperty]
         private int _calciumThreshold;

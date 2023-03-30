@@ -127,7 +127,8 @@ namespace RaywattApp.ViewModels
 
             if (extraData != null)
             {
-                PrevStatus = (PrevStatus)extraData;
+                Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
+                PrevStatus = (PrevStatus)data["prevStatus"];
 
                 SetPrevStatus();
             }
@@ -244,7 +245,9 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("MovePatientNew");
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientNewPage) {  Parameter = GetListStatus() });
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["prevStatus"] = GetListStatus();
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientNewPage) {  Parameter = parameter });
         }
 
         private PrevStatus GetListStatus()

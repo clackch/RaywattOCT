@@ -10,10 +10,7 @@ using RaywattApp.Services;
 using System.Windows.Navigation;
 using System;
 using System.Collections.Generic;
-using RaywattOCT;
-using static RaywattOCT.RayCoreWrapper;
 using System.Windows.Threading;
-using RaywattApp.Common.Util;
 
 namespace RaywattApp.ViewModels
 {
@@ -32,19 +29,28 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private PatientCase _patientCase;
 
+        [ObservableProperty]
+        private bool _isStep1;
+
         private DispatcherTimer timer = new DispatcherTimer();
         private DispatcherTimer timerUpdateImage = new DispatcherTimer();
 
-        private ICommand _redoPullbackCommand;
-        public ICommand RedoPullbackCommand
+        private ICommand _cancelCommand;
+        public ICommand CancelCommand
         {
-            get { return this._redoPullbackCommand ?? (this._redoPullbackCommand = new RelayCommand(RedoPullback)); }
+            get { return this._cancelCommand ?? (this._cancelCommand = new RelayCommand(Cancel)); }
         }
 
-        private ICommand _confirmCommand;
-        public ICommand ConfirmCommand
+        private ICommand _readyCommand;
+        public ICommand ReadyCommand
         {
-            get { return this._confirmCommand ?? (this._confirmCommand = new RelayCommand(Confirm)); }
+            get { return this._readyCommand ?? (this._readyCommand = new RelayCommand(Ready)); }
+        }
+
+        private ICommand _startCommand;
+        public ICommand StartCommand
+        {
+            get { return this._startCommand ?? (this._startCommand = new RelayCommand(Start)); }
         }
 
         public RecordingViewModel(SqlManager sqlManager)
@@ -55,8 +61,9 @@ namespace RaywattApp.ViewModels
 
             _sqlManager = sqlManager;
 
-            PatientCase = new PatientCase();
+            IsStep1 = true;
         }
+
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
             base.OnNavigated(sender, navigatedEventArgs);
@@ -69,18 +76,12 @@ namespace RaywattApp.ViewModels
                 Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
                 Patient = (Patient)data["patient"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
+                PatientCase = (PatientCase)data["patientCase"];
 
-                //Preset 화면으로 갔다가, Back 한 경우
-                if (data.ContainsKey("patientCase"))
-                    PatientCase = (PatientCase)data["patientCase"];
-
-                RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+                timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
+                timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
+                timerUpdateImage.Start();
             }
-
-            timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
-            timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
-            timerUpdateImage.Start();
-
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -89,76 +90,41 @@ namespace RaywattApp.ViewModels
             _log.Debug("OnNavigating");
         }
 
-        private void RedoPullback()
+        private void Cancel()
         {
-            _log.Debug("RedoPullback");
+            _log.Debug("Cancel");
 
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["patient"] = Patient;
-            parameter["prevStatus"] = PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.LiveViewPage) { Parameter = parameter });
+            leaveToPage(Constants.LiveViewPage);
         }
 
-        private void Confirm()
+        private void Ready()
         {
-            _log.Debug("Confirm");
+            _log.Debug("Ready");
 
-            //TO-DO 초기값 정의 및 Preset 화면에서 Back해서 돌아온 경우에 대한 처리 필요
-            PatientCase.PhysicianName = Constants.NotSelected;
-            PatientCase.AccessionNumber = "";
-            PatientCase.AccessionName = "";
-            PatientCase.Comment = "";
-            PatientCase.Vessel = "$000";
-            PatientCase.Procedure = "$000";
-            PatientCase.ThumbnailNo = 1;
-            PatientCase.StillImageYn = "N";
-            PatientCase.Image = "";
-            PatientCase.PullbackType = "LONG";
-            PatientCase.AngioCoRegistration = false;
-            PatientCase.IndicatorDegree = 90;
-
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["patient"] = Patient;
-            parameter["patientCase"] = PatientCase;
-            SetDetailStatusInit();
-            parameter["prevStatus"] = PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewPresetPage) { Parameter = parameter });
+            IsStep1 = false;
         }
 
-        private void SetDetailStatusInit()
+        private void Start()
         {
-            PrevStatus.DetailSelectedGroup = null;
-            PrevStatus.DetailPageOffset = 0;
-            PrevStatus.DetailPageGroup = 1;
-            PrevStatus.DetailPageNumber = 0;
+            _log.Debug("Start");
+
+            //TO-DD : Recording
+
+            leaveToPage(Constants.RecordingConfirmPage);
         }
         
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {
             DrawCrossSectionImage();
-            if (imgLongitude != null)
-            {
-                RayScannerState state = (RayScannerState)RayGetProperty(Property.CurrentState);
-
-                if (state == RayScannerState.Review)
-                {
-                    LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgLongitude);
-                }
-            }
         }
-        private string generateFileName(string ext)
+
+        private void leaveToPage(string viewPage)
         {
-            string filename = "{" + 
-                CommonUtil.GetRandomText(8) + "-" + 
-                CommonUtil.GetRandomText(4) + "-" + 
-                CommonUtil.GetRandomText(4) + "-" + 
-                CommonUtil.GetRandomText(4) + "-" + 
-                CommonUtil.GetRandomText(12) + 
-                "}."+ext;
-
-            _log.Debug("generateFileName : " + filename);
-
-            return filename;
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = Patient;
+            parameter["prevStatus"] = PrevStatus;
+            parameter["patientCase"] = PatientCase;
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(viewPage) { Parameter = parameter });
         }
     }
 }

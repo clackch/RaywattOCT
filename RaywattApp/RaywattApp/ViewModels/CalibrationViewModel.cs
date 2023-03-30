@@ -22,6 +22,9 @@ namespace RaywattApp.ViewModels
         private Patient _patient;
 
         [ObservableProperty]
+        private PatientCase _patientCase;
+
+        [ObservableProperty]
         private PrevStatus _prevStatus;
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer();
@@ -63,6 +66,7 @@ namespace RaywattApp.ViewModels
                 Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
                 this.Patient = (Patient)data["patient"];
                 this.PrevStatus = (PrevStatus)data["prevStatus"];
+                PatientCase = (PatientCase)data["patientCase"];
 
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
@@ -84,6 +88,7 @@ namespace RaywattApp.ViewModels
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = this.Patient;
             parameter["prevStatus"] = this.PrevStatus;
+            parameter["patientCase"] = PatientCase;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.LiveViewPage) { Parameter = parameter });
         }
 

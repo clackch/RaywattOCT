@@ -10,13 +10,13 @@ namespace RaywattApp.Common.Converters
         {
             int nPagingNoIdx = (int)value;
             int nParameter = int.Parse(parameter.ToString());
-            var ButtonImportant = App.Current.Resources["PagingSelectedNo"];
-            var ButtonBasic = App.Current.Resources["PagingNotSelectedNo"];
+            var PagingSelectedNo = App.Current.Resources["PagingSelectedNo"];
+            var PagingNotSelectedNo = App.Current.Resources["PagingNotSelectedNo"];
 
             if (nPagingNoIdx % 5 == nParameter)
-                return ButtonImportant;
+                return PagingSelectedNo;
             else
-                return ButtonBasic;
+                return PagingNotSelectedNo;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

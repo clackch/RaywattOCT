@@ -130,6 +130,7 @@
     </Style>
 
     <Style TargetType="DataGridColumnHeader" x:Key="DataGridColumnHeaderDialog">
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
         <Setter Property="Height" Value="48"/>
@@ -137,11 +138,20 @@
             <Setter.Value>
                 <ControlTemplate TargetType="DataGridColumnHeader">
                     <Border CornerRadius="8, 8, 0, 0" Background="{DynamicResource GrayscaleGray7Brush}">
-                        <ContentPresenter Content="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center" ContentTemplate="{StaticResource DataGridColumnHeaderWrap}"/>
+                        <ContentPresenter x:Name="content" Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" ContentTemplate="{StaticResource DataGridColumnHeaderWrap}"/>
                     </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="HorizontalContentAlignment" Value="Left">
+                            <Setter TargetName="content" Property="Margin" Value="28,0,0,0"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <Style TargetType="DataGridColumnHeader" x:Key="DataGridColumnHeaderDialogLeft" BasedOn="{StaticResource DataGridColumnHeaderDialog}">
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
     </Style>
 
     <Style TargetType="DataGridRow" x:Key="DataGridRow">
@@ -193,15 +203,25 @@
     </Style>
 
     <Style TargetType="DataGridCell" x:Key="DataGridCellTooltip">
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="DataGridCell">
                     <Grid Background="Transparent">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Content.Text}"/>
+                        <ContentPresenter x:Name="content" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Content.Text}"/>
                     </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="HorizontalContentAlignment" Value="Left">
+                            <Setter TargetName="content" Property="Margin" Value="28,0,0,0"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <Style TargetType="DataGridCell" x:Key="DataGridCellTooltipLeft" BasedOn="{StaticResource DataGridCellTooltip}">
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
     </Style>
 
     <Style TargetType="DataGridCell" x:Key="DataGridCellEdit">

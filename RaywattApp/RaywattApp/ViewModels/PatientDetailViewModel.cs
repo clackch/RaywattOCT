@@ -209,7 +209,9 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Back");
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage) { Parameter = PrevStatus});
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["prevStatus"] = PrevStatus;
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage) { Parameter = parameter });
         }
 
         private void GoPatientEdit()

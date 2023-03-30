@@ -8,12 +8,14 @@ using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels
@@ -29,11 +31,6 @@ namespace RaywattApp.ViewModels
 
         private IDialogService _dialogService;
 
-        private IList<BusyMessage> _busys = new List<BusyMessage>();
-
-        [ObservableProperty]
-        private bool _isBusy;
-
         [ObservableProperty]
         private Visibility _isHome;
 
@@ -44,6 +41,18 @@ namespace RaywattApp.ViewModels
         private object _navigationParameter;
 
         private List<string> reviewPages;
+
+        [ObservableProperty]
+        private PrevStatus? _prevStatus;
+
+        [ObservableProperty]
+        private Patient? _patient;
+
+        [ObservableProperty]
+        private PatientCase? _patientCase;
+
+        [ObservableProperty]
+        private double _catheterProgress;
 
         private ICommand _homeCommand;
         public ICommand HomeCommand
@@ -61,6 +70,20 @@ namespace RaywattApp.ViewModels
         public ICommand ExitCommand
         {
             get { return this._exitCommand ?? (this._exitCommand = new RelayCommand(Exit)); }
+        }
+
+        //Test
+        private ICommand _catheterFailTest;
+        public ICommand CatheterFailTestCommmand
+        {
+            get { return this._catheterFailTest ?? (this._catheterFailTest = new RelayCommand(CatheterFailReceiver)); }
+        }
+
+        //Test
+        private ICommand _catheterConnectTest;
+        public ICommand CatheterConnectTestCommmand
+        {
+            get { return this._catheterConnectTest ?? (this._catheterConnectTest = new RelayCommand(CatheterConnectReceiver)); }
         }
 
         // to avoid garbage collection
@@ -87,9 +110,6 @@ namespace RaywattApp.ViewModels
             //네비게이션 메시지 수신 등록
             WeakReferenceMessenger.Default.Register<NavigationMessage>(this, OnNavigationMessage);
 
-            //BusyMessage 수신 등록
-            WeakReferenceMessenger.Default.Register<BusyMessage>(this, OnBusyMessage);
-
             RayRegisterCallback(Marshal.GetFunctionPointerForDelegate(CBFunction));
             RayStartSystem();
             RayConnectDevices();
@@ -105,6 +125,10 @@ namespace RaywattApp.ViewModels
             reviewPages.Add(Constants.ReviewAngioCoRegPage);
 
             IsHome = Visibility.Hidden;
+
+            //Test
+            timer.Interval = TimeSpan.FromMilliseconds(500);
+            timer.Tick += new EventHandler(ProgressTest);
         }
 
         private void OnNavigationMessage(object recipient, NavigationMessage message)
@@ -115,6 +139,23 @@ namespace RaywattApp.ViewModels
             //순서 중요 - NavigationParameter 먼저 입력 후, NavigationSource 입력 필요
             NavigationParameter = message.Parameter;
             NavigationSource = pageUri;
+
+            if(message.Parameter != null)
+            {
+                Dictionary<string, Object> data = (Dictionary<string, Object>)message.Parameter;
+                if (data.ContainsKey("prevStatus"))
+                    PrevStatus = (PrevStatus)data["prevStatus"];
+                else
+                    PrevStatus = null;
+                if (data.ContainsKey("patient"))
+                    Patient = (Patient)data["patient"];
+                else
+                    Patient = null;
+                if (data.ContainsKey("patientCase"))
+                    PatientCase = (PatientCase)data["patientCase"];
+                else
+                    PatientCase = null;
+            }
 
             //Review 화면에서 나가는 경우, RayEndReivew 호출
             if (reviewPages.Contains(Constants.CurrentPage))
@@ -135,34 +176,6 @@ namespace RaywattApp.ViewModels
                 IsHome = Visibility.Visible;
         }
 
-        private void OnBusyMessage(object recipient, BusyMessage message)
-        {
-            _log.Debug("OnBusyMessage : " + message.Value);
-
-            if (message.Value)
-            {
-                var existBusy = _busys.FirstOrDefault(b => b.BusyId == message.BusyId);
-                if (existBusy != null)
-                {
-                    //이미 추가된 녀석이기 때문에 추가하지 않음
-                    return;
-                }
-                _busys.Add(message);
-            }
-            else
-            {
-                var existBusy = _busys.FirstOrDefault(b => b.BusyId == message.BusyId);
-                if (existBusy == null)
-                {
-                    //없기 때문에 나감
-                    return;
-                }
-                _busys.Remove(existBusy);
-            }
-            //_busys에 아이템이 있으면 true, 없으면 false
-            IsBusy = _busys.Any();
-        }
-
         private void Home()
         {
             _log.Debug("Home");
@@ -173,7 +186,7 @@ namespace RaywattApp.ViewModels
         private void Setting()
         {
             _log.Debug("Setting");
-            var result = _dialogService.OpenDialog(new SettingDialogControl());
+            var result = _dialogService.OpenDialog(new SettingDialogControl(), null, Constants.ApplicationWidth, Constants.ApplicationHeight);
         }
 
         private void Exit()
@@ -183,6 +196,52 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
 
             Application.Current.MainWindow.Close();
+        }
+
+        private void CatheterFailReceiver()
+        {
+            _log.Debug("CatheterFailReceiver");
+            DeviceStatus.CatheterStatus = Constants.CatheterStatusFailed;//Fail Receive
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["title"] = _l10n["Error"];
+            parameter["message"] = _l10n["The imaging catheter has failed. It must be removed from the patient before continuing."];
+            parameter["error"] = true;
+            var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+            if (result != null && result.DialogAnswer == DialogResults.Answer.Undefined)
+            {
+                parameter.Clear();
+                parameter["patient"] = Patient;
+                parameter["prevStatus"] = PrevStatus;
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingCatheterFailPage) { Parameter = parameter });
+            }
+        }
+
+        private void CatheterConnectReceiver()
+        {
+            _log.Debug("CatheterConnectReceiver");
+            DeviceStatus.CatheterStatus = Constants.CatheterStatusLocked;//Locked Receive
+
+            CatheterProgress = 0;
+
+            //Test
+            timer.Start();
+        }
+
+        //Test
+        private DispatcherTimer timer = new DispatcherTimer();
+        private void ProgressTest(object sender, EventArgs e)
+        {
+            if (CatheterProgress == 100)
+            {
+                timer.Stop();
+
+                Thread.Sleep(1000);
+                DeviceStatus.CatheterStatus = Constants.CatheterStatusLoaded;
+            }
+
+            CatheterProgress += 10;
         }
 
         private void OnMsgCallback(int request, int response)
@@ -209,10 +268,9 @@ namespace RaywattApp.ViewModels
         private void handleState(RayCallbackRequest request, RayScannerState state)
         {
             RayScannerState curState = (RayScannerState)RayGetProperty(Property.CurrentState);
-            bool isLiveView = (bool)(RayGetProperty(Property.MotorOnOff) != 0);
-
             DeviceStatus.IsInitialized = (curState == RayScannerState.Default) ? true : false;
-            DeviceStatus.ViewMode = (isLiveView) ? Constants.ViewModeLiveView : Constants.ViewModeStandBy;
+            DeviceStatus.IsLiveView = (bool)(RayGetProperty(Property.MotorOnOff) != 0);
+            DeviceStatus.IsAngioConnected = true;
         }
         protected void handleProgress(RayCallbackRequest request, int progress) { }
         protected void handleError(RayCallbackRequest request, RayError error) { }

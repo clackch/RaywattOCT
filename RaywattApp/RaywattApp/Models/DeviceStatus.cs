@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using RaywattApp.Common.Bases;
 
 namespace RaywattApp.Models
 {
@@ -9,10 +8,16 @@ namespace RaywattApp.Models
         private bool _isInitialized = false;
 
         [ObservableProperty]
-        private string? _viewMode = Constants.ViewModeStandBy;
+        private bool _isLiveView = false;
 
         [ObservableProperty]
         private bool _canExecuteCalibration = true;
+
+        [ObservableProperty]
+        private bool _isAngioConnected = false;
+
+        [ObservableProperty]
+        private string? _catheterStatus;
 
         public DeviceStatus()
         {
