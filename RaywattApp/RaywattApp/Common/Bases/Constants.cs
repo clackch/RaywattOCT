@@ -39,6 +39,8 @@ namespace RaywattApp.Common.Bases
         public const string SettingLocalizationPage = "Views/Setting/SettingLocalizationPage.xaml";
         public const string SettingDatabasePage = "Views/Setting/SettingDatabasePage.xaml";
         public const string SettingPhysicianPage = "Views/Setting/SettingPhysicianPage.xaml";
+        public const string SettingServicePage = "Views/Setting/SettingServicePage.xaml";
+        public const string SettingLogPage = "Views/Setting/SettingLogPage.xaml";
 
         //Resolution
         public const double ApplicationWidth = 1280;
@@ -220,6 +222,9 @@ namespace RaywattApp.Common.Bases
 
         //Temporary Folder (CD/DVD Write)
         public const string TempFolderPath = SystemRootPath + "\\Raywatt\\Temp";
+
+        //Log Folder
+        public const string LogFolderPath = SystemRootPath + "\\Raywatt\\log";
 
         //Encrypt, Decrypt Public Key
         public const string PublicKey = "raywatt07_hwjckklls_298-87-01441";

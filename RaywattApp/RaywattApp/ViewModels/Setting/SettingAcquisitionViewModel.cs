@@ -1,6 +1,5 @@
 ﻿using log4net;
 using RaywattApp.Common.Setting;
-using RaywattApp.Models;
 using System.Windows.Navigation;
 
 namespace RaywattApp.ViewModels.Setting

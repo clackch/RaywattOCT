@@ -9,7 +9,6 @@ using RaywattApp.Models;
 using System;
 using System.Collections.Generic;
 using RaywattApp.Common.Annotation.Models;
-using System.Collections.ObjectModel;
 using RaywattApp.Common.Annotation.Util;
 using System.Linq;
 using static RayCoreWrapper.RayExportWrapper;
@@ -48,7 +47,7 @@ namespace RaywattApp.ViewModels.Dialog
         [ObservableProperty]
         private bool enableDone = false;
 
-        Dictionary<string, string> importfiles;
+        Dictionary<string, string> copyfiles;
 
         Dictionary<string, string> dicomProperty;
 
@@ -84,10 +83,17 @@ namespace RaywattApp.ViewModels.Dialog
             }
             else if (data.ContainsKey("fileImport"))//Import
             {
-                importfiles = (Dictionary<string, string>)data["fileImport"];
+                copyfiles = (Dictionary<string, string>)data["fileImport"];
 
-                if(importfiles != null)
-                    FileImportAction();
+                if(copyfiles != null)
+                    FileCopyAction();
+            }
+            else if (data.ContainsKey("logExport"))//logExport
+            {
+                copyfiles = (Dictionary<string, string>)data["logExport"];
+
+                if (copyfiles != null)
+                    FileCopyAction();
             }
         }
 
@@ -142,16 +148,16 @@ namespace RaywattApp.ViewModels.Dialog
             EnableDone = true;
         }
 
-        private async void FileImportAction()
+        private async void FileCopyAction()
         {
-            await FileCopyNative(Constants.FileTypeImport);
+            await FileCopyNative();
 
             ProgressText = Constants.ExportStatusCompleted;
             EnableDone = true;
         }
 
 
-        private async Task FileCopyNative(string fileType)
+        private async Task FileCopyNative(string? fileType = null)
         {
             double progressSize = 100.0;
             Dictionary<string, string> fileCopyInfo;
@@ -170,7 +176,7 @@ namespace RaywattApp.ViewModels.Dialog
             }
             else
             {
-                fileCopyInfo = importfiles;
+                fileCopyInfo = copyfiles;
             }
             await CommonUtil.CopyFiles(fileCopyInfo, prog => Progress = prog, progressSize, progText => ProgressText = progText);
 

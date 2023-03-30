@@ -1,10 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
-using RaywattApp.Common.Dialog;
-using RaywattApp.Common.Messages;
 using RaywattApp.Views.Dialog;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 
@@ -13,18 +11,6 @@ namespace RaywattApp.Common.Setting
     public class SettingBase : ViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(SettingBase));
-
-        private ICommand _refreshCommand;
-        public ICommand RefreshCommand
-        {
-            get { return this._refreshCommand ?? (this._refreshCommand = new RelayCommand(Refresh)); }
-        }
-
-        private ICommand _cancelCommand;
-        public ICommand CancelCommand
-        {
-            get { return this._cancelCommand ?? (this._cancelCommand = new RelayCommand(Cancel)); }
-        }
 
         private ICommand _okayCommand;
         public ICommand OkayCommand
@@ -38,33 +24,12 @@ namespace RaywattApp.Common.Setting
             get { return this._applyCommand ?? (this._applyCommand = new RelayCommand(Apply)); }
         }
 
-        private void Refresh()
-        {
-            _log.Debug("Refresh");
-
-            WeakReferenceMessenger.Default.Send(new PopupNavigationMessage("Refresh"));
-        }
-
-        private void Cancel()
-        {
-            _log.Debug("Cancel");
-
-            CloseDialog();
-        }
-
         protected void CloseDialog()
         {
-            foreach (var winCollection in Application.Current.Windows)
+            DialogWindow? dialog = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive) as DialogWindow;
+            if (dialog != null)
             {
-                if (winCollection.GetType() == typeof(DialogWindow))
-                {
-                    if ("settingDialogControl".Equals(((winCollection as DialogWindow).Content as SettingDialogControl).Name))
-                    {
-                        var dialog = (DialogWindow)winCollection;
-                        dialog.DialogResult = true;
-                        break;
-                    }
-                }
+                dialog.DialogResult = true;
             }
         }
 

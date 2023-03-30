@@ -84,6 +84,7 @@
     <Style TargetType="DataGrid" x:Key="DataGridDialog" BasedOn="{StaticResource DataGridBase}">
         <Setter Property="TextBlock.FontSize" Value="14"/>
         <Setter Property="RowHeight" Value="42"/>
+        <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource GrayscaleGray7Brush}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type DataGrid}">
