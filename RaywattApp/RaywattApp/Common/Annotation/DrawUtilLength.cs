@@ -262,7 +262,7 @@ namespace RaywattApp.Common.Annotation
             Path path = new Path();
             path.Style = (Style)this.Resources["StylePath"];
             path.Data = CommonUtil.GetLine(firstPoint, secondPoint);
-            path.Stroke = brushes[group % brushes.Length];
+            path.Stroke = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
             path.Name = constLine + "_" + group;
 
             if (this.isDrawing)
@@ -314,7 +314,7 @@ namespace RaywattApp.Common.Annotation
             Ellipse ellipse = new Ellipse();
             ellipse.Name = constEllipse + "_" + group + "_" + isFirst;
             ellipse.Style = (Style)this.Resources["StyleEllipse"];
-            ellipse.Stroke = brushes[group % brushes.Length];
+            ellipse.Stroke = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
             Canvas.SetLeft(ellipse, point.X - ellipse.Width / 2);
             Canvas.SetTop(ellipse, point.Y - ellipse.Height / 2);
 

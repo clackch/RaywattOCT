@@ -18,475 +18,500 @@
     <Page.Resources>
         <System:Boolean x:Key="TrueValue">True</System:Boolean>
         <System:Boolean x:Key="FalseValue">False</System:Boolean>
-        <System:Double x:Key="CrossSectionSmallSize">350</System:Double>
-        <System:Double x:Key="CrossSectionSmallCenter">175</System:Double>
-        <System:Double x:Key="AngioSize">640</System:Double>
     </Page.Resources>
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="60" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="40" />
-        </Grid.RowDefinitions>
-
-        <Grid Grid.Row="0" Background="{DynamicResource SideCardBackgroundBrush}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" Orientation="Horizontal">
-                <StackPanel Width="70"/>
-                <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="2D" IsChecked="True"/>
-                <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="3D" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.Review3dPage}"/>
-                <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="Compare" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewComparePage}"/>
-                <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="AI FFR" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrPage}"/>
-            </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                <component:IconButton Style="{StaticResource IconButton}" Icon="editPresetSimple" Width="42" Height="42" Command="{Binding EditPresetCommand}" Content="{Binding [Edit Preset], Source={StaticResource L10N}}"/>
-                <StackPanel Width="6"/>
-                <component:IconButton Style="{StaticResource IconButton}" Icon="exportSimple" Width="42" Height="42" Command="{Binding ExportCommand}" Content="{Binding [Export], Source={StaticResource L10N}}"/>
-                <StackPanel Width="118"/>
-            </StackPanel>
-        </Grid>
-
-        <Grid Grid.Row="1" Background="{StaticResource BackgroundBrush}">
+        <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="10"/>
-                <RowDefinition/>
-                <RowDefinition Height="10"/>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="60" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="40" />
             </Grid.RowDefinitions>
 
-            <!-- Cross Section Part -->
-            <Grid x:Name="crossSection" Grid.Row="1">
+            <Grid Grid.Row="0" Background="{DynamicResource SideCardBackgroundBrush}">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition/>
-                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition/>
-                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <StackPanel Width="70"/>
+                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="2D" IsChecked="True"/>
+                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="3D" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.Review3dPage}"/>
+                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="Compare" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewComparePage}"/>
+                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="AI FFR" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrPage}"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <component:IconButton Style="{StaticResource IconButton}" Icon="editPresetSimple" Width="42" Height="42" Command="{Binding EditPresetCommand}" Content="{Binding [Edit Preset], Source={StaticResource L10N}}"/>
+                    <StackPanel Width="6"/>
+                    <component:IconButton Style="{StaticResource IconButton}" Icon="exportSimple" Width="42" Height="42" Command="{Binding ExportCommand}" Content="{Binding [Export], Source={StaticResource L10N}}"/>
+                    <StackPanel Width="118"/>
+                </StackPanel>
+            </Grid>
 
-                <!-- Cross Section -->
-                <Grid Grid.Column="2" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                    <!-- Cross Seciton Image -->
-                    <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}">
-                        <i:Interaction.Triggers>
-                            <i:EventTrigger EventName="Loaded">
-                                <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}">
-                                    <i:InvokeCommandAction.CommandParameter>
-                                        <MultiBinding Converter="{StaticResource MultiParamConverter}">
-                                            <Binding Path="Name" ElementName="crossSectionImage"/>
-                                            <Binding Path="ActualWidth" ElementName="crossSectionImage"/>
-                                            <Binding Path="ActualHeight" ElementName="crossSectionImage"/>
-                                        </MultiBinding>
-                                    </i:InvokeCommandAction.CommandParameter>
-                                </i:InvokeCommandAction>
-                            </i:EventTrigger>
-                            <i:EventTrigger EventName="SizeChanged">
-                                <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}">
-                                    <i:InvokeCommandAction.CommandParameter>
-                                        <MultiBinding Converter="{StaticResource MultiParamConverter}">
-                                            <Binding Path="Name" ElementName="crossSectionImage"/>
-                                            <Binding Path="ActualWidth" ElementName="crossSectionImage"/>
-                                            <Binding Path="ActualHeight" ElementName="crossSectionImage"/>
-                                        </MultiBinding>
-                                    </i:InvokeCommandAction.CommandParameter>
-                                </i:InvokeCommandAction>
-                            </i:EventTrigger>
-                        </i:Interaction.Triggers>
-                    </Image>
-                    <!-- Indicator  -->
-                    <Grid Background="Transparent" Visibility="{Binding IndicatorCrossSection.IsVisible}">
-                        <i:Interaction.Behaviors>
-                            <behaviors:MouseBehavior MouseX="{Binding IndicatorCrossSection.X, Mode=OneWayToSource}" MouseY="{Binding IndicatorCrossSection.Y, Mode=OneWayToSource}" />
-                        </i:Interaction.Behaviors>
+            <Grid Grid.Row="1" Background="{StaticResource BackgroundBrush}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition/>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-                        <i:Interaction.Triggers>
-                            <i:EventTrigger EventName="MouseLeave" >
-                                <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
-                            </i:EventTrigger>
-                            <i:EventTrigger EventName="PreviewMouseUp" >
-                                <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
-                            </i:EventTrigger>
-                            <i:EventTrigger EventName="PreviewMouseMove" >
-                                <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
-                            </i:EventTrigger>
-                        </i:Interaction.Triggers>
+                <!-- Cross Section Part -->
+                <Grid x:Name="crossSection" Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                        <Canvas>
-                            <Image Source="/res/bar/indicator.png" Height="{x:Static const:Constants.CrossSectionSize}" Width="{x:Static const:Constants.CrossSectionSize}" Cursor="Hand" Opacity="0.25">
-                                <Image.RenderTransform>
-                                    <!-- Image Indicator bar width(about 7) => CenterY 3.5 -->
-                                    <RotateTransform CenterX="{x:Static const:Constants.CrossSectionCenter}" CenterY="3.5" Angle="{Binding Degree}"/>
-                                </Image.RenderTransform>
-
+                    <!-- Cross Section -->
+                    <Grid Grid.Column="2">
+                        <Grid Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                            <!-- Cross Seciton Image -->
+                            <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
                                 <i:Interaction.Triggers>
-                                    <i:EventTrigger EventName="PreviewMouseDown" >
-                                        <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
+                                    <i:EventTrigger EventName="Loaded">
+                                        <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
                                     </i:EventTrigger>
-                                    <i:EventTrigger EventName="PreviewMouseUp" >
-                                        <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
-                                    </i:EventTrigger>
-                                    <i:EventTrigger EventName="PreviewMouseMove" >
-                                        <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
+                                    <i:EventTrigger EventName="SizeChanged">
+                                        <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
                                     </i:EventTrigger>
                                 </i:Interaction.Triggers>
                             </Image>
-                        </Canvas>
+                            <!-- Cross Section Info. -->
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="50">
+                                <Label Content="F : " Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}"/>
+                                <Label Content="{Binding DisplayFrameNumber}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" />
+                            </StackPanel>
+                            <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Right">
+                                <Separator Width="{Binding CrossSectionScale}" Height="1"/>
+                                <StackPanel Height="4"/>
+                                <Label Content="1 mm" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                    <!-- Angio -->
+                    <Grid Grid.Column="2" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Background="LightGray">
+
                     </Grid>
 
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="50">
-                        <Label Content="F : " Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}"/>
-                        <Label Content="{Binding DisplayFrameNumber}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" />
-                    </StackPanel>
-
-                    <!-- Measurement -->
-                    <annotation:DrawUtil Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorCrossSection.IsMoving}" IsEnabled="{Binding IndicatorCrossSection.IsMoving}"/>
-                </Grid>
-                <!-- Angio -->
-                <Grid Grid.Column="2" Width="{StaticResource AngioSize}" Height="{StaticResource AngioSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Background="Beige">
-                    
-                </Grid>
-
-                <!-- Left Menu  -->
-                <Grid Grid.Column="0" Width="{x:Static const:Constants.LeftSideBarExpandSize}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="329"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="329"/>
-                    </Grid.RowDefinitions>
-                    <!-- View Option  -->
-                    <Border Grid.Row="0" CornerRadius="0,8,8,0" HorizontalAlignment="Left" Width="{x:Static const:Constants.LeftSideBarExpandSize}" Visibility="{Binding ExpandLeftUpMenu, Converter={StaticResource BoolToVisibilityConverter}}" Background="{StaticResource SideCardBackgroundBrush}">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition/>
-                            </Grid.RowDefinitions>
-                            <StackPanel Grid.Row="0">
-                                <Button Style="{DynamicResource SideMenuTitleLeft}" Content="2D Option" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftUpMenu}"/>
-                            </StackPanel>
-                            <StackPanel Grid.Row="1" Width="192" HorizontalAlignment="Center">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="26"/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                        <RowDefinition Height="16"/>
-                                        <RowDefinition Height="1"/>
-                                        <RowDefinition Height="16"/>
-                                        <RowDefinition/>
-                                        <RowDefinition Height="4"/>
-                                        <RowDefinition/>
-                                        <RowDefinition Height="8"/>
-                                        <RowDefinition Height="1"/>
-                                        <RowDefinition/>
-                                    </Grid.RowDefinitions>
-                                    <ToggleButton Grid.Row="1" IsChecked="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource InverseBooleanConverter}}" Style="{DynamicResource ContainedToggleBtnType2}" Command="{Binding ToggleAngioCommand}" CommandParameter="{StaticResource FalseValue}" Content="{Binding [OCT], Source={StaticResource L10N}}"/>
-                                    <ToggleButton Grid.Row="2" IsChecked="{Binding ReviewStatus.IsAngioOn}" Style="{DynamicResource ContainedToggleBtnType2}" Command="{Binding ToggleAngioCommand}" CommandParameter="{StaticResource TrueValue}" Content="{Binding [OCT + Angio], Source={StaticResource L10N}}"/>
-                                    <Separator Grid.Row="4" Margin="0,0,0,0" Background="{DynamicResource SeparatorBrush}"/>
-                                    <Label Grid.Row="6" Content="{Binding [Measure], Source={StaticResource L10N}}" Foreground="{DynamicResource SideMenuTitleBrush}" Style="{DynamicResource Pretendard-Medium-12}"/>
-                                    <Grid Grid.Row="8">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition/>
-                                            <ColumnDefinition/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        <Label Grid.Row="0" Grid.Column="0" Content="{Binding [Auto], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="White" VerticalAlignment="Center"/>
-                                        <ToggleButton Style="{DynamicResource IconToggleBtn-Large}" IsChecked="{Binding ReviewStatus.IsContourStentOn, Mode=OneWay}" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Command="{Binding ToggleContourStentCommand}"/>
-                                        <Label Grid.Row="1" Grid.Column="0" Content="{Binding [Manual], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="White" VerticalAlignment="Center"/>
-                                        <ToggleButton Style="{DynamicResource IconToggleBtn-Large}" IsChecked="{Binding ReviewStatus.IsMeasurementOn, Mode=OneWay}" IsEnabled="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource InverseBooleanConverter}}" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Command="{Binding ToggleMeasurementCommand}" Margin="0,-2,0,0"/>
-                                    </Grid>
-                                    <Separator Grid.Row="10" Margin="0,0,0,0" Background="{DynamicResource SeparatorBrush}" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                                    <Separator Grid.Row="10" Margin="0,0,0,0" Background="{DynamicResource SeparatorBrush}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                                    <Grid Grid.Row="11">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="16"/>
-                                            <RowDefinition/>
-                                        </Grid.RowDefinitions>
-                                        <annotation:DrawCommandUtil Grid.Row="1" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" OutCommand="{Binding MeasurementCommand, Mode=TwoWay}"/>
-                                        <Button Grid.Row="1" Style="{StaticResource OutlinedBtnType1-Medium}" Height="26" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding CoRegistrationCommand}" Content="{Binding [Co-Registration], Source={StaticResource L10N}}"/>
-                                    </Grid>
-                                </Grid>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-                    <Button Grid.Row="0" HorizontalAlignment="Left" Visibility="{Binding ExpandLeftUpMenu, Converter={StaticResource BoolToVisibilityReverseConverter}}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftUpMenu}">
-                        <Button.Template>
-                            <ControlTemplate>
-                                <Border CornerRadius="0,8,8,0" Width="{x:Static const:Constants.SideBarCollapseSize}" Background="{StaticResource SideCardBackgroundBrush}">
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition/>
-                                        </Grid.RowDefinitions>
-                                        <StackPanel Grid.Row="0" >
-                                            <Button Style="{DynamicResource SideMenuTitleLeftCollapsed}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftUpMenu}"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Center">
-                                            <StackPanel Height="114.2"/>
-                                            <Image Source="{svgc:SvgImage Source=/res/icon/2dOption.svg}" Width="24.3" Height="24.3"/>
-                                            <StackPanel Height="8"/>
-                                            <Image Source="{svgc:SvgImage Source=/res/icon/2dOptionText.svg}" Width="38" Height="26"/>
-                                        </StackPanel>
-                                    </Grid>
-                                </Border>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
-                    <!-- Patient Info  -->
-                    <Border Grid.Row="2" CornerRadius="0,8,8,0" HorizontalAlignment="Left" Width="{x:Static const:Constants.LeftSideBarExpandSize}" Visibility="{Binding ExpandLeftDownMenu, Converter={StaticResource BoolToVisibilityConverter}}" Background="{StaticResource SideCardBackgroundBrush}">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition/>
-                            </Grid.RowDefinitions>
-                            <StackPanel Grid.Row="0" >
-                                <Button Style="{DynamicResource SideMenuTitleLeft}" Content="Case Info." Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftDownMenu}"/>
-                            </StackPanel>
-                            <StackPanel Grid.Row="1">
-                                <Grid Width="192">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="24"/>
-                                        <RowDefinition Height="26"/>
-                                        <RowDefinition Height="22"/>
-                                        <RowDefinition/>
-                                    </Grid.RowDefinitions>
-                                    <Grid Grid.Row="1">
-                                        <Label Style="{DynamicResource ProcedureLabel}" Content="{Binding PatientCase.Procedure, Converter={StaticResource CodeConverter}, ConverterParameter='PROC'}" HorizontalAlignment="Left"/>
-                                        <component:IconButton Style="{DynamicResource IconButton}" Icon="editSimple" Command="{Binding EditCaseCommand}" Content="{Binding [Edit], Source={StaticResource L10N}}" HorizontalAlignment="Right"/>
-                                    </Grid>
-                                    <StackPanel Grid.Row="3">
-                                        <Label Content="{Binding Patient.Name}" Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
-                                        <StackPanel Height="2"/>
-                                        <StackPanel Orientation="Horizontal">
-                                            <Label Content="{Binding [ID], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
-                                            <Label Content=" [ " Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
-                                            <Label Content="{Binding Patient.Id}" Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
-                                            <Label Content=" ]" Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
-                                        </StackPanel>
-                                        <StackPanel Height="9"/> <!-- design guide : 12px -->
-                                        <Separator Height="1" Background="{DynamicResource SeparatorBrush}"/>
-                                        <StackPanel Height="18"/> <!-- design guide : 20px -->
-                                        <StackPanel Orientation="Vertical">
-                                            <StackPanel Orientation="Horizontal">
-                                                <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Birth], Source={StaticResource L10N}}"/>
-                                                <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}"/>
-                                            </StackPanel>
-                                            <StackPanel Height="4"/>
-                                            <StackPanel Orientation="Horizontal">
-                                                <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
-                                                <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
-                                            </StackPanel>
-                                            <StackPanel Height="12"/>
-                                            <StackPanel Orientation="Horizontal">
-                                                <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Vessel], Source={StaticResource L10N}}"/>
-                                                <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding PatientCase.Vessel, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}"/>
-                                            </StackPanel>
-                                            <StackPanel Height="4"/>
-                                            <StackPanel Orientation="Horizontal">
-                                                <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Physician], Source={StaticResource L10N}}"/>
-                                                <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding PatientCase.PhysicianName}"/>
-                                            </StackPanel>
-                                            <StackPanel Height="12"/>
-                                            <StackPanel Orientation="Horizontal">
-                                                <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Comment], Source={StaticResource L10N}}"/>
-                                                <TextBlock Width="112" Height="42" Text="{Binding PatientCase.Comment}" TextWrapping="WrapWithOverflow" FontFamily="Pretendard" FontWeight="Medium" FontSize="12" Foreground="{DynamicResource CaseValueBrush}"/>
-                                            </StackPanel>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Grid>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-                    <Button Grid.Row="2" HorizontalAlignment="Left" Visibility="{Binding ExpandLeftDownMenu, Converter={StaticResource BoolToVisibilityReverseConverter}}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftDownMenu}">
-                        <Button.Template>
-                            <ControlTemplate>
-                                <Border CornerRadius="0,8,8,0" HorizontalAlignment="Left" Width="{x:Static const:Constants.SideBarCollapseSize}" Background="{StaticResource SideCardBackgroundBrush}">
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition/>
-                                        </Grid.RowDefinitions>
-                                        <StackPanel Grid.Row="0" >
-                                            <Button Style="{DynamicResource SideMenuTitleLeftCollapsed}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftDownMenu}"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Center">
-                                            <StackPanel Height="125.5"/>
-                                            <Image Source="{svgc:SvgImage Source=/res/icon/CaseInfo.svg}" Width="24" Height="24"/>
-                                            <StackPanel Height="8"/>
-                                            <Image Source="{svgc:SvgImage Source=/res/icon/CaseInfoText.svg}" Width="28" Height="26"/>
-                                        </StackPanel>
-                                    </Grid>
-                                </Border>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
-                </Grid>
-
-                <!-- Right Menu  -->
-                <Grid Grid.Column="4" Width="{Binding RightSideBarExpand}">
-                    <!-- Value Info -->
-                    <Border CornerRadius="8,0,0,8" HorizontalAlignment="Right" Width="{Binding RightSideBarExpand}" Visibility="{Binding ExpandRightMenu, Converter={StaticResource BoolToVisibilityConverter}}" Background="{StaticResource SideCardBackgroundBrush}">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition/>
-                            </Grid.RowDefinitions>
-                            <StackPanel Grid.Row="0" >
-                                <Button Style="{DynamicResource SideMenuTitleRight}" Content="Value Info." Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.RightMenu}" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
-                                <Button Style="{DynamicResource SideMenuTitleRight}" Content="Measurement" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.RightMenu}" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                            </StackPanel>
-
-                            <!-- Default -->
-                            <Grid Grid.Row="1" Margin="0" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                                <Grid Width="192" HorizontalAlignment="Center">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="40"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="20"/>
-                                        <RowDefinition Height="1"/>
-                                        <RowDefinition Height="20"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="40"/>
-                                        <RowDefinition/>
-                                    </Grid.RowDefinitions>
-                                    <StackPanel x:Name="LumenInfo" Grid.Row="1" Orientation="Vertical">
-                                        <Label Content="{Binding [Lumen], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-20}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
-                                        <StackPanel Height="16"/>
-                                        <Label Content="{Binding [Diameter], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
-                                        <StackPanel Height="64" Orientation="Horizontal">
-                                            <Label Content="1.54" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
-                                            <StackPanel Width="10"/>
-                                            <Label Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-30}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom"/>
-                                        </StackPanel>
-                                        <Grid>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="2"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="2"/>
-                                                <RowDefinition Height="Auto"/>
-                                            </Grid.RowDefinitions>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="45"/>
-                                                <ColumnDefinition Width="40"/>
-                                                <ColumnDefinition Width="4"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Grid.Row="0" Grid.Column="0" Content="{Binding [Min], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
-                                            <Label Grid.Row="0" Grid.Column="1" Content="00.00" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
-                                            <Label Grid.Row="0" Grid.Column="3" Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
-                                            <Label Grid.Row="2" Grid.Column="0" Content="{Binding [Max], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
-                                            <Label Grid.Row="2" Grid.Column="1" Content="00.00" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
-                                            <Label Grid.Row="2" Grid.Column="3" Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
-                                            <Label Grid.Row="4" Grid.Column="0" Content="{Binding [%DS], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
-                                            <Label Grid.Row="4" Grid.Column="1" Content="00.00" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
-                                        </Grid>
-                                        <StackPanel Height="20"/>
-                                        <Label Content="{Binding [Area], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
-                                        <StackPanel Height="64" Orientation="Horizontal">
-                                            <Label Content="1.89" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
-                                            <StackPanel Width="10"/>
-                                            <Label Content="{Binding [㎟], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-30}"  Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom"/>
-                                        </StackPanel>
-                                        <StackPanel Height="4"/>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="45"/>
-                                                <ColumnDefinition Width="40"/>
-                                                <ColumnDefinition Width="4"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Grid.Column="0" Content="{Binding [%AS], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
-                                            <Label Grid.Column="1" Content="00.00" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
-                                        </Grid>
-                                    </StackPanel>
-                                    <Separator Grid.Row="3" Height="1" Margin="0,0,0,0" Background="{DynamicResource SeparatorBrush}"/>
-                                    <StackPanel x:Name="CalciumInfo" Grid.Row="5" Orientation="Vertical">
-                                        <Label Content="{Binding [Calcium], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-20}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
-                                        <StackPanel Height="16"/>
-                                        <Label Content="{Binding [Total Angle], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
-                                        <StackPanel Height="64">
-                                            <Label Content="200º" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
-                                        </StackPanel>
-                                        <StackPanel Height="12"/>
-                                        <Label Content="{Binding [Max Thickness], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
-                                        <StackPanel Height="64">
-                                            <Label Content="0.73" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
-                                            <StackPanel Width="10"/>
-                                            <Label Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-30}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom"/>
-                                        </StackPanel>                                        
-                                    </StackPanel>
-                                </Grid>
-                            </Grid>
-
-                            <Grid Grid.Row="1" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                                <annotation:DrawListUtil Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" Measurements="{Binding Measurements}"  LModeLengthGeometries="{Binding LModeLengthGeometries}" FrameNumber="{Binding MeasurementFrameNumber}" OutFrameNumber="{Binding OutFrameNumber, Mode=TwoWay}" OutCommand="{Binding MeasurementCommand, Mode=TwoWay}"/>
-                            </Grid>
-
-                            <!-- Angio -->
-                            <Grid Grid.Row="1" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <!-- Left Menu  -->
+                    <Grid Grid.Column="0" Width="{x:Static const:Constants.LeftSideBarExpandSize}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="329"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="329"/>
+                        </Grid.RowDefinitions>
+                        <!-- View Option  -->
+                        <Border Grid.Row="0" CornerRadius="0,8,8,0" HorizontalAlignment="Left" Width="{x:Static const:Constants.LeftSideBarExpandSize}" Visibility="{Binding ExpandLeftUpMenu, Converter={StaticResource BoolToVisibilityConverter}}" Background="{StaticResource SideCardBackgroundBrush}">
+                            <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition/>
                                 </Grid.RowDefinitions>
-                                <!-- Cross-section -->
-                                <Grid Grid.Row="0">
-                                    <!-- Cross Seciton Image -->
-                                    <Image x:Name="crossSectionImageSmall" Source="{Binding CrossSectionImage}">
-                                        <i:Interaction.Triggers>
-                                            <i:EventTrigger EventName="Loaded">
-                                                <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}">
-                                                    <i:InvokeCommandAction.CommandParameter>
-                                                        <MultiBinding Converter="{StaticResource MultiParamConverter}">
-                                                            <Binding Path="Name" ElementName="crossSectionImageSmall"/>
-                                                            <Binding Path="ActualWidth" ElementName="crossSectionImageSmall"/>
-                                                            <Binding Path="ActualHeight" ElementName="crossSectionImageSmall"/>
-                                                        </MultiBinding>
-                                                    </i:InvokeCommandAction.CommandParameter>
-                                                </i:InvokeCommandAction>
-                                            </i:EventTrigger>
-                                            <i:EventTrigger EventName="SizeChanged">
-                                                <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}">
-                                                    <i:InvokeCommandAction.CommandParameter>
-                                                        <MultiBinding Converter="{StaticResource MultiParamConverter}">
-                                                            <Binding Path="Name" ElementName="crossSectionImageSmall"/>
-                                                            <Binding Path="ActualWidth" ElementName="crossSectionImageSmall"/>
-                                                            <Binding Path="ActualHeight" ElementName="crossSectionImageSmall"/>
-                                                        </MultiBinding>
-                                                    </i:InvokeCommandAction.CommandParameter>
-                                                </i:InvokeCommandAction>
-                                            </i:EventTrigger>
-                                        </i:Interaction.Triggers>
-                                    </Image>
-                                    <!-- Indicator  -->
-                                    <Grid Background="Transparent" Visibility="{Binding IndicatorCrossSection.IsVisible}">
-                                        <i:Interaction.Behaviors>
-                                            <behaviors:MouseBehavior MouseX="{Binding IndicatorCrossSection.X, Mode=OneWayToSource}" MouseY="{Binding IndicatorCrossSection.Y, Mode=OneWayToSource}" />
-                                        </i:Interaction.Behaviors>
+                                <StackPanel Grid.Row="0">
+                                    <Button Style="{DynamicResource SideMenuTitleLeft}" Content="2D Option" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftUpMenu}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Width="192" HorizontalAlignment="Center">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="26"/>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                            <RowDefinition Height="16"/>
+                                            <RowDefinition Height="1"/>
+                                            <RowDefinition Height="16"/>
+                                            <RowDefinition/>
+                                            <RowDefinition Height="4"/>
+                                            <RowDefinition/>
+                                            <RowDefinition Height="8"/>
+                                            <RowDefinition Height="1"/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <ToggleButton Grid.Row="1" IsChecked="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource InverseBooleanConverter}}" Style="{DynamicResource ContainedToggleBtnType2}" Command="{Binding ToggleAngioCommand}" CommandParameter="{StaticResource FalseValue}" Content="{Binding [OCT], Source={StaticResource L10N}}"/>
+                                        <ToggleButton Grid.Row="2" IsChecked="{Binding ReviewStatus.IsAngioOn}" Style="{DynamicResource ContainedToggleBtnType2}" Command="{Binding ToggleAngioCommand}" CommandParameter="{StaticResource TrueValue}" Content="{Binding [OCT + Angio], Source={StaticResource L10N}}"/>
+                                        <Separator Grid.Row="4" Margin="0,0,0,0" Background="{DynamicResource SeparatorBrush}"/>
+                                        <Label Grid.Row="6" Content="{Binding [Measure], Source={StaticResource L10N}}" Foreground="{DynamicResource SideMenuTitleBrush}" Style="{DynamicResource Pretendard-Medium-12}"/>
+                                        <Grid Grid.Row="8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="{Binding [Auto], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="White" VerticalAlignment="Center"/>
+                                            <ToggleButton Style="{DynamicResource IconToggleBtn-Large}" IsChecked="{Binding ReviewStatus.IsContourStentOn, Mode=OneWay}" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Command="{Binding ToggleContourStentCommand}"/>
+                                            <Label Grid.Row="1" Grid.Column="0" Content="{Binding [Manual], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="White" VerticalAlignment="Center"/>
+                                            <ToggleButton Style="{DynamicResource IconToggleBtn-Large}" IsChecked="{Binding ReviewStatus.IsMeasurementOn, Mode=OneWay}" IsEnabled="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource InverseBooleanConverter}}" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Command="{Binding ToggleMeasurementCommand}" Margin="0,-2,0,0"/>
+                                        </Grid>
+                                        <Separator Grid.Row="10" Margin="0,0,0,0" Background="{DynamicResource SeparatorBrush}" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                        <Separator Grid.Row="10" Margin="0,0,0,0" Background="{DynamicResource SeparatorBrush}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                        <Grid Grid.Row="11">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="16"/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <annotation:DrawCommandUtil Grid.Row="1" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" OutCommand="{Binding MeasurementCommand, Mode=TwoWay}"/>
+                                            <Button Grid.Row="1" Style="{StaticResource OutlinedBtnType1-Medium}" Height="26" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding CoRegistrationCommand}" Content="{Binding [Co-Registration], Source={StaticResource L10N}}"/>
+                                        </Grid>
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <Button Grid.Row="0" HorizontalAlignment="Left" Visibility="{Binding ExpandLeftUpMenu, Converter={StaticResource BoolToVisibilityReverseConverter}}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftUpMenu}">
+                            <Button.Template>
+                                <ControlTemplate>
+                                    <Border CornerRadius="0,8,8,0" Width="{x:Static const:Constants.SideBarCollapseSize}" Background="{StaticResource SideCardBackgroundBrush}">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <StackPanel Grid.Row="0" >
+                                                <Button Style="{DynamicResource SideMenuTitleLeftCollapsed}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftUpMenu}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Center">
+                                                <StackPanel Height="114.2"/>
+                                                <Image Source="{svgc:SvgImage Source=/res/icon/2dOption.svg}" Width="24.3" Height="24.3"/>
+                                                <StackPanel Height="8"/>
+                                                <Image Source="{svgc:SvgImage Source=/res/icon/2dOptionText.svg}" Width="38" Height="26"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                        <!-- Patient Info  -->
+                        <Border Grid.Row="2" CornerRadius="0,8,8,0" HorizontalAlignment="Left" Width="{x:Static const:Constants.LeftSideBarExpandSize}" Visibility="{Binding ExpandLeftDownMenu, Converter={StaticResource BoolToVisibilityConverter}}" Background="{StaticResource SideCardBackgroundBrush}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <StackPanel Grid.Row="0" >
+                                    <Button Style="{DynamicResource SideMenuTitleLeft}" Content="Case Info." Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftDownMenu}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="1">
+                                    <Grid Width="192">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="24"/>
+                                            <RowDefinition Height="26"/>
+                                            <RowDefinition Height="22"/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <Grid Grid.Row="1">
+                                            <Label Style="{DynamicResource ProcedureLabel}" Content="{Binding PatientCase.Procedure, Converter={StaticResource CodeConverter}, ConverterParameter='PROC'}" HorizontalAlignment="Left"/>
+                                            <component:IconButton Style="{DynamicResource IconButton}" Icon="editSimple" Command="{Binding EditCaseCommand}" Content="{Binding [Edit], Source={StaticResource L10N}}" HorizontalAlignment="Right"/>
+                                        </Grid>
+                                        <StackPanel Grid.Row="3">
+                                            <Label Content="{Binding Patient.Name}" Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
+                                            <StackPanel Height="2"/>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Label Content="{Binding [ID], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
+                                                <Label Content=" [ " Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
+                                                <Label Content="{Binding Patient.Id}" Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
+                                                <Label Content=" ]" Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
+                                            </StackPanel>
+                                            <StackPanel Height="9"/>
+                                            <!-- design guide : 12px -->
+                                            <Separator Height="1" Background="{DynamicResource SeparatorBrush}"/>
+                                            <StackPanel Height="18"/>
+                                            <!-- design guide : 20px -->
+                                            <StackPanel Orientation="Vertical">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Birth], Source={StaticResource L10N}}"/>
+                                                    <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}"/>
+                                                </StackPanel>
+                                                <StackPanel Height="4"/>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
+                                                    <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
+                                                </StackPanel>
+                                                <StackPanel Height="12"/>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Vessel], Source={StaticResource L10N}}"/>
+                                                    <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding PatientCase.Vessel, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}"/>
+                                                </StackPanel>
+                                                <StackPanel Height="4"/>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Physician], Source={StaticResource L10N}}"/>
+                                                    <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding PatientCase.PhysicianName}"/>
+                                                </StackPanel>
+                                                <StackPanel Height="12"/>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Comment], Source={StaticResource L10N}}"/>
+                                                    <TextBlock Width="112" Height="42" Text="{Binding PatientCase.Comment}" TextWrapping="WrapWithOverflow" FontFamily="Pretendard" FontWeight="Medium" FontSize="12" Foreground="{DynamicResource CaseValueBrush}"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <Button Grid.Row="2" HorizontalAlignment="Left" Visibility="{Binding ExpandLeftDownMenu, Converter={StaticResource BoolToVisibilityReverseConverter}}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftDownMenu}">
+                            <Button.Template>
+                                <ControlTemplate>
+                                    <Border CornerRadius="0,8,8,0" HorizontalAlignment="Left" Width="{x:Static const:Constants.SideBarCollapseSize}" Background="{StaticResource SideCardBackgroundBrush}">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <StackPanel Grid.Row="0" >
+                                                <Button Style="{DynamicResource SideMenuTitleLeftCollapsed}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftDownMenu}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Center">
+                                                <StackPanel Height="125.5"/>
+                                                <Image Source="{svgc:SvgImage Source=/res/icon/CaseInfo.svg}" Width="24" Height="24"/>
+                                                <StackPanel Height="8"/>
+                                                <Image Source="{svgc:SvgImage Source=/res/icon/CaseInfoText.svg}" Width="28" Height="26"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </Grid>
 
-                                        <i:Interaction.Triggers>
-                                            <i:EventTrigger EventName="MouseLeave" >
-                                                <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
-                                            </i:EventTrigger>
-                                            <i:EventTrigger EventName="PreviewMouseUp" >
-                                                <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
-                                            </i:EventTrigger>
-                                            <i:EventTrigger EventName="PreviewMouseMove" >
-                                                <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
-                                            </i:EventTrigger>
-                                        </i:Interaction.Triggers>
+                    <!-- Right Menu  -->
+                    <Grid Grid.Column="4" Width="{Binding RightSideBarExpand}">
+                        <!-- Value Info -->
+                        <Border CornerRadius="8,0,0,8" HorizontalAlignment="Right" Width="{Binding RightSideBarExpand}" Visibility="{Binding ExpandRightMenu, Converter={StaticResource BoolToVisibilityConverter}}" Background="{StaticResource SideCardBackgroundBrush}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <StackPanel Grid.Row="0" >
+                                    <Button Style="{DynamicResource SideMenuTitleRight}" Content="Value Info." Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.RightMenu}"/>
+                                </StackPanel>
 
-                                        <Canvas>
-                                            <Image Source="/res/bar/indicator.png" Height="{StaticResource CrossSectionSmallSize}" Width="{StaticResource CrossSectionSmallSize}" Cursor="Hand" Opacity="0.25">
+                                <!-- Default -->
+                                <Grid Grid.Row="1" Margin="0" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                                    <Grid Width="192" HorizontalAlignment="Center">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="40"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="20"/>
+                                            <RowDefinition Height="1"/>
+                                            <RowDefinition Height="20"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="40"/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <StackPanel x:Name="LumenInfo" Grid.Row="1" Orientation="Vertical">
+                                            <Label Content="{Binding [Lumen], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-20}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                            <StackPanel Height="16"/>
+                                            <Label Content="{Binding [Diameter], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                            <StackPanel Height="64" Orientation="Horizontal">
+                                                <Label Content="1.54" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
+                                                <StackPanel Width="10"/>
+                                                <Label Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-30}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom"/>
+                                            </StackPanel>
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="2"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="2"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="45"/>
+                                                    <ColumnDefinition Width="40"/>
+                                                    <ColumnDefinition Width="4"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Row="0" Grid.Column="0" Content="{Binding [Min], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                                <Label Grid.Row="0" Grid.Column="1" Content="00.00" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
+                                                <Label Grid.Row="0" Grid.Column="3" Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                                <Label Grid.Row="2" Grid.Column="0" Content="{Binding [Max], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                                <Label Grid.Row="2" Grid.Column="1" Content="00.00" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
+                                                <Label Grid.Row="2" Grid.Column="3" Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                                <Label Grid.Row="4" Grid.Column="0" Content="{Binding [%DS], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                                <Label Grid.Row="4" Grid.Column="1" Content="00.00" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
+                                            </Grid>
+                                            <StackPanel Height="20"/>
+                                            <Label Content="{Binding [Area], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                            <StackPanel Height="64" Orientation="Horizontal">
+                                                <Label Content="1.89" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
+                                                <StackPanel Width="10"/>
+                                                <Label Content="{Binding [㎟], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-30}"  Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom"/>
+                                            </StackPanel>
+                                            <StackPanel Height="4"/>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="45"/>
+                                                    <ColumnDefinition Width="40"/>
+                                                    <ColumnDefinition Width="4"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="{Binding [%AS], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                                <Label Grid.Column="1" Content="00.00" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
+                                            </Grid>
+                                        </StackPanel>
+                                        <Separator Grid.Row="3" Height="1" Margin="0,0,0,0" Background="{DynamicResource SeparatorBrush}"/>
+                                        <StackPanel x:Name="CalciumInfo" Grid.Row="5" Orientation="Vertical">
+                                            <Label Content="{Binding [Calcium], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-20}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                            <StackPanel Height="16"/>
+                                            <Label Content="{Binding [Total Angle], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                            <StackPanel Height="64">
+                                                <Label Content="200º" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                            <StackPanel Height="12"/>
+                                            <Label Content="{Binding [Max Thickness], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                            <StackPanel Height="64">
+                                                <Label Content="0.73" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
+                                                <StackPanel Width="10"/>
+                                                <Label Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-30}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Grid>
+                                </Grid>
+
+                                <Grid Grid.Row="1" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                                    <annotation:DrawListUtil Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" Measurements="{Binding Measurements}"  LModeLengthGeometries="{Binding LModeLengthGeometries}" FrameNumber="{Binding MeasurementFrameNumber}" OutFrameNumber="{Binding OutFrameNumber, Mode=TwoWay}" OutCommand="{Binding MeasurementCommand, Mode=TwoWay}"/>
+                                </Grid>
+
+                                <!-- Angio -->
+                                <Grid Grid.Row="1" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" HorizontalAlignment="Center">
+                                    <Grid Width="{x:Static const:Constants.CrossSectionAngio}">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="28"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <!-- Cross-section -->
+                                        <Grid Grid.Row="1">
+                                            <!-- Cross Seciton Image -->
+                                            <Image x:Name="crossSectionImageSmall" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionAngio}" Height="{x:Static const:Constants.CrossSectionAngio}">
+                                                <i:Interaction.Triggers>
+                                                    <i:EventTrigger EventName="Loaded">
+                                                        <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
+                                                    </i:EventTrigger>
+                                                    <i:EventTrigger EventName="SizeChanged">
+                                                        <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
+                                                    </i:EventTrigger>
+                                                </i:Interaction.Triggers>
+                                            </Image>
+
+                                            <StackPanel Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Left">
+                                                <StackPanel Height="3"/>
+                                                <StackPanel Orientation="Horizontal" Width="50">
+                                                    <Label Content="F : " Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}"/>
+                                                    <Label Content="{Binding DisplayFrameNumber}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Right">
+                                                <Separator Width="{Binding CrossSectionAngioScale}" Height="1"/>
+                                                <StackPanel Height="2"/>
+                                                <Label Content="1 mm" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Grid>
+                                        <!-- Info -->
+                                        <Grid Grid.Row="2">
+                                            <StackPanel Orientation="Vertical">
+                                                <StackPanel Height="4"/>
+                                                <Label Content="{Binding [Lumen], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-20}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                                <StackPanel Height="12"/>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="157"/>
+                                                        <ColumnDefinition/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Grid.Column="0" Orientation="Vertical">
+                                                        <Label Content="{Binding [Diameter], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                                        <StackPanel Height="48" Orientation="Horizontal">
+                                                            <Label Content="1.54" Style="{DynamicResource Pretendard-Bold-40}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
+                                                            <StackPanel Width="6"/>
+                                                            <Label Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom"/>
+                                                        </StackPanel>
+                                                        <StackPanel Height="4"/>
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="42"/>
+                                                                <ColumnDefinition Width="44"/>
+                                                                <ColumnDefinition/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <Grid.RowDefinitions>
+                                                                <RowDefinition Height="16"/>
+                                                                <RowDefinition Height="2"/>
+                                                                <RowDefinition Height="16"/>
+                                                                <RowDefinition Height="2"/>
+                                                                <RowDefinition Height="16"/>
+                                                            </Grid.RowDefinitions>
+                                                            <Label Grid.Row="0" Grid.Column="0" Content="{Binding [Min], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                                            <Label Grid.Row="0" Grid.Column="1" Content="00.00" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Left"/>
+                                                            <Label Grid.Row="0" Grid.Column="3" Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                                            <Label Grid.Row="2" Grid.Column="0" Content="{Binding [Max], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                                            <Label Grid.Row="2" Grid.Column="1" Content="00.00" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Left"/>
+                                                            <Label Grid.Row="2" Grid.Column="3" Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                                            <Label Grid.Row="4" Grid.Column="0" Content="{Binding [%DS], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                                            <Label Grid.Row="4" Grid.Column="1" Content="00.00" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Left"/>
+                                                        </Grid>
+                                                    </StackPanel>
+                                                    <StackPanel Grid.Column="1" Orientation="Vertical">
+                                                        <Label Content="{Binding [Area], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                                        <StackPanel Height="48" Orientation="Horizontal">
+                                                            <Label Content="1.89" Style="{DynamicResource Pretendard-Bold-40}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
+                                                            <StackPanel Width="6"/>
+                                                            <Label Content="{Binding [㎟], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom"/>
+                                                        </StackPanel>
+                                                        <StackPanel Height="4"/>
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="42"/>
+                                                                <ColumnDefinition Width="44"/>
+                                                                <ColumnDefinition/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <Grid.RowDefinitions>
+                                                                <RowDefinition Height="16"/>
+                                                            </Grid.RowDefinitions>
+                                                            <Label Grid.Row="0" Grid.Column="0" Content="{Binding [%AS], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                                            <Label Grid.Row="0" Grid.Column="1" Content="00.00" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Left"/>
+                                                        </Grid>
+                                                    </StackPanel>
+                                                </Grid>
+                                                <StackPanel Height="16"/>
+                                                <Separator Height="1" Background="{DynamicResource SeparatorBrush}"/>
+                                                <StackPanel Height="16"/>
+                                                <Label Content="{Binding [Calcium], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-20}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                                <StackPanel Height="12"/>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="157"/>
+                                                        <ColumnDefinition/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Grid.Column="0" Orientation="Vertical">
+                                                        <Label Content="{Binding [Total Angle], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                                        <StackPanel Height="48" Orientation="Horizontal">
+                                                            <Label Content="200" Style="{DynamicResource Pretendard-Bold-40}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
+                                                            <Label Content="{Binding [º], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-40}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Bottom"/>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                    <StackPanel Grid.Column="1" Orientation="Vertical">
+                                                        <Label Content="{Binding [Max Thickness], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                                        <StackPanel Height="48" Orientation="Horizontal">
+                                                            <Label Content="0.73" Style="{DynamicResource Pretendard-Bold-40}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
+                                                            <StackPanel Width="6"/>
+                                                            <Label Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom"/>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Grid>
+                                    <StackPanel Orientation="Vertical">
+                                        <StackPanel Height="24"/>
+                                        <Grid Width="300" Height="300" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                            <!-- Indicator  -->
+                                            <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Width="300" Height="18" Icon="crossSectionAngio" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Cursor="Hand" Visibility="{Binding IndicatorCrossSection.IsVisible}">
                                                 <Image.RenderTransform>
-                                                    <!-- Image Indicator bar width(about 7) => CenterY 3.5 -->
-                                                    <RotateTransform CenterX="{StaticResource CrossSectionSmallCenter}" CenterY="3.5" Angle="{Binding Degree}"/>
+                                                    <RotateTransform CenterX="150" CenterY="9" Angle="{Binding Degree}"/>
                                                 </Image.RenderTransform>
 
                                                 <i:Interaction.Triggers>
@@ -500,136 +525,166 @@
                                                         <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
                                                     </i:EventTrigger>
                                                 </i:Interaction.Triggers>
-                                            </Image>
-                                        </Canvas>
-                                    </Grid>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="50">
-                                        <Label Content="F :" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}"/>
-                                        <Label Content="{Binding DisplayFrameNumber}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" />
+                                            </component:IndicatorImage>
+                                        </Grid>
                                     </StackPanel>
                                 </Grid>
-                                <!-- Info -->
-                                <Grid Grid.Row="1">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <Label Grid.Column="0">Lumen</Label>
-                                    <Label Grid.Column="1">Calcium</Label>
-                                </Grid>
+                            </Grid>
+                        </Border>
+                        <Button Grid.Row="1" HorizontalAlignment="Right" Visibility="{Binding ExpandRightMenu, Converter={StaticResource BoolToVisibilityReverseConverter}}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.RightMenu}">
+                            <Button.Template>
+                                <ControlTemplate>
+                                    <Border CornerRadius="8,0,0,8" HorizontalAlignment="Right" Width="{x:Static const:Constants.SideBarCollapseSize}" Background="{StaticResource SideCardBackgroundBrush}">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <StackPanel Grid.Row="0" >
+                                                <Button Style="{DynamicResource SideMenuTitleRightCollapsed}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.RightMenu}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Center">
+                                                <StackPanel Height="284"/>
+                                                <Image Source="{svgc:SvgImage Source=/res/icon/ValueInfo.svg}" Width="24" Height="24"/>
+                                                <StackPanel Height="8"/>
+                                                <Image Source="{svgc:SvgImage Source=/res/icon/ValueInfoText.svg}" Width="32" Height="26"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </Grid>
+                </Grid>
+
+                <!-- Calcium Indicator -->
+                <Grid Grid.Row="0" Grid.RowSpan="3" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                    <Image x:Name="CalciumIndicator" Width="{x:Static const:Constants.CalciumIndicatorSize}" Height="{x:Static const:Constants.CalciumIndicatorSize}" Source="{Binding CalciumIndicator}"/>
+                    <Grid Width="{x:Static const:Constants.CalciumThicknessIndicatorSize}" Height="{x:Static const:Constants.CalciumThicknessIndicatorSize}" Background="Transparent">
+                        <Image Width="14" Height="15.6" Source="{svgc:SvgImage Source=/res/icon/thicknessIndicator.svg}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                        <Grid.RenderTransform>
+                            <RotateTransform CenterX="{x:Static const:Constants.CalciumThicknessIndicatorCenter}" CenterY="{x:Static const:Constants.CalciumThicknessIndicatorCenter}" Angle="{Binding Degree}"/>
+                        </Grid.RenderTransform>
+                    </Grid>
+                </Grid>
+
+                <!-- Indicator  -->
+                <Grid Grid.Row="1" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                    <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Width="640" Height="18" Icon="crossSection" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Cursor="Hand" Visibility="{Binding IndicatorCrossSection.IsVisible}">
+                        <Image.RenderTransform>
+                            <RotateTransform CenterX="319" CenterY="9" Angle="{Binding Degree}"/>
+                        </Image.RenderTransform>
+
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="PreviewMouseDown" >
+                                <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
+                            </i:EventTrigger>
+                            <i:EventTrigger EventName="PreviewMouseUp" >
+                                <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                            </i:EventTrigger>
+                            <i:EventTrigger EventName="PreviewMouseMove" >
+                                <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </component:IndicatorImage>
+                </Grid>
+
+                <!-- Measurement -->
+                <annotation:DrawUtil Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}"/>
+
+                <!-- Longitude Part -->
+                <Grid Grid.Row="3" Background="{StaticResource BottomCardBackgroundBrush}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="51"/>
+                        <RowDefinition Height="1"/>
+                        <RowDefinition Height="184"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Play/Pause/Prev/Next, Lumen Profile/L-Mode -->
+                    <Grid Grid.Row="0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="prev" Width="24" Height="21.3" Command="{Binding CmdPlayback}" CommandParameter="prev" />
+                            <StackPanel Width="40"/>
+                            <component:IconMultiToggleButton Style="{DynamicResource IconMultiToggleButton}" IsChecked="{Binding IsPaused}" Icon="play" CheckedIcon="pause" Width="22" Height="26.8" Command="{Binding CmdPlayback}" CommandParameter="play"/>
+                            <StackPanel Width="40"/>
+                            <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="next"  Width="24" Height="21.3" Command="{Binding CmdPlayback}" CommandParameter="next"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                            <StackPanel Width="20"/>
+                            <ToggleButton IsChecked="{Binding ReviewStatus.IsLumenProfile}" Style="{StaticResource ContainedToggleBtnType2-Small}" Command="{Binding ToggleLongitudeCommand}" CommandParameter="{StaticResource TrueValue}" Content="{Binding [Lumen Profile], Source={StaticResource L10N}}"/>
+                            <ToggleButton IsChecked="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource InverseBooleanConverter}}" Style="{StaticResource ContainedToggleBtnType2-Small}" Width="80" Command="{Binding ToggleLongitudeCommand}" CommandParameter="{StaticResource FalseValue}" Content="{Binding [L-Mode], Source={StaticResource L10N}}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Separator Grid.Row="1" Margin="0" Padding="0" Background="#161616"/>
+
+                    <!-- Longitude -->
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="70"/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="70"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Orientation="Vertical">
+                            <StackPanel Height="76"/>
+                            <Label Content="P" Style="{DynamicResource Pretendard-Semibold-20}" HorizontalAlignment="Center" Foreground="#fcfcfc" Opacity="0.5"/>
+                        </StackPanel>
+                        <Grid Grid.Column="2">
+                            <StackPanel Orientation="Vertical">
+                                <StackPanel Height="76"/>
+                                <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" HorizontalAlignment="Center" Foreground="#fcfcfc" Opacity="0.5"/>
+                            </StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="9"/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="35"/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Image Grid.Column="1" Grid.Row="1" Width="12" Height="105" Source="{svgc:SvgImage Source=/res/icon/indicator.svg}" Visibility="{Binding IndicatorCrossSection.IsVisible}" VerticalAlignment="Top" HorizontalAlignment="Left"/>
                             </Grid>
                         </Grid>
-                    </Border>
-                    <Button Grid.Row="1" HorizontalAlignment="Right" Visibility="{Binding ExpandRightMenu, Converter={StaticResource BoolToVisibilityReverseConverter}}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.RightMenu}">
-                        <Button.Template>
-                            <ControlTemplate>
-                                <Border CornerRadius="8,0,0,8" HorizontalAlignment="Right" Width="{x:Static const:Constants.SideBarCollapseSize}" Background="{StaticResource SideCardBackgroundBrush}">
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition/>
-                                        </Grid.RowDefinitions>
-                                        <StackPanel Grid.Row="0" >
-                                            <Button Style="{DynamicResource SideMenuTitleRightCollapsed}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.RightMenu}"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Center">
-                                            <StackPanel Height="284"/>
-                                            <Image Source="{svgc:SvgImage Source=/res/icon/ValueInfo.svg}" Width="24" Height="24"/>
-                                            <StackPanel Height="8"/>
-                                            <Image Source="{svgc:SvgImage Source=/res/icon/ValueInfoText.svg}" Width="32" Height="26"/>
-                                        </StackPanel>
-                                    </Grid>
-                                </Border>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
-                </Grid>
-            </Grid>
 
-            <!-- Longitude Part -->
-            <Grid Grid.Row="3" Background="{StaticResource BottomCardBackgroundBrush}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="51"/>
-                    <RowDefinition Height="1"/>
-                    <RowDefinition Height="184"/>
-                </Grid.RowDefinitions>
-                
-                <!-- Play/Pause/Prev/Next, Lumen Profile/L-Mode -->
-                <Grid Grid.Row="0" VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="prev" Width="24" Height="21.3" Command="{Binding CmdPlayback}" CommandParameter="prev" />
-                        <StackPanel Width="40"/>
-                        <component:IconMultiToggleButton Style="{DynamicResource IconMultiToggleButton}" IsChecked="{Binding IsPaused}" Icon="play" CheckedIcon="pause" Width="22" Height="26.8" Command="{Binding CmdPlayback}" CommandParameter="play"/>
-                        <StackPanel Width="40"/>
-                        <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="next"  Width="24" Height="21.3" Command="{Binding CmdPlayback}" CommandParameter="next"/>
-                    </StackPanel>
+                        <Grid Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="105"/>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="24"/>
+                            </Grid.RowDefinitions>
 
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                        <StackPanel Width="20"/>
-                        <ToggleButton IsChecked="{Binding ReviewStatus.IsLumenProfile}" Style="{StaticResource ContainedToggleBtnType2-Small}" Command="{Binding ToggleLongitudeCommand}" CommandParameter="{StaticResource TrueValue}" Content="{Binding [Lumen Profile], Source={StaticResource L10N}}"/>
-                        <ToggleButton IsChecked="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource InverseBooleanConverter}}" Style="{StaticResource ContainedToggleBtnType2-Small}" Width="80" Command="{Binding ToggleLongitudeCommand}" CommandParameter="{StaticResource FalseValue}" Content="{Binding [L-Mode], Source={StaticResource L10N}}"/>
-                    </StackPanel>
-                </Grid>
+                            <!-- Longitude Image -->
+                            <Grid x:Name="longitude" Grid.Row="1">
+                                <!-- Lumen Profile -->
+                                <Image x:Name="lumenProfile" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" Stretch="Fill" Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="Loaded">
+                                            <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
+                                        </i:EventTrigger>
+                                        <i:EventTrigger EventName="SizeChanged">
+                                            <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </Image>
+                                <!-- L-Mode -->
+                                <Image x:Name="lMode" Source="{Binding LongitudeImage}" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" Stretch="Fill" Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="Loaded">
+                                            <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
+                                        </i:EventTrigger>
+                                        <i:EventTrigger EventName="SizeChanged">
+                                            <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </Image>
 
-                <Separator Grid.Row="1" Margin="0" Padding="0" Background="#161616"/>
-
-                <!-- Longitude -->
-                <Grid Grid.Row="2">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="70"/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition Width="70"/>
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel Grid.Column="0" Orientation="Vertical">
-                        <StackPanel Height="76"/>
-                        <Label Content="P" Style="{DynamicResource Pretendard-Semibold-20}" HorizontalAlignment="Center" Foreground="#fcfcfc" Opacity="0.5"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="2" Orientation="Vertical">
-                        <StackPanel Height="76"/>
-                        <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" HorizontalAlignment="Center" Foreground="#fcfcfc" Opacity="0.5"/>
-                    </StackPanel>
-
-                    <Grid Grid.Column="1">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="35"/>
-                            <RowDefinition Height="105"/>
-                            <RowDefinition Height="20"/>
-                            <RowDefinition Height="24"/>
-                        </Grid.RowDefinitions>
-                        
-                        <!-- Longitude Image -->
-                        <Grid x:Name="longitude" Grid.Row="1">
-
-                            <!-- Lumen Profile -->
-                            <Image x:Name="lumenProfile" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" Stretch="Fill" Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityConverter}}">
-                            </Image>
-                            <!-- L-Mode -->
-                            <Image x:Name="lMode" Source="{Binding LongitudeImage}" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" Stretch="Fill" Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                            </Image>
-                            <StackPanel Background="Transparent" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" Visibility="{Binding IndicatorLongitude.IsVisible}">
-                                <!-- L-Mode Mouse Pointer X -->
-                                <i:Interaction.Behaviors>
-                                    <behaviors:MouseBehavior MouseX="{Binding PointLongitudeX, Mode=OneWayToSource}"/>
-                                </i:Interaction.Behaviors>
-                                <!-- Trigger -->
-                                <i:Interaction.Triggers>
-                                    <!--MouseLeave : StackPanel 영역 벗어날 경우, Indicator 멈춤 -->
-                                    <i:EventTrigger EventName="MouseLeave" >
-                                        <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
-                                    </i:EventTrigger>
-                                    <!--PreviewMouseUp : StackPanel 영역에서 MouseUp 할 경우, Indicator 멈춤  -->
-                                    <i:EventTrigger EventName="PreviewMouseUp" >
-                                        <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
-                                    </i:EventTrigger>
-                                    <!--PreviewMouseMove : StackPanel 영역에서 MouseMove 할 경우, Indicator 동작(단, Indicator가 동작 가능 상태 일때) -->
-                                    <i:EventTrigger EventName="PreviewMouseMove" >
-                                        <i:InvokeCommandAction Command="{Binding CmdMoveIndicator}" CommandParameter="{Binding IndicatorLongitude}"/>
-                                    </i:EventTrigger>
-                                </i:Interaction.Triggers>
-
+                                <!-- L-Mode Indicator -->
                                 <Canvas>
-                                    <component:IndicatorImage x:Name="longitudeIndicatorImage" Style="{DynamicResource IndicatorImage}" Icon="longitude" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="{x:Static const:Constants.LongitudeIndicatorHeight}" Cursor="Hand" Stretch="None" Canvas.Left="{Binding IndicatorLongitude.X}" Margin="0,-11,0,0">
+                                    <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitude" IsCaptured="{Binding IndicatorLongitude.IsCaptured}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="{x:Static const:Constants.LongitudeIndicatorHeight}" Cursor="Hand" Stretch="None" Canvas.Left="{Binding IndicatorLongitude.X}" Margin="0,-11,0,0" Visibility="{Binding IndicatorLongitude.IsVisible}">
                                         <!-- Trigger -->
                                         <i:Interaction.Triggers>
                                             <!--PreviewMouseDown : Image 영역에서 MouseDown 할 경우, Indicator 동작 가능 상태로 변경 -->
@@ -647,57 +702,92 @@
                                         </i:Interaction.Triggers>
                                     </component:IndicatorImage>
                                 </Canvas>
-                            </StackPanel>
 
-                            <!-- Measurement -->
-                            <Grid>
-                                <annotation:DrawLmodeUtil Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" LModeLengthGeometries="{Binding LModeLengthGeometries}" LModeTextGeometries="{Binding LModeTextGeometries}" LModeIndicatorX="{Binding LModeIndicatorX, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorLongitude.IsMoving}" IsEnabled="{Binding IndicatorLongitude.IsMoving}"/>
+                                <!-- Measurement -->
+                                <Grid>
+                                    <annotation:DrawLmodeUtil Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" LModeLengthGeometries="{Binding LModeLengthGeometries}" LModeTextGeometries="{Binding LModeTextGeometries}" LModeIndicatorX="{Binding LModeIndicatorX, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorLongitude.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorLongitude.IsCaptured, Converter={StaticResource InverseBooleanConverter}}"/>
+                                </Grid>
                             </Grid>
+
+                            <!-- Bookmark Scale -->
+                            <Border Grid.Row="2" CornerRadius="0,0,8,8" Background="{DynamicResource BackgroundBrush}">
+                                <Grid >
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale}}"/>
+                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale}}"/>
+                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale}}"/>
+                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale}}"/>
+                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale}}"/>
+                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale}}"/>
+                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale}}"/>
+                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale}}"/>
+                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale}}"/>
+                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale}}"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="1" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
+                                    <StackPanel Grid.Column="2" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
+                                    <StackPanel Grid.Column="3" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
+                                    <StackPanel Grid.Column="4" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
+                                    <StackPanel Grid.Column="5" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
+                                    <StackPanel Grid.Column="6" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
+                                    <StackPanel Grid.Column="7" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
+                                    <StackPanel Grid.Column="8" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
+                                    <StackPanel Grid.Column="9" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
+                                </Grid>
+                            </Border>
                         </Grid>
-                        
-                        <!-- Bookmark Scale -->
-                        <Border Grid.Row="2" CornerRadius="0,0,8,8" Background="{DynamicResource BackgroundBrush}">
-                            <Grid >
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale}}"/>
-                                    <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale}}"/>
-                                    <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale}}"/>
-                                    <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale}}"/>
-                                    <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale}}"/>
-                                    <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale}}"/>
-                                    <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale}}"/>
-                                    <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale}}"/>
-                                    <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale}}"/>
-                                    <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale}}"/>
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="1" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                <StackPanel Grid.Column="2" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                <StackPanel Grid.Column="3" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                <StackPanel Grid.Column="4" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                <StackPanel Grid.Column="5" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                <StackPanel Grid.Column="6" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                <StackPanel Grid.Column="7" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                <StackPanel Grid.Column="8" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                <StackPanel Grid.Column="9" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                            </Grid>
-                        </Border>
                     </Grid>
                 </Grid>
+
+                <!-- Bookmark -->
+                <Grid Grid.Row="3">
+                    <annotation:BookmarkUtil Bookmarks="{Binding Bookmarks}" BookmarkFrameNumber="{Binding FrameNumber}" BookmarkLongitudeX="{Binding IndicatorLongitude.CenterX}" BookmarkOutFrameNumber="{Binding OutFrameNumber, Mode=TwoWay}"/>
+                </Grid>
             </Grid>
-            
-            <!-- Bookmark -->
-            <Grid Grid.Row="3">
-                <annotation:BookmarkUtil Bookmarks="{Binding Bookmarks}" BookmarkFrameNumber="{Binding FrameNumber}" BookmarkLongitudeX="{Binding IndicatorLongitude.CenterX}" BookmarkOutFrameNumber="{Binding OutFrameNumber, Mode=TwoWay}"/>
+
+            <Grid Grid.Row="2" Height="40" Background="#0d0d0d">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" >
+                    <Button Style="{StaticResource OutlinedBtnType1-Small-Wide}" Command="{Binding NewRecordingCommand}" Content="{Binding [New Recording], Source={StaticResource L10N}}"/>
+                    <StackPanel Width="8"/>
+                    <Button Style="{StaticResource OutlinedBtnType1-Small-Medium}" Command="{Binding EndReviewCommand}" Content="{Binding [End Review], Source={StaticResource L10N}}"/>
+                    <StackPanel Width="16"/>
+                </StackPanel>
             </Grid>
         </Grid>
 
-        <Grid Grid.Row="2" Height="40" Background="#0d0d0d">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" >
-                <Button Style="{StaticResource OutlinedBtnType1-Small-Wide}" Command="{Binding NewRecordingCommand}" Content="{Binding [New Recording], Source={StaticResource L10N}}"/>
-                <StackPanel Width="8"/>
-                <Button Style="{StaticResource OutlinedBtnType1-Small-Medium}" Command="{Binding EndReviewCommand}" Content="{Binding [End Review], Source={StaticResource L10N}}"/>
-                <StackPanel Width="16"/>
-            </StackPanel>
-        </Grid>
+        <component:IndicatorAreaGrid Style="{DynamicResource IndicatorAreaGrid}" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Visibility="{Binding IndicatorCrossSection.IsVisible}">
+            <i:Interaction.Behaviors>
+                <behaviors:MouseBehavior MouseX="{Binding IndicatorCrossSection.X, Mode=OneWayToSource}" MouseY="{Binding IndicatorCrossSection.Y, Mode=OneWayToSource}" />
+            </i:Interaction.Behaviors>
+
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="MouseLeave" >
+                    <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="PreviewMouseUp" >
+                    <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="PreviewMouseMove" >
+                    <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </component:IndicatorAreaGrid>
+        <component:IndicatorAreaGrid Style="{DynamicResource IndicatorAreaGrid}" IsCaptured="{Binding IndicatorLongitude.IsCaptured}" Visibility="{Binding IndicatorLongitude.IsVisible}">
+            <i:Interaction.Behaviors>
+                <behaviors:MouseBehavior MouseX="{Binding PointLongitudeX, Mode=OneWayToSource}"/>
+            </i:Interaction.Behaviors>
+            
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="MouseLeave" >
+                    <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="PreviewMouseUp" >
+                    <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="PreviewMouseMove" >
+                    <i:InvokeCommandAction Command="{Binding CmdMoveIndicator}" CommandParameter="{Binding IndicatorLongitude}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </component:IndicatorAreaGrid>
     </Grid>
 </Page>

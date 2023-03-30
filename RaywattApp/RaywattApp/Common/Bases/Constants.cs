@@ -227,6 +227,15 @@ namespace RaywattApp.Common.Bases
         //Review - 2D - Cross Section
         public const double CrossSectionSize = 620;
         public const double CrossSectionCenter = CrossSectionSize / 2;
+        public const double CalciumIndicatorSize = 645;
+        public const double CalciumThicknessIndicatorSize = 681;
+        public const double CalciumThicknessIndicatorCenter = CalciumThicknessIndicatorSize / 2;
+        public const int CalciumIndicatorColor = 0x57FEEB;
+
+        //Review - 2D - Angio
+        public const double AngioSize = 580;
+        public const double CrossSectionAngio = 292;
+        public const double CrossSectionAngioCenter = CrossSectionAngio / 2;
 
         //Review - 2D - Longitude
         public const double LongitudeWidth = 1140;
@@ -262,7 +271,17 @@ namespace RaywattApp.Common.Bases
         public const string MeasureDsbText = "DT";
 
         //Draw Annotation
-        public static Brush[] AnnotationBrushes = { Brushes.Red, Brushes.Orange, Brushes.Yellow, Brushes.Green, Brushes.Blue, Brushes.Navy, Brushes.Purple };
+        public static Brush[] AnnotationBrushes = {
+            new SolidColorBrush(Color.FromRgb(0xEE, 0x6C, 0x4F)),
+            new SolidColorBrush(Color.FromRgb(0xF7, 0xC9, 0x61)),
+            new SolidColorBrush(Color.FromRgb(0x47, 0x4F, 0xEB)),
+            new SolidColorBrush(Color.FromRgb(0xE9, 0x8C, 0x33)),
+            new SolidColorBrush(Color.FromRgb(0x56, 0xBD, 0x7C)),
+            new SolidColorBrush(Color.FromRgb(0x21, 0x24, 0x83)),
+            new SolidColorBrush(Color.FromRgb(0xF3, 0xAB, 0x97)),
+            new SolidColorBrush(Color.FromRgb(0x3D, 0x85, 0x51)),
+            new SolidColorBrush(Color.FromRgb(0xA9, 0xA9, 0xF9))
+        };
         public static DashStyle AnnotationDashLarge = new DashStyle(new double[] { 7, 7 }, 0);
         public static DashStyle AnnotationDashSmall = new DashStyle(new double[] { 2, 5 }, 0);
         public const double AnnotationTextPointSize = 6;

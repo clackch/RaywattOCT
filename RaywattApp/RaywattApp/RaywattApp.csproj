@@ -13,6 +13,10 @@
     <None Remove="res\bar\indicator2.png" />
     <None Remove="res\icon\recordingBar.svg" />
     <None Remove="res\icon\test.png" />
+    <None Remove="res\indicator\crossSection.svg" />
+    <None Remove="res\indicator\crossSectionAngio.svg" />
+    <None Remove="res\indicator\crossSectionAngio_hover.svg" />
+    <None Remove="res\indicator\crossSection_hover.svg" />
   </ItemGroup>
 
   <ItemGroup>
@@ -433,6 +437,9 @@
     <None Update="res\icon\import_hover.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="res\icon\indicator.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="res\icon\length.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -619,6 +626,9 @@
     <None Update="res\icon\text_hover.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="res\icon\thicknessIndicator.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="res\icon\valueInfo.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -665,6 +675,18 @@
 
   <ItemGroup>
     <Resource Include="res\bar\indicator.png" />
+    <Resource Include="res\indicator\crossSection.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="res\indicator\crossSectionAngio.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="res\indicator\crossSectionAngio_hover.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="res\indicator\crossSection_hover.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="res\indicator\longitude_hover.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
