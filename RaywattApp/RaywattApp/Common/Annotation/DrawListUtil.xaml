@@ -33,7 +33,7 @@
                     <DataGridTemplateColumn Width="22.2" CellStyle="{StaticResource DataGridCellMeasurementDelete}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Button Style="{DynamicResource DataGridDelete}" Click="delete_Area" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}, Path=CurrentItem}"/>
+                                <Button Style="{DynamicResource DataGridDeleteMeasurement}" Click="delete_Area" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}, Path=CurrentItem}"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -50,7 +50,7 @@
                     <DataGridTemplateColumn Width="31" CellStyle="{StaticResource DataGridCellMeasurementDelete}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Button Style="{DynamicResource DataGridDelete}" Click="delete_Length" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}, Path=CurrentItem}" Content="X"/>
+                                <Button Style="{DynamicResource DataGridDeleteMeasurement}" Click="delete_Length" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}, Path=CurrentItem}" Content="X"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -69,7 +69,7 @@
                     <DataGridTemplateColumn Width="31" CellStyle="{StaticResource DataGridCellMeasurementDelete}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Button Style="{DynamicResource DataGridDelete}" Click="delete_LModeLength" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}, Path=CurrentItem}" Content="X"/>
+                                <Button Style="{DynamicResource DataGridDeleteMeasurement}" Click="delete_LModeLength" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}, Path=CurrentItem}"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

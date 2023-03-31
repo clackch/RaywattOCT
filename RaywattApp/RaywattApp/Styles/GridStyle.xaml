@@ -956,6 +956,18 @@
         </Setter>
     </Style>
 
+    <Style TargetType="Button" x:Key="DataGridDeleteMeasurement">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid Background="Transparent"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- Paging -->
     <Style TargetType="Button" x:Key="PagingSelectedNo" BasedOn="{StaticResource Pretendard-Medium-14}">
         <Setter Property="Width" Value="26"/>
