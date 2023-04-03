@@ -173,7 +173,7 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 		pImaging->Process(pBuffer);
 
 		pCutView->AddRecord(pImaging->GetCircleImage(), nFrame);
-		pSession->m_pMsg->postMessage(WM_PROCESS_CUTVIEW, nSession, nFrame + 1);
+		pSession->m_pMsg->postMessage(WM_PROCESS_CUTVIEW, nSession, nFrame);
 	}
 	delete pImaging;
 

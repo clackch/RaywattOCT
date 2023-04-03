@@ -594,7 +594,8 @@ RayError COCTSystem::SetDegree(double value) {
 		if (pCutView != nullptr) {
 			int nFrames = pCutView->GetNumOfGeneratedSamples();
 			if (nFrames > 0) {
-				this->postMessage(WM_PROCESS_CUTVIEW, SESSION_REVIEW, nFrames);
+				int nCurFrame = nFrames - 1;
+				this->postMessage(WM_PROCESS_CUTVIEW, SESSION_REVIEW, nCurFrame);
 			}
 		}
 	}
@@ -1219,16 +1220,15 @@ LRESULT COCTSystem::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 */
 LRESULT COCTSystem::OnMsgProcessCutView(WPARAM wParam, LPARAM lParam) {
 	int nSession = wParam;
-	int nDrawSamples = lParam;
+	int nDrawSamples = lParam + 1;
 
 	CCutViewManager* pCutView = m_reviewSession[nSession]->GetCutView();
 
 	pCutView->GenerateCutView(m_fDegree);
 	cv::Mat imgCutView = pCutView->DrawLongitudeImage(nDrawSamples);
 
-	int nCurFrame = nDrawSamples + 1;
 	int nTotalFrame = pCutView->GetNumOfSamples();
-	int nFrameInfo = (nCurFrame << 16) | (nTotalFrame);
+	int nFrameInfo = (nDrawSamples << 16) | (nTotalFrame);
 
 	if (m_cbLongitude != nullptr) m_cbLongitude(nSession, imgCutView.data, imgCutView.cols, imgCutView.rows, imgCutView.channels(), nFrameInfo);
 
