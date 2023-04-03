@@ -1,13 +1,25 @@
-﻿using log4net;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using log4net;
+using RaywattApp.Common.Bases;
 using RaywattApp.Common.Setting;
-using RaywattApp.Models;
+using RaywattApp.Common.Util;
+using System.IO;
 using System.Windows.Navigation;
 
 namespace RaywattApp.ViewModels.Setting
 {
-    public class SettingDatabaseViewModel : SettingBase
+    public partial class SettingDatabaseViewModel : SettingBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(SettingDatabaseViewModel));
+
+        [ObservableProperty]
+        private double _dbProgress;
+
+        [ObservableProperty]
+        public double _dbTotalSize;
+
+        [ObservableProperty]
+        public double _dbAvailableFreeSpace;
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
@@ -18,6 +30,8 @@ namespace RaywattApp.ViewModels.Setting
             if (extraData != null)
             {
             }
+
+            GetDbSize();
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -28,11 +42,31 @@ namespace RaywattApp.ViewModels.Setting
         protected override void Okay()
         {
             _log.Debug("Okay");
+
+            CloseDialog();
         }
 
         protected override void Apply()
         {
             _log.Debug("Apply");
+        }
+
+        private void GetDbSize()
+        {
+            string configDrive = Constants.SystemRootPath + "\\";
+
+            DriveInfo[] allDrives = DriveInfo.GetDrives();
+            foreach (DriveInfo drive in allDrives)
+            {
+                if (drive.Name.Equals(configDrive))
+                {
+                    DbTotalSize = CommonUtil.ByteToGB(drive.TotalSize);
+                    DbAvailableFreeSpace = CommonUtil.ByteToGB(drive.AvailableFreeSpace);
+                    break;
+                }
+            }
+
+            DbProgress = DbAvailableFreeSpace / DbTotalSize * 100;
         }
     }
 }

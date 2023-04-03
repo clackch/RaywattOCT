@@ -42,8 +42,8 @@
                     <Label Style="{DynamicResource Pretendard-Medium-14}" MinWidth="52" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [Loading], Source={StaticResource L10N}}"/>
                 </StackPanel>
                 <StackPanel VerticalAlignment="Center" Margin="200,0,0,0">
-                    <Button Command="{Binding CatheterFailTestCommmand}" Width="100" Height="15" FontSize="9" Content="Catheter Fail"/>
-                    <Button Command="{Binding CatheterConnectTestCommmand}" Width="100" Height="15" FontSize="9" Content="Catheter Connect"/>
+                    <Button Style="{DynamicResource OutlinedBtnType1}" Command="{Binding CatheterFailTestCommmand}" Width="100" Height="15" FontSize="9" Content="Catheter Fail"/>
+                    <Button Style="{DynamicResource OutlinedBtnType1}" Command="{Binding CatheterConnectTestCommmand}" Width="100" Height="15" FontSize="9" Content="Catheter Connect"/>
                 </StackPanel>
             </StackPanel>
         </Grid>

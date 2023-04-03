@@ -43,7 +43,7 @@
             </StackPanel>
 
             <StackPanel Grid.Row="3" Grid.Column="1">
-                <ComboBox Style="{DynamicResource ComboBoxDialog}" Width="800" ItemsSource="{Binding ExternalDriveComboBox}" SelectedValue="{Binding SelectedExternalDrive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectedValuePath="Key" DisplayMemberPath="Value" IsEnabled="{Binding IsEnableExternalDrive}" Tag="{Binding [Enter an external device], Source={StaticResource L10N}}"/>
+                <ComboBox Style="{DynamicResource ComboBoxDialog}" Width="800" ItemsSource="{Binding ExternalDriveComboBox}" SelectedValue="{Binding SelectedExternalDrive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectedValuePath="Key" DisplayMemberPath="Value" IsEnabled="{Binding IsEnableExternalDrive}" Tag="{Binding [No Drive], Source={StaticResource L10N}}"/>
             </StackPanel>
 
             <TreeView Grid.Row="4" Grid.Column="1" Style="{DynamicResource TreeViewImport}" ItemsSource="{Binding DirItems}">

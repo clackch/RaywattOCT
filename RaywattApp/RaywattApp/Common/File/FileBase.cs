@@ -1,8 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using log4net;
 using RaywattApp.Common.Bases;
-using RaywattApp.Common.Dialog;
 using RaywattApp.Views.Dialog;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 
@@ -51,17 +51,10 @@ namespace RaywattApp.Common.File
 
         protected void CloseDialog()
         {
-            foreach (var winCollection in Application.Current.Windows)
+            DialogWindow? dialog = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive) as DialogWindow;
+            if (dialog != null)
             {
-                if (winCollection.GetType() == typeof(DialogWindow))
-                {
-                    if ("fileDialogControl".Equals(((winCollection as DialogWindow).Content as FileDialogControl).Name))
-                    {
-                        var dialog = (DialogWindow)winCollection;
-                        dialog.DialogResult = true;
-                        break;
-                    }
-                }
+                dialog.DialogResult = true;
             }
         }
 

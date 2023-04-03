@@ -5,6 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:RaywattApp.Views.Setting"
       xmlns:const="clr-namespace:RaywattApp.Common.Bases"
+      xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
       mc:Ignorable="d" 
       Width="{x:Static const:Constants.SettingInsideDialogWidth}" Height="{x:Static const:Constants.SettingInsideDialogHeight}"
       Title="SettingDatabasePage">
@@ -17,12 +18,41 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0" CornerRadius="10" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray8Brush}">
-
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="28,0,28,0">
+                    <Image Source="{svgc:SvgImage Source=/res/icon/drive_fold.svg}" Width="100"/>
+                    <StackPanel Width="50"/>
+                    <ProgressBar Value="{Binding DbProgress}" Width="376" Height="70"/>
+                </StackPanel>
+                <Grid Grid.Row="1" Margin="178,0,28,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Total], Source={StaticResource L10N}}"/>
+                        <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding DbTotalSize}"/>
+                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [GB], Source={StaticResource L10N}}" Margin="5,0,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Free], Source={StaticResource L10N}}"/>
+                        <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding DbAvailableFreeSpace}"/>
+                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [GB], Source={StaticResource L10N}}" Margin="5,0,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Grid>
         </Border>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding ApplyCommand}" Content="{Binding [Apply], Source={StaticResource L10N}}"/>
-            <StackPanel Width="16"/>
             <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding OkayCommand}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
         </StackPanel>
     </Grid>

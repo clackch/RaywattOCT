@@ -6,8 +6,6 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
 using RaywattApp.Common.Bases;
-using RaywattApp.Views.Dialog;
-using System.Windows;
 
 namespace RaywattApp.ViewModels.Dialog
 {
@@ -37,7 +35,7 @@ namespace RaywattApp.ViewModels.Dialog
         private ICommand _cancelCommand;
         public ICommand CancelCommand
         {
-            get { return this._cancelCommand ?? (this._cancelCommand = new RelayCommand(Cancel)); }
+            get { return this._cancelCommand ?? (this._cancelCommand = new RelayCommand<IDialogWindow>(Cancel)); }
         }
 
         public SettingDialogViewModel()
@@ -70,26 +68,13 @@ namespace RaywattApp.ViewModels.Dialog
             WeakReferenceMessenger.Default.Send(new PopupNavigationMessage("Refresh"));
         }
 
-        private void Cancel()
+        private void Cancel(IDialogWindow dialog)
         {
             _log.Debug("Cancel");
 
-            CloseDialog();
-        }
-
-        protected void CloseDialog()
-        {
-            foreach (var winCollection in Application.Current.Windows)
+            if (dialog != null)
             {
-                if (winCollection.GetType() == typeof(DialogWindow))
-                {
-                    if ("settingDialogControl".Equals(((winCollection as DialogWindow).Content as SettingDialogControl).Name))
-                    {
-                        var dialog = (DialogWindow)winCollection;
-                        dialog.DialogResult = true;
-                        break;
-                    }
-                }
+                dialog.DialogResult = true;
             }
         }
     }
