@@ -42,13 +42,12 @@
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="260"/>
-                    <ColumnDefinition Width="9"/>
-                    <ColumnDefinition/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <Label Grid.Row="0" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Accession Number], Source={StaticResource L10N}}"/>
                 <Label Grid.Row="0" Grid.Column="2" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Comment], Source={StaticResource L10N}}"/>
-                <!-- Design Guide : 260 / 532 (border 2 pixel) -->
-                <TextBox Grid.Row="2" Grid.Column="0" Width="258" Height="54" Style="{DynamicResource TextBoxBase}" Text="{Binding PatientCase.AccessionNumber, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBox Grid.Row="2" Grid.Column="0" Width="260" Height="54" Style="{DynamicResource TextBoxBase}" Text="{Binding PatientCase.AccessionNumber, UpdateSourceTrigger=PropertyChanged}"/>
                 <TextBox Grid.Row="2" Grid.Column="2" Width="530" Height="54" Style="{DynamicResource TextBoxBase}" Text="{Binding PatientCase.Comment, UpdateSourceTrigger=PropertyChanged}"/>
             </Grid>
             <StackPanel Height="40"/>
