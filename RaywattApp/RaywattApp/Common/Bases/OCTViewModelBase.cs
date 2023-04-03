@@ -60,6 +60,11 @@ namespace RaywattApp.Common.Bases
         /// </summary>
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
+            double isPaused = RayGetProperty(Property.IsPaused);
+            if (isPaused == 0)
+            { 
+                RayPlayPause();
+            }
             RayUnregisterImageCallback();
         }
 
