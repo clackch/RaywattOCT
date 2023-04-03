@@ -5,7 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RaywattApp.Views.Dialog"
              xmlns:const="clr-namespace:RaywattApp.Common.Bases"
-             mc:Ignorable="d" >
+             mc:Ignorable="d"
+             Width="{Binding DialogWidth}" Height="{Binding DialogHeight}">
     <Border Width="{x:Static const:Constants.PatientCaseEditDialogWidth}"  Height="{x:Static const:Constants.PatientCaseEditDialogHeight}" CornerRadius="10,10,10,10" BorderThickness="0" BorderBrush="Transparent" Background="{DynamicResource GrayscaleGray6Brush}">
         <StackPanel Orientation="Vertical" Background="Transparent">
             <StackPanel Height="40"/>

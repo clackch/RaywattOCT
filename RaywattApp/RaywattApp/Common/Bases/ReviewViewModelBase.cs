@@ -137,7 +137,7 @@ namespace RaywattApp.Common.Bases
             parameter["physicianName"] = PatientCase.PhysicianName;
             parameter["accessionNumber"] = PatientCase.AccessionNumber;
             parameter["comment"] = PatientCase.Comment;
-            var result = _dialogService.OpenDialog(new EditCaseInfoDialogControl(), parameter);
+            var result = _dialogService.OpenDialog(new EditCaseInfoDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
             if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
             {
