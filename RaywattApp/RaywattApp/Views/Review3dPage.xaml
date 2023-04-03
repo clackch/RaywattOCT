@@ -404,6 +404,17 @@
                                 </i:EventTrigger>
                             </i:Interaction.Triggers>
                         </Image>
+                        <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="15,0,0,10">
+                            <StackPanel Orientation="Horizontal" Width="50">
+                                <Label Content="F : " Style="{DynamicResource Pretendard-Medium-10}" Foreground="{DynamicResource SideMenuTitleBrush}"/>
+                                <Label Content="{Binding DisplayFrameNumber}" Style="{DynamicResource Pretendard-Medium-10}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,17,10">
+                            <Separator Width="{Binding CrossSection3dScale}" Height="1"/>
+                            <StackPanel Height="2"/>
+                            <Label Content="1 mm" Style="{DynamicResource Pretendard-Medium-10}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
+                        </StackPanel>
 
                         <!-- Indicator  -->
                         <Grid>

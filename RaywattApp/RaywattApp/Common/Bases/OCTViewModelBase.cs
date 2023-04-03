@@ -32,6 +32,9 @@ namespace RaywattApp.Common.Bases
         protected double _crossSectionAngioScale = 60;
 
         [ObservableProperty]
+        private double _crossSection3dScale = 28;
+
+        [ObservableProperty]
         private BitmapSource _longitudeImage;
 
         protected Mat imgLongitude;
