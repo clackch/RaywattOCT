@@ -160,6 +160,32 @@ namespace RaywattApp.ViewModels
                 timerUpdateImage.Stop();
         }
 
+        protected override void Save()
+        {
+            _log.Debug("Save");
+
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = PatientCase.Id;
+            sqlParameters["physician_name"] = PatientCase.PhysicianName;
+            sqlParameters["accession_number"] = PatientCase.AccessionNumber;
+            sqlParameters["comment"] = PatientCase.Comment;
+            sqlParameters["vessel"] = PatientCase.Vessel;
+            sqlParameters["procedure"] = PatientCase.Procedure;
+            sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
+            sqlParameters["indicator_degree"] = PatientCase.IndicatorDegree;
+            sqlParameters["preset_name"] = PatientCase.PresetName;
+            sqlParameters["calcium_threshold"] = PatientCase.CalciumThreshold;
+            sqlParameters["expansion_calculation"] = PatientCase.ExpansionCalculation;
+            sqlParameters["expansion_threshold"] = PatientCase.ExpansionThreshold;
+            sqlParameters["apposition_threshold"] = PatientCase.AppositionThreshold;
+            sqlParameters["measurements"] = PatientCase.Measurements;
+            sqlParameters["bookmarks"] = PatientCase.Bookmarks;
+
+            int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
+            if (nRows == 0)
+                _log.Error("Update Error");
+        }
+
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {
             if (DrawCrossSectionImage())
