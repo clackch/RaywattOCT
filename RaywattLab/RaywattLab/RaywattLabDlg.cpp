@@ -478,7 +478,7 @@ LRESULT CRaywattLabDlg::OnMsgSaveCalibrationFrame(WPARAM wParam, LPARAM lParam) 
 	HANDLE hFile = CreateFile(
 		strFilePath, GENERIC_WRITE,
 		FILE_SHARE_READ, nullptr, CREATE_ALWAYS,
-		FILE_FLAG_NO_BUFFERING | FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
+		FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
 	if (hFile != INVALID_HANDLE_VALUE) {
 		DWORD dwBytesWrote = 0;
 		WriteFile(hFile, m_pFrameBuffer, nFrameSize, &dwBytesWrote, nullptr);
@@ -581,14 +581,12 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	m_pImagingRealtime = new CLabImaging(this);
 	m_pImagingRealtime->Initialize(m_strCurCalibration, BACKGROUND_FILEPATH);
 	m_pImagingRealtime->SetColor(m_chkImageHotColor);
-	m_pImagingRealtime->SetBackgroundColor(cv::Scalar(0, 0, 0));
 	m_pImagingRealtime->SetGoodClockRange(goodClockStart, goodClockEnd);
 	m_pImagingRealtime->Start();
 
 	m_pImagingSimulate = new CLabImaging(this);
 	m_pImagingSimulate->Initialize(m_strCurCalibration, BACKGROUND_FILEPATH);
 	m_pImagingSimulate->SetColor(m_chkImageHotColor);
-	m_pImagingSimulate->SetBackgroundColor(cv::Scalar(0, 0, 0));
 	m_pImagingSimulate->SetGoodClockRange(goodClockStart, goodClockEnd);
 	m_pImagingSimulate->Start();
 

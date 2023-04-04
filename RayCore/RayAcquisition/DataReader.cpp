@@ -36,7 +36,7 @@ int CDataReader::Initialize(tstring strDataFilePath) {
 	}
 
 	m_hFile = CreateFile(strDataFilePath.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING,
-		FILE_FLAG_NO_BUFFERING | FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+		FILE_FLAG_SEQUENTIAL_SCAN, NULL);
 
 	if (m_hFile != INVALID_HANDLE_VALUE) {
 		return m_nNumOfSamples;

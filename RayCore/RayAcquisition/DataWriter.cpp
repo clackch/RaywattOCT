@@ -44,7 +44,7 @@ void CDataWriter::StartSave(tstring strFilePath) {
 	m_hRecordingFile = CreateFile(
 		strFilePath.c_str(), GENERIC_WRITE,
 		FILE_SHARE_READ, NULL, CREATE_ALWAYS,
-		FILE_FLAG_NO_BUFFERING | FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+		FILE_FLAG_SEQUENTIAL_SCAN, NULL);
 }
 bool CDataWriter::WriteFrame(int nFrame) {
 	char* pBuffer = (char *) GetSample(nFrame);
