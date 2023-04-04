@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:svgc="http://sharpvectors.codeplex.com/svgc/">
+                    xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+                    xmlns:component="clr-namespace:RaywattApp.Views.Component">
 
     <!-- Button -->
     <Style TargetType="Button" x:Key="ButtonBase">
@@ -528,6 +529,41 @@
         </Setter>
     </Style>
 
+    <Style TargetType="ToggleButton" x:Key="IconToggleBtn-Small">
+        <Setter Property="Width" Value="32"/>
+        <Setter Property="Height" Value="20"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Grid>
+                        <Border x:Name="border" CornerRadius="8" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Background="{DynamicResource BackgroundBrush}" BorderThickness="2" BorderBrush="Transparent">
+                            <Grid Background="Transparent"/>
+                        </Border>
+                        <Image x:Name="icon" Source="{svgc:SvgImage Source=/res/button/toggle/small.svg}" Width="12" Height="12" HorizontalAlignment="Left" Margin="4"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="Transparent"/>
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/button/toggle/small.svg}"/>
+                            <Setter TargetName="icon" Property="HorizontalAlignment" Value="Left"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/button/toggle/small_disabled.svg}"/>
+                            <Setter TargetName="icon" Property="HorizontalAlignment" Value="Left"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="White"/>
+                            <Setter TargetName="border" Property="Opacity" Value="0.08"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/button/toggle/small_active.svg}"/>
+                            <Setter TargetName="icon" Property="HorizontalAlignment" Value="Right"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
     <Style TargetType="ToggleButton" x:Key="TabToggleBtn">
         <Setter Property="Width" Value="92"/>
@@ -535,7 +571,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToggleButton">
-                    <Grid>
+                    <Grid Background="Transparent">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="20"/>
                             <RowDefinition Height="21"/>
@@ -549,8 +585,11 @@
                             <Setter TargetName="text" Property="Foreground" Value="{DynamicResource TabMenuDefaultBrush}"/>
                             <Setter TargetName="separator" Property="Background" Value="Transparent"/>
                         </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="text" Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+                        </Trigger>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="text" Property="Foreground" Value="White"/>
+                            <Setter TargetName="text" Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
                             <Setter TargetName="separator" Property="Background" Value="{DynamicResource MainThemeBrush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -601,6 +640,42 @@
                             </MultiTrigger.Conditions>
                             <Setter TargetName="hoverBorder" Property="BorderBrush" Value="{DynamicResource AdditionalColor2Brush}"/>
                         </MultiTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type component:IconToggleButton}" x:Key="ToggleButtonWithText" BasedOn="{StaticResource Pretendard-Medium-14}">
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type component:IconToggleButton}">
+                    <Border CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray5Brush}">
+                        <StackPanel Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Image x:Name="icon" Source="{Binding IconDefault, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}" Height="20" Margin="10,0,0,0"/>
+                            <Label Content="{TemplateBinding Content}" VerticalAlignment="Center" Margin="6,0,0,0" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+                            <Grid Margin="8,0,8,0">
+                                <Border x:Name="hoverBorder" CornerRadius="8" Width="34" Height="22" Background="Transparent" BorderThickness="2" BorderBrush="Transparent"/>
+                                <Border x:Name="border" CornerRadius="8" Width="30" Height="18" Background="Transparent" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray5Brush}">
+                                    <Image x:Name="toggleIcon" Source="{svgc:SvgImage Source=/res/button/toggle/small.svg}" Width="12" Height="12" HorizontalAlignment="Left" Margin="2"/>
+                                </Border>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="toggleIcon" Property="Source" Value="{svgc:SvgImage Source=/res/button/toggle/small_disabled.svg}"/>
+                            <Setter TargetName="toggleIcon" Property="HorizontalAlignment" Value="Left"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="hoverBorder" Property="BorderBrush" Value="White"/>
+                            <Setter TargetName="hoverBorder" Property="Opacity" Value="0.08"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="toggleIcon" Property="Source" Value="{svgc:SvgImage Source=/res/button/toggle/small_active.svg}"/>
+                            <Setter TargetName="toggleIcon" Property="HorizontalAlignment" Value="Right"/>
+                        </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>

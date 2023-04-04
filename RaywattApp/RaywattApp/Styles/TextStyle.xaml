@@ -19,17 +19,17 @@
                         <TextBlock x:Name="text" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{TemplateBinding Content}" Foreground="{DynamicResource PreLabelForegroundBrush}" FontFamily="Pretendard" FontWeight="Medium" FontSize="14px"/>
                     </Grid>
                     <ControlTemplate.Triggers>
-                        <DataTrigger Binding="{Binding ElementName=text, Path=Text}" Value="Pre-PCI">
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=Content}" Value="Pre-PCI">
                             <Setter Property="Width" Value="79"/>
                             <Setter TargetName="border" Property="Background" Value="{DynamicResource PreLabelBackgroundBrush}"/>
                             <Setter TargetName="text" Property="Foreground" Value="{DynamicResource PreLabelForegroundBrush}"/>
                         </DataTrigger>
-                        <DataTrigger Binding="{Binding ElementName=text, Path=Text}" Value="Post-PCI">
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=Content}" Value="Post-PCI">
                             <Setter Property="Width" Value="86"/>
                             <Setter TargetName="border" Property="Background" Value="{DynamicResource PostLabelBackgroundBrush}"/>
                             <Setter TargetName="text" Property="Foreground" Value="{DynamicResource PostLabelForegroundBrush}"/>
                         </DataTrigger>
-                        <DataTrigger Binding="{Binding ElementName=text, Path=Text}" Value="Follow-Up">
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=Content}" Value="Follow-Up">
                             <Setter Property="Width" Value="93"/>
                             <Setter TargetName="border" Property="Background" Value="{DynamicResource FULabelBackgroundBrush}"/>
                             <Setter TargetName="text" Property="Foreground" Value="{DynamicResource FULabelForegroundBrush}"/>
