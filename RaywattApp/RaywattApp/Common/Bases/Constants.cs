@@ -264,6 +264,16 @@ namespace RaywattApp.Common.Bases
         public const string LongitudeProfile = "Profile";
         public const string LongitudeLMode = "LMode";
 
+        //Review - 3D - Cross Section
+        public const double CrossSectionSize3d = 180;
+        public const double CrossSectionCenter3d = CrossSectionSize3d / 2;
+
+        //Review - 3D - Longitude
+        public const double LongitudeWidth3d = 868;
+        public const double LongitudeHeight3d = 150;
+        public const double LongitudeScale3d = LongitudeWidth3d / 10;
+        public const double LongitudeIndicatorHeight3d = 161;
+
         //Measurement
         public const string MeasureDrawAll = "DR";
         public const string MeasureDeleAll = "DE";
