@@ -122,8 +122,6 @@ namespace RaywattApp.ViewModels
             IsStentOn = false;
             IsGuidewireOneOn = true;
             IsGuidewireTwoOn = false;
-
-            updatePlayPauseState();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -180,17 +178,10 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private void updatePlayPauseState()
-        {
-            double pauseState = RayGetProperty(Property.IsPaused);
-
-            IsPaused = (pauseState == 0);
-        }
-
         private void updateNavigator(int curFrame, int totalFrame)
         {
             double curPosition = (double)curFrame / (totalFrame - 1);
-            curPosition *= Constants.LongitudeWidth3d;
+            curPosition *= Constants.Longitude3dWidth;
             IndicatorLongitude.X = curPosition - Constants.LongitudeIndicatorWidth / 2;
             IndicatorLongitude.CenterX = curPosition;
         }
@@ -231,7 +222,7 @@ namespace RaywattApp.ViewModels
             {
                 double x = PointLongitudeX - longitudeCoordinate.X;
 
-                if (x >= 0 && x < Constants.LongitudeWidth3d)
+                if (x >= 0 && x < Constants.Longitude3dWidth)
                 {
                     indicator.X = x - Constants.LongitudeIndicatorWidth / 2;
                     setCurrentFrame(x);
@@ -264,7 +255,7 @@ namespace RaywattApp.ViewModels
 
         private void setCurrentFrame(double navigatorPosition)
         {
-            double curPosition = navigatorPosition / Constants.LongitudeWidth3d;
+            double curPosition = navigatorPosition / Constants.Longitude3dWidth;
 
             if (longitudeFrameInfo != null)
             {

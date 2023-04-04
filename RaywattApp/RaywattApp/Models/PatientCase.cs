@@ -119,8 +119,19 @@ namespace RaywattApp.Models
         [ObservableProperty]
         private int _expansionThreshold;
 
-        [ObservableProperty]
         private double _appositionThreshold;
+        public double AppositionThreshold
+        {
+            get { return _appositionThreshold; }
+            set
+            {
+                if (value >= 0.0 && value <= 1.0)
+                {
+                    _appositionThreshold = Math.Round(value, 2);
+                    OnPropertyChanged(nameof(AppositionThreshold));
+                }
+            }
+        }
 
         [ObservableProperty]
         private string? _measurements;

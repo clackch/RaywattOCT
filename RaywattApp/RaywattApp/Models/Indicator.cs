@@ -30,6 +30,8 @@ namespace RaywattApp.Models
 
         public bool OppositeCaptured = false;
 
+        public bool IsCompare = false;
+
         private ICommand _cmdSetCaptured;
 
         public Indicator()
