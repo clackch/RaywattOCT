@@ -248,6 +248,7 @@ namespace RaywattApp.Common.Bases
         //Review - 2D - Longitude
         public const double LongitudeWidth = 1140;
         public const double LongitudeHeight = 105;
+        public const double LongitudeImageClipHeight = LongitudeHeight + 10;
         public const double LongitudeScale = LongitudeWidth / 10;
         public const double LongitudeIndicatorWidth = 22;
         public const double LongitudeIndicatorHeight = 116;
@@ -272,6 +273,7 @@ namespace RaywattApp.Common.Bases
         //Review - 3D - Longitude
         public const double Longitude3dWidth = 868;
         public const double Longitude3dHeight = 150;
+        public const double Longitude3dImageClipHeight = Longitude3dHeight + 10;
         public const double Longitude3dScale = Longitude3dWidth / 10;
         public const double LongitudeIndicator3dHeight = 161;
 
