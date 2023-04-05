@@ -396,8 +396,8 @@ namespace RaywattApp.ViewModels
                 AnnotationConverter.ConvertFromJsonString(jsonAnnotation[0].ReturnString, out measurements, out lModeMeasurement);
 
                 Measurements = measurements;
-                LModeLengthGeometries = lModeMeasurement.LengthGeometries;
-                LModeTextGeometries = lModeMeasurement.TextGeometries;
+                LModeLengthGeometries = lModeMeasurement.LengthGeometries == null ? new ObservableCollection<LengthGeometry>() : lModeMeasurement.LengthGeometries; 
+                LModeTextGeometries = lModeMeasurement.TextGeometries == null ? new List<TextGeometry>() : lModeMeasurement.TextGeometries;
             }
 
             if (jsonAnnotation == null || jsonAnnotation.Count != 1 || String.IsNullOrEmpty(jsonAnnotation[0].ReturnString2))
