@@ -416,6 +416,22 @@
                             <Label Content="1 mm" Style="{DynamicResource Pretendard-Medium-10}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
                         </StackPanel>
 
+                        <!-- camera -->
+                        <Grid Width="214" Height="214" Background="Transparent">
+                            <Image Width="12" Height="9.6" Source="{svgc:SvgImage Source=/res/icon/camera.svg}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                            <Grid.RenderTransform>
+                                <RotateTransform CenterX="107" CenterY="107" Angle="{Binding CameraDegree}"/>
+                            </Grid.RenderTransform>
+                        </Grid>
+
+                        <!-- camera View Part -->
+                        <Grid Width="181" Height="181" Background="Transparent">
+                            <Image Width="91" Height="181" Source="{svgc:SvgImage Source=/res/icon/cameraViewPart.svg}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                            <Grid.RenderTransform>
+                                <RotateTransform CenterX="90.5" CenterY="90.5" Angle="{Binding CameraDegree}"/>
+                            </Grid.RenderTransform>
+                        </Grid>
+
                         <!-- Indicator  -->
                         <Grid>
                             <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Width="188" Icon="crossSectionAngio" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Cursor="Hand" Visibility="{Binding IndicatorCrossSection.IsVisible}">

@@ -57,8 +57,18 @@ namespace RaywattApp.ViewModels
         public double Degree
         {
             get { return degree; }
-            set { degree = value; OnPropertyChanged(nameof(Degree)); RaySetProperty(Property.LongitudeDegree, degree); }
+            set 
+            { 
+                degree = value; 
+                OnPropertyChanged(nameof(Degree)); 
+                RaySetProperty(Property.LongitudeDegree, degree);
+
+                CameraDegree = degree + 90;
+            }
         }
+
+        [ObservableProperty]
+        private double _cameraDegree;
 
         [ObservableProperty]
         private Indicator _indicatorCrossSection;
@@ -155,6 +165,7 @@ namespace RaywattApp.ViewModels
         {
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
+            Save();
 
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
@@ -172,6 +183,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["vessel"] = PatientCase.Vessel;
             sqlParameters["procedure"] = PatientCase.Procedure;
             sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
+            PatientCase.IndicatorDegree = Degree;
             sqlParameters["indicator_degree"] = PatientCase.IndicatorDegree;
             sqlParameters["preset_name"] = PatientCase.PresetName;
             sqlParameters["calcium_threshold"] = PatientCase.CalciumThreshold;
