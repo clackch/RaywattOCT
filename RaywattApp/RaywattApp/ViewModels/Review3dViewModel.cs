@@ -57,8 +57,18 @@ namespace RaywattApp.ViewModels
         public double Degree
         {
             get { return degree; }
-            set { degree = value; OnPropertyChanged(nameof(Degree)); RaySetProperty(Property.LongitudeDegree, degree); }
+            set 
+            { 
+                degree = value; 
+                OnPropertyChanged(nameof(Degree)); 
+                RaySetProperty(Property.LongitudeDegree, degree);
+
+                CameraDegree = degree + 90;
+            }
         }
+
+        [ObservableProperty]
+        private double _cameraDegree;
 
         [ObservableProperty]
         private Indicator _indicatorCrossSection;
@@ -122,8 +132,6 @@ namespace RaywattApp.ViewModels
             IsStentOn = false;
             IsGuidewireOneOn = true;
             IsGuidewireTwoOn = false;
-
-            updatePlayPauseState();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -157,9 +165,37 @@ namespace RaywattApp.ViewModels
         {
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
+            Save();
 
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
+        }
+
+        protected override void Save()
+        {
+            _log.Debug("Save");
+
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = PatientCase.Id;
+            sqlParameters["physician_name"] = PatientCase.PhysicianName;
+            sqlParameters["accession_number"] = PatientCase.AccessionNumber;
+            sqlParameters["comment"] = PatientCase.Comment;
+            sqlParameters["vessel"] = PatientCase.Vessel;
+            sqlParameters["procedure"] = PatientCase.Procedure;
+            sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
+            PatientCase.IndicatorDegree = Degree;
+            sqlParameters["indicator_degree"] = PatientCase.IndicatorDegree;
+            sqlParameters["preset_name"] = PatientCase.PresetName;
+            sqlParameters["calcium_threshold"] = PatientCase.CalciumThreshold;
+            sqlParameters["expansion_calculation"] = PatientCase.ExpansionCalculation;
+            sqlParameters["expansion_threshold"] = PatientCase.ExpansionThreshold;
+            sqlParameters["apposition_threshold"] = PatientCase.AppositionThreshold;
+            sqlParameters["measurements"] = PatientCase.Measurements;
+            sqlParameters["bookmarks"] = PatientCase.Bookmarks;
+
+            int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
+            if (nRows == 0)
+                _log.Error("Update Error");
         }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
@@ -180,17 +216,10 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private void updatePlayPauseState()
-        {
-            double pauseState = RayGetProperty(Property.IsPaused);
-
-            IsPaused = (pauseState == 0);
-        }
-
         private void updateNavigator(int curFrame, int totalFrame)
         {
             double curPosition = (double)curFrame / (totalFrame - 1);
-            curPosition *= Constants.LongitudeWidth3d;
+            curPosition *= Constants.Longitude3dWidth;
             IndicatorLongitude.X = curPosition - Constants.LongitudeIndicatorWidth / 2;
             IndicatorLongitude.CenterX = curPosition;
         }
@@ -231,7 +260,7 @@ namespace RaywattApp.ViewModels
             {
                 double x = PointLongitudeX - longitudeCoordinate.X;
 
-                if (x >= 0 && x < Constants.LongitudeWidth3d)
+                if (x >= 0 && x < Constants.Longitude3dWidth)
                 {
                     indicator.X = x - Constants.LongitudeIndicatorWidth / 2;
                     setCurrentFrame(x);
@@ -264,7 +293,7 @@ namespace RaywattApp.ViewModels
 
         private void setCurrentFrame(double navigatorPosition)
         {
-            double curPosition = navigatorPosition / Constants.LongitudeWidth3d;
+            double curPosition = navigatorPosition / Constants.Longitude3dWidth;
 
             if (longitudeFrameInfo != null)
             {

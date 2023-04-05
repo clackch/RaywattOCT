@@ -212,6 +212,7 @@ namespace RaywattApp.Common.Bases
         //Background Color
         public const int BackgroundColor = 0x161616;
         public const int CardBackgroundColor = 0x232323;
+        public const int CompareBackgroundColor = 0x0d0d0d;
 
         //Update Image Interval (msec)
         public const double UpdateImageInterval = 5;
@@ -265,14 +266,27 @@ namespace RaywattApp.Common.Bases
         public const string LongitudeLMode = "LMode";
 
         //Review - 3D - Cross Section
-        public const double CrossSectionSize3d = 180;
-        public const double CrossSectionCenter3d = CrossSectionSize3d / 2;
+        public const double CrossSection3dSize = 180;
+        public const double CrossSection3dCenter = CrossSection3dSize / 2;
 
         //Review - 3D - Longitude
-        public const double LongitudeWidth3d = 868;
-        public const double LongitudeHeight3d = 150;
-        public const double LongitudeScale3d = LongitudeWidth3d / 10;
-        public const double LongitudeIndicatorHeight3d = 161;
+        public const double Longitude3dWidth = 868;
+        public const double Longitude3dHeight = 150;
+        public const double Longitude3dScale = Longitude3dWidth / 10;
+        public const double LongitudeIndicator3dHeight = 161;
+
+        //Review - Compare - Cross Section
+        public const double CrossSectionCompareSize = 278;
+        public const double CrossSectionCompareCenter = CrossSectionCompareSize / 2;
+
+        //Review - Compare - Longitude
+        public const double LongitudeCompareWidth = 780;
+        public const double LongitudeCompareHeight = 170;
+        public const double LongitudeCompareScale = (LongitudeCompareWidth - 1) / 10;
+        public const double LongitudeIndicatorCompareHeight = 177;
+
+        //Review - Compare - Side Menu
+        public const double SelectPreCaseExpandSize = 460;
 
         //Measurement
         public const string MeasureDrawAll = "DR";

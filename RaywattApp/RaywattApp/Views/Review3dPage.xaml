@@ -333,7 +333,7 @@
                             </StackPanel>
                             <Border Grid.Row="0" Grid.Column="1" CornerRadius="8,8,0,0" Background="{DynamicResource AdditionalColor5Brush}">
                                 <Grid>
-                                    <Image x:Name="lMode" Source="{Binding LongitudeImage}" Width="{x:Static const:Constants.LongitudeWidth3d}" Height="{x:Static const:Constants.LongitudeHeight3d}" Stretch="Fill">
+                                    <Image x:Name="lMode" Source="{Binding LongitudeImage}" Width="{x:Static const:Constants.Longitude3dWidth}" Height="{x:Static const:Constants.Longitude3dHeight}" Stretch="Fill">
                                         <i:Interaction.Triggers>
                                             <i:EventTrigger EventName="Loaded">
                                                 <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
@@ -346,7 +346,7 @@
 
                                     <!-- L-Mode Indicator -->
                                     <Canvas>
-                                        <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitude3d" IsCaptured="{Binding IndicatorLongitude.IsCaptured}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="{x:Static const:Constants.LongitudeIndicatorHeight3d}" Cursor="Hand" Stretch="None" Canvas.Left="{Binding IndicatorLongitude.X}" Margin="0,-11,0,0" Visibility="{Binding IndicatorLongitude.IsVisible}">
+                                        <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitude3d" IsCaptured="{Binding IndicatorLongitude.IsCaptured}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="{x:Static const:Constants.LongitudeIndicator3dHeight}" Cursor="Hand" Stretch="None" Canvas.Left="{Binding IndicatorLongitude.X}" Margin="0,-11,0,0" Visibility="{Binding IndicatorLongitude.IsVisible}">
                                             <!-- Trigger -->
                                             <i:Interaction.Triggers>
                                                 <!--PreviewMouseDown : Image 영역에서 MouseDown 할 경우, Indicator 동작 가능 상태로 변경 -->
@@ -369,16 +369,16 @@
                             <Border Grid.Row="1" Grid.Column="1" CornerRadius="0,0,8,8" Background="{DynamicResource BackgroundBrush}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale3d}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale3d}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale3d}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale3d}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale3d}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale3d}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale3d}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale3d}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale3d}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.LongitudeScale3d}}"/>
+                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
+                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
+                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
+                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
+                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
+                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
+                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
+                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
+                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
+                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="1" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
                                     <StackPanel Grid.Column="2" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
@@ -394,7 +394,7 @@
                         </Grid>
                     </Grid>
                     <Grid Grid.Column="1" Background="{DynamicResource GrayscaleGray8Brush}">
-                        <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize3d}" Height="{x:Static const:Constants.CrossSectionSize3d}">
+                        <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSection3dSize}" Height="{x:Static const:Constants.CrossSection3dSize}">
                             <i:Interaction.Triggers>
                                 <i:EventTrigger EventName="Loaded">
                                     <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
@@ -415,6 +415,22 @@
                             <StackPanel Height="2"/>
                             <Label Content="1 mm" Style="{DynamicResource Pretendard-Medium-10}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
                         </StackPanel>
+
+                        <!-- camera -->
+                        <Grid Width="214" Height="214" Background="Transparent">
+                            <Image Width="12" Height="9.6" Source="{svgc:SvgImage Source=/res/icon/camera.svg}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                            <Grid.RenderTransform>
+                                <RotateTransform CenterX="107" CenterY="107" Angle="{Binding CameraDegree}"/>
+                            </Grid.RenderTransform>
+                        </Grid>
+
+                        <!-- camera View Part -->
+                        <Grid Width="181" Height="181" Background="Transparent">
+                            <Image Width="91" Height="181" Source="{svgc:SvgImage Source=/res/icon/cameraViewPart.svg}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                            <Grid.RenderTransform>
+                                <RotateTransform CenterX="90.5" CenterY="90.5" Angle="{Binding CameraDegree}"/>
+                            </Grid.RenderTransform>
+                        </Grid>
 
                         <!-- Indicator  -->
                         <Grid>

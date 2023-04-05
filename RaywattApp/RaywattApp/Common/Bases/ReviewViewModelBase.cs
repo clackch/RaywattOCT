@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
+using Newtonsoft.Json;
 using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
@@ -186,6 +187,11 @@ namespace RaywattApp.Common.Bases
         private List<int> GetBookmarks()
         {
             List<int> bookmarks = new List<int>();
+
+            if(Constants.CurrentPage != Constants.ReviewPage)
+            {
+                Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(PatientCase.Bookmarks);
+            }
 
             foreach(Bookmark bookmark in Bookmarks)
             {
