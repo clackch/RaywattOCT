@@ -181,7 +181,7 @@ namespace RaywattApp.Common.Bases
             fileExport.BookmarkedFrames = GetBookmarks();
             parameter["fileExport"] = fileExport;
 
-            var result = _dialogService.OpenDialog(new FileDialogControl(), parameter);
+            var result = _dialogService.OpenDialog(new FileDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
         }
 
         private List<int> GetBookmarks()

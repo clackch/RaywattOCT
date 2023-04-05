@@ -425,10 +425,10 @@
                         </Grid>
 
                         <!-- camera View Part -->
-                        <Grid Width="181" Height="181" Background="Transparent">
-                            <Image Width="91" Height="181" Source="{svgc:SvgImage Source=/res/icon/cameraViewPart.svg}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                        <Grid Width="182" Height="182" Background="Transparent">
+                            <Image Width="91" Height="182" Source="{svgc:SvgImage Source=/res/icon/cameraViewPart.svg}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
                             <Grid.RenderTransform>
-                                <RotateTransform CenterX="90.5" CenterY="90.5" Angle="{Binding CameraDegree}"/>
+                                <RotateTransform CenterX="91" CenterY="91" Angle="{Binding CameraDegree}"/>
                             </Grid.RenderTransform>
                         </Grid>
 

@@ -6,15 +6,19 @@ namespace RaywattApp.Common.Converters
 {
     public class RadioButtonConverter : IValueConverter
     {
+        public bool TrueValue { get; set; } = true;
+
+        public bool FalseValue { get; set; } = false;
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value == null)
-                return false;
+                return FalseValue;
 
             if (value.ToString() == parameter.ToString())
-                return true;
+                return TrueValue;
             else
-                return false;
+                return FalseValue;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
