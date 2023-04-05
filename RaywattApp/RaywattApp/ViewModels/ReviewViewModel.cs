@@ -167,6 +167,7 @@ namespace RaywattApp.ViewModels
 
             IndicatorCrossSection = new Indicator();
             IndicatorCrossSection.IsVisible = Visibility.Collapsed;
+            IndicatorCrossSection.IsCrossSection = true;
 
             IndicatorLongitude = new Indicator();
             IndicatorLongitude.X = Constants.LongitudeIndicatorWidth / 2;
