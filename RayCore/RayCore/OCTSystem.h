@@ -58,7 +58,7 @@ private:
 
 	// Machine Learning
 	CRayLearning* m_pLearning;
-	std::vector<std::vector<std::vector<cv::Point>>> m_vLumen;
+	std::vector<std::vector<cv::Mat>> m_vLumen;
 
 	RayScannerState m_prevState;
 	RayScannerState m_curState;
@@ -105,6 +105,8 @@ public:
 	RayError CloseImage();
 	void* GetImageData(int nFrame);
 	void* GetLongitudeData(double fDegree);
+	void* GetLumenContour(int nFrame);
+	int GetNumOfLumenContourPoints(int nFrame);
 	
 	//Property
 	RayScannerState GetCurrentState() { return m_curState; }

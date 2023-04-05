@@ -533,6 +533,26 @@ void* COCTSystem::GetLongitudeData(double fDegree) {
 	return imgLongitude.data;
 }
 
+/*
+* GetLumenContour
+*/
+void* COCTSystem::GetLumenContour(int nFrame) {
+	if (m_vLumen.size() <= nFrame) return nullptr;
+
+	cv::Mat matContour = m_vLumen.at(nFrame).at(0);
+	return matContour.ptr();
+}
+
+/*
+* GetNumOfLumenContourPoints
+*/
+int COCTSystem::GetNumOfLumenContourPoints(int nFrame) {
+	if (m_vLumen.size() <= nFrame) return 0;
+
+	cv::Mat matContour = m_vLumen.at(nFrame).at(0);
+	return matContour.cols * matContour.rows;
+}
+
 
 /*
 * GetBrightness
@@ -869,7 +889,7 @@ UINT COCTSystem::threadGenerateVolume(LPVOID param) {
 UINT COCTSystem::threadLumenDetection(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	IDataManager* pDataManager = pSystem->m_reviewSession[SESSION_REVIEW]->GetDataManager();
-	std::vector<std::vector<std::vector<cv::Point>>>& vLumen = pSystem->m_vLumen;
+	std::vector<std::vector<cv::Mat>>& vLumen = pSystem->m_vLumen;
 
 	CRayLearning* pLearning = pSystem->m_pLearning;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
@@ -882,7 +902,17 @@ UINT COCTSystem::threadLumenDetection(LPVOID param) {
 		unsigned short* pBuffer = pDataManager->GetSample(nFrame);
 
 		pImaging->Process(pBuffer);
-		vLumen.push_back(pLearning->FindLumen(pImaging->GetCircleImage()));
+		std::vector<std::vector<cv::Point>> vContours = pLearning->FindLumen(pImaging->GetCircleImage());
+		std::vector<cv::Mat> vLumens;
+		for (int i = 0; i < vContours.size(); i++) {
+			std::vector<cv::Point> contour = vContours.at(i);
+			cv::Mat matContour(contour.size(), 1, CV_32SC2);
+			for (size_t row = 0; row < contour.size(); row++) {
+				matContour.at<cv::Point>(row, 0) = contour[row];
+			}
+			vLumens.push_back(matContour);
+		}
+		vLumen.push_back(vLumens);
 	}
 	delete pImaging;
 
