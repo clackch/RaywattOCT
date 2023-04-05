@@ -152,5 +152,9 @@ namespace RaywattOCT
         public static extern IntPtr RayGetImageData(int frame);
         [DllImport("RayCore.dll")]
         public static extern IntPtr RayGetLongitudeData(double degree);
+        [DllImport("RayCore.dll")]
+        public static extern IntPtr RayGetLumenContour(int nFrame);
+        [DllImport("RayCore.dll")]
+        public static extern int RayGetNumOfLumenContourPoints(int nFrame);
     }
 }

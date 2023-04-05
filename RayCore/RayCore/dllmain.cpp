@@ -152,6 +152,12 @@ _declspec(dllexport) void* RayGetImageData(int nFrame) {
 _declspec(dllexport) void* RayGetLongitudeData(double fDegree) {
     return octSystem.GetLongitudeData(fDegree);
 }
+_declspec(dllexport) void* RayGetLumenContour(int nFrame) {
+    return octSystem.GetLumenContour(nFrame);
+}
+_declspec(dllexport) int RayGetNumOfLumenContourPoints(int nFrame) {
+    return octSystem.GetNumOfLumenContourPoints(nFrame);
+}
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,

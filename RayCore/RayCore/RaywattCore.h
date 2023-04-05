@@ -39,4 +39,7 @@ extern "C" {
 	_declspec(dllexport) RayError RayCloseImage();
 	_declspec(dllexport) void *RayGetImageData(int nFrame);
 	_declspec(dllexport) void *RayGetLongitudeData(double fDegree);
+
+	_declspec(dllexport) void* RayGetLumenContour(int nFrame);
+	_declspec(dllexport) int RayGetNumOfLumenContourPoints(int nFrame);
 }
