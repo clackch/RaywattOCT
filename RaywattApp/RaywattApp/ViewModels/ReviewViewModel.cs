@@ -167,6 +167,7 @@ namespace RaywattApp.ViewModels
 
             IndicatorCrossSection = new Indicator();
             IndicatorCrossSection.IsVisible = Visibility.Collapsed;
+            IndicatorCrossSection.IsCrossSection = true;
 
             IndicatorLongitude = new Indicator();
             IndicatorLongitude.X = Constants.LongitudeIndicatorWidth / 2;
@@ -300,6 +301,12 @@ namespace RaywattApp.ViewModels
 
             if (indicator.IsCaptured)
             {
+                if (indicator.IsLongitudeClicked)
+                {
+                    indicator.IsLongitudeClicked = false;
+                    return;
+                }
+
                 double x = PointLongitudeX - longitudeCoordinate.X;
 
                 if (x >= 0 && x < Constants.LongitudeWidth)
@@ -396,8 +403,8 @@ namespace RaywattApp.ViewModels
                 AnnotationConverter.ConvertFromJsonString(jsonAnnotation[0].ReturnString, out measurements, out lModeMeasurement);
 
                 Measurements = measurements;
-                LModeLengthGeometries = lModeMeasurement.LengthGeometries;
-                LModeTextGeometries = lModeMeasurement.TextGeometries;
+                LModeLengthGeometries = lModeMeasurement.LengthGeometries == null ? new ObservableCollection<LengthGeometry>() : lModeMeasurement.LengthGeometries; 
+                LModeTextGeometries = lModeMeasurement.TextGeometries == null ? new List<TextGeometry>() : lModeMeasurement.TextGeometries;
             }
 
             if (jsonAnnotation == null || jsonAnnotation.Count != 1 || String.IsNullOrEmpty(jsonAnnotation[0].ReturnString2))

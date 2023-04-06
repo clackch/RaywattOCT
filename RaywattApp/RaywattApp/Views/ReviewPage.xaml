@@ -669,6 +669,13 @@
                                             <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
                                         </i:EventTrigger>
                                     </i:Interaction.Triggers>
+                                    <Image.Clip>
+                                        <RectangleGeometry RadiusX="8" RadiusY="8">
+                                            <RectangleGeometry.Rect>
+                                                <Rect X="0" Y="0" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeImageClipHeight}"/>
+                                            </RectangleGeometry.Rect>
+                                        </RectangleGeometry>
+                                    </Image.Clip>
                                 </Image>
                                 <!-- L-Mode -->
                                 <Image x:Name="lMode" Source="{Binding LongitudeImage}" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" Stretch="Fill" Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityReverseConverter}}">
@@ -680,6 +687,13 @@
                                             <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
                                         </i:EventTrigger>
                                     </i:Interaction.Triggers>
+                                    <Image.Clip>
+                                        <RectangleGeometry RadiusX="8" RadiusY="8">
+                                            <RectangleGeometry.Rect>
+                                                <Rect X="0" Y="0" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeImageClipHeight}"/>
+                                            </RectangleGeometry.Rect>
+                                        </RectangleGeometry>
+                                    </Image.Clip>
                                 </Image>
 
                                 <!-- L-Mode Indicator -->

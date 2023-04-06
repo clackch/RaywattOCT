@@ -89,17 +89,11 @@ namespace RaywattApp.Common.Annotation
             if (drawLmodeUtil == null || drawLmodeUtil.InCommand == null)
                 return;
 
-            if(drawLmodeUtil.lengthGeometries == null)
-                drawLmodeUtil.lengthGeometries = drawLmodeUtil.LModeLengthGeometries;
-
             if (drawLmodeUtil.lengthGeometries == null)
-                drawLmodeUtil.lengthGeometries = new ObservableCollection<LengthGeometry>();
+                drawLmodeUtil.lengthGeometries = drawLmodeUtil.LModeLengthGeometries;
 
             if (drawLmodeUtil.textGeometries == null)
                 drawLmodeUtil.textGeometries = drawLmodeUtil.LModeTextGeometries;
-
-            if (drawLmodeUtil.textGeometries == null)
-                drawLmodeUtil.textGeometries = new List<TextGeometry>();
 
             switch (drawLmodeUtil.InCommand.Substring(0, 2))
             {

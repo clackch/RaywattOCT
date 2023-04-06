@@ -9,7 +9,10 @@
     <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityReverseConverter" FalseValue="Visible" TrueValue="Collapsed" />
 
     <!-- Radio Button Converter -->
-    <converters:RadioButtonConverter x:Key="RadioButtonConverter" /> 
+    <converters:RadioButtonConverter x:Key="RadioButtonConverter" />
+
+    <!-- Radio Button Reverse Converter -->
+    <converters:RadioButtonConverter x:Key="RadioButtonReverseConverter" FalseValue="True" TrueValue="False"/>
 
     <!-- Paging No Indicator Converter -->
     <converters:PagingNoIndicatorConverter x:Key="PagingNoIndicatorConverter" />
