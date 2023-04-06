@@ -34,6 +34,8 @@ namespace RaywattApp.Models
 
         public bool IsCrossSection = false;
 
+        public bool IsLongitudeClicked = false;
+
         private ICommand _cmdSetCaptured;
 
         public Indicator()
@@ -53,6 +55,10 @@ namespace RaywattApp.Models
             {
                 X = double.NaN;
                 Y = double.NaN;
+            }
+            else
+            {
+                IsLongitudeClicked = true;
             }
             
             IsValid = false;

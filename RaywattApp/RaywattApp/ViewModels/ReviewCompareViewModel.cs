@@ -281,6 +281,12 @@ namespace RaywattApp.ViewModels
 
             if (indicator.IsCaptured)
             {
+                if (indicator.IsLongitudeClicked)
+                {
+                    indicator.IsLongitudeClicked = false;
+                    return;
+                }
+
                 double x = indicator.IsCompare ? PointCompareLongitudeX - longitudeCompareCoordinate.X : PointLongitudeX - longitudeCoordinate.X;                
 
                 if (x >= 0 && x < Constants.LongitudeCompareWidth)
