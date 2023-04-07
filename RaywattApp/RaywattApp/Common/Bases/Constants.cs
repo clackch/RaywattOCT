@@ -187,7 +187,7 @@ namespace RaywattApp.Common.Bases
         public const string PullbackTypeLong = "LONG";
         public const string PullbackTypeShort = "SHOR";
         public const int PullbackLongFrameCnt = 1000;
-        public const int PullbackShortFrameCnt = 500;
+        public const int PullbackShortFrameCnt = 700;
 
         //Not Selected
         public const string NotSelected = "Not Selected";

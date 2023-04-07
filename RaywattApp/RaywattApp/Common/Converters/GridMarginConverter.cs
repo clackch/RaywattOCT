@@ -1,4 +1,5 @@
-﻿using RaywattApp.Common.Bases;
+﻿using Newtonsoft.Json.Linq;
+using RaywattApp.Common.Bases;
 using System;
 using System.Globalization;
 using System.Windows;
@@ -6,11 +7,11 @@ using System.Windows.Data;
 
 namespace RaywattApp.Common.Converters
 {
-    internal class GridLengthConverter : IMultiValueConverter
+    internal class GridMarginConverter : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values == null || values[0] == null || values[1] == null) return new GridLength();
+            if(values == null || values[0] == null || values[1] == null) return new Thickness(0, 0, 0, 0);
 
             double dValue = 0;
 
@@ -21,12 +22,16 @@ namespace RaywattApp.Common.Converters
             else
             {
                 dValue = (double)values[1] / (Constants.PullbackShortFrameCnt / 100);
+            }            
 
-                if (parameter != null && (Constants.PullbackTypeLong.Equals(parameter.ToString())))
-                    dValue = 0;
+            if (parameter != null)
+            {
+                return new Thickness(0, 0, -1 * dValue, 0);
             }
-
-            return new GridLength(dValue);
+            else
+            {
+                return new Thickness(-1 * dValue, 0, 0, 0);
+            }
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)

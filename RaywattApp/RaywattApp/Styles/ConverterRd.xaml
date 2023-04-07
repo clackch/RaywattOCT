@@ -56,6 +56,9 @@
     <!-- Grid Length Converter -->
     <converters:GridLengthConverter x:Key="GridLengthConverter"/>
 
+    <!-- Grid Margin Converter -->
+    <converters:GridMarginConverter x:Key="GridMarginConverter"/>
+    
     <!-- DataGrid Sort Icon Converter -->
     <converters:DataGridSortIconConverter x:Key="DataGridSortIconConverter" />
 
