@@ -37,6 +37,7 @@ COCTSystem::COCTSystem() {
 	m_pAcqDevice = nullptr;	
 	m_pLearning = nullptr;
 
+	m_curSession = SESSION_UNKNOWN;
 	for (int i = 0; i < MAX_SESSION_NUM; i++) {
 		m_reviewSession[i] = nullptr;
 	}
@@ -391,13 +392,26 @@ RayError COCTSystem::StopLiveView()
 }
 
 /*
+* SetSession
+*/
+RayError COCTSystem::SetSession(int session) 
+{
+	if (session <= SessionType::SESSION_UNKNOWN || session >= SessionType::MAX_SESSION_NUM) return RayError::WrongSession;
+	if (m_reviewSession[session] == nullptr) return RayError::WrongSession;
+
+	m_curSession = (SessionType) session;
+
+	return RayError::OK;
+}
+
+/*
 * PlayPause
 */
 RayError COCTSystem::PlayPause()
 {
 	if (m_curState == RayScannerState::Review) {
 		bool isPaused = GetIsPaused();
-		m_reviewSession[SESSION_REVIEW]->SetPause(!isPaused);
+		m_reviewSession[m_curSession]->SetPause(!isPaused);
 
 		return RayError::OK;
 	}
@@ -413,7 +427,7 @@ RayError COCTSystem::PrevFrame()
 		if (!GetIsPaused())
 			return RayError::NotPaused;
 
-		m_reviewSession[SESSION_REVIEW]->PrevFrame();
+		m_reviewSession[m_curSession]->PrevFrame();
 
 		return RayError::OK;
 	}
@@ -429,7 +443,7 @@ RayError COCTSystem::NextFrame()
 		if (!GetIsPaused())
 			return RayError::NotPaused;
 
-		m_reviewSession[SESSION_REVIEW]->NextFrame();
+		m_reviewSession[m_curSession]->NextFrame();
 
 		return RayError::OK;
 	}
@@ -444,7 +458,7 @@ RayError COCTSystem::MoveToFrame(int nFrame) {
 		if (!GetIsPaused())
 			return RayError::NotPaused;
 
-		m_reviewSession[SESSION_REVIEW]->MoveToFrame(nFrame);
+		m_reviewSession[m_curSession]->MoveToFrame(nFrame);
 
 		return RayError::OK;
 	}
@@ -609,13 +623,13 @@ RayError COCTSystem::SetDegree(double value) {
 
 	m_fDegree = value;
 
-	if (m_reviewSession[SESSION_REVIEW] != nullptr) {
-		CCutViewManager *pCutView = m_reviewSession[SESSION_REVIEW]->GetCutView();
+	if (m_curSession != SESSION_UNKNOWN && m_reviewSession[m_curSession] != nullptr) {
+		CCutViewManager *pCutView = m_reviewSession[m_curSession]->GetCutView();
 		if (pCutView != nullptr) {
 			int nFrames = pCutView->GetNumOfGeneratedSamples();
 			if (nFrames > 0) {
 				int nCurFrame = nFrames - 1;
-				this->postMessage(WM_PROCESS_CUTVIEW, SESSION_REVIEW, nCurFrame);
+				this->postMessage(WM_PROCESS_CUTVIEW, m_curSession, nCurFrame);
 			}
 		}
 	}
@@ -678,9 +692,9 @@ bool COCTSystem::GetMotorOnOff()
 */
 bool COCTSystem::GetIsPaused()
 {
-	if (m_reviewSession[SESSION_REVIEW] == nullptr) return true;	// default state is paused
+	if (m_curSession == SESSION_UNKNOWN || m_reviewSession[m_curSession] == nullptr) return true;	// default state is paused
 
-	return m_reviewSession[SESSION_REVIEW]->IsPaused();
+	return m_reviewSession[m_curSession]->IsPaused();
 }
 
 /*
@@ -1278,6 +1292,7 @@ void COCTSystem::closeAllSessions() {
 			m_reviewSession[i] = nullptr;
 		}
 	}
+	m_curSession = SESSION_UNKNOWN;
 }
 /*
 * OnMsgUpdateScannerState
@@ -1378,6 +1393,7 @@ LRESULT COCTSystem::OnMsgStartReviewSession(WPARAM wParam, LPARAM lParam) {
 
 	m_reviewSession[nSession] = pSession;
 	m_reviewSession[nSession]->Start();
+	m_curSession = (SessionType) nSession;
 
 	return NOERROR;
 }

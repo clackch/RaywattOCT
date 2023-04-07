@@ -18,6 +18,7 @@ enum class RayError {
 	InvalidArgument,
 	WrongState,
 	NotPaused,
+	WrongSession,
 };
 
 enum class RayProperty {
@@ -67,4 +68,10 @@ enum class RayWorkItem {
 	LoadCatheter,
 	UnloadCatheter,
 	ValidateCatheter
+};
+
+enum class RaySession {
+	Unknown = -1,
+	Review,
+	Compare
 };

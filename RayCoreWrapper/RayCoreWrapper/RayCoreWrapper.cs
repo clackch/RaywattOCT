@@ -17,7 +17,8 @@ namespace RaywattOCT
             CatheterNotValid,
             InvalidArgument,
             WrongState,
-            NotPaused
+            NotPaused,
+            WrongSession
         };
 
         public enum Property : int
@@ -73,6 +74,13 @@ namespace RaywattOCT
             ValidateCatheter
         };
 
+        public enum RaySession : int
+        {  
+            Unknown = -1,
+            Review,
+            Compare
+        }
+
         public class FrameInfo {
             public int curFrame;
             public int totalFrame;
@@ -126,6 +134,8 @@ namespace RaywattOCT
         public static extern int RayStartLiveView();
         [DllImport("RayCore.dll")]
         public static extern int RayStopLiveView();
+        [DllImport("RayCore.dll")]
+        public static extern int RaySetSession(RaySession session);
         [DllImport("RayCore.dll")]
         public static extern int RayPlayPause();
         [DllImport("RayCore.dll")]

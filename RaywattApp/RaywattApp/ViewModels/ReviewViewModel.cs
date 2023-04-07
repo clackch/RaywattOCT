@@ -212,7 +212,8 @@ namespace RaywattApp.ViewModels
                 Degree = PatientCase.IndicatorDegree;
 
                 SetAnnotation(PatientCase.Id);
-                
+
+                RaySetSession(RaySession.Review);
                 RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);              
                 SetCrossSectionBackground(0, (ReviewStatus.IsAngioOn) ? Constants.CardBackgroundColor : Constants.BackgroundColor);
             }

@@ -25,6 +25,7 @@ extern "C" {
 	_declspec(dllexport) RayError RayStartReview(char *strFilePath);
 	_declspec(dllexport) RayError RayStartCompare(char* strFilePath);
 	_declspec(dllexport) RayError RayEndReview();
+	_declspec(dllexport) RayError RaySetSession(int session);
 	_declspec(dllexport) RayError RayPlayPause();
 	_declspec(dllexport) RayError RayPrevFrame();
 	_declspec(dllexport) RayError RayNextFrame();

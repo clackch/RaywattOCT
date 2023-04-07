@@ -59,6 +59,9 @@ _declspec(dllexport) RayError RayStartLiveView() {
 _declspec(dllexport) RayError RayStopLiveView() {
     return octSystem.StopLiveView();
 }
+_declspec(dllexport) RayError RaySetSession(int session) {
+    return octSystem.SetSession(session);
+}
 _declspec(dllexport) RayError RayPlayPause() {
     return octSystem.PlayPause();
 }

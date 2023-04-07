@@ -8,8 +8,8 @@
 #include <opencv2/opencv.hpp>
 
 typedef enum {
-	SESSION_UNKNOWN = -1,
-	SESSION_REVIEW = 0,	// RealTime, Review
+	SESSION_UNKNOWN = RaySession::Unknown,
+	SESSION_REVIEW,	// RealTime, Review
 	SESSION_COMPARE,
 	MAX_SESSION_NUM
 }SessionType;
@@ -53,6 +53,7 @@ private:
 	IAcquisitionDevice* m_pAcqDevice;
 
 	// Imaging Session (Review)
+	SessionType m_curSession;
 	CImagingSession* m_reviewSession[MAX_SESSION_NUM];
 	CImagingSession* m_openedSession;
 
@@ -94,6 +95,7 @@ public:
 	RayError EndReview();
 	RayError StartLiveView();
 	RayError StopLiveView();
+	RayError SetSession(int session);
 	RayError PlayPause();
 	RayError PrevFrame();
 	RayError NextFrame();
