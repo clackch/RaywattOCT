@@ -106,9 +106,9 @@
 
                                 </Border>
                                 <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                                    <component:IconToggleButton Style="{DynamicResource ToggleButtonWithText}" Icon="cutView" Content="{Binding [P to D], Source={StaticResource L10N}}" IsChecked="{Binding IsPtoD}"/>
+                                    <ToggleButton Style="{DynamicResource FlyThroughToggleBtn}" Content="{Binding [P to D], Source={StaticResource L10N}}" IsChecked="{Binding IsPtoD}"/>
                                     <StackPanel Width="6"/>
-                                    <component:IconToggleButton Style="{DynamicResource ToggleButtonWithText}" Icon="currentFrameIndicator3D" Content="{Binding [Side Branch View], Source={StaticResource L10N}}" IsChecked="{Binding IsSideBranchView}"/>
+                                    <component:IconToggleButton Style="{DynamicResource ToggleButtonWithText}" Icon="sideBranchView" Content="{Binding [Side Branch View], Source={StaticResource L10N}}" IsChecked="{Binding IsSideBranchView}"/>
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
