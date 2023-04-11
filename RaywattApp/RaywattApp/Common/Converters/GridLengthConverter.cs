@@ -10,7 +10,7 @@ namespace RaywattApp.Common.Converters
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values == null || values[0] == null || values[1] == null) return new GridLength();
+            if (values == null || values[0] == null || values[1] == null || values.Length != 2) return new GridLength();
 
             double dValue = 0;
 
