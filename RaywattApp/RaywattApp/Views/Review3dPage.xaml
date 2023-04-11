@@ -106,9 +106,9 @@
 
                                 </Border>
                                 <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                                    <component:IconToggleButton Style="{DynamicResource ToggleButtonWithText}" Icon="cutView" Content="{Binding [P to D], Source={StaticResource L10N}}" IsChecked="{Binding IsPtoD}"/>
+                                    <ToggleButton Style="{DynamicResource FlyThroughToggleBtn}" Content="{Binding [P to D], Source={StaticResource L10N}}" IsChecked="{Binding IsPtoD}"/>
                                     <StackPanel Width="6"/>
-                                    <component:IconToggleButton Style="{DynamicResource ToggleButtonWithText}" Icon="currentFrameIndicator3D" Content="{Binding [Side Branch View], Source={StaticResource L10N}}" IsChecked="{Binding IsSideBranchView}"/>
+                                    <component:IconToggleButton Style="{DynamicResource ToggleButtonWithText}" Icon="sideBranchView" Content="{Binding [Side Branch View], Source={StaticResource L10N}}" IsChecked="{Binding IsSideBranchView}"/>
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
@@ -371,31 +371,7 @@
                                     </component:IndicatorImage>
                                 </Canvas>
                             </Grid>
-                            <Border Grid.Row="1" Grid.Column="1" CornerRadius="0,0,8,8" Background="{DynamicResource BackgroundBrush}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel Grid.Column="1" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                    <StackPanel Grid.Column="2" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                    <StackPanel Grid.Column="3" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                    <StackPanel Grid.Column="4" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                    <StackPanel Grid.Column="5" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                    <StackPanel Grid.Column="6" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                    <StackPanel Grid.Column="7" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                    <StackPanel Grid.Column="8" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                    <StackPanel Grid.Column="9" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                </Grid>
-                            </Border>
+                            <ContentControl Grid.Row="1" Grid.Column="1" Template="{DynamicResource LongitudeScaleBar}" Width="{x:Static const:Constants.Longitude3dWidth}" Tag="{Binding PatientCase.PullbackType}"/>
                         </Grid>
                     </Grid>
                     <Grid Grid.Column="1" Background="{DynamicResource GrayscaleGray8Brush}">

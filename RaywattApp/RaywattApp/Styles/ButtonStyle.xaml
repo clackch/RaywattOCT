@@ -682,6 +682,43 @@
         </Setter>
     </Style>
 
+    <Style TargetType="ToggleButton" x:Key="FlyThroughToggleBtn" BasedOn="{StaticResource Pretendard-Medium-14}">
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Border CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray5Brush}">
+                        <StackPanel Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Image x:Name="icon" Source="{svgc:SvgImage Source=/res/icon/flyThroughDtoP.svg}" Height="20" Margin="10,0,0,0"/>
+                            <Label Content="{TemplateBinding Content}" VerticalAlignment="Center" Margin="6,0,0,0" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+                            <Grid Margin="8,0,8,0">
+                                <Border x:Name="hoverBorder" CornerRadius="8" Width="34" Height="22" Background="Transparent" BorderThickness="2" BorderBrush="Transparent"/>
+                                <Border x:Name="border" CornerRadius="8" Width="30" Height="18" Background="Transparent" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray5Brush}">
+                                    <Image x:Name="toggleIcon" Source="{svgc:SvgImage Source=/res/button/toggle/small.svg}" Width="12" Height="12" HorizontalAlignment="Left" Margin="2"/>
+                                </Border>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="toggleIcon" Property="Source" Value="{svgc:SvgImage Source=/res/button/toggle/small_disabled.svg}"/>
+                            <Setter TargetName="toggleIcon" Property="HorizontalAlignment" Value="Left"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="hoverBorder" Property="BorderBrush" Value="White"/>
+                            <Setter TargetName="hoverBorder" Property="Opacity" Value="0.08"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="toggleIcon" Property="Source" Value="{svgc:SvgImage Source=/res/button/toggle/small_active.svg}"/>
+                            <Setter TargetName="toggleIcon" Property="HorizontalAlignment" Value="Right"/>
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/icon/flyThroughPtoD.svg}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- Repeat Button -->
     <Style TargetType="RepeatButton">
 

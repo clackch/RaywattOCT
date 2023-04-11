@@ -122,31 +122,7 @@
                         <Border Grid.Row="0" Grid.Column="1" CornerRadius="8,8,0,0" Background="{DynamicResource AdditionalColor5Brush}">
                             <Image x:Name="longitudeImage" Source="{Binding LongitudeImage}" Width="{StaticResource LongitudeWidth}" Height="{StaticResource LongitudeHeight}" Stretch="Fill"/>
                         </Border>
-                        <Border Grid.Row="1" Grid.Column="1" CornerRadius="0,0,8,8" Background="{DynamicResource BackgroundBrush}">
-                            <Grid >
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={StaticResource LongitudeScale}}"/>
-                                    <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={StaticResource LongitudeScale}}"/>
-                                    <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={StaticResource LongitudeScale}}"/>
-                                    <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={StaticResource LongitudeScale}}"/>
-                                    <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={StaticResource LongitudeScale}}"/>
-                                    <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={StaticResource LongitudeScale}}"/>
-                                    <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={StaticResource LongitudeScale}}"/>
-                                    <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={StaticResource LongitudeScale}}"/>
-                                    <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={StaticResource LongitudeScale}}"/>
-                                    <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={StaticResource LongitudeScale}}"/>
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="1" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                <StackPanel Grid.Column="2" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                <StackPanel Grid.Column="3" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                <StackPanel Grid.Column="4" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                <StackPanel Grid.Column="5" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                <StackPanel Grid.Column="6" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                <StackPanel Grid.Column="7" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                <StackPanel Grid.Column="8" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                <StackPanel Grid.Column="9" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                            </Grid>
-                        </Border>
+                        <ContentControl Grid.Row="1" Grid.Column="1" Template="{DynamicResource LongitudeScaleBar}" Width="{StaticResource LongitudeWidth}" Tag="{Binding PatientCase.PullbackType}"/>
                     </Grid>
                 </Grid>
             </Border>

@@ -193,10 +193,25 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ProgressBar">
                     <Grid>
-                        <Border BorderThickness="0" CornerRadius="4" Background="{DynamicResource GrayscaleGray7Brush}"/>
+                        <Border Background="{DynamicResource GrayscaleGray3Brush}" Margin="1,0,1,0"/>
                         <Rectangle Name="PART_Track"/>
-                        <Border Name="PART_Indicator" CornerRadius="4" Background="{DynamicResource MainPrimaryColorBrush}" HorizontalAlignment="Left"/>
+                        <Border Name="PART_Indicator" Background="{DynamicResource MainPrimaryColorBrush}" HorizontalAlignment="Left" Margin="1,0,1,0"/>
                         <Image x:Name="img" Source="{svgc:SvgImage Source=/res/icon/catheterConnect.svg}"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type ProgressBar}" x:Key="HomeCatheterProgressBar">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ProgressBar">
+                    <Grid>
+                        <Border Background="{DynamicResource GrayscaleGray3Brush}" Margin="1,0,1,0"/>
+                        <Rectangle Name="PART_Track"/>
+                        <Border Name="PART_Indicator" Background="{DynamicResource MainPrimaryColorBrush}" HorizontalAlignment="Left" Margin="1,0,1,0"/>
+                        <Image x:Name="img" Source="{svgc:SvgImage Source=/res/icon/catheterConnect_home.svg}"/>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>

@@ -32,7 +32,7 @@ namespace RaywattApp.ViewModels
         private IDialogService _dialogService;
 
         [ObservableProperty]
-        private Visibility _isHome;
+        private bool _isHome;
 
         [ObservableProperty]
         private string _navigationSource;
@@ -124,7 +124,7 @@ namespace RaywattApp.ViewModels
             reviewPages.Add(Constants.ReviewPresetPage);
             reviewPages.Add(Constants.ReviewAngioCoRegPage);
 
-            IsHome = Visibility.Hidden;
+            IsHome = true;
 
             //Test
             timer.Interval = TimeSpan.FromMilliseconds(500);
@@ -171,9 +171,9 @@ namespace RaywattApp.ViewModels
             }
 
             if (NavigationSource == Constants.PatientListPage)
-                IsHome = Visibility.Hidden;
+                IsHome = true;
             else
-                IsHome = Visibility.Visible;
+                IsHome = false;
         }
 
         private void Home()
