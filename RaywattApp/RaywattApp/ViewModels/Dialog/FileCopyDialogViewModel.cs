@@ -14,6 +14,7 @@ using System.Linq;
 using static RayCoreWrapper.RayExportWrapper;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace RaywattApp.ViewModels.Dialog
 {
@@ -245,7 +246,8 @@ namespace RaywattApp.ViewModels.Dialog
                         Measurement? LMeasurement = null;
                         if (FileExport.Measurements != Constants.ExportMeasurementHideAll)
                         {
-                            AnnotationConverter.ConvertFromJsonString(patientCase.Measurements, out Measurements, out LMeasurement);
+                            Measurements = JsonConvert.DeserializeObject<List<Measurement>>(patientCase.CrossSection);
+                            LMeasurement = JsonConvert.DeserializeObject<Measurement>(patientCase.Longitude);
                         }
                 
                         await Task.Run(() =>
@@ -350,7 +352,8 @@ namespace RaywattApp.ViewModels.Dialog
                 Measurement? LMeasurement = null;
                 if (FileExport.Measurements != Constants.ExportMeasurementHideAll)
                 {
-                    AnnotationConverter.ConvertFromJsonString(patientCase.Measurements, out Measurements, out LMeasurement);
+                    Measurements = JsonConvert.DeserializeObject<List<Measurement>>(patientCase.CrossSection);
+                    LMeasurement = JsonConvert.DeserializeObject<Measurement>(patientCase.Longitude);
                 }
 
                 for (int frame = 0; frame < convertedImages.Count; frame++)

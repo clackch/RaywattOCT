@@ -191,8 +191,6 @@ namespace RaywattApp.ViewModels
             sqlParameters["expansion_calculation"] = PatientCase.ExpansionCalculation;
             sqlParameters["expansion_threshold"] = PatientCase.ExpansionThreshold;
             sqlParameters["apposition_threshold"] = PatientCase.AppositionThreshold;
-            sqlParameters["measurements"] = PatientCase.Measurements;
-            sqlParameters["bookmarks"] = PatientCase.Bookmarks;
 
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
             if (nRows == 0)

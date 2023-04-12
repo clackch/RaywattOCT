@@ -132,8 +132,6 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case
     expansion_calculation character varying(4) COLLATE pg_catalog."default",
     expansion_threshold integer,
     apposition_threshold real,
-	measurements text COLLATE pg_catalog."default",
-	bookmarks text COLLATE pg_catalog."default",
     create_date timestamp without time zone,
     update_date timestamp without time zone,
     CONSTRAINT patient_case_pkey PRIMARY KEY (id)
@@ -147,6 +145,33 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case
 TABLESPACE rv_tablespace;
 
 ALTER TABLE IF EXISTS rv_schema.patient_case
+    OWNER to rv_user;
+
+
+-- Table: rv_schema.patient_case_annotation
+
+-- DROP TABLE IF EXISTS rv_schema.patient_case_annotation;
+
+CREATE TABLE IF NOT EXISTS rv_schema.patient_case_annotation
+(
+    id character varying(24) COLLATE pg_catalog."default" NOT NULL,
+    bookmark text COLLATE pg_catalog."default",
+    longitude text COLLATE pg_catalog."default",
+    cross_section text COLLATE pg_catalog."default",
+    lumen_contour text COLLATE pg_catalog."default",
+	create_date timestamp without time zone,
+    update_date timestamp without time zone,
+    CONSTRAINT patient_case_annotation_pkey PRIMARY KEY (id)
+        USING INDEX TABLESPACE rv_tablespace,
+    CONSTRAINT patient_case_annotation_id_fkey FOREIGN KEY (id)
+        REFERENCES rv_schema.patient_case (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+)
+
+TABLESPACE rv_tablespace;
+
+ALTER TABLE IF EXISTS rv_schema.patient_case_annotation
     OWNER to rv_user;
 
 
