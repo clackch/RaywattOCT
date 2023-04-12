@@ -265,7 +265,13 @@ namespace RaywattApp.ViewModels.Dialog
                                 if (region != null && region.Count > 0)
                                 {
                                     Rect rectCrossSection = region[region.Count - 1].Item1;
-                                    DrawAnnotation.DrawMeasurements(imgExport[rectCrossSection], frame, new System.Windows.Size(Constants.CrossSectionSize, Constants.CrossSectionSize), Measurements);
+
+                                    int frameNumber = frame;
+                                    if (FileExport.Material != Constants.ExportMaterialPullback)
+                                    {
+                                        frameNumber = exportIndices[frame];
+                                    }
+                                    DrawAnnotation.DrawMeasurements(imgExport[rectCrossSection], frameNumber, new System.Windows.Size(Constants.CrossSectionSize, Constants.CrossSectionSize), Measurements);
 
                                     if (imgLongitude != null && region.Count > 1)
                                     {
@@ -364,7 +370,13 @@ namespace RaywattApp.ViewModels.Dialog
                     if (region != null && region.Count > 0)
                     {
                         Rect rectCrossSection = region[region.Count - 1].Item1;
-                        DrawAnnotation.DrawMeasurements(convertedImages[frame][rectCrossSection], frame, new System.Windows.Size(Constants.CrossSectionSize, Constants.CrossSectionSize), Measurements);
+
+                        int frameNumber = frame;
+                        if (FileExport.Material != Constants.ExportMaterialPullback)
+                        {
+                            frameNumber = exportIndices[frame];
+                        }
+                        DrawAnnotation.DrawMeasurements(convertedImages[frame][rectCrossSection], frameNumber, new System.Windows.Size(Constants.CrossSectionSize, Constants.CrossSectionSize), Measurements);
 
                         if (imgLongitude != null && region.Count > 1)
                         {

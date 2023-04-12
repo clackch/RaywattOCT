@@ -3,7 +3,6 @@ using RaywattApp.Common.Bases;
 using RaywattApp.Common.Util;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
 
@@ -11,13 +10,13 @@ namespace RaywattApp.Common.Annotation.Util
 {
     public class DrawAnnotation
     {
-        public static void DrawMeasurements(OpenCvSharp.Mat image, int frame, Size originSize, List<Measurement>? Measurements)
+        public static void DrawMeasurements(OpenCvSharp.Mat image, int frameNumber, Size originSize, List<Measurement>? Measurements)
         {
             if (Measurements == null) return;
 
             foreach (Measurement measurement in Measurements)
             {
-                if (frame == measurement.FrameNumber)
+                if (frameNumber == measurement.FrameNumber)
                 {
                     DrawMeasurement(image, originSize, measurement);
                     break;
