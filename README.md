@@ -52,8 +52,10 @@ Download & Install OCT Host
 1. [OCT Host (.exe)](https://docs.axsun.com/axsun-technologies-knowledge-base/other/downloads) 다운로드 후 설치
 2. DLL Register
 
-    (a) ```C:\Program Files\Axsun\Axsun OCT Control``` 로 이동
+    (a) Command Prompt 관리자 권한으로 실행
+
+    (b) ```C:\Program Files\Axsun\Axsun OCT Control``` 로 이동
     
-    (b) cmd 창 (Run as administrator) 에서 ```c:\Windows\Microsoft.NET\Framework64\v4.0.30319\RegAsm.exe AxsunOCTControl.dll /tlb:AxsunOCTControl.tlb /codebase``` 입력
+    (c) ```c:\Windows\Microsoft.NET\Framework64\v4.0.30319\RegAsm.exe AxsunOCTControl.dll /tlb:AxsunOCTControl.tlb /codebase``` 입력
     
-    (c) ```C:\Program Files\Axsun\Axsun OCT Control\AxsunOCTControl.tlb``` 파일 생성 확인
+    (d) ```C:\Program Files\Axsun\Axsun OCT Control\AxsunOCTControl.tlb``` 파일 생성 확인
