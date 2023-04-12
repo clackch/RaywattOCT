@@ -203,5 +203,26 @@ namespace RaywattApp.Common.Annotation
                 }
             }
         }
+
+        private Size GetLabelSize(string style, string text = "")
+        {
+            Label label = new Label();
+            label.Style = (Style)this.Resources[style];
+            label.Content = text;
+
+            label.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+
+            return label.DesiredSize;
+        }
+
+        private Size GetTextBoxSize(string style)
+        {
+            TextBox textBox = new TextBox();
+            textBox.Style = (Style)this.Resources[style];
+
+            textBox.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+
+            return textBox.DesiredSize;
+        }
     }
 }

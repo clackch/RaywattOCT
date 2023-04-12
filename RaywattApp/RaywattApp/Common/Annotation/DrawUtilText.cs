@@ -70,6 +70,18 @@ namespace RaywattApp.Common.Annotation
                 this.pointerPoint = e.GetPosition(this.canvas);
                 this.textPoint = e.GetPosition(this.canvas);
                 DrawPointer(this.pointerPoint, this.textGeometries.Count);
+
+                double labelHeight = GetLabelSize("StyleLabelText").Height;
+                double textBoxWidth = GetTextBoxSize("StyleTextBox").Width;
+
+                if (this.canvas.ActualHeight - this.textPoint.Y < labelHeight)
+                {
+                    this.textPoint.Y = this.canvas.ActualHeight - labelHeight;
+                }
+                if (this.canvas.ActualWidth - this.textPoint.X < textBoxWidth)
+                {
+                    this.textPoint.X = this.canvas.ActualWidth - textBoxWidth;
+                }
                 DrawTextInput(this.textPoint, this.textGeometries.Count, "");
 
                 TextGeometry textGeometry = new TextGeometry();
@@ -239,7 +251,6 @@ namespace RaywattApp.Common.Annotation
                     point.Y = point.Y - this.diffY;
                 }
 
-
                 Canvas.SetLeft(label, point.X);
                 Canvas.SetTop(label, point.Y);
 
@@ -285,6 +296,15 @@ namespace RaywattApp.Common.Annotation
             this.canvas.Background = null;
 
             DeleteTextInput(group);
+            DeleteTextLine(group);
+
+            double labelWidth = GetLabelSize("StyleLabelText", textBox.Text).Width;
+
+            if (this.canvas.ActualWidth - this.textGeometries[group].TextPoint.X < labelWidth)
+            {
+                this.textGeometries[group].TextPoint = new Point(this.canvas.ActualWidth - labelWidth, this.textGeometries[group].TextPoint.Y);
+            }
+            DrawTextLine(this.textGeometries[group].PointerPoint, this.textGeometries[group].TextPoint, this.textGeometries[group].Group);
             DrawText(this.textGeometries[group].TextPoint, group, textBox.Text);
         }
 
