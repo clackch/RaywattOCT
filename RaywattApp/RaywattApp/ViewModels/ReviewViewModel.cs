@@ -470,18 +470,16 @@ namespace RaywattApp.ViewModels
 
             for (int i=0; i<size; i++)
             {
-                if(Measurements.Find(x => x.FrameNumber == i) == null)
-                {
-                    Measurement measurement = new Measurement();
-                    measurement.FrameNumber = i;
-                    measurement.AreaGeometries = new ObservableCollection<AreaGeometry>();
-                    measurement.LengthGeometries = new ObservableCollection<LengthGeometry>();
-                    measurement.TextGeometries = new List<TextGeometry>();
-                    Measurements.Add(measurement);
-                }
+                Measurement measurement = new Measurement();
+                measurement.FrameNumber = i;
+                measurement.AreaGeometries = new ObservableCollection<AreaGeometry>();
+                measurement.LengthGeometries = new ObservableCollection<LengthGeometry>();
+                measurement.TextGeometries = new List<TextGeometry>();
+                Measurements.Add(measurement);
+
             }
 
-            Measurements = Measurements.OrderBy(x => x.FrameNumber).ToList();
+            Measurements = Measurements.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
         }
 
         private string ConvertMeasurementsToJson(List<Measurement> param)
@@ -516,19 +514,6 @@ namespace RaywattApp.ViewModels
             longitudeMeasurement.TextGeometries = LModeTextGeometries;
 
             return JsonConvert.SerializeObject(longitudeMeasurement, Formatting.Indented);
-        }
-
-        private PatientCaseAnnotation ConvertAnnotation()
-        {
-            PatientCaseAnnotation annotation = new PatientCaseAnnotation();
-
-            annotation.Id = PatientCase.Id;
-            annotation.CrossSection = ConvertMeasurementsToJson(Measurements);
-            annotation.Longitude = ConvertLongitudeToJson();
-            annotation.Bookmark = JsonConvert.SerializeObject(Bookmarks, Formatting.Indented);
-            annotation.LumenContour = ConvertMeasurementsToJson(LumenContour);
-
-            return annotation;
         }
 
         private void ToggleLongitude(bool isLumenProfile)
