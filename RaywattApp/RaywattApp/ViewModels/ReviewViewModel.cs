@@ -215,7 +215,7 @@ namespace RaywattApp.ViewModels
                 ReviewStatus.CurrentPage = Constants.ReviewPage;
                 Degree = PatientCase.IndicatorDegree;
 
-                SetAnnotation(PatientCase.Id);
+                SetAnnotation();
                 
                 RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);              
                 SetCrossSectionBackground(0, (ReviewStatus.IsAngioOn) ? Constants.CardBackgroundColor : Constants.BackgroundColor);
@@ -409,62 +409,75 @@ namespace RaywattApp.ViewModels
             ReviewStatus.IsMeasurementOn = !ReviewStatus.IsMeasurementOn;
         }
 
-        private void SetAnnotation(string id)
+        private void SetAnnotation()
         {
-            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-            sqlParameters["id"] = PatientCase.Id;
-            IList<PatientCaseAnnotation> patientCaseAnnotations = _sqlManager.SelectPatientCaseAnnotation(sqlParameters);
-
-            if (patientCaseAnnotations != null && patientCaseAnnotations.Count == 1)
+            if(PatientCase.Bookmark != null && PatientCase.CrossSection != null && PatientCase.Longitude != null && PatientCase.LumenContour != null)
             {
-                if (!string.IsNullOrEmpty(patientCaseAnnotations[0].CrossSection))
+                Measurements = JsonConvert.DeserializeObject<List<Measurement>>(PatientCase.CrossSection);
+
+                Measurement lModeMeasurement = JsonConvert.DeserializeObject<Measurement>(PatientCase.Longitude);
+                LModeLengthGeometries = lModeMeasurement.LengthGeometries;
+                LModeTextGeometries = lModeMeasurement.TextGeometries;
+
+                Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(PatientCase.Bookmark);
+                LumenContour = JsonConvert.DeserializeObject<List<Measurement>>(PatientCase.LumenContour);
+            }
+            else
+            {
+                Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+                sqlParameters["id"] = PatientCase.Id;
+                IList<PatientCaseAnnotation> patientCaseAnnotations = _sqlManager.SelectPatientCaseAnnotation(sqlParameters);
+
+                if (patientCaseAnnotations != null && patientCaseAnnotations.Count == 1)
                 {
-                    Measurements = JsonConvert.DeserializeObject<List<Measurement>>(patientCaseAnnotations[0].CrossSection);
+                    if (!string.IsNullOrEmpty(patientCaseAnnotations[0].CrossSection))
+                    {
+                        Measurements = JsonConvert.DeserializeObject<List<Measurement>>(patientCaseAnnotations[0].CrossSection);
+                    }
+                    else
+                    {
+                        Measurements = new List<Measurement>();
+                    }
+
+                    if (!string.IsNullOrEmpty(patientCaseAnnotations[0].Longitude))
+                    {
+                        Measurement lModeMeasurement = JsonConvert.DeserializeObject<Measurement>(patientCaseAnnotations[0].Longitude);
+                        LModeLengthGeometries = lModeMeasurement.LengthGeometries;
+                        LModeTextGeometries = lModeMeasurement.TextGeometries;
+                    }
+                    else
+                    {
+                        LModeLengthGeometries = new ObservableCollection<LengthGeometry>();
+                        LModeTextGeometries = new List<TextGeometry>();
+                    }
+
+                    if (!string.IsNullOrEmpty(patientCaseAnnotations[0].Bookmark))
+                    {
+                        Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(patientCaseAnnotations[0].Bookmark);
+                    }
+                    else
+                    {
+                        Bookmarks = new ObservableCollection<Bookmark>();
+                    }
+
+                    if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenContour))
+                    {
+                        LumenContour = JsonConvert.DeserializeObject<List<Measurement>>(patientCaseAnnotations[0].LumenContour);
+                    }
+                    else
+                    {
+                        LumenContour = new List<Measurement>();
+                    }
                 }
                 else
                 {
                     Measurements = new List<Measurement>();
-                }
-
-                if (!string.IsNullOrEmpty(patientCaseAnnotations[0].Longitude))
-                {
-                    Measurement lModeMeasurement = JsonConvert.DeserializeObject<Measurement>(patientCaseAnnotations[0].Longitude);
-
-                    LModeLengthGeometries = lModeMeasurement.LengthGeometries == null ? new ObservableCollection<LengthGeometry>() : lModeMeasurement.LengthGeometries;
-                    LModeTextGeometries = lModeMeasurement.TextGeometries == null ? new List<TextGeometry>() : lModeMeasurement.TextGeometries;
-                }
-                else
-                {
                     LModeLengthGeometries = new ObservableCollection<LengthGeometry>();
                     LModeTextGeometries = new List<TextGeometry>();
-                }
-
-                if (!string.IsNullOrEmpty(patientCaseAnnotations[0].Bookmark))
-                {
-                    Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(patientCaseAnnotations[0].Bookmark);
-                }
-                else
-                {
                     Bookmarks = new ObservableCollection<Bookmark>();
-                }
-
-                if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenContour))
-                {
-                    LumenContour = JsonConvert.DeserializeObject<List<Measurement>>(patientCaseAnnotations[0].LumenContour);
-                }
-                else
-                {
                     LumenContour = new List<Measurement>();
                 }
-            }
-            else
-            {
-                Measurements = new List<Measurement>();
-                LModeLengthGeometries = new ObservableCollection<LengthGeometry>();
-                LModeTextGeometries = new List<TextGeometry>();
-                Bookmarks = new ObservableCollection<Bookmark>();
-                LumenContour = new List<Measurement>();
-            }
+            }            
 
             int size = PatientCase.PullbackType == Constants.PullbackTypeLong ? Constants.PullbackLongFrameCnt : Constants.PullbackShortFrameCnt;
 
@@ -476,7 +489,6 @@ namespace RaywattApp.ViewModels
                 measurement.LengthGeometries = new ObservableCollection<LengthGeometry>();
                 measurement.TextGeometries = new List<TextGeometry>();
                 Measurements.Add(measurement);
-
             }
 
             Measurements = Measurements.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
