@@ -18,6 +18,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
 using Point = System.Windows.Point;
+using System.Linq;
 
 namespace RaywattApp.ViewModels
 {
@@ -479,6 +480,8 @@ namespace RaywattApp.ViewModels
                     Measurements.Add(measurement);
                 }
             }
+
+            Measurements = Measurements.OrderBy(x => x.FrameNumber).ToList();
         }
 
         private string ConvertMeasurementsToJson(List<Measurement> param)

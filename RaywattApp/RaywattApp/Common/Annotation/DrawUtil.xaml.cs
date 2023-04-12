@@ -125,63 +125,9 @@ namespace RaywattApp.Common.Annotation
             if(drawUtil == null || drawUtil.Measurements == null)
                 return;
 
-            bool isFind = false;
-
-            for (int i = 0; i < drawUtil.Measurements.Count; i++)
-            {
-                if (drawUtil.Measurements[i].FrameNumber == frameNumber)
-                {
-                    //Area
-                    if (drawUtil.Measurements[i].AreaGeometries == null)
-                    {
-                        drawUtil.areaGeometrys = new ObservableCollection<AreaGeometry>();
-                        drawUtil.Measurements[i].AreaGeometries = drawUtil.areaGeometrys;
-                    }
-                    else
-                    {
-                        drawUtil.areaGeometrys = drawUtil.Measurements[i].AreaGeometries;
-                    }
-
-                    //Length
-                    if (drawUtil.Measurements[i].LengthGeometries == null)
-                    {
-                        drawUtil.lengthGeometries = new ObservableCollection<LengthGeometry>();
-                        drawUtil.Measurements[i].LengthGeometries = drawUtil.lengthGeometries;
-                    }
-                    else
-                    {
-                        drawUtil.lengthGeometries = drawUtil.Measurements[i].LengthGeometries;
-                    }
-
-                    //Text
-                    if (drawUtil.Measurements[i].TextGeometries == null)
-                    {
-                        drawUtil.textGeometries = new List<TextGeometry>();
-                        drawUtil.Measurements[i].TextGeometries = drawUtil.textGeometries;
-                    }
-                    else
-                    {
-                        drawUtil.textGeometries = drawUtil.Measurements[i].TextGeometries;
-                    }
-
-                    isFind = true;
-                    break;
-                }
-            }
-
-            if (!isFind)
-            {
-                drawUtil.areaGeometrys = new ObservableCollection<AreaGeometry>();
-                drawUtil.lengthGeometries = new ObservableCollection<LengthGeometry>();
-                drawUtil.textGeometries = new List<TextGeometry>();
-
-                Measurement measurement = new Measurement();
-                measurement.FrameNumber = frameNumber;
-                measurement.AreaGeometries = drawUtil.areaGeometrys;
-                measurement.LengthGeometries = drawUtil.lengthGeometries;
-                measurement.TextGeometries = drawUtil.textGeometries;
-                drawUtil.Measurements.Add(measurement);
-            }
+            drawUtil.areaGeometrys = drawUtil.Measurements[frameNumber].AreaGeometries;
+            drawUtil.lengthGeometries = drawUtil.Measurements[frameNumber].LengthGeometries;
+            drawUtil.textGeometries = drawUtil.Measurements[frameNumber].TextGeometries;
 
             drawUtil.DrawAll();
         }
