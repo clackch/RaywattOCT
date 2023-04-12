@@ -45,3 +45,15 @@ Download & copy dll files
 * dll 파일 용량 문제로 git 으로 관리가 안됨
 * [LibTorch cuda 11.7](https://pytorch.org/get-started/locally/) release / debug ver. 각각 다운로드
 * 압축 풀고, lib 폴더에서 asmjit / c10 / c10_cuda / caffe2_nvrtc / fbgemm / libiomp5md / nvToolsExt64_1 / torch / torch_cpu / torch_cuda / torch_cuda_cpp / torch_cuda_cu / uv / zlibwapi dll 파일들을 각각 extern/libtorch/lib 하위 release / debug 폴더에 복사
+
+## [Axsun]
+
+Download & Install OCT Host
+1. [OCT Host (.exe)](https://docs.axsun.com/axsun-technologies-knowledge-base/other/downloads) 다운로드 후 설치
+2. DLL Register
+
+    (a) ```C:\Program Files\Axsun\Axsun OCT Control``` 로 이동
+    
+    (b) cmd 창에서 ```c:\Windows\Microsoft.NET\Framework64\v4.0.30319\RegAsm.exe AxsunOCTControl.dll /tlb:AxsunOCTControl.tlb /codebase``` 입력
+    
+    (c) ```C:\Program Files\Axsun\Axsun OCT Control\AxsunOCTControl.tlb``` 파일 생성 확인
