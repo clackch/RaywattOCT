@@ -54,6 +54,6 @@ Download & Install OCT Host
 
     (a) ```C:\Program Files\Axsun\Axsun OCT Control``` 로 이동
     
-    (b) cmd 창에서 ```c:\Windows\Microsoft.NET\Framework64\v4.0.30319\RegAsm.exe AxsunOCTControl.dll /tlb:AxsunOCTControl.tlb /codebase``` 입력
+    (b) cmd 창 (Run as administrator) 에서 ```c:\Windows\Microsoft.NET\Framework64\v4.0.30319\RegAsm.exe AxsunOCTControl.dll /tlb:AxsunOCTControl.tlb /codebase``` 입력
     
     (c) ```C:\Program Files\Axsun\Axsun OCT Control\AxsunOCTControl.tlb``` 파일 생성 확인
