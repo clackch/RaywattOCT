@@ -303,6 +303,13 @@ namespace RaywattApp.Common.Annotation
             label.Content = DrawAnnotation.GetLabelText(group, length);
             label.RenderTransform = new RotateTransform(angle);
 
+            double labelHeight = GetLabelSize("StyleLabel").Height;
+
+            if (this.canvas.ActualHeight - firstPoint.Y < labelHeight * 2 && this.canvas.ActualHeight - secondPoint.Y < labelHeight * 2)
+            {
+                ptLabel.Y -= labelHeight;
+            }
+
             Canvas.SetLeft(label, ptLabel.X);
             Canvas.SetTop(label, ptLabel.Y);
             this.canvas.Children.Add(label);

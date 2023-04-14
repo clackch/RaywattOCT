@@ -99,15 +99,8 @@ namespace RaywattApp.Common.Annotation
             if (drawListUtil == null)
                 return;
 
-            for (int i = 0; i < drawListUtil.Measurements.Count; i++)
-            {
-                if (drawListUtil.Measurements[i].FrameNumber == frameNumber)
-                {
-                    drawListUtil.CurrAreaGeometries = drawListUtil.Measurements[i].AreaGeometries;
-                    drawListUtil.CurrLengthGeometries = drawListUtil.Measurements[i].LengthGeometries;
-                    break;
-                }                
-            }
+            drawListUtil.CurrAreaGeometries = drawListUtil.Measurements[frameNumber].AreaGeometries;
+            drawListUtil.CurrLengthGeometries = drawListUtil.Measurements[frameNumber].LengthGeometries;
         }
 
         private void delete_Area(object sender, RoutedEventArgs e)

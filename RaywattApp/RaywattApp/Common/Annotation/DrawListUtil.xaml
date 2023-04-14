@@ -60,7 +60,7 @@
             <Separator Height="1" Background="{DynamicResource SeparatorBrush}"/>
             <StackPanel Height="20"/>
 
-            <Label Content="{Binding [L-mode Length], Source={StaticResource L10N}}"/>
+            <Label Content="{Binding [Longitude Length], Source={StaticResource L10N}}"/>
             <StackPanel Height="8"/>
             <DataGrid ItemsSource="{Binding LModeLengthGeometries, ElementName=UserControl}" Height="130" Style="{StaticResource DataGridMeasurement}" RowStyle="{StaticResource DataGridRowMeasurement}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderMeasurement}">
                 <DataGrid.Columns>

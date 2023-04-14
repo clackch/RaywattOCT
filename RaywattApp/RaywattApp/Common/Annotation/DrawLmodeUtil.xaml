@@ -60,13 +60,14 @@
             <Setter Property="BorderBrush" Value="Transparent"/>
         </Style>
         <Style TargetType="Label" x:Key="StyleLabelText">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="MinWidth" Value="10"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Cursor" Value="Hand"/>
-                    <Setter Property="BorderThickness" Value="2"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -84,6 +85,8 @@
         </Style>
         <Style TargetType="TextBox" x:Key="StyleTextBox">
             <Setter Property="MinWidth" Value="50"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="MaxLength" Value="50"/>
         </Style>
     </UserControl.Resources>
 

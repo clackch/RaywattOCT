@@ -190,7 +190,7 @@ namespace RaywattApp.Common.Bases
 
             if(Constants.CurrentPage != Constants.ReviewPage)
             {
-                Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(PatientCase.Bookmarks);
+                Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(PatientCase.Bookmark);
             }
 
             foreach(Bookmark bookmark in Bookmarks)

@@ -254,13 +254,13 @@ namespace RaywattApp.Services
             commandText = SqlQuery.GetQuery("SelectPatientCaseByList");
 
             List<string> ids = (List<string>)sqlParameters["ids"];
-            string commandTextExtra = "WHERE id IN (''";
+            string commandTextExtra = "WHERE T1.id IN (''";
             for (int i = 0; i < ids.Count; i++)
             {
                 commandTextExtra += ", '" + ids[i] + "'";
             }
             commandTextExtra += ") ";
-            commandTextExtra += "ORDER BY patient_id, create_date DESC";
+            commandTextExtra += "ORDER BY patient_id, T1.create_date DESC";
 
             commandText = commandText + commandTextExtra;
 
@@ -303,13 +303,13 @@ namespace RaywattApp.Services
             return _databaseService.InsertData(commandText, sqlParameters);
         }
 
-        public IList<StringModel> SelectPatientCaseAnnotation(Dictionary<string, Object> sqlParameters)
+        public IList<PatientCaseAnnotation> SelectPatientCaseAnnotation(Dictionary<string, Object> sqlParameters)
         {
             _log.Debug("SelectPatientCaseAnnotation");
 
             string commandText = SqlQuery.GetQuery("SelectPatientCaseAnnotation");
 
-            return _databaseService.GetDatas<StringModel>(commandText, sqlParameters);
+            return _databaseService.GetDatas<PatientCaseAnnotation>(commandText, sqlParameters);
         }
 
         /**
@@ -347,6 +347,18 @@ namespace RaywattApp.Services
             _log.Debug("UpdatePatientCasePreset");
 
             string commandText = SqlQuery.GetQuery("UpdatePatientCasePreset");
+
+            return _databaseService.InsertData(commandText, sqlParameters);
+        }
+
+        /**
+         * Patient Case Annotation
+         */
+        public int UpsertPatientCaseAnnotation(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpsertPatientCaseAnnotation");
+
+            string commandText = SqlQuery.GetQuery("UpsertPatientCaseAnnotation");
 
             return _databaseService.InsertData(commandText, sqlParameters);
         }

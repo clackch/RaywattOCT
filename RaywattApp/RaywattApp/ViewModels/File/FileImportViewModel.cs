@@ -17,6 +17,8 @@ using RaywattApp.Common.Dialog;
 using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using RayCoreWrapper;
+using Newtonsoft.Json;
+using RaywattApp.Common.Annotation.Models;
 
 namespace RaywattApp.ViewModels.File
 {
@@ -370,8 +372,6 @@ namespace RaywattApp.ViewModels.File
                                 sqlParameters["expansion_calculation"] = patientCase.ExpansionCalculation;
                                 sqlParameters["expansion_threshold"] = patientCase.ExpansionThreshold;
                                 sqlParameters["apposition_threshold"] = patientCase.AppositionThreshold;
-                                sqlParameters["measurements"] = patientCase.Measurements;
-                                sqlParameters["bookmarks"] = patientCase.Bookmarks;
                                 sqlParameters["thumbnail_no"] = patientCase.ThumbnailNo;
                                 sqlParameters["still_image_yn"] = patientCase.StillImageYn;
                                 sqlParameters["create_date"] = patientCase.CreateDate;
@@ -379,7 +379,23 @@ namespace RaywattApp.ViewModels.File
                                 string srcPath = CommonUtil.GetDirectoryPath(SelectedDir.Path) + "\\" + patientCase.Image;
                                 sqlParameters["image"] = System.IO.File.Exists(srcPath) ? patientCase.Image : "";
 
-                                _sqlManager.UpsertPatientCase(sqlParameters);
+                                var nRows = _sqlManager.UpsertPatientCase(sqlParameters);
+                                if (nRows == 1)
+                                {
+                                    sqlParameters.Clear();
+                                    sqlParameters["id"] = patientCase.Id;
+                                    sqlParameters["cross_section"] = patientCase.CrossSection;
+                                    sqlParameters["longitude"] = patientCase.Longitude;
+                                    sqlParameters["bookmark"] = patientCase.Bookmark;
+                                    sqlParameters["lumen_contour"] = patientCase.LumenContour;
+                                    nRows = _sqlManager.UpsertPatientCaseAnnotation(sqlParameters);
+                                    if(nRows==0)
+                                        _log.Error("Upsert Error");
+                                }
+                                else
+                                {
+                                    _log.Error("Upsert Error");
+                                }
                             }
                         }
                     }
@@ -600,8 +616,10 @@ namespace RaywattApp.ViewModels.File
                             patientCase.ExpansionCalculation = GetStrValue(caseObj, "ExpansionCalculation");
                             patientCase.ExpansionThreshold = GetIntValue(caseObj, "ExpansionThreshold");
                             patientCase.AppositionThreshold = GetDoubleValue(caseObj, "AppositionThreshold");
-                            patientCase.Measurements = GetStrValue(caseObj, "Measurements");
-                            patientCase.Bookmarks = GetStrValue(caseObj, "Bookmarks");
+                            patientCase.Bookmark = GetStrValue(caseObj, "Bookmark");
+                            patientCase.Longitude = GetStrValue(caseObj, "Longitude");
+                            patientCase.CrossSection = GetStrValue(caseObj, "CrossSection");
+                            patientCase.LumenContour = GetStrValue(caseObj, "LumenContour");
                             patientCase.CreateDate = GetDateValue(caseObj, "CreateDate");
                             patientCase.UpdateDate = GetDateValue(caseObj, "UpdateDate");
 
