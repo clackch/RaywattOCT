@@ -1,8 +1,9 @@
 #include "Config.h"
 #include "ATSDevice.h"
-#include "Configuration.h"
 
-CATSDevice::CATSDevice() {
+CATSDevice::CATSDevice(Setting setting)
+	: IAcquisitionDevice(setting)
+{
 	m_hATSBoard = NULL;
 	m_nBufferIndex = 0;
 	m_pAcqBuffers = NULL;
@@ -31,12 +32,9 @@ int CATSDevice::InitDevice() {
 	return NOERROR;
 }
 int CATSDevice::CleanUp() {
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nAcqBufCount = config.settingsAlazar.nAcqBufferCount;
-
 	// Free all memory allocated
 	if (m_pAcqBuffers != NULL) {
-		for (int bufferIndex = 0; bufferIndex < nAcqBufCount; bufferIndex++)
+		for (int bufferIndex = 0; bufferIndex < m_setting.nBufferCount; bufferIndex++)
 		{
 			if (m_pAcqBuffers[bufferIndex] != NULL)
 			{
@@ -88,9 +86,8 @@ int CATSDevice::stop() {
 }
 
 unsigned short *CATSDevice::acquire(int& nCurFrame, int& nTotalFrame) {
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nBufferSize = config.nBufferSize;
-	const int nAcqBufCount = config.settingsAlazar.nAcqBufferCount;
+	const int nBufferSize = m_setting.nBufferSize;
+	const int nAcqBufCount = m_setting.nBufferCount;
 	const U32 timeout_ms = 5000;
 	RETURN_CODE retCode;
 	
@@ -130,17 +127,15 @@ unsigned short *CATSDevice::acquire(int& nCurFrame, int& nTotalFrame) {
 BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 {
 	RETURN_CODE retCode;
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nAScan = config.nAScan;
-	const int nAScanPadding = config.nAScanPadding;
-	const int nBScan = config.nBScan;
-	const int nLaserSpeed = config.nLaserSpeed;
-	const int nBufferSize = config.nBufferSize;
-	const int nAcqBufCount = config.settingsAlazar.nAcqBufferCount;
-	const int nTriggerDelaySample = config.settingsAlazar.nTriggerDelaySample;
-	const bool useKClock = config.settingsAlazar.bUseKClock;
-	const double secGoodClkDuration = config.settingsAlazar.usGoodClockDuration * 1e-6;
-	const double secBadClkDuration = config.settingsAlazar.usBadClockDuration * 1e-6;
+	const int nAScan = m_setting.nAScan;
+	const int nBScan = m_setting.nBScan;
+	const int nLaserSpeed = m_setting.nLaserSpeed;
+	const int nBufferSize = m_setting.nBufferSize;
+	const int nAcqBufCount = m_setting.nBufferCount;
+	const int nTriggerDelaySample = m_setting.nTriggerDelaySample;
+	const bool useKClock = m_setting.bUseKClock;
+	const double secGoodClkDuration = m_setting.usGoodClockDuration * 1e-6;
+	const double secBadClkDuration = m_setting.usBadClockDuration * 1e-6;
 
 	// TODO: Specify the sample rate (see sample rate id below)
 	double dSamplePerSec = nAScan * nLaserSpeed;
@@ -263,11 +258,9 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 
 BOOL CATSDevice::configureAcquisition(HANDLE boardHandle) {
 	RETURN_CODE retCode;
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nAScan = config.nAScan;
-	const int nAScanPadding = config.nAScanPadding;
-	const int nBScan = config.nBScan;
-	const int nAcqBufCount = config.settingsAlazar.nAcqBufferCount;
+	const int nAScan = m_setting.nAScan;
+	const int nBScan = m_setting.nBScan;
+	const int nAcqBufCount = m_setting.nBufferCount;
 	BOOL success = TRUE;
 
 	//==========================================================================================================
@@ -278,7 +271,7 @@ BOOL CATSDevice::configureAcquisition(HANDLE boardHandle) {
 	U32 preTriggerSamples = 0;
 
 	// TODO: Select the number of post-trigger samples per record
-	U32 postTriggerSamples = nAScan + nAScanPadding;
+	U32 postTriggerSamples = nAScan;
 
 	// TODO: Specify the number of records per DMA buffer
 	U32 recordsPerBuffer = nBScan;

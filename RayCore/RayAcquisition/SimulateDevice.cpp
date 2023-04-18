@@ -1,10 +1,10 @@
 #include "Config.h"
 #include "SimulateDevice.h"
-#include "Configuration.h"
 #include "DataManager.h"
 
-CSimulateDevice::CSimulateDevice(IDataManager* pDataReader)
-	:m_pDataReader(pDataReader){
+CSimulateDevice::CSimulateDevice(Setting setting, IDataManager* pDataReader)
+	: IAcquisitionDevice(setting),
+	m_pDataReader(pDataReader){
 	m_nCurSampleIndex = 0;
 	m_bPause = true;
 }
@@ -29,7 +29,6 @@ int CSimulateDevice::CleanUp() {
 }
 
 void CSimulateDevice::PrevFrame() {
-	CConfiguration& config = CConfiguration::GetInstance();
 	const int nNumOfSamples = m_pDataReader->GetNumOfSamples();
 
 	int nFrameIndex = m_nCurSampleIndex;
@@ -39,7 +38,6 @@ void CSimulateDevice::PrevFrame() {
 	m_nCurSampleIndex = nFrameIndex;
 }
 void CSimulateDevice::NextFrame() {
-	CConfiguration& config = CConfiguration::GetInstance();
 	const int nNumOfSamples = m_pDataReader->GetNumOfSamples();
 
 	int nFrameIndex = m_nCurSampleIndex;
@@ -49,7 +47,6 @@ void CSimulateDevice::NextFrame() {
 	m_nCurSampleIndex = nFrameIndex;
 }
 void CSimulateDevice::SetFrame(int nFrame) {
-	CConfiguration& config = CConfiguration::GetInstance();
 	const int nNumOfSamples = m_pDataReader->GetNumOfSamples();
 
 	int nFrameIndex = m_nCurSampleIndex;
@@ -69,7 +66,6 @@ int CSimulateDevice::stop() {
 	return NOERROR;
 }
 unsigned short* CSimulateDevice::acquire(int& nCurFrame, int& nTotalFrame) {
-	CConfiguration& config = CConfiguration::GetInstance();
 	const int nNumOfSamples = m_pDataReader->GetNumOfSamples();
 	bool result = true;
 

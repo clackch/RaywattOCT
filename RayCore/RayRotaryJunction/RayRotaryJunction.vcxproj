@@ -158,7 +158,6 @@ xcopy "$(ProjectDir)*Controller.h" "$(TargetDir)include\" /y /d</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\Utility\Config.h" />
-    <ClInclude Include="..\Utility\Configuration.h" />
     <ClInclude Include="..\Utility\MessageService.h" />
     <ClInclude Include="..\Utility\Utility.h" />
     <ClInclude Include="LaserController.h" />
@@ -167,7 +166,6 @@ xcopy "$(ProjectDir)*Controller.h" "$(TargetDir)include\" /y /d</Command>
     <ClInclude Include="ZaberController.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Utility\Configuration.cpp" />
     <ClCompile Include="..\Utility\MessageService.cpp" />
     <ClCompile Include="..\Utility\Utility.cpp" />
     <ClCompile Include="LaserController.cpp" />

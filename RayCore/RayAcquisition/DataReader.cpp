@@ -1,6 +1,5 @@
 #include "Config.h"
 #include "DataReader.h"
-#include "Configuration.h"
 #include <fstream>
 
 CDataReader::CDataReader() {
@@ -15,12 +14,11 @@ CDataReader::~CDataReader() {
 	DeleteCriticalSection(&m_csReadFrame);
 }
 
-int CDataReader::Initialize(tstring strDataFilePath) {
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nBufferSize = config.nBufferSize;
-
+int CDataReader::Initialize(tstring strDataFilePath, int nDataSize) {
 	if (strDataFilePath.empty()) return 0;
+	if (nDataSize <= 0) return 0;
 
+	m_nDataSize = nDataSize;
 	finalize();
 
 	std::ifstream ifs(strDataFilePath, std::ifstream::ate | std::ifstream::binary);
@@ -29,7 +27,7 @@ int CDataReader::Initialize(tstring strDataFilePath) {
 
 	if (nFileSize <= 0) return 0;
 
-	m_nNumOfSamples = (nFileSize / (nBufferSize * sizeof(unsigned short)));
+	m_nNumOfSamples = (nFileSize / (m_nDataSize * sizeof(unsigned short)));
 	m_pReadSamples = new unsigned short* [m_nNumOfSamples];
 	for (int i = 0; i < m_nNumOfSamples; i++) {
 		m_pReadSamples[i] = NULL;
@@ -73,8 +71,6 @@ void CDataReader::finalize() {
 	}
 }
 bool CDataReader::readFrame(int nIndex) {
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nBufferSize = config.nBufferSize;
 	DWORD dwBytesRead = 0;
 	bool result = true;
 
@@ -83,13 +79,13 @@ bool CDataReader::readFrame(int nIndex) {
 	EnterCriticalSection(&m_csReadFrame);
 	if (m_pReadSamples[nIndex] == NULL) {
 		if(m_pReadSamples[nIndex] == NULL){
-			m_pReadSamples[nIndex] = new unsigned short[nBufferSize];
+			m_pReadSamples[nIndex] = new unsigned short[m_nDataSize];
 
-			long long offset = nBufferSize * sizeof(unsigned short) * nIndex;
+			long long offset = m_nDataSize * sizeof(unsigned short) * nIndex;
 			long offsetL = 0xFFFFFFFF & offset;
 			long offsetH = 0xFFFFFFFF & (offset >> 32);
 			SetFilePointer(m_hFile, offsetL, &offsetH, FILE_BEGIN);
-			result = ReadFile(m_hFile, m_pReadSamples[nIndex], nBufferSize * sizeof(unsigned short), &dwBytesRead, NULL);
+			result = ReadFile(m_hFile, m_pReadSamples[nIndex], m_nDataSize * sizeof(unsigned short), &dwBytesRead, NULL);
 		}
 	}
 	LeaveCriticalSection(&m_csReadFrame);

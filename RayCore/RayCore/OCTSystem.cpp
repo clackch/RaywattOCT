@@ -79,9 +79,9 @@ RayError COCTSystem::Start() {
 	m_pImagingRealtime->Start();
 
 	m_pVolume = new CVolumeGenerator();
-	m_pVolume->Initialize(config.nCircleSize, config.nCircleSize, config.volume.size, config.volume.size);
+	m_pVolume->Initialize(config.imaging.nCircleSize, config.imaging.nCircleSize, config.volume.size, config.volume.size);
 
-	m_pAcqDevice = new CATSDevice();
+	m_pAcqDevice = new CATSDevice(config.acquisition);
 	m_pAcqDevice->SetImaging(m_pImagingRealtime);
 
 	return RayError::OK;
@@ -364,7 +364,7 @@ RayError COCTSystem::StartLiveView()
 		CConfiguration& config = CConfiguration::GetInstance();
 
 		pLaser->LaserOnOff(true);
-		pMotorCtrl->PerfomRun(config.motor.velocityLiveView);
+		pMotorCtrl->PerfomRun(config.bldcMotor.velocityLiveView);
 
 		return RayError::OK;
 	}
@@ -925,21 +925,21 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	CZaberController* pZaber = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
 
 	CDataWriter *pDataWriter = new CDataWriter();
-	pDataWriter->Initialize(config.nBufferSize * sizeof(unsigned short));
+	pDataWriter->Initialize(config.acquisition.nBufferSize * sizeof(unsigned short));
 	pSystem->m_pAcqDevice->SetWriter(pDataWriter);
 
 	// 1. Motor ON
-	pMotor->PerfomRun(config.motor.velocityPullback);
-	Sleep(config.motor.settleDown);
+	pMotor->PerfomRun(config.bldcMotor.velocityPullback);
+	Sleep(config.bldcMotor.settleDown);
 
-	pZaber->SetSpeed(config.zaber.pullbackSpeed);
+	pZaber->SetSpeed(config.stepMotor.pullbackSpeed);
 
 	// 2. Start Recording OCT
 	pDataWriter->StartRecording();
 
 	// 3. Pullback Linear Stage
 	if (pZaber->IsOpen()) {
-		pZaber->MoveRelative(config.zaber.pullbackDistance * -1);
+		pZaber->MoveRelative(config.stepMotor.pullbackDistance * -1);
 		while (pSystem->m_pThreadRotaryJunction->isRun) {
 			if (pZaber->GetZaberStatus()) {
 				break;
@@ -1063,7 +1063,7 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 
 	pSystem->startAcqDevice();
 	pLaser->LaserOnOff(true);
-	pMotor->PerfomRun(config.motor.velocityLiveView);
+	pMotor->PerfomRun(config.bldcMotor.velocityLiveView);
 
 	// To-Do: determine image verification
 	bool verified = true;
@@ -1157,7 +1157,7 @@ int COCTSystem::connectRotaryJunction() {
 	bool result = true;
 	
 	if (!pLinearStage->IsOpen()) {
-		result &= pLinearStage->Open(config.zaber.pullback);
+		result &= pLinearStage->Open(config.stepMotor.pullback);
 	}
 
 	if (!pMotor->IsConnected()) {

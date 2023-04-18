@@ -8,7 +8,24 @@ class IDataManager;
 class CThread;
 class IAcquisitionDevice
 {
+public:
+	class Setting {
+	public:
+		unsigned int nAScan;
+		unsigned int nBScan;
+		unsigned int nBufferSize;
+		unsigned int nLaserSpeed;
+		unsigned int nBufferCount;
+		unsigned int msTimeOut;
+		unsigned int nTriggerDelaySample;
+		bool bUseKClock;
+		double usGoodClockDuration;
+		double usBadClockDuration;
+	};
+
 protected:
+	Setting m_setting;
+
 	bool m_isInit;
 	CThread *m_pThread;
 
@@ -18,7 +35,7 @@ protected:
 	std::chrono::system_clock::time_point m_start, m_end;
 	double m_fps;
 public:
-	IAcquisitionDevice();
+	IAcquisitionDevice(Setting);
 	virtual ~IAcquisitionDevice();
 
 	bool IsInit() { return m_isInit; }

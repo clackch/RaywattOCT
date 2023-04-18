@@ -35,8 +35,9 @@ CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSess
 }
 
 CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSession, const char* strFilePath) {
+	CConfiguration& config = CConfiguration::GetInstance();
 	CDataReader* pReader = new CDataReader();
-	int nNumOfSamples = pReader->Initialize(CUtility::StringToWstring(strFilePath));
+	int nNumOfSamples = pReader->Initialize(CUtility::StringToWstring(strFilePath), config.acquisition.nBufferSize);
 
 	if (pMsg == nullptr || nNumOfSamples <= 0) {
 		delete pReader;
@@ -47,8 +48,8 @@ CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSess
 }
 
 COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg) {
-	COCTImaging* pImaging = new COCTImaging(msg);
 	CConfiguration& config = CConfiguration::GetInstance();
+	COCTImaging* pImaging = new COCTImaging(config.imaging, msg);
 
 	pImaging->Initialize(_T("CALIBRATION.DAT"));
 	pImaging->SetColor(true);
@@ -146,12 +147,13 @@ UINT CImagingSession::GetCutViewChannels() {
 }
 
 CImagingSession* CImagingSession::createSession(CMessageService* pMsg, int nSession, IDataManager* pData, bool deleteData) {
+	CConfiguration& config = CConfiguration::GetInstance();
 	CImagingSession* pSession = new CImagingSession(pMsg, nSession, deleteData);
 
 	pSession->m_pDataManager = pData;
 	pSession->m_pImaging = CreateColorImaging(pMsg);
 	pSession->m_pImaging->SetSession(nSession);
-	pSession->m_pSimDevice = new CSimulateDevice(pData);
+	pSession->m_pSimDevice = new CSimulateDevice(config.acquisition, pData);
 	pSession->m_pSimDevice->InitDevice();
 	pSession->m_pSimDevice->SetImaging(pSession->m_pImaging);
 

@@ -1,6 +1,5 @@
 ﻿#include "OCTImaging.h"
 #include "Calibration.h"
-#include "Configuration.h"
 #include "Utility.h"
 #include "MessageService.h"
 #include "opencv2/opencv.hpp"
@@ -25,7 +24,8 @@ void ippsRelease_double_ptr(void**& ptr, int dim) {
 	}
 }
 
-COCTImaging::COCTImaging(CMessageService* pMsg) {
+COCTImaging::COCTImaging(Setting setting, CMessageService* pMsg) {
+	m_setting = setting;
 	m_msg = pMsg;
 
 	m_pThread = nullptr;
@@ -57,6 +57,8 @@ COCTImaging::COCTImaging(CMessageService* pMsg) {
 
 	m_nCurFrame = 0;
 	m_nTotalFrame = 0;
+
+	m_nSheathPosition = 0;
 }
 
 COCTImaging::~COCTImaging() {
@@ -65,24 +67,20 @@ COCTImaging::~COCTImaging() {
 }
 
 void COCTImaging::Initialize(tstring calibFile) {
-	CConfiguration& config = CConfiguration::GetInstance();
-
 	releaseMemory();
 	allocateMemory();
-	calibration->Initialize(calibFile);
+	calibration->Initialize(calibFile, m_setting.nAScan, m_setting.nFFTLength);
 
 	releaseCircularizeMap();
-	initCircularizeMap(config.nOutputLength, config.nBScan, config.nOutputLength, config.nCircleSize, config.nCircleSize, 2.0f);
+	initCircularizeMap(m_setting.nOutputLength, m_setting.nBScan, m_setting.nOutputLength, m_setting.nCircleSize, m_setting.nCircleSize, 2.0f);
 
-	m_nWidth = config.nCircleSize;
-	m_nHeight = config.nCircleSize;
+	m_nWidth = m_setting.nCircleSize;
+	m_nHeight = m_setting.nCircleSize;
 	m_nChannels = 3;	// RGB
 
 	loadLUT("LUT.csv");
 }
 void COCTImaging::Process(USHORT* fringes) {
-	CConfiguration& config = CConfiguration::GetInstance();
-
 	if (fringes == nullptr) return;
 
 	generateBackground((Ipp16u*)fringes);
@@ -118,16 +116,13 @@ void COCTImaging::DoAsyncRender(USHORT* fringes) {
 void COCTImaging::allocateMemory() {
 	// ORDER = 11, nFFTLength = 2^11
 	// nScans 보다 큰 2^n 중에서 제일 작은 수
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nAScan = config.nAScan;
-	const int nAScanWithPadding = config.nAScan + config.nAScanPadding;
-	const int nBScan = config.nBScan;
-	const int nFFTOrder = config.nFFTOrder;
-	const int nFFTLength = config.nFFTLength;
-	const int nOutputLength = config.nOutputLength;
-	const int nBufferSize = config.nBufferSize;
-	const int nScopeLength = config.getScopeLength();
-	const int nCircleSize = config.nCircleSize;
+	const int nAScan = m_setting.nAScan;
+	const int nBScan = m_setting.nBScan;
+	const int nFFTOrder = m_setting.nFFTOrder;
+	const int nFFTLength = m_setting.nFFTLength;
+	const int nOutputLength = m_setting.nOutputLength;
+	const int nBufferSize = m_setting.nBufferSize;
+	const int nCircleSize = m_setting.nCircleSize;
 
 	fringes32f = ippsMalloc_32f(nAScan * nBScan);
 	fringes32fAverage = ippsMalloc_32f(nAScan);
@@ -148,8 +143,6 @@ void COCTImaging::allocateMemory() {
 	ippsFFTInitAlloc_C_32fc(&fftSpecSecond, nFFTOrder - 1, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
 }
 void COCTImaging::releaseMemory() {
-	CConfiguration& config = CConfiguration::GetInstance();
-
 	if (fringes32f) { ippsFree(fringes32f); fringes32f = nullptr; }
 	if (fringes32fAverage) { ippsFree(fringes32fAverage); fringes32fAverage = nullptr; }
 
@@ -197,9 +190,8 @@ void COCTImaging::releaseCircularizeMap() {
 }
 
 void COCTImaging::generateBackground(Ipp16u* fringes) {
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nWidth = config.nAScan;
-	const int nHeight = config.nBScan;
+	const int nWidth = m_setting.nAScan;
+	const int nHeight = m_setting.nBScan;
 
 	// 모든 fringe의 평균으로 background를 계산한다. 
 	ippsZero_32f(fringes32fAverage, nWidth);
@@ -213,12 +205,11 @@ void COCTImaging::generateBackground(Ipp16u* fringes) {
 	ippsMulC_32f_I(1.0f / ((float)nHeight), fringes32fAverage, nWidth);
 }
 void COCTImaging::fftProcessing(const Ipp32f* fringes32f) {
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nAScan = config.nAScan, nBScan = config.nBScan;
-	const int numDynamic = config.settingsOpenMP.numDynamic;
-	const int numThreads = config.settingsOpenMP.numThread;
-	const int nFFTLength = config.nFFTLength;
-	const int nOutputLength = config.nOutputLength;
+	const int numDynamic = 1;
+	const int numThreads = 8;
+	const int nAScan = m_setting.nAScan, nBScan = m_setting.nBScan;
+	const int nFFTLength = m_setting.nFFTLength;
+	const int nOutputLength = m_setting.nOutputLength;
 
 	// Process Frame
 	// To-Do : enable openmp, check shared variables
@@ -269,19 +260,17 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f) {
 
 }
 void COCTImaging::computeLogarithm(Ipp32f* src, Ipp32f* dst) {
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nBScan = config.nBScan;
-	const int nOutputLength = config.nOutputLength;
+	const int nBScan = m_setting.nBScan;
+	const int nOutputLength = m_setting.nOutputLength;
 
 	ippsLn_32f(src, dst, nOutputLength * nBScan);
 	ippsMulC_32f(dst, log10(exp(1)) * 10, dst, nOutputLength * nBScan);
 }
 
 void COCTImaging::findSheath(Ipp32f* logaritihmData) {
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nBScan = config.nBScan;
-	const int nFFTLength = config.nFFTLength;
-	const int nOutputLength = config.nOutputLength;
+	const int nBScan = m_setting.nBScan;
+	const int nFFTLength = m_setting.nFFTLength;
+	const int nOutputLength = m_setting.nOutputLength;
 	const int minPeakHeight = 1500.f;
 	const int distBetweenLayer = 24;
 
@@ -327,12 +316,11 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 }
 
 void COCTImaging::generateImage(Ipp32f* logaritihmData, bool bInvert){
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nBScan = config.nBScan;
-	const float fHighLevel = (bInvert) ? config.imaging.highLevel : 0.0f;
-	const float fLowLevel = (bInvert) ? config.imaging.lowLevel : 0.0f;
-	const int nFFTLength = config.nFFTLength;
-	const int nOutputLength = config.nOutputLength;
+	const int nBScan = m_setting.nBScan;
+	const float fHighLevel = (bInvert) ? m_setting.highLevel : 0.0f;
+	const float fLowLevel = (bInvert) ? m_setting.lowLevel : 0.0f;
+	const int nFFTLength = m_setting.nFFTLength;
+	const int nOutputLength = m_setting.nOutputLength;
 
 	for (int i = 0; i < nBScan; i++)
 	{
@@ -353,21 +341,11 @@ void COCTImaging::postProcessing() {
 
 	cv::convertScaleAbs(imageResultColor, imageResultColor, m_fContrast, m_fBrightness);
 
-	if (m_bShowCalibGuide) {
-		CConfiguration& config = CConfiguration::GetInstance();
-		drawGuideLine(imageResultColor, config.measurementValues.nSheathPosition, cv::Scalar(0xff, 0xcc, 0x33));
-		drawGuideLine(imageResultColor, m_nSheathPosition, cv::Scalar(0xff, 0xff, 0xff));
-	}
-
-	//cv::rectangle(imageResultColor, cv::Rect(0, 0, 100, imageResultColor.rows), m_backgroundColor, cv::FILLED);
-
 	circularizeImage(imageResultColor, imageCircle);
 }
 
 void COCTImaging::circularizeImage(cv::Mat& src, cv::Mat& dst)
 {
-	CConfiguration& config = CConfiguration::GetInstance();
-
 	cv::remap(src, dst, matXMap, matYMap, cv::INTER_LINEAR);
 }
 

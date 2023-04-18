@@ -15,7 +15,7 @@ private:
 	U16 *	m_pPrevBuffer;
 
 public:
-	CATSDevice();
+	CATSDevice(Setting);
 	virtual ~CATSDevice();
 
 	virtual int InitDevice();

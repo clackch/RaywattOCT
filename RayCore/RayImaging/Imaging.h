@@ -1,6 +1,23 @@
 #pragma once
 
 class IImaging {
+public:
+	class Setting {
+	public:
+		int nAScan;		// Axial Scan (z-Depth)
+		int nBScan;		// Number of A-Scan (Transverse)
+		int nBufferSize;
+		int nCircleSize;
+		int nFFTOrder;
+		int nFFTLength;
+		int nOutputLength;
+
+		float brightness;
+		float contrast;
+		float lowLevel;
+		float highLevel;
+	};
+
 private:
 	unsigned int m_nSession;
 protected:

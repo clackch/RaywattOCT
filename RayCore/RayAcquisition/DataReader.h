@@ -4,6 +4,8 @@
 class CDataReader : public IDataManager
 {
 private:
+	int m_nDataSize;
+
 	unsigned short** m_pReadSamples;
 	HANDLE m_hFile;
 
@@ -12,7 +14,7 @@ public:
 	CDataReader();
 	virtual ~CDataReader();
 
-	int Initialize(tstring strDataFilePath);
+	int Initialize(tstring strDataFilePath, int nDataSize);
 	virtual unsigned short* GetSample(int nIndex);
 	virtual void AddFrame(void* pFrame) {}
 
