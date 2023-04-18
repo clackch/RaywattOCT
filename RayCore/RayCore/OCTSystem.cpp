@@ -1092,7 +1092,6 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 */
 bool COCTSystem::checkConnection() {
 	bool result = true;
-	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
 	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
 	
@@ -1253,7 +1252,6 @@ void COCTSystem::closeAllSessions() {
 * OnMsgUpdateScannerState
 */
 LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
-	CConfiguration& config = CConfiguration::GetInstance();
 	m_prevState = m_curState;
 	m_curState = (RayScannerState)wParam;
 
@@ -1306,7 +1304,6 @@ LRESULT COCTSystem::OnMsgUpdateSaveRaw(WPARAM wParam, LPARAM lParam) {
 * OnMsgUpdateCatheterState
 */
 LRESULT COCTSystem::OnMsgUpdateCatheterState(WPARAM wParam, LPARAM lParam) {
-	CConfiguration& config = CConfiguration::GetInstance();
 	m_cathState = (CatheterState)wParam;
 
 	CUtility::StopThread(m_pThreadRotaryJunction);
