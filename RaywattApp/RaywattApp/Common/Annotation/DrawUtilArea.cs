@@ -61,26 +61,14 @@ namespace RaywattApp.Common.Annotation
         {
             _log.Debug("area_canvas_MouseLeave");
 
-            if (this.isDrawing)
+            if (this.isDrawing && this.isCanvasClicked)
             {
-                //this.pointList = null;
-                this.isDrawing = false;
-                this.groupFirst = false;
+                this.pointList.Clear();
+                this.groupFirst = true;
                 this.isCanvasClicked = false;
 
                 DeleteCurve(this.areaGeometrys.Count);
                 DeleteRectagle(this.areaGeometrys.Count);
-
-                DeleteAreaAll();
-                DrawAreaAll();
-
-                //Canvas 마우스 이벤트 비활성화
-                this.canvas.MouseLeftButtonDown -= area_canvas_MouseLeftButtonDown;
-                this.canvas.MouseMove -= area_canvas_MouseMove;
-                this.canvas.MouseLeave -= area_canvas_MouseLeave;
-
-                this.canvas.Background = null;
-                MouseCursor = 0;
             }
         }
 
@@ -101,6 +89,40 @@ namespace RaywattApp.Common.Annotation
             }
 
             DrawRectangle(this.pointList, false, this.areaGeometrys.Count);
+        }
+
+        private void area_canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            _log.Debug("area_canvas_MouseRightButtonDown");
+
+            if (this.isDrawing)
+            {
+                if (this.pointList.Count > 2)
+                {
+                    this.pointList.RemoveAt(this.pointList.Count - 1);
+                    this.pointList.RemoveAt(this.pointList.Count - 1);
+
+                    Point point = e.GetPosition(this.canvas);
+                    this.pointList.Add(point);
+
+                    DrawCurve(this.pointList, false, this.areaGeometrys.Count);
+                    DrawRectangle(this.pointList, false, this.areaGeometrys.Count);
+                }
+                else if(this.pointList.Count == 2)//Point 1개 일 경우(마우스 따라다니는 Point가 1개 더 있어서 Count가 2)
+                {
+                    this.pointList.Clear();
+                    this.groupFirst = true;
+                    this.isCanvasClicked = false;
+
+                    DeleteCurve(this.areaGeometrys.Count);
+                    DeleteRectagle(this.areaGeometrys.Count);
+                }
+                else//Point 없을 경우, Disable Command 처리
+                {
+                    DisableCommand();
+                    CommandOff = true;
+                }
+            }
         }
 
         private void area_canvas_MouseMove(object sender, MouseEventArgs e)
@@ -131,6 +153,37 @@ namespace RaywattApp.Common.Annotation
 
             if (this.isDrawing)
                 return;
+
+            if (this.isErasing)
+            {
+                Rectangle rectangle = sender as Rectangle;
+                string[] tempArr = rectangle.Name.Split('_');
+                int group = int.Parse(tempArr[1]);
+                int index = int.Parse(tempArr[2]);
+
+                //Point 삭제
+                if (this.areaGeometrys[group].Points.Count > 3)
+                {
+                    this.areaGeometrys[group].Points.RemoveAt(index);
+
+                    DrawCurve(this.areaGeometrys[group]);
+
+                    DrawRectangle(this.areaGeometrys[group]);
+                }
+                else//Area 삭제(Point 3개 이하 일 경우)
+                {
+                    DeleteAreaAll();
+
+                    for (int i = group + 1; i < this.areaGeometrys.Count; i++)
+                    {
+                        this.areaGeometrys[i].Group--;
+                    }
+                    this.areaGeometrys.RemoveAt(group);
+
+                    DrawAreaAll();
+                }
+                return;
+            }
 
             this.isRectClicked = true;
             Mouse.Capture((FrameworkElement)sender);
@@ -212,20 +265,15 @@ namespace RaywattApp.Common.Annotation
             DrawCurve(areaGeometry);
             DrawRectangle(areaGeometry);
 
-            //Canvas 마우스 이벤트 비활성화
-            this.canvas.MouseLeftButtonDown -= area_canvas_MouseLeftButtonDown;
-            this.canvas.MouseMove -= area_canvas_MouseMove;
-            this.canvas.MouseLeave -= area_canvas_MouseLeave;
-
-            this.canvas.Background = null;
-            MouseCursor = 0;
+            DisableCommand();
+            CommandOff = true;
         }
 
         private void rectangle_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             _log.Debug("rectangle_MouseRightButtonDown");
 
-            if (this.isDrawing)
+            if (this.isDrawing || this.isErasing)
                 return;
 
             Rectangle rectangle = sender as Rectangle;
@@ -297,11 +345,14 @@ namespace RaywattApp.Common.Annotation
         }
 
         //---------------------------------------------------------------------------------------------------- Function
-        private void AddArea()
+        private void AddArea(string isAreaOn)
         {
             _log.Debug("AddArea");
 
-            if (!this.isDrawing)
+            if(CommandType != 0)
+                DisableCommand();
+
+            if(Convert.ToBoolean(isAreaOn))
             {
                 this.pointList = new List<Point>();
                 this.isDrawing = true;
@@ -311,9 +362,10 @@ namespace RaywattApp.Common.Annotation
                 this.canvas.MouseLeftButtonDown += area_canvas_MouseLeftButtonDown;
                 this.canvas.MouseMove += area_canvas_MouseMove;
                 this.canvas.MouseLeave += area_canvas_MouseLeave;
+                this.canvas.MouseRightButtonDown += area_canvas_MouseRightButtonDown;
 
                 this.canvas.Background = Brushes.Transparent;
-                MouseCursor = 1;
+                CommandType = Constants.MeasureCmdArea;
             }
         }
 
@@ -364,7 +416,7 @@ namespace RaywattApp.Common.Annotation
                 path.Stroke = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
                 path.Name = constCurve + "_" + group;
 
-                if (this.isDrawing)
+                if (!isClosed)
                 {
                     path.StrokeDashArray.Add(2);
                 }
