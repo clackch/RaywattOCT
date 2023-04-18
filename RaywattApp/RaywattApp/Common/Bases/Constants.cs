@@ -291,18 +291,18 @@ namespace RaywattApp.Common.Bases
         public const double SelectPreCaseExpandSize = 460;
 
         //Measurement
-        public const string MeasureDrawAll = "DR";  //Draw All
-        public const string MeasureDeleteAll = "DE";  //Delete All
-        public const string MeasureAddArea = "AA";  //Add Area
-        public const string MeasureAddLength = "AL";  //Add Length
-        public const string MeasureAddText = "AT";  //Add Text
-        public const string MeasureErasePoint = "ET";  //Erase Point
-        public const string MeasureDeleteArea = "A_";  //(Grid) Delete Area
-        public const string MeasureDeleteLength = "L_";  //(Grid) Delete Length
-        public const string MeasureDeleteLongitudeLength = "M_";  //(Grid) Delete Longitude Length
-        public const string MeasureDisableLength = "DL";  //Disable Length
-        public const string MeasureDisableText = "DT";  //Disable Text
-        public const string MeasureDisableErase = "DD";  //Disable Erase
+        public const string MeasureDrawAll = "DrawAll";  //Draw All
+        public const string MeasureDeleteAll = "DeleteAll";  //Delete All
+        public const string MeasureAddArea = "AddArea";  //Add Area
+        public const string MeasureAddLength = "AddLength";  //Add Length
+        public const string MeasureAddText = "AddText";  //Add Text
+        public const string MeasureErasePoint = "ErasePoint";  //Erase Point
+        public const string MeasureDeleteArea = "GridDeleteArea";  //(Grid) Delete Area
+        public const string MeasureDeleteLength = "GridDeleteLength";  //(Grid) Delete Length
+        public const string MeasureDeleteLongitudeLength = "GridDeleteLongitudeLength";  //(Grid) Delete Longitude Length
+        public const string MeasureDisableLength = "DisableLength";  //Disable Length
+        public const string MeasureDisableText = "DisableText";  //Disable Text
+        public const string MeasureDisableErase = "DisableErase";  //Disable Erase
 
         //Draw Annotation
         public static Brush[] AnnotationBrushes = {
