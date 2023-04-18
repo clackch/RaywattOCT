@@ -140,16 +140,16 @@ void CRotaryJunctionDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 		CConfiguration &config = CConfiguration::GetInstance();
 		CString strBuffer = _T("");
 
-		GetDlgItem(IDC_EDIT_PULLBACK_ZABER_PORT)->SetWindowText(config.zaber.pullback);
-		GetDlgItem(IDC_EDIT_INTERFEROMETER_ZABER_PORT)->SetWindowText(config.zaber.interferometer);
+		GetDlgItem(IDC_EDIT_PULLBACK_ZABER_PORT)->SetWindowText(config.stepMotor.pullback);
+		GetDlgItem(IDC_EDIT_INTERFEROMETER_ZABER_PORT)->SetWindowText(config.stepMotor.delayline);
 
-		strBuffer.Format(_T("%d"), config.zaber.pullbackDistance);
+		strBuffer.Format(_T("%d"), config.stepMotor.pullbackDistance);
 		GetDlgItem(IDC_EDIT_ZABER_DISTANCE)->SetWindowText(strBuffer);
 
-		strBuffer.Format(_T("%d"), config.zaber.pullbackSpeed);
+		strBuffer.Format(_T("%d"), config.stepMotor.pullbackSpeed);
 		GetDlgItem(IDC_EDIT_ZABER_VELOCITY)->SetWindowText(strBuffer);
 
-		strBuffer.Format(_T("%d"), config.motor.velocityPullback);
+		strBuffer.Format(_T("%d"), config.bldcMotor.velocityPullback);
 		GetDlgItem(IDC_EDIT_MOTOR_VELOCITY)->SetWindowText(strBuffer);
 	}
 }
@@ -235,16 +235,16 @@ void CRotaryJunctionDlg::OnBnClickedButtonSaveSettings()
 	CString strBuffer = _T("");
 
 	GetDlgItem(IDC_EDIT_ZABER_DISTANCE)->GetWindowText(strBuffer);
-	config.zaber.pullbackDistance = _ttoi(strBuffer);
+	config.stepMotor.pullbackDistance = _ttoi(strBuffer);
 
 	GetDlgItem(IDC_EDIT_ZABER_VELOCITY)->GetWindowText(strBuffer);
-	config.zaber.pullbackSpeed = _ttoi(strBuffer);
+	config.stepMotor.pullbackSpeed = _ttoi(strBuffer);
 
 	GetDlgItem(IDC_EDIT_MOTOR_VELOCITY)->GetWindowText(strBuffer);
-	config.motor.velocityPullback = _ttoi(strBuffer);
+	config.bldcMotor.velocityPullback = _ttoi(strBuffer);
 
-	config.SaveZaberSettings();
-	config.SaveMotorSettings();
+	config.SaveStepMotorSettings();
+	config.SaveBLDCMotorSettings();
 }
 
 
