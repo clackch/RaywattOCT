@@ -34,6 +34,11 @@ public:
 	USHORT width;
 	USHORT height;
 	USHORT frames;
+
+	static int Size()
+	{
+		return sizeof(Bit) + sizeof(Type) + sizeof(DataType) + sizeof(Channels) + (sizeof(USHORT) * 3);
+	}
 };
 
 class IDataManager
