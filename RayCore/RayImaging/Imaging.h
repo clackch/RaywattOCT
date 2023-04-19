@@ -16,6 +16,21 @@ public:
 		float contrast;
 		float lowLevel;
 		float highLevel;
+		
+		void Set(int nAScan, int nBScan)
+		{
+			this->nAScan = nAScan;
+			this->nBScan = nBScan;
+			this->nBufferSize = (this->nBScan * this->nAScan);
+			this->nFFTOrder = 1;
+			this->nFFTLength = 1 << this->nFFTOrder;
+			while (this->nFFTLength < this->nAScan) { // AScan 보다 큰 2^n 중에서 제일 작은 수
+				this->nFFTOrder++;
+				this->nFFTLength = 1 << this->nFFTOrder;
+			}
+			this->nOutputLength = this->nFFTLength / 2;
+			this->nCircleSize = this->nOutputLength;
+		}
 	};
 
 private:

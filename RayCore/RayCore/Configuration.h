@@ -47,8 +47,8 @@ public:
 	bool isInit;
 	tstring configFilePath;
 
-	IImaging::Setting imaging;
 	IAcquisitionDevice::Setting acquisition;
+	IImaging::Setting imaging;
 	COCTMeasurement::Setting measurement;
 	StepMotorSetting stepMotor;
 	BLDCMotorSetting bldcMotor;

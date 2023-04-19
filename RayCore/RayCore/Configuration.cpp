@@ -24,21 +24,13 @@ void CConfiguration::Initialize(tstring configFile)
 	configFilePath = configFile;
 
 	// [Imaging]
-	this->imaging.nAScan = ::GetPrivateProfileInt(_T("Imaging"), _T("AScan"), 1920, configFilePath.c_str());
-	this->imaging.nBScan = ::GetPrivateProfileInt(_T("Imaging"), _T("BScan"), 500, configFilePath.c_str());
-	this->imaging.nCircleSize = ::GetPrivateProfileInt(_T("Imaging"), _T("CircleSize"), 1024, configFilePath.c_str());
+	int nAScan = ::GetPrivateProfileInt(_T("Imaging"), _T("AScan"), 1920, configFilePath.c_str());
+	int nBScan = ::GetPrivateProfileInt(_T("Imaging"), _T("BScan"), 500, configFilePath.c_str());
+	this->imaging.Set(nAScan, nBScan);
 	this->imaging.lowLevel = getPrivateProfileFloat(_T("Imaging"), _T("LowLevel"), 40.0f, configFilePath.c_str());
 	this->imaging.highLevel = getPrivateProfileFloat(_T("Imaging"), _T("HighLevel"), 65.0f, configFilePath.c_str());
 	this->imaging.brightness = getPrivateProfileFloat(_T("Imaging"), _T("Brightness"), 0.f, configFilePath.c_str());
 	this->imaging.contrast = getPrivateProfileFloat(_T("Imaging"), _T("Contrast"), 0.875f, configFilePath.c_str());
-	this->imaging.nBufferSize = (this->imaging.nBScan * this->imaging.nAScan);
-	this->imaging.nFFTOrder = 1;
-	this->imaging.nFFTLength = 1 << this->imaging.nFFTOrder;
-	while (this->imaging.nFFTLength < this->imaging.nAScan) { // AScan 보다 큰 2^n 중에서 제일 작은 수
-		this->imaging.nFFTOrder++;
-		this->imaging.nFFTLength = 1 << this->imaging.nFFTOrder;
-	}
-	this->imaging.nOutputLength = this->imaging.nFFTLength / 2;
 
 	// [Measurement]
 	this->measurement.fAxialResolutionScale = getPrivateProfileFloat(_T("Measurement"), _T("AxialResolutionScale"), 8.3, configFilePath.c_str());
@@ -47,7 +39,7 @@ void CConfiguration::Initialize(tstring configFile)
 	this->measurement.fSheathRadius = getPrivateProfileFloat(_T("Measurement"), _T("SheathRadius"), 0.43, configFilePath.c_str());
 	this->measurement.nSheathPosition = measurement.fSheathRadius * 1000.f / measurement.fAxialResolutionScale;
 
-	// [Alazar]
+	// [Acquisition]
 	this->acquisition.nAScan = imaging.nAScan;
 	this->acquisition.nBScan = imaging.nBScan;
 	this->acquisition.nBufferSize = imaging.nBufferSize;
