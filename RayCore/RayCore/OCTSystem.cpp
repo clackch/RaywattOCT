@@ -816,12 +816,15 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 	int nFrame = 0;
 	pSystem->postMessage(WM_UPDATE_SAVE_RAW, 0, nNumOfSamples);
 
+	CConfiguration& config = CConfiguration::GetInstance();
 	pDataWriter->StartSave(strSaveFilePath);
+	pDataWriter->WriteHeader(OCTHeader::Type::TimeSignal, OCTHeader::DataType::UShort, OCTHeader::Channels::Single, config.acquisition.nAScan, config.acquisition.nBScan);
 	for (nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadSaveRaw->isRun; nFrame++) {
 		pDataWriter->WriteFrame(nFrame);
 
 		pSystem->postMessage(WM_UPDATE_SAVE_RAW, nFrame + 1, nNumOfSamples);
 	}
+	pDataWriter->WriteEOF();
 	pDataWriter->StopSave();
 
 	pSystem->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::SaveRawData);
