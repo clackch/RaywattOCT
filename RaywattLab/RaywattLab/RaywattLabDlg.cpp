@@ -788,9 +788,9 @@ void CRaywattLabDlg::OnBnClickedButtonLoadSelectedData()
 		m_listPatientData.GetText(nSelected, strFileName);
 		strFilePath.Format(_T("%s/%s"), m_strPatientPath, strFileName);
 
-		m_pDataReader->Initialize(strFilePath.GetBuffer(), config.imaging.nBufferSize);
+		m_pDataReader->Initialize(strFilePath.GetBuffer(), config.imaging.nBufferSize, 0);
 		if (m_pSimDevice == nullptr) {
-			m_pSimDevice = new CSimulateDevice(config.acquisition, m_pDataReader);
+			m_pSimDevice = new CSimulateDevice(m_pDataReader);
 			m_pSimDevice->SetImaging(m_pImagingSimulate);
 		}
 		result = m_pSimDevice->InitDevice();
@@ -933,7 +933,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveVideo()
 	CLabImaging* pImaging = createImaging();
 
 	CDataReader* pReader = new CDataReader();
-	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nBufferSize);
+	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nBufferSize, 0);
 
 	CVideoWriter videoWriter;
 	bool isCircle = (m_radioImageShape == 0);
@@ -972,7 +972,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveTif()
 	CLabImaging* pImaging = createImaging();
 
 	CDataReader* pReader = new CDataReader();
-	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nBufferSize);
+	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nBufferSize, 0);
 
 	CTIFFWriter tiffWriter(strTifPath);
 	bool isCircle = (m_radioImageShape == 0);
@@ -1009,7 +1009,7 @@ void CRaywattLabDlg::OnBnClickedButtonSavePng()
 	CLabImaging* pImaging = createImaging();
 
 	CDataReader* pReader = new CDataReader();
-	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nBufferSize);
+	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nBufferSize, 0);
 
 	bool isCircle = (m_radioImageShape == 0);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
