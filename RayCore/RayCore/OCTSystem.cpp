@@ -74,7 +74,7 @@ RayError COCTSystem::Start() {
 
 	CUtility::StartThread(threadService, m_pThreadService, this);
 
-	m_pImagingRealtime = CImagingSession::CreateColorImaging(this);
+	m_pImagingRealtime = CImagingSession::CreateColorImaging(this, config.imaging);
 	m_pImagingRealtime->SetSession(SESSION_REVIEW);
 	m_pImagingRealtime->Start();
 
@@ -844,7 +844,8 @@ UINT COCTSystem::threadGenerateVolume(LPVOID param) {
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
 	// prepare imaging
-	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr);
+	CConfiguration& config = CConfiguration::GetInstance();
+	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr, config.imaging);
 
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadGenerateVolume->isRun; nFrame++) {
 		unsigned short* pBuffer = pDataManager->GetSample(nFrame);
@@ -875,7 +876,8 @@ UINT COCTSystem::threadLumenDetection(LPVOID param) {
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
 	// prepare imaging
-	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr);
+	CConfiguration& config = CConfiguration::GetInstance();
+	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr, config.imaging);
 
 	vLumen.clear();
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadLumenDetection->isRun; nFrame++) {

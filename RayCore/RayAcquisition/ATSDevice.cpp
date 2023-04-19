@@ -2,7 +2,7 @@
 #include "ATSDevice.h"
 
 CATSDevice::CATSDevice(Setting setting)
-	: IAcquisitionDevice(setting)
+	: m_setting(setting)
 {
 	m_hATSBoard = NULL;
 	m_nBufferIndex = 0;

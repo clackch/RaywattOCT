@@ -2,9 +2,8 @@
 #include "SimulateDevice.h"
 #include "DataManager.h"
 
-CSimulateDevice::CSimulateDevice(Setting setting, IDataManager* pDataReader)
-	: IAcquisitionDevice(setting),
-	m_pDataReader(pDataReader){
+CSimulateDevice::CSimulateDevice(IDataManager* pDataReader)
+	: m_pDataReader(pDataReader){
 	m_nCurSampleIndex = 0;
 	m_bPause = true;
 }

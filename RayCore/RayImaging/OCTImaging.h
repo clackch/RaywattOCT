@@ -82,6 +82,7 @@ public:
 
 	cv::Mat GetCircleImage() { return imageCircle; }
 	USHORT* GetFringesBuffer() { return m_pFringesBuffer; }
+	Setting GetSetting() { return m_setting; }
 
 protected:
 	void allocateMemory();

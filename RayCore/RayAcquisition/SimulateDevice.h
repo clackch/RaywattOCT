@@ -11,7 +11,7 @@ private:
 	bool m_bPause;
 
 public:
-    CSimulateDevice(Setting, IDataManager*);
+    CSimulateDevice(IDataManager*);
     virtual ~CSimulateDevice();
 
 	virtual int InitDevice();

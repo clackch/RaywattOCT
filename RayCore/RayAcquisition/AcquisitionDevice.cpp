@@ -4,8 +4,7 @@
 #include "DataManager.h"
 #include "Utility.h"
 
-IAcquisitionDevice::IAcquisitionDevice(Setting setting)
-	: m_setting(setting)
+IAcquisitionDevice::IAcquisitionDevice()
 {
 	m_pThread = NULL;
 	m_isInit = false;

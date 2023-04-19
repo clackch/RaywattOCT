@@ -6,6 +6,8 @@ class CATSDevice :
 	public IAcquisitionDevice
 {
 private:
+	Setting m_setting;
+
 	HANDLE	m_hATSBoard;
 	double	m_dSamplePerSec;
 	U32		m_nBufferIndex;

@@ -24,8 +24,6 @@ public:
 	};
 
 protected:
-	Setting m_setting;
-
 	bool m_isInit;
 	CThread *m_pThread;
 
@@ -35,7 +33,7 @@ protected:
 	std::chrono::system_clock::time_point m_start, m_end;
 	double m_fps;
 public:
-	IAcquisitionDevice(Setting);
+	IAcquisitionDevice();
 	virtual ~IAcquisitionDevice();
 
 	bool IsInit() { return m_isInit; }

@@ -2,7 +2,11 @@
 
 #include "define.h"
 #include "Config.h"
+#include "Imaging.h"
 #include <opencv2/opencv.hpp>
+
+#define FILE_EXTENSION_RAW	"bin"
+#define FILE_EXTENSION_OCT	"oct"
 
 class CMessageService;
 class COCTImaging;
@@ -32,7 +36,7 @@ public:
 
 	static CImagingSession* CreateSession(CMessageService* pMsg, int nSession, IDataManager *pWriter);
 	static CImagingSession* CreateSession(CMessageService* pMsg, int nSession, const char* strFilePath);
-	static COCTImaging* CreateColorImaging(CMessageService* msg);
+	static COCTImaging* CreateColorImaging(CMessageService* msg, IImaging::Setting setting);
 
 	void EnableCutView(cv::Scalar backgroundColor);
 
@@ -60,7 +64,7 @@ public:
 	UINT GetCutViewChannels();
 
 private:
-	static CImagingSession* createSession(CMessageService* pMsg, int nSession, IDataManager* pData, bool deleteData);
+	static CImagingSession* createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData);
 	static UINT threadUpdateCutView(LPVOID param);	
 };
 
