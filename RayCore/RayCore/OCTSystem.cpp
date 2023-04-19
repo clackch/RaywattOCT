@@ -75,7 +75,7 @@ RayError COCTSystem::Start() {
 	CUtility::StartThread(threadService, m_pThreadService, this);
 
 	m_pImagingRealtime = CImagingSession::CreateColorImaging(this, config.imaging);
-	m_pImagingRealtime->SetSession(SESSION_REVIEW);
+	m_pImagingRealtime->SetSession(SESSION_REALTIME);
 	m_pImagingRealtime->Start();
 
 	m_pVolume = new CVolumeGenerator();
@@ -810,7 +810,7 @@ UINT COCTSystem::threadService(LPVOID param) {
 UINT COCTSystem::threadSaveRaw(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	tstring strSaveFilePath = pSystem->m_strFilePath;
-	CDataWriter* pDataWriter = (CDataWriter*)pSystem->m_reviewSession[SESSION_REVIEW]->GetDataManager();
+	CDataWriter* pDataWriter = (CDataWriter*)pSystem->m_reviewSession[SESSION_REALTIME]->GetDataManager();
 	const int nNumOfSamples = pDataWriter->GetNumOfSamples();
 
 	int nFrame = 0;

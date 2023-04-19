@@ -9,7 +9,8 @@
 
 typedef enum {
 	SESSION_UNKNOWN = -1,
-	SESSION_REVIEW = 0,	// RealTime, Review
+	SESSION_REALTIME = 0,
+	SESSION_REVIEW = 0,
 	SESSION_COMPARE,
 	MAX_SESSION_NUM
 }SessionType;
