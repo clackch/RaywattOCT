@@ -86,12 +86,12 @@ void CLabImaging::Process(USHORT* fringes) {
 		hasNewCalibration = false;
 	}
 
-	cropSignalData(fringes, goodClockStart, goodClockEnd);
-
 	// copy first line to display scope
 	ippsCopy_16s((Ipp16s*)fringes, (Ipp16s*)scopeData, nScopeLength);
 
 	generateBackground((Ipp16u*)fringes);
+
+	//cropSignalData(fringes, goodClockStart, goodClockEnd);
 
 	fftProcessing(fringes32f);
 	computeLogarithm(fFFTResult, logData);
