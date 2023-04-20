@@ -60,6 +60,7 @@ void CConfiguration::Initialize(tstring configFile)
 	this->settingsAlazar.bUseKClock = ::GetPrivateProfileInt(_T("Alazar"), _T("UseKClock"), 1, configFilePath.c_str());
 	this->settingsAlazar.usGoodClockDuration = getPrivateProfileFloat(_T("Alazar"), _T("GoodClockInMicroSecond"), 5.0, configFilePath.c_str());
 	this->settingsAlazar.usBadClockDuration = getPrivateProfileFloat(_T("Alazar"), _T("BadClockInMicroSecond"), 4.0, configFilePath.c_str());
+	this->settingsAlazar.bUseDES= ::GetPrivateProfileInt(_T("Alazar"), _T("UseDES"), 0, configFilePath.c_str());
 
 	// [Imaging]	
 	this->imaging.lowLevel = getPrivateProfileFloat(_T("Imaging"), _T("LowLevel"), 40.0f, configFilePath.c_str());

@@ -141,10 +141,16 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	const bool useKClock = config.settingsAlazar.bUseKClock;
 	const double secGoodClkDuration = config.settingsAlazar.usGoodClockDuration * 1e-6;
 	const double secBadClkDuration = config.settingsAlazar.usBadClockDuration * 1e-6;
+	const bool useDES = config.settingsAlazar.bUseDES;
 
 	// TODO: Specify the sample rate (see sample rate id below)
 	double dSamplePerSec = nAScan * nLaserSpeed;
 	dSamplePerSec = ceil((dSamplePerSec / 1000000.f)) * 1000000.f;
+
+	if (useDES) {
+		retCode = AlazarSetParameterUL(boardHandle, CHANNEL_A, SET_ADC_MODE, ADC_MODE_DES);
+		printf("Use DES Mode - %s\n", AlazarErrorToText(retCode));
+	}
 
 	printf("sample per sec : %.2f\n", dSamplePerSec);
 	printf("sample per frame : %d\n", nBufferSize);
@@ -156,10 +162,12 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	// - select clock source FAST_EXTERNAL_CLOCK, sample rate SAMPLE_RATE_USER_DEF, and connect a
 	//   100 MHz signal to the EXT CLK BNC connector.
 
+	double dutyCycle = 0.5f;	// maximum 50%
 	U32 srcClock = (useKClock) ? FAST_EXTERNAL_CLOCK : INTERNAL_CLOCK_10MHz_REF;
+	U32 rate = (useKClock) ? SAMPLE_RATE_USER_DEF : dSamplePerSec / dutyCycle;
 	retCode = AlazarSetCaptureClock(boardHandle,
 		srcClock,
-		dSamplePerSec,
+		rate,
 		CLOCK_EDGE_RISING,
 		0);
 	if (retCode != ApiSuccess)
@@ -278,7 +286,7 @@ BOOL CATSDevice::configureAcquisition(HANDLE boardHandle) {
 	U32 preTriggerSamples = 0;
 
 	// TODO: Select the number of post-trigger samples per record
-	U32 postTriggerSamples = nAScan + nAScanPadding;
+	U32 postTriggerSamples = (nAScan + nAScanPadding - preTriggerSamples);
 
 	// TODO: Specify the number of records per DMA buffer
 	U32 recordsPerBuffer = nBScan;
