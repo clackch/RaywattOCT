@@ -19,6 +19,7 @@ class CConfiguration
 		bool bUseKClock;
 		double usGoodClockDuration;
 		double usBadClockDuration;
+		bool bUseDES;
 	};
 
 	class Measurement {

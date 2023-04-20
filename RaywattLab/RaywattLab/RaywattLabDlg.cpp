@@ -198,7 +198,8 @@ CString CRaywattLabDlg::generateFileName(CString strPath, CString strExtension, 
 	CString strFilePath = _T("");
 
 	if (!strPrefix.IsEmpty()) {
-		strFilePath.Format(_T("%s\\%s_%s%s"), strPath, strPrefix, currentTime.Format("%m%d_%H%M%S"), strExtension);
+		//strFilePath.Format(_T("%s\\%s_%s%s"), strPath, strPrefix, currentTime.Format("%m%d_%H%M%S"), strExtension);
+		strFilePath.Format(_T("%s\\%s%s"), strPath, strPrefix, strExtension);
 	}
 	else {
 		strFilePath.Format(_T("%s\\%s%s"), strPath, currentTime.Format("%m%d_%H%M%S"), strExtension);
@@ -275,10 +276,10 @@ void CRaywattLabDlg::drawGuideLine(cv::Mat image) {
 		int actualDist = dist * 1000 / umPerPixel;
 		cv::line(image,
 			cv::Point(centerX - actualDist / 2, markerFrom),
-			cv::Point(centerX - actualDist / 2, markerTo), lineColor, lineThickness);
+			cv::Point(centerX - actualDist / 2, markerTo), lineColor, lineThickness * 2);
 		cv::line(image,
 			cv::Point(centerX + actualDist / 2, markerFrom),
-			cv::Point(centerX + actualDist / 2, markerTo), lineColor, lineThickness);
+			cv::Point(centerX + actualDist / 2, markerTo), lineColor, lineThickness * 2);
 	}
 }
 
@@ -307,29 +308,29 @@ UINT CRaywattLabDlg::threadSaveCalibration(LPVOID param) {
 	CThread *pThread = pDlg->m_pThreadCalibration;
 	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
 
-	int from, step, count = 0;
+	long long from, step, count = 0;
 
 	CString strValue = _T("");
 	pDlg->GetDlgItem(IDC_EDIT_CALIBRATION_FROM)->GetWindowText(strValue);
-	from = _ttoi(strValue);
+	from = _ttoi64(strValue);
 	pDlg->GetDlgItem(IDC_EDIT_CALIBRATION_STEP)->GetWindowText(strValue);
-	step = _ttoi(strValue);
+	step = _ttoi64(strValue);
 	pDlg->GetDlgItem(IDC_EDIT_CALIBRATION_COUNT)->GetWindowText(strValue);
-	count = _ttoi(strValue);
+	count = _ttoi64(strValue);
 
-	pLinearStage->Move(from);
+	pLinearStage->MoveMicrometer(from);
 	while (pDlg->m_pThreadCalibration->isRun && !pLinearStage->GetZaberStatus()) {
 		Sleep(DELAY_FOR_STOP_THREAD);
 	}
 
 	for (int frame = 0; frame < count && pDlg->m_pThreadCalibration->isRun; frame++) {
-		int position = from + (frame * step);
-		pLinearStage->Move(position);
+		long long position = from + (frame * step);
+		pLinearStage->MoveMicrometer(position);
 		while (pDlg->m_pThreadCalibration->isRun && !pLinearStage->GetZaberStatus()) {
 			Sleep(DELAY_FOR_STOP_THREAD);
 		}
 
-		pDlg->PostMessage(WM_SAVE_CALIBRATION_FRAME, position);
+		pDlg->PostMessage(WM_SAVE_CALIBRATION_FRAME, frame);
 		CUtility::SuspendThread(pDlg->m_pThreadCalibration);
 	}
 
@@ -465,7 +466,7 @@ LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 }
 
 LRESULT CRaywattLabDlg::OnMsgSaveCalibrationFrame(WPARAM wParam, LPARAM lParam) {
-	int position = (int)wParam;
+	int frame = (int)wParam;
 
 	// To-Do : how to save frame? call DataWriter::Push directly?
 	CConfiguration& config = CConfiguration::GetInstance();
@@ -474,7 +475,7 @@ LRESULT CRaywattLabDlg::OnMsgSaveCalibrationFrame(WPARAM wParam, LPARAM lParam) 
 	memcpy(m_pFrameBuffer, m_pImagingRealtime->GetFringesBuffer(), nFrameSize);
 
 	CString strFilePath = _T("");
-	strFilePath.Format(_T("%s_%dmm.bin"), m_strCalibrationPrefix, position);
+	strFilePath.Format(_T("%s_%d.bin"), m_strCalibrationPrefix, frame);
 	HANDLE hFile = CreateFile(
 		strFilePath, GENERIC_WRITE,
 		FILE_SHARE_READ, nullptr, CREATE_ALWAYS,
@@ -1151,7 +1152,8 @@ void CRaywattLabDlg::OnBnClickedButtonSaveCalibration()
 	}
 	GetDlgItem(IDC_BUTTON_SAVE_CALIBRATION)->EnableWindow(FALSE);
 
-	m_strCalibrationPrefix = generateFileName(m_strPatientPath, _T(""));
+	m_strCalibrationPrefix = _T("");
+	m_strCalibrationPrefix.Format(_T("%s\\pos"), m_strPatientPath);
 	CUtility::StartThread(threadSaveCalibration, m_pThreadCalibration, this);
 }
 
