@@ -108,7 +108,7 @@ namespace RaywattApp.Common.Annotation
             Button button = (Button)sender;
             AreaGeometry areaGeometry = button.CommandParameter as AreaGeometry;
 
-            OutCommand = Constants.MeasureDelArea + areaGeometry.Group;
+            OutCommand = Constants.MeasureDeleteArea + "|" + areaGeometry.Group;
         }
 
         private void delete_Length(object sender, RoutedEventArgs e)
@@ -116,7 +116,7 @@ namespace RaywattApp.Common.Annotation
             Button button = (Button)sender;
             LengthGeometry lengthGeometry = button.CommandParameter as LengthGeometry;
 
-            OutCommand = Constants.MeasureDelLeng + lengthGeometry.Group;
+            OutCommand = Constants.MeasureDeleteLength + "|" + lengthGeometry.Group;
         }
 
         private void delete_LModeLength(object sender, RoutedEventArgs e)
@@ -124,7 +124,7 @@ namespace RaywattApp.Common.Annotation
             Button button = (Button)sender;
             LengthGeometry lengthGeometry = button.CommandParameter as LengthGeometry;
 
-            OutCommand = Constants.MeasureDelLMod + lengthGeometry.Group;
+            OutCommand = Constants.MeasureDeleteLongitudeLength + "|" + lengthGeometry.Group;
         }
 
         private void move_Frame(object sender, RoutedEventArgs e)

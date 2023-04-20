@@ -1,6 +1,7 @@
 ﻿using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Util;
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -46,21 +47,6 @@ namespace RaywattApp.Common.Annotation
         }
 
         //---------------------------------------------------------------------------------------------------- Event
-        private void text_canvas_MouseLeave(object sender, MouseEventArgs e)
-        {
-            if (this.isDrawing)
-            {
-                this.isDrawing = false;
-
-                //Canvas 마우스 이벤트 비활성화
-                this.canvas.MouseLeftButtonDown -= text_canvas_MouseLeftButtonDown;
-                this.canvas.MouseLeave -= text_canvas_MouseLeave;
-
-                this.canvas.Background = null;
-                MouseCursor = 0;
-            }
-        }
-
         private void text_canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             _log.Debug("text_canvas_MouseLeftButtonDown");
@@ -90,19 +76,44 @@ namespace RaywattApp.Common.Annotation
                 textGeometry.Group = this.textGeometries.Count;
                 this.textGeometries.Add(textGeometry);
 
-                //Canvas 마우스 이벤트 비활성화
-                this.canvas.MouseLeftButtonDown -= text_canvas_MouseLeftButtonDown;
-                this.canvas.MouseLeave -= text_canvas_MouseLeave;
-
-                this.isDrawing = false;
-                MouseCursor = 0;
-                InCommand = Constants.MeasureDsbText;
+                InCommand = Constants.MeasureDisableText;
+                CommandOff = true;
             }
+        }
+
+        private void text_canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            _log.Debug("text_canvas_MouseRightButtonDown");
+
+            InCommand = Constants.MeasureDisableText;
+            CommandOff = true;
         }
 
         private void pointer_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             _log.Debug("pointer_MouseLeftButtonDown");
+
+            if (this.isDrawing)
+                return;
+
+            if (this.isErasing)
+            {
+                Ellipse ellipse = sender as Ellipse;
+                string[] tempArr = ellipse.Name.Split('_');
+                int group = int.Parse(tempArr[1]);
+
+                DeleteTextAll();
+
+                for (int i = group + 1; i < this.textGeometries.Count; i++)
+                {
+                    this.textGeometries[i].Group--;
+                }
+                this.textGeometries.RemoveAt(group);
+
+                DrawTextAll();
+
+                return;
+            }
 
             this.isPointerClicked = true;
             Mouse.Capture((FrameworkElement)sender);
@@ -162,6 +173,9 @@ namespace RaywattApp.Common.Annotation
         {
             _log.Debug("pointer_MouseRightButtonDown");
 
+            if (this.isDrawing || this.isErasing)
+                return;
+
             Ellipse ellipse = sender as Ellipse;
             string[] tempArr = ellipse.Name.Split('_');
             int group = int.Parse(tempArr[1]);
@@ -181,15 +195,33 @@ namespace RaywattApp.Common.Annotation
         {
             _log.Debug("text_MouseLeftButtonDown");
 
+            if (this.isDrawing)
+                return;
+
+            Label label = sender as Label;
+            string[] tempArr = label.Name.Split('_');
+            int group = int.Parse(tempArr[1]);
+
+            if (this.isErasing)
+            {
+                DeleteTextAll();
+
+                for (int i = group + 1; i < this.textGeometries.Count; i++)
+                {
+                    this.textGeometries[i].Group--;
+                }
+                this.textGeometries.RemoveAt(group);
+
+                DrawTextAll();
+
+                return;
+            }
+
             if (this.isDoubleClicked)
                 return;
 
             this.isTextClicked = true;
-
-            Label label = sender as Label;
             Point point = e.GetPosition(this.canvas);
-            string[] tempArr = label.Name.Split('_');
-            int group = int.Parse(tempArr[1]);
 
             TextGeometry textGeometry = this.textGeometries[group];
             this.diffX = point.X - textGeometry.TextPoint.X;
@@ -241,7 +273,6 @@ namespace RaywattApp.Common.Annotation
                     point.X = point.X - this.diffX;
                 }
 
-
                 if (point.Y - this.diffY > this.canvas.ActualHeight - label.ActualHeight || point.Y - this.diffY < 0)
                 {
                     point.Y = textGeometry.TextPoint.Y;
@@ -265,6 +296,9 @@ namespace RaywattApp.Common.Annotation
         private void text_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             _log.Debug("text_MouseRightButtonDown");
+
+            if (this.isDrawing || this.isErasing)
+                return;
 
             Label label = sender as Label;
             string[] tempArr = label.Name.Split('_');
@@ -364,20 +398,23 @@ namespace RaywattApp.Common.Annotation
         }
 
         //---------------------------------------------------------------------------------------------------- Function
-        private void AddText()
+        private void AddText(string isTextOn)
         {
             _log.Debug("AddText");
 
-            if (!this.isDrawing)
+            if (CommandType != 0)
+                DisableCommand();
+
+            if (Convert.ToBoolean(isTextOn))
             {
                 this.isDrawing = true;
 
                 //Canvas 마우스 이벤트 활성화
                 this.canvas.MouseLeftButtonDown += text_canvas_MouseLeftButtonDown;
-                this.canvas.MouseLeave += text_canvas_MouseLeave;
+                this.canvas.MouseRightButtonDown += text_canvas_MouseRightButtonDown;
 
                 this.canvas.Background = Brushes.Transparent;
-                MouseCursor = 3;
+                CommandType = Constants.MeasureCmdText;
             }
         }
 

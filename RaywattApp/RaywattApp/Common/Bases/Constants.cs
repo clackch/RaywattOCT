@@ -291,17 +291,18 @@ namespace RaywattApp.Common.Bases
         public const double SelectPreCaseExpandSize = 460;
 
         //Measurement
-        public const string MeasureDrawAll = "DR";
-        public const string MeasureDeleAll = "DE";
-        public const string MeasureAddArea = "AA";
-        public const string MeasureAddLeng = "AL";
-        public const string MeasureAddText = "AT";
-        public const string MeasureDelArea = "A_";
-        public const string MeasureDelLeng = "L_";
-        public const string MeasureDelLMod = "M_";
-        public const string MeasureDsbCLen = "DC";
-        public const string MeasureDsbLLen = "DL";
-        public const string MeasureDsbText = "DT";
+        public const string MeasureDrawAll = "DrawAll";  //Draw All
+        public const string MeasureDeleteAll = "DeleteAll";  //Delete All
+        public const string MeasureAddArea = "AddArea";  //Add Area
+        public const string MeasureAddLength = "AddLength";  //Add Length
+        public const string MeasureAddText = "AddText";  //Add Text
+        public const string MeasureErasePoint = "ErasePoint";  //Erase Point
+        public const string MeasureDeleteArea = "GridDeleteArea";  //(Grid) Delete Area
+        public const string MeasureDeleteLength = "GridDeleteLength";  //(Grid) Delete Length
+        public const string MeasureDeleteLongitudeLength = "GridDeleteLongitudeLength";  //(Grid) Delete Longitude Length
+        public const string MeasureDisableLength = "DisableLength";  //Disable Length
+        public const string MeasureDisableText = "DisableText";  //Disable Text
+        public const string MeasureDisableErase = "DisableErase";  //Disable Erase
 
         //Draw Annotation
         public static Brush[] AnnotationBrushes = {
@@ -327,5 +328,12 @@ namespace RaywattApp.Common.Bases
         public const string CatheterStatusUnlocked = "Unlocked";
         public const string CatheterStatusUnloaded = "Unloaded";
         public const string CatheterStatusDisconnected = "Disconnected";
+
+        //Measurement Type
+        public const int MeasureCmdDefault = 0;
+        public const int MeasureCmdArea = 1;
+        public const int MeasureCmdLength = 2;
+        public const int MeasureCmdText = 3;
+        public const int MeasureCmdErase = 4;
     }
 }
