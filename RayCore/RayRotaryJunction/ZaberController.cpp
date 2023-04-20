@@ -70,6 +70,16 @@ bool CZaberController::Move(int nPos) {
 }
 
 /*
+* @param nPos : absolute position (um)
+*/
+bool CZaberController::MoveMicrometer(long long nPos) {
+	char strCommand[MAX_PATH];
+	sprintf(strCommand, "/move abs %d\n", convertUMtoData(nPos));
+
+	return sendCommand(strCommand);
+}
+
+/*
 * @param nPos : relative position (mm)
 */
 bool CZaberController::MoveRelative(int nPos) {
@@ -181,6 +191,9 @@ bool CZaberController::parseZaberState(const char* strResponse, std::string& str
 		return true;
 	}
 	return false;
+}
+int CZaberController::convertUMtoData(long long nPos) {
+	return (nPos * ZABER_SCALE_MM_TO_POSITION / 1000.f);
 }
 int CZaberController::convertMMtoData(int nPos) {
 	return (nPos * ZABER_SCALE_MM_TO_POSITION);

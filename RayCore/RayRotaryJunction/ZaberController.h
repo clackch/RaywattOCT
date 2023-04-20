@@ -40,6 +40,7 @@ public:
 
 	bool Idle();
 	bool Move(int nPos);
+	bool MoveMicrometer(long long nPos);
 	bool MoveRelative(int nPos);
 	bool RotateRelative(int nPos);
 	bool Pull(int nVelocity, int nDistance);
@@ -50,6 +51,7 @@ private:
 	bool sendCommand(const char* strCommand);
 	void readZaber();
 	bool parseZaberState(const char *strResponse, std::string& strState, int& nPos);
+	int convertUMtoData(long long nPos);
 	int convertMMtoData(int nPos);
 	int convertMMtoRotate(int nPos);
 	int convertMMStoData(int nVelocity);
