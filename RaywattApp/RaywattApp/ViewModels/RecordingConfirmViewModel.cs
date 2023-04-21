@@ -106,7 +106,6 @@ namespace RaywattApp.ViewModels
             PatientCase.Vessel = Constants.NotSelectedCode;
             PatientCase.ThumbnailNo = 1;
             PatientCase.StillImageYn = "N";
-            PatientCase.Image = "0710_145117_6028rpm_20mms_2000Aline_ch1.bin";
             PatientCase.AngioCoRegistration = DeviceStatus.IsAngioConnected;
             PatientCase.IndicatorDegree = 90;
 
@@ -138,21 +137,6 @@ namespace RaywattApp.ViewModels
                     LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgLongitude);
                 }
             }
-        }
-
-        private string generateFileName(string ext)
-        {
-            string filename = "{" +
-                CommonUtil.GetRandomText(8) + "-" +
-                CommonUtil.GetRandomText(4) + "-" +
-                CommonUtil.GetRandomText(4) + "-" +
-                CommonUtil.GetRandomText(4) + "-" +
-                CommonUtil.GetRandomText(12) +
-                "}." + ext;
-
-            _log.Debug("generateFileName : " + filename);
-
-            return filename;
         }
 
     }
