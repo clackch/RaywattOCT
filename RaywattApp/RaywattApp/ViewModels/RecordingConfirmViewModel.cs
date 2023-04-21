@@ -132,18 +132,12 @@ namespace RaywattApp.ViewModels
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {
             DrawCrossSectionImage();
-            if (imgLongitude != null)
+            if (DrawLongitudeImage())
             {
-                RayScannerState state = (RayScannerState)RayGetProperty(Property.CurrentState);
-
-                if (state == RayScannerState.Review)
+                // when generating longitude image is completed
+                if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame)
                 {
-                    LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgLongitude);
-                    // when generating longitude image is completed
-                    if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame)
-                    {
-                        IsPullbackDone = true;
-                    }
+                    IsPullbackDone = true;
                 }
             }
         }
