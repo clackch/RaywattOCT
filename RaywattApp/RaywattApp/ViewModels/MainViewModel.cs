@@ -254,6 +254,9 @@ namespace RaywattApp.ViewModels
                 case RayCallbackRequest.Progress:
                     handleProgress((RayCallbackRequest)request, response);
                     break;
+                case RayCallbackRequest.Event:
+                    handleEvent((RayCallbackRequest)request, (RayEvent)response);
+                    break;
                 case RayCallbackRequest.Error:
                     handleError((RayCallbackRequest)request, (RayError)response);
                     break;
@@ -274,11 +277,28 @@ namespace RaywattApp.ViewModels
         }
         protected void handleProgress(RayCallbackRequest request, int progress) { }
         protected void handleError(RayCallbackRequest request, RayError error) { }
+        protected void handleEvent(RayCallbackRequest request, RayEvent e) {
+            switch (e)
+            {
+                case RayEvent.CatheterLoading:
+                    CatheterConnectReceiver();
+                    break;
+                default:
+                    break;
+            }
+        }
         protected void handleWorkDone(RayCallbackRequest request, RayWorkItem work)
         {
-            if (work == RayWorkItem.AutoCalibration)
+            switch (work)
             {
-                DeviceStatus.CanExecuteCalibration = true;
+                case RayWorkItem.AutoCalibration:
+                    DeviceStatus.CanExecuteCalibration = true;
+                    break;
+                case RayWorkItem.LoadCatheter:
+                    DeviceStatus.CatheterStatus = Constants.CatheterStatusLoaded;
+                    break;
+                default:
+                    break;
             }
         }
     }
