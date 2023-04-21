@@ -127,7 +127,8 @@ namespace RaywattApp.ViewModels
             IsHome = true;
 
             //Test
-            timer.Interval = TimeSpan.FromMilliseconds(500);
+            double rotationTime = RayGetProperty(Property.LoadCatheterTime);
+            timer.Interval = TimeSpan.FromMilliseconds(rotationTime / (100 / catheterProgressStep));
             timer.Tick += new EventHandler(ProgressTest);
         }
 
@@ -232,6 +233,7 @@ namespace RaywattApp.ViewModels
         }
 
         //Test
+        private double catheterProgressStep = 10;
         private DispatcherTimer timer = new DispatcherTimer();
         private void ProgressTest(object sender, EventArgs e)
         {
@@ -239,11 +241,10 @@ namespace RaywattApp.ViewModels
             {
                 timer.Stop();
 
-                Thread.Sleep(1000);
                 DeviceStatus.CatheterStatus = Constants.CatheterStatusLoaded;
             }
 
-            CatheterProgress += 10;
+            CatheterProgress += catheterProgressStep;
         }
 
         private void OnMsgCallback(int request, int response)

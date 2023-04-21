@@ -141,5 +141,5 @@ double CConfiguration::getPrivateProfileFloat(LPCWSTR lpAppName, LPCWSTR lpKeyNa
 }
 
 double CConfiguration::GetLoadCatheterTime() {
-	return (catheter.rotationTime) / 1000;
+	return catheter.rotationTime;
 }
