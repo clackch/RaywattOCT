@@ -9,6 +9,7 @@ using System.Windows.Input;
 using System.Windows.Navigation;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
+using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels
 {
@@ -52,6 +53,11 @@ namespace RaywattApp.ViewModels
                 Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
                 this.Patient = (Patient)data["patient"];
                 this.PrevStatus = (PrevStatus)data["prevStatus"];
+
+                if (DeviceStatus.CatheterStatus != Constants.CatheterStatusLoaded)
+                {
+                    RayLoadCatheter();
+                }
             }
         }
 
