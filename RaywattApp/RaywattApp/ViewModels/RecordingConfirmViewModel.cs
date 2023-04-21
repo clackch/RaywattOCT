@@ -89,6 +89,8 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("RedoPullback");
 
+            RayEndReview();
+
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
