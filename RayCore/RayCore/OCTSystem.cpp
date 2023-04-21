@@ -185,8 +185,8 @@ RayError COCTSystem::DisconnectDevices() {
 	int result = NOERROR;
 
 	// To-Do: stop all threads
-	// disconnectAcqDevice();
-	// disconnectRotaryJunction();
+	disconnectAcqDevice();
+	disconnectRotaryJunction();
 
 	postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Initial);
 
