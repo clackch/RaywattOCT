@@ -932,6 +932,8 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	CDataWriter *pDataWriter = new CDataWriter();
 	pDataWriter->Initialize(config.nBufferSize * sizeof(unsigned short));
 	pSystem->m_pAcqDevice->SetWriter(pDataWriter);
+	pSystem->m_pAcqDevice->StopAcquisition();
+	pSystem->m_pAcqDevice->StartAcquisition();
 
 	// 1. Motor ON
 	pMotor->PerfomRun(config.motor.velocityPullback);
