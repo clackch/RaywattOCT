@@ -162,6 +162,7 @@ protected:
 	LRESULT OnMsgUpdateCatheterState(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgStartReviewSession(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgNotifyProcessDone(WPARAM wParam, LPARAM lParam);
+	LRESULT OnMsgNotifyEventOccured(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgDeviceWorkDone(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgNotifyErrorOccured(WPARAM wParam, LPARAM lParam);
 };
