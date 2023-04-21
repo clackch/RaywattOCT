@@ -12,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using static RaywattOCT.RayCoreWrapper;
 using System.Windows.Threading;
-using RaywattApp.Common.Util;
 
 namespace RaywattApp.ViewModels
 {
@@ -30,6 +29,9 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private PatientCase _patientCase;
+
+        [ObservableProperty]
+        private bool _isPullbackDone = false;
 
         private DispatcherTimer timer = new DispatcherTimer();
         private DispatcherTimer timerUpdateImage = new DispatcherTimer();
@@ -135,6 +137,11 @@ namespace RaywattApp.ViewModels
                 if (state == RayScannerState.Review)
                 {
                     LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgLongitude);
+                    // when generating longitude image is completed
+                    if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame)
+                    {
+                        IsPullbackDone = true;
+                    }
                 }
             }
         }
