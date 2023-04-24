@@ -185,6 +185,7 @@ xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattAp
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Configuration.h" />
     <ClInclude Include="CutViewManager.h" />
     <ClInclude Include="define.h" />
     <ClInclude Include="ImagingSession.h" />
@@ -194,6 +195,7 @@ xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattAp
     <ClInclude Include="VolumeGenerator.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Configuration.cpp" />
     <ClCompile Include="CutViewManager.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="ImagingSession.cpp" />

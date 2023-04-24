@@ -30,25 +30,45 @@ CImagingSession::~CImagingSession() {
 
 CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSession, IDataManager* pWriter) {
 	if (pMsg == nullptr || pWriter == nullptr) return nullptr;
+	
+	CConfiguration& config = CConfiguration::GetInstance();
+	IImaging::Setting setting;
+	setting.Set(config.acquisition.nAScan, config.acquisition.nBScan);
 
-	return createSession(pMsg, nSession, pWriter, false);
+	return createSession(pMsg, setting, nSession,  pWriter, false);
 }
 
 CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSession, const char* strFilePath) {
+	IImaging::Setting setting;
+	int nHeaderSize = 0;
+
+	std::string ext = CUtility::GetFileExtension(strFilePath);
+	if (ext.compare(FILE_EXTENSION_OCT) == 0)
+	{
+		OCTHeader header = CDataReader::ReadHeader(CUtility::StringToWstring(strFilePath));
+		setting.Set(header.width, header.height);
+		nHeaderSize = OCTHeader::Size();
+	}
+	else if (ext.compare(FILE_EXTENSION_RAW) == 0)
+	{
+		CConfiguration& config = CConfiguration::GetInstance();
+		setting.Set(config.acquisition.nAScan, config.acquisition.nBScan);
+	}
+
 	CDataReader* pReader = new CDataReader();
-	int nNumOfSamples = pReader->Initialize(CUtility::StringToWstring(strFilePath));
+	int nNumOfSamples = pReader->Initialize(CUtility::StringToWstring(strFilePath), setting.nBufferSize, nHeaderSize);
 
 	if (pMsg == nullptr || nNumOfSamples <= 0) {
 		delete pReader;
 		return nullptr;
 	}
 
-	return createSession(pMsg, nSession, pReader, true);
+	return createSession(pMsg, setting, nSession, pReader, true);
 }
 
-COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg) {
-	COCTImaging* pImaging = new COCTImaging(msg);
+COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging::Setting setting) {
 	CConfiguration& config = CConfiguration::GetInstance();
+	COCTImaging* pImaging = new COCTImaging(setting, msg);
 
 	pImaging->Initialize(_T("CALIBRATION.DAT"));
 	pImaging->SetColor(true);
@@ -145,11 +165,11 @@ UINT CImagingSession::GetCutViewChannels() {
 	return m_pCutView->GetCutView().channels();
 }
 
-CImagingSession* CImagingSession::createSession(CMessageService* pMsg, int nSession, IDataManager* pData, bool deleteData) {
+CImagingSession* CImagingSession::createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData) {
 	CImagingSession* pSession = new CImagingSession(pMsg, nSession, deleteData);
 
 	pSession->m_pDataManager = pData;
-	pSession->m_pImaging = CreateColorImaging(pMsg);
+	pSession->m_pImaging = CreateColorImaging(pMsg, setting);
 	pSession->m_pImaging->SetSession(nSession);
 	pSession->m_pSimDevice = new CSimulateDevice(pData);
 	pSession->m_pSimDevice->InitDevice();
@@ -166,7 +186,7 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
 	// prepare imaging (without message)
-	COCTImaging* pImaging = CreateColorImaging(nullptr);
+	COCTImaging* pImaging = CreateColorImaging(nullptr, pSession->m_pImaging->GetSetting());
 
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadUpdateCutView->isRun; nFrame++) {
 		unsigned short* pBuffer = pDataManager->GetSample(nFrame);

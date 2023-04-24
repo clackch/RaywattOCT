@@ -74,14 +74,14 @@ RayError COCTSystem::Start() {
 
 	CUtility::StartThread(threadService, m_pThreadService, this);
 
-	m_pImagingRealtime = CImagingSession::CreateColorImaging(this);
-	m_pImagingRealtime->SetSession(SESSION_REVIEW);
+	m_pImagingRealtime = CImagingSession::CreateColorImaging(this, config.imaging);
+	m_pImagingRealtime->SetSession(SESSION_REALTIME);
 	m_pImagingRealtime->Start();
 
 	m_pVolume = new CVolumeGenerator();
-	m_pVolume->Initialize(config.nCircleSize, config.nCircleSize, config.volume.size, config.volume.size);
+	m_pVolume->Initialize(config.imaging.nCircleSize, config.imaging.nCircleSize, config.volume.size, config.volume.size);
 
-	m_pAcqDevice = new CATSDevice();
+	m_pAcqDevice = new CATSDevice(config.acquisition);
 	m_pAcqDevice->SetImaging(m_pImagingRealtime);
 
 	return RayError::OK;
@@ -364,7 +364,7 @@ RayError COCTSystem::StartLiveView()
 		CConfiguration& config = CConfiguration::GetInstance();
 
 		pLaser->LaserOnOff(true);
-		pMotorCtrl->PerfomRun(config.motor.velocityLiveView);
+		pMotorCtrl->PerfomRun(config.bldcMotor.velocityLiveView);
 
 		return RayError::OK;
 	}
@@ -815,18 +815,21 @@ UINT COCTSystem::threadService(LPVOID param) {
 UINT COCTSystem::threadSaveRaw(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	tstring strSaveFilePath = pSystem->m_strFilePath;
-	CDataWriter* pDataWriter = (CDataWriter*)pSystem->m_reviewSession[SESSION_REVIEW]->GetDataManager();
+	CDataWriter* pDataWriter = (CDataWriter*)pSystem->m_reviewSession[SESSION_REALTIME]->GetDataManager();
 	const int nNumOfSamples = pDataWriter->GetNumOfSamples();
 
 	int nFrame = 0;
 	pSystem->postMessage(WM_UPDATE_SAVE_RAW, 0, nNumOfSamples);
 
+	CConfiguration& config = CConfiguration::GetInstance();
 	pDataWriter->StartSave(strSaveFilePath);
+	pDataWriter->WriteHeader(OCTHeader::Type::TimeSignal, OCTHeader::DataType::UShort, OCTHeader::Channels::Single, config.acquisition.nAScan, config.acquisition.nBScan);
 	for (nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadSaveRaw->isRun; nFrame++) {
 		pDataWriter->WriteFrame(nFrame);
 
 		pSystem->postMessage(WM_UPDATE_SAVE_RAW, nFrame + 1, nNumOfSamples);
 	}
+	pDataWriter->WriteEOF();
 	pDataWriter->StopSave();
 
 	pSystem->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::SaveRawData);
@@ -849,7 +852,8 @@ UINT COCTSystem::threadGenerateVolume(LPVOID param) {
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
 	// prepare imaging
-	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr);
+	CConfiguration& config = CConfiguration::GetInstance();
+	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr, config.imaging);
 
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadGenerateVolume->isRun; nFrame++) {
 		unsigned short* pBuffer = pDataManager->GetSample(nFrame);
@@ -880,7 +884,8 @@ UINT COCTSystem::threadLumenDetection(LPVOID param) {
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
 	// prepare imaging
-	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr);
+	CConfiguration& config = CConfiguration::GetInstance();
+	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr, config.imaging);
 
 	vLumen.clear();
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadLumenDetection->isRun; nFrame++) {
@@ -930,23 +935,23 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	CZaberController* pZaber = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
 
 	CDataWriter *pDataWriter = new CDataWriter();
-	pDataWriter->Initialize(config.nBufferSize * sizeof(unsigned short));
+	pDataWriter->Initialize(config.acquisition.nBufferSize * sizeof(unsigned short));
 	pSystem->m_pAcqDevice->SetWriter(pDataWriter);
 	pSystem->m_pAcqDevice->StopAcquisition();
 	pSystem->m_pAcqDevice->StartAcquisition();
 
 	// 1. Motor ON
-	pMotor->PerfomRun(config.motor.velocityPullback);
-	Sleep(config.motor.settleDown);
+	pMotor->PerfomRun(config.bldcMotor.velocityPullback);
+	Sleep(config.bldcMotor.settleDown);
 
-	pZaber->SetSpeed(config.zaber.pullbackSpeed);
+	pZaber->SetSpeed(config.stepMotor.pullbackSpeed);
 
 	// 2. Start Recording OCT
 	pDataWriter->StartRecording();
 
 	// 3. Pullback Linear Stage
 	if (pZaber->IsOpen()) {
-		pZaber->MoveRelative(config.zaber.pullbackDistance * -1);
+		pZaber->MoveRelative(config.stepMotor.pullbackDistance * -1);
 		while (pSystem->m_pThreadRotaryJunction->isRun) {
 			if (pZaber->GetZaberStatus()) {
 				break;
@@ -1072,7 +1077,7 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 
 	pSystem->startAcqDevice();
 	pLaser->LaserOnOff(true);
-	pMotor->PerfomRun(config.motor.velocityLiveView);
+	pMotor->PerfomRun(config.bldcMotor.velocityLiveView);
 
 	// To-Do: determine image verification
 	bool verified = true;
@@ -1101,7 +1106,6 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 */
 bool COCTSystem::checkConnection() {
 	bool result = true;
-	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
 	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
 	
@@ -1166,7 +1170,7 @@ int COCTSystem::connectRotaryJunction() {
 	bool result = true;
 
 	if (!pLinearStage->IsOpen()) {
-		result &= pLinearStage->Open(config.zaber.pullback);
+		result &= pLinearStage->Open(config.stepMotor.pullback);
 	}
 
 	if (!pMotor->IsConnected()) {
@@ -1262,7 +1266,6 @@ void COCTSystem::closeAllSessions() {
 * OnMsgUpdateScannerState
 */
 LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
-	CConfiguration& config = CConfiguration::GetInstance();
 	m_prevState = m_curState;
 	m_curState = (RayScannerState)wParam;
 
@@ -1315,7 +1318,6 @@ LRESULT COCTSystem::OnMsgUpdateSaveRaw(WPARAM wParam, LPARAM lParam) {
 * OnMsgUpdateCatheterState
 */
 LRESULT COCTSystem::OnMsgUpdateCatheterState(WPARAM wParam, LPARAM lParam) {
-	CConfiguration& config = CConfiguration::GetInstance();
 	m_cathState = (CatheterState)wParam;
 
 	CUtility::StopThread(m_pThreadRotaryJunction);

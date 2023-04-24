@@ -1,19 +1,15 @@
 #include "OCTMeasurement.h"
-#include "Configuration.h"
 
 COCTMeasurement::COCTMeasurement() {}
 COCTMeasurement::~COCTMeasurement() {}
 
-void COCTMeasurement::CalculateAxialResolution(USHORT* fftData, USHORT& nPeakValue, int& nPeakIndex, int& nLineWidth) {
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nOutputLength = config.nOutputLength;
-	const float fScaleFactor = config.measurementValues.fAxialResolutionScale;
+void COCTMeasurement::CalculateAxialResolution(USHORT* fftData, UINT nLength, Setting setting, USHORT& nPeakValue, int& nPeakIndex, int& nLineWidth) {
 	const int nFindRange = 40;
 
 	// get peak and index
 	nPeakIndex = 0;
 	nPeakValue = 0;
-	for (int i = 0; i < nOutputLength; i++) {
+	for (int i = 0; i < nLength; i++) {
 		if (fftData[i] > nPeakValue) {
 			nPeakIndex = i;
 			nPeakValue = fftData[i];
@@ -35,7 +31,7 @@ void COCTMeasurement::CalculateAxialResolution(USHORT* fftData, USHORT& nPeakVal
 	// find right 3db
 	int nRightIndex = 0;
 	int nEnd = nPeakIndex + nFindRange;
-	nEnd = (nEnd >= nOutputLength) ? nOutputLength - 1 : nEnd;
+	nEnd = (nEnd >= nLength) ? nLength - 1 : nEnd;
 	for (int i = nPeakIndex; i <= nEnd; i++) {
 		if (fftData[i] < nFWHM) {
 			nRightIndex = i;
@@ -46,21 +42,16 @@ void COCTMeasurement::CalculateAxialResolution(USHORT* fftData, USHORT& nPeakVal
 	double fLeftWidth = (double)(fftData[nLeftIndex] - nFWHM) / (double)(fftData[nLeftIndex] - fftData[nLeftIndex - 1]);
 	double fRightWidth = (double)(fftData[nRightIndex] - nFWHM) / (double)(fftData[nRightIndex - 1] - fftData[nRightIndex]);
 
-	nLineWidth = ((fRightWidth + nRightIndex) - (fLeftWidth + nLeftIndex)) * fScaleFactor;
+	nLineWidth = ((fRightWidth + nRightIndex) - (fLeftWidth + nLeftIndex)) * setting.fAxialResolutionScale;
 }
-void COCTMeasurement::CalculateNoisePower(USHORT* fftData, int nPeakIndex, USHORT& nNoisePower) {
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nOutputLength = config.nOutputLength;
-	const int nNoiseSkip = config.measurementValues.nNoiseSkip;
-	const int nNoiseAverage = config.measurementValues.nNoiseAverage;
-
+void COCTMeasurement::CalculateNoisePower(USHORT* fftData, UINT nLength, Setting setting, int nPeakIndex, USHORT& nNoisePower) {
 	int nStart, nEnd;
 	unsigned int nSum = 0;
 	int nCount = 0;
 
-	nStart = nPeakIndex - nNoiseSkip - nNoiseAverage;
+	nStart = nPeakIndex - setting.nNoiseSkip - setting.nNoiseAverage;
 	nStart = (nStart < 0) ? 0 : nStart;
-	nEnd = nPeakIndex - nNoiseSkip;
+	nEnd = nPeakIndex - setting.nNoiseSkip;
 	nEnd = (nEnd < 0) ? 0 : nEnd;
 
 	for (int i = nStart; i <= nEnd; i++) {
@@ -68,10 +59,10 @@ void COCTMeasurement::CalculateNoisePower(USHORT* fftData, int nPeakIndex, USHOR
 		nCount++;
 	}
 
-	nStart = nPeakIndex + nNoiseSkip;
-	nStart = (nStart >= nOutputLength) ? nOutputLength - 1 : nStart;
-	nEnd = nPeakIndex + nNoiseSkip + nNoiseAverage;
-	nEnd = (nEnd >= nOutputLength) ? nOutputLength - 1 : nEnd;
+	nStart = nPeakIndex + setting.nNoiseSkip;
+	nStart = (nStart >= nLength) ? nLength - 1 : nStart;
+	nEnd = nPeakIndex + setting.nNoiseSkip + setting.nNoiseAverage;
+	nEnd = (nEnd >= nLength) ? nLength - 1 : nEnd;
 
 	for (int i = nStart; i <= nEnd; i++) {
 		nSum += fftData[i];
