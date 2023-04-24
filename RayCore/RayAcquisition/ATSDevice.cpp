@@ -10,10 +10,12 @@ CATSDevice::CATSDevice(Setting setting)
 	m_pCurBuffer = NULL;
 	m_pPrevBuffer = NULL;
 }
-CATSDevice::~CATSDevice() {}
+CATSDevice::~CATSDevice() {
+	CleanUp();
+}
 
 int CATSDevice::InitDevice() {
-	CleanUp();
+	m_isInit = false;
 
 	U32 systemId = 1;
 	U32 boardId = 1;
@@ -48,8 +50,6 @@ int CATSDevice::CleanUp() {
 		delete[] m_pAcqBuffers;
 		m_pAcqBuffers = nullptr;
 	}
-
-	m_isInit = false;
 
 	return NOERROR;
 }
@@ -128,9 +128,7 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 {
 	RETURN_CODE retCode;
 	const int nAScan = m_setting.nAScan;
-	const int nBScan = m_setting.nBScan;
 	const int nLaserSpeed = m_setting.nLaserSpeed;
-	const int nBufferSize = m_setting.nBufferSize;
 	const int nAcqBufCount = m_setting.nBufferCount;
 	const int nTriggerDelaySample = m_setting.nTriggerDelaySample;
 	const bool useKClock = m_setting.bUseKClock;
@@ -148,8 +146,6 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	}
 
 	printf("sample per sec : %.2f\n", dSamplePerSec);
-	printf("sample per frame : %d\n", nBufferSize);
-	printf("frame per sec : %.2f\n", dSamplePerSec / nBufferSize);
 	// TODO: Select clock parameters as required to generate this sample rate.
 	//
 	// For example: if samplesPerSec is 100.e6 (100 MS/s), then:
@@ -270,6 +266,8 @@ BOOL CATSDevice::configureAcquisition(HANDLE boardHandle) {
 	const int nBScan = m_setting.nBScan;
 	const int nAcqBufCount = m_setting.nBufferCount;
 	BOOL success = TRUE;
+	
+	CleanUp();
 
 	//==========================================================================================================
 	// Acquisition Setting
