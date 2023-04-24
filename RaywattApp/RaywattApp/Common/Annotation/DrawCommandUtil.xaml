@@ -6,17 +6,20 @@
              xmlns:local="clr-namespace:RaywattApp.Common.Annotation"
              xmlns:component="clr-namespace:RaywattApp.Views.Component"
              mc:Ignorable="d" 
+             x:Name="UserControl"
              d:DesignHeight="68" d:DesignWidth="192">
     <Grid>
         <StackPanel Orientation="Vertical">
             <Label Content="{Binding [Measurement Tool], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource SideMenuTitleBrush}"/>
             <Grid Height="12"/>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
-                <component:IconButton Style="{DynamicResource IconButton}" Icon="area" Click="area_Add"/>
+                <component:IconToggleButton Style="{DynamicResource IconToggleButton}" Icon="area" Click="area_Add" IsChecked="{Binding IsAreaOn, ElementName=UserControl}"/>
                 <Grid Width="6"/>
-                <component:IconButton Style="{DynamicResource IconButton}" Icon="length" Click="length_Add"/>
+                <component:IconToggleButton Style="{DynamicResource IconToggleButton}" Icon="length" Click="length_Add" IsChecked="{Binding IsLengthOn, ElementName=UserControl}"/>
                 <Grid Width="6"/>
-                <component:IconButton Style="{DynamicResource IconButton}" Icon="text" Click="text_Add"/>
+                <component:IconToggleButton Style="{DynamicResource IconToggleButton}" Icon="text" Click="text_Add" IsChecked="{Binding IsTextOn, ElementName=UserControl}"/>
+                <Grid Width="6"/>
+                <component:IconToggleButton Style="{DynamicResource IconToggleButton}" Icon="import" Click="erase_point" IsChecked="{Binding IsEraseOn, ElementName=UserControl}"/>
                 <Grid Width="6"/>
                 <component:IconButton Style="{DynamicResource IconButton}" Icon="deleteAll" Click="delete_All"/>
             </StackPanel>

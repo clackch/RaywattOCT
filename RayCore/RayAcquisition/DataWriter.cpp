@@ -16,7 +16,7 @@ CDataWriter::~CDataWriter() {
 }
 
 void CDataWriter::Initialize(int nFrameBytes) {
-	const unsigned int nDefaultBufferSize = 1000;
+	const unsigned int nDefaultBufferSize = 3000;
 
 	finalize();
 	m_nBufferSize = nDefaultBufferSize;

@@ -185,8 +185,8 @@ RayError COCTSystem::DisconnectDevices() {
 	int result = NOERROR;
 
 	// To-Do: stop all threads
-	// disconnectAcqDevice();
-	// disconnectRotaryJunction();
+	disconnectAcqDevice();
+	disconnectRotaryJunction();
 
 	postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Initial);
 
@@ -764,6 +764,11 @@ UINT COCTSystem::threadService(LPVOID param) {
 			pSystem->OnMsgNotifyProcessDone(wParam, lParam);
 			break;
 		}
+		case WM_NOTIFY_EVENT_OCCURED:
+		{
+			pSystem->OnMsgNotifyEventOccured(wParam, lParam);
+			break;
+		}
 		case WM_NOTIFY_DEVICE_WORK_DONE:
 		{
 			pSystem->OnMsgDeviceWorkDone(wParam, lParam);
@@ -932,6 +937,8 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	CDataWriter *pDataWriter = new CDataWriter();
 	pDataWriter->Initialize(config.acquisition.nBufferSize * sizeof(unsigned short));
 	pSystem->m_pAcqDevice->SetWriter(pDataWriter);
+	pSystem->m_pAcqDevice->StopAcquisition();
+	pSystem->m_pAcqDevice->StartAcquisition();
 
 	// 1. Motor ON
 	pMotor->PerfomRun(config.bldcMotor.velocityPullback);
@@ -984,6 +991,8 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
 	CZaberController* pZaber = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
+
+	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterLoading);
 
 	// 1. Motor ON
 	int nVelocity = config.catheter.velocity;
@@ -1159,7 +1168,7 @@ int COCTSystem::connectRotaryJunction() {
 	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
 
 	bool result = true;
-	
+
 	if (!pLinearStage->IsOpen()) {
 		result &= pLinearStage->Open(config.stepMotor.pullback);
 	}
@@ -1377,6 +1386,15 @@ LRESULT COCTSystem::OnMsgNotifyProcessDone(WPARAM wParam, LPARAM lParam) {
 	if (m_callback != nullptr) {
 		m_callback((int)RayCallbackRequest::WorkDone, (int)workItem);
 	}
+
+	return NOERROR;
+}
+
+/*
+* OnMsgNotifyEventOccured
+*/
+LRESULT COCTSystem::OnMsgNotifyEventOccured(WPARAM wParam, LPARAM lParam) {
+	if (m_callback != nullptr) m_callback((int)RayCallbackRequest::Event, wParam);
 
 	return NOERROR;
 }

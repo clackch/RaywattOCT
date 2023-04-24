@@ -43,26 +43,14 @@ namespace RaywattApp.Common.Annotation
         {
             _log.Debug("length_canvas_MouseLeave");
 
-            if (this.isDrawing)
+            if (this.isDrawing && this.isCanvasClicked)
             {
-                this.isDrawing = false;
-                this.isFisrtPoint = false;
+                this.isFisrtPoint = true;
                 this.isCanvasClicked = false;
 
                 DeleteLine(this.lengthGeometries.Count);
                 DeleteEllipse(this.lengthGeometries.Count, true);
                 DeleteLabel(constLength, this.lengthGeometries.Count);
-
-                DeleteLengthAll();
-                DrawLengthAll();
-
-                //Canvas 마우스 이벤트 비활성화
-                this.canvas.MouseLeftButtonDown -= length_canvas_MouseLeftButtonDown;
-                this.canvas.MouseMove -= length_canvas_MouseMove;
-                this.canvas.MouseLeave -= length_canvas_MouseLeave;
-
-                this.canvas.Background = null;
-                MouseCursor = 0;
             }
         }
 
@@ -75,22 +63,19 @@ namespace RaywattApp.Common.Annotation
                 if (this.isFisrtPoint)
                 {
                     this.firstPoint = e.GetPosition(this.canvas);
-                    this.secondPoint = e.GetPosition(this.canvas);
+
+                    lastX = firstPoint.X;
+                    lastY = firstPoint.Y;
 
                     this.isFisrtPoint = false;
                     this.isCanvasClicked = true;
 
                     DrawEllipse(this.firstPoint, this.lengthGeometries.Count, true);
-
-                    InCommand = Constants.MeasureDsbLLen;
                 }
                 else
                 {
-                    this.isDrawing = false;
-                    this.isCanvasClicked = false;
-
                     DeleteLine(this.lengthGeometries.Count);
-                    DrawLine(this.firstPoint, this.secondPoint, this.lengthGeometries.Count);
+                    DrawLine(this.firstPoint, this.secondPoint, this.lengthGeometries.Count, true);
 
                     DeleteEllipse(this.lengthGeometries.Count, true);
                     DrawEllipse(this.firstPoint, this.lengthGeometries.Count, true);
@@ -103,13 +88,31 @@ namespace RaywattApp.Common.Annotation
                     lengthGeometry.Length = this.length;
                     this.lengthGeometries.Add(lengthGeometry);
 
-                    //Canvas 마우스 이벤트 비활성화
-                    this.canvas.MouseLeftButtonDown -= length_canvas_MouseLeftButtonDown;
-                    this.canvas.MouseMove -= length_canvas_MouseMove;
-                    this.canvas.MouseLeave -= length_canvas_MouseLeave;
+                    InCommand = Constants.MeasureDisableLength;
+                    CommandOff = true;
+                }
+            }
+        }
 
-                    this.canvas.Background = null;
-                    MouseCursor = 0;
+        private void length_canvas_MouseRightButtonDown(object sender, MouseEventArgs e)
+        {
+            _log.Debug("length_canvas_MouseRightButtonDown");
+
+            if (this.isDrawing)
+            {
+                if (this.isFisrtPoint)
+                {
+                    InCommand = Constants.MeasureDisableLength;
+                    CommandOff = true;
+                }
+                else
+                {
+                    this.isFisrtPoint = true;
+                    this.isCanvasClicked = false;
+
+                    DeleteLine(this.lengthGeometries.Count);
+                    DeleteEllipse(this.lengthGeometries.Count, true);
+                    DeleteLabel(constLength, this.lengthGeometries.Count);
                 }
             }
         }
@@ -118,7 +121,6 @@ namespace RaywattApp.Common.Annotation
         {
             if (this.isDrawing && this.isCanvasClicked)
             {
-
                 Point point = e.GetPosition(this.canvas);
 
                 if (lastX == point.X && lastY == point.Y)
@@ -130,13 +132,35 @@ namespace RaywattApp.Common.Annotation
                 this.secondPoint = e.GetPosition(this.canvas);
 
                 DeleteLine(this.lengthGeometries.Count);
-                DrawLine(this.firstPoint, this.secondPoint, this.lengthGeometries.Count);
+                DrawLine(this.firstPoint, this.secondPoint, this.lengthGeometries.Count, false);
             }
         }
 
         private void ellipse_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             _log.Debug("ellipse_MouseLeftButtonDown");
+
+            if (this.isDrawing)
+                return;
+
+            if (this.isErasing)
+            {
+                Ellipse ellipse = sender as Ellipse;
+                string[] tempArr = ellipse.Name.Split('_');
+                int group = int.Parse(tempArr[1]);
+
+                DeleteLengthAll();
+
+                for (int i = group + 1; i < this.lengthGeometries.Count; i++)
+                {
+                    this.lengthGeometries[i].Group--;
+                }
+                this.lengthGeometries.RemoveAt(group);
+
+                DrawLengthAll();
+
+                return;
+            }
 
             this.isEllipseClicked = true;
             Mouse.Capture((FrameworkElement)sender);
@@ -202,13 +226,16 @@ namespace RaywattApp.Common.Annotation
                 Canvas.SetTop(ellipse, point.Y - ellipse.Height / 2);
 
                 DeleteLine(group);
-                DrawLine(lengthGeometry.FirstPoint, lengthGeometry.SecondPoint, group);
+                DrawLine(lengthGeometry.FirstPoint, lengthGeometry.SecondPoint, group, true);
             }
         }
 
         private void ellipse_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             _log.Debug("ellipse_MouseRightButtonDown");
+
+            if (this.isDrawing || this.isErasing)
+                return;
 
             Ellipse ellipse = sender as Ellipse;
             string[] tempArr = ellipse.Name.Split('_');
@@ -226,11 +253,14 @@ namespace RaywattApp.Common.Annotation
         }
 
         //---------------------------------------------------------------------------------------------------- Function
-        private void AddLength()
+        private void AddLength(string isLengthOn)
         {
             _log.Debug("AddLength");
 
-            if (!this.isDrawing)
+            if (CommandType != 0)
+                DisableCommand();
+
+            if (Convert.ToBoolean(isLengthOn))
             {
                 this.isDrawing = true;
                 this.isFisrtPoint = true;
@@ -239,9 +269,10 @@ namespace RaywattApp.Common.Annotation
                 this.canvas.MouseLeftButtonDown += length_canvas_MouseLeftButtonDown;
                 this.canvas.MouseMove += length_canvas_MouseMove;
                 this.canvas.MouseLeave += length_canvas_MouseLeave;
+                this.canvas.MouseRightButtonDown += length_canvas_MouseRightButtonDown;
 
                 this.canvas.Background = Brushes.Transparent;
-                MouseCursor = 2;
+                CommandType = Constants.MeasureCmdLength;
             }
         }
 
@@ -251,13 +282,13 @@ namespace RaywattApp.Common.Annotation
 
             foreach (var lengthGeometry in this.lengthGeometries)
             {
-                DrawLine(lengthGeometry.FirstPoint, lengthGeometry.SecondPoint, lengthGeometry.Group);
+                DrawLine(lengthGeometry.FirstPoint, lengthGeometry.SecondPoint, lengthGeometry.Group, true);
                 DrawEllipse(lengthGeometry.FirstPoint, lengthGeometry.Group, true);
                 DrawEllipse(lengthGeometry.SecondPoint, lengthGeometry.Group, false);
             }
         }
 
-        private void DrawLine(Point firstPoint, Point secondPoint, int group)
+        private void DrawLine(Point firstPoint, Point secondPoint, int group, bool isEnd)
         {
             Path path = new Path();
             path.Style = (Style)this.Resources["StylePath"];
@@ -265,7 +296,7 @@ namespace RaywattApp.Common.Annotation
             path.Stroke = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
             path.Name = constLine + "_" + group;
 
-            if (this.isDrawing)
+            if (!isEnd)
             {
                 path.StrokeDashArray.Add(2);
             }

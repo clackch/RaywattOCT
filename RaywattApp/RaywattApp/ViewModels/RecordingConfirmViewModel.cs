@@ -12,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using static RaywattOCT.RayCoreWrapper;
 using System.Windows.Threading;
-using RaywattApp.Common.Util;
 
 namespace RaywattApp.ViewModels
 {
@@ -30,6 +29,9 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private PatientCase _patientCase;
+
+        [ObservableProperty]
+        private bool _isPullbackDone = false;
 
         private DispatcherTimer timer = new DispatcherTimer();
         private DispatcherTimer timerUpdateImage = new DispatcherTimer();
@@ -87,6 +89,8 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("RedoPullback");
 
+            RayEndReview();
+
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
@@ -106,7 +110,6 @@ namespace RaywattApp.ViewModels
             PatientCase.Vessel = Constants.NotSelectedCode;
             PatientCase.ThumbnailNo = 1;
             PatientCase.StillImageYn = "N";
-            PatientCase.Image = "0710_145117_6028rpm_20mms_2000Aline_ch1.bin";
             PatientCase.AngioCoRegistration = DeviceStatus.IsAngioConnected;
             PatientCase.IndicatorDegree = 90;
 
@@ -129,30 +132,14 @@ namespace RaywattApp.ViewModels
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {
             DrawCrossSectionImage();
-            if (imgLongitude != null)
+            if (DrawLongitudeImage())
             {
-                RayScannerState state = (RayScannerState)RayGetProperty(Property.CurrentState);
-
-                if (state == RayScannerState.Review)
+                // when generating longitude image is completed
+                if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame)
                 {
-                    LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgLongitude);
+                    IsPullbackDone = true;
                 }
             }
-        }
-
-        private string generateFileName(string ext)
-        {
-            string filename = "{" +
-                CommonUtil.GetRandomText(8) + "-" +
-                CommonUtil.GetRandomText(4) + "-" +
-                CommonUtil.GetRandomText(4) + "-" +
-                CommonUtil.GetRandomText(4) + "-" +
-                CommonUtil.GetRandomText(12) +
-                "}." + ext;
-
-            _log.Debug("generateFileName : " + filename);
-
-            return filename;
         }
 
     }
