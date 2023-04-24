@@ -44,7 +44,7 @@ void CConfiguration::Initialize(tstring configFile)
 	this->acquisition.nBScan = imaging.nBScan;
 	this->acquisition.nBufferSize = imaging.nBufferSize;
 	this->acquisition.nLaserSpeed = ::GetPrivateProfileInt(_T("Acquisition"), _T("LaserSpeed"), 200000, configFilePath.c_str());
-	this->acquisition.nBufferCount = ::GetPrivateProfileInt(_T("Acquisition"), _T("AcqBufferCount"), 4, configFilePath.c_str());
+	this->acquisition.nBufferCount = ::GetPrivateProfileInt(_T("Acquisition"), _T("BufferCount"), 4, configFilePath.c_str());
 	this->acquisition.msTimeOut = ::GetPrivateProfileInt(_T("Acquisition"), _T("TimeOutInMilliSecond"), 5000, configFilePath.c_str());
 	this->acquisition.nTriggerDelaySample = ::GetPrivateProfileInt(_T("Acquisition"), _T("TriggerDelaySample"), 0, configFilePath.c_str());
 	this->acquisition.bUseKClock = ::GetPrivateProfileInt(_T("Acquisition"), _T("UseKClock"), 1, configFilePath.c_str());
