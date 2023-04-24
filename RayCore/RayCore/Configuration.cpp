@@ -50,6 +50,7 @@ void CConfiguration::Initialize(tstring configFile)
 	this->acquisition.bUseKClock = ::GetPrivateProfileInt(_T("Acquisition"), _T("UseKClock"), 1, configFilePath.c_str());
 	this->acquisition.usGoodClockDuration = getPrivateProfileFloat(_T("Acquisition"), _T("GoodClockInMicroSecond"), 5.0, configFilePath.c_str());
 	this->acquisition.usBadClockDuration = getPrivateProfileFloat(_T("Acquisition"), _T("BadClockInMicroSecond"), 4.0, configFilePath.c_str());
+	this->acquisition.bUseDES = ::GetPrivateProfileInt(_T("Acquisition"), _T("UseDES"), 0, configFilePath.c_str());
 
 	// [StepMotor]
 	::GetPrivateProfileString(_T("StepMotor"), _T("Pullback"), _T(""), this->stepMotor.pullback, sizeof(this->stepMotor.pullback), configFilePath.c_str());

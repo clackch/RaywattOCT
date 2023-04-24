@@ -21,6 +21,7 @@ public:
 		bool bUseKClock;
 		double usGoodClockDuration;
 		double usBadClockDuration;
+		bool bUseDES;
 	};
 
 protected:
