@@ -102,7 +102,7 @@ void CConfiguration::SaveBLDCMotorSettings() {
 }
 
 double CConfiguration::GetLoadCatheterTime() {
-	return (catheter.rotationTime) / 1000;
+	return catheter.rotationTime;
 }
 
 double CConfiguration::getPrivateProfileFloat(LPCWSTR lpAppName, LPCWSTR lpKeyName, double fDefault, LPCWSTR lpFileName)
