@@ -41,7 +41,9 @@ private:
 	CThread* m_pThreadRotaryJunction;
 	
 	// Imaging
-	COCTImaging* m_pImagingRealtime;
+	COCTImaging* m_pImagingRealtime;	// Pullback or LiveView
+	COCTImaging* m_pImagingPullback;
+	COCTImaging* m_pImagingLiveView;
 
 	// Data Manager
 	IDataManager* m_pDataWriter;
@@ -70,8 +72,6 @@ private:
 	double m_fContrast;
 	double m_fDegree;
 	cv::Scalar m_backgroundColor;	// for longitude image
-	double m_fLowLevel;
-	double m_fHighLevel;
 
 public:
 	COCTSystem();
@@ -150,6 +150,7 @@ private:
 	int disconnectAcqDevice();
 	int startAcqDevice();
 	int stopAcqDevice();
+	int restartAcqDevice(COCTImaging* pImaging);
 	int connectRotaryJunction();
 	int disconnectRotaryJunction();
 	void stopAllSessions();

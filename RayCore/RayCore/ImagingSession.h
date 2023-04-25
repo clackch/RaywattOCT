@@ -34,7 +34,7 @@ private:
 public:
 	virtual ~CImagingSession();
 
-	static CImagingSession* CreateSession(CMessageService* pMsg, int nSession, IDataManager *pWriter);
+	static CImagingSession* CreateSession(CMessageService* pMsg, int nSession, IImaging::Setting setting, IDataManager *pWriter);
 	static CImagingSession* CreateSession(CMessageService* pMsg, int nSession, const char* strFilePath);
 	static COCTImaging* CreateColorImaging(CMessageService* msg, IImaging::Setting setting);
 

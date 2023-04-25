@@ -29,6 +29,8 @@ COCTSystem::COCTSystem() {
 	m_pThreadRotaryJunction = nullptr;
 
 	m_pImagingRealtime = nullptr;
+	m_pImagingPullback = nullptr;
+	m_pImagingLiveView = nullptr;
 
 	m_pDataWriter = nullptr;
 
@@ -50,8 +52,6 @@ COCTSystem::COCTSystem() {
 	m_fBrightness = 0.0f;
 	m_fContrast = 0.5f;
 	m_fDegree = 90;
-	m_fLowLevel = 108.f;
-	m_fHighLevel = 109.f;
 }
 
 /*
@@ -74,15 +74,22 @@ RayError COCTSystem::Start() {
 
 	CUtility::StartThread(threadService, m_pThreadService, this);
 
-	m_pImagingRealtime = CImagingSession::CreateColorImaging(this, config.imaging);
-	m_pImagingRealtime->SetSession(SESSION_REALTIME);
-	m_pImagingRealtime->Start();
+	IImaging::Setting settingPullback = config.imaging;
+	settingPullback.Set(settingPullback.nAScan, config.acquisition.nLaserSpeed / (config.bldcMotor.velocityPullback / 60));
+	m_pImagingPullback = CImagingSession::CreateColorImaging(this, settingPullback);
+	m_pImagingPullback->SetSession(SESSION_REALTIME);
+	m_pImagingPullback->Start();
+
+	IImaging::Setting settingLiveView = config.imaging;
+	settingLiveView.Set(settingLiveView.nAScan, config.acquisition.nLaserSpeed / (config.bldcMotor.velocityLiveView / 60));
+	m_pImagingLiveView = CImagingSession::CreateColorImaging(this, settingLiveView);
+	m_pImagingLiveView->SetSession(SESSION_REALTIME);
+	m_pImagingLiveView->Start();
+
+	m_pAcqDevice = new CATSDevice(config.acquisition);
 
 	m_pVolume = new CVolumeGenerator();
 	m_pVolume->Initialize(config.imaging.nCircleSize, config.imaging.nCircleSize, config.volume.size, config.volume.size);
-
-	m_pAcqDevice = new CATSDevice(config.acquisition);
-	m_pAcqDevice->SetImaging(m_pImagingRealtime);
 
 	return RayError::OK;
 }
@@ -108,10 +115,17 @@ RayError COCTSystem::Stop() {
 		delete m_pAcqDevice;
 		m_pAcqDevice = nullptr;
 	}
-	if (m_pImagingRealtime != nullptr) {
-		m_pImagingRealtime->Stop();
-		delete m_pImagingRealtime;
-		m_pImagingRealtime = nullptr;
+
+	m_pImagingRealtime = nullptr;
+	if (m_pImagingPullback != nullptr) {
+		m_pImagingPullback->Stop();
+		delete m_pImagingPullback;
+		m_pImagingPullback = nullptr;
+	}
+	if (m_pImagingLiveView != nullptr) {
+		m_pImagingLiveView->Stop();
+		delete m_pImagingLiveView;
+		m_pImagingLiveView = nullptr;
 	}
 	if (m_pDataWriter != nullptr) {
 		delete m_pDataWriter;
@@ -232,7 +246,8 @@ RayError COCTSystem::ManualCalibration(bool forward) {
 RayError COCTSystem::ShowCalibrationGuide(bool show) {
 	if (m_pThreadService == nullptr) return RayError::SystemNotRunning;
 
-	m_pImagingRealtime->ShowCalibGuide(show);
+	m_pImagingPullback->ShowCalibGuide(show);
+	m_pImagingLiveView->ShowCalibGuide(show);
 
 	return RayError::OK;
 }
@@ -362,6 +377,8 @@ RayError COCTSystem::StartLiveView()
 		CLaserController* pLaser = CLaserController::GetInstance();
 		CMotorController* pMotorCtrl = CMotorController::GetInstance();
 		CConfiguration& config = CConfiguration::GetInstance();
+
+		restartAcqDevice(m_pImagingLiveView);
 
 		pLaser->LaserOnOff(true);
 		pMotorCtrl->PerfomRun(config.bldcMotor.velocityLiveView);
@@ -549,7 +566,8 @@ RayError COCTSystem::SetBrightness(double value) {
 
 	m_fBrightness = value;
 
-	m_pImagingRealtime->SetBrightnessContrast(m_fBrightness, m_fContrast);
+	m_pImagingPullback->SetBrightnessContrast(m_fBrightness, m_fContrast);
+	m_pImagingLiveView->SetBrightnessContrast(m_fBrightness, m_fContrast);
 	
 	return RayError::OK;
 }
@@ -569,7 +587,8 @@ RayError COCTSystem::SetContrast(double value) {
 
 	m_fContrast = value;
 
-	m_pImagingRealtime->SetBrightnessContrast(m_fBrightness, m_fContrast);
+	m_pImagingPullback->SetBrightnessContrast(m_fBrightness, m_fContrast);
+	m_pImagingLiveView->SetBrightnessContrast(m_fBrightness, m_fContrast);
 
 	return RayError::OK;
 }
@@ -821,9 +840,9 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 	int nFrame = 0;
 	pSystem->postMessage(WM_UPDATE_SAVE_RAW, 0, nNumOfSamples);
 
-	CConfiguration& config = CConfiguration::GetInstance();
+	IImaging::Setting settingPullback = pSystem->m_pImagingPullback->GetSetting();
 	pDataWriter->StartSave(strSaveFilePath);
-	pDataWriter->WriteHeader(OCTHeader::Type::TimeSignal, OCTHeader::DataType::UShort, OCTHeader::Channels::Single, config.acquisition.nAScan, config.acquisition.nBScan);
+	pDataWriter->WriteHeader(OCTHeader::Type::TimeSignal, OCTHeader::DataType::UShort, OCTHeader::Channels::Single, settingPullback.nAScan, settingPullback.nBScan);
 	for (nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadSaveRaw->isRun; nFrame++) {
 		pDataWriter->WriteFrame(nFrame);
 
@@ -935,10 +954,10 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	CZaberController* pZaber = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
 
 	CDataWriter *pDataWriter = new CDataWriter();
-	pDataWriter->Initialize(config.acquisition.nBufferSize * sizeof(unsigned short));
+	IImaging::Setting settingPullback = pSystem->m_pImagingPullback->GetSetting();
+	pDataWriter->Initialize(settingPullback.nAScan * settingPullback.nBScan * sizeof(unsigned short));
 	pSystem->m_pAcqDevice->SetWriter(pDataWriter);
-	pSystem->m_pAcqDevice->StopAcquisition();
-	pSystem->m_pAcqDevice->StartAcquisition();
+	pSystem->restartAcqDevice(pSystem->m_pImagingPullback);
 
 	// 1. Motor ON
 	pMotor->PerfomRun(config.bldcMotor.velocityPullback);
@@ -971,7 +990,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	// 5. Motor OFF
 	pMotor->StopMotor();
 
-	CImagingSession* pSession = CImagingSession::CreateSession(pSystem, SESSION_REVIEW, pDataWriter);
+	CImagingSession* pSession = CImagingSession::CreateSession(pSystem, SESSION_REVIEW, settingPullback, pDataWriter);
 	pSystem->postMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
 	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
 	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::Pullback);
@@ -1017,7 +1036,6 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 
 	// To-Do: Check Catheter Connection
 	bool loaded = true;
-		
 	if (loaded) {
 		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loaded);
 	}
@@ -1075,7 +1093,7 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 	CMotorController* pMotor = CMotorController::GetInstance();
 	CLaserController* pLaser = CLaserController::GetInstance();
 
-	pSystem->startAcqDevice();
+	pSystem->restartAcqDevice(pSystem->m_pImagingLiveView);
 	pLaser->LaserOnOff(true);
 	pMotor->PerfomRun(config.bldcMotor.velocityLiveView);
 
@@ -1159,6 +1177,25 @@ int COCTSystem::stopAcqDevice() {
 
 	return NOERROR;
 }
+
+/*
+* restartAcqDevice
+*/
+int COCTSystem::restartAcqDevice(COCTImaging* pImaging) {
+	stopAcqDevice();
+
+	m_pImagingRealtime = pImaging;
+
+	IImaging::Setting imaging = pImaging->GetSetting();
+	CATSDevice::Setting acquire = ((CATSDevice *)m_pAcqDevice)->GetSetting();
+	acquire.nAScan = imaging.nAScan;
+	acquire.nBScan = imaging.nBScan;
+	((CATSDevice*)m_pAcqDevice)->SetSetting(acquire);
+	m_pAcqDevice->SetImaging(pImaging);
+
+	return startAcqDevice();
+}
+
 /*
 * connectRotaryJunction
 */
@@ -1166,11 +1203,16 @@ int COCTSystem::connectRotaryJunction() {
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
 	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
+	CZaberController* pDelayLine = CZaberController::GetInstance(ZABER_TYPE_DELAYLINE);
 
 	bool result = true;
 
 	if (!pLinearStage->IsOpen()) {
 		result &= pLinearStage->Open(config.stepMotor.pullback);
+	}
+
+	if (!pDelayLine->IsOpen()) {
+		result &= pDelayLine->Open(config.stepMotor.delayline);
 	}
 
 	if (!pMotor->IsConnected()) {

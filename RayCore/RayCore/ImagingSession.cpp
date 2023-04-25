@@ -28,18 +28,15 @@ CImagingSession::~CImagingSession() {
 	if (m_pCutView != nullptr) delete m_pCutView;
 }
 
-CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSession, IDataManager* pWriter) {
+CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSession, IImaging::Setting setting, IDataManager* pWriter) {
 	if (pMsg == nullptr || pWriter == nullptr) return nullptr;
-	
-	CConfiguration& config = CConfiguration::GetInstance();
-	IImaging::Setting setting;
-	setting.Set(config.acquisition.nAScan, config.acquisition.nBScan);
 
 	return createSession(pMsg, setting, nSession,  pWriter, false);
 }
 
 CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSession, const char* strFilePath) {
-	IImaging::Setting setting;
+	CConfiguration& config = CConfiguration::GetInstance();
+	IImaging::Setting setting = config.imaging;
 	int nHeaderSize = 0;
 
 	std::string ext = CUtility::GetFileExtension(strFilePath);
@@ -51,7 +48,6 @@ CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSess
 	}
 	else if (ext.compare(FILE_EXTENSION_RAW) == 0)
 	{
-		CConfiguration& config = CConfiguration::GetInstance();
 		setting.Set(config.acquisition.nAScan, config.acquisition.nBScan);
 	}
 
