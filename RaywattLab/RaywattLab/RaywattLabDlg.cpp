@@ -471,7 +471,7 @@ LRESULT CRaywattLabDlg::OnMsgSaveCalibrationFrame(WPARAM wParam, LPARAM lParam) 
 
 	// To-Do : how to save frame? call DataWriter::Push directly?
 	CConfiguration& config = CConfiguration::GetInstance();
-	int nFrameSize = config.acquisition.nBufferSize * sizeof(unsigned short);
+	int nFrameSize = config.acquisition.nAScan * config.acquisition.nBScan * sizeof(unsigned short);
 
 	memcpy(m_pFrameBuffer, m_pImagingRealtime->GetFringesBuffer(), nFrameSize);
 
@@ -592,12 +592,14 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	m_pImagingSimulate->SetGoodClockRange(goodClockStart, goodClockEnd);
 	m_pImagingSimulate->Start();
 
+	int nBufferSize = config.acquisition.nAScan * config.acquisition.nBScan;
+
 	m_pDataWriter = new CDataWriter();
-	m_pDataWriter->Initialize(config.acquisition.nBufferSize * sizeof(unsigned short));
+	m_pDataWriter->Initialize(nBufferSize * sizeof(unsigned short));
 
 	m_pDataReader = new CDataReader();
 
-	m_pFrameBuffer = new char[config.acquisition.nBufferSize * sizeof(unsigned short)];
+	m_pFrameBuffer = new char[nBufferSize * sizeof(unsigned short)];
 
 	updateBrightnessContrast(m_pImagingRealtime);
 	updateBrightnessContrast(m_pImagingSimulate);
@@ -934,7 +936,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveVideo()
 	CLabImaging* pImaging = createImaging();
 
 	CDataReader* pReader = new CDataReader();
-	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nBufferSize, 0);
+	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nAScan * config.acquisition.nBScan, 0);
 
 	CVideoWriter videoWriter;
 	bool isCircle = (m_radioImageShape == 0);
@@ -973,7 +975,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveTif()
 	CLabImaging* pImaging = createImaging();
 
 	CDataReader* pReader = new CDataReader();
-	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nBufferSize, 0);
+	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nAScan * config.acquisition.nBScan, 0);
 
 	CTIFFWriter tiffWriter(strTifPath);
 	bool isCircle = (m_radioImageShape == 0);
@@ -1010,7 +1012,7 @@ void CRaywattLabDlg::OnBnClickedButtonSavePng()
 	CLabImaging* pImaging = createImaging();
 
 	CDataReader* pReader = new CDataReader();
-	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nBufferSize, 0);
+	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nAScan * config.acquisition.nBScan, 0);
 
 	bool isCircle = (m_radioImageShape == 0);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
