@@ -23,6 +23,9 @@ public:
 	virtual int InitDevice();
 	virtual int CleanUp();
 
+	void SetSetting(Setting setting) { m_setting = setting; }
+	Setting GetSetting() { return m_setting; }
+
 protected:
 	virtual int start();
 	virtual int stop();

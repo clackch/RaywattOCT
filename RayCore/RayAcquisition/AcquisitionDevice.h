@@ -13,7 +13,6 @@ public:
 	public:
 		unsigned int nAScan;
 		unsigned int nBScan;
-		unsigned int nBufferSize;
 		unsigned int nLaserSpeed;
 		unsigned int nBufferCount;
 		unsigned int msTimeOut;

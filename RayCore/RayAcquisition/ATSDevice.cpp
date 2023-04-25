@@ -20,6 +20,10 @@ int CATSDevice::InitDevice() {
 	U32 systemId = 1;
 	U32 boardId = 1;
 
+	U8 major, minor, revision;
+	AlazarGetSDKVersion(&major, &minor, &revision);
+	printf("[Alazar] SDK Ver.%d.%d.%d\n", major, minor, revision);
+	
 	m_hATSBoard = AlazarGetBoardBySystemID(systemId, boardId);
 	if (m_hATSBoard == NULL)
 	{
@@ -86,9 +90,9 @@ int CATSDevice::stop() {
 }
 
 unsigned short *CATSDevice::acquire(int& nCurFrame, int& nTotalFrame) {
-	const int nBufferSize = m_setting.nBufferSize;
+	const int nBufferSize = m_setting.nAScan * m_setting.nBScan;
 	const int nAcqBufCount = m_setting.nBufferCount;
-	const U32 timeout_ms = 5000;
+	const U32 timeout_ms = m_setting.msTimeOut;
 	RETURN_CODE retCode;
 	
 	nCurFrame = 0;
