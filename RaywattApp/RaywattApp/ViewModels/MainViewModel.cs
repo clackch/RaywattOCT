@@ -123,6 +123,7 @@ namespace RaywattApp.ViewModels
             reviewPages.Add(Constants.ReviewFfrPage);
             reviewPages.Add(Constants.ReviewPresetPage);
             reviewPages.Add(Constants.ReviewAngioCoRegPage);
+            reviewPages.Add(Constants.ReviewLumenEditPage);
 
             IsHome = true;
 

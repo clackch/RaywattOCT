@@ -418,6 +418,44 @@
         <Setter Property="Height" Value="26"/>
     </Style>
 
+    <!-- FfrPredictBtn -->
+    <Style TargetType="Button" x:Key="FfrPredictBtn" BasedOn="{StaticResource Pretendard-Medium-18}">
+        <Setter Property="Width" Value="200"/>
+        <Setter Property="Height" Value="54"/>
+        <Setter Property="FontSize" Value="18"/>
+        <Setter Property="Foreground" Value="{DynamicResource MainPrimaryColorBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="border" CornerRadius="6" BorderThickness="1" BorderBrush="{DynamicResource MainPrimaryColorBrush}" Background="Transparent"/>
+                        <Image x:Name="icon" Source="{svgc:SvgImage Source=/res/icon/ffrPredict.svg}" Width="26" Height="27" HorizontalAlignment="Left" Margin="32,0,0,0"/>
+                        <ContentPresenter x:Name="content" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="70,0,0,0"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource MainThemeBrush}"/>
+                            <Setter TargetName="border" Property="Opacity" Value="0.3"/>
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/icon/ffrPredict_hover.svg}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="Transparent"/>
+                            <Setter TargetName="border" Property="Opacity" Value="1.0"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MainThemePressedBrush}"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource MainThemePressedBrush}"/>
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/icon/ffrPredict_active.svg}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource GrayscaleGray6Brush}"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource GrayscaleGray6Brush}"/>
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/icon/ffrPredict_disabled.svg}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- Setting -->
     <Style TargetType="Button" x:Key="SettingSelected" BasedOn="{StaticResource Pretendard-Medium-18}">
         <Setter Property="Width" Value="200"/>

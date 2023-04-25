@@ -93,7 +93,7 @@ namespace RaywattApp.Common.Annotation.Util
 
             context.DrawLine(new Pen(brush, 1.0), CommonUtil.GetScaledPoint(length.FirstPoint, xScale, yScale), CommonUtil.GetScaledPoint(length.SecondPoint, xScale, yScale));
 
-            DrawLengthLabel(context, length.FirstPoint, length.SecondPoint, GetLabelText(length.Group, length.Length), xScale, yScale);
+            DrawLengthLabel(context, length.FirstPoint, length.SecondPoint, GetLabelText(length.Length), xScale, yScale);
         }
 
         public static void DrawTextGeometry(DrawingContext context, TextGeometry text, double xScale, double yScale)
@@ -177,6 +177,11 @@ namespace RaywattApp.Common.Annotation.Util
         public static string GetLabelText(int group, double value)
         {
             return "[" + (group + 1) + "] " + (Math.Round(value, 3)).ToString();
+        }
+
+        public static string GetLabelText(double value)
+        {
+            return (Math.Round(value, 3)).ToString();
         }
 
         public static double GetLabelAngle(Point firstPoint, Point secondPoint, out bool flip)

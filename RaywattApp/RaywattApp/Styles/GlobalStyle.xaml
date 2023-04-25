@@ -96,6 +96,14 @@
     <SolidColorBrush x:Key="FULabelForegroundBrush" Color="#fcfcfc"/>
 
     <!-- font -->
+    <Style TargetType="Control" x:Key="Pretendard-Bold-80">
+        <Setter Property="Padding" Value="0,0,0,0"/>
+        <Setter Property="FontFamily" Value="Pretendard"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontStyle" Value="Normal"/>
+        <Setter Property="FontSize" Value="80"/>
+    </Style>
+
     <Style TargetType="Control" x:Key="Pretendard-Bold-54">
         <Setter Property="Padding" Value="0,0,0,0"/>
         <Setter Property="FontFamily" Value="Pretendard"/>
@@ -118,6 +126,14 @@
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="FontStyle" Value="Normal"/>
         <Setter Property="FontSize" Value="32"/>
+    </Style>
+
+    <Style TargetType="Control" x:Key="Pretendard-Bold-26">
+        <Setter Property="Padding" Value="0,0,0,0"/>
+        <Setter Property="FontFamily" Value="Pretendard"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontStyle" Value="Normal"/>
+        <Setter Property="FontSize" Value="26"/>
     </Style>
 
     <Style TargetType="Control" x:Key="Pretendard-Bold-24">

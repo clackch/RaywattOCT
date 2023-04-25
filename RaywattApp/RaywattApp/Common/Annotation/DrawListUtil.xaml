@@ -23,7 +23,7 @@
             <StackPanel Height="26"/>
             <Label Content="{Binding [Area], Source={StaticResource L10N}}"/>
             <StackPanel Height="8"/>
-            <DataGrid ItemsSource="{Binding CurrAreaGeometries, ElementName=UserControl}" Height="160" Style="{StaticResource DataGridMeasurement}" RowStyle="{StaticResource DataGridRowMeasurement}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderMeasurementArea}">
+            <DataGrid ItemsSource="{Binding CurrAreaGeometries, ElementName=UserControl}" Height="199" Style="{StaticResource DataGridMeasurement}" RowStyle="{StaticResource DataGridRowMeasurement}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderMeasurementArea}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Width="32" CellStyle="{StaticResource DataGridCellTooltip}" Binding="{Binding Group, Converter={StaticResource GroupNameConverter}}" Header="{Binding [No.], Source={StaticResource L10N}}"/>
                     <DataGridTextColumn Width="33.6" CellStyle="{StaticResource DataGridCellTooltip}" Binding="{Binding Area, StringFormat={}{0:N3}}" Header="{Binding [Area(㎟)], Source={StaticResource L10N}}"/>
@@ -39,43 +39,7 @@
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
-            <StackPanel Height="16"/>
-            
-            <Label Content="{Binding [Length], Source={StaticResource L10N}}"/>
-            <StackPanel Height="8"/>
-            <DataGrid ItemsSource="{Binding CurrLengthGeometries, ElementName=UserControl}" Height="130" Style="{StaticResource DataGridMeasurement}" RowStyle="{StaticResource DataGridRowMeasurement}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderMeasurement}">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Width="32" CellStyle="{StaticResource DataGridCellTooltip}" Binding="{Binding Group, Converter={StaticResource GroupNameConverter}}" Header="{Binding [No.], Source={StaticResource L10N}}"/>
-                    <DataGridTextColumn Width="136" CellStyle="{StaticResource DataGridCellTooltip}" Binding="{Binding Length, StringFormat={}{0:N3}}" Header="{Binding [Length (㎜)], Source={StaticResource L10N}}"/>
-                    <DataGridTemplateColumn Width="31" CellStyle="{StaticResource DataGridCellMeasurementDelete}">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button Style="{DynamicResource DataGridDeleteMeasurement}" Click="delete_Length" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}, Path=CurrentItem}" Content="X"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>            
-            <StackPanel Height="20"/>
-            <Separator Height="1" Background="{DynamicResource SeparatorBrush}"/>
-            <StackPanel Height="20"/>
-
-            <Label Content="{Binding [Longitude Length], Source={StaticResource L10N}}"/>
-            <StackPanel Height="8"/>
-            <DataGrid ItemsSource="{Binding LModeLengthGeometries, ElementName=UserControl}" Height="130" Style="{StaticResource DataGridMeasurement}" RowStyle="{StaticResource DataGridRowMeasurement}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderMeasurement}">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Width="32" CellStyle="{StaticResource DataGridCellTooltip}" Binding="{Binding Group, Converter={StaticResource GroupNameConverter}}" Header="{Binding [No.], Source={StaticResource L10N}}"/>
-                    <DataGridTextColumn Width="136" CellStyle="{StaticResource DataGridCellTooltip}" Binding="{Binding Length, StringFormat={}{0:N3}}" Header="{Binding [Length (㎜)], Source={StaticResource L10N}}"/>
-                    <DataGridTemplateColumn Width="31" CellStyle="{StaticResource DataGridCellMeasurementDelete}">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button Style="{DynamicResource DataGridDeleteMeasurement}" Click="delete_LModeLength" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}, Path=CurrentItem}"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
-            <StackPanel Height="16"/>
+            <StackPanel Height="12"/>
             <Grid>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <component:IconButton Style="{DynamicResource IconButton}" Icon="pagingPrev" Click="move_Frame" CommandParameter="prev"/>

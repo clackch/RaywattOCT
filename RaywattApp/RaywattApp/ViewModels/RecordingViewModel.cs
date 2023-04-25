@@ -88,6 +88,9 @@ namespace RaywattApp.ViewModels
         {
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
+
+            if (timerUpdateImage.IsEnabled)
+                timerUpdateImage.Stop();
         }
 
         private void Cancel()

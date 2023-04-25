@@ -114,9 +114,6 @@ namespace RaywattApp.Common.Annotation
                 case Constants.MeasureDeleteArea:
                     drawUtil.DeleteArea(command[1]);
                     break;
-                case Constants.MeasureDeleteLength:
-                    drawUtil.DeleteLength(command[1]);
-                    break;
                 case Constants.MeasureDisableLength:
                     drawUtil.DisableCommand();
                     break;
@@ -202,21 +199,6 @@ namespace RaywattApp.Common.Annotation
             this.areaGeometrys.RemoveAt(groupIdx);
 
             DrawAreaAll();
-        }
-
-        private void DeleteLength(string param)
-        {
-            DeleteLengthAll();
-
-            int groupIdx = int.Parse(param);
-
-            for (int i = groupIdx + 1; i < this.lengthGeometries.Count; i++)
-            {
-                this.lengthGeometries[i].Group--;
-            }
-            this.lengthGeometries.RemoveAt(groupIdx);
-
-            DrawLengthAll();
         }
 
         private void DeleteLabel(string classfication, int group)

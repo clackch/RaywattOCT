@@ -101,8 +101,8 @@ namespace RaywattApp.ViewModels
         private List<TextGeometry> _lModeTextGeometries;
         public List<TextGeometry> LModeTextGeometries { get { return _lModeTextGeometries; } set { _lModeTextGeometries = value; OnPropertyChanged(nameof(LModeTextGeometries)); } }
 
-        private List<Measurement> _lumenContour;
-        public List<Measurement> LumenContour { get { return _lumenContour; } set { _lumenContour = value; OnPropertyChanged(nameof(LumenContour)); } }
+        private List<LumenContour> _lumenContours;
+        public List<LumenContour> LumenContours { get { return _lumenContours; } set { _lumenContours = value; OnPropertyChanged(nameof(LumenContours)); } }
 
         private double _lModeIndicatorX;
         public double LModeIndicatorX 
@@ -386,7 +386,7 @@ namespace RaywattApp.ViewModels
                 sqlParameters["longitude"] = PatientCase.Longitude;
                 PatientCase.Bookmark = JsonConvert.SerializeObject(Bookmarks, Formatting.Indented);
                 sqlParameters["bookmark"] = PatientCase.Bookmark;
-                PatientCase.LumenContour = ConvertMeasurementsToJson(LumenContour);
+                PatientCase.LumenContour = JsonConvert.SerializeObject(LumenContours, Formatting.Indented);
                 sqlParameters["lumen_contour"] = PatientCase.LumenContour;
                 nRows = _sqlManager.UpsertPatientCaseAnnotation(sqlParameters);
                 if (nRows == 0)
@@ -423,7 +423,7 @@ namespace RaywattApp.ViewModels
                 LModeTextGeometries = lModeMeasurement.TextGeometries;
 
                 Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(PatientCase.Bookmark);
-                LumenContour = JsonConvert.DeserializeObject<List<Measurement>>(PatientCase.LumenContour);
+                LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(PatientCase.LumenContour);
             }
             else
             {
@@ -465,11 +465,11 @@ namespace RaywattApp.ViewModels
 
                     if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenContour))
                     {
-                        LumenContour = JsonConvert.DeserializeObject<List<Measurement>>(patientCaseAnnotations[0].LumenContour);
+                        LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(patientCaseAnnotations[0].LumenContour);
                     }
                     else
                     {
-                        LumenContour = new List<Measurement>();
+                        LumenContours = new List<LumenContour>();
                     }
                 }
                 else
@@ -478,7 +478,7 @@ namespace RaywattApp.ViewModels
                     LModeLengthGeometries = new ObservableCollection<LengthGeometry>();
                     LModeTextGeometries = new List<TextGeometry>();
                     Bookmarks = new ObservableCollection<Bookmark>();
-                    LumenContour = new List<Measurement>();
+                    LumenContours = new List<LumenContour>();
                 }
             }            
 

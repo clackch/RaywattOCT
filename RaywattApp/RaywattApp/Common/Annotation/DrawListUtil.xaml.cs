@@ -52,15 +52,6 @@ namespace RaywattApp.Common.Annotation
         public static readonly DependencyProperty MeasurementsProperty =
             DependencyProperty.Register("Measurements", typeof(List<Measurement>), typeof(DrawListUtil), new PropertyMetadata(null));
 
-        public ObservableCollection<LengthGeometry> LModeLengthGeometries
-        {
-            get { return (ObservableCollection<LengthGeometry>)GetValue(LModeLengthGeometriesProperty); }
-            set { SetValue(LModeLengthGeometriesProperty, value); }
-        }
-
-        public static readonly DependencyProperty LModeLengthGeometriesProperty =
-            DependencyProperty.Register("LModeLengthGeometries", typeof(ObservableCollection<LengthGeometry>), typeof(DrawListUtil), new PropertyMetadata(null));
-
         public ObservableCollection<AreaGeometry> CurrAreaGeometries
         {
             get { return (ObservableCollection<AreaGeometry>)GetValue(CurrAreaGeometriesProperty); }
@@ -69,15 +60,6 @@ namespace RaywattApp.Common.Annotation
 
         public static readonly DependencyProperty CurrAreaGeometriesProperty =
             DependencyProperty.Register("CurrAreaGeometries", typeof(ObservableCollection<AreaGeometry>), typeof(DrawListUtil), new PropertyMetadata(null));
-
-        public ObservableCollection<LengthGeometry> CurrLengthGeometries
-        {
-            get { return (ObservableCollection<LengthGeometry>)GetValue(CurrLengthGeometriesProperty); }
-            set { SetValue(CurrLengthGeometriesProperty, value); }
-        }
-
-        public static readonly DependencyProperty CurrLengthGeometriesProperty =
-            DependencyProperty.Register("CurrLengthGeometries", typeof(ObservableCollection<LengthGeometry>), typeof(DrawListUtil), new PropertyMetadata(null));
 
         //---------------------------------------------------------------------------------------------------- Constructor
         public DrawListUtil()
@@ -100,7 +82,6 @@ namespace RaywattApp.Common.Annotation
                 return;
 
             drawListUtil.CurrAreaGeometries = drawListUtil.Measurements[frameNumber].AreaGeometries;
-            drawListUtil.CurrLengthGeometries = drawListUtil.Measurements[frameNumber].LengthGeometries;
         }
 
         private void delete_Area(object sender, RoutedEventArgs e)
@@ -109,22 +90,6 @@ namespace RaywattApp.Common.Annotation
             AreaGeometry areaGeometry = button.CommandParameter as AreaGeometry;
 
             OutCommand = Constants.MeasureDeleteArea + "|" + areaGeometry.Group;
-        }
-
-        private void delete_Length(object sender, RoutedEventArgs e)
-        {
-            Button button = (Button)sender;
-            LengthGeometry lengthGeometry = button.CommandParameter as LengthGeometry;
-
-            OutCommand = Constants.MeasureDeleteLength + "|" + lengthGeometry.Group;
-        }
-
-        private void delete_LModeLength(object sender, RoutedEventArgs e)
-        {
-            Button button = (Button)sender;
-            LengthGeometry lengthGeometry = button.CommandParameter as LengthGeometry;
-
-            OutCommand = Constants.MeasureDeleteLongitudeLength + "|" + lengthGeometry.Group;
         }
 
         private void move_Frame(object sender, RoutedEventArgs e)

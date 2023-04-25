@@ -125,9 +125,6 @@ namespace RaywattApp.Common.Annotation
                 case Constants.MeasureErasePoint:
                     drawLmodeUtil.ErasePoint(command[1]);
                     break;
-                case Constants.MeasureDeleteLongitudeLength:
-                    drawLmodeUtil.DeleteLength(command[1]);
-                    break;
                 case Constants.MeasureDisableLength:
                     drawLmodeUtil.DisableCommand();
                     break;
@@ -160,24 +157,6 @@ namespace RaywattApp.Common.Annotation
             this.canvas.Children.Clear();
             DrawLengthAll();
             DrawTextAll();
-        }
-
-        private void DeleteLength(string param)
-        {
-            _log.Debug("DeleteLength : " + param);
-
-            DeleteLengthAll();
-
-            int groupIdx = int.Parse(param);
-
-            for (int i = groupIdx + 1; i < this.lengthGeometries.Count; i++)
-            {
-                this.lengthGeometries[i].Group--;
-            }
-            this.lengthGeometries.RemoveAt(groupIdx);
-
-            DrawLengthAll();
-
         }
 
         private void DeleteLabel(string classfication, int group)
