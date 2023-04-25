@@ -50,10 +50,10 @@ COCTImaging::COCTImaging(Setting setting, CMessageService* pMsg) {
 	m_bInvert = false;
 	m_bColor = false;
 	m_bShowCalibGuide = false;
-	m_fBrightness = 0.0f;
-	m_fContrast = 1.0f;
-	m_fLowLevel = 108.0f;
-	m_fHighLevel = 109.0f;
+	m_fBrightness = setting.brightness;
+	m_fContrast = setting.contrast;
+	m_fLowLevel = setting.lowLevel;
+	m_fHighLevel = setting.highLevel;
 
 	m_nCurFrame = 0;
 	m_nTotalFrame = 0;
