@@ -381,7 +381,7 @@ RayError COCTSystem::StartLiveView()
 		restartAcqDevice(m_pImagingLiveView);
 
 		pLaser->LaserOnOff(true);
-		pMotorCtrl->PerfomRun(config.bldcMotor.velocityLiveView);
+		pMotorCtrl->PerformRun(config.bldcMotor.velocityLiveView);
 
 		return RayError::OK;
 	}
@@ -960,7 +960,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pSystem->restartAcqDevice(pSystem->m_pImagingPullback);
 
 	// 1. Motor ON
-	pMotor->PerfomRun(config.bldcMotor.velocityPullback);
+	pMotor->PerformRun(config.bldcMotor.velocityPullback);
 	Sleep(config.bldcMotor.settleDown);
 
 	pZaber->SetSpeed(config.stepMotor.pullbackSpeed);
@@ -1015,7 +1015,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 
 	// 1. Motor ON
 	int nVelocity = config.catheter.velocity;
-	pMotor->PerfomRun(nVelocity);
+	pMotor->PerformRun(nVelocity);
 
 	// 2. Set Linear Stage Position
 	if (pZaber->IsOpen()) {
@@ -1095,7 +1095,7 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 
 	pSystem->restartAcqDevice(pSystem->m_pImagingLiveView);
 	pLaser->LaserOnOff(true);
-	pMotor->PerfomRun(config.bldcMotor.velocityLiveView);
+	pMotor->PerformRun(config.bldcMotor.velocityLiveView);
 
 	// To-Do: determine image verification
 	bool verified = true;

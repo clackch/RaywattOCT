@@ -215,7 +215,7 @@ void CRotaryJunctionDlg::OnBnClickedButtonMotorPerformRun()
 	GetDlgItem(IDC_EDIT_MOTOR_VELOCITY)->GetWindowText(strVelocity);
 	nVelocity = _ttoi(strVelocity);
 
-	pMotorCtrl->PerfomRun(nVelocity);
+	pMotorCtrl->PerformRun(nVelocity);
 
 	strVelocity.Format(_T("%d"), nVelocity);
 	GetDlgItem(IDC_EDIT_MOTOR_VELOCITY)->SetWindowText(strVelocity);
