@@ -160,17 +160,21 @@ xcopy "$(ProjectDir)*Controller.h" "$(TargetDir)include\" /y /d</Command>
     <ClInclude Include="..\Utility\Config.h" />
     <ClInclude Include="..\Utility\MessageService.h" />
     <ClInclude Include="..\Utility\Utility.h" />
+    <ClInclude Include="ArduinoController.h" />
     <ClInclude Include="LaserController.h" />
     <ClInclude Include="MotorController.h" />
     <ClInclude Include="SerialPort.h" />
+    <ClInclude Include="StepMotorController.h" />
     <ClInclude Include="ZaberController.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Utility\MessageService.cpp" />
     <ClCompile Include="..\Utility\Utility.cpp" />
+    <ClCompile Include="ArduinoController.cpp" />
     <ClCompile Include="LaserController.cpp" />
     <ClCompile Include="MotorController.cpp" />
     <ClCompile Include="SerialPort.cpp" />
+    <ClCompile Include="StepMotorController.cpp" />
     <ClCompile Include="ZaberController.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
