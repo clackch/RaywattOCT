@@ -335,7 +335,7 @@
 
                                 <!-- Default -->
                                 <Grid Grid.Row="1" Margin="0" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                                    <Grid Width="192" HorizontalAlignment="Center">
+                                    <Grid HorizontalAlignment="Left" Margin="24,0,0,0" Width="216">
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="40"/>
                                             <RowDefinition Height="Auto"/>
@@ -397,7 +397,7 @@
                                                 <Label Grid.Column="1" Content="00.00" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
                                             </Grid>
                                         </StackPanel>
-                                        <Separator Grid.Row="3" Height="1" Margin="0,0,0,0" Background="{DynamicResource SeparatorBrush}"/>
+                                        <Separator Grid.Row="3" Height="1" HorizontalAlignment="Left" Width="192" Background="{DynamicResource SeparatorBrush}"/>
                                         <StackPanel x:Name="CalciumInfo" Grid.Row="5" Orientation="Vertical">
                                             <Label Content="{Binding [Calcium], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-20}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                             <StackPanel Height="16"/>
@@ -407,7 +407,7 @@
                                             </StackPanel>
                                             <StackPanel Height="12"/>
                                             <Label Content="{Binding [Max Thickness], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
-                                            <StackPanel Height="64">
+                                            <StackPanel Height="64" Orientation="Horizontal">
                                                 <Label Content="0.73" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
                                                 <StackPanel Width="10"/>
                                                 <Label Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-30}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom"/>
@@ -425,7 +425,7 @@
                                             <RowDefinition/>
                                         </Grid.RowDefinitions>
                                         <!-- Cross-section -->
-                                        <Grid Grid.Row="1">
+                                        <Grid Grid.Row="1" Margin="24,0,24,0">
                                             <!-- Cross Seciton Image -->
                                             <Image x:Name="crossSectionImageSmall" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionAngio}" Height="{x:Static const:Constants.CrossSectionAngio}">
                                                 <i:Interaction.Triggers>
@@ -452,7 +452,7 @@
                                             </StackPanel>
                                         </Grid>
                                         <!-- Info -->
-                                        <Grid Grid.Row="2">
+                                        <Grid Grid.Row="2" Margin="24,0,0,0">
                                             <StackPanel Orientation="Vertical">
                                                 <StackPanel Height="4"/>
                                                 <Label Content="{Binding [Lumen], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-20}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
@@ -618,7 +618,7 @@
                 </Grid>
 
                 <!-- Lumen Contour-->
-                <annotation:DrawLumenContourUtil Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" LumenContours="{Binding LumenContours}" FrameNumber="{Binding FrameNumber}" Visibility="{Binding ReviewStatus.IsContourStentOn, Converter={StaticResource BoolToVisibilityConverter}}" IsEnabled="False"/>
+                <annotation:DrawLumenContourUtil Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" LumenContours="{Binding LumenContours}" FrameNumber="{Binding FrameNumber}" Visibility="{Binding ReviewStatus.IsContourStentOn, Converter={StaticResource BoolToVisibilityConverter}}" IsEditOn="False"/>
                 
                 <!-- Measurement -->
                 <annotation:DrawUtil Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" CommandOff="{Binding MeasurementCommandOff, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}"/>

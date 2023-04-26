@@ -20,9 +20,13 @@
             <Setter Property="Stroke" Value="White"/>
             <Setter Property="StrokeThickness" Value="1"/>
             <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding IsEditOn, ElementName=UserControl}" Value="True"/>
+                        <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
+                    </MultiDataTrigger.Conditions>
                     <Setter Property="Cursor" Value="Pen"/>
-                </Trigger>
+                </MultiDataTrigger>
                 <DataTrigger Binding="{Binding IsContourMouseOver, ElementName=UserControl}" Value="True">
                     <Setter Property="StrokeThickness" Value="2"/>
                 </DataTrigger>
@@ -32,6 +36,15 @@
             <Setter Property="StrokeThickness" Value="1"/>
             <Setter Property="Stroke" Value="White"/>
             <Setter Property="StrokeDashArray" Value="2"/>
+        </Style>
+        <Style TargetType="Path" x:Key="StylePathDiameter">
+            <Setter Property="StrokeThickness" Value="1"/>
+            <Setter Property="Stroke" Value="Transparent"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsContourMouseOver, ElementName=UserControl}" Value="True">
+                    <Setter Property="Stroke" Value="White"/>
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
         <Style TargetType="Path" x:Key="StylePathBackground">
             <Setter Property="StrokeThickness" Value="1"/>

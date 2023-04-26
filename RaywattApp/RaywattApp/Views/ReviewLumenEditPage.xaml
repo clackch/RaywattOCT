@@ -92,7 +92,7 @@
                                 <Label Content="1 mm" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Grid>
-                        <annotation:DrawLumenContourUtil Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" LumenContours="{Binding LumenContours}" FrameNumber="{Binding FrameNumber}" InCommand="{Binding LumenContourCommand, Mode=TwoWay}" IsEnabled="True"/>
+                        <annotation:DrawLumenContourUtil Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" LumenContours="{Binding LumenContours}" FrameNumber="{Binding FrameNumber}" InCommand="{Binding LumenContourCommand, Mode=TwoWay}" IsEditOn="True"/>
                         <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="50,0,0,0">
                             <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="next"  Width="40" Height="35.5" Command="{Binding CmdPlayback}" CommandParameter="next"/>
                         </StackPanel>

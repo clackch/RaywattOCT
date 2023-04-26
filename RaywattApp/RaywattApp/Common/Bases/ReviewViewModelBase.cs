@@ -55,8 +55,7 @@ namespace RaywattApp.Common.Bases
                 OnPropertyChanged(nameof(FrameNumber));
                 DisplayFrameNumber = FrameNumber + 1;
 
-                if(LumenContours.Count > frameNumber)
-                    CurrentLumenContour = LumenContours[frameNumber];
+                CurrentLumenContour = LumenContours[frameNumber];
             }
         }
 

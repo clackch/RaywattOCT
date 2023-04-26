@@ -15,6 +15,19 @@ using Point = System.Windows.Point;
 
 namespace RaywattApp.Common.Annotation
 {
+    public class LumenContourHistory
+    {
+        public List<Point>? points;
+
+        public double area;
+
+        public DiameterInfo? minDiameter;
+
+        public DiameterInfo? maxDiameter;
+
+        public double meanDiameter;
+    }
+
     /// <summary>
     /// DrawLumenContourUtil.xaml에 대한 상호 작용 논리
     /// </summary>
@@ -34,7 +47,7 @@ namespace RaywattApp.Common.Annotation
 
         const string constMaxDiameter = "MaxDiameter";
 
-        List<Stack<List<Point>>> lumenContourHistory;
+        List<Stack<LumenContourHistory>> lumenContourHistory;
 
         List<Point> newPoints;
 
@@ -66,6 +79,15 @@ namespace RaywattApp.Common.Annotation
 
         private static readonly DependencyProperty IsContourMouseOverProperty =
             DependencyProperty.Register("IsContourMouseOver", typeof(bool), typeof(DrawLumenContourUtil), new PropertyMetadata(default(bool)));
+
+        public bool IsEditOn
+        {
+            get { return (bool)GetValue(IsEditOnProperty); }
+            set { this.SetValue(IsEditOnProperty, value); }
+        }
+
+        private static readonly DependencyProperty IsEditOnProperty =
+            DependencyProperty.Register("IsEditOn", typeof(bool), typeof(DrawLumenContourUtil), new PropertyMetadata(default(bool)));
 
         public int FrameNumber
         {
@@ -116,13 +138,7 @@ namespace RaywattApp.Common.Annotation
             if (drawUtil == null || drawUtil.LumenContours == null)
                 return;                       
 
-            if (frameNumber >= drawUtil.LumenContours.Count)
-            {
-                drawUtil.canvas.Children.Clear();
-                return;
-            }
-
-            if (!drawUtil.isInit && drawUtil.IsEnabled)
+            if (!drawUtil.isInit && drawUtil.IsEditOn)
             {
                 drawUtil.newPoints = new List<Point>();
                 drawUtil.contourLines = new List<Line>();
@@ -131,20 +147,18 @@ namespace RaywattApp.Common.Annotation
                 drawUtil.curPath.Style = (Style)drawUtil.Resources["StylePath"];
                 drawUtil.isFirstPoint = true;
 
-                drawUtil.lumenContourHistory = new List<Stack<List<Point>>>(drawUtil.LumenContours.Count);
+                drawUtil.lumenContourHistory = new List<Stack<LumenContourHistory>>(drawUtil.LumenContours.Count);
                 foreach(LumenContour lumenContour in drawUtil.LumenContours)
                 {
-                    Stack<List<Point>> stack = new Stack<List<Point>>();
-                    stack.Push(lumenContour.Points.Count == 0 ? lumenContour.PointsFromMl : lumenContour.Points);
+                    Stack<LumenContourHistory> stack = new Stack<LumenContourHistory>();
+                    stack.Push(drawUtil.CopyLumenContourToHistory(lumenContour));
                     drawUtil.lumenContourHistory.Add(stack);
                 }
 
                 drawUtil.isInit = true;
             }
 
-            List<Point>? points = drawUtil.LumenContours[frameNumber].Points.Count == 0 ? drawUtil.LumenContours[frameNumber].PointsFromMl : drawUtil.LumenContours[frameNumber].Points;
-
-            drawUtil.DrawLumenContour(points, drawUtil.IsEnabled);
+            drawUtil.DrawLumenContour(drawUtil.LumenContours[frameNumber], drawUtil.IsEditOn);
         }
 
         private static void ReceiveCommand(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
@@ -262,8 +276,15 @@ namespace RaywattApp.Common.Annotation
 
         private void Line_MouseLeave(object sender, MouseEventArgs e)
         {
-            if (isFirstPoint)
+            if (IsEditOn)
+            {
+                if (isFirstPoint)
+                    IsContourMouseOver = false;
+            }
+            else
+            {
                 IsContourMouseOver = false;
+            }            
         }
 
         //---------------------------------------------------------------------------------------------------- Function
@@ -289,11 +310,13 @@ namespace RaywattApp.Common.Annotation
             this.canvas.Background = null;
         }
 
-        private void DrawLumenContour(List<Point>? pointList, bool isEditOn)
+        private void DrawLumenContour(LumenContour lumenContour, bool isEditOn)
         {
             _log.Debug("DrawLumenContour");
 
             this.canvas.Children.Clear();
+
+            List<Point>? pointList = lumenContour.Points;
 
             if (pointList == null || pointList.Count < 3)
                 return;
@@ -313,11 +336,11 @@ namespace RaywattApp.Common.Annotation
                 line.Y1 = pointList[i].Y;
                 line.X2 = pointList[i + 1].X;
                 line.Y2 = pointList[i + 1].Y;
+                line.MouseEnter += Line_MouseEnter;
+                line.MouseLeave += Line_MouseLeave;
                 if (isEditOn)
                 {
                     line.MouseLeftButtonDown += Line_MouseLeftButtonDown;
-                    line.MouseEnter += Line_MouseEnter;
-                    line.MouseLeave += Line_MouseLeave;
                     contourLines.Add(line);
                 }
                 this.canvas.Children.Add(line);
@@ -331,14 +354,20 @@ namespace RaywattApp.Common.Annotation
             lineConnect.Y1 = pointList[pointList.Count - 1].Y;
             lineConnect.X2 = pointList[0].X;
             lineConnect.Y2 = pointList[0].Y;
+            lineConnect.MouseEnter += Line_MouseEnter;
+            lineConnect.MouseLeave += Line_MouseLeave;
             if (isEditOn)
             {
                 lineConnect.MouseLeftButtonDown += Line_MouseLeftButtonDown;
-                lineConnect.MouseEnter += Line_MouseEnter;
-                lineConnect.MouseLeave += Line_MouseLeave;
                 contourLines.Add(lineConnect);
             }
             this.canvas.Children.Add(lineConnect);
+
+            if (!isEditOn)
+            {
+                DrawDiameter(lumenContour.MinDiameter.point1, lumenContour.MinDiameter.point2, constMinDiameter);
+                DrawDiameter(lumenContour.MaxDiameter.point1, lumenContour.MaxDiameter.point2, constMaxDiameter);
+            }
         }
 
         private void ReDrawLumenContour()
@@ -433,7 +462,7 @@ namespace RaywattApp.Common.Annotation
 
             if (!IsValidPathGeometry(finalPathGeometry))
             {
-                DrawLumenContour(LumenContours[FrameNumber].Points, true);
+                DrawLumenContour(LumenContours[FrameNumber], true);
             }
             else
             {
@@ -441,28 +470,11 @@ namespace RaywattApp.Common.Annotation
                 CalculateDiameter(LumenContours[FrameNumber]);
                 LumenContours[FrameNumber].Area = finalPathGeometry.GetArea();
                 LumenContours[FrameNumber].Points = finalPoint;
+                lumenContourHistory[FrameNumber].Push(CopyLumenContourToHistory(LumenContours[FrameNumber]));
 
-                DrawLumenContour(finalPoint, true);
-                DrawDiameter(LumenContours[FrameNumber].MinDiameter.point1, LumenContours[FrameNumber].MinDiameter.point2, constMinDiameter);
-                DrawDiameter(LumenContours[FrameNumber].MaxDiameter.point1, LumenContours[FrameNumber].MaxDiameter.point2, constMaxDiameter);
-
-                lumenContourHistory[FrameNumber].Push(finalPoint);
+                DrawLumenContour(LumenContours[FrameNumber], true);
             }
         }
-
-        private void SetLumenContour(List<Point> points)
-        {
-            PathGeometry pathGeometry = GetPathGeometry(points);
-
-            if (IsValidPathGeometry(pathGeometry))
-            {
-                UpdateGeometry(LumenContours[FrameNumber]);
-                CalculateDiameter(LumenContours[FrameNumber]);
-                DrawDiameter(LumenContours[FrameNumber].MinDiameter.point1, LumenContours[FrameNumber].MinDiameter.point2, constMinDiameter);
-                DrawDiameter(LumenContours[FrameNumber].MaxDiameter.point1, LumenContours[FrameNumber].MaxDiameter.point2, constMaxDiameter);
-            }
-        }
-
 
         private PathGeometry GetPathGeometry(List<Point> points)
         {
@@ -564,14 +576,14 @@ namespace RaywattApp.Common.Annotation
         private void DrawDiameter(Point firstPoint, Point secondPoint, string prefix)
         {
             Path path = new Path();
-            path.Style = (Style)this.Resources["StylePath"];
+            path.Style = (Style)this.Resources["StylePathDiameter"];
             path.Data = CommonUtil.GetLine(firstPoint, secondPoint);
-
+            
             if (prefix.Equals(constMinDiameter))
                 path.StrokeDashArray.Add(2);
             else
                 path.StrokeDashArray.Add(4);
-
+            
             this.canvas.Children.Add(path);
         }
 
@@ -589,42 +601,64 @@ namespace RaywattApp.Common.Annotation
         {
             _log.Debug("Restore");
 
-            if (lumenContourHistory.Count <= FrameNumber || lumenContourHistory[FrameNumber].Count < 2)
+            if (lumenContourHistory[FrameNumber].Count < 2)
                 return;
 
             lumenContourHistory[FrameNumber].Pop();
-            List<Point> points = lumenContourHistory[FrameNumber].Peek();
-            DrawLumenContour(points, true);
-
-            LumenContours[FrameNumber].Points = points;
+            CopyHistoryToLumenContour(lumenContourHistory[FrameNumber].Peek());
+            DrawLumenContour(LumenContours[FrameNumber], true);
         }
 
         private void Reset()
         {
             _log.Debug("Reset");
 
-            if (lumenContourHistory.Count <= FrameNumber || lumenContourHistory[FrameNumber].Count < 2)
+            if (lumenContourHistory[FrameNumber].Count < 2)
                 return;
 
-            List<Point> points = lumenContourHistory[FrameNumber].ToArray()[lumenContourHistory[FrameNumber].Count - 1];
+            CopyHistoryToLumenContour(lumenContourHistory[FrameNumber].ToArray()[lumenContourHistory[FrameNumber].Count - 1]);
             lumenContourHistory[FrameNumber].Clear();
-            lumenContourHistory[FrameNumber].Push(points);
-            DrawLumenContour(points, true);
-
-            LumenContours[FrameNumber].Points = points;
+            lumenContourHistory[FrameNumber].Push(CopyLumenContourToHistory(LumenContours[FrameNumber]));
+            DrawLumenContour(LumenContours[FrameNumber], true);
         }
 
         private void AutoDetect()
         {
             _log.Debug("AutoDetect");
 
-            if (LumenContours.Count <= FrameNumber)
-                return;
+            CopyMlToLumenContour();
+            lumenContourHistory[FrameNumber].Push(CopyLumenContourToHistory(LumenContours[FrameNumber]));
+            DrawLumenContour(LumenContours[FrameNumber], true);
+        }
 
-            List<Point> points = LumenContours[FrameNumber].PointsFromMl;
-            DrawLumenContour(points, true);
+        private LumenContourHistory CopyLumenContourToHistory(LumenContour lumenContour)
+        {
+            LumenContourHistory lumenContourHistory = new LumenContourHistory();
+            lumenContourHistory.points = lumenContour.Points;
+            lumenContourHistory.minDiameter = lumenContour.MinDiameter;
+            lumenContourHistory.maxDiameter = lumenContour.MaxDiameter;
+            lumenContourHistory.meanDiameter = lumenContour.MeanDiameter;
+            lumenContourHistory.area = lumenContour.Area;
 
-            LumenContours[FrameNumber].Points = points;
+            return lumenContourHistory;
+        }
+
+        private void CopyHistoryToLumenContour(LumenContourHistory lumenContourHistory)
+        {
+            LumenContours[FrameNumber].Points = lumenContourHistory.points;
+            LumenContours[FrameNumber].MinDiameter = lumenContourHistory.minDiameter;
+            LumenContours[FrameNumber].MaxDiameter = lumenContourHistory.maxDiameter;
+            LumenContours[FrameNumber].MeanDiameter = lumenContourHistory.meanDiameter;
+            LumenContours[FrameNumber].Area = lumenContourHistory.area;
+        }
+
+        private void CopyMlToLumenContour()
+        {
+            LumenContours[FrameNumber].Points = LumenContours[FrameNumber].MlPoints;
+            LumenContours[FrameNumber].MinDiameter = LumenContours[FrameNumber].MlMinDiameter;
+            LumenContours[FrameNumber].MaxDiameter = LumenContours[FrameNumber].MlMaxDiameter;
+            LumenContours[FrameNumber].MeanDiameter = LumenContours[FrameNumber].MlMeanDiameter;
+            LumenContours[FrameNumber].Area = LumenContours[FrameNumber].MlArea;
         }
 
         private void DrawContourToBackBuffer(Path path)

@@ -77,7 +77,15 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <Border Grid.Column="0" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
-                            <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill"/>
+                            <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill">
+                                <Image.Clip>
+                                    <RectangleGeometry RadiusX="10" RadiusY="10">
+                                        <RectangleGeometry.Rect>
+                                            <Rect X="0" Y="0" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}"/>
+                                        </RectangleGeometry.Rect>
+                                    </RectangleGeometry>
+                                </Image.Clip>
+                            </Image>
                         </Border>
                         <Grid Grid.Column="1" Margin="60,109,52,109">
                             <Grid.RowDefinitions>

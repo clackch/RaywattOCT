@@ -489,6 +489,22 @@ namespace RaywattApp.ViewModels
                 measurement.LengthGeometries = new ObservableCollection<LengthGeometry>();
                 measurement.TextGeometries = new List<TextGeometry>();
                 Measurements.Add(measurement);
+
+                if (LumenContours.Count <= i)
+                {
+                    LumenContour lumenContour = new LumenContour();
+                    DiameterInfo diameterInfo = new DiameterInfo();
+                    diameterInfo.diameter = 0.0;
+
+                    lumenContour.MlPoints = new List<Point>();
+                    lumenContour.MlMaxDiameter = diameterInfo;
+                    lumenContour.MlMinDiameter = diameterInfo;
+                    lumenContour.Points = new List<Point>();
+                    lumenContour.MaxDiameter = diameterInfo;
+                    lumenContour.MinDiameter = diameterInfo;
+
+                    LumenContours.Add(lumenContour);
+                }
             }
 
             Measurements = Measurements.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();

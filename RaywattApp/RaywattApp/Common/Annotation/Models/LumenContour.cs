@@ -5,33 +5,45 @@ using System.Windows;
 
 namespace RaywattApp.Common.Annotation.Models
 {
-    public class LumenContour : ObservableObject
+    public partial class LumenContour : ObservableObject
     {
-        private List<Point>? pointsFromMl;
-        public List<Point>? PointsFromMl { get { return pointsFromMl; } set { pointsFromMl = value; } }
+        [ObservableProperty]
+        private List<Point>? mlPoints;
 
+        [ObservableProperty]
+        private double mlArea;
+
+        [ObservableProperty]
+        private DiameterInfo? mlMinDiameter;
+
+        [ObservableProperty]
+        private DiameterInfo? mlMaxDiameter;
+
+        [ObservableProperty]
+        private double mlMeanDiameter;
+
+        [ObservableProperty]
         private List<Point>? points;
-        public List<Point>? Points { get { return points; } set { points = value; } }
 
+        [ObservableProperty]
         private List<OpenCvSharp.Point>? pointsAll;
-        public List<OpenCvSharp.Point>? PointsAll { get { return pointsAll; } set { pointsAll = value; } }
 
+        [ObservableProperty]
         private double area;
-        public double Area { get { return area; } set { area = value; OnPropertyChanged(nameof(Area)); } }
 
         public double DisplayArea { get { return area / Constants.ScaleArea; } }
 
+        [ObservableProperty]
         private Point centerOfMass;
-        public Point CenterOfMass { get { return centerOfMass; } set { centerOfMass = value; } }
 
+        [ObservableProperty]
         private DiameterInfo? minDiameter;
-        public DiameterInfo? MinDiameter { get { return minDiameter; } set { minDiameter = value; OnPropertyChanged(nameof(MinDiameter)); } }
 
+        [ObservableProperty]
         private DiameterInfo? maxDiameter;
-        public DiameterInfo? MaxDiameter { get { return maxDiameter; } set { maxDiameter = value; OnPropertyChanged(nameof(MaxDiameter)); } }
 
+        [ObservableProperty]
         private double meanDiameter;
-        public double MeanDiameter { get { return meanDiameter; } set { meanDiameter = value; OnPropertyChanged(nameof(MeanDiameter)); } }
 
         public double DisplayMeanDiameter { get { return meanDiameter / Constants.ScaleLength; } }
     }

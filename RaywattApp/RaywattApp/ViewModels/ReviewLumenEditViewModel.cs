@@ -38,7 +38,7 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private PatientCase _patientCase;
 
-        private int frameNumber;
+        private int frameNumber = -1;
         public int FrameNumber
         {
             get { return frameNumber; }
@@ -142,7 +142,7 @@ namespace RaywattApp.ViewModels
 
                 LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(PatientCase.LumenContour);
 
-                RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+                SetCrossSectionBackground(0, Constants.CardBackgroundColor);
 
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
