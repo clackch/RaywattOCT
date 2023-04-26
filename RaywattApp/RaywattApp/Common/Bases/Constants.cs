@@ -341,5 +341,9 @@ namespace RaywattApp.Common.Bases
         public const string LumenContourRestore = "Restore";
         public const string LumenContourReset = "Reset";
         public const string LumenContourAutoDetect = "AutoDetect";
+
+        //Scale
+        public const double ScaleLength = 100;
+        public const double ScaleArea = ScaleLength * ScaleLength;
     }
 }

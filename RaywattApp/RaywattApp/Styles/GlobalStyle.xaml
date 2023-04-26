@@ -112,7 +112,23 @@
         <Setter Property="FontSize" Value="54"/>
     </Style>
 
+    <Style TargetType="TextBlock" x:Key="TextBlock_Pretendard-Bold-54">
+        <Setter Property="Padding" Value="0,0,0,0"/>
+        <Setter Property="FontFamily" Value="Pretendard"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontStyle" Value="Normal"/>
+        <Setter Property="FontSize" Value="54"/>
+    </Style>
+
     <Style TargetType="Control" x:Key="Pretendard-Bold-40">
+        <Setter Property="Padding" Value="0,0,0,0"/>
+        <Setter Property="FontFamily" Value="Pretendard"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontStyle" Value="Normal"/>
+        <Setter Property="FontSize" Value="40"/>
+    </Style>
+
+    <Style TargetType="TextBlock" x:Key="TextBlock_Pretendard-Bold-40">
         <Setter Property="Padding" Value="0,0,0,0"/>
         <Setter Property="FontFamily" Value="Pretendard"/>
         <Setter Property="FontWeight" Value="Bold"/>
@@ -153,6 +169,14 @@
     </Style>
 
     <Style TargetType="Control" x:Key="Pretendard-Bold-14">
+        <Setter Property="Padding" Value="0,0,0,0"/>
+        <Setter Property="FontFamily" Value="Pretendard"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontStyle" Value="Normal"/>
+        <Setter Property="FontSize" Value="14"/>
+    </Style>
+
+    <Style TargetType="TextBlock" x:Key="TextBlock_Pretendard-Bold-14">
         <Setter Property="Padding" Value="0,0,0,0"/>
         <Setter Property="FontFamily" Value="Pretendard"/>
         <Setter Property="FontWeight" Value="Bold"/>

@@ -101,9 +101,6 @@ namespace RaywattApp.ViewModels
         private List<TextGeometry> _lModeTextGeometries;
         public List<TextGeometry> LModeTextGeometries { get { return _lModeTextGeometries; } set { _lModeTextGeometries = value; OnPropertyChanged(nameof(LModeTextGeometries)); } }
 
-        private List<LumenContour> _lumenContours;
-        public List<LumenContour> LumenContours { get { return _lumenContours; } set { _lumenContours = value; OnPropertyChanged(nameof(LumenContours)); } }
-
         private double _lModeIndicatorX;
         public double LModeIndicatorX 
         { 

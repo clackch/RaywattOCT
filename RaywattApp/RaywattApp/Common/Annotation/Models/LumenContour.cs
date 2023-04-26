@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using RaywattApp.Common.Bases;
 using System.Collections.Generic;
 using System.Windows;
 
@@ -15,6 +16,11 @@ namespace RaywattApp.Common.Annotation.Models
         private List<OpenCvSharp.Point>? pointsAll;
         public List<OpenCvSharp.Point>? PointsAll { get { return pointsAll; } set { pointsAll = value; } }
 
+        private double area;
+        public double Area { get { return area; } set { area = value; OnPropertyChanged(nameof(Area)); } }
+
+        public double DisplayArea { get { return area / Constants.ScaleArea; } }
+
         private Point centerOfMass;
         public Point CenterOfMass { get { return centerOfMass; } set { centerOfMass = value; } }
 
@@ -26,5 +32,7 @@ namespace RaywattApp.Common.Annotation.Models
 
         private double meanDiameter;
         public double MeanDiameter { get { return meanDiameter; } set { meanDiameter = value; OnPropertyChanged(nameof(MeanDiameter)); } }
+
+        public double DisplayMeanDiameter { get { return meanDiameter / Constants.ScaleLength; } }
     }
 }

@@ -189,12 +189,22 @@ namespace RaywattApp.ViewModels
             parameter["patient"] = Patient;
             if (isSave)
             {
-                PatientCase.LumenContour = JsonConvert.SerializeObject(LumenContours, Formatting.Indented);
+                PatientCase.LumenContour = ConvertLumenContourToJson(LumenContours);
             }
             parameter["patientCase"] = PatientCase;
             parameter["prevStatus"] = PrevStatus;
             parameter["reviewStatus"] = ReviewStatus;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(ReviewStatus.CurrentPage) { Parameter = parameter });
+        }
+
+        private string ConvertLumenContourToJson(List<LumenContour> lumenContours)
+        {
+            foreach(LumenContour lumenContour in lumenContours)
+            {
+                lumenContour.PointsAll = null;
+            }
+
+            return JsonConvert.SerializeObject(lumenContours, Formatting.Indented);
         }
 
         private void Information()
