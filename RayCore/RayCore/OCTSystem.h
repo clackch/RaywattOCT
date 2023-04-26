@@ -1,6 +1,7 @@
 #pragma once
 #include "define.h"
 #include "AcquisitionDevice.h"
+#include "StepMotorController.h"
 #include "MessageService.h"
 #include <vector>
 #include <mutex>
@@ -58,6 +59,9 @@ private:
 	// Imaging Session (Review)
 	CImagingSession* m_reviewSession[MAX_SESSION_NUM];
 	CImagingSession* m_openedSession;
+
+	// Rotary Junction
+	CStepMotorController* m_pStepMotor[STEP_MOTOR_NUM];
 
 	// Machine Learning
 	CRayLearning* m_pLearning;

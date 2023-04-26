@@ -11,6 +11,7 @@
 #include "LaserController.h"
 #include "MotorController.h"
 #include "ZaberController.h"
+#include "ArduinoController.h"
 #include "RayLearning.h"
 #include "ImagingSession.h"
 
@@ -43,6 +44,10 @@ COCTSystem::COCTSystem() {
 		m_reviewSession[i] = nullptr;
 	}
 	m_openedSession = nullptr;
+
+	for (int i = 0; i < STEP_MOTOR_NUM; i++) {
+		m_pStepMotor[i] = new CArduinoController();
+	}
 
 	m_prevState = RayScannerState::Initial;
 	m_curState = RayScannerState::Initial;
@@ -141,13 +146,15 @@ RayError COCTSystem::Stop() {
 	}
 
 	CMotorController* pMotor = CMotorController::GetInstance();
-	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
-
 	pMotor->StopMotor();
 	pMotor->SwitchOff();
 	pMotor->Disconnect();
 
-	pLinearStage->Close();
+	for (int i = 0; i < STEP_MOTOR_NUM; i++) {
+		m_pStepMotor[i]->Close();
+		delete m_pStepMotor[i];
+		m_pStepMotor[i] = nullptr;
+	}
 
 	return RayError::OK;
 }
@@ -230,11 +237,9 @@ RayError COCTSystem::AutoCalibration() {
 */
 RayError COCTSystem::ManualCalibration(bool forward) {
 	if (m_curState == RayScannerState::Default) {
-		CZaberController* pDelayLine = CZaberController::GetInstance(ZABER_TYPE_DELAYLINE);
+		if (m_pStepMotor[STEP_MOTOR_DELAYLINE]->IsOpen() == false) return RayError::DeviceNotConnected;
 
-		if (pDelayLine->IsOpen() == false) return RayError::DeviceNotConnected;
-
-		pDelayLine->RotateRelative((forward ? DELAYLINE_FORWARD_POSITION : DELAYLINE_BACKWARD_POSITION));
+		m_pStepMotor[STEP_MOTOR_DELAYLINE]->MoveRelative((forward ? DELAYLINE_FORWARD_POSITION : DELAYLINE_BACKWARD_POSITION));
 
 		return RayError::OK;
 	}
@@ -951,7 +956,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
-	CZaberController* pZaber = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
+	CStepMotorController* pPullbackMotor = pSystem->m_pStepMotor[STEP_MOTOR_PULLBACK];
 
 	CDataWriter *pDataWriter = new CDataWriter();
 	IImaging::Setting settingPullback = pSystem->m_pImagingPullback->GetSetting();
@@ -963,16 +968,17 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pMotor->PerformRun(config.bldcMotor.velocityPullback);
 	Sleep(config.bldcMotor.settleDown);
 
-	pZaber->SetSpeed(config.stepMotor.pullbackSpeed);
+	pPullbackMotor->SetSpeed(config.stepMotor.pullbackSpeed);
 
 	// 2. Start Recording OCT
 	pDataWriter->StartRecording();
 
 	// 3. Pullback Linear Stage
-	if (pZaber->IsOpen()) {
-		pZaber->MoveRelative(config.stepMotor.pullbackDistance * -1);
+	if (pPullbackMotor->IsOpen()) {
+		int nPullbackPosition = config.stepMotor.pullbackStart + config.stepMotor.pullbackDistance;
+		pPullbackMotor->MoveAbsolute(nPullbackPosition);
 		while (pSystem->m_pThreadRotaryJunction->isRun) {
-			if (pZaber->GetZaberStatus()) {
+			if (pPullbackMotor->IsMoving()) {
 				break;
 			}
 			else {
@@ -1009,20 +1015,20 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
-	CZaberController* pZaber = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
+	CStepMotorController* pPullbackMotor = pSystem->m_pStepMotor[STEP_MOTOR_PULLBACK];
 
 	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterLoading);
 
 	// 1. Motor ON
-	int nVelocity = config.catheter.velocity;
+	int nVelocity = config.bldcMotor.velocityHoming;
 	pMotor->PerformRun(nVelocity);
 
 	// 2. Set Linear Stage Position
-	if (pZaber->IsOpen()) {
-		pZaber->SetSpeed(config.catheter.speed);
-		pZaber->Move(config.catheter.position);
+	if (pPullbackMotor->IsOpen()) {
+		pPullbackMotor->SetSpeed(config.stepMotor.pullbackSpeed);
+		pPullbackMotor->MoveAbsolute(config.stepMotor.pullbackStart);
 		while (pSystem->m_pThreadRotaryJunction->isRun) {
-			if (pZaber->GetZaberStatus()) {
+			if (pPullbackMotor->IsMoving()) {
 				break;
 			}
 			else {
@@ -1058,14 +1064,14 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
-	CZaberController* pZaber = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
+	CStepMotorController* pPullbackMotor = pSystem->m_pStepMotor[STEP_MOTOR_PULLBACK];
 
 	// Set Linear Stage Position to Zero
-	if (pZaber->IsOpen()) {
-		pZaber->SetSpeed(config.catheter.speed);
-		pZaber->Move(0);
+	if (pPullbackMotor->IsOpen()) {
+		pPullbackMotor->SetSpeed(config.stepMotor.pullbackSpeed);
+		pPullbackMotor->MoveAbsolute(config.stepMotor.pullbackStart);
 		while (pSystem->m_pThreadRotaryJunction->isRun) {
-			if (pZaber->GetZaberStatus()) {
+			if (pPullbackMotor->IsMoving()) {
 				break;
 			}
 			else {
@@ -1125,11 +1131,12 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 bool COCTSystem::checkConnection() {
 	bool result = true;
 	CMotorController* pMotor = CMotorController::GetInstance();
-	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
 	
 	result &= m_pAcqDevice->IsInit();
-	result &= pLinearStage->IsOpen();
 	result &= pMotor->IsConnected();
+	for (int i = 0; i < STEP_MOTOR_NUM; i++) {
+		result &= m_pStepMotor[i]->IsOpen();
+	}
 
 	return result;
 }
@@ -1202,13 +1209,13 @@ int COCTSystem::restartAcqDevice(COCTImaging* pImaging) {
 int COCTSystem::connectRotaryJunction() {
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
-	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
-	CZaberController* pDelayLine = CZaberController::GetInstance(ZABER_TYPE_DELAYLINE);
+	CStepMotorController* pPullbackMotor = m_pStepMotor[STEP_MOTOR_PULLBACK];
+	CStepMotorController* pDelayLine = m_pStepMotor[STEP_MOTOR_DELAYLINE];
 
 	bool result = true;
 
-	if (!pLinearStage->IsOpen()) {
-		result &= pLinearStage->Open(config.stepMotor.pullback);
+	if (!pPullbackMotor->IsOpen()) {
+		result &= pPullbackMotor->Open(config.stepMotor.pullback);
 	}
 
 	if (!pDelayLine->IsOpen()) {
@@ -1228,7 +1235,6 @@ int COCTSystem::connectRotaryJunction() {
 */
 int COCTSystem::disconnectRotaryJunction() {
 	CMotorController* pMotor = CMotorController::GetInstance();
-	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
 
 	bool result = true;
 	
@@ -1236,8 +1242,12 @@ int COCTSystem::disconnectRotaryJunction() {
 		result &= pMotor->SwitchOff();
 	}
 
-	if (pLinearStage->IsOpen()) {
-		pLinearStage->Close();
+	for (int i = 0; i < STEP_MOTOR_NUM; i++)
+	{
+		if (m_pStepMotor[i]->IsOpen())
+		{
+			m_pStepMotor[i]->Close();
+		}
 	}
 
 	return (result) ? NOERROR : E_FAIL;

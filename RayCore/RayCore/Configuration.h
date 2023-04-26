@@ -14,21 +14,20 @@ public:
 		TCHAR delayline[MAX_PATH];
 		int pullbackDistance;
 		int pullbackSpeed;
+		int pullbackStart;	// pullback start position
 	};
 
 	class BLDCMotorSetting {
 	public:
 		int velocityPullback;
 		int velocityLiveView;
+		int velocityHoming;
 		int settleDown;
 	};
 
-	class Catheter {
+	class CatheterSetting {
 	public:
-		int position;		// load catheter position
-		int speed;			// move to position with speed
-		int velocity;		// motor rotation velocity
-		int rotationTime;
+		int rotationTime;	// To-Do: remove
 	};
 
 	class Volume {
@@ -52,7 +51,7 @@ public:
 	COCTMeasurement::Setting measurement;
 	StepMotorSetting stepMotor;
 	BLDCMotorSetting bldcMotor;
-	Catheter catheter;
+	CatheterSetting catheter;
 	Volume volume;
 	int shutterSerial;
 public:

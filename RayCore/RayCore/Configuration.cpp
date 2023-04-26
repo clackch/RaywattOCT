@@ -56,19 +56,18 @@ void CConfiguration::Initialize(tstring configFile)
 	::GetPrivateProfileString(_T("StepMotor"), _T("DelayLine"), _T(""), this->stepMotor.delayline, sizeof(this->stepMotor.delayline), configFilePath.c_str());
 	this->stepMotor.pullbackDistance = ::GetPrivateProfileInt(_T("StepMotor"), _T("PullbackDistance"), 10, configFilePath.c_str());
 	this->stepMotor.pullbackSpeed = ::GetPrivateProfileInt(_T("StepMotor"), _T("PullbackSpeed"), 10, configFilePath.c_str());
+	this->stepMotor.pullbackStart = ::GetPrivateProfileInt(_T("StepMotor"), _T("PullbackStart"), 0, configFilePath.c_str());
 
 	// [Motor]
 	this->bldcMotor.velocityPullback = ::GetPrivateProfileInt(_T("BLDCMotor"), _T("VelocityPullback"), 3005, configFilePath.c_str());
 	this->bldcMotor.velocityLiveView = ::GetPrivateProfileInt(_T("BLDCMotor"), _T("VelocityLiveView"), 3005, configFilePath.c_str());
+	this->bldcMotor.velocityHoming = ::GetPrivateProfileInt(_T("BLDCMotor"), _T("VelocityHoming"), 3005, configFilePath.c_str());
 	this->bldcMotor.settleDown = ::GetPrivateProfileInt(_T("BLDCMotor"), _T("SettleDown"), 1000, configFilePath.c_str());
 
 	// [Shutter]
 	this->shutterSerial = ::GetPrivateProfileInt(_T("Shutter"), _T("Serial"), 478, configFilePath.c_str());
 
 	// [Catheter]
-	this->catheter.position = ::GetPrivateProfileInt(_T("Catheter"), _T("Position"), 75, configFilePath.c_str());
-	this->catheter.speed = ::GetPrivateProfileInt(_T("Catheter"), _T("Speed"), 5, configFilePath.c_str());
-	this->catheter.velocity = ::GetPrivateProfileInt(_T("Catheter"), _T("MotorVelocity"), 50, configFilePath.c_str());
 	this->catheter.rotationTime = ::GetPrivateProfileInt(_T("Catheter"), _T("RotationTime"), 10000, configFilePath.c_str());
 
 	// [Volume]
