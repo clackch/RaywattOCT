@@ -384,6 +384,7 @@ BOOL CATSDevice::configureAcquisition(HANDLE boardHandle) {
 	}
 
 	m_nBufferIndex = 0;
+	m_pPrevBuffer = NULL;
 
 	return success;
 }
