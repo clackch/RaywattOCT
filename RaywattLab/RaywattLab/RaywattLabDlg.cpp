@@ -43,6 +43,9 @@ CRaywattLabDlg::CRaywattLabDlg(CWnd* pParent /*=nullptr*/)
 	m_pFFTFile = nullptr;
 	m_pDataReader = nullptr;
 
+	m_pPullback = nullptr;
+	m_pDelayLine = nullptr;
+
 	m_pThreadCalibration = nullptr;
 	m_pFrameBuffer = nullptr;
 
@@ -74,8 +77,6 @@ void CRaywattLabDlg::DoDataExchange(CDataExchange* pDX)
 int CRaywattLabDlg::initializeDevices() {
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
-	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
-	CZaberController* pInterferometer = CZaberController::GetInstance(ZABER_TYPE_DELAYLINE);
 
 	if (m_pAcqDevice == nullptr) {
 		m_pAcqDevice = new CATSDevice(config.acquisition);
@@ -89,17 +90,17 @@ int CRaywattLabDlg::initializeDevices() {
 	}
 
 	if (m_chkInitStage) {
-		if (pLinearStage->Open(config.stepMotor.pullback) == false) {
+		if (m_pPullback->Open(config.stepMotor.pullback) == false) {
 			m_pAcqDevice->CleanUp();
 			return E_FAIL;
 		}
-		pLinearStage->SetSpeed(config.stepMotor.pullbackSpeed);
+		m_pPullback->SetSpeed(config.stepMotor.pullbackSpeed);
 	}
 
 	if (m_chkInitMotor) {
 		if (pMotor->Connect() == false) {
-			pInterferometer->Close();
-			pLinearStage->Close();
+			m_pPullback->Close();
+			m_pDelayLine->Close();
 			m_pAcqDevice->CleanUp();
 			return E_FAIL;
 		}
@@ -307,7 +308,7 @@ UINT CRaywattLabDlg::threadService(LPVOID param) {
 UINT CRaywattLabDlg::threadSaveCalibration(LPVOID param) {
 	CRaywattLabDlg* pDlg = (CRaywattLabDlg*)param;
 	CThread *pThread = pDlg->m_pThreadCalibration;
-	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
+	CZaberController* pLinearStage = pDlg->m_pPullback;
 
 	long long from, step, count = 0;
 
@@ -320,14 +321,14 @@ UINT CRaywattLabDlg::threadSaveCalibration(LPVOID param) {
 	count = _ttoi64(strValue);
 
 	pLinearStage->MoveMicrometer(from);
-	while (pDlg->m_pThreadCalibration->isRun && !pLinearStage->GetZaberStatus()) {
+	while (pDlg->m_pThreadCalibration->isRun && !pLinearStage->IsMoving()) {
 		Sleep(DELAY_FOR_STOP_THREAD);
 	}
 
 	for (int frame = 0; frame < count && pDlg->m_pThreadCalibration->isRun; frame++) {
 		long long position = from + (frame * step);
 		pLinearStage->MoveMicrometer(position);
-		while (pDlg->m_pThreadCalibration->isRun && !pLinearStage->GetZaberStatus()) {
+		while (pDlg->m_pThreadCalibration->isRun && !pLinearStage->IsMoving()) {
 			Sleep(DELAY_FOR_STOP_THREAD);
 		}
 
@@ -345,18 +346,18 @@ UINT CRaywattLabDlg::threadSaveCalibration(LPVOID param) {
 UINT CRaywattLabDlg::threadPullback(LPVOID param) {
 	CRaywattLabDlg* pDlg = (CRaywattLabDlg*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
-	CZaberController* pZaber = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
+	CZaberController* pPullbackStage = pDlg->m_pPullback;
 
-	if (pZaber->IsOpen()) {
-		pZaber->SetSpeed(config.stepMotor.pullbackSpeed);
+	if (pPullbackStage->IsOpen()) {
+		pPullbackStage->SetSpeed(config.stepMotor.pullbackSpeed);
 
 		// Start Recording OCT
 		pDlg->m_pDataWriter->StartRecording();
 
 		// Pullback Linear Stage
-		pZaber->MoveRelative(config.stepMotor.pullbackDistance * -1);
+		pPullbackStage->MoveRelative(config.stepMotor.pullbackDistance * -1);
 		while (pDlg->m_pThreadPullback->isRun) {
-			if (pZaber->GetZaberStatus()) {
+			if (pPullbackStage->IsMoving()) {
 				break;
 			}
 			else {
@@ -599,6 +600,9 @@ BOOL CRaywattLabDlg::OnInitDialog()
 
 	m_pDataReader = new CDataReader();
 
+	m_pPullback = new CZaberController();
+	m_pDelayLine = new CZaberController();
+
 	m_pFrameBuffer = new char[nBufferSize * sizeof(unsigned short)];
 
 	updateBrightnessContrast(m_pImagingRealtime);
@@ -700,15 +704,15 @@ void CRaywattLabDlg::OnDestroy() {
 	}
 
 	CMotorController* pMotor = CMotorController::GetInstance();
-	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
-	CZaberController* pInterferometer = CZaberController::GetInstance(ZABER_TYPE_DELAYLINE);
-
 	pMotor->StopMotor();
 	pMotor->SwitchOff();
 	pMotor->Disconnect();
 
-	pLinearStage->Close();
-	pInterferometer->Close();
+	m_pPullback->Close();
+	delete m_pPullback;
+
+	m_pDelayLine->Close();
+	delete m_pDelayLine;
 }
 
 
@@ -1126,6 +1130,7 @@ void CRaywattLabDlg::OnBnClickedButtonOpenRotaryJunction()
 	bool dlgVisible = m_dlgRotaryJunction.IsWindowVisible();
 
 	if (dlgVisible) {
+		m_dlgRotaryJunction.SetStepMotor(m_pPullback, m_pDelayLine);
 		m_dlgRotaryJunction.ShowWindow(SW_HIDE);
 	}
 	else {
@@ -1137,9 +1142,7 @@ void CRaywattLabDlg::OnBnClickedButtonOpenRotaryJunction()
 
 void CRaywattLabDlg::OnBnClickedButtonSaveCalibration()
 {
-	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
-
-	if (m_pAcqDevice == nullptr || !m_pAcqDevice->IsInit() || !pLinearStage->IsOpen()) {
+	if (m_pAcqDevice == nullptr || !m_pAcqDevice->IsInit() || !m_pPullback->IsOpen()) {
 		AfxMessageBox(_T("[FAILED] Do initialize first"));
 		return;
 	}
