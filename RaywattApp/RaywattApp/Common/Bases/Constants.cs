@@ -188,7 +188,7 @@ namespace RaywattApp.Common.Bases
         public const string PullbackTypeLong = "LONG";
         public const string PullbackTypeShort = "SHOR";
         public const int PullbackLongFrameCnt = 1000;
-        public const int PullbackShortFrameCnt = 700;
+        public const int PullbackShortFrameCnt = 500;
 
         //Not Selected
         public const string NotSelected = "Not Selected";
@@ -239,6 +239,7 @@ namespace RaywattApp.Common.Bases
         public const double CalciumIndicatorSize = 645;
         public const double CalciumThicknessIndicatorSize = 681;
         public const double CalciumThicknessIndicatorCenter = CalciumThicknessIndicatorSize / 2;
+        public static System.Windows.Point CalciumThicknessIndicatorPointCenter = new System.Windows.Point(CalciumThicknessIndicatorCenter, CalciumThicknessIndicatorCenter);
         public const int CalciumIndicatorColor = 0x57FEEB;
 
         //Review - 2D - Angio
