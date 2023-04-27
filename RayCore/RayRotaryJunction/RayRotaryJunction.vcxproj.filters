@@ -33,14 +33,17 @@
     <ClInclude Include="..\Utility\Config.h">
       <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\Utility\Configuration.h">
-      <Filter>Utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\Utility\MessageService.h">
       <Filter>Utility</Filter>
     </ClInclude>
     <ClInclude Include="..\Utility\Utility.h">
       <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="StepMotorController.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ArduinoController.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -56,14 +59,17 @@
     <ClCompile Include="ZaberController.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\Utility\Configuration.cpp">
-      <Filter>Utility</Filter>
-    </ClCompile>
     <ClCompile Include="..\Utility\MessageService.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
     <ClCompile Include="..\Utility\Utility.cpp">
       <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="StepMotorController.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ArduinoController.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

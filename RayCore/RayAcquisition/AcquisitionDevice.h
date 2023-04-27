@@ -8,6 +8,21 @@ class IDataManager;
 class CThread;
 class IAcquisitionDevice
 {
+public:
+	class Setting {
+	public:
+		unsigned int nAScan;
+		unsigned int nBScan;
+		unsigned int nLaserSpeed;
+		unsigned int nBufferCount;
+		unsigned int msTimeOut;
+		unsigned int nTriggerDelaySample;
+		bool bUseKClock;
+		double usGoodClockDuration;
+		double usBadClockDuration;
+		bool bUseDES;
+	};
+
 protected:
 	bool m_isInit;
 	CThread *m_pThread;

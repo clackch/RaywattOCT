@@ -11,6 +11,10 @@ typedef struct {
 
 class CCalibration
 {	
+private:
+	int nAScan;
+	int nFFTLength;
+
 public:
 	// from calibration file
 	int *indexMap;
@@ -22,7 +26,7 @@ public:
 	CCalibration();
 	~CCalibration(void);
 
-	bool Initialize(tstring calibFile);
+	bool Initialize(tstring calibFile, int nAScan, int nFFTLength);
 private:
 	void allocateMemory();
 	void releaseMemory();

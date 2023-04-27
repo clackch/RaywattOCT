@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -127,7 +128,8 @@ namespace RaywattApp.ViewModels
             IsHome = true;
 
             //Test
-            timer.Interval = TimeSpan.FromMilliseconds(500);
+            double rotationTime = RayGetProperty(Property.LoadCatheterTime);
+            timer.Interval = TimeSpan.FromMilliseconds(rotationTime / (100 / catheterProgressStep));
             timer.Tick += new EventHandler(ProgressTest);
         }
 
@@ -193,6 +195,8 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Exit");
 
+            RayDisconnectDevices();
+
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
 
             Application.Current.MainWindow.Close();
@@ -230,6 +234,7 @@ namespace RaywattApp.ViewModels
         }
 
         //Test
+        private double catheterProgressStep = 10;
         private DispatcherTimer timer = new DispatcherTimer();
         private void ProgressTest(object sender, EventArgs e)
         {
@@ -237,11 +242,10 @@ namespace RaywattApp.ViewModels
             {
                 timer.Stop();
 
-                Thread.Sleep(1000);
                 DeviceStatus.CatheterStatus = Constants.CatheterStatusLoaded;
             }
 
-            CatheterProgress += 10;
+            CatheterProgress += catheterProgressStep;
         }
 
         private void OnMsgCallback(int request, int response)
@@ -253,6 +257,9 @@ namespace RaywattApp.ViewModels
                     break;
                 case RayCallbackRequest.Progress:
                     handleProgress((RayCallbackRequest)request, response);
+                    break;
+                case RayCallbackRequest.Event:
+                    handleEvent((RayCallbackRequest)request, (RayEvent)response);
                     break;
                 case RayCallbackRequest.Error:
                     handleError((RayCallbackRequest)request, (RayError)response);
@@ -274,11 +281,37 @@ namespace RaywattApp.ViewModels
         }
         protected void handleProgress(RayCallbackRequest request, int progress) { }
         protected void handleError(RayCallbackRequest request, RayError error) { }
+        protected void handleEvent(RayCallbackRequest request, RayEvent e) {
+            switch (e)
+            {
+                case RayEvent.CatheterLoading:
+                    CatheterConnectReceiver();
+                    break;
+                default:
+                    break;
+            }
+        }
         protected void handleWorkDone(RayCallbackRequest request, RayWorkItem work)
         {
-            if (work == RayWorkItem.AutoCalibration)
+            switch (work)
             {
-                DeviceStatus.CanExecuteCalibration = true;
+                case RayWorkItem.AutoCalibration:
+                    DeviceStatus.CanExecuteCalibration = true;
+                    break;
+                case RayWorkItem.LoadCatheter:
+                    DeviceStatus.CatheterStatus = Constants.CatheterStatusLoaded;
+                    break;
+                case RayWorkItem.UnloadCatheter:
+                    DeviceStatus.CatheterStatus = Constants.CatheterStatusUnloaded;
+                    break;
+                case RayWorkItem.Pullback:
+                    Task.Run(() => {
+                        Thread.Sleep(3000);
+                        RayUnloadCatheter();
+                    });
+                    break;
+                default:
+                    break;
             }
         }
     }

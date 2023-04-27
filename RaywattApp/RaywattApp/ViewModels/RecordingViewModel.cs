@@ -11,6 +11,8 @@ using System.Windows.Navigation;
 using System;
 using System.Collections.Generic;
 using System.Windows.Threading;
+using RaywattApp.Common.Util;
+using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels
 {
@@ -108,7 +110,8 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Start");
 
-            //TO-DD : Recording
+            PatientCase.Image = generateFileName("oct");
+            RayPullbackScan(PatientCase.ImageFullPath);
 
             leaveToPage(Constants.RecordingConfirmPage);
         }
@@ -125,6 +128,21 @@ namespace RaywattApp.ViewModels
             parameter["prevStatus"] = PrevStatus;
             parameter["patientCase"] = PatientCase;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(viewPage) { Parameter = parameter });
+        }
+
+        private string generateFileName(string ext)
+        {
+            string filename = "{" +
+                CommonUtil.GetRandomText(8) + "-" +
+                CommonUtil.GetRandomText(4) + "-" +
+                CommonUtil.GetRandomText(4) + "-" +
+                CommonUtil.GetRandomText(4) + "-" +
+                CommonUtil.GetRandomText(12) +
+                "}." + ext;
+
+            _log.Debug("generateFileName : " + filename);
+
+            return filename;
         }
     }
 }

@@ -8,9 +8,11 @@
 class CCalibration;
 class CThread;
 class CMessageService;
+
 class COCTImaging : public IImaging
 {
 protected:
+	Setting m_setting;
 	CMessageService* m_msg;
 
 	CThread* m_pThread;
@@ -53,7 +55,7 @@ protected:
 
 	int m_nSheathPosition;
 public:
-	COCTImaging(CMessageService*);
+	COCTImaging(Setting, CMessageService*);
 	virtual ~COCTImaging(void);
 
 	virtual void Initialize(tstring calibFile);
@@ -80,6 +82,7 @@ public:
 
 	cv::Mat GetCircleImage() { return imageCircle; }
 	USHORT* GetFringesBuffer() { return m_pFringesBuffer; }
+	Setting GetSetting() { return m_setting; }
 
 protected:
 	void allocateMemory();

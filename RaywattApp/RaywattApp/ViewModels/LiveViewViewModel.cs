@@ -72,8 +72,6 @@ namespace RaywattApp.ViewModels
             _sqlManager = sqlManager;
             _dialogService = dialogService;
 
-            PatientCase = new PatientCase();
-
             ProcedureList = CodeDefinition.Codes["PROC"];
         }
 
@@ -92,6 +90,11 @@ namespace RaywattApp.ViewModels
 
                 if (data.ContainsKey("patientCase"))
                     PatientCase = (PatientCase)data["patientCase"];
+                else
+                {
+                    PatientCase = new PatientCase();
+                    PatientCase.PatientId = Patient.Id;
+                }
 
                 RayShowCalibrationGuide(true);
 
@@ -111,7 +114,9 @@ namespace RaywattApp.ViewModels
 
         private void SetCondition()
         {
-            _log.Debug("SetCondition");          
+            _log.Debug("SetCondition");
+
+            DeviceStatus.IsLiveView = (RayGetProperty(Property.MotorOnOff) != 0);
 
             if (PatientCase.PullbackType == null)
                 PatientCase.PullbackType = Constants.PullbackTypeShort;
@@ -121,6 +126,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Back");
 
+            RayStopLiveView();
             leaveToPage(Constants.PatientDetailPage);
         }
 
