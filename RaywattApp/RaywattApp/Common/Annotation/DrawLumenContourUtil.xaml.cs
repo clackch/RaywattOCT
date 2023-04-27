@@ -107,6 +107,15 @@ namespace RaywattApp.Common.Annotation
         public static readonly DependencyProperty LumenContoursProperty =
             DependencyProperty.Register("LumenContours", typeof(List<LumenContour>), typeof(DrawLumenContourUtil), new PropertyMetadata(null));
 
+        public LumenContour CurrentLumenContour
+        {
+            get { return (LumenContour)GetValue(CurrentLumenContourProperty); }
+            set { SetValue(CurrentLumenContourProperty, value); }
+        }
+
+        public static readonly DependencyProperty CurrentLumenContourProperty =
+            DependencyProperty.Register("CurrentLumenContour", typeof(LumenContour), typeof(DrawLumenContourUtil), new PropertyMetadata(null));
+
         public string? InCommand
         {
             get { return (string)GetValue(InCommandProperty); }
@@ -158,6 +167,7 @@ namespace RaywattApp.Common.Annotation
                 drawUtil.isInit = true;
             }
 
+            drawUtil.CurrentLumenContour = drawUtil.LumenContours[frameNumber];
             drawUtil.DrawLumenContour(drawUtil.LumenContours[frameNumber], drawUtil.IsEditOn);
         }
 

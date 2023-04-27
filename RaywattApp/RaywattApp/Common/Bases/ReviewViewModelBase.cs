@@ -54,9 +54,6 @@ namespace RaywattApp.Common.Bases
                 frameNumber = value;
                 OnPropertyChanged(nameof(FrameNumber));
                 DisplayFrameNumber = FrameNumber + 1;
-
-                if(Constants.CurrentPage == Constants.ReviewPage)
-                    CurrentLumenContour = LumenContours[frameNumber];
             }
         }
 
@@ -65,12 +62,6 @@ namespace RaywattApp.Common.Bases
 
         [ObservableProperty]
         private ObservableCollection<Bookmark> bookmarks;
-
-        [ObservableProperty]
-        private LumenContour _currentLumenContour;
-
-        private List<LumenContour> _lumenContours;
-        public List<LumenContour> LumenContours { get { return _lumenContours; } set { _lumenContours = value; OnPropertyChanged(nameof(LumenContours)); } }
 
         private ICommand _reviewTypeSwitchCommand;
         public ICommand ReviewTypeSwitchCommand

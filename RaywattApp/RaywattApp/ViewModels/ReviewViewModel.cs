@@ -101,6 +101,12 @@ namespace RaywattApp.ViewModels
         private List<TextGeometry> _lModeTextGeometries;
         public List<TextGeometry> LModeTextGeometries { get { return _lModeTextGeometries; } set { _lModeTextGeometries = value; OnPropertyChanged(nameof(LModeTextGeometries)); } }
 
+        [ObservableProperty]
+        private LumenContour _currentLumenContour;
+
+        private List<LumenContour> _lumenContours;
+        public List<LumenContour> LumenContours { get { return _lumenContours; } set { _lumenContours = value; OnPropertyChanged(nameof(LumenContours)); } }
+
         private double _lModeIndicatorX;
         public double LModeIndicatorX 
         { 
@@ -182,6 +188,8 @@ namespace RaywattApp.ViewModels
             RightSideBarExpand = Constants.RightSideBarExpandDefaultSize;
 
             isLongitudeMeasurementInit = false;
+
+            CurrentLumenContour = new LumenContour();
 
             updatePlayPauseState();
         }
