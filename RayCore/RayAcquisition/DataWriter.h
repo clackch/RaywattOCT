@@ -1,5 +1,6 @@
 #pragma once
 #include <Windows.h>
+#include <vector>
 #include "DataManager.h"
 
 class CDataWriter : public IDataManager
@@ -23,6 +24,8 @@ public:
 	bool IsRecording() { return m_isRecording; }
 
 	void StartSave(tstring strFilePath);
+	void WriteHeader(OCTHeader::Type type, OCTHeader::DataType dataType, OCTHeader::Channels ch, int width, int height);
+	void WriteEOF();
 	bool WriteFrame(int nFrame);
 	void StopSave();
 
@@ -32,5 +35,6 @@ public:
 private:
 	void finalize();
 	void flush(unsigned int nSaveBufferSize);
+	std::vector<char> createHeader(OCTHeader::Type type, OCTHeader::DataType dataType, OCTHeader::Channels ch, int width, int height, int frames);
 };
 

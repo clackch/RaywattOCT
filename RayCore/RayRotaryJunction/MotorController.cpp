@@ -89,7 +89,7 @@ bool CMotorController::SwitchOn() {
 /*
 * @param nVelocity : input velocity value (limits apply if needed)
 */
-bool CMotorController::PerfomRun(int &nVelocity) {
+bool CMotorController::PerformRun(int &nVelocity) {
 	char strCommand[MAX_PATH];	BYTE packet[MAX_PATH];
 	int packetLength = 0;
 	bool result = false;
@@ -103,12 +103,10 @@ bool CMotorController::PerfomRun(int &nVelocity) {
 		nVelocity = (nVelocity > 50000) ? 50000 : (nVelocity < 100) ? 100 : nVelocity;
 	}
 
-	if (!m_isRun) {
-		getMotorPacket(MOTOR_INDEX_TARGETVELOCITY, nVelocity, 4, packet, packetLength);
-		result = writeMotor(packet, packetLength);
+	getMotorPacket(MOTOR_INDEX_TARGETVELOCITY, nVelocity, 4, packet, packetLength);
+	result = writeMotor(packet, packetLength);
 
-		m_isRun = result;
-	}
+	m_isRun = result;
 	return result;
 }
 bool CMotorController::StopMotor() {

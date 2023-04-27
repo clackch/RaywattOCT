@@ -22,7 +22,7 @@ private:
 	int goodClockEnd;
 
 public:
-	CLabImaging(CMessageService*);
+	CLabImaging(Setting, CMessageService*);
 	virtual ~CLabImaging();
 
 	virtual void Initialize(tstring calibFile, const char* strBgFile);

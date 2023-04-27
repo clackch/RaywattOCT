@@ -1,22 +1,29 @@
 #include "Config.h"
 #include "ATSDevice.h"
-#include "Configuration.h"
 
-CATSDevice::CATSDevice() {
+CATSDevice::CATSDevice(Setting setting)
+	: m_setting(setting)
+{
 	m_hATSBoard = NULL;
 	m_nBufferIndex = 0;
 	m_pAcqBuffers = NULL;
 	m_pCurBuffer = NULL;
 	m_pPrevBuffer = NULL;
 }
-CATSDevice::~CATSDevice() {}
+CATSDevice::~CATSDevice() {
+	CleanUp();
+}
 
 int CATSDevice::InitDevice() {
-	CleanUp();
+	m_isInit = false;
 
 	U32 systemId = 1;
 	U32 boardId = 1;
 
+	U8 major, minor, revision;
+	AlazarGetSDKVersion(&major, &minor, &revision);
+	printf("[Alazar] SDK Ver.%d.%d.%d\n", major, minor, revision);
+	
 	m_hATSBoard = AlazarGetBoardBySystemID(systemId, boardId);
 	if (m_hATSBoard == NULL)
 	{
@@ -31,12 +38,9 @@ int CATSDevice::InitDevice() {
 	return NOERROR;
 }
 int CATSDevice::CleanUp() {
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nAcqBufCount = config.settingsAlazar.nAcqBufferCount;
-
 	// Free all memory allocated
 	if (m_pAcqBuffers != NULL) {
-		for (int bufferIndex = 0; bufferIndex < nAcqBufCount; bufferIndex++)
+		for (int bufferIndex = 0; bufferIndex < m_setting.nBufferCount; bufferIndex++)
 		{
 			if (m_pAcqBuffers[bufferIndex] != NULL)
 			{
@@ -50,8 +54,6 @@ int CATSDevice::CleanUp() {
 		delete[] m_pAcqBuffers;
 		m_pAcqBuffers = nullptr;
 	}
-
-	m_isInit = false;
 
 	return NOERROR;
 }
@@ -88,10 +90,9 @@ int CATSDevice::stop() {
 }
 
 unsigned short *CATSDevice::acquire(int& nCurFrame, int& nTotalFrame) {
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nBufferSize = config.nBufferSize;
-	const int nAcqBufCount = config.settingsAlazar.nAcqBufferCount;
-	const U32 timeout_ms = 5000;
+	const int nBufferSize = m_setting.nAScan * m_setting.nBScan;
+	const int nAcqBufCount = m_setting.nBufferCount;
+	const U32 timeout_ms = m_setting.msTimeOut;
 	RETURN_CODE retCode;
 	
 	nCurFrame = 0;
@@ -130,18 +131,14 @@ unsigned short *CATSDevice::acquire(int& nCurFrame, int& nTotalFrame) {
 BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 {
 	RETURN_CODE retCode;
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nAScan = config.nAScan;
-	const int nAScanPadding = config.nAScanPadding;
-	const int nBScan = config.nBScan;
-	const int nLaserSpeed = config.nLaserSpeed;
-	const int nBufferSize = config.nBufferSize;
-	const int nAcqBufCount = config.settingsAlazar.nAcqBufferCount;
-	const int nTriggerDelaySample = config.settingsAlazar.nTriggerDelaySample;
-	const bool useKClock = config.settingsAlazar.bUseKClock;
-	const double secGoodClkDuration = config.settingsAlazar.usGoodClockDuration * 1e-6;
-	const double secBadClkDuration = config.settingsAlazar.usBadClockDuration * 1e-6;
-	const bool useDES = config.settingsAlazar.bUseDES;
+	const int nAScan = m_setting.nAScan;
+	const int nLaserSpeed = m_setting.nLaserSpeed;
+	const int nAcqBufCount = m_setting.nBufferCount;
+	const int nTriggerDelaySample = m_setting.nTriggerDelaySample;
+	const bool useKClock = m_setting.bUseKClock;
+	const double secGoodClkDuration = m_setting.usGoodClockDuration * 1e-6;
+	const double secBadClkDuration = m_setting.usBadClockDuration * 1e-6;
+	const bool useDES = m_setting.bUseDES;
 
 	// TODO: Specify the sample rate (see sample rate id below)
 	double dSamplePerSec = nAScan * nLaserSpeed;
@@ -153,8 +150,6 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	}
 
 	printf("sample per sec : %.2f\n", dSamplePerSec);
-	printf("sample per frame : %d\n", nBufferSize);
-	printf("frame per sec : %.2f\n", dSamplePerSec / nBufferSize);
 	// TODO: Select clock parameters as required to generate this sample rate.
 	//
 	// For example: if samplesPerSec is 100.e6 (100 MS/s), then:
@@ -271,12 +266,12 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 
 BOOL CATSDevice::configureAcquisition(HANDLE boardHandle) {
 	RETURN_CODE retCode;
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nAScan = config.nAScan;
-	const int nAScanPadding = config.nAScanPadding;
-	const int nBScan = config.nBScan;
-	const int nAcqBufCount = config.settingsAlazar.nAcqBufferCount;
+	const int nAScan = m_setting.nAScan;
+	const int nBScan = m_setting.nBScan;
+	const int nAcqBufCount = m_setting.nBufferCount;
 	BOOL success = TRUE;
+	
+	CleanUp();
 
 	//==========================================================================================================
 	// Acquisition Setting
@@ -286,7 +281,7 @@ BOOL CATSDevice::configureAcquisition(HANDLE boardHandle) {
 	U32 preTriggerSamples = 0;
 
 	// TODO: Select the number of post-trigger samples per record
-	U32 postTriggerSamples = (nAScan + nAScanPadding - preTriggerSamples);
+	U32 postTriggerSamples = nAScan;
 
 	// TODO: Specify the number of records per DMA buffer
 	U32 recordsPerBuffer = nBScan;
@@ -389,6 +384,7 @@ BOOL CATSDevice::configureAcquisition(HANDLE boardHandle) {
 	}
 
 	m_nBufferIndex = 0;
+	m_pPrevBuffer = NULL;
 
 	return success;
 }

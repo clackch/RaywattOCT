@@ -34,7 +34,7 @@ public:
 	void Disconnect();
 
 	bool SwitchOn();
-	bool PerfomRun(int &nVelocity);
+	bool PerformRun(int &nVelocity);
 	bool StopMotor();
 	bool SwitchOff();
 	

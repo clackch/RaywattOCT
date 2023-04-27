@@ -82,3 +82,8 @@ std::wstring CUtility::StringToWstring(const std::string& var)
 	auto& facet = std::use_facet<std::codecvt<wchar_t, char, std::mbstate_t>>(loc);
 	return std::wstring_convert<std::remove_reference<decltype(facet)>::type, wchar_t>(&facet).from_bytes(var);
 }
+std::string CUtility::GetFileExtension(const std::string path)
+{
+	size_t offset = path.find_last_of('.');
+	return path.substr(offset + 1, path.length() - offset - 1);
+}

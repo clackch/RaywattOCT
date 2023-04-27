@@ -1,7 +1,6 @@
 ﻿#include <Windows.h>
 #include <math.h>
 #include "Calibration.h"
-#include "Configuration.h"
 
 CCalibration::CCalibration() :
 	indexMap(nullptr),
@@ -16,8 +15,10 @@ CCalibration::~CCalibration()
 	releaseMemory();
 }
 
-bool CCalibration::Initialize(tstring calibFile)
+bool CCalibration::Initialize(tstring calibFile, int nAScan, int nFFTLength)
 {
+	this->nAScan = nAScan;
+	this->nFFTLength = nFFTLength;
 	releaseMemory();
 	allocateMemory();
 	
@@ -27,9 +28,6 @@ bool CCalibration::Initialize(tstring calibFile)
 }
 
 bool CCalibration::loadCalibration(LPCTSTR calibrationFileName){
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nAScan = config.nAScan;
-
 	// open calibration file
 	HANDLE hCalibFile = CreateFile(calibrationFileName, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
 
@@ -62,10 +60,7 @@ bool CCalibration::loadCalibration(LPCTSTR calibrationFileName){
 
 void CCalibration::setWindow(enum Windows eWindow)
 {
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nAScan = config.nAScan;
 	const float fAScan = (float) nAScan;
-	const int nFFTLength = config.nFFTLength;
 
 	ippsSet_32f(1.0f, window, nFFTLength);
 
@@ -92,10 +87,6 @@ void CCalibration::setWindow(enum Windows eWindow)
 }
 
 void CCalibration::allocateMemory() {
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nAScan = config.nAScan;
-	const int nFFTLength = config.nFFTLength;
-
 	// memory allocate
 	indexMap = new int[nAScan / 2];
 	weightMap = new float[nAScan / 2];

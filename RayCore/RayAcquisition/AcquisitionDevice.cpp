@@ -4,12 +4,15 @@
 #include "DataManager.h"
 #include "Utility.h"
 
-IAcquisitionDevice::IAcquisitionDevice() {
+IAcquisitionDevice::IAcquisitionDevice()
+{
 	m_pThread = NULL;
 	m_isInit = false;
 
 	m_pImaging = NULL;
 	m_pWriter = NULL;
+	
+	m_fps = 0.0f;
 }
 IAcquisitionDevice::~IAcquisitionDevice() {
 }

@@ -27,9 +27,6 @@
     <ClInclude Include="..\Utility\Config.h">
       <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\Utility\Configuration.h">
-      <Filter>Utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\Utility\Utility.h">
       <Filter>Utility</Filter>
     </ClInclude>
@@ -52,9 +49,6 @@
     </ClCompile>
     <ClCompile Include="Calibration.cpp">
       <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Utility\Configuration.cpp">
-      <Filter>Utility</Filter>
     </ClCompile>
     <ClCompile Include="..\Utility\MessageService.cpp">
       <Filter>Utility</Filter>

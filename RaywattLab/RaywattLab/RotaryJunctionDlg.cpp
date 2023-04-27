@@ -31,14 +31,14 @@ CRotaryJunctionDlg::~CRotaryJunctionDlg()
 
 UINT CRotaryJunctionDlg::threadInterferometer(LPVOID param) {
 	CRotaryJunctionDlg* pDlg = (CRotaryJunctionDlg*)param;
-	CZaberController* pZaberCtrl = (CZaberController*)CZaberController::GetInstance(ZABER_TYPE_DELAYLINE);
+	CZaberController* pDelayLine = pDlg->m_pDelayLine;
 
 	while (pDlg->m_pThreadInterferometer->isRun) {
 		if (pDlg->m_isClickedBackward) {
-			pZaberCtrl->RotateRelative(DELAYLINE_BACKWARD_POSITION);
+			pDelayLine->RotateRelative(DELAYLINE_BACKWARD_POSITION);
 		}
 		else if (pDlg->m_isClickedForward) {
-			pZaberCtrl->RotateRelative(DELAYLINE_FORWARD_POSITION);
+			pDelayLine->RotateRelative(DELAYLINE_FORWARD_POSITION);
 		}
 		Sleep(30);
 	}
@@ -111,11 +111,11 @@ void CRotaryJunctionDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 	__super::OnShowWindow(bShow, nStatus);
 
 	if (bShow) {
-		CZaberController* pZaberCtrl = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
-		CZaberController* pInterferometerCtrl = CZaberController::GetInstance(ZABER_TYPE_DELAYLINE);
+		CZaberController* pPullback = m_pPullback;
+		CZaberController* pDelayLine = m_pDelayLine;
 		CMotorController* pMotorCtrl = CMotorController::GetInstance();
 
-		bool zaberConnected = pZaberCtrl->IsOpen();
+		bool zaberConnected = pPullback->IsOpen();
 		if (zaberConnected) {
 			GetDlgItem(IDC_BUTTON_ZABER_IDLE)->EnableWindow(TRUE);
 			GetDlgItem(IDC_BUTTON_ZABER_MOVE)->EnableWindow(TRUE);
@@ -128,7 +128,7 @@ void CRotaryJunctionDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 			GetDlgItem(IDC_BUTTON_MOTOR_STOP)->EnableWindow(TRUE);
 		}
 
-		bool interferometerConnected = pInterferometerCtrl->IsOpen();
+		bool interferometerConnected = pDelayLine->IsOpen();
 		if (interferometerConnected) {
 			GetDlgItem(IDC_BUTTON_MOVE_ZABER_BACKWARD)->EnableWindow(TRUE);
 			GetDlgItem(IDC_BUTTON_MOVE_ZABER_FORWARD)->EnableWindow(TRUE);
@@ -140,16 +140,16 @@ void CRotaryJunctionDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 		CConfiguration &config = CConfiguration::GetInstance();
 		CString strBuffer = _T("");
 
-		GetDlgItem(IDC_EDIT_PULLBACK_ZABER_PORT)->SetWindowText(config.zaber.pullback);
-		GetDlgItem(IDC_EDIT_INTERFEROMETER_ZABER_PORT)->SetWindowText(config.zaber.interferometer);
+		GetDlgItem(IDC_EDIT_PULLBACK_ZABER_PORT)->SetWindowText(config.stepMotor.pullback);
+		GetDlgItem(IDC_EDIT_INTERFEROMETER_ZABER_PORT)->SetWindowText(config.stepMotor.delayline);
 
-		strBuffer.Format(_T("%d"), config.zaber.pullbackDistance);
+		strBuffer.Format(_T("%d"), config.stepMotor.pullbackDistance);
 		GetDlgItem(IDC_EDIT_ZABER_DISTANCE)->SetWindowText(strBuffer);
 
-		strBuffer.Format(_T("%d"), config.zaber.pullbackSpeed);
+		strBuffer.Format(_T("%d"), config.stepMotor.pullbackSpeed);
 		GetDlgItem(IDC_EDIT_ZABER_VELOCITY)->SetWindowText(strBuffer);
 
-		strBuffer.Format(_T("%d"), config.motor.velocityPullback);
+		strBuffer.Format(_T("%d"), config.bldcMotor.velocityPullback);
 		GetDlgItem(IDC_EDIT_MOTOR_VELOCITY)->SetWindowText(strBuffer);
 	}
 }
@@ -169,29 +169,24 @@ void CRotaryJunctionDlg::OnDestroy()
 
 void CRotaryJunctionDlg::OnBnClickedButtonZaberIdle()
 {
-	CZaberController* pZaberCtrl = (CZaberController*)CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
-	pZaberCtrl->Idle();	
+	m_pPullback->Idle();	
 }
 
 
 void CRotaryJunctionDlg::OnBnClickedButtonZaberMove()
 {
-	CZaberController* pZaberCtrl = (CZaberController*)CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
-
 	CString strPosition = _T("");
 	int nPosition = 0;
 
 	GetDlgItem(IDC_EDIT_ZABER_POSITION)->GetWindowText(strPosition);
 	nPosition = _ttoi(strPosition);
 
-	pZaberCtrl->Move(nPosition);
+	m_pPullback->MoveAbsolute(nPosition);
 }
 
 
 void CRotaryJunctionDlg::OnBnClickedButtonZaberPullback()
 {
-	CZaberController* pZaberCtrl = (CZaberController*)CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
-
 	CString strVelocity = _T("");
 	CString strDistance = _T("");
 	int nVelocity = 0;
@@ -202,7 +197,7 @@ void CRotaryJunctionDlg::OnBnClickedButtonZaberPullback()
 	GetDlgItem(IDC_EDIT_ZABER_DISTANCE)->GetWindowText(strDistance);
 	nDistance = _ttoi(strDistance);
 
-	pZaberCtrl->Pull(nVelocity, nDistance);
+	m_pPullback->Pull(nVelocity, nDistance);
 }
 
 
@@ -215,7 +210,7 @@ void CRotaryJunctionDlg::OnBnClickedButtonMotorPerformRun()
 	GetDlgItem(IDC_EDIT_MOTOR_VELOCITY)->GetWindowText(strVelocity);
 	nVelocity = _ttoi(strVelocity);
 
-	pMotorCtrl->PerfomRun(nVelocity);
+	pMotorCtrl->PerformRun(nVelocity);
 
 	strVelocity.Format(_T("%d"), nVelocity);
 	GetDlgItem(IDC_EDIT_MOTOR_VELOCITY)->SetWindowText(strVelocity);
@@ -235,16 +230,16 @@ void CRotaryJunctionDlg::OnBnClickedButtonSaveSettings()
 	CString strBuffer = _T("");
 
 	GetDlgItem(IDC_EDIT_ZABER_DISTANCE)->GetWindowText(strBuffer);
-	config.zaber.pullbackDistance = _ttoi(strBuffer);
+	config.stepMotor.pullbackDistance = _ttoi(strBuffer);
 
 	GetDlgItem(IDC_EDIT_ZABER_VELOCITY)->GetWindowText(strBuffer);
-	config.zaber.pullbackSpeed = _ttoi(strBuffer);
+	config.stepMotor.pullbackSpeed = _ttoi(strBuffer);
 
 	GetDlgItem(IDC_EDIT_MOTOR_VELOCITY)->GetWindowText(strBuffer);
-	config.motor.velocityPullback = _ttoi(strBuffer);
+	config.bldcMotor.velocityPullback = _ttoi(strBuffer);
 
-	config.SaveZaberSettings();
-	config.SaveMotorSettings();
+	config.SaveStepMotorSettings();
+	config.SaveBLDCMotorSettings();
 }
 
 
