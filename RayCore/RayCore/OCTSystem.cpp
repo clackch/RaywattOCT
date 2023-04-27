@@ -1019,11 +1019,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 
 	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterLoading);
 
-	// 1. Motor ON
-	int nVelocity = config.bldcMotor.velocityHoming;
-	pMotor->PerformRun(nVelocity);
-
-	// 2. Set Linear Stage Position
+	// 1. Set Linear Stage Position
 	if (pPullbackMotor->IsOpen()) {
 		pPullbackMotor->SetSpeed(config.stepMotor.pullbackSpeed);
 		pPullbackMotor->MoveAbsolute(config.stepMotor.pullbackStart);
@@ -1037,7 +1033,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 		}
 	}
 
-	// 3. Wait
+	// 2. Wait
 	Sleep(config.catheter.rotationTime);
 
 	// To-Do: Check Catheter Connection
@@ -1064,9 +1060,14 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
+	CMotorController* pMotor = CMotorController::GetInstance();
 	CStepMotorController* pPullbackMotor = pSystem->m_pStepMotor[STEP_MOTOR_PULLBACK];
 
-	// Set Linear Stage Position to Zero
+	// 1. Motor ON
+	int nVelocity = config.bldcMotor.velocityHoming;
+	pMotor->PerformRun(nVelocity);
+
+	// 2. Set Linear Stage Position to Zero
 	if (pPullbackMotor->IsOpen()) {
 		pPullbackMotor->SetSpeed(config.stepMotor.pullbackSpeed);
 		pPullbackMotor->MoveAbsolute(config.stepMotor.pullbackStart);
@@ -1080,8 +1081,10 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 		}
 	}
 
+	// 3. Motor Off
+	pMotor->StopMotor();
+
 	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Unloaded);
-	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::UnloadCatheter);
 
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
@@ -1224,6 +1227,7 @@ int COCTSystem::connectRotaryJunction() {
 
 	if (!pMotor->IsConnected()) {
 		result &= pMotor->Connect();
+		result &= pMotor->SwitchOff();
 		result &= pMotor->SwitchOn();
 	}
 
@@ -1376,7 +1380,7 @@ LRESULT COCTSystem::OnMsgUpdateCatheterState(WPARAM wParam, LPARAM lParam) {
 
 	switch (m_cathState) {
 	case CatheterState::Unloaded:
-		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Default);
+		postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::UnloadCatheter);
 		break;
 	case CatheterState::Loaded:
 		CUtility::StartThread(threadValidateCatheter, m_pThreadRotaryJunction, this);
