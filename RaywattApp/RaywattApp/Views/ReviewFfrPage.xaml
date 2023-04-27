@@ -4,48 +4,137 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:RaywattApp.Views"
+      xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
       xmlns:const="clr-namespace:RaywattApp.Common.Bases"
+      xmlns:component="clr-namespace:RaywattApp.Views.Component"
+      xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
       mc:Ignorable="d" 
       d:DesignHeight="1024" d:DesignWidth="1280"
+      Background="{DynamicResource GrayscaleGray8Brush}"
       Title="ReviewFfrPage">
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="60" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="40" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Background="Gray">
+        <Grid Grid.Row="0" Background="{DynamicResource SideCardBackgroundBrush}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Orientation="Horizontal">
-                <StackPanel Width="60"/>
-                <Button Style="{StaticResource ButtonImportant}" Width="80" Content="2D" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewPage}"/>
-                <Button Style="{StaticResource ButtonImportant}" Width="80" Content="3D" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.Review3dPage}"/>
-                <Button Style="{StaticResource ButtonImportant}" Width="80" Content="Compare" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewComparePage}"/>
-                <Button Style="{StaticResource ButtonImportant}" Width="80" Content="AI FFR"/>
+                <StackPanel Width="70"/>
+                <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="2D" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewPage}"/>
+                <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="3D" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.Review3dPage}"/>
+                <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="Compare" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewComparePage}"/>
+                <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="AI FFR" IsChecked="True"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding EditPresetCommand}" Content="{Binding [Edit Preset], Source={StaticResource L10N}}"/>
-                <Button Style="{StaticResource ButtonBasic}" Width="80" Command="{Binding ExportCommand}" Content="{Binding [Export], Source={StaticResource L10N}}"/>
-                <StackPanel Width="120"/>
+                <component:IconButton Style="{StaticResource IconButton}" Icon="editPresetSimple" Width="42" Height="42" Command="{Binding EditPresetCommand}" Content="{Binding [Edit Preset], Source={StaticResource L10N}}"/>
+                <StackPanel Width="6"/>
+                <component:IconButton Style="{StaticResource IconButton}" Icon="exportSimple" Width="42" Height="42" Command="{Binding ExportCommand}" Content="{Binding [Export], Source={StaticResource L10N}}"/>
+                <StackPanel Width="118"/>
             </StackPanel>
         </Grid>
 
+        <Grid Grid.Row="1" Margin="60,48,60,42">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="55"/>
+                <RowDefinition Height="545"/>
+                <RowDefinition Height="39"/>
+                <RowDefinition Height="195"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="39"/>
+                    <RowDefinition Height="16"/>
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="0,0,0,10">
+                    <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Patient.Firstname}"/>
+                    <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content=", "/>
+                    <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Patient.Lastname}"/>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [ID], Source={StaticResource L10N}}"/>
+                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content=" [ "/>
+                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Patient.Id}"/>
+                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content=" ]"/>
+                    </StackPanel>
+                    <StackPanel Margin="24,0,0,0" Orientation="Horizontal">
+                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Birth], Source={StaticResource L10N}}"/>
+                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="8,0,0,0" Content="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}"/>
+                    </StackPanel>
+                    <StackPanel Margin="24,0,0,0" Orientation="Horizontal">
+                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
+                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="8,0,0,0" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+            <Grid Grid.Row="1">
+                <Image Source="/res/png/ffrCrossSectionImage.png" Width="380" Height="380" HorizontalAlignment="Left" Margin="8,0,0,0"/>
+                <Image Source="{svgc:SvgImage Source=/res/icon/ffrCrossSectionCircle.svg}" Width="396" Height="396" HorizontalAlignment="Left"/>
+                <ProgressBar Style="{DynamicResource FfrProgressBar}" Value="{Binding FfrProgress}" Width="170" Height="228.7" HorizontalAlignment="Left" Margin="420,0,0,0"/>
+                <Image Source="{svgc:SvgImage Source=/res/icon/ffrHeart.svg}" Width="170" Height="228.7" HorizontalAlignment="Left" Margin="420,0,0,0"/>
+                <MediaElement x:Name="mediaElement" Source="res/media/ffr-508px.mp4" Width="508" Height="508" LoadedBehavior="Manual" MediaEnded="MediaElement_MediaEnded" HorizontalAlignment="Right" Margin="0,0,18,0">
 
-        <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="2*"/>
-            </Grid.ColumnDefinitions>
+                </MediaElement>
+                <Image Source="{svgc:SvgImage Source=/res/icon/ffrCenterLine.svg}" Width="348.3" Height="316.3" HorizontalAlignment="Left" Margin="320,0,0,0"/>
+                <Image Source="{svgc:SvgImage Source=/res/icon/ffrResultInnerCircle.svg}" Width="508" Height="508" HorizontalAlignment="Right" Margin="0,0,18,0"/>
+                <Image Source="{svgc:SvgImage Source=/res/icon/ffrResultOuterCircle.svg}" Width="545" Height="545" HorizontalAlignment="Right" />
 
-            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" >
-                <Button Style="{StaticResource ButtonImportant}" Width="100" Command="{Binding NewRecordingCommand}" Content="{Binding [New Recording], Source={StaticResource L10N}}"/>
-                <Button Style="{StaticResource ButtonImportant}" Width="80" Command="{Binding EndReviewCommand}" Content="{Binding [End Review], Source={StaticResource L10N}}"/>
+                <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center" Width="545" Margin="615,0,0,0">
+                    <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [FFR], Source={StaticResource L10N}}" HorizontalAlignment="Center"/>
+                    <Label Style="{DynamicResource Pretendard-Bold-80}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Opacity="{Binding OpacityResult}" Content="{Binding FfrResult}" HorizontalAlignment="Center" Visibility="{Binding VisibilityResult}"/>
+                </StackPanel>
+            </Grid>
+            <Border Grid.Row="3" CornerRadius="10" Background="{DynamicResource GrayscaleGray7Brush}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="228"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Column="0" Margin="32,28,0,28">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="21"/>
+                            <RowDefinition/>
+                            <RowDefinition Height="21"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="0" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Model], Source={StaticResource L10N}}"/>
+                        <Label Grid.Row="1" Grid.Column="0" Style="{DynamicResource Pretendard-Bold-26}" Margin="0,5,0,0" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Four Features], Source={StaticResource L10N}}"/>
+                        <Label Grid.Row="0" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [% of Stenosis], Source={StaticResource L10N}}"/>
+                        <Label Grid.Row="1" Grid.Column="1" Style="{DynamicResource Pretendard-Bold-26}" Margin="0,5,0,0" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [80.47], Source={StaticResource L10N}}"/>
+                        <Label Grid.Row="0" Grid.Column="2" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pre-PLT], Source={StaticResource L10N}}"/>
+                        <Label Grid.Row="1" Grid.Column="2" Style="{DynamicResource Pretendard-Bold-26}" Margin="0,5,0,0" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [0], Source={StaticResource L10N}}"/>
+                        <Label Grid.Row="2" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Lesion Length], Source={StaticResource L10N}}"/>
+                        <Label Grid.Row="3" Grid.Column="0" Style="{DynamicResource Pretendard-Bold-26}" Margin="0,5,0,0" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [10.27], Source={StaticResource L10N}}"/>
+                        <Label Grid.Row="2" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [HTN], Source={StaticResource L10N}}"/>
+                        <Label Grid.Row="3" Grid.Column="1" Style="{DynamicResource Pretendard-Bold-26}" Margin="0,5,0,0" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [1.0], Source={StaticResource L10N}}"/>
+                    </Grid>
+                    <Grid Grid.Column="1" Margin="0,113,28,28">
+                        <Button Style="{StaticResource FfrPredictBtn}" Command="{Binding FfrPredictCommand}" Content="{Binding [Predict FFR], Source={StaticResource L10N}}"/>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="2" Height="40" Background="{DynamicResource GrayscaleBlackBrush}">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" >
+                <Button Style="{StaticResource OutlinedBtnType1-Small-Wide}" Command="{Binding NewRecordingCommand}" Content="{Binding [New Recording], Source={StaticResource L10N}}"/>
+                <StackPanel Width="8"/>
+                <Button Style="{StaticResource OutlinedBtnType1-Small-Medium}" Command="{Binding EndReviewCommand}" Content="{Binding [End Review], Source={StaticResource L10N}}"/>
+                <StackPanel Width="16"/>
             </StackPanel>
         </Grid>
     </Grid>

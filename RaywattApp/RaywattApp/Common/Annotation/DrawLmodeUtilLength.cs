@@ -346,19 +346,20 @@ namespace RaywattApp.Common.Annotation
             bool flip;
             double angle = DrawAnnotation.GetLabelAngle(firstPoint, secondPoint, out flip);
 
-            // move label point along the line
-            double unitX = deltaX / length;
-            double unitY = deltaY / length;
-            ptLabel.X += (unitX * 40 * (flip ? 1 : -1));
-            ptLabel.Y += (unitY * 40 * (flip ? 1 : -1));
-
             Label label = new Label();
             label.Style = (Style)this.Resources["StyleLabel"];
             label.Name = constLength + "_" + group;
-            label.Content = DrawAnnotation.GetLabelText(group, length);
+            label.Content = DrawAnnotation.GetLabelText(length);
             label.RenderTransform = new RotateTransform(angle);
 
             double labelHeight = GetLabelSize("StyleLabel").Height;
+            double labelWidth = GetLabelSize("StyleLabel", label.Content.ToString()).Width;
+
+            // move label point along the line
+            double unitX = deltaX / length;
+            double unitY = deltaY / length;
+            ptLabel.X += unitX * labelWidth / 2 * (flip ? 1 : -1);
+            ptLabel.Y += unitY * labelWidth / 2 * (flip ? 1 : -1);
 
             if (this.canvas.ActualHeight - ptLabel.Y < labelHeight)
             {

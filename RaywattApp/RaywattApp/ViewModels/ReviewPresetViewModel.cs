@@ -118,10 +118,10 @@ namespace RaywattApp.ViewModels
             get { return this._saveCommand ?? (this._saveCommand = new RelayCommand(Save)); }
         }
 
-        private ICommand _cancleCommand;
+        private ICommand _cancelCommand;
         public ICommand CancelCommand
         {
-            get { return this._cancleCommand ?? (this._cancleCommand = new RelayCommand(Cancel)); }
+            get { return this._cancelCommand ?? (this._cancelCommand = new RelayCommand(Cancel)); }
         }
 
         private ICommand _showPresetCommand;

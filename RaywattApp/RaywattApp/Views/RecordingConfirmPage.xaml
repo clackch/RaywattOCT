@@ -77,7 +77,15 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <Border Grid.Column="0" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
-                            <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill"/>
+                            <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill">
+                                <Image.Clip>
+                                    <RectangleGeometry RadiusX="10" RadiusY="10">
+                                        <RectangleGeometry.Rect>
+                                            <Rect X="0" Y="0" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}"/>
+                                        </RectangleGeometry.Rect>
+                                    </RectangleGeometry>
+                                </Image.Clip>
+                            </Image>
                         </Border>
                         <Grid Grid.Column="1" Margin="60,109,52,109">
                             <Grid.RowDefinitions>
@@ -119,8 +127,16 @@
                         <StackPanel Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,12,0">
                             <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" Opacity="0.5"/>
                         </StackPanel>
-                        <Border Grid.Row="0" Grid.Column="1" CornerRadius="8,8,0,0" Background="{DynamicResource GrayscaleGray7Brush}">
-                            <Image x:Name="longitudeImage" Source="{Binding LongitudeImage}" Width="{StaticResource LongitudeWidth}" Height="{StaticResource LongitudeHeight}" Stretch="Fill"/>
+                        <Border Grid.Row="0" Grid.Column="1" CornerRadius="8,8,0,0" Background="{DynamicResource AdditionalColor5Brush}">
+                            <Image x:Name="longitudeImage" Source="{Binding LongitudeImage}" Width="{StaticResource LongitudeWidth}" Height="{StaticResource LongitudeHeight}" Stretch="Fill">
+                                <Image.Clip>
+                                    <RectangleGeometry RadiusX="8" RadiusY="8">
+                                        <RectangleGeometry.Rect>
+                                            <Rect X="0" Y="0" Width="{StaticResource LongitudeWidth}" Height="{StaticResource LongitudeHeight}"/>
+                                        </RectangleGeometry.Rect>
+                                    </RectangleGeometry>
+                                </Image.Clip>
+                            </Image>
                         </Border>
                         <ContentControl Grid.Row="1" Grid.Column="1" Template="{DynamicResource LongitudeScaleBar}" Width="{StaticResource LongitudeWidth}" Tag="{Binding PatientCase.PullbackType}"/>
                     </Grid>

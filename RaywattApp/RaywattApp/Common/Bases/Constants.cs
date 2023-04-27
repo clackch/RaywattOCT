@@ -28,6 +28,7 @@ namespace RaywattApp.Common.Bases
         public const string ReviewFfrPage = "Views/ReviewFfrPage.xaml";
         public const string ReviewPresetPage = "Views/ReviewPresetPage.xaml";
         public const string ReviewAngioCoRegPage = "Views/ReviewAngioCoRegPage.xaml";
+        public const string ReviewLumenEditPage = "Views/ReviewLumenEditPage.xaml";
         //File
         public const string FileExportStep1Page = "Views/File/FileExportStep1Page.xaml";
         public const string FileExportStep2DicomPage = "Views/File/FileExportStep2DicomPage.xaml";
@@ -298,8 +299,6 @@ namespace RaywattApp.Common.Bases
         public const string MeasureAddText = "AddText";  //Add Text
         public const string MeasureErasePoint = "ErasePoint";  //Erase Point
         public const string MeasureDeleteArea = "GridDeleteArea";  //(Grid) Delete Area
-        public const string MeasureDeleteLength = "GridDeleteLength";  //(Grid) Delete Length
-        public const string MeasureDeleteLongitudeLength = "GridDeleteLongitudeLength";  //(Grid) Delete Longitude Length
         public const string MeasureDisableLength = "DisableLength";  //Disable Length
         public const string MeasureDisableText = "DisableText";  //Disable Text
         public const string MeasureDisableErase = "DisableErase";  //Disable Erase
@@ -335,5 +334,16 @@ namespace RaywattApp.Common.Bases
         public const int MeasureCmdLength = 2;
         public const int MeasureCmdText = 3;
         public const int MeasureCmdErase = 4;
+
+        //Lumen Contour Command
+        public const string LumenContourZoomIn = "ZoomIn";
+        public const string LumenContourZoomOut = "ZoomOut";
+        public const string LumenContourRestore = "Restore";
+        public const string LumenContourReset = "Reset";
+        public const string LumenContourAutoDetect = "AutoDetect";
+
+        //Scale
+        public const double ScaleLength = 100;
+        public const double ScaleArea = ScaleLength * ScaleLength;
     }
 }

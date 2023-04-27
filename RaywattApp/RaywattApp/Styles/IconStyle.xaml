@@ -218,4 +218,18 @@
         </Setter>
     </Style>
 
+    <Style TargetType="{x:Type ProgressBar}" x:Key="FfrProgressBar">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ProgressBar">
+                    <Grid>
+                        <Border Background="{DynamicResource GrayscaleGray8Brush}" Margin="1,0,1,0"/>
+                        <Rectangle Name="PART_Track"/>
+                        <Border Name="PART_Indicator" Background="{DynamicResource MainPrimaryColorBrush}" Opacity="0.25" HorizontalAlignment="Left" Margin="1,0,1,0"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>

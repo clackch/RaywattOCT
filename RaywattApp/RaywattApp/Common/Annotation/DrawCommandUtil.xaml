@@ -19,7 +19,7 @@
                 <Grid Width="6"/>
                 <component:IconToggleButton Style="{DynamicResource IconToggleButton}" Icon="text" Click="text_Add" IsChecked="{Binding IsTextOn, ElementName=UserControl}"/>
                 <Grid Width="6"/>
-                <component:IconToggleButton Style="{DynamicResource IconToggleButton}" Icon="import" Click="erase_point" IsChecked="{Binding IsEraseOn, ElementName=UserControl}"/>
+                <component:IconToggleButton Style="{DynamicResource IconToggleButton}" Icon="erase" Click="erase_point" IsChecked="{Binding IsEraseOn, ElementName=UserControl}"/>
                 <Grid Width="6"/>
                 <component:IconButton Style="{DynamicResource IconButton}" Icon="deleteAll" Click="delete_All"/>
             </StackPanel>
