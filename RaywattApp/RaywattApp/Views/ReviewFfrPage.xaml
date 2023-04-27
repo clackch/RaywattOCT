@@ -80,7 +80,9 @@
                 <ProgressBar Style="{DynamicResource FfrProgressBar}" Value="{Binding FfrProgress}" Width="170" Height="228.7" HorizontalAlignment="Left" Margin="420,0,0,0"/>
                 <Image Source="{svgc:SvgImage Source=/res/icon/ffrHeart.svg}" Width="170" Height="228.7" HorizontalAlignment="Left" Margin="420,0,0,0"/>
                 <MediaElement x:Name="mediaElement" Source="res/media/ffr-508px.mp4" Width="508" Height="508" LoadedBehavior="Manual" MediaEnded="MediaElement_MediaEnded" HorizontalAlignment="Right" Margin="0,0,18,0">
-
+                    <MediaElement.Clip>
+                        <EllipseGeometry Center="254,254" RadiusX="254" RadiusY="254"/>
+                    </MediaElement.Clip>
                 </MediaElement>
                 <Image Source="{svgc:SvgImage Source=/res/icon/ffrCenterLine.svg}" Width="348.3" Height="316.3" HorizontalAlignment="Left" Margin="320,0,0,0"/>
                 <Image Source="{svgc:SvgImage Source=/res/icon/ffrResultInnerCircle.svg}" Width="508" Height="508" HorizontalAlignment="Right" Margin="0,0,18,0"/>

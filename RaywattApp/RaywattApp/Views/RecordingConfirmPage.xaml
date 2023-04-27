@@ -17,6 +17,7 @@
         <System:Double x:Key="CrossSectionSize">400</System:Double>
         <System:Double x:Key="LongitudeWidth">860</System:Double>
         <System:Double x:Key="LongitudeHeight">105</System:Double>
+        <System:Double x:Key="LongitudeClipHeight">125</System:Double>
         <System:Double x:Key="LongitudeScale">86</System:Double>
     </Page.Resources>
 
@@ -132,7 +133,7 @@
                                 <Image.Clip>
                                     <RectangleGeometry RadiusX="8" RadiusY="8">
                                         <RectangleGeometry.Rect>
-                                            <Rect X="0" Y="0" Width="{StaticResource LongitudeWidth}" Height="{StaticResource LongitudeHeight}"/>
+                                            <Rect X="0" Y="0" Width="{StaticResource LongitudeWidth}" Height="{StaticResource LongitudeClipHeight}"/>
                                         </RectangleGeometry.Rect>
                                     </RectangleGeometry>
                                 </Image.Clip>
