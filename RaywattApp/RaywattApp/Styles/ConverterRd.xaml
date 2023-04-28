@@ -74,4 +74,10 @@
     <!-- Opacity Converter -->
     <converters:OpacityConverter x:Key="OpacityConverter" />
 
+    <!-- Longitude Scale Label Visibility Converter -->
+    <converters:LongitudeScaleLabelVisibilityConverter x:Key="LongitudeScaleLabelVisibilityConverter" />
+
+    <!-- Longitude Scale Column Visibility Converter -->
+    <converters:LongitudeScaleColumnVisibilityConverter x:Key="LongitudeScaleColumnVisibilityConverter" />
+
 </ResourceDictionary>
