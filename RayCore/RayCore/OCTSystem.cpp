@@ -80,7 +80,7 @@ RayError COCTSystem::Start() {
 	CUtility::StartThread(threadService, m_pThreadService, this);
 
 	IImaging::Setting settingPullback = config.imaging;
-	settingPullback.Set(settingPullback.nAScan, config.acquisition.nLaserSpeed / (config.bldcMotor.velocityPullback / 60));
+	settingPullback.Set(settingPullback.nAScan, 625); // config.acquisition.nLaserSpeed / (config.bldcMotor.velocityPullback / 60));
 	m_pImagingPullback = CImagingSession::CreateColorImaging(this, settingPullback);
 	m_pImagingPullback->SetSession(SESSION_REALTIME);
 	m_pImagingPullback->Start();
@@ -95,6 +95,9 @@ RayError COCTSystem::Start() {
 
 	m_pVolume = new CVolumeGenerator();
 	m_pVolume->Initialize(config.imaging.nCircleSize, config.imaging.nCircleSize, config.volume.size, config.volume.size);
+
+	CLaserController* pLaser = CLaserController::GetInstance();
+	pLaser->LaserOnOff(true);
 
 	return RayError::OK;
 }
@@ -144,6 +147,9 @@ RayError COCTSystem::Stop() {
 		delete m_pLearning;
 		m_pLearning = nullptr;
 	}
+
+	CLaserController* pLaser = CLaserController::GetInstance();
+	pLaser->LaserOnOff(false);
 
 	CMotorController* pMotor = CMotorController::GetInstance();
 	pMotor->StopMotor();
@@ -379,13 +385,13 @@ RayError COCTSystem::StartLiveView()
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 
-		CLaserController* pLaser = CLaserController::GetInstance();
+		//CLaserController* pLaser = CLaserController::GetInstance();
 		CMotorController* pMotorCtrl = CMotorController::GetInstance();
 		CConfiguration& config = CConfiguration::GetInstance();
 
 		restartAcqDevice(m_pImagingLiveView);
 
-		pLaser->LaserOnOff(true);
+		//pLaser->LaserOnOff(true);
 		pMotorCtrl->PerformRun(config.bldcMotor.velocityLiveView);
 
 		return RayError::OK;
@@ -401,10 +407,10 @@ RayError COCTSystem::StopLiveView()
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 
-		CLaserController* pLaser = CLaserController::GetInstance();
+		//CLaserController* pLaser = CLaserController::GetInstance();
 		CMotorController* pMotorCtrl = CMotorController::GetInstance();
 
-		pLaser->LaserOnOff(false);
+		//pLaser->LaserOnOff(false);
 		pMotorCtrl->StopMotor();
 
 		return RayError::OK;
@@ -758,7 +764,7 @@ UINT COCTSystem::threadService(LPVOID param) {
 	CThread* pThread = pSystem->m_pThreadService;
 
 	// Connect to COM Interface first time asynchronous
-	CLaserController::GetInstance();
+	//CLaserController::GetInstance();
 
 	// Initialize (first prediction)
 	cv::Mat imgSample = cv::imread(".\\oct_sample.png");
@@ -1100,17 +1106,17 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
-	CLaserController* pLaser = CLaserController::GetInstance();
+	//CLaserController* pLaser = CLaserController::GetInstance();
 
 	pSystem->restartAcqDevice(pSystem->m_pImagingLiveView);
-	pLaser->LaserOnOff(true);
+	//pLaser->LaserOnOff(true);
 	pMotor->PerformRun(config.bldcMotor.velocityLiveView);
 
 	// To-Do: determine image verification
 	bool verified = true;
 
 	pMotor->StopMotor();
-	pLaser->LaserOnOff(false);
+	//pLaser->LaserOnOff(false);
 
 	if (verified) {
 		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Enable);
@@ -1218,11 +1224,12 @@ int COCTSystem::connectRotaryJunction() {
 	bool result = true;
 
 	if (!pPullbackMotor->IsOpen()) {
-		result &= pPullbackMotor->Open(config.stepMotor.pullback);
+		pPullbackMotor->Open(config.stepMotor.pullback);
+		pPullbackMotor->SetCurrent(config.stepMotor.pullbackStart);
 	}
 
 	if (!pDelayLine->IsOpen()) {
-		result &= pDelayLine->Open(config.stepMotor.delayline);
+		pDelayLine->Open(config.stepMotor.delayline);
 	}
 
 	if (!pMotor->IsConnected()) {
@@ -1347,8 +1354,8 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 			CUtility::StartThread(threadSaveRaw, m_pThreadSaveRaw, this);
 		}
 
-		CUtility::StartThread(threadGenerateVolume, m_pThreadGenerateVolume, this);
-		CUtility::StartThread(threadLumenDetection, m_pThreadLumenDetection, this);
+		//CUtility::StartThread(threadGenerateVolume, m_pThreadGenerateVolume, this);
+		//CUtility::StartThread(threadLumenDetection, m_pThreadLumenDetection, this);
 		break;
 	default:
 		break;

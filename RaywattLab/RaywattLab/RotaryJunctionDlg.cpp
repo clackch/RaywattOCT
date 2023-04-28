@@ -115,7 +115,7 @@ void CRotaryJunctionDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 		CZaberController* pDelayLine = m_pDelayLine;
 		CMotorController* pMotorCtrl = CMotorController::GetInstance();
 
-		bool zaberConnected = pPullback->IsOpen();
+		bool zaberConnected = (pPullback != nullptr && pPullback->IsOpen());
 		if (zaberConnected) {
 			GetDlgItem(IDC_BUTTON_ZABER_IDLE)->EnableWindow(TRUE);
 			GetDlgItem(IDC_BUTTON_ZABER_MOVE)->EnableWindow(TRUE);
@@ -128,7 +128,7 @@ void CRotaryJunctionDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 			GetDlgItem(IDC_BUTTON_MOTOR_STOP)->EnableWindow(TRUE);
 		}
 
-		bool interferometerConnected = pDelayLine->IsOpen();
+		bool interferometerConnected = (pDelayLine != nullptr && pDelayLine->IsOpen());
 		if (interferometerConnected) {
 			GetDlgItem(IDC_BUTTON_MOVE_ZABER_BACKWARD)->EnableWindow(TRUE);
 			GetDlgItem(IDC_BUTTON_MOVE_ZABER_FORWARD)->EnableWindow(TRUE);

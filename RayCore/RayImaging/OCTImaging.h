@@ -4,6 +4,7 @@
 #include <vector>
 #include "Config.h"
 #include "Imaging.h"
+#include "OCTMeasurement.h"
 
 class CCalibration;
 class CThread;
@@ -13,6 +14,7 @@ class COCTImaging : public IImaging
 {
 protected:
 	Setting m_setting;
+	COCTMeasurement::Setting m_measureSetting;
 	CMessageService* m_msg;
 
 	CThread* m_pThread;
@@ -67,6 +69,7 @@ public:
 	void SetInvert(bool bInvert) { m_bInvert = bInvert; }
 	void SetColor(bool bColor) { m_bColor = bColor; }
 	void ShowCalibGuide(bool bShow) { m_bShowCalibGuide = bShow; }
+	void SetMeasurementSetting(COCTMeasurement::Setting setting) { m_measureSetting = setting; }
 	void SetBrightnessContrast(double brightness, double contrast) {
 		m_fBrightness = brightness;
 		m_fContrast = contrast;

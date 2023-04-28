@@ -347,6 +347,7 @@ namespace RaywattApp.ViewModels
             if (patientCase == null)
                 return;
 
+            RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
             RayStartReview(patientCase.ImageFullPath);
 
             Dictionary<string, Object> parameter = new Dictionary<string, Object>();

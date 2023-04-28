@@ -96,8 +96,6 @@ namespace RaywattApp.ViewModels
                     PatientCase.PatientId = Patient.Id;
                 }
 
-                RayShowCalibrationGuide(true);
-
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
                 timerUpdateImage.Start();

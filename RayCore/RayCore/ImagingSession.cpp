@@ -2,6 +2,7 @@
 #include "Utility.h"
 #include "MessageService.h"
 #include "OCTImaging.h"
+#include "LabImaging.h"
 #include "SimulateDevice.h"
 #include "DataReader.h"
 #include "Configuration.h"
@@ -63,10 +64,13 @@ CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSess
 }
 
 COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging::Setting setting) {
-	COCTImaging* pImaging = new COCTImaging(setting, msg);
+	CConfiguration& config = CConfiguration::GetInstance();
+	CLabImaging* pImaging = new CLabImaging(setting, msg);
 
-	pImaging->Initialize(_T("CALIBRATION.DAT"));
+	pImaging->Initialize(_T("CALIBRATION.DAT"), "BACKGROUND.bin");
+	pImaging->SetBackgroundSubtract(true);
 	pImaging->SetColor(true);
+	pImaging->SetMeasurementSetting(config.measurement);
 
 	return pImaging;
 }

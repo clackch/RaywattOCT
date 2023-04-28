@@ -23,6 +23,14 @@ bool CArduinoController::Open(tstring strPort)
 
 	return result;
 }
+bool CArduinoController::SetCurrent(int nPosition)
+{
+	char strCommand[MAX_PATH];
+	sprintf(strCommand, "current %d\n", (int)nPosition);
+	printf("[SetCurrent] %s", strCommand);
+
+	return sendCommand(strCommand);
+}
 bool CArduinoController::IsMoving()
 {
 	if (m_fPosition != m_fTargetPosition)
@@ -73,6 +81,7 @@ void CArduinoController::readResponse()
 			if (buf == '\n') {
 				m_pReadBuffer[nRead] = '\0';
 				parseResponse((const char*) m_pReadBuffer);
+				printf("[readResponse] %s\n", m_pReadBuffer);
 				break;
 			}
 		}

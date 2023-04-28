@@ -224,8 +224,7 @@ namespace RaywattApp.ViewModels
                 Degree = PatientCase.IndicatorDegree;
 
                 SetAnnotation();
-                
-                RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);              
+                  
                 SetCrossSectionBackground(0, (ReviewStatus.IsAngioOn) ? Constants.CardBackgroundColor : Constants.BackgroundColor);
             }
 
@@ -489,7 +488,7 @@ namespace RaywattApp.ViewModels
 
             int size = PatientCase.PullbackType == Constants.PullbackTypeLong ? Constants.PullbackLongFrameCnt : Constants.PullbackShortFrameCnt;
 
-            for (int i=0; i<size; i++)
+            for (int i=0; i<1500; i++)
             {
                 Measurement measurement = new Measurement();
                 measurement.FrameNumber = i;

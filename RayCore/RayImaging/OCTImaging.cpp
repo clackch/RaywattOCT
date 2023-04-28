@@ -341,6 +341,11 @@ void COCTImaging::postProcessing() {
 
 	cv::convertScaleAbs(imageResultColor, imageResultColor, m_fContrast, m_fBrightness);
 
+	if (m_bShowCalibGuide) {
+		drawGuideLine(imageResultColor, m_measureSetting.nSheathPosition, cv::Scalar(0xff, 0xcc, 0x33));
+		drawGuideLine(imageResultColor, m_nSheathPosition, cv::Scalar(0xff, 0xff, 0xff));
+	}
+
 	circularizeImage(imageResultColor, imageCircle);
 }
 
