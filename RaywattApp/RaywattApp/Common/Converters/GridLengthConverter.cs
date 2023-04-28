@@ -10,20 +10,25 @@ namespace RaywattApp.Common.Converters
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values == null || values[0] == null || values[1] == null || values.Length != 2) return new GridLength();
+            if (values == null || values[0] == null || values[1] == null || values.Length != 2 || parameter == null)
+                return new GridLength();
 
             double dValue = 0;
+            int frameCnt = int.Parse(parameter.ToString());
 
             if (Constants.PullbackTypeLong.Equals(values[0].ToString()))
             {
-                dValue = (double)values[1] / (Constants.PullbackLongFrameCnt / 100);
+                if(Constants.PullbackLongFrameCnt >= frameCnt)
+                {
+                    dValue = (double)values[1] / (Constants.PullbackLongFrameCnt / 100);
+                }                
             }
             else
             {
-                dValue = (double)values[1] / (Constants.PullbackShortFrameCnt / 100);
-
-                if (parameter != null && (Constants.PullbackTypeLong.Equals(parameter.ToString())))
-                    dValue = 0;
+                if(Constants.PullbackShortFrameCnt >= frameCnt)
+                {
+                    dValue = (double)values[1] / (Constants.PullbackShortFrameCnt / 100);
+                }
             }
 
             return new GridLength(dValue);
