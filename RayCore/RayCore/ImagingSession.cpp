@@ -63,10 +63,12 @@ CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSess
 }
 
 COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging::Setting setting) {
+	CConfiguration& config = CConfiguration::GetInstance();
 	COCTImaging* pImaging = new COCTImaging(setting, msg);
 
 	pImaging->Initialize(_T("CALIBRATION.DAT"));
 	pImaging->SetColor(true);
+	pImaging->SetMeasurementSetting(config.measurement);
 
 	return pImaging;
 }
