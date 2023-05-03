@@ -104,7 +104,7 @@
                         </Grid.Clip>
                         <Image Width="14" Height="15.6" Source="{svgc:SvgImage Source=/res/icon/thicknessIndicator.svg}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
                         <Grid.RenderTransform>
-                            <RotateTransform CenterX="{x:Static const:Constants.CalciumThicknessIndicatorCenter}" CenterY="{x:Static const:Constants.CalciumThicknessIndicatorCenter}" Angle="{Binding Degree}"/>
+                            <RotateTransform CenterX="{x:Static const:Constants.CalciumThicknessIndicatorCenter}" CenterY="{x:Static const:Constants.CalciumThicknessIndicatorCenter}" Angle="{Binding MaxCalciumDegree}"/>
                         </Grid.RenderTransform>
                     </Grid>
                 </Grid>
