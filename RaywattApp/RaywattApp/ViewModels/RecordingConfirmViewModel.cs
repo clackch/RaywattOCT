@@ -105,6 +105,8 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Confirm");
 
+            RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+
             //TO-DO 초기값 정의 필요
             PatientCase.PhysicianName = Constants.NotSelected;
             PatientCase.AccessionNumber = "";
