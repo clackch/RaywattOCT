@@ -20,6 +20,7 @@ public:
 	virtual ~CStepMotorController();
 
 	virtual bool Open(tstring strPort) = 0;
+	virtual bool SetCurrent(int nPosition) = 0;
 	virtual bool IsMoving() = 0;
 	virtual bool MoveAbsolute(int nPosition) = 0;	// forward (load / unload catheter)
 	virtual bool MoveRelative(int nOffset) = 0;	// pullback

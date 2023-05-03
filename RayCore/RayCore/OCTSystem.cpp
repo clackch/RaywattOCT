@@ -1219,6 +1219,7 @@ int COCTSystem::connectRotaryJunction() {
 
 	if (!pPullbackMotor->IsOpen()) {
 		result &= pPullbackMotor->Open(config.stepMotor.pullback);
+		result &= pPullbackMotor->SetCurrent(config.stepMotor.pullbackStart);
 	}
 
 	if (!pDelayLine->IsOpen()) {

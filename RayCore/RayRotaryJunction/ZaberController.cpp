@@ -23,6 +23,14 @@ bool CZaberController::Open(tstring strPort) {
 }
 
 /*
+* @returns always true, Zaber can detect the position
+*/
+bool CZaberController::SetCurrent(int nPos) {
+
+	return true;
+}
+
+/*
 * @returns true, if Zaber position is Idle
 */
 bool CZaberController::IsMoving() {
