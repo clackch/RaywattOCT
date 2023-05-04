@@ -197,6 +197,7 @@ namespace RaywattApp.ViewModels
             _log.Debug("Exit");
 
             RayDisconnectDevices();
+            RayStopSystem();
 
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
 

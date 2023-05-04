@@ -14,6 +14,7 @@ public:
 	virtual ~CArduinoController();
 
 	virtual bool Open(tstring strPort);
+	virtual bool SetCurrent(int nPosition);
 	virtual bool IsMoving();
 	virtual bool MoveAbsolute(int nPos);
 	virtual bool MoveRelative(int nOffset);
