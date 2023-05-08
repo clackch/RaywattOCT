@@ -64,6 +64,13 @@
                 <Grid x:Name="crossSection" Grid.Row="1">
                     <!-- Cross Section -->
                     <Grid Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                        <Grid.Clip>
+                            <RectangleGeometry RadiusX="10" RadiusY="10">
+                                <RectangleGeometry.Rect>
+                                    <Rect X="0" Y="0" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}"/>
+                                </RectangleGeometry.Rect>
+                            </RectangleGeometry>
+                        </Grid.Clip>
                         <!-- Cross Seciton Image -->
                         <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
                             <i:Interaction.Triggers>
@@ -74,6 +81,12 @@
                                     <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
                                 </i:EventTrigger>
                             </i:Interaction.Triggers>
+                            <Image.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform ScaleX="{Binding ReviewStatus.Zoom.ScaleX}" ScaleY="{Binding ReviewStatus.Zoom.ScaleY}"/>
+                                    <TranslateTransform X="{Binding ReviewStatus.Zoom.TranslateX}" Y="{Binding ReviewStatus.Zoom.TranslateY}"/>
+                                </TransformGroup>
+                            </Image.RenderTransform>
                         </Image>
                         <!-- Cross Section Info. -->
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="50">
@@ -97,15 +110,17 @@
 
                 <!-- Calcium Indicator -->
                 <Grid Grid.Row="0" Grid.RowSpan="3" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                    <Image x:Name="CalciumIndicator" Width="{x:Static const:Constants.CalciumIndicatorSize}" Height="{x:Static const:Constants.CalciumIndicatorSize}" Source="{Binding CalciumIndicator}"/>
-                    <Grid Width="{x:Static const:Constants.CalciumThicknessIndicatorSize}" Height="{x:Static const:Constants.CalciumThicknessIndicatorSize}" Background="Transparent">
-                        <Grid.Clip>
-                            <EllipseGeometry Center="{x:Static const:Constants.CalciumThicknessIndicatorPointCenter}" RadiusX="{x:Static const:Constants.CalciumThicknessIndicatorCenter}" RadiusY="{x:Static const:Constants.CalciumThicknessIndicatorCenter}"/>
-                        </Grid.Clip>
-                        <Image Width="14" Height="15.6" Source="{svgc:SvgImage Source=/res/icon/thicknessIndicator.svg}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                        <Grid.RenderTransform>
-                            <RotateTransform CenterX="{x:Static const:Constants.CalciumThicknessIndicatorCenter}" CenterY="{x:Static const:Constants.CalciumThicknessIndicatorCenter}" Angle="{Binding MaxCalciumDegree}"/>
-                        </Grid.RenderTransform>
+                    <Grid Visibility="{Binding ReviewStatus.IsCalciumOn, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Image x:Name="CalciumIndicator" Width="{x:Static const:Constants.CalciumIndicatorSize}" Height="{x:Static const:Constants.CalciumIndicatorSize}" Source="{Binding CalciumIndicator}"/>
+                        <Grid Width="{x:Static const:Constants.CalciumThicknessIndicatorSize}" Height="{x:Static const:Constants.CalciumThicknessIndicatorSize}" Background="Transparent">
+                            <Grid.Clip>
+                                <EllipseGeometry Center="{x:Static const:Constants.CalciumThicknessIndicatorPointCenter}" RadiusX="{x:Static const:Constants.CalciumThicknessIndicatorCenter}" RadiusY="{x:Static const:Constants.CalciumThicknessIndicatorCenter}"/>
+                            </Grid.Clip>
+                            <Image Width="14" Height="15.6" Source="{svgc:SvgImage Source=/res/icon/thicknessIndicator.svg}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                            <Grid.RenderTransform>
+                                <RotateTransform CenterX="{x:Static const:Constants.CalciumThicknessIndicatorCenter}" CenterY="{x:Static const:Constants.CalciumThicknessIndicatorCenter}" Angle="{Binding MaxCalciumDegree}"/>
+                            </Grid.RenderTransform>
+                        </Grid>
                     </Grid>
                 </Grid>
 
@@ -182,9 +197,9 @@
                                                 <Label Content="{Binding [OCT Zoom], Source={StaticResource L10N}}" Foreground="{DynamicResource SideMenuTitleBrush}" Style="{DynamicResource Pretendard-Medium-12}"/>
                                             </StackPanel>
                                             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                                                <component:IconButton Style="{StaticResource IconButton}" Icon="zoomInSmall"/>
+                                                <component:IconButton Style="{StaticResource IconButton}" Icon="zoomInSmall" Command="{Binding ZoomInCommand}"/>
                                                 <StackPanel Width="6"/>
-                                                <component:IconButton Style="{StaticResource IconButton}" Icon="zoomOutSmall"/>
+                                                <component:IconButton Style="{StaticResource IconButton}" Icon="zoomOutSmall" Command="{Binding ZoomOutCommand}"/>
                                             </StackPanel>
                                         </Grid>
                                         <Grid Grid.Row="7" Margin="0,12,0,0" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -455,6 +470,16 @@
                                                 <Label Content="1 mm" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
                                             </StackPanel>
                                         </Grid>
+                                        <!-- Lumen Contour-->
+                                        <Grid Grid.Row="1" Margin="24,0,24,0" Width="{x:Static const:Constants.CrossSectionAngio}" Height="{x:Static const:Constants.CrossSectionAngio}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
+                                            <Grid.RenderTransform>
+                                                <TransformGroup>
+                                                    <ScaleTransform ScaleX="{x:Static const:Constants.CrossSectionAngioScale}" ScaleY="{x:Static const:Constants.CrossSectionAngioScale}"/>
+                                                </TransformGroup>
+                                            </Grid.RenderTransform>
+                                            <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}"  FrameNumber="{Binding FrameNumber}" Visibility="{Binding ReviewStatus.IsContourStentOn, Converter={StaticResource BoolToVisibilityConverter}}" IsEditOn="False"/>
+                                        </Grid>
+
                                         <!-- Info -->
                                         <Grid Grid.Row="2" Margin="20,0,0,0">
                                             <StackPanel Orientation="Vertical">
@@ -622,11 +647,44 @@
                 </Grid>
 
                 <!-- Lumen Contour-->
-                <annotation:DrawLumenContourUtil Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}"  FrameNumber="{Binding FrameNumber}" Visibility="{Binding ReviewStatus.IsContourStentOn, Converter={StaticResource BoolToVisibilityConverter}}" IsEditOn="False"/>
-                
-                <!-- Measurement -->
-                <annotation:DrawUtil Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" CommandOff="{Binding MeasurementCommandOff, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}"/>
+                <Grid Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                    <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}"  FrameNumber="{Binding FrameNumber}" Visibility="{Binding ReviewStatus.IsContourStentOn, Converter={StaticResource BoolToVisibilityConverter}}" IsEditOn="False" Zoom="{Binding ReviewStatus.Zoom}"/>
+                </Grid>
 
+                <!-- Measurement -->
+                <annotation:DrawUtil Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" CommandOff="{Binding MeasurementCommandOff, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" Zoom="{Binding ReviewStatus.Zoom}"/>
+
+                <!-- Mini Map -->
+                <Grid Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                    <Border Width="{x:Static const:Constants.MiniMapBorderSize}" Height="{x:Static const:Constants.MiniMapBorderSize}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="16" BorderBrush="{DynamicResource GrayscaleGray8Brush}" BorderThickness="1" CornerRadius="10" Visibility="{Binding ReviewStatus.Zoom.Visibility}">
+                        <Canvas>
+                            <Canvas.Background>
+                                <ImageBrush ImageSource="{Binding CrossSectionImage}" Stretch="Fill"/>
+                            </Canvas.Background>
+                            <Canvas.Clip>
+                                <RectangleGeometry RadiusX="10" RadiusY="10">
+                                    <RectangleGeometry.Rect>
+                                        <Rect X="0" Y="0" Width="{x:Static const:Constants.MiniMapCanvasSize}" Height="{x:Static const:Constants.MiniMapCanvasSize}"/>
+                                    </RectangleGeometry.Rect>
+                                </RectangleGeometry>
+                            </Canvas.Clip>
+
+                            <Rectangle Style="{DynamicResource MiniMapRect}" Canvas.Left="{Binding ReviewStatus.Zoom.RectLeft}" Canvas.Top="{Binding ReviewStatus.Zoom.RectTop}" Width="{Binding ReviewStatus.Zoom.RectWidth}" Height="{Binding ReviewStatus.Zoom.RectHeight}" Tag="{Binding ReviewStatus.Zoom.IsCaptured}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="PreviewMouseDown">
+                                        <i:InvokeCommandAction Command="{Binding ReviewStatus.Zoom.CmdSetCaptured}" CommandParameter="{Binding ReviewStatus.Zoom}"/>
+                                    </i:EventTrigger>
+                                    <i:EventTrigger EventName="PreviewMouseUp">
+                                        <i:InvokeCommandAction Command="{Binding ReviewStatus.Zoom.CmdSetCaptured}"/>
+                                    </i:EventTrigger>
+                                    <i:EventTrigger EventName="PreviewMouseMove">
+                                        <i:InvokeCommandAction Command="{Binding ReviewStatus.Zoom.CmdMoveRect}" CommandParameter="{Binding ReviewStatus.Zoom}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </Rectangle>
+                        </Canvas>
+                    </Border>
+                </Grid>
                 <!-- Longitude Part -->
                 <Grid Grid.Row="3" Background="{StaticResource BottomCardBackgroundBrush}">
                     <Grid.RowDefinitions>
@@ -814,5 +872,20 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </component:IndicatorAreaGrid>
+
+        <i:Interaction.Behaviors>
+            <behaviors:MouseBehavior MouseX="{Binding ReviewStatus.Zoom.MouseX, Mode=OneWayToSource}" MouseY="{Binding ReviewStatus.Zoom.MouseY, Mode=OneWayToSource}" />
+        </i:Interaction.Behaviors>
+        <i:Interaction.Triggers>
+            <i:EventTrigger EventName="MouseLeave" >
+                <i:InvokeCommandAction Command="{Binding ReviewStatus.Zoom.CmdSetCaptured}"/>
+            </i:EventTrigger>
+            <i:EventTrigger EventName="PreviewMouseUp" >
+                <i:InvokeCommandAction Command="{Binding ReviewStatus.Zoom.CmdSetCaptured}"/>
+            </i:EventTrigger>
+            <i:EventTrigger EventName="PreviewMouseMove" >
+                <i:InvokeCommandAction Command="{Binding ReviewStatus.Zoom.CmdMoveRect}" CommandParameter="{Binding ReviewStatus.Zoom}"/>
+            </i:EventTrigger>
+        </i:Interaction.Triggers>
     </Grid>
 </Page>

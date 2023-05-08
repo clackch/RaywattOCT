@@ -1,6 +1,7 @@
 ﻿using log4net;
 using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
+using RaywattApp.Models;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -70,6 +71,15 @@ namespace RaywattApp.Common.Annotation
         private static readonly DependencyProperty CommandOffProperty =
             DependencyProperty.Register("CommandOff", typeof(bool), typeof(DrawUtil), new PropertyMetadata(default(bool)));
 
+        public Zoom Zoom
+        {
+            get { return (Zoom)GetValue(ZoomProperty); }
+            set { SetValue(ZoomProperty, value); }
+        }
+
+        public static readonly DependencyProperty ZoomProperty =
+            DependencyProperty.Register("Zoom", typeof(Zoom), typeof(DrawUtil), new PropertyMetadata(null));
+
         //---------------------------------------------------------------------------------------------------- Constructor
         public DrawUtil()
         {
@@ -123,6 +133,12 @@ namespace RaywattApp.Common.Annotation
                 case Constants.MeasureDisableErase:
                     drawUtil.DisableCommand();
                     break;
+                case Constants.MeasureZoomIn:
+                    drawUtil.DrawAll();
+                    break;
+                case Constants.MeasureZoomOut:
+                    drawUtil.DrawAll();
+                    break;
                 default:
                     break;
             }
@@ -163,6 +179,9 @@ namespace RaywattApp.Common.Annotation
         private void DrawAll()
         {
             _log.Debug("DrawAll");
+
+            if (this.areaGeometrys == null || this.lengthGeometries == null || this.textGeometries == null)
+                return;
 
             this.canvas.Children.Clear();
             DrawAreaAll();

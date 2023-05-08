@@ -468,8 +468,8 @@ namespace RaywattApp.Common.Annotation
                 rectangle.Style = (Style)this.Resources["StyleRectangle"];
                 rectangle.Stroke = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
                 rectangle.Name = constRectangle + "_" + group + "_" + i;
-                Canvas.SetLeft(rectangle, pointList[i].X - rectangle.Width / 2);
-                Canvas.SetTop(rectangle, pointList[i].Y - rectangle.Height / 2);
+                Canvas.SetLeft(rectangle, pointList[i].X - (Constants.AnnotationRectWidth / Zoom.ScaleX) / 2);
+                Canvas.SetTop(rectangle, pointList[i].Y - (Constants.AnnotationRectHeight / Zoom.ScaleY) / 2);
 
                 if (i == 0 && !isClosed)
                 {

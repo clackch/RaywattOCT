@@ -3,6 +3,7 @@ using OpenCvSharp;
 using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Util;
+using RaywattApp.Models;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -116,6 +117,15 @@ namespace RaywattApp.Common.Annotation
         public static readonly DependencyProperty CurrentLumenContourProperty =
             DependencyProperty.Register("CurrentLumenContour", typeof(LumenContour), typeof(DrawLumenContourUtil), new PropertyMetadata(null));
 
+        public Zoom Zoom
+        {
+            get { return (Zoom)GetValue(ZoomProperty); }
+            set { SetValue(ZoomProperty, value); }
+        }
+
+        public static readonly DependencyProperty ZoomProperty =
+            DependencyProperty.Register("Zoom", typeof(Zoom), typeof(DrawLumenContourUtil), new PropertyMetadata(null));
+
         public string? InCommand
         {
             get { return (string)GetValue(InCommandProperty); }
@@ -151,9 +161,6 @@ namespace RaywattApp.Common.Annotation
             {
                 drawUtil.newPoints = new List<Point>();
                 drawUtil.contourLines = new List<Line>();
-                drawUtil.curPath = new Path();
-                drawUtil.curPath.Name = constContourCurve;
-                drawUtil.curPath.Style = (Style)drawUtil.Resources["StylePath"];
                 drawUtil.isFirstPoint = true;
 
                 drawUtil.lumenContourHistory = new List<Stack<LumenContourHistory>>(drawUtil.LumenContours.Count);
@@ -179,12 +186,6 @@ namespace RaywattApp.Common.Annotation
 
             switch (drawUtil.InCommand)
             {
-                case Constants.LumenContourZoomIn:
-                    drawUtil.ZoomIn();
-                    break;
-                case Constants.LumenContourZoomOut:
-                    drawUtil.ZoomOut();
-                    break;
                 case Constants.LumenContourRestore:
                     drawUtil.Restore();
                     break;
@@ -531,8 +532,8 @@ namespace RaywattApp.Common.Annotation
             Rectangle rectangle = new Rectangle();
             rectangle.Name = constContourPoint + "_" + index;
             rectangle.Style = (Style)this.Resources["StyleRectangle"];
-            Canvas.SetLeft(rectangle, point.X - rectangle.Width / 2);
-            Canvas.SetTop(rectangle, point.Y - rectangle.Height / 2);
+            Canvas.SetLeft(rectangle, point.X - (Constants.AnnotationRectWidth / Zoom.ScaleX) / 2);
+            Canvas.SetTop(rectangle, point.Y - (Constants.AnnotationRectHeight / Zoom.ScaleY) / 2);
 
             this.canvas.Children.Add(rectangle);
         }
@@ -560,6 +561,12 @@ namespace RaywattApp.Common.Annotation
         {
             DeleteLumenContourCurve();
 
+            if(this.curPath == null)
+            {
+                this.curPath = new Path();
+                this.curPath.Name = constContourCurve;
+                this.curPath.Style = (Style)this.Resources["StylePath"];
+            }                        
             this.curPath.Data = CommonUtil.GetBezierCurve(this.newPoints, false); ;
 
             //Lumen Contour 보다 아래쪽에 배치되도록 Index 0에 추가(마우스 클릭 이벤트 처리 때문)
@@ -595,16 +602,6 @@ namespace RaywattApp.Common.Annotation
                 path.StrokeDashArray.Add(4);
             
             this.canvas.Children.Add(path);
-        }
-
-        private void ZoomIn()
-        {
-            _log.Debug("ZoomIn");
-        }
-
-        private void ZoomOut()
-        {
-            _log.Debug("ZoomOut");
         }
 
         private void Restore()

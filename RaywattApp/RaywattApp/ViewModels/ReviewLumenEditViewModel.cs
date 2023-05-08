@@ -38,6 +38,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private PatientCase _patientCase;
 
+        [ObservableProperty]
+        private Zoom _zoom;
+
         private int frameNumber = -1;
         public int FrameNumber
         {
@@ -123,6 +126,8 @@ namespace RaywattApp.ViewModels
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;
+
+            Zoom = new Zoom();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -216,14 +221,16 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ZoomIn");
 
-            LumenContourCommand = Constants.LumenContourZoomIn;
+            if (Zoom.ZoomIn())
+                LumenContourCommand = Constants.LumenContourZoomIn;
         }
 
         private void ZoomOut()
         {
             _log.Debug("ZoomOut");
 
-            LumenContourCommand = Constants.LumenContourZoomOut;
+            if(Zoom.ZoomOut())
+                LumenContourCommand = Constants.LumenContourZoomOut;
         }
 
         private void Restore()
