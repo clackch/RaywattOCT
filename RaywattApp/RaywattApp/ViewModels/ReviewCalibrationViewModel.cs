@@ -123,12 +123,13 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("GoToPreviousPage");
 
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["patient"] = Patient;
             if (!isSave)
             {
                 Reset();
             }
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = Patient;
             parameter["patientCase"] = PatientCase;
             parameter["prevStatus"] = PrevStatus;
             parameter["reviewStatus"] = ReviewStatus;
