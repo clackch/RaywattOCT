@@ -113,7 +113,7 @@
 
                                 <!-- L-Mode Indicator -->
                                 <Canvas>
-                                    <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitudeCompare" IsCaptured="{Binding IndicatorCompareLongitude.IsCaptured}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="181" Cursor="Hand" Stretch="None" Canvas.Left="{Binding IndicatorCompareLongitude.X}" Visibility="{Binding IndicatorCompareLongitude.IsVisible}" HorizontalAlignment="Center" Canvas.Top="-11" VerticalAlignment="Top">
+                                    <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitudeCompare" IsCaptured="{Binding IndicatorCompareLongitude.IsCaptured}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="181" Stretch="None" Canvas.Left="{Binding IndicatorCompareLongitude.X}" Visibility="{Binding IndicatorCompareLongitude.IsVisible}" HorizontalAlignment="Center" Canvas.Top="-11" VerticalAlignment="Top">
                                         <!-- Trigger -->
                                         <i:Interaction.Triggers>
                                             <!--PreviewMouseDown : Image 영역에서 MouseDown 할 경우, Indicator 동작 가능 상태로 변경 -->
@@ -222,7 +222,7 @@
 
                                 <!-- L-Mode Indicator -->
                                 <Canvas>
-                                    <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitudeCompare" IsCaptured="{Binding IndicatorLongitude.IsCaptured}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="181" Cursor="Hand" Stretch="None" Canvas.Left="{Binding IndicatorLongitude.X}" Visibility="{Binding IndicatorLongitude.IsVisible}" HorizontalAlignment="Center" Canvas.Top="-11" VerticalAlignment="Top">
+                                    <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitudeCompare" IsCaptured="{Binding IndicatorLongitude.IsCaptured}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="181" Stretch="None" Canvas.Left="{Binding IndicatorLongitude.X}" Visibility="{Binding IndicatorLongitude.IsVisible}" HorizontalAlignment="Center" Canvas.Top="-11" VerticalAlignment="Top">
                                         <!-- Trigger -->
                                         <i:Interaction.Triggers>
                                             <!--PreviewMouseDown : Image 영역에서 MouseDown 할 경우, Indicator 동작 가능 상태로 변경 -->

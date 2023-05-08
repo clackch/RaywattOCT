@@ -352,7 +352,7 @@
 
                                 <!-- L-Mode Indicator -->
                                 <Canvas>
-                                    <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitude3d" IsCaptured="{Binding IndicatorLongitude.IsCaptured}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="{x:Static const:Constants.LongitudeIndicator3dHeight}" Cursor="Hand" Stretch="None" Canvas.Left="{Binding IndicatorLongitude.X}" Margin="0,-11,0,0" Visibility="{Binding IndicatorLongitude.IsVisible}">
+                                    <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitude3d" IsCaptured="{Binding IndicatorLongitude.IsCaptured}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="{x:Static const:Constants.LongitudeIndicator3dHeight}" Stretch="None" Canvas.Left="{Binding IndicatorLongitude.X}" Margin="0,-11,0,0" Visibility="{Binding IndicatorLongitude.IsVisible}">
                                         <!-- Trigger -->
                                         <i:Interaction.Triggers>
                                             <!--PreviewMouseDown : Image 영역에서 MouseDown 할 경우, Indicator 동작 가능 상태로 변경 -->
@@ -415,7 +415,7 @@
 
                         <!-- Indicator  -->
                         <Grid>
-                            <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Width="188" Icon="crossSectionAngio" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Cursor="Hand" Visibility="{Binding IndicatorCrossSection.IsVisible}">
+                            <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Width="188" Icon="crossSectionAngio" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Visibility="{Binding IndicatorCrossSection.IsVisible}">
                                 <Image.RenderTransform>
                                     <RotateTransform CenterX="94" CenterY="5" Angle="{Binding Degree}"/>
                                 </Image.RenderTransform>

@@ -26,7 +26,7 @@
                         <Condition Binding="{Binding IsEditOn, ElementName=UserControl}" Value="True"/>
                         <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
                     </MultiDataTrigger.Conditions>
-                    <Setter Property="Cursor" Value="Pen"/>
+                    <Setter Property="Cursor" Value="{StaticResource measureArea}"/>
                 </MultiDataTrigger>
                 <DataTrigger Binding="{Binding IsContourMouseOver, ElementName=UserControl}" Value="True">
                     <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThicknessBold}}"/>

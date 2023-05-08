@@ -10,22 +10,19 @@
              d:DesignHeight="180" d:DesignWidth="800">
 
     <UserControl.Resources>
-
-        <Cursor x:Key="OpenHandCursor">C:\Raywatt\system\image\cursor\default.cur</Cursor>
-
         <Style TargetType="Canvas">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding CommandType, ElementName=UserControl}" Value="1">
-                    <Setter Property="Cursor" Value="Pen"/>
+                    <Setter Property="Cursor" Value="{StaticResource measureArea}"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding CommandType, ElementName=UserControl}" Value="2">
-                    <Setter Property="Cursor" Value="Cross"/>
+                    <Setter Property="Cursor" Value="{StaticResource measureLength}"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding CommandType, ElementName=UserControl}" Value="3">
-                    <Setter Property="Cursor" Value="UpArrow"/>
+                    <Setter Property="Cursor" Value="{StaticResource measureText}"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding CommandType, ElementName=UserControl}" Value="4">
-                    <Setter Property="Cursor" Value="Help"/>
+                    <Setter Property="Cursor" Value="{StaticResource measureErase}"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -39,7 +36,7 @@
                         <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
                         <Condition Binding="{Binding CommandType, ElementName=UserControl}" Value="0"/>
                     </MultiDataTrigger.Conditions>
-                    <Setter Property="Cursor" Value="Pen"/>
+                    <Setter Property="Cursor" Value="{StaticResource measureArea}"/>
                     <Setter Property="StrokeThickness" Value="3"/>
                 </MultiDataTrigger>
             </Style.Triggers>

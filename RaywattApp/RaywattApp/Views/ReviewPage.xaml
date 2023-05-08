@@ -100,11 +100,19 @@
                         </StackPanel>
                     </Grid>
                     <!-- Angio -->
-                    <Grid Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Background="LightGray">
+                    <Grid Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid.Margin>
                             <Thickness Left="{x:Static const:Constants.LeftSideBarExpandSize}" Right="{x:Static const:Constants.RightSideBarExpandAngioSize}"/>
                         </Grid.Margin>
-
+                        <Image Grid.Column="0" Source="/res/png/angioImage.png" Stretch="Fill">
+                            <Image.Clip>
+                                <RectangleGeometry RadiusX="10" RadiusY="10">
+                                    <RectangleGeometry.Rect>
+                                        <Rect X="0" Y="0" Width="580" Height="580"/>
+                                    </RectangleGeometry.Rect>
+                                </RectangleGeometry>
+                            </Image.Clip>
+                        </Image>
                     </Grid>
                 </Grid>
 
@@ -577,7 +585,7 @@
                                         <StackPanel Height="24"/>
                                         <Grid Width="300" Height="300" VerticalAlignment="Center" HorizontalAlignment="Center">
                                             <!-- Indicator  -->
-                                            <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Width="300" Height="18" Icon="crossSectionAngio" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Cursor="Hand" Visibility="{Binding IndicatorCrossSection.IsVisible}">
+                                            <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Width="300" Height="18" Icon="crossSectionAngio" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Visibility="{Binding IndicatorCrossSection.IsVisible}">
                                                 <Image.RenderTransform>
                                                     <RotateTransform CenterX="150" CenterY="9" Angle="{Binding Degree}"/>
                                                 </Image.RenderTransform>
@@ -627,7 +635,7 @@
 
                 <!-- Indicator  -->
                 <Grid Grid.Row="1" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                    <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Width="640" Height="18" Icon="crossSection" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Cursor="Hand" Visibility="{Binding IndicatorCrossSection.IsVisible}">
+                    <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Width="640" Height="18" Icon="crossSection" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Visibility="{Binding IndicatorCrossSection.IsVisible}">
                         <Image.RenderTransform>
                             <RotateTransform CenterX="319" CenterY="9" Angle="{Binding Degree}"/>
                         </Image.RenderTransform>
@@ -791,7 +799,7 @@
 
                                 <!-- L-Mode Indicator -->
                                 <Canvas>
-                                    <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitude" IsCaptured="{Binding IndicatorLongitude.IsCaptured}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="{x:Static const:Constants.LongitudeIndicatorHeight}" Cursor="Hand" Stretch="None" Canvas.Left="{Binding IndicatorLongitude.X}" Margin="0,-11,0,0" Visibility="{Binding IndicatorLongitude.IsVisible}">
+                                    <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitude" IsCaptured="{Binding IndicatorLongitude.IsCaptured}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="{x:Static const:Constants.LongitudeIndicatorHeight}" Stretch="None" Canvas.Left="{Binding IndicatorLongitude.X}" Margin="0,-11,0,0" Visibility="{Binding IndicatorLongitude.IsVisible}">
                                         <!-- Trigger -->
                                         <i:Interaction.Triggers>
                                             <!--PreviewMouseDown : Image 영역에서 MouseDown 할 경우, Indicator 동작 가능 상태로 변경 -->

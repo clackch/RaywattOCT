@@ -276,6 +276,7 @@
     </Style>
 
     <Style TargetType="TextBox" x:Key="DataGridCellEditTextBox" BasedOn="{StaticResource Pretendard-Medium-14}">
+        <Setter Property="Cursor" Value="{StaticResource iBeam}"/>
         <Setter Property="Margin" Value="8"/>
         <Setter Property="Width" Value="133"/>
         <Setter Property="Height" Value="41"/>
@@ -1033,6 +1034,7 @@
 
     <!-- Search -->
     <Style TargetType="TextBox" x:Key="PatientSearch" BasedOn="{StaticResource Pretendard-Medium-18}">
+        <Setter Property="Cursor" Value="{StaticResource iBeam}"/>
         <Setter Property="Width" Value="260"/>
         <Setter Property="Height" Value="54"/>
         <Setter Property="SelectionBrush" Value="{DynamicResource MainPrimaryColorBrush}"/>
