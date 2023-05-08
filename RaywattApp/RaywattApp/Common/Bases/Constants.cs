@@ -29,6 +29,7 @@ namespace RaywattApp.Common.Bases
         public const string ReviewPresetPage = "Views/ReviewPresetPage.xaml";
         public const string ReviewAngioCoRegPage = "Views/ReviewAngioCoRegPage.xaml";
         public const string ReviewLumenEditPage = "Views/ReviewLumenEditPage.xaml";
+        public const string ReviewCalibrationPage = "Views/ReviewCalibrationPage.xaml";
         //File
         public const string FileExportStep1Page = "Views/File/FileExportStep1Page.xaml";
         public const string FileExportStep2DicomPage = "Views/File/FileExportStep2DicomPage.xaml";
