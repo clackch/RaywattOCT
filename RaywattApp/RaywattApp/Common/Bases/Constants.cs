@@ -16,8 +16,8 @@ namespace RaywattApp.Common.Bases
         public const string PatientEditPage = "Views/PatientEditPage.xaml";
         //Recording
         public const string RecordingSetupPage = "Views/RecordingSetupPage.xaml";
-        public const string LiveViewPage = "Views/LiveViewPage.xaml";
-        public const string CalibrationPage = "Views/CalibrationPage.xaml";
+        public const string RecordingLiveViewPage = "Views/RecordingLiveViewPage.xaml";
+        public const string RecordingCalibrationPage = "Views/RecordingCalibrationPage.xaml";
         public const string RecordingPage = "Views/RecordingPage.xaml";
         public const string RecordingConfirmPage = "Views/RecordingConfirmPage.xaml";
         public const string RecordingCatheterFailPage = "Views/RecordingCatheterFailPage.xaml";

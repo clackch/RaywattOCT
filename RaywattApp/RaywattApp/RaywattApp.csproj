@@ -54,7 +54,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resource.resx</DependentUpon>
     </Compile>
-    <Compile Update="Views\CalibrationPage.xaml.cs">
+    <Compile Update="Views\RecordingCalibrationPage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
@@ -877,7 +877,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="Views\CalibrationPage.xaml">
+    <Page Update="Views\RecordingCalibrationPage.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>

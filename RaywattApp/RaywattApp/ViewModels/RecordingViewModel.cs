@@ -99,7 +99,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Cancel");
 
-            leaveToPage(Constants.LiveViewPage);
+            leaveToPage(Constants.RecordingLiveViewPage);
         }
 
         private void Ready()
