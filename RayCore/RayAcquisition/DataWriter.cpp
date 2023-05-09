@@ -75,11 +75,11 @@ void CDataWriter::StopSave() {
 	m_hRecordingFile = NULL;
 }
 
-unsigned short* CDataWriter::GetSample(int nFrame) {
+char* CDataWriter::GetSample(int nFrame) {
 	if (nFrame >= m_nNumOfSamples) return NULL;
 
 	unsigned long long ulOffset = nFrame * (unsigned long long) m_nElementSize;
-	return (unsigned short *)(m_pRecordBuffer + ulOffset);
+	return (m_pRecordBuffer + ulOffset);
 }
 
 void CDataWriter::AddFrame(void* pFrame) {

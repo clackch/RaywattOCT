@@ -89,7 +89,7 @@ int CATSDevice::stop() {
 	return NOERROR;
 }
 
-unsigned short *CATSDevice::acquire(int& nCurFrame, int& nTotalFrame) {
+char *CATSDevice::acquire(int& nCurFrame, int& nTotalFrame) {
 	const int nBufferSize = m_setting.nAScan * m_setting.nBScan;
 	const int nAcqBufCount = m_setting.nBufferCount;
 	const U32 timeout_ms = m_setting.msTimeOut;
@@ -125,7 +125,7 @@ unsigned short *CATSDevice::acquire(int& nCurFrame, int& nTotalFrame) {
 	m_nBufferIndex++;
 	m_nBufferIndex = (m_nBufferIndex >= nAcqBufCount) ? 0 : m_nBufferIndex;
 
-	return m_pCurBuffer;
+	return (char *)m_pCurBuffer;
 }
 
 BOOL CATSDevice::configureBoard(HANDLE boardHandle)

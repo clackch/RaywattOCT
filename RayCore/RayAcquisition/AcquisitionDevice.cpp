@@ -40,7 +40,7 @@ UINT IAcquisitionDevice::threadAcquire(LPVOID param) {
 	pDevice->start();
 
 	while (pDevice->m_pThread->isRun) {
-		unsigned short *pBuffer = pDevice->acquire(nCurFrame, nTotalFrame);
+		char *pBuffer = pDevice->acquire(nCurFrame, nTotalFrame);
 		// To-Do : need Critical Section?
 		if (pImaging != NULL && pBuffer != NULL) {
 			pImaging->DoAsyncRender(pBuffer);

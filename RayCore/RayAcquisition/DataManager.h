@@ -1,4 +1,5 @@
 #pragma once
+#include "Config.h"
 
 class OCTHeader {
 public:
@@ -50,7 +51,7 @@ public:
 	virtual ~IDataManager() {}
 
 	int GetNumOfSamples() { return m_nNumOfSamples; }
-	virtual unsigned short* GetSample(int nIndex) = 0;
+	virtual char* GetSample(int nIndex) = 0;
 	virtual void AddFrame(void* pFrame) = 0;
 };
 

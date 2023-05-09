@@ -29,7 +29,7 @@ public:
 	bool WriteFrame(int nFrame);
 	void StopSave();
 
-	virtual unsigned short* GetSample(int nFrame);
+	virtual char* GetSample(int nFrame);
 	virtual void AddFrame(void* pFrame);
 
 private:
