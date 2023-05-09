@@ -81,13 +81,13 @@ RayError COCTSystem::Start() {
 
 	IImaging::Setting settingPullback = config.imaging;
 	settingPullback.Set(settingPullback.nAScan, config.acquisition.nLaserSpeed / (config.bldcMotor.velocityPullback / 60));
-	m_pImagingPullback = CImagingSession::CreateColorImaging(this, settingPullback);
+	m_pImagingPullback = CImagingSession::CreateColorImaging(this, settingPullback, ImagingType::Default);
 	m_pImagingPullback->SetSession(SESSION_REALTIME);
 	m_pImagingPullback->Start();
 
 	IImaging::Setting settingLiveView = config.imaging;
 	settingLiveView.Set(settingLiveView.nAScan, config.acquisition.nLaserSpeed / (config.bldcMotor.velocityLiveView / 60));
-	m_pImagingLiveView = CImagingSession::CreateColorImaging(this, settingLiveView);
+	m_pImagingLiveView = CImagingSession::CreateColorImaging(this, settingLiveView, ImagingType::Default);
 	m_pImagingLiveView->SetSession(SESSION_REALTIME);
 	m_pImagingLiveView->Start();
 
@@ -870,17 +870,18 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 */
 UINT COCTSystem::threadGenerateVolume(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
-	IDataManager* pDataManager = pSystem->m_reviewSession[SESSION_REVIEW]->GetDataManager();
+	CImagingSession* pSession = pSystem->m_reviewSession[SESSION_REVIEW];
+	IDataManager* pDataManager = pSession->GetDataManager();
+	ImagingType imagingType = pSession->GetImagingType();
 
 	CVolumeGenerator* pVolume = pSystem->m_pVolume;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
 	// prepare imaging
-	CConfiguration& config = CConfiguration::GetInstance();
-	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr, config.imaging);
+	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr, pSession->GetImaging()->GetSetting(), imagingType);
 
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadGenerateVolume->isRun; nFrame++) {
-		unsigned short* pBuffer = pDataManager->GetSample(nFrame);
+		char* pBuffer = pDataManager->GetSample(nFrame);
 
 		pVolume->AddRecord(pBuffer, pImaging, nFrame);
 	}
@@ -901,19 +902,20 @@ UINT COCTSystem::threadGenerateVolume(LPVOID param) {
 */
 UINT COCTSystem::threadLumenDetection(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
-	IDataManager* pDataManager = pSystem->m_reviewSession[SESSION_REVIEW]->GetDataManager();
+	CImagingSession* pSession = pSystem->m_reviewSession[SESSION_REVIEW];
+	IDataManager* pDataManager = pSession->GetDataManager();
+	ImagingType imagingType = pSession->GetImagingType();
 	std::vector<std::vector<std::vector<cv::Point>>>& vLumen = pSystem->m_vLumen;
 
 	CRayLearning* pLearning = pSystem->m_pLearning;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
 	// prepare imaging
-	CConfiguration& config = CConfiguration::GetInstance();
-	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr, config.imaging);
+	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr, pSession->GetImaging()->GetSetting(), imagingType);
 
 	vLumen.clear();
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadLumenDetection->isRun; nFrame++) {
-		unsigned short* pBuffer = pDataManager->GetSample(nFrame);
+		char* pBuffer = pDataManager->GetSample(nFrame);
 
 		pImaging->Process(pBuffer);
 		vLumen.push_back(pLearning->FindLumen(pImaging->GetCircleImage()));
