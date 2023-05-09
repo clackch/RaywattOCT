@@ -95,11 +95,11 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_WINDOWS;_CRT_SECURE_NO_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>.\px14400\include;.\shutter\include;.\libtiff\include;..\..\RayCore\lib\include;..\..\RayCore\extern\libusb\include\libusb-1.0;..\..\RayCore\extern\opencv\include;..\..\RayCore\extern\ATS\include;..\..\RayCore\extern\ipp\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\px14400\include;.\shutter\include;..\..\RayCore\lib\include;..\..\RayCore\extern\libtiff\include;..\..\RayCore\extern\libusb\include\libusb-1.0;..\..\RayCore\extern\opencv\include;..\..\RayCore\extern\ATS\include;..\..\RayCore\extern\ipp\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>.\px14400\lib;.\shutter\lib\x64;.\libtiff\lib;..\..\RayCore\lib;..\..\RayCore\extern\libusb\lib\x64;..\..\RayCore\extern\opencv\lib;..\..\RayCore\extern\ATS\Library\x64;..\..\RayCore\extern\ipp\lib\intel64</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>.\px14400\lib;.\shutter\lib\x64;..\..\RayCore\lib;..\..\RayCore\extern\libtiff\lib;..\..\RayCore\extern\libusb\lib\x64;..\..\RayCore\extern\opencv\lib;..\..\RayCore\extern\ATS\Library\x64;..\..\RayCore\extern\ipp\lib\intel64</AdditionalLibraryDirectories>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -169,13 +169,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_WINDOWS;_CRT_SECURE_NO_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>.\px14400\include;.\shutter\include;.\libtiff\include;..\..\RayCore\lib\include;..\..\RayCore\extern\libusb\include\libusb-1.0;..\..\RayCore\extern\opencv\include;..\..\RayCore\extern\ATS\include;..\..\RayCore\extern\ipp\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\px14400\include;.\shutter\include;..\..\RayCore\lib\include;..\..\RayCore\extern\libtiff\include;..\..\RayCore\extern\libusb\include\libusb-1.0;..\..\RayCore\extern\opencv\include;..\..\RayCore\extern\ATS\include;..\..\RayCore\extern\ipp\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>.\px14400\lib;.\shutter\lib\x64;.\libtiff\lib;..\..\RayCore\lib;..\..\RayCore\extern\libusb\lib\x64;..\..\RayCore\extern\opencv\lib;..\..\RayCore\extern\ATS\Library\x64;..\..\RayCore\extern\ipp\lib\intel64</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>.\px14400\lib;.\shutter\lib\x64;..\..\RayCore\lib;..\..\RayCore\extern\libtiff\lib;..\..\RayCore\extern\libusb\lib\x64;..\..\RayCore\extern\opencv\lib;..\..\RayCore\extern\ATS\Library\x64;..\..\RayCore\extern\ipp\lib\intel64</AdditionalLibraryDirectories>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
