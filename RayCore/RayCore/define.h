@@ -48,6 +48,7 @@ enum class RayCallbackRequest {
 	State,
 	Progress,
 	Error,
+	Event,
 	WorkDone
 };
 
@@ -56,6 +57,11 @@ enum class RayScannerState {
 	Default,
 	Scanning,
 	Review
+};
+
+enum class RayEvent {
+	Unknown = 0,
+	CatheterLoading,
 };
 
 enum class RayWorkItem {

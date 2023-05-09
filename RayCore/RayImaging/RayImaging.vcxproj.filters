@@ -27,9 +27,6 @@
     <ClInclude Include="..\Utility\Config.h">
       <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\Utility\Configuration.h">
-      <Filter>Utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\Utility\Utility.h">
       <Filter>Utility</Filter>
     </ClInclude>
@@ -45,6 +42,9 @@
     <ClInclude Include="OCTMeasurement.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="TIFFImaging.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="OCTImaging.cpp">
@@ -52,9 +52,6 @@
     </ClCompile>
     <ClCompile Include="Calibration.cpp">
       <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Utility\Configuration.cpp">
-      <Filter>Utility</Filter>
     </ClCompile>
     <ClCompile Include="..\Utility\MessageService.cpp">
       <Filter>Utility</Filter>
@@ -66,6 +63,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="OCTMeasurement.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="TIFFImaging.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

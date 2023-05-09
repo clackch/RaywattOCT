@@ -134,10 +134,16 @@ namespace RaywattApp.Models
         }
 
         [ObservableProperty]
-        private string? _measurements;
-        
+        private string? _bookmark;
+
         [ObservableProperty]
-        private string? _bookmarks;
+        private string? _longitude;
+
+        [ObservableProperty]
+        private string? _crossSection;
+
+        [ObservableProperty]
+        private string? _lumenContour;
 
         [ObservableProperty]
         private DateTime createDate;

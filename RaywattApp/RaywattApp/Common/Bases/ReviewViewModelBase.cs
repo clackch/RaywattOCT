@@ -87,6 +87,18 @@ namespace RaywattApp.Common.Bases
             get { return this._exportCommand ?? (this._exportCommand = new RelayCommand(Export)); }
         }
 
+        private ICommand _editLumenContourCommand;
+        public ICommand EditLumenContourCommand
+        {
+            get { return this._editLumenContourCommand ?? (this._editLumenContourCommand = new RelayCommand(EditLumenContour)); }
+        }
+
+        private ICommand _manualCalibrationCommand;
+        public ICommand ManualCalibrationCommand
+        {
+            get { return this._manualCalibrationCommand ?? (this._manualCalibrationCommand = new RelayCommand(ManualCalibration)); }
+        }
+
         private ICommand _endReviewCommand;
         public ICommand EndReviewCommand
         {
@@ -181,7 +193,32 @@ namespace RaywattApp.Common.Bases
             fileExport.BookmarkedFrames = GetBookmarks();
             parameter["fileExport"] = fileExport;
 
-            var result = _dialogService.OpenDialog(new FileDialogControl(), parameter);
+            var result = _dialogService.OpenDialog(new FileDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+        }
+
+        private void EditLumenContour()
+
+        {
+            _log.Debug("EditLumenContour");
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = Patient;
+            parameter["patientCase"] = PatientCase;
+            parameter["prevStatus"] = PrevStatus;
+            parameter["reviewStatus"] = ReviewStatus;
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewLumenEditPage) { Parameter = parameter });
+        }
+
+        private void ManualCalibration()
+        {
+            _log.Debug("ManualCalibration");
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = Patient;
+            parameter["patientCase"] = PatientCase;
+            parameter["prevStatus"] = PrevStatus;
+            parameter["reviewStatus"] = ReviewStatus;
+            //WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewCali) { Parameter = parameter });
         }
 
         private List<int> GetBookmarks()
@@ -190,7 +227,7 @@ namespace RaywattApp.Common.Bases
 
             if(Constants.CurrentPage != Constants.ReviewPage)
             {
-                Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(PatientCase.Bookmarks);
+                Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(PatientCase.Bookmark);
             }
 
             foreach(Bookmark bookmark in Bookmarks)

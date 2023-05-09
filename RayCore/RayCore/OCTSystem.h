@@ -1,6 +1,7 @@
 #pragma once
 #include "define.h"
 #include "AcquisitionDevice.h"
+#include "StepMotorController.h"
 #include "MessageService.h"
 #include <vector>
 #include <mutex>
@@ -9,7 +10,8 @@
 
 typedef enum {
 	SESSION_UNKNOWN = RaySession::Unknown,
-	SESSION_REVIEW,	// RealTime, Review
+	SESSION_REALTIME = 0,
+	SESSION_REVIEW = 0,
 	SESSION_COMPARE,
 	MAX_SESSION_NUM
 }SessionType;
@@ -40,7 +42,9 @@ private:
 	CThread* m_pThreadRotaryJunction;
 	
 	// Imaging
-	COCTImaging* m_pImagingRealtime;
+	COCTImaging* m_pImagingRealtime;	// Pullback or LiveView
+	COCTImaging* m_pImagingPullback;
+	COCTImaging* m_pImagingLiveView;
 
 	// Data Manager
 	IDataManager* m_pDataWriter;
@@ -57,6 +61,9 @@ private:
 	CImagingSession* m_reviewSession[MAX_SESSION_NUM];
 	CImagingSession* m_openedSession;
 
+	// Rotary Junction
+	CStepMotorController* m_pStepMotor[STEP_MOTOR_NUM];
+
 	// Machine Learning
 	CRayLearning* m_pLearning;
 	std::vector<std::vector<cv::Mat>> m_vLumen;
@@ -70,8 +77,6 @@ private:
 	double m_fContrast;
 	double m_fDegree;
 	cv::Scalar m_backgroundColor;	// for longitude image
-	double m_fLowLevel;
-	double m_fHighLevel;
 
 public:
 	COCTSystem();
@@ -153,6 +158,7 @@ private:
 	int disconnectAcqDevice();
 	int startAcqDevice();
 	int stopAcqDevice();
+	int restartAcqDevice(COCTImaging* pImaging);
 	int connectRotaryJunction();
 	int disconnectRotaryJunction();
 	void stopAllSessions();
@@ -166,6 +172,7 @@ protected:
 	LRESULT OnMsgUpdateCatheterState(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgStartReviewSession(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgNotifyProcessDone(WPARAM wParam, LPARAM lParam);
+	LRESULT OnMsgNotifyEventOccured(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgDeviceWorkDone(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgNotifyErrorOccured(WPARAM wParam, LPARAM lParam);
 };

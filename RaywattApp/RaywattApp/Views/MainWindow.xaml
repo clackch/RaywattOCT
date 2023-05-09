@@ -27,7 +27,7 @@
             </Grid.RowDefinitions>
             <Grid Grid.Row="0" Width="1280" Height="60">
                 <StackPanel HorizontalAlignment="Left">
-                    <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="home" Margin="14,9,0,9" Command="{Binding HomeCommand}" Visibility="{Binding IsHome}"/>
+                    <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="home" Margin="14,9,0,9" Command="{Binding HomeCommand}" Visibility="{Binding IsHome, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="setting" Margin="0,9,6,9" Command="{Binding SettingCommand}"/>
@@ -37,7 +37,8 @@
             <StackPanel Grid.Row="2" Width="1280" Height="40" Orientation="Horizontal">
                 <Image Style="{DynamicResource RaywattSmall_Icon}"/>
                 <StackPanel MinWidth="130" Margin="25,0,0,0" VerticalAlignment="Center" Orientation="Horizontal" Visibility="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusLocked}}">
-                    <ProgressBar Style="{DynamicResource CatheterProgressBar}" Value="{Binding CatheterProgress}" Width="70" Height="18.8"/>
+                    <ProgressBar Style="{DynamicResource HomeCatheterProgressBar}" Value="{Binding CatheterProgress}" Width="72" Height="20" Visibility="{Binding IsHome, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    <ProgressBar Style="{DynamicResource CatheterProgressBar}" Value="{Binding CatheterProgress}" Width="72" Height="20" Visibility="{Binding IsHome, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
                     <StackPanel Width="8"/>
                     <Label Style="{DynamicResource Pretendard-Medium-14}" MinWidth="52" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [Loading], Source={StaticResource L10N}}"/>
                 </StackPanel>

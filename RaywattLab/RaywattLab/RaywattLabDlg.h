@@ -5,6 +5,7 @@
 #pragma once
 #include "CommonDlg.h"
 #include "AcquisitionDevice.h"
+#include "ZaberController.h"
 #include "ScopeView.h"
 #include "RotaryJunctionDlg.h"
 #include "MessageService.h"
@@ -45,6 +46,10 @@ private:
 
 	// Data Reader
 	CDataReader* m_pDataReader;
+
+	// Rotary Junction
+	CZaberController* m_pPullback;
+	CZaberController* m_pDelayLine;
 
 	// UI Components
 	CListBox m_listPatientData;

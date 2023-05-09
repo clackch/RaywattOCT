@@ -117,6 +117,7 @@ namespace RaywattApp.ViewModels
 
             IndicatorCrossSection = new Indicator();
             IndicatorCrossSection.IsVisible = Visibility.Visible;
+            IndicatorCrossSection.IsCrossSection = true;
 
             IndicatorLongitude = new Indicator();
             IndicatorLongitude.X = Constants.LongitudeIndicatorWidth / 2;
@@ -190,8 +191,6 @@ namespace RaywattApp.ViewModels
             sqlParameters["expansion_calculation"] = PatientCase.ExpansionCalculation;
             sqlParameters["expansion_threshold"] = PatientCase.ExpansionThreshold;
             sqlParameters["apposition_threshold"] = PatientCase.AppositionThreshold;
-            sqlParameters["measurements"] = PatientCase.Measurements;
-            sqlParameters["bookmarks"] = PatientCase.Bookmarks;
 
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
             if (nRows == 0)
@@ -258,6 +257,12 @@ namespace RaywattApp.ViewModels
 
             if (indicator.IsCaptured)
             {
+                if (indicator.IsLongitudeClicked)
+                {
+                    indicator.IsLongitudeClicked = false;
+                    return;
+                }
+
                 double x = PointLongitudeX - longitudeCoordinate.X;
 
                 if (x >= 0 && x < Constants.Longitude3dWidth)

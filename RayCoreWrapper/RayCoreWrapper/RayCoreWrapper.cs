@@ -50,6 +50,7 @@ namespace RaywattOCT
             State,
             Progress,
             Error,
+            Event,
             WorkDone
         };
 
@@ -59,6 +60,11 @@ namespace RaywattOCT
             Default,
             Scanning,
             Review
+        };
+
+        public enum RayEvent : int { 
+            Unknown = 0,
+            CatheterLoading
         };
 
         public enum RayWorkItem : int

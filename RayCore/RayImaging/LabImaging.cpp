@@ -1,9 +1,8 @@
 #include "LabImaging.h"
-#include "Configuration.h"
 #include "Calibration.h"
 
-CLabImaging::CLabImaging(CMessageService* pMsg) 
-	: COCTImaging(pMsg) {
+CLabImaging::CLabImaging(Setting setting, CMessageService* pMsg)
+	: COCTImaging(setting, pMsg) {
 	backgroundData = nullptr;
 	backgroundFFT = nullptr;
 	backgroundSubtracted = nullptr;
@@ -32,12 +31,10 @@ CLabImaging::~CLabImaging() {
 void CLabImaging::Initialize(tstring calibFile, const char* strBgFile) {
 	COCTImaging::Initialize(calibFile);
 
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nAScan = config.nAScan;
-	const int nBScan = config.nBScan;
-	const int nBufferSize = config.nBufferSize;
-	const int nOutputLength = config.nOutputLength;
-	const int nScopeLength = config.getScopeLength();
+	const int nAScan = m_setting.nAScan;
+	const int nBScan = m_setting.nBScan;
+	const int nBufferSize = m_setting.nBufferSize;
+	const int nOutputLength = m_setting.nOutputLength;
 
 	backgroundData = new USHORT[nBufferSize];
 	backgroundFFT = new float[nOutputLength * nBScan];
@@ -61,7 +58,7 @@ void CLabImaging::Initialize(tstring calibFile, const char* strBgFile) {
 
 	ippsCopy_32f(fFFTResult, backgroundFFT, nOutputLength * nBScan);
 
-	scopeData = new USHORT[nScopeLength * 2];
+	scopeData = new USHORT[nAScan * 2];
 	scopeFFTData = new USHORT[nOutputLength * 2];
 
 	imageRectangle.create(nOutputLength, nBScan, CV_8UC3);
@@ -69,13 +66,12 @@ void CLabImaging::Initialize(tstring calibFile, const char* strBgFile) {
 	goodClockStart = 0;
 	goodClockEnd = nAScan;
 }
-void CLabImaging::Process(USHORT* fringes) {
-	CConfiguration& config = CConfiguration::GetInstance();
+void CLabImaging::Process(char* fringes) {
 	const bool bInvert = m_bInvert;
-	const int nBScan = config.nBScan;
-	const int nScopeLength = config.getScopeLength();
-	const int nOutputLength = config.nOutputLength;
-	const int nFFTLength = config.nFFTLength;
+	const int nAScan = m_setting.nAScan;
+	const int nBScan = m_setting.nBScan;
+	const int nOutputLength = m_setting.nOutputLength;
+	const int nFFTLength = m_setting.nFFTLength;
 
 	if (fringes == nullptr) return;
 
@@ -86,12 +82,12 @@ void CLabImaging::Process(USHORT* fringes) {
 		hasNewCalibration = false;
 	}
 
-	cropSignalData(fringes, goodClockStart, goodClockEnd);
-
 	// copy first line to display scope
-	ippsCopy_16s((Ipp16s*)fringes, (Ipp16s*)scopeData, nScopeLength);
+	ippsCopy_16s((Ipp16s*)fringes, (Ipp16s*)scopeData, nAScan);
 
 	generateBackground((Ipp16u*)fringes);
+
+	//cropSignalData(fringes, goodClockStart, goodClockEnd);
 
 	fftProcessing(fringes32f);
 	computeLogarithm(fFFTResult, logData);
@@ -134,9 +130,8 @@ void CLabImaging::subtractBackground(T* fringes, T* background, T* dst, int size
 }
 
 void CLabImaging::generateScopeData(Ipp32f* output, Ipp16u* scope) {
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nFFTLength = config.nFFTLength;
-	const int nOutputLength = config.nOutputLength;
+	const int nFFTLength = m_setting.nFFTLength;
+	const int nOutputLength = m_setting.nOutputLength;
 	Ipp32f* temp = new Ipp32f[nOutputLength];
 	
 	ippsSubC_32f(output,m_fLowLevel, temp, nOutputLength);
@@ -147,9 +142,8 @@ void CLabImaging::generateScopeData(Ipp32f* output, Ipp16u* scope) {
 }
 
 void CLabImaging::cropSignalData(USHORT* fringes, int start, int end) {
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int nAScan = config.nAScan;
-	const int nBScan = config.nBScan;
+	const int nAScan = m_setting.nAScan;
+	const int nBScan = m_setting.nBScan;
 
 	for (int i = 0; i < nBScan; i++) {
 		USHORT* buffer = fringes + i * nAScan;

@@ -6,6 +6,8 @@ class CATSDevice :
 	public IAcquisitionDevice
 {
 private:
+	Setting m_setting;
+
 	HANDLE	m_hATSBoard;
 	double	m_dSamplePerSec;
 	U32		m_nBufferIndex;
@@ -15,16 +17,19 @@ private:
 	U16 *	m_pPrevBuffer;
 
 public:
-	CATSDevice();
+	CATSDevice(Setting);
 	virtual ~CATSDevice();
 
 	virtual int InitDevice();
 	virtual int CleanUp();
 
+	void SetSetting(Setting setting) { m_setting = setting; }
+	Setting GetSetting() { return m_setting; }
+
 protected:
 	virtual int start();
 	virtual int stop();
-	virtual unsigned short *acquire(int& nCurFrame, int& nTotalFrame);
+	virtual char *acquire(int& nCurFrame, int& nTotalFrame);
 
 private:
 	BOOL configureBoard(HANDLE boardHandle);

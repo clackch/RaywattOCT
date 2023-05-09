@@ -1,5 +1,6 @@
 #pragma once
 #include "Config.h"
+#include "StepMotorController.h"
 
 /*
 * Linear Stage Model : A-LSQ075B-E01
@@ -13,43 +14,30 @@
 #define ZABER_SCALE_MMS_TO_VELOCITY			(1.6384f / ZABER_MICROSTEP_SIZE * 1000)
 #define ZABER_SCALE_MM_TO_ROTATE			12800
 
-typedef enum {
-	ZABER_TYPE_PULLBACK = 0,
-	ZABER_TYPE_DELAYLINE,
-	ZABER_TYPE_NUM
-}ZaberType;
-
 class CSerialPort;
 class CZaberController
+	: public CStepMotorController
 {
-private:
-	CSerialPort* m_pZaber;
-	BYTE m_pReadBuffer[MAX_PATH];
-
-private:
-	static CZaberController* pInstance[ZABER_TYPE_NUM];
-	CZaberController();
-
 public:
-	static CZaberController* GetInstance(ZaberType type);
+	CZaberController();
 	virtual ~CZaberController();
 
-	bool IsOpen();
-	bool Open(tstring strPort);
-	void Close();
+	virtual bool Open(tstring strPort);
+	virtual bool SetCurrent(int nPos);
+	virtual bool IsMoving();
+	virtual bool MoveAbsolute(int nPos);
+	virtual bool MoveRelative(int nOffset);
+	virtual bool SetSpeed(int nVelocity);
 
 	bool Idle();
-	bool Move(int nPos);
-	bool MoveRelative(int nPos);
+	bool MoveMicrometer(long long nPos);
 	bool RotateRelative(int nPos);
 	bool Pull(int nVelocity, int nDistance);
-	bool SetSpeed(int nVelocity);
-	bool GetZaberStatus();
 
-private:
-	bool sendCommand(const char* strCommand);
-	void readZaber();
-	bool parseZaberState(const char *strResponse, std::string& strState, int& nPos);
+protected:
+	virtual void readResponse();
+	bool parseZaberState(const char* strResponse, std::string& strState, int& nPos);
+	int convertUMtoData(long long nPos);
 	int convertMMtoData(int nPos);
 	int convertMMtoRotate(int nPos);
 	int convertMMStoData(int nVelocity);

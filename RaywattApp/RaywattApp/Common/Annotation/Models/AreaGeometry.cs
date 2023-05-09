@@ -5,11 +5,6 @@ using System.Windows.Shapes;
 
 namespace RaywattApp.Common.Annotation.Models
 {
-    public struct DiameterInfo
-    {
-        public Point point1, point2;
-        public double diameter { get; set; }
-    }
     public class AreaGeometry : ObservableObject
     {
         private List<Point> points;

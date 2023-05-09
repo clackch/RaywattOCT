@@ -106,9 +106,9 @@
 
                                 </Border>
                                 <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                                    <component:IconToggleButton Style="{DynamicResource ToggleButtonWithText}" Icon="cutView" Content="{Binding [P to D], Source={StaticResource L10N}}" IsChecked="{Binding IsPtoD}"/>
+                                    <ToggleButton Style="{DynamicResource FlyThroughToggleBtn}" Content="{Binding [P to D], Source={StaticResource L10N}}" IsChecked="{Binding IsPtoD}"/>
                                     <StackPanel Width="6"/>
-                                    <component:IconToggleButton Style="{DynamicResource ToggleButtonWithText}" Icon="currentFrameIndicator3D" Content="{Binding [Side Branch View], Source={StaticResource L10N}}" IsChecked="{Binding IsSideBranchView}"/>
+                                    <component:IconToggleButton Style="{DynamicResource ToggleButtonWithText}" Icon="sideBranchView" Content="{Binding [Side Branch View], Source={StaticResource L10N}}" IsChecked="{Binding IsSideBranchView}"/>
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
@@ -331,66 +331,47 @@
                             <StackPanel Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,12,0">
                                 <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" Opacity="0.5"/>
                             </StackPanel>
-                            <Border Grid.Row="0" Grid.Column="1" CornerRadius="8,8,0,0" Background="{DynamicResource AdditionalColor5Brush}">
-                                <Grid>
-                                    <Image x:Name="lMode" Source="{Binding LongitudeImage}" Width="{x:Static const:Constants.Longitude3dWidth}" Height="{x:Static const:Constants.Longitude3dHeight}" Stretch="Fill">
+                            <Grid Grid.Row="0" Grid.Column="1" >
+                                <Image x:Name="lMode" Source="{Binding LongitudeImage}" Width="{x:Static const:Constants.Longitude3dWidth}" Height="{x:Static const:Constants.Longitude3dHeight}" Stretch="Fill">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="Loaded">
+                                            <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
+                                        </i:EventTrigger>
+                                        <i:EventTrigger EventName="SizeChanged">
+                                            <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                    <Image.Clip>
+                                        <RectangleGeometry RadiusX="8" RadiusY="8">
+                                            <RectangleGeometry.Rect>
+                                                <Rect X="0" Y="0" Width="{x:Static const:Constants.Longitude3dWidth}" Height="{x:Static const:Constants.Longitude3dImageClipHeight}"/>
+                                            </RectangleGeometry.Rect>
+                                        </RectangleGeometry>
+                                    </Image.Clip>
+                                </Image>
+
+                                <!-- L-Mode Indicator -->
+                                <Canvas>
+                                    <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitude3d" IsCaptured="{Binding IndicatorLongitude.IsCaptured}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="{x:Static const:Constants.LongitudeIndicator3dHeight}" Cursor="Hand" Stretch="None" Canvas.Left="{Binding IndicatorLongitude.X}" Margin="0,-11,0,0" Visibility="{Binding IndicatorLongitude.IsVisible}">
+                                        <!-- Trigger -->
                                         <i:Interaction.Triggers>
-                                            <i:EventTrigger EventName="Loaded">
-                                                <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
+                                            <!--PreviewMouseDown : Image 영역에서 MouseDown 할 경우, Indicator 동작 가능 상태로 변경 -->
+                                            <i:EventTrigger EventName="PreviewMouseDown" >
+                                                <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
                                             </i:EventTrigger>
-                                            <i:EventTrigger EventName="SizeChanged">
-                                                <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
+                                            <!--PreviewMouseUp : Image 영역에서 MouseUp 할 경우, Indicator 멈춤 -->
+                                            <i:EventTrigger EventName="PreviewMouseUp" >
+                                                <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                                            </i:EventTrigger>
+                                            <!--PreviewMouseMove : Image 영역에서 MouseMove 할 경우, Indicator 동작(단, Indicator가 동작 가능 상태 일때) -->
+                                            <i:EventTrigger EventName="PreviewMouseMove" >
+                                                <i:InvokeCommandAction Command="{Binding CmdMoveIndicator}" CommandParameter="{Binding IndicatorLongitude}"/>
                                             </i:EventTrigger>
                                         </i:Interaction.Triggers>
-                                    </Image>
-
-                                    <!-- L-Mode Indicator -->
-                                    <Canvas>
-                                        <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitude3d" IsCaptured="{Binding IndicatorLongitude.IsCaptured}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="{x:Static const:Constants.LongitudeIndicator3dHeight}" Cursor="Hand" Stretch="None" Canvas.Left="{Binding IndicatorLongitude.X}" Margin="0,-11,0,0" Visibility="{Binding IndicatorLongitude.IsVisible}">
-                                            <!-- Trigger -->
-                                            <i:Interaction.Triggers>
-                                                <!--PreviewMouseDown : Image 영역에서 MouseDown 할 경우, Indicator 동작 가능 상태로 변경 -->
-                                                <i:EventTrigger EventName="PreviewMouseDown" >
-                                                    <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
-                                                </i:EventTrigger>
-                                                <!--PreviewMouseUp : Image 영역에서 MouseUp 할 경우, Indicator 멈춤 -->
-                                                <i:EventTrigger EventName="PreviewMouseUp" >
-                                                    <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
-                                                </i:EventTrigger>
-                                                <!--PreviewMouseMove : Image 영역에서 MouseMove 할 경우, Indicator 동작(단, Indicator가 동작 가능 상태 일때) -->
-                                                <i:EventTrigger EventName="PreviewMouseMove" >
-                                                    <i:InvokeCommandAction Command="{Binding CmdMoveIndicator}" CommandParameter="{Binding IndicatorLongitude}"/>
-                                                </i:EventTrigger>
-                                            </i:Interaction.Triggers>
-                                        </component:IndicatorImage>
-                                    </Canvas>
-                                </Grid>
-                            </Border>
-                            <Border Grid.Row="1" Grid.Column="1" CornerRadius="0,0,8,8" Background="{DynamicResource BackgroundBrush}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
-                                        <ColumnDefinition Width="{Binding Converter={StaticResource GridLengthConverter}, ConverterParameter={x:Static const:Constants.Longitude3dScale}}"/>
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel Grid.Column="1" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                    <StackPanel Grid.Column="2" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                    <StackPanel Grid.Column="3" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                    <StackPanel Grid.Column="4" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                    <StackPanel Grid.Column="5" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                    <StackPanel Grid.Column="6" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                    <StackPanel Grid.Column="7" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                    <StackPanel Grid.Column="8" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                    <StackPanel Grid.Column="9" Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
-                                </Grid>
-                            </Border>
+                                    </component:IndicatorImage>
+                                </Canvas>
+                            </Grid>
+                            <ContentControl Grid.Row="1" Grid.Column="1" Template="{DynamicResource LongitudeScaleBar}" Width="{x:Static const:Constants.Longitude3dWidth}" Tag="{Binding PatientCase.PullbackType}"/>
                         </Grid>
                     </Grid>
                     <Grid Grid.Column="1" Background="{DynamicResource GrayscaleGray8Brush}">
@@ -425,10 +406,10 @@
                         </Grid>
 
                         <!-- camera View Part -->
-                        <Grid Width="181" Height="181" Background="Transparent">
-                            <Image Width="91" Height="181" Source="{svgc:SvgImage Source=/res/icon/cameraViewPart.svg}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                        <Grid Width="182" Height="182" Background="Transparent">
+                            <Image Width="91" Height="182" Source="{svgc:SvgImage Source=/res/icon/cameraViewPart.svg}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
                             <Grid.RenderTransform>
-                                <RotateTransform CenterX="90.5" CenterY="90.5" Angle="{Binding CameraDegree}"/>
+                                <RotateTransform CenterX="91" CenterY="91" Angle="{Binding CameraDegree}"/>
                             </Grid.RenderTransform>
                         </Grid>
 

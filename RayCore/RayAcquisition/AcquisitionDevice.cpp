@@ -4,12 +4,15 @@
 #include "DataManager.h"
 #include "Utility.h"
 
-IAcquisitionDevice::IAcquisitionDevice() {
+IAcquisitionDevice::IAcquisitionDevice()
+{
 	m_pThread = NULL;
 	m_isInit = false;
 
 	m_pImaging = NULL;
 	m_pWriter = NULL;
+	
+	m_fps = 0.0f;
 }
 IAcquisitionDevice::~IAcquisitionDevice() {
 }
@@ -37,7 +40,7 @@ UINT IAcquisitionDevice::threadAcquire(LPVOID param) {
 	pDevice->start();
 
 	while (pDevice->m_pThread->isRun) {
-		unsigned short *pBuffer = pDevice->acquire(nCurFrame, nTotalFrame);
+		char *pBuffer = pDevice->acquire(nCurFrame, nTotalFrame);
 		// To-Do : need Critical Section?
 		if (pImaging != NULL && pBuffer != NULL) {
 			pImaging->DoAsyncRender(pBuffer);

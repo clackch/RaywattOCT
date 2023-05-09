@@ -26,6 +26,7 @@
 #pragma comment (lib, "torch_cuda_cu")
 #pragma comment (lib, "torch_cuda_cpp")
 #pragma comment (lib, "torch_cpu")
+#pragma comment (lib, "tiff.lib")
 
 #pragma comment(lib, "RayImaging")
 #pragma comment(lib, "RayAcquisition")

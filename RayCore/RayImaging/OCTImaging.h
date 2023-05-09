@@ -4,13 +4,17 @@
 #include <vector>
 #include "Config.h"
 #include "Imaging.h"
+#include "OCTMeasurement.h"
 
 class CCalibration;
 class CThread;
 class CMessageService;
+
 class COCTImaging : public IImaging
 {
 protected:
+	Setting m_setting;
+	COCTMeasurement::Setting m_measureSetting;
 	CMessageService* m_msg;
 
 	CThread* m_pThread;
@@ -53,18 +57,19 @@ protected:
 
 	int m_nSheathPosition;
 public:
-	COCTImaging(CMessageService*);
+	COCTImaging(Setting, CMessageService*);
 	virtual ~COCTImaging(void);
 
 	virtual void Initialize(tstring calibFile);
-	virtual void Process(USHORT* fringes);
+	virtual void Process(char* fringes);
 
 	int Start();
 	int Stop();
-	virtual void DoAsyncRender(USHORT* fringes);
+	virtual void DoAsyncRender(char* fringes);
 	void SetInvert(bool bInvert) { m_bInvert = bInvert; }
 	void SetColor(bool bColor) { m_bColor = bColor; }
 	void ShowCalibGuide(bool bShow) { m_bShowCalibGuide = bShow; }
+	void SetMeasurementSetting(COCTMeasurement::Setting setting) { m_measureSetting = setting; }
 	void SetBrightnessContrast(double brightness, double contrast) {
 		m_fBrightness = brightness;
 		m_fContrast = contrast;
@@ -80,6 +85,7 @@ public:
 
 	cv::Mat GetCircleImage() { return imageCircle; }
 	USHORT* GetFringesBuffer() { return m_pFringesBuffer; }
+	Setting GetSetting() { return m_setting; }
 
 protected:
 	void allocateMemory();

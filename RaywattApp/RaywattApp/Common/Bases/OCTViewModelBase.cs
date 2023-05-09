@@ -46,6 +46,9 @@ namespace RaywattApp.Common.Bases
         [ObservableProperty]
         private BitmapSource _calciumIndicator;
 
+        [ObservableProperty]
+        private double _maxCalciumDegree = 150;
+
         // to avoid garbage collection
         private CallbackFunctionWithImage cbCrossSection;
         public CallbackFunctionWithImage CBCrossSection => (this.cbCrossSection) ?? (this.cbCrossSection = new CallbackFunctionWithImage(OnRecvCrossSection));

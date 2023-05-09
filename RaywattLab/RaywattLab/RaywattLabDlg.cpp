@@ -43,6 +43,9 @@ CRaywattLabDlg::CRaywattLabDlg(CWnd* pParent /*=nullptr*/)
 	m_pFFTFile = nullptr;
 	m_pDataReader = nullptr;
 
+	m_pPullback = nullptr;
+	m_pDelayLine = nullptr;
+
 	m_pThreadCalibration = nullptr;
 	m_pFrameBuffer = nullptr;
 
@@ -74,11 +77,9 @@ void CRaywattLabDlg::DoDataExchange(CDataExchange* pDX)
 int CRaywattLabDlg::initializeDevices() {
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
-	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
-	CZaberController* pInterferometer = CZaberController::GetInstance(ZABER_TYPE_DELAYLINE);
 
 	if (m_pAcqDevice == nullptr) {
-		m_pAcqDevice = new CATSDevice();
+		m_pAcqDevice = new CATSDevice(config.acquisition);
 		m_pAcqDevice->SetImaging(m_pImagingRealtime);
 		m_pAcqDevice->SetWriter(m_pDataWriter);
 	}
@@ -89,17 +90,17 @@ int CRaywattLabDlg::initializeDevices() {
 	}
 
 	if (m_chkInitStage) {
-		if (pLinearStage->Open(config.zaber.pullback) == false) {
+		if (m_pPullback->Open(config.stepMotor.pullback) == false) {
 			m_pAcqDevice->CleanUp();
 			return E_FAIL;
 		}
-		pLinearStage->SetSpeed(config.zaber.pullbackSpeed);
+		m_pPullback->SetSpeed(config.stepMotor.pullbackSpeed);
 	}
 
 	if (m_chkInitMotor) {
 		if (pMotor->Connect() == false) {
-			pInterferometer->Close();
-			pLinearStage->Close();
+			m_pPullback->Close();
+			m_pDelayLine->Close();
 			m_pAcqDevice->CleanUp();
 			return E_FAIL;
 		}
@@ -198,7 +199,8 @@ CString CRaywattLabDlg::generateFileName(CString strPath, CString strExtension, 
 	CString strFilePath = _T("");
 
 	if (!strPrefix.IsEmpty()) {
-		strFilePath.Format(_T("%s\\%s_%s%s"), strPath, strPrefix, currentTime.Format("%m%d_%H%M%S"), strExtension);
+		//strFilePath.Format(_T("%s\\%s_%s%s"), strPath, strPrefix, currentTime.Format("%m%d_%H%M%S"), strExtension);
+		strFilePath.Format(_T("%s\\%s%s"), strPath, strPrefix, strExtension);
 	}
 	else {
 		strFilePath.Format(_T("%s\\%s%s"), strPath, currentTime.Format("%m%d_%H%M%S"), strExtension);
@@ -218,7 +220,8 @@ CString CRaywattLabDlg::splitFileName(CString strFilePath) {
 	return strFilePath.Right(strFilePath.GetLength() - strFilePath.ReverseFind('\\') - 1);
 }
 CLabImaging* CRaywattLabDlg::createImaging() {
-	CLabImaging* pImaging = new CLabImaging(this);
+	CConfiguration& config = CConfiguration::GetInstance();	
+	CLabImaging* pImaging = new CLabImaging(config.imaging, this);
 	pImaging->Initialize(m_strCurCalibration, BACKGROUND_FILEPATH);
 	pImaging->SetColor(m_chkImageHotColor);
 
@@ -262,7 +265,7 @@ void CRaywattLabDlg::drawGuideLine(cv::Mat image) {
 	const int centerX = image.cols / 2;
 	const int centerY = image.rows / 2;
 	const int markerSize = 10;
-	const double umPerPixel = config.measurementValues.fAxialResolutionScale * 2;	// fft signal scale -> circle image scale
+	const double umPerPixel = config.measurement.fAxialResolutionScale * 2;	// fft signal scale -> circle image scale
 
 	// horizontal line
 	cv::line(image, cv::Point(0, centerY), cv::Point(image.cols - 1, centerY), lineColor, lineThickness);
@@ -275,10 +278,10 @@ void CRaywattLabDlg::drawGuideLine(cv::Mat image) {
 		int actualDist = dist * 1000 / umPerPixel;
 		cv::line(image,
 			cv::Point(centerX - actualDist / 2, markerFrom),
-			cv::Point(centerX - actualDist / 2, markerTo), lineColor, lineThickness);
+			cv::Point(centerX - actualDist / 2, markerTo), lineColor, lineThickness * 2);
 		cv::line(image,
 			cv::Point(centerX + actualDist / 2, markerFrom),
-			cv::Point(centerX + actualDist / 2, markerTo), lineColor, lineThickness);
+			cv::Point(centerX + actualDist / 2, markerTo), lineColor, lineThickness * 2);
 	}
 }
 
@@ -305,31 +308,31 @@ UINT CRaywattLabDlg::threadService(LPVOID param) {
 UINT CRaywattLabDlg::threadSaveCalibration(LPVOID param) {
 	CRaywattLabDlg* pDlg = (CRaywattLabDlg*)param;
 	CThread *pThread = pDlg->m_pThreadCalibration;
-	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
+	CZaberController* pLinearStage = pDlg->m_pPullback;
 
-	int from, step, count = 0;
+	long long from, step, count = 0;
 
 	CString strValue = _T("");
 	pDlg->GetDlgItem(IDC_EDIT_CALIBRATION_FROM)->GetWindowText(strValue);
-	from = _ttoi(strValue);
+	from = _ttoi64(strValue);
 	pDlg->GetDlgItem(IDC_EDIT_CALIBRATION_STEP)->GetWindowText(strValue);
-	step = _ttoi(strValue);
+	step = _ttoi64(strValue);
 	pDlg->GetDlgItem(IDC_EDIT_CALIBRATION_COUNT)->GetWindowText(strValue);
-	count = _ttoi(strValue);
+	count = _ttoi64(strValue);
 
-	pLinearStage->Move(from);
-	while (pDlg->m_pThreadCalibration->isRun && !pLinearStage->GetZaberStatus()) {
+	pLinearStage->MoveMicrometer(from);
+	while (pDlg->m_pThreadCalibration->isRun && !pLinearStage->IsMoving()) {
 		Sleep(DELAY_FOR_STOP_THREAD);
 	}
 
 	for (int frame = 0; frame < count && pDlg->m_pThreadCalibration->isRun; frame++) {
-		int position = from + (frame * step);
-		pLinearStage->Move(position);
-		while (pDlg->m_pThreadCalibration->isRun && !pLinearStage->GetZaberStatus()) {
+		long long position = from + (frame * step);
+		pLinearStage->MoveMicrometer(position);
+		while (pDlg->m_pThreadCalibration->isRun && !pLinearStage->IsMoving()) {
 			Sleep(DELAY_FOR_STOP_THREAD);
 		}
 
-		pDlg->PostMessage(WM_SAVE_CALIBRATION_FRAME, position);
+		pDlg->PostMessage(WM_SAVE_CALIBRATION_FRAME, frame);
 		CUtility::SuspendThread(pDlg->m_pThreadCalibration);
 	}
 
@@ -343,18 +346,18 @@ UINT CRaywattLabDlg::threadSaveCalibration(LPVOID param) {
 UINT CRaywattLabDlg::threadPullback(LPVOID param) {
 	CRaywattLabDlg* pDlg = (CRaywattLabDlg*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
-	CZaberController* pZaber = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
+	CZaberController* pPullbackStage = pDlg->m_pPullback;
 
-	if (pZaber->IsOpen()) {
-		pZaber->SetSpeed(config.zaber.pullbackSpeed);
+	if (pPullbackStage->IsOpen()) {
+		pPullbackStage->SetSpeed(config.stepMotor.pullbackSpeed);
 
 		// Start Recording OCT
 		pDlg->m_pDataWriter->StartRecording();
 
 		// Pullback Linear Stage
-		pZaber->MoveRelative(config.zaber.pullbackDistance * -1);
+		pPullbackStage->MoveRelative(config.stepMotor.pullbackDistance * -1);
 		while (pDlg->m_pThreadPullback->isRun) {
-			if (pZaber->GetZaberStatus()) {
+			if (pPullbackStage->IsMoving()) {
 				break;
 			}
 			else {
@@ -366,7 +369,7 @@ UINT CRaywattLabDlg::threadPullback(LPVOID param) {
 		pDlg->m_pDataWriter->StopRecording();
 
 		CString strPrefix = _T("");
-		strPrefix.Format(_T("%dalines_%drpm_%dmm_%dmms"), config.nBScan, config.motor.velocityPullback, config.zaber.pullbackDistance, config.zaber.pullbackSpeed);
+		strPrefix.Format(_T("%dalines_%drpm_%dmm_%dmms"), config.imaging.nBScan, config.bldcMotor.velocityPullback, config.stepMotor.pullbackDistance, config.stepMotor.pullbackSpeed);
 		CString strFileName = pDlg->generateFileName(pDlg->m_strPatientPath, _T(".bin"), strPrefix);
 
 		CDataWriter* pDataManager = pDlg->m_pDataWriter;
@@ -440,8 +443,8 @@ LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 	}
 
 	CConfiguration& config = CConfiguration::GetInstance();
-	const int nScopeLength = config.getScopeLength();
-	const int nOutputLength = config.nOutputLength;
+	const int nScopeLength = config.imaging.nAScan;
+	const int nOutputLength = config.imaging.nOutputLength;
 
 	if (m_chkShowGuide && m_radioImageShape == 0) {
 		drawGuideLine(image);
@@ -465,16 +468,16 @@ LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 }
 
 LRESULT CRaywattLabDlg::OnMsgSaveCalibrationFrame(WPARAM wParam, LPARAM lParam) {
-	int position = (int)wParam;
+	int frame = (int)wParam;
 
 	// To-Do : how to save frame? call DataWriter::Push directly?
 	CConfiguration& config = CConfiguration::GetInstance();
-	int nFrameSize = config.nBufferSize * sizeof(unsigned short);
+	int nFrameSize = config.acquisition.nAScan * config.acquisition.nBScan * sizeof(unsigned short);
 
 	memcpy(m_pFrameBuffer, m_pImagingRealtime->GetFringesBuffer(), nFrameSize);
 
 	CString strFilePath = _T("");
-	strFilePath.Format(_T("%s_%dmm.bin"), m_strCalibrationPrefix, position);
+	strFilePath.Format(_T("%s_%d.bin"), m_strCalibrationPrefix, frame);
 	HANDLE hFile = CreateFile(
 		strFilePath, GENERIC_WRITE,
 		FILE_SHARE_READ, nullptr, CREATE_ALWAYS,
@@ -536,12 +539,12 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	m_strPatientPath = AfxGetApp()->GetProfileString(_T("RECENT_SETTING"), _T("PATIENT_PATH"), _T(""));
 	updatePatientDataList();
 
-	int nScopeLength = config.getScopeLength();
+	int nScopeLength = config.imaging.nAScan;
 	m_scopeView.Create(this, 0);
 	m_scopeView.AddChannel(_T("Data 1"), nScopeLength);
 	m_scopeView.AddChannel(_T("Data 2"), nScopeLength);
 
-	int nOutputLength = config.nOutputLength;
+	int nOutputLength = config.imaging.nOutputLength;
 	m_scopeViewFFT.Create(this, 0);
 	m_scopeViewFFT.AddChannel(_T("FFT Data 1"), nOutputLength);
 	m_scopeViewFFT.AddChannel(_T("FFT Data 2"), nOutputLength);
@@ -576,26 +579,31 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	m_sliderHighLevel.SetPos(highLevel);
 
 	int goodClockStart = 0;
-	int goodClockEnd = config.nAScan;
+	int goodClockEnd = config.imaging.nAScan;
 
-	m_pImagingRealtime = new CLabImaging(this);
+	m_pImagingRealtime = new CLabImaging(config.imaging, this);
 	m_pImagingRealtime->Initialize(m_strCurCalibration, BACKGROUND_FILEPATH);
 	m_pImagingRealtime->SetColor(m_chkImageHotColor);
 	m_pImagingRealtime->SetGoodClockRange(goodClockStart, goodClockEnd);
 	m_pImagingRealtime->Start();
 
-	m_pImagingSimulate = new CLabImaging(this);
+	m_pImagingSimulate = new CLabImaging(config.imaging, this);
 	m_pImagingSimulate->Initialize(m_strCurCalibration, BACKGROUND_FILEPATH);
 	m_pImagingSimulate->SetColor(m_chkImageHotColor);
 	m_pImagingSimulate->SetGoodClockRange(goodClockStart, goodClockEnd);
 	m_pImagingSimulate->Start();
 
+	int nBufferSize = config.acquisition.nAScan * config.acquisition.nBScan;
+
 	m_pDataWriter = new CDataWriter();
-	m_pDataWriter->Initialize(config.nBufferSize * sizeof(unsigned short));
+	m_pDataWriter->Initialize(nBufferSize * sizeof(unsigned short));
 
 	m_pDataReader = new CDataReader();
 
-	m_pFrameBuffer = new char[config.nBufferSize * sizeof(unsigned short)];
+	m_pPullback = new CZaberController();
+	m_pDelayLine = new CZaberController();
+
+	m_pFrameBuffer = new char[nBufferSize * sizeof(unsigned short)];
 
 	updateBrightnessContrast(m_pImagingRealtime);
 	updateBrightnessContrast(m_pImagingSimulate);
@@ -696,15 +704,15 @@ void CRaywattLabDlg::OnDestroy() {
 	}
 
 	CMotorController* pMotor = CMotorController::GetInstance();
-	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
-	CZaberController* pInterferometer = CZaberController::GetInstance(ZABER_TYPE_DELAYLINE);
-
 	pMotor->StopMotor();
 	pMotor->SwitchOff();
 	pMotor->Disconnect();
 
-	pLinearStage->Close();
-	pInterferometer->Close();
+	m_pPullback->Close();
+	delete m_pPullback;
+
+	m_pDelayLine->Close();
+	delete m_pDelayLine;
 }
 
 
@@ -780,13 +788,14 @@ void CRaywattLabDlg::OnBnClickedButtonLoadSelectedData()
 	else {
 		m_isRealtime = false;
 
+		CConfiguration& config = CConfiguration::GetInstance();
 		CString strFilePath = _T("");
 		CString strFileName = _T("");
 		int nSelected = m_listPatientData.GetCurSel();
 		m_listPatientData.GetText(nSelected, strFileName);
 		strFilePath.Format(_T("%s/%s"), m_strPatientPath, strFileName);
 
-		m_pDataReader->Initialize(strFilePath.GetBuffer());
+		m_pDataReader->Initialize(strFilePath.GetBuffer(), config.imaging.nBufferSize, 0);
 		if (m_pSimDevice == nullptr) {
 			m_pSimDevice = new CSimulateDevice(m_pDataReader);
 			m_pSimDevice->SetImaging(m_pImagingSimulate);
@@ -846,7 +855,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveData()
 	bool dataPlayed = m_btnPlayData.pushed;
 
 	CConfiguration& config = CConfiguration::GetInstance();
-	const int nOutputLength = config.nOutputLength;
+	const int nOutputLength = config.imaging.nOutputLength;
 
 	if (dataSaving) {
 		CString strPrefix = _T("");
@@ -876,12 +885,12 @@ void CRaywattLabDlg::OnBnClickedButtonSaveData()
 			USHORT* pFFTData = m_pImagingRealtime->GetScopeFFTData();
 			USHORT nPeakValue;
 			int nPeakIndex, nLineWidth;
-			measurement.CalculateAxialResolution(pFFTData, nPeakValue, nPeakIndex, nLineWidth);
+			measurement.CalculateAxialResolution(pFFTData, config.imaging.nOutputLength, config.measurement, nPeakValue,  nPeakIndex, nLineWidth);
 			if (nPeakValue > nMaxPeak) {
 				nMaxPeak = nPeakValue;
 				nMaxIndex = nPeakIndex;
 				nMaxWidth = nLineWidth;
-				measurement.CalculateNoisePower(pFFTData, nPeakIndex, nNoisePower);
+				measurement.CalculateNoisePower(pFFTData, config.imaging.nOutputLength, config.measurement, nPeakIndex, nNoisePower);
 			}
 			if (m_pFFTFile != nullptr) {
 				for (int i = 0; i < nOutputLength; i++) {
@@ -931,12 +940,12 @@ void CRaywattLabDlg::OnBnClickedButtonSaveVideo()
 	CLabImaging* pImaging = createImaging();
 
 	CDataReader* pReader = new CDataReader();
-	pReader->Initialize(strDataPath.GetBuffer());
+	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nAScan * config.acquisition.nBScan, 0);
 
 	CVideoWriter videoWriter;
 	bool isCircle = (m_radioImageShape == 0);
-	int width = (isCircle) ? config.nCircleSize : config.nBScan;
-	int height = (isCircle) ? config.nCircleSize : config.nOutputLength;
+	int width = (isCircle) ? config.imaging.nCircleSize : config.imaging.nBScan;
+	int height = (isCircle) ? config.imaging.nCircleSize : config.imaging.nOutputLength;
 	videoWriter.StartRecording(strAviPath, width, height);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
 		pImaging->Process(pReader->GetSample(i));
@@ -961,6 +970,8 @@ void CRaywattLabDlg::OnBnClickedButtonSaveTif()
 
 	GetDlgItem(IDC_BUTTON_SAVE_TIF)->SetWindowText(_T("Saving"));
 
+	CConfiguration& config = CConfiguration::GetInstance();
+
 	CString strDataPath = getLoadedFilePath();
 	CString strTifPath = strDataPath;
 	strTifPath.Replace(_T(".bin"), _T(".tif"));
@@ -968,7 +979,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveTif()
 	CLabImaging* pImaging = createImaging();
 
 	CDataReader* pReader = new CDataReader();
-	pReader->Initialize(strDataPath.GetBuffer());
+	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nAScan * config.acquisition.nBScan, 0);
 
 	CTIFFWriter tiffWriter(strTifPath);
 	bool isCircle = (m_radioImageShape == 0);
@@ -995,6 +1006,8 @@ void CRaywattLabDlg::OnBnClickedButtonSavePng()
 
 	GetDlgItem(IDC_BUTTON_SAVE_PNG)->SetWindowText(_T("Saving"));
 
+	CConfiguration& config = CConfiguration::GetInstance();
+
 	CString strDataPath = getLoadedFilePath();
 
 	CString strPngDirectoryW = strDataPath.Left(strDataPath.GetLength() - 4);
@@ -1003,7 +1016,7 @@ void CRaywattLabDlg::OnBnClickedButtonSavePng()
 	CLabImaging* pImaging = createImaging();
 
 	CDataReader* pReader = new CDataReader();
-	pReader->Initialize(strDataPath.GetBuffer());
+	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nAScan * config.acquisition.nBScan, 0);
 
 	bool isCircle = (m_radioImageShape == 0);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
@@ -1117,6 +1130,7 @@ void CRaywattLabDlg::OnBnClickedButtonOpenRotaryJunction()
 	bool dlgVisible = m_dlgRotaryJunction.IsWindowVisible();
 
 	if (dlgVisible) {
+		m_dlgRotaryJunction.SetStepMotor(m_pPullback, m_pDelayLine);
 		m_dlgRotaryJunction.ShowWindow(SW_HIDE);
 	}
 	else {
@@ -1128,9 +1142,7 @@ void CRaywattLabDlg::OnBnClickedButtonOpenRotaryJunction()
 
 void CRaywattLabDlg::OnBnClickedButtonSaveCalibration()
 {
-	CZaberController* pLinearStage = CZaberController::GetInstance(ZABER_TYPE_PULLBACK);
-
-	if (m_pAcqDevice == nullptr || !m_pAcqDevice->IsInit() || !pLinearStage->IsOpen()) {
+	if (m_pAcqDevice == nullptr || !m_pAcqDevice->IsInit() || !m_pPullback->IsOpen()) {
 		AfxMessageBox(_T("[FAILED] Do initialize first"));
 		return;
 	}
@@ -1151,7 +1163,8 @@ void CRaywattLabDlg::OnBnClickedButtonSaveCalibration()
 	}
 	GetDlgItem(IDC_BUTTON_SAVE_CALIBRATION)->EnableWindow(FALSE);
 
-	m_strCalibrationPrefix = generateFileName(m_strPatientPath, _T(""));
+	m_strCalibrationPrefix = _T("");
+	m_strCalibrationPrefix.Format(_T("%s\\pos"), m_strPatientPath);
 	CUtility::StartThread(threadSaveCalibration, m_pThreadCalibration, this);
 }
 
@@ -1159,9 +1172,11 @@ void CRaywattLabDlg::OnBnClickedButtonChangeCalibration()
 {
 	if (m_vCalibList.empty()) return;
 
+	CConfiguration& config = CConfiguration::GetInstance();
+
 	CString strCurFile = m_vCalibList.at(m_nCurCalibIndex);
 	CCalibration* calibration = new CCalibration();
-	calibration->Initialize(strCurFile.GetBuffer());
+	calibration->Initialize(strCurFile.GetBuffer(), config.imaging.nAScan, config.imaging.nFFTLength);
 	m_pImagingRealtime->ChangeCalibration(calibration);
 	m_pImagingSimulate->ChangeCalibration(calibration);
 	m_strCurCalibration = strCurFile.GetBuffer();
@@ -1212,6 +1227,7 @@ void CRaywattLabDlg::OnBnClickedButtonOpenCalibFolder()
 void CRaywattLabDlg::OnBnClickedButtonMeasure()
 {
 	CLabImaging* pImaging = (m_btnLoadData.pushed) ? m_pImagingSimulate : m_pImagingRealtime;
+	CConfiguration& config = CConfiguration::GetInstance();
 
 	COCTMeasurement measurement;
 	USHORT* pFFTData = pImaging->GetScopeFFTData();
@@ -1219,8 +1235,8 @@ void CRaywattLabDlg::OnBnClickedButtonMeasure()
 	USHORT nPeakValue, nNoisePower;
 	int nPeakIndex, nLineWidth;
 
-	measurement.CalculateAxialResolution(pFFTData, nPeakValue, nPeakIndex, nLineWidth);
-	measurement.CalculateNoisePower(pFFTData, nPeakIndex, nNoisePower);
+	measurement.CalculateAxialResolution(pFFTData, config.imaging.nOutputLength, config.measurement, nPeakValue, nPeakIndex, nLineWidth);
+	measurement.CalculateNoisePower(pFFTData, config.imaging.nOutputLength, config.measurement, nPeakIndex, nNoisePower);
 
 	updateMeasurement(nPeakValue, nPeakIndex, nLineWidth, nNoisePower);
 }

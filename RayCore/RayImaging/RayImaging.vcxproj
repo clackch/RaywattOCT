@@ -161,22 +161,22 @@ xcopy "$(ProjectDir)*.h" "$(TargetDir)include\" /y /d</Command>
   <ItemGroup>
     <ClInclude Include="..\Utility\Config.h" />
     <ClInclude Include="..\Utility\MessageService.h" />
-    <ClInclude Include="..\Utility\Configuration.h" />
     <ClInclude Include="..\Utility\Utility.h" />
     <ClInclude Include="LabImaging.h" />
     <ClInclude Include="Calibration.h" />
     <ClInclude Include="Imaging.h" />
     <ClInclude Include="OCTImaging.h" />
     <ClInclude Include="OCTMeasurement.h" />
+    <ClInclude Include="TIFFImaging.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Utility\MessageService.cpp" />
-    <ClCompile Include="..\Utility\Configuration.cpp" />
     <ClCompile Include="..\Utility\Utility.cpp" />
     <ClCompile Include="LabImaging.cpp" />
     <ClCompile Include="Calibration.cpp" />
     <ClCompile Include="OCTImaging.cpp" />
     <ClCompile Include="OCTMeasurement.cpp" />
+    <ClCompile Include="TIFFImaging.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -17,11 +17,11 @@ using Newtonsoft.Json;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
-using RaywattApp.Common.Annotation.Util;
 using Point = System.Windows.Point;
+using System.Linq;
 
 namespace RaywattApp.ViewModels
-{   
+{
     public partial class ReviewViewModel : ReviewViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewViewModel));
@@ -87,6 +87,9 @@ namespace RaywattApp.ViewModels
         private string _measurementCommand;
         public string MeasurementCommand { get { return _measurementCommand; } set { _measurementCommand = value; OnPropertyChanged(nameof(MeasurementCommand)); } }
 
+        private bool _measurementCommandOff;
+        public bool MeasurementCommandOff { get { return _measurementCommandOff; } set { _measurementCommandOff = value; OnPropertyChanged(nameof(MeasurementCommandOff)); } }
+
         private List<Measurement> measurements;
         public List<Measurement> Measurements { get { return measurements; } set { measurements = value; OnPropertyChanged(nameof(Measurements)); } }
 
@@ -97,6 +100,12 @@ namespace RaywattApp.ViewModels
 
         private List<TextGeometry> _lModeTextGeometries;
         public List<TextGeometry> LModeTextGeometries { get { return _lModeTextGeometries; } set { _lModeTextGeometries = value; OnPropertyChanged(nameof(LModeTextGeometries)); } }
+
+        [ObservableProperty]
+        private LumenContour _currentLumenContour;
+
+        private List<LumenContour> _lumenContours;
+        public List<LumenContour> LumenContours { get { return _lumenContours; } set { _lumenContours = value; OnPropertyChanged(nameof(LumenContours)); } }
 
         private double _lModeIndicatorX;
         public double LModeIndicatorX 
@@ -167,6 +176,7 @@ namespace RaywattApp.ViewModels
 
             IndicatorCrossSection = new Indicator();
             IndicatorCrossSection.IsVisible = Visibility.Collapsed;
+            IndicatorCrossSection.IsCrossSection = true;
 
             IndicatorLongitude = new Indicator();
             IndicatorLongitude.X = Constants.LongitudeIndicatorWidth / 2;
@@ -178,6 +188,8 @@ namespace RaywattApp.ViewModels
             RightSideBarExpand = Constants.RightSideBarExpandDefaultSize;
 
             isLongitudeMeasurementInit = false;
+
+            CurrentLumenContour = new LumenContour();
 
             updatePlayPauseState();
         }
@@ -211,10 +223,8 @@ namespace RaywattApp.ViewModels
                 ReviewStatus.CurrentPage = Constants.ReviewPage;
                 Degree = PatientCase.IndicatorDegree;
 
-                SetAnnotation(PatientCase.Id);
-
                 RaySetSession(RaySession.Review);
-                RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);              
+                SetAnnotation();
                 SetCrossSectionBackground(0, (ReviewStatus.IsAngioOn) ? Constants.CardBackgroundColor : Constants.BackgroundColor);
             }
 
@@ -301,6 +311,12 @@ namespace RaywattApp.ViewModels
 
             if (indicator.IsCaptured)
             {
+                if (indicator.IsLongitudeClicked)
+                {
+                    indicator.IsLongitudeClicked = false;
+                    return;
+                }
+
                 double x = PointLongitudeX - longitudeCoordinate.X;
 
                 if (x >= 0 && x < Constants.LongitudeWidth)
@@ -358,14 +374,30 @@ namespace RaywattApp.ViewModels
             sqlParameters["expansion_calculation"] = PatientCase.ExpansionCalculation;
             sqlParameters["expansion_threshold"] = PatientCase.ExpansionThreshold;
             sqlParameters["apposition_threshold"] = PatientCase.AppositionThreshold;
-            PatientCase.Measurements = ConvertMeasurementsToJson();
-            sqlParameters["measurements"] = PatientCase.Measurements;
-            PatientCase.Bookmarks = JsonConvert.SerializeObject(Bookmarks, Formatting.Indented);
-            sqlParameters["bookmarks"] = PatientCase.Bookmarks;
-
+            
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
             if (nRows == 0)
+            {
                 _log.Error("Update Error");
+            }
+            else
+            {
+                sqlParameters.Clear();
+                sqlParameters["id"] = PatientCase.Id;
+                PatientCase.CrossSection = ConvertMeasurementsToJson(Measurements);
+                sqlParameters["cross_section"] = PatientCase.CrossSection;
+                PatientCase.Longitude = ConvertLongitudeToJson();
+                sqlParameters["longitude"] = PatientCase.Longitude;
+                PatientCase.Bookmark = JsonConvert.SerializeObject(Bookmarks, Formatting.Indented);
+                sqlParameters["bookmark"] = PatientCase.Bookmark;
+                PatientCase.LumenContour = JsonConvert.SerializeObject(LumenContours, Formatting.Indented);
+                sqlParameters["lumen_contour"] = PatientCase.LumenContour;
+                nRows = _sqlManager.UpsertPatientCaseAnnotation(sqlParameters);
+                if (nRows == 0)
+                {
+                    _log.Error("Update Error");
+                }
+            }
         }
 
         private void ToggleMeasurement()
@@ -384,39 +416,113 @@ namespace RaywattApp.ViewModels
             ReviewStatus.IsMeasurementOn = !ReviewStatus.IsMeasurementOn;
         }
 
-        private void SetAnnotation(string id)
+        private void SetAnnotation()
         {
-            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-            sqlParameters["id"] = PatientCase.Id;
-            IList<StringModel> jsonAnnotation = _sqlManager.SelectPatientCaseAnnotation(sqlParameters);
-
-            if (jsonAnnotation != null && jsonAnnotation.Count == 1)
+            if(PatientCase.Bookmark != null && PatientCase.CrossSection != null && PatientCase.Longitude != null && PatientCase.LumenContour != null)
             {
-                List<Measurement>? measurements = new List<Measurement>();
-                Measurement lModeMeasurement = new Measurement();
-                AnnotationConverter.ConvertFromJsonString(jsonAnnotation[0].ReturnString, out measurements, out lModeMeasurement);
+                Measurements = JsonConvert.DeserializeObject<List<Measurement>>(PatientCase.CrossSection);
 
-                Measurements = measurements;
+                Measurement lModeMeasurement = JsonConvert.DeserializeObject<Measurement>(PatientCase.Longitude);
                 LModeLengthGeometries = lModeMeasurement.LengthGeometries;
                 LModeTextGeometries = lModeMeasurement.TextGeometries;
-            }
 
-            if (jsonAnnotation == null || jsonAnnotation.Count != 1 || String.IsNullOrEmpty(jsonAnnotation[0].ReturnString2))
-            {
-                Bookmarks = new ObservableCollection<Bookmark>();
+                Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(PatientCase.Bookmark);
+                LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(PatientCase.LumenContour);
             }
             else
             {
-                Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(jsonAnnotation[0].ReturnString2);
+                Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+                sqlParameters["id"] = PatientCase.Id;
+                IList<PatientCaseAnnotation> patientCaseAnnotations = _sqlManager.SelectPatientCaseAnnotation(sqlParameters);
+
+                if (patientCaseAnnotations != null && patientCaseAnnotations.Count == 1)
+                {
+                    if (!string.IsNullOrEmpty(patientCaseAnnotations[0].CrossSection))
+                    {
+                        Measurements = JsonConvert.DeserializeObject<List<Measurement>>(patientCaseAnnotations[0].CrossSection);
+                    }
+                    else
+                    {
+                        Measurements = new List<Measurement>();
+                    }
+
+                    if (!string.IsNullOrEmpty(patientCaseAnnotations[0].Longitude))
+                    {
+                        Measurement lModeMeasurement = JsonConvert.DeserializeObject<Measurement>(patientCaseAnnotations[0].Longitude);
+                        LModeLengthGeometries = lModeMeasurement.LengthGeometries;
+                        LModeTextGeometries = lModeMeasurement.TextGeometries;
+                    }
+                    else
+                    {
+                        LModeLengthGeometries = new ObservableCollection<LengthGeometry>();
+                        LModeTextGeometries = new List<TextGeometry>();
+                    }
+
+                    if (!string.IsNullOrEmpty(patientCaseAnnotations[0].Bookmark))
+                    {
+                        Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(patientCaseAnnotations[0].Bookmark);
+                    }
+                    else
+                    {
+                        Bookmarks = new ObservableCollection<Bookmark>();
+                    }
+
+                    if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenContour))
+                    {
+                        LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(patientCaseAnnotations[0].LumenContour);
+                    }
+                    else
+                    {
+                        LumenContours = new List<LumenContour>();
+                    }
+                }
+                else
+                {
+                    Measurements = new List<Measurement>();
+                    LModeLengthGeometries = new ObservableCollection<LengthGeometry>();
+                    LModeTextGeometries = new List<TextGeometry>();
+                    Bookmarks = new ObservableCollection<Bookmark>();
+                    LumenContours = new List<LumenContour>();
+                }
+            }            
+
+            int size = PatientCase.PullbackType == Constants.PullbackTypeLong ? Constants.PullbackLongFrameCnt : Constants.PullbackShortFrameCnt;
+
+            for (int i=0; i<size; i++)
+            {
+                Measurement measurement = new Measurement();
+                measurement.FrameNumber = i;
+                measurement.AreaGeometries = new ObservableCollection<AreaGeometry>();
+                measurement.LengthGeometries = new ObservableCollection<LengthGeometry>();
+                measurement.TextGeometries = new List<TextGeometry>();
+                Measurements.Add(measurement);
+
+                if (LumenContours.Count <= i)
+                {
+                    LumenContour lumenContour = new LumenContour();
+                    DiameterInfo diameterInfo = new DiameterInfo();
+                    diameterInfo.diameter = 0.0;
+
+                    lumenContour.MlPoints = new List<Point>();
+                    lumenContour.MlMaxDiameter = diameterInfo;
+                    lumenContour.MlMinDiameter = diameterInfo;
+                    lumenContour.Points = new List<Point>();
+                    lumenContour.MaxDiameter = diameterInfo;
+                    lumenContour.MinDiameter = diameterInfo;
+
+                    LumenContours.Add(lumenContour);
+                }
             }
+
+            Measurements = Measurements.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
         }
 
-        private string ConvertMeasurementsToJson()
+        private string ConvertMeasurementsToJson(List<Measurement> param)
         {
             List<Measurement> measurements = new List<Measurement>();
 
             //Cross-section
-            foreach(Measurement measurement in Measurements)
+            foreach(Measurement measurement in param)
             {
                 if(measurement.AreaGeometries.Count > 0 || measurement.LengthGeometries.Count > 0 || measurement.TextGeometries.Count > 0)
                 {
@@ -432,14 +538,17 @@ namespace RaywattApp.ViewModels
                 }
             }
 
+            return JsonConvert.SerializeObject(measurements, Formatting.Indented);
+        }
+
+        private string ConvertLongitudeToJson()
+        {
             //Longitude
             Measurement longitudeMeasurement = new Measurement();
-            longitudeMeasurement.FrameNumber = -1;
             longitudeMeasurement.LengthGeometries = LModeLengthGeometries;
             longitudeMeasurement.TextGeometries = LModeTextGeometries;
-            measurements.Add(longitudeMeasurement);
 
-            return JsonConvert.SerializeObject(measurements, Formatting.Indented);
+            return JsonConvert.SerializeObject(longitudeMeasurement, Formatting.Indented);
         }
 
         private void ToggleLongitude(bool isLumenProfile)

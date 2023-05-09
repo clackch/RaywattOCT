@@ -127,13 +127,14 @@ namespace RaywattApp.Services
 
             //SelectPatientCaseByList
             _query["SelectPatientCaseByList"] =
-                $"SELECT id, patient_id, physician_name, accession_number, accession_name, comment, vessel, procedure, thumbnail_no, still_image_yn, image" +
+                $"SELECT T1.id, patient_id, physician_name, accession_number, accession_name, comment, vessel, procedure, thumbnail_no, still_image_yn, image" +
                         $", rv_schema.fn_patient(patient_id) patient_name" +
                         $", rv_schema.fn_patient_gender(patient_id) gender, rv_schema.fn_patient_birth(patient_id) birthdate" +
                         $", pullback_type, angio_co_registration, indicator_degree" +
-                        $", preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold, measurements, bookmarks" +
-                        $", create_date, update_date " +
-                $"FROM rv_schema.patient_case ";
+                        $", preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold" +
+                        $", T1.create_date, T1.update_date" +
+                        $", bookmark, longitude, cross_section, lumen_contour " +
+                $"FROM rv_schema.patient_case T1 LEFT JOIN rv_schema.patient_case_annotation T2 ON T1.id = T2.id ";
 
             //SelectPhysicianList
             _query["SelectPhysicianList"] =
@@ -149,8 +150,8 @@ namespace RaywattApp.Services
 
             //SelectPatientCaseAnnotation
             _query["SelectPatientCaseAnnotation"] =
-                $"SELECT measurements return_string, bookmarks return_string2 " +
-                $"FROM rv_schema.patient_case " +
+                $"SELECT id, bookmark, longitude, cross_section, lumen_contour " +
+                $"FROM rv_schema.patient_case_annotation " +
                 $"WHERE id = @id ";
         }
 
@@ -222,8 +223,6 @@ namespace RaywattApp.Services
                     $", angio_co_registration=@angio_co_registration, indicator_degree=@indicator_degree" +
                     $", preset_name=@preset_name, calcium_threshold=@calcium_threshold, expansion_calculation=@expansion_calculation" +
                     $", expansion_threshold=@expansion_threshold, apposition_threshold=@apposition_threshold" +
-                    $", measurements=@measurements" +
-                    $", bookmarks=@bookmarks" +
                     $", update_date=now() " +
                 $"WHERE id=@id";
 
@@ -266,29 +265,37 @@ namespace RaywattApp.Services
             //UpsertPatient
             _query["UpsertPatient"] =
                 $"INSERT INTO rv_schema.patient(id, lastname, firstname, birthdate, gender, create_date, update_date) " +
-                $"VALUES (@id, @lastname, @firstname, @birthdate, @gender, @create_date, @update_date) " +
+                $"VALUES (@id, @lastname, @firstname, @birthdate, @gender, now(), now()) " +
                 $"ON CONFLICT (id) " +
                 $"DO UPDATE " +
-                $"SET lastname=@lastname, firstname=@firstname, birthdate=@birthdate, gender=@gender, create_date=@create_date, update_date=@update_date";
+                $"SET lastname=@lastname, firstname=@firstname, birthdate=@birthdate, gender=@gender, update_date=now()";
 
             //UpsertPatientCase
             _query["UpsertPatientCase"] =
                 $"INSERT INTO rv_schema.patient_case(id, patient_id, physician_name, accession_number, accession_name, comment, vessel, procedure" +
                                                     $", thumbnail_no, still_image_yn, image, pullback_type, angio_co_registration, indicator_degree" +
                                                     $", preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold" +
-                                                    $", measurements, bookmarks, create_date, update_date) " +
+                                                    $", create_date, update_date) " +
                 $"VALUES (@id, @patient_id, @physician_name, @accession_number, @accession_name, @comment, @vessel, @procedure" +
                                                     $", @thumbnail_no, @still_image_yn, @image, @pullback_type, @angio_co_registration, @indicator_degree" +
                                                     $", @preset_name, @calcium_threshold, @expansion_calculation, @expansion_threshold, @apposition_threshold" +
-                                                    $", @measurements, @bookmarks, @create_date, @update_date) " +
+                                                    $", now(), now()) " +
                 $"ON CONFLICT (id) " +
                 $"DO UPDATE " +
                 $"SET patient_id=@patient_id, physician_name=@physician_name, accession_number=@accession_number, comment=@comment" +
                     $", vessel=@vessel, procedure=@procedure, thumbnail_no=@thumbnail_no, still_image_yn=@still_image_yn, image=@image" +
                     $", pullback_type=@pullback_type, angio_co_registration=@angio_co_registration, indicator_degree=@indicator_degree, preset_name=@preset_name" +
                     $", calcium_threshold=@calcium_threshold, expansion_calculation=@expansion_calculation, expansion_threshold=@expansion_threshold" +
-                    $", apposition_threshold=@apposition_threshold, measurements=@measurements, bookmarks=@bookmarks" +
-                    $", create_date=@create_date, update_date=@update_date";
+                    $", apposition_threshold=@apposition_threshold" +
+                    $", update_date=now()";
+
+            //UpsertPatientCaseAnnotation
+            _query["UpsertPatientCaseAnnotation"] =
+                $"INSERT INTO rv_schema.patient_case_annotation(id, bookmark, longitude, cross_section, lumen_contour, create_date, update_date) " +
+                $"VALUES (@id, @bookmark, @longitude, @cross_section, @lumen_contour, now(), now()) " +
+                $"ON CONFLICT (id) " +
+                $"DO UPDATE " +
+                $"SET bookmark=@bookmark, longitude=@longitude, cross_section=@cross_section, lumen_contour=@lumen_contour, update_date=now()";
         }
     }
 }

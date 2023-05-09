@@ -8,6 +8,21 @@ class IDataManager;
 class CThread;
 class IAcquisitionDevice
 {
+public:
+	class Setting {
+	public:
+		unsigned int nAScan;
+		unsigned int nBScan;
+		unsigned int nLaserSpeed;
+		unsigned int nBufferCount;
+		unsigned int msTimeOut;
+		unsigned int nTriggerDelaySample;
+		bool bUseKClock;
+		double usGoodClockDuration;
+		double usBadClockDuration;
+		bool bUseDES;
+	};
+
 protected:
 	bool m_isInit;
 	CThread *m_pThread;
@@ -36,7 +51,7 @@ public:
 protected:
 	virtual int start() = 0;
 	virtual int stop() = 0;
-	virtual unsigned short *acquire(int & nCurFrame, int &nTotalFrame) = 0;
+	virtual char *acquire(int &nCurFrame, int &nTotalFrame) = 0;
 
 private:
 	static UINT threadAcquire(LPVOID param);

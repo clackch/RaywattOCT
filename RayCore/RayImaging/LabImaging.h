@@ -22,11 +22,11 @@ private:
 	int goodClockEnd;
 
 public:
-	CLabImaging(CMessageService*);
+	CLabImaging(Setting, CMessageService*);
 	virtual ~CLabImaging();
 
 	virtual void Initialize(tstring calibFile, const char* strBgFile);
-	virtual void Process(USHORT* fringes);
+	virtual void Process(char* fringes);
 
 	cv::Mat GetRectangleImage() { return imageRectangle; }
 	USHORT* GetScopeData() { return scopeData; }

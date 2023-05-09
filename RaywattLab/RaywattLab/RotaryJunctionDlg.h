@@ -2,6 +2,7 @@
 #include "resource.h"
 #include "CommonDlg.h"
 #include "Utility.h"
+#include "ZaberController.h"
 
 // CRotaryJunctionDlg dialog
 
@@ -15,6 +16,10 @@ private:
 
 	CThread* m_pThreadInterferometer;
 
+	// Rotary Junction
+	CZaberController* m_pPullback;
+	CZaberController* m_pDelayLine;
+
 	// Shutter
 	void* m_pShutter;
 	bool m_isShutterOpened;
@@ -22,6 +27,8 @@ private:
 public:
 	CRotaryJunctionDlg(CWnd* pParent = nullptr);   // standard constructor
 	virtual ~CRotaryJunctionDlg();
+
+	void SetStepMotor(CZaberController* pPullback, CZaberController* pDelayLine) { m_pPullback = pPullback; m_pDelayLine = pDelayLine; }
 
 // Dialog Data
 #ifdef AFX_DESIGN_TIME

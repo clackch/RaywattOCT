@@ -14,6 +14,7 @@ using System.Linq;
 using static RayCoreWrapper.RayExportWrapper;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace RaywattApp.ViewModels.Dialog
 {
@@ -245,7 +246,8 @@ namespace RaywattApp.ViewModels.Dialog
                         Measurement? LMeasurement = null;
                         if (FileExport.Measurements != Constants.ExportMeasurementHideAll)
                         {
-                            AnnotationConverter.ConvertFromJsonString(patientCase.Measurements, out Measurements, out LMeasurement);
+                            Measurements = JsonConvert.DeserializeObject<List<Measurement>>(patientCase.CrossSection);
+                            LMeasurement = JsonConvert.DeserializeObject<Measurement>(patientCase.Longitude);
                         }
                 
                         await Task.Run(() =>
@@ -263,7 +265,13 @@ namespace RaywattApp.ViewModels.Dialog
                                 if (region != null && region.Count > 0)
                                 {
                                     Rect rectCrossSection = region[region.Count - 1].Item1;
-                                    DrawAnnotation.DrawMeasurements(imgExport[rectCrossSection], frame, new System.Windows.Size(Constants.CrossSectionSize, Constants.CrossSectionSize), Measurements);
+
+                                    int frameNumber = frame;
+                                    if (FileExport.Material != Constants.ExportMaterialPullback)
+                                    {
+                                        frameNumber = exportIndices[frame];
+                                    }
+                                    DrawAnnotation.DrawMeasurements(imgExport[rectCrossSection], frameNumber, new System.Windows.Size(Constants.CrossSectionSize, Constants.CrossSectionSize), Measurements);
 
                                     if (imgLongitude != null && region.Count > 1)
                                     {
@@ -350,7 +358,8 @@ namespace RaywattApp.ViewModels.Dialog
                 Measurement? LMeasurement = null;
                 if (FileExport.Measurements != Constants.ExportMeasurementHideAll)
                 {
-                    AnnotationConverter.ConvertFromJsonString(patientCase.Measurements, out Measurements, out LMeasurement);
+                    Measurements = JsonConvert.DeserializeObject<List<Measurement>>(patientCase.CrossSection);
+                    LMeasurement = JsonConvert.DeserializeObject<Measurement>(patientCase.Longitude);
                 }
 
                 for (int frame = 0; frame < convertedImages.Count; frame++)
@@ -361,7 +370,13 @@ namespace RaywattApp.ViewModels.Dialog
                     if (region != null && region.Count > 0)
                     {
                         Rect rectCrossSection = region[region.Count - 1].Item1;
-                        DrawAnnotation.DrawMeasurements(convertedImages[frame][rectCrossSection], frame, new System.Windows.Size(Constants.CrossSectionSize, Constants.CrossSectionSize), Measurements);
+
+                        int frameNumber = frame;
+                        if (FileExport.Material != Constants.ExportMaterialPullback)
+                        {
+                            frameNumber = exportIndices[frame];
+                        }
+                        DrawAnnotation.DrawMeasurements(convertedImages[frame][rectCrossSection], frameNumber, new System.Windows.Size(Constants.CrossSectionSize, Constants.CrossSectionSize), Measurements);
 
                         if (imgLongitude != null && region.Count > 1)
                         {

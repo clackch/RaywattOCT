@@ -25,8 +25,22 @@ namespace RaywattApp.Models
         [ObservableProperty]
         private List<int> bookmarkedFrames;
 
-        [ObservableProperty]
         private string type; //Native, DICOM, Standard
+        public string Type
+        {
+            get { return type; }
+            set
+            {
+                type = value;
+                OnPropertyChanged(nameof(Type));
+
+                if (isFromReview && type == Constants.ExportTypeNative)
+                {
+                    material = Constants.ExportMaterialPullback;
+                    OnPropertyChanged(nameof(Material));
+                }       
+            }
+        }
 
         [ObservableProperty]
         private string material; //Pullback, Current Frame, Bookmarked Frames

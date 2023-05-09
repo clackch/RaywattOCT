@@ -3,7 +3,6 @@ using RaywattApp.Common.Bases;
 using RaywattApp.Common.Util;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
 
@@ -11,13 +10,13 @@ namespace RaywattApp.Common.Annotation.Util
 {
     public class DrawAnnotation
     {
-        public static void DrawMeasurements(OpenCvSharp.Mat image, int frame, Size originSize, List<Measurement>? Measurements)
+        public static void DrawMeasurements(OpenCvSharp.Mat image, int frameNumber, Size originSize, List<Measurement>? Measurements)
         {
             if (Measurements == null) return;
 
             foreach (Measurement measurement in Measurements)
             {
-                if (frame == measurement.FrameNumber)
+                if (frameNumber == measurement.FrameNumber)
                 {
                     DrawMeasurement(image, originSize, measurement);
                     break;
@@ -94,7 +93,7 @@ namespace RaywattApp.Common.Annotation.Util
 
             context.DrawLine(new Pen(brush, 1.0), CommonUtil.GetScaledPoint(length.FirstPoint, xScale, yScale), CommonUtil.GetScaledPoint(length.SecondPoint, xScale, yScale));
 
-            DrawLengthLabel(context, length.FirstPoint, length.SecondPoint, GetLabelText(length.Group, length.Length), xScale, yScale);
+            DrawLengthLabel(context, length.FirstPoint, length.SecondPoint, GetLabelText(length.Length), xScale, yScale);
         }
 
         public static void DrawTextGeometry(DrawingContext context, TextGeometry text, double xScale, double yScale)
@@ -178,6 +177,11 @@ namespace RaywattApp.Common.Annotation.Util
         public static string GetLabelText(int group, double value)
         {
             return "[" + (group + 1) + "] " + (Math.Round(value, 3)).ToString();
+        }
+
+        public static string GetLabelText(double value)
+        {
+            return (Math.Round(value, 3)).ToString();
         }
 
         public static double GetLabelAngle(Point firstPoint, Point secondPoint, out bool flip)

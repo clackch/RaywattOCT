@@ -37,10 +37,11 @@
     <Color x:Key="GrayscaleGray8">#161616</Color>
     <Color x:Key="GrayscaleBlack">#0d0d0d</Color>
 
-    <Color x:Key="MainPrimaryColor"     >#1ed760</Color>
-    <Color x:Key="MainSecondaryColor"   >#1ebe57</Color>
-    <Color x:Key="MainTertiaryColor"    >#26a353</Color>
-    <Color x:Key="MainBackgroundColor"  >#c7efd5</Color>
+    <Color x:Key="MainPrimaryColor">#1ed760</Color>
+    <Color x:Key="MainSecondaryColor">#1ebe57</Color>
+    <Color x:Key="MainTertiaryColor">#26a353</Color>
+    <Color x:Key="MainBackgroundColor">#c7efd5</Color>
+    <Color x:Key="CalciumColor">#57feeb</Color>
 
     <Color x:Key="AdditionalColor1">#343434</Color>
     <Color x:Key="AdditionalColor2">#385042</Color>
@@ -61,10 +62,11 @@
     <SolidColorBrush x:Key="GrayscaleGray8Brush" Color="{StaticResource GrayscaleGray8}"/>
     <SolidColorBrush x:Key="GrayscaleBlackBrush" Color="{StaticResource GrayscaleBlack}"/>
 
-    <SolidColorBrush x:Key="MainPrimaryColorBrush"      Color="{StaticResource MainPrimaryColor}"/>
-    <SolidColorBrush x:Key="MainSecondaryColorBrush"    Color="{StaticResource MainSecondaryColor}"/>
-    <SolidColorBrush x:Key="MainTertiaryColorBrush"     Color="{StaticResource MainTertiaryColor}"/>
-    <SolidColorBrush x:Key="MainBackgroundColorBrush"   Color="{StaticResource MainBackgroundColor}"/>
+    <SolidColorBrush x:Key="MainPrimaryColorBrush" Color="{StaticResource MainPrimaryColor}"/>
+    <SolidColorBrush x:Key="MainSecondaryColorBrush" Color="{StaticResource MainSecondaryColor}"/>
+    <SolidColorBrush x:Key="MainTertiaryColorBrush" Color="{StaticResource MainTertiaryColor}"/>
+    <SolidColorBrush x:Key="MainBackgroundColorBrush" Color="{StaticResource MainBackgroundColor}"/>
+    <SolidColorBrush x:Key="CalciumColorBrush" Color="{StaticResource CalciumColor}"/>
 
     <SolidColorBrush x:Key="AdditionalColor1Brush" Color="{StaticResource AdditionalColor1}"/>
     <SolidColorBrush x:Key="AdditionalColor2Brush" Color="{StaticResource AdditionalColor2}"/>
@@ -96,7 +98,23 @@
     <SolidColorBrush x:Key="FULabelForegroundBrush" Color="#fcfcfc"/>
 
     <!-- font -->
+    <Style TargetType="Control" x:Key="Pretendard-Bold-80">
+        <Setter Property="Padding" Value="0,0,0,0"/>
+        <Setter Property="FontFamily" Value="Pretendard"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontStyle" Value="Normal"/>
+        <Setter Property="FontSize" Value="80"/>
+    </Style>
+
     <Style TargetType="Control" x:Key="Pretendard-Bold-54">
+        <Setter Property="Padding" Value="0,0,0,0"/>
+        <Setter Property="FontFamily" Value="Pretendard"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontStyle" Value="Normal"/>
+        <Setter Property="FontSize" Value="54"/>
+    </Style>
+
+    <Style TargetType="TextBlock" x:Key="TextBlock_Pretendard-Bold-54">
         <Setter Property="Padding" Value="0,0,0,0"/>
         <Setter Property="FontFamily" Value="Pretendard"/>
         <Setter Property="FontWeight" Value="Bold"/>
@@ -112,12 +130,28 @@
         <Setter Property="FontSize" Value="40"/>
     </Style>
 
+    <Style TargetType="TextBlock" x:Key="TextBlock_Pretendard-Bold-40">
+        <Setter Property="Padding" Value="0,0,0,0"/>
+        <Setter Property="FontFamily" Value="Pretendard"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontStyle" Value="Normal"/>
+        <Setter Property="FontSize" Value="40"/>
+    </Style>
+
     <Style TargetType="Control" x:Key="Pretendard-Bold-32">
         <Setter Property="Padding" Value="0,0,0,0"/>
         <Setter Property="FontFamily" Value="Pretendard"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="FontStyle" Value="Normal"/>
         <Setter Property="FontSize" Value="32"/>
+    </Style>
+
+    <Style TargetType="Control" x:Key="Pretendard-Bold-26">
+        <Setter Property="Padding" Value="0,0,0,0"/>
+        <Setter Property="FontFamily" Value="Pretendard"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontStyle" Value="Normal"/>
+        <Setter Property="FontSize" Value="26"/>
     </Style>
 
     <Style TargetType="Control" x:Key="Pretendard-Bold-24">
@@ -144,12 +178,28 @@
         <Setter Property="FontSize" Value="14"/>
     </Style>
 
+    <Style TargetType="TextBlock" x:Key="TextBlock_Pretendard-Bold-14">
+        <Setter Property="Padding" Value="0,0,0,0"/>
+        <Setter Property="FontFamily" Value="Pretendard"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontStyle" Value="Normal"/>
+        <Setter Property="FontSize" Value="14"/>
+    </Style>
+
     <Style TargetType="Control" x:Key="Pretendard-Semibold-24">
         <Setter Property="Padding" Value="0,0,0,0"/>
         <Setter Property="FontFamily" Value="Pretendard"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="FontStyle" Value="Normal"/>
         <Setter Property="FontSize" Value="24"/>
+    </Style>
+
+    <Style TargetType="Control" x:Key="Pretendard-Semibold-22">
+        <Setter Property="Padding" Value="0,0,0,0"/>
+        <Setter Property="FontFamily" Value="Pretendard"/>
+        <Setter Property="FontWeight" Value="Semibold"/>
+        <Setter Property="FontStyle" Value="Normal"/>
+        <Setter Property="FontSize" Value="22"/>
     </Style>
 
     <Style TargetType="Control" x:Key="Pretendard-Semibold-20">

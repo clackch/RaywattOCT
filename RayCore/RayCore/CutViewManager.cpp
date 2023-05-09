@@ -1,6 +1,5 @@
 #include "Config.h"
 #include "CutViewManager.h"
-#include "Configuration.h"
 
 CCutViewManager::CCutViewManager() {
 }
@@ -31,13 +30,11 @@ void CCutViewManager::GenerateCutView(double degree) {
 	}
 }
 void CCutViewManager::GenerateCutView(int nFrameIndex, double degree) {
-	CConfiguration& config = CConfiguration::GetInstance();
-	const int centerX = config.nCircleSize / 2;
-	const int centerY = config.nCircleSize / 2;
-
 	// generate cut view
 	cv::Mat imgCircle = m_vRecords.at(nFrameIndex);
 	if(!imgCircle.empty()) {
+		const int centerX = imgCircle.cols / 2;
+		const int centerY = imgCircle.rows / 2;
 		int radius = imgCircle.rows / 2;
 		double xDirection = cos(degree * CV_PI / 180.0f);
 		double yDirection = sin(degree * CV_PI / 180.0f);

@@ -22,9 +22,9 @@ void CVolumeGenerator::Initialize(int srcWidth, int srcHeight, int roiWidth, int
 	m_rectROI = cv::Rect(x, y, roiWidth, roiHeight);
 }
 
-void CVolumeGenerator::AddRecord(unsigned short* pBuffer, COCTImaging* pImaging, int nFrameIndex) {
+void CVolumeGenerator::AddRecord(char* pBuffer, COCTImaging* pImaging, int nFrameIndex) {
 	CConfiguration& config = CConfiguration::GetInstance();
-	const int sizeCatheter = (int)((double)config.measurementValues.nSheathPosition * 1.1f);
+	const int sizeCatheter = (int)((double)config.measurement.nSheathPosition * 1.1f);
 
 	pImaging->Process(pBuffer);
 	

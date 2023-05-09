@@ -16,7 +16,7 @@ CDataWriter::~CDataWriter() {
 }
 
 void CDataWriter::Initialize(int nFrameBytes) {
-	const unsigned int nDefaultBufferSize = 1000;
+	const unsigned int nDefaultBufferSize = 3000;
 
 	finalize();
 	m_nBufferSize = nDefaultBufferSize;
@@ -46,6 +46,17 @@ void CDataWriter::StartSave(tstring strFilePath) {
 		FILE_SHARE_READ, NULL, CREATE_ALWAYS,
 		FILE_FLAG_SEQUENTIAL_SCAN, NULL);
 }
+void CDataWriter::WriteHeader(OCTHeader::Type type, OCTHeader::DataType dataType, OCTHeader::Channels ch, int width, int height) {
+	std::vector<char> vHeader = createHeader(type, dataType, ch, width, height, m_nNumOfSamples);
+
+	DWORD dwBytesWrote = 0;
+	WriteFile(m_hRecordingFile, vHeader.data(), vHeader.size(), &dwBytesWrote, NULL);
+}
+void CDataWriter::WriteEOF() {
+	OCTHeader::Bit flag = OCTHeader::Bit::EoF;
+	DWORD dwBytesWrote = 0;
+	WriteFile(m_hRecordingFile, &flag, sizeof(flag), &dwBytesWrote, NULL);
+}
 bool CDataWriter::WriteFrame(int nFrame) {
 	char* pBuffer = (char *) GetSample(nFrame);
 	if (pBuffer == NULL) return false;
@@ -64,11 +75,11 @@ void CDataWriter::StopSave() {
 	m_hRecordingFile = NULL;
 }
 
-unsigned short* CDataWriter::GetSample(int nFrame) {
+char* CDataWriter::GetSample(int nFrame) {
 	if (nFrame >= m_nNumOfSamples) return NULL;
 
 	unsigned long long ulOffset = nFrame * (unsigned long long) m_nElementSize;
-	return (unsigned short *)(m_pRecordBuffer + ulOffset);
+	return (m_pRecordBuffer + ulOffset);
 }
 
 void CDataWriter::AddFrame(void* pFrame) {
@@ -98,4 +109,21 @@ void CDataWriter::flush(unsigned int nSaveBufferSize) {
 			}
 		}
 	}
+}
+std::vector<char> CDataWriter::createHeader(OCTHeader::Type type, OCTHeader::DataType dataType, OCTHeader::Channels ch, int width, int height, int frames) {
+	std::vector<char> vPacket;
+
+	vPacket.push_back((char)OCTHeader::Bit::SoF);
+
+	vPacket.push_back((char)type);
+	vPacket.push_back((char)dataType);
+	vPacket.push_back((char)(width & 0xFF));
+	vPacket.push_back((char)((width >> 8) & 0xFF));
+	vPacket.push_back((char)(height & 0xFF));
+	vPacket.push_back((char)((height >> 8) & 0xFF));
+	vPacket.push_back((char)(frames & 0xFF));
+	vPacket.push_back((char)((frames >> 8) & 0xFF));
+	vPacket.push_back((char)ch);
+
+	return vPacket;
 }

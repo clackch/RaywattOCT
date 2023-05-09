@@ -1,10 +1,12 @@
 ﻿using log4net;
 using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace RaywattApp.Common.Annotation
@@ -23,6 +25,8 @@ namespace RaywattApp.Common.Annotation
         private bool isDrawing;
 
         private bool isCanvasClicked;
+
+        private bool isErasing;
 
         public string InCommand
         {
@@ -51,14 +55,23 @@ namespace RaywattApp.Common.Annotation
         public static readonly DependencyProperty LModeTextGeometriesProperty =
             DependencyProperty.Register("LModeTextGeometries", typeof(List<TextGeometry>), typeof(DrawLmodeUtil), new PropertyMetadata(null));
 
-        public int MouseCursor
+        public int CommandType
         {
-            get { return (int)GetValue(MouseCursorProperty); }
-            set { this.SetValue(MouseCursorProperty, value); }
+            get { return (int)GetValue(CommandTypeProperty); }
+            set { this.SetValue(CommandTypeProperty, value); }
         }
 
-        private static readonly DependencyProperty MouseCursorProperty =
-            DependencyProperty.Register("MouseCursor", typeof(int), typeof(DrawLmodeUtil), new PropertyMetadata(default(int)));
+        private static readonly DependencyProperty CommandTypeProperty =
+            DependencyProperty.Register("CommandType", typeof(int), typeof(DrawLmodeUtil), new PropertyMetadata(default(int)));
+
+        public bool CommandOff
+        {
+            get { return (bool)GetValue(CommandOffProperty); }
+            set { this.SetValue(CommandOffProperty, value); }
+        }
+
+        private static readonly DependencyProperty CommandOffProperty =
+            DependencyProperty.Register("CommandOff", typeof(bool), typeof(DrawLmodeUtil), new PropertyMetadata(default(bool)));
 
         public double LModeIndicatorX
         {
@@ -77,6 +90,7 @@ namespace RaywattApp.Common.Annotation
             //Default Setting
             isDrawing = false;
             isCanvasClicked = false;
+            isErasing = false;
 
             LengthInit();
             TextInit();
@@ -89,43 +103,50 @@ namespace RaywattApp.Common.Annotation
             if (drawLmodeUtil == null || drawLmodeUtil.InCommand == null)
                 return;
 
-            if(drawLmodeUtil.lengthGeometries == null)
-                drawLmodeUtil.lengthGeometries = drawLmodeUtil.LModeLengthGeometries;
-
             if (drawLmodeUtil.lengthGeometries == null)
-                drawLmodeUtil.lengthGeometries = new ObservableCollection<LengthGeometry>();
+                drawLmodeUtil.lengthGeometries = drawLmodeUtil.LModeLengthGeometries;
 
             if (drawLmodeUtil.textGeometries == null)
                 drawLmodeUtil.textGeometries = drawLmodeUtil.LModeTextGeometries;
 
-            if (drawLmodeUtil.textGeometries == null)
-                drawLmodeUtil.textGeometries = new List<TextGeometry>();
+            string[] command = drawLmodeUtil.InCommand.Split("|");
 
-            switch (drawLmodeUtil.InCommand.Substring(0, 2))
+            switch (command[0])
             {
                 case Constants.MeasureDrawAll:
                     drawLmodeUtil.DrawAll();
                     break;
-                case Constants.MeasureAddLeng:
-                    drawLmodeUtil.AddLength();
+                case Constants.MeasureAddLength:
+                    drawLmodeUtil.AddLength(command[1]);
                     break;
                 case Constants.MeasureAddText:
-                    drawLmodeUtil.AddText();
+                    drawLmodeUtil.AddText(command[1]);
                     break;
-                case Constants.MeasureDelLMod:
-                    drawLmodeUtil.DeleteLength(drawLmodeUtil.InCommand);
+                case Constants.MeasureErasePoint:
+                    drawLmodeUtil.ErasePoint(command[1]);
                     break;
-                case Constants.MeasureDsbLLen:
-                    drawLmodeUtil.length_canvas_MouseLeave(null, null);
+                case Constants.MeasureDisableLength:
+                    drawLmodeUtil.DisableCommand();
                     break;
-                case Constants.MeasureDsbText:
-                    drawLmodeUtil.text_canvas_MouseLeave(null, null);
+                case Constants.MeasureDisableText:
+                    drawLmodeUtil.DisableCommand();
+                    break;
+                case Constants.MeasureDisableErase:
+                    drawLmodeUtil.DisableCommand();
                     break;
                 default:
                     break;
             }
 
             drawLmodeUtil.InCommand = null;
+        }
+
+        private void erase_canvas_MouseRightButtonDown(object sender, MouseEventArgs e)
+        {
+            _log.Debug("erase_canvas_MouseRightButtonDown");
+
+            InCommand = Constants.MeasureDisableErase;
+            CommandOff = true;
         }
 
         //---------------------------------------------------------------------------------------------------- Function
@@ -136,24 +157,6 @@ namespace RaywattApp.Common.Annotation
             this.canvas.Children.Clear();
             DrawLengthAll();
             DrawTextAll();
-        }
-
-        private void DeleteLength(string param)
-        {
-            _log.Debug("DeleteLength : " + param);
-
-            DeleteLengthAll();
-
-            int groupIdx = int.Parse(param.Substring(2, 1));
-
-            for (int i = groupIdx + 1; i < this.lengthGeometries.Count; i++)
-            {
-                this.lengthGeometries[i].Group--;
-            }
-            this.lengthGeometries.RemoveAt(groupIdx);
-
-            DrawLengthAll();
-
         }
 
         private void DeleteLabel(string classfication, int group)
@@ -173,5 +176,69 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
+        private void ErasePoint(string isEraseOn)
+        {
+            DisableCommand();
+
+            if (Convert.ToBoolean(isEraseOn))
+            {
+                this.isErasing = true;
+
+                this.canvas.MouseRightButtonDown += erase_canvas_MouseRightButtonDown;
+
+                this.canvas.Background = Brushes.Transparent;
+                CommandType = Constants.MeasureCmdErase;
+            }
+        }
+
+        private Size GetLabelSize(string style, string text = "")
+        {
+            Label label = new Label();
+            label.Style = (Style)this.Resources[style];
+            label.Content = text;
+
+            label.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+
+            return label.DesiredSize;
+        }
+
+        private Size GetTextBoxSize(string style)
+        {
+            TextBox textBox = new TextBox();
+            textBox.Style = (Style)this.Resources[style];
+
+            textBox.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+
+            return textBox.DesiredSize;
+        }
+
+        private void DisableCommand()
+        {
+            switch (CommandType)
+            {
+                case 2://Length
+                    this.canvas.MouseLeftButtonDown -= length_canvas_MouseLeftButtonDown;
+                    this.canvas.MouseMove -= length_canvas_MouseMove;
+                    this.canvas.MouseLeave -= length_canvas_MouseLeave;
+                    this.canvas.MouseRightButtonDown -= length_canvas_MouseRightButtonDown;
+                    this.isFisrtPoint = true;
+                    this.isCanvasClicked = false;
+                    break;
+                case 3://Text
+                    this.canvas.MouseLeftButtonDown -= text_canvas_MouseLeftButtonDown;
+                    this.canvas.MouseRightButtonDown -= text_canvas_MouseRightButtonDown;
+                    break;
+                case 4://Erase
+                    this.canvas.MouseRightButtonDown -= erase_canvas_MouseRightButtonDown;
+                    this.isErasing = false;
+                    break;
+                default:
+                    break;
+            }
+
+            this.isDrawing = false;
+            this.canvas.Background = null;
+            CommandType = Constants.MeasureCmdDefault;
+        }
     }
 }

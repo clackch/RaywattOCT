@@ -140,7 +140,7 @@ namespace RaywattApp.ViewModels
             if (!String.IsNullOrEmpty(SelectedGender))
             {
                 sqlParameters["gender"] = SelectedGender;
-                PatientEdit.Gender = CodeDefinition.Codes["GEND"][SelectedGender];
+                PatientEdit.Gender = SelectedGender;
             }
             else
             {

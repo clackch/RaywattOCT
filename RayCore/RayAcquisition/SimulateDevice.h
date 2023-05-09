@@ -11,7 +11,7 @@ private:
 	bool m_bPause;
 
 public:
-    CSimulateDevice(IDataManager* pDataReader);
+    CSimulateDevice(IDataManager*);
     virtual ~CSimulateDevice();
 
 	virtual int InitDevice();
@@ -26,6 +26,6 @@ public:
 protected:
 	virtual int start();
 	virtual int stop();
-	virtual unsigned short* acquire(int& nCurFrame, int& nTotalFrame);
+	virtual char* acquire(int& nCurFrame, int& nTotalFrame);
 };
 

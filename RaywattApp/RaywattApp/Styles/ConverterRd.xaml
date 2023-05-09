@@ -9,7 +9,10 @@
     <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityReverseConverter" FalseValue="Visible" TrueValue="Collapsed" />
 
     <!-- Radio Button Converter -->
-    <converters:RadioButtonConverter x:Key="RadioButtonConverter" /> 
+    <converters:RadioButtonConverter x:Key="RadioButtonConverter" />
+
+    <!-- Radio Button Reverse Converter -->
+    <converters:RadioButtonConverter x:Key="RadioButtonReverseConverter" FalseValue="True" TrueValue="False"/>
 
     <!-- Paging No Indicator Converter -->
     <converters:PagingNoIndicatorConverter x:Key="PagingNoIndicatorConverter" />
@@ -53,6 +56,9 @@
     <!-- Grid Length Converter -->
     <converters:GridLengthConverter x:Key="GridLengthConverter"/>
 
+    <!-- Grid Margin Converter -->
+    <converters:GridMarginConverter x:Key="GridMarginConverter"/>
+    
     <!-- DataGrid Sort Icon Converter -->
     <converters:DataGridSortIconConverter x:Key="DataGridSortIconConverter" />
 
@@ -67,5 +73,11 @@
 
     <!-- Opacity Converter -->
     <converters:OpacityConverter x:Key="OpacityConverter" />
+
+    <!-- Longitude Scale Label Visibility Converter -->
+    <converters:LongitudeScaleLabelVisibilityConverter x:Key="LongitudeScaleLabelVisibilityConverter" />
+
+    <!-- Longitude Scale Column Visibility Converter -->
+    <converters:LongitudeScaleColumnVisibilityConverter x:Key="LongitudeScaleColumnVisibilityConverter" />
 
 </ResourceDictionary>

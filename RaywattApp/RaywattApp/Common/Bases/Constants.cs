@@ -28,6 +28,7 @@ namespace RaywattApp.Common.Bases
         public const string ReviewFfrPage = "Views/ReviewFfrPage.xaml";
         public const string ReviewPresetPage = "Views/ReviewPresetPage.xaml";
         public const string ReviewAngioCoRegPage = "Views/ReviewAngioCoRegPage.xaml";
+        public const string ReviewLumenEditPage = "Views/ReviewLumenEditPage.xaml";
         //File
         public const string FileExportStep1Page = "Views/File/FileExportStep1Page.xaml";
         public const string FileExportStep2DicomPage = "Views/File/FileExportStep2DicomPage.xaml";
@@ -238,6 +239,7 @@ namespace RaywattApp.Common.Bases
         public const double CalciumIndicatorSize = 645;
         public const double CalciumThicknessIndicatorSize = 681;
         public const double CalciumThicknessIndicatorCenter = CalciumThicknessIndicatorSize / 2;
+        public static System.Windows.Point CalciumThicknessIndicatorPointCenter = new System.Windows.Point(CalciumThicknessIndicatorCenter, CalciumThicknessIndicatorCenter);
         public const int CalciumIndicatorColor = 0x57FEEB;
 
         //Review - 2D - Angio
@@ -248,6 +250,7 @@ namespace RaywattApp.Common.Bases
         //Review - 2D - Longitude
         public const double LongitudeWidth = 1140;
         public const double LongitudeHeight = 105;
+        public const double LongitudeImageClipHeight = LongitudeHeight + 10;
         public const double LongitudeScale = LongitudeWidth / 10;
         public const double LongitudeIndicatorWidth = 22;
         public const double LongitudeIndicatorHeight = 116;
@@ -272,6 +275,7 @@ namespace RaywattApp.Common.Bases
         //Review - 3D - Longitude
         public const double Longitude3dWidth = 868;
         public const double Longitude3dHeight = 150;
+        public const double Longitude3dImageClipHeight = Longitude3dHeight + 10;
         public const double Longitude3dScale = Longitude3dWidth / 10;
         public const double LongitudeIndicator3dHeight = 161;
 
@@ -289,17 +293,16 @@ namespace RaywattApp.Common.Bases
         public const double SelectPreCaseExpandSize = 460;
 
         //Measurement
-        public const string MeasureDrawAll = "DR";
-        public const string MeasureDeleAll = "DE";
-        public const string MeasureAddArea = "AA";
-        public const string MeasureAddLeng = "AL";
-        public const string MeasureAddText = "AT";
-        public const string MeasureDelArea = "A_";
-        public const string MeasureDelLeng = "L_";
-        public const string MeasureDelLMod = "M_";
-        public const string MeasureDsbCLen = "DC";
-        public const string MeasureDsbLLen = "DL";
-        public const string MeasureDsbText = "DT";
+        public const string MeasureDrawAll = "DrawAll";  //Draw All
+        public const string MeasureDeleteAll = "DeleteAll";  //Delete All
+        public const string MeasureAddArea = "AddArea";  //Add Area
+        public const string MeasureAddLength = "AddLength";  //Add Length
+        public const string MeasureAddText = "AddText";  //Add Text
+        public const string MeasureErasePoint = "ErasePoint";  //Erase Point
+        public const string MeasureDeleteArea = "GridDeleteArea";  //(Grid) Delete Area
+        public const string MeasureDisableLength = "DisableLength";  //Disable Length
+        public const string MeasureDisableText = "DisableText";  //Disable Text
+        public const string MeasureDisableErase = "DisableErase";  //Disable Erase
 
         //Draw Annotation
         public static Brush[] AnnotationBrushes = {
@@ -325,5 +328,23 @@ namespace RaywattApp.Common.Bases
         public const string CatheterStatusUnlocked = "Unlocked";
         public const string CatheterStatusUnloaded = "Unloaded";
         public const string CatheterStatusDisconnected = "Disconnected";
+
+        //Measurement Type
+        public const int MeasureCmdDefault = 0;
+        public const int MeasureCmdArea = 1;
+        public const int MeasureCmdLength = 2;
+        public const int MeasureCmdText = 3;
+        public const int MeasureCmdErase = 4;
+
+        //Lumen Contour Command
+        public const string LumenContourZoomIn = "ZoomIn";
+        public const string LumenContourZoomOut = "ZoomOut";
+        public const string LumenContourRestore = "Restore";
+        public const string LumenContourReset = "Reset";
+        public const string LumenContourAutoDetect = "AutoDetect";
+
+        //Scale
+        public const double ScaleLength = 100;
+        public const double ScaleArea = ScaleLength * ScaleLength;
     }
 }
