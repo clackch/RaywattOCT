@@ -47,6 +47,6 @@ public:
 	unsigned int GetImageHeight() { return m_nHeight; }
 	unsigned int GetImageChannels() { return m_nChannels; }
 public:
-	virtual void DoAsyncRender(USHORT* fringes) = 0;
+	virtual void DoAsyncRender(char* fringes) = 0;
 	virtual void SetFrameInfo(int nCurFrame, int nTotalFrame) = 0;
 };

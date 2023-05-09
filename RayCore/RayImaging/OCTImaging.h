@@ -61,11 +61,11 @@ public:
 	virtual ~COCTImaging(void);
 
 	virtual void Initialize(tstring calibFile);
-	virtual void Process(USHORT* fringes);
+	virtual void Process(char* fringes);
 
 	int Start();
 	int Stop();
-	virtual void DoAsyncRender(USHORT* fringes);
+	virtual void DoAsyncRender(char* fringes);
 	void SetInvert(bool bInvert) { m_bInvert = bInvert; }
 	void SetColor(bool bColor) { m_bColor = bColor; }
 	void ShowCalibGuide(bool bShow) { m_bShowCalibGuide = bShow; }
