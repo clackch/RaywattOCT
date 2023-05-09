@@ -948,4 +948,19 @@
         </Style.Triggers>
     </Style>
     
+    <!-- Mini Map -->
+    <Style TargetType="Rectangle" x:Key="MiniMapRect">
+        <Setter Property="Stroke" Value="{DynamicResource MainPrimaryColorBrush}"/>
+        <Setter Property="StrokeThickness" Value="2"/>
+        <Setter Property="Opacity" Value="0.5"/>
+        <Setter Property="Fill" Value="Transparent"/>
+        <Setter Property="RadiusX" Value="10"/>
+        <Setter Property="RadiusY" Value="10"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=Tag}" Value="True">
+                <Setter Property="Opacity" Value="1"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
 </ResourceDictionary>

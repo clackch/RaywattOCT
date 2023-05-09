@@ -8,6 +8,8 @@
       xmlns:const="clr-namespace:RaywattApp.Common.Bases"
       xmlns:component="clr-namespace:RaywattApp.Views.Component"
       xmlns:annotation="clr-namespace:RaywattApp.Common.Annotation"
+      xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+      xmlns:behaviors="clr-namespace:RaywattApp.Common.Behaviors"
       mc:Ignorable="d" 
       d:DesignHeight="1024" d:DesignWidth="1280"
       Background="{DynamicResource GrayscaleGray8Brush}"
@@ -73,15 +75,52 @@
                             <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="prev" Width="40" Height="35.5" Command="{Binding CmdPlayback}" CommandParameter="prev" />
                         </StackPanel>
                         <Grid Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
+                            <Grid.Clip>
+                                <RectangleGeometry RadiusX="10" RadiusY="10">
+                                    <RectangleGeometry.Rect>
+                                        <Rect X="0" Y="0" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}"/>
+                                    </RectangleGeometry.Rect>
+                                </RectangleGeometry>
+                            </Grid.Clip>
                             <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Stretch="Fill">
-                                <Image.Clip>
-                                    <RectangleGeometry RadiusX="10" RadiusY="10">
-                                        <RectangleGeometry.Rect>
-                                            <Rect X="0" Y="0" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}"/>
-                                        </RectangleGeometry.Rect>
-                                    </RectangleGeometry>
-                                </Image.Clip>
+                                <Image.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleX="{Binding Zoom.ScaleX}" ScaleY="{Binding Zoom.ScaleY}"/>
+                                        <TranslateTransform X="{Binding Zoom.TranslateX}" Y="{Binding Zoom.TranslateY}"/>
+                                    </TransformGroup>
+                                </Image.RenderTransform>
                             </Image>
+                        </Grid>
+                        <annotation:DrawLumenContourUtil Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" LumenContours="{Binding LumenContours}" FrameNumber="{Binding FrameNumber}" InCommand="{Binding LumenContourCommand, Mode=TwoWay}" IsEditOn="True" Zoom="{Binding Zoom}"/>
+                        <Grid Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
+                            <Border Width="{x:Static const:Constants.MiniMapBorderSize}" Height="{x:Static const:Constants.MiniMapBorderSize}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="16" BorderBrush="{DynamicResource GrayscaleGray8Brush}" BorderThickness="1" CornerRadius="10" Visibility="{Binding Zoom.Visibility}">
+                                <Canvas>
+                                    <Canvas.Background>
+                                        <ImageBrush ImageSource="{Binding CrossSectionImage}" Stretch="Fill"/>
+                                    </Canvas.Background>
+                                    <Canvas.Clip>
+                                        <RectangleGeometry RadiusX="10" RadiusY="10">
+                                            <RectangleGeometry.Rect>
+                                                <Rect X="0" Y="0" Width="{x:Static const:Constants.MiniMapCanvasSize}" Height="{x:Static const:Constants.MiniMapCanvasSize}"/>
+                                            </RectangleGeometry.Rect>
+                                        </RectangleGeometry>
+                                    </Canvas.Clip>
+
+                                    <Rectangle Style="{DynamicResource MiniMapRect}" Canvas.Left="{Binding Zoom.RectLeft}" Canvas.Top="{Binding Zoom.RectTop}" Width="{Binding Zoom.RectWidth}" Height="{Binding Zoom.RectHeight}" Tag="{Binding Zoom.IsCaptured}">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="PreviewMouseDown">
+                                                <i:InvokeCommandAction Command="{Binding Zoom.CmdSetCaptured}" CommandParameter="{Binding Zoom}"/>
+                                            </i:EventTrigger>
+                                            <i:EventTrigger EventName="PreviewMouseUp">
+                                                <i:InvokeCommandAction Command="{Binding Zoom.CmdSetCaptured}"/>
+                                            </i:EventTrigger>
+                                            <i:EventTrigger EventName="PreviewMouseMove">
+                                                <i:InvokeCommandAction Command="{Binding Zoom.CmdMoveRect}" CommandParameter="{Binding Zoom}"/>
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                    </Rectangle>
+                                </Canvas>
+                            </Border>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="50">
                                 <Label Content="F : " Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}"/>
                                 <Label Content="{Binding DisplayFrameNumber}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" />
@@ -92,7 +131,6 @@
                                 <Label Content="1 mm" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Grid>
-                        <annotation:DrawLumenContourUtil Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" LumenContours="{Binding LumenContours}" FrameNumber="{Binding FrameNumber}" InCommand="{Binding LumenContourCommand, Mode=TwoWay}" IsEditOn="True"/>
                         <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="50,0,0,0">
                             <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="next"  Width="40" Height="35.5" Command="{Binding CmdPlayback}" CommandParameter="next"/>
                         </StackPanel>
@@ -113,6 +151,21 @@
                     </Grid>
                 </Grid>
             </Border>
+
+            <i:Interaction.Behaviors>
+                <behaviors:MouseBehavior MouseX="{Binding Zoom.MouseX, Mode=OneWayToSource}" MouseY="{Binding Zoom.MouseY, Mode=OneWayToSource}" />
+            </i:Interaction.Behaviors>
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="MouseLeave" >
+                    <i:InvokeCommandAction Command="{Binding Zoom.CmdSetCaptured}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="PreviewMouseUp" >
+                    <i:InvokeCommandAction Command="{Binding Zoom.CmdSetCaptured}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="PreviewMouseMove" >
+                    <i:InvokeCommandAction Command="{Binding Zoom.CmdMoveRect}" CommandParameter="{Binding Zoom}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
         </Grid>
 
         <Grid Grid.Row="2" Height="40" Background="{DynamicResource GrayscaleBlackBrush}"/>

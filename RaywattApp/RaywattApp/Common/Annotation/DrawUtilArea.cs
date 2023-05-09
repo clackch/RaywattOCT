@@ -200,7 +200,13 @@ namespace RaywattApp.Common.Annotation
             {
                 this.isRectClicked = false;
 
-                DrawAreaAll();
+                Rectangle rectangle = sender as Rectangle;
+
+                string[] tempArr = rectangle.Name.Split('_');
+                int group = int.Parse(tempArr[1]);
+
+                DrawCurve(this.areaGeometrys[group]);
+                DrawRectangle(this.areaGeometrys[group]);
 
                 Mouse.Capture(null);
             }
@@ -267,6 +273,16 @@ namespace RaywattApp.Common.Annotation
 
             DisableCommand();
             CommandOff = true;
+        }
+
+        private void rectangle_MouseEnter(object sender, MouseEventArgs e)
+        {
+            PathBoldOn = true;
+        }
+
+        private void rectangle_MouseLeave(object sender, MouseEventArgs e)
+        {
+            PathBoldOn = false;
         }
 
         private void rectangle_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
@@ -411,7 +427,7 @@ namespace RaywattApp.Common.Annotation
                 this.overlayPathGeometry = pathGeometry;
 
                 path = new Path();
-                path.Style = (Style)this.Resources["StylePath"];
+                path.Style = (Style)this.Resources["StylePathCurve"];
                 path.Data = pathGeometry;
                 path.Stroke = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
                 path.Name = constCurve + "_" + group;
@@ -423,7 +439,7 @@ namespace RaywattApp.Common.Annotation
 
                 if (isClosed)
                 {
-                    path.Style = (Style)this.Resources["StylePathCurve"];
+                    path.Style = (Style)this.Resources["StylePathCurveClosed"];
                     this.area = path.Data.GetArea();
 
                     foreach (var areaGeometry in this.areaGeometrys)
@@ -468,8 +484,8 @@ namespace RaywattApp.Common.Annotation
                 rectangle.Style = (Style)this.Resources["StyleRectangle"];
                 rectangle.Stroke = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
                 rectangle.Name = constRectangle + "_" + group + "_" + i;
-                Canvas.SetLeft(rectangle, pointList[i].X - rectangle.Width / 2);
-                Canvas.SetTop(rectangle, pointList[i].Y - rectangle.Height / 2);
+                Canvas.SetLeft(rectangle, pointList[i].X - (Constants.AnnotationRectWidth / Zoom.ScaleX) / 2);
+                Canvas.SetTop(rectangle, pointList[i].Y - (Constants.AnnotationRectHeight / Zoom.ScaleY) / 2);
 
                 if (i == 0 && !isClosed)
                 {
@@ -477,6 +493,8 @@ namespace RaywattApp.Common.Annotation
                     rectangle.Stroke = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
                     rectangle.Fill = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
                     rectangle.MouseLeftButtonDown += rectangle_Connect;
+                    rectangle.MouseEnter += rectangle_MouseEnter;
+                    rectangle.MouseLeave += rectangle_MouseLeave;
                 }
                 else if (isClosed)
                 {
@@ -585,7 +603,11 @@ namespace RaywattApp.Common.Annotation
                     if (temp.Name.StartsWith(constRectangle + "_" + group))
                     {
                         if (temp.Name == constRectangle + "_" + group + "_0")
+                        {
                             temp.MouseLeftButtonDown -= rectangle_Connect;
+                            temp.MouseEnter -= rectangle_MouseEnter;
+                            temp.MouseLeave -= rectangle_MouseLeave;
+                        }                            
 
                         temp.MouseLeftButtonDown -= rectangle_MouseLeftButtonDown;
                         temp.MouseLeftButtonUp -= rectangle_MouseLeftButtonUp;

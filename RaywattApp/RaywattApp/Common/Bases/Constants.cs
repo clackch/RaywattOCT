@@ -1,5 +1,4 @@
-﻿
-using System.Windows.Media;
+﻿using System.Windows.Media;
 
 namespace RaywattApp.Common.Bases
 {
@@ -16,8 +15,8 @@ namespace RaywattApp.Common.Bases
         public const string PatientEditPage = "Views/PatientEditPage.xaml";
         //Recording
         public const string RecordingSetupPage = "Views/RecordingSetupPage.xaml";
-        public const string LiveViewPage = "Views/LiveViewPage.xaml";
-        public const string CalibrationPage = "Views/CalibrationPage.xaml";
+        public const string RecordingLiveViewPage = "Views/RecordingLiveViewPage.xaml";
+        public const string RecordingCalibrationPage = "Views/RecordingCalibrationPage.xaml";
         public const string RecordingPage = "Views/RecordingPage.xaml";
         public const string RecordingConfirmPage = "Views/RecordingConfirmPage.xaml";
         public const string RecordingCatheterFailPage = "Views/RecordingCatheterFailPage.xaml";
@@ -29,6 +28,7 @@ namespace RaywattApp.Common.Bases
         public const string ReviewPresetPage = "Views/ReviewPresetPage.xaml";
         public const string ReviewAngioCoRegPage = "Views/ReviewAngioCoRegPage.xaml";
         public const string ReviewLumenEditPage = "Views/ReviewLumenEditPage.xaml";
+        public const string ReviewCalibrationPage = "Views/ReviewCalibrationPage.xaml";
         //File
         public const string FileExportStep1Page = "Views/File/FileExportStep1Page.xaml";
         public const string FileExportStep2DicomPage = "Views/File/FileExportStep2DicomPage.xaml";
@@ -246,6 +246,9 @@ namespace RaywattApp.Common.Bases
         public const double AngioSize = 580;
         public const double CrossSectionAngio = 292;
         public const double CrossSectionAngioCenter = CrossSectionAngio / 2;
+        public const double CrossSectionAngioScale = CrossSectionAngio / CrossSectionSize;
+        public const double CoRegZoomAngioSize = 382;
+        public const double CoRegZoomScale = 5;
 
         //Review - 2D - Longitude
         public const double LongitudeWidth = 1140;
@@ -303,6 +306,8 @@ namespace RaywattApp.Common.Bases
         public const string MeasureDisableLength = "DisableLength";  //Disable Length
         public const string MeasureDisableText = "DisableText";  //Disable Text
         public const string MeasureDisableErase = "DisableErase";  //Disable Erase
+        public const string MeasureZoomIn = "ZoomIn";  //ZoomIn
+        public const string MeasureZoomOut = "ZoomOut";  //ZoomOut
 
         //Draw Annotation
         public static Brush[] AnnotationBrushes = {
@@ -319,6 +324,11 @@ namespace RaywattApp.Common.Bases
         public static DashStyle AnnotationDashLarge = new DashStyle(new double[] { 7, 7 }, 0);
         public static DashStyle AnnotationDashSmall = new DashStyle(new double[] { 2, 5 }, 0);
         public const double AnnotationTextPointSize = 6;
+        public const double AnnotationRectWidth = 6;
+        public const double AnnotationRectHeight = 6;
+        public const double AnnotationStrokeThickness = 1;
+        public const double AnnotationStrokeThicknessBold = 3;
+        public const double AnnotationScale = 1.2;
 
         //Catheter Status
         public const string CatheterStatusConnected = "Connected";
@@ -346,5 +356,13 @@ namespace RaywattApp.Common.Bases
         //Scale
         public const double ScaleLength = 100;
         public const double ScaleArea = ScaleLength * ScaleLength;
+
+        //Mini-Map
+        public const double MiniMapBorderSize = 140;
+        public const double MiniMapCanvasSize = 138;
+
+        //Zoom
+        public const double ZoomScaleDefault = 1.0;
+        public const double ZoomScaleMax = 2.0;
     }
 }

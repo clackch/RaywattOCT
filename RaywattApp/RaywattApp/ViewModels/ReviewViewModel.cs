@@ -83,7 +83,7 @@ namespace RaywattApp.ViewModels
                 RayMoveToFrame(value);
             }
         }
-    
+
         private string _measurementCommand;
         public string MeasurementCommand { get { return _measurementCommand; } set { _measurementCommand = value; OnPropertyChanged(nameof(MeasurementCommand)); } }
 
@@ -168,6 +168,18 @@ namespace RaywattApp.ViewModels
             get { return this._toggleAngioCommand ?? (this._toggleAngioCommand = new RelayCommand<bool>(ToggleAngio)); }
         }
 
+        private ICommand _zoomInCommand;
+        public ICommand ZoomInCommand
+        {
+            get { return this._zoomInCommand ?? (this._zoomInCommand = new RelayCommand(ZoomIn)); }
+        }
+
+        private ICommand _zoomOutCommand;
+        public ICommand ZoomOutCommand
+        {
+            get { return this._zoomOutCommand ?? (this._zoomOutCommand = new RelayCommand(ZoomOut)); }
+        }
+
         public ReviewViewModel(SqlManager sqlManager, IDialogService dialogService) : base(sqlManager, dialogService)
         {
             _log.Debug("ReviewViewModel");
@@ -211,14 +223,12 @@ namespace RaywattApp.ViewModels
                 {
                     ReviewStatus = (ReviewStatus)data["reviewStatus"];
                     ToggleAngio(ReviewStatus.IsAngioOn);
-                    if (ReviewStatus.IsLumenProfile)
-                        IndicatorCrossSection.IsVisible = Visibility.Collapsed;
-                    else
-                        IndicatorCrossSection.IsVisible = Visibility.Visible;
+                    ToggleLongitude(ReviewStatus.IsLumenProfile);
                 }
                 else
                 {
                     ReviewStatus = new ReviewStatus();
+                    ReviewStatus.Zoom = new Zoom();
                 }
                 ReviewStatus.CurrentPage = Constants.ReviewPage;
                 Degree = PatientCase.IndicatorDegree;
@@ -340,8 +350,8 @@ namespace RaywattApp.ViewModels
 
                 if (frameworkElement.Name.Equals("crossSectionImage"))
                 {
-                    crossSectionCenterBig.X = point.X + (frameworkElement.ActualWidth / 2);
-                    crossSectionCenterBig.Y = point.Y + (frameworkElement.ActualHeight / 2);
+                    crossSectionCenterBig.X = point.X + (frameworkElement.ActualWidth * ReviewStatus.Zoom.ScaleX / 2);
+                    crossSectionCenterBig.Y = point.Y + (frameworkElement.ActualHeight * ReviewStatus.Zoom.ScaleY / 2);
                 }
                 else if (frameworkElement.Name.Equals("crossSectionImageSmall"))
                 {
@@ -554,7 +564,7 @@ namespace RaywattApp.ViewModels
         private void ToggleLongitude(bool isLumenProfile)
         {
             ReviewStatus.IsLumenProfile = isLumenProfile;
-            IndicatorCrossSection.IsVisible = (isLumenProfile) ? Visibility.Collapsed : Visibility.Visible;
+            IndicatorCrossSection.IsVisible = (!isLumenProfile && ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault) ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void CoRegistration()
@@ -584,13 +594,53 @@ namespace RaywattApp.ViewModels
             {
                 RightSideBarExpand = Constants.RightSideBarExpandAngioSize;
                 ReviewStatus.IsMeasurementOn = false;
+                ReviewStatus.IsCalciumOn = true;
+                IndicatorCrossSection.IsVisible = Visibility.Visible;
             }
             else
             {
                 RightSideBarExpand = Constants.RightSideBarExpandDefaultSize;
+                if (ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault)
+                {
+                    ReviewStatus.IsCalciumOn = true;
+                    IndicatorCrossSection.IsVisible = Visibility.Visible;
+                }
+                else
+                {
+                    ReviewStatus.IsCalciumOn = false;
+                    IndicatorCrossSection.IsVisible = Visibility.Collapsed;
+                }                    
             }
 
             (ToggleMeasurementCommand as RelayCommand).NotifyCanExecuteChanged();
+        }
+
+        private void ZoomIn()
+        {
+            _log.Debug("ZoomIn");
+
+            if (ReviewStatus.Zoom.ZoomIn())
+            {
+                MeasurementCommand = Constants.MeasureZoomIn;
+                IndicatorCrossSection.IsVisible = Visibility.Collapsed;
+                ReviewStatus.IsCalciumOn = false;
+            }
+        }
+
+        private void ZoomOut()
+        {
+            _log.Debug("ZoomOut");
+
+            if (ReviewStatus.Zoom.ZoomOut())
+                MeasurementCommand = Constants.MeasureZoomOut;
+
+            if(ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault)
+            {
+                ReviewStatus.IsCalciumOn = true;
+
+                if(!ReviewStatus.IsLumenProfile)
+                    IndicatorCrossSection.IsVisible = Visibility.Visible;
+            }                
         }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)

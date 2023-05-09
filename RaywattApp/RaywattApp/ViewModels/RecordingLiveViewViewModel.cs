@@ -17,9 +17,9 @@ using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels
 {
-    public partial class LiveViewViewModel : OCTViewModelBase
+    public partial class RecordingLiveViewViewModel : OCTViewModelBase
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(LiveViewViewModel));
+        private static readonly ILog _log = LogManager.GetLogger(typeof(RecordingLiveViewViewModel));
 
         private readonly SqlManager? _sqlManager;
 
@@ -63,11 +63,11 @@ namespace RaywattApp.ViewModels
             get { return _cmdStartRecording ?? (this._cmdStartRecording = new RelayCommand(StartRecording)); }
         }
 
-        public LiveViewViewModel(SqlManager sqlManager, IDialogService dialogService)
+        public RecordingLiveViewViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
-            _log.Debug("LiveViewViewModel");
+            _log.Debug("RecordingLiveViewViewModel");
 
-            Constants.CurrentPage = Constants.LiveViewPage;
+            Constants.CurrentPage = Constants.RecordingLiveViewPage;
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;
@@ -154,7 +154,7 @@ namespace RaywattApp.ViewModels
             DeviceStatus.IsLiveView = true;
             ChangeViewMode();
 
-            leaveToPage(Constants.CalibrationPage);
+            leaveToPage(Constants.RecordingCalibrationPage);
         }
 
         private void StartRecording()

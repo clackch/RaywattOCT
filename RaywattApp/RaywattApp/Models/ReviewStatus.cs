@@ -21,6 +21,12 @@ namespace RaywattApp.Models
         [ObservableProperty]
         private bool _isMeasurementOn = false;
 
+        [ObservableProperty]
+        private bool _isCalciumOn = true;
+
+        [ObservableProperty]
+        private Zoom _zoom;
+
         //3D
 
 

@@ -80,4 +80,7 @@
     <!-- Longitude Scale Column Visibility Converter -->
     <converters:LongitudeScaleColumnVisibilityConverter x:Key="LongitudeScaleColumnVisibilityConverter" />
 
+    <!-- Scale Converter -->
+    <converters:ScaleConverter x:Key="ScaleConverter" />
+
 </ResourceDictionary>

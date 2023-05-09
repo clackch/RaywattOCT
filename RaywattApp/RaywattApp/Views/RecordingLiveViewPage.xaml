@@ -1,4 +1,4 @@
-﻿<Page x:Class="RaywattApp.Views.LiveViewPage"
+﻿<Page x:Class="RaywattApp.Views.RecordingLiveViewPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -10,7 +10,7 @@
       mc:Ignorable="d" 
       d:DesignHeight="1024" d:DesignWidth="1280"
       Background="{DynamicResource GrayscaleGray8Brush}"
-      Title="LiveViewPage">
+      Title="RecordingLiveViewPage">
     <Page.Resources>
         <System:Double x:Key="CrossSectionSize">420</System:Double>
     </Page.Resources>

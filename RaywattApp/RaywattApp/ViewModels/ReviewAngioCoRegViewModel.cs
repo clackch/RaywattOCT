@@ -77,18 +77,29 @@ namespace RaywattApp.ViewModels
             _log.Debug("OnNavigating");
         }
 
-        private void Cancel()
-        {
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["patient"] = Patient;
-            parameter["patientCase"] = PatientCase;
-            parameter["prevStatus"] = PrevStatus;
-            parameter["reviewStatus"] = ReviewStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(ReviewStatus.CurrentPage) { Parameter = parameter });
-        }
-
         private void Ok()
         {
+            _log.Debug("Ok");
+
+            GoToPreviousPage(true);
+        }
+
+        private void Cancel()
+        {
+            _log.Debug("Cancel");
+
+            GoToPreviousPage(false);
+        }
+
+        private void GoToPreviousPage(bool isSave)
+        {
+            _log.Debug("GoToPreviousPage");
+
+            if (isSave)
+            {
+
+            }
+
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
             parameter["patientCase"] = PatientCase;
