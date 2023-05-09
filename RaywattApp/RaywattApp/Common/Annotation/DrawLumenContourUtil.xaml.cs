@@ -293,6 +293,18 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
+        private void Canvas_MouseLeave(object sender, MouseEventArgs e)
+        {
+            _log.Debug("Canvas_MouseLeave");
+
+            this.newPoints.Clear();
+            DrawLumenContour(LumenContours[FrameNumber], true);
+
+            DeactivateEvent();
+            isFirstPoint = true;
+            IsContourMouseOver = false;
+        }
+
         private void Line_MouseEnter(object sender, MouseEventArgs e)
         {
             IsContourMouseOver = true;
@@ -311,6 +323,7 @@ namespace RaywattApp.Common.Annotation
             this.canvas.MouseLeftButtonDown += Canvas_MouseLeftButtonDown;
             this.canvas.MouseMove += Canvas_MouseMove;
             this.canvas.MouseRightButtonDown += Canvas_MouseRightButtonDown;
+            this.canvas.MouseLeave += Canvas_MouseLeave;
 
             this.canvas.Background = Brushes.Transparent;
         }
@@ -322,6 +335,7 @@ namespace RaywattApp.Common.Annotation
             this.canvas.MouseLeftButtonDown -= Canvas_MouseLeftButtonDown;
             this.canvas.MouseMove -= Canvas_MouseMove;
             this.canvas.MouseRightButtonDown -= Canvas_MouseRightButtonDown;
+            this.canvas.MouseLeave -= Canvas_MouseLeave;
 
             this.canvas.Background = null;
         }
