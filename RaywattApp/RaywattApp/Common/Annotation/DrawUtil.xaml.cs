@@ -80,6 +80,15 @@ namespace RaywattApp.Common.Annotation
         public static readonly DependencyProperty ZoomProperty =
             DependencyProperty.Register("Zoom", typeof(Zoom), typeof(DrawUtil), new PropertyMetadata(null));
 
+        public bool PathBoldOn
+        {
+            get { return (bool)GetValue(PathBoldOnProperty); }
+            set { this.SetValue(PathBoldOnProperty, value); }
+        }
+
+        private static readonly DependencyProperty PathBoldOnProperty =
+            DependencyProperty.Register("PathBoldOn", typeof(bool), typeof(DrawUtil), new PropertyMetadata(default(bool)));
+
         //---------------------------------------------------------------------------------------------------- Constructor
         public DrawUtil()
         {

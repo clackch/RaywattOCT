@@ -10,6 +10,14 @@
              d:DesignHeight="640" d:DesignWidth="640">
 
     <UserControl.Resources>
+        <Style TargetType="Canvas">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding CommandType, ElementName=UserControl}" Value="1">
+                    <Setter Property="Cursor" Value="{StaticResource measureArea}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <Style TargetType="Rectangle" x:Key="StyleRectangle">
             <Setter Property="Width" Value="{Binding Zoom.ScaleX, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationRectWidth}}"/>
             <Setter Property="Height" Value="{Binding Zoom.ScaleY, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationRectHeight}}"/>

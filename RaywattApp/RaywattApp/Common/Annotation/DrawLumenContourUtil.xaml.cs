@@ -81,6 +81,15 @@ namespace RaywattApp.Common.Annotation
         private static readonly DependencyProperty IsContourMouseOverProperty =
             DependencyProperty.Register("IsContourMouseOver", typeof(bool), typeof(DrawLumenContourUtil), new PropertyMetadata(default(bool)));
 
+        public int CommandType
+        {
+            get { return (int)GetValue(CommandTypeProperty); }
+            set { this.SetValue(CommandTypeProperty, value); }
+        }
+
+        private static readonly DependencyProperty CommandTypeProperty =
+            DependencyProperty.Register("CommandType", typeof(int), typeof(DrawLumenContourUtil), new PropertyMetadata(default(int)));
+
         public bool IsEditOn
         {
             get { return (bool)GetValue(IsEditOnProperty); }
@@ -221,6 +230,8 @@ namespace RaywattApp.Common.Annotation
                 this.newPoints.Clear();
                 newPoints.Add(point);
                 ActivateEvent();
+
+                CommandType = 1;
             }
             else
             {
@@ -230,6 +241,8 @@ namespace RaywattApp.Common.Annotation
 
                 DeactivateEvent();
                 ReDrawLumenContour();
+
+                CommandType = 0;
             }
         }
 
@@ -287,15 +300,7 @@ namespace RaywattApp.Common.Annotation
 
         private void Line_MouseLeave(object sender, MouseEventArgs e)
         {
-            if (IsEditOn)
-            {
-                if (isFirstPoint)
-                    IsContourMouseOver = false;
-            }
-            else
-            {
-                IsContourMouseOver = false;
-            }            
+            IsContourMouseOver = false;
         }
 
         //---------------------------------------------------------------------------------------------------- Function

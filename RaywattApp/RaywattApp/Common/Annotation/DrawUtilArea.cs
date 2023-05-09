@@ -269,6 +269,16 @@ namespace RaywattApp.Common.Annotation
             CommandOff = true;
         }
 
+        private void rectangle_MouseEnter(object sender, MouseEventArgs e)
+        {
+            PathBoldOn = true;
+        }
+
+        private void rectangle_MouseLeave(object sender, MouseEventArgs e)
+        {
+            PathBoldOn = false;
+        }
+
         private void rectangle_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             _log.Debug("rectangle_MouseRightButtonDown");
@@ -411,7 +421,7 @@ namespace RaywattApp.Common.Annotation
                 this.overlayPathGeometry = pathGeometry;
 
                 path = new Path();
-                path.Style = (Style)this.Resources["StylePath"];
+                path.Style = (Style)this.Resources["StylePathCurve"];
                 path.Data = pathGeometry;
                 path.Stroke = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
                 path.Name = constCurve + "_" + group;
@@ -423,7 +433,7 @@ namespace RaywattApp.Common.Annotation
 
                 if (isClosed)
                 {
-                    path.Style = (Style)this.Resources["StylePathCurve"];
+                    path.Style = (Style)this.Resources["StylePathCurveClosed"];
                     this.area = path.Data.GetArea();
 
                     foreach (var areaGeometry in this.areaGeometrys)
@@ -477,6 +487,8 @@ namespace RaywattApp.Common.Annotation
                     rectangle.Stroke = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
                     rectangle.Fill = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
                     rectangle.MouseLeftButtonDown += rectangle_Connect;
+                    rectangle.MouseEnter += rectangle_MouseEnter;
+                    rectangle.MouseLeave += rectangle_MouseLeave;
                 }
                 else if (isClosed)
                 {
@@ -585,7 +597,11 @@ namespace RaywattApp.Common.Annotation
                     if (temp.Name.StartsWith(constRectangle + "_" + group))
                     {
                         if (temp.Name == constRectangle + "_" + group + "_0")
+                        {
                             temp.MouseLeftButtonDown -= rectangle_Connect;
+                            temp.MouseEnter -= rectangle_MouseEnter;
+                            temp.MouseLeave -= rectangle_MouseLeave;
+                        }                            
 
                         temp.MouseLeftButtonDown -= rectangle_MouseLeftButtonDown;
                         temp.MouseLeftButtonUp -= rectangle_MouseLeftButtonUp;

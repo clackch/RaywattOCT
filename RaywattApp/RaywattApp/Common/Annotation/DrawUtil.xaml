@@ -30,13 +30,20 @@
         </Style>
         <Style TargetType="Path" x:Key="StylePathCurve" BasedOn="{StaticResource StylePath}">
             <Style.Triggers>
+                <DataTrigger Binding="{Binding PathBoldOn, ElementName=UserControl}" Value="True">
+                    <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThicknessBold}}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="Path" x:Key="StylePathCurveClosed" BasedOn="{StaticResource StylePath}">
+            <Style.Triggers>
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
                         <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
                         <Condition Binding="{Binding CommandType, ElementName=UserControl}" Value="0"/>
                     </MultiDataTrigger.Conditions>
                     <Setter Property="Cursor" Value="{StaticResource measureArea}"/>
-                    <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThicknessBold}}"/>
+                    <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThicknessBold}}"/>
                 </MultiDataTrigger>
             </Style.Triggers>
         </Style>
@@ -65,7 +72,6 @@
             </Style.Triggers>
         </Style>
         <Style TargetType="Rectangle" x:Key="StyleRectangleFirst">
-            <Setter Property="Cursor" Value="Cross"/>
             <Setter Property="Width" Value="{Binding Zoom.ScaleX, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationRectWidth}}"/>
             <Setter Property="Height" Value="{Binding Zoom.ScaleY, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationRectHeight}}"/>
             <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThickness}}"/>
