@@ -51,6 +51,18 @@ namespace RaywattApp.Models
         {
             IsCaptured = isCaptured;
 
+
+            Window mainWindow = Application.Current.MainWindow;
+
+            if (IsCaptured)
+            {
+                mainWindow.Cursor = (Cursor)Application.Current.Resources["grab"];
+            }
+            else
+            {
+                mainWindow.Cursor = (Cursor)Application.Current.Resources["arrow"];
+            }
+
             if (IsCrossSection)
             {
                 X = double.NaN;

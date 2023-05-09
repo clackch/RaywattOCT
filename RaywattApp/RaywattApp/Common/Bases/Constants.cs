@@ -1,5 +1,4 @@
-﻿
-using System.Windows.Media;
+﻿using System.Windows.Media;
 
 namespace RaywattApp.Common.Bases
 {
@@ -248,6 +247,8 @@ namespace RaywattApp.Common.Bases
         public const double CrossSectionAngio = 292;
         public const double CrossSectionAngioCenter = CrossSectionAngio / 2;
         public const double CrossSectionAngioScale = CrossSectionAngio / CrossSectionSize;
+        public const double CoRegZoomAngioSize = 382;
+        public const double CoRegZoomScale = 5;
 
         //Review - 2D - Longitude
         public const double LongitudeWidth = 1140;

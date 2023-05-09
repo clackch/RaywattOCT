@@ -4,24 +4,114 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:RaywattApp.Views"
+      xmlns:const="clr-namespace:RaywattApp.Common.Bases"
+      xmlns:component="clr-namespace:RaywattApp.Views.Component"
+      xmlns:annotation="clr-namespace:RaywattApp.Common.Annotation"
+      xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+      xmlns:behaviors="clr-namespace:RaywattApp.Common.Behaviors"
+      xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
       mc:Ignorable="d" 
       d:DesignHeight="1024" d:DesignWidth="1280"
+      Background="{DynamicResource GrayscaleGray8Brush}"
       Title="ReviewAngioCoRegPage">
-
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition />
+            <RowDefinition Height="*"/>
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Background="Gray">
-            <Label Content="{Binding [Co-Registration], Source={StaticResource L10N}}"></Label>
-        </StackPanel>
+        <Grid Grid.Row="0" Height="60" Background="{DynamicResource GrayscaleGray7Brush}">
+            <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Margin="75,20,0,19" Content="{Binding [Review], Source={StaticResource L10N}}"/>
+        </Grid>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource ButtonBasic}" Width="50" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
-            <Button Style="{StaticResource ButtonImportant}" Width="50" Command="{Binding OkCommand}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
-        </StackPanel>
+        <Grid Grid.Row="1" Margin="60,40,60,40">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="769"/>
+                <RowDefinition Height="75"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" CornerRadius="10,10,0,0" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray7Brush}">
+                <Grid Margin="49,54,49,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="70"/>
+                        <RowDefinition Height="580"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Co-Registration], Source={StaticResource L10N}}"/>
+                    </Grid>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="580"/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="448"/>
+                        </Grid.ColumnDefinitions>
+                        <Image Grid.Column="0" Source="/res/png/angioImage.png" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}" Stretch="Fill" Cursor="Cross">
+                            <Image.Clip>
+                                <RectangleGeometry RadiusX="10" RadiusY="10">
+                                    <RectangleGeometry.Rect>
+                                        <Rect X="0" Y="0" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}"/>
+                                    </RectangleGeometry.Rect>
+                                </RectangleGeometry>
+                            </Image.Clip>
+                        </Image>
+                        <Border Grid.Column="2" CornerRadius="8" Background="{DynamicResource GrayscaleGray6Brush}">
+                            <Grid Margin="30,36,30,30" >
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="54"/>
+                                    <RowDefinition Height="72"/>
+                                    <RowDefinition Height="388"/>
+                                </Grid.RowDefinitions>
+                                <Grid Grid.Row="0">
+                                    <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Place first point], Source={StaticResource L10N}}"/>
+                                </Grid>
+                                <Grid Grid.Row="1">
+                                    <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}">
+                                        <Label.Content>
+                                            <AccessText TextWrapping="Wrap" Text="{Binding [Place the first point on the vessel. Just digital to the guide catheter tip.], Source={StaticResource L10N}}"/>
+                                        </Label.Content>
+                                    </Label>
+                                </Grid>
+                                <Border Grid.Row="2" BorderBrush="{DynamicResource GrayscaleGray1Brush}" BorderThickness="3" CornerRadius="10">
+                                    <Grid>
+                                        <Grid.Clip>
+                                            <RectangleGeometry RadiusX="10" RadiusY="10">
+                                                <RectangleGeometry.Rect>
+                                                    <Rect X="0" Y="0" Width="{x:Static const:Constants.CoRegZoomAngioSize}" Height="{x:Static const:Constants.CoRegZoomAngioSize}"/>
+                                                </RectangleGeometry.Rect>
+                                            </RectangleGeometry>
+                                        </Grid.Clip>
+                                        <Image Source="/res/png/angioImage.png" Width="{x:Static const:Constants.CoRegZoomAngioSize}" Height="{x:Static const:Constants.CoRegZoomAngioSize}" Stretch="Fill">
+                                            <Image.RenderTransform>
+                                                <TransformGroup>
+                                                    <ScaleTransform ScaleX="{x:Static const:Constants.CoRegZoomScale}" ScaleY="{x:Static const:Constants.CoRegZoomScale}"/>
+                                                </TransformGroup>
+                                            </Image.RenderTransform>
+                                        </Image>
+                                        <Image Source="{svgc:SvgImage Source=/res/icon/angioZoomCenter.svg}" Width="39" Height="39"/>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+            <Border Grid.Row="1" CornerRadius="0,0,10,10" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray6Brush}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" HorizontalAlignment="Left" Margin="16,16,0,0">
+                        <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+                    <Grid Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,16,0">
+                        <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding OkCommand}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+        <Grid Grid.Row="2" Height="40" Background="{DynamicResource GrayscaleBlackBrush}"/>
     </Grid>
 </Page>
