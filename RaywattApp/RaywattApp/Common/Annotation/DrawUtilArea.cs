@@ -200,7 +200,13 @@ namespace RaywattApp.Common.Annotation
             {
                 this.isRectClicked = false;
 
-                DrawAreaAll();
+                Rectangle rectangle = sender as Rectangle;
+
+                string[] tempArr = rectangle.Name.Split('_');
+                int group = int.Parse(tempArr[1]);
+
+                DrawCurve(this.areaGeometrys[group]);
+                DrawRectangle(this.areaGeometrys[group]);
 
                 Mouse.Capture(null);
             }
