@@ -59,6 +59,9 @@ _declspec(dllexport) RayError RayStartLiveView() {
 _declspec(dllexport) RayError RayStopLiveView() {
     return octSystem.StopLiveView();
 }
+_declspec(dllexport) RayError RaySetSession(int session) {
+    return octSystem.SetSession(session);
+}
 _declspec(dllexport) RayError RayPlayPause() {
     return octSystem.PlayPause();
 }
@@ -151,6 +154,12 @@ _declspec(dllexport) void* RayGetImageData(int nFrame) {
 }
 _declspec(dllexport) void* RayGetLongitudeData(double fDegree) {
     return octSystem.GetLongitudeData(fDegree);
+}
+_declspec(dllexport) void* RayGetLumenContour(int nFrame) {
+    return octSystem.GetLumenContour(nFrame);
+}
+_declspec(dllexport) int RayGetNumOfLumenContourPoints(int nFrame) {
+    return octSystem.GetNumOfLumenContourPoints(nFrame);
 }
 
 BOOL APIENTRY DllMain( HMODULE hModule,
