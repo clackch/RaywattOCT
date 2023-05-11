@@ -67,5 +67,18 @@ vector<vector<cv::Point>> CRayLearning::FindLumen(cv::Mat image) {
 
 	cv::findContours(imgLumen, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
+	// filtering - erase wrong contours
+	cv::Point ptCenter;
+	ptCenter.x = image.cols / 2;
+	ptCenter.y = image.rows / 2;
+	for (int i = contours.size() - 1; i >= 0; i--)
+	{
+		cv::Rect boundingBox = cv::boundingRect(contours[i]);
+		if (!boundingBox.contains(ptCenter))
+		{
+			contours.erase(contours.begin() + i);
+		}
+	}
+
 	return contours;
 }
