@@ -210,16 +210,18 @@ namespace RaywattApp.ViewModels
                 if (data.ContainsKey("reviewStatus"))
                 {
                     ReviewStatus = (ReviewStatus)data["reviewStatus"];
-                    ToggleAngio(ReviewStatus.IsAngioOn);
-                    if (ReviewStatus.IsLumenProfile)
-                        IndicatorCrossSection.IsVisible = Visibility.Collapsed;
-                    else
-                        IndicatorCrossSection.IsVisible = Visibility.Visible;
                 }
                 else
                 {
                     ReviewStatus = new ReviewStatus();
                 }
+
+                ToggleAngio(ReviewStatus.IsAngioOn);
+                if (ReviewStatus.IsLumenProfile)
+                    IndicatorCrossSection.IsVisible = Visibility.Collapsed;
+                else
+                    IndicatorCrossSection.IsVisible = Visibility.Visible;
+
                 ReviewStatus.CurrentPage = Constants.ReviewPage;
                 Degree = PatientCase.IndicatorDegree;
 
