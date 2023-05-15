@@ -17,6 +17,7 @@
     <None Remove="res\indicator\crossSectionAngio.svg" />
     <None Remove="res\indicator\crossSectionAngio_hover.svg" />
     <None Remove="res\indicator\crossSection_hover.svg" />
+    <None Remove="res\png\angioImage.png" />
     <None Remove="res\png\ffrCrossSectionImage.png" />
     <None Remove="res\media\ffr-508px.mp4" />
   </ItemGroup>
@@ -54,7 +55,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resource.resx</DependentUpon>
     </Compile>
-    <Compile Update="Views\CalibrationPage.xaml.cs">
+    <Compile Update="Views\RecordingCalibrationPage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
@@ -164,6 +165,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="res\icon\alertWarning.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="res\icon\angioZoom.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="res\icon\angioZoomCenter.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="res\icon\appositionIcon.svg">
@@ -877,7 +884,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="Views\CalibrationPage.xaml">
+    <Page Update="Views\RecordingCalibrationPage.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
@@ -923,6 +930,7 @@
     <Resource Include="res\indicator\longitude.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="res\png\angioImage.png" />
     <Resource Include="res\png\ffrCrossSectionImage.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>

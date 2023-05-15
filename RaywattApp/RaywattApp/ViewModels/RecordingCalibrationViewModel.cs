@@ -14,9 +14,9 @@ using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels
 {
-    public partial class CalibrationViewModel : OCTViewModelBase
+    public partial class RecordingCalibrationViewModel : OCTViewModelBase
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(CalibrationViewModel));
+        private static readonly ILog _log = LogManager.GetLogger(typeof(RecordingCalibrationViewModel));
 
         [ObservableProperty]
         private Patient _patient;
@@ -47,11 +47,11 @@ namespace RaywattApp.ViewModels
             get { return _cmdAutoCalibration ?? (this._cmdAutoCalibration = new RelayCommand(AutoCalibration)); }
         }
 
-        public CalibrationViewModel()
+        public RecordingCalibrationViewModel()
         {
-            _log.Debug("CalibrationViewModel");
+            _log.Debug("RecordingCalibrationViewModel");
 
-            Constants.CurrentPage = Constants.CalibrationPage;
+            Constants.CurrentPage = Constants.RecordingCalibrationPage;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -92,7 +92,7 @@ namespace RaywattApp.ViewModels
             parameter["patient"] = this.Patient;
             parameter["prevStatus"] = this.PrevStatus;
             parameter["patientCase"] = PatientCase;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.LiveViewPage) { Parameter = parameter });
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingLiveViewPage) { Parameter = parameter });
         }
 
         private void ManualZoomIn(bool zoomIn)

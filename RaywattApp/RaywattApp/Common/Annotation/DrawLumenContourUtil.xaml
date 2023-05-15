@@ -4,41 +4,50 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RaywattApp.Common.Annotation"
+             xmlns:const="clr-namespace:RaywattApp.Common.Bases"
              mc:Ignorable="d" 
              x:Name="UserControl"
              d:DesignHeight="640" d:DesignWidth="640">
 
     <UserControl.Resources>
+        <Style TargetType="Canvas">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding CommandType, ElementName=UserControl}" Value="1">
+                    <Setter Property="Cursor" Value="{StaticResource measureArea}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <Style TargetType="Rectangle" x:Key="StyleRectangle">
-            <Setter Property="Width" Value="6"/>
-            <Setter Property="Height" Value="6"/>
-            <Setter Property="StrokeThickness" Value="1"/>
+            <Setter Property="Width" Value="{Binding Zoom.ScaleX, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationRectWidth}}"/>
+            <Setter Property="Height" Value="{Binding Zoom.ScaleY, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationRectHeight}}"/>
+            <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThickness}}"/>
             <Setter Property="Stroke" Value="Black"/>
             <Setter Property="Fill" Value="White"/>
         </Style>
         <Style TargetType="Line" x:Key="StyleLine">
             <Setter Property="Stroke" Value="White"/>
-            <Setter Property="StrokeThickness" Value="1"/>
+            <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThickness}}"/>
             <Style.Triggers>
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
                         <Condition Binding="{Binding IsEditOn, ElementName=UserControl}" Value="True"/>
                         <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
                     </MultiDataTrigger.Conditions>
-                    <Setter Property="Cursor" Value="Pen"/>
+                    <Setter Property="Cursor" Value="{StaticResource measureArea}"/>
                 </MultiDataTrigger>
                 <DataTrigger Binding="{Binding IsContourMouseOver, ElementName=UserControl}" Value="True">
-                    <Setter Property="StrokeThickness" Value="2"/>
+                    <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThicknessBold}}"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
         <Style TargetType="Path" x:Key="StylePath">
-            <Setter Property="StrokeThickness" Value="1"/>
+            <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThickness}}"/>
             <Setter Property="Stroke" Value="White"/>
             <Setter Property="StrokeDashArray" Value="2"/>
         </Style>
         <Style TargetType="Path" x:Key="StylePathDiameter">
-            <Setter Property="StrokeThickness" Value="1"/>
+            <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThickness}}"/>
             <Setter Property="Stroke" Value="Transparent"/>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsContourMouseOver, ElementName=UserControl}" Value="True">
@@ -47,13 +56,27 @@
             </Style.Triggers>
         </Style>
         <Style TargetType="Path" x:Key="StylePathBackground">
-            <Setter Property="StrokeThickness" Value="1"/>
+            <Setter Property="StrokeThickness" Value="{x:Static const:Constants.AnnotationStrokeThickness}"/>
             <Setter Property="Stroke" Value="White"/>
         </Style>
     </UserControl.Resources>
 
     <Grid>
+        <Grid.Clip>
+            <RectangleGeometry RadiusX="10" RadiusY="10">
+                <RectangleGeometry.Rect>
+                    <Rect X="0" Y="0" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}"/>
+                </RectangleGeometry.Rect>
+            </RectangleGeometry>
+        </Grid.Clip>
         <Canvas Name="canvasBackground"/>
-        <Canvas Name="canvas"/>
+        <Canvas Name="canvas">
+            <Canvas.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="{Binding Zoom.ScaleX, ElementName=UserControl}" ScaleY="{Binding Zoom.ScaleY, ElementName=UserControl}"/>
+                    <TranslateTransform X="{Binding Zoom.TranslateX, ElementName=UserControl}" Y="{Binding Zoom.TranslateY, ElementName=UserControl}"/>
+                </TransformGroup>
+            </Canvas.RenderTransform>
+        </Canvas>
     </Grid>
 </UserControl>

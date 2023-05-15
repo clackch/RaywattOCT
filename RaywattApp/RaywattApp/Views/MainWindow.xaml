@@ -11,7 +11,7 @@
         ResizeMode="NoResize"
         WindowStyle="None"
         mc:Ignorable="d"
-        Width="1280" Height="1024">
+        Width="1280" Height="1024" Cursor="{DynamicResource arrow}">
 
     <Grid Width="1280">
         <Frame NavigationUIVisibility="Hidden">

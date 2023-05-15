@@ -23,6 +23,12 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private int _numberOfFrames = 0;
+        
+        [ObservableProperty]
+        private bool _isCalciumOn = true;
+
+        [ObservableProperty]
+        private Zoom _zoom = new Zoom();
 
         //3D
 

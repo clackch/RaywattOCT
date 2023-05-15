@@ -9,16 +9,6 @@
              x:Name="UserControl"
              d:DesignWidth="1280">
 
-    <UserControl.Resources>
-        <Style TargetType="Rectangle" x:Key="StyleRectangle">
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Cursor" Value="Hand"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-    </UserControl.Resources>
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="51"/>

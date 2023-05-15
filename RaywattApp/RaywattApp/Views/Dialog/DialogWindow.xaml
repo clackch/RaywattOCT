@@ -9,7 +9,8 @@
         WindowStyle="None"
         Title="{Binding Title}"
         AllowsTransparency="True"
-        SizeToContent="WidthAndHeight">
+        SizeToContent="WidthAndHeight"
+        Cursor="{DynamicResource arrow}">
     <Window.Background>
         <SolidColorBrush Color="#0d0d0d" Opacity="0.8"/>
     </Window.Background>

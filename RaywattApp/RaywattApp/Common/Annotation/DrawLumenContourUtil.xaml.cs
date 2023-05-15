@@ -3,6 +3,7 @@ using OpenCvSharp;
 using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Util;
+using RaywattApp.Models;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -80,6 +81,15 @@ namespace RaywattApp.Common.Annotation
         private static readonly DependencyProperty IsContourMouseOverProperty =
             DependencyProperty.Register("IsContourMouseOver", typeof(bool), typeof(DrawLumenContourUtil), new PropertyMetadata(default(bool)));
 
+        public int CommandType
+        {
+            get { return (int)GetValue(CommandTypeProperty); }
+            set { this.SetValue(CommandTypeProperty, value); }
+        }
+
+        private static readonly DependencyProperty CommandTypeProperty =
+            DependencyProperty.Register("CommandType", typeof(int), typeof(DrawLumenContourUtil), new PropertyMetadata(default(int)));
+
         public bool IsEditOn
         {
             get { return (bool)GetValue(IsEditOnProperty); }
@@ -116,6 +126,15 @@ namespace RaywattApp.Common.Annotation
         public static readonly DependencyProperty CurrentLumenContourProperty =
             DependencyProperty.Register("CurrentLumenContour", typeof(LumenContour), typeof(DrawLumenContourUtil), new PropertyMetadata(null));
 
+        public Zoom Zoom
+        {
+            get { return (Zoom)GetValue(ZoomProperty); }
+            set { SetValue(ZoomProperty, value); }
+        }
+
+        public static readonly DependencyProperty ZoomProperty =
+            DependencyProperty.Register("Zoom", typeof(Zoom), typeof(DrawLumenContourUtil), new PropertyMetadata(null));
+
         public string? InCommand
         {
             get { return (string)GetValue(InCommandProperty); }
@@ -151,9 +170,6 @@ namespace RaywattApp.Common.Annotation
             {
                 drawUtil.newPoints = new List<Point>();
                 drawUtil.contourLines = new List<Line>();
-                drawUtil.curPath = new Path();
-                drawUtil.curPath.Name = constContourCurve;
-                drawUtil.curPath.Style = (Style)drawUtil.Resources["StylePath"];
                 drawUtil.isFirstPoint = true;
 
                 drawUtil.lumenContourHistory = new List<Stack<LumenContourHistory>>(drawUtil.LumenContours.Count);
@@ -179,12 +195,6 @@ namespace RaywattApp.Common.Annotation
 
             switch (drawUtil.InCommand)
             {
-                case Constants.LumenContourZoomIn:
-                    drawUtil.ZoomIn();
-                    break;
-                case Constants.LumenContourZoomOut:
-                    drawUtil.ZoomOut();
-                    break;
                 case Constants.LumenContourRestore:
                     drawUtil.Restore();
                     break;
@@ -220,6 +230,8 @@ namespace RaywattApp.Common.Annotation
                 this.newPoints.Clear();
                 newPoints.Add(point);
                 ActivateEvent();
+
+                CommandType = 1;
             }
             else
             {
@@ -229,6 +241,8 @@ namespace RaywattApp.Common.Annotation
 
                 DeactivateEvent();
                 ReDrawLumenContour();
+
+                CommandType = 0;
             }
         }
 
@@ -279,6 +293,18 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
+        private void Canvas_MouseLeave(object sender, MouseEventArgs e)
+        {
+            _log.Debug("Canvas_MouseLeave");
+
+            this.newPoints.Clear();
+            DrawLumenContour(LumenContours[FrameNumber], true);
+
+            DeactivateEvent();
+            isFirstPoint = true;
+            IsContourMouseOver = false;
+        }
+
         private void Line_MouseEnter(object sender, MouseEventArgs e)
         {
             IsContourMouseOver = true;
@@ -286,15 +312,7 @@ namespace RaywattApp.Common.Annotation
 
         private void Line_MouseLeave(object sender, MouseEventArgs e)
         {
-            if (IsEditOn)
-            {
-                if (isFirstPoint)
-                    IsContourMouseOver = false;
-            }
-            else
-            {
-                IsContourMouseOver = false;
-            }            
+            IsContourMouseOver = false;
         }
 
         //---------------------------------------------------------------------------------------------------- Function
@@ -305,6 +323,7 @@ namespace RaywattApp.Common.Annotation
             this.canvas.MouseLeftButtonDown += Canvas_MouseLeftButtonDown;
             this.canvas.MouseMove += Canvas_MouseMove;
             this.canvas.MouseRightButtonDown += Canvas_MouseRightButtonDown;
+            this.canvas.MouseLeave += Canvas_MouseLeave;
 
             this.canvas.Background = Brushes.Transparent;
         }
@@ -316,6 +335,7 @@ namespace RaywattApp.Common.Annotation
             this.canvas.MouseLeftButtonDown -= Canvas_MouseLeftButtonDown;
             this.canvas.MouseMove -= Canvas_MouseMove;
             this.canvas.MouseRightButtonDown -= Canvas_MouseRightButtonDown;
+            this.canvas.MouseLeave -= Canvas_MouseLeave;
 
             this.canvas.Background = null;
         }
@@ -531,8 +551,8 @@ namespace RaywattApp.Common.Annotation
             Rectangle rectangle = new Rectangle();
             rectangle.Name = constContourPoint + "_" + index;
             rectangle.Style = (Style)this.Resources["StyleRectangle"];
-            Canvas.SetLeft(rectangle, point.X - rectangle.Width / 2);
-            Canvas.SetTop(rectangle, point.Y - rectangle.Height / 2);
+            Canvas.SetLeft(rectangle, point.X - (Constants.AnnotationRectWidth / Zoom.ScaleX) / 2);
+            Canvas.SetTop(rectangle, point.Y - (Constants.AnnotationRectHeight / Zoom.ScaleY) / 2);
 
             this.canvas.Children.Add(rectangle);
         }
@@ -560,6 +580,12 @@ namespace RaywattApp.Common.Annotation
         {
             DeleteLumenContourCurve();
 
+            if(this.curPath == null)
+            {
+                this.curPath = new Path();
+                this.curPath.Name = constContourCurve;
+                this.curPath.Style = (Style)this.Resources["StylePath"];
+            }                        
             this.curPath.Data = CommonUtil.GetBezierCurve(this.newPoints, false); ;
 
             //Lumen Contour 보다 아래쪽에 배치되도록 Index 0에 추가(마우스 클릭 이벤트 처리 때문)
@@ -595,16 +621,6 @@ namespace RaywattApp.Common.Annotation
                 path.StrokeDashArray.Add(4);
             
             this.canvas.Children.Add(path);
-        }
-
-        private void ZoomIn()
-        {
-            _log.Debug("ZoomIn");
-        }
-
-        private void ZoomOut()
-        {
-            _log.Debug("ZoomOut");
         }
 
         private void Restore()
