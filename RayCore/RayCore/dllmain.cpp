@@ -44,7 +44,7 @@ _declspec(dllexport) RayError RayLoadCatheter() {
 _declspec(dllexport) RayError RayUnloadCatheter() {
     return octSystem.UnloadCatheter();
 }
-_declspec(dllexport) RayError RayStartReview(char* strFilePath) {
+_declspec(dllexport) int RayStartReview(char* strFilePath) {
     return octSystem.StartReview(strFilePath);
 }
 _declspec(dllexport) RayError RayStartCompare(char* strFilePath) {
@@ -58,6 +58,9 @@ _declspec(dllexport) RayError RayStartLiveView() {
 }
 _declspec(dllexport) RayError RayStopLiveView() {
     return octSystem.StopLiveView();
+}
+_declspec(dllexport) RayError RaySetSession(int session) {
+    return octSystem.SetSession(session);
 }
 _declspec(dllexport) RayError RayPlayPause() {
     return octSystem.PlayPause();
@@ -139,6 +142,9 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
 _declspec(dllexport) void* RayGetVolumeData() {
     return octSystem.GetVolumeData();
 }
+_declspec(dllexport) RayError RayStartLumenDetection() {
+    return octSystem.StartLumenDetection();
+}
 
 _declspec(dllexport) RayError RayOpenImage(char* strFilePath) {
     return octSystem.OpenImage(strFilePath);
@@ -151,6 +157,12 @@ _declspec(dllexport) void* RayGetImageData(int nFrame) {
 }
 _declspec(dllexport) void* RayGetLongitudeData(double fDegree) {
     return octSystem.GetLongitudeData(fDegree);
+}
+_declspec(dllexport) void* RayGetLumenContour(int nFrame) {
+    return octSystem.GetLumenContour(nFrame);
+}
+_declspec(dllexport) int RayGetNumOfLumenContourPoints(int nFrame) {
+    return octSystem.GetNumOfLumenContourPoints(nFrame);
 }
 
 BOOL APIENTRY DllMain( HMODULE hModule,

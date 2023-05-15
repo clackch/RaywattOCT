@@ -40,6 +40,7 @@ COCTSystem::COCTSystem() {
 	m_pAcqDevice = nullptr;	
 	m_pLearning = nullptr;
 
+	m_curSession = SESSION_UNKNOWN;
 	for (int i = 0; i < MAX_SESSION_NUM; i++) {
 		m_reviewSession[i] = nullptr;
 	}
@@ -81,13 +82,13 @@ RayError COCTSystem::Start() {
 
 	IImaging::Setting settingPullback = config.imaging;
 	settingPullback.Set(settingPullback.nAScan, config.acquisition.nLaserSpeed / (config.bldcMotor.velocityPullback / 60));
-	m_pImagingPullback = CImagingSession::CreateColorImaging(this, settingPullback);
+	m_pImagingPullback = CImagingSession::CreateColorImaging(this, settingPullback, ImagingType::Default);
 	m_pImagingPullback->SetSession(SESSION_REALTIME);
 	m_pImagingPullback->Start();
 
 	IImaging::Setting settingLiveView = config.imaging;
 	settingLiveView.Set(settingLiveView.nAScan, config.acquisition.nLaserSpeed / (config.bldcMotor.velocityLiveView / 60));
-	m_pImagingLiveView = CImagingSession::CreateColorImaging(this, settingLiveView);
+	m_pImagingLiveView = CImagingSession::CreateColorImaging(this, settingLiveView, ImagingType::Default);
 	m_pImagingLiveView->SetSession(SESSION_REALTIME);
 	m_pImagingLiveView->Start();
 
@@ -308,21 +309,23 @@ RayError COCTSystem::UnloadCatheter() {
 
 /*
 * StartReview
+* return N (>0) when current state & argument is right.
+* return Error Code (<0) when something is wrong.
 */
-RayError COCTSystem::StartReview(char* strFilePath) {
+int COCTSystem::StartReview(char* strFilePath) {
 	if (m_curState == RayScannerState::Initial || m_curState == RayScannerState::Default) {
 		CImagingSession *pSession = CImagingSession::CreateSession(this, SESSION_REVIEW, strFilePath);
 		if (pSession == nullptr) {
-			return RayError::InvalidArgument;
+			return (int)RayError::InvalidArgument;
 		}
 
 		postMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
 		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
 	
-		return RayError::OK;
+		return pSession->GetDataManager()->GetNumOfSamples();
 	}
 
-	return RayError::WrongState;
+	return (int)RayError::WrongState;
 }
 
 /*
@@ -413,13 +416,26 @@ RayError COCTSystem::StopLiveView()
 }
 
 /*
+* SetSession
+*/
+RayError COCTSystem::SetSession(int session) 
+{
+	if (session <= SessionType::SESSION_UNKNOWN || session >= SessionType::MAX_SESSION_NUM) return RayError::WrongSession;
+	if (m_reviewSession[session] == nullptr) return RayError::WrongSession;
+
+	m_curSession = (SessionType) session;
+
+	return RayError::OK;
+}
+
+/*
 * PlayPause
 */
 RayError COCTSystem::PlayPause()
 {
 	if (m_curState == RayScannerState::Review) {
 		bool isPaused = GetIsPaused();
-		m_reviewSession[SESSION_REVIEW]->SetPause(!isPaused);
+		m_reviewSession[m_curSession]->SetPause(!isPaused);
 
 		return RayError::OK;
 	}
@@ -435,7 +451,7 @@ RayError COCTSystem::PrevFrame()
 		if (!GetIsPaused())
 			return RayError::NotPaused;
 
-		m_reviewSession[SESSION_REVIEW]->PrevFrame();
+		m_reviewSession[m_curSession]->PrevFrame();
 
 		return RayError::OK;
 	}
@@ -451,7 +467,7 @@ RayError COCTSystem::NextFrame()
 		if (!GetIsPaused())
 			return RayError::NotPaused;
 
-		m_reviewSession[SESSION_REVIEW]->NextFrame();
+		m_reviewSession[m_curSession]->NextFrame();
 
 		return RayError::OK;
 	}
@@ -466,7 +482,7 @@ RayError COCTSystem::MoveToFrame(int nFrame) {
 		if (!GetIsPaused())
 			return RayError::NotPaused;
 
-		m_reviewSession[SESSION_REVIEW]->MoveToFrame(nFrame);
+		m_reviewSession[m_curSession]->MoveToFrame(nFrame);
 
 		return RayError::OK;
 	}
@@ -500,6 +516,20 @@ void* COCTSystem::GetVolumeData() {
 	if (m_pVolume == nullptr) return nullptr;
 
 	return m_pVolume->GetVolumeData();
+}
+
+/*
+* StartLumenDetection
+*/
+RayError COCTSystem::StartLumenDetection() {
+	if (m_curState == RayScannerState::Review)
+	{
+		BOOL result = CUtility::StartThread(threadLumenDetection, m_pThreadLumenDetection, this);
+		
+		return (result) ? RayError::OK : RayError::InvalidFunctionCall;
+	}
+
+	return RayError::WrongState;
 }
 
 /*
@@ -553,6 +583,28 @@ void* COCTSystem::GetLongitudeData(double fDegree) {
 	cv::Mat imgLongitude = pCutView->DrawLongitudeImage(pCutView->GetNumOfSamples());
 
 	return imgLongitude.data;
+}
+
+/*
+* GetLumenContour
+*/
+void* COCTSystem::GetLumenContour(int nFrame) {
+	if (m_vLumen.size() <= nFrame) return nullptr;
+	if (m_vLumen.at(nFrame).size() <= 0) return nullptr;
+
+	cv::Mat matContour = m_vLumen.at(nFrame).at(0);
+	return matContour.ptr();
+}
+
+/*
+* GetNumOfLumenContourPoints
+*/
+int COCTSystem::GetNumOfLumenContourPoints(int nFrame) {
+	if (m_vLumen.size() <= nFrame) return 0;
+	if (m_vLumen.at(nFrame).size() <= 0) return 0;
+
+	cv::Mat matContour = m_vLumen.at(nFrame).at(0);
+	return matContour.cols * matContour.rows;
 }
 
 
@@ -613,13 +665,13 @@ RayError COCTSystem::SetDegree(double value) {
 
 	m_fDegree = value;
 
-	if (m_reviewSession[SESSION_REVIEW] != nullptr) {
-		CCutViewManager *pCutView = m_reviewSession[SESSION_REVIEW]->GetCutView();
+	if (m_curSession != SESSION_UNKNOWN && m_reviewSession[m_curSession] != nullptr) {
+		CCutViewManager *pCutView = m_reviewSession[m_curSession]->GetCutView();
 		if (pCutView != nullptr) {
 			int nFrames = pCutView->GetNumOfGeneratedSamples();
 			if (nFrames > 0) {
 				int nCurFrame = nFrames - 1;
-				this->postMessage(WM_PROCESS_CUTVIEW, SESSION_REVIEW, nCurFrame);
+				this->postMessage(WM_PROCESS_CUTVIEW, m_curSession, nCurFrame);
 			}
 		}
 	}
@@ -682,9 +734,9 @@ bool COCTSystem::GetMotorOnOff()
 */
 bool COCTSystem::GetIsPaused()
 {
-	if (m_reviewSession[SESSION_REVIEW] == nullptr) return true;	// default state is paused
+	if (m_curSession == SESSION_UNKNOWN || m_reviewSession[m_curSession] == nullptr) return true;	// default state is paused
 
-	return m_reviewSession[SESSION_REVIEW]->IsPaused();
+	return m_reviewSession[m_curSession]->IsPaused();
 }
 
 /*
@@ -692,8 +744,8 @@ bool COCTSystem::GetIsPaused()
 */
 UINT COCTSystem::GetImageWidth() 
 {
-	if (m_openedSession == nullptr) return 0;
-	return m_openedSession->GetImageWidth();
+	if (m_openedSession != nullptr) return m_openedSession->GetImageWidth();
+	else return m_reviewSession[m_curSession]->GetImageWidth();
 }
 
 /*
@@ -701,8 +753,8 @@ UINT COCTSystem::GetImageWidth()
 */
 UINT COCTSystem::GetImageHeight() 
 {
-	if (m_openedSession == nullptr) return 0;
-	return m_openedSession->GetImageHeight();
+	if (m_openedSession != nullptr) return m_openedSession->GetImageHeight();
+	else return m_reviewSession[m_curSession]->GetImageHeight();
 }
 
 /*
@@ -710,8 +762,8 @@ UINT COCTSystem::GetImageHeight()
 */
 UINT COCTSystem::GetImageChannels() 
 {
-	if (m_openedSession == nullptr) return 0;
-	return m_openedSession->GetImageChannels();
+	if (m_openedSession != nullptr) return m_openedSession->GetImageChannels();
+	else return m_reviewSession[m_curSession]->GetImageChannels();
 }
 
 /*
@@ -719,8 +771,8 @@ UINT COCTSystem::GetImageChannels()
 */
 UINT COCTSystem::GetImageDepth()
 {
-	if (m_openedSession == nullptr) return 0;
-	return m_openedSession->GetImageDepth();
+	if (m_openedSession != nullptr) return m_openedSession->GetImageDepth();
+	else return m_reviewSession[m_curSession]->GetImageDepth();
 }
 
 /*
@@ -728,8 +780,8 @@ UINT COCTSystem::GetImageDepth()
 */
 UINT COCTSystem::GetLongitudeImageWidth()
 {
-	if (m_openedSession == nullptr) return 0;
-	return m_openedSession->GetCutViewWidth();
+	if (m_openedSession != nullptr) return m_openedSession->GetCutViewWidth();
+	else return m_reviewSession[m_curSession]->GetCutViewWidth();
 }
 
 /*
@@ -737,8 +789,8 @@ UINT COCTSystem::GetLongitudeImageWidth()
 */
 UINT COCTSystem::GetLongitudeImageHeight()
 {
-	if (m_openedSession == nullptr) return 0;
-	return m_openedSession->GetCutViewHeight();
+	if (m_openedSession != nullptr) return m_openedSession->GetCutViewHeight();
+	else return m_reviewSession[m_curSession]->GetCutViewHeight();
 }
 
 /*
@@ -746,8 +798,8 @@ UINT COCTSystem::GetLongitudeImageHeight()
 */
 UINT COCTSystem::GetLongitudeImageChannels()
 {
-	if (m_openedSession == nullptr) return 0;
-	return m_openedSession->GetCutViewChannels();
+	if (m_openedSession != nullptr) return m_openedSession->GetCutViewChannels();
+	else return m_reviewSession[m_curSession]->GetCutViewChannels();
 }
 
 /*
@@ -870,17 +922,18 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 */
 UINT COCTSystem::threadGenerateVolume(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
-	IDataManager* pDataManager = pSystem->m_reviewSession[SESSION_REVIEW]->GetDataManager();
+	CImagingSession* pSession = pSystem->m_reviewSession[SESSION_REVIEW];
+	IDataManager* pDataManager = pSession->GetDataManager();
+	ImagingType imagingType = pSession->GetImagingType();
 
 	CVolumeGenerator* pVolume = pSystem->m_pVolume;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
 	// prepare imaging
-	CConfiguration& config = CConfiguration::GetInstance();
-	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr, config.imaging);
+	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr, pSession->GetImaging()->GetSetting(), imagingType);
 
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadGenerateVolume->isRun; nFrame++) {
-		unsigned short* pBuffer = pDataManager->GetSample(nFrame);
+		char* pBuffer = pDataManager->GetSample(nFrame);
 
 		pVolume->AddRecord(pBuffer, pImaging, nFrame);
 	}
@@ -901,22 +954,33 @@ UINT COCTSystem::threadGenerateVolume(LPVOID param) {
 */
 UINT COCTSystem::threadLumenDetection(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
-	IDataManager* pDataManager = pSystem->m_reviewSession[SESSION_REVIEW]->GetDataManager();
-	std::vector<std::vector<std::vector<cv::Point>>>& vLumen = pSystem->m_vLumen;
+	CImagingSession* pSession = pSystem->m_reviewSession[SESSION_REVIEW];
+	IDataManager* pDataManager = pSession->GetDataManager();
+	ImagingType imagingType = pSession->GetImagingType();
+	std::vector<std::vector<cv::Mat>>& vLumen = pSystem->m_vLumen;
 
 	CRayLearning* pLearning = pSystem->m_pLearning;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
 	// prepare imaging
-	CConfiguration& config = CConfiguration::GetInstance();
-	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr, config.imaging);
+	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr, pSession->GetImaging()->GetSetting(), imagingType);
 
 	vLumen.clear();
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadLumenDetection->isRun; nFrame++) {
-		unsigned short* pBuffer = pDataManager->GetSample(nFrame);
-
+		char* pBuffer = pDataManager->GetSample(nFrame);
 		pImaging->Process(pBuffer);
-		vLumen.push_back(pLearning->FindLumen(pImaging->GetCircleImage()));
+
+		std::vector<std::vector<cv::Point>> vContours = pLearning->FindLumen(pImaging->GetCircleImage());
+		std::vector<cv::Mat> vLumens;
+		for (int i = 0; i < vContours.size(); i++) {
+			std::vector<cv::Point> contour = vContours.at(i);
+			cv::Mat matContour(contour.size(), 1, CV_32SC2);
+			for (size_t row = 0; row < contour.size(); row++) {
+				matContour.at<cv::Point>(row, 0) = contour[row];
+			}
+			vLumens.push_back(matContour);
+		}
+		vLumen.push_back(vLumens);
 	}
 	delete pImaging;
 
@@ -1318,6 +1382,7 @@ void COCTSystem::closeAllSessions() {
 			m_reviewSession[i] = nullptr;
 		}
 	}
+	m_curSession = SESSION_UNKNOWN;
 }
 /*
 * OnMsgUpdateScannerState
@@ -1346,10 +1411,10 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 	case RayScannerState::Review:		
 		if (m_prevState == RayScannerState::Scanning) {
 			CUtility::StartThread(threadSaveRaw, m_pThreadSaveRaw, this);
+			CUtility::StartThread(threadLumenDetection, m_pThreadLumenDetection, this);
 		}
 
 		CUtility::StartThread(threadGenerateVolume, m_pThreadGenerateVolume, this);
-		CUtility::StartThread(threadLumenDetection, m_pThreadLumenDetection, this);
 		break;
 	default:
 		break;
@@ -1416,6 +1481,7 @@ LRESULT COCTSystem::OnMsgStartReviewSession(WPARAM wParam, LPARAM lParam) {
 
 	m_reviewSession[nSession] = pSession;
 	m_reviewSession[nSession]->Start();
+	m_curSession = (SessionType) nSession;
 
 	return NOERROR;
 }

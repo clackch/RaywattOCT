@@ -64,7 +64,18 @@ namespace RaywattApp.Common.Util
 
         public static Mat ByteMemoryToCvMat(IntPtr data, int width, int height, int ch)
         {
-            MatType type = ch == 3 ? MatType.CV_8UC3 : MatType.CV_8UC1;
+            MatType type = MatType.CV_8UC1;
+            switch (ch)
+            {
+                case 2:
+                    type = MatType.CV_32SC2;    // coordinates
+                    break;
+                case 3:
+                    type = MatType.CV_8UC3;     // 3ch image
+                    break;
+                default:
+                    break;
+            }
             return new Mat(height, width, type, data).Clone();
         }
 

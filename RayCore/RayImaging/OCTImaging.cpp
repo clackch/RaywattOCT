@@ -80,7 +80,7 @@ void COCTImaging::Initialize(tstring calibFile) {
 
 	loadLUT("LUT.csv");
 }
-void COCTImaging::Process(USHORT* fringes) {
+void COCTImaging::Process(char* fringes) {
 	if (fringes == nullptr) return;
 
 	generateBackground((Ipp16u*)fringes);
@@ -104,11 +104,11 @@ int COCTImaging::Stop() {
 
 	return NOERROR;
 }
-void COCTImaging::DoAsyncRender(USHORT* fringes) {
+void COCTImaging::DoAsyncRender(char* fringes) {
 	if (m_pThread == nullptr || m_pThread->isRun == false) return;
 
 	if (m_waitForFringes) {
-		m_pFringesBuffer = fringes;
+		m_pFringesBuffer = (USHORT *)fringes;
 		CUtility::ResumeThread(m_pThread);
 	}
 }
@@ -456,7 +456,7 @@ UINT COCTImaging::threadRender(LPVOID param) {
 		pImaging->m_waitForFringes = false;
 
 		if (pImaging->m_pThread->isRun) {
-			pImaging->Process(pImaging->m_pFringesBuffer);
+			pImaging->Process((char *)pImaging->m_pFringesBuffer);
 			// To-Do
 			// double buffering 필요?
 			// Invert, coloring 을 View (Dialog) 쪽으로 뺄 수 없을까?

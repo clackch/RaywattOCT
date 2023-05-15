@@ -3,11 +3,11 @@
 
 class CDataReader : public IDataManager
 {
-private:
+protected:
 	int m_nDataSize;
 	int m_nHeaderSize;
 
-	unsigned short** m_pReadSamples;
+	char** m_pReadSamples;
 	HANDLE m_hFile;
 
 	CRITICAL_SECTION m_csReadFrame;
@@ -16,12 +16,12 @@ public:
 	virtual ~CDataReader();
 
 	int Initialize(tstring strDataFilePath, int nDataSize, int nHeaderSize);
-	virtual unsigned short* GetSample(int nIndex);
+	virtual char* GetSample(int nIndex);
 	virtual void AddFrame(void* pFrame) {}
 
 	static OCTHeader ReadHeader(tstring strFilePath);
-private:
-	void finalize();
-	bool readFrame(int nIndex);
+protected:
+	virtual void finalize();
+	virtual bool readFrame(int nIndex);
 };
 

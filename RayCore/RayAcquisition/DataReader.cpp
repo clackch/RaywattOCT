@@ -29,7 +29,7 @@ int CDataReader::Initialize(tstring strDataFilePath, int nDataSize, int nHeaderS
 	if (nFileSize <= 0) return 0;
 
 	m_nNumOfSamples = ((nFileSize - nHeaderSize) / (m_nDataSize * sizeof(unsigned short)));
-	m_pReadSamples = new unsigned short* [m_nNumOfSamples];
+	m_pReadSamples = new char* [m_nNumOfSamples];
 	for (int i = 0; i < m_nNumOfSamples; i++) {
 		m_pReadSamples[i] = NULL;
 	}
@@ -44,7 +44,7 @@ int CDataReader::Initialize(tstring strDataFilePath, int nDataSize, int nHeaderS
 	return 0;
 
 }
-unsigned short* CDataReader::GetSample(int nIndex) {
+char* CDataReader::GetSample(int nIndex) {
 	if (nIndex < 0 || nIndex >= m_nNumOfSamples) return NULL;
 
 	EnterCriticalSection(&m_csReadFrame);
@@ -126,19 +126,15 @@ bool CDataReader::readFrame(int nIndex) {
 
 	if (nIndex < 0 || nIndex >= m_nNumOfSamples) return false;
 
-	EnterCriticalSection(&m_csReadFrame);
 	if (m_pReadSamples[nIndex] == NULL) {
-		if(m_pReadSamples[nIndex] == NULL){
-			m_pReadSamples[nIndex] = new unsigned short[m_nDataSize];
+		m_pReadSamples[nIndex] = new char[m_nDataSize * sizeof(unsigned short)];
 
-			long long offset = m_nHeaderSize + m_nDataSize * sizeof(unsigned short) * nIndex;
-			long offsetL = 0xFFFFFFFF & offset;
-			long offsetH = 0xFFFFFFFF & (offset >> 32);
-			SetFilePointer(m_hFile, offsetL, &offsetH, FILE_BEGIN);
-			result = ReadFile(m_hFile, m_pReadSamples[nIndex], m_nDataSize * sizeof(unsigned short), &dwBytesRead, NULL);
-		}
+		long long offset = m_nHeaderSize + m_nDataSize * sizeof(unsigned short) * nIndex;
+		long offsetL = 0xFFFFFFFF & offset;
+		long offsetH = 0xFFFFFFFF & (offset >> 32);
+		SetFilePointer(m_hFile, offsetL, &offsetH, FILE_BEGIN);
+		result = ReadFile(m_hFile, m_pReadSamples[nIndex], m_nDataSize * sizeof(unsigned short), &dwBytesRead, NULL);
 	}
-	LeaveCriticalSection(&m_csReadFrame);
 
 	return result;
 }

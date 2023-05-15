@@ -29,7 +29,7 @@ public:
 protected:
 	virtual int start();
 	virtual int stop();
-	virtual unsigned short *acquire(int& nCurFrame, int& nTotalFrame);
+	virtual char *acquire(int& nCurFrame, int& nTotalFrame);
 
 private:
 	BOOL configureBoard(HANDLE boardHandle);

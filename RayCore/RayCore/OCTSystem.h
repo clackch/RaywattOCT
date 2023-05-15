@@ -9,7 +9,7 @@
 #include <opencv2/opencv.hpp>
 
 typedef enum {
-	SESSION_UNKNOWN = -1,
+	SESSION_UNKNOWN = RaySession::Unknown,
 	SESSION_REALTIME = 0,
 	SESSION_REVIEW = 0,
 	SESSION_COMPARE,
@@ -57,6 +57,7 @@ private:
 	IAcquisitionDevice* m_pAcqDevice;
 
 	// Imaging Session (Review)
+	SessionType m_curSession;
 	CImagingSession* m_reviewSession[MAX_SESSION_NUM];
 	CImagingSession* m_openedSession;
 
@@ -65,7 +66,7 @@ private:
 
 	// Machine Learning
 	CRayLearning* m_pLearning;
-	std::vector<std::vector<std::vector<cv::Point>>> m_vLumen;
+	std::vector<std::vector<cv::Mat>> m_vLumen;
 
 	RayScannerState m_prevState;
 	RayScannerState m_curState;
@@ -94,11 +95,12 @@ public:
 	RayError PullbackScan(char *strFilePath);
 	RayError LoadCatheter();
 	RayError UnloadCatheter();
-	RayError StartReview(char* strFilePath);
+	int StartReview(char* strFilePath);
 	RayError StartCompare(char* strFilePath);
 	RayError EndReview();
 	RayError StartLiveView();
 	RayError StopLiveView();
+	RayError SetSession(int session);
 	RayError PlayPause();
 	RayError PrevFrame();
 	RayError NextFrame();
@@ -106,10 +108,13 @@ public:
 	RayError RegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude);
 	RayError UnregisterImageCallback();
 	void* GetVolumeData();
+	RayError StartLumenDetection();
 	RayError OpenImage(char* strFilePath);
 	RayError CloseImage();
 	void* GetImageData(int nFrame);
 	void* GetLongitudeData(double fDegree);
+	void* GetLumenContour(int nFrame);
+	int GetNumOfLumenContourPoints(int nFrame);
 	
 	//Property
 	RayScannerState GetCurrentState() { return m_curState; }

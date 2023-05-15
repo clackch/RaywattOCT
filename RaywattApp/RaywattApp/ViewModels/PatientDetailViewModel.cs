@@ -348,13 +348,16 @@ namespace RaywattApp.ViewModels
                 return;
 
             RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
-            RayStartReview(patientCase.ImageFullPath);
+            int numOfFrames = RayStartReview(patientCase.ImageFullPath);
 
             Dictionary<string, Object> parameter = new Dictionary<string, Object>();
             parameter["patient"] = Patient;
             parameter["patientCase"] = patientCase;
             GetDetailStatus();
             parameter["prevStatus"] = PrevStatus;
+            ReviewStatus reviewStatus = new ReviewStatus();
+            reviewStatus.NumberOfFrames = numOfFrames;
+            parameter["reviewStatus"] = reviewStatus;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewPage) { Parameter = parameter });
         }
 

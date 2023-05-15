@@ -19,6 +19,12 @@ using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
 using Point = System.Windows.Point;
 using System.Linq;
+using OpenCvSharp;
+using RaywattApp.Common.Util;
+using System.Threading.Tasks;
+using System.Threading;
+using System.Drawing;
+using System.Windows.Controls;
 
 namespace RaywattApp.ViewModels
 {
@@ -58,6 +64,8 @@ namespace RaywattApp.ViewModels
         }
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer();
+        private Thread? threadWaitLumenDetection = null;
+        private bool runWaitLumenDetection = false;
 
         private int measurementFrameNumber = -1;
         public int MeasurementFrameNumber 
@@ -90,21 +98,21 @@ namespace RaywattApp.ViewModels
         private bool _measurementCommandOff;
         public bool MeasurementCommandOff { get { return _measurementCommandOff; } set { _measurementCommandOff = value; OnPropertyChanged(nameof(MeasurementCommandOff)); } }
 
-        private List<Measurement> measurements;
+        private List<Measurement> measurements = new List<Measurement>();
         public List<Measurement> Measurements { get { return measurements; } set { measurements = value; OnPropertyChanged(nameof(Measurements)); } }
 
         private bool isLongitudeMeasurementInit;
 
-        private ObservableCollection<LengthGeometry> _lModeLengthGeometries;
+        private ObservableCollection<LengthGeometry> _lModeLengthGeometries = new ObservableCollection<LengthGeometry>();
         public ObservableCollection<LengthGeometry> LModeLengthGeometries { get { return _lModeLengthGeometries; } set { _lModeLengthGeometries = value; OnPropertyChanged(nameof(LModeLengthGeometries)); } }
 
-        private List<TextGeometry> _lModeTextGeometries;
+        private List<TextGeometry> _lModeTextGeometries = new List<TextGeometry>();
         public List<TextGeometry> LModeTextGeometries { get { return _lModeTextGeometries; } set { _lModeTextGeometries = value; OnPropertyChanged(nameof(LModeTextGeometries)); } }
 
         [ObservableProperty]
         private LumenContour _currentLumenContour;
 
-        private List<LumenContour> _lumenContours;
+        private List<LumenContour> _lumenContours = new List<LumenContour>();
         public List<LumenContour> LumenContours { get { return _lumenContours; } set { _lumenContours = value; OnPropertyChanged(nameof(LumenContours)); } }
 
         private double _lModeIndicatorX;
@@ -219,22 +227,16 @@ namespace RaywattApp.ViewModels
                 Patient = (Patient)data["patient"];
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
-                if (data.ContainsKey("reviewStatus"))
-                {
-                    ReviewStatus = (ReviewStatus)data["reviewStatus"];
-                    ToggleAngio(ReviewStatus.IsAngioOn);
-                    ToggleLongitude(ReviewStatus.IsLumenProfile);
-                }
-                else
-                {
-                    ReviewStatus = new ReviewStatus();
-                    ReviewStatus.Zoom = new Zoom();
-                }
+                ReviewStatus = (ReviewStatus)data["reviewStatus"];
+
+                ToggleAngio(ReviewStatus.IsAngioOn);
+                ToggleLongitude(ReviewStatus.IsLumenProfile);
+                
                 ReviewStatus.CurrentPage = Constants.ReviewPage;
                 Degree = PatientCase.IndicatorDegree;
 
+                RaySetSession(RaySession.Review);
                 SetAnnotation();
-                  
                 SetCrossSectionBackground(0, (ReviewStatus.IsAngioOn) ? Constants.CardBackgroundColor : Constants.BackgroundColor);
             }
 
@@ -251,6 +253,9 @@ namespace RaywattApp.ViewModels
 
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
+
+            if (threadWaitLumenDetection != null && threadWaitLumenDetection.IsAlive)
+                runWaitLumenDetection = false;
         }
 
         private void Playback(object param)
@@ -428,7 +433,24 @@ namespace RaywattApp.ViewModels
 
         private void SetAnnotation()
         {
-            if(PatientCase.Bookmark != null && PatientCase.CrossSection != null && PatientCase.Longitude != null && PatientCase.LumenContour != null)
+            // Initialize with empty objects
+            for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)
+            {
+                LumenContour lumenContour = new LumenContour();
+                DiameterInfo diameterInfo = new DiameterInfo();
+                diameterInfo.diameter = 0.0;
+
+                lumenContour.MlPoints = new List<Point>();
+                lumenContour.MlMaxDiameter = diameterInfo;
+                lumenContour.MlMinDiameter = diameterInfo;
+                lumenContour.Points = new List<Point>();
+                lumenContour.MaxDiameter = diameterInfo;
+                lumenContour.MinDiameter = diameterInfo;
+
+                LumenContours.Add(lumenContour);
+            }
+
+            if (PatientCase.Bookmark != null && PatientCase.CrossSection != null && PatientCase.Longitude != null && PatientCase.LumenContour != null)
             {
                 Measurements = JsonConvert.DeserializeObject<List<Measurement>>(PatientCase.CrossSection);
 
@@ -437,7 +459,9 @@ namespace RaywattApp.ViewModels
                 LModeTextGeometries = lModeMeasurement.TextGeometries;
 
                 Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(PatientCase.Bookmark);
+
                 LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(PatientCase.LumenContour);
+                MakeLumenProfileImage(LumenContours);
             }
             else
             {
@@ -451,10 +475,6 @@ namespace RaywattApp.ViewModels
                     {
                         Measurements = JsonConvert.DeserializeObject<List<Measurement>>(patientCaseAnnotations[0].CrossSection);
                     }
-                    else
-                    {
-                        Measurements = new List<Measurement>();
-                    }
 
                     if (!string.IsNullOrEmpty(patientCaseAnnotations[0].Longitude))
                     {
@@ -462,43 +482,30 @@ namespace RaywattApp.ViewModels
                         LModeLengthGeometries = lModeMeasurement.LengthGeometries;
                         LModeTextGeometries = lModeMeasurement.TextGeometries;
                     }
-                    else
-                    {
-                        LModeLengthGeometries = new ObservableCollection<LengthGeometry>();
-                        LModeTextGeometries = new List<TextGeometry>();
-                    }
 
                     if (!string.IsNullOrEmpty(patientCaseAnnotations[0].Bookmark))
                     {
                         Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(patientCaseAnnotations[0].Bookmark);
                     }
-                    else
-                    {
-                        Bookmarks = new ObservableCollection<Bookmark>();
-                    }
 
                     if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenContour))
                     {
+                        DeviceStatus.IsLumenDetected = true;
                         LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(patientCaseAnnotations[0].LumenContour);
+                        MakeLumenProfileImage(LumenContours);
                     }
                     else
                     {
-                        LumenContours = new List<LumenContour>();
+                        DeviceStatus.IsLumenDetected = false;
+                        RayStartLumenDetection();
+
+                        threadWaitLumenDetection = new Thread(new ThreadStart(threadFuncWaitLumenDetection));
+                        threadWaitLumenDetection.Start();
                     }
                 }
-                else
-                {
-                    Measurements = new List<Measurement>();
-                    LModeLengthGeometries = new ObservableCollection<LengthGeometry>();
-                    LModeTextGeometries = new List<TextGeometry>();
-                    Bookmarks = new ObservableCollection<Bookmark>();
-                    LumenContours = new List<LumenContour>();
-                }
-            }            
+            }
 
-            int size = PatientCase.PullbackType == Constants.PullbackTypeLong ? Constants.PullbackLongFrameCnt : Constants.PullbackShortFrameCnt;
-
-            for (int i=0; i<size; i++)
+            for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)
             {
                 Measurement measurement = new Measurement();
                 measurement.FrameNumber = i;
@@ -506,22 +513,6 @@ namespace RaywattApp.ViewModels
                 measurement.LengthGeometries = new ObservableCollection<LengthGeometry>();
                 measurement.TextGeometries = new List<TextGeometry>();
                 Measurements.Add(measurement);
-
-                if (LumenContours.Count <= i)
-                {
-                    LumenContour lumenContour = new LumenContour();
-                    DiameterInfo diameterInfo = new DiameterInfo();
-                    diameterInfo.diameter = 0.0;
-
-                    lumenContour.MlPoints = new List<Point>();
-                    lumenContour.MlMaxDiameter = diameterInfo;
-                    lumenContour.MlMinDiameter = diameterInfo;
-                    lumenContour.Points = new List<Point>();
-                    lumenContour.MaxDiameter = diameterInfo;
-                    lumenContour.MinDiameter = diameterInfo;
-
-                    LumenContours.Add(lumenContour);
-                }
             }
 
             Measurements = Measurements.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
@@ -540,7 +531,6 @@ namespace RaywattApp.ViewModels
                     {
                         foreach (AreaGeometry geometry in measurement.AreaGeometries)
                         {
-                            geometry.PointsAll = null;
                             geometry.Path = null;
                         }
                     }
@@ -665,6 +655,47 @@ namespace RaywattApp.ViewModels
                         isLongitudeMeasurementInit = true;
                     }
                 }
+            }
+            DrawLumenProfileImage();
+        }
+
+        private void threadFuncWaitLumenDetection()
+        {
+            runWaitLumenDetection = true;
+            imglumenProfile = null;
+
+            while (runWaitLumenDetection && !DeviceStatus.IsLumenDetected)
+            {
+                Thread.Sleep((int) Constants.UpdateLumenProfileInterval);
+            }
+            runWaitLumenDetection = false;
+
+            for (int curFrame = 0; curFrame < LumenContours.Count; curFrame++)
+            {
+                int num = RayGetNumOfLumenContourPoints(curFrame);
+                if (num > 0)
+                {
+                    IntPtr contour = RayGetLumenContour(curFrame);
+                    Mat matContour = CommonUtil.ByteMemoryToCvMat(contour, 1, num, 2);
+
+                    LumenContours[curFrame].MlPoints = new List<Point>();
+                    for(int row = 0; row < matContour.Rows; row++)
+                    {
+                        Vec2i point = matContour.At<Vec2i>(0, row);
+                        LumenContours[curFrame].MlPoints.Add(new Point(point.Item0, point.Item1));
+                    }
+                    updateLumenContour(LumenContours[curFrame]);
+                }
+            }
+            MakeLumenProfileImage(LumenContours);
+        }
+
+        private void updateLumenContour(LumenContour lumenContour)
+        {
+            lumenContour.Points = new List<Point>();
+            for (int i = 0; i < lumenContour.MlPoints.Count; i++)
+            {
+                lumenContour.Points.Add(new Point(lumenContour.MlPoints[i].X, lumenContour.MlPoints[i].Y));
             }
         }
 

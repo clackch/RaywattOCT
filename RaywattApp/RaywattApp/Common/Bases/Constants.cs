@@ -216,7 +216,10 @@ namespace RaywattApp.Common.Bases
         public const int CompareBackgroundColor = 0x0d0d0d;
 
         //Update Image Interval (msec)
-        public const double UpdateImageInterval = 5;
+        public const double UpdateImageInterval = 20;
+
+        //Update Lumen Profile Inverval (msec)
+        public const double UpdateLumenProfileInterval = 20;
 
         //System File Root Path
         public const string SystemRootPath = "C:";

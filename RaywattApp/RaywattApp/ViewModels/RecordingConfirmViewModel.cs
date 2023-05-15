@@ -105,6 +105,9 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Confirm");
 
+            RaySetSession(RaySession.Review);
+            int numOfFrames = (int) RayGetProperty(Property.ImageDepth);
+
             RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
 
             //TO-DO 초기값 정의 필요
@@ -123,6 +126,9 @@ namespace RaywattApp.ViewModels
             parameter["patientCase"] = PatientCase;
             SetDetailStatusInit();
             parameter["prevStatus"] = PrevStatus;
+            ReviewStatus reviewStatus = new ReviewStatus();
+            reviewStatus.NumberOfFrames = numOfFrames;
+            parameter["reviewStatus"] = reviewStatus;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewPresetPage) { Parameter = parameter });
         }
 

@@ -51,7 +51,7 @@ public:
 protected:
 	virtual int start() = 0;
 	virtual int stop() = 0;
-	virtual unsigned short *acquire(int & nCurFrame, int &nTotalFrame) = 0;
+	virtual char *acquire(int &nCurFrame, int &nTotalFrame) = 0;
 
 private:
 	static UINT threadAcquire(LPVOID param);

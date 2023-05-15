@@ -66,7 +66,7 @@ void CLabImaging::Initialize(tstring calibFile, const char* strBgFile) {
 	goodClockStart = 0;
 	goodClockEnd = nAScan;
 }
-void CLabImaging::Process(USHORT* fringes) {
+void CLabImaging::Process(char* fringes) {
 	const bool bInvert = m_bInvert;
 	const int nAScan = m_setting.nAScan;
 	const int nBScan = m_setting.nBScan;

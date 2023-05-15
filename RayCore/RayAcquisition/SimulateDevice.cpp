@@ -64,7 +64,7 @@ int CSimulateDevice::start() {
 int CSimulateDevice::stop() {
 	return NOERROR;
 }
-unsigned short* CSimulateDevice::acquire(int& nCurFrame, int& nTotalFrame) {
+char* CSimulateDevice::acquire(int& nCurFrame, int& nTotalFrame) {
 	const int nNumOfSamples = m_pDataReader->GetNumOfSamples();
 	bool result = true;
 

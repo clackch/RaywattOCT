@@ -320,19 +320,15 @@ namespace RaywattApp.ViewModels
         private void setCurrentFrame(double navigatorPosition, bool isCompare)
         {
             double curPosition = navigatorPosition / Constants.LongitudeCompareWidth;
+            RaySession session = (isCompare) ? RaySession.Compare : RaySession.Review;
+            FrameInfo frameInfo = crossSectionFrameInfo[(int)session];
 
-            if (isCompare)
-            {
-
-            }
-            else
-            {
-                if (longitudeFrameInfo != null)
-                {
-                    curPosition *= (longitudeFrameInfo.totalFrame - 1);
-                    curPosition = Math.Round(curPosition);
-                    RayMoveToFrame((int)curPosition);
-                }
+            if (frameInfo != null)
+            {             
+                curPosition *= (frameInfo.totalFrame - 1);
+                curPosition = Math.Round(curPosition);
+                RaySetSession(session);
+                RayMoveToFrame((int)curPosition);
             }
         }
 

@@ -313,6 +313,9 @@ namespace RaywattApp.ViewModels
                         RayUnloadCatheter();
                     });
                     break;
+                case RayWorkItem.LumenDetection:
+                    DeviceStatus.IsLumenDetected = true;
+                    break;
                 default:
                     break;
             }

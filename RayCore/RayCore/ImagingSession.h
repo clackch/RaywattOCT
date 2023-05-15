@@ -7,6 +7,15 @@
 
 #define FILE_EXTENSION_RAW	"bin"
 #define FILE_EXTENSION_OCT	"oct"
+#define FILE_EXTENSION_TIF	"tif"
+
+enum class ImagingType
+{
+	OCTImaging,
+	LabImaging,
+	TIFFImaging,
+	Default = OCTImaging
+};
 
 class CMessageService;
 class COCTImaging;
@@ -20,6 +29,7 @@ private:
 	CMessageService* m_pMsg;
 	int m_nSession;
 
+	ImagingType m_imagingType;
 	COCTImaging* m_pImaging;
 	CSimulateDevice* m_pSimDevice;
 	IDataManager* m_pDataManager;
@@ -36,10 +46,11 @@ public:
 
 	static CImagingSession* CreateSession(CMessageService* pMsg, int nSession, IImaging::Setting setting, IDataManager *pWriter);
 	static CImagingSession* CreateSession(CMessageService* pMsg, int nSession, const char* strFilePath);
-	static COCTImaging* CreateColorImaging(CMessageService* msg, IImaging::Setting setting);
+	static COCTImaging* CreateColorImaging(CMessageService* msg, IImaging::Setting setting, ImagingType type);
 
 	void EnableCutView(cv::Scalar backgroundColor);
 
+	ImagingType GetImagingType() { return m_imagingType; }
 	IDataManager* GetDataManager() { return m_pDataManager; }
 	COCTImaging* GetImaging() { return m_pImaging; }
 	CCutViewManager* GetCutView() { return m_pCutView; }
@@ -64,7 +75,7 @@ public:
 	UINT GetCutViewChannels();
 
 private:
-	static CImagingSession* createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData);
+	static CImagingSession* createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type);
 	static UINT threadUpdateCutView(LPVOID param);	
 };
 

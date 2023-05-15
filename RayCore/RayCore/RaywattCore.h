@@ -22,9 +22,10 @@ extern "C" {
 	_declspec(dllexport) RayError RayStopLiveView();
 
 	_declspec(dllexport) RayError RayShowCalibrationGuide(bool show);
-	_declspec(dllexport) RayError RayStartReview(char *strFilePath);
+	_declspec(dllexport) int RayStartReview(char *strFilePath);
 	_declspec(dllexport) RayError RayStartCompare(char* strFilePath);
 	_declspec(dllexport) RayError RayEndReview();
+	_declspec(dllexport) RayError RaySetSession(int session);
 	_declspec(dllexport) RayError RayPlayPause();
 	_declspec(dllexport) RayError RayPrevFrame();
 	_declspec(dllexport) RayError RayNextFrame();
@@ -34,9 +35,13 @@ extern "C" {
 	_declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value);
 	_declspec(dllexport) double RayGetProperty(RayProperty prop);
 	_declspec(dllexport) void* RayGetVolumeData();
+	_declspec(dllexport) RayError RayStartLumenDetection();
 
 	_declspec(dllexport) RayError RayOpenImage(char* strFilePath);
 	_declspec(dllexport) RayError RayCloseImage();
 	_declspec(dllexport) void *RayGetImageData(int nFrame);
 	_declspec(dllexport) void *RayGetLongitudeData(double fDegree);
+
+	_declspec(dllexport) void* RayGetLumenContour(int nFrame);
+	_declspec(dllexport) int RayGetNumOfLumenContourPoints(int nFrame);
 }

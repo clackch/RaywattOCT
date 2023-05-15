@@ -17,7 +17,9 @@ namespace RaywattOCT
             CatheterNotValid,
             InvalidArgument,
             WrongState,
-            NotPaused
+            NotPaused,
+            WrongSession,
+            InvalidFunctionCall
         };
 
         public enum Property : int
@@ -79,6 +81,13 @@ namespace RaywattOCT
             ValidateCatheter
         };
 
+        public enum RaySession : int
+        {  
+            Unknown = -1,
+            Review,
+            Compare
+        }
+
         public class FrameInfo {
             public int curFrame;
             public int totalFrame;
@@ -133,6 +142,8 @@ namespace RaywattOCT
         [DllImport("RayCore.dll")]
         public static extern int RayStopLiveView();
         [DllImport("RayCore.dll")]
+        public static extern int RaySetSession(RaySession session);
+        [DllImport("RayCore.dll")]
         public static extern int RayPlayPause();
         [DllImport("RayCore.dll")]
         public static extern int RayPrevFrame();
@@ -151,6 +162,8 @@ namespace RaywattOCT
         [DllImport("RayCore.dll")]
         public static extern IntPtr RayGetVolumeData();
         [DllImport("RayCore.dll")]
+        public static extern int RayStartLumenDetection();
+        [DllImport("RayCore.dll")]
         public static extern int RayOpenImage(string filePath);
         [DllImport("RayCore.dll")]
         public static extern int RayCloseImage();
@@ -158,5 +171,9 @@ namespace RaywattOCT
         public static extern IntPtr RayGetImageData(int frame);
         [DllImport("RayCore.dll")]
         public static extern IntPtr RayGetLongitudeData(double degree);
+        [DllImport("RayCore.dll")]
+        public static extern IntPtr RayGetLumenContour(int nFrame);
+        [DllImport("RayCore.dll")]
+        public static extern int RayGetNumOfLumenContourPoints(int nFrame);
     }
 }
