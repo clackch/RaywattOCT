@@ -21,6 +21,9 @@ namespace RaywattApp.Models
         [ObservableProperty]
         private bool _isMeasurementOn = false;
 
+        [ObservableProperty]
+        private int _numberOfFrames = 0;
+
         //3D
 
 
