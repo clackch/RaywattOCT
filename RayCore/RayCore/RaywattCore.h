@@ -22,7 +22,7 @@ extern "C" {
 	_declspec(dllexport) RayError RayStopLiveView();
 
 	_declspec(dllexport) RayError RayShowCalibrationGuide(bool show);
-	_declspec(dllexport) RayError RayStartReview(char *strFilePath);
+	_declspec(dllexport) int RayStartReview(char *strFilePath);
 	_declspec(dllexport) RayError RayStartCompare(char* strFilePath);
 	_declspec(dllexport) RayError RayEndReview();
 	_declspec(dllexport) RayError RaySetSession(int session);
@@ -35,6 +35,7 @@ extern "C" {
 	_declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value);
 	_declspec(dllexport) double RayGetProperty(RayProperty prop);
 	_declspec(dllexport) void* RayGetVolumeData();
+	_declspec(dllexport) RayError RayStartLumenDetection();
 
 	_declspec(dllexport) RayError RayOpenImage(char* strFilePath);
 	_declspec(dllexport) RayError RayCloseImage();

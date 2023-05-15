@@ -44,7 +44,7 @@ _declspec(dllexport) RayError RayLoadCatheter() {
 _declspec(dllexport) RayError RayUnloadCatheter() {
     return octSystem.UnloadCatheter();
 }
-_declspec(dllexport) RayError RayStartReview(char* strFilePath) {
+_declspec(dllexport) int RayStartReview(char* strFilePath) {
     return octSystem.StartReview(strFilePath);
 }
 _declspec(dllexport) RayError RayStartCompare(char* strFilePath) {
@@ -141,6 +141,9 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
 
 _declspec(dllexport) void* RayGetVolumeData() {
     return octSystem.GetVolumeData();
+}
+_declspec(dllexport) RayError RayStartLumenDetection() {
+    return octSystem.StartLumenDetection();
 }
 
 _declspec(dllexport) RayError RayOpenImage(char* strFilePath) {

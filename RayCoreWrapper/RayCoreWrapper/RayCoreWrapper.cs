@@ -18,7 +18,8 @@ namespace RaywattOCT
             InvalidArgument,
             WrongState,
             NotPaused,
-            WrongSession
+            WrongSession,
+            InvalidFunctionCall
         };
 
         public enum Property : int
@@ -160,6 +161,8 @@ namespace RaywattOCT
         public static extern double RayGetProperty(Property property);
         [DllImport("RayCore.dll")]
         public static extern IntPtr RayGetVolumeData();
+        [DllImport("RayCore.dll")]
+        public static extern int RayStartLumenDetection();
         [DllImport("RayCore.dll")]
         public static extern int RayOpenImage(string filePath);
         [DllImport("RayCore.dll")]

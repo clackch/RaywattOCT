@@ -95,7 +95,7 @@ public:
 	RayError PullbackScan(char *strFilePath);
 	RayError LoadCatheter();
 	RayError UnloadCatheter();
-	RayError StartReview(char* strFilePath);
+	int StartReview(char* strFilePath);
 	RayError StartCompare(char* strFilePath);
 	RayError EndReview();
 	RayError StartLiveView();
@@ -108,6 +108,7 @@ public:
 	RayError RegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude);
 	RayError UnregisterImageCallback();
 	void* GetVolumeData();
+	RayError StartLumenDetection();
 	RayError OpenImage(char* strFilePath);
 	RayError CloseImage();
 	void* GetImageData(int nFrame);

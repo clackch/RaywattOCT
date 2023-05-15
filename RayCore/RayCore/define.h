@@ -19,6 +19,7 @@ enum class RayError {
 	WrongState,
 	NotPaused,
 	WrongSession,
+	InvalidFunctionCall
 };
 
 enum class RayProperty {
