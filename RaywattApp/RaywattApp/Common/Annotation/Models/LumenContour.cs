@@ -5,7 +5,7 @@ using System.Windows;
 
 namespace RaywattApp.Common.Annotation.Models
 {
-    public partial class LumenContour : ObservableObject
+    public partial class LumenContour : Contour
     {
         [ObservableProperty]
         private List<Point>? mlPoints;
@@ -23,27 +23,9 @@ namespace RaywattApp.Common.Annotation.Models
         private double mlMeanDiameter;
 
         [ObservableProperty]
-        private List<Point>? points;
-
-        [ObservableProperty]
         private List<OpenCvSharp.Point>? pointsAll;
 
-        [ObservableProperty]
-        private double area;
-
         public double DisplayArea { get { return area / Constants.ScaleArea; } }
-
-        [ObservableProperty]
-        private Point centerOfMass;
-
-        [ObservableProperty]
-        private DiameterInfo? minDiameter;
-
-        [ObservableProperty]
-        private DiameterInfo? maxDiameter;
-
-        [ObservableProperty]
-        private double meanDiameter;
 
         public double DisplayMeanDiameter { get { return meanDiameter / Constants.ScaleLength; } }
     }
