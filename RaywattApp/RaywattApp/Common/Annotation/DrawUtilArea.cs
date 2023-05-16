@@ -751,7 +751,6 @@ namespace RaywattApp.Common.Annotation
         private void DrawContourToBackBuffer(Path path)
         {
             Path copiedPath = new Path();
-            //copiedPath.Style = path.Style;
             copiedPath.Style = (Style)this.Resources["StylePathBackground"];
             copiedPath.Data = path.Data;
             copiedPath.Stroke = Brushes.White;
