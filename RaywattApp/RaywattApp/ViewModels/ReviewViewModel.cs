@@ -25,6 +25,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Drawing;
 using System.Windows.Controls;
+using RaywattApp.Common.Annotation.Util;
 
 namespace RaywattApp.ViewModels
 {
@@ -438,11 +439,11 @@ namespace RaywattApp.ViewModels
             {
                 LumenContour lumenContour = new LumenContour();
                 DiameterInfo diameterInfo = new DiameterInfo();
-                diameterInfo.diameter = 0.0;
+                diameterInfo.value = 0.0;
 
-                lumenContour.MlPoints = new List<Point>();
-                lumenContour.MlMaxDiameter = diameterInfo;
-                lumenContour.MlMinDiameter = diameterInfo;
+                lumenContour.MlContour.Points = new List<Point>();
+                lumenContour.MlContour.MaxDiameter = diameterInfo;
+                lumenContour.MlContour.MinDiameter = diameterInfo;
                 lumenContour.Points = new List<Point>();
                 lumenContour.MaxDiameter = diameterInfo;
                 lumenContour.MinDiameter = diameterInfo;
@@ -678,25 +679,19 @@ namespace RaywattApp.ViewModels
                     IntPtr contour = RayGetLumenContour(curFrame);
                     Mat matContour = CommonUtil.ByteMemoryToCvMat(contour, 1, num, 2);
 
-                    LumenContours[curFrame].MlPoints = new List<Point>();
+                    LumenContours[curFrame].MlContour.Points = new List<Point>();
                     for(int row = 0; row < matContour.Rows; row++)
                     {
                         Vec2i point = matContour.At<Vec2i>(0, row);
-                        LumenContours[curFrame].MlPoints.Add(new Point(point.Item0, point.Item1));
+                        LumenContours[curFrame].MlContour.Points.Add(new Point(point.Item0, point.Item1));
                     }
-                    updateLumenContour(LumenContours[curFrame]);
+                    ContourMeasurement contourMeasurement = new ContourMeasurement();
+                    contourMeasurement.Measure(LumenContours[curFrame].MlContour, 1024, 1024);
+                    contourMeasurement.CalculateDiameter(LumenContours[curFrame].MlContour);
+                    LumenContours[curFrame].CopyMlToLumenContour();
                 }
             }
             MakeLumenProfileImage(LumenContours);
-        }
-
-        private void updateLumenContour(LumenContour lumenContour)
-        {
-            lumenContour.Points = new List<Point>();
-            for (int i = 0; i < lumenContour.MlPoints.Count; i++)
-            {
-                lumenContour.Points.Add(new Point(lumenContour.MlPoints[i].X, lumenContour.MlPoints[i].Y));
-            }
         }
 
         private void updatePlayPauseState()

@@ -8,22 +8,15 @@ namespace RaywattApp.Common.Annotation.Models
     public partial class LumenContour : Contour
     {
         [ObservableProperty]
-        private List<Point>? mlPoints;
+        private Contour mlContour = new Contour();
 
-        [ObservableProperty]
-        private double mlArea;
-
-        [ObservableProperty]
-        private DiameterInfo? mlMinDiameter;
-
-        [ObservableProperty]
-        private DiameterInfo? mlMaxDiameter;
-
-        [ObservableProperty]
-        private double mlMeanDiameter;
-
-        public double DisplayArea { get { return area / Constants.ScaleArea; } }
-
-        public double DisplayMeanDiameter { get { return meanDiameter / Constants.ScaleLength; } }
+        public void CopyMlToLumenContour()
+        {
+            Points = MlContour.Points;
+            MinDiameter = MlContour.MinDiameter;
+            MaxDiameter = MlContour.MaxDiameter;
+            MeanDiameter = MlContour.MeanDiameter;
+            Area = MlContour.Area;
+        }
     }
 }

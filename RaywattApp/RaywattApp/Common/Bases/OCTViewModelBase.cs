@@ -204,7 +204,7 @@ namespace RaywattApp.Common.Bases
             int curFrame = 0;
             foreach(LumenContour lumenContour in lumenContours)
             {
-                double area = lumenContour.MlArea;
+                double area = lumenContour.MlContour.Area;
 
                 int lumenArea = (int)(area / totalArea * imglumenProfile.Rows);
                 int yStart = (imglumenProfile.Rows - lumenArea) / 2;

@@ -657,7 +657,7 @@ namespace RaywattApp.Common.Annotation
         {
             _log.Debug("AutoDetect");
 
-            CopyMlToLumenContour();
+            LumenContours[FrameNumber].CopyMlToLumenContour();
             lumenContourHistory[FrameNumber].Push(CopyLumenContourToHistory(LumenContours[FrameNumber]));
             DrawLumenContour(LumenContours[FrameNumber], true);
         }
@@ -681,15 +681,6 @@ namespace RaywattApp.Common.Annotation
             LumenContours[FrameNumber].MaxDiameter = lumenContourHistory.maxDiameter;
             LumenContours[FrameNumber].MeanDiameter = lumenContourHistory.meanDiameter;
             LumenContours[FrameNumber].Area = lumenContourHistory.area;
-        }
-
-        private void CopyMlToLumenContour()
-        {
-            LumenContours[FrameNumber].Points = LumenContours[FrameNumber].MlPoints;
-            LumenContours[FrameNumber].MinDiameter = LumenContours[FrameNumber].MlMinDiameter;
-            LumenContours[FrameNumber].MaxDiameter = LumenContours[FrameNumber].MlMaxDiameter;
-            LumenContours[FrameNumber].MeanDiameter = LumenContours[FrameNumber].MlMeanDiameter;
-            LumenContours[FrameNumber].Area = LumenContours[FrameNumber].MlArea;
         }
 
         private void DrawContourToBackBuffer(Path path)

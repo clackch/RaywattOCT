@@ -87,10 +87,10 @@ namespace RaywattApp.Common.Annotation.Util
                 DiameterInfo diameterInfo = new DiameterInfo();
                 diameterInfo.point1 = new System.Windows.Point(point1.X, point1.Y);
                 diameterInfo.point2 = new System.Windows.Point(point2.X, point2.Y);
-                diameterInfo.diameter = diameter;
+                diameterInfo.value = diameter;
                 isValid = true;
 
-                sumDiameter += diameterInfo.diameter;
+                sumDiameter += diameterInfo.value;
                 numOfDiameter++;
 
                 if (diameter < minDiameter)

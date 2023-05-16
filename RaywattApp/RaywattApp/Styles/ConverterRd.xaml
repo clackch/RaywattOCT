@@ -83,4 +83,7 @@
     <!-- Scale Converter -->
     <converters:ScaleConverter x:Key="ScaleConverter" />
 
+    <!-- Unit Converter -->
+    <converters:UnitConverter x:Key="UnitConverter" />
+
 </ResourceDictionary>
