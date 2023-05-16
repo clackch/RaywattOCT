@@ -439,10 +439,13 @@ namespace RaywattApp.Common.Annotation
             Canvas.SetLeft(ellipse, point.X - (Constants.AnnotationTextPointSize / Zoom.ScaleX) / 2);
             Canvas.SetTop(ellipse, point.Y - (Constants.AnnotationTextPointSize / Zoom.ScaleY) / 2);
 
-            ellipse.MouseLeftButtonDown += pointer_MouseLeftButtonDown;
-            ellipse.MouseLeftButtonUp += pointer_MouseLeftButtonUp;
-            ellipse.MouseMove += pointer_MouseMove;
-            ellipse.MouseRightButtonDown += pointer_MouseRightButtonDown;
+            if (IsEditOn)
+            {
+                ellipse.MouseLeftButtonDown += pointer_MouseLeftButtonDown;
+                ellipse.MouseLeftButtonUp += pointer_MouseLeftButtonUp;
+                ellipse.MouseMove += pointer_MouseMove;
+                ellipse.MouseRightButtonDown += pointer_MouseRightButtonDown;
+            }
 
             this.canvas.Children.Add(ellipse);
         }
@@ -457,11 +460,16 @@ namespace RaywattApp.Common.Annotation
             label.BorderBrush = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
             Canvas.SetLeft(label, point.X);
             Canvas.SetTop(label, point.Y);
-            label.MouseDoubleClick += text_MouseDoubleClick;
-            label.MouseLeftButtonDown += text_MouseLeftButtonDown;
-            label.MouseLeftButtonUp += text_MouseLeftButtonUp;
-            label.MouseMove += text_MouseMove;
-            label.MouseRightButtonDown += text_MouseRightButtonDown;
+
+            if (IsEditOn)
+            {
+                label.MouseDoubleClick += text_MouseDoubleClick;
+                label.MouseLeftButtonDown += text_MouseLeftButtonDown;
+                label.MouseLeftButtonUp += text_MouseLeftButtonUp;
+                label.MouseMove += text_MouseMove;
+                label.MouseRightButtonDown += text_MouseRightButtonDown;
+            }
+
             this.canvas.Children.Add(label);
         }
 

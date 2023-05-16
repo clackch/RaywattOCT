@@ -357,10 +357,13 @@ namespace RaywattApp.Common.Annotation
             Canvas.SetLeft(ellipse, point.X - (Constants.AnnotationTextPointSize / Zoom.ScaleX) / 2);
             Canvas.SetTop(ellipse, point.Y - (Constants.AnnotationTextPointSize / Zoom.ScaleY) / 2);
 
-            ellipse.MouseLeftButtonDown += ellipse_MouseLeftButtonDown;
-            ellipse.MouseLeftButtonUp += ellipse_MouseLeftButtonUp;
-            ellipse.MouseMove += ellipse_MouseMove;
-            ellipse.MouseRightButtonDown += ellipse_MouseRightButtonDown;
+            if (IsEditOn)
+            {
+                ellipse.MouseLeftButtonDown += ellipse_MouseLeftButtonDown;
+                ellipse.MouseLeftButtonUp += ellipse_MouseLeftButtonUp;
+                ellipse.MouseMove += ellipse_MouseMove;
+                ellipse.MouseRightButtonDown += ellipse_MouseRightButtonDown;
+            }
 
             this.canvas.Children.Add(ellipse);
         }

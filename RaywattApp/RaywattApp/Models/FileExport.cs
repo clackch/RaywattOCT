@@ -93,9 +93,6 @@ namespace RaywattApp.Models
         private bool ejectWhenComplete;
 
         [ObservableProperty]
-        private string measurements; //Show All, Hide Lumen Contour, Hide All
-
-        [ObservableProperty]
         private bool patientInfoAnonymize; //Patient Information Anonymize
 
         [ObservableProperty]
@@ -111,9 +108,12 @@ namespace RaywattApp.Models
         private bool angioView; //Advanced View - Angio Co-Registration
 
         [ObservableProperty]
-        private bool lumenProfileView; //Advanced View - Lumen Profile
+        private bool longitude; //Advanced View - longitude
 
         [ObservableProperty]
-        private bool lModeView; //Advanced View - L-Mode
+        private bool measureAuto;
+
+        [ObservableProperty]
+        private bool measureManual;
     }
 }

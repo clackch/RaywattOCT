@@ -89,6 +89,15 @@ namespace RaywattApp.Common.Annotation
         private static readonly DependencyProperty PathBoldOnProperty =
             DependencyProperty.Register("PathBoldOn", typeof(bool), typeof(DrawUtil), new PropertyMetadata(default(bool)));
 
+        public bool IsEditOn
+        {
+            get { return (bool)GetValue(IsEditOnProperty); }
+            set { this.SetValue(IsEditOnProperty, value); }
+        }
+
+        private static readonly DependencyProperty IsEditOnProperty =
+            DependencyProperty.Register("IsEditOn", typeof(bool), typeof(DrawUtil), new PropertyMetadata(default(bool)));
+
         //---------------------------------------------------------------------------------------------------- Constructor
         public DrawUtil()
         {
