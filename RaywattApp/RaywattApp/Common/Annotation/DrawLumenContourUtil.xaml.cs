@@ -1,10 +1,10 @@
 ﻿using log4net;
 using OpenCvSharp;
 using RaywattApp.Common.Annotation.Models;
+using RaywattApp.Common.Annotation.Util;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Util;
 using RaywattApp.Models;
-using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -496,10 +496,15 @@ namespace RaywattApp.Common.Annotation
             }
             else
             {
-                UpdateGeometry(LumenContours[FrameNumber]);
-                CalculateDiameter(LumenContours[FrameNumber]);
-                LumenContours[FrameNumber].Area = finalPathGeometry.GetArea();
                 LumenContours[FrameNumber].Points = finalPoint;
+                LumenContours[FrameNumber].MaxDiameter = new DiameterInfo();
+                LumenContours[FrameNumber].MinDiameter = new DiameterInfo();
+                LumenContours[FrameNumber].MeanDiameter = 0.0f;
+
+                ContourMeasurement measurement = new ContourMeasurement();
+                measurement.Measure(LumenContours[FrameNumber], imageContour);
+                measurement.CalculateDiameter(LumenContours[FrameNumber]);
+
                 lumenContourHistory[FrameNumber].Push(CopyLumenContourToHistory(LumenContours[FrameNumber]));
 
                 DrawLumenContour(LumenContours[FrameNumber], true);
@@ -724,146 +729,6 @@ namespace RaywattApp.Common.Annotation
 
             this.canvasBackground.Children.Clear();
             this.canvasBackground.UpdateLayout();
-        }
-
-        private void UpdateGeometry(LumenContour lumenContour)
-        {
-            lumenContour.CenterOfMass = CalculateMassCenter();
-            lumenContour.PointsAll = FindAllPoints();
-            lumenContour.MaxDiameter = new DiameterInfo();
-            lumenContour.MinDiameter = new DiameterInfo();
-            lumenContour.MeanDiameter = 0.0f;
-        }
-
-        private Point CalculateMassCenter()
-        {
-            OpenCvSharp.Point[][] contours;
-            HierarchyIndex[] hierarchy;
-            Cv2.FindContours(imageContour, out contours, out hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
-
-            Moments moments = Cv2.Moments(contours[0]);
-            Point centerOfMass = new Point();
-            centerOfMass.X = moments.M10 / moments.M00;
-            centerOfMass.Y = moments.M01 / moments.M00;
-
-            contourBounds = Cv2.BoundingRect(contours[0]);
-
-            return centerOfMass;
-        }
-
-        private List<OpenCvSharp.Point> FindAllPoints()
-        {
-            List<OpenCvSharp.Point> pointsAll = new List<OpenCvSharp.Point>();
-
-            Mat points = new Mat();
-            Cv2.FindNonZero(imageContour, points);
-
-            for (int i = 0; i < points.Rows; i++)
-            {
-                OpenCvSharp.Point point = points.At<OpenCvSharp.Point>(i);
-                pointsAll.Add(point);
-            }
-
-            return pointsAll;
-        }
-
-        private List<OpenCvSharp.Point> FindNonZero(List<OpenCvSharp.Point> points, Mat image)
-        {
-            List<OpenCvSharp.Point> nonZeroPoints = new List<OpenCvSharp.Point>();
-
-            foreach (var point in points)
-            {
-                if (image.At<Byte>(point.Y - contourBounds.Y, point.X - contourBounds.X) != 0x00) nonZeroPoints.Add(point);
-            }
-
-            return nonZeroPoints;
-        }
-
-        private OpenCvSharp.Point GetIntersectionPoint(LumenContour lumenContour, Mat imageRoi, OpenCvSharp.Point ptFrom, int degree)
-        {
-            double lineLength = Math.Sqrt(Math.Pow(contourBounds.Right - contourBounds.Left, 2) + Math.Pow(contourBounds.Bottom - contourBounds.Top, 2));
-            Scalar color = new Scalar(0x00, 0x00, 0x00);
-
-            Mat imageMask = imageRoi.Clone();
-
-            double xDirection = Math.Cos(degree * Math.PI / 180.0f);
-            double yDirection = Math.Sin(degree * Math.PI / 180.0f);
-
-            OpenCvSharp.Point ptTo = new OpenCvSharp.Point(ptFrom.X + lineLength * xDirection, ptFrom.Y + lineLength * yDirection);
-
-            Cv2.Line(imageMask, ptFrom, ptTo, color, 1, LineTypes.Link4);
-
-            Mat imageSub = imageRoi - imageMask;
-
-            OpenCvSharp.Point point = new OpenCvSharp.Point(-1, -1);
-            List<OpenCvSharp.Point> pointsIntersection = FindNonZero(lumenContour.PointsAll, imageSub);
-
-            if (pointsIntersection.Count < 1)
-            {
-                return point;
-            }
-
-            point = pointsIntersection[0];
-            double minDistance = Math.Sqrt(Math.Pow(ptFrom.X - (point.X - contourBounds.X), 2) + Math.Pow(ptFrom.Y - (point.Y - contourBounds.Y), 2));
-            for (int i = 1; i < pointsIntersection.Count; i++)
-            {
-                OpenCvSharp.Point nextPoint = pointsIntersection[i];
-                double distance = Math.Sqrt(Math.Pow(ptFrom.X - (nextPoint.X - contourBounds.X), 2) + Math.Pow(ptFrom.Y - (nextPoint.Y - contourBounds.Y), 2));
-
-                if (distance < minDistance)
-                {
-                    minDistance = distance;
-                    point = nextPoint;
-                }
-            }
-
-            return point;
-        }
-
-        private void CalculateDiameter(LumenContour lumenContour)
-        {
-            OpenCvSharp.Point ptFrom = new OpenCvSharp.Point(lumenContour.CenterOfMass.X - contourBounds.X, lumenContour.CenterOfMass.Y - contourBounds.Y);
-
-            double minDiameter = double.MaxValue;
-            double maxDiameter = double.MinValue;
-
-            OpenCvSharp.Rect rectROI = new OpenCvSharp.Rect((int)contourBounds.X, (int)contourBounds.Y, (int)contourBounds.Width, (int)contourBounds.Height);
-            Mat imageRoi = imageContour[rectROI];
-
-            double sumDiameter = 0;
-            int numOfDiameter = 0;
-            for (int degree = 0; degree < 180; degree++)
-            {
-                OpenCvSharp.Point point1 = GetIntersectionPoint(lumenContour, imageRoi, ptFrom, degree);
-                if (point1.X < 0 || point1.Y < 0) continue;
-
-                OpenCvSharp.Point point2 = GetIntersectionPoint(lumenContour, imageRoi, ptFrom, degree + 180);
-                if (point2.X < 0 || point2.Y < 0) continue;
-
-                double diameter = Math.Sqrt(Math.Pow(point1.X - point2.X, 2) + Math.Pow(point1.Y - point2.Y, 2));
-
-                DiameterInfo diameterInfo = new DiameterInfo();
-                diameterInfo.point1 = new Point(point1.X, point1.Y);
-                diameterInfo.point2 = new Point(point2.X, point2.Y);
-                diameterInfo.diameter = diameter;
-
-                sumDiameter += diameterInfo.diameter;
-                numOfDiameter++;
-
-                if (diameter < minDiameter)
-                {
-                    minDiameter = diameter;
-                    lumenContour.MinDiameter = diameterInfo;
-                }
-
-                if (diameter > maxDiameter)
-                {
-                    maxDiameter = diameter;
-                    lumenContour.MaxDiameter = diameterInfo;
-                }
-            }
-
-            lumenContour.MeanDiameter = (numOfDiameter == 0) ? 0 : sumDiameter / numOfDiameter;
         }
     }
 }

@@ -22,9 +22,6 @@ namespace RaywattApp.Common.Annotation.Models
         [ObservableProperty]
         private double mlMeanDiameter;
 
-        [ObservableProperty]
-        private List<OpenCvSharp.Point>? pointsAll;
-
         public double DisplayArea { get { return area / Constants.ScaleArea; } }
 
         public double DisplayMeanDiameter { get { return meanDiameter / Constants.ScaleLength; } }
