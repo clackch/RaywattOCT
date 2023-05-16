@@ -35,8 +35,6 @@ namespace RaywattApp.Common.Annotation
 
         private bool groupFirst;
 
-        private double area;
-
         private bool isRectClicked;
 
         private double lastX;
@@ -264,7 +262,6 @@ namespace RaywattApp.Common.Annotation
             AreaGeometry areaGeometry = new AreaGeometry();
             areaGeometry.Points = this.pointList;
             areaGeometry.Group = this.areaGeometrys.Count;
-            areaGeometry.Area = this.area;
             areaGeometry.IsClosed = true;
             this.areaGeometrys.Add(areaGeometry);
 
@@ -401,12 +398,17 @@ namespace RaywattApp.Common.Annotation
 
             if (areaGeometry.IsClosed)
             {
-                UpdateGeometry(areaGeometry);
-                ValidateGeometry(areaGeometry);
+                areaGeometry.MaxDiameter = new DiameterInfo();
+                areaGeometry.MinDiameter = new DiameterInfo();
+                areaGeometry.MeanDiameter = 0.0f;
 
+                ContourMeasurement measurement = new ContourMeasurement();
+                measurement.Measure(areaGeometry, imageContour);
+
+                ValidateGeometry(areaGeometry);
                 if (areaGeometry.Valid)
                 {
-                    CalculateDiameter(areaGeometry);
+                    areaGeometry.Valid = measurement.CalculateDiameter(areaGeometry);
 
                     if (areaGeometry.Valid)
                     {
@@ -440,17 +442,6 @@ namespace RaywattApp.Common.Annotation
                 if (isClosed)
                 {
                     path.Style = (Style)this.Resources["StylePathCurveClosed"];
-                    this.area = path.Data.GetArea();
-
-                    foreach (var areaGeometry in this.areaGeometrys)
-                    {
-                        if (areaGeometry.Group == group)
-                        {
-                            areaGeometry.Area = this.area;
-                            break;
-                        }
-                    }
-
                     path.MouseLeftButtonDown += path_MouseLeftButtonDown;
 
                     DrawContourToBackBuffer(path);
@@ -519,7 +510,7 @@ namespace RaywattApp.Common.Annotation
                 Label label = new Label();
                 label.Style = (Style)this.Resources["StyleLabel"];
                 label.Name = constArea + "_" + areaGeometry.Group;
-                label.Content = DrawAnnotation.GetLabelText(areaGeometry.Group, this.area);
+                label.Content = DrawAnnotation.GetLabelText(areaGeometry.Group, areaGeometry.Area);
 
                 Point centerdPoint = areaGeometry.CenterOfMass;
 
@@ -721,15 +712,6 @@ namespace RaywattApp.Common.Annotation
             return isFind;
         }
 
-        private void UpdateGeometry(AreaGeometry areaGeometry)
-        {
-            areaGeometry.CenterOfMass = CalculateMassCenter();
-            areaGeometry.PointsAll = FindAllPoints();
-            areaGeometry.MaxDiameter = new DiameterInfo();
-            areaGeometry.MinDiameter = new DiameterInfo();
-            areaGeometry.MeanDiameter = 0.0f;
-        }
-
         private void DrawContourToBackBuffer(Path path)
         {
             Path copiedPath = new Path();
@@ -767,134 +749,6 @@ namespace RaywattApp.Common.Annotation
 
             this.canvasBackground.Children.Clear();
             this.canvasBackground.UpdateLayout();
-        }
-
-        private Point CalculateMassCenter() {
-            OpenCvSharp.Point[][] contours;
-            HierarchyIndex[] hierarchy;
-            Cv2.FindContours(imageContour, out contours, out hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
-
-            Moments moments = Cv2.Moments(contours[0]);
-            Point centerOfMass = new Point();
-            centerOfMass.X = moments.M10 / moments.M00;
-            centerOfMass.Y = moments.M01 / moments.M00;
-
-            contourBounds = Cv2.BoundingRect(contours[0]);
-
-            return centerOfMass;
-        }
-
-        private List<OpenCvSharp.Point> FindAllPoints()
-        {
-            List<OpenCvSharp.Point> pointsAll = new List<OpenCvSharp.Point>();
-
-            Mat points = new Mat();
-            Cv2.FindNonZero(imageContour, points);
-
-            for (int i = 0; i < points.Rows; i++)
-            {
-                OpenCvSharp.Point point = points.At<OpenCvSharp.Point>(i);
-                pointsAll.Add(point);
-            }
-
-            return pointsAll;
-        }
-
-        private List<OpenCvSharp.Point> FindNonZero(List<OpenCvSharp.Point> points, Mat image) {
-            List<OpenCvSharp.Point> nonZeroPoints = new List<OpenCvSharp.Point>();
-
-            foreach (var point in points) {
-                if (image.At<Byte>(point.Y - contourBounds.Y, point.X - contourBounds.X) != 0x00) nonZeroPoints.Add(point);
-            }
-
-            return nonZeroPoints;
-        }
-
-        private OpenCvSharp.Point GetIntersectionPoint(AreaGeometry areaGeometry, Mat imageRoi, OpenCvSharp.Point ptFrom, int degree)
-        {
-            double lineLength = Math.Sqrt(Math.Pow(contourBounds.Right - contourBounds.Left, 2) + Math.Pow(contourBounds.Bottom - contourBounds.Top, 2));
-            Scalar color = new Scalar(0x00, 0x00, 0x00);
-
-            Mat imageMask = imageRoi.Clone();
-
-            double xDirection = Math.Cos(degree * Math.PI / 180.0f);
-            double yDirection = Math.Sin(degree * Math.PI / 180.0f);
-
-            OpenCvSharp.Point ptTo = new OpenCvSharp.Point(ptFrom.X + lineLength * xDirection, ptFrom.Y + lineLength * yDirection);
-
-            Cv2.Line(imageMask, ptFrom, ptTo, color, 1, LineTypes.Link4);
-
-            Mat imageSub = imageRoi - imageMask;
-
-            OpenCvSharp.Point point = new OpenCvSharp.Point(-1, -1);
-            List<OpenCvSharp.Point> pointsIntersection = FindNonZero(areaGeometry.PointsAll, imageSub);
-
-            if (pointsIntersection.Count < 1)
-            {
-                return point;
-            }
-
-            point = pointsIntersection[0];
-            double minDistance = Math.Sqrt(Math.Pow(ptFrom.X - (point.X - contourBounds.X), 2) + Math.Pow(ptFrom.Y - (point.Y - contourBounds.Y), 2));
-            for (int i = 1; i < pointsIntersection.Count; i++)
-            {
-                OpenCvSharp.Point nextPoint = pointsIntersection[i];
-                double distance = Math.Sqrt(Math.Pow(ptFrom.X - (nextPoint.X - contourBounds.X), 2) + Math.Pow(ptFrom.Y - (nextPoint.Y - contourBounds.Y), 2));
-
-                if (distance < minDistance)
-                {
-                    minDistance = distance;
-                    point = nextPoint;
-                }
-            }
-
-            return point;
-        }
-
-        private void CalculateDiameter(AreaGeometry areaGeometry)
-        {
-            areaGeometry.Valid = false;
-
-            OpenCvSharp.Point ptFrom = new OpenCvSharp.Point(areaGeometry.CenterOfMass.X - contourBounds.X, areaGeometry.CenterOfMass.Y - contourBounds.Y);
-
-            double minDiameter = double.MaxValue;
-            double maxDiameter = double.MinValue;
-
-            OpenCvSharp.Rect rectROI = new OpenCvSharp.Rect((int)contourBounds.X, (int)contourBounds.Y, (int)contourBounds.Width, (int)contourBounds.Height);
-            Mat imageRoi = imageContour[rectROI];
-
-            double sumDiameter = 0;
-            int numOfDiameter = 0;
-            for (int degree = 0; degree < 180; degree++) {
-                OpenCvSharp.Point point1 = GetIntersectionPoint(areaGeometry, imageRoi, ptFrom, degree);
-                if (point1.X < 0 || point1.Y < 0) continue;
-
-                OpenCvSharp.Point point2 = GetIntersectionPoint(areaGeometry, imageRoi, ptFrom, degree + 180);
-                if (point2.X < 0 || point2.Y < 0) continue;
-
-                double diameter = Math.Sqrt(Math.Pow(point1.X - point2.X, 2) + Math.Pow(point1.Y - point2.Y, 2));
-
-                DiameterInfo diameterInfo = new DiameterInfo();
-                diameterInfo.point1 = new Point(point1.X, point1.Y);
-                diameterInfo.point2 = new Point(point2.X, point2.Y);
-                diameterInfo.diameter = diameter;
-                areaGeometry.Valid = true;
-
-                sumDiameter += diameterInfo.diameter;
-                numOfDiameter++;
-
-                if (diameter < minDiameter) {
-                    minDiameter = diameter;
-                    areaGeometry.MinDiameter = diameterInfo;
-                }
-
-                if (diameter > maxDiameter) {
-                    maxDiameter = diameter;
-                    areaGeometry.MaxDiameter = diameterInfo;
-                }
-            }
-
-            areaGeometry.MeanDiameter = (numOfDiameter == 0) ? 0 : sumDiameter / numOfDiameter;
         }
     }
 }
