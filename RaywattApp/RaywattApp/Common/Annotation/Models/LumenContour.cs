@@ -1,7 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using RaywattApp.Common.Bases;
-using System.Collections.Generic;
-using System.Windows;
 
 namespace RaywattApp.Common.Annotation.Models
 {
