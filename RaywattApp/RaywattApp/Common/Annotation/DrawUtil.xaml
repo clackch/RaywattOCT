@@ -35,6 +35,9 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+        <Style TargetType="Path" x:Key="StylePathBackground">
+            <Setter Property="StrokeThickness" Value="1"/>
+        </Style>
         <Style TargetType="Path" x:Key="StylePathCurveClosed" BasedOn="{StaticResource StylePath}">
             <Style.Triggers>
                 <MultiDataTrigger>

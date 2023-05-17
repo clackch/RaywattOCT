@@ -389,35 +389,49 @@ namespace RaywattApp.Common.Annotation
             foreach (var areaGeometry in this.areaGeometrys)
             {
                 DrawCurve(areaGeometry);
-                DrawRectangle(areaGeometry);
+                if(IsEditOn)
+                    DrawRectangle(areaGeometry);
+                else
+                    DrawLabel(areaGeometry);
             }
         }
 
         private void DrawCurve(AreaGeometry areaGeometry) {
             areaGeometry.Path = DrawCurve(areaGeometry.Points, areaGeometry.IsClosed, areaGeometry.Group);
 
-            if (areaGeometry.IsClosed)
+            if (IsEditOn)
             {
-                areaGeometry.MaxDiameter = new DiameterInfo();
-                areaGeometry.MinDiameter = new DiameterInfo();
-                areaGeometry.MeanDiameter = 0.0f;
-
-                ContourMeasurement measurement = new ContourMeasurement();
-                measurement.Measure(areaGeometry, imageContour);
-
-                ValidateGeometry(areaGeometry);
-                if (areaGeometry.Valid)
+                if (areaGeometry.IsClosed)
                 {
-                    areaGeometry.Valid = measurement.CalculateDiameter(areaGeometry);
+                    areaGeometry.MaxDiameter = new DiameterInfo();
+                    areaGeometry.MinDiameter = new DiameterInfo();
+                    areaGeometry.MeanDiameter = 0.0f;
 
+                    ContourMeasurement measurement = new ContourMeasurement();
+                    measurement.Measure(areaGeometry, imageContour);
+
+                    ValidateGeometry(areaGeometry);
                     if (areaGeometry.Valid)
                     {
-                        DrawDiameter(areaGeometry.MinDiameter.point1, areaGeometry.MinDiameter.point2, areaGeometry.Group, constMinDiameter);
-                        DrawDiameter(areaGeometry.MaxDiameter.point1, areaGeometry.MaxDiameter.point2, areaGeometry.Group, constMaxDiameter);
+                        areaGeometry.Valid = measurement.CalculateDiameter(areaGeometry);
+                        if (areaGeometry.Valid)
+                        {
+                            DrawDiameter(areaGeometry.MinDiameter.point1, areaGeometry.MinDiameter.point2, areaGeometry.Group, constMinDiameter);
+                            DrawDiameter(areaGeometry.MaxDiameter.point1, areaGeometry.MaxDiameter.point2, areaGeometry.Group, constMaxDiameter);
+                        }
                     }
                 }
             }
+            else
+            {
+                if (areaGeometry.Valid)
+                {
+                    DrawDiameter(areaGeometry.MinDiameter.point1, areaGeometry.MinDiameter.point2, areaGeometry.Group, constMinDiameter);
+                    DrawDiameter(areaGeometry.MaxDiameter.point1, areaGeometry.MaxDiameter.point2, areaGeometry.Group, constMaxDiameter);
+                }
+            }
         }
+
         private Path DrawCurve(List<Point> pointList, bool isClosed, int group)
         {
             Path path = null;
@@ -442,9 +456,11 @@ namespace RaywattApp.Common.Annotation
                 if (isClosed)
                 {
                     path.Style = (Style)this.Resources["StylePathCurveClosed"];
-                    path.MouseLeftButtonDown += path_MouseLeftButtonDown;
-
-                    DrawContourToBackBuffer(path);
+                    if (IsEditOn)
+                    {
+                        path.MouseLeftButtonDown += path_MouseLeftButtonDown;
+                        DrawContourToBackBuffer(path);
+                    }
                 }
 
                 this.canvas.Children.Add(path);
@@ -715,7 +731,7 @@ namespace RaywattApp.Common.Annotation
         private void DrawContourToBackBuffer(Path path)
         {
             Path copiedPath = new Path();
-            copiedPath.Style = path.Style;
+            copiedPath.Style = (Style)this.Resources["StylePathBackground"];
             copiedPath.Data = path.Data;
             copiedPath.Stroke = Brushes.White;
             copiedPath.Name = "BackBuffer_" + path.Name;
