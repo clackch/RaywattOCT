@@ -462,7 +462,7 @@ namespace RaywattApp.ViewModels
                 Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(PatientCase.Bookmark);
 
                 LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(PatientCase.LumenContour);
-                MakeLumenProfileImage(LumenContours);
+                imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours);
             }
             else
             {
@@ -493,7 +493,7 @@ namespace RaywattApp.ViewModels
                     {
                         DeviceStatus.IsLumenDetected = true;
                         LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(patientCaseAnnotations[0].LumenContour);
-                        MakeLumenProfileImage(LumenContours);
+                        imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours);
                     }
                     else
                     {
@@ -631,7 +631,7 @@ namespace RaywattApp.ViewModels
 
                 if(!ReviewStatus.IsLumenProfile)
                     IndicatorCrossSection.IsVisible = Visibility.Visible;
-            }                
+            }
         }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
@@ -686,12 +686,12 @@ namespace RaywattApp.ViewModels
                         LumenContours[curFrame].MlContour.Points.Add(new Point(point.Item0, point.Item1));
                     }
                     ContourMeasurement contourMeasurement = new ContourMeasurement();
-                    contourMeasurement.Measure(LumenContours[curFrame].MlContour, 1024, 1024);
+                    contourMeasurement.Measure(LumenContours[curFrame].MlContour, (int) Constants.OCTImageSize, (int) Constants.OCTImageSize);
                     contourMeasurement.CalculateDiameter(LumenContours[curFrame].MlContour);
                     LumenContours[curFrame].CopyMlToLumenContour();
                 }
             }
-            MakeLumenProfileImage(LumenContours);
+            imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours);
         }
 
         private void updatePlayPauseState()

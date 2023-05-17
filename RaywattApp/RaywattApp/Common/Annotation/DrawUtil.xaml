@@ -136,15 +136,15 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid>
+    <Grid Width="{x:Static const:Constants.OCTImageSize}" Height="{x:Static const:Constants.OCTImageSize}">
         <Grid.Clip>
             <RectangleGeometry RadiusX="10" RadiusY="10">
                 <RectangleGeometry.Rect>
-                    <Rect X="0" Y="0" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}"/>
+                    <Rect X="0" Y="0" Width="{x:Static const:Constants.OCTImageSize}" Height="{x:Static const:Constants.OCTImageSize}"/>
                 </RectangleGeometry.Rect>
             </RectangleGeometry>
         </Grid.Clip>
-        <Canvas Name="canvasBackground"/>
+        <Canvas Name="canvasBackground" Width="{x:Static const:Constants.OCTImageSize}" Height="{x:Static const:Constants.OCTImageSize}"/>
         <Canvas Name="canvas">
             <Canvas.RenderTransform>
                 <TransformGroup>

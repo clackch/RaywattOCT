@@ -83,7 +83,7 @@
                             </i:Interaction.Triggers>
                             <Image.RenderTransform>
                                 <TransformGroup>
-                                    <ScaleTransform ScaleX="{Binding ReviewStatus.Zoom.ScaleX}" ScaleY="{Binding ReviewStatus.Zoom.ScaleY}"/>
+                                    <ScaleTransform ScaleX="{Binding ReviewStatus.Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding ReviewStatus.Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
                                     <TranslateTransform X="{Binding ReviewStatus.Zoom.TranslateX}" Y="{Binding ReviewStatus.Zoom.TranslateY}"/>
                                 </TransformGroup>
                             </Image.RenderTransform>

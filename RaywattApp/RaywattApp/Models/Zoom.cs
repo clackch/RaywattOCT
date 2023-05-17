@@ -2,9 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using log4net;
 using RaywattApp.Common.Bases;
-using System;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace RaywattApp.Models
@@ -57,8 +55,8 @@ namespace RaywattApp.Models
 
         public Zoom()
         {
-            ScaleX = 1;
-            ScaleY = 1;
+            ScaleX = Constants.ZoomScaleDefault;
+            ScaleY = Constants.ZoomScaleDefault;
             RectLeft = 0;
             RectTop = 0;
             RectWidth = Constants.MiniMapCanvasSize;
