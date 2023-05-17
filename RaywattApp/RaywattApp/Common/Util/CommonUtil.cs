@@ -15,6 +15,11 @@ using static RaywattOCT.RayCoreWrapper;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Size = OpenCvSharp.Size;
+using RaywattApp.Common.Dialog;
+using RaywattApp.Models;
+using RaywattApp.ViewModels.Dialog;
+using RaywattApp.Views.Dialog;
+using System.Threading;
 
 namespace RaywattApp.Common.Util
 {
@@ -302,7 +307,7 @@ namespace RaywattApp.Common.Util
             }
         }
 
-        public static async Task<Mat> ConvertImage(string filePath, List<int> bookmarkedIndices, List<Mat> convertedImages, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
+        public static async Task<Mat> ConvertImage(string filePath, double degree, List<Mat> convertedImages, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
         {
             RayOpenImage(filePath);
 
@@ -311,8 +316,6 @@ namespace RaywattApp.Common.Util
             int height = (int)RayGetProperty(Property.ImageHeight);
             int channels = (int)RayGetProperty(Property.ImageChannels);
 
-            int totalNum = (bookmarkedIndices == null) ? numOfFrames : bookmarkedIndices.Count;
-
             // convert all frames
             for (int index = 0; index < numOfFrames; index++)
             {
@@ -320,11 +323,8 @@ namespace RaywattApp.Common.Util
                     IntPtr data = RayGetImageData(index);
                     if (convertedImages != null)
                     {
-                        if (bookmarkedIndices == null || bookmarkedIndices.Contains(index))
-                        {
-                            Mat img = CommonUtil.ByteMemoryToCvMat(data, width, height, channels);
-                            convertedImages.Add(img);
-                        }
+                        Mat img = CommonUtil.ByteMemoryToCvMat(data, width, height, channels);
+                        convertedImages.Add(img);
                     }
                     progressCallback(progress / numOfFrames);
                     progressTextCallback(Constants.ExportStatusConvertImage);
@@ -335,12 +335,94 @@ namespace RaywattApp.Common.Util
             width = (int)RayGetProperty(Property.LongitudeImageWidth);
             height = (int)RayGetProperty(Property.LongitudeImageHeight);
             channels = (int)RayGetProperty(Property.LongitudeImageChannels);
-            IntPtr data = RayGetLongitudeData(45);
+            IntPtr data = RayGetLongitudeData(degree);
             Mat imgLongitude = CommonUtil.ByteMemoryToCvMat(data, width, height, channels);
 
             RayCloseImage();
 
             return imgLongitude;
+        }
+
+        public static async Task<List<Mat>> MakeImageForExport(PatientCase patientCase, List<Mat> imgCrossSections, Mat imgLongitude, List<int>? exportIndices, FileExport fileExport, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
+        {
+            List<Mat> convertedImages = new List<Mat>();
+
+            IDialogWindow window = new DialogWindow();
+
+            var dialog = new FileExportDialogControl();
+            double originWidth = dialog.Width;
+            double originHeight = dialog.Height;
+            dialog.Width = 0;
+            dialog.Height = 0;
+            window.Content = dialog;
+
+            var dialogFE = dialog as System.Windows.FrameworkElement;
+            var dialogDataContext = dialogFE.DataContext as FileExportDialogViewModel;
+            dialogDataContext.SetInitialize(patientCase, imgCrossSections, imgLongitude, fileExport);
+
+            window.Show();
+            window.Hide();
+            dialog.Width = originWidth;
+            dialog.Height = originHeight;
+
+            int totalCnt = imgCrossSections.Count;
+            if(exportIndices != null)
+                totalCnt = exportIndices.Count;
+
+            for (int i = 0; i < totalCnt; i++)
+            {
+                int index = i;
+                if (exportIndices != null)
+                    index = exportIndices[i];
+
+                dialogDataContext.SetFrameNumber(index);
+                dialog.UpdateLayout();
+                        
+                RenderTargetBitmap rtb = new RenderTargetBitmap((int)dialog.ActualWidth, (int)dialog.ActualHeight, 96, 96, PixelFormats.Pbgra32);
+                System.Windows.Rect bounds = VisualTreeHelper.GetDescendantBounds(dialog);
+                DrawingVisual dv = new DrawingVisual();
+                using (DrawingContext ctx = dv.RenderOpen())
+                {
+                    VisualBrush vb = new VisualBrush(dialog);
+                    ctx.DrawRectangle(vb, null, bounds);
+                }
+                rtb.Render(dv);
+
+                PngBitmapEncoder png = new PngBitmapEncoder();
+                png.Frames.Add(BitmapFrame.Create(rtb));
+                var bitmapImage = new BitmapImage();
+
+                using (var stream = new System.IO.MemoryStream())
+                {
+                    png.Save(stream);
+                    stream.Seek(0, System.IO.SeekOrigin.Begin);
+
+                    bitmapImage.BeginInit();
+                    bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmapImage.StreamSource = stream;
+                    bitmapImage.EndInit();
+                }
+
+                Mat image = new Mat();
+                Mat imgDraw = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToMat(bitmapImage);
+                Mat imgDrawGray = new Mat();
+                Mat imgBW = new Mat();
+                Cv2.CvtColor(imgDraw, imgDrawGray, ColorConversionCodes.RGBA2GRAY);
+                Cv2.Threshold(imgDrawGray, imgBW, 1, 255, ThresholdTypes.Binary);
+                Cv2.CvtColor(imgDraw, imgDraw, ColorConversionCodes.RGBA2RGB);
+                Cv2.CopyTo(imgDraw, image, imgBW);
+
+                convertedImages.Add(image);
+
+                await Task.Run(() => {
+                    progressCallback(progress / totalCnt);
+                    progressTextCallback(Constants.ExportStatusMakeImage);
+                    Thread.Sleep(10);
+                });
+            }
+            window.Close();
+
+            return convertedImages;
         }
 
         public static Mat MakeImageForExport(Mat crossSection, Mat? longitude, Mat? lumenProfile, Mat? angio, out List<Tuple<Rect, Size2f>> region) {

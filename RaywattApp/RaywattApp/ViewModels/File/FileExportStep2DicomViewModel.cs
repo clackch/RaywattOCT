@@ -53,9 +53,6 @@ namespace RaywattApp.ViewModels.File
         {
             _log.Debug("SetCondition");
 
-            if (FileExport.Measurements == null)
-                FileExport.Measurements = Constants.ExportMeasurementShowAll;
-
             if (FileExport.DiskType == null)
                 DiskType = Constants.FileDiskExternal;
             else

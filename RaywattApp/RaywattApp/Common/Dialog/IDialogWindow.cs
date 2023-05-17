@@ -16,5 +16,11 @@ namespace RaywattApp.Common.Dialog
         double Top { get; set; }
 
         bool? ShowDialog();
+
+        void Show();
+
+        void Hide();
+
+        void Close();
     }
 }

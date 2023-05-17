@@ -35,6 +35,9 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+        <Style TargetType="Path" x:Key="StylePathBackground">
+            <Setter Property="StrokeThickness" Value="1"/>
+        </Style>
         <Style TargetType="Path" x:Key="StylePathCurveClosed" BasedOn="{StaticResource StylePath}">
             <Style.Triggers>
                 <MultiDataTrigger>
@@ -144,7 +147,7 @@
                 </RectangleGeometry.Rect>
             </RectangleGeometry>
         </Grid.Clip>
-        <Canvas Name="canvasBackground"/>
+        <Canvas Name="canvasBackground" Width="1024" Height="1024"/>
         <Canvas Name="canvas">
             <Canvas.RenderTransform>
                 <TransformGroup>

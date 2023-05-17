@@ -392,30 +392,45 @@ namespace RaywattApp.Common.Annotation
             foreach (var areaGeometry in this.areaGeometrys)
             {
                 DrawCurve(areaGeometry);
-                DrawRectangle(areaGeometry);
+                if(IsEditOn)
+                    DrawRectangle(areaGeometry);
+                else
+                    DrawLabel(areaGeometry);
             }
         }
 
         private void DrawCurve(AreaGeometry areaGeometry) {
             areaGeometry.Path = DrawCurve(areaGeometry.Points, areaGeometry.IsClosed, areaGeometry.Group);
 
-            if (areaGeometry.IsClosed)
+            if (IsEditOn)
             {
-                UpdateGeometry(areaGeometry);
-                ValidateGeometry(areaGeometry);
-
-                if (areaGeometry.Valid)
+                if (areaGeometry.IsClosed)
                 {
-                    CalculateDiameter(areaGeometry);
+                    UpdateGeometry(areaGeometry);
+                    ValidateGeometry(areaGeometry);
 
                     if (areaGeometry.Valid)
                     {
-                        DrawDiameter(areaGeometry.MinDiameter.point1, areaGeometry.MinDiameter.point2, areaGeometry.Group, constMinDiameter);
-                        DrawDiameter(areaGeometry.MaxDiameter.point1, areaGeometry.MaxDiameter.point2, areaGeometry.Group, constMaxDiameter);
+                        CalculateDiameter(areaGeometry);
+
+                        if (areaGeometry.Valid)
+                        {
+                            DrawDiameter(areaGeometry.MinDiameter.point1, areaGeometry.MinDiameter.point2, areaGeometry.Group, constMinDiameter);
+                            DrawDiameter(areaGeometry.MaxDiameter.point1, areaGeometry.MaxDiameter.point2, areaGeometry.Group, constMaxDiameter);
+                        }
                     }
                 }
             }
+            else
+            {
+                if (areaGeometry.Valid)
+                {
+                    DrawDiameter(areaGeometry.MinDiameter.point1, areaGeometry.MinDiameter.point2, areaGeometry.Group, constMinDiameter);
+                    DrawDiameter(areaGeometry.MaxDiameter.point1, areaGeometry.MaxDiameter.point2, areaGeometry.Group, constMaxDiameter);
+                }
+            }
         }
+
         private Path DrawCurve(List<Point> pointList, bool isClosed, int group)
         {
             Path path = null;
@@ -451,9 +466,12 @@ namespace RaywattApp.Common.Annotation
                         }
                     }
 
-                    path.MouseLeftButtonDown += path_MouseLeftButtonDown;
+                    if (IsEditOn)
+                    {
+                        path.MouseLeftButtonDown += path_MouseLeftButtonDown;
 
-                    DrawContourToBackBuffer(path);
+                        DrawContourToBackBuffer(path);
+                    }
                 }
 
                 this.canvas.Children.Add(path);
@@ -733,7 +751,7 @@ namespace RaywattApp.Common.Annotation
         private void DrawContourToBackBuffer(Path path)
         {
             Path copiedPath = new Path();
-            copiedPath.Style = path.Style;
+            copiedPath.Style = (Style)this.Resources["StylePathBackground"];
             copiedPath.Data = path.Data;
             copiedPath.Stroke = Brushes.White;
             copiedPath.Name = "BackBuffer_" + path.Name;

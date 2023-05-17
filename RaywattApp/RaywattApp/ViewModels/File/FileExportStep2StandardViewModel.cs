@@ -67,9 +67,6 @@ namespace RaywattApp.ViewModels.File
             if (FileExport.StillFrame == null)
                 FileExport.StillFrame = Constants.ExportStillFrameJPEG;
 
-            if (FileExport.Measurements == null)
-                FileExport.Measurements = Constants.ExportMeasurementShowAll;
-
             if (FileExport.DiskType == null)
                 DiskType = Constants.FileDiskExternal;
             else

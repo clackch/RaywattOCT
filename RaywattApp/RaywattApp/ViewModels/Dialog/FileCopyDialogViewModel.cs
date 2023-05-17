@@ -15,6 +15,14 @@ using static RayCoreWrapper.RayExportWrapper;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using RaywattApp.Views.Dialog;
+using System.IO;
+using System.Windows.Controls;
+using System.Windows.Media.Imaging;
+using System.Windows.Media;
+using SharpDX.Win32;
+using SharpDX.DXGI;
+using System.Threading;
 
 namespace RaywattApp.ViewModels.Dialog
 {
@@ -204,7 +212,7 @@ namespace RaywattApp.ViewModels.Dialog
                              select g;
 
             int index = 0, studyId, seriesNumber;
-            double progressConvert = 100.0 / 2 / PatientCases.Count / progressDivide;
+            double progressConvert = 100.0 / 3 / PatientCases.Count / progressDivide;
 
             foreach (var patient in patientGrp)
             {
@@ -235,21 +243,10 @@ namespace RaywattApp.ViewModels.Dialog
                             exportIndices = FileExport.BookmarkedFrames;
                         }
 
-                        List<Mat> convertedImages = new List<Mat>();
-                        Mat imgLongitude = await CommonUtil.ConvertImage(patientCase.ImageFullPath, exportIndices, convertedImages, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
+                        List<Mat> imgCrossSections = new List<Mat>();
+                        Mat? imgLongitude = await CommonUtil.ConvertImage(patientCase.ImageFullPath, patientCase.IndicatorDegree, imgCrossSections, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
+                        List<Mat> convertedImages = await CommonUtil.MakeImageForExport(patientCase, imgCrossSections, imgLongitude, exportIndices, FileExport, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
 
-                        imgLongitude = FileExport.LModeView ? imgLongitude : null;
-                        Mat? imgLumeProfile = FileExport.LumenProfileView ? lumenProfile : null;
-                        Mat? imgAngio = FileExport.AngioView ? angio : null;
-
-                        List<Measurement>? Measurements = null;
-                        Measurement? LMeasurement = null;
-                        if (FileExport.Measurements != Constants.ExportMeasurementHideAll)
-                        {
-                            Measurements = JsonConvert.DeserializeObject<List<Measurement>>(patientCase.CrossSection);
-                            LMeasurement = JsonConvert.DeserializeObject<Measurement>(patientCase.Longitude);
-                        }
-                
                         await Task.Run(() =>
                         {
                             //Start
@@ -259,26 +256,7 @@ namespace RaywattApp.ViewModels.Dialog
                             RayExportWrapper.DicomImageStart(convertedImages.Count);
                             for (int frame = 0; frame < convertedImages.Count; frame++)
                             {
-                                List<Tuple<Rect, Size2f>>? region = null;
-                                Mat imgExport = CommonUtil.MakeImageForExport(convertedImages[frame], imgLongitude, imgLumeProfile, imgAngio, out region);
-
-                                if (region != null && region.Count > 0)
-                                {
-                                    Rect rectCrossSection = region[region.Count - 1].Item1;
-
-                                    int frameNumber = frame;
-                                    if (FileExport.Material != Constants.ExportMaterialPullback)
-                                    {
-                                        frameNumber = exportIndices[frame];
-                                    }
-                                    DrawAnnotation.DrawMeasurements(imgExport[rectCrossSection], frameNumber, new System.Windows.Size(Constants.CrossSectionSize, Constants.CrossSectionSize), Measurements);
-
-                                    if (imgLongitude != null && region.Count > 1)
-                                    {
-                                        Rect rectLongitude = region[0].Item1;
-                                        DrawAnnotation.DrawMeasurement(imgExport[rectLongitude], new System.Windows.Size(Constants.LongitudeWidth, Constants.LongitudeHeight), LMeasurement);
-                                    }
-                                }
+                                Mat imgExport = convertedImages[frame];
                                 Cv2.CvtColor(imgExport, imgExport, ColorConversionCodes.RGB2BGR);
                                 RayExportWrapper.DicomAddImage(imgExport.Cols, imgExport.Rows, imgExport.Data);
                             }
@@ -322,19 +300,12 @@ namespace RaywattApp.ViewModels.Dialog
 
         private async Task FileSaveStandard()
         {
-            // test data
-            Mat lumenProfile = new Mat(100, 100, MatType.CV_8UC3);
-            Mat angio = new Mat(100, 100, MatType.CV_8UC3);
-            lumenProfile.SetTo(new Scalar(0xfe, 0xfe, 0xfe));
-            angio.SetTo(new Scalar(0xee, 0xee, 0xee));
-
-            string format = (FileExport.Material == Constants.ExportMaterialPullback) ? FileExport.Pullback : FileExport.StillFrame;
-
             foreach (PatientCase patientCase in PatientCases)
             {
+                string format = (FileExport.Material == Constants.ExportMaterialPullback) ? FileExport.Pullback : FileExport.StillFrame;
                 double progressPerCase = 100.0 / PatientCases.Count / progressDivide;
-                double progressConvert = progressPerCase / 2;
-                double progressSave = progressPerCase / 2;
+                double progressConvert = progressPerCase / 3;
+                double progressSave = progressPerCase / 3;
 
                 List<int>? exportIndices = null;
                 if (FileExport.Material == Constants.ExportMaterialCurrent)
@@ -347,44 +318,9 @@ namespace RaywattApp.ViewModels.Dialog
                     exportIndices = FileExport.BookmarkedFrames;
                 }
 
-                List<Mat> convertedImages = new List<Mat>();
-                Mat? imgLongitude = await CommonUtil.ConvertImage(patientCase.ImageFullPath, exportIndices, convertedImages, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
-
-                imgLongitude = FileExport.LModeView ? imgLongitude : null;
-                Mat? imgLumeProfile = FileExport.LumenProfileView ? lumenProfile : null;
-                Mat? imgAngio = FileExport.AngioView ? angio : null;
-
-                List<Measurement>? Measurements = null;
-                Measurement? LMeasurement = null;
-                if (FileExport.Measurements != Constants.ExportMeasurementHideAll)
-                {
-                    Measurements = JsonConvert.DeserializeObject<List<Measurement>>(patientCase.CrossSection);
-                    LMeasurement = JsonConvert.DeserializeObject<Measurement>(patientCase.Longitude);
-                }
-
-                for (int frame = 0; frame < convertedImages.Count; frame++)
-                {
-                    List<Tuple<Rect, Size2f>>? region = null;
-                    convertedImages[frame] = CommonUtil.MakeImageForExport(convertedImages[frame], imgLongitude, imgLumeProfile, imgAngio, out region);
-
-                    if (region != null && region.Count > 0)
-                    {
-                        Rect rectCrossSection = region[region.Count - 1].Item1;
-
-                        int frameNumber = frame;
-                        if (FileExport.Material != Constants.ExportMaterialPullback)
-                        {
-                            frameNumber = exportIndices[frame];
-                        }
-                        DrawAnnotation.DrawMeasurements(convertedImages[frame][rectCrossSection], frameNumber, new System.Windows.Size(Constants.CrossSectionSize, Constants.CrossSectionSize), Measurements);
-
-                        if (imgLongitude != null && region.Count > 1)
-                        {
-                            Rect rectLongitude = region[0].Item1;
-                            DrawAnnotation.DrawMeasurement(convertedImages[frame][rectLongitude], new System.Windows.Size(Constants.LongitudeWidth, Constants.LongitudeHeight), LMeasurement);
-                        }
-                    }
-                }
+                List<Mat> imgCrossSections = new List<Mat>();
+                Mat? imgLongitude = await CommonUtil.ConvertImage(patientCase.ImageFullPath, patientCase.IndicatorDegree, imgCrossSections, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
+                List<Mat> convertedImages = await CommonUtil.MakeImageForExport(patientCase, imgCrossSections, imgLongitude, exportIndices, FileExport, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
 
                 if (format == Constants.ExportPullbackAVI)
                 {
