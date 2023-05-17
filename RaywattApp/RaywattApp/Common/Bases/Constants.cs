@@ -238,6 +238,7 @@ namespace RaywattApp.Common.Bases
         public const string PublicKey = "raywatt07_hwjckklls_298-87-01441";
 
         //Review - 2D - Cross Section
+        public const double OCTImageSize = 1024;
         public const double CrossSectionSize = 620;
         public const double CrossSectionCenter = CrossSectionSize / 2;
         public const double CalciumIndicatorSize = 645;
@@ -366,7 +367,7 @@ namespace RaywattApp.Common.Bases
         public const double MiniMapCanvasSize = 138;
 
         //Zoom
-        public const double ZoomScaleDefault = 1.0;
-        public const double ZoomScaleMax = 2.0;
+        public const double ZoomScaleDefault = CrossSectionSize / OCTImageSize;
+        public const double ZoomScaleMax = ZoomScaleDefault * 2;
     }
 }

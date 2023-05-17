@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using OpenCvSharp;
 using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
+using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.Services;
 using System;
@@ -227,11 +228,11 @@ namespace RaywattApp.ViewModels.Dialog
             {
                 LumenContour lumenContour = new LumenContour();
                 DiameterInfo diameterInfo = new DiameterInfo();
-                diameterInfo.diameter = 0.0;
+                diameterInfo.value = 0.0;
 
-                lumenContour.MlPoints = new List<Point>();
-                lumenContour.MlMaxDiameter = diameterInfo;
-                lumenContour.MlMinDiameter = diameterInfo;
+                lumenContour.MlContour.Points = new List<Point>();
+                lumenContour.MlContour.MaxDiameter = diameterInfo;
+                lumenContour.MlContour.MinDiameter = diameterInfo;
                 lumenContour.Points = new List<Point>();
                 lumenContour.MaxDiameter = diameterInfo;
                 lumenContour.MinDiameter = diameterInfo;
@@ -260,7 +261,7 @@ namespace RaywattApp.ViewModels.Dialog
                 if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenContour))
                 {
                     LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(patientCaseAnnotations[0].LumenContour);
-                    MakeLumenProfileImage(LumenContours);
+                    imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours);
                 }
             }
 
@@ -275,31 +276,6 @@ namespace RaywattApp.ViewModels.Dialog
             }
 
             Measurements = Measurements.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
-        }
-
-        private bool MakeLumenProfileImage(List<LumenContour> lumenContours)
-        {
-            const double totalArea = 512 * 512 * Math.PI;
-
-            if (imglumenProfile == null)
-            {
-                imglumenProfile = new Mat(100, lumenContours.Count, MatType.CV_8UC3);
-            }
-            imglumenProfile.SetTo(new Scalar(0x4f, 0x4f, 0x4f));
-
-            int curFrame = 0;
-            foreach (LumenContour lumenContour in lumenContours)
-            {
-                double area = lumenContour.MlArea;
-
-                int lumenArea = (int)(area / totalArea * imglumenProfile.Rows);
-                int yStart = (imglumenProfile.Rows - lumenArea) / 2;
-
-                Cv2.Line(imglumenProfile, new OpenCvSharp.Point(curFrame, yStart), new OpenCvSharp.Point(curFrame, yStart + lumenArea), new Scalar(0x16, 0x16, 0x16));
-                curFrame++;
-            }
-
-            return true;
         }
 
         private bool DrawLumenProfileImage()

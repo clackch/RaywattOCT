@@ -169,52 +169,6 @@ namespace RaywattApp.Common.Bases
 
             return false;
         }
-        protected bool MakeLumenProfileImage(int totalFrame)
-        {
-            const double totalArea = 512 * 512 * Math.PI;
-
-            for (int curFrame = 0; curFrame < totalFrame; curFrame++)
-            {
-                int num = RayGetNumOfLumenContourPoints(curFrame);
-                if (num > 0)
-                {
-                    IntPtr contour = RayGetLumenContour(curFrame);
-                    Mat matContour = CommonUtil.ByteMemoryToCvMat(contour, 1, num, 2);
-                    double area = Cv2.ContourArea(matContour);
-
-                    int lumenArea = (int)(area / totalArea * imglumenProfile.Rows);
-                    int yStart = (imglumenProfile.Rows - lumenArea) / 2;
-
-                    Cv2.Line(imglumenProfile, new Point(curFrame, yStart), new Point(curFrame, yStart + lumenArea), new Scalar(0x16, 0x16, 0x16));
-                }
-            }
-
-            return true;
-        }
-        protected bool MakeLumenProfileImage(List<LumenContour> lumenContours)
-        {
-            const double totalArea = 512 * 512 * Math.PI;
-
-            if (imglumenProfile == null)
-            {
-                imglumenProfile = new Mat(100, lumenContours.Count, MatType.CV_8UC3);
-            }
-            imglumenProfile.SetTo(new Scalar(0x4f, 0x4f, 0x4f));
-
-            int curFrame = 0;
-            foreach(LumenContour lumenContour in lumenContours)
-            {
-                double area = lumenContour.MlArea;
-
-                int lumenArea = (int)(area / totalArea * imglumenProfile.Rows);
-                int yStart = (imglumenProfile.Rows - lumenArea) / 2;
-
-                Cv2.Line(imglumenProfile, new Point(curFrame, yStart), new Point(curFrame, yStart + lumenArea), new Scalar(0x16, 0x16, 0x16));
-                curFrame++;
-            }
-
-            return true;
-        }
         protected bool DrawLumenProfileImage()
         {
             if (imglumenProfile == null) return false;

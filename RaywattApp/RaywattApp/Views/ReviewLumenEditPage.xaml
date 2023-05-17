@@ -85,7 +85,7 @@
                             <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Stretch="Fill">
                                 <Image.RenderTransform>
                                     <TransformGroup>
-                                        <ScaleTransform ScaleX="{Binding Zoom.ScaleX}" ScaleY="{Binding Zoom.ScaleY}"/>
+                                        <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
                                         <TranslateTransform X="{Binding Zoom.TranslateX}" Y="{Binding Zoom.TranslateY}"/>
                                     </TransformGroup>
                                 </Image.RenderTransform>

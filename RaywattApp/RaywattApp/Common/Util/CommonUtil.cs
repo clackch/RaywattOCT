@@ -15,6 +15,7 @@ using static RaywattOCT.RayCoreWrapper;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Size = OpenCvSharp.Size;
+using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Models;
 using RaywattApp.ViewModels.Dialog;
@@ -491,6 +492,29 @@ namespace RaywattApp.Common.Util
             region.Add(regionCrossSection);
 
             return imgExport;
+        }
+
+        public static Mat MakeLumenProfileImage(List<LumenContour> lumenContours)
+        {
+            const double radius = Constants.OCTImageSize / 2;
+            const double totalArea = radius * radius * Math.PI;
+
+            Mat imglumenProfile = new Mat(100, lumenContours.Count, MatType.CV_8UC3);
+            imglumenProfile.SetTo(new Scalar(0x4f, 0x4f, 0x4f));
+
+            int curFrame = 0;
+            foreach (LumenContour lumenContour in lumenContours)
+            {
+                double area = lumenContour.Area;
+
+                int lumenArea = (int)(area / totalArea * imglumenProfile.Rows);
+                int yStart = (imglumenProfile.Rows - lumenArea) / 2;
+
+                Cv2.Line(imglumenProfile, new Point(curFrame, yStart), new Point(curFrame, yStart + lumenArea), new Scalar(0x16, 0x16, 0x16));
+                curFrame++;
+            }
+
+            return imglumenProfile;
         }
 
         public static async Task SaveStillFrame(Mat image, string rootPath, string fileName, string format, Action<double> progressCallback, double progressIncrease, Action<string> progressTextCallback)
