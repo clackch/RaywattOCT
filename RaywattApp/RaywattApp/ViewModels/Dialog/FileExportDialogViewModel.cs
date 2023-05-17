@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using OpenCvSharp;
 using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
+using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.Services;
 using System;
@@ -260,7 +261,7 @@ namespace RaywattApp.ViewModels.Dialog
                 if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenContour))
                 {
                     LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(patientCaseAnnotations[0].LumenContour);
-                    MakeLumenProfileImage(LumenContours);
+                    imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours);
                 }
             }
 
@@ -275,31 +276,6 @@ namespace RaywattApp.ViewModels.Dialog
             }
 
             Measurements = Measurements.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
-        }
-
-        private bool MakeLumenProfileImage(List<LumenContour> lumenContours)
-        {
-            const double totalArea = 512 * 512 * Math.PI;
-
-            if (imglumenProfile == null)
-            {
-                imglumenProfile = new Mat(100, lumenContours.Count, MatType.CV_8UC3);
-            }
-            imglumenProfile.SetTo(new Scalar(0x4f, 0x4f, 0x4f));
-
-            int curFrame = 0;
-            foreach (LumenContour lumenContour in lumenContours)
-            {
-                double area = lumenContour.MlContour.Area;
-
-                int lumenArea = (int)(area / totalArea * imglumenProfile.Rows);
-                int yStart = (imglumenProfile.Rows - lumenArea) / 2;
-
-                Cv2.Line(imglumenProfile, new OpenCvSharp.Point(curFrame, yStart), new OpenCvSharp.Point(curFrame, yStart + lumenArea), new Scalar(0x16, 0x16, 0x16));
-                curFrame++;
-            }
-
-            return true;
         }
 
         private bool DrawLumenProfileImage()
