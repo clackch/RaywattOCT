@@ -35,11 +35,21 @@ namespace RaywattApp.ViewModels.Dialog
         private int _frameNumber = -1;
 
         [ObservableProperty]
+        private int _displayFrameNumber;
+
+        [ObservableProperty]
         private BitmapSource _crossSectionImage;
+
+        [ObservableProperty]
+        protected double _crossSectionScale = 65;
 
         [ObservableProperty]
         private BitmapSource _longitudeImage;
 
+        [ObservableProperty]
+        private BitmapSource _lumenProfileImage;
+
+        protected Mat imglumenProfile;
         protected Mat imgCrossSectionBackground;
         protected Mat imgCrossSectionMask;
 
@@ -127,7 +137,10 @@ namespace RaywattApp.ViewModels.Dialog
 
             FileExport = fileExport;
 
-            if(fileExport.AngioView || fileExport.Longitude)
+            if(fileExport.Longitude || fileExport.MeasureAuto || fileExport.MeasureManual)
+                SetAnnotation();
+
+            if (fileExport.AngioView || fileExport.Longitude)
             {
                 CrossSectionSize = crossSectionSmall;
 
@@ -137,6 +150,8 @@ namespace RaywattApp.ViewModels.Dialog
                     LongitudeHeight = 105;
                     LongitudeScaleX = LongitudeWidth / Constants.LongitudeWidth;
                     LongitudeScaleY = LongitudeHeight / Constants.LongitudeHeight;
+
+                    DrawLumenProfileImage();
                 }
             }
             else
@@ -149,8 +164,6 @@ namespace RaywattApp.ViewModels.Dialog
 
             if(fileExport.MeasureAuto || fileExport.MeasureManual)
             {
-                SetAnnotation();
-
                 if(fileExport.MeasureManual)
                     MeasurementCommand = Constants.MeasureDrawAll;
             }
@@ -166,6 +179,7 @@ namespace RaywattApp.ViewModels.Dialog
             CrossSectionImage = DrawCrossSectionWithBackground(crossSections[frameNumber], new Scalar(0x0d, 0x0d, 0x0d));
 
             FrameNumber = frameNumber;
+            DisplayFrameNumber = frameNumber + 1;
 
             if (FileExport.MeasureAuto)
                 MeasureAutoframeNumber = frameNumber;
@@ -225,43 +239,28 @@ namespace RaywattApp.ViewModels.Dialog
                 LumenContours.Add(lumenContour);
             }
 
-            if (PatientCase.Bookmark != null && PatientCase.CrossSection != null && PatientCase.Longitude != null && PatientCase.LumenContour != null)
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = PatientCase.Id;
+            IList<PatientCaseAnnotation> patientCaseAnnotations = _sqlManager.SelectPatientCaseAnnotation(sqlParameters);
+
+            if (patientCaseAnnotations != null && patientCaseAnnotations.Count == 1)
             {
-                Measurements = JsonConvert.DeserializeObject<List<Measurement>>(PatientCase.CrossSection);
-
-                Measurement lModeMeasurement = JsonConvert.DeserializeObject<Measurement>(PatientCase.Longitude);
-                LModeLengthGeometries = lModeMeasurement.LengthGeometries;
-                LModeTextGeometries = lModeMeasurement.TextGeometries;
-
-                LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(PatientCase.LumenContour);
-                //MakeLumenProfileImage(LumenContours);
-            }
-            else
-            {
-                Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-                sqlParameters["id"] = PatientCase.Id;
-                IList<PatientCaseAnnotation> patientCaseAnnotations = _sqlManager.SelectPatientCaseAnnotation(sqlParameters);
-
-                if (patientCaseAnnotations != null && patientCaseAnnotations.Count == 1)
+                if (!string.IsNullOrEmpty(patientCaseAnnotations[0].CrossSection))
                 {
-                    if (!string.IsNullOrEmpty(patientCaseAnnotations[0].CrossSection))
-                    {
-                        Measurements = JsonConvert.DeserializeObject<List<Measurement>>(patientCaseAnnotations[0].CrossSection);
-                    }
+                    Measurements = JsonConvert.DeserializeObject<List<Measurement>>(patientCaseAnnotations[0].CrossSection);
+                }
 
-                    if (!string.IsNullOrEmpty(patientCaseAnnotations[0].Longitude))
-                    {
-                        Measurement lModeMeasurement = JsonConvert.DeserializeObject<Measurement>(patientCaseAnnotations[0].Longitude);
-                        LModeLengthGeometries = lModeMeasurement.LengthGeometries;
-                        LModeTextGeometries = lModeMeasurement.TextGeometries;
-                    }
+                if (!string.IsNullOrEmpty(patientCaseAnnotations[0].Longitude))
+                {
+                    Measurement lModeMeasurement = JsonConvert.DeserializeObject<Measurement>(patientCaseAnnotations[0].Longitude);
+                    LModeLengthGeometries = lModeMeasurement.LengthGeometries;
+                    LModeTextGeometries = lModeMeasurement.TextGeometries;
+                }
 
-                    if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenContour))
-                    {
-                        //DeviceStatus.IsLumenDetected = true;
-                        LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(patientCaseAnnotations[0].LumenContour);
-                        //MakeLumenProfileImage(LumenContours);
-                    }
+                if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenContour))
+                {
+                    LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(patientCaseAnnotations[0].LumenContour);
+                    MakeLumenProfileImage(LumenContours);
                 }
             }
 
@@ -276,6 +275,39 @@ namespace RaywattApp.ViewModels.Dialog
             }
 
             Measurements = Measurements.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
+        }
+
+        private bool MakeLumenProfileImage(List<LumenContour> lumenContours)
+        {
+            const double totalArea = 512 * 512 * Math.PI;
+
+            if (imglumenProfile == null)
+            {
+                imglumenProfile = new Mat(100, lumenContours.Count, MatType.CV_8UC3);
+            }
+            imglumenProfile.SetTo(new Scalar(0x4f, 0x4f, 0x4f));
+
+            int curFrame = 0;
+            foreach (LumenContour lumenContour in lumenContours)
+            {
+                double area = lumenContour.MlArea;
+
+                int lumenArea = (int)(area / totalArea * imglumenProfile.Rows);
+                int yStart = (imglumenProfile.Rows - lumenArea) / 2;
+
+                Cv2.Line(imglumenProfile, new OpenCvSharp.Point(curFrame, yStart), new OpenCvSharp.Point(curFrame, yStart + lumenArea), new Scalar(0x16, 0x16, 0x16));
+                curFrame++;
+            }
+
+            return true;
+        }
+
+        private bool DrawLumenProfileImage()
+        {
+            if (imglumenProfile == null) return false;
+
+            LumenProfileImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfile);
+            return true;
         }
     }
 }

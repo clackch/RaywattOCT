@@ -32,6 +32,16 @@
                 <Grid>
                     <!-- Cross Seciton Image -->
                     <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{Binding CrossSectionSize}" Height="{Binding CrossSectionSize}"/>
+                    <!-- Cross Section Info. -->
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="50">
+                        <Label Content="F : " Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}"/>
+                        <Label Content="{Binding DisplayFrameNumber}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Right">
+                        <Separator Width="{Binding CrossSectionScale}" Height="1"/>
+                        <StackPanel Height="4"/>
+                        <Label Content="1 mm" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
+                    </StackPanel>
                     <!-- Lumen Contour-->
                     <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}"  FrameNumber="{Binding MeasureAutoframeNumber}" IsEditOn="False" Zoom="{Binding Zoom}"/>
                     <!-- Measurement -->
@@ -47,7 +57,54 @@
             <StackPanel Grid.Row="1" Visibility="{Binding FileExport.Longitude, Converter={StaticResource BoolToVisibilityConverter}}">
                 <!-- Lumen Profile -->
                 <Grid Width="1024" Height="256" >
-                    <Image x:Name="lumenProfile" Source="{Binding LongitudeImage}" Stretch="Fill"/>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="70"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="70"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Vertical">
+                        <StackPanel Height="76"/>
+                        <Label Content="P" Style="{DynamicResource Pretendard-Semibold-20}" HorizontalAlignment="Center" Foreground="#fcfcfc" Opacity="0.5"/>
+                    </StackPanel>
+                    <Grid Grid.Column="2">
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Height="76"/>
+                            <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" HorizontalAlignment="Center" Foreground="#fcfcfc" Opacity="0.5"/>
+                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="9"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Image Grid.Column="1" Grid.Row="1" Width="12" Height="105" Source="{svgc:SvgImage Source=/res/icon/indicator.svg}" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                        </Grid>
+                    </Grid>
+
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="35"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="24"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Longitude Image -->
+                        <Grid Grid.Row="1" Height="{Binding LongitudeHeight}">
+                            <!-- Lumen Profile -->
+                            <Image Source="{Binding LumenProfileImage}" Stretch="Fill"/>
+                            <!-- L-Mode Indicator -->
+                            <Canvas>
+                                <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitude" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="{x:Static const:Constants.LongitudeIndicatorHeight}" Stretch="None" Canvas.Left="{Binding IndicatorLongitude.X}" Margin="0,-11,0,0"/>
+                            </Canvas>
+                        </Grid>
+                        <!-- Bookmark Scale -->
+                        <ContentControl Grid.Row="2" Template="{DynamicResource LongitudeScaleBar}" Width="{Binding LongitudeWidth}" Tag="{Binding PatientCase.PullbackType}"/>
+                    </Grid>
                 </Grid>
                 <!-- L-Mode -->
                 <Grid Width="1024" Height="256" >
@@ -88,9 +145,9 @@
                         </Grid.RowDefinitions>
 
                         <!-- Longitude Image -->
-                        <Grid x:Name="longitude" Grid.Row="1" Height="{Binding LongitudeHeight}">
+                        <Grid Grid.Row="1" Height="{Binding LongitudeHeight}">
                             <!-- L-Mode -->
-                            <Image x:Name="lMode" Source="{Binding LongitudeImage}" Stretch="Fill"/>
+                            <Image Source="{Binding LongitudeImage}" Stretch="Fill"/>
                             <!-- Measurement -->
                             <annotation:DrawLmodeUtil LModeLengthGeometries="{Binding LModeLengthGeometries}" LModeTextGeometries="{Binding LModeTextGeometries}" InCommand="{Binding MeasurementCommand}">
                                 <annotation:DrawLmodeUtil.RenderTransform>
@@ -113,7 +170,7 @@
 
         <!-- Text -->
         <StackPanel Grid.Column="1">
-            <Grid Margin="20,0,0,0" Width="220" Visibility="{Binding FileExport.MeasureAuto, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Grid Width="256" Visibility="{Binding FileExport.MeasureAuto, Converter={StaticResource BoolToVisibilityConverter}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="40"/>
                     <RowDefinition Height="Auto"/>
@@ -193,7 +250,7 @@
                     </StackPanel>
                 </StackPanel>
             </Grid>
-            <Grid Visibility="{Binding FileExport.MeasureManual, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Grid Width="256" Visibility="{Binding FileExport.MeasureManual, Converter={StaticResource BoolToVisibilityConverter}}">
                 <annotation:DrawListUtil Measurements="{Binding Measurements}" FrameNumber="{Binding MeasureManualframeNumber}"/>
             </Grid>
         </StackPanel>
