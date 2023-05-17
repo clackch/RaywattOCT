@@ -21,10 +21,7 @@ using Point = System.Windows.Point;
 using System.Linq;
 using OpenCvSharp;
 using RaywattApp.Common.Util;
-using System.Threading.Tasks;
 using System.Threading;
-using System.Drawing;
-using System.Windows.Controls;
 using RaywattApp.Common.Annotation.Util;
 
 namespace RaywattApp.ViewModels
@@ -115,6 +112,9 @@ namespace RaywattApp.ViewModels
 
         private List<LumenContour> _lumenContours = new List<LumenContour>();
         public List<LumenContour> LumenContours { get { return _lumenContours; } set { _lumenContours = value; OnPropertyChanged(nameof(LumenContours)); } }
+
+        [ObservableProperty]
+        private Zoom _zoomAngio = new Zoom(Constants.CrossSectionAngio / Constants.OCTImageSize);
 
         private double _lModeIndicatorX;
         public double LModeIndicatorX 

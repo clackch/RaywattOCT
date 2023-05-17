@@ -480,12 +480,7 @@
                                         </Grid>
                                         <!-- Lumen Contour-->
                                         <Grid Grid.Row="1" Margin="24,0,24,0" Width="{x:Static const:Constants.CrossSectionAngio}" Height="{x:Static const:Constants.CrossSectionAngio}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
-                                            <Grid.RenderTransform>
-                                                <TransformGroup>
-                                                    <ScaleTransform ScaleX="{x:Static const:Constants.CrossSectionAngioScale}" ScaleY="{x:Static const:Constants.CrossSectionAngioScale}"/>
-                                                </TransformGroup>
-                                            </Grid.RenderTransform>
-                                            <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}"  FrameNumber="{Binding FrameNumber}" Visibility="{Binding ReviewStatus.IsContourStentOn, Converter={StaticResource BoolToVisibilityConverter}}" IsEditOn="False"/>
+                                            <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}"  FrameNumber="{Binding FrameNumber}" Visibility="{Binding ReviewStatus.IsContourStentOn, Converter={StaticResource BoolToVisibilityConverter}}" IsEditOn="False" Zoom="{Binding ZoomAngio}"/>
                                         </Grid>
 
                                         <!-- Info -->

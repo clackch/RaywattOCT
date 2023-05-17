@@ -53,10 +53,14 @@ namespace RaywattApp.Models
         [ObservableProperty]
         public bool _isCaptured = false;
 
-        public Zoom()
+        public Zoom() : this(Constants.ZoomScaleDefault)
         {
-            ScaleX = Constants.ZoomScaleDefault;
-            ScaleY = Constants.ZoomScaleDefault;
+        }
+
+        public Zoom(double defaultScale)
+        {
+            ScaleX = defaultScale;
+            ScaleY = defaultScale;
             RectLeft = 0;
             RectTop = 0;
             RectWidth = Constants.MiniMapCanvasSize;
