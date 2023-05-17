@@ -401,9 +401,9 @@ namespace RaywattApp.Common.Util
                 Cv2.CvtColor(imgDraw, imgDraw, ColorConversionCodes.RGBA2RGB);
                 Cv2.CopyTo(imgDraw, image, imgBW);
 
-                await Task.Run(() => {
-                    convertedImages.Add(image);
+                convertedImages.Add(image);
 
+                await Task.Run(() => {
                     progressCallback(progress / totalCnt);
                     progressTextCallback(Constants.ExportStatusMakeImage);
                     Thread.Sleep(10);
