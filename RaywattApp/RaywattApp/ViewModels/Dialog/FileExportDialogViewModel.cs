@@ -227,11 +227,11 @@ namespace RaywattApp.ViewModels.Dialog
             {
                 LumenContour lumenContour = new LumenContour();
                 DiameterInfo diameterInfo = new DiameterInfo();
-                diameterInfo.diameter = 0.0;
+                diameterInfo.value = 0.0;
 
-                lumenContour.MlPoints = new List<Point>();
-                lumenContour.MlMaxDiameter = diameterInfo;
-                lumenContour.MlMinDiameter = diameterInfo;
+                lumenContour.MlContour.Points = new List<Point>();
+                lumenContour.MlContour.MaxDiameter = diameterInfo;
+                lumenContour.MlContour.MinDiameter = diameterInfo;
                 lumenContour.Points = new List<Point>();
                 lumenContour.MaxDiameter = diameterInfo;
                 lumenContour.MinDiameter = diameterInfo;
@@ -290,7 +290,7 @@ namespace RaywattApp.ViewModels.Dialog
             int curFrame = 0;
             foreach (LumenContour lumenContour in lumenContours)
             {
-                double area = lumenContour.MlArea;
+                double area = lumenContour.MlContour.Area;
 
                 int lumenArea = (int)(area / totalArea * imglumenProfile.Rows);
                 int yStart = (imglumenProfile.Rows - lumenArea) / 2;
