@@ -35,7 +35,13 @@ namespace RaywattApp.ViewModels.Dialog
         private int _frameNumber = -1;
 
         [ObservableProperty]
+        private int _displayFrameNumber;
+
+        [ObservableProperty]
         private BitmapSource _crossSectionImage;
+
+        [ObservableProperty]
+        protected double _crossSectionScale = 65;
 
         [ObservableProperty]
         private BitmapSource _longitudeImage;
@@ -173,6 +179,7 @@ namespace RaywattApp.ViewModels.Dialog
             CrossSectionImage = DrawCrossSectionWithBackground(crossSections[frameNumber], new Scalar(0x0d, 0x0d, 0x0d));
 
             FrameNumber = frameNumber;
+            DisplayFrameNumber = frameNumber + 1;
 
             if (FileExport.MeasureAuto)
                 MeasureAutoframeNumber = frameNumber;

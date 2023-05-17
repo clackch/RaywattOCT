@@ -32,6 +32,16 @@
                 <Grid>
                     <!-- Cross Seciton Image -->
                     <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{Binding CrossSectionSize}" Height="{Binding CrossSectionSize}"/>
+                    <!-- Cross Section Info. -->
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="50">
+                        <Label Content="F : " Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}"/>
+                        <Label Content="{Binding DisplayFrameNumber}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Right">
+                        <Separator Width="{Binding CrossSectionScale}" Height="1"/>
+                        <StackPanel Height="4"/>
+                        <Label Content="1 mm" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
+                    </StackPanel>
                     <!-- Lumen Contour-->
                     <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}"  FrameNumber="{Binding MeasureAutoframeNumber}" IsEditOn="False" Zoom="{Binding Zoom}"/>
                     <!-- Measurement -->
