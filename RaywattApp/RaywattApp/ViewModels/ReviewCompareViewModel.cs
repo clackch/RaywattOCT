@@ -61,6 +61,12 @@ namespace RaywattApp.ViewModels
         private BitmapSource _lumenProfileImageCompare;
         protected Mat imglumenProfileCompare;
 
+        [ObservableProperty]
+        private int _frameNumberCompare;
+
+        [ObservableProperty]
+        private Zoom _zoom = new Zoom(Constants.CrossSectionCompareSize / Constants.OCTImageSize);
+
         private ICommand _caseSelectCancelCommand;
         public ICommand CaseSelectCancelCommand
         {
@@ -362,6 +368,14 @@ namespace RaywattApp.ViewModels
                 curPosition = Math.Round(curPosition);
                 RaySetSession(session);
                 RayMoveToFrame((int)curPosition);
+
+                if (isCompare)
+                {
+                    FrameNumberCompare = (int)curPosition;
+                }
+                else {
+                    FrameNumber = (int)curPosition;
+                }
             }
         }
 

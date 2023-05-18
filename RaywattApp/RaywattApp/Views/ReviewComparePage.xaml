@@ -11,6 +11,7 @@
       xmlns:behaviors="clr-namespace:RaywattApp.Common.Behaviors"
       xmlns:System="clr-namespace:System;assembly=mscorlib"
       xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+      xmlns:annotation="clr-namespace:RaywattApp.Common.Annotation"
       mc:Ignorable="d" 
       d:DesignHeight="1024" d:DesignWidth="1280"
       Title="ReviewComparePage">
@@ -138,6 +139,7 @@
                     <!-- Before : Cross-section -->
                     <Grid Grid.Column="1" Margin="0,84,40,85">
                         <Image x:Name="crossSectionForCompare" Source="{Binding CrossSectionForCompare}" Width="{x:Static const:Constants.CrossSectionCompareSize}" Height="{x:Static const:Constants.CrossSectionCompareSize}"/>
+                        <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours[1]}" FrameNumber="{Binding FrameNumberCompare}" Visibility="Visible" IsEditOn="False" Zoom="{Binding Zoom}"/>
                         <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Left">
                             <StackPanel Orientation="Horizontal" Width="50">
                                 <Label Content="F : " Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}"/>
@@ -270,6 +272,7 @@
                     <!-- After : Cross-section -->
                     <Grid Grid.Column="1" Margin="0,87,40,82">
                         <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionCompareSize}" Height="{x:Static const:Constants.CrossSectionCompareSize}"/>
+                        <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours[0]}" FrameNumber="{Binding FrameNumber}" Visibility="Visible" IsEditOn="False" Zoom="{Binding Zoom}"/>
                         <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Left">
                             <StackPanel Orientation="Horizontal" Width="50">
                                 <Label Content="F : " Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}"/>
