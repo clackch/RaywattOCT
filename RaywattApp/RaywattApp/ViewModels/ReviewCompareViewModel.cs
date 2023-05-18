@@ -1,17 +1,23 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using log4net;
+using Newtonsoft.Json;
+using OpenCvSharp;
+using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
+using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.Services;
 using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
+using Point = System.Windows.Point;
 
 namespace RaywattApp.ViewModels
 {
@@ -47,6 +53,13 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private int displayFrameNumberCompare;
+
+        [ObservableProperty]
+        private List<LumenContour>[] _lumenContours = new List<LumenContour>[2];
+
+        [ObservableProperty]
+        private BitmapSource _lumenProfileImageCompare;
+        protected Mat imglumenProfileCompare;
 
         private ICommand _caseSelectCancelCommand;
         public ICommand CaseSelectCancelCommand
@@ -105,7 +118,7 @@ namespace RaywattApp.ViewModels
                 Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
                 Patient = (Patient)data["patient"];
                 PatientCase = (PatientCase)data["patientCase"];
-                PrevStatus = (PrevStatus)data["prevStatus"];                
+                PrevStatus = (PrevStatus)data["prevStatus"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
                 ReviewStatus.CurrentPage = Constants.ReviewComparePage;
 
@@ -123,11 +136,24 @@ namespace RaywattApp.ViewModels
                     GetPatientCase(false);
                 }
 
-                //Test -> Degree 설정해줘야, 화면에 들어온 뒤에 Longitude 동작
-                RaySetProperty(Property.LongitudeDegree, PatientCase.IndicatorDegree);
+                SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
+                SetCrossSectionBackground(RaySession.Compare, Constants.CompareBackgroundColor);
 
-                SetCrossSectionBackground(0, Constants.BackgroundColor);
-                SetCrossSectionBackground(1, Constants.CompareBackgroundColor);
+                LumenContours[(int)RaySession.Review] = GetLumenContours(PatientCase.Id);
+                LumenContours[(int)RaySession.Compare] = GetLumenContours(ReviewStatus.SelectedPatientCase.Id);
+
+                imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours[(int)RaySession.Review]);
+                imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(LumenContours[(int)RaySession.Compare]);
+
+                if (DrawLumenProfileImage())
+                {
+                    IndicatorLongitude.IsVisible = Visibility.Visible;
+                }
+                if(imglumenProfileCompare != null)
+                {
+                    LumenProfileImageCompare = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileCompare);
+                    IndicatorCompareLongitude.IsVisible = Visibility.Visible;
+                }
             }
 
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
@@ -143,6 +169,24 @@ namespace RaywattApp.ViewModels
 
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
+        }
+
+        private List<LumenContour> GetLumenContours(string patientCaseId)
+        {
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = patientCaseId;
+            
+            IList<PatientCaseAnnotation> patientCaseAnnotations = _sqlManager.SelectPatientCaseAnnotation(sqlParameters);
+            
+            if (patientCaseAnnotations != null && patientCaseAnnotations.Count == 1)
+            {
+                if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenContour))
+                {
+                    return JsonConvert.DeserializeObject<List<LumenContour>>(patientCaseAnnotations[0].LumenContour);
+                }
+            }
+
+            return null;
         }
 
         protected override void Save()
@@ -185,17 +229,6 @@ namespace RaywattApp.ViewModels
                     if (!IndicatorCompareLongitude.IsCaptured) updateNavigator(crossSectionFrameInfo[1].curFrame, crossSectionFrameInfo[1].totalFrame, true);
 
                     DisplayFrameNumberCompare = crossSectionFrameInfo[1].curFrame + 1;
-                }
-            }
-
-            //TODO - Lumen Profile로 변경 필요 (Indicator 때문에 Test로 L-mode 사용)
-            if (DrawLongitudeImage())
-            {
-                // when generating longitude image is completed
-                if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame)
-                {
-                    IndicatorLongitude.IsVisible = Visibility.Visible;
-                    IndicatorCompareLongitude.IsVisible = Visibility.Visible;
                 }
             }
         }

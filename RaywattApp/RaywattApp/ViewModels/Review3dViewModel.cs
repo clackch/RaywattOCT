@@ -154,7 +154,7 @@ namespace RaywattApp.ViewModels
                 Degree = PatientCase.IndicatorDegree;
 
                 RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
-                SetCrossSectionBackground(0, Constants.BackgroundColor);
+                SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
             }
 
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);

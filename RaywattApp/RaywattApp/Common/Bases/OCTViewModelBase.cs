@@ -135,10 +135,8 @@ namespace RaywattApp.Common.Bases
 
             return true;
         }
-        protected void SetCrossSectionBackground(uint session, int rgbCode) {
-            if (session >= crossSectionBackground.Length) return;
-
-            crossSectionBackground[session] = new Scalar(rgbCode & 0xFF, (rgbCode >> 8) & 0xFF, (rgbCode >> 16) & 0xFF);
+        protected void SetCrossSectionBackground(RaySession session, int rgbCode) {
+            crossSectionBackground[(int)session] = new Scalar(rgbCode & 0xFF, (rgbCode >> 8) & 0xFF, (rgbCode >> 16) & 0xFF);
         }
         protected bool DrawLongitudeImage()
         {

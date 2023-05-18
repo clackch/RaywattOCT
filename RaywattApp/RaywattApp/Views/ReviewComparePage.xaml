@@ -93,7 +93,7 @@
                                 <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" Opacity="0.5"/>
                             </StackPanel>
                             <Grid Grid.Row="1" Grid.Column="1" >
-                                <Image x:Name="longitudeCompare" Source="{Binding LongitudeImage}" Width="{x:Static const:Constants.LongitudeCompareWidth}" Height="{x:Static const:Constants.LongitudeCompareHeight}" Stretch="Fill">
+                                <Image x:Name="longitudeCompare" Source="{Binding LumenProfileImageCompare}" Width="{x:Static const:Constants.LongitudeCompareWidth}" Height="{x:Static const:Constants.LongitudeCompareHeight}" Stretch="Fill">
                                     <i:Interaction.Triggers>
                                         <i:EventTrigger EventName="Loaded">
                                             <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
@@ -202,7 +202,7 @@
                             </StackPanel>
 
                             <Grid Grid.Row="1" Grid.Column="1">
-                                <Image x:Name="longitude" Source="{Binding LongitudeImage}" Width="{x:Static const:Constants.LongitudeCompareWidth}" Height="{x:Static const:Constants.LongitudeCompareHeight}" Stretch="Fill">
+                                <Image x:Name="longitude" Source="{Binding LumenProfileImage}" Width="{x:Static const:Constants.LongitudeCompareWidth}" Height="{x:Static const:Constants.LongitudeCompareHeight}" Stretch="Fill">
                                     <i:Interaction.Triggers>
                                         <i:EventTrigger EventName="Loaded">
                                             <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>

@@ -238,7 +238,7 @@ namespace RaywattApp.ViewModels
 
                 RaySetSession(RaySession.Review);
                 SetAnnotation();
-                SetCrossSectionBackground(0, (ReviewStatus.IsAngioOn) ? Constants.CardBackgroundColor : Constants.BackgroundColor);
+                SetCrossSectionBackground(RaySession.Review, (ReviewStatus.IsAngioOn) ? Constants.CardBackgroundColor : Constants.BackgroundColor);
             }
 
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
@@ -579,7 +579,7 @@ namespace RaywattApp.ViewModels
         {
             ReviewStatus.IsAngioOn = isAngioOn;
 
-            SetCrossSectionBackground(0, (ReviewStatus.IsAngioOn) ? Constants.CardBackgroundColor : Constants.BackgroundColor);
+            SetCrossSectionBackground(RaySession.Review, (ReviewStatus.IsAngioOn) ? Constants.CardBackgroundColor : Constants.BackgroundColor);
 
             if (ReviewStatus.IsAngioOn)
             {
