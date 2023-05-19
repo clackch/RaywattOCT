@@ -687,7 +687,10 @@ namespace RaywattApp.ViewModels
                     }
                     ContourMeasurement contourMeasurement = new ContourMeasurement();
                     contourMeasurement.Measure(LumenContours[curFrame].MlContour, (int) Constants.OCTImageSize, (int) Constants.OCTImageSize);
-                    contourMeasurement.CalculateDiameter(LumenContours[curFrame].MlContour);
+                    if (LumenContours[curFrame].MlContour.Valid)
+                    {
+                        contourMeasurement.CalculateDiameter(LumenContours[curFrame].MlContour);
+                    }
                     LumenContours[curFrame].CopyMlToLumenContour();
                 }
             }

@@ -393,7 +393,7 @@ namespace RaywattApp.Common.Annotation
             }
             this.canvas.Children.Add(lineConnect);
 
-            if (!isEditOn)
+            if (!isEditOn && lumenContour.Valid)
             {
                 DrawDiameter(lumenContour.MinDiameter.point1, lumenContour.MinDiameter.point2, constMinDiameter);
                 DrawDiameter(lumenContour.MaxDiameter.point1, lumenContour.MaxDiameter.point2, constMaxDiameter);
@@ -503,7 +503,10 @@ namespace RaywattApp.Common.Annotation
 
                 ContourMeasurement measurement = new ContourMeasurement();
                 measurement.Measure(LumenContours[FrameNumber], imageContour);
-                measurement.CalculateDiameter(LumenContours[FrameNumber]);
+                if (LumenContours[FrameNumber].Valid)
+                {
+                    measurement.CalculateDiameter(LumenContours[FrameNumber]);
+                }
 
                 lumenContourHistory[FrameNumber].Push(CopyLumenContourToHistory(LumenContours[FrameNumber]));
 

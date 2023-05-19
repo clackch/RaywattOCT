@@ -14,6 +14,7 @@ namespace RaywattApp.Common.Annotation.Models
             MaxDiameter = MlContour.MaxDiameter;
             MeanDiameter = MlContour.MeanDiameter;
             Area = MlContour.Area;
+            Valid = MlContour.Valid;
         }
     }
 }

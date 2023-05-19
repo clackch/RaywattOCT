@@ -23,5 +23,8 @@ namespace RaywattApp.Common.Annotation.Models
 
         [ObservableProperty]
         protected double meanDiameter;
+
+        [ObservableProperty]
+        protected bool valid;
     }
 }
