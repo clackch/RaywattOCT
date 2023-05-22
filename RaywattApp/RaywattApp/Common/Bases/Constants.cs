@@ -217,7 +217,7 @@ namespace RaywattApp.Common.Bases
         public const int CompareBackgroundColor = 0x0d0d0d;
 
         //Update Image Interval (msec)
-        public const double UpdateImageInterval = 20;
+        public const double UpdateImageInterval = 5;
 
         //Update Lumen Profile Inverval (msec)
         public const double UpdateLumenProfileInterval = 20;

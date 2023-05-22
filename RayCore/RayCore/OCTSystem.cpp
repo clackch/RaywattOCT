@@ -1329,14 +1329,16 @@ LRESULT COCTSystem::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 	cv::Mat image;
 	int nSession = wParam;
 	int nFrameInfo = lParam;	// 0 if real time frame
-	int nCurFrame = (nFrameInfo >> 16) & 0xFFFF;
-	int nTotalFrame = nFrameInfo & 0xFFFF;
 	bool isRealTime = (nFrameInfo == 0);
 
 	if (m_curState == RayScannerState::Review) {
 		if (isRealTime) return NOERROR;
 
 		image = m_reviewSession[nSession]->GetImaging()->GetCircleImage();
+
+		int nCurFrame, nTotalFrame;
+		m_reviewSession[nSession]->GetImaging()->GetFrameInfo(nCurFrame, nTotalFrame);
+		nFrameInfo = (nCurFrame << 16) | (nTotalFrame);
 	}
 	else {
 		if (isRealTime == false) return NOERROR;
@@ -1414,7 +1416,8 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 			CUtility::StartThread(threadLumenDetection, m_pThreadLumenDetection, this);
 		}
 
-		CUtility::StartThread(threadGenerateVolume, m_pThreadGenerateVolume, this);
+		// To-Do: Change to OnDemand ver.
+		// CUtility::StartThread(threadGenerateVolume, m_pThreadGenerateVolume, this);
 		break;
 	default:
 		break;
