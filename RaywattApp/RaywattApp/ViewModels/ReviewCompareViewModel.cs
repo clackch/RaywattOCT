@@ -151,13 +151,15 @@ namespace RaywattApp.ViewModels
                 }
 
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
-                SetCrossSectionBackground(RaySession.Compare, Constants.CompareBackgroundColor);
-
                 LumenContours[(int)RaySession.Review] = GetLumenContours(PatientCase.Id);
-                LumenContours[(int)RaySession.Compare] = GetLumenContours(ReviewStatus.SelectedPatientCase.Id);
-
                 imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours[(int)RaySession.Review]);
-                imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(LumenContours[(int)RaySession.Compare]);
+
+                if (ReviewStatus.SelectedPatientCase != null)
+                {
+                    SetCrossSectionBackground(RaySession.Compare, Constants.CompareBackgroundColor);
+                    LumenContours[(int)RaySession.Compare] = GetLumenContours(ReviewStatus.SelectedPatientCase.Id);
+                    imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(LumenContours[(int)RaySession.Compare]);
+                }
 
                 if (DrawLumenProfileImage())
                 {
