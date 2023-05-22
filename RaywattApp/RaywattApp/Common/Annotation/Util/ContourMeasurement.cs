@@ -46,6 +46,23 @@ namespace RaywattApp.Common.Annotation.Util
             calculateCenterOfMass(contour, cvPoints);
             findAllPoints();
         }
+        private void validate(Contour contour, Point[][] contours)
+        {
+            Mat imageFill = contourImage.EmptyClone();
+            imageFill.SetTo(Scalar.White);
+
+            Cv2.DrawContours(imageFill, contours, -1, Scalar.Black, -1);
+
+            Mat imageCenter = imageFill.Clone();
+            imageCenter.At<byte>((int)contour.CenterOfMass.Y, (int)contour.CenterOfMass.X) = 0xff;
+
+            Mat imageSub = imageCenter - imageFill;
+
+            Mat points = new Mat();
+            Cv2.FindNonZero(imageSub, points);
+
+            contour.Valid = (points.Rows == 1);
+        }
         private void calculateCenterOfMass(Contour contour, Point[] cvPoints)
         {
             Moments moments = Cv2.Moments(cvPoints);
@@ -54,6 +71,10 @@ namespace RaywattApp.Common.Annotation.Util
             centerOfMass.Y = moments.M01 / moments.M00;
 
             contour.CenterOfMass = centerOfMass;
+
+            Point[][] cvContours = new Point[1][];
+            cvContours[0] = cvPoints;
+            validate(contour, cvContours);
         }
 
         private void calculateArea(Contour contour, Point[] cvPoints)

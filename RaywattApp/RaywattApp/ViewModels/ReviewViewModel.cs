@@ -224,7 +224,7 @@ namespace RaywattApp.ViewModels
 
                 RaySetSession(RaySession.Review);
                 SetAnnotation();
-                SetCrossSectionBackground(0, (ReviewStatus.IsAngioOn) ? Constants.CardBackgroundColor : Constants.BackgroundColor);
+                SetCrossSectionBackground(RaySession.Review, (ReviewStatus.IsAngioOn) ? Constants.CardBackgroundColor : Constants.BackgroundColor);
             }
 
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
@@ -569,7 +569,7 @@ namespace RaywattApp.ViewModels
         {
             ReviewStatus.IsAngioOn = isAngioOn;
 
-            SetCrossSectionBackground(0, (ReviewStatus.IsAngioOn) ? Constants.CardBackgroundColor : Constants.BackgroundColor);
+            SetCrossSectionBackground(RaySession.Review, (ReviewStatus.IsAngioOn) ? Constants.CardBackgroundColor : Constants.BackgroundColor);
 
             if (ReviewStatus.IsAngioOn)
             {
@@ -677,7 +677,10 @@ namespace RaywattApp.ViewModels
                     }
                     ContourMeasurement contourMeasurement = new ContourMeasurement();
                     contourMeasurement.Measure(LumenContours[curFrame].MlContour, (int) Constants.OCTImageSize, (int) Constants.OCTImageSize);
-                    contourMeasurement.CalculateDiameter(LumenContours[curFrame].MlContour);
+                    if (LumenContours[curFrame].MlContour.Valid)
+                    {
+                        contourMeasurement.CalculateDiameter(LumenContours[curFrame].MlContour);
+                    }
                     LumenContours[curFrame].CopyMlToLumenContour();
                 }
             }

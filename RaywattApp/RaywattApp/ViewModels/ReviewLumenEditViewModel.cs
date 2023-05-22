@@ -147,7 +147,7 @@ namespace RaywattApp.ViewModels
 
                 LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(PatientCase.LumenContour);
 
-                SetCrossSectionBackground(0, Constants.CardBackgroundColor);
+                SetCrossSectionBackground(RaySession.Review, Constants.CardBackgroundColor);
 
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);

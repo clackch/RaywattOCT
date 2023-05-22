@@ -436,8 +436,11 @@ namespace RaywattApp.Common.Annotation
                 polygon.MouseLeave += Polygon_MouseLeave;
                 this.canvas.Children.Add(polygon);
 
-                DrawDiameter(lumenContour.MinDiameter.point1, lumenContour.MinDiameter.point2, constMinDiameter);
-                DrawDiameter(lumenContour.MaxDiameter.point1, lumenContour.MaxDiameter.point2, constMaxDiameter);
+                if (lumenContour.Valid)
+                {
+                    DrawDiameter(lumenContour.MinDiameter.point1, lumenContour.MinDiameter.point2, constMinDiameter);
+                    DrawDiameter(lumenContour.MaxDiameter.point1, lumenContour.MaxDiameter.point2, constMaxDiameter);
+                }
             }
         }
 
@@ -544,7 +547,10 @@ namespace RaywattApp.Common.Annotation
 
                 ContourMeasurement measurement = new ContourMeasurement();
                 measurement.Measure(LumenContours[FrameNumber], imageContour);
-                measurement.CalculateDiameter(LumenContours[FrameNumber]);
+                if (LumenContours[FrameNumber].Valid)
+                {
+                    measurement.CalculateDiameter(LumenContours[FrameNumber]);
+                }
 
                 lumenContourHistory[FrameNumber].Push(CopyLumenContourToHistory(LumenContours[FrameNumber]));
 

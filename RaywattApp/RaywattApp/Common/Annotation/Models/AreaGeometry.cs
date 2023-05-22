@@ -10,9 +10,6 @@ namespace RaywattApp.Common.Annotation.Models
         private bool isClosed;
         public bool IsClosed { get { return isClosed; } set { isClosed = value; } }
 
-        private bool valid = false;
-        public bool Valid { get { return valid; } set { valid = value; } }
-
         private Path path;
         public Path Path { get { return path; } set { path = value; } }
     }
