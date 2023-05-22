@@ -63,7 +63,15 @@
                 <!-- Cross Section Part -->
                 <Grid x:Name="crossSection" Grid.Row="1">
                     <!-- Cross Section -->
-                    <Grid Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                    <Grid x:Name="crossSectionImage" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Loaded">
+                                <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Grid}}"/>
+                            </i:EventTrigger>
+                            <i:EventTrigger EventName="SizeChanged">
+                                <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Grid}}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
                         <Grid.Clip>
                             <RectangleGeometry RadiusX="10" RadiusY="10">
                                 <RectangleGeometry.Rect>
@@ -72,19 +80,11 @@
                             </RectangleGeometry>
                         </Grid.Clip>
                         <!-- Cross Seciton Image -->
-                        <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="Loaded">
-                                    <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
-                                </i:EventTrigger>
-                                <i:EventTrigger EventName="SizeChanged">
-                                    <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
+                        <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
                             <Image.RenderTransform>
                                 <TransformGroup>
                                     <ScaleTransform ScaleX="{Binding ReviewStatus.Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding ReviewStatus.Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
-                                    <TranslateTransform X="{Binding ReviewStatus.Zoom.TranslateX}" Y="{Binding ReviewStatus.Zoom.TranslateY}"/>
+                                    <TranslateTransform X="{Binding ReviewStatus.Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding ReviewStatus.Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}}"/>
                                 </TransformGroup>
                             </Image.RenderTransform>
                         </Image>
@@ -310,7 +310,7 @@
                                         </StackPanel>
                                     </Grid>
                                     <Grid Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}">
-                                        <annotation:DrawListUtil Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" OutFrameNumber="{Binding OutFrameNumber, Mode=TwoWay}" OutCommand="{Binding MeasurementCommand, Mode=TwoWay}"/>
+                                        <annotation:DrawListUtil Measurements="{Binding Measurements}" FrameNumber="{Binding FrameNumber}" OutFrameNumber="{Binding OutFrameNumber, Mode=TwoWay}" OutCommand="{Binding MeasurementCommand, Mode=TwoWay}"/>
                                     </Grid>
                                 </Grid>
                             </Grid>
@@ -480,7 +480,7 @@
                                         </Grid>
                                         <!-- Lumen Contour-->
                                         <Grid Grid.Row="1" Margin="24,0,24,0" Width="{x:Static const:Constants.CrossSectionAngio}" Height="{x:Static const:Constants.CrossSectionAngio}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
-                                            <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}"  FrameNumber="{Binding FrameNumber}" Visibility="{Binding ReviewStatus.IsContourStentOn, Converter={StaticResource BoolToVisibilityConverter}}" IsEditOn="False" Zoom="{Binding ZoomAngio}"/>
+                                            <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}"  FrameNumber="{Binding FrameNumber}" IsDrawOn="{Binding ReviewStatus.IsContourStentOn}" IsEditOn="False" Zoom="{Binding ZoomAngio}"/>
                                         </Grid>
 
                                         <!-- Info -->
@@ -651,12 +651,14 @@
 
                 <!-- Lumen Contour-->
                 <Grid Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                    <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}"  FrameNumber="{Binding FrameNumber}" Visibility="{Binding ReviewStatus.IsContourStentOn, Converter={StaticResource BoolToVisibilityConverter}}" IsEditOn="False" Zoom="{Binding ReviewStatus.Zoom}"/>
+                    <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" FrameNumber="{Binding FrameNumber}" IsDrawOn="{Binding ReviewStatus.IsContourStentOn}" IsEditOn="False" Zoom="{Binding ReviewStatus.Zoom}"/>
                 </Grid>
 
                 <!-- Measurement -->
-                <annotation:DrawUtil Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" Measurements="{Binding Measurements}" FrameNumber="{Binding MeasurementFrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" CommandOff="{Binding MeasurementCommandOff, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" Zoom="{Binding ReviewStatus.Zoom}" IsEditOn="True"/>
-
+                <Grid Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                    <annotation:DrawUtil Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" IsDrawOn="{Binding ReviewStatus.IsMeasurementOn}" Measurements="{Binding Measurements}" FrameNumber="{Binding FrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" CommandOff="{Binding MeasurementCommandOff, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" Zoom="{Binding ReviewStatus.Zoom}" IsEditOn="True"/>
+                </Grid>
+                
                 <!-- Mini Map -->
                 <Grid Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                     <Border Width="{x:Static const:Constants.MiniMapBorderSize}" Height="{x:Static const:Constants.MiniMapBorderSize}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="16" BorderBrush="{DynamicResource GrayscaleGray8Brush}" BorderThickness="1" CornerRadius="10" Visibility="{Binding ReviewStatus.Zoom.Visibility}">

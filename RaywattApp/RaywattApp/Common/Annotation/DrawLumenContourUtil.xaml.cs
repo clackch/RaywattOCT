@@ -70,8 +70,6 @@ namespace RaywattApp.Common.Annotation
 
         private Mat imageContour = new Mat();
 
-        private OpenCvSharp.Rect contourBounds;
-
         public bool IsContourMouseOver
         {
             get { return (bool)GetValue(IsContourMouseOverProperty); }
@@ -144,6 +142,15 @@ namespace RaywattApp.Common.Annotation
         private static readonly DependencyProperty InCommandProperty =
             DependencyProperty.Register("InCommand", typeof(string), typeof(DrawLumenContourUtil), new PropertyMetadata(ReceiveCommand));
 
+        public bool IsDrawOn
+        {
+            get { return (bool)GetValue(IsDrawOnProperty); }
+            set { this.SetValue(IsDrawOnProperty, value); }
+        }
+
+        private static readonly DependencyProperty IsDrawOnProperty =
+            DependencyProperty.Register("IsDrawOn", typeof(bool), typeof(DrawLumenContourUtil), new PropertyMetadata(DrawPropertyChanged));
+
         //---------------------------------------------------------------------------------------------------- Constructor
         public DrawLumenContourUtil()
         {
@@ -164,7 +171,7 @@ namespace RaywattApp.Common.Annotation
             var drawUtil = dependencyObject as DrawLumenContourUtil;
             
             if (drawUtil == null || drawUtil.LumenContours == null)
-                return;                       
+                return;
 
             if (!drawUtil.isInit && drawUtil.IsEditOn)
             {
@@ -184,7 +191,28 @@ namespace RaywattApp.Common.Annotation
             }
 
             drawUtil.CurrentLumenContour = drawUtil.LumenContours[frameNumber];
-            drawUtil.DrawLumenContour(drawUtil.LumenContours[frameNumber], drawUtil.IsEditOn);
+
+            if(drawUtil.IsEditOn || drawUtil.IsDrawOn)
+                drawUtil.DrawLumenContour(drawUtil.LumenContours[frameNumber], drawUtil.IsEditOn);
+        }
+
+        private static void DrawPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
+        {
+            bool isDrawOn = (bool)dependencyPropertyChangedEventArgs.NewValue;
+
+            var drawUtil = dependencyObject as DrawLumenContourUtil;
+
+            if (drawUtil == null || drawUtil.LumenContours == null || drawUtil.FrameNumber < 0)
+                return;
+
+            if (isDrawOn)
+            {
+                drawUtil.DrawLumenContour(drawUtil.CurrentLumenContour, drawUtil.IsEditOn);
+            }
+            else
+            {
+                drawUtil.canvas.Children.Clear();
+            }
         }
 
         private static void ReceiveCommand(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
@@ -315,6 +343,16 @@ namespace RaywattApp.Common.Annotation
             IsContourMouseOver = false;
         }
 
+        private void Polygon_MouseEnter(object sender, MouseEventArgs e)
+        {
+            IsContourMouseOver = true;
+        }
+
+        private void Polygon_MouseLeave(object sender, MouseEventArgs e)
+        {
+            IsContourMouseOver = false;
+        }
+
         //---------------------------------------------------------------------------------------------------- Function
         private void ActivateEvent()
         {
@@ -354,49 +392,55 @@ namespace RaywattApp.Common.Annotation
             if (isEditOn)
             {
                 contourLines.Clear();
-            }
 
-            //Contour Lines
-            for (int i = 0; i < pointList.Count - 1; i++)
-            {
-                Line line = new Line();
-                line.Name = constContourLine + "_" + i;
-                line.Style = (Style)this.Resources["StyleLine"];
-                line.X1 = pointList[i].X;
-                line.Y1 = pointList[i].Y;
-                line.X2 = pointList[i + 1].X;
-                line.Y2 = pointList[i + 1].Y;
-                line.MouseEnter += Line_MouseEnter;
-                line.MouseLeave += Line_MouseLeave;
-                if (isEditOn)
+                //Contour Lines
+                for (int i = 0; i < pointList.Count - 1; i++)
                 {
+                    Line line = new Line();
+                    line.Name = constContourLine + "_" + i;
+                    line.Style = (Style)this.Resources["StyleLine"];
+                    line.X1 = pointList[i].X;
+                    line.Y1 = pointList[i].Y;
+                    line.X2 = pointList[i + 1].X;
+                    line.Y2 = pointList[i + 1].Y;
+                    line.MouseEnter += Line_MouseEnter;
+                    line.MouseLeave += Line_MouseLeave;
                     line.MouseLeftButtonDown += Line_MouseLeftButtonDown;
                     contourLines.Add(line);
+                    this.canvas.Children.Add(line);
                 }
-                this.canvas.Children.Add(line);
-            }
 
-            //Contour Line Closed
-            Line lineConnect = new Line();
-            lineConnect.Name = constContourLine + "_" + (pointList.Count - 1);
-            lineConnect.Style = (Style)this.Resources["StyleLine"];
-            lineConnect.X1 = pointList[pointList.Count - 1].X;
-            lineConnect.Y1 = pointList[pointList.Count - 1].Y;
-            lineConnect.X2 = pointList[0].X;
-            lineConnect.Y2 = pointList[0].Y;
-            lineConnect.MouseEnter += Line_MouseEnter;
-            lineConnect.MouseLeave += Line_MouseLeave;
-            if (isEditOn)
-            {
+                //Contour Line Closed
+                Line lineConnect = new Line();
+                lineConnect.Name = constContourLine + "_" + (pointList.Count - 1);
+                lineConnect.Style = (Style)this.Resources["StyleLine"];
+                lineConnect.X1 = pointList[pointList.Count - 1].X;
+                lineConnect.Y1 = pointList[pointList.Count - 1].Y;
+                lineConnect.X2 = pointList[0].X;
+                lineConnect.Y2 = pointList[0].Y;
+                lineConnect.MouseEnter += Line_MouseEnter;
+                lineConnect.MouseLeave += Line_MouseLeave;
                 lineConnect.MouseLeftButtonDown += Line_MouseLeftButtonDown;
                 contourLines.Add(lineConnect);
+                this.canvas.Children.Add(lineConnect);
             }
-            this.canvas.Children.Add(lineConnect);
-
-            if (!isEditOn && lumenContour.Valid)
+            else
             {
-                DrawDiameter(lumenContour.MinDiameter.point1, lumenContour.MinDiameter.point2, constMinDiameter);
-                DrawDiameter(lumenContour.MaxDiameter.point1, lumenContour.MaxDiameter.point2, constMaxDiameter);
+                Polygon polygon = new Polygon();
+                polygon.Style = (Style)this.Resources["StylePolygon"];
+                foreach (Point point in pointList)
+                {
+                    polygon.Points.Add(point);
+                }
+                polygon.MouseEnter += Polygon_MouseEnter;
+                polygon.MouseLeave += Polygon_MouseLeave;
+                this.canvas.Children.Add(polygon);
+
+                if (lumenContour.Valid)
+                {
+                    DrawDiameter(lumenContour.MinDiameter.point1, lumenContour.MinDiameter.point2, constMinDiameter);
+                    DrawDiameter(lumenContour.MaxDiameter.point1, lumenContour.MaxDiameter.point2, constMaxDiameter);
+                }
             }
         }
 
@@ -543,13 +587,17 @@ namespace RaywattApp.Common.Annotation
 
             OpenCvSharp.Point[][] contours;
             HierarchyIndex[] hierarchy;
-            Cv2.FindContours(imageContour, out contours, out hierarchy, RetrievalModes.List, ContourApproximationModes.ApproxSimple);
+            Cv2.FindContours(imageContour, out contours, out hierarchy, RetrievalModes.CComp, ContourApproximationModes.ApproxSimple);
 
-            //_log.Debug(contours.Length);
-            //Cv2.ImShow(name, imageContour);
-            //Cv2.WaitKey(1);
+            Mat imgInnerContour = new Mat(1024, 1024, MatType.CV_8UC1);
+            for (int i = 0; i < contours.Length; i++)
+            {
+                if (hierarchy[i].Parent != -1)
+                    Cv2.DrawContours(imgInnerContour, contours, i, Scalar.White, -1);
+            }
+            Cv2.FindContours(imgInnerContour, out contours, out hierarchy, RetrievalModes.Tree, ContourApproximationModes.ApproxSimple);
 
-            return contours.Length == 2 ? true : false;
+            return contours.Length == 1 ? true : false;
         }
 
         private void DrawLumenContourPoint(Point point, int index)

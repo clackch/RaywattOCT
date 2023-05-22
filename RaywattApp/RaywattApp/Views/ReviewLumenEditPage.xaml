@@ -86,7 +86,7 @@
                                 <Image.RenderTransform>
                                     <TransformGroup>
                                         <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
-                                        <TranslateTransform X="{Binding Zoom.TranslateX}" Y="{Binding Zoom.TranslateY}"/>
+                                        <TranslateTransform X="{Binding Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}}"/>
                                     </TransformGroup>
                                 </Image.RenderTransform>
                             </Image>

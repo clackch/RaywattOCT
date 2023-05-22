@@ -65,20 +65,6 @@ namespace RaywattApp.ViewModels
         private Thread? threadWaitLumenDetection = null;
         private bool runWaitLumenDetection = false;
 
-        private int measurementFrameNumber = -1;
-        public int MeasurementFrameNumber 
-        { 
-            get { return measurementFrameNumber; } 
-            set 
-            { 
-                if(ReviewStatus.IsMeasurementOn)
-                {
-                    measurementFrameNumber = value;
-                    OnPropertyChanged(nameof(MeasurementFrameNumber));
-                }
-            } 
-        }
-
         private int outFrameNumber;
         public int OutFrameNumber
         {
@@ -356,8 +342,8 @@ namespace RaywattApp.ViewModels
 
                 if (frameworkElement.Name.Equals("crossSectionImage"))
                 {
-                    crossSectionCenterBig.X = point.X + (frameworkElement.ActualWidth * ReviewStatus.Zoom.ScaleX / 2);
-                    crossSectionCenterBig.Y = point.Y + (frameworkElement.ActualHeight * ReviewStatus.Zoom.ScaleY / 2);
+                    crossSectionCenterBig.X = point.X + (frameworkElement.ActualWidth / 2);
+                    crossSectionCenterBig.Y = point.Y + (frameworkElement.ActualHeight / 2);
                 }
                 else if (frameworkElement.Name.Equals("crossSectionImageSmall"))
                 {
@@ -555,7 +541,11 @@ namespace RaywattApp.ViewModels
         private void ToggleLongitude(bool isLumenProfile)
         {
             ReviewStatus.IsLumenProfile = isLumenProfile;
-            IndicatorCrossSection.IsVisible = (!isLumenProfile && ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault) ? Visibility.Visible : Visibility.Collapsed;
+            
+            if(ReviewStatus.IsAngioOn)
+                IndicatorCrossSection.IsVisible = isLumenProfile ? Visibility.Collapsed : Visibility.Visible;
+            else
+                IndicatorCrossSection.IsVisible = (!isLumenProfile && ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault) ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void CoRegistration()
@@ -586,7 +576,8 @@ namespace RaywattApp.ViewModels
                 RightSideBarExpand = Constants.RightSideBarExpandAngioSize;
                 ReviewStatus.IsMeasurementOn = false;
                 ReviewStatus.IsCalciumOn = true;
-                IndicatorCrossSection.IsVisible = Visibility.Visible;
+                if(!ReviewStatus.IsLumenProfile)
+                    IndicatorCrossSection.IsVisible = Visibility.Visible;
             }
             else
             {
@@ -641,7 +632,6 @@ namespace RaywattApp.ViewModels
                 if (!IndicatorLongitude.IsCaptured) updateNavigator(crossSectionFrameInfo[0].curFrame, crossSectionFrameInfo[0].totalFrame);
 
                 FrameNumber = crossSectionFrameInfo[0].curFrame;
-                MeasurementFrameNumber = FrameNumber;
             }
             if (DrawLongitudeImage())
             {

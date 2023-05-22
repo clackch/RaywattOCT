@@ -98,6 +98,15 @@ namespace RaywattApp.Common.Annotation
         private static readonly DependencyProperty IsEditOnProperty =
             DependencyProperty.Register("IsEditOn", typeof(bool), typeof(DrawUtil), new PropertyMetadata(default(bool)));
 
+        public bool IsDrawOn
+        {
+            get { return (bool)GetValue(IsDrawOnProperty); }
+            set { this.SetValue(IsDrawOnProperty, value); }
+        }
+
+        private static readonly DependencyProperty IsDrawOnProperty =
+            DependencyProperty.Register("IsDrawOn", typeof(bool), typeof(DrawUtil), new PropertyMetadata(DrawPropertyChanged));
+
         //---------------------------------------------------------------------------------------------------- Constructor
         public DrawUtil()
         {
@@ -181,7 +190,27 @@ namespace RaywattApp.Common.Annotation
             drawUtil.lengthGeometries = drawUtil.Measurements[frameNumber].LengthGeometries;
             drawUtil.textGeometries = drawUtil.Measurements[frameNumber].TextGeometries;
 
-            drawUtil.DrawAll();
+            if (drawUtil.IsDrawOn)
+                drawUtil.DrawAll();
+        }
+
+        private static void DrawPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
+        {
+            bool isDrawOn = (bool)dependencyPropertyChangedEventArgs.NewValue;
+
+            var drawUtil = dependencyObject as DrawUtil;
+
+            if (drawUtil == null || drawUtil.Measurements == null)
+                return;
+
+            if (isDrawOn)
+            {
+                drawUtil.DrawAll();
+            }
+            else
+            {
+                drawUtil.canvas.Children.Clear();
+            }
         }
 
         private void erase_canvas_MouseRightButtonDown(object sender, MouseEventArgs e)

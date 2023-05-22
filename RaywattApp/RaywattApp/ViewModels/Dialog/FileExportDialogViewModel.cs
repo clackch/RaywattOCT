@@ -82,11 +82,13 @@ namespace RaywattApp.ViewModels.Dialog
         private List<LumenContour> _lumenContours = new List<LumenContour>();
         public List<LumenContour> LumenContours { get { return _lumenContours; } set { _lumenContours = value; OnPropertyChanged(nameof(LumenContours)); } }
 
-        private double crossSectionBig = 1024;
         private double crossSectionSmall = 500;
 
         [ObservableProperty]
         private double _crossSectionSize;
+
+        [ObservableProperty]
+        private double _crossSectionImageSize;
 
         [ObservableProperty]
         private double _longitudeWidth;
@@ -101,13 +103,13 @@ namespace RaywattApp.ViewModels.Dialog
         private double _longitudeScaleY;
 
         [ObservableProperty]
-        private Zoom _zoom = new Zoom();
+        private Zoom _zoom;
 
         [ObservableProperty]
-        private int _measureAutoframeNumber = -1;
+        private int _measureAutoFrameNumber = -1;
 
         [ObservableProperty]
-        private int _measureManualframeNumber = -1;
+        private int _measureManualFrameNumber = -1;
 
         [ObservableProperty]
         private string _measurementCommand;
@@ -143,7 +145,8 @@ namespace RaywattApp.ViewModels.Dialog
 
             if (fileExport.AngioView || fileExport.Longitude)
             {
-                CrossSectionSize = crossSectionSmall;
+                CrossSectionSize = Constants.OCTImageSize / 2;
+                CrossSectionImageSize = crossSectionSmall;
 
                 if (fileExport.Longitude)
                 {
@@ -157,11 +160,11 @@ namespace RaywattApp.ViewModels.Dialog
             }
             else
             {
-                CrossSectionSize = crossSectionBig;
+                CrossSectionSize = Constants.OCTImageSize;
+                CrossSectionImageSize = Constants.OCTImageSize;
             }
 
-            Zoom.ScaleX = CrossSectionSize / crossSectionBig;
-            Zoom.ScaleY = CrossSectionSize / crossSectionBig;
+            Zoom = new Zoom(CrossSectionImageSize / Constants.OCTImageSize);
 
             if(fileExport.MeasureAuto || fileExport.MeasureManual)
             {
@@ -183,10 +186,10 @@ namespace RaywattApp.ViewModels.Dialog
             DisplayFrameNumber = frameNumber + 1;
 
             if (FileExport.MeasureAuto)
-                MeasureAutoframeNumber = frameNumber;
+                MeasureAutoFrameNumber = frameNumber;
 
             if(FileExport.MeasureManual)
-                MeasureManualframeNumber = frameNumber;
+                MeasureManualFrameNumber = frameNumber;
 
             updateNavigator(frameNumber, this.crossSections.Count);
         }
