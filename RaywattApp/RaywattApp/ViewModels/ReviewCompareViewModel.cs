@@ -67,6 +67,8 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private Zoom _zoom = new Zoom(Constants.CrossSectionCompareSize / Constants.OCTImageSize);
 
+        private int indicatorLockOffset;
+
         private ICommand _caseSelectCancelCommand;
         public ICommand CaseSelectCancelCommand
         {
@@ -89,6 +91,12 @@ namespace RaywattApp.ViewModels
         public ICommand CmdViewSizeChanged
         {
             get { return this._cmdViewSizeChanged ?? (this._cmdViewSizeChanged = new RelayCommand<object>(ViewSizeChanged)); }
+        }
+
+        private ICommand _cmdIndicatorLock;
+        public ICommand CmdIndicatorLock
+        { 
+            get { return this._cmdIndicatorLock ?? (this._cmdIndicatorLock = new RelayCommand(IndicatorLock)); }
         }
 
         public ReviewCompareViewModel(SqlManager sqlManager, IDialogService dialogService) : base(sqlManager, dialogService)
@@ -234,7 +242,8 @@ namespace RaywattApp.ViewModels
                 {
                     if (!IndicatorCompareLongitude.IsCaptured) updateNavigator(crossSectionFrameInfo[1].curFrame, crossSectionFrameInfo[1].totalFrame, true);
 
-                    DisplayFrameNumberCompare = crossSectionFrameInfo[1].curFrame + 1;
+                    FrameNumberCompare = crossSectionFrameInfo[1].curFrame;
+                    DisplayFrameNumberCompare = FrameNumberCompare + 1;
                 }
             }
         }
@@ -328,8 +337,7 @@ namespace RaywattApp.ViewModels
 
                 if (x >= 0 && x < Constants.LongitudeCompareWidth)
                 {
-                    indicator.X = x - Constants.LongitudeIndicatorWidth / 2;
-                    setCurrentFrame(x, indicator.IsCompare);
+                    setCurrentFrame(indicator, x);
                 }
             }
         }
@@ -356,20 +364,52 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private void setCurrentFrame(double navigatorPosition, bool isCompare)
+        private void IndicatorLock()
+        {
+            indicatorLockOffset = FrameNumberCompare - FrameNumber;
+        }
+
+        private void setCurrentFrame(Indicator indicator, double navigatorPosition)
         {
             double curPosition = navigatorPosition / Constants.LongitudeCompareWidth;
-            RaySession session = (isCompare) ? RaySession.Compare : RaySession.Review;
+            RaySession session = (indicator.IsCompare) ? RaySession.Compare : RaySession.Review;
             FrameInfo frameInfo = crossSectionFrameInfo[(int)session];
 
             if (frameInfo != null)
             {             
                 curPosition *= (frameInfo.totalFrame - 1);
                 curPosition = Math.Round(curPosition);
+
+                if (IsIndicatorLockOn)
+                {
+                    RaySession syncSession = (indicator.IsCompare) ? RaySession.Review : RaySession.Compare;
+                    int diff = indicatorLockOffset;
+                    int syncPosition = (indicator.IsCompare) ? (int)curPosition - diff : (int)curPosition + diff;
+                    FrameInfo syncInfo = (indicator.IsCompare) ? crossSectionFrameInfo[(int)RaySession.Review] : crossSectionFrameInfo[(int)RaySession.Compare];
+
+                    if (syncInfo == null) return;
+                    if (syncPosition < 0 || syncPosition >= syncInfo.totalFrame) return;
+
+                    RaySetSession(syncSession);
+                    RayMoveToFrame(syncPosition);
+                    _log.Debug("diff : " + diff);
+
+                    if (indicator.IsCompare)
+                    {
+                        FrameNumber = (int)syncPosition;
+                    }
+                    else
+                    {
+                        FrameNumberCompare = (int)syncPosition;
+                    }
+                }
+
                 RaySetSession(session);
                 RayMoveToFrame((int)curPosition);
 
-                if (isCompare)
+                indicator.X = navigatorPosition - Constants.LongitudeIndicatorWidth / 2;
+
+                if (indicator.IsCompare)
                 {
                     FrameNumberCompare = (int)curPosition;
                 }

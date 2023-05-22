@@ -156,7 +156,7 @@
 
                 <!-- Indicator Lock -->
                 <StackPanel Grid.Row="1" HorizontalAlignment="Right" Margin="0,10,20,0">
-                    <component:IconToggleButton Style="{DynamicResource ToggleButtonWithText}" Icon="indicatorLock" Height="32" Content="{Binding [Indicator Lock], Source={StaticResource L10N}}" IsChecked="{Binding IsIndicatorLockOn}"/>
+                    <component:IconToggleButton Style="{DynamicResource ToggleButtonWithText}" Icon="indicatorLock" Height="32" Content="{Binding [Indicator Lock], Source={StaticResource L10N}}" IsChecked="{Binding IsIndicatorLockOn}" Command="{Binding CmdIndicatorLock}"/>
                 </StackPanel>
 
                 <Grid Grid.Row="2">
