@@ -152,7 +152,7 @@
             <Canvas.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform ScaleX="{Binding Zoom.ScaleX, ElementName=UserControl}" ScaleY="{Binding Zoom.ScaleY, ElementName=UserControl}"/>
-                    <TranslateTransform X="{Binding Zoom.TranslateX, ElementName=UserControl}" Y="{Binding Zoom.TranslateY, ElementName=UserControl}"/>
+                    <TranslateTransform X="{Binding Zoom.TranslateX, ElementName=UserControl, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding Zoom.TranslateY, ElementName=UserControl, Converter={StaticResource CrossSectionScaleConverter}}"/>
                 </TransformGroup>
             </Canvas.RenderTransform>
         </Canvas>

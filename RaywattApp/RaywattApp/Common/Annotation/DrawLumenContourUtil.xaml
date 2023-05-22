@@ -41,6 +41,15 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+        <Style TargetType="Polygon" x:Key="StylePolygon">
+            <Setter Property="Stroke" Value="White"/>
+            <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThickness}}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsContourMouseOver, ElementName=UserControl}" Value="True">
+                    <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThicknessBold}}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
         <Style TargetType="Path" x:Key="StylePath">
             <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThickness}}"/>
             <Setter Property="Stroke" Value="White"/>
@@ -74,7 +83,7 @@
             <Canvas.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform ScaleX="{Binding Zoom.ScaleX, ElementName=UserControl}" ScaleY="{Binding Zoom.ScaleY, ElementName=UserControl}"/>
-                    <TranslateTransform X="{Binding Zoom.TranslateX, ElementName=UserControl}" Y="{Binding Zoom.TranslateY, ElementName=UserControl}"/>
+                    <TranslateTransform X="{Binding Zoom.TranslateX, ElementName=UserControl, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding Zoom.TranslateY, ElementName=UserControl, Converter={StaticResource CrossSectionScaleConverter}}"/>
                 </TransformGroup>
             </Canvas.RenderTransform>
         </Canvas>
