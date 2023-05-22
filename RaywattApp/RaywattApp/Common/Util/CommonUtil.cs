@@ -418,7 +418,7 @@ namespace RaywattApp.Common.Util
                 await Task.Run(() => {
                     progressCallback(progress / totalCnt);
                     progressTextCallback(Constants.ExportStatusMakeImage);
-                    Thread.Sleep(10);
+                    Thread.Sleep(100);
                 });
             }
             window.Close();
