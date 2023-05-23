@@ -74,6 +74,9 @@ void CConfiguration::Initialize(tstring configFile)
 	this->volume.size = ::GetPrivateProfileInt(_T("Volume"), _T("Size"), 600, configFilePath.c_str());
 	this->volume.threshold = ::GetPrivateProfileInt(_T("Volume"), _T("Threshold"), 50, configFilePath.c_str());
 
+	// [Log]
+	::GetPrivateProfileString(_T("Log"), _T("LogRootPath"), _T(""), this->logRootPath, sizeof(this->logRootPath), configFilePath.c_str());
+
 	isInit = true;
 }
 
