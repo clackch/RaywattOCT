@@ -1,6 +1,5 @@
 #pragma once
 #include "OCTImaging.h"
-#include <plog/Log.h>
 
 class CTIFFImaging : public COCTImaging
 {

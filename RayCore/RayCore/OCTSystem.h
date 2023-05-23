@@ -8,7 +8,6 @@
 #include <tuple>
 #include <opencv2/opencv.hpp>
 #include <time.h>
-#include <plog/Log.h>
 #include "plog/Initializers/RollingFileInitializer.h"
 
 typedef enum {
