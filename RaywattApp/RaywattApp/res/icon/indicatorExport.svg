@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="30" height="157" viewBox="0 0 30 157">
+    <defs>
+        <filter id="8hlfq5ylta" x="0" y="0" width="30" height="30" filterUnits="userSpaceOnUse">
+            <feOffset dy="3"/>
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feFlood flood-opacity=".161"/>
+            <feComposite operator="in" in2="blur"/>
+            <feComposite in="SourceGraphic"/>
+        </filter>
+        <filter id="59wctp5njb" x="0" y="127" width="30" height="30" filterUnits="userSpaceOnUse">
+            <feOffset dy="3"/>
+            <feGaussianBlur stdDeviation="3" result="blur-2"/>
+            <feFlood flood-opacity=".161"/>
+            <feComposite operator="in" in2="blur-2"/>
+            <feComposite in="SourceGraphic"/>
+        </filter>
+    </defs>
+    <g data-name="그룹 10352">
+        <g style="filter:url(#8hlfq5ylta)">
+            <path data-name="패스 2597" d="M0 2.6v6.01l6 5.99 6-5.99V2.6z" transform="translate(9 3.4)" style="fill:#b1b1b1"/>
+        </g>
+        <g style="filter:url(#59wctp5njb)">
+            <g data-name="패스 2598" style="fill:none">
+                <path d="M0 0v6.011L6 12l6-5.989V0z" style="stroke:none" transform="rotate(180 10.5 72.5)"/>
+                <path d="M2 2v3.181l4 3.993 4-3.993V2H2M0 0h12v6.01L6 12 0 6.01V0z" style="fill:#b1b1b1;stroke:none" transform="rotate(180 10.5 72.5)"/>
+            </g>
+        </g>
+        <path data-name="선 53" transform="translate(15 13.5)" style="stroke:#b1b1b1;stroke-dasharray:2;fill:none" d="M0 0v123"/>
+    </g>
+</svg>

@@ -67,6 +67,9 @@ namespace RaywattApp.ViewModels.Dialog
         [ObservableProperty]
         private PatientCase _patientCase;
 
+        [ObservableProperty]
+        private ObservableCollection<AreaGeometry> _currAreaGeometries;
+
         private List<Measurement> measurements = new List<Measurement>();
         public List<Measurement> Measurements { get { return measurements; } set { measurements = value; OnPropertyChanged(nameof(Measurements)); } }
 
@@ -82,7 +85,11 @@ namespace RaywattApp.ViewModels.Dialog
         private List<LumenContour> _lumenContours = new List<LumenContour>();
         public List<LumenContour> LumenContours { get { return _lumenContours; } set { _lumenContours = value; OnPropertyChanged(nameof(LumenContours)); } }
 
-        private double crossSectionSmall = 500;
+        [ObservableProperty]
+        private double _crossSectionPartWidth;
+
+        [ObservableProperty]
+        private double _textPartWidth;
 
         [ObservableProperty]
         private double _crossSectionSize;
@@ -91,19 +98,13 @@ namespace RaywattApp.ViewModels.Dialog
         private double _crossSectionImageSize;
 
         [ObservableProperty]
-        private double _longitudeWidth;
-
-        [ObservableProperty]
-        private double _longitudeHeight;
-
-        [ObservableProperty]
-        private double _longitudeScaleX;
-
-        [ObservableProperty]
-        private double _longitudeScaleY;
+        private Visibility _measureSeparator;
 
         [ObservableProperty]
         private Zoom _zoom;
+
+        [ObservableProperty]
+        private Zoom _longitudeZoom;
 
         [ObservableProperty]
         private int _measureAutoFrameNumber = -1;
@@ -122,8 +123,11 @@ namespace RaywattApp.ViewModels.Dialog
             _sqlManager = sqlManager;
 
             IndicatorLongitude = new Indicator();
-            IndicatorLongitude.X = Constants.LongitudeIndicatorWidth / 2;
+            IndicatorLongitude.X = 12 / 2;
             IndicatorLongitude.IsVisible = Visibility.Visible;
+
+            TextPartWidth = 0;
+            MeasureSeparator = Visibility.Collapsed;
 
             CurrentLumenContour = new LumenContour();
         }
@@ -145,32 +149,42 @@ namespace RaywattApp.ViewModels.Dialog
 
             if (fileExport.AngioView || fileExport.Longitude)
             {
-                CrossSectionSize = Constants.OCTImageSize / 2;
-                CrossSectionImageSize = crossSectionSmall;
+                CrossSectionPartWidth = Constants.ExportCrossSectionSmall;
+                CrossSectionSize = Constants.ExportCrossSectionSmall;
+                CrossSectionImageSize = Constants.ExportCrossSectionImageSmall;
 
                 if (fileExport.Longitude)
-                {
-                    LongitudeWidth = 884;
-                    LongitudeHeight = 105;
-                    LongitudeScaleX = LongitudeWidth / Constants.LongitudeWidth;
-                    LongitudeScaleY = LongitudeHeight / Constants.LongitudeHeight;
-
                     DrawLumenProfileImage();
-                }
+                if (!fileExport.AngioView)
+                    CrossSectionPartWidth = Constants.ExportLongitudeWidth;
             }
             else
             {
-                CrossSectionSize = Constants.OCTImageSize;
-                CrossSectionImageSize = Constants.OCTImageSize;
+                CrossSectionPartWidth = Constants.ExportCrossSectionBig;
+                CrossSectionSize = Constants.ExportCrossSectionBig;
+                CrossSectionImageSize = Constants.ExportCrossSectionBig;
+
+                if (fileExport.MeasureAuto || fileExport.MeasureManual)
+                    CrossSectionImageSize = Constants.ExportCrossSectionImageBig;
             }
+
+            if (fileExport.MeasureAuto || fileExport.MeasureManual)
+            {
+                if(CrossSectionPartWidth == Constants.ExportCrossSectionBig)
+                    CrossSectionPartWidth = Constants.ExportLongitudeWidth;
+                TextPartWidth = Constants.ExportTextPartSize;
+
+                if (fileExport.MeasureManual)
+                    MeasurementCommand = Constants.MeasureDrawAll;                
+            }
+
+            if(fileExport.MeasureAuto && fileExport.MeasureManual)
+                MeasureSeparator = Visibility.Visible;
 
             Zoom = new Zoom(CrossSectionImageSize / Constants.OCTImageSize);
-
-            if(fileExport.MeasureAuto || fileExport.MeasureManual)
-            {
-                if(fileExport.MeasureManual)
-                    MeasurementCommand = Constants.MeasureDrawAll;
-            }
+            LongitudeZoom = new Zoom();
+            LongitudeZoom.ScaleX = Constants.ExportLongitudeImageWidth / Constants.LongitudeWidth;
+            LongitudeZoom.ScaleY = Constants.ExportLongitudeImageHeight / Constants.LongitudeHeight;
         }
 
         public void SetFinalize()
@@ -188,8 +202,11 @@ namespace RaywattApp.ViewModels.Dialog
             if (FileExport.MeasureAuto)
                 MeasureAutoFrameNumber = frameNumber;
 
-            if(FileExport.MeasureManual)
+            if (FileExport.MeasureManual)
+            {
                 MeasureManualFrameNumber = frameNumber;
+                CurrAreaGeometries = Measurements[frameNumber].AreaGeometries;
+            }
 
             updateNavigator(frameNumber, this.crossSections.Count);
         }
@@ -219,8 +236,8 @@ namespace RaywattApp.ViewModels.Dialog
         private void updateNavigator(int curFrame, int totalFrame)
         {
             double curPosition = (double)curFrame / (totalFrame - 1);
-            curPosition *= LongitudeWidth;
-            IndicatorLongitude.X = curPosition - Constants.LongitudeIndicatorWidth / 2;
+            curPosition *= Constants.ExportLongitudeImageWidth;
+            IndicatorLongitude.X = curPosition - 12 / 2;
             IndicatorLongitude.CenterX = curPosition;
         }
 

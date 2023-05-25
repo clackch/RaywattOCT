@@ -1,6 +1,7 @@
 ﻿using log4net;
 using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
+using RaywattApp.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -82,6 +83,15 @@ namespace RaywattApp.Common.Annotation
         private static readonly DependencyProperty LModeIndicatorXProperty =
             DependencyProperty.Register("LModeIndicatorX", typeof(double), typeof(DrawLmodeUtil), new PropertyMetadata(default(double)));
 
+        public Zoom Zoom
+        {
+            get { return (Zoom)GetValue(ZoomProperty); }
+            set { SetValue(ZoomProperty, value); }
+        }
+
+        public static readonly DependencyProperty ZoomProperty =
+            DependencyProperty.Register("Zoom", typeof(Zoom), typeof(DrawLmodeUtil), new PropertyMetadata(null));
+
         //---------------------------------------------------------------------------------------------------- Constructor
         public DrawLmodeUtil()
         {
@@ -108,6 +118,9 @@ namespace RaywattApp.Common.Annotation
 
             if (drawLmodeUtil.textGeometries == null)
                 drawLmodeUtil.textGeometries = drawLmodeUtil.LModeTextGeometries;
+
+            if (drawLmodeUtil.Zoom == null)
+                drawLmodeUtil.Zoom = new Zoom(1);
 
             string[] command = drawLmodeUtil.InCommand.Split("|");
 

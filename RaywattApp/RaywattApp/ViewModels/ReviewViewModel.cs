@@ -603,7 +603,8 @@ namespace RaywattApp.ViewModels
 
             if (ReviewStatus.Zoom.ZoomIn())
             {
-                MeasurementCommand = Constants.MeasureZoomIn;
+                if(ReviewStatus.IsMeasurementOn)
+                    MeasurementCommand = Constants.MeasureZoomIn;
                 IndicatorCrossSection.IsVisible = Visibility.Collapsed;
                 ReviewStatus.IsCalciumOn = false;
             }
@@ -613,7 +614,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ZoomOut");
 
-            if (ReviewStatus.Zoom.ZoomOut())
+            if (ReviewStatus.Zoom.ZoomOut() && ReviewStatus.IsMeasurementOn)
                 MeasurementCommand = Constants.MeasureZoomOut;
 
             if(ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault)
