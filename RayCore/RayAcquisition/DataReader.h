@@ -15,13 +15,14 @@ public:
 	CDataReader();
 	virtual ~CDataReader();
 
-	int Initialize(tstring strDataFilePath, int nDataSize, int nHeaderSize);
+	int Initialize(tstring strDataFilePath, int nDataSize);
 	virtual char* GetSample(int nIndex);
 	virtual void AddFrame(void* pFrame) {}
 
-	static OCTHeader ReadHeader(tstring strFilePath);
+	OCTHeader ReadHeader(tstring strFilePath);
 protected:
 	virtual void finalize();
 	virtual bool readFrame(int nIndex);
+	bool readExtraData(HANDLE hFile, OCTHeader::ExtraData extraData, int nSize);
 };
 

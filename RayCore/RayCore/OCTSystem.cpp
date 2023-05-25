@@ -3,6 +3,7 @@
 #include "Utility.h"
 #include "Configuration.h"
 #include "OCTImaging.h"
+#include "LabImaging.h"
 #include "DataWriter.h"
 #include "CutViewManager.h"
 #include "VolumeGenerator.h"
@@ -82,13 +83,13 @@ RayError COCTSystem::Start() {
 
 	IImaging::Setting settingPullback = config.imaging;
 	settingPullback.Set(settingPullback.nAScan, config.acquisition.nLaserSpeed / (config.bldcMotor.velocityPullback / 60));
-	m_pImagingPullback = CImagingSession::CreateColorImaging(this, settingPullback, ImagingType::Default);
+	m_pImagingPullback = CImagingSession::CreateColorImaging(this, settingPullback, nullptr, ImagingType::Default);
 	m_pImagingPullback->SetSession(SESSION_REALTIME);
 	m_pImagingPullback->Start();
 
 	IImaging::Setting settingLiveView = config.imaging;
 	settingLiveView.Set(settingLiveView.nAScan, config.acquisition.nLaserSpeed / (config.bldcMotor.velocityLiveView / 60));
-	m_pImagingLiveView = CImagingSession::CreateColorImaging(this, settingLiveView, ImagingType::Default);
+	m_pImagingLiveView = CImagingSession::CreateColorImaging(this, settingLiveView, nullptr, ImagingType::Default);
 	m_pImagingLiveView->SetSession(SESSION_REALTIME);
 	m_pImagingLiveView->Start();
 
@@ -745,7 +746,10 @@ bool COCTSystem::GetIsPaused()
 UINT COCTSystem::GetImageWidth() 
 {
 	if (m_openedSession != nullptr) return m_openedSession->GetImageWidth();
-	else return m_reviewSession[m_curSession]->GetImageWidth();
+	else {
+		if (m_curSession == SESSION_UNKNOWN || m_reviewSession[m_curSession] == nullptr) return 0;
+		return m_reviewSession[m_curSession]->GetImageWidth();
+	}
 }
 
 /*
@@ -754,7 +758,10 @@ UINT COCTSystem::GetImageWidth()
 UINT COCTSystem::GetImageHeight() 
 {
 	if (m_openedSession != nullptr) return m_openedSession->GetImageHeight();
-	else return m_reviewSession[m_curSession]->GetImageHeight();
+	else {
+		if (m_curSession == SESSION_UNKNOWN || m_reviewSession[m_curSession] == nullptr) return 0;
+		return m_reviewSession[m_curSession]->GetImageHeight();
+	}
 }
 
 /*
@@ -763,7 +770,10 @@ UINT COCTSystem::GetImageHeight()
 UINT COCTSystem::GetImageChannels() 
 {
 	if (m_openedSession != nullptr) return m_openedSession->GetImageChannels();
-	else return m_reviewSession[m_curSession]->GetImageChannels();
+	else {
+		if (m_curSession == SESSION_UNKNOWN || m_reviewSession[m_curSession] == nullptr) return 0;
+		return m_reviewSession[m_curSession]->GetImageChannels();
+	}
 }
 
 /*
@@ -772,7 +782,10 @@ UINT COCTSystem::GetImageChannels()
 UINT COCTSystem::GetImageDepth()
 {
 	if (m_openedSession != nullptr) return m_openedSession->GetImageDepth();
-	else return m_reviewSession[m_curSession]->GetImageDepth();
+	else {
+		if (m_curSession == SESSION_UNKNOWN || m_reviewSession[m_curSession] == nullptr) return 0;
+		return m_reviewSession[m_curSession]->GetImageDepth();
+	}
 }
 
 /*
@@ -781,7 +794,10 @@ UINT COCTSystem::GetImageDepth()
 UINT COCTSystem::GetLongitudeImageWidth()
 {
 	if (m_openedSession != nullptr) return m_openedSession->GetCutViewWidth();
-	else return m_reviewSession[m_curSession]->GetCutViewWidth();
+	else {
+		if (m_curSession == SESSION_UNKNOWN || m_reviewSession[m_curSession] == nullptr) return 0;
+		return m_reviewSession[m_curSession]->GetCutViewWidth();
+	}
 }
 
 /*
@@ -790,7 +806,10 @@ UINT COCTSystem::GetLongitudeImageWidth()
 UINT COCTSystem::GetLongitudeImageHeight()
 {
 	if (m_openedSession != nullptr) return m_openedSession->GetCutViewHeight();
-	else return m_reviewSession[m_curSession]->GetCutViewHeight();
+	else {
+		if (m_curSession == SESSION_UNKNOWN || m_reviewSession[m_curSession] == nullptr) return 0;
+		return m_reviewSession[m_curSession]->GetCutViewHeight();
+	}
 }
 
 /*
@@ -799,7 +818,10 @@ UINT COCTSystem::GetLongitudeImageHeight()
 UINT COCTSystem::GetLongitudeImageChannels()
 {
 	if (m_openedSession != nullptr) return m_openedSession->GetCutViewChannels();
-	else return m_reviewSession[m_curSession]->GetCutViewChannels();
+	else {
+		if (m_curSession == SESSION_UNKNOWN || m_reviewSession[m_curSession] == nullptr) return 0;
+		return m_reviewSession[m_curSession]->GetCutViewChannels();
+	}
 }
 
 /*
@@ -891,15 +913,31 @@ UINT COCTSystem::threadService(LPVOID param) {
 UINT COCTSystem::threadSaveRaw(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	tstring strSaveFilePath = pSystem->m_strFilePath;
-	CDataWriter* pDataWriter = (CDataWriter*)pSystem->m_reviewSession[SESSION_REALTIME]->GetDataManager();
+	CImagingSession* pSession = pSystem->m_reviewSession[SESSION_REALTIME];
+	CDataWriter* pDataWriter = (CDataWriter*)pSession->GetDataManager();
+	COCTImaging* pImaging = pSession->GetImaging();
+	ImagingType type = pSession->GetImagingType();
 	const int nNumOfSamples = pDataWriter->GetNumOfSamples();
 
 	int nFrame = 0;
 	pSystem->postMessage(WM_UPDATE_SAVE_RAW, 0, nNumOfSamples);
 
 	IImaging::Setting settingPullback = pSystem->m_pImagingPullback->GetSetting();
+	UCHAR extraData = (UCHAR)OCTHeader::ExtraData::Dispersion;
+	if (type == ImagingType::LabImaging)
+	{
+		extraData |= (UCHAR)OCTHeader::ExtraData::Background;
+	}
+
 	pDataWriter->StartSave(strSaveFilePath);
-	pDataWriter->WriteHeader(OCTHeader::Type::TimeSignal, OCTHeader::DataType::UShort, OCTHeader::Channels::Single, settingPullback.nAScan, settingPullback.nBScan);
+	pDataWriter->WriteHeader(OCTHeader::Type::TimeSignal, OCTHeader::DataType::UShort, OCTHeader::Channels::Single, settingPullback.nAScan, settingPullback.nBScan, extraData);
+	pDataWriter->WriteExtraData(pImaging->GetCalibrationData(), settingPullback.nAScan * 2 * sizeof(int));
+	if (type == ImagingType::LabImaging)
+	{
+		USHORT* pBackgroundData = ((CLabImaging*)pImaging)->GetBackground();
+		pDataWriter->WriteExtraData(pBackgroundData, settingPullback.nBufferSize * sizeof(USHORT));
+	}
+
 	for (nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadSaveRaw->isRun; nFrame++) {
 		pDataWriter->WriteFrame(nFrame);
 
@@ -930,7 +968,7 @@ UINT COCTSystem::threadGenerateVolume(LPVOID param) {
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
 	// prepare imaging
-	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr, pSession->GetImaging()->GetSetting(), imagingType);
+	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr, pSession->GetImaging()->GetSetting(), pDataManager, imagingType);
 
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadGenerateVolume->isRun; nFrame++) {
 		char* pBuffer = pDataManager->GetSample(nFrame);
@@ -963,7 +1001,7 @@ UINT COCTSystem::threadLumenDetection(LPVOID param) {
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
 	// prepare imaging
-	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr, pSession->GetImaging()->GetSetting(), imagingType);
+	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr, pSession->GetImaging()->GetSetting(), pDataManager, imagingType);
 
 	vLumen.clear();
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadLumenDetection->isRun; nFrame++) {
@@ -1021,10 +1059,17 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
 	CStepMotorController* pPullbackMotor = pSystem->m_pStepMotor[STEP_MOTOR_PULLBACK];
-
-	CDataWriter *pDataWriter = new CDataWriter();
 	IImaging::Setting settingPullback = pSystem->m_pImagingPullback->GetSetting();
-	pDataWriter->Initialize(settingPullback.nAScan * settingPullback.nBScan * sizeof(unsigned short));
+
+	CDataWriter* pDataWriter = new CDataWriter();
+	pDataWriter->Initialize(settingPullback.nBufferSize * sizeof(USHORT));
+	pDataWriter->AddExtraData(OCTHeader::ExtraData::Dispersion, pSystem->m_pImagingPullback->GetCalibrationData(), settingPullback.nAScan * 2 * sizeof(int));
+	if (ImagingType::Default == ImagingType::LabImaging)
+	{
+		pDataWriter->AddExtraData(OCTHeader::ExtraData::Background, 
+			((CLabImaging*)pSystem->m_pImagingPullback)->GetBackground(), settingPullback.nBufferSize * sizeof(USHORT));
+	}
+
 	pSystem->m_pAcqDevice->SetWriter(pDataWriter);
 	pSystem->restartAcqDevice(pSystem->m_pImagingPullback);
 

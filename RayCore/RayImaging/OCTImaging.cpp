@@ -32,7 +32,7 @@ COCTImaging::COCTImaging(Setting setting, CMessageService* pMsg) {
 	m_waitForFringes = true;
 	m_pFringesBuffer = nullptr;
 
-	calibration = new CCalibration();
+	calibration = nullptr;
 
 	fringes32f = nullptr;
 	fringes32fAverage = nullptr;
@@ -66,10 +66,11 @@ COCTImaging::~COCTImaging() {
 	if (calibration != nullptr) delete calibration;
 }
 
-void COCTImaging::Initialize(tstring calibFile) {
+void COCTImaging::Initialize(CCalibration* calibration) {
 	releaseMemory();
 	allocateMemory();
-	calibration->Initialize(calibFile, m_setting.nAScan, m_setting.nFFTLength);
+
+	this->calibration = calibration;
 
 	releaseCircularizeMap();
 	initCircularizeMap(m_setting.nOutputLength, m_setting.nBScan, m_setting.nOutputLength, m_setting.nCircleSize, m_setting.nCircleSize, 2.0f);
@@ -103,6 +104,11 @@ int COCTImaging::Stop() {
 	CUtility::StopThread(m_pThread);
 
 	return NOERROR;
+}
+void* COCTImaging::GetCalibrationData() {
+	if (calibration == nullptr) return nullptr;
+
+	return calibration->data;
 }
 void COCTImaging::DoAsyncRender(char* fringes) {
 	if (m_pThread == nullptr || m_pThread->isRun == false) return;
