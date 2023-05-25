@@ -123,7 +123,7 @@ namespace RaywattApp.ViewModels.Dialog
             _sqlManager = sqlManager;
 
             IndicatorLongitude = new Indicator();
-            IndicatorLongitude.X = 12 / 2;
+            IndicatorLongitude.X = Constants.ExportLongitudeIndicatorWidth / 2;
             IndicatorLongitude.IsVisible = Visibility.Visible;
 
             TextPartWidth = 0;
@@ -237,7 +237,7 @@ namespace RaywattApp.ViewModels.Dialog
         {
             double curPosition = (double)curFrame / (totalFrame - 1);
             curPosition *= Constants.ExportLongitudeImageWidth;
-            IndicatorLongitude.X = curPosition - 12 / 2;
+            IndicatorLongitude.X = curPosition - Constants.ExportLongitudeIndicatorWidth / 2;
             IndicatorLongitude.CenterX = curPosition;
         }
 

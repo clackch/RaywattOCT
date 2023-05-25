@@ -187,6 +187,7 @@ namespace RaywattApp.Common.Bases
         public const double ExportLongitudeImageHeight = 140;
         public const double ExportAngioSize = 677;
         public const double ExportTextPartSize = 566;
+        public const double ExportLongitudeIndicatorWidth = 12;
 
         //File Icon
         public const string FileIconDrive = "drive";
