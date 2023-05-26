@@ -67,6 +67,25 @@ COCTSystem::~COCTSystem() {
 	Stop();
 }
 
+void COCTSystem::SetLogger(TCHAR* logRootPath) {
+
+	time_t timer = time(nullptr);
+	tm t;
+	errno_t err = localtime_s(&t, &timer);
+
+	char rootPath[MAX_PATH];
+	WideCharToMultiByte(CP_ACP, 0, logRootPath, MAX_PATH, rootPath, MAX_PATH, nullptr, nullptr);
+
+	char logFile[_MAX_PATH];
+	sprintf(logFile, "%s\\core_%d-%02d-%02d.log", rootPath, (t.tm_year + 1900), (t.tm_mon + 1), t.tm_mday);
+
+#ifdef DEBUG
+	plog::init(plog::debug, logFile);
+#else
+	plog::init(plog::info, logFile);
+#endif
+}
+
 /*
 * Start
 */
@@ -77,6 +96,8 @@ RayError COCTSystem::Start() {
 	if (!config.IsInit()) {
 		config.Initialize(_T(".\\raycore.ini"));
 	}
+
+	SetLogger(config.logRootPath);
 
 	CUtility::StartThread(threadService, m_pThreadService, this);
 
@@ -1414,7 +1435,7 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 			CUtility::StartThread(threadLumenDetection, m_pThreadLumenDetection, this);
 		}
 
-		CUtility::StartThread(threadGenerateVolume, m_pThreadGenerateVolume, this);
+		//CUtility::StartThread(threadGenerateVolume, m_pThreadGenerateVolume, this);
 		break;
 	default:
 		break;

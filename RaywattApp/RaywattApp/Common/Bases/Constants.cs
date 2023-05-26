@@ -176,6 +176,19 @@ namespace RaywattApp.Common.Bases
         public const string FileExtension = "dbf";
         public const string FileNamePrefix = "Export_";
 
+        //Export Layout
+        public const double ExportCrossSectionBig = 1080;
+        public const double ExportCrossSectionSmall = 677;
+        public const double ExportCrossSectionImageBig = 965;
+        public const double ExportCrossSectionImageSmall = 604;
+        public const double ExportLongitudeWidth = 1354;
+        public const double ExportLongitudeHeight = 403;
+        public const double ExportLongitudeImageWidth = 1200;
+        public const double ExportLongitudeImageHeight = 140;
+        public const double ExportAngioSize = 677;
+        public const double ExportTextPartSize = 566;
+        public const double ExportLongitudeIndicatorWidth = 12;
+
         //File Icon
         public const string FileIconDrive = "drive";
         public const string FileIconFolder = "folder";

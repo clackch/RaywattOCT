@@ -436,8 +436,8 @@ namespace RaywattApp.Common.Annotation
             ellipse.Name = constPointer + "_" + group;
             ellipse.Style = (Style)this.Resources["StyleEllipse"];
             ellipse.Stroke = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
-            Canvas.SetLeft(ellipse, point.X - ellipse.Width / 2);
-            Canvas.SetTop(ellipse, point.Y - ellipse.Height / 2);
+            Canvas.SetLeft(ellipse, point.X - (Constants.AnnotationTextPointSize / Zoom.ScaleX) / 2);
+            Canvas.SetTop(ellipse, point.Y - (Constants.AnnotationTextPointSize / Zoom.ScaleY) / 2);
 
             ellipse.MouseLeftButtonDown += pointer_MouseLeftButtonDown;
             ellipse.MouseLeftButtonUp += pointer_MouseLeftButtonUp;

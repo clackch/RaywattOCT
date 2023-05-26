@@ -361,7 +361,7 @@ namespace RaywattApp.Common.Annotation
             ptLabel.X += unitX * labelWidth / 2 * (flip ? 1 : -1);
             ptLabel.Y += unitY * labelWidth / 2 * (flip ? 1 : -1);
 
-            if (this.canvas.ActualHeight - ptLabel.Y < labelHeight)
+            if (this.canvas.Height - ptLabel.Y < labelHeight)
             {
                 ptLabel.Y -= labelHeight;
             }
@@ -377,8 +377,8 @@ namespace RaywattApp.Common.Annotation
             ellipse.Name = constEllipse + "_" + group + "_" + isFirst;
             ellipse.Style = (Style)this.Resources["StyleEllipse"];
             ellipse.Stroke = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
-            Canvas.SetLeft(ellipse, point.X - ellipse.Width / 2);
-            Canvas.SetTop(ellipse, point.Y - ellipse.Height / 2);
+            Canvas.SetLeft(ellipse, point.X - (Constants.AnnotationTextPointSize / Zoom.ScaleX) / 2);
+            Canvas.SetTop(ellipse, point.Y - (Constants.AnnotationTextPointSize / Zoom.ScaleY) / 2);
 
             ellipse.MouseLeftButtonDown += ellipse_MouseLeftButtonDown;
             ellipse.MouseLeftButtonUp += ellipse_MouseLeftButtonUp;

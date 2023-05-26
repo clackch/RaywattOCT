@@ -17,8 +17,6 @@ using RaywattApp.Common.Dialog;
 using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using RayCoreWrapper;
-using Newtonsoft.Json;
-using RaywattApp.Common.Annotation.Models;
 
 namespace RaywattApp.ViewModels.File
 {
@@ -374,6 +372,8 @@ namespace RaywattApp.ViewModels.File
                                 sqlParameters["apposition_threshold"] = patientCase.AppositionThreshold;
                                 sqlParameters["thumbnail_no"] = patientCase.ThumbnailNo;
                                 sqlParameters["still_image_yn"] = patientCase.StillImageYn;
+                                sqlParameters["brightness"] = patientCase.Brightness;
+                                sqlParameters["contrast"] = patientCase.Contrast;
                                 sqlParameters["create_date"] = patientCase.CreateDate;
                                 sqlParameters["update_date"] = patientCase.UpdateDate;
                                 string srcPath = CommonUtil.GetDirectoryPath(SelectedDir.Path) + "\\" + patientCase.Image;
@@ -616,6 +616,8 @@ namespace RaywattApp.ViewModels.File
                             patientCase.ExpansionCalculation = GetStrValue(caseObj, "ExpansionCalculation");
                             patientCase.ExpansionThreshold = GetIntValue(caseObj, "ExpansionThreshold");
                             patientCase.AppositionThreshold = GetDoubleValue(caseObj, "AppositionThreshold");
+                            patientCase.Brightness = GetIntValue(caseObj, "Brightness");
+                            patientCase.Contrast = GetIntValue(caseObj, "Contrast");
                             patientCase.Bookmark = GetStrValue(caseObj, "Bookmark");
                             patientCase.Longitude = GetStrValue(caseObj, "Longitude");
                             patientCase.CrossSection = GetStrValue(caseObj, "CrossSection");

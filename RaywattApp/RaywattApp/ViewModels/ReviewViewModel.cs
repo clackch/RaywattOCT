@@ -109,6 +109,20 @@ namespace RaywattApp.ViewModels
             set { _lModeIndicatorX = value; OnPropertyChanged(nameof(LModeIndicatorX)); setCurrentFrame(value); } 
         }
 
+        private int _brightness;
+        public int Brightness
+        {
+            get { return _brightness; }
+            set { _brightness = value; OnPropertyChanged(nameof(Brightness)); RaySetProperty(Property.Brightness, value); }
+        }
+
+        private int _contrast;
+        public int Contrast
+        {
+            get { return _contrast; }
+            set { _contrast = value; OnPropertyChanged(nameof(Contrast)); RaySetProperty(Property.Contrast, value); }
+        }
+
         private ICommand _toggleMeasurementCommand;
         public ICommand ToggleMeasurementCommand
         {
@@ -223,6 +237,8 @@ namespace RaywattApp.ViewModels
                 Degree = PatientCase.IndicatorDegree;
 
                 RaySetSession(RaySession.Review);
+                Brightness = PatientCase.Brightness;
+                Contrast = PatientCase.Contrast;
                 SetAnnotation();
                 SetCrossSectionBackground(RaySession.Review, (ReviewStatus.IsAngioOn) ? Constants.CardBackgroundColor : Constants.BackgroundColor);
             }
@@ -376,7 +392,11 @@ namespace RaywattApp.ViewModels
             sqlParameters["expansion_calculation"] = PatientCase.ExpansionCalculation;
             sqlParameters["expansion_threshold"] = PatientCase.ExpansionThreshold;
             sqlParameters["apposition_threshold"] = PatientCase.AppositionThreshold;
-            
+            PatientCase.Brightness = Brightness;
+            sqlParameters["brightness"] = PatientCase.Brightness;
+            PatientCase.Contrast = Contrast;
+            sqlParameters["contrast"] = PatientCase.Contrast;
+
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
             if (nRows == 0)
             {
@@ -603,7 +623,8 @@ namespace RaywattApp.ViewModels
 
             if (ReviewStatus.Zoom.ZoomIn())
             {
-                MeasurementCommand = Constants.MeasureZoomIn;
+                if(ReviewStatus.IsMeasurementOn)
+                    MeasurementCommand = Constants.MeasureZoomIn;
                 IndicatorCrossSection.IsVisible = Visibility.Collapsed;
                 ReviewStatus.IsCalciumOn = false;
             }
@@ -613,7 +634,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ZoomOut");
 
-            if (ReviewStatus.Zoom.ZoomOut())
+            if (ReviewStatus.Zoom.ZoomOut() && ReviewStatus.IsMeasurementOn)
                 MeasurementCommand = Constants.MeasureZoomOut;
 
             if(ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault)

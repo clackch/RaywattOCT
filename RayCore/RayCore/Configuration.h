@@ -53,6 +53,7 @@ public:
 	BLDCMotorSetting bldcMotor;
 	CatheterSetting catheter;
 	Volume volume;
+	TCHAR logRootPath[MAX_PATH];
 	int shutterSerial;
 public:
 	static CConfiguration& GetInstance();
