@@ -28,30 +28,18 @@ CLabImaging::~CLabImaging() {
 	imageRectangle.release();
 }
 
-void CLabImaging::Initialize(tstring calibFile, const char* strBgFile) {
-	COCTImaging::Initialize(calibFile);
+void CLabImaging::Initialize(CCalibration* calibration, USHORT* backgroundData) {
+	COCTImaging::Initialize(calibration);
 
 	const int nAScan = m_setting.nAScan;
 	const int nBScan = m_setting.nBScan;
 	const int nBufferSize = m_setting.nBufferSize;
 	const int nOutputLength = m_setting.nOutputLength;
 
-	backgroundData = new USHORT[nBufferSize];
-	backgroundFFT = new float[nOutputLength * nBScan];
-	backgroundSubtracted = new float[nOutputLength * nBScan];
-	logData = new float[nOutputLength * nBScan];
-
-	memset(backgroundData, 0x00, sizeof(USHORT) * nBufferSize);
-	FILE* fp = fopen(strBgFile, "rb");
-	if (fp != nullptr) {
-		if (fp) {
-			size_t readSize = fread(backgroundData, sizeof(USHORT), nBufferSize, fp);
-			if (readSize != nBufferSize) {
-				memset(backgroundData, 0x00, sizeof(USHORT) * nBufferSize);
-			}
-			fclose(fp);
-		}
-	}
+	this->backgroundData = backgroundData;
+	this->backgroundFFT = new float[nOutputLength * nBScan];
+	this->backgroundSubtracted = new float[nOutputLength * nBScan];
+	this->logData = new float[nOutputLength * nBScan];
 
 	generateBackground((Ipp16u*)backgroundData);
 	fftProcessing(fringes32f);

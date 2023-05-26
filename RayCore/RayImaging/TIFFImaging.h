@@ -5,6 +5,7 @@ class CTIFFImaging : public COCTImaging
 {
 private:
 	cv::Mat imageConvert;
+	std::chrono::system_clock::time_point m_start, m_end;
 
 public:
 	CTIFFImaging(Setting, CMessageService*);

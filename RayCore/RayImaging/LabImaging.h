@@ -25,7 +25,7 @@ public:
 	CLabImaging(Setting, CMessageService*);
 	virtual ~CLabImaging();
 
-	virtual void Initialize(tstring calibFile, const char* strBgFile);
+	virtual void Initialize(CCalibration* calibration, USHORT* backgroundData);
 	virtual void Process(char* fringes);
 
 	cv::Mat GetRectangleImage() { return imageRectangle; }
@@ -35,6 +35,8 @@ public:
 	void SetBackgroundSubtract(bool subtract) { this->subtract = subtract; }
 	void ChangeCalibration(CCalibration* pNewCalib);
 	void SetGoodClockRange(int start, int end) { goodClockStart = start; goodClockEnd = end; }
+
+	USHORT* GetBackground() { return backgroundData; }
 
 private:
 	template <typename T>

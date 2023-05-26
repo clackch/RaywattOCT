@@ -17,20 +17,23 @@ private:
 
 public:
 	// from calibration file
+	char* data;
 	int *indexMap;
 	float *weightMap;
 	complex_t *dispersion;
 	
 	float *window;
 public:
-	CCalibration();
+	CCalibration(int nAScan, int nFFTLength);
 	~CCalibration(void);
 
-	bool Initialize(tstring calibFile, int nAScan, int nFFTLength);
+	bool Initialize(tstring calibFile);
+	bool Initialize(char* data);
 private:
 	void allocateMemory();
 	void releaseMemory();
 
-	bool loadCalibration(LPCTSTR calibrationFileName);
+	bool loadCalibration();
+	bool readCalibration(LPCTSTR calibrationFileName);
 	void setWindow(enum Windows eWindow);
 };

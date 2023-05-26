@@ -14,11 +14,12 @@ enum class ImagingType
 	OCTImaging,
 	LabImaging,
 	TIFFImaging,
-	Default = OCTImaging
+	Default = LabImaging
 };
 
 class CMessageService;
 class COCTImaging;
+class CCalibration;
 class CSimulateDevice;
 class IDataManager;
 class CThread;
@@ -46,7 +47,7 @@ public:
 
 	static CImagingSession* CreateSession(CMessageService* pMsg, int nSession, IImaging::Setting setting, IDataManager *pWriter);
 	static CImagingSession* CreateSession(CMessageService* pMsg, int nSession, const char* strFilePath);
-	static COCTImaging* CreateColorImaging(CMessageService* msg, IImaging::Setting setting, ImagingType type);
+	static COCTImaging* CreateColorImaging(CMessageService* msg, IImaging::Setting setting, IDataManager* pData, ImagingType type);
 
 	void EnableCutView(cv::Scalar backgroundColor);
 
@@ -77,5 +78,6 @@ public:
 private:
 	static CImagingSession* createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type);
 	static UINT threadUpdateCutView(LPVOID param);	
+	static USHORT* readBackground(const char* strBackgroundFile, IImaging::Setting setting);
 };
 

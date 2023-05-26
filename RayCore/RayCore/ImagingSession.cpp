@@ -4,6 +4,7 @@
 #include "OCTImaging.h"
 #include "LabImaging.h"
 #include "TIFFImaging.h"
+#include "Calibration.h"
 #include "SimulateDevice.h"
 #include "DataReader.h"
 #include "TIFFReader.h"
@@ -52,19 +53,17 @@ CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSess
 	std::string ext = CUtility::GetFileExtension(strFilePath);
 	if (ext.compare(FILE_EXTENSION_OCT) == 0)
 	{
-		OCTHeader header = CDataReader::ReadHeader(CUtility::StringToWstring(strFilePath));
-		setting.Set(header.width, header.height);
-		nHeaderSize = OCTHeader::Size();
-
 		pReader = new CDataReader();
-		nNumOfSamples = pReader->Initialize(CUtility::StringToWstring(strFilePath), setting.nBufferSize, nHeaderSize);
+		OCTHeader header = pReader->ReadHeader(CUtility::StringToWstring(strFilePath));
+		setting.Set(header.width, header.height);
+		nNumOfSamples = pReader->Initialize(CUtility::StringToWstring(strFilePath), setting.nBufferSize);
 	}
 	else if (ext.compare(FILE_EXTENSION_RAW) == 0)
 	{
 		setting.Set(config.acquisition.nAScan, config.acquisition.nBScan);
 
 		pReader = new CDataReader();
-		nNumOfSamples = pReader->Initialize(CUtility::StringToWstring(strFilePath), setting.nBufferSize, nHeaderSize);
+		nNumOfSamples = pReader->Initialize(CUtility::StringToWstring(strFilePath), setting.nBufferSize);
 	}
 	else if (ext.compare(FILE_EXTENSION_TIF) == 0)
 	{
@@ -86,19 +85,40 @@ CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSess
 	return createSession(pMsg, setting, nSession, pReader, true, type);
 }
 
-COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging::Setting setting, ImagingType type) {
+COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging::Setting setting, IDataManager* pData, ImagingType type) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	COCTImaging* pImaging = nullptr;
+
+	CCalibration* calibration = new CCalibration(setting.nAScan, setting.nFFTLength);
+	if (pData != nullptr && pData->GetExtraData(OCTHeader::ExtraData::Dispersion) != nullptr)
+	{
+		calibration->Initialize((char*)pData->GetExtraData(OCTHeader::ExtraData::Dispersion));
+	}
+	else 
+	{
+		calibration->Initialize(_T("CALIBRATION.DAT"));
+	}
+
+	USHORT* background = nullptr;
+	if (pData != nullptr && pData->GetExtraData(OCTHeader::ExtraData::Background) != nullptr) 
+	{
+		background = new USHORT[setting.nBufferSize];
+		memcpy(background, pData->GetExtraData(OCTHeader::ExtraData::Background), sizeof(USHORT) * setting.nBufferSize);
+	}
+	else 
+	{
+		background = readBackground("BACKGROUND.bin", setting);
+	}
 
 	switch (type)
 	{
 	case ImagingType::OCTImaging:
 		pImaging = new COCTImaging(setting, msg);
-		pImaging->Initialize(_T("CALIBRATION.DAT"));
+		pImaging->Initialize(calibration);
 		break;
 	case ImagingType::LabImaging:
 		pImaging = new CLabImaging(setting, msg);
-		((CLabImaging *)pImaging)->Initialize(_T("CALIBRATION.DAT"), "BACKGROUND.bin");
+		((CLabImaging *)pImaging)->Initialize(calibration, background);
 		((CLabImaging *)pImaging)->SetBackgroundSubtract(true);
 		break;
 	case ImagingType::TIFFImaging:
@@ -208,7 +228,7 @@ CImagingSession* CImagingSession::createSession(CMessageService* pMsg, IImaging:
 
 	pSession->m_imagingType = type;
 	pSession->m_pDataManager = pData;
-	pSession->m_pImaging = CreateColorImaging(pMsg, setting, type);
+	pSession->m_pImaging = CreateColorImaging(pMsg, setting, pData, type);
 	pSession->m_pImaging->SetSession(nSession);
 	pSession->m_pSimDevice = new CSimulateDevice(pData);
 	pSession->m_pSimDevice->InitDevice();
@@ -225,7 +245,7 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
 	// prepare imaging (without message)
-	COCTImaging* pImaging = CreateColorImaging(nullptr, pSession->m_pImaging->GetSetting(), pSession->GetImagingType());
+	COCTImaging* pImaging = CreateColorImaging(nullptr, pSession->m_pImaging->GetSetting(), pDataManager, pSession->GetImagingType());
 
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadUpdateCutView->isRun; nFrame++) {
 		char* pBuffer = pDataManager->GetSample(nFrame);
@@ -242,4 +262,17 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 	}
 
 	return NOERROR;
+}
+USHORT* CImagingSession::readBackground(const char* strBackgroundFile, IImaging::Setting setting) {
+	if (strBackgroundFile == nullptr) return nullptr;
+	
+	FILE* fp = fopen(strBackgroundFile, "rb");
+	if (fp == nullptr) return nullptr;
+
+	USHORT* pBackground = new USHORT[setting.nBufferSize];
+	fread(pBackground, sizeof(USHORT), setting.nBufferSize, fp);
+
+	fclose(fp);
+
+	return pBackground;
 }

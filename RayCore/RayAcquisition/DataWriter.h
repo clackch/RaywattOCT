@@ -24,9 +24,10 @@ public:
 	bool IsRecording() { return m_isRecording; }
 
 	void StartSave(tstring strFilePath);
-	void WriteHeader(OCTHeader::Type type, OCTHeader::DataType dataType, OCTHeader::Channels ch, int width, int height);
-	void WriteEOF();
+	void WriteHeader(OCTHeader::Type type, OCTHeader::DataType dataType, OCTHeader::Channels ch, int width, int height, UCHAR extraData);
+	void WriteExtraData(void* pExtraData, long nSize);
 	bool WriteFrame(int nFrame);
+	void WriteEOF();
 	void StopSave();
 
 	virtual char* GetSample(int nFrame);
@@ -35,6 +36,6 @@ public:
 private:
 	void finalize();
 	void flush(unsigned int nSaveBufferSize);
-	std::vector<char> createHeader(OCTHeader::Type type, OCTHeader::DataType dataType, OCTHeader::Channels ch, int width, int height, int frames);
+	std::vector<char> createHeader(OCTHeader::Type type, OCTHeader::DataType dataType, OCTHeader::Channels ch, int width, int height, int frames, UCHAR extraData);
 };
 

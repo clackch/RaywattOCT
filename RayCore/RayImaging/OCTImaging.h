@@ -60,7 +60,7 @@ public:
 	COCTImaging(Setting, CMessageService*);
 	virtual ~COCTImaging(void);
 
-	virtual void Initialize(tstring calibFile);
+	virtual void Initialize(CCalibration *calibration);
 	virtual void Process(char* fringes);
 
 	int Start();
@@ -86,6 +86,8 @@ public:
 	cv::Mat GetCircleImage() { return imageCircle; }
 	USHORT* GetFringesBuffer() { return m_pFringesBuffer; }
 	Setting GetSetting() { return m_setting; }
+	void GetFrameInfo(int& nCurFrame, int& nTotalFrame) { nCurFrame = m_nCurFrame; nTotalFrame = m_nTotalFrame; }
+	void* GetCalibrationData();
 
 protected:
 	void allocateMemory();

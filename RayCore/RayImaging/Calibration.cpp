@@ -2,12 +2,17 @@
 #include <math.h>
 #include "Calibration.h"
 
-CCalibration::CCalibration() :
+CCalibration::CCalibration(int nAScan, int nFFTLength) :
+	nAScan(nAScan),
+	nFFTLength(nFFTLength),
+	data(nullptr),
 	indexMap(nullptr),
 	weightMap(nullptr),
 	window(nullptr),
 	dispersion(nullptr)
 {
+	allocateMemory();
+	setWindow(Hanning);
 }
 
 CCalibration::~CCalibration() 
@@ -15,47 +20,61 @@ CCalibration::~CCalibration()
 	releaseMemory();
 }
 
-bool CCalibration::Initialize(tstring calibFile, int nAScan, int nFFTLength)
+bool CCalibration::Initialize(tstring calibFile)
 {
-	this->nAScan = nAScan;
-	this->nFFTLength = nFFTLength;
-	releaseMemory();
-	allocateMemory();
-	
-	// Setup options
-	setWindow(Hanning);
-	return loadCalibration(calibFile.c_str());
+	bool result = readCalibration(calibFile.c_str());
+	if (!result) return false;
+
+	return loadCalibration();
+}
+bool CCalibration::Initialize(char* data)
+{
+	const int calibrationSize = nAScan * sizeof(int) * 2;
+	if (data == nullptr) return false;
+
+	memcpy(this->data, data, calibrationSize);
+
+	return loadCalibration();
 }
 
-bool CCalibration::loadCalibration(LPCTSTR calibrationFileName){
+bool CCalibration::loadCalibration() {
+	float* dispersionReal = new float[nAScan];
+
+	int offset = 0;
+	memcpy(indexMap, data + offset, nAScan / 2 * sizeof(int)); offset += (nAScan / 2 * sizeof(int));
+	memcpy(weightMap, data + offset, nAScan / 2 * sizeof(float)); offset += (nAScan / 2 * sizeof(float));
+	memcpy(dispersionReal, data + offset, nAScan * sizeof(float)); offset += (nAScan * sizeof(float));
+
+	// 실수 허수부를 복합하여 리턴
+	ippsRealToCplx_32f(dispersionReal, dispersionReal + nAScan / 2, (Ipp32fc*)dispersion, nAScan / 2);
+
+	delete[] dispersionReal;
+
+	return true;
+}
+bool CCalibration::readCalibration(LPCTSTR calibrationFileName){
+	const int calibrationSize = nAScan * sizeof(int) * 2;
+
 	// open calibration file
 	HANDLE hCalibFile = CreateFile(calibrationFileName, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
 
 	if (hCalibFile == INVALID_HANDLE_VALUE) 
 		return FALSE;
 
-	int fileSize =0;
+	int fileSize = 0;
 	DWORD dwIgnored;
-	float* dispersionReal = new float[nAScan];
 
-	ReadFile(hCalibFile, indexMap, sizeof(int) * nAScan /2, &dwIgnored, nullptr); fileSize += dwIgnored;
-	ReadFile(hCalibFile, weightMap, sizeof(float) * nAScan /2, &dwIgnored, nullptr); fileSize += dwIgnored;
-	ReadFile(hCalibFile, dispersionReal, sizeof(float) * nAScan, &dwIgnored, nullptr); fileSize += dwIgnored;
+	ReadFile(hCalibFile, data, calibrationSize, &dwIgnored, nullptr); fileSize += dwIgnored;
 
 	CloseHandle(hCalibFile);
 
-	if (fileSize != 2 * nAScan * sizeof(int))
+	if (fileSize != calibrationSize)
 	{
-		delete[] dispersionReal;
 		return false;
 	}
 
-	// 실수 허수부를 복합하여 리턴
-	ippsRealToCplx_32f(dispersionReal, dispersionReal + nAScan /2, (Ipp32fc *)dispersion, nAScan / 2);
-	
-	delete[] dispersionReal;
 
-	return true;
+	return loadCalibration();
 }
 
 void CCalibration::setWindow(enum Windows eWindow)
@@ -88,13 +107,15 @@ void CCalibration::setWindow(enum Windows eWindow)
 
 void CCalibration::allocateMemory() {
 	// memory allocate
+	data = new char[nAScan * sizeof(int) * 2];
 	indexMap = new int[nAScan / 2];
 	weightMap = new float[nAScan / 2];
 	dispersion = new complex_t[nAScan / 2];
 	window = new float[nFFTLength];
 }
 
-void CCalibration::releaseMemory(){
+void CCalibration::releaseMemory() {
+	if (data) { delete[] data; data = nullptr; }
 	if (indexMap) { delete[] indexMap; indexMap = nullptr; }
 	if (weightMap) { delete[] weightMap; weightMap = nullptr;}
 	if (dispersion) { delete[] dispersion; dispersion = nullptr; }

@@ -46,16 +46,15 @@ void CDataWriter::StartSave(tstring strFilePath) {
 		FILE_SHARE_READ, NULL, CREATE_ALWAYS,
 		FILE_FLAG_SEQUENTIAL_SCAN, NULL);
 }
-void CDataWriter::WriteHeader(OCTHeader::Type type, OCTHeader::DataType dataType, OCTHeader::Channels ch, int width, int height) {
-	std::vector<char> vHeader = createHeader(type, dataType, ch, width, height, m_nNumOfSamples);
+void CDataWriter::WriteHeader(OCTHeader::Type type, OCTHeader::DataType dataType, OCTHeader::Channels ch, int width, int height, UCHAR extraData) {
+	std::vector<char> vHeader = createHeader(type, dataType, ch, width, height, m_nNumOfSamples, extraData);
 
 	DWORD dwBytesWrote = 0;
 	WriteFile(m_hRecordingFile, vHeader.data(), vHeader.size(), &dwBytesWrote, NULL);
 }
-void CDataWriter::WriteEOF() {
-	OCTHeader::Bit flag = OCTHeader::Bit::EoF;
+void CDataWriter::WriteExtraData(void* pExtraData, long nSize) {
 	DWORD dwBytesWrote = 0;
-	WriteFile(m_hRecordingFile, &flag, sizeof(flag), &dwBytesWrote, NULL);
+	WriteFile(m_hRecordingFile, pExtraData, nSize, &dwBytesWrote, NULL);
 }
 bool CDataWriter::WriteFrame(int nFrame) {
 	char* pBuffer = (char *) GetSample(nFrame);
@@ -69,6 +68,11 @@ bool CDataWriter::WriteFrame(int nFrame) {
 	}
 
 	return true;
+}
+void CDataWriter::WriteEOF() {
+	OCTHeader::Bit flag = OCTHeader::Bit::EoF;
+	DWORD dwBytesWrote = 0;
+	WriteFile(m_hRecordingFile, &flag, sizeof(flag), &dwBytesWrote, NULL);
 }
 void CDataWriter::StopSave() {
 	CloseHandle(m_hRecordingFile);
@@ -110,7 +114,7 @@ void CDataWriter::flush(unsigned int nSaveBufferSize) {
 		}
 	}
 }
-std::vector<char> CDataWriter::createHeader(OCTHeader::Type type, OCTHeader::DataType dataType, OCTHeader::Channels ch, int width, int height, int frames) {
+std::vector<char> CDataWriter::createHeader(OCTHeader::Type type, OCTHeader::DataType dataType, OCTHeader::Channels ch, int width, int height, int frames, UCHAR extraData) {
 	std::vector<char> vPacket;
 
 	vPacket.push_back((char)OCTHeader::Bit::SoF);
@@ -123,6 +127,7 @@ std::vector<char> CDataWriter::createHeader(OCTHeader::Type type, OCTHeader::Dat
 	vPacket.push_back((char)((height >> 8) & 0xFF));
 	vPacket.push_back((char)(frames & 0xFF));
 	vPacket.push_back((char)((frames >> 8) & 0xFF));
+	vPacket.push_back((char)ch);
 	vPacket.push_back((char)ch);
 
 	return vPacket;
