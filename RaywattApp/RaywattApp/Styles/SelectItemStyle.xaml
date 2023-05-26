@@ -941,13 +941,62 @@
         <Setter Property="Focusable" Value="False"/>
         <Setter Property="SnapsToDevicePixels" Value="true" />
         <Setter Property="OverridesDefaultStyle" Value="true" />
-        <Style.Triggers>
-            <Trigger Property="Orientation" Value="Horizontal">
-                <Setter Property="Template" Value="{StaticResource Slider}" />
-            </Trigger>
-        </Style.Triggers>
+        <Setter Property="Template" Value="{StaticResource Slider}"/>
     </Style>
-    
+
+    <Style x:Key="SliderThumbSimple" TargetType="Thumb">
+        <Setter Property="SnapsToDevicePixels" Value="true" />
+        <Setter Property="OverridesDefaultStyle" Value="true" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Thumb">
+                    <Grid Background="Transparent">
+                        <Image x:Name="img" Source="{svgc:SvgImage Source=/res/indicator/sliderSimple.svg}" Width="12" Height="12" Margin="0,0,0,3"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/indicator/sliderSimple_hover.svg}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Slider" x:Key="SliderSimple">
+        <Style.Resources>
+            <SolidColorBrush x:Key="SliderBackground" Color="{DynamicResource GrayscaleGray6}" />
+        </Style.Resources>
+        <Setter Property="Focusable" Value="False"/>
+        <Setter Property="SnapsToDevicePixels" Value="true" />
+        <Setter Property="OverridesDefaultStyle" Value="true" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Slider">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Border Grid.Row="1" x:Name="TrackBackground" VerticalAlignment="Center" Margin="4,0,4,0" CornerRadius="3" BorderThickness="0" Background="{DynamicResource SliderBackground}" Height="3"/>
+                        <Track Grid.Row="1" x:Name="PART_Track">
+                            <Track.Thumb>
+                                <Thumb Style="{StaticResource SliderThumbSimple}"/>
+                            </Track.Thumb>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Slider" x:Key="SliderSimpleBlack" BasedOn="{StaticResource SliderSimple}">
+        <Style.Resources>
+            <SolidColorBrush x:Key="SliderBackground" Color="{DynamicResource GrayscaleGray7}" />
+        </Style.Resources>
+    </Style>
+
     <!-- Mini Map -->
     <Style TargetType="Rectangle" x:Key="MiniMapRect">
         <Setter Property="Stroke" Value="{DynamicResource MainPrimaryColorBrush}"/>
