@@ -27,54 +27,13 @@
             </Style.Triggers>
         </Style>
         <Style TargetType="Path" x:Key="StylePath">
-            <Setter Property="StrokeThickness" Value="1"/>
-        </Style>
-        <Style TargetType="Path" x:Key="StylePathCurve" BasedOn="{StaticResource StylePath}">
-            <Style.Triggers>
-                <MultiDataTrigger>
-                    <MultiDataTrigger.Conditions>
-                        <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
-                        <Condition Binding="{Binding CommandType, ElementName=UserControl}" Value="0"/>
-                    </MultiDataTrigger.Conditions>
-                    <Setter Property="Cursor" Value="{StaticResource measureArea}"/>
-                    <Setter Property="StrokeThickness" Value="3"/>
-                </MultiDataTrigger>
-            </Style.Triggers>
-        </Style>
-        <Style TargetType="Rectangle" x:Key="StyleRectangle">
-            <Setter Property="Width" Value="6"/>
-            <Setter Property="Height" Value="6"/>
-            <Setter Property="StrokeThickness" Value="1"/>
-            <Setter Property="Fill" Value="White"/>
-        </Style>
-        <Style TargetType="Rectangle" x:Key="StyleRectangleClosed" BasedOn="{StaticResource StyleRectangle}">
-            <Style.Triggers>
-                <MultiDataTrigger>
-                    <MultiDataTrigger.Conditions>
-                        <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
-                        <Condition Binding="{Binding CommandType, ElementName=UserControl}" Value="0"/>
-                    </MultiDataTrigger.Conditions>
-                    <Setter Property="StrokeThickness" Value="3"/>
-                </MultiDataTrigger>
-                <MultiDataTrigger>
-                    <MultiDataTrigger.Conditions>
-                        <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
-                        <Condition Binding="{Binding CommandType, ElementName=UserControl}" Value="4"/>
-                    </MultiDataTrigger.Conditions>
-                    <Setter Property="StrokeThickness" Value="3"/>
-                </MultiDataTrigger>
-            </Style.Triggers>
-        </Style>
-        <Style TargetType="Rectangle" x:Key="StyleRectangleFirst">
-            <Setter Property="Cursor" Value="Cross"/>
-            <Setter Property="Width" Value="8"/>
-            <Setter Property="Height" Value="8"/>
-            <Setter Property="StrokeThickness" Value="1"/>
+            <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleY, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThickness}}"/>
         </Style>
         <Style TargetType="Label" x:Key="StyleLabel">
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="FontSize" Value="{Binding Zoom.ScaleY, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter=12}"/>
         </Style>
         <Style TargetType="Label" x:Key="StyleLabelText">
             <Setter Property="Padding" Value="0"/>
@@ -82,6 +41,7 @@
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="{Binding Zoom.ScaleY, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter=12}"/>
             <Style.Triggers>
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
@@ -100,9 +60,9 @@
             </Style.Triggers>
         </Style>
         <Style TargetType="Ellipse" x:Key="StyleEllipse">
-            <Setter Property="Width" Value="{x:Static const:Constants.AnnotationTextPointSize}"/>
-            <Setter Property="Height" Value="{x:Static const:Constants.AnnotationTextPointSize}"/>
-            <Setter Property="StrokeThickness" Value="1"/>
+            <Setter Property="Width" Value="{Binding Zoom.ScaleX, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationTextPointSize}}"/>
+            <Setter Property="Height" Value="{Binding Zoom.ScaleY, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationTextPointSize}}"/>
+            <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleY, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThickness}}"/>
             <Setter Property="Fill" Value="White"/>
             <Style.Triggers>
                 <MultiDataTrigger>
@@ -110,14 +70,14 @@
                         <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
                         <Condition Binding="{Binding CommandType, ElementName=UserControl}" Value="0"/>
                     </MultiDataTrigger.Conditions>
-                    <Setter Property="StrokeThickness" Value="3"/>
+                    <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleY, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThicknessBold}}"/>
                 </MultiDataTrigger>
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
                         <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
                         <Condition Binding="{Binding CommandType, ElementName=UserControl}" Value="4"/>
                     </MultiDataTrigger.Conditions>
-                    <Setter Property="StrokeThickness" Value="3"/>
+                    <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleY, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThicknessBold}}"/>
                 </MultiDataTrigger>
             </Style.Triggers>
         </Style>
@@ -125,10 +85,17 @@
             <Setter Property="MinWidth" Value="50"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="MaxLength" Value="50"/>
+            <Setter Property="FontSize" Value="{Binding Zoom.ScaleY, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter=12}"/>
         </Style>
     </UserControl.Resources>
 
     <Grid>
-        <Canvas Name="canvas"/>
+        <Canvas Name="canvas" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}">
+            <Canvas.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="{Binding Zoom.ScaleX, ElementName=UserControl}" ScaleY="{Binding Zoom.ScaleY, ElementName=UserControl}"/>
+                </TransformGroup>
+            </Canvas.RenderTransform>
+        </Canvas>
     </Grid>
 </UserControl>

@@ -39,6 +39,20 @@ namespace RaywattApp.ViewModels
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer();
 
+        private int _brightness;
+        public int Brightness
+        {
+            get { return _brightness; }
+            set { _brightness = value; OnPropertyChanged(nameof(Brightness)); RaySetProperty(Property.Brightness, value); }
+        }
+
+        private int _contrast;
+        public int Contrast
+        {
+            get { return _contrast; }
+            set { _contrast = value; OnPropertyChanged(nameof(Contrast)); RaySetProperty(Property.Contrast, value); }
+        }
+
         private ICommand _cmdBack;
         public ICommand CmdBack
         {
@@ -184,6 +198,8 @@ namespace RaywattApp.ViewModels
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = this.Patient;
             parameter["prevStatus"] = this.PrevStatus;
+            PatientCase.Brightness = Brightness;
+            PatientCase.Contrast = Contrast;
             parameter["patientCase"] = PatientCase;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(viewPage) { Parameter = parameter });
         }

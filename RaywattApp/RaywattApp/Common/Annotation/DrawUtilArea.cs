@@ -388,7 +388,7 @@ namespace RaywattApp.Common.Annotation
 
             foreach (var areaGeometry in this.areaGeometrys)
             {
-                DrawCurve(areaGeometry);
+                DrawCurve(areaGeometry, false);
                 if(IsEditOn)
                     DrawRectangle(areaGeometry);
                 else
@@ -396,10 +396,10 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
-        private void DrawCurve(AreaGeometry areaGeometry) {
+        private void DrawCurve(AreaGeometry areaGeometry, bool isCurrentEditOn = true) {
             areaGeometry.Path = DrawCurve(areaGeometry.Points, areaGeometry.IsClosed, areaGeometry.Group);
 
-            if (IsEditOn)
+            if (IsEditOn && isCurrentEditOn)
             {
                 if (areaGeometry.IsClosed)
                 {

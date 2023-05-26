@@ -7,6 +7,8 @@
 #include <mutex>
 #include <tuple>
 #include <opencv2/opencv.hpp>
+#include <time.h>
+#include "plog/Initializers/RollingFileInitializer.h"
 
 typedef enum {
 	SESSION_UNKNOWN = RaySession::Unknown,
@@ -81,6 +83,7 @@ private:
 public:
 	COCTSystem();
 	virtual ~COCTSystem();
+	void SetLogger(TCHAR*);
 
 	// Call from dll only
 	RayError Start();

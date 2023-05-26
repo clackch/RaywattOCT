@@ -134,6 +134,12 @@ namespace RaywattApp.Models
         }
 
         [ObservableProperty]
+        private int _brightness;
+
+        [ObservableProperty]
+        private int _contrast;
+
+        [ObservableProperty]
         private string? _bookmark;
 
         [ObservableProperty]

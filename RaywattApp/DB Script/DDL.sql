@@ -132,6 +132,8 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case
     expansion_calculation character varying(4) COLLATE pg_catalog."default",
     expansion_threshold integer,
     apposition_threshold real,
+	brightness integer,
+    contrast integer,
     create_date timestamp without time zone,
     update_date timestamp without time zone,
     CONSTRAINT patient_case_pkey PRIMARY KEY (id)

@@ -909,6 +909,11 @@
         </Setter>
     </Style>
 
+    <Style TargetType="DataGrid" x:Key="DataGridMeasurementExport" BasedOn="{StaticResource DataGridMeasurement}">
+        <Setter Property="TextBlock.FontSize" Value="22"/>
+        <Setter Property="RowHeight" Value="44"/>
+    </Style>
+
     <Style TargetType="DataGridColumnHeader" x:Key="DataGridColumnHeaderMeasurement">
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="BorderThickness" Value="0"/>
@@ -940,6 +945,11 @@
         <Setter Property="Height" Value="53"/>
     </Style>
 
+    <Style TargetType="DataGridColumnHeader" x:Key="DataGridColumnHeaderMeasurementAreaExport" BasedOn="{StaticResource DataGridColumnHeaderMeasurement}">
+        <Setter Property="FontSize" Value="18"/>
+        <Setter Property="Height" Value="65"/>
+    </Style>
+
     <Style TargetType="DataGridRow" x:Key="DataGridRowMeasurement">
         <Setter Property="Template">
             <Setter.Value>
@@ -959,6 +969,23 @@
                             <Setter TargetName="border" Property="Opacity" Value="0.08"/>
                         </DataTrigger>
                     </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="DataGridRow" x:Key="DataGridRowMeasurementExport">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridRow">
+                    <Border Background="Transparent">
+                        <Grid Height="44">
+                            <Border x:Name="border" BorderBrush="Transparent" BorderThickness="0" CornerRadius="4" Margin="4,3,4,4"/>
+                            <Border>
+                                <DataGridCellsPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                    </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -1242,6 +1269,147 @@
                     <StackPanel Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
                     <Label Margin="3,2,0,0" Content="90" Style="{DynamicResource Pretendard-Medium-10}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
                     <Label Margin="0,2,3,0" Content="100" HorizontalAlignment="Right" Style="{DynamicResource Pretendard-Medium-10}" Foreground="{DynamicResource GrayscaleGray3Brush}" Visibility="{TemplateBinding Tag, Converter={StaticResource LongitudeScaleLabelVisibilityConverter}, ConverterParameter=1000}"/>
+                </Grid>
+            </Grid>
+        </Border>
+    </ControlTemplate>
+
+    <ControlTemplate x:Key="LongitudeScaleBarExport">
+        <ControlTemplate.Resources>
+            <Style TargetType="Control" x:Key="FontStyle" BasedOn="{StaticResource Pretendard-Medium-20}"/>
+        </ControlTemplate.Resources>
+        <Border CornerRadius="0,0,8,8" Background="{DynamicResource GrayscaleBlackBrush}">
+            <Grid x:Name="grid" Width="{TemplateBinding Width}" Tag="{TemplateBinding Tag}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition>
+                        <ColumnDefinition.Width>
+                            <MultiBinding Converter="{StaticResource GridLengthConverter}" ConverterParameter="100">
+                                <Binding ElementName="grid" Path="Tag"/>
+                                <Binding ElementName="grid" Path="Width"/>
+                            </MultiBinding>
+                        </ColumnDefinition.Width>
+                    </ColumnDefinition>
+                    <ColumnDefinition>
+                        <ColumnDefinition.Width>
+                            <MultiBinding Converter="{StaticResource GridLengthConverter}" ConverterParameter="200">
+                                <Binding ElementName="grid" Path="Tag"/>
+                                <Binding ElementName="grid" Path="Width"/>
+                            </MultiBinding>
+                        </ColumnDefinition.Width>
+                    </ColumnDefinition>
+                    <ColumnDefinition>
+                        <ColumnDefinition.Width>
+                            <MultiBinding Converter="{StaticResource GridLengthConverter}" ConverterParameter="300">
+                                <Binding ElementName="grid" Path="Tag"/>
+                                <Binding ElementName="grid" Path="Width"/>
+                            </MultiBinding>
+                        </ColumnDefinition.Width>
+                    </ColumnDefinition>
+                    <ColumnDefinition>
+                        <ColumnDefinition.Width>
+                            <MultiBinding Converter="{StaticResource GridLengthConverter}" ConverterParameter="400">
+                                <Binding ElementName="grid" Path="Tag"/>
+                                <Binding ElementName="grid" Path="Width"/>
+                            </MultiBinding>
+                        </ColumnDefinition.Width>
+                    </ColumnDefinition>
+                    <ColumnDefinition>
+                        <ColumnDefinition.Width>
+                            <MultiBinding Converter="{StaticResource GridLengthConverter}" ConverterParameter="500">
+                                <Binding ElementName="grid" Path="Tag"/>
+                                <Binding ElementName="grid" Path="Width"/>
+                            </MultiBinding>
+                        </ColumnDefinition.Width>
+                    </ColumnDefinition>
+                    <ColumnDefinition>
+                        <ColumnDefinition.Width>
+                            <MultiBinding Converter="{StaticResource GridLengthConverter}" ConverterParameter="600">
+                                <Binding ElementName="grid" Path="Tag"/>
+                                <Binding ElementName="grid" Path="Width"/>
+                            </MultiBinding>
+                        </ColumnDefinition.Width>
+                    </ColumnDefinition>
+                    <ColumnDefinition>
+                        <ColumnDefinition.Width>
+                            <MultiBinding Converter="{StaticResource GridLengthConverter}" ConverterParameter="700">
+                                <Binding ElementName="grid" Path="Tag"/>
+                                <Binding ElementName="grid" Path="Width"/>
+                            </MultiBinding>
+                        </ColumnDefinition.Width>
+                    </ColumnDefinition>
+                    <ColumnDefinition>
+                        <ColumnDefinition.Width>
+                            <MultiBinding Converter="{StaticResource GridLengthConverter}" ConverterParameter="800">
+                                <Binding ElementName="grid" Path="Tag"/>
+                                <Binding ElementName="grid" Path="Width"/>
+                            </MultiBinding>
+                        </ColumnDefinition.Width>
+                    </ColumnDefinition>
+                    <ColumnDefinition>
+                        <ColumnDefinition.Width>
+                            <MultiBinding Converter="{StaticResource GridLengthConverter}" ConverterParameter="900">
+                                <Binding ElementName="grid" Path="Tag"/>
+                                <Binding ElementName="grid" Path="Width"/>
+                            </MultiBinding>
+                        </ColumnDefinition.Width>
+                    </ColumnDefinition>
+                    <ColumnDefinition>
+                        <ColumnDefinition.Width>
+                            <MultiBinding Converter="{StaticResource GridLengthConverter}" ConverterParameter="1000">
+                                <Binding ElementName="grid" Path="Tag"/>
+                                <Binding ElementName="grid" Path="Width"/>
+                            </MultiBinding>
+                        </ColumnDefinition.Width>
+                    </ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Column="0" Visibility="{TemplateBinding Tag, Converter={StaticResource LongitudeScaleColumnVisibilityConverter}, ConverterParameter=100}">
+                    <Label Margin="8,2,0,2" Content="0" Style="{StaticResource FontStyle}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+                    <Label Margin="0,2,8,2" Content="10" HorizontalAlignment="Right" Style="{StaticResource FontStyle}" Foreground="{DynamicResource GrayscaleGray3Brush}" Visibility="{TemplateBinding Tag, Converter={StaticResource LongitudeScaleLabelVisibilityConverter}, ConverterParameter=100}"/>
+                </Grid>
+                <Grid Grid.Column="1" Visibility="{TemplateBinding Tag, Converter={StaticResource LongitudeScaleColumnVisibilityConverter}, ConverterParameter=200}">
+                    <StackPanel Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
+                    <Label Margin="8,2,0,2" Content="10" Style="{StaticResource FontStyle}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+                    <Label Margin="0,2,8,2" Content="20" HorizontalAlignment="Right" Style="{StaticResource FontStyle}" Foreground="{DynamicResource GrayscaleGray3Brush}" Visibility="{TemplateBinding Tag, Converter={StaticResource LongitudeScaleLabelVisibilityConverter}, ConverterParameter=200}"/>
+                </Grid>
+                <Grid Grid.Column="2" Visibility="{TemplateBinding Tag, Converter={StaticResource LongitudeScaleColumnVisibilityConverter}, ConverterParameter=300}">
+                    <StackPanel Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
+                    <Label Margin="8,2,0,2" Content="20" Style="{StaticResource FontStyle}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+                    <Label Margin="0,2,8,2" Content="30" HorizontalAlignment="Right" Style="{StaticResource FontStyle}" Foreground="{DynamicResource GrayscaleGray3Brush}" Visibility="{TemplateBinding Tag, Converter={StaticResource LongitudeScaleLabelVisibilityConverter}, ConverterParameter=300}"/>
+                </Grid>
+                <Grid Grid.Column="3" Visibility="{TemplateBinding Tag, Converter={StaticResource LongitudeScaleColumnVisibilityConverter}, ConverterParameter=400}">
+                    <StackPanel Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
+                    <Label Margin="8,2,0,2" Content="30" Style="{StaticResource FontStyle}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+                    <Label Margin="0,2,8,2" Content="40" HorizontalAlignment="Right" Style="{StaticResource FontStyle}" Foreground="{DynamicResource GrayscaleGray3Brush}" Visibility="{TemplateBinding Tag, Converter={StaticResource LongitudeScaleLabelVisibilityConverter}, ConverterParameter=400}"/>
+                </Grid>
+                <Grid Grid.Column="4" Visibility="{TemplateBinding Tag, Converter={StaticResource LongitudeScaleColumnVisibilityConverter}, ConverterParameter=500}">
+                    <StackPanel Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
+                    <Label Margin="8,2,0,2" Content="40" Style="{StaticResource FontStyle}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+                    <Label Margin="0,2,8,2" Content="50" HorizontalAlignment="Right" Style="{StaticResource FontStyle}" Foreground="{DynamicResource GrayscaleGray3Brush}" Visibility="{TemplateBinding Tag, Converter={StaticResource LongitudeScaleLabelVisibilityConverter}, ConverterParameter=500}"/>
+                </Grid>
+                <Grid Grid.Column="5" Visibility="{TemplateBinding Tag, Converter={StaticResource LongitudeScaleColumnVisibilityConverter}, ConverterParameter=600}">
+                    <StackPanel Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
+                    <Label Margin="8,2,0,2" Content="50" Style="{StaticResource FontStyle}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+                    <Label Margin="0,2,8,2" Content="60" HorizontalAlignment="Right" Style="{StaticResource FontStyle}" Foreground="{DynamicResource GrayscaleGray3Brush}" Visibility="{TemplateBinding Tag, Converter={StaticResource LongitudeScaleLabelVisibilityConverter}, ConverterParameter=600}"/>
+                </Grid>
+                <Grid Grid.Column="6" Visibility="{TemplateBinding Tag, Converter={StaticResource LongitudeScaleColumnVisibilityConverter}, ConverterParameter=700}">
+                    <StackPanel Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
+                    <Label Margin="8,2,0,2" Content="60" Style="{StaticResource FontStyle}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+                    <Label Margin="0,2,8,2" Content="70" HorizontalAlignment="Right" Style="{StaticResource FontStyle}" Foreground="{DynamicResource GrayscaleGray3Brush}" Visibility="{TemplateBinding Tag, Converter={StaticResource LongitudeScaleLabelVisibilityConverter}, ConverterParameter=700}"/>
+                </Grid>
+                <Grid Grid.Column="7" Visibility="{TemplateBinding Tag, Converter={StaticResource LongitudeScaleColumnVisibilityConverter}, ConverterParameter=800}">
+                    <StackPanel Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
+                    <Label Margin="8,2,0,2" Content="70" Style="{StaticResource FontStyle}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+                    <Label Margin="0,2,8,2" Content="80" HorizontalAlignment="Right" Style="{StaticResource FontStyle}" Foreground="{DynamicResource GrayscaleGray3Brush}" Visibility="{TemplateBinding Tag, Converter={StaticResource LongitudeScaleLabelVisibilityConverter}, ConverterParameter=800}"/>
+                </Grid>
+                <Grid Grid.Column="8" Visibility="{TemplateBinding Tag, Converter={StaticResource LongitudeScaleColumnVisibilityConverter}, ConverterParameter=900}">
+                    <StackPanel Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
+                    <Label Margin="8,2,0,2" Content="80" Style="{StaticResource FontStyle}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+                    <Label Margin="0,2,8,2" Content="90" HorizontalAlignment="Right" Style="{StaticResource FontStyle}" Foreground="{DynamicResource GrayscaleGray3Brush}" Visibility="{TemplateBinding Tag, Converter={StaticResource LongitudeScaleLabelVisibilityConverter}, ConverterParameter=900}"/>
+                </Grid>
+                <Grid Grid.Column="9" Visibility="{TemplateBinding Tag, Converter={StaticResource LongitudeScaleColumnVisibilityConverter}, ConverterParameter=1000}">
+                    <StackPanel Width="1" HorizontalAlignment="Left" Background="{DynamicResource VerticalSeparatorBrush}"/>
+                    <Label Margin="8,2,0,2" Content="90" Style="{StaticResource FontStyle}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+                    <Label Margin="0,2,8,2" Content="100" HorizontalAlignment="Right" Style="{StaticResource FontStyle}" Foreground="{DynamicResource GrayscaleGray3Brush}" Visibility="{TemplateBinding Tag, Converter={StaticResource LongitudeScaleLabelVisibilityConverter}, ConverterParameter=1000}"/>
                 </Grid>
             </Grid>
         </Border>
