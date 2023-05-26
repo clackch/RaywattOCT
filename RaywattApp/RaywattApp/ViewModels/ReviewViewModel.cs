@@ -667,6 +667,8 @@ namespace RaywattApp.ViewModels
                 if (num > 0)
                 {
                     IntPtr contour = RayGetLumenContour(curFrame);
+                    if (contour == IntPtr.Zero) continue;
+
                     Mat matContour = CommonUtil.ByteMemoryToCvMat(contour, 1, num, 2);
 
                     LumenContours[curFrame].MlContour.Points = new List<Point>();
