@@ -1,6 +1,7 @@
 ﻿using OpenCvSharp;
 using RaywattApp.Common.Annotation.Models;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace RaywattApp.Common.Annotation.Util
@@ -84,32 +85,50 @@ namespace RaywattApp.Common.Annotation.Util
 
         public bool CalculateDiameter(Contour contour)
         {
-            bool isValid = false;
-            Point ptFrom = new Point(contour.CenterOfMass.X - contourBounds.X, contour.CenterOfMass.Y - contourBounds.Y);
+            int[] conflict = new int[360];
+            Dictionary<double, Tuple<Point, double>> dictionary = new Dictionary<double, Tuple<Point, double>>();
+            foreach (Point point in pointsAll)
+            {
+                double x = contour.CenterOfMass.X - point.X;
+                double y = contour.CenterOfMass.Y - point.Y;
+                double degree = Math.Round(Math.Atan2(y, x) * 180 / Math.PI) + 180;
+                double distance = Math.Sqrt(Math.Pow(contour.CenterOfMass.X - point.X, 2) + Math.Pow(contour.CenterOfMass.Y - point.Y, 2));
+
+                degree = (degree == 0) ? 360 : degree;
+
+                if (dictionary.ContainsKey(degree))
+                {
+                    conflict[(int)degree - 1]++;
+                    if (distance < dictionary[degree].Item2)
+                    {
+                        dictionary.Remove(degree);
+                        dictionary.Add(degree, new Tuple<Point, double>(point, distance));
+                    }
+                }
+                else 
+                { 
+                    dictionary.Add(degree, new Tuple<Point, double>(point, distance));
+                }
+            }
 
             double minDiameter = double.MaxValue;
             double maxDiameter = double.MinValue;
 
-            Rect rectROI = new Rect((int)contourBounds.X, (int)contourBounds.Y, (int)contourBounds.Width, (int)contourBounds.Height);
-            Mat imageRoi = contourImage[rectROI];
-
             double sumDiameter = 0;
             int numOfDiameter = 0;
-            for (int degree = 0; degree < 180; degree++)
+            for (int degree = 1; degree <= 180; degree++)
             {
-                Point point1 = getIntersectionPoint(contour, imageRoi, ptFrom, degree);
-                if (point1.X < 0 || point1.Y < 0) continue;
+                if (!dictionary.ContainsKey(degree) || !dictionary.ContainsKey(degree + 180)) continue;
 
-                Point point2 = getIntersectionPoint(contour, imageRoi, ptFrom, degree + 180);
-                if (point2.X < 0 || point2.Y < 0) continue;
+                Tuple<Point, double> point1 = dictionary[degree];
+                Tuple<Point, double> point2 = dictionary[degree + 180];
 
-                double diameter = Math.Sqrt(Math.Pow(point1.X - point2.X, 2) + Math.Pow(point1.Y - point2.Y, 2));
+                double diameter = point1.Item2 + point2.Item2;
 
                 DiameterInfo diameterInfo = new DiameterInfo();
-                diameterInfo.point1 = new System.Windows.Point(point1.X, point1.Y);
-                diameterInfo.point2 = new System.Windows.Point(point2.X, point2.Y);
+                diameterInfo.point1 = new System.Windows.Point(point1.Item1.X, point1.Item1.Y);
+                diameterInfo.point2 = new System.Windows.Point(point2.Item1.X, point2.Item1.Y);
                 diameterInfo.value = diameter;
-                isValid = true;
 
                 sumDiameter += diameterInfo.value;
                 numOfDiameter++;
@@ -127,50 +146,9 @@ namespace RaywattApp.Common.Annotation.Util
                 }
             }
 
-            contour.MeanDiameter = (numOfDiameter == 0) ? 0 : sumDiameter / numOfDiameter;
-
-            return isValid;
+            return true;
         }
-        private Point getIntersectionPoint(Contour contour, Mat imageRoi, OpenCvSharp.Point ptFrom, int degree)
-        {
-            double lineLength = Math.Sqrt(Math.Pow(contourBounds.Right - contourBounds.Left, 2) + Math.Pow(contourBounds.Bottom - contourBounds.Top, 2));
-            Scalar color = new Scalar(0x00, 0x00, 0x00);
 
-            Mat imageMask = imageRoi.Clone();
-
-            double xDirection = Math.Cos(degree * Math.PI / 180.0f);
-            double yDirection = Math.Sin(degree * Math.PI / 180.0f);
-
-            Point ptTo = new OpenCvSharp.Point(ptFrom.X + lineLength * xDirection, ptFrom.Y + lineLength * yDirection);
-
-            Cv2.Line(imageMask, ptFrom, ptTo, color, 1, LineTypes.Link4);
-
-            Mat imageSub = imageRoi - imageMask;
-
-            Point point = new OpenCvSharp.Point(-1, -1);
-            List<Point> pointsIntersection = findNonZero(pointsAll, imageSub);
-
-            if (pointsIntersection.Count < 1)
-            {
-                return point;
-            }
-
-            point = pointsIntersection[0];
-            double minDistance = Math.Sqrt(Math.Pow(ptFrom.X - (point.X - contourBounds.X), 2) + Math.Pow(ptFrom.Y - (point.Y - contourBounds.Y), 2));
-            for (int i = 1; i < pointsIntersection.Count; i++)
-            {
-                Point nextPoint = pointsIntersection[i];
-                double distance = Math.Sqrt(Math.Pow(ptFrom.X - (nextPoint.X - contourBounds.X), 2) + Math.Pow(ptFrom.Y - (nextPoint.Y - contourBounds.Y), 2));
-
-                if (distance < minDistance)
-                {
-                    minDistance = distance;
-                    point = nextPoint;
-                }
-            }
-
-            return point;
-        }
         private void findAllPoints()
         {
             pointsAll = new List<Point>();
@@ -183,18 +161,6 @@ namespace RaywattApp.Common.Annotation.Util
                 Point point = points.At<Point>(i);
                 pointsAll.Add(point);
             }
-        }
-
-        private List<Point> findNonZero(List<Point> points, Mat image)
-        {
-            List<Point> nonZeroPoints = new List<Point>();
-
-            foreach (var point in points)
-            {
-                if (image.At<byte>(point.Y - contourBounds.Y, point.X - contourBounds.X) != 0x00) nonZeroPoints.Add(point);
-            }
-
-            return nonZeroPoints;
         }
     }
 }
