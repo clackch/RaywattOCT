@@ -123,7 +123,7 @@ void CRaywattLabDlg::updatePatientDataList() {
 	GetDlgItem(IDC_EDIT_CURRENT_PATH)->SetWindowText(m_strPatientPath);
 
 	CString strQuery = _T("");
-	strQuery.Format(_T("%s\\*.*"), m_strPatientPath.GetBuffer(), m_strPatientPath.GetBuffer());
+	strQuery.Format(_T("%s\\*.bin"), m_strPatientPath.GetBuffer(), m_strPatientPath.GetBuffer());
 
 	CFileFind fileFind;
 	BOOL find = fileFind.FindFile(strQuery);
@@ -134,7 +134,7 @@ void CRaywattLabDlg::updatePatientDataList() {
 		CString strFileName = fileFind.GetFileName();
 
 		CString strExt = strFileName.Right(strFileName.GetLength() - strFileName.ReverseFind('.') - 1);
-		if (strExt.Compare(_T("bin")) == 0 || strExt.Compare(_T("oct")) == 0) {
+		if (strExt.Compare(_T("bin")) == 0) {
 			m_listPatientData.AddString(strFileName);
 		}
 	}
@@ -551,9 +551,6 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
-	AllocConsole();
-	freopen("CONOUT$", "w", stdout);
-
 	CConfiguration& config = CConfiguration::GetInstance();
 	if (!config.IsInit()) {
 		config.Initialize(_T(".\\raywattLab.ini"));
@@ -817,13 +814,8 @@ void CRaywattLabDlg::OnBnClickedButtonLoadSelectedData()
 		CString strFileName = _T("");
 		int nSelected = m_listPatientData.GetCurSel();
 		m_listPatientData.GetText(nSelected, strFileName);
-		strFilePath.Format(_T("%s/%s.bin"), m_strPatientPath, strFileName);
+		strFilePath.Format(_T("%s/%s"), m_strPatientPath, strFileName);
 
-		CString strExt = strFileName.Right(strFileName.GetLength() - strFileName.ReverseFind('.') - 1);
-		int nHeaderSize = 0;
-		if (strExt.Compare(_T("oct")) == 0) {
-			nHeaderSize = OCTHeader::Size();
-		}
 		m_pDataReader->Initialize(strFilePath.GetBuffer(), config.imaging.nBufferSize);
 		if (m_pSimDevice == nullptr) {
 			m_pSimDevice = new CSimulateDevice(m_pDataReader);
