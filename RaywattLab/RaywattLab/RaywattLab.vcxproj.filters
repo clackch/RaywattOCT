@@ -90,6 +90,7 @@
     <None Include="res\RaywattLab.rc2">
       <Filter>리소스 파일</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\RaywattLab.ico">

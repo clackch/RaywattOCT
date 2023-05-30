@@ -31,6 +31,9 @@
 *.out
 *.app
 
+# Package
+packages
+
 # Temporary Files & Directories
 .vs
 .vs/*
