@@ -634,7 +634,10 @@ int COCTSystem::GetNumOfLumenContourPoints(int nFrame) {
 * GetBrightness
 */
 double COCTSystem::GetBrightness() {
-	return m_fBrightness;
+	const double rangeB[] = { 0.0f, 100.0f };
+
+	double percentage = (m_fBrightness - rangeB[0]) / (rangeB[1] - rangeB[0]) * 100.f;
+	return percentage;
 }
 
 /*
@@ -643,10 +646,13 @@ double COCTSystem::GetBrightness() {
 RayError COCTSystem::SetBrightness(double value) {
 	if (m_pThreadService == nullptr) return RayError::SystemNotRunning;
 
-	m_fBrightness = value;
+	const double rangeB[] = { 0.0f, 100.0f };
 
-	m_pImagingPullback->SetBrightnessContrast(m_fBrightness, m_fContrast);
-	m_pImagingLiveView->SetBrightnessContrast(m_fBrightness, m_fContrast);
+	value = (value < 0) ? 0 : (value > 100) ? 100 : value;
+	double brightness = (value / 100.f) * (rangeB[1] - rangeB[0]) + rangeB[0];
+
+	m_fBrightness = brightness;
+	setBrightnessContrastAllSessions();
 	
 	return RayError::OK;
 }
@@ -655,7 +661,10 @@ RayError COCTSystem::SetBrightness(double value) {
 * GetContrast
 */
 double COCTSystem::GetContrast() {
-	return m_fContrast;
+	const double rangeC[] = { 0.5f, 3.0f };
+
+	double percentage = (m_fContrast - rangeC[0]) / (rangeC[1] - rangeC[0]) * 100.f;
+	return percentage;
 }
 
 /*
@@ -664,10 +673,13 @@ double COCTSystem::GetContrast() {
 RayError COCTSystem::SetContrast(double value) {
 	if (m_pThreadService == nullptr) return RayError::SystemNotRunning;
 
-	m_fContrast = value;
+	const double rangeC[] = { 0.5f, 3.0f };
 
-	m_pImagingPullback->SetBrightnessContrast(m_fBrightness, m_fContrast);
-	m_pImagingLiveView->SetBrightnessContrast(m_fBrightness, m_fContrast);
+	value = (value < 0) ? 0 : (value > 100) ? 100 : value;
+	double contrast = (value / 100.f) * (rangeC[1] - rangeC[0]) + rangeC[0];
+
+	m_fContrast = contrast;
+	setBrightnessContrastAllSessions();
 
 	return RayError::OK;
 }
@@ -1451,6 +1463,21 @@ void COCTSystem::closeAllSessions() {
 		}
 	}
 	m_curSession = SESSION_UNKNOWN;
+}
+void COCTSystem::setBrightnessContrastAllSessions() {
+	m_pImagingPullback->SetBrightnessContrast(m_fBrightness, m_fContrast);
+	m_pImagingLiveView->SetBrightnessContrast(m_fBrightness, m_fContrast);
+
+	for (int session = 0; session < SessionType::MAX_SESSION_NUM; session++)
+	{
+		if (m_reviewSession[session] != nullptr)
+		{
+			if (m_reviewSession[session]->GetImaging() != nullptr)
+			{
+				m_reviewSession[session]->GetImaging()->SetBrightnessContrast(m_fBrightness, m_fContrast);
+			}
+		}
+	}
 }
 /*
 * OnMsgUpdateScannerState
