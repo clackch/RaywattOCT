@@ -229,7 +229,12 @@ CString CRaywattLabDlg::splitFileName(CString strFilePath) {
 CLabImaging* CRaywattLabDlg::createImaging() {
 	CConfiguration& config = CConfiguration::GetInstance();	
 	CLabImaging* pImaging = new CLabImaging(config.imaging, this);
-	pImaging->Initialize(m_strCurCalibration, BACKGROUND_FILEPATH);
+
+	CCalibration* calibration = new CCalibration(config.imaging.nAScan, config.imaging.nFFTLength);
+	calibration->Initialize(m_strCurCalibration);
+	USHORT* background = readBackground(BACKGROUND_FILEPATH, config.imaging);
+
+	pImaging->Initialize(calibration, background);
 	pImaging->SetColor(m_chkImageHotColor);
 
 	int subtract = ((CButton*)GetDlgItem(IDC_CHECK_BACKGROUND_SUBTRACT))->GetCheck();
@@ -239,6 +244,19 @@ CLabImaging* CRaywattLabDlg::createImaging() {
 	updateLevel(pImaging);
 	
 	return pImaging;
+}
+USHORT* CRaywattLabDlg::readBackground(const char* strBackgroundFile, IImaging::Setting setting) {
+	if (strBackgroundFile == nullptr) return nullptr;
+
+	FILE* fp = fopen(strBackgroundFile, "rb");
+	if (fp == nullptr) return nullptr;
+
+	USHORT* pBackground = new USHORT[setting.nBufferSize];
+	fread(pBackground, sizeof(USHORT), setting.nBufferSize, fp);
+
+	fclose(fp);
+
+	return pBackground;
 }
 void CRaywattLabDlg::findFileByExtension(CString strFolder, CString strExt, std::vector<CString>& vList) {
 	CString strQuery = _T("");
@@ -533,6 +551,9 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
+	AllocConsole();
+	freopen("CONOUT$", "w", stdout);
+
 	CConfiguration& config = CConfiguration::GetInstance();
 	if (!config.IsInit()) {
 		config.Initialize(_T(".\\raywattLab.ini"));
@@ -588,15 +609,11 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	int goodClockStart = 0;
 	int goodClockEnd = config.imaging.nAScan;
 
-	m_pImagingRealtime = new CLabImaging(config.imaging, this);
-	m_pImagingRealtime->Initialize(m_strCurCalibration, BACKGROUND_FILEPATH);
-	m_pImagingRealtime->SetColor(m_chkImageHotColor);
+	m_pImagingRealtime = createImaging();
 	m_pImagingRealtime->SetGoodClockRange(goodClockStart, goodClockEnd);
 	m_pImagingRealtime->Start();
 
-	m_pImagingSimulate = new CLabImaging(config.imaging, this);
-	m_pImagingSimulate->Initialize(m_strCurCalibration, BACKGROUND_FILEPATH);
-	m_pImagingSimulate->SetColor(m_chkImageHotColor);
+	m_pImagingSimulate = createImaging();
 	m_pImagingSimulate->SetGoodClockRange(goodClockStart, goodClockEnd);
 	m_pImagingSimulate->Start();
 
@@ -800,14 +817,14 @@ void CRaywattLabDlg::OnBnClickedButtonLoadSelectedData()
 		CString strFileName = _T("");
 		int nSelected = m_listPatientData.GetCurSel();
 		m_listPatientData.GetText(nSelected, strFileName);
-		strFilePath.Format(_T("%s/%s"), m_strPatientPath, strFileName);
+		strFilePath.Format(_T("%s/%s.bin"), m_strPatientPath, strFileName);
 
 		CString strExt = strFileName.Right(strFileName.GetLength() - strFileName.ReverseFind('.') - 1);
 		int nHeaderSize = 0;
 		if (strExt.Compare(_T("oct")) == 0) {
 			nHeaderSize = OCTHeader::Size();
 		}
-		m_pDataReader->Initialize(strFilePath.GetBuffer(), config.imaging.nBufferSize, nHeaderSize);
+		m_pDataReader->Initialize(strFilePath.GetBuffer(), config.imaging.nBufferSize);
 		if (m_pSimDevice == nullptr) {
 			m_pSimDevice = new CSimulateDevice(m_pDataReader);
 			m_pSimDevice->SetImaging(m_pImagingSimulate);
@@ -952,7 +969,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveVideo()
 	CLabImaging* pImaging = createImaging();
 
 	CDataReader* pReader = new CDataReader();
-	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nAScan * config.acquisition.nBScan, 0);
+	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nAScan * config.acquisition.nBScan);
 
 	CVideoWriter videoWriter;
 	bool isCircle = (m_radioImageShape == 0);
@@ -991,7 +1008,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveTif()
 	CLabImaging* pImaging = createImaging();
 
 	CDataReader* pReader = new CDataReader();
-	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nAScan * config.acquisition.nBScan, 0);
+	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nAScan * config.acquisition.nBScan);
 
 	CTIFFWriter tiffWriter(strTifPath);
 	bool isCircle = (m_radioImageShape == 0);
@@ -1028,7 +1045,7 @@ void CRaywattLabDlg::OnBnClickedButtonSavePng()
 	CLabImaging* pImaging = createImaging();
 
 	CDataReader* pReader = new CDataReader();
-	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nAScan * config.acquisition.nBScan, 0);
+	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nAScan * config.acquisition.nBScan);
 
 	bool isCircle = (m_radioImageShape == 0);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
@@ -1187,8 +1204,8 @@ void CRaywattLabDlg::OnBnClickedButtonChangeCalibration()
 	CConfiguration& config = CConfiguration::GetInstance();
 
 	CString strCurFile = m_vCalibList.at(m_nCurCalibIndex);
-	CCalibration* calibration = new CCalibration();
-	calibration->Initialize(strCurFile.GetBuffer(), config.imaging.nAScan, config.imaging.nFFTLength);
+	CCalibration* calibration = new CCalibration(config.imaging.nAScan, config.imaging.nFFTLength);
+	calibration->Initialize(strCurFile.GetBuffer());
 	m_pImagingRealtime->ChangeCalibration(calibration);
 	m_pImagingSimulate->ChangeCalibration(calibration);
 	m_strCurCalibration = strCurFile.GetBuffer();
