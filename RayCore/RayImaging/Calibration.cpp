@@ -74,7 +74,7 @@ bool CCalibration::readCalibration(LPCTSTR calibrationFileName){
 	}
 
 
-	return loadCalibration();
+	return true;
 }
 
 void CCalibration::setWindow(enum Windows eWindow)
