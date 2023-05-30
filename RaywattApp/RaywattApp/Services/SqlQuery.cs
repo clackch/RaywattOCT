@@ -232,6 +232,18 @@ namespace RaywattApp.Services
                 $"SET preset_name=@preset_name, calcium_threshold=@calcium_threshold, expansion_calculation=@expansion_calculation" +
                 $", expansion_threshold=@expansion_threshold, apposition_threshold=@apposition_threshold, update_date=now() " +
                 $"WHERE id=@id";
+
+            //UpdatePatientCaseAnnotationLumenContour
+            _query["UpdatePatientCaseAnnotationLumenContour"] =
+                $"UPDATE rv_schema.patient_case_annotation " +
+                $"SET lumen_contour=@lumen_contour " +
+                $"WHERE id = @id ";
+
+            //UpdatePatientCaseAnnotationWithoutLumenContour
+            _query["UpdatePatientCaseAnnotationWithoutLumenContour"] =
+                $"UPDATE rv_schema.patient_case_annotation " +
+                $"SET bookmark=@bookmark, longitude=@longitude, cross_section=@cross_section " +
+                $"WHERE id = @id ";
         }
 
         private static void SetDeleteQuery()

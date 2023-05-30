@@ -387,7 +387,7 @@ namespace RaywattApp.ViewModels.File
                                     sqlParameters["cross_section"] = patientCase.CrossSection;
                                     sqlParameters["longitude"] = patientCase.Longitude;
                                     sqlParameters["bookmark"] = patientCase.Bookmark;
-                                    sqlParameters["lumen_contour"] = patientCase.LumenContour;
+                                    sqlParameters["lumen_contour"] = patientCase.StrLumenContour;
                                     nRows = _sqlManager.UpsertPatientCaseAnnotation(sqlParameters);
                                     if(nRows==0)
                                         _log.Error("Upsert Error");
@@ -621,7 +621,7 @@ namespace RaywattApp.ViewModels.File
                             patientCase.Bookmark = GetStrValue(caseObj, "Bookmark");
                             patientCase.Longitude = GetStrValue(caseObj, "Longitude");
                             patientCase.CrossSection = GetStrValue(caseObj, "CrossSection");
-                            patientCase.LumenContour = GetStrValue(caseObj, "LumenContour");
+                            patientCase.StrLumenContour = GetStrValue(caseObj, "LumenContour");
                             patientCase.CreateDate = GetDateValue(caseObj, "CreateDate");
                             patientCase.UpdateDate = GetDateValue(caseObj, "UpdateDate");
 
