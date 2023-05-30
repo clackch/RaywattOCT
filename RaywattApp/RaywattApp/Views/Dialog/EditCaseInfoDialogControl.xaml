@@ -54,7 +54,7 @@
             <Separator Height="1" Background="{DynamicResource VerticalSeparatorBrush}"/>
             <StackPanel Height="16"/>
             <Grid Width="828">
-                <Button Style="{StaticResource OutlinedBtnType1-Large}" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Cancel], Source={StaticResource L10N}}" HorizontalAlignment="Left"/>
+                <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Cancel], Source={StaticResource L10N}}" HorizontalAlignment="Left"/>
                 <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}" HorizontalAlignment="Right"/>
             </Grid>
         </StackPanel>
