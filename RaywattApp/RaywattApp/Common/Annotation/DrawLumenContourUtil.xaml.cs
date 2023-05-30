@@ -428,7 +428,7 @@ namespace RaywattApp.Common.Annotation
             {
                 Polygon polygon = new Polygon();
                 polygon.Style = (Style)this.Resources["StylePolygon"];
-                foreach (Point point in pointList)
+                foreach (Point point in pointList.GetRange(0, pointList.Count - 1))
                 {
                     polygon.Points.Add(point);
                 }
