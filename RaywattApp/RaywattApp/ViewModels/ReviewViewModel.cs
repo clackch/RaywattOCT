@@ -423,7 +423,7 @@ namespace RaywattApp.ViewModels
                 }
                 else
                 {
-                    sqlParameters["lumen_contour"] = PatientCase.LumenContour;
+                    sqlParameters["lumen_contour"] = JsonConvert.SerializeObject(PatientCase.LumenContour, Formatting.Indented);
                     nRows = _sqlManager.UpsertPatientCaseAnnotation(sqlParameters);
                 }
                 
