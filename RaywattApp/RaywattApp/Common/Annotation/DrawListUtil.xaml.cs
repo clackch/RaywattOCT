@@ -78,7 +78,7 @@ namespace RaywattApp.Common.Annotation
 
             var drawListUtil = dependencyObject as DrawListUtil;
 
-            if (drawListUtil == null)
+            if (drawListUtil == null || drawListUtil.Measurements == null || drawListUtil.Measurements.Count <= frameNumber)
                 return;
 
             drawListUtil.CurrAreaGeometries = drawListUtil.Measurements[frameNumber].AreaGeometries;

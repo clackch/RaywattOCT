@@ -348,12 +348,30 @@ namespace RaywattApp.Services
 
             string commandText = SqlQuery.GetQuery("UpdatePatientCasePreset");
 
-            return _databaseService.InsertData(commandText, sqlParameters);
+            return _databaseService.UpdateData(commandText, sqlParameters);
         }
 
         /**
          * Patient Case Annotation
          */
+        public int UpdatePatientCaseAnnotationLumenContour(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpdatePatientCaseAnnotationLumenContour");
+
+            string commandText = SqlQuery.GetQuery("UpdatePatientCaseAnnotationLumenContour");
+
+            return _databaseService.UpdateData(commandText, sqlParameters);
+        }
+
+        public int UpdatePatientCaseAnnotationWithoutLumenContour(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpdatePatientCaseAnnotationWithoutLumenContour");
+
+            string commandText = SqlQuery.GetQuery("UpdatePatientCaseAnnotationWithoutLumenContour");
+
+            return _databaseService.UpdateData(commandText, sqlParameters);
+        }
+
         public int UpsertPatientCaseAnnotation(Dictionary<string, Object> sqlParameters)
         {
             _log.Debug("UpsertPatientCaseAnnotation");

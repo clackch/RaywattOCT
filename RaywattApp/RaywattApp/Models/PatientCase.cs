@@ -1,7 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Util;
 using System;
+using System.Collections.Generic;
 
 namespace RaywattApp.Models
 {
@@ -149,7 +151,10 @@ namespace RaywattApp.Models
         private string? _crossSection;
 
         [ObservableProperty]
-        private string? _lumenContour;
+        private List<LumenContour>? _lumenContour;
+
+        [ObservableProperty]
+        private string _strLumenContour;
 
         [ObservableProperty]
         private DateTime createDate;

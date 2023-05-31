@@ -275,7 +275,13 @@ namespace RaywattApp.ViewModels
             ExpandLeftUpMenu = false;
 
             if (ReviewStatus.SelectedPatientCase != null) {
-                RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath);                
+                RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath);
+
+                LumenContours[(int)RaySession.Compare] = GetLumenContours(ReviewStatus.SelectedPatientCase.Id);
+                imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(LumenContours[(int)RaySession.Compare]);
+                LumenProfileImageCompare = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileCompare);
+
+                IsIndicatorLockOn = false;
             }
         }
 

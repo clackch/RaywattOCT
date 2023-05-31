@@ -145,7 +145,7 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
 
-                LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(PatientCase.LumenContour);
+                LumenContours = PatientCase.LumenContour;
 
                 SetCrossSectionBackground(RaySession.Review, Constants.CardBackgroundColor);
 
@@ -194,7 +194,18 @@ namespace RaywattApp.ViewModels
             parameter["patient"] = Patient;
             if (isSave)
             {
-                PatientCase.LumenContour = JsonConvert.SerializeObject(LumenContours, Formatting.Indented);
+                Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+                sqlParameters["id"] = PatientCase.Id;
+                sqlParameters["lumen_contour"] = JsonConvert.SerializeObject(PatientCase.LumenContour, Formatting.Indented);
+                int nRows = _sqlManager.UpdatePatientCaseAnnotationLumenContour(sqlParameters);
+                if (nRows == 0)
+                {
+                    _log.Error("Update Error");
+                }
+            }
+            else
+            {
+                Reset();
             }
             parameter["patientCase"] = PatientCase;
             parameter["prevStatus"] = PrevStatus;

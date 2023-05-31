@@ -146,6 +146,8 @@ namespace RaywattApp.Common.Annotation.Util
                 }
             }
 
+            contour.MeanDiameter = sumDiameter / numOfDiameter;
+
             return true;
         }
 

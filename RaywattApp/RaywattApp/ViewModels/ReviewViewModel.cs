@@ -123,6 +123,8 @@ namespace RaywattApp.ViewModels
             set { _contrast = value; OnPropertyChanged(nameof(Contrast)); RaySetProperty(Property.Contrast, value); }
         }
 
+        private bool hasAnnotation = true;
+
         private ICommand _toggleMeasurementCommand;
         public ICommand ToggleMeasurementCommand
         {
@@ -404,6 +406,8 @@ namespace RaywattApp.ViewModels
             }
             else
             {
+                PatientCase.LumenContour = LumenContours;
+
                 sqlParameters.Clear();
                 sqlParameters["id"] = PatientCase.Id;
                 PatientCase.CrossSection = ConvertMeasurementsToJson(Measurements);
@@ -412,9 +416,17 @@ namespace RaywattApp.ViewModels
                 sqlParameters["longitude"] = PatientCase.Longitude;
                 PatientCase.Bookmark = JsonConvert.SerializeObject(Bookmarks, Formatting.Indented);
                 sqlParameters["bookmark"] = PatientCase.Bookmark;
-                PatientCase.LumenContour = JsonConvert.SerializeObject(LumenContours, Formatting.Indented);
-                sqlParameters["lumen_contour"] = PatientCase.LumenContour;
-                nRows = _sqlManager.UpsertPatientCaseAnnotation(sqlParameters);
+
+                if (this.hasAnnotation)
+                {
+                    nRows = _sqlManager.UpdatePatientCaseAnnotationWithoutLumenContour(sqlParameters);
+                }
+                else
+                {
+                    sqlParameters["lumen_contour"] = PatientCase.LumenContour;
+                    nRows = _sqlManager.UpsertPatientCaseAnnotation(sqlParameters);
+                }
+                
                 if (nRows == 0)
                 {
                     _log.Error("Update Error");
@@ -467,7 +479,7 @@ namespace RaywattApp.ViewModels
 
                 Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(PatientCase.Bookmark);
 
-                LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(PatientCase.LumenContour);
+                LumenContours = PatientCase.LumenContour;
                 imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours);
             }
             else
@@ -509,6 +521,16 @@ namespace RaywattApp.ViewModels
                         threadWaitLumenDetection = new Thread(new ThreadStart(threadFuncWaitLumenDetection));
                         threadWaitLumenDetection.Start();
                     }
+                }
+                else 
+                {
+                    this.hasAnnotation = false;
+
+                    DeviceStatus.IsLumenDetected = false;
+                    RayStartLumenDetection();
+
+                    threadWaitLumenDetection = new Thread(new ThreadStart(threadFuncWaitLumenDetection));
+                    threadWaitLumenDetection.Start();
                 }
             }
 
