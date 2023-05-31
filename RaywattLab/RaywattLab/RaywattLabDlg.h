@@ -4,6 +4,7 @@
 
 #pragma once
 #include "CommonDlg.h"
+#include "Imaging.h"
 #include "AcquisitionDevice.h"
 #include "ZaberController.h"
 #include "ScopeView.h"
@@ -114,6 +115,7 @@ private:
 	CString getLoadedFilePath();
 	CString splitFileName(CString strFilePath);
 	CLabImaging* createImaging();
+	USHORT* readBackground(const char* strBackgroundFile, IImaging::Setting setting);
 	void findFileByExtension(CString strFolder, CString strExt, std::vector<CString>& vList);
 	void updateMeasurement(USHORT nPeakValue, int nPeakIndex, int nLineWidth, USHORT nNoisePower);
 	void drawGuideLine(cv::Mat image);

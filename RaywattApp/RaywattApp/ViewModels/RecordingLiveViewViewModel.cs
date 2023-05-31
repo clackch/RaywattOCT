@@ -137,6 +137,9 @@ namespace RaywattApp.ViewModels
 
             if (PatientCase.PullbackType == null)
                 PatientCase.PullbackType = Constants.PullbackTypeShort;
+
+            Brightness = (int) RayGetProperty(Property.Brightness);
+            Contrast = (int) RayGetProperty(Property.Contrast);
         }
 
         private void Back()

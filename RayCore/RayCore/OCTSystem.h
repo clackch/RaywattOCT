@@ -167,6 +167,7 @@ private:
 	int disconnectRotaryJunction();
 	void stopAllSessions();
 	void closeAllSessions();
+	void setBrightnessContrastAllSessions();
 
 protected:
 	LRESULT OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam);
