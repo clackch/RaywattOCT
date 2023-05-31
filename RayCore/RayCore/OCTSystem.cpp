@@ -98,6 +98,9 @@ RayError COCTSystem::Start() {
 		config.Initialize(_T(".\\raycore.ini"));
 	}
 
+	m_fBrightness = config.imaging.brightness;
+	m_fContrast = config.imaging.contrast;
+
 	SetLogger(config.logRootPath);
 
 	CUtility::StartThread(threadService, m_pThreadService, this);
@@ -1477,6 +1480,11 @@ void COCTSystem::setBrightnessContrastAllSessions() {
 				m_reviewSession[session]->GetImaging()->SetBrightnessContrast(m_fBrightness, m_fContrast);
 			}
 		}
+	}
+
+	if (m_openedSession != nullptr && m_openedSession->GetImaging() != nullptr)
+	{
+		m_openedSession->GetImaging()->SetBrightnessContrast(m_fBrightness, m_fContrast);
 	}
 }
 /*
