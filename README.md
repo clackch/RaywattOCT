@@ -82,3 +82,9 @@ Download & Install Font
 Download & Create Folder, Copy/Paste
 1. [cursor.zip](https://github.com/Raywatt/RaywattOCT/files/11419744/cursor.zip) 다운로드 후 압축 해제
 2. C:\Raywatt\system\image\cursor 폴더 생성 및 복사/붙여넣기
+
+Windows Default Mouse Curser Setting
+1. 설정-> Bluethooth 및 장치 -> 마우스
+2. 관련설정 -> 더 많은 마우스 설정
+3. 포인터
+    - 찾아보기에서 cur 파일  
