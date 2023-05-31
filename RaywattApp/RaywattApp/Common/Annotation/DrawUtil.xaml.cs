@@ -183,7 +183,7 @@ namespace RaywattApp.Common.Annotation
 
             var drawUtil = dependencyObject as DrawUtil;
 
-            if(drawUtil == null || drawUtil.Measurements == null)
+            if(drawUtil == null || drawUtil.Measurements == null || drawUtil.Measurements.Count <= frameNumber)
                 return;
 
             drawUtil.areaGeometrys = drawUtil.Measurements[frameNumber].AreaGeometries;
