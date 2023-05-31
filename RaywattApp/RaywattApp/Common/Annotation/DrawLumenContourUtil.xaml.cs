@@ -170,7 +170,7 @@ namespace RaywattApp.Common.Annotation
 
             var drawUtil = dependencyObject as DrawLumenContourUtil;
             
-            if (drawUtil == null || drawUtil.LumenContours == null)
+            if (drawUtil == null || drawUtil.LumenContours == null || drawUtil.LumenContours.Count <= frameNumber)
                 return;
 
             if (!drawUtil.isInit && drawUtil.IsEditOn)

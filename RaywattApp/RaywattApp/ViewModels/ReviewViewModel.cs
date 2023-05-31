@@ -473,9 +473,16 @@ namespace RaywattApp.ViewModels
             {
                 Measurements = JsonConvert.DeserializeObject<List<Measurement>>(PatientCase.CrossSection);
 
-                Measurement lModeMeasurement = JsonConvert.DeserializeObject<Measurement>(PatientCase.Longitude);
-                LModeLengthGeometries = lModeMeasurement.LengthGeometries;
-                LModeTextGeometries = lModeMeasurement.TextGeometries;
+                if(PatientCase.Longitude != "")
+                {
+                    Measurement lModeMeasurement = JsonConvert.DeserializeObject<Measurement>(PatientCase.Longitude);
+                    LModeLengthGeometries = lModeMeasurement.LengthGeometries;
+                    LModeTextGeometries = lModeMeasurement.TextGeometries;
+                }
+                else
+                {
+                    this.hasAnnotation = false;
+                }
 
                 Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(PatientCase.Bookmark);
 
