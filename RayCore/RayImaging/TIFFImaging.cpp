@@ -26,6 +26,7 @@ void CTIFFImaging::Process(char* fringes)
 	cv::flip(imageConvert, imageConvert, 0);
 
 	cv::copyTo(imageConvert, imageCircle, cv::Mat());
+	cv::convertScaleAbs(imageCircle, imageCircle, m_fContrast, m_fBrightness);
 
 	std::chrono::milliseconds total_time = std::chrono::duration_cast<std::chrono::milliseconds>(m_end - m_start);
 	long long msec = total_time.count();
