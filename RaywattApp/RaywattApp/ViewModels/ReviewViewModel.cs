@@ -248,6 +248,8 @@ namespace RaywattApp.ViewModels
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
             timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
             timerUpdateImage.Start();
+
+            Constants.mainWindow.Cursor = (Cursor)Application.Current.Resources["arrow"];            
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -618,7 +620,9 @@ namespace RaywattApp.ViewModels
                 RightSideBarExpand = Constants.RightSideBarExpandAngioSize;
                 ReviewStatus.IsMeasurementOn = false;
                 ReviewStatus.IsCalciumOn = true;
-                if(!ReviewStatus.IsLumenProfile)
+                if(ReviewStatus.IsLumenProfile)
+                    IndicatorCrossSection.IsVisible = Visibility.Collapsed;
+                else
                     IndicatorCrossSection.IsVisible = Visibility.Visible;
             }
             else

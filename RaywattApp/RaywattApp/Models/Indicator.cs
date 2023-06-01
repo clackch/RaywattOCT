@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using log4net;
 using System.Windows.Input;
 using System.Windows;
+using RaywattApp.Common.Bases;
 
 namespace RaywattApp.Models
 {
@@ -51,16 +52,13 @@ namespace RaywattApp.Models
         {
             IsCaptured = isCaptured;
 
-
-            Window mainWindow = Application.Current.MainWindow;
-
             if (IsCaptured)
             {
-                mainWindow.Cursor = (Cursor)Application.Current.Resources["grab"];
+                Constants.mainWindow.Cursor = (Cursor)Application.Current.Resources["grab"];
             }
             else
             {
-                mainWindow.Cursor = (Cursor)Application.Current.Resources["arrow"];
+                Constants.mainWindow.Cursor = (Cursor)Application.Current.Resources["arrow"];
             }
 
             if (IsCrossSection)

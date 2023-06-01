@@ -15,6 +15,7 @@ using System.Windows.Controls;
 using RaywattApp.Views.Dialog;
 using RaywattApp.Common.Dialog;
 using static RaywattOCT.RayCoreWrapper;
+using System.Windows;
 
 namespace RaywattApp.ViewModels
 {
@@ -346,6 +347,8 @@ namespace RaywattApp.ViewModels
 
             if (patientCase == null)
                 return;
+
+            Constants.mainWindow.Cursor = (Cursor)Application.Current.Resources["wait"];
 
             RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
             int numOfFrames = RayStartReview(patientCase.ImageFullPath);
