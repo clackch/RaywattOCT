@@ -281,19 +281,17 @@
                                         </Grid>
                                         <StackPanel Grid.Row="3">
                                             <Label Content="{Binding Patient.Name}" Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
-                                            <StackPanel Height="2"/>
-                                            <StackPanel Orientation="Horizontal">
-                                                <Label Content="{Binding [ID], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
-                                                <Label Content=" [ " Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
-                                                <Label Content="{Binding Patient.Id}" Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
-                                                <Label Content=" ]" Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
-                                            </StackPanel>
                                             <StackPanel Height="9"/>
                                             <!-- design guide : 12px -->
                                             <Separator Height="1" Background="{DynamicResource SeparatorBrush}"/>
                                             <StackPanel Height="18"/>
                                             <!-- design guide : 20px -->
                                             <StackPanel Orientation="Vertical">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [ID], Source={StaticResource L10N}}"/>
+                                                    <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding Patient.Id}"/>
+                                                </StackPanel>
+                                                <StackPanel Height="4"/>
                                                 <StackPanel Orientation="Horizontal">
                                                     <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Birth], Source={StaticResource L10N}}"/>
                                                     <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}"/>
