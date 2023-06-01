@@ -66,7 +66,7 @@ namespace RaywattApp.ViewModels.Setting
                 }
             }
 
-            DbProgress = DbAvailableFreeSpace / DbTotalSize * 100;
+            DbProgress = (DbTotalSize - DbAvailableFreeSpace) / DbTotalSize * 100;
         }
     }
 }
