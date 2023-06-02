@@ -122,8 +122,8 @@ void CLabImaging::generateScopeData(Ipp32f* output, Ipp16u* scope) {
 	const int nOutputLength = m_setting.nOutputLength;
 	Ipp32f* temp = new Ipp32f[nOutputLength];
 	
-	ippsSubC_32f(output,m_fLowLevel, temp, nOutputLength);
-	ippsMulC_32f_I(USHRT_MAX / m_fHighLevel, temp, nOutputLength);
+	ippsSubC_32f(output, m_setting.lowLevel, temp, nOutputLength);
+	ippsMulC_32f_I(USHRT_MAX / m_setting.highLevel, temp, nOutputLength);
 	ippsConvert_32f16u_Sfs(temp, scope, nOutputLength, ippRndNear, 0);
 
 	delete[] temp;

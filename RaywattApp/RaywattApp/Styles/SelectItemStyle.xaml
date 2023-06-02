@@ -148,8 +148,8 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ComboBoxItem}">
-                    <Border x:Name="Border" CornerRadius="4">
-                        <Grid Margin="15,0,0,0" VerticalAlignment="Center">
+                    <Border x:Name="Border" CornerRadius="4" Background="Transparent">
+                        <Grid x:Name="Grid" Margin="15,0,0,0" VerticalAlignment="Center" Background="Transparent">
                             <ContentPresenter x:Name="NormalText" VerticalAlignment="Center" TextBlock.Foreground="{DynamicResource GrayscaleGray4Brush}" />
                         </Grid>
                     </Border>
@@ -160,6 +160,7 @@
                         <Trigger Property="IsSelected" Value="True">
                             <Setter TargetName="Border" Property="Background" Value="{DynamicResource selectedBackground}"/>
                             <Setter TargetName="NormalText" Property="TextBlock.Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+                            <Setter TargetName="Grid" Property="Background" Value="{DynamicResource selectedBackground}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
