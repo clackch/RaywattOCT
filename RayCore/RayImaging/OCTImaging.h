@@ -30,25 +30,21 @@ protected:
 	cv::Mat imageCircle;
 
 	// using in GenerateBackground
-	Ipp32f *fringes32f;
-	Ipp32f *fringes32fAverage;
+	Ipp32f* fringes32f;
+	Ipp32f* fringes32fAverage;
 
 	// using in Gen_8bit_Image
-	Ipp32f *fBuffer_Window;
-	Ipp32fc *fcBuffer_FFT;
-	Ipp32fc *fcBuffer_IFFT;
-	Ipp32f *fFFTResult;
-	Ipp32f *fOutput;
-	IppsFFTSpec_R_32f *fftSpecFirst;	// first FFT
-	IppsFFTSpec_C_32fc *ifftSpec, *fftSpecSecond;	// Inverse, second FFT
+	Ipp32f* fBuffer_Window;
+	Ipp32fc* fcBuffer_FFT;
+	Ipp32fc* fcBuffer_IFFT;
+	Ipp32f* fFFTResult;
+	Ipp32f* fOutput;
+	IppsFFTSpec_R_32f* fftSpecFirst;	// first FFT
+	IppsFFTSpec_C_32fc* ifftSpec, * fftSpecSecond;	// Inverse, second FFT
 
 	bool m_bInvert;
 	bool m_bColor;
 	bool m_bShowCalibGuide;
-	double m_fBrightness;
-	double m_fContrast;
-	double m_fLowLevel;
-	double m_fHighLevel;
 
 	std::vector<cv::Vec3b> m_vLUT;
 
@@ -60,7 +56,7 @@ public:
 	COCTImaging(Setting, CMessageService*);
 	virtual ~COCTImaging(void);
 
-	virtual void Initialize(CCalibration *calibration);
+	virtual void Initialize(CCalibration* calibration);
 	virtual void Process(char* fringes);
 
 	int Start();
@@ -71,12 +67,12 @@ public:
 	void ShowCalibGuide(bool bShow) { m_bShowCalibGuide = bShow; }
 	void SetMeasurementSetting(COCTMeasurement::Setting setting) { m_measureSetting = setting; }
 	void SetBrightnessContrast(double brightness, double contrast) {
-		m_fBrightness = brightness;
-		m_fContrast = contrast;
+		m_setting.brightness = brightness;
+		m_setting.contrast = contrast;
 	}
 	void SetLevel(double low, double high) {
-		m_fLowLevel = low;
-		m_fHighLevel = high;
+		m_setting.lowLevel = low;
+		m_setting.highLevel = high;
 	}
 	virtual void SetFrameInfo(int nCurFrame, int nTotalFrame) {
 		m_nCurFrame = nCurFrame;
@@ -95,7 +91,7 @@ protected:
 	void initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale);
 	void releaseCircularizeMap();
 
-	void generateBackground(Ipp16u *fringes);
+	void generateBackground(Ipp16u* fringes);
 	void fftProcessing(const Ipp32f* fringes32f);
 	void computeLogarithm(Ipp32f* src, Ipp32f* dst);
 	void generateImage(Ipp32f* logaritihmData, bool bInvert);

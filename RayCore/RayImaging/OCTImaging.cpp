@@ -50,10 +50,6 @@ COCTImaging::COCTImaging(Setting setting, CMessageService* pMsg) {
 	m_bInvert = false;
 	m_bColor = false;
 	m_bShowCalibGuide = false;
-	m_fBrightness = setting.brightness;
-	m_fContrast = setting.contrast;
-	m_fLowLevel = setting.lowLevel;
-	m_fHighLevel = setting.highLevel;
 
 	m_nCurFrame = 0;
 	m_nTotalFrame = 0;
@@ -284,8 +280,8 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 	std::vector<int> sheathPoints;
 	int sheathPointSum = 0;
 	for (int n = 0; n < nBScan; n++) {
-		ippsSubC_32f(logaritihmData + n * nOutputLength, m_fLowLevel, fScope, nOutputLength);
-		ippsMulC_32f_I(USHRT_MAX / m_fHighLevel, fScope, nOutputLength);
+		ippsSubC_32f(logaritihmData + n * nOutputLength, m_setting.lowLevel, fScope, nOutputLength);
+		ippsMulC_32f_I(USHRT_MAX / m_setting.highLevel, fScope, nOutputLength);
 		ippsDivC_32f_I(1000.f, fScope, nOutputLength);	// db scale
 
 		// linearize
@@ -330,8 +326,8 @@ void COCTImaging::generateImage(Ipp32f* logaritihmData, bool bInvert){
 
 	for (int i = 0; i < nBScan; i++)
 	{
-		ippsSubC_32f(logaritihmData + i * nOutputLength, (m_fLowLevel + fLowLevel), fOutput + i * nOutputLength, nOutputLength);
-		ippsMulC_32f_I(UCHAR_MAX / (m_fHighLevel - fHighLevel), fOutput + i * nOutputLength, nOutputLength);
+		ippsSubC_32f(logaritihmData + i * nOutputLength, (m_setting.lowLevel + fLowLevel), fOutput + i * nOutputLength, nOutputLength);
+		ippsMulC_32f_I(UCHAR_MAX / (m_setting.highLevel - fHighLevel), fOutput + i * nOutputLength, nOutputLength);
 		ippsConvert_32f8u_Sfs(fOutput + i * nOutputLength, imageResult.data + i * nOutputLength /*stepBytes*/, nOutputLength, ippRndNear, 0);
 	}
 }
@@ -345,7 +341,7 @@ void COCTImaging::postProcessing() {
 	if (bInvert) cv::bitwise_not(imageResultColor, imageResultColor);
 	if (bColor) applyLUT(imageResultColor);
 
-	cv::convertScaleAbs(imageResultColor, imageResultColor, m_fContrast, m_fBrightness);
+	cv::convertScaleAbs(imageResultColor, imageResultColor, m_setting.contrast, m_setting.brightness);
 
 	if (m_bShowCalibGuide) {
 		drawGuideLine(imageResultColor, m_measureSetting.nSheathPosition, cv::Scalar(0xff, 0xcc, 0x33));
