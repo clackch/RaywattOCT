@@ -33,7 +33,6 @@ int IAcquisitionDevice::StopAcquisition() {
 UINT IAcquisitionDevice::threadAcquire(LPVOID param) {
 	IAcquisitionDevice *pDevice = (IAcquisitionDevice *)param;
 	IImaging* pImaging = pDevice->m_pImaging;
-	IDataManager* pWriter = pDevice->m_pWriter;
 	int nCurFrame = 0;
 	int nTotalFrame = 0;
 
@@ -47,8 +46,8 @@ UINT IAcquisitionDevice::threadAcquire(LPVOID param) {
 			pImaging->SetFrameInfo(nCurFrame, nTotalFrame);
 		}
 
-		if (pWriter != NULL) {
-			pWriter->AddFrame(pBuffer);
+		if (pDevice->m_pWriter != NULL) {
+			pDevice->m_pWriter->AddFrame(pBuffer);
 		}
 	}
 

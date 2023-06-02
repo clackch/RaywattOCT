@@ -36,7 +36,7 @@ CImagingSession::~CImagingSession() {
 CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSession, IImaging::Setting setting, IDataManager* pWriter) {
 	if (pMsg == nullptr || pWriter == nullptr) return nullptr;
 
-	return createSession(pMsg, setting, nSession,  pWriter, false, ImagingType::Default);
+	return createSession(pMsg, setting, nSession,  pWriter, true, ImagingType::Default);
 }
 
 CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSession, const char* strFilePath) {

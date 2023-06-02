@@ -1137,6 +1137,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 
 	// 4. Stop Recording OCT
 	pDataWriter->StopRecording();
+	pSystem->m_pAcqDevice->SetWriter(nullptr);
 
 	// 5. Motor OFF
 	pMotor->StopMotor();
