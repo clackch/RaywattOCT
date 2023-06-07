@@ -9,6 +9,10 @@ CRayLearning::CRayLearning() {
 
 	m_useGPU = false;
 }
+CRayLearning& CRayLearning::GetInstance() {
+	static CRayLearning pInstance;
+	return pInstance;
+}
 CRayLearning::~CRayLearning() {}
 
 void CRayLearning::Initialize(bool useGPU) {

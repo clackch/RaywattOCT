@@ -39,7 +39,6 @@ COCTSystem::COCTSystem() {
 	m_pVolume = nullptr;
 
 	m_pAcqDevice = nullptr;	
-	m_pLearning = nullptr;
 
 	m_curSession = SESSION_UNKNOWN;
 	for (int i = 0; i < MAX_SESSION_NUM; i++) {
@@ -79,6 +78,7 @@ void COCTSystem::SetLogger(TCHAR* logRootPath) {
 
 	char logFile[_MAX_PATH];
 	sprintf(logFile, "%s\\core_%d-%02d-%02d.log", rootPath, (t.tm_year + 1900), (t.tm_mon + 1), t.tm_mday);
+	printf("plog::init - %s\n", logFile);
 
 #ifdef DEBUG
 	plog::init(plog::debug, logFile);
@@ -106,13 +106,13 @@ RayError COCTSystem::Start() {
 	CUtility::StartThread(threadService, m_pThreadService, this);
 
 	IImaging::Setting settingPullback = config.imaging;
-	settingPullback.Set(settingPullback.nAScan, config.acquisition.nLaserSpeed / (config.bldcMotor.velocityPullback / 60));
+	settingPullback.Set(settingPullback.nAScan, config.imaging.nBScan); //  config.acquisition.nLaserSpeed / (config.bldcMotor.velocityPullback / 60));
 	m_pImagingPullback = CImagingSession::CreateColorImaging(this, settingPullback, nullptr, ImagingType::Default);
 	m_pImagingPullback->SetSession(SESSION_REALTIME);
 	m_pImagingPullback->Start();
 
 	IImaging::Setting settingLiveView = config.imaging;
-	settingLiveView.Set(settingLiveView.nAScan, config.acquisition.nLaserSpeed / (config.bldcMotor.velocityLiveView / 60));
+	settingLiveView.Set(settingLiveView.nAScan, 4000); // config.imaging.nBScan); // ceil((double)config.acquisition.nLaserSpeed / ((double)config.bldcMotor.velocityLiveView / 60.f)));
 	m_pImagingLiveView = CImagingSession::CreateColorImaging(this, settingLiveView, nullptr, ImagingType::Default);
 	m_pImagingLiveView->SetSession(SESSION_REALTIME);
 	m_pImagingLiveView->Start();
@@ -121,6 +121,9 @@ RayError COCTSystem::Start() {
 
 	m_pVolume = new CVolumeGenerator();
 	m_pVolume->Initialize(config.imaging.nCircleSize, config.imaging.nCircleSize, config.volume.size, config.volume.size);
+
+	CLaserController* pLaser = CLaserController::GetInstance();
+	pLaser->LaserOnOff(true);
 
 	return RayError::OK;
 }
@@ -165,10 +168,6 @@ RayError COCTSystem::Stop() {
 	if (m_pVolume != nullptr) {
 		delete m_pVolume;
 		m_pVolume = nullptr;
-	}
-	if (m_pLearning != nullptr) {
-		delete m_pLearning;
-		m_pLearning = nullptr;
 	}
 
 	CMotorController* pMotor = CMotorController::GetInstance();
@@ -341,14 +340,17 @@ int COCTSystem::StartReview(char* strFilePath) {
 	if (m_curState == RayScannerState::Initial || m_curState == RayScannerState::Default) {
 		CImagingSession *pSession = CImagingSession::CreateSession(this, SESSION_REVIEW, strFilePath);
 		if (pSession == nullptr) {
+			PLOGE.printf("InvalidArgument : %s", strFilePath);
 			return (int)RayError::InvalidArgument;
 		}
+		pSession->EnableLumenDetection(false);
 
 		postMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
 		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
 	
 		return pSession->GetDataManager()->GetNumOfSamples();
 	}
+	PLOGE.printf("WrongState : %d", m_curState);
 
 	return (int)RayError::WrongState;
 }
@@ -413,7 +415,7 @@ RayError COCTSystem::StartLiveView()
 
 		restartAcqDevice(m_pImagingLiveView);
 
-		pLaser->LaserOnOff(true);
+		//pLaser->LaserOnOff(true);
 		pMotorCtrl->PerformRun(config.bldcMotor.velocityLiveView);
 
 		return RayError::OK;
@@ -432,7 +434,7 @@ RayError COCTSystem::StopLiveView()
 		CLaserController* pLaser = CLaserController::GetInstance();
 		CMotorController* pMotorCtrl = CMotorController::GetInstance();
 
-		pLaser->LaserOnOff(false);
+		//pLaser->LaserOnOff(false);
 		pMotorCtrl->StopMotor();
 
 		return RayError::OK;
@@ -569,6 +571,7 @@ RayError COCTSystem::OpenImage(char* strFilePath) {
 	}
 
 	pSession->EnableCutView(cv::Scalar(0x00, 0x00, 0x00));
+	pSession->EnableLumenDetection(false);
 	m_openedSession = pSession;
 
 	return RayError::OK;
@@ -614,22 +617,18 @@ void* COCTSystem::GetLongitudeData(double fDegree) {
 * GetLumenContour
 */
 void* COCTSystem::GetLumenContour(int nFrame) {
-	if (m_vLumen.size() <= nFrame) return nullptr;
-	if (m_vLumen.at(nFrame).size() <= 0) return nullptr;
+	if (m_reviewSession[SESSION_REVIEW] == nullptr) return nullptr;
 
-	cv::Mat matContour = m_vLumen.at(nFrame).at(0);
-	return matContour.ptr();
+	return m_reviewSession[SESSION_REVIEW]->GetLumenContour(nFrame);
 }
 
 /*
 * GetNumOfLumenContourPoints
 */
 int COCTSystem::GetNumOfLumenContourPoints(int nFrame) {
-	if (m_vLumen.size() <= nFrame) return 0;
-	if (m_vLumen.at(nFrame).size() <= 0) return 0;
+	if (m_reviewSession[SESSION_REVIEW] == nullptr) return 0;
 
-	cv::Mat matContour = m_vLumen.at(nFrame).at(0);
-	return matContour.cols * matContour.rows;
+	return m_reviewSession[SESSION_REVIEW]->GetNumOfLumenContourPoints(nFrame);
 }
 
 
@@ -867,15 +866,20 @@ UINT COCTSystem::threadService(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CThread* pThread = pSystem->m_pThreadService;
 
+	PLOGI.printf("Service Start");
+
 	// Connect to COM Interface first time asynchronous
-	CLaserController::GetInstance();
+	CLaserController* pLaser = CLaserController::GetInstance();
+	//pLaser->LaserOnOff(true);
 
 	// Initialize (first prediction)
 	cv::Mat imgSample = cv::imread(".\\oct_sample.png");
-	pSystem->m_pLearning = new CRayLearning();
-	pSystem->m_pLearning->Initialize(true);
-	pSystem->m_pLearning->FindLumen(imgSample);
+	CRayLearning& learning = CRayLearning::GetInstance();
+	learning.Initialize(true);
+	learning.FindLumen(imgSample);
 
+	PLOGI.printf("sample lumen detection done.");
+	printf("[threadService] start!\n");
 	while (pThread->isRun) {
 		std::tuple<int, WPARAM, LPARAM> popMsgThread = pSystem->popMessage();
 		int popMsg = std::get<0>(popMsgThread);
@@ -940,6 +944,8 @@ UINT COCTSystem::threadService(LPVOID param) {
 		Sleep(5);
 	}
 
+	pLaser->LaserOnOff(false);
+
 	return (UINT)RayError::OK;
 }
 
@@ -983,6 +989,7 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 	pDataWriter->StopSave();
 
 	pSystem->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::SaveRawData);
+	printf("[threadSaveRaw] done.\n");
 
 	while (pSystem->m_pThreadSaveRaw->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
@@ -1027,6 +1034,7 @@ UINT COCTSystem::threadGenerateVolume(LPVOID param) {
 * threadLumenDetection
 */
 UINT COCTSystem::threadLumenDetection(LPVOID param) {
+#if 0
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CImagingSession* pSession = pSystem->m_reviewSession[SESSION_REVIEW];
 	IDataManager* pDataManager = pSession->GetDataManager();
@@ -1039,12 +1047,14 @@ UINT COCTSystem::threadLumenDetection(LPVOID param) {
 	// prepare imaging
 	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr, pSession->GetImaging()->GetSetting(), pDataManager, imagingType);
 
+	PLOGI.printf("lumen detection start - %d frames", nNumOfSamples);
 	vLumen.clear();
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadLumenDetection->isRun; nFrame++) {
 		char* pBuffer = pDataManager->GetSample(nFrame);
 		pImaging->Process(pBuffer);
 
 		std::vector<std::vector<cv::Point>> vContours = pLearning->FindLumen(pImaging->GetCircleImage());
+		printf("[threadLumenDetection] %d - %d contours\n",nFrame, vContours.size());
 		std::vector<cv::Mat> vLumens;
 		for (int i = 0; i < vContours.size(); i++) {
 			std::vector<cv::Point> contour = vContours.at(i);
@@ -1058,13 +1068,15 @@ UINT COCTSystem::threadLumenDetection(LPVOID param) {
 	}
 	delete pImaging;
 
+	PLOGI.printf("lumen detection done.");
+	printf("[threadLumenDetection] done.\n");
 	pSystem->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::LumenDetection);
 
 	// wait for StopThread
 	while (pSystem->m_pThreadLumenDetection->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
 	}
-
+#endif
 	return NOERROR;
 }
 
@@ -1143,6 +1155,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pMotor->StopMotor();
 
 	CImagingSession* pSession = CImagingSession::CreateSession(pSystem, SESSION_REVIEW, settingPullback, pDataWriter);
+	pSession->EnableLumenDetection(true);
 	pSystem->postMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
 	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
 	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::Pullback);
@@ -1249,14 +1262,14 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 	CLaserController* pLaser = CLaserController::GetInstance();
 
 	pSystem->restartAcqDevice(pSystem->m_pImagingLiveView);
-	pLaser->LaserOnOff(true);
+	//pLaser->LaserOnOff(true);
 	pMotor->PerformRun(config.bldcMotor.velocityLiveView);
 
 	// To-Do: determine image verification
 	bool verified = true;
 
 	pMotor->StopMotor();
-	pLaser->LaserOnOff(false);
+	//pLaser->LaserOnOff(false);
 
 	if (verified) {
 		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Enable);
@@ -1364,12 +1377,12 @@ int COCTSystem::connectRotaryJunction() {
 	bool result = true;
 
 	if (!pPullbackMotor->IsOpen()) {
-		result &= pPullbackMotor->Open(config.stepMotor.pullback);
-		result &= pPullbackMotor->SetCurrent(config.stepMotor.pullbackStart);
+		pPullbackMotor->Open(config.stepMotor.pullback);
+		pPullbackMotor->SetCurrent(config.stepMotor.pullbackStart);
 	}
 
 	if (!pDelayLine->IsOpen()) {
-		result &= pDelayLine->Open(config.stepMotor.delayline);
+		pDelayLine->Open(config.stepMotor.delayline);
 	}
 
 	if (!pMotor->IsConnected()) {
@@ -1497,6 +1510,7 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 
 	if(m_callback != nullptr) m_callback((int)RayCallbackRequest::State, (int)m_curState);
 
+	PLOGI.printf("%d > %d", m_prevState, m_curState);
 	switch (m_curState) {
 	case RayScannerState::Initial:
 		CUtility::StopThread(m_pThreadGenerateVolume);
@@ -1575,6 +1589,7 @@ LRESULT COCTSystem::OnMsgStartReviewSession(WPARAM wParam, LPARAM lParam) {
 	CImagingSession* pSession = (CImagingSession*)lParam;
 
 	if (m_reviewSession[nSession] != nullptr) {
+		PLOGI.printf("Stop session #%d", nSession);
 		m_reviewSession[nSession]->Stop();
 		delete m_reviewSession[nSession];
 		m_reviewSession[nSession] = nullptr;
@@ -1584,6 +1599,7 @@ LRESULT COCTSystem::OnMsgStartReviewSession(WPARAM wParam, LPARAM lParam) {
 		pSession->EnableCutView(m_backgroundColor);
 	}
 
+	PLOGI.printf("Start session #%d", nSession);
 	m_reviewSession[nSession] = pSession;
 	m_reviewSession[nSession]->Start();
 	m_curSession = (SessionType) nSession;

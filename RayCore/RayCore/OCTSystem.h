@@ -66,10 +66,6 @@ private:
 	// Rotary Junction
 	CStepMotorController* m_pStepMotor[STEP_MOTOR_NUM];
 
-	// Machine Learning
-	CRayLearning* m_pLearning;
-	std::vector<std::vector<cv::Mat>> m_vLumen;
-
 	RayScannerState m_prevState;
 	RayScannerState m_curState;
 	CatheterState m_cathState;
