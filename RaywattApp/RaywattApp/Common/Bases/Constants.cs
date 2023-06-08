@@ -382,5 +382,10 @@ namespace RaywattApp.Common.Bases
         //Zoom
         public const double ZoomScaleDefault = CrossSectionSize / OCTImageSize;
         public const double ZoomScaleMax = ZoomScaleDefault * 2;
+
+
+        //Recording
+        public const int TransientTime = 3000;
+        public const int StartTime = 15;
     }
 }

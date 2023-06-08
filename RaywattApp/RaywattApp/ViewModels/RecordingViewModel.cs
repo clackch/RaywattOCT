@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Windows.Threading;
 using RaywattApp.Common.Util;
 using static RaywattOCT.RayCoreWrapper;
+using System.Threading;
 
 namespace RaywattApp.ViewModels
 {
@@ -33,6 +34,9 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private bool _isStep1;
+
+        [ObservableProperty]
+        private int _startTime;
 
         private DispatcherTimer timer = new DispatcherTimer();
         private DispatcherTimer timerUpdateImage = new DispatcherTimer();
@@ -64,6 +68,9 @@ namespace RaywattApp.ViewModels
             _sqlManager = sqlManager;
 
             IsStep1 = true;
+
+            timer.Interval = TimeSpan.FromMilliseconds(1000);
+            timer.Tick += new EventHandler(StartTimer);
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -93,6 +100,9 @@ namespace RaywattApp.ViewModels
 
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
+
+            if (timer.IsEnabled)
+                timer.Stop();
         }
 
         private void Cancel()
@@ -106,12 +116,36 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Ready");
 
+            //400 rps
+
+
             IsStep1 = false;
+
+            Thread.Sleep(Constants.TransientTime);
+
+            StartTime = Constants.StartTime;
+            timer.Start();
+        }
+
+        private void StartTimer(object sender, EventArgs e)
+        {
+            StartTime--;
+            if(StartTime == 0)
+            {
+                //50 rps
+
+
+                IsStep1 = true;
+                timer.Stop();
+            }
         }
 
         private void Start()
         {
             _log.Debug("Start");
+
+            if (timer.IsEnabled)
+                timer.Stop();
 
             PatientCase.Image = generateFileName("oct");
             DeviceStatus.IsLumenDetected = false;
