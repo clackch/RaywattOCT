@@ -151,7 +151,7 @@ namespace RaywattApp.ViewModels
                 }
 
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
-                LumenContours[(int)RaySession.Review] = GetLumenContours(PatientCase.Id);
+                LumenContours[(int)RaySession.Review] = PatientCase.LumenContour;
                 imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours[(int)RaySession.Review]);
 
                 if (ReviewStatus.SelectedPatientCase != null)
