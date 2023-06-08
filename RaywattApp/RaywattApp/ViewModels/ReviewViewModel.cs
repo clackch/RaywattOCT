@@ -517,8 +517,9 @@ namespace RaywattApp.ViewModels
                     if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenContour))
                     {
                         DeviceStatus.IsLumenDetected = true;
-                        LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(patientCaseAnnotations[0].LumenContour);
-                        imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours);
+
+                        Thread threadMakeLumenProfile = new Thread(() => ThreadMakeLumenProfile(patientCaseAnnotations[0].LumenContour));
+                        threadMakeLumenProfile.Start();
                     }
                     else
                     {
@@ -552,6 +553,12 @@ namespace RaywattApp.ViewModels
             }
 
             Measurements = Measurements.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
+        }
+
+        private void ThreadMakeLumenProfile(string lumenContour)
+        {
+            LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(lumenContour);
+            imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours);
         }
 
         private string ConvertMeasurementsToJson(List<Measurement> param)
