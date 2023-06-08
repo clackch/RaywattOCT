@@ -116,8 +116,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Ready");
 
-            //400 rps
-
+            RayReadyPullback();
 
             IsStep1 = false;
 
