@@ -159,10 +159,10 @@ namespace RaywattApp.ViewModels
                 Patient = (Patient)data["patient"];
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
+                ReviewStatus = (ReviewStatus)data["reviewStatus"];
 
                 if (String.IsNullOrEmpty(PatientCase.Id))
                 {
-                    ReviewStatus = new ReviewStatus();
                     PatientCasePresetList = _sqlManager.SelectPatientCasePresetList();
 
                     IsPreset = true;
@@ -173,8 +173,6 @@ namespace RaywattApp.ViewModels
                 }
                 else
                 {
-                    ReviewStatus = (ReviewStatus)data["reviewStatus"];
-
                     PatientCasePresetList = new List<PatientCasePreset>();
                     PatientCasePreset patientCasePreset = new PatientCasePreset();
                     patientCasePreset.Id = PatientCase.Id;
