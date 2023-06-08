@@ -147,7 +147,7 @@ namespace RaywattApp.ViewModels
                 }
                 else
                 {
-                    GetPatientCase(false);
+                    GetPatientCase(false, ReviewStatus.SelectedPatientCase.LumenContour);
                 }
 
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
@@ -157,7 +157,9 @@ namespace RaywattApp.ViewModels
                 if (ReviewStatus.SelectedPatientCase != null)
                 {
                     SetCrossSectionBackground(RaySession.Compare, Constants.CompareBackgroundColor);
-                    LumenContours[(int)RaySession.Compare] = GetLumenContours(ReviewStatus.SelectedPatientCase.Id);
+                    if (ReviewStatus.SelectedPatientCase.LumenContour == null)
+                        ReviewStatus.SelectedPatientCase.LumenContour = GetLumenContours(ReviewStatus.SelectedPatientCase.Id);
+                    LumenContours[(int)RaySession.Compare] = ReviewStatus.SelectedPatientCase.LumenContour;
                     imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(LumenContours[(int)RaySession.Compare]);
                 }
 
@@ -277,7 +279,8 @@ namespace RaywattApp.ViewModels
             if (ReviewStatus.SelectedPatientCase != null) {
                 RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath);
 
-                LumenContours[(int)RaySession.Compare] = GetLumenContours(ReviewStatus.SelectedPatientCase.Id);
+                ReviewStatus.SelectedPatientCase.LumenContour = GetLumenContours(ReviewStatus.SelectedPatientCase.Id);
+                LumenContours[(int)RaySession.Compare] = ReviewStatus.SelectedPatientCase.LumenContour;
                 imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(LumenContours[(int)RaySession.Compare]);
                 LumenProfileImageCompare = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileCompare);
 
@@ -285,7 +288,7 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private void GetPatientCase(bool isNullPatientCase)
+        private void GetPatientCase(bool isNullPatientCase, List<LumenContour> lumenContour = null)
         {
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = Patient.Id;
@@ -310,6 +313,8 @@ namespace RaywattApp.ViewModels
                     }
                 }
 
+                if (lumenContour != null)
+                    ReviewStatus.SelectedPatientCase.LumenContour = lumenContour;
                 DisplayPatientCase = ReviewStatus.SelectedPatientCase;
             }
         }
