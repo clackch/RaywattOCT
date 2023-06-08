@@ -283,6 +283,27 @@ RayError COCTSystem::ShowCalibrationGuide(bool show) {
 }
 
 /*
+* ReadyPullback
+*/
+RayError COCTSystem::ReadyPullback()
+{
+	if (m_curState == RayScannerState::Default) {
+		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
+
+		CLaserController* pLaser = CLaserController::GetInstance();
+		CMotorController* pMotorCtrl = CMotorController::GetInstance();
+		CConfiguration& config = CConfiguration::GetInstance();
+
+		restartAcqDevice(m_pImagingPullback);
+
+		//pLaser->LaserOnOff(true);
+		pMotorCtrl->PerformRun(config.bldcMotor.velocityPullback);
+
+		return RayError::OK;
+	}
+	return RayError::WrongState;
+}
+/*
 * PullbackScan
 */
 RayError COCTSystem::PullbackScan(char *strFilePath) {
@@ -1120,12 +1141,10 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 
 	pSystem->m_pAcqDevice->SetWriter(pDataWriter);
 	pSystem->restartAcqDevice(pSystem->m_pImagingPullback);
+	pPullbackMotor->SetSpeed(config.stepMotor.pullbackSpeed);
 
 	// 1. Motor ON
 	pMotor->PerformRun(config.bldcMotor.velocityPullback);
-	Sleep(config.bldcMotor.settleDown);
-
-	pPullbackMotor->SetSpeed(config.stepMotor.pullbackSpeed);
 
 	// 2. Start Recording OCT
 	pDataWriter->StartRecording();
@@ -1152,6 +1171,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pSystem->m_pAcqDevice->SetWriter(nullptr);
 
 	// 5. Motor OFF
+	Sleep(500);
 	pMotor->StopMotor();
 
 	CImagingSession* pSession = CImagingSession::CreateSession(pSystem, SESSION_REVIEW, settingPullback, pDataWriter);

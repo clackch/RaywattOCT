@@ -91,6 +91,7 @@ public:
 	RayError AutoCalibration();
 	RayError ManualCalibration(bool forward);
 	RayError ShowCalibrationGuide(bool enable);
+	RayError ReadyPullback();
 	RayError PullbackScan(char *strFilePath);
 	RayError LoadCatheter();
 	RayError UnloadCatheter();

@@ -35,6 +35,9 @@ _declspec(dllexport) RayError RayManualCalibration(bool moveForward) {
 _declspec(dllexport) RayError RayShowCalibrationGuide(bool show) {
     return octSystem.ShowCalibrationGuide(show);
 }
+_declspec(dllexport) RayError RayReadyPullback() {
+    return octSystem.ReadyPullback();
+}
 _declspec(dllexport) RayError RayPullbackScan(char* strFilePath) {
     return octSystem.PullbackScan(strFilePath);
 }
