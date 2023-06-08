@@ -39,7 +39,10 @@ namespace RaywattApp.ViewModels
         private int _startTime;
 
         private DispatcherTimer timer = new DispatcherTimer();
+        private DispatcherTimer readyTimer = new DispatcherTimer();
         private DispatcherTimer timerUpdateImage = new DispatcherTimer();
+
+        private bool isReadyOn = true;
 
         private ICommand _cancelCommand;
         public ICommand CancelCommand
@@ -50,7 +53,7 @@ namespace RaywattApp.ViewModels
         private ICommand _readyCommand;
         public ICommand ReadyCommand
         {
-            get { return this._readyCommand ?? (this._readyCommand = new RelayCommand(Ready)); }
+            get { return this._readyCommand ?? (this._readyCommand = new RelayCommand(Ready, CanReady)); }
         }
 
         private ICommand _startCommand;
@@ -71,6 +74,9 @@ namespace RaywattApp.ViewModels
 
             timer.Interval = TimeSpan.FromMilliseconds(1000);
             timer.Tick += new EventHandler(StartTimer);
+
+            readyTimer.Interval = TimeSpan.FromMilliseconds(Constants.TransientTime);
+            readyTimer.Tick += new EventHandler(ReadyTimer);
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -103,12 +109,16 @@ namespace RaywattApp.ViewModels
 
             if (timer.IsEnabled)
                 timer.Stop();
+
+            if(readyTimer.IsEnabled)
+                readyTimer.Stop();
         }
 
         private void Cancel()
         {
             _log.Debug("Cancel");
 
+            RayStopLiveView();
             leaveToPage(Constants.RecordingLiveViewPage);
         }
 
@@ -118,12 +128,26 @@ namespace RaywattApp.ViewModels
 
             RayReadyPullback();
 
-            IsStep1 = false;
+            isReadyOn = false;
+            (ReadyCommand as RelayCommand).NotifyCanExecuteChanged();
+            readyTimer.Start();
+        }
 
-            Thread.Sleep(Constants.TransientTime);
+        private bool CanReady()
+        {
+            _log.Debug("CanReady");
+
+            return isReadyOn;
+        }
+
+        private void ReadyTimer(object sender, EventArgs e)
+        {
+            IsStep1 = false;
 
             StartTime = Constants.StartTime;
             timer.Start();
+
+            readyTimer.Stop();
         }
 
         private void StartTimer(object sender, EventArgs e)
@@ -131,10 +155,11 @@ namespace RaywattApp.ViewModels
             StartTime--;
             if(StartTime == 0)
             {
-                //50 rps
-
+                RayStartLiveView();
 
                 IsStep1 = true;
+                isReadyOn = true;
+                (ReadyCommand as RelayCommand).NotifyCanExecuteChanged();
                 timer.Stop();
             }
         }
