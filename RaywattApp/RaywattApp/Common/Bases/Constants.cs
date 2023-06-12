@@ -4,6 +4,9 @@ namespace RaywattApp.Common.Bases
 {
     public class Constants
     {
+        //MainWindow for Cursor
+        public static System.Windows.Window mainWindow = System.Windows.Application.Current.MainWindow;
+
         //Current Page
         public static string CurrentPage = "";
 

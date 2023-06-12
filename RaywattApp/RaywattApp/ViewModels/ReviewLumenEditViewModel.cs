@@ -15,6 +15,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
 using RaywattApp.Common.Annotation.Models;
 using Newtonsoft.Json;
+using System.Windows;
 
 namespace RaywattApp.ViewModels
 {
@@ -194,6 +195,8 @@ namespace RaywattApp.ViewModels
             parameter["patient"] = Patient;
             if (isSave)
             {
+                Constants.mainWindow.Cursor = (Cursor)Application.Current.Resources["wait"];
+
                 Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
                 sqlParameters["id"] = PatientCase.Id;
                 sqlParameters["lumen_contour"] = JsonConvert.SerializeObject(PatientCase.LumenContour, Formatting.Indented);
@@ -202,6 +205,8 @@ namespace RaywattApp.ViewModels
                 {
                     _log.Error("Update Error");
                 }
+
+                Constants.mainWindow.Cursor = (Cursor)Application.Current.Resources["arrow"];
             }
             else
             {
@@ -230,7 +235,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ZoomOut");
 
-            if(Zoom.ZoomOut())
+            if (Zoom.ZoomOut())
                 LumenContourCommand = Constants.LumenContourZoomOut;
         }
 
