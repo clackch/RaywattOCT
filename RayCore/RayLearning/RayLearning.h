@@ -8,8 +8,12 @@ private:
 	CompNet m_compNet;
 	bool m_useGPU;
 
-public:
+private:
 	CRayLearning();
+	CRayLearning(const CRayLearning& ref) {};
+	CRayLearning& operator=(const CRayLearning& ref) {};
+public:
+	static CRayLearning& GetInstance();
 	virtual ~CRayLearning();
 
 	void Initialize(bool useGPU);

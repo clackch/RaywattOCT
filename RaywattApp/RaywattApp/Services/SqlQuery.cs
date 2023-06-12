@@ -133,7 +133,7 @@ namespace RaywattApp.Services
                         $", pullback_type, angio_co_registration, indicator_degree" +
                         $", preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold, brightness, contrast" +
                         $", T1.create_date, T1.update_date" +
-                        $", bookmark, longitude, cross_section, lumen_contour " +
+                        $", bookmark, longitude, cross_section, lumen_contour as str_lumen_contour " +
                 $"FROM rv_schema.patient_case T1 LEFT JOIN rv_schema.patient_case_annotation T2 ON T1.id = T2.id ";
 
             //SelectPhysicianList

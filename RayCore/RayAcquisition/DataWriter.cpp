@@ -128,7 +128,7 @@ std::vector<char> CDataWriter::createHeader(OCTHeader::Type type, OCTHeader::Dat
 	vPacket.push_back((char)(frames & 0xFF));
 	vPacket.push_back((char)((frames >> 8) & 0xFF));
 	vPacket.push_back((char)ch);
-	vPacket.push_back((char)ch);
+	vPacket.push_back((char)extraData);
 
 	return vPacket;
 }

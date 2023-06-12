@@ -40,6 +40,9 @@ private:
 	CThread* m_pThreadUpdateCutView;
 	CCutViewManager* m_pCutView;
 
+	std::vector<std::vector<cv::Mat>> m_vLumen;
+	bool m_detectLumen;
+
 private:
 	CImagingSession(CMessageService* pMsg, int nSession, bool deleteData = true);
 public:
@@ -50,6 +53,7 @@ public:
 	static COCTImaging* CreateColorImaging(CMessageService* msg, IImaging::Setting setting, IDataManager* pData, ImagingType type);
 
 	void EnableCutView(cv::Scalar backgroundColor);
+	void EnableLumenDetection(bool enable) { m_detectLumen = enable; }
 
 	ImagingType GetImagingType() { return m_imagingType; }
 	IDataManager* GetDataManager() { return m_pDataManager; }
@@ -74,6 +78,8 @@ public:
 	UINT GetCutViewWidth();
 	UINT GetCutViewHeight();
 	UINT GetCutViewChannels();
+	void* GetLumenContour(int nFrame);
+	int GetNumOfLumenContourPoints(int nFrame);
 
 private:
 	static CImagingSession* createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type);

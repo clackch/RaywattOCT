@@ -10,11 +10,13 @@
 #include "TIFFReader.h"
 #include "Configuration.h"
 #include "CutViewManager.h"
+#include "RayLearning.h"
 
 CImagingSession::CImagingSession(CMessageService* pMsg, int nSession, bool deleteData) :
 	m_pMsg(pMsg),
 	m_nSession(nSession),
-	m_deleteData(deleteData)
+	m_deleteData(deleteData),
+	m_detectLumen(false)
 {
 	m_imagingType = ImagingType::Default;
 	m_pImaging = nullptr;
@@ -36,7 +38,7 @@ CImagingSession::~CImagingSession() {
 CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSession, IImaging::Setting setting, IDataManager* pWriter) {
 	if (pMsg == nullptr || pWriter == nullptr) return nullptr;
 
-	return createSession(pMsg, setting, nSession,  pWriter, false, ImagingType::Default);
+	return createSession(pMsg, setting, nSession,  pWriter, true, ImagingType::Default);
 }
 
 CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSession, const char* strFilePath) {
@@ -57,6 +59,7 @@ CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSess
 		OCTHeader header = pReader->ReadHeader(CUtility::StringToWstring(strFilePath));
 		setting.Set(header.width, header.height);
 		nNumOfSamples = pReader->Initialize(CUtility::StringToWstring(strFilePath), setting.nBufferSize);
+		PLOGI.printf("%s opened - %d x %d (%d frames)", strFilePath, header.width, header.height, nNumOfSamples);
 	}
 	else if (ext.compare(FILE_EXTENSION_RAW) == 0)
 	{
@@ -222,6 +225,21 @@ UINT CImagingSession::GetCutViewChannels() {
 
 	return m_pCutView->GetCutView().channels();
 }
+void* CImagingSession::GetLumenContour(int nFrame) {
+	if (m_vLumen.size() <= nFrame) return nullptr;
+	if (m_vLumen.at(nFrame).size() <= 0) return nullptr;
+
+	cv::Mat matContour = m_vLumen.at(nFrame).at(0);
+	return matContour.ptr();
+}
+int CImagingSession::GetNumOfLumenContourPoints(int nFrame) {
+	if (m_vLumen.size() <= nFrame) return 0;
+	if (m_vLumen.at(nFrame).size() <= 0) return 0;
+
+	cv::Mat matContour = m_vLumen.at(nFrame).at(0);
+	return matContour.cols * matContour.rows;
+}
+
 
 CImagingSession* CImagingSession::createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type) {
 	CImagingSession* pSession = new CImagingSession(pMsg, nSession, deleteData);
@@ -242,20 +260,42 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 	int nSession = pSession->m_nSession;
 
 	CCutViewManager* pCutView = pSession->m_pCutView;
+	CRayLearning& learning = CRayLearning::GetInstance();
+	std::vector<std::vector<cv::Mat>>& vLumen = pSession->m_vLumen;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
 	// prepare imaging (without message)
 	COCTImaging* pImaging = CreateColorImaging(nullptr, pSession->m_pImaging->GetSetting(), pDataManager, pSession->GetImagingType());
 
+	PLOGI.printf("update cutview & lumen detection start - %d frames", nNumOfSamples);
+	printf("update cutview & lumen detection start - %d frames\n", nNumOfSamples);
+	vLumen.clear();
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadUpdateCutView->isRun; nFrame++) {
 		char* pBuffer = pDataManager->GetSample(nFrame);
 		pImaging->Process(pBuffer);
 
 		pCutView->AddRecord(pImaging->GetCircleImage(), nFrame);
+
+		if (pSession->m_detectLumen) {
+			std::vector<std::vector<cv::Point>> vContours = learning.FindLumen(pImaging->GetCircleImage());
+			std::vector<cv::Mat> vLumens;
+			for (int i = 0; i < vContours.size(); i++) {
+				std::vector<cv::Point> contour = vContours.at(i);
+				cv::Mat matContour(contour.size(), 1, CV_32SC2);
+				for (size_t row = 0; row < contour.size(); row++) {
+					matContour.at<cv::Point>(row, 0) = contour[row];
+				}
+				vLumens.push_back(matContour);
+			}
+			vLumen.push_back(vLumens);
+		}
+
 		pSession->m_pMsg->postMessage(WM_PROCESS_CUTVIEW, nSession, nFrame);
 	}
 	delete pImaging;
 
+	PLOGI.printf("update cutview & lumen detection done.");
+	if (pSession->m_detectLumen) pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::LumenDetection);
 	// wait for StopThread
 	while (pSession->m_pThreadUpdateCutView->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);

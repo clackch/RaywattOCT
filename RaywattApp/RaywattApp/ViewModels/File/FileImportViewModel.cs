@@ -621,7 +621,7 @@ namespace RaywattApp.ViewModels.File
                             patientCase.Bookmark = GetStrValue(caseObj, "Bookmark");
                             patientCase.Longitude = GetStrValue(caseObj, "Longitude");
                             patientCase.CrossSection = GetStrValue(caseObj, "CrossSection");
-                            patientCase.StrLumenContour = GetStrValue(caseObj, "LumenContour");
+                            patientCase.StrLumenContour = GetStrValue(caseObj, "StrLumenContour");
                             patientCase.CreateDate = GetDateValue(caseObj, "CreateDate");
                             patientCase.UpdateDate = GetDateValue(caseObj, "UpdateDate");
 
