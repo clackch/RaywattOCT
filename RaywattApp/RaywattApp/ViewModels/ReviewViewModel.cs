@@ -236,9 +236,9 @@ namespace RaywattApp.ViewModels
                 ToggleLongitude(ReviewStatus.IsLumenProfile);
                 
                 ReviewStatus.CurrentPage = Constants.ReviewPage;
-                Degree = PatientCase.IndicatorDegree;
-
                 RaySetSession(RaySession.Review);
+
+                Degree = PatientCase.IndicatorDegree;
                 Brightness = PatientCase.Brightness;
                 Contrast = PatientCase.Contrast;
                 SetAnnotation();

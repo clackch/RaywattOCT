@@ -499,7 +499,7 @@ namespace RaywattApp.Common.Util
             const double radius = Constants.OCTImageSize / 2;
             const double totalArea = radius * radius * Math.PI;
 
-            if (lumenContours.Count <= 0) return null;
+            if (lumenContours == null || lumenContours.Count <= 0) return null;
 
             Mat imglumenProfile = new Mat(100, lumenContours.Count, MatType.CV_8UC3);
             imglumenProfile.SetTo(new Scalar(0x4f, 0x4f, 0x4f));
