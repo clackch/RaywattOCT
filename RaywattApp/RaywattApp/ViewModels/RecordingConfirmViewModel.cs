@@ -96,6 +96,9 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("RedoPullback");
 
+            DeviceStatus.IsLumenDetected = true;
+            //Cancel Lumen Detection
+
             RayEndReview();
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
