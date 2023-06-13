@@ -431,7 +431,7 @@ namespace RaywattApp.ViewModels
                     sqlParameters["lumen_contour"] = JsonConvert.SerializeObject(PatientCase.LumenContour, Formatting.Indented);
                     nRows = _sqlManager.UpsertPatientCaseAnnotation(sqlParameters);
                 }
-                
+
                 if (nRows == 0)
                 {
                     _log.Error("Update Error");
@@ -756,6 +756,12 @@ namespace RaywattApp.ViewModels
                 }
             }
             imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours);
+
+            if (ReviewStatus.IsContourStentOn)
+                LumenContourCommand = Constants.LumenContourDraw;
+            else
+                LumenContourCommand = Constants.LumenContourCurrentInit;
+
         }
 
         private void updatePlayPauseState()
