@@ -232,6 +232,24 @@ namespace RaywattApp.Common.Annotation
                 case Constants.LumenContourAutoDetect:
                     drawUtil.AutoDetect();
                     break;
+                case Constants.LumenContourDraw:
+                    drawUtil.canvas.Children.Clear();
+                    if(drawUtil.LumenContours != null && drawUtil.LumenContours.Count > 0 && drawUtil.LumenContours.Count > drawUtil.FrameNumber)
+                    {
+                        drawUtil.CurrentLumenContour = drawUtil.LumenContours[drawUtil.FrameNumber];
+                        drawUtil.DrawLumenContour(drawUtil.CurrentLumenContour, drawUtil.IsEditOn);
+                    }
+                    break;
+                case Constants.LumenContourClear:
+                    drawUtil.canvas.Children.Clear();
+                    break;
+                case Constants.LumenContourCurrentInit:
+                    if (drawUtil.LumenContours != null && drawUtil.LumenContours.Count > 0 && drawUtil.LumenContours.Count > drawUtil.FrameNumber)
+                    {
+                        drawUtil.CurrentLumenContour = drawUtil.LumenContours[drawUtil.FrameNumber];
+                    }
+                    break;
+                    break;
                 default:
                     break;
             }

@@ -99,6 +99,9 @@ namespace RaywattApp.ViewModels
         private List<LumenContour> _lumenContours = new List<LumenContour>();
         public List<LumenContour> LumenContours { get { return _lumenContours; } set { _lumenContours = value; OnPropertyChanged(nameof(LumenContours)); } }
 
+        private string _lumenContourCommand;
+        public string LumenContourCommand { get { return _lumenContourCommand; } set { _lumenContourCommand = value; OnPropertyChanged(nameof(LumenContourCommand)); } }
+
         [ObservableProperty]
         private Zoom _zoomAngio = new Zoom(Constants.CrossSectionAngio / Constants.OCTImageSize);
 
@@ -561,6 +564,11 @@ namespace RaywattApp.ViewModels
         {
             LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(lumenContour);
             imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours);
+
+            if (ReviewStatus.IsContourStentOn)
+                LumenContourCommand = Constants.LumenContourDraw;
+            else
+                LumenContourCommand = Constants.LumenContourCurrentInit;
         }
 
         private string ConvertMeasurementsToJson(List<Measurement> param)

@@ -373,6 +373,9 @@ namespace RaywattApp.Common.Bases
         public const string LumenContourRestore = "Restore";
         public const string LumenContourReset = "Reset";
         public const string LumenContourAutoDetect = "AutoDetect";
+        public const string LumenContourDraw = "Draw";
+        public const string LumenContourClear = "Clear";
+        public const string LumenContourCurrentInit = "Init";
 
         //Scale
         public const double ScaleLength = 100;
