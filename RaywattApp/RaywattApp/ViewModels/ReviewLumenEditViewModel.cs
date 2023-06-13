@@ -196,8 +196,8 @@ namespace RaywattApp.ViewModels
             parameter["patient"] = Patient;
             if (isSave)
             {
-                Thread threadMakeLumenProfile = new Thread(() => ThreadSaveLumenContour());
-                threadMakeLumenProfile.Start();
+                Thread threadSaveLumenContour = new Thread(() => ThreadSaveLumenContour());
+                threadSaveLumenContour.Start();
             }
             else
             {
