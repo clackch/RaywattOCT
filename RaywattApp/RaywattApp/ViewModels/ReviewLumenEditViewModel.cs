@@ -196,6 +196,8 @@ namespace RaywattApp.ViewModels
             parameter["patient"] = Patient;
             if (isSave)
             {
+                DeviceStatus.IsLumenLoaded = false;
+
                 Thread threadSaveLumenContour = new Thread(() => ThreadSaveLumenContour());
                 threadSaveLumenContour.Start();
             }
@@ -219,6 +221,8 @@ namespace RaywattApp.ViewModels
             {
                 _log.Error("Update Error");
             }
+
+            DeviceStatus.IsLumenLoaded = true;
         }
 
         private void Information()

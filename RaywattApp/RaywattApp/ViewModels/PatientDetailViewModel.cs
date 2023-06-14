@@ -348,8 +348,6 @@ namespace RaywattApp.ViewModels
             if (patientCase == null)
                 return;
 
-            Constants.mainWindow.Cursor = (Cursor)Application.Current.Resources["wait"];
-
             RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
             int numOfFrames = RayStartReview(patientCase.ImageFullPath);
 

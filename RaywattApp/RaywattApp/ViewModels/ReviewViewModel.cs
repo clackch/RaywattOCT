@@ -250,9 +250,7 @@ namespace RaywattApp.ViewModels
 
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
             timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
-            timerUpdateImage.Start();
-
-            Constants.mainWindow.Cursor = (Cursor)Application.Current.Resources["arrow"];            
+            timerUpdateImage.Start();        
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -428,7 +426,7 @@ namespace RaywattApp.ViewModels
                 }
                 else
                 {
-                    sqlParameters["lumen_contour"] = JsonConvert.SerializeObject(PatientCase.LumenContour, Formatting.Indented);
+                    sqlParameters["lumen_contour"] = PatientCase.StrLumenContour;
                     nRows = _sqlManager.UpsertPatientCaseAnnotation(sqlParameters);
                 }
 
@@ -522,6 +520,7 @@ namespace RaywattApp.ViewModels
                     if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenContour))
                     {
                         DeviceStatus.IsLumenDetected = true;
+                        DeviceStatus.IsLumenLoaded = false;
 
                         Thread threadMakeLumenProfile = new Thread(() => ThreadMakeLumenProfile(patientCaseAnnotations[0].LumenContour));
                         threadMakeLumenProfile.Start();
@@ -529,6 +528,7 @@ namespace RaywattApp.ViewModels
                     else
                     {
                         DeviceStatus.IsLumenDetected = false;
+                        DeviceStatus.IsLumenLoaded = false;
                         RayStartLumenDetection();
 
                         threadWaitLumenDetection = new Thread(new ThreadStart(threadFuncWaitLumenDetection));
@@ -540,6 +540,7 @@ namespace RaywattApp.ViewModels
                     this.hasAnnotation = false;
 
                     DeviceStatus.IsLumenDetected = false;
+                    DeviceStatus.IsLumenLoaded = false;
                     RayStartLumenDetection();
 
                     threadWaitLumenDetection = new Thread(new ThreadStart(threadFuncWaitLumenDetection));
@@ -569,6 +570,8 @@ namespace RaywattApp.ViewModels
                 LumenContourCommand = Constants.LumenContourDraw;
             else
                 LumenContourCommand = Constants.LumenContourCurrentInit;
+
+            DeviceStatus.IsLumenLoaded = true;
         }
 
         private string ConvertMeasurementsToJson(List<Measurement> param)
@@ -762,6 +765,9 @@ namespace RaywattApp.ViewModels
             else
                 LumenContourCommand = Constants.LumenContourCurrentInit;
 
+            PatientCase.StrLumenContour = JsonConvert.SerializeObject(LumenContours, Formatting.Indented);
+
+            DeviceStatus.IsLumenLoaded = true;
         }
 
         private void updatePlayPauseState()

@@ -96,8 +96,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("RedoPullback");
 
-            DeviceStatus.IsLumenDetected = true;
-            //Cancel Lumen Detection
+            DeviceStatus.IsLumenLoaded = true;
 
             RayEndReview();
 
@@ -153,7 +152,7 @@ namespace RaywattApp.ViewModels
             if (DrawLongitudeImage())
             {
                 // when generating longitude image is completed
-                if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame && DeviceStatus.IsLumenDetected)
+                if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame)
                 {
                     PatientCase.Bookmark = "[]";
                     PatientCase.CrossSection = "[]";

@@ -48,8 +48,8 @@
                 </StackPanel>
             </StackPanel>
 
-            <StackPanel Grid.Row="0" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" Visibility="{Binding DeviceStatus.IsLumenDetected, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
-            <StackPanel Grid.Row="2" Background="{StaticResource GrayscaleBlackBrush}" Opacity="0.7" Visibility="{Binding DeviceStatus.IsLumenDetected, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+            <StackPanel Grid.Row="0" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" Visibility="{Binding DeviceStatus.IsLumenLoaded, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+            <StackPanel Grid.Row="2" Background="{StaticResource GrayscaleBlackBrush}" Opacity="0.7" Visibility="{Binding DeviceStatus.IsLumenLoaded, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
         </Grid>
     </Grid>
 </Window>
