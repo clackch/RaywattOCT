@@ -26,7 +26,6 @@ void CTIFFImaging::Process(char* fringes)
 	cv::flip(imageConvert, imageConvert, 0);
 
 	cv::copyTo(imageConvert, imageCircle, cv::Mat());
-	cv::convertScaleAbs(imageCircle, imageCircle, m_setting.contrast, m_setting.brightness);
 
 	std::chrono::milliseconds total_time = std::chrono::duration_cast<std::chrono::milliseconds>(m_end - m_start);
 	long long msec = total_time.count();
@@ -36,4 +35,8 @@ void CTIFFImaging::Process(char* fringes)
 	}
 
 	m_start = m_end;
+}
+void CTIFFImaging::PostProcess(cv::Mat image)
+{
+	cv::convertScaleAbs(imageCircle, imageCircle, m_setting.contrast, m_setting.brightness);
 }

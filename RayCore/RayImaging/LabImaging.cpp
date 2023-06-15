@@ -96,9 +96,9 @@ void CLabImaging::Process(char* fringes) {
 	}
 	
 	generateImage(logData, false);
-
-	postProcessing();
-	
+}
+void CLabImaging::PostProcess(cv::Mat image) {
+	COCTImaging::PostProcess(image);
 	cv::rotate(imageResultColor, imageRectangle, cv::ROTATE_90_COUNTERCLOCKWISE);
 }
 

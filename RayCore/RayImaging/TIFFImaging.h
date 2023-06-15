@@ -13,5 +13,6 @@ public:
 
 	void Initialize();
 	virtual void Process(char* fringes);
+	virtual void PostProcess(cv::Mat image);
 };
 
