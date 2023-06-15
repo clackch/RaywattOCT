@@ -1304,6 +1304,7 @@ void CRaywattLabDlg::OnBnClickedButtonRestartAcquisition()
 	
 	// re-allocate imaging
 	m_pImagingRealtime = createImaging(imaging);
+	m_pImagingRealtime->Start();
 
 	CATSDevice::Setting acquire = ((CATSDevice*)m_pAcqDevice)->GetSetting();
 	acquire.nAScan = imaging.nAScan;
