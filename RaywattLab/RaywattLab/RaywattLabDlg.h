@@ -114,7 +114,7 @@ private:
 	CString generateFileName(CString strPath, CString strExtension, CString strPrefix = _T(""));
 	CString getLoadedFilePath();
 	CString splitFileName(CString strFilePath);
-	CLabImaging* createImaging();
+	CLabImaging* createImaging(IImaging::Setting imaging);
 	USHORT* readBackground(const char* strBackgroundFile, IImaging::Setting setting);
 	void findFileByExtension(CString strFolder, CString strExt, std::vector<CString>& vList);
 	void updateMeasurement(USHORT nPeakValue, int nPeakIndex, int nLineWidth, USHORT nNoisePower);
@@ -171,4 +171,5 @@ public:
 	afx_msg void OnBnClickedCheckInitMotor();
 	afx_msg void OnBnClickedCheckInitStage();
 	afx_msg void OnBnClickedButtonPullback();
+	afx_msg void OnBnClickedButtonRestartAcquisition();
 };
