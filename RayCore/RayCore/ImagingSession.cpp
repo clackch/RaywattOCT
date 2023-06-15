@@ -203,6 +203,7 @@ void* CImagingSession::GetImageData(int nFrame) {
 
 	char* pBuffer = m_pDataManager->GetSample(nFrame);
 	m_pImaging->Process(pBuffer);
+	m_pImaging->PostProcess(m_pImaging->GetRectangleImage());
 	
 	if (m_pCutView != nullptr) {
 		m_pCutView->AddRecord(m_pImaging->GetCircleImage(), nFrame);
@@ -273,6 +274,7 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadUpdateCutView->isRun; nFrame++) {
 		char* pBuffer = pDataManager->GetSample(nFrame);
 		pImaging->Process(pBuffer);
+		pImaging->PostProcess(pImaging->GetRectangleImage());
 
 		pCutView->AddRecord(pImaging->GetCircleImage(), nFrame);
 

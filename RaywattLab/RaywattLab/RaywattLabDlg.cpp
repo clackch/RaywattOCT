@@ -902,6 +902,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveData()
 		for (int idx = 0; idx < nNumOfSamples; idx++) {
 			m_pDataWriter->WriteFrame(idx);
 			m_pImagingRealtime->Process(m_pDataWriter->GetSample(idx));
+			m_pImagingRealtime->PostProcess(m_pImagingRealtime->GetRectangleImage());
 
 			USHORT* pFFTData = m_pImagingRealtime->GetScopeFFTData();
 			USHORT nPeakValue;
@@ -970,6 +971,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveVideo()
 	videoWriter.StartRecording(strAviPath, width, height);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
 		pImaging->Process(pReader->GetSample(i));
+		pImaging->PostProcess(pImaging->GetRectangleImage());
 		videoWriter.PushToBuffer(((isCircle) ? pImaging->GetCircleImage() : pImaging->GetRectangleImage()));
 	}
 	videoWriter.StopRecording();
@@ -1006,6 +1008,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveTif()
 	bool isCircle = (m_radioImageShape == 0);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
 		pImaging->Process(pReader->GetSample(i));
+		pImaging->PostProcess(pImaging->GetRectangleImage());
 
 		tiffWriter.SaveFrame(((isCircle) ? pImaging->GetCircleImage() : pImaging->GetRectangleImage()));
 	}
@@ -1042,6 +1045,7 @@ void CRaywattLabDlg::OnBnClickedButtonSavePng()
 	bool isCircle = (m_radioImageShape == 0);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
 		pImaging->Process(pReader->GetSample(i));
+		pImaging->PostProcess(pImaging->GetRectangleImage());
 
 		CStringA strPngDirectory(strPngDirectoryW);
 		char strPngName[MAX_PATH];
