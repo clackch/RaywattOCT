@@ -212,7 +212,7 @@ namespace RaywattApp.ViewModels
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["title"] = _l10n["Error"];
-            parameter["message"] = _l10n["$MSG013"];
+            parameter["message"] = _l10n["$MSG014"];
             parameter["error"] = true;
             var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 

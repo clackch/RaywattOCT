@@ -90,7 +90,7 @@
                                     <RowDefinition Height="440"/>
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,10">
-                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG010], Source={StaticResource L10N}}"/>
+                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG011], Source={StaticResource L10N}}"/>
                                 </StackPanel>
                                 <Border Grid.Row="1" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
 
@@ -102,7 +102,7 @@
                                     <RowDefinition Height="440"/>
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,10">
-                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG011], Source={StaticResource L10N}}"/>
+                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG012], Source={StaticResource L10N}}"/>
                                 </StackPanel>
                                 <Border Grid.Row="1" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
 
@@ -114,7 +114,7 @@
                                     <RowDefinition Height="440"/>
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,10">
-                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG012], Source={StaticResource L10N}}"/>
+                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG013], Source={StaticResource L10N}}"/>
                                 </StackPanel>
                                 <Border Grid.Row="1" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
 

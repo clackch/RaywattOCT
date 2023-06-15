@@ -153,9 +153,6 @@
   <data name="$MSG009" xml:space="preserve">
     <value>System will continue once imageing Catheter is connected</value>
   </data>
-  <data name="$MSG010" xml:space="preserve">
-    <value>1. Unlock Catheter</value>
-  </data>
   <data name="$MSG010-1" xml:space="preserve">
     <value>After the damaged catheter has been removed from the patient</value>
   </data>
@@ -163,12 +160,15 @@
     <value>disconnect it from the DOC before continuing the case.</value>
   </data>
   <data name="$MSG011" xml:space="preserve">
-    <value>2. Wait for unload</value>
+    <value>1. Unlock Catheter</value>
   </data>
   <data name="$MSG012" xml:space="preserve">
-    <value>3. Disconnect Catheter</value>
+    <value>2. Wait for unload</value>
   </data>
   <data name="$MSG013" xml:space="preserve">
+    <value>3. Disconnect Catheter</value>
+  </data>
+  <data name="$MSG014" xml:space="preserve">
     <value>The imaging catheter has failed.
 It must be removed from the patient before continuing.</value>
   </data>
