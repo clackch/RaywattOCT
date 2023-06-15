@@ -117,6 +117,82 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="$MSG001" xml:space="preserve">
+    <value>카테터 -&gt; DOC 연결</value>
+  </data>
+  <data name="$MSG002" xml:space="preserve">
+    <value>[한글]System will continue once imageing Catheter is connected</value>
+  </data>
+  <data name="$MSG003" xml:space="preserve">
+    <value>[한글]Verify guide catheter is positioned for adequate flush</value>
+  </data>
+  <data name="$MSG004" xml:space="preserve">
+    <value>[한글]Prepare for pullback</value>
+  </data>
+  <data name="$MSG005-1" xml:space="preserve">
+    <value>[한글]Inject flush media within</value>
+  </data>
+  <data name="$MSG005-2" xml:space="preserve">
+    <value>[한글]seconds</value>
+  </data>
+  <data name="$MSG006" xml:space="preserve">
+    <value>[한글]Confirm Image Quality</value>
+  </data>
+  <data name="$MSG007-1" xml:space="preserve">
+    <value>[한글]Review pullback for proper blood clearing in areas of interest.</value>
+  </data>
+  <data name="$MSG007-2" xml:space="preserve">
+    <value>[한글]And indicates area of low confidence in Lumen contour.</value>
+  </data>
+  <data name="$MSG008-1" xml:space="preserve">
+    <value>[한글]The imaging catheter has failed.</value>
+  </data>
+  <data name="$MSG008-2" xml:space="preserve">
+    <value>[한글]Remove the catheter from the patient then chick Next.</value>
+  </data>
+  <data name="$MSG009" xml:space="preserve">
+    <value>[한글]System will continue once imageing Catheter is connected</value>
+  </data>
+  <data name="$MSG010" xml:space="preserve">
+    <value>[한글]1. Unlock Catheter</value>
+  </data>
+  <data name="$MSG010-1" xml:space="preserve">
+    <value>[한글]After the damaged catheter has been removed from the patient</value>
+  </data>
+  <data name="$MSG010-2" xml:space="preserve">
+    <value>[한글]disconnect it from the DOC before continuing the case.</value>
+  </data>
+  <data name="$MSG011" xml:space="preserve">
+    <value>[한글]2. Wait for unload</value>
+  </data>
+  <data name="$MSG012" xml:space="preserve">
+    <value>[한글]3. Disconnect Catheter</value>
+  </data>
+  <data name="$MSG013" xml:space="preserve">
+    <value>[한글]The imaging catheter has failed.
+It must be removed from the patient before continuing.</value>
+  </data>
+  <data name="%AS" xml:space="preserve">
+    <value>%에이에스</value>
+  </data>
+  <data name="%DS" xml:space="preserve">
+    <value>%디에스</value>
+  </data>
+  <data name="2D Option" xml:space="preserve">
+    <value>2D 옵션</value>
+  </data>
+  <data name="3D Cut-View" xml:space="preserve">
+    <value>3D 컷뷰</value>
+  </data>
+  <data name="3D Fly through" xml:space="preserve">
+    <value>3D 플라이쓰루</value>
+  </data>
+  <data name="3D Option" xml:space="preserve">
+    <value>3D 옵션</value>
+  </data>
+  <data name="Accept and Continue" xml:space="preserve">
+    <value>수락, 계속</value>
+  </data>
   <data name="Accession Name" xml:space="preserve">
     <value>어세션명</value>
   </data>
@@ -126,8 +202,14 @@
   <data name="Acquisition" xml:space="preserve">
     <value>습득</value>
   </data>
+  <data name="Add" xml:space="preserve">
+    <value>추가</value>
+  </data>
   <data name="Add Patient" xml:space="preserve">
     <value>환자 추가</value>
+  </data>
+  <data name="Add Physician" xml:space="preserve">
+    <value>의사 추가</value>
   </data>
   <data name="Additional Option" xml:space="preserve">
     <value>추가 옵션</value>
@@ -138,8 +220,17 @@
   <data name="Alternate Patient IDs" xml:space="preserve">
     <value>환자 아이디 대체</value>
   </data>
+  <data name="Angio" xml:space="preserve">
+    <value>앤지오</value>
+  </data>
+  <data name="Angio Co-Registration" xml:space="preserve">
+    <value>앤지오 등록</value>
+  </data>
   <data name="Apply" xml:space="preserve">
     <value>적용</value>
+  </data>
+  <data name="Apposition" xml:space="preserve">
+    <value>어포지션</value>
   </data>
   <data name="Apposition threshold" xml:space="preserve">
     <value>어포지션 임계치</value>
@@ -159,17 +250,42 @@
   <data name="Are you sure to import selected file?" xml:space="preserve">
     <value>선택한 파일을 임포트하겠습니까?</value>
   </data>
+  <data name="Area" xml:space="preserve">
+    <value>면적</value>
+  </data>
+  <data name="Area(㎟)" xml:space="preserve">
+    <value>면적
+(㎟)</value>
+  </data>
+  <data name="Auto" xml:space="preserve">
+    <value>자동</value>
+  </data>
   <data name="Auto Calibration" xml:space="preserve">
     <value>자동 영상 조정</value>
+  </data>
+  <data name="Auto Detect" xml:space="preserve">
+    <value>자동 검출</value>
   </data>
   <data name="Available Space" xml:space="preserve">
     <value>가용 공간</value>
   </data>
+  <data name="AVI" xml:space="preserve">
+    <value>에이브이아이</value>
+  </data>
   <data name="Back" xml:space="preserve">
     <value>뒤로</value>
   </data>
+  <data name="Birth" xml:space="preserve">
+    <value>생년월일</value>
+  </data>
   <data name="Birth Date" xml:space="preserve">
     <value>생년월일</value>
+  </data>
+  <data name="Bitmap" xml:space="preserve">
+    <value>비트맵</value>
+  </data>
+  <data name="Bookmarked Frames" xml:space="preserve">
+    <value>북마크 프레임</value>
   </data>
   <data name="Brightness" xml:space="preserve">
     <value>밝기</value>
@@ -178,10 +294,13 @@
     <value>폴더 검색</value>
   </data>
   <data name="Byte" xml:space="preserve">
-    <value>Byte</value>
+    <value>바이트</value>
   </data>
   <data name="bytes" xml:space="preserve">
-    <value>바이트</value>
+    <value>바이츠</value>
+  </data>
+  <data name="Calcium" xml:space="preserve">
+    <value>칼슘</value>
   </data>
   <data name="Calcium threshold" xml:space="preserve">
     <value>칼슘 임계치</value>
@@ -195,8 +314,23 @@
   <data name="Case" xml:space="preserve">
     <value>케이스</value>
   </data>
+  <data name="Case Edit" xml:space="preserve">
+    <value>케이스 수정</value>
+  </data>
+  <data name="Case Info." xml:space="preserve">
+    <value>케이스 정보.</value>
+  </data>
+  <data name="Case List" xml:space="preserve">
+    <value>케이스 목록</value>
+  </data>
   <data name="CD/DVD" xml:space="preserve">
     <value>씨디/디비디</value>
+  </data>
+  <data name="CD/DVD is required" xml:space="preserve">
+    <value>CD/DVD 요구됨</value>
+  </data>
+  <data name="Co-Registration" xml:space="preserve">
+    <value>코-레지스트레이션</value>
   </data>
   <data name="Comment" xml:space="preserve">
     <value>코멘트</value>
@@ -206,9 +340,6 @@
   </data>
   <data name="Confirm Password" xml:space="preserve">
     <value>비밀번호 재입력</value>
-  </data>
-  <data name="Connect Catheter to the DOC" xml:space="preserve">
-    <value>카테터 -&gt; DOC 연결</value>
   </data>
   <data name="Contrast" xml:space="preserve">
     <value>채도</value>
@@ -222,7 +353,16 @@
   <data name="Current Folder" xml:space="preserve">
     <value>현재 폴더</value>
   </data>
-  <data name="Data already exists.&#xD;&#xA;Do you want to import data?" xml:space="preserve">
+  <data name="Current Frame" xml:space="preserve">
+    <value>현재 프레임</value>
+  </data>
+  <data name="Current Frame Indicator" xml:space="preserve">
+    <value>현재 프레임 인디케이터</value>
+  </data>
+  <data name="Cut-View" xml:space="preserve">
+    <value>컷뷰</value>
+  </data>
+  <data name="Data already exists. Do you want to import data?" xml:space="preserve">
     <value>이미 존재하는 데이터가 있습니다.
 데이터를 임포트 하시겠습니까?</value>
   </data>
@@ -244,11 +384,17 @@
   <data name="Destination" xml:space="preserve">
     <value>목적지</value>
   </data>
+  <data name="Diameter" xml:space="preserve">
+    <value>지름</value>
+  </data>
   <data name="DICOM" xml:space="preserve">
     <value>다이콤</value>
   </data>
   <data name="Disk Type" xml:space="preserve">
     <value>디스크 종류</value>
+  </data>
+  <data name="Display Modes" xml:space="preserve">
+    <value>디스플레이 모드</value>
   </data>
   <data name="Done" xml:space="preserve">
     <value>완료</value>
@@ -265,6 +411,9 @@
   <data name="Edit Patient" xml:space="preserve">
     <value>환자 수정</value>
   </data>
+  <data name="Edit Physician" xml:space="preserve">
+    <value>의사 수정</value>
+  </data>
   <data name="Eject when Complete" xml:space="preserve">
     <value>완료 후 추출</value>
   </data>
@@ -277,6 +426,9 @@
   <data name="English" xml:space="preserve">
     <value>영어</value>
   </data>
+  <data name="Enter an external device" xml:space="preserve">
+    <value>외부저장장치 입력</value>
+  </data>
   <data name="Enter Dataset Password" xml:space="preserve">
     <value>파일 패스워드 입력</value>
   </data>
@@ -285,6 +437,9 @@
   </data>
   <data name="Exit" xml:space="preserve">
     <value>종료</value>
+  </data>
+  <data name="Expansion" xml:space="preserve">
+    <value>팽창</value>
   </data>
   <data name="Expansion calculation" xml:space="preserve">
     <value>팽창 계산</value>
@@ -301,6 +456,9 @@
   <data name="Export Size" xml:space="preserve">
     <value>추출 크기</value>
   </data>
+  <data name="Export Type" xml:space="preserve">
+    <value>익스포트 타입</value>
+  </data>
   <data name="External Drive" xml:space="preserve">
     <value>외부저장장치</value>
   </data>
@@ -313,8 +471,14 @@
   <data name="Folder" xml:space="preserve">
     <value>폴더</value>
   </data>
+  <data name="Folder Name" xml:space="preserve">
+    <value>폴더명</value>
+  </data>
   <data name="Format" xml:space="preserve">
     <value>포맷</value>
+  </data>
+  <data name="Frame Option" xml:space="preserve">
+    <value>프레임 옵션</value>
   </data>
   <data name="Frame Resolution" xml:space="preserve">
     <value>프레임 해상도</value>
@@ -327,6 +491,18 @@
   </data>
   <data name="Gender" xml:space="preserve">
     <value>성별</value>
+  </data>
+  <data name="Guidewire 1" xml:space="preserve">
+    <value>가이드와이어 1</value>
+  </data>
+  <data name="Guidewire 2" xml:space="preserve">
+    <value>가이드와이어 2</value>
+  </data>
+  <data name="Guidewires" xml:space="preserve">
+    <value>가이드와이어</value>
+  </data>
+  <data name="Hi-Res (100㎜)" xml:space="preserve">
+    <value>하이레졸루션 (100㎜)</value>
   </data>
   <data name="Hide All" xml:space="preserve">
     <value>모두 숨김</value>
@@ -349,14 +525,23 @@
   <data name="Include region calibration (calibrated images only)" xml:space="preserve">
     <value>Region Calibration 포함</value>
   </data>
+  <data name="Indicator Lock" xml:space="preserve">
+    <value>인디케이터 락</value>
+  </data>
   <data name="Information" xml:space="preserve">
     <value>알림</value>
+  </data>
+  <data name="Input Folder Name" xml:space="preserve">
+    <value>폴더명 입력</value>
   </data>
   <data name="Input Password" xml:space="preserve">
     <value>패스워드 입력</value>
   </data>
   <data name="Intravascular OCT - For Presentation" xml:space="preserve">
     <value>인트라배스큘라 OCT</value>
+  </data>
+  <data name="JPEG" xml:space="preserve">
+    <value>제이피지</value>
   </data>
   <data name="KB" xml:space="preserve">
     <value>KB</value>
@@ -366,6 +551,9 @@
   </data>
   <data name="Korean" xml:space="preserve">
     <value>한글</value>
+  </data>
+  <data name="L-Mode" xml:space="preserve">
+    <value>엘모드</value>
   </data>
   <data name="Language" xml:space="preserve">
     <value>언어</value>
@@ -385,17 +573,62 @@
   <data name="Localization" xml:space="preserve">
     <value>현지화</value>
   </data>
+  <data name="Log" xml:space="preserve">
+    <value>로그</value>
+  </data>
+  <data name="Longitude" xml:space="preserve">
+    <value>롱기튜드</value>
+  </data>
+  <data name="Lumen" xml:space="preserve">
+    <value>루멘</value>
+  </data>
+  <data name="Lumen Contour" xml:space="preserve">
+    <value>루멘 컨투어</value>
+  </data>
+  <data name="Lumen Profile" xml:space="preserve">
+    <value>루멘 프로파일</value>
+  </data>
   <data name="Male" xml:space="preserve">
     <value>남</value>
+  </data>
+  <data name="Manual" xml:space="preserve">
+    <value>수동</value>
   </data>
   <data name="Mark as Archived" xml:space="preserve">
     <value>아카이브 마크</value>
   </data>
+  <data name="Max" xml:space="preserve">
+    <value>최대</value>
+  </data>
+  <data name="Max Diam.(㎜)" xml:space="preserve">
+    <value>최대 지름
+(㎜)</value>
+  </data>
+  <data name="Max Thickness" xml:space="preserve">
+    <value>최대 두께</value>
+  </data>
   <data name="MB" xml:space="preserve">
     <value>MB</value>
   </data>
+  <data name="Mean Diam.(㎜)" xml:space="preserve">
+    <value>평균 지름
+(㎜)</value>
+  </data>
+  <data name="Measure" xml:space="preserve">
+    <value>측정</value>
+  </data>
   <data name="Measurements" xml:space="preserve">
     <value>측정</value>
+  </data>
+  <data name="Media Type is not supported" xml:space="preserve">
+    <value>미디어 타입 지원 안됨</value>
+  </data>
+  <data name="Min" xml:space="preserve">
+    <value>최소</value>
+  </data>
+  <data name="Min Diam.(㎜)" xml:space="preserve">
+    <value>최소 지름
+(㎜)</value>
   </data>
   <data name="Modality" xml:space="preserve">
     <value>형식</value>
@@ -408,6 +641,9 @@
   </data>
   <data name="Name is duplicated." xml:space="preserve">
     <value>이름이 중복되었습니다.</value>
+  </data>
+  <data name="Native" xml:space="preserve">
+    <value>네이티브</value>
   </data>
   <data name="Native(Raw)" xml:space="preserve">
     <value>네이티브(로우)</value>
@@ -433,17 +669,32 @@
   <data name="No" xml:space="preserve">
     <value>아니요</value>
   </data>
+  <data name="No Drive" xml:space="preserve">
+    <value>드라이브 없음</value>
+  </data>
+  <data name="No." xml:space="preserve">
+    <value>번호.</value>
+  </data>
   <data name="OCT" xml:space="preserve">
-    <value>OCT</value>
+    <value>오씨티</value>
+  </data>
+  <data name="OCT + Angio" xml:space="preserve">
+    <value>오씨티 + 앤지오</value>
   </data>
   <data name="OK" xml:space="preserve">
     <value>오케이</value>
   </data>
+  <data name="Other" xml:space="preserve">
+    <value>아덜</value>
+  </data>
   <data name="Other (OT)" xml:space="preserve">
-    <value>Other (OT)</value>
+    <value>아덜 (OT)</value>
   </data>
   <data name="Output Option" xml:space="preserve">
     <value>아웃풋 옵션</value>
+  </data>
+  <data name="P to D" xml:space="preserve">
+    <value>P 투 D</value>
   </data>
   <data name="Page Size" xml:space="preserve">
     <value>페이지 사이즈</value>
@@ -505,6 +756,15 @@
   <data name="Please enter last name" xml:space="preserve">
     <value>성을 입력하세요</value>
   </data>
+  <data name="Post" xml:space="preserve">
+    <value>포스트</value>
+  </data>
+  <data name="Pre" xml:space="preserve">
+    <value>프리</value>
+  </data>
+  <data name="Presentation" xml:space="preserve">
+    <value>프리젠테이션</value>
+  </data>
   <data name="Preset" xml:space="preserve">
     <value>사전설정</value>
   </data>
@@ -514,6 +774,12 @@
   <data name="Procedure" xml:space="preserve">
     <value>프로시저</value>
   </data>
+  <data name="Pullback" xml:space="preserve">
+    <value>풀백</value>
+  </data>
+  <data name="Pullback Setting" xml:space="preserve">
+    <value>풀백 설정</value>
+  </data>
   <data name="Purpose" xml:space="preserve">
     <value>목적</value>
   </data>
@@ -522,6 +788,9 @@
   </data>
   <data name="Re-do Pullback" xml:space="preserve">
     <value>풀백 다시</value>
+  </data>
+  <data name="Ready" xml:space="preserve">
+    <value>준비</value>
   </data>
   <data name="Recording" xml:space="preserve">
     <value>촬영</value>
@@ -571,6 +840,18 @@
   <data name="Select Drive" xml:space="preserve">
     <value>드라이브 선택</value>
   </data>
+  <data name="Select Language" xml:space="preserve">
+    <value>언어 선택</value>
+  </data>
+  <data name="Select Pre-Case" xml:space="preserve">
+    <value>프리 케이스 선택</value>
+  </data>
+  <data name="Select Procedure" xml:space="preserve">
+    <value>프로시저 선택</value>
+  </data>
+  <data name="Service" xml:space="preserve">
+    <value>서비스</value>
+  </data>
   <data name="Setting" xml:space="preserve">
     <value>설정</value>
   </data>
@@ -579,6 +860,12 @@
   </data>
   <data name="Show All" xml:space="preserve">
     <value>모두 표시</value>
+  </data>
+  <data name="Side Branch View" xml:space="preserve">
+    <value>사이드 브랜치 뷰</value>
+  </data>
+  <data name="Size" xml:space="preserve">
+    <value>크기</value>
   </data>
   <data name="SKIP" xml:space="preserve">
     <value>건너뛰기</value>
@@ -592,11 +879,26 @@
   <data name="Standard" xml:space="preserve">
     <value>스탠다드</value>
   </data>
+  <data name="Start" xml:space="preserve">
+    <value>시작</value>
+  </data>
   <data name="Start Recording" xml:space="preserve">
     <value>촬영 시작</value>
   </data>
+  <data name="Step 1." xml:space="preserve">
+    <value>단계 1.</value>
+  </data>
+  <data name="Step 2." xml:space="preserve">
+    <value>단계 2.</value>
+  </data>
+  <data name="Survey (54㎜)" xml:space="preserve">
+    <value>서베이 (54㎜)</value>
+  </data>
   <data name="System File Option" xml:space="preserve">
     <value>시스템 파일 옵션</value>
+  </data>
+  <data name="Tapered" xml:space="preserve">
+    <value>테이퍼드</value>
   </data>
   <data name="The password you entered is not valid" xml:space="preserve">
     <value>입력한 비밀번호가 맞지 않습니다.</value>
@@ -604,14 +906,26 @@
   <data name="There are no items selected." xml:space="preserve">
     <value>선택된 항목이 없습니다.</value>
   </data>
+  <data name="There is not enough space on the storage device to store." xml:space="preserve">
+    <value>저장공간 부족</value>
+  </data>
+  <data name="TIFF" xml:space="preserve">
+    <value>티아이에프</value>
+  </data>
+  <data name="Tissue" xml:space="preserve">
+    <value>티슈</value>
+  </data>
   <data name="Total" xml:space="preserve">
     <value>전체</value>
+  </data>
+  <data name="Total Angle" xml:space="preserve">
+    <value>총 각도</value>
   </data>
   <data name="Total Export Size" xml:space="preserve">
     <value>전체 추출 크기</value>
   </data>
   <data name="Ultrasound (US)" xml:space="preserve">
-    <value>Ultrasound (US)</value>
+    <value>울타라사운드 (US)</value>
   </data>
   <data name="Ultrasound Multi-frame" xml:space="preserve">
     <value>울트라사운드 멀티-프레임</value>
@@ -619,17 +933,35 @@
   <data name="Update Date" xml:space="preserve">
     <value>수정일</value>
   </data>
+  <data name="Value Info." xml:space="preserve">
+    <value>값 정보.</value>
+  </data>
   <data name="Vessel" xml:space="preserve">
     <value>베셀</value>
+  </data>
+  <data name="View" xml:space="preserve">
+    <value>뷰</value>
   </data>
   <data name="Volume Label" xml:space="preserve">
     <value>볼륨 라벨</value>
   </data>
+  <data name="Volume Label is required" xml:space="preserve">
+    <value>볼륨 라벨 요구됨</value>
+  </data>
   <data name="Warning" xml:space="preserve">
     <value>경고</value>
   </data>
+  <data name="Write Physician Name" xml:space="preserve">
+    <value>의사명 입력</value>
+  </data>
+  <data name="Write Preset Name" xml:space="preserve">
+    <value>프리셋명 입력</value>
+  </data>
   <data name="Yes" xml:space="preserve">
     <value>예</value>
+  </data>
+  <data name="Zoom" xml:space="preserve">
+    <value>줌</value>
   </data>
   <data name="Zoom In" xml:space="preserve">
     <value>확대</value>

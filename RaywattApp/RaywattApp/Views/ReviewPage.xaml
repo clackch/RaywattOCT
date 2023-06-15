@@ -155,7 +155,7 @@
                                     <RowDefinition/>
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0">
-                                    <Button Style="{DynamicResource SideMenuTitleLeft}" Content="2D Option" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftUpMenu}"/>
+                                    <Button Style="{DynamicResource SideMenuTitleLeft}" Content="{Binding [2D Option], Source={StaticResource L10N}}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftUpMenu}"/>
                                 </StackPanel>
                                 <StackPanel Grid.Row="1" Width="192" HorizontalAlignment="Center">
                                     <Grid>
@@ -202,7 +202,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                <Label Content="{Binding [OCT Zoom], Source={StaticResource L10N}}" Foreground="{DynamicResource SideMenuTitleBrush}" Style="{DynamicResource Pretendard-Medium-12}"/>
+                                                <Label Content="{Binding [Zoom], Source={StaticResource L10N}}" Foreground="{DynamicResource SideMenuTitleBrush}" Style="{DynamicResource Pretendard-Medium-12}"/>
                                             </StackPanel>
                                             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                                                 <component:IconButton Style="{StaticResource IconButton}" Icon="zoomInSmall" Command="{Binding ZoomInCommand}"/>
@@ -370,7 +370,7 @@
                                     <RowDefinition/>
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0" >
-                                    <Button Style="{DynamicResource SideMenuTitleRight}" Content="Value Info." Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.RightMenu}"/>
+                                    <Button Style="{DynamicResource SideMenuTitleRight}" Content="{Binding [Value Info.], Source={StaticResource L10N}}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.RightMenu}"/>
                                 </StackPanel>
 
                                 <!-- Default -->

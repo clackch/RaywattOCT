@@ -36,10 +36,10 @@
                         <RowDefinition Height="40"/>
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" HorizontalAlignment="Center">
-                        <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Connect Catheter to the DOC], Source={StaticResource L10N}}"/>
+                        <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [$MSG001], Source={StaticResource L10N}}"/>
                     </StackPanel>
                     <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [System will continue once imageing Catheter is connected], Source={StaticResource L10N}}"/>
+                        <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG002], Source={StaticResource L10N}}"/>
                     </StackPanel>
                     <Border Grid.Row="2" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
 

@@ -151,7 +151,7 @@
                                         <RowDefinition/>
                                     </Grid.RowDefinitions>
                                     <StackPanel Grid.Row="0">
-                                        <Button Style="{DynamicResource SideMenuTitleLeft}" Content="3D Option" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftUpMenu}"/>
+                                        <Button Style="{DynamicResource SideMenuTitleLeft}" Content="{Binding [3D Option], Source={StaticResource L10N}}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftUpMenu}"/>
                                     </StackPanel>
                                     <Grid Grid.Row="1" Width="192" HorizontalAlignment="Center" Margin="0,25,0,0">
                                         <Grid.ColumnDefinitions>
@@ -237,7 +237,7 @@
                                         <RowDefinition/>
                                     </Grid.RowDefinitions>
                                     <StackPanel Grid.Row="0" >
-                                        <Button Style="{DynamicResource SideMenuTitleLeft}" Content="Case Info." Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftDownMenu}"/>
+                                        <Button Style="{DynamicResource SideMenuTitleLeft}" Content="{Binding [Case Info.], Source={StaticResource L10N}}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftDownMenu}"/>
                                     </StackPanel>
                                     <StackPanel Grid.Row="1">
                                         <Grid Width="192">

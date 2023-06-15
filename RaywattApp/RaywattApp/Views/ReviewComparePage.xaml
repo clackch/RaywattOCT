@@ -322,7 +322,7 @@
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
                             <StackPanel Grid.Row="0">
-                                <Button Style="{DynamicResource SideMenuTitleLeft}" Content="Select Pre-Case" Command="{Binding CaseSelectCancelCommand}"/>
+                                <Button Style="{DynamicResource SideMenuTitleLeft}" Content="{Binding [Select Pre-Case], Source={StaticResource L10N}}" Command="{Binding CaseSelectCancelCommand}"/>
                             </StackPanel>
                             <DataGrid Grid.Row="1" Margin="20,20,20,12" Name="patientCaseList" ItemsSource="{Binding PatientCases}" Style="{StaticResource DataGridSelectPreCase}" RowStyle="{StaticResource DataGridRowSelectPreCase}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderSelectPreCase}" SelectionMode="Single" SelectedItem="{Binding DisplayPatientCase}">
                                 <DataGrid.Columns>
@@ -374,7 +374,7 @@
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
                             <StackPanel Grid.Row="0" >
-                                <Button Style="{DynamicResource SideMenuTitleLeft}" Content="Case Info." Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftDownMenu}"/>
+                                <Button Style="{DynamicResource SideMenuTitleLeft}" Content="{Binding [Case Info.], Source={StaticResource L10N}}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftDownMenu}"/>
                             </StackPanel>
                             <Grid Grid.Row="1" Margin="24,24,24,0">
                                 <Grid.RowDefinitions>
