@@ -151,7 +151,8 @@
     <value>[한글]Remove the catheter from the patient then chick Next.</value>
   </data>
   <data name="$MSG009" xml:space="preserve">
-    <value>[한글]System will continue once imageing Catheter is connected</value>
+    <value>[한글]The imaging catheter has failed.
+It must be removed from the patient before continuing.</value>
   </data>
   <data name="$MSG010-1" xml:space="preserve">
     <value>[한글]After the damaged catheter has been removed from the patient</value>
@@ -167,10 +168,6 @@
   </data>
   <data name="$MSG013" xml:space="preserve">
     <value>[한글]3. Disconnect Catheter</value>
-  </data>
-  <data name="$MSG014" xml:space="preserve">
-    <value>[한글]The imaging catheter has failed.
-It must be removed from the patient before continuing.</value>
   </data>
   <data name="%AS" xml:space="preserve">
     <value>%에이에스</value>

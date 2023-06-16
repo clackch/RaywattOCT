@@ -50,9 +50,6 @@
                                 <Label Style="{DynamicResource Pretendard-Semibold-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [$MSG008-2], Source={StaticResource L10N}}"/>
                             </StackPanel>
                         </Grid>
-                        <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG009], Source={StaticResource L10N}}"/>
-                        </StackPanel>
                         <Border Grid.Row="2" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
 
                         </Border>
