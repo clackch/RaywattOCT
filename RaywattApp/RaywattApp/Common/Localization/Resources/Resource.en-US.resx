@@ -567,6 +567,9 @@ Do you want to import data?</value>
   <data name="Live View" xml:space="preserve">
     <value>Live View</value>
   </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading</value>
+  </data>
   <data name="Localization" xml:space="preserve">
     <value>Localization</value>
   </data>
