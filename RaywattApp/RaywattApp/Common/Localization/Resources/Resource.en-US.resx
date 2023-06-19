@@ -564,6 +564,9 @@ Do you want to import data?</value>
   <data name="Leave Unchanged" xml:space="preserve">
     <value>Leave Unchanged</value>
   </data>
+  <data name="Live" xml:space="preserve">
+    <value>Live</value>
+  </data>
   <data name="Live View" xml:space="preserve">
     <value>Live View</value>
   </data>

@@ -50,7 +50,7 @@
                         <StackPanel Grid.Column="0" Orientation="Horizontal">
                             <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Live View], Source={StaticResource L10N}}"/>
                             <StackPanel Margin="11,0,0,0" Orientation="Horizontal">
-                                <ToggleButton Style="{DynamicResource LiveToggleBtn}" IsChecked="{Binding DeviceStatus.IsLiveView}" Command="{Binding CmdChangeViewMode}" IsEnabled="{Binding DeviceStatus.IsInitialized}"/>
+                                <ToggleButton Style="{DynamicResource LiveToggleBtn}" IsChecked="{Binding DeviceStatus.IsLiveView}" Command="{Binding CmdChangeViewMode}" IsEnabled="{Binding DeviceStatus.IsInitialized}" Content="{Binding [Live], Source={StaticResource L10N}}"/>
                             </StackPanel>
                             <StackPanel Margin="11,0,0,0" Orientation="Horizontal">
                                 <Button Style="{StaticResource OutlinedBtnType3-Medium}" Command="{Binding CmdCalibration}" IsEnabled="{Binding DeviceStatus.IsInitialized}" Width="104" Content="{Binding [Calibration], Source={StaticResource L10N}}"/>
