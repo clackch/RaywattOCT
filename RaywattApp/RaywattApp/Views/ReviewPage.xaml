@@ -63,31 +63,33 @@
                 <!-- Cross Section Part -->
                 <Grid x:Name="crossSection" Grid.Row="1">
                     <!-- Cross Section -->
-                    <Grid x:Name="crossSectionImage" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                        <i:Interaction.Triggers>
-                            <i:EventTrigger EventName="Loaded">
-                                <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Grid}}"/>
-                            </i:EventTrigger>
-                            <i:EventTrigger EventName="SizeChanged">
-                                <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Grid}}"/>
-                            </i:EventTrigger>
-                        </i:Interaction.Triggers>
-                        <Grid.Clip>
-                            <RectangleGeometry RadiusX="10" RadiusY="10">
-                                <RectangleGeometry.Rect>
-                                    <Rect X="0" Y="0" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}"/>
-                                </RectangleGeometry.Rect>
-                            </RectangleGeometry>
-                        </Grid.Clip>
-                        <!-- Cross Seciton Image -->
-                        <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
-                            <Image.RenderTransform>
-                                <TransformGroup>
-                                    <ScaleTransform ScaleX="{Binding ReviewStatus.Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding ReviewStatus.Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
-                                    <TranslateTransform X="{Binding ReviewStatus.Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding ReviewStatus.Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}}"/>
-                                </TransformGroup>
-                            </Image.RenderTransform>
-                        </Image>
+                    <Grid Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                        <Grid x:Name="crossSectionImage">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="Loaded">
+                                    <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Grid}}"/>
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="SizeChanged">
+                                    <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Grid}}"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                            <Grid.Clip>
+                                <RectangleGeometry RadiusX="10" RadiusY="10">
+                                    <RectangleGeometry.Rect>
+                                        <Rect X="0" Y="0" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}"/>
+                                    </RectangleGeometry.Rect>
+                                </RectangleGeometry>
+                            </Grid.Clip>
+                            <!-- Cross Seciton Image -->
+                            <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
+                                <Image.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleX="{Binding ReviewStatus.Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding ReviewStatus.Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                        <TranslateTransform X="{Binding ReviewStatus.Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding ReviewStatus.Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                    </TransformGroup>
+                                </Image.RenderTransform>
+                            </Image>
+                        </Grid>
                         <!-- Cross Section Info. -->
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="50">
                             <Label Content="F : " Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}"/>
