@@ -59,10 +59,8 @@
                 </StackPanel>
                 <StackPanel Grid.Row="1" Orientation="Horizontal">
                     <StackPanel Orientation="Horizontal">
-                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [ID], Source={StaticResource L10N}}"/>
-                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content=" [ "/>
-                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Patient.Id}"/>
-                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content=" ]"/>
+                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [ID], Source={StaticResource L10N}}"/>
+                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="8,0,0,0" Content="{Binding Patient.Id}"/>
                     </StackPanel>
                     <StackPanel Margin="24,0,0,0" Orientation="Horizontal">
                         <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Birth], Source={StaticResource L10N}}"/>
