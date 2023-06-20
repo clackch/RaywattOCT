@@ -249,6 +249,7 @@ namespace RaywattApp.Common.Bases
 
         //Log Folder
         public const string LogFolderPath = SystemRootPath + "\\Raywatt\\log";
+        public const string LogExtension = "*.log";
 
         //Encrypt, Decrypt Public Key
         public const string PublicKey = "raywatt07_hwjckklls_298-87-01441";
