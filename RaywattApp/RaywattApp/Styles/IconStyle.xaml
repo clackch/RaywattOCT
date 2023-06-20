@@ -231,4 +231,33 @@
         </Setter>
     </Style>
 
+    <!-- Loading -->
+    <ControlTemplate x:Key="Loading">
+        <Ellipse Width="40" Height="40" StrokeThickness="4">
+            <Ellipse.Stroke>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#1ed760" Offset="0.25"/>
+                    <GradientStop Color="#161616" Offset="0.75"/>
+                </LinearGradientBrush>
+            </Ellipse.Stroke>
+            <Ellipse.Triggers>
+                <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation
+                                Storyboard.TargetName="rotateTransform"
+                                Storyboard.TargetProperty="Angle"
+                                From="0" To="360"
+                                Duration="0:0:1"
+                                RepeatBehavior="Forever"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Ellipse.Triggers>
+            <Ellipse.RenderTransform>
+                <RotateTransform x:Name="rotateTransform" CenterX="20" CenterY="20"/>
+            </Ellipse.RenderTransform>
+        </Ellipse>
+    </ControlTemplate>
+    
 </ResourceDictionary>

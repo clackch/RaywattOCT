@@ -111,7 +111,9 @@
                                         </RectangleGeometry>
                                     </Image.Clip>
                                 </Image>
-
+                                <!-- Loading -->
+                                <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding IsLumenLoaded, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                                
                                 <!-- L-Mode Indicator -->
                                 <Canvas>
                                     <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitudeCompare" IsCaptured="{Binding IndicatorCompareLongitude.IsCaptured}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="181" Stretch="None" Canvas.Left="{Binding IndicatorCompareLongitude.X}" Visibility="{Binding IndicatorCompareLongitude.IsVisible}" HorizontalAlignment="Center" Canvas.Top="-11" VerticalAlignment="Top">

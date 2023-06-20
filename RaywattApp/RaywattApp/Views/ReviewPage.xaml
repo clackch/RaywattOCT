@@ -809,6 +809,8 @@
                                         </RectangleGeometry>
                                     </Image.Clip>
                                 </Image>
+                                <!-- Loading -->
+                                <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding DeviceStatus.IsLumenLoaded, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
 
                                 <!-- L-Mode Indicator -->
                                 <Canvas>

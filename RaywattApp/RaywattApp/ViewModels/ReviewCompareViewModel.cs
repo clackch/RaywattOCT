@@ -75,6 +75,9 @@ namespace RaywattApp.ViewModels
         private int _frameNumberCompare = -1;
 
         [ObservableProperty]
+        private bool _isLumenLoaded;
+
+        [ObservableProperty]
         private Zoom _zoom = new Zoom(Constants.CrossSectionCompareSize / Constants.OCTImageSize);
 
         private int indicatorLockOffset;
@@ -170,6 +173,8 @@ namespace RaywattApp.ViewModels
 
                     if(ReviewStatus.SelectedPatientCase.LumenContour == null)
                     {
+                        IsLumenLoaded = false;
+
                         Thread threadMakeLumenProfile = new Thread(() => ThreadMakeLumenProfile());
                         threadMakeLumenProfile.Start();
                     }
@@ -224,6 +229,8 @@ namespace RaywattApp.ViewModels
             ReviewStatus.SelectedPatientCase.LumenContour = GetLumenContours(ReviewStatus.SelectedPatientCase.Id);
             PreLumenContour = ReviewStatus.SelectedPatientCase.LumenContour;
             imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(PreLumenContour);
+
+            IsLumenLoaded = true;
 
             LumenContourCommand = Constants.LumenContourDraw;
         }
@@ -316,6 +323,8 @@ namespace RaywattApp.ViewModels
 
                 if (ReviewStatus.SelectedPatientCase.LumenContour == null)
                 {
+                    IsLumenLoaded = false;
+
                     Thread threadMakeLumenProfile = new Thread(() => ThreadMakeLumenProfile());
                     threadMakeLumenProfile.Start();
                 }
