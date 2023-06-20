@@ -75,7 +75,7 @@ namespace RaywattApp.ViewModels
         private int _frameNumberCompare = -1;
 
         [ObservableProperty]
-        private bool _isLumenLoaded;
+        private bool _isLumenLoaded = true;
 
         [ObservableProperty]
         private Zoom _zoom = new Zoom(Constants.CrossSectionCompareSize / Constants.OCTImageSize);
