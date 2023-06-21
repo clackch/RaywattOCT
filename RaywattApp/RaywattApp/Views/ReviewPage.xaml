@@ -35,10 +35,10 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
                     <StackPanel Width="70"/>
-                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="2D" IsChecked="True"/>
-                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="3D" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.Review3dPage}"/>
-                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="Compare" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewComparePage}"/>
-                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="AI FFR" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrPage}"/>
+                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [2D], Source={StaticResource L10N}}" IsChecked="True"/>
+                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [3D], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.Review3dPage}"/>
+                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [Compare], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewComparePage}"/>
+                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [AI FFR], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrPage}"/>
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                     <component:IconButton Style="{StaticResource IconButton}" Icon="editLumenContourSimple" Width="42" Height="42" Command="{Binding EditLumenContourCommand}"/>
@@ -255,7 +255,11 @@
                                                 <StackPanel Height="114.2"/>
                                                 <Image Source="{svgc:SvgImage Source=/res/icon/2dOption.svg}" Width="24.3" Height="24.3"/>
                                                 <StackPanel Height="8"/>
-                                                <Image Source="{svgc:SvgImage Source=/res/icon/2dOptionText.svg}" Width="38" Height="26"/>
+                                                <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" TextBlock.TextAlignment="Center" Padding="10,0,10,0">
+                                                    <Label.Content>
+                                                        <AccessText TextWrapping="Wrap" Text="{Binding [2D Option], Source={StaticResource L10N}}"/>
+                                                    </Label.Content>
+                                                </Label>
                                             </StackPanel>
                                         </Grid>
                                     </Border>
@@ -347,13 +351,21 @@
                                                 <StackPanel Height="125.5"/>
                                                 <Image Source="{svgc:SvgImage Source=/res/icon/CaseInfo.svg}" Width="24" Height="24"/>
                                                 <StackPanel Height="8"/>
-                                                <Image Source="{svgc:SvgImage Source=/res/icon/CaseInfoText.svg}" Width="28" Height="26"/>
+                                                <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" TextBlock.TextAlignment="Center" Padding="10,0,10,0">
+                                                    <Label.Content>
+                                                        <AccessText TextWrapping="Wrap" Text="{Binding [Case Info.], Source={StaticResource L10N}}"/>
+                                                    </Label.Content>
+                                                </Label>
                                             </StackPanel>
                                             <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Center" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}">
                                                 <StackPanel Height="123.9"/>
                                                 <Image Source="{svgc:SvgImage Source=/res/icon/measurement.svg}" Width="24" Height="26.6"/>
                                                 <StackPanel Height="8"/>
-                                                <Image Source="{svgc:SvgImage Source=/res/icon/measurementText.svg}" Width="50" Height="26"/>
+                                                <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" TextBlock.TextAlignment="Center" Padding="10,0,10,0">
+                                                    <Label.Content>
+                                                        <AccessText TextWrapping="Wrap" Text="{Binding [Measurement], Source={StaticResource L10N}}"/>
+                                                    </Label.Content>
+                                                </Label>
                                             </StackPanel>
                                         </Grid>
                                     </Border>
@@ -634,7 +646,11 @@
                                                 <StackPanel Height="284"/>
                                                 <Image Source="{svgc:SvgImage Source=/res/icon/ValueInfo.svg}" Width="24" Height="24"/>
                                                 <StackPanel Height="8"/>
-                                                <Image Source="{svgc:SvgImage Source=/res/icon/ValueInfoText.svg}" Width="32" Height="26"/>
+                                                <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" TextBlock.TextAlignment="Center" Padding="10,0,10,0">
+                                                    <Label.Content>
+                                                        <AccessText TextWrapping="Wrap" Text="{Binding [Value Info.], Source={StaticResource L10N}}"/>
+                                                    </Label.Content>
+                                                </Label>
                                             </StackPanel>
                                         </Grid>
                                     </Border>

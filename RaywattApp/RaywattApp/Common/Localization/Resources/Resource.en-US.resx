@@ -175,8 +175,14 @@ It must be removed from the patient before continuing.</value>
   <data name="%DS" xml:space="preserve">
     <value>%DS</value>
   </data>
+  <data name="2D" xml:space="preserve">
+    <value>2D</value>
+  </data>
   <data name="2D Option" xml:space="preserve">
     <value>2D Option</value>
+  </data>
+  <data name="3D" xml:space="preserve">
+    <value>3D</value>
   </data>
   <data name="3D Cut-View" xml:space="preserve">
     <value>3D Cut-View</value>
@@ -210,6 +216,9 @@ It must be removed from the patient before continuing.</value>
   </data>
   <data name="Additional Option" xml:space="preserve">
     <value>Additional Option</value>
+  </data>
+  <data name="AI FFR" xml:space="preserve">
+    <value>AI FFR</value>
   </data>
   <data name="Alternate ID" xml:space="preserve">
     <value>Alternate ID</value>
@@ -331,6 +340,9 @@ It must be removed from the patient before continuing.</value>
   </data>
   <data name="Comment" xml:space="preserve">
     <value>Comment</value>
+  </data>
+  <data name="Compare" xml:space="preserve">
+    <value>Compare</value>
   </data>
   <data name="Confirm" xml:space="preserve">
     <value>Confirm</value>
@@ -619,6 +631,9 @@ Do you want to import data?</value>
   </data>
   <data name="Measure" xml:space="preserve">
     <value>Measure</value>
+  </data>
+  <data name="Measurement" xml:space="preserve">
+    <value>Measurement</value>
   </data>
   <data name="Measurements" xml:space="preserve">
     <value>Measurements</value>
