@@ -810,7 +810,9 @@
                                     </Image.Clip>
                                 </Image>
                                 <!-- Loading -->
-                                <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding DeviceStatus.IsLumenLoaded, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                                <Grid Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding DeviceStatus.IsLumenLoaded, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                                </Grid>
 
                                 <!-- L-Mode Indicator -->
                                 <Canvas>
