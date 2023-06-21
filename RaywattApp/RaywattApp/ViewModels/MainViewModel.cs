@@ -174,7 +174,7 @@ namespace RaywattApp.ViewModels
                     RayEndReview();
             }
 
-            if (NavigationSource == Constants.PatientListPage)
+            if (NavigationSource == Constants.PatientListPage || (NavigationSource == "Refresh" && Constants.CurrentPage == Constants.PatientListPage))
                 IsHome = true;
             else
                 IsHome = false;
