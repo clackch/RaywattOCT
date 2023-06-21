@@ -37,6 +37,8 @@ namespace RaywattApp.Models
 
         public bool IsLongitudeClicked = false;
 
+        public bool IsLongitudeMove = false;
+
         private ICommand _cmdSetCaptured;
 
         public Indicator()
@@ -69,6 +71,7 @@ namespace RaywattApp.Models
             else
             {
                 IsLongitudeClicked = true;
+                IsLongitudeMove = true;
             }
             
             IsValid = false;
