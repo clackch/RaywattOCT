@@ -80,7 +80,7 @@ public:
 		m_nTotalFrame = nTotalFrame;
 	}
 
-	cv::Mat GetRectangleImage() { return imageResult; }
+	virtual cv::Mat GetProcessedImage() { return imageResult; }
 	cv::Mat GetCircleImage() { return imageCircle; }
 	USHORT* GetFringesBuffer() { return m_pFringesBuffer; }
 	Setting GetSetting() { return m_setting; }

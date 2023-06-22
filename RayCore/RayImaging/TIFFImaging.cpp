@@ -38,5 +38,5 @@ void CTIFFImaging::Process(char* fringes)
 }
 void CTIFFImaging::PostProcess(cv::Mat image)
 {
-	cv::convertScaleAbs(imageCircle, imageCircle, m_setting.contrast, m_setting.brightness);
+	cv::convertScaleAbs(image, imageCircle, m_setting.contrast, m_setting.brightness);
 }

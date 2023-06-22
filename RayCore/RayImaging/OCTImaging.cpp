@@ -457,14 +457,14 @@ UINT COCTImaging::threadRender(LPVOID param) {
 
 		if (pImaging->m_pThread->isRun) {
 			pImaging->Process((char *)pImaging->m_pFringesBuffer);
-			pImaging->PostProcess(pImaging->GetRectangleImage());
+			pImaging->PostProcess(pImaging->GetProcessedImage());
 			// To-Do
 			// double buffering 필요?
 			// Invert, coloring 을 View (Dialog) 쪽으로 뺄 수 없을까?
 
 			if (pMsg != nullptr) {
 				int nFrameInfo = (pImaging->m_nCurFrame << 16) | (pImaging->m_nTotalFrame);
-				pMsg->postMessage(WM_PROCESS_OCT_DONE, pImaging->GetSession(), nFrameInfo);
+				pMsg->postMessage(WM_PROCESS_CROSSSECTION, pImaging->GetSession(), nFrameInfo);
 			}
 		}
 	}

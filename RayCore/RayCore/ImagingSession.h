@@ -4,6 +4,7 @@
 #include "Config.h"
 #include "Imaging.h"
 #include <opencv2/opencv.hpp>
+#include <map>
 
 #define FILE_EXTENSION_RAW	"bin"
 #define FILE_EXTENSION_OCT	"oct"
@@ -20,7 +21,6 @@ enum class ImagingType
 class CMessageService;
 class COCTImaging;
 class CCalibration;
-class CSimulateDevice;
 class IDataManager;
 class CThread;
 class CCutViewManager;
@@ -32,16 +32,18 @@ private:
 
 	ImagingType m_imagingType;
 	COCTImaging* m_pImaging;
-	CSimulateDevice* m_pSimDevice;
 	IDataManager* m_pDataManager;
+
+	CThread* m_pThreadImaging;
+	std::map<int, cv::Mat> m_mapImage;
 
 	bool m_deleteData;
 
 	CThread* m_pThreadUpdateCutView;
+	CThread* m_pThreadObjectDetection;
 	CCutViewManager* m_pCutView;
 
 	std::vector<std::vector<cv::Mat>> m_vLumen;
-	bool m_detectLumen;
 
 private:
 	CImagingSession(CMessageService* pMsg, int nSession, bool deleteData = true);
@@ -52,38 +54,38 @@ public:
 	static CImagingSession* CreateSession(CMessageService* pMsg, int nSession, const char* strFilePath);
 	static COCTImaging* CreateColorImaging(CMessageService* msg, IImaging::Setting setting, IDataManager* pData, ImagingType type);
 
-	void EnableCutView(cv::Scalar backgroundColor);
-	void EnableLumenDetection(bool enable) { m_detectLumen = enable; }
-
 	ImagingType GetImagingType() { return m_imagingType; }
 	IDataManager* GetDataManager() { return m_pDataManager; }
 	COCTImaging* GetImaging() { return m_pImaging; }
 	CCutViewManager* GetCutView() { return m_pCutView; }
 
 	// Asynchronous functions
-	int Start();
-	int Stop();
-	bool IsPaused();
-	void SetPause(bool pause);
-	void PrevFrame();
-	void NextFrame();
-	void MoveToFrame(int nFrame);
+	RayError Start();
+	RayError Stop();
+	void StartCutViewUpdate(cv::Scalar backgroundColor);
+	void StartObjectDetection();
+	bool IsProcessed(int nFrame);
 
 	// Synchronous functions
+	cv::Mat PostProcess(int nFrame);
 	UINT GetImageWidth();
 	UINT GetImageHeight();
 	UINT GetImageChannels();
 	UINT GetImageDepth();
 	void* GetImageData(int nFrame);
+	void InitCutView(cv::Scalar backgroundColor);
 	UINT GetCutViewWidth();
 	UINT GetCutViewHeight();
 	UINT GetCutViewChannels();
+	void AddFramesIntoCutView();
 	void* GetLumenContour(int nFrame);
 	int GetNumOfLumenContourPoints(int nFrame);
 
 private:
 	static CImagingSession* createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type);
+	static UINT threadImaging(LPVOID param);
 	static UINT threadUpdateCutView(LPVOID param);	
+	static UINT threadDetectObject(LPVOID param);
 	static USHORT* readBackground(const char* strBackgroundFile, IImaging::Setting setting);
 };
 
