@@ -27,7 +27,6 @@ COCTSystem::COCTSystem() {
 	m_pThreadService = nullptr;
 	m_pThreadSaveRaw = nullptr;
 	m_pThreadGenerateVolume = nullptr;
-	m_pThreadLumenDetection = nullptr;
 	m_pThreadRotaryJunction = nullptr;
 
 	m_pImagingRealtime = nullptr;
@@ -135,7 +134,6 @@ RayError COCTSystem::Stop() {
 	CUtility::StopThread(m_pThreadService);
 	CUtility::StopThread(m_pThreadSaveRaw);
 	CUtility::StopThread(m_pThreadGenerateVolume);
-	CUtility::StopThread(m_pThreadLumenDetection);
 	CUtility::StopThread(m_pThreadRotaryJunction);
 
 	closeAllSessions();
@@ -364,7 +362,6 @@ int COCTSystem::StartReview(char* strFilePath) {
 			PLOGE.printf("InvalidArgument : %s", strFilePath);
 			return (int)RayError::InvalidArgument;
 		}
-		pSession->EnableLumenDetection(false);
 
 		postMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
 		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
@@ -391,7 +388,7 @@ RayError COCTSystem::StartCompare(char* strFilePath) {
 		m_reviewSession[SESSION_COMPARE]->Stop();
 	}
 
-	postMessage(WM_START_REVIEW_SESSION, SESSION_COMPARE, (LPARAM)pSession);
+	postPriorMessage(WM_START_REVIEW_SESSION, SESSION_COMPARE, (LPARAM)pSession);
 
 	return RayError::OK;
 }
@@ -469,72 +466,16 @@ RayError COCTSystem::StopLiveView()
 RayError COCTSystem::SetSession(int session) 
 {
 	if (session <= SessionType::SESSION_UNKNOWN || session >= SessionType::MAX_SESSION_NUM) return RayError::WrongSession;
-	if (m_reviewSession[session] == nullptr) return RayError::WrongSession;
+	if (m_reviewSession[session] == nullptr)
+	{
+		PLOGI.printf("Session #%d is null", session);
+		return RayError::WrongSession;
+	}
 
 	m_curSession = (SessionType) session;
+	PLOGI.printf("Current Session : %d", m_curSession);
 
 	return RayError::OK;
-}
-
-/*
-* PlayPause
-*/
-RayError COCTSystem::PlayPause()
-{
-	if (m_curState == RayScannerState::Review) {
-		bool isPaused = GetIsPaused();
-		m_reviewSession[m_curSession]->SetPause(!isPaused);
-
-		return RayError::OK;
-	}
-	return RayError::WrongState;
-}
-
-/*
-* PrevFrame
-*/
-RayError COCTSystem::PrevFrame()
-{
-	if (m_curState == RayScannerState::Review) {
-		if (!GetIsPaused())
-			return RayError::NotPaused;
-
-		m_reviewSession[m_curSession]->PrevFrame();
-
-		return RayError::OK;
-	}
-	return RayError::WrongState;
-}
-
-/*
-* NextFrame
-*/
-RayError COCTSystem::NextFrame()
-{
-	if (m_curState == RayScannerState::Review) {
-		if (!GetIsPaused())
-			return RayError::NotPaused;
-
-		m_reviewSession[m_curSession]->NextFrame();
-
-		return RayError::OK;
-	}
-	return RayError::WrongState;
-}
-
-/*
-* NextFrame
-*/
-RayError COCTSystem::MoveToFrame(int nFrame) {
-	if (m_curState == RayScannerState::Review) {
-		if (!GetIsPaused())
-			return RayError::NotPaused;
-
-		m_reviewSession[m_curSession]->MoveToFrame(nFrame);
-
-		return RayError::OK;
-	}
-	return RayError::WrongState;
 }
 
 /*
@@ -572,9 +513,9 @@ void* COCTSystem::GetVolumeData() {
 RayError COCTSystem::StartLumenDetection() {
 	if (m_curState == RayScannerState::Review)
 	{
-		BOOL result = CUtility::StartThread(threadLumenDetection, m_pThreadLumenDetection, this);
-		
-		return (result) ? RayError::OK : RayError::InvalidFunctionCall;
+		if (m_reviewSession[SESSION_REVIEW] == nullptr) return RayError::WrongSession;
+		m_reviewSession[SESSION_REVIEW]->StartObjectDetection();
+		PLOGI.printf("Start object detection manually.");
 	}
 
 	return RayError::WrongState;
@@ -591,9 +532,8 @@ RayError COCTSystem::OpenImage(char* strFilePath) {
 		return RayError::InvalidArgument;
 	}
 
-	pSession->EnableCutView(cv::Scalar(0x00, 0x00, 0x00));
-	pSession->EnableLumenDetection(false);
 	m_openedSession = pSession;
+	m_openedSession->InitCutView(cv::Scalar(0x00, 0x00, 0x00));
 
 	return RayError::OK;
 }
@@ -614,9 +554,20 @@ RayError COCTSystem::CloseImage() {
 * GetImageData
 */
 void* COCTSystem::GetImageData(int nFrame) {
-	if (m_openedSession == nullptr) return nullptr;
+	if (m_openedSession != nullptr) return m_openedSession->GetImageData(nFrame);
+	else {
+		if (m_curSession == SESSION_UNKNOWN || m_reviewSession[m_curSession] == nullptr) {
+			PLOGI.printf("Session #%d is not started.", m_curSession);
+			return nullptr;
+		}
+		if (m_reviewSession[m_curSession]->IsProcessed(nFrame)) {
+			cv::Mat image = m_reviewSession[m_curSession]->PostProcess(nFrame);
+			PLOGI.printf("Session #%d - Frame #%d post-processed.", m_curSession, nFrame);
+			return image.data;
+		}
+	}
 
-	return m_openedSession->GetImageData(nFrame);
+	return nullptr;
 }
 
 /*
@@ -628,6 +579,7 @@ void* COCTSystem::GetLongitudeData(double fDegree) {
 	CCutViewManager* pCutView = m_openedSession->GetCutView();
 	if (pCutView == nullptr) return nullptr;
 
+	m_openedSession->AddFramesIntoCutView();
 	pCutView->GenerateCutView(fDegree);
 	cv::Mat imgLongitude = pCutView->DrawLongitudeImage(pCutView->GetNumOfSamples());
 
@@ -787,16 +739,6 @@ bool COCTSystem::GetMotorOnOff()
 }
 
 /*
-* GetIsPaused
-*/
-bool COCTSystem::GetIsPaused()
-{
-	if (m_curSession == SESSION_UNKNOWN || m_reviewSession[m_curSession] == nullptr) return true;	// default state is paused
-
-	return m_reviewSession[m_curSession]->IsPaused();
-}
-
-/*
 * GetImageWidth
 */
 UINT COCTSystem::GetImageWidth() 
@@ -938,14 +880,19 @@ UINT COCTSystem::threadService(LPVOID param) {
 			pSystem->OnMsgNotifyErrorOccured(wParam, lParam);
 			break;
 		}
-		case WM_PROCESS_OCT_DONE:
+		case WM_PROCESS_CROSSSECTION:
 		{
-			pSystem->OnMsgProcessOCTDone(wParam, lParam);
+			pSystem->OnMsgProcessCrossSection(wParam, lParam);
 			break;
 		}
 		case WM_PROCESS_CUTVIEW:
 		{
 			pSystem->OnMsgProcessCutView(wParam, lParam);
+			break;
+		}
+		case WM_PROCESS_DETECTION:
+		{
+			pSystem->OnMsgProcessDetection(wParam, lParam);
 			break;
 		}
 		case WM_UPDATE_CATHETER_STATE:
@@ -1052,56 +999,6 @@ UINT COCTSystem::threadGenerateVolume(LPVOID param) {
 }
 
 /*
-* threadLumenDetection
-*/
-UINT COCTSystem::threadLumenDetection(LPVOID param) {
-#if 0
-	COCTSystem* pSystem = (COCTSystem*)param;
-	CImagingSession* pSession = pSystem->m_reviewSession[SESSION_REVIEW];
-	IDataManager* pDataManager = pSession->GetDataManager();
-	ImagingType imagingType = pSession->GetImagingType();
-	std::vector<std::vector<cv::Mat>>& vLumen = pSystem->m_vLumen;
-
-	CRayLearning* pLearning = pSystem->m_pLearning;
-	const int nNumOfSamples = pDataManager->GetNumOfSamples();
-
-	// prepare imaging
-	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr, pSession->GetImaging()->GetSetting(), pDataManager, imagingType);
-
-	PLOGI.printf("lumen detection start - %d frames", nNumOfSamples);
-	vLumen.clear();
-	for (int nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadLumenDetection->isRun; nFrame++) {
-		char* pBuffer = pDataManager->GetSample(nFrame);
-		pImaging->Process(pBuffer);
-
-		std::vector<std::vector<cv::Point>> vContours = pLearning->FindLumen(pImaging->GetCircleImage());
-		printf("[threadLumenDetection] %d - %d contours\n",nFrame, vContours.size());
-		std::vector<cv::Mat> vLumens;
-		for (int i = 0; i < vContours.size(); i++) {
-			std::vector<cv::Point> contour = vContours.at(i);
-			cv::Mat matContour(contour.size(), 1, CV_32SC2);
-			for (size_t row = 0; row < contour.size(); row++) {
-				matContour.at<cv::Point>(row, 0) = contour[row];
-			}
-			vLumens.push_back(matContour);
-		}
-		vLumen.push_back(vLumens);
-	}
-	delete pImaging;
-
-	PLOGI.printf("lumen detection done.");
-	printf("[threadLumenDetection] done.\n");
-	pSystem->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::LumenDetection);
-
-	// wait for StopThread
-	while (pSystem->m_pThreadLumenDetection->isRun) {
-		Sleep(DELAY_FOR_STOP_THREAD);
-	}
-#endif
-	return NOERROR;
-}
-
-/*
 * threadAutoCalibration
 */
 UINT COCTSystem::threadAutoCalibration(LPVOID param) {
@@ -1175,10 +1072,11 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pMotor->StopMotor();
 
 	CImagingSession* pSession = CImagingSession::CreateSession(pSystem, SESSION_REVIEW, settingPullback, pDataWriter);
-	pSession->EnableLumenDetection(true);
 	pSystem->postMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
 	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
 	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::Pullback);
+
+	pSession->StartObjectDetection();
 
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
@@ -1438,9 +1336,9 @@ int COCTSystem::disconnectRotaryJunction() {
 }
 
 /*
-* OnMsgProcessOCTDone
+* OnMsgProcessCrossSection
 */
-LRESULT COCTSystem::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
+LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 	cv::Mat image;
 	int nSession = wParam;
 	int nFrameInfo = lParam;	// 0 if real time frame
@@ -1448,12 +1346,10 @@ LRESULT COCTSystem::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 
 	if (m_curState == RayScannerState::Review) {
 		if (isRealTime) return NOERROR;
-
-		image = m_reviewSession[nSession]->GetImaging()->GetCircleImage();
-
-		int nCurFrame, nTotalFrame;
-		m_reviewSession[nSession]->GetImaging()->GetFrameInfo(nCurFrame, nTotalFrame);
-		nFrameInfo = (nCurFrame << 16) | (nTotalFrame);
+		int nCurFrame = (nFrameInfo >> 16) & 0xFFFF;
+		int nTotalFrame = (nFrameInfo & 0xFFFF);
+		
+		image = m_reviewSession[nSession]->PostProcess(nCurFrame);
 	}
 	else {
 		if (isRealTime == false) return NOERROR;
@@ -1482,6 +1378,18 @@ LRESULT COCTSystem::OnMsgProcessCutView(WPARAM wParam, LPARAM lParam) {
 	int nFrameInfo = (nDrawSamples << 16) | (nTotalFrame);
 
 	if (m_cbLongitude != nullptr) m_cbLongitude(nSession, imgCutView.data, imgCutView.cols, imgCutView.rows, imgCutView.channels(), nFrameInfo);
+
+	return NOERROR;
+}
+/*
+* OnMsgProcessDetection
+*/
+LRESULT COCTSystem::OnMsgProcessDetection(WPARAM wParam, LPARAM lParam) {
+	UINT nSession = wParam;
+	UINT nFrame = lParam;
+
+	int nFrameInfo = (nSession << 16) | (nFrame);
+	if (m_callback != nullptr) m_callback((int)RayCallbackRequest::ProgressDetection, nFrameInfo);
 
 	return NOERROR;
 }
@@ -1534,13 +1442,11 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 	switch (m_curState) {
 	case RayScannerState::Initial:
 		CUtility::StopThread(m_pThreadGenerateVolume);
-		CUtility::StopThread(m_pThreadLumenDetection);
 		closeAllSessions();
 		// To-Do: unload catheter
 		break;
 	case RayScannerState::Default:
 		CUtility::StopThread(m_pThreadGenerateVolume);
-		CUtility::StopThread(m_pThreadLumenDetection);
 		closeAllSessions();
 		break;
 	case RayScannerState::Scanning:
@@ -1549,7 +1455,6 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 	case RayScannerState::Review:		
 		if (m_prevState == RayScannerState::Scanning) {
 			CUtility::StartThread(threadSaveRaw, m_pThreadSaveRaw, this);
-			CUtility::StartThread(threadLumenDetection, m_pThreadLumenDetection, this);
 		}
 
 		// To-Do: Change to OnDemand ver.
@@ -1570,7 +1475,7 @@ LRESULT COCTSystem::OnMsgUpdateSaveRaw(WPARAM wParam, LPARAM lParam) {
 	UINT nTotalFrame = lParam;
 
 	int nFrameInfo = (nFrame << 16) | (nTotalFrame);
-	if (m_callback != nullptr) m_callback((int) RayCallbackRequest::Progress, nFrameInfo);
+	if (m_callback != nullptr) m_callback((int) RayCallbackRequest::ProgressSave, nFrameInfo);
 
 	return NOERROR;
 }
@@ -1615,14 +1520,14 @@ LRESULT COCTSystem::OnMsgStartReviewSession(WPARAM wParam, LPARAM lParam) {
 		m_reviewSession[nSession] = nullptr;
 	}
 
-	if (nSession == SESSION_REVIEW) {
-		pSession->EnableCutView(m_backgroundColor);
-	}
-
 	PLOGI.printf("Start session #%d", nSession);
 	m_reviewSession[nSession] = pSession;
 	m_reviewSession[nSession]->Start();
 	m_curSession = (SessionType) nSession;
+
+	if (nSession == SESSION_REVIEW) {
+		pSession->StartCutViewUpdate(m_backgroundColor);
+	}
 
 	return NOERROR;
 }
@@ -1641,7 +1546,6 @@ LRESULT COCTSystem::OnMsgNotifyProcessDone(WPARAM wParam, LPARAM lParam) {
 		CUtility::StopThread(m_pThreadGenerateVolume);
 		break;
 	case RayWorkItem::LumenDetection:
-		CUtility::StopThread(m_pThreadLumenDetection);
 		break;
 	default:
 		return NOERROR;

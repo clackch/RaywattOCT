@@ -85,9 +85,27 @@ void COCTImaging::Process(char* fringes) {
 	computeLogarithm(fFFTResult, fFFTResult);
 	findSheath(fFFTResult);
 	generateImage(fFFTResult, false);
-
-	postProcessing();
 }
+void COCTImaging::PostProcess(cv::Mat image) {
+	const bool bInvert = m_bInvert;
+	const bool bColor = m_bColor;
+
+	cv::cvtColor(image, imageResultColor, cv::COLOR_GRAY2RGB);
+	cv::flip(imageResultColor, imageResultColor, 1);
+
+	if (bInvert) cv::bitwise_not(imageResultColor, imageResultColor);
+	if (bColor) applyLUT(imageResultColor);
+
+	cv::convertScaleAbs(imageResultColor, imageResultColor, m_setting.contrast, m_setting.brightness);
+
+	if (m_bShowCalibGuide) {
+		drawGuideLine(imageResultColor, m_measureSetting.nSheathPosition, cv::Scalar(0xff, 0xcc, 0x33));
+		drawGuideLine(imageResultColor, m_nSheathPosition, cv::Scalar(0xff, 0xff, 0xff));
+	}
+
+	circularizeImage(imageResultColor, imageCircle);
+}
+
 
 int COCTImaging::Start() {
 	BOOL result = FALSE;
@@ -331,26 +349,6 @@ void COCTImaging::generateImage(Ipp32f* logaritihmData, bool bInvert){
 		ippsConvert_32f8u_Sfs(fOutput + i * nOutputLength, imageResult.data + i * nOutputLength /*stepBytes*/, nOutputLength, ippRndNear, 0);
 	}
 }
-void COCTImaging::postProcessing() {
-	const bool bInvert = m_bInvert;
-	const bool bColor = m_bColor;
-
-	cv::cvtColor(imageResult, imageResultColor, cv::COLOR_GRAY2RGB);
-	cv::flip(imageResultColor, imageResultColor, 1);
-
-	if (bInvert) cv::bitwise_not(imageResultColor, imageResultColor);
-	if (bColor) applyLUT(imageResultColor);
-
-	cv::convertScaleAbs(imageResultColor, imageResultColor, m_setting.contrast, m_setting.brightness);
-
-	if (m_bShowCalibGuide) {
-		drawGuideLine(imageResultColor, m_measureSetting.nSheathPosition, cv::Scalar(0xff, 0xcc, 0x33));
-		drawGuideLine(imageResultColor, m_nSheathPosition, cv::Scalar(0xff, 0xff, 0xff));
-	}
-
-	circularizeImage(imageResultColor, imageCircle);
-}
-
 void COCTImaging::circularizeImage(cv::Mat& src, cv::Mat& dst)
 {
 	cv::remap(src, dst, matXMap, matYMap, cv::INTER_LINEAR);
@@ -459,13 +457,14 @@ UINT COCTImaging::threadRender(LPVOID param) {
 
 		if (pImaging->m_pThread->isRun) {
 			pImaging->Process((char *)pImaging->m_pFringesBuffer);
+			pImaging->PostProcess(pImaging->GetProcessedImage());
 			// To-Do
 			// double buffering 필요?
 			// Invert, coloring 을 View (Dialog) 쪽으로 뺄 수 없을까?
 
 			if (pMsg != nullptr) {
 				int nFrameInfo = (pImaging->m_nCurFrame << 16) | (pImaging->m_nTotalFrame);
-				pMsg->postMessage(WM_PROCESS_OCT_DONE, pImaging->GetSession(), nFrameInfo);
+				pMsg->postMessage(WM_PROCESS_CROSSSECTION, pImaging->GetSession(), nFrameInfo);
 			}
 		}
 	}

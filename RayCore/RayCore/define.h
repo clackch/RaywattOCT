@@ -1,6 +1,7 @@
 #pragma once
 #include "import.h"
 
+#define DELAY_FOR_WAIT_PROCESS			5
 #define DELAY_FOR_STOP_THREAD			50
 
 typedef void (*FunctionPtr)(int, int);
@@ -17,7 +18,6 @@ enum class RayError {
 	CatheterNotValid,
 	InvalidArgument,
 	WrongState,
-	NotPaused,
 	WrongSession,
 	InvalidFunctionCall
 };
@@ -30,7 +30,6 @@ enum class RayProperty {
 	LongitudeBackgroundColor,
 	LongitudeDegree,
 	MotorOnOff,
-	IsPaused,
 	LoadCatheterTime,
 	VolumeWidth,
 	VolumeHeight,
@@ -47,7 +46,8 @@ enum class RayProperty {
 enum class RayCallbackRequest {
 	Unknown = 0,
 	State,
-	Progress,
+	ProgressSave,
+	ProgressDetection,
 	Error,
 	Event,
 	WorkDone

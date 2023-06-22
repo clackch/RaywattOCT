@@ -10,6 +10,7 @@ using RaywattApp.Services;
 using RaywattOCT;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Navigation;
@@ -159,6 +160,9 @@ namespace RaywattApp.ViewModels
 
                 RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
+
+                GetImageInfo(RaySession.Review);
+                MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
             }
 
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
@@ -207,9 +211,10 @@ namespace RaywattApp.ViewModels
         {
             if (DrawCrossSectionImage())
             {
-                if (!IndicatorLongitude.IsCaptured) updateNavigator(crossSectionFrameInfo[0].curFrame, crossSectionFrameInfo[0].totalFrame);
+                DeviceStatus.ReviewImageInfo imageInfo = DeviceStatus.ReviewImageInfos[(int)RaySession.Review];
+                if (!IndicatorLongitude.IsCaptured) updateNavigator(imageInfo.Current, imageInfo.Total);
 
-                FrameNumber = crossSectionFrameInfo[0].curFrame;
+                FrameNumber = imageInfo.Current;
             }
             if (DrawLongitudeImage())
             {
@@ -338,7 +343,7 @@ namespace RaywattApp.ViewModels
             {
                 curPosition *= (longitudeFrameInfo.totalFrame - 1);
                 curPosition = Math.Round(curPosition);
-                RayMoveToFrame((int)curPosition);
+                MoveToFrame(RaySession.Review, (int)curPosition);
             }
         }
     }

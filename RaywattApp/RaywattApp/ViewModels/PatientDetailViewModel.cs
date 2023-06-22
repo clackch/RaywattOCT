@@ -351,6 +351,11 @@ namespace RaywattApp.ViewModels
             RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
             int numOfFrames = RayStartReview(patientCase.ImageFullPath);
 
+            DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current = 0;
+            DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total = 0;
+            DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current = 0;
+            DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total = 0;
+
             Dictionary<string, Object> parameter = new Dictionary<string, Object>();
             parameter["patient"] = Patient;
             parameter["patientCase"] = patientCase;

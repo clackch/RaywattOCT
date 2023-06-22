@@ -13,5 +13,7 @@ public:
 
 	void Initialize();
 	virtual void Process(char* fringes);
+	virtual void PostProcess(cv::Mat image);
+	virtual cv::Mat GetProcessedImage() { return imageConvert; }
 };
 

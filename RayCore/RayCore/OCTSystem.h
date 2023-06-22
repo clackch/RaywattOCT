@@ -40,7 +40,6 @@ private:
 	CThread* m_pThreadService;
 	CThread* m_pThreadSaveRaw;
 	CThread* m_pThreadGenerateVolume;
-	CThread* m_pThreadLumenDetection;
 	CThread* m_pThreadRotaryJunction;
 	
 	// Imaging
@@ -101,10 +100,6 @@ public:
 	RayError StartLiveView();
 	RayError StopLiveView();
 	RayError SetSession(int session);
-	RayError PlayPause();
-	RayError PrevFrame();
-	RayError NextFrame();
-	RayError MoveToFrame(int nFrame);
 	RayError RegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude);
 	RayError UnregisterImageCallback();
 	void* GetVolumeData();
@@ -128,7 +123,6 @@ public:
 	RayError SetLongitudeBackgroundColor(UINT value);
 	UINT GetVolumeDepth();
 	bool GetMotorOnOff();
-	bool GetIsPaused();
 	UINT GetImageWidth();
 	UINT GetImageHeight();
 	UINT GetImageChannels();
@@ -143,7 +137,6 @@ private:
 	// Work Thread (stop in OnMsgNotifyProcessDone, OnMsgUpdateScannerState)
 	static UINT threadSaveRaw(LPVOID param);
 	static UINT threadGenerateVolume(LPVOID param);
-	static UINT threadLumenDetection(LPVOID param);
 	
 	// Rotary Junction Thread (stop in OnMsgDeviceWorkDone func)
 	static UINT threadAutoCalibration(LPVOID param);
@@ -167,8 +160,9 @@ private:
 	void setBrightnessContrastAllSessions();
 
 protected:
-	LRESULT OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam);
+	LRESULT OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgProcessCutView(WPARAM wParam, LPARAM lParam);
+	LRESULT OnMsgProcessDetection(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgUpdateSaveRaw(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgUpdateCatheterState(WPARAM wParam, LPARAM lParam);

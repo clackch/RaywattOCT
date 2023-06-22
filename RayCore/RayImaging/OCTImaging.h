@@ -58,6 +58,7 @@ public:
 
 	virtual void Initialize(CCalibration* calibration);
 	virtual void Process(char* fringes);
+	virtual void PostProcess(cv::Mat image);
 
 	int Start();
 	int Stop();
@@ -79,6 +80,7 @@ public:
 		m_nTotalFrame = nTotalFrame;
 	}
 
+	virtual cv::Mat GetProcessedImage() { return imageResult; }
 	cv::Mat GetCircleImage() { return imageCircle; }
 	USHORT* GetFringesBuffer() { return m_pFringesBuffer; }
 	Setting GetSetting() { return m_setting; }
@@ -95,7 +97,6 @@ protected:
 	void fftProcessing(const Ipp32f* fringes32f);
 	void computeLogarithm(Ipp32f* src, Ipp32f* dst);
 	void generateImage(Ipp32f* logaritihmData, bool bInvert);
-	void postProcessing();
 	void findSheath(Ipp32f* logaritihmData);
 	void circularizeImage(cv::Mat& src, cv::Mat& dst);
 	void applyHotColor(cv::Mat& image);

@@ -15,23 +15,23 @@
 CImagingSession::CImagingSession(CMessageService* pMsg, int nSession, bool deleteData) :
 	m_pMsg(pMsg),
 	m_nSession(nSession),
-	m_deleteData(deleteData),
-	m_detectLumen(false)
+	m_deleteData(deleteData)
 {
 	m_imagingType = ImagingType::Default;
 	m_pImaging = nullptr;
-	m_pSimDevice = nullptr;
 	m_pDataManager = nullptr;
+	m_pThreadImaging = nullptr;
 
 	m_pThreadUpdateCutView = nullptr;
+	m_pThreadObjectDetection = nullptr;
 	m_pCutView = nullptr;
 }
 CImagingSession::~CImagingSession() {
 	Stop();
 	if (m_pImaging != nullptr) delete m_pImaging;
-	if (m_pSimDevice != nullptr) delete m_pSimDevice;
 	if (m_deleteData && m_pDataManager != nullptr) delete m_pDataManager;
 	if (m_pThreadUpdateCutView != nullptr) delete m_pThreadUpdateCutView;
+	if (m_pThreadObjectDetection != nullptr) delete m_pThreadObjectDetection;
 	if (m_pCutView != nullptr) delete m_pCutView;
 }
 
@@ -138,48 +138,44 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 	return pImaging;
 }
 
-void CImagingSession::EnableCutView(cv::Scalar backgroundColor) {
+RayError CImagingSession::Start() {
+	if (m_pImaging == nullptr) return RayError::InvalidFunctionCall;
+
+	CUtility::StopThread(m_pThreadImaging);
+	CUtility::StartThread(threadImaging, m_pThreadImaging, this);
+
+	return RayError::OK;
+}
+
+RayError CImagingSession::Stop() {
 	CUtility::StopThread(m_pThreadUpdateCutView);
-	if (m_pCutView != nullptr) delete m_pCutView;
+	CUtility::StopThread(m_pThreadObjectDetection);
+	CUtility::StopThread(m_pThreadImaging);
 
-	m_pCutView = new CCutViewManager();
-	m_pCutView->Initialize(m_pDataManager->GetNumOfSamples(), backgroundColor);
+	return RayError::OK;
 }
 
-int CImagingSession::Start() {
-	if (m_pSimDevice == nullptr || m_pImaging == nullptr) return -1;
+void CImagingSession::StartCutViewUpdate(cv::Scalar backgroundColor) {
+	if (m_pThreadUpdateCutView != nullptr) return;
 
-	if (m_pCutView != nullptr) {
-		CUtility::StartThread(threadUpdateCutView, m_pThreadUpdateCutView, this);
+	InitCutView(backgroundColor);
+	CUtility::StartThread(threadUpdateCutView, m_pThreadUpdateCutView, this);
+}
+void CImagingSession::StartObjectDetection() {
+	if (m_pThreadObjectDetection != nullptr) return;
+	CUtility::StartThread(threadDetectObject, m_pThreadObjectDetection, this);
+}
+
+bool CImagingSession::IsProcessed(int nFrame) {
+	std::map<int, cv::Mat>::iterator it = m_mapImage.find(nFrame);
+	return (it != m_mapImage.end());
+}
+cv::Mat CImagingSession::PostProcess(int nFrame) {
+	std::map<int, cv::Mat>::iterator it = m_mapImage.find(nFrame);
+	if (it != m_mapImage.end()) {
+		m_pImaging->PostProcess(it->second);
 	}
-
-	m_pImaging->Start();
-	return m_pSimDevice->StartAcquisition();
-}
-
-int CImagingSession::Stop() {
-	if (m_pImaging != nullptr) m_pImaging->Stop();
-	if (m_pSimDevice != nullptr) m_pSimDevice->StopAcquisition();
-	if (m_pThreadUpdateCutView != nullptr) CUtility::StopThread(m_pThreadUpdateCutView);
-
-	return NOERROR;
-}
-
-bool CImagingSession::IsPaused() {
-	if (m_pSimDevice == nullptr) return true;
-	return m_pSimDevice->IsPaused();
-}
-void CImagingSession::SetPause(bool pause) {
-	if (m_pSimDevice != nullptr) m_pSimDevice->SetPause(pause);
-}
-void CImagingSession::PrevFrame() {
-	if (m_pSimDevice != nullptr) m_pSimDevice->PrevFrame();
-}
-void CImagingSession::NextFrame() {
-	if (m_pSimDevice != nullptr) m_pSimDevice->NextFrame();
-}
-void CImagingSession::MoveToFrame(int nFrame) {
-	if (m_pSimDevice != nullptr) m_pSimDevice->SetFrame(nFrame);
+	return m_pImaging->GetCircleImage();
 }
 UINT CImagingSession::GetImageWidth() {
 	if (m_pImaging != nullptr) return m_pImaging->GetImageWidth();
@@ -203,12 +199,26 @@ void* CImagingSession::GetImageData(int nFrame) {
 
 	char* pBuffer = m_pDataManager->GetSample(nFrame);
 	m_pImaging->Process(pBuffer);
-	
-	if (m_pCutView != nullptr) {
-		m_pCutView->AddRecord(m_pImaging->GetCircleImage(), nFrame);
+	cv::Mat imgResult = m_pImaging->GetProcessedImage().clone();
+
+	m_pImaging->PostProcess(imgResult);
+
+	std::map<int, cv::Mat>::iterator it = m_mapImage.find(nFrame);
+	if (it != m_mapImage.end())
+	{
+		it->second = imgResult;
+	}
+	else {
+		m_mapImage.insert(std::make_pair(nFrame, imgResult));
 	}
 
 	return m_pImaging->GetCircleImage().data;
+}
+void CImagingSession::InitCutView(cv::Scalar backgroundColor) {
+	if (m_pCutView != nullptr) delete m_pCutView;
+
+	m_pCutView = new CCutViewManager();
+	m_pCutView->Initialize(m_pDataManager->GetNumOfSamples(), backgroundColor);
 }
 UINT CImagingSession::GetCutViewWidth() {
 	if (m_pCutView == nullptr) return 0;
@@ -225,6 +235,19 @@ UINT CImagingSession::GetCutViewChannels() {
 
 	return m_pCutView->GetCutView().channels();
 }
+void CImagingSession::AddFramesIntoCutView() {
+	if (m_pCutView == nullptr) return;
+
+	for (int nFrame = 0; nFrame < m_pCutView->GetNumOfSamples(); nFrame++)
+	{
+		std::map<int, cv::Mat>::iterator it = m_mapImage.find(nFrame);
+		if (it != m_mapImage.end())
+		{
+			m_pImaging->PostProcess(it->second);
+			m_pCutView->AddRecord(m_pImaging->GetCircleImage(), nFrame);
+		}
+	}
+}
 void* CImagingSession::GetLumenContour(int nFrame) {
 	if (m_vLumen.size() <= nFrame) return nullptr;
 	if (m_vLumen.at(nFrame).size() <= 0) return nullptr;
@@ -240,7 +263,6 @@ int CImagingSession::GetNumOfLumenContourPoints(int nFrame) {
 	return matContour.cols * matContour.rows;
 }
 
-
 CImagingSession* CImagingSession::createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type) {
 	CImagingSession* pSession = new CImagingSession(pMsg, nSession, deleteData);
 
@@ -248,58 +270,101 @@ CImagingSession* CImagingSession::createSession(CMessageService* pMsg, IImaging:
 	pSession->m_pDataManager = pData;
 	pSession->m_pImaging = CreateColorImaging(pMsg, setting, pData, type);
 	pSession->m_pImaging->SetSession(nSession);
-	pSession->m_pSimDevice = new CSimulateDevice(pData);
-	pSession->m_pSimDevice->InitDevice();
-	pSession->m_pSimDevice->SetImaging(pSession->m_pImaging);
 
 	return pSession;
+}
+UINT CImagingSession::threadImaging(LPVOID param) {
+	CImagingSession* pSession = (CImagingSession*)param;
+	IDataManager* pDataManager = pSession->m_pDataManager;
+	COCTImaging* pImaging = pSession->m_pImaging;
+	CMessageService* pMsg = pSession->m_pMsg;
+
+	pSession->m_mapImage.clear();
+	const int nNumOfSamples = pDataManager->GetNumOfSamples();
+	PLOGI.printf("process oct imaging - %d frames", nNumOfSamples);
+	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadImaging->isRun; nFrame++)
+	{
+		char* pBuffer = pDataManager->GetSample(nFrame);
+		pImaging->Process(pBuffer);
+		cv::Mat imgResult = pImaging->GetProcessedImage().clone();
+		pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult));
+	}
+	PLOGI.printf("process oct imaging done.");
+	
+	return NOERROR;
 }
 UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 	CImagingSession* pSession = (CImagingSession*)param;
 	IDataManager* pDataManager = pSession->m_pDataManager;
 	int nSession = pSession->m_nSession;
 
+	// prepare imaging (without message)
+	COCTImaging* pImaging = CreateColorImaging(nullptr, pSession->m_pImaging->GetSetting(), pDataManager, pSession->GetImagingType());
+
 	CCutViewManager* pCutView = pSession->m_pCutView;
-	CRayLearning& learning = CRayLearning::GetInstance();
-	std::vector<std::vector<cv::Mat>>& vLumen = pSession->m_vLumen;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
+
+	PLOGI.printf("update cutview - %d frames", nNumOfSamples);
+	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadUpdateCutView->isRun; nFrame++) {
+		std::map<int, cv::Mat>::iterator it = pSession->m_mapImage.find(nFrame);
+		if (it == pSession->m_mapImage.end()) {
+			nFrame--;
+			Sleep(DELAY_FOR_WAIT_PROCESS);
+			continue;
+		}
+		pImaging->PostProcess(it->second);
+		pCutView->AddRecord(pImaging->GetCircleImage(), nFrame);
+
+		pSession->m_pMsg->postMessage(WM_PROCESS_CUTVIEW, nSession, nFrame);
+		Sleep(10);
+	}
+	delete pImaging;
+
+	PLOGI.printf("update cutview done.");
+
+	return NOERROR;
+}
+UINT CImagingSession::threadDetectObject(LPVOID param) {
+	CImagingSession* pSession = (CImagingSession*)param;
+	IDataManager* pDataManager = pSession->m_pDataManager;
+	int nSession = pSession->m_nSession;
 
 	// prepare imaging (without message)
 	COCTImaging* pImaging = CreateColorImaging(nullptr, pSession->m_pImaging->GetSetting(), pDataManager, pSession->GetImagingType());
 
-	PLOGI.printf("update cutview & lumen detection start - %d frames", nNumOfSamples);
-	printf("update cutview & lumen detection start - %d frames\n", nNumOfSamples);
+	CRayLearning& learning = CRayLearning::GetInstance();
+	std::vector<std::vector<cv::Mat>>& vLumen = pSession->m_vLumen;
+	const int nNumOfSamples = pDataManager->GetNumOfSamples();
+
+	PLOGI.printf("lumen detection start - %d frames", nNumOfSamples);
 	vLumen.clear();
-	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadUpdateCutView->isRun; nFrame++) {
-		char* pBuffer = pDataManager->GetSample(nFrame);
-		pImaging->Process(pBuffer);
-
-		pCutView->AddRecord(pImaging->GetCircleImage(), nFrame);
-
-		if (pSession->m_detectLumen) {
-			std::vector<std::vector<cv::Point>> vContours = learning.FindLumen(pImaging->GetCircleImage());
-			std::vector<cv::Mat> vLumens;
-			for (int i = 0; i < vContours.size(); i++) {
-				std::vector<cv::Point> contour = vContours.at(i);
-				cv::Mat matContour(contour.size(), 1, CV_32SC2);
-				for (size_t row = 0; row < contour.size(); row++) {
-					matContour.at<cv::Point>(row, 0) = contour[row];
-				}
-				vLumens.push_back(matContour);
-			}
-			vLumen.push_back(vLumens);
+	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadObjectDetection->isRun; nFrame++) {
+		std::map<int, cv::Mat>::iterator it = pSession->m_mapImage.find(nFrame);
+		if (it == pSession->m_mapImage.end()) {
+			nFrame--;
+			Sleep(DELAY_FOR_WAIT_PROCESS);
+			continue;
 		}
+		pImaging->PostProcess(it->second);
 
-		pSession->m_pMsg->postMessage(WM_PROCESS_CUTVIEW, nSession, nFrame);
+		std::vector<std::vector<cv::Point>> vContours = learning.FindLumen(pImaging->GetCircleImage());
+		std::vector<cv::Mat> vLumens;
+		for (int i = 0; i < vContours.size(); i++) {
+			std::vector<cv::Point> contour = vContours.at(i);
+			cv::Mat matContour(contour.size(), 1, CV_32SC2);
+			for (size_t row = 0; row < contour.size(); row++) {
+				matContour.at<cv::Point>(row, 0) = contour[row];
+			}
+			vLumens.push_back(matContour);
+		}
+		vLumen.push_back(vLumens);
+
+		pSession->m_pMsg->postMessage(WM_PROCESS_DETECTION, nSession, nFrame);
 	}
 	delete pImaging;
 
-	PLOGI.printf("update cutview & lumen detection done.");
-	if (pSession->m_detectLumen) pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::LumenDetection);
-	// wait for StopThread
-	while (pSession->m_pThreadUpdateCutView->isRun) {
-		Sleep(DELAY_FOR_STOP_THREAD);
-	}
+	PLOGI.printf("lumen detection done.");
+	pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::LumenDetection);
 
 	return NOERROR;
 }

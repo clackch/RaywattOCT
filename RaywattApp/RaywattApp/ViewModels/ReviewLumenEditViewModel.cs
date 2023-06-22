@@ -170,7 +170,7 @@ namespace RaywattApp.ViewModels
         {
             if (DrawCrossSectionImage())
             {
-                FrameNumber = crossSectionFrameInfo[0].curFrame;
+                FrameNumber = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current;
             }
         }
 
@@ -270,15 +270,14 @@ namespace RaywattApp.ViewModels
         private void Playback(object param)
         {
             string action = (string)param;
-            RayError result = RayError.OK;
 
             if (action.ToLower().Equals("prev"))
             {
-                result = (RayError)RayPrevFrame();
+                PrevFrame(RaySession.Review);
             }
             else if (action.ToLower().Equals("next"))
             {
-                result = (RayError)RayNextFrame();
+                NextFrame(RaySession.Review);
             }
         }
     }

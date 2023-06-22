@@ -17,7 +17,6 @@ namespace RaywattOCT
             CatheterNotValid,
             InvalidArgument,
             WrongState,
-            NotPaused,
             WrongSession,
             InvalidFunctionCall
         };
@@ -31,7 +30,6 @@ namespace RaywattOCT
             LongitudeBackgroundColor,
             LongitudeDegree,
             MotorOnOff,
-            IsPaused,
             LoadCatheterTime,
             VolumeWidth,
             VolumeHeight,
@@ -49,7 +47,8 @@ namespace RaywattOCT
         {
             Unknown = 0,
             State,
-            Progress,
+            ProgressSave,
+            ProgressDetection,
             Error,
             Event,
             WorkDone
@@ -95,6 +94,11 @@ namespace RaywattOCT
             {
                 curFrame = (frameInformation >> 16) & 0x00FFFF;
                 totalFrame = (frameInformation) & 0x00FFFF;
+            }
+            public FrameInfo(int curFrame, int totalFrame)
+            { 
+                this.curFrame = curFrame;
+                this.totalFrame = totalFrame;
             }
         };
 
@@ -145,14 +149,6 @@ namespace RaywattOCT
         public static extern int RayStopLiveView();
         [DllImport("RayCore.dll")]
         public static extern int RaySetSession(RaySession session);
-        [DllImport("RayCore.dll")]
-        public static extern int RayPlayPause();
-        [DllImport("RayCore.dll")]
-        public static extern int RayPrevFrame();
-        [DllImport("RayCore.dll")]
-        public static extern int RayNextFrame();
-        [DllImport("RayCore.dll")]
-        public static extern int RayMoveToFrame(int frame);
         [DllImport("RayCore.dll")]
         public static extern int RayRegisterImageCallback(IntPtr cbCrossSection, IntPtr cbLongitude);
         [DllImport("RayCore.dll")]

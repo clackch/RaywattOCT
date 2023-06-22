@@ -65,18 +65,6 @@ _declspec(dllexport) RayError RayStopLiveView() {
 _declspec(dllexport) RayError RaySetSession(int session) {
     return octSystem.SetSession(session);
 }
-_declspec(dllexport) RayError RayPlayPause() {
-    return octSystem.PlayPause();
-}
-_declspec(dllexport) RayError RayPrevFrame() {
-    return octSystem.PrevFrame();
-}
-_declspec(dllexport) RayError RayNextFrame() {
-    return octSystem.NextFrame();
-}
-_declspec(dllexport) RayError RayMoveToFrame(int nFrame) {
-    return octSystem.MoveToFrame(nFrame);
-}
 _declspec(dllexport) RayError RayRegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude) {
     return octSystem.RegisterImageCallback(cbCrossSection, cbLongitude);
 }
@@ -113,8 +101,6 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return octSystem.GetDegree();
     case RayProperty::MotorOnOff:
         return octSystem.GetMotorOnOff();
-    case RayProperty::IsPaused:
-        return octSystem.GetIsPaused();
     case RayProperty::LoadCatheterTime:
         return config.GetLoadCatheterTime();
     case RayProperty::VolumeWidth:

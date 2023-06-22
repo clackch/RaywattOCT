@@ -27,6 +27,7 @@ public:
 
 	virtual void Initialize(CCalibration* calibration, USHORT* backgroundData);
 	virtual void Process(char* fringes);
+	virtual void PostProcess(cv::Mat image);
 
 	cv::Mat GetRectangleImage() { return imageRectangle; }
 	USHORT* GetScopeData() { return scopeData; }

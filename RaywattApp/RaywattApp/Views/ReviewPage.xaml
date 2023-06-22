@@ -735,7 +735,7 @@
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="prev" Width="24" Height="21.3" Command="{Binding CmdPlayback}" CommandParameter="prev" />
                             <StackPanel Width="40"/>
-                            <component:IconMultiToggleButton Style="{DynamicResource IconMultiToggleButton}" IsChecked="{Binding IsPaused}" Icon="play" CheckedIcon="pause" Width="22" Height="26.8" Command="{Binding CmdPlayback}" CommandParameter="play"/>
+                            <component:IconMultiToggleButton Style="{DynamicResource IconMultiToggleButton}" IsChecked="{Binding IsPaused}" Icon="pause" CheckedIcon="play" Width="22" Height="26.8" Command="{Binding CmdPlayback}" CommandParameter="play"/>
                             <StackPanel Width="40"/>
                             <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="next"  Width="24" Height="21.3" Command="{Binding CmdPlayback}" CommandParameter="next"/>
                         </StackPanel>
