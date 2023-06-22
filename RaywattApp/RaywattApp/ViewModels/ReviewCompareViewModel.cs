@@ -49,6 +49,8 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private double _pointLongitudeX;
 
+        private double indicatorDiffX = 0;
+
         [ObservableProperty]
         private double _pointCompareLongitudeX;
 
@@ -56,14 +58,26 @@ namespace RaywattApp.ViewModels
         private int displayFrameNumberCompare;
 
         [ObservableProperty]
-        private List<LumenContour>[] _lumenContours = new List<LumenContour>[2];
+        private List<LumenContour> _preLumenContour = new List<LumenContour>();
+
+        [ObservableProperty]
+        private List<LumenContour> _postLumenContour = new List<LumenContour>();
+
+        [ObservableProperty]
+        private LumenContour _currentPreLumenContour = new LumenContour();
+
+        private string _lumenContourCommand;
+        public string LumenContourCommand { get { return _lumenContourCommand; } set { _lumenContourCommand = value; OnPropertyChanged(nameof(LumenContourCommand)); } }
 
         [ObservableProperty]
         private BitmapSource _lumenProfileImageCompare;
         protected Mat imglumenProfileCompare;
 
         [ObservableProperty]
-        private int _frameNumberCompare;
+        private int _frameNumberCompare = -1;
+
+        [ObservableProperty]
+        private bool _isLumenLoaded = true;
 
         [ObservableProperty]
         private Zoom _zoom = new Zoom(Constants.CrossSectionCompareSize / Constants.OCTImageSize);
@@ -152,15 +166,25 @@ namespace RaywattApp.ViewModels
                 }
 
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
-                LumenContours[(int)RaySession.Review] = PatientCase.LumenContour;
-                imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours[(int)RaySession.Review]);
+                PostLumenContour = PatientCase.LumenContour;
+                imglumenProfile = CommonUtil.MakeLumenProfileImage(PostLumenContour);
 
                 if (ReviewStatus.SelectedPatientCase != null)
                 {
                     SetCrossSectionBackground(RaySession.Compare, Constants.CompareBackgroundColor);
 
-                    Thread threadMakeLumenProfile = new Thread(() => ThreadMakeLumenProfile());
-                    threadMakeLumenProfile.Start();
+                    if(ReviewStatus.SelectedPatientCase.LumenContour == null)
+                    {
+                        IsLumenLoaded = false;
+
+                        Thread threadMakeLumenProfile = new Thread(() => ThreadMakeLumenProfile());
+                        threadMakeLumenProfile.Start();
+                    }
+                    else
+                    {
+                        PreLumenContour = ReviewStatus.SelectedPatientCase.LumenContour;
+                        imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(PreLumenContour);
+                    }
                 }
 
                 if (DrawLumenProfileImage())
@@ -204,12 +228,14 @@ namespace RaywattApp.ViewModels
 
         private void ThreadMakeLumenProfile()
         {
-            if (ReviewStatus.SelectedPatientCase.LumenContour == null)
-                ReviewStatus.SelectedPatientCase.LumenContour = GetLumenContours(ReviewStatus.SelectedPatientCase.Id);
-            LumenContours[(int)RaySession.Compare] = ReviewStatus.SelectedPatientCase.LumenContour;
-            imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(LumenContours[(int)RaySession.Compare]);
-        }
+            ReviewStatus.SelectedPatientCase.LumenContour = GetLumenContours(ReviewStatus.SelectedPatientCase.Id);
+            PreLumenContour = ReviewStatus.SelectedPatientCase.LumenContour;
+            imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(PreLumenContour);
 
+            IsLumenLoaded = true;
+
+            LumenContourCommand = Constants.LumenContourDraw;
+        }
 
         protected override void Save()
         {
@@ -284,7 +310,11 @@ namespace RaywattApp.ViewModels
             // avoid duplication
             if (ReviewStatus.SelectedPatientCase != null && patientCase != null)
             {
-                if (ReviewStatus.SelectedPatientCase.Id == patientCase.Id) return;
+                if (ReviewStatus.SelectedPatientCase.Id == patientCase.Id)
+                {
+                    ExpandLeftUpMenu = false;
+                    return;
+                }
             }
 
             ReviewStatus.SelectedPatientCase = patientCase;
@@ -292,10 +322,25 @@ namespace RaywattApp.ViewModels
             ExpandLeftUpMenu = false;
 
             if (ReviewStatus.SelectedPatientCase != null) {
+
+                LumenContourCommand = Constants.LumenContourClear;
+
                 RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath);
 
-                Thread threadMakeLumenProfile = new Thread(() => ThreadMakeLumenProfile());
-                threadMakeLumenProfile.Start();
+                if (ReviewStatus.SelectedPatientCase.LumenContour == null)
+                {
+                    IsLumenLoaded = false;
+
+                    Thread threadMakeLumenProfile = new Thread(() => ThreadMakeLumenProfile());
+                    threadMakeLumenProfile.Start();
+                }
+                else
+                {
+                    PreLumenContour = ReviewStatus.SelectedPatientCase.LumenContour;
+                    imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(PreLumenContour);
+
+                    LumenContourCommand = Constants.LumenContourDraw;
+                }
 
                 IsIndicatorLockOn = false;
             }
@@ -334,6 +379,17 @@ namespace RaywattApp.ViewModels
 
         private void updateNavigator(int curFrame, int totalFrame, bool isCompare)
         {
+            if (isCompare)
+            {
+                if (FrameNumberCompare == curFrame)
+                    return;
+            }
+            else
+            {
+                if (FrameNumber == curFrame)
+                    return;
+            }
+
             double curPosition = (double)curFrame / (totalFrame - 1);
             curPosition *= Constants.LongitudeCompareWidth;
 
@@ -361,11 +417,20 @@ namespace RaywattApp.ViewModels
                     return;
                 }
 
-                double x = indicator.IsCompare ? PointCompareLongitudeX - longitudeCompareCoordinate.X : PointLongitudeX - longitudeCoordinate.X;                
-
-                if (x >= 0 && x < Constants.LongitudeCompareWidth)
+                if (indicator.IsLongitudeMove)
                 {
-                    setCurrentFrame(indicator, x);
+                    indicatorDiffX = indicator.IsCompare ? PointCompareLongitudeX - longitudeCompareCoordinate.X : PointLongitudeX - longitudeCoordinate.X;
+                    indicatorDiffX = indicatorDiffX - indicator.X;
+                    indicator.IsLongitudeMove = false;
+                }
+
+                double x = indicator.IsCompare ? PointCompareLongitudeX - longitudeCompareCoordinate.X : PointLongitudeX - longitudeCoordinate.X;
+                double indicatorX = x - indicatorDiffX;
+                double indicatorCenterX = indicatorX + Constants.LongitudeIndicatorWidth / 2;
+
+                if (indicatorCenterX >= 0 && indicatorCenterX < Constants.LongitudeCompareWidth)
+                {
+                    setCurrentFrame(indicator, indicatorCenterX);
                 }
             }
         }

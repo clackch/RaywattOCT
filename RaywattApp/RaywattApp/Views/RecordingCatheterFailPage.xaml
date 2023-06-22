@@ -46,13 +46,10 @@
                                 <Image Source="{svgc:SvgImage Source=/res/icon/alertError.svg}" Width="74" Height="74"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <Label Style="{DynamicResource Pretendard-Semibold-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [The imaging catheter has failed.], Source={StaticResource L10N}}"/>
-                                <Label Style="{DynamicResource Pretendard-Semibold-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Remove the catheter from the patient then chick Next.], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource Pretendard-Semibold-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [$MSG008-1], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource Pretendard-Semibold-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [$MSG008-2], Source={StaticResource L10N}}"/>
                             </StackPanel>
                         </Grid>
-                        <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [System will continue once imageing Catheter is connected], Source={StaticResource L10N}}"/>
-                        </StackPanel>
                         <Border Grid.Row="2" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
 
                         </Border>
@@ -72,8 +69,8 @@
                                 <Image Source="{svgc:SvgImage Source=/res/icon/alertWarning.svg}" Height="74"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <Label Style="{DynamicResource Pretendard-Semibold-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [After the damaged catheter has been removed from the patient], Source={StaticResource L10N}}"/>
-                                <Label Style="{DynamicResource Pretendard-Semibold-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [disconnect it from the DOC before continuing the case.], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource Pretendard-Semibold-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [$MSG010-1], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource Pretendard-Semibold-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [$MSG010-2], Source={StaticResource L10N}}"/>
                             </StackPanel>
                         </Grid>
                         <Grid Grid.Row="1">
@@ -90,7 +87,7 @@
                                     <RowDefinition Height="440"/>
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,10">
-                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [1. Unlock Catheter], Source={StaticResource L10N}}"/>
+                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG011], Source={StaticResource L10N}}"/>
                                 </StackPanel>
                                 <Border Grid.Row="1" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
 
@@ -102,7 +99,7 @@
                                     <RowDefinition Height="440"/>
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,10">
-                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [2. Wait for unload], Source={StaticResource L10N}}"/>
+                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG012], Source={StaticResource L10N}}"/>
                                 </StackPanel>
                                 <Border Grid.Row="1" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
 
@@ -114,7 +111,7 @@
                                     <RowDefinition Height="440"/>
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,10">
-                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [3. Disconnect Catheter], Source={StaticResource L10N}}"/>
+                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG013], Source={StaticResource L10N}}"/>
                                 </StackPanel>
                                 <Border Grid.Row="1" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
 

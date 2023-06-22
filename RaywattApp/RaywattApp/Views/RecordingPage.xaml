@@ -70,15 +70,15 @@
                         </Grid>
                     </Grid>
                     <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Verify guide catheter is positioned for adequate flush], Source={StaticResource L10N}}"/>
-                        <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Prepare for pullback], Source={StaticResource L10N}}" HorizontalAlignment="Center"/>
+                        <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG003], Source={StaticResource L10N}}"/>
+                        <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG004], Source={StaticResource L10N}}" HorizontalAlignment="Center"/>
                     </StackPanel>
                     <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal" Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                        <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Inject flush media within], Source={StaticResource L10N}}"/>
+                        <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG005-1], Source={StaticResource L10N}}"/>
                         <StackPanel Width="10"/>
                         <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding StartTime}"/>
                         <StackPanel Width="10"/>
-                        <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [seconds], Source={StaticResource L10N}}"/>
+                        <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG005-2], Source={StaticResource L10N}}"/>
                     </StackPanel>
                     <Border Grid.Row="2" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
                         <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill"/>

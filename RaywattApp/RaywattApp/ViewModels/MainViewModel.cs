@@ -174,7 +174,7 @@ namespace RaywattApp.ViewModels
                     RayEndReview();
             }
 
-            if (NavigationSource == Constants.PatientListPage)
+            if (NavigationSource == Constants.PatientListPage || (NavigationSource == "Refresh" && Constants.CurrentPage == Constants.PatientListPage))
                 IsHome = true;
             else
                 IsHome = false;
@@ -212,7 +212,7 @@ namespace RaywattApp.ViewModels
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["title"] = _l10n["Error"];
-            parameter["message"] = _l10n["The imaging catheter has failed. It must be removed from the patient before continuing."];
+            parameter["message"] = _l10n["$MSG009"];
             parameter["error"] = true;
             var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
@@ -280,7 +280,7 @@ namespace RaywattApp.ViewModels
             RayScannerState curState = (RayScannerState)RayGetProperty(Property.CurrentState);
             DeviceStatus.IsInitialized = (curState == RayScannerState.Default) ? true : false;
             DeviceStatus.IsLiveView = (bool)(RayGetProperty(Property.MotorOnOff) != 0);
-            DeviceStatus.IsAngioConnected = true;
+            DeviceStatus.IsAngioConnected = false;
         }
         protected void handleProgress(RayCallbackRequest request, int progress) { }
         protected void handleError(RayCallbackRequest request, RayError error) { }

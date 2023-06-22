@@ -218,7 +218,7 @@ namespace RaywattApp.Common.Annotation
         private static void ReceiveCommand(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
             var drawUtil = dependencyObject as DrawLumenContourUtil;
-            if (drawUtil == null || drawUtil.InCommand == null)
+            if (drawUtil == null || drawUtil.InCommand == null || drawUtil.FrameNumber < 0)
                 return;
 
             switch (drawUtil.InCommand)
@@ -231,6 +231,23 @@ namespace RaywattApp.Common.Annotation
                     break;
                 case Constants.LumenContourAutoDetect:
                     drawUtil.AutoDetect();
+                    break;
+                case Constants.LumenContourDraw:
+                    drawUtil.canvas.Children.Clear();
+                    if(drawUtil.LumenContours != null && drawUtil.LumenContours.Count > 0 && drawUtil.LumenContours.Count > drawUtil.FrameNumber)
+                    {
+                        drawUtil.CurrentLumenContour = drawUtil.LumenContours[drawUtil.FrameNumber];
+                        drawUtil.DrawLumenContour(drawUtil.CurrentLumenContour, drawUtil.IsEditOn);
+                    }
+                    break;
+                case Constants.LumenContourClear:
+                    drawUtil.canvas.Children.Clear();
+                    break;
+                case Constants.LumenContourCurrentInit:
+                    if (drawUtil.LumenContours != null && drawUtil.LumenContours.Count > 0 && drawUtil.LumenContours.Count > drawUtil.FrameNumber)
+                    {
+                        drawUtil.CurrentLumenContour = drawUtil.LumenContours[drawUtil.FrameNumber];
+                    }
                     break;
                 default:
                     break;

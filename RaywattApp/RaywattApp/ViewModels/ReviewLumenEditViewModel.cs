@@ -16,6 +16,7 @@ using RaywattApp.Common.Messages;
 using RaywattApp.Common.Annotation.Models;
 using Newtonsoft.Json;
 using System.Windows;
+using System.Threading;
 
 namespace RaywattApp.ViewModels
 {
@@ -195,18 +196,10 @@ namespace RaywattApp.ViewModels
             parameter["patient"] = Patient;
             if (isSave)
             {
-                Constants.mainWindow.Cursor = (Cursor)Application.Current.Resources["wait"];
+                DeviceStatus.IsLumenSaved = false;
 
-                Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-                sqlParameters["id"] = PatientCase.Id;
-                sqlParameters["lumen_contour"] = JsonConvert.SerializeObject(PatientCase.LumenContour, Formatting.Indented);
-                int nRows = _sqlManager.UpdatePatientCaseAnnotationLumenContour(sqlParameters);
-                if (nRows == 0)
-                {
-                    _log.Error("Update Error");
-                }
-
-                Constants.mainWindow.Cursor = (Cursor)Application.Current.Resources["arrow"];
+                Thread threadSaveLumenContour = new Thread(() => ThreadSaveLumenContour());
+                threadSaveLumenContour.Start();
             }
             else
             {
@@ -216,6 +209,20 @@ namespace RaywattApp.ViewModels
             parameter["prevStatus"] = PrevStatus;
             parameter["reviewStatus"] = ReviewStatus;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(ReviewStatus.CurrentPage) { Parameter = parameter });
+        }
+
+        private void ThreadSaveLumenContour()
+        {
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = PatientCase.Id;
+            sqlParameters["lumen_contour"] = JsonConvert.SerializeObject(PatientCase.LumenContour, Formatting.Indented);
+            int nRows = _sqlManager.UpdatePatientCaseAnnotationLumenContour(sqlParameters);
+            if (nRows == 0)
+            {
+                _log.Error("Update Error");
+            }
+
+            DeviceStatus.IsLumenSaved = true;
         }
 
         private void Information()

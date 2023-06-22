@@ -117,6 +117,85 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="$MSG001" xml:space="preserve">
+    <value>Connect Catheter to the DOC</value>
+  </data>
+  <data name="$MSG002" xml:space="preserve">
+    <value>System will continue once imageing Catheter is connected</value>
+  </data>
+  <data name="$MSG003" xml:space="preserve">
+    <value>Verify guide catheter is positioned for adequate flush</value>
+  </data>
+  <data name="$MSG004" xml:space="preserve">
+    <value>Prepare for pullback</value>
+  </data>
+  <data name="$MSG005-1" xml:space="preserve">
+    <value>Inject flush media within</value>
+  </data>
+  <data name="$MSG005-2" xml:space="preserve">
+    <value>seconds</value>
+  </data>
+  <data name="$MSG006" xml:space="preserve">
+    <value>Confirm Image Quality</value>
+  </data>
+  <data name="$MSG007-1" xml:space="preserve">
+    <value>Review pullback for proper blood clearing in areas of interest.</value>
+  </data>
+  <data name="$MSG007-2" xml:space="preserve">
+    <value>And indicates area of low confidence in Lumen contour.</value>
+  </data>
+  <data name="$MSG008-1" xml:space="preserve">
+    <value>The imaging catheter has failed.</value>
+  </data>
+  <data name="$MSG008-2" xml:space="preserve">
+    <value>Remove the catheter from the patient then chick Next.</value>
+  </data>
+  <data name="$MSG009" xml:space="preserve">
+    <value>The imaging catheter has failed.
+It must be removed from the patient before continuing.</value>
+  </data>
+  <data name="$MSG010-1" xml:space="preserve">
+    <value>After the damaged catheter has been removed from the patient</value>
+  </data>
+  <data name="$MSG010-2" xml:space="preserve">
+    <value>disconnect it from the DOC before continuing the case.</value>
+  </data>
+  <data name="$MSG011" xml:space="preserve">
+    <value>1. Unlock Catheter</value>
+  </data>
+  <data name="$MSG012" xml:space="preserve">
+    <value>2. Wait for unload</value>
+  </data>
+  <data name="$MSG013" xml:space="preserve">
+    <value>3. Disconnect Catheter</value>
+  </data>
+  <data name="%AS" xml:space="preserve">
+    <value>%AS</value>
+  </data>
+  <data name="%DS" xml:space="preserve">
+    <value>%DS</value>
+  </data>
+  <data name="2D" xml:space="preserve">
+    <value>2D</value>
+  </data>
+  <data name="2D Option" xml:space="preserve">
+    <value>2D Option</value>
+  </data>
+  <data name="3D" xml:space="preserve">
+    <value>3D</value>
+  </data>
+  <data name="3D Cut-View" xml:space="preserve">
+    <value>3D Cut-View</value>
+  </data>
+  <data name="3D Fly through" xml:space="preserve">
+    <value>3D Fly through</value>
+  </data>
+  <data name="3D Option" xml:space="preserve">
+    <value>3D Option</value>
+  </data>
+  <data name="Accept and Continue" xml:space="preserve">
+    <value>Accept and Continue</value>
+  </data>
   <data name="Accession Name" xml:space="preserve">
     <value>Accession Name</value>
   </data>
@@ -126,11 +205,20 @@
   <data name="Acquisition" xml:space="preserve">
     <value>Acquisition</value>
   </data>
+  <data name="Add" xml:space="preserve">
+    <value>Add</value>
+  </data>
   <data name="Add Patient" xml:space="preserve">
     <value>Add Patient</value>
   </data>
+  <data name="Add Physician" xml:space="preserve">
+    <value>Add Physician</value>
+  </data>
   <data name="Additional Option" xml:space="preserve">
     <value>Additional Option</value>
+  </data>
+  <data name="AI FFR" xml:space="preserve">
+    <value>AI FFR</value>
   </data>
   <data name="Alternate ID" xml:space="preserve">
     <value>Alternate ID</value>
@@ -138,8 +226,17 @@
   <data name="Alternate Patient IDs" xml:space="preserve">
     <value>Alternate Patient IDs</value>
   </data>
+  <data name="Angio" xml:space="preserve">
+    <value>Angio</value>
+  </data>
+  <data name="Angio Co-Registration" xml:space="preserve">
+    <value>Angio Co-Registration</value>
+  </data>
   <data name="Apply" xml:space="preserve">
     <value>Apply</value>
+  </data>
+  <data name="Apposition" xml:space="preserve">
+    <value>Apposition</value>
   </data>
   <data name="Apposition threshold" xml:space="preserve">
     <value>Apposition threshold</value>
@@ -159,17 +256,42 @@
   <data name="Are you sure to import selected file?" xml:space="preserve">
     <value>Are you sure to import selected file?</value>
   </data>
+  <data name="Area" xml:space="preserve">
+    <value>Area</value>
+  </data>
+  <data name="Area(㎟)" xml:space="preserve">
+    <value>Area
+(㎟)</value>
+  </data>
+  <data name="Auto" xml:space="preserve">
+    <value>Auto</value>
+  </data>
   <data name="Auto Calibration" xml:space="preserve">
     <value>Auto Calibration</value>
+  </data>
+  <data name="Auto Detect" xml:space="preserve">
+    <value>Auto Detect</value>
   </data>
   <data name="Available Space" xml:space="preserve">
     <value>Available Space</value>
   </data>
+  <data name="AVI" xml:space="preserve">
+    <value>AVI</value>
+  </data>
   <data name="Back" xml:space="preserve">
     <value>Back</value>
   </data>
+  <data name="Birth" xml:space="preserve">
+    <value>Birth</value>
+  </data>
   <data name="Birth Date" xml:space="preserve">
     <value>Birth Date</value>
+  </data>
+  <data name="Bitmap" xml:space="preserve">
+    <value>Bitmap</value>
+  </data>
+  <data name="Bookmarked Frames" xml:space="preserve">
+    <value>Bookmarked Frames</value>
   </data>
   <data name="Brightness" xml:space="preserve">
     <value>Brightness</value>
@@ -183,6 +305,9 @@
   <data name="bytes" xml:space="preserve">
     <value>bytes</value>
   </data>
+  <data name="Calcium" xml:space="preserve">
+    <value>Calcium</value>
+  </data>
   <data name="Calcium threshold" xml:space="preserve">
     <value>Calcium threshold</value>
   </data>
@@ -195,20 +320,35 @@
   <data name="Case" xml:space="preserve">
     <value>Case</value>
   </data>
+  <data name="Case Edit" xml:space="preserve">
+    <value>Case Edit</value>
+  </data>
+  <data name="Case Info." xml:space="preserve">
+    <value>Case Info.</value>
+  </data>
+  <data name="Case List" xml:space="preserve">
+    <value>Case List</value>
+  </data>
   <data name="CD/DVD" xml:space="preserve">
     <value>CD/DVD</value>
   </data>
+  <data name="CD/DVD is required" xml:space="preserve">
+    <value>CD/DVD is required</value>
+  </data>
+  <data name="Co-Registration" xml:space="preserve">
+    <value>Co-Registration</value>
+  </data>
   <data name="Comment" xml:space="preserve">
     <value>Comment</value>
+  </data>
+  <data name="Compare" xml:space="preserve">
+    <value>Compare</value>
   </data>
   <data name="Confirm" xml:space="preserve">
     <value>Confirm</value>
   </data>
   <data name="Confirm Password" xml:space="preserve">
     <value>Confirm Password</value>
-  </data>
-  <data name="Connect Catheter to the DOC" xml:space="preserve">
-    <value>Connect Catheter to the DOC</value>
   </data>
   <data name="Contrast" xml:space="preserve">
     <value>Contrast</value>
@@ -222,7 +362,16 @@
   <data name="Current Folder" xml:space="preserve">
     <value>Current Folder</value>
   </data>
-  <data name="Data already exists.&#xD;&#xA;Do you want to import data?" xml:space="preserve">
+  <data name="Current Frame" xml:space="preserve">
+    <value>Current Frame</value>
+  </data>
+  <data name="Current Frame Indicator" xml:space="preserve">
+    <value>Current Frame Indicator</value>
+  </data>
+  <data name="Cut-View" xml:space="preserve">
+    <value>Cut-View</value>
+  </data>
+  <data name="Data already exists. Do you want to import data?" xml:space="preserve">
     <value>Data already exists.
 Do you want to import data?</value>
   </data>
@@ -244,11 +393,17 @@ Do you want to import data?</value>
   <data name="Destination" xml:space="preserve">
     <value>Destination</value>
   </data>
+  <data name="Diameter" xml:space="preserve">
+    <value>Diameter</value>
+  </data>
   <data name="DICOM" xml:space="preserve">
     <value>DICOM</value>
   </data>
   <data name="Disk Type" xml:space="preserve">
     <value>Disk Type</value>
+  </data>
+  <data name="Display Modes" xml:space="preserve">
+    <value>Display Modes</value>
   </data>
   <data name="Done" xml:space="preserve">
     <value>Done</value>
@@ -265,6 +420,9 @@ Do you want to import data?</value>
   <data name="Edit Patient" xml:space="preserve">
     <value>Edit Patient</value>
   </data>
+  <data name="Edit Physician" xml:space="preserve">
+    <value>Edit Physician</value>
+  </data>
   <data name="Eject when Complete" xml:space="preserve">
     <value>Eject when Complete</value>
   </data>
@@ -277,6 +435,9 @@ Do you want to import data?</value>
   <data name="English" xml:space="preserve">
     <value>English</value>
   </data>
+  <data name="Enter an external device" xml:space="preserve">
+    <value>Enter an external device</value>
+  </data>
   <data name="Enter Dataset Password" xml:space="preserve">
     <value>Enter Dataset Password</value>
   </data>
@@ -285,6 +446,9 @@ Do you want to import data?</value>
   </data>
   <data name="Exit" xml:space="preserve">
     <value>Exit</value>
+  </data>
+  <data name="Expansion" xml:space="preserve">
+    <value>Expansion</value>
   </data>
   <data name="Expansion calculation" xml:space="preserve">
     <value>Expansion calculation</value>
@@ -301,6 +465,9 @@ Do you want to import data?</value>
   <data name="Export Size" xml:space="preserve">
     <value>Export Size</value>
   </data>
+  <data name="Export Type" xml:space="preserve">
+    <value>Export Type</value>
+  </data>
   <data name="External Drive" xml:space="preserve">
     <value>External Drive</value>
   </data>
@@ -313,8 +480,14 @@ Do you want to import data?</value>
   <data name="Folder" xml:space="preserve">
     <value>Folder</value>
   </data>
+  <data name="Folder Name" xml:space="preserve">
+    <value>Folder Name</value>
+  </data>
   <data name="Format" xml:space="preserve">
     <value>Format</value>
+  </data>
+  <data name="Frame Option" xml:space="preserve">
+    <value>Frame Option</value>
   </data>
   <data name="Frame Resolution" xml:space="preserve">
     <value>Frame Resolution</value>
@@ -327,6 +500,18 @@ Do you want to import data?</value>
   </data>
   <data name="Gender" xml:space="preserve">
     <value>Gender</value>
+  </data>
+  <data name="Guidewire 1" xml:space="preserve">
+    <value>Guidewire 1</value>
+  </data>
+  <data name="Guidewire 2" xml:space="preserve">
+    <value>Guidewire 2</value>
+  </data>
+  <data name="Guidewires" xml:space="preserve">
+    <value>Guidewires</value>
+  </data>
+  <data name="Hi-Res (100㎜)" xml:space="preserve">
+    <value>Hi-Res (100㎜)</value>
   </data>
   <data name="Hide All" xml:space="preserve">
     <value>Hide All</value>
@@ -349,14 +534,23 @@ Do you want to import data?</value>
   <data name="Include region calibration (calibrated images only)" xml:space="preserve">
     <value>Include region calibration (calibrated images only)</value>
   </data>
+  <data name="Indicator Lock" xml:space="preserve">
+    <value>Indicator Lock</value>
+  </data>
   <data name="Information" xml:space="preserve">
     <value>Information</value>
+  </data>
+  <data name="Input Folder Name" xml:space="preserve">
+    <value>Input Folder Name</value>
   </data>
   <data name="Input Password" xml:space="preserve">
     <value>Input Password</value>
   </data>
   <data name="Intravascular OCT - For Presentation" xml:space="preserve">
     <value>Intravascular OCT - For Presentation</value>
+  </data>
+  <data name="JPEG" xml:space="preserve">
+    <value>JPEG</value>
   </data>
   <data name="KB" xml:space="preserve">
     <value>KB</value>
@@ -366,6 +560,9 @@ Do you want to import data?</value>
   </data>
   <data name="Korean" xml:space="preserve">
     <value>Korean</value>
+  </data>
+  <data name="L-Mode" xml:space="preserve">
+    <value>L-Mode</value>
   </data>
   <data name="Language" xml:space="preserve">
     <value>Language</value>
@@ -379,23 +576,77 @@ Do you want to import data?</value>
   <data name="Leave Unchanged" xml:space="preserve">
     <value>Leave Unchanged</value>
   </data>
+  <data name="Live" xml:space="preserve">
+    <value>Live</value>
+  </data>
   <data name="Live View" xml:space="preserve">
     <value>Live View</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading</value>
   </data>
   <data name="Localization" xml:space="preserve">
     <value>Localization</value>
   </data>
+  <data name="Log" xml:space="preserve">
+    <value>Log</value>
+  </data>
+  <data name="Longitude" xml:space="preserve">
+    <value>Longitude</value>
+  </data>
+  <data name="Lumen" xml:space="preserve">
+    <value>Lumen</value>
+  </data>
+  <data name="Lumen Contour" xml:space="preserve">
+    <value>Lumen Contour</value>
+  </data>
+  <data name="Lumen Profile" xml:space="preserve">
+    <value>Lumen Profile</value>
+  </data>
   <data name="Male" xml:space="preserve">
     <value>Male</value>
+  </data>
+  <data name="Manual" xml:space="preserve">
+    <value>Manual</value>
   </data>
   <data name="Mark as Archived" xml:space="preserve">
     <value>Mark as Archived</value>
   </data>
+  <data name="Max" xml:space="preserve">
+    <value>Max</value>
+  </data>
+  <data name="Max Diam.(㎜)" xml:space="preserve">
+    <value>Max Diam.
+(㎜)</value>
+  </data>
+  <data name="Max Thickness" xml:space="preserve">
+    <value>Max Thickness</value>
+  </data>
   <data name="MB" xml:space="preserve">
     <value>MB</value>
   </data>
+  <data name="Mean Diam.(㎜)" xml:space="preserve">
+    <value>Mean Diam.
+(㎜)</value>
+  </data>
+  <data name="Measure" xml:space="preserve">
+    <value>Measure</value>
+  </data>
+  <data name="Measurement" xml:space="preserve">
+    <value>Measurement</value>
+  </data>
   <data name="Measurements" xml:space="preserve">
     <value>Measurements</value>
+  </data>
+  <data name="Media Type is not supported" xml:space="preserve">
+    <value>Media Type is not supported</value>
+  </data>
+  <data name="Min" xml:space="preserve">
+    <value>Min</value>
+  </data>
+  <data name="Min Diam.(㎜)" xml:space="preserve">
+    <value>Min Diam.
+(㎜)</value>
   </data>
   <data name="Modality" xml:space="preserve">
     <value>Modality</value>
@@ -408,6 +659,9 @@ Do you want to import data?</value>
   </data>
   <data name="Name is duplicated." xml:space="preserve">
     <value>Name is duplicated.</value>
+  </data>
+  <data name="Native" xml:space="preserve">
+    <value>Native</value>
   </data>
   <data name="Native(Raw)" xml:space="preserve">
     <value>Native(Raw)</value>
@@ -433,17 +687,32 @@ Do you want to import data?</value>
   <data name="No" xml:space="preserve">
     <value>No</value>
   </data>
+  <data name="No Drive" xml:space="preserve">
+    <value>No Drive</value>
+  </data>
+  <data name="No." xml:space="preserve">
+    <value>No.</value>
+  </data>
   <data name="OCT" xml:space="preserve">
     <value>OCT</value>
   </data>
+  <data name="OCT + Angio" xml:space="preserve">
+    <value>OCT + Angio</value>
+  </data>
   <data name="OK" xml:space="preserve">
     <value>OK</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>Other</value>
   </data>
   <data name="Other (OT)" xml:space="preserve">
     <value>Other (OT)</value>
   </data>
   <data name="Output Option" xml:space="preserve">
     <value>Output Option</value>
+  </data>
+  <data name="P to D" xml:space="preserve">
+    <value>P to D</value>
   </data>
   <data name="Page Size" xml:space="preserve">
     <value>Page Size</value>
@@ -505,6 +774,15 @@ Do you want to import data?</value>
   <data name="Please enter last name" xml:space="preserve">
     <value>Please enter last name</value>
   </data>
+  <data name="Post" xml:space="preserve">
+    <value>Post</value>
+  </data>
+  <data name="Pre" xml:space="preserve">
+    <value>Pre</value>
+  </data>
+  <data name="Presentation" xml:space="preserve">
+    <value>Presentation</value>
+  </data>
   <data name="Preset" xml:space="preserve">
     <value>Preset</value>
   </data>
@@ -514,6 +792,12 @@ Do you want to import data?</value>
   <data name="Procedure" xml:space="preserve">
     <value>Procedure</value>
   </data>
+  <data name="Pullback" xml:space="preserve">
+    <value>Pullback</value>
+  </data>
+  <data name="Pullback Setting" xml:space="preserve">
+    <value>Pullback Setting</value>
+  </data>
   <data name="Purpose" xml:space="preserve">
     <value>Purpose</value>
   </data>
@@ -522,6 +806,9 @@ Do you want to import data?</value>
   </data>
   <data name="Re-do Pullback" xml:space="preserve">
     <value>Re-do Pullback</value>
+  </data>
+  <data name="Ready" xml:space="preserve">
+    <value>Ready</value>
   </data>
   <data name="Recording" xml:space="preserve">
     <value>Recording</value>
@@ -571,6 +858,18 @@ Do you want to import data?</value>
   <data name="Select Drive" xml:space="preserve">
     <value>Select Drive</value>
   </data>
+  <data name="Select Language" xml:space="preserve">
+    <value>Select Language</value>
+  </data>
+  <data name="Select Pre-Case" xml:space="preserve">
+    <value>Select Pre-Case</value>
+  </data>
+  <data name="Select Procedure" xml:space="preserve">
+    <value>Select Procedure</value>
+  </data>
+  <data name="Service" xml:space="preserve">
+    <value>Service</value>
+  </data>
   <data name="Setting" xml:space="preserve">
     <value>Setting</value>
   </data>
@@ -579,6 +878,12 @@ Do you want to import data?</value>
   </data>
   <data name="Show All" xml:space="preserve">
     <value>Show All</value>
+  </data>
+  <data name="Side Branch View" xml:space="preserve">
+    <value>Side Branch View</value>
+  </data>
+  <data name="Size" xml:space="preserve">
+    <value>Size</value>
   </data>
   <data name="SKIP" xml:space="preserve">
     <value>SKIP</value>
@@ -592,11 +897,26 @@ Do you want to import data?</value>
   <data name="Standard" xml:space="preserve">
     <value>Standard</value>
   </data>
+  <data name="Start" xml:space="preserve">
+    <value>Start</value>
+  </data>
   <data name="Start Recording" xml:space="preserve">
     <value>Start Recording</value>
   </data>
+  <data name="Step 1." xml:space="preserve">
+    <value>Step 1.</value>
+  </data>
+  <data name="Step 2." xml:space="preserve">
+    <value>Step 2.</value>
+  </data>
+  <data name="Survey (54㎜)" xml:space="preserve">
+    <value>Survey (54㎜)</value>
+  </data>
   <data name="System File Option" xml:space="preserve">
     <value>System File Option</value>
+  </data>
+  <data name="Tapered" xml:space="preserve">
+    <value>Tapered</value>
   </data>
   <data name="The password you entered is not valid" xml:space="preserve">
     <value>The password you entered is not valid</value>
@@ -604,8 +924,20 @@ Do you want to import data?</value>
   <data name="There are no items selected." xml:space="preserve">
     <value>There are no items selected.</value>
   </data>
+  <data name="There is not enough space on the storage device to store." xml:space="preserve">
+    <value>There is not enough space on the storage device to store.</value>
+  </data>
+  <data name="TIFF" xml:space="preserve">
+    <value>TIFF</value>
+  </data>
+  <data name="Tissue" xml:space="preserve">
+    <value>Tissue</value>
+  </data>
   <data name="Total" xml:space="preserve">
     <value>Total</value>
+  </data>
+  <data name="Total Angle" xml:space="preserve">
+    <value>Total Angle</value>
   </data>
   <data name="Total Export Size" xml:space="preserve">
     <value>Total Export Size</value>
@@ -619,17 +951,35 @@ Do you want to import data?</value>
   <data name="Update Date" xml:space="preserve">
     <value>Update Date</value>
   </data>
+  <data name="Value Info." xml:space="preserve">
+    <value>Value Info.</value>
+  </data>
   <data name="Vessel" xml:space="preserve">
     <value>Vessel</value>
+  </data>
+  <data name="View" xml:space="preserve">
+    <value>View</value>
   </data>
   <data name="Volume Label" xml:space="preserve">
     <value>Volume Label</value>
   </data>
+  <data name="Volume Label is required" xml:space="preserve">
+    <value>Volume Label is required</value>
+  </data>
   <data name="Warning" xml:space="preserve">
     <value>Warning</value>
   </data>
+  <data name="Write Physician Name" xml:space="preserve">
+    <value>Write Physician Name</value>
+  </data>
+  <data name="Write Preset Name" xml:space="preserve">
+    <value>Write Preset Name</value>
+  </data>
   <data name="Yes" xml:space="preserve">
     <value>Yes</value>
+  </data>
+  <data name="Zoom" xml:space="preserve">
+    <value>Zoom</value>
   </data>
   <data name="Zoom In" xml:space="preserve">
     <value>Zoom In</value>

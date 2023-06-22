@@ -79,6 +79,10 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private double _pointLongitudeX;
 
+        private double indicatorDiffX = 0;
+
+        private double indicatorDiffDegree = 0;
+
         [ObservableProperty]
         private bool _isPaused;
 
@@ -219,6 +223,9 @@ namespace RaywattApp.ViewModels
 
         private void updateNavigator(int curFrame, int totalFrame)
         {
+            if (FrameNumber == curFrame)
+                return;
+
             double curPosition = (double)curFrame / (totalFrame - 1);
             curPosition *= Constants.Longitude3dWidth;
             IndicatorLongitude.X = curPosition - Constants.LongitudeIndicatorWidth / 2;
@@ -237,6 +244,24 @@ namespace RaywattApp.ViewModels
                 indicator.SetDirection(crossSectionCenter, Degree);
                 if (!indicator.IsValid) return;
 
+                if (indicator.IsCrossSectionClicked)
+                {
+                    Point headerSidePointDiff = new Point(indicator.X, indicator.Y);
+                    if (indicator.OppositeCaptured)
+                    {
+                        double xOffset = indicator.X - crossSectionCenter.X;
+                        double yOffset = indicator.Y - crossSectionCenter.Y;
+
+                        headerSidePointDiff.X = crossSectionCenter.X - xOffset;
+                        headerSidePointDiff.Y = crossSectionCenter.Y - yOffset;
+                    }
+
+                    double pointXDiff = crossSectionCenter.X - headerSidePointDiff.X;
+                    double pointYDiff = crossSectionCenter.Y - headerSidePointDiff.Y;
+                    indicatorDiffDegree = Math.Round((Math.Atan2(pointYDiff, pointXDiff) * 180 / Math.PI),1) - Degree;
+                    indicator.IsCrossSectionClicked = false;
+                }
+
                 Point headerSidePoint = new Point(indicator.X, indicator.Y);
                 if (indicator.OppositeCaptured)
                 {
@@ -249,7 +274,7 @@ namespace RaywattApp.ViewModels
 
                 double pointX = crossSectionCenter.X - headerSidePoint.X;
                 double pointY = crossSectionCenter.Y - headerSidePoint.Y;
-                Degree = (int)(Math.Atan2(pointY, pointX) * 180 / Math.PI);
+                Degree = Math.Round((Math.Atan2(pointY, pointX) * 180 / Math.PI),1) - indicatorDiffDegree;
             }
         }
 
@@ -265,12 +290,19 @@ namespace RaywattApp.ViewModels
                     return;
                 }
 
-                double x = PointLongitudeX - longitudeCoordinate.X;
-
-                if (x >= 0 && x < Constants.Longitude3dWidth)
+                if (indicator.IsLongitudeMove)
                 {
-                    indicator.X = x - Constants.LongitudeIndicatorWidth / 2;
-                    setCurrentFrame(x);
+                    indicatorDiffX = PointLongitudeX - longitudeCoordinate.X - indicator.X;
+                    indicator.IsLongitudeMove = false;
+                }
+
+                double indicatorX = PointLongitudeX - longitudeCoordinate.X - indicatorDiffX;
+                double indicatorCenterX = indicatorX + Constants.LongitudeIndicatorWidth / 2;
+
+                if (indicatorCenterX >= 0 && indicatorCenterX < Constants.Longitude3dWidth)
+                {
+                    indicator.X = indicatorX;
+                    setCurrentFrame(indicatorCenterX);
                 }
             }
         }

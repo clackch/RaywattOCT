@@ -35,10 +35,10 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
                     <StackPanel Width="70"/>
-                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="2D" IsChecked="True"/>
-                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="3D" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.Review3dPage}"/>
-                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="Compare" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewComparePage}"/>
-                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="AI FFR" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrPage}"/>
+                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [2D], Source={StaticResource L10N}}" IsChecked="True"/>
+                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [3D], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.Review3dPage}"/>
+                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [Compare], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewComparePage}"/>
+                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [AI FFR], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrPage}"/>
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                     <component:IconButton Style="{StaticResource IconButton}" Icon="editLumenContourSimple" Width="42" Height="42" Command="{Binding EditLumenContourCommand}"/>
@@ -63,31 +63,33 @@
                 <!-- Cross Section Part -->
                 <Grid x:Name="crossSection" Grid.Row="1">
                     <!-- Cross Section -->
-                    <Grid x:Name="crossSectionImage" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                        <i:Interaction.Triggers>
-                            <i:EventTrigger EventName="Loaded">
-                                <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Grid}}"/>
-                            </i:EventTrigger>
-                            <i:EventTrigger EventName="SizeChanged">
-                                <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Grid}}"/>
-                            </i:EventTrigger>
-                        </i:Interaction.Triggers>
-                        <Grid.Clip>
-                            <RectangleGeometry RadiusX="10" RadiusY="10">
-                                <RectangleGeometry.Rect>
-                                    <Rect X="0" Y="0" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}"/>
-                                </RectangleGeometry.Rect>
-                            </RectangleGeometry>
-                        </Grid.Clip>
-                        <!-- Cross Seciton Image -->
-                        <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
-                            <Image.RenderTransform>
-                                <TransformGroup>
-                                    <ScaleTransform ScaleX="{Binding ReviewStatus.Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding ReviewStatus.Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
-                                    <TranslateTransform X="{Binding ReviewStatus.Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding ReviewStatus.Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}}"/>
-                                </TransformGroup>
-                            </Image.RenderTransform>
-                        </Image>
+                    <Grid Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                        <Grid x:Name="crossSectionImage">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="Loaded">
+                                    <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Grid}}"/>
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="SizeChanged">
+                                    <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Grid}}"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                            <Grid.Clip>
+                                <RectangleGeometry RadiusX="10" RadiusY="10">
+                                    <RectangleGeometry.Rect>
+                                        <Rect X="0" Y="0" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}"/>
+                                    </RectangleGeometry.Rect>
+                                </RectangleGeometry>
+                            </Grid.Clip>
+                            <!-- Cross Seciton Image -->
+                            <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
+                                <Image.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleX="{Binding ReviewStatus.Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding ReviewStatus.Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                        <TranslateTransform X="{Binding ReviewStatus.Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding ReviewStatus.Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                    </TransformGroup>
+                                </Image.RenderTransform>
+                            </Image>
+                        </Grid>
                         <!-- Cross Section Info. -->
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="50">
                             <Label Content="F : " Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}"/>
@@ -155,7 +157,7 @@
                                     <RowDefinition/>
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0">
-                                    <Button Style="{DynamicResource SideMenuTitleLeft}" Content="2D Option" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftUpMenu}"/>
+                                    <Button Style="{DynamicResource SideMenuTitleLeft}" Content="{Binding [2D Option], Source={StaticResource L10N}}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftUpMenu}"/>
                                 </StackPanel>
                                 <StackPanel Grid.Row="1" Width="192" HorizontalAlignment="Center">
                                     <Grid>
@@ -202,7 +204,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                <Label Content="{Binding [OCT Zoom], Source={StaticResource L10N}}" Foreground="{DynamicResource SideMenuTitleBrush}" Style="{DynamicResource Pretendard-Medium-12}"/>
+                                                <Label Content="{Binding [Zoom], Source={StaticResource L10N}}" Foreground="{DynamicResource SideMenuTitleBrush}" Style="{DynamicResource Pretendard-Medium-12}"/>
                                             </StackPanel>
                                             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                                                 <component:IconButton Style="{StaticResource IconButton}" Icon="zoomInSmall" Command="{Binding ZoomInCommand}"/>
@@ -253,7 +255,11 @@
                                                 <StackPanel Height="114.2"/>
                                                 <Image Source="{svgc:SvgImage Source=/res/icon/2dOption.svg}" Width="24.3" Height="24.3"/>
                                                 <StackPanel Height="8"/>
-                                                <Image Source="{svgc:SvgImage Source=/res/icon/2dOptionText.svg}" Width="38" Height="26"/>
+                                                <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" TextBlock.TextAlignment="Center" Padding="10,0,10,0">
+                                                    <Label.Content>
+                                                        <AccessText TextWrapping="Wrap" Text="{Binding [2D Option], Source={StaticResource L10N}}"/>
+                                                    </Label.Content>
+                                                </Label>
                                             </StackPanel>
                                         </Grid>
                                     </Border>
@@ -345,13 +351,21 @@
                                                 <StackPanel Height="125.5"/>
                                                 <Image Source="{svgc:SvgImage Source=/res/icon/CaseInfo.svg}" Width="24" Height="24"/>
                                                 <StackPanel Height="8"/>
-                                                <Image Source="{svgc:SvgImage Source=/res/icon/CaseInfoText.svg}" Width="28" Height="26"/>
+                                                <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" TextBlock.TextAlignment="Center" Padding="10,0,10,0">
+                                                    <Label.Content>
+                                                        <AccessText TextWrapping="Wrap" Text="{Binding [Case Info.], Source={StaticResource L10N}}"/>
+                                                    </Label.Content>
+                                                </Label>
                                             </StackPanel>
                                             <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Center" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}">
                                                 <StackPanel Height="123.9"/>
                                                 <Image Source="{svgc:SvgImage Source=/res/icon/measurement.svg}" Width="24" Height="26.6"/>
                                                 <StackPanel Height="8"/>
-                                                <Image Source="{svgc:SvgImage Source=/res/icon/measurementText.svg}" Width="50" Height="26"/>
+                                                <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" TextBlock.TextAlignment="Center" Padding="10,0,10,0">
+                                                    <Label.Content>
+                                                        <AccessText TextWrapping="Wrap" Text="{Binding [Measurement], Source={StaticResource L10N}}"/>
+                                                    </Label.Content>
+                                                </Label>
                                             </StackPanel>
                                         </Grid>
                                     </Border>
@@ -370,7 +384,7 @@
                                     <RowDefinition/>
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0" >
-                                    <Button Style="{DynamicResource SideMenuTitleRight}" Content="Value Info." Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.RightMenu}"/>
+                                    <Button Style="{DynamicResource SideMenuTitleRight}" Content="{Binding [Value Info.], Source={StaticResource L10N}}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.RightMenu}"/>
                                 </StackPanel>
 
                                 <!-- Default -->
@@ -494,7 +508,7 @@
                                         </Grid>
                                         <!-- Lumen Contour-->
                                         <Grid Grid.Row="1" Margin="24,0,24,0" Width="{x:Static const:Constants.CrossSectionAngio}" Height="{x:Static const:Constants.CrossSectionAngio}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
-                                            <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}"  FrameNumber="{Binding FrameNumber}" IsDrawOn="{Binding ReviewStatus.IsContourStentOn}" IsEditOn="False" Zoom="{Binding ZoomAngio}"/>
+                                            <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}"  FrameNumber="{Binding FrameNumber}" IsDrawOn="{Binding ReviewStatus.IsContourStentOn}" IsEditOn="False" Zoom="{Binding ZoomAngio}" InCommand="{Binding LumenContourCommand, Mode=TwoWay}"/>
                                         </Grid>
 
                                         <!-- Info -->
@@ -632,7 +646,11 @@
                                                 <StackPanel Height="284"/>
                                                 <Image Source="{svgc:SvgImage Source=/res/icon/ValueInfo.svg}" Width="24" Height="24"/>
                                                 <StackPanel Height="8"/>
-                                                <Image Source="{svgc:SvgImage Source=/res/icon/ValueInfoText.svg}" Width="32" Height="26"/>
+                                                <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" TextBlock.TextAlignment="Center" Padding="10,0,10,0">
+                                                    <Label.Content>
+                                                        <AccessText TextWrapping="Wrap" Text="{Binding [Value Info.], Source={StaticResource L10N}}"/>
+                                                    </Label.Content>
+                                                </Label>
                                             </StackPanel>
                                         </Grid>
                                     </Border>
@@ -665,7 +683,7 @@
 
                 <!-- Lumen Contour-->
                 <Grid Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                    <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" FrameNumber="{Binding FrameNumber}" IsDrawOn="{Binding ReviewStatus.IsContourStentOn}" IsEditOn="False" Zoom="{Binding ReviewStatus.Zoom}"/>
+                    <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" FrameNumber="{Binding FrameNumber}" IsDrawOn="{Binding ReviewStatus.IsContourStentOn}" IsEditOn="False" Zoom="{Binding ReviewStatus.Zoom}" InCommand="{Binding LumenContourCommand, Mode=TwoWay}"/>
                 </Grid>
 
                 <!-- Measurement -->
@@ -807,6 +825,10 @@
                                         </RectangleGeometry>
                                     </Image.Clip>
                                 </Image>
+                                <!-- Loading -->
+                                <Grid Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding DeviceStatus.IsLumenLoaded, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                                </Grid>
 
                                 <!-- L-Mode Indicator -->
                                 <Canvas>

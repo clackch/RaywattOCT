@@ -173,6 +173,7 @@ namespace RaywattApp.ViewModels
 
             PatientCase.Image = generateFileName("oct");
             DeviceStatus.IsLumenDetected = false;
+            DeviceStatus.IsLumenLoaded = false;
             RayPullbackScan(PatientCase.ImageFullPath);
 
             leaveToPage(Constants.RecordingConfirmPage);

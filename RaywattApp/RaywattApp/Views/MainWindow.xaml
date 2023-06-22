@@ -21,11 +21,11 @@
         </Frame>
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="60"/>
                 <RowDefinition/>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="40"/>
             </Grid.RowDefinitions>
-            <Grid Grid.Row="0" Width="1280" Height="60">
+            <Grid Grid.Row="0">
                 <StackPanel HorizontalAlignment="Left">
                     <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="home" Margin="14,9,0,9" Command="{Binding HomeCommand}" Visibility="{Binding IsHome, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
                 </StackPanel>
@@ -34,7 +34,7 @@
                     <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="power" Margin="0,9,12,9" Command="{Binding ExitCommand}"/>
                 </StackPanel>
             </Grid>
-            <StackPanel Grid.Row="2" Width="1280" Height="40" Orientation="Horizontal">
+            <StackPanel Grid.Row="2" Orientation="Horizontal">
                 <Image Style="{DynamicResource RaywattSmall_Icon}"/>
                 <StackPanel MinWidth="130" Margin="25,0,0,0" VerticalAlignment="Center" Orientation="Horizontal" Visibility="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusLocked}}">
                     <ProgressBar Style="{DynamicResource HomeCatheterProgressBar}" Value="{Binding CatheterProgress}" Width="72" Height="20" Visibility="{Binding IsHome, Converter={StaticResource BoolToVisibilityConverter}}"/>
@@ -47,6 +47,11 @@
                     <Button Style="{DynamicResource OutlinedBtnType1}" Command="{Binding CatheterConnectTestCommmand}" Width="100" Height="15" FontSize="9" Content="Catheter Connect"/>
                 </StackPanel>
             </StackPanel>
+
+            <StackPanel Grid.Row="0" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" Visibility="{Binding DeviceStatus.IsLumenLoaded, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+            <StackPanel Grid.Row="2" Background="{StaticResource GrayscaleBlackBrush}" Opacity="0.7" Visibility="{Binding DeviceStatus.IsLumenLoaded, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+            <StackPanel Grid.Row="0" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" Visibility="{Binding DeviceStatus.IsLumenSaved, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+            <StackPanel Grid.Row="2" Background="{StaticResource GrayscaleBlackBrush}" Opacity="0.7" Visibility="{Binding DeviceStatus.IsLumenSaved, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
         </Grid>
     </Grid>
 </Window>

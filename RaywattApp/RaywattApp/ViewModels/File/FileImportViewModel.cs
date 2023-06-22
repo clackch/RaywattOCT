@@ -232,7 +232,7 @@ namespace RaywattApp.ViewModels.File
                 {
                     Dictionary<string, object> parameter = new Dictionary<string, object>();
                     parameter["title"] = _l10n["Information"];
-                    parameter["message"] = _l10n["Data already exists.\r\nDo you want to import data?"];
+                    parameter["message"] = _l10n["Data already exists. Do you want to import data?"];
                     parameter["patientCaseList"] = existPatientCases;
                     var result = _dialogService.OpenDialog(new FileImportDialogControl(), parameter, Constants.FileImportDialogWidth, Constants.FileImportDialogHeight);
 
