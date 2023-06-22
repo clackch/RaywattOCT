@@ -182,7 +182,7 @@
                                 <RadioButton IsChecked="{Binding FileExport.Material, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportMaterialCurrent}}" Content="{Binding [Current Frame], Source={StaticResource L10N}}"/>
                             </StackPanel>
                             <StackPanel Margin="0,6,0,0">
-                                <RadioButton IsChecked="{Binding FileExport.Material, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportMaterialBookmarked}}" Content="{Binding [Bookmarked Frames], Source={StaticResource L10N}}"/>
+                                <RadioButton IsChecked="{Binding FileExport.Material, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.ExportMaterialBookmarked}}" Content="{Binding [Bookmarked Frames], Source={StaticResource L10N}}" IsEnabled="{Binding IsBookmarkOn}"/>
                             </StackPanel>
                         </StackPanel>
                     </Grid>

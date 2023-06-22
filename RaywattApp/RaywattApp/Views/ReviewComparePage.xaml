@@ -35,10 +35,10 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
                     <StackPanel Width="60"/>
-                    <ToggleButton Style="{StaticResource TabToggleBtn}" Content="2D" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewPage}"/>
-                    <ToggleButton Style="{StaticResource TabToggleBtn}" Content="3D" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.Review3dPage}"/>
-                    <ToggleButton Style="{StaticResource TabToggleBtn}" Content="Compare" IsChecked="True"/>
-                    <ToggleButton Style="{StaticResource TabToggleBtn}" Content="AI FFR" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrPage}"/>
+                    <ToggleButton Style="{StaticResource TabToggleBtn}" Content="{Binding [2D], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewPage}"/>
+                    <ToggleButton Style="{StaticResource TabToggleBtn}" Content="{Binding [3D], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.Review3dPage}"/>
+                    <ToggleButton Style="{StaticResource TabToggleBtn}" Content="{Binding [Compare], Source={StaticResource L10N}}" IsChecked="True"/>
+                    <ToggleButton Style="{StaticResource TabToggleBtn}" Content="{Binding [AI FFR], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrPage}"/>
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                     <component:IconButton Style="{StaticResource IconButton}" Icon="editPresetSimple" Width="42" Height="42" Command="{Binding EditPresetCommand}" Content="{Binding [Edit Preset], Source={StaticResource L10N}}"/>
@@ -111,7 +111,9 @@
                                         </RectangleGeometry>
                                     </Image.Clip>
                                 </Image>
-
+                                <!-- Loading -->
+                                <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding IsLumenLoaded, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                                
                                 <!-- L-Mode Indicator -->
                                 <Canvas>
                                     <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitudeCompare" IsCaptured="{Binding IndicatorCompareLongitude.IsCaptured}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="181" Stretch="None" Canvas.Left="{Binding IndicatorCompareLongitude.X}" Visibility="{Binding IndicatorCompareLongitude.IsVisible}" HorizontalAlignment="Center" Canvas.Top="-11" VerticalAlignment="Top">
@@ -307,7 +309,11 @@
                                             <StackPanel Height="173.3"/>
                                             <Image Source="{svgc:SvgImage Source=/res/icon/selectPreCase.svg}" Width="27.2" Height="24"/>
                                             <StackPanel Height="8"/>
-                                            <Image Source="{svgc:SvgImage Source=/res/icon/selectPreCaseText.svg}" Width="54" Height="26"/>
+                                            <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" TextBlock.TextAlignment="Center" Padding="5,0,5,0">
+                                                <Label.Content>
+                                                    <AccessText TextWrapping="Wrap" Text="{Binding [Select Pre-Case], Source={StaticResource L10N}}"/>
+                                                </Label.Content>
+                                            </Label>
                                         </StackPanel>
                                     </Grid>
                                 </Border>
@@ -322,7 +328,7 @@
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
                             <StackPanel Grid.Row="0">
-                                <Button Style="{DynamicResource SideMenuTitleLeft}" Content="Select Pre-Case" Command="{Binding CaseSelectCancelCommand}"/>
+                                <Button Style="{DynamicResource SideMenuTitleLeft}" Content="{Binding [Select Pre-Case], Source={StaticResource L10N}}" Command="{Binding CaseSelectCancelCommand}"/>
                             </StackPanel>
                             <DataGrid Grid.Row="1" Margin="20,20,20,12" Name="patientCaseList" ItemsSource="{Binding PatientCases}" Style="{StaticResource DataGridSelectPreCase}" RowStyle="{StaticResource DataGridRowSelectPreCase}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderSelectPreCase}" SelectionMode="Single" SelectedItem="{Binding DisplayPatientCase}">
                                 <DataGrid.Columns>
@@ -360,7 +366,11 @@
                                             <StackPanel Height="172"/>
                                             <Image Source="{svgc:SvgImage Source=/res/icon/CaseInfo.svg}" Width="24" Height="24"/>
                                             <StackPanel Height="8"/>
-                                            <Image Source="{svgc:SvgImage Source=/res/icon/CaseInfoText.svg}" Width="28" Height="26"/>
+                                            <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" TextBlock.TextAlignment="Center" Padding="10,0,10,0">
+                                                <Label.Content>
+                                                    <AccessText TextWrapping="Wrap" Text="{Binding [Case Info.], Source={StaticResource L10N}}"/>
+                                                </Label.Content>
+                                            </Label>
                                         </StackPanel>
                                     </Grid>
                                 </Border>
@@ -374,7 +384,7 @@
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
                             <StackPanel Grid.Row="0" >
-                                <Button Style="{DynamicResource SideMenuTitleLeft}" Content="Case Info." Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftDownMenu}"/>
+                                <Button Style="{DynamicResource SideMenuTitleLeft}" Content="{Binding [Case Info.], Source={StaticResource L10N}}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftDownMenu}"/>
                             </StackPanel>
                             <Grid Grid.Row="1" Margin="24,24,24,0">
                                 <Grid.RowDefinitions>

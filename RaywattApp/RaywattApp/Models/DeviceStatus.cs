@@ -34,6 +34,9 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private bool _isPaused = true;
+        
+        [ObservableProperty]
+        private bool _isLumenSaved = true;
 
         [ObservableProperty]
         private string? _catheterStatus;

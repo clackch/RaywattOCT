@@ -49,6 +49,8 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private double _pointLongitudeX;
 
+        private double indicatorDiffX = 0;
+
         [ObservableProperty]
         private double _pointCompareLongitudeX;
 
@@ -73,6 +75,9 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private int _frameNumberCompare = -1;
+
+        [ObservableProperty]
+        private bool _isLumenLoaded = true;
 
         [ObservableProperty]
         private Zoom _zoom = new Zoom(Constants.CrossSectionCompareSize / Constants.OCTImageSize);
@@ -171,6 +176,8 @@ namespace RaywattApp.ViewModels
 
                     if(ReviewStatus.SelectedPatientCase.LumenContour == null)
                     {
+                        IsLumenLoaded = false;
+
                         Thread threadMakeLumenProfile = new Thread(() => ThreadMakeLumenProfile());
                         threadMakeLumenProfile.Start();
                     }
@@ -230,6 +237,8 @@ namespace RaywattApp.ViewModels
             ReviewStatus.SelectedPatientCase.LumenContour = GetLumenContours(ReviewStatus.SelectedPatientCase.Id);
             PreLumenContour = ReviewStatus.SelectedPatientCase.LumenContour;
             imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(PreLumenContour);
+
+            IsLumenLoaded = true;
 
             LumenContourCommand = Constants.LumenContourDraw;
         }
@@ -310,7 +319,11 @@ namespace RaywattApp.ViewModels
             // avoid duplication
             if (ReviewStatus.SelectedPatientCase != null && patientCase != null)
             {
-                if (ReviewStatus.SelectedPatientCase.Id == patientCase.Id) return;
+                if (ReviewStatus.SelectedPatientCase.Id == patientCase.Id)
+                {
+                    ExpandLeftUpMenu = false;
+                    return;
+                }
             }
 
             ReviewStatus.SelectedPatientCase = patientCase;
@@ -325,6 +338,8 @@ namespace RaywattApp.ViewModels
 
                 if (ReviewStatus.SelectedPatientCase.LumenContour == null)
                 {
+                    IsLumenLoaded = false;
+
                     Thread threadMakeLumenProfile = new Thread(() => ThreadMakeLumenProfile());
                     threadMakeLumenProfile.Start();
                 }
@@ -373,6 +388,17 @@ namespace RaywattApp.ViewModels
 
         private void updateNavigator(int curFrame, int totalFrame, bool isCompare)
         {
+            if (isCompare)
+            {
+                if (FrameNumberCompare == curFrame)
+                    return;
+            }
+            else
+            {
+                if (FrameNumber == curFrame)
+                    return;
+            }
+
             double curPosition = (double)curFrame / (totalFrame - 1);
             curPosition *= Constants.LongitudeCompareWidth;
 
@@ -400,11 +426,20 @@ namespace RaywattApp.ViewModels
                     return;
                 }
 
-                double x = indicator.IsCompare ? PointCompareLongitudeX - longitudeCompareCoordinate.X : PointLongitudeX - longitudeCoordinate.X;                
-
-                if (x >= 0 && x < Constants.LongitudeCompareWidth)
+                if (indicator.IsLongitudeMove)
                 {
-                    setCurrentFrame(indicator, x);
+                    indicatorDiffX = indicator.IsCompare ? PointCompareLongitudeX - longitudeCompareCoordinate.X : PointLongitudeX - longitudeCoordinate.X;
+                    indicatorDiffX = indicatorDiffX - indicator.X;
+                    indicator.IsLongitudeMove = false;
+                }
+
+                double x = indicator.IsCompare ? PointCompareLongitudeX - longitudeCompareCoordinate.X : PointLongitudeX - longitudeCoordinate.X;
+                double indicatorX = x - indicatorDiffX;
+                double indicatorCenterX = indicatorX + Constants.LongitudeIndicatorWidth / 2;
+
+                if (indicatorCenterX >= 0 && indicatorCenterX < Constants.LongitudeCompareWidth)
+                {
+                    setCurrentFrame(indicator, indicatorCenterX);
                 }
             }
         }

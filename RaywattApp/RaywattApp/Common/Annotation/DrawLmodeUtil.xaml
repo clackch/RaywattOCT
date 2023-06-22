@@ -27,7 +27,7 @@
             </Style.Triggers>
         </Style>
         <Style TargetType="Path" x:Key="StylePath">
-            <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleY, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThickness}}"/>
+            <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleY, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThickness}}"/>
         </Style>
         <Style TargetType="Label" x:Key="StyleLabel">
             <Setter Property="Foreground" Value="White"/>
@@ -60,9 +60,9 @@
             </Style.Triggers>
         </Style>
         <Style TargetType="Ellipse" x:Key="StyleEllipse">
-            <Setter Property="Width" Value="{Binding Zoom.ScaleX, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationTextPointSize}}"/>
-            <Setter Property="Height" Value="{Binding Zoom.ScaleY, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationTextPointSize}}"/>
-            <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleY, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThickness}}"/>
+            <Setter Property="Width" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationTextPointSize}}"/>
+            <Setter Property="Height" Value="{Binding Zoom.ScaleY, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationTextPointSize}}"/>
+            <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleY, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThickness}}"/>
             <Setter Property="Fill" Value="White"/>
             <Style.Triggers>
                 <MultiDataTrigger>

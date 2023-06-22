@@ -57,7 +57,7 @@ namespace RaywattApp.ViewModels.Setting
         private void GetLogFileList()
         {
             DirectoryInfo directory = new DirectoryInfo(Constants.LogFolderPath);
-            FileInfo[] logFileList = directory.GetFiles();
+            FileInfo[] logFileList = directory.GetFiles(Constants.LogExtension);
             var orderedLogFIleList = logFileList.OrderByDescending(x => x.LastWriteTime);
 
             foreach(FileInfo logFile in orderedLogFIleList)

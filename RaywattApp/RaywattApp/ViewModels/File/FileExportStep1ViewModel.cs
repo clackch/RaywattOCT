@@ -40,6 +40,9 @@ namespace RaywattApp.ViewModels.File
         [ObservableProperty]
         private bool? _checkBoxAllSelected;
 
+        [ObservableProperty]
+        private bool _isBookmarkOn = false;
+
         private ICommand _showCaseCommand;
         public ICommand ShowCaseCommand
         {
@@ -166,6 +169,12 @@ namespace RaywattApp.ViewModels.File
 
             if (FileExport.Type == null)
                 FileExport.Type = Constants.ExportTypeNative;
+
+            if (FileExport.IsFromReview)
+            {
+                if (FileExport.BookmarkedFrames.Count > 0)
+                    IsBookmarkOn = true;
+            }
 
             SetPatientList(FileExport.PatientId);
         }

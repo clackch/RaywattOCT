@@ -249,7 +249,6 @@ namespace RaywattApp.Common.Annotation
                         drawUtil.CurrentLumenContour = drawUtil.LumenContours[drawUtil.FrameNumber];
                     }
                     break;
-                    break;
                 default:
                     break;
             }

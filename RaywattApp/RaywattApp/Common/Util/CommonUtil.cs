@@ -293,7 +293,7 @@ namespace RaywattApp.Common.Util
 
                 using (var outStream = new FileStream(to, FileMode.Create, FileAccess.Write, FileShare.Read))
                 {
-                    using (var inStream = new FileStream(from, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    using (var inStream = new FileStream(from, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                     {
                         await CopyStream(inStream, outStream, x =>
                         {
