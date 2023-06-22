@@ -218,7 +218,7 @@ namespace RaywattApp.Common.Annotation
         private static void ReceiveCommand(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
             var drawUtil = dependencyObject as DrawLumenContourUtil;
-            if (drawUtil == null || drawUtil.InCommand == null)
+            if (drawUtil == null || drawUtil.InCommand == null || drawUtil.FrameNumber < 0)
                 return;
 
             switch (drawUtil.InCommand)

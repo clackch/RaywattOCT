@@ -51,9 +51,6 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private double _pointLongitudeX;
 
-        [ObservableProperty]
-        private bool _isPaused;
-
         private double _rightSideBarExpand;
         public double RightSideBarExpand
         {
@@ -72,7 +69,7 @@ namespace RaywattApp.ViewModels
             set
             {
                 outFrameNumber = value;
-                RayMoveToFrame(value);
+                MoveToFrame(RaySession.Review, value);
             }
         }
 
@@ -116,14 +113,24 @@ namespace RaywattApp.ViewModels
         public int Brightness
         {
             get { return _brightness; }
-            set { _brightness = value; OnPropertyChanged(nameof(Brightness)); RaySetProperty(Property.Brightness, value); }
+            set { 
+                _brightness = value;
+                OnPropertyChanged(nameof(Brightness));
+                RaySetProperty(Property.Brightness, value);
+                MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current); 
+            }
         }
 
         private int _contrast;
         public int Contrast
         {
             get { return _contrast; }
-            set { _contrast = value; OnPropertyChanged(nameof(Contrast)); RaySetProperty(Property.Contrast, value); }
+            set { 
+                _contrast = value; 
+                OnPropertyChanged(nameof(Contrast));
+                RaySetProperty(Property.Contrast, value);
+                MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
+            }
         }
 
         private bool hasAnnotation = true;
@@ -216,8 +223,6 @@ namespace RaywattApp.ViewModels
             isLongitudeMeasurementInit = false;
 
             CurrentLumenContour = new LumenContour();
-
-            updatePlayPauseState();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -239,13 +244,16 @@ namespace RaywattApp.ViewModels
                 ToggleLongitude(ReviewStatus.IsLumenProfile);
                 
                 ReviewStatus.CurrentPage = Constants.ReviewPage;
-                RaySetSession(RaySession.Review);
+
+                GetImageInfo(RaySession.Review);
 
                 Degree = PatientCase.IndicatorDegree;
                 Brightness = PatientCase.Brightness;
                 Contrast = PatientCase.Contrast;
                 SetAnnotation();
                 SetCrossSectionBackground(RaySession.Review, (ReviewStatus.IsAngioOn) ? Constants.CardBackgroundColor : Constants.BackgroundColor);
+
+                MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
             }
 
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
@@ -269,27 +277,19 @@ namespace RaywattApp.ViewModels
         private void Playback(object param)
         {
             string action = (string)param;
-            RayError result = RayError.OK;
 
             if (action.ToLower().Equals("prev"))
             {
-                result = (RayError)RayPrevFrame();
+                PrevFrame(RaySession.Review);
             }
             else if (action.ToLower().Equals("next"))
             {
-                result = (RayError)RayNextFrame();
+                NextFrame(RaySession.Review);
             }
             else if (action.ToLower().Equals("play"))
             {
-                double pauseState = RayGetProperty(Property.IsPaused);
-                if(pauseState == 1)
-                    ReviewStatus.IsMeasurementOn = false;
-
-                result = (RayError)RayPlayPause();
-                if (result == RayError.OK)
-                {
-                    updatePlayPauseState();
-                }
+                Playback();
+                if (!IsPaused) ReviewStatus.IsMeasurementOn = false;
             }
         }
 
@@ -439,15 +439,9 @@ namespace RaywattApp.ViewModels
 
         private void ToggleMeasurement()
         {
-            double pauseState = RayGetProperty(Property.IsPaused);
-
-            if(pauseState == 0)
+            if(DeviceStatus.IsPaused == false)
             {
-                var result = (RayError)RayPlayPause();
-                if (result == RayError.OK)
-                {
-                    updatePlayPauseState();
-                }
+                Playback();
             }
 
             ReviewStatus.IsMeasurementOn = !ReviewStatus.IsMeasurementOn;
@@ -527,6 +521,8 @@ namespace RaywattApp.ViewModels
                     }
                     else
                     {
+                        this.hasAnnotation = false;
+
                         DeviceStatus.IsLumenDetected = false;
                         DeviceStatus.IsLumenLoaded = false;
                         RayStartLumenDetection();
@@ -701,9 +697,10 @@ namespace RaywattApp.ViewModels
         {
             if (DrawCrossSectionImage())
             {
-                if (!IndicatorLongitude.IsCaptured) updateNavigator(crossSectionFrameInfo[0].curFrame, crossSectionFrameInfo[0].totalFrame);
+                DeviceStatus.ReviewImageInfo imageInfo = DeviceStatus.ReviewImageInfos[(int)RaySession.Review];
+                if (!IndicatorLongitude.IsCaptured) updateNavigator(imageInfo.Current, imageInfo.Total);
 
-                FrameNumber = crossSectionFrameInfo[0].curFrame;
+                FrameNumber = imageInfo.Current;
             }
             if (DrawLongitudeImage())
             {
@@ -770,13 +767,6 @@ namespace RaywattApp.ViewModels
             DeviceStatus.IsLumenLoaded = true;
         }
 
-        private void updatePlayPauseState()
-        {
-            double pauseState = RayGetProperty(Property.IsPaused);
-
-            IsPaused = (pauseState == 0);
-        }
-
         private void updateNavigator(int curFrame, int totalFrame)
         {
             double curPosition = (double)curFrame / (totalFrame - 1);
@@ -793,7 +783,7 @@ namespace RaywattApp.ViewModels
             {
                 curPosition *= (longitudeFrameInfo.totalFrame - 1);
                 curPosition = Math.Round(curPosition);
-                RayMoveToFrame((int)curPosition);
+                MoveToFrame(RaySession.Review, (int)curPosition);
             }
         }
     }

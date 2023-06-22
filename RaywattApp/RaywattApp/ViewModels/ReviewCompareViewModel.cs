@@ -153,6 +153,7 @@ namespace RaywattApp.ViewModels
                     if (ReviewStatus.SelectedPatientCase != null)
                     {
                         RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath);
+                        Thread.Sleep(500);
                     }
                 }
                 else
@@ -185,6 +186,11 @@ namespace RaywattApp.ViewModels
                     IndicatorLongitude.IsVisible = Visibility.Visible;
                 }
             }
+
+            GetImageInfo(RaySession.Review);
+            MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
+            GetImageInfo(RaySession.Compare);
+            MoveToFrame(RaySession.Compare, DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current);
 
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
             timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
@@ -259,17 +265,20 @@ namespace RaywattApp.ViewModels
             if (DrawCrossSectionImage())
             {
                 {
-                    if (!IndicatorLongitude.IsCaptured) updateNavigator(crossSectionFrameInfo[0].curFrame, crossSectionFrameInfo[0].totalFrame, false);
+                    DeviceStatus.ReviewImageInfo imageInfo = DeviceStatus.ReviewImageInfos[(int)RaySession.Review];
+                    if (!IndicatorLongitude.IsCaptured) updateNavigator(imageInfo.Current, imageInfo.Total, false);
 
-                    FrameNumber = crossSectionFrameInfo[0].curFrame;
+                    FrameNumber = imageInfo.Current;
                 }
             }
+
             if (DrawCrossSectionForCompare())
             {
                 {
-                    if (!IndicatorCompareLongitude.IsCaptured) updateNavigator(crossSectionFrameInfo[1].curFrame, crossSectionFrameInfo[1].totalFrame, true);
+                    DeviceStatus.ReviewImageInfo imageInfo = DeviceStatus.ReviewImageInfos[(int)RaySession.Compare];
+                    if (!IndicatorCompareLongitude.IsCaptured) updateNavigator(imageInfo.Current, imageInfo.Total, true);
 
-                    FrameNumberCompare = crossSectionFrameInfo[1].curFrame;
+                    FrameNumberCompare = imageInfo.Current;
                     DisplayFrameNumberCompare = FrameNumberCompare + 1;
                 }
             }
@@ -431,11 +440,11 @@ namespace RaywattApp.ViewModels
         {
             double curPosition = navigatorPosition / Constants.LongitudeCompareWidth;
             RaySession session = (indicator.IsCompare) ? RaySession.Compare : RaySession.Review;
-            FrameInfo frameInfo = crossSectionFrameInfo[(int)session];
+            DeviceStatus.ReviewImageInfo frameInfo = DeviceStatus.ReviewImageInfos[(int)session];
 
             if (frameInfo != null)
             {             
-                curPosition *= (frameInfo.totalFrame - 1);
+                curPosition *= (frameInfo.Total - 1);
                 curPosition = Math.Round(curPosition);
 
                 if (IsIndicatorLockOn)
@@ -443,13 +452,12 @@ namespace RaywattApp.ViewModels
                     RaySession syncSession = (indicator.IsCompare) ? RaySession.Review : RaySession.Compare;
                     int diff = indicatorLockOffset;
                     int syncPosition = (indicator.IsCompare) ? (int)curPosition - diff : (int)curPosition + diff;
-                    FrameInfo syncInfo = (indicator.IsCompare) ? crossSectionFrameInfo[(int)RaySession.Review] : crossSectionFrameInfo[(int)RaySession.Compare];
+                    DeviceStatus.ReviewImageInfo syncInfo = (indicator.IsCompare) ? DeviceStatus.ReviewImageInfos[(int)RaySession.Review] : DeviceStatus.ReviewImageInfos[(int)RaySession.Compare];
 
                     if (syncInfo == null) return;
-                    if (syncPosition < 0 || syncPosition >= syncInfo.totalFrame) return;
+                    if (syncPosition < 0 || syncPosition >= syncInfo.Total) return;
 
-                    RaySetSession(syncSession);
-                    RayMoveToFrame(syncPosition);
+                    MoveToFrame(syncSession, syncPosition);
                     _log.Debug("diff : " + diff);
 
                     if (indicator.IsCompare)
@@ -462,8 +470,7 @@ namespace RaywattApp.ViewModels
                     }
                 }
 
-                RaySetSession(session);
-                RayMoveToFrame((int)curPosition);
+                MoveToFrame(session, (int)curPosition);
 
                 indicator.X = navigatorPosition - Constants.LongitudeIndicatorWidth / 2;
 

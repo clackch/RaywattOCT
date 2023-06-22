@@ -258,7 +258,7 @@ namespace RaywattApp.ViewModels
                 case RayCallbackRequest.State:
                     handleState((RayCallbackRequest)request, (RayScannerState)response);
                     break;
-                case RayCallbackRequest.Progress:
+                case RayCallbackRequest.ProgressSave:
                     handleProgress((RayCallbackRequest)request, response);
                     break;
                 case RayCallbackRequest.Event:

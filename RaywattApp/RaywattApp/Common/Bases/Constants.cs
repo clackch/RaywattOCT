@@ -232,6 +232,9 @@ namespace RaywattApp.Common.Bases
         public const int CardBackgroundColor = 0x232323;
         public const int CompareBackgroundColor = 0x0d0d0d;
 
+        //Playback Interval (msec)
+        public const double PlaybackInterval = 50;
+
         //Update Image Interval (msec)
         public const double UpdateImageInterval = 5;
 
