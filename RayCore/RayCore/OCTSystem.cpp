@@ -473,7 +473,6 @@ RayError COCTSystem::SetSession(int session)
 	}
 
 	m_curSession = (SessionType) session;
-	PLOGI.printf("Current Session : %d", m_curSession);
 
 	return RayError::OK;
 }
@@ -562,7 +561,6 @@ void* COCTSystem::GetImageData(int nFrame) {
 		}
 		if (m_reviewSession[m_curSession]->IsProcessed(nFrame)) {
 			cv::Mat image = m_reviewSession[m_curSession]->PostProcess(nFrame);
-			PLOGI.printf("Session #%d - Frame #%d post-processed.", m_curSession, nFrame);
 			return image.data;
 		}
 	}

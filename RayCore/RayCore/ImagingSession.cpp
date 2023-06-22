@@ -281,7 +281,7 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 
 	pSession->m_mapImage.clear();
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
-	PLOGI.printf("process oct imaging - %d frames", nNumOfSamples);
+	PLOGI.printf("Session #%d process oct imaging - %d frames", pSession->m_nSession, nNumOfSamples);
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadImaging->isRun; nFrame++)
 	{
 		char* pBuffer = pDataManager->GetSample(nFrame);
@@ -289,7 +289,7 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 		cv::Mat imgResult = pImaging->GetProcessedImage().clone();
 		pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult));
 	}
-	PLOGI.printf("process oct imaging done.");
+	PLOGI.printf("Session #%d process oct imaging done.", pSession->m_nSession);
 	
 	return NOERROR;
 }
@@ -304,7 +304,7 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 	CCutViewManager* pCutView = pSession->m_pCutView;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
-	PLOGI.printf("update cutview - %d frames", nNumOfSamples);
+	PLOGI.printf("Session #%d update cutview - %d frames", pSession->m_nSession, nNumOfSamples);
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadUpdateCutView->isRun; nFrame++) {
 		std::map<int, cv::Mat>::iterator it = pSession->m_mapImage.find(nFrame);
 		if (it == pSession->m_mapImage.end()) {
@@ -316,11 +316,10 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 		pCutView->AddRecord(pImaging->GetCircleImage(), nFrame);
 
 		pSession->m_pMsg->postMessage(WM_PROCESS_CUTVIEW, nSession, nFrame);
-		Sleep(10);
 	}
 	delete pImaging;
 
-	PLOGI.printf("update cutview done.");
+	PLOGI.printf("Session #%d update cutview done.", pSession->m_nSession);
 
 	return NOERROR;
 }
@@ -336,7 +335,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	std::vector<std::vector<cv::Mat>>& vLumen = pSession->m_vLumen;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
-	PLOGI.printf("lumen detection start - %d frames", nNumOfSamples);
+	PLOGI.printf("Session #%d lumen detection start - %d frames", pSession->m_nSession, nNumOfSamples);
 	vLumen.clear();
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadObjectDetection->isRun; nFrame++) {
 		std::map<int, cv::Mat>::iterator it = pSession->m_mapImage.find(nFrame);
@@ -363,7 +362,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	}
 	delete pImaging;
 
-	PLOGI.printf("lumen detection done.");
+	PLOGI.printf("Session #%d lumen detection done.", pSession->m_nSession);
 	pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::LumenDetection);
 
 	return NOERROR;
