@@ -334,7 +334,12 @@ namespace RaywattApp.ViewModels
 
                 LumenContourCommand = Constants.LumenContourClear;
 
+                DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current = 0;
                 RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath);
+                Thread.Sleep(500);
+
+                GetImageInfo(RaySession.Compare);
+                MoveToFrame(RaySession.Compare, DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current);
 
                 if (ReviewStatus.SelectedPatientCase.LumenContour == null)
                 {
