@@ -156,10 +156,11 @@ namespace RaywattApp.ViewModels
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
                 ReviewStatus.CurrentPage = Constants.Review3dPage;
 
-                Degree = PatientCase.IndicatorDegree;
-
+                RaySetSession(RaySession.Review);
                 RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
+
+                Degree = PatientCase.IndicatorDegree;
 
                 GetImageInfo(RaySession.Review);
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
