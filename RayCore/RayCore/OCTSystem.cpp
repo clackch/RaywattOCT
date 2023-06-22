@@ -388,7 +388,7 @@ RayError COCTSystem::StartCompare(char* strFilePath) {
 		m_reviewSession[SESSION_COMPARE]->Stop();
 	}
 
-	postPriorMessage(WM_START_REVIEW_SESSION, SESSION_COMPARE, (LPARAM)pSession);
+	postMessage(WM_START_REVIEW_SESSION, SESSION_COMPARE, (LPARAM)pSession);
 
 	return RayError::OK;
 }
@@ -399,7 +399,9 @@ RayError COCTSystem::StartCompare(char* strFilePath) {
 RayError COCTSystem::EndReview()
 {
 	if (m_curState == RayScannerState::Review) {
+		postPriorMessage(WM_IGNORE_MESSAGES);
 		stopAllSessions();
+		postMessage(WM_STOP_IGNORE_MESSAGES);
 
 		switch (m_prevState) {
 		case RayScannerState::Initial:
@@ -826,6 +828,7 @@ UINT COCTSystem::GetLongitudeImageChannels()
 UINT COCTSystem::threadService(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CThread* pThread = pSystem->m_pThreadService;
+	bool ignoreMsg = false;
 
 	PLOGI.printf("Service Start");
 
@@ -846,6 +849,12 @@ UINT COCTSystem::threadService(LPVOID param) {
 		int popMsg = std::get<0>(popMsgThread);
 		WPARAM wParam = std::get<1>(popMsgThread);
 		LPARAM lParam = std::get<2>(popMsgThread);
+
+		if (ignoreMsg)
+		{
+			if (popMsg == WM_STOP_IGNORE_MESSAGES) ignoreMsg = false;
+			continue;
+		}
 
 		switch(popMsg) {
 		case WM_UPDATE_SCANNER_STATE :
@@ -901,6 +910,11 @@ UINT COCTSystem::threadService(LPVOID param) {
 		case WM_START_REVIEW_SESSION:
 		{
 			pSystem->OnMsgStartReviewSession(wParam, lParam);
+			break;
+		}
+		case WM_IGNORE_MESSAGES:
+		{
+			ignoreMsg = true;
 			break;
 		}
 		default:
