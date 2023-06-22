@@ -310,7 +310,11 @@ namespace RaywattApp.ViewModels
             // avoid duplication
             if (ReviewStatus.SelectedPatientCase != null && patientCase != null)
             {
-                if (ReviewStatus.SelectedPatientCase.Id == patientCase.Id) return;
+                if (ReviewStatus.SelectedPatientCase.Id == patientCase.Id)
+                {
+                    ExpandLeftUpMenu = false;
+                    return;
+                }
             }
 
             ReviewStatus.SelectedPatientCase = patientCase;
