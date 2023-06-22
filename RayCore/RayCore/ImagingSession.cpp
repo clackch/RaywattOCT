@@ -95,23 +95,29 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 	CCalibration* calibration = new CCalibration(setting.nAScan, setting.nFFTLength);
 	if (pData != nullptr && pData->GetExtraData(OCTHeader::ExtraData::Dispersion) != nullptr)
 	{
+		PLOGI.printf("Read dispersion from .oct file.");
 		calibration->Initialize((char*)pData->GetExtraData(OCTHeader::ExtraData::Dispersion));
 	}
 	else 
 	{
+		PLOGI.printf("Read dispersion from .dat file.");
 		calibration->Initialize(_T("CALIBRATION.DAT"));
 	}
 
 	USHORT* background = nullptr;
 	if (pData != nullptr && pData->GetExtraData(OCTHeader::ExtraData::Background) != nullptr) 
 	{
+		PLOGI.printf("Read background from .oct file.");
 		background = new USHORT[setting.nBufferSize];
 		memcpy(background, pData->GetExtraData(OCTHeader::ExtraData::Background), sizeof(USHORT) * setting.nBufferSize);
 	}
 	else 
 	{
+		PLOGI.printf("Read background from .dat file.");
 		background = readBackground("BACKGROUND.bin", setting);
 	}
+
+	PLOGI.printf("Create Imaging - %d x %d (type: %d)", setting.nAScan, setting.nBScan, type);
 
 	switch (type)
 	{
