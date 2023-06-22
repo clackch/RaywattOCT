@@ -151,6 +151,9 @@ namespace RaywattApp.ViewModels
 
                 SetCrossSectionBackground(RaySession.Review, Constants.CardBackgroundColor);
 
+                GetImageInfo(RaySession.Review);
+                MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
+
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
                 timerUpdateImage.Start();
