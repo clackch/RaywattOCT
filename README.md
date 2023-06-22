@@ -77,6 +77,10 @@ Download & Install Font
 1. [Pretendard](https://github.com/orioncactus/pretendard) 최신 버전 다운로드 후 압축 해제
 2. /Pretendard/public/static/alternative/Pretendard-Bold / Pretendard-Medium / Pretendard-Regular / Pretendard-SemiBold.ttf 실행, 설치
 
+설치확인 방법
+1. 설정 > 개인 설정 > 글꼴
+2. Pretendard 검색
+3. 확인
 
 ## [Cursor]
 Download & Create Folder, Copy/Paste
