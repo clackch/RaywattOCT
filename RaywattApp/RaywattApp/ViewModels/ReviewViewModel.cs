@@ -63,8 +63,6 @@ namespace RaywattApp.ViewModels
         }
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer();
-        private Thread? threadWaitLumenDetection = null;
-        private bool runWaitLumenDetection = false;
 
         private int outFrameNumber;
         public int OutFrameNumber
@@ -282,9 +280,6 @@ namespace RaywattApp.ViewModels
 
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
-
-            if (threadWaitLumenDetection != null && threadWaitLumenDetection.IsAlive)
-                runWaitLumenDetection = false;
         }
 
         protected void OnRecvLumenContour(int frame)
@@ -612,7 +607,6 @@ namespace RaywattApp.ViewModels
 
                     if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenContour))
                     {
-                        //DeviceStatus.IsLumenDetected = true;
                         DeviceStatus.IsLumenLoaded = false;
 
                         Thread threadMakeLumenProfile = new Thread(() => ThreadMakeLumenProfile(patientCaseAnnotations[0].LumenContour));
@@ -621,25 +615,13 @@ namespace RaywattApp.ViewModels
                     else
                     {
                         this.hasAnnotation = false;
-
-                        //DeviceStatus.IsLumenDetected = false;
                         DeviceStatus.IsLumenLoaded = false;
-                        //RayStartLumenDetection();
-
-                        //threadWaitLumenDetection = new Thread(new ThreadStart(threadFuncWaitLumenDetection));
-                        //threadWaitLumenDetection.Start();
                     }
                 }
                 else 
                 {
                     this.hasAnnotation = false;
-
-                    //DeviceStatus.IsLumenDetected = false;
-                    DeviceStatus.IsLumenLoaded = false;
-                    //RayStartLumenDetection();
-
-                    //threadWaitLumenDetection = new Thread(new ThreadStart(threadFuncWaitLumenDetection));
-                    //threadWaitLumenDetection.Start();
+                    DeviceStatus.IsLumenLoaded = true;
                 }
             }
 
@@ -819,56 +801,6 @@ namespace RaywattApp.ViewModels
             }
             DrawLumenProfileImage();
         }
-
-        /*
-        private void threadFuncWaitLumenDetection()
-        {
-            runWaitLumenDetection = true;
-            imglumenProfile = null;
-
-            while (runWaitLumenDetection && !DeviceStatus.IsLumenDetected)
-            {
-                Thread.Sleep((int) Constants.WaitForEventInterval);
-            }
-            runWaitLumenDetection = false;
-
-            for (int curFrame = 0; curFrame < LumenContours.Count; curFrame++)
-            {
-                int num = RayGetNumOfLumenContourPoints(curFrame);
-                if (num > 0)
-                {
-                    IntPtr contour = RayGetLumenContour(curFrame);
-                    if (contour == IntPtr.Zero) continue;
-
-                    Mat matContour = CommonUtil.ByteMemoryToCvMat(contour, 1, num, 2);
-
-                    LumenContours[curFrame].MlContour.Points = new List<Point>();
-                    for(int row = 0; row < matContour.Rows; row++)
-                    {
-                        Vec2i point = matContour.At<Vec2i>(0, row);
-                        LumenContours[curFrame].MlContour.Points.Add(new Point(point.Item0, point.Item1));
-                    }
-                    ContourMeasurement contourMeasurement = new ContourMeasurement();
-                    contourMeasurement.Measure(LumenContours[curFrame].MlContour, (int) Constants.OCTImageSize, (int) Constants.OCTImageSize);
-                    if (LumenContours[curFrame].MlContour.Valid)
-                    {
-                        contourMeasurement.CalculateDiameter(LumenContours[curFrame].MlContour);
-                    }
-                    LumenContours[curFrame].CopyMlToLumenContour();
-                }
-            }
-            imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours);
-
-            if (ReviewStatus.IsContourStentOn)
-                LumenContourCommand = Constants.LumenContourDraw;
-            else
-                LumenContourCommand = Constants.LumenContourCurrentInit;
-
-            PatientCase.StrLumenContour = JsonConvert.SerializeObject(LumenContours, Formatting.Indented);
-
-            DeviceStatus.IsLumenLoaded = true;
-        }
-        */
 
         private void updateNavigator(int curFrame, int totalFrame)
         {
