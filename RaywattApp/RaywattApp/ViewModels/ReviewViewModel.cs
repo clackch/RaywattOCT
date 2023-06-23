@@ -341,6 +341,16 @@ namespace RaywattApp.ViewModels
             }
         }
 
+        private void ThreadLumenDetectionDone()
+        {
+            while (!DeviceStatus.IsLumenDetected)
+            {
+                Thread.Sleep(500);
+            }
+
+            OnRecvLumenContour(ReviewStatus.NumberOfFrames - 1);
+        }
+
         private void Playback(object param)
         {
             string action = (string)param;
@@ -621,6 +631,9 @@ namespace RaywattApp.ViewModels
                 else 
                 {
                     this.hasAnnotation = false;
+
+                    Thread threadLumenDetectionDone = new Thread(() => ThreadLumenDetectionDone());
+                    threadLumenDetectionDone.Start();
                 }
             }
 
