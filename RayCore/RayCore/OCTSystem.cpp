@@ -1039,6 +1039,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	CStepMotorController* pPullbackMotor = pSystem->m_pStepMotor[STEP_MOTOR_PULLBACK];
 	IImaging::Setting settingPullback = pSystem->m_pImagingPullback->GetSetting();
 
+	PLOGI.printf("Pullback start.");
 	CDataWriter* pDataWriter = new CDataWriter();
 	pDataWriter->Initialize(settingPullback.nBufferSize * sizeof(USHORT));
 	pDataWriter->AddExtraData(OCTHeader::ExtraData::Dispersion, pSystem->m_pImagingPullback->GetCalibrationData(), settingPullback.nAScan * 2 * sizeof(int));
@@ -1083,6 +1084,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	Sleep(500);
 	pMotor->StopMotor();
 
+	PLOGI.printf("Pullback done.");
 	CImagingSession* pSession = CImagingSession::CreateSession(pSystem, SESSION_REVIEW, settingPullback, pDataWriter);
 	pSystem->postMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
 	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);

@@ -216,6 +216,7 @@ namespace RaywattApp.ViewModels
             }
             runWaitPullbackDone = false;
 
+            GetImageInfo(RaySession.Review);
             Playback();
         }
 
