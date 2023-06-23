@@ -17,12 +17,15 @@ namespace RaywattApp.Views.Component
         {
             IconDefault = SvgComponentBase.GetPath(resPath, iconName);
             IconOver = SvgComponentBase.GetPath(resPath, iconName, "_hover");
+            IconDisabled = SvgComponentBase.GetPath(resPath, iconName, "_disabled");
         }
 
         public static readonly DependencyProperty IconDefaultProperty = DependencyProperty.Register(nameof(IconDefault), typeof(string), typeof(IndicatorImage));
         public static readonly DependencyProperty IconOverProperty = DependencyProperty.Register(nameof(IconOver), typeof(string), typeof(IndicatorImage));
+        public static readonly DependencyProperty IconDisabledProperty = DependencyProperty.Register(nameof(IconDisabled), typeof(string), typeof(IndicatorImage));
 
         public string IconDefault { get => (string)GetValue(IconDefaultProperty); set => SetValue(IconDefaultProperty, value); }
         public string IconOver { get => (string)GetValue(IconOverProperty); set => SetValue(IconOverProperty, value); }
+        public string IconDisabled { get => (string)GetValue(IconDisabledProperty); set => SetValue(IconDisabledProperty, value); }
     }
 }

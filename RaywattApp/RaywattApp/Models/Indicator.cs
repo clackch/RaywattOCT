@@ -18,6 +18,9 @@ namespace RaywattApp.Models
         public Visibility _isVisible;
 
         [ObservableProperty]
+        public bool _isEnabled;
+
+        [ObservableProperty]
         public double _x = double.NaN;
 
         [ObservableProperty]

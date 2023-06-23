@@ -216,7 +216,8 @@ namespace RaywattApp.ViewModels
 
             IndicatorLongitude = new Indicator();
             IndicatorLongitude.X = Constants.LongitudeIndicatorWidth / 2;
-            IndicatorLongitude.IsVisible = Visibility.Collapsed;
+            IndicatorLongitude.IsVisible = Visibility.Visible;
+            IndicatorLongitude.IsEnabled = false;
 
             ExpandLeftUpMenu = true;
             ExpandLeftDownMenu = true;
@@ -588,7 +589,6 @@ namespace RaywattApp.ViewModels
         private void ThreadMakeLumenProfile(string lumenContour)
         {
             LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(lumenContour);
-            imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours);
 
             if (ReviewStatus.IsContourStentOn)
                 LumenContourCommand = Constants.LumenContourDraw;
@@ -680,7 +680,6 @@ namespace RaywattApp.ViewModels
                 if (ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault)
                 {
                     ReviewStatus.IsCalciumOn = true;
-                    IndicatorCrossSection.IsVisible = Visibility.Visible;
                 }
                 else
                 {
@@ -735,13 +734,17 @@ namespace RaywattApp.ViewModels
                 // when generating longitude image is completed
                 if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame)
                 {
-                    IndicatorLongitude.IsVisible = Visibility.Visible;
+                    IndicatorLongitude.IsEnabled = true;
 
                     if (!isLongitudeMeasurementInit)
                     {
                         MeasurementCommand = Constants.MeasureDrawAll;
                         isLongitudeMeasurementInit = true;
                     }
+                }
+                else if(DeviceStatus.IsLumenLoaded)
+                {
+                    imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, longitudeFrameInfo.curFrame);
                 }
             }
             DrawLumenProfileImage();

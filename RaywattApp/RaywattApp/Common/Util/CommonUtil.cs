@@ -494,18 +494,20 @@ namespace RaywattApp.Common.Util
             return imgExport;
         }
 
-        public static Mat MakeLumenProfileImage(List<LumenContour> lumenContours)
+        public static Mat MakeLumenProfileImage(List<LumenContour> lumenContours, int currentFrame = -1)
         {
             const double radius = Constants.OCTImageSize / 2;
             const double totalArea = radius * radius * Math.PI;
 
             if (lumenContours == null || lumenContours.Count <= 0) return null;
 
+            int cols = currentFrame == -1 ? lumenContours.Count : currentFrame + 1;
+
             Mat imglumenProfile = new Mat(100, lumenContours.Count, MatType.CV_8UC3);
             imglumenProfile.SetTo(new Scalar(0x4f, 0x4f, 0x4f));
 
             int curFrame = 0;
-            foreach (LumenContour lumenContour in lumenContours)
+            foreach (LumenContour lumenContour in lumenContours.GetRange(0, cols))
             {
                 double area = lumenContour.Area;
 
