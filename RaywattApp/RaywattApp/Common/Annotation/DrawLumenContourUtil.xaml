@@ -19,9 +19,9 @@
         </Style>
 
         <Style TargetType="Rectangle" x:Key="StyleRectangle">
-            <Setter Property="Width" Value="{Binding Zoom.ScaleX, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationRectWidth}}"/>
-            <Setter Property="Height" Value="{Binding Zoom.ScaleY, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationRectHeight}}"/>
-            <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThickness}}"/>
+            <Setter Property="Width" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationRectWidth}}"/>
+            <Setter Property="Height" Value="{Binding Zoom.ScaleY, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationRectHeight}}"/>
+            <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThickness}}"/>
             <Setter Property="Stroke" Value="Black"/>
             <Setter Property="Fill" Value="White"/>
         </Style>
@@ -37,7 +37,7 @@
                     <Setter Property="Cursor" Value="{StaticResource measureArea}"/>
                 </MultiDataTrigger>
                 <DataTrigger Binding="{Binding IsContourMouseOver, Source={x:Reference UserControl}}" Value="True">
-                    <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThicknessBold}}"/>
+                    <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThicknessBold}}"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -46,7 +46,7 @@
             <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThickness}}"/>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsContourMouseOver, Source={x:Reference UserControl}}" Value="True">
-                    <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThicknessBold}}"/>
+                    <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThicknessBold}}"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
