@@ -6,6 +6,7 @@
 
 typedef void (*FunctionPtr)(int, int);
 typedef void (*FunctionImgPtr)(int, void*, int, int, int, int);
+typedef void (*FunctionObjPtr)(int);
 
 enum class RayError {
 	OK = 0,
@@ -47,7 +48,6 @@ enum class RayCallbackRequest {
 	Unknown = 0,
 	State,
 	ProgressSave,
-	ProgressDetection,
 	Error,
 	Event,
 	WorkDone

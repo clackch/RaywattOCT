@@ -23,6 +23,7 @@ using OpenCvSharp;
 using RaywattApp.Common.Util;
 using System.Threading;
 using RaywattApp.Common.Annotation.Util;
+using System.Runtime.InteropServices;
 
 namespace RaywattApp.ViewModels
 {
@@ -206,6 +207,9 @@ namespace RaywattApp.ViewModels
             get { return this._zoomOutCommand ?? (this._zoomOutCommand = new RelayCommand(ZoomOut)); }
         }
 
+        private CallbackFunctionForDetection cbLumenContour;
+        public CallbackFunctionForDetection CBLumenContour => (this.cbLumenContour) ?? (this.cbLumenContour = new CallbackFunctionForDetection(OnRecvLumenContour));
+
         public ReviewViewModel(SqlManager sqlManager, IDialogService dialogService) : base(sqlManager, dialogService)
         {
             _log.Debug("ReviewViewModel");
@@ -236,6 +240,7 @@ namespace RaywattApp.ViewModels
             base.OnNavigated(sender, navigatedEventArgs);
             _log.Debug("OnNavigated");
 
+            RayRegisterDetectionCallback(Marshal.GetFunctionPointerForDelegate(CBLumenContour));
             var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
 
             if (extraData != null)
@@ -273,6 +278,8 @@ namespace RaywattApp.ViewModels
             _log.Debug("OnNavigating");
             Save();
 
+            RayUnregisterDetectionCallback();
+
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
 
@@ -280,14 +287,14 @@ namespace RaywattApp.ViewModels
                 runWaitLumenDetection = false;
         }
 
-        protected override void OnRecvLumenContour(int request, int frameInfo)
+        protected void OnRecvLumenContour(int frame)
         {
             if (LumenContours.Count != ReviewStatus.NumberOfFrames)
                 return;
 
-            if (isLumenDetectedFrontDone && frameInfo > 0)
+            if (isLumenDetectedFrontDone && frame > 0)
             {
-                int numOfFrames = frameInfo - 1;
+                int numOfFrames = frame - 1;
                 for(int curFrame = 0; curFrame < numOfFrames; curFrame++)
                 {
                     LumenContourProcess(curFrame);
@@ -296,11 +303,11 @@ namespace RaywattApp.ViewModels
                 isLumenDetectedFrontDone = false;
             }
 
-            LumenContourProcess(frameInfo);
+            LumenContourProcess(frame);
 
             imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours);
 
-            if(ReviewStatus.NumberOfFrames - 1 == frameInfo)
+            if(ReviewStatus.NumberOfFrames - 1 == frame)
             {
                 if (ReviewStatus.IsContourStentOn)
                     LumenContourCommand = Constants.LumenContourDraw;

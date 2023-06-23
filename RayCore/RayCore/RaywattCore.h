@@ -29,6 +29,8 @@ extern "C" {
 	_declspec(dllexport) RayError RaySetSession(int session);
 	_declspec(dllexport) RayError RayRegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude);
 	_declspec(dllexport) RayError RayUnregisterImageCallback();
+	_declspec(dllexport) RayError RayRegisterDetectionCallback(FunctionObjPtr cbObjectDetection);
+	_declspec(dllexport) RayError RayUnregisterDetectionCallback();
 	_declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value);
 	_declspec(dllexport) double RayGetProperty(RayProperty prop);
 	_declspec(dllexport) void* RayGetVolumeData();

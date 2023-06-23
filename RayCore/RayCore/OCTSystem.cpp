@@ -23,6 +23,7 @@ COCTSystem::COCTSystem() {
 	m_callback = nullptr;
 	m_cbCrossSection = nullptr;
 	m_cbLongitude = nullptr;
+	m_cbObjectDetection = nullptr;
 
 	m_pThreadService = nullptr;
 	m_pThreadSaveRaw = nullptr;
@@ -495,6 +496,24 @@ RayError COCTSystem::RegisterImageCallback(FunctionImgPtr cbCrossSection, Functi
 RayError COCTSystem::UnregisterImageCallback() {
 	m_cbCrossSection = nullptr;
 	m_cbLongitude = nullptr;
+
+	return RayError::OK;
+}
+
+/*
+* RegisterDetectionCallback
+*/
+RayError COCTSystem::RegisterDetectionCallback(FunctionObjPtr cbObjectDetection) {
+	m_cbObjectDetection = cbObjectDetection;
+
+	return RayError::OK;
+}
+
+/*
+* UnregisterDetectionCallback
+*/
+RayError COCTSystem::UnregisterDetectionCallback() {
+	m_cbObjectDetection = nullptr;
 
 	return RayError::OK;
 }
@@ -1402,8 +1421,7 @@ LRESULT COCTSystem::OnMsgProcessDetection(WPARAM wParam, LPARAM lParam) {
 	UINT nSession = wParam;
 	UINT nFrame = lParam;
 
-	int nFrameInfo = (nSession << 16) | (nFrame);
-	if (m_callback != nullptr) m_callback((int)RayCallbackRequest::ProgressDetection, nFrameInfo);
+	if (m_cbObjectDetection != nullptr) m_cbObjectDetection(nFrame);
 
 	return NOERROR;
 }

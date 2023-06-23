@@ -71,6 +71,12 @@ _declspec(dllexport) RayError RayRegisterImageCallback(FunctionImgPtr cbCrossSec
 _declspec(dllexport) RayError RayUnregisterImageCallback() {
     return octSystem.UnregisterImageCallback();
 }
+_declspec(dllexport) RayError RayRegisterDetectionCallback(FunctionObjPtr cbObjectDetection) {
+    return octSystem.RegisterDetectionCallback(cbObjectDetection);
+}
+_declspec(dllexport) RayError RayUnregisterDetectionCallback() {
+    return octSystem.UnregisterDetectionCallback();
+}
 _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
 
     switch (prop) {
