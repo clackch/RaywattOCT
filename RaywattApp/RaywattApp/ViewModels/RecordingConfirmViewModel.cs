@@ -16,6 +16,7 @@ using OpenCvSharp;
 using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Annotation.Util;
 using RaywattApp.Common.Util;
+using System.Threading;
 
 namespace RaywattApp.ViewModels
 {
@@ -39,6 +40,9 @@ namespace RaywattApp.ViewModels
 
         private DispatcherTimer timer = new DispatcherTimer();
         private DispatcherTimer timerUpdateImage = new DispatcherTimer();
+
+        private Thread threadWaitPullbackDone;
+        private bool runWaitPullbackDone;
 
         private ICommand _redoPullbackCommand;
         public ICommand RedoPullbackCommand
@@ -80,6 +84,9 @@ namespace RaywattApp.ViewModels
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
                 timerUpdateImage.Start();
+
+                threadWaitPullbackDone = new Thread(new ThreadStart(threadFuncWaitPullbackDone));
+                threadWaitPullbackDone.Start();
             }
         }
 
@@ -197,6 +204,19 @@ namespace RaywattApp.ViewModels
             }
 
             return lumenContours;
+        }
+
+        private void threadFuncWaitPullbackDone()
+        { 
+            runWaitPullbackDone = true;
+
+            while (runWaitPullbackDone && !DeviceStatus.IsPullbackDone)
+            {
+                Thread.Sleep((int)Constants.WaitForEventInterval);
+            }
+            runWaitPullbackDone = false;
+
+            Playback();
         }
 
     }

@@ -754,7 +754,7 @@ namespace RaywattApp.ViewModels
 
             while (runWaitLumenDetection && !DeviceStatus.IsLumenDetected)
             {
-                Thread.Sleep((int) Constants.UpdateLumenProfileInterval);
+                Thread.Sleep((int) Constants.WaitForEventInterval);
             }
             runWaitLumenDetection = false;
 
