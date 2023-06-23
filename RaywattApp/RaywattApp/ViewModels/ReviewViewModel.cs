@@ -514,6 +514,8 @@ namespace RaywattApp.ViewModels
 
                 LumenContours = PatientCase.LumenContour;
                 imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours);
+
+                DeviceStatus.IsLumenLoaded = true;
             }
             else
             {
