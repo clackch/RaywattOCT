@@ -308,6 +308,7 @@ namespace RaywattApp.ViewModels
                     DeviceStatus.CatheterStatus = Constants.CatheterStatusUnloaded;
                     break;
                 case RayWorkItem.Pullback:
+                    DeviceStatus.IsPullbackDone = true;
                     Task.Run(() => {
                         Thread.Sleep(3000);
                         RayUnloadCatheter();
