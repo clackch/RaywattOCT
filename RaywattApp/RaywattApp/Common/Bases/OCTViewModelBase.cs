@@ -69,6 +69,9 @@ namespace RaywattApp.Common.Bases
         private CallbackFunctionWithImage cbLongitude;
         public CallbackFunctionWithImage CBLongitude => (this.cbLongitude) ?? (this.cbLongitude = new CallbackFunctionWithImage(OnRecvLongitude));
 
+        private CallbackFunction cbLumenContour;
+        public CallbackFunction CBLumenContour => (this.cbLumenContour) ?? (this.cbLumenContour = new CallbackFunction(OnRecvLumenContour));
+
 
         public OCTViewModelBase()
         {
@@ -111,6 +114,8 @@ namespace RaywattApp.Common.Bases
             imgLongitude = imgRecv;
             longitudeFrameInfo = new FrameInfo(frameInfo);
         }
+
+        protected virtual void OnRecvLumenContour(int request, int frameInfo) { }
 
         protected bool DrawCrossSectionImage()
         {

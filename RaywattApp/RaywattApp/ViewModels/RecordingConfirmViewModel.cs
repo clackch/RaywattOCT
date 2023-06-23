@@ -12,10 +12,6 @@ using System;
 using System.Collections.Generic;
 using static RaywattOCT.RayCoreWrapper;
 using System.Windows.Threading;
-using OpenCvSharp;
-using RaywattApp.Common.Annotation.Models;
-using RaywattApp.Common.Annotation.Util;
-using RaywattApp.Common.Util;
 using System.Threading;
 
 namespace RaywattApp.ViewModels
@@ -161,15 +157,16 @@ namespace RaywattApp.ViewModels
                 // when generating longitude image is completed
                 if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame)
                 {
-                    PatientCase.Bookmark = "[]";
-                    PatientCase.CrossSection = "[]";
-                    PatientCase.Longitude = "";
-                    PatientCase.LumenContour = getLumenContours();
+                    //PatientCase.Bookmark = "[]";
+                    //PatientCase.CrossSection = "[]";
+                    //PatientCase.Longitude = "";
+                    //PatientCase.LumenContour = getLumenContours();
                     IsPullbackDone = true;
                 }
             }
         }
 
+        /*
         private List<LumenContour> getLumenContours()
         {
             int numOfFrames = (int)RayGetProperty(Property.ImageDepth);
@@ -205,6 +202,7 @@ namespace RaywattApp.ViewModels
 
             return lumenContours;
         }
+        */
 
         private void threadFuncWaitPullbackDone()
         { 

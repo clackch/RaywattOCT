@@ -102,6 +102,8 @@ namespace RaywattApp.ViewModels
         private string _lumenContourCommand;
         public string LumenContourCommand { get { return _lumenContourCommand; } set { _lumenContourCommand = value; OnPropertyChanged(nameof(LumenContourCommand)); } }
 
+        private bool isLumenDetectedFrontDone = true;
+
         [ObservableProperty]
         private Zoom _zoomAngio = new Zoom(Constants.CrossSectionAngio / Constants.OCTImageSize);
 
@@ -276,6 +278,65 @@ namespace RaywattApp.ViewModels
 
             if (threadWaitLumenDetection != null && threadWaitLumenDetection.IsAlive)
                 runWaitLumenDetection = false;
+        }
+
+        protected override void OnRecvLumenContour(int request, int frameInfo)
+        {
+            if (LumenContours.Count != ReviewStatus.NumberOfFrames)
+                return;
+
+            if (isLumenDetectedFrontDone && frameInfo > 0)
+            {
+                int numOfFrames = frameInfo - 1;
+                for(int curFrame = 0; curFrame < numOfFrames; curFrame++)
+                {
+                    LumenContourProcess(curFrame);
+                }
+
+                isLumenDetectedFrontDone = false;
+            }
+
+            LumenContourProcess(frameInfo);
+
+            imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours);
+
+            if(ReviewStatus.NumberOfFrames - 1 == frameInfo)
+            {
+                if (ReviewStatus.IsContourStentOn)
+                    LumenContourCommand = Constants.LumenContourDraw;
+                else
+                    LumenContourCommand = Constants.LumenContourCurrentInit;
+
+                PatientCase.StrLumenContour = JsonConvert.SerializeObject(LumenContours, Formatting.Indented);
+
+                DeviceStatus.IsLumenLoaded = true;
+            }
+        }
+
+        private void LumenContourProcess(int frameInfo)
+        {
+            int num = RayGetNumOfLumenContourPoints(frameInfo);
+            if (num > 0)
+            {
+                IntPtr contour = RayGetLumenContour(frameInfo);
+                if (contour == IntPtr.Zero) return;
+
+                Mat matContour = CommonUtil.ByteMemoryToCvMat(contour, 1, num, 2);
+
+                LumenContours[frameInfo].MlContour.Points = new List<Point>();
+                for (int row = 0; row < matContour.Rows; row++)
+                {
+                    Vec2i point = matContour.At<Vec2i>(0, row);
+                    LumenContours[frameInfo].MlContour.Points.Add(new Point(point.Item0, point.Item1));
+                }
+                ContourMeasurement contourMeasurement = new ContourMeasurement();
+                contourMeasurement.Measure(LumenContours[frameInfo].MlContour, (int)Constants.OCTImageSize, (int)Constants.OCTImageSize);
+                if (LumenContours[frameInfo].MlContour.Valid)
+                {
+                    contourMeasurement.CalculateDiameter(LumenContours[frameInfo].MlContour);
+                }
+                LumenContours[frameInfo].CopyMlToLumenContour();
+            }
         }
 
         private void Playback(object param)
@@ -544,7 +605,7 @@ namespace RaywattApp.ViewModels
 
                     if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenContour))
                     {
-                        DeviceStatus.IsLumenDetected = true;
+                        //DeviceStatus.IsLumenDetected = true;
                         DeviceStatus.IsLumenLoaded = false;
 
                         Thread threadMakeLumenProfile = new Thread(() => ThreadMakeLumenProfile(patientCaseAnnotations[0].LumenContour));
@@ -554,24 +615,24 @@ namespace RaywattApp.ViewModels
                     {
                         this.hasAnnotation = false;
 
-                        DeviceStatus.IsLumenDetected = false;
+                        //DeviceStatus.IsLumenDetected = false;
                         DeviceStatus.IsLumenLoaded = false;
-                        RayStartLumenDetection();
+                        //RayStartLumenDetection();
 
-                        threadWaitLumenDetection = new Thread(new ThreadStart(threadFuncWaitLumenDetection));
-                        threadWaitLumenDetection.Start();
+                        //threadWaitLumenDetection = new Thread(new ThreadStart(threadFuncWaitLumenDetection));
+                        //threadWaitLumenDetection.Start();
                     }
                 }
                 else 
                 {
                     this.hasAnnotation = false;
 
-                    DeviceStatus.IsLumenDetected = false;
+                    //DeviceStatus.IsLumenDetected = false;
                     DeviceStatus.IsLumenLoaded = false;
-                    RayStartLumenDetection();
+                    //RayStartLumenDetection();
 
-                    threadWaitLumenDetection = new Thread(new ThreadStart(threadFuncWaitLumenDetection));
-                    threadWaitLumenDetection.Start();
+                    //threadWaitLumenDetection = new Thread(new ThreadStart(threadFuncWaitLumenDetection));
+                    //threadWaitLumenDetection.Start();
                 }
             }
 
@@ -752,6 +813,7 @@ namespace RaywattApp.ViewModels
             DrawLumenProfileImage();
         }
 
+        /*
         private void threadFuncWaitLumenDetection()
         {
             runWaitLumenDetection = true;
@@ -799,6 +861,7 @@ namespace RaywattApp.ViewModels
 
             DeviceStatus.IsLumenLoaded = true;
         }
+        */
 
         private void updateNavigator(int curFrame, int totalFrame)
         {
