@@ -311,7 +311,7 @@ namespace RaywattApp.ViewModels
 
                 PatientCase.StrLumenContour = JsonConvert.SerializeObject(LumenContours, Formatting.Indented);
 
-                DeviceStatus.IsLumenLoaded = true;
+                DeviceStatus.IsLumenSaved = true;
             }
         }
 
@@ -621,7 +621,6 @@ namespace RaywattApp.ViewModels
                 else 
                 {
                     this.hasAnnotation = false;
-                    DeviceStatus.IsLumenLoaded = true;
                 }
             }
 

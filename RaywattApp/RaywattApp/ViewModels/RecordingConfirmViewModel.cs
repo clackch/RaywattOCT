@@ -99,7 +99,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("RedoPullback");
 
-            DeviceStatus.IsLumenLoaded = true;
+            DeviceStatus.IsLumenSaved = true;
 
             RayEndReview();
 
@@ -157,52 +157,10 @@ namespace RaywattApp.ViewModels
                 // when generating longitude image is completed
                 if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame)
                 {
-                    //PatientCase.Bookmark = "[]";
-                    //PatientCase.CrossSection = "[]";
-                    //PatientCase.Longitude = "";
-                    //PatientCase.LumenContour = getLumenContours();
                     IsPullbackDone = true;
                 }
             }
         }
-
-        /*
-        private List<LumenContour> getLumenContours()
-        {
-            int numOfFrames = (int)RayGetProperty(Property.ImageDepth);
-
-            List<LumenContour> lumenContours = new List<LumenContour>();
-            for (int curFrame = 0; curFrame < numOfFrames; curFrame++)
-            {
-                int num = RayGetNumOfLumenContourPoints(curFrame);
-                if (num > 0)
-                {
-                    IntPtr contour = RayGetLumenContour(curFrame);
-                    if (contour == IntPtr.Zero) continue;
-
-                    Mat matContour = CommonUtil.ByteMemoryToCvMat(contour, 1, num, 2);
-
-                    LumenContour lumenContour = new LumenContour();
-                    lumenContour.MlContour.Points = new List<System.Windows.Point>();
-                    for (int row = 0; row < matContour.Rows; row++)
-                    {
-                        Vec2i point = matContour.At<Vec2i>(0, row);
-                        lumenContour.MlContour.Points.Add(new System.Windows.Point(point.Item0, point.Item1));
-                    }
-                    ContourMeasurement contourMeasurement = new ContourMeasurement();
-                    contourMeasurement.Measure(lumenContour.MlContour, (int)Constants.OCTImageSize, (int)Constants.OCTImageSize);
-                    if (lumenContour.MlContour.Valid)
-                    {
-                        contourMeasurement.CalculateDiameter(lumenContour.MlContour);
-                    }
-                    lumenContour.CopyMlToLumenContour();
-                    lumenContours.Add(lumenContour);
-                }
-            }
-
-            return lumenContours;
-        }
-        */
 
         private void threadFuncWaitPullbackDone()
         { 
