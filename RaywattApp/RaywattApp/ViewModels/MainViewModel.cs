@@ -197,6 +197,12 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Exit");
 
+            DeviceStatus.IsPaused = true;
+            while (!DeviceStatus.CanExit)
+            {
+                Thread.Sleep(50);
+            }
+
             RayDisconnectDevices();
             RayStopSystem();
 

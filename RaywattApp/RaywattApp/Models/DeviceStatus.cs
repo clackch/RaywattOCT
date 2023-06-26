@@ -37,7 +37,10 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private bool _isPaused = true;
-        
+
+        [ObservableProperty]
+        private bool _canExit = true;
+
         [ObservableProperty]
         private bool _isLumenSaved = true;
 

@@ -316,11 +316,13 @@ namespace RaywattApp.Common.Bases
         }
         private void ThreadFuncPlayback()
         {
+            DeviceStatus.CanExit = false;
             while (!DeviceStatus.IsPaused)
             {
                 NextFrame(RaySession.Review);
                 Thread.Sleep((int)Constants.PlaybackInterval);
-            }            
+            }
+            DeviceStatus.CanExit = true;
         }
     }
 }
