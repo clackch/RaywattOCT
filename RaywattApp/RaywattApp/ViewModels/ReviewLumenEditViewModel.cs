@@ -64,7 +64,7 @@ namespace RaywattApp.ViewModels
         private string _lumenContourCommand;
         public string LumenContourCommand { get { return _lumenContourCommand; } set { _lumenContourCommand = value; OnPropertyChanged(nameof(LumenContourCommand)); } }
 
-        private DispatcherTimer timerUpdateImage = new DispatcherTimer();
+        private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
         private ICommand _okCommand;
         public ICommand OkCommand

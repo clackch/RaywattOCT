@@ -32,7 +32,7 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private ReviewStatus _reviewStatus;
 
-        private DispatcherTimer timerUpdateImage = new DispatcherTimer();
+        private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
         private ICommand _okCommand;
         public ICommand OkCommand

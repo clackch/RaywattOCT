@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.Common.Bases
 {
@@ -179,6 +180,9 @@ namespace RaywattApp.Common.Bases
         {
             _log.Debug("Export");
 
+            if (!DeviceStatus.IsPaused)
+                Playback();
+
             //화면 변경 사항에 대해서도 Export 하기 위해서, Save 처리
             Save();
 
@@ -189,7 +193,7 @@ namespace RaywattApp.Common.Bases
             fileExport.SelectedItem = new List<string>();
             fileExport.SelectedItem.Add(PatientCase.Id);
             fileExport.IsFromReview = true;
-            fileExport.CurrentFrame = FrameNumber;
+            fileExport.CurrentFrame = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current;
             fileExport.BookmarkedFrames = GetBookmarks();
             parameter["fileExport"] = fileExport;
 

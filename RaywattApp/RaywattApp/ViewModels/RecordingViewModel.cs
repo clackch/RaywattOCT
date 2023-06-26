@@ -40,7 +40,7 @@ namespace RaywattApp.ViewModels
 
         private DispatcherTimer timer = new DispatcherTimer();
         private DispatcherTimer readyTimer = new DispatcherTimer();
-        private DispatcherTimer timerUpdateImage = new DispatcherTimer();
+        private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
         private bool isReadyOn = true;
 

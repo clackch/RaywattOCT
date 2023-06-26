@@ -62,7 +62,7 @@ namespace RaywattApp.ViewModels
             set { _rightSideBarExpand = value; OnPropertyChanged(nameof(RightSideBarExpand)); }
         }
 
-        private DispatcherTimer timerUpdateImage = new DispatcherTimer();
+        private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
         private int outFrameNumber;
         public int OutFrameNumber
@@ -357,10 +357,16 @@ namespace RaywattApp.ViewModels
 
             if (action.ToLower().Equals("prev"))
             {
+                if (!DeviceStatus.IsPaused)
+                    Playback();
+
                 PrevFrame(RaySession.Review);
             }
             else if (action.ToLower().Equals("next"))
             {
+                if (!DeviceStatus.IsPaused)
+                    Playback();
+
                 NextFrame(RaySession.Review);
             }
             else if (action.ToLower().Equals("play"))
@@ -431,6 +437,9 @@ namespace RaywattApp.ViewModels
             {
                 if (indicator.IsLongitudeClicked)
                 {
+                    if (!DeviceStatus.IsPaused)
+                        Playback();
+
                     indicator.IsLongitudeClicked = false;
                     return;
                 }

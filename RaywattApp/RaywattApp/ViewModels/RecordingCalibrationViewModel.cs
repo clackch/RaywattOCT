@@ -27,7 +27,7 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private PrevStatus _prevStatus;
 
-        private DispatcherTimer timerUpdateImage = new DispatcherTimer();
+        private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
         private ICommand _cmdBack;
         public ICommand CmdBack
