@@ -1442,6 +1442,10 @@ void COCTSystem::closeAllSessions() {
 	m_curSession = SESSION_UNKNOWN;
 }
 void COCTSystem::setBrightnessContrastAllSessions() {
+	CConfiguration& config = CConfiguration::GetInstance();
+	config.imaging.brightness = m_fBrightness;
+	config.imaging.contrast = m_fContrast;
+
 	m_pImagingPullback->SetBrightnessContrast(m_fBrightness, m_fContrast);
 	m_pImagingLiveView->SetBrightnessContrast(m_fBrightness, m_fContrast);
 
