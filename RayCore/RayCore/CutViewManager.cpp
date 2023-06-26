@@ -63,12 +63,13 @@ void CCutViewManager::AddRecord(cv::Mat imgCircle, int nFrameIndex) {
 		m_vRecords.at(nFrameIndex) = imgCircle.clone();
 	}
 }
-cv::Mat CCutViewManager::DrawLongitudeImage(int nDrawSamples) {
+cv::Mat CCutViewManager::DrawLongitudeImage(int nDrawSamples, double brightness, double contrast) {
 	cv::Mat imgMask = cv::Mat(m_imgCutView.rows, m_imgCutView.cols, CV_8UC1);
 	cv::Rect rectMask = cv::Rect(0, 0, nDrawSamples, imgMask.rows);
 	memset(imgMask.data, 0x00, imgMask.cols * imgMask.rows);
 	imgMask(rectMask) = 0x01;
 
+	cv::convertScaleAbs(m_imgCutView, m_imgCutView, contrast, brightness);
 	cv::copyTo(m_imgCutView, m_imgLongitude, imgMask);
 	
 	return m_imgLongitude;

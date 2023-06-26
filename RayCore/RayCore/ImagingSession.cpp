@@ -303,6 +303,11 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 	CImagingSession* pSession = (CImagingSession*)param;
 	IDataManager* pDataManager = pSession->m_pDataManager;
 	int nSession = pSession->m_nSession;
+	IImaging::Setting setting = pSession->m_pImaging->GetSetting();
+
+	// apply brightness / contrast when DrawLongitudeImage is called.
+	setting.brightness = 0.f;
+	setting.contrast = 1.0f;
 
 	// prepare imaging (without message)
 	COCTImaging* pImaging = CreateColorImaging(nullptr, pSession->m_pImaging->GetSetting(), pDataManager, pSession->GetImagingType());
