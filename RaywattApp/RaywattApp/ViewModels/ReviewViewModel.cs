@@ -24,6 +24,7 @@ using RaywattApp.Common.Util;
 using System.Threading;
 using RaywattApp.Common.Annotation.Util;
 using System.Runtime.InteropServices;
+using System.Windows.Controls;
 
 namespace RaywattApp.ViewModels
 {
@@ -289,19 +290,19 @@ namespace RaywattApp.ViewModels
 
             if (isLumenDetectedFrontDone && frame > 0)
             {
-                for(int curFrame = 0; curFrame < frame; curFrame++)
+                isLumenDetectedFrontDone = false;
+
+                for (int curFrame = 0; curFrame < frame; curFrame++)
                 {
                     LumenContourProcess(curFrame);
                 }
-
-                isLumenDetectedFrontDone = false;
             }
 
             LumenContourProcess(frame);
 
-            imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours);
+            imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, frame);
 
-            if(ReviewStatus.NumberOfFrames - 1 == frame)
+            if (ReviewStatus.NumberOfFrames - 1 == frame)
             {
                 if (ReviewStatus.IsContourStentOn)
                     LumenContourCommand = Constants.LumenContourDraw;
@@ -347,7 +348,8 @@ namespace RaywattApp.ViewModels
                 Thread.Sleep(500);
             }
 
-            OnRecvLumenContour(ReviewStatus.NumberOfFrames - 1);
+            if(isLumenDetectedFrontDone)
+                OnRecvLumenContour(ReviewStatus.NumberOfFrames - 1);           
         }
 
         private void Playback(object param)
@@ -633,7 +635,7 @@ namespace RaywattApp.ViewModels
                     else
                     {
                         this.hasAnnotation = false;
-                        DeviceStatus.IsLumenLoaded = false;
+                        RayStartLumenDetection();
                     }
                 }
                 else 
