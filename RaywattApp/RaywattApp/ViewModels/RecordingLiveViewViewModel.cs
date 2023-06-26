@@ -37,7 +37,7 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private Dictionary<string, string> _procedureList;
 
-        private DispatcherTimer timerUpdateImage = new DispatcherTimer();
+        private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
         private int _brightness;
         public int Brightness

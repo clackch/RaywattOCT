@@ -62,7 +62,7 @@ namespace RaywattApp.ViewModels
             set { _rightSideBarExpand = value; OnPropertyChanged(nameof(RightSideBarExpand)); }
         }
 
-        private DispatcherTimer timerUpdateImage = new DispatcherTimer();
+        private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
         private int outFrameNumber;
         public int OutFrameNumber

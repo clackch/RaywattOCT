@@ -35,7 +35,7 @@ namespace RaywattApp.ViewModels
         private bool _isPullbackDone = false;
 
         private DispatcherTimer timer = new DispatcherTimer();
-        private DispatcherTimer timerUpdateImage = new DispatcherTimer();
+        private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
         private Thread threadWaitPullbackDone;
         private bool runWaitPullbackDone;
