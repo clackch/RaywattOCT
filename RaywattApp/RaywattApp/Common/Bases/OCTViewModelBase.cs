@@ -6,8 +6,8 @@ using RaywattApp.Models;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows.Media.Imaging;
-using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
 using Point = OpenCvSharp.Point;
 
@@ -60,7 +60,7 @@ namespace RaywattApp.Common.Bases
         [ObservableProperty]
         private bool _isPaused = true;
 
-        private DispatcherTimer timerPlayback = new DispatcherTimer();
+        private Thread threadFuncPlayback;
 
         // to avoid garbage collection
         private CallbackFunctionWithImage cbCrossSection;
@@ -270,17 +270,18 @@ namespace RaywattApp.Common.Bases
         {
             if (DeviceStatus.IsPaused)
             {
-                timerPlayback.Interval = TimeSpan.FromMilliseconds(Constants.PlaybackInterval);
-                timerPlayback.Tick += new EventHandler(timerFuncPlayback);
-                timerPlayback.Start();
+                DeviceStatus.IsPaused = false;
+
+                threadFuncPlayback = new Thread(() => ThreadFuncPlayback());
+                threadFuncPlayback.Start();
             }
             else
             {
-                if (timerPlayback.IsEnabled)
-                    timerPlayback.Stop();
+                DeviceStatus.IsPaused = true;
+
+                threadFuncPlayback.Join();
             }
 
-            DeviceStatus.IsPaused = !DeviceStatus.IsPaused;
             IsPaused = DeviceStatus.IsPaused;
         }
         protected bool MoveToFrame(RaySession session, int nFrame)
@@ -313,9 +314,13 @@ namespace RaywattApp.Common.Bases
 
             DeviceStatus.ReviewImageInfos[(int)session] = imageInfo;
         }
-        private void timerFuncPlayback(object sender, EventArgs e)
+        private void ThreadFuncPlayback()
         {
-            NextFrame(RaySession.Review);
+            while (!DeviceStatus.IsPaused)
+            {
+                NextFrame(RaySession.Review);
+                Thread.Sleep((int)Constants.PlaybackInterval);
+            }            
         }
     }
 }
