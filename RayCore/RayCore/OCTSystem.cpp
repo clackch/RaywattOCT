@@ -364,8 +364,8 @@ int COCTSystem::StartReview(char* strFilePath) {
 			return (int)RayError::InvalidArgument;
 		}
 
-		postMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
-		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
+		postPriorMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
+		postPriorMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
 	
 		return pSession->GetDataManager()->GetNumOfSamples();
 	}
@@ -389,7 +389,7 @@ RayError COCTSystem::StartCompare(char* strFilePath) {
 		m_reviewSession[SESSION_COMPARE]->Stop();
 	}
 
-	postMessage(WM_START_REVIEW_SESSION, SESSION_COMPARE, (LPARAM)pSession);
+	postPriorMessage(WM_START_REVIEW_SESSION, SESSION_COMPARE, (LPARAM)pSession);
 
 	return RayError::OK;
 }
@@ -1105,9 +1105,9 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 
 	PLOGI.printf("Pullback done.");
 	CImagingSession* pSession = CImagingSession::CreateSession(pSystem, SESSION_REVIEW, settingPullback, pDataWriter);
-	pSystem->postMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
-	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
-	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::Pullback);
+	pSystem->postPriorMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
+	pSystem->postPriorMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
+	pSystem->postPriorMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::Pullback);
 
 	pSession->StartObjectDetection();
 

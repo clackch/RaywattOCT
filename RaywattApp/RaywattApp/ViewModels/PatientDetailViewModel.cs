@@ -16,6 +16,7 @@ using RaywattApp.Views.Dialog;
 using RaywattApp.Common.Dialog;
 using static RaywattOCT.RayCoreWrapper;
 using System.Windows;
+using System.Threading;
 
 namespace RaywattApp.ViewModels
 {
@@ -350,6 +351,20 @@ namespace RaywattApp.ViewModels
 
             RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
             int numOfFrames = RayStartReview(patientCase.ImageFullPath);
+
+            if (numOfFrames < (int)RayError.OK)
+            {
+                // To-Do: Error
+            }
+            else
+            {
+                // Wait for Review to start
+                for (int i = 0; i < 10; i++)
+                {
+                    if ((RayScannerState)RayGetProperty(Property.CurrentState) == RayScannerState.Review) break;
+                    Thread.Sleep(5);
+                }
+            }
 
             DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current = 0;
             DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total = 0;
