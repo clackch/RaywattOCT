@@ -289,8 +289,7 @@ namespace RaywattApp.ViewModels
 
             if (isLumenDetectedFrontDone && frame > 0)
             {
-                int numOfFrames = frame - 1;
-                for(int curFrame = 0; curFrame < numOfFrames; curFrame++)
+                for(int curFrame = 0; curFrame < frame; curFrame++)
                 {
                     LumenContourProcess(curFrame);
                 }

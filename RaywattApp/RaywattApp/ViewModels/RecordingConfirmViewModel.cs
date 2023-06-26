@@ -101,6 +101,11 @@ namespace RaywattApp.ViewModels
 
             DeviceStatus.IsLumenSaved = true;
 
+            if (DeviceStatus.IsPaused == false)
+            {
+                Playback();
+            }
+
             RayEndReview();
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
