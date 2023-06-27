@@ -40,7 +40,7 @@ namespace RaywattApp.ViewModels
 
         private DispatcherTimer timer = new DispatcherTimer();
         private DispatcherTimer readyTimer = new DispatcherTimer();
-        private DispatcherTimer timerUpdateImage = new DispatcherTimer();
+        private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
         private bool isReadyOn = true;
 
@@ -172,8 +172,9 @@ namespace RaywattApp.ViewModels
                 timer.Stop();
 
             PatientCase.Image = generateFileName("oct");
+            DeviceStatus.IsLumenSaved = false;
+            DeviceStatus.IsPullbackDone = false;
             DeviceStatus.IsLumenDetected = false;
-            DeviceStatus.IsLumenLoaded = false;
             RayPullbackScan(PatientCase.ImageFullPath);
 
             leaveToPage(Constants.RecordingConfirmPage);

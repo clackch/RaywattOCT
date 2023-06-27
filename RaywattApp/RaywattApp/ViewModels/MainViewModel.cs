@@ -197,6 +197,12 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Exit");
 
+            DeviceStatus.IsPaused = true;
+            while (!DeviceStatus.CanExit)
+            {
+                Thread.Sleep(50);
+            }
+
             RayDisconnectDevices();
             RayStopSystem();
 
@@ -308,6 +314,7 @@ namespace RaywattApp.ViewModels
                     DeviceStatus.CatheterStatus = Constants.CatheterStatusUnloaded;
                     break;
                 case RayWorkItem.Pullback:
+                    DeviceStatus.IsPullbackDone = true;
                     Task.Run(() => {
                         Thread.Sleep(3000);
                         RayUnloadCatheter();

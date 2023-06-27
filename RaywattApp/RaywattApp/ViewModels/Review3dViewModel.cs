@@ -87,7 +87,7 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private bool _isPaused;
 
-        private DispatcherTimer timerUpdateImage = new DispatcherTimer();
+        private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
         private ICommand _cmdRotateIndicator;
         public ICommand CmdRotateIndicator

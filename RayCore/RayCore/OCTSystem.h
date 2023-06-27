@@ -36,6 +36,7 @@ private:
 	// Thread
 	FunctionPtr m_callback;
 	FunctionImgPtr m_cbCrossSection, m_cbLongitude;
+	FunctionObjPtr m_cbObjectDetection;
 	
 	CThread* m_pThreadService;
 	CThread* m_pThreadSaveRaw;
@@ -102,6 +103,8 @@ public:
 	RayError SetSession(int session);
 	RayError RegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude);
 	RayError UnregisterImageCallback();
+	RayError RegisterDetectionCallback(FunctionObjPtr cbObjectDetection);
+	RayError UnregisterDetectionCallback();
 	void* GetVolumeData();
 	RayError StartLumenDetection();
 	RayError OpenImage(char* strFilePath);
@@ -158,6 +161,7 @@ private:
 	void stopAllSessions();
 	void closeAllSessions();
 	void setBrightnessContrastAllSessions();
+	void redrawCutView();
 
 protected:
 	LRESULT OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam);

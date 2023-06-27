@@ -23,6 +23,7 @@ using OpenCvSharp;
 using RaywattApp.Common.Util;
 using System.Threading;
 using RaywattApp.Common.Annotation.Util;
+using System.Runtime.InteropServices;
 
 namespace RaywattApp.ViewModels
 {
@@ -61,9 +62,7 @@ namespace RaywattApp.ViewModels
             set { _rightSideBarExpand = value; OnPropertyChanged(nameof(RightSideBarExpand)); }
         }
 
-        private DispatcherTimer timerUpdateImage = new DispatcherTimer();
-        private Thread? threadWaitLumenDetection = null;
-        private bool runWaitLumenDetection = false;
+        private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
         private int outFrameNumber;
         public int OutFrameNumber
@@ -82,25 +81,27 @@ namespace RaywattApp.ViewModels
         private bool _measurementCommandOff;
         public bool MeasurementCommandOff { get { return _measurementCommandOff; } set { _measurementCommandOff = value; OnPropertyChanged(nameof(MeasurementCommandOff)); } }
 
-        private List<Measurement> measurements = new List<Measurement>();
+        private List<Measurement> measurements;
         public List<Measurement> Measurements { get { return measurements; } set { measurements = value; OnPropertyChanged(nameof(Measurements)); } }
 
         private bool isLongitudeMeasurementInit;
 
-        private ObservableCollection<LengthGeometry> _lModeLengthGeometries = new ObservableCollection<LengthGeometry>();
+        private ObservableCollection<LengthGeometry> _lModeLengthGeometries;
         public ObservableCollection<LengthGeometry> LModeLengthGeometries { get { return _lModeLengthGeometries; } set { _lModeLengthGeometries = value; OnPropertyChanged(nameof(LModeLengthGeometries)); } }
 
-        private List<TextGeometry> _lModeTextGeometries = new List<TextGeometry>();
+        private List<TextGeometry> _lModeTextGeometries;
         public List<TextGeometry> LModeTextGeometries { get { return _lModeTextGeometries; } set { _lModeTextGeometries = value; OnPropertyChanged(nameof(LModeTextGeometries)); } }
 
         [ObservableProperty]
         private LumenContour _currentLumenContour;
 
-        private List<LumenContour> _lumenContours = new List<LumenContour>();
+        private List<LumenContour> _lumenContours;
         public List<LumenContour> LumenContours { get { return _lumenContours; } set { _lumenContours = value; OnPropertyChanged(nameof(LumenContours)); } }
 
         private string _lumenContourCommand;
         public string LumenContourCommand { get { return _lumenContourCommand; } set { _lumenContourCommand = value; OnPropertyChanged(nameof(LumenContourCommand)); } }
+
+        private bool isLumenDetectedFrontDone = true;
 
         [ObservableProperty]
         private Zoom _zoomAngio = new Zoom(Constants.CrossSectionAngio / Constants.OCTImageSize);
@@ -136,7 +137,7 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private bool hasAnnotation = true;
+        private bool isLumenContourSave = false;
 
         private ICommand _toggleMeasurementCommand;
         public ICommand ToggleMeasurementCommand
@@ -204,6 +205,9 @@ namespace RaywattApp.ViewModels
             get { return this._zoomOutCommand ?? (this._zoomOutCommand = new RelayCommand(ZoomOut)); }
         }
 
+        private CallbackFunctionForDetection cbLumenContour;
+        public CallbackFunctionForDetection CBLumenContour => (this.cbLumenContour) ?? (this.cbLumenContour = new CallbackFunctionForDetection(OnRecvLumenContour));
+
         public ReviewViewModel(SqlManager sqlManager, IDialogService dialogService) : base(sqlManager, dialogService)
         {
             _log.Debug("ReviewViewModel");
@@ -216,7 +220,8 @@ namespace RaywattApp.ViewModels
 
             IndicatorLongitude = new Indicator();
             IndicatorLongitude.X = Constants.LongitudeIndicatorWidth / 2;
-            IndicatorLongitude.IsVisible = Visibility.Collapsed;
+            IndicatorLongitude.IsVisible = Visibility.Visible;
+            IndicatorLongitude.IsEnabled = false;
 
             ExpandLeftUpMenu = true;
             ExpandLeftDownMenu = true;
@@ -233,6 +238,7 @@ namespace RaywattApp.ViewModels
             base.OnNavigated(sender, navigatedEventArgs);
             _log.Debug("OnNavigated");
 
+            RayRegisterDetectionCallback(Marshal.GetFunctionPointerForDelegate(CBLumenContour));
             var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
 
             if (extraData != null)
@@ -270,11 +276,79 @@ namespace RaywattApp.ViewModels
             _log.Debug("OnNavigating");
             Save();
 
+            RayUnregisterDetectionCallback();
+
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
+        }
 
-            if (threadWaitLumenDetection != null && threadWaitLumenDetection.IsAlive)
-                runWaitLumenDetection = false;
+        protected void OnRecvLumenContour(int frame)
+        {
+            if (LumenContours == null || LumenContours.Count != ReviewStatus.NumberOfFrames)
+                return;
+
+            if (isLumenDetectedFrontDone && frame > 0)
+            {
+                isLumenDetectedFrontDone = false;
+
+                for (int curFrame = 0; curFrame < frame; curFrame++)
+                {
+                    LumenContourProcess(curFrame);
+                }
+            }
+
+            LumenContourProcess(frame);
+
+            imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, frame);
+
+            if (ReviewStatus.NumberOfFrames - 1 == frame)
+            {
+                if (ReviewStatus.IsContourStentOn)
+                    LumenContourCommand = Constants.LumenContourDraw;
+                else
+                    LumenContourCommand = Constants.LumenContourCurrentInit;
+
+                PatientCase.StrLumenContour = JsonConvert.SerializeObject(LumenContours, Formatting.Indented);
+
+                DeviceStatus.IsLumenSaved = true;
+            }
+        }
+
+        private void LumenContourProcess(int frameInfo)
+        {
+            int num = RayGetNumOfLumenContourPoints(frameInfo);
+            if (num > 0)
+            {
+                IntPtr contour = RayGetLumenContour(frameInfo);
+                if (contour == IntPtr.Zero) return;
+
+                Mat matContour = CommonUtil.ByteMemoryToCvMat(contour, 1, num, 2);
+
+                LumenContours[frameInfo].MlContour.Points = new List<Point>();
+                for (int row = 0; row < matContour.Rows; row++)
+                {
+                    Vec2i point = matContour.At<Vec2i>(0, row);
+                    LumenContours[frameInfo].MlContour.Points.Add(new Point(point.Item0, point.Item1));
+                }
+                ContourMeasurement contourMeasurement = new ContourMeasurement();
+                contourMeasurement.Measure(LumenContours[frameInfo].MlContour, (int)Constants.OCTImageSize, (int)Constants.OCTImageSize);
+                if (LumenContours[frameInfo].MlContour.Valid)
+                {
+                    contourMeasurement.CalculateDiameter(LumenContours[frameInfo].MlContour);
+                }
+                LumenContours[frameInfo].CopyMlToLumenContour();
+            }
+        }
+
+        private void ThreadLumenDetectionDone()
+        {
+            while (!DeviceStatus.IsLumenDetected)
+            {
+                Thread.Sleep(500);
+            }
+
+            if(isLumenDetectedFrontDone)
+                OnRecvLumenContour(ReviewStatus.NumberOfFrames - 1);           
         }
 
         private void Playback(object param)
@@ -283,10 +357,16 @@ namespace RaywattApp.ViewModels
 
             if (action.ToLower().Equals("prev"))
             {
+                if (!DeviceStatus.IsPaused)
+                    Playback();
+
                 PrevFrame(RaySession.Review);
             }
             else if (action.ToLower().Equals("next"))
             {
+                if (!DeviceStatus.IsPaused)
+                    Playback();
+
                 NextFrame(RaySession.Review);
             }
             else if (action.ToLower().Equals("play"))
@@ -357,6 +437,9 @@ namespace RaywattApp.ViewModels
             {
                 if (indicator.IsLongitudeClicked)
                 {
+                    if (!DeviceStatus.IsPaused)
+                        Playback();
+
                     indicator.IsLongitudeClicked = false;
                     return;
                 }
@@ -448,14 +531,14 @@ namespace RaywattApp.ViewModels
                 PatientCase.Bookmark = JsonConvert.SerializeObject(Bookmarks, Formatting.Indented);
                 sqlParameters["bookmark"] = PatientCase.Bookmark;
 
-                if (this.hasAnnotation)
-                {
-                    nRows = _sqlManager.UpdatePatientCaseAnnotationWithoutLumenContour(sqlParameters);
-                }
-                else
+                if (this.isLumenContourSave)
                 {
                     sqlParameters["lumen_contour"] = PatientCase.StrLumenContour;
                     nRows = _sqlManager.UpsertPatientCaseAnnotation(sqlParameters);
+                }
+                else
+                {
+                    nRows = _sqlManager.UpdatePatientCaseAnnotationWithoutLumenContour(sqlParameters);
                 }
 
                 if (nRows == 0)
@@ -477,7 +560,80 @@ namespace RaywattApp.ViewModels
 
         private void SetAnnotation()
         {
-            // Initialize with empty objects
+            string tempCrossSection = "[]", tempLongitude = "", tempBookmark = "[]";
+
+            if (PatientCase.Bookmark != null && PatientCase.CrossSection != null && PatientCase.Longitude != null && PatientCase.LumenContour != null)//From Related Review Pages
+            {
+                //Cross-Section
+                tempCrossSection = PatientCase.CrossSection;
+
+                //Longitude
+                tempLongitude = PatientCase.Longitude;
+
+                //Bookmark
+                tempBookmark = PatientCase.Bookmark;
+
+                //Lumen Contour
+                LumenContours = PatientCase.LumenContour;
+                imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours);
+            }
+            else
+            {
+                Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+                sqlParameters["id"] = PatientCase.Id;
+                IList<PatientCaseAnnotation> patientCaseAnnotations = _sqlManager.SelectPatientCaseAnnotation(sqlParameters);
+
+                if (patientCaseAnnotations.Count == 1)//From Patient Detail
+                {
+                    //Cross-Section
+                    tempCrossSection = patientCaseAnnotations[0].CrossSection;
+
+                    //Longitude
+                    tempLongitude = patientCaseAnnotations[0].Longitude;
+
+                    //Bookmark
+                    tempBookmark = patientCaseAnnotations[0].Bookmark;
+
+                    //Lumen Contour
+                    DeviceStatus.IsLumenLoaded = false;
+                    Thread threadMakeLumenProfile = new Thread(() => ThreadMakeLumenProfile(patientCaseAnnotations[0].LumenContour));
+                    threadMakeLumenProfile.Start();
+                }
+                else//From Recording
+                {
+                    this.isLumenContourSave = true;
+                    InitializeLumenContour();
+                    Thread threadLumenDetectionDone = new Thread(() => ThreadLumenDetectionDone());
+                    threadLumenDetectionDone.Start();
+                }
+            }
+
+            //Longitude
+            Measurement lModeMeasurement = JsonConvert.DeserializeObject<Measurement>(tempLongitude);
+            LModeLengthGeometries = lModeMeasurement == null ? new ObservableCollection<LengthGeometry>() : lModeMeasurement.LengthGeometries;
+            LModeTextGeometries = lModeMeasurement == null ? new List<TextGeometry>() : lModeMeasurement.TextGeometries;
+
+            //Bookmark
+            Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(tempBookmark);
+
+            //Cross-Section
+            Measurements = JsonConvert.DeserializeObject<List<Measurement>>(tempCrossSection);
+            for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)
+            {
+                Measurement measurement = new Measurement();
+                measurement.FrameNumber = i;
+                measurement.AreaGeometries = new ObservableCollection<AreaGeometry>();
+                measurement.LengthGeometries = new ObservableCollection<LengthGeometry>();
+                measurement.TextGeometries = new List<TextGeometry>();
+                Measurements.Add(measurement);
+            }
+            Measurements = Measurements.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
+        }
+
+        private void InitializeLumenContour()
+        {
+            LumenContours = new List<LumenContour>();
+
             for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)
             {
                 LumenContour lumenContour = new LumenContour();
@@ -493,102 +649,11 @@ namespace RaywattApp.ViewModels
 
                 LumenContours.Add(lumenContour);
             }
-
-            if (PatientCase.Bookmark != null && PatientCase.CrossSection != null && PatientCase.Longitude != null && PatientCase.LumenContour != null)
-            {
-                Measurements = JsonConvert.DeserializeObject<List<Measurement>>(PatientCase.CrossSection);
-
-                if(PatientCase.Longitude != "")
-                {
-                    Measurement lModeMeasurement = JsonConvert.DeserializeObject<Measurement>(PatientCase.Longitude);
-                    LModeLengthGeometries = lModeMeasurement.LengthGeometries;
-                    LModeTextGeometries = lModeMeasurement.TextGeometries;
-                }
-                else
-                {
-                    this.hasAnnotation = false;
-                }
-
-                Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(PatientCase.Bookmark);
-
-                LumenContours = PatientCase.LumenContour;
-                imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours);
-            }
-            else
-            {
-                Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-                sqlParameters["id"] = PatientCase.Id;
-                IList<PatientCaseAnnotation> patientCaseAnnotations = _sqlManager.SelectPatientCaseAnnotation(sqlParameters);
-
-                if (patientCaseAnnotations != null && patientCaseAnnotations.Count == 1)
-                {
-                    if (!string.IsNullOrEmpty(patientCaseAnnotations[0].CrossSection))
-                    {
-                        Measurements = JsonConvert.DeserializeObject<List<Measurement>>(patientCaseAnnotations[0].CrossSection);
-                    }
-
-                    if (!string.IsNullOrEmpty(patientCaseAnnotations[0].Longitude))
-                    {
-                        Measurement lModeMeasurement = JsonConvert.DeserializeObject<Measurement>(patientCaseAnnotations[0].Longitude);
-                        LModeLengthGeometries = lModeMeasurement.LengthGeometries;
-                        LModeTextGeometries = lModeMeasurement.TextGeometries;
-                    }
-
-                    if (!string.IsNullOrEmpty(patientCaseAnnotations[0].Bookmark))
-                    {
-                        Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(patientCaseAnnotations[0].Bookmark);
-                    }
-
-                    if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenContour))
-                    {
-                        DeviceStatus.IsLumenDetected = true;
-                        DeviceStatus.IsLumenLoaded = false;
-
-                        Thread threadMakeLumenProfile = new Thread(() => ThreadMakeLumenProfile(patientCaseAnnotations[0].LumenContour));
-                        threadMakeLumenProfile.Start();
-                    }
-                    else
-                    {
-                        this.hasAnnotation = false;
-
-                        DeviceStatus.IsLumenDetected = false;
-                        DeviceStatus.IsLumenLoaded = false;
-                        RayStartLumenDetection();
-
-                        threadWaitLumenDetection = new Thread(new ThreadStart(threadFuncWaitLumenDetection));
-                        threadWaitLumenDetection.Start();
-                    }
-                }
-                else 
-                {
-                    this.hasAnnotation = false;
-
-                    DeviceStatus.IsLumenDetected = false;
-                    DeviceStatus.IsLumenLoaded = false;
-                    RayStartLumenDetection();
-
-                    threadWaitLumenDetection = new Thread(new ThreadStart(threadFuncWaitLumenDetection));
-                    threadWaitLumenDetection.Start();
-                }
-            }
-
-            for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)
-            {
-                Measurement measurement = new Measurement();
-                measurement.FrameNumber = i;
-                measurement.AreaGeometries = new ObservableCollection<AreaGeometry>();
-                measurement.LengthGeometries = new ObservableCollection<LengthGeometry>();
-                measurement.TextGeometries = new List<TextGeometry>();
-                Measurements.Add(measurement);
-            }
-
-            Measurements = Measurements.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
         }
 
         private void ThreadMakeLumenProfile(string lumenContour)
         {
             LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(lumenContour);
-            imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours);
 
             if (ReviewStatus.IsContourStentOn)
                 LumenContourCommand = Constants.LumenContourDraw;
@@ -680,7 +745,6 @@ namespace RaywattApp.ViewModels
                 if (ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault)
                 {
                     ReviewStatus.IsCalciumOn = true;
-                    IndicatorCrossSection.IsVisible = Visibility.Visible;
                 }
                 else
                 {
@@ -735,7 +799,7 @@ namespace RaywattApp.ViewModels
                 // when generating longitude image is completed
                 if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame)
                 {
-                    IndicatorLongitude.IsVisible = Visibility.Visible;
+                    IndicatorLongitude.IsEnabled = true;
 
                     if (!isLongitudeMeasurementInit)
                     {
@@ -743,56 +807,12 @@ namespace RaywattApp.ViewModels
                         isLongitudeMeasurementInit = true;
                     }
                 }
-            }
-            DrawLumenProfileImage();
-        }
-
-        private void threadFuncWaitLumenDetection()
-        {
-            runWaitLumenDetection = true;
-            imglumenProfile = null;
-
-            while (runWaitLumenDetection && !DeviceStatus.IsLumenDetected)
-            {
-                Thread.Sleep((int) Constants.UpdateLumenProfileInterval);
-            }
-            runWaitLumenDetection = false;
-
-            for (int curFrame = 0; curFrame < LumenContours.Count; curFrame++)
-            {
-                int num = RayGetNumOfLumenContourPoints(curFrame);
-                if (num > 0)
+                else if(DeviceStatus.IsLumenLoaded && !this.isLumenContourSave)
                 {
-                    IntPtr contour = RayGetLumenContour(curFrame);
-                    if (contour == IntPtr.Zero) continue;
-
-                    Mat matContour = CommonUtil.ByteMemoryToCvMat(contour, 1, num, 2);
-
-                    LumenContours[curFrame].MlContour.Points = new List<Point>();
-                    for(int row = 0; row < matContour.Rows; row++)
-                    {
-                        Vec2i point = matContour.At<Vec2i>(0, row);
-                        LumenContours[curFrame].MlContour.Points.Add(new Point(point.Item0, point.Item1));
-                    }
-                    ContourMeasurement contourMeasurement = new ContourMeasurement();
-                    contourMeasurement.Measure(LumenContours[curFrame].MlContour, (int) Constants.OCTImageSize, (int) Constants.OCTImageSize);
-                    if (LumenContours[curFrame].MlContour.Valid)
-                    {
-                        contourMeasurement.CalculateDiameter(LumenContours[curFrame].MlContour);
-                    }
-                    LumenContours[curFrame].CopyMlToLumenContour();
+                    imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, longitudeFrameInfo.curFrame);
                 }
             }
-            imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours);
-
-            if (ReviewStatus.IsContourStentOn)
-                LumenContourCommand = Constants.LumenContourDraw;
-            else
-                LumenContourCommand = Constants.LumenContourCurrentInit;
-
-            PatientCase.StrLumenContour = JsonConvert.SerializeObject(LumenContours, Formatting.Indented);
-
-            DeviceStatus.IsLumenLoaded = true;
+            DrawLumenProfileImage();
         }
 
         private void updateNavigator(int curFrame, int totalFrame)

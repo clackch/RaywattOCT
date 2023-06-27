@@ -163,6 +163,9 @@
                 <Setter Property="Source" Value="{Binding IconOver, Converter={svgc:SvgImageConverter}, RelativeSource={x:Static RelativeSource.Self}}"/>
                 <Setter Property="Cursor" Value="{StaticResource grab}"/>
             </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Source" Value="{Binding IconDisabled, Converter={svgc:SvgImageConverter}, RelativeSource={x:Static RelativeSource.Self}}"/>
+            </Trigger>
         </Style.Triggers>
     </Style>
     

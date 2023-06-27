@@ -606,7 +606,7 @@
                                     </Grid>
                                     <StackPanel Orientation="Vertical">
                                         <StackPanel Height="24"/>
-                                        <Grid Width="300" Height="300" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <Grid Width="300" Height="300" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding IndicatorLongitude.IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
                                             <!-- Indicator  -->
                                             <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Width="300" Height="18" Icon="crossSectionAngio" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Visibility="{Binding IndicatorCrossSection.IsVisible}">
                                                 <Image.RenderTransform>
@@ -662,23 +662,25 @@
 
                 <!-- Indicator  -->
                 <Grid Grid.Row="1" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                    <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Width="640" Height="18" Icon="crossSection" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Visibility="{Binding IndicatorCrossSection.IsVisible}">
-                        <Image.RenderTransform>
-                            <RotateTransform CenterX="319" CenterY="9" Angle="{Binding Degree}"/>
-                        </Image.RenderTransform>
+                    <Grid Visibility="{Binding IndicatorLongitude.IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Width="640" Height="18" Icon="crossSection" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Visibility="{Binding IndicatorCrossSection.IsVisible}">
+                            <Image.RenderTransform>
+                                <RotateTransform CenterX="319" CenterY="9" Angle="{Binding Degree}"/>
+                            </Image.RenderTransform>
 
-                        <i:Interaction.Triggers>
-                            <i:EventTrigger EventName="PreviewMouseDown" >
-                                <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
-                            </i:EventTrigger>
-                            <i:EventTrigger EventName="PreviewMouseUp" >
-                                <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
-                            </i:EventTrigger>
-                            <i:EventTrigger EventName="PreviewMouseMove" >
-                                <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
-                            </i:EventTrigger>
-                        </i:Interaction.Triggers>
-                    </component:IndicatorImage>
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="PreviewMouseDown" >
+                                    <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="PreviewMouseUp" >
+                                    <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="PreviewMouseMove" >
+                                    <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </component:IndicatorImage>
+                    </Grid>
                 </Grid>
 
                 <!-- Lumen Contour-->
@@ -832,7 +834,7 @@
 
                                 <!-- L-Mode Indicator -->
                                 <Canvas>
-                                    <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitude" IsCaptured="{Binding IndicatorLongitude.IsCaptured}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="{x:Static const:Constants.LongitudeIndicatorHeight}" Stretch="None" Canvas.Left="{Binding IndicatorLongitude.X}" Margin="0,-11,0,0" Visibility="{Binding IndicatorLongitude.IsVisible}">
+                                    <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitude" IsCaptured="{Binding IndicatorLongitude.IsCaptured}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="{x:Static const:Constants.LongitudeIndicatorHeight}" Stretch="None" Canvas.Left="{Binding IndicatorLongitude.X}" Margin="0,-11,0,0" IsEnabled="{Binding IndicatorLongitude.IsEnabled}">
                                         <!-- Trigger -->
                                         <i:Interaction.Triggers>
                                             <!--PreviewMouseDown : Image 영역에서 MouseDown 할 경우, Indicator 동작 가능 상태로 변경 -->
@@ -896,7 +898,7 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </component:IndicatorAreaGrid>
-        <component:IndicatorAreaGrid Style="{DynamicResource IndicatorAreaGrid}" IsCaptured="{Binding IndicatorLongitude.IsCaptured}" Visibility="{Binding IndicatorLongitude.IsVisible}">
+        <component:IndicatorAreaGrid Style="{DynamicResource IndicatorAreaGrid}" IsCaptured="{Binding IndicatorLongitude.IsCaptured}" Visibility="{Binding IndicatorLongitude.IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
             <i:Interaction.Behaviors>
                 <behaviors:MouseBehavior MouseX="{Binding PointLongitudeX, Mode=OneWayToSource}"/>
             </i:Interaction.Behaviors>

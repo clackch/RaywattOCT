@@ -48,7 +48,6 @@ namespace RaywattOCT
             Unknown = 0,
             State,
             ProgressSave,
-            ProgressDetection,
             Error,
             Event,
             WorkDone
@@ -110,6 +109,7 @@ namespace RaywattOCT
 
         public delegate void CallbackFunction(int request, int response);
         public delegate void CallbackFunctionWithImage(int session, IntPtr data, int width, int height, int channel, int frameInfo);
+        public delegate void CallbackFunctionForDetection(int frame);
 
         [DllImport("RayCore.dll")]
         public static extern int RayStartSystem();
@@ -153,6 +153,10 @@ namespace RaywattOCT
         public static extern int RayRegisterImageCallback(IntPtr cbCrossSection, IntPtr cbLongitude);
         [DllImport("RayCore.dll")]
         public static extern int RayUnregisterImageCallback();
+        [DllImport("RayCore.dll")]
+        public static extern int RayRegisterDetectionCallback(IntPtr cbOBjectDetection);
+        [DllImport("RayCore.dll")]
+        public static extern int RayUnregisterDetectionCallback();
         [DllImport("RayCore.dll")]
         public static extern int RaySetProperty(Property property, double value);
         [DllImport("RayCore.dll")]

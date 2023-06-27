@@ -27,6 +27,9 @@ namespace RaywattApp.Models
         private bool _isAngioConnected = false;
 
         [ObservableProperty]
+        private bool _isPullbackDone = false;
+
+        [ObservableProperty]
         private bool _isLumenDetected = false;
 
         [ObservableProperty]
@@ -34,7 +37,10 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private bool _isPaused = true;
-        
+
+        [ObservableProperty]
+        private bool _canExit = true;
+
         [ObservableProperty]
         private bool _isLumenSaved = true;
 

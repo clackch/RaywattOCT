@@ -404,7 +404,7 @@
                         </StackPanel>
 
                         <!-- camera -->
-                        <Grid Width="214" Height="214" Background="Transparent">
+                        <Grid Width="214" Height="214" Background="Transparent" Visibility="{Binding IndicatorLongitude.IsVisible}">
                             <Image Width="12" Height="9.6" Source="{svgc:SvgImage Source=/res/icon/camera.svg}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
                             <Grid.RenderTransform>
                                 <RotateTransform CenterX="107" CenterY="107" Angle="{Binding CameraDegree}"/>
@@ -412,7 +412,7 @@
                         </Grid>
 
                         <!-- camera View Part -->
-                        <Grid Width="182" Height="182" Background="Transparent">
+                        <Grid Width="182" Height="182" Background="Transparent" Visibility="{Binding IndicatorLongitude.IsVisible}">
                             <Image Width="91" Height="182" Source="{svgc:SvgImage Source=/res/icon/cameraViewPart.svg}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
                             <Grid.RenderTransform>
                                 <RotateTransform CenterX="91" CenterY="91" Angle="{Binding CameraDegree}"/>
@@ -421,7 +421,7 @@
 
                         <!-- Indicator  -->
                         <Grid>
-                            <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Width="188" Icon="crossSectionAngio" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Visibility="{Binding IndicatorCrossSection.IsVisible}">
+                            <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Width="188" Icon="crossSectionAngio" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Visibility="{Binding IndicatorLongitude.IsVisible}">
                                 <Image.RenderTransform>
                                     <RotateTransform CenterX="94" CenterY="5" Angle="{Binding Degree}"/>
                                 </Image.RenderTransform>

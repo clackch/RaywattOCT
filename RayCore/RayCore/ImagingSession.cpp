@@ -95,23 +95,29 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 	CCalibration* calibration = new CCalibration(setting.nAScan, setting.nFFTLength);
 	if (pData != nullptr && pData->GetExtraData(OCTHeader::ExtraData::Dispersion) != nullptr)
 	{
+		PLOGI.printf("Read dispersion from .oct file.");
 		calibration->Initialize((char*)pData->GetExtraData(OCTHeader::ExtraData::Dispersion));
 	}
 	else 
 	{
+		PLOGI.printf("Read dispersion from .dat file.");
 		calibration->Initialize(_T("CALIBRATION.DAT"));
 	}
 
 	USHORT* background = nullptr;
 	if (pData != nullptr && pData->GetExtraData(OCTHeader::ExtraData::Background) != nullptr) 
 	{
+		PLOGI.printf("Read background from .oct file.");
 		background = new USHORT[setting.nBufferSize];
 		memcpy(background, pData->GetExtraData(OCTHeader::ExtraData::Background), sizeof(USHORT) * setting.nBufferSize);
 	}
 	else 
 	{
+		PLOGI.printf("Read background from .dat file.");
 		background = readBackground("BACKGROUND.bin", setting);
 	}
+
+	PLOGI.printf("Create Imaging - %d x %d (type: %d)", setting.nAScan, setting.nBScan, type);
 
 	switch (type)
 	{
@@ -297,9 +303,14 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 	CImagingSession* pSession = (CImagingSession*)param;
 	IDataManager* pDataManager = pSession->m_pDataManager;
 	int nSession = pSession->m_nSession;
+	IImaging::Setting setting = pSession->m_pImaging->GetSetting();
+
+	// apply brightness / contrast when DrawLongitudeImage is called.
+	setting.brightness = 0.f;
+	setting.contrast = 1.0f;
 
 	// prepare imaging (without message)
-	COCTImaging* pImaging = CreateColorImaging(nullptr, pSession->m_pImaging->GetSetting(), pDataManager, pSession->GetImagingType());
+	COCTImaging* pImaging = CreateColorImaging(nullptr, setting, pDataManager, pSession->GetImagingType());
 
 	CCutViewManager* pCutView = pSession->m_pCutView;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();

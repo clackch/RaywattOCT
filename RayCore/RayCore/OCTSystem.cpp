@@ -23,6 +23,7 @@ COCTSystem::COCTSystem() {
 	m_callback = nullptr;
 	m_cbCrossSection = nullptr;
 	m_cbLongitude = nullptr;
+	m_cbObjectDetection = nullptr;
 
 	m_pThreadService = nullptr;
 	m_pThreadSaveRaw = nullptr;
@@ -363,8 +364,8 @@ int COCTSystem::StartReview(char* strFilePath) {
 			return (int)RayError::InvalidArgument;
 		}
 
-		postMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
-		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
+		postPriorMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
+		postPriorMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
 	
 		return pSession->GetDataManager()->GetNumOfSamples();
 	}
@@ -399,7 +400,9 @@ RayError COCTSystem::StartCompare(char* strFilePath) {
 RayError COCTSystem::EndReview()
 {
 	if (m_curState == RayScannerState::Review) {
+		postPriorMessage(WM_IGNORE_MESSAGES);
 		stopAllSessions();
+		postMessage(WM_STOP_IGNORE_MESSAGES);
 
 		switch (m_prevState) {
 		case RayScannerState::Initial:
@@ -498,6 +501,24 @@ RayError COCTSystem::UnregisterImageCallback() {
 }
 
 /*
+* RegisterDetectionCallback
+*/
+RayError COCTSystem::RegisterDetectionCallback(FunctionObjPtr cbObjectDetection) {
+	m_cbObjectDetection = cbObjectDetection;
+
+	return RayError::OK;
+}
+
+/*
+* UnregisterDetectionCallback
+*/
+RayError COCTSystem::UnregisterDetectionCallback() {
+	m_cbObjectDetection = nullptr;
+
+	return RayError::OK;
+}
+
+/*
 * GetVolumeData
 */
 void* COCTSystem::GetVolumeData() {
@@ -577,9 +598,11 @@ void* COCTSystem::GetLongitudeData(double fDegree) {
 	CCutViewManager* pCutView = m_openedSession->GetCutView();
 	if (pCutView == nullptr) return nullptr;
 
+	CConfiguration& config = CConfiguration::GetInstance();
+
 	m_openedSession->AddFramesIntoCutView();
 	pCutView->GenerateCutView(fDegree);
-	cv::Mat imgLongitude = pCutView->DrawLongitudeImage(pCutView->GetNumOfSamples());
+	cv::Mat imgLongitude = pCutView->DrawLongitudeImage(pCutView->GetNumOfSamples(), config.imaging.brightness, config.imaging.contrast);
 
 	return imgLongitude.data;
 }
@@ -671,17 +694,8 @@ RayError COCTSystem::SetDegree(double value) {
 	if (m_pThreadService == nullptr) return RayError::SystemNotRunning;
 
 	m_fDegree = value;
-
-	if (m_curSession != SESSION_UNKNOWN && m_reviewSession[m_curSession] != nullptr) {
-		CCutViewManager *pCutView = m_reviewSession[m_curSession]->GetCutView();
-		if (pCutView != nullptr) {
-			int nFrames = pCutView->GetNumOfGeneratedSamples();
-			if (nFrames > 0) {
-				int nCurFrame = nFrames - 1;
-				this->postMessage(WM_PROCESS_CUTVIEW, m_curSession, nCurFrame);
-			}
-		}
-	}
+	
+	redrawCutView();
 
 	return RayError::OK;
 }
@@ -826,6 +840,7 @@ UINT COCTSystem::GetLongitudeImageChannels()
 UINT COCTSystem::threadService(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CThread* pThread = pSystem->m_pThreadService;
+	bool ignoreMsg = false;
 
 	PLOGI.printf("Service Start");
 
@@ -846,6 +861,12 @@ UINT COCTSystem::threadService(LPVOID param) {
 		int popMsg = std::get<0>(popMsgThread);
 		WPARAM wParam = std::get<1>(popMsgThread);
 		LPARAM lParam = std::get<2>(popMsgThread);
+
+		if (ignoreMsg)
+		{
+			if (popMsg == WM_STOP_IGNORE_MESSAGES) ignoreMsg = false;
+			continue;
+		}
 
 		switch(popMsg) {
 		case WM_UPDATE_SCANNER_STATE :
@@ -901,6 +922,11 @@ UINT COCTSystem::threadService(LPVOID param) {
 		case WM_START_REVIEW_SESSION:
 		{
 			pSystem->OnMsgStartReviewSession(wParam, lParam);
+			break;
+		}
+		case WM_IGNORE_MESSAGES:
+		{
+			ignoreMsg = true;
 			break;
 		}
 		default:
@@ -1025,6 +1051,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	CStepMotorController* pPullbackMotor = pSystem->m_pStepMotor[STEP_MOTOR_PULLBACK];
 	IImaging::Setting settingPullback = pSystem->m_pImagingPullback->GetSetting();
 
+	PLOGI.printf("Pullback start.");
 	CDataWriter* pDataWriter = new CDataWriter();
 	pDataWriter->Initialize(settingPullback.nBufferSize * sizeof(USHORT));
 	pDataWriter->AddExtraData(OCTHeader::ExtraData::Dispersion, pSystem->m_pImagingPullback->GetCalibrationData(), settingPullback.nAScan * 2 * sizeof(int));
@@ -1069,10 +1096,11 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	Sleep(500);
 	pMotor->StopMotor();
 
+	PLOGI.printf("Pullback done.");
 	CImagingSession* pSession = CImagingSession::CreateSession(pSystem, SESSION_REVIEW, settingPullback, pDataWriter);
-	pSystem->postMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
-	pSystem->postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
-	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::Pullback);
+	pSystem->postPriorMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
+	pSystem->postPriorMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
+	pSystem->postPriorMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::Pullback);
 
 	pSession->StartObjectDetection();
 
@@ -1367,10 +1395,11 @@ LRESULT COCTSystem::OnMsgProcessCutView(WPARAM wParam, LPARAM lParam) {
 	int nSession = wParam;
 	int nDrawSamples = lParam + 1;
 
+	CConfiguration& config = CConfiguration::GetInstance();
 	CCutViewManager* pCutView = m_reviewSession[nSession]->GetCutView();
 
 	pCutView->GenerateCutView(m_fDegree);
-	cv::Mat imgCutView = pCutView->DrawLongitudeImage(nDrawSamples);
+	cv::Mat imgCutView = pCutView->DrawLongitudeImage(nDrawSamples, config.imaging.brightness, config.imaging.contrast);
 
 	int nTotalFrame = pCutView->GetNumOfSamples();
 	int nFrameInfo = (nDrawSamples << 16) | (nTotalFrame);
@@ -1386,8 +1415,7 @@ LRESULT COCTSystem::OnMsgProcessDetection(WPARAM wParam, LPARAM lParam) {
 	UINT nSession = wParam;
 	UINT nFrame = lParam;
 
-	int nFrameInfo = (nSession << 16) | (nFrame);
-	if (m_callback != nullptr) m_callback((int)RayCallbackRequest::ProgressDetection, nFrameInfo);
+	if (m_cbObjectDetection != nullptr) m_cbObjectDetection(nFrame);
 
 	return NOERROR;
 }
@@ -1408,6 +1436,10 @@ void COCTSystem::closeAllSessions() {
 	m_curSession = SESSION_UNKNOWN;
 }
 void COCTSystem::setBrightnessContrastAllSessions() {
+	CConfiguration& config = CConfiguration::GetInstance();
+	config.imaging.brightness = m_fBrightness;
+	config.imaging.contrast = m_fContrast;
+
 	m_pImagingPullback->SetBrightnessContrast(m_fBrightness, m_fContrast);
 	m_pImagingLiveView->SetBrightnessContrast(m_fBrightness, m_fContrast);
 
@@ -1425,6 +1457,21 @@ void COCTSystem::setBrightnessContrastAllSessions() {
 	if (m_openedSession != nullptr && m_openedSession->GetImaging() != nullptr)
 	{
 		m_openedSession->GetImaging()->SetBrightnessContrast(m_fBrightness, m_fContrast);
+	}
+
+	redrawCutView();
+}
+
+void COCTSystem::redrawCutView() {
+	if (m_curSession != SESSION_UNKNOWN && m_reviewSession[m_curSession] != nullptr) {
+		CCutViewManager* pCutView = m_reviewSession[m_curSession]->GetCutView();
+		if (pCutView != nullptr) {
+			int nFrames = pCutView->GetNumOfGeneratedSamples();
+			if (nFrames > 0) {
+				int nCurFrame = nFrames - 1;
+				this->postMessage(WM_PROCESS_CUTVIEW, m_curSession, nCurFrame);
+			}
+		}
 	}
 }
 /*
