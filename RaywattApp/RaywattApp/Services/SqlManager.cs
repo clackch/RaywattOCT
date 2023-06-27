@@ -199,6 +199,15 @@ namespace RaywattApp.Services
             return _databaseService.DeleteData(commandText, sqlParameters);
         }
 
+        public int UpsertPatient(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpsertPatient");
+
+            string commandText = SqlQuery.GetQuery("UpsertPatient");
+
+            return _databaseService.InsertData(commandText, sqlParameters);
+        }
+
         /**
          * Patient Case
          */
@@ -409,15 +418,6 @@ namespace RaywattApp.Services
             string commandText = SqlQuery.GetQuery("DeletePhysician");
 
             return _databaseService.DeleteData(commandText);
-        }
-
-        public int UpsertPatient(Dictionary<string, Object> sqlParameters)
-        {
-            _log.Debug("UpsertPatient");
-
-            string commandText = SqlQuery.GetQuery("UpsertPatient");
-
-            return _databaseService.InsertData(commandText, sqlParameters);
         }
 
         /**

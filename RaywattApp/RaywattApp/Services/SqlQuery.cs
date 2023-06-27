@@ -277,10 +277,10 @@ namespace RaywattApp.Services
             //UpsertPatient
             _query["UpsertPatient"] =
                 $"INSERT INTO rv_schema.patient(id, lastname, firstname, birthdate, gender, create_date, update_date) " +
-                $"VALUES (@id, @lastname, @firstname, @birthdate, @gender, now(), now()) " +
+                $"VALUES (@id, @lastname, @firstname, @birthdate, @gender, @create_date, @update_date) " +
                 $"ON CONFLICT (id) " +
                 $"DO UPDATE " +
-                $"SET lastname=@lastname, firstname=@firstname, birthdate=@birthdate, gender=@gender, update_date=now()";
+                $"SET lastname=@lastname, firstname=@firstname, birthdate=@birthdate, gender=@gender, create_date=@create_date, update_date=@update_date";
 
             //UpsertPatientCase
             _query["UpsertPatientCase"] =
@@ -291,7 +291,7 @@ namespace RaywattApp.Services
                 $"VALUES (@id, @patient_id, @physician_name, @accession_number, @accession_name, @comment, @vessel, @procedure" +
                                                     $", @thumbnail_no, @still_image_yn, @image, @pullback_type, @angio_co_registration, @indicator_degree" +
                                                     $", @preset_name, @calcium_threshold, @expansion_calculation, @expansion_threshold, @apposition_threshold" +
-                                                    $", @brightness, @contrast, now(), now()) " +
+                                                    $", @brightness, @contrast, @create_date, @update_date) " +
                 $"ON CONFLICT (id) " +
                 $"DO UPDATE " +
                 $"SET patient_id=@patient_id, physician_name=@physician_name, accession_number=@accession_number, comment=@comment" +
@@ -299,7 +299,7 @@ namespace RaywattApp.Services
                     $", pullback_type=@pullback_type, angio_co_registration=@angio_co_registration, indicator_degree=@indicator_degree, preset_name=@preset_name" +
                     $", calcium_threshold=@calcium_threshold, expansion_calculation=@expansion_calculation, expansion_threshold=@expansion_threshold" +
                     $", apposition_threshold=@apposition_threshold, brightness=@brightness, contrast=@contrast" +
-                    $", update_date=now()";
+                    $", create_date=@create_date, update_date=@update_date";
 
             //UpsertPatientCaseAnnotation
             _query["UpsertPatientCaseAnnotation"] =
