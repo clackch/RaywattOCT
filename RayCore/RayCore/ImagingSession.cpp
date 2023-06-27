@@ -310,7 +310,7 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 	setting.contrast = 1.0f;
 
 	// prepare imaging (without message)
-	COCTImaging* pImaging = CreateColorImaging(nullptr, pSession->m_pImaging->GetSetting(), pDataManager, pSession->GetImagingType());
+	COCTImaging* pImaging = CreateColorImaging(nullptr, setting, pDataManager, pSession->GetImagingType());
 
 	CCutViewManager* pCutView = pSession->m_pCutView;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();

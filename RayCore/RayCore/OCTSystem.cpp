@@ -694,17 +694,8 @@ RayError COCTSystem::SetDegree(double value) {
 	if (m_pThreadService == nullptr) return RayError::SystemNotRunning;
 
 	m_fDegree = value;
-
-	if (m_curSession != SESSION_UNKNOWN && m_reviewSession[m_curSession] != nullptr) {
-		CCutViewManager *pCutView = m_reviewSession[m_curSession]->GetCutView();
-		if (pCutView != nullptr) {
-			int nFrames = pCutView->GetNumOfGeneratedSamples();
-			if (nFrames > 0) {
-				int nCurFrame = nFrames - 1;
-				this->postMessage(WM_PROCESS_CUTVIEW, m_curSession, nCurFrame);
-			}
-		}
-	}
+	
+	redrawCutView();
 
 	return RayError::OK;
 }
@@ -1466,6 +1457,21 @@ void COCTSystem::setBrightnessContrastAllSessions() {
 	if (m_openedSession != nullptr && m_openedSession->GetImaging() != nullptr)
 	{
 		m_openedSession->GetImaging()->SetBrightnessContrast(m_fBrightness, m_fContrast);
+	}
+
+	redrawCutView();
+}
+
+void COCTSystem::redrawCutView() {
+	if (m_curSession != SESSION_UNKNOWN && m_reviewSession[m_curSession] != nullptr) {
+		CCutViewManager* pCutView = m_reviewSession[m_curSession]->GetCutView();
+		if (pCutView != nullptr) {
+			int nFrames = pCutView->GetNumOfGeneratedSamples();
+			if (nFrames > 0) {
+				int nCurFrame = nFrames - 1;
+				this->postMessage(WM_PROCESS_CUTVIEW, m_curSession, nCurFrame);
+			}
+		}
 	}
 }
 /*

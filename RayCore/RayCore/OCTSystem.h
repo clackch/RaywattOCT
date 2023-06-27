@@ -161,6 +161,7 @@ private:
 	void stopAllSessions();
 	void closeAllSessions();
 	void setBrightnessContrastAllSessions();
+	void redrawCutView();
 
 protected:
 	LRESULT OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam);
