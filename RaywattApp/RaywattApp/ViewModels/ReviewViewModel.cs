@@ -138,7 +138,7 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private bool hasAnnotation = true;
+        private bool isLumenContourSave = false;
 
         private ICommand _toggleMeasurementCommand;
         public ICommand ToggleMeasurementCommand
@@ -532,14 +532,14 @@ namespace RaywattApp.ViewModels
                 PatientCase.Bookmark = JsonConvert.SerializeObject(Bookmarks, Formatting.Indented);
                 sqlParameters["bookmark"] = PatientCase.Bookmark;
 
-                if (this.hasAnnotation)
-                {
-                    nRows = _sqlManager.UpdatePatientCaseAnnotationWithoutLumenContour(sqlParameters);
-                }
-                else
+                if (this.isLumenContourSave)
                 {
                     sqlParameters["lumen_contour"] = PatientCase.StrLumenContour;
                     nRows = _sqlManager.UpsertPatientCaseAnnotation(sqlParameters);
+                }
+                else
+                {
+                    nRows = _sqlManager.UpdatePatientCaseAnnotationWithoutLumenContour(sqlParameters);
                 }
 
                 if (nRows == 0)
@@ -578,27 +578,23 @@ namespace RaywattApp.ViewModels
                 LumenContours.Add(lumenContour);
             }
 
-            if (PatientCase.Bookmark != null && PatientCase.CrossSection != null && PatientCase.Longitude != null && PatientCase.LumenContour != null)
+            if (PatientCase.Bookmark != null && PatientCase.CrossSection != null && PatientCase.Longitude != null && PatientCase.LumenContour != null)// From Related Review Pages
             {
+                //Cross-Section
                 Measurements = JsonConvert.DeserializeObject<List<Measurement>>(PatientCase.CrossSection);
 
-                if(PatientCase.Longitude != "")
-                {
-                    Measurement lModeMeasurement = JsonConvert.DeserializeObject<Measurement>(PatientCase.Longitude);
-                    LModeLengthGeometries = lModeMeasurement.LengthGeometries;
-                    LModeTextGeometries = lModeMeasurement.TextGeometries;
-                }
-                else
-                {
-                    this.hasAnnotation = false;
-                }
+                //Longitude
+                Measurement lModeMeasurement = JsonConvert.DeserializeObject<Measurement>(PatientCase.Longitude);
+                LModeLengthGeometries = lModeMeasurement.LengthGeometries;
+                LModeTextGeometries = lModeMeasurement.TextGeometries;
 
+                //Bookmark
                 Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(PatientCase.Bookmark);
 
+                //Lumen Contour
                 LumenContours = PatientCase.LumenContour;
-                imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours);
 
-                DeviceStatus.IsLumenLoaded = true;
+                imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours);
             }
             else
             {
@@ -606,13 +602,15 @@ namespace RaywattApp.ViewModels
                 sqlParameters["id"] = PatientCase.Id;
                 IList<PatientCaseAnnotation> patientCaseAnnotations = _sqlManager.SelectPatientCaseAnnotation(sqlParameters);
 
-                if (patientCaseAnnotations != null && patientCaseAnnotations.Count == 1)
+                if (patientCaseAnnotations.Count == 1)// From Patient Detail
                 {
+                    //Cross-Section
                     if (!string.IsNullOrEmpty(patientCaseAnnotations[0].CrossSection))
                     {
                         Measurements = JsonConvert.DeserializeObject<List<Measurement>>(patientCaseAnnotations[0].CrossSection);
                     }
 
+                    //Longitude
                     if (!string.IsNullOrEmpty(patientCaseAnnotations[0].Longitude))
                     {
                         Measurement lModeMeasurement = JsonConvert.DeserializeObject<Measurement>(patientCaseAnnotations[0].Longitude);
@@ -620,11 +618,13 @@ namespace RaywattApp.ViewModels
                         LModeTextGeometries = lModeMeasurement.TextGeometries;
                     }
 
+                    //Bookmark
                     if (!string.IsNullOrEmpty(patientCaseAnnotations[0].Bookmark))
                     {
                         Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(patientCaseAnnotations[0].Bookmark);
                     }
 
+                    //Lumen Contour
                     if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenContour))
                     {
                         DeviceStatus.IsLumenLoaded = false;
@@ -634,13 +634,15 @@ namespace RaywattApp.ViewModels
                     }
                     else
                     {
-                        this.hasAnnotation = false;
+                        this.isLumenContourSave = true;
+                        DeviceStatus.IsLumenSaved = false;
+
                         RayStartLumenDetection();
                     }
                 }
-                else 
+                else // From Recording 
                 {
-                    this.hasAnnotation = false;
+                    this.isLumenContourSave = true;
 
                     Thread threadLumenDetectionDone = new Thread(() => ThreadLumenDetectionDone());
                     threadLumenDetectionDone.Start();
@@ -816,7 +818,7 @@ namespace RaywattApp.ViewModels
                         isLongitudeMeasurementInit = true;
                     }
                 }
-                else if(DeviceStatus.IsLumenLoaded)
+                else if(DeviceStatus.IsLumenLoaded && !this.isLumenContourSave)
                 {
                     imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, longitudeFrameInfo.curFrame);
                 }
