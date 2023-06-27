@@ -62,7 +62,7 @@ namespace RaywattApp.Common.Bases
         private int displayFrameNumber;
 
         [ObservableProperty]
-        private ObservableCollection<Bookmark> bookmarks = new ObservableCollection<Bookmark>();
+        private ObservableCollection<Bookmark> bookmarks;
 
         private ICommand _reviewTypeSwitchCommand;
         public ICommand ReviewTypeSwitchCommand

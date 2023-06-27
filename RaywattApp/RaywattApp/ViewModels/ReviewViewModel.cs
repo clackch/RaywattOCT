@@ -24,7 +24,6 @@ using RaywattApp.Common.Util;
 using System.Threading;
 using RaywattApp.Common.Annotation.Util;
 using System.Runtime.InteropServices;
-using System.Windows.Controls;
 
 namespace RaywattApp.ViewModels
 {
@@ -82,21 +81,21 @@ namespace RaywattApp.ViewModels
         private bool _measurementCommandOff;
         public bool MeasurementCommandOff { get { return _measurementCommandOff; } set { _measurementCommandOff = value; OnPropertyChanged(nameof(MeasurementCommandOff)); } }
 
-        private List<Measurement> measurements = new List<Measurement>();
+        private List<Measurement> measurements;
         public List<Measurement> Measurements { get { return measurements; } set { measurements = value; OnPropertyChanged(nameof(Measurements)); } }
 
         private bool isLongitudeMeasurementInit;
 
-        private ObservableCollection<LengthGeometry> _lModeLengthGeometries = new ObservableCollection<LengthGeometry>();
+        private ObservableCollection<LengthGeometry> _lModeLengthGeometries;
         public ObservableCollection<LengthGeometry> LModeLengthGeometries { get { return _lModeLengthGeometries; } set { _lModeLengthGeometries = value; OnPropertyChanged(nameof(LModeLengthGeometries)); } }
 
-        private List<TextGeometry> _lModeTextGeometries = new List<TextGeometry>();
+        private List<TextGeometry> _lModeTextGeometries;
         public List<TextGeometry> LModeTextGeometries { get { return _lModeTextGeometries; } set { _lModeTextGeometries = value; OnPropertyChanged(nameof(LModeTextGeometries)); } }
 
         [ObservableProperty]
         private LumenContour _currentLumenContour;
 
-        private List<LumenContour> _lumenContours = new List<LumenContour>();
+        private List<LumenContour> _lumenContours;
         public List<LumenContour> LumenContours { get { return _lumenContours; } set { _lumenContours = value; OnPropertyChanged(nameof(LumenContours)); } }
 
         private string _lumenContourCommand;
@@ -285,7 +284,7 @@ namespace RaywattApp.ViewModels
 
         protected void OnRecvLumenContour(int frame)
         {
-            if (LumenContours.Count != ReviewStatus.NumberOfFrames)
+            if (LumenContours == null || LumenContours.Count != ReviewStatus.NumberOfFrames)
                 return;
 
             if (isLumenDetectedFrontDone && frame > 0)
@@ -561,7 +560,80 @@ namespace RaywattApp.ViewModels
 
         private void SetAnnotation()
         {
-            // Initialize with empty objects
+            string tempCrossSection = "[]", tempLongitude = "", tempBookmark = "[]";
+
+            if (PatientCase.Bookmark != null && PatientCase.CrossSection != null && PatientCase.Longitude != null && PatientCase.LumenContour != null)//From Related Review Pages
+            {
+                //Cross-Section
+                tempCrossSection = PatientCase.CrossSection;
+
+                //Longitude
+                tempLongitude = PatientCase.Longitude;
+
+                //Bookmark
+                tempBookmark = PatientCase.Bookmark;
+
+                //Lumen Contour
+                LumenContours = PatientCase.LumenContour;
+                imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours);
+            }
+            else
+            {
+                Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+                sqlParameters["id"] = PatientCase.Id;
+                IList<PatientCaseAnnotation> patientCaseAnnotations = _sqlManager.SelectPatientCaseAnnotation(sqlParameters);
+
+                if (patientCaseAnnotations.Count == 1)//From Patient Detail
+                {
+                    //Cross-Section
+                    tempCrossSection = patientCaseAnnotations[0].CrossSection;
+
+                    //Longitude
+                    tempLongitude = patientCaseAnnotations[0].Longitude;
+
+                    //Bookmark
+                    tempBookmark = patientCaseAnnotations[0].Bookmark;
+
+                    //Lumen Contour
+                    DeviceStatus.IsLumenLoaded = false;
+                    Thread threadMakeLumenProfile = new Thread(() => ThreadMakeLumenProfile(patientCaseAnnotations[0].LumenContour));
+                    threadMakeLumenProfile.Start();
+                }
+                else//From Recording
+                {
+                    this.isLumenContourSave = true;
+                    InitializeLumenContour();
+                    Thread threadLumenDetectionDone = new Thread(() => ThreadLumenDetectionDone());
+                    threadLumenDetectionDone.Start();
+                }
+            }
+
+            //Longitude
+            Measurement lModeMeasurement = JsonConvert.DeserializeObject<Measurement>(tempLongitude);
+            LModeLengthGeometries = lModeMeasurement == null ? new ObservableCollection<LengthGeometry>() : lModeMeasurement.LengthGeometries;
+            LModeTextGeometries = lModeMeasurement == null ? new List<TextGeometry>() : lModeMeasurement.TextGeometries;
+
+            //Bookmark
+            Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(tempBookmark);
+
+            //Cross-Section
+            Measurements = JsonConvert.DeserializeObject<List<Measurement>>(tempCrossSection);
+            for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)
+            {
+                Measurement measurement = new Measurement();
+                measurement.FrameNumber = i;
+                measurement.AreaGeometries = new ObservableCollection<AreaGeometry>();
+                measurement.LengthGeometries = new ObservableCollection<LengthGeometry>();
+                measurement.TextGeometries = new List<TextGeometry>();
+                Measurements.Add(measurement);
+            }
+            Measurements = Measurements.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
+        }
+
+        private void InitializeLumenContour()
+        {
+            LumenContours = new List<LumenContour>();
+
             for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)
             {
                 LumenContour lumenContour = new LumenContour();
@@ -577,89 +649,6 @@ namespace RaywattApp.ViewModels
 
                 LumenContours.Add(lumenContour);
             }
-
-            if (PatientCase.Bookmark != null && PatientCase.CrossSection != null && PatientCase.Longitude != null && PatientCase.LumenContour != null)// From Related Review Pages
-            {
-                //Cross-Section
-                Measurements = JsonConvert.DeserializeObject<List<Measurement>>(PatientCase.CrossSection);
-
-                //Longitude
-                Measurement lModeMeasurement = JsonConvert.DeserializeObject<Measurement>(PatientCase.Longitude);
-                LModeLengthGeometries = lModeMeasurement.LengthGeometries;
-                LModeTextGeometries = lModeMeasurement.TextGeometries;
-
-                //Bookmark
-                Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(PatientCase.Bookmark);
-
-                //Lumen Contour
-                LumenContours = PatientCase.LumenContour;
-
-                imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours);
-            }
-            else
-            {
-                Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-                sqlParameters["id"] = PatientCase.Id;
-                IList<PatientCaseAnnotation> patientCaseAnnotations = _sqlManager.SelectPatientCaseAnnotation(sqlParameters);
-
-                if (patientCaseAnnotations.Count == 1)// From Patient Detail
-                {
-                    //Cross-Section
-                    if (!string.IsNullOrEmpty(patientCaseAnnotations[0].CrossSection))
-                    {
-                        Measurements = JsonConvert.DeserializeObject<List<Measurement>>(patientCaseAnnotations[0].CrossSection);
-                    }
-
-                    //Longitude
-                    if (!string.IsNullOrEmpty(patientCaseAnnotations[0].Longitude))
-                    {
-                        Measurement lModeMeasurement = JsonConvert.DeserializeObject<Measurement>(patientCaseAnnotations[0].Longitude);
-                        LModeLengthGeometries = lModeMeasurement.LengthGeometries;
-                        LModeTextGeometries = lModeMeasurement.TextGeometries;
-                    }
-
-                    //Bookmark
-                    if (!string.IsNullOrEmpty(patientCaseAnnotations[0].Bookmark))
-                    {
-                        Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(patientCaseAnnotations[0].Bookmark);
-                    }
-
-                    //Lumen Contour
-                    if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenContour))
-                    {
-                        DeviceStatus.IsLumenLoaded = false;
-
-                        Thread threadMakeLumenProfile = new Thread(() => ThreadMakeLumenProfile(patientCaseAnnotations[0].LumenContour));
-                        threadMakeLumenProfile.Start();
-                    }
-                    else
-                    {
-                        this.isLumenContourSave = true;
-                        DeviceStatus.IsLumenSaved = false;
-
-                        RayStartLumenDetection();
-                    }
-                }
-                else // From Recording 
-                {
-                    this.isLumenContourSave = true;
-
-                    Thread threadLumenDetectionDone = new Thread(() => ThreadLumenDetectionDone());
-                    threadLumenDetectionDone.Start();
-                }
-            }
-
-            for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)
-            {
-                Measurement measurement = new Measurement();
-                measurement.FrameNumber = i;
-                measurement.AreaGeometries = new ObservableCollection<AreaGeometry>();
-                measurement.LengthGeometries = new ObservableCollection<LengthGeometry>();
-                measurement.TextGeometries = new List<TextGeometry>();
-                Measurements.Add(measurement);
-            }
-
-            Measurements = Measurements.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
         }
 
         private void ThreadMakeLumenProfile(string lumenContour)
