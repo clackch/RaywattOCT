@@ -124,10 +124,7 @@
     <value>System will continue once imageing Catheter is connected</value>
   </data>
   <data name="$MSG003" xml:space="preserve">
-    <value>Verify guide catheter is positioned for adequate flush</value>
-  </data>
-  <data name="$MSG004" xml:space="preserve">
-    <value>Prepare for pullback</value>
+    <value>Verify guide catheter is positioned for adequate flush, Prepare for pullback</value>
   </data>
   <data name="$MSG005-1" xml:space="preserve">
     <value>Inject flush media within</value>
