@@ -498,16 +498,6 @@ namespace RaywattApp.ViewModels
                     if (syncPosition < 0 || syncPosition >= syncInfo.Total) return;
 
                     MoveToFrame(syncSession, syncPosition);
-                    _log.Debug("diff : " + diff);
-
-                    if (indicator.IsCompare)
-                    {
-                        FrameNumber = (int)syncPosition;
-                    }
-                    else
-                    {
-                        FrameNumberCompare = (int)syncPosition;
-                    }
                 }
 
                 MoveToFrame(session, (int)curPosition);

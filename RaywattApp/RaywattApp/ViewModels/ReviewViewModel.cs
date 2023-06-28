@@ -807,9 +807,9 @@ namespace RaywattApp.ViewModels
                         isLongitudeMeasurementInit = true;
                     }
                 }
-                else if(DeviceStatus.IsLumenLoaded && !this.isLumenContourSave)
+                if(DeviceStatus.IsLumenLoaded && !this.isLumenContourSave)
                 {
-                    imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, longitudeFrameInfo.curFrame);
+                    imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, longitudeFrameInfo.curFrame - 1);
                 }
             }
             DrawLumenProfileImage();
