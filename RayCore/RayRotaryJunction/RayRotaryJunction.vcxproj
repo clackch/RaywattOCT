@@ -119,7 +119,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\Utility;..\extern\libusb\include\libusb-1.0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Utility;..\extern\libusb\include\libusb-1.0;.\indruino\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -142,7 +142,7 @@ xcopy "$(ProjectDir)*Controller.h" "$(TargetDir)include\" /y /d</Command>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\Utility;..\extern\libusb\include\libusb-1.0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Utility;..\extern\libusb\include\libusb-1.0;.\indruino\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -171,6 +171,9 @@ xcopy "$(ProjectDir)*Controller.h" "$(TargetDir)include\" /y /d</Command>
     <ClCompile Include="..\Utility\MessageService.cpp" />
     <ClCompile Include="..\Utility\Utility.cpp" />
     <ClCompile Include="ArduinoController.cpp" />
+    <ClCompile Include="Indruino\src\DelayLineComm.cpp" />
+    <ClCompile Include="Indruino\src\min.c" />
+    <ClCompile Include="Indruino\src\RS232Comm.cpp" />
     <ClCompile Include="LaserController.cpp" />
     <ClCompile Include="MotorController.cpp" />
     <ClCompile Include="SerialPort.cpp" />

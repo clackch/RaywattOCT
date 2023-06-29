@@ -16,6 +16,9 @@
     <Filter Include="Utility">
       <UniqueIdentifier>{46ddccb9-29c1-4295-8270-0d1882a45e72}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Indruino">
+      <UniqueIdentifier>{224dbe0d-dbc8-4e26-8955-e732036a973c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LaserController.h">
@@ -70,6 +73,15 @@
     </ClCompile>
     <ClCompile Include="ArduinoController.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Indruino\src\DelayLineComm.cpp">
+      <Filter>Indruino</Filter>
+    </ClCompile>
+    <ClCompile Include="Indruino\src\min.c">
+      <Filter>Indruino</Filter>
+    </ClCompile>
+    <ClCompile Include="Indruino\src\RS232Comm.cpp">
+      <Filter>Indruino</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
