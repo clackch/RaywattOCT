@@ -229,7 +229,7 @@ after removing it from the patient.</value>
   <data name="Area" xml:space="preserve">
     <value>Area</value>
   </data>
-  <data name="Area&#xA;(㎟)" xml:space="preserve">
+  <data name="Area(㎟)" xml:space="preserve">
     <value>Area
 (㎟)</value>
   </data>
@@ -408,6 +408,12 @@ Overwrite existing data?</value>
   <data name="Enter Dataset Password" xml:space="preserve">
     <value>Enter Dataset Password</value>
   </data>
+  <data name="Enter Folder Name" xml:space="preserve">
+    <value>Enter Folder Name</value>
+  </data>
+  <data name="Enter Password" xml:space="preserve">
+    <value>Enter Password</value>
+  </data>
   <data name="Enter Physician Name" xml:space="preserve">
     <value>Enter Physician Name</value>
   </data>
@@ -516,12 +522,6 @@ Overwrite existing data?</value>
   <data name="Information" xml:space="preserve">
     <value>Information</value>
   </data>
-  <data name="Input Folder Name" xml:space="preserve">
-    <value>Input Folder Name</value>
-  </data>
-  <data name="Input Password" xml:space="preserve">
-    <value>Input Password</value>
-  </data>
   <data name="Insufficient storage space available" xml:space="preserve">
     <value>Insufficient storage space available</value>
   </data>
@@ -594,7 +594,7 @@ Overwrite existing data?</value>
   <data name="Max" xml:space="preserve">
     <value>Max</value>
   </data>
-  <data name="Max Diam.&#xA;(㎜)" xml:space="preserve">
+  <data name="Max Diam.(㎜)" xml:space="preserve">
     <value>Max Diam.
 (㎜)</value>
   </data>
@@ -604,7 +604,7 @@ Overwrite existing data?</value>
   <data name="MB" xml:space="preserve">
     <value>MB</value>
   </data>
-  <data name="Mean Diam.&#xA;(㎜)" xml:space="preserve">
+  <data name="Mean Diam.(㎜)" xml:space="preserve">
     <value>Mean Diam.
 (㎜)</value>
   </data>
@@ -623,7 +623,7 @@ Overwrite existing data?</value>
   <data name="Min" xml:space="preserve">
     <value>Min</value>
   </data>
-  <data name="Min Diam.&#xA;(㎜)" xml:space="preserve">
+  <data name="Min Diam.(㎜)" xml:space="preserve">
     <value>Min Diam.
 (㎜)</value>
   </data>

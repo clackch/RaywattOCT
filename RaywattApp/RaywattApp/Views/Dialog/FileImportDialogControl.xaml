@@ -39,7 +39,7 @@
 
             <DataGrid Grid.Row="3" Grid.Column="1" ItemsSource="{Binding PatientCaseList}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="2*" Binding="{Binding PatientId}" Header="{Binding [ID], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="2.5*" Binding="{Binding PatientId}" Header="{Binding [ID], Source={StaticResource L10N}}" />
                     <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="3*" Binding="{Binding PatientName}" Header="{Binding [Name], Source={StaticResource L10N}}" />
                     <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="5*" Binding="{Binding CreateDate, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Create Date], Source={StaticResource L10N}}" />
                 </DataGrid.Columns>
