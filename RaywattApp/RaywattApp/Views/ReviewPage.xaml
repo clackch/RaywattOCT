@@ -745,7 +745,7 @@
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                             <StackPanel Width="20"/>
                             <ToggleButton IsChecked="{Binding ReviewStatus.IsLumenProfile}" Style="{StaticResource ContainedToggleBtnType2-Small}" Command="{Binding ToggleLongitudeCommand}" CommandParameter="{StaticResource TrueValue}" Content="{Binding [Lumen Profile], Source={StaticResource L10N}}"/>
-                            <ToggleButton IsChecked="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource InverseBooleanConverter}}" Style="{StaticResource ContainedToggleBtnType2-Small}" Width="80" Command="{Binding ToggleLongitudeCommand}" CommandParameter="{StaticResource FalseValue}" Content="{Binding [L-Mode], Source={StaticResource L10N}}"/>
+                            <ToggleButton IsChecked="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource InverseBooleanConverter}}" Style="{StaticResource ContainedToggleBtnType2-Small}" Width="80" Command="{Binding ToggleLongitudeCommand}" CommandParameter="{StaticResource FalseValue}" Content="{Binding [L-View], Source={StaticResource L10N}}"/>
                         </StackPanel>
                     </Grid>
 

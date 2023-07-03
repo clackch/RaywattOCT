@@ -276,7 +276,7 @@ namespace RaywattApp.ViewModels
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["title"] = _l10n["Information"];
-            parameter["message"] = _l10n["Are you sure to delete selected Preset?"];
+            parameter["message"] = _l10n["Confirm deletion of selected preset"];
             var result = _dialogService.OpenDialog(new ConfirmDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
             if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
@@ -334,7 +334,7 @@ namespace RaywattApp.ViewModels
 
             if (String.IsNullOrEmpty(PatientCasePreset.PresetName.Trim()))
             {
-                PatientCasePreset.ValidatePresetName = _l10n["Write Preset Name"];
+                PatientCasePreset.ValidatePresetName = _l10n["Enter Preset Name"];
                 return;
             }
 

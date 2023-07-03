@@ -95,18 +95,12 @@
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
                             <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [$MSG006], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [$MSG004], Source={StaticResource L10N}}"/>
                             </StackPanel>
                             <StackPanel Grid.Row="2">
                                 <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}">
                                     <Label.Content>
-                                        <AccessText TextWrapping="Wrap" Text="{Binding [$MSG007-1], Source={StaticResource L10N}}"/>
-                                    </Label.Content>
-                                </Label>
-                                <Label Content=""/>
-                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}">
-                                    <Label.Content>
-                                        <AccessText TextWrapping="Wrap" Text="{Binding [$MSG007-2], Source={StaticResource L10N}}"/>
+                                        <AccessText TextWrapping="Wrap" Text="{Binding [$MSG005], Source={StaticResource L10N}}"/>
                                     </Label.Content>
                                 </Label>
                             </StackPanel>

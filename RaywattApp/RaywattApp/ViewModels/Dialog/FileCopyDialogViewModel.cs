@@ -60,12 +60,6 @@ namespace RaywattApp.ViewModels.Dialog
 
         Dictionary<string, string> dicomProperty;
 
-        private FormatCallbackFunction formatCallbackFunction;
-        public FormatCallbackFunction FormatCallbackFunction => this.formatCallbackFunction ?? (this.formatCallbackFunction = new FormatCallbackFunction(FormatCallback));
-
-        private WriteCallbackFunction writeCallbackFunction;
-        public WriteCallbackFunction WriteCallbackFunction => this.writeCallbackFunction ?? (this.writeCallbackFunction = new WriteCallbackFunction(WriteCallback));
-
         public override void SetParameter(object parameter)
         {
             Dictionary<string, Object> data = (Dictionary<string, Object>)parameter;
@@ -107,31 +101,10 @@ namespace RaywattApp.ViewModels.Dialog
         }
 
         private async void FileExportAction()
-        {
-            if (FileExport.DiskType == Constants.FileDiskCd)
-            {
-                //CD,DVD - Writing
-                progressDivide = 2;
-
-                SaveFolder = Constants.TempFolderPath;
-                CommonUtil.CreateFolder(SaveFolder);
-
-                if (FileExport.IsDiskFormat)
-                {
-                    //CD,DVD - Format
-                    progressDivide = 3;
-                    RayExportWrapper.registerFormatCallback(Marshal.GetFunctionPointerForDelegate(FormatCallbackFunction));
-                }
-
-                RayExportWrapper.registerWritingCallback(Marshal.GetFunctionPointerForDelegate(WriteCallbackFunction));
-            }
-            else
-            {
-                //External Drive
-                progressDivide = 1;
-
-                SaveFolder = FileExport.ExternalDrivePath;
-            }
+        {           
+            //External Drive
+            progressDivide = 1;
+            SaveFolder = FileExport.ExternalDrivePath;            
 
             if (FileExport.Type == Constants.ExportTypeNative)
             {
@@ -144,13 +117,6 @@ namespace RaywattApp.ViewModels.Dialog
             else if (FileExport.Type == Constants.ExportTypeStandard)
             {
                 await FileSaveStandard();
-            }
-
-            if (FileExport.DiskType == Constants.FileDiskCd)
-            {
-                await CdBurning();
-
-                CommonUtil.DeleteFolder(SaveFolder);
             }
 
             ProgressText = Constants.ExportStatusCompleted;
@@ -343,44 +309,6 @@ namespace RaywattApp.ViewModels.Dialog
                     }
                 }
             }
-        }
-
-        private async Task CdBurning()
-        {
-            await Task.Run(() =>
-            {
-                RayExportWrapper.CDBurnError cDBurnError;
-
-                if (FileExport.IsDiskFormat)
-                {
-                    cDBurnError = RayExportWrapper.initDevice();
-                    _log.Debug("discFormat initDevice : " + cDBurnError);
-                    cDBurnError = RayExportWrapper.discFormat("discFormat", false);
-                    _log.Debug("discFormat : " + cDBurnError);
-                }
-
-                cDBurnError = RayExportWrapper.initDevice();
-                _log.Debug("burningCD initDevice : " + cDBurnError);
-                cDBurnError = RayExportWrapper.burningCD(SaveFolder, FileExport.EjectWhenComplete, FileExport.VolumeLabel, "burningCD");
-                _log.Debug("burningCD : " + cDBurnError);
-
-                cDBurnError = RayExportWrapper.releaseCD();
-                _log.Debug("releaseCD : " + cDBurnError);
-            });
-        }
-
-        private void FormatCallback(int percent)
-        {
-            //_log.Debug("percent : " + percent);
-            ProgressText = Constants.CdWrtingStatus[1];
-            Progress = 100.0 / progressDivide + percent / progressDivide;
-        }
-
-        private void WriteCallback(int percent, int status)
-        {
-            //_log.Debug("percent : " + percent + " / status : " + status);
-            ProgressText = Constants.CdWrtingStatus[status];
-            Progress = progressDivide == 3 ? 100.0 / progressDivide * 2 + percent / progressDivide : 100.0 / progressDivide + percent / progressDivide;
         }
 
         private void SetProperty(PatientCase patientCase, int studyId, int seriesNumber, int instanceNumber)

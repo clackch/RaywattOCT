@@ -80,7 +80,7 @@
                                     <RowDefinition Height="50"/>
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0">
-                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [3D Cut-View], Source={StaticResource L10N}}"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Cut-View], Source={StaticResource L10N}}"/>
                                 </StackPanel>
                                 <Border Grid.Row="1" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
 
@@ -100,7 +100,7 @@
                                     <RowDefinition Height="50"/>
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0">
-                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [3D Fly through], Source={StaticResource L10N}}"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Fly-Through], Source={StaticResource L10N}}"/>
                                 </StackPanel>
                                 <Border Grid.Row="1" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
 

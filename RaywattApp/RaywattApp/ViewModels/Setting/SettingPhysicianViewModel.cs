@@ -138,7 +138,7 @@ namespace RaywattApp.ViewModels.Setting
             {
                 if (item.Name.Equals(NewPhysician.Name.Trim()))
                 {
-                    NewPhysician.ValidateName = _l10n["Name is duplicated."];
+                    NewPhysician.ValidateName = _l10n["Name is duplicated"];
                     return;
                 }
             }

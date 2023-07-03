@@ -30,7 +30,7 @@
             </Grid.RowDefinitions>
             
             <StackPanel Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center">
-                <Label Style="{DynamicResource Pretendard-Bold-32}" Content="{Binding [Browse for Folder], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleWhiteBrush}"/>
+                <Label Style="{DynamicResource Pretendard-Bold-32}" Content="{Binding [Select Folder], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleWhiteBrush}"/>
             </StackPanel>
 
             <Border Grid.Row="2" Grid.Column="1" CornerRadius="8,8,0,0" Background="{DynamicResource GrayscaleGray8Brush}">

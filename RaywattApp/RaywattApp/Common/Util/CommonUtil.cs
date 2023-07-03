@@ -58,16 +58,6 @@ namespace RaywattApp.Common.Util
             return regex.IsMatch(input);
         }
 
-        public static bool ValidatevolumeLabel(string input)
-        {
-            var regex = new Regex(@"^[a-zA-Z0-9_.]+$");
-
-            if (input.Length == 0)
-                return true;
-
-            return regex.IsMatch(input);
-        }
-
         public static Mat ByteMemoryToCvMat(IntPtr data, int width, int height, int ch)
         {
             MatType type = MatType.CV_8UC1;

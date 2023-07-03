@@ -102,10 +102,10 @@
                             </StackPanel>
                             <StackPanel Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal">
                                 <StackPanel>
-                                    <RadioButton IsChecked="{Binding PatientCase.PullbackType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.PullbackTypeShort}}" Content="{Binding [Survey (54㎜)], Source={StaticResource L10N}}" />
+                                    <RadioButton IsChecked="{Binding PatientCase.PullbackType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.PullbackTypeShort}}" Content="{Binding [Standard (60㎜)], Source={StaticResource L10N}}" />
                                 </StackPanel>
                                 <StackPanel Margin="18,0,0,0">
-                                    <RadioButton IsChecked="{Binding PatientCase.PullbackType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.PullbackTypeLong}}" Content="{Binding [Hi-Res (100㎜)], Source={StaticResource L10N}}" />
+                                    <RadioButton IsChecked="{Binding PatientCase.PullbackType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.PullbackTypeLong}}" Content="{Binding [Survey (100㎜)], Source={StaticResource L10N}}" />
                                 </StackPanel>
                             </StackPanel>
                             <StackPanel Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">
