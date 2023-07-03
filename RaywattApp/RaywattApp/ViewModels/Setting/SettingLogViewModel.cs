@@ -97,7 +97,7 @@ namespace RaywattApp.ViewModels.Setting
             {
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["title"] = _l10n["Information"];
-                parameter["message"] = _l10n["There are no items selected."];
+                parameter["message"] = _l10n["No items have been selected"];
                 var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.SettingDialogWidth, Constants.SettingDialogHeight);
                 return;
             }

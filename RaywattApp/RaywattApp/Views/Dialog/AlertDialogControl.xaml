@@ -27,7 +27,7 @@
                 <StackPanel Height="30"/>
                 <Image Source="{svgc:SvgImage Source=/res/icon/alertError.svg}" Width="60" Height="60"/>
             </StackPanel>
-            <StackPanel Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20,20,20,20">
+            <StackPanel Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10,20,10,20">
                 <Label Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource GrayscaleWhiteBrush}" TextBlock.TextAlignment="Center">
                     <Label.Content>
                         <AccessText TextWrapping="Wrap" Text="{Binding Message}"/>

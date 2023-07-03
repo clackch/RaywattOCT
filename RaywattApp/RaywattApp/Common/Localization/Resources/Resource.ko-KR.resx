@@ -118,53 +118,41 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="$MSG001" xml:space="preserve">
-    <value>㉿Connect Catheter to the DOC</value>
+    <value>㉿Connect Catheter to the RJ</value>
   </data>
   <data name="$MSG002" xml:space="preserve">
-    <value>㉿System will continue once imageing Catheter is connected</value>
+    <value>㉿Verify guide catheter position for flush, Prepare for pullback.</value>
   </data>
   <data name="$MSG003" xml:space="preserve">
-    <value>㉿Verify guide catheter is positioned for adequate flush, Prepare for pullback</value>
+    <value>㉿Injcect flush media</value>
   </data>
-  <data name="$MSG005-1" xml:space="preserve">
-    <value>㉿Inject flush media within</value>
+  <data name="$MSG004" xml:space="preserve">
+    <value>㉿Verify Image Quality</value>
   </data>
-  <data name="$MSG005-2" xml:space="preserve">
-    <value>㉿seconds</value>
+  <data name="$MSG005" xml:space="preserve">
+    <value>㉿Review pullback to ensure proper blood clearance in relevant areas.
+And Identify regions of uncertainty in lumen contour.</value>
   </data>
   <data name="$MSG006" xml:space="preserve">
-    <value>㉿Confirm Image Quality</value>
+    <value>㉿The imaging catheter has malfunctioned.
+Remove the catheter from the patient and proceed to the next step.</value>
   </data>
-  <data name="$MSG007-1" xml:space="preserve">
-    <value>㉿Review pullback for proper blood clearing in areas of interest.</value>
+  <data name="$MSG007" xml:space="preserve">
+    <value>㉿The imaging catheter has failed.
+Remove catheter from patient before proceeding.</value>
   </data>
-  <data name="$MSG007-2" xml:space="preserve">
-    <value>㉿And indicates area of low confidence in Lumen contour.</value>
-  </data>
-  <data name="$MSG008-1" xml:space="preserve">
-    <value>㉿The imaging catheter has failed.</value>
-  </data>
-  <data name="$MSG008-2" xml:space="preserve">
-    <value>㉿Remove the catheter from the patient then chick Next.</value>
+  <data name="$MSG008" xml:space="preserve">
+    <value>㉿Disconnect the damaged catheter from the RJ 
+after removing it from the patient.</value>
   </data>
   <data name="$MSG009" xml:space="preserve">
-    <value>㉿The imaging catheter has failed.
-It must be removed from the patient before continuing.</value>
+    <value>㉿1. Unlock the catheter</value>
   </data>
-  <data name="$MSG010-1" xml:space="preserve">
-    <value>㉿After the damaged catheter has been removed from the patient</value>
-  </data>
-  <data name="$MSG010-2" xml:space="preserve">
-    <value>㉿disconnect it from the DOC before continuing the case.</value>
+  <data name="$MSG010" xml:space="preserve">
+    <value>㉿2. Wait for the unload process to complete</value>
   </data>
   <data name="$MSG011" xml:space="preserve">
-    <value>㉿1. Unlock Catheter</value>
-  </data>
-  <data name="$MSG012" xml:space="preserve">
-    <value>㉿2. Wait for unload</value>
-  </data>
-  <data name="$MSG013" xml:space="preserve">
-    <value>㉿3. Disconnect Catheter</value>
+    <value>㉿3. Disconnect the catheter</value>
   </data>
   <data name="%AS" xml:space="preserve">
     <value>㉿%AS</value>
@@ -180,12 +168,6 @@ It must be removed from the patient before continuing.</value>
   </data>
   <data name="3D" xml:space="preserve">
     <value>㉿3D</value>
-  </data>
-  <data name="3D Cut-View" xml:space="preserve">
-    <value>㉿3D Cut-View</value>
-  </data>
-  <data name="3D Fly through" xml:space="preserve">
-    <value>㉿3D Fly through</value>
   </data>
   <data name="3D Option" xml:space="preserve">
     <value>㉿3D Option</value>
@@ -235,8 +217,8 @@ It must be removed from the patient before continuing.</value>
   <data name="Apposition" xml:space="preserve">
     <value>㉿Apposition</value>
   </data>
-  <data name="Apposition threshold" xml:space="preserve">
-    <value>㉿Apposition threshold</value>
+  <data name="Apposition Threshold" xml:space="preserve">
+    <value>㉿Apposition Threshold</value>
   </data>
   <data name="Approximate Import Size" xml:space="preserve">
     <value>㉿Approximate Import Size</value>
@@ -244,19 +226,10 @@ It must be removed from the patient before continuing.</value>
   <data name="Archive" xml:space="preserve">
     <value>㉿Archive</value>
   </data>
-  <data name="Are you sure to delete selected patient case?" xml:space="preserve">
-    <value>㉿Are you sure to delete selected patient case?</value>
-  </data>
-  <data name="Are you sure to delete selected Preset?" xml:space="preserve">
-    <value>㉿Are you sure to delete selected Preset?</value>
-  </data>
-  <data name="Are you sure to import selected file?" xml:space="preserve">
-    <value>㉿Are you sure to import selected file?</value>
-  </data>
   <data name="Area" xml:space="preserve">
     <value>㉿Area</value>
   </data>
-  <data name="Area(㎟)" xml:space="preserve">
+  <data name="Area&#xA;(㎟)" xml:space="preserve">
     <value>㉿Area
 (㎟)</value>
   </data>
@@ -293,9 +266,6 @@ It must be removed from the patient before continuing.</value>
   <data name="Brightness" xml:space="preserve">
     <value>㉿Brightness</value>
   </data>
-  <data name="Browse for Folder" xml:space="preserve">
-    <value>㉿Browse for Folder</value>
-  </data>
   <data name="Byte" xml:space="preserve">
     <value>㉿Byte</value>
   </data>
@@ -304,9 +274,6 @@ It must be removed from the patient before continuing.</value>
   </data>
   <data name="Calcium" xml:space="preserve">
     <value>㉿Calcium</value>
-  </data>
-  <data name="Calcium threshold" xml:space="preserve">
-    <value>㉿Calcium threshold</value>
   </data>
   <data name="Calibration" xml:space="preserve">
     <value>㉿Calibration</value>
@@ -344,6 +311,18 @@ It must be removed from the patient before continuing.</value>
   <data name="Confirm" xml:space="preserve">
     <value>㉿Confirm</value>
   </data>
+  <data name="Confirm deletion of selected patient" xml:space="preserve">
+    <value>㉿Confirm deletion of selected patient</value>
+  </data>
+  <data name="Confirm deletion of selected patient case" xml:space="preserve">
+    <value>㉿Confirm deletion of selected patient case</value>
+  </data>
+  <data name="Confirm deletion of selected preset" xml:space="preserve">
+    <value>㉿Confirm deletion of selected preset</value>
+  </data>
+  <data name="Confirm import of selected file" xml:space="preserve">
+    <value>㉿Confirm import of selected file</value>
+  </data>
   <data name="Confirm Password" xml:space="preserve">
     <value>㉿Confirm Password</value>
   </data>
@@ -368,21 +347,18 @@ It must be removed from the patient before continuing.</value>
   <data name="Cut-View" xml:space="preserve">
     <value>㉿Cut-View</value>
   </data>
-  <data name="Data already exists. Do you want to import data?" xml:space="preserve">
+  <data name="Cut-View1" xml:space="preserve">
+    <value>㉿Cut-View</value>
+  </data>
+  <data name="Data already exists. Overwrite existing data?" xml:space="preserve">
     <value>㉿Data already exists.
-Do you want to import data?</value>
+Overwrite existing data?</value>
   </data>
   <data name="Database" xml:space="preserve">
     <value>㉿Database</value>
   </data>
-  <data name="Default Preset can not be deleted" xml:space="preserve">
-    <value>㉿Default Preset can not be deleted</value>
-  </data>
-  <data name="Default Preset can not be modified" xml:space="preserve">
-    <value>㉿Default Preset can not be modified</value>
-  </data>
-  <data name="Define Alternate Patient ID" xml:space="preserve">
-    <value>㉿Define Alternate Patient ID</value>
+  <data name="Define an Alternate Patient ID" xml:space="preserve">
+    <value>㉿Define an Alternate Patient ID</value>
   </data>
   <data name="Delete" xml:space="preserve">
     <value>㉿Delete</value>
@@ -405,9 +381,6 @@ Do you want to import data?</value>
   <data name="Done" xml:space="preserve">
     <value>㉿Done</value>
   </data>
-  <data name="Duplicated Folder Name" xml:space="preserve">
-    <value>㉿Duplicated Folder Name</value>
-  </data>
   <data name="Edit" xml:space="preserve">
     <value>㉿Edit</value>
   </data>
@@ -420,16 +393,13 @@ Do you want to import data?</value>
   <data name="Edit Physician" xml:space="preserve">
     <value>㉿Edit Physician</value>
   </data>
-  <data name="Eject when Complete" xml:space="preserve">
-    <value>㉿Eject when Complete</value>
-  </data>
-  <data name="en-US" xml:space="preserve">
-    <value>㉿English</value>
-  </data>
   <data name="End Review" xml:space="preserve">
     <value>㉿End Review</value>
   </data>
   <data name="English" xml:space="preserve">
+    <value>㉿English</value>
+  </data>
+  <data name="English1" xml:space="preserve">
     <value>㉿English</value>
   </data>
   <data name="Enter an external device" xml:space="preserve">
@@ -437,6 +407,12 @@ Do you want to import data?</value>
   </data>
   <data name="Enter Dataset Password" xml:space="preserve">
     <value>㉿Enter Dataset Password</value>
+  </data>
+  <data name="Enter Physician Name" xml:space="preserve">
+    <value>㉿Enter Physician Name</value>
+  </data>
+  <data name="Enter Preset Name" xml:space="preserve">
+    <value>㉿Enter Preset Name</value>
   </data>
   <data name="Error" xml:space="preserve">
     <value>㉿Error</value>
@@ -447,11 +423,11 @@ Do you want to import data?</value>
   <data name="Expansion" xml:space="preserve">
     <value>㉿Expansion</value>
   </data>
-  <data name="Expansion calculation" xml:space="preserve">
-    <value>㉿Expansion calculation</value>
+  <data name="Expansion Calculation" xml:space="preserve">
+    <value>㉿Expansion Calculation</value>
   </data>
-  <data name="Expansion threshold" xml:space="preserve">
-    <value>㉿Expansion threshold</value>
+  <data name="Expansion Threshold" xml:space="preserve">
+    <value>㉿Expansion Threshold</value>
   </data>
   <data name="Export" xml:space="preserve">
     <value>㉿Export</value>
@@ -474,11 +450,17 @@ Do you want to import data?</value>
   <data name="First Name" xml:space="preserve">
     <value>㉿First Name</value>
   </data>
+  <data name="Fly-Through" xml:space="preserve">
+    <value>㉿Fly-Through</value>
+  </data>
   <data name="Folder" xml:space="preserve">
     <value>㉿Folder</value>
   </data>
   <data name="Folder Name" xml:space="preserve">
     <value>㉿Folder Name</value>
+  </data>
+  <data name="Folder name is duplicated" xml:space="preserve">
+    <value>㉿Folder name is duplicated</value>
   </data>
   <data name="Format" xml:space="preserve">
     <value>㉿Format</value>
@@ -507,9 +489,6 @@ Do you want to import data?</value>
   <data name="Guidewires" xml:space="preserve">
     <value>㉿Guidewires</value>
   </data>
-  <data name="Hi-Res (100㎜)" xml:space="preserve">
-    <value>㉿Hi-Res (100㎜)</value>
-  </data>
   <data name="Hide All" xml:space="preserve">
     <value>㉿Hide All</value>
   </data>
@@ -519,8 +498,8 @@ Do you want to import data?</value>
   <data name="ID" xml:space="preserve">
     <value>㉿ID</value>
   </data>
-  <data name="ID is duplicated." xml:space="preserve">
-    <value>㉿ID is duplicated.</value>
+  <data name="ID is duplicated" xml:space="preserve">
+    <value>㉿ID is duplicated</value>
   </data>
   <data name="Image Type" xml:space="preserve">
     <value>㉿Image Type</value>
@@ -543,6 +522,9 @@ Do you want to import data?</value>
   <data name="Input Password" xml:space="preserve">
     <value>㉿Input Password</value>
   </data>
+  <data name="Insufficient storage space available" xml:space="preserve">
+    <value>㉿Insufficient storage space available</value>
+  </data>
   <data name="Intravascular OCT - For Presentation" xml:space="preserve">
     <value>㉿Intravascular OCT - For Presentation</value>
   </data>
@@ -552,14 +534,14 @@ Do you want to import data?</value>
   <data name="KB" xml:space="preserve">
     <value>㉿KB</value>
   </data>
-  <data name="ko-KR" xml:space="preserve">
-    <value>㉿Korean</value>
-  </data>
   <data name="Korean" xml:space="preserve">
     <value>㉿Korean</value>
   </data>
-  <data name="L-Mode" xml:space="preserve">
-    <value>㉿L-Mode</value>
+  <data name="Korean1" xml:space="preserve">
+    <value>㉿Korean</value>
+  </data>
+  <data name="L-View" xml:space="preserve">
+    <value>㉿L-View</value>
   </data>
   <data name="Language" xml:space="preserve">
     <value>㉿Language</value>
@@ -612,7 +594,7 @@ Do you want to import data?</value>
   <data name="Max" xml:space="preserve">
     <value>㉿Max</value>
   </data>
-  <data name="Max Diam.(㎜)" xml:space="preserve">
+  <data name="Max Diam.&#xA;(㎜)" xml:space="preserve">
     <value>㉿Max Diam.
 (㎜)</value>
   </data>
@@ -622,7 +604,7 @@ Do you want to import data?</value>
   <data name="MB" xml:space="preserve">
     <value>㉿MB</value>
   </data>
-  <data name="Mean Diam.(㎜)" xml:space="preserve">
+  <data name="Mean Diam.&#xA;(㎜)" xml:space="preserve">
     <value>㉿Mean Diam.
 (㎜)</value>
   </data>
@@ -635,13 +617,13 @@ Do you want to import data?</value>
   <data name="Measurements" xml:space="preserve">
     <value>㉿Measurements</value>
   </data>
-  <data name="Media Type is not supported" xml:space="preserve">
-    <value>㉿Media Type is not supported</value>
+  <data name="Media type is not supported" xml:space="preserve">
+    <value>㉿Media type is not supported</value>
   </data>
   <data name="Min" xml:space="preserve">
     <value>㉿Min</value>
   </data>
-  <data name="Min Diam.(㎜)" xml:space="preserve">
+  <data name="Min Diam.&#xA;(㎜)" xml:space="preserve">
     <value>㉿Min Diam.
 (㎜)</value>
   </data>
@@ -654,8 +636,8 @@ Do you want to import data?</value>
   <data name="Name" xml:space="preserve">
     <value>㉿Name</value>
   </data>
-  <data name="Name is duplicated." xml:space="preserve">
-    <value>㉿Name is duplicated.</value>
+  <data name="Name is duplicated" xml:space="preserve">
+    <value>㉿Name is duplicated</value>
   </data>
   <data name="Native" xml:space="preserve">
     <value>㉿Native</value>
@@ -686,6 +668,9 @@ Do you want to import data?</value>
   </data>
   <data name="No Drive" xml:space="preserve">
     <value>㉿No Drive</value>
+  </data>
+  <data name="No items have been selected" xml:space="preserve">
+    <value>㉿No items have been selected</value>
   </data>
   <data name="No." xml:space="preserve">
     <value>㉿No.</value>
@@ -756,9 +741,6 @@ Do you want to import data?</value>
   <data name="Play" xml:space="preserve">
     <value>㉿Play</value>
   </data>
-  <data name="Please choose gender" xml:space="preserve">
-    <value>㉿Please choose gender</value>
-  </data>
   <data name="Please enter date of birth" xml:space="preserve">
     <value>㉿Please enter date of birth</value>
   </data>
@@ -770,6 +752,12 @@ Do you want to import data?</value>
   </data>
   <data name="Please enter last name" xml:space="preserve">
     <value>㉿Please enter last name</value>
+  </data>
+  <data name="Please enter volume label" xml:space="preserve">
+    <value>㉿Please enter volume label</value>
+  </data>
+  <data name="Please select gender" xml:space="preserve">
+    <value>㉿Please select gender</value>
   </data>
   <data name="Post" xml:space="preserve">
     <value>㉿Post</value>
@@ -813,8 +801,8 @@ Do you want to import data?</value>
   <data name="Refresh" xml:space="preserve">
     <value>㉿Refresh</value>
   </data>
-  <data name="Remove when Complete" xml:space="preserve">
-    <value>㉿Remove when Complete</value>
+  <data name="Remove when complete" xml:space="preserve">
+    <value>㉿Remove when complete</value>
   </data>
   <data name="Rename" xml:space="preserve">
     <value>㉿Rename</value>
@@ -846,14 +834,20 @@ Do you want to import data?</value>
   <data name="Search ID or Name" xml:space="preserve">
     <value>㉿Search ID or Name</value>
   </data>
+  <data name="sec" xml:space="preserve">
+    <value>㉿sec</value>
+  </data>
   <data name="Secondary Capture" xml:space="preserve">
     <value>㉿Secondary Capture</value>
   </data>
-  <data name="Select destination path" xml:space="preserve">
-    <value>㉿Select destination path</value>
+  <data name="Select Destination path" xml:space="preserve">
+    <value>㉿Select Destination path</value>
   </data>
   <data name="Select Drive" xml:space="preserve">
     <value>㉿Select Drive</value>
+  </data>
+  <data name="Select Folder" xml:space="preserve">
+    <value>㉿Select Folder</value>
   </data>
   <data name="Select Language" xml:space="preserve">
     <value>㉿Select Language</value>
@@ -894,6 +888,9 @@ Do you want to import data?</value>
   <data name="Standard" xml:space="preserve">
     <value>㉿Standard</value>
   </data>
+  <data name="Standard (60㎜ 30㎜/s 40㎛)" xml:space="preserve">
+    <value>㉿Standard (60㎜, 30㎜/s, 40㎛)</value>
+  </data>
   <data name="Start" xml:space="preserve">
     <value>㉿Start</value>
   </data>
@@ -906,23 +903,14 @@ Do you want to import data?</value>
   <data name="Step 2." xml:space="preserve">
     <value>㉿Step 2.</value>
   </data>
-  <data name="Survey (54㎜)" xml:space="preserve">
-    <value>㉿Survey (54㎜)</value>
+  <data name="Survey (100㎜ 30㎜/s 100㎛)" xml:space="preserve">
+    <value>㉿Survey (100㎜, 30㎜/s, 100㎛)</value>
   </data>
   <data name="System File Option" xml:space="preserve">
     <value>㉿System File Option</value>
   </data>
   <data name="Tapered" xml:space="preserve">
     <value>㉿Tapered</value>
-  </data>
-  <data name="The password you entered is not valid" xml:space="preserve">
-    <value>㉿The password you entered is not valid</value>
-  </data>
-  <data name="There are no items selected." xml:space="preserve">
-    <value>㉿There are no items selected.</value>
-  </data>
-  <data name="There is not enough space on the storage device to store." xml:space="preserve">
-    <value>㉿There is not enough space on the storage device to store.</value>
   </data>
   <data name="TIFF" xml:space="preserve">
     <value>㉿TIFF</value>
@@ -960,17 +948,8 @@ Do you want to import data?</value>
   <data name="Volume Label" xml:space="preserve">
     <value>㉿Volume Label</value>
   </data>
-  <data name="Volume Label is required" xml:space="preserve">
-    <value>㉿Volume Label is required</value>
-  </data>
   <data name="Warning" xml:space="preserve">
     <value>㉿Warning</value>
-  </data>
-  <data name="Write Physician Name" xml:space="preserve">
-    <value>㉿Write Physician Name</value>
-  </data>
-  <data name="Write Preset Name" xml:space="preserve">
-    <value>㉿Write Preset Name</value>
   </data>
   <data name="Yes" xml:space="preserve">
     <value>㉿Yes</value>

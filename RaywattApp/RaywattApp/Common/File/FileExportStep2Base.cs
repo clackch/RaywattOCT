@@ -383,14 +383,14 @@ namespace RaywattApp.Common.File
                 {
                     Dictionary<string, object> parameter = new Dictionary<string, object>();
                     parameter["title"] = _l10n["Information"];
-                    parameter["message"] = _l10n["Select destination path"];
+                    parameter["message"] = _l10n["Select Destination path"];
                     var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.FileExportDialogWidth, Constants.FileExportDialogHeight);
                 }
                 else if (_externalDriveAvailableFreeSpaceByte <= _exportSizeByte)
                 {
                     Dictionary<string, object> parameter = new Dictionary<string, object>();
                     parameter["title"] = _l10n["Information"];
-                    parameter["message"] = _l10n["There is not enough space on the storage device to store."];
+                    parameter["message"] = _l10n["Insufficient storage space available"];
                     var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.FileExportDialogWidth, Constants.FileExportDialogHeight);
                 }
                 else
@@ -413,18 +413,18 @@ namespace RaywattApp.Common.File
                 {
                     Dictionary<string, object> parameter = new Dictionary<string, object>();
                     parameter["title"] = _l10n["Information"];
-                    parameter["message"] = _l10n["Media Type is not supported"];
+                    parameter["message"] = _l10n["Media type is not supported"];
                     var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.FileExportDialogWidth, Constants.FileExportDialogHeight);
                 }
                 else if (FileExport.VolumeLabel == null || String.IsNullOrEmpty(FileExport.VolumeLabel.Trim()))
                 {
-                    FileExport.ValidateVolumeLabel = _l10n["Volume Label is required"];
+                    FileExport.ValidateVolumeLabel = _l10n["Please enter volume label"];
                 }
                 else if (CdTotalSize <= ExportSize)
                 {
                     Dictionary<string, object> parameter = new Dictionary<string, object>();
                     parameter["title"] = _l10n["Information"];
-                    parameter["message"] = _l10n["There is not enough space on the storage device to store."];
+                    parameter["message"] = _l10n["Insufficient storage space available"];
                     var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.FileExportDialogWidth, Constants.FileExportDialogHeight);
                 }
                 else

@@ -124,7 +124,7 @@ namespace RaywattApp.ViewModels
 
             if(nCnt > 0)
             {
-                Patient.ValidateId = _l10n["ID is duplicated."];
+                Patient.ValidateId = _l10n["ID is duplicated"];
 
                 return;
             }

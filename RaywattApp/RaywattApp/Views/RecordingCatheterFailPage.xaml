@@ -39,15 +39,18 @@
                         </Grid.RowDefinitions>
                         <Grid Grid.Row="0">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="110"/>
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
                                 <Image Source="{svgc:SvgImage Source=/res/icon/alertError.svg}" Width="74" Height="74"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <Label Style="{DynamicResource Pretendard-Semibold-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [$MSG008-1], Source={StaticResource L10N}}"/>
-                                <Label Style="{DynamicResource Pretendard-Semibold-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [$MSG008-2], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource Pretendard-Semibold-24}" Foreground="{DynamicResource GrayscaleGray3Brush}">
+                                    <Label.Content>
+                                        <AccessText TextWrapping="Wrap" Text="{Binding [$MSG006], Source={StaticResource L10N}}"/>
+                                    </Label.Content>
+                                </Label>
                             </StackPanel>
                         </Grid>
                         <Border Grid.Row="2" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
@@ -62,15 +65,18 @@
                         </Grid.RowDefinitions>
                         <Grid Grid.Row="0">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="110"/>
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
                                 <Image Source="{svgc:SvgImage Source=/res/icon/alertWarning.svg}" Height="74"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <Label Style="{DynamicResource Pretendard-Semibold-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [$MSG010-1], Source={StaticResource L10N}}"/>
-                                <Label Style="{DynamicResource Pretendard-Semibold-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [$MSG010-2], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource Pretendard-Semibold-24}" Foreground="{DynamicResource GrayscaleGray3Brush}">
+                                    <Label.Content>
+                                        <AccessText TextWrapping="Wrap" Text="{Binding [$MSG008], Source={StaticResource L10N}}"/>
+                                    </Label.Content>
+                                </Label>
                             </StackPanel>
                         </Grid>
                         <Grid Grid.Row="1">
@@ -87,7 +93,7 @@
                                     <RowDefinition Height="440"/>
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,10">
-                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG011], Source={StaticResource L10N}}"/>
+                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG009], Source={StaticResource L10N}}"/>
                                 </StackPanel>
                                 <Border Grid.Row="1" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
 
@@ -99,7 +105,7 @@
                                     <RowDefinition Height="440"/>
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,10">
-                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG012], Source={StaticResource L10N}}"/>
+                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG010], Source={StaticResource L10N}}"/>
                                 </StackPanel>
                                 <Border Grid.Row="1" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
 
@@ -111,7 +117,7 @@
                                     <RowDefinition Height="440"/>
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,10">
-                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG013], Source={StaticResource L10N}}"/>
+                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG011], Source={StaticResource L10N}}"/>
                                 </StackPanel>
                                 <Border Grid.Row="1" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
 

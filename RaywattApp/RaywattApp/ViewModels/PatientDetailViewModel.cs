@@ -269,7 +269,7 @@ namespace RaywattApp.ViewModels
 
             parameter.Clear();
             parameter["title"] = _l10n["Information"];
-            parameter["message"] = _l10n["Are you sure to delete selected patient case?"];
+            parameter["message"] = _l10n["Confirm deletion of selected patient case"];
             result = _dialogService.OpenDialog(new ConfirmDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
             if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)

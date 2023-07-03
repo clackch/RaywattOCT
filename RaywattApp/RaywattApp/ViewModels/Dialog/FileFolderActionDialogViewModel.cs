@@ -68,7 +68,7 @@ namespace RaywattApp.ViewModels.Dialog
                 bool result = directoryProvider.DuplicateCheckRename(SelectedDir.Path, SelectedDir.Name, CreateRenameFolderName.Trim());
                 if (!result)
                 {
-                    ValidateCreateRenameFolderName = _l10n["Duplicated Folder Name"];
+                    ValidateCreateRenameFolderName = _l10n["Folder name is duplicated"];
                     return;
                 }
             }
@@ -77,7 +77,7 @@ namespace RaywattApp.ViewModels.Dialog
                 bool result = directoryProvider.DuplicateCheck(SelectedDir.Path, CreateRenameFolderName.Trim());
                 if (!result)
                 {
-                    ValidateCreateRenameFolderName = _l10n["Duplicated Folder Name"];
+                    ValidateCreateRenameFolderName = _l10n["Folder name is duplicated"];
                     return;
                 }
             }

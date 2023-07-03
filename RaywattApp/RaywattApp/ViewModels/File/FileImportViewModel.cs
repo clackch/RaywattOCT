@@ -232,7 +232,7 @@ namespace RaywattApp.ViewModels.File
                 {
                     Dictionary<string, object> parameter = new Dictionary<string, object>();
                     parameter["title"] = _l10n["Information"];
-                    parameter["message"] = _l10n["Data already exists. Do you want to import data?"];
+                    parameter["message"] = _l10n["Data already exists. Overwrite existing data?"];
                     parameter["patientCaseList"] = existPatientCases;
                     var result = _dialogService.OpenDialog(new FileImportDialogControl(), parameter, Constants.FileImportDialogWidth, Constants.FileImportDialogHeight);
 
@@ -252,7 +252,7 @@ namespace RaywattApp.ViewModels.File
                 {
                     Dictionary<string, object> parameter = new Dictionary<string, object>();
                     parameter["title"] = _l10n["Information"];
-                    parameter["message"] = _l10n["Are you sure to import selected file?"];
+                    parameter["message"] = _l10n["Confirm import of selected file"];
                     var result = _dialogService.OpenDialog(new ConfirmDialogControl(), parameter, Constants.FileImportDialogWidth, Constants.FileImportDialogHeight);
 
                     if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
@@ -265,7 +265,7 @@ namespace RaywattApp.ViewModels.File
             {
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["title"] = _l10n["Information"];
-                parameter["message"] = _l10n["There are no items selected."];
+                parameter["message"] = _l10n["No items have been selected"];
                 var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.FileImportDialogWidth, Constants.FileImportDialogHeight);
             }
         }

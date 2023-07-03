@@ -32,7 +32,7 @@
             </StackPanel>
 
             <StackPanel Grid.Row="3" Grid.Column="1">
-                <TextBox Style="{DynamicResource TextBoxValidator}" Text="{Binding Physician.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Write Physician Name], Source={StaticResource L10N}}" ToolTip="{Binding Physician.ValidateName}"/>
+                <TextBox Style="{DynamicResource TextBoxValidator}" Text="{Binding Physician.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter Physician Name], Source={StaticResource L10N}}" ToolTip="{Binding Physician.ValidateName}"/>
             </StackPanel>
             
             <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top">

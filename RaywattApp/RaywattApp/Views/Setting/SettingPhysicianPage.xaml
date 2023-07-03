@@ -53,7 +53,7 @@
                 </Label>
             </StackPanel>
             <StackPanel Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
-                <TextBox Style="{DynamicResource TextBoxValidator}" Width="360" Text="{Binding NewPhysician.Name, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Write Physician Name], Source={StaticResource L10N}}" ToolTip="{Binding NewPhysician.ValidateName}"/>
+                <TextBox Style="{DynamicResource TextBoxValidator}" Width="360" Text="{Binding NewPhysician.Name, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter Physician Name], Source={StaticResource L10N}}" ToolTip="{Binding NewPhysician.ValidateName}"/>
                 <StackPanel Width="10"/>
             </StackPanel>
             <StackPanel Grid.Row="0" Grid.Column="2">
