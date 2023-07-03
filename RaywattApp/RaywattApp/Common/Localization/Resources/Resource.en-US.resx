@@ -888,8 +888,8 @@ Overwrite existing data?</value>
   <data name="Standard" xml:space="preserve">
     <value>Standard</value>
   </data>
-  <data name="Standard (60㎜ 30㎜/s 40㎛)" xml:space="preserve">
-    <value>Standard (60㎜, 30㎜/s, 40㎛)</value>
+  <data name="Standard (60㎜)" xml:space="preserve">
+    <value>Standard (60㎜)</value>
   </data>
   <data name="Start" xml:space="preserve">
     <value>Start</value>
@@ -903,8 +903,8 @@ Overwrite existing data?</value>
   <data name="Step 2." xml:space="preserve">
     <value>Step 2.</value>
   </data>
-  <data name="Survey (100㎜ 30㎜/s 100㎛)" xml:space="preserve">
-    <value>Survey (100㎜, 30㎜/s, 100㎛)</value>
+  <data name="Survey (100㎜)" xml:space="preserve">
+    <value>Survey (100㎜)</value>
   </data>
   <data name="System File Option" xml:space="preserve">
     <value>System File Option</value>

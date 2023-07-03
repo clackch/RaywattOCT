@@ -92,8 +92,12 @@
                                     <RowDefinition/>
                                     <RowDefinition Height="440"/>
                                 </Grid.RowDefinitions>
-                                <StackPanel Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,10">
-                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG009], Source={StaticResource L10N}}"/>
+                                <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,10">
+                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" TextBlock.TextAlignment="Center">
+                                        <Label.Content>
+                                            <AccessText TextWrapping="Wrap" Text="{Binding [$MSG009], Source={StaticResource L10N}}"/>
+                                        </Label.Content>
+                                    </Label>
                                 </StackPanel>
                                 <Border Grid.Row="1" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
 
@@ -105,7 +109,11 @@
                                     <RowDefinition Height="440"/>
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,10">
-                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG010], Source={StaticResource L10N}}"/>
+                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" TextBlock.TextAlignment="Center">
+                                        <Label.Content>
+                                            <AccessText TextWrapping="Wrap" Text="{Binding [$MSG010], Source={StaticResource L10N}}"/>
+                                        </Label.Content>
+                                    </Label>
                                 </StackPanel>
                                 <Border Grid.Row="1" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
 
@@ -116,8 +124,12 @@
                                     <RowDefinition/>
                                     <RowDefinition Height="440"/>
                                 </Grid.RowDefinitions>
-                                <StackPanel Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,10">
-                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG011], Source={StaticResource L10N}}"/>
+                                <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,10">
+                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" TextBlock.TextAlignment="Center">
+                                        <Label.Content>
+                                            <AccessText TextWrapping="Wrap" Text="{Binding [$MSG011], Source={StaticResource L10N}}"/>
+                                        </Label.Content>
+                                    </Label>
                                 </StackPanel>
                                 <Border Grid.Row="1" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
 

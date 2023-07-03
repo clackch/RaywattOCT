@@ -66,7 +66,7 @@
                         <CheckBox IsChecked="{Binding FileExport.MeasureManual}" Content="{Binding [Manual], Source={StaticResource L10N}}" Margin="35,0,0,0"/>
                     </StackPanel>
                     <Separator Grid.Row="3" Grid.ColumnSpan="3" Background="{DynamicResource GrayscaleGray5Brush}" Width="760" Height="1"/>
-                    <Label Grid.Row="4" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Margin="20,20,0,28" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Additional Option], Source={StaticResource L10N}}"/>
+                    <Label Grid.Row="4" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Margin="20,20,0,0" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Additional Option], Source={StaticResource L10N}}"/>
                     <CheckBox Grid.Row="4" Grid.Column="1" IsChecked="{Binding FileExport.PatientInfoAnonymize}" Margin="0,15,0,22" Content="{Binding [Patient Information Anonymize], Source={StaticResource L10N}}"/>
                 </Grid>
             </Border>
