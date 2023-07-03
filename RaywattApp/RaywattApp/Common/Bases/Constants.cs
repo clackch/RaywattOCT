@@ -115,25 +115,6 @@ namespace RaywattApp.Common.Bases
         public const string ExportMaterialCurrent = "C";
         public const string ExportMaterialBookmarked = "B";
 
-        //Disk Type - CD/DVD, External Drive        
-        public const string FileDiskCd = "C";
-        public const string FileDiskExternal = "E";
-
-        //CD
-        public const string MediaTypeNoDisc = "No Disc";
-        public const string MediaTypeNotSupportDisc = "Not Support Disc";
-        public const string MediaTypeCDR = "CD-R";
-        public const string MediaTypeCDRW = "CD-RW";
-        public const string MediaTypeDVDDASHR = "DVD-R";
-        public const string MediaTypeDVDDASHRW = "DVD-RW";
-        public const string MediaTypeDVDPLUSR = "DVD+R";
-        public const string MediaTypeDVDPLUSRW = "DVD+RW";
-        public const string MediaTypeBDR = "Blu-ray Recordable";
-        public const string MediaTypeBDRE = "Blu-ray Recordable Erasable";
-
-        //CD Writing Status -  validating(0), formatting(1), initializing(2), calibrating(3), writing(4), finalizing(5), completed(6)
-        public static string[] CdWrtingStatus = {"Validating", "Formatting", "Initializing", "Calibrating", "Writing", "Finalizing", "Completed" };
-
         //Export Status
         public const string ExportStatusCopyFile = "Copy file(s)";
         public const string ExportStatusConvertImage = "Convert Image(s)";
@@ -143,15 +124,6 @@ namespace RaywattApp.Common.Bases
         public const string ExportStatusSaveMultipleFiles = "Save Multiple Image Files";
         public const string ExportStatusSaveFile = "Save File";
         public const string ExportStatusCompleted = "Completed";
-
-        //Export(Raw) File Option - Leave Unchanged, Remove when Complete
-        public const string ExportOptionUnchanged = "U";
-        public const string ExportOptionRemove = "R";
-
-        //Export(DICOM) Measurements - Show All, Hide Lumen Contour, Hide All
-        public const string ExportMeasurementShowAll = "S";
-        public const string ExportMeasurementHideLumen = "L";
-        public const string ExportMeasurementHideAll = "H";
 
         //Export(Standard) Pullback - AVI, TIFF
         public const string ExportPullbackAVI = "MP4";
@@ -196,10 +168,6 @@ namespace RaywattApp.Common.Bases
         public const string FileIconDrive = "drive";
         public const string FileIconFolder = "folder";
         public const string FileIconFile = "file";
-
-        //View Mode - Live View, Stand By
-        public const string ViewModeLiveView = "LiveView";
-        public const string ViewModeStandBy = "StandBy";
 
         //Pullback Type
         public const string PullbackTypeLong = "LONG";
@@ -246,9 +214,6 @@ namespace RaywattApp.Common.Bases
 
         //Data File Root Path (OCT raw files) - ※ Patient Folder (DataRootPath + Patient ID)
         public const string DataRootPath = SystemRootPath + "\\Raywatt\\DataSave";
-
-        //Temporary Folder (CD/DVD Write)
-        public const string TempFolderPath = SystemRootPath + "\\Raywatt\\Temp";
 
         //Log Folder
         public const string LogFolderPath = SystemRootPath + "\\Raywatt\\log";

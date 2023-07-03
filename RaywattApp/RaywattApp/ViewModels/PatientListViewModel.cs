@@ -174,7 +174,7 @@ namespace RaywattApp.ViewModels
             HeaderGender = _l10n["Gender"];
             HeaderCreateDate = _l10n["Create Date"];
             HeaderUpdateDate = _l10n["Update Date"];
-            HeaderLastCase = _l10n["Last Case (total)"];
+            HeaderLastCase = _l10n["Last Case (Total)"];
         }
 
         private void SetPrevStatus()

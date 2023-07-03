@@ -38,18 +38,6 @@ namespace RaywattApp.ViewModels.File
 
         private string curPath;
 
-        private string _diskType; //CD/DVD, External Drive
-        public string DiskType
-        {
-            get { return _diskType; }
-            set 
-            { 
-                _diskType = value;
-                GetDrive();
-                OnPropertyChanged(nameof(DiskType));
-            }
-        }
-
         [ObservableProperty]
         private string _selectedFile;
 
@@ -101,8 +89,6 @@ namespace RaywattApp.ViewModels.File
 
         [ObservableProperty]
         private string _mediaType;
-
-        private bool cdInit = false;
 
         private bool externDriveInit = false;
 
@@ -158,10 +144,6 @@ namespace RaywattApp.ViewModels.File
             directoryProvider = new();
             ExternalDriveComboBox = new Dictionary<string, string>();
             ExternalDriveList = new Dictionary<string, object>();
-
-            RayExportWrapper.CDBurnError cDBurnError;
-            cDBurnError = RayExportWrapper.initDevice();
-            _log.Debug("initDevice : " + cDBurnError);
 
             timer.Interval = TimeSpan.FromMilliseconds(1000);
             timer.Tick += new EventHandler(CheckDrive);
@@ -422,9 +404,6 @@ namespace RaywattApp.ViewModels.File
                     break;
                 }
             }
-
-            if (DiskType == null)
-                DiskType = Constants.FileDiskExternal;
         }
 
         private void CheckDrive(object sender, EventArgs e)
@@ -434,123 +413,71 @@ namespace RaywattApp.ViewModels.File
 
         private void GetDrive()
         {
-            if (DiskType.Equals(Constants.FileDiskCd))
+            Dictionary<string, string> currExternalDrive = new Dictionary<string, string>();
+
+            string firstExternalDrive = "";
+            bool isFirstExternalDrive = true;
+
+            ExternalDriveList.Clear();
+
+            DriveInfo[] allDrives = DriveInfo.GetDrives();
+
+            foreach (DriveInfo d in allDrives)
             {
-                externDriveInit = false;
-
-                RayExportWrapper.CDBurnError cDBurnError;
-                cDBurnError = RayExportWrapper.checkDiskOnDrive();
-                _log.Debug("checkDiskOnDrive : " + cDBurnError);
-
-                if (cDBurnError == RayExportWrapper.CDBurnError.OK)
+                if (d.IsReady == true)
                 {
-                    if (!cdInit)
+                    if (d.DriveType == DriveType.Removable)
                     {
-                        DriveInfo[] allDrives = DriveInfo.GetDrives();
-                        foreach (DriveInfo d in allDrives)
-                        {
-                            if(d.DriveType == DriveType.CDRom)
-                            {
-                                curPath = d.Name;
-                                break;
-                            }
-                        }
+                        string driveName = d.Name.Replace("\\", "");
 
-                        RayExportWrapper.MediaType mediaType;
-                        mediaType = RayExportWrapper.getDiskType();
-                        _log.Debug("getDiskType : " + mediaType);
-                        if (SetMediaType(mediaType))
-                        {
-                            directoryProvider.GetDirectoryWithExtension(curPath);
-                            DirItems = directoryProvider.DirItems;
-                        }
-                        else
-                        {
-                            DirItems = null;
-                        }
+                        currExternalDrive[driveName] = driveName;
+                        long[] data = { d.TotalSize, d.AvailableFreeSpace };
+                        ExternalDriveList.Add(driveName, data);
 
-                        cdInit = true;
+                        if (isFirstExternalDrive)
+                        {
+                            firstExternalDrive = driveName;
+                            isFirstExternalDrive = false;
+                        }
+                    }
+                }
+            }
+
+            if (ExternalDriveComboBox.Count != currExternalDrive.Count)
+            {
+                ExternalDriveComboBox = currExternalDrive;
+
+                if (ExternalDriveComboBox.Count > 0)
+                {
+                    IsEnableExternalDrive = true;
+
+                    if (String.IsNullOrEmpty(externalDrive))
+                    {
+                        SelectedExternalDrive = firstExternalDrive;
+                    }
+                    else
+                    {
+                        SelectedExternalDrive = externalDrive;
                     }
                 }
                 else
                 {
-                    MediaType = Constants.MediaTypeNoDisc;
-
-                    cdInit = false;
-
+                    IsEnableExternalDrive = false;
                     DirItems = null;
                 }
             }
-            else
+
+            if (ExternalDriveComboBox.Count == 1)
             {
-                cdInit = false;
-
-                Dictionary<string, string> currExternalDrive = new Dictionary<string, string>();
-
-                string firstExternalDrive = "";
-                bool isFirstExternalDrive = true;
-
-                ExternalDriveList.Clear();
-
-                DriveInfo[] allDrives = DriveInfo.GetDrives();
-
-                foreach (DriveInfo d in allDrives)
+                if (!externDriveInit || !ExternalDriveComboBox.ContainsKey(SelectedExternalDrive))
                 {
-                    if (d.IsReady == true)
-                    {
-                        if (d.DriveType == DriveType.Removable)
-                        {
-                            string driveName = d.Name.Replace("\\", "");
-
-                            currExternalDrive[driveName] = driveName;
-                            long[] data = { d.TotalSize, d.AvailableFreeSpace };
-                            ExternalDriveList.Add(driveName, data);
-
-                            if (isFirstExternalDrive)
-                            {
-                                firstExternalDrive = driveName;
-                                isFirstExternalDrive = false;
-                            }
-                        }
-                    }
+                    SelectedExternalDrive = firstExternalDrive;
                 }
-
-                if (ExternalDriveComboBox.Count != currExternalDrive.Count)
-                {
-                    ExternalDriveComboBox = currExternalDrive;
-
-                    if (ExternalDriveComboBox.Count > 0)
-                    {
-                        IsEnableExternalDrive = true;
-
-                        if (String.IsNullOrEmpty(externalDrive))
-                        {
-                            SelectedExternalDrive = firstExternalDrive;
-                        }
-                        else
-                        {
-                            SelectedExternalDrive = externalDrive;
-                        }
-                    }
-                    else
-                    {
-                        IsEnableExternalDrive = false;
-                        DirItems = null;
-                    }
-                }
-
-                if (ExternalDriveComboBox.Count == 1)
-                {
-                    if (!externDriveInit || !ExternalDriveComboBox.ContainsKey(SelectedExternalDrive))
-                    {
-                        SelectedExternalDrive = firstExternalDrive;
-                    }
-                }
-                else if(ExternalDriveComboBox.Count == 0)
-                {
-                    DirItems = null;
-                }
-            }            
+            }
+            else if(ExternalDriveComboBox.Count == 0)
+            {
+                DirItems = null;
+            }
         }
 
         private void ReadFile(string path)
@@ -701,57 +628,6 @@ namespace RaywattApp.ViewModels.File
                 return false;
 
             return (bool)obj[key];
-        }
-
-        private bool SetMediaType(RayExportWrapper.MediaType mediaType)
-        {
-            bool res;
-
-            switch (mediaType)
-            {
-                case RayExportWrapper.MediaType.NotSupportDisc:
-                    MediaType = Constants.MediaTypeNotSupportDisc;
-                    res = false;
-                    break;
-                case RayExportWrapper.MediaType.TYPE_CDR:
-                    MediaType = Constants.MediaTypeCDR;
-                    res = true;
-                    break;
-                case RayExportWrapper.MediaType.TYPE_CDRW:
-                    MediaType = Constants.MediaTypeCDRW;
-                    res = true;
-                    break;
-                case RayExportWrapper.MediaType.TYPE_DVDDASHR:
-                    MediaType = Constants.MediaTypeDVDDASHR;
-                    res = true;
-                    break;
-                case RayExportWrapper.MediaType.TYPE_DVDDASHRW:
-                    MediaType = Constants.MediaTypeDVDDASHRW;
-                    res = true;
-                    break;
-                case RayExportWrapper.MediaType.TYPE_DVDPLUSR:
-                    MediaType = Constants.MediaTypeDVDPLUSR;
-                    res = true;
-                    break;
-                case RayExportWrapper.MediaType.TYPE_DVDPLUSRW:
-                    MediaType = Constants.MediaTypeDVDPLUSRW;
-                    res = true;
-                    break;
-                case RayExportWrapper.MediaType.TYPE_BDR:
-                    MediaType = Constants.MediaTypeBDR;
-                    res = true;
-                    break;
-                case RayExportWrapper.MediaType.TYPE_BDRE:
-                    MediaType = Constants.MediaTypeBDRE;
-                    res = true;
-                    break;
-                default:
-                    MediaType = Constants.MediaTypeNotSupportDisc;
-                    res = false;
-                    break;
-            }
-
-            return res;
         }
     }
 }

@@ -101,7 +101,7 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <ComboBox Grid.Column="0" Style="{DynamicResource ComboBoxDialog}" Width="280" ItemsSource="{Binding ExternalDriveComboBox}" SelectedValue="{Binding SelectedExternalDrive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectedValuePath="Key" DisplayMemberPath="Value" IsEnabled="{Binding IsEnableExternalDrive}" Tag="{Binding [No Drive], Source={StaticResource L10N}}" Margin="20,0,0,0"/>
-                        <TextBox Grid.Column="1" Style="{DynamicResource TextBoxWithCorner}" Width="386" IsReadOnly="True" Text="{Binding FileExport.ExternalDrivePath}" Tag="{Binding [Select Destination path], Source={StaticResource L10N}}" Margin="12,0,0,0"/>
+                        <TextBox Grid.Column="1" Style="{DynamicResource TextBoxWithCorner}" Width="386" IsReadOnly="True" Text="{Binding FileExport.ExternalDrivePath}" Tag="{Binding [Select Destination Path], Source={StaticResource L10N}}" Margin="12,0,0,0"/>
                         <Button Grid.Column="2" Style="{StaticResource OutlinedBtnType1}" Width="72" Height="54" Command="{Binding ExternalDrivePathCommand}" Content="{Binding [Path], Source={StaticResource L10N}}" IsEnabled="{Binding IsEnableExternalDrive}" HorizontalAlignment="Left" Margin="10,0,0,0"/>
                     </Grid>
                     <Grid Grid.Row="5">

@@ -47,7 +47,7 @@
             </StackPanel>
 
             <StackPanel Grid.Row="7" Grid.Column="1">
-                <TextBox Style="{DynamicResource TextBoxValidator}" Text="{Binding CreateRenameFolderName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Input Folder Name], Source={StaticResource L10N}}" ToolTip="{Binding ValidateCreateRenameFolderName}"/>
+                <TextBox Style="{DynamicResource TextBoxValidator}" Text="{Binding CreateRenameFolderName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter Folder Name], Source={StaticResource L10N}}" ToolTip="{Binding ValidateCreateRenameFolderName}"/>
             </StackPanel>
 
             <StackPanel Grid.Row="9" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">

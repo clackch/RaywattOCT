@@ -41,7 +41,6 @@ namespace RaywattApp.ViewModels.Setting
             _dialogService = dialogService;
 
             FileExport = new FileExport();
-            FileExport.DiskType = Constants.FileDiskExternal;
             FileExport.ExternalDrivePath = "";
 
 
