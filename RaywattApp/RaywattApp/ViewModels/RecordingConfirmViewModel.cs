@@ -106,8 +106,6 @@ namespace RaywattApp.ViewModels
                 Playback();
             }
 
-            RayEndReview();
-
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
