@@ -36,6 +36,9 @@ namespace RaywattApp.ViewModels
         private bool _isHome;
 
         [ObservableProperty]
+        private bool _isLoading;
+
+        [ObservableProperty]
         private string _navigationSource;
 
         [ObservableProperty]
@@ -106,7 +109,7 @@ namespace RaywattApp.ViewModels
             codeDefinition.GetCode();
 
             //시작 페이지 설정
-            NavigationSource = Constants.PatientListPage;
+            NavigationSource = Constants.OutsetLoadingPage;
 
             //네비게이션 메시지 수신 등록
             WeakReferenceMessenger.Default.Register<NavigationMessage>(this, OnNavigationMessage);
@@ -128,6 +131,7 @@ namespace RaywattApp.ViewModels
             reviewPages.Add(Constants.ReviewCalibrationPage);
 
             IsHome = true;
+            IsLoading = true;
 
             //Test
             double rotationTime = RayGetProperty(Property.LoadCatheterTime);
@@ -178,6 +182,8 @@ namespace RaywattApp.ViewModels
                 IsHome = true;
             else
                 IsHome = false;
+
+            IsLoading = false;
         }
 
         private void Home()
