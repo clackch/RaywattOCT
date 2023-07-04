@@ -11,6 +11,8 @@ namespace RaywattApp.Common.Bases
         public static string CurrentPage = "";
 
         //[Page List]
+        //Outset
+        public const string OutsetLoadingPage = "Views/OutsetLoadingPage.xaml";
         //Patient
         public const string PatientListPage = "Views/PatientListPage.xaml";
         public const string PatientDetailPage = "Views/PatientDetailPage.xaml";

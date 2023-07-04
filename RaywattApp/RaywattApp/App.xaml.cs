@@ -49,6 +49,9 @@ namespace RaywattApp
 
             //ViewModel 등록
             services.AddTransient(typeof(MainViewModel));
+            services.AddTransient(typeof(OutsetLoadingViewModel));
+            services.AddTransient(typeof(OutsetLoginViewModel));
+            services.AddTransient(typeof(OutsetTermsViewModel));
             services.AddTransient(typeof(PatientListViewModel));
             services.AddTransient(typeof(PatientNewViewModel));
             services.AddTransient(typeof(PatientEditViewModel));

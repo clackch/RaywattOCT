@@ -4,6 +4,12 @@
                     xmlns:component="clr-namespace:RaywattApp.Views.Component">
 
     <!-- Icon -->
+    <Style TargetType="Image" x:Key="RaywattOutset">
+        <Setter Property="Width" Value="383.1"/>
+        <Setter Property="Height" Value="220"/>
+        <Setter Property="Source" Value="{svgc:SvgImage Source=/res/icon/raywattOutset.svg}"/>
+    </Style>
+
     <Style TargetType="Image" x:Key="Raywatt">
         <Setter Property="Width" Value="437.3"/>
         <Setter Property="Height" Value="95"/>
@@ -184,6 +190,20 @@
                         <Border BorderThickness="0" CornerRadius="4" Background="{DynamicResource GrayscaleGray7Brush}"/>
                         <Rectangle Name="PART_Track"/>
                         <Border Name="PART_Indicator" CornerRadius="4" Background="{DynamicResource MainPrimaryColorBrush}" HorizontalAlignment="Left"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type ProgressBar}" x:Key="LoadingProgressBar">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ProgressBar">
+                    <Grid>
+                        <Border BorderThickness="0" CornerRadius="6" Background="{DynamicResource GrayscaleGray8Brush}"/>
+                        <Rectangle Name="PART_Track"/>
+                        <Border Name="PART_Indicator" CornerRadius="6" Background="{DynamicResource MainPrimaryColorBrush}" HorizontalAlignment="Left"/>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
