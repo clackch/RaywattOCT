@@ -154,6 +154,7 @@ namespace RaywattApp.ViewModels
                 CommonUtil.RenameFolder(Constants.DataRootPath + "\\" + Patient.Id.Trim(), Constants.DataRootPath + "\\" + PatientEdit.Id);
 
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
+                PatientEdit.Name = PatientEdit.Firstname + ", " + PatientEdit.Lastname;
                 parameter["patient"] = PatientEdit;
                 SetDetailStatusInit();
                 parameter["prevStatus"] = PrevStatus;
