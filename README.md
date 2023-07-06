@@ -16,6 +16,7 @@ Install PostgreSQL
 * Windows x86, x64 v14.5 [installer](https://www.postgresql.org/download/windows/)
 * Port : 5432
 * 환경 변수 PATH 에 PostgreSQL (C:\Program Files\PostgreSQL\14\bin) 추가
+* PW : 1111
 
 테이블 설계서(2022.10.11 Updated)
 [테이블 설계서.xlsx](https://github.com/raywatt-jeansu/RaywattOCT/files/9762372/default.xlsx)
