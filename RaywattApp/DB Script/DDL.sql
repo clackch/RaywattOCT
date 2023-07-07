@@ -46,45 +46,6 @@ ALTER TABLE IF EXISTS rv_schema.code
     OWNER to rv_user;
 
 
--- Table: rv_schema.log_file
-
--- DROP TABLE IF EXISTS rv_schema.log_file;
-
-CREATE TABLE IF NOT EXISTS rv_schema.log_file
-(
-    index integer NOT NULL DEFAULT nextval('rv_schema.log_file_index_seq'::regclass),
-    classification character varying(4) COLLATE pg_catalog."default",
-    name character varying(200) COLLATE pg_catalog."default",
-    create_date timestamp without time zone,
-    update_date timestamp without time zone,
-    CONSTRAINT log_file_pkey PRIMARY KEY (index)
-)
-
-TABLESPACE rv_tablespace;
-
-ALTER TABLE IF EXISTS rv_schema.log_file
-    OWNER to rv_user;
-	
--- Table: rv_schema.message
-
--- DROP TABLE IF EXISTS rv_schema.message;
-
-CREATE TABLE IF NOT EXISTS rv_schema.message
-(
-    language character varying(2) COLLATE pg_catalog."default" NOT NULL,
-    key character varying(4) COLLATE pg_catalog."default" NOT NULL,
-    value character varying(200) COLLATE pg_catalog."default",
-    create_date timestamp without time zone,
-    update_date timestamp without time zone,
-    CONSTRAINT message_pkey PRIMARY KEY (language, key)
-)
-
-TABLESPACE rv_tablespace;
-
-ALTER TABLE IF EXISTS rv_schema.message
-    OWNER to rv_user;
-
-
 -- Table: rv_schema.patient
 
 -- DROP TABLE IF EXISTS rv_schema.patient;
