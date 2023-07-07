@@ -46,7 +46,6 @@ namespace RaywattApp.Common.Annotation
         private PathGeometry overlayPathGeometry;
 
         private Mat imageContour = new Mat();
-        private OpenCvSharp.Rect contourBounds;
 
         private void AreaInit()
         {
