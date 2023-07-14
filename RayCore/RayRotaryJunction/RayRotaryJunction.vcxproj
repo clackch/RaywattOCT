@@ -120,6 +120,7 @@
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>..\Utility;..\extern\libusb\include\libusb-1.0;.\indruino\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>Default</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -128,7 +129,9 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(ProjectDir)..\Utility\*.h" "$(TargetDir)include\" /y /d
-xcopy "$(ProjectDir)*Controller.h" "$(TargetDir)include\" /y /d</Command>
+xcopy "$(ProjectDir)*Controller.h" "$(TargetDir)include\"
+xcopy "$(ProjectDir)*Module.h" "$(TargetDir)include\" /y /d
+xcopy "$(ProjectDir)Indruino\inc\*.h" "$(TargetDir)include\" /y /d</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -143,6 +146,7 @@ xcopy "$(ProjectDir)*Controller.h" "$(TargetDir)include\" /y /d</Command>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>..\Utility;..\extern\libusb\include\libusb-1.0;.\indruino\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>Default</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -153,7 +157,9 @@ xcopy "$(ProjectDir)*Controller.h" "$(TargetDir)include\" /y /d</Command>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(ProjectDir)..\Utility\*.h" "$(TargetDir)include\" /y /d
-xcopy "$(ProjectDir)*Controller.h" "$(TargetDir)include\" /y /d</Command>
+xcopy "$(ProjectDir)*Controller.h" "$(TargetDir)include\"
+xcopy "$(ProjectDir)*Module.h" "$(TargetDir)include\" /y /d
+xcopy "$(ProjectDir)Indruino\inc\*.h" "$(TargetDir)include\" /y /d</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -161,6 +167,7 @@ xcopy "$(ProjectDir)*Controller.h" "$(TargetDir)include\" /y /d</Command>
     <ClInclude Include="..\Utility\MessageService.h" />
     <ClInclude Include="..\Utility\Utility.h" />
     <ClInclude Include="ArduinoController.h" />
+    <ClInclude Include="LaserModule.h" />
     <ClInclude Include="LaserController.h" />
     <ClInclude Include="MotorController.h" />
     <ClInclude Include="SerialPort.h" />
@@ -172,12 +179,13 @@ xcopy "$(ProjectDir)*Controller.h" "$(TargetDir)include\" /y /d</Command>
     <ClCompile Include="..\Utility\Utility.cpp" />
     <ClCompile Include="ArduinoController.cpp" />
     <ClCompile Include="Indruino\src\DelayLineComm.cpp" />
-    <ClCompile Include="Indruino\src\min.c" />
+    <ClCompile Include="Indruino\src\min.cpp" />
     <ClCompile Include="Indruino\src\RS232Comm.cpp" />
     <ClCompile Include="LaserController.cpp" />
     <ClCompile Include="MotorController.cpp" />
     <ClCompile Include="SerialPort.cpp" />
     <ClCompile Include="StepMotorController.cpp" />
+    <ClCompile Include="LaserModule.cpp" />
     <ClCompile Include="ZaberController.cpp" />
   </ItemGroup>
   <ItemGroup>

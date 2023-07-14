@@ -48,6 +48,9 @@
     <ClInclude Include="ArduinoController.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="LaserModule.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LaserController.cpp">
@@ -77,11 +80,14 @@
     <ClCompile Include="Indruino\src\DelayLineComm.cpp">
       <Filter>Indruino</Filter>
     </ClCompile>
-    <ClCompile Include="Indruino\src\min.c">
+    <ClCompile Include="Indruino\src\min.cpp">
       <Filter>Indruino</Filter>
     </ClCompile>
     <ClCompile Include="Indruino\src\RS232Comm.cpp">
       <Filter>Indruino</Filter>
+    </ClCompile>
+    <ClCompile Include="LaserModule.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
