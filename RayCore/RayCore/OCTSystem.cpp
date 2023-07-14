@@ -15,6 +15,7 @@
 #include "ArduinoController.h"
 #include "RayLearning.h"
 #include "ImagingSession.h"
+#include "LaserModule.h"
 
 /*
 * COCTSystem
@@ -46,9 +47,8 @@ COCTSystem::COCTSystem() {
 	}
 	m_openedSession = nullptr;
 
-	for (int i = 0; i < STEP_MOTOR_NUM; i++) {
-		m_pStepMotor[i] = new CArduinoController();
-	}
+	m_pPullbackMotor = new CArduinoController();
+	m_pLaserModule = new CLaserModule();
 
 	m_prevState = RayScannerState::Initial;
 	m_curState = RayScannerState::Initial;
@@ -174,11 +174,13 @@ RayError COCTSystem::Stop() {
 	pMotor->SwitchOff();
 	pMotor->Disconnect();
 
-	for (int i = 0; i < STEP_MOTOR_NUM; i++) {
-		m_pStepMotor[i]->Close();
-		delete m_pStepMotor[i];
-		m_pStepMotor[i] = nullptr;
-	}
+	m_pPullbackMotor->Close();
+	delete m_pPullbackMotor;
+	m_pPullbackMotor = nullptr;
+
+	m_pLaserModule->Close();
+	delete m_pLaserModule;
+	m_pLaserModule = nullptr;
 
 	return RayError::OK;
 }
@@ -261,12 +263,14 @@ RayError COCTSystem::AutoCalibration() {
 */
 RayError COCTSystem::ManualCalibration(bool forward) {
 	if (m_curState == RayScannerState::Default) {
-		if (m_pStepMotor[STEP_MOTOR_DELAYLINE]->IsOpen() == false) return RayError::DeviceNotConnected;
+		if (m_pLaserModule->IsOpen() == false) return RayError::DeviceNotConnected;
 
-		m_pStepMotor[STEP_MOTOR_DELAYLINE]->MoveRelative((forward ? DELAYLINE_FORWARD_POSITION : DELAYLINE_BACKWARD_POSITION));
+		m_pLaserModule->MoveRelative(MotorIndex::DelayLine, (forward ? DELAYLINE_FORWARD_POSITION : DELAYLINE_BACKWARD_POSITION));
 
 		return RayError::OK;
 	}
+
+	return RayError::WrongState;
 }
 
 /*
@@ -1048,7 +1052,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
-	CStepMotorController* pPullbackMotor = pSystem->m_pStepMotor[STEP_MOTOR_PULLBACK];
+	CStepMotorController* pPullbackMotor = pSystem->m_pPullbackMotor;
 	IImaging::Setting settingPullback = pSystem->m_pImagingPullback->GetSetting();
 
 	PLOGI.printf("Pullback start.");
@@ -1118,7 +1122,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
-	CStepMotorController* pPullbackMotor = pSystem->m_pStepMotor[STEP_MOTOR_PULLBACK];
+	CStepMotorController* pPullbackMotor = pSystem->m_pPullbackMotor;
 
 	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterLoading);
 
@@ -1164,7 +1168,7 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
-	CStepMotorController* pPullbackMotor = pSystem->m_pStepMotor[STEP_MOTOR_PULLBACK];
+	CStepMotorController* pPullbackMotor = pSystem->m_pPullbackMotor;
 
 	// 1. Motor ON
 	int nVelocity = config.bldcMotor.velocityHoming;
@@ -1240,9 +1244,8 @@ bool COCTSystem::checkConnection() {
 	
 	result &= m_pAcqDevice->IsInit();
 	result &= pMotor->IsConnected();
-	for (int i = 0; i < STEP_MOTOR_NUM; i++) {
-		result &= m_pStepMotor[i]->IsOpen();
-	}
+	result &= m_pPullbackMotor->IsOpen();
+	result &= m_pLaserModule->IsOpen();
 
 	return result;
 }
@@ -1315,18 +1318,17 @@ int COCTSystem::restartAcqDevice(COCTImaging* pImaging) {
 int COCTSystem::connectRotaryJunction() {
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
-	CStepMotorController* pPullbackMotor = m_pStepMotor[STEP_MOTOR_PULLBACK];
-	CStepMotorController* pDelayLine = m_pStepMotor[STEP_MOTOR_DELAYLINE];
 
 	bool result = true;
 
-	if (!pPullbackMotor->IsOpen()) {
-		pPullbackMotor->Open(config.stepMotor.pullback);
-		pPullbackMotor->SetCurrent(config.stepMotor.pullbackStart);
+	if (!m_pPullbackMotor->IsOpen()) {
+		m_pPullbackMotor->Open(config.stepMotor.pullback);
+		m_pPullbackMotor->SetCurrent(config.stepMotor.pullbackStart);
 	}
 
-	if (!pDelayLine->IsOpen()) {
-		pDelayLine->Open(config.stepMotor.delayline);
+	if (!m_pLaserModule->IsOpen()) {
+		m_pLaserModule->Open(config.stepMotor.delayline);
+		m_pLaserModule->MoveAbsolute(MotorIndex::DelayLine, 30000);
 	}
 
 	if (!pMotor->IsConnected()) {
@@ -1350,13 +1352,8 @@ int COCTSystem::disconnectRotaryJunction() {
 		result &= pMotor->SwitchOff();
 	}
 
-	for (int i = 0; i < STEP_MOTOR_NUM; i++)
-	{
-		if (m_pStepMotor[i]->IsOpen())
-		{
-			m_pStepMotor[i]->Close();
-		}
-	}
+	m_pPullbackMotor->Close();
+	m_pLaserModule->Close();
 
 	return (result) ? NOERROR : E_FAIL;
 }
@@ -1381,6 +1378,8 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 		if (isRealTime == false) return NOERROR;
 
 		image = m_pImagingRealtime->GetCircleImage();
+
+		// To-Do: if AutoCalibration mode, Get SheathPosition & Get DelayLinePosition
 	}
 
 	if (m_cbCrossSection != nullptr) m_cbCrossSection(nSession, image.data, image.cols, image.rows, image.channels(), nFrameInfo);

@@ -23,6 +23,7 @@ class COCTImaging;
 class CVolumeGenerator;
 class CRayLearning;
 class CImagingSession;
+class CLaserModule;
 class COCTSystem : public CMessageService
 {
 private:
@@ -64,7 +65,10 @@ private:
 	CImagingSession* m_openedSession;
 
 	// Rotary Junction
-	CStepMotorController* m_pStepMotor[STEP_MOTOR_NUM];
+	CStepMotorController* m_pPullbackMotor;
+
+	// Laser Module
+	CLaserModule* m_pLaserModule;
 
 	RayScannerState m_prevState;
 	RayScannerState m_curState;
