@@ -11,8 +11,6 @@
 /// With application need low letency. You should use delay_line_GetDelayLineObj with mode CONTINUOUS mode.
 /// 
 
-extern struct min_context min_ctx;
-
 /// <summary>
 /// Set cmnd: motor [idMotor] move to [pos] pulse
 /// </summary>

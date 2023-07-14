@@ -11,7 +11,7 @@
 #define EX_FATAL 1
 
 // Initializes the port and sets the communication parameters
-void initPort(HANDLE* hCom, wchar_t* COMPORT, int nComRate, int nComBits, COMMTIMEOUTS timeout) {
+void initPort(HANDLE* hCom, const wchar_t* COMPORT, int nComRate, int nComBits, COMMTIMEOUTS timeout) {
 	createPortFile(hCom, COMPORT);						// Initializes hCom to point to PORT#
 	purgePort(hCom);									// Purges the COM port
 	SetComParms(hCom, nComRate, nComBits, timeout);		// Uses the DCB structure to set up the COM port
@@ -79,7 +79,7 @@ DWORD inputFromPort(HANDLE* hCom, LPVOID buf, DWORD szBuf) {
 // Sub functions called by above functions
 /**************************************************************************************/
 // Set the hCom HANDLE to point to a COM port, initialize for reading and writing, open the port and set securities
-void createPortFile(HANDLE* hCom, wchar_t* COMPORT) {
+void createPortFile(HANDLE* hCom, const wchar_t* COMPORT) {
 	// Call the CreateFile() function 
 	*hCom = CreateFile(
 		COMPORT,									// COM port number  --> If COM# is larger than 9 then use the following syntax--> "\\\\.\\COM10"

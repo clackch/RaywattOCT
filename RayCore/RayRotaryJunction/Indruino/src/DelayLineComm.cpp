@@ -3,7 +3,8 @@
 #include "min.h"
 #include "MemoryStruct.h"
 
-extern struct min_context min_ctx;
+// global variable
+struct min_context min_ctx;
 
 //--------------------------------------
 void delay_line_Move_single_axis_abs_pos(uint8_t idMotor, int32_t pos)
