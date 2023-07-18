@@ -24,7 +24,7 @@ UINT CLaserModule::threadReadStatus(LPVOID param) {
 	while (pModule->m_pThread->isRun)
 	{
 		pModule->readStatus();
-		Sleep(10);
+		Sleep(5);
 	}
 
 	return NOERROR;
@@ -113,9 +113,11 @@ bool CLaserModule::MoveAbsolute(MotorIndex idx, int nPosition) {
 	delay_line_Move_single_axis_abs_pos((uint8_t) idx, nPosition);
 	min_poll(&m_ctx, nullptr, 0);
 
+	m_lastTargetPosition[(int)idx - 1] = nPosition;
+
 	return true;
 }
-bool CLaserModule::MoveRelative(MotorIndex idx, int nOffset) {
+int CLaserModule::MoveRelative(MotorIndex idx, int nOffset) {
 	int nCurPosition = (idx == MotorIndex::DelayLine) ? m_RAM.marshall.position_motor2_actual : m_RAM.marshall.position_motor1_actual;
 	int nLastTargetPos = (m_lastTargetPosition[(int)idx - 1] < 0) ? nCurPosition : m_lastTargetPosition[(int)idx - 1];
 
@@ -124,9 +126,7 @@ bool CLaserModule::MoveRelative(MotorIndex idx, int nOffset) {
 
 	MoveAbsolute(idx, nPosition);
 
-	m_lastTargetPosition[(int)idx - 1] = nPosition;
-
-	return true;
+	return nPosition;
 }
 void CLaserModule::SetVLD(unsigned short nValue) {
 	nValue = (nValue < 0) ? 0 : (nValue > MAX_VOLTAGE_RAW_VALUE) ? MAX_VOLTAGE_RAW_VALUE : nValue;

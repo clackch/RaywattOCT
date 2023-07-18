@@ -44,7 +44,7 @@ public:
 	bool IsMoving(MotorIndex idx);
 	int GetPosition(MotorIndex idx) { return (idx == MotorIndex::DelayLine) ? m_RAM.marshall.position_motor2_actual : m_RAM.marshall.position_motor1_actual; }
 	bool MoveAbsolute(MotorIndex idx, int nPosition);
-	bool MoveRelative(MotorIndex idx, int nOffset);
+	int MoveRelative(MotorIndex idx, int nOffset);
 
 	// VLD
 	void SetVLD(unsigned short nValue);

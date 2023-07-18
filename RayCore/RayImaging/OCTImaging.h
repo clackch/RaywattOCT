@@ -87,6 +87,7 @@ public:
 	void GetFrameInfo(int& nCurFrame, int& nTotalFrame) { nCurFrame = m_nCurFrame; nTotalFrame = m_nTotalFrame; }
 	void* GetCalibrationData();
 
+	int GetSheathPosition() { return m_nSheathPosition; }
 protected:
 	void allocateMemory();
 	void releaseMemory();
