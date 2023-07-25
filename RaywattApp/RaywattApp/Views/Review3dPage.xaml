@@ -475,7 +475,7 @@
         </component:IndicatorAreaGrid>
         <component:IndicatorAreaGrid Style="{DynamicResource IndicatorAreaGrid}" IsCaptured="{Binding IndicatorLongitude.IsCaptured}" Visibility="{Binding IndicatorLongitude.IsVisible}">
             <i:Interaction.Behaviors>
-                <behaviors:MouseBehavior MouseX="{Binding PointLongitudeX, Mode=OneWayToSource}"/>
+                <behaviors:MouseBehavior MouseX="{Binding IndicatorLongitude.PointLongitudeX, Mode=OneWayToSource}"/>
             </i:Interaction.Behaviors>
 
             <i:Interaction.Triggers>

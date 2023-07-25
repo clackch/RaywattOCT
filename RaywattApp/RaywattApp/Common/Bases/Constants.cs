@@ -175,7 +175,7 @@ namespace RaywattApp.Common.Bases
         public const string PullbackTypeLong = "LONG";
         public const string PullbackTypeShort = "SHOR";
         public const int PullbackLongFrameCnt = 1000;
-        public const int PullbackShortFrameCnt = 500;
+        public const int PullbackShortFrameCnt = 600;
 
         //Not Selected
         public const string NotSelected = "Not Selected";
@@ -249,6 +249,10 @@ namespace RaywattApp.Common.Bases
         public const double LongitudeScale = LongitudeWidth / 10;
         public const double LongitudeIndicatorWidth = 22;
         public const double LongitudeIndicatorHeight = 116;
+        public const double SectionIndicatorWidth = 12.5;
+        public const double SectionMlaMldWidth = 45;
+        public const double SectionMlaValueWidth = 80;
+        public const double SectionMsaMinExpWidth = 22.5;
 
         //Review - 2D - Side Menu
         public const string LeftUpMenu = "LeftUpMenu";
@@ -359,7 +363,6 @@ namespace RaywattApp.Common.Bases
         //Zoom
         public const double ZoomScaleDefault = CrossSectionSize / OCTImageSize;
         public const double ZoomScaleMax = ZoomScaleDefault * 2;
-
 
         //Recording
         public const int TransientTime = 3000;

@@ -28,9 +28,6 @@ namespace RaywattApp.ViewModels
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
-        private Point longitudeCoordinate = new Point();
-        private Point longitudeCompareCoordinate = new Point();
-
         [ObservableProperty]
         private bool _isIndicatorLockOn;
 
@@ -47,12 +44,10 @@ namespace RaywattApp.ViewModels
         private Indicator _indicatorCompareLongitude;
 
         [ObservableProperty]
-        private double _pointLongitudeX;
-
-        private double indicatorDiffX = 0;
+        private Section _section;
 
         [ObservableProperty]
-        private double _pointCompareLongitudeX;
+        private Section _sectionCompare;
 
         [ObservableProperty]
         private int displayFrameNumberCompare;
@@ -129,6 +124,11 @@ namespace RaywattApp.ViewModels
             IndicatorCompareLongitude.IsVisible = Visibility.Collapsed;
             IndicatorCompareLongitude.IsCompare = true;
 
+            Section = new Section();
+            Section.Proximal.IsVisible = Visibility.Visible;
+            Section.Distal.IsVisible = Visibility.Visible;
+            SectionCompare = new Section();
+
             ExpandLeftUpMenu = false;
             ExpandLeftDownMenu = false;
 
@@ -168,7 +168,12 @@ namespace RaywattApp.ViewModels
 
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
                 PostLumenContour = PatientCase.LumenContour;
-                imglumenProfile = CommonUtil.MakeLumenProfileImage(PostLumenContour);
+                int frameProximal = PatientCase.SectionProximal;
+                int frameDistal = PatientCase.SectionDistal;
+                imglumenProfile = CommonUtil.MakeLumenProfileImage(PostLumenContour, frameProximal, frameDistal);
+                Section.Proximal.X = CommonUtil.GetPositionFromFrame(PatientCase.SectionProximal, ReviewStatus.NumberOfFrames, Constants.LongitudeCompareWidth, 0);
+                Section.Distal.X = CommonUtil.GetPositionFromFrame(PatientCase.SectionDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeCompareWidth, Constants.SectionIndicatorWidth);
+                ShowSection();
 
                 if (ReviewStatus.SelectedPatientCase != null)
                 {
@@ -184,7 +189,10 @@ namespace RaywattApp.ViewModels
                     else
                     {
                         PreLumenContour = ReviewStatus.SelectedPatientCase.LumenContour;
-                        imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(PreLumenContour);
+                        int frameProximalCompare = ReviewStatus.SelectedPatientCase.SectionProximal;
+                        int frameDistalCompare = ReviewStatus.SelectedPatientCase.SectionDistal;
+                        imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(PreLumenContour, frameProximalCompare, frameDistalCompare);
+                        ShowSectionCompare();
                     }
                 }
 
@@ -236,7 +244,13 @@ namespace RaywattApp.ViewModels
         {
             ReviewStatus.SelectedPatientCase.LumenContour = GetLumenContours(ReviewStatus.SelectedPatientCase.Id);
             PreLumenContour = ReviewStatus.SelectedPatientCase.LumenContour;
-            imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(PreLumenContour);
+            int frameProximal = ReviewStatus.SelectedPatientCase.SectionProximal;
+            int frameDistal = ReviewStatus.SelectedPatientCase.SectionDistal;
+            imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(PreLumenContour, frameProximal, frameDistal);
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                ShowSectionCompare();
+            });
 
             IsLumenLoaded = true;
 
@@ -263,6 +277,8 @@ namespace RaywattApp.ViewModels
             sqlParameters["apposition_threshold"] = PatientCase.AppositionThreshold;
             sqlParameters["brightness"] = PatientCase.Brightness;
             sqlParameters["contrast"] = PatientCase.Contrast;
+            sqlParameters["section_proximal"] = PatientCase.SectionProximal;
+            sqlParameters["section_distal"] = PatientCase.SectionDistal;
 
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
             if (nRows == 0)
@@ -290,17 +306,6 @@ namespace RaywattApp.ViewModels
                     FrameNumberCompare = imageInfo.Current;
                     DisplayFrameNumberCompare = FrameNumberCompare + 1;
                 }
-            }
-
-            if (imglumenProfileCompare != null)
-            {
-                LumenProfileImageCompare = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileCompare);
-                IndicatorCompareLongitude.IsVisible = Visibility.Visible;
-            }
-            else
-            {
-                LumenProfileImageCompare = null;
-                IndicatorCompareLongitude.IsVisible = Visibility.Collapsed;
             }
         }
 
@@ -333,6 +338,7 @@ namespace RaywattApp.ViewModels
             if (ReviewStatus.SelectedPatientCase != null) {
 
                 LumenContourCommand = Constants.LumenContourClear;
+                HideSectionCompare();
 
                 DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current = 0;
                 RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath);
@@ -351,7 +357,10 @@ namespace RaywattApp.ViewModels
                 else
                 {
                     PreLumenContour = ReviewStatus.SelectedPatientCase.LumenContour;
-                    imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(PreLumenContour);
+                    int frameProximal = ReviewStatus.SelectedPatientCase.SectionProximal;
+                    int frameDistal = ReviewStatus.SelectedPatientCase.SectionDistal;
+                    imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(PreLumenContour, frameProximal, frameDistal);
+                    ShowSectionCompare();
 
                     LumenContourCommand = Constants.LumenContourDraw;
                 }
@@ -433,13 +442,11 @@ namespace RaywattApp.ViewModels
 
                 if (indicator.IsLongitudeMove)
                 {
-                    indicatorDiffX = indicator.IsCompare ? PointCompareLongitudeX - longitudeCompareCoordinate.X : PointLongitudeX - longitudeCoordinate.X;
-                    indicatorDiffX = indicatorDiffX - indicator.X;
+                    indicator.IndicatorDiff = indicator.PointLongitudeX - indicator.Coordinate.X - indicator.X;
                     indicator.IsLongitudeMove = false;
                 }
 
-                double x = indicator.IsCompare ? PointCompareLongitudeX - longitudeCompareCoordinate.X : PointLongitudeX - longitudeCoordinate.X;
-                double indicatorX = x - indicatorDiffX;
+                double indicatorX = indicator.PointLongitudeX - indicator.Coordinate.X - indicator.IndicatorDiff;
                 double indicatorCenterX = indicatorX + Constants.LongitudeIndicatorWidth / 2;
 
                 if (indicatorCenterX >= 0 && indicatorCenterX < Constants.LongitudeCompareWidth)
@@ -462,11 +469,11 @@ namespace RaywattApp.ViewModels
 
                 if (frameworkElement.Name.Equals("longitude"))
                 {
-                    longitudeCoordinate = point;
+                    IndicatorLongitude.Coordinate = point;
                 }
                 else if (frameworkElement.Name.Equals("longitudeCompare"))
                 {
-                    longitudeCompareCoordinate = point;
+                    IndicatorCompareLongitude.Coordinate = point;
                 }
             }
         }
@@ -514,5 +521,47 @@ namespace RaywattApp.ViewModels
             }
         }
 
+        private void ShowSection()
+        {
+            int frameProximal = PatientCase.SectionProximal;
+            int frameDistal = PatientCase.SectionDistal;
+            Section.SetMsaMinExp(PatientCase.LumenContour, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeCompareWidth);
+
+            Section.Proximal.IsVisible = Visibility.Visible;
+            Section.Distal.IsVisible = Visibility.Visible;
+            Section.Msa.IsVisible = Visibility.Visible;
+            Section.MinExp.IsVisible = Visibility.Visible;
+            Section.MsaValue.IsVisible = Visibility.Visible;
+            Section.MinExpValue.IsVisible = Visibility.Visible;
+        }
+
+        private void ShowSectionCompare()
+        {
+            LumenProfileImageCompare = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileCompare);          
+
+            SectionCompare.Proximal.X = CommonUtil.GetPositionFromFrame(ReviewStatus.SelectedPatientCase.SectionProximal, DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total, Constants.LongitudeCompareWidth, 0);            
+            SectionCompare.Distal.X = CommonUtil.GetPositionFromFrame(ReviewStatus.SelectedPatientCase.SectionDistal, DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total, Constants.LongitudeCompareWidth, Constants.SectionIndicatorWidth);
+            
+            int frameProximal = ReviewStatus.SelectedPatientCase.SectionProximal;
+            int frameDistal = ReviewStatus.SelectedPatientCase.SectionDistal;
+            SectionCompare.SetMlaMld(ReviewStatus.SelectedPatientCase.LumenContour, frameProximal, frameDistal, DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total, Constants.LongitudeCompareWidth);
+
+            IndicatorCompareLongitude.IsVisible = Visibility.Visible;
+            SectionCompare.Proximal.IsVisible = Visibility.Visible;
+            SectionCompare.Distal.IsVisible = Visibility.Visible;
+            SectionCompare.MlaMld.IsVisible = Visibility.Visible;
+            SectionCompare.MlaValue.IsVisible = Visibility.Visible;
+            SectionCompare.MldValue.IsVisible = Visibility.Visible;
+        }
+
+        private void HideSectionCompare()
+        {
+            IndicatorCompareLongitude.IsVisible = Visibility.Collapsed;
+            SectionCompare.Proximal.IsVisible = Visibility.Collapsed;
+            SectionCompare.Distal.IsVisible = Visibility.Collapsed;
+            SectionCompare.MlaMld.IsVisible = Visibility.Collapsed;
+            SectionCompare.MlaValue.IsVisible = Visibility.Collapsed;
+            SectionCompare.MldValue.IsVisible = Visibility.Collapsed;
+        }
     }
 }

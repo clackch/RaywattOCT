@@ -142,6 +142,12 @@ namespace RaywattApp.Models
         private int _contrast;
 
         [ObservableProperty]
+        private int _sectionProximal;
+
+        [ObservableProperty]
+        private int _sectionDistal;
+
+        [ObservableProperty]
         private string? _bookmark;
 
         [ObservableProperty]

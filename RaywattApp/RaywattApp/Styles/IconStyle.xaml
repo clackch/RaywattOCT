@@ -174,13 +174,31 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-    
-    <Style TargetType="Image" x:Key="VerticalLine_Icon">
-        <Setter Property="Source" Value="{svgc:SvgImage Source=/res/icon/verticalLine.svg}"/>
-        <Setter Property="Width" Value="1"/>
-        <Setter Property="Height" Value="49"/>
+
+    <Style TargetType="Image" x:Key="SectionMsaMinExp">
+        <Setter Property="Width" Value="26"/>
+        <Setter Property="Height" Value="121"/>
+        <Setter Property="Margin" Value="0, -16, 0, 0"/>
+        <Setter Property="Source" Value="{svgc:SvgImage Source=/res/indicator/sectionMsaMinExpLeft.svg}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=Tag}" Value="Right">
+                <Setter Property="Source" Value="{svgc:SvgImage Source=/res/indicator/sectionMsaMinExpRight.svg}"/>
+            </DataTrigger>
+        </Style.Triggers>
     </Style>
-    
+
+    <Style TargetType="Image" x:Key="SectionMsaMinExpCompare">
+        <Setter Property="Width" Value="26"/>
+        <Setter Property="Height" Value="186"/>
+        <Setter Property="Margin" Value="0, -16, 0, 0"/>
+        <Setter Property="Source" Value="{svgc:SvgImage Source=/res/indicator/sectionMsaMinExpLeftCompare.svg}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=Tag}" Value="Right">
+                <Setter Property="Source" Value="{svgc:SvgImage Source=/res/indicator/sectionMsaMinExpRightCompare.svg}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
     <!-- Progress Bar -->
     <Style TargetType="{x:Type ProgressBar}">
         <Setter Property="Template">

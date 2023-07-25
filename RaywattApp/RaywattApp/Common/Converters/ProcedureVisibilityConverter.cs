@@ -5,7 +5,7 @@ using System.Windows.Data;
 
 namespace RaywattApp.Common.Converters
 {
-    public class RadioButtonVisibilityConverter : IValueConverter
+    public class ProcedureVisibilityConverter : IValueConverter
     {
         public Visibility TrueValue { get; set; } = Visibility.Visible;
 
@@ -13,10 +13,10 @@ namespace RaywattApp.Common.Converters
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null)
+            if (value == null || parameter == null)
                 return FalseValue;
 
-            if (value.ToString() == parameter.ToString())
+            if (parameter.ToString().Contains(value.ToString()))
                 return TrueValue;
             else
                 return FalseValue;
@@ -24,7 +24,7 @@ namespace RaywattApp.Common.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return parameter;
+            throw new NotImplementedException();
         }
     }
 }

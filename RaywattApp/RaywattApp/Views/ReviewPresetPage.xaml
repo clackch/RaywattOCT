@@ -79,17 +79,21 @@
                         </StackPanel>
                         <Separator Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Foreground="{DynamicResource GrayscaleGray5Brush}"/>
                         <StackPanel Grid.Row="2" Grid.Column="0" VerticalAlignment="Center">
-                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Expansion Calculation], Source={StaticResource L10N}}"/>
+                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Calcium Threshold], Source={StaticResource L10N}}"/>
                         </StackPanel>
-                        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                            <StackPanel>
-                                <RadioButton IsChecked="{Binding PatientCasePreset.ExpansionCalculation, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.PresetTapered}}" Content="{Binding [Tapered], Source={StaticResource L10N}}"/>
+                        <Grid Grid.Row="2" Grid.Column="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="320"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="5,0,0,0">
+                                <Slider Value="{Binding PatientCasePreset.CalciumThreshold}" Maximum="{Binding MaxCalciumThreshold}" Minimum="{Binding MinCalciumThreshold}"/>
                             </StackPanel>
-                            <StackPanel Width="45"/>
-                            <StackPanel>
-                                <RadioButton IsChecked="{Binding PatientCasePreset.ExpansionCalculation, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.PresetOther}}" Content="{Binding [Other], Source={StaticResource L10N}}"/>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="30,0,0,0">
+                                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCasePreset.CalciumThreshold}"/>
+                                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="º"/>
                             </StackPanel>
-                        </StackPanel>
+                        </Grid>
                         <Separator Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Foreground="{DynamicResource GrayscaleGray5Brush}"/>
                         <StackPanel Grid.Row="4" Grid.Column="0" VerticalAlignment="Center">
                             <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Expansion Threshold], Source={StaticResource L10N}}"/>
@@ -156,10 +160,11 @@
                         </StackPanel>
                         <Separator Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Foreground="{DynamicResource GrayscaleGray5Brush}"/>
                         <StackPanel Grid.Row="2" Grid.Column="0" VerticalAlignment="Center">
-                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Expansion Calculation], Source={StaticResource L10N}}"/>
+                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Calcium Threshold], Source={StaticResource L10N}}"/>
                         </StackPanel>
                         <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCasePreset.ExpansionCalculation, Converter={StaticResource CodeConverter}, ConverterParameter='EXCC'}"/>
+                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCasePreset.CalciumThreshold}"/>
+                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="º"/>
                         </StackPanel>
                         <Separator Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Foreground="{DynamicResource GrayscaleGray5Brush}"/>
                         <StackPanel Grid.Row="4" Grid.Column="0" VerticalAlignment="Center">

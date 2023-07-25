@@ -44,8 +44,8 @@
     <!-- Code Converter -->
     <converters:CodeConverter x:Key="CodeConverter" />
 
-    <!-- Multi Parameter Converter -->
-    <converters:MultiParamConverter x:Key="MultiParamConverter" />
+    <!-- Percent Value Converter -->
+    <converters:PercentValueConverter x:Key="PercentValueConverter" />
 
     <!-- Group Name Converter -->
     <converters:GroupNameConverter x:Key="GroupNameConverter" />
@@ -88,5 +88,8 @@
 
     <!-- CrossSection Scale Converter -->
     <converters:CrossSectionScaleConverter x:Key="CrossSectionScaleConverter" />
+
+    <!-- Procedure Visibility Converter -->
+    <converters:ProcedureVisibilityConverter x:Key="ProcedureVisibilityConverter" />
 
 </ResourceDictionary>

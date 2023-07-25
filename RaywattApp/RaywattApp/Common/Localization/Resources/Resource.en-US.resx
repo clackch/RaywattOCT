@@ -578,6 +578,18 @@ Overwrite existing data?</value>
     <value>Min Diam.
 (㎜)</value>
   </data>
+  <data name="Min Exp." xml:space="preserve">
+    <value>Min Exp.</value>
+  </data>
+  <data name="MLA" xml:space="preserve">
+    <value>MLA</value>
+  </data>
+  <data name="MLD" xml:space="preserve">
+    <value>MLD</value>
+  </data>
+  <data name="MSA" xml:space="preserve">
+    <value>MSA</value>
+  </data>
   <data name="Name" xml:space="preserve">
     <value>Name</value>
   </data>

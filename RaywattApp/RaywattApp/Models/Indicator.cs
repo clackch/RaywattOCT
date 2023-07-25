@@ -7,30 +7,19 @@ using RaywattApp.Common.Bases;
 
 namespace RaywattApp.Models
 {
-    public partial class Indicator : ObservableObject
+    public partial class Indicator : IndicatorBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(Indicator));
 
-        [ObservableProperty]
-        public bool _isCaptured = false;
+        public Point Coordinate = new Point();
 
         [ObservableProperty]
-        public Visibility _isVisible;
+        private bool _isCaptured = false;
 
         [ObservableProperty]
-        public bool _isEnabled;
+        private double _pointLongitudeX;
 
-        [ObservableProperty]
-        public double _x = double.NaN;
-
-        [ObservableProperty]
-        public double _y = double.NaN;
-
-        [ObservableProperty]
-        public bool _isValid = false;
-
-        [ObservableProperty]
-        public double _centerX;
+        public double IndicatorDiff = 0;
 
         public bool OppositeCaptured = false;
 
@@ -43,6 +32,10 @@ namespace RaywattApp.Models
         public bool IsLongitudeMove = false;
 
         public bool IsCrossSectionClicked = false;
+
+        public bool IsSectionIndicator = false;
+
+        public bool IsSectionProximal = false;
 
         private ICommand _cmdSetCaptured;
 
