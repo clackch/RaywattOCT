@@ -95,6 +95,8 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case
     apposition_threshold real,
 	brightness integer,
     contrast integer,
+	section_proximal integer,
+    section_distal integer,
     create_date timestamp without time zone,
     update_date timestamp without time zone,
     CONSTRAINT patient_case_pkey PRIMARY KEY (id)
