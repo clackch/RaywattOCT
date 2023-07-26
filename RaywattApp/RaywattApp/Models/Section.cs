@@ -106,17 +106,17 @@ namespace RaywattApp.Models
             CalcMean(LumenContours, frameProximal, frameDistal);
 
             int count = frameDistal - frameProximal + 1;
-            double minArea = LumenContours.GetRange(frameProximal, count).Min(x => x.Area);
-            int minIdx = LumenContours.GetRange(frameProximal, count).FindIndex(x => x.Area == minArea);
+            double mla = LumenContours.GetRange(frameProximal, count).Min(x => x.Area);
+            int mlaIdx = LumenContours.GetRange(frameProximal, count).FindIndex(x => x.Area == mla);
 
             //Diameter 로직에 따라 mla, mld 분리 여부 결정
             double mld = LumenContours.GetRange(frameProximal, count).Min(x => x.MeanDiameter);
             int mldIdx = LumenContours.GetRange(frameProximal, count).FindIndex(x => x.MeanDiameter == mld);
 
-            MlaMld.X = CommonUtil.GetPositionFromFrame(minIdx + frameProximal, totalFrame, longitudeWidth, Constants.SectionMlaMldWidth / 2);
-            MlaValue.DValue = minArea;
+            MlaMld.X = CommonUtil.GetPositionFromFrame(mlaIdx + frameProximal, totalFrame, longitudeWidth, Constants.SectionMlaMldWidth / 2);
+            MlaValue.DValue = mla;
             MlaValue.X = MlaMld.X - Constants.SectionMlaValueWidth;
-            MldValue.DValue = LumenContours[minIdx + frameProximal].MeanDiameter;
+            MldValue.DValue = LumenContours[mlaIdx + frameProximal].MeanDiameter;
             MldValue.X = MlaMld.X + Constants.SectionMlaMldWidth + 2;
         }
 
