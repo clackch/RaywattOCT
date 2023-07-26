@@ -153,12 +153,12 @@
                                     </component:IndicatorImage>
                                 </Canvas>
                             </Grid>
-
-                            <!-- Calcium -->
-                            <Grid Grid.Row="2" Grid.Column="1" Height="12" VerticalAlignment="Top" Margin="0,9,0,0" Background="{StaticResource GrayscaleGray5Brush}" Opacity="0.5"></Grid>
                             
                             <!-- Scale Bar -->
                             <ContentControl Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" Margin="0,9,0,0" Template="{DynamicResource LongitudeCompareScaleBar}" Width="{x:Static const:Constants.LongitudeCompareWidth}" Tag="{Binding ReviewStatus.SelectedPatientCase.PullbackType}"/>
+
+                            <!-- Lumen Profile Extra : Calcium -->
+                            <Image Grid.Row="2" Grid.Column="1" VerticalAlignment="Top" Margin="0,9,0,0" Source="{Binding LumenProfileImageExtraCompare}" Width="{x:Static const:Constants.LongitudeCompareWidth}" Height="{x:Static const:Constants.LumenProfileExtraCompareHeight}" Stretch="Fill"/>
                         </Grid>
                         <StackPanel Margin="56,21,0,0" Orientation="Horizontal">
                             <StackPanel Orientation="Horizontal">
@@ -300,11 +300,11 @@
                                     </component:IndicatorImage>
                                 </Canvas>
                             </Grid>
-                            <!-- Calcium -->
-                            <Grid Grid.Row="2" Grid.Column="1" Height="12" VerticalAlignment="Top" Margin="0,9,0,0" Background="{StaticResource GrayscaleGray5Brush}" Opacity="0.5"></Grid>
-
                             <!-- Scale Bar -->
                             <ContentControl Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" Margin="0,9,0,0" Template="{DynamicResource LongitudeCompareScaleBar}" Width="{x:Static const:Constants.LongitudeCompareWidth}" Tag="{Binding PatientCase.PullbackType}"/>
+                            
+                            <!-- Lumen Profile Extra : Expansion -->
+                            <Image Grid.Row="2" Grid.Column="1" VerticalAlignment="Top" Margin="0,9,0,0" Source="{Binding LumenProfileImageExtra}" Width="{x:Static const:Constants.LongitudeCompareWidth}" Height="{x:Static const:Constants.LumenProfileExtraCompareHeight}" Stretch="Fill"/>
                         </Grid>
                         <StackPanel Margin="56,21,0,0" Orientation="Horizontal">
                             <StackPanel Orientation="Horizontal">

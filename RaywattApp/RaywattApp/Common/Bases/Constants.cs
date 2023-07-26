@@ -253,6 +253,7 @@ namespace RaywattApp.Common.Bases
         public const double SectionMlaMldWidth = 45;
         public const double SectionMlaValueWidth = 80;
         public const double SectionMsaMinExpWidth = 22.5;
+        public const double LumenProfileExtraHeight = 6;
 
         //Review - 2D - Side Menu
         public const string LeftUpMenu = "LeftUpMenu";
@@ -287,6 +288,7 @@ namespace RaywattApp.Common.Bases
         public const double LongitudeCompareHeight = 170;
         public const double LongitudeCompareScale = (LongitudeCompareWidth - 1) / 10;
         public const double LongitudeIndicatorCompareHeight = 177;
+        public const double LumenProfileExtraCompareHeight = 6;
 
         //Review - Compare - Side Menu
         public const double SelectPreCaseExpandSize = 460;

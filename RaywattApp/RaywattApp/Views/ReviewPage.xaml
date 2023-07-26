@@ -1071,8 +1071,8 @@
                             <!-- Bookmark Scale -->
                             <ContentControl Grid.Row="2" Template="{DynamicResource LongitudeScaleBar}" Width="{x:Static const:Constants.LongitudeWidth}" Tag="{Binding PatientCase.PullbackType}"/>
                             
-                            <!-- Calcium -->
-                            <Grid Grid.Row="4" Background="{StaticResource GrayscaleGray5Brush}" Opacity="0.5"></Grid>
+                            <!-- Lumen Profile Extra : Calcium, Expansion -->
+                            <Image Grid.Row="4" Source="{Binding LumenProfileImageExtra}" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LumenProfileExtraHeight}" Stretch="Fill"/>
                         </Grid>
                     </Grid>
                 </Grid>

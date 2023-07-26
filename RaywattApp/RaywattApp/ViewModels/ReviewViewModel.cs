@@ -24,12 +24,23 @@ using RaywattApp.Common.Util;
 using System.Threading;
 using RaywattApp.Common.Annotation.Util;
 using System.Runtime.InteropServices;
+using System.Windows.Media.Imaging;
 
 namespace RaywattApp.ViewModels
 {
     public partial class ReviewViewModel : ReviewViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewViewModel));
+
+        private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
+
+        private bool isLongitudeMeasurementInit;
+
+        private bool isLumenContourSave = false;
+
+        private bool isLumenDetectedFrontDone = true;
+
+        private Mat imglumenProfileExtra;
 
         private double degree;
         public double Degree
@@ -50,14 +61,15 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private Section _section;
 
+        [ObservableProperty]
+        private BitmapSource _lumenProfileImageExtra;
+
         private double _rightSideBarExpand;
         public double RightSideBarExpand
         {
             get { return _rightSideBarExpand; }
             set { _rightSideBarExpand = value; OnPropertyChanged(nameof(RightSideBarExpand)); }
         }
-
-        private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
         private int outFrameNumber;
         public int OutFrameNumber
@@ -79,8 +91,6 @@ namespace RaywattApp.ViewModels
         private List<Measurement> measurements;
         public List<Measurement> Measurements { get { return measurements; } set { measurements = value; OnPropertyChanged(nameof(Measurements)); } }
 
-        private bool isLongitudeMeasurementInit;
-
         private ObservableCollection<LengthGeometry> _lModeLengthGeometries;
         public ObservableCollection<LengthGeometry> LModeLengthGeometries { get { return _lModeLengthGeometries; } set { _lModeLengthGeometries = value; OnPropertyChanged(nameof(LModeLengthGeometries)); } }
 
@@ -95,8 +105,6 @@ namespace RaywattApp.ViewModels
 
         private string _lumenContourCommand;
         public string LumenContourCommand { get { return _lumenContourCommand; } set { _lumenContourCommand = value; OnPropertyChanged(nameof(LumenContourCommand)); } }
-
-        private bool isLumenDetectedFrontDone = true;
 
         [ObservableProperty]
         private Zoom _zoomAngio = new Zoom(Constants.CrossSectionAngio / Constants.OCTImageSize);
@@ -131,8 +139,6 @@ namespace RaywattApp.ViewModels
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
             }
         }
-
-        private bool isLumenContourSave = false;
 
         private ICommand _toggleMeasurementCommand;
         public ICommand ToggleMeasurementCommand
@@ -307,8 +313,14 @@ namespace RaywattApp.ViewModels
 
             int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, 0);
             int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth);
-            bool isStentOn = PatientCase.Procedure == "$002" || PatientCase.Procedure == "$003" ? true : false;
-            imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, frameProximal, frameDistal, isStentOn, frame);
+            //Test
+            List<int> appositionFrames = new List<int>() { 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
+            imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, frameProximal, frameDistal, CommonUtil.IsPostCase(PatientCase.Procedure), appositionFrames, frame);
+
+            //Test
+            List<int> colorFrames = new List<int>() { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
+            imglumenProfileExtra = CommonUtil.MakeLumenProfileImageExtra(ReviewStatus.NumberOfFrames, colorFrames, CommonUtil.IsPreCase(PatientCase.Procedure), longitudeFrameInfo.curFrame - 1);
+            LumenProfileImageExtra = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileExtra);
 
             if (ReviewStatus.NumberOfFrames - 1 == frame)
             {
@@ -851,12 +863,12 @@ namespace RaywattApp.ViewModels
             Section.VisibleMlaMld(false);
             Section.VislbleMsaMinExp(false);
 
-            if (PatientCase.Procedure.Equals("$001"))
+            if (CommonUtil.IsPreCase(PatientCase.Procedure))
             {
                 Section.SetMlaMld(LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth);
                 Section.VisibleMlaMld(true);
             }    
-            else if (PatientCase.Procedure.Equals("$002") || PatientCase.Procedure.Equals("$003"))
+            else if (CommonUtil.IsPostCase(PatientCase.Procedure))
             {
                 Section.SetMsaMinExp(LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth);
                 Section.VislbleMsaMinExp(true);
@@ -892,8 +904,14 @@ namespace RaywattApp.ViewModels
                 {
                     int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, 0);
                     int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth);
-                    bool isStentOn = PatientCase.Procedure == "$002" || PatientCase.Procedure == "$003" ? true : false;
-                    imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, frameProximal, frameDistal, isStentOn, longitudeFrameInfo.curFrame - 1);
+                    //Test
+                    List<int> appositionFrames = new List<int>() { 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
+                    imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, frameProximal, frameDistal, CommonUtil.IsPostCase(PatientCase.Procedure), appositionFrames, longitudeFrameInfo.curFrame - 1);
+
+                    //Test
+                    List<int> colorFrames = new List<int>() { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
+                    imglumenProfileExtra = CommonUtil.MakeLumenProfileImageExtra(ReviewStatus.NumberOfFrames, colorFrames, CommonUtil.IsPreCase(PatientCase.Procedure), longitudeFrameInfo.curFrame - 1);
+                    LumenProfileImageExtra = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileExtra);
                 }
             }
             DrawLumenProfileImage();
