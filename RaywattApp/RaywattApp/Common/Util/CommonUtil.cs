@@ -511,7 +511,7 @@ namespace RaywattApp.Common.Util
             return imglumenProfile;
         }
 
-        public static Mat MakeLumenProfileImage(List<LumenContour> lumenContours, int frameProximal, int frameDistal, int currentFrame = -1)
+        public static Mat MakeLumenProfileImage(List<LumenContour> lumenContours, int frameProximal, int frameDistal, bool isStentOn, int currentFrame = -1)
         {
             const double radius = Constants.OCTImageSize / 2;
             const double totalArea = radius * radius * Math.PI;
@@ -531,13 +531,23 @@ namespace RaywattApp.Common.Util
                 int lumenArea = (int)(area / totalArea * imglumenProfile.Rows);
                 int yStart = (imglumenProfile.Rows - lumenArea) / 2;
 
+                Cv2.Line(imglumenProfile, new Point(curFrame, yStart), new Point(curFrame, yStart + lumenArea), new Scalar(0x16, 0x16, 0x16));
+
                 if (curFrame >= frameProximal && curFrame <= frameDistal)
                 {
+                    for (int i = 0; isStentOn && i < imglumenProfile.Rows; i++)
+                    {
+                        if ((i + curFrame) % 12 == 0)
+                            Cv2.Line(imglumenProfile, new Point(curFrame, i), new Point(curFrame, i), new Scalar(0x8d, 0x8d, 0x8d));
+
+                        if ((i - curFrame) % 12 == 0)
+                            Cv2.Line(imglumenProfile, new Point(curFrame, i), new Point(curFrame, i), new Scalar(0x8d, 0x8d, 0x8d));
+                    }
+
                     Cv2.Line(imglumenProfile, new Point(curFrame, 0), new Point(curFrame, yStart - 1), new Scalar(0x4f, 0x4f, 0x4f));
                     Cv2.Line(imglumenProfile, new Point(curFrame, yStart + lumenArea + 1), new Point(curFrame, imglumenProfile.Rows), new Scalar(0x4f, 0x4f, 0x4f));
                 }
 
-                Cv2.Line(imglumenProfile, new Point(curFrame, yStart), new Point(curFrame, yStart + lumenArea), new Scalar(0x16, 0x16, 0x16));
                 curFrame++;
             }
 

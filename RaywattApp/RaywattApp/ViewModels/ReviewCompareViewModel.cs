@@ -170,7 +170,7 @@ namespace RaywattApp.ViewModels
                 PostLumenContour = PatientCase.LumenContour;
                 int frameProximal = PatientCase.SectionProximal;
                 int frameDistal = PatientCase.SectionDistal;
-                imglumenProfile = CommonUtil.MakeLumenProfileImage(PostLumenContour, frameProximal, frameDistal);
+                imglumenProfile = CommonUtil.MakeLumenProfileImage(PostLumenContour, frameProximal, frameDistal, true);
                 Section.Proximal.X = CommonUtil.GetPositionFromFrame(PatientCase.SectionProximal, ReviewStatus.NumberOfFrames, Constants.LongitudeCompareWidth, 0);
                 Section.Distal.X = CommonUtil.GetPositionFromFrame(PatientCase.SectionDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeCompareWidth, Constants.SectionIndicatorWidth);
                 ShowSection();
@@ -191,7 +191,7 @@ namespace RaywattApp.ViewModels
                         PreLumenContour = ReviewStatus.SelectedPatientCase.LumenContour;
                         int frameProximalCompare = ReviewStatus.SelectedPatientCase.SectionProximal;
                         int frameDistalCompare = ReviewStatus.SelectedPatientCase.SectionDistal;
-                        imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(PreLumenContour, frameProximalCompare, frameDistalCompare);
+                        imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(PreLumenContour, frameProximalCompare, frameDistalCompare, false);
                         ShowSectionCompare();
                     }
                 }
@@ -246,7 +246,7 @@ namespace RaywattApp.ViewModels
             PreLumenContour = ReviewStatus.SelectedPatientCase.LumenContour;
             int frameProximal = ReviewStatus.SelectedPatientCase.SectionProximal;
             int frameDistal = ReviewStatus.SelectedPatientCase.SectionDistal;
-            imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(PreLumenContour, frameProximal, frameDistal);
+            imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(PreLumenContour, frameProximal, frameDistal, false);
             Application.Current.Dispatcher.Invoke(() =>
             {
                 ShowSectionCompare();
@@ -359,7 +359,7 @@ namespace RaywattApp.ViewModels
                     PreLumenContour = ReviewStatus.SelectedPatientCase.LumenContour;
                     int frameProximal = ReviewStatus.SelectedPatientCase.SectionProximal;
                     int frameDistal = ReviewStatus.SelectedPatientCase.SectionDistal;
-                    imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(PreLumenContour, frameProximal, frameDistal);
+                    imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(PreLumenContour, frameProximal, frameDistal, false);
                     ShowSectionCompare();
 
                     LumenContourCommand = Constants.LumenContourDraw;

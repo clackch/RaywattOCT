@@ -307,7 +307,8 @@ namespace RaywattApp.ViewModels
 
             int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, 0);
             int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth);
-            imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, frameProximal, frameDistal, frame);
+            bool isStentOn = PatientCase.Procedure == "$002" || PatientCase.Procedure == "$003" ? true : false;
+            imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, frameProximal, frameDistal, isStentOn, frame);
 
             if (ReviewStatus.NumberOfFrames - 1 == frame)
             {
@@ -891,7 +892,8 @@ namespace RaywattApp.ViewModels
                 {
                     int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, 0);
                     int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth);
-                    imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, frameProximal, frameDistal, longitudeFrameInfo.curFrame - 1);
+                    bool isStentOn = PatientCase.Procedure == "$002" || PatientCase.Procedure == "$003" ? true : false;
+                    imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, frameProximal, frameDistal, isStentOn, longitudeFrameInfo.curFrame - 1);
                 }
             }
             DrawLumenProfileImage();
