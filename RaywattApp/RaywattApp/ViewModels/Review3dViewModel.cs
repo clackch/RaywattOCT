@@ -296,9 +296,22 @@ namespace RaywattApp.ViewModels
                 double indicatorX = indicator.PointLongitudeX - indicator.Coordinate.X - indicator.IndicatorDiff;
                 double indicatorCenterX = indicatorX + Constants.LongitudeIndicatorWidth / 2;
 
-                if (indicatorCenterX >= 0 && indicatorCenterX < Constants.Longitude3dWidth)
+                if (indicatorCenterX < 0)
+                {
+                    indicator.X = 0 - Constants.LongitudeIndicatorWidth / 2;
+                    indicator.CenterX = 0;
+                    setCurrentFrame(0);
+                }
+                else if (indicatorCenterX > Constants.Longitude3dWidth)
+                {
+                    indicator.X = Constants.Longitude3dWidth - Constants.LongitudeIndicatorWidth / 2;
+                    indicator.CenterX = Constants.Longitude3dWidth;
+                    setCurrentFrame(Constants.Longitude3dWidth);
+                }
+                else
                 {
                     indicator.X = indicatorX;
+                    indicator.CenterX = indicatorCenterX;
                     setCurrentFrame(indicatorCenterX);
                 }
             }

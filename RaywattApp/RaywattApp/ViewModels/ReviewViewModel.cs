@@ -463,13 +463,26 @@ namespace RaywattApp.ViewModels
                 if (indicator.IsSectionIndicator)
                 {
                     if (indicator.IsSectionProximal && (indicatorX >= Section.Distal.X - Constants.SectionIndicatorWidth))
-                            return;
+                    {
+                        indicator.X = Section.Distal.X - Constants.SectionIndicatorWidth;
+                        return;
+                    }
+                            
                     if (!indicator.IsSectionProximal && (indicatorX <= Section.Proximal.X + Constants.SectionIndicatorWidth))
-                            return;
+                    {
+                        indicator.X = Section.Proximal.X + Constants.SectionIndicatorWidth;
+                        return;
+                    }                            
 
-                    double indicatorCenterX = indicatorX + Constants.SectionIndicatorWidth;
-
-                    if (indicatorCenterX >= Constants.SectionIndicatorWidth && indicatorCenterX < Constants.LongitudeWidth)
+                    if(indicatorX < 0)
+                    {
+                        indicator.X = 0;
+                    }
+                    else if(indicatorX > Constants.LongitudeWidth - Constants.SectionIndicatorWidth)
+                    {
+                        indicator.X = Constants.LongitudeWidth - Constants.SectionIndicatorWidth;
+                    }
+                    else
                     {
                         indicator.X = indicatorX;
                     }
@@ -478,7 +491,19 @@ namespace RaywattApp.ViewModels
                 {
                     double indicatorCenterX = indicatorX + Constants.LongitudeIndicatorWidth / 2;
 
-                    if (indicatorCenterX >= 0 && indicatorCenterX < Constants.LongitudeWidth)
+                    if(indicatorCenterX < 0)
+                    {
+                        indicator.X = 0 - Constants.LongitudeIndicatorWidth / 2;
+                        indicator.CenterX = 0;
+                        setCurrentFrame(0);
+                    }
+                    else if(indicatorCenterX > Constants.LongitudeWidth)
+                    {
+                        indicator.X = Constants.LongitudeWidth - Constants.LongitudeIndicatorWidth / 2;
+                        indicator.CenterX = Constants.LongitudeWidth;
+                        setCurrentFrame(Constants.LongitudeWidth);
+                    }
+                    else
                     {
                         indicator.X = indicatorX;
                         indicator.CenterX = indicatorCenterX;
