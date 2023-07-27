@@ -178,7 +178,7 @@ namespace RaywattApp.ViewModels
                 }
 
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
-                ShowSection();
+                ShowLumenProfile();
 
                 if (ReviewStatus.SelectedPatientCase != null)
                 {
@@ -193,7 +193,7 @@ namespace RaywattApp.ViewModels
                     }
                     else
                     {
-                        ShowSectionCompare();
+                        ShowLumenProfileCompare();
                     }
                 }
 
@@ -246,7 +246,7 @@ namespace RaywattApp.ViewModels
             ReviewStatus.SelectedPatientCase.LumenContour = GetLumenContours(ReviewStatus.SelectedPatientCase.Id);
             Application.Current.Dispatcher.Invoke(() =>
             {
-                ShowSectionCompare();
+                ShowLumenProfileCompare();
             });
 
             IsLumenLoaded = true;
@@ -335,7 +335,7 @@ namespace RaywattApp.ViewModels
             if (ReviewStatus.SelectedPatientCase != null) {
 
                 LumenContourCommand = Constants.LumenContourClear;
-                HideSectionCompare();
+                HideLumenProfileCompare();
 
                 DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current = 0;
                 RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath);
@@ -353,7 +353,7 @@ namespace RaywattApp.ViewModels
                 }
                 else
                 {
-                    ShowSectionCompare();
+                    ShowLumenProfileCompare();
 
                     LumenContourCommand = Constants.LumenContourDraw;
                 }
@@ -528,14 +528,15 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private void ShowSection()
+        private void ShowLumenProfile()
         {
             PostLumenContour = PatientCase.LumenContour;
             int frameProximal = PatientCase.SectionProximal;
             int frameDistal = PatientCase.SectionDistal;
             //Test
+            List<int> sidebranchs = new List<int>() { 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 419, 420 };
             List<int> appositionFrames = new List<int>() { 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
-            imglumenProfile = CommonUtil.MakeLumenProfileImage(PostLumenContour, frameProximal, frameDistal, true, appositionFrames);
+            imglumenProfile = CommonUtil.MakeLumenProfileImage(PostLumenContour, frameProximal, frameDistal, sidebranchs, true, appositionFrames);
 
             //Test
             List<int> colorFrames = new List<int>() { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
@@ -555,12 +556,14 @@ namespace RaywattApp.ViewModels
             Section.MinExpValue.IsVisible = Visibility.Visible;
         }
 
-        private void ShowSectionCompare()
+        private void ShowLumenProfileCompare()
         {
             PreLumenContour = ReviewStatus.SelectedPatientCase.LumenContour;
             int frameProximalCompare = ReviewStatus.SelectedPatientCase.SectionProximal;
             int frameDistalCompare = ReviewStatus.SelectedPatientCase.SectionDistal;
-            imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(PreLumenContour, frameProximalCompare, frameDistalCompare, false, null);
+            //Test
+            List<int> sidebranchs = new List<int>() { 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 419, 420 };
+            imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(PreLumenContour, frameProximalCompare, frameDistalCompare, sidebranchs, false, null);
             LumenProfileImageCompare = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileCompare);
 
             //Test
@@ -581,7 +584,7 @@ namespace RaywattApp.ViewModels
             SectionCompare.MldValue.IsVisible = Visibility.Visible;
         }
 
-        private void HideSectionCompare()
+        private void HideLumenProfileCompare()
         {
             IndicatorCompareLongitude.IsVisible = Visibility.Collapsed;
             SectionCompare.Proximal.IsVisible = Visibility.Collapsed;
