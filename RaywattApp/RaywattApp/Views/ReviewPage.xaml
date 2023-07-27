@@ -983,7 +983,8 @@
                                     <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding DeviceStatus.IsLumenLoaded, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
                                 </Grid>
 
-                                <Canvas>
+                                <!-- Lesion Section -->
+                                <Canvas Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityConverter}}">
                                     <!-- Section MLA/MLD -->
                                     <Image Width="45" Height="121" Margin="0,-16,0,0" Source="{svgc:SvgImage Source=/res/indicator/sectionMlaMld.svg}" Canvas.Left="{Binding Section.MlaMld.X}" Visibility="{Binding Section.MlaMld.IsVisible}"/>
                                     <StackPanel Orientation="Horizontal" Margin="0,-22,0,0" Canvas.Left="{Binding Section.MlaValue.X}" Visibility="{Binding Section.MlaValue.IsVisible}">
@@ -1014,6 +1015,11 @@
                                         <TextBlock Style="{DynamicResource TextBlock_Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Text="{Binding Section.MinExpValue.DValue, StringFormat={}{0:N0}}"/>
                                         <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [%], Source={StaticResource L10N}}"/>
                                     </StackPanel>
+                                    <!-- Section Lesion Length -->
+                                    <StackPanel Orientation="Horizontal" Margin="0,90,0,0" Canvas.Left="{Binding Section.LesionLength.X}" Visibility="{Binding Section.LesionLength.IsVisible}">
+                                        <TextBlock Style="{DynamicResource TextBlock_Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Text="{Binding Section.LesionLength.DValue, StringFormat={}{0:N1}}"/>
+                                        <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [㎜], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
                                     <!-- Section Proximal -->
                                     <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="sectionProximal" IsCaptured="{Binding Section.Proximal.IsCaptured}" Stretch="None" Canvas.Left="{Binding Section.Proximal.X}" IsEnabled="{Binding Section.Proximal.IsEnabled}">
                                         <i:Interaction.Triggers>
@@ -1042,7 +1048,10 @@
                                             </i:EventTrigger>
                                         </i:Interaction.Triggers>
                                     </component:IndicatorImage>
-                                    <!-- L-Mode Indicator -->
+                                </Canvas>
+
+                                <!-- L-Mode Indicator -->
+                                <Canvas>
                                     <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitude" IsCaptured="{Binding IndicatorLongitude.IsCaptured}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="{x:Static const:Constants.LongitudeIndicatorHeight}" Stretch="None" Canvas.Left="{Binding IndicatorLongitude.X}" Margin="0,-11,0,0" IsEnabled="{Binding IndicatorLongitude.IsEnabled}">
                                         <!-- Trigger -->
                                         <i:Interaction.Triggers>

@@ -21,6 +21,7 @@ using RaywattApp.Models;
 using RaywattApp.ViewModels.Dialog;
 using RaywattApp.Views.Dialog;
 using System.Threading;
+using System.Windows.Controls;
 
 namespace RaywattApp.Common.Util
 {
@@ -565,6 +566,12 @@ namespace RaywattApp.Common.Util
 
                     Cv2.Line(imglumenProfile, new Point(curFrame, 0), new Point(curFrame, yStart - 1), new Scalar(0x4f, 0x4f, 0x4f));
                     Cv2.Line(imglumenProfile, new Point(curFrame, yStart + lumenArea + 1), new Point(curFrame, imglumenProfile.Rows), new Scalar(0x4f, 0x4f, 0x4f));
+
+                    if(curFrame % 2 == 0)
+                    {
+                        Cv2.Line(imglumenProfile, new Point(curFrame, 0), new Point(curFrame, 0), new Scalar(0xe4, 0xe4, 0xe4));
+                        Cv2.Line(imglumenProfile, new Point(curFrame, imglumenProfile.Rows - 1), new Point(curFrame, imglumenProfile.Rows), new Scalar(0xe4, 0xe4, 0xe4));
+                    }
                 }
 
                 curFrame++;
@@ -873,6 +880,17 @@ namespace RaywattApp.Common.Util
             {
                 return false;
             }
+        }
+
+        public static System.Windows.Size GetTextBlockSize(string style, string text = "")
+        {
+            TextBlock textBlock = new TextBlock();
+            textBlock.Style = (System.Windows.Style)App.Current.Resources[style];
+            textBlock.Text = text;
+
+            textBlock.Measure(new System.Windows.Size(double.PositiveInfinity, double.PositiveInfinity));
+
+            return textBlock.DesiredSize;
         }
     }
 }

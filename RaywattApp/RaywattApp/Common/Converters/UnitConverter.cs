@@ -1,5 +1,5 @@
-﻿using System;
-using System.Diagnostics;
+﻿using RaywattApp.Common.Bases;
+using System;
 using System.Globalization;
 using System.Windows.Data;
 
@@ -13,9 +13,19 @@ namespace RaywattApp.Common.Converters
                 return Binding.DoNothing;
 
             double originValue = (double)value;
-            double scale = (double)parameter;
+            string scale = parameter.ToString();
+            double realValue = 0;
 
-            return (originValue / scale);
+            if(scale == Constants.ScaleLength)
+            {
+                realValue = originValue * Constants.MilimeterPerPixel;
+            }
+            else
+            {
+                realValue = originValue * Constants.MilimeterPerPixel * Constants.MilimeterPerPixel;
+            }
+
+            return Math.Round(realValue, 2);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

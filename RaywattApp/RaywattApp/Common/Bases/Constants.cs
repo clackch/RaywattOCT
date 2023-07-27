@@ -251,7 +251,6 @@ namespace RaywattApp.Common.Bases
         public const double LongitudeIndicatorHeight = 116;
         public const double SectionIndicatorWidth = 12.5;
         public const double SectionMlaMldWidth = 45;
-        public const double SectionMlaValueWidth = 80;
         public const double SectionMsaMinExpWidth = 22.5;
         public const double LumenProfileExtraHeight = 6;
 
@@ -355,8 +354,9 @@ namespace RaywattApp.Common.Bases
         public const string LumenContourCurrentInit = "Init";
 
         //Scale
-        public const double ScaleLength = 100;
-        public const double ScaleArea = ScaleLength * ScaleLength;
+        public const string ScaleLength = "Length";
+        public const string ScaleArea = "Area";
+        public const double MilimeterPerPixel = 0.0082;
 
         //Mini-Map
         public const double MiniMapBorderSize = 140;

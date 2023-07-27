@@ -129,6 +129,11 @@
                                         <TextBlock Style="{DynamicResource TextBlock_Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Text="{Binding SectionCompare.MldValue.DValue, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}"/>
                                         <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [㎜], Source={StaticResource L10N}}"/>
                                     </StackPanel>
+                                    <!-- Section Lesion Length -->
+                                    <StackPanel Orientation="Horizontal" Margin="0,155,0,0" Canvas.Left="{Binding SectionCompare.LesionLength.X}" Visibility="{Binding SectionCompare.LesionLength.IsVisible}">
+                                        <TextBlock Style="{DynamicResource TextBlock_Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Text="{Binding SectionCompare.LesionLength.DValue, StringFormat={}{0:N1}}"/>
+                                        <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [㎜], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
                                     <!-- Section Proximal -->
                                     <Image Height="170" Source="{svgc:SvgImage Source=/res/indicator/sectionProximalCompare.svg}" Canvas.Left="{Binding SectionCompare.Proximal.X}" Visibility="{Binding SectionCompare.Proximal.IsVisible}"/>
                                     <!-- Section Distal -->
@@ -275,6 +280,11 @@
                                         <StackPanel Width="2"/>
                                         <TextBlock Style="{DynamicResource TextBlock_Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Text="{Binding Section.MinExpValue.DValue, StringFormat={}{0:N0}}"/>
                                         <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [%], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
+                                    <!-- Section Lesion Length -->
+                                    <StackPanel Orientation="Horizontal" Margin="0,155,0,0" Canvas.Left="{Binding Section.LesionLength.X}" Visibility="{Binding Section.LesionLength.IsVisible}">
+                                        <TextBlock Style="{DynamicResource TextBlock_Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Text="{Binding Section.LesionLength.DValue, StringFormat={}{0:N1}}"/>
+                                        <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [㎜], Source={StaticResource L10N}}"/>
                                     </StackPanel>
                                     <!-- Section Proximal -->
                                     <Image Height="170" Source="{svgc:SvgImage Source=/res/indicator/sectionProximalCompare.svg}" Canvas.Left="{Binding Section.Proximal.X}" Visibility="{Binding Section.Proximal.IsVisible}"/>
