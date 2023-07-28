@@ -31,5 +31,8 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private double _dValue;
+
+        [ObservableProperty]
+        private int _nValue;
     }
 }

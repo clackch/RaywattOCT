@@ -141,6 +141,7 @@ namespace RaywattApp.Models
 
             MlaMld.X = CommonUtil.GetPositionFromFrame(mlaIdx + frameProximal, totalFrame, longitudeWidth, Constants.SectionMlaMldWidth / 2);
             MlaValue.DValue = mla;
+            MlaValue.NValue = mlaIdx + frameProximal;
             string text = "MLA " + Math.Round(mla * Constants.MilimeterPerPixel * Constants.MilimeterPerPixel, 2).ToString() + "㎟";
             double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-12", text).Width;
             MlaValue.X = MlaMld.X - (width + 2);
@@ -170,6 +171,7 @@ namespace RaywattApp.Models
                 Msa.StrValue = "Left";
                 MinExp.StrValue = "Right";
                 MsaValue.DValue = msa;
+                MsaValue.NValue = msaIdx + frameProximal;
                 string text = "MSA " + Math.Round(msa * Constants.MilimeterPerPixel * Constants.MilimeterPerPixel, 2).ToString() + "㎟";
                 double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-12", text).Width;
                 MsaValue.X = Msa.X - (width + 2);
@@ -183,6 +185,7 @@ namespace RaywattApp.Models
                 Msa.StrValue = "Right";
                 MinExp.StrValue = "Left";
                 MsaValue.DValue = msa;
+                MsaValue.NValue = msaIdx + frameProximal;
                 MsaValue.X = Msa.X + Constants.SectionMsaMinExpWidth + 4 + 2;
                 MinExpValue.DValue = minExp;
                 string text = "Min Exp. " + minExp + "%";

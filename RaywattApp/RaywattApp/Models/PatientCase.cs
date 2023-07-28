@@ -163,6 +163,9 @@ namespace RaywattApp.Models
         private string _strLumenContour;
 
         [ObservableProperty]
+        private FfrFeature _ffrFeature;
+
+        [ObservableProperty]
         private DateTime createDate;
 
         [ObservableProperty]

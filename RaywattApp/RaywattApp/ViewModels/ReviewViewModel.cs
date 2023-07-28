@@ -618,6 +618,45 @@ namespace RaywattApp.ViewModels
                     _log.Error("Update Error");
                 }
             }
+
+            SaveFfrValues();
+        }
+
+        private void SaveFfrValues()
+        {
+            if (PatientCase.FfrFeature == null)
+                PatientCase.FfrFeature = new FfrFeature();
+
+            double percentAreaStenosis = 0;
+            double minimalLumenArea = 0;
+            int minimalLumenFrameNumber = 0;
+
+            if (CommonUtil.IsPreCase(PatientCase.Procedure))
+            {
+                percentAreaStenosis = Section.MlaValue.DValue / Section.MeanArea;
+                minimalLumenArea = Section.MlaValue.DValue;
+                minimalLumenFrameNumber = Section.MlaValue.NValue;
+            }
+            else if (CommonUtil.IsPostCase(PatientCase.Procedure))
+            {
+                percentAreaStenosis = Section.MsaValue.DValue / Section.MeanArea;
+                minimalLumenArea = Section.MsaValue.DValue;
+                minimalLumenFrameNumber = Section.MsaValue.NValue;
+            }
+            else
+            {
+                percentAreaStenosis = Section.MlaValue.DValue / Section.MeanArea;
+                minimalLumenArea = Section.MlaValue.DValue;
+                minimalLumenFrameNumber = Section.MlaValue.NValue;
+            }
+
+            PatientCase.FfrFeature.MinimalLumenFrameNumber = minimalLumenFrameNumber;
+            PatientCase.FfrFeature.PercentAreaStenosis = Math.Round(percentAreaStenosis * 100, 1);
+            PatientCase.FfrFeature.MinimalLumenArea = Math.Round(minimalLumenArea * Constants.MilimeterPerPixel * Constants.MilimeterPerPixel, 2);
+            PatientCase.FfrFeature.DistalLumenArea = Math.Round(Section.Distal.DValue * Constants.MilimeterPerPixel * Constants.MilimeterPerPixel, 2);
+            PatientCase.FfrFeature.LesionLength = Math.Round(Section.LesionLength.DValue, 1);
+            PatientCase.FfrFeature.PlaqueArea = 0.0;
+            PatientCase.FfrFeature.ProximalLumenArea = Math.Round(Section.Proximal.DValue * Constants.MilimeterPerPixel * Constants.MilimeterPerPixel, 2);
         }
 
         private void ToggleMeasurement()
@@ -873,6 +912,11 @@ namespace RaywattApp.ViewModels
             {
                 Section.SetMsaMinExp(LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackType);
                 Section.VislbleMsaMinExp(true);
+            }
+            else
+            {
+                //Procedure Other Case 확인 필요
+                Section.SetMlaMld(LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackType);
             }
         }
 
