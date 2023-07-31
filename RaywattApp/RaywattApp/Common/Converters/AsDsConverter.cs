@@ -4,7 +4,7 @@ using System.Windows.Data;
 
 namespace RaywattApp.Common.Converters
 {
-    public class PercentValueConverter : IMultiValueConverter
+    public class AsDsConverter : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {

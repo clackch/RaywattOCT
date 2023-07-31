@@ -434,7 +434,7 @@
                                                 <Label Grid.Row="4" Grid.Column="0" Content="{Binding [%DS], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                 <component:PercentValueComponent Grid.Row="4" Grid.Column="1" Style="{DynamicResource TextBlock_Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right" Value="{Binding CurrentLumenContour.MeanDiameter}" Overall="{Binding Section.MeanDiameter}">
                                                     <TextBlock.Text>
-                                                        <MultiBinding Converter="{StaticResource PercentValueConverter}">
+                                                        <MultiBinding Converter="{StaticResource AsDsConverter}">
                                                             <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Value"/>
                                                             <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Overall"/>
                                                         </MultiBinding>
@@ -459,7 +459,7 @@
                                                 <Label Grid.Column="0" Content="{Binding [%AS], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                 <component:PercentValueComponent Grid.Column="1" Style="{DynamicResource TextBlock_Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right" Value="{Binding CurrentLumenContour.Area}" Overall="{Binding Section.MeanArea}">
                                                     <TextBlock.Text>
-                                                        <MultiBinding Converter="{StaticResource PercentValueConverter}">
+                                                        <MultiBinding Converter="{StaticResource AsDsConverter}">
                                                             <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Value"/>
                                                             <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Overall"/>
                                                         </MultiBinding>
@@ -612,7 +612,7 @@
                                                             <Label Grid.Row="4" Grid.Column="0" Content="{Binding [%DS], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                             <component:PercentValueComponent Grid.Row="4" Grid.Column="1" Style="{DynamicResource TextBlock_Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Left" Value="{Binding CurrentLumenContour.MeanDiameter}" Overall="{Binding Section.MeanDiameter}">
                                                                 <TextBlock.Text>
-                                                                    <MultiBinding Converter="{StaticResource PercentValueConverter}">
+                                                                    <MultiBinding Converter="{StaticResource AsDsConverter}">
                                                                         <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Value"/>
                                                                         <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Overall"/>
                                                                     </MultiBinding>
@@ -640,7 +640,7 @@
                                                             <Label Grid.Row="0" Grid.Column="0" Content="{Binding [%AS], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                             <component:PercentValueComponent Grid.Row="0" Grid.Column="1" Style="{DynamicResource TextBlock_Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Left" Value="{Binding CurrentLumenContour.Area}" Overall="{Binding Section.MeanArea}">
                                                                 <TextBlock.Text>
-                                                                    <MultiBinding Converter="{StaticResource PercentValueConverter}">
+                                                                    <MultiBinding Converter="{StaticResource AsDsConverter}">
                                                                         <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Value"/>
                                                                         <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Overall"/>
                                                                     </MultiBinding>
