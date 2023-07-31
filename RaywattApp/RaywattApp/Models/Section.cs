@@ -50,6 +50,12 @@ namespace RaywattApp.Models
         [ObservableProperty]
         private double _meanDiameter;
 
+        [ObservableProperty]
+        private double _refArea;
+
+        [ObservableProperty]
+        private double _refDiameter;
+
         public Section()
         {
             Proximal = new Indicator();
@@ -106,6 +112,9 @@ namespace RaywattApp.Models
 
             MeanArea = meanArea / temp.Count;
             MeanDiameter = meanDiameter / temp.Count;
+
+            RefArea = (LumenContours[frameProximal].Area + LumenContours[frameDistal].Area) / 2;
+            RefDiameter = (LumenContours[frameProximal].MeanDiameter + LumenContours[frameDistal].MeanDiameter) / 2;
         }
 
         private void SetProximalDisatalArea(double proximalArea, double distalArea)
@@ -135,7 +144,6 @@ namespace RaywattApp.Models
             double mla = LumenContours.GetRange(frameProximal, count).Min(x => x.Area);
             int mlaIdx = LumenContours.GetRange(frameProximal, count).FindIndex(x => x.Area == mla);
 
-            //Diameter 로직에 따라 mla, mld 분리 여부 결정
             double mld = LumenContours.GetRange(frameProximal, count).Min(x => x.MeanDiameter);
             int mldIdx = LumenContours.GetRange(frameProximal, count).FindIndex(x => x.MeanDiameter == mld);
 
@@ -159,10 +167,9 @@ namespace RaywattApp.Models
             double msa = LumenContours.GetRange(frameProximal, count).Min(x => x.Area);
             int msaIdx = LumenContours.GetRange(frameProximal, count).FindIndex(x => x.Area == msa);
 
-            //Min Exp 정의가 되면 Min Exp 변경 필요 (Test로 Max로 설정)
-            double minExp = LumenContours.GetRange(frameProximal, count).Max(x => x.Area);
-            int minExpIdx = LumenContours.GetRange(frameProximal, count).FindIndex(x => x.Area == minExp);
-            minExp = Math.Round(minExp / 10000, 0);
+            //TODO) Min Exp 정의가 되면 Min Exp 변경 필요
+            double minExp = msa;
+            int minExpIdx = msaIdx;
 
             if(msaIdx <= minExpIdx)
             {

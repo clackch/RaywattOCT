@@ -92,4 +92,7 @@
     <!-- Procedure Visibility Converter -->
     <converters:ProcedureVisibilityConverter x:Key="ProcedureVisibilityConverter" />
 
+    <!-- Expansion Converter -->
+    <converters:ExpansionConverter x:Key="ExpansionConverter" />
+
 </ResourceDictionary>

@@ -432,7 +432,7 @@
                                                 <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CurrentLumenContour.MaxDiameter.value, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}" Style="{DynamicResource TextBlock_Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
                                                 <Label Grid.Row="2" Grid.Column="3" Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                 <Label Grid.Row="4" Grid.Column="0" Content="{Binding [%DS], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
-                                                <component:PercentValueComponent Grid.Row="4" Grid.Column="1" Style="{DynamicResource TextBlock_Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right" Value="{Binding CurrentLumenContour.MaxDiameter.value}" Overall="{Binding Section.MeanDiameter}">
+                                                <component:PercentValueComponent Grid.Row="4" Grid.Column="1" Style="{DynamicResource TextBlock_Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right" Value="{Binding CurrentLumenContour.MeanDiameter}" Overall="{Binding Section.MeanDiameter}">
                                                     <TextBlock.Text>
                                                         <MultiBinding Converter="{StaticResource PercentValueConverter}">
                                                             <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Value"/>
@@ -492,7 +492,14 @@
                                                 <StackPanel Height="16"/>
                                                 <Label Content="{Binding [Expansion], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                 <StackPanel Height="64" Orientation="Horizontal">
-                                                    <Label Content="89" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource SubPointColor2Brush}" VerticalAlignment="Center"/>
+                                                    <component:PercentValueComponent Style="{DynamicResource TextBlock_Pretendard-Bold-54}" Foreground="{DynamicResource SubPointColor2Brush}" VerticalAlignment="Center" Value="{Binding CurrentLumenContour.Area}" Overall="{Binding Section.RefArea}">
+                                                        <TextBlock.Text>
+                                                            <MultiBinding Converter="{StaticResource ExpansionConverter}">
+                                                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Value"/>
+                                                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Overall"/>
+                                                            </MultiBinding>
+                                                        </TextBlock.Text>
+                                                    </component:PercentValueComponent>
                                                     <Label Content="{Binding [%], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource SubPointColor2Brush}" VerticalAlignment="Center"/>
                                                 </StackPanel>
                                                 <StackPanel Height="12"/>
@@ -513,10 +520,10 @@
                                                     </Grid.RowDefinitions>
                                                     <!-- Expansion 로직 확정 후, 변경 필요 -->
                                                     <Label Grid.Row="0" Grid.Column="0" Content="{Binding [Diameter], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
-                                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Section.MeanDiameter, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}" Style="{DynamicResource TextBlock_Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
+                                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Section.RefDiameter, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}" Style="{DynamicResource TextBlock_Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
                                                     <Label Grid.Row="0" Grid.Column="3" Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                     <Label Grid.Row="2" Grid.Column="0" Content="{Binding [Area], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
-                                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Section.MeanArea, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleArea}}" Style="{DynamicResource TextBlock_Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
+                                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Section.RefArea, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleArea}}" Style="{DynamicResource TextBlock_Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
                                                     <Label Grid.Row="2" Grid.Column="3" Content="{Binding [㎟], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                 </Grid>
                                             </StackPanel>
@@ -603,7 +610,7 @@
                                                             <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CurrentLumenContour.MaxDiameter.value, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}" Style="{DynamicResource TextBlock_Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Left"/>
                                                             <Label Grid.Row="2" Grid.Column="3" Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                             <Label Grid.Row="4" Grid.Column="0" Content="{Binding [%DS], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
-                                                            <component:PercentValueComponent Grid.Row="4" Grid.Column="1" Style="{DynamicResource TextBlock_Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Left" Value="{Binding CurrentLumenContour.MaxDiameter.value}" Overall="{Binding Section.MeanDiameter}">
+                                                            <component:PercentValueComponent Grid.Row="4" Grid.Column="1" Style="{DynamicResource TextBlock_Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Left" Value="{Binding CurrentLumenContour.MeanDiameter}" Overall="{Binding Section.MeanDiameter}">
                                                                 <TextBlock.Text>
                                                                     <MultiBinding Converter="{StaticResource PercentValueConverter}">
                                                                         <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Value"/>
@@ -683,7 +690,14 @@
                                                         <StackPanel Grid.Column="0" Orientation="Vertical">
                                                             <Label Content="{Binding [Expansion], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                             <StackPanel Height="48" Orientation="Horizontal">
-                                                                <Label Content="89" Style="{DynamicResource Pretendard-Bold-40}" Foreground="{DynamicResource SubPointColor2Brush}" VerticalAlignment="Center"/>
+                                                                <component:PercentValueComponent Style="{DynamicResource TextBlock_Pretendard-Bold-40}" Foreground="{DynamicResource SubPointColor2Brush}" VerticalAlignment="Center" Value="{Binding CurrentLumenContour.Area}" Overall="{Binding Section.RefArea}">
+                                                                    <TextBlock.Text>
+                                                                        <MultiBinding Converter="{StaticResource ExpansionConverter}">
+                                                                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Value"/>
+                                                                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Overall"/>
+                                                                        </MultiBinding>
+                                                                    </TextBlock.Text>
+                                                                </component:PercentValueComponent>
                                                                 <Label Content="{Binding [%], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-40}" Foreground="{DynamicResource SubPointColor2Brush}" VerticalAlignment="Center"/>
                                                             </StackPanel>
                                                         </StackPanel>
@@ -705,10 +719,10 @@
                                                                 </Grid.RowDefinitions>
                                                                 <!-- Expansion 로직 확정 후, 변경 필요 -->
                                                                 <Label Grid.Row="0" Grid.Column="0" Content="{Binding [Diameter], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
-                                                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Section.MeanDiameter, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}" Style="{DynamicResource TextBlock_Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
+                                                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Section.RefDiameter, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}" Style="{DynamicResource TextBlock_Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
                                                                 <Label Grid.Row="0" Grid.Column="3" Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                                 <Label Grid.Row="2" Grid.Column="0" Content="{Binding [Area], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
-                                                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Section.MeanArea, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleArea}}" Style="{DynamicResource TextBlock_Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
+                                                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Section.RefArea, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleArea}}" Style="{DynamicResource TextBlock_Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
                                                                 <Label Grid.Row="2" Grid.Column="3" Content="{Binding [㎟], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                             </Grid>
                                                         </StackPanel>
@@ -1012,7 +1026,14 @@
                                     <StackPanel Orientation="Horizontal" Margin="0,-22,0,0" Canvas.Left="{Binding Section.MinExpValue.X}" Visibility="{Binding Section.MinExpValue.IsVisible}">
                                         <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Min Exp.], Source={StaticResource L10N}}"/>
                                         <StackPanel Width="2"/>
-                                        <TextBlock Style="{DynamicResource TextBlock_Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Text="{Binding Section.MinExpValue.DValue, StringFormat={}{0:N0}}"/>
+                                        <component:PercentValueComponent Style="{DynamicResource TextBlock_Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Value="{Binding Section.MinExpValue.DValue}" Overall="{Binding Section.RefArea}">
+                                            <TextBlock.Text>
+                                                <MultiBinding Converter="{StaticResource ExpansionConverter}">
+                                                    <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Value"/>
+                                                    <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Overall"/>
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </component:PercentValueComponent>
                                         <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [%], Source={StaticResource L10N}}"/>
                                     </StackPanel>
                                     <!-- Section Lesion Length -->
