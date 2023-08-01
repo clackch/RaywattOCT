@@ -40,9 +40,13 @@
                                 <Label Content="{Binding DisplayFrameNumber}" Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource SideMenuTitleBrush}" />
                             </StackPanel>
                             <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Right">
-                                <Separator Width="{Binding CrossSectionScale}" Height="1"/>
+                                <Label Content="1 ㎜" Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
                                 <StackPanel Height="4"/>
-                                <Label Content="1 mm" Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
+                                <Grid>
+                                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="5" Width="1" Margin="0" HorizontalAlignment="Left"/>
+                                    <Separator Width="{Binding CrossSectionScale}" Height="1" Margin="0"/>
+                                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="5" Width="1" Margin="0" HorizontalAlignment="Right"/>
+                                </Grid>
                             </StackPanel>
                             <!-- Lumen Contour-->
                             <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}"  FrameNumber="{Binding MeasureAutoFrameNumber}" IsEditOn="False" IsDrawOn="{Binding FileExport.MeasureAuto}" Zoom="{Binding Zoom}"/>
@@ -142,19 +146,19 @@
                                 <StackPanel Height="10"/>
                                 <StackPanel Height="88" Orientation="Horizontal">
                                     <TextBlock Text="{Binding CurrentLumenContour.MeanDiameter, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}" Style="{DynamicResource TextBlock_Pretendard-Bold-74}" Foreground="{DynamicResource ValueInfoValueBrush}" MinWidth="160"/>
-                                    <Label Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-28}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom" Margin="0,0,0,5"/>
+                                    <Label Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-28}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom" Margin="0,0,0,5"/>
                                 </StackPanel>
                                 <StackPanel Height="4"/>
                                 <StackPanel Height="29" Orientation="Horizontal">
                                     <Label Content="{Binding [Min], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource ValueInfoLabelBrush}" MinWidth="73"/>
                                     <TextBlock Text="{Binding CurrentLumenContour.MinDiameter.value, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}" Style="{DynamicResource TextBlock_Pretendard-Bold-24}" Foreground="{DynamicResource ValueInfoValueBrush}" MinWidth="80"/>
-                                    <Label Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource ValueInfoLabelBrush}"/>
+                                    <Label Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource ValueInfoLabelBrush}"/>
                                 </StackPanel>
                                 <StackPanel Height="2"/>
                                 <StackPanel Height="29" Orientation="Horizontal">
                                     <Label Content="{Binding [Max], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource ValueInfoLabelBrush}" MinWidth="73"/>
                                     <TextBlock Text="{Binding CurrentLumenContour.MaxDiameter.value, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}" Style="{DynamicResource TextBlock_Pretendard-Bold-24}" Foreground="{DynamicResource ValueInfoValueBrush}" MinWidth="80"/>
-                                    <Label Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource ValueInfoLabelBrush}"/>
+                                    <Label Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource ValueInfoLabelBrush}"/>
                                 </StackPanel>
                                 <StackPanel Height="2"/>
                                 <StackPanel Height="29" Orientation="Horizontal">
@@ -200,7 +204,7 @@
                                 <StackPanel Height="10"/>
                                 <StackPanel Height="88" Orientation="Horizontal">
                                     <TextBlock Text="0.00" Style="{DynamicResource TextBlock_Pretendard-Bold-74}" Foreground="{DynamicResource ValueInfoValueBrush}" MinWidth="160"/>
-                                    <Label Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-28}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom" Margin="0,0,0,5"/>
+                                    <Label Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-28}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom" Margin="0,0,0,5"/>
                                 </StackPanel>
                             </StackPanel>
                         </Grid>

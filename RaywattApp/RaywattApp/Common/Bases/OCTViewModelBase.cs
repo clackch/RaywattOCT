@@ -29,10 +29,10 @@ namespace RaywattApp.Common.Bases
         protected Mat imgCrossSectionMask;
 
         [ObservableProperty]
-        protected double _crossSectionScale = 65;
+        protected double _crossSectionScale = (1 / Constants.MilimeterPerPixel) * (Constants.CrossSectionSize / Constants.OCTImageSize);
 
         [ObservableProperty]
-        protected double _crossSectionAngioScale = 60;
+        protected double _crossSectionAngioScale = (1 / Constants.MilimeterPerPixel) * (Constants.CrossSectionAngio / Constants.OCTImageSize);
 
         [ObservableProperty]
         private double _crossSection3dScale = 28;

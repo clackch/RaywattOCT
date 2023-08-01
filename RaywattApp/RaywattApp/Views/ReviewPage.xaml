@@ -91,14 +91,32 @@
                             </Image>
                         </Grid>
                         <!-- Cross Section Info. -->
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="50">
-                            <Label Content="F : " Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}"/>
+                        <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="50">
+                            <Label Content="Frame" Style="{DynamicResource Pretendard-Medium-10}" Foreground="{DynamicResource SideMenuTitleBrush}"/>
                             <Label Content="{Binding DisplayFrameNumber}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" />
                         </StackPanel>
+                        <!-- Scale Bar -->
                         <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Right">
-                            <Separator Width="{Binding CrossSectionScale}" Height="1"/>
+                            <Label Content="1 ㎜" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
                             <StackPanel Height="4"/>
-                            <Label Content="1 mm" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
+                            <Grid>
+                                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="5" Width="1" Margin="0" HorizontalAlignment="Left">
+                                    <Separator.RenderTransform>
+                                        <TransformGroup>
+                                            <TranslateTransform X="{Binding ReviewStatus.Zoom.ScaleX, Converter={StaticResource ScaleBarScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionSize}}"/>
+                                        </TransformGroup>
+                                    </Separator.RenderTransform>
+                                </Separator>
+                                <Separator Width="{Binding CrossSectionScale}" Height="1" Margin="0">
+                                    <Separator.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform ScaleX="{Binding ReviewStatus.Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                            <TranslateTransform X="{Binding ReviewStatus.Zoom.ScaleX, Converter={StaticResource ScaleBarScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionSize}}"/>
+                                        </TransformGroup>
+                                    </Separator.RenderTransform>
+                                </Separator>
+                                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="5" Width="1" Margin="0" HorizontalAlignment="Right"/>
+                            </Grid>
                         </StackPanel>
                     </Grid>
                     <!-- Angio -->
@@ -409,7 +427,7 @@
                                             <StackPanel Height="64" Orientation="Horizontal">
                                                 <TextBlock Text="{Binding CurrentLumenContour.MeanDiameter, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}" Style="{DynamicResource TextBlock_Pretendard-Bold-54}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center" MinWidth="120"/>
                                                 <StackPanel Width="4"/>
-                                                <Label Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom" Margin="0,0,0,5"/>
+                                                <Label Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom" Margin="0,0,0,5"/>
                                             </StackPanel>
                                             <Grid>
                                                 <Grid.RowDefinitions>
@@ -427,10 +445,10 @@
                                                 </Grid.ColumnDefinitions>
                                                 <Label Grid.Row="0" Grid.Column="0" Content="{Binding [Min], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                 <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CurrentLumenContour.MinDiameter.value, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}" Style="{DynamicResource TextBlock_Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
-                                                <Label Grid.Row="0" Grid.Column="3" Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                                <Label Grid.Row="0" Grid.Column="3" Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                 <Label Grid.Row="2" Grid.Column="0" Content="{Binding [Max], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                 <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CurrentLumenContour.MaxDiameter.value, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}" Style="{DynamicResource TextBlock_Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
-                                                <Label Grid.Row="2" Grid.Column="3" Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                                <Label Grid.Row="2" Grid.Column="3" Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                 <Label Grid.Row="4" Grid.Column="0" Content="{Binding [%DS], Source={StaticResource L10N}}" FontFamily="Pretendard" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                 <component:PercentValueComponent Grid.Row="4" Grid.Column="1" Style="{DynamicResource TextBlock_Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right" Value="{Binding CurrentLumenContour.MeanDiameter}" Overall="{Binding Section.MeanDiameter}">
                                                     <TextBlock.Text>
@@ -483,7 +501,7 @@
                                                 <StackPanel Height="64" Orientation="Horizontal">
                                                     <Label Content="0.73" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
                                                     <StackPanel Width="10"/>
-                                                    <Label Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom" Margin="0,0,0,5"/>
+                                                    <Label Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom" Margin="0,0,0,5"/>
                                                 </StackPanel>
                                             </StackPanel>
                                             <!-- Stent Info. -->
@@ -555,15 +573,19 @@
 
                                             <StackPanel Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Left">
                                                 <StackPanel Height="3"/>
-                                                <StackPanel Orientation="Horizontal" Width="50">
-                                                    <Label Content="F : " Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}"/>
-                                                    <Label Content="{Binding DisplayFrameNumber}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center" />
+                                                <StackPanel Width="50">
+                                                    <Label Content="Frame" Style="{DynamicResource Pretendard-Medium-10}" Foreground="{DynamicResource SideMenuTitleBrush}"/>
+                                                    <Label Content="{Binding DisplayFrameNumber}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Left" />
                                                 </StackPanel>
                                             </StackPanel>
                                             <StackPanel Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Right">
-                                                <Separator Width="{Binding CrossSectionAngioScale}" Height="1"/>
+                                                <Label Content="1 ㎜" Style="{DynamicResource Pretendard-Medium-10}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
                                                 <StackPanel Height="2"/>
-                                                <Label Content="1 mm" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
+                                                <Grid>
+                                                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="5" Width="1" Margin="0" HorizontalAlignment="Left"/>
+                                                    <Separator Width="{Binding CrossSectionAngioScale}" Height="1" Margin="0"/>
+                                                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="5" Width="1" Margin="0" HorizontalAlignment="Right"/>
+                                                </Grid>
                                             </StackPanel>
                                         </Grid>
                                         <!-- Lumen Contour-->
@@ -587,7 +609,7 @@
                                                         <StackPanel Height="48" Orientation="Horizontal">
                                                             <TextBlock Text="{Binding CurrentLumenContour.MeanDiameter, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}" Style="{DynamicResource TextBlock_Pretendard-Bold-40}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center" MinWidth="90"/>
                                                             <StackPanel Width="4"/>
-                                                            <Label Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom" Margin="0,0,0,3"/>
+                                                            <Label Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom" Margin="0,0,0,3"/>
                                                         </StackPanel>
                                                         <StackPanel Height="4"/>
                                                         <Grid>
@@ -605,10 +627,10 @@
                                                             </Grid.RowDefinitions>
                                                             <Label Grid.Row="0" Grid.Column="0" Content="{Binding [Min], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                             <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CurrentLumenContour.MinDiameter.value, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}" Style="{DynamicResource TextBlock_Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Left"/>
-                                                            <Label Grid.Row="0" Grid.Column="3" Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                                            <Label Grid.Row="0" Grid.Column="3" Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                             <Label Grid.Row="2" Grid.Column="0" Content="{Binding [Max], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                             <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CurrentLumenContour.MaxDiameter.value, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}" Style="{DynamicResource TextBlock_Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Left"/>
-                                                            <Label Grid.Row="2" Grid.Column="3" Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                                            <Label Grid.Row="2" Grid.Column="3" Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                             <Label Grid.Row="4" Grid.Column="0" Content="{Binding [%DS], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                             <component:PercentValueComponent Grid.Row="4" Grid.Column="1" Style="{DynamicResource TextBlock_Pretendard-Bold-14}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Left" Value="{Binding CurrentLumenContour.MeanDiameter}" Overall="{Binding Section.MeanDiameter}">
                                                                 <TextBlock.Text>
@@ -673,7 +695,7 @@
                                                             <StackPanel Height="48" Orientation="Horizontal">
                                                                 <Label Content="0.73" Style="{DynamicResource Pretendard-Bold-40}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
                                                                 <StackPanel Width="6"/>
-                                                                <Label Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom" Margin="0,0,0,3"/>
+                                                                <Label Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom" Margin="0,0,0,3"/>
                                                             </StackPanel>
                                                         </StackPanel>
                                                     </Grid>

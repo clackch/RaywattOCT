@@ -95,4 +95,7 @@
     <!-- Expansion Converter -->
     <converters:ExpansionConverter x:Key="ExpansionConverter" />
 
+    <!-- ScaleBar Scale Converter -->
+    <converters:ScaleBarScaleConverter x:Key="ScaleBarScaleConverter" />
+
 </ResourceDictionary>
