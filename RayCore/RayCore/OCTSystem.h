@@ -137,10 +137,9 @@ public:
 private:
 	// Main Thread
 	static UINT threadService(LPVOID param);
-	// Work Thread (stop in OnMsgNotifyProcessDone, OnMsgUpdateScannerState)
-	static UINT threadSaveRaw(LPVOID param);
-	static UINT threadGenerateVolume(LPVOID param);
-	
+
+	// Work Thread (stop in OnMsgNotifyProcessDone func)
+	static UINT threadSaveRaw(LPVOID param);	
 	// Rotary Junction Thread (stop in OnMsgDeviceWorkDone func)
 	static UINT threadAutoCalibration(LPVOID param);
 	static UINT threadPullbackScan(LPVOID param);

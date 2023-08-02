@@ -6,7 +6,6 @@
 #include "LabImaging.h"
 #include "DataWriter.h"
 #include "CutViewManager.h"
-#include "VolumeGenerator.h"
 #include "ATSDevice.h"
 #include "SimulateDevice.h"
 #include "LaserController.h"
@@ -118,9 +117,6 @@ RayError COCTSystem::Start() {
 	m_pImagingLiveView->Start();
 
 	m_pAcqDevice = new CATSDevice(config.acquisition);
-
-	m_pVolume = new CVolumeGenerator();
-	m_pVolume->Initialize(config.imaging.nCircleSize, config.imaging.nCircleSize, config.volume.size, config.volume.size);
 
 	CLaserController* pLaser = CLaserController::GetInstance();
 	pLaser->LaserOnOff(true);
@@ -522,9 +518,11 @@ RayError COCTSystem::UnregisterDetectionCallback() {
 * GetVolumeData
 */
 void* COCTSystem::GetVolumeData() {
-	if (m_pVolume == nullptr) return nullptr;
-
-	return m_pVolume->GetVolumeData();
+	if (m_curState == RayScannerState::Review)
+	{
+		if (m_reviewSession[SESSION_REVIEW] != nullptr) return m_reviewSession[SESSION_REVIEW]->GetVolumeData();
+	}
+	return nullptr;
 }
 
 /*
@@ -984,38 +982,6 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 	printf("[threadSaveRaw] done.\n");
 
 	while (pSystem->m_pThreadSaveRaw->isRun) {
-		Sleep(DELAY_FOR_STOP_THREAD);
-	}
-
-	return NOERROR;
-}
-
-/*
-* threadGenerateVolume
-*/
-UINT COCTSystem::threadGenerateVolume(LPVOID param) {
-	COCTSystem* pSystem = (COCTSystem*)param;
-	CImagingSession* pSession = pSystem->m_reviewSession[SESSION_REVIEW];
-	IDataManager* pDataManager = pSession->GetDataManager();
-	ImagingType imagingType = pSession->GetImagingType();
-
-	CVolumeGenerator* pVolume = pSystem->m_pVolume;
-	const int nNumOfSamples = pDataManager->GetNumOfSamples();
-
-	// prepare imaging
-	COCTImaging* pImaging = CImagingSession::CreateColorImaging(nullptr, pSession->GetImaging()->GetSetting(), pDataManager, imagingType);
-
-	for (int nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadGenerateVolume->isRun; nFrame++) {
-		char* pBuffer = pDataManager->GetSample(nFrame);
-
-		pVolume->AddRecord(pBuffer, pImaging, nFrame);
-	}
-	delete pImaging;
-
-	pSystem->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::GenerateVolume);
-
-	// wait for StopThread
-	while (pSystem->m_pThreadGenerateVolume->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
 	}
 
@@ -1572,6 +1538,7 @@ LRESULT COCTSystem::OnMsgStartReviewSession(WPARAM wParam, LPARAM lParam) {
 
 	if (nSession == SESSION_REVIEW) {
 		pSession->StartCutViewUpdate(m_backgroundColor);
+		pSession->StartVolumeGeneration();
 	}
 
 	return NOERROR;

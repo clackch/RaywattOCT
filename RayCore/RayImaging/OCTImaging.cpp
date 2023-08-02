@@ -91,7 +91,6 @@ void COCTImaging::PostProcess(cv::Mat image) {
 	const bool bColor = m_bColor;
 
 	cv::cvtColor(image, imageResultColor, cv::COLOR_GRAY2RGB);
-	cv::flip(imageResultColor, imageResultColor, 1);
 
 	if (bInvert) cv::bitwise_not(imageResultColor, imageResultColor);
 	if (bColor) applyLUT(imageResultColor);
@@ -103,7 +102,7 @@ void COCTImaging::PostProcess(cv::Mat image) {
 		drawGuideLine(imageResultColor, m_nSheathPosition, cv::Scalar(0xff, 0xff, 0xff));
 	}
 
-	circularizeImage(imageResultColor, imageCircle);
+	CircularizeImage(imageResultColor, imageCircle);
 }
 
 
@@ -131,6 +130,10 @@ void COCTImaging::DoAsyncRender(char* fringes) {
 		m_pFringesBuffer = (USHORT *)fringes;
 		CUtility::ResumeThread(m_pThread);
 	}
+}
+void COCTImaging::CircularizeImage(cv::Mat& src, cv::Mat& dst)
+{
+	cv::remap(src, dst, matXMap, matYMap, cv::INTER_LINEAR);
 }
 
 void COCTImaging::allocateMemory() {
@@ -348,10 +351,7 @@ void COCTImaging::generateImage(Ipp32f* logaritihmData, bool bInvert){
 		ippsMulC_32f_I(UCHAR_MAX / (m_setting.highLevel - fHighLevel), fOutput + i * nOutputLength, nOutputLength);
 		ippsConvert_32f8u_Sfs(fOutput + i * nOutputLength, imageResult.data + i * nOutputLength /*stepBytes*/, nOutputLength, ippRndNear, 0);
 	}
-}
-void COCTImaging::circularizeImage(cv::Mat& src, cv::Mat& dst)
-{
-	cv::remap(src, dst, matXMap, matYMap, cv::INTER_LINEAR);
+	cv::flip(imageResult, imageResult, 1);
 }
 
 void COCTImaging::applyHotColor(cv::Mat& image) {
