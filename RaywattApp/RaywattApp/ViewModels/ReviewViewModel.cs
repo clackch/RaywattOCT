@@ -855,6 +855,10 @@ namespace RaywattApp.ViewModels
                 if (ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault)
                 {
                     ReviewStatus.IsCalciumOn = true;
+                    if(ReviewStatus.IsLumenProfile)
+                        IndicatorCrossSection.IsVisible = Visibility.Collapsed;
+                    else
+                        IndicatorCrossSection.IsVisible = Visibility.Visible;
                 }
                 else
                 {

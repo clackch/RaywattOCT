@@ -757,7 +757,7 @@
                                         <StackPanel Height="24"/>
                                         <Grid Width="300" Height="300" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding IndicatorLongitude.IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
                                             <!-- Indicator  -->
-                                            <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Width="300" Height="18" Icon="crossSectionAngio" IsCaptured="{Binding IndicatorCrossSectionAngio.IsCaptured}" Visibility="{Binding IndicatorCrossSectionAngio.IsVisible}">
+                                            <component:IndicatorImage Style="{DynamicResource IndicatorImage}" x:Name="crossSectionAngioIndicator" Width="300" Height="18" Icon="crossSectionAngio" IsCaptured="{Binding IndicatorCrossSectionAngio.IsCaptured}" Visibility="{Binding IndicatorCrossSectionAngio.IsVisible}">
                                                 <Image.RenderTransform>
                                                     <RotateTransform CenterX="150" CenterY="9" Angle="{Binding Degree}"/>
                                                 </Image.RenderTransform>
@@ -774,6 +774,22 @@
                                                     </i:EventTrigger>
                                                 </i:Interaction.Triggers>
                                             </component:IndicatorImage>
+                                            <Grid>
+                                                <Grid.Style>
+                                                    <Style TargetType="Grid">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding ElementName=crossSectionAngioIndicator,Path=IsMouseOver}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding ElementName=crossSectionAngioIndicator,Path=IsCaptured}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Grid.Style>
+                                                <ContentControl Template="{DynamicResource IndicatorScale}" Width="270" Height="18" Tag="{x:Static const:Constants.CrossSectionAngio}"/>
+                                            </Grid>
                                         </Grid>
                                     </StackPanel>
                                 </Grid>
@@ -812,9 +828,9 @@
                 <!-- Indicator  -->
                 <Grid Grid.Row="1" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                     <Grid Visibility="{Binding IndicatorLongitude.IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Width="640" Height="18" Icon="crossSection" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Visibility="{Binding IndicatorCrossSection.IsVisible}">
+                        <component:IndicatorImage Style="{DynamicResource IndicatorImage}" x:Name="crossSectionIndicator" Width="640" Height="18" Icon="crossSection" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Visibility="{Binding IndicatorCrossSection.IsVisible}">
                             <Image.RenderTransform>
-                                <RotateTransform CenterX="319" CenterY="9" Angle="{Binding Degree}"/>
+                                <RotateTransform CenterX="320" CenterY="9" Angle="{Binding Degree}"/>
                             </Image.RenderTransform>
 
                             <i:Interaction.Triggers>
@@ -829,6 +845,22 @@
                                 </i:EventTrigger>
                             </i:Interaction.Triggers>
                         </component:IndicatorImage>
+                        <Grid>
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=crossSectionIndicator,Path=IsMouseOver}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding ElementName=crossSectionIndicator,Path=IsCaptured}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                            <ContentControl Template="{DynamicResource IndicatorScale}" Width="610" Height="18" Tag="{x:Static const:Constants.CrossSectionSize}"/>
+                        </Grid>
                     </Grid>
                 </Grid>
 

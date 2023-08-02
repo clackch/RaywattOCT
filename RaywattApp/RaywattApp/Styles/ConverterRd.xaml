@@ -98,4 +98,10 @@
     <!-- ScaleBar Scale Converter -->
     <converters:ScaleBarScaleConverter x:Key="ScaleBarScaleConverter" />
 
+    <!-- Halve Converter -->
+    <converters:HalveConverter x:Key="HalveConverter" />
+
+    <!-- Indicator Scale Conveter -->
+    <converters:IndicatorScaleConveter x:Key="IndicatorScaleConveter" />
+
 </ResourceDictionary>
