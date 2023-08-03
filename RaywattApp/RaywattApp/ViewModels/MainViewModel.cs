@@ -263,40 +263,40 @@ namespace RaywattApp.ViewModels
             CatheterProgress += catheterProgressStep;
         }
 
-        private void OnMsgCallback(int request, int response)
+        private void OnMsgCallback(int request, int response, int param)
         {
             switch ((RayCallbackRequest)request)
             {
                 case RayCallbackRequest.State:
-                    handleState((RayCallbackRequest)request, (RayScannerState)response);
+                    handleState((RayCallbackRequest)request, (RayScannerState)response, param);
                     break;
                 case RayCallbackRequest.ProgressSave:
-                    handleProgress((RayCallbackRequest)request, response);
+                    handleProgress((RayCallbackRequest)request, response, param);
                     break;
                 case RayCallbackRequest.Event:
-                    handleEvent((RayCallbackRequest)request, (RayEvent)response);
+                    handleEvent((RayCallbackRequest)request, (RayEvent)response, param);
                     break;
                 case RayCallbackRequest.Error:
-                    handleError((RayCallbackRequest)request, (RayError)response);
+                    handleError((RayCallbackRequest)request, (RayError)response, param);
                     break;
                 case RayCallbackRequest.WorkDone:
-                    handleWorkDone((RayCallbackRequest)request, (RayWorkItem)response);
+                    handleWorkDone((RayCallbackRequest)request, (RayWorkItem)response, param);
                     break;
                 default:
                     break;
             }
         }
 
-        private void handleState(RayCallbackRequest request, RayScannerState state)
+        private void handleState(RayCallbackRequest request, RayScannerState state, int param)
         {
             RayScannerState curState = (RayScannerState)RayGetProperty(Property.CurrentState);
             DeviceStatus.IsInitialized = (curState == RayScannerState.Default) ? true : false;
             DeviceStatus.IsLiveView = (bool)(RayGetProperty(Property.MotorOnOff) != 0);
             DeviceStatus.IsAngioConnected = false;
         }
-        protected void handleProgress(RayCallbackRequest request, int progress) { }
-        protected void handleError(RayCallbackRequest request, RayError error) { }
-        protected void handleEvent(RayCallbackRequest request, RayEvent e) {
+        protected void handleProgress(RayCallbackRequest request, int progress, int param) { }
+        protected void handleError(RayCallbackRequest request, RayError error, int param) { }
+        protected void handleEvent(RayCallbackRequest request, RayEvent e, int param) {
             switch (e)
             {
                 case RayEvent.CatheterLoading:
@@ -306,7 +306,7 @@ namespace RaywattApp.ViewModels
                     break;
             }
         }
-        protected void handleWorkDone(RayCallbackRequest request, RayWorkItem work)
+        protected void handleWorkDone(RayCallbackRequest request, RayWorkItem work, int param)
         {
             switch (work)
             {
@@ -326,8 +326,14 @@ namespace RaywattApp.ViewModels
                         RayUnloadCatheter();
                     });
                     break;
-                case RayWorkItem.LumenDetection:
+                case RayWorkItem.OCTImaging:
+                    break;
+                case RayWorkItem.GenerateCutView:
+                    break;
+                case RayWorkItem.DetectLumen:
                     DeviceStatus.IsLumenDetected = true;
+                    break;
+                case RayWorkItem.GenerateVolume:
                     break;
                 default:
                     break;

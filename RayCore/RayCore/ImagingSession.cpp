@@ -306,6 +306,7 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 		pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult));
 	}
 	PLOGI.printf("Session #%d process oct imaging done.", pSession->m_nSession);
+	pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::OCTImaging, pSession->m_nSession);
 	
 	return NOERROR;
 }
@@ -342,6 +343,7 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 	delete pImaging;
 
 	PLOGI.printf("Session #%d update cutview done.", pSession->m_nSession);
+	pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::GenerateCutView, pSession->m_nSession);
 
 	return NOERROR;
 }
@@ -385,7 +387,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	delete pImaging;
 
 	PLOGI.printf("Session #%d lumen detection done.", pSession->m_nSession);
-	pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::LumenDetection);
+	pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::DetectLumen, pSession->m_nSession);
 
 	return NOERROR;
 }
@@ -424,7 +426,7 @@ UINT CImagingSession::threadGenerateVolume(LPVOID param) {
 	delete pImaging;
 
 	PLOGI.printf("Session #%d volume generation done.", pSession->m_nSession);
-	pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::GenerateVolume);
+	pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::GenerateVolume, pSession->m_nSession);
 
 	return NOERROR;
 }

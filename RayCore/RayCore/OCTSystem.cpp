@@ -27,7 +27,6 @@ COCTSystem::COCTSystem() {
 
 	m_pThreadService = nullptr;
 	m_pThreadSaveRaw = nullptr;
-	m_pThreadGenerateVolume = nullptr;
 	m_pThreadRotaryJunction = nullptr;
 
 	m_pImagingRealtime = nullptr;
@@ -131,7 +130,6 @@ RayError COCTSystem::Start() {
 RayError COCTSystem::Stop() {
 	CUtility::StopThread(m_pThreadService);
 	CUtility::StopThread(m_pThreadSaveRaw);
-	CUtility::StopThread(m_pThreadGenerateVolume);
 	CUtility::StopThread(m_pThreadRotaryJunction);
 
 	closeAllSessions();
@@ -1452,17 +1450,15 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 	m_prevState = m_curState;
 	m_curState = (RayScannerState)wParam;
 
-	if(m_callback != nullptr) m_callback((int)RayCallbackRequest::State, (int)m_curState);
+	if(m_callback != nullptr) m_callback((int)RayCallbackRequest::State, (int)m_curState, lParam);
 
 	PLOGI.printf("%d > %d", m_prevState, m_curState);
 	switch (m_curState) {
 	case RayScannerState::Initial:
-		CUtility::StopThread(m_pThreadGenerateVolume);
 		closeAllSessions();
 		// To-Do: unload catheter
 		break;
 	case RayScannerState::Default:
-		CUtility::StopThread(m_pThreadGenerateVolume);
 		closeAllSessions();
 		break;
 	case RayScannerState::Scanning:
@@ -1472,9 +1468,6 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 		if (m_prevState == RayScannerState::Scanning) {
 			CUtility::StartThread(threadSaveRaw, m_pThreadSaveRaw, this);
 		}
-
-		// To-Do: Change to OnDemand ver.
-		// CUtility::StartThread(threadGenerateVolume, m_pThreadGenerateVolume, this);
 		break;
 	default:
 		break;
@@ -1490,8 +1483,7 @@ LRESULT COCTSystem::OnMsgUpdateSaveRaw(WPARAM wParam, LPARAM lParam) {
 	UINT nFrame = wParam;
 	UINT nTotalFrame = lParam;
 
-	int nFrameInfo = (nFrame << 16) | (nTotalFrame);
-	if (m_callback != nullptr) m_callback((int) RayCallbackRequest::ProgressSave, nFrameInfo);
+	if (m_callback != nullptr) m_callback((int) RayCallbackRequest::ProgressSave, nFrame, nTotalFrame);
 
 	return NOERROR;
 }
@@ -1559,17 +1551,17 @@ LRESULT COCTSystem::OnMsgNotifyProcessDone(WPARAM wParam, LPARAM lParam) {
 	case RayWorkItem::SaveRawData:
 		CUtility::StopThread(m_pThreadSaveRaw);
 		break;
+	case RayWorkItem::OCTImaging:
+	case RayWorkItem::GenerateCutView:
+	case RayWorkItem::DetectLumen:
 	case RayWorkItem::GenerateVolume:
-		CUtility::StopThread(m_pThreadGenerateVolume);
-		break;
-	case RayWorkItem::LumenDetection:
 		break;
 	default:
 		return NOERROR;
 	}
 
 	if (m_callback != nullptr) {
-		m_callback((int)RayCallbackRequest::WorkDone, (int)workItem);
+		m_callback((int)RayCallbackRequest::WorkDone, (int)workItem, lParam);
 	}
 
 	return NOERROR;
@@ -1579,7 +1571,7 @@ LRESULT COCTSystem::OnMsgNotifyProcessDone(WPARAM wParam, LPARAM lParam) {
 * OnMsgNotifyEventOccured
 */
 LRESULT COCTSystem::OnMsgNotifyEventOccured(WPARAM wParam, LPARAM lParam) {
-	if (m_callback != nullptr) m_callback((int)RayCallbackRequest::Event, wParam);
+	if (m_callback != nullptr) m_callback((int)RayCallbackRequest::Event, wParam, lParam);
 
 	return NOERROR;
 }
@@ -1590,7 +1582,7 @@ LRESULT COCTSystem::OnMsgNotifyEventOccured(WPARAM wParam, LPARAM lParam) {
 LRESULT COCTSystem::OnMsgDeviceWorkDone(WPARAM wParam, LPARAM lParam) {
 	CUtility::StopThread(m_pThreadRotaryJunction);
 
-	if (m_callback != nullptr) m_callback((int)RayCallbackRequest::WorkDone, (int)wParam);
+	if (m_callback != nullptr) m_callback((int)RayCallbackRequest::WorkDone, wParam, lParam);
 
 	return NOERROR;
 }
@@ -1599,7 +1591,7 @@ LRESULT COCTSystem::OnMsgDeviceWorkDone(WPARAM wParam, LPARAM lParam) {
 * OnMsgNotifyErrorOccured
 */
 LRESULT COCTSystem::OnMsgNotifyErrorOccured(WPARAM wParam, LPARAM lParam) {
-	if (m_callback != nullptr) m_callback((int)RayCallbackRequest::Error, wParam);
+	if (m_callback != nullptr) m_callback((int)RayCallbackRequest::Error, wParam, lParam);
 
 	return NOERROR;
 }

@@ -40,7 +40,6 @@ private:
 	
 	CThread* m_pThreadService;
 	CThread* m_pThreadSaveRaw;
-	CThread* m_pThreadGenerateVolume;
 	CThread* m_pThreadRotaryJunction;
 	
 	// Imaging
