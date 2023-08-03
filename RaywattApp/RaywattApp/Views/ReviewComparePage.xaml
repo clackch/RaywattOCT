@@ -282,7 +282,14 @@
                                     <StackPanel Orientation="Horizontal" Margin="0,-22,0,0" Canvas.Left="{Binding Section.MinExpValue.X}" Visibility="{Binding Section.MinExpValue.IsVisible}">
                                         <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Min Exp.], Source={StaticResource L10N}}"/>
                                         <StackPanel Width="2"/>
-                                        <TextBlock Style="{DynamicResource TextBlock_Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Text="{Binding Section.MinExpValue.DValue, StringFormat={}{0:N0}}"/>
+                                        <component:PercentValueComponent Style="{DynamicResource TextBlock_Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Value="{Binding Section.MinExpValue.DValue}" Overall="{Binding Section.RefArea}">
+                                            <TextBlock.Text>
+                                                <MultiBinding Converter="{StaticResource ExpansionConverter}">
+                                                    <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Value"/>
+                                                    <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Overall"/>
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </component:PercentValueComponent>
                                         <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [%], Source={StaticResource L10N}}"/>
                                     </StackPanel>
                                     <!-- Section Lesion Length -->
