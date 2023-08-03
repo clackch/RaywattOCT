@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS rv_schema.configuration
     key character varying(10) COLLATE pg_catalog."default" NOT NULL,
     value character varying(100) COLLATE pg_catalog."default",
     buffer character varying(100) COLLATE pg_catalog."default",
+	buffer_text text COLLATE pg_catalog."default",
     CONSTRAINT configuration_pkey PRIMARY KEY (classification, key)
         USING INDEX TABLESPACE rv_tablespace
 )
