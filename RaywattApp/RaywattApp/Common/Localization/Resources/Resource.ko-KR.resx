@@ -374,11 +374,11 @@ Overwrite existing data?</value>
   <data name="Edit Physician" xml:space="preserve">
     <value>㉿Edit Physician</value>
   </data>
+  <data name="en-US" xml:space="preserve">
+    <value>㉿English</value>
+  </data>
   <data name="End Review" xml:space="preserve">
     <value>㉿End Review</value>
-  </data>
-  <data name="English" xml:space="preserve">
-    <value>㉿English</value>
   </data>
   <data name="Enter an External Device" xml:space="preserve">
     <value>㉿Enter an External Device</value>
@@ -497,7 +497,7 @@ Overwrite existing data?</value>
   <data name="KB" xml:space="preserve">
     <value>㉿KB</value>
   </data>
-  <data name="Korean" xml:space="preserve">
+  <data name="ko-KR" xml:space="preserve">
     <value>㉿Korean</value>
   </data>
   <data name="L-View" xml:space="preserve">

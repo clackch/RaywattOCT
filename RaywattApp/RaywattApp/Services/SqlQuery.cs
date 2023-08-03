@@ -44,17 +44,18 @@ namespace RaywattApp.Services
                 $"FROM rv_schema.code " +
                 $"ORDER BY classification, sort_order, key";
 
-            //SelectL10n
-            _query["SelectL10n"] =
-                $"SELECT lang, choice " +
-                $"FROM rv_schema.l10n " +
-                $"WHERE choice = TRUE";
+            //SelectConfigurationL10n
+            _query["SelectConfigurationL10n"] =
+                $"SELECT key " +
+                $"FROM rv_schema.configuration " +
+                $"WHERE classification = 'L10N' AND value = 'Y'";
 
-            //SelectL10nList
-            _query["SelectL10nList"] =
-                $"SELECT lang, choice " +
-                $"FROM rv_schema.l10n " +
-                $"ORDER BY lang";
+            //SelectConfigurationL10nList
+            _query["SelectConfigurationL10nList"] =
+                $"SELECT key, value " +
+                $"FROM rv_schema.configuration " +
+                $"WHERE classification = 'L10N' " +
+                $"ORDER BY key";
 
             //SelectDicomPropertyList
             _query["SelectDicomPropertyList"] =
@@ -203,10 +204,11 @@ namespace RaywattApp.Services
         {
             _log.Debug("SetUpdateQuery");
 
-            //UpdateL10n
-            _query["UpdateL10n"] =
-                $"UPDATE rv_schema.l10n " +
-                $"SET choice = CASE WHEN lang = @lang THEN TRUE ELSE FALSE END";
+            //UpdateConfigurationL10n
+            _query["UpdateConfigurationL10n"] =
+                $"UPDATE rv_schema.configuration " +
+                $"SET value = CASE WHEN key = @key THEN 'Y' ELSE 'N' END " +
+                $"WHERE classification = 'L10N'";
 
             //UpdatePatient
             _query["UpdatePatient"] =
