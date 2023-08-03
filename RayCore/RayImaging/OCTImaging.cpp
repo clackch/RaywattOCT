@@ -1,5 +1,6 @@
 ﻿#include "OCTImaging.h"
 #include "Calibration.h"
+#include "LookUpTable.h"
 #include "Utility.h"
 #include "MessageService.h"
 #include "opencv2/opencv.hpp"
@@ -74,8 +75,6 @@ void COCTImaging::Initialize(CCalibration* calibration) {
 	m_nWidth = m_setting.nCircleSize;
 	m_nHeight = m_setting.nCircleSize;
 	m_nChannels = 3;	// RGB
-
-	loadLUT("LUT.csv");
 }
 void COCTImaging::Process(char* fringes) {
 	if (fringes == nullptr) return;
@@ -93,7 +92,10 @@ void COCTImaging::PostProcess(cv::Mat image) {
 	cv::cvtColor(image, imageResultColor, cv::COLOR_GRAY2RGB);
 
 	if (bInvert) cv::bitwise_not(imageResultColor, imageResultColor);
-	if (bColor) applyLUT(imageResultColor);
+	if (bColor) {
+		CLookUpTable& lut = CLookUpTable::GetInstance();
+		lut.Apply(imageResultColor, 0);
+	}
 
 	cv::convertScaleAbs(imageResultColor, imageResultColor, m_setting.contrast, m_setting.brightness);
 
@@ -354,82 +356,6 @@ void COCTImaging::generateImage(Ipp32f* logaritihmData, bool bInvert){
 	cv::flip(imageResult, imageResult, 1);
 }
 
-void COCTImaging::applyHotColor(cv::Mat& image) {
-	const int colorMapLength = 254;
-	int nn = 90;
-
-	for (int y = 0; y < image.rows; y++) {
-		for (int x = 0; x < image.cols; x++) {
-			cv::Vec3b color = image.at<cv::Vec3b>(y, x);
-			cv::Vec3b hotColor;
-
-			unsigned char red = color.val[2];
-			unsigned char green = color.val[1];
-			unsigned char blue = color.val[0];
-
-			float r, g, b = 0.0f;
-
-			if (red < nn) r = (float)(red + 1) / (float)nn;
-			else r = 1;
-
-			if (green < nn) g = 0;
-			else if (green > 2 * nn) g = 1;
-			else g = (float)(green + 1 - nn) / (float)nn;
-
-			if (blue <= 2 * nn) b = 0;
-			else b = (float)(blue + 1 - 2 * nn) / (float)(colorMapLength - 2 * nn);
-
-			hotColor.val[0] = b * 255;
-			hotColor.val[1] = g * 255;
-			hotColor.val[2] = r * 255;
-			
-			image.at<cv::Vec3b>(y, x) = hotColor;
-		}
-	}
-}
-
-void COCTImaging::loadLUT(const char* strLUTPath) {
-	m_vLUT.clear();
-	FILE* fpLUT = fopen(strLUTPath, "r");
-	if (fpLUT) {
-		char strBuffer[MAX_PATH];
-		bool bStartLUT = false;
-		while (fscanf(fpLUT, "%s", strBuffer) != EOF) {
-			if (strBuffer[0] == '0') {
-				bStartLUT = true;
-			}
-
-			if (bStartLUT) {
-				std::stringstream buffer(strBuffer);
-				std::string token;
-				cv::Vec3b color;
-
-				std::getline(buffer, token, ',');	// index
-				for (int i = 0; i < 3; i++) {
-					std::getline(buffer, token, ',');
-					color.val[i] = atoi(token.c_str());
-				}
-				m_vLUT.push_back(color);
-			}
-		}
-	}
-}
-void COCTImaging::applyLUT(cv::Mat& image) {
-
-	for (int y = 0; y < image.rows; y++) {
-		for (int x = 0; x < image.cols; x++) {
-			cv::Vec3b color = image.at<cv::Vec3b>(y, x);
-			cv::Vec3b bgrColor = m_vLUT.at(color.val[0]);
-			cv::Vec3b cvtColor;
-
-			cvtColor.val[0] = bgrColor.val[2];
-			cvtColor.val[1] = bgrColor.val[1];
-			cvtColor.val[2] = bgrColor.val[0];
-
-			image.at<cv::Vec3b>(y, x) = cvtColor;
-		}
-	}
-}
 void COCTImaging::drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color) {
 	int posDraw = image.cols - nPosition - 1;
 

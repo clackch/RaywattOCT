@@ -14,6 +14,7 @@
 #include "ArduinoController.h"
 #include "RayLearning.h"
 #include "ImagingSession.h"
+#include "LookUpTable.h"
 
 /*
 * COCTSystem
@@ -846,6 +847,11 @@ UINT COCTSystem::threadService(LPVOID param) {
 	CLaserController* pLaser = CLaserController::GetInstance();
 	//pLaser->LaserOnOff(true);
 
+	// Read LUT from File
+	CLookUpTable& lut = CLookUpTable::GetInstance();
+	int result = lut.Load("LUT.csv");
+	PLOGI.printf("read LUT : %s", (result > 0) ? "Succeed" : "Failed");
+
 	// Initialize (first prediction)
 	cv::Mat imgSample = cv::imread(".\\oct_sample.png");
 	CRayLearning& learning = CRayLearning::GetInstance();
@@ -853,7 +859,6 @@ UINT COCTSystem::threadService(LPVOID param) {
 	learning.FindLumen(imgSample);
 
 	PLOGI.printf("sample lumen detection done.");
-	printf("[threadService] start!\n");
 	while (pThread->isRun) {
 		std::tuple<int, WPARAM, LPARAM> popMsgThread = pSystem->popMessage();
 		int popMsg = std::get<0>(popMsgThread);
