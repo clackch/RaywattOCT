@@ -324,6 +324,7 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 
 	CCutViewManager* pCutView = pSession->m_pCutView;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
+	cv::Mat imgCircle;
 
 	PLOGI.printf("Session #%d update cutview - %d frames", pSession->m_nSession, nNumOfSamples);
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadUpdateCutView->isRun; nFrame++) {
@@ -333,8 +334,8 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 			Sleep(DELAY_FOR_WAIT_PROCESS);
 			continue;
 		}
-		pImaging->PostProcess(it->second);
-		pCutView->AddRecord(pImaging->GetCircleImage(), nFrame);
+		pImaging->CircularizeImage(it->second, imgCircle);
+		pCutView->AddRecord(imgCircle, nFrame);
 
 		pSession->m_pMsg->postMessage(WM_PROCESS_CUTVIEW, nSession, nFrame);
 	}

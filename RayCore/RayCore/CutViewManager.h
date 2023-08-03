@@ -6,6 +6,7 @@ class CCutViewManager
 private:
 	std::vector<cv::Mat> m_vRecords;
 	cv::Mat m_imgCutView;
+	cv::Mat m_imgConvertedCutView;
 	cv::Mat m_imgLongitude;
 
 public:
