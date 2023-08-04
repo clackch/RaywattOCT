@@ -25,12 +25,6 @@ namespace RaywattApp.ViewModels.Setting
         {
             _log.Debug("OnNavigated");
 
-            var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
-
-            if (extraData != null)
-            {
-            }
-
             GetDbSize();
         }
 

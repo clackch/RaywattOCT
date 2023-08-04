@@ -71,6 +71,11 @@ namespace RaywattApp.ViewModels.Setting
             _log.Debug("OnNavigated");
         }
 
+        public override void OnNavigating(object sender, object navigationEventArgs)
+        {
+            _log.Debug("OnNavigating");
+        }
+
         private void GetLogFileList()
         {
             DirectoryInfo directory = new DirectoryInfo(Constants.LogFolderPath);

@@ -15,8 +15,5 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private string? _buffer;
-
-        [ObservableProperty]
-        private string? _bufferText;
     }
 }

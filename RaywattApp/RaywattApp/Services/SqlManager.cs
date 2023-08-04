@@ -51,11 +51,29 @@ namespace RaywattApp.Services
             return _databaseService.GetDatas<Configuration>(commandText);
         }
 
+        public IList<Configuration> SelectConfigurationTnC()
+        {
+            _log.Debug("SelectConfigurationTnC");
+
+            string commandText = SqlQuery.GetQuery("SelectConfigurationTnC");
+
+            return _databaseService.GetDatas<Configuration>(commandText);
+        }
+
         public int UpdateConfigurationL10n(Dictionary<string, Object> sqlParameters)
         {
             _log.Debug("UpdateConfigurationL10n");
 
             string commandText = SqlQuery.GetQuery("UpdateConfigurationL10n");
+
+            return _databaseService.UpdateData(commandText, sqlParameters);
+        }
+
+        public int UpdateConfigurationTnC(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpdateConfigurationTnC");
+
+            string commandText = SqlQuery.GetQuery("UpdateConfigurationTnC");
 
             return _databaseService.UpdateData(commandText, sqlParameters);
         }

@@ -132,6 +132,13 @@ namespace RaywattApp.ViewModels.File
                 dicomProperty.Add(temp.ReturnString, temp.ReturnString2);
             }
 
+            IList<Configuration> tnCs = _sqlManager.SelectConfigurationTnC();
+            if (tnCs != null || tnCs.Count == 1)
+            {
+                //Institution Name
+                dicomProperty.Add("00080080", tnCs[0].Buffer);
+            }
+
             return dicomProperty;
         }
     }

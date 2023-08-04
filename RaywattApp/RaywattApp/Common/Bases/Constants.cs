@@ -47,6 +47,7 @@ namespace RaywattApp.Common.Bases
         public const string SettingPhysicianPage = "Views/Setting/SettingPhysicianPage.xaml";
         public const string SettingServicePage = "Views/Setting/SettingServicePage.xaml";
         public const string SettingLogPage = "Views/Setting/SettingLogPage.xaml";
+        public const string SettingTermsConditionsPage = "Views/Setting/SettingTermsConditionsPage.xaml";
 
         //Resolution
         public const double ApplicationWidth = 1280;
@@ -77,6 +78,8 @@ namespace RaywattApp.Common.Bases
         public const double SettingEditPhysicianDialogHeight = 279;
         public const double PatientCaseEditDialogWidth = 860;
         public const double PatientCaseEditDialogHeight = 734;
+        public const double TermsConditionsDialogWidth = 860;
+        public const double TermsConditionsDialogHeight = 660;
 
         //Max Length
         public const int MaxPatientId = 9;

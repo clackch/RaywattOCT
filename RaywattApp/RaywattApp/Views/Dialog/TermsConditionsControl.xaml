@@ -1,0 +1,33 @@
+﻿<UserControl x:Class="RaywattApp.Views.Dialog.TermsConditionsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:RaywattApp.Views.Dialog"
+             xmlns:const="clr-namespace:RaywattApp.Common.Bases"
+             mc:Ignorable="d" 
+             Width="{Binding DialogWidth}" Height="{Binding DialogHeight}">
+    <Border Width="{x:Static const:Constants.TermsConditionsDialogWidth}"  Height="{x:Static const:Constants.TermsConditionsDialogHeight}" CornerRadius="10,10,10,10" BorderThickness="0" BorderBrush="Transparent" Background="{DynamicResource GrayscaleGray6Brush}">
+        <Grid Width="800">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="112"/>
+                <RowDefinition/>
+                <RowDefinition Height="74"/>
+                <RowDefinition Height="74"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,50,0,0">
+                <Label Style="{DynamicResource Pretendard-Bold-32}" Content="{Binding [Terms and Conditions], Source={StaticResource L10N}}" Foreground="White"/>
+            </StackPanel>
+
+            <Border Grid.Row="1" CornerRadius="10" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray8Brush}">
+                <TextBox Style="{StaticResource TextBoxReadOnly}" TextWrapping="Wrap" VerticalScrollBarVisibility="Visible" Text="{Binding TermsAndConditions}" Foreground="{StaticResource GrayscaleGray3Brush}" Margin="20,20,5,20"/>
+            </Border>
+
+            <Grid Grid.Row="3">
+                <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Cancel], Source={StaticResource L10N}}" HorizontalAlignment="Left"/>
+                <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}" HorizontalAlignment="Right"/>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>

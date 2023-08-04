@@ -1,0 +1,55 @@
+﻿<Page x:Class="RaywattApp.Views.Setting.SettingTermsConditionsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:RaywattApp.Views.Setting"
+      xmlns:const="clr-namespace:RaywattApp.Common.Bases"
+      xmlns:component="clr-namespace:RaywattApp.Views.Component"
+      mc:Ignorable="d" 
+      Width="{x:Static const:Constants.SettingInsideDialogWidth}" Height="{x:Static const:Constants.SettingInsideDialogHeight}"
+      Title="SettingTermsConditionsPage">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="413"/>
+            <RowDefinition Height="15"/>
+            <RowDefinition Height="72"/>
+            <RowDefinition Height="41"/>
+            <RowDefinition Height="42"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" CornerRadius="10" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray8Brush}">
+            <TextBox Style="{StaticResource TextBoxReadOnly}" TextWrapping="Wrap" VerticalScrollBarVisibility="Visible" Text="{Binding TermsAndConditions}" Foreground="{StaticResource GrayscaleGray3Brush}" Margin="20,20,5,20"/>
+        </Border>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Top" Margin="0,16,0,0">
+                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}">
+                    <Label.Content>
+                        <AccessText TextWrapping="Wrap" Text="{Binding [Institude Name], Source={StaticResource L10N}}"/>
+                    </Label.Content>
+                </Label>
+            </StackPanel>
+            <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                <StackPanel Orientation="Horizontal" Visibility="{Binding IsModify, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                    <TextBox Style="{DynamicResource TextBoxWithCorner}" Width="400" IsReadOnly="True" Text="{Binding TermsConditions.Buffer}" Margin="0,0,0,0"/>
+                    <component:IconButton Style="{DynamicResource IconButton}" Icon="editSimple" HorizontalAlignment="Left" Margin="-40,0,0,0" Command="{Binding ModifyInstitudeCommand}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Visibility="{Binding IsModify, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <TextBox Style="{DynamicResource TextBoxValidator}" Width="400" MaxLength="50" Text="{Binding TermsConditions.Buffer, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter Institude Name], Source={StaticResource L10N}}" ToolTip="{Binding ValidateInstitudeName}"/>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding ApplyCommand}" Content="{Binding [Apply], Source={StaticResource L10N}}"/>
+            <StackPanel Width="16"/>
+            <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding OkayCommand}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
+        </StackPanel>
+    </Grid>
+</Page>

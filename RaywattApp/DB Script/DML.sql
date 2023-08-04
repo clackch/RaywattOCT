@@ -49,7 +49,6 @@ INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00020016', 
 INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00080060', 'Modality', 'OCT');
 INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00080064', 'Conversion Type', 'SI');
 INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00080070', 'Manufacturer', 'Raywatt Inc.');
-INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00080080', 'Institution Name', 'XXX Hospital');
 INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00081090', 'Manufacturer''s Model Name', 'FASTER');
 INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00180015', 'Body Part Examined', 'HEART');
 INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00181016', 'Secondary Capture Device Manufacturer', 'Raywatt Inc.');

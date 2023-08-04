@@ -149,7 +149,7 @@
                         <Grid Grid.Row="1" Width="{x:Static const:Constants.ExportLongitudeImageWidth}" Height="{x:Static const:Constants.ExportLongitudeImageHeight}">
                             <Image Source="{Binding LongitudeImage}" Stretch="Fill"/>
                             <!-- Measurement -->
-                            <annotation:DrawLmodeUtil Zoom="{Binding LongitudeZoom}" LModeLengthGeometries="{Binding LModeLengthGeometries}" LModeTextGeometries="{Binding LModeTextGeometries}" InCommand="{Binding MeasurementCommand}" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                            <annotation:DrawLmodeUtil Zoom="{Binding LongitudeZoom}" LModeLengthGeometries="{Binding LModeLengthGeometries}" LModeTextGeometries="{Binding LModeTextGeometries}" PullbackType="{Binding PatientCase.PullbackType}" InCommand="{Binding MeasurementCommand}" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" VerticalAlignment="Top" HorizontalAlignment="Left"/>
                         </Grid>
                         <!-- L-Mode Indicator -->
                         <Canvas>

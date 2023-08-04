@@ -57,6 +57,12 @@ namespace RaywattApp.Services
                 $"WHERE classification = 'L10N' " +
                 $"ORDER BY key";
 
+            //SelectConfigurationTnC
+            _query["SelectConfigurationTnC"] =
+                $"SELECT value, buffer " +
+                $"FROM rv_schema.configuration " +
+                $"WHERE classification = 'Terms&Cond'";
+
             //SelectDicomPropertyList
             _query["SelectDicomPropertyList"] =
                 $"SELECT tag return_string, value return_string2 " +
@@ -209,6 +215,12 @@ namespace RaywattApp.Services
                 $"UPDATE rv_schema.configuration " +
                 $"SET value = CASE WHEN key = @key THEN 'Y' ELSE 'N' END " +
                 $"WHERE classification = 'L10N'";
+
+            //UpdateConfigurationTnC
+            _query["UpdateConfigurationTnC"] =
+                $"UPDATE rv_schema.configuration " +
+                $"SET value = @value, buffer = @buffer " +
+                $"WHERE classification = 'Terms&Cond'";
 
             //UpdatePatient
             _query["UpdatePatient"] =
