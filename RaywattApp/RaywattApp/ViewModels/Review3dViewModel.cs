@@ -1,21 +1,18 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
-using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Services;
-using RaywattOCT;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Navigation;
 using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
+using static RaywattOCT.Ray3DWrapper;
 
 namespace RaywattApp.ViewModels
 {
@@ -88,6 +85,8 @@ namespace RaywattApp.ViewModels
         private bool _isPaused;
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
+        private DispatcherTimer timerInitialize = new DispatcherTimer();
+        private DispatcherTimer timerShowData = new DispatcherTimer();
 
         private ICommand _cmdRotateIndicator;
         public ICommand CmdRotateIndicator
@@ -169,6 +168,10 @@ namespace RaywattApp.ViewModels
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
             timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
             timerUpdateImage.Start();
+
+            timerInitialize.Interval = TimeSpan.FromMilliseconds(MinWaitingDelay);
+            timerInitialize.Tick += new EventHandler(timerFuncInitialize);
+            timerInitialize.Start();
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -176,6 +179,7 @@ namespace RaywattApp.ViewModels
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
             Save();
+            ODSOCT_HideAllWindows();
 
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
@@ -225,6 +229,30 @@ namespace RaywattApp.ViewModels
                     IndicatorLongitude.IsVisible = Visibility.Visible;
                 }
             }
+        }
+
+        private void timerFuncInitialize(object sender, EventArgs e)
+        {
+            if (timerInitialize.IsEnabled)
+                timerInitialize.Stop();
+
+            int diameter = (int)RayGetProperty(Property.VolumeWidth);
+            int depth = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total;
+            ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(), diameter, diameter, depth, 1, 1, 12.5);
+            ODSOCT_ProcessingDatas();
+
+            timerShowData.Interval = TimeSpan.FromMilliseconds(MinWaitingDelay);
+            timerShowData.Tick += new EventHandler(timerFuncShowData);
+            timerShowData.Start();
+        }
+
+        private void timerFuncShowData(object sender, EventArgs e)
+        { 
+            if (timerShowData.IsEnabled)
+                timerShowData.Stop();
+
+            ODSOCT_ShowAllWindows();
+            ODSOCT_SetViewData(Ray3DObject.Tissue, Ray3DObjectMode.Cut);
         }
 
         private void updateNavigator(int curFrame, int totalFrame)
