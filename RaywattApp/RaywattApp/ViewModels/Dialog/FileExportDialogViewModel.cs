@@ -47,7 +47,7 @@ namespace RaywattApp.ViewModels.Dialog
         private BitmapSource _crossSectionImage;
 
         [ObservableProperty]
-        private double _crossSectionScale = (1 / Constants.MilimeterPerPixel) * (Constants.CrossSectionSize / Constants.OCTImageSize);
+        private double _crossSectionScale = (1 / Constants.MillimeterPerPixel ) * (Constants.CrossSectionSize / Constants.OCTImageSize);
 
         [ObservableProperty]
         private BitmapSource _longitudeImage;

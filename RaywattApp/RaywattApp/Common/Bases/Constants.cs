@@ -359,7 +359,7 @@ namespace RaywattApp.Common.Bases
         //Scale
         public const string ScaleLength = "Length";
         public const string ScaleArea = "Area";
-        public const double MilimeterPerPixel = 0.0082;
+        public const double MillimeterPerPixel  = 0.0082;
 
         //Mini-Map
         public const double MiniMapBorderSize = 140;

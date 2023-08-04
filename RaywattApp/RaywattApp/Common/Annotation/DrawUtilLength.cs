@@ -325,7 +325,7 @@ namespace RaywattApp.Common.Annotation
             Label label = new Label();
             label.Style = (Style)this.Resources["StyleLabel"];
             label.Name = constLength + "_" + group;
-            label.Content = DrawAnnotation.GetLabelText(length * Constants.MilimeterPerPixel);
+            label.Content = DrawAnnotation.GetLabelText(length * Constants.MillimeterPerPixel );
             label.RenderTransform = new RotateTransform(angle);
 
             double labelHeight = GetLabelSize("StyleLabel").Height;

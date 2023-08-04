@@ -18,11 +18,11 @@ namespace RaywattApp.Common.Converters
 
             if(scale == Constants.ScaleLength)
             {
-                realValue = originValue * Constants.MilimeterPerPixel;
+                realValue = originValue * Constants.MillimeterPerPixel ;
             }
             else
             {
-                realValue = originValue * Constants.MilimeterPerPixel * Constants.MilimeterPerPixel;
+                realValue = originValue * Constants.MillimeterPerPixel  * Constants.MillimeterPerPixel ;
             }
 
             return Math.Round(realValue, 2);

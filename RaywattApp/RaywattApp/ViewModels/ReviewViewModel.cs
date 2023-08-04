@@ -652,11 +652,11 @@ namespace RaywattApp.ViewModels
 
             PatientCase.FfrFeature.MinimalLumenFrameNumber = minimalLumenFrameNumber;
             PatientCase.FfrFeature.PercentAreaStenosis = Math.Round(percentAreaStenosis * 100, 1);
-            PatientCase.FfrFeature.MinimalLumenArea = Math.Round(minimalLumenArea * Constants.MilimeterPerPixel * Constants.MilimeterPerPixel, 2);
-            PatientCase.FfrFeature.DistalLumenArea = Math.Round(Section.Distal.DValue * Constants.MilimeterPerPixel * Constants.MilimeterPerPixel, 2);
+            PatientCase.FfrFeature.MinimalLumenArea = Math.Round(minimalLumenArea * Constants.MillimeterPerPixel  * Constants.MillimeterPerPixel , 2);
+            PatientCase.FfrFeature.DistalLumenArea = Math.Round(Section.Distal.DValue * Constants.MillimeterPerPixel  * Constants.MillimeterPerPixel , 2);
             PatientCase.FfrFeature.LesionLength = Math.Round(Section.LesionLength.DValue, 1);
             PatientCase.FfrFeature.PlaqueArea = 0.0;
-            PatientCase.FfrFeature.ProximalLumenArea = Math.Round(Section.Proximal.DValue * Constants.MilimeterPerPixel * Constants.MilimeterPerPixel, 2);
+            PatientCase.FfrFeature.ProximalLumenArea = Math.Round(Section.Proximal.DValue * Constants.MillimeterPerPixel  * Constants.MillimeterPerPixel , 2);
         }
 
         private void ToggleMeasurement()
