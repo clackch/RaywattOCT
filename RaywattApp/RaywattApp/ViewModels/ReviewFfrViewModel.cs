@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Navigation;
 using System.Windows.Threading;
+using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels
 {
@@ -67,6 +68,12 @@ namespace RaywattApp.ViewModels
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
                 ReviewStatus.CurrentPage = Constants.ReviewFfrPage;
+
+                SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
+                int currentFrameNumber = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current;
+                MoveToFrame(RaySession.Review, PatientCase.FfrFeature.MinimalLumenFrameNumber);
+                DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current = currentFrameNumber;
+                DrawCrossSectionImage();
             }
         }
 
@@ -75,7 +82,6 @@ namespace RaywattApp.ViewModels
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
         }
-
 
         private void FfrPredict()
         {

@@ -1,16 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
-using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Services;
-using RaywattOCT;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Navigation;
@@ -22,10 +18,6 @@ namespace RaywattApp.ViewModels
     public partial class Review3dViewModel : ReviewViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(Review3dViewModel));
-
-        // size from view
-        private Point crossSectionCenterBig = new Point();
-        private Point longitudeCoordinate = new Point();
 
         [ObservableProperty]
         private bool _isCutViewOn;
@@ -76,13 +68,6 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private Indicator _indicatorLongitude;
-
-        [ObservableProperty]
-        private double _pointLongitudeX;
-
-        private double indicatorDiffX = 0;
-
-        private double indicatorDiffDegree = 0;
 
         [ObservableProperty]
         private bool _isPaused;
@@ -202,6 +187,8 @@ namespace RaywattApp.ViewModels
             sqlParameters["apposition_threshold"] = PatientCase.AppositionThreshold;
             sqlParameters["brightness"] = PatientCase.Brightness;
             sqlParameters["contrast"] = PatientCase.Contrast;
+            sqlParameters["section_proximal"] = PatientCase.SectionProximal;
+            sqlParameters["section_distal"] = PatientCase.SectionDistal;
 
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
             if (nRows == 0)
@@ -245,7 +232,7 @@ namespace RaywattApp.ViewModels
             if (indicator.IsCaptured)
             {
                 Point crossSectionCenter;                
-                crossSectionCenter = crossSectionCenterBig;
+                crossSectionCenter = indicator.Coordinate;
 
                 indicator.SetDirection(crossSectionCenter, Degree);
                 if (!indicator.IsValid) return;
@@ -264,7 +251,7 @@ namespace RaywattApp.ViewModels
 
                     double pointXDiff = crossSectionCenter.X - headerSidePointDiff.X;
                     double pointYDiff = crossSectionCenter.Y - headerSidePointDiff.Y;
-                    indicatorDiffDegree = Math.Round((Math.Atan2(pointYDiff, pointXDiff) * 180 / Math.PI),1) - Degree;
+                    indicator.IndicatorDiff = Math.Round((Math.Atan2(pointYDiff, pointXDiff) * 180 / Math.PI),1) - Degree;
                     indicator.IsCrossSectionClicked = false;
                 }
 
@@ -280,7 +267,7 @@ namespace RaywattApp.ViewModels
 
                 double pointX = crossSectionCenter.X - headerSidePoint.X;
                 double pointY = crossSectionCenter.Y - headerSidePoint.Y;
-                Degree = Math.Round((Math.Atan2(pointY, pointX) * 180 / Math.PI),1) - indicatorDiffDegree;
+                Degree = Math.Round((Math.Atan2(pointY, pointX) * 180 / Math.PI),1) - indicator.IndicatorDiff;
             }
         }
 
@@ -298,16 +285,29 @@ namespace RaywattApp.ViewModels
 
                 if (indicator.IsLongitudeMove)
                 {
-                    indicatorDiffX = PointLongitudeX - longitudeCoordinate.X - indicator.X;
+                    indicator.IndicatorDiff = indicator.PointLongitudeX - indicator.Coordinate.X - indicator.X;
                     indicator.IsLongitudeMove = false;
                 }
 
-                double indicatorX = PointLongitudeX - longitudeCoordinate.X - indicatorDiffX;
+                double indicatorX = indicator.PointLongitudeX - indicator.Coordinate.X - indicator.IndicatorDiff;
                 double indicatorCenterX = indicatorX + Constants.LongitudeIndicatorWidth / 2;
 
-                if (indicatorCenterX >= 0 && indicatorCenterX < Constants.Longitude3dWidth)
+                if (indicatorCenterX < 0)
+                {
+                    indicator.X = 0 - Constants.LongitudeIndicatorWidth / 2;
+                    indicator.CenterX = 0;
+                    setCurrentFrame(0);
+                }
+                else if (indicatorCenterX > Constants.Longitude3dWidth)
+                {
+                    indicator.X = Constants.Longitude3dWidth - Constants.LongitudeIndicatorWidth / 2;
+                    indicator.CenterX = Constants.Longitude3dWidth;
+                    setCurrentFrame(Constants.Longitude3dWidth);
+                }
+                else
                 {
                     indicator.X = indicatorX;
+                    indicator.CenterX = indicatorCenterX;
                     setCurrentFrame(indicatorCenterX);
                 }
             }
@@ -326,12 +326,12 @@ namespace RaywattApp.ViewModels
 
                 if (frameworkElement.Name.Equals("crossSectionImage"))
                 {
-                    crossSectionCenterBig.X = point.X + (frameworkElement.ActualWidth / 2);
-                    crossSectionCenterBig.Y = point.Y + (frameworkElement.ActualHeight / 2);
+                    IndicatorCrossSection.Coordinate.X = point.X + (frameworkElement.ActualWidth / 2);
+                    IndicatorCrossSection.Coordinate.Y = point.Y + (frameworkElement.ActualHeight / 2);
                 }
                 else if (frameworkElement.Name.Equals("lMode"))
                 {
-                    longitudeCoordinate = point;
+                    IndicatorLongitude.Coordinate = point;
                 }
             }
         }

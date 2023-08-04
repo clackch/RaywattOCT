@@ -11,12 +11,6 @@ namespace RaywattApp.ViewModels.Setting
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
             _log.Debug("OnNavigated");
-
-            var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
-
-            if (extraData != null)
-            {
-            }
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)

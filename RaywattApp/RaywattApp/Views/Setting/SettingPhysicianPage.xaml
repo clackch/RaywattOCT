@@ -13,7 +13,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="413"/>
             <RowDefinition Height="15"/>
-            <RowDefinition Height="113"/>
+            <RowDefinition Height="54"/>
+            <RowDefinition Height="59"/>
             <RowDefinition Height="42"/>
         </Grid.RowDefinitions>
 
@@ -41,27 +42,23 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="54"/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
-            <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">
+            <StackPanel Grid.Column="0" VerticalAlignment="Center">
                 <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}">
                     <Label.Content>
                         <AccessText TextWrapping="Wrap" Text="{Binding [Add Physician], Source={StaticResource L10N}}"/>
                     </Label.Content>
                 </Label>
             </StackPanel>
-            <StackPanel Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
                 <TextBox Style="{DynamicResource TextBoxValidator}" Width="360" Text="{Binding NewPhysician.Name, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter Physician Name], Source={StaticResource L10N}}" ToolTip="{Binding NewPhysician.ValidateName}"/>
                 <StackPanel Width="10"/>
             </StackPanel>
-            <StackPanel Grid.Row="0" Grid.Column="2">
+            <StackPanel Grid.Column="2">
                 <Button Style="{StaticResource OutlinedBtnType3-Large}" Width="72" Height="54" Command="{Binding RowAddCommand}" Content="{Binding [Add], Source={StaticResource L10N}}"/>
             </StackPanel>
         </Grid>
 
-        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding ApplyCommand}" Content="{Binding [Apply], Source={StaticResource L10N}}"/>
             <StackPanel Width="16"/>
             <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding OkayCommand}" Content="{Binding [OK], Source={StaticResource L10N}}"/>

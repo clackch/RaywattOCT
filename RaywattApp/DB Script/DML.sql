@@ -1,3 +1,9 @@
+-- rv_schema.configuration
+DELETE FROM rv_schema.configuration;
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('L10N', 'en-US', 'Y', '');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('L10N', 'ko-KR', 'N', '');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Terms&Cond', 'AgreeYN', 'N', '');
+
 -- rv_schema.code
 DELETE FROM rv_schema.code;
 -- GENDER
@@ -30,27 +36,22 @@ INSERT INTO rv_schema.code( classification, key, value, sort_order, description,
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('EXCC', 'TAPE', 'Tapered', 1, 'Expansion Calculation Tapered', now(), now());
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('EXCC', 'OTHE', 'Other', 2, 'Expansion Calculation Other', now(), now());
 
--- rv_schema.l10n
-DELETE FROM rv_schema.l10n;
-INSERT INTO rv_schema.l10n(lang, choice) VALUES ('en-US', TRUE);
-INSERT INTO rv_schema.l10n(lang, choice) VALUES ('ko-KR', FALSE);
-
 -- rv_schema.patient_case_preset
+DELETE FROM rv_schema.patient_case_preset WHERE id = 'Default';
 INSERT INTO rv_schema.patient_case_preset(id, preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold, default_set, create_date, update_date) VALUES ('Default', 'Default', 180, 'TAPE', 90, 0.3, TRUE, now(), now());
 
 -- rv_schema.dicom_property
+DELETE FROM rv_schema.dicom_property;
 INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('ORG_RT', 'Organization Root', '1.2.410.200124');
 INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('APP_ID', 'Application ID', '1');
-INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('APP_VR', 'Application Version', '1');
-INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00020013', 'Implementation Version Name', 'Raywatt Version Name');
-INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00020016', 'Source Application Entity Title', 'Raywatt Title');
+INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00020013', 'Implementation Version Name', 'FasterDx');
+INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00020016', 'Source Application Entity Title', 'Raywatt Inc.');
 INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00080060', 'Modality', 'OCT');
 INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00080064', 'Conversion Type', 'SI');
-INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00080070', 'Manufacturer', 'Raywatt Manufacturer');
-INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00080080', 'Institution Name', 'XXX Hospital');
-INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00081090', 'Manufacturer''s Model Name', 'Raywatt Model Name');
+INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00080070', 'Manufacturer', 'Raywatt Inc.');
+INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00081090', 'Manufacturer''s Model Name', 'FASTER');
 INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00180015', 'Body Part Examined', 'HEART');
-INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00181016', 'Secondary Capture Device Manufacturer', 'Raywatt SC Device Manufacturer');
-INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00181018', 'Secondary Capture Device Manufacturer''s Model Name', 'Raywatt SC Device Manufacturer Model Name');
-INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00181019', 'Secondary Capture Device Software Versions', 'Raywatt SC Device SW Version');
-INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00181020', 'Software Version(s)', 'Raywatt SW Version');
+INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00181016', 'Secondary Capture Device Manufacturer', 'Raywatt Inc.');
+INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00181018', 'Secondary Capture Device Manufacturer''s Model Name', 'FASTER');
+INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00181019', 'Secondary Capture Device Software Versions', '1.00.00');
+INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00181020', 'Software Version(s)', '1.00.00');

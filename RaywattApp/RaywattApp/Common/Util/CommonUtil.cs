@@ -21,6 +21,7 @@ using RaywattApp.Models;
 using RaywattApp.ViewModels.Dialog;
 using RaywattApp.Views.Dialog;
 using System.Threading;
+using System.Windows.Controls;
 
 namespace RaywattApp.Common.Util
 {
@@ -511,6 +512,90 @@ namespace RaywattApp.Common.Util
             return imglumenProfile;
         }
 
+        public static Mat MakeLumenProfileImage(List<LumenContour> lumenContours, int frameProximal, int frameDistal, List<int>? sidebranchs, bool isPostCase, List<int>? appositionFrames, int currentFrame = -1)
+        {
+            const double radius = Constants.OCTImageSize / 2;
+            const double totalArea = radius * radius * Math.PI;
+
+            if (lumenContours == null || lumenContours.Count <= 0) return null;
+
+            int cols = currentFrame == -1 ? lumenContours.Count : currentFrame + 1;
+
+            Mat imglumenProfile = new Mat(200, lumenContours.Count, MatType.CV_8UC3);
+            imglumenProfile.SetTo(new Scalar(0x33, 0x33, 0x33));
+
+            int curFrame = 0;
+            foreach (LumenContour lumenContour in lumenContours.GetRange(0, cols))
+            {
+                double area = lumenContour.Area;
+
+                int lumenArea = (int)(area / totalArea * imglumenProfile.Rows);
+                int yStart = (imglumenProfile.Rows - lumenArea) / 2;
+
+                Cv2.Line(imglumenProfile, new Point(curFrame, yStart), new Point(curFrame, yStart + lumenArea), new Scalar(0x16, 0x16, 0x16));
+
+                //Side Branch
+                if (sidebranchs != null)
+                {
+                    if(sidebranchs.Contains(curFrame))
+                        Cv2.Line(imglumenProfile, new Point(curFrame, imglumenProfile.Rows / 2 - 5), new Point(curFrame, imglumenProfile.Rows / 2 + 5), new Scalar(0xe4, 0xe4, 0xe4));
+                }
+
+                //Lesion Section
+                if (curFrame >= frameProximal && curFrame <= frameDistal)
+                {
+                    Scalar scalar;
+
+                    if (appositionFrames != null && appositionFrames.Contains(curFrame))
+                        scalar = new Scalar(0x77, 0x7d, 0xff);
+                    else
+                        scalar = new Scalar(0x8d, 0x8d, 0x8d);
+
+                    //Stent
+                    for (int i = 0; isPostCase && i < imglumenProfile.Rows; i++)
+                    {
+                        if ((i + curFrame) % 20 == 0)
+                        {
+                            Cv2.Line(imglumenProfile, new Point(curFrame, i), new Point(curFrame, i), scalar);
+                        }
+                        if ((i - curFrame) % 20 == 0)
+                        {
+                            Cv2.Line(imglumenProfile, new Point(curFrame, i), new Point(curFrame, i), scalar);
+                        }
+                    }
+
+                    Cv2.Line(imglumenProfile, new Point(curFrame, 0), new Point(curFrame, yStart - 1), new Scalar(0x4f, 0x4f, 0x4f));
+                    Cv2.Line(imglumenProfile, new Point(curFrame, yStart + lumenArea + 1), new Point(curFrame, imglumenProfile.Rows), new Scalar(0x4f, 0x4f, 0x4f));
+
+                    if(curFrame % 2 == 0)
+                    {
+                        Cv2.Line(imglumenProfile, new Point(curFrame, 0), new Point(curFrame, 0), new Scalar(0xe4, 0xe4, 0xe4));
+                        Cv2.Line(imglumenProfile, new Point(curFrame, imglumenProfile.Rows - 1), new Point(curFrame, imglumenProfile.Rows), new Scalar(0xe4, 0xe4, 0xe4));
+                    }
+                }
+
+                curFrame++;
+            }
+
+            return imglumenProfile;
+        }
+
+        public static Mat MakeLumenProfileImageExtra(int frameCnt, List<int> colorFrames, bool isPreCase, int currentFrame = -1)
+        {
+            int cols = currentFrame == -1 ? frameCnt : currentFrame + 1;
+
+            Mat imglumenProfile = new Mat(20, frameCnt, MatType.CV_8UC3);
+            imglumenProfile.SetTo(new Scalar(0x33, 0x33, 0x33));
+
+            for (int i = 0; i < cols; i++)
+            {
+                if(colorFrames.Contains(i))
+                    Cv2.Line(imglumenProfile, new Point(i, 0), new Point(i, imglumenProfile.Rows), isPreCase ? new Scalar(0xeb, 0xfe, 0x75) : new Scalar(0x00, 0xd8, 0xff));
+            }
+
+            return imglumenProfile;
+        }
+
         public static async Task SaveStillFrame(Mat image, string rootPath, string fileName, string format, Action<double> progressCallback, double progressIncrease, Action<string> progressTextCallback)
         {
             string filePath = rootPath + "\\" + fileName + "." + format.ToLower();
@@ -749,6 +834,63 @@ namespace RaywattApp.Common.Util
                 if (totalFileSize == curFileSize)
                     break;
             }
+        }
+
+        public static int GetFrameFromPosition(double position, int totalFrame, double longitudeWidth, double indicatorDiff)
+        {
+            int frame = 0;
+            double curPosition = (position + indicatorDiff) / longitudeWidth;
+
+            curPosition *= (totalFrame - 1);
+            frame = (int)Math.Round(curPosition);
+
+            return frame;
+        }
+
+        public static double GetPositionFromFrame(int curFrame, int totalFrame, double longitudeWidth, double indicatorDiff)
+        {
+            double position = 0;
+
+            double curPosition = (double)curFrame / (totalFrame - 1);
+            curPosition *= longitudeWidth;
+            position = curPosition - indicatorDiff;
+
+            return position;
+        }
+
+        public static bool IsPreCase(string procedure)
+        {
+            if ("$001".Contains(procedure))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public static bool IsPostCase(string procedure)
+        {
+            if ("$002|$003".Contains(procedure))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public static System.Windows.Size GetTextBlockSize(string style, string text = "")
+        {
+            TextBlock textBlock = new TextBlock();
+            textBlock.Style = (System.Windows.Style)App.Current.Resources[style];
+            textBlock.Text = text;
+
+            textBlock.Measure(new System.Windows.Size(double.PositiveInfinity, double.PositiveInfinity));
+
+            return textBlock.DesiredSize;
         }
     }
 }

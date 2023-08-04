@@ -317,16 +317,18 @@ namespace RaywattApp.ViewModels.Dialog
 
             RayExportWrapper.DicomStartProperty();
 
+            string implementationClassUID = dicomProperty["ORG_RT"] + "." + dicomProperty["APP_ID"];
+
             //(0002, 0001)	File Meta Information Version	-	M	OB
             //Auto Assigned
             //(0002, 0002)	Media Storage SOP Class UID	-	M	UI
             //Auto Assigned
             //(0002, 0003)	Media Storage SOP Instance UID	-	M	UI
-            RayExportWrapper.DicomAddProperty(0x00020003, dicomProperty["ORG_RT"] + "." + dicomProperty["APP_ID"] + "." + dicomProperty["APP_VR"] + "." + dateTimeNow, 0);
+            RayExportWrapper.DicomAddProperty(0x00020003, implementationClassUID + "." + dateTimeNow, 0);
             //(0002, 0010)	Transfer Syntax UID	-	M	UI
             //Auto Assigned
             //(0002, 0012)	Implementation Class UID	-	M	UI
-            RayExportWrapper.DicomAddProperty(0x00020012, dicomProperty["ORG_RT"] + "." + dicomProperty["APP_ID"] + "." + dicomProperty["APP_VR"], 0);
+            RayExportWrapper.DicomAddProperty(0x00020012, implementationClassUID, 0);
             //(0002, 0013)	Implementation Version Name	-	C	SH
             RayExportWrapper.DicomAddProperty(0x00020013, dicomProperty["00020013"], 0);
             //(0002, 0016)	Source Application Entity Title	-	M	AE
@@ -338,7 +340,7 @@ namespace RaywattApp.ViewModels.Dialog
             //(0008, 0016)	SOP Class UID	-	M	UI
             //Auto Assigned (1.2.840.10008.5.1.4.1.1.7.4)
             //(0008, 0018)	SOP Instance UID	-	M	UI
-            RayExportWrapper.DicomAddProperty(0x00080018, dicomProperty["ORG_RT"] + "." + dicomProperty["APP_ID"] + "." + dicomProperty["APP_VR"] + "." + dateTimeNow, 0);
+            RayExportWrapper.DicomAddProperty(0x00080018, implementationClassUID + "." + dateTimeNow, 0);
             //(0008, 0020)	Study Date	-	M	DA
             RayExportWrapper.DicomAddProperty(0x00080020, patientCase.CreateDate.ToString("yyyyMMdd"), 0);
             //(0008, 0021)	Series Date	-	M, C, U	DA
@@ -401,9 +403,9 @@ namespace RaywattApp.ViewModels.Dialog
             //(0018, 1063)	Frame Time	-	U	DS
             //(0018, 3101)	IVUS Pullback Rate	-	U	DS
             //(0020, 000d)	Study Instance UID	-	M	UI
-            RayExportWrapper.DicomAddProperty(0x0020000d, dicomProperty["ORG_RT"] + "." + dicomProperty["APP_ID"] + "." + dicomProperty["APP_VR"] + "." + patientCase.CreateDate.ToString("yyyyMMdd") + "000000." + studyId.ToString(), 0);
+            RayExportWrapper.DicomAddProperty(0x0020000d, implementationClassUID + "." + patientCase.CreateDate.ToString("yyyyMMdd") + "000000." + studyId.ToString(), 0);
             //(0020, 000e)	Series Instance UID	-	M	UI
-            RayExportWrapper.DicomAddProperty(0x0020000e, dicomProperty["ORG_RT"] + "." + dicomProperty["APP_ID"] + "." + dicomProperty["APP_VR"] + "." + patientCase.CreateDate.ToString("yyyyMMddhhmmss") + "." + seriesNumber.ToString(), 0);
+            RayExportWrapper.DicomAddProperty(0x0020000e, implementationClassUID + "." + patientCase.CreateDate.ToString("yyyyMMddhhmmss") + "." + seriesNumber.ToString(), 0);
             //(0020, 0010)	Study ID	-	M	SH
             RayExportWrapper.DicomAddProperty(0x00200010, studyId.ToString(), 0);
             //(0020, 0011)	Series Number	-	M, C, U	IS

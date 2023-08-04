@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="45" height="121.5" viewBox="0 0 45 121.5">
+    <path data-name="패스 2027" d="M272.236 1687.457v-121h-22" transform="translate(-250.236 -1565.957)" style="fill:none;stroke:#fff"/>
+    <path data-name="패스 2522" d="M272.236 1687.457v-121h22" transform="translate(-249.736 -1565.957)" style="fill:none;stroke:#fff"/>
+
+    <defs>
+        <filter id="d5a5v8sm1a" x="0" y="0" width="30" height="26" filterUnits="userSpaceOnUse">
+            <feOffset dy="3"/>
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feFlood flood-opacity=".161"/>
+            <feComposite operator="in" in2="blur"/>
+            <feComposite in="SourceGraphic"/>
+        </filter>
+    </defs>
+    <g style="filter:url(#d5a5v8sm1a)">
+        <path data-name="패스 2026" d="M0 2.6v4.007L4 10.6l4-3.993V2.6z" transform="translate(18 9.4)" style="fill:#fff"/>
+    </g>  
+</svg>

@@ -47,6 +47,7 @@ namespace RaywattApp.Common.Bases
         public const string SettingPhysicianPage = "Views/Setting/SettingPhysicianPage.xaml";
         public const string SettingServicePage = "Views/Setting/SettingServicePage.xaml";
         public const string SettingLogPage = "Views/Setting/SettingLogPage.xaml";
+        public const string SettingTermsConditionsPage = "Views/Setting/SettingTermsConditionsPage.xaml";
 
         //Resolution
         public const double ApplicationWidth = 1280;
@@ -77,6 +78,8 @@ namespace RaywattApp.Common.Bases
         public const double SettingEditPhysicianDialogHeight = 279;
         public const double PatientCaseEditDialogWidth = 860;
         public const double PatientCaseEditDialogHeight = 734;
+        public const double TermsConditionsDialogWidth = 860;
+        public const double TermsConditionsDialogHeight = 660;
 
         //Max Length
         public const int MaxPatientId = 9;
@@ -175,7 +178,7 @@ namespace RaywattApp.Common.Bases
         public const string PullbackTypeLong = "LONG";
         public const string PullbackTypeShort = "SHOR";
         public const int PullbackLongFrameCnt = 1000;
-        public const int PullbackShortFrameCnt = 500;
+        public const int PullbackShortFrameCnt = 600;
 
         //Not Selected
         public const string NotSelected = "Not Selected";
@@ -249,6 +252,10 @@ namespace RaywattApp.Common.Bases
         public const double LongitudeScale = LongitudeWidth / 10;
         public const double LongitudeIndicatorWidth = 22;
         public const double LongitudeIndicatorHeight = 116;
+        public const double SectionIndicatorWidth = 12.5;
+        public const double SectionMlaMldWidth = 45;
+        public const double SectionMsaMinExpWidth = 22.5;
+        public const double LumenProfileExtraHeight = 6;
 
         //Review - 2D - Side Menu
         public const string LeftUpMenu = "LeftUpMenu";
@@ -283,6 +290,7 @@ namespace RaywattApp.Common.Bases
         public const double LongitudeCompareHeight = 170;
         public const double LongitudeCompareScale = (LongitudeCompareWidth - 1) / 10;
         public const double LongitudeIndicatorCompareHeight = 177;
+        public const double LumenProfileExtraCompareHeight = 6;
 
         //Review - Compare - Side Menu
         public const double SelectPreCaseExpandSize = 460;
@@ -349,8 +357,9 @@ namespace RaywattApp.Common.Bases
         public const string LumenContourCurrentInit = "Init";
 
         //Scale
-        public const double ScaleLength = 100;
-        public const double ScaleArea = ScaleLength * ScaleLength;
+        public const string ScaleLength = "Length";
+        public const string ScaleArea = "Area";
+        public const double MillimeterPerPixel  = 0.0082;
 
         //Mini-Map
         public const double MiniMapBorderSize = 140;
@@ -359,7 +368,6 @@ namespace RaywattApp.Common.Bases
         //Zoom
         public const double ZoomScaleDefault = CrossSectionSize / OCTImageSize;
         public const double ZoomScaleMax = ZoomScaleDefault * 2;
-
 
         //Recording
         public const int TransientTime = 3000;

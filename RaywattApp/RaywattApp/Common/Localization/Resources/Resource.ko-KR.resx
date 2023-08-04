@@ -153,6 +153,37 @@ Remove catheter from patient before proceeding.</value>
   <data name="$MSG011" xml:space="preserve">
     <value>㉿3. Disconnect the catheter</value>
   </data>
+  <data name="$Terms and Conditions" xml:space="preserve">
+    <value>㉿Product Intended Use: Clearly define the intended use of the OCT device, including any limitations or specific conditions for use.
+
+Product Warranty: Outline the warranty coverage provided for the OCT device, including the duration, scope, and process for claiming warranty services.
+
+Limitations of the Device: Clearly state any limitations, risks, or potential side effects associated with the use of the OCT device.
+
+Regulatory Compliance: Ensure that the OCT device complies with all relevant regulatory standards and requirements, and inform users about any necessary certifications.
+
+Intellectual Property: Specify the ownership and protection of intellectual property related to the OCT device, including patents, trademarks, and copyrights.
+
+User Responsibilities: Detail the responsibilities of users when operating or maintaining the OCT device, including proper usage, storage, and maintenance.
+
+Data Privacy and Security: Address how user data collected by the OCT device will be handled, stored, and protected to ensure user privacy and comply with data protection laws.
+
+Service and Support: Describe the availability of customer support and service for the OCT device, including contact information and response times.
+
+Product Modifications: Specify whether users are allowed to modify or alter the OCT device and any consequences for doing so.
+
+Liability and Indemnification: Clearly define the limitations of liability for the manufacturer and specify instances where users may indemnify the manufacturer.
+
+Dispute Resolution: Outline the procedures for resolving any disputes related to the OCT device or the terms and conditions.
+
+Governing Law: Specify the governing law that applies to the terms and conditions and the OCT device's use.
+
+Termination: Define the circumstances under which the manufacturer may terminate or suspend access to the OCT device or its services.
+
+Updates and Changes: Specify how updates or changes to the device's software or firmware will be communicated to users.
+
+Acceptance of Terms: Require users to explicitly accept the terms and conditions before using the OCT device.</value>
+  </data>
   <data name="%AS" xml:space="preserve">
     <value>㉿%AS</value>
   </data>
@@ -374,11 +405,11 @@ Overwrite existing data?</value>
   <data name="Edit Physician" xml:space="preserve">
     <value>㉿Edit Physician</value>
   </data>
+  <data name="en-US" xml:space="preserve">
+    <value>㉿English</value>
+  </data>
   <data name="End Review" xml:space="preserve">
     <value>㉿End Review</value>
-  </data>
-  <data name="English" xml:space="preserve">
-    <value>㉿English</value>
   </data>
   <data name="Enter an External Device" xml:space="preserve">
     <value>㉿Enter an External Device</value>
@@ -394,6 +425,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Enter ID" xml:space="preserve">
     <value>㉿Enter ID</value>
+  </data>
+  <data name="Enter Institude Name" xml:space="preserve">
+    <value>㉿Enter Institude Name</value>
   </data>
   <data name="Enter Last Name" xml:space="preserve">
     <value>㉿Enter Last Name</value>
@@ -488,6 +522,9 @@ Overwrite existing data?</value>
   <data name="Information" xml:space="preserve">
     <value>㉿Information</value>
   </data>
+  <data name="Institude Name" xml:space="preserve">
+    <value>㉿Institude Name</value>
+  </data>
   <data name="Insufficient storage space available." xml:space="preserve">
     <value>㉿Insufficient storage space available</value>
   </data>
@@ -497,7 +534,7 @@ Overwrite existing data?</value>
   <data name="KB" xml:space="preserve">
     <value>㉿KB</value>
   </data>
-  <data name="Korean" xml:space="preserve">
+  <data name="ko-KR" xml:space="preserve">
     <value>㉿Korean</value>
   </data>
   <data name="L-View" xml:space="preserve">
@@ -577,6 +614,18 @@ Overwrite existing data?</value>
   <data name="Min Diam.(㎜)" xml:space="preserve">
     <value>㉿Min Diam.
 (㎜)</value>
+  </data>
+  <data name="Min Exp." xml:space="preserve">
+    <value>㉿Min Exp.</value>
+  </data>
+  <data name="MLA" xml:space="preserve">
+    <value>㉿MLA</value>
+  </data>
+  <data name="MLD" xml:space="preserve">
+    <value>㉿MLD</value>
+  </data>
+  <data name="MSA" xml:space="preserve">
+    <value>㉿MSA</value>
   </data>
   <data name="Name" xml:space="preserve">
     <value>㉿Name</value>

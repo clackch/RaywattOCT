@@ -54,9 +54,9 @@ namespace RaywattApp.Common.Localization
 
                 string languageCode = null;
 
-                IList<L10n> l10Ns = _sqlManager.SelectL10n();
+                IList<Configuration> l10Ns = _sqlManager.SelectConfigurationL10n();
                 if (l10Ns != null && l10Ns.Count == 1)
-                    languageCode = l10Ns[0].Lang;
+                    languageCode = l10Ns[0].Key;
 
                 //l10n_current_language 없을 경우, Default로 en-US 사용
                 if (languageCode == null)
@@ -172,8 +172,8 @@ namespace RaywattApp.Common.Localization
         private void UpdateL10n(string languageCode)
         {
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-            sqlParameters["lang"] = languageCode;
-            int nRows = _sqlManager.UpdateL10n(sqlParameters);
+            sqlParameters["key"] = languageCode;
+            int nRows = _sqlManager.UpdateConfigurationL10n(sqlParameters);
         }
     }
 }

@@ -224,6 +224,10 @@ namespace RaywattApp.ViewModels
             sqlParameters["expansion_calculation"] = PatientCasePreset.ExpansionCalculation;
             sqlParameters["expansion_threshold"] = PatientCasePreset.ExpansionThreshold;
             sqlParameters["apposition_threshold"] = PatientCasePreset.AppositionThreshold;
+            sqlParameters["brightness"] = PatientCase.Brightness;
+            sqlParameters["contrast"] = PatientCase.Contrast;
+            sqlParameters["section_proximal"] = 0;
+            sqlParameters["section_distal"] = ReviewStatus.NumberOfFrames - 1;
 
             int nRows = _sqlManager.InsertPatientCase(sqlParameters);
 

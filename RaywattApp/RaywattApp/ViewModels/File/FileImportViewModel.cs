@@ -356,6 +356,8 @@ namespace RaywattApp.ViewModels.File
                                 sqlParameters["still_image_yn"] = patientCase.StillImageYn;
                                 sqlParameters["brightness"] = patientCase.Brightness;
                                 sqlParameters["contrast"] = patientCase.Contrast;
+                                sqlParameters["section_proximal"] = patientCase.SectionProximal;
+                                sqlParameters["section_distal"] = patientCase.SectionDistal;
                                 sqlParameters["create_date"] = patientCase.CreateDate;
                                 sqlParameters["update_date"] = patientCase.UpdateDate;
                                 string srcPath = CommonUtil.GetDirectoryPath(SelectedDir.Path) + "\\" + patientCase.Image;
@@ -545,6 +547,8 @@ namespace RaywattApp.ViewModels.File
                             patientCase.AppositionThreshold = GetDoubleValue(caseObj, "AppositionThreshold");
                             patientCase.Brightness = GetIntValue(caseObj, "Brightness");
                             patientCase.Contrast = GetIntValue(caseObj, "Contrast");
+                            patientCase.SectionProximal = GetIntValue(caseObj, "SectionProximal");
+                            patientCase.SectionDistal = GetIntValue(caseObj, "SectionDistal");
                             patientCase.Bookmark = GetStrValue(caseObj, "Bookmark");
                             patientCase.Longitude = GetStrValue(caseObj, "Longitude");
                             patientCase.CrossSection = GetStrValue(caseObj, "CrossSection");
