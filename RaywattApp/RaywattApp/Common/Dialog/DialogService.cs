@@ -1,7 +1,7 @@
-﻿using RaywattApp.Common.Bases;
-using RaywattApp.Models;
+﻿using RaywattApp.Models;
 using RaywattApp.Views.Dialog;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 
 namespace RaywattApp.Common.Dialog
@@ -42,26 +42,10 @@ namespace RaywattApp.Common.Dialog
             if (parameter != null)
                 dialogDataContext.SetParameter(parameter);
 
+            window.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
             window.ShowDialog();
 
             return dialogDataContext.DialogResult;
-        }
-
-        private void GetParentSize(out double width, out double height)
-        {
-            width = Constants.ApplicationWidth;
-            height = Constants.ApplicationHeight;
-            
-            for(int i = 0; i < Application.Current.Windows.Count-1; i++)
-            {
-                var win = Application.Current.Windows[i];
-
-                if (win.IsActive && win.IsVisible && win.Width != double.NaN && win.Height != double.NaN)
-                {
-                    width = win.Width;
-                    height = win.Height;
-                }
-            }
         }
     }
 }

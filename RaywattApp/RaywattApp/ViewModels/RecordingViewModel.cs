@@ -175,6 +175,7 @@ namespace RaywattApp.ViewModels
             DeviceStatus.IsLumenSaved = false;
             DeviceStatus.IsPullbackDone = false;
             DeviceStatus.IsLumenDetected = false;
+            DeviceStatus.IsOCTImagingDone = false;
             RayPullbackScan(PatientCase.ImageFullPath);
 
             leaveToPage(Constants.RecordingConfirmPage);

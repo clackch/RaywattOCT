@@ -370,6 +370,7 @@ namespace RaywattApp.ViewModels
             DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total = 0;
             DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current = 0;
             DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total = 0;
+            DeviceStatus.IsOCTImagingDone = false;
 
             Dictionary<string, Object> parameter = new Dictionary<string, Object>();
             parameter["patient"] = Patient;

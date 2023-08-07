@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.Windows;
+﻿using System.Windows;
 
 namespace RaywattApp.Common.Dialog
 {
@@ -14,6 +13,8 @@ namespace RaywattApp.Common.Dialog
         double Left { get; set; }
 
         double Top { get; set; }
+
+        Window Owner { get; set; }
 
         bool? ShowDialog();
 
