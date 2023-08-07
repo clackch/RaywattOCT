@@ -270,6 +270,18 @@ namespace RaywattApp.Common.Bases
         public const string LongitudeProfile = "Profile";
         public const string LongitudeLMode = "LMode";
 
+        //Review - 3D - Cut View
+        public const double CutView3dX = 98;
+        public const double CutView3dY = 120;
+        public const double CutView3dWidth = 736;
+        public const double CutView3dHeight = 560;
+
+        //Review - 3D - Fly Through View
+        public const double FlyThroughView3dX = 886;
+        public const double FlyThroughView3dY = 216;
+        public const double FlyThroughView3dWidth = 368;
+        public const double FlyThroughView3dHeight = 368;
+
         //Review - 3D - Cross Section
         public const double CrossSection3dSize = 180;
         public const double CrossSection3dCenter = CrossSection3dSize / 2;

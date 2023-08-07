@@ -196,7 +196,6 @@ xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattAp
     <ClInclude Include="OCTSystem.h" />
     <ClInclude Include="import.h" />
     <ClInclude Include="RaywattCore.h" />
-    <ClInclude Include="VolumeGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Configuration.cpp" />
@@ -204,7 +203,6 @@ xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattAp
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="ImagingSession.cpp" />
     <ClCompile Include="OCTSystem.cpp" />
-    <ClCompile Include="VolumeGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

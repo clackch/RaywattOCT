@@ -6,7 +6,6 @@
 #include <stdio.h>
 
 static COCTSystem octSystem;
-CConfiguration& config = CConfiguration::GetInstance();
 
 _declspec(dllexport) RayError RayStartSystem() {
     return octSystem.Start();
@@ -93,6 +92,7 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
     }
 }
 _declspec(dllexport) double RayGetProperty(RayProperty prop) {
+    CConfiguration& config = CConfiguration::GetInstance();
 
     switch (prop) {
     case RayProperty::CurrentState:
