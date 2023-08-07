@@ -22,6 +22,8 @@ using RaywattApp.ViewModels.Dialog;
 using RaywattApp.Views.Dialog;
 using System.Threading;
 using System.Windows.Controls;
+using CommunityToolkit.Mvvm.Messaging;
+using RaywattApp.Common.Messages;
 
 namespace RaywattApp.Common.Util
 {
@@ -891,6 +893,22 @@ namespace RaywattApp.Common.Util
             textBlock.Measure(new System.Windows.Size(double.PositiveInfinity, double.PositiveInfinity));
 
             return textBlock.DesiredSize;
+        }
+
+        public static void Exit(DeviceStatus deviceStatus)
+        {
+            deviceStatus.IsPaused = true;
+            while (!deviceStatus.CanExit)
+            {
+                Thread.Sleep(50);
+            }
+
+            RayDisconnectDevices();
+            RayStopSystem();
+
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
+
+            System.Windows.Application.Current.MainWindow.Close();
         }
     }
 }

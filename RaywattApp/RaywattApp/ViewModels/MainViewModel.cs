@@ -5,6 +5,7 @@ using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
+using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
@@ -203,18 +204,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Exit");
 
-            DeviceStatus.IsPaused = true;
-            while (!DeviceStatus.CanExit)
-            {
-                Thread.Sleep(50);
-            }
-
-            RayDisconnectDevices();
-            RayStopSystem();
-
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
-
-            Application.Current.MainWindow.Close();
+            CommonUtil.Exit(DeviceStatus);
         }
 
         private void CatheterFailReceiver()
@@ -327,6 +317,7 @@ namespace RaywattApp.ViewModels
                     });
                     break;
                 case RayWorkItem.OCTImaging:
+                    DeviceStatus.IsOCTImagingDone = true;
                     break;
                 case RayWorkItem.GenerateCutView:
                     break;
