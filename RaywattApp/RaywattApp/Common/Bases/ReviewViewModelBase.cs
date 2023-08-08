@@ -23,7 +23,7 @@ namespace RaywattApp.Common.Bases
 
         protected readonly SqlManager _sqlManager;
 
-        private IDialogService _dialogService;
+        protected IDialogService _dialogService;
 
         [ObservableProperty]
         private PrevStatus _prevStatus;

@@ -4,6 +4,51 @@ namespace RaywattOCT
 {
     public class Ray3DWrapper
     {
+        public class Ray3DStatus
+        {
+            private Ray3DObjectMode[] _objectVisibility = new Ray3DObjectMode[(int)Ray3DObject.Count];
+            public Ray3DObjectMode[] ObjectVisibility
+            {
+                get { return _objectVisibility; }
+                set { _objectVisibility = value; }
+            }
+
+            private bool _cutviewOn = true;
+            public bool CutViewOn
+            {
+                get { return _cutviewOn; }
+                set { _cutviewOn = value; }
+            }
+
+            public Ray3DStatus()
+            {
+                for (Ray3DObject obj = Ray3DObject.Tissue; obj < Ray3DObject.Count; obj++) 
+                {
+                    ObjectVisibility[(int)obj] = Ray3DObjectMode.Hide;
+                }
+                ObjectVisibility[(int)Ray3DObject.Tissue] = Ray3DObjectMode.Cut;
+                CutViewOn = true;
+            }
+
+            public int ShowObject(Ray3DObject obj, Ray3DObjectMode mode)
+            {
+                ObjectVisibility[(int)obj] = mode;
+                return ODSOCT_SetViewData(obj, mode);
+            }
+
+            public bool IsObjectVisible(Ray3DObject obj)
+            {
+                return (ObjectVisibility[(int)obj] != Ray3DObjectMode.Hide);
+            }
+        }
+
+        private static Ray3DStatus _ray3DStatus;
+        public static Ray3DStatus ray3DStatus
+        { 
+            get { return _ray3DStatus; }
+            set { _ray3DStatus = value; }
+        }
+
         public static int MinWaitingDelay = 50;
         public enum Ray3DObject : int
         {
@@ -14,7 +59,8 @@ namespace RaywattOCT
             StentMalaposition,
             GuideWire,
             GuideWire2,
-            SideBranch
+            SideBranch,
+            Count
         };
         public enum Ray3DObjectMode : int 
         { 
