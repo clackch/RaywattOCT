@@ -1,0 +1,77 @@
+﻿<UserControl x:Class="RaywattApp.Views.Dialog.Review3dPatientMenuControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+             xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:component="clr-namespace:RaywattApp.Views.Component"
+             xmlns:const="clr-namespace:RaywattApp.Common.Bases"
+             mc:Ignorable="d" 
+             Width="{Binding DialogWidth}" Height="{Binding DialogHeight}">
+
+    <Border Grid.Row="2" CornerRadius="0,8,8,0" HorizontalAlignment="Left" Width="{x:Static const:Constants.LeftSideBarExpandSize}" Visibility="{Binding ExpandLeftDownMenu, Converter={StaticResource BoolToVisibilityConverter}}" Background="{StaticResource SideCardBackgroundBrush}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0" >
+                <Button Style="{DynamicResource SideMenuTitleLeft}" Content="{Binding [Case Info.], Source={StaticResource L10N}}" Command="{Binding CmdClose}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"/>
+            </StackPanel>
+            <StackPanel Grid.Row="1">
+                <Grid Width="192">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="24"/>
+                        <RowDefinition Height="26"/>
+                        <RowDefinition Height="22"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="1">
+                        <Label Style="{DynamicResource ProcedureLabel}" Content="{Binding PatientCase.Procedure, Converter={StaticResource CodeConverter}, ConverterParameter='PROC'}" HorizontalAlignment="Left"/>
+                        <component:IconButton Style="{DynamicResource IconButton}" Icon="editSimple" Command="{Binding EditCaseCommand}" Content="{Binding [Edit], Source={StaticResource L10N}}" HorizontalAlignment="Right"/>
+                    </Grid>
+                    <StackPanel Grid.Row="3">
+                        <Label Content="{Binding Patient.Name}" Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
+                        <StackPanel Height="9"/>
+                        <!-- design guide : 12px -->
+                        <Separator Height="1" Background="{DynamicResource SeparatorBrush}"/>
+                        <StackPanel Height="18"/>
+                        <!-- design guide : 20px -->
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [ID], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding Patient.Id}"/>
+                            </StackPanel>
+                            <StackPanel Height="4"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Birth], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}"/>
+                            </StackPanel>
+                            <StackPanel Height="4"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
+                            </StackPanel>
+                            <StackPanel Height="12"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Vessel], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding PatientCase.Vessel, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}"/>
+                            </StackPanel>
+                            <StackPanel Height="4"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Physician], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding PatientCase.PhysicianName}"/>
+                            </StackPanel>
+                            <StackPanel Height="12"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Comment], Source={StaticResource L10N}}"/>
+                                <TextBlock Width="112" Height="42" Text="{Binding PatientCase.Comment}" TextWrapping="WrapWithOverflow" FontFamily="Pretendard" FontWeight="Medium" FontSize="12" Foreground="{DynamicResource CaseValueBrush}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>
