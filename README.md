@@ -46,6 +46,8 @@ Database Initial Setting
 
 (Tool에서 Import/Export 기능 불가 시 [링크](https://velog.io/@myway00/Postgre-error-Utility-file-not-found.-Please-correct-the-Binary-Path-in-the-Preferences-dialog-오류-해결-1분만-투자하면-해결-ㅆㄱㄴ) 참고)
 
+* DB Schema 변경 시 Import/Export
+  - Import/Export -> Columns -> Import/Export 할 Columns 선택 (헤더 불필요)
 
 ## [LibTorch]
 (※ 신규 장비 Set-up 시에 필요없음. RaywattApp에 dll 파일 존재)
