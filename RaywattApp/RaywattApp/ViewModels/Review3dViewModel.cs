@@ -183,6 +183,12 @@ namespace RaywattApp.ViewModels
             if (viewMenuWindow != null) viewMenuWindow.Close();
             if (patientMenuWindow != null) patientMenuWindow.Close();
 
+            if (timerInitialize.IsEnabled)
+                timerInitialize.Stop();
+
+            if (timerShowData.IsEnabled)
+                timerShowData.Stop();
+
             Save();
             ODSOCT_HideAllWindows();
 
