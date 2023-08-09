@@ -21,6 +21,9 @@ namespace RaywattApp.ViewModels
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(Review3dViewModel));
 
+        [ObservableProperty]
+        private bool _isRendering = false;
+
         private bool _isCutViewOn;
         public bool IsCutViewOn 
         { 
@@ -261,6 +264,8 @@ namespace RaywattApp.ViewModels
             {
                 ray3DStatus.ShowObject(obj, ray3DStatus.ObjectVisibility[(int)obj]);
             }
+
+            IsRendering = true;
         }
 
         private void updateNavigator(int curFrame, int totalFrame)
