@@ -22,15 +22,15 @@ namespace RaywattApp.ViewModels.Setting
         private string _termsAndConditions;
 
         [ObservableProperty]
-        private string _validateInstitudeName;
+        private string _validateInstituteName;
 
         [ObservableProperty]
         private bool _isModify;
 
-        private ICommand _modifyInstitudeCommand;
-        public ICommand ModifyInstitudeCommand
+        private ICommand _modifyInstituteCommand;
+        public ICommand ModifyInstituteCommand
         {
-            get { return this._modifyInstitudeCommand ?? (this._modifyInstitudeCommand = new RelayCommand(ModifyInstitude)); }
+            get { return this._modifyInstituteCommand ?? (this._modifyInstituteCommand = new RelayCommand(ModifyInstitute)); }
         }
 
         public SettingTermsConditionsViewModel(SqlManager sqlManager)
@@ -48,7 +48,7 @@ namespace RaywattApp.ViewModels.Setting
         private void TermsConditions_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (IsModify)
-                ValidateInstitudeName = "";
+                ValidateInstituteName = "";
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -94,7 +94,7 @@ namespace RaywattApp.ViewModels.Setting
             }
         }
 
-        private void ModifyInstitude()
+        private void ModifyInstitute()
         {
             IsModify = true;
         }
@@ -103,7 +103,7 @@ namespace RaywattApp.ViewModels.Setting
         {
             if(string.IsNullOrEmpty(TermsConditions.Buffer))
             {
-                ValidateInstitudeName = _l10n["Enter Institude Name"];
+                ValidateInstituteName = _l10n["Enter Institute Name"];
                 return false;
             }
             else

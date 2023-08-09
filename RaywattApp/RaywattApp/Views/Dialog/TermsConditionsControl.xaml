@@ -33,13 +33,13 @@
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Top" Margin="0,20,20,0">
                     <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray1Brush}">
                         <Label.Content>
-                            <AccessText TextWrapping="Wrap" Text="{Binding [Institude Name], Source={StaticResource L10N}}"/>
+                            <AccessText TextWrapping="Wrap" Text="{Binding [Institute Name], Source={StaticResource L10N}}"/>
                         </Label.Content>
                     </Label>
                 </StackPanel>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal">
-                        <TextBox Style="{DynamicResource TextBoxValidator}" Width="600" MaxLength="50" Text="{Binding TermsConditions.Buffer, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter Institude Name], Source={StaticResource L10N}}"/>
+                        <TextBox Style="{DynamicResource TextBoxValidator}" Width="600" MaxLength="50" Text="{Binding TermsConditions.Buffer, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter Institute Name], Source={StaticResource L10N}}"/>
                     </StackPanel>
                 </StackPanel>
             </Grid>

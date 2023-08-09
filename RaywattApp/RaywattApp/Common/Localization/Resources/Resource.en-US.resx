@@ -426,8 +426,8 @@ Overwrite existing data?</value>
   <data name="Enter ID" xml:space="preserve">
     <value>Enter ID</value>
   </data>
-  <data name="Enter Institude Name" xml:space="preserve">
-    <value>Enter Institude Name</value>
+  <data name="Enter Institute Name" xml:space="preserve">
+    <value>Enter Institute Name</value>
   </data>
   <data name="Enter Last Name" xml:space="preserve">
     <value>Enter Last Name</value>
@@ -522,8 +522,8 @@ Overwrite existing data?</value>
   <data name="Information" xml:space="preserve">
     <value>Information</value>
   </data>
-  <data name="Institude Name" xml:space="preserve">
-    <value>Institude Name</value>
+  <data name="Institute Name" xml:space="preserve">
+    <value>Institute Name</value>
   </data>
   <data name="Insufficient storage space available" xml:space="preserve">
     <value>Insufficient storage space available</value>
