@@ -48,14 +48,25 @@
                 </StackPanel>
             </StackPanel>
 
-            <StackPanel Grid.Row="0" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" Visibility="{Binding DeviceStatus.IsLumenLoaded, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
-            <StackPanel Grid.Row="2" Background="{StaticResource GrayscaleBlackBrush}" Opacity="0.7" Visibility="{Binding DeviceStatus.IsLumenLoaded, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
-            <StackPanel Grid.Row="0" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" Visibility="{Binding DeviceStatus.IsLumenSaved, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
-            <StackPanel Grid.Row="2" Background="{StaticResource GrayscaleBlackBrush}" Opacity="0.7" Visibility="{Binding DeviceStatus.IsLumenSaved, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
-            <StackPanel Grid.Row="0" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" Visibility="{Binding DeviceStatus.IsLumenSaved, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
-            <StackPanel Grid.Row="2" Background="{StaticResource GrayscaleBlackBrush}" Opacity="0.7" Visibility="{Binding DeviceStatus.IsLumenSaved, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
-            <StackPanel Grid.Row="0" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" Visibility="{Binding DeviceStatus.IsOCTImagingDone, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
-            <StackPanel Grid.Row="2" Background="{StaticResource GrayscaleBlackBrush}" Opacity="0.7" Visibility="{Binding DeviceStatus.IsOCTImagingDone, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+            <component:MenuUnableComponent Grid.Row="0" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}">
+                <component:MenuUnableComponent.Visibility>
+                    <MultiBinding Converter="{StaticResource MenuUnableConverter}">
+                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
+                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
+                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
+                    </MultiBinding>
+                </component:MenuUnableComponent.Visibility>
+            </component:MenuUnableComponent>
+
+            <component:MenuUnableComponent Grid.Row="2" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}">
+                <component:MenuUnableComponent.Visibility>
+                    <MultiBinding Converter="{StaticResource MenuUnableConverter}">
+                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
+                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
+                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
+                    </MultiBinding>
+                </component:MenuUnableComponent.Visibility>
+            </component:MenuUnableComponent>
         </Grid>
     </Grid>
 </Window>
