@@ -56,7 +56,7 @@ namespace RaywattApp.Common.Dialog
             dialogDataContext.DialogWidth = width;
             dialogDataContext.DialogHeight = height;
 
-            IDialogWindow window = new DialogWindow();
+            IDialogWindow window = new ChildWindow();
             window.Content = dialog;
             window.DataContext = dialogDataContext;
 

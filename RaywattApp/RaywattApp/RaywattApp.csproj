@@ -956,6 +956,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="Views\Dialog\ChildWindow.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
     <Page Update="Views\Dialog\Review3dPatientMenuControl.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
