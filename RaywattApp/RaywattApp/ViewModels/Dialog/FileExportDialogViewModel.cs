@@ -175,15 +175,10 @@ namespace RaywattApp.ViewModels.Dialog
                         Section.SetMlaMld(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackType);
                         Section.VisibleMlaMld(true);
                     }
-                    else if (CommonUtil.IsPostCase(PatientCase.Procedure))
+                    else
                     {
                         Section.SetMsaMinExp(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackType);
                         Section.VislbleMsaMinExp(true);
-                    }
-                    else
-                    {
-                        //Procedure Other Case 확인 필요
-                        Section.SetMlaMld(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackType);
                     }
                 }
 

@@ -86,7 +86,9 @@ namespace RaywattApp.ViewModels.Setting
 
         private void Init()
         {
-            IList<Configuration> tnCs = _sqlManager.SelectConfigurationTnC();
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "Terms&Cond";
+            IList<Configuration> tnCs = _sqlManager.SelectConfiguration(sqlParameters);
             if(tnCs != null || tnCs.Count == 1)
             {
                 TermsConditions.Value = tnCs[0].Value;
@@ -120,10 +122,11 @@ namespace RaywattApp.ViewModels.Setting
             IsModify = false;
 
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "Terms&Cond";
             sqlParameters["value"] = TermsConditions.Value;
             sqlParameters["buffer"] = TermsConditions.Buffer;
 
-            int res = _sqlManager.UpdateConfigurationTnC(sqlParameters);
+            int res = _sqlManager.UpdateConfiguration(sqlParameters);
             if(res != 1)
             {
                 _log.Error("Insert Error");

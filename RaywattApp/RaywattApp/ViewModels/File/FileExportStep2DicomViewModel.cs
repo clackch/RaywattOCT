@@ -132,7 +132,9 @@ namespace RaywattApp.ViewModels.File
                 dicomProperty.Add(temp.ReturnString, temp.ReturnString2);
             }
 
-            IList<Configuration> tnCs = _sqlManager.SelectConfigurationTnC();
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "Terms&Cond";
+            IList<Configuration> tnCs = _sqlManager.SelectConfiguration(sqlParameters);
             if (tnCs != null || tnCs.Count == 1)
             {
                 //Institution Name

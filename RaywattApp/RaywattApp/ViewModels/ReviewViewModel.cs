@@ -206,6 +206,12 @@ namespace RaywattApp.ViewModels
             get { return this._zoomOutCommand ?? (this._zoomOutCommand = new RelayCommand(ZoomOut)); }
         }
 
+        private ICommand _adjustResetCommand;
+        public ICommand AdjustResetCommand
+        {
+            get { return this._adjustResetCommand ?? (this._adjustResetCommand = new RelayCommand(AdjustReset)); }
+        }
+
         private CallbackFunctionForDetection cbLumenContour;
         public CallbackFunctionForDetection CBLumenContour => (this.cbLumenContour) ?? (this.cbLumenContour = new CallbackFunctionForDetection(OnRecvLumenContour));
 
@@ -909,6 +915,20 @@ namespace RaywattApp.ViewModels
             }
         }
 
+        private void AdjustReset()
+        {
+            _log.Debug("AdjustReset");
+
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "Present";
+            IList<Configuration> presents = _sqlManager.SelectConfiguration(sqlParameters);
+            if(presents != null && presents.Count > 0)
+            {
+                Brightness = int.Parse(presents.FirstOrDefault(x => x.Key == "brightness").Value);
+                Contrast = int.Parse(presents.FirstOrDefault(x => x.Key == "contrast").Value);
+            }
+        }
+
         private void MinimalValueChanged()
         {
             int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
@@ -922,15 +942,10 @@ namespace RaywattApp.ViewModels
                 Section.SetMlaMld(LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackType);
                 Section.VisibleMlaMld(true);
             }    
-            else if (CommonUtil.IsPostCase(PatientCase.Procedure))
+            else
             {
                 Section.SetMsaMinExp(LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackType);
                 Section.VislbleMsaMinExp(true);
-            }
-            else
-            {
-                //Procedure Other Case 확인 필요
-                Section.SetMlaMld(LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackType);
             }
         }
 

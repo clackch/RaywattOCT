@@ -3,6 +3,8 @@ DELETE FROM rv_schema.configuration;
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('L10N', 'en-US', 'Y', '');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('L10N', 'ko-KR', 'N', '');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Terms&Cond', 'AgreeYN', 'N', '');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Present', 'brightness', '0', '');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Present', 'contrast', '39', '');
 
 -- rv_schema.code
 DELETE FROM rv_schema.code;
@@ -31,7 +33,6 @@ INSERT INTO rv_schema.code( classification, key, value, sort_order, description,
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PROC', '$001', 'Pre-PCI', 1, 'Procedure Pre-PCI', now(), now());
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PROC', '$002', 'Post-PCI', 2, 'Procedure Post-PCI', now(), now());
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PROC', '$003', 'Follow-Up', 3, 'Procedure Follow-Up', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PROC', '$OTH', 'Other', 4, 'Procedure Other', now(), now());
 -- EXPANSION CALCULATION
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('EXCC', 'TAPE', 'Tapered', 1, 'Expansion Calculation Tapered', now(), now());
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('EXCC', 'OTHE', 'Other', 2, 'Expansion Calculation Other', now(), now());

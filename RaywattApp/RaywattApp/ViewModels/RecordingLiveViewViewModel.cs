@@ -10,6 +10,7 @@ using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Input;
 using System.Windows.Navigation;
 using System.Windows.Threading;
@@ -138,8 +139,14 @@ namespace RaywattApp.ViewModels
             if (PatientCase.PullbackType == null)
                 PatientCase.PullbackType = Constants.PullbackTypeShort;
 
-            Brightness = (int) RayGetProperty(Property.Brightness);
-            Contrast = (int) RayGetProperty(Property.Contrast);
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "Present";
+            IList<Configuration> presents = _sqlManager.SelectConfiguration(sqlParameters);
+            if (presents != null && presents.Count > 0)
+            {
+                Brightness = int.Parse(presents.FirstOrDefault(x => x.Key == "brightness").Value);
+                Contrast = int.Parse(presents.FirstOrDefault(x => x.Key == "contrast").Value);
+            }
         }
 
         private void Back()
