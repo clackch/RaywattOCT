@@ -166,8 +166,8 @@ namespace RaywattApp.ViewModels.Dialog
 
                 if (fileExport.Longitude)
                 {
-                    Section.Proximal.X = CommonUtil.GetPositionFromFrame(patientCase.SectionProximal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, 0);
-                    Section.Distal.X = CommonUtil.GetPositionFromFrame(patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, Constants.SectionIndicatorWidth);
+                    Section.Proximal.X = CommonUtil.GetPositionFromFrame(patientCase.SectionProximal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, Constants.SectionIndicatorCenterWidth);
+                    Section.Distal.X = CommonUtil.GetPositionFromFrame(patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
                     DrawLumenProfileImage();
 
                     if (CommonUtil.IsPreCase(patientCase.Procedure))

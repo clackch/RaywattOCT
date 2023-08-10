@@ -393,8 +393,9 @@
                         </Image>
                         <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="15,0,0,10">
                             <StackPanel Orientation="Horizontal" Width="50">
-                                <Label Content="F : " Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}"/>
-                                <Label Content="{Binding DisplayFrameNumber}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center" />
+                                <Label Content="F" Style="{DynamicResource Pretendard-ExtraBold-14}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+                                <StackPanel Width="6"/>
+                                <Label Content="{Binding DisplayFrameNumber}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" HorizontalAlignment="Center" />
                             </StackPanel>
                         </StackPanel>
                         <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,17,10">

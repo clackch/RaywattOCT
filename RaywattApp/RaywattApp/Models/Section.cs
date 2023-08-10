@@ -21,7 +21,10 @@ namespace RaywattApp.Models
         private Indicator _distal;
 
         [ObservableProperty]
-        private IndicatorBase _mlaMld;
+        private IndicatorBase _mla;
+
+        [ObservableProperty]
+        private IndicatorBase _mld;
 
         [ObservableProperty]
         private IndicatorBase _mlaValue;
@@ -56,6 +59,15 @@ namespace RaywattApp.Models
         [ObservableProperty]
         private double _refDiameter;
 
+        [ObservableProperty]
+        private double _lesionProximal;
+
+        [ObservableProperty]
+        private double _lesionDistal;
+
+        [ObservableProperty]
+        private double _lesionLengthWidth;
+
         public Section()
         {
             Proximal = new Indicator();
@@ -70,9 +82,11 @@ namespace RaywattApp.Models
             Distal.IsVisible = Visibility.Collapsed;
             Distal.IsEnabled = false;
 
-            MlaMld = new IndicatorBase();
-            MlaMld.IsVisible = Visibility.Collapsed;
-            MlaMld.X = 0 - Constants.SectionMlaMldWidth / 2;
+            Mla = new IndicatorBase();
+            Mla.IsVisible = Visibility.Collapsed;
+
+            Mld = new IndicatorBase();
+            Mld.IsVisible = Visibility.Collapsed;
 
             MlaValue = new IndicatorBase();
             MlaValue.IsVisible = Visibility.Collapsed;
@@ -128,10 +142,15 @@ namespace RaywattApp.Models
             int frameCnt = pullbackType == Constants.PullbackTypeLong ? Constants.PullbackLongFrameCnt : Constants.PullbackShortFrameCnt;
 
             LesionLength.DValue = Math.Round(((frameDistal - frameProximal + 1) * frameCnt / 10) / (double)totalFrame, 1);
-            double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-12", LesionLength.DValue + "㎜").Width;
+            double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-10", LesionLength.DValue + "㎜", 1).Width + 1;
             LesionLength.X = CommonUtil.GetPositionFromFrame((frameDistal + frameProximal) / 2, totalFrame, longitudeWidth, width / 2);
 
             LesionLength.IsVisible = Visibility.Visible;
+
+            LesionProximal = CommonUtil.GetPositionFromFrame(frameProximal, totalFrame, longitudeWidth, 0);
+            double lesionDistalTemp = CommonUtil.GetPositionFromFrame(frameDistal, totalFrame, longitudeWidth, 0);
+            LesionLengthWidth = (lesionDistalTemp - LesionProximal - (width + 10)) / 2;
+            LesionDistal = lesionDistalTemp - LesionLengthWidth;
         }
 
         public void SetMlaMld(List<LumenContour> LumenContours, int frameProximal, int frameDistal, int totalFrame, double longitudeWidth, string pullbackType)
@@ -144,17 +163,21 @@ namespace RaywattApp.Models
             double mla = LumenContours.GetRange(frameProximal, count).Min(x => x.Area);
             int mlaIdx = LumenContours.GetRange(frameProximal, count).FindIndex(x => x.Area == mla);
 
-            double mld = LumenContours.GetRange(frameProximal, count).Min(x => x.MeanDiameter);
-            int mldIdx = LumenContours.GetRange(frameProximal, count).FindIndex(x => x.MeanDiameter == mld);
+            //mla, mld 위치가 동일해야하는데, 현재 diameter 구하는 방식으로 인해 차이 발생
+            //double mld = LumenContours.GetRange(frameProximal, count).Min(x => x.MeanDiameter);
+            //int mldIdx = LumenContours.GetRange(frameProximal, count).FindIndex(x => x.MeanDiameter == mld);
 
-            MlaMld.X = CommonUtil.GetPositionFromFrame(mlaIdx + frameProximal, totalFrame, longitudeWidth, Constants.SectionMlaMldWidth / 2);
+            Mla.X = CommonUtil.GetPositionFromFrame(mlaIdx + frameProximal, totalFrame, longitudeWidth, Constants.SectionValueWidth - Constants.SectionValueCenterWidth );
+            Mld.X = CommonUtil.GetPositionFromFrame(mlaIdx/*mldIdx*/ + frameProximal, totalFrame, longitudeWidth, - Constants.SectionValueCenterWidth);
+            Mla.StrValue = "Left";
+            Mld.StrValue = "Right";
             MlaValue.DValue = mla;
             MlaValue.NValue = mlaIdx + frameProximal;
-            string text = "MLA " + Math.Round(mla * Constants.MillimeterPerPixel  * Constants.MillimeterPerPixel , 2).ToString() + "㎟";
-            double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-12", text).Width;
-            MlaValue.X = MlaMld.X - (width + 2);
-            MldValue.DValue = LumenContours[mlaIdx + frameProximal].MeanDiameter;
-            MldValue.X = MlaMld.X + Constants.SectionMlaMldWidth + 2;
+            string text = "MLA " + Math.Round(mla * Constants.MillimeterPerPixel * Constants.MillimeterPerPixel, 2).ToString() + "㎟";
+            double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-12", text, 2).Width;
+            MlaValue.X = Mla.X - (width + 18);
+            MldValue.DValue = LumenContours[mlaIdx/*mldIdx*/ + frameProximal].MeanDiameter;//mld
+            MldValue.X = Mld.X + Constants.SectionValueWidth;
         }
 
         public void SetMsaMinExp(List<LumenContour> LumenContours, int frameProximal, int frameDistal, int totalFrame, double longitudeWidth, string pullbackType)
@@ -173,39 +196,40 @@ namespace RaywattApp.Models
 
             if(msaIdx <= minExpIdx)
             {
-                Msa.X = CommonUtil.GetPositionFromFrame(msaIdx + frameProximal, totalFrame, longitudeWidth, Constants.SectionMsaMinExpWidth);
-                MinExp.X = CommonUtil.GetPositionFromFrame(minExpIdx + frameProximal, totalFrame, longitudeWidth, 4);
+                Msa.X = CommonUtil.GetPositionFromFrame(msaIdx + frameProximal, totalFrame, longitudeWidth, Constants.SectionValueWidth - Constants.SectionValueCenterWidth);
+                MinExp.X = CommonUtil.GetPositionFromFrame(minExpIdx + frameProximal, totalFrame, longitudeWidth, - Constants.SectionValueCenterWidth);
                 Msa.StrValue = "Left";
                 MinExp.StrValue = "Right";
                 MsaValue.DValue = msa;
                 MsaValue.NValue = msaIdx + frameProximal;
                 string text = "MSA " + Math.Round(msa * Constants.MillimeterPerPixel  * Constants.MillimeterPerPixel , 2).ToString() + "㎟";
-                double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-12", text).Width;
-                MsaValue.X = Msa.X - (width + 2);
+                double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-12", text, 2).Width;
+                MsaValue.X = Msa.X - (width + 18);
                 MinExpValue.DValue = minExp;
-                MinExpValue.X = MinExp.X + Constants.SectionMsaMinExpWidth + 4 + 2;
+                MinExpValue.X = MinExp.X + Constants.SectionValueWidth;
             }
             else
             {
-                Msa.X = CommonUtil.GetPositionFromFrame(msaIdx + frameProximal, totalFrame, longitudeWidth, 4);
-                MinExp.X = CommonUtil.GetPositionFromFrame(minExpIdx + frameProximal, totalFrame, longitudeWidth, Constants.SectionMsaMinExpWidth);
+                Msa.X = CommonUtil.GetPositionFromFrame(msaIdx + frameProximal, totalFrame, longitudeWidth, - Constants.SectionValueCenterWidth);
+                MinExp.X = CommonUtil.GetPositionFromFrame(minExpIdx + frameProximal, totalFrame, longitudeWidth, Constants.SectionValueWidth - Constants.SectionValueCenterWidth);
                 Msa.StrValue = "Right";
                 MinExp.StrValue = "Left";
                 MsaValue.DValue = msa;
                 MsaValue.NValue = msaIdx + frameProximal;
-                MsaValue.X = Msa.X + Constants.SectionMsaMinExpWidth + 4 + 2;
+                MsaValue.X = Msa.X + Constants.SectionValueWidth;
                 MinExpValue.DValue = minExp;
                 string text = "Min Exp. " + minExp + "%";
-                double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-12", text).Width;
-                MinExpValue.X = MinExp.X - (width + 2);
-            }            
+                double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-12", text, 2).Width;
+                MinExpValue.X = MinExp.X - (width + 18);
+            }
         }
 
         public void VisibleMlaMld(bool isVisible)
         {   
             Visibility visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
-            
-            MlaMld.IsVisible = visibility;
+
+            Mla.IsVisible = visibility;
+            Mld.IsVisible = visibility;
             MlaValue.IsVisible = visibility;
             MldValue.IsVisible = visibility;
         }

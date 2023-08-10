@@ -252,9 +252,10 @@ namespace RaywattApp.Common.Bases
         public const double LongitudeScale = LongitudeWidth / 10;
         public const double LongitudeIndicatorWidth = 22;
         public const double LongitudeIndicatorHeight = 116;
-        public const double SectionIndicatorWidth = 12.5;
-        public const double SectionMlaMldWidth = 45;
-        public const double SectionMsaMinExpWidth = 22.5;
+        public const double SectionIndicatorWidth = 7.5;
+        public const double SectionIndicatorCenterWidth = 1;
+        public const double SectionValueWidth = 24;
+        public const double SectionValueCenterWidth = 0.25;
         public const double LumenProfileExtraHeight = 6;
 
         //Review - 2D - Side Menu

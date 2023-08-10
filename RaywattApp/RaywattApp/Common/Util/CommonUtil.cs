@@ -536,44 +536,35 @@ namespace RaywattApp.Common.Util
 
                 Cv2.Line(imglumenProfile, new Point(curFrame, yStart), new Point(curFrame, yStart + lumenArea), new Scalar(0x16, 0x16, 0x16));
 
-                //Side Branch
-                if (sidebranchs != null)
-                {
-                    if(sidebranchs.Contains(curFrame))
-                        Cv2.Line(imglumenProfile, new Point(curFrame, imglumenProfile.Rows / 2 - 5), new Point(curFrame, imglumenProfile.Rows / 2 + 5), new Scalar(0xe4, 0xe4, 0xe4));
-                }
-
                 //Lesion Section
                 if (curFrame >= frameProximal && curFrame <= frameDistal)
                 {
-                    Scalar scalar;
-
-                    if (appositionFrames != null && appositionFrames.Contains(curFrame))
-                        scalar = new Scalar(0x77, 0x7d, 0xff);
-                    else
-                        scalar = new Scalar(0x8d, 0x8d, 0x8d);
+                    //Stent Area
+                    if (isPostCase && appositionFrames != null && appositionFrames.Contains(curFrame))
+                        Cv2.Line(imglumenProfile, new Point(curFrame, yStart), new Point(curFrame, yStart + lumenArea), new Scalar(0x3f, 0x41, 0x76));
 
                     //Stent
                     for (int i = 0; isPostCase && i < imglumenProfile.Rows; i++)
                     {
                         if ((i + curFrame) % 20 == 0)
                         {
-                            Cv2.Line(imglumenProfile, new Point(curFrame, i), new Point(curFrame, i), scalar);
+                            Cv2.Line(imglumenProfile, new Point(curFrame, i), new Point(curFrame, i), new Scalar(0x8d, 0x8d, 0x8d));
                         }
                         if ((i - curFrame) % 20 == 0)
                         {
-                            Cv2.Line(imglumenProfile, new Point(curFrame, i), new Point(curFrame, i), scalar);
+                            Cv2.Line(imglumenProfile, new Point(curFrame, i), new Point(curFrame, i), new Scalar(0x8d, 0x8d, 0x8d));
                         }
                     }
 
                     Cv2.Line(imglumenProfile, new Point(curFrame, 0), new Point(curFrame, yStart - 1), new Scalar(0x4f, 0x4f, 0x4f));
                     Cv2.Line(imglumenProfile, new Point(curFrame, yStart + lumenArea + 1), new Point(curFrame, imglumenProfile.Rows), new Scalar(0x4f, 0x4f, 0x4f));
+                }
 
-                    if(curFrame % 2 == 0)
-                    {
-                        Cv2.Line(imglumenProfile, new Point(curFrame, 0), new Point(curFrame, 0), new Scalar(0xe4, 0xe4, 0xe4));
-                        Cv2.Line(imglumenProfile, new Point(curFrame, imglumenProfile.Rows - 1), new Point(curFrame, imglumenProfile.Rows), new Scalar(0xe4, 0xe4, 0xe4));
-                    }
+                //Side Branch
+                if (sidebranchs != null)
+                {
+                    if (sidebranchs.Contains(curFrame))
+                        Cv2.Line(imglumenProfile, new Point(curFrame, imglumenProfile.Rows / 2 - 5), new Point(curFrame, imglumenProfile.Rows / 2 + 5), new Scalar(0xe4, 0xe4, 0xe4));
                 }
 
                 curFrame++;
@@ -596,6 +587,20 @@ namespace RaywattApp.Common.Util
             }
 
             return imglumenProfile;
+        }
+
+        public static List<int> GetExpansionList(List<LumenContour> lumenContours, int frameProximal, int frameDistal, double refArea, int expansionThreshold)
+        {
+            List<int> expansionList = new List<int>();
+
+            for (int i = frameProximal; i <= frameDistal && refArea != 0; i++)
+            {
+                double expansion = lumenContours[i].Area / refArea * 100;
+                if (expansion <= expansionThreshold)
+                    expansionList.Add(i);
+            }
+
+            return expansionList;
         }
 
         public static async Task SaveStillFrame(Mat image, string rootPath, string fileName, string format, Action<double> progressCallback, double progressIncrease, Action<string> progressTextCallback)
@@ -884,8 +889,19 @@ namespace RaywattApp.Common.Util
             }
         }
 
-        public static System.Windows.Size GetTextBlockSize(string style, string text = "")
+        public static System.Windows.Size GetTextBlockSize(string style, string text, int digits)
         {
+            string[] temp = text.Split(".");
+            if (temp != null && temp.Length == 2)
+            {
+                temp[1] = temp[1].Replace("㎜", "").Replace("㎟", "");
+
+                for(int i = temp[1].Length; i < digits; i++)
+                {
+                    text = text + "0";
+                }
+            }
+
             TextBlock textBlock = new TextBlock();
             textBlock.Style = (System.Windows.Style)App.Current.Resources[style];
             textBlock.Text = text;
