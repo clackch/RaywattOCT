@@ -254,13 +254,14 @@ UINT CImagingSession::GetCutViewChannels() {
 void CImagingSession::AddFramesIntoCutView() {
 	if (m_pCutView == nullptr) return;
 
+	cv::Mat imgCircle;
 	for (int nFrame = 0; nFrame < m_pCutView->GetNumOfSamples(); nFrame++)
 	{
 		std::map<int, cv::Mat>::iterator it = m_mapImage.find(nFrame);
 		if (it != m_mapImage.end())
 		{
-			m_pImaging->PostProcess(it->second);
-			m_pCutView->AddRecord(m_pImaging->GetCircleImage(), nFrame);
+			m_pImaging->CircularizeImage(it->second, imgCircle);
+			m_pCutView->AddRecord(imgCircle, nFrame);
 		}
 	}
 }
