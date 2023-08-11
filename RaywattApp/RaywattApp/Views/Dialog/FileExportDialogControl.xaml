@@ -158,7 +158,7 @@
                         <Grid Grid.Row="1" Width="{x:Static const:Constants.ExportLongitudeImageWidth}" Height="{x:Static const:Constants.ExportLongitudeImageHeight}">
                             <Image Source="{Binding LongitudeImage}" Stretch="Fill"/>
                             <!-- Measurement -->
-                            <annotation:DrawLmodeUtil Zoom="{Binding LongitudeZoom}" LModeLengthGeometries="{Binding LModeLengthGeometries}" LModeTextGeometries="{Binding LModeTextGeometries}" PullbackType="{Binding PatientCase.PullbackType}" InCommand="{Binding MeasurementCommand}" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                            <annotation:DrawLmodeUtil Zoom="{Binding LongitudeZoom}" LModeLengthGeometries="{Binding LModeLengthGeometries}" LModeTextGeometries="{Binding LModeTextGeometries}" PullbackLength="{Binding PatientCase.PullbackLength}" InCommand="{Binding MeasurementCommand}" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" VerticalAlignment="Top" HorizontalAlignment="Left"/>
                         </Grid>
                         <!-- L-Mode Indicator -->
                         <Canvas>
@@ -225,7 +225,7 @@
                         </Canvas>
                     </Grid>
                     <!-- Bookmark Scale -->
-                    <ContentControl Grid.Row="2" Template="{DynamicResource LongitudeScaleBarExport}" Width="{x:Static const:Constants.ExportLongitudeImageWidth}" Tag="{Binding PatientCase.PullbackType}"/>
+                    <ContentControl Grid.Row="2" Template="{DynamicResource LongitudeScaleBarExport}" Width="{x:Static const:Constants.ExportLongitudeImageWidth}" Tag="{Binding PatientCase.PullbackLength}"/>
 
                     <!-- Lumen Profile Extra : Expansion -->
                     <Image Grid.Row="3" VerticalAlignment="Top" Margin="0,13,0,0" Source="{Binding LumenProfileImageExtra}" Width="{x:Static const:Constants.ExportLongitudeImageWidth}" Height="{x:Static const:Constants.LumenProfileExtraCompareHeight}" Stretch="Fill"/>

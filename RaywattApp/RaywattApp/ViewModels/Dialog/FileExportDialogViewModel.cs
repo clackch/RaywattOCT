@@ -172,12 +172,12 @@ namespace RaywattApp.ViewModels.Dialog
 
                     if (CommonUtil.IsPreCase(patientCase.Procedure))
                     {
-                        Section.SetMlaMld(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackType);
+                        Section.SetMlaMld(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength);
                         Section.VisibleMlaMld(true);
                     }
                     else
                     {
-                        Section.SetMsaMinExp(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackType);
+                        Section.SetMsaMinExp(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength);
                         Section.VislbleMsaMinExp(true);
                     }
                 }

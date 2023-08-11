@@ -40,9 +40,16 @@ namespace RaywattApp.Services
 
             //SelectCodeList
             _query["SelectCodeList"] =
+                $"SELECT classification, key, value " +
+                $"FROM rv_schema.code " +
+                $"ORDER BY classification, sort_order";
+
+            //SelectCode
+            _query["SelectCode"] =
                 $"SELECT classification, key, value, buffer1, buffer2 " +
                 $"FROM rv_schema.code " +
-                $"ORDER BY classification, sort_order, key";
+                $"WHERE classification=@classification " +
+                $"ORDER BY sort_order";
 
             //SelectConfigurationL10n
             _query["SelectConfigurationL10n"] =
@@ -107,7 +114,7 @@ namespace RaywattApp.Services
                         $", accession_number, accession_name, comment" +
                         $", vessel, procedure" +
                         $", thumbnail_no, still_image_yn, image" +
-                        $", pullback_type, angio_co_registration, indicator_degree" +
+                        $", pullback_type, pullback_length, angio_co_registration, indicator_degree" +
                         $", preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold" +
                         $", brightness, contrast, section_proximal, section_distal" +
                         $", create_date, update_date " +
@@ -121,7 +128,7 @@ namespace RaywattApp.Services
                         $", accession_number, accession_name, comment" +
                         $", vessel, procedure" +
                         $", thumbnail_no, still_image_yn, image" +
-                        $", pullback_type, angio_co_registration, indicator_degree" +
+                        $", pullback_type, pullback_length, angio_co_registration, indicator_degree" +
                         $", preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold" +
                         $", brightness, contrast, section_proximal, section_distal" +
                         $", create_date, update_date " +
@@ -133,7 +140,7 @@ namespace RaywattApp.Services
                 $"SELECT T1.id, patient_id, physician_name, accession_number, accession_name, comment, vessel, procedure, thumbnail_no, still_image_yn, image" +
                         $", rv_schema.fn_patient(patient_id) patient_name" +
                         $", rv_schema.fn_patient_gender(patient_id) gender, rv_schema.fn_patient_birth(patient_id) birthdate" +
-                        $", pullback_type, angio_co_registration, indicator_degree" +
+                        $", pullback_type, pullback_length, angio_co_registration, indicator_degree" +
                         $", preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold" +
                         $", brightness, contrast, section_proximal, section_distal" +
                         $", T1.create_date, T1.update_date" +
@@ -177,13 +184,13 @@ namespace RaywattApp.Services
             _query["InsertPatientCase"] =
                 $"INSERT INTO rv_schema.patient_case(id, patient_id, physician_name, accession_number, accession_name" +
                                                     $", comment, vessel, procedure, thumbnail_no, still_image_yn, image" +
-                                                    $", pullback_type, angio_co_registration, indicator_degree" +
+                                                    $", pullback_type, pullback_length, angio_co_registration, indicator_degree" +
                                                     $", preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold" +
                                                     $", brightness, contrast, section_proximal, section_distal" +
                                                     $", create_date, update_date) " +
                 $"VALUES (@id, @patient_id, @physician_name, @accession_number, @accession_name" +
                         $", @comment, @vessel, @procedure, @thumbnail_no, @still_image_yn, @image" +
-                        $", @pullback_type, @angio_co_registration, @indicator_degree" +
+                        $", @pullback_type, @pullback_length, @angio_co_registration, @indicator_degree" +
                         $", @preset_name, @calcium_threshold, @expansion_calculation, @expansion_threshold, @apposition_threshold" +
                         $", @brightness, @contrast, @section_proximal, @section_distal" +
                         $", now(), now())";
@@ -299,18 +306,18 @@ namespace RaywattApp.Services
             //UpsertPatientCase
             _query["UpsertPatientCase"] =
                 $"INSERT INTO rv_schema.patient_case(id, patient_id, physician_name, accession_number, accession_name, comment, vessel, procedure" +
-                                                    $", thumbnail_no, still_image_yn, image, pullback_type, angio_co_registration, indicator_degree" +
+                                                    $", thumbnail_no, still_image_yn, image, pullback_type, pullback_length, angio_co_registration, indicator_degree" +
                                                     $", preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold" +
                                                     $", brightness, contrast, section_proximal, section_distal, create_date, update_date) " +
                 $"VALUES (@id, @patient_id, @physician_name, @accession_number, @accession_name, @comment, @vessel, @procedure" +
-                                                    $", @thumbnail_no, @still_image_yn, @image, @pullback_type, @angio_co_registration, @indicator_degree" +
+                                                    $", @thumbnail_no, @still_image_yn, @image, @pullback_type, @pullback_length, @angio_co_registration, @indicator_degree" +
                                                     $", @preset_name, @calcium_threshold, @expansion_calculation, @expansion_threshold, @apposition_threshold" +
                                                     $", @brightness, @contrast, @section_proximal, @section_distal, @create_date, @update_date) " +
                 $"ON CONFLICT (id) " +
                 $"DO UPDATE " +
                 $"SET patient_id=@patient_id, physician_name=@physician_name, accession_number=@accession_number, comment=@comment" +
                     $", vessel=@vessel, procedure=@procedure, thumbnail_no=@thumbnail_no, still_image_yn=@still_image_yn, image=@image" +
-                    $", pullback_type=@pullback_type, angio_co_registration=@angio_co_registration, indicator_degree=@indicator_degree, preset_name=@preset_name" +
+                    $", pullback_type=@pullback_type, pullback_length=@pullback_length, angio_co_registration=@angio_co_registration, indicator_degree=@indicator_degree, preset_name=@preset_name" +
                     $", calcium_threshold=@calcium_threshold, expansion_calculation=@expansion_calculation, expansion_threshold=@expansion_threshold" +
                     $", apposition_threshold=@apposition_threshold, brightness=@brightness, contrast=@contrast" +
                     $", section_proximal=@section_proximal, section_distal=@section_distal" +

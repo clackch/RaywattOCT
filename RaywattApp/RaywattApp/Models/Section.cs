@@ -137,9 +137,9 @@ namespace RaywattApp.Models
             Distal.DValue = distalArea;
         }
 
-        private void CalcLesionLength(int frameProximal, int frameDistal, int totalFrame, double longitudeWidth, string pullbackType)
+        private void CalcLesionLength(int frameProximal, int frameDistal, int totalFrame, double longitudeWidth, string pullbackLength)
         {
-            int frameCnt = pullbackType == Constants.PullbackTypeLong ? Constants.PullbackLongFrameCnt : Constants.PullbackShortFrameCnt;
+            int frameCnt = int.Parse(CodeDefinition.Codes["PBLE"][pullbackLength]);
 
             LesionLength.DValue = Math.Round(((frameDistal - frameProximal + 1) * frameCnt / 10) / (double)totalFrame, 1);
             double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-10", LesionLength.DValue + "㎜", 1).Width + 1;
@@ -153,11 +153,11 @@ namespace RaywattApp.Models
             LesionDistal = lesionDistalTemp - LesionLengthWidth;
         }
 
-        public void SetMlaMld(List<LumenContour> LumenContours, int frameProximal, int frameDistal, int totalFrame, double longitudeWidth, string pullbackType)
+        public void SetMlaMld(List<LumenContour> LumenContours, int frameProximal, int frameDistal, int totalFrame, double longitudeWidth, string pullbackLength)
         {
             CalcMean(LumenContours, frameProximal, frameDistal);
             SetProximalDisatalArea(LumenContours[frameProximal].Area, LumenContours[frameDistal].Area);
-            CalcLesionLength(frameProximal, frameDistal, totalFrame, longitudeWidth, pullbackType);
+            CalcLesionLength(frameProximal, frameDistal, totalFrame, longitudeWidth, pullbackLength);
 
             int count = frameDistal - frameProximal + 1;
             double mla = LumenContours.GetRange(frameProximal, count).Min(x => x.Area);
@@ -180,11 +180,11 @@ namespace RaywattApp.Models
             MldValue.X = Mld.X + Constants.SectionValueWidth;
         }
 
-        public void SetMsaMinExp(List<LumenContour> LumenContours, int frameProximal, int frameDistal, int totalFrame, double longitudeWidth, string pullbackType)
+        public void SetMsaMinExp(List<LumenContour> LumenContours, int frameProximal, int frameDistal, int totalFrame, double longitudeWidth, string pullbackLength)
         {
             CalcMean(LumenContours, frameProximal, frameDistal);
             SetProximalDisatalArea(LumenContours[frameProximal].Area, LumenContours[frameDistal].Area);
-            CalcLesionLength(frameProximal, frameDistal, totalFrame, longitudeWidth, pullbackType);
+            CalcLesionLength(frameProximal, frameDistal, totalFrame, longitudeWidth, pullbackLength);
 
             int count = frameDistal - frameProximal + 1;
             double msa = LumenContours.GetRange(frameProximal, count).Min(x => x.Area);

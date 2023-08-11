@@ -377,7 +377,7 @@
                                     </component:IndicatorImage>
                                 </Canvas>
                             </Grid>
-                            <ContentControl Grid.Row="1" Grid.Column="1" Template="{DynamicResource LongitudeScaleBar}" Width="{x:Static const:Constants.Longitude3dWidth}" Tag="{Binding PatientCase.PullbackType}"/>
+                            <ContentControl Grid.Row="1" Grid.Column="1" Template="{DynamicResource LongitudeScaleBar}" Width="{x:Static const:Constants.Longitude3dWidth}" Tag="{Binding PatientCase.PullbackLength}"/>
                         </Grid>
                     </Grid>
                     <Grid Grid.Column="1" Background="{DynamicResource GrayscaleGray8Brush}">

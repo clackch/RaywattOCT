@@ -1176,12 +1176,12 @@
 
                                 <!-- Measurement -->
                                 <Grid>
-                                    <annotation:DrawLmodeUtil Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" LModeLengthGeometries="{Binding LModeLengthGeometries}" LModeTextGeometries="{Binding LModeTextGeometries}" LModeIndicatorX="{Binding LModeIndicatorX, Mode=TwoWay}" CommandOff="{Binding MeasurementCommandOff, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorLongitude.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorLongitude.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" PullbackType="{Binding PatientCase.PullbackType}"/>
+                                    <annotation:DrawLmodeUtil Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" LModeLengthGeometries="{Binding LModeLengthGeometries}" LModeTextGeometries="{Binding LModeTextGeometries}" LModeIndicatorX="{Binding LModeIndicatorX, Mode=TwoWay}" CommandOff="{Binding MeasurementCommandOff, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorLongitude.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorLongitude.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" PullbackLength="{Binding PatientCase.PullbackLength}"/>
                                 </Grid>
                             </Grid>
 
                             <!-- Bookmark Scale -->
-                            <ContentControl Grid.Row="2" Template="{DynamicResource LongitudeScaleBar}" Width="{x:Static const:Constants.LongitudeWidth}" Tag="{Binding PatientCase.PullbackType}"/>
+                            <ContentControl Grid.Row="2" Template="{DynamicResource LongitudeScaleBar}" Width="{x:Static const:Constants.LongitudeWidth}" Tag="{Binding PatientCase.PullbackLength}"/>
                             
                             <!-- Lumen Profile Extra : Calcium, Expansion -->
                             <Image Grid.Row="4" Source="{Binding LumenProfileImageExtra}" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LumenProfileExtraHeight}" Stretch="Fill"/>
