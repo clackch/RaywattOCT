@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="$MSG001" xml:space="preserve">
-    <value>㉿Connect Catheter to the RJ</value>
+    <value>㉿Connect the catheter to the RJ</value>
   </data>
   <data name="$MSG002" xml:space="preserve">
     <value>㉿Verify guide catheter position for flush, Prepare for pullback.</value>
