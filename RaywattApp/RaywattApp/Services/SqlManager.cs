@@ -30,6 +30,15 @@ namespace RaywattApp.Services
             return _databaseService.GetDatas<Code>(commandText);
         }
 
+        public IList<Code> SelectCode(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("SelectCode");
+
+            string commandText = SqlQuery.GetQuery("SelectCode");
+
+            return _databaseService.GetDatas<Code>(commandText, sqlParameters);
+        }
+
         /**
          * Configuration
          */

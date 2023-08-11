@@ -26,6 +26,10 @@ namespace RaywattApp.ViewModels
 
         private IDialogService? _dialogService;
 
+        private IList<Code> pullbackTypes;
+
+        private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
+
         [ObservableProperty]
         private Patient _patient;
 
@@ -36,9 +40,23 @@ namespace RaywattApp.ViewModels
         private PrevStatus _prevStatus;
 
         [ObservableProperty]
-        private Dictionary<string, string> _procedureList;
+        private Dictionary<string, string> _pullbackList;
 
-        private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
+        [ObservableProperty]
+        private string _pbLength;
+
+        [ObservableProperty]
+        private string _pbSpeed;
+
+        [ObservableProperty]
+        private string _pbTime;
+
+        private string _selectedPullbackType;
+        public string SelectedPullbackType
+        {
+            get { return _selectedPullbackType; }
+            set { _selectedPullbackType = value; SetPullback(); }
+        }
 
         private int _brightness;
         public int Brightness
@@ -87,7 +105,20 @@ namespace RaywattApp.ViewModels
             _sqlManager = sqlManager;
             _dialogService = dialogService;
 
-            ProcedureList = CodeDefinition.Codes["PROC"];
+            PullbackList = CodeDefinition.Codes["PBTY"];
+
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "PBTY";
+            pullbackTypes = _sqlManager.SelectCode(sqlParameters);
+
+            sqlParameters.Clear();
+            sqlParameters["classification"] = "Present";
+            IList<Configuration> presents = _sqlManager.SelectConfiguration(sqlParameters);
+            if (presents != null && presents.Count > 0)
+            {
+                Brightness = int.Parse(presents.FirstOrDefault(x => x.Key == "brightness").Value);
+                Contrast = int.Parse(presents.FirstOrDefault(x => x.Key == "contrast").Value);
+            }
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -104,7 +135,12 @@ namespace RaywattApp.ViewModels
                 this.PrevStatus = (PrevStatus)data["prevStatus"];
 
                 if (data.ContainsKey("patientCase"))
+                {
                     PatientCase = (PatientCase)data["patientCase"];
+                    SelectedPullbackType = PatientCase.PullbackType;
+                    Brightness = PatientCase.Brightness;
+                    Contrast = PatientCase.Contrast;
+                }                    
                 else
                 {
                     PatientCase = new PatientCase();
@@ -136,17 +172,8 @@ namespace RaywattApp.ViewModels
 
             DeviceStatus.IsLiveView = (RayGetProperty(Property.MotorOnOff) != 0);
 
-            if (PatientCase.PullbackType == null)
-                PatientCase.PullbackType = Constants.PullbackTypeShort;
-
-            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
-            sqlParameters["classification"] = "Present";
-            IList<Configuration> presents = _sqlManager.SelectConfiguration(sqlParameters);
-            if (presents != null && presents.Count > 0)
-            {
-                Brightness = int.Parse(presents.FirstOrDefault(x => x.Key == "brightness").Value);
-                Contrast = int.Parse(presents.FirstOrDefault(x => x.Key == "contrast").Value);
-            }
+            if (PatientCase.Procedure == null)
+                PatientCase.Procedure = "$001";
         }
 
         private void Back()
@@ -185,11 +212,11 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("StartRecording");
 
-            if (String.IsNullOrEmpty(PatientCase.Procedure))
+            if (String.IsNullOrEmpty(PatientCase.PullbackType))
             {
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["title"] = _l10n["Information"];
-                parameter["message"] = _l10n["Select Procedure"];
+                parameter["message"] = _l10n["Select Pullback"];
                 var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
                 return;
@@ -212,6 +239,22 @@ namespace RaywattApp.ViewModels
             PatientCase.Contrast = Contrast;
             parameter["patientCase"] = PatientCase;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(viewPage) { Parameter = parameter });
+        }
+
+        private void SetPullback()
+        {
+            PatientCase.PullbackType = SelectedPullbackType;
+            PatientCase.PullbackLength = SelectedPullbackType.IndexOf("LO") > 0 ? Constants.PullbackLengthLong : Constants.PullbackLengthShort;
+
+            Code pullback = pullbackTypes.FirstOrDefault(x => x.Key == SelectedPullbackType);
+
+            if(pullback != null)
+            {
+                string[] temp = pullback.Buffer1.Split("|");
+                PbLength = temp[0];
+                PbSpeed = temp[1];
+                PbTime = temp[2];
+            }
         }
     }
 }
