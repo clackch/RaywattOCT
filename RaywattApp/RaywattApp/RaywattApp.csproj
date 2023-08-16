@@ -14,8 +14,6 @@
     <None Remove="res\icon\recordingBar.svg" />
     <None Remove="res\icon\test.png" />
     <None Remove="res\indicator\crossSection.svg" />
-    <None Remove="res\indicator\crossSectionAngio.svg" />
-    <None Remove="res\indicator\crossSectionAngio_hover.svg" />
     <None Remove="res\indicator\crossSection_hover.svg" />
     <None Remove="res\png\angioImage.png" />
     <None Remove="res\png\ffrCrossSectionImage.png" />
@@ -554,6 +552,9 @@
     <None Update="res\icon\indicator.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="res\icon\indicator3d.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="res\icon\indicatorExport.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -876,6 +877,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="res\indicator\bookmark.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="res\indicator\crossSectionSmall.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="res\indicator\crossSectionSmall_hover.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="res\indicator\crossSectionExport.svg">

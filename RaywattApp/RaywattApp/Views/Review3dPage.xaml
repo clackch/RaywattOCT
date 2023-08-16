@@ -334,8 +334,10 @@
                             <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="12,0,0,0">
                                 <Label Content="P" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" Opacity="0.5"/>
                             </StackPanel>
-                            <StackPanel Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,12,0">
-                                <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" Opacity="0.5"/>
+                            <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,12,0">
+                                <Image Height="150" Source="{svgc:SvgImage Source=/res/icon/indicator3d.svg}"/>
+                                <StackPanel Width="5"/>
+                                <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" VerticalAlignment="Center" Opacity="0.5"/>
                             </StackPanel>
                             <Grid Grid.Row="0" Grid.Column="1" >
                                 <Image x:Name="lMode" Source="{Binding LongitudeImage}" Width="{x:Static const:Constants.Longitude3dWidth}" Height="{x:Static const:Constants.Longitude3dHeight}" Stretch="Fill">
@@ -426,7 +428,7 @@
 
                         <!-- Indicator  -->
                         <Grid>
-                            <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Width="188" Icon="crossSectionAngio" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Visibility="{Binding IndicatorLongitude.IsVisible}">
+                            <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Width="188" Icon="crossSectionSmall" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Visibility="{Binding IndicatorLongitude.IsVisible}">
                                 <Image.RenderTransform>
                                     <RotateTransform CenterX="94" CenterY="5" Angle="{Binding Degree}"/>
                                 </Image.RenderTransform>

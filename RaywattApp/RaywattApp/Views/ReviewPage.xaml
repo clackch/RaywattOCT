@@ -130,7 +130,7 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <!-- Angio -->
-                        <Grid Grid.Column="0" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}" HorizontalAlignment="Left" Margin="100,0,0,0">
+                        <Grid Grid.Column="0" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}" HorizontalAlignment="Left" Margin="125,0,0,0">
                             <Image Grid.Column="0" Source="/res/png/angioImage.png" Stretch="Fill">
                                 <Image.Clip>
                                     <RectangleGeometry RadiusX="10" RadiusY="10">
@@ -142,7 +142,7 @@
                             </Image>
                         </Grid>
                         <!-- Cross-Section -->
-                        <Grid Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,20,10,0">
+                        <Grid Grid.Column="1" Width="510" Height="510" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,20,10,0">
                             <Grid>
                                 <!-- Cross Seciton Image -->
                                 <Image x:Name="crossSectionImageSmall" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionAngio}" Height="{x:Static const:Constants.CrossSectionAngio}">
@@ -156,15 +156,14 @@
                                     </i:Interaction.Triggers>
                                 </Image>
 
-                                <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Left">
-                                    <StackPanel Height="3"/>
+                                <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10,0,0,0">
                                     <StackPanel Orientation="Horizontal" Width="50">
                                         <Label Content="F" Style="{DynamicResource Pretendard-ExtraBold-14}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
                                         <StackPanel Width="6"/>
                                         <Label Content="{Binding DisplayFrameNumber}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" />
                                     </StackPanel>
                                 </StackPanel>
-                                <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Right">
+                                <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,10,0">
                                     <Label Content="1 ㎜" Style="{DynamicResource Pretendard-Medium-10}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
                                     <StackPanel Height="2"/>
                                     <Grid>
@@ -685,7 +684,7 @@
                         </Button>
                     </Grid>
                     <!-- Value Info. (Angio) -->
-                    <Grid Grid.Column="2" Width="520" Height="120" Margin="0,0,10,0" VerticalAlignment="Bottom" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Grid Grid.Column="2" Width="510" Height="120" Margin="0,0,10,0" VerticalAlignment="Bottom" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Border CornerRadius="8,8,8,8" Background="{StaticResource SideCardBackgroundBrush}">
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -987,7 +986,7 @@
                                     <RowDefinition Height="35"/>
                                     <RowDefinition/>
                                 </Grid.RowDefinitions>
-                                <Image Grid.Column="1" Grid.Row="1" Width="12" Height="105" Source="{svgc:SvgImage Source=/res/icon/indicator.svg}" Visibility="{Binding IndicatorCrossSection.IsVisible}" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                                <Image Grid.Column="1" Grid.Row="1" Width="12" Height="105" Source="{svgc:SvgImage Source=/res/icon/indicator.svg}" Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityReverseConverter}}" VerticalAlignment="Top" HorizontalAlignment="Left"/>
                             </Grid>
                         </Grid>
 

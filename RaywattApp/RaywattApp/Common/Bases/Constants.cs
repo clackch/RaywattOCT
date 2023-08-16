@@ -240,7 +240,7 @@ namespace RaywattApp.Common.Bases
         public const int CalciumIndicatorColor = 0x57FEEB;
 
         //Review - 2D - Angio
-        public const double AngioSize = 620;
+        public const double AngioSize = 580;
         public const double CrossSectionAngio = 470;
         public const double CrossSectionAngioCenter = CrossSectionAngio / 2;
         public const double CrossSectionAngioScale = CrossSectionAngio / CrossSectionSize;
