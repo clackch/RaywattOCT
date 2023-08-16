@@ -114,7 +114,7 @@
                         </StackPanel>
 
                         <!-- Left Menu -->
-                        <Grid Grid.Column="0" Width="{x:Static const:Constants.LeftSideBarExpandSize}" HorizontalAlignment="Left">
+                        <Grid Grid.Column="0" Width="{x:Static const:Constants.SideBarExpandSize}" HorizontalAlignment="Left">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="329"/>
                                 <RowDefinition Height="10"/>
@@ -148,7 +148,7 @@
                                     </ControlTemplate>
                                 </Button.Template>
                             </Button>
-                            <Border Grid.Row="0" CornerRadius="0,8,8,0" HorizontalAlignment="Left" Width="{x:Static const:Constants.LeftSideBarExpandSize}" Visibility="{Binding ExpandLeftUpMenu, Converter={StaticResource BoolToVisibilityConverter}}" Background="{StaticResource SideCardBackgroundBrush}">
+                            <Border Grid.Row="0" CornerRadius="0,8,8,0" HorizontalAlignment="Left" Width="{x:Static const:Constants.SideBarExpandSize}" Visibility="{Binding ExpandLeftUpMenu, Converter={StaticResource BoolToVisibilityConverter}}" Background="{StaticResource SideCardBackgroundBrush}">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
@@ -238,7 +238,7 @@
                                     </ControlTemplate>
                                 </Button.Template>
                             </Button>
-                            <Border Grid.Row="2" CornerRadius="0,8,8,0" HorizontalAlignment="Left" Width="{x:Static const:Constants.LeftSideBarExpandSize}" Visibility="{Binding ExpandLeftDownMenu, Converter={StaticResource BoolToVisibilityConverter}}" Background="{StaticResource SideCardBackgroundBrush}">
+                            <Border Grid.Row="2" CornerRadius="0,8,8,0" HorizontalAlignment="Left" Width="{x:Static const:Constants.SideBarExpandSize}" Visibility="{Binding ExpandLeftDownMenu, Converter={StaticResource BoolToVisibilityConverter}}" Background="{StaticResource SideCardBackgroundBrush}">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>

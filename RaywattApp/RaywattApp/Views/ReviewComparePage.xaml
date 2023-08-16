@@ -485,7 +485,7 @@
                             </ControlTemplate>
                         </Button.Template>
                     </Button>
-                    <Border CornerRadius="0,8,8,0" HorizontalAlignment="Left" Width="{x:Static const:Constants.LeftSideBarExpandSize}" Visibility="{Binding ExpandLeftDownMenu, Converter={StaticResource BoolToVisibilityConverter}}" Background="{StaticResource SideCardBackgroundBrush}">
+                    <Border CornerRadius="0,8,8,0" HorizontalAlignment="Left" Width="{x:Static const:Constants.SideBarExpandSize}" Visibility="{Binding ExpandLeftDownMenu, Converter={StaticResource BoolToVisibilityConverter}}" Background="{StaticResource SideCardBackgroundBrush}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>

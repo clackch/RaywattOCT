@@ -230,14 +230,18 @@ namespace RaywattApp.Common.Bases
         public const double CrossSectionSize = 620;
         public const double CrossSectionCenter = CrossSectionSize / 2;
         public const double CalciumIndicatorSize = 645;
+        public const double CalciumIndicatorAngioSize = 490;
         public const double CalciumThicknessIndicatorSize = 681;
+        public const double CalciumThicknessIndicatorAngioSize = 510;
         public const double CalciumThicknessIndicatorCenter = CalciumThicknessIndicatorSize / 2;
+        public const double CalciumThicknessIndicatorCenterAngio = CalciumThicknessIndicatorAngioSize / 2;
         public static System.Windows.Point CalciumThicknessIndicatorPointCenter = new System.Windows.Point(CalciumThicknessIndicatorCenter, CalciumThicknessIndicatorCenter);
+        public static System.Windows.Point CalciumThicknessIndicatorPointCenterAngio = new System.Windows.Point(CalciumThicknessIndicatorCenterAngio, CalciumThicknessIndicatorCenterAngio);
         public const int CalciumIndicatorColor = 0x57FEEB;
 
         //Review - 2D - Angio
-        public const double AngioSize = 580;
-        public const double CrossSectionAngio = 292;
+        public const double AngioSize = 620;
+        public const double CrossSectionAngio = 470;
         public const double CrossSectionAngioCenter = CrossSectionAngio / 2;
         public const double CrossSectionAngioScale = CrossSectionAngio / CrossSectionSize;
         public const double CoRegZoomAngioSize = 382;
@@ -261,9 +265,7 @@ namespace RaywattApp.Common.Bases
         public const string LeftDownMenu = "LeftDownMenu";
         public const string RightMenu = "RightMenu";
         public const double SideBarCollapseSize = 70;
-        public const double LeftSideBarExpandSize = 240;
-        public const double RightSideBarExpandAngioSize = 340;
-        public const double RightSideBarExpandDefaultSize = 240;
+        public const double SideBarExpandSize = 240;
 
         //Review - 2D - Longitude
         public const string LongitudeProfile = "Profile";

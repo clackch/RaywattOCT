@@ -64,13 +64,6 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private BitmapSource _lumenProfileImageExtra;
 
-        private double _rightSideBarExpand;
-        public double RightSideBarExpand
-        {
-            get { return _rightSideBarExpand; }
-            set { _rightSideBarExpand = value; OnPropertyChanged(nameof(RightSideBarExpand)); }
-        }
-
         private int outFrameNumber;
         public int OutFrameNumber
         {
@@ -238,10 +231,7 @@ namespace RaywattApp.ViewModels
             Section.Proximal.IsVisible = Visibility.Visible;
             Section.Distal.IsVisible = Visibility.Visible;
 
-            ExpandLeftUpMenu = true;
-            ExpandLeftDownMenu = true;
-            ExpandRightMenu = true;
-            RightSideBarExpand = Constants.RightSideBarExpandDefaultSize;
+            MenuExpand(true);
 
             isLongitudeMeasurementInit = false;
 
@@ -278,7 +268,7 @@ namespace RaywattApp.ViewModels
                 Brightness = PatientCase.Brightness;
                 Contrast = PatientCase.Contrast;
                 SetAnnotation();
-                SetCrossSectionBackground(RaySession.Review, (ReviewStatus.IsAngioOn) ? Constants.CardBackgroundColor : Constants.BackgroundColor);
+                SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
 
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
             }
@@ -853,21 +843,19 @@ namespace RaywattApp.ViewModels
         {
             ReviewStatus.IsAngioOn = isAngioOn;
 
-            SetCrossSectionBackground(RaySession.Review, (ReviewStatus.IsAngioOn) ? Constants.CardBackgroundColor : Constants.BackgroundColor);
-
             if (ReviewStatus.IsAngioOn)
             {
-                RightSideBarExpand = Constants.RightSideBarExpandAngioSize;
                 ReviewStatus.IsMeasurementOn = false;
                 ReviewStatus.IsCalciumOn = true;
                 if(ReviewStatus.IsLumenProfile)
                     IndicatorCrossSectionAngio.IsVisible = Visibility.Collapsed;
                 else
                     IndicatorCrossSectionAngio.IsVisible = Visibility.Visible;
+
+                MenuExpand(false);
             }
             else
             {
-                RightSideBarExpand = Constants.RightSideBarExpandDefaultSize;
                 if (ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault)
                 {
                     ReviewStatus.IsCalciumOn = true;
@@ -880,11 +868,21 @@ namespace RaywattApp.ViewModels
                 {
                     ReviewStatus.IsCalciumOn = false;
                     IndicatorCrossSection.IsVisible = Visibility.Collapsed;
-                }                    
+                }
+
+                MenuExpand(true);
             }
 
             (ToggleMeasurementCommand as RelayCommand).NotifyCanExecuteChanged();
         }
+
+        private void MenuExpand(bool isExpand)
+        {
+            ExpandLeftUpMenu = isExpand;
+            ExpandLeftDownMenu = isExpand;
+            ExpandRightMenu = isExpand;
+        }
+
 
         private void ZoomIn()
         {
