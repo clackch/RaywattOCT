@@ -204,7 +204,30 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Exit");
 
-            CommonUtil.Exit(DeviceStatus);
+            [DllImport("user32.dll")]
+            static extern bool ExitWindowsEx(uint uFlags, uint dwReason);
+
+            uint EWX_LOGOFF = 0x00000000;
+            uint EWX_SHUTDOWN = 0x00000001;
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["title"] = _l10n["Power"];
+            parameter["message"] = _l10n["Power Off?"];
+            var result = _dialogService.OpenDialog(new PowerOffDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+            if (result != null && result.DialogAnswer != DialogResults.Answer.No)
+            {
+                CommonUtil.Exit(DeviceStatus);
+
+                if (result.DialogAnswer == DialogResults.Answer.Yes)
+                {
+                    //ExitWindowsEx(EWX_SHUTDOWN, 0);
+                }
+                else if (result.DialogAnswer == DialogResults.Answer.Extra)
+                {
+                    ExitWindowsEx(EWX_LOGOFF, 0);
+                }
+            }
         }
 
         private void CatheterFailReceiver()
