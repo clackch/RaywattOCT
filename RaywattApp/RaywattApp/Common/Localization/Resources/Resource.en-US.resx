@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="$MSG001" xml:space="preserve">
-    <value>Connect the catheter to the RJ</value>
+    <value>Get ready for the recording</value>
   </data>
   <data name="$MSG002" xml:space="preserve">
     <value>Verify the catheter position for flush, Prepare for pullback.</value>
@@ -134,8 +134,7 @@
 And identify regions of uncertainty in lumen contour.</value>
   </data>
   <data name="$MSG006" xml:space="preserve">
-    <value>The imaging catheter has malfunctioned.
-Remove the catheter from the patient and proceed to the next step.</value>
+    <value>Connect the catheter to the RJ</value>
   </data>
   <data name="$MSG007" xml:space="preserve">
     <value>The imaging catheter has failed.
@@ -145,13 +144,7 @@ Remove the catheter from patient before proceeding.</value>
     <value>Disconnect the damaged catheter from the RJ after removing it from the patient.</value>
   </data>
   <data name="$MSG009" xml:space="preserve">
-    <value>1. Unlock the catheter</value>
-  </data>
-  <data name="$MSG010" xml:space="preserve">
-    <value>2. Wait for the unload process to complete</value>
-  </data>
-  <data name="$MSG011" xml:space="preserve">
-    <value>3. Disconnect the catheter</value>
+    <value>Unlock the catheter</value>
   </data>
   <data name="$Terms and Conditions" xml:space="preserve">
     <value>Product Intended Use: Clearly define the intended use of the OCT device, including any limitations or specific conditions for use.
@@ -606,6 +599,9 @@ Overwrite existing data?</value>
   <data name="Loading" xml:space="preserve">
     <value>Loading</value>
   </data>
+  <data name="Loading..." xml:space="preserve">
+    <value>Loading...</value>
+  </data>
   <data name="Localization" xml:space="preserve">
     <value>Localization</value>
   </data>
@@ -947,6 +943,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Total Export Size" xml:space="preserve">
     <value>Total Export Size</value>
+  </data>
+  <data name="Unloading..." xml:space="preserve">
+    <value>Unloading...</value>
   </data>
   <data name="Update Date" xml:space="preserve">
     <value>Update Date</value>

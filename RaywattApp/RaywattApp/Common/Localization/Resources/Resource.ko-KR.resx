@@ -118,861 +118,846 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="$MSG001" xml:space="preserve">
-    <value>㉿Connect the catheter to the RJ</value>
+    <value>[K]Get ready for the recording</value>
   </data>
   <data name="$MSG002" xml:space="preserve">
-    <value>㉿Verify guide catheter position for flush, Prepare for pullback.</value>
+    <value>[K]Verify the catheter position for flush, Prepare for pullback.</value>
   </data>
   <data name="$MSG003" xml:space="preserve">
-    <value>㉿Injcect flush media</value>
+    <value>[K]Injcect flush media</value>
   </data>
   <data name="$MSG004" xml:space="preserve">
-    <value>㉿Verify Image Quality</value>
+    <value>[K]Verify Image Quality</value>
   </data>
   <data name="$MSG005" xml:space="preserve">
-    <value>㉿Review pullback to ensure proper blood clearance in relevant areas.
-And Identify regions of uncertainty in lumen contour.</value>
+    <value>[K]Review pullback to ensure proper blood clearance in relevant areas.
+And identify regions of uncertainty in lumen contour.</value>
   </data>
   <data name="$MSG006" xml:space="preserve">
-    <value>㉿The imaging catheter has malfunctioned.
-Remove the catheter from the patient and proceed to the next step.</value>
+    <value>[K]Connect the catheter to the RJ</value>
   </data>
   <data name="$MSG007" xml:space="preserve">
-    <value>㉿The imaging catheter has failed.
-Remove catheter from patient before proceeding.</value>
+    <value>[K]The imaging catheter has failed.
+Remove the catheter from patient before proceeding.</value>
   </data>
   <data name="$MSG008" xml:space="preserve">
-    <value>㉿Disconnect the damaged catheter from the RJ after removing it from the patient.</value>
+    <value>[K]Disconnect the damaged catheter from the RJ after removing it from the patient.</value>
   </data>
   <data name="$MSG009" xml:space="preserve">
-    <value>㉿1. Unlock the catheter</value>
-  </data>
-  <data name="$MSG010" xml:space="preserve">
-    <value>㉿2. Wait for the unload process to complete</value>
-  </data>
-  <data name="$MSG011" xml:space="preserve">
-    <value>㉿3. Disconnect the catheter</value>
+    <value>[K]Unlock the catheter</value>
   </data>
   <data name="$Terms and Conditions" xml:space="preserve">
-    <value>㉿Product Intended Use: Clearly define the intended use of the OCT device, including any limitations or specific conditions for use.
-
+    <value>[K]Product Intended Use: Clearly define the intended use of the OCT device, including any limitations or specific conditions for use.
 Product Warranty: Outline the warranty coverage provided for the OCT device, including the duration, scope, and process for claiming warranty services.
-
 Limitations of the Device: Clearly state any limitations, risks, or potential side effects associated with the use of the OCT device.
-
 Regulatory Compliance: Ensure that the OCT device complies with all relevant regulatory standards and requirements, and inform users about any necessary certifications.
-
 Intellectual Property: Specify the ownership and protection of intellectual property related to the OCT device, including patents, trademarks, and copyrights.
-
 User Responsibilities: Detail the responsibilities of users when operating or maintaining the OCT device, including proper usage, storage, and maintenance.
-
 Data Privacy and Security: Address how user data collected by the OCT device will be handled, stored, and protected to ensure user privacy and comply with data protection laws.
-
 Service and Support: Describe the availability of customer support and service for the OCT device, including contact information and response times.
-
 Product Modifications: Specify whether users are allowed to modify or alter the OCT device and any consequences for doing so.
-
 Liability and Indemnification: Clearly define the limitations of liability for the manufacturer and specify instances where users may indemnify the manufacturer.
-
 Dispute Resolution: Outline the procedures for resolving any disputes related to the OCT device or the terms and conditions.
-
 Governing Law: Specify the governing law that applies to the terms and conditions and the OCT device's use.
-
 Termination: Define the circumstances under which the manufacturer may terminate or suspend access to the OCT device or its services.
-
 Updates and Changes: Specify how updates or changes to the device's software or firmware will be communicated to users.
-
 Acceptance of Terms: Require users to explicitly accept the terms and conditions before using the OCT device.</value>
   </data>
   <data name="%AS" xml:space="preserve">
-    <value>㉿%AS</value>
+    <value>[K]%AS</value>
   </data>
   <data name="%DS" xml:space="preserve">
-    <value>㉿%DS</value>
+    <value>[K]%DS</value>
   </data>
   <data name="2D" xml:space="preserve">
-    <value>㉿2D</value>
+    <value>[K]2D</value>
   </data>
   <data name="2D Option" xml:space="preserve">
-    <value>㉿2D Option</value>
+    <value>[K]2D Option</value>
   </data>
   <data name="3D" xml:space="preserve">
-    <value>㉿3D</value>
+    <value>[K]3D</value>
   </data>
   <data name="3D Option" xml:space="preserve">
-    <value>㉿3D Option</value>
+    <value>[K]3D Option</value>
   </data>
   <data name="Accept and Continue" xml:space="preserve">
-    <value>㉿Accept and Continue</value>
+    <value>[K]Accept and Continue</value>
   </data>
   <data name="Accession Name" xml:space="preserve">
-    <value>㉿Accession Name</value>
+    <value>[K]Accession Name</value>
   </data>
   <data name="Accession Number" xml:space="preserve">
-    <value>㉿Accession Number</value>
+    <value>[K]Accession Number</value>
   </data>
   <data name="Acquisition" xml:space="preserve">
-    <value>㉿Acquisition</value>
+    <value>[K]Acquisition</value>
   </data>
   <data name="Add" xml:space="preserve">
-    <value>㉿Add</value>
+    <value>[K]Add</value>
   </data>
   <data name="Add Patient" xml:space="preserve">
-    <value>㉿Add Patient</value>
+    <value>[K]Add Patient</value>
   </data>
   <data name="Add Physician" xml:space="preserve">
-    <value>㉿Add Physician</value>
+    <value>[K]Add Physician</value>
   </data>
   <data name="Additional Option" xml:space="preserve">
-    <value>㉿Additional Option</value>
+    <value>[K]Additional Option</value>
   </data>
   <data name="AI FFR" xml:space="preserve">
-    <value>㉿AI FFR</value>
+    <value>[K]AI FFR</value>
   </data>
   <data name="Alternate ID" xml:space="preserve">
-    <value>㉿Alternate ID</value>
+    <value>[K]Alternate ID</value>
   </data>
   <data name="Alternate Patient IDs" xml:space="preserve">
-    <value>㉿Alternate Patient IDs</value>
+    <value>[K]Alternate Patient IDs</value>
   </data>
   <data name="Angio" xml:space="preserve">
-    <value>㉿Angio</value>
+    <value>[K]Angio</value>
   </data>
   <data name="Angio Co-Registration" xml:space="preserve">
-    <value>㉿Angio Co-Registration</value>
+    <value>[K]Angio Co-Registration</value>
   </data>
   <data name="Apply" xml:space="preserve">
-    <value>㉿Apply</value>
+    <value>[K]Apply</value>
   </data>
   <data name="Apposition" xml:space="preserve">
-    <value>㉿Apposition</value>
+    <value>[K]Apposition</value>
   </data>
   <data name="Apposition Threshold" xml:space="preserve">
-    <value>㉿Apposition Threshold</value>
+    <value>[K]Apposition Threshold</value>
   </data>
   <data name="Approximate Import Size" xml:space="preserve">
-    <value>㉿Approximate Import Size</value>
+    <value>[K]Approximate Import Size</value>
   </data>
   <data name="Archive" xml:space="preserve">
-    <value>㉿Archive</value>
+    <value>[K]Archive</value>
   </data>
   <data name="Area" xml:space="preserve">
-    <value>㉿Area</value>
+    <value>[K]Area</value>
   </data>
   <data name="Area(㎟)" xml:space="preserve">
-    <value>㉿Area
+    <value>[K]Area
 (㎟)</value>
   </data>
   <data name="Auto" xml:space="preserve">
-    <value>㉿Auto</value>
+    <value>[K]Auto</value>
   </data>
   <data name="Auto Calibration" xml:space="preserve">
-    <value>㉿Auto Calibration</value>
+    <value>[K]Auto Calibration</value>
   </data>
   <data name="Auto Detect" xml:space="preserve">
-    <value>㉿Auto Detect</value>
+    <value>[K]Auto Detect</value>
   </data>
   <data name="Available Space" xml:space="preserve">
-    <value>㉿Available Space</value>
+    <value>[K]Available Space</value>
   </data>
   <data name="AVI" xml:space="preserve">
-    <value>㉿AVI</value>
+    <value>[K]AVI</value>
   </data>
   <data name="Back" xml:space="preserve">
-    <value>㉿Back</value>
+    <value>[K]Back</value>
   </data>
   <data name="Birth" xml:space="preserve">
-    <value>㉿Birth</value>
+    <value>[K]Birth</value>
   </data>
   <data name="Birth Date" xml:space="preserve">
-    <value>㉿Birth Date</value>
+    <value>[K]Birth Date</value>
   </data>
   <data name="Bitmap" xml:space="preserve">
-    <value>㉿Bitmap</value>
+    <value>[K]Bitmap</value>
   </data>
   <data name="Bookmarked Frames" xml:space="preserve">
-    <value>㉿Bookmarked Frames</value>
+    <value>[K]Bookmarked Frames</value>
   </data>
   <data name="Brightness" xml:space="preserve">
-    <value>㉿Brightness</value>
+    <value>[K]Brightness</value>
   </data>
   <data name="Byte" xml:space="preserve">
-    <value>㉿Byte</value>
+    <value>[K]Byte</value>
   </data>
   <data name="bytes" xml:space="preserve">
-    <value>㉿bytes</value>
+    <value>[K]bytes</value>
   </data>
   <data name="Calcium" xml:space="preserve">
-    <value>㉿Calcium</value>
+    <value>[K]Calcium</value>
   </data>
   <data name="Calibration" xml:space="preserve">
-    <value>㉿Calibration</value>
+    <value>[K]Calibration</value>
   </data>
   <data name="Cancel" xml:space="preserve">
-    <value>㉿Cancel</value>
+    <value>[K]Cancel</value>
   </data>
   <data name="Case" xml:space="preserve">
-    <value>㉿Case</value>
+    <value>[K]Case</value>
   </data>
   <data name="Case Edit" xml:space="preserve">
-    <value>㉿Case Edit</value>
+    <value>[K]Case Edit</value>
   </data>
   <data name="Case Info." xml:space="preserve">
-    <value>㉿Case Info.</value>
+    <value>[K]Case Info.</value>
   </data>
   <data name="Case List" xml:space="preserve">
-    <value>㉿Case List</value>
+    <value>[K]Case List</value>
   </data>
   <data name="Co-Registration" xml:space="preserve">
-    <value>㉿Co-Registration</value>
+    <value>[K]Co-Registration</value>
   </data>
   <data name="Comment" xml:space="preserve">
-    <value>㉿Comment</value>
+    <value>[K]Comment</value>
   </data>
   <data name="Compare" xml:space="preserve">
-    <value>㉿Compare</value>
+    <value>[K]Compare</value>
   </data>
   <data name="Confirm" xml:space="preserve">
-    <value>㉿Confirm</value>
+    <value>[K]Confirm</value>
   </data>
   <data name="Confirm deletion of selected patient" xml:space="preserve">
-    <value>㉿Confirm deletion of selected patient</value>
+    <value>[K]Confirm deletion of selected patient</value>
   </data>
   <data name="Confirm deletion of selected patient case" xml:space="preserve">
-    <value>㉿Confirm deletion of selected patient case</value>
+    <value>[K]Confirm deletion of selected patient case</value>
   </data>
   <data name="Confirm deletion of selected preset" xml:space="preserve">
-    <value>㉿Confirm deletion of selected preset</value>
+    <value>[K]Confirm deletion of selected preset</value>
   </data>
   <data name="Confirm import of selected file" xml:space="preserve">
-    <value>㉿Confirm import of selected file</value>
+    <value>[K]Confirm import of selected file</value>
   </data>
   <data name="Contrast" xml:space="preserve">
-    <value>㉿Contrast</value>
+    <value>[K]Contrast</value>
   </data>
   <data name="Create Date" xml:space="preserve">
-    <value>㉿Create Date</value>
+    <value>[K]Create Date</value>
   </data>
   <data name="Create New Folder" xml:space="preserve">
-    <value>㉿Create New Folder</value>
+    <value>[K]Create New Folder</value>
   </data>
   <data name="Current Folder" xml:space="preserve">
-    <value>㉿Current Folder</value>
+    <value>[K]Current Folder</value>
   </data>
   <data name="Current Frame" xml:space="preserve">
-    <value>㉿Current Frame</value>
+    <value>[K]Current Frame</value>
   </data>
   <data name="Current Frame Indicator" xml:space="preserve">
-    <value>㉿Current Frame Indicator</value>
+    <value>[K]Current Frame Indicator</value>
   </data>
   <data name="Cut-View" xml:space="preserve">
-    <value>㉿Cut-View</value>
+    <value>[K]Cut-View</value>
   </data>
   <data name="Data already exists. Overwrite existing data?" xml:space="preserve">
-    <value>㉿Data already exists.
+    <value>[K]Data already exists.
 Overwrite existing data?</value>
   </data>
   <data name="Database" xml:space="preserve">
-    <value>㉿Database</value>
+    <value>[K]Database</value>
   </data>
   <data name="Delete" xml:space="preserve">
-    <value>㉿Delete</value>
+    <value>[K]Delete</value>
   </data>
   <data name="Destination" xml:space="preserve">
-    <value>㉿Destination</value>
+    <value>[K]Destination</value>
   </data>
   <data name="Diagonal 1" xml:space="preserve">
-    <value>㉿Diagonal 1</value>
+    <value>[K]Diagonal 1</value>
   </data>
   <data name="Diagonal 2" xml:space="preserve">
-    <value>㉿Diagonal 2</value>
+    <value>[K]Diagonal 2</value>
   </data>
   <data name="Diameter" xml:space="preserve">
-    <value>㉿Diameter</value>
+    <value>[K]Diameter</value>
   </data>
   <data name="DICOM" xml:space="preserve">
-    <value>㉿DICOM</value>
+    <value>[K]DICOM</value>
   </data>
   <data name="Display Modes" xml:space="preserve">
-    <value>㉿Display Modes</value>
+    <value>[K]Display Modes</value>
   </data>
   <data name="Done" xml:space="preserve">
-    <value>㉿Done</value>
+    <value>[K]Done</value>
   </data>
   <data name="Edit" xml:space="preserve">
-    <value>㉿Edit</value>
+    <value>[K]Edit</value>
   </data>
   <data name="Edit Case" xml:space="preserve">
-    <value>㉿Edit Case</value>
+    <value>[K]Edit Case</value>
   </data>
   <data name="Edit Patient" xml:space="preserve">
-    <value>㉿Edit Patient</value>
+    <value>[K]Edit Patient</value>
   </data>
   <data name="Edit Physician" xml:space="preserve">
-    <value>㉿Edit Physician</value>
+    <value>[K]Edit Physician</value>
   </data>
   <data name="en-US" xml:space="preserve">
-    <value>㉿English</value>
+    <value>[K]English</value>
   </data>
   <data name="End Review" xml:space="preserve">
-    <value>㉿End Review</value>
+    <value>[K]End Review</value>
   </data>
   <data name="Enter an External Device" xml:space="preserve">
-    <value>㉿Enter an External Device</value>
+    <value>[K]Enter an External Device</value>
   </data>
   <data name="Enter Birth Date" xml:space="preserve">
-    <value>㉿Enter Birth Date</value>
+    <value>[K]Enter Birth Date</value>
   </data>
   <data name="Enter First Name" xml:space="preserve">
-    <value>㉿Enter First Name</value>
+    <value>[K]Enter First Name</value>
   </data>
   <data name="Enter Folder Name" xml:space="preserve">
-    <value>㉿Enter Folder Name</value>
+    <value>[K]Enter Folder Name</value>
   </data>
   <data name="Enter ID" xml:space="preserve">
-    <value>㉿Enter ID</value>
+    <value>[K]Enter ID</value>
   </data>
   <data name="Enter Institute Name" xml:space="preserve">
-    <value>㉿Enter Institute Name</value>
+    <value>[K]Enter Institute Name</value>
   </data>
   <data name="Enter Last Name" xml:space="preserve">
-    <value>㉿Enter Last Name</value>
+    <value>[K]Enter Last Name</value>
   </data>
   <data name="Enter Physician Name" xml:space="preserve">
-    <value>㉿Enter Physician Name</value>
+    <value>[K]Enter Physician Name</value>
   </data>
   <data name="Enter Preset Name" xml:space="preserve">
-    <value>㉿Enter Preset Name</value>
+    <value>[K]Enter Preset Name</value>
   </data>
   <data name="Error" xml:space="preserve">
-    <value>㉿Error</value>
+    <value>[K]Error</value>
   </data>
   <data name="Exit" xml:space="preserve">
-    <value>㉿Exit</value>
+    <value>[K]Exit</value>
   </data>
   <data name="Expansion" xml:space="preserve">
-    <value>㉿Expansion</value>
+    <value>[K]Expansion</value>
   </data>
   <data name="Expansion Calculation" xml:space="preserve">
-    <value>㉿Expansion Calculation</value>
+    <value>[K]Expansion Calculation</value>
   </data>
   <data name="Expansion Threshold" xml:space="preserve">
-    <value>㉿Expansion Threshold</value>
+    <value>[K]Expansion Threshold</value>
   </data>
   <data name="Export" xml:space="preserve">
-    <value>㉿Export</value>
+    <value>[K]Export</value>
   </data>
   <data name="Export Option" xml:space="preserve">
-    <value>㉿Export Option</value>
+    <value>[K]Export Option</value>
   </data>
   <data name="Export Size" xml:space="preserve">
-    <value>㉿Export Size</value>
+    <value>[K]Export Size</value>
   </data>
   <data name="Export Type" xml:space="preserve">
-    <value>㉿Export Type</value>
+    <value>[K]Export Type</value>
   </data>
   <data name="External Drive" xml:space="preserve">
-    <value>㉿External Drive</value>
+    <value>[K]External Drive</value>
   </data>
   <data name="Faster for specialized care" xml:space="preserve">
-    <value>㉿Faster for specialized care</value>
+    <value>[K]Faster for specialized care</value>
   </data>
   <data name="Female" xml:space="preserve">
-    <value>㉿Female</value>
+    <value>[K]Female</value>
   </data>
   <data name="First Name" xml:space="preserve">
-    <value>㉿First Name</value>
+    <value>[K]First Name</value>
   </data>
   <data name="Fly-Through" xml:space="preserve">
-    <value>㉿Fly-Through</value>
+    <value>[K]Fly-Through</value>
   </data>
   <data name="Folder" xml:space="preserve">
-    <value>㉿Folder</value>
+    <value>[K]Folder</value>
   </data>
   <data name="Folder Name" xml:space="preserve">
-    <value>㉿Folder Name</value>
+    <value>[K]Folder Name</value>
   </data>
   <data name="Folder name is duplicated" xml:space="preserve">
-    <value>㉿Folder name is duplicated</value>
+    <value>[K]Folder name is duplicated</value>
   </data>
   <data name="Follow-Up" xml:space="preserve">
-    <value>㉿Follow-Up</value>
+    <value>[K]Follow-Up</value>
   </data>
   <data name="Frame Option" xml:space="preserve">
-    <value>㉿Frame Option</value>
+    <value>[K]Frame Option</value>
   </data>
   <data name="Free" xml:space="preserve">
-    <value>㉿Free</value>
+    <value>[K]Free</value>
   </data>
   <data name="GB" xml:space="preserve">
-    <value>㉿GB</value>
+    <value>[K]GB</value>
   </data>
   <data name="Gender" xml:space="preserve">
-    <value>㉿Gender</value>
+    <value>[K]Gender</value>
   </data>
   <data name="Guidewire 1" xml:space="preserve">
-    <value>㉿Guidewire 1</value>
+    <value>[K]Guidewire 1</value>
   </data>
   <data name="Guidewire 2" xml:space="preserve">
-    <value>㉿Guidewire 2</value>
+    <value>[K]Guidewire 2</value>
   </data>
   <data name="Guidewires" xml:space="preserve">
-    <value>㉿Guidewires</value>
+    <value>[K]Guidewires</value>
   </data>
   <data name="High Resolution" xml:space="preserve">
-    <value>㉿High Resolution</value>
+    <value>[K]High Resolution</value>
   </data>
   <data name="High Resolution - Long" xml:space="preserve">
-    <value>㉿High Resolution - Long</value>
+    <value>[K]High Resolution - Long</value>
   </data>
   <data name="ID" xml:space="preserve">
-    <value>㉿ID</value>
+    <value>[K]ID</value>
   </data>
   <data name="ID is duplicated" xml:space="preserve">
-    <value>㉿ID is duplicated</value>
+    <value>[K]ID is duplicated</value>
   </data>
   <data name="Import" xml:space="preserve">
-    <value>㉿Import</value>
+    <value>[K]Import</value>
   </data>
   <data name="Indicator Lock" xml:space="preserve">
-    <value>㉿Indicator Lock</value>
+    <value>[K]Indicator Lock</value>
   </data>
   <data name="Information" xml:space="preserve">
-    <value>㉿Information</value>
+    <value>[K]Information</value>
   </data>
   <data name="Institute Name" xml:space="preserve">
-    <value>㉿Institute Name</value>
+    <value>[K]Institute Name</value>
   </data>
-  <data name="Insufficient storage space available." xml:space="preserve">
-    <value>㉿Insufficient storage space available</value>
+  <data name="Insufficient storage space available" xml:space="preserve">
+    <value>[K]Insufficient storage space available</value>
   </data>
   <data name="JPEG" xml:space="preserve">
-    <value>㉿JPEG</value>
+    <value>[K]JPEG</value>
   </data>
   <data name="KB" xml:space="preserve">
-    <value>㉿KB</value>
+    <value>[K]KB</value>
   </data>
   <data name="ko-KR" xml:space="preserve">
-    <value>㉿Korean</value>
+    <value>[K]Korean</value>
   </data>
   <data name="L-View" xml:space="preserve">
-    <value>㉿L-View</value>
+    <value>[K]L-View</value>
   </data>
   <data name="LAD Distal" xml:space="preserve">
-    <value>㉿LAD Distal</value>
+    <value>[K]LAD Distal</value>
   </data>
   <data name="LAD Mid" xml:space="preserve">
-    <value>㉿LAD Mid</value>
+    <value>[K]LAD Mid</value>
   </data>
   <data name="LAD Prox" xml:space="preserve">
-    <value>㉿LAD Prox</value>
+    <value>[K]LAD Prox</value>
   </data>
   <data name="Language" xml:space="preserve">
-    <value>㉿Language</value>
+    <value>[K]Language</value>
   </data>
   <data name="Last Case (Total)" xml:space="preserve">
-    <value>㉿Last Case (Total)</value>
+    <value>[K]Last Case (Total)</value>
   </data>
   <data name="Last Name" xml:space="preserve">
-    <value>㉿Last Name</value>
+    <value>[K]Last Name</value>
   </data>
   <data name="LCX Distal" xml:space="preserve">
-    <value>㉿LCX Distal</value>
+    <value>[K]LCX Distal</value>
   </data>
   <data name="LCX Mid" xml:space="preserve">
-    <value>㉿LCX Mid</value>
+    <value>[K]LCX Mid</value>
   </data>
   <data name="LCX OM1" xml:space="preserve">
-    <value>㉿LCX OM1</value>
+    <value>[K]LCX OM1</value>
   </data>
   <data name="LCX OM2" xml:space="preserve">
-    <value>㉿LCX OM2</value>
+    <value>[K]LCX OM2</value>
   </data>
   <data name="LCX Prox" xml:space="preserve">
-    <value>㉿LCX Prox</value>
+    <value>[K]LCX Prox</value>
   </data>
   <data name="Left Main" xml:space="preserve">
-    <value>㉿Left Main</value>
+    <value>[K]Left Main</value>
   </data>
   <data name="Length" xml:space="preserve">
-    <value>㉿Length</value>
+    <value>[K]Length</value>
   </data>
   <data name="Live" xml:space="preserve">
-    <value>㉿Live</value>
+    <value>[K]Live</value>
   </data>
   <data name="Live View" xml:space="preserve">
-    <value>㉿Live View</value>
+    <value>[K]Live View</value>
   </data>
   <data name="Loading" xml:space="preserve">
-    <value>㉿Loading</value>
+    <value>[K]Loading</value>
+  </data>
+  <data name="Loading..." xml:space="preserve">
+    <value>[K]Loading...</value>
   </data>
   <data name="Localization" xml:space="preserve">
-    <value>㉿Localization</value>
+    <value>[K]Localization</value>
   </data>
   <data name="Log" xml:space="preserve">
-    <value>㉿Log</value>
+    <value>[K]Log</value>
   </data>
   <data name="Longitude" xml:space="preserve">
-    <value>㉿Longitude</value>
+    <value>[K]Longitude</value>
   </data>
   <data name="Lumen" xml:space="preserve">
-    <value>㉿Lumen</value>
+    <value>[K]Lumen</value>
   </data>
   <data name="Lumen Contour" xml:space="preserve">
-    <value>㉿Lumen Contour</value>
+    <value>[K]Lumen Contour</value>
   </data>
   <data name="Lumen Profile" xml:space="preserve">
-    <value>㉿Lumen Profile</value>
+    <value>[K]Lumen Profile</value>
   </data>
   <data name="Male" xml:space="preserve">
-    <value>㉿Male</value>
+    <value>[K]Male</value>
   </data>
   <data name="Manual" xml:space="preserve">
-    <value>㉿Manual</value>
+    <value>[K]Manual</value>
   </data>
   <data name="Max" xml:space="preserve">
-    <value>㉿Max</value>
+    <value>[K]Max</value>
   </data>
   <data name="Max Diam.(㎜)" xml:space="preserve">
-    <value>㉿Max Diam.
+    <value>[K]Max Diam.
 (㎜)</value>
   </data>
   <data name="Max Thickness" xml:space="preserve">
-    <value>㉿Max Thickness</value>
+    <value>[K]Max Thickness</value>
   </data>
   <data name="MB" xml:space="preserve">
-    <value>㉿MB</value>
+    <value>[K]MB</value>
   </data>
   <data name="Mean Diam.(㎜)" xml:space="preserve">
-    <value>㉿Mean Diam.
+    <value>[K]Mean Diam.
 (㎜)</value>
   </data>
   <data name="Measure" xml:space="preserve">
-    <value>㉿Measure</value>
+    <value>[K]Measure</value>
   </data>
   <data name="Measurement" xml:space="preserve">
-    <value>㉿Measurement</value>
+    <value>[K]Measurement</value>
   </data>
   <data name="Measurements" xml:space="preserve">
-    <value>㉿Measurements</value>
+    <value>[K]Measurements</value>
   </data>
   <data name="Min" xml:space="preserve">
-    <value>㉿Min</value>
+    <value>[K]Min</value>
   </data>
   <data name="Min Diam.(㎜)" xml:space="preserve">
-    <value>㉿Min Diam.
+    <value>[K]Min Diam.
 (㎜)</value>
   </data>
   <data name="Min Exp." xml:space="preserve">
-    <value>㉿Min Exp.</value>
+    <value>[K]Min Exp.</value>
   </data>
   <data name="MLA" xml:space="preserve">
-    <value>㉿MLA</value>
+    <value>[K]MLA</value>
   </data>
   <data name="MLD" xml:space="preserve">
-    <value>㉿MLD</value>
+    <value>[K]MLD</value>
   </data>
   <data name="MSA" xml:space="preserve">
-    <value>㉿MSA</value>
+    <value>[K]MSA</value>
   </data>
   <data name="Name" xml:space="preserve">
-    <value>㉿Name</value>
+    <value>[K]Name</value>
   </data>
   <data name="Name is duplicated" xml:space="preserve">
-    <value>㉿Name is duplicated</value>
+    <value>[K]Name is duplicated</value>
   </data>
   <data name="Native" xml:space="preserve">
-    <value>㉿Native</value>
+    <value>[K]Native</value>
   </data>
   <data name="Native(Raw)" xml:space="preserve">
-    <value>㉿Native(Raw)</value>
+    <value>[K]Native(Raw)</value>
   </data>
   <data name="New" xml:space="preserve">
-    <value>㉿New</value>
+    <value>[K]New</value>
   </data>
   <data name="New Folder" xml:space="preserve">
-    <value>㉿New Folder</value>
+    <value>[K]New Folder</value>
   </data>
   <data name="New Folder Name" xml:space="preserve">
-    <value>㉿New Folder Name</value>
+    <value>[K]New Folder Name</value>
   </data>
   <data name="New Patient" xml:space="preserve">
-    <value>㉿New Patient</value>
+    <value>[K]New Patient</value>
   </data>
   <data name="New Recording" xml:space="preserve">
-    <value>㉿New Recording</value>
+    <value>[K]New Recording</value>
   </data>
   <data name="Next" xml:space="preserve">
-    <value>㉿Next</value>
+    <value>[K]Next</value>
   </data>
   <data name="No" xml:space="preserve">
-    <value>㉿No</value>
+    <value>[K]No</value>
   </data>
   <data name="No Drive" xml:space="preserve">
-    <value>㉿No Drive</value>
+    <value>[K]No Drive</value>
   </data>
   <data name="No items have been selected" xml:space="preserve">
-    <value>㉿No items have been selected</value>
+    <value>[K]No items have been selected</value>
   </data>
   <data name="No." xml:space="preserve">
-    <value>㉿No.</value>
+    <value>[K]No.</value>
   </data>
   <data name="Not Selected" xml:space="preserve">
-    <value>㉿Not Selected</value>
+    <value>[K]Not Selected</value>
   </data>
   <data name="OCT" xml:space="preserve">
-    <value>㉿OCT</value>
+    <value>[K]OCT</value>
   </data>
   <data name="OCT + Angio" xml:space="preserve">
-    <value>㉿OCT + Angio</value>
+    <value>[K]OCT + Angio</value>
   </data>
   <data name="OK" xml:space="preserve">
-    <value>㉿OK</value>
+    <value>[K]OK</value>
   </data>
   <data name="Other" xml:space="preserve">
-    <value>㉿Other</value>
+    <value>[K]Other</value>
   </data>
   <data name="Output Option" xml:space="preserve">
-    <value>㉿Output Option</value>
+    <value>[K]Output Option</value>
   </data>
   <data name="P to D" xml:space="preserve">
-    <value>㉿P to D</value>
+    <value>[K]P to D</value>
   </data>
   <data name="Page Size" xml:space="preserve">
-    <value>㉿Page Size</value>
+    <value>[K]Page Size</value>
   </data>
   <data name="Path" xml:space="preserve">
-    <value>㉿Path</value>
+    <value>[K]Path</value>
   </data>
   <data name="Patient" xml:space="preserve">
-    <value>㉿Patient</value>
+    <value>[K]Patient</value>
   </data>
   <data name="Patient Case" xml:space="preserve">
-    <value>㉿Patient Case</value>
+    <value>[K]Patient Case</value>
   </data>
   <data name="Patient Information Anonymize" xml:space="preserve">
-    <value>㉿Patient Information Anonymize</value>
+    <value>[K]Patient Information Anonymize</value>
   </data>
   <data name="Patient List" xml:space="preserve">
-    <value>㉿Patient List</value>
+    <value>[K]Patient List</value>
   </data>
   <data name="Patient Summary" xml:space="preserve">
-    <value>㉿Patient Summary</value>
+    <value>[K]Patient Summary</value>
   </data>
   <data name="PDA" xml:space="preserve">
-    <value>㉿PDA</value>
+    <value>[K]PDA</value>
   </data>
   <data name="Physician" xml:space="preserve">
-    <value>㉿Physician</value>
+    <value>[K]Physician</value>
   </data>
   <data name="Physician ID" xml:space="preserve">
-    <value>㉿Physician ID</value>
+    <value>[K]Physician ID</value>
   </data>
   <data name="Physician Name" xml:space="preserve">
-    <value>㉿Physician Name</value>
+    <value>[K]Physician Name</value>
   </data>
   <data name="Post" xml:space="preserve">
-    <value>㉿Post</value>
+    <value>[K]Post</value>
   </data>
   <data name="Post-PCI" xml:space="preserve">
-    <value>㉿Post-PCI</value>
+    <value>[K]Post-PCI</value>
   </data>
   <data name="Pre" xml:space="preserve">
-    <value>㉿Pre</value>
+    <value>[K]Pre</value>
   </data>
   <data name="Pre-PCI" xml:space="preserve">
-    <value>㉿Pre-PCI</value>
+    <value>[K]Pre-PCI</value>
   </data>
   <data name="Presentation" xml:space="preserve">
-    <value>㉿Presentation</value>
+    <value>[K]Presentation</value>
   </data>
   <data name="Preset" xml:space="preserve">
-    <value>㉿Preset</value>
+    <value>[K]Preset</value>
   </data>
   <data name="Preset Name" xml:space="preserve">
-    <value>㉿Preset Name</value>
+    <value>[K]Preset Name</value>
   </data>
   <data name="Procedure" xml:space="preserve">
-    <value>㉿Procedure</value>
+    <value>[K]Procedure</value>
   </data>
   <data name="Pullback" xml:space="preserve">
-    <value>㉿Pullback</value>
+    <value>[K]Pullback</value>
   </data>
   <data name="Pullback Again" xml:space="preserve">
-    <value>㉿Pullback Again</value>
+    <value>[K]Pullback Again</value>
   </data>
   <data name="Pullback Setting" xml:space="preserve">
-    <value>㉿Pullback Setting</value>
+    <value>[K]Pullback Setting</value>
   </data>
   <data name="Purpose" xml:space="preserve">
-    <value>㉿Purpose</value>
+    <value>[K]Purpose</value>
   </data>
   <data name="Raywatt" xml:space="preserve">
-    <value>㉿Raywatt</value>
+    <value>[K]Raywatt</value>
   </data>
   <data name="RCA Distal" xml:space="preserve">
-    <value>㉿RCA Distal</value>
+    <value>[K]RCA Distal</value>
   </data>
   <data name="RCA Mid" xml:space="preserve">
-    <value>㉿RCA Mid</value>
+    <value>[K]RCA Mid</value>
   </data>
   <data name="RCA Prox" xml:space="preserve">
-    <value>㉿RCA Prox</value>
+    <value>[K]RCA Prox</value>
   </data>
   <data name="Ready" xml:space="preserve">
-    <value>㉿Ready</value>
+    <value>[K]Ready</value>
   </data>
   <data name="Recording" xml:space="preserve">
-    <value>㉿Recording</value>
+    <value>[K]Recording</value>
   </data>
   <data name="Refresh" xml:space="preserve">
-    <value>㉿Refresh</value>
+    <value>[K]Refresh</value>
   </data>
   <data name="Remove when complete" xml:space="preserve">
-    <value>㉿Remove when complete</value>
+    <value>[K]Remove when complete</value>
   </data>
   <data name="Rename" xml:space="preserve">
-    <value>㉿Rename</value>
+    <value>[K]Rename</value>
   </data>
   <data name="Rename Folder" xml:space="preserve">
-    <value>㉿Rename Folder</value>
+    <value>[K]Rename Folder</value>
   </data>
   <data name="Reset" xml:space="preserve">
-    <value>㉿Reset</value>
+    <value>[K]Reset</value>
   </data>
   <data name="Review" xml:space="preserve">
-    <value>㉿Review</value>
+    <value>[K]Review</value>
   </data>
   <data name="Review Preset" xml:space="preserve">
-    <value>㉿Review Preset</value>
+    <value>[K]Review Preset</value>
   </data>
   <data name="Save" xml:space="preserve">
-    <value>㉿Save</value>
+    <value>[K]Save</value>
   </data>
   <data name="Search" xml:space="preserve">
-    <value>㉿Search</value>
+    <value>[K]Search</value>
   </data>
   <data name="Search ID or Name" xml:space="preserve">
-    <value>㉿Search ID or Name</value>
+    <value>[K]Search ID or Name</value>
   </data>
   <data name="sec" xml:space="preserve">
-    <value>㉿sec</value>
+    <value>[K]sec</value>
   </data>
   <data name="Select Destination Path" xml:space="preserve">
-    <value>㉿Select Destination Path</value>
+    <value>[K]Select Destination Path</value>
   </data>
   <data name="Select Drive" xml:space="preserve">
-    <value>㉿Select Drive</value>
+    <value>[K]Select Drive</value>
   </data>
   <data name="Select Folder" xml:space="preserve">
-    <value>㉿Select Folder</value>
+    <value>[K]Select Folder</value>
   </data>
   <data name="Select Gender" xml:space="preserve">
-    <value>㉿Select Gender</value>
+    <value>[K]Select Gender</value>
   </data>
   <data name="Select Language" xml:space="preserve">
-    <value>㉿Select Language</value>
+    <value>[K]Select Language</value>
   </data>
   <data name="Select Pre-Case" xml:space="preserve">
-    <value>㉿Select Pre-Case</value>
+    <value>[K]Select Pre-Case</value>
   </data>
   <data name="Select Procedure" xml:space="preserve">
-    <value>㉿Select Procedure</value>
+    <value>[K]Select Procedure</value>
   </data>
   <data name="Select Pullback" xml:space="preserve">
-    <value>㉿Select Pullback</value>
+    <value>[K]Select Pullback</value>
   </data>
   <data name="Service" xml:space="preserve">
-    <value>㉿Service</value>
+    <value>[K]Service</value>
   </data>
   <data name="Setting" xml:space="preserve">
-    <value>㉿Setting</value>
+    <value>[K]Setting</value>
   </data>
   <data name="Side Branch View" xml:space="preserve">
-    <value>㉿Side Branch View</value>
+    <value>[K]Side Branch View</value>
   </data>
   <data name="Size" xml:space="preserve">
-    <value>㉿Size</value>
+    <value>[K]Size</value>
   </data>
   <data name="SKIP" xml:space="preserve">
-    <value>㉿SKIP</value>
+    <value>[K]SKIP</value>
   </data>
   <data name="Speed" xml:space="preserve">
-    <value>㉿Speed</value>
+    <value>[K]Speed</value>
   </data>
   <data name="Standard" xml:space="preserve">
-    <value>㉿Standard</value>
+    <value>[K]Standard</value>
   </data>
   <data name="Standard (60㎜)" xml:space="preserve">
-    <value>㉿Standard (60㎜)</value>
+    <value>[K]Standard (60㎜)</value>
   </data>
   <data name="Standard - Long" xml:space="preserve">
-    <value>㉿Standard - Long</value>
+    <value>[K]Standard - Long</value>
   </data>
   <data name="Start" xml:space="preserve">
-    <value>㉿Start</value>
+    <value>[K]Start</value>
   </data>
   <data name="Start Recording" xml:space="preserve">
-    <value>㉿Start Recording</value>
+    <value>[K]Start Recording</value>
   </data>
   <data name="Step 1." xml:space="preserve">
-    <value>㉿Step 1.</value>
+    <value>[K]Step 1.</value>
   </data>
   <data name="Step 2." xml:space="preserve">
-    <value>㉿Step 2.</value>
+    <value>[K]Step 2.</value>
   </data>
   <data name="Survey (100㎜)" xml:space="preserve">
-    <value>㉿Survey (100㎜)</value>
+    <value>[K]Survey (100㎜)</value>
   </data>
   <data name="System File Option" xml:space="preserve">
-    <value>㉿System File Option</value>
+    <value>[K]System File Option</value>
   </data>
   <data name="Tapered" xml:space="preserve">
-    <value>㉿Tapered</value>
+    <value>[K]Tapered</value>
   </data>
   <data name="TIFF" xml:space="preserve">
-    <value>㉿TIFF</value>
+    <value>[K]TIFF</value>
   </data>
   <data name="Time" xml:space="preserve">
-    <value>㉿Time</value>
+    <value>[K]Time</value>
   </data>
   <data name="Tissue" xml:space="preserve">
-    <value>㉿Tissue</value>
+    <value>[K]Tissue</value>
   </data>
   <data name="Total" xml:space="preserve">
-    <value>㉿Total</value>
+    <value>[K]Total</value>
   </data>
   <data name="Total Angle" xml:space="preserve">
-    <value>㉿Total Angle</value>
+    <value>[K]Total Angle</value>
   </data>
   <data name="Total Export Size" xml:space="preserve">
-    <value>㉿Total Export Size</value>
+    <value>[K]Total Export Size</value>
+  </data>
+  <data name="Unloading..." xml:space="preserve">
+    <value>[K]Unloading...</value>
   </data>
   <data name="Update Date" xml:space="preserve">
-    <value>㉿Update Date</value>
+    <value>[K]Update Date</value>
   </data>
   <data name="Value Info." xml:space="preserve">
-    <value>㉿Value Info.</value>
+    <value>[K]Value Info.</value>
   </data>
   <data name="Vessel" xml:space="preserve">
-    <value>㉿Vessel</value>
+    <value>[K]Vessel</value>
   </data>
   <data name="View" xml:space="preserve">
-    <value>㉿View</value>
+    <value>[K]View</value>
   </data>
   <data name="Warning" xml:space="preserve">
-    <value>㉿Warning</value>
+    <value>[K]Warning</value>
   </data>
   <data name="Yes" xml:space="preserve">
-    <value>㉿Yes</value>
+    <value>[K]Yes</value>
   </data>
   <data name="Zoom" xml:space="preserve">
-    <value>㉿Zoom</value>
+    <value>[K]Zoom</value>
   </data>
   <data name="Zoom In" xml:space="preserve">
-    <value>㉿Zoom In</value>
+    <value>[K]Zoom In</value>
   </data>
   <data name="Zoom Out" xml:space="preserve">
-    <value>㉿Zoom Out</value>
+    <value>[K]Zoom Out</value>
   </data>
 </root>

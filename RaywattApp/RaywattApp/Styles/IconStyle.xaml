@@ -24,6 +24,12 @@
         <Setter Property="Source" Value="{svgc:SvgImage Source=/res/icon/raywattSmall.svg}"/>
     </Style>
 
+    <Style TargetType="Image" x:Key="Faster">
+        <Setter Property="Width" Value="450"/>
+        <Setter Property="Height" Value="125.8"/>
+        <Setter Property="Source" Value="{svgc:SvgImage Source=/res/icon/faster.svg}"/>
+    </Style>
+
     <Style TargetType="{x:Type component:IconButton}" x:Key="IconButton">
         <Setter Property="Width" Value="26"/>
         <Setter Property="Height" Value="26"/>

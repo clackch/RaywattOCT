@@ -11,6 +11,10 @@
   <ItemGroup>
     <None Remove="res\bar\indicator.png" />
     <None Remove="res\bar\indicator2.png" />
+    <None Remove="res\guide\ConnectCatheter.png" />
+    <None Remove="res\guide\Loading.png" />
+    <None Remove="res\guide\Unloading.png" />
+    <None Remove="res\guide\UnlockCatheter.png" />
     <None Remove="res\icon\recordingBar.svg" />
     <None Remove="res\icon\test.png" />
     <None Remove="res\indicator\crossSection.svg" />
@@ -148,6 +152,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="res\button\toggle\small_hover.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="res\guide\ConnectCatheter.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="res\icon\2dOption.svg">
@@ -463,6 +470,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="res\icon\export_hover.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="res\icon\faster.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="res\icon\ffrCenterLine.svg">
@@ -1024,6 +1034,10 @@
 
   <ItemGroup>
     <Resource Include="res\bar\indicator.png" />
+    <Resource Include="res\guide\ConnectCatheter.png" />
+    <Resource Include="res\guide\Loading.png" />
+    <Resource Include="res\guide\Unloading.png" />
+    <Resource Include="res\guide\UnlockCatheter.png" />
     <Resource Include="res\indicator\crossSection.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
