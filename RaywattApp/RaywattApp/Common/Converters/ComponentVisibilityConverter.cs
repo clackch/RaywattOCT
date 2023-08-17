@@ -5,7 +5,7 @@ using System.Windows.Data;
 
 namespace RaywattApp.Common.Converters
 {
-    public class MenuUnableConverter : IMultiValueConverter
+    public class ComponentVisibilityConverter : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {

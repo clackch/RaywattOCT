@@ -79,9 +79,6 @@ namespace RaywattApp.ViewModels
         private int _frameNumberCompare = -1;
 
         [ObservableProperty]
-        private bool _isLumenLoaded = true;
-
-        [ObservableProperty]
         private Zoom _zoom = new Zoom(Constants.CrossSectionCompareSize / Constants.OCTImageSize);
 
         [ObservableProperty]
@@ -144,6 +141,8 @@ namespace RaywattApp.ViewModels
             ExpandLeftDownMenu = false;
 
             IsIndicatorLockOn = false;
+
+            DeviceStatus.IsOCTImagingCompareDone = false;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -186,8 +185,6 @@ namespace RaywattApp.ViewModels
 
                     if(ReviewStatus.SelectedPatientCase.LumenContour == null)
                     {
-                        IsLumenLoaded = false;
-
                         Thread threadMakeLumenProfile = new Thread(() => ThreadMakeLumenProfile());
                         threadMakeLumenProfile.Start();
                     }
@@ -248,8 +245,6 @@ namespace RaywattApp.ViewModels
             {
                 ShowLumenProfileCompare();
             });
-
-            IsLumenLoaded = true;
 
             LumenContourCommand = Constants.LumenContourDraw;
         }
@@ -339,6 +334,7 @@ namespace RaywattApp.ViewModels
 
                 DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current = 0;
                 RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath);
+                DeviceStatus.IsOCTImagingCompareDone = false;
                 Thread.Sleep(500);
 
                 GetImageInfo(RaySession.Compare);
@@ -346,8 +342,6 @@ namespace RaywattApp.ViewModels
 
                 if (ReviewStatus.SelectedPatientCase.LumenContour == null)
                 {
-                    IsLumenLoaded = false;
-
                     Thread threadMakeLumenProfile = new Thread(() => ThreadMakeLumenProfile());
                     threadMakeLumenProfile.Start();
                 }
@@ -444,20 +438,14 @@ namespace RaywattApp.ViewModels
 
                 if (indicatorCenterX < 0)
                 {
-                    indicator.X = 0 - Constants.LongitudeIndicatorWidth / 2;
-                    indicator.CenterX = 0;
                     setCurrentFrame(indicator, 0);
                 }
                 else if (indicatorCenterX > Constants.LongitudeCompareWidth)
                 {
-                    indicator.X = Constants.LongitudeCompareWidth - Constants.LongitudeIndicatorWidth / 2;
-                    indicator.CenterX = Constants.LongitudeCompareWidth;
                     setCurrentFrame(indicator, Constants.LongitudeCompareWidth);
                 }
                 else
                 {
-                    indicator.X = indicatorX;
-                    indicator.CenterX = indicatorCenterX;
                     setCurrentFrame(indicator, indicatorCenterX);
                 }
             }
@@ -508,8 +496,18 @@ namespace RaywattApp.ViewModels
                     int syncPosition = (indicator.IsCompare) ? (int)curPosition - diff : (int)curPosition + diff;
                     DeviceStatus.ReviewImageInfo syncInfo = (indicator.IsCompare) ? DeviceStatus.ReviewImageInfos[(int)RaySession.Review] : DeviceStatus.ReviewImageInfos[(int)RaySession.Compare];
 
-                    if (syncInfo == null) return;
-                    if (syncPosition < 0 || syncPosition >= syncInfo.Total) return;
+                    if (syncInfo == null) 
+                        return;
+                    if (syncPosition < 0 || syncPosition >= syncInfo.Total)
+                    {
+                        if(syncPosition < 0)
+                            syncPosition = 0;
+                        else
+                            syncPosition = syncInfo.Total - 1;
+
+                        curPosition = (indicator.IsCompare) ? (int)syncPosition + diff : (int)syncPosition - diff;
+                        navigatorPosition = curPosition * Constants.LongitudeCompareWidth / (frameInfo.Total - 1);
+                    }
 
                     MoveToFrame(syncSession, syncPosition);
                 }

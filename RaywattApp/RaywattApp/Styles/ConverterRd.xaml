@@ -104,7 +104,10 @@
     <!-- Indicator Scale Conveter -->
     <converters:IndicatorScaleConveter x:Key="IndicatorScaleConveter" />
 
-    <!-- Menu Unable Converter -->
-    <converters:MenuUnableConverter x:Key="MenuUnableConverter" />
+    <!-- Component Visibility Converter -->
+    <converters:ComponentVisibilityConverter x:Key="ComponentVisibilityConverter" />
+
+    <!-- Component Unable Converter -->
+    <converters:ComponentUnableConverter x:Key="ComponentUnableConverter" />
 
 </ResourceDictionary>

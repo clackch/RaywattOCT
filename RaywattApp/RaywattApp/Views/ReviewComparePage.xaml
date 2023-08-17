@@ -112,7 +112,7 @@
                                     </Image.Clip>
                                 </Image>
                                 <!-- Loading -->
-                                <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding IsLumenLoaded, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                                <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding DeviceStatus.IsOCTImagingCompareDone, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
                                                                 
                                 <Canvas>
                                     <!-- Section MLA -->
@@ -148,7 +148,7 @@
                                     <!-- Section Distal -->
                                     <Image Height="170" Source="{svgc:SvgImage Source=/res/indicator/sectionDistalCompare.svg}" Canvas.Left="{Binding SectionCompare.Distal.X}" Visibility="{Binding SectionCompare.Distal.IsVisible}"/>
                                     <!-- L-Mode Indicator -->
-                                    <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitudeCompare" IsCaptured="{Binding IndicatorCompareLongitude.IsCaptured}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="181" Stretch="None" Canvas.Left="{Binding IndicatorCompareLongitude.X}" Visibility="{Binding IndicatorCompareLongitude.IsVisible}" HorizontalAlignment="Center" Canvas.Top="-11" VerticalAlignment="Top">
+                                    <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitudeCompare" IsCaptured="{Binding IndicatorCompareLongitude.IsCaptured}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="181" Stretch="None" Canvas.Left="{Binding IndicatorCompareLongitude.X}" Visibility="{Binding IndicatorCompareLongitude.IsVisible}" IsEnabled="{Binding DeviceStatus.IsOCTImagingCompareDone}" HorizontalAlignment="Center" Canvas.Top="-11" VerticalAlignment="Top">
                                         <!-- Trigger -->
                                         <i:Interaction.Triggers>
                                             <!--PreviewMouseDown : Image 영역에서 MouseDown 할 경우, Indicator 동작 가능 상태로 변경 -->
@@ -214,7 +214,7 @@
 
                 <!-- Indicator Lock -->
                 <StackPanel Grid.Row="1" HorizontalAlignment="Right" Margin="0,10,20,0">
-                    <component:IconToggleButton Style="{DynamicResource ToggleButtonWithText}" Icon="indicatorLock" Height="32" Content="{Binding [Indicator Lock], Source={StaticResource L10N}}" IsChecked="{Binding IsIndicatorLockOn}" Command="{Binding CmdIndicatorLock}"/>
+                    <component:IconToggleButton Style="{DynamicResource ToggleButtonWithText}" Icon="indicatorLock" Height="32" Content="{Binding [Indicator Lock], Source={StaticResource L10N}}" IsChecked="{Binding IsIndicatorLockOn}" Command="{Binding CmdIndicatorLock}" IsEnabled="{Binding DeviceStatus.IsOCTImagingCompareDone}"/>
                 </StackPanel>
 
                 <Grid Grid.Row="2">

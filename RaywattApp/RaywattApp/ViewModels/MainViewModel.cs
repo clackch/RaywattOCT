@@ -317,7 +317,10 @@ namespace RaywattApp.ViewModels
                     });
                     break;
                 case RayWorkItem.OCTImaging:
-                    DeviceStatus.IsOCTImagingDone = true;
+                    if(param == 0)
+                        DeviceStatus.IsOCTImagingDone = true;
+                    else
+                        DeviceStatus.IsOCTImagingCompareDone = true;
                     break;
                 case RayWorkItem.GenerateCutView:
                     break;
