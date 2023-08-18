@@ -617,6 +617,9 @@ namespace RaywattApp.Common.Annotation
             if (contours.Length == 1)
                 return true;
 
+            if (contours.Length > 10)
+                return false;
+
             int contourCnt = contours.Length;
 
             foreach (var contour in contours)
