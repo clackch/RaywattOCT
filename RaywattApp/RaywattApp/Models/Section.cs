@@ -163,21 +163,37 @@ namespace RaywattApp.Models
             double mla = LumenContours.GetRange(frameProximal, count).Min(x => x.Area);
             int mlaIdx = LumenContours.GetRange(frameProximal, count).FindIndex(x => x.Area == mla);
 
-            //mla, mld 위치가 동일해야하는데, 현재 diameter 구하는 방식으로 인해 차이 발생
-            //double mld = LumenContours.GetRange(frameProximal, count).Min(x => x.MeanDiameter);
-            //int mldIdx = LumenContours.GetRange(frameProximal, count).FindIndex(x => x.MeanDiameter == mld);
+            double mld = LumenContours.GetRange(frameProximal, count).Min(x => x.MeanDiameter);
+            int mldIdx = LumenContours.GetRange(frameProximal, count).FindIndex(x => x.MeanDiameter == mld);
 
-            Mla.X = CommonUtil.GetPositionFromFrame(mlaIdx + frameProximal, totalFrame, longitudeWidth, Constants.SectionValueWidth - Constants.SectionValueCenterWidth );
-            Mld.X = CommonUtil.GetPositionFromFrame(mlaIdx/*mldIdx*/ + frameProximal, totalFrame, longitudeWidth, - Constants.SectionValueCenterWidth);
-            Mla.StrValue = "Left";
-            Mld.StrValue = "Right";
-            MlaValue.DValue = mla;
-            MlaValue.NValue = mlaIdx + frameProximal;
-            string text = "MLA " + Math.Round(mla * Constants.MillimeterPerPixel * Constants.MillimeterPerPixel, 2).ToString() + "㎟";
-            double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-12", text, 2).Width;
-            MlaValue.X = Mla.X - (width + 18);
-            MldValue.DValue = LumenContours[mlaIdx/*mldIdx*/ + frameProximal].MeanDiameter;//mld
-            MldValue.X = Mld.X + Constants.SectionValueWidth;
+            if(mlaIdx <= mldIdx)
+            {
+                Mla.X = CommonUtil.GetPositionFromFrame(mlaIdx + frameProximal, totalFrame, longitudeWidth, Constants.SectionValueWidth - Constants.SectionValueCenterWidth);
+                Mld.X = CommonUtil.GetPositionFromFrame(mldIdx + frameProximal, totalFrame, longitudeWidth, -Constants.SectionValueCenterWidth);
+                Mla.StrValue = "Left";
+                Mld.StrValue = "Right";
+                MlaValue.DValue = mla;
+                MlaValue.NValue = mlaIdx + frameProximal;
+                string text = "MLA " + Math.Round(mla * Constants.MillimeterPerPixel * Constants.MillimeterPerPixel, 2).ToString() + "㎟";
+                double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-12", text, 2).Width;
+                MlaValue.X = Mla.X - (width + 18);
+                MldValue.DValue = LumenContours[mldIdx + frameProximal].MeanDiameter;
+                MldValue.X = Mld.X + Constants.SectionValueWidth;
+            }
+            else
+            {
+                Mla.X = CommonUtil.GetPositionFromFrame(mlaIdx + frameProximal, totalFrame, longitudeWidth,  - Constants.SectionValueCenterWidth);
+                Mld.X = CommonUtil.GetPositionFromFrame(mldIdx + frameProximal, totalFrame, longitudeWidth, Constants.SectionValueWidth - Constants.SectionValueCenterWidth);
+                Mla.StrValue = "Right";
+                Mld.StrValue = "Left";
+                MlaValue.DValue = mla;
+                MlaValue.NValue = mlaIdx + frameProximal;
+                MlaValue.X = Mla.X + Constants.SectionValueWidth;
+                MldValue.DValue = LumenContours[mldIdx + frameProximal].MeanDiameter;
+                string text = "MLD " + Math.Round(mla * Constants.MillimeterPerPixel * Constants.MillimeterPerPixel, 2).ToString() + "㎜";
+                double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-12", text, 2).Width;              
+                MldValue.X = Mld.X - (width + 18);
+            }
         }
 
         public void SetMsaMinExp(List<LumenContour> LumenContours, int frameProximal, int frameDistal, int totalFrame, double longitudeWidth, string pullbackLength)
