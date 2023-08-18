@@ -99,7 +99,7 @@ namespace RaywattApp.Common.Annotation.Util
                 if (dictionary.ContainsKey(degree))
                 {
                     conflict[(int)degree - 1]++;
-                    if (distance < dictionary[degree].Item2)
+                    if (distance > dictionary[degree].Item2)
                     {
                         dictionary.Remove(degree);
                         dictionary.Add(degree, new Tuple<Point, double>(point, distance));
