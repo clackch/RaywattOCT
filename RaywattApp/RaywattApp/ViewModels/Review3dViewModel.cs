@@ -61,6 +61,7 @@ namespace RaywattApp.ViewModels
                 RaySetProperty(Property.LongitudeDegree, degree);
 
                 CameraDegree = degree + 90;
+                ODSOCT_RotateAngle((float)CameraDegree);
             }
         }
 
@@ -445,6 +446,7 @@ namespace RaywattApp.ViewModels
                 curPosition *= (longitudeFrameInfo.totalFrame - 1);
                 curPosition = Math.Round(curPosition);
                 MoveToFrame(RaySession.Review, (int)curPosition);
+                ODSOCT_MoveToFrame((int)curPosition);
             }
         }
     }

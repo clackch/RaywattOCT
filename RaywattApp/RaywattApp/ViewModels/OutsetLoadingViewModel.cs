@@ -81,6 +81,9 @@ namespace RaywattApp.ViewModels
                 ODSOCT_CreateOCTWindowByPos(Ray3DViewID.FlyThrough, (int)Constants.FlyThroughView3dX, (int)Constants.FlyThroughView3dY,
                     (int)Constants.FlyThroughView3dWidth, (int)Constants.FlyThroughView3dHeight);
                 ODSOCT_StartRendering();
+                ODSOCT_EnableInteractor(Ray3DViewID.CutView, false);
+                ODSOCT_EnableInteractor(Ray3DViewID.FlyThrough, false);
+                ODSOCT_EnableWheelEvent(false);
 
                 timer.Stop();
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));

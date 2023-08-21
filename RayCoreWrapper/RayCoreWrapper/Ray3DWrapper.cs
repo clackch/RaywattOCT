@@ -93,6 +93,10 @@ namespace RaywattOCT
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_StartRendering();
         [DllImport("OCT3d.dll")]
+        public static extern int ODSOCT_EnableInteractor(Ray3DViewID id, bool enable);
+        [DllImport("OCT3d.dll")]
+        public static extern int ODSOCT_EnableWheelEvent(bool enable);
+        [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_DeleteDll();
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_InputData(Ray3DObject obj, IntPtr raw, int width, int height, int depth, double scaleX, double scaleY, double scaleZ);
@@ -105,6 +109,8 @@ namespace RaywattOCT
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_MoveCameraPosition(int direction, bool inverse);
         [DllImport("OCT3d.dll")]
+        public static extern int ODSOCT_MoveToFrame(int frame);
+        [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_SetFov(int angle);
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_Rendering();
@@ -112,6 +118,8 @@ namespace RaywattOCT
         public static extern int ODSOCT_RenderingForce();
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_MoveSliceAngle(int direction);
+        [DllImport("OCT3d.dll")]
+        public static extern int ODSOCT_RotateAngle(float angle);
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_CutViewZoom(int zoomDirection);
         [DllImport("OCT3d.dll")]
