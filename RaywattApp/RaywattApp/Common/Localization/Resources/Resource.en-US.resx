@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="$MSG001" xml:space="preserve">
-    <value>Connect the catheter to the RJ</value>
+    <value>Get ready for the recording</value>
   </data>
   <data name="$MSG002" xml:space="preserve">
     <value>Verify the catheter position for flush, Prepare for pullback.</value>
@@ -134,8 +134,7 @@
 And identify regions of uncertainty in lumen contour.</value>
   </data>
   <data name="$MSG006" xml:space="preserve">
-    <value>The imaging catheter has malfunctioned.
-Remove the catheter from the patient and proceed to the next step.</value>
+    <value>Connect the catheter to the RJ</value>
   </data>
   <data name="$MSG007" xml:space="preserve">
     <value>The imaging catheter has failed.
@@ -145,13 +144,7 @@ Remove the catheter from patient before proceeding.</value>
     <value>Disconnect the damaged catheter from the RJ after removing it from the patient.</value>
   </data>
   <data name="$MSG009" xml:space="preserve">
-    <value>1. Unlock the catheter</value>
-  </data>
-  <data name="$MSG010" xml:space="preserve">
-    <value>2. Wait for the unload process to complete</value>
-  </data>
-  <data name="$MSG011" xml:space="preserve">
-    <value>3. Disconnect the catheter</value>
+    <value>Unlock the catheter</value>
   </data>
   <data name="$Terms and Conditions" xml:space="preserve">
     <value>Product Intended Use: Clearly define the intended use of the OCT device, including any limitations or specific conditions for use.
@@ -381,6 +374,12 @@ Overwrite existing data?</value>
   <data name="Destination" xml:space="preserve">
     <value>Destination</value>
   </data>
+  <data name="Diagonal 1" xml:space="preserve">
+    <value>Diagonal 1</value>
+  </data>
+  <data name="Diagonal 2" xml:space="preserve">
+    <value>Diagonal 2</value>
+  </data>
   <data name="Diameter" xml:space="preserve">
     <value>Diameter</value>
   </data>
@@ -426,8 +425,8 @@ Overwrite existing data?</value>
   <data name="Enter ID" xml:space="preserve">
     <value>Enter ID</value>
   </data>
-  <data name="Enter Institude Name" xml:space="preserve">
-    <value>Enter Institude Name</value>
+  <data name="Enter Institute Name" xml:space="preserve">
+    <value>Enter Institute Name</value>
   </data>
   <data name="Enter Last Name" xml:space="preserve">
     <value>Enter Last Name</value>
@@ -468,6 +467,9 @@ Overwrite existing data?</value>
   <data name="External Drive" xml:space="preserve">
     <value>External Drive</value>
   </data>
+  <data name="Faster for specialized care" xml:space="preserve">
+    <value>Faster for specialized care</value>
+  </data>
   <data name="Female" xml:space="preserve">
     <value>Female</value>
   </data>
@@ -485,6 +487,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Folder name is duplicated" xml:space="preserve">
     <value>Folder name is duplicated</value>
+  </data>
+  <data name="Follow-Up" xml:space="preserve">
+    <value>Follow-Up</value>
   </data>
   <data name="Frame Option" xml:space="preserve">
     <value>Frame Option</value>
@@ -507,6 +512,12 @@ Overwrite existing data?</value>
   <data name="Guidewires" xml:space="preserve">
     <value>Guidewires</value>
   </data>
+  <data name="High Resolution" xml:space="preserve">
+    <value>High Resolution</value>
+  </data>
+  <data name="High Resolution - Long" xml:space="preserve">
+    <value>High Resolution - Long</value>
+  </data>
   <data name="ID" xml:space="preserve">
     <value>ID</value>
   </data>
@@ -522,8 +533,8 @@ Overwrite existing data?</value>
   <data name="Information" xml:space="preserve">
     <value>Information</value>
   </data>
-  <data name="Institude Name" xml:space="preserve">
-    <value>Institude Name</value>
+  <data name="Institute Name" xml:space="preserve">
+    <value>Institute Name</value>
   </data>
   <data name="Insufficient storage space available" xml:space="preserve">
     <value>Insufficient storage space available</value>
@@ -540,6 +551,15 @@ Overwrite existing data?</value>
   <data name="L-View" xml:space="preserve">
     <value>L-View</value>
   </data>
+  <data name="LAD Distal" xml:space="preserve">
+    <value>LAD Distal</value>
+  </data>
+  <data name="LAD Mid" xml:space="preserve">
+    <value>LAD Mid</value>
+  </data>
+  <data name="LAD Prox" xml:space="preserve">
+    <value>LAD Prox</value>
+  </data>
   <data name="Language" xml:space="preserve">
     <value>Language</value>
   </data>
@@ -549,6 +569,27 @@ Overwrite existing data?</value>
   <data name="Last Name" xml:space="preserve">
     <value>Last Name</value>
   </data>
+  <data name="LCX Distal" xml:space="preserve">
+    <value>LCX Distal</value>
+  </data>
+  <data name="LCX Mid" xml:space="preserve">
+    <value>LCX Mid</value>
+  </data>
+  <data name="LCX OM1" xml:space="preserve">
+    <value>LCX OM1</value>
+  </data>
+  <data name="LCX OM2" xml:space="preserve">
+    <value>LCX OM2</value>
+  </data>
+  <data name="LCX Prox" xml:space="preserve">
+    <value>LCX Prox</value>
+  </data>
+  <data name="Left Main" xml:space="preserve">
+    <value>Left Main</value>
+  </data>
+  <data name="Length" xml:space="preserve">
+    <value>Length</value>
+  </data>
   <data name="Live" xml:space="preserve">
     <value>Live</value>
   </data>
@@ -557,6 +598,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Loading" xml:space="preserve">
     <value>Loading</value>
+  </data>
+  <data name="Loading..." xml:space="preserve">
+    <value>Loading...</value>
   </data>
   <data name="Localization" xml:space="preserve">
     <value>Localization</value>
@@ -669,6 +713,9 @@ Overwrite existing data?</value>
   <data name="No." xml:space="preserve">
     <value>No.</value>
   </data>
+  <data name="Not Selected" xml:space="preserve">
+    <value>Not Selected</value>
+  </data>
   <data name="OCT" xml:space="preserve">
     <value>OCT</value>
   </data>
@@ -708,6 +755,9 @@ Overwrite existing data?</value>
   <data name="Patient Summary" xml:space="preserve">
     <value>Patient Summary</value>
   </data>
+  <data name="PDA" xml:space="preserve">
+    <value>PDA</value>
+  </data>
   <data name="Physician" xml:space="preserve">
     <value>Physician</value>
   </data>
@@ -720,8 +770,14 @@ Overwrite existing data?</value>
   <data name="Post" xml:space="preserve">
     <value>Post</value>
   </data>
+  <data name="Post-PCI" xml:space="preserve">
+    <value>Post-PCI</value>
+  </data>
   <data name="Pre" xml:space="preserve">
     <value>Pre</value>
+  </data>
+  <data name="Pre-PCI" xml:space="preserve">
+    <value>Pre-PCI</value>
   </data>
   <data name="Presentation" xml:space="preserve">
     <value>Presentation</value>
@@ -749,6 +805,15 @@ Overwrite existing data?</value>
   </data>
   <data name="Raywatt" xml:space="preserve">
     <value>Raywatt</value>
+  </data>
+  <data name="RCA Distal" xml:space="preserve">
+    <value>RCA Distal</value>
+  </data>
+  <data name="RCA Mid" xml:space="preserve">
+    <value>RCA Mid</value>
+  </data>
+  <data name="RCA Prox" xml:space="preserve">
+    <value>RCA Prox</value>
   </data>
   <data name="Ready" xml:space="preserve">
     <value>Ready</value>
@@ -810,6 +875,9 @@ Overwrite existing data?</value>
   <data name="Select Procedure" xml:space="preserve">
     <value>Select Procedure</value>
   </data>
+  <data name="Select Pullback" xml:space="preserve">
+    <value>Select Pullback</value>
+  </data>
   <data name="Service" xml:space="preserve">
     <value>Service</value>
   </data>
@@ -825,11 +893,17 @@ Overwrite existing data?</value>
   <data name="SKIP" xml:space="preserve">
     <value>SKIP</value>
   </data>
+  <data name="Speed" xml:space="preserve">
+    <value>Speed</value>
+  </data>
   <data name="Standard" xml:space="preserve">
     <value>Standard</value>
   </data>
   <data name="Standard (60㎜)" xml:space="preserve">
     <value>Standard (60㎜)</value>
+  </data>
+  <data name="Standard - Long" xml:space="preserve">
+    <value>Standard - Long</value>
   </data>
   <data name="Start" xml:space="preserve">
     <value>Start</value>
@@ -855,6 +929,9 @@ Overwrite existing data?</value>
   <data name="TIFF" xml:space="preserve">
     <value>TIFF</value>
   </data>
+  <data name="Time" xml:space="preserve">
+    <value>Time</value>
+  </data>
   <data name="Tissue" xml:space="preserve">
     <value>Tissue</value>
   </data>
@@ -866,6 +943,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Total Export Size" xml:space="preserve">
     <value>Total Export Size</value>
+  </data>
+  <data name="Unloading..." xml:space="preserve">
+    <value>Unloading...</value>
   </data>
   <data name="Update Date" xml:space="preserve">
     <value>Update Date</value>

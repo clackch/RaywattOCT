@@ -166,24 +166,19 @@ namespace RaywattApp.ViewModels.Dialog
 
                 if (fileExport.Longitude)
                 {
-                    Section.Proximal.X = CommonUtil.GetPositionFromFrame(patientCase.SectionProximal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, 0);
-                    Section.Distal.X = CommonUtil.GetPositionFromFrame(patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, Constants.SectionIndicatorWidth);
+                    Section.Proximal.X = CommonUtil.GetPositionFromFrame(patientCase.SectionProximal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, Constants.SectionIndicatorCenterWidth);
+                    Section.Distal.X = CommonUtil.GetPositionFromFrame(patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
                     DrawLumenProfileImage();
 
                     if (CommonUtil.IsPreCase(patientCase.Procedure))
                     {
-                        Section.SetMlaMld(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackType);
+                        Section.SetMlaMld(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength);
                         Section.VisibleMlaMld(true);
-                    }
-                    else if (CommonUtil.IsPostCase(PatientCase.Procedure))
-                    {
-                        Section.SetMsaMinExp(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackType);
-                        Section.VislbleMsaMinExp(true);
                     }
                     else
                     {
-                        //Procedure Other Case 확인 필요
-                        Section.SetMlaMld(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackType);
+                        Section.SetMsaMinExp(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength);
+                        Section.VislbleMsaMinExp(true);
                     }
                 }
 
@@ -312,7 +307,7 @@ namespace RaywattApp.ViewModels.Dialog
 
                 if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenContour))
                 {
-                    LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(patientCaseAnnotations[0].LumenContour);
+                    LumenContours = CommonUtil.JsonToLumenContours(patientCaseAnnotations[0].LumenContour);
 
                     int frameProximal = PatientCase.SectionProximal;
                     int frameDistal = PatientCase.SectionDistal;

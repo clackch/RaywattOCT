@@ -614,7 +614,22 @@ namespace RaywattApp.Common.Annotation
             }
             Cv2.FindContours(imgInnerContour, out contours, out hierarchy, RetrievalModes.Tree, ContourApproximationModes.ApproxSimple);
 
-            return contours.Length == 1 ? true : false;
+            if (contours.Length == 1)
+                return true;
+
+            if (contours.Length > 10)
+                return false;
+
+            int contourCnt = contours.Length;
+
+            foreach (var contour in contours)
+            {
+                //작은 크기의 contour는 예외처리 (contour의 point 갯수가 10 미만이며, area가 20 미만의 경우 통과)
+                if (contour.Length < 10 && Cv2.ContourArea(contour) < 20)
+                    contourCnt--;
+            }
+
+            return contourCnt == 1 ? true : false;
         }
 
         private void DrawLumenContourPoint(Point point, int index)

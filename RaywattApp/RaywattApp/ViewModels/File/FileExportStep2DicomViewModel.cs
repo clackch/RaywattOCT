@@ -72,14 +72,7 @@ namespace RaywattApp.ViewModels.File
             {
                 foreach (PatientCase patientCase in PatientCases)
                 {
-                    if (patientCase.PullbackType == Constants.PullbackTypeLong)
-                    {
-                        ExportSize += frameSize * Constants.PullbackLongFrameCnt;
-                    }
-                    else
-                    {
-                        ExportSize += frameSize * Constants.PullbackShortFrameCnt;
-                    }
+                    ExportSize += frameSize * int.Parse(CodeDefinition.Codes["PBLE"][patientCase.PullbackLength]);
                 }
             }
             else if(FileExport.Material == Constants.ExportMaterialBookmarked)
@@ -132,7 +125,9 @@ namespace RaywattApp.ViewModels.File
                 dicomProperty.Add(temp.ReturnString, temp.ReturnString2);
             }
 
-            IList<Configuration> tnCs = _sqlManager.SelectConfigurationTnC();
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "Terms&Cond";
+            IList<Configuration> tnCs = _sqlManager.SelectConfiguration(sqlParameters);
             if (tnCs != null || tnCs.Count == 1)
             {
                 //Institution Name
