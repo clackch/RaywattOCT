@@ -40,12 +40,6 @@
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [Compare], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewComparePage}" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$002|$003}"/>
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [AI FFR], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrPage}"/>
                 </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <component:IconButton Style="{StaticResource IconButton}" Icon="editPresetSimple" Width="42" Height="42" Command="{Binding EditPresetCommand}" Content="{Binding [Edit Preset], Source={StaticResource L10N}}"/>
-                    <StackPanel Width="6"/>
-                    <component:IconButton Style="{StaticResource IconButton}" Icon="exportSimple" Width="42" Height="42" Command="{Binding ExportCommand}" Content="{Binding [Export], Source={StaticResource L10N}}"/>
-                    <StackPanel Width="118"/>
-                </StackPanel>
             </Grid>
 
             <Grid Grid.Row="1">

@@ -174,6 +174,7 @@ namespace RaywattApp.ViewModels
                 else
                 {
                     GetPatientCase(false, ReviewStatus.SelectedPatientCase.LumenContour);
+                    DeviceStatus.IsOCTImagingCompareDone = true;
                 }
 
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
