@@ -30,7 +30,7 @@
             </Grid.RowDefinitions>
             <Border Grid.Row="0" CornerRadius="10,10,0,0" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray6Brush}">
                 <Grid>
-                    <Grid Margin="49,78,49,0" Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Grid Margin="49,78,49,0">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="74"/>
                             <RowDefinition Height="58"/>
@@ -48,112 +48,29 @@
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                 <Label Style="{DynamicResource Pretendard-Semibold-24}" Foreground="{DynamicResource GrayscaleGray3Brush}">
                                     <Label.Content>
-                                        <AccessText TextWrapping="Wrap" Text="{Binding [$MSG006], Source={StaticResource L10N}}"/>
-                                    </Label.Content>
-                                </Label>
-                            </StackPanel>
-                        </Grid>
-                        <Border Grid.Row="2" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
-
-                        </Border>
-                    </Grid>
-                    <Grid Margin="49,78,49,0" Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="74"/>
-                            <RowDefinition/>
-                            <RowDefinition Height="40"/>
-                        </Grid.RowDefinitions>
-                        <Grid Grid.Row="0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="110"/>
-                                <ColumnDefinition/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <Image Source="{svgc:SvgImage Source=/res/icon/alertWarning.svg}" Height="74"/>
-                            </StackPanel>
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <Label Style="{DynamicResource Pretendard-Semibold-24}" Foreground="{DynamicResource GrayscaleGray3Brush}">
-                                    <Label.Content>
                                         <AccessText TextWrapping="Wrap" Text="{Binding [$MSG008], Source={StaticResource L10N}}"/>
                                     </Label.Content>
                                 </Label>
                             </StackPanel>
                         </Grid>
-                        <Grid Grid.Row="1">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition Width="16"/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition Width="16"/>
-                                <ColumnDefinition/>
-                            </Grid.ColumnDefinitions>
-                            <Grid Grid.Column="0" Opacity="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource OpacityConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusFailed}}">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition/>
-                                    <RowDefinition Height="440"/>
-                                </Grid.RowDefinitions>
-                                <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,30,0,0">
-                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" TextBlock.TextAlignment="Center">
-                                        <Label.Content>
-                                            <AccessText TextWrapping="Wrap" Text="{Binding [$MSG009], Source={StaticResource L10N}}"/>
-                                        </Label.Content>
-                                    </Label>
-                                </StackPanel>
-                                <Border Grid.Row="1" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
-
-                                </Border>
+                        <Border Grid.Row="2" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
+                            <Grid Visibility="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource RadioButtonVisibilityReverseConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusUnloaded}}">
+                                <Grid Visibility="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusFailed}}">
+                                    <Label Style="{DynamicResource Pretendard-Medium-28}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG009], Source={StaticResource L10N}}" HorizontalAlignment="Center" Margin="0,40,0,0"/>
+                                    <Image Source="/res/guide/UnlockCatheter.png"/>
+                                </Grid>
+                                <Grid Visibility="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusUnlocked}}">
+                                    <Label Style="{DynamicResource Pretendard-Medium-28}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Unloading...], Source={StaticResource L10N}}" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,40"/>
+                                    <Image Source="/res/guide/Unloading.png"/>
+                                </Grid>
                             </Grid>
-                            <Grid Grid.Column="2" Opacity="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource OpacityConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusUnlocked}}">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition/>
-                                    <RowDefinition Height="440"/>
-                                </Grid.RowDefinitions>
-                                <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,30,0,0">
-                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" TextBlock.TextAlignment="Center">
-                                        <Label.Content>
-                                            <AccessText TextWrapping="Wrap" Text="{Binding [$MSG010], Source={StaticResource L10N}}"/>
-                                        </Label.Content>
-                                    </Label>
-                                </StackPanel>
-                                <Border Grid.Row="1" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
-
-                                </Border>
-                            </Grid>
-                            <Grid Grid.Column="4" Opacity="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource OpacityConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusUnloaded}}">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition/>
-                                    <RowDefinition Height="440"/>
-                                </Grid.RowDefinitions>
-                                <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,30,0,0">
-                                    <Label Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" TextBlock.TextAlignment="Center">
-                                        <Label.Content>
-                                            <AccessText TextWrapping="Wrap" Text="{Binding [$MSG011], Source={StaticResource L10N}}"/>
-                                        </Label.Content>
-                                    </Label>
-                                </StackPanel>
-                                <Border Grid.Row="1" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
-
-                                </Border>
-                            </Grid>
-                        </Grid>
+                        </Border>
                     </Grid>
                 </Grid>
             </Border>
             <Separator Grid.Row="1" Foreground="{DynamicResource GrayscaleGray5Brush}"/>
             <Border Grid.Row="2" CornerRadius="0,0,10,10" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray6Brush}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" HorizontalAlignment="Left" Margin="16,16,0,0">
-                        <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
-                    </StackPanel>
-                    <Grid Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,16,0">
-                        <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding NextStepCommand}" Content="{Binding [Next], Source={StaticResource L10N}}" Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                        <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding NextCommand}" Content="{Binding [Next], Source={StaticResource L10N}}" Visibility="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusDisconnected}}"/>
-                    </Grid>
-                </Grid>
+
             </Border>
         </Grid>
 

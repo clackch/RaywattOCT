@@ -44,7 +44,9 @@ namespace RaywattApp.ViewModels
             _log.Debug("OnNavigated");
 
             // Terms and Contidions 확인
-            IList<Configuration> tnCs = _sqlManager.SelectConfigurationTnC();
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "Terms&Cond";
+            IList<Configuration> tnCs = _sqlManager.SelectConfiguration(sqlParameters);
             if (tnCs != null || tnCs.Count == 1)
             {
                 if ("N".Equals(tnCs[0].Value))

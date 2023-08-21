@@ -30,6 +30,15 @@ namespace RaywattApp.Services
             return _databaseService.GetDatas<Code>(commandText);
         }
 
+        public IList<Code> SelectCode(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("SelectCode");
+
+            string commandText = SqlQuery.GetQuery("SelectCode");
+
+            return _databaseService.GetDatas<Code>(commandText, sqlParameters);
+        }
+
         /**
          * Configuration
          */
@@ -42,22 +51,13 @@ namespace RaywattApp.Services
             return _databaseService.GetDatas<Configuration>(commandText);
         }
 
-        public IList<Configuration> SelectConfigurationL10nList()
+        public IList<Configuration> SelectConfiguration(Dictionary<string, Object> sqlParameters)
         {
-            _log.Debug("SelectConfigurationL10nList");
+            _log.Debug("SelectConfiguration");
 
-            string commandText = SqlQuery.GetQuery("SelectConfigurationL10nList");
+            string commandText = SqlQuery.GetQuery("SelectConfiguration");
 
-            return _databaseService.GetDatas<Configuration>(commandText);
-        }
-
-        public IList<Configuration> SelectConfigurationTnC()
-        {
-            _log.Debug("SelectConfigurationTnC");
-
-            string commandText = SqlQuery.GetQuery("SelectConfigurationTnC");
-
-            return _databaseService.GetDatas<Configuration>(commandText);
+            return _databaseService.GetDatas<Configuration>(commandText, sqlParameters);
         }
 
         public int UpdateConfigurationL10n(Dictionary<string, Object> sqlParameters)
@@ -69,11 +69,11 @@ namespace RaywattApp.Services
             return _databaseService.UpdateData(commandText, sqlParameters);
         }
 
-        public int UpdateConfigurationTnC(Dictionary<string, Object> sqlParameters)
+        public int UpdateConfiguration(Dictionary<string, Object> sqlParameters)
         {
-            _log.Debug("UpdateConfigurationTnC");
+            _log.Debug("UpdateConfiguration");
 
-            string commandText = SqlQuery.GetQuery("UpdateConfigurationTnC");
+            string commandText = SqlQuery.GetQuery("UpdateConfiguration");
 
             return _databaseService.UpdateData(commandText, sqlParameters);
         }

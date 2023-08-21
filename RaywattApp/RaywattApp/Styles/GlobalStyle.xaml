@@ -118,6 +118,22 @@
     <SolidColorBrush x:Key="FULabelForegroundBrush" Color="#fcfcfc"/>
 
     <!-- font -->
+    <Style TargetType="Control" x:Key="Pretendard-ExtraBold-20">
+        <Setter Property="Padding" Value="0,0,0,0"/>
+        <Setter Property="FontFamily" Value="Pretendard"/>
+        <Setter Property="FontWeight" Value="ExtraBold"/>
+        <Setter Property="FontStyle" Value="Normal"/>
+        <Setter Property="FontSize" Value="20"/>
+    </Style>
+
+    <Style TargetType="Control" x:Key="Pretendard-ExtraBold-14">
+        <Setter Property="Padding" Value="0,0,0,0"/>
+        <Setter Property="FontFamily" Value="Pretendard"/>
+        <Setter Property="FontWeight" Value="ExtraBold"/>
+        <Setter Property="FontStyle" Value="Normal"/>
+        <Setter Property="FontSize" Value="14"/>
+    </Style>
+
     <Style TargetType="Control" x:Key="Pretendard-Bold-80">
         <Setter Property="Padding" Value="0,0,0,0"/>
         <Setter Property="FontFamily" Value="Pretendard"/>
@@ -404,6 +420,14 @@
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="FontStyle" Value="Normal"/>
         <Setter Property="FontSize" Value="12"/>
+    </Style>
+
+    <Style TargetType="TextBlock" x:Key="TextBlock_Pretendard-Semibold-10">
+        <Setter Property="Padding" Value="0,0,0,0"/>
+        <Setter Property="FontFamily" Value="Pretendard"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="FontStyle" Value="Normal"/>
+        <Setter Property="FontSize" Value="10"/>
     </Style>
 
 </ResourceDictionary>

@@ -13,7 +13,6 @@ using System.Collections.Generic;
 using System.Windows.Threading;
 using RaywattApp.Common.Util;
 using static RaywattOCT.RayCoreWrapper;
-using System.Threading;
 
 namespace RaywattApp.ViewModels
 {

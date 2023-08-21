@@ -349,15 +349,7 @@ namespace RaywattApp.Common.Annotation
             Label label = new Label();
             label.Style = (Style)this.Resources["StyleLabel"];
             label.Name = constLength + "_" + group;
-            double scale = 0.0;
-            if (Constants.PullbackTypeLong.Equals(PullbackType))
-            {
-                scale = Constants.PullbackLongFrameCnt / Constants.LongitudeWidth / 10;
-            }
-            else
-            {
-                scale = Constants.PullbackShortFrameCnt / Constants.LongitudeWidth / 10;
-            }
+            double scale = int.Parse(CodeDefinition.Codes["PBLE"][PullbackLength]) / Constants.LongitudeWidth / 10;
             label.Content = DrawAnnotation.GetLabelText(length * scale);
             label.RenderTransform = new RotateTransform(angle);
 

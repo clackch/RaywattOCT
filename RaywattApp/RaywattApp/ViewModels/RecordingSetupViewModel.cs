@@ -10,12 +10,15 @@ using System.Windows.Navigation;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
 using static RaywattOCT.RayCoreWrapper;
+using System.Windows.Threading;
 
 namespace RaywattApp.ViewModels
 {
     public partial class RecordingSetupViewModel : ViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(RecordingSetupViewModel));
+
+        private DispatcherTimer timer = new DispatcherTimer();
 
         [ObservableProperty]
         private Patient _patient;
@@ -29,17 +32,15 @@ namespace RaywattApp.ViewModels
             get { return this._cancelCommand ?? (this._cancelCommand = new RelayCommand(Cancel)); }
         }
 
-        private ICommand _nextCommand;
-        public ICommand NextCommand
-        {
-            get { return this._nextCommand ?? (this._nextCommand = new RelayCommand(Next)); }
-        }
-
         public RecordingSetupViewModel()
         {
             _log.Debug("RecordingSetupViewModel");
 
             Constants.CurrentPage = Constants.RecordingSetupPage;
+
+            timer.Interval = TimeSpan.FromMilliseconds(10);
+            timer.Tick += new EventHandler(CheckCatheterStatus);
+            timer.Start();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -58,12 +59,19 @@ namespace RaywattApp.ViewModels
                 {
                     RayLoadCatheter();
                 }
+                else
+                {
+                    Next();
+                }
             }
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
             _log.Debug("OnNavigating");
+
+            if (timer.IsEnabled)
+                timer.Stop();
         }
 
         private void Cancel()
@@ -84,6 +92,12 @@ namespace RaywattApp.ViewModels
             parameter["patient"] = this.Patient;
             parameter["prevStatus"] = this.PrevStatus;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingLiveViewPage) { Parameter = parameter });
+        }
+
+        private void CheckCatheterStatus(object sender, EventArgs e)
+        {
+            if(DeviceStatus.CatheterStatus == Constants.CatheterStatusLoaded)
+                Next();
         }
     }
 }
