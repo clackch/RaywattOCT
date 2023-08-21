@@ -231,7 +231,7 @@ namespace RaywattApp.ViewModels
             {
                 if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenContour))
                 {
-                    return JsonConvert.DeserializeObject<List<LumenContour>>(patientCaseAnnotations[0].LumenContour);
+                    return CommonUtil.JsonToLumenContours(patientCaseAnnotations[0].LumenContour);
                 }
             }
 

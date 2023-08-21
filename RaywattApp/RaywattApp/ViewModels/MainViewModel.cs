@@ -351,7 +351,7 @@ namespace RaywattApp.ViewModels
                     });
                     break;
                 case RayWorkItem.OCTImaging:
-                    if(param == 0)
+                    if(param == (int)RaySession.Review)
                         DeviceStatus.IsOCTImagingDone = true;
                     else
                         DeviceStatus.IsOCTImagingCompareDone = true;

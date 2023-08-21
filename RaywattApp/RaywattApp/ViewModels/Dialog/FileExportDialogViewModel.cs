@@ -307,7 +307,7 @@ namespace RaywattApp.ViewModels.Dialog
 
                 if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenContour))
                 {
-                    LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(patientCaseAnnotations[0].LumenContour);
+                    LumenContours = CommonUtil.JsonToLumenContours(patientCaseAnnotations[0].LumenContour);
 
                     int frameProximal = PatientCase.SectionProximal;
                     int frameDistal = PatientCase.SectionDistal;

@@ -334,7 +334,7 @@ namespace RaywattApp.ViewModels
                 else
                     LumenContourCommand = Constants.LumenContourCurrentInit;
 
-                PatientCase.StrLumenContour = JsonConvert.SerializeObject(LumenContours, Formatting.Indented);
+                PatientCase.StrLumenContour = CommonUtil.LumenContoursToJson(LumenContours);
 
                 DeviceStatus.IsLumenSaved = true;
             }
@@ -769,7 +769,7 @@ namespace RaywattApp.ViewModels
 
         private void ThreadMakeLumenProfile(string lumenContour)
         {
-            LumenContours = JsonConvert.DeserializeObject<List<LumenContour>>(lumenContour);
+            LumenContours = CommonUtil.JsonToLumenContours(lumenContour);
 
             if (ReviewStatus.IsContourStentOn)
                 LumenContourCommand = Constants.LumenContourDraw;
