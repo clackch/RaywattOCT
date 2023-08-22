@@ -42,6 +42,12 @@ namespace RaywattApp.ViewModels
 
         private Mat imglumenProfileExtra;
 
+        private double originSectionProximalX;
+
+        private double originSectionDistalX;
+
+        private string originProcedure;
+
         private double degree;
         public double Degree
         {
@@ -259,6 +265,8 @@ namespace RaywattApp.ViewModels
 
                 Section.Proximal.X = CommonUtil.GetPositionFromFrame(PatientCase.SectionProximal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
                 Section.Distal.X = CommonUtil.GetPositionFromFrame(PatientCase.SectionDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
+
+                SetLumenProfileValue();
 
                 GetImageInfo(RaySession.Review);
 
@@ -925,6 +933,21 @@ namespace RaywattApp.ViewModels
             }
         }
 
+        private void SetLumenProfileValue()
+        {
+            this.originSectionProximalX = Section.Proximal.X;
+            this.originSectionDistalX = Section.Distal.X;
+            this.originProcedure = PatientCase.Procedure;
+        }
+
+        private bool IsChangedLumenProfileValue()
+        {
+            if (this.originSectionProximalX != Section.Proximal.X || this.originSectionDistalX != Section.Distal.X || this.originProcedure != PatientCase.Procedure)
+                return true;
+            else
+                return false;
+        }
+
         private void MinimalValueChanged()
         {
             int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
@@ -945,6 +968,30 @@ namespace RaywattApp.ViewModels
             }
         }
 
+        private void DrawLumenProfile()
+        {
+            int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
+            int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
+            //Test
+            List<int> sidebranchs = new List<int>() { 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 419, 420 };
+            List<int> appositionFrames = new List<int>() { 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
+            imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, frameProximal, frameDistal, sidebranchs, CommonUtil.IsPostCase(PatientCase.Procedure), appositionFrames, longitudeFrameInfo.curFrame - 1);
+            DrawLumenProfileImage();
+
+            //Test
+            List<int> colorFrames = new List<int>();
+            if (CommonUtil.IsPreCase(PatientCase.Procedure))
+            {
+                colorFrames = new List<int>() { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
+            }
+            else if (CommonUtil.IsPostCase(PatientCase.Procedure))
+            {
+                colorFrames = CommonUtil.GetExpansionList(LumenContours, frameProximal, frameDistal, Section.RefArea, PatientCase.ExpansionThreshold);
+            }
+            imglumenProfileExtra = CommonUtil.MakeLumenProfileImageExtra(ReviewStatus.NumberOfFrames, colorFrames, CommonUtil.IsPreCase(PatientCase.Procedure), longitudeFrameInfo.curFrame - 1);
+            LumenProfileImageExtra = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileExtra);
+        }
+
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {
             if (DrawCrossSectionImage())
@@ -959,39 +1006,27 @@ namespace RaywattApp.ViewModels
                 // when generating longitude image is completed
                 if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame)
                 {
-                    IndicatorLongitude.IsEnabled = true;
-                    Section.Proximal.IsEnabled = true;
-                    Section.Distal.IsEnabled = true;
-                    MinimalValueChanged();
+                    if (IsChangedLumenProfileValue())
+                    {
+                        MinimalValueChanged();
+                        DrawLumenProfile();
+                        SetLumenProfileValue();
+                    }                        
 
                     if (!this.isLongitudeMeasurementInit)
                     {
                         MeasurementCommand = Constants.MeasureDrawAll;
+                        IndicatorLongitude.IsEnabled = true;
+                        Section.Proximal.IsEnabled = true;
+                        Section.Distal.IsEnabled = true;
+                        MinimalValueChanged();
+                        DrawLumenProfile();
                         this.isLongitudeMeasurementInit = true;
                     }
                 }
-                if(DeviceStatus.IsLumenLoaded && !this.isLumenContourSave)
+                else if (DeviceStatus.IsLumenLoaded && !this.isLumenContourSave)
                 {
-                    int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
-                    int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
-                    //Test
-                    List<int> sidebranchs = new List<int>() { 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 419, 420 };
-                    List<int> appositionFrames = new List<int>() { 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
-                    imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, frameProximal, frameDistal, sidebranchs, CommonUtil.IsPostCase(PatientCase.Procedure), appositionFrames, longitudeFrameInfo.curFrame - 1);
-                    DrawLumenProfileImage();
-
-                    //Test
-                    List<int> colorFrames = new List<int>();
-                    if (CommonUtil.IsPreCase(PatientCase.Procedure))
-                    {
-                        colorFrames = new List<int>() { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
-                    }
-                    else if(CommonUtil.IsPostCase(PatientCase.Procedure))
-                    {
-                        colorFrames = CommonUtil.GetExpansionList(LumenContours, frameProximal, frameDistal, Section.RefArea, PatientCase.ExpansionThreshold);
-                    }                   
-                    imglumenProfileExtra = CommonUtil.MakeLumenProfileImageExtra(ReviewStatus.NumberOfFrames, colorFrames, CommonUtil.IsPreCase(PatientCase.Procedure), longitudeFrameInfo.curFrame - 1);
-                    LumenProfileImageExtra = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileExtra);
+                    DrawLumenProfile();
                 }
             }
         }
