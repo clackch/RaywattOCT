@@ -69,7 +69,7 @@ namespace RaywattApp.ViewModels.Dialog
                 PatientCase.Procedure = data["procedure"].ToString();
                 PatientCase.PhysicianName = data["physicianName"].ToString();
                 PatientCase.AccessionNumber = data["accessionNumber"].ToString();
-                PatientCase.Comment = data["comment"].ToString();
+                PatientCase.Comment = data["comment"].ToString().Trim();
             }
         }
     }
