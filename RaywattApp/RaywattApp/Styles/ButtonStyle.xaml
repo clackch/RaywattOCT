@@ -383,6 +383,35 @@
         <Setter Property="Height" Value="26"/>
     </Style>
 
+    <!-- BtnForTest -->
+    <Style TargetType="Button" x:Key="BtnForTest" BasedOn="{StaticResource Pretendard-Medium-14}">
+        <Setter Property="Foreground" Value="Transparent"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="border" CornerRadius="6" BorderThickness="1" BorderBrush="Transparent" Background="Transparent"/>
+                        <ContentPresenter x:Name="content" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Height" Value="26">
+                            <Setter TargetName="border" Property="CornerRadius" Value="4"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource AdditionalColor1Brush}"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource MainBackgroundColorBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MainThemeBrush}"/>
+                            <Setter TargetName="border" Property="Background" Value="Transparent"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource MainThemeBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- FfrPredictBtn -->
     <Style TargetType="Button" x:Key="FfrPredictBtn" BasedOn="{StaticResource Pretendard-Medium-18}">
         <Setter Property="Width" Value="200"/>

@@ -1180,7 +1180,7 @@
                 </Grid>
             </Grid>
 
-            <Grid Grid.Row="2" Height="40" Background="#0d0d0d">
+            <Grid Grid.Row="2" Height="40" Background="{StaticResource GrayscaleBlackBrush}">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" >
                     <Button Style="{StaticResource OutlinedBtnType1-Small-Wide}" Command="{Binding NewRecordingCommand}" Content="{Binding [New Recording], Source={StaticResource L10N}}"/>
                     <StackPanel Width="8"/>
