@@ -34,7 +34,7 @@ namespace RaywattApp.ViewModels
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
-        private bool isLongitudeMeasurementInit;
+        private bool isLongitudeMeasurementInit = false;
 
         private bool isLumenContourSave = false;
 
@@ -232,8 +232,6 @@ namespace RaywattApp.ViewModels
             Section.Distal.IsVisible = Visibility.Visible;
 
             MenuExpand(true);
-
-            isLongitudeMeasurementInit = false;
 
             CurrentLumenContour = new LumenContour();
         }
@@ -966,10 +964,10 @@ namespace RaywattApp.ViewModels
                     Section.Distal.IsEnabled = true;
                     MinimalValueChanged();
 
-                    if (!isLongitudeMeasurementInit)
+                    if (!this.isLongitudeMeasurementInit)
                     {
                         MeasurementCommand = Constants.MeasureDrawAll;
-                        isLongitudeMeasurementInit = true;
+                        this.isLongitudeMeasurementInit = true;
                     }
                 }
                 if(DeviceStatus.IsLumenLoaded && !this.isLumenContourSave)
