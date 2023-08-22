@@ -52,6 +52,8 @@ namespace RaywattApp.ViewModels
             { 
                 _isPtoD = value;
                 OnPropertyChanged(nameof(IsPtoD));
+
+                ray3DStatus.IsPtoD = value;
                 ODSOCT_MoveCameraPosition(0, !value);
             }
         }
@@ -173,7 +175,7 @@ namespace RaywattApp.ViewModels
                 // set default values without rendering
                 _isCutViewOn = ray3DStatus.CutViewOn;
                 _isIndicatorOn = true;
-                _isPtoD = true;
+                _isPtoD = ray3DStatus.IsPtoD;
                 _isSideBranchView = false;
             }
 

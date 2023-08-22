@@ -20,6 +20,13 @@ namespace RaywattOCT
                 set { _cutviewOn = value; }
             }
 
+            private bool _isPtoD = true;
+            public bool IsPtoD
+            { 
+                get { return _isPtoD; }
+                set { _isPtoD = value; }
+            }
+
             public Ray3DStatus()
             {
                 for (Ray3DObject obj = Ray3DObject.Tissue; obj < Ray3DObject.Count; obj++) 
@@ -28,6 +35,7 @@ namespace RaywattOCT
                 }
                 ObjectVisibility[(int)Ray3DObject.Tissue] = Ray3DObjectMode.Cut;
                 CutViewOn = true;
+                IsPtoD = true;
             }
 
             public int ShowObject(Ray3DObject obj, Ray3DObjectMode mode)
