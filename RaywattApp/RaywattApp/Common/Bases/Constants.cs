@@ -294,6 +294,11 @@ namespace RaywattApp.Common.Bases
         public const double Longitude3dScale = Longitude3dWidth / 10;
         public const double LongitudeIndicator3dHeight = 161;
 
+        //Review - 3D - Side Menu
+        public const double LeftSideBarExpand3dSize = 329;
+        public const double ViewMenu3dY = 70;
+        public const double PatientMenu3dY = 409;
+
         //Review - Compare - Cross Section
         public const double CrossSectionCompareSize = 278;
         public const double CrossSectionCompareCenter = CrossSectionCompareSize / 2;

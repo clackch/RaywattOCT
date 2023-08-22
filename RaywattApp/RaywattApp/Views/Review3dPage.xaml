@@ -77,7 +77,10 @@
                                     <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Cut-View], Source={StaticResource L10N}}"/>
                                 </StackPanel>
                                 <Border Grid.Row="1" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
-
+                                    <!-- Loading -->
+                                    <Grid Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding IsRendering, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                                    </Grid>
                                 </Border>
                                 <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom">
                                     <component:IconToggleButton Style="{DynamicResource ToggleButtonWithText}" Icon="cutView" Content="{Binding [Cut-View], Source={StaticResource L10N}}" IsChecked="{Binding IsCutViewOn}"/>
@@ -97,7 +100,7 @@
                                     <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Fly-Through], Source={StaticResource L10N}}"/>
                                 </StackPanel>
                                 <Border Grid.Row="1" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
-
+                                    <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding IsRendering, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
                                 </Border>
                                 <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom">
                                     <ToggleButton Style="{DynamicResource FlyThroughToggleBtn}" Content="{Binding [P to D], Source={StaticResource L10N}}" IsChecked="{Binding IsPtoD}"/>
@@ -115,7 +118,7 @@
                                 <RowDefinition Height="329"/>
                             </Grid.RowDefinitions>
                             <!-- 3D Option  -->
-                            <Button Grid.Row="0" HorizontalAlignment="Left" Visibility="{Binding ExpandLeftUpMenu, Converter={StaticResource BoolToVisibilityReverseConverter}}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftUpMenu}">
+                            <Button Grid.Row="0" HorizontalAlignment="Left" Visibility="{Binding ExpandLeftUpMenu, Converter={StaticResource BoolToVisibilityReverseConverter}}" Command="{Binding CmdExpandLeftViewMenu}">
                                 <Button.Template>
                                     <ControlTemplate>
                                         <Border CornerRadius="0,8,8,0" Width="{x:Static const:Constants.SideBarCollapseSize}" Background="{StaticResource SideCardBackgroundBrush}">
@@ -125,7 +128,7 @@
                                                     <RowDefinition/>
                                                 </Grid.RowDefinitions>
                                                 <StackPanel Grid.Row="0" >
-                                                    <Button Style="{DynamicResource SideMenuTitleLeftCollapsed}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftUpMenu}"/>
+                                                    <Button Style="{DynamicResource SideMenuTitleLeftCollapsed}" Command="{Binding CmdExpandLeftViewMenu}"/>
                                                 </StackPanel>
                                                 <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Center">
                                                     <StackPanel Height="114.2"/>
@@ -142,70 +145,8 @@
                                     </ControlTemplate>
                                 </Button.Template>
                             </Button>
-                            <Border Grid.Row="0" CornerRadius="0,8,8,0" HorizontalAlignment="Left" Width="{x:Static const:Constants.SideBarExpandSize}" Visibility="{Binding ExpandLeftUpMenu, Converter={StaticResource BoolToVisibilityConverter}}" Background="{StaticResource SideCardBackgroundBrush}">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition/>
-                                    </Grid.RowDefinitions>
-                                    <StackPanel Grid.Row="0">
-                                        <Button Style="{DynamicResource SideMenuTitleLeft}" Content="{Binding [3D Option], Source={StaticResource L10N}}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftUpMenu}"/>
-                                    </StackPanel>
-                                    <Grid Grid.Row="1" Width="192" HorizontalAlignment="Center" Margin="0,25,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition/>
-                                            <ColumnDefinition/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="28"/>
-                                            <RowDefinition Height="30"/>
-                                            <RowDefinition Height="30"/>
-                                            <RowDefinition Height="44"/>
-                                            <RowDefinition Height="30"/>
-                                            <RowDefinition Height="30"/>
-                                            <RowDefinition/>
-                                        </Grid.RowDefinitions>
-                                        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
-                                            <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Display Modes], Source={StaticResource L10N}}"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,2,0,0">
-                                            <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Tissue], Source={StaticResource L10N}}"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right">
-                                            <ToggleButton Style="{DynamicResource IconToggleBtn-Small}" IsChecked="{Binding IsTissueOn}" HorizontalAlignment="Right"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,2,0,0">
-                                            <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Lumen], Source={StaticResource L10N}}"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right">
-                                            <ToggleButton Style="{DynamicResource IconToggleBtn-Small}" IsChecked="{Binding IsLumenOn}" HorizontalAlignment="Right"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,2,0,0">
-                                            <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Lumen], Source={StaticResource L10N}}"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right">
-                                            <ToggleButton Style="{DynamicResource IconToggleBtn-Small}" IsChecked="{Binding IsStentOn}" HorizontalAlignment="Right"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
-                                            <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Guidewires], Source={StaticResource L10N}}"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Row="5" Grid.Column="0" Margin="0,2,0,0">
-                                            <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Guidewire 1], Source={StaticResource L10N}}"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Row="5" Grid.Column="1" HorizontalAlignment="Right">
-                                            <ToggleButton Style="{DynamicResource IconToggleBtn-Small}" IsChecked="{Binding IsGuidewireOneOn}" HorizontalAlignment="Right"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Row="6" Grid.Column="0" Margin="0,2,0,0">
-                                            <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Guidewire 2], Source={StaticResource L10N}}"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Row="6" Grid.Column="1" HorizontalAlignment="Right">
-                                            <ToggleButton Style="{DynamicResource IconToggleBtn-Small}" IsChecked="{Binding IsGuidewireTwoOn}" HorizontalAlignment="Right"/>
-                                        </StackPanel>
-                                    </Grid>
-                                </Grid>
-                            </Border>
                             <!-- Patient Info  -->
-                            <Button Grid.Row="2" HorizontalAlignment="Left" Visibility="{Binding ExpandLeftDownMenu, Converter={StaticResource BoolToVisibilityReverseConverter}}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftDownMenu}">
+                            <Button Grid.Row="2" HorizontalAlignment="Left" Visibility="{Binding ExpandLeftDownMenu, Converter={StaticResource BoolToVisibilityReverseConverter}}" Command="{Binding CmdExpandLeftPatientMenu}">
                                 <Button.Template>
                                     <ControlTemplate>
                                         <Border CornerRadius="0,8,8,0" HorizontalAlignment="Left" Width="{x:Static const:Constants.SideBarCollapseSize}" Background="{StaticResource SideCardBackgroundBrush}">
@@ -215,7 +156,7 @@
                                                     <RowDefinition/>
                                                 </Grid.RowDefinitions>
                                                 <StackPanel Grid.Row="0" >
-                                                    <Button Style="{DynamicResource SideMenuTitleLeftCollapsed}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftDownMenu}"/>
+                                                    <Button Style="{DynamicResource SideMenuTitleLeftCollapsed}" Command="{Binding CmdExpandLeftPatientMenu}"/>
                                                 </StackPanel>
                                                 <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Center">
                                                     <StackPanel Height="125.5"/>
@@ -232,70 +173,6 @@
                                     </ControlTemplate>
                                 </Button.Template>
                             </Button>
-                            <Border Grid.Row="2" CornerRadius="0,8,8,0" HorizontalAlignment="Left" Width="{x:Static const:Constants.SideBarExpandSize}" Visibility="{Binding ExpandLeftDownMenu, Converter={StaticResource BoolToVisibilityConverter}}" Background="{StaticResource SideCardBackgroundBrush}">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition/>
-                                    </Grid.RowDefinitions>
-                                    <StackPanel Grid.Row="0" >
-                                        <Button Style="{DynamicResource SideMenuTitleLeft}" Content="{Binding [Case Info.], Source={StaticResource L10N}}" Command="{Binding ExpandCollapseCommand}" CommandParameter="{x:Static const:Constants.LeftDownMenu}"/>
-                                    </StackPanel>
-                                    <StackPanel Grid.Row="1">
-                                        <Grid Width="192">
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="24"/>
-                                                <RowDefinition Height="26"/>
-                                                <RowDefinition Height="22"/>
-                                                <RowDefinition/>
-                                            </Grid.RowDefinitions>
-                                            <Grid Grid.Row="1">
-                                                <Label Style="{DynamicResource ProcedureLabel}" Content="{Binding PatientCase.Procedure, Converter={StaticResource CodeConverter}, ConverterParameter='PROC'}" HorizontalAlignment="Left"/>
-                                                <component:IconButton Style="{DynamicResource IconButton}" Icon="editSimple" Command="{Binding EditCaseCommand}" Content="{Binding [Edit], Source={StaticResource L10N}}" HorizontalAlignment="Right"/>
-                                            </Grid>
-                                            <StackPanel Grid.Row="3">
-                                                <Label Content="{Binding Patient.Name}" Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
-                                                <StackPanel Height="9"/>
-                                                <!-- design guide : 12px -->
-                                                <Separator Height="1" Background="{DynamicResource SeparatorBrush}"/>
-                                                <StackPanel Height="18"/>
-                                                <!-- design guide : 20px -->
-                                                <StackPanel Orientation="Vertical">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [ID], Source={StaticResource L10N}}"/>
-                                                        <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding Patient.Id}"/>
-                                                    </StackPanel>
-                                                    <StackPanel Height="4"/>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Birth], Source={StaticResource L10N}}"/>
-                                                        <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}"/>
-                                                    </StackPanel>
-                                                    <StackPanel Height="4"/>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
-                                                        <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
-                                                    </StackPanel>
-                                                    <StackPanel Height="12"/>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Vessel], Source={StaticResource L10N}}"/>
-                                                        <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding PatientCase.Vessel, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}"/>
-                                                    </StackPanel>
-                                                    <StackPanel Height="4"/>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Physician], Source={StaticResource L10N}}"/>
-                                                        <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding PatientCase.PhysicianName}"/>
-                                                    </StackPanel>
-                                                    <StackPanel Height="12"/>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Comment], Source={StaticResource L10N}}"/>
-                                                        <TextBlock Width="112" Height="42" Text="{Binding PatientCase.Comment}" TextWrapping="WrapWithOverflow" FontFamily="Pretendard" FontWeight="Medium" FontSize="12" Foreground="{DynamicResource CaseValueBrush}"/>
-                                                    </StackPanel>
-                                                </StackPanel>
-                                            </StackPanel>
-                                        </Grid>
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
                         </Grid>
                     </Grid>
                 </Grid>

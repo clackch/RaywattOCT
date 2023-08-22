@@ -11,17 +11,35 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Navigation;
 using System.Windows.Threading;
+using RaywattApp.Views.Dialog;
 using static RaywattOCT.RayCoreWrapper;
 using static RaywattOCT.Ray3DWrapper;
 
 namespace RaywattApp.ViewModels
 {
-    public partial class Review3dViewModel : ReviewViewModelBase
+    public partial class Review3dViewModel : ReviewViewModelBase, IModelessPatient
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(Review3dViewModel));
 
         [ObservableProperty]
+        private bool _isRendering = false;
+
         private bool _isCutViewOn;
+        public bool IsCutViewOn 
+        { 
+            get {  return _isCutViewOn; } 
+            set 
+            {
+                _isCutViewOn = value;
+                OnPropertyChanged(nameof(IsCutViewOn));
+
+                ray3DStatus.CutViewOn = value;
+                for(Ray3DObject obj = Ray3DObject.Tissue; obj < Ray3DObject.Count; obj++)
+                {
+                    changeCutVisibility(obj, value);
+                }
+            }
+        }
 
         [ObservableProperty]
         private bool _isIndicatorOn;
@@ -31,21 +49,6 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private bool _isSideBranchView;
-
-        [ObservableProperty]
-        private bool _isTissueOn;
-
-        [ObservableProperty]
-        private bool _isLumenOn;
-
-        [ObservableProperty]
-        private bool _isStentOn;
-
-        [ObservableProperty]
-        private bool _isGuidewireOneOn;
-
-        [ObservableProperty]
-        private bool _isGuidewireTwoOn;
 
         private double degree;
         public double Degree
@@ -58,6 +61,7 @@ namespace RaywattApp.ViewModels
                 RaySetProperty(Property.LongitudeDegree, degree);
 
                 CameraDegree = degree + 90;
+                ODSOCT_RotateAngle((float)CameraDegree);
             }
         }
 
@@ -102,6 +106,21 @@ namespace RaywattApp.ViewModels
             set { _lModeIndicatorX = value; OnPropertyChanged(nameof(LModeIndicatorX)); setCurrentFrame(value); }
         }
 
+        private IDialogWindow viewMenuWindow;
+        private ICommand _cmdExpandLeftViewMenu;
+        public ICommand CmdExpandLeftViewMenu
+        { 
+            get { return this._cmdExpandLeftViewMenu ?? (this._cmdExpandLeftViewMenu = new RelayCommand(ExpandLeftViewMenu)); }
+        }
+
+        private IDialogWindow patientMenuWindow;
+        private ICommand _cmdExpandLeftPatientMenu;
+
+        public ICommand CmdExpandLeftPatientMenu
+        { 
+            get { return this._cmdExpandLeftPatientMenu ?? (this._cmdExpandLeftPatientMenu = new RelayCommand(ExpandLeftPatientMenu)); }
+        }
+
         public Review3dViewModel(SqlManager sqlManager, IDialogService dialogService) : base(sqlManager, dialogService)
         {
             _log.Debug("Review3dViewModel");
@@ -115,17 +134,6 @@ namespace RaywattApp.ViewModels
             IndicatorLongitude = new Indicator();
             IndicatorLongitude.X = Constants.LongitudeIndicatorWidth / 2;
             IndicatorLongitude.IsVisible = Visibility.Collapsed;
-
-            IsCutViewOn = true;
-            IsIndicatorOn = true;
-            IsPtoD = true;
-            IsSideBranchView = false;
-
-            IsTissueOn = true;
-            IsLumenOn = false;
-            IsStentOn = false;
-            IsGuidewireOneOn = true;
-            IsGuidewireTwoOn = false;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -152,6 +160,12 @@ namespace RaywattApp.ViewModels
 
                 GetImageInfo(RaySession.Review);
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
+
+                // set default values without rendering
+                _isCutViewOn = ray3DStatus.CutViewOn;
+                _isIndicatorOn = true;
+                _isPtoD = true;
+                _isSideBranchView = false;
             }
 
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
@@ -167,6 +181,15 @@ namespace RaywattApp.ViewModels
         {
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
+            if (viewMenuWindow != null) viewMenuWindow.Close();
+            if (patientMenuWindow != null) patientMenuWindow.Close();
+
+            if (timerInitialize.IsEnabled)
+                timerInitialize.Stop();
+
+            if (timerShowData.IsEnabled)
+                timerShowData.Stop();
+
             Save();
             ODSOCT_HideAllWindows();
 
@@ -243,7 +266,13 @@ namespace RaywattApp.ViewModels
                 timerShowData.Stop();
 
             ODSOCT_ShowAllWindows();
-            ODSOCT_SetViewData(Ray3DObject.Tissue, Ray3DObjectMode.Cut);
+
+            for (Ray3DObject obj = Ray3DObject.Tissue; obj < Ray3DObject.Count; obj++)
+            {
+                ray3DStatus.ShowObject(obj, ray3DStatus.ObjectVisibility[(int)obj]);
+            }
+
+            IsRendering = true;
         }
 
         private void updateNavigator(int curFrame, int totalFrame)
@@ -255,6 +284,15 @@ namespace RaywattApp.ViewModels
             curPosition *= Constants.Longitude3dWidth;
             IndicatorLongitude.X = curPosition - Constants.LongitudeIndicatorWidth / 2;
             IndicatorLongitude.CenterX = curPosition;
+        }
+
+        private void changeCutVisibility(Ray3DObject obj, bool isCutView)
+        {
+            Ray3DObjectMode mode = (isCutView) ? Ray3DObjectMode.Cut : Ray3DObjectMode.Full;
+            if (ray3DStatus.IsObjectVisible(obj))
+            {
+                ray3DStatus.ShowObject(obj, mode);
+            }
         }
 
         private void RotateIndicator(object param)
@@ -368,6 +406,37 @@ namespace RaywattApp.ViewModels
             }
         }
 
+        private void ExpandLeftViewMenu()
+        {
+            viewMenuWindow = _dialogService.OpenChildWindow(new Review3dViewMenuControl(), this, null, Constants.SideBarExpandSize, Constants.LeftSideBarExpand3dSize, 0, Constants.ViewMenu3dY);
+        }
+        private void ExpandLeftPatientMenu()
+        {
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = Patient;
+            parameter["patientCase"] = PatientCase;
+
+            patientMenuWindow = _dialogService.OpenChildWindow(new Review3dPatientMenuControl(), this, parameter, Constants.SideBarExpandSize, Constants.LeftSideBarExpand3dSize, 0, Constants.PatientMenu3dY);
+        }
+
+        public void SetResult(object result)
+        {
+            Dictionary<string, Object> data = (Dictionary<string, Object>)result;
+
+            if (data.ContainsKey("reviewStatus"))
+            {
+                ReviewStatus = (ReviewStatus)data["reviewStatus"];
+            }
+            if (data.ContainsKey("patient"))
+            {
+                Patient = (Patient)data["patient"];
+            }
+            if (data.ContainsKey("patientCase"))
+            {
+                PatientCase = (PatientCase)data["patientCase"];
+            }
+        }
+
         private void setCurrentFrame(double navigatorPosition)
         {
             double curPosition = navigatorPosition / Constants.Longitude3dWidth;
@@ -377,6 +446,7 @@ namespace RaywattApp.ViewModels
                 curPosition *= (longitudeFrameInfo.totalFrame - 1);
                 curPosition = Math.Round(curPosition);
                 MoveToFrame(RaySession.Review, (int)curPosition);
+                ODSOCT_MoveToFrame((int)curPosition);
             }
         }
     }

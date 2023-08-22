@@ -17,6 +17,7 @@ using RaywattApp.Common.Dialog;
 using static RaywattOCT.RayCoreWrapper;
 using System.Windows;
 using System.Threading;
+using RaywattOCT;
 
 namespace RaywattApp.ViewModels
 {
@@ -380,6 +381,7 @@ namespace RaywattApp.ViewModels
             ReviewStatus reviewStatus = new ReviewStatus();
             reviewStatus.NumberOfFrames = numOfFrames;
             parameter["reviewStatus"] = reviewStatus;
+            Ray3DWrapper.ray3DStatus = new Ray3DWrapper.Ray3DStatus();
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewPage) { Parameter = parameter });
         }
 
