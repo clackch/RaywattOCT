@@ -24,6 +24,7 @@ using System.Threading;
 using System.Windows.Controls;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
+using Newtonsoft.Json;
 
 namespace RaywattApp.Common.Util
 {
@@ -536,44 +537,35 @@ namespace RaywattApp.Common.Util
 
                 Cv2.Line(imglumenProfile, new Point(curFrame, yStart), new Point(curFrame, yStart + lumenArea), new Scalar(0x16, 0x16, 0x16));
 
-                //Side Branch
-                if (sidebranchs != null)
-                {
-                    if(sidebranchs.Contains(curFrame))
-                        Cv2.Line(imglumenProfile, new Point(curFrame, imglumenProfile.Rows / 2 - 5), new Point(curFrame, imglumenProfile.Rows / 2 + 5), new Scalar(0xe4, 0xe4, 0xe4));
-                }
-
                 //Lesion Section
                 if (curFrame >= frameProximal && curFrame <= frameDistal)
                 {
-                    Scalar scalar;
-
-                    if (appositionFrames != null && appositionFrames.Contains(curFrame))
-                        scalar = new Scalar(0x77, 0x7d, 0xff);
-                    else
-                        scalar = new Scalar(0x8d, 0x8d, 0x8d);
+                    //Stent Area
+                    if (isPostCase && appositionFrames != null && appositionFrames.Contains(curFrame))
+                        Cv2.Line(imglumenProfile, new Point(curFrame, yStart), new Point(curFrame, yStart + lumenArea), new Scalar(0x3f, 0x41, 0x76));
 
                     //Stent
                     for (int i = 0; isPostCase && i < imglumenProfile.Rows; i++)
                     {
                         if ((i + curFrame) % 20 == 0)
                         {
-                            Cv2.Line(imglumenProfile, new Point(curFrame, i), new Point(curFrame, i), scalar);
+                            Cv2.Line(imglumenProfile, new Point(curFrame, i), new Point(curFrame, i), new Scalar(0x8d, 0x8d, 0x8d));
                         }
                         if ((i - curFrame) % 20 == 0)
                         {
-                            Cv2.Line(imglumenProfile, new Point(curFrame, i), new Point(curFrame, i), scalar);
+                            Cv2.Line(imglumenProfile, new Point(curFrame, i), new Point(curFrame, i), new Scalar(0x8d, 0x8d, 0x8d));
                         }
                     }
 
                     Cv2.Line(imglumenProfile, new Point(curFrame, 0), new Point(curFrame, yStart - 1), new Scalar(0x4f, 0x4f, 0x4f));
                     Cv2.Line(imglumenProfile, new Point(curFrame, yStart + lumenArea + 1), new Point(curFrame, imglumenProfile.Rows), new Scalar(0x4f, 0x4f, 0x4f));
+                }
 
-                    if(curFrame % 2 == 0)
-                    {
-                        Cv2.Line(imglumenProfile, new Point(curFrame, 0), new Point(curFrame, 0), new Scalar(0xe4, 0xe4, 0xe4));
-                        Cv2.Line(imglumenProfile, new Point(curFrame, imglumenProfile.Rows - 1), new Point(curFrame, imglumenProfile.Rows), new Scalar(0xe4, 0xe4, 0xe4));
-                    }
+                //Side Branch
+                if (sidebranchs != null)
+                {
+                    if (sidebranchs.Contains(curFrame))
+                        Cv2.Line(imglumenProfile, new Point(curFrame, imglumenProfile.Rows / 2 - 5), new Point(curFrame, imglumenProfile.Rows / 2 + 5), new Scalar(0xe4, 0xe4, 0xe4));
                 }
 
                 curFrame++;
@@ -596,6 +588,20 @@ namespace RaywattApp.Common.Util
             }
 
             return imglumenProfile;
+        }
+
+        public static List<int> GetExpansionList(List<LumenContour> lumenContours, int frameProximal, int frameDistal, double refArea, int expansionThreshold)
+        {
+            List<int> expansionList = new List<int>();
+
+            for (int i = frameProximal; i <= frameDistal && refArea != 0; i++)
+            {
+                double expansion = lumenContours[i].Area / refArea * 100;
+                if (expansion <= expansionThreshold)
+                    expansionList.Add(i);
+            }
+
+            return expansionList;
         }
 
         public static async Task SaveStillFrame(Mat image, string rootPath, string fileName, string format, Action<double> progressCallback, double progressIncrease, Action<string> progressTextCallback)
@@ -884,8 +890,19 @@ namespace RaywattApp.Common.Util
             }
         }
 
-        public static System.Windows.Size GetTextBlockSize(string style, string text = "")
+        public static System.Windows.Size GetTextBlockSize(string style, string text, int digits)
         {
+            string[] temp = text.Split(".");
+            if (temp != null && temp.Length == 2)
+            {
+                temp[1] = temp[1].Replace("㎜", "").Replace("㎟", "");
+
+                for(int i = temp[1].Length; i < digits; i++)
+                {
+                    text = text + "0";
+                }
+            }
+
             TextBlock textBlock = new TextBlock();
             textBlock.Style = (System.Windows.Style)App.Current.Resources[style];
             textBlock.Text = text;
@@ -909,6 +926,335 @@ namespace RaywattApp.Common.Util
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
 
             System.Windows.Application.Current.MainWindow.Close();
+        }
+
+        public static string LumenContoursToJson(List<LumenContour> lumenContours)
+        {
+            StringBuilder sb = new StringBuilder();
+            StringWriter sw = new StringWriter(sb);
+
+            using (JsonWriter writer = new JsonTextWriter(sw))
+            {
+                string strPoint;
+
+                writer.WriteStartArray();
+
+                foreach (LumenContour lumenContour in lumenContours)
+                {
+                    writer.WriteStartObject();
+
+                    //MlContour
+                    {
+                        writer.WritePropertyName(nameof(lumenContour.MlContour));
+                        {
+                            writer.WriteStartObject();
+
+                            //Points
+                            writer.WritePropertyName(nameof(lumenContour.MlContour.Points));
+
+                            writer.WriteStartArray();
+
+                            foreach (System.Windows.Point point in lumenContour.MlContour.Points)
+                            {
+                                strPoint = point.X + "," + point.Y;
+                                writer.WriteValue(strPoint);
+                            }
+                            writer.WriteEndArray();
+
+                            //Area
+                            writer.WritePropertyName(nameof(lumenContour.MlContour.Area));
+                            writer.WriteValue(lumenContour.MlContour.Area);
+
+                            //CenterOfMass
+                            writer.WritePropertyName(nameof(lumenContour.MlContour.CenterOfMass));
+                            strPoint = lumenContour.MlContour.CenterOfMass.X + "," + lumenContour.MlContour.CenterOfMass.Y;
+                            writer.WriteValue(strPoint);
+
+                            //MinDiameter
+                            {
+                                writer.WritePropertyName(nameof(lumenContour.MlContour.MinDiameter));
+                                writer.WriteStartObject();
+
+                                //point1
+                                writer.WritePropertyName(nameof(lumenContour.MlContour.MinDiameter.point1));
+                                strPoint = lumenContour.MlContour.MinDiameter.point1.X + "," + lumenContour.MlContour.MinDiameter.point1.Y;
+                                writer.WriteValue(strPoint);
+
+                                //point2
+                                writer.WritePropertyName(nameof(lumenContour.MlContour.MinDiameter.point2));
+                                strPoint = lumenContour.MlContour.MinDiameter.point2.X + "," + lumenContour.MlContour.MinDiameter.point2.Y;
+                                writer.WriteValue(strPoint);
+
+                                //value
+                                writer.WritePropertyName(nameof(lumenContour.MlContour.MinDiameter.value));
+                                writer.WriteValue(lumenContour.MlContour.MinDiameter.value);
+
+                                writer.WriteEndObject();
+                            }
+
+                            //MaxDiameter
+                            {
+                                writer.WritePropertyName(nameof(lumenContour.MlContour.MaxDiameter));
+                                writer.WriteStartObject();
+
+                                //point1
+                                writer.WritePropertyName(nameof(lumenContour.MlContour.MaxDiameter.point1));
+                                strPoint = lumenContour.MlContour.MaxDiameter.point1.X + "," + lumenContour.MlContour.MaxDiameter.point1.Y;
+                                writer.WriteValue(strPoint);
+
+                                //point2
+                                writer.WritePropertyName(nameof(lumenContour.MlContour.MaxDiameter.point2));
+                                strPoint = lumenContour.MlContour.MaxDiameter.point2.X + "," + lumenContour.MlContour.MaxDiameter.point2.Y;
+                                writer.WriteValue(strPoint);
+
+                                //value
+                                writer.WritePropertyName(nameof(lumenContour.MlContour.MaxDiameter.value));
+                                writer.WriteValue(lumenContour.MlContour.MaxDiameter.value);
+
+                                writer.WriteEndObject();
+                            }
+
+                            //MeanDiameter
+                            writer.WritePropertyName(nameof(lumenContour.MlContour.MeanDiameter));
+                            writer.WriteValue(lumenContour.MlContour.MeanDiameter);
+
+                            //Valid
+                            writer.WritePropertyName(nameof(lumenContour.MlContour.Valid));
+                            writer.WriteValue(lumenContour.MlContour.Valid);
+
+                            writer.WriteEndObject();
+                        }
+                    }
+
+                    //Contour
+                    {
+                        //Points
+                        writer.WritePropertyName(nameof(lumenContour.Points));
+
+                        writer.WriteStartArray();
+
+                        foreach (System.Windows.Point point in lumenContour.Points)
+                        {
+                            strPoint = point.X + "," + point.Y;
+                            writer.WriteValue(strPoint);
+                        }
+                        writer.WriteEndArray();
+
+                        //Area
+                        writer.WritePropertyName(nameof(lumenContour.Area));
+                        writer.WriteValue(lumenContour.Area);
+
+                        //CenterOfMass
+                        writer.WritePropertyName(nameof(lumenContour.CenterOfMass));
+                        strPoint = lumenContour.CenterOfMass.X + "," + lumenContour.CenterOfMass.Y;
+                        writer.WriteValue(strPoint);
+
+                        //MinDiameter
+                        {
+                            writer.WritePropertyName(nameof(lumenContour.MinDiameter));
+                            writer.WriteStartObject();
+
+                            //point1
+                            writer.WritePropertyName(nameof(lumenContour.MinDiameter.point1));
+                            strPoint = lumenContour.MinDiameter.point1.X + "," + lumenContour.MinDiameter.point1.Y;
+                            writer.WriteValue(strPoint);
+
+                            //point2
+                            writer.WritePropertyName(nameof(lumenContour.MinDiameter.point2));
+                            strPoint = lumenContour.MinDiameter.point2.X + "," + lumenContour.MinDiameter.point2.Y;
+                            writer.WriteValue(strPoint);
+
+                            //value
+                            writer.WritePropertyName(nameof(lumenContour.MinDiameter.value));
+                            writer.WriteValue(lumenContour.MinDiameter.value);
+
+                            writer.WriteEndObject();
+                        }
+
+                        //MaxDiameter
+                        {
+                            writer.WritePropertyName(nameof(lumenContour.MaxDiameter));
+                            writer.WriteStartObject();
+
+                            //point1
+                            writer.WritePropertyName(nameof(lumenContour.MaxDiameter.point1));
+                            strPoint = lumenContour.MaxDiameter.point1.X + "," + lumenContour.MaxDiameter.point1.Y;
+                            writer.WriteValue(strPoint);
+
+                            //point2
+                            writer.WritePropertyName(nameof(lumenContour.MaxDiameter.point2));
+                            strPoint = lumenContour.MaxDiameter.point2.X + "," + lumenContour.MaxDiameter.point2.Y;
+                            writer.WriteValue(strPoint);
+
+                            //value
+                            writer.WritePropertyName(nameof(lumenContour.MaxDiameter.value));
+                            writer.WriteValue(lumenContour.MaxDiameter.value);
+
+                            writer.WriteEndObject();
+                        }
+
+                        //MeanDiameter
+                        writer.WritePropertyName(nameof(lumenContour.MeanDiameter));
+                        writer.WriteValue(lumenContour.MeanDiameter);
+
+                        //Valid
+                        writer.WritePropertyName(nameof(lumenContour.Valid));
+                        writer.WriteValue(lumenContour.Valid);
+                    }
+
+                    writer.WriteEndObject();
+                }
+
+                writer.WriteEndArray();
+            }
+
+            return sb.ToString();
+        }
+
+        public static List<LumenContour> JsonToLumenContours(string strLumenContours)
+        {
+            List<LumenContour> lumenContours = new List<LumenContour>();
+
+            JsonTextReader reader = new JsonTextReader(new StringReader(strLumenContours));
+            string currentProperty = string.Empty;
+
+            while (reader.Read())
+            {
+                //LumenContour
+                if (reader.Depth == 1 && reader.TokenType == JsonToken.StartObject)
+                {
+                    LumenContour lumenContour = new LumenContour();
+
+                    while (reader.Read())
+                    {
+                        if (reader.Depth == 1 && reader.TokenType == JsonToken.EndObject)
+                        {
+                            lumenContours.Add(lumenContour);
+                            break;
+                        }
+
+                        if (reader.TokenType == JsonToken.PropertyName)
+                            currentProperty = reader.Value.ToString();
+
+                        if(reader.Depth == 2)
+                        {
+                            if (nameof(lumenContour.MlContour).Equals(currentProperty))
+                            {
+                                lumenContour.MlContour = new Contour();
+                                while (reader.Read())
+                                {
+                                    if (reader.Depth == 2 && reader.TokenType == JsonToken.EndObject)
+                                        break;
+
+                                    if (reader.TokenType == JsonToken.PropertyName)
+                                        currentProperty = reader.Value.ToString();
+
+                                    if (reader.Depth == 3)
+                                    {
+                                        SetContour(reader, currentProperty, lumenContour.MlContour);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                SetContour(reader, currentProperty, lumenContour);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return lumenContours;
+        }
+
+        private static System.Windows.Point StrToPoint(string str)
+        {
+            string[] temp = str.Split(",");
+            return new System.Windows.Point(double.Parse(temp[0]), double.Parse(temp[1]));
+        }
+
+        private static void SetContour(JsonTextReader reader, string currentProperty, Contour lumenContour)
+        {
+            switch (currentProperty)
+            {
+                case nameof(lumenContour.Points):
+                    lumenContour.Points = new List<System.Windows.Point>();
+                    SetPoints(reader, lumenContour.Points);
+                    break;
+                case nameof(lumenContour.Area):
+                    if (reader.Value != null && reader.TokenType == JsonToken.Float)
+                        lumenContour.Area = double.Parse(reader.Value.ToString());
+                    break;
+                case nameof(lumenContour.CenterOfMass):
+                    if (reader.Value != null && reader.TokenType == JsonToken.String)
+                        lumenContour.CenterOfMass = StrToPoint(reader.Value.ToString());
+                    break;
+                case nameof(lumenContour.MinDiameter):
+                    lumenContour.MinDiameter = new DiameterInfo();
+                    SetDiameterInfo(reader, lumenContour.MinDiameter);
+                    break;
+                case nameof(lumenContour.MaxDiameter):
+                    lumenContour.MaxDiameter = new DiameterInfo();
+                    SetDiameterInfo(reader, lumenContour.MaxDiameter);
+                    break;
+                case nameof(lumenContour.MeanDiameter):
+                    if (reader.Value != null && reader.TokenType == JsonToken.Float)
+                        lumenContour.MeanDiameter = (double)reader.Value;
+                    break;
+                case nameof(lumenContour.Valid):
+                    if (reader.Value != null && reader.TokenType == JsonToken.Boolean)
+                        lumenContour.Valid = (bool)reader.Value;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private static void SetPoints(JsonTextReader reader, List<System.Windows.Point> points)
+        {
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonToken.EndArray)
+                    break;
+
+                if (reader.Value != null)
+                    points.Add(StrToPoint(reader.Value.ToString()));
+            }
+        }
+
+        private static void SetDiameterInfo(JsonTextReader reader, DiameterInfo diameterInfo)
+        {
+            string currentProperty = string.Empty;
+
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonToken.EndObject)
+                    break;
+
+                if (reader.TokenType == JsonToken.PropertyName)
+                    currentProperty = reader.Value.ToString();
+
+                if (reader.Value != null)
+                {
+                    switch (currentProperty)
+                    {
+                        case nameof(diameterInfo.point1):
+                            if (reader.TokenType == JsonToken.String)
+                                diameterInfo.point1 = StrToPoint(reader.Value.ToString());
+                            break;
+                        case nameof(diameterInfo.point2):
+                            if (reader.TokenType == JsonToken.String)
+                                diameterInfo.point2 = StrToPoint(reader.Value.ToString());
+                            break;
+                        case nameof(diameterInfo.value):
+                            if (reader.TokenType == JsonToken.Float)
+                                diameterInfo.value = (double)reader.Value;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
         }
     }
 }

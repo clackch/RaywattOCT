@@ -24,6 +24,12 @@
         <Setter Property="Source" Value="{svgc:SvgImage Source=/res/icon/raywattSmall.svg}"/>
     </Style>
 
+    <Style TargetType="Image" x:Key="Faster">
+        <Setter Property="Width" Value="450"/>
+        <Setter Property="Height" Value="125.8"/>
+        <Setter Property="Source" Value="{svgc:SvgImage Source=/res/icon/faster.svg}"/>
+    </Style>
+
     <Style TargetType="{x:Type component:IconButton}" x:Key="IconButton">
         <Setter Property="Width" Value="26"/>
         <Setter Property="Height" Value="26"/>
@@ -175,26 +181,38 @@
         </Style.Triggers>
     </Style>
 
-    <Style TargetType="Image" x:Key="SectionMsaMinExp">
-        <Setter Property="Width" Value="26"/>
-        <Setter Property="Height" Value="121"/>
-        <Setter Property="Margin" Value="0, -16, 0, 0"/>
-        <Setter Property="Source" Value="{svgc:SvgImage Source=/res/indicator/sectionMsaMinExpLeft.svg}"/>
+    <Style TargetType="Image" x:Key="SectionLeftRight">
+        <Setter Property="Width" Value="24"/>
+        <Setter Property="Height" Value="123"/>
+        <Setter Property="Margin" Value="0, -18, 0, 0"/>
+        <Setter Property="Source" Value="{svgc:SvgImage Source=/res/indicator/sectionLeft.svg}"/>
         <Style.Triggers>
             <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=Tag}" Value="Right">
-                <Setter Property="Source" Value="{svgc:SvgImage Source=/res/indicator/sectionMsaMinExpRight.svg}"/>
+                <Setter Property="Source" Value="{svgc:SvgImage Source=/res/indicator/sectionRight.svg}"/>
             </DataTrigger>
         </Style.Triggers>
     </Style>
 
-    <Style TargetType="Image" x:Key="SectionMsaMinExpCompare">
-        <Setter Property="Width" Value="26"/>
-        <Setter Property="Height" Value="186"/>
-        <Setter Property="Margin" Value="0, -16, 0, 0"/>
-        <Setter Property="Source" Value="{svgc:SvgImage Source=/res/indicator/sectionMsaMinExpLeftCompare.svg}"/>
+    <Style TargetType="Image" x:Key="SectionCompareLeftRight">
+        <Setter Property="Width" Value="24"/>
+        <Setter Property="Height" Value="188"/>
+        <Setter Property="Margin" Value="0, -18, 0, 0"/>
+        <Setter Property="Source" Value="{svgc:SvgImage Source=/res/indicator/sectionCompareLeft.svg}"/>
         <Style.Triggers>
             <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=Tag}" Value="Right">
-                <Setter Property="Source" Value="{svgc:SvgImage Source=/res/indicator/sectionMsaMinExpRightCompare.svg}"/>
+                <Setter Property="Source" Value="{svgc:SvgImage Source=/res/indicator/sectionCompareRight.svg}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="Image" x:Key="SectionExportLeftRight">
+        <Setter Property="Width" Value="24"/>
+        <Setter Property="Height" Value="298"/>
+        <Setter Property="Margin" Value="0, -18, 0, 0"/>
+        <Setter Property="Source" Value="{svgc:SvgImage Source=/res/indicator/sectionExportLeft.svg}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=Tag}" Value="Right">
+                <Setter Property="Source" Value="{svgc:SvgImage Source=/res/indicator/sectionExportRight.svg}"/>
             </DataTrigger>
         </Style.Triggers>
     </Style>

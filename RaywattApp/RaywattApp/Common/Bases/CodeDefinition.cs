@@ -1,4 +1,5 @@
 ﻿using log4net;
+using RaywattApp.Common.Localization;
 using RaywattApp.Models;
 using RaywattApp.Services;
 using System.Collections.Generic;
@@ -9,6 +10,8 @@ namespace RaywattApp.Common.Bases
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(CodeDefinition));
 
+        protected readonly DynamicResource _l10n;
+
         private readonly SqlManager _sqlManager;
 
         public static Dictionary<string, Dictionary<string, string>> Codes = new Dictionary<string, Dictionary<string, string>>();
@@ -16,6 +19,8 @@ namespace RaywattApp.Common.Bases
         public CodeDefinition(SqlManager sqlManager)
         {
             _log.Debug("CodeDefinition");
+
+            _l10n = (DynamicResource)App.Current.Resources["L10N"];
 
             _sqlManager = sqlManager;
         }
@@ -37,7 +42,7 @@ namespace RaywattApp.Common.Bases
                     addCode = new Dictionary<string, string>();
 
                 }
-                addCode[tempCode.Key] = tempCode.Value;
+                addCode[tempCode.Key] = _l10n[tempCode.Value];
                 prevClassification = tempCode.Classification;
             }
 

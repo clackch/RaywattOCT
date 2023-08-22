@@ -96,13 +96,35 @@ namespace RaywattApp.ViewModels
             timer.Start();
         }
 
+        private void CalcFfrResult()
+        {
+            //고정값 나오도록 처리 (인증용) - 변경 필요
+            double res = 0;
+            double sum = PatientCase.FfrFeature.PercentAreaStenosis + PatientCase.FfrFeature.LesionLength + PatientCase.FfrFeature.MinimalLumenArea
+                + PatientCase.FfrFeature.PlaqueArea + PatientCase.FfrFeature.DistalLumenArea + PatientCase.FfrFeature.ProximalLumenArea;
+
+            int temp = (int)sum % 3;
+            if (temp == 0)
+                res = 0.7;
+            else if (temp == 1)
+                res = 0.8;
+            else
+                res = 0.9;
+
+            int temp2 = (int)sum % 10;
+
+            res += temp2 * 0.01;
+
+            FfrResult = Math.Round(res, 2);
+        }
+
         private void ProgressTest(object sender, EventArgs e)
         {
             if (FfrProgress == 100)
             {
                 timer.Stop();
 
-                FfrResult = 0.83;
+                CalcFfrResult();
                 VisibilityResult = Visibility.Visible;
 
                 opacityTimer.Start();

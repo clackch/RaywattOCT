@@ -15,7 +15,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
@@ -85,6 +84,13 @@ namespace RaywattApp.ViewModels
         }
 
         //Test
+        private ICommand _catheterUnlockTest;
+        public ICommand CatheterUnlockTestCommmand
+        {
+            get { return this._catheterUnlockTest ?? (this._catheterUnlockTest = new RelayCommand(CatheterUnlockReceiver)); }
+        }
+
+        //Test
         private ICommand _catheterConnectTest;
         public ICommand CatheterConnectTestCommmand
         {
@@ -138,6 +144,8 @@ namespace RaywattApp.ViewModels
             double rotationTime = RayGetProperty(Property.LoadCatheterTime);
             timer.Interval = TimeSpan.FromMilliseconds(rotationTime / (100 / catheterProgressStep));
             timer.Tick += new EventHandler(ProgressTest);
+            timerUnload.Interval = TimeSpan.FromMilliseconds(rotationTime / (100 / catheterProgressStep));
+            timerUnload.Tick += new EventHandler(ProgressUnloadTest);
         }
 
         private void OnNavigationMessage(object recipient, NavigationMessage message)
@@ -226,6 +234,32 @@ namespace RaywattApp.ViewModels
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingCatheterFailPage) { Parameter = parameter });
             }
         }
+
+        private void CatheterUnlockReceiver() 
+        {
+            _log.Debug("CatheterUnlockReceiver");
+
+            DeviceStatus.CatheterStatus = Constants.CatheterStatusUnlocked;//Unlock Receive
+
+            CatheterProgress = 100;
+
+            //Test
+            timerUnload.Start();
+        }
+
+        private DispatcherTimer timerUnload = new DispatcherTimer();
+        private void ProgressUnloadTest(object sender, EventArgs e)
+        {
+            if (CatheterProgress == 0)
+            {
+                timerUnload.Stop();
+
+                DeviceStatus.CatheterStatus = Constants.CatheterStatusUnloaded;
+            }
+
+            CatheterProgress -= catheterProgressStep;
+        }
+
 
         private void CatheterConnectReceiver()
         {
@@ -317,7 +351,10 @@ namespace RaywattApp.ViewModels
                     });
                     break;
                 case RayWorkItem.OCTImaging:
-                    DeviceStatus.IsOCTImagingDone = true;
+                    if(param == (int)RaySession.Review)
+                        DeviceStatus.IsOCTImagingDone = true;
+                    else
+                        DeviceStatus.IsOCTImagingCompareDone = true;
                     break;
                 case RayWorkItem.GenerateCutView:
                     break;

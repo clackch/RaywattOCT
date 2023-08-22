@@ -345,6 +345,7 @@ namespace RaywattApp.ViewModels.File
                                 sqlParameters["vessel"] = patientCase.Vessel;
                                 sqlParameters["procedure"] = patientCase.Procedure;
                                 sqlParameters["pullback_type"] = patientCase.PullbackType;
+                                sqlParameters["pullback_length"] = patientCase.PullbackLength;
                                 sqlParameters["angio_co_registration"] = patientCase.AngioCoRegistration;
                                 sqlParameters["indicator_degree"] = patientCase.IndicatorDegree;
                                 sqlParameters["preset_name"] = patientCase.PresetName;
@@ -538,6 +539,7 @@ namespace RaywattApp.ViewModels.File
                             patientCase.StillImageYn = GetStrValue(caseObj, "StillImageYn");
                             patientCase.Image = GetStrValue(caseObj, "Image");
                             patientCase.PullbackType = GetStrValue(caseObj, "PullbackType");
+                            patientCase.PullbackLength = GetStrValue(caseObj, "PullbackLength");
                             patientCase.AngioCoRegistration = GetBoolValue(caseObj, "AngioCoRegistration");
                             patientCase.IndicatorDegree = GetDoubleValue(caseObj, "IndicatorDegree");
                             patientCase.PresetName = GetStrValue(caseObj, "PresetName");

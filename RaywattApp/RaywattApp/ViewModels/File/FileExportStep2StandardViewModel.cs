@@ -85,7 +85,7 @@ namespace RaywattApp.ViewModels.File
             {
                 foreach (PatientCase patientCase in PatientCases)
                 {
-                    int numOfFrames = (patientCase.PullbackType == Constants.PullbackTypeLong) ? Constants.PullbackLongFrameCnt : Constants.PullbackShortFrameCnt;
+                    int numOfFrames = int.Parse(CodeDefinition.Codes["PBLE"][patientCase.PullbackLength]);
                     if (FileExport.Pullback == Constants.ExportPullbackAVI)
                     {
                         ExportSize = CommonUtil.GetVideoSize((int)Constants.ApplicationWidth, (int)Constants.ApplicationHeight, 10, 12, numOfFrames);

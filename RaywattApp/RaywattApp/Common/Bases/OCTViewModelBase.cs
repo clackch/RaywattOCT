@@ -55,6 +55,9 @@ namespace RaywattApp.Common.Bases
         private BitmapSource _calciumIndicator;
 
         [ObservableProperty]
+        private BitmapSource _calciumIndicatorAngio;
+
+        [ObservableProperty]
         private double _maxCalciumDegree = 150;
 
         [ObservableProperty]
@@ -123,7 +126,8 @@ namespace RaywattApp.Common.Bases
             testCalciumData.Add(new Tuple<double, double>(90, 45));
             testCalciumData.Add(new Tuple<double, double>(180, 45));
             testCalciumData.Add(new Tuple<double, double>(270, 45));
-            CalciumIndicator = DrawCalciumIndicator(testCalciumData, Constants.CalciumIndicatorColor);
+            CalciumIndicator = DrawCalciumIndicator(testCalciumData, Constants.CalciumIndicatorColor, (int)Constants.CalciumIndicatorSize);
+            CalciumIndicatorAngio = DrawCalciumIndicator(testCalciumData, Constants.CalciumIndicatorColor, (int)Constants.CalciumIndicatorAngioSize);
 
             return true;
         }
@@ -173,13 +177,13 @@ namespace RaywattApp.Common.Bases
             return bitmap;
         }
 
-        private BitmapSource DrawCalciumIndicator(List<Tuple<double, double>> calciumAngleList, int rgbCode)
+        private BitmapSource DrawCalciumIndicator(List<Tuple<double, double>> calciumAngleList, int rgbCode, int calciumIndicatorSize)
         {
             int r = (rgbCode >> 16) & 0xFF;
             int g = (rgbCode >> 8) & 0xFF;
             int b = (rgbCode >> 0) & 0xFF;
 
-            Mat imgCalcium = new Mat((int)Constants.CalciumIndicatorSize, (int)Constants.CalciumIndicatorSize, MatType.CV_8UC4);
+            Mat imgCalcium = new Mat(calciumIndicatorSize, calciumIndicatorSize, MatType.CV_8UC4);
             Point center = new Point(imgCalcium.Width / 2, imgCalcium.Height / 2);
             int thickness = 3;
             int radius = (imgCalcium.Width / 2) - thickness;

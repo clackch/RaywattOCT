@@ -133,7 +133,7 @@
                                 </Image.Clip>
                             </Image>
                         </Border>
-                        <ContentControl Grid.Row="1" Grid.Column="1" Template="{DynamicResource LongitudeScaleBar}" Width="{StaticResource LongitudeWidth}" Tag="{Binding PatientCase.PullbackType}"/>
+                        <ContentControl Grid.Row="1" Grid.Column="1" Template="{DynamicResource LongitudeScaleBar}" Width="{StaticResource LongitudeWidth}" Tag="{Binding PatientCase.PullbackLength}"/>
                     </Grid>
                 </Grid>
             </Border>

@@ -7,7 +7,6 @@ using RaywattApp.Common.Setting;
 using RaywattApp.Models;
 using RaywattApp.Services;
 using System.Collections.Generic;
-using System.Windows.Navigation;
 
 namespace RaywattApp.ViewModels.Setting
 {
@@ -31,7 +30,9 @@ namespace RaywattApp.ViewModels.Setting
 
             _sqlManager = sqlManager;
 
-            IList<Configuration> l10Ns = _sqlManager.SelectConfigurationL10nList();
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "L10N";
+            IList<Configuration> l10Ns = _sqlManager.SelectConfiguration(sqlParameters);
 
             foreach(Configuration l10n in l10Ns)
             {
