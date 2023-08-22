@@ -10,7 +10,7 @@
              mc:Ignorable="d" 
              Width="{Binding DialogWidth}" Height="{Binding DialogHeight}">
 
-    <Border Grid.Row="2" CornerRadius="0,8,8,0" HorizontalAlignment="Left" Width="{x:Static const:Constants.LeftSideBarExpandSize}" Background="{StaticResource SideCardBackgroundBrush}">
+    <Border Grid.Row="2" CornerRadius="0,8,8,0" HorizontalAlignment="Left" Width="{x:Static const:Constants.SideBarExpandSize}" Background="{StaticResource SideCardBackgroundBrush}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>

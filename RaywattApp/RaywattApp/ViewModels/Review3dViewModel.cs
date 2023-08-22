@@ -408,7 +408,7 @@ namespace RaywattApp.ViewModels
 
         private void ExpandLeftViewMenu()
         {
-            viewMenuWindow = _dialogService.OpenChildWindow(new Review3dViewMenuControl(), this, null, Constants.LeftSideBarExpandSize, Constants.LeftSideBarExpand3dSize, 0, Constants.ViewMenu3dY);
+            viewMenuWindow = _dialogService.OpenChildWindow(new Review3dViewMenuControl(), this, null, Constants.SideBarExpandSize, Constants.LeftSideBarExpand3dSize, 0, Constants.ViewMenu3dY);
         }
         private void ExpandLeftPatientMenu()
         {
@@ -416,7 +416,7 @@ namespace RaywattApp.ViewModels
             parameter["patient"] = Patient;
             parameter["patientCase"] = PatientCase;
 
-            patientMenuWindow = _dialogService.OpenChildWindow(new Review3dPatientMenuControl(), this, parameter, Constants.LeftSideBarExpandSize, Constants.LeftSideBarExpand3dSize, 0, Constants.PatientMenu3dY);
+            patientMenuWindow = _dialogService.OpenChildWindow(new Review3dPatientMenuControl(), this, parameter, Constants.SideBarExpandSize, Constants.LeftSideBarExpand3dSize, 0, Constants.PatientMenu3dY);
         }
 
         public void SetResult(object result)
