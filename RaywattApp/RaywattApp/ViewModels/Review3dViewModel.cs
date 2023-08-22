@@ -44,8 +44,17 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private bool _isIndicatorOn;
 
-        [ObservableProperty]
         private bool _isPtoD;
+        public bool IsPtoD
+        { 
+            get { return _isPtoD; } 
+            set 
+            { 
+                _isPtoD = value;
+                OnPropertyChanged(nameof(IsPtoD));
+                ODSOCT_MoveCameraPosition(0, !value);
+            }
+        }
 
         [ObservableProperty]
         private bool _isSideBranchView;
