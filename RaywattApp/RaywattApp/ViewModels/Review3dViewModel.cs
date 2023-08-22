@@ -254,6 +254,8 @@ namespace RaywattApp.ViewModels
             int depth = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total;
             ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(), diameter, diameter, depth, 1, 1, 12.5);
             ODSOCT_ProcessingDatas();
+            ODSOCT_RotateAngle((float)CameraDegree);
+            ODSOCT_MoveToFrame(DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
 
             timerShowData.Interval = TimeSpan.FromMilliseconds(MinWaitingDelay);
             timerShowData.Tick += new EventHandler(timerFuncShowData);
