@@ -173,10 +173,6 @@
                                     </Grid>
                                 </StackPanel>
                             </Grid>
-                            <!-- Lumen Contour-->
-                            <Grid Width="{x:Static const:Constants.CrossSectionAngio}" Height="{x:Static const:Constants.CrossSectionAngio}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
-                                <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}"  FrameNumber="{Binding FrameNumber}" IsDrawOn="{Binding ReviewStatus.IsContourStentOn}" IsEditOn="False" Zoom="{Binding ZoomAngio}" InCommand="{Binding LumenContourCommand, Mode=TwoWay}"/>
-                            </Grid>
                             <!-- Calcium Indicator -->
                             <Grid Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$001}">
                                 <Grid Visibility="{Binding ReviewStatus.IsCalciumOn, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -191,6 +187,10 @@
                                         </Grid.RenderTransform>
                                     </Grid>
                                 </Grid>
+                            </Grid>
+                            <!-- Lumen Contour-->
+                            <Grid Width="{x:Static const:Constants.CrossSectionAngio}" Height="{x:Static const:Constants.CrossSectionAngio}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}"  FrameNumber="{Binding FrameNumber}" IsDrawOn="{Binding ReviewStatus.IsContourStentOn}" IsEditOn="False" Zoom="{Binding ZoomAngio}" InCommand="{Binding LumenContourCommand, Mode=TwoWay}"/>
                             </Grid>
                             <!-- Cross-Section Indicator -->
                             <Grid Width="480" Height="480" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding IndicatorLongitude.IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
