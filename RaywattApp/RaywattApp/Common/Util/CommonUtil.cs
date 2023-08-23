@@ -941,6 +941,8 @@ namespace RaywattApp.Common.Util
 
                 foreach (LumenContour lumenContour in lumenContours)
                 {
+                    lumenContour.SetOriginData(true);
+
                     writer.WriteStartObject();
 
                     //MlContour
@@ -1103,6 +1105,8 @@ namespace RaywattApp.Common.Util
                     }
 
                     writer.WriteEndObject();
+
+                    lumenContour.SetOriginData(false);
                 }
 
                 writer.WriteEndArray();

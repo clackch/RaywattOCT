@@ -368,7 +368,7 @@ namespace RaywattApp.ViewModels
                 {
                     contourMeasurement.CalculateDiameter(LumenContours[frameInfo].MlContour);
                 }
-                LumenContours[frameInfo].CopyMlToLumenContour();
+                LumenContours[frameInfo].ResetLumenContour();
             }
         }
 
