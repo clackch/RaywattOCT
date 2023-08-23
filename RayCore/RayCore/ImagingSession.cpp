@@ -305,6 +305,7 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 		pImaging->Process(pBuffer);
 		cv::Mat imgResult = pImaging->GetProcessedImage().clone();
 		pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult));
+		pSession->m_mapSheathPosition.insert(std::make_pair(nFrame, pImaging->GetFoundSheathPosition()));
 	}
 	PLOGI.printf("Session #%d process oct imaging done.", pSession->m_nSession);
 	pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::OCTImaging, pSession->m_nSession);
@@ -420,7 +421,15 @@ UINT CImagingSession::threadGenerateVolume(LPVOID param) {
 			Sleep(DELAY_FOR_WAIT_PROCESS);
 			continue;
 		}
-		pImaging->CircularizeImage(it->second, imgCircle);
+
+		// remove sheath
+		cv::Mat imgRect = it->second.clone();
+		int nSheathPos = config.measurement.nSheathPosition + 15;
+		//int nSheathPos = pSession->m_mapSheathPosition.find(nFrame)->second;
+		cv::Rect rectSheath(imgRect.cols - nSheathPos, 0, nSheathPos, imgRect.rows);
+		imgRect(rectSheath).setTo(cv::Scalar(0, 0, 0));
+
+		pImaging->CircularizeImage(imgRect, imgCircle);
 		cv::resize(imgCircle, imgResize, cv::Size(nDiameter, nDiameter));
 		memcpy(pSession->m_pVolumeData + nImageSize * nFrame, imgResize.data, nImageSize);
 	}
