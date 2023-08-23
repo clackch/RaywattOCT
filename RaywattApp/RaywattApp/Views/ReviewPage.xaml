@@ -226,7 +226,7 @@
                                             </Style.Triggers>
                                         </Style>
                                     </Grid.Style>
-                                    <ContentControl Template="{DynamicResource IndicatorScale}" Width="450" Height="18" Tag="{x:Static const:Constants.CrossSectionAngio}"/>
+                                    <ContentControl Template="{DynamicResource IndicatorScale}" Width="455" Height="18" Tag="{x:Static const:Constants.CrossSectionAngio}"/>
                                 </Grid>
                             </Grid>
                         </Grid>
@@ -820,9 +820,9 @@
                 <!-- Indicator  -->
                 <Grid Grid.Row="1" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                     <Grid Visibility="{Binding IndicatorLongitude.IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <component:IndicatorImage Style="{DynamicResource IndicatorImage}" x:Name="crossSectionIndicator" Width="640" Height="18" Icon="crossSection" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Visibility="{Binding IndicatorCrossSection.IsVisible}">
+                        <component:IndicatorImage Style="{DynamicResource IndicatorImage}" x:Name="crossSectionIndicator" Height="18" Icon="crossSection" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Visibility="{Binding IndicatorCrossSection.IsVisible}">
                             <Image.RenderTransform>
-                                <RotateTransform CenterX="320" CenterY="9" Angle="{Binding Degree}"/>
+                                <RotateTransform CenterX="316" CenterY="9" Angle="{Binding Degree}"/>
                             </Image.RenderTransform>
 
                             <i:Interaction.Triggers>
@@ -851,7 +851,7 @@
                                     </Style.Triggers>
                                 </Style>
                             </Grid.Style>
-                            <ContentControl Template="{DynamicResource IndicatorScale}" Width="610" Height="18" Tag="{x:Static const:Constants.CrossSectionSize}"/>
+                            <ContentControl Template="{DynamicResource IndicatorScale}" Width="600" Height="18" Tag="{x:Static const:Constants.CrossSectionSize}"/>
                         </Grid>
                     </Grid>
                 </Grid>
