@@ -14,6 +14,8 @@ using System.Windows.Threading;
 using RaywattApp.Views.Dialog;
 using static RaywattOCT.RayCoreWrapper;
 using static RaywattOCT.Ray3DWrapper;
+using System.Runtime.InteropServices;
+using RaywattApp.Common.Util;
 
 namespace RaywattApp.ViewModels
 {
@@ -263,8 +265,20 @@ namespace RaywattApp.ViewModels
 
             int diameter = (int)RayGetProperty(Property.VolumeWidth);
             int depth = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total;
+            IntPtr buffer = Marshal.AllocHGlobal(diameter * diameter * depth);
+
             ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(), diameter, diameter, depth, 1, 1, 12.5);
+
+            CommonUtil.ContoursToMemory(PatientCase.LumenContour, 
+                new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize), 
+                buffer, 
+                new OpenCvSharp.Size(diameter, diameter));
+            ODSOCT_InputSurfaceParameter(Ray3DObject.Lumen, 10, 50, ".\\data\\lumen_tex.jpg");
+            ODSOCT_InputData(Ray3DObject.Lumen, buffer, diameter, diameter, depth, 1, 1, 12.5);
+
             ODSOCT_ProcessingDatas();
+            Marshal.FreeHGlobal(buffer);
+
             ODSOCT_RotateAngle((float)CameraDegree);
             ODSOCT_MoveToFrame(DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
 
