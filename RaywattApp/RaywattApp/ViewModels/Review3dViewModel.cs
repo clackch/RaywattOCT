@@ -16,6 +16,7 @@ using static RaywattOCT.RayCoreWrapper;
 using static RaywattOCT.Ray3DWrapper;
 using System.Runtime.InteropServices;
 using RaywattApp.Common.Util;
+using System.Threading;
 
 namespace RaywattApp.ViewModels
 {
@@ -91,7 +92,6 @@ namespace RaywattApp.ViewModels
         private bool _isPaused;
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
-        private DispatcherTimer timerInitialize = new DispatcherTimer();
         private DispatcherTimer timerShowData = new DispatcherTimer();
 
         private ICommand _cmdRotateIndicator;
@@ -133,6 +133,8 @@ namespace RaywattApp.ViewModels
         { 
             get { return this._cmdExpandLeftPatientMenu ?? (this._cmdExpandLeftPatientMenu = new RelayCommand(ExpandLeftPatientMenu)); }
         }
+
+        private Thread threadInitialize;
 
         public Review3dViewModel(SqlManager sqlManager, IDialogService dialogService) : base(sqlManager, dialogService)
         {
@@ -185,9 +187,8 @@ namespace RaywattApp.ViewModels
             timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
             timerUpdateImage.Start();
 
-            timerInitialize.Interval = TimeSpan.FromMilliseconds(MinWaitingDelay);
-            timerInitialize.Tick += new EventHandler(timerFuncInitialize);
-            timerInitialize.Start();
+            threadInitialize = new Thread(() => threadFuncInitialize());
+            threadInitialize.Start();
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -197,8 +198,8 @@ namespace RaywattApp.ViewModels
             if (viewMenuWindow != null) viewMenuWindow.Close();
             if (patientMenuWindow != null) patientMenuWindow.Close();
 
-            if (timerInitialize.IsEnabled)
-                timerInitialize.Stop();
+            if (threadInitialize.IsAlive)
+                threadInitialize.Join();
 
             if (timerShowData.IsEnabled)
                 timerShowData.Stop();
@@ -258,11 +259,8 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private void timerFuncInitialize(object sender, EventArgs e)
+        private void threadFuncInitialize()
         {
-            if (timerInitialize.IsEnabled)
-                timerInitialize.Stop();
-
             int diameter = (int)RayGetProperty(Property.VolumeWidth);
             int depth = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total;
             IntPtr buffer = Marshal.AllocHGlobal(diameter * diameter * depth);
@@ -279,9 +277,6 @@ namespace RaywattApp.ViewModels
             ODSOCT_ProcessingDatas();
             Marshal.FreeHGlobal(buffer);
 
-            ODSOCT_RotateAngle((float)CameraDegree);
-            ODSOCT_MoveToFrame(DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
-
             timerShowData.Interval = TimeSpan.FromMilliseconds(MinWaitingDelay);
             timerShowData.Tick += new EventHandler(timerFuncShowData);
             timerShowData.Start();
@@ -292,6 +287,8 @@ namespace RaywattApp.ViewModels
             if (timerShowData.IsEnabled)
                 timerShowData.Stop();
 
+            ODSOCT_RotateAngle((float)CameraDegree);
+            ODSOCT_MoveToFrame(DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
             ODSOCT_ShowAllWindows();
 
             for (Ray3DObject obj = Ray3DObject.Tissue; obj < Ray3DObject.Count; obj++)
