@@ -110,7 +110,7 @@ namespace RaywattApp.Models
             LesionLength.IsVisible = Visibility.Collapsed;
         }
 
-        private void CalcMean(List<LumenContour> LumenContours, int frameProximal, int frameDistal)
+        public void CalcMean(List<LumenContour> LumenContours, int frameProximal, int frameDistal)
         {
             int count = frameDistal - frameProximal + 1;
             List<LumenContour> temp = LumenContours.GetRange(frameProximal, count);

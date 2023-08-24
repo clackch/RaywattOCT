@@ -177,7 +177,7 @@
                             <Grid Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$001}">
                                 <Grid Visibility="{Binding ReviewStatus.IsCalciumOn, Converter={StaticResource BoolToVisibilityConverter}}">
                                     <Image x:Name="CalciumIndicatorAngio" Width="{x:Static const:Constants.CalciumIndicatorAngioSize}" Height="{x:Static const:Constants.CalciumIndicatorAngioSize}" Source="{Binding CalciumIndicator}"/>
-                                    <Grid Width="{x:Static const:Constants.CalciumThicknessIndicatorAngioSize}" Height="{x:Static const:Constants.CalciumThicknessIndicatorAngioSize}" Background="Transparent">
+                                    <Grid Width="{x:Static const:Constants.CalciumThicknessIndicatorAngioSize}" Height="{x:Static const:Constants.CalciumThicknessIndicatorAngioSize}" Background="Transparent" Visibility="{Binding MaxCalciumDegree, Converter={StaticResource MaxThicknessVisibilityConverter}}">
                                         <Grid.Clip>
                                             <EllipseGeometry Center="{x:Static const:Constants.CalciumThicknessIndicatorPointCenterAngio}" RadiusX="{x:Static const:Constants.CalciumThicknessIndicatorCenterAngio}" RadiusY="{x:Static const:Constants.CalciumThicknessIndicatorCenterAngio}"/>
                                         </Grid.Clip>
@@ -239,7 +239,7 @@
                     <Grid Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                         <Grid Visibility="{Binding ReviewStatus.IsCalciumOn, Converter={StaticResource BoolToVisibilityConverter}}">
                             <Image x:Name="CalciumIndicator" Width="{x:Static const:Constants.CalciumIndicatorSize}" Height="{x:Static const:Constants.CalciumIndicatorSize}" Source="{Binding CalciumIndicator}"/>
-                            <Grid Width="{x:Static const:Constants.CalciumThicknessIndicatorSize}" Height="{x:Static const:Constants.CalciumThicknessIndicatorSize}" Background="Transparent">
+                            <Grid Width="{x:Static const:Constants.CalciumThicknessIndicatorSize}" Height="{x:Static const:Constants.CalciumThicknessIndicatorSize}" Background="Transparent" Visibility="{Binding MaxCalciumDegree, Converter={StaticResource MaxThicknessVisibilityConverter}}">
                                 <Grid.Clip>
                                     <EllipseGeometry Center="{x:Static const:Constants.CalciumThicknessIndicatorPointCenter}" RadiusX="{x:Static const:Constants.CalciumThicknessIndicatorCenter}" RadiusY="{x:Static const:Constants.CalciumThicknessIndicatorCenter}"/>
                                 </Grid.Clip>
@@ -606,13 +606,13 @@
                                                 <StackPanel Height="16"/>
                                                 <Label Content="{Binding [Total Angle], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                 <StackPanel Height="64" Orientation="Horizontal">
-                                                    <Label Content="200" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource SubPointColor1Brush}" VerticalAlignment="Center"/>
+                                                    <Label Content="{Binding TotalAngle}" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource SubPointColor1Brush}" VerticalAlignment="Center"/>
                                                     <Label Content="{Binding [º], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource SubPointColor1Brush}" VerticalAlignment="Center"/>
                                                 </StackPanel>
                                                 <StackPanel Height="12"/>
                                                 <Label Content="{Binding [Max Thickness], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left" MinWidth="120"/>
                                                 <StackPanel Height="64" Orientation="Horizontal">
-                                                    <Label Content="0.73" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
+                                                    <Label Content="{Binding MaxThickness}" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
                                                     <StackPanel Width="10"/>
                                                     <Label Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom" Margin="0,0,0,5"/>
                                                 </StackPanel>
@@ -747,14 +747,14 @@
                                                 <StackPanel Grid.Column="0" Orientation="Vertical">
                                                     <Label Content="{Binding [Total Angle], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                     <StackPanel Height="40" Orientation="Horizontal">
-                                                        <Label Content="200" Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource SubPointColor1Brush}" VerticalAlignment="Center"/>
+                                                        <Label Content="{Binding TotalAngle}" Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource SubPointColor1Brush}" VerticalAlignment="Center"/>
                                                         <Label Content="{Binding [º], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource SubPointColor1Brush}" VerticalAlignment="Center"/>
                                                     </StackPanel>
                                                 </StackPanel>
                                                 <StackPanel Grid.Column="1" Orientation="Vertical">
                                                     <Label Content="{Binding [Max Thickness], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                     <StackPanel Height="40" Orientation="Horizontal">
-                                                        <Label Content="0.73" Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
+                                                        <Label Content="{Binding MaxThickness}" Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
                                                         <StackPanel Width="6"/>
                                                         <Label Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom" Margin="0,0,0,7"/>
                                                     </StackPanel>

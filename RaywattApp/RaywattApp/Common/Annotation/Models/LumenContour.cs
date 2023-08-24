@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using RaywattApp.Models;
 using System.Collections.Generic;
 using System.Windows;
 
@@ -8,6 +9,9 @@ namespace RaywattApp.Common.Annotation.Models
     {
         [ObservableProperty]
         private Contour mlContour = new Contour();
+
+        [ObservableProperty]
+        private Calcium calcium;
 
         public new List<Point>? Points
         {
