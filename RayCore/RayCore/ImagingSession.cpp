@@ -422,14 +422,14 @@ UINT CImagingSession::threadGenerateVolume(LPVOID param) {
 			continue;
 		}
 
-		// remove sheath
 		cv::Mat imgRect = it->second.clone();
+		pImaging->CircularizeImage(imgRect, imgCircle);
+
+		// remove sheath
 		int nSheathPos = config.measurement.nSheathPosition + 15;
 		//int nSheathPos = pSession->m_mapSheathPosition.find(nFrame)->second;
-		cv::Rect rectSheath(imgRect.cols - nSheathPos, 0, nSheathPos, imgRect.rows);
-		imgRect(rectSheath).setTo(cv::Scalar(0, 0, 0));
+		cv::circle(imgCircle, cv::Point(imgCircle.cols / 2, imgCircle.rows / 2), nSheathPos / 2, cv::Scalar(0, 0, 0), -1);
 
-		pImaging->CircularizeImage(imgRect, imgCircle);
 		cv::resize(imgCircle, imgResize, cv::Size(nDiameter, nDiameter));
 		memcpy(pSession->m_pVolumeData + nImageSize * nFrame, imgResize.data, nImageSize);
 	}
