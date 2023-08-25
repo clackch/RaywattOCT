@@ -25,6 +25,7 @@ using System.Windows.Controls;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
 using Newtonsoft.Json;
+using System.Windows.Shapes;
 
 namespace RaywattApp.Common.Util
 {
@@ -132,7 +133,7 @@ namespace RaywattApp.Common.Util
             return System.Text.Encoding.ASCII.GetString(rndNumbers);
         }
 
-        public static bool Encryptor(string filePath, string contents)
+        public static async Task Encryptor(string filePath, string contents, Action<double> progressCallback, double progressSize, Action<string> progressTextCallback)
         {
             try
             {
@@ -153,26 +154,41 @@ namespace RaywattApp.Common.Util
                             // For example, new StreamWriter(cryptoStream, Encoding.Unicode).
                             using (StreamWriter encryptWriter = new(cryptoStream))
                             {
-                                encryptWriter.WriteLine(contents);
+                                string[] strings = new string[10];
+                                int cnt = contents.Length / 10;
+                                for(int i = 0; i < 9; i++)
+                                {
+                                    strings[i] = contents.Substring(i * cnt, cnt);
+                                }
+                                strings[9] = contents.Substring(9 * cnt);
+                               
+                                foreach (string ch in strings)
+                                {
+                                    await Task.Run(() =>
+                                    {
+                                        encryptWriter.Write(ch);
+                                        progressCallback(progressSize / 10);
+                                        progressTextCallback(Constants.ExportStatusSaveFile);
+                                    });
+                                }
                             }
                         }
                     }
                 }
-                return true;
             }
             catch (Exception ex)
             {
                 _log.Error($"The encryption failed. {ex}");
-                return false;
             }
         }
 
-        public static string[] Decryptor(string filePath)
+        public static Tuple<bool, string> Decryptor(string filePath)
         {
-            string[] result = new string[2];
-
             try
             {
+                if (!System.IO.File.Exists(filePath))
+                    return new Tuple<bool, string>(false, "No File");
+
                 string contents = "";
 
                 using (FileStream fileStream = System.IO.File.OpenRead(filePath))
@@ -205,16 +221,12 @@ namespace RaywattApp.Common.Util
                         }
                     }
                 }
-                result[0] = "1";
-                result[1] = contents;
-                return result;
+                return new Tuple<bool, string>(true, contents);
             }
             catch (Exception ex)
             {
                 _log.Error($"The decryption failed. {ex}");
-                result[0] = "0";
-                result[1] = ex.ToString();
-                return result;
+                return new Tuple<bool, string>(false, ex.ToString());
             }
         }
 

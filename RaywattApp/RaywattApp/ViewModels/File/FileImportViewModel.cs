@@ -16,7 +16,7 @@ using System.Windows.Input;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
-using RayCoreWrapper;
+using System.Linq;
 
 namespace RaywattApp.ViewModels.File
 {
@@ -30,13 +30,21 @@ namespace RaywattApp.ViewModels.File
 
         private DispatcherTimer timer = new DispatcherTimer();
 
+        private string curPath;
+
+        private string annotationFilePath;
+
+        private string externalDrive;
+
+        private bool externDriveInit = false;
+
+        private DirectoryProvider directoryProvider;
+
         [ObservableProperty]
         private IList<Patient>? _patientList;
 
         [ObservableProperty]
         private IList<PatientCase>? _patientCaseList;
-
-        private string curPath;
 
         [ObservableProperty]
         private string _selectedFile;
@@ -82,17 +90,11 @@ namespace RaywattApp.ViewModels.File
             }
         }
 
-        private string externalDrive;
-
         [ObservableProperty]
         private Dictionary<string, object> _externalDriveList;
 
         [ObservableProperty]
         private string _mediaType;
-
-        private bool externDriveInit = false;
-
-        private DirectoryProvider directoryProvider;
 
         private ObservableCollection<Item> _dirItems;
         public ObservableCollection<Item> DirItems
@@ -261,29 +263,26 @@ namespace RaywattApp.ViewModels.File
 
             try
             {
+                if(existPatientCases != null)
+                {
+                    foreach (Patient patient in PatientList)
+                    {
+                        if (patient.PatientCaseList != null && patient.PatientCaseList.Count > 0)
+                        {
+                            foreach (PatientCase patientCase in existPatientCases)
+                                patient.PatientCaseList.Remove(patient.PatientCaseList.Where(x => x.Id == patientCase.Id).First());
+                        }                            
+                    }
+                }
+
                 Dictionary<string, string> importfiles = new Dictionary<string, string>();
 
                 foreach (Patient patient in PatientList)
                 {
-                    if (patient.PatientCaseList != null)
+                    if (patient.PatientCaseList != null && patient.PatientCaseList.Count > 0)
                     {
                         foreach (PatientCase patientCase in patient.PatientCaseList)
                         {
-                            if (existPatientCases != null)
-                            {
-                                bool exist = false;
-                                foreach (PatientCase pc in existPatientCases)
-                                {
-                                    if (patientCase.Id.Equals(pc.Id))
-                                    {
-                                        exist = true;
-                                        break;
-                                    }
-                                }
-                                if (exist)
-                                    continue;
-                            }
-
                             //image
                             string srcPath = CommonUtil.GetDirectoryPath(SelectedDir.Path) + "\\" + patientCase.Image;
                             if (System.IO.File.Exists(srcPath))
@@ -298,93 +297,13 @@ namespace RaywattApp.ViewModels.File
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["title"] = _l10n["File Import"];
                 parameter["fileImport"] = importfiles;
+                parameter["patients"] = PatientList;
+                parameter["path"] = SelectedDir.Path;
+                parameter["annotationFilePath"] = this.annotationFilePath;
                 var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter, Constants.FileImportDialogWidth, Constants.FileImportDialogHeight);
 
                 if (result != null && result.DialogAnswer == DialogResults.Answer.Undefined)
                 {
-                    Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-
-                    foreach (Patient patient in PatientList)
-                    {
-                        sqlParameters.Clear();
-                        sqlParameters["id"] = patient.Id;
-                        sqlParameters["lastname"] = patient.Lastname;
-                        sqlParameters["firstname"] = patient.Firstname;
-                        sqlParameters["birthdate"] = patient.Birthdate;
-                        sqlParameters["gender"] = patient.Gender;
-                        sqlParameters["create_date"] = patient.CreateDate;
-                        sqlParameters["update_date"] = patient.UpdateDate;
-                        _sqlManager.UpsertPatient(sqlParameters);
-
-                        if (patient.PatientCaseList != null)
-                        {
-                            foreach (PatientCase patientCase in patient.PatientCaseList)
-                            {
-                                if (existPatientCases != null)
-                                {
-                                    bool exist = false;
-                                    foreach (PatientCase pc in existPatientCases)
-                                    {
-                                        if (patientCase.Id.Equals(pc.Id))
-                                        {
-                                            exist = true;
-                                            break;
-                                        }
-                                    }
-                                    if (exist)
-                                        continue;
-                                }
-
-                                sqlParameters.Clear();
-                                sqlParameters["id"] = patientCase.Id;
-                                sqlParameters["patient_id"] = patientCase.PatientId;
-                                sqlParameters["physician_name"] = patientCase.PhysicianName;
-                                sqlParameters["accession_number"] = patientCase.AccessionNumber;
-                                sqlParameters["accession_name"] = patientCase.AccessionName;
-                                sqlParameters["comment"] = patientCase.Comment;
-                                sqlParameters["vessel"] = patientCase.Vessel;
-                                sqlParameters["procedure"] = patientCase.Procedure;
-                                sqlParameters["pullback_type"] = patientCase.PullbackType;
-                                sqlParameters["pullback_length"] = patientCase.PullbackLength;
-                                sqlParameters["angio_co_registration"] = patientCase.AngioCoRegistration;
-                                sqlParameters["indicator_degree"] = patientCase.IndicatorDegree;
-                                sqlParameters["preset_name"] = patientCase.PresetName;
-                                sqlParameters["calcium_threshold"] = patientCase.CalciumThreshold;
-                                sqlParameters["expansion_calculation"] = patientCase.ExpansionCalculation;
-                                sqlParameters["expansion_threshold"] = patientCase.ExpansionThreshold;
-                                sqlParameters["apposition_threshold"] = patientCase.AppositionThreshold;
-                                sqlParameters["thumbnail_no"] = patientCase.ThumbnailNo;
-                                sqlParameters["still_image_yn"] = patientCase.StillImageYn;
-                                sqlParameters["brightness"] = patientCase.Brightness;
-                                sqlParameters["contrast"] = patientCase.Contrast;
-                                sqlParameters["section_proximal"] = patientCase.SectionProximal;
-                                sqlParameters["section_distal"] = patientCase.SectionDistal;
-                                sqlParameters["create_date"] = patientCase.CreateDate;
-                                sqlParameters["update_date"] = patientCase.UpdateDate;
-                                string srcPath = CommonUtil.GetDirectoryPath(SelectedDir.Path) + "\\" + patientCase.Image;
-                                sqlParameters["image"] = System.IO.File.Exists(srcPath) ? patientCase.Image : "";
-
-                                var nRows = _sqlManager.UpsertPatientCase(sqlParameters);
-                                if (nRows == 1)
-                                {
-                                    sqlParameters.Clear();
-                                    sqlParameters["id"] = patientCase.Id;
-                                    sqlParameters["cross_section"] = patientCase.CrossSection;
-                                    sqlParameters["longitude"] = patientCase.Longitude;
-                                    sqlParameters["bookmark"] = patientCase.Bookmark;
-                                    sqlParameters["lumen_contour"] = patientCase.StrLumenContour;
-                                    nRows = _sqlManager.UpsertPatientCaseAnnotation(sqlParameters);
-                                    if(nRows==0)
-                                        _log.Error("Upsert Error");
-                                }
-                                else
-                                {
-                                    _log.Error("Upsert Error");
-                                }
-                            }
-                        }
-                    }
-
                     Close();
                 }
             }
@@ -495,19 +414,20 @@ namespace RaywattApp.ViewModels.File
                 PatientCaseList = null;
                 return;
             }
-  
-            string[] result = CommonUtil.Decryptor(path);
 
-            if (result[0].Equals("1"))
+            Tuple<bool, string> result = CommonUtil.Decryptor(path);
+
+            if (result.Item1)
             {
                 IList<Patient> patients = new List<Patient>();
 
-                string json = result[1];
+                string json = result.Item2;
                 if (!String.IsNullOrEmpty(json))
                 {
                     JObject obj = JObject.Parse(json);
 
                     ApproximateImportSize = CommonUtil.ByteToGB(GetLongValue(obj, "Size"));
+                    this.annotationFilePath = GetStrValue(obj, "AnnotationFilePath");
 
                     JArray patientArray = JArray.Parse(GetStrValue(obj, "PatientList"));
                     foreach (JObject patientObj in patientArray)

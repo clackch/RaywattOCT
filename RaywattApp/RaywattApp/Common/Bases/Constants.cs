@@ -154,6 +154,7 @@ namespace RaywattApp.Common.Bases
         //File Import/Export
         public const string FileImageExtension = "bin";
         public const string FileExtension = "dbf";
+        public const string AnnotationFileExtension = "annot";
         public const string FileNamePrefix = "Export_";
 
         //Export Layout
