@@ -52,15 +52,6 @@ namespace RaywattApp.Common.Bases
         protected Mat imglumenProfile;
 
         [ObservableProperty]
-        private BitmapSource _calciumIndicator;
-
-        [ObservableProperty]
-        private BitmapSource _calciumIndicatorAngio;
-
-        [ObservableProperty]
-        private double _maxCalciumDegree = 150;
-
-        [ObservableProperty]
         private bool _isPaused = true;
 
         private Thread threadFuncPlayback;
@@ -121,14 +112,6 @@ namespace RaywattApp.Common.Bases
 
             CrossSectionImage = DrawCrossSectionWithBackground(imgCrossSection[0], crossSectionBackground[0]);
 
-            List<Tuple<double, double>> testCalciumData = new List<Tuple<double, double>>();
-            testCalciumData.Add(new Tuple<double, double>(0, 45));
-            testCalciumData.Add(new Tuple<double, double>(90, 45));
-            testCalciumData.Add(new Tuple<double, double>(180, 45));
-            testCalciumData.Add(new Tuple<double, double>(270, 45));
-            CalciumIndicator = DrawCalciumIndicator(testCalciumData, Constants.CalciumIndicatorColor, (int)Constants.CalciumIndicatorSize);
-            CalciumIndicatorAngio = DrawCalciumIndicator(testCalciumData, Constants.CalciumIndicatorColor, (int)Constants.CalciumIndicatorAngioSize);
-
             return true;
         }
         protected bool DrawCrossSectionForCompare()
@@ -175,69 +158,7 @@ namespace RaywattApp.Common.Bases
             BitmapSource bitmap = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(image);
 
             return bitmap;
-        }
-
-        private BitmapSource DrawCalciumIndicator(List<Tuple<double, double>> calciumAngleList, int rgbCode, int calciumIndicatorSize)
-        {
-            int r = (rgbCode >> 16) & 0xFF;
-            int g = (rgbCode >> 8) & 0xFF;
-            int b = (rgbCode >> 0) & 0xFF;
-
-            Mat imgCalcium = new Mat(calciumIndicatorSize, calciumIndicatorSize, MatType.CV_8UC4);
-            Point center = new Point(imgCalcium.Width / 2, imgCalcium.Height / 2);
-            int thickness = 3;
-            int radius = (imgCalcium.Width / 2) - thickness;
-
-            imgCalcium.SetTo(new Scalar(0x00, 0x00, 0x00, 0x00));
-            imgCalcium.Circle(center, radius, new Scalar(b, g, r, 0xff), thickness, LineTypes.AntiAlias);
-
-            List<Tuple<double, double>> nonCalciumAngleList = new List<Tuple<double, double>>
-            {
-                new Tuple<double, double>(0, 360)
-            };
-
-            foreach (var calciumArea in calciumAngleList)
-            {
-                double calciumStart = calciumArea.Item1;
-                double calciumEnd = calciumArea.Item1 + calciumArea.Item2;
-                for (int i = nonCalciumAngleList.Count - 1; i >= 0; i--)
-                {
-                    Tuple<double, double> nonCalciumArea = nonCalciumAngleList[i];
-                    double nonCalciumStart = nonCalciumArea.Item1;
-                    double nonCalciumEnd = nonCalciumArea.Item1 + nonCalciumArea.Item2;
-                    if (calciumStart >= nonCalciumStart && calciumEnd <= nonCalciumEnd)
-                    {
-                        nonCalciumAngleList.RemoveAt(i);
-                        if (calciumStart > nonCalciumStart) 
-                        {
-                            Tuple<double, double> splitArea = new Tuple<double, double>(nonCalciumStart, calciumStart - nonCalciumStart);
-                            nonCalciumAngleList.Add(splitArea);
-                        }
-                        if (calciumEnd < nonCalciumEnd)
-                        {
-                            Tuple<double, double> splitArea = new Tuple<double, double>(calciumEnd, nonCalciumEnd - calciumEnd);
-                            nonCalciumAngleList.Add(splitArea);
-                        }
-
-                        break;
-                    }
-                }
-            }
-
-            foreach (var calciumArea in nonCalciumAngleList)
-            {
-                imgCalcium.Ellipse(center,
-                    new OpenCvSharp.Size(imgCalcium.Width / 2, imgCalcium.Height / 2),
-                    0,
-                    calciumArea.Item1,
-                    calciumArea.Item1 + calciumArea.Item2,
-                    new Scalar(0x00, 0x00, 0x00, 0x00),
-                    -1);             
-            }
-
-            BitmapSource bitmap = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgCalcium);
-            return bitmap;
-        }
+        }       
 
         private Mat GenerateMask(Mat image)
         {

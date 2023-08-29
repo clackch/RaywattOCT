@@ -9,6 +9,9 @@ namespace RaywattApp.Models
         long size;
 
         [ObservableProperty]
+        string annotationFilePath;
+
+        [ObservableProperty]
         IList<Patient> patientList;
     }
 }

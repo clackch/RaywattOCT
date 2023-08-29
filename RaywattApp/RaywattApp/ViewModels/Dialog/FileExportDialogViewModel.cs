@@ -55,6 +55,18 @@ namespace RaywattApp.ViewModels.Dialog
         [ObservableProperty]
         private BitmapSource _lumenProfileImage;
 
+        [ObservableProperty]
+        private BitmapSource _calciumIndicator;
+
+        [ObservableProperty]
+        private double _maxCalciumDegree = -1;
+
+        [ObservableProperty]
+        private double _totalAngle;
+
+        [ObservableProperty]
+        private double _maxThickness;
+
         private double degree;
         public double Degree
         {
@@ -168,18 +180,32 @@ namespace RaywattApp.ViewModels.Dialog
                 {
                     Section.Proximal.X = CommonUtil.GetPositionFromFrame(patientCase.SectionProximal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, Constants.SectionIndicatorCenterWidth);
                     Section.Distal.X = CommonUtil.GetPositionFromFrame(patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
+
+                    int frameProximal = PatientCase.SectionProximal;
+                    int frameDistal = PatientCase.SectionDistal;
+                    
+                    //Test
+                    List<int> appositionFrames = new List<int>() { 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
+                    imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, frameProximal, frameDistal, CommonUtil.IsPostCase(PatientCase.Procedure), appositionFrames);
                     DrawLumenProfileImage();
 
+                    List<int> colorFrames = new List<int>();
                     if (CommonUtil.IsPreCase(patientCase.Procedure))
                     {
                         Section.SetMlaMld(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength);
                         Section.VisibleMlaMld(true);
+
+                        colorFrames = CommonUtil.GetCalciumList(LumenContours, patientCase.CalciumThreshold);
                     }
                     else
                     {
                         Section.SetMsaMinExp(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength);
                         Section.VislbleMsaMinExp(true);
+
+                        colorFrames = CommonUtil.GetExpansionList(LumenContours, frameProximal, frameDistal, Section.RefArea, PatientCase.ExpansionThreshold);
                     }
+                    imglumenProfileExtra = CommonUtil.MakeLumenProfileImageExtra(LumenContours.Count, colorFrames, CommonUtil.IsPreCase(PatientCase.Procedure));
+                    LumenProfileImageExtra = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileExtra);
                 }
 
                 if (!fileExport.AngioView)
@@ -225,6 +251,8 @@ namespace RaywattApp.ViewModels.Dialog
 
             FrameNumber = frameNumber;
             DisplayFrameNumber = frameNumber + 1;
+
+            DrawCalciumIndicator();
 
             if (FileExport.MeasureAuto)
                 MeasureAutoFrameNumber = frameNumber;
@@ -308,18 +336,6 @@ namespace RaywattApp.ViewModels.Dialog
                 if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenContour))
                 {
                     LumenContours = CommonUtil.JsonToLumenContours(patientCaseAnnotations[0].LumenContour);
-
-                    int frameProximal = PatientCase.SectionProximal;
-                    int frameDistal = PatientCase.SectionDistal;
-                    //Test
-                    List<int> sidebranchs = new List<int>() { 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 419, 420 };
-                    List<int> appositionFrames = new List<int>() { 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
-                    imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, frameProximal, frameDistal, sidebranchs, CommonUtil.IsPostCase(PatientCase.Procedure), appositionFrames);
-
-                    //Test
-                    List<int> colorFrames = new List<int>() { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
-                    imglumenProfileExtra = CommonUtil.MakeLumenProfileImageExtra(LumenContours.Count, colorFrames, CommonUtil.IsPreCase(PatientCase.Procedure));
-                    LumenProfileImageExtra = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileExtra);
                 }
             }
 
@@ -342,6 +358,15 @@ namespace RaywattApp.ViewModels.Dialog
 
             LumenProfileImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfile);
             return true;
+        }
+
+        private void DrawCalciumIndicator()
+        {
+            CalciumIndicator = CommonUtil.DrawCalciumIndicator(LumenContours[FrameNumber].Calcium.List, Constants.CalciumIndicatorColor, (int)Constants.CalciumIndicatorSize);
+
+            TotalAngle = LumenContours[FrameNumber].Calcium.TotalAngle;
+            MaxThickness = LumenContours[FrameNumber].Calcium.MaxThickness;
+            MaxCalciumDegree = LumenContours[FrameNumber].Calcium.MaxThicknessDegree;
         }
     }
 }

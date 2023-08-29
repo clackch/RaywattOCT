@@ -110,4 +110,7 @@
     <!-- Component Unable Converter -->
     <converters:ComponentUnableConverter x:Key="ComponentUnableConverter" />
 
+    <!-- MaxThickness Visibility Converter -->
+    <converters:MaxThicknessVisibilityConverter x:Key="MaxThicknessVisibilityConverter" />
+
 </ResourceDictionary>

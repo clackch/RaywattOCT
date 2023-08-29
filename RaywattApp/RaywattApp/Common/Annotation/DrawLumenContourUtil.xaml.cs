@@ -740,7 +740,7 @@ namespace RaywattApp.Common.Annotation
         {
             _log.Debug("AutoDetect");
 
-            LumenContours[FrameNumber].CopyMlToLumenContour();
+            LumenContours[FrameNumber].ResetLumenContour();
             lumenContourHistory[FrameNumber].Push(CopyLumenContourToHistory(LumenContours[FrameNumber]));
             DrawLumenContour(LumenContours[FrameNumber], true);
         }

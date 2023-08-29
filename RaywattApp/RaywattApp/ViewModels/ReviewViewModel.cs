@@ -40,6 +40,8 @@ namespace RaywattApp.ViewModels
 
         private bool isLumenDetectedFrontDone = true;
 
+        private bool isLumenLoadedInit = false;
+
         private Mat imglumenProfileExtra;
 
         private double originSectionProximalX;
@@ -54,6 +56,21 @@ namespace RaywattApp.ViewModels
             get { return degree; }
             set { degree = value; OnPropertyChanged(nameof(Degree)); RaySetProperty(Property.LongitudeDegree, degree); }
         }
+
+        [ObservableProperty]
+        private BitmapSource _calciumIndicator;
+
+        [ObservableProperty]
+        private BitmapSource _calciumIndicatorAngio;
+
+        [ObservableProperty]
+        private double _maxCalciumDegree = -1;
+
+        [ObservableProperty]
+        private double _totalAngle;
+
+        [ObservableProperty]
+        private double _maxThickness;
 
         [ObservableProperty]
         private Indicator _indicatorCrossSection;
@@ -313,25 +330,7 @@ namespace RaywattApp.ViewModels
 
             LumenContourProcess(frame);
 
-            int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
-            int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
-            //Test
-            List<int> sidebranchs = new List<int>() { 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 419, 420 };
-            List<int> appositionFrames = new List<int>() { 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
-            imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, frameProximal, frameDistal, sidebranchs, CommonUtil.IsPostCase(PatientCase.Procedure), appositionFrames, frame);
-
-            //Test
-            List<int> colorFrames = new List<int>();
-            if (CommonUtil.IsPreCase(PatientCase.Procedure))
-            {
-                colorFrames = new List<int>() { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
-            }
-            else if (CommonUtil.IsPostCase(PatientCase.Procedure))
-            {
-                colorFrames = CommonUtil.GetExpansionList(LumenContours, frameProximal, frameDistal, Section.RefArea, PatientCase.ExpansionThreshold);
-            }
-            imglumenProfileExtra = CommonUtil.MakeLumenProfileImageExtra(ReviewStatus.NumberOfFrames, colorFrames, CommonUtil.IsPreCase(PatientCase.Procedure), longitudeFrameInfo.curFrame - 1);
-            LumenProfileImageExtra = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileExtra);
+            DrawLumenProfile();
 
             if (ReviewStatus.NumberOfFrames - 1 == frame)
             {
@@ -368,7 +367,7 @@ namespace RaywattApp.ViewModels
                 {
                     contourMeasurement.CalculateDiameter(LumenContours[frameInfo].MlContour);
                 }
-                LumenContours[frameInfo].CopyMlToLumenContour();
+                LumenContours[frameInfo].ResetLumenContour();
             }
         }
 
@@ -649,17 +648,11 @@ namespace RaywattApp.ViewModels
                 minimalLumenArea = Section.MlaValue.DValue;
                 minimalLumenFrameNumber = Section.MlaValue.NValue;
             }
-            else if (CommonUtil.IsPostCase(PatientCase.Procedure))
+            else
             {
                 percentAreaStenosis = Section.MsaValue.DValue / Section.MeanArea;
                 minimalLumenArea = Section.MsaValue.DValue;
                 minimalLumenFrameNumber = Section.MsaValue.NValue;
-            }
-            else
-            {
-                percentAreaStenosis = Section.MlaValue.DValue / Section.MeanArea;
-                minimalLumenArea = Section.MlaValue.DValue;
-                minimalLumenFrameNumber = Section.MlaValue.NValue;
             }
 
             PatientCase.FfrFeature.MinimalLumenFrameNumber = minimalLumenFrameNumber;
@@ -777,6 +770,10 @@ namespace RaywattApp.ViewModels
         {
             LumenContours = CommonUtil.JsonToLumenContours(lumenContour);
 
+            //나중에는 ML에서 값을 미리 넣어주면, GetMlData 삭제
+            //if (LumenContours[0].Calcium == null || LumenContours[0].Calcium.TotalAngle == 0)
+                GetMlData();
+
             if (ReviewStatus.IsContourStentOn)
                 LumenContourCommand = Constants.LumenContourDraw;
             else
@@ -889,7 +886,6 @@ namespace RaywattApp.ViewModels
             ExpandRightMenu = isExpand;
         }
 
-
         private void ZoomIn()
         {
             _log.Debug("ZoomIn");
@@ -973,16 +969,14 @@ namespace RaywattApp.ViewModels
             int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
             int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
             //Test
-            List<int> sidebranchs = new List<int>() { 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 419, 420 };
             List<int> appositionFrames = new List<int>() { 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
-            imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, frameProximal, frameDistal, sidebranchs, CommonUtil.IsPostCase(PatientCase.Procedure), appositionFrames, longitudeFrameInfo.curFrame - 1);
+            imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, frameProximal, frameDistal, CommonUtil.IsPostCase(PatientCase.Procedure), appositionFrames, longitudeFrameInfo.curFrame - 1);
             DrawLumenProfileImage();
 
-            //Test
             List<int> colorFrames = new List<int>();
             if (CommonUtil.IsPreCase(PatientCase.Procedure))
             {
-                colorFrames = new List<int>() { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
+                colorFrames = CommonUtil.GetCalciumList(LumenContours, PatientCase.CalciumThreshold);
             }
             else if (CommonUtil.IsPostCase(PatientCase.Procedure))
             {
@@ -990,6 +984,101 @@ namespace RaywattApp.ViewModels
             }
             imglumenProfileExtra = CommonUtil.MakeLumenProfileImageExtra(ReviewStatus.NumberOfFrames, colorFrames, CommonUtil.IsPreCase(PatientCase.Procedure), longitudeFrameInfo.curFrame - 1);
             LumenProfileImageExtra = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileExtra);
+        }
+
+        private void GetMlData()
+        {
+            Random random = new Random();
+            List<int> samples = new List<int>();
+            double firstSize = 0, secondSize = 0, thirdSize = 0;
+            int range = 0, i = 0, sbSize = 0, sbIdx = 0;
+
+            List<int> sidebranchIdx = new List<int>();
+            int sbTotal = random.Next(2, 6);
+
+            for (int j = 0; j < sbTotal; j++)
+            {
+                sidebranchIdx.Add(random.Next(0, LumenContours.Count));
+            }
+            sidebranchIdx.Sort();
+
+            foreach (LumenContour lumenContour in LumenContours)
+            {
+                //Calcium
+                if(i == range)
+                {
+                    samples.Clear();
+
+                    if (random.Next(0, 2) % 2 == 0)
+                    {
+                        samples.Add(random.Next(0, 361));
+                        samples.Add(random.Next(0, 361));
+                        samples.Add(random.Next(0, 361));
+                        samples.Sort();
+
+                        firstSize = random.Next(samples[0], samples[1]) - samples[0];
+                        secondSize = random.Next(samples[1], samples[2]) - samples[1];
+                        thirdSize = random.Next(samples[2], 361) - samples[2];
+                    }
+                    else
+                    {
+                        samples.Add(0);
+                        samples.Add(0);
+                        samples.Add(0);
+                        firstSize = 0;
+                        secondSize = 0;
+                        thirdSize = 0;
+                    }
+
+                    range = random.Next(10, 50);
+                    i = 0;
+                }
+                i++;
+
+                lumenContour.Calcium = new Calcium();
+                lumenContour.Calcium.List = new List<Tuple<double, double>>();
+
+                lumenContour.Calcium.List.Add(new Tuple<double, double>(samples[0], firstSize));
+                lumenContour.Calcium.List.Add(new Tuple<double, double>(samples[1], secondSize));
+                lumenContour.Calcium.List.Add(new Tuple<double, double>(samples[2], thirdSize));
+
+                lumenContour.Calcium.TotalAngle = (int)(firstSize + secondSize + thirdSize);
+                lumenContour.Calcium.MaxThickness = Math.Round(lumenContour.Calcium.TotalAngle / 200.0, 2);
+
+                int idx = firstSize > secondSize ? firstSize > thirdSize ? 0 : 2 : secondSize > thirdSize ? 1 : 2;
+                double size = firstSize > secondSize ? firstSize > thirdSize ? firstSize : thirdSize : secondSize > thirdSize ? secondSize : thirdSize;
+                lumenContour.Calcium.MaxThicknessDegree = samples[idx] + size/2;
+                if (firstSize + secondSize + thirdSize == 0)
+                    lumenContour.Calcium.MaxThicknessDegree = -1;
+
+                //Sidebranch
+                if (sidebranchIdx.Contains(sbIdx) && sbSize == 0)
+                {
+                    sbSize = random.Next(0, 50);
+                }
+
+                if (sbSize > 0)
+                {
+                    lumenContour.HasSidebranch = true;
+                    sbSize--;
+                }
+                else
+                {
+                    lumenContour.HasSidebranch = false;
+                }
+
+                sbIdx++;
+            }
+        }
+
+        private void DrawCalciumIndicator()
+        {
+            CalciumIndicator = CommonUtil.DrawCalciumIndicator(LumenContours[FrameNumber].Calcium.List, Constants.CalciumIndicatorColor, (int)Constants.CalciumIndicatorSize);
+            CalciumIndicatorAngio = CommonUtil.DrawCalciumIndicator(LumenContours[FrameNumber].Calcium.List, Constants.CalciumIndicatorColor, (int)Constants.CalciumIndicatorAngioSize);
+
+            TotalAngle = LumenContours[FrameNumber].Calcium.TotalAngle;
+            MaxThickness = LumenContours[FrameNumber].Calcium.MaxThickness;
+            MaxCalciumDegree = LumenContours[FrameNumber].Calcium.MaxThicknessDegree;
         }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
@@ -1006,6 +1095,9 @@ namespace RaywattApp.ViewModels
                 // when generating longitude image is completed
                 if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame)
                 {
+                    if (CommonUtil.IsPreCase(PatientCase.Procedure))
+                        DrawCalciumIndicator();
+
                     if (IsChangedLumenProfileValue())
                     {
                         MinimalValueChanged();
@@ -1026,6 +1118,17 @@ namespace RaywattApp.ViewModels
                 }
                 else if (DeviceStatus.IsLumenLoaded && !this.isLumenContourSave)
                 {
+                    if (!this.isLumenLoadedInit)
+                    {
+                        int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
+                        int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
+                        Section.CalcMean(LumenContours, frameProximal, frameDistal);
+                        this.isLumenLoadedInit = true;
+                    }
+
+                    if (CommonUtil.IsPreCase(PatientCase.Procedure))
+                        DrawCalciumIndicator();
+
                     DrawLumenProfile();
                 }
             }
