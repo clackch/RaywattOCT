@@ -770,9 +770,9 @@ namespace RaywattApp.ViewModels
         {
             LumenContours = CommonUtil.JsonToLumenContours(lumenContour);
 
-            //나중에는 ML에서 값을 미리 넣어주면, GetCalcium 삭제
-            if (LumenContours[0].Calcium == null || LumenContours[0].Calcium.TotalAngle == 0)
-                GetCalcium();
+            //나중에는 ML에서 값을 미리 넣어주면, GetMlData 삭제
+            //if (LumenContours[0].Calcium == null || LumenContours[0].Calcium.TotalAngle == 0)
+                GetMlData();
 
             if (ReviewStatus.IsContourStentOn)
                 LumenContourCommand = Constants.LumenContourDraw;
@@ -886,7 +886,6 @@ namespace RaywattApp.ViewModels
             ExpandRightMenu = isExpand;
         }
 
-
         private void ZoomIn()
         {
             _log.Debug("ZoomIn");
@@ -970,12 +969,10 @@ namespace RaywattApp.ViewModels
             int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
             int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
             //Test
-            List<int> sidebranchs = new List<int>() { 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 419, 420 };
             List<int> appositionFrames = new List<int>() { 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
-            imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, frameProximal, frameDistal, sidebranchs, CommonUtil.IsPostCase(PatientCase.Procedure), appositionFrames, longitudeFrameInfo.curFrame - 1);
+            imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, frameProximal, frameDistal, CommonUtil.IsPostCase(PatientCase.Procedure), appositionFrames, longitudeFrameInfo.curFrame - 1);
             DrawLumenProfileImage();
 
-            //Test
             List<int> colorFrames = new List<int>();
             if (CommonUtil.IsPreCase(PatientCase.Procedure))
             {
@@ -989,26 +986,49 @@ namespace RaywattApp.ViewModels
             LumenProfileImageExtra = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileExtra);
         }
 
-        private void GetCalcium()
+        private void GetMlData()
         {
             Random random = new Random();
             List<int> samples = new List<int>();
             double firstSize = 0, secondSize = 0, thirdSize = 0;
-            int range = 0, i = 0;
+            int range = 0, i = 0, sbSize = 0, sbIdx = 0;
+
+            List<int> sidebranchIdx = new List<int>();
+            int sbTotal = random.Next(2, 6);
+
+            for (int j = 0; j < sbTotal; j++)
+            {
+                sidebranchIdx.Add(random.Next(0, LumenContours.Count));
+            }
+            sidebranchIdx.Sort();
 
             foreach (LumenContour lumenContour in LumenContours)
             {
+                //Calcium
                 if(i == range)
                 {
                     samples.Clear();
-                    samples.Add(random.Next(0, 361));
-                    samples.Add(random.Next(0, 361));
-                    samples.Add(random.Next(0, 361));
-                    samples.Sort();
 
-                    firstSize = random.Next(samples[0], samples[1]) - samples[0];
-                    secondSize = random.Next(samples[1], samples[2]) - samples[1];
-                    thirdSize = random.Next(samples[2], 361) - samples[2];
+                    if (random.Next(0, 2) % 2 == 0)
+                    {
+                        samples.Add(random.Next(0, 361));
+                        samples.Add(random.Next(0, 361));
+                        samples.Add(random.Next(0, 361));
+                        samples.Sort();
+
+                        firstSize = random.Next(samples[0], samples[1]) - samples[0];
+                        secondSize = random.Next(samples[1], samples[2]) - samples[1];
+                        thirdSize = random.Next(samples[2], 361) - samples[2];
+                    }
+                    else
+                    {
+                        samples.Add(0);
+                        samples.Add(0);
+                        samples.Add(0);
+                        firstSize = 0;
+                        secondSize = 0;
+                        thirdSize = 0;
+                    }
 
                     range = random.Next(10, 50);
                     i = 0;
@@ -1028,6 +1048,26 @@ namespace RaywattApp.ViewModels
                 int idx = firstSize > secondSize ? firstSize > thirdSize ? 0 : 2 : secondSize > thirdSize ? 1 : 2;
                 double size = firstSize > secondSize ? firstSize > thirdSize ? firstSize : thirdSize : secondSize > thirdSize ? secondSize : thirdSize;
                 lumenContour.Calcium.MaxThicknessDegree = samples[idx] + size/2;
+                if (firstSize + secondSize + thirdSize == 0)
+                    lumenContour.Calcium.MaxThicknessDegree = -1;
+
+                //Sidebranch
+                if (sidebranchIdx.Contains(sbIdx) && sbSize == 0)
+                {
+                    sbSize = random.Next(0, 50);
+                }
+
+                if (sbSize > 0)
+                {
+                    lumenContour.HasSidebranch = true;
+                    sbSize--;
+                }
+                else
+                {
+                    lumenContour.HasSidebranch = false;
+                }
+
+                sbIdx++;
             }
         }
 

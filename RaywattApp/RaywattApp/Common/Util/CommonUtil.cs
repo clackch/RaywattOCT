@@ -527,7 +527,7 @@ namespace RaywattApp.Common.Util
             return imglumenProfile;
         }
 
-        public static Mat MakeLumenProfileImage(List<LumenContour> lumenContours, int frameProximal, int frameDistal, List<int>? sidebranchs, bool isPostCase, List<int>? appositionFrames, int currentFrame = -1)
+        public static Mat MakeLumenProfileImage(List<LumenContour> lumenContours, int frameProximal, int frameDistal, bool isPostCase, List<int>? appositionFrames, int currentFrame = -1)
         {
             const double radius = Constants.OCTImageSize / 2;
             const double totalArea = radius * radius * Math.PI;
@@ -574,10 +574,9 @@ namespace RaywattApp.Common.Util
                 }
 
                 //Side Branch
-                if (sidebranchs != null)
-                {
-                    if (sidebranchs.Contains(curFrame))
-                        Cv2.Line(imglumenProfile, new Point(curFrame, imglumenProfile.Rows / 2 - 5), new Point(curFrame, imglumenProfile.Rows / 2 + 5), new Scalar(0xe4, 0xe4, 0xe4));
+                if (lumenContour.HasSidebranch)
+                {    
+                    Cv2.Line(imglumenProfile, new Point(curFrame, imglumenProfile.Rows / 2 - 5), new Point(curFrame, imglumenProfile.Rows / 2 + 5), new Scalar(0xe4, 0xe4, 0xe4));
                 }
 
                 curFrame++;
@@ -1131,6 +1130,10 @@ namespace RaywattApp.Common.Util
                         writer.WritePropertyName(nameof(lumenContour.Valid));
                         writer.WriteValue(lumenContour.Valid);
 
+                        //HasSidebranch
+                        writer.WritePropertyName(nameof(lumenContour.HasSidebranch));
+                        writer.WriteValue(lumenContour.HasSidebranch);
+
                         //Calcium
                         {
                             writer.WritePropertyName(nameof(lumenContour.Calcium));
@@ -1235,6 +1238,11 @@ namespace RaywattApp.Common.Util
                                         SetCalcium(reader, currentProperty, lumenContour);
                                     }
                                 }
+                            }
+                            else if (nameof(lumenContour.HasSidebranch).Equals(currentProperty))
+                            {
+                                if (reader.Value != null && reader.TokenType == JsonToken.Boolean)
+                                    lumenContour.HasSidebranch = (bool)reader.Value;
                             }
                             else
                             {
