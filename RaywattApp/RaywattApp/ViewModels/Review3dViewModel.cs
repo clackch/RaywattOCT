@@ -14,6 +14,9 @@ using System.Windows.Threading;
 using RaywattApp.Views.Dialog;
 using static RaywattOCT.RayCoreWrapper;
 using static RaywattOCT.Ray3DWrapper;
+using System.Runtime.InteropServices;
+using RaywattApp.Common.Util;
+using System.Threading;
 
 namespace RaywattApp.ViewModels
 {
@@ -44,8 +47,19 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private bool _isIndicatorOn;
 
-        [ObservableProperty]
         private bool _isPtoD;
+        public bool IsPtoD
+        { 
+            get { return _isPtoD; } 
+            set 
+            { 
+                _isPtoD = value;
+                OnPropertyChanged(nameof(IsPtoD));
+
+                ray3DStatus.IsPtoD = value;
+                ODSOCT_MoveCameraPosition(0, !value);
+            }
+        }
 
         [ObservableProperty]
         private bool _isSideBranchView;
@@ -78,7 +92,6 @@ namespace RaywattApp.ViewModels
         private bool _isPaused;
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
-        private DispatcherTimer timerInitialize = new DispatcherTimer();
         private DispatcherTimer timerShowData = new DispatcherTimer();
 
         private ICommand _cmdRotateIndicator;
@@ -120,6 +133,8 @@ namespace RaywattApp.ViewModels
         { 
             get { return this._cmdExpandLeftPatientMenu ?? (this._cmdExpandLeftPatientMenu = new RelayCommand(ExpandLeftPatientMenu)); }
         }
+
+        private Thread threadInitialize;
 
         public Review3dViewModel(SqlManager sqlManager, IDialogService dialogService) : base(sqlManager, dialogService)
         {
@@ -164,7 +179,7 @@ namespace RaywattApp.ViewModels
                 // set default values without rendering
                 _isCutViewOn = ray3DStatus.CutViewOn;
                 _isIndicatorOn = true;
-                _isPtoD = true;
+                _isPtoD = ray3DStatus.IsPtoD;
                 _isSideBranchView = false;
             }
 
@@ -172,9 +187,8 @@ namespace RaywattApp.ViewModels
             timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
             timerUpdateImage.Start();
 
-            timerInitialize.Interval = TimeSpan.FromMilliseconds(MinWaitingDelay);
-            timerInitialize.Tick += new EventHandler(timerFuncInitialize);
-            timerInitialize.Start();
+            threadInitialize = new Thread(() => threadFuncInitialize());
+            threadInitialize.Start();
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -184,8 +198,8 @@ namespace RaywattApp.ViewModels
             if (viewMenuWindow != null) viewMenuWindow.Close();
             if (patientMenuWindow != null) patientMenuWindow.Close();
 
-            if (timerInitialize.IsEnabled)
-                timerInitialize.Stop();
+            if (threadInitialize.IsAlive)
+                threadInitialize.Join();
 
             if (timerShowData.IsEnabled)
                 timerShowData.Stop();
@@ -245,15 +259,23 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private void timerFuncInitialize(object sender, EventArgs e)
+        private void threadFuncInitialize()
         {
-            if (timerInitialize.IsEnabled)
-                timerInitialize.Stop();
-
             int diameter = (int)RayGetProperty(Property.VolumeWidth);
             int depth = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total;
+            IntPtr buffer = Marshal.AllocHGlobal(diameter * diameter * depth);
+
             ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(), diameter, diameter, depth, 1, 1, 12.5);
+
+            CommonUtil.ContoursToMemory(PatientCase.LumenContour, 
+                new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize), 
+                buffer, 
+                new OpenCvSharp.Size(diameter, diameter));
+            ODSOCT_InputSurfaceParameter(Ray3DObject.Lumen, 10, 50, ".\\data\\lumen_tex.jpg");
+            ODSOCT_InputData(Ray3DObject.Lumen, buffer, diameter, diameter, depth, 1, 1, 12.5);
+
             ODSOCT_ProcessingDatas();
+            Marshal.FreeHGlobal(buffer);
 
             timerShowData.Interval = TimeSpan.FromMilliseconds(MinWaitingDelay);
             timerShowData.Tick += new EventHandler(timerFuncShowData);
@@ -265,6 +287,8 @@ namespace RaywattApp.ViewModels
             if (timerShowData.IsEnabled)
                 timerShowData.Stop();
 
+            ODSOCT_RotateAngle((float)CameraDegree);
+            ODSOCT_MoveToFrame(DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
             ODSOCT_ShowAllWindows();
 
             for (Ray3DObject obj = Ray3DObject.Tissue; obj < Ray3DObject.Count; obj++)

@@ -1256,6 +1256,31 @@ namespace RaywattApp.Common.Util
             return lumenContours;
         }
 
+        unsafe public static void ContoursToMemory(List<LumenContour>? contourList, Size sizeContour, IntPtr buffer, Size sizeBuffer)
+        {
+            if (contourList == null) return;
+
+            int frameSize = sizeBuffer.Width * sizeBuffer.Height;
+            for (int i = 0; i < contourList.Count; i++)
+            {
+                Mat imgLumen = new Mat(sizeContour, MatType.CV_8UC1);
+                Mat imgResize = new Mat(sizeBuffer, MatType.CV_8UC1);
+                List<List<Point>> contours = new List<List<Point>>();
+                List<Point> contour = new List<Point>();
+                foreach (System.Windows.Point point in contourList[i].Points)
+                {
+                    contour.Add(new OpenCvSharp.Point(point.X, point.Y));
+                }
+                contours.Add(contour);
+
+                imgLumen.SetTo(Scalar.Black);
+                Cv2.DrawContours(imgLumen, contours, -1, Scalar.White, -1);
+                Cv2.Resize(imgLumen, imgResize, imgResize.Size());
+
+                Buffer.MemoryCopy((void*)imgResize.Data, (void*)(IntPtr.Add(buffer, i * frameSize)), frameSize, frameSize);
+            }
+        }
+
         private static System.Windows.Point StrToPoint(string str)
         {
             string[] temp = str.Split(",");
