@@ -771,7 +771,7 @@ namespace RaywattApp.ViewModels
             LumenContours = CommonUtil.JsonToLumenContours(lumenContour);
 
             //나중에는 ML에서 값을 미리 넣어주면, GetMlData 삭제
-            //if (LumenContours[0].Calcium == null || LumenContours[0].Calcium.TotalAngle == 0)
+            if (LumenContours[0].Calcium == null || LumenContours[0].Calcium.TotalAngle == 0)
                 GetMlData();
 
             if (ReviewStatus.IsContourStentOn)
