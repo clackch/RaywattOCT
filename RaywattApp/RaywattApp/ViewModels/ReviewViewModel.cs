@@ -330,6 +330,9 @@ namespace RaywattApp.ViewModels
 
             LumenContourProcess(frame);
 
+            //TODO - ML detection에서 Calcium/Sidebranch 가져오도록 개발되면 삭제 필요
+            GetMlData();
+
             DrawLumenProfile();
 
             if (ReviewStatus.NumberOfFrames - 1 == frame)
@@ -770,8 +773,8 @@ namespace RaywattApp.ViewModels
         {
             LumenContours = CommonUtil.JsonToLumenContours(lumenContour);
 
-            //나중에는 ML에서 값을 미리 넣어주면, GetMlData 삭제
-            if (LumenContours[0].Calcium == null || LumenContours[0].Calcium.TotalAngle == 0)
+            //TODO - Calcium/Sidebranch 추가를 위한 테스트 코드 (추후 삭제 필요)
+            if (false)
                 GetMlData();
 
             if (ReviewStatus.IsContourStentOn)
@@ -986,6 +989,7 @@ namespace RaywattApp.ViewModels
             LumenProfileImageExtra = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileExtra);
         }
 
+        //TODO - Calcium/Sidebranch 테스트 데이터 만드는 함수 (추후 삭제 필요)
         private void GetMlData()
         {
             Random random = new Random();
