@@ -957,13 +957,17 @@ namespace RaywattApp.ViewModels
 
             if (CommonUtil.IsPreCase(PatientCase.Procedure))
             {
-                Section.SetMlaMld(LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength);
-                Section.VisibleMlaMld(true);
+                if(Section.SetMlaMld(LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength))
+                    Section.VisibleMlaMld(true);
+                else
+                    Section.VisibleMlaMld(false);
             }    
             else
             {
-                Section.SetMsaMinExp(LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength);
-                Section.VislbleMsaMinExp(true);
+                if(Section.SetMsaMinExp(LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength))
+                    Section.VislbleMsaMinExp(true);
+                else
+                    Section.VislbleMsaMinExp(false);
             }
         }
 
@@ -1077,6 +1081,9 @@ namespace RaywattApp.ViewModels
 
         private void DrawCalciumIndicator()
         {
+            if (LumenContours == null || LumenContours.Count == 0)
+                return;
+
             CalciumIndicator = CommonUtil.DrawCalciumIndicator(LumenContours[FrameNumber].Calcium.List, Constants.CalciumIndicatorColor, (int)Constants.CalciumIndicatorSize);
             CalciumIndicatorAngio = CommonUtil.DrawCalciumIndicator(LumenContours[FrameNumber].Calcium.List, Constants.CalciumIndicatorColor, (int)Constants.CalciumIndicatorAngioSize);
 

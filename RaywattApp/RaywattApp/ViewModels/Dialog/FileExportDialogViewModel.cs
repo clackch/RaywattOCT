@@ -192,15 +192,19 @@ namespace RaywattApp.ViewModels.Dialog
                     List<int> colorFrames = new List<int>();
                     if (CommonUtil.IsPreCase(patientCase.Procedure))
                     {
-                        Section.SetMlaMld(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength);
-                        Section.VisibleMlaMld(true);
+                        if(Section.SetMlaMld(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength))
+                            Section.VisibleMlaMld(true);
+                        else
+                            Section.VisibleMlaMld(false);
 
                         colorFrames = CommonUtil.GetCalciumList(LumenContours, patientCase.CalciumThreshold);
                     }
                     else
                     {
-                        Section.SetMsaMinExp(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength);
-                        Section.VislbleMsaMinExp(true);
+                        if(Section.SetMsaMinExp(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength))
+                            Section.VislbleMsaMinExp(true);
+                        else
+                            Section.VislbleMsaMinExp(false);
 
                         colorFrames = CommonUtil.GetExpansionList(LumenContours, frameProximal, frameDistal, Section.RefArea, PatientCase.ExpansionThreshold);
                     }

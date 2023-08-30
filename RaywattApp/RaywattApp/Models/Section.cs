@@ -110,10 +110,13 @@ namespace RaywattApp.Models
             LesionLength.IsVisible = Visibility.Collapsed;
         }
 
-        public void CalcMean(List<LumenContour> LumenContours, int frameProximal, int frameDistal)
+        public void CalcMean(List<LumenContour> lumenContours, int frameProximal, int frameDistal)
         {
+            if (lumenContours == null || lumenContours.Count == 0)
+                return;
+
             int count = frameDistal - frameProximal + 1;
-            List<LumenContour> temp = LumenContours.GetRange(frameProximal, count);
+            List<LumenContour> temp = lumenContours.GetRange(frameProximal, count);
 
             double meanArea = 0;
             double meanDiameter = 0;
@@ -127,8 +130,8 @@ namespace RaywattApp.Models
             MeanArea = meanArea / temp.Count;
             MeanDiameter = meanDiameter / temp.Count;
 
-            RefArea = (LumenContours[frameProximal].Area + LumenContours[frameDistal].Area) / 2;
-            RefDiameter = (LumenContours[frameProximal].MeanDiameter + LumenContours[frameDistal].MeanDiameter) / 2;
+            RefArea = (lumenContours[frameProximal].Area + lumenContours[frameDistal].Area) / 2;
+            RefDiameter = (lumenContours[frameProximal].MeanDiameter + lumenContours[frameDistal].MeanDiameter) / 2;
         }
 
         private void SetProximalDisatalArea(double proximalArea, double distalArea)
@@ -153,18 +156,21 @@ namespace RaywattApp.Models
             LesionDistal = lesionDistalTemp - LesionLengthWidth;
         }
 
-        public void SetMlaMld(List<LumenContour> LumenContours, int frameProximal, int frameDistal, int totalFrame, double longitudeWidth, string pullbackLength)
+        public bool SetMlaMld(List<LumenContour> lumenContours, int frameProximal, int frameDistal, int totalFrame, double longitudeWidth, string pullbackLength)
         {
-            CalcMean(LumenContours, frameProximal, frameDistal);
-            SetProximalDisatalArea(LumenContours[frameProximal].Area, LumenContours[frameDistal].Area);
+            if(lumenContours == null || lumenContours.Count == 0) 
+                return false;
+
+            CalcMean(lumenContours, frameProximal, frameDistal);
+            SetProximalDisatalArea(lumenContours[frameProximal].Area, lumenContours[frameDistal].Area);
             CalcLesionLength(frameProximal, frameDistal, totalFrame, longitudeWidth, pullbackLength);
 
             int count = frameDistal - frameProximal + 1;
-            double mla = LumenContours.GetRange(frameProximal, count).Min(x => x.Area);
-            int mlaIdx = LumenContours.GetRange(frameProximal, count).FindIndex(x => x.Area == mla);
+            double mla = lumenContours.GetRange(frameProximal, count).Min(x => x.Area);
+            int mlaIdx = lumenContours.GetRange(frameProximal, count).FindIndex(x => x.Area == mla);
 
-            double mld = LumenContours.GetRange(frameProximal, count).Min(x => x.MeanDiameter);
-            int mldIdx = LumenContours.GetRange(frameProximal, count).FindIndex(x => x.MeanDiameter == mld);
+            double mld = lumenContours.GetRange(frameProximal, count).Min(x => x.MeanDiameter);
+            int mldIdx = lumenContours.GetRange(frameProximal, count).FindIndex(x => x.MeanDiameter == mld);
 
             if(mlaIdx <= mldIdx)
             {
@@ -177,7 +183,7 @@ namespace RaywattApp.Models
                 string text = "MLA " + Math.Round(mla * Constants.MillimeterPerPixel * Constants.MillimeterPerPixel, 2).ToString() + "㎟";
                 double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-12", text, 2).Width;
                 MlaValue.X = Mla.X - (width + 18);
-                MldValue.DValue = LumenContours[mldIdx + frameProximal].MeanDiameter;
+                MldValue.DValue = lumenContours[mldIdx + frameProximal].MeanDiameter;
                 MldValue.X = Mld.X + Constants.SectionValueWidth;
             }
             else
@@ -189,22 +195,27 @@ namespace RaywattApp.Models
                 MlaValue.DValue = mla;
                 MlaValue.NValue = mlaIdx + frameProximal;
                 MlaValue.X = Mla.X + Constants.SectionValueWidth;
-                MldValue.DValue = LumenContours[mldIdx + frameProximal].MeanDiameter;
+                MldValue.DValue = lumenContours[mldIdx + frameProximal].MeanDiameter;
                 string text = "MLD " + Math.Round(mla * Constants.MillimeterPerPixel * Constants.MillimeterPerPixel, 2).ToString() + "㎜";
                 double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-12", text, 2).Width;              
                 MldValue.X = Mld.X - (width + 18);
             }
+
+            return true;
         }
 
-        public void SetMsaMinExp(List<LumenContour> LumenContours, int frameProximal, int frameDistal, int totalFrame, double longitudeWidth, string pullbackLength)
+        public bool SetMsaMinExp(List<LumenContour> lumenContours, int frameProximal, int frameDistal, int totalFrame, double longitudeWidth, string pullbackLength)
         {
-            CalcMean(LumenContours, frameProximal, frameDistal);
-            SetProximalDisatalArea(LumenContours[frameProximal].Area, LumenContours[frameDistal].Area);
+            if (lumenContours == null || lumenContours.Count == 0)
+                return false;
+
+            CalcMean(lumenContours, frameProximal, frameDistal);
+            SetProximalDisatalArea(lumenContours[frameProximal].Area, lumenContours[frameDistal].Area);
             CalcLesionLength(frameProximal, frameDistal, totalFrame, longitudeWidth, pullbackLength);
 
             int count = frameDistal - frameProximal + 1;
-            double msa = LumenContours.GetRange(frameProximal, count).Min(x => x.Area);
-            int msaIdx = LumenContours.GetRange(frameProximal, count).FindIndex(x => x.Area == msa);
+            double msa = lumenContours.GetRange(frameProximal, count).Min(x => x.Area);
+            int msaIdx = lumenContours.GetRange(frameProximal, count).FindIndex(x => x.Area == msa);
 
             //TODO) Min Exp 정의가 되면 Min Exp 변경 필요
             double minExp = msa;
@@ -238,6 +249,8 @@ namespace RaywattApp.Models
                 double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-12", text, 2).Width;
                 MinExpValue.X = MinExp.X - (width + 18);
             }
+
+            return true;
         }
 
         public void VisibleMlaMld(bool isVisible)

@@ -532,7 +532,18 @@ namespace RaywattApp.ViewModels
             PostLumenContour = PatientCase.LumenContour;
             int frameProximal = PatientCase.SectionProximal;
             int frameDistal = PatientCase.SectionDistal;
-            Section.SetMsaMinExp(PatientCase.LumenContour, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeCompareWidth, PatientCase.PullbackLength);
+            if(Section.SetMsaMinExp(PatientCase.LumenContour, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeCompareWidth, PatientCase.PullbackLength))
+            {
+                Section.VislbleMsaMinExp(true);
+                Section.Proximal.IsVisible = Visibility.Visible;
+                Section.Distal.IsVisible = Visibility.Visible;
+            }
+            else
+            {
+                Section.VislbleMsaMinExp(false);
+                Section.Proximal.IsVisible = Visibility.Collapsed;
+                Section.Distal.IsVisible = Visibility.Collapsed;
+            }
 
             //Test
             List<int> appositionFrames = new List<int>() { 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
@@ -544,13 +555,6 @@ namespace RaywattApp.ViewModels
 
             Section.Proximal.X = CommonUtil.GetPositionFromFrame(PatientCase.SectionProximal, ReviewStatus.NumberOfFrames, Constants.LongitudeCompareWidth, Constants.SectionIndicatorCenterWidth);
             Section.Distal.X = CommonUtil.GetPositionFromFrame(PatientCase.SectionDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeCompareWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
-
-            Section.Proximal.IsVisible = Visibility.Visible;
-            Section.Distal.IsVisible = Visibility.Visible;
-            Section.Msa.IsVisible = Visibility.Visible;
-            Section.MinExp.IsVisible = Visibility.Visible;
-            Section.MsaValue.IsVisible = Visibility.Visible;
-            Section.MinExpValue.IsVisible = Visibility.Visible;
         }
 
         private void ShowLumenProfileCompare()
@@ -558,7 +562,18 @@ namespace RaywattApp.ViewModels
             PreLumenContour = ReviewStatus.SelectedPatientCase.LumenContour;
             int frameProximalCompare = ReviewStatus.SelectedPatientCase.SectionProximal;
             int frameDistalCompare = ReviewStatus.SelectedPatientCase.SectionDistal;
-            SectionCompare.SetMlaMld(ReviewStatus.SelectedPatientCase.LumenContour, frameProximalCompare, frameDistalCompare, DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total, Constants.LongitudeCompareWidth, ReviewStatus.SelectedPatientCase.PullbackLength);
+            if(SectionCompare.SetMlaMld(ReviewStatus.SelectedPatientCase.LumenContour, frameProximalCompare, frameDistalCompare, DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total, Constants.LongitudeCompareWidth, ReviewStatus.SelectedPatientCase.PullbackLength))
+            {
+                SectionCompare.VisibleMlaMld(true);
+                SectionCompare.Proximal.IsVisible = Visibility.Visible;
+                SectionCompare.Distal.IsVisible = Visibility.Visible;
+            }
+            else
+            {
+                SectionCompare.VisibleMlaMld(false);
+                SectionCompare.Proximal.IsVisible = Visibility.Collapsed;
+                SectionCompare.Distal.IsVisible = Visibility.Collapsed;
+            }
 
             imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(PreLumenContour, frameProximalCompare, frameDistalCompare, false, null);
             LumenProfileImageCompare = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileCompare);
@@ -571,12 +586,6 @@ namespace RaywattApp.ViewModels
             SectionCompare.Distal.X = CommonUtil.GetPositionFromFrame(ReviewStatus.SelectedPatientCase.SectionDistal, DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total, Constants.LongitudeCompareWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
 
             IndicatorCompareLongitude.IsVisible = Visibility.Visible;
-            SectionCompare.Proximal.IsVisible = Visibility.Visible;
-            SectionCompare.Distal.IsVisible = Visibility.Visible;
-            SectionCompare.Mla.IsVisible = Visibility.Visible;
-            SectionCompare.Mld.IsVisible = Visibility.Visible;
-            SectionCompare.MlaValue.IsVisible = Visibility.Visible;
-            SectionCompare.MldValue.IsVisible = Visibility.Visible;
         }
 
         private void HideLumenProfileCompare()
