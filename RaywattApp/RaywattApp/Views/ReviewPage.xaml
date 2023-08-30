@@ -1050,6 +1050,9 @@
                                 <Grid Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityConverter}}">
                                     <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding DeviceStatus.IsLumenLoaded, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
                                 </Grid>
+                                <Grid Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding DeviceStatus.IsLumenSaved, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                                </Grid>
 
                                 <!-- Lesion Section -->
                                 <Canvas Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityConverter}}">

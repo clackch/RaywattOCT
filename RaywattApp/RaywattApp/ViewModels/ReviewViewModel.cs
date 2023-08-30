@@ -333,8 +333,6 @@ namespace RaywattApp.ViewModels
             //TODO - ML detection에서 Calcium/Sidebranch 가져오도록 개발되면 삭제 필요
             GetMlData();
 
-            DrawLumenProfile();
-
             if (ReviewStatus.NumberOfFrames - 1 == frame)
             {
                 if (ReviewStatus.IsContourStentOn)
@@ -1104,7 +1102,7 @@ namespace RaywattApp.ViewModels
             if (DrawLongitudeImage())
             {
                 // when generating longitude image is completed
-                if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame)
+                if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame && DeviceStatus.IsLumenSaved)
                 {
                     if (CommonUtil.IsPreCase(PatientCase.Procedure))
                         DrawCalciumIndicator();
