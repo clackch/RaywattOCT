@@ -220,7 +220,7 @@ namespace RaywattApp.ViewModels
             {
                 CommonUtil.Exit(DeviceStatus);
 
-                OutsetLoadingViewModel.threadOnLiveAngioImage = false; // thread 종료 함수 지원 X?
+                AngioClient.threadOnLiveAngioImage = false; // thread 종료 함수 지원 X?
 
                 // Server Off
                 Process[] processes = Process.GetProcessesByName("FGServer");
