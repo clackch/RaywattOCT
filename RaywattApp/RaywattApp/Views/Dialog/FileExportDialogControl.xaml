@@ -59,7 +59,7 @@
                         <Grid Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$001}">
                             <Grid Visibility="{Binding FileExport.Longitude, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <Image x:Name="CalciumIndicatorAngio" Width="{x:Static const:Constants.CalciumIndicatorExportSize}" Height="{x:Static const:Constants.CalciumIndicatorExportSize}" Source="{Binding CalciumIndicator}"/>
-                                <Grid Width="{x:Static const:Constants.CalciumThicknessIndicatorExportSize}" Height="{x:Static const:Constants.CalciumThicknessIndicatorExportSize}" Background="Transparent">
+                                <Grid Width="{x:Static const:Constants.CalciumThicknessIndicatorExportSize}" Height="{x:Static const:Constants.CalciumThicknessIndicatorExportSize}" Background="Transparent" Visibility="{Binding MaxCalciumDegree, Converter={StaticResource MaxThicknessVisibilityConverter}}">
                                     <Grid.Clip>
                                         <EllipseGeometry Center="{x:Static const:Constants.CalciumThicknessIndicatorPointCenterExport}" RadiusX="{x:Static const:Constants.CalciumThicknessIndicatorCenterExport}" RadiusY="{x:Static const:Constants.CalciumThicknessIndicatorCenterAngio}"/>
                                     </Grid.Clip>
