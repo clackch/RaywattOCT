@@ -19,6 +19,8 @@ namespace RaywattApp.ViewModels
 {
     public partial class RecordingLiveViewViewModel : OCTViewModelBase
     {
+        private DispatcherTimer timerLiveAngioImage = new DispatcherTimer(DispatcherPriority.Background);
+
         private static readonly ILog _log = LogManager.GetLogger(typeof(RecordingLiveViewViewModel));
 
         private readonly SqlManager? _sqlManager;
@@ -118,6 +120,13 @@ namespace RaywattApp.ViewModels
 
                 SetCondition();
             }
+
+            // Send Start Command
+            TcpClientSingleton.Instance.GetStream().Write(TcpClientSingleton.startCommand, 0, TcpClientSingleton.startCommand.Length);
+
+            timerLiveAngioImage.Interval = TimeSpan.Zero; // TimeSpan.Zero;
+            timerLiveAngioImage.Tick += new EventHandler(timerFuncLiveAngioImage);
+            timerLiveAngioImage.Start();
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -145,6 +154,11 @@ namespace RaywattApp.ViewModels
         private void Back()
         {
             _log.Debug("Back");
+
+            //Send Stop Command
+            TcpClientSingleton.Instance.GetStream().Write(TcpClientSingleton.stopCommand, 0, TcpClientSingleton.stopCommand.Length);
+            
+            timerLiveAngioImage.Stop();
 
             RayStopLiveView();
             leaveToPage(Constants.PatientDetailPage);
@@ -206,6 +220,19 @@ namespace RaywattApp.ViewModels
             parameter["patientCase"] = PatientCase;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(viewPage) { Parameter = parameter });
         }
+
+        private void timerFuncLiveAngioImage(object sender, EventArgs e)
+        {
+            DrawAngioImage();
+        }
+
+        protected bool DrawAngioImage()
+        {
+            AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(TcpClientSingleton.imgAngio);
+
+            return true;
+        }
+
     }
 }
  

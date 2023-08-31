@@ -11,6 +11,7 @@ using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -218,6 +219,13 @@ namespace RaywattApp.ViewModels
             if (result != null && result.DialogAnswer != DialogResults.Answer.No)
             {
                 CommonUtil.Exit(DeviceStatus);
+
+                OutsetLoadingViewModel.threadOnLiveAngioImage = false; // thread 종료 함수 지원 X?
+
+                // Server Off
+                Process[] processes = Process.GetProcessesByName("FGServer");
+                foreach (Process process in processes)
+                    process.Kill();
 
                 if (result.DialogAnswer == DialogResults.Answer.Yes)
                 {
