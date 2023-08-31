@@ -169,9 +169,13 @@ namespace RaywattApp.Common.Bases
         public const double ExportAngioSize = 677;
         public const double ExportTextPartSize = 566;
         public const double ExportLongitudeIndicatorWidth = 12;
+        public const double CalciumIndicatorExportSizeBig = 989;
         public const double CalciumIndicatorExportSize = 630;
+        public const double CalciumThicknessIndicatorExportSizeBig = 1005;
         public const double CalciumThicknessIndicatorExportSize = 644;
+        public const double CalciumThicknessIndicatorCenterExportBig = CalciumThicknessIndicatorExportSizeBig / 2;
         public const double CalciumThicknessIndicatorCenterExport = CalciumThicknessIndicatorExportSize / 2;
+        public static System.Windows.Point CalciumThicknessIndicatorPointCenterExportBig = new System.Windows.Point(CalciumThicknessIndicatorCenterExportBig, CalciumThicknessIndicatorCenterExportBig);
         public static System.Windows.Point CalciumThicknessIndicatorPointCenterExport = new System.Windows.Point(CalciumThicknessIndicatorCenterExport, CalciumThicknessIndicatorCenterExport);
 
         //File Icon
