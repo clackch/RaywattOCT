@@ -156,6 +156,17 @@ namespace RaywattApp.ViewModels
             return true;
         }
 
+        static byte CalcCheckSum(byte[] buffer, int size)
+        {
+            size--;
+            byte csum = 0;
+            for (; size >= 0; size--)
+            {
+                csum += buffer[size];
+            }
+            return (byte)~csum;
+        }
+
         private void imagePacketProcess()
         {
             int offset = 2;
@@ -165,7 +176,8 @@ namespace RaywattApp.ViewModels
             offset += sizeof(short);
             char BitsPerPixel = (char)TcpClientSingleton.tmpBuffer[offset++];
             int imageSize = height * width * BitsPerPixel / 8;
-            if (TcpClientSingleton.tmpBuffer[imageSize + Sizes.imageHeaderSize + Sizes.imageTailSize - 1] == 0xA3)
+            if (TcpClientSingleton.tmpBuffer[imageSize + Sizes.imageHeaderSize + Sizes.imageTailSize - 2] == CalcCheckSum(TcpClientSingleton.tmpBuffer, offset + imageSize)
+                && TcpClientSingleton.tmpBuffer[imageSize + Sizes.imageHeaderSize + Sizes.imageTailSize - 1] == 0xA3)
             {
                 Mat image = new Mat(height, width, MatType.CV_8UC(BitsPerPixel / 8));
                 Marshal.Copy(TcpClientSingleton.tmpBuffer, offset, image.Data, imageSize);
@@ -190,6 +202,8 @@ namespace RaywattApp.ViewModels
             char checksum = BitConverter.ToChar(TcpClientSingleton.tmpBuffer, offset++);
             char eof = BitConverter.ToChar(TcpClientSingleton.tmpBuffer, offset++);
 
+            if ((byte)checksum == CalcCheckSum(TcpClientSingleton.tmpBuffer, 3))
+            {
             if (command == (int)CommandType.FGDisconnected)
             {
                 TcpClientSingleton.portConnection = false;
@@ -212,6 +226,7 @@ namespace RaywattApp.ViewModels
 
             Array.Copy(TcpClientSingleton.tmpBuffer, Sizes.commandPacketSize, TcpClientSingleton.tmpBuffer, 0, 20000000 - Sizes.commandPacketSize);
             TcpClientSingleton.tmpBufferLen -= Sizes.commandPacketSize;
+            }
         }
     }
 }
