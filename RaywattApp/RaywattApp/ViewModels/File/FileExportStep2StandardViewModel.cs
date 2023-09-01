@@ -80,19 +80,22 @@ namespace RaywattApp.ViewModels.File
             sqlParameters["ids"] = FileExport.SelectedItem;
             PatientCases = _sqlManager.SelectPatientCaseByList(sqlParameters);
 
-            const double frameSize = Constants.ApplicationWidth * Constants.ApplicationHeight * 3.0;
+            ExportSize = 0;
+
+            double frameSize = GetFrameSize();
             if (FileExport.Material == Constants.ExportMaterialPullback)
             {
                 foreach (PatientCase patientCase in PatientCases)
                 {
-                    int numOfFrames = int.Parse(CodeDefinition.Codes["PBLE"][patientCase.PullbackLength]);
+                    int numOfFrames = patientCase.NumOfFrames;
                     if (FileExport.Pullback == Constants.ExportPullbackAVI)
                     {
-                        ExportSize = CommonUtil.GetVideoSize((int)Constants.ApplicationWidth, (int)Constants.ApplicationHeight, 10, 12, numOfFrames);
+                        frameSize = FileExport.MeasureAuto || FileExport.MeasureManual ? 250 : 180; //Export 한 파일 대상으로 경험적으로 찾은 수치
+                        ExportSize += frameSize * numOfFrames * 1024;
                     }
                     else
                     {
-                        ExportSize = frameSize * numOfFrames;
+                        ExportSize += frameSize * numOfFrames;
                     }
                 }
             }
@@ -104,6 +107,17 @@ namespace RaywattApp.ViewModels.File
             }
 
             UpdateFileSize(ExportSize);
+        }
+
+        private double GetFrameSize()
+        {
+            double height = Constants.ExportHeight;
+            double width = Constants.ExportLongitudeWidth;
+
+            if (FileExport.MeasureAuto || FileExport.MeasureManual)
+                width = Constants.ExportWidth;
+
+            return height * width * 3.0;
         }
 
         protected override void FileSave()

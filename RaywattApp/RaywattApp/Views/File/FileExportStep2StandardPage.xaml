@@ -62,8 +62,8 @@
                     <Separator Grid.Row="1" Grid.ColumnSpan="3" Background="{DynamicResource GrayscaleGray5Brush}" Width="760" Height="1"/>
                     <Label Grid.Row="2" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Margin="20,21,0,20" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Measurements], Source={StaticResource L10N}}"/>
                     <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,16,0,15" >
-                        <CheckBox IsChecked="{Binding FileExport.MeasureAuto}" Content="{Binding [Auto], Source={StaticResource L10N}}"/>
-                        <CheckBox IsChecked="{Binding FileExport.MeasureManual}" Content="{Binding [Manual], Source={StaticResource L10N}}" Margin="35,0,0,0"/>
+                        <CheckBox IsChecked="{Binding FileExport.MeasureAuto}" Command="{Binding CmdFormatChanged}" Content="{Binding [Auto], Source={StaticResource L10N}}"/>
+                        <CheckBox IsChecked="{Binding FileExport.MeasureManual}" Command="{Binding CmdFormatChanged}" Content="{Binding [Manual], Source={StaticResource L10N}}" Margin="35,0,0,0"/>
                     </StackPanel>
                     <Separator Grid.Row="3" Grid.ColumnSpan="3" Background="{DynamicResource GrayscaleGray5Brush}" Width="760" Height="1"/>
                     <Label Grid.Row="4" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Margin="20,20,0,0" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Additional Option], Source={StaticResource L10N}}"/>

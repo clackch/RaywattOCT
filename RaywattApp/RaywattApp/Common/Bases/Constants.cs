@@ -158,6 +158,8 @@ namespace RaywattApp.Common.Bases
         public const string FileNamePrefix = "Export_";
 
         //Export Layout
+        public const double ExportHeight = 1080;
+        public const double ExportWidth = 1920;
         public const double ExportCrossSectionBig = 1080;
         public const double ExportCrossSectionSmall = 677;
         public const double ExportCrossSectionImageBig = 965;
