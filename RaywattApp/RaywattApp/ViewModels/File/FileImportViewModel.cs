@@ -455,8 +455,7 @@ namespace RaywattApp.ViewModels.File
                             patientCase.Comment = GetStrValue(caseObj, "Comment");
                             patientCase.Vessel = GetStrValue(caseObj, "Vessel");
                             patientCase.Procedure = GetStrValue(caseObj, "Procedure");
-                            patientCase.ThumbnailNo = GetIntValue(caseObj, "ThumbnailNo");
-                            patientCase.StillImageYn = GetStrValue(caseObj, "StillImageYn");
+                            patientCase.NumOfFrames = GetIntValue(caseObj, "NumOfFrames");
                             patientCase.Image = GetStrValue(caseObj, "Image");
                             patientCase.PullbackType = GetStrValue(caseObj, "PullbackType");
                             patientCase.PullbackLength = GetStrValue(caseObj, "PullbackLength");

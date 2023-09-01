@@ -213,8 +213,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["comment"] = PatientCase.Comment;
             sqlParameters["vessel"] = PatientCase.Vessel;
             sqlParameters["procedure"] = PatientCase.Procedure;
-            sqlParameters["thumbnail_no"] = PatientCase.ThumbnailNo;
-            sqlParameters["still_image_yn"] = PatientCase.StillImageYn;
+            sqlParameters["num_of_frames"] = PatientCase.NumOfFrames;
             sqlParameters["image"] = PatientCase.Image;
             sqlParameters["pullback_type"] = PatientCase.PullbackType;
             sqlParameters["pullback_length"] = PatientCase.PullbackLength;
