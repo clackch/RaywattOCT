@@ -197,13 +197,9 @@ vector<vector<cv::Point>> CRayUnetr::FindLumen(cv::Mat image) {
 
 	cv::Mat output_image(IMG_INPUT_HEIGHT, IMG_INPUT_HEIGHT, CV_32FC1, data);
 
-	double minVal, maxVal;
-	cv::minMaxLoc(output_image, &minVal, &maxVal);
-
-	cout << "Min value: " << minVal << ", Max value: " << maxVal << endl;
 	cv::threshold(output_image, output_image, 0.5, 1, cv::THRESH_BINARY);
 	output_image *= 255;
-	output_image.convertTo(output_image, CV_32S);
+	output_image.convertTo(output_image, CV_8UC1);
 
 	vector<vector<cv::Point>> contours;
 	cv::findContours(output_image, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
