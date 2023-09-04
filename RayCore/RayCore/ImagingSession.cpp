@@ -349,6 +349,7 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 	return NOERROR;
 }
 UINT CImagingSession::threadDetectObject(LPVOID param) {
+	PLOGI.printf("threadDetectObject start\n");
 	CImagingSession* pSession = (CImagingSession*)param;
 	IDataManager* pDataManager = pSession->m_pDataManager;
 	int nSession = pSession->m_nSession;
@@ -356,7 +357,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	// prepare imaging (without message)
 	COCTImaging* pImaging = CreateColorImaging(nullptr, pSession->m_pImaging->GetSetting(), pDataManager, pSession->GetImagingType());
 
-	CRayLearning& learning = CRayLearning::GetInstance();
+	IRayLearning* learning = IRayLearning::GetInstance();
 	std::vector<std::vector<cv::Mat>>& vLumen = pSession->m_vLumen;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
@@ -371,7 +372,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		}
 		pImaging->PostProcess(it->second);
 
-		std::vector<std::vector<cv::Point>> vContours = learning.FindLumen(pImaging->GetCircleImage());
+		std::vector<std::vector<cv::Point>> vContours = learning->FindLumen(pImaging->GetCircleImage());
 		std::vector<cv::Mat> vLumens;
 		for (int i = 0; i < vContours.size(); i++) {
 			std::vector<cv::Point> contour = vContours.at(i);
@@ -390,6 +391,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	PLOGI.printf("Session #%d lumen detection done.", pSession->m_nSession);
 	pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::DetectLumen, pSession->m_nSession);
 
+	PLOGI.printf("threadDetectObject end\n");
 	return NOERROR;
 }
 UINT CImagingSession::threadGenerateVolume(LPVOID param) {

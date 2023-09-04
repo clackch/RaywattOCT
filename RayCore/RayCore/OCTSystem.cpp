@@ -851,10 +851,10 @@ UINT COCTSystem::threadService(LPVOID param) {
 	PLOGI.printf("read LUT : %s", (result > 0) ? "Succeed" : "Failed");
 
 	// Initialize (first prediction)
-	cv::Mat imgSample = cv::imread(".\\oct_sample.png");
-	CRayLearning& learning = CRayLearning::GetInstance();
-	learning.Initialize(true);
-	learning.FindLumen(imgSample);
+	cv::Mat imgSample = cv::imread(".\\sample1.png");
+	IRayLearning* learning = IRayLearning::GetInstance();
+	learning->Initialize(true);
+	learning->FindLumen(imgSample);
 
 	PLOGI.printf("sample lumen detection done.");
 	while (pThread->isRun) {

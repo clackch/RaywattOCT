@@ -2,20 +2,20 @@
 #include "Config.h"
 #include "CompNet.h"
 #include <opencv2/opencv.hpp>
+#include <vector>
 
-class CRayLearning {
-private:
-	CompNet m_compNet;
+#define interface class
+
+interface IRayLearning {
+protected:
 	bool m_useGPU;
 
-private:
-	CRayLearning();
-	CRayLearning(const CRayLearning& ref) {};
-	CRayLearning& operator=(const CRayLearning& ref) {};
-public:
-	static CRayLearning& GetInstance();
-	virtual ~CRayLearning();
+protected:
+	IRayLearning();
 
-	void Initialize(bool useGPU);
-	vector<vector<cv::Point>> FindLumen(cv::Mat image);
+public:
+	static IRayLearning* GetInstance();
+	virtual ~IRayLearning();
+	virtual void Initialize(bool useGPU) = 0;
+	virtual std::vector<std::vector<cv::Point>> FindLumen(cv::Mat image) = 0;
 };

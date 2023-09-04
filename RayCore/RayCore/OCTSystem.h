@@ -21,7 +21,7 @@ typedef enum {
 class CThread;
 class COCTImaging;
 class CVolumeGenerator;
-class CRayLearning;
+class IRayLearning;
 class CImagingSession;
 class COCTSystem : public CMessageService
 {

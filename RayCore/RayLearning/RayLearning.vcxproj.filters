@@ -15,6 +15,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="RayTensorflow.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="RayPytorch.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="RayLearning.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -24,6 +30,12 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="CompNet.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="RayTensorflow.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="RayPytorch.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
