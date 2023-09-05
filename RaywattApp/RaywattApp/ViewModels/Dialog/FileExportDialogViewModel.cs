@@ -137,6 +137,19 @@ namespace RaywattApp.ViewModels.Dialog
         [ObservableProperty]
         private BitmapSource _lumenProfileImageExtra;
 
+        [ObservableProperty]
+        private double _calciumIndicatorSize;
+
+        [ObservableProperty]
+        private double _calciumThicknessIndicatorSize;
+
+        [ObservableProperty]
+        private double _calciumThicknessIndicatorCenter;
+
+        [ObservableProperty]
+        private System.Windows.Point _calciumThicknessIndicatorPointCenter;
+
+
         public FileExportDialogViewModel(SqlManager sqlManager)
         {
             _sqlManager = sqlManager;
@@ -217,7 +230,7 @@ namespace RaywattApp.ViewModels.Dialog
             }
             else
             {
-                CrossSectionPartWidth = Constants.ExportCrossSectionBig;
+                CrossSectionPartWidth = Constants.ExportLongitudeWidth;
                 CrossSectionSize = Constants.ExportCrossSectionBig;
                 CrossSectionImageSize = Constants.ExportCrossSectionBig;
 
@@ -227,8 +240,6 @@ namespace RaywattApp.ViewModels.Dialog
 
             if (fileExport.MeasureAuto || fileExport.MeasureManual)
             {
-                if(CrossSectionPartWidth == Constants.ExportCrossSectionBig)
-                    CrossSectionPartWidth = Constants.ExportLongitudeWidth;
                 TextPartWidth = Constants.ExportTextPartSize;
 
                 if (fileExport.MeasureManual)
@@ -237,6 +248,25 @@ namespace RaywattApp.ViewModels.Dialog
 
             if(fileExport.MeasureAuto && fileExport.MeasureManual)
                 MeasureSeparator = Visibility.Visible;
+
+            //for Calcium
+            if (CommonUtil.IsPreCase(PatientCase.Procedure))
+            {
+                if (FileExport.Longitude)
+                {
+                    CalciumIndicatorSize = Constants.CalciumIndicatorExportSize;
+                    CalciumThicknessIndicatorSize = Constants.CalciumThicknessIndicatorExportSize;
+                    CalciumThicknessIndicatorCenter = Constants.CalciumThicknessIndicatorCenterExport;
+                    CalciumThicknessIndicatorPointCenter = Constants.CalciumThicknessIndicatorPointCenterExport;
+                }
+                else if (FileExport.MeasureAuto)
+                {
+                    CalciumIndicatorSize = Constants.CalciumIndicatorExportSizeBig;
+                    CalciumThicknessIndicatorSize = Constants.CalciumThicknessIndicatorExportSizeBig;
+                    CalciumThicknessIndicatorCenter = Constants.CalciumThicknessIndicatorCenterExportBig;
+                    CalciumThicknessIndicatorPointCenter = Constants.CalciumThicknessIndicatorPointCenterExportBig;
+                }
+            }
 
             Zoom = new Zoom(CrossSectionImageSize / Constants.OCTImageSize);
             LongitudeZoom = new Zoom();
@@ -256,7 +286,17 @@ namespace RaywattApp.ViewModels.Dialog
             FrameNumber = frameNumber;
             DisplayFrameNumber = frameNumber + 1;
 
-            DrawCalciumIndicator();
+            if (CommonUtil.IsPreCase(PatientCase.Procedure))
+            {
+                if (FileExport.Longitude)
+                {
+                    DrawCalciumIndicator((int)Constants.CalciumIndicatorExportSize);
+                }
+                else if (FileExport.MeasureAuto)
+                {
+                    DrawCalciumIndicator((int)Constants.CalciumIndicatorExportSizeBig);
+                }
+            }
 
             if (FileExport.MeasureAuto)
                 MeasureAutoFrameNumber = frameNumber;
@@ -364,9 +404,9 @@ namespace RaywattApp.ViewModels.Dialog
             return true;
         }
 
-        private void DrawCalciumIndicator()
+        private void DrawCalciumIndicator(int calciumIndicatorSize)
         {
-            CalciumIndicator = CommonUtil.DrawCalciumIndicator(LumenContours[FrameNumber].Calcium.List, Constants.CalciumIndicatorColor, (int)Constants.CalciumIndicatorSize);
+            CalciumIndicator = CommonUtil.DrawCalciumIndicator(LumenContours[FrameNumber].Calcium.List, Constants.CalciumIndicatorColor, calciumIndicatorSize);
 
             TotalAngle = LumenContours[FrameNumber].Calcium.TotalAngle;
             MaxThickness = LumenContours[FrameNumber].Calcium.MaxThickness;

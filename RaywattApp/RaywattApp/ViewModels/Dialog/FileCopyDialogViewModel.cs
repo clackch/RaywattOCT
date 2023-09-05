@@ -404,8 +404,7 @@ namespace RaywattApp.ViewModels.Dialog
                             sqlParameters["expansion_calculation"] = patientCase.ExpansionCalculation;
                             sqlParameters["expansion_threshold"] = patientCase.ExpansionThreshold;
                             sqlParameters["apposition_threshold"] = patientCase.AppositionThreshold;
-                            sqlParameters["thumbnail_no"] = patientCase.ThumbnailNo;
-                            sqlParameters["still_image_yn"] = patientCase.StillImageYn;
+                            sqlParameters["num_of_frames"] = patientCase.NumOfFrames;
                             sqlParameters["brightness"] = patientCase.Brightness;
                             sqlParameters["contrast"] = patientCase.Contrast;
                             sqlParameters["section_proximal"] = patientCase.SectionProximal;

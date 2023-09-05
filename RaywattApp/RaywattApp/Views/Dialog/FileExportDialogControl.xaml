@@ -57,17 +57,15 @@
                         </Grid>
                         <!-- Calcium Indicator -->
                         <Grid Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$001}">
-                            <Grid Visibility="{Binding FileExport.Longitude, Converter={StaticResource BoolToVisibilityConverter}}">
-                                <Image x:Name="CalciumIndicatorAngio" Width="{x:Static const:Constants.CalciumIndicatorExportSize}" Height="{x:Static const:Constants.CalciumIndicatorExportSize}" Source="{Binding CalciumIndicator}"/>
-                                <Grid Width="{x:Static const:Constants.CalciumThicknessIndicatorExportSize}" Height="{x:Static const:Constants.CalciumThicknessIndicatorExportSize}" Background="Transparent" Visibility="{Binding MaxCalciumDegree, Converter={StaticResource MaxThicknessVisibilityConverter}}">
-                                    <Grid.Clip>
-                                        <EllipseGeometry Center="{x:Static const:Constants.CalciumThicknessIndicatorPointCenterExport}" RadiusX="{x:Static const:Constants.CalciumThicknessIndicatorCenterExport}" RadiusY="{x:Static const:Constants.CalciumThicknessIndicatorCenterAngio}"/>
-                                    </Grid.Clip>
-                                    <Image Width="8" Height="10" Source="{svgc:SvgImage Source=/res/icon/thicknessIndicator.svg}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                                    <Grid.RenderTransform>
-                                        <RotateTransform CenterX="{x:Static const:Constants.CalciumThicknessIndicatorCenterExport}" CenterY="{x:Static const:Constants.CalciumThicknessIndicatorCenterExport}" Angle="{Binding MaxCalciumDegree}"/>
-                                    </Grid.RenderTransform>
-                                </Grid>
+                            <Image x:Name="CalciumIndicatorAngio" Width="{Binding CalciumIndicatorSize}" Height="{Binding CalciumIndicatorSize}" Source="{Binding CalciumIndicator}"/>
+                            <Grid Width="{Binding CalciumThicknessIndicatorSize}" Height="{Binding CalciumThicknessIndicatorSize}" Background="Transparent" Visibility="{Binding MaxCalciumDegree, Converter={StaticResource MaxThicknessVisibilityConverter}}">
+                                <Grid.Clip>
+                                    <EllipseGeometry Center="{Binding CalciumThicknessIndicatorPointCenter}" RadiusX="{Binding CalciumThicknessIndicatorCenter}" RadiusY="{Binding CalciumThicknessIndicatorCenter}"/>
+                                </Grid.Clip>
+                                <Image Width="8" Height="10" Source="{svgc:SvgImage Source=/res/icon/thicknessIndicator.svg}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                                <Grid.RenderTransform>
+                                    <RotateTransform CenterX="{Binding CalciumThicknessIndicatorCenter}" CenterY="{Binding CalciumThicknessIndicatorCenter}" Angle="{Binding MaxCalciumDegree}"/>
+                                </Grid.RenderTransform>
                             </Grid>
                         </Grid>
                         <!-- Indicator -->

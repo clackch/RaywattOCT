@@ -68,10 +68,7 @@ namespace RaywattApp.Models
         private string procedure;
 
         [ObservableProperty]
-        private int thumbnailNo;
-
-        [ObservableProperty]
-        private string stillImageYn;
+        private int numOfFrames;
 
         [ObservableProperty]
         private string image;
