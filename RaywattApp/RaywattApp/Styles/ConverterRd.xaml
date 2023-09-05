@@ -113,4 +113,7 @@
     <!-- MaxThickness Visibility Converter -->
     <converters:MaxThicknessVisibilityConverter x:Key="MaxThicknessVisibilityConverter" />
 
+    <!--  Not Null To Visibility Conveter  -->
+    <converters:NotNullToVisibilityConveter x:Key="NotNullToVisibilityConveter" />
+
 </ResourceDictionary>

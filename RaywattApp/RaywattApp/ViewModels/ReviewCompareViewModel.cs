@@ -170,6 +170,10 @@ namespace RaywattApp.ViewModels
                         RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath);
                         Thread.Sleep(500);
                     }
+                    else
+                    {
+                        DeviceStatus.IsOCTImagingCompareDone = true;
+                    }
                 }
                 else
                 {
@@ -476,6 +480,12 @@ namespace RaywattApp.ViewModels
 
         private void IndicatorLock()
         {
+            if (ReviewStatus.SelectedPatientCase == null)
+            {
+                IsIndicatorLockOn = false;
+                return;
+            }                
+
             indicatorLockOffset = FrameNumberCompare - FrameNumber;
         }
 
