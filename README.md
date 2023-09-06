@@ -109,8 +109,8 @@ Windows Default Mouse Cursor Setting (※ 필요 시 진행)
 
 Download & Copy/Paste
 *모델 파일은 상시로 바뀔 수 있으므로 LFS로 관리하지 않음
-(https://github.com/Raywatt/RaywattOCT/issues/170) 에서 Raywatt One-Drive 링크 접속
-ML 폴더를 다운로드 후, 하위 디렉토리에 있는 model 폴더를 RaywattOCT\RayCore\extern\libTensorflow에 복사/붙여넣기
+1. (https://github.com/Raywatt/RaywattOCT/issues/170) 에서 Raywatt One-Drive 링크 접속
+2. ML 폴더를 다운로드 후, 하위 디렉토리에 있는 model 폴더를 RaywattOCT\RayCore\extern\libTensorflow에 복사/붙여넣기
 
 ## [Environment Variable]
 
@@ -120,4 +120,11 @@ C:\Raywatt\system\runtime 에서 App 실행을 위한 빌드 경로 설정
 3. "시스템 변수"에 "새로 만들기"버튼 클릭
 4. 변수 이름 : RAYWATT_PATH , 변수 값 : C:\Raywatt\system\runtime\ 입력 후 확인
 5. 적용까지 완료 하면 OK
+
+## [3D Related DLL]
+
+Download & Copy/Paste
+1. (https://github.com/Raywatt/RaywattOCT/issues/170) 에서 Raywatt One-Drive 링크 접속
+2. 3D_Related_DLL 폴더를 다운로드 후 내부 dll 파일들을 C:\Raywatt\system\runtime\ 에 추가
+
 
