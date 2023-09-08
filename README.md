@@ -103,4 +103,38 @@ Windows Default Mouse Cursor Setting (※ 필요 시 진행)
 1. 설정-> Bluethooth 및 장치 -> 마우스
 2. 관련설정 -> 더 많은 마우스 설정
 3. 포인터
-    - 찾아보기에서 cur 파일  
+    - 찾아보기에서 cur 파일
+  
+## [Windows]
+1. 윈도우 잠금화면 해제
+   
+   (a) 윈도우 + R > gpedit.msc
+
+   (b) 컴퓨터 구성 > 관리 템플릿 > 제어판 > 개인 설정 > 잠금 화면 표시 안 함 > 사용
+
+2. 로그인 창의 네트워크 아이콘 숨기기
+   
+   (a) 윈도우 + R > gpedit.msc
+   
+   (b) 컴퓨터 구성 > 관리 템플릿 > 시스템 -> 로그온 > 네트워크 선택 UI 표시 안 함 > 사용
+
+3. Shell Launcher (고정 프로그램)
+   
+   (a) 제어판 > 프로그램 > 프로그램 및 기능 > Windows 기능 켜기/끄기 > Device Lockdown(디바이스 잠금) > Shell Launcher(셸 시작 관리자) 체크
+   
+   (b) 관리자 권한 PowerShell 실행 > `Set-ExecutionPolicy Unrestricted` 입력 후 `Y`
+   
+   (c) 스크립트 변경
+
+   - $Cashier_SID = Get-UsernameSID("사용자명")
+   - $ShellLauncherClass.SetCustomShell($Cashier_SID, "실행파일 경로", ($null), ($null), $프로그램 종료 동작)
+   - *프로그램 종료 동작: `$restart_shell`, `$restart_device`, `$shutdown_device`, `$do_nothing`
+   
+   (d) 스크립트 실행 (경고 발생)
+
+
+
+
+
+
+
