@@ -124,13 +124,14 @@ Windows Default Mouse Cursor Setting (※ 필요 시 진행)
    
    (b) 관리자 권한 PowerShell 실행 > `Set-ExecutionPolicy Unrestricted` 입력 후 `Y`
    
-   (c) 스크립트 변경
+   (c) [ShellLauncher_explore.zip](https://github.com/Raywatt/RaywattOCT/files/12555831/ShellLauncher_explore.zip) 스크립트 변경
 
    - $Cashier_SID = Get-UsernameSID("사용자명")
    - $ShellLauncherClass.SetCustomShell($Cashier_SID, "실행파일 경로", ($null), ($null), $프로그램 종료 동작)
    - *프로그램 종료 동작: `$restart_shell`, `$restart_device`, `$shutdown_device`, `$do_nothing`
    
    (d) 스크립트 실행 (경고 발생)
+
 
 
 
