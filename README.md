@@ -124,17 +124,17 @@ Windows Default Mouse Cursor Setting (※ 필요 시 진행)
    
    (b) 관리자 권한 PowerShell 실행 > `Set-ExecutionPolicy Unrestricted` 입력 후 `Y`
    
-   (c) 스크립트 변경
+   (c) [ShellLauncher_explore.zip](https://github.com/Raywatt/RaywattOCT/files/12555831/ShellLauncher_explore.zip) 스크립트 변경
 
-   - $Cashier_SID = Get-UsernameSID("사용자명")
-   - $ShellLauncherClass.SetCustomShell($Cashier_SID, "실행파일 경로", ($null), ($null), $프로그램 종료 동작)
-   - *프로그램 종료 동작: `$restart_shell`, `$restart_device`, `$shutdown_device`, `$do_nothing`
+   - \$Cashier_SID = Get-UsernameSID("사용자명")
+   - \$ShellLauncherClass.SetCustomShell(\$Cashier_SID, "실행파일 경로", (\$null), (\$null), "프로그램 종료 동작")
+   
+    *프로그램 종료 동작: `$restart_shell`, `$restart_device`, `$shutdown_device`, `$do_nothing`
    
    (d) 스크립트 실행 (경고 발생)
 
+4. 부팅 로고 변경
 
+    (a) [HackBGRT-1.5.1.zip](https://github.com/Raywatt/RaywattOCT/files/12555912/HackBGRT-1.5.1.zip) 다운로드 후 setup.exe 실행
 
-
-
-
-
+    (b) 'I' 입력 후 메모장 닫기 > 그림판에 256 * 128 이미지 삽입 > 저장 후 재부팅
