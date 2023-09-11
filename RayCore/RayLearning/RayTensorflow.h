@@ -1,5 +1,5 @@
 #pragma once
-#include "RayLearning.h"
+#include "IRayLearning.h"
 #include <iostream>
 #include <vector>
 #include <opencv2/opencv.hpp>

@@ -1,6 +1,6 @@
 #pragma once
 #include "CompNet.h"
-#include "RayLearning.h"
+#include "IRayLearning.h"
 #include <opencv2/opencv.hpp>
 
 class CRayCompNet : public IRayLearning {
