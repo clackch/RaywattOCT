@@ -118,7 +118,13 @@ Windows Default Mouse Cursor Setting (※ 필요 시 진행)
    
    (b) 컴퓨터 구성 > 관리 템플릿 > 시스템 -> 로그온 > 네트워크 선택 UI 표시 안 함 > 사용
 
-3. Shell Launcher (고정 프로그램)
+3. 사용자 계정 추가
+   
+   (a) 제어판 > 사용자 계정 > 사용자 계정 > 다른 계정 관리 > PC 설정에서 새 사용자 추가 > 계정 추가 > 이 사람의 로그인 정보를 가지고 있지 않습니다. > Microsoft 계정 없이 사용자 추가
+   
+   (b) 사용자 이름 : FASTER / 암호 : faster / 보안 질문 1,2,3 답변 : raywatt
+
+4. Shell Launcher (고정 프로그램)
    
    (a) 제어판 > 프로그램 > 프로그램 및 기능 > Windows 기능 켜기/끄기 > Device Lockdown(디바이스 잠금) > Shell Launcher(셸 시작 관리자) 체크
    
