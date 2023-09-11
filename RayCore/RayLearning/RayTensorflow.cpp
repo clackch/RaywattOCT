@@ -58,6 +58,9 @@ float* CRayUnetr::RunModel(float* image_data) {
 		return nullptr;
 	}
 
+	//GPU 환경 변수 추가
+	_putenv("CUDA_VISIBLE_DEVICES=0,1");
+	
 	auto* status = TFRayStatus();
 	if (status == nullptr) {
 		cout << "Status not initialized" << endl;

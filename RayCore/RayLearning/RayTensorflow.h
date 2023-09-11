@@ -7,6 +7,7 @@
 #include <tensorflow/c/tf_status.h>
 #include <tensorflow/c/tf_tensor.h>
 #include <tensorflow/c/tf_datatype.h>
+#include <stdlib.h>
 
 using namespace std;
 
