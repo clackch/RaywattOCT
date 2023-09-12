@@ -107,9 +107,9 @@ Windows Default Mouse Cursor Setting (※ 필요 시 진행)
 
 ## [Executable file]
 1. Visual Studio Debug/Release Solution Clean > Release Build
-2. RaywattApp에서 bin 폴더를 외장 저장장치에 복사
-3. bin 의 Release>net6.0-windows 하위 폴더/파일을 bin 폴더로 이동, Release/Debug 폴더 삭제
-4. 외장 장치에서 장비 PC의 C:\Raywatt\system 경로에 bin 폴더 복사 (※ C:\Raywatt\system\bin)
+2. RaywattApp에서 bin 폴더를 외장 저장장치에 복사 및 폴더명 변경(bin -> runtime)
+3. runtime 폴더에서 Release/Debug 폴더 삭제
+4. 외장 장치에서 장비 PC의 C:\Raywatt\system 경로에 runtime 폴더 복사 (※ C:\Raywatt\system\runtime)
   
 ## [Windows]
 1. 사용자 계정 추가
@@ -144,18 +144,13 @@ Windows Default Mouse Cursor Setting (※ 필요 시 진행)
    
    (b) 관리자 권한 PowerShell 실행 > `Set-ExecutionPolicy Unrestricted` 입력 후 `Y`
 
-   (c) [launcher.zip](https://github.com/Raywatt/RaywattOCT/files/12574480/launcher.zip) 다운로드 및 C:\Raywatt\system 폴더에 이동 (C:\Raywatt\system\launcher\app_launcher.ps1)
-
-       ※ Working Directory 설정해서 RaywattApp.exe 실행하는 shell launcher
-
-
-   (d) [ShellLauncher.zip](https://github.com/Raywatt/RaywattOCT/files/12574471/ShellLauncher.zip) 다운로드 및 `ShellLauncher_enable.ps1` 실행
+   (c) [ShellLauncher.zip](https://github.com/Raywatt/RaywattOCT/files/12583810/ShellLauncher.zip) 다운로드 및 `ShellLauncher_enable.ps1` 실행
    
-       ※ ShellLauncher_enable.ps1에서 app_launcher.ps1를 실행하게 설정
+       ※ ShellLauncher_enable.ps1에서 C:\Raywatt\system\runtime\RaywattApp.exe를 실행하게 설정
    
        ※ 설정이 잘 못되었을 경우, ShellLauncher_disable.ps1 실행해서 설정 내용 해제 가능
    
-   (e) 스크립트 실행 (경고 발생)
+   (d) 스크립트 실행 (경고 발생)
 
 6. 부팅 로고 변경
 
