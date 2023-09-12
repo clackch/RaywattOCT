@@ -23,18 +23,18 @@ Install PostgreSQL
 
 Database Initial Setting
 1. Tablespace를 위한 폴더 생성 (C:\Tablespace)
-2. RaywattApp Solution 폴더로 이동
+2. SQL 파일이 있는 폴더로 이동
 3. 아래 sql script 를 차례대로 실행
 
-    (a) ```> psql --dbname=postgres --username=postgres --file=".\DB Script\Prerequisite.sql"```
+    (a) ```> psql --dbname=postgres --username=postgres --file=".\Prerequisite.sql"```
 
     (b) PostgreSQL 설치 시, 입력한 기본 계정 암호 입력
 
-    (c) ```> psql --dbname=rv_database --username=rv_user --file=".\DB Script\DDL.sql"```
+    (c) ```> psql --dbname=rv_database --username=rv_user --file=".\DDL.sql"```
 
     (d) rv_user 암호 (raywatt) 입력
 
-    (e) ```> psql --dbname=rv_database --username=rv_user --file=".\DB Script\DML.sql"```
+    (e) ```> psql --dbname=rv_database --username=rv_user --file=".\DML.sql"```
 
     (f) rv_user 암호 (raywatt) 입력
 
