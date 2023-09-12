@@ -160,6 +160,6 @@ Windows Default Mouse Cursor Setting (※ 필요 시 진행)
        (3) 설정 화면
        (4) SETTING > Boot > Full Screen Logo Display (Enabled -> Disabled 변경) > Exit
    
-    (b) [HackBGRT-1.5.1.zip](https://github.com/Raywatt/RaywattOCT/files/12555912/HackBGRT-1.5.1.zip) 다운로드 후 setup.exe 실행
+    (b) [HackBGRT-1.5.1_Raywatt.zip](https://github.com/Raywatt/RaywattOCT/files/12582646/HackBGRT-1.5.1_Raywatt.zip) 다운로드 후 setup.exe 실행
 
-    (c) 'I', 'I' 입력 후 메모장 닫기 > 그림판에 256 * 128 이미지 삽입 > 저장 후 재부팅
+    (c) 'I', 'I' 입력 후 메모장 닫기 > 저장 후 재부팅
