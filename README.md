@@ -104,6 +104,12 @@ Windows Default Mouse Cursor Setting (※ 필요 시 진행)
 2. 관련설정 -> 더 많은 마우스 설정
 3. 포인터
     - 찾아보기에서 cur 파일
+
+## [Executable file]
+1. Visual Studio Debug/Release Solution Clean > Release Build
+2. RaywattApp에서 bin 폴더를 외장 저장장치에 복사
+3. bin 의 Release>net6.0-windows 하위 폴더/파일을 bin 폴더로 이동, Release/Debug 폴더 삭제
+4. 외장 장치에서 장비 PC의 C:\Raywatt\system 경로에 bin 폴더 복사 (※ C:\Raywatt\system\bin)
   
 ## [Windows]
 1. 사용자 계정 추가
