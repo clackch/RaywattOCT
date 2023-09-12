@@ -58,6 +58,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private double _catheterProgress;
 
+        [ObservableProperty]
+        private bool _isTestMode;
+
         private ICommand _homeCommand;
         public ICommand HomeCommand
         {
@@ -140,6 +143,14 @@ namespace RaywattApp.ViewModels
             IsHome = true;
             IsLoading = true;
 
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "TestMode";
+            IList<Configuration> testMode = _sqlManager.SelectConfiguration(sqlParameters);
+
+            //Setting Test Mode
+            if(testMode != null && testMode.Count == 1 && "Y".Equals(testMode[0].Value))
+                IsTestMode = true;
+
             //Test
             double rotationTime = RayGetProperty(Property.LoadCatheterTime);
             timer.Interval = TimeSpan.FromMilliseconds(rotationTime / (100 / catheterProgressStep));
@@ -212,7 +223,24 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Exit");
 
-            CommonUtil.Exit(DeviceStatus);
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["title"] = _l10n["Power Off"];
+            parameter["message"] = _l10n["Choose one of the power off options"];
+            var result = _dialogService.OpenDialog(new PowerOffDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+            if (result != null && result.DialogAnswer != DialogResults.Answer.No)
+            {
+                CommonUtil.Exit(DeviceStatus);
+
+                if (result.DialogAnswer == DialogResults.Answer.Yes && !IsTestMode)
+                {
+                    Win32Helper.Shutdown();
+                }
+                else if (result.DialogAnswer == DialogResults.Answer.Extra && !IsTestMode)
+                {
+                    Win32Helper.LogOff();
+                }
+            }
         }
 
         private void CatheterFailReceiver()
