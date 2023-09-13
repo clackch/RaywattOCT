@@ -118,6 +118,16 @@ UINT CMotorController::threadReadMotor(LPVOID pParam) {
 
 	while (pMotorController->m_pThread->isRun) {
 		int readSize = pMotorController->m_pConnection->Read(recvBuf);
+		if (readSize > 0) {
+			char strBuffer[MAX_PATH];
+			int nLength = 0;
+			for (int i = 0; i < readSize; i++) {
+				sprintf(strBuffer + nLength, "0x0%02x ", recvBuf[i]);
+				nLength = strlen(strBuffer);
+			}
+			strBuffer[nLength] = '\0';
+			PLOGI.printf(" [Motor] read packet : %s", strBuffer);
+		}
 
 		Sleep(100);
 	}

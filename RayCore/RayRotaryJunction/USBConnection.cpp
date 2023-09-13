@@ -17,7 +17,7 @@ bool CUSBConnection::Connect(void* param)
 	bool result = false;
 
 	libusb_device** pUsbDevices = nullptr;
-	ssize_t cnt = libusb_get_device_list(NULL, &pUsbDevices);
+	ssize_t cnt = libusb_get_device_list(nullptr, &pUsbDevices);
 
 	if (cnt < 0) return result;
 	if (pUsbDevices == nullptr) return result;
@@ -41,7 +41,7 @@ void CUSBConnection::Disconnect()
 {
 	if (m_hUsbHandle) {
 		libusb_close(m_hUsbHandle);
-		m_hUsbHandle = NULL;
+		m_hUsbHandle = nullptr;
 	}
 }
 
@@ -83,24 +83,13 @@ int CUSBConnection::Read(unsigned char* buffer)
 
 	int nRead = 0;
 	int err = libusb_bulk_transfer(m_hUsbHandle, USB_ENDPOINT_IN, buffer, sizeof(buffer), &nRead, USB_TIMEOUT);
-	if (err == NOERROR) {
-		char strBuffer[MAX_PATH];
-		int nLength = 0;
-		for (int i = 0; i < nRead; i++) {
-			sprintf(strBuffer + nLength, "0x0%02x ", buffer[i]);
-			nLength = strlen(strBuffer);
-		}
-		strBuffer[nLength] = '\0';
-		PLOGI.printf(" [Motor] read packet : %s", strBuffer);
-	}
-
 	return nRead;
 }
 
 bool CUSBConnection::checkUsbDescription(libusb_device* dev) {
-	if (dev != NULL) {
+	if (dev != nullptr) {
 		struct libusb_device_descriptor desc;
-		libusb_device_handle* handle = NULL;
+		libusb_device_handle* handle = nullptr;
 		char description[256];
 		unsigned char string[256];
 		int ret;
@@ -108,7 +97,7 @@ bool CUSBConnection::checkUsbDescription(libusb_device* dev) {
 
 		ret = libusb_get_device_descriptor(dev, &desc);
 		if (ret < 0) {
-			fprintf(stderr, "failed to get device descriptor");
+			PLOGI.printf("failed to get device descriptor");
 			return false;
 		}
 
