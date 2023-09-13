@@ -51,6 +51,12 @@
     <ClInclude Include="LaserModule.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="USBConnection.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Connection.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LaserController.cpp">
@@ -87,6 +93,9 @@
       <Filter>Indruino</Filter>
     </ClCompile>
     <ClCompile Include="LaserModule.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="USBConnection.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

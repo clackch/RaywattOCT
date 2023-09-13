@@ -1,21 +1,19 @@
 #include "MotorController.h"
+#include "USBConnection.h"
 #include "Utility.h"
 
-CMotorController* CMotorController::pInstance = NULL;
+CMotorController* CMotorController::pInstance = nullptr;
 
 CMotorController::CMotorController() {
-	int result = libusb_init(NULL);
-
-	m_initUsb = (result >= 0) ? true : false;
+	m_pConnection = new CUSBConnection();
 	m_initMotor = false;
 	m_isRun = false;
-	m_hUsbHandle = NULL;
 
-	m_pThread = NULL;
+	m_pThread = nullptr;
 }
 
 CMotorController* CMotorController::GetInstance() {
-	if (pInstance == NULL) {
+	if (pInstance == nullptr) {
 		pInstance = new CMotorController();
 	}
 	return pInstance;
@@ -23,29 +21,14 @@ CMotorController* CMotorController::GetInstance() {
 
 CMotorController::~CMotorController() {	
 	Disconnect();
-	if (m_initUsb) libusb_exit(NULL);
+	
+	if (m_pConnection != nullptr) delete m_pConnection;
 }
 
-bool CMotorController::Connect() {
-	libusb_device** pUsbDevices;
+bool CMotorController::Connect(void* param) {
+	if (m_initMotor) return m_initMotor;
 
-	ssize_t cnt = libusb_get_device_list(NULL, &pUsbDevices);
-	if (cnt < 0) return false;
-
-	m_initMotor = false;
-	for (int i = 0; pUsbDevices[i]; ++i) {
-		if (checkUsbDescription(pUsbDevices[i])) {
-			libusb_open(pUsbDevices[i], &m_hUsbHandle);
-			libusb_claim_interface(m_hUsbHandle, 1);
-			m_initMotor = true;
-			break;
-		}
-	}
-
-	if (pUsbDevices) {
-		libusb_free_device_list(pUsbDevices, 1);
-	}
-
+	m_initMotor = m_pConnection->Connect(param);
 	if (m_initMotor) {
 		BOOL result = FALSE;
 		result = CUtility::StartThread(threadReadMotor, m_pThread, (LPVOID)this);
@@ -62,10 +45,8 @@ bool CMotorController::Connect() {
 void CMotorController::Disconnect() {
 	CUtility::StopThread(m_pThread);
 
-	if (m_hUsbHandle) {
-		libusb_close(m_hUsbHandle);
-		m_hUsbHandle = NULL;
-	}
+	m_pConnection->Disconnect();
+	m_initMotor = false;
 }
 
 bool CMotorController::SwitchOn() {
@@ -133,53 +114,15 @@ bool CMotorController::SwitchOff() {
 
 UINT CMotorController::threadReadMotor(LPVOID pParam) {
 	CMotorController* pMotorController = (CMotorController*)pParam;
-	libusb_device_handle* hUsbHandle = pMotorController->m_hUsbHandle;
 	BYTE recvBuf[MAX_PATH];
 
 	while (pMotorController->m_pThread->isRun) {
-		int nRead = 0;
-		int err = libusb_bulk_transfer(hUsbHandle, USB_ENDPOINT_IN, recvBuf, sizeof(recvBuf), &nRead, USB_TIMEOUT);
-		if (err == 0) {
-			printf(" [Motor] read packet : ");
-			for (int i = 0; i < nRead; i++) {
-				printf("0x%02x ", recvBuf[i]);
-			}
-			printf("\n");
-		}
+		int readSize = pMotorController->m_pConnection->Read(recvBuf);
+
 		Sleep(100);
 	}
 
 	return NOERROR;
-}
-
-bool CMotorController::checkUsbDescription(libusb_device* dev) {
-	if (dev != NULL) {
-		struct libusb_device_descriptor desc;
-		libusb_device_handle* handle = NULL;
-		char description[256];
-		unsigned char string[256];
-		int ret;
-		uint8_t i;
-
-		ret = libusb_get_device_descriptor(dev, &desc);
-		if (ret < 0) {
-			fprintf(stderr, "failed to get device descriptor");
-			return false;
-		}
-
-		ret = libusb_open(dev, &handle);
-		if (LIBUSB_SUCCESS == ret) {
-			if (desc.iManufacturer) {
-				ret = libusb_get_string_descriptor_ascii(handle, desc.iManufacturer, string, sizeof(string));
-				if (strcmp((const char*)string, "Dr. Fritz Faulhaber GmbH") == 0) {
-					libusb_close(handle);
-					return true;
-				}
-			}
-		}
-	}
-
-	return false;
 }
 
 BYTE CMotorController::calcCRCByte(BYTE u8Byte, BYTE u8CRC){
@@ -198,33 +141,11 @@ BYTE CMotorController::calcCRCByte(BYTE u8Byte, BYTE u8CRC){
 }
 
 bool CMotorController::writeMotor(BYTE* packet, int size) {
-	if (m_hUsbHandle == NULL) return false;
+	if (!m_initMotor) return false;
 
-	int writeSize = 0;
-	int ret = libusb_bulk_transfer(m_hUsbHandle, USB_ENDPOINT_OUT, packet, size, &writeSize, USB_TIMEOUT);
-	//Error handling
-	switch (ret) {
-	case 0:
-		printf("send %d bytes to device\n", size);
-		return true;
-	case LIBUSB_ERROR_TIMEOUT:
-		printf("ERROR in bulk write: %d Timeout\n", ret);
-		break;
-	case LIBUSB_ERROR_PIPE:
-		printf("ERROR in bulk write: %d Pipe\n", ret);
-		break;
-	case LIBUSB_ERROR_OVERFLOW:
-		printf("ERROR in bulk write: %d Overflow\n", ret);
-		break;
-	case LIBUSB_ERROR_NO_DEVICE:
-		printf("ERROR in bulk write: %d No Device\n", ret);
-		break;
-	default:
-		printf("ERROR in bulk write: %d\n", ret);
-		break;
-	}
+	int written = m_pConnection->Write(packet, size);
 
-	return false;
+	return (written == size);
 }
 
 void CMotorController::getMotorPacket(unsigned short command, unsigned int data, unsigned int dataSize, BYTE* packet, int& packetLength) {

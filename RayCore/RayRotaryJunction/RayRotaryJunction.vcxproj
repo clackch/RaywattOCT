@@ -129,6 +129,7 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(ProjectDir)..\Utility\*.h" "$(TargetDir)include\" /y /d
+xcopy "$(ProjectDir)*Connection.h" "$(TargetDir)include\"
 xcopy "$(ProjectDir)*Controller.h" "$(TargetDir)include\"
 xcopy "$(ProjectDir)*Module.h" "$(TargetDir)include\" /y /d
 xcopy "$(ProjectDir)Indruino\inc\*.h" "$(TargetDir)include\" /y /d</Command>
@@ -157,6 +158,7 @@ xcopy "$(ProjectDir)Indruino\inc\*.h" "$(TargetDir)include\" /y /d</Command>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(ProjectDir)..\Utility\*.h" "$(TargetDir)include\" /y /d
+xcopy "$(ProjectDir)*Connection.h" "$(TargetDir)include\"
 xcopy "$(ProjectDir)*Controller.h" "$(TargetDir)include\"
 xcopy "$(ProjectDir)*Module.h" "$(TargetDir)include\" /y /d
 xcopy "$(ProjectDir)Indruino\inc\*.h" "$(TargetDir)include\" /y /d</Command>
@@ -167,11 +169,13 @@ xcopy "$(ProjectDir)Indruino\inc\*.h" "$(TargetDir)include\" /y /d</Command>
     <ClInclude Include="..\Utility\MessageService.h" />
     <ClInclude Include="..\Utility\Utility.h" />
     <ClInclude Include="ArduinoController.h" />
+    <ClInclude Include="Connection.h" />
     <ClInclude Include="LaserModule.h" />
     <ClInclude Include="LaserController.h" />
     <ClInclude Include="MotorController.h" />
     <ClInclude Include="SerialPort.h" />
     <ClInclude Include="StepMotorController.h" />
+    <ClInclude Include="USBConnection.h" />
     <ClInclude Include="ZaberController.h" />
   </ItemGroup>
   <ItemGroup>
@@ -186,6 +190,7 @@ xcopy "$(ProjectDir)Indruino\inc\*.h" "$(TargetDir)include\" /y /d</Command>
     <ClCompile Include="SerialPort.cpp" />
     <ClCompile Include="StepMotorController.cpp" />
     <ClCompile Include="LaserModule.cpp" />
+    <ClCompile Include="USBConnection.cpp" />
     <ClCompile Include="ZaberController.cpp" />
   </ItemGroup>
   <ItemGroup>
