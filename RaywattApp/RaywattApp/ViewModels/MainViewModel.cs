@@ -125,8 +125,6 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Register<NavigationMessage>(this, OnNavigationMessage);
 
             RayRegisterCallback(Marshal.GetFunctionPointerForDelegate(CBFunction));
-            RayStartSystem();
-            RayConnectDevices();
 
             Directory.CreateDirectory(Constants.DataRootPath);
 
