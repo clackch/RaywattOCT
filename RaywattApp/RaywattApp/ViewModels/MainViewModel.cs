@@ -58,9 +58,6 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private double _catheterProgress;
 
-        [ObservableProperty]
-        private bool _isTestMode;
-
         private ICommand _homeCommand;
         public ICommand HomeCommand
         {
@@ -147,7 +144,7 @@ namespace RaywattApp.ViewModels
 
             //Setting Test Mode
             if(testMode != null && testMode.Count == 1 && "Y".Equals(testMode[0].Value))
-                IsTestMode = true;
+                DeviceStatus.IsTestMode = true;
 
             //Test
             double rotationTime = RayGetProperty(Property.LoadCatheterTime);
@@ -228,13 +225,13 @@ namespace RaywattApp.ViewModels
 
             if (result != null && result.DialogAnswer != DialogResults.Answer.No)
             {
-                CommonUtil.Exit(DeviceStatus);
+                CommonUtil.Exit(DeviceStatus, true);
 
-                if (result.DialogAnswer == DialogResults.Answer.Yes && !IsTestMode)
+                if (result.DialogAnswer == DialogResults.Answer.Yes && !DeviceStatus.IsTestMode)
                 {
                     Win32Helper.Shutdown();
                 }
-                else if (result.DialogAnswer == DialogResults.Answer.Extra && !IsTestMode)
+                else if (result.DialogAnswer == DialogResults.Answer.Extra && !DeviceStatus.IsTestMode)
                 {
                     Win32Helper.LogOff();
                 }

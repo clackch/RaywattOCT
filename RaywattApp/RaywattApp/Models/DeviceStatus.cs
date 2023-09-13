@@ -54,6 +54,9 @@ namespace RaywattApp.Models
         private string? _catheterStatus;
 
         [ObservableProperty]
+        private bool _isTestMode = false;
+
+        [ObservableProperty]
         private ReviewImageInfo[] _reviewImageInfos = new ReviewImageInfo[2];
 
         public DeviceStatus()
