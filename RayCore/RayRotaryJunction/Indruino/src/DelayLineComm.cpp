@@ -41,7 +41,7 @@ void delay_line_Set_voltage_VOAwLD(uint16_t valueVOA, uint16_t valueLD)
 	min_send_frame(&min_ctx, CTRL_CODE_SET_VOLTAGE_VOA_LD, (const uint8_t*)(data.unmarshall), sizeof(Set_voltage_VOAwLD_t));
 }
 
-void delay_line_Set_Acc_Time(uint8_t idMotor, uint16_t value)
+void delay_line_Set_Acc_Time(uint8_t idMotor, uint32_t value)
 {
 	Set_ACC_Time_u data;
 	data.marshall.idMotor = idMotor;

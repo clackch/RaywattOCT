@@ -73,8 +73,8 @@ bool CLaserModule::Open(tstring strPort) {
 
 	CUtility::StartThread(threadReadStatus, m_pThread, this);
 
-	const uint16_t accTime = 6400;
-	const uint16_t velocity = 8000;
+	const uint32_t accTime = 6400;
+	const uint32_t velocity = 8000;
 	delay_line_Set_Acc_Time((uint8_t) MotorIndex::Polarization, accTime);
 	delay_line_Set_Acc_Time((uint8_t) MotorIndex::DelayLine, accTime);
 	delay_line_Set_Velocity((uint8_t)MotorIndex::Polarization, velocity);
