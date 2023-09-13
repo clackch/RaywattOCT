@@ -124,21 +124,23 @@ Windows Default Mouse Cursor Setting (※ 필요 시 진행)
 
    (b) 설정 > 개인 설정 > 잠금 화면 - 로그인 화면에 잠금 화면 배경 그림 표시 (켬 -> 끔) (※ Raywatt, FASTER 모두 적용)
 
-   (c) 마우스 포인터 설정 (※ FASTER에 적용)
+   (c) Font 설정 (※ Raywatt, FASTER 모두 적용)
 
-3. 윈도우 잠금화면 해제
+   (d) 마우스 포인터 설정 (※ FASTER에 적용)
+
+4. 윈도우 잠금화면 해제
    
    (a) 윈도우 + R > gpedit.msc
 
    (b) 컴퓨터 구성 > 관리 템플릿 > 제어판 > 개인 설정 > 잠금 화면 표시 안 함 > 사용
 
-4. 로그인 창의 네트워크 아이콘 숨기기
+5. 로그인 창의 네트워크 아이콘 숨기기
    
    (a) 윈도우 + R > gpedit.msc
    
    (b) 컴퓨터 구성 > 관리 템플릿 > 시스템 -> 로그온 > 네트워크 선택 UI 표시 안 함 > 사용   
 
-5. Shell Launcher (고정 프로그램)
+6. Shell Launcher (고정 프로그램)
    
    (a) 제어판 > 프로그램 > 프로그램 및 기능 > Windows 기능 켜기/끄기 > Device Lockdown(디바이스 잠금) > Shell Launcher(셸 시작 관리자) 체크
    
@@ -152,7 +154,7 @@ Windows Default Mouse Cursor Setting (※ 필요 시 진행)
    
    (d) 스크립트 실행 (경고 발생)
 
-6. 부팅 로고 변경
+7. 부팅 로고 변경
 
     (a) [HackBGRT-1.5.1_Raywatt.zip](https://github.com/Raywatt/RaywattOCT/files/12582646/HackBGRT-1.5.1_Raywatt.zip) 다운로드 후 setup.exe 실행
 
