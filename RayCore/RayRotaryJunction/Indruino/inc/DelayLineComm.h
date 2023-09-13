@@ -42,7 +42,7 @@ void delay_line_Set_voltage_VOAwLD(uint16_t valueVOA, uint16_t valueLD);
 /// </summary>
 /// <param name="idMotor">equal [1 or 2]</param>
 /// <param name="value">pulse per second^2</param>
-void delay_line_Set_Acc_Time(uint8_t idMotor, uint16_t value);
+void delay_line_Set_Acc_Time(uint8_t idMotor, uint32_t value);
 
 /// <summary>
 /// Set velocity value

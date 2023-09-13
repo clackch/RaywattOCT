@@ -60,11 +60,11 @@ typedef union _ObjDelayStatus_u
 typedef struct _ObjDelayLineData_t
 {
     /* data */
-    uint16_t param_acc_tim_1;
+    uint32_t param_acc_tim_1;
     uint16_t param_velocity_1;
     int32_t  position_motor1_sp;
 
-    uint16_t param_acc_tim_2;
+    uint32_t param_acc_tim_2;
     uint16_t param_velocity_2;
     int32_t  position_motor2_sp;
 
@@ -142,7 +142,7 @@ typedef struct _Set_voltage_VOAwLD_t
 typedef struct _Set_ACC_Time_t
 {
     uint8_t idMotor;
-    uint16_t ppss;
+    uint32_t ppss;
 } Set_ACC_Time_t;
 #pragma pack(pop)
 
