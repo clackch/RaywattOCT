@@ -26,7 +26,7 @@ namespace RaywattApp
         {
             //Setting Working Directory
             Process process = Process.GetCurrentProcess();
-            Directory.SetCurrentDirectory(Path.GetDirectoryName(process.MainModule.FileName));
+            Environment.CurrentDirectory = Path.GetDirectoryName(process.MainModule.FileName);
 
             Services = ConfigureServices();
             this.InitializeComponent();
