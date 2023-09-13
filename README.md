@@ -154,13 +154,13 @@ Windows Default Mouse Cursor Setting (※ 필요 시 진행)
 
 6. 부팅 로고 변경
 
-    (a) Bios Logo Disabled
+    (a) [HackBGRT-1.5.1_Raywatt.zip](https://github.com/Raywatt/RaywattOCT/files/12582646/HackBGRT-1.5.1_Raywatt.zip) 다운로드 후 setup.exe 실행
+
+    (b) 'I', 'I' 입력 후 메모장 닫기 > 저장
+
+    (c) Bios Logo Disabled
 
        (1) 안전 모드 진입 (shift + 다시 시작)
        (2) 문제 해결 > 고급옵션 > UEFI 펌웨어 설정 > 다시 시작
-       (3) 설정 화면
+       (3) 설정 화면 (※ BARCO 모니터의 경우, 설정 화면이 안 보이는 경우가 있어 다른 모니터 이용하는 편이 좋음)
        (4) SETTING > Boot > Full Screen Logo Display (Enabled -> Disabled 변경) > Exit
-   
-    (b) [HackBGRT-1.5.1_Raywatt.zip](https://github.com/Raywatt/RaywattOCT/files/12582646/HackBGRT-1.5.1_Raywatt.zip) 다운로드 후 setup.exe 실행
-
-    (c) 'I', 'I' 입력 후 메모장 닫기 > 저장 후 재부팅
