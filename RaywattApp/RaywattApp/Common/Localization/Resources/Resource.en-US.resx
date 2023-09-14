@@ -316,6 +316,9 @@ Acceptance of Terms: Require users to explicitly accept the terms and conditions
   <data name="Case List" xml:space="preserve">
     <value>Case List</value>
   </data>
+  <data name="Choose one of the power off options" xml:space="preserve">
+    <value>Choose one of the power off options</value>
+  </data>
   <data name="Co-Registration" xml:space="preserve">
     <value>Co-Registration</value>
   </data>
@@ -773,6 +776,9 @@ Overwrite existing data?</value>
   <data name="Post-PCI" xml:space="preserve">
     <value>Post-PCI</value>
   </data>
+  <data name="Power Off" xml:space="preserve">
+    <value>Power Off</value>
+  </data>
   <data name="Pre" xml:space="preserve">
     <value>Pre</value>
   </data>
@@ -919,6 +925,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Survey (100㎜)" xml:space="preserve">
     <value>Survey (100㎜)</value>
+  </data>
+  <data name="Switch User" xml:space="preserve">
+    <value>Switch User</value>
   </data>
   <data name="System File Option" xml:space="preserve">
     <value>System File Option</value>

@@ -80,6 +80,8 @@ namespace RaywattApp.Common.Bases
         public const double PatientCaseEditDialogHeight = 734;
         public const double TermsConditionsDialogWidth = 860;
         public const double TermsConditionsDialogHeight = 660;
+        public const double PowerOffDialogWidth = 472;
+        public const double PowerOffDialogHeight = 269;
 
         //Max Length
         public const int MaxPatientId = 9;

@@ -10,9 +10,11 @@ using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Windows.Interop;
 using System.Windows.Threading;
 using static RaywattOCT.Ray3DWrapper;
+using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels
 {
@@ -25,6 +27,8 @@ namespace RaywattApp.ViewModels
         private IDialogService _dialogService;
 
         private DispatcherTimer timer = new DispatcherTimer();
+
+        private bool isCoreInitDone = false;
 
         [ObservableProperty]
         private double _progress;
@@ -57,10 +61,15 @@ namespace RaywattApp.ViewModels
 
                     if (result != null && result.DialogAnswer == DialogResults.Answer.No)
                     {
-                        CommonUtil.Exit(DeviceStatus);
+                        CommonUtil.Exit(DeviceStatus, false);
+                        if(!DeviceStatus.IsTestMode)
+                            Win32Helper.LogOff();
                     }
                 }
             }
+
+            Thread threadCoreInit = new Thread(() => ThreadCoreInit());
+            threadCoreInit.Start();
 
             timer.Interval = TimeSpan.FromMilliseconds(1);
             timer.Tick += new EventHandler(ProgressTest);
@@ -74,7 +83,7 @@ namespace RaywattApp.ViewModels
 
         private void ProgressTest(object sender, EventArgs e)
         {
-            if (Progress >= 100)
+            if (Progress >= 100 && isCoreInitDone)
             {
                 IntPtr hWnd = new WindowInteropHelper(Constants.mainWindow).Handle;
                 ODSOCT_CreateDll(hWnd);
@@ -92,6 +101,17 @@ namespace RaywattApp.ViewModels
             }
 
             Progress += 0.5;
+        }
+
+        private void ThreadCoreInit()
+        {
+            _log.Debug("ThreadCoreInit");
+
+            RayStartSystem();
+            RayConnectDevices();
+
+            isCoreInitDone = true;
+            _log.Debug("ThreadCoreInit - Done");
         }
     }
 }

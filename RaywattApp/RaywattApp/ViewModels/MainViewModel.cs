@@ -122,8 +122,6 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Register<NavigationMessage>(this, OnNavigationMessage);
 
             RayRegisterCallback(Marshal.GetFunctionPointerForDelegate(CBFunction));
-            RayStartSystem();
-            RayConnectDevices();
 
             Directory.CreateDirectory(Constants.DataRootPath);
 
@@ -139,6 +137,14 @@ namespace RaywattApp.ViewModels
 
             IsHome = true;
             IsLoading = true;
+
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "TestMode";
+            IList<Configuration> testMode = _sqlManager.SelectConfiguration(sqlParameters);
+
+            //Setting Test Mode
+            if(testMode != null && testMode.Count == 1 && "Y".Equals(testMode[0].Value))
+                DeviceStatus.IsTestMode = true;
 
             //Test
             double rotationTime = RayGetProperty(Property.LoadCatheterTime);
@@ -212,7 +218,24 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Exit");
 
-            CommonUtil.Exit(DeviceStatus);
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["title"] = _l10n["Power Off"];
+            parameter["message"] = _l10n["Choose one of the power off options"];
+            var result = _dialogService.OpenDialog(new PowerOffDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+            if (result != null && result.DialogAnswer != DialogResults.Answer.No)
+            {
+                CommonUtil.Exit(DeviceStatus, true);
+
+                if (result.DialogAnswer == DialogResults.Answer.Yes && !DeviceStatus.IsTestMode)
+                {
+                    Win32Helper.Shutdown();
+                }
+                else if (result.DialogAnswer == DialogResults.Answer.Extra && !DeviceStatus.IsTestMode)
+                {
+                    Win32Helper.LogOff();
+                }
+            }
         }
 
         private void CatheterFailReceiver()
