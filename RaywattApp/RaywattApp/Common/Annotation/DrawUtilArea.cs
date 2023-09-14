@@ -46,7 +46,6 @@ namespace RaywattApp.Common.Annotation
         private PathGeometry overlayPathGeometry;
 
         private Mat imageContour = new Mat();
-        private OpenCvSharp.Rect contourBounds;
 
         private void AreaInit()
         {
@@ -526,7 +525,7 @@ namespace RaywattApp.Common.Annotation
                 Label label = new Label();
                 label.Style = (Style)this.Resources["StyleLabel"];
                 label.Name = constArea + "_" + areaGeometry.Group;
-                label.Content = DrawAnnotation.GetLabelText(areaGeometry.Group, areaGeometry.Area);
+                label.Content = DrawAnnotation.GetLabelText(areaGeometry.Group, areaGeometry.Area * Constants.MillimeterPerPixel  * Constants.MillimeterPerPixel );
 
                 Point centerdPoint = areaGeometry.CenterOfMass;
 

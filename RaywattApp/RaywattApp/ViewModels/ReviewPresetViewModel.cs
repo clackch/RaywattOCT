@@ -213,10 +213,10 @@ namespace RaywattApp.ViewModels
             sqlParameters["comment"] = PatientCase.Comment;
             sqlParameters["vessel"] = PatientCase.Vessel;
             sqlParameters["procedure"] = PatientCase.Procedure;
-            sqlParameters["thumbnail_no"] = PatientCase.ThumbnailNo;
-            sqlParameters["still_image_yn"] = PatientCase.StillImageYn;
+            sqlParameters["num_of_frames"] = PatientCase.NumOfFrames;
             sqlParameters["image"] = PatientCase.Image;
             sqlParameters["pullback_type"] = PatientCase.PullbackType;
+            sqlParameters["pullback_length"] = PatientCase.PullbackLength;
             sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
             sqlParameters["indicator_degree"] = PatientCase.IndicatorDegree;
             sqlParameters["preset_name"] = PatientCasePreset.PresetName.Trim();
@@ -224,6 +224,12 @@ namespace RaywattApp.ViewModels
             sqlParameters["expansion_calculation"] = PatientCasePreset.ExpansionCalculation;
             sqlParameters["expansion_threshold"] = PatientCasePreset.ExpansionThreshold;
             sqlParameters["apposition_threshold"] = PatientCasePreset.AppositionThreshold;
+            sqlParameters["brightness"] = PatientCase.Brightness;
+            sqlParameters["contrast"] = PatientCase.Contrast;
+            PatientCase.SectionProximal = 0;
+            sqlParameters["section_proximal"] = PatientCase.SectionProximal;
+            PatientCase.SectionDistal = ReviewStatus.NumberOfFrames - 1;
+            sqlParameters["section_distal"] = PatientCase.SectionDistal;
 
             int nRows = _sqlManager.InsertPatientCase(sqlParameters);
 
@@ -276,7 +282,7 @@ namespace RaywattApp.ViewModels
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["title"] = _l10n["Information"];
-            parameter["message"] = _l10n["Are you sure to delete selected Preset?"];
+            parameter["message"] = _l10n["Confirm deletion of selected preset"];
             var result = _dialogService.OpenDialog(new ConfirmDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
             if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
@@ -334,7 +340,7 @@ namespace RaywattApp.ViewModels
 
             if (String.IsNullOrEmpty(PatientCasePreset.PresetName.Trim()))
             {
-                PatientCasePreset.ValidatePresetName = _l10n["Write Preset Name"];
+                PatientCasePreset.ValidatePresetName = _l10n["Enter Preset Name"];
                 return;
             }
 

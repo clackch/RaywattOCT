@@ -54,7 +54,7 @@ namespace RaywattApp.ViewModels.Dialog
             {
                 if (PhysicianList[i].Name.Equals(Physician.Name.Trim()) && i != _physicianIndex)
                 {
-                    Physician.ValidateName = _l10n["Name is duplicated."];
+                    Physician.ValidateName = _l10n["Name is duplicated"];
                     return;
                 }
             }

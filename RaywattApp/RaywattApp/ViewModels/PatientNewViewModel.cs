@@ -62,11 +62,7 @@ namespace RaywattApp.ViewModels
             Patient.Lastname = "";
             Patient.Firstname = "";
             Patient.Birthdate = null;
-            GenderComboBox = new Dictionary<string, string>();
-            foreach(var gender in CodeDefinition.Codes["GEND"])
-            {
-                GenderComboBox.Add(gender.Key, _l10n[gender.Value]);
-            }
+            GenderComboBox = CodeDefinition.Codes["GEND"];
 
             Patient.PropertyChanged += Patient_PropertyChanged;
         }
@@ -124,7 +120,7 @@ namespace RaywattApp.ViewModels
 
             if(nCnt > 0)
             {
-                Patient.ValidateId = _l10n["ID is duplicated."];
+                Patient.ValidateId = _l10n["ID is duplicated"];
 
                 return;
             }

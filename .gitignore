@@ -34,23 +34,31 @@
 # Package
 packages
 
-# Temporary Files & Directories
-.vs
+# Temporary Files
 .vs/*
 *.aps
 *.bak
 *.user
 *.pdb
-extern
 *.bin
 *.dat
 dlldata.c
 vc*.h
 vc*_i.c
 vc*_p.c
+*.idb
+*.exp
 *.idl
 *.tlb
-bin
+*.log
+*.tlog
+
+# Temporary Directories
+.vs
+extern
+Debug
+Release
 obj
 x64
 RayCore/lib
+bin

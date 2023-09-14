@@ -92,6 +92,15 @@ namespace RaywattApp.Common.Annotation
         public static readonly DependencyProperty ZoomProperty =
             DependencyProperty.Register("Zoom", typeof(Zoom), typeof(DrawLmodeUtil), new PropertyMetadata(null));
 
+        public string PullbackLength
+        {
+            get { return (string)GetValue(PullbackTypeProperty); }
+            set { this.SetValue(PullbackTypeProperty, value); }
+        }
+
+        private static readonly DependencyProperty PullbackTypeProperty =
+            DependencyProperty.Register("PullbackLength", typeof(string), typeof(DrawLmodeUtil), new PropertyMetadata(null));
+
         //---------------------------------------------------------------------------------------------------- Constructor
         public DrawLmodeUtil()
         {

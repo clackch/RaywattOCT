@@ -6,6 +6,7 @@ class CCutViewManager
 private:
 	std::vector<cv::Mat> m_vRecords;
 	cv::Mat m_imgCutView;
+	cv::Mat m_imgConvertedCutView;
 	cv::Mat m_imgLongitude;
 
 public:
@@ -19,7 +20,7 @@ public:
 	void AddRecord(cv::Mat imgCircle, int nFrameIndex);
 
 	cv::Mat DrawLongitudeImage(int nDrawSamples, double brightness, double contrast);
-	cv::Mat GetCutView() { return m_imgCutView; }
+	cv::Mat GetCutView() { return m_imgLongitude; }
 	
 	int GetNumOfSamples() { return m_vRecords.size(); }
 	int GetNumOfGeneratedSamples();

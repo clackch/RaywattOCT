@@ -273,7 +273,7 @@ namespace RaywattApp.Common.Annotation
 
                 Point point = e.GetPosition(this.canvas);
                 this.newPoints.Clear();
-                newPoints.Add(point);
+                this.newPoints.Add(point);
                 ActivateEvent();
 
                 CommandType = 1;
@@ -495,14 +495,14 @@ namespace RaywattApp.Common.Annotation
 
             if (firstPointIndex > secondPointIndex)
             {
-                for (int i = secondPointIndex; i < firstPointIndex; i++)
+                for (int i = secondPointIndex + 1; i < firstPointIndex; i++)
                 {
                     points.Add(new Point(contourLines[i].X2, contourLines[i].Y2));
                 }
             }
             else
             {
-                for (int i = secondPointIndex; i < contourLines.Count; i++)
+                for (int i = secondPointIndex + 1; i < contourLines.Count; i++)
                 {
                     points.Add(new Point(contourLines[i].X2, contourLines[i].Y2));
                 }
@@ -517,14 +517,14 @@ namespace RaywattApp.Common.Annotation
 
             if (secondPointIndex > firstPointIndex)
             {
-                for (int i = firstPointIndex; i < secondPointIndex; i++)
+                for (int i = firstPointIndex + 1; i < secondPointIndex; i++)
                 {
                     reversePoints.Add(new Point(contourLines[i].X2, contourLines[i].Y2));
                 }
             }
             else
             {
-                for (int i = firstPointIndex; i < contourLines.Count; i++)
+                for (int i = firstPointIndex + 1; i < contourLines.Count; i++)
                 {
                     reversePoints.Add(new Point(contourLines[i].X2, contourLines[i].Y2));
                 }
@@ -614,7 +614,22 @@ namespace RaywattApp.Common.Annotation
             }
             Cv2.FindContours(imgInnerContour, out contours, out hierarchy, RetrievalModes.Tree, ContourApproximationModes.ApproxSimple);
 
-            return contours.Length == 1 ? true : false;
+            if (contours.Length == 1)
+                return true;
+
+            if (contours.Length > 10)
+                return false;
+
+            int contourCnt = contours.Length;
+
+            foreach (var contour in contours)
+            {
+                //작은 크기의 contour는 예외처리 (contour의 point 갯수가 10 미만이며, area가 20 미만의 경우 통과)
+                if (contour.Length < 10 && Cv2.ContourArea(contour) < 20)
+                    contourCnt--;
+            }
+
+            return contourCnt == 1 ? true : false;
         }
 
         private void DrawLumenContourPoint(Point point, int index)
@@ -659,7 +674,7 @@ namespace RaywattApp.Common.Annotation
                 this.curPath.Name = constContourCurve;
                 this.curPath.Style = (Style)this.Resources["StylePath"];
             }                        
-            this.curPath.Data = CommonUtil.GetBezierCurve(this.newPoints, false); ;
+            this.curPath.Data = CommonUtil.GetBezierCurve(this.newPoints, false);
 
             //Lumen Contour 보다 아래쪽에 배치되도록 Index 0에 추가(마우스 클릭 이벤트 처리 때문)
             this.canvas.Children.Insert(0, this.curPath);
@@ -725,7 +740,7 @@ namespace RaywattApp.Common.Annotation
         {
             _log.Debug("AutoDetect");
 
-            LumenContours[FrameNumber].CopyMlToLumenContour();
+            LumenContours[FrameNumber].ResetLumenContour();
             lumenContourHistory[FrameNumber].Push(CopyLumenContourToHistory(LumenContours[FrameNumber]));
             DrawLumenContour(LumenContours[FrameNumber], true);
         }

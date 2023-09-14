@@ -45,7 +45,7 @@ namespace RaywattApp.ViewModels.Dialog
 
             PhysicianList = _sqlManager.SelectPhysicianList();
             Physician notSelected = new Physician();
-            notSelected.Name = Constants.NotSelected;
+            notSelected.Name = _l10n[Constants.NotSelected];
             PhysicianList.Insert(0, notSelected);
             
             VesselList = CodeDefinition.Codes["VESS"];

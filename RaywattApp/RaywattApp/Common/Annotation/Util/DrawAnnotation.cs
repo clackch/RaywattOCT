@@ -176,12 +176,12 @@ namespace RaywattApp.Common.Annotation.Util
 
         public static string GetLabelText(int group, double value)
         {
-            return "[" + (group + 1) + "] " + (Math.Round(value, 3)).ToString();
+            return "[" + (group + 1) + "] " + (Math.Round(value, 2)).ToString();
         }
 
         public static string GetLabelText(double value)
         {
-            return (Math.Round(value, 3)).ToString();
+            return (Math.Round(value, 2)).ToString();
         }
 
         public static double GetLabelAngle(Point firstPoint, Point secondPoint, out bool flip)

@@ -36,16 +36,25 @@ namespace RaywattApp.Models
         private bool _isLumenLoaded = true;
 
         [ObservableProperty]
+        private bool _isLumenSaved = true;
+
+        [ObservableProperty]
+        private bool _isOCTImagingDone = true;
+
+        [ObservableProperty]
+        private bool _isOCTImagingCompareDone = true;
+
+        [ObservableProperty]
         private bool _isPaused = true;
 
         [ObservableProperty]
         private bool _canExit = true;
 
         [ObservableProperty]
-        private bool _isLumenSaved = true;
+        private string? _catheterStatus;
 
         [ObservableProperty]
-        private string? _catheterStatus;
+        private bool _isTestMode = false;
 
         [ObservableProperty]
         private ReviewImageInfo[] _reviewImageInfos = new ReviewImageInfo[2];

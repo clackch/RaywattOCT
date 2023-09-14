@@ -165,6 +165,7 @@ xcopy "$(ProjectDir)*.h" "$(TargetDir)include\" /y /d</Command>
     <ClInclude Include="LabImaging.h" />
     <ClInclude Include="Calibration.h" />
     <ClInclude Include="Imaging.h" />
+    <ClInclude Include="LookUpTable.h" />
     <ClInclude Include="OCTImaging.h" />
     <ClInclude Include="OCTMeasurement.h" />
     <ClInclude Include="TIFFImaging.h" />
@@ -174,6 +175,7 @@ xcopy "$(ProjectDir)*.h" "$(TargetDir)include\" /y /d</Command>
     <ClCompile Include="..\Utility\Utility.cpp" />
     <ClCompile Include="LabImaging.cpp" />
     <ClCompile Include="Calibration.cpp" />
+    <ClCompile Include="LookUpTable.cpp" />
     <ClCompile Include="OCTImaging.cpp" />
     <ClCompile Include="OCTMeasurement.cpp" />
     <ClCompile Include="TIFFImaging.cpp" />

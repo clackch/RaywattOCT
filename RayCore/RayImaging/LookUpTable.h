@@ -1,0 +1,21 @@
+#pragma once
+#include <opencv2/opencv.hpp>
+#include <vector>
+
+class CLookUpTable
+{	
+private:
+	std::vector<std::vector<cv::Vec3b>> m_vLUT;
+
+private:
+	CLookUpTable();
+	CLookUpTable(const CLookUpTable& ref) {};
+	CLookUpTable& operator=(const CLookUpTable& ref) {};
+	~CLookUpTable();
+
+public:
+	static CLookUpTable& GetInstance();
+	int Load(const char* strLUTPath);
+	void Apply(cv::Mat& image, uint nIdxLUT);
+};
+

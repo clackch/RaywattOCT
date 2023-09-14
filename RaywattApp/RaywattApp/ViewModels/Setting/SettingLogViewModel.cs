@@ -8,8 +8,10 @@ using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
@@ -22,15 +24,27 @@ namespace RaywattApp.ViewModels.Setting
 
         private readonly SqlManager _sqlManager;
 
-        [ObservableProperty]
-        private IList<FileInformation> _logFileList;
-
         List<FileInformation> selectedLogFileList;
+
+        [ObservableProperty]
+        private ObservableCollection<FileInformation> _logFileList;
+
+        [ObservableProperty]
+        private string _searchYear;
+
+        [ObservableProperty]
+        private string _searchMonth;
 
         private ICommand _logExportCommand;
         public ICommand LogExportCommand
         {
             get { return this._logExportCommand ?? (this._logExportCommand = new RelayCommand<object>(LogExport)); }
+        }
+
+        private ICommand _searchParameterCommand;
+        public ICommand SearchParameterCommand
+        {
+            get { return this._searchParameterCommand ?? (this._searchParameterCommand = new RelayCommand<string>(SetSearchParameter)); }
         }
 
         public SettingLogViewModel(SqlManager sqlManager, IDialogService dialogService) : base(dialogService)
@@ -41,11 +55,14 @@ namespace RaywattApp.ViewModels.Setting
             _dialogService = dialogService;
 
             FileExport = new FileExport();
-            FileExport.DiskType = Constants.FileDiskExternal;
             FileExport.ExternalDrivePath = "";
 
+            DateTime dateTimeNow = DateTime.Now;
 
-            LogFileList = new List<FileInformation>();
+            SearchYear = dateTimeNow.Year.ToString();
+            SearchMonth = MonthZeroPadding(dateTimeNow.Month.ToString());
+
+            LogFileList = new ObservableCollection<FileInformation>();
             GetLogFileList();
         }
 
@@ -54,13 +71,21 @@ namespace RaywattApp.ViewModels.Setting
             _log.Debug("OnNavigated");
         }
 
+        public override void OnNavigating(object sender, object navigationEventArgs)
+        {
+            _log.Debug("OnNavigating");
+        }
+
         private void GetLogFileList()
         {
             DirectoryInfo directory = new DirectoryInfo(Constants.LogFolderPath);
-            FileInfo[] logFileList = directory.GetFiles(Constants.LogExtension);
+            string fileNameFilter = "*_" + SearchYear + "-" + SearchMonth + "-" + Constants.LogExtension;
+            FileInfo[] logFileList = directory.GetFiles(fileNameFilter);
             var orderedLogFIleList = logFileList.OrderByDescending(x => x.LastWriteTime);
 
-            foreach(FileInfo logFile in orderedLogFIleList)
+            LogFileList.Clear();
+
+            foreach (FileInfo logFile in orderedLogFIleList)
             {
                 FileInformation fileInfo = new FileInformation();
                 fileInfo.Name = logFile.Name;
@@ -97,7 +122,7 @@ namespace RaywattApp.ViewModels.Setting
             {
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["title"] = _l10n["Information"];
-                parameter["message"] = _l10n["There are no items selected."];
+                parameter["message"] = _l10n["No items have been selected"];
                 var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.SettingDialogWidth, Constants.SettingDialogHeight);
                 return;
             }
@@ -107,6 +132,62 @@ namespace RaywattApp.ViewModels.Setting
             selectedLogFileList = logFileList;
 
             base.Export();
+        }
+
+        private void SetSearchParameter(string type)
+        {
+            int num;
+
+            switch (type)
+            {
+                case "YP"://Year Previous
+                    num = int.Parse(SearchYear);
+                    if (num > 1)
+                        SearchYear = (num - 1).ToString();
+                    break;
+                case "YN"://Year Next
+                    num = int.Parse(SearchYear);
+                    SearchYear = (num + 1).ToString();
+                    break;
+                case "MP"://Month Previous
+                    num = int.Parse(SearchMonth);
+                    if(num > 1)
+                    {
+                        SearchMonth = MonthZeroPadding((num - 1).ToString());
+                    }
+                    else
+                    {
+                        SetSearchParameter("YP");
+                        SearchMonth = "12";
+                    }
+                    break;
+                case "MN"://Month Next
+                    num = int.Parse(SearchMonth);
+                    if(num < 12)
+                    {
+                        SearchMonth = MonthZeroPadding((num + 1).ToString());
+                    }
+                    else
+                    {
+                        SetSearchParameter("YN");
+                        SearchMonth = "01";
+                    }                        
+                    break;
+                default:
+                    break;
+            }
+
+            GetLogFileList();
+        }
+
+        private string MonthZeroPadding(string month)
+        {
+            string result = month;
+
+            if (month.Length == 1)
+                result = "0" + month;
+
+            return result;
         }
     }
 }

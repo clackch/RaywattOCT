@@ -68,6 +68,10 @@ namespace RaywattApp.Common.Annotation
                 {
                     this.textPoint.X = this.canvas.ActualWidth - textBoxWidth;
                 }
+
+                InCommand = Constants.MeasureDisableText;
+                CommandOff = true;
+
                 DrawTextInput(this.textPoint, this.textGeometries.Count, "");
 
                 TextGeometry textGeometry = new TextGeometry();
@@ -75,9 +79,6 @@ namespace RaywattApp.Common.Annotation
                 textGeometry.TextPoint = this.textPoint;
                 textGeometry.Group = this.textGeometries.Count;
                 this.textGeometries.Add(textGeometry);
-
-                InCommand = Constants.MeasureDisableText;
-                CommandOff = true;
             }
         }
 

@@ -17,6 +17,7 @@ using RaywattApp.Common.Dialog;
 using static RaywattOCT.RayCoreWrapper;
 using System.Windows;
 using System.Threading;
+using RaywattOCT;
 
 namespace RaywattApp.ViewModels
 {
@@ -269,7 +270,7 @@ namespace RaywattApp.ViewModels
 
             parameter.Clear();
             parameter["title"] = _l10n["Information"];
-            parameter["message"] = _l10n["Are you sure to delete selected patient case?"];
+            parameter["message"] = _l10n["Confirm deletion of selected patient case"];
             result = _dialogService.OpenDialog(new ConfirmDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
             if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
@@ -370,6 +371,7 @@ namespace RaywattApp.ViewModels
             DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total = 0;
             DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current = 0;
             DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total = 0;
+            DeviceStatus.IsOCTImagingDone = false;
 
             Dictionary<string, Object> parameter = new Dictionary<string, Object>();
             parameter["patient"] = Patient;
@@ -379,6 +381,7 @@ namespace RaywattApp.ViewModels
             ReviewStatus reviewStatus = new ReviewStatus();
             reviewStatus.NumberOfFrames = numOfFrames;
             parameter["reviewStatus"] = reviewStatus;
+            Ray3DWrapper.ray3DStatus = new Ray3DWrapper.Ray3DStatus();
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewPage) { Parameter = parameter });
         }
 

@@ -68,10 +68,7 @@ namespace RaywattApp.Models
         private string procedure;
 
         [ObservableProperty]
-        private int thumbnailNo;
-
-        [ObservableProperty]
-        private string stillImageYn;
+        private int numOfFrames;
 
         [ObservableProperty]
         private string image;
@@ -91,6 +88,9 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private string? _pullbackType;
+
+        [ObservableProperty]
+        private string? _pullbackLength;
 
         [ObservableProperty]
         private bool _angioCoRegistration;
@@ -142,6 +142,12 @@ namespace RaywattApp.Models
         private int _contrast;
 
         [ObservableProperty]
+        private int _sectionProximal;
+
+        [ObservableProperty]
+        private int _sectionDistal;
+
+        [ObservableProperty]
         private string? _bookmark;
 
         [ObservableProperty]
@@ -155,6 +161,9 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private string _strLumenContour;
+
+        [ObservableProperty]
+        private FfrFeature _ffrFeature;
 
         [ObservableProperty]
         private DateTime createDate;

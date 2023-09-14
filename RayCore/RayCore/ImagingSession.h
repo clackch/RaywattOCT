@@ -36,14 +36,17 @@ private:
 
 	CThread* m_pThreadImaging;
 	std::map<int, cv::Mat> m_mapImage;
+	std::map<int, int> m_mapSheathPosition;
 
 	bool m_deleteData;
 
 	CThread* m_pThreadUpdateCutView;
 	CThread* m_pThreadObjectDetection;
+	CThread* m_pThreadVolumeGeneration;;
 	CCutViewManager* m_pCutView;
 
 	std::vector<std::vector<cv::Mat>> m_vLumen;
+	char* m_pVolumeData;
 
 private:
 	CImagingSession(CMessageService* pMsg, int nSession, bool deleteData = true);
@@ -58,12 +61,14 @@ public:
 	IDataManager* GetDataManager() { return m_pDataManager; }
 	COCTImaging* GetImaging() { return m_pImaging; }
 	CCutViewManager* GetCutView() { return m_pCutView; }
+	char* GetVolumeData() { return m_pVolumeData; }
 
 	// Asynchronous functions
 	RayError Start();
 	RayError Stop();
 	void StartCutViewUpdate(cv::Scalar backgroundColor);
 	void StartObjectDetection();
+	void StartVolumeGeneration();
 	bool IsProcessed(int nFrame);
 
 	// Synchronous functions
@@ -86,6 +91,7 @@ private:
 	static UINT threadImaging(LPVOID param);
 	static UINT threadUpdateCutView(LPVOID param);	
 	static UINT threadDetectObject(LPVOID param);
+	static UINT threadGenerateVolume(LPVOID param);
 	static USHORT* readBackground(const char* strBackgroundFile, IImaging::Setting setting);
 };
 

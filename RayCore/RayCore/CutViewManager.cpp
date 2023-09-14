@@ -1,5 +1,6 @@
 #include "Config.h"
 #include "CutViewManager.h"
+#include "LookUpTable.h"
 
 CCutViewManager::CCutViewManager() {
 }
@@ -18,9 +19,11 @@ void CCutViewManager::Initialize(int nNumOfSamples, cv::Scalar backgroundColor) 
 	m_vRecords.resize(nNumOfSamples);
 
 	m_imgCutView.release();
-	m_imgCutView.create(1024, nNumOfSamples, CV_8UC3);
-	m_imgCutView.setTo(backgroundColor);
-	m_imgLongitude = m_imgCutView.clone();
+	m_imgCutView.create(1024, nNumOfSamples, CV_8UC1);
+	m_imgConvertedCutView.release();
+	m_imgConvertedCutView.create(1024, nNumOfSamples, CV_8UC3);
+	m_imgLongitude = m_imgConvertedCutView.clone();
+	m_imgLongitude.setTo(backgroundColor);
 }
 void CCutViewManager::GenerateCutView(double degree) {
 
@@ -44,7 +47,7 @@ void CCutViewManager::GenerateCutView(int nFrameIndex, double degree) {
 			point.y = (int)round(centerY + r * yDirection);
 			int y = centerY - r;
 
-			m_imgCutView.at<cv::Vec3b>(y, nFrameIndex) = imgCircle.at<cv::Vec3b>(point);
+			m_imgCutView.at<char>(y, nFrameIndex) = imgCircle.at<char>(point);
 		}
 		xDirection = cos((180 + degree) * CV_PI / 180.0f);
 		yDirection = sin((180 + degree) * CV_PI / 180.0f);
@@ -54,7 +57,7 @@ void CCutViewManager::GenerateCutView(int nFrameIndex, double degree) {
 			point.y = (int)round(centerY + r * yDirection);
 			int y = centerY + r;
 
-			m_imgCutView.at<cv::Vec3b>(y, nFrameIndex) = imgCircle.at<cv::Vec3b>(point);
+			m_imgCutView.at<char>(y, nFrameIndex) = imgCircle.at<char>(point);
 		}
 	}
 }
@@ -68,9 +71,13 @@ cv::Mat CCutViewManager::DrawLongitudeImage(int nDrawSamples, double brightness,
 	cv::Rect rectMask = cv::Rect(0, 0, nDrawSamples, imgMask.rows);
 	memset(imgMask.data, 0x00, imgMask.cols * imgMask.rows);
 	imgMask(rectMask) = 0x01;
+	
+	CLookUpTable& lut = CLookUpTable::GetInstance();
+	cv::cvtColor(m_imgCutView, m_imgConvertedCutView, cv::COLOR_GRAY2RGB);
+	lut.Apply(m_imgConvertedCutView, 0);
 
-	cv::convertScaleAbs(m_imgCutView, m_imgCutView, contrast, brightness);
-	cv::copyTo(m_imgCutView, m_imgLongitude, imgMask);
+	cv::convertScaleAbs(m_imgConvertedCutView, m_imgConvertedCutView, contrast, brightness);
+	cv::copyTo(m_imgConvertedCutView, m_imgLongitude, imgMask);
 	
 	return m_imgLongitude;
 }

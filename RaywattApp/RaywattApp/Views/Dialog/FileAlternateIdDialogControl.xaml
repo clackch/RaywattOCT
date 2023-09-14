@@ -25,7 +25,7 @@
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center">
-                <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Define Alternate Patient ID], Source={StaticResource L10N}}"/>
+                <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Alternate Patient IDs], Source={StaticResource L10N}}"/>
             </StackPanel>
 
             <DataGrid Grid.Row="2" Grid.Column="1" Name="patientList" ItemsSource="{Binding PatientList, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" Style="{StaticResource DataGridDialog}" RowHeight="58" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" IsReadOnly="False" Height="224">

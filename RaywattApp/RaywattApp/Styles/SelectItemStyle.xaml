@@ -992,6 +992,55 @@
         </Setter>
     </Style>
 
+    <Style x:Key="SliderThumbSimpleTooltip" TargetType="Thumb">
+        <Setter Property="SnapsToDevicePixels" Value="true" />
+        <Setter Property="OverridesDefaultStyle" Value="true" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Thumb">
+                    <Grid Background="Transparent" Width="20">
+                        <Image x:Name="img" Source="{svgc:SvgImage Source=/res/indicator/sliderSimple.svg}" Width="12" Height="12" Margin="0,0,0,3"/>
+                        <Label x:Name="tooltip" Content="{TemplateBinding Tag}" Margin="0,-9,0,0" Foreground="{StaticResource GrayscaleWhiteBrush}" Style="{StaticResource Pretendard-Medium-10}" HorizontalAlignment="Center" Visibility="Collapsed"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/indicator/sliderSimple_hover.svg}"/>
+                            <Setter TargetName="tooltip" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Slider" x:Key="SliderSimpleTooltip">
+        <Style.Resources>
+            <SolidColorBrush x:Key="SliderBackground" Color="{DynamicResource GrayscaleGray6}" />
+        </Style.Resources>
+        <Setter Property="Focusable" Value="False"/>
+        <Setter Property="SnapsToDevicePixels" Value="true" />
+        <Setter Property="OverridesDefaultStyle" Value="true" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Slider">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Border Grid.Row="1" x:Name="TrackBackground" VerticalAlignment="Center" Margin="4,0,4,0" CornerRadius="3" BorderThickness="0" Background="{DynamicResource SliderBackground}" Height="3"/>
+                        <Track Grid.Row="1" x:Name="PART_Track">
+                            <Track.Thumb>
+                                <Thumb Style="{StaticResource SliderThumbSimpleTooltip}" Tag="{TemplateBinding Value}"/>
+                            </Track.Thumb>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style TargetType="Slider" x:Key="SliderSimpleBlack" BasedOn="{StaticResource SliderSimple}">
         <Style.Resources>
             <SolidColorBrush x:Key="SliderBackground" Color="{DynamicResource GrayscaleGray7}" />

@@ -53,11 +53,6 @@ namespace RaywattApp.ViewModels.File
         {
             _log.Debug("SetCondition");
 
-            if (FileExport.DiskType == null)
-                DiskType = Constants.FileDiskExternal;
-            else
-                DiskType = FileExport.DiskType;
-
             if (FileExport.ExternalDrivePath == null)
                 FileExport.ExternalDrivePath = "";
 
@@ -77,14 +72,7 @@ namespace RaywattApp.ViewModels.File
             {
                 foreach (PatientCase patientCase in PatientCases)
                 {
-                    if (patientCase.PullbackType == Constants.PullbackTypeLong)
-                    {
-                        ExportSize += frameSize * Constants.PullbackLongFrameCnt;
-                    }
-                    else
-                    {
-                        ExportSize += frameSize * Constants.PullbackShortFrameCnt;
-                    }
+                    ExportSize += frameSize * int.Parse(CodeDefinition.Codes["PBLE"][patientCase.PullbackLength]);
                 }
             }
             else if(FileExport.Material == Constants.ExportMaterialBookmarked)
@@ -135,6 +123,15 @@ namespace RaywattApp.ViewModels.File
             foreach(StringModel temp in dicomPropertyList)
             {
                 dicomProperty.Add(temp.ReturnString, temp.ReturnString2);
+            }
+
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "Terms&Cond";
+            IList<Configuration> tnCs = _sqlManager.SelectConfiguration(sqlParameters);
+            if (tnCs != null || tnCs.Count == 1)
+            {
+                //Institution Name
+                dicomProperty.Add("00080080", tnCs[0].Buffer);
             }
 
             return dicomProperty;

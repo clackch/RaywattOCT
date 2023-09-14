@@ -7,7 +7,6 @@ using RaywattApp.Common.Setting;
 using RaywattApp.Models;
 using RaywattApp.Services;
 using System.Collections.Generic;
-using System.Windows.Navigation;
 
 namespace RaywattApp.ViewModels.Setting
 {
@@ -31,13 +30,15 @@ namespace RaywattApp.ViewModels.Setting
 
             _sqlManager = sqlManager;
 
-            IList<L10n> l10Ns = _sqlManager.SelectL10nList();
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "L10N";
+            IList<Configuration> l10Ns = _sqlManager.SelectConfiguration(sqlParameters);
 
-            foreach(L10n l10n in l10Ns)
+            foreach(Configuration l10n in l10Ns)
             {
-                LanguageComboBox[l10n.Lang] = _l10n[l10n.Lang];
-                if (l10n.Choice)
-                    CurrentLanguage = l10n.Lang;
+                LanguageComboBox[l10n.Key] = _l10n[l10n.Key];
+                if ("Y".Equals(l10n.Value))
+                    CurrentLanguage = l10n.Key;
             }
             
             OriginLanguage = CurrentLanguage;
@@ -46,13 +47,6 @@ namespace RaywattApp.ViewModels.Setting
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
             _log.Debug("OnNavigated");
-
-            var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
-
-            if (extraData != null)
-            {
-            }
-
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)

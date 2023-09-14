@@ -4,6 +4,12 @@
                     xmlns:component="clr-namespace:RaywattApp.Views.Component">
 
     <!-- Icon -->
+    <Style TargetType="Image" x:Key="RaywattOutset">
+        <Setter Property="Width" Value="383.1"/>
+        <Setter Property="Height" Value="220"/>
+        <Setter Property="Source" Value="{svgc:SvgImage Source=/res/icon/raywattOutset.svg}"/>
+    </Style>
+
     <Style TargetType="Image" x:Key="Raywatt">
         <Setter Property="Width" Value="437.3"/>
         <Setter Property="Height" Value="95"/>
@@ -16,6 +22,12 @@
         <Setter Property="Margin" Value="16, 10, 0, 10"/>
         <Setter Property="HorizontalAlignment" Value="Left"/>
         <Setter Property="Source" Value="{svgc:SvgImage Source=/res/icon/raywattSmall.svg}"/>
+    </Style>
+
+    <Style TargetType="Image" x:Key="Faster">
+        <Setter Property="Width" Value="450"/>
+        <Setter Property="Height" Value="125.8"/>
+        <Setter Property="Source" Value="{svgc:SvgImage Source=/res/icon/faster.svg}"/>
     </Style>
 
     <Style TargetType="{x:Type component:IconButton}" x:Key="IconButton">
@@ -168,13 +180,43 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-    
-    <Style TargetType="Image" x:Key="VerticalLine_Icon">
-        <Setter Property="Source" Value="{svgc:SvgImage Source=/res/icon/verticalLine.svg}"/>
-        <Setter Property="Width" Value="1"/>
-        <Setter Property="Height" Value="49"/>
+
+    <Style TargetType="Image" x:Key="SectionLeftRight">
+        <Setter Property="Width" Value="24"/>
+        <Setter Property="Height" Value="123"/>
+        <Setter Property="Margin" Value="0, -18, 0, 0"/>
+        <Setter Property="Source" Value="{svgc:SvgImage Source=/res/indicator/sectionLeft.svg}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=Tag}" Value="Right">
+                <Setter Property="Source" Value="{svgc:SvgImage Source=/res/indicator/sectionRight.svg}"/>
+            </DataTrigger>
+        </Style.Triggers>
     </Style>
-    
+
+    <Style TargetType="Image" x:Key="SectionCompareLeftRight">
+        <Setter Property="Width" Value="24"/>
+        <Setter Property="Height" Value="188"/>
+        <Setter Property="Margin" Value="0, -18, 0, 0"/>
+        <Setter Property="Source" Value="{svgc:SvgImage Source=/res/indicator/sectionCompareLeft.svg}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=Tag}" Value="Right">
+                <Setter Property="Source" Value="{svgc:SvgImage Source=/res/indicator/sectionCompareRight.svg}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="Image" x:Key="SectionExportLeftRight">
+        <Setter Property="Width" Value="24"/>
+        <Setter Property="Height" Value="298"/>
+        <Setter Property="Margin" Value="0, -18, 0, 0"/>
+        <Setter Property="Source" Value="{svgc:SvgImage Source=/res/indicator/sectionExportLeft.svg}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=Tag}" Value="Right">
+                <Setter Property="Source" Value="{svgc:SvgImage Source=/res/indicator/sectionExportRight.svg}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
     <!-- Progress Bar -->
     <Style TargetType="{x:Type ProgressBar}">
         <Setter Property="Template">
@@ -184,6 +226,20 @@
                         <Border BorderThickness="0" CornerRadius="4" Background="{DynamicResource GrayscaleGray7Brush}"/>
                         <Rectangle Name="PART_Track"/>
                         <Border Name="PART_Indicator" CornerRadius="4" Background="{DynamicResource MainPrimaryColorBrush}" HorizontalAlignment="Left"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type ProgressBar}" x:Key="LoadingProgressBar">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ProgressBar">
+                    <Grid>
+                        <Border BorderThickness="0" CornerRadius="6" Background="{DynamicResource GrayscaleGray8Brush}"/>
+                        <Rectangle Name="PART_Track"/>
+                        <Border Name="PART_Indicator" CornerRadius="6" Background="{DynamicResource MainPrimaryColorBrush}" HorizontalAlignment="Left"/>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
@@ -263,4 +319,71 @@
         </Ellipse>
     </ControlTemplate>
     
+    <!-- Indicator Scale -->
+    <ControlTemplate x:Key="IndicatorScale">
+        <Grid x:Name="indicatorScale" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Tag="{TemplateBinding Tag}">
+            <Grid.RenderTransform>
+                <RotateTransform CenterX="{Binding ElementName=indicatorScale, Path=Width, Converter={StaticResource HalveConverter}}" CenterY="{Binding ElementName=indicatorScale, Path=Height, Converter={StaticResource HalveConverter}}" Angle="{Binding Degree}"/>
+            </Grid.RenderTransform>
+
+            <Separator Width="{TemplateBinding Width}" Height="1"/>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="{TemplateBinding Height, Converter={StaticResource HalveConverter}}" Width="1">
+                <Separator.Margin>
+                    <MultiBinding Converter="{StaticResource IndicatorScaleConveter}" ConverterParameter="-7">
+                        <Binding ElementName="indicatorScale" Path="Tag"/>
+                    </MultiBinding>
+                </Separator.Margin>
+            </Separator>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="{TemplateBinding Height, Converter={StaticResource HalveConverter}}" Width="1">
+                <Separator.Margin>
+                    <MultiBinding Converter="{StaticResource IndicatorScaleConveter}" ConverterParameter="-5">
+                        <Binding ElementName="indicatorScale" Path="Tag"/>
+                    </MultiBinding>
+                </Separator.Margin>
+            </Separator>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="{TemplateBinding Height, Converter={StaticResource HalveConverter}}" Width="1">
+                <Separator.Margin>
+                    <MultiBinding Converter="{StaticResource IndicatorScaleConveter}" ConverterParameter="-3">
+                        <Binding ElementName="indicatorScale" Path="Tag"/>
+                    </MultiBinding>
+                </Separator.Margin>
+            </Separator>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="{TemplateBinding Height, Converter={StaticResource HalveConverter}}" Width="1">
+                <Separator.Margin>
+                    <MultiBinding Converter="{StaticResource IndicatorScaleConveter}" ConverterParameter="-1">
+                        <Binding ElementName="indicatorScale" Path="Tag"/>
+                    </MultiBinding>
+                </Separator.Margin>
+            </Separator>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="{TemplateBinding Height, Converter={StaticResource HalveConverter}}" Width="1">
+                <Separator.Margin>
+                    <MultiBinding Converter="{StaticResource IndicatorScaleConveter}" ConverterParameter="1">
+                        <Binding ElementName="indicatorScale" Path="Tag"/>
+                    </MultiBinding>
+                </Separator.Margin>
+            </Separator>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="{TemplateBinding Height, Converter={StaticResource HalveConverter}}" Width="1">
+                <Separator.Margin>
+                    <MultiBinding Converter="{StaticResource IndicatorScaleConveter}" ConverterParameter="3">
+                        <Binding ElementName="indicatorScale" Path="Tag"/>
+                    </MultiBinding>
+                </Separator.Margin>
+            </Separator>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="{TemplateBinding Height, Converter={StaticResource HalveConverter}}" Width="1">
+                <Separator.Margin>
+                    <MultiBinding Converter="{StaticResource IndicatorScaleConveter}" ConverterParameter="5">
+                        <Binding ElementName="indicatorScale" Path="Tag"/>
+                    </MultiBinding>
+                </Separator.Margin>
+            </Separator>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="{TemplateBinding Height, Converter={StaticResource HalveConverter}}" Width="1">
+                <Separator.Margin>
+                    <MultiBinding Converter="{StaticResource IndicatorScaleConveter}" ConverterParameter="7">
+                        <Binding ElementName="indicatorScale" Path="Tag"/>
+                    </MultiBinding>
+                </Separator.Margin>
+            </Separator>
+        </Grid>
+    </ControlTemplate>
+
 </ResourceDictionary>

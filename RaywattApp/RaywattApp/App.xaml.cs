@@ -10,6 +10,8 @@ using RaywattApp.ViewModels.Dialog;
 using RaywattApp.Common.Dialog;
 using System.Threading.Tasks;
 using log4net;
+using System.Diagnostics;
+using System.IO;
 
 namespace RaywattApp
 {
@@ -22,6 +24,10 @@ namespace RaywattApp
 
         public App()
         {
+            //Setting Working Directory
+            Process process = Process.GetCurrentProcess();
+            Environment.CurrentDirectory = Path.GetDirectoryName(process.MainModule.FileName);
+
             Services = ConfigureServices();
             this.InitializeComponent();
 
@@ -49,6 +55,7 @@ namespace RaywattApp
 
             //ViewModel 등록
             services.AddTransient(typeof(MainViewModel));
+            services.AddTransient(typeof(OutsetLoadingViewModel));
             services.AddTransient(typeof(PatientListViewModel));
             services.AddTransient(typeof(PatientNewViewModel));
             services.AddTransient(typeof(PatientEditViewModel));
@@ -75,6 +82,7 @@ namespace RaywattApp
             services.AddTransient(typeof(SettingPhysicianViewModel));
             services.AddTransient(typeof(SettingServiceViewModel));
             services.AddTransient(typeof(SettingLogViewModel));
+            services.AddTransient(typeof(SettingTermsConditionsViewModel));
 
             //File
             services.AddTransient(typeof(FileExportStep1ViewModel));
@@ -96,7 +104,11 @@ namespace RaywattApp
             services.AddTransient(typeof(FileCopyDialogViewModel));
             services.AddTransient(typeof(FileAlternateIdDialogViewModel));
             services.AddTransient(typeof(FileExportDialogViewModel));
-            services.AddTransient(typeof(SettingEditPhysicianDialogViewModel));            
+            services.AddTransient(typeof(SettingEditPhysicianDialogViewModel));
+            services.AddTransient(typeof(TermsConditionsDialogViewModel));
+            services.AddTransient(typeof(Review3dViewMenuViewModel));
+            services.AddTransient(typeof(Review3dPatientMenuViewModel));
+            services.AddTransient(typeof(PowerOffDialogViewModel));
 
             //IDatabaseService 등록 (Singleton 사용 안함 => Connection Pooling을 Default로 사용)
             services.AddTransient<IDatabaseService, SqlService>(obj => new SqlService(connectionString));

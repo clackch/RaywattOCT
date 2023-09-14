@@ -1,7 +1,7 @@
-﻿using RaywattApp.Common.Bases;
-using RaywattApp.Models;
+﻿using RaywattApp.Models;
 using RaywattApp.Views.Dialog;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 
 namespace RaywattApp.Common.Dialog
@@ -42,26 +42,49 @@ namespace RaywattApp.Common.Dialog
             if (parameter != null)
                 dialogDataContext.SetParameter(parameter);
 
+            window.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
             window.ShowDialog();
 
             return dialogDataContext.DialogResult;
         }
-
-        private void GetParentSize(out double width, out double height)
+        public IDialogWindow OpenChildWindow(object dialog, IModelessPatient parent, Dictionary<string, object> parameter, double width, double height, double left, double top)
         {
-            width = Constants.ApplicationWidth;
-            height = Constants.ApplicationHeight;
-            
-            for(int i = 0; i < Application.Current.Windows.Count-1; i++)
-            {
-                var win = Application.Current.Windows[i];
+            var dialogFE = dialog as FrameworkElement;
+            var dialogDataContext = dialogFE.DataContext as ModelessViewModelBase;
+            Window mainWindow = Application.Current.MainWindow;
 
-                if (win.IsActive && win.IsVisible && win.Width != double.NaN && win.Height != double.NaN)
-                {
-                    width = win.Width;
-                    height = win.Height;
-                }
+            dialogDataContext.DialogWidth = width;
+            dialogDataContext.DialogHeight = height;
+
+            IDialogWindow window = new ChildWindow();
+            window.Content = dialog;
+            window.DataContext = dialogDataContext;
+
+            if (double.NaN.Equals(left))
+            {
+                window.Left = mainWindow.Left + (mainWindow.Width - width) / 2;
             }
+            else
+            {
+                window.Left = left;
+            }
+
+            if (double.NaN.Equals(top))
+            {
+                window.Top = mainWindow.Top + (mainWindow.Height - height) / 2;
+            }
+            else
+            {
+                window.Top = top;
+            }
+
+            if (parameter != null)
+                dialogDataContext.SetParameter(parent, parameter);
+
+            window.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
+            window.Show();
+
+            return window;
         }
     }
 }

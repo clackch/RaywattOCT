@@ -4,7 +4,7 @@
 #define DELAY_FOR_WAIT_PROCESS			5
 #define DELAY_FOR_STOP_THREAD			50
 
-typedef void (*FunctionPtr)(int, int);
+typedef void (*FunctionPtr)(int, int, int);
 typedef void (*FunctionImgPtr)(int, void*, int, int, int, int);
 typedef void (*FunctionObjPtr)(int);
 
@@ -68,8 +68,10 @@ enum class RayEvent {
 enum class RayWorkItem {
 	Unknown = 0,
 	SaveRawData,
+	OCTImaging,
+	GenerateCutView,
+	DetectLumen,
 	GenerateVolume,
-	LumenDetection,
 	AutoCalibration,
 	Pullback,
 	LoadCatheter,

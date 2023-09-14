@@ -33,12 +33,12 @@
                 <RowDefinition Height="74"/>
             </Grid.RowDefinitions>
             <Border Grid.Row="0" CornerRadius="10,10,0,0" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray6Brush}">
-                <Grid Margin="49,69,49,0">
+                <Grid Margin="49,59,49,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="38"/>
                         <RowDefinition Height="14"/>
                         <RowDefinition Height="1"/>
-                        <RowDefinition Height="138"/>
+                        <RowDefinition Height="148"/>
                         <RowDefinition Height="420"/>
                         <RowDefinition Height="44"/>
                     </Grid.RowDefinitions>
@@ -82,7 +82,7 @@
                         </StackPanel>
                     </Grid>
                     <Separator Grid.Row="2" Foreground="{DynamicResource GrayscaleGray5Brush}"/>
-                    <Grid Grid.Row="3" Margin="0,20,0,20">
+                    <Grid Grid.Row="3" Margin="0,0,0,20">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="583"/>
                             <ColumnDefinition Width="1"/>
@@ -96,29 +96,58 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition/>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
-                            <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">
-                                <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Pullback Setting], Source={StaticResource L10N}}"/>
+                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,20,0,0">
+                                <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Procedure], Source={StaticResource L10N}}"/>
                             </StackPanel>
-                            <StackPanel Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal">
+                            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,5,0,0">
                                 <StackPanel>
-                                    <RadioButton IsChecked="{Binding PatientCase.PullbackType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.PullbackTypeShort}}" Content="{Binding [Survey (54㎜)], Source={StaticResource L10N}}" />
+                                    <RadioButton IsChecked="{Binding PatientCase.Procedure, Converter={StaticResource RadioButtonConverter}, ConverterParameter=$001}" Content="{Binding [Pre-PCI], Source={StaticResource L10N}}" />
                                 </StackPanel>
-                                <StackPanel Margin="18,0,0,0">
-                                    <RadioButton IsChecked="{Binding PatientCase.PullbackType, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.PullbackTypeLong}}" Content="{Binding [Hi-Res (100㎜)], Source={StaticResource L10N}}" />
+                                <StackPanel Margin="30,0,0,0">
+                                    <RadioButton IsChecked="{Binding PatientCase.Procedure, Converter={StaticResource RadioButtonConverter}, ConverterParameter=$002}" Content="{Binding [Post-PCI], Source={StaticResource L10N}}" />
+                                </StackPanel>
+                                <StackPanel Margin="30,0,0,0">
+                                    <RadioButton IsChecked="{Binding PatientCase.Procedure, Converter={StaticResource RadioButtonConverter}, ConverterParameter=$003}" Content="{Binding [Follow-Up], Source={StaticResource L10N}}" />
                                 </StackPanel>
                             </StackPanel>
                             <StackPanel Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">
-                                <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Procedure], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Pullback], Source={StaticResource L10N}}"/>
                             </StackPanel>
                             <StackPanel Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal">
-                                <ComboBox Grid.Column="0" Style="{DynamicResource ComboBoxDialog}" Width="404" ItemsSource="{Binding ProcedureList}" SelectedValue="{Binding PatientCase.Procedure}" SelectedValuePath="Key" DisplayMemberPath="Value" Tag="{Binding [Select Procedure], Source={StaticResource L10N}}"/>
+                                <ComboBox Grid.Column="0" Style="{DynamicResource ComboBoxDialog}" Width="404" ItemsSource="{Binding PullbackList}" SelectedValue="{Binding SelectedPullbackType}" SelectedValuePath="Key" DisplayMemberPath="Value" Tag="{Binding [Select Pullback], Source={StaticResource L10N}}"/>
                             </StackPanel>
+                            <Grid Grid.Row="2" Grid.Column="1" Height="20" Margin="10,0,0,0">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Length], Source={StaticResource L10N}}"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content=" : "/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray1Brush}" Content="{Binding PbLength}"/>
+                                        <StackPanel Width="5"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [㎜], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                        <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Speed], Source={StaticResource L10N}}"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content=" : "/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray1Brush}" Content="{Binding PbSpeed}"/>
+                                        <StackPanel Width="5"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [㎜/s], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                        <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Time], Source={StaticResource L10N}}"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content=" : "/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray1Brush}" Content="{Binding PbTime}"/>
+                                        <StackPanel Width="5"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [s], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
                         </Grid>
-                        <Separator Grid.Column="1" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Foreground="{DynamicResource GrayscaleGray5Brush}" Margin="0"/>
-                        <StackPanel Grid.Column="2" Margin="40,0,0,0">
+                        <Separator Grid.Column="1" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Foreground="{DynamicResource GrayscaleGray5Brush}" Margin="0,20,0,0"/>
+                        <StackPanel Grid.Column="2" Margin="40,20,0,0">
                             <Label Content="{Binding [Presentation], Source={StaticResource L10N}}" Foreground="{DynamicResource SideMenuTitleBrush}" Style="{DynamicResource Pretendard-Medium-14}" HorizontalAlignment="Left"/>
-                            <StackPanel Height="16"/>
+                            <StackPanel Height="20"/>
                             <Grid>
                                 <Label Content="{Binding [Brightness], Source={StaticResource L10N}}" Foreground="{DynamicResource SideMenuTitleBrush}" Style="{DynamicResource Pretendard-Medium-12}" HorizontalAlignment="Left"/>
                                 <Label Content="{Binding Brightness}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Style="{DynamicResource Pretendard-Medium-12}" HorizontalAlignment="Right"/>

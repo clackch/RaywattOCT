@@ -24,7 +24,10 @@ CImagingSession::CImagingSession(CMessageService* pMsg, int nSession, bool delet
 
 	m_pThreadUpdateCutView = nullptr;
 	m_pThreadObjectDetection = nullptr;
+	m_pThreadVolumeGeneration = nullptr;
 	m_pCutView = nullptr;
+
+	m_pVolumeData = nullptr;
 }
 CImagingSession::~CImagingSession() {
 	Stop();
@@ -32,7 +35,9 @@ CImagingSession::~CImagingSession() {
 	if (m_deleteData && m_pDataManager != nullptr) delete m_pDataManager;
 	if (m_pThreadUpdateCutView != nullptr) delete m_pThreadUpdateCutView;
 	if (m_pThreadObjectDetection != nullptr) delete m_pThreadObjectDetection;
+	if (m_pThreadVolumeGeneration != nullptr) delete m_pThreadVolumeGeneration;
 	if (m_pCutView != nullptr) delete m_pCutView;
+	if (m_pVolumeData != nullptr) delete m_pVolumeData;
 }
 
 CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSession, IImaging::Setting setting, IDataManager* pWriter) {
@@ -156,6 +161,7 @@ RayError CImagingSession::Start() {
 RayError CImagingSession::Stop() {
 	CUtility::StopThread(m_pThreadUpdateCutView);
 	CUtility::StopThread(m_pThreadObjectDetection);
+	CUtility::StopThread(m_pThreadVolumeGeneration);
 	CUtility::StopThread(m_pThreadImaging);
 
 	return RayError::OK;
@@ -170,6 +176,10 @@ void CImagingSession::StartCutViewUpdate(cv::Scalar backgroundColor) {
 void CImagingSession::StartObjectDetection() {
 	if (m_pThreadObjectDetection != nullptr) return;
 	CUtility::StartThread(threadDetectObject, m_pThreadObjectDetection, this);
+}
+void CImagingSession::StartVolumeGeneration() {
+	if (m_pThreadVolumeGeneration != nullptr) return;
+	CUtility::StartThread(threadGenerateVolume, m_pThreadVolumeGeneration, this);
 }
 
 bool CImagingSession::IsProcessed(int nFrame) {
@@ -244,13 +254,14 @@ UINT CImagingSession::GetCutViewChannels() {
 void CImagingSession::AddFramesIntoCutView() {
 	if (m_pCutView == nullptr) return;
 
+	cv::Mat imgCircle;
 	for (int nFrame = 0; nFrame < m_pCutView->GetNumOfSamples(); nFrame++)
 	{
 		std::map<int, cv::Mat>::iterator it = m_mapImage.find(nFrame);
 		if (it != m_mapImage.end())
 		{
-			m_pImaging->PostProcess(it->second);
-			m_pCutView->AddRecord(m_pImaging->GetCircleImage(), nFrame);
+			m_pImaging->CircularizeImage(it->second, imgCircle);
+			m_pCutView->AddRecord(imgCircle, nFrame);
 		}
 	}
 }
@@ -294,8 +305,10 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 		pImaging->Process(pBuffer);
 		cv::Mat imgResult = pImaging->GetProcessedImage().clone();
 		pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult));
+		pSession->m_mapSheathPosition.insert(std::make_pair(nFrame, pImaging->GetFoundSheathPosition()));
 	}
 	PLOGI.printf("Session #%d process oct imaging done.", pSession->m_nSession);
+	pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::OCTImaging, pSession->m_nSession);
 	
 	return NOERROR;
 }
@@ -314,6 +327,7 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 
 	CCutViewManager* pCutView = pSession->m_pCutView;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
+	cv::Mat imgCircle;
 
 	PLOGI.printf("Session #%d update cutview - %d frames", pSession->m_nSession, nNumOfSamples);
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadUpdateCutView->isRun; nFrame++) {
@@ -323,14 +337,15 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 			Sleep(DELAY_FOR_WAIT_PROCESS);
 			continue;
 		}
-		pImaging->PostProcess(it->second);
-		pCutView->AddRecord(pImaging->GetCircleImage(), nFrame);
+		pImaging->CircularizeImage(it->second, imgCircle);
+		pCutView->AddRecord(imgCircle, nFrame);
 
 		pSession->m_pMsg->postMessage(WM_PROCESS_CUTVIEW, nSession, nFrame);
 	}
 	delete pImaging;
 
 	PLOGI.printf("Session #%d update cutview done.", pSession->m_nSession);
+	pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::GenerateCutView, pSession->m_nSession);
 
 	return NOERROR;
 }
@@ -374,7 +389,54 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	delete pImaging;
 
 	PLOGI.printf("Session #%d lumen detection done.", pSession->m_nSession);
-	pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::LumenDetection);
+	pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::DetectLumen, pSession->m_nSession);
+
+	return NOERROR;
+}
+UINT CImagingSession::threadGenerateVolume(LPVOID param) {
+	CImagingSession* pSession = (CImagingSession*)param;
+	IDataManager* pDataManager = pSession->m_pDataManager;
+	int nSession = pSession->m_nSession;
+
+	// prepare imaging (without message)
+	COCTImaging* pImaging = CreateColorImaging(nullptr, pSession->m_pImaging->GetSetting(), pDataManager, pSession->GetImagingType());
+
+	CConfiguration& config = CConfiguration::GetInstance();
+	const int nNumOfSamples = pDataManager->GetNumOfSamples();
+	const int nDiameter = config.volume.size;
+	const int nImageSize = nDiameter * nDiameter;
+	cv::Mat imgCircle, imgResize;
+
+	if (pSession->m_pVolumeData != nullptr)
+	{
+		delete[] pSession->m_pVolumeData;
+	}
+	pSession->m_pVolumeData = new char[nImageSize * nNumOfSamples];
+
+	PLOGI.printf("Session #%d volume generation start - %d frames", pSession->m_nSession, nNumOfSamples);
+	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadVolumeGeneration->isRun; nFrame++) {
+		std::map<int, cv::Mat>::iterator it = pSession->m_mapImage.find(nFrame);
+		if (it == pSession->m_mapImage.end()) {
+			nFrame--;
+			Sleep(DELAY_FOR_WAIT_PROCESS);
+			continue;
+		}
+
+		cv::Mat imgRect = it->second.clone();
+		pImaging->CircularizeImage(imgRect, imgCircle);
+
+		// remove sheath
+		int nSheathPos = config.measurement.nSheathPosition + 15;
+		//int nSheathPos = pSession->m_mapSheathPosition.find(nFrame)->second;
+		cv::circle(imgCircle, cv::Point(imgCircle.cols / 2, imgCircle.rows / 2), nSheathPos / 2, cv::Scalar(0, 0, 0), -1);
+
+		cv::resize(imgCircle, imgResize, cv::Size(nDiameter, nDiameter));
+		memcpy(pSession->m_pVolumeData + nImageSize * nFrame, imgResize.data, nImageSize);
+	}
+	delete pImaging;
+
+	PLOGI.printf("Session #%d volume generation done.", pSession->m_nSession);
+	pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::GenerateVolume, pSession->m_nSession);
 
 	return NOERROR;
 }

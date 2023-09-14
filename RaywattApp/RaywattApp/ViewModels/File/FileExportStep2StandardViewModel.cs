@@ -67,11 +67,6 @@ namespace RaywattApp.ViewModels.File
             if (FileExport.StillFrame == null)
                 FileExport.StillFrame = Constants.ExportStillFrameJPEG;
 
-            if (FileExport.DiskType == null)
-                DiskType = Constants.FileDiskExternal;
-            else
-                DiskType = FileExport.DiskType;
-
             if (FileExport.ExternalDrivePath == null)
                 FileExport.ExternalDrivePath = "";
 
@@ -85,19 +80,21 @@ namespace RaywattApp.ViewModels.File
             sqlParameters["ids"] = FileExport.SelectedItem;
             PatientCases = _sqlManager.SelectPatientCaseByList(sqlParameters);
 
-            const double frameSize = Constants.ApplicationWidth * Constants.ApplicationHeight * 3.0;
+            ExportSize = 0;
+
+            double frameSize = GetFrameSize();
             if (FileExport.Material == Constants.ExportMaterialPullback)
             {
                 foreach (PatientCase patientCase in PatientCases)
                 {
-                    int numOfFrames = (patientCase.PullbackType == Constants.PullbackTypeLong) ? Constants.PullbackLongFrameCnt : Constants.PullbackShortFrameCnt;
+                    int numOfFrames = patientCase.NumOfFrames;
                     if (FileExport.Pullback == Constants.ExportPullbackAVI)
                     {
-                        ExportSize = CommonUtil.GetVideoSize((int)Constants.ApplicationWidth, (int)Constants.ApplicationHeight, 10, 12, numOfFrames);
+                        ExportSize += frameSize * numOfFrames * 1024;
                     }
                     else
                     {
-                        ExportSize = frameSize * numOfFrames;
+                        ExportSize += frameSize * numOfFrames;
                     }
                 }
             }
@@ -109,6 +106,46 @@ namespace RaywattApp.ViewModels.File
             }
 
             UpdateFileSize(ExportSize);
+        }
+
+        private double GetFrameSize()
+        {
+            double frameSize = 0;
+
+            if(FileExport.Material == Constants.ExportMaterialPullback && FileExport.Pullback == Constants.ExportPullbackAVI)
+            {
+                //Export 한 파일 대상으로 경험적으로 찾은 수치
+                if (!FileExport.AngioView && !FileExport.Longitude && !FileExport.MeasureAuto && !FileExport.MeasureManual)//Cross Section Only
+                {
+                    frameSize = 145;
+                }
+                else if((FileExport.Longitude || FileExport.AngioView) && (FileExport.MeasureAuto || FileExport.MeasureManual))//Check All, Longitude + Measure, Angio + Measure
+                {
+                    frameSize = 240;
+                }
+                else if((FileExport.Longitude || FileExport.AngioView) && (!FileExport.MeasureAuto && !FileExport.MeasureManual))//Longitude, Angio (Measure X)
+                {
+                    frameSize = 170;
+                }
+                else
+                {
+                    frameSize = 255;
+                }
+            }
+            else
+            {
+                double height = Constants.ExportHeight;
+                double width = Constants.ExportLongitudeWidth;
+
+                if (FileExport.MeasureAuto || FileExport.MeasureManual)
+                    width = Constants.ExportWidth;
+                else if (!FileExport.AngioView && !FileExport.Longitude && !FileExport.MeasureAuto && !FileExport.MeasureManual)
+                    width = Constants.ExportCrossSectionBig;
+
+                frameSize = height * width * 3.0;
+            }
+
+            return frameSize;
         }
 
         protected override void FileSave()

@@ -67,12 +67,6 @@ namespace RaywattApp.ViewModels.Setting
         {
             _log.Debug("OnNavigated");
 
-            var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
-
-            if (extraData != null)
-            {
-            }
-
             Search();
         }
 
@@ -138,7 +132,7 @@ namespace RaywattApp.ViewModels.Setting
             {
                 if (item.Name.Equals(NewPhysician.Name.Trim()))
                 {
-                    NewPhysician.ValidateName = _l10n["Name is duplicated."];
+                    NewPhysician.ValidateName = _l10n["Name is duplicated"];
                     return;
                 }
             }

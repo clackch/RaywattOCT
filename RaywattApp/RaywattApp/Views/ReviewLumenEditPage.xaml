@@ -49,8 +49,6 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,32,0,10" Orientation="Horizontal" VerticalAlignment="Center">
                             <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Lumen Contour], Source={StaticResource L10N}}"/>
-                            <StackPanel Width="10"/>
-                            <component:IconButton Style="{StaticResource IconButton}" Icon="information" Command="{Binding InformationCommand}"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1" Margin="0,32,0,10" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
                             <component:IconButton Style="{StaticResource IconButtonLarge}" Icon="zoomIn" Command="{Binding ZoomInCommand}"/>
@@ -122,13 +120,31 @@
                                 </Canvas>
                             </Border>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="50">
-                                <Label Content="F : " Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}"/>
-                                <Label Content="{Binding DisplayFrameNumber}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" />
+                                <Label Content="F" Style="{DynamicResource Pretendard-ExtraBold-14}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+                                <StackPanel Width="6"/>
+                                <Label Content="{Binding DisplayFrameNumber}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" />
                             </StackPanel>
                             <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Right">
-                                <Separator Width="{Binding CrossSectionScale}" Height="1"/>
+                                <Label Content="1 ㎜" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
                                 <StackPanel Height="4"/>
-                                <Label Content="1 mm" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
+                                <Grid>
+                                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="5" Width="1" Margin="0" HorizontalAlignment="Left">
+                                        <Separator.RenderTransform>
+                                            <TransformGroup>
+                                                <TranslateTransform X="{Binding Zoom.ScaleX, Converter={StaticResource ScaleBarScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionSize}}"/>
+                                            </TransformGroup>
+                                        </Separator.RenderTransform>
+                                    </Separator>
+                                    <Separator Width="{Binding CrossSectionScale}" Height="1" Margin="0">
+                                        <Separator.RenderTransform>
+                                            <TransformGroup>
+                                                <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                                <TranslateTransform X="{Binding Zoom.ScaleX, Converter={StaticResource ScaleBarScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionSize}}"/>
+                                            </TransformGroup>
+                                        </Separator.RenderTransform>
+                                    </Separator>
+                                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="5" Width="1" Margin="0" HorizontalAlignment="Right"/>
+                                </Grid>
                             </StackPanel>
                         </Grid>
                         <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="50,0,0,0">

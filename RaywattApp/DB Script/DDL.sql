@@ -6,20 +6,25 @@ CREATE SCHEMA IF NOT EXISTS rv_schema
     AUTHORIZATION rv_user;
 
 
--- SEQUENCE: rv_schema.log_file_index_seq
+-- Table: rv_schema.configuration
 
--- DROP SEQUENCE IF EXISTS rv_schema.log_file_index_seq;
+-- DROP TABLE IF EXISTS rv_schema.configuration;
 
-CREATE SEQUENCE IF NOT EXISTS rv_schema.log_file_index_seq
-    INCREMENT 1
-    START 1
-    MINVALUE 1
-    MAXVALUE 2147483647
-    CACHE 1;
+CREATE TABLE IF NOT EXISTS rv_schema.configuration
+(
+    classification character varying(10) COLLATE pg_catalog."default" NOT NULL,
+    key character varying(10) COLLATE pg_catalog."default" NOT NULL,
+    value character varying(100) COLLATE pg_catalog."default",
+    buffer character varying(100) COLLATE pg_catalog."default",
+    CONSTRAINT configuration_pkey PRIMARY KEY (classification, key)
+        USING INDEX TABLESPACE rv_tablespace
+)
 
-ALTER SEQUENCE rv_schema.log_file_index_seq
-    OWNER TO rv_user;
+TABLESPACE rv_tablespace;
 
+ALTER TABLE IF EXISTS rv_schema.configuration
+    OWNER to rv_user;
+	
 
 -- Table: rv_schema.code
 
@@ -43,45 +48,6 @@ CREATE TABLE IF NOT EXISTS rv_schema.code
 TABLESPACE rv_tablespace;
 
 ALTER TABLE IF EXISTS rv_schema.code
-    OWNER to rv_user;
-
-
--- Table: rv_schema.log_file
-
--- DROP TABLE IF EXISTS rv_schema.log_file;
-
-CREATE TABLE IF NOT EXISTS rv_schema.log_file
-(
-    index integer NOT NULL DEFAULT nextval('rv_schema.log_file_index_seq'::regclass),
-    classification character varying(4) COLLATE pg_catalog."default",
-    name character varying(200) COLLATE pg_catalog."default",
-    create_date timestamp without time zone,
-    update_date timestamp without time zone,
-    CONSTRAINT log_file_pkey PRIMARY KEY (index)
-)
-
-TABLESPACE rv_tablespace;
-
-ALTER TABLE IF EXISTS rv_schema.log_file
-    OWNER to rv_user;
-	
--- Table: rv_schema.message
-
--- DROP TABLE IF EXISTS rv_schema.message;
-
-CREATE TABLE IF NOT EXISTS rv_schema.message
-(
-    language character varying(2) COLLATE pg_catalog."default" NOT NULL,
-    key character varying(4) COLLATE pg_catalog."default" NOT NULL,
-    value character varying(200) COLLATE pg_catalog."default",
-    create_date timestamp without time zone,
-    update_date timestamp without time zone,
-    CONSTRAINT message_pkey PRIMARY KEY (language, key)
-)
-
-TABLESPACE rv_tablespace;
-
-ALTER TABLE IF EXISTS rv_schema.message
     OWNER to rv_user;
 
 
@@ -121,10 +87,10 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case
     comment character varying(200) COLLATE pg_catalog."default",
     vessel character varying(20) COLLATE pg_catalog."default",
     procedure character varying(20) COLLATE pg_catalog."default",
-    thumbnail_no integer,
-    still_image_yn character varying(1) COLLATE pg_catalog."default",
+    num_of_frames integer,
     image character varying(200) COLLATE pg_catalog."default",
-    pullback_type character varying(4) COLLATE pg_catalog."default",
+    pullback_type character varying(4) COLLATE pg_catalog."default",	
+    pullback_length character varying(4) COLLATE pg_catalog."default",
 	angio_co_registration boolean,
 	indicator_degree real,
 	preset_name character varying(40) COLLATE pg_catalog."default",
@@ -134,6 +100,8 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case
     apposition_threshold real,
 	brightness integer,
     contrast integer,
+	section_proximal integer,
+    section_distal integer,
     create_date timestamp without time zone,
     update_date timestamp without time zone,
     CONSTRAINT patient_case_pkey PRIMARY KEY (id)
@@ -192,24 +160,6 @@ CREATE TABLE IF NOT EXISTS rv_schema.physician
 TABLESPACE rv_tablespace;
 
 ALTER TABLE IF EXISTS rv_schema.physician
-    OWNER to rv_user;
-
-
--- Table: rv_schema.l10n
-
--- DROP TABLE IF EXISTS rv_schema.l10n;
-
-CREATE TABLE IF NOT EXISTS rv_schema.l10n
-(
-    lang character varying(10) COLLATE pg_catalog."default" NOT NULL,
-    choice boolean,
-    CONSTRAINT language_pkey PRIMARY KEY (lang)
-        USING INDEX TABLESPACE rv_tablespace
-)
-
-TABLESPACE rv_tablespace;
-
-ALTER TABLE IF EXISTS rv_schema.l10n
     OWNER to rv_user;
 	
 
@@ -373,9 +323,9 @@ DECLARE
 res_value character varying;
 lang_code character varying;
 BEGIN
-	SELECT lang INTO lang_code
-	FROM rv_schema.l10n
-	WHERE choice = TRUE;
+	SELECT key INTO lang_code
+	FROM rv_schema.configuration
+	WHERE classification = 'L10N' AND value = 'Y';
 	
 	CASE lang_code
 	WHEN 'en-US' THEN RETURN TO_CHAR(arg_date, 'MM/dd/yyyy');

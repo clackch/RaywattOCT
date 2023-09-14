@@ -5,42 +5,62 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:RaywattApp.Views.Setting"
       xmlns:const="clr-namespace:RaywattApp.Common.Bases"
+      xmlns:component="clr-namespace:RaywattApp.Views.Component"
       mc:Ignorable="d" 
       Width="{x:Static const:Constants.SettingInsideDialogWidth}" Height="{x:Static const:Constants.SettingInsideDialogHeight}"
       Title="SettingLogPage">
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="347"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="305"/>
             <RowDefinition Height="15"/>
             <RowDefinition Height="27"/>
             <RowDefinition Height="54"/>
             <RowDefinition Height="57"/>
-            <RowDefinition Height="41"/>
+            <RowDefinition Height="43"/>
             <RowDefinition Height="42"/>
         </Grid.RowDefinitions>
 
-        <DataGrid Grid.Row="0" x:Name="logFileList" ItemsSource="{Binding LogFileList}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialogLeft}">
+        <Grid Grid.Row="0" VerticalAlignment="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="150"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <component:IconButton Style="{DynamicResource IconButton}" Icon="calendarPrev" Command="{Binding SearchParameterCommand}" CommandParameter="YP"/>
+                <Label Width="70" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding SearchYear}" HorizontalContentAlignment="Center" VerticalAlignment="Center"/>
+                <component:IconButton Style="{DynamicResource IconButton}" Icon="calendarNext" Command="{Binding SearchParameterCommand}" CommandParameter="YN"/>
+            </StackPanel>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                <component:IconButton Style="{DynamicResource IconButton}" Icon="calendarPrev" Command="{Binding SearchParameterCommand}" CommandParameter="MP"/>
+                <Label Width="70" Style="{DynamicResource Pretendard-Bold-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding SearchMonth}" HorizontalContentAlignment="Center" VerticalAlignment="Center"/>
+                <component:IconButton Style="{DynamicResource IconButton}" Icon="calendarNext" Command="{Binding SearchParameterCommand}" CommandParameter="MN"/>
+            </StackPanel>
+        </Grid>
+        
+        <DataGrid Grid.Row="1" x:Name="logFileList" ItemsSource="{Binding LogFileList}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialogLeft}">
             <DataGrid.Columns>
                 <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipLeft}" Width="3*" Binding="{Binding Name}" Header="{Binding [Name], Source={StaticResource L10N}}" />
                 <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipLeft}" Width="*" Binding="{Binding DisplaySize}" Header="{Binding [Size], Source={StaticResource L10N}}" />
             </DataGrid.Columns>
         </DataGrid>
 
-        <StackPanel Grid.Row="2">
+        <StackPanel Grid.Row="3">
             <Label Style="{DynamicResource Pretendard-Medium-16}" Margin="0,0,0,8" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Select Drive], Source={StaticResource L10N}}"/>
         </StackPanel>
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <ComboBox Grid.Column="0" Style="{DynamicResource ComboBoxDialog}" Width="140" ItemsSource="{Binding ExternalDriveComboBox}" SelectedValue="{Binding SelectedExternalDrive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectedValuePath="Key" DisplayMemberPath="Value" IsEnabled="{Binding IsEnableExternalDrive}" Tag="{Binding [No Drive], Source={StaticResource L10N}}"/>
-            <TextBox Grid.Column="1" Style="{DynamicResource TextBoxWithCorner}" Width="350" IsReadOnly="True" Text="{Binding FileExport.ExternalDrivePath}" Tag="{Binding [Select destination path], Source={StaticResource L10N}}" Margin="12,0,0,0"/>
+            <TextBox Grid.Column="1" Style="{DynamicResource TextBoxWithCorner}" Width="350" IsReadOnly="True" Text="{Binding FileExport.ExternalDrivePath}" Tag="{Binding [Select Destination Path], Source={StaticResource L10N}}" Margin="12,0,0,0"/>
             <Button Grid.Column="2" Style="{StaticResource OutlinedBtnType3}" Width="72" Height="54" Command="{Binding ExternalDrivePathCommand}" Content="{Binding [Path], Source={StaticResource L10N}}" IsEnabled="{Binding IsEnableExternalDrive}" HorizontalAlignment="Left" Margin="10,0,0,0"/>
         </Grid>
-        <Grid Grid.Row="4">
+        <Grid Grid.Row="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="130"/>
                 <ColumnDefinition Width="130"/>
@@ -61,7 +81,7 @@
                 </StackPanel>
             </StackPanel>
         </Grid>
-        <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding LogExportCommand}" CommandParameter="{Binding ElementName=logFileList, Path=SelectedItems}" Content="{Binding [Export], Source={StaticResource L10N}}"/>
         </StackPanel>
     </Grid>

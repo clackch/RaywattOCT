@@ -11,6 +11,8 @@ namespace RaywattApp.Common.Bases
         public static string CurrentPage = "";
 
         //[Page List]
+        //Outset
+        public const string OutsetLoadingPage = "Views/OutsetLoadingPage.xaml";
         //Patient
         public const string PatientListPage = "Views/PatientListPage.xaml";
         public const string PatientDetailPage = "Views/PatientDetailPage.xaml";
@@ -45,6 +47,7 @@ namespace RaywattApp.Common.Bases
         public const string SettingPhysicianPage = "Views/Setting/SettingPhysicianPage.xaml";
         public const string SettingServicePage = "Views/Setting/SettingServicePage.xaml";
         public const string SettingLogPage = "Views/Setting/SettingLogPage.xaml";
+        public const string SettingTermsConditionsPage = "Views/Setting/SettingTermsConditionsPage.xaml";
 
         //Resolution
         public const double ApplicationWidth = 1280;
@@ -75,6 +78,10 @@ namespace RaywattApp.Common.Bases
         public const double SettingEditPhysicianDialogHeight = 279;
         public const double PatientCaseEditDialogWidth = 860;
         public const double PatientCaseEditDialogHeight = 734;
+        public const double TermsConditionsDialogWidth = 860;
+        public const double TermsConditionsDialogHeight = 660;
+        public const double PowerOffDialogWidth = 472;
+        public const double PowerOffDialogHeight = 269;
 
         //Max Length
         public const int MaxPatientId = 9;
@@ -115,25 +122,6 @@ namespace RaywattApp.Common.Bases
         public const string ExportMaterialCurrent = "C";
         public const string ExportMaterialBookmarked = "B";
 
-        //Disk Type - CD/DVD, External Drive        
-        public const string FileDiskCd = "C";
-        public const string FileDiskExternal = "E";
-
-        //CD
-        public const string MediaTypeNoDisc = "No Disc";
-        public const string MediaTypeNotSupportDisc = "Not Support Disc";
-        public const string MediaTypeCDR = "CD-R";
-        public const string MediaTypeCDRW = "CD-RW";
-        public const string MediaTypeDVDDASHR = "DVD-R";
-        public const string MediaTypeDVDDASHRW = "DVD-RW";
-        public const string MediaTypeDVDPLUSR = "DVD+R";
-        public const string MediaTypeDVDPLUSRW = "DVD+RW";
-        public const string MediaTypeBDR = "Blu-ray Recordable";
-        public const string MediaTypeBDRE = "Blu-ray Recordable Erasable";
-
-        //CD Writing Status -  validating(0), formatting(1), initializing(2), calibrating(3), writing(4), finalizing(5), completed(6)
-        public static string[] CdWrtingStatus = {"Validating", "Formatting", "Initializing", "Calibrating", "Writing", "Finalizing", "Completed" };
-
         //Export Status
         public const string ExportStatusCopyFile = "Copy file(s)";
         public const string ExportStatusConvertImage = "Convert Image(s)";
@@ -143,15 +131,6 @@ namespace RaywattApp.Common.Bases
         public const string ExportStatusSaveMultipleFiles = "Save Multiple Image Files";
         public const string ExportStatusSaveFile = "Save File";
         public const string ExportStatusCompleted = "Completed";
-
-        //Export(Raw) File Option - Leave Unchanged, Remove when Complete
-        public const string ExportOptionUnchanged = "U";
-        public const string ExportOptionRemove = "R";
-
-        //Export(DICOM) Measurements - Show All, Hide Lumen Contour, Hide All
-        public const string ExportMeasurementShowAll = "S";
-        public const string ExportMeasurementHideLumen = "L";
-        public const string ExportMeasurementHideAll = "H";
 
         //Export(Standard) Pullback - AVI, TIFF
         public const string ExportPullbackAVI = "MP4";
@@ -177,9 +156,12 @@ namespace RaywattApp.Common.Bases
         //File Import/Export
         public const string FileImageExtension = "bin";
         public const string FileExtension = "dbf";
+        public const string AnnotationFileExtension = "annot";
         public const string FileNamePrefix = "Export_";
 
         //Export Layout
+        public const double ExportHeight = 1080;
+        public const double ExportWidth = 1920;
         public const double ExportCrossSectionBig = 1080;
         public const double ExportCrossSectionSmall = 677;
         public const double ExportCrossSectionImageBig = 965;
@@ -191,21 +173,23 @@ namespace RaywattApp.Common.Bases
         public const double ExportAngioSize = 677;
         public const double ExportTextPartSize = 566;
         public const double ExportLongitudeIndicatorWidth = 12;
+        public const double CalciumIndicatorExportSizeBig = 989;
+        public const double CalciumIndicatorExportSize = 630;
+        public const double CalciumThicknessIndicatorExportSizeBig = 1005;
+        public const double CalciumThicknessIndicatorExportSize = 644;
+        public const double CalciumThicknessIndicatorCenterExportBig = CalciumThicknessIndicatorExportSizeBig / 2;
+        public const double CalciumThicknessIndicatorCenterExport = CalciumThicknessIndicatorExportSize / 2;
+        public static System.Windows.Point CalciumThicknessIndicatorPointCenterExportBig = new System.Windows.Point(CalciumThicknessIndicatorCenterExportBig, CalciumThicknessIndicatorCenterExportBig);
+        public static System.Windows.Point CalciumThicknessIndicatorPointCenterExport = new System.Windows.Point(CalciumThicknessIndicatorCenterExport, CalciumThicknessIndicatorCenterExport);
 
         //File Icon
         public const string FileIconDrive = "drive";
         public const string FileIconFolder = "folder";
         public const string FileIconFile = "file";
 
-        //View Mode - Live View, Stand By
-        public const string ViewModeLiveView = "LiveView";
-        public const string ViewModeStandBy = "StandBy";
-
-        //Pullback Type
-        public const string PullbackTypeLong = "LONG";
-        public const string PullbackTypeShort = "SHOR";
-        public const int PullbackLongFrameCnt = 1000;
-        public const int PullbackShortFrameCnt = 500;
+        //Pullback Length
+        public const string PullbackLengthLong = "LONG";
+        public const string PullbackLengthShort = "SHOR";
 
         //Not Selected
         public const string NotSelected = "Not Selected";
@@ -247,9 +231,6 @@ namespace RaywattApp.Common.Bases
         //Data File Root Path (OCT raw files) - ※ Patient Folder (DataRootPath + Patient ID)
         public const string DataRootPath = SystemRootPath + "\\Raywatt\\DataSave";
 
-        //Temporary Folder (CD/DVD Write)
-        public const string TempFolderPath = SystemRootPath + "\\Raywatt\\Temp";
-
         //Log Folder
         public const string LogFolderPath = SystemRootPath + "\\Raywatt\\log";
         public const string LogExtension = "*.log";
@@ -262,14 +243,18 @@ namespace RaywattApp.Common.Bases
         public const double CrossSectionSize = 620;
         public const double CrossSectionCenter = CrossSectionSize / 2;
         public const double CalciumIndicatorSize = 645;
+        public const double CalciumIndicatorAngioSize = 490;
         public const double CalciumThicknessIndicatorSize = 681;
+        public const double CalciumThicknessIndicatorAngioSize = 510;
         public const double CalciumThicknessIndicatorCenter = CalciumThicknessIndicatorSize / 2;
+        public const double CalciumThicknessIndicatorCenterAngio = CalciumThicknessIndicatorAngioSize / 2;
         public static System.Windows.Point CalciumThicknessIndicatorPointCenter = new System.Windows.Point(CalciumThicknessIndicatorCenter, CalciumThicknessIndicatorCenter);
+        public static System.Windows.Point CalciumThicknessIndicatorPointCenterAngio = new System.Windows.Point(CalciumThicknessIndicatorCenterAngio, CalciumThicknessIndicatorCenterAngio);
         public const int CalciumIndicatorColor = 0x57FEEB;
 
         //Review - 2D - Angio
         public const double AngioSize = 580;
-        public const double CrossSectionAngio = 292;
+        public const double CrossSectionAngio = 470;
         public const double CrossSectionAngioCenter = CrossSectionAngio / 2;
         public const double CrossSectionAngioScale = CrossSectionAngio / CrossSectionSize;
         public const double CoRegZoomAngioSize = 382;
@@ -282,19 +267,34 @@ namespace RaywattApp.Common.Bases
         public const double LongitudeScale = LongitudeWidth / 10;
         public const double LongitudeIndicatorWidth = 22;
         public const double LongitudeIndicatorHeight = 116;
+        public const double SectionIndicatorWidth = 7.5;
+        public const double SectionIndicatorCenterWidth = 1;
+        public const double SectionValueWidth = 24;
+        public const double SectionValueCenterWidth = 0.25;
+        public const double LumenProfileExtraHeight = 6;
 
         //Review - 2D - Side Menu
         public const string LeftUpMenu = "LeftUpMenu";
         public const string LeftDownMenu = "LeftDownMenu";
         public const string RightMenu = "RightMenu";
         public const double SideBarCollapseSize = 70;
-        public const double LeftSideBarExpandSize = 240;
-        public const double RightSideBarExpandAngioSize = 340;
-        public const double RightSideBarExpandDefaultSize = 240;
+        public const double SideBarExpandSize = 240;
 
         //Review - 2D - Longitude
         public const string LongitudeProfile = "Profile";
         public const string LongitudeLMode = "LMode";
+
+        //Review - 3D - Cut View
+        public const double CutView3dX = 98;
+        public const double CutView3dY = 120;
+        public const double CutView3dWidth = 736;
+        public const double CutView3dHeight = 560;
+
+        //Review - 3D - Fly Through View
+        public const double FlyThroughView3dX = 886;
+        public const double FlyThroughView3dY = 216;
+        public const double FlyThroughView3dWidth = 368;
+        public const double FlyThroughView3dHeight = 368;
 
         //Review - 3D - Cross Section
         public const double CrossSection3dSize = 180;
@@ -307,6 +307,11 @@ namespace RaywattApp.Common.Bases
         public const double Longitude3dScale = Longitude3dWidth / 10;
         public const double LongitudeIndicator3dHeight = 161;
 
+        //Review - 3D - Side Menu
+        public const double LeftSideBarExpand3dSize = 329;
+        public const double ViewMenu3dY = 70;
+        public const double PatientMenu3dY = 409;
+
         //Review - Compare - Cross Section
         public const double CrossSectionCompareSize = 278;
         public const double CrossSectionCompareCenter = CrossSectionCompareSize / 2;
@@ -316,6 +321,7 @@ namespace RaywattApp.Common.Bases
         public const double LongitudeCompareHeight = 170;
         public const double LongitudeCompareScale = (LongitudeCompareWidth - 1) / 10;
         public const double LongitudeIndicatorCompareHeight = 177;
+        public const double LumenProfileExtraCompareHeight = 6;
 
         //Review - Compare - Side Menu
         public const double SelectPreCaseExpandSize = 460;
@@ -382,8 +388,9 @@ namespace RaywattApp.Common.Bases
         public const string LumenContourCurrentInit = "Init";
 
         //Scale
-        public const double ScaleLength = 100;
-        public const double ScaleArea = ScaleLength * ScaleLength;
+        public const string ScaleLength = "Length";
+        public const string ScaleArea = "Area";
+        public const double MillimeterPerPixel  = 0.0082;
 
         //Mini-Map
         public const double MiniMapBorderSize = 140;
@@ -392,7 +399,6 @@ namespace RaywattApp.Common.Bases
         //Zoom
         public const double ZoomScaleDefault = CrossSectionSize / OCTImageSize;
         public const double ZoomScaleMax = ZoomScaleDefault * 2;
-
 
         //Recording
         public const int TransientTime = 3000;

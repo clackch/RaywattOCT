@@ -29,14 +29,8 @@
                 <StackPanel Width="70"/>
                 <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [2D], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewPage}"/>
                 <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [3D], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.Review3dPage}"/>
-                <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [Compare], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewComparePage}"/>
-                <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [AI FFR], Source={StaticResource L10N}}" IsChecked="True"/>
-            </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                <component:IconButton Style="{StaticResource IconButton}" Icon="editPresetSimple" Width="42" Height="42" Command="{Binding EditPresetCommand}" Content="{Binding [Edit Preset], Source={StaticResource L10N}}"/>
-                <StackPanel Width="6"/>
-                <component:IconButton Style="{StaticResource IconButton}" Icon="exportSimple" Width="42" Height="42" Command="{Binding ExportCommand}" Content="{Binding [Export], Source={StaticResource L10N}}"/>
-                <StackPanel Width="118"/>
+                <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [Compare], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewComparePage}" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$002|$003}"/>
+                <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [AI FFR], Source={StaticResource L10N}}" IsChecked="True" IsEnabled="False"/>
             </StackPanel>
         </Grid>
 
@@ -73,7 +67,7 @@
                 </StackPanel>
             </Grid>
             <Grid Grid.Row="1">
-                <Image Source="/res/png/ffrCrossSectionImage.png" Width="380" Height="380" HorizontalAlignment="Left" Margin="8,0,0,0"/>
+                <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="380" Height="380" HorizontalAlignment="Left" Margin="8,0,0,0"/>
                 <Image Source="{svgc:SvgImage Source=/res/icon/ffrCrossSectionCircle.svg}" Width="396" Height="396" HorizontalAlignment="Left"/>
                 <ProgressBar Style="{DynamicResource FfrProgressBar}" Value="{Binding FfrProgress}" Width="170" Height="228.7" HorizontalAlignment="Left" Margin="420,0,0,0"/>
                 <Image Source="{svgc:SvgImage Source=/res/icon/ffrHeart.svg}" Width="170" Height="228.7" HorizontalAlignment="Left" Margin="420,0,0,0"/>
@@ -92,37 +86,37 @@
                 </StackPanel>
             </Grid>
             <Border Grid.Row="3" CornerRadius="10" Background="{DynamicResource GrayscaleGray7Brush}">
-                <Grid>
+                <Grid Margin="32,28,28,28">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="203"/>
+                        <ColumnDefinition Width="38"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
                         <ColumnDefinition/>
                         <ColumnDefinition Width="228"/>
                     </Grid.ColumnDefinitions>
-                    <Grid Grid.Column="0" Margin="32,28,0,28">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="200"/>
-                            <ColumnDefinition Width="200"/>
-                            <ColumnDefinition Width="200"/>
-                            <ColumnDefinition Width="200"/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="21"/>
-                            <RowDefinition/>
-                            <RowDefinition Height="21"/>
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <Label Grid.Row="0" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Model], Source={StaticResource L10N}}"/>
-                        <Label Grid.Row="1" Grid.Column="0" Style="{DynamicResource Pretendard-Bold-26}" Margin="0,5,0,0" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Four Features], Source={StaticResource L10N}}"/>
-                        <Label Grid.Row="0" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [% of Stenosis], Source={StaticResource L10N}}"/>
-                        <Label Grid.Row="1" Grid.Column="1" Style="{DynamicResource Pretendard-Bold-26}" Margin="0,5,0,0" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [80.47], Source={StaticResource L10N}}"/>
-                        <Label Grid.Row="0" Grid.Column="2" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pre-PLT], Source={StaticResource L10N}}"/>
-                        <Label Grid.Row="1" Grid.Column="2" Style="{DynamicResource Pretendard-Bold-26}" Margin="0,5,0,0" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [0], Source={StaticResource L10N}}"/>
-                        <Label Grid.Row="2" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Lesion Length], Source={StaticResource L10N}}"/>
-                        <Label Grid.Row="3" Grid.Column="0" Style="{DynamicResource Pretendard-Bold-26}" Margin="0,5,0,0" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [10.27], Source={StaticResource L10N}}"/>
-                        <Label Grid.Row="2" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [HTN], Source={StaticResource L10N}}"/>
-                        <Label Grid.Row="3" Grid.Column="1" Style="{DynamicResource Pretendard-Bold-26}" Margin="0,5,0,0" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [1.0], Source={StaticResource L10N}}"/>
-                    </Grid>
-                    <Grid Grid.Column="1" Margin="0,113,28,28">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Label Grid.Column="0" Grid.Row="0" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Model], Source={StaticResource L10N}}"/>
+                    <Label Grid.Column="0" Grid.Row="1" Style="{DynamicResource Pretendard-Bold-26}" Margin="0,5,0,0" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Random Forest], Source={StaticResource L10N}}"/>
+                    <Separator Grid.Column="1" Grid.RowSpan="4" Width="1" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Background="{DynamicResource SeparatorBrush}" HorizontalAlignment="Left" Margin="0"/>
+                    <Label Grid.Column="2" Grid.Row="0" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Percent Area Stenosis], Source={StaticResource L10N}}"/>
+                    <Label Grid.Column="2" Grid.Row="1" Style="{DynamicResource Pretendard-Bold-26}" Margin="0,5,0,0" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FfrFeature.PercentAreaStenosis}"/>
+                    <Label Grid.Column="2" Grid.Row="2" Style="{DynamicResource Pretendard-Medium-18}" Margin="0,23,0,0" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Lesion Length], Source={StaticResource L10N}}"/>
+                    <Label Grid.Column="2" Grid.Row="3" Style="{DynamicResource Pretendard-Bold-26}" Margin="0,5,0,0" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FfrFeature.LesionLength}"/>
+                    <Label Grid.Column="3" Grid.Row="0" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Minimal Lumen Area], Source={StaticResource L10N}}"/>
+                    <Label Grid.Column="3" Grid.Row="1" Style="{DynamicResource Pretendard-Bold-26}" Margin="0,5,0,0" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FfrFeature.MinimalLumenArea}"/>
+                    <Label Grid.Column="3" Grid.Row="2" Style="{DynamicResource Pretendard-Medium-18}" Margin="0,23,0,0" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Plaque Area], Source={StaticResource L10N}}"/>
+                    <Label Grid.Column="3" Grid.Row="3" Style="{DynamicResource Pretendard-Bold-26}" Margin="0,5,0,0" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FfrFeature.PlaqueArea}"/>
+                    <Label Grid.Column="4" Grid.Row="0" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Distal Lumen Area], Source={StaticResource L10N}}"/>
+                    <Label Grid.Column="4" Grid.Row="1" Style="{DynamicResource Pretendard-Bold-26}" Margin="0,5,0,0" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FfrFeature.DistalLumenArea}"/>
+                    <Label Grid.Column="4" Grid.Row="2" Style="{DynamicResource Pretendard-Medium-18}" Margin="0,23,0,0" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Proximal Lumen Area], Source={StaticResource L10N}}"/>
+                    <Label Grid.Column="4" Grid.Row="3" Style="{DynamicResource Pretendard-Bold-26}" Margin="0,5,0,0" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FfrFeature.ProximalLumenArea}"/>
+                    <Grid Grid.Column="5" Grid.RowSpan="4" Margin="0,85,0,0" HorizontalAlignment="Right">
                         <Button Style="{StaticResource FfrPredictBtn}" Command="{Binding FfrPredictCommand}" Content="{Binding [Predict FFR], Source={StaticResource L10N}}"/>
                     </Grid>
                 </Grid>

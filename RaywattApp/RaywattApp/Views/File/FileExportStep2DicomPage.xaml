@@ -66,7 +66,7 @@
                         <CheckBox IsChecked="{Binding FileExport.MeasureManual}" Content="{Binding [Manual], Source={StaticResource L10N}}" Margin="35,0,0,0"/>
                     </StackPanel>
                     <Separator Grid.Row="3" Grid.ColumnSpan="3" Background="{DynamicResource GrayscaleGray5Brush}" Width="760" Height="1"/>
-                    <Label Grid.Row="4" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Margin="20,20,0,28" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Additional Option], Source={StaticResource L10N}}"/>
+                    <Label Grid.Row="4" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Margin="20,20,0,0" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Additional Option], Source={StaticResource L10N}}"/>
                     <CheckBox Grid.Row="4" Grid.Column="1" IsChecked="{Binding FileExport.PatientInfoAnonymize}" Margin="0,15,0,22" Content="{Binding [Patient Information Anonymize], Source={StaticResource L10N}}"/>
                 </Grid>
             </Border>
@@ -101,7 +101,7 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <ComboBox Grid.Column="0" Style="{DynamicResource ComboBoxDialog}" Width="280" ItemsSource="{Binding ExternalDriveComboBox}" SelectedValue="{Binding SelectedExternalDrive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectedValuePath="Key" DisplayMemberPath="Value" IsEnabled="{Binding IsEnableExternalDrive}" Tag="{Binding [No Drive], Source={StaticResource L10N}}" Margin="20,0,0,0"/>
-                        <TextBox Grid.Column="1" Style="{DynamicResource TextBoxWithCorner}" Width="386" IsReadOnly="True" Text="{Binding FileExport.ExternalDrivePath}" Tag="{Binding [Select destination path], Source={StaticResource L10N}}" Margin="12,0,0,0"/>
+                        <TextBox Grid.Column="1" Style="{DynamicResource TextBoxWithCorner}" Width="386" IsReadOnly="True" Text="{Binding FileExport.ExternalDrivePath}" Tag="{Binding [Select Destination Path], Source={StaticResource L10N}}" Margin="12,0,0,0"/>
                         <Button Grid.Column="2" Style="{StaticResource OutlinedBtnType1}" Width="72" Height="54" Command="{Binding ExternalDrivePathCommand}" Content="{Binding [Path], Source={StaticResource L10N}}" IsEnabled="{Binding IsEnableExternalDrive}" HorizontalAlignment="Left" Margin="10,0,0,0"/>
                     </Grid>
                     <Grid Grid.Row="5">

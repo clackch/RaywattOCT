@@ -46,8 +46,6 @@ protected:
 	bool m_bColor;
 	bool m_bShowCalibGuide;
 
-	std::vector<cv::Vec3b> m_vLUT;
-
 	int m_nCurFrame;
 	int m_nTotalFrame;
 
@@ -86,6 +84,8 @@ public:
 	Setting GetSetting() { return m_setting; }
 	void GetFrameInfo(int& nCurFrame, int& nTotalFrame) { nCurFrame = m_nCurFrame; nTotalFrame = m_nTotalFrame; }
 	void* GetCalibrationData();
+	int GetFoundSheathPosition() { return m_nSheathPosition; }
+	virtual void CircularizeImage(cv::Mat& src, cv::Mat& dst);
 
 	int GetSheathPosition() { return m_nSheathPosition; }
 protected:
@@ -99,10 +99,6 @@ protected:
 	void computeLogarithm(Ipp32f* src, Ipp32f* dst);
 	void generateImage(Ipp32f* logaritihmData, bool bInvert);
 	void findSheath(Ipp32f* logaritihmData);
-	void circularizeImage(cv::Mat& src, cv::Mat& dst);
-	void applyHotColor(cv::Mat& image);
-	void loadLUT(const char* strLUTPath);
-	void applyLUT(cv::Mat& image);
 	void drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color);
 
 	static UINT threadRender(LPVOID param);

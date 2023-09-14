@@ -124,7 +124,7 @@ namespace RaywattApp.ViewModels
 
                 if (nCnt > 0)
                 {
-                    PatientEdit.ValidateId = _l10n["ID is duplicated."];
+                    PatientEdit.ValidateId = _l10n["ID is duplicated"];
 
                     return;
                 }
@@ -154,6 +154,7 @@ namespace RaywattApp.ViewModels
                 CommonUtil.RenameFolder(Constants.DataRootPath + "\\" + Patient.Id.Trim(), Constants.DataRootPath + "\\" + PatientEdit.Id);
 
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
+                PatientEdit.Name = PatientEdit.Firstname + ", " + PatientEdit.Lastname;
                 parameter["patient"] = PatientEdit;
                 SetDetailStatusInit();
                 parameter["prevStatus"] = PrevStatus;
@@ -216,7 +217,7 @@ namespace RaywattApp.ViewModels
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["title"] = _l10n["Information"];
-            parameter["message"] = _l10n["Are you sure to delete patient?"];
+            parameter["message"] = _l10n["Confirm deletion of selected patient"];
             var result = _dialogService.OpenDialog(new ConfirmDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
             if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)

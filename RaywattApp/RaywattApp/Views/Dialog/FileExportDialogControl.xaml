@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:RaywattApp.Views.Dialog"
              xmlns:const="clr-namespace:RaywattApp.Common.Bases"
              xmlns:annotation="clr-namespace:RaywattApp.Common.Annotation"
+             xmlns:component="clr-namespace:RaywattApp.Views.Component"
              xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
              mc:Ignorable="d" 
              x:Name="ReviewExport"
@@ -23,31 +24,49 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <StackPanel Orientation="Horizontal">
+            <Grid Width="{Binding ImagePartWidth}">
                 <!-- Angio -->
-                <Grid Width="{x:Static const:Constants.ExportAngioSize}" Height="{x:Static const:Constants.ExportAngioSize}" Visibility="{Binding FileExport.AngioView, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Grid Width="{x:Static const:Constants.ExportAngioSize}" Height="{x:Static const:Constants.ExportAngioSize}" Visibility="{Binding FileExport.AngioView, Converter={StaticResource BoolToVisibilityConverter}}" HorizontalAlignment="Left">
                     <Image Source="/res/png/angioImage.png" Stretch="Fill"/>
                 </Grid>
                 <!-- Cross-Section -->
-                <Grid Width="{Binding CrossSectionPartWidth}">
+                <Grid Width="{Binding CrossSectionPartWidth}" HorizontalAlignment="Right">
                     <Grid Width="{Binding CrossSectionSize}" Height="{Binding CrossSectionSize}">
                         <Grid Width="{Binding CrossSectionImageSize}" Height="{Binding CrossSectionImageSize}">
                             <!-- Cross Seciton Image -->
                             <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{Binding CrossSectionImageSize}" Height="{Binding CrossSectionImageSize}"/>
                             <!-- Cross Section Info. -->
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left">
-                                <Label Content="F : " Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource SideMenuTitleBrush}"/>
-                                <Label Content="{Binding DisplayFrameNumber}" Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource SideMenuTitleBrush}" />
+                                <Label Content="F" Style="{DynamicResource Pretendard-ExtraBold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+                                <StackPanel Width="6"/>
+                                <Label Content="{Binding DisplayFrameNumber}" Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" />
                             </StackPanel>
                             <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Right">
-                                <Separator Width="{Binding CrossSectionScale}" Height="1"/>
+                                <Label Content="1 ㎜" Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
                                 <StackPanel Height="4"/>
-                                <Label Content="1 mm" Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
+                                <Grid>
+                                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="5" Width="1" Margin="0" HorizontalAlignment="Left"/>
+                                    <Separator Width="{Binding CrossSectionScale}" Height="1" Margin="0"/>
+                                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="5" Width="1" Margin="0" HorizontalAlignment="Right"/>
+                                </Grid>
                             </StackPanel>
                             <!-- Lumen Contour-->
                             <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}"  FrameNumber="{Binding MeasureAutoFrameNumber}" IsEditOn="False" IsDrawOn="{Binding FileExport.MeasureAuto}" Zoom="{Binding Zoom}"/>
                             <!-- Measurement -->
                             <annotation:DrawUtil Measurements="{Binding Measurements}" FrameNumber="{Binding MeasureManualFrameNumber}" Zoom="{Binding Zoom}" IsEditOn="False" IsDrawOn="{Binding FileExport.MeasureManual}"/>
+                        </Grid>
+                        <!-- Calcium Indicator -->
+                        <Grid Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$001}">
+                            <Image x:Name="CalciumIndicatorAngio" Width="{Binding CalciumIndicatorSize}" Height="{Binding CalciumIndicatorSize}" Source="{Binding CalciumIndicator}"/>
+                            <Grid Width="{Binding CalciumThicknessIndicatorSize}" Height="{Binding CalciumThicknessIndicatorSize}" Background="Transparent" Visibility="{Binding MaxCalciumDegree, Converter={StaticResource MaxThicknessVisibilityConverter}}">
+                                <Grid.Clip>
+                                    <EllipseGeometry Center="{Binding CalciumThicknessIndicatorPointCenter}" RadiusX="{Binding CalciumThicknessIndicatorCenter}" RadiusY="{Binding CalciumThicknessIndicatorCenter}"/>
+                                </Grid.Clip>
+                                <Image Width="8" Height="10" Source="{svgc:SvgImage Source=/res/icon/thicknessIndicator.svg}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                                <Grid.RenderTransform>
+                                    <RotateTransform CenterX="{Binding CalciumThicknessIndicatorCenter}" CenterY="{Binding CalciumThicknessIndicatorCenter}" Angle="{Binding MaxCalciumDegree}"/>
+                                </Grid.RenderTransform>
+                            </Grid>
                         </Grid>
                         <!-- Indicator -->
                         <Image Source="{svgc:SvgImage Source=/res/indicator/crossSectionExport.svg}" Width="619" Height="16" Visibility="{Binding FileExport.Longitude, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -57,7 +76,7 @@
                         </Image>
                     </Grid>
                 </Grid>
-            </StackPanel>
+            </Grid>
             <!-- Longitude -->
             <Grid Grid.Row="1" Width="{x:Static const:Constants.ExportLongitudeWidth}" Height="{x:Static const:Constants.ExportLongitudeHeight}" Background="{DynamicResource GrayscaleGray8Brush}" Visibility="{Binding FileExport.Longitude, Converter={StaticResource BoolToVisibilityConverter}}">
                 <Grid.ColumnDefinitions>
@@ -85,6 +104,51 @@
                         <RowDefinition Height="47"/>
                     </Grid.RowDefinitions>
 
+                    <!-- Calcium/Expansion/Apposition -->
+                    <StackPanel Grid.Row="0" Margin="0,2,-67,0" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                        <StackPanel Orientation="Horizontal" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$001}">
+                            <Border CornerRadius="4" Background="{StaticResource GrayscaleGray7Brush}">
+                                <StackPanel Orientation="Horizontal" Margin="2,1,2,1">
+                                    <Image Source="{svgc:SvgImage Source=/res/icon/calciumIcon.svg}" Width="14" Height="14"/>
+                                    <StackPanel Width="6"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Calcium], Source={StaticResource L10N}}"/>
+                                    <StackPanel Width="4"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [≥], Source={StaticResource L10N}}"/>
+                                    <StackPanel Width="4"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding PatientCase.CalciumThreshold}"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [º], Source={StaticResource L10N}}"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$002|$003}">
+                            <Border CornerRadius="4" Background="{StaticResource GrayscaleGray7Brush}">
+                                <StackPanel Orientation="Horizontal" Margin="2,1,2,1">
+                                    <Image Source="{svgc:SvgImage Source=/res/icon/expansionIcon.svg}" Width="14" Height="14"/>
+                                    <StackPanel Width="6"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Expansion], Source={StaticResource L10N}}"/>
+                                    <StackPanel Width="4"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [≤], Source={StaticResource L10N}}"/>
+                                    <StackPanel Width="4"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding PatientCase.ExpansionThreshold}"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [%], Source={StaticResource L10N}}"/>
+                                </StackPanel>
+                            </Border>
+                            <StackPanel Width="6"/>
+                            <Border CornerRadius="4" Background="{StaticResource GrayscaleGray7Brush}">
+                                <StackPanel Orientation="Horizontal" Margin="2,1,2,1">
+                                    <Image Source="{svgc:SvgImage Source=/res/icon/appositionIcon.svg}" Width="14" Height="14"/>
+                                    <StackPanel Width="6"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Apposition], Source={StaticResource L10N}}"/>
+                                    <StackPanel Width="4"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [≥], Source={StaticResource L10N}}"/>
+                                    <StackPanel Width="4"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding PatientCase.AppositionThreshold}"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [㎜], Source={StaticResource L10N}}"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </StackPanel>
+
                     <!-- Longitude Image -->
                     <Grid Grid.Row="1">
                         <Grid.RowDefinitions>
@@ -107,15 +171,77 @@
                         <Grid Grid.Row="1" Width="{x:Static const:Constants.ExportLongitudeImageWidth}" Height="{x:Static const:Constants.ExportLongitudeImageHeight}">
                             <Image Source="{Binding LongitudeImage}" Stretch="Fill"/>
                             <!-- Measurement -->
-                            <annotation:DrawLmodeUtil Zoom="{Binding LongitudeZoom}" LModeLengthGeometries="{Binding LModeLengthGeometries}" LModeTextGeometries="{Binding LModeTextGeometries}" InCommand="{Binding MeasurementCommand}" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                            <annotation:DrawLmodeUtil Zoom="{Binding LongitudeZoom}" LModeLengthGeometries="{Binding LModeLengthGeometries}" LModeTextGeometries="{Binding LModeTextGeometries}" PullbackLength="{Binding PatientCase.PullbackLength}" InCommand="{Binding MeasurementCommand}" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" VerticalAlignment="Top" HorizontalAlignment="Left"/>
                         </Grid>
                         <!-- L-Mode Indicator -->
                         <Canvas>
+                            <!-- Section MLA -->
+                            <Image Style="{DynamicResource SectionExportLeftRight}" Canvas.Left="{Binding Section.Mla.X}" Visibility="{Binding Section.Mla.IsVisible}" Tag="{Binding Section.Mla.StrValue}"/>
+                            <Border Margin="0,-27,0,9" Canvas.Left="{Binding Section.MlaValue.X}" Visibility="{Binding Section.MlaValue.IsVisible}" CornerRadius="4" BorderBrush="{StaticResource GrayscaleGray2Brush}" BorderThickness="0.5">
+                                <StackPanel Orientation="Horizontal" Margin="9,0,9,0" VerticalAlignment="Center">
+                                    <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [MLA], Source={StaticResource L10N}}"/>
+                                    <StackPanel Width="2"/>
+                                    <TextBlock Style="{DynamicResource TextBlock_Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Text="{Binding Section.MlaValue.DValue, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleArea}}"/>
+                                    <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [㎟], Source={StaticResource L10N}}"/>
+                                </StackPanel>
+                            </Border>
+                            <!-- Section MLD -->
+                            <Image Style="{DynamicResource SectionExportLeftRight}" Canvas.Left="{Binding Section.Mld.X}" Visibility="{Binding Section.Mld.IsVisible}" Tag="{Binding Section.Mld.StrValue}"/>
+                            <Border Margin="0,-27,0,9" Canvas.Left="{Binding Section.MldValue.X}" Visibility="{Binding Section.MldValue.IsVisible}" CornerRadius="4" BorderBrush="{StaticResource GrayscaleGray2Brush}" BorderThickness="0.5">
+                                <StackPanel Orientation="Horizontal" Margin="9,0,9,0" VerticalAlignment="Center">
+                                    <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [MLD], Source={StaticResource L10N}}"/>
+                                    <StackPanel Width="2"/>
+                                    <TextBlock Style="{DynamicResource TextBlock_Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Text="{Binding Section.MldValue.DValue, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}"/>
+                                    <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [㎜], Source={StaticResource L10N}}"/>
+                                </StackPanel>
+                            </Border>
+                            <!-- Section MSA -->
+                            <Image Style="{DynamicResource SectionExportLeftRight}" Canvas.Left="{Binding Section.Msa.X}" Visibility="{Binding Section.Msa.IsVisible}" Tag="{Binding Section.Msa.StrValue}"/>
+                            <Border Margin="0,-27,0,9" Canvas.Left="{Binding Section.MsaValue.X}" Visibility="{Binding Section.MsaValue.IsVisible}" CornerRadius="4" BorderBrush="{StaticResource GrayscaleGray2Brush}" BorderThickness="0.5">
+                                <StackPanel Orientation="Horizontal" Margin="9,0,9,0" VerticalAlignment="Center">
+                                    <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [MSA], Source={StaticResource L10N}}"/>
+                                    <StackPanel Width="2"/>
+                                    <TextBlock Style="{DynamicResource TextBlock_Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Text="{Binding Section.MsaValue.DValue, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleArea}}"/>
+                                    <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [㎟], Source={StaticResource L10N}}"/>
+                                </StackPanel>
+                            </Border>
+                            <!-- Section Min Exp -->
+                            <Image Style="{DynamicResource SectionExportLeftRight}" Canvas.Left="{Binding Section.MinExp.X}" Visibility="{Binding Section.MinExp.IsVisible}" Tag="{Binding Section.MinExp.StrValue}"/>
+                            <Border Margin="0,-27,0,9" Canvas.Left="{Binding Section.MinExpValue.X}" Visibility="{Binding Section.MinExpValue.IsVisible}" CornerRadius="4" BorderBrush="{StaticResource GrayscaleGray2Brush}" BorderThickness="0.5">
+                                <StackPanel Orientation="Horizontal" Margin="9,0,9,0" VerticalAlignment="Center">
+                                    <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Min Exp.], Source={StaticResource L10N}}"/>
+                                    <StackPanel Width="2"/>
+                                    <component:PercentValueComponent Style="{DynamicResource TextBlock_Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Value="{Binding Section.MinExpValue.DValue}" Overall="{Binding Section.RefArea}">
+                                        <TextBlock.Text>
+                                            <MultiBinding Converter="{StaticResource ExpansionConverter}">
+                                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Value"/>
+                                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Overall"/>
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </component:PercentValueComponent>
+                                    <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [%], Source={StaticResource L10N}}"/>
+                                </StackPanel>
+                            </Border>
+                            <!-- Section Lesion Length -->
+                            <Line Canvas.Left="{Binding Section.LesionProximal}" HorizontalAlignment="Stretch" Stroke="{StaticResource GrayscaleGray2Brush}" StrokeDashArray="2 3" StrokeThickness="1" X1="{Binding Section.LesionLengthWidth}" Margin="0,135,0,0"/>
+                            <Line Canvas.Left="{Binding Section.LesionDistal}" HorizontalAlignment="Stretch" Stroke="{StaticResource GrayscaleGray2Brush}" StrokeDashArray="2 3" StrokeThickness="1" X1="{Binding Section.LesionLengthWidth}" Margin="0,135,0,0"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,128,0,0" Canvas.Left="{Binding Section.LesionLength.X}" Visibility="{Binding Section.LesionLength.IsVisible}">
+                                <TextBlock Style="{DynamicResource TextBlock_Pretendard-Semibold-10}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Text="{Binding Section.LesionLength.DValue, StringFormat={}{0:N1}}"/>
+                                <StackPanel Width="1"/>
+                                <Label Style="{DynamicResource Pretendard-Medium-10}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [㎜], Source={StaticResource L10N}}"/>
+                            </StackPanel>
+                            <!-- Section Proximal -->
+                            <Image Height="140" Source="{svgc:SvgImage Source=/res/indicator/sectionProximalExport.svg}" Canvas.Left="{Binding Section.Proximal.X}" Visibility="{Binding Section.Proximal.IsVisible}"/>
+                            <!-- Section Distal -->
+                            <Image Height="140" Source="{svgc:SvgImage Source=/res/indicator/sectionDistalExport.svg}" Canvas.Left="{Binding Section.Distal.X}" Visibility="{Binding Section.Distal.IsVisible}"/>
                             <Image Source="{svgc:SvgImage Source=/res/indicator/longitudeExport.svg}" Width="12" Height="286.5" Stretch="None" Canvas.Left="{Binding IndicatorLongitude.X}" Margin="0,-6,0,0"/>
                         </Canvas>
                     </Grid>
                     <!-- Bookmark Scale -->
-                    <ContentControl Grid.Row="2" Template="{DynamicResource LongitudeScaleBarExport}" Width="{x:Static const:Constants.ExportLongitudeImageWidth}" Tag="{Binding PatientCase.PullbackType}"/>
+                    <ContentControl Grid.Row="2" Template="{DynamicResource LongitudeScaleBarExport}" Width="{x:Static const:Constants.ExportLongitudeImageWidth}" Tag="{Binding PatientCase.PullbackLength}"/>
+
+                    <!-- Lumen Profile Extra : Expansion -->
+                    <Image Grid.Row="3" VerticalAlignment="Top" Margin="0,13,0,0" Source="{Binding LumenProfileImageExtra}" Width="{x:Static const:Constants.ExportLongitudeImageWidth}" Height="{x:Static const:Constants.LumenProfileExtraCompareHeight}" Stretch="Fill"/>
                 </Grid>
             </Grid>
         </Grid>
@@ -142,24 +268,31 @@
                                 <StackPanel Height="10"/>
                                 <StackPanel Height="88" Orientation="Horizontal">
                                     <TextBlock Text="{Binding CurrentLumenContour.MeanDiameter, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}" Style="{DynamicResource TextBlock_Pretendard-Bold-74}" Foreground="{DynamicResource ValueInfoValueBrush}" MinWidth="160"/>
-                                    <Label Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-28}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom" Margin="0,0,0,5"/>
+                                    <Label Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-28}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom" Margin="0,0,0,5"/>
                                 </StackPanel>
                                 <StackPanel Height="4"/>
                                 <StackPanel Height="29" Orientation="Horizontal">
                                     <Label Content="{Binding [Min], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource ValueInfoLabelBrush}" MinWidth="73"/>
                                     <TextBlock Text="{Binding CurrentLumenContour.MinDiameter.value, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}" Style="{DynamicResource TextBlock_Pretendard-Bold-24}" Foreground="{DynamicResource ValueInfoValueBrush}" MinWidth="80"/>
-                                    <Label Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource ValueInfoLabelBrush}"/>
+                                    <Label Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource ValueInfoLabelBrush}"/>
                                 </StackPanel>
                                 <StackPanel Height="2"/>
                                 <StackPanel Height="29" Orientation="Horizontal">
                                     <Label Content="{Binding [Max], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource ValueInfoLabelBrush}" MinWidth="73"/>
                                     <TextBlock Text="{Binding CurrentLumenContour.MaxDiameter.value, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}" Style="{DynamicResource TextBlock_Pretendard-Bold-24}" Foreground="{DynamicResource ValueInfoValueBrush}" MinWidth="80"/>
-                                    <Label Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource ValueInfoLabelBrush}"/>
+                                    <Label Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource ValueInfoLabelBrush}"/>
                                 </StackPanel>
                                 <StackPanel Height="2"/>
                                 <StackPanel Height="29" Orientation="Horizontal">
                                     <Label Content="{Binding [%DS], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource ValueInfoLabelBrush}" MinWidth="73"/>
-                                    <TextBlock Text="00.0" Style="{DynamicResource TextBlock_Pretendard-Bold-24}" Foreground="{DynamicResource ValueInfoValueBrush}" MinWidth="80"/>
+                                    <component:PercentValueComponent Style="{DynamicResource TextBlock_Pretendard-Bold-24}" Foreground="{DynamicResource ValueInfoValueBrush}" MinWidth="80" Value="{Binding CurrentLumenContour.MeanDiameter}" Overall="{Binding Section.MeanDiameter}">
+                                        <TextBlock.Text>
+                                            <MultiBinding Converter="{StaticResource AsDsConverter}">
+                                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Value"/>
+                                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Overall"/>
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </component:PercentValueComponent>
                                 </StackPanel>
                             </StackPanel>
                             <StackPanel Grid.Column="1">
@@ -172,13 +305,20 @@
                                 <StackPanel Height="4"/>
                                 <StackPanel Height="29" Orientation="Horizontal">
                                     <Label Content="{Binding [%AS], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource ValueInfoLabelBrush}" MinWidth="73"/>
-                                    <TextBlock Text="00.0" Style="{DynamicResource TextBlock_Pretendard-Bold-24}" Foreground="{DynamicResource ValueInfoValueBrush}" MinWidth="80"/>
+                                    <component:PercentValueComponent Style="{DynamicResource TextBlock_Pretendard-Bold-24}" Foreground="{DynamicResource ValueInfoValueBrush}" MinWidth="80" Value="{Binding CurrentLumenContour.Area}" Overall="{Binding Section.MeanArea}">
+                                        <TextBlock.Text>
+                                            <MultiBinding Converter="{StaticResource AsDsConverter}">
+                                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Value"/>
+                                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Overall"/>
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </component:PercentValueComponent>
                                 </StackPanel>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
                     <Separator Grid.Row="1" Background="{DynamicResource SeparatorBrush}"/>
-                    <StackPanel Grid.Row="2">
+                    <StackPanel Grid.Row="2" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$001}">
                         <StackPanel Height="28"/>
                         <Label Content="{Binding [Calcium], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-38}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                         <StackPanel Height="20"/>
@@ -191,17 +331,68 @@
                                 <Label Content="{Binding [Total Angle], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-28}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                 <StackPanel Height="10"/>
                                 <StackPanel Height="88" Orientation="Horizontal">
-                                    <TextBlock Text="200" Style="{DynamicResource TextBlock_Pretendard-Bold-74}" Foreground="{DynamicResource ValueInfoValueBrush}"/>
-                                    <Label Content="{Binding [º], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-74}" Foreground="{DynamicResource ValueInfoValueBrush}"/>
+                                    <TextBlock Text="{Binding TotalAngle}" Style="{DynamicResource TextBlock_Pretendard-Bold-64}" Foreground="{DynamicResource SubPointColor1Brush}"/>
+                                    <Label Content="{Binding [º], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-64}" Foreground="{DynamicResource SubPointColor1Brush}"/>
                                 </StackPanel>
                             </StackPanel>
                             <StackPanel Grid.Column="1">
                                 <Label Content="{Binding [Max Thickness], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-28}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                 <StackPanel Height="10"/>
                                 <StackPanel Height="88" Orientation="Horizontal">
-                                    <TextBlock Text="0.00" Style="{DynamicResource TextBlock_Pretendard-Bold-74}" Foreground="{DynamicResource ValueInfoValueBrush}" MinWidth="160"/>
-                                    <Label Content="{Binding [mm], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-28}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom" Margin="0,0,0,5"/>
+                                    <TextBlock Text="{Binding MaxThickness}" Style="{DynamicResource TextBlock_Pretendard-Bold-64}" Foreground="{DynamicResource ValueInfoValueBrush}" MinWidth="140"/>
+                                    <Label Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-28}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom" Margin="0,0,0,20"/>
                                 </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                    <StackPanel Grid.Row="2" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$002|$003}">
+                        <StackPanel Height="28"/>
+                        <Label Content="{Binding [Stent], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-38}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                        <StackPanel Height="20"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="238"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <Label Content="{Binding [Expansion], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-28}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                <StackPanel Height="10"/>
+                                <StackPanel Height="88" Orientation="Horizontal">
+                                    <component:PercentValueComponent Style="{DynamicResource TextBlock_Pretendard-Bold-64}" Foreground="{DynamicResource SubPointColor2Brush}" Value="{Binding CurrentLumenContour.Area}" Overall="{Binding Section.RefArea}">
+                                        <TextBlock.Text>
+                                            <MultiBinding Converter="{StaticResource ExpansionConverter}">
+                                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Value"/>
+                                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Overall"/>
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </component:PercentValueComponent>
+                                    <Label Content="{Binding [%], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-64}" Foreground="{DynamicResource SubPointColor2Brush}"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1">
+                                <Label Content="{Binding [Reference Lumen], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-28}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                <StackPanel Height="20"/>
+                                <Grid Height="80">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="auto"/>
+                                        <RowDefinition Height="10"/>
+                                        <RowDefinition Height="auto"/>
+                                        <RowDefinition Height="2"/>
+                                    </Grid.RowDefinitions>
+                                    <!-- Expansion 로직 확정 후, 변경 필요 -->
+                                    <Label Grid.Row="0" Grid.Column="0" Content="{Binding [Diameter], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-20}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Section.RefDiameter, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}" Style="{DynamicResource TextBlock_Pretendard-Bold-20}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
+                                    <Label Grid.Row="0" Grid.Column="3" Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                    <Label Grid.Row="2" Grid.Column="0" Content="{Binding [Area], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-20}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Section.RefArea, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleArea}}" Style="{DynamicResource TextBlock_Pretendard-Bold-20}" Foreground="{DynamicResource ValueInfoValueBrush}" HorizontalAlignment="Right"/>
+                                    <Label Grid.Row="2" Grid.Column="3" Content="{Binding [㎟], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
+                                </Grid>
                             </StackPanel>
                         </Grid>
                     </StackPanel>

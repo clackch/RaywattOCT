@@ -14,9 +14,8 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
 using RaywattApp.Common.Annotation.Models;
-using Newtonsoft.Json;
-using System.Windows;
 using System.Threading;
+using RaywattApp.Common.Util;
 
 namespace RaywattApp.ViewModels
 {
@@ -218,7 +217,7 @@ namespace RaywattApp.ViewModels
         {
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
-            sqlParameters["lumen_contour"] = JsonConvert.SerializeObject(PatientCase.LumenContour, Formatting.Indented);
+            sqlParameters["lumen_contour"] = CommonUtil.LumenContoursToJson(PatientCase.LumenContour);
             int nRows = _sqlManager.UpdatePatientCaseAnnotationLumenContour(sqlParameters);
             if (nRows == 0)
             {

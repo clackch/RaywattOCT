@@ -132,6 +132,7 @@
       <Command>xcopy "$(TargetDir)*.dll" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
 xcopy "$(TargetDir)raycore.ini" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
 xcopy "$(TargetDir)CALIBRATION.dat" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
+xcopy "$(TargetDir)BACKGROUND.bin" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
 xcopy "$(TargetDir)LUT.csv" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
 xcopy "$(SolutionDir)extern\libtorch\model\*.pt" "$(ProjectDir)..\..\RaywattOCT\bin\" /y
 xcopy "$(SolutionDir)extern\libtorch\lib\debug\*.dll" "$(ProjectDir)..\..\RaywattOCT\bin\" /y
@@ -139,6 +140,7 @@ xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattOC
 xcopy "$(TargetDir)*.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(TargetDir)raycore.ini" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(TargetDir)CALIBRATION.dat" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
+xcopy "$(TargetDir)BACKGROUND.bin" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(TargetDir)LUT.csv" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(SolutionDir)extern\libtorch\model\*.pt" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y
 xcopy "$(SolutionDir)extern\libtorch\lib\debug\*.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y
@@ -171,6 +173,7 @@ xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattAp
       <Command>xcopy "$(TargetDir)*.dll" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
 xcopy "$(TargetDir)raycore.ini" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
 xcopy "$(TargetDir)CALIBRATION.dat" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
+xcopy "$(TargetDir)BACKGROUND.bin" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
 xcopy "$(TargetDir)LUT.csv" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
 xcopy "$(SolutionDir)extern\libtorch\model\*.pt" "$(ProjectDir)..\..\RaywattOCT\bin\" /y
 xcopy "$(SolutionDir)extern\libtorch\lib\release\*.dll" "$(ProjectDir)..\..\RaywattOCT\bin\" /y
@@ -178,6 +181,7 @@ xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattOC
 xcopy "$(TargetDir)*.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(TargetDir)raycore.ini" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(TargetDir)CALIBRATION.dat" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
+xcopy "$(TargetDir)BACKGROUND.bin" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(TargetDir)LUT.csv" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(SolutionDir)extern\libtorch\model\*.pt" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y
 xcopy "$(SolutionDir)extern\libtorch\lib\release\*.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y
@@ -192,7 +196,6 @@ xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattAp
     <ClInclude Include="OCTSystem.h" />
     <ClInclude Include="import.h" />
     <ClInclude Include="RaywattCore.h" />
-    <ClInclude Include="VolumeGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Configuration.cpp" />
@@ -200,7 +203,6 @@ xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattAp
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="ImagingSession.cpp" />
     <ClCompile Include="OCTSystem.cpp" />
-    <ClCompile Include="VolumeGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

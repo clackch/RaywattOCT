@@ -40,7 +40,7 @@ namespace RaywattApp.ViewModels.Dialog
 
         public SettingDialogViewModel()
         {
-            PopupNavigationSource = Constants.SettingAcquisitionPage;
+            PopupNavigationSource = Constants.SettingPhysicianPage;
 
             WeakReferenceMessenger.Default.Register<PopupNavigationMessage>(this, OnPopupNavigationMessage);
         }

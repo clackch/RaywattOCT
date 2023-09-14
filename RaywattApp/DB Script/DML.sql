@@ -1,3 +1,11 @@
+-- rv_schema.configuration
+DELETE FROM rv_schema.configuration;
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('L10N', 'en-US', 'Y', '');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('L10N', 'ko-KR', 'N', '');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Terms&Cond', 'AgreeYN', 'N', '');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Present', 'brightness', '0', '');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Present', 'contrast', '39', '');
+
 -- rv_schema.code
 DELETE FROM rv_schema.code;
 -- GENDER
@@ -25,35 +33,32 @@ INSERT INTO rv_schema.code( classification, key, value, sort_order, description,
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PROC', '$001', 'Pre-PCI', 1, 'Procedure Pre-PCI', now(), now());
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PROC', '$002', 'Post-PCI', 2, 'Procedure Post-PCI', now(), now());
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PROC', '$003', 'Follow-Up', 3, 'Procedure Follow-Up', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PROC', '$OTH', 'Other', 4, 'Procedure Other', now(), now());
 -- PULLBACK TYPE
-INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PBTY', 'SHOR', '50 ㎜', 1, 'Pullback Type 50 ㎜', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PBTY', 'LONG', '75 ㎜', 2, 'Pullback Type 75 ㎜', now(), now());
--- EXPANSION CALCULATION
-INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('EXCC', 'TAPE', 'Tapered', 1, 'Expansion Calculation Tapered', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('EXCC', 'OTHE', 'Other', 2, 'Expansion Calculation Other', now(), now());
-
--- rv_schema.l10n
-DELETE FROM rv_schema.l10n;
-INSERT INTO rv_schema.l10n(lang, choice) VALUES ('en-US', TRUE);
-INSERT INTO rv_schema.l10n(lang, choice) VALUES ('ko-KR', FALSE);
+INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'STSH', 'Standard', '60|60|1', 1, 'Pullback Type Standard', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'STLO', 'Standard - Long', '100|100|1', 2, 'Pullback Type Standard - Long', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'HISH', 'High Resolution', '60|20|3', 3, 'Pullback Type High Resolution', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'HILO', 'High Resolution - Long', '100|40|2.5', 4, 'Pullback Type High Resolution - Long', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'FAST', 'Faster for specialized care', '60|120|0.5', 5, 'Pullback Type Faster for specialized care', now(), now());
+-- PULLBACK LENGTH
+INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PBLE', 'SHOR', '600', 1, 'Pullback Length Short', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PBLE', 'LONG', '1000', 2, 'Pullback Length Long', now(), now());
 
 -- rv_schema.patient_case_preset
+DELETE FROM rv_schema.patient_case_preset WHERE id = 'Default';
 INSERT INTO rv_schema.patient_case_preset(id, preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold, default_set, create_date, update_date) VALUES ('Default', 'Default', 180, 'TAPE', 90, 0.3, TRUE, now(), now());
 
 -- rv_schema.dicom_property
+DELETE FROM rv_schema.dicom_property;
 INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('ORG_RT', 'Organization Root', '1.2.410.200124');
 INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('APP_ID', 'Application ID', '1');
-INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('APP_VR', 'Application Version', '1');
-INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00020013', 'Implementation Version Name', 'Raywatt Version Name');
-INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00020016', 'Source Application Entity Title', 'Raywatt Title');
+INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00020013', 'Implementation Version Name', 'FasterDx');
+INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00020016', 'Source Application Entity Title', 'Raywatt Inc.');
 INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00080060', 'Modality', 'OCT');
 INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00080064', 'Conversion Type', 'SI');
-INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00080070', 'Manufacturer', 'Raywatt Manufacturer');
-INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00080080', 'Institution Name', 'XXX Hospital');
-INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00081090', 'Manufacturer''s Model Name', 'Raywatt Model Name');
+INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00080070', 'Manufacturer', 'Raywatt Inc.');
+INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00081090', 'Manufacturer''s Model Name', 'FASTER');
 INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00180015', 'Body Part Examined', 'HEART');
-INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00181016', 'Secondary Capture Device Manufacturer', 'Raywatt SC Device Manufacturer');
-INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00181018', 'Secondary Capture Device Manufacturer''s Model Name', 'Raywatt SC Device Manufacturer Model Name');
-INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00181019', 'Secondary Capture Device Software Versions', 'Raywatt SC Device SW Version');
-INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00181020', 'Software Version(s)', 'Raywatt SW Version');
+INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00181016', 'Secondary Capture Device Manufacturer', 'Raywatt Inc.');
+INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00181018', 'Secondary Capture Device Manufacturer''s Model Name', 'FASTER');
+INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00181019', 'Secondary Capture Device Software Versions', '1.00.00');
+INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00181020', 'Software Version(s)', '1.00.00');

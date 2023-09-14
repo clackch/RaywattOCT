@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using RaywattApp.Common.Bases;
+﻿using RaywattApp.Common.Bases;
 using System;
 using System.Globalization;
 using System.Windows;
@@ -13,16 +12,7 @@ namespace RaywattApp.Common.Converters
         {
             if(values == null || values[0] == null || values[1] == null || values.Length != 2) return new Thickness(0, 0, 0, 0);
 
-            double dValue = 0;
-
-            if (Constants.PullbackTypeLong.Equals(values[0].ToString()))
-            {
-                dValue = (double)values[1] / (Constants.PullbackLongFrameCnt / 100);
-            }
-            else
-            {
-                dValue = (double)values[1] / (Constants.PullbackShortFrameCnt / 100);
-            }            
+            double dValue = (double)values[1] / (int.Parse(CodeDefinition.Codes["PBLE"][values[0].ToString()]) / 100);
 
             if (parameter != null)
             {

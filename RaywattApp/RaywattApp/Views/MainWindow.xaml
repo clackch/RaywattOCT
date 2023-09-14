@@ -30,8 +30,8 @@
                     <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="home" Margin="14,9,0,9" Command="{Binding HomeCommand}" Visibility="{Binding IsHome, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="setting" Margin="0,9,6,9" Command="{Binding SettingCommand}"/>
-                    <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="power" Margin="0,9,12,9" Command="{Binding ExitCommand}"/>
+                    <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="setting" Margin="0,9,6,9" Command="{Binding SettingCommand}" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                    <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="power" Margin="0,9,12,9" Command="{Binding ExitCommand}" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
                 </StackPanel>
             </Grid>
             <StackPanel Grid.Row="2" Orientation="Horizontal">
@@ -42,16 +42,40 @@
                     <StackPanel Width="8"/>
                     <Label Style="{DynamicResource Pretendard-Medium-14}" MinWidth="52" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [Loading], Source={StaticResource L10N}}"/>
                 </StackPanel>
-                <StackPanel VerticalAlignment="Center" Margin="200,0,0,0">
-                    <Button Style="{DynamicResource OutlinedBtnType1}" Command="{Binding CatheterFailTestCommmand}" Width="100" Height="15" FontSize="9" Content="Catheter Fail"/>
-                    <Button Style="{DynamicResource OutlinedBtnType1}" Command="{Binding CatheterConnectTestCommmand}" Width="100" Height="15" FontSize="9" Content="Catheter Connect"/>
+                <StackPanel MinWidth="130" Margin="25,0,0,0" VerticalAlignment="Center" Orientation="Horizontal" Visibility="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusUnlocked}}">
+                    <ProgressBar Style="{DynamicResource HomeCatheterProgressBar}" Value="{Binding CatheterProgress}" Width="72" Height="20" Visibility="{Binding IsHome, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    <ProgressBar Style="{DynamicResource CatheterProgressBar}" Value="{Binding CatheterProgress}" Width="72" Height="20" Visibility="{Binding IsHome, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                    <StackPanel Width="8"/>
+                    <Label Style="{DynamicResource Pretendard-Medium-14}" MinWidth="52" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [Loading], Source={StaticResource L10N}}"/>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Center" Margin="200,0,0,0" IsEnabled="{Binding DeviceStatus.IsTestMode}">
+                    <Button Style="{DynamicResource BtnForTest}" Command="{Binding CatheterFailTestCommmand}" Width="100" Height="15" FontSize="9" Content="Catheter Fail"/>
+                    <Button Style="{DynamicResource BtnForTest}" Command="{Binding CatheterUnlockTestCommmand}" Width="100" Height="15" FontSize="9" Content="Unlock Catheter"/>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Center" Margin="10,0,0,0" IsEnabled="{Binding DeviceStatus.IsTestMode}">
+                    <Button Style="{DynamicResource BtnForTest}" Command="{Binding CatheterConnectTestCommmand}" Width="100" Height="15" FontSize="9" Content="Catheter Connect"/>
                 </StackPanel>
             </StackPanel>
 
-            <StackPanel Grid.Row="0" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" Visibility="{Binding DeviceStatus.IsLumenLoaded, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
-            <StackPanel Grid.Row="2" Background="{StaticResource GrayscaleBlackBrush}" Opacity="0.7" Visibility="{Binding DeviceStatus.IsLumenLoaded, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
-            <StackPanel Grid.Row="0" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" Visibility="{Binding DeviceStatus.IsLumenSaved, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
-            <StackPanel Grid.Row="2" Background="{StaticResource GrayscaleBlackBrush}" Opacity="0.7" Visibility="{Binding DeviceStatus.IsLumenSaved, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+            <component:MenuUnableComponent Grid.Row="0" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}">
+                <component:MenuUnableComponent.Visibility>
+                    <MultiBinding Converter="{StaticResource ComponentVisibilityConverter}">
+                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
+                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
+                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
+                    </MultiBinding>
+                </component:MenuUnableComponent.Visibility>
+            </component:MenuUnableComponent>
+
+            <component:MenuUnableComponent Grid.Row="2" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}">
+                <component:MenuUnableComponent.Visibility>
+                    <MultiBinding Converter="{StaticResource ComponentVisibilityConverter}">
+                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
+                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
+                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
+                    </MultiBinding>
+                </component:MenuUnableComponent.Visibility>
+            </component:MenuUnableComponent>
         </Grid>
     </Grid>
 </Window>

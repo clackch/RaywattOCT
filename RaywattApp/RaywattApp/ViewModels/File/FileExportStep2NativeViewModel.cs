@@ -12,6 +12,7 @@ using RaywattApp.Services;
 using RaywattApp.Common.Util;
 using CommunityToolkit.Mvvm.Input;
 using System.Windows.Input;
+using System.Text;
 
 namespace RaywattApp.ViewModels.File
 {
@@ -52,11 +53,6 @@ namespace RaywattApp.ViewModels.File
         {
             _log.Debug("SetCondition");
 
-            if (FileExport.DiskType == null)
-                DiskType = Constants.FileDiskExternal;
-            else
-                DiskType = FileExport.DiskType;
-
             if (FileExport.ExternalDrivePath == null)
                 FileExport.ExternalDrivePath = "";
 
@@ -83,12 +79,16 @@ namespace RaywattApp.ViewModels.File
         {
             string exportPrefix = Constants.FileNamePrefix + DateTime.Now.ToString("yyyyMMddHHmmss");
             string dbFilePath = exportPrefix + "." + Constants.FileExtension;
+            string annotationFilePath = exportPrefix + "." + Constants.AnnotationFileExtension;
             List<string> exportfiles = new List<string>();
 
             int cnt = 1;
+            string fileName = string.Empty;
             while (System.IO.File.Exists(dbFilePath))
             {
-                dbFilePath = exportPrefix + "(" + cnt + ")" + "." + Constants.FileExtension;
+                fileName = exportPrefix + "(" + cnt + ")" + ".";
+                dbFilePath = fileName + Constants.FileExtension;
+                annotationFilePath = fileName + Constants.AnnotationFileExtension;
                 cnt++;
             }
 
@@ -97,10 +97,13 @@ namespace RaywattApp.ViewModels.File
 
             FileFormat fileFormat = new FileFormat();
             fileFormat.Size = 0;
+            fileFormat.AnnotationFilePath = annotationFilePath;
             fileFormat.PatientList = _sqlManager.SelectPatientByList(sqlParameters);
 
             string alternateId = "";
             string originId = "";
+
+            List<PatientCaseAnnotation> annotations = new List<PatientCaseAnnotation>();
 
             foreach (Patient patient in fileFormat.PatientList)
             {
@@ -149,17 +152,37 @@ namespace RaywattApp.ViewModels.File
                             patientCase.PatientName = Constants.ExportAnonymous;
                         }
 
+                        PatientCaseAnnotation annotation = new PatientCaseAnnotation();
+                        annotation.Id = patientCase.Id;
+                        annotation.Bookmark = patientCase.Bookmark;
+                        annotation.Longitude = patientCase.Longitude;
+                        annotation.CrossSection = patientCase.CrossSection;
+                        annotation.LumenContour = patientCase.StrLumenContour;
+                        annotations.Add(annotation);
+
+                        patientCase.Bookmark = null;
+                        patientCase.Longitude = null;
+                        patientCase.CrossSection = null;
+                        patientCase.StrLumenContour = null;
+
                         patient.PatientCaseList.Add(patientCase);
                     }
                 }
             }
-            
+
+            string contents = JsonConvert.SerializeObject(fileFormat, Formatting.Indented);
+            string strAnnotations = JsonConvert.SerializeObject(annotations, Formatting.Indented);
+
+            fileFormat.Size += Encoding.UTF8.GetBytes(contents + strAnnotations).LongLength;
+
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["title"] = _l10n["File Export"];
             parameter["fileExport"] = FileExport;
             parameter["patientCases"] = PatientCases;
             parameter["dbFilePath"] = dbFilePath;
-            parameter["contents"] = JsonConvert.SerializeObject(fileFormat, Formatting.Indented);
+            parameter["contents"] = contents;
+            parameter["annotationFilePath"] = annotationFilePath;
+            parameter["annotations"] = strAnnotations;
             var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter, Constants.FileExportDialogWidth, Constants.FileExportDialogHeight);
 
             if(FileExport.RemoveWhenComplete)
