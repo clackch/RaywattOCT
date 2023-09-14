@@ -126,7 +126,9 @@ Windows Default Mouse Cursor Setting (※ 필요 시 진행)
 
    (c) Font 설정 (※ Raywatt, FASTER 모두 적용)
 
-   (d) 마우스 포인터 설정 (※ FASTER에 적용)
+   (d) [raywattLogoAccount.zip](https://github.com/Raywatt/RaywattOCT/files/12602861/raywattLogoAccount.zip) 다운로드 및 설정 > 계정 사진 변경 > 찾아보기 - 다운받은 이미지 선택 (※ Raywatt, FASTER 모두 적용)
+
+   (e) 마우스 포인터 설정 (※ FASTER에 적용)
 
 4. 윈도우 잠금화면 해제
    
