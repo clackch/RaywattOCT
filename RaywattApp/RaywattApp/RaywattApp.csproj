@@ -7,8 +7,9 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>False</UseWindowsForms>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-    <BaseOutputPath></BaseOutputPath>
-    <PackageOutputPath>$(OutputPath)</PackageOutputPath>
+    <OutputPath>bin\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
 
@@ -1068,7 +1069,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy &quot;$(TargetDir)*.*&quot; &quot;$(RAYWATT_PATH)&quot; /Y /E" />
+    <Exec Command="xcopy /E /Y &quot;$(TargetDir)*.*&quot; &quot;C:\Raywatt\system\runtime\&quot;&#xD;&#xA;del &quot;C:\Raywatt\system\runtime\*.pdb&quot;&#xD;&#xA;" />
   </Target>
 
 </Project>
