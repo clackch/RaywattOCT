@@ -12,7 +12,7 @@
 #include "MotorController.h"
 #include "ZaberController.h"
 #include "ArduinoController.h"
-#include "RayLearning.h"
+#include "IRayLearning.h"
 #include "ImagingSession.h"
 #include "LookUpTable.h"
 

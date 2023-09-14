@@ -10,7 +10,7 @@
 #include "TIFFReader.h"
 #include "Configuration.h"
 #include "CutViewManager.h"
-#include "RayLearning.h"
+#include "IRayLearning.h"
 
 CImagingSession::CImagingSession(CMessageService* pMsg, int nSession, bool deleteData) :
 	m_pMsg(pMsg),
