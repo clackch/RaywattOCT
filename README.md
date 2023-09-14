@@ -105,6 +105,24 @@ Windows Default Mouse Cursor Setting (※ 필요 시 진행)
 3. 포인터
     - 찾아보기에서 cur 파일
 
+## [Tensorflow Model]
+Download & Copy/Paste
+*모델 파일은 상시로 바뀔 수 있으므로 LFS로 관리하지 않음
+1. (https://github.com/Raywatt/RaywattOCT/issues/170) 에서 Raywatt One-Drive 링크 접속
+2. ML 폴더를 다운로드 후, 하위 디렉토리에 있는 model 폴더를 RaywattOCT\RayCore\extern\libTensorflow에 복사/붙여넣기
+
+## [Environment Variable]
+1. Windows 검색창에 "시스템 환경 변수 편집"을 검색 후 클릭
+2. "고급"탭에서 하단 "환경 변수" 버튼 클릭
+3. "시스템 변수"항목 중 변수 이름 : Path(or PATH) 더블클릭
+4. "환경 변수 편집" 창이 뜨면 "새로 만들기"를 클릭한 후 C:\Raywatt\system\3rdparty를 추가
+5. 적용까지 완료 하면 OK
+
+## [3D Related DLL]
+Download & Copy/Paste
+1. (https://github.com/Raywatt/RaywattOCT/issues/170) 에서 Raywatt One-Drive 링크 접속
+2. 3D_Related_DLL 폴더를 다운로드 후 OCT3D.dll을 제외한 모든 .dll 파일들을 C:\Raywatt\system\3rdparty\ 에 추가
+
 ## [Executable file]
 1. Visual Studio Debug/Release Solution Clean > Release Build
 2. RaywattApp에서 bin 폴더를 외장 저장장치에 복사 및 폴더명 변경(bin -> runtime)
