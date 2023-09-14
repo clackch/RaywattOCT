@@ -1407,8 +1407,7 @@ int COCTSystem::connectRotaryJunction() {
 	}
 
 	if (!pMotor->IsConnected()) {
-		result &= pMotor->Connect();
-		result &= pMotor->SwitchOff();
+		result &= pMotor->Connect(config.bldcMotor.port);
 		result &= pMotor->SwitchOn();
 	}
 

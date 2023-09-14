@@ -73,8 +73,8 @@ bool CLaserModule::Open(tstring strPort) {
 
 	CUtility::StartThread(threadReadStatus, m_pThread, this);
 
-	const uint32_t accTime = 6400;
-	const uint32_t velocity = 8000;
+	const uint32_t accTime = 250000;
+	const uint32_t velocity = 19200;
 	delay_line_Set_Acc_Time((uint8_t) MotorIndex::Polarization, accTime);
 	delay_line_Set_Acc_Time((uint8_t) MotorIndex::DelayLine, accTime);
 	delay_line_Set_Velocity((uint8_t)MotorIndex::Polarization, velocity);
@@ -110,6 +110,7 @@ bool CLaserModule::IsMoving(MotorIndex idx) {
 bool CLaserModule::MoveAbsolute(MotorIndex idx, int nPosition) {
 	if (!IsOpen()) return false;
 
+	PLOGI.printf("Move Motor #%d - %d", idx, nPosition);
 	delay_line_Move_single_axis_abs_pos((uint8_t) idx, nPosition);
 	min_poll(&m_ctx, nullptr, 0);
 

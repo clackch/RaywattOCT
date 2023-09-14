@@ -1,11 +1,12 @@
 #include "MotorController.h"
 #include "USBConnection.h"
+#include "COMConnection.h"
 #include "Utility.h"
 
 CMotorController* CMotorController::pInstance = nullptr;
 
 CMotorController::CMotorController() {
-	m_pConnection = new CUSBConnection();
+	m_pConnection = new CCOMConnection();
 	m_initMotor = false;
 	m_isRun = false;
 
@@ -53,6 +54,9 @@ bool CMotorController::SwitchOn() {
 	BYTE packet[MAX_PATH];
 	int packetLength = 0;
 	bool result = false;
+
+	getMotorPacket(MOTOR_INDEX_STATUSWORD, 0, 0, packet, packetLength);
+	result = writeMotor(packet, packetLength);
 
 	getMotorPacket(MOTOR_INDEX_CONTROLWORD, MOTOR_DATA_SWITCH_ON, 2, packet, packetLength);
 	result = writeMotor(packet, packetLength);

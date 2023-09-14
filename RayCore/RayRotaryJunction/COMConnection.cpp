@@ -12,7 +12,7 @@ CCOMConnection::~CCOMConnection() {
 }
 
 bool CCOMConnection::Connect(void* param) {
-	tstring strPort = CUtility::StringToWstring((const char*)param);
+	tstring strPort = (TCHAR*)param;
 	bool result = m_pPort->OpenPort(strPort);
 
 	if (result) {
