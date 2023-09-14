@@ -121,7 +121,7 @@ Download & Copy/Paste
 ## [3D Related DLL]
 Download & Copy/Paste
 1. (https://github.com/Raywatt/RaywattOCT/issues/170) 에서 Raywatt One-Drive 링크 접속
-2. 3D_Related_DLL 폴더를 다운로드 후 OCT3D.dll을 제외한 모든 .dll 파일들을 C:\Raywatt\system\3rdparty\ 에 추가
+2. 3D_Related_DLL 폴더를 다운로드 후 cv210.dll, cxcore210.dll, OCT3D.dll을 제외한 모든 vtk~~.dll 파일들을 C:\Raywatt\system\3rdparty\ 에 추가
 
 ## [Executable file]
 1. Visual Studio Debug/Release Solution Clean > Release Build
