@@ -121,7 +121,7 @@ Download & Copy/Paste
 ## [3drparty]
 Download & Copy/Paste
 1. (https://github.com/Raywatt/RaywattOCT/issues/170) 에서 Raywatt One-Drive 링크 접속
-2. 3drparty 폴더를 다운로드 한 후 C:\Raywatt\system에 추가
+2. 3drparty 폴더를 다운로드 한 후 폴더 자체를 C:\Raywatt\system에 추가
 
 ## [Executable file]
 1. Visual Studio Debug/Release Solution Clean > Release Build
