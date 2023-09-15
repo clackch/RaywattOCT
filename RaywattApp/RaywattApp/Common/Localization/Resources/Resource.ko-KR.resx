@@ -344,6 +344,9 @@ Acceptance of Terms: Require users to explicitly accept the terms and conditions
   <data name="Create New Folder" xml:space="preserve">
     <value>[K]Create New Folder</value>
   </data>
+  <data name="Create Time" xml:space="preserve">
+    <value>[K]Create Time</value>
+  </data>
   <data name="Current Folder" xml:space="preserve">
     <value>[K]Current Folder</value>
   </data>
