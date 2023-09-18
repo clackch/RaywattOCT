@@ -55,11 +55,7 @@ namespace RaywattApp.ViewModels
                 this.Patient = (Patient)data["patient"];
                 this.PrevStatus = (PrevStatus)data["prevStatus"];
 
-                if (DeviceStatus.CatheterStatus != Constants.CatheterStatusLoaded)
-                {
-                    RayLoadCatheter();
-                }
-                else
+                if (DeviceStatus.CatheterStatus == Constants.CatheterStatusLoaded)
                 {
                     Next();
                 }
