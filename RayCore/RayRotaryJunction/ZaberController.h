@@ -7,8 +7,8 @@
 * Reference : https://www.zaber.com/protocol-manual?device=X-LSQ075B-E01&peripheral=N%2FA&version=7.29&protocol=ASCII#topic_physical_units
 */
 
-#define DELAYLINE_BACKWARD_POSITION	(-1)
-#define DELAYLINE_FORWARD_POSITION		(1)
+#define DELAYLINE_BACKWARD_POSITION	(-400)
+#define DELAYLINE_FORWARD_POSITION		(400)
 #define ZABER_MICROSTEP_SIZE				0.49609375f							// um
 #define ZABER_SCALE_MM_TO_POSITION			(1000.f / ZABER_MICROSTEP_SIZE)		// 1000um = 1mm
 #define ZABER_SCALE_MMS_TO_VELOCITY			(1.6384f / ZABER_MICROSTEP_SIZE * 1000)

@@ -19,6 +19,7 @@ public:
 
 	class BLDCMotorSetting {
 	public:
+		TCHAR port[MAX_PATH];
 		int velocityPullback;
 		int velocityLiveView;
 		int velocityHoming;

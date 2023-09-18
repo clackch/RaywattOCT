@@ -273,7 +273,7 @@ namespace RaywattApp.Common.Annotation
 
                 Point point = e.GetPosition(this.canvas);
                 this.newPoints.Clear();
-                newPoints.Add(point);
+                this.newPoints.Add(point);
                 ActivateEvent();
 
                 CommandType = 1;
@@ -495,14 +495,14 @@ namespace RaywattApp.Common.Annotation
 
             if (firstPointIndex > secondPointIndex)
             {
-                for (int i = secondPointIndex; i < firstPointIndex; i++)
+                for (int i = secondPointIndex + 1; i < firstPointIndex; i++)
                 {
                     points.Add(new Point(contourLines[i].X2, contourLines[i].Y2));
                 }
             }
             else
             {
-                for (int i = secondPointIndex; i < contourLines.Count; i++)
+                for (int i = secondPointIndex + 1; i < contourLines.Count; i++)
                 {
                     points.Add(new Point(contourLines[i].X2, contourLines[i].Y2));
                 }
@@ -517,14 +517,14 @@ namespace RaywattApp.Common.Annotation
 
             if (secondPointIndex > firstPointIndex)
             {
-                for (int i = firstPointIndex; i < secondPointIndex; i++)
+                for (int i = firstPointIndex + 1; i < secondPointIndex; i++)
                 {
                     reversePoints.Add(new Point(contourLines[i].X2, contourLines[i].Y2));
                 }
             }
             else
             {
-                for (int i = firstPointIndex; i < contourLines.Count; i++)
+                for (int i = firstPointIndex + 1; i < contourLines.Count; i++)
                 {
                     reversePoints.Add(new Point(contourLines[i].X2, contourLines[i].Y2));
                 }
@@ -674,7 +674,7 @@ namespace RaywattApp.Common.Annotation
                 this.curPath.Name = constContourCurve;
                 this.curPath.Style = (Style)this.Resources["StylePath"];
             }                        
-            this.curPath.Data = CommonUtil.GetBezierCurve(this.newPoints, false); ;
+            this.curPath.Data = CommonUtil.GetBezierCurve(this.newPoints, false);
 
             //Lumen Contour 보다 아래쪽에 배치되도록 Index 0에 추가(마우스 클릭 이벤트 처리 때문)
             this.canvas.Children.Insert(0, this.curPath);

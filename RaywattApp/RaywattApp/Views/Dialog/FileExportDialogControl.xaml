@@ -24,13 +24,13 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <StackPanel Orientation="Horizontal">
+            <Grid Width="{Binding ImagePartWidth}">
                 <!-- Angio -->
-                <Grid Width="{x:Static const:Constants.ExportAngioSize}" Height="{x:Static const:Constants.ExportAngioSize}" Visibility="{Binding FileExport.AngioView, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Grid Width="{x:Static const:Constants.ExportAngioSize}" Height="{x:Static const:Constants.ExportAngioSize}" Visibility="{Binding FileExport.AngioView, Converter={StaticResource BoolToVisibilityConverter}}" HorizontalAlignment="Left">
                     <Image Source="/res/png/angioImage.png" Stretch="Fill"/>
                 </Grid>
                 <!-- Cross-Section -->
-                <Grid Width="{Binding CrossSectionPartWidth}">
+                <Grid Width="{Binding CrossSectionPartWidth}" HorizontalAlignment="Right">
                     <Grid Width="{Binding CrossSectionSize}" Height="{Binding CrossSectionSize}">
                         <Grid Width="{Binding CrossSectionImageSize}" Height="{Binding CrossSectionImageSize}">
                             <!-- Cross Seciton Image -->
@@ -76,7 +76,7 @@
                         </Image>
                     </Grid>
                 </Grid>
-            </StackPanel>
+            </Grid>
             <!-- Longitude -->
             <Grid Grid.Row="1" Width="{x:Static const:Constants.ExportLongitudeWidth}" Height="{x:Static const:Constants.ExportLongitudeHeight}" Background="{DynamicResource GrayscaleGray8Brush}" Visibility="{Binding FileExport.Longitude, Converter={StaticResource BoolToVisibilityConverter}}">
                 <Grid.ColumnDefinitions>
