@@ -90,7 +90,6 @@ namespace RaywattApp.ViewModels.File
                     int numOfFrames = patientCase.NumOfFrames;
                     if (FileExport.Pullback == Constants.ExportPullbackAVI)
                     {
-                        frameSize = FileExport.MeasureAuto || FileExport.MeasureManual ? 250 : 180; //Export 한 파일 대상으로 경험적으로 찾은 수치
                         ExportSize += frameSize * numOfFrames * 1024;
                     }
                     else
@@ -111,13 +110,42 @@ namespace RaywattApp.ViewModels.File
 
         private double GetFrameSize()
         {
-            double height = Constants.ExportHeight;
-            double width = Constants.ExportLongitudeWidth;
+            double frameSize = 0;
 
-            if (FileExport.MeasureAuto || FileExport.MeasureManual)
-                width = Constants.ExportWidth;
+            if(FileExport.Material == Constants.ExportMaterialPullback && FileExport.Pullback == Constants.ExportPullbackAVI)
+            {
+                //Export 한 파일 대상으로 경험적으로 찾은 수치
+                if (!FileExport.AngioView && !FileExport.Longitude && !FileExport.MeasureAuto && !FileExport.MeasureManual)//Cross Section Only
+                {
+                    frameSize = 145;
+                }
+                else if((FileExport.Longitude || FileExport.AngioView) && (FileExport.MeasureAuto || FileExport.MeasureManual))//Check All, Longitude + Measure, Angio + Measure
+                {
+                    frameSize = 240;
+                }
+                else if((FileExport.Longitude || FileExport.AngioView) && (!FileExport.MeasureAuto && !FileExport.MeasureManual))//Longitude, Angio (Measure X)
+                {
+                    frameSize = 170;
+                }
+                else
+                {
+                    frameSize = 255;
+                }
+            }
+            else
+            {
+                double height = Constants.ExportHeight;
+                double width = Constants.ExportLongitudeWidth;
 
-            return height * width * 3.0;
+                if (FileExport.MeasureAuto || FileExport.MeasureManual)
+                    width = Constants.ExportWidth;
+                else if (!FileExport.AngioView && !FileExport.Longitude && !FileExport.MeasureAuto && !FileExport.MeasureManual)
+                    width = Constants.ExportCrossSectionBig;
+
+                frameSize = height * width * 3.0;
+            }
+
+            return frameSize;
         }
 
         protected override void FileSave()

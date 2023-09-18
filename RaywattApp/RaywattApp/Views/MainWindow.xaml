@@ -48,11 +48,11 @@
                     <StackPanel Width="8"/>
                     <Label Style="{DynamicResource Pretendard-Medium-14}" MinWidth="52" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [Loading], Source={StaticResource L10N}}"/>
                 </StackPanel>
-                <StackPanel VerticalAlignment="Center" Margin="200,0,0,0">
+                <StackPanel VerticalAlignment="Center" Margin="200,0,0,0" IsEnabled="{Binding DeviceStatus.IsTestMode}">
                     <Button Style="{DynamicResource BtnForTest}" Command="{Binding CatheterFailTestCommmand}" Width="100" Height="15" FontSize="9" Content="Catheter Fail"/>
                     <Button Style="{DynamicResource BtnForTest}" Command="{Binding CatheterUnlockTestCommmand}" Width="100" Height="15" FontSize="9" Content="Unlock Catheter"/>
                 </StackPanel>
-                <StackPanel VerticalAlignment="Center" Margin="10,0,0,0">
+                <StackPanel VerticalAlignment="Center" Margin="10,0,0,0" IsEnabled="{Binding DeviceStatus.IsTestMode}">
                     <Button Style="{DynamicResource BtnForTest}" Command="{Binding CatheterConnectTestCommmand}" Width="100" Height="15" FontSize="9" Content="Catheter Connect"/>
                 </StackPanel>
             </StackPanel>
