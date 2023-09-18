@@ -1069,7 +1069,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /E /Y &quot;$(TargetDir)*.*&quot; &quot;C:\Raywatt\system\runtime\&quot;&#xD;&#xA;del &quot;C:\Raywatt\system\runtime\*.pdb&quot;&#xD;&#xA;" />
+    <Exec Command="&#xD;&#xA;" />
   </Target>
 
 </Project>
