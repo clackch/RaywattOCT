@@ -170,12 +170,15 @@ xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattAp
       <AdditionalLibraryDirectories>..\lib;..\extern\opencv\lib;..\extern\ATS\Library\x64;..\extern\ipp\lib\intel64;..\extern\libusb\lib\x64;..\extern\libtiff\lib;..\extern\libtorch\lib\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(TargetDir)RayCore.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
+      <Command>xcopy "$(TargetDir)raycore.ini" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
+xcopy "$(TargetDir)CALIBRATION.dat" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
+xcopy "$(TargetDir)BACKGROUND.bin" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
+xcopy "$(TargetDir)LUT.csv" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
+xcopy "$(TargetDir)RayCore.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(SolutionDir)extern\libTensorflow\sample\*.png" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(SolutionDir)extern\libtorch\model\*.pt" "C:\Raywatt\system\3rdparty" /y
 xcopy "$(SolutionDir)extern\libTensorflow\model\*.*" "C:\Raywatt\system\3rdparty\model" /E /y /I
-
 
 
 
