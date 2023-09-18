@@ -145,13 +145,6 @@ namespace RaywattApp.ViewModels
             //Setting Test Mode
             if(testMode != null && testMode.Count == 1 && "Y".Equals(testMode[0].Value))
                 DeviceStatus.IsTestMode = true;
-
-            //TODO - Outset에서 호출하는 Core Start 완료 후, 완료 Callback 받은 후에 RayGetProperty 사용 필요 (Start에 대한 Callback 기능 개발 필요)
-            double rotationTime = 5000; // RayGetProperty(Property.LoadCatheterTime);
-            timer.Interval = TimeSpan.FromMilliseconds(rotationTime / (100 / catheterProgressStep));
-            timer.Tick += new EventHandler(ProgressTest);
-            timerUnload.Interval = TimeSpan.FromMilliseconds(rotationTime / (100 / catheterProgressStep));
-            timerUnload.Tick += new EventHandler(ProgressUnloadTest);
         }
 
         private void OnNavigationMessage(object recipient, NavigationMessage message)
@@ -236,6 +229,15 @@ namespace RaywattApp.ViewModels
                     Win32Helper.LogOff();
                 }
             }
+        }
+
+        private void InitCatheterTimer()
+        {
+            double rotationTime = RayGetProperty(Property.LoadCatheterTime);
+            timer.Interval = TimeSpan.FromMilliseconds(rotationTime / (100 / catheterProgressStep));
+            timer.Tick += new EventHandler(ProgressTest);
+            timerUnload.Interval = TimeSpan.FromMilliseconds(rotationTime / (100 / catheterProgressStep));
+            timerUnload.Tick += new EventHandler(ProgressUnloadTest);
         }
 
         private void CatheterFailReceiver()
@@ -337,7 +339,6 @@ namespace RaywattApp.ViewModels
         private void handleState(RayCallbackRequest request, RayScannerState state, int param)
         {
             RayScannerState curState = (RayScannerState)RayGetProperty(Property.CurrentState);
-            DeviceStatus.IsInitialized = (curState == RayScannerState.Default) ? true : false;
             DeviceStatus.IsLiveView = (bool)(RayGetProperty(Property.MotorOnOff) != 0);
             DeviceStatus.IsAngioConnected = false;
         }
@@ -357,6 +358,10 @@ namespace RaywattApp.ViewModels
         {
             switch (work)
             {
+                case RayWorkItem.StartService:
+                    DeviceStatus.IsServiceStarted = true;
+                    InitCatheterTimer();
+                    break;
                 case RayWorkItem.AutoCalibration:
                     DeviceStatus.CanExecuteCalibration = true;
                     break;

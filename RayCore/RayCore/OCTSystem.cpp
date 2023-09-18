@@ -862,6 +862,12 @@ UINT COCTSystem::threadService(LPVOID param) {
 	learning.FindLumen(imgSample);
 
 	PLOGI.printf("sample lumen detection done.");
+
+	if (pSystem->m_callback != nullptr)
+	{
+		pSystem->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::StartService);
+	}
+
 	while (pThread->isRun) {
 		std::tuple<int, WPARAM, LPARAM> popMsgThread = pSystem->popMessage();
 		int popMsg = std::get<0>(popMsgThread);
@@ -1648,6 +1654,7 @@ LRESULT COCTSystem::OnMsgNotifyProcessDone(WPARAM wParam, LPARAM lParam) {
 	case RayWorkItem::SaveRawData:
 		CUtility::StopThread(m_pThreadSaveRaw);
 		break;
+	case RayWorkItem::StartService:
 	case RayWorkItem::OCTImaging:
 	case RayWorkItem::GenerateCutView:
 	case RayWorkItem::DetectLumen:

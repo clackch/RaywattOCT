@@ -15,7 +15,10 @@ namespace RaywattApp.Models
         };
 
         [ObservableProperty]
-        private bool _isInitialized = false;
+        private bool _isDeviceConnected = false;
+
+        [ObservableProperty]
+        private bool _isServiceStarted = false;
 
         [ObservableProperty]
         private bool _isLiveView = false;
