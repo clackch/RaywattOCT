@@ -177,8 +177,9 @@ xcopy "$(TargetDir)LUT.csv" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /
 xcopy "$(TargetDir)RayCore.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(SolutionDir)extern\libTensorflow\sample\*.png" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
-xcopy "$(SolutionDir)extern\libtorch\model\*.pt" "C:\Raywatt\system\3rdparty" /y
-xcopy "$(SolutionDir)extern\libTensorflow\model\*.*" "C:\Raywatt\system\3rdparty\model" /E /y /I
+xcopy "$(SolutionDir)extern\libtorch\model\*.pt" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y
+mkdir "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\model"
+xcopy "$(SolutionDir)extern\libTensorflow\model\*.*" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\model" /E /y /I
 
 
 

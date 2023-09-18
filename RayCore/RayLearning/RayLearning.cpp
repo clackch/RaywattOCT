@@ -21,7 +21,7 @@ void CRayLearning::Initialize(bool useGPU) {
 		m_useGPU = true;
 	}
 
-	torch::load(m_compNet, (m_useGPU ? "C:\\Raywatt\\system\\3rdparty\\compnet_gpu.pt" : "C:\\Raywatt\\system\\3rdparty\\compnet_cpu.pt"));
+	torch::load(m_compNet, (m_useGPU ? ".\\compnet_gpu.pt" : ".\\compnet_cpu.pt"));
 	m_compNet->eval();
 }
 
