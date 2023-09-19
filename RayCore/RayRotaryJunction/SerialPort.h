@@ -23,7 +23,7 @@ public:
 	bool OpenPort(tstring portname);
 	void ClosePort();     
 	bool ReadByte(BYTE &resp);     
-	bool ReadByte(BYTE* &resp, UINT size);
+	int ReadByte(BYTE* &resp, UINT size);
 	bool WriteByte(BYTE *pBuff);
 	bool WriteByte(BYTE *pBuff, UINT nByte);
 	bool SetCommunicationTimeouts(DWORD ReadIntervalTimeout, DWORD ReadTotalTimeoutMultiplier, DWORD ReadTotalTimeoutConstant, DWORD WriteTotalTimeoutMultiplier, DWORD WriteTotalTimeoutConstant);

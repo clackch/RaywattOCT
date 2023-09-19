@@ -14,6 +14,7 @@
 #include "ArduinoController.h"
 #include "RayLearning.h"
 #include "ImagingSession.h"
+#include "LaserModule.h"
 #include "LookUpTable.h"
 
 /*
@@ -45,9 +46,8 @@ COCTSystem::COCTSystem() {
 	}
 	m_openedSession = nullptr;
 
-	for (int i = 0; i < STEP_MOTOR_NUM; i++) {
-		m_pStepMotor[i] = new CArduinoController();
-	}
+	m_pPullbackMotor = new CArduinoController();
+	m_pLaserModule = new CLaserModule();
 
 	m_prevState = RayScannerState::Initial;
 	m_curState = RayScannerState::Initial;
@@ -169,11 +169,13 @@ RayError COCTSystem::Stop() {
 	pMotor->SwitchOff();
 	pMotor->Disconnect();
 
-	for (int i = 0; i < STEP_MOTOR_NUM; i++) {
-		m_pStepMotor[i]->Close();
-		delete m_pStepMotor[i];
-		m_pStepMotor[i] = nullptr;
-	}
+	m_pPullbackMotor->Close();
+	delete m_pPullbackMotor;
+	m_pPullbackMotor = nullptr;
+
+	m_pLaserModule->Close();
+	delete m_pLaserModule;
+	m_pLaserModule = nullptr;
 
 	return RayError::OK;
 }
@@ -256,12 +258,15 @@ RayError COCTSystem::AutoCalibration() {
 */
 RayError COCTSystem::ManualCalibration(bool forward) {
 	if (m_curState == RayScannerState::Default) {
-		if (m_pStepMotor[STEP_MOTOR_DELAYLINE]->IsOpen() == false) return RayError::DeviceNotConnected;
+		if (m_pLaserModule->IsOpen() == false) return RayError::DeviceNotConnected;
+		//if (m_pLaserModule->IsMoving(MotorIndex::DelayLine)) return RayError::DeviceBusy;
 
-		m_pStepMotor[STEP_MOTOR_DELAYLINE]->MoveRelative((forward ? DELAYLINE_FORWARD_POSITION : DELAYLINE_BACKWARD_POSITION));
+		m_pLaserModule->MoveRelative(MotorIndex::DelayLine, (forward ? DELAYLINE_FORWARD_POSITION : DELAYLINE_BACKWARD_POSITION));
 
 		return RayError::OK;
 	}
+
+	return RayError::WrongState;
 }
 
 /*
@@ -857,6 +862,12 @@ UINT COCTSystem::threadService(LPVOID param) {
 	learning.FindLumen(imgSample);
 
 	PLOGI.printf("sample lumen detection done.");
+
+	if (pSystem->m_callback != nullptr)
+	{
+		pSystem->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::StartService);
+	}
+
 	while (pThread->isRun) {
 		std::tuple<int, WPARAM, LPARAM> popMsgThread = pSystem->popMessage();
 		int popMsg = std::get<0>(popMsgThread);
@@ -996,10 +1007,84 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 */
 UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
+	CLaserModule* pLaserModule = pSystem->m_pLaserModule;
+	int nTargetPos = 0;
 
-	//To-Do: implement auto calibration
-	Sleep(5000);
+	if (pLaserModule != nullptr && pLaserModule->IsOpen())
+	{
+		// 1. Start Finding Sheath
+		pSystem->m_vCalibrationInfo.clear();
+		pSystem->m_cathState = CatheterState::FindingSheath;
+		
+		// 1-1. Move Delay-line & Find Sheath
+		nTargetPos = pLaserModule->MoveRelative(MotorIndex::DelayLine, DELAYLINE_BACKWARD_POSITION * 50);
+		do {
+			Sleep(10);
+			if (!pLaserModule->IsMoving(MotorIndex::DelayLine)) pLaserModule->MoveAbsolute(MotorIndex::DelayLine, nTargetPos);
+		} while (pLaserModule->GetPosition(MotorIndex::DelayLine) != nTargetPos);
 
+		nTargetPos = pLaserModule->MoveRelative(MotorIndex::DelayLine, DELAYLINE_FORWARD_POSITION * 100);
+		do {
+			Sleep(10);
+			if (!pLaserModule->IsMoving(MotorIndex::DelayLine)) pLaserModule->MoveAbsolute(MotorIndex::DelayLine, nTargetPos);
+		} while (pLaserModule->GetPosition(MotorIndex::DelayLine) != nTargetPos);
+
+		// 1-2. Find Z-Offset Position
+		const int nSheathPosition = CConfiguration::GetInstance().measurement.nSheathPosition;
+		int nMinDiff = INT_MAX;
+		int nZOffset = 0;
+		for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
+			int nDiff = abs(nSheathPosition - pSystem->m_vCalibrationInfo.at(i).first);
+			if (nMinDiff > nDiff) {
+				nMinDiff = nDiff;
+				nZOffset = pSystem->m_vCalibrationInfo.at(i).second;
+			}
+		}
+
+		// 1-3. Move to calibrated position
+		nTargetPos = nZOffset;
+		pLaserModule->MoveAbsolute(MotorIndex::DelayLine, nZOffset);
+		do {
+			Sleep(10);
+			if (!pLaserModule->IsMoving(MotorIndex::DelayLine)) pLaserModule->MoveAbsolute(MotorIndex::DelayLine, nTargetPos);
+		} while (pLaserModule->GetPosition(MotorIndex::DelayLine) != nTargetPos);
+
+		// 2. Start Finding Peak
+		pSystem->m_vCalibrationInfo.clear();
+		pSystem->m_cathState = CatheterState::FindingPeak;
+
+		// 2-1. Move Polarization-control & Find Peak
+		nTargetPos = pLaserModule->MoveAbsolute(MotorIndex::Polarization, 0);
+		do {
+			Sleep(10);
+			if (!pLaserModule->IsMoving(MotorIndex::Polarization)) pLaserModule->MoveAbsolute(MotorIndex::Polarization, nTargetPos);
+		} while (pLaserModule->GetPosition(MotorIndex::Polarization) != nTargetPos);
+
+		nTargetPos = pLaserModule->MoveRelative(MotorIndex::Polarization, 3240);
+		do {
+			Sleep(10);
+			if (!pLaserModule->IsMoving(MotorIndex::Polarization)) pLaserModule->MoveAbsolute(MotorIndex::Polarization, nTargetPos);
+		} while (pLaserModule->GetPosition(MotorIndex::Polarization) != nTargetPos);
+
+		// 2-2. Find Max Peak
+		int nMaxPeak = INT_MIN;
+		int nMaxPeakPos = 0;
+		for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
+			if (nMaxPeak < pSystem->m_vCalibrationInfo.at(i).first) {
+				nMaxPeak = pSystem->m_vCalibrationInfo.at(i).first;
+				nMaxPeakPos = pSystem->m_vCalibrationInfo.at(i).second;
+			}
+		}
+
+		// 2-3. Move to calibrated position
+		nTargetPos = nMaxPeakPos;
+		pLaserModule->MoveAbsolute(MotorIndex::DelayLine, nTargetPos);
+		do {
+			Sleep(10);
+			if (!pLaserModule->IsMoving(MotorIndex::DelayLine)) pLaserModule->MoveAbsolute(MotorIndex::DelayLine, nTargetPos);
+		} while (pLaserModule->GetPosition(MotorIndex::DelayLine) != nTargetPos);
+	}
+	
 	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Calibrated);
 	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::AutoCalibration);
 
@@ -1017,7 +1102,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
-	CStepMotorController* pPullbackMotor = pSystem->m_pStepMotor[STEP_MOTOR_PULLBACK];
+	CStepMotorController* pPullbackMotor = pSystem->m_pPullbackMotor;
 	IImaging::Setting settingPullback = pSystem->m_pImagingPullback->GetSetting();
 
 	PLOGI.printf("Pullback start.");
@@ -1087,7 +1172,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
-	CStepMotorController* pPullbackMotor = pSystem->m_pStepMotor[STEP_MOTOR_PULLBACK];
+	CStepMotorController* pPullbackMotor = pSystem->m_pPullbackMotor;
 
 	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterLoading);
 
@@ -1133,7 +1218,7 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
-	CStepMotorController* pPullbackMotor = pSystem->m_pStepMotor[STEP_MOTOR_PULLBACK];
+	CStepMotorController* pPullbackMotor = pSystem->m_pPullbackMotor;
 
 	// 1. Motor ON
 	int nVelocity = config.bldcMotor.velocityHoming;
@@ -1209,9 +1294,8 @@ bool COCTSystem::checkConnection() {
 	
 	result &= m_pAcqDevice->IsInit();
 	result &= pMotor->IsConnected();
-	for (int i = 0; i < STEP_MOTOR_NUM; i++) {
-		result &= m_pStepMotor[i]->IsOpen();
-	}
+	result &= m_pPullbackMotor->IsOpen();
+	result &= m_pLaserModule->IsOpen();
 
 	return result;
 }
@@ -1284,23 +1368,21 @@ int COCTSystem::restartAcqDevice(COCTImaging* pImaging) {
 int COCTSystem::connectRotaryJunction() {
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
-	CStepMotorController* pPullbackMotor = m_pStepMotor[STEP_MOTOR_PULLBACK];
-	CStepMotorController* pDelayLine = m_pStepMotor[STEP_MOTOR_DELAYLINE];
 
 	bool result = true;
 
-	if (!pPullbackMotor->IsOpen()) {
-		pPullbackMotor->Open(config.stepMotor.pullback);
-		pPullbackMotor->SetCurrent(config.stepMotor.pullbackStart);
+	if (!m_pPullbackMotor->IsOpen()) {
+		m_pPullbackMotor->Open(config.stepMotor.pullback);
+		m_pPullbackMotor->SetCurrent(config.stepMotor.pullbackStart);
 	}
 
-	if (!pDelayLine->IsOpen()) {
-		pDelayLine->Open(config.stepMotor.delayline);
+	if (!m_pLaserModule->IsOpen()) {
+		m_pLaserModule->Open(config.stepMotor.delayline);
+		m_pLaserModule->MoveAbsolute(MotorIndex::DelayLine, 30000);
 	}
 
 	if (!pMotor->IsConnected()) {
-		result &= pMotor->Connect();
-		result &= pMotor->SwitchOff();
+		result &= pMotor->Connect(config.bldcMotor.port);
 		result &= pMotor->SwitchOn();
 	}
 
@@ -1319,13 +1401,8 @@ int COCTSystem::disconnectRotaryJunction() {
 		result &= pMotor->SwitchOff();
 	}
 
-	for (int i = 0; i < STEP_MOTOR_NUM; i++)
-	{
-		if (m_pStepMotor[i]->IsOpen())
-		{
-			m_pStepMotor[i]->Close();
-		}
-	}
+	m_pPullbackMotor->Close();
+	m_pLaserModule->Close();
 
 	return (result) ? NOERROR : E_FAIL;
 }
@@ -1350,6 +1427,32 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 		if (isRealTime == false) return NOERROR;
 
 		image = m_pImagingRealtime->GetCircleImage();
+
+		switch (m_cathState)
+		{
+		case CatheterState::FindingSheath:
+		{
+			int nSheathPosition = m_pImagingRealtime->GetSheathPosition();
+			int nDelayLinePos = m_pLaserModule->GetPosition(MotorIndex::DelayLine);
+			m_vCalibrationInfo.push_back(std::make_pair(nSheathPosition, nDelayLinePos));
+		}
+			break;
+		case CatheterState::FindingPeak:
+		{
+			COCTMeasurement measurement;
+			CConfiguration& config = CConfiguration::GetInstance();
+
+			USHORT nPeakValue;
+			int nPeakIndex, nLineWidth;
+			measurement.CalculateAxialResolution(((CLabImaging *)m_pImagingRealtime)->GetScopeFFTData(), config.imaging.nOutputLength, config.measurement, nPeakValue, nPeakIndex, nLineWidth);
+
+			int nPolarizationPos = m_pLaserModule->GetPosition(MotorIndex::Polarization);
+			m_vCalibrationInfo.push_back(std::make_pair(nPeakValue, nPolarizationPos));
+		}
+			break;
+		default:
+			break;
+		}
 	}
 
 	if (m_cbCrossSection != nullptr) m_cbCrossSection(nSession, image.data, image.cols, image.rows, image.channels(), nFrameInfo);
@@ -1551,6 +1654,7 @@ LRESULT COCTSystem::OnMsgNotifyProcessDone(WPARAM wParam, LPARAM lParam) {
 	case RayWorkItem::SaveRawData:
 		CUtility::StopThread(m_pThreadSaveRaw);
 		break;
+	case RayWorkItem::StartService:
 	case RayWorkItem::OCTImaging:
 	case RayWorkItem::GenerateCutView:
 	case RayWorkItem::DetectLumen:

@@ -67,6 +67,7 @@ enum class RayEvent {
 
 enum class RayWorkItem {
 	Unknown = 0,
+	StartService,
 	SaveRawData,
 	OCTImaging,
 	GenerateCutView,

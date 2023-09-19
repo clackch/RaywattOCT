@@ -87,6 +87,7 @@ public:
 	int GetFoundSheathPosition() { return m_nSheathPosition; }
 	virtual void CircularizeImage(cv::Mat& src, cv::Mat& dst);
 
+	int GetSheathPosition() { return m_nSheathPosition; }
 protected:
 	void allocateMemory();
 	void releaseMemory();

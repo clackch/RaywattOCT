@@ -99,6 +99,9 @@ namespace RaywattApp.ViewModels.Dialog
         public List<LumenContour> LumenContours { get { return _lumenContours; } set { _lumenContours = value; OnPropertyChanged(nameof(LumenContours)); } }
 
         [ObservableProperty]
+        private double _ImagePartWidth;
+
+        [ObservableProperty]
         private double _crossSectionPartWidth;
 
         [ObservableProperty]
@@ -158,6 +161,7 @@ namespace RaywattApp.ViewModels.Dialog
             IndicatorLongitude.X = Constants.ExportLongitudeIndicatorWidth / 2;
             IndicatorLongitude.IsVisible = Visibility.Visible;
 
+            ImagePartWidth = Constants.ExportLongitudeWidth;
             TextPartWidth = 0;
             MeasureSeparator = Visibility.Collapsed;
 
@@ -230,7 +234,8 @@ namespace RaywattApp.ViewModels.Dialog
             }
             else
             {
-                CrossSectionPartWidth = Constants.ExportLongitudeWidth;
+                ImagePartWidth = Constants.ExportCrossSectionBig;
+                CrossSectionPartWidth = Constants.ExportCrossSectionBig;
                 CrossSectionSize = Constants.ExportCrossSectionBig;
                 CrossSectionImageSize = Constants.ExportCrossSectionBig;
 
@@ -240,6 +245,11 @@ namespace RaywattApp.ViewModels.Dialog
 
             if (fileExport.MeasureAuto || fileExport.MeasureManual)
             {
+                if (CrossSectionPartWidth == Constants.ExportCrossSectionBig)
+                {
+                    ImagePartWidth = Constants.ExportLongitudeWidth;
+                    CrossSectionPartWidth = Constants.ExportLongitudeWidth;
+                }
                 TextPartWidth = Constants.ExportTextPartSize;
 
                 if (fileExport.MeasureManual)
@@ -252,7 +262,7 @@ namespace RaywattApp.ViewModels.Dialog
             //for Calcium
             if (CommonUtil.IsPreCase(PatientCase.Procedure))
             {
-                if (FileExport.Longitude)
+                if (FileExport.Longitude || FileExport.AngioView)
                 {
                     CalciumIndicatorSize = Constants.CalciumIndicatorExportSize;
                     CalciumThicknessIndicatorSize = Constants.CalciumThicknessIndicatorExportSize;

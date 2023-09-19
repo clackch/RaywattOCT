@@ -23,6 +23,7 @@ class COCTImaging;
 class CVolumeGenerator;
 class CRayLearning;
 class CImagingSession;
+class CLaserModule;
 class COCTSystem : public CMessageService
 {
 private:
@@ -30,6 +31,8 @@ private:
 		Unloaded = 0,
 		Loaded,
 		Enable,
+		FindingSheath,
+		FindingPeak,
 		Calibrated
 	};
 
@@ -63,7 +66,11 @@ private:
 	CImagingSession* m_openedSession;
 
 	// Rotary Junction
-	CStepMotorController* m_pStepMotor[STEP_MOTOR_NUM];
+	CStepMotorController* m_pPullbackMotor;
+
+	// Laser Module
+	CLaserModule* m_pLaserModule;
+	std::vector<std::pair<int, int>> m_vCalibrationInfo;
 
 	RayScannerState m_prevState;
 	RayScannerState m_curState;

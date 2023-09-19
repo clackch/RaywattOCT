@@ -69,6 +69,7 @@ namespace RaywattOCT
         public enum RayWorkItem : int
         {
             Unknown = 0,
+            StartService,
             SaveRawData,
             OCTImaging,
             GenerateCutView,
