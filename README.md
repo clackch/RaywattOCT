@@ -186,3 +186,7 @@ Download & Copy/Paste
        (2) 문제 해결 > 고급옵션 > UEFI 펌웨어 설정 > 다시 시작
        (3) 설정 화면 (※ BARCO 모니터의 경우, 설정 화면이 안 보이는 경우가 있어 다른 모니터 이용하는 편이 좋음)
        (4) SETTING > Boot > Full Screen Logo Display (Enabled -> Disabled 변경) > Exit
+
+## Local 환경 설정 참고
+
+- App 종료 시, Power Off/Switch User가 호출되지 않도록 설정 방법(https://github.com/Raywatt/RaywattOCT/pull/173#issue-1892013269)
