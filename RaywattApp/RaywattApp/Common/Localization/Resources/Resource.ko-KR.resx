@@ -146,9 +146,6 @@ Remove the catheter from patient before proceeding.</value>
   <data name="$MSG009" xml:space="preserve">
     <value>[K]Unlock the catheter</value>
   </data>
-  <data name="$MSG010" xml:space="preserve">
-    <value>[K]Mark at least two points on the vessel.</value>
-  </data>
   <data name="$Terms and Conditions" xml:space="preserve">
     <value>[K]Product Intended Use: Clearly define the intended use of the OCT device, including any limitations or specific conditions for use.
 Product Warranty: Outline the warranty coverage provided for the OCT device, including the duration, scope, and process for claiming warranty services.
@@ -305,12 +302,6 @@ Acceptance of Terms: Require users to explicitly accept the terms and conditions
   <data name="Case List" xml:space="preserve">
     <value>[K]Case List</value>
   </data>
-  <data name="Choose one of the power off options" xml:space="preserve">
-    <value>[K]Choose one of the power off options</value>
-  </data>
-  <data name="Clarify a lesion" xml:space="preserve">
-    <value>[K]Clarify a lesion</value>
-  </data>
   <data name="Co-Registration" xml:space="preserve">
     <value>[K]Co-Registration</value>
   </data>
@@ -343,9 +334,6 @@ Acceptance of Terms: Require users to explicitly accept the terms and conditions
   </data>
   <data name="Create New Folder" xml:space="preserve">
     <value>[K]Create New Folder</value>
-  </data>
-  <data name="Create Time" xml:space="preserve">
-    <value>[K]Create Time</value>
   </data>
   <data name="Current Folder" xml:space="preserve">
     <value>[K]Current Folder</value>
@@ -771,9 +759,6 @@ Overwrite existing data?</value>
   <data name="Post-PCI" xml:space="preserve">
     <value>[K]Post-PCI</value>
   </data>
-  <data name="Power Off" xml:space="preserve">
-    <value>[K]Power Off</value>
-  </data>
   <data name="Pre" xml:space="preserve">
     <value>[K]Pre</value>
   </data>
@@ -920,9 +905,6 @@ Overwrite existing data?</value>
   </data>
   <data name="Survey (100㎜)" xml:space="preserve">
     <value>[K]Survey (100㎜)</value>
-  </data>
-  <data name="Switch User" xml:space="preserve">
-    <value>[K]Switch User</value>
   </data>
   <data name="System File Option" xml:space="preserve">
     <value>[K]System File Option</value>

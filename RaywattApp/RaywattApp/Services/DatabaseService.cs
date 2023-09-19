@@ -390,7 +390,7 @@ namespace RaywattApp.Services
 
         private void PrintLog(string commandText, Dictionary<string, Object> commandParameters)
         {
-            _log.Debug("Query : " + commandText.Replace("\r\n", " ").Replace("  ", ""));
+            _log.Debug("Query : " + commandText);
             if (commandParameters != null)
             {
                 string str = "Parameters : ";

@@ -122,6 +122,8 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Register<NavigationMessage>(this, OnNavigationMessage);
 
             RayRegisterCallback(Marshal.GetFunctionPointerForDelegate(CBFunction));
+            RayStartSystem();
+            RayConnectDevices();
 
             Directory.CreateDirectory(Constants.DataRootPath);
 
@@ -138,16 +140,8 @@ namespace RaywattApp.ViewModels
             IsHome = true;
             IsLoading = true;
 
-            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
-            sqlParameters["classification"] = "TestMode";
-            IList<Configuration> testMode = _sqlManager.SelectConfiguration(sqlParameters);
-
-            //Setting Test Mode
-            if(testMode != null && testMode.Count == 1 && "Y".Equals(testMode[0].Value))
-                DeviceStatus.IsTestMode = true;
-
-            //TODO - Outset에서 호출하는 Core Start 완료 후, 완료 Callback 받은 후에 RayGetProperty 사용 필요 (Start에 대한 Callback 기능 개발 필요)
-            double rotationTime = 5000; // RayGetProperty(Property.LoadCatheterTime);
+            //Test
+            double rotationTime = RayGetProperty(Property.LoadCatheterTime);
             timer.Interval = TimeSpan.FromMilliseconds(rotationTime / (100 / catheterProgressStep));
             timer.Tick += new EventHandler(ProgressTest);
             timerUnload.Interval = TimeSpan.FromMilliseconds(rotationTime / (100 / catheterProgressStep));
@@ -218,24 +212,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Exit");
 
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["title"] = _l10n["Power Off"];
-            parameter["message"] = _l10n["Choose one of the power off options"];
-            var result = _dialogService.OpenDialog(new PowerOffDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-
-            if (result != null && result.DialogAnswer != DialogResults.Answer.No)
-            {
-                CommonUtil.Exit(DeviceStatus, true);
-
-                if (result.DialogAnswer == DialogResults.Answer.Yes && !DeviceStatus.IsTestMode)
-                {
-                    Win32Helper.Shutdown();
-                }
-                else if (result.DialogAnswer == DialogResults.Answer.Extra && !DeviceStatus.IsTestMode)
-                {
-                    Win32Helper.LogOff();
-                }
-            }
+            CommonUtil.Exit(DeviceStatus);
         }
 
         private void CatheterFailReceiver()

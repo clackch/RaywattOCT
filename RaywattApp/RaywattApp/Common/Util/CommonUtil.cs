@@ -942,7 +942,7 @@ namespace RaywattApp.Common.Util
             return textBlock.DesiredSize;
         }
 
-        public static void Exit(DeviceStatus deviceStatus, bool coreStop)
+        public static void Exit(DeviceStatus deviceStatus)
         {
             deviceStatus.IsPaused = true;
             while (!deviceStatus.CanExit)
@@ -950,11 +950,8 @@ namespace RaywattApp.Common.Util
                 Thread.Sleep(50);
             }
 
-            if (coreStop)
-            {
-                RayDisconnectDevices();
-                RayStopSystem();
-            }            
+            RayDisconnectDevices();
+            RayStopSystem();
 
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
 

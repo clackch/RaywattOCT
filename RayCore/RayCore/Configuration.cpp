@@ -59,7 +59,6 @@ void CConfiguration::Initialize(tstring configFile)
 	this->stepMotor.pullbackStart = ::GetPrivateProfileInt(_T("StepMotor"), _T("PullbackStart"), 0, configFilePath.c_str());
 
 	// [Motor]
-	::GetPrivateProfileString(_T("BLDCMotor"), _T("Port"), _T(""), this->bldcMotor.port, sizeof(this->bldcMotor.port), configFilePath.c_str());
 	this->bldcMotor.velocityPullback = ::GetPrivateProfileInt(_T("BLDCMotor"), _T("VelocityPullback"), 3005, configFilePath.c_str());
 	this->bldcMotor.velocityLiveView = ::GetPrivateProfileInt(_T("BLDCMotor"), _T("VelocityLiveView"), 3005, configFilePath.c_str());
 	this->bldcMotor.velocityHoming = ::GetPrivateProfileInt(_T("BLDCMotor"), _T("VelocityHoming"), 3005, configFilePath.c_str());

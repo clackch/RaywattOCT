@@ -135,7 +135,6 @@
             <Setter Property="MinWidth" Value="50"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="MaxLength" Value="50"/>
-            <Setter Property="Cursor" Value="{StaticResource iBeam}"/>
             <Setter Property="FontSize" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter=12}"/>
         </Style>
     </UserControl.Resources>
