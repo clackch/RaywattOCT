@@ -1,45 +1,53 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Messaging;
-using log4net;
-using OpenCvSharp;
+﻿using OpenCvSharp;
 using RaywattApp.Common.Bases;
-using RaywattApp.Common.Dialog;
-using RaywattApp.Common.Messages;
 using RaywattApp.Common.Util;
-using RaywattApp.Models;
-using RaywattApp.Services;
-using RaywattApp.Views.Dialog;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Windows.Interop;
-using System.Windows.Threading;
-using static RaywattOCT.Ray3DWrapper;
+public enum PacketType
+{
+    Image,
+    Command,
+    Nothing
+};
+
+enum CommandType
+{
+    FGConnected,
+    FGDisconnected,
+    FGStarted,
+    FGStopped,
+    FGNothing,
+};
 
 namespace RaywattApp.Models
 {
-    public partial class AngioClient : ViewModelBase
+    public partial class AngioClient
     {
         public static Thread threadFuncLiveAngioImage;
 
         public static bool threadOnLiveAngioImage;
 
+        private readonly TcpClientSingleton _tcpClientSingleton;
+
+        public AngioClient(TcpClientSingleton tcpClientSingleton)
+        {
+            Array.Fill<byte>(tcpClientSingleton.tmpBuffer, 0);
+
+            if (tcpClientSingleton.Instance.Connected == true)
+                tcpClientSingleton.isConnected = true;
+
+            _tcpClientSingleton = tcpClientSingleton;
+        }
+
         public void ThreadFuncLiveAngioImage()
         {
             while (threadOnLiveAngioImage)
             {
-                DrawAngioImage();
+                ReadPacket();
             }
-        }
-
-        public void ConnectServer()
-        {
-            Array.Fill<byte>(TcpClientSingleton.tmpBuffer, 0);
-
-            if (TcpClientSingleton.Instance.Connected == true)
-                TcpClientSingleton.isConnected = true;
         }
 
         public void ActivateClientThread()
@@ -49,29 +57,29 @@ namespace RaywattApp.Models
             threadFuncLiveAngioImage.Start();
         }
 
-        protected bool DrawAngioImage()
+        protected bool ReadPacket()
         {
             try
             {
-                TcpClientSingleton.bytesRead = TcpClientSingleton.Instance.GetStream().Read(TcpClientSingleton.buffer, 0, 10000000);
+                _tcpClientSingleton.bytesRead = _tcpClientSingleton.Instance.GetStream().Read(_tcpClientSingleton.buffer, 0, 10000000);
 
-                Array.Copy(TcpClientSingleton.buffer, 0, TcpClientSingleton.tmpBuffer, TcpClientSingleton.tmpBufferLen, TcpClientSingleton.bytesRead);
-                TcpClientSingleton.tmpBufferLen += TcpClientSingleton.bytesRead;
+                Array.Copy(_tcpClientSingleton.buffer, 0, _tcpClientSingleton.tmpBuffer, _tcpClientSingleton.tmpBufferLen, _tcpClientSingleton.bytesRead);
+                _tcpClientSingleton.tmpBufferLen += _tcpClientSingleton.bytesRead;
 
                 while (true)
                 {
-                    PacketType type = FrameGrabber.checkPacketType(TcpClientSingleton.tmpBuffer);
+                    PacketType type = CheckPacketType(_tcpClientSingleton.tmpBuffer);
                     if (type == PacketType.Command)
-                        commandPacketProcess();
+                        CommandPacketProcess();
                     else if (type == PacketType.Image)
-                        imagePacketProcess();
+                        ImagePacketProcess();
                     else if (type == PacketType.Nothing)
                         break;
                 }
             }
             catch (Exception ex)
             {
-                TcpClientSingleton.isConnected = false;
+                _tcpClientSingleton.isConnected = false;
                 return false;
             }
 
@@ -89,66 +97,162 @@ namespace RaywattApp.Models
             return (byte)~csum;
         }
 
-        private void imagePacketProcess()
+        private void ImagePacketProcess()
         {
             int offset = 2;
-            short height = BitConverter.ToInt16(TcpClientSingleton.tmpBuffer, offset);
+            short height = BitConverter.ToInt16(_tcpClientSingleton.tmpBuffer, offset);
             offset += sizeof(short);
-            short width = BitConverter.ToInt16(TcpClientSingleton.tmpBuffer, offset);
+            short width = BitConverter.ToInt16(_tcpClientSingleton.tmpBuffer, offset);
             offset += sizeof(short);
-            char BitsPerPixel = (char)TcpClientSingleton.tmpBuffer[offset++];
+            char BitsPerPixel = (char)_tcpClientSingleton.tmpBuffer[offset++];
             int imageSize = height * width * BitsPerPixel / 8;
-            if (TcpClientSingleton.tmpBuffer[imageSize + Sizes.imageHeaderSize + Sizes.imageTailSize - 2] == CalcCheckSum(TcpClientSingleton.tmpBuffer, offset + imageSize)
-                && TcpClientSingleton.tmpBuffer[imageSize + Sizes.imageHeaderSize + Sizes.imageTailSize - 1] == 0xA3)
+            if (_tcpClientSingleton.tmpBuffer[imageSize + Constants.imageHeaderSize + Constants.imageTailSize - 2] == CalcCheckSum(_tcpClientSingleton.tmpBuffer, offset + imageSize)
+                && _tcpClientSingleton.tmpBuffer[imageSize + Constants.imageHeaderSize + Constants.imageTailSize - 1] == 0xA3)
             {
                 Mat image = new Mat(height, width, MatType.CV_8UC(BitsPerPixel / 8));
-                Marshal.Copy(TcpClientSingleton.tmpBuffer, offset, image.Data, imageSize);
+                Marshal.Copy(_tcpClientSingleton.tmpBuffer, offset, image.Data, imageSize);
                 offset += imageSize;
-                char checksum = BitConverter.ToChar(TcpClientSingleton.tmpBuffer, offset++);
-                char eof = BitConverter.ToChar(TcpClientSingleton.tmpBuffer, offset++);
+                char checksum = BitConverter.ToChar(_tcpClientSingleton.tmpBuffer, offset++);
+                char eof = BitConverter.ToChar(_tcpClientSingleton.tmpBuffer, offset++);
 
-                Array.Copy(TcpClientSingleton.tmpBuffer, imageSize + Sizes.imageHeaderSize + Sizes.imageTailSize, TcpClientSingleton.tmpBuffer, 0, 20000000 - imageSize - Sizes.imageHeaderSize - Sizes.imageTailSize);
-                TcpClientSingleton.tmpBufferLen -= imageSize + Sizes.imageHeaderSize + Sizes.imageTailSize;
+                Array.Copy(_tcpClientSingleton.tmpBuffer, imageSize + Constants.imageHeaderSize + Constants.imageTailSize, _tcpClientSingleton.tmpBuffer, 0, 20000000 - imageSize - Constants.imageHeaderSize - Constants.imageTailSize);
+                _tcpClientSingleton.tmpBufferLen -= imageSize + Constants.imageHeaderSize + Constants.imageTailSize;
 
                 Cv2.Flip(image, image, 0);
 
                 Mat imgRecv = CommonUtil.ByteMemoryToCvMat(image.Data, width, height, BitsPerPixel / 8);
-                TcpClientSingleton.imgAngio = imgRecv;
+                _tcpClientSingleton.imgAngio = imgRecv;
             }
         }
 
-        private void commandPacketProcess()
+        private void CommandPacketProcess()
         {
             int offset = 2;
-            int command = TcpClientSingleton.tmpBuffer[offset++];
-            char checksum = BitConverter.ToChar(TcpClientSingleton.tmpBuffer, offset++);
-            char eof = BitConverter.ToChar(TcpClientSingleton.tmpBuffer, offset++);
+            int command = _tcpClientSingleton.tmpBuffer[offset++];
+            char checksum = BitConverter.ToChar(_tcpClientSingleton.tmpBuffer, offset++);
+            char eof = BitConverter.ToChar(_tcpClientSingleton.tmpBuffer, offset++);
 
-            if ((byte)checksum == CalcCheckSum(TcpClientSingleton.tmpBuffer, 3))
+            if ((byte)checksum == CalcCheckSum(_tcpClientSingleton.tmpBuffer, 3))
             {
                 if (command == (int)CommandType.FGDisconnected)
                 {
-                    TcpClientSingleton.portConnection = false;
-                    TcpClientSingleton.imgAngio = TcpClientSingleton.ShowNoSignal();
+                    _tcpClientSingleton.portConnection = false;
+                    _tcpClientSingleton.imgAngio = ShowNoSignal();
 
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
-                        DeviceStatus.IsAngioConnected = TcpClientSingleton.portConnection;
+                        ViewModelBase._deviceStatus.IsAngioConnected = _tcpClientSingleton.portConnection;
                     });
                 }
                 else if (command == (int)CommandType.FGConnected)
                 {
-                    TcpClientSingleton.portConnection = true;
+                    _tcpClientSingleton.portConnection = true;
 
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
-                        DeviceStatus.IsAngioConnected = TcpClientSingleton.portConnection;
+                        ViewModelBase._deviceStatus._isAngioConnected = _tcpClientSingleton.portConnection;
                     });
                 }
 
-                Array.Copy(TcpClientSingleton.tmpBuffer, Sizes.commandPacketSize, TcpClientSingleton.tmpBuffer, 0, 20000000 - Sizes.commandPacketSize);
-                TcpClientSingleton.tmpBufferLen -= Sizes.commandPacketSize;
+                Array.Copy(_tcpClientSingleton.tmpBuffer, Constants.commandPacketSize, _tcpClientSingleton.tmpBuffer, 0, 20000000 - Constants.commandPacketSize);
+                _tcpClientSingleton.tmpBufferLen -= Constants.commandPacketSize;
             }
+        }
+
+        public static void CloseLiveAngioImageThread()
+        {
+            threadOnLiveAngioImage = false;
+            threadFuncLiveAngioImage.Join();
+        }
+
+        public PacketType CheckPacketType(byte[] tmpBuffer)
+        {
+            int offset = 0;
+            if (tmpBuffer[offset++] == 0x3A)
+            {
+                switch (tmpBuffer[offset++])
+                {
+                    case (byte)PacketType.Command:
+                        if (tmpBuffer[4] == 0xA3)
+                        {
+                            return PacketType.Command;
+                        }
+                        break;
+
+                    case (byte)PacketType.Image:
+                        short height = BitConverter.ToInt16(tmpBuffer, offset);
+                        offset += sizeof(short);
+                        short width = BitConverter.ToInt16(tmpBuffer, offset);
+                        offset += sizeof(short);
+                        char BitsPerPixel = (char)tmpBuffer[offset++];
+                        int imageSize = height * width * BitsPerPixel / 8;
+
+                        if (tmpBuffer[Constants.imageHeaderSize + imageSize + Constants.imageTailSize - 1] == 0xA3)
+                        {
+                            return (int)PacketType.Image;
+                        }
+                        break;
+
+                    case (byte)PacketType.Nothing:
+                        break;
+                }
+            }
+            return PacketType.Nothing;
+        }
+        public static Mat ShowNoSignal()
+        {
+            Mat image = new Mat(800, 1000, MatType.CV_8UC3);
+            image.SetTo(new Scalar(0, 0, 0));
+
+            Scalar textColor = new Scalar(0, 0, 255);
+            HersheyFonts fontFace = HersheyFonts.HersheyComplex;
+            double fontScale = 2.0;
+            int thickness = 5;
+
+            Point textPosition = new Point(300, 500);
+            Cv2.PutText(image, "No Signal", textPosition, fontFace, fontScale, textColor, thickness);
+
+            return image;
+        }
+    }
+
+    public class TcpClientSingleton
+    {
+        string serverIP = "127.0.0.1";
+        int serverPort = 8888;
+
+        private TcpClient _tcpClient;
+        public TcpClient Instance => _tcpClient;
+
+        public bool isConnected = false; // Server - Client Connection
+        public bool portConnection = false; // FG Conenction
+        public byte[] buffer = new byte[10000000];
+        public byte[] tmpBuffer = new byte[20000000];
+        public int bytesRead;
+        public int tmpBufferLen = 0;
+        public byte[] startCommand = { 0x3A, (byte)PacketType.Command, (byte)CommandType.FGStarted, 0x07, 0xA3 };
+        public byte[] stopCommand = { 0x3A, (byte)PacketType.Command, (byte)CommandType.FGStopped, 0x07, 0xA3 };
+        public Mat imgAngio = AngioClient.ShowNoSignal();
+
+        public TcpClientSingleton()
+        {
+            Thread clientThread = new Thread(ConnectToServer);
+            clientThread.Start();
+        }
+        private void ConnectToServer()
+        {
+            // Angio Server On
+            ProcessStartInfo psi = new ProcessStartInfo();
+            Process p = new Process();
+            psi.FileName = "C:\\Raywatt\\FGServer\\FGServer.exe";
+            psi.CreateNoWindow = true;
+            p.StartInfo = psi;
+            p.Start();
+
+            // Client On
+            _tcpClient = new TcpClient(serverIP, serverPort);
+            AngioClient angioclient = new AngioClient(this);
+            angioclient.ActivateClientThread();
         }
     }
 }

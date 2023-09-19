@@ -96,10 +96,12 @@ namespace RaywattApp.ViewModels
         private CallbackFunction cbFunction;
         public CallbackFunction CBFunction => (this.cbFunction) ?? (this.cbFunction = new CallbackFunction(OnMsgCallback));
 
+        private readonly TcpClientSingleton _tcpClientSingleton;
+
         /// <summary>
         /// 생성자
         /// </summary>
-        public MainViewModel(SqlManager sqlManager, IDialogService dialogService)
+        public MainViewModel(SqlManager sqlManager, IDialogService dialogService, TcpClientSingleton tcpClientSingleton)
         {
             _log.Debug("MainViewModel");
 
@@ -139,6 +141,8 @@ namespace RaywattApp.ViewModels
             double rotationTime = RayGetProperty(Property.LoadCatheterTime);
             timer.Interval = TimeSpan.FromMilliseconds(rotationTime / (100 / catheterProgressStep));
             timer.Tick += new EventHandler(ProgressTest);
+
+            _tcpClientSingleton = tcpClientSingleton;
         }
 
         private void OnNavigationMessage(object recipient, NavigationMessage message)
@@ -220,7 +224,8 @@ namespace RaywattApp.ViewModels
             {
                 CommonUtil.Exit(DeviceStatus);
 
-                AngioClient.threadOnLiveAngioImage = false; // thread 종료 함수 지원 X?
+                _tcpClientSingleton.Instance.GetStream().Close();
+                AngioClient.CloseLiveAngioImageThread();
 
                 // Server Off
                 Process[] processes = Process.GetProcessesByName("FGServer");

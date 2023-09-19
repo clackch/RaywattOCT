@@ -7,6 +7,7 @@ using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Services;
+using RaywattApp.Views;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
@@ -38,6 +39,8 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private Dictionary<string, string> _procedureList;
+
+        private readonly TcpClientSingleton _tcpClientSingleton;
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
@@ -79,7 +82,7 @@ namespace RaywattApp.ViewModels
             get { return _cmdStartRecording ?? (this._cmdStartRecording = new RelayCommand(StartRecording)); }
         }
 
-        public RecordingLiveViewViewModel(SqlManager sqlManager, IDialogService dialogService)
+        public RecordingLiveViewViewModel(SqlManager sqlManager, IDialogService dialogService, TcpClientSingleton tcpClientSingleton)
         {
             _log.Debug("RecordingLiveViewViewModel");
 
@@ -89,6 +92,8 @@ namespace RaywattApp.ViewModels
             _dialogService = dialogService;
 
             ProcedureList = CodeDefinition.Codes["PROC"];
+
+            _tcpClientSingleton = tcpClientSingleton;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -122,7 +127,7 @@ namespace RaywattApp.ViewModels
             }
 
             // Send Start Command
-            TcpClientSingleton.Instance.GetStream().Write(TcpClientSingleton.startCommand, 0, TcpClientSingleton.startCommand.Length);
+            _tcpClientSingleton.Instance.GetStream().Write(_tcpClientSingleton.startCommand, 0, _tcpClientSingleton.startCommand.Length);
 
             timerLiveAngioImage.Interval = TimeSpan.Zero; // TimeSpan.Zero;
             timerLiveAngioImage.Tick += new EventHandler(timerFuncLiveAngioImage);
@@ -136,6 +141,18 @@ namespace RaywattApp.ViewModels
 
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
+
+            if (AngioClient.threadOnLiveAngioImage)
+                if (navigationEventArgs is System.Windows.Navigation.NavigatingCancelEventArgs args)
+                {
+                    if (args.Navigator.ToString() != "System.Windows.Controls.Frame: Views/RecordingPage.xaml")
+                    {
+                        //Send Stop Command
+                        _tcpClientSingleton.Instance.GetStream().Write(_tcpClientSingleton.stopCommand, 0, _tcpClientSingleton.stopCommand.Length);
+
+                        timerLiveAngioImage.Stop();
+                    }
+                }
         }
 
         private void SetCondition()
@@ -154,11 +171,6 @@ namespace RaywattApp.ViewModels
         private void Back()
         {
             _log.Debug("Back");
-
-            //Send Stop Command
-            TcpClientSingleton.Instance.GetStream().Write(TcpClientSingleton.stopCommand, 0, TcpClientSingleton.stopCommand.Length);
-            
-            timerLiveAngioImage.Stop();
 
             RayStopLiveView();
             leaveToPage(Constants.PatientDetailPage);
@@ -198,7 +210,7 @@ namespace RaywattApp.ViewModels
                 parameter["title"] = _l10n["Information"];
                 parameter["message"] = _l10n["Select Procedure"];
                 var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-
+                    
                 return;
             }
 
@@ -228,7 +240,7 @@ namespace RaywattApp.ViewModels
 
         protected bool DrawAngioImage()
         {
-            AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(TcpClientSingleton.imgAngio);
+            AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(_tcpClientSingleton.imgAngio);
 
             return true;
         }

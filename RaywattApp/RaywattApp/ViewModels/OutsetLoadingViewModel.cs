@@ -33,7 +33,8 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private double _progress;
 
-        public OutsetLoadingViewModel(SqlManager sqlManager, IDialogService dialogService)
+        private readonly TcpClientSingleton _tcpClientSingleton;
+        public OutsetLoadingViewModel(SqlManager sqlManager, IDialogService dialogService, TcpClientSingleton tcpClientSingleton)
         {
             _log.Debug("OutsetLoadingViewModel");
 
@@ -41,6 +42,8 @@ namespace RaywattApp.ViewModels
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;
+
+            _tcpClientSingleton = tcpClientSingleton;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -88,19 +91,6 @@ namespace RaywattApp.ViewModels
 
                 timer.Stop();
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
-
-                // Angio Server On
-                ProcessStartInfo psi = new ProcessStartInfo();
-                Process p = new Process();
-                psi.FileName = "..\\..\\..\\..\\Sejong\\FrameGrabber\\FGServer\\x64\\Debug\\FGServer.exe";
-                psi.CreateNoWindow = true;
-                p.StartInfo = psi;
-                p.Start();
-
-                // Client On
-                AngioClient angioclient = new AngioClient();
-                angioclient.ConnectServer();
-                angioclient.ActivateClientThread();
             }
 
             Progress += 0.5;

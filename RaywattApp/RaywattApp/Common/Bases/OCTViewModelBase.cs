@@ -6,6 +6,7 @@ using RaywattApp.Models;
 using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Media.Imaging;
@@ -160,12 +161,6 @@ namespace RaywattApp.Common.Bases
             if (state != RayScannerState.Review) return false;
 
             LumenProfileImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfile);
-            return true;
-        }
-        protected bool DrawAngioImage()
-        {
-            AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(TcpClientSingleton.imgAngio);
-            
             return true;
         }
 
@@ -334,67 +329,5 @@ namespace RaywattApp.Common.Bases
             }
             DeviceStatus.CanExit = true;
         }
-    }
-}
-
-
-enum PacketType
-{
-    Image,
-    Command,
-    Nothing
-};
-
-enum CommandType
-{
-    FGConnected,
-    FGDisconnected,
-    FGStarted,
-    FGStopped,
-    FGNothing,
-};
-
-static class Sizes
-{
-    public const int imageHeaderSize = 7;
-    public const int imageTailSize = 2;
-    public const int commandPacketSize = 5;
-}
-
-class FrameGrabber
-{
-    public static PacketType checkPacketType(byte[] tmpBuffer)
-    {
-        int offset = 0;
-        if (tmpBuffer[offset++] == 0x3A)
-        {
-            switch (tmpBuffer[offset++])
-            {
-                case (byte)PacketType.Command:
-                    if (tmpBuffer[4] == 0xA3)
-                    {
-                        return PacketType.Command;
-                    }
-                    break;
-
-                case (byte)PacketType.Image:
-                    short height = BitConverter.ToInt16(tmpBuffer, offset);
-                    offset += sizeof(short);
-                    short width = BitConverter.ToInt16(tmpBuffer, offset);
-                    offset += sizeof(short);
-                    char BitsPerPixel = (char)tmpBuffer[offset++];
-                    int imageSize = height * width * BitsPerPixel / 8;
-
-                    if (tmpBuffer[Sizes.imageHeaderSize + imageSize + Sizes.imageTailSize - 1] == 0xA3)
-                    {
-                        return (int)PacketType.Image;
-                    }
-                    break;
-
-                case (byte)PacketType.Nothing:
-                    break;
-            }
-        }
-        return PacketType.Nothing;
     }
 }

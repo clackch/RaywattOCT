@@ -24,7 +24,7 @@ namespace RaywattApp.Models
         private bool _canExecuteCalibration = true;
 
         [ObservableProperty]
-        private bool _isAngioConnected = false;
+        public bool _isAngioConnected = false;
 
         [ObservableProperty]
         private bool _isPullbackDone = false;
