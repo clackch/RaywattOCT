@@ -26,7 +26,7 @@
             </DataGrid.InputBindings>
             <DataGrid.Columns>
                 <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipLeft}" Width="*" Binding="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="{Binding [Name], Source={StaticResource L10N}}" />
-                <DataGridTemplateColumn CellStyle="{StaticResource DataGridCellDelete}" Width="80">
+                <DataGridTemplateColumn CellStyle="{StaticResource DataGridCellDelete}">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button Style="{DynamicResource DataGridDelete}" Command="{Binding DataContext.RowDeleteCommand, Source={x:Reference ProxyElement}}" CommandParameter="{Binding ElementName=physicianList, Path=CurrentItem}"/>

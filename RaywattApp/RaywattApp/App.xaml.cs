@@ -10,8 +10,6 @@ using RaywattApp.ViewModels.Dialog;
 using RaywattApp.Common.Dialog;
 using System.Threading.Tasks;
 using log4net;
-using System.Diagnostics;
-using System.IO;
 
 namespace RaywattApp
 {
@@ -24,7 +22,7 @@ namespace RaywattApp
 
         public App()
         {
-            //Setting Working Directory 
+            //Setting Working Directory
             Process process = Process.GetCurrentProcess();
             Environment.CurrentDirectory = Path.GetDirectoryName(process.MainModule.FileName);
 
@@ -108,7 +106,6 @@ namespace RaywattApp
             services.AddTransient(typeof(TermsConditionsDialogViewModel));
             services.AddTransient(typeof(Review3dViewMenuViewModel));
             services.AddTransient(typeof(Review3dPatientMenuViewModel));
-            services.AddTransient(typeof(PowerOffDialogViewModel));
 
             //IDatabaseService 등록 (Singleton 사용 안함 => Connection Pooling을 Default로 사용)
             services.AddTransient<IDatabaseService, SqlService>(obj => new SqlService(connectionString));
