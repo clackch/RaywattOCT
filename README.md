@@ -49,22 +49,10 @@ Database Initial Setting
 * DB Schema 변경 시 Import/Export
   - Import/Export -> Columns -> Import/Export 할 Columns 선택 (헤더 불필요)
 
-## [LibTorch]
-(※ 신규 장비 Set-up 시에 필요없음. RaywattApp에 dll 파일 존재)
-
-Download & copy dll files
-* dll 파일 용량 문제로 git 으로 관리가 안됨
-* [LibTorch](https://pytorch.org/get-started/locally/) 1.13.0 cuda 11.7 [release](https://download.pytorch.org/libtorch/cu117/libtorch-win-shared-with-deps-1.13.0%2Bcu117.zip) / [debug](https://download.pytorch.org/libtorch/cu117/libtorch-win-shared-with-deps-debug-1.13.0%2Bcu117.zip) ver. 각각 다운로드
-* 압축 풀고, lib 폴더에서 asmjit / c10 / c10_cuda / caffe2_nvrtc / fbgemm / libiomp5md / nvToolsExt64_1 / torch / torch_cpu / torch_cuda / torch_cuda_cpp / torch_cuda_cu / uv / zlibwapi dll 파일들을 각각 extern/libtorch/lib 하위 release / debug 폴더에 복사
-
-## [CUDA & CuDNN]
+## [CUDA]
 
 CUDA
 * CUDA Toolkit 11.7.0 Download(https://pytorch.org/get-started/locally/) & 설치
-
-CuDNN
-* [cuDNN for CUDA 11.x](https://developer.nvidia.com/rdp/cudnn-download) download
-* 압축 풀고, bin 폴더의 dll 파일들을 CUDA 설치 경로 (C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.7\bin) 에 복사
 
 ## [Axsun]
 
@@ -118,10 +106,10 @@ Download & Copy/Paste
 4. "환경 변수 편집" 창이 뜨면 "새로 만들기"를 클릭한 후 C:\Raywatt\system\3rdparty를 추가
 5. 적용까지 완료 하면 OK
 
-## [3drparty And runtime]
+## [3drparty]
 Download & Copy/Paste
 1. (https://github.com/Raywatt/RaywattOCT/issues/170) 에서 Raywatt One-Drive 링크 접속
-2. 3drparty 폴더와 Runtime 폴더를 다운로드 한 후, 각각 폴더 자체를 C:\Raywatt\system에 추가
+2. 3drparty 폴더를 다운로드 한 후, 폴더 자체를 C:\Raywatt\system에 추가
 
 ## [Executable file]
 1. Visual Studio Debug/Release Solution Clean > Release Build
