@@ -218,7 +218,7 @@ namespace RaywattApp.ViewModels
 
             if (result != null && result.DialogAnswer != DialogResults.Answer.No)
             {
-                CommonUtil.Exit(DeviceStatus, true);
+                CommonUtil.Exit(DeviceStatus);
 
                 if (result.DialogAnswer == DialogResults.Answer.Yes && !DeviceStatus.IsTestMode)
                 {

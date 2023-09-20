@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using log4net;
 using System.Diagnostics;
 using System.IO;
+using RaywattApp.Common.Util;
 
 namespace RaywattApp
 {
@@ -32,6 +33,12 @@ namespace RaywattApp
             this.InitializeComponent();
 
             SetupExceptionHandling();
+            this.SessionEnding += SessionEndingCancelEventHandler;
+        }
+
+        private void SessionEndingCancelEventHandler(object sender, SessionEndingCancelEventArgs e)
+        {
+            CommonUtil.Exit(null);
         }
 
         /// <summary>

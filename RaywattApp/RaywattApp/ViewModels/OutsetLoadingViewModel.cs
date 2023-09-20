@@ -59,9 +59,10 @@ namespace RaywattApp.ViewModels
 
                     if (result != null && result.DialogAnswer == DialogResults.Answer.No)
                     {
-                        CommonUtil.Exit(DeviceStatus, false);
+                        CommonUtil.Exit(DeviceStatus);
                         if(!DeviceStatus.IsTestMode)
                             Win32Helper.LogOff();
+                        return;
                     }
                 }
             }
