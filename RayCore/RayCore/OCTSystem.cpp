@@ -118,9 +118,6 @@ RayError COCTSystem::Start() {
 
 	m_pAcqDevice = new CATSDevice(config.acquisition);
 
-	CLaserController* pLaser = CLaserController::GetInstance();
-	pLaser->LaserOnOff(true);
-
 	return RayError::OK;
 }
 
@@ -259,7 +256,7 @@ RayError COCTSystem::AutoCalibration() {
 RayError COCTSystem::ManualCalibration(bool forward) {
 	if (m_curState == RayScannerState::Default) {
 		if (m_pLaserModule->IsOpen() == false) return RayError::DeviceNotConnected;
-		//if (m_pLaserModule->IsMoving(MotorIndex::DelayLine)) return RayError::DeviceBusy;
+		if (m_pLaserModule->IsMoving(MotorIndex::DelayLine)) return RayError::DeviceBusy;
 
 		m_pLaserModule->MoveRelative(MotorIndex::DelayLine, (forward ? DELAYLINE_FORWARD_POSITION : DELAYLINE_BACKWARD_POSITION));
 
@@ -295,7 +292,8 @@ RayError COCTSystem::ReadyPullback()
 
 		restartAcqDevice(m_pImagingPullback);
 
-		//pLaser->LaserOnOff(true);
+		m_pLaserModule->SetVLD(VISIBLE_LASER_POWER);
+		pLaser->LaserOnOff(true);
 		pMotorCtrl->PerformRun(config.bldcMotor.velocityPullback);
 
 		return RayError::OK;
@@ -436,7 +434,8 @@ RayError COCTSystem::StartLiveView()
 
 		restartAcqDevice(m_pImagingLiveView);
 
-		//pLaser->LaserOnOff(true);
+		m_pLaserModule->SetVLD(VISIBLE_LASER_POWER);
+		pLaser->LaserOnOff(true);
 		pMotorCtrl->PerformRun(config.bldcMotor.velocityLiveView);
 
 		return RayError::OK;
@@ -455,7 +454,8 @@ RayError COCTSystem::StopLiveView()
 		CLaserController* pLaser = CLaserController::GetInstance();
 		CMotorController* pMotorCtrl = CMotorController::GetInstance();
 
-		//pLaser->LaserOnOff(false);
+		m_pLaserModule->SetVLD(0);
+		pLaser->LaserOnOff(false);
 		pMotorCtrl->StopMotor();
 
 		return RayError::OK;
@@ -848,7 +848,7 @@ UINT COCTSystem::threadService(LPVOID param) {
 
 	// Connect to COM Interface first time asynchronous
 	CLaserController* pLaser = CLaserController::GetInstance();
-	//pLaser->LaserOnOff(true);
+	pLaser->LaserOnOff(false);
 
 	// Read LUT from File
 	CLookUpTable& lut = CLookUpTable::GetInstance();
@@ -1313,6 +1313,8 @@ int COCTSystem::connectAcqDevice() {
 * disconnectAcqDevice
 */
 int COCTSystem::disconnectAcqDevice() {
+	if (m_pAcqDevice == nullptr) return NOERROR;
+
 	stopAcqDevice();
 
 	if (m_pAcqDevice->IsInit()) {
@@ -1377,8 +1379,21 @@ int COCTSystem::connectRotaryJunction() {
 	}
 
 	if (!m_pLaserModule->IsOpen()) {
-		m_pLaserModule->Open(config.stepMotor.delayline);
-		m_pLaserModule->MoveAbsolute(MotorIndex::DelayLine, 30000);
+		result &= m_pLaserModule->Open(config.stepMotor.delayline);
+		if (result) {
+			m_pLaserModule->SetVLD(0);
+			Sleep(500);
+			m_pLaserModule->MoveAbsolute(MotorIndex::DelayLine, 30000);
+			while (m_pLaserModule->IsMoving(MotorIndex::DelayLine)) {
+				Sleep(10);
+			}
+			Sleep(500);
+			m_pLaserModule->MoveAbsolute(MotorIndex::Polarization, 0);
+		}
+		else
+		{
+			PLOGE.printf("Failed to connect to laser module");
+		}
 	}
 
 	if (!pMotor->IsConnected()) {

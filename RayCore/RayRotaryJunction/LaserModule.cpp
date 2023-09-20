@@ -91,6 +91,7 @@ void CLaserModule::Close() {
 	CUtility::StopThread(m_pThread);
 
 	if (IsOpen()) {
+		SetVLD(0);
 		CloseHandle(m_hComTx);
 		m_hComTx = INVALID_HANDLE_VALUE;
 	}
@@ -130,12 +131,14 @@ int CLaserModule::MoveRelative(MotorIndex idx, int nOffset) {
 	return nPosition;
 }
 void CLaserModule::SetVLD(unsigned short nValue) {
+	if (!IsOpen()) return;
 	nValue = (nValue < 0) ? 0 : (nValue > MAX_VOLTAGE_RAW_VALUE) ? MAX_VOLTAGE_RAW_VALUE : nValue;
 
 	delay_line_Set_voltage_ld(nValue);
 	m_nVLDValue = nValue;
 }
 void CLaserModule::SetVOA(unsigned short nValue) {
+	if (!IsOpen()) return;
 	nValue = (nValue < 0) ? 0 : (nValue > MAX_VOLTAGE_RAW_VALUE) ? MAX_VOLTAGE_RAW_VALUE : nValue;
 
 	delay_line_Set_voltage_voa(nValue);
