@@ -20,6 +20,18 @@ namespace RaywattOCT
                 set { _cutviewOn = value; }
             }
 
+            private bool _isIndicatorOn = true;
+            public bool IsIndicatorOn
+            { 
+                get { return _isIndicatorOn; }
+                set 
+                {
+                    _isIndicatorOn = value;
+                    ODSOCT_ShowIndicatorCutView(value);
+                    ODSOCT_ShowCuttingline(value);
+                }
+            }
+
             private bool _isPtoD = true;
             public bool IsPtoD
             { 

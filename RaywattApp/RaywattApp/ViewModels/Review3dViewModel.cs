@@ -24,8 +24,20 @@ namespace RaywattApp.ViewModels
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(Review3dViewModel));
 
-        [ObservableProperty]
         private bool _isRendering = false;
+        public bool IsRendering
+        { 
+            get { return _isRendering; }
+            set 
+            { 
+                _isRendering = value; 
+                OnPropertyChanged(nameof(IsRendering));
+
+                DeviceStatus.IsOCTImagingDone = value;
+                IndicatorLongitude.IsEnabled = value;
+                IndicatorCrossSection.IsEnabled = value;
+            }
+        }
 
         private bool _isCutViewOn;
         public bool IsCutViewOn 
@@ -44,8 +56,18 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        [ObservableProperty]
         private bool _isIndicatorOn;
+        public bool IsIndicatorOn
+        { 
+            get { return _isIndicatorOn; }
+            set 
+            { 
+                _isIndicatorOn = value;
+                OnPropertyChanged(nameof(IsIndicatorOn));
+
+                ray3DStatus.IsIndicatorOn = value;
+            }
+        }
 
         private bool _isPtoD;
         public bool IsPtoD
@@ -148,7 +170,7 @@ namespace RaywattApp.ViewModels
 
             IndicatorLongitude = new Indicator();
             IndicatorLongitude.X = Constants.LongitudeIndicatorWidth / 2;
-            IndicatorLongitude.IsVisible = Visibility.Collapsed;
+            IndicatorLongitude.IsVisible = Visibility.Visible;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -178,10 +200,12 @@ namespace RaywattApp.ViewModels
 
                 // set default values without rendering
                 _isCutViewOn = ray3DStatus.CutViewOn;
-                _isIndicatorOn = true;
+                _isIndicatorOn = ray3DStatus.IsIndicatorOn;
                 _isPtoD = ray3DStatus.IsPtoD;
                 _isSideBranchView = false;
             }
+
+            IsRendering = false;
 
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
             timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
@@ -249,14 +273,7 @@ namespace RaywattApp.ViewModels
 
                 FrameNumber = imageInfo.Current;
             }
-            if (DrawLongitudeImage())
-            {
-                // when generating longitude image is completed
-                if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame)
-                {
-                    IndicatorLongitude.IsVisible = Visibility.Visible;
-                }
-            }
+            DrawLongitudeImage();
         }
 
         private void threadFuncInitialize()
@@ -432,10 +449,14 @@ namespace RaywattApp.ViewModels
 
         private void ExpandLeftViewMenu()
         {
+            if (!IsRendering) return;
+
             viewMenuWindow = _dialogService.OpenChildWindow(new Review3dViewMenuControl(), this, null, Constants.SideBarExpandSize, Constants.LeftSideBarExpand3dSize, 0, Constants.ViewMenu3dY);
         }
         private void ExpandLeftPatientMenu()
         {
+            if (!IsRendering) return;
+
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
             parameter["patientCase"] = PatientCase;
