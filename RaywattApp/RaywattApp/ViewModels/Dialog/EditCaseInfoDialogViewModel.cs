@@ -73,7 +73,7 @@ namespace RaywattApp.ViewModels.Dialog
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["vessel"] = CurrentVessel.Key;
             parameter["procedure"] = CurrentProcedure.Key;
-            parameter["physicianName"] = CurrentPhysician.Name;
+            parameter["physicianName"] = CurrentPhysician != null ? CurrentPhysician.Name : PatientCase.PhysicianName;
             parameter["accessionNumber"] = PatientCase.AccessionNumber.Trim();
             parameter["comment"] = PatientCase.Comment.Trim();
 
