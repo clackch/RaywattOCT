@@ -32,6 +32,9 @@ namespace RaywattApp.ViewModels
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewViewModel));
 
+        private CallbackFunctionForDetection cbLumenContour;
+        public CallbackFunctionForDetection CBLumenContour => (this.cbLumenContour) ?? (this.cbLumenContour = new CallbackFunctionForDetection(OnRecvLumenContour));
+
         private bool isLumenContourSave = false;
 
         private bool isLumenDetectedFrontDone = false;
@@ -161,34 +164,10 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private ICommand _toggleMeasurementCommand;
-        public ICommand ToggleMeasurementCommand
-        {
-            get { return this._toggleMeasurementCommand ?? (this._toggleMeasurementCommand = new RelayCommand(ToggleMeasurement)); }
-        }
-
         private ICommand _cmdPlayback;
         public ICommand CmdPlayback
         {
             get { return this._cmdPlayback ?? (this._cmdPlayback = new RelayCommand<object>(Playback)); }
-        }
-
-        private ICommand _cmdRotateIndicator;
-        public ICommand CmdRotateIndicator
-        {
-            get { return this._cmdRotateIndicator ?? (this._cmdRotateIndicator = new RelayCommand<object>(RotateIndicator)); }
-        }
-
-        private ICommand _cmdMoveIndicator;
-        public ICommand CmdMoveIndicator
-        {
-            get { return this._cmdMoveIndicator ?? (this._cmdMoveIndicator = new RelayCommand<object>(MoveIndicator)); }
-        }
-
-        private ICommand _cmdViewSizeChanged;
-        public ICommand CmdViewSizeChanged
-        {
-            get { return this._cmdViewSizeChanged ?? (this._cmdViewSizeChanged = new RelayCommand<object>(ViewSizeChanged)); }
         }
 
         private ICommand _toggleLongitudeCommand;
@@ -197,10 +176,10 @@ namespace RaywattApp.ViewModels
             get { return this._toggleLongitudeCommand ?? (this._toggleLongitudeCommand = new RelayCommand<bool>(ToggleLongitude)); }
         }
 
-        private ICommand _coRegistrationCommand;
-        public ICommand CoRegistrationCommand
+        private ICommand _toggleAngioCommand;
+        public ICommand ToggleAngioCommand
         {
-            get { return this._coRegistrationCommand ?? (this._coRegistrationCommand = new RelayCommand(CoRegistration)); }
+            get { return this._toggleAngioCommand ?? (this._toggleAngioCommand = new RelayCommand<bool>(ToggleAngio)); }
         }
 
         private ICommand _toggleContourStentCommand;
@@ -209,10 +188,10 @@ namespace RaywattApp.ViewModels
             get { return this._toggleContourStentCommand ?? (this._toggleContourStentCommand = new RelayCommand(ToggleContourStent)); }
         }
 
-        private ICommand _toggleAngioCommand;
-        public ICommand ToggleAngioCommand
+        private ICommand _toggleMeasurementCommand;
+        public ICommand ToggleMeasurementCommand
         {
-            get { return this._toggleAngioCommand ?? (this._toggleAngioCommand = new RelayCommand<bool>(ToggleAngio)); }
+            get { return this._toggleMeasurementCommand ?? (this._toggleMeasurementCommand = new RelayCommand(ToggleMeasurement)); }
         }
 
         private ICommand _zoomInCommand;
@@ -233,14 +212,35 @@ namespace RaywattApp.ViewModels
             get { return this._adjustResetCommand ?? (this._adjustResetCommand = new RelayCommand(AdjustReset)); }
         }
 
+        private ICommand _coRegistrationCommand;
+        public ICommand CoRegistrationCommand
+        {
+            get { return this._coRegistrationCommand ?? (this._coRegistrationCommand = new RelayCommand(CoRegistration)); }
+        }
+
         private ICommand _editCaseCommand;
         public ICommand EditCaseCommand
         {
             get { return this._editCaseCommand ?? (this._editCaseCommand = new RelayCommand(EditCase)); }
         }
 
-        private CallbackFunctionForDetection cbLumenContour;
-        public CallbackFunctionForDetection CBLumenContour => (this.cbLumenContour) ?? (this.cbLumenContour = new CallbackFunctionForDetection(OnRecvLumenContour));
+        private ICommand _cmdViewSizeChanged;
+        public ICommand CmdViewSizeChanged
+        {
+            get { return this._cmdViewSizeChanged ?? (this._cmdViewSizeChanged = new RelayCommand<object>(ViewSizeChanged)); }
+        }
+
+        private ICommand _cmdRotateIndicator;
+        public ICommand CmdRotateIndicator
+        {
+            get { return this._cmdRotateIndicator ?? (this._cmdRotateIndicator = new RelayCommand<object>(RotateIndicator)); }
+        }
+
+        private ICommand _cmdMoveIndicator;
+        public ICommand CmdMoveIndicator
+        {
+            get { return this._cmdMoveIndicator ?? (this._cmdMoveIndicator = new RelayCommand<object>(MoveIndicator)); }
+        }
 
         public ReviewViewModel(SqlManager sqlManager, IDialogService dialogService) : base(sqlManager, dialogService)
         {
