@@ -161,6 +161,9 @@ RayError COCTSystem::Stop() {
 		m_pVolume = nullptr;
 	}
 
+	CLaserController* pLaser = CLaserController::GetInstance();
+	pLaser->LaserOnOff(false);
+
 	CMotorController* pMotor = CMotorController::GetInstance();
 	pMotor->StopMotor();
 	pMotor->SwitchOff();
