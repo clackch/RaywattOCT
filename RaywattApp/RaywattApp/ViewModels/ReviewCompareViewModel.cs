@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using log4net;
-using Newtonsoft.Json;
 using OpenCvSharp;
 using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
@@ -16,7 +15,6 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
 using Point = System.Windows.Point;
 
@@ -25,8 +23,6 @@ namespace RaywattApp.ViewModels
     public partial class ReviewCompareViewModel : ReviewViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewCompareViewModel));
-
-        private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
         private Mat imglumenProfileCompare;
 
@@ -209,10 +205,6 @@ namespace RaywattApp.ViewModels
             MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
             GetImageInfo(RaySession.Compare);
             MoveToFrame(RaySession.Compare, DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current);
-
-            timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
-            timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
-            timerUpdateImage.Start();
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -220,9 +212,6 @@ namespace RaywattApp.ViewModels
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
             Save();
-
-            if (timerUpdateImage.IsEnabled)
-                timerUpdateImage.Stop();
         }
 
         private List<LumenContour> GetLumenContours(string patientCaseId)
@@ -281,8 +270,8 @@ namespace RaywattApp.ViewModels
             if (nRows == 0)
                 _log.Error("Update Error");
         }
-        
-        private void timerFuncUpdateImage(object sender, EventArgs e)
+
+        protected override void UpdateCrossSectionImage()
         {
             if (DrawCrossSectionImage())
             {

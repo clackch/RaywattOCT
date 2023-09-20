@@ -2,7 +2,6 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
-using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
@@ -10,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Input;
 using System.Windows.Navigation;
-using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels
@@ -18,7 +16,6 @@ namespace RaywattApp.ViewModels
     public partial class ReviewCalibrationViewModel : OCTViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewCalibrationViewModel));
-
 
         [ObservableProperty]
         private Patient _patient;
@@ -31,8 +28,6 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private ReviewStatus _reviewStatus;
-
-        private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
         private ICommand _okCommand;
         public ICommand OkCommand
@@ -82,10 +77,6 @@ namespace RaywattApp.ViewModels
 
                 GetImageInfo(RaySession.Review);
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
-
-                timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
-                timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
-                timerUpdateImage.Start();
             }
         }
 
@@ -93,9 +84,6 @@ namespace RaywattApp.ViewModels
         {
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
-
-            if (timerUpdateImage.IsEnabled)
-                timerUpdateImage.Stop();
         }
 
         private void ManualZoomIn(bool zoomIn)
@@ -139,7 +127,7 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Send(new NavigationMessage(ReviewStatus.CurrentPage) { Parameter = parameter });
         }
 
-        private void timerFuncUpdateImage(object sender, EventArgs e)
+        protected override void UpdateCrossSectionImage()
         {
             DrawCrossSectionImage();
         }

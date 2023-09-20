@@ -4,16 +4,15 @@ using OpenCvSharp;
 using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Threading;
+using System.Windows;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
 using Point = OpenCvSharp.Point;
 
 namespace RaywattApp.Common.Bases
 {
-
     public abstract partial class OCTViewModelBase : ViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(OCTViewModelBase));
@@ -54,7 +53,7 @@ namespace RaywattApp.Common.Bases
         [ObservableProperty]
         private bool _isPaused = true;
 
-        private Thread threadFuncPlayback;
+        private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
         // to avoid garbage collection
         private CallbackFunctionWithImage cbCrossSection;
@@ -69,6 +68,9 @@ namespace RaywattApp.Common.Bases
             for (int i = 0; i < crossSectionBackground.Length; i++) {
                 crossSectionBackground[i] = new Scalar(0, 0, 0);
             }
+
+            timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.PlaybackInterval);
+            timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
         }
 
         /// <summary>
@@ -104,6 +106,12 @@ namespace RaywattApp.Common.Bases
             Mat imgRecv = CommonUtil.ByteMemoryToCvMat(data, width, height, ch);
             imgLongitude = imgRecv;
             longitudeFrameInfo = new FrameInfo(frameInfo);
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                DrawLongitudeImage();
+                UpdateLumenProfile();
+            });
         }
 
         protected bool DrawCrossSectionImage()
@@ -197,14 +205,13 @@ namespace RaywattApp.Common.Bases
             {
                 DeviceStatus.IsPaused = false;
 
-                threadFuncPlayback = new Thread(() => ThreadFuncPlayback());
-                threadFuncPlayback.Start();
+                timerUpdateImage.Start();
             }
             else
             {
                 DeviceStatus.IsPaused = true;
 
-                threadFuncPlayback.Join();
+                timerUpdateImage.Stop();
             }
 
             IsPaused = DeviceStatus.IsPaused;
@@ -223,6 +230,8 @@ namespace RaywattApp.Common.Bases
             imgCrossSection[(int)session] = img;
             DeviceStatus.ReviewImageInfos[(int)session].Current = nFrame;
 
+            UpdateCrossSectionImage();
+
             return true;
         }
         protected void GetImageInfo(RaySession session)
@@ -239,13 +248,17 @@ namespace RaywattApp.Common.Bases
 
             DeviceStatus.ReviewImageInfos[(int)session] = imageInfo;
         }
-        private void ThreadFuncPlayback()
+
+        protected virtual void UpdateCrossSectionImage() { }
+
+        protected virtual void UpdateLumenProfile() { }
+
+        private void timerFuncUpdateImage(object sender, EventArgs e)
         {
             DeviceStatus.CanExit = false;
-            while (!DeviceStatus.IsPaused)
+            if (!DeviceStatus.IsPaused)
             {
                 NextFrame(RaySession.Review);
-                Thread.Sleep((int)Constants.PlaybackInterval);
             }
             DeviceStatus.CanExit = true;
         }
