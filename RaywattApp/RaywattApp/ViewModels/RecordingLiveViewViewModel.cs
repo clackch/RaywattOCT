@@ -243,6 +243,8 @@ namespace RaywattApp.ViewModels
 
         private void SetPullback()
         {
+            if (SelectedPullbackType == null) return;
+
             PatientCase.PullbackType = SelectedPullbackType;
             PatientCase.PullbackLength = SelectedPullbackType.IndexOf("LO") > 0 ? Constants.PullbackLengthLong : Constants.PullbackLengthShort;
 
