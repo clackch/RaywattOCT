@@ -52,10 +52,10 @@ namespace RaywattApp.ViewModels
         public double Degree
         {
             get { return degree; }
-            set 
-            { 
-                degree = value; 
-                OnPropertyChanged(nameof(Degree)); 
+            set
+            {
+                degree = value;
+                OnPropertyChanged(nameof(Degree));
                 RaySetProperty(Property.LongitudeDegree, degree);
             }
         }
@@ -129,17 +129,18 @@ namespace RaywattApp.ViewModels
         private Zoom _zoomAngio = new Zoom(Constants.CrossSectionAngio / Constants.OCTImageSize);
 
         private double _lModeIndicatorX;
-        public double LModeIndicatorX 
-        { 
-            get { return _lModeIndicatorX; } 
-            set { _lModeIndicatorX = value; OnPropertyChanged(nameof(LModeIndicatorX)); setCurrentFrame(value); } 
+        public double LModeIndicatorX
+        {
+            get { return _lModeIndicatorX; }
+            set { _lModeIndicatorX = value; OnPropertyChanged(nameof(LModeIndicatorX)); setCurrentFrame(value); }
         }
 
         private int _brightness;
         public int Brightness
         {
             get { return _brightness; }
-            set { 
+            set
+            {
                 _brightness = value;
                 OnPropertyChanged(nameof(Brightness));
                 RaySetProperty(Property.Brightness, value);
@@ -151,8 +152,9 @@ namespace RaywattApp.ViewModels
         public int Contrast
         {
             get { return _contrast; }
-            set { 
-                _contrast = value; 
+            set
+            {
+                _contrast = value;
                 OnPropertyChanged(nameof(Contrast));
                 RaySetProperty(Property.Contrast, value);
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
@@ -167,7 +169,7 @@ namespace RaywattApp.ViewModels
 
         private ICommand _cmdPlayback;
         public ICommand CmdPlayback
-        { 
+        {
             get { return this._cmdPlayback ?? (this._cmdPlayback = new RelayCommand<object>(Playback)); }
         }
 
@@ -185,7 +187,7 @@ namespace RaywattApp.ViewModels
 
         private ICommand _cmdViewSizeChanged;
         public ICommand CmdViewSizeChanged
-        { 
+        {
             get { return this._cmdViewSizeChanged ?? (this._cmdViewSizeChanged = new RelayCommand<object>(ViewSizeChanged)); }
         }
 
