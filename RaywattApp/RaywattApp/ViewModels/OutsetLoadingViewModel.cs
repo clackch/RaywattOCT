@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
-using OpenCvSharp;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
@@ -11,9 +10,6 @@ using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Threading;
 using System.Windows.Interop;
 using System.Windows.Threading;
 using static RaywattOCT.Ray3DWrapper;
@@ -32,9 +28,7 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private double _progress;
-
-        private readonly TcpClientSingleton _tcpClientSingleton;
-        public OutsetLoadingViewModel(SqlManager sqlManager, IDialogService dialogService, TcpClientSingleton tcpClientSingleton)
+        public OutsetLoadingViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
             _log.Debug("OutsetLoadingViewModel");
 
@@ -42,8 +36,6 @@ namespace RaywattApp.ViewModels
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;
-
-            _tcpClientSingleton = tcpClientSingleton;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)

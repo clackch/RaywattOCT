@@ -15,6 +15,7 @@ using System.Windows.Input;
 using System.Windows.Navigation;
 using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
+using RaywattApp.Angio;
 
 namespace RaywattApp.ViewModels
 {

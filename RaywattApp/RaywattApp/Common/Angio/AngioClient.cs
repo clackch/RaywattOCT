@@ -22,7 +22,7 @@ enum CommandType
     FGNothing,
 };
 
-namespace RaywattApp.Models
+namespace RaywattApp.Angio
 {
     public partial class AngioClient
     {
@@ -150,7 +150,7 @@ namespace RaywattApp.Models
 
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
-                        ViewModelBase._deviceStatus._isAngioConnected = _tcpClientSingleton.portConnection;
+                        ViewModelBase._deviceStatus.IsAngioConnected = _tcpClientSingleton.portConnection;
                     });
                 }
 
@@ -213,46 +213,6 @@ namespace RaywattApp.Models
             Cv2.PutText(image, "No Signal", textPosition, fontFace, fontScale, textColor, thickness);
 
             return image;
-        }
-    }
-
-    public class TcpClientSingleton
-    {
-        string serverIP = "127.0.0.1";
-        int serverPort = 8888;
-
-        private TcpClient _tcpClient;
-        public TcpClient Instance => _tcpClient;
-
-        public bool isConnected = false; // Server - Client Connection
-        public bool portConnection = false; // FG Conenction
-        public byte[] buffer = new byte[10000000];
-        public byte[] tmpBuffer = new byte[20000000];
-        public int bytesRead;
-        public int tmpBufferLen = 0;
-        public byte[] startCommand = { 0x3A, (byte)PacketType.Command, (byte)CommandType.FGStarted, 0x07, 0xA3 };
-        public byte[] stopCommand = { 0x3A, (byte)PacketType.Command, (byte)CommandType.FGStopped, 0x07, 0xA3 };
-        public Mat imgAngio = AngioClient.ShowNoSignal();
-
-        public TcpClientSingleton()
-        {
-            Thread clientThread = new Thread(ConnectToServer);
-            clientThread.Start();
-        }
-        private void ConnectToServer()
-        {
-            // Angio Server On
-            ProcessStartInfo psi = new ProcessStartInfo();
-            Process p = new Process();
-            psi.FileName = "C:\\Raywatt\\FGServer\\FGServer.exe";
-            psi.CreateNoWindow = true;
-            p.StartInfo = psi;
-            p.Start();
-
-            // Client On
-            _tcpClient = new TcpClient(serverIP, serverPort);
-            AngioClient angioclient = new AngioClient(this);
-            angioclient.ActivateClientThread();
         }
     }
 }
