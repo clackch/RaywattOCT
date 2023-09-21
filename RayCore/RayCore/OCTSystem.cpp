@@ -125,22 +125,26 @@ RayError COCTSystem::Start() {
 * Stop
 */
 RayError COCTSystem::Stop() {
+	PLOGI.printf("Stop threads");
 	CUtility::StopThread(m_pThreadService);
 	CUtility::StopThread(m_pThreadSaveRaw);
 	CUtility::StopThread(m_pThreadRotaryJunction);
 
+	PLOGI.printf("Close All Sessions");
 	closeAllSessions();
 	if (m_openedSession != nullptr) {
 		delete m_openedSession;
 		m_openedSession = nullptr;
 	}
 
+	PLOGI.printf("Stop Acquisition");
 	if (m_pAcqDevice != nullptr) {
 		m_pAcqDevice->StopAcquisition();
 		delete m_pAcqDevice;
 		m_pAcqDevice = nullptr;
 	}
 
+	PLOGI.printf("Stop Imaging");
 	m_pImagingRealtime = nullptr;
 	if (m_pImagingPullback != nullptr) {
 		m_pImagingPullback->Stop();
@@ -161,14 +165,17 @@ RayError COCTSystem::Stop() {
 		m_pVolume = nullptr;
 	}
 
+	PLOGI.printf("Laser Off");
 	CLaserController* pLaser = CLaserController::GetInstance();
 	pLaser->LaserOnOff(false);
 
+	PLOGI.printf("Stop Motor");
 	CMotorController* pMotor = CMotorController::GetInstance();
 	pMotor->StopMotor();
 	pMotor->SwitchOff();
 	pMotor->Disconnect();
 
+	PLOGI.printf("Close COM Ports");
 	m_pPullbackMotor->Close();
 	delete m_pPullbackMotor;
 	m_pPullbackMotor = nullptr;
@@ -206,7 +213,9 @@ RayError COCTSystem::ConnectDevices() {
 
 	if (m_curState == RayScannerState::Initial) {
 		result |= connectAcqDevice();
+		PLOGI.printf("connect DAQ - %s", ((result) ? "Succeed" : "Failed"));
 		result |= connectRotaryJunction();
+		PLOGI.printf("connect Rotary Junction - %s", ((result) ? "Succeed" : "Failed"));
 
 		if (result == NOERROR) {
 			postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Default);
@@ -216,6 +225,7 @@ RayError COCTSystem::ConnectDevices() {
 			return RayError::DeviceNotConnected;
 		}
 	}
+	PLOGI.printf("WrongState - %d", m_curState);
 
 	return RayError::WrongState;
 }
@@ -1453,6 +1463,7 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 			int nSheathPosition = m_pImagingRealtime->GetSheathPosition();
 			int nDelayLinePos = m_pLaserModule->GetPosition(MotorIndex::DelayLine);
 			m_vCalibrationInfo.push_back(std::make_pair(nSheathPosition, nDelayLinePos));
+			PLOGI.printf("FindingSheath - %d, %d", nSheathPosition, nDelayLinePos);
 		}
 			break;
 		case CatheterState::FindingPeak:
@@ -1466,6 +1477,7 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 
 			int nPolarizationPos = m_pLaserModule->GetPosition(MotorIndex::Polarization);
 			m_vCalibrationInfo.push_back(std::make_pair(nPeakValue, nPolarizationPos));
+			PLOGI.printf("FindingPeak - %d, %d", nPeakValue, nPolarizationPos);
 		}
 			break;
 		default:
@@ -1573,7 +1585,7 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 
 	if(m_callback != nullptr) m_callback((int)RayCallbackRequest::State, (int)m_curState, lParam);
 
-	PLOGI.printf("%d > %d", m_prevState, m_curState);
+	PLOGI.printf("ScannerState - %d > %d", m_prevState, m_curState);
 	switch (m_curState) {
 	case RayScannerState::Initial:
 		closeAllSessions();
