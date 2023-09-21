@@ -6,7 +6,7 @@
 CMotorController* CMotorController::pInstance = nullptr;
 
 CMotorController::CMotorController() {
-	m_pConnection = new CCOMConnection();
+	m_pConnection = new CUSBConnection();
 	m_initMotor = false;
 	m_isRun = false;
 
