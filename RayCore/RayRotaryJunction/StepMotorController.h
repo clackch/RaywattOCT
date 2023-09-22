@@ -1,11 +1,14 @@
 #pragma once
 #include "Config.h"
 
-typedef enum {
-	STEP_MOTOR_PULLBACK = 0,
-	STEP_MOTOR_DELAYLINE,
-	STEP_MOTOR_NUM
-}MotorType;
+#define DISTANCE_BETWEEN_MOTORS	4
+enum class StepMotorIndex : UINT
+{
+	Both = 0,
+	Pullback = 1,
+	Hub = 2,
+	Max
+};
 
 class CSerialPort;
 class CStepMotorController
@@ -20,11 +23,11 @@ public:
 	virtual ~CStepMotorController();
 
 	virtual bool Open(tstring strPort) = 0;
-	virtual bool SetCurrent(int nPosition) = 0;
+	virtual bool SetCurrent(StepMotorIndex idx, int nPosition) = 0;
 	virtual bool IsMoving() = 0;
-	virtual bool MoveAbsolute(int nPosition) = 0;	// forward (load / unload catheter)
-	virtual bool MoveRelative(int nOffset) = 0;	// pullback
-	virtual bool SetSpeed(int nVelocity) = 0;
+	virtual bool MoveAbsolute(StepMotorIndex idx, int nPosition) = 0;	// forward (load / unload catheter)
+	virtual bool MoveRelative(StepMotorIndex idx, int nOffset) = 0;	// pullback
+	virtual bool SetSpeed(StepMotorIndex idx, int nVelocity) = 0;
 
 	bool IsOpen();
 	void Close();

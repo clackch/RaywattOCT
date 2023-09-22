@@ -2,23 +2,25 @@
 #include "Config.h"
 #include "StepMotorController.h"
 
-#define HAYDON_PULLBACK_LIMIT	870
+#define DELAY_BETWEEN_COMMAND	2000
 
 class CArduinoController
 	: public CStepMotorController
 {
 private:
+	double m_pPosition[(UINT)StepMotorIndex::Max];
 	double m_fTargetPosition;
+	UINT m_nSpeed;
 public:
 	CArduinoController();
 	virtual ~CArduinoController();
 
 	virtual bool Open(tstring strPort);
-	virtual bool SetCurrent(int nPosition);
+	virtual bool SetCurrent(StepMotorIndex idx, int nPosition);
 	virtual bool IsMoving();
-	virtual bool MoveAbsolute(int nPos);
-	virtual bool MoveRelative(int nOffset);
-	virtual bool SetSpeed(int nVelocity);
+	virtual bool MoveAbsolute(StepMotorIndex idx, int nPos);
+	virtual bool MoveRelative(StepMotorIndex idx, int nOffset);
+	virtual bool SetSpeed(StepMotorIndex idx, int nVelocity);
 
 protected:
 	virtual void readResponse();

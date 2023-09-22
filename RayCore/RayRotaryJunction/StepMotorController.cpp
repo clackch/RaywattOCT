@@ -31,6 +31,7 @@ bool CStepMotorController::sendCommand(const char* strCommand, bool readResponse
 	if (!m_pPort->IsOpen()) {
 		return false;
 	}
+	PLOGI.printf("%s", strCommand);
 
 	bool result = m_pPort->WriteByte((BYTE*)strCommand, strlen(strCommand));
 

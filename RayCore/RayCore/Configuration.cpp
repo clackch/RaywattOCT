@@ -52,7 +52,7 @@ void CConfiguration::Initialize(tstring configFile)
 	this->acquisition.bUseDES = ::GetPrivateProfileInt(_T("Acquisition"), _T("UseDES"), 0, configFilePath.c_str());
 
 	// [StepMotor]
-	::GetPrivateProfileString(_T("StepMotor"), _T("Pullback"), _T(""), this->stepMotor.pullback, sizeof(this->stepMotor.pullback), configFilePath.c_str());
+	::GetPrivateProfileString(_T("StepMotor"), _T("RotaryJunction"), _T(""), this->stepMotor.rotaryJunction, sizeof(this->stepMotor.rotaryJunction), configFilePath.c_str());
 	::GetPrivateProfileString(_T("StepMotor"), _T("DelayLine"), _T(""), this->stepMotor.delayline, sizeof(this->stepMotor.delayline), configFilePath.c_str());
 	this->stepMotor.pullbackDistance = ::GetPrivateProfileInt(_T("StepMotor"), _T("PullbackDistance"), 10, configFilePath.c_str());
 	this->stepMotor.pullbackSpeed = ::GetPrivateProfileInt(_T("StepMotor"), _T("PullbackSpeed"), 10, configFilePath.c_str());

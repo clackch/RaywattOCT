@@ -176,7 +176,13 @@ RayError COCTSystem::Stop() {
 	pMotor->Disconnect();
 
 	PLOGI.printf("Close COM Ports");
-	m_pPullbackMotor->Close();
+	if (m_pPullbackMotor->IsOpen()) {
+		if (m_pPullbackMotor->IsOpen()) {
+			m_pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, 30);
+			m_pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, 80);
+		}
+		m_pPullbackMotor->Close();
+	}
 	delete m_pPullbackMotor;
 	m_pPullbackMotor = nullptr;
 
@@ -1130,18 +1136,18 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 
 	pSystem->m_pAcqDevice->SetWriter(pDataWriter);
 	pSystem->restartAcqDevice(pSystem->m_pImagingPullback);
-	pPullbackMotor->SetSpeed(config.stepMotor.pullbackSpeed);
+	pPullbackMotor->SetSpeed(StepMotorIndex::Both, config.stepMotor.pullbackSpeed);
 
 	// 1. Motor ON
-	pMotor->PerformRun(config.bldcMotor.velocityPullback);
+	int nVelocity = config.bldcMotor.velocityPullback;
+	pMotor->PerformRun(nVelocity);
 
 	// 2. Start Recording OCT
 	pDataWriter->StartRecording();
 
 	// 3. Pullback Linear Stage
-	if (pPullbackMotor->IsOpen()) {
-		int nPullbackPosition = config.stepMotor.pullbackStart + config.stepMotor.pullbackDistance;
-		pPullbackMotor->MoveAbsolute(nPullbackPosition);
+	if (pPullbackMotor->IsOpen()) {		
+		pPullbackMotor->MoveAbsolute(StepMotorIndex::Both, config.stepMotor.pullbackDistance);
 		while (pSystem->m_pThreadRotaryJunction->isRun) {
 			if (pPullbackMotor->IsMoving()) {
 				break;
@@ -1189,22 +1195,22 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 
 	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterLoading);
 
-	// 1. Set Linear Stage Position
+	// 1. Rotate BLDC Motor
+	int nVelocity = 600;
+	pMotor->PerformRun(nVelocity);
+
+	// 2. Move Step-Motor (Pullback)
 	if (pPullbackMotor->IsOpen()) {
-		pPullbackMotor->SetSpeed(config.stepMotor.pullbackSpeed);
-		pPullbackMotor->MoveAbsolute(config.stepMotor.pullbackStart);
-		while (pSystem->m_pThreadRotaryJunction->isRun) {
-			if (pPullbackMotor->IsMoving()) {
-				break;
-			}
-			else {
-				Sleep(DELAY_FOR_STOP_THREAD);
-			}
-		}
+		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, 30);
+		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, 30);
+
+		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, 4);
+		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, 0);
+		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 	}
 
-	// 2. Wait
-	Sleep(config.catheter.rotationTime);
+	// 3. Stop BLDC Motor
+	pMotor->StopMotor();
 
 	// To-Do: Check Catheter Connection
 	bool loaded = true;
@@ -1233,26 +1239,12 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	CMotorController* pMotor = CMotorController::GetInstance();
 	CStepMotorController* pPullbackMotor = pSystem->m_pPullbackMotor;
 
-	// 1. Motor ON
-	int nVelocity = config.bldcMotor.velocityHoming;
-	pMotor->PerformRun(nVelocity);
+	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterUnloading);
 
-	// 2. Set Linear Stage Position to Zero
 	if (pPullbackMotor->IsOpen()) {
-		pPullbackMotor->SetSpeed(config.stepMotor.pullbackSpeed);
-		pPullbackMotor->MoveAbsolute(config.stepMotor.pullbackStart);
-		while (pSystem->m_pThreadRotaryJunction->isRun) {
-			if (pPullbackMotor->IsMoving()) {
-				break;
-			}
-			else {
-				Sleep(DELAY_FOR_STOP_THREAD);
-			}
-		}
+		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, 30);
+		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, 80);
 	}
-
-	// 3. Motor Off
-	pMotor->StopMotor();
 
 	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Unloaded);
 
@@ -1387,8 +1379,11 @@ int COCTSystem::connectRotaryJunction() {
 	bool result = true;
 
 	if (!m_pPullbackMotor->IsOpen()) {
-		m_pPullbackMotor->Open(config.stepMotor.pullback);
-		m_pPullbackMotor->SetCurrent(config.stepMotor.pullbackStart);
+		m_pPullbackMotor->Open(config.stepMotor.rotaryJunction);
+		Sleep(DELAY_BETWEEN_COMMAND);
+		m_pPullbackMotor->SetCurrent(StepMotorIndex::Pullback, 80);
+		Sleep(DELAY_BETWEEN_COMMAND);
+		m_pPullbackMotor->SetCurrent(StepMotorIndex::Hub, 0);
 	}
 
 	if (!m_pLaserModule->IsOpen()) {

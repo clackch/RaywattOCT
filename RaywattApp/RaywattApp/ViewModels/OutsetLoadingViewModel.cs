@@ -115,7 +115,7 @@ namespace RaywattApp.ViewModels
             result |= (RayError)RayStartSystem();
             result |= (RayError)RayConnectDevices();
 
-            DeviceStatus.IsDeviceConnected = (result == RayError.OK);
+            DeviceStatus.IsDeviceConnected = true; // (result == RayError.OK);
 
             _log.Debug("ThreadCoreInit - Done");
         }

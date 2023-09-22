@@ -40,6 +40,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("OnNavigated");
 
+
             var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
 
             if (extraData != null)
@@ -48,7 +49,7 @@ namespace RaywattApp.ViewModels
                 this.Patient = (Patient)data["patient"];
                 this.PrevStatus = (PrevStatus)data["prevStatus"];
 
-                if (DeviceStatus.CatheterStatus == Constants.CatheterStatusUnloaded)
+                if (DeviceStatus.CatheterStatus == Constants.CatheterStatusConnected)
                     Next();
             }
         }
@@ -80,7 +81,7 @@ namespace RaywattApp.ViewModels
 
         private void CheckCatheterStatus(object sender, EventArgs e)
         {
-            if (DeviceStatus.CatheterStatus == Constants.CatheterStatusUnloaded)
+            if (DeviceStatus.CatheterStatus == Constants.CatheterStatusConnected)
                 Next();
         }
     }

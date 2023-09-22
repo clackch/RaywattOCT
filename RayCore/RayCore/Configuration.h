@@ -10,7 +10,7 @@ class CConfiguration
 public:
 	class StepMotorSetting {
 	public:
-		TCHAR pullback[MAX_PATH];
+		TCHAR rotaryJunction[MAX_PATH];
 		TCHAR delayline[MAX_PATH];
 		int pullbackDistance;
 		int pullbackSpeed;

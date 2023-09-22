@@ -63,7 +63,9 @@ namespace RaywattOCT
 
         public enum RayEvent : int { 
             Unknown = 0,
-            CatheterLoading
+            CatheterConnected,
+            CatheterLoading,
+            CatheterUnloading
         };
 
         public enum RayWorkItem : int
