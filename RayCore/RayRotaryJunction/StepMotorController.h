@@ -1,7 +1,13 @@
 #pragma once
 #include "Config.h"
 
-#define DISTANCE_BETWEEN_MOTORS	4
+// position: mm, speed: mm/s
+#define DISTANCE_BETWEEN_MOTORS			4
+#define PULLBACK_MOTOR_POS_INITIAL		80
+#define PULLBACK_MOTOR_POS_LOAD			30
+#define HUB_MOTOR_POS_INITIAL			0
+#define STEP_MOTOR_SPEED_DEFAULT		30
+#define STEP_MOTOR_SPEED_LOAD			4
 enum class StepMotorIndex : UINT
 {
 	Both = 0,

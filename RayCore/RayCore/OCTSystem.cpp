@@ -178,8 +178,8 @@ RayError COCTSystem::Stop() {
 	PLOGI.printf("Close COM Ports");
 	if (m_pPullbackMotor->IsOpen()) {
 		if (m_pPullbackMotor->IsOpen()) {
-			m_pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, 30);
-			m_pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, 80);
+			m_pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
+			m_pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 		}
 		m_pPullbackMotor->Close();
 	}
@@ -1201,10 +1201,10 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 
 	// 2. Move Step-Motor (Pullback)
 	if (pPullbackMotor->IsOpen()) {
-		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, 30);
-		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, 30);
+		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
+		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_LOAD);
 
-		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, 4);
+		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_LOAD);
 		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, 0);
 		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 	}
@@ -1242,8 +1242,8 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterUnloading);
 
 	if (pPullbackMotor->IsOpen()) {
-		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, 30);
-		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, 80);
+		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
+		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 	}
 
 	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Unloaded);
@@ -1263,6 +1263,8 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
 	CLaserController* pLaser = CLaserController::GetInstance();
+
+	PLOGI.printf("Catheter Validation");
 
 	pSystem->restartAcqDevice(pSystem->m_pImagingLiveView);
 	//pLaser->LaserOnOff(true);
@@ -1381,9 +1383,9 @@ int COCTSystem::connectRotaryJunction() {
 	if (!m_pPullbackMotor->IsOpen()) {
 		m_pPullbackMotor->Open(config.stepMotor.rotaryJunction);
 		Sleep(DELAY_BETWEEN_COMMAND);
-		m_pPullbackMotor->SetCurrent(StepMotorIndex::Pullback, 80);
+		m_pPullbackMotor->SetCurrent(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 		Sleep(DELAY_BETWEEN_COMMAND);
-		m_pPullbackMotor->SetCurrent(StepMotorIndex::Hub, 0);
+		m_pPullbackMotor->SetCurrent(StepMotorIndex::Hub, HUB_MOTOR_POS_INITIAL);
 	}
 
 	if (!m_pLaserModule->IsOpen()) {
