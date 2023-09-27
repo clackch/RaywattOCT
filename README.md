@@ -136,6 +136,8 @@ Download & Copy/Paste
 
    (e) 마우스 포인터 설정 (※ FASTER에 적용)
 
+   (f) 전원 관리 옵션 설정 편집 - 디스플레이 끄기/절전 모드 설정 > 해당 없음으로 설정 (※ Raywatt 적용. FASTER는 자동 적용됨)
+
 4. 윈도우 잠금화면 해제
    
    (a) 윈도우 + R > gpedit.msc
