@@ -15,16 +15,21 @@ using System.Windows.Input;
 using System.Windows.Navigation;
 using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
+using RaywattApp.Common.Angio;
 
 namespace RaywattApp.ViewModels
 {
     public partial class RecordingLiveViewViewModel : OCTViewModelBase
     {
+        private DispatcherTimer timerLiveAngioImage = new DispatcherTimer(DispatcherPriority.Background);
+
         private static readonly ILog _log = LogManager.GetLogger(typeof(RecordingLiveViewViewModel));
 
         private readonly SqlManager? _sqlManager;
 
         private IDialogService? _dialogService;
+               
+        private readonly TcpClientSingleton _tcpClientSingleton;
 
         private IList<Code> pullbackTypes;
 
@@ -57,7 +62,7 @@ namespace RaywattApp.ViewModels
             get { return _selectedPullbackType; }
             set { _selectedPullbackType = value; SetPullback(); }
         }
-
+        
         private int _brightness;
         public int Brightness
         {
@@ -96,7 +101,8 @@ namespace RaywattApp.ViewModels
             get { return _cmdStartRecording ?? (this._cmdStartRecording = new RelayCommand(StartRecording)); }
         }
 
-        public RecordingLiveViewViewModel(SqlManager sqlManager, IDialogService dialogService)
+        private bool _isRecording = false;
+        public RecordingLiveViewViewModel(SqlManager sqlManager, IDialogService dialogService, TcpClientSingleton tcpClientSingleton)
         {
             _log.Debug("RecordingLiveViewViewModel");
 
@@ -105,6 +111,8 @@ namespace RaywattApp.ViewModels
             _sqlManager = sqlManager;
             _dialogService = dialogService;
 
+            _tcpClientSingleton = tcpClientSingleton;
+            
             PullbackList = CodeDefinition.Codes["PBTY"];
 
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
@@ -155,6 +163,13 @@ namespace RaywattApp.ViewModels
 
                 SetCondition();
             }
+
+            // Send Start Command
+            _tcpClientSingleton.Instance.GetStream().Write(_tcpClientSingleton.startCommand, 0, _tcpClientSingleton.startCommand.Length);
+
+            timerLiveAngioImage.Interval = TimeSpan.Zero; // TimeSpan.Zero;
+            timerLiveAngioImage.Tick += new EventHandler(timerFuncLiveAngioImage);
+            timerLiveAngioImage.Start();
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -164,6 +179,16 @@ namespace RaywattApp.ViewModels
 
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
+
+            if (AngioClient.threadOnLiveAngioImage)
+                if (_isRecording)
+                {
+                    //Send Stop Command
+                    _tcpClientSingleton.Instance.GetStream().Write(_tcpClientSingleton.stopCommand, 0, _tcpClientSingleton.stopCommand.Length);
+
+                    timerLiveAngioImage.Stop();
+                    _isRecording = false;
+                }
         }
 
         private void SetCondition()
@@ -211,6 +236,7 @@ namespace RaywattApp.ViewModels
         private void StartRecording()
         {
             _log.Debug("StartRecording");
+            _isRecording = true;
 
             if (String.IsNullOrEmpty(PatientCase.PullbackType))
             {
@@ -218,7 +244,7 @@ namespace RaywattApp.ViewModels
                 parameter["title"] = _l10n["Information"];
                 parameter["message"] = _l10n["Select Pullback"];
                 var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-
+                    
                 return;
             }
 
@@ -239,6 +265,18 @@ namespace RaywattApp.ViewModels
             PatientCase.Contrast = Contrast;
             parameter["patientCase"] = PatientCase;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(viewPage) { Parameter = parameter });
+        }
+
+        private void timerFuncLiveAngioImage(object sender, EventArgs e)
+        {
+            DrawAngioImage();
+        }
+
+        protected bool DrawAngioImage()
+        {
+            AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(_tcpClientSingleton.imgAngio);
+
+            return true;
         }
 
         private void SetPullback()

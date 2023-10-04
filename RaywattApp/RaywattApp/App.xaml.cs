@@ -10,6 +10,7 @@ using RaywattApp.ViewModels.Dialog;
 using RaywattApp.Common.Dialog;
 using System.Threading.Tasks;
 using log4net;
+using RaywattApp.Common.Angio;
 using System.Diagnostics;
 using System.IO;
 using RaywattApp.Common.Util;
@@ -120,6 +121,8 @@ namespace RaywattApp
             //IDatabaseService 등록 (Singleton 사용 안함 => Connection Pooling을 Default로 사용)
             services.AddTransient<IDatabaseService, SqlService>(obj => new SqlService(connectionString));
             services.AddTransient(typeof(SqlManager));
+
+            services.AddSingleton(typeof(TcpClientSingleton));
 
             return services.BuildServiceProvider();
         }

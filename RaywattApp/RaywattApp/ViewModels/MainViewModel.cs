@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
@@ -11,6 +11,7 @@ using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -18,6 +19,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
+using RaywattApp.Common.Angio;
 
 namespace RaywattApp.ViewModels
 {
@@ -101,10 +103,12 @@ namespace RaywattApp.ViewModels
         private CallbackFunction cbFunction;
         public CallbackFunction CBFunction => (this.cbFunction) ?? (this.cbFunction = new CallbackFunction(OnMsgCallback));
 
+        private readonly TcpClientSingleton _tcpClientSingleton;
+
         /// <summary>
         /// 생성자
         /// </summary>
-        public MainViewModel(SqlManager sqlManager, IDialogService dialogService)
+        public MainViewModel(SqlManager sqlManager, IDialogService dialogService, TcpClientSingleton tcpClientSingleton)
         {
             _log.Debug("MainViewModel");
 
@@ -137,6 +141,8 @@ namespace RaywattApp.ViewModels
 
             IsHome = true;
             IsLoading = true;
+
+            _tcpClientSingleton = tcpClientSingleton;
 
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["classification"] = "TestMode";
@@ -214,11 +220,20 @@ namespace RaywattApp.ViewModels
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["title"] = _l10n["Power Off"];
             parameter["message"] = _l10n["Choose one of the power off options"];
+            
             var result = _dialogService.OpenDialog(new PowerOffDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
             if (result != null && result.DialogAnswer != DialogResults.Answer.No)
             {
                 CommonUtil.Exit(DeviceStatus);
+
+                _tcpClientSingleton.Instance.GetStream().Close();
+                AngioClient.CloseLiveAngioImageThread();
+
+                // Server Off
+                Process[] processes = Process.GetProcessesByName("FGServer");
+                foreach (Process process in processes)
+                    process.Kill();
 
                 if (result.DialogAnswer == DialogResults.Answer.Yes && !DeviceStatus.IsTestMode)
                 {

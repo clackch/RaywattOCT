@@ -1,6 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using RaywattApp.Common.Localization;
 using RaywattApp.Models;
+using System;
+using System.Net.Sockets;
+using OpenCvSharp;
 
 namespace RaywattApp.Common.Bases
 {
@@ -12,7 +15,7 @@ namespace RaywattApp.Common.Bases
         protected readonly DynamicResource _l10n;
 
         [ObservableProperty]
-        protected static DeviceStatus _deviceStatus = new DeviceStatus();
+        public static DeviceStatus _deviceStatus = new DeviceStatus();
 
         public ViewModelBase()
         {

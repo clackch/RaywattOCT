@@ -235,6 +235,9 @@ namespace RaywattApp.Common.Bases
         public const string LogFolderPath = SystemRootPath + "\\Raywatt\\log";
         public const string LogExtension = "*.log";
 
+        //FrameGrabber Folder
+        public const string FGFolderPath = SystemRootPath + "\\Raywatt\\FrameGrabber";
+
         //Encrypt, Decrypt Public Key
         public const string PublicKey = "raywatt07_hwjckklls_298-87-01441";
 
@@ -403,5 +406,10 @@ namespace RaywattApp.Common.Bases
         //Recording
         public const int TransientTime = 3000;
         public const int StartTime = 15;
+
+        //AngioClient
+        public const int imageHeaderSize = 7;
+        public const int imageTailSize = 2;
+        public const int commandPacketSize = 5;
     }
 }

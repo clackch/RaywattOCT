@@ -51,6 +51,9 @@ namespace RaywattApp.Common.Bases
         protected Mat imglumenProfile;
 
         [ObservableProperty]
+        private BitmapSource _angioImage;
+
+        [ObservableProperty]
         private bool _isPaused = true;
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);

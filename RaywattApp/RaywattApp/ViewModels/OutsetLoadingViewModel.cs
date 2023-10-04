@@ -30,7 +30,6 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private double _progress;
-
         public OutsetLoadingViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
             _log.Debug("OutsetLoadingViewModel");
