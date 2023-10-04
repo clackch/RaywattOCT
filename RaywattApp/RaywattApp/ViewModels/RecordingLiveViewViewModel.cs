@@ -7,7 +7,6 @@ using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Services;
-using RaywattApp.Views;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
@@ -15,7 +14,7 @@ using System.Windows.Input;
 using System.Windows.Navigation;
 using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
-using RaywattApp.Angio;
+using RaywattApp.Common.Angio;
 
 namespace RaywattApp.ViewModels
 {
@@ -83,6 +82,7 @@ namespace RaywattApp.ViewModels
             get { return _cmdStartRecording ?? (this._cmdStartRecording = new RelayCommand(StartRecording)); }
         }
 
+        private bool _isRecording = false;
         public RecordingLiveViewViewModel(SqlManager sqlManager, IDialogService dialogService, TcpClientSingleton tcpClientSingleton)
         {
             _log.Debug("RecordingLiveViewViewModel");
@@ -144,15 +144,13 @@ namespace RaywattApp.ViewModels
                 timerUpdateImage.Stop();
 
             if (AngioClient.threadOnLiveAngioImage)
-                if (navigationEventArgs is System.Windows.Navigation.NavigatingCancelEventArgs args)
+                if (_isRecording)
                 {
-                    if (args.Navigator.ToString() != "System.Windows.Controls.Frame: Views/RecordingPage.xaml")
-                    {
-                        //Send Stop Command
-                        _tcpClientSingleton.Instance.GetStream().Write(_tcpClientSingleton.stopCommand, 0, _tcpClientSingleton.stopCommand.Length);
+                    //Send Stop Command
+                    _tcpClientSingleton.Instance.GetStream().Write(_tcpClientSingleton.stopCommand, 0, _tcpClientSingleton.stopCommand.Length);
 
-                        timerLiveAngioImage.Stop();
-                    }
+                    timerLiveAngioImage.Stop();
+                    _isRecording = false;
                 }
         }
 
@@ -204,6 +202,7 @@ namespace RaywattApp.ViewModels
         private void StartRecording()
         {
             _log.Debug("StartRecording");
+            _isRecording = true;
 
             if (String.IsNullOrEmpty(PatientCase.Procedure))
             {

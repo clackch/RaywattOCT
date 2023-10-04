@@ -1,4 +1,5 @@
-﻿using RaywattApp.ViewModels;
+﻿using RaywattApp.Common.Angio;
+using RaywattApp.ViewModels;
 using System.Windows.Controls;
 
 namespace RaywattApp.Views
@@ -8,7 +9,9 @@ namespace RaywattApp.Views
     /// </summary>
     public partial class RecordingLiveViewPage : Page
     {
-        public RecordingLiveViewPage()
+        private readonly TcpClientSingleton _tcpClientSingleton;
+
+        public RecordingLiveViewPage(TcpClientSingleton tcpClientSingleton)
         {
             InitializeComponent();
             DataContext = App.Current.Services.GetService(typeof(RecordingLiveViewViewModel));

@@ -22,7 +22,7 @@ enum CommandType
     FGNothing,
 };
 
-namespace RaywattApp.Angio
+namespace RaywattApp.Common.Angio
 {
     public partial class AngioClient
     {

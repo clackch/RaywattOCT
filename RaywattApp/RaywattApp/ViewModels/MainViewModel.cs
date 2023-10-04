@@ -20,7 +20,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
-using RaywattApp.Angio;
+using RaywattApp.Common.Angio;
 
 namespace RaywattApp.ViewModels
 {
