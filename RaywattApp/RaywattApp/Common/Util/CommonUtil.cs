@@ -24,6 +24,8 @@ using System.Threading;
 using System.Windows.Controls;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
+using Newtonsoft.Json;
+using System.Windows.Shapes;
 
 namespace RaywattApp.Common.Util
 {
@@ -131,7 +133,7 @@ namespace RaywattApp.Common.Util
             return System.Text.Encoding.ASCII.GetString(rndNumbers);
         }
 
-        public static bool Encryptor(string filePath, string contents)
+        public static async Task Encryptor(string filePath, string contents, Action<double> progressCallback, double progressSize, Action<string> progressTextCallback)
         {
             try
             {
@@ -152,26 +154,41 @@ namespace RaywattApp.Common.Util
                             // For example, new StreamWriter(cryptoStream, Encoding.Unicode).
                             using (StreamWriter encryptWriter = new(cryptoStream))
                             {
-                                encryptWriter.WriteLine(contents);
+                                string[] strings = new string[10];
+                                int cnt = contents.Length / 10;
+                                for(int i = 0; i < 9; i++)
+                                {
+                                    strings[i] = contents.Substring(i * cnt, cnt);
+                                }
+                                strings[9] = contents.Substring(9 * cnt);
+                               
+                                foreach (string ch in strings)
+                                {
+                                    await Task.Run(() =>
+                                    {
+                                        encryptWriter.Write(ch);
+                                        progressCallback(progressSize / 10);
+                                        progressTextCallback(Constants.ExportStatusSaveFile);
+                                    });
+                                }
                             }
                         }
                     }
                 }
-                return true;
             }
             catch (Exception ex)
             {
                 _log.Error($"The encryption failed. {ex}");
-                return false;
             }
         }
 
-        public static string[] Decryptor(string filePath)
+        public static Tuple<bool, string> Decryptor(string filePath)
         {
-            string[] result = new string[2];
-
             try
             {
+                if (!System.IO.File.Exists(filePath))
+                    return new Tuple<bool, string>(false, "No File");
+
                 string contents = "";
 
                 using (FileStream fileStream = System.IO.File.OpenRead(filePath))
@@ -204,16 +221,12 @@ namespace RaywattApp.Common.Util
                         }
                     }
                 }
-                result[0] = "1";
-                result[1] = contents;
-                return result;
+                return new Tuple<bool, string>(true, contents);
             }
             catch (Exception ex)
             {
                 _log.Error($"The decryption failed. {ex}");
-                result[0] = "0";
-                result[1] = ex.ToString();
-                return result;
+                return new Tuple<bool, string>(false, ex.ToString());
             }
         }
 
@@ -514,7 +527,7 @@ namespace RaywattApp.Common.Util
             return imglumenProfile;
         }
 
-        public static Mat MakeLumenProfileImage(List<LumenContour> lumenContours, int frameProximal, int frameDistal, List<int>? sidebranchs, bool isPostCase, List<int>? appositionFrames, int currentFrame = -1)
+        public static Mat MakeLumenProfileImage(List<LumenContour> lumenContours, int frameProximal, int frameDistal, bool isPostCase, List<int>? appositionFrames, int currentFrame = -1)
         {
             const double radius = Constants.OCTImageSize / 2;
             const double totalArea = radius * radius * Math.PI;
@@ -536,44 +549,37 @@ namespace RaywattApp.Common.Util
 
                 Cv2.Line(imglumenProfile, new Point(curFrame, yStart), new Point(curFrame, yStart + lumenArea), new Scalar(0x16, 0x16, 0x16));
 
-                //Side Branch
-                if (sidebranchs != null)
-                {
-                    if(sidebranchs.Contains(curFrame))
-                        Cv2.Line(imglumenProfile, new Point(curFrame, imglumenProfile.Rows / 2 - 5), new Point(curFrame, imglumenProfile.Rows / 2 + 5), new Scalar(0xe4, 0xe4, 0xe4));
-                }
-
                 //Lesion Section
                 if (curFrame >= frameProximal && curFrame <= frameDistal)
                 {
-                    Scalar scalar;
-
-                    if (appositionFrames != null && appositionFrames.Contains(curFrame))
-                        scalar = new Scalar(0x77, 0x7d, 0xff);
-                    else
-                        scalar = new Scalar(0x8d, 0x8d, 0x8d);
+                    //Stent Area
+                    if (isPostCase && appositionFrames != null && appositionFrames.Contains(curFrame))
+                        Cv2.Line(imglumenProfile, new Point(curFrame, yStart), new Point(curFrame, yStart + lumenArea), new Scalar(0x3f, 0x41, 0x76));
 
                     //Stent
                     for (int i = 0; isPostCase && i < imglumenProfile.Rows; i++)
                     {
                         if ((i + curFrame) % 20 == 0)
                         {
-                            Cv2.Line(imglumenProfile, new Point(curFrame, i), new Point(curFrame, i), scalar);
+                            Cv2.Line(imglumenProfile, new Point(curFrame, i), new Point(curFrame, i), new Scalar(0x8d, 0x8d, 0x8d));
                         }
                         if ((i - curFrame) % 20 == 0)
                         {
-                            Cv2.Line(imglumenProfile, new Point(curFrame, i), new Point(curFrame, i), scalar);
+                            Cv2.Line(imglumenProfile, new Point(curFrame, i), new Point(curFrame, i), new Scalar(0x8d, 0x8d, 0x8d));
                         }
                     }
 
                     Cv2.Line(imglumenProfile, new Point(curFrame, 0), new Point(curFrame, yStart - 1), new Scalar(0x4f, 0x4f, 0x4f));
                     Cv2.Line(imglumenProfile, new Point(curFrame, yStart + lumenArea + 1), new Point(curFrame, imglumenProfile.Rows), new Scalar(0x4f, 0x4f, 0x4f));
+                }
 
-                    if(curFrame % 2 == 0)
-                    {
-                        Cv2.Line(imglumenProfile, new Point(curFrame, 0), new Point(curFrame, 0), new Scalar(0xe4, 0xe4, 0xe4));
-                        Cv2.Line(imglumenProfile, new Point(curFrame, imglumenProfile.Rows - 1), new Point(curFrame, imglumenProfile.Rows), new Scalar(0xe4, 0xe4, 0xe4));
-                    }
+                //Side Branch
+                if (lumenContour.HasSidebranch)
+                {
+                    if (curFrame >= frameProximal && curFrame <= frameDistal)
+                        Cv2.Line(imglumenProfile, new Point(curFrame, imglumenProfile.Rows / 2 - 5), new Point(curFrame, imglumenProfile.Rows / 2 + 5), new Scalar(0xe4, 0xe4, 0xe4));
+                    else
+                        Cv2.Line(imglumenProfile, new Point(curFrame, imglumenProfile.Rows / 2 - 5), new Point(curFrame, imglumenProfile.Rows / 2 + 5), new Scalar(0x7d, 0x7d, 0x7d));
                 }
 
                 curFrame++;
@@ -596,6 +602,36 @@ namespace RaywattApp.Common.Util
             }
 
             return imglumenProfile;
+        }
+
+        public static List<int> GetCalciumList(List<LumenContour> lumenContours, int calciumThreshold)
+        {
+            List<int> calciumList = new List<int>();
+
+            for(int i = 0; i<lumenContours.Count; i++)
+            {
+                if (lumenContours[i].Calcium == null)
+                    continue;
+
+                if (lumenContours[i].Calcium.TotalAngle >= calciumThreshold)
+                    calciumList.Add(i);
+            }
+
+            return calciumList;
+        }
+
+        public static List<int> GetExpansionList(List<LumenContour> lumenContours, int frameProximal, int frameDistal, double refArea, int expansionThreshold)
+        {
+            List<int> expansionList = new List<int>();
+
+            for (int i = frameProximal; i <= frameDistal && refArea != 0; i++)
+            {
+                double expansion = lumenContours[i].Area / refArea * 100;
+                if (expansion <= expansionThreshold)
+                    expansionList.Add(i);
+            }
+
+            return expansionList;
         }
 
         public static async Task SaveStillFrame(Mat image, string rootPath, string fileName, string format, Action<double> progressCallback, double progressIncrease, Action<string> progressTextCallback)
@@ -884,8 +920,19 @@ namespace RaywattApp.Common.Util
             }
         }
 
-        public static System.Windows.Size GetTextBlockSize(string style, string text = "")
+        public static System.Windows.Size GetTextBlockSize(string style, string text, int digits)
         {
+            string[] temp = text.Split(".");
+            if (temp != null && temp.Length == 2)
+            {
+                temp[1] = temp[1].Replace("㎜", "").Replace("㎟", "");
+
+                for(int i = temp[1].Length; i < digits; i++)
+                {
+                    text = text + "0";
+                }
+            }
+
             TextBlock textBlock = new TextBlock();
             textBlock.Style = (System.Windows.Style)App.Current.Resources[style];
             textBlock.Text = text;
@@ -895,12 +942,15 @@ namespace RaywattApp.Common.Util
             return textBlock.DesiredSize;
         }
 
-        public static void Exit(DeviceStatus deviceStatus)
+        public static void Exit(DeviceStatus? deviceStatus)
         {
-            deviceStatus.IsPaused = true;
-            while (!deviceStatus.CanExit)
+            if (deviceStatus != null)
             {
-                Thread.Sleep(50);
+                deviceStatus.IsPaused = true;
+                while (!deviceStatus.CanExit)
+                {
+                    Thread.Sleep(50);
+                }
             }
 
             RayDisconnectDevices();
@@ -909,6 +959,527 @@ namespace RaywattApp.Common.Util
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
 
             System.Windows.Application.Current.MainWindow.Close();
+        }
+
+        public static string LumenContoursToJson(List<LumenContour> lumenContours)
+        {
+            StringBuilder sb = new StringBuilder();
+            StringWriter sw = new StringWriter(sb);
+
+            using (JsonWriter writer = new JsonTextWriter(sw))
+            {
+                string strPoint;
+
+                writer.WriteStartArray();
+
+                foreach (LumenContour lumenContour in lumenContours)
+                {
+                    lumenContour.SetOriginData(true);
+
+                    writer.WriteStartObject();
+
+                    //MlContour
+                    {
+                        writer.WritePropertyName(nameof(lumenContour.MlContour));
+                        {
+                            writer.WriteStartObject();
+
+                            //Points
+                            writer.WritePropertyName(nameof(lumenContour.MlContour.Points));
+
+                            writer.WriteStartArray();
+
+                            foreach (System.Windows.Point point in lumenContour.MlContour.Points)
+                            {
+                                strPoint = point.X + "," + point.Y;
+                                writer.WriteValue(strPoint);
+                            }
+                            writer.WriteEndArray();
+
+                            //Area
+                            writer.WritePropertyName(nameof(lumenContour.MlContour.Area));
+                            writer.WriteValue(lumenContour.MlContour.Area);
+
+                            //CenterOfMass
+                            writer.WritePropertyName(nameof(lumenContour.MlContour.CenterOfMass));
+                            strPoint = lumenContour.MlContour.CenterOfMass.X + "," + lumenContour.MlContour.CenterOfMass.Y;
+                            writer.WriteValue(strPoint);
+
+                            //MinDiameter
+                            {
+                                writer.WritePropertyName(nameof(lumenContour.MlContour.MinDiameter));
+                                writer.WriteStartObject();
+
+                                //point1
+                                writer.WritePropertyName(nameof(lumenContour.MlContour.MinDiameter.point1));
+                                strPoint = lumenContour.MlContour.MinDiameter.point1.X + "," + lumenContour.MlContour.MinDiameter.point1.Y;
+                                writer.WriteValue(strPoint);
+
+                                //point2
+                                writer.WritePropertyName(nameof(lumenContour.MlContour.MinDiameter.point2));
+                                strPoint = lumenContour.MlContour.MinDiameter.point2.X + "," + lumenContour.MlContour.MinDiameter.point2.Y;
+                                writer.WriteValue(strPoint);
+
+                                //value
+                                writer.WritePropertyName(nameof(lumenContour.MlContour.MinDiameter.value));
+                                writer.WriteValue(lumenContour.MlContour.MinDiameter.value);
+
+                                writer.WriteEndObject();
+                            }
+
+                            //MaxDiameter
+                            {
+                                writer.WritePropertyName(nameof(lumenContour.MlContour.MaxDiameter));
+                                writer.WriteStartObject();
+
+                                //point1
+                                writer.WritePropertyName(nameof(lumenContour.MlContour.MaxDiameter.point1));
+                                strPoint = lumenContour.MlContour.MaxDiameter.point1.X + "," + lumenContour.MlContour.MaxDiameter.point1.Y;
+                                writer.WriteValue(strPoint);
+
+                                //point2
+                                writer.WritePropertyName(nameof(lumenContour.MlContour.MaxDiameter.point2));
+                                strPoint = lumenContour.MlContour.MaxDiameter.point2.X + "," + lumenContour.MlContour.MaxDiameter.point2.Y;
+                                writer.WriteValue(strPoint);
+
+                                //value
+                                writer.WritePropertyName(nameof(lumenContour.MlContour.MaxDiameter.value));
+                                writer.WriteValue(lumenContour.MlContour.MaxDiameter.value);
+
+                                writer.WriteEndObject();
+                            }
+
+                            //MeanDiameter
+                            writer.WritePropertyName(nameof(lumenContour.MlContour.MeanDiameter));
+                            writer.WriteValue(lumenContour.MlContour.MeanDiameter);
+
+                            //Valid
+                            writer.WritePropertyName(nameof(lumenContour.MlContour.Valid));
+                            writer.WriteValue(lumenContour.MlContour.Valid);
+
+                            writer.WriteEndObject();
+                        }
+                    }
+
+                    //Contour
+                    {
+                        //Points
+                        writer.WritePropertyName(nameof(lumenContour.Points));
+
+                        writer.WriteStartArray();
+
+                        foreach (System.Windows.Point point in lumenContour.Points)
+                        {
+                            strPoint = point.X + "," + point.Y;
+                            writer.WriteValue(strPoint);
+                        }
+                        writer.WriteEndArray();
+
+                        //Area
+                        writer.WritePropertyName(nameof(lumenContour.Area));
+                        writer.WriteValue(lumenContour.Area);
+
+                        //CenterOfMass
+                        writer.WritePropertyName(nameof(lumenContour.CenterOfMass));
+                        strPoint = lumenContour.CenterOfMass.X + "," + lumenContour.CenterOfMass.Y;
+                        writer.WriteValue(strPoint);
+
+                        //MinDiameter
+                        {
+                            writer.WritePropertyName(nameof(lumenContour.MinDiameter));
+                            writer.WriteStartObject();
+
+                            //point1
+                            writer.WritePropertyName(nameof(lumenContour.MinDiameter.point1));
+                            strPoint = lumenContour.MinDiameter.point1.X + "," + lumenContour.MinDiameter.point1.Y;
+                            writer.WriteValue(strPoint);
+
+                            //point2
+                            writer.WritePropertyName(nameof(lumenContour.MinDiameter.point2));
+                            strPoint = lumenContour.MinDiameter.point2.X + "," + lumenContour.MinDiameter.point2.Y;
+                            writer.WriteValue(strPoint);
+
+                            //value
+                            writer.WritePropertyName(nameof(lumenContour.MinDiameter.value));
+                            writer.WriteValue(lumenContour.MinDiameter.value);
+
+                            writer.WriteEndObject();
+                        }
+
+                        //MaxDiameter
+                        {
+                            writer.WritePropertyName(nameof(lumenContour.MaxDiameter));
+                            writer.WriteStartObject();
+
+                            //point1
+                            writer.WritePropertyName(nameof(lumenContour.MaxDiameter.point1));
+                            strPoint = lumenContour.MaxDiameter.point1.X + "," + lumenContour.MaxDiameter.point1.Y;
+                            writer.WriteValue(strPoint);
+
+                            //point2
+                            writer.WritePropertyName(nameof(lumenContour.MaxDiameter.point2));
+                            strPoint = lumenContour.MaxDiameter.point2.X + "," + lumenContour.MaxDiameter.point2.Y;
+                            writer.WriteValue(strPoint);
+
+                            //value
+                            writer.WritePropertyName(nameof(lumenContour.MaxDiameter.value));
+                            writer.WriteValue(lumenContour.MaxDiameter.value);
+
+                            writer.WriteEndObject();
+                        }
+
+                        //MeanDiameter
+                        writer.WritePropertyName(nameof(lumenContour.MeanDiameter));
+                        writer.WriteValue(lumenContour.MeanDiameter);
+
+                        //Valid
+                        writer.WritePropertyName(nameof(lumenContour.Valid));
+                        writer.WriteValue(lumenContour.Valid);
+
+                        //HasSidebranch
+                        writer.WritePropertyName(nameof(lumenContour.HasSidebranch));
+                        writer.WriteValue(lumenContour.HasSidebranch);
+
+                        //Calcium
+                        {
+                            writer.WritePropertyName(nameof(lumenContour.Calcium));
+                            writer.WriteStartObject();
+
+                            //List
+                            writer.WritePropertyName(nameof(lumenContour.Calcium.List));
+
+                            writer.WriteStartArray();
+
+                            foreach (Tuple<double, double> calcium in lumenContour.Calcium.List)
+                            {
+                                strPoint = calcium.Item1 + "," + calcium.Item2;
+                                writer.WriteValue(strPoint);
+                            }
+                            writer.WriteEndArray();
+
+                            //TotalAngle
+                            writer.WritePropertyName(nameof(lumenContour.Calcium.TotalAngle));
+                            writer.WriteValue(lumenContour.Calcium.TotalAngle);
+
+                            //MaxThickness
+                            writer.WritePropertyName(nameof(lumenContour.Calcium.MaxThickness));
+                            writer.WriteValue(lumenContour.Calcium.MaxThickness);
+
+                            //MaxThicknessDegree
+                            writer.WritePropertyName(nameof(lumenContour.Calcium.MaxThicknessDegree));
+                            writer.WriteValue(lumenContour.Calcium.MaxThicknessDegree);
+
+                            writer.WriteEndObject();
+                        }
+                    }
+
+                    writer.WriteEndObject();
+
+                    lumenContour.SetOriginData(false);
+                }
+
+                writer.WriteEndArray();
+            }
+
+            return sb.ToString();
+        }
+
+        public static List<LumenContour> JsonToLumenContours(string strLumenContours)
+        {
+            List<LumenContour> lumenContours = new List<LumenContour>();
+
+            JsonTextReader reader = new JsonTextReader(new StringReader(strLumenContours));
+            string currentProperty = string.Empty;
+
+            while (reader.Read())
+            {
+                //LumenContour
+                if (reader.Depth == 1 && reader.TokenType == JsonToken.StartObject)
+                {
+                    LumenContour lumenContour = new LumenContour();
+
+                    while (reader.Read())
+                    {
+                        if (reader.Depth == 1 && reader.TokenType == JsonToken.EndObject)
+                        {
+                            lumenContours.Add(lumenContour);
+                            break;
+                        }
+
+                        if (reader.TokenType == JsonToken.PropertyName)
+                            currentProperty = reader.Value.ToString();
+
+                        if(reader.Depth == 2)
+                        {
+                            if (nameof(lumenContour.MlContour).Equals(currentProperty))
+                            {
+                                lumenContour.MlContour = new Contour();
+                                while (reader.Read())
+                                {
+                                    if (reader.Depth == 2 && reader.TokenType == JsonToken.EndObject)
+                                        break;
+
+                                    if (reader.TokenType == JsonToken.PropertyName)
+                                        currentProperty = reader.Value.ToString();
+
+                                    if (reader.Depth == 3)
+                                    {
+                                        SetContour(reader, currentProperty, lumenContour.MlContour);
+                                    }
+                                }
+                            }
+                            else if (nameof(lumenContour.Calcium).Equals(currentProperty))
+                            {
+                                lumenContour.Calcium = new Calcium();
+                                while (reader.Read())
+                                {
+                                    if (reader.Depth == 2 && reader.TokenType == JsonToken.EndObject)
+                                        break;
+
+                                    if (reader.TokenType == JsonToken.PropertyName)
+                                        currentProperty = reader.Value.ToString();
+
+                                    if (reader.Depth == 3)
+                                    {
+                                        SetCalcium(reader, currentProperty, lumenContour);
+                                    }
+                                }
+                            }
+                            else if (nameof(lumenContour.HasSidebranch).Equals(currentProperty))
+                            {
+                                if (reader.Value != null && reader.TokenType == JsonToken.Boolean)
+                                    lumenContour.HasSidebranch = (bool)reader.Value;
+                            }
+                            else
+                            {
+                                SetContour(reader, currentProperty, lumenContour);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return lumenContours;
+        }
+
+        unsafe public static void ContoursToMemory(List<LumenContour>? contourList, Size sizeContour, IntPtr buffer, Size sizeBuffer)
+        {
+            if (contourList == null) return;
+
+            int frameSize = sizeBuffer.Width * sizeBuffer.Height;
+            for (int i = 0; i < contourList.Count; i++)
+            {
+                Mat imgLumen = new Mat(sizeContour, MatType.CV_8UC1);
+                Mat imgResize = new Mat(sizeBuffer, MatType.CV_8UC1);
+                List<List<Point>> contours = new List<List<Point>>();
+                List<Point> contour = new List<Point>();
+                foreach (System.Windows.Point point in contourList[i].Points)
+                {
+                    contour.Add(new OpenCvSharp.Point(point.X, point.Y));
+                }
+                contours.Add(contour);
+
+                imgLumen.SetTo(Scalar.Black);
+                Cv2.DrawContours(imgLumen, contours, -1, Scalar.White, -1);
+                Cv2.Resize(imgLumen, imgResize, imgResize.Size());
+
+                Buffer.MemoryCopy((void*)imgResize.Data, (void*)(IntPtr.Add(buffer, i * frameSize)), frameSize, frameSize);
+            }
+        }
+
+        private static System.Windows.Point StrToPoint(string str)
+        {
+            string[] temp = str.Split(",");
+            return new System.Windows.Point(double.Parse(temp[0]), double.Parse(temp[1]));
+        }
+
+        private static Tuple<double, double> StrToTuple(string str)
+        {
+            string[] temp = str.Split(",");
+            return new Tuple<double, double>(double.Parse(temp[0]), double.Parse(temp[1]));
+        }
+
+        private static void SetContour(JsonTextReader reader, string currentProperty, Contour lumenContour)
+        {
+            switch (currentProperty)
+            {
+                case nameof(lumenContour.Points):
+                    lumenContour.Points = new List<System.Windows.Point>();
+                    SetPoints(reader, lumenContour.Points);
+                    break;
+                case nameof(lumenContour.Area):
+                    if (reader.Value != null && reader.TokenType == JsonToken.Float)
+                        lumenContour.Area = double.Parse(reader.Value.ToString());
+                    break;
+                case nameof(lumenContour.CenterOfMass):
+                    if (reader.Value != null && reader.TokenType == JsonToken.String)
+                        lumenContour.CenterOfMass = StrToPoint(reader.Value.ToString());
+                    break;
+                case nameof(lumenContour.MinDiameter):
+                    lumenContour.MinDiameter = new DiameterInfo();
+                    SetDiameterInfo(reader, lumenContour.MinDiameter);
+                    break;
+                case nameof(lumenContour.MaxDiameter):
+                    lumenContour.MaxDiameter = new DiameterInfo();
+                    SetDiameterInfo(reader, lumenContour.MaxDiameter);
+                    break;
+                case nameof(lumenContour.MeanDiameter):
+                    if (reader.Value != null && reader.TokenType == JsonToken.Float)
+                        lumenContour.MeanDiameter = (double)reader.Value;
+                    break;
+                case nameof(lumenContour.Valid):
+                    if (reader.Value != null && reader.TokenType == JsonToken.Boolean)
+                        lumenContour.Valid = (bool)reader.Value;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private static void SetCalcium(JsonTextReader reader, string currentProperty, LumenContour lumenContour)
+        {
+            switch (currentProperty)
+            {
+                case nameof(lumenContour.Calcium.List):
+                    lumenContour.Calcium.List = new List<Tuple<double, double>>();
+                    SetTuples(reader, lumenContour.Calcium.List);
+                    break;
+                case nameof(lumenContour.Calcium.TotalAngle):
+                    if (reader.Value != null && reader.TokenType == JsonToken.Integer)
+                        lumenContour.Calcium.TotalAngle = (int)(long)reader.Value;
+                    break;
+                case nameof(lumenContour.Calcium.MaxThickness):
+                    if (reader.Value != null && reader.TokenType == JsonToken.Float)
+                        lumenContour.Calcium.MaxThickness = (double)reader.Value;
+                    break;
+                case nameof(lumenContour.Calcium.MaxThicknessDegree):
+                    if (reader.Value != null && reader.TokenType == JsonToken.Float)
+                        lumenContour.Calcium.MaxThicknessDegree = (double)reader.Value;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private static void SetPoints(JsonTextReader reader, List<System.Windows.Point> points)
+        {
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonToken.EndArray)
+                    break;
+
+                if (reader.Value != null)
+                    points.Add(StrToPoint(reader.Value.ToString()));
+            }
+        }
+
+        private static void SetTuples(JsonTextReader reader, List<Tuple<double, double>> tuples)
+        {
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonToken.EndArray)
+                    break;
+
+                if (reader.Value != null)
+                    tuples.Add(StrToTuple(reader.Value.ToString()));
+            }
+        }
+
+        private static void SetDiameterInfo(JsonTextReader reader, DiameterInfo diameterInfo)
+        {
+            string currentProperty = string.Empty;
+
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonToken.EndObject)
+                    break;
+
+                if (reader.TokenType == JsonToken.PropertyName)
+                    currentProperty = reader.Value.ToString();
+
+                if (reader.Value != null)
+                {
+                    switch (currentProperty)
+                    {
+                        case nameof(diameterInfo.point1):
+                            if (reader.TokenType == JsonToken.String)
+                                diameterInfo.point1 = StrToPoint(reader.Value.ToString());
+                            break;
+                        case nameof(diameterInfo.point2):
+                            if (reader.TokenType == JsonToken.String)
+                                diameterInfo.point2 = StrToPoint(reader.Value.ToString());
+                            break;
+                        case nameof(diameterInfo.value):
+                            if (reader.TokenType == JsonToken.Float)
+                                diameterInfo.value = (double)reader.Value;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+
+        public static BitmapSource DrawCalciumIndicator(List<Tuple<double, double>> calciumAngleList, int rgbCode, int calciumIndicatorSize)
+        {
+            int r = (rgbCode >> 16) & 0xFF;
+            int g = (rgbCode >> 8) & 0xFF;
+            int b = (rgbCode >> 0) & 0xFF;
+
+            Mat imgCalcium = new Mat(calciumIndicatorSize, calciumIndicatorSize, MatType.CV_8UC4);
+            Point center = new Point(imgCalcium.Width / 2, imgCalcium.Height / 2);
+            int thickness = 3;
+            int radius = (imgCalcium.Width / 2) - thickness;
+
+            imgCalcium.SetTo(new Scalar(0x00, 0x00, 0x00, 0x00));
+            imgCalcium.Circle(center, radius, new Scalar(b, g, r, 0xff), thickness, LineTypes.AntiAlias);
+
+            List<Tuple<double, double>> nonCalciumAngleList = new List<Tuple<double, double>>
+            {
+                new Tuple<double, double>(0, 360)
+            };
+
+            foreach (var calciumArea in calciumAngleList)
+            {
+                double calciumStart = calciumArea.Item1;
+                double calciumEnd = calciumArea.Item1 + calciumArea.Item2;
+                for (int i = nonCalciumAngleList.Count - 1; i >= 0; i--)
+                {
+                    Tuple<double, double> nonCalciumArea = nonCalciumAngleList[i];
+                    double nonCalciumStart = nonCalciumArea.Item1;
+                    double nonCalciumEnd = nonCalciumArea.Item1 + nonCalciumArea.Item2;
+                    if (calciumStart >= nonCalciumStart && calciumEnd <= nonCalciumEnd)
+                    {
+                        nonCalciumAngleList.RemoveAt(i);
+                        if (calciumStart > nonCalciumStart)
+                        {
+                            Tuple<double, double> splitArea = new Tuple<double, double>(nonCalciumStart, calciumStart - nonCalciumStart);
+                            nonCalciumAngleList.Add(splitArea);
+                        }
+                        if (calciumEnd < nonCalciumEnd)
+                        {
+                            Tuple<double, double> splitArea = new Tuple<double, double>(calciumEnd, nonCalciumEnd - calciumEnd);
+                            nonCalciumAngleList.Add(splitArea);
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+            foreach (var calciumArea in nonCalciumAngleList)
+            {
+                imgCalcium.Ellipse(center,
+                    new OpenCvSharp.Size(imgCalcium.Width / 2, imgCalcium.Height / 2),
+                    0,
+                    calciumArea.Item1,
+                    calciumArea.Item1 + calciumArea.Item2,
+                    new Scalar(0x00, 0x00, 0x00, 0x00),
+                    -1);
+            }
+
+            BitmapSource bitmap = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgCalcium);
+            return bitmap;
         }
     }
 }

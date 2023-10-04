@@ -45,7 +45,7 @@ namespace RaywattApp.ViewModels.Dialog
 
             PhysicianList = _sqlManager.SelectPhysicianList();
             Physician notSelected = new Physician();
-            notSelected.Name = Constants.NotSelected;
+            notSelected.Name = _l10n[Constants.NotSelected];
             PhysicianList.Insert(0, notSelected);
             
             VesselList = CodeDefinition.Codes["VESS"];
@@ -73,7 +73,7 @@ namespace RaywattApp.ViewModels.Dialog
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["vessel"] = CurrentVessel.Key;
             parameter["procedure"] = CurrentProcedure.Key;
-            parameter["physicianName"] = CurrentPhysician.Name;
+            parameter["physicianName"] = CurrentPhysician != null ? CurrentPhysician.Name : PatientCase.PhysicianName;
             parameter["accessionNumber"] = PatientCase.AccessionNumber.Trim();
             parameter["comment"] = PatientCase.Comment.Trim();
 

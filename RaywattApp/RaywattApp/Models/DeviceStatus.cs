@@ -15,7 +15,10 @@ namespace RaywattApp.Models
         };
 
         [ObservableProperty]
-        private bool _isInitialized = false;
+        private bool _isDeviceConnected = false;
+
+        [ObservableProperty]
+        private bool _isServiceStarted = false;
 
         [ObservableProperty]
         private bool _isLiveView = false;
@@ -42,6 +45,9 @@ namespace RaywattApp.Models
         private bool _isOCTImagingDone = true;
 
         [ObservableProperty]
+        private bool _isOCTImagingCompareDone = true;
+
+        [ObservableProperty]
         private bool _isPaused = true;
 
         [ObservableProperty]
@@ -49,6 +55,9 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private string? _catheterStatus;
+
+        [ObservableProperty]
+        private bool _isTestMode = false;
 
         [ObservableProperty]
         private ReviewImageInfo[] _reviewImageInfos = new ReviewImageInfo[2];

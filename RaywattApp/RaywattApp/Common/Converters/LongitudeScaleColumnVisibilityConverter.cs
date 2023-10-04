@@ -15,18 +15,10 @@ namespace RaywattApp.Common.Converters
 
             int frameCnt = int.Parse(parameter.ToString());
 
-            if (Constants.PullbackTypeLong.Equals(value.ToString()))
-            {
-                if (Constants.PullbackLongFrameCnt >= frameCnt)
-                    return Visibility.Visible;
-            }
+            if (int.Parse(CodeDefinition.Codes["PBLE"][value.ToString()]) >= frameCnt)
+                return Visibility.Visible;
             else
-            {
-                if (Constants.PullbackShortFrameCnt >= frameCnt)
-                    return Visibility.Visible;
-            }
-
-            return Visibility.Collapsed;
+                return Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

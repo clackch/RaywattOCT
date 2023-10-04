@@ -8,15 +8,13 @@ using System.Collections.Generic;
 using static RaywattOCT.RayCoreWrapper;
 using System.Windows.Navigation;
 using CommunityToolkit.Mvvm.ComponentModel;
-using System.Windows.Threading;
 using CommunityToolkit.Mvvm.Input;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
 using RaywattApp.Common.Annotation.Models;
-using Newtonsoft.Json;
-using System.Windows;
 using System.Threading;
+using RaywattApp.Common.Util;
 
 namespace RaywattApp.ViewModels
 {
@@ -63,8 +61,6 @@ namespace RaywattApp.ViewModels
 
         private string _lumenContourCommand;
         public string LumenContourCommand { get { return _lumenContourCommand; } set { _lumenContourCommand = value; OnPropertyChanged(nameof(LumenContourCommand)); } }
-
-        private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
         private ICommand _okCommand;
         public ICommand OkCommand
@@ -153,10 +149,6 @@ namespace RaywattApp.ViewModels
 
                 GetImageInfo(RaySession.Review);
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
-
-                timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
-                timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
-                timerUpdateImage.Start();
             }
         }
 
@@ -164,12 +156,9 @@ namespace RaywattApp.ViewModels
         {
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
-
-            if (timerUpdateImage.IsEnabled)
-                timerUpdateImage.Stop();
         }
 
-        private void timerFuncUpdateImage(object sender, EventArgs e)
+        protected override void UpdateCrossSectionImage()
         {
             if (DrawCrossSectionImage())
             {
@@ -218,7 +207,7 @@ namespace RaywattApp.ViewModels
         {
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
-            sqlParameters["lumen_contour"] = JsonConvert.SerializeObject(PatientCase.LumenContour, Formatting.Indented);
+            sqlParameters["lumen_contour"] = CommonUtil.LumenContoursToJson(PatientCase.LumenContour);
             int nRows = _sqlManager.UpdatePatientCaseAnnotationLumenContour(sqlParameters);
             if (nRows == 0)
             {

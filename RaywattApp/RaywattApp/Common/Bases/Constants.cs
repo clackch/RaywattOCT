@@ -156,9 +156,12 @@ namespace RaywattApp.Common.Bases
         //File Import/Export
         public const string FileImageExtension = "bin";
         public const string FileExtension = "dbf";
+        public const string AnnotationFileExtension = "annot";
         public const string FileNamePrefix = "Export_";
 
         //Export Layout
+        public const double ExportHeight = 1080;
+        public const double ExportWidth = 1920;
         public const double ExportCrossSectionBig = 1080;
         public const double ExportCrossSectionSmall = 677;
         public const double ExportCrossSectionImageBig = 965;
@@ -170,17 +173,23 @@ namespace RaywattApp.Common.Bases
         public const double ExportAngioSize = 677;
         public const double ExportTextPartSize = 566;
         public const double ExportLongitudeIndicatorWidth = 12;
+        public const double CalciumIndicatorExportSizeBig = 989;
+        public const double CalciumIndicatorExportSize = 630;
+        public const double CalciumThicknessIndicatorExportSizeBig = 1005;
+        public const double CalciumThicknessIndicatorExportSize = 644;
+        public const double CalciumThicknessIndicatorCenterExportBig = CalciumThicknessIndicatorExportSizeBig / 2;
+        public const double CalciumThicknessIndicatorCenterExport = CalciumThicknessIndicatorExportSize / 2;
+        public static System.Windows.Point CalciumThicknessIndicatorPointCenterExportBig = new System.Windows.Point(CalciumThicknessIndicatorCenterExportBig, CalciumThicknessIndicatorCenterExportBig);
+        public static System.Windows.Point CalciumThicknessIndicatorPointCenterExport = new System.Windows.Point(CalciumThicknessIndicatorCenterExport, CalciumThicknessIndicatorCenterExport);
 
         //File Icon
         public const string FileIconDrive = "drive";
         public const string FileIconFolder = "folder";
         public const string FileIconFile = "file";
 
-        //Pullback Type
-        public const string PullbackTypeLong = "LONG";
-        public const string PullbackTypeShort = "SHOR";
-        public const int PullbackLongFrameCnt = 1000;
-        public const int PullbackShortFrameCnt = 600;
+        //Pullback Length
+        public const string PullbackLengthLong = "LONG";
+        public const string PullbackLengthShort = "SHOR";
 
         //Not Selected
         public const string NotSelected = "Not Selected";
@@ -237,14 +246,18 @@ namespace RaywattApp.Common.Bases
         public const double CrossSectionSize = 620;
         public const double CrossSectionCenter = CrossSectionSize / 2;
         public const double CalciumIndicatorSize = 645;
+        public const double CalciumIndicatorAngioSize = 490;
         public const double CalciumThicknessIndicatorSize = 681;
+        public const double CalciumThicknessIndicatorAngioSize = 510;
         public const double CalciumThicknessIndicatorCenter = CalciumThicknessIndicatorSize / 2;
+        public const double CalciumThicknessIndicatorCenterAngio = CalciumThicknessIndicatorAngioSize / 2;
         public static System.Windows.Point CalciumThicknessIndicatorPointCenter = new System.Windows.Point(CalciumThicknessIndicatorCenter, CalciumThicknessIndicatorCenter);
+        public static System.Windows.Point CalciumThicknessIndicatorPointCenterAngio = new System.Windows.Point(CalciumThicknessIndicatorCenterAngio, CalciumThicknessIndicatorCenterAngio);
         public const int CalciumIndicatorColor = 0x57FEEB;
 
         //Review - 2D - Angio
         public const double AngioSize = 580;
-        public const double CrossSectionAngio = 292;
+        public const double CrossSectionAngio = 470;
         public const double CrossSectionAngioCenter = CrossSectionAngio / 2;
         public const double CrossSectionAngioScale = CrossSectionAngio / CrossSectionSize;
         public const double CoRegZoomAngioSize = 382;
@@ -257,9 +270,10 @@ namespace RaywattApp.Common.Bases
         public const double LongitudeScale = LongitudeWidth / 10;
         public const double LongitudeIndicatorWidth = 22;
         public const double LongitudeIndicatorHeight = 116;
-        public const double SectionIndicatorWidth = 12.5;
-        public const double SectionMlaMldWidth = 45;
-        public const double SectionMsaMinExpWidth = 22.5;
+        public const double SectionIndicatorWidth = 7.5;
+        public const double SectionIndicatorCenterWidth = 1;
+        public const double SectionValueWidth = 24;
+        public const double SectionValueCenterWidth = 0.25;
         public const double LumenProfileExtraHeight = 6;
 
         //Review - 2D - Side Menu
@@ -267,9 +281,7 @@ namespace RaywattApp.Common.Bases
         public const string LeftDownMenu = "LeftDownMenu";
         public const string RightMenu = "RightMenu";
         public const double SideBarCollapseSize = 70;
-        public const double LeftSideBarExpandSize = 240;
-        public const double RightSideBarExpandAngioSize = 340;
-        public const double RightSideBarExpandDefaultSize = 240;
+        public const double SideBarExpandSize = 240;
 
         //Review - 2D - Longitude
         public const string LongitudeProfile = "Profile";
@@ -297,6 +309,11 @@ namespace RaywattApp.Common.Bases
         public const double Longitude3dImageClipHeight = Longitude3dHeight + 10;
         public const double Longitude3dScale = Longitude3dWidth / 10;
         public const double LongitudeIndicator3dHeight = 161;
+
+        //Review - 3D - Side Menu
+        public const double LeftSideBarExpand3dSize = 329;
+        public const double ViewMenu3dY = 70;
+        public const double PatientMenu3dY = 409;
 
         //Review - Compare - Cross Section
         public const double CrossSectionCompareSize = 278;

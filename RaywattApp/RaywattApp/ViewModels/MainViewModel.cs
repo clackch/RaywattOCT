@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
@@ -16,7 +16,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
@@ -87,6 +86,13 @@ namespace RaywattApp.ViewModels
         }
 
         //Test
+        private ICommand _catheterUnlockTest;
+        public ICommand CatheterUnlockTestCommmand
+        {
+            get { return this._catheterUnlockTest ?? (this._catheterUnlockTest = new RelayCommand(CatheterUnlockReceiver)); }
+        }
+
+        //Test
         private ICommand _catheterConnectTest;
         public ICommand CatheterConnectTestCommmand
         {
@@ -120,8 +126,6 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Register<NavigationMessage>(this, OnNavigationMessage);
 
             RayRegisterCallback(Marshal.GetFunctionPointerForDelegate(CBFunction));
-            RayStartSystem();
-            RayConnectDevices();
 
             Directory.CreateDirectory(Constants.DataRootPath);
 
@@ -138,12 +142,15 @@ namespace RaywattApp.ViewModels
             IsHome = true;
             IsLoading = true;
 
-            //Test
-            double rotationTime = RayGetProperty(Property.LoadCatheterTime);
-            timer.Interval = TimeSpan.FromMilliseconds(rotationTime / (100 / catheterProgressStep));
-            timer.Tick += new EventHandler(ProgressTest);
-
             _tcpClientSingleton = tcpClientSingleton;
+
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "TestMode";
+            IList<Configuration> testMode = _sqlManager.SelectConfiguration(sqlParameters);
+
+            //Setting Test Mode
+            if(testMode != null && testMode.Count == 1 && "Y".Equals(testMode[0].Value))
+                DeviceStatus.IsTestMode = true;
         }
 
         private void OnNavigationMessage(object recipient, NavigationMessage message)
@@ -210,15 +217,10 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Exit");
 
-            [DllImport("user32.dll")]
-            static extern bool ExitWindowsEx(uint uFlags, uint dwReason);
-
-            uint EWX_LOGOFF = 0x00000000;
-            uint EWX_SHUTDOWN = 0x00000001;
-
             Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["title"] = _l10n["Power"];
-            parameter["message"] = _l10n["Power Off?"];
+            parameter["title"] = _l10n["Power Off"];
+            parameter["message"] = _l10n["Choose one of the power off options"];
+            
             var result = _dialogService.OpenDialog(new PowerOffDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
             if (result != null && result.DialogAnswer != DialogResults.Answer.No)
@@ -233,15 +235,24 @@ namespace RaywattApp.ViewModels
                 foreach (Process process in processes)
                     process.Kill();
 
-                if (result.DialogAnswer == DialogResults.Answer.Yes)
+                if (result.DialogAnswer == DialogResults.Answer.Yes && !DeviceStatus.IsTestMode)
                 {
-                    //ExitWindowsEx(EWX_SHUTDOWN, 0);
+                    Win32Helper.Shutdown();
                 }
-                else if (result.DialogAnswer == DialogResults.Answer.Extra)
+                else if (result.DialogAnswer == DialogResults.Answer.Extra && !DeviceStatus.IsTestMode)
                 {
-                    ExitWindowsEx(EWX_LOGOFF, 0);
+                    Win32Helper.LogOff();
                 }
             }
+        }
+
+        private void InitCatheterTimer()
+        {
+            double rotationTime = RayGetProperty(Property.LoadCatheterTime);
+            timer.Interval = TimeSpan.FromMilliseconds(rotationTime / (100 / catheterProgressStep));
+            timer.Tick += new EventHandler(ProgressTest);
+            timerUnload.Interval = TimeSpan.FromMilliseconds(rotationTime / (100 / catheterProgressStep));
+            timerUnload.Tick += new EventHandler(ProgressUnloadTest);
         }
 
         private void CatheterFailReceiver()
@@ -263,6 +274,32 @@ namespace RaywattApp.ViewModels
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingCatheterFailPage) { Parameter = parameter });
             }
         }
+
+        private void CatheterUnlockReceiver() 
+        {
+            _log.Debug("CatheterUnlockReceiver");
+
+            DeviceStatus.CatheterStatus = Constants.CatheterStatusUnlocked;//Unlock Receive
+
+            CatheterProgress = 100;
+
+            //Test
+            timerUnload.Start();
+        }
+
+        private DispatcherTimer timerUnload = new DispatcherTimer();
+        private void ProgressUnloadTest(object sender, EventArgs e)
+        {
+            if (CatheterProgress == 0)
+            {
+                timerUnload.Stop();
+
+                DeviceStatus.CatheterStatus = Constants.CatheterStatusUnloaded;
+            }
+
+            CatheterProgress -= catheterProgressStep;
+        }
+
 
         private void CatheterConnectReceiver()
         {
@@ -317,7 +354,6 @@ namespace RaywattApp.ViewModels
         private void handleState(RayCallbackRequest request, RayScannerState state, int param)
         {
             RayScannerState curState = (RayScannerState)RayGetProperty(Property.CurrentState);
-            DeviceStatus.IsInitialized = (curState == RayScannerState.Default) ? true : false;
             DeviceStatus.IsLiveView = (bool)(RayGetProperty(Property.MotorOnOff) != 0);
             DeviceStatus.IsAngioConnected = false;
         }
@@ -337,6 +373,10 @@ namespace RaywattApp.ViewModels
         {
             switch (work)
             {
+                case RayWorkItem.StartService:
+                    DeviceStatus.IsServiceStarted = true;
+                    InitCatheterTimer();
+                    break;
                 case RayWorkItem.AutoCalibration:
                     DeviceStatus.CanExecuteCalibration = true;
                     break;
@@ -354,7 +394,10 @@ namespace RaywattApp.ViewModels
                     });
                     break;
                 case RayWorkItem.OCTImaging:
-                    DeviceStatus.IsOCTImagingDone = true;
+                    if(param == (int)RaySession.Review)
+                        DeviceStatus.IsOCTImagingDone = true;
+                    else
+                        DeviceStatus.IsOCTImagingCompareDone = true;
                     break;
                 case RayWorkItem.GenerateCutView:
                     break;

@@ -11,41 +11,80 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Navigation;
 using System.Windows.Threading;
+using RaywattApp.Views.Dialog;
 using static RaywattOCT.RayCoreWrapper;
 using static RaywattOCT.Ray3DWrapper;
+using System.Runtime.InteropServices;
+using RaywattApp.Common.Util;
+using System.Threading;
 
 namespace RaywattApp.ViewModels
 {
-    public partial class Review3dViewModel : ReviewViewModelBase
+    public partial class Review3dViewModel : ReviewViewModelBase, IModelessPatient
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(Review3dViewModel));
 
-        [ObservableProperty]
+        private bool _isRendering = false;
+        public bool IsRendering
+        { 
+            get { return _isRendering; }
+            set 
+            { 
+                _isRendering = value; 
+                OnPropertyChanged(nameof(IsRendering));
+
+                DeviceStatus.IsOCTImagingDone = value;
+                IndicatorLongitude.IsEnabled = value;
+                IndicatorCrossSection.IsEnabled = value;
+            }
+        }
+
         private bool _isCutViewOn;
+        public bool IsCutViewOn 
+        { 
+            get {  return _isCutViewOn; } 
+            set 
+            {
+                _isCutViewOn = value;
+                OnPropertyChanged(nameof(IsCutViewOn));
 
-        [ObservableProperty]
+                ray3DStatus.CutViewOn = value;
+                for(Ray3DObject obj = Ray3DObject.Tissue; obj < Ray3DObject.Count; obj++)
+                {
+                    changeCutVisibility(obj, value);
+                }
+            }
+        }
+
         private bool _isIndicatorOn;
+        public bool IsIndicatorOn
+        { 
+            get { return _isIndicatorOn; }
+            set 
+            { 
+                _isIndicatorOn = value;
+                OnPropertyChanged(nameof(IsIndicatorOn));
 
-        [ObservableProperty]
+                ray3DStatus.IsIndicatorOn = value;
+            }
+        }
+
         private bool _isPtoD;
+        public bool IsPtoD
+        { 
+            get { return _isPtoD; } 
+            set 
+            { 
+                _isPtoD = value;
+                OnPropertyChanged(nameof(IsPtoD));
+
+                ray3DStatus.IsPtoD = value;
+                ODSOCT_MoveCameraPosition(0, !value);
+            }
+        }
 
         [ObservableProperty]
         private bool _isSideBranchView;
-
-        [ObservableProperty]
-        private bool _isTissueOn;
-
-        [ObservableProperty]
-        private bool _isLumenOn;
-
-        [ObservableProperty]
-        private bool _isStentOn;
-
-        [ObservableProperty]
-        private bool _isGuidewireOneOn;
-
-        [ObservableProperty]
-        private bool _isGuidewireTwoOn;
 
         private double degree;
         public double Degree
@@ -58,6 +97,7 @@ namespace RaywattApp.ViewModels
                 RaySetProperty(Property.LongitudeDegree, degree);
 
                 CameraDegree = degree + 90;
+                ODSOCT_RotateAngle((float)CameraDegree);
             }
         }
 
@@ -73,8 +113,6 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private bool _isPaused;
 
-        private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
-        private DispatcherTimer timerInitialize = new DispatcherTimer();
         private DispatcherTimer timerShowData = new DispatcherTimer();
 
         private ICommand _cmdRotateIndicator;
@@ -102,6 +140,23 @@ namespace RaywattApp.ViewModels
             set { _lModeIndicatorX = value; OnPropertyChanged(nameof(LModeIndicatorX)); setCurrentFrame(value); }
         }
 
+        private IDialogWindow viewMenuWindow;
+        private ICommand _cmdExpandLeftViewMenu;
+        public ICommand CmdExpandLeftViewMenu
+        { 
+            get { return this._cmdExpandLeftViewMenu ?? (this._cmdExpandLeftViewMenu = new RelayCommand(ExpandLeftViewMenu)); }
+        }
+
+        private IDialogWindow patientMenuWindow;
+        private ICommand _cmdExpandLeftPatientMenu;
+
+        public ICommand CmdExpandLeftPatientMenu
+        { 
+            get { return this._cmdExpandLeftPatientMenu ?? (this._cmdExpandLeftPatientMenu = new RelayCommand(ExpandLeftPatientMenu)); }
+        }
+
+        private Thread threadInitialize;
+
         public Review3dViewModel(SqlManager sqlManager, IDialogService dialogService) : base(sqlManager, dialogService)
         {
             _log.Debug("Review3dViewModel");
@@ -114,18 +169,7 @@ namespace RaywattApp.ViewModels
 
             IndicatorLongitude = new Indicator();
             IndicatorLongitude.X = Constants.LongitudeIndicatorWidth / 2;
-            IndicatorLongitude.IsVisible = Visibility.Collapsed;
-
-            IsCutViewOn = true;
-            IsIndicatorOn = true;
-            IsPtoD = true;
-            IsSideBranchView = false;
-
-            IsTissueOn = true;
-            IsLumenOn = false;
-            IsStentOn = false;
-            IsGuidewireOneOn = true;
-            IsGuidewireTwoOn = false;
+            IndicatorLongitude.IsVisible = Visibility.Visible;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -152,26 +196,35 @@ namespace RaywattApp.ViewModels
 
                 GetImageInfo(RaySession.Review);
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
+
+                // set default values without rendering
+                _isCutViewOn = ray3DStatus.CutViewOn;
+                _isIndicatorOn = ray3DStatus.IsIndicatorOn;
+                _isPtoD = ray3DStatus.IsPtoD;
+                _isSideBranchView = false;
             }
 
-            timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
-            timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
-            timerUpdateImage.Start();
+            IsRendering = false;
 
-            timerInitialize.Interval = TimeSpan.FromMilliseconds(MinWaitingDelay);
-            timerInitialize.Tick += new EventHandler(timerFuncInitialize);
-            timerInitialize.Start();
+            threadInitialize = new Thread(() => threadFuncInitialize());
+            threadInitialize.Start();
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
+            if (viewMenuWindow != null) viewMenuWindow.Close();
+            if (patientMenuWindow != null) patientMenuWindow.Close();
+
+            if (threadInitialize.IsAlive)
+                threadInitialize.Join();
+
+            if (timerShowData.IsEnabled)
+                timerShowData.Stop();
+
             Save();
             ODSOCT_HideAllWindows();
-
-            if (timerUpdateImage.IsEnabled)
-                timerUpdateImage.Stop();
         }
 
         protected override void Save()
@@ -203,7 +256,7 @@ namespace RaywattApp.ViewModels
                 _log.Error("Update Error");
         }
 
-        private void timerFuncUpdateImage(object sender, EventArgs e)
+        protected override void UpdateCrossSectionImage()
         {
             if (DrawCrossSectionImage())
             {
@@ -212,25 +265,25 @@ namespace RaywattApp.ViewModels
 
                 FrameNumber = imageInfo.Current;
             }
-            if (DrawLongitudeImage())
-            {
-                // when generating longitude image is completed
-                if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame)
-                {
-                    IndicatorLongitude.IsVisible = Visibility.Visible;
-                }
-            }
         }
 
-        private void timerFuncInitialize(object sender, EventArgs e)
+        private void threadFuncInitialize()
         {
-            if (timerInitialize.IsEnabled)
-                timerInitialize.Stop();
-
             int diameter = (int)RayGetProperty(Property.VolumeWidth);
             int depth = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total;
+            IntPtr buffer = Marshal.AllocHGlobal(diameter * diameter * depth);
+
             ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(), diameter, diameter, depth, 1, 1, 12.5);
+
+            CommonUtil.ContoursToMemory(PatientCase.LumenContour, 
+                new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize), 
+                buffer, 
+                new OpenCvSharp.Size(diameter, diameter));
+            ODSOCT_InputSurfaceParameter(Ray3DObject.Lumen, 10, 50, ".\\data\\lumen_tex.jpg");
+            ODSOCT_InputData(Ray3DObject.Lumen, buffer, diameter, diameter, depth, 1, 1, 12.5);
+
             ODSOCT_ProcessingDatas();
+            Marshal.FreeHGlobal(buffer);
 
             timerShowData.Interval = TimeSpan.FromMilliseconds(MinWaitingDelay);
             timerShowData.Tick += new EventHandler(timerFuncShowData);
@@ -242,8 +295,16 @@ namespace RaywattApp.ViewModels
             if (timerShowData.IsEnabled)
                 timerShowData.Stop();
 
+            ODSOCT_RotateAngle((float)CameraDegree);
+            ODSOCT_MoveToFrame(DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
             ODSOCT_ShowAllWindows();
-            ODSOCT_SetViewData(Ray3DObject.Tissue, Ray3DObjectMode.Cut);
+
+            for (Ray3DObject obj = Ray3DObject.Tissue; obj < Ray3DObject.Count; obj++)
+            {
+                ray3DStatus.ShowObject(obj, ray3DStatus.ObjectVisibility[(int)obj]);
+            }
+
+            IsRendering = true;
         }
 
         private void updateNavigator(int curFrame, int totalFrame)
@@ -255,6 +316,15 @@ namespace RaywattApp.ViewModels
             curPosition *= Constants.Longitude3dWidth;
             IndicatorLongitude.X = curPosition - Constants.LongitudeIndicatorWidth / 2;
             IndicatorLongitude.CenterX = curPosition;
+        }
+
+        private void changeCutVisibility(Ray3DObject obj, bool isCutView)
+        {
+            Ray3DObjectMode mode = (isCutView) ? Ray3DObjectMode.Cut : Ray3DObjectMode.Full;
+            if (ray3DStatus.IsObjectVisible(obj))
+            {
+                ray3DStatus.ShowObject(obj, mode);
+            }
         }
 
         private void RotateIndicator(object param)
@@ -368,6 +438,41 @@ namespace RaywattApp.ViewModels
             }
         }
 
+        private void ExpandLeftViewMenu()
+        {
+            if (!IsRendering) return;
+
+            viewMenuWindow = _dialogService.OpenChildWindow(new Review3dViewMenuControl(), this, null, Constants.SideBarExpandSize, Constants.LeftSideBarExpand3dSize, 0, Constants.ViewMenu3dY);
+        }
+        private void ExpandLeftPatientMenu()
+        {
+            if (!IsRendering) return;
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = Patient;
+            parameter["patientCase"] = PatientCase;
+
+            patientMenuWindow = _dialogService.OpenChildWindow(new Review3dPatientMenuControl(), this, parameter, Constants.SideBarExpandSize, Constants.LeftSideBarExpand3dSize, 0, Constants.PatientMenu3dY);
+        }
+
+        public void SetResult(object result)
+        {
+            Dictionary<string, Object> data = (Dictionary<string, Object>)result;
+
+            if (data.ContainsKey("reviewStatus"))
+            {
+                ReviewStatus = (ReviewStatus)data["reviewStatus"];
+            }
+            if (data.ContainsKey("patient"))
+            {
+                Patient = (Patient)data["patient"];
+            }
+            if (data.ContainsKey("patientCase"))
+            {
+                PatientCase = (PatientCase)data["patientCase"];
+            }
+        }
+
         private void setCurrentFrame(double navigatorPosition)
         {
             double curPosition = navigatorPosition / Constants.Longitude3dWidth;
@@ -377,6 +482,7 @@ namespace RaywattApp.ViewModels
                 curPosition *= (longitudeFrameInfo.totalFrame - 1);
                 curPosition = Math.Round(curPosition);
                 MoveToFrame(RaySession.Review, (int)curPosition);
+                ODSOCT_MoveToFrame((int)curPosition);
             }
         }
     }

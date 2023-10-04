@@ -31,17 +31,17 @@
             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Top" Margin="0,16,0,0">
                 <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}">
                     <Label.Content>
-                        <AccessText TextWrapping="Wrap" Text="{Binding [Institude Name], Source={StaticResource L10N}}"/>
+                        <AccessText TextWrapping="Wrap" Text="{Binding [Institute Name], Source={StaticResource L10N}}"/>
                     </Label.Content>
                 </Label>
             </StackPanel>
             <StackPanel Grid.Column="1" VerticalAlignment="Top">
                 <StackPanel Orientation="Horizontal" Visibility="{Binding IsModify, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                     <TextBox Style="{DynamicResource TextBoxWithCorner}" Width="400" IsReadOnly="True" Text="{Binding TermsConditions.Buffer}" Margin="0,0,0,0"/>
-                    <component:IconButton Style="{DynamicResource IconButton}" Icon="editSimple" HorizontalAlignment="Left" Margin="-40,0,0,0" Command="{Binding ModifyInstitudeCommand}"/>
+                    <component:IconButton Style="{DynamicResource IconButton}" Icon="editSimple" HorizontalAlignment="Left" Margin="-40,0,0,0" Command="{Binding ModifyInstituteCommand}"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Visibility="{Binding IsModify, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <TextBox Style="{DynamicResource TextBoxValidator}" Width="400" MaxLength="50" Text="{Binding TermsConditions.Buffer, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter Institude Name], Source={StaticResource L10N}}" ToolTip="{Binding ValidateInstitudeName}"/>
+                    <TextBox Style="{DynamicResource TextBoxValidator}" Width="400" MaxLength="50" Text="{Binding TermsConditions.Buffer, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter Institute Name], Source={StaticResource L10N}}" ToolTip="{Binding ValidateInstituteName}"/>
                 </StackPanel>
             </StackPanel>
         </Grid>

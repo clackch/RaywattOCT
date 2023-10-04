@@ -409,25 +409,15 @@ namespace RaywattApp.Common.Annotation
                     ContourMeasurement measurement = new ContourMeasurement();
                     measurement.Measure(areaGeometry, imageContour);
 
-                    ValidateGeometry(areaGeometry);
-                    if (areaGeometry.Valid)
-                    {
-                        areaGeometry.Valid = measurement.CalculateDiameter(areaGeometry);
-                        if (areaGeometry.Valid)
-                        {
-                            DrawDiameter(areaGeometry.MinDiameter.point1, areaGeometry.MinDiameter.point2, areaGeometry.Group, constMinDiameter);
-                            DrawDiameter(areaGeometry.MaxDiameter.point1, areaGeometry.MaxDiameter.point2, areaGeometry.Group, constMaxDiameter);
-                        }
-                    }
+                    measurement.CalculateDiameter(areaGeometry);
+                    DrawDiameter(areaGeometry.MinDiameter.point1, areaGeometry.MinDiameter.point2, areaGeometry.Group, constMinDiameter);
+                    DrawDiameter(areaGeometry.MaxDiameter.point1, areaGeometry.MaxDiameter.point2, areaGeometry.Group, constMaxDiameter);
                 }
             }
             else
             {
-                if (areaGeometry.Valid)
-                {
-                    DrawDiameter(areaGeometry.MinDiameter.point1, areaGeometry.MinDiameter.point2, areaGeometry.Group, constMinDiameter);
-                    DrawDiameter(areaGeometry.MaxDiameter.point1, areaGeometry.MaxDiameter.point2, areaGeometry.Group, constMaxDiameter);
-                }
+                DrawDiameter(areaGeometry.MinDiameter.point1, areaGeometry.MinDiameter.point2, areaGeometry.Group, constMinDiameter);
+                DrawDiameter(areaGeometry.MaxDiameter.point1, areaGeometry.MaxDiameter.point2, areaGeometry.Group, constMaxDiameter);
             }
         }
 
@@ -520,19 +510,16 @@ namespace RaywattApp.Common.Annotation
             //Label 삭제
             DeleteLabel(constArea, areaGeometry.Group);
 
-            if (areaGeometry.Valid)
-            {
-                Label label = new Label();
-                label.Style = (Style)this.Resources["StyleLabel"];
-                label.Name = constArea + "_" + areaGeometry.Group;
-                label.Content = DrawAnnotation.GetLabelText(areaGeometry.Group, areaGeometry.Area * Constants.MillimeterPerPixel  * Constants.MillimeterPerPixel );
+            Label label = new Label();
+            label.Style = (Style)this.Resources["StyleLabel"];
+            label.Name = constArea + "_" + areaGeometry.Group;
+            label.Content = DrawAnnotation.GetLabelText(areaGeometry.Group, areaGeometry.Area * Constants.MillimeterPerPixel * Constants.MillimeterPerPixel);
 
-                Point centerdPoint = areaGeometry.CenterOfMass;
+            Point centerdPoint = areaGeometry.CenterOfMass;
 
-                Canvas.SetLeft(label, centerdPoint.X - 40);
-                Canvas.SetTop(label, centerdPoint.Y - 10);
-                this.canvas.Children.Add(label);
-            }
+            Canvas.SetLeft(label, centerdPoint.X - 40);
+            Canvas.SetTop(label, centerdPoint.Y - 10);
+            this.canvas.Children.Add(label);
         }
 
         private void DrawDiameter(Point firstPoint, Point secondPoint, int group, string prefix)
@@ -548,14 +535,6 @@ namespace RaywattApp.Common.Annotation
                 path.StrokeDashArray.Add(4);
 
             this.canvas.Children.Add(path);
-        }
-
-        private void ValidateGeometry(AreaGeometry areaGeometry)
-        {
-            areaGeometry.Valid = true;
-
-            if (!areaGeometry.Path.Data.FillContains(areaGeometry.CenterOfMass)) areaGeometry.Valid = false;
-            if (IsOverlayed(areaGeometry.Points, areaGeometry.Group)) areaGeometry.Valid = false;
         }
 
         private void DeleteAreaAll()

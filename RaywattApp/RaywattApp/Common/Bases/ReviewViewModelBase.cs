@@ -9,7 +9,6 @@ using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
@@ -23,7 +22,7 @@ namespace RaywattApp.Common.Bases
 
         protected readonly SqlManager _sqlManager;
 
-        private IDialogService _dialogService;
+        protected IDialogService _dialogService;
 
         [ObservableProperty]
         private PrevStatus _prevStatus;
@@ -68,12 +67,6 @@ namespace RaywattApp.Common.Bases
         public ICommand ReviewTypeSwitchCommand
         {
             get { return this._reviewTypeSwitchCommand ?? (this._reviewTypeSwitchCommand = new RelayCommand<string>(ReviewTypeSwitch)); }
-        }
-
-        private ICommand _editCaseCommand;
-        public ICommand EditCaseCommand
-        {
-            get { return this._editCaseCommand ?? (this._editCaseCommand = new RelayCommand(EditCase)); }
         }
 
         private ICommand _editPresetCommand;
@@ -139,29 +132,6 @@ namespace RaywattApp.Common.Bases
             parameter["prevStatus"] = PrevStatus;
             parameter["reviewStatus"] = ReviewStatus;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(url) { Parameter = parameter });
-        }
-
-        private void EditCase()
-        {
-            _log.Debug("EditCase");
-
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["vessel"] = PatientCase.Vessel;
-            parameter["procedure"] = PatientCase.Procedure;
-            parameter["physicianName"] = PatientCase.PhysicianName;
-            parameter["accessionNumber"] = PatientCase.AccessionNumber;
-            parameter["comment"] = PatientCase.Comment;
-            var result = _dialogService.OpenDialog(new EditCaseInfoDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-
-            if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
-            {
-                Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
-                PatientCase.Vessel = data["vessel"].ToString();
-                PatientCase.Procedure = data["procedure"].ToString();
-                PatientCase.PhysicianName = data["physicianName"].ToString();
-                PatientCase.AccessionNumber = data["accessionNumber"].ToString();
-                PatientCase.Comment = data["comment"].ToString();
-            }
         }
 
         private void EditPreset()

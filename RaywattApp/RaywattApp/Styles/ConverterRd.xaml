@@ -104,4 +104,16 @@
     <!-- Indicator Scale Conveter -->
     <converters:IndicatorScaleConveter x:Key="IndicatorScaleConveter" />
 
+    <!-- Component Visibility Converter -->
+    <converters:ComponentVisibilityConverter x:Key="ComponentVisibilityConverter" />
+
+    <!-- Component Unable Converter -->
+    <converters:ComponentUnableConverter x:Key="ComponentUnableConverter" />
+
+    <!-- MaxThickness Visibility Converter -->
+    <converters:MaxThicknessVisibilityConverter x:Key="MaxThicknessVisibilityConverter" />
+
+    <!--  Not Null To Visibility Conveter  -->
+    <converters:NotNullToVisibilityConveter x:Key="NotNullToVisibilityConveter" />
+
 </ResourceDictionary>

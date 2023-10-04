@@ -16,20 +16,12 @@ namespace RaywattApp.Common.Converters
             double dValue = 0;
             int frameCnt = int.Parse(parameter.ToString());
 
-            if (Constants.PullbackTypeLong.Equals(values[0].ToString()))
+            int pullbackLength = int.Parse(CodeDefinition.Codes["PBLE"][values[0].ToString()]);
+
+            if(pullbackLength >= frameCnt)
             {
-                if(Constants.PullbackLongFrameCnt >= frameCnt)
-                {
-                    dValue = (double)values[1] / (Constants.PullbackLongFrameCnt / 100);
-                }                
-            }
-            else
-            {
-                if(Constants.PullbackShortFrameCnt >= frameCnt)
-                {
-                    dValue = (double)values[1] / (Constants.PullbackShortFrameCnt / 100);
-                }
-            }
+                dValue = (double)values[1] / (pullbackLength / 100);
+            }                
 
             return new GridLength(dValue);
         }

@@ -46,10 +46,11 @@ namespace RaywattApp.ViewModels.Dialog
         protected override void AnswerYes(IDialogWindow dialog)
         {
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "Terms&Cond";
             sqlParameters["value"] = "Y(" + DateTime.Now.ToString("yyyyMMddHHmmss") + ")";
             sqlParameters["buffer"] = TermsConditions.Buffer.Trim();
 
-            int res = _sqlManager.UpdateConfigurationTnC(sqlParameters);
+            int res = _sqlManager.UpdateConfiguration(sqlParameters);
             if (res != 1)
             {
                 _log.Error("Insert Error");

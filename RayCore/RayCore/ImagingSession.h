@@ -36,6 +36,7 @@ private:
 
 	CThread* m_pThreadImaging;
 	std::map<int, cv::Mat> m_mapImage;
+	std::map<int, int> m_mapSheathPosition;
 
 	bool m_deleteData;
 

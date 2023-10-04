@@ -10,9 +10,11 @@ using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Windows.Interop;
 using System.Windows.Threading;
 using static RaywattOCT.Ray3DWrapper;
+using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels
 {
@@ -43,7 +45,9 @@ namespace RaywattApp.ViewModels
             _log.Debug("OnNavigated");
 
             // Terms and Contidions 확인
-            IList<Configuration> tnCs = _sqlManager.SelectConfigurationTnC();
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "Terms&Cond";
+            IList<Configuration> tnCs = _sqlManager.SelectConfiguration(sqlParameters);
             if (tnCs != null || tnCs.Count == 1)
             {
                 if ("N".Equals(tnCs[0].Value))
@@ -55,11 +59,17 @@ namespace RaywattApp.ViewModels
                     if (result != null && result.DialogAnswer == DialogResults.Answer.No)
                     {
                         CommonUtil.Exit(DeviceStatus);
+                        if(!DeviceStatus.IsTestMode)
+                            Win32Helper.LogOff();
+                        return;
                     }
                 }
             }
 
-            timer.Interval = TimeSpan.FromMilliseconds(1);
+            Thread threadCoreInit = new Thread(() => ThreadCoreInit());
+            threadCoreInit.Start();
+
+            timer.Interval = TimeSpan.FromMilliseconds(25);
             timer.Tick += new EventHandler(ProgressTest);
             timer.Start();
         }
@@ -71,21 +81,42 @@ namespace RaywattApp.ViewModels
 
         private void ProgressTest(object sender, EventArgs e)
         {
-            if (Progress >= 100)
+            if (Progress >= 100 && DeviceStatus.IsServiceStarted)
             {
                 IntPtr hWnd = new WindowInteropHelper(Constants.mainWindow).Handle;
                 ODSOCT_CreateDll(hWnd);
-                ODSOCT_CreateOCTWindowByPos(Ray3DViewID.CutView, (int) Constants.CutView3dX, (int) Constants.CutView3dY, 
-                    (int) Constants.CutView3dWidth, (int) Constants.CutView3dHeight);
+                ODSOCT_CreateOCTWindowByPos(Ray3DViewID.CutView, (int)Constants.CutView3dX, (int)Constants.CutView3dY,
+                    (int)Constants.CutView3dWidth, (int)Constants.CutView3dHeight);
                 ODSOCT_CreateOCTWindowByPos(Ray3DViewID.FlyThrough, (int)Constants.FlyThroughView3dX, (int)Constants.FlyThroughView3dY,
                     (int)Constants.FlyThroughView3dWidth, (int)Constants.FlyThroughView3dHeight);
                 ODSOCT_StartRendering();
+                ODSOCT_EnableInteractor(Ray3DViewID.CutView, false);
+                ODSOCT_EnableInteractor(Ray3DViewID.FlyThrough, false);
+                ODSOCT_EnableWheelEvent(false);
 
                 timer.Stop();
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
             }
+            else if (DeviceStatus.IsServiceStarted)
+            {
+                Progress = 100;
+            }
 
             Progress += 0.5;
+        }
+
+        private void ThreadCoreInit()
+        {
+            _log.Debug("ThreadCoreInit");
+
+            RayError result = RayError.OK;
+
+            result |= (RayError)RayStartSystem();
+            result |= (RayError)RayConnectDevices();
+
+            DeviceStatus.IsDeviceConnected = (result == RayError.OK);
+
+            _log.Debug("ThreadCoreInit - Done");
         }
     }
 }

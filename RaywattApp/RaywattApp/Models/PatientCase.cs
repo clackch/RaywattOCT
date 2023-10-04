@@ -68,10 +68,7 @@ namespace RaywattApp.Models
         private string procedure;
 
         [ObservableProperty]
-        private int thumbnailNo;
-
-        [ObservableProperty]
-        private string stillImageYn;
+        private int numOfFrames;
 
         [ObservableProperty]
         private string image;
@@ -91,6 +88,9 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private string? _pullbackType;
+
+        [ObservableProperty]
+        private string? _pullbackLength;
 
         [ObservableProperty]
         private bool _angioCoRegistration;
