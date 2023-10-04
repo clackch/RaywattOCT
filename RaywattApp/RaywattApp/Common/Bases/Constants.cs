@@ -226,6 +226,9 @@ namespace RaywattApp.Common.Bases
         public const string LogFolderPath = SystemRootPath + "\\Raywatt\\log";
         public const string LogExtension = "*.log";
 
+        //FrameGrabber Folder
+        public const string FGFolderPath = SystemRootPath + "\\Raywatt\\FrameGrabber";
+
         //Encrypt, Decrypt Public Key
         public const string PublicKey = "raywatt07_hwjckklls_298-87-01441";
 

@@ -1,13 +1,11 @@
 ﻿using OpenCvSharp;
-using RaywattApp.Common.Bases;
-using RaywattApp.Common.Util;
 using System;
 using System.Diagnostics;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Threading;
+using RaywattApp.Common.Bases;
 
-namespace RaywattApp.Angio
+namespace RaywattApp.Common.Angio
 {
     public class TcpClientSingleton
     {
@@ -37,7 +35,7 @@ namespace RaywattApp.Angio
             // Angio Server On
             ProcessStartInfo psi = new ProcessStartInfo();
             Process p = new Process();
-            psi.FileName = "C:\\Raywatt\\FGServer\\FGServer.exe";
+            psi.FileName = Constants.FGFolderPath + "\\FGServer.exe";
             psi.CreateNoWindow = true;
             p.StartInfo = psi;
             p.Start();
