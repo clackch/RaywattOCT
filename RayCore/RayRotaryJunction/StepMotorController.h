@@ -8,6 +8,7 @@
 #define HUB_MOTOR_POS_INITIAL			0
 #define STEP_MOTOR_SPEED_DEFAULT		30
 #define STEP_MOTOR_SPEED_LOAD			4
+#define VOA_DEFAULT_VALUE				2960
 enum class StepMotorIndex : UINT
 {
 	Both = 0,

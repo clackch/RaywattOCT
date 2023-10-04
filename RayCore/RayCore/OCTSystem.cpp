@@ -186,7 +186,11 @@ RayError COCTSystem::Stop() {
 	delete m_pPullbackMotor;
 	m_pPullbackMotor = nullptr;
 
-	m_pLaserModule->Close();
+	if (m_pLaserModule->IsOpen()) {
+		m_pLaserModule->SetVLD(0);
+		m_pLaserModule->SetVOA(0);
+		m_pLaserModule->Close();
+	}
 	delete m_pLaserModule;
 	m_pLaserModule = nullptr;
 
@@ -219,9 +223,13 @@ RayError COCTSystem::ConnectDevices() {
 
 	if (m_curState == RayScannerState::Initial) {
 		result |= connectAcqDevice();
-		PLOGI.printf("connect DAQ - %s", ((result) ? "Succeed" : "Failed"));
+		PLOGI.printf("connect DAQ - %s", ((result == NOERROR) ? "Succeed" : "Failed"));
 		result |= connectRotaryJunction();
-		PLOGI.printf("connect Rotary Junction - %s", ((result) ? "Succeed" : "Failed"));
+		PLOGI.printf("connect Rotary Junction - %s", ((result == NOERROR) ? "Succeed" : "Failed"));
+
+		// Connect to COM Interface first time asynchronous
+		CLaserController* pLaser = CLaserController::GetInstance();
+		pLaser->LaserOnOff(false);
 
 		if (result == NOERROR) {
 			postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Default);
@@ -451,11 +459,12 @@ RayError COCTSystem::StartLiveView()
 		CMotorController* pMotorCtrl = CMotorController::GetInstance();
 		CConfiguration& config = CConfiguration::GetInstance();
 
-		restartAcqDevice(m_pImagingLiveView);
-
 		m_pLaserModule->SetVLD(VISIBLE_LASER_POWER);
 		pLaser->LaserOnOff(true);
 		pMotorCtrl->PerformRun(config.bldcMotor.velocityLiveView);
+		Sleep(500);
+
+		restartAcqDevice(m_pImagingLiveView);
 
 		return RayError::OK;
 	}
@@ -865,10 +874,6 @@ UINT COCTSystem::threadService(LPVOID param) {
 
 	PLOGI.printf("Service Start");
 
-	// Connect to COM Interface first time asynchronous
-	CLaserController* pLaser = CLaserController::GetInstance();
-	pLaser->LaserOnOff(false);
-
 	// Read LUT from File
 	CLookUpTable& lut = CLookUpTable::GetInstance();
 	int result = lut.Load("LUT.csv");
@@ -966,8 +971,6 @@ UINT COCTSystem::threadService(LPVOID param) {
 	
 		Sleep(5);
 	}
-
-	pLaser->LaserOnOff(false);
 
 	return (UINT)RayError::OK;
 }
@@ -1392,6 +1395,8 @@ int COCTSystem::connectRotaryJunction() {
 		result &= m_pLaserModule->Open(config.stepMotor.delayline);
 		if (result) {
 			m_pLaserModule->SetVLD(0);
+			Sleep(500);
+			m_pLaserModule->SetVOA(VOA_DEFAULT_VALUE);
 			Sleep(500);
 			m_pLaserModule->MoveAbsolute(MotorIndex::DelayLine, 30000);
 			while (m_pLaserModule->IsMoving(MotorIndex::DelayLine)) {
