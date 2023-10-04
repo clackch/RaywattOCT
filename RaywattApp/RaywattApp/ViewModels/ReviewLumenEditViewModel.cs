@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using static RaywattOCT.RayCoreWrapper;
 using System.Windows.Navigation;
 using CommunityToolkit.Mvvm.ComponentModel;
-using System.Windows.Threading;
 using CommunityToolkit.Mvvm.Input;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -62,8 +61,6 @@ namespace RaywattApp.ViewModels
 
         private string _lumenContourCommand;
         public string LumenContourCommand { get { return _lumenContourCommand; } set { _lumenContourCommand = value; OnPropertyChanged(nameof(LumenContourCommand)); } }
-
-        private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
         private ICommand _okCommand;
         public ICommand OkCommand
@@ -152,10 +149,6 @@ namespace RaywattApp.ViewModels
 
                 GetImageInfo(RaySession.Review);
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
-
-                timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
-                timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
-                timerUpdateImage.Start();
             }
         }
 
@@ -163,12 +156,9 @@ namespace RaywattApp.ViewModels
         {
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
-
-            if (timerUpdateImage.IsEnabled)
-                timerUpdateImage.Stop();
         }
 
-        private void timerFuncUpdateImage(object sender, EventArgs e)
+        protected override void UpdateCrossSectionImage()
         {
             if (DrawCrossSectionImage())
             {

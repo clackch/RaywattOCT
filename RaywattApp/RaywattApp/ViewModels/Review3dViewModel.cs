@@ -113,7 +113,6 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private bool _isPaused;
 
-        private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
         private DispatcherTimer timerShowData = new DispatcherTimer();
 
         private ICommand _cmdRotateIndicator;
@@ -207,10 +206,6 @@ namespace RaywattApp.ViewModels
 
             IsRendering = false;
 
-            timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
-            timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
-            timerUpdateImage.Start();
-
             threadInitialize = new Thread(() => threadFuncInitialize());
             threadInitialize.Start();
         }
@@ -230,9 +225,6 @@ namespace RaywattApp.ViewModels
 
             Save();
             ODSOCT_HideAllWindows();
-
-            if (timerUpdateImage.IsEnabled)
-                timerUpdateImage.Stop();
         }
 
         protected override void Save()
@@ -264,7 +256,7 @@ namespace RaywattApp.ViewModels
                 _log.Error("Update Error");
         }
 
-        private void timerFuncUpdateImage(object sender, EventArgs e)
+        protected override void UpdateCrossSectionImage()
         {
             if (DrawCrossSectionImage())
             {
@@ -273,7 +265,6 @@ namespace RaywattApp.ViewModels
 
                 FrameNumber = imageInfo.Current;
             }
-            DrawLongitudeImage();
         }
 
         private void threadFuncInitialize()

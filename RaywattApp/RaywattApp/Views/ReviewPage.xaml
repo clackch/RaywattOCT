@@ -1164,7 +1164,7 @@
 
                                 <!-- Measurement -->
                                 <Grid>
-                                    <annotation:DrawLmodeUtil Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" LModeLengthGeometries="{Binding LModeLengthGeometries}" LModeTextGeometries="{Binding LModeTextGeometries}" LModeIndicatorX="{Binding LModeIndicatorX, Mode=TwoWay}" CommandOff="{Binding MeasurementCommandOff, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorLongitude.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorLongitude.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" PullbackLength="{Binding PatientCase.PullbackLength}"/>
+                                    <annotation:DrawLmodeUtil Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" LModeLengthGeometries="{Binding LModeLengthGeometries}" LModeTextGeometries="{Binding LModeTextGeometries}" LModeIndicatorX="{Binding LModeIndicatorX, Mode=TwoWay}" CommandOff="{Binding MeasurementCommandOff, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorLongitude.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorLongitude.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" PullbackLength="{Binding PatientCase.PullbackLength}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}"/>
                                 </Grid>
                             </Grid>
 

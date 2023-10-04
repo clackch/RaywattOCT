@@ -156,13 +156,11 @@ namespace RaywattApp.ViewModels
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {
             DrawCrossSectionImage();
-            if (DrawLongitudeImage())
+
+            // when generating longitude image is completed
+            if (longitudeFrameInfo != null && (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame))
             {
-                // when generating longitude image is completed
-                if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame)
-                {
-                    IsPullbackDone = true;
-                }
+                IsPullbackDone = true;
             }
         }
 
