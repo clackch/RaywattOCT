@@ -177,10 +177,8 @@ RayError COCTSystem::Stop() {
 
 	PLOGI.printf("Close COM Ports");
 	if (m_pPullbackMotor->IsOpen()) {
-		if (m_pPullbackMotor->IsOpen()) {
-			m_pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
-			m_pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
-		}
+		m_pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
+		m_pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 		m_pPullbackMotor->Close();
 	}
 	delete m_pPullbackMotor;
