@@ -176,11 +176,19 @@ RayError COCTSystem::Stop() {
 	pMotor->Disconnect();
 
 	PLOGI.printf("Close COM Ports");
-	m_pPullbackMotor->Close();
+	if (m_pPullbackMotor->IsOpen()) {
+		m_pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
+		m_pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
+		m_pPullbackMotor->Close();
+	}
 	delete m_pPullbackMotor;
 	m_pPullbackMotor = nullptr;
 
-	m_pLaserModule->Close();
+	if (m_pLaserModule->IsOpen()) {
+		m_pLaserModule->SetVLD(0);
+		m_pLaserModule->SetVOA(0);
+		m_pLaserModule->Close();
+	}
 	delete m_pLaserModule;
 	m_pLaserModule = nullptr;
 
@@ -213,9 +221,13 @@ RayError COCTSystem::ConnectDevices() {
 
 	if (m_curState == RayScannerState::Initial) {
 		result |= connectAcqDevice();
-		PLOGI.printf("connect DAQ - %s", ((result) ? "Succeed" : "Failed"));
+		PLOGI.printf("connect DAQ - %s", ((result == NOERROR) ? "Succeed" : "Failed"));
 		result |= connectRotaryJunction();
-		PLOGI.printf("connect Rotary Junction - %s", ((result) ? "Succeed" : "Failed"));
+		PLOGI.printf("connect Rotary Junction - %s", ((result == NOERROR) ? "Succeed" : "Failed"));
+
+		// Connect to COM Interface first time asynchronous
+		CLaserController* pLaser = CLaserController::GetInstance();
+		pLaser->LaserOnOff(false);
 
 		if (result == NOERROR) {
 			postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Default);
@@ -445,11 +457,12 @@ RayError COCTSystem::StartLiveView()
 		CMotorController* pMotorCtrl = CMotorController::GetInstance();
 		CConfiguration& config = CConfiguration::GetInstance();
 
-		restartAcqDevice(m_pImagingLiveView);
-
 		m_pLaserModule->SetVLD(VISIBLE_LASER_POWER);
 		pLaser->LaserOnOff(true);
 		pMotorCtrl->PerformRun(config.bldcMotor.velocityLiveView);
+		Sleep(500);
+
+		restartAcqDevice(m_pImagingLiveView);
 
 		return RayError::OK;
 	}
@@ -859,10 +872,6 @@ UINT COCTSystem::threadService(LPVOID param) {
 
 	PLOGI.printf("Service Start");
 
-	// Connect to COM Interface first time asynchronous
-	CLaserController* pLaser = CLaserController::GetInstance();
-	pLaser->LaserOnOff(false);
-
 	// Read LUT from File
 	CLookUpTable& lut = CLookUpTable::GetInstance();
 	int result = lut.Load("LUT.csv");
@@ -960,8 +969,6 @@ UINT COCTSystem::threadService(LPVOID param) {
 	
 		Sleep(5);
 	}
-
-	pLaser->LaserOnOff(false);
 
 	return (UINT)RayError::OK;
 }
@@ -1130,18 +1137,18 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 
 	pSystem->m_pAcqDevice->SetWriter(pDataWriter);
 	pSystem->restartAcqDevice(pSystem->m_pImagingPullback);
-	pPullbackMotor->SetSpeed(config.stepMotor.pullbackSpeed);
+	pPullbackMotor->SetSpeed(StepMotorIndex::Both, config.stepMotor.pullbackSpeed);
 
 	// 1. Motor ON
-	pMotor->PerformRun(config.bldcMotor.velocityPullback);
+	int nVelocity = config.bldcMotor.velocityPullback;
+	pMotor->PerformRun(nVelocity);
 
 	// 2. Start Recording OCT
 	pDataWriter->StartRecording();
 
 	// 3. Pullback Linear Stage
-	if (pPullbackMotor->IsOpen()) {
-		int nPullbackPosition = config.stepMotor.pullbackStart + config.stepMotor.pullbackDistance;
-		pPullbackMotor->MoveAbsolute(nPullbackPosition);
+	if (pPullbackMotor->IsOpen()) {		
+		pPullbackMotor->MoveAbsolute(StepMotorIndex::Both, config.stepMotor.pullbackDistance);
 		while (pSystem->m_pThreadRotaryJunction->isRun) {
 			if (pPullbackMotor->IsMoving()) {
 				break;
@@ -1189,22 +1196,22 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 
 	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterLoading);
 
-	// 1. Set Linear Stage Position
+	// 1. Rotate BLDC Motor
+	int nVelocity = 600;
+	pMotor->PerformRun(nVelocity);
+
+	// 2. Move Step-Motor (Pullback)
 	if (pPullbackMotor->IsOpen()) {
-		pPullbackMotor->SetSpeed(config.stepMotor.pullbackSpeed);
-		pPullbackMotor->MoveAbsolute(config.stepMotor.pullbackStart);
-		while (pSystem->m_pThreadRotaryJunction->isRun) {
-			if (pPullbackMotor->IsMoving()) {
-				break;
-			}
-			else {
-				Sleep(DELAY_FOR_STOP_THREAD);
-			}
-		}
+		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
+		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_LOAD);
+
+		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_LOAD);
+		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, 0);
+		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 	}
 
-	// 2. Wait
-	Sleep(config.catheter.rotationTime);
+	// 3. Stop BLDC Motor
+	pMotor->StopMotor();
 
 	// To-Do: Check Catheter Connection
 	bool loaded = true;
@@ -1233,26 +1240,12 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	CMotorController* pMotor = CMotorController::GetInstance();
 	CStepMotorController* pPullbackMotor = pSystem->m_pPullbackMotor;
 
-	// 1. Motor ON
-	int nVelocity = config.bldcMotor.velocityHoming;
-	pMotor->PerformRun(nVelocity);
+	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterUnloading);
 
-	// 2. Set Linear Stage Position to Zero
 	if (pPullbackMotor->IsOpen()) {
-		pPullbackMotor->SetSpeed(config.stepMotor.pullbackSpeed);
-		pPullbackMotor->MoveAbsolute(config.stepMotor.pullbackStart);
-		while (pSystem->m_pThreadRotaryJunction->isRun) {
-			if (pPullbackMotor->IsMoving()) {
-				break;
-			}
-			else {
-				Sleep(DELAY_FOR_STOP_THREAD);
-			}
-		}
+		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
+		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 	}
-
-	// 3. Motor Off
-	pMotor->StopMotor();
 
 	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Unloaded);
 
@@ -1271,6 +1264,8 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
 	CLaserController* pLaser = CLaserController::GetInstance();
+
+	PLOGI.printf("Catheter Validation");
 
 	pSystem->restartAcqDevice(pSystem->m_pImagingLiveView);
 	//pLaser->LaserOnOff(true);
@@ -1387,14 +1382,19 @@ int COCTSystem::connectRotaryJunction() {
 	bool result = true;
 
 	if (!m_pPullbackMotor->IsOpen()) {
-		m_pPullbackMotor->Open(config.stepMotor.pullback);
-		m_pPullbackMotor->SetCurrent(config.stepMotor.pullbackStart);
+		m_pPullbackMotor->Open(config.stepMotor.rotaryJunction);
+		Sleep(DELAY_BETWEEN_COMMAND);
+		m_pPullbackMotor->SetCurrent(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
+		Sleep(DELAY_BETWEEN_COMMAND);
+		m_pPullbackMotor->SetCurrent(StepMotorIndex::Hub, HUB_MOTOR_POS_INITIAL);
 	}
 
 	if (!m_pLaserModule->IsOpen()) {
 		result &= m_pLaserModule->Open(config.stepMotor.delayline);
 		if (result) {
 			m_pLaserModule->SetVLD(0);
+			Sleep(500);
+			m_pLaserModule->SetVOA(VOA_DEFAULT_VALUE);
 			Sleep(500);
 			m_pLaserModule->MoveAbsolute(MotorIndex::DelayLine, 30000);
 			while (m_pLaserModule->IsMoving(MotorIndex::DelayLine)) {

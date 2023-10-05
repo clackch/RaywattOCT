@@ -134,6 +134,7 @@ void CLaserModule::SetVLD(unsigned short nValue) {
 	if (!IsOpen()) return;
 	nValue = (nValue < 0) ? 0 : (nValue > MAX_VOLTAGE_RAW_VALUE) ? MAX_VOLTAGE_RAW_VALUE : nValue;
 
+	PLOGI.printf("Visible Laser Power - %d", nValue);
 	delay_line_Set_voltage_ld(nValue);
 	m_nVLDValue = nValue;
 }
@@ -141,6 +142,7 @@ void CLaserModule::SetVOA(unsigned short nValue) {
 	if (!IsOpen()) return;
 	nValue = (nValue < 0) ? 0 : (nValue > MAX_VOLTAGE_RAW_VALUE) ? MAX_VOLTAGE_RAW_VALUE : nValue;
 
+	PLOGI.printf("VOA Power - %d", nValue);
 	delay_line_Set_voltage_voa(nValue);
 	m_nVOAValue = nValue;
 

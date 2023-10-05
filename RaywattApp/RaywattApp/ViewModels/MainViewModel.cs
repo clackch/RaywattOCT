@@ -250,8 +250,8 @@ namespace RaywattApp.ViewModels
         {
             double rotationTime = RayGetProperty(Property.LoadCatheterTime);
             timer.Interval = TimeSpan.FromMilliseconds(rotationTime / (100 / catheterProgressStep));
-            timer.Tick += new EventHandler(ProgressTest);
-            timerUnload.Interval = TimeSpan.FromMilliseconds(rotationTime / (100 / catheterProgressStep));
+            timer.Tick += new EventHandler(ProgressLoadTest);
+            timerUnload.Interval = TimeSpan.FromMilliseconds(rotationTime / (100 / catheterProgressStep) / 2);
             timerUnload.Tick += new EventHandler(ProgressUnloadTest);
         }
 
@@ -279,22 +279,19 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("CatheterUnlockReceiver");
 
-            DeviceStatus.CatheterStatus = Constants.CatheterStatusUnlocked;//Unlock Receive
+            DeviceStatus.CatheterStatus = Constants.CatheterStatusUnloading;   //Unlock Receive
 
-            CatheterProgress = 100;
-
-            //Test
-            timerUnload.Start();
+            RayUnloadCatheter();
         }
 
         private DispatcherTimer timerUnload = new DispatcherTimer();
         private void ProgressUnloadTest(object sender, EventArgs e)
         {
-            if (CatheterProgress == 0)
+            if (CatheterProgress <= 0 && DeviceStatus.CatheterStatus == Constants.CatheterStatusConnected)
             {
                 timerUnload.Stop();
 
-                DeviceStatus.CatheterStatus = Constants.CatheterStatusUnloaded;
+                DeviceStatus.CatheterStatus = Constants.CatheterStatusConnected;
             }
 
             CatheterProgress -= catheterProgressStep;
@@ -304,20 +301,17 @@ namespace RaywattApp.ViewModels
         private void CatheterConnectReceiver()
         {
             _log.Debug("CatheterConnectReceiver");
-            DeviceStatus.CatheterStatus = Constants.CatheterStatusLocked;//Locked Receive
+            DeviceStatus.CatheterStatus = Constants.CatheterStatusLoading;    // Micro-limit switch on
 
-            CatheterProgress = 0;
-
-            //Test
-            timer.Start();
+            RayLoadCatheter();
         }
 
         //Test
         private double catheterProgressStep = 10;
         private DispatcherTimer timer = new DispatcherTimer();
-        private void ProgressTest(object sender, EventArgs e)
+        private void ProgressLoadTest(object sender, EventArgs e)
         {
-            if (CatheterProgress == 100)
+            if (CatheterProgress >= 100 && DeviceStatus.CatheterStatus == Constants.CatheterStatusLoaded)
             {
                 timer.Stop();
 
@@ -362,8 +356,18 @@ namespace RaywattApp.ViewModels
         protected void handleEvent(RayCallbackRequest request, RayEvent e, int param) {
             switch (e)
             {
-                case RayEvent.CatheterLoading:
+                case RayEvent.CatheterConnected:
                     CatheterConnectReceiver();
+                    break;
+                case RayEvent.CatheterLoading:
+                    //Test
+                    CatheterProgress = 0;
+                    timer.Start();
+                    break;
+                case RayEvent.CatheterUnloading:
+                    //Test
+                    CatheterProgress = 100;
+                    timerUnload.Start();
                     break;
                 default:
                     break;
@@ -384,7 +388,7 @@ namespace RaywattApp.ViewModels
                     DeviceStatus.CatheterStatus = Constants.CatheterStatusLoaded;
                     break;
                 case RayWorkItem.UnloadCatheter:
-                    DeviceStatus.CatheterStatus = Constants.CatheterStatusUnloaded;
+                    DeviceStatus.CatheterStatus = Constants.CatheterStatusConnected;
                     break;
                 case RayWorkItem.Pullback:
                     DeviceStatus.IsPullbackDone = true;

@@ -62,7 +62,9 @@ enum class RayScannerState {
 
 enum class RayEvent {
 	Unknown = 0,
+	CatheterConnected,
 	CatheterLoading,
+	CatheterUnloading,
 };
 
 enum class RayWorkItem {

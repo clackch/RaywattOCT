@@ -81,7 +81,7 @@ namespace RaywattApp.ViewModels
 
         private void ProgressTest(object sender, EventArgs e)
         {
-            if (Progress >= 100 && DeviceStatus.IsServiceStarted)
+            if (Progress >= 100 && DeviceStatus.IsServiceStarted && DeviceStatus.IsDeviceConnected)
             {
                 IntPtr hWnd = new WindowInteropHelper(Constants.mainWindow).Handle;
                 ODSOCT_CreateDll(hWnd);
@@ -114,7 +114,7 @@ namespace RaywattApp.ViewModels
             result |= (RayError)RayStartSystem();
             result |= (RayError)RayConnectDevices();
 
-            DeviceStatus.IsDeviceConnected = (result == RayError.OK);
+            DeviceStatus.IsDeviceConnected = true; // (result == RayError.OK);
 
             _log.Debug("ThreadCoreInit - Done");
         }
