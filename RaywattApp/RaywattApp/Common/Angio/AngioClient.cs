@@ -2,10 +2,9 @@
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Util;
 using System;
-using System.Diagnostics;
-using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Threading;
+
 public enum PacketType
 {
     Image,

@@ -9,7 +9,6 @@ using System.Windows.Input;
 using System.Windows.Navigation;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
-using static RaywattOCT.RayCoreWrapper;
 using System.Windows.Threading;
 
 namespace RaywattApp.ViewModels
