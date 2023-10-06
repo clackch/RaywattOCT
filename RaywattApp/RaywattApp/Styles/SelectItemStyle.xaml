@@ -86,12 +86,12 @@
                 <ColumnDefinition Width="20" />
             </Grid.ColumnDefinitions>
             <Border x:Name="border" Grid.ColumnSpan="2" CornerRadius="8" BorderThickness="1" Background="Transparent" BorderBrush="{DynamicResource GrayscaleGray5Brush}"/>
-            <Image x:Name="img" Source="{svgc:SvgImage Source=/res/icon/arrowUp.svg}" HorizontalAlignment="Right" Width="14" Height="7" />
+            <Image x:Name="img" Source="{svgc:SvgImage Source=/res/icon/arrowDown.svg}" HorizontalAlignment="Right" Width="14" Height="7" />
         </Grid>
         <ControlTemplate.Triggers>
             <Trigger Property="IsChecked" Value="True">
                 <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MainPrimaryColorBrush}"/>
-                <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/arrowDownLight.svg}"/>
+                <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/arrowUpLight.svg}"/>
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
