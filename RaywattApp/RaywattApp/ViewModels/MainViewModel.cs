@@ -149,8 +149,11 @@ namespace RaywattApp.ViewModels
             IList<Configuration> testMode = _sqlManager.SelectConfiguration(sqlParameters);
 
             //Setting Test Mode
-            if(testMode != null && testMode.Count == 1 && "Y".Equals(testMode[0].Value))
+            if (testMode != null && testMode.Count == 1 && "Y".Equals(testMode[0].Value))
+            {
                 DeviceStatus.IsTestMode = true;
+                RaySetProperty(Property.TestMode, (DeviceStatus.IsTestMode ? 1.0f : 0.0f));
+            }
         }
 
         private void OnNavigationMessage(object recipient, NavigationMessage message)

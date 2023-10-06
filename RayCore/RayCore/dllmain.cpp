@@ -77,6 +77,7 @@ _declspec(dllexport) RayError RayUnregisterDetectionCallback() {
     return octSystem.UnregisterDetectionCallback();
 }
 _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
+    CConfiguration& config = CConfiguration::GetInstance();
 
     switch (prop) {
     case RayProperty::Brightness:
@@ -87,9 +88,22 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
         return octSystem.SetLongitudeBackgroundColor(value);
     case RayProperty::LongitudeDegree:
         return octSystem.SetDegree(value);
+    case RayProperty::PullbackRPM:
+        config.bldcMotor.velocityPullback = value;
+        break;
+    case RayProperty::PullbackDistance:
+        config.stepMotor.pullbackDistance = value;
+        break;
+    case RayProperty::PullbackSpeed:
+        config.stepMotor.pullbackSpeed = value;
+        break;
+    case RayProperty::TestMode:
+        octSystem.SetTestMode((bool) value);
+        break;
     default:
         return RayError::InvalidArgument;
     }
+    return RayError::OK;
 }
 _declspec(dllexport) double RayGetProperty(RayProperty prop) {
     CConfiguration& config = CConfiguration::GetInstance();
@@ -129,6 +143,14 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return octSystem.GetLongitudeImageHeight();
     case RayProperty::LongitudeImageChannels:
         return octSystem.GetLongitudeImageChannels();
+    case RayProperty::PullbackRPM:
+        return config.bldcMotor.velocityPullback;
+    case RayProperty::PullbackDistance:
+        return config.stepMotor.pullbackDistance;
+    case RayProperty::PullbackSpeed:
+        return config.stepMotor.pullbackSpeed;
+    case RayProperty::TestMode:
+        return (double) octSystem.IsTestMode();
     default:
         return (int)RayError::InvalidArgument;
     }

@@ -41,7 +41,11 @@ enum class RayProperty {
 	ImageDepth,
 	LongitudeImageWidth,
 	LongitudeImageHeight,
-	LongitudeImageChannels
+	LongitudeImageChannels,
+	PullbackRPM,
+	PullbackDistance,
+	PullbackSpeed,
+	TestMode
 };
 
 enum class RayCallbackRequest {
