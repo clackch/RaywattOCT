@@ -165,11 +165,8 @@ namespace RaywattApp.ViewModels
             }
 
             // Send Start Command
-            AngioManager.Instance.GetStream().Write(AngioManager.startCommand, 0, AngioManager.startCommand.Length);
-
-            timerLiveAngioImage.Interval = TimeSpan.Zero; // TimeSpan.Zero;
-            timerLiveAngioImage.Tick += new EventHandler(timerFuncLiveAngioImage);
-            timerLiveAngioImage.Start();
+            if (DeviceStatus.IsAngioConnected)
+                AngioManager.Instance.GetStream().Write(AngioManager.startCommand, 0, AngioManager.startCommand.Length);
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -180,15 +177,9 @@ namespace RaywattApp.ViewModels
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
 
-            if (AngioClient.threadOnLiveAngioImage)
-                if (_isRecording)
-                {
-                    //Send Stop Command
-                    AngioManager.Instance.GetStream().Write(AngioManager.stopCommand, 0, AngioManager.stopCommand.Length);
-
-                    timerLiveAngioImage.Stop();
-                    _isRecording = false;
-                }
+            //Send Stop Command
+            if (DeviceStatus.IsAngioConnected)
+                AngioManager.Instance.GetStream().Write(AngioManager.stopCommand, 0, AngioManager.stopCommand.Length);
         }
 
         private void SetCondition()
@@ -254,6 +245,9 @@ namespace RaywattApp.ViewModels
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {
             DrawCrossSectionImage();
+
+            if (DeviceStatus.IsAngioConnected)
+                DrawAngioImage();
         }
 
         private void leaveToPage(string viewPage)
@@ -265,11 +259,6 @@ namespace RaywattApp.ViewModels
             PatientCase.Contrast = Contrast;
             parameter["patientCase"] = PatientCase;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(viewPage) { Parameter = parameter });
-        }
-
-        private void timerFuncLiveAngioImage(object sender, EventArgs e)
-        {
-            DrawAngioImage();
         }
 
         protected bool DrawAngioImage()
