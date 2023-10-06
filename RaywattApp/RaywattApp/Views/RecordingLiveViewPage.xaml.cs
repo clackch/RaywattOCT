@@ -9,9 +9,7 @@ namespace RaywattApp.Views
     /// </summary>
     public partial class RecordingLiveViewPage : Page
     {
-        private readonly TcpClientSingleton _tcpClientSingleton;
-
-        public RecordingLiveViewPage(TcpClientSingleton tcpClientSingleton)
+        public RecordingLiveViewPage()
         {
             InitializeComponent();
             DataContext = App.Current.Services.GetService(typeof(RecordingLiveViewViewModel));
