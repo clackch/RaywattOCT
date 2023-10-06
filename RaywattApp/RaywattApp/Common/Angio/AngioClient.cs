@@ -29,16 +29,16 @@ namespace RaywattApp.Common.Angio
 
         public static bool threadOnLiveAngioImage;
 
-        private readonly TcpClientSingleton _tcpClientSingleton;
+        private readonly AngioManager AngioManager;
 
-        public AngioClient(TcpClientSingleton tcpClientSingleton)
+        public AngioClient(AngioManager AngioManager)
         {
-            Array.Fill<byte>(tcpClientSingleton.tmpBuffer, 0);
+            Array.Fill<byte>(AngioManager.tmpBuffer, 0);
 
-            if (tcpClientSingleton.Instance.Connected == true)
-                tcpClientSingleton.isConnected = true;
+            if (AngioManager.Instance.Connected == true)
+                AngioManager.isConnected = true;
 
-            _tcpClientSingleton = tcpClientSingleton;
+            AngioManager = AngioManager;
         }
 
         public void ThreadFuncLiveAngioImage()
@@ -60,14 +60,14 @@ namespace RaywattApp.Common.Angio
         {
             try
             {
-                _tcpClientSingleton.bytesRead = _tcpClientSingleton.Instance.GetStream().Read(_tcpClientSingleton.buffer, 0, 10000000);
+                AngioManager.bytesRead = AngioManager.Instance.GetStream().Read(AngioManager.buffer, 0, 10000000);
 
-                Array.Copy(_tcpClientSingleton.buffer, 0, _tcpClientSingleton.tmpBuffer, _tcpClientSingleton.tmpBufferLen, _tcpClientSingleton.bytesRead);
-                _tcpClientSingleton.tmpBufferLen += _tcpClientSingleton.bytesRead;
+                Array.Copy(AngioManager.buffer, 0, AngioManager.tmpBuffer, AngioManager.tmpBufferLen, AngioManager.bytesRead);
+                AngioManager.tmpBufferLen += AngioManager.bytesRead;
 
                 while (true)
                 {
-                    PacketType type = CheckPacketType(_tcpClientSingleton.tmpBuffer);
+                    PacketType type = CheckPacketType(AngioManager.tmpBuffer);
                     if (type == PacketType.Command)
                         CommandPacketProcess();
                     else if (type == PacketType.Image)
@@ -78,7 +78,7 @@ namespace RaywattApp.Common.Angio
             }
             catch (Exception ex)
             {
-                _tcpClientSingleton.isConnected = false;
+                AngioManager.isConnected = false;
                 return false;
             }
 
@@ -99,62 +99,62 @@ namespace RaywattApp.Common.Angio
         private void ImagePacketProcess()
         {
             int offset = 2;
-            short height = BitConverter.ToInt16(_tcpClientSingleton.tmpBuffer, offset);
+            short height = BitConverter.ToInt16(AngioManager.tmpBuffer, offset);
             offset += sizeof(short);
-            short width = BitConverter.ToInt16(_tcpClientSingleton.tmpBuffer, offset);
+            short width = BitConverter.ToInt16(AngioManager.tmpBuffer, offset);
             offset += sizeof(short);
-            char BitsPerPixel = (char)_tcpClientSingleton.tmpBuffer[offset++];
+            char BitsPerPixel = (char)AngioManager.tmpBuffer[offset++];
             int imageSize = height * width * BitsPerPixel / 8;
-            if (_tcpClientSingleton.tmpBuffer[imageSize + Constants.imageHeaderSize + Constants.imageTailSize - 2] == CalcCheckSum(_tcpClientSingleton.tmpBuffer, offset + imageSize)
-                && _tcpClientSingleton.tmpBuffer[imageSize + Constants.imageHeaderSize + Constants.imageTailSize - 1] == 0xA3)
+            if (AngioManager.tmpBuffer[imageSize + Constants.imageHeaderSize + Constants.imageTailSize - 2] == CalcCheckSum(AngioManager.tmpBuffer, offset + imageSize)
+                && AngioManager.tmpBuffer[imageSize + Constants.imageHeaderSize + Constants.imageTailSize - 1] == 0xA3)
             {
                 Mat image = new Mat(height, width, MatType.CV_8UC(BitsPerPixel / 8));
-                Marshal.Copy(_tcpClientSingleton.tmpBuffer, offset, image.Data, imageSize);
+                Marshal.Copy(AngioManager.tmpBuffer, offset, image.Data, imageSize);
                 offset += imageSize;
-                char checksum = BitConverter.ToChar(_tcpClientSingleton.tmpBuffer, offset++);
-                char eof = BitConverter.ToChar(_tcpClientSingleton.tmpBuffer, offset++);
+                char checksum = BitConverter.ToChar(AngioManager.tmpBuffer, offset++);
+                char eof = BitConverter.ToChar(AngioManager.tmpBuffer, offset++);
 
-                Array.Copy(_tcpClientSingleton.tmpBuffer, imageSize + Constants.imageHeaderSize + Constants.imageTailSize, _tcpClientSingleton.tmpBuffer, 0, 20000000 - imageSize - Constants.imageHeaderSize - Constants.imageTailSize);
-                _tcpClientSingleton.tmpBufferLen -= imageSize + Constants.imageHeaderSize + Constants.imageTailSize;
+                Array.Copy(AngioManager.tmpBuffer, imageSize + Constants.imageHeaderSize + Constants.imageTailSize, AngioManager.tmpBuffer, 0, 20000000 - imageSize - Constants.imageHeaderSize - Constants.imageTailSize);
+                AngioManager.tmpBufferLen -= imageSize + Constants.imageHeaderSize + Constants.imageTailSize;
 
                 Cv2.Flip(image, image, 0);
 
                 Mat imgRecv = CommonUtil.ByteMemoryToCvMat(image.Data, width, height, BitsPerPixel / 8);
-                _tcpClientSingleton.imgAngio = imgRecv;
+                AngioManager.imgAngio = imgRecv;
             }
         }
 
         private void CommandPacketProcess()
         {
             int offset = 2;
-            int command = _tcpClientSingleton.tmpBuffer[offset++];
-            char checksum = BitConverter.ToChar(_tcpClientSingleton.tmpBuffer, offset++);
-            char eof = BitConverter.ToChar(_tcpClientSingleton.tmpBuffer, offset++);
+            int command = AngioManager.tmpBuffer[offset++];
+            char checksum = BitConverter.ToChar(AngioManager.tmpBuffer, offset++);
+            char eof = BitConverter.ToChar(AngioManager.tmpBuffer, offset++);
 
-            if ((byte)checksum == CalcCheckSum(_tcpClientSingleton.tmpBuffer, 3))
+            if ((byte)checksum == CalcCheckSum(AngioManager.tmpBuffer, 3))
             {
                 if (command == (int)CommandType.FGDisconnected)
                 {
-                    _tcpClientSingleton.portConnection = false;
-                    _tcpClientSingleton.imgAngio = ShowNoSignal();
+                    AngioManager.portConnection = false;
+                    AngioManager.imgAngio = ShowNoSignal();
 
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
-                        ViewModelBase._deviceStatus.IsAngioConnected = _tcpClientSingleton.portConnection;
+                        ViewModelBase._deviceStatus.IsAngioConnected = AngioManager.portConnection;
                     });
                 }
                 else if (command == (int)CommandType.FGConnected)
                 {
-                    _tcpClientSingleton.portConnection = true;
+                    AngioManager.portConnection = true;
 
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
-                        ViewModelBase._deviceStatus.IsAngioConnected = _tcpClientSingleton.portConnection;
+                        ViewModelBase._deviceStatus.IsAngioConnected = AngioManager.portConnection;
                     });
                 }
 
-                Array.Copy(_tcpClientSingleton.tmpBuffer, Constants.commandPacketSize, _tcpClientSingleton.tmpBuffer, 0, 20000000 - Constants.commandPacketSize);
-                _tcpClientSingleton.tmpBufferLen -= Constants.commandPacketSize;
+                Array.Copy(AngioManager.tmpBuffer, Constants.commandPacketSize, AngioManager.tmpBuffer, 0, 20000000 - Constants.commandPacketSize);
+                AngioManager.tmpBufferLen -= Constants.commandPacketSize;
             }
         }
 

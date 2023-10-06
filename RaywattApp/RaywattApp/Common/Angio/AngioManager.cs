@@ -6,7 +6,7 @@ using RaywattApp.Common.Bases;
 
 namespace RaywattApp.Common.Angio
 {
-    public class TcpClientSingleton
+    public class AngioManager
     {
         string serverIP = "127.0.0.1";
         int serverPort = 8888;
@@ -24,7 +24,7 @@ namespace RaywattApp.Common.Angio
         public byte[] stopCommand = { 0x3A, (byte)PacketType.Command, (byte)CommandType.FGStopped, 0x07, 0xA3 };
         public Mat imgAngio = AngioClient.ShowNoSignal();
 
-        public TcpClientSingleton()
+        public AngioManager()
         {
             Thread clientThread = new Thread(ConnectToServer);
             clientThread.Start();

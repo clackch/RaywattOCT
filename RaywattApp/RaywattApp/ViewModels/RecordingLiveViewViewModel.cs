@@ -29,7 +29,7 @@ namespace RaywattApp.ViewModels
 
         private IDialogService? _dialogService;
                
-        private readonly TcpClientSingleton _tcpClientSingleton;
+        private readonly AngioManager AngioManager;
 
         private IList<Code> pullbackTypes;
 
@@ -102,7 +102,7 @@ namespace RaywattApp.ViewModels
         }
 
         private bool _isRecording = false;
-        public RecordingLiveViewViewModel(SqlManager sqlManager, IDialogService dialogService, TcpClientSingleton tcpClientSingleton)
+        public RecordingLiveViewViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager AngioManager)
         {
             _log.Debug("RecordingLiveViewViewModel");
 
@@ -111,7 +111,7 @@ namespace RaywattApp.ViewModels
             _sqlManager = sqlManager;
             _dialogService = dialogService;
 
-            _tcpClientSingleton = tcpClientSingleton;
+            AngioManager = AngioManager;
             
             PullbackList = CodeDefinition.Codes["PBTY"];
 
@@ -165,7 +165,7 @@ namespace RaywattApp.ViewModels
             }
 
             // Send Start Command
-            _tcpClientSingleton.Instance.GetStream().Write(_tcpClientSingleton.startCommand, 0, _tcpClientSingleton.startCommand.Length);
+            AngioManager.Instance.GetStream().Write(AngioManager.startCommand, 0, AngioManager.startCommand.Length);
 
             timerLiveAngioImage.Interval = TimeSpan.Zero; // TimeSpan.Zero;
             timerLiveAngioImage.Tick += new EventHandler(timerFuncLiveAngioImage);
@@ -184,7 +184,7 @@ namespace RaywattApp.ViewModels
                 if (_isRecording)
                 {
                     //Send Stop Command
-                    _tcpClientSingleton.Instance.GetStream().Write(_tcpClientSingleton.stopCommand, 0, _tcpClientSingleton.stopCommand.Length);
+                    AngioManager.Instance.GetStream().Write(AngioManager.stopCommand, 0, AngioManager.stopCommand.Length);
 
                     timerLiveAngioImage.Stop();
                     _isRecording = false;
@@ -274,7 +274,7 @@ namespace RaywattApp.ViewModels
 
         protected bool DrawAngioImage()
         {
-            AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(_tcpClientSingleton.imgAngio);
+            AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(AngioManager.imgAngio);
 
             return true;
         }
