@@ -1254,7 +1254,7 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	}
 	else if (pSystem->m_isTestMode)
 	{
-		Sleep(config.GetLoadCatheterTime());
+		Sleep(config.GetLoadCatheterTime() / 2);
 	}
 
 	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Unloaded);
