@@ -207,6 +207,29 @@ ALTER TABLE IF EXISTS rv_schema.dicom_property
     OWNER to rv_user;
 
 
+-- Table: rv_schema.cath_room
+
+-- DROP TABLE IF EXISTS rv_schema.cath_room;
+
+CREATE TABLE IF NOT EXISTS rv_schema.cath_room
+(
+    num integer NOT NULL,
+    name character varying(50) COLLATE pg_catalog."default",
+    chp_file character varying(200) COLLATE pg_catalog."default",
+    rect_left real,
+    rect_top real,
+    rect_right real,
+    rect_bottom real,
+    CONSTRAINT cath_room_pkey PRIMARY KEY (num)
+        USING INDEX TABLESPACE rv_tablespace
+)
+
+TABLESPACE rv_tablespace;
+
+ALTER TABLE IF EXISTS rv_schema.cath_room
+    OWNER to rv_user;
+	
+
 -- FUNCTION: rv_schema.fn_code(character varying, character varying)
 
 -- DROP FUNCTION IF EXISTS rv_schema.fn_code(character varying, character varying);
