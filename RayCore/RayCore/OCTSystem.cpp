@@ -1252,6 +1252,10 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
 		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 	}
+	else if (pSystem->m_isTestMode)
+	{
+		Sleep(config.GetLoadCatheterTime());
+	}
 
 	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Unloaded);
 
