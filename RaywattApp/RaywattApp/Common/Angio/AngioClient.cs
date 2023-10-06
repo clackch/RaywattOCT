@@ -18,6 +18,7 @@ enum CommandType
     FGDisconnected,
     FGStarted,
     FGStopped,
+    FGAskPort,
     FGNothing,
 };
 
@@ -29,16 +30,16 @@ namespace RaywattApp.Common.Angio
 
         public static bool threadOnLiveAngioImage;
 
-        private readonly AngioManager AngioManager;
+        private readonly AngioManager _angioManager;
 
-        public AngioClient(AngioManager AngioManager)
+        public AngioClient(AngioManager angioManager)
         {
-            Array.Fill<byte>(AngioManager.tmpBuffer, 0);
+            Array.Fill<byte>(angioManager.tmpBuffer, 0);
 
-            if (AngioManager.Instance.Connected == true)
-                AngioManager.isConnected = true;
+            if (angioManager.Instance.Connected == true)
+                angioManager.isConnected = true;
 
-            AngioManager = AngioManager;
+            _angioManager = angioManager;
         }
 
         public void ThreadFuncLiveAngioImage()
@@ -56,18 +57,18 @@ namespace RaywattApp.Common.Angio
             threadFuncLiveAngioImage.Start();
         }
 
-        protected bool ReadPacket()
+        private bool ReadPacket()
         {
             try
             {
-                AngioManager.bytesRead = AngioManager.Instance.GetStream().Read(AngioManager.buffer, 0, 10000000);
+                _angioManager.bytesRead = _angioManager.Instance.GetStream().Read(_angioManager.buffer, 0, 10000000);
 
-                Array.Copy(AngioManager.buffer, 0, AngioManager.tmpBuffer, AngioManager.tmpBufferLen, AngioManager.bytesRead);
-                AngioManager.tmpBufferLen += AngioManager.bytesRead;
+                Array.Copy(_angioManager.buffer, 0, _angioManager.tmpBuffer, _angioManager.tmpBufferLen, _angioManager.bytesRead);
+                _angioManager.tmpBufferLen += _angioManager.bytesRead;
 
                 while (true)
                 {
-                    PacketType type = CheckPacketType(AngioManager.tmpBuffer);
+                    PacketType type = CheckPacketType(_angioManager.tmpBuffer);
                     if (type == PacketType.Command)
                         CommandPacketProcess();
                     else if (type == PacketType.Image)
@@ -78,7 +79,7 @@ namespace RaywattApp.Common.Angio
             }
             catch (Exception ex)
             {
-                AngioManager.isConnected = false;
+                _angioManager.isConnected = false;
                 return false;
             }
 
@@ -99,62 +100,62 @@ namespace RaywattApp.Common.Angio
         private void ImagePacketProcess()
         {
             int offset = 2;
-            short height = BitConverter.ToInt16(AngioManager.tmpBuffer, offset);
+            short height = BitConverter.ToInt16(_angioManager.tmpBuffer, offset);
             offset += sizeof(short);
-            short width = BitConverter.ToInt16(AngioManager.tmpBuffer, offset);
+            short width = BitConverter.ToInt16(_angioManager.tmpBuffer, offset);
             offset += sizeof(short);
-            char BitsPerPixel = (char)AngioManager.tmpBuffer[offset++];
+            char BitsPerPixel = (char)_angioManager.tmpBuffer[offset++];
             int imageSize = height * width * BitsPerPixel / 8;
-            if (AngioManager.tmpBuffer[imageSize + Constants.imageHeaderSize + Constants.imageTailSize - 2] == CalcCheckSum(AngioManager.tmpBuffer, offset + imageSize)
-                && AngioManager.tmpBuffer[imageSize + Constants.imageHeaderSize + Constants.imageTailSize - 1] == 0xA3)
+            if (_angioManager.tmpBuffer[imageSize + Constants.imageHeaderSize + Constants.imageTailSize - 2] == CalcCheckSum(_angioManager.tmpBuffer, offset + imageSize)
+                && _angioManager.tmpBuffer[imageSize + Constants.imageHeaderSize + Constants.imageTailSize - 1] == 0xA3)
             {
                 Mat image = new Mat(height, width, MatType.CV_8UC(BitsPerPixel / 8));
-                Marshal.Copy(AngioManager.tmpBuffer, offset, image.Data, imageSize);
+                Marshal.Copy(_angioManager.tmpBuffer, offset, image.Data, imageSize);
                 offset += imageSize;
-                char checksum = BitConverter.ToChar(AngioManager.tmpBuffer, offset++);
-                char eof = BitConverter.ToChar(AngioManager.tmpBuffer, offset++);
+                char checksum = BitConverter.ToChar(_angioManager.tmpBuffer, offset++);
+                char eof = BitConverter.ToChar(_angioManager.tmpBuffer, offset++);
 
-                Array.Copy(AngioManager.tmpBuffer, imageSize + Constants.imageHeaderSize + Constants.imageTailSize, AngioManager.tmpBuffer, 0, 20000000 - imageSize - Constants.imageHeaderSize - Constants.imageTailSize);
-                AngioManager.tmpBufferLen -= imageSize + Constants.imageHeaderSize + Constants.imageTailSize;
+                Array.Copy(_angioManager.tmpBuffer, imageSize + Constants.imageHeaderSize + Constants.imageTailSize, _angioManager.tmpBuffer, 0, 20000000 - imageSize - Constants.imageHeaderSize - Constants.imageTailSize);
+                _angioManager.tmpBufferLen -= imageSize + Constants.imageHeaderSize + Constants.imageTailSize;
 
                 Cv2.Flip(image, image, 0);
 
                 Mat imgRecv = CommonUtil.ByteMemoryToCvMat(image.Data, width, height, BitsPerPixel / 8);
-                AngioManager.imgAngio = imgRecv;
+                _angioManager.imgAngio = imgRecv;
             }
         }
 
         private void CommandPacketProcess()
         {
             int offset = 2;
-            int command = AngioManager.tmpBuffer[offset++];
-            char checksum = BitConverter.ToChar(AngioManager.tmpBuffer, offset++);
-            char eof = BitConverter.ToChar(AngioManager.tmpBuffer, offset++);
+            int command = _angioManager.tmpBuffer[offset++];
+            char checksum = BitConverter.ToChar(_angioManager.tmpBuffer, offset++);
+            char eof = BitConverter.ToChar(_angioManager.tmpBuffer, offset++);
 
-            if ((byte)checksum == CalcCheckSum(AngioManager.tmpBuffer, 3))
+            if ((byte)checksum == CalcCheckSum(_angioManager.tmpBuffer, 3))
             {
                 if (command == (int)CommandType.FGDisconnected)
                 {
-                    AngioManager.portConnection = false;
-                    AngioManager.imgAngio = ShowNoSignal();
+                    _angioManager.portConnection = false;
+                    _angioManager.imgAngio = ShowNoSignal();
 
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
-                        ViewModelBase._deviceStatus.IsAngioConnected = AngioManager.portConnection;
+                        ViewModelBase._deviceStatus.IsAngioConnected = _angioManager.portConnection;
                     });
                 }
                 else if (command == (int)CommandType.FGConnected)
                 {
-                    AngioManager.portConnection = true;
+                    _angioManager.portConnection = true;
 
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
-                        ViewModelBase._deviceStatus.IsAngioConnected = AngioManager.portConnection;
+                        ViewModelBase._deviceStatus.IsAngioConnected = _angioManager.portConnection;
                     });
                 }
 
-                Array.Copy(AngioManager.tmpBuffer, Constants.commandPacketSize, AngioManager.tmpBuffer, 0, 20000000 - Constants.commandPacketSize);
-                AngioManager.tmpBufferLen -= Constants.commandPacketSize;
+                Array.Copy(_angioManager.tmpBuffer, Constants.commandPacketSize, _angioManager.tmpBuffer, 0, 20000000 - Constants.commandPacketSize);
+                _angioManager.tmpBufferLen -= Constants.commandPacketSize;
             }
         }
 
@@ -164,7 +165,7 @@ namespace RaywattApp.Common.Angio
             threadFuncLiveAngioImage.Join();
         }
 
-        public PacketType CheckPacketType(byte[] tmpBuffer)
+        private PacketType CheckPacketType(byte[] tmpBuffer)
         {
             int offset = 0;
             if (tmpBuffer[offset++] == 0x3A)

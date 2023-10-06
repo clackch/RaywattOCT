@@ -103,12 +103,12 @@ namespace RaywattApp.ViewModels
         private CallbackFunction cbFunction;
         public CallbackFunction CBFunction => (this.cbFunction) ?? (this.cbFunction = new CallbackFunction(OnMsgCallback));
 
-        private readonly AngioManager AngioManager;
+        private readonly AngioManager _angioManager;
 
         /// <summary>
         /// 생성자
         /// </summary>
-        public MainViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager AngioManager)
+        public MainViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager)
         {
             _log.Debug("MainViewModel");
 
@@ -142,7 +142,7 @@ namespace RaywattApp.ViewModels
             IsHome = true;
             IsLoading = true;
 
-            AngioManager = AngioManager;
+            _angioManager = angioManager;
 
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["classification"] = "TestMode";
@@ -230,7 +230,7 @@ namespace RaywattApp.ViewModels
             {
                 CommonUtil.Exit(DeviceStatus);
 
-                AngioManager.Instance.GetStream().Close();
+                _angioManager.Instance.GetStream().Close();
                 AngioClient.CloseLiveAngioImageThread();
 
                 // Server Off

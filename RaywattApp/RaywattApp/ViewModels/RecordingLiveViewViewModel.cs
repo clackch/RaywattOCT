@@ -21,15 +21,13 @@ namespace RaywattApp.ViewModels
 {
     public partial class RecordingLiveViewViewModel : OCTViewModelBase
     {
-        private DispatcherTimer timerLiveAngioImage = new DispatcherTimer(DispatcherPriority.Background);
-
         private static readonly ILog _log = LogManager.GetLogger(typeof(RecordingLiveViewViewModel));
 
         private readonly SqlManager? _sqlManager;
 
         private IDialogService? _dialogService;
                
-        private readonly AngioManager AngioManager;
+        private readonly AngioManager _angioManager;
 
         private IList<Code> pullbackTypes;
 
@@ -102,7 +100,7 @@ namespace RaywattApp.ViewModels
         }
 
         private bool _isRecording = false;
-        public RecordingLiveViewViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager AngioManager)
+        public RecordingLiveViewViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager)
         {
             _log.Debug("RecordingLiveViewViewModel");
 
@@ -111,7 +109,7 @@ namespace RaywattApp.ViewModels
             _sqlManager = sqlManager;
             _dialogService = dialogService;
 
-            AngioManager = AngioManager;
+            _angioManager = angioManager;
             
             PullbackList = CodeDefinition.Codes["PBTY"];
 
@@ -166,7 +164,7 @@ namespace RaywattApp.ViewModels
 
             // Send Start Command
             if (DeviceStatus.IsAngioConnected)
-                AngioManager.Instance.GetStream().Write(AngioManager.startCommand, 0, AngioManager.startCommand.Length);
+                _angioManager.Instance.GetStream().Write(_angioManager.startCommand, 0, _angioManager.startCommand.Length);
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -179,7 +177,7 @@ namespace RaywattApp.ViewModels
 
             //Send Stop Command
             if (DeviceStatus.IsAngioConnected)
-                AngioManager.Instance.GetStream().Write(AngioManager.stopCommand, 0, AngioManager.stopCommand.Length);
+                _angioManager.Instance.GetStream().Write(_angioManager.stopCommand, 0, _angioManager.stopCommand.Length);
         }
 
         private void SetCondition()
@@ -263,7 +261,7 @@ namespace RaywattApp.ViewModels
 
         protected bool DrawAngioImage()
         {
-            AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(AngioManager.imgAngio);
+            AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(_angioManager.imgAngio);
 
             return true;
         }
