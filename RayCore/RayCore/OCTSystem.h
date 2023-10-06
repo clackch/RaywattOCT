@@ -81,6 +81,7 @@ private:
 	double m_fContrast;
 	double m_fDegree;
 	cv::Scalar m_backgroundColor;	// for longitude image
+	bool m_isTestMode;
 
 public:
 	COCTSystem();
@@ -139,6 +140,8 @@ public:
 	UINT GetLongitudeImageWidth();
 	UINT GetLongitudeImageHeight();
 	UINT GetLongitudeImageChannels();
+	void SetTestMode(bool isTestMode) { m_isTestMode = isTestMode; }
+	bool IsTestMode() { return m_isTestMode; }
 
 private:
 	// Main Thread

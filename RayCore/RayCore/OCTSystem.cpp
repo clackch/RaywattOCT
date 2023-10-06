@@ -57,6 +57,7 @@ COCTSystem::COCTSystem() {
 	m_fBrightness = 0.0f;
 	m_fContrast = 0.5f;
 	m_fDegree = 90;
+	m_isTestMode = false;
 }
 
 /*
@@ -229,6 +230,7 @@ RayError COCTSystem::ConnectDevices() {
 		CLaserController* pLaser = CLaserController::GetInstance();
 		pLaser->LaserOnOff(false);
 
+		if (m_isTestMode) result = NOERROR;
 		if (result == NOERROR) {
 			postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Default);
 			return RayError::OK;
@@ -1208,6 +1210,10 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_LOAD);
 		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, 0);
 		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
+	}
+	else if (pSystem->m_isTestMode)
+	{
+		Sleep(config.GetLoadCatheterTime());
 	}
 
 	// 3. Stop BLDC Motor

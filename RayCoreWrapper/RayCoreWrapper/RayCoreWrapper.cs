@@ -40,7 +40,11 @@ namespace RaywattOCT
             ImageDepth,
             LongitudeImageWidth,
             LongitudeImageHeight,
-            LongitudeImageChannels
+            LongitudeImageChannels,
+            PullbackRPM,
+            PullbackDistance,
+            PullbackSpeed,
+            TestMode
         }
 
         public enum RayCallbackRequest : int
