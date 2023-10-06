@@ -26,18 +26,21 @@ namespace RaywattApp.Common.Angio
 
         public AngioManager()
         {
-            Thread clientThread = new Thread(ConnectToServer);
-            clientThread.Start();
+            ConnectToServer();
         }
         private void ConnectToServer()
         {
             // Angio Server On
-            ProcessStartInfo psi = new ProcessStartInfo();
-            Process p = new Process();
-            psi.FileName = Constants.FGFolderPath + "\\FGServer.exe";
-            psi.CreateNoWindow = true;
-            p.StartInfo = psi;
-            p.Start();
+            Process[] processes = Process.GetProcessesByName("FGServer");
+            if(processes.Length == 0)
+            {
+                ProcessStartInfo psi = new ProcessStartInfo();
+                Process p = new Process();
+                psi.FileName = Constants.FGFolderPath + "\\FGServer.exe";
+                psi.CreateNoWindow = true;
+                p.StartInfo = psi;
+                p.Start();
+            }
 
             // Client On
             _tcpClient = new TcpClient(serverIP, serverPort);
