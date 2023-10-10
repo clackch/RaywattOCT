@@ -57,6 +57,9 @@ namespace RaywattApp.Models
         private string? _catheterStatus;
 
         [ObservableProperty]
+        private CathRoom _selectedCathRoom;
+
+        [ObservableProperty]
         private bool _isTestMode = false;
 
         [ObservableProperty]

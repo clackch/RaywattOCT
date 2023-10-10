@@ -869,6 +869,9 @@ Overwrite existing data?</value>
   <data name="sec" xml:space="preserve">
     <value>sec</value>
   </data>
+  <data name="Select Cath Room" xml:space="preserve">
+    <value>Select Cath Room</value>
+  </data>
   <data name="Select Destination Path" xml:space="preserve">
     <value>Select Destination Path</value>
   </data>

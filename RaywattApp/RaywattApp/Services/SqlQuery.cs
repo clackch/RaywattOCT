@@ -176,6 +176,13 @@ namespace RaywattApp.Services
                 FROM rv_schema.patient_case_annotation
                 WHERE id = @id
                 ";
+
+            //SelectCathRoomList
+            _query["SelectCathRoomList"] = @$"
+                SELECT id, name, chp_file, rect_left, rect_top, rect_right, rect_bottom, description, create_date, update_date
+                FROM rv_schema.cath_room
+                ORDER BY name;
+                ";
         }
 
         private static void SetInsertQuery()
