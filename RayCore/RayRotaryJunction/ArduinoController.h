@@ -16,11 +16,12 @@ public:
 	virtual ~CArduinoController();
 
 	virtual bool Open(tstring strPort);
-	virtual bool SetCurrent(StepMotorIndex idx, int nPosition);
 	virtual bool IsMoving();
-	virtual bool MoveAbsolute(StepMotorIndex idx, int nPos);
-	virtual bool MoveRelative(StepMotorIndex idx, int nOffset);
-	virtual bool SetSpeed(StepMotorIndex idx, int nVelocity);
+
+	bool SetCurrent(StepMotorIndex idx, int nPosition);
+	bool MoveAbsolute(StepMotorIndex idx, int nPos);	// forward (load / unload catheter)
+	bool MoveRelative(StepMotorIndex idx, int nOffset);	// pullback
+	bool SetSpeed(StepMotorIndex idx, int nVelocity);
 
 protected:
 	virtual void readResponse();

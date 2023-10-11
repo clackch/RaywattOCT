@@ -2,6 +2,8 @@
 #include "Config.h"
 
 // position: mm, speed: mm/s
+#define DELAYLINE_BACKWARD_POSITION	(-400)
+#define DELAYLINE_FORWARD_POSITION		(400)
 #define DISTANCE_BETWEEN_MOTORS			4
 #define PULLBACK_MOTOR_POS_INITIAL		80
 #define PULLBACK_MOTOR_POS_LOAD			30
@@ -30,11 +32,7 @@ public:
 	virtual ~CStepMotorController();
 
 	virtual bool Open(tstring strPort) = 0;
-	virtual bool SetCurrent(StepMotorIndex idx, int nPosition) = 0;
 	virtual bool IsMoving() = 0;
-	virtual bool MoveAbsolute(StepMotorIndex idx, int nPosition) = 0;	// forward (load / unload catheter)
-	virtual bool MoveRelative(StepMotorIndex idx, int nOffset) = 0;	// pullback
-	virtual bool SetSpeed(StepMotorIndex idx, int nVelocity) = 0;
 
 	bool IsOpen();
 	void Close();
