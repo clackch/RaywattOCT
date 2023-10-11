@@ -8,8 +8,6 @@ private:
 	cv::Mat dematXMap;
 	cv::Mat dematYMap;
 	std::chrono::system_clock::time_point m_start, m_end;
-	int count = 0;
-	int countPost = 0;
 
 public:
 	CTIFFImaging(Setting, CMessageService*);
