@@ -54,8 +54,8 @@ void CTIFFImaging::Process(char* fringes)
 
 	cv::cvtColor(imgTIFF, imageConvert, cv::COLOR_BGRA2GRAY);
 	cv::flip(imageConvert, imageConvert, 0);
-	//Circle to Rect
-	cv::remap(imageConvert, imageConvert, dematXMap, dematYMap, cv::INTER_LINEAR);
+	
+	InverseCircularizeImage(imageConvert, imageConvert);
 
 	std::chrono::milliseconds total_time = std::chrono::duration_cast<std::chrono::milliseconds>(m_end - m_start);
 	long long msec = total_time.count();
@@ -75,4 +75,9 @@ void CTIFFImaging::CircularizeImage(cv::Mat& src, cv::Mat& dst)
 {
 	cv::rotate(src, dst, cv::ROTATE_90_COUNTERCLOCKWISE);
 	cv::remap(dst, dst, matXMap, matYMap, cv::INTER_LINEAR);
+}
+
+void CTIFFImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst)
+{
+	cv::remap(src, dst, dematXMap, dematYMap, cv::INTER_LINEAR);
 }
