@@ -160,11 +160,15 @@ namespace RaywattApp.ViewModels
             sqlParameters["classification"] = "TestMode";
             IList<Configuration> testMode = _sqlManager.SelectConfiguration(sqlParameters);
 
-            //Setting Test Mode
-            if (testMode != null && testMode.Count == 1 && "Y".Equals(testMode[0].Value))
+            foreach(Configuration config in testMode)
             {
-                DeviceStatus.IsTestMode = true;
-                RaySetProperty(Property.TestMode, (DeviceStatus.IsTestMode ? 1.0f : 0.0f));
+                if(String.IsNullOrEmpty(config.Key))
+                    continue;
+
+                DeviceStatus.TestMode.Add(config.Key, "Y".Equals(config.Value) ? true : false);
+
+                if ("RJ".Equals(config.Key))
+                    RaySetProperty(Property.TestMode, "Y".Equals(config.Value) ? 1.0f : 0.0f);
             }
         }
 
@@ -250,11 +254,11 @@ namespace RaywattApp.ViewModels
                 foreach (Process process in processes)
                     process.Kill();
 
-                if (result.DialogAnswer == DialogResults.Answer.Yes && !DeviceStatus.IsTestMode)
+                if (result.DialogAnswer == DialogResults.Answer.Yes && !CommonUtil.IsTestMode(DeviceStatus.TestMode, "Power"))
                 {
                     Win32Helper.Shutdown();
                 }
-                else if (result.DialogAnswer == DialogResults.Answer.Extra && !DeviceStatus.IsTestMode)
+                else if (result.DialogAnswer == DialogResults.Answer.Extra && !CommonUtil.IsTestMode(DeviceStatus.TestMode, "Power"))
                 {
                     Win32Helper.LogOff();
                 }

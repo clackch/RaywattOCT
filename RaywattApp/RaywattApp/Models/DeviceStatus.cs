@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.Collections.Generic;
 using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.Models
@@ -60,7 +61,7 @@ namespace RaywattApp.Models
         private CathRoom _selectedCathRoom;
 
         [ObservableProperty]
-        private bool _isTestMode = false;
+        private Dictionary<string, bool> _testMode = new Dictionary<string, bool>();
 
         [ObservableProperty]
         private ReviewImageInfo[] _reviewImageInfos = new ReviewImageInfo[2];

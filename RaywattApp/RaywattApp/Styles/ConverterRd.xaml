@@ -119,4 +119,7 @@
     <!--  Not Null To Visibility Conveter  -->
     <converters:NotNullToVisibilityConveter x:Key="NotNullToVisibilityConveter" />
 
+    <!--  IsTestMode Converter  -->
+    <converters:IsTestModeConverter x:Key="IsTestModeConverter" />
+
 </ResourceDictionary>

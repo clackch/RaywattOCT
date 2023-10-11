@@ -59,7 +59,7 @@ namespace RaywattApp.ViewModels
                     if (result != null && result.DialogAnswer == DialogResults.Answer.No)
                     {
                         CommonUtil.Exit(DeviceStatus);
-                        if(!DeviceStatus.IsTestMode)
+                        if (!CommonUtil.IsTestMode(DeviceStatus.TestMode, "Power"))
                             Win32Helper.LogOff();
                         return;
                     }
