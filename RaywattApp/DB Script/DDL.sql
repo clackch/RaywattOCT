@@ -213,14 +213,17 @@ ALTER TABLE IF EXISTS rv_schema.dicom_property
 
 CREATE TABLE IF NOT EXISTS rv_schema.cath_room
 (
-    num integer NOT NULL,
+    id serial NOT NULL,
     name character varying(50) COLLATE pg_catalog."default",
     chp_file character varying(200) COLLATE pg_catalog."default",
     rect_left real,
     rect_top real,
     rect_right real,
     rect_bottom real,
-    CONSTRAINT cath_room_pkey PRIMARY KEY (num)
+    description character varying(200) COLLATE pg_catalog."default",
+    create_date timestamp without time zone,
+    update_date timestamp without time zone,
+    CONSTRAINT cath_room_pkey PRIMARY KEY (id)
         USING INDEX TABLESPACE rv_tablespace
 )
 

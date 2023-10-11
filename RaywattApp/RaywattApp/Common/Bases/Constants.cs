@@ -82,6 +82,8 @@ namespace RaywattApp.Common.Bases
         public const double TermsConditionsDialogHeight = 660;
         public const double PowerOffDialogWidth = 472;
         public const double PowerOffDialogHeight = 269;
+        public const double CathRoomDialogHeight = 472;
+        public const double CathRoomDialogWidth = 472;
 
         //Max Length
         public const int MaxPatientId = 9;

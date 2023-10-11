@@ -1481,5 +1481,13 @@ namespace RaywattApp.Common.Util
             BitmapSource bitmap = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgCalcium);
             return bitmap;
         }
+
+        public static bool IsTestMode(Dictionary<string, bool> testMode, string key)
+        {
+            if (!testMode.ContainsKey(key))
+                return false;
+
+            return testMode[key];
+        }
     }
 }
