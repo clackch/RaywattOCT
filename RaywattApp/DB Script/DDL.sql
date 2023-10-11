@@ -213,7 +213,7 @@ ALTER TABLE IF EXISTS rv_schema.dicom_property
 
 CREATE TABLE IF NOT EXISTS rv_schema.cath_room
 (
-    id integer NOT NULL,
+    id serial NOT NULL,
     name character varying(50) COLLATE pg_catalog."default",
     chp_file character varying(200) COLLATE pg_catalog."default",
     rect_left real,
