@@ -460,11 +460,6 @@ namespace RaywattApp.ViewModels
 
             LumenContourProcess(frame);
 
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                DrawLumenProfile(frame);
-            });
-
             if (ReviewStatus.NumberOfFrames - 1 == frame)
             {
                 //TODO - ML detection에서 Calcium/Sidebranch 가져오도록 개발되면 삭제 필요
@@ -482,6 +477,13 @@ namespace RaywattApp.ViewModels
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     UpdateLumenProfile();
+                });
+            }
+            else
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    DrawLumenProfile(frame);
                 });
             }
         }
