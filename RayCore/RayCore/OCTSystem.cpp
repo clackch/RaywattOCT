@@ -230,7 +230,18 @@ RayError COCTSystem::ConnectDevices() {
 		CLaserController* pLaser = CLaserController::GetInstance();
 		pLaser->LaserOnOff(false);
 
-		if (m_isTestMode) result = NOERROR;
+		if (m_isTestMode) {
+			CMotorController *pMotor = CMotorController::GetInstance();
+			if (pMotor->IsConnected() == false)
+			{
+				delete pMotor;
+				CMotorControllerStub* pMotorStub = new CMotorControllerStub();
+				pMotorStub->EnableStub();
+			}
+
+			result = NOERROR;
+		}
+
 		if (result == NOERROR) {
 			postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Default);
 			return RayError::OK;
@@ -1636,14 +1647,18 @@ LRESULT COCTSystem::OnMsgUpdateCatheterState(WPARAM wParam, LPARAM lParam) {
 
 	switch (m_cathState) {
 	case CatheterState::Unloaded:
+		PLOGI.printf("Catheter - Unloaded.");
 		postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::UnloadCatheter);
 		break;
 	case CatheterState::Loaded:
+		PLOGI.printf("Catheter - Loaded.");
 		CUtility::StartThread(threadValidateCatheter, m_pThreadRotaryJunction, this);
 		break;
 	case CatheterState::Enable:
+		PLOGI.printf("Catheter - Enable.");
 		break;
 	case CatheterState::Calibrated:
+		PLOGI.printf("Catheter - Calibrated.");
 		break;
 	default:
 		break;
