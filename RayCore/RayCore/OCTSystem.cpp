@@ -1581,7 +1581,7 @@ void COCTSystem::redrawCutView() {
 			int nFrames = pCutView->GetNumOfGeneratedSamples();
 			if (nFrames > 0) {
 				int nCurFrame = nFrames - 1;
-				this->postMessage(WM_PROCESS_CUTVIEW, m_curSession, nCurFrame);
+				this->postPriorMessage(WM_PROCESS_CUTVIEW, m_curSession, nCurFrame);
 			}
 		}
 	}
