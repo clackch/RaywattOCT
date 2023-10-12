@@ -319,6 +319,7 @@ RayError COCTSystem::ReadyPullback()
 
 		restartAcqDevice(m_pImagingPullback);
 
+		m_pPullbackMotor->SetSpeed(StepMotorIndex::Both, config.stepMotor.pullbackSpeed);
 		m_pLaserModule->SetVLD(VISIBLE_LASER_POWER);
 		pLaser->LaserOnOff(true);
 		pMotorCtrl->PerformRun(config.bldcMotor.velocityPullback);
@@ -1126,8 +1127,11 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	CMotorController* pMotor = CMotorController::GetInstance();
 	CStepMotorController* pPullbackMotor = pSystem->m_pPullbackMotor;
 	IImaging::Setting settingPullback = pSystem->m_pImagingPullback->GetSetting();
+	int pullbackTime = ((double)config.stepMotor.pullbackDistance / (double)config.stepMotor.pullbackSpeed) * 1000;
 
-	PLOGI.printf("Pullback start.");
+	PLOGI.printf("Pullback start - %dmm, %dmm/s - %dsec", config.stepMotor.pullbackDistance, config.stepMotor.pullbackSpeed, pullbackTime);
+
+	// 1. Start Recording OCT
 	CDataWriter* pDataWriter = new CDataWriter();
 	pDataWriter->Initialize(settingPullback.nBufferSize * sizeof(USHORT));
 	pDataWriter->AddExtraData(OCTHeader::ExtraData::Dispersion, pSystem->m_pImagingPullback->GetCalibrationData(), settingPullback.nAScan * 2 * sizeof(int));
@@ -1136,19 +1140,10 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 		pDataWriter->AddExtraData(OCTHeader::ExtraData::Background, 
 			((CLabImaging*)pSystem->m_pImagingPullback)->GetBackground(), settingPullback.nBufferSize * sizeof(USHORT));
 	}
-
-	pSystem->m_pAcqDevice->SetWriter(pDataWriter);
-	pSystem->restartAcqDevice(pSystem->m_pImagingPullback);
-	pPullbackMotor->SetSpeed(StepMotorIndex::Both, config.stepMotor.pullbackSpeed);
-
-	// 1. Motor ON
-	int nVelocity = config.bldcMotor.velocityPullback;
-	pMotor->PerformRun(nVelocity);
-
-	// 2. Start Recording OCT
 	pDataWriter->StartRecording();
+	pSystem->m_pAcqDevice->SetWriter(pDataWriter);
 
-	// 3. Pullback Linear Stage
+	// 2. Pullback Linear Stage
 	if (pPullbackMotor->IsOpen()) {		
 		pPullbackMotor->MoveAbsolute(StepMotorIndex::Both, config.stepMotor.pullbackDistance);
 		while (pSystem->m_pThreadRotaryJunction->isRun) {
@@ -1161,14 +1156,14 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 		}
 	}
 	else {
-		Sleep(3000);
+		Sleep(pullbackTime);
 	}
 
-	// 4. Stop Recording OCT
+	// 3. Stop Recording OCT
 	pDataWriter->StopRecording();
 	pSystem->m_pAcqDevice->SetWriter(nullptr);
 
-	// 5. Motor OFF
+	// 4. Motor OFF
 	Sleep(500);
 	pMotor->StopMotor();
 
