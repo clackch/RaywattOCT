@@ -12,7 +12,7 @@
 #include "MotorController.h"
 #include "ZaberController.h"
 #include "ArduinoController.h"
-#include "RayLearning.h"
+#include "IRayLearning.h"
 #include "ImagingSession.h"
 #include "LaserModule.h"
 #include "LookUpTable.h"
@@ -893,9 +893,9 @@ UINT COCTSystem::threadService(LPVOID param) {
 
 	// Initialize (first prediction)
 	cv::Mat imgSample = cv::imread(".\\oct_sample.png");
-	CRayLearning& learning = CRayLearning::GetInstance();
-	learning.Initialize(true);
-	learning.FindLumen(imgSample);
+	IRayLearning* learning = IRayLearning::GetInstance();
+	learning->Initialize(true);
+	learning->FindLumen(imgSample);
 
 	PLOGI.printf("sample lumen detection done.");
 

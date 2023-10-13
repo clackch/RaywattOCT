@@ -149,7 +149,7 @@ xcopy "$(SolutionDir)extern\libtorch\model\*.pt" "$(ProjectDir)..\..\RaywattApp\
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\Utility;..\lib\include;..\extern\opencv\include;..\extern\ATS\include;..\extern\ipp\include;..\extern\libusb\include\libusb-1.0;..\extern\libtorch\include;..\extern\libtorch\include\torch\csrc\api\include;..\extern\libtiff\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Utility;..\lib\include;..\extern\opencv\include;..\extern\ATS\include;..\extern\ipp\include;..\extern\libusb\include\libusb-1.0;..\extern\libtorch\include;..\extern\libtorch\include\torch\csrc\api\include;..\extern\libtiff\include;..\extern\libTensorflow\include</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
@@ -166,8 +166,12 @@ xcopy "$(TargetDir)CALIBRATION.dat" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bi
 xcopy "$(TargetDir)BACKGROUND.bin" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(TargetDir)LUT.csv" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(TargetDir)RayCore.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
+xcopy "$(SolutionDir)extern\libtorch\model\*.pt" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y
+xcopy "$(SolutionDir)extern\libtorch\lib\release\*.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y
 xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
-xcopy "$(SolutionDir)extern\libtorch\model\*.pt" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y</Command>
+xcopy "$(SolutionDir)extern\libTensorflow\model\*" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /E /y
+xcopy "$(SolutionDir)extern\libTensorflow\lib\*.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y
+xcopy "$(SolutionDir)extern\libTensorflow\sample\*.png" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

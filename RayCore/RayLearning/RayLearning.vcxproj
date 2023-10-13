@@ -141,7 +141,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\Utility;..\extern\opencv\include;..\extern\libtorch\include;..\extern\libtorch\include\torch\csrc\api\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Utility;..\extern\opencv\include;..\extern\libtorch\include;..\extern\libtorch\include\torch\csrc\api\include;..\extern\libTensorflow\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -155,11 +155,15 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="RayLearning.cpp" />
+    <ClCompile Include="IRayLearning.cpp" />
+    <ClCompile Include="RayTensorflow.cpp" />
+    <ClCompile Include="RayPytorch.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CompNet.h" />
-    <ClInclude Include="RayLearning.h" />
+    <ClInclude Include="IRayLearning.h" />
+    <ClInclude Include="RayTensorflow.h" />
+    <ClInclude Include="RayPytorch.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
