@@ -195,6 +195,22 @@
                             <!-- Cross-Section Indicator -->
                             <Grid Width="480" Height="480" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding IndicatorLongitude.IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <!-- Indicator  -->
+                                <Grid>
+                                    <Grid.Style>
+                                        <Style TargetType="Grid">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ElementName=crossSectionAngioIndicator,Path=IsMouseOver}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding ElementName=crossSectionAngioIndicator,Path=IsCaptured}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Grid.Style>
+                                    <ContentControl Template="{DynamicResource IndicatorScale}" Width="455" Height="18" Tag="{x:Static const:Constants.CrossSectionAngio}"/>
+                                </Grid>
                                 <component:IndicatorImage Style="{DynamicResource IndicatorImage}" x:Name="crossSectionAngioIndicator" Width="480" Height="14" Icon="crossSection" IsCaptured="{Binding IndicatorCrossSectionAngio.IsCaptured}" Visibility="{Binding IndicatorCrossSectionAngio.IsVisible}">
                                     <Image.RenderTransform>
                                         <RotateTransform CenterX="240" CenterY="7" Angle="{Binding Degree}"/>
@@ -212,22 +228,6 @@
                                         </i:EventTrigger>
                                     </i:Interaction.Triggers>
                                 </component:IndicatorImage>
-                                <Grid>
-                                    <Grid.Style>
-                                        <Style TargetType="Grid">
-                                            <Setter Property="Visibility" Value="Collapsed" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding ElementName=crossSectionAngioIndicator,Path=IsMouseOver}" Value="True">
-                                                    <Setter Property="Visibility" Value="Visible" />
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding ElementName=crossSectionAngioIndicator,Path=IsCaptured}" Value="True">
-                                                    <Setter Property="Visibility" Value="Visible" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Grid.Style>
-                                    <ContentControl Template="{DynamicResource IndicatorScale}" Width="455" Height="18" Tag="{x:Static const:Constants.CrossSectionAngio}"/>
-                                </Grid>
                             </Grid>
                         </Grid>
                     </Grid>
@@ -312,7 +312,9 @@
                                                 <Label Grid.Row="0" Grid.Column="0" Content="{Binding [Auto], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" VerticalAlignment="Center"/>
                                                 <ToggleButton Style="{DynamicResource IconToggleBtn-Large}" IsChecked="{Binding ReviewStatus.IsContourStentOn, Mode=OneWay}" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Command="{Binding ToggleContourStentCommand}"/>
                                                 <Label Grid.Row="1" Grid.Column="0" Content="{Binding [Manual], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" VerticalAlignment="Center" Margin="0,-4,0,0"/>
-                                                <ToggleButton Style="{DynamicResource IconToggleBtn-Large}" IsChecked="{Binding ReviewStatus.IsMeasurementOn, Mode=OneWay}" IsEnabled="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource InverseBooleanConverter}}" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Command="{Binding ToggleMeasurementCommand}" Margin="0,-4,0,0"/>
+                                                <StackPanel IsEnabled="{Binding DeviceStatus.IsOCTImagingDone}" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Margin="0,-4,0,0">
+                                                    <ToggleButton Style="{DynamicResource IconToggleBtn-Large}" IsChecked="{Binding ReviewStatus.IsMeasurementOn, Mode=OneWay}" IsEnabled="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource InverseBooleanConverter}}" Command="{Binding ToggleMeasurementCommand}"/>
+                                                </StackPanel>
                                             </Grid>
                                         </Grid>
                                         <Separator Grid.Row="6" Margin="0,0,0,0" Background="{DynamicResource SeparatorBrush}"/>
@@ -820,6 +822,22 @@
                 <!-- Indicator  -->
                 <Grid Grid.Row="1" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                     <Grid Visibility="{Binding IndicatorLongitude.IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Grid>
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=crossSectionIndicator,Path=IsMouseOver}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding ElementName=crossSectionIndicator,Path=IsCaptured}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                            <ContentControl Template="{DynamicResource IndicatorScale}" Width="600" Height="18" Tag="{x:Static const:Constants.CrossSectionSize}"/>
+                        </Grid>
                         <component:IndicatorImage Style="{DynamicResource IndicatorImage}" x:Name="crossSectionIndicator" Height="18" Icon="crossSection" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Visibility="{Binding IndicatorCrossSection.IsVisible}">
                             <Image.RenderTransform>
                                 <RotateTransform CenterX="316" CenterY="9" Angle="{Binding Degree}"/>
@@ -837,22 +855,6 @@
                                 </i:EventTrigger>
                             </i:Interaction.Triggers>
                         </component:IndicatorImage>
-                        <Grid>
-                            <Grid.Style>
-                                <Style TargetType="Grid">
-                                    <Setter Property="Visibility" Value="Collapsed" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ElementName=crossSectionIndicator,Path=IsMouseOver}" Value="True">
-                                            <Setter Property="Visibility" Value="Visible" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding ElementName=crossSectionIndicator,Path=IsCaptured}" Value="True">
-                                            <Setter Property="Visibility" Value="Visible" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Grid.Style>
-                            <ContentControl Template="{DynamicResource IndicatorScale}" Width="600" Height="18" Tag="{x:Static const:Constants.CrossSectionSize}"/>
-                        </Grid>
                     </Grid>
                 </Grid>
 
@@ -1050,6 +1052,9 @@
                                 <Grid Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityConverter}}">
                                     <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding DeviceStatus.IsLumenLoaded, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
                                 </Grid>
+                                <Grid Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding DeviceStatus.IsLumenSaved, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                                </Grid>
 
                                 <!-- Lesion Section -->
                                 <Canvas Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -1161,7 +1166,7 @@
 
                                 <!-- Measurement -->
                                 <Grid>
-                                    <annotation:DrawLmodeUtil Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" LModeLengthGeometries="{Binding LModeLengthGeometries}" LModeTextGeometries="{Binding LModeTextGeometries}" LModeIndicatorX="{Binding LModeIndicatorX, Mode=TwoWay}" CommandOff="{Binding MeasurementCommandOff, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorLongitude.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorLongitude.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" PullbackLength="{Binding PatientCase.PullbackLength}"/>
+                                    <annotation:DrawLmodeUtil Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" LModeLengthGeometries="{Binding LModeLengthGeometries}" LModeTextGeometries="{Binding LModeTextGeometries}" LModeIndicatorX="{Binding LModeIndicatorX, Mode=TwoWay}" CommandOff="{Binding MeasurementCommandOff, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorLongitude.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorLongitude.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" PullbackLength="{Binding PatientCase.PullbackLength}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}"/>
                                 </Grid>
                             </Grid>
 

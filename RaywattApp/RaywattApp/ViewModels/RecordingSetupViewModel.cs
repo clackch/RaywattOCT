@@ -9,7 +9,6 @@ using System.Windows.Input;
 using System.Windows.Navigation;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
-using static RaywattOCT.RayCoreWrapper;
 using System.Windows.Threading;
 
 namespace RaywattApp.ViewModels
@@ -55,11 +54,7 @@ namespace RaywattApp.ViewModels
                 this.Patient = (Patient)data["patient"];
                 this.PrevStatus = (PrevStatus)data["prevStatus"];
 
-                if (DeviceStatus.CatheterStatus != Constants.CatheterStatusLoaded)
-                {
-                    RayLoadCatheter();
-                }
-                else
+                if (DeviceStatus.CatheterStatus == Constants.CatheterStatusLoaded)
                 {
                     Next();
                 }

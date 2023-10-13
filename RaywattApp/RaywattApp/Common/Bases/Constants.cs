@@ -80,6 +80,10 @@ namespace RaywattApp.Common.Bases
         public const double PatientCaseEditDialogHeight = 734;
         public const double TermsConditionsDialogWidth = 860;
         public const double TermsConditionsDialogHeight = 660;
+        public const double PowerOffDialogWidth = 472;
+        public const double PowerOffDialogHeight = 269;
+        public const double CathRoomDialogHeight = 472;
+        public const double CathRoomDialogWidth = 472;
 
         //Max Length
         public const int MaxPatientId = 9;
@@ -158,6 +162,8 @@ namespace RaywattApp.Common.Bases
         public const string FileNamePrefix = "Export_";
 
         //Export Layout
+        public const double ExportHeight = 1080;
+        public const double ExportWidth = 1920;
         public const double ExportCrossSectionBig = 1080;
         public const double ExportCrossSectionSmall = 677;
         public const double ExportCrossSectionImageBig = 965;
@@ -169,9 +175,13 @@ namespace RaywattApp.Common.Bases
         public const double ExportAngioSize = 677;
         public const double ExportTextPartSize = 566;
         public const double ExportLongitudeIndicatorWidth = 12;
+        public const double CalciumIndicatorExportSizeBig = 989;
         public const double CalciumIndicatorExportSize = 630;
+        public const double CalciumThicknessIndicatorExportSizeBig = 1005;
         public const double CalciumThicknessIndicatorExportSize = 644;
+        public const double CalciumThicknessIndicatorCenterExportBig = CalciumThicknessIndicatorExportSizeBig / 2;
         public const double CalciumThicknessIndicatorCenterExport = CalciumThicknessIndicatorExportSize / 2;
+        public static System.Windows.Point CalciumThicknessIndicatorPointCenterExportBig = new System.Windows.Point(CalciumThicknessIndicatorCenterExportBig, CalciumThicknessIndicatorCenterExportBig);
         public static System.Windows.Point CalciumThicknessIndicatorPointCenterExport = new System.Windows.Point(CalciumThicknessIndicatorCenterExport, CalciumThicknessIndicatorCenterExport);
 
         //File Icon
@@ -226,6 +236,9 @@ namespace RaywattApp.Common.Bases
         //Log Folder
         public const string LogFolderPath = SystemRootPath + "\\Raywatt\\log";
         public const string LogExtension = "*.log";
+
+        //FrameGrabber Folder
+        public const string FGFolderPath = SystemRootPath + "\\Raywatt\\FrameGrabber";
 
         //Encrypt, Decrypt Public Key
         public const string PublicKey = "raywatt07_hwjckklls_298-87-01441";
@@ -355,11 +368,10 @@ namespace RaywattApp.Common.Bases
 
         //Catheter Status
         public const string CatheterStatusConnected = "Connected";
-        public const string CatheterStatusLocked = "Locked";
+        public const string CatheterStatusLoading = "Loading";
         public const string CatheterStatusLoaded = "Loaded";
         public const string CatheterStatusFailed = "Failed";
-        public const string CatheterStatusUnlocked = "Unlocked";
-        public const string CatheterStatusUnloaded = "Unloaded";
+        public const string CatheterStatusUnloading = "Unloading";
         public const string CatheterStatusDisconnected = "Disconnected";
 
         //Measurement Type
@@ -395,5 +407,10 @@ namespace RaywattApp.Common.Bases
         //Recording
         public const int TransientTime = 3000;
         public const int StartTime = 15;
+
+        //AngioClient
+        public const int imageHeaderSize = 7;
+        public const int imageTailSize = 2;
+        public const int commandPacketSize = 5;
     }
 }

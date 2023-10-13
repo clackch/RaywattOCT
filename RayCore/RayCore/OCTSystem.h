@@ -23,6 +23,7 @@ class COCTImaging;
 class CVolumeGenerator;
 class IRayLearning;
 class CImagingSession;
+class CLaserModule;
 class COCTSystem : public CMessageService
 {
 private:
@@ -30,6 +31,8 @@ private:
 		Unloaded = 0,
 		Loaded,
 		Enable,
+		FindingSheath,
+		FindingPeak,
 		Calibrated
 	};
 
@@ -63,7 +66,11 @@ private:
 	CImagingSession* m_openedSession;
 
 	// Rotary Junction
-	CStepMotorController* m_pStepMotor[STEP_MOTOR_NUM];
+	CStepMotorController* m_pPullbackMotor;
+
+	// Laser Module
+	CLaserModule* m_pLaserModule;
+	std::vector<std::pair<int, int>> m_vCalibrationInfo;
 
 	RayScannerState m_prevState;
 	RayScannerState m_curState;
@@ -74,6 +81,7 @@ private:
 	double m_fContrast;
 	double m_fDegree;
 	cv::Scalar m_backgroundColor;	// for longitude image
+	bool m_isTestMode;
 
 public:
 	COCTSystem();
@@ -132,6 +140,8 @@ public:
 	UINT GetLongitudeImageWidth();
 	UINT GetLongitudeImageHeight();
 	UINT GetLongitudeImageChannels();
+	void SetTestMode(bool isTestMode) { m_isTestMode = isTestMode; }
+	bool IsTestMode() { return m_isTestMode; }
 
 private:
 	// Main Thread

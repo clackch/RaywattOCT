@@ -439,6 +439,18 @@ namespace RaywattApp.Services
         }
 
         /**
+         * Cath Room
+         */
+        public IList<CathRoom> SelectCathRoomList()
+        {
+            _log.Debug("SelectCathRoomList");
+
+            string commandText = SqlQuery.GetQuery("SelectCathRoomList");
+
+            return _databaseService.GetDatas<CathRoom>(commandText);
+        }
+
+        /**
          * Extra
          */
         private string getAdditionalCondition(Dictionary<string, Object> sqlAdditionalCondition)

@@ -34,28 +34,32 @@
                     <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="power" Margin="0,9,12,9" Command="{Binding ExitCommand}" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
                 </StackPanel>
             </Grid>
-            <StackPanel Grid.Row="2" Orientation="Horizontal">
+            <Grid Grid.Row="2">
                 <Image Style="{DynamicResource RaywattSmall_Icon}"/>
-                <StackPanel MinWidth="130" Margin="25,0,0,0" VerticalAlignment="Center" Orientation="Horizontal" Visibility="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusLocked}}">
+                <StackPanel Margin="130,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" Orientation="Horizontal">
+                    <component:IconButton Style="{DynamicResource IconButton}" Icon="angioIndicator" Margin="0" Command="{Binding AngioIndicatorCommand}" IsEnabled="{Binding DeviceStatus.IsAngioConnected, Converter={StaticResource BoolToEnableConverter}}"/>
+                    <component:IconButton Style="{DynamicResource IconButton}" Icon="catheterIndicator" Margin="6,0,0,0" Command="{Binding CatheterIndicatorCommand}" IsEnabled="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusLoaded}}"/>
+                </StackPanel>
+                <StackPanel MinWidth="130" VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal" Visibility="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusLoading}}">
                     <ProgressBar Style="{DynamicResource HomeCatheterProgressBar}" Value="{Binding CatheterProgress}" Width="72" Height="20" Visibility="{Binding IsHome, Converter={StaticResource BoolToVisibilityConverter}}"/>
                     <ProgressBar Style="{DynamicResource CatheterProgressBar}" Value="{Binding CatheterProgress}" Width="72" Height="20" Visibility="{Binding IsHome, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
                     <StackPanel Width="8"/>
                     <Label Style="{DynamicResource Pretendard-Medium-14}" MinWidth="52" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [Loading], Source={StaticResource L10N}}"/>
                 </StackPanel>
-                <StackPanel MinWidth="130" Margin="25,0,0,0" VerticalAlignment="Center" Orientation="Horizontal" Visibility="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusUnlocked}}">
+                <StackPanel MinWidth="130" VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal" Visibility="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusUnloading}}">
                     <ProgressBar Style="{DynamicResource HomeCatheterProgressBar}" Value="{Binding CatheterProgress}" Width="72" Height="20" Visibility="{Binding IsHome, Converter={StaticResource BoolToVisibilityConverter}}"/>
                     <ProgressBar Style="{DynamicResource CatheterProgressBar}" Value="{Binding CatheterProgress}" Width="72" Height="20" Visibility="{Binding IsHome, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
                     <StackPanel Width="8"/>
-                    <Label Style="{DynamicResource Pretendard-Medium-14}" MinWidth="52" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [Loading], Source={StaticResource L10N}}"/>
+                    <Label Style="{DynamicResource Pretendard-Medium-14}" MinWidth="52" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [Unloading], Source={StaticResource L10N}}"/>
                 </StackPanel>
-                <StackPanel VerticalAlignment="Center" Margin="200,0,0,0">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" Margin="200,0,0,0" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=RJ}">
                     <Button Style="{DynamicResource BtnForTest}" Command="{Binding CatheterFailTestCommmand}" Width="100" Height="15" FontSize="9" Content="Catheter Fail"/>
                     <Button Style="{DynamicResource BtnForTest}" Command="{Binding CatheterUnlockTestCommmand}" Width="100" Height="15" FontSize="9" Content="Unlock Catheter"/>
                 </StackPanel>
-                <StackPanel VerticalAlignment="Center" Margin="10,0,0,0">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" Margin="310,0,0,0" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=RJ}">
                     <Button Style="{DynamicResource BtnForTest}" Command="{Binding CatheterConnectTestCommmand}" Width="100" Height="15" FontSize="9" Content="Catheter Connect"/>
                 </StackPanel>
-            </StackPanel>
+            </Grid>
 
             <component:MenuUnableComponent Grid.Row="0" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}">
                 <component:MenuUnableComponent.Visibility>

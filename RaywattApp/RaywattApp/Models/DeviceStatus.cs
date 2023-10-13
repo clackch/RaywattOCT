@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.Collections.Generic;
 using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.Models
@@ -15,7 +16,10 @@ namespace RaywattApp.Models
         };
 
         [ObservableProperty]
-        private bool _isInitialized = false;
+        private bool _isDeviceConnected = false;
+
+        [ObservableProperty]
+        private bool _isServiceStarted = false;
 
         [ObservableProperty]
         private bool _isLiveView = false;
@@ -52,6 +56,12 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private string? _catheterStatus;
+
+        [ObservableProperty]
+        private CathRoom _selectedCathRoom;
+
+        [ObservableProperty]
+        private Dictionary<string, bool> _testMode = new Dictionary<string, bool>();
 
         [ObservableProperty]
         private ReviewImageInfo[] _reviewImageInfos = new ReviewImageInfo[2];

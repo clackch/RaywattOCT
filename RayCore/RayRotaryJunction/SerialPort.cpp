@@ -113,14 +113,13 @@ bool CSerialPort::ReadByte(BYTE &resp) {
 	return false; 
 } 
 
-bool CSerialPort::ReadByte(BYTE* &resp, UINT size) {  
+int CSerialPort::ReadByte(BYTE* &resp, UINT size) {  
 	DWORD dwBytesTransferred = 0;    
 	if (ReadFile(m_hComm, resp, size, &dwBytesTransferred, 0)) 
 	{      
-		if (dwBytesTransferred == size)        
-			return true;  
+		return dwBytesTransferred;
 	}     
-	return false;
+	return 0;
 }    
 
 void CSerialPort::ClosePort() { 

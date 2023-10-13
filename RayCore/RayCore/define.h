@@ -41,7 +41,11 @@ enum class RayProperty {
 	ImageDepth,
 	LongitudeImageWidth,
 	LongitudeImageHeight,
-	LongitudeImageChannels
+	LongitudeImageChannels,
+	PullbackRPM,
+	PullbackDistance,
+	PullbackSpeed,
+	TestMode
 };
 
 enum class RayCallbackRequest {
@@ -62,11 +66,14 @@ enum class RayScannerState {
 
 enum class RayEvent {
 	Unknown = 0,
+	CatheterConnected,
 	CatheterLoading,
+	CatheterUnloading,
 };
 
 enum class RayWorkItem {
 	Unknown = 0,
+	StartService,
 	SaveRawData,
 	OCTImaging,
 	GenerateCutView,

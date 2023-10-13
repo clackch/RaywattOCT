@@ -84,8 +84,10 @@ public:
 	Setting GetSetting() { return m_setting; }
 	void GetFrameInfo(int& nCurFrame, int& nTotalFrame) { nCurFrame = m_nCurFrame; nTotalFrame = m_nTotalFrame; }
 	void* GetCalibrationData();
-	void CircularizeImage(cv::Mat& src, cv::Mat& dst);
+	int GetFoundSheathPosition() { return m_nSheathPosition; }
+	virtual void CircularizeImage(cv::Mat& src, cv::Mat& dst);
 
+	int GetSheathPosition() { return m_nSheathPosition; }
 protected:
 	void allocateMemory();
 	void releaseMemory();
@@ -97,7 +99,6 @@ protected:
 	void computeLogarithm(Ipp32f* src, Ipp32f* dst);
 	void generateImage(Ipp32f* logaritihmData, bool bInvert);
 	void findSheath(Ipp32f* logaritihmData);
-	void applyHotColor(cv::Mat& image);
 	void drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color);
 
 	static UINT threadRender(LPVOID param);

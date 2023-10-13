@@ -5,6 +5,8 @@ INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES (
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Terms&Cond', 'AgreeYN', 'N', '');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Present', 'brightness', '0', '');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Present', 'contrast', '39', '');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'Power', 'N', '');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'RJ', 'N', '');
 
 -- rv_schema.code
 DELETE FROM rv_schema.code;

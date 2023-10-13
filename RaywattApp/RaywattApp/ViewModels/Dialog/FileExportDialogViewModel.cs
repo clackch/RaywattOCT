@@ -99,6 +99,9 @@ namespace RaywattApp.ViewModels.Dialog
         public List<LumenContour> LumenContours { get { return _lumenContours; } set { _lumenContours = value; OnPropertyChanged(nameof(LumenContours)); } }
 
         [ObservableProperty]
+        private double _ImagePartWidth;
+
+        [ObservableProperty]
         private double _crossSectionPartWidth;
 
         [ObservableProperty]
@@ -137,6 +140,19 @@ namespace RaywattApp.ViewModels.Dialog
         [ObservableProperty]
         private BitmapSource _lumenProfileImageExtra;
 
+        [ObservableProperty]
+        private double _calciumIndicatorSize;
+
+        [ObservableProperty]
+        private double _calciumThicknessIndicatorSize;
+
+        [ObservableProperty]
+        private double _calciumThicknessIndicatorCenter;
+
+        [ObservableProperty]
+        private System.Windows.Point _calciumThicknessIndicatorPointCenter;
+
+
         public FileExportDialogViewModel(SqlManager sqlManager)
         {
             _sqlManager = sqlManager;
@@ -145,6 +161,7 @@ namespace RaywattApp.ViewModels.Dialog
             IndicatorLongitude.X = Constants.ExportLongitudeIndicatorWidth / 2;
             IndicatorLongitude.IsVisible = Visibility.Visible;
 
+            ImagePartWidth = Constants.ExportLongitudeWidth;
             TextPartWidth = 0;
             MeasureSeparator = Visibility.Collapsed;
 
@@ -192,15 +209,19 @@ namespace RaywattApp.ViewModels.Dialog
                     List<int> colorFrames = new List<int>();
                     if (CommonUtil.IsPreCase(patientCase.Procedure))
                     {
-                        Section.SetMlaMld(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength);
-                        Section.VisibleMlaMld(true);
+                        if(Section.SetMlaMld(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength))
+                            Section.VisibleMlaMld(true);
+                        else
+                            Section.VisibleMlaMld(false);
 
                         colorFrames = CommonUtil.GetCalciumList(LumenContours, patientCase.CalciumThreshold);
                     }
                     else
                     {
-                        Section.SetMsaMinExp(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength);
-                        Section.VislbleMsaMinExp(true);
+                        if(Section.SetMsaMinExp(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength))
+                            Section.VislbleMsaMinExp(true);
+                        else
+                            Section.VislbleMsaMinExp(false);
 
                         colorFrames = CommonUtil.GetExpansionList(LumenContours, frameProximal, frameDistal, Section.RefArea, PatientCase.ExpansionThreshold);
                     }
@@ -213,6 +234,7 @@ namespace RaywattApp.ViewModels.Dialog
             }
             else
             {
+                ImagePartWidth = Constants.ExportCrossSectionBig;
                 CrossSectionPartWidth = Constants.ExportCrossSectionBig;
                 CrossSectionSize = Constants.ExportCrossSectionBig;
                 CrossSectionImageSize = Constants.ExportCrossSectionBig;
@@ -223,8 +245,11 @@ namespace RaywattApp.ViewModels.Dialog
 
             if (fileExport.MeasureAuto || fileExport.MeasureManual)
             {
-                if(CrossSectionPartWidth == Constants.ExportCrossSectionBig)
+                if (CrossSectionPartWidth == Constants.ExportCrossSectionBig)
+                {
+                    ImagePartWidth = Constants.ExportLongitudeWidth;
                     CrossSectionPartWidth = Constants.ExportLongitudeWidth;
+                }
                 TextPartWidth = Constants.ExportTextPartSize;
 
                 if (fileExport.MeasureManual)
@@ -233,6 +258,25 @@ namespace RaywattApp.ViewModels.Dialog
 
             if(fileExport.MeasureAuto && fileExport.MeasureManual)
                 MeasureSeparator = Visibility.Visible;
+
+            //for Calcium
+            if (CommonUtil.IsPreCase(PatientCase.Procedure))
+            {
+                if (FileExport.Longitude || FileExport.AngioView)
+                {
+                    CalciumIndicatorSize = Constants.CalciumIndicatorExportSize;
+                    CalciumThicknessIndicatorSize = Constants.CalciumThicknessIndicatorExportSize;
+                    CalciumThicknessIndicatorCenter = Constants.CalciumThicknessIndicatorCenterExport;
+                    CalciumThicknessIndicatorPointCenter = Constants.CalciumThicknessIndicatorPointCenterExport;
+                }
+                else if (FileExport.MeasureAuto)
+                {
+                    CalciumIndicatorSize = Constants.CalciumIndicatorExportSizeBig;
+                    CalciumThicknessIndicatorSize = Constants.CalciumThicknessIndicatorExportSizeBig;
+                    CalciumThicknessIndicatorCenter = Constants.CalciumThicknessIndicatorCenterExportBig;
+                    CalciumThicknessIndicatorPointCenter = Constants.CalciumThicknessIndicatorPointCenterExportBig;
+                }
+            }
 
             Zoom = new Zoom(CrossSectionImageSize / Constants.OCTImageSize);
             LongitudeZoom = new Zoom();
@@ -252,7 +296,17 @@ namespace RaywattApp.ViewModels.Dialog
             FrameNumber = frameNumber;
             DisplayFrameNumber = frameNumber + 1;
 
-            DrawCalciumIndicator();
+            if (CommonUtil.IsPreCase(PatientCase.Procedure))
+            {
+                if (FileExport.Longitude)
+                {
+                    DrawCalciumIndicator((int)Constants.CalciumIndicatorExportSize);
+                }
+                else if (FileExport.MeasureAuto)
+                {
+                    DrawCalciumIndicator((int)Constants.CalciumIndicatorExportSizeBig);
+                }
+            }
 
             if (FileExport.MeasureAuto)
                 MeasureAutoFrameNumber = frameNumber;
@@ -360,9 +414,9 @@ namespace RaywattApp.ViewModels.Dialog
             return true;
         }
 
-        private void DrawCalciumIndicator()
+        private void DrawCalciumIndicator(int calciumIndicatorSize)
         {
-            CalciumIndicator = CommonUtil.DrawCalciumIndicator(LumenContours[FrameNumber].Calcium.List, Constants.CalciumIndicatorColor, (int)Constants.CalciumIndicatorSize);
+            CalciumIndicator = CommonUtil.DrawCalciumIndicator(LumenContours[FrameNumber].Calcium.List, Constants.CalciumIndicatorColor, calciumIndicatorSize);
 
             TotalAngle = LumenContours[FrameNumber].Calcium.TotalAngle;
             MaxThickness = LumenContours[FrameNumber].Calcium.MaxThickness;

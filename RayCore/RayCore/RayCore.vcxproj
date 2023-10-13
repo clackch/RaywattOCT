@@ -129,22 +129,13 @@
       <AdditionalLibraryDirectories>..\lib;..\extern\opencv\lib;..\extern\ATS\Library\x64;..\extern\ipp\lib\intel64;..\extern\libusb\lib\x64;..\extern\libtiff\lib;..\extern\libtorch\lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(TargetDir)*.dll" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
-xcopy "$(TargetDir)raycore.ini" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
-xcopy "$(TargetDir)CALIBRATION.dat" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
-xcopy "$(TargetDir)BACKGROUND.bin" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
-xcopy "$(TargetDir)LUT.csv" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
-xcopy "$(SolutionDir)extern\libtorch\model\*.pt" "$(ProjectDir)..\..\RaywattOCT\bin\" /y
-xcopy "$(SolutionDir)extern\libtorch\lib\debug\*.dll" "$(ProjectDir)..\..\RaywattOCT\bin\" /y
-xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
-xcopy "$(TargetDir)*.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
-xcopy "$(TargetDir)raycore.ini" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
+      <Command>xcopy "$(TargetDir)raycore.ini" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(TargetDir)CALIBRATION.dat" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(TargetDir)BACKGROUND.bin" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(TargetDir)LUT.csv" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
-xcopy "$(SolutionDir)extern\libtorch\model\*.pt" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y
-xcopy "$(SolutionDir)extern\libtorch\lib\debug\*.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y
-xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d</Command>
+xcopy "$(TargetDir)RayCore.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
+xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
+xcopy "$(SolutionDir)extern\libtorch\model\*.pt" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -170,26 +161,17 @@ xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattAp
       <AdditionalLibraryDirectories>..\lib;..\extern\opencv\lib;..\extern\ATS\Library\x64;..\extern\ipp\lib\intel64;..\extern\libusb\lib\x64;..\extern\libtiff\lib;..\extern\libtorch\lib\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(TargetDir)*.dll" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
-xcopy "$(TargetDir)raycore.ini" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
-xcopy "$(TargetDir)CALIBRATION.dat" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
-xcopy "$(TargetDir)BACKGROUND.bin" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
-xcopy "$(TargetDir)LUT.csv" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
-xcopy "$(SolutionDir)extern\libtorch\model\*.pt" "$(ProjectDir)..\..\RaywattOCT\bin\" /y
-xcopy "$(SolutionDir)extern\libtorch\lib\release\*.dll" "$(ProjectDir)..\..\RaywattOCT\bin\" /y
-xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattOCT\bin\" /y /d
-xcopy "$(TargetDir)*.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
-xcopy "$(TargetDir)raycore.ini" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
+      <Command>xcopy "$(TargetDir)raycore.ini" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(TargetDir)CALIBRATION.dat" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(TargetDir)BACKGROUND.bin" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(TargetDir)LUT.csv" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
+xcopy "$(TargetDir)RayCore.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(SolutionDir)extern\libtorch\model\*.pt" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y
 xcopy "$(SolutionDir)extern\libtorch\lib\release\*.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y
 xcopy "$(SolutionDir)extern\libtorch\sample\*.png" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
 xcopy "$(SolutionDir)extern\libTensorflow\model\*" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /E /y
 xcopy "$(SolutionDir)extern\libTensorflow\lib\*.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y
 xcopy "$(SolutionDir)extern\libTensorflow\sample\*.png" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
-</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

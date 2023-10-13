@@ -213,8 +213,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["comment"] = PatientCase.Comment;
             sqlParameters["vessel"] = PatientCase.Vessel;
             sqlParameters["procedure"] = PatientCase.Procedure;
-            sqlParameters["thumbnail_no"] = PatientCase.ThumbnailNo;
-            sqlParameters["still_image_yn"] = PatientCase.StillImageYn;
+            sqlParameters["num_of_frames"] = PatientCase.NumOfFrames;
             sqlParameters["image"] = PatientCase.Image;
             sqlParameters["pullback_type"] = PatientCase.PullbackType;
             sqlParameters["pullback_length"] = PatientCase.PullbackLength;
@@ -227,8 +226,10 @@ namespace RaywattApp.ViewModels
             sqlParameters["apposition_threshold"] = PatientCasePreset.AppositionThreshold;
             sqlParameters["brightness"] = PatientCase.Brightness;
             sqlParameters["contrast"] = PatientCase.Contrast;
-            sqlParameters["section_proximal"] = 0;
-            sqlParameters["section_distal"] = ReviewStatus.NumberOfFrames - 1;
+            PatientCase.SectionProximal = 0;
+            sqlParameters["section_proximal"] = PatientCase.SectionProximal;
+            PatientCase.SectionDistal = ReviewStatus.NumberOfFrames - 1;
+            sqlParameters["section_distal"] = PatientCase.SectionDistal;
 
             int nRows = _sqlManager.InsertPatientCase(sqlParameters);
 

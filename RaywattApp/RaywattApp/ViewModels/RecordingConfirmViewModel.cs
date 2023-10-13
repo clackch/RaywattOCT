@@ -129,8 +129,7 @@ namespace RaywattApp.ViewModels
             PatientCase.AccessionName = "";
             PatientCase.Comment = "";
             PatientCase.Vessel = Constants.NotSelectedCode;
-            PatientCase.ThumbnailNo = 1;
-            PatientCase.StillImageYn = "N";
+            PatientCase.NumOfFrames = numOfFrames;
             PatientCase.AngioCoRegistration = DeviceStatus.IsAngioConnected;
             PatientCase.IndicatorDegree = 90;
 
@@ -157,13 +156,11 @@ namespace RaywattApp.ViewModels
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {
             DrawCrossSectionImage();
-            if (DrawLongitudeImage())
+
+            // when generating longitude image is completed
+            if (longitudeFrameInfo != null && (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame))
             {
-                // when generating longitude image is completed
-                if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame)
-                {
-                    IsPullbackDone = true;
-                }
+                IsPullbackDone = true;
             }
         }
 

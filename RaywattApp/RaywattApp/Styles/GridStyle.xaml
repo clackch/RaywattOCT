@@ -702,11 +702,11 @@
                                     <ToggleButton.Template>
                                         <ControlTemplate TargetType="ToggleButton">
                                             <StackPanel Background="Transparent">
-                                                <Image x:Name="img" Source="{svgc:SvgImage Source=/res/icon/arrowUp.svg}" HorizontalAlignment="Right" Width="14" Height="7" Margin="0,21,32,20"/>
+                                                <Image x:Name="img" Source="{svgc:SvgImage Source=/res/icon/arrowDown.svg}" HorizontalAlignment="Right" Width="14" Height="7" Margin="0,21,32,20"/>
                                             </StackPanel>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsChecked" Value="true">
-                                                    <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/arrowDownLight.svg}"/>
+                                                    <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/arrowUpLight.svg}"/>
                                                 </Trigger>
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>

@@ -50,10 +50,10 @@
                         <StackPanel Grid.Column="0" Orientation="Horizontal">
                             <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Live View], Source={StaticResource L10N}}"/>
                             <StackPanel Margin="11,0,0,0" Orientation="Horizontal">
-                                <ToggleButton Style="{DynamicResource LiveToggleBtn}" IsChecked="{Binding DeviceStatus.IsLiveView}" Command="{Binding CmdChangeViewMode}" IsEnabled="{Binding DeviceStatus.IsInitialized}" Content="{Binding [Live], Source={StaticResource L10N}}"/>
+                                <ToggleButton Style="{DynamicResource LiveToggleBtn}" IsChecked="{Binding DeviceStatus.IsLiveView}" Command="{Binding CmdChangeViewMode}" IsEnabled="{Binding DeviceStatus.IsDeviceConnected}" Content="{Binding [Live], Source={StaticResource L10N}}"/>
                             </StackPanel>
                             <StackPanel Margin="11,0,0,0" Orientation="Horizontal">
-                                <Button Style="{StaticResource OutlinedBtnType3-Medium}" Command="{Binding CmdCalibration}" IsEnabled="{Binding DeviceStatus.IsInitialized}" Width="104" Content="{Binding [Calibration], Source={StaticResource L10N}}"/>
+                                <Button Style="{StaticResource OutlinedBtnType3-Medium}" Command="{Binding CmdCalibration}" IsEnabled="{Binding DeviceStatus.IsDeviceConnected}" Width="104" Content="{Binding [Calibration], Source={StaticResource L10N}}"/>
                             </StackPanel>
                         </StackPanel>
                         <StackPanel Grid.Column="1">
@@ -173,7 +173,7 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <Border Grid.Column="0" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
-                            
+                            <Image Name="angioImage" Source="{Binding AngioImage}" Stretch="Uniform"/>
                         </Border>
                         <Border Grid.Column="2" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
                             <Image Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill"/>
@@ -192,7 +192,7 @@
                         <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding CmdBack}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" HorizontalAlignment="Right" Margin="0,16,16,0">
-                        <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding CmdStartRecording}" IsEnabled="{Binding DeviceStatus.IsInitialized}" Content="{Binding [Start Recording], Source={StaticResource L10N}}"/>
+                        <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding CmdStartRecording}" IsEnabled="{Binding DeviceStatus.IsDeviceConnected}" Content="{Binding [Start Recording], Source={StaticResource L10N}}"/>
                     </StackPanel>
                 </Grid>
             </Border>

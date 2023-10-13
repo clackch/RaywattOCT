@@ -87,8 +87,7 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case
     comment character varying(200) COLLATE pg_catalog."default",
     vessel character varying(20) COLLATE pg_catalog."default",
     procedure character varying(20) COLLATE pg_catalog."default",
-    thumbnail_no integer,
-    still_image_yn character varying(1) COLLATE pg_catalog."default",
+    num_of_frames integer,
     image character varying(200) COLLATE pg_catalog."default",
     pullback_type character varying(4) COLLATE pg_catalog."default",	
     pullback_length character varying(4) COLLATE pg_catalog."default",
@@ -207,6 +206,32 @@ TABLESPACE rv_tablespace;
 ALTER TABLE IF EXISTS rv_schema.dicom_property
     OWNER to rv_user;
 
+
+-- Table: rv_schema.cath_room
+
+-- DROP TABLE IF EXISTS rv_schema.cath_room;
+
+CREATE TABLE IF NOT EXISTS rv_schema.cath_room
+(
+    id serial NOT NULL,
+    name character varying(50) COLLATE pg_catalog."default",
+    chp_file character varying(200) COLLATE pg_catalog."default",
+    rect_left real,
+    rect_top real,
+    rect_right real,
+    rect_bottom real,
+    description character varying(200) COLLATE pg_catalog."default",
+    create_date timestamp without time zone,
+    update_date timestamp without time zone,
+    CONSTRAINT cath_room_pkey PRIMARY KEY (id)
+        USING INDEX TABLESPACE rv_tablespace
+)
+
+TABLESPACE rv_tablespace;
+
+ALTER TABLE IF EXISTS rv_schema.cath_room
+    OWNER to rv_user;
+	
 
 -- FUNCTION: rv_schema.fn_code(character varying, character varying)
 

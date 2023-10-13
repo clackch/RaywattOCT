@@ -40,7 +40,11 @@ namespace RaywattOCT
             ImageDepth,
             LongitudeImageWidth,
             LongitudeImageHeight,
-            LongitudeImageChannels
+            LongitudeImageChannels,
+            PullbackRPM,
+            PullbackDistance,
+            PullbackSpeed,
+            TestMode
         }
 
         public enum RayCallbackRequest : int
@@ -63,12 +67,15 @@ namespace RaywattOCT
 
         public enum RayEvent : int { 
             Unknown = 0,
-            CatheterLoading
+            CatheterConnected,
+            CatheterLoading,
+            CatheterUnloading
         };
 
         public enum RayWorkItem : int
         {
             Unknown = 0,
+            StartService,
             SaveRawData,
             OCTImaging,
             GenerateCutView,

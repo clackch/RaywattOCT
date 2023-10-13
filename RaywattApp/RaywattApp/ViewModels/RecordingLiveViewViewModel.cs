@@ -15,6 +15,7 @@ using System.Windows.Input;
 using System.Windows.Navigation;
 using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
+using RaywattApp.Common.Angio;
 
 namespace RaywattApp.ViewModels
 {
@@ -25,6 +26,8 @@ namespace RaywattApp.ViewModels
         private readonly SqlManager? _sqlManager;
 
         private IDialogService? _dialogService;
+               
+        private readonly TcpClientSingleton _tcpClientSingleton;
 
         private IList<Code> pullbackTypes;
 
@@ -57,7 +60,7 @@ namespace RaywattApp.ViewModels
             get { return _selectedPullbackType; }
             set { _selectedPullbackType = value; SetPullback(); }
         }
-
+        
         private int _brightness;
         public int Brightness
         {
@@ -96,7 +99,7 @@ namespace RaywattApp.ViewModels
             get { return _cmdStartRecording ?? (this._cmdStartRecording = new RelayCommand(StartRecording)); }
         }
 
-        public RecordingLiveViewViewModel(SqlManager sqlManager, IDialogService dialogService)
+        public RecordingLiveViewViewModel(SqlManager sqlManager, IDialogService dialogService, TcpClientSingleton tcpClientSingleton)
         {
             _log.Debug("RecordingLiveViewViewModel");
 
@@ -105,6 +108,8 @@ namespace RaywattApp.ViewModels
             _sqlManager = sqlManager;
             _dialogService = dialogService;
 
+            _tcpClientSingleton = tcpClientSingleton;
+            
             PullbackList = CodeDefinition.Codes["PBTY"];
 
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
@@ -155,6 +160,10 @@ namespace RaywattApp.ViewModels
 
                 SetCondition();
             }
+
+            // Send Start Command
+            if(DeviceStatus.IsAngioConnected)
+                _tcpClientSingleton.Instance.GetStream().Write(_tcpClientSingleton.startCommand, 0, _tcpClientSingleton.startCommand.Length);
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -164,6 +173,10 @@ namespace RaywattApp.ViewModels
 
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
+
+            //Send Stop Command
+            if (DeviceStatus.IsAngioConnected)
+                _tcpClientSingleton.Instance.GetStream().Write(_tcpClientSingleton.stopCommand, 0, _tcpClientSingleton.stopCommand.Length);
         }
 
         private void SetCondition()
@@ -218,7 +231,7 @@ namespace RaywattApp.ViewModels
                 parameter["title"] = _l10n["Information"];
                 parameter["message"] = _l10n["Select Pullback"];
                 var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-
+                    
                 return;
             }
 
@@ -228,6 +241,9 @@ namespace RaywattApp.ViewModels
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {
             DrawCrossSectionImage();
+
+            if(DeviceStatus.IsAngioConnected)
+                DrawAngioImage();
         }
 
         private void leaveToPage(string viewPage)
@@ -241,8 +257,17 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Send(new NavigationMessage(viewPage) { Parameter = parameter });
         }
 
+        protected bool DrawAngioImage()
+        {
+            AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(_tcpClientSingleton.imgAngio);
+
+            return true;
+        }
+
         private void SetPullback()
         {
+            if (SelectedPullbackType == null) return;
+
             PatientCase.PullbackType = SelectedPullbackType;
             PatientCase.PullbackLength = SelectedPullbackType.IndexOf("LO") > 0 ? Constants.PullbackLengthLong : Constants.PullbackLengthShort;
 
@@ -255,6 +280,8 @@ namespace RaywattApp.ViewModels
                 PbSpeed = temp[1];
                 PbTime = temp[2];
             }
+            RaySetProperty(Property.PullbackDistance, Double.Parse(PbLength));
+            RaySetProperty(Property.PullbackSpeed, Double.Parse(PbSpeed));
         }
     }
 }

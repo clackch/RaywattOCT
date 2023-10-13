@@ -22,12 +22,12 @@ int CATSDevice::InitDevice() {
 
 	U8 major, minor, revision;
 	AlazarGetSDKVersion(&major, &minor, &revision);
-	printf("[Alazar] SDK Ver.%d.%d.%d\n", major, minor, revision);
+	PLOGI.printf("[Alazar] SDK Ver.%d.%d.%d\n", major, minor, revision);
 	
 	m_hATSBoard = AlazarGetBoardBySystemID(systemId, boardId);
 	if (m_hATSBoard == NULL)
 	{
-		printf("Error: Unable to open board system Id %u board Id %u\n", systemId, boardId);
+		PLOGI.printf("Error: Unable to open board system Id %u board Id %u\n", systemId, boardId);
 		return E_FAIL;
 	}
 
@@ -66,7 +66,7 @@ int CATSDevice::start() {
 
 	if (retCode != ApiSuccess)
 	{
-		printf("Error: AlazarStartCapture failed -- %s\n", AlazarErrorToText(retCode));
+		PLOGI.printf("Error: AlazarStartCapture failed -- %s\n", AlazarErrorToText(retCode));
 		MessageBox((HWND)"AlazarStartCapture failed", NULL, L"Error", MB_OK);
 
 		return retCode;
@@ -81,7 +81,7 @@ int CATSDevice::stop() {
 
 	if (retCode != ApiSuccess)
 	{
-		printf("Error: AlazarAbortAsyncRead failed -- %s\n", AlazarErrorToText(retCode));
+		PLOGI.printf("Error: AlazarAbortAsyncRead failed -- %s\n", AlazarErrorToText(retCode));
 		
 		return retCode;
 	}
@@ -115,7 +115,7 @@ char *CATSDevice::acquire(int& nCurFrame, int& nTotalFrame) {
 		retCode = AlazarWaitAsyncBufferComplete(m_hATSBoard, m_pCurBuffer, timeout_ms);
 		if (retCode != ApiSuccess)
 		{
-			printf("Error: AlazarWaitAsyncBufferComplete failed -- %s\n", AlazarErrorToText(retCode));
+			PLOGI.printf("Error: AlazarWaitAsyncBufferComplete failed -- %s\n", AlazarErrorToText(retCode));
 			return NULL;
 		}
 
@@ -146,10 +146,10 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 
 	if (useDES) {
 		retCode = AlazarSetParameterUL(boardHandle, CHANNEL_A, SET_ADC_MODE, ADC_MODE_DES);
-		printf("Use DES Mode - %s\n", AlazarErrorToText(retCode));
+		PLOGI.printf("Use DES Mode - %s\n", AlazarErrorToText(retCode));
 	}
 
-	printf("sample per sec : %.2f\n", dSamplePerSec);
+	PLOGI.printf("sample per sec : %.2f\n", dSamplePerSec);
 	// TODO: Select clock parameters as required to generate this sample rate.
 	//
 	// For example: if samplesPerSec is 100.e6 (100 MS/s), then:
@@ -167,7 +167,7 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 		0);
 	if (retCode != ApiSuccess)
 	{
-		printf("Error: AlazarSetCaptureClock failed -- %s\n", AlazarErrorToText(retCode));
+		PLOGI.printf("Error: AlazarSetCaptureClock failed -- %s\n", AlazarErrorToText(retCode));
 		return FALSE;
 	}
 
@@ -181,7 +181,7 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 		IMPEDANCE_50_OHM);
 	if (retCode != ApiSuccess)
 	{
-		printf("Error: AlazarInputControlEx failed -- %s\n", AlazarErrorToText(retCode));
+		PLOGI.printf("Error: AlazarInputControlEx failed -- %s\n", AlazarErrorToText(retCode));
 		return FALSE;
 	}
 
@@ -200,7 +200,7 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 		128);
 	if (retCode != ApiSuccess)
 	{
-		printf("Error: AlazarSetTriggerOperation failed -- %s\n", AlazarErrorToText(retCode));
+		PLOGI.printf("Error: AlazarSetTriggerOperation failed -- %s\n", AlazarErrorToText(retCode));
 		return FALSE;
 	}
 
@@ -215,7 +215,7 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	retCode = AlazarSetTriggerDelay(boardHandle, nTriggerDelaySample);
 	if (retCode != ApiSuccess)
 	{
-		printf("Error: AlazarSetTriggerDelay failed -- %s\n", AlazarErrorToText(retCode));
+		PLOGI.printf("Error: AlazarSetTriggerDelay failed -- %s\n", AlazarErrorToText(retCode));
 		return FALSE;
 	}
 
@@ -240,7 +240,7 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	retCode = AlazarSetTriggerTimeOut(boardHandle, triggerTimeout_clocks);
 	if (retCode != ApiSuccess)
 	{
-		printf("Error: AlazarSetTriggerTimeOut failed -- %s\n", AlazarErrorToText(retCode));
+		PLOGI.printf("Error: AlazarSetTriggerTimeOut failed -- %s\n", AlazarErrorToText(retCode));
 		return FALSE;
 	}
 
@@ -249,7 +249,7 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	retCode = AlazarConfigureAuxIO(boardHandle, AUX_OUT_TRIGGER, AUX_OUT_TRIGGER);
 	if (retCode != ApiSuccess)
 	{
-		printf("Error: AlazarConfigureAuxIO failed -- %s\n", AlazarErrorToText(retCode));
+		PLOGI.printf("Error: AlazarConfigureAuxIO failed -- %s\n", AlazarErrorToText(retCode));
 		return FALSE;
 	}
 
@@ -258,7 +258,7 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 		// (goodClock + badClock) <= triggerCycleTime(=0.000010)
 		double triggerCycleTime, triggerPulseWidth;
 		retCode = AlazarOCTIgnoreBadClock(m_hATSBoard, TRUE, secGoodClkDuration, secBadClkDuration, &triggerCycleTime, &triggerPulseWidth);
-		printf("AlazarOCTIgnoreBadClock : %s, cycleTime : %lf, pulseWidth : %lf\n", AlazarErrorToText(retCode), triggerCycleTime, triggerPulseWidth);
+		PLOGI.printf("AlazarOCTIgnoreBadClock : %s, cycleTime : %lf, pulseWidth : %lf\n", AlazarErrorToText(retCode), triggerCycleTime, triggerPulseWidth);
 	}
 
 	return TRUE;
@@ -311,7 +311,7 @@ BOOL CATSDevice::configureAcquisition(HANDLE boardHandle) {
 	retCode = AlazarGetChannelInfo(boardHandle, &maxSamplesPerChannel, &bitsPerSample);
 	if (retCode != ApiSuccess)
 	{
-		printf("Error: AlazarGetChannelInfo failed -- %s\n", AlazarErrorToText(retCode));
+		PLOGI.printf("Error: AlazarGetChannelInfo failed -- %s\n", AlazarErrorToText(retCode));
 		return FALSE;
 	}
 
@@ -321,7 +321,7 @@ BOOL CATSDevice::configureAcquisition(HANDLE boardHandle) {
 	U32 bytesPerRecord = (U32)(bytesPerSample * samplesPerRecord +
 		0.5); // 0.5 compensates for double to integer conversion 
 	U32 bytesPerBuffer = bytesPerRecord * recordsPerBuffer * channelCount;
-	printf("samplesPerRecord : %d, recordsPerBuffer : %d, channelCount : %d\n", samplesPerRecord, recordsPerBuffer, channelCount);
+	PLOGI.printf("samplesPerRecord : %d, recordsPerBuffer : %d, channelCount : %d\n", samplesPerRecord, recordsPerBuffer, channelCount);
 
 	// Allocate memory for DMA buffers
 	if (m_pAcqBuffers == nullptr) {
@@ -336,7 +336,7 @@ BOOL CATSDevice::configureAcquisition(HANDLE boardHandle) {
 #endif
 			if (m_pAcqBuffers[bufferIndex] == NULL)
 			{
-				printf("Error: Alloc %u bytes failed\n", bytesPerBuffer);
+				PLOGI.printf("Error: Alloc %u bytes failed\n", bytesPerBuffer);
 				success = FALSE;
 			}
 		}
@@ -348,7 +348,7 @@ BOOL CATSDevice::configureAcquisition(HANDLE boardHandle) {
 		retCode = AlazarSetRecordSize(boardHandle, preTriggerSamples, postTriggerSamples);
 		if (retCode != ApiSuccess)
 		{
-			printf("Error: AlazarSetRecordSize failed -- %s\n", AlazarErrorToText(retCode));
+			PLOGI.printf("Error: AlazarSetRecordSize failed -- %s\n", AlazarErrorToText(retCode));
 			success = FALSE;
 		}
 	}
@@ -365,7 +365,7 @@ BOOL CATSDevice::configureAcquisition(HANDLE boardHandle) {
 
 		if (retCode != ApiSuccess)
 		{
-			printf("Error: AlazarBeforeAsyncRead failed -- %s\n", AlazarErrorToText(retCode));
+			PLOGI.printf("Error: AlazarBeforeAsyncRead failed -- %s\n", AlazarErrorToText(retCode));
 			success = FALSE;
 		}
 	}
@@ -377,7 +377,7 @@ BOOL CATSDevice::configureAcquisition(HANDLE boardHandle) {
 		retCode = AlazarPostAsyncBuffer(m_hATSBoard, pBuffer, bytesPerBuffer);
 		if (retCode != ApiSuccess)
 		{
-			printf("Error: AlazarPostAsyncBuffer %u failed -- %s\n", bufferIndex,
+			PLOGI.printf("Error: AlazarPostAsyncBuffer %u failed -- %s\n", bufferIndex,
 				AlazarErrorToText(retCode));
 			success = FALSE;
 		}

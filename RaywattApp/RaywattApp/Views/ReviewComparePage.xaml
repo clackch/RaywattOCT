@@ -60,7 +60,7 @@
                         <ColumnDefinition Width="318"/>
                     </Grid.ColumnDefinitions>
                     <!-- Before : Lumen Profile -->
-                    <StackPanel Grid.Column="0" Margin="70,0,0,0">
+                    <StackPanel Grid.Column="0" Margin="70,0,0,0" Visibility="{Binding ReviewStatus.SelectedPatientCase, Converter={StaticResource NotNullToVisibilityConveter}}">
                         <StackPanel Height="29" Margin="56,53,0,0" Orientation="Horizontal">
                             <Label Style="{DynamicResource Pretendard-Semibold-24}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pre], Source={StaticResource L10N}}"/>
                             <StackPanel Width="14"/>
@@ -184,7 +184,7 @@
                         </StackPanel>
                     </StackPanel>
                     <!-- Before : Cross-section -->
-                    <Grid Grid.Column="1" Margin="0,84,40,85">
+                    <Grid Grid.Column="1" Margin="0,84,40,85"  Visibility="{Binding ReviewStatus.SelectedPatientCase, Converter={StaticResource NotNullToVisibilityConveter}}">
                         <Image x:Name="crossSectionForCompare" Source="{Binding CrossSectionForCompare}" Width="{x:Static const:Constants.CrossSectionCompareSize}" Height="{x:Static const:Constants.CrossSectionCompareSize}"/>
                         <annotation:DrawLumenContourUtil LumenContours="{Binding PreLumenContour}" CurrentLumenContour="{Binding CurrentPreLumenContour, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" FrameNumber="{Binding FrameNumberCompare}" Visibility="Visible" IsEditOn="False" Zoom="{Binding Zoom}" IsDrawOn="True" InCommand="{Binding LumenContourCommand, Mode=TwoWay}"/>
                         <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Left">

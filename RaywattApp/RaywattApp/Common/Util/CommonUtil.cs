@@ -575,8 +575,11 @@ namespace RaywattApp.Common.Util
 
                 //Side Branch
                 if (lumenContour.HasSidebranch)
-                {    
-                    Cv2.Line(imglumenProfile, new Point(curFrame, imglumenProfile.Rows / 2 - 5), new Point(curFrame, imglumenProfile.Rows / 2 + 5), new Scalar(0xe4, 0xe4, 0xe4));
+                {
+                    if (curFrame >= frameProximal && curFrame <= frameDistal)
+                        Cv2.Line(imglumenProfile, new Point(curFrame, imglumenProfile.Rows / 2 - 5), new Point(curFrame, imglumenProfile.Rows / 2 + 5), new Scalar(0xe4, 0xe4, 0xe4));
+                    else
+                        Cv2.Line(imglumenProfile, new Point(curFrame, imglumenProfile.Rows / 2 - 5), new Point(curFrame, imglumenProfile.Rows / 2 + 5), new Scalar(0x7d, 0x7d, 0x7d));
                 }
 
                 curFrame++;
@@ -939,12 +942,15 @@ namespace RaywattApp.Common.Util
             return textBlock.DesiredSize;
         }
 
-        public static void Exit(DeviceStatus deviceStatus)
+        public static void Exit(DeviceStatus? deviceStatus)
         {
-            deviceStatus.IsPaused = true;
-            while (!deviceStatus.CanExit)
+            if (deviceStatus != null)
             {
-                Thread.Sleep(50);
+                deviceStatus.IsPaused = true;
+                while (!deviceStatus.CanExit)
+                {
+                    Thread.Sleep(50);
+                }
             }
 
             RayDisconnectDevices();
@@ -1256,6 +1262,31 @@ namespace RaywattApp.Common.Util
             return lumenContours;
         }
 
+        unsafe public static void ContoursToMemory(List<LumenContour>? contourList, Size sizeContour, IntPtr buffer, Size sizeBuffer)
+        {
+            if (contourList == null) return;
+
+            int frameSize = sizeBuffer.Width * sizeBuffer.Height;
+            for (int i = 0; i < contourList.Count; i++)
+            {
+                Mat imgLumen = new Mat(sizeContour, MatType.CV_8UC1);
+                Mat imgResize = new Mat(sizeBuffer, MatType.CV_8UC1);
+                List<List<Point>> contours = new List<List<Point>>();
+                List<Point> contour = new List<Point>();
+                foreach (System.Windows.Point point in contourList[i].Points)
+                {
+                    contour.Add(new OpenCvSharp.Point(point.X, point.Y));
+                }
+                contours.Add(contour);
+
+                imgLumen.SetTo(Scalar.Black);
+                Cv2.DrawContours(imgLumen, contours, -1, Scalar.White, -1);
+                Cv2.Resize(imgLumen, imgResize, imgResize.Size());
+
+                Buffer.MemoryCopy((void*)imgResize.Data, (void*)(IntPtr.Add(buffer, i * frameSize)), frameSize, frameSize);
+            }
+        }
+
         private static System.Windows.Point StrToPoint(string str)
         {
             string[] temp = str.Split(",");
@@ -1449,6 +1480,14 @@ namespace RaywattApp.Common.Util
 
             BitmapSource bitmap = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgCalcium);
             return bitmap;
+        }
+
+        public static bool IsTestMode(Dictionary<string, bool> testMode, string key)
+        {
+            if (!testMode.ContainsKey(key))
+                return false;
+
+            return testMode[key];
         }
     }
 }
