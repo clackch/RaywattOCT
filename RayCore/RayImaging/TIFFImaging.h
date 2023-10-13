@@ -15,7 +15,6 @@ public:
 
 	void Initialize();
 	virtual void Process(char* fringes);
-	virtual void PostProcess(cv::Mat image);
 	virtual cv::Mat GetProcessedImage() { return imageConvert; }
 	virtual void CircularizeImage(cv::Mat& src, cv::Mat& dst);
 	void InverseCircularizeImage(cv::Mat& src, cv::Mat& dst);
