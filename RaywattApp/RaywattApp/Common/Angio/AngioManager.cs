@@ -16,12 +16,15 @@ namespace RaywattApp.Common.Angio
 
         public bool isConnected = false; // Server - Client Connection
         public bool portConnection = false; // FG Conenction
+        public bool boardConnection = false; // FG Board Connection
         public byte[] buffer = new byte[10000000];
         public byte[] tmpBuffer = new byte[20000000];
         public int bytesRead;
         public int tmpBufferLen = 0;
         public byte[] startCommand = { 0x3A, (byte)PacketType.Command, (byte)CommandType.FGStarted, 0x07, 0xA3 };
         public byte[] stopCommand = { 0x3A, (byte)PacketType.Command, (byte)CommandType.FGStopped, 0x07, 0xA3 };
+        public byte[] askPortCommand = { 0x3A, (byte)PacketType.Command, (byte)CommandType.FGAskPort, 0x07, 0xA3 };
+        public byte[] askBoardCommand = { 0x3A, (byte)PacketType.Command, (byte)CommandType.FGAskBoard, 0x07, 0xA3 };
         public Mat imgAngio = AngioClient.ShowNoSignal();
 
         public AngioManager()
@@ -46,6 +49,8 @@ namespace RaywattApp.Common.Angio
             _tcpClient = new TcpClient(serverIP, serverPort);
             AngioClient angioclient = new AngioClient(this);
             angioclient.ActivateClientThread();
+            angioclient.AskBoardConnection();
+            angioclient.AskPortConnection();
         }
     }
 }

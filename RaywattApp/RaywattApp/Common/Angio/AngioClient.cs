@@ -1,7 +1,9 @@
 ﻿using OpenCvSharp;
+using OpenCvSharp.Internal;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Util;
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -14,11 +16,14 @@ public enum PacketType
 
 enum CommandType
 {
-    FGConnected,
-    FGDisconnected,
+    FGConnected, // Port
+    FGDisconnected, // Port
     FGStarted,
     FGStopped,
     FGAskPort,
+    FGAskBoard,
+    FGBoardExist,
+    FGBoardNotExist,
     FGNothing,
 };
 
@@ -57,6 +62,16 @@ namespace RaywattApp.Common.Angio
             threadFuncLiveAngioImage.Start();
         }
 
+        public void AskPortConnection()
+        {
+            _angioManager.Instance.GetStream().Write(_angioManager.askPortCommand, 0, _angioManager.askPortCommand.Length);
+        }
+
+        public void AskBoardConnection()
+        {
+            _angioManager.Instance.GetStream().Write(_angioManager.askBoardCommand, 0, _angioManager.askBoardCommand.Length);
+        }
+
         private bool ReadPacket()
         {
             try
@@ -79,7 +94,8 @@ namespace RaywattApp.Common.Angio
             }
             catch (Exception ex)
             {
-                _angioManager.isConnected = false;
+                //_angioManager.isConnected = false;
+                Debug.WriteLine(ex.Message);
                 return false;
             }
 
@@ -120,8 +136,11 @@ namespace RaywattApp.Common.Angio
 
                 Cv2.Flip(image, image, 0);
 
-                Mat imgRecv = CommonUtil.ByteMemoryToCvMat(image.Data, width, height, BitsPerPixel / 8);
-                _angioManager.imgAngio = imgRecv;
+                int t = 500, l = 1000, b = 1000, r = 1900;
+                Rect roi = new Rect(l, t, r - l, b - t);
+                image = image.SubMat(roi);
+
+                _angioManager.imgAngio = image;
             }
         }
 
@@ -152,6 +171,14 @@ namespace RaywattApp.Common.Angio
                     {
                         ViewModelBase._deviceStatus.IsAngioConnected = _angioManager.portConnection;
                     });
+                }
+                else if (command == (int)CommandType.FGBoardExist)
+                {
+                    _angioManager.boardConnection = true;
+                }
+                else if (command == (int)CommandType.FGBoardNotExist)
+                {
+                    _angioManager.boardConnection = false;
                 }
 
                 Array.Copy(_angioManager.tmpBuffer, Constants.commandPacketSize, _angioManager.tmpBuffer, 0, 20000000 - Constants.commandPacketSize);
@@ -201,15 +228,15 @@ namespace RaywattApp.Common.Angio
         }
         public static Mat ShowNoSignal()
         {
-            Mat image = new Mat(800, 1000, MatType.CV_8UC3);
+            Mat image = new Mat(1080, 1920, MatType.CV_8UC3);
             image.SetTo(new Scalar(0, 0, 0));
 
             Scalar textColor = new Scalar(0, 0, 255);
             HersheyFonts fontFace = HersheyFonts.HersheyComplex;
-            double fontScale = 2.0;
+            double fontScale = 5.0;
             int thickness = 5;
 
-            Point textPosition = new Point(300, 500);
+            Point textPosition = new Point(500, 500);
             Cv2.PutText(image, "No Signal", textPosition, fontFace, fontScale, textColor, thickness);
 
             return image;
