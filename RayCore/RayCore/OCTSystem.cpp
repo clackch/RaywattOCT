@@ -324,16 +324,14 @@ RayError COCTSystem::ReadyPullback()
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 
-		CLaserController* pLaser = CLaserController::GetInstance();
 		CMotorController* pMotorCtrl = CMotorController::GetInstance();
 		CConfiguration& config = CConfiguration::GetInstance();
 
+		laserOnOff(true);
 		restartAcqDevice(m_pImagingPullback);
 
-		m_pPullbackMotor->SetSpeed(StepMotorIndex::Both, config.stepMotor.pullbackSpeed);
-		m_pLaserModule->SetVLD(VISIBLE_LASER_POWER);
-		pLaser->LaserOnOff(true);
 		pMotorCtrl->PerformRun(config.bldcMotor.velocityPullback);
+		m_pPullbackMotor->SetSpeed(StepMotorIndex::Both, config.stepMotor.pullbackSpeed);
 
 		return RayError::OK;
 	}
@@ -467,15 +465,12 @@ RayError COCTSystem::StartLiveView()
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 
-		CLaserController* pLaser = CLaserController::GetInstance();
 		CMotorController* pMotorCtrl = CMotorController::GetInstance();
 		CConfiguration& config = CConfiguration::GetInstance();
 
-		m_pLaserModule->SetVLD(VISIBLE_LASER_POWER);
-		pLaser->LaserOnOff(true);
 		pMotorCtrl->PerformRun(config.bldcMotor.velocityLiveView);
-		Sleep(500);
 
+		laserOnOff(true);
 		restartAcqDevice(m_pImagingLiveView);
 
 		return RayError::OK;
@@ -491,11 +486,9 @@ RayError COCTSystem::StopLiveView()
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 
-		CLaserController* pLaser = CLaserController::GetInstance();
 		CMotorController* pMotorCtrl = CMotorController::GetInstance();
 
-		m_pLaserModule->SetVLD(0);
-		pLaser->LaserOnOff(false);
+		laserOnOff(false);
 		pMotorCtrl->StopMotor();
 
 		return RayError::OK;
@@ -1279,19 +1272,18 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
-	CLaserController* pLaser = CLaserController::GetInstance();
 
 	PLOGI.printf("Catheter Validation");
 
+	pSystem->laserOnOff(true);
 	pSystem->restartAcqDevice(pSystem->m_pImagingLiveView);
-	//pLaser->LaserOnOff(true);
 	pMotor->PerformRun(config.bldcMotor.velocityLiveView);
 
 	// To-Do: determine image verification
 	bool verified = true;
 
 	pMotor->StopMotor();
-	//pLaser->LaserOnOff(false);
+	pSystem->laserOnOff(false);
 
 	if (verified) {
 		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Enable);
@@ -1590,6 +1582,16 @@ void COCTSystem::redrawCutView() {
 				this->postPriorMessage(WM_PROCESS_CUTVIEW, m_curSession, nCurFrame);
 			}
 		}
+	}
+}
+void COCTSystem::laserOnOff(bool isOn) {
+	CLaserController* pLaser = CLaserController::GetInstance();
+
+	pLaser->LaserOnOff(isOn);
+	
+	if (m_pLaserModule != nullptr && m_pLaserModule->IsOpen()) {
+		int vldPower = (isOn) ? VISIBLE_LASER_POWER : 0;
+		m_pLaserModule->SetVLD(vldPower);
 	}
 }
 /*

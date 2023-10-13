@@ -170,6 +170,7 @@ private:
 	void closeAllSessions();
 	void setBrightnessContrastAllSessions();
 	void redrawCutView();
+	void laserOnOff(bool isOn);
 
 protected:
 	LRESULT OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam);
