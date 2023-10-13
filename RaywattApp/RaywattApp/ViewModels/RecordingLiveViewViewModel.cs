@@ -21,8 +21,6 @@ namespace RaywattApp.ViewModels
 {
     public partial class RecordingLiveViewViewModel : OCTViewModelBase
     {
-        private DispatcherTimer timerLiveAngioImage = new DispatcherTimer(DispatcherPriority.Background);
-
         private static readonly ILog _log = LogManager.GetLogger(typeof(RecordingLiveViewViewModel));
 
         private readonly SqlManager? _sqlManager;
@@ -101,7 +99,6 @@ namespace RaywattApp.ViewModels
             get { return _cmdStartRecording ?? (this._cmdStartRecording = new RelayCommand(StartRecording)); }
         }
 
-        private bool _isRecording = false;
         public RecordingLiveViewViewModel(SqlManager sqlManager, IDialogService dialogService, TcpClientSingleton tcpClientSingleton)
         {
             _log.Debug("RecordingLiveViewViewModel");
@@ -165,11 +162,8 @@ namespace RaywattApp.ViewModels
             }
 
             // Send Start Command
-            _tcpClientSingleton.Instance.GetStream().Write(_tcpClientSingleton.startCommand, 0, _tcpClientSingleton.startCommand.Length);
-
-            timerLiveAngioImage.Interval = TimeSpan.Zero; // TimeSpan.Zero;
-            timerLiveAngioImage.Tick += new EventHandler(timerFuncLiveAngioImage);
-            timerLiveAngioImage.Start();
+            if(DeviceStatus.IsAngioConnected)
+                _tcpClientSingleton.Instance.GetStream().Write(_tcpClientSingleton.startCommand, 0, _tcpClientSingleton.startCommand.Length);
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -180,15 +174,9 @@ namespace RaywattApp.ViewModels
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
 
-            if (AngioClient.threadOnLiveAngioImage)
-                if (_isRecording)
-                {
-                    //Send Stop Command
-                    _tcpClientSingleton.Instance.GetStream().Write(_tcpClientSingleton.stopCommand, 0, _tcpClientSingleton.stopCommand.Length);
-
-                    timerLiveAngioImage.Stop();
-                    _isRecording = false;
-                }
+            //Send Stop Command
+            if (DeviceStatus.IsAngioConnected)
+                _tcpClientSingleton.Instance.GetStream().Write(_tcpClientSingleton.stopCommand, 0, _tcpClientSingleton.stopCommand.Length);
         }
 
         private void SetCondition()
@@ -236,7 +224,6 @@ namespace RaywattApp.ViewModels
         private void StartRecording()
         {
             _log.Debug("StartRecording");
-            _isRecording = true;
 
             if (String.IsNullOrEmpty(PatientCase.PullbackType))
             {
@@ -254,6 +241,9 @@ namespace RaywattApp.ViewModels
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {
             DrawCrossSectionImage();
+
+            if(DeviceStatus.IsAngioConnected)
+                DrawAngioImage();
         }
 
         private void leaveToPage(string viewPage)
@@ -265,11 +255,6 @@ namespace RaywattApp.ViewModels
             PatientCase.Contrast = Contrast;
             parameter["patientCase"] = PatientCase;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(viewPage) { Parameter = parameter });
-        }
-
-        private void timerFuncLiveAngioImage(object sender, EventArgs e)
-        {
-            DrawAngioImage();
         }
 
         protected bool DrawAngioImage()
