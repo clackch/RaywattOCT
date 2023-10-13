@@ -1,9 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 42 42">
-    <g data-name="그룹 9619">
-        <g data-name="사각형 1858" style="stroke:#333;fill:none">
-            <rect width="42" height="42" rx="6" style="stroke:none"/>
-            <rect x=".5" y=".5" width="41" height="41" rx="5.5" style="fill:none"/>
-        </g>
-        <path data-name="패스 2694" d="M16.313 12.291v4.022H1.688v-4.022H0V18h18v-5.709zM8.156 0v10.435L4.781 7.059l-1.209 1.21L9 13.7l5.428-5.428-1.209-1.21-3.375 3.373V0z" transform="translate(12 12)" style="fill:#333"/>
-    </g>
+<svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="m16.106 18.3 1.21 1.21 3.38-3.38v10.44h1.68V16.13l3.38 3.38 1.21-1.21-5.43-5.43-5.43 5.43z" fill="#333"/>
+    <path d="M28.846 25.17v4.03h-14.62v-4.03h-1.69v5.71h18v-5.71h-1.69z" fill="#333"/>
+    <path d="M36.876.61h-30a6 6 0 0 0-6 6v30a6 6 0 0 0 6 6h30a6 6 0 0 0 6-6v-30a6 6 0 0 0-6-6z" stroke="#333"/>
+    <path d="M36.876 1.11h-30a5.5 5.5 0 0 0-5.5 5.5v30a5.5 5.5 0 0 0 5.5 5.5h30a5.5 5.5 0 0 0 5.5-5.5v-30a5.5 5.5 0 0 0-5.5-5.5z" stroke="#333"/>
 </svg>
