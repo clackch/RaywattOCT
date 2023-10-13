@@ -66,7 +66,6 @@ void CTIFFImaging::Process(char* fringes)
 
 	m_start = m_end;
 }
-{
 
 void CTIFFImaging::CircularizeImage(cv::Mat& src, cv::Mat& dst)
 {
