@@ -32,6 +32,7 @@ namespace RaywattApp.ViewModels
         private IList<Code> pullbackTypes;
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
+        private DispatcherTimer timerCheckCatheter = new DispatcherTimer();
 
         [ObservableProperty]
         private Patient _patient;
@@ -124,6 +125,10 @@ namespace RaywattApp.ViewModels
                 Brightness = int.Parse(presents.FirstOrDefault(x => x.Key == "brightness").Value);
                 Contrast = int.Parse(presents.FirstOrDefault(x => x.Key == "contrast").Value);
             }
+
+            timerCheckCatheter.Interval = TimeSpan.FromMilliseconds(10);
+            timerCheckCatheter.Tick += new EventHandler(CheckCatheterStatus);
+            timerCheckCatheter.Start();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -173,6 +178,9 @@ namespace RaywattApp.ViewModels
 
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
+
+            if (timerCheckCatheter.IsEnabled)
+                timerCheckCatheter.Stop();
 
             //Send Stop Command
             if (DeviceStatus.IsAngioConnected)
@@ -282,6 +290,17 @@ namespace RaywattApp.ViewModels
             }
             RaySetProperty(Property.PullbackDistance, Double.Parse(PbLength));
             RaySetProperty(Property.PullbackSpeed, Double.Parse(PbSpeed));
+        }
+
+        private void CheckCatheterStatus(object sender, EventArgs e)
+        {
+            if (DeviceStatus.CatheterStatus != Constants.CatheterStatusLoaded)
+            {
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["patient"] = this.Patient;
+                parameter["prevStatus"] = this.PrevStatus;
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
+            }
         }
     }
 }
