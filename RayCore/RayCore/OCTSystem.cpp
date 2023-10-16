@@ -45,6 +45,7 @@ COCTSystem::COCTSystem() {
 		m_reviewSession[i] = nullptr;
 	}
 	m_openedSession = nullptr;
+	InitializeCriticalSection(&m_csSession);
 
 	m_pPullbackMotor = new CArduinoController();
 	m_pLaserModule = new CLaserModule();
@@ -65,6 +66,7 @@ COCTSystem::COCTSystem() {
 */
 COCTSystem::~COCTSystem() {
 	Stop();
+	DeleteCriticalSection(&m_csSession);
 }
 
 void COCTSystem::SetLogger(TCHAR* logRootPath) {
@@ -1537,12 +1539,14 @@ void COCTSystem::stopAllSessions() {
 	}
 }
 void COCTSystem::closeAllSessions() {
+	EnterCriticalSection(&m_csSession);
 	for (int i = 0; i < MAX_SESSION_NUM; i++) {
 		if (m_reviewSession[i] != nullptr) {
 			delete m_reviewSession[i];
 			m_reviewSession[i] = nullptr;
 		}
 	}
+	LeaveCriticalSection(&m_csSession);
 	m_curSession = SESSION_UNKNOWN;
 }
 void COCTSystem::setBrightnessContrastAllSessions() {
@@ -1553,6 +1557,7 @@ void COCTSystem::setBrightnessContrastAllSessions() {
 	m_pImagingPullback->SetBrightnessContrast(m_fBrightness, m_fContrast);
 	m_pImagingLiveView->SetBrightnessContrast(m_fBrightness, m_fContrast);
 
+	EnterCriticalSection(&m_csSession);
 	for (int session = 0; session < SessionType::MAX_SESSION_NUM; session++)
 	{
 		if (m_reviewSession[session] != nullptr)
@@ -1563,6 +1568,7 @@ void COCTSystem::setBrightnessContrastAllSessions() {
 			}
 		}
 	}
+	LeaveCriticalSection(&m_csSession);
 
 	if (m_openedSession != nullptr && m_openedSession->GetImaging() != nullptr)
 	{

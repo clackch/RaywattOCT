@@ -64,6 +64,7 @@ private:
 	SessionType m_curSession;
 	CImagingSession* m_reviewSession[MAX_SESSION_NUM];
 	CImagingSession* m_openedSession;
+	CRITICAL_SECTION m_csSession;
 
 	// Rotary Junction
 	CStepMotorController* m_pPullbackMotor;
