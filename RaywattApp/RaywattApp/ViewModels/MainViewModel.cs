@@ -231,7 +231,7 @@ namespace RaywattApp.ViewModels
                 CommonUtil.Exit(DeviceStatus);
 
                 _angioManager.Instance.GetStream().Close();
-                AngioClient.CloseLiveAngioImageThread();
+                _angioManager.CloseLiveAngioImageThread();
 
                 // Server Off
                 Process[] processes = Process.GetProcessesByName("FGServer");

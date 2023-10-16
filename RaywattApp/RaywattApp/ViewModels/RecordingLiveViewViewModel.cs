@@ -164,7 +164,11 @@ namespace RaywattApp.ViewModels
 
             // Send Start Command
             if (DeviceStatus.IsAngioConnected)
-                _angioManager.Instance.GetStream().Write(_angioManager.startCommand, 0, _angioManager.startCommand.Length);
+            {
+                _angioManager.SetCommandPacket(CommandType.FGStarted);
+                _angioManager.Instance.GetStream().Write(_angioManager.commandBuffer, 0, _angioManager.commandBuffer.Length);
+
+            }
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -177,7 +181,10 @@ namespace RaywattApp.ViewModels
 
             //Send Stop Command
             if (DeviceStatus.IsAngioConnected)
-                _angioManager.Instance.GetStream().Write(_angioManager.stopCommand, 0, _angioManager.stopCommand.Length);
+            {
+                _angioManager.SetCommandPacket(CommandType.FGStopped);
+                _angioManager.Instance.GetStream().Write(_angioManager.commandBuffer, 0, _angioManager.commandBuffer.Length);
+            }
         }
 
         private void SetCondition()
