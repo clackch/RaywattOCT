@@ -1200,8 +1200,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterLoading);
 
 	// 1. Rotate BLDC Motor
-	int nVelocity = 600;
-	pMotor->PerformRun(nVelocity);
+	pMotor->PerformRun(config.bldcMotor.velocityLoad);
 
 	// 2. Move Step-Motor (Pullback)
 	if (pPullbackMotor->IsOpen()) {
@@ -1392,7 +1391,7 @@ int COCTSystem::connectRotaryJunction() {
 	bool result = true;
 
 	if (!m_pPullbackMotor->IsOpen()) {
-		m_pPullbackMotor->Open(config.stepMotor.rotaryJunction);
+		m_pPullbackMotor->Open(config.stepMotor.port);
 		Sleep(DELAY_BETWEEN_COMMAND);
 		m_pPullbackMotor->SetCurrent(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 		Sleep(DELAY_BETWEEN_COMMAND);
@@ -1400,18 +1399,18 @@ int COCTSystem::connectRotaryJunction() {
 	}
 
 	if (!m_pLaserModule->IsOpen()) {
-		result &= m_pLaserModule->Open(config.stepMotor.delayline);
+		result &= m_pLaserModule->Open(config.laserModule.port);
 		if (result) {
 			m_pLaserModule->SetVLD(0);
 			Sleep(500);
-			m_pLaserModule->SetVOA(VOA_DEFAULT_VALUE);
+			m_pLaserModule->SetVOA(config.laserModule.voaValue);
 			Sleep(500);
-			m_pLaserModule->MoveAbsolute(MotorIndex::DelayLine, 30000);
+			m_pLaserModule->MoveAbsolute(MotorIndex::DelayLine, config.laserModule.delayPosition);
 			while (m_pLaserModule->IsMoving(MotorIndex::DelayLine)) {
 				Sleep(10);
 			}
 			Sleep(500);
-			m_pLaserModule->MoveAbsolute(MotorIndex::Polarization, 0);
+			m_pLaserModule->MoveAbsolute(MotorIndex::Polarization, config.laserModule.polarPosition);
 		}
 		else
 		{
@@ -1591,12 +1590,13 @@ void COCTSystem::redrawCutView() {
 	}
 }
 void COCTSystem::laserOnOff(bool isOn) {
+	CConfiguration& config = CConfiguration::GetInstance();
 	CLaserController* pLaser = CLaserController::GetInstance();
 
 	pLaser->LaserOnOff(isOn);
 	
 	if (m_pLaserModule != nullptr && m_pLaserModule->IsOpen()) {
-		int vldPower = (isOn) ? VISIBLE_LASER_POWER : 0;
+		int vldPower = (isOn) ? config.laserModule.vldValue : 0;
 		m_pLaserModule->SetVLD(vldPower);
 	}
 }
