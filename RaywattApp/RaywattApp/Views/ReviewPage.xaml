@@ -359,12 +359,12 @@
                                                 </Grid.RowDefinitions>
                                                 <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center">
                                                     <Label Content="{Binding [Presentation], Source={StaticResource L10N}}" Foreground="{DynamicResource SideMenuTitleBrush}" Style="{DynamicResource Pretendard-Medium-12}" VerticalAlignment="Center"/>
-                                                    <component:IconButton Grid.Row="0" Grid.Column="1" Style="{StaticResource IconButton}" Icon="reset" Command="{Binding AdjustResetCommand}" HorizontalAlignment="Right"/>
+                                                    <component:IconButton Grid.Row="0" Grid.Column="1" Style="{StaticResource IconButton}" Icon="reset" Command="{Binding AdjustResetCommand}" HorizontalAlignment="Right" IsEnabled="{Binding DeviceStatus.IsOCTImagingDone}"/>
                                                 </Grid>
                                                 <Label Grid.Row="1" Grid.Column="0" Content="{Binding [Brightness], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleGray4Brush}" Style="{DynamicResource Pretendard-Medium-12}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <Slider Grid.Row="1" Grid.Column="1" Style="{DynamicResource SliderSimpleTooltip}" Value="{Binding Brightness}" Maximum="100" Minimum="0" TickFrequency="1" IsSnapToTickEnabled="True" LargeChange="1" SmallChange="1" VerticalAlignment="Center"/>
+                                                <Slider Grid.Row="1" Grid.Column="1" Style="{DynamicResource SliderSimpleTooltip}" Value="{Binding Brightness}" Maximum="100" Minimum="0" TickFrequency="1" IsSnapToTickEnabled="True" LargeChange="1" SmallChange="1" VerticalAlignment="Center" IsEnabled="{Binding DeviceStatus.IsOCTImagingDone}"/>
                                                 <Label Grid.Row="2" Grid.Column="0" Content="{Binding [Contrast], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleGray4Brush}" Style="{DynamicResource Pretendard-Medium-12}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <Slider Grid.Row="2" Grid.Column="1" Style="{DynamicResource SliderSimpleTooltip}" Value="{Binding Contrast}" Maximum="100" Minimum="0" TickFrequency="1" IsSnapToTickEnabled="True" LargeChange="1" SmallChange="1" VerticalAlignment="Center"/>
+                                                <Slider Grid.Row="2" Grid.Column="1" Style="{DynamicResource SliderSimpleTooltip}" Value="{Binding Contrast}" Maximum="100" Minimum="0" TickFrequency="1" IsSnapToTickEnabled="True" LargeChange="1" SmallChange="1" VerticalAlignment="Center" IsEnabled="{Binding DeviceStatus.IsOCTImagingDone}"/>
                                             </Grid>
                                         </StackPanel>
                                         <Grid Grid.Row="9" Margin="0,12,0,0" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}">

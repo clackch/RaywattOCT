@@ -20,6 +20,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
 using RaywattApp.Common.Angio;
+using System.Reflection.Metadata;
 
 namespace RaywattApp.ViewModels
 {
@@ -294,21 +295,24 @@ namespace RaywattApp.ViewModels
 
             if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
             {
-                List<string> recordingPages = new List<string>();
-                recordingPages.Add(Constants.RecordingLiveViewPage);
-                recordingPages.Add(Constants.RecordingCalibrationPage);
-                recordingPages.Add(Constants.RecordingPage);
-
-                if (recordingPages.Contains(Constants.CurrentPage))
-                {
-                    parameter.Clear();
-                    parameter["patient"] = Patient;
-                    parameter["prevStatus"] = PrevStatus;
-                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
-                }
-
                 CatheterUnlockReceiver();
             }            
+        }
+
+        private void LeaveFromRecording()
+        {
+            List<string> recordingPages = new List<string>();
+            recordingPages.Add(Constants.RecordingLiveViewPage);
+            recordingPages.Add(Constants.RecordingCalibrationPage);
+            recordingPages.Add(Constants.RecordingPage);
+
+            if (recordingPages.Contains(Constants.CurrentPage))
+            {
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["patient"] = Patient;
+                parameter["prevStatus"] = PrevStatus;
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
+            }
         }
 
         private void InitCatheterTimer()
@@ -345,6 +349,8 @@ namespace RaywattApp.ViewModels
             _log.Debug("CatheterUnlockReceiver");
 
             DeviceStatus.CatheterStatus = Constants.CatheterStatusUnloading;   //Unlock Receive
+
+            LeaveFromRecording();
 
             RayUnloadCatheter();
         }

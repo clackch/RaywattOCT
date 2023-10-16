@@ -26,13 +26,12 @@ namespace RaywattApp.ViewModels
         private readonly SqlManager? _sqlManager;
 
         private IDialogService? _dialogService;
-               
+
         private readonly TcpClientSingleton _tcpClientSingleton;
 
         private IList<Code> pullbackTypes;
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
-        private DispatcherTimer timerCheckCatheter = new DispatcherTimer();
 
         [ObservableProperty]
         private Patient _patient;
@@ -61,7 +60,7 @@ namespace RaywattApp.ViewModels
             get { return _selectedPullbackType; }
             set { _selectedPullbackType = value; SetPullback(); }
         }
-        
+
         private int _brightness;
         public int Brightness
         {
@@ -84,7 +83,7 @@ namespace RaywattApp.ViewModels
 
         private ICommand _cmdChangeViewMode;
         public ICommand CmdChangeViewMode
-        { 
+        {
             get { return _cmdChangeViewMode ?? (this._cmdChangeViewMode = new RelayCommand(ChangeViewMode)); }
         }
 
@@ -110,7 +109,7 @@ namespace RaywattApp.ViewModels
             _dialogService = dialogService;
 
             _tcpClientSingleton = tcpClientSingleton;
-            
+
             PullbackList = CodeDefinition.Codes["PBTY"];
 
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
@@ -125,10 +124,6 @@ namespace RaywattApp.ViewModels
                 Brightness = int.Parse(presents.FirstOrDefault(x => x.Key == "brightness").Value);
                 Contrast = int.Parse(presents.FirstOrDefault(x => x.Key == "contrast").Value);
             }
-
-            timerCheckCatheter.Interval = TimeSpan.FromMilliseconds(10);
-            timerCheckCatheter.Tick += new EventHandler(CheckCatheterStatus);
-            timerCheckCatheter.Start();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -150,7 +145,7 @@ namespace RaywattApp.ViewModels
                     SelectedPullbackType = PatientCase.PullbackType;
                     Brightness = PatientCase.Brightness;
                     Contrast = PatientCase.Contrast;
-                }                    
+                }
                 else
                 {
                     PatientCase = new PatientCase();
@@ -167,7 +162,7 @@ namespace RaywattApp.ViewModels
             }
 
             // Send Start Command
-            if(DeviceStatus.IsAngioConnected)
+            if (DeviceStatus.IsAngioConnected)
                 _tcpClientSingleton.Instance.GetStream().Write(_tcpClientSingleton.startCommand, 0, _tcpClientSingleton.startCommand.Length);
         }
 
@@ -178,9 +173,6 @@ namespace RaywattApp.ViewModels
 
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
-
-            if (timerCheckCatheter.IsEnabled)
-                timerCheckCatheter.Stop();
 
             //Send Stop Command
             if (DeviceStatus.IsAngioConnected)
@@ -239,7 +231,7 @@ namespace RaywattApp.ViewModels
                 parameter["title"] = _l10n["Information"];
                 parameter["message"] = _l10n["Select Pullback"];
                 var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-                    
+
                 return;
             }
 
@@ -250,7 +242,7 @@ namespace RaywattApp.ViewModels
         {
             DrawCrossSectionImage();
 
-            if(DeviceStatus.IsAngioConnected)
+            if (DeviceStatus.IsAngioConnected)
                 DrawAngioImage();
         }
 
@@ -281,7 +273,7 @@ namespace RaywattApp.ViewModels
 
             Code pullback = pullbackTypes.FirstOrDefault(x => x.Key == SelectedPullbackType);
 
-            if(pullback != null)
+            if (pullback != null)
             {
                 string[] temp = pullback.Buffer1.Split("|");
                 PbLength = temp[0];
@@ -291,17 +283,5 @@ namespace RaywattApp.ViewModels
             RaySetProperty(Property.PullbackDistance, Double.Parse(PbLength));
             RaySetProperty(Property.PullbackSpeed, Double.Parse(PbSpeed));
         }
-
-        private void CheckCatheterStatus(object sender, EventArgs e)
-        {
-            if (DeviceStatus.CatheterStatus != Constants.CatheterStatusLoaded)
-            {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["patient"] = this.Patient;
-                parameter["prevStatus"] = this.PrevStatus;
-                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
-            }
-        }
     }
 }
- 
