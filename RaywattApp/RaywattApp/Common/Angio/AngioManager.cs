@@ -226,11 +226,11 @@ namespace RaywattApp.Common.Angio
                 else if (command == (int)CommandType.FGBoardExist)
                 {
                     boardConnection = true;
-                    threadOnLiveAngioImage = false;
                 }
                 else if (command == (int)CommandType.FGBoardNotExist)
                 {
                     boardConnection = false;
+                    threadOnLiveAngioImage = false;
                 }
 
                 Array.Copy(tmpBuffer, Constants.commandPacketSize, tmpBuffer, 0, 20000000 - Constants.commandPacketSize);
