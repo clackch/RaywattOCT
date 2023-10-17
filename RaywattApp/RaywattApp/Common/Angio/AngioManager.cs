@@ -83,8 +83,7 @@ namespace RaywattApp.Common.Angio
             {
                 ProcessStartInfo psi = new ProcessStartInfo();
                 Process p = new Process();
-                // psi.FileName = Constants.FGFolderPath + "\\FGServer.exe";
-                psi.FileName = "C:\\github\\Sejong\\FrameGrabber\\FGServer\\x64\\Release\\FGServer.exe";
+                psi.FileName = Constants.FGFolderPath + "\\FGServer.exe";
             
                 psi.CreateNoWindow = true;
                 p.StartInfo = psi;
