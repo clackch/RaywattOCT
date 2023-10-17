@@ -18,6 +18,7 @@ namespace RaywattApp.Common.Angio
 
     public enum CommandType
     {
+        FGUnknown,
         FGStarted,
         FGStopped,
         FGAskPort,
@@ -39,20 +40,20 @@ namespace RaywattApp.Common.Angio
 
         public Mat imgAngio;
 
-        public bool serverConnection; // Server - Client Connection
-        public bool angioConnection; // FG Angio Conenction
-        public bool boardConnection; // FG Board Connection
+        private bool serverConnection; // Server - Client Connection
+        private bool angioConnection; // FG Angio Conenction
+        private CommandType boardConnection; // FG Board Connection
 
-        public byte[] buffer;
-        public byte[] tmpBuffer;
+        private byte[] buffer;
+        private byte[] tmpBuffer;
 
-        public int bytesRead;
-        public int tmpBufferLen;
+        private int bytesRead;
+        private int tmpBufferLen;
 
-        public byte[] commandBuffer = { 0x3A, (byte)PacketType.Command, (byte)CommandType.FGStarted, 0x00, 0xA3 };
+        private byte[] commandBuffer = { 0x3A, (byte)PacketType.Command, (byte)CommandType.FGUnknown, 0x00, 0xA3 };
 
-        public Thread threadFuncLiveAngioImage;
-        public bool threadOnLiveAngioImage;
+        private Thread threadFuncLiveAngioImage;
+        private bool threadOnLiveAngioImage;
 
         public AngioManager()
         {
@@ -64,7 +65,7 @@ namespace RaywattApp.Common.Angio
             serverConnection = false;
 
             angioConnection = false;
-            boardConnection = false;
+            boardConnection = CommandType.FGUnknown;
 
             buffer = new byte[10000000];
             tmpBuffer = new byte[20000000];
@@ -75,6 +76,7 @@ namespace RaywattApp.Common.Angio
 
             ConnectToServer();
         }
+
         private void ConnectToServer()
         {
             // Angio Server On
@@ -84,7 +86,7 @@ namespace RaywattApp.Common.Angio
                 ProcessStartInfo psi = new ProcessStartInfo();
                 Process p = new Process();
                 psi.FileName = Constants.FGFolderPath + "\\FGServer.exe";
-            
+                
                 psi.CreateNoWindow = true;
                 p.StartInfo = psi;
                 p.Start();
@@ -100,17 +102,18 @@ namespace RaywattApp.Common.Angio
             AskBoardConnection();
             AskAngioConnection();
         }
-        public void AskAngioConnection()
+
+        private void AskAngioConnection()
         {
             SendCommandPacket(CommandType.FGAskPort);
         }
 
-        public void AskBoardConnection()
+        private void AskBoardConnection()
         {
             SendCommandPacket(CommandType.FGAskBoard);
         }
 
-        public void ThreadFuncLiveAngioImage()
+        private void ThreadFuncLiveAngioImage()
         {
             while (threadOnLiveAngioImage)
             {
@@ -118,7 +121,7 @@ namespace RaywattApp.Common.Angio
             }
         }
 
-        public void ActivateClientThread()
+        private void ActivateClientThread()
         {
             threadOnLiveAngioImage = true;
             threadFuncLiveAngioImage = new Thread(() => ThreadFuncLiveAngioImage());
@@ -196,13 +199,13 @@ namespace RaywattApp.Common.Angio
         private void CommandPacketProcess()
         {
             int offset = 2;
-            int command = tmpBuffer[offset++];
+            byte command = tmpBuffer[offset++];
             char checksum = BitConverter.ToChar(tmpBuffer, offset++);
             char eof = BitConverter.ToChar(tmpBuffer, offset++);
 
             if ((byte)checksum == CalcCheckSum(tmpBuffer, 3))
             {
-                if (command == (int)CommandType.FGAngioDisconnected)
+                if (command == (byte)CommandType.FGAngioDisconnected)
                 {
                     angioConnection = false;
                     imgAngio = ShowNoSignal();
@@ -212,7 +215,7 @@ namespace RaywattApp.Common.Angio
                         ViewModelBase._deviceStatus.IsAngioConnected = angioConnection;
                     });
                 }
-                else if (command == (int)CommandType.FGAngioConnected)
+                else if (command == (byte)CommandType.FGAngioConnected)
                 {
                     angioConnection = true;
 
@@ -221,13 +224,13 @@ namespace RaywattApp.Common.Angio
                         ViewModelBase._deviceStatus.IsAngioConnected = angioConnection;
                     });
                 }
-                else if (command == (int)CommandType.FGBoardExist)
+                else if (command == (byte)CommandType.FGBoardExist)
                 {
-                    boardConnection = true;
+                    boardConnection = CommandType.FGBoardExist;
                 }
-                else if (command == (int)CommandType.FGBoardNotExist)
+                else if (command == (byte)CommandType.FGBoardNotExist)
                 {
-                    boardConnection = false;
+                    boardConnection = (CommandType)CommandType.FGBoardNotExist;
                     threadOnLiveAngioImage = false;
                 }
 
@@ -270,7 +273,8 @@ namespace RaywattApp.Common.Angio
             }
             return PacketType.Nothing;
         }
-        public Mat ShowNoSignal()
+
+        private Mat ShowNoSignal()
         {
             Mat image = new Mat(1080, 1920, MatType.CV_8UC3);
             image.SetTo(new Scalar(0, 0, 0));
@@ -285,6 +289,7 @@ namespace RaywattApp.Common.Angio
 
             return image;
         }
+
         private byte CalcCheckSum(byte[] buffer, int size)
         {
             size--;
@@ -295,7 +300,6 @@ namespace RaywattApp.Common.Angio
             }
             return (byte)~csum;
         }
-
 
         public void SendCommandPacket(CommandType commandType)
         {
