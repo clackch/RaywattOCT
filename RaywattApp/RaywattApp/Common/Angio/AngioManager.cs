@@ -18,12 +18,12 @@ namespace RaywattApp.Common.Angio
 
     public enum CommandType
     {
-        FGConnected, // Port
-        FGDisconnected, // Port
         FGStarted,
         FGStopped,
         FGAskPort,
         FGAskBoard,
+        FGAngioConnected, // Port
+        FGAngioDisconnected, // Port
         FGBoardExist,
         FGBoardNotExist,
         FGNothing,
@@ -39,8 +39,8 @@ namespace RaywattApp.Common.Angio
 
         public Mat imgAngio;
 
-        public bool isConnected; // Server - Client Connection
-        public bool portConnection; // FG Conenction
+        public bool serverConnection; // Server - Client Connection
+        public bool portConnection; // FG Angio Conenction
         public bool boardConnection; // FG Board Connection
 
         public byte[] buffer;
@@ -61,7 +61,7 @@ namespace RaywattApp.Common.Angio
 
             imgAngio = ShowNoSignal();
 
-            isConnected = false;
+            serverConnection = false;
 
             portConnection = false;
             boardConnection = false;
@@ -95,7 +95,7 @@ namespace RaywattApp.Common.Angio
             _tcpClient = new TcpClient(serverIP, serverPort);
 
             if (Instance.Connected == true)
-                isConnected = true;
+                serverConnection = true;
 
             ActivateClientThread();
             AskBoardConnection();
@@ -204,7 +204,7 @@ namespace RaywattApp.Common.Angio
 
             if ((byte)checksum == CalcCheckSum(tmpBuffer, 3))
             {
-                if (command == (int)CommandType.FGDisconnected)
+                if (command == (int)CommandType.FGAngioDisconnected)
                 {
                     portConnection = false;
                     imgAngio = ShowNoSignal();
@@ -214,7 +214,7 @@ namespace RaywattApp.Common.Angio
                         ViewModelBase._deviceStatus.IsAngioConnected = portConnection;
                     });
                 }
-                else if (command == (int)CommandType.FGConnected)
+                else if (command == (int)CommandType.FGAngioConnected)
                 {
                     portConnection = true;
 

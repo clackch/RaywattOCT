@@ -180,7 +180,7 @@ namespace RaywattApp.ViewModels
                 timerUpdateImage.Stop();
 
             //Send Stop Command
-            if (DeviceStatus.IsAngioConnected)
+            if (!_isRecording)
             {
                 _angioManager.SetCommandPacket(CommandType.FGStopped);
                 _angioManager.Instance.GetStream().Write(_angioManager.commandBuffer, 0, _angioManager.commandBuffer.Length);
