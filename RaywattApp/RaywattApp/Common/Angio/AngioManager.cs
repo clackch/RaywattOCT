@@ -5,7 +5,6 @@ using System.Threading;
 using RaywattApp.Common.Bases;
 using System;
 using System.Runtime.InteropServices;
-using System.Printing.IndexedProperties;
 
 namespace RaywattApp.Common.Angio
 {
