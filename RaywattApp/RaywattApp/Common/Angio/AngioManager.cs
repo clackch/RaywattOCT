@@ -35,12 +35,12 @@ namespace RaywattApp.Common.Angio
         private int serverPort;
 
         private TcpClient _tcpClient;
-        public TcpClient Instance => _tcpClient;
+        private TcpClient Instance => _tcpClient;
 
         public Mat imgAngio;
 
         public bool serverConnection; // Server - Client Connection
-        public bool portConnection; // FG Angio Conenction
+        public bool angioConnection; // FG Angio Conenction
         public bool boardConnection; // FG Board Connection
 
         public byte[] buffer;
@@ -63,7 +63,7 @@ namespace RaywattApp.Common.Angio
 
             serverConnection = false;
 
-            portConnection = false;
+            angioConnection = false;
             boardConnection = false;
 
             buffer = new byte[10000000];
@@ -99,18 +99,16 @@ namespace RaywattApp.Common.Angio
 
             ActivateClientThread();
             AskBoardConnection();
-            AskPortConnection();
+            AskAngioConnection();
         }
-        public void AskPortConnection()
+        public void AskAngioConnection()
         {
-            SetCommandPacket(CommandType.FGAskPort);
-            Instance.GetStream().Write(commandBuffer, 0, commandBuffer.Length);
+            SendCommandPacket(CommandType.FGAskPort);
         }
 
         public void AskBoardConnection()
         {
-            SetCommandPacket(CommandType.FGAskBoard);
-            Instance.GetStream().Write(commandBuffer, 0, commandBuffer.Length);
+            SendCommandPacket(CommandType.FGAskBoard);
         }
 
         public void ThreadFuncLiveAngioImage()
@@ -128,8 +126,10 @@ namespace RaywattApp.Common.Angio
             threadFuncLiveAngioImage.Start();
         }
 
-        public void CloseLiveAngioImageThread()
+        public void CloseAngioManager()
         {
+            Instance.GetStream().Close();
+
             threadOnLiveAngioImage = false;
             threadFuncLiveAngioImage.Join();
         }
@@ -156,7 +156,6 @@ namespace RaywattApp.Common.Angio
             }
             catch (Exception ex)
             {
-                //_angioManager.isConnected = false;
                 Debug.WriteLine(ex.Message);
                 return false;
             }
@@ -206,21 +205,21 @@ namespace RaywattApp.Common.Angio
             {
                 if (command == (int)CommandType.FGAngioDisconnected)
                 {
-                    portConnection = false;
+                    angioConnection = false;
                     imgAngio = ShowNoSignal();
 
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
-                        ViewModelBase._deviceStatus.IsAngioConnected = portConnection;
+                        ViewModelBase._deviceStatus.IsAngioConnected = angioConnection;
                     });
                 }
                 else if (command == (int)CommandType.FGAngioConnected)
                 {
-                    portConnection = true;
+                    angioConnection = true;
 
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
-                        ViewModelBase._deviceStatus.IsAngioConnected = portConnection;
+                        ViewModelBase._deviceStatus.IsAngioConnected = angioConnection;
                     });
                 }
                 else if (command == (int)CommandType.FGBoardExist)
@@ -287,7 +286,7 @@ namespace RaywattApp.Common.Angio
 
             return image;
         }
-        byte CalcCheckSum(byte[] buffer, int size)
+        private byte CalcCheckSum(byte[] buffer, int size)
         {
             size--;
             byte csum = 0;
@@ -298,11 +297,14 @@ namespace RaywattApp.Common.Angio
             return (byte)~csum;
         }
 
-        public void SetCommandPacket(CommandType commandType)
+
+        public void SendCommandPacket(CommandType commandType)
         {
             commandBuffer[2] = (byte)commandType;
             byte checksum = CalcCheckSum(commandBuffer, 3);
             commandBuffer[3] = checksum;
+
+            Instance.GetStream().Write(commandBuffer, 0, commandBuffer.Length);
         }
     }
 }

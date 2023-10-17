@@ -165,9 +165,7 @@ namespace RaywattApp.ViewModels
             // Send Start Command
             if (DeviceStatus.IsAngioConnected)
             {
-                _angioManager.SetCommandPacket(CommandType.FGStarted);
-                _angioManager.Instance.GetStream().Write(_angioManager.commandBuffer, 0, _angioManager.commandBuffer.Length);
-
+                _angioManager.SendCommandPacket(CommandType.FGStarted);
             }
         }
 
@@ -182,8 +180,7 @@ namespace RaywattApp.ViewModels
             //Send Stop Command
             if (!_isRecording)
             {
-                _angioManager.SetCommandPacket(CommandType.FGStopped);
-                _angioManager.Instance.GetStream().Write(_angioManager.commandBuffer, 0, _angioManager.commandBuffer.Length);
+                _angioManager.SendCommandPacket(CommandType.FGStopped);
             }
         }
 
