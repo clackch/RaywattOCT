@@ -26,6 +26,15 @@ bool CArduinoController::Open(tstring strPort)
 
 	return result;
 }
+bool CArduinoController::IsMoving()
+{
+	if (m_fPosition != m_fTargetPosition)
+	{
+		readResponse();
+	}
+
+	return (m_fPosition == m_fTargetPosition);
+}
 bool CArduinoController::SetCurrent(StepMotorIndex idx, int nPosition)
 {
 	char strCommand[MAX_PATH];
@@ -41,15 +50,6 @@ bool CArduinoController::SetCurrent(StepMotorIndex idx, int nPosition)
 	}
 
 	return result;
-}
-bool CArduinoController::IsMoving()
-{
-	if (m_fPosition != m_fTargetPosition)
-	{
-		readResponse();
-	}
-
-	return (m_fPosition == m_fTargetPosition);
 }
 bool CArduinoController::MoveAbsolute(StepMotorIndex idx, int nPos)
 {

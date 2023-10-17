@@ -11,7 +11,6 @@
 #include "LaserController.h"
 #include "MotorController.h"
 #include "ZaberController.h"
-#include "ArduinoController.h"
 #include "RayLearning.h"
 #include "ImagingSession.h"
 #include "LaserModule.h"
@@ -1131,7 +1130,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
-	CStepMotorController* pPullbackMotor = pSystem->m_pPullbackMotor;
+	CArduinoController* pPullbackMotor = pSystem->m_pPullbackMotor;
 	IImaging::Setting settingPullback = pSystem->m_pImagingPullback->GetSetting();
 	int pullbackTime = ((double)config.stepMotor.pullbackDistance / (double)config.stepMotor.pullbackSpeed) * 1000;
 
@@ -1195,7 +1194,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
-	CStepMotorController* pPullbackMotor = pSystem->m_pPullbackMotor;
+	CArduinoController* pPullbackMotor = pSystem->m_pPullbackMotor;
 
 	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterLoading);
 
@@ -1244,7 +1243,7 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
-	CStepMotorController* pPullbackMotor = pSystem->m_pPullbackMotor;
+	CArduinoController* pPullbackMotor = pSystem->m_pPullbackMotor;
 
 	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterUnloading);
 

@@ -7,8 +7,6 @@
 * Reference : https://www.zaber.com/protocol-manual?device=X-LSQ075B-E01&peripheral=N%2FA&version=7.29&protocol=ASCII#topic_physical_units
 */
 
-#define DELAYLINE_BACKWARD_POSITION	(-400)
-#define DELAYLINE_FORWARD_POSITION		(400)
 #define ZABER_MICROSTEP_SIZE				0.49609375f							// um
 #define ZABER_SCALE_MM_TO_POSITION			(1000.f / ZABER_MICROSTEP_SIZE)		// 1000um = 1mm
 #define ZABER_SCALE_MMS_TO_VELOCITY			(1.6384f / ZABER_MICROSTEP_SIZE * 1000)
@@ -23,11 +21,12 @@ public:
 	virtual ~CZaberController();
 
 	virtual bool Open(tstring strPort);
-	virtual bool SetCurrent(int nPos);
 	virtual bool IsMoving();
-	virtual bool MoveAbsolute(int nPos);
-	virtual bool MoveRelative(int nOffset);
-	virtual bool SetSpeed(int nVelocity);
+
+	bool SetCurrent(int nPos);
+	bool MoveAbsolute(int nPos);
+	bool MoveRelative(int nOffset);
+	bool SetSpeed(int nVelocity);
 
 	bool Idle();
 	bool MoveMicrometer(long long nPos);

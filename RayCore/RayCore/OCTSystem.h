@@ -1,7 +1,7 @@
 #pragma once
 #include "define.h"
 #include "AcquisitionDevice.h"
-#include "StepMotorController.h"
+#include "ArduinoController.h"
 #include "MessageService.h"
 #include <vector>
 #include <mutex>
@@ -67,7 +67,7 @@ private:
 	CRITICAL_SECTION m_csSession;
 
 	// Rotary Junction
-	CStepMotorController* m_pPullbackMotor;
+	CArduinoController* m_pPullbackMotor;
 
 	// Laser Module
 	CLaserModule* m_pLaserModule;
