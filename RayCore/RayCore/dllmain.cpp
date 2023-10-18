@@ -156,8 +156,8 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
     }
 }
 
-_declspec(dllexport) void* RayGetVolumeData() {
-    return octSystem.GetVolumeData();
+_declspec(dllexport) void* RayGetVolumeData(void* pLumenContours) {
+    return octSystem.GetVolumeData(pLumenContours);
 }
 _declspec(dllexport) RayError RayStartLumenDetection() {
     return octSystem.StartLumenDetection();

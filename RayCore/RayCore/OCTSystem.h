@@ -113,7 +113,7 @@ public:
 	RayError UnregisterImageCallback();
 	RayError RegisterDetectionCallback(FunctionObjPtr cbObjectDetection);
 	RayError UnregisterDetectionCallback();
-	void* GetVolumeData();
+	void* GetVolumeData(void* pLumenContours = nullptr);
 	RayError StartLumenDetection();
 	RayError OpenImage(char* strFilePath);
 	RayError CloseImage();

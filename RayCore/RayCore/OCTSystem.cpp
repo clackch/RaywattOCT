@@ -555,10 +555,35 @@ RayError COCTSystem::UnregisterDetectionCallback() {
 /*
 * GetVolumeData
 */
-void* COCTSystem::GetVolumeData() {
+void* COCTSystem::GetVolumeData(void* pLumenContours) {
 	if (m_curState == RayScannerState::Review)
 	{
-		if (m_reviewSession[SESSION_REVIEW] != nullptr) return m_reviewSession[SESSION_REVIEW]->GetVolumeData();
+		if (m_reviewSession[SESSION_REVIEW] != nullptr) {
+			void* pVolumeData = m_reviewSession[SESSION_REVIEW]->GetVolumeData();
+
+			// remove lumen area from volume data
+			if (pLumenContours != nullptr)
+			{
+				CConfiguration& config = CConfiguration::GetInstance();
+				int nDiameter = config.volume.size;
+				int nFrames = m_reviewSession[SESSION_REVIEW]->GetImageDepth();
+
+				for (int i = 0; i < nFrames; i++) {
+					int nOffset = (nDiameter * nDiameter) * i;
+					cv::Mat imgOCT = cv::Mat(nDiameter, nDiameter, CV_8UC1, ((char*)pVolumeData) + nOffset);
+					cv::Mat imgLumen = cv::Mat(nDiameter, nDiameter, CV_8UC1, ((char *)pLumenContours) + nOffset);
+
+					cv::Mat imgMask;
+					cv::bitwise_not(imgLumen, imgMask);
+
+					cv::Mat imgOrigin = imgOCT.clone();
+					memset(imgOCT.data, 0x00, (nDiameter * nDiameter));
+					cv::copyTo(imgOrigin, imgOCT, imgMask);
+				}
+			}
+
+			return pVolumeData;
+		}
 	}
 	return nullptr;
 }
