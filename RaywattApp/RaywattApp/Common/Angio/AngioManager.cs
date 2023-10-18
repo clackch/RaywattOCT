@@ -54,6 +54,9 @@ namespace RaywattApp.Common.Angio
         private Thread threadFuncLiveAngioImage;
         private bool threadOnLiveAngioImage;
 
+        private Thread threadFuncSaveAngioFrames;
+        private bool threadOnSaveAngioFrames;
+
         public AngioManager()
         {
             serverIP = "127.0.0.1";
@@ -97,7 +100,7 @@ namespace RaywattApp.Common.Angio
             if (Instance.Connected == true)
                 serverConnection = true;
 
-            ActivateClientThread();
+            ActivateClientThreads();
             AskBoardConnection();
             AskAngioConnection();
         }
@@ -120,7 +123,7 @@ namespace RaywattApp.Common.Angio
             }
         }
 
-        private void ActivateClientThread()
+        private void ActivateClientThreads()
         {
             threadOnLiveAngioImage = true;
             threadFuncLiveAngioImage = new Thread(() => ThreadFuncLiveAngioImage());
