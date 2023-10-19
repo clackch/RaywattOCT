@@ -7,7 +7,7 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>False</UseWindowsForms>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-	<OutputPath>bin\</OutputPath>
+  	<OutputPath>bin\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
