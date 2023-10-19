@@ -8,6 +8,8 @@ private:
 	cv::Mat dematXMap;
 	cv::Mat dematYMap;
 	std::chrono::system_clock::time_point m_start, m_end;
+	cv::Mat imageOrigin;
+	cv::Mat imageMask;
 
 public:
 	CTIFFImaging(Setting, CMessageService*);

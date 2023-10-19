@@ -1,7 +1,7 @@
 #pragma once
 #include "define.h"
 #include "AcquisitionDevice.h"
-#include "StepMotorController.h"
+#include "ArduinoController.h"
 #include "MessageService.h"
 #include <vector>
 #include <mutex>
@@ -64,9 +64,10 @@ private:
 	SessionType m_curSession;
 	CImagingSession* m_reviewSession[MAX_SESSION_NUM];
 	CImagingSession* m_openedSession;
+	CRITICAL_SECTION m_csSession;
 
 	// Rotary Junction
-	CStepMotorController* m_pPullbackMotor;
+	CArduinoController* m_pPullbackMotor;
 
 	// Laser Module
 	CLaserModule* m_pLaserModule;
@@ -112,7 +113,7 @@ public:
 	RayError UnregisterImageCallback();
 	RayError RegisterDetectionCallback(FunctionObjPtr cbObjectDetection);
 	RayError UnregisterDetectionCallback();
-	void* GetVolumeData();
+	void* GetVolumeData(void* pLumenContours = nullptr);
 	RayError StartLumenDetection();
 	RayError OpenImage(char* strFilePath);
 	RayError CloseImage();
@@ -170,6 +171,7 @@ private:
 	void closeAllSessions();
 	void setBrightnessContrastAllSessions();
 	void redrawCutView();
+	void laserOnOff(bool isOn);
 
 protected:
 	LRESULT OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam);

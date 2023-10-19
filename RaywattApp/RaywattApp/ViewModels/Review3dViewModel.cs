@@ -273,12 +273,13 @@ namespace RaywattApp.ViewModels
             int depth = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total;
             IntPtr buffer = Marshal.AllocHGlobal(diameter * diameter * depth);
 
-            ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(), diameter, diameter, depth, 1, 1, 12.5);
-
             CommonUtil.ContoursToMemory(PatientCase.LumenContour, 
                 new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize), 
                 buffer, 
                 new OpenCvSharp.Size(diameter, diameter));
+
+            ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(buffer), diameter, diameter, depth, 1, 1, 12.5);
+
             ODSOCT_InputSurfaceParameter(Ray3DObject.Lumen, 10, 50, ".\\data\\lumen_tex.jpg");
             ODSOCT_InputData(Ray3DObject.Lumen, buffer, diameter, diameter, depth, 1, 1, 12.5);
 

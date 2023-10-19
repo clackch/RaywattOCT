@@ -4,7 +4,6 @@
 #include "MemoryStruct.h"
 
 #define MAX_VOLTAGE_RAW_VALUE	4095
-#define VISIBLE_LASER_POWER		3000
 
 enum class MotorIndex {
 	DelayLine = 2,

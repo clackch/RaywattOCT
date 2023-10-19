@@ -215,6 +215,9 @@ namespace RaywattApp.ViewModels
             }
 
             DeviceStatus.IsLumenSaved = true;
+
+            //Thread 종료 시, Review에서 OnRecvLongitude 받아서 Lumen Profile 생성하기 위함
+            RaySetProperty(Property.LongitudeDegree, PatientCase.IndicatorDegree);
         }
 
         private void Information()
