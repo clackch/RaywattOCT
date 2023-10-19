@@ -292,7 +292,7 @@
                                             <RowDefinition/>
                                         </Grid.RowDefinitions>
                                         <ToggleButton Grid.Row="1" IsChecked="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource InverseBooleanConverter}}" Style="{DynamicResource ContainedToggleBtnType2}" Command="{Binding ToggleAngioCommand}" CommandParameter="{StaticResource FalseValue}" Content="{Binding [OCT], Source={StaticResource L10N}}"/>
-                                        <ToggleButton Grid.Row="2" IsChecked="{Binding ReviewStatus.IsAngioOn}" Style="{DynamicResource ContainedToggleBtnType2}" Command="{Binding ToggleAngioCommand}" CommandParameter="{StaticResource TrueValue}" Content="{Binding [OCT + Angio], Source={StaticResource L10N}}" IsEnabled="False"/>
+                                        <ToggleButton Grid.Row="2" IsChecked="{Binding ReviewStatus.IsAngioOn}" Style="{DynamicResource ContainedToggleBtnType2}" Command="{Binding ToggleAngioCommand}" CommandParameter="{StaticResource TrueValue}" Content="{Binding [OCT + Angio], Source={StaticResource L10N}}"/>
                                         <Separator Grid.Row="4" Margin="0,0,0,0" Background="{DynamicResource SeparatorBrush}"/>
                                         <Grid Grid.Row="5">
                                             <Grid.ColumnDefinitions>
