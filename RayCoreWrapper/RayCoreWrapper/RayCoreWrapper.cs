@@ -171,7 +171,7 @@ namespace RaywattOCT
         [DllImport("RayCore.dll")]
         public static extern double RayGetProperty(Property property);
         [DllImport("RayCore.dll")]
-        public static extern IntPtr RayGetVolumeData();
+        public static extern IntPtr RayGetVolumeData(IntPtr lumenContours);
         [DllImport("RayCore.dll")]
         public static extern int RayStartLumenDetection();
         [DllImport("RayCore.dll")]

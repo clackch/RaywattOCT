@@ -226,13 +226,12 @@ CString CRaywattLabDlg::getLoadedFilePath() {
 CString CRaywattLabDlg::splitFileName(CString strFilePath) {
 	return strFilePath.Right(strFilePath.GetLength() - strFilePath.ReverseFind('\\') - 1);
 }
-CLabImaging* CRaywattLabDlg::createImaging() {
-	CConfiguration& config = CConfiguration::GetInstance();	
-	CLabImaging* pImaging = new CLabImaging(config.imaging, this);
+CLabImaging* CRaywattLabDlg::createImaging(IImaging::Setting imaging) {
+	CLabImaging* pImaging = new CLabImaging(imaging, this);
 
-	CCalibration* calibration = new CCalibration(config.imaging.nAScan, config.imaging.nFFTLength);
+	CCalibration* calibration = new CCalibration(imaging.nAScan, imaging.nFFTLength);
 	calibration->Initialize(m_strCurCalibration);
-	USHORT* background = readBackground(BACKGROUND_FILEPATH, config.imaging);
+	USHORT* background = readBackground(BACKGROUND_FILEPATH, imaging);
 
 	pImaging->Initialize(calibration, background);
 	pImaging->SetColor(m_chkImageHotColor);
@@ -454,6 +453,7 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_CHECK_INIT_MOTOR, &CRaywattLabDlg::OnBnClickedCheckInitMotor)
 	ON_BN_CLICKED(IDC_CHECK_INIT_STAGE, &CRaywattLabDlg::OnBnClickedCheckInitStage)
 	ON_BN_CLICKED(IDC_BUTTON_PULLBACK, &CRaywattLabDlg::OnBnClickedButtonPullback)
+	ON_BN_CLICKED(IDC_BUTTON_RESTART_ACQUISITION, &CRaywattLabDlg::OnBnClickedButtonRestartAcquisition)
 END_MESSAGE_MAP()
 
 LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
@@ -606,11 +606,11 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	int goodClockStart = 0;
 	int goodClockEnd = config.imaging.nAScan;
 
-	m_pImagingRealtime = createImaging();
+	m_pImagingRealtime = createImaging(config.imaging);
 	m_pImagingRealtime->SetGoodClockRange(goodClockStart, goodClockEnd);
 	m_pImagingRealtime->Start();
 
-	m_pImagingSimulate = createImaging();
+	m_pImagingSimulate = createImaging(config.imaging);
 	m_pImagingSimulate->SetGoodClockRange(goodClockStart, goodClockEnd);
 	m_pImagingSimulate->Start();
 
@@ -637,6 +637,10 @@ BOOL CRaywattLabDlg::OnInitDialog()
 
 	m_strCalibPath = AfxGetApp()->GetProfileString(_T("RECENT_SETTING"), _T("CALIB_PATH"), _T(""));
 	GetDlgItem(IDC_EDIT_CALIB_PATH)->SetWindowText(m_strCalibPath);
+
+	wchar_t strBuffer[MAX_PATH];
+	wsprintf(strBuffer, L"%d", config.acquisition.nBScan);
+	GetDlgItem(IDC_EDIT_BSCAN)->SetWindowText(strBuffer);
 
 	m_vCalibList.clear();
 	m_nCurCalibIndex = 0;
@@ -768,6 +772,7 @@ void CRaywattLabDlg::OnBnClickedButtonAdminInitialize()
 		GetDlgItem(IDC_BUTTON_ADMIN_INITIALIZE)->EnableWindow(FALSE);
 		GetDlgItem(IDC_BUTTON_SAVE_DATA)->EnableWindow(TRUE);
 		GetDlgItem(IDC_BUTTON_SAVE_CALIBRATION)->EnableWindow(TRUE);
+		GetDlgItem(IDC_BUTTON_RESTART_ACQUISITION)->EnableWindow(TRUE);
 	}
 	else {
 		AfxMessageBox(_T("[FAILED] Please check the device connection"));
@@ -902,7 +907,6 @@ void CRaywattLabDlg::OnBnClickedButtonSaveData()
 		for (int idx = 0; idx < nNumOfSamples; idx++) {
 			m_pDataWriter->WriteFrame(idx);
 			m_pImagingRealtime->Process(m_pDataWriter->GetSample(idx));
-			m_pImagingRealtime->PostProcess(m_pImagingRealtime->GetRectangleImage());
 
 			USHORT* pFFTData = m_pImagingRealtime->GetScopeFFTData();
 			USHORT nPeakValue;
@@ -959,7 +963,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveVideo()
 	CString strAviPath = strDataPath;
 	strAviPath.Replace(_T(".bin"), _T(".avi"));
 
-	CLabImaging* pImaging = createImaging();
+	CLabImaging* pImaging = createImaging(config.imaging);
 
 	CDataReader* pReader = new CDataReader();
 	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nAScan * config.acquisition.nBScan);
@@ -971,7 +975,6 @@ void CRaywattLabDlg::OnBnClickedButtonSaveVideo()
 	videoWriter.StartRecording(strAviPath, width, height);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
 		pImaging->Process(pReader->GetSample(i));
-		pImaging->PostProcess(pImaging->GetRectangleImage());
 		videoWriter.PushToBuffer(((isCircle) ? pImaging->GetCircleImage() : pImaging->GetRectangleImage()));
 	}
 	videoWriter.StopRecording();
@@ -999,7 +1002,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveTif()
 	CString strTifPath = strDataPath;
 	strTifPath.Replace(_T(".bin"), _T(".tif"));
 
-	CLabImaging* pImaging = createImaging();
+	CLabImaging* pImaging = createImaging(config.imaging);
 
 	CDataReader* pReader = new CDataReader();
 	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nAScan * config.acquisition.nBScan);
@@ -1008,7 +1011,6 @@ void CRaywattLabDlg::OnBnClickedButtonSaveTif()
 	bool isCircle = (m_radioImageShape == 0);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
 		pImaging->Process(pReader->GetSample(i));
-		pImaging->PostProcess(pImaging->GetRectangleImage());
 
 		tiffWriter.SaveFrame(((isCircle) ? pImaging->GetCircleImage() : pImaging->GetRectangleImage()));
 	}
@@ -1037,7 +1039,7 @@ void CRaywattLabDlg::OnBnClickedButtonSavePng()
 	CString strPngDirectoryW = strDataPath.Left(strDataPath.GetLength() - 4);
 	_tmkdir(strPngDirectoryW.GetBuffer());
 
-	CLabImaging* pImaging = createImaging();
+	CLabImaging* pImaging = createImaging(config.imaging);
 
 	CDataReader* pReader = new CDataReader();
 	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nAScan * config.acquisition.nBScan);
@@ -1045,7 +1047,6 @@ void CRaywattLabDlg::OnBnClickedButtonSavePng()
 	bool isCircle = (m_radioImageShape == 0);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
 		pImaging->Process(pReader->GetSample(i));
-		pImaging->PostProcess(pImaging->GetRectangleImage());
 
 		CStringA strPngDirectory(strPngDirectoryW);
 		char strPngName[MAX_PATH];
@@ -1283,4 +1284,32 @@ void CRaywattLabDlg::OnBnClickedButtonPullback()
 {
 	GetDlgItem(IDC_BUTTON_PULLBACK)->EnableWindow(FALSE);
 	CUtility::StartThread(threadPullback, m_pThreadPullback, this);
+}
+
+void CRaywattLabDlg::OnBnClickedButtonRestartAcquisition()
+{
+	CString strBuffer = _T("");
+	GetDlgItem(IDC_EDIT_BSCAN)->GetWindowText(strBuffer);
+	int nBScan = _ttoi64(strBuffer);
+
+	if (nBScan <= 0) return;
+
+	IImaging::Setting imaging = m_pImagingRealtime->GetSetting();
+	imaging.Set(imaging.nAScan, nBScan);
+
+	// stop acquisition & imaging
+	m_pAcqDevice->StopAcquisition();
+	m_pImagingRealtime->Stop();
+	delete m_pImagingRealtime;
+	
+	// re-allocate imaging
+	m_pImagingRealtime = createImaging(imaging);
+	m_pImagingRealtime->Start();
+
+	CATSDevice::Setting acquire = ((CATSDevice*)m_pAcqDevice)->GetSetting();
+	acquire.nAScan = imaging.nAScan;
+	acquire.nBScan = imaging.nBScan;
+	((CATSDevice*)m_pAcqDevice)->SetSetting(acquire);
+	m_pAcqDevice->SetImaging(m_pImagingRealtime);
+	m_pAcqDevice->StartAcquisition();
 }

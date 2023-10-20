@@ -460,11 +460,11 @@ namespace RaywattApp.ViewModels
 
             LumenContourProcess(frame);
 
-            //TODO - ML detection에서 Calcium/Sidebranch 가져오도록 개발되면 삭제 필요
-            GetMlData();
-
             if (ReviewStatus.NumberOfFrames - 1 == frame)
             {
+                //TODO - ML detection에서 Calcium/Sidebranch 가져오도록 개발되면 삭제 필요
+                GetMlData();
+
                 if (ReviewStatus.IsContourStentOn)
                     LumenContourCommand = Constants.LumenContourDraw;
                 else
@@ -474,7 +474,17 @@ namespace RaywattApp.ViewModels
 
                 DeviceStatus.IsLumenSaved = true;
 
-                UpdateLumenProfile();
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    UpdateLumenProfile();
+                });
+            }
+            else
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    DrawLumenProfile(frame);
+                });
             }
         }
 
@@ -770,7 +780,7 @@ namespace RaywattApp.ViewModels
                 if (IsChangedLumenProfileValue())
                 {
                     MinimalValueChanged();
-                    DrawLumenProfile();
+                    DrawLumenProfile(longitudeFrameInfo.curFrame - 1);
                     SetLumenProfileValue();
                 }
             }
@@ -958,7 +968,7 @@ namespace RaywattApp.ViewModels
 
         protected override void UpdateLumenProfile()
         {
-            if (DeviceStatus.IsLumenLoaded && !this.isLumenProfileInit)
+            if (DeviceStatus.IsLumenLoaded && DeviceStatus.IsLumenSaved && !this.isLumenProfileInit)
             {
                 // when generating longitude image is completed
                 if (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame)
@@ -971,7 +981,7 @@ namespace RaywattApp.ViewModels
 
                     this.isLumenProfileInit = true;
                 }
-                else if (DeviceStatus.IsLumenSaved && !this.isLumenLoadedInit)
+                else if (!this.isLumenLoadedInit)
                 {
                     int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
                     int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
@@ -979,17 +989,17 @@ namespace RaywattApp.ViewModels
                     this.isLumenLoadedInit = true;
                 }
 
-                DrawLumenProfile();
+                DrawLumenProfile(longitudeFrameInfo.curFrame - 1);
             }
         }
 
-        private void DrawLumenProfile()
+        private void DrawLumenProfile(int totalFrame)
         {
             int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
             int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
             //Test
             List<int> appositionFrames = new List<int>() { 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
-            imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, frameProximal, frameDistal, CommonUtil.IsPostCase(PatientCase.Procedure), appositionFrames, longitudeFrameInfo.curFrame - 1);
+            imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, frameProximal, frameDistal, CommonUtil.IsPostCase(PatientCase.Procedure), appositionFrames, totalFrame);
             DrawLumenProfileImage();
 
             List<int> colorFrames = new List<int>();
@@ -1001,13 +1011,13 @@ namespace RaywattApp.ViewModels
             {
                 colorFrames = CommonUtil.GetExpansionList(LumenContours, frameProximal, frameDistal, Section.RefArea, PatientCase.ExpansionThreshold);
             }
-            imglumenProfileExtra = CommonUtil.MakeLumenProfileImageExtra(ReviewStatus.NumberOfFrames, colorFrames, CommonUtil.IsPreCase(PatientCase.Procedure), longitudeFrameInfo.curFrame - 1);
+            imglumenProfileExtra = CommonUtil.MakeLumenProfileImageExtra(ReviewStatus.NumberOfFrames, colorFrames, CommonUtil.IsPreCase(PatientCase.Procedure), totalFrame);
             LumenProfileImageExtra = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileExtra);
         }
 
         private void DrawCalciumIndicator()
         {
-            if (LumenContours == null || LumenContours.Count == 0)
+            if (LumenContours == null || LumenContours.Count == 0 || FrameNumber < 0 || LumenContours[FrameNumber].Calcium == null)
                 return;
 
             CalciumIndicator = CommonUtil.DrawCalciumIndicator(LumenContours[FrameNumber].Calcium.List, Constants.CalciumIndicatorColor, (int)Constants.CalciumIndicatorSize);
@@ -1172,7 +1182,7 @@ namespace RaywattApp.ViewModels
                     if (IsChangedLumenProfileValue())
                     {
                         MinimalValueChanged();
-                        DrawLumenProfile();
+                        DrawLumenProfile(longitudeFrameInfo.curFrame - 1);
                         SetLumenProfileValue();
                     }
                 }

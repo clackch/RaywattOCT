@@ -8,6 +8,9 @@
     <!--  true이면 안보이고, false이면 보임  -->
     <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityReverseConverter" FalseValue="Visible" TrueValue="Collapsed" />
 
+    <!--  Bool To Enable Converter  -->
+    <converters:BoolToEnableConverter x:Key="BoolToEnableConverter" />
+
     <!-- Radio Button Converter -->
     <converters:RadioButtonConverter x:Key="RadioButtonConverter" />
 
@@ -115,5 +118,8 @@
 
     <!--  Not Null To Visibility Conveter  -->
     <converters:NotNullToVisibilityConveter x:Key="NotNullToVisibilityConveter" />
+
+    <!--  IsTestMode Converter  -->
+    <converters:IsTestModeConverter x:Key="IsTestModeConverter" />
 
 </ResourceDictionary>

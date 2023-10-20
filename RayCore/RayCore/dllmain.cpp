@@ -156,8 +156,8 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
     }
 }
 
-_declspec(dllexport) void* RayGetVolumeData() {
-    return octSystem.GetVolumeData();
+_declspec(dllexport) void* RayGetVolumeData(void* pLumenContours) {
+    return octSystem.GetVolumeData(pLumenContours);
 }
 _declspec(dllexport) RayError RayStartLumenDetection() {
     return octSystem.StartLumenDetection();
@@ -191,6 +191,8 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     {
     case DLL_PROCESS_ATTACH:
     case DLL_THREAD_ATTACH:
+        //AllocConsole();
+        //freopen("CONOUT$", "w", stdout);
     case DLL_THREAD_DETACH:
     case DLL_PROCESS_DETACH:
         break;

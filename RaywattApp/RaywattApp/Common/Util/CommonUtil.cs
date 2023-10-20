@@ -1277,10 +1277,16 @@ namespace RaywattApp.Common.Util
                 {
                     contour.Add(new OpenCvSharp.Point(point.X, point.Y));
                 }
-                contours.Add(contour);
+                if (contour.Count > 0)
+                {
+                    contours.Add(contour);
+                }
 
                 imgLumen.SetTo(Scalar.Black);
-                Cv2.DrawContours(imgLumen, contours, -1, Scalar.White, -1);
+                if (contours.Count > 0)
+                {
+                    Cv2.DrawContours(imgLumen, contours, -1, Scalar.White, -1);
+                }
                 Cv2.Resize(imgLumen, imgResize, imgResize.Size());
 
                 Buffer.MemoryCopy((void*)imgResize.Data, (void*)(IntPtr.Add(buffer, i * frameSize)), frameSize, frameSize);
@@ -1480,6 +1486,14 @@ namespace RaywattApp.Common.Util
 
             BitmapSource bitmap = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgCalcium);
             return bitmap;
+        }
+
+        public static bool IsTestMode(Dictionary<string, bool> testMode, string key)
+        {
+            if (!testMode.ContainsKey(key))
+                return false;
+
+            return testMode[key];
         }
     }
 }

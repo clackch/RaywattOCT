@@ -60,7 +60,7 @@ namespace RaywattApp.ViewModels
             get { return _selectedPullbackType; }
             set { _selectedPullbackType = value; SetPullback(); }
         }
-        
+
         private int _brightness;
         public int Brightness
         {
@@ -83,7 +83,7 @@ namespace RaywattApp.ViewModels
 
         private ICommand _cmdChangeViewMode;
         public ICommand CmdChangeViewMode
-        { 
+        {
             get { return _cmdChangeViewMode ?? (this._cmdChangeViewMode = new RelayCommand(ChangeViewMode)); }
         }
 
@@ -110,7 +110,6 @@ namespace RaywattApp.ViewModels
             _dialogService = dialogService;
 
             _angioManager = angioManager;
-            
             PullbackList = CodeDefinition.Codes["PBTY"];
 
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
@@ -146,7 +145,7 @@ namespace RaywattApp.ViewModels
                     SelectedPullbackType = PatientCase.PullbackType;
                     Brightness = PatientCase.Brightness;
                     Contrast = PatientCase.Contrast;
-                }                    
+                }
                 else
                 {
                     PatientCase = new PatientCase();
@@ -229,7 +228,6 @@ namespace RaywattApp.ViewModels
         private void StartRecording()
         {
             _log.Debug("StartRecording");
-            _isRecording = true;
 
             if (String.IsNullOrEmpty(PatientCase.PullbackType))
             {
@@ -237,7 +235,7 @@ namespace RaywattApp.ViewModels
                 parameter["title"] = _l10n["Information"];
                 parameter["message"] = _l10n["Select Pullback"];
                 var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-                    
+
                 return;
             }
 
@@ -279,7 +277,7 @@ namespace RaywattApp.ViewModels
 
             Code pullback = pullbackTypes.FirstOrDefault(x => x.Key == SelectedPullbackType);
 
-            if(pullback != null)
+            if (pullback != null)
             {
                 string[] temp = pullback.Buffer1.Split("|");
                 PbLength = temp[0];
@@ -291,4 +289,3 @@ namespace RaywattApp.ViewModels
         }
     }
 }
- 

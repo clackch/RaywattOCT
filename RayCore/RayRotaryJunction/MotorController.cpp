@@ -75,7 +75,7 @@ bool CMotorController::SwitchOn() {
 * @param nVelocity : input velocity value (limits apply if needed)
 */
 bool CMotorController::PerformRun(int &nVelocity) {
-	char strCommand[MAX_PATH];	BYTE packet[MAX_PATH];
+	BYTE packet[MAX_PATH];
 	int packetLength = 0;
 	bool result = false;
 

@@ -117,6 +117,7 @@ namespace RaywattApp
             services.AddTransient(typeof(Review3dViewMenuViewModel));
             services.AddTransient(typeof(Review3dPatientMenuViewModel));
             services.AddTransient(typeof(PowerOffDialogViewModel));
+            services.AddTransient(typeof(CathRoomDialogViewModel));
 
             //IDatabaseService 등록 (Singleton 사용 안함 => Connection Pooling을 Default로 사용)
             services.AddTransient<IDatabaseService, SqlService>(obj => new SqlService(connectionString));

@@ -12,16 +12,13 @@
 class CThread;
 class CMotorController
 {
-private:
+protected:
 	IConnection* m_pConnection;
 	bool m_initMotor;
 	bool m_isRun;
-
 	CThread* m_pThread;
 
-private:
 	static CMotorController* pInstance;
-
 	CMotorController();
 public:
 	static CMotorController* GetInstance();
@@ -32,8 +29,8 @@ public:
 	void Disconnect();
 
 	bool SwitchOn();
-	bool PerformRun(int &nVelocity);
-	bool StopMotor();
+	virtual bool PerformRun(int &nVelocity);
+	virtual bool StopMotor();
 	bool SwitchOff();
 	
 	bool IsRun() { return m_isRun; }
@@ -45,3 +42,15 @@ private:
 	void getMotorPacket(unsigned short command, unsigned int data, unsigned int dataSize, BYTE* packet, int& packetLength);
 };
 
+class CMotorControllerStub
+	: public CMotorController
+{
+public:
+	CMotorControllerStub(){}
+	virtual ~CMotorControllerStub() {}
+
+	virtual bool PerformRun(int& nVelocity) { m_isRun = true; return true; }
+	virtual bool StopMotor() { m_isRun = false; return true; }
+
+	void EnableStub() { pInstance = this; }
+};

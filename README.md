@@ -93,12 +93,6 @@ Windows Default Mouse Cursor Setting (※ 필요 시 진행)
 3. 포인터
     - 찾아보기에서 cur 파일
 
-## [Tensorflow Model]
-Download & Copy/Paste
-*모델 파일은 상시로 바뀔 수 있으므로 LFS로 관리하지 않음
-1. (https://github.com/Raywatt/RaywattOCT/issues/170) 에서 Raywatt One-Drive 링크 접속
-2. ML 폴더를 다운로드 후, 하위 디렉토리에 있는 model 폴더를 RaywattOCT\RayCore\extern\libTensorflow에 복사/붙여넣기
-
 ## [Environment Variable]
 1. Windows 검색창에 "시스템 환경 변수 편집"을 검색 후 클릭
 2. "고급"탭에서 하단 "환경 변수" 버튼 클릭
