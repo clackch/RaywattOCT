@@ -116,12 +116,12 @@ namespace RaywattApp.ViewModels
         private CallbackFunction cbFunction;
         public CallbackFunction CBFunction => (this.cbFunction) ?? (this.cbFunction = new CallbackFunction(OnMsgCallback));
 
-        private readonly TcpClientSingleton _tcpClientSingleton;
+        private readonly AngioManager _angioManager;
 
         /// <summary>
         /// 생성자
         /// </summary>
-        public MainViewModel(SqlManager sqlManager, IDialogService dialogService, TcpClientSingleton tcpClientSingleton)
+        public MainViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager)
         {
             _log.Debug("MainViewModel");
 
@@ -155,7 +155,7 @@ namespace RaywattApp.ViewModels
             IsHome = true;
             IsLoading = true;
 
-            _tcpClientSingleton = tcpClientSingleton;
+            _angioManager = angioManager;
 
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["classification"] = "TestMode";
@@ -247,8 +247,7 @@ namespace RaywattApp.ViewModels
             {
                 CommonUtil.Exit(DeviceStatus);
 
-                _tcpClientSingleton.Instance.GetStream().Close();
-                AngioClient.CloseLiveAngioImageThread();
+                _angioManager.CloseAngioManager();
 
                 // Server Off
                 Process[] processes = Process.GetProcessesByName("FGServer");
@@ -416,7 +415,7 @@ namespace RaywattApp.ViewModels
         {
             RayScannerState curState = (RayScannerState)RayGetProperty(Property.CurrentState);
             DeviceStatus.IsLiveView = (bool)(RayGetProperty(Property.MotorOnOff) != 0);
-            DeviceStatus.IsAngioConnected = false;
+            //DeviceStatus.IsAngioConnected = false;
         }
         protected void handleProgress(RayCallbackRequest request, int progress, int param) { }
         protected void handleError(RayCallbackRequest request, RayError error, int param) { }

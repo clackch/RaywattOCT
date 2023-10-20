@@ -123,7 +123,7 @@ namespace RaywattApp
             services.AddTransient<IDatabaseService, SqlService>(obj => new SqlService(connectionString));
             services.AddTransient(typeof(SqlManager));
 
-            services.AddSingleton(typeof(TcpClientSingleton));
+            services.AddSingleton(typeof(AngioManager));
 
             return services.BuildServiceProvider();
         }

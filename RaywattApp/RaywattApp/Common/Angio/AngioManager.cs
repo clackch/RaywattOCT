@@ -1,0 +1,316 @@
+﻿using OpenCvSharp;
+using System.Diagnostics;
+using System.Net.Sockets;
+using System.Threading;
+using RaywattApp.Common.Bases;
+using System;
+using System.Runtime.InteropServices;
+
+namespace RaywattApp.Common.Angio
+{
+    public enum PacketType
+    {
+        Image,
+        Command,
+        Nothing
+    };
+
+    public enum CommandType
+    {
+        FGUnknown,
+        FGStarted,
+        FGStopped,
+        FGAskPort,
+        FGAskBoard,
+        FGAngioConnected, // Port
+        FGAngioDisconnected, // Port
+        FGBoardExist,
+        FGBoardNotExist,
+        FGNothing,
+    };
+
+    public class AngioManager
+    {
+        private string serverIP;
+        private int serverPort;
+
+        private TcpClient _tcpClient;
+        private TcpClient Instance => _tcpClient;
+
+        private Mat imgAngio;
+        public Mat ImgAngio {  get { return imgAngio; } }
+
+        private bool serverConnection; // Server - Client Connection
+        private bool angioConnection; // FG Angio Conenction
+        private CommandType boardConnection; // FG Board Connection
+
+        private byte[] buffer;
+        private byte[] tmpBuffer;
+
+        private int bytesRead;
+        private int tmpBufferLen;
+
+        private byte[] commandBuffer = { 0x3A, (byte)PacketType.Command, (byte)CommandType.FGUnknown, 0x00, 0xA3 };
+
+        private Thread threadFuncLiveAngioImage;
+        private bool threadOnLiveAngioImage;
+
+        private Thread threadFuncSaveAngioFrames;
+        private bool threadOnSaveAngioFrames;
+
+        public AngioManager()
+        {
+            serverIP = "127.0.0.1";
+            serverPort = 8888;
+
+            imgAngio = ShowNoSignal();
+
+            serverConnection = false;
+
+            angioConnection = false;
+            boardConnection = CommandType.FGUnknown;
+
+            buffer = new byte[10000000];
+            tmpBuffer = new byte[20000000];
+            Array.Fill<byte>(tmpBuffer, 0);
+            Array.Fill<byte>(tmpBuffer, 0);
+
+            tmpBufferLen = 0;
+
+            ConnectToServer();
+        }
+
+        private void ConnectToServer()
+        {
+            // Angio Server On
+            Process[] processes = Process.GetProcessesByName("FGServer");
+            if (processes.Length == 0)
+            {
+                ProcessStartInfo psi = new ProcessStartInfo();
+                Process p = new Process();
+                psi.FileName = Constants.FGFolderPath + "\\FGServer.exe";
+                
+                psi.CreateNoWindow = true;
+                p.StartInfo = psi;
+                p.Start();
+            }
+
+            // Client On
+            _tcpClient = new TcpClient(serverIP, serverPort);
+
+            if (Instance.Connected == true)
+                serverConnection = true;
+
+            ActivateClientThreads();
+            AskBoardConnection();
+            AskAngioConnection();
+        }
+
+        private void AskAngioConnection()
+        {
+            SendCommandPacket(CommandType.FGAskPort);
+        }
+
+        private void AskBoardConnection()
+        {
+            SendCommandPacket(CommandType.FGAskBoard);
+        }
+
+        private void ThreadFuncLiveAngioImage()
+        {
+            while (threadOnLiveAngioImage)
+            {
+                ReadPacket();
+            }
+        }
+
+        private void ActivateClientThreads()
+        {
+            threadOnLiveAngioImage = true;
+            threadFuncLiveAngioImage = new Thread(() => ThreadFuncLiveAngioImage());
+            threadFuncLiveAngioImage.Start();
+        }
+
+        public void CloseAngioManager()
+        {
+            Instance.GetStream().Close();
+
+            threadOnLiveAngioImage = false;
+            threadFuncLiveAngioImage.Join();
+        }
+
+        private bool ReadPacket()
+        {
+            try
+            {
+                bytesRead = Instance.GetStream().Read(buffer, 0, 10000000);
+
+                Array.Copy(buffer, 0, tmpBuffer, tmpBufferLen, bytesRead);
+                tmpBufferLen += bytesRead;
+
+                while (true)
+                {
+                    PacketType type = CheckPacketType(tmpBuffer);
+                    if (type == PacketType.Command)
+                        CommandPacketProcess();
+                    else if (type == PacketType.Image)
+                        ImagePacketProcess();
+                    else if (type == PacketType.Nothing)
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                return false;
+            }
+
+            return true;
+        }
+
+        private void ImagePacketProcess()
+        {
+            int offset = 2;
+            short height = BitConverter.ToInt16(tmpBuffer, offset);
+            offset += sizeof(short);
+            short width = BitConverter.ToInt16(tmpBuffer, offset);
+            offset += sizeof(short);
+            char BitsPerPixel = (char)tmpBuffer[offset++];
+            int imageSize = height * width * BitsPerPixel / 8;
+            if (tmpBuffer[imageSize + Constants.imageHeaderSize + Constants.imageTailSize - 2] == CalcCheckSum(tmpBuffer, offset + imageSize)
+                && tmpBuffer[imageSize + Constants.imageHeaderSize + Constants.imageTailSize - 1] == 0xA3)
+            {
+                Mat image = new Mat(height, width, MatType.CV_8UC(BitsPerPixel / 8));
+                Marshal.Copy(tmpBuffer, offset, image.Data, imageSize);
+                offset += imageSize;
+                char checksum = BitConverter.ToChar(tmpBuffer, offset++);
+                char eof = BitConverter.ToChar(tmpBuffer, offset++);
+
+                Array.Copy(tmpBuffer, imageSize + Constants.imageHeaderSize + Constants.imageTailSize, tmpBuffer, 0, 20000000 - imageSize - Constants.imageHeaderSize - Constants.imageTailSize);
+                tmpBufferLen -= imageSize + Constants.imageHeaderSize + Constants.imageTailSize;
+
+                Cv2.Flip(image, image, 0);
+
+                int t = 500, l = 1000, b = 1000, r = 1900;
+                Rect roi = new Rect(l, t, r - l, b - t);
+                image = image.SubMat(roi);
+
+                imgAngio = image;
+            }
+        }
+
+        private void CommandPacketProcess()
+        {
+            int offset = 2;
+            byte command = tmpBuffer[offset++];
+            char checksum = BitConverter.ToChar(tmpBuffer, offset++);
+            char eof = BitConverter.ToChar(tmpBuffer, offset++);
+
+            if ((byte)checksum == CalcCheckSum(tmpBuffer, 3))
+            {
+                if (command == (byte)CommandType.FGAngioDisconnected)
+                {
+                    angioConnection = false;
+                    imgAngio = ShowNoSignal();
+
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        ViewModelBase._deviceStatus.IsAngioConnected = angioConnection;
+                    });
+                }
+                else if (command == (byte)CommandType.FGAngioConnected)
+                {
+                    angioConnection = true;
+
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        ViewModelBase._deviceStatus.IsAngioConnected = angioConnection;
+                    });
+                }
+                else if (command == (byte)CommandType.FGBoardExist)
+                {
+                    boardConnection = CommandType.FGBoardExist;
+                }
+                else if (command == (byte)CommandType.FGBoardNotExist)
+                {
+                    boardConnection = (CommandType)CommandType.FGBoardNotExist;
+                    threadOnLiveAngioImage = false;
+                }
+
+                Array.Copy(tmpBuffer, Constants.commandPacketSize, tmpBuffer, 0, 20000000 - Constants.commandPacketSize);
+                tmpBufferLen -= Constants.commandPacketSize;
+            }
+        }
+
+        private PacketType CheckPacketType(byte[] tmpBuffer)
+        {
+            int offset = 0;
+            if (tmpBuffer[offset++] == 0x3A)
+            {
+                switch (tmpBuffer[offset++])
+                {
+                    case (byte)PacketType.Command:
+                        if (tmpBuffer[4] == 0xA3)
+                        {
+                            return PacketType.Command;
+                        }
+                        break;
+
+                    case (byte)PacketType.Image:
+                        short height = BitConverter.ToInt16(tmpBuffer, offset);
+                        offset += sizeof(short);
+                        short width = BitConverter.ToInt16(tmpBuffer, offset);
+                        offset += sizeof(short);
+                        char BitsPerPixel = (char)tmpBuffer[offset++];
+                        int imageSize = height * width * BitsPerPixel / 8;
+
+                        if (tmpBuffer[Constants.imageHeaderSize + imageSize + Constants.imageTailSize - 1] == 0xA3)
+                        {
+                            return (int)PacketType.Image;
+                        }
+                        break;
+
+                    case (byte)PacketType.Nothing:
+                        break;
+                }
+            }
+            return PacketType.Nothing;
+        }
+
+        private Mat ShowNoSignal()
+        {
+            Mat image = new Mat(1080, 1920, MatType.CV_8UC3);
+            image.SetTo(new Scalar(0, 0, 0));
+
+            Scalar textColor = new Scalar(0, 0, 255);
+            HersheyFonts fontFace = HersheyFonts.HersheyComplex;
+            double fontScale = 5.0;
+            int thickness = 5;
+
+            Point textPosition = new Point(500, 500);
+            Cv2.PutText(image, "No Signal", textPosition, fontFace, fontScale, textColor, thickness);
+
+            return image;
+        }
+
+        private byte CalcCheckSum(byte[] buffer, int size)
+        {
+            size--;
+            byte csum = 0;
+            for (; size >= 0; size--)
+            {
+                csum += buffer[size];
+            }
+            return (byte)~csum;
+        }
+
+        public void SendCommandPacket(CommandType commandType)
+        {
+            commandBuffer[2] = (byte)commandType;
+            byte checksum = CalcCheckSum(commandBuffer, 3);
+            commandBuffer[3] = checksum;
+
+            Instance.GetStream().Write(commandBuffer, 0, commandBuffer.Length);
+        }
+    }
+}

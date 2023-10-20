@@ -1,4 +1,6 @@
-﻿using System.Windows.Media;
+﻿using RaywattApp.Common.Angio;
+using System;
+using System.Windows.Media;
 
 namespace RaywattApp.Common.Bases
 {
@@ -408,7 +410,7 @@ namespace RaywattApp.Common.Bases
         public const int TransientTime = 3000;
         public const int StartTime = 15;
 
-        //AngioClient
+        //AngioManager
         public const int imageHeaderSize = 7;
         public const int imageTailSize = 2;
         public const int commandPacketSize = 5;
