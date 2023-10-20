@@ -228,7 +228,6 @@ namespace RaywattApp.ViewModels
         private void StartRecording()
         {
             _log.Debug("StartRecording");
-            isRecording = true;
 
             if (String.IsNullOrEmpty(PatientCase.PullbackType))
             {
@@ -240,6 +239,7 @@ namespace RaywattApp.ViewModels
                 return;
             }
 
+            isRecording = true;
             leaveToPage(Constants.RecordingPage);
         }
 
