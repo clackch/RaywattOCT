@@ -265,7 +265,7 @@ namespace RaywattApp.ViewModels
 
         protected bool DrawAngioImage()
         {
-            AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(_angioManager.imgAngio);
+            AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(_angioManager.ImgAngio);
 
             return true;
         }

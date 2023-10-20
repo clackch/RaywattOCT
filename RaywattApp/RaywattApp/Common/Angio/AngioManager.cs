@@ -37,7 +37,8 @@ namespace RaywattApp.Common.Angio
         private TcpClient _tcpClient;
         private TcpClient Instance => _tcpClient;
 
-        public Mat imgAngio;
+        private Mat imgAngio;
+        public Mat ImgAngio {  get { return imgAngio; } }
 
         private bool serverConnection; // Server - Client Connection
         private bool angioConnection; // FG Angio Conenction
