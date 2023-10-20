@@ -99,7 +99,7 @@ namespace RaywattApp.ViewModels
             get { return _cmdStartRecording ?? (this._cmdStartRecording = new RelayCommand(StartRecording)); }
         }
 
-        private bool _isRecording = false;
+        private bool isRecording = false;
         public RecordingLiveViewViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager)
         {
             _log.Debug("RecordingLiveViewViewModel");
@@ -177,7 +177,7 @@ namespace RaywattApp.ViewModels
                 timerUpdateImage.Stop();
 
             //Send Stop Command
-            if (!_isRecording)
+            if (!isRecording && DeviceStatus.IsAngioConnected)
             {
                 _angioManager.SendCommandPacket(CommandType.FGStopped);
             }
@@ -228,6 +228,7 @@ namespace RaywattApp.ViewModels
         private void StartRecording()
         {
             _log.Debug("StartRecording");
+            isRecording = true;
 
             if (String.IsNullOrEmpty(PatientCase.PullbackType))
             {
