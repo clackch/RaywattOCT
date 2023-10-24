@@ -20,7 +20,6 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
 using RaywattApp.Common.Angio;
-using System.Reflection.Metadata;
 
 namespace RaywattApp.ViewModels
 {
@@ -415,7 +414,6 @@ namespace RaywattApp.ViewModels
         {
             RayScannerState curState = (RayScannerState)RayGetProperty(Property.CurrentState);
             DeviceStatus.IsLiveView = (bool)(RayGetProperty(Property.MotorOnOff) != 0);
-            //DeviceStatus.IsAngioConnected = false;
         }
         protected void handleProgress(RayCallbackRequest request, int progress, int param) { }
         protected void handleError(RayCallbackRequest request, RayError error, int param) { }
