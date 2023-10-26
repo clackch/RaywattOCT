@@ -14,13 +14,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
 using RaywattApp.Common.Angio;
-using System.Reflection.Metadata;
 
 namespace RaywattApp.ViewModels
 {
@@ -347,7 +344,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("CatheterUnlockReceiver");
 
-            DeviceStatus.CatheterStatus = Constants.CatheterStatusUnloading;   //Unlock Receive
+            DeviceStatus.CatheterStatus = Constants.CatheterStatusUnloading;
 
             LeaveFromRecording();
 
@@ -460,10 +457,6 @@ namespace RaywattApp.ViewModels
                     break;
                 case RayWorkItem.Pullback:
                     DeviceStatus.IsPullbackDone = true;
-                    Task.Run(() => {
-                        Thread.Sleep(3000);
-                        RayUnloadCatheter();
-                    });
                     break;
                 case RayWorkItem.OCTImaging:
                     if(param == (int)RaySession.Review)
@@ -477,6 +470,9 @@ namespace RaywattApp.ViewModels
                     DeviceStatus.IsLumenDetected = true;
                     break;
                 case RayWorkItem.GenerateVolume:
+                    break;
+                case RayWorkItem.SaveRawData:
+                    DeviceStatus.IsSaveRawDataDone = true;
                     break;
                 default:
                     break;
