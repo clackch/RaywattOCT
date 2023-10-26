@@ -5,6 +5,9 @@ namespace RaywattApp.Views.Component
 {
     public class ButtonUnableComponent : Button
     {
+        public static DependencyProperty IsSaveRawDataDoneProperty = DependencyProperty.Register("IsSaveRawDataDone", typeof(bool), typeof(ButtonUnableComponent));
+        public bool IsSaveRawDataDone { get => (bool)GetValue(IsSaveRawDataDoneProperty); set => SetValue(IsSaveRawDataDoneProperty, value); }
+
         public static DependencyProperty IsLumenLoadedProperty = DependencyProperty.Register("IsLumenLoaded", typeof(bool), typeof(ButtonUnableComponent));
         public bool IsLumenLoaded { get => (bool)GetValue(IsLumenLoadedProperty); set => SetValue(IsLumenLoadedProperty, value); }
 

@@ -61,9 +61,10 @@
                 </StackPanel>
             </Grid>
 
-            <component:MenuUnableComponent Grid.Row="0" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}">
+            <component:MenuUnableComponent Grid.Row="0" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}">
                 <component:MenuUnableComponent.Visibility>
                     <MultiBinding Converter="{StaticResource ComponentVisibilityConverter}">
+                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSaveRawDataDone"/>
                         <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
                         <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
                         <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
@@ -71,9 +72,10 @@
                 </component:MenuUnableComponent.Visibility>
             </component:MenuUnableComponent>
 
-            <component:MenuUnableComponent Grid.Row="2" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}">
+            <component:MenuUnableComponent Grid.Row="2" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}">
                 <component:MenuUnableComponent.Visibility>
                     <MultiBinding Converter="{StaticResource ComponentVisibilityConverter}">
+                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSaveRawDataDone"/>
                         <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
                         <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
                         <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>

@@ -333,9 +333,10 @@
                                             </StackPanel>
                                         </Grid>
                                         <Grid Grid.Row="7" Margin="0,0,0,0" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
-                                            <component:ButtonUnableComponent Grid.Row="1" Style="{StaticResource OutlinedBtnType1-Medium}" Height="26" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding CoRegistrationCommand}" Content="{Binding [Co-Registration], Source={StaticResource L10N}}"  IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}">
+                                            <component:ButtonUnableComponent Grid.Row="1" Style="{StaticResource OutlinedBtnType1-Medium}" Height="26" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding CoRegistrationCommand}" Content="{Binding [Co-Registration], Source={StaticResource L10N}}" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}">
                                                 <component:ButtonUnableComponent.IsEnabled>
                                                     <MultiBinding Converter="{StaticResource ComponentUnableConverter}">
+                                                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSaveRawDataDone"/>
                                                         <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
                                                         <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
                                                         <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
