@@ -66,7 +66,9 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
 
                 GetImageInfo(RaySession.Review);
-                RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);                
+                RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+
+                MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
                 Playback();
             }
         }
