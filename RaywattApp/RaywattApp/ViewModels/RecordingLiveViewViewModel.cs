@@ -240,6 +240,12 @@ namespace RaywattApp.ViewModels
             }
 
             isRecording = true;
+
+            if (!DeviceStatus.IsLiveView)
+            {
+                RayStartLiveView();
+            }
+
             leaveToPage(Constants.RecordingPage);
         }
 
