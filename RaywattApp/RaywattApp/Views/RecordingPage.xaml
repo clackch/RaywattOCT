@@ -99,8 +99,8 @@
                         <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
                     </StackPanel>
                     <Grid Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,16,0">
-                        <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding ReadyCommand}" Content="{Binding [Ready], Source={StaticResource L10N}}" Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                        <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding StartCommand}" Content="{Binding [Start], Source={StaticResource L10N}}" Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                        <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding ReadyCommand}" Content="{Binding [Ready], Source={StaticResource L10N}}" Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibilityConverter}}" IsEnabled="{Binding IsReady}"/>
+                        <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding StartCommand}" Content="{Binding [Start], Source={StaticResource L10N}}" Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibilityReverseConverter}}" IsEnabled="{Binding IsStart}"/>
                     </Grid>
                 </Grid>
             </Border>

@@ -11,8 +11,6 @@ using System.Windows.Navigation;
 using System;
 using System.Collections.Generic;
 using static RaywattOCT.RayCoreWrapper;
-using System.Windows.Threading;
-using System.Threading;
 using RaywattOCT;
 
 namespace RaywattApp.ViewModels
@@ -31,15 +29,6 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private PatientCase _patientCase;
-
-        [ObservableProperty]
-        private bool _isPullbackDone = false;
-
-        private DispatcherTimer timer = new DispatcherTimer();
-        private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
-
-        private Thread threadWaitPullbackDone;
-        private bool runWaitPullbackDone;
 
         private ICommand _redoPullbackCommand;
         public ICommand RedoPullbackCommand
@@ -76,14 +65,9 @@ namespace RaywattApp.ViewModels
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 PatientCase = (PatientCase)data["patientCase"];
 
-                RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
-
-                timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
-                timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
-                timerUpdateImage.Start();
-
-                threadWaitPullbackDone = new Thread(new ThreadStart(threadFuncWaitPullbackDone));
-                threadWaitPullbackDone.Start();
+                GetImageInfo(RaySession.Review);
+                RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);                
+                Playback();
             }
         }
 
@@ -91,16 +75,16 @@ namespace RaywattApp.ViewModels
         {
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
-
-            if (timerUpdateImage.IsEnabled)
-                timerUpdateImage.Stop();
         }
 
         private void RedoPullback()
         {
             _log.Debug("RedoPullback");
 
+            DeviceStatus.IsSaveRawDataDone = true;
             DeviceStatus.IsLumenSaved = true;
+            DeviceStatus.IsOCTImagingDone = true;
+            DeviceStatus.IsPullbackDone = false;
 
             if (DeviceStatus.IsPaused == false)
             {
@@ -117,6 +101,9 @@ namespace RaywattApp.ViewModels
         private void Confirm()
         {
             _log.Debug("Confirm");
+
+            DeviceStatus.CatheterStatus = Constants.CatheterStatusUnloading;
+            RayUnloadCatheter();
 
             RaySetSession(RaySession.Review);
             int numOfFrames = (int) RayGetProperty(Property.ImageDepth);
@@ -153,30 +140,9 @@ namespace RaywattApp.ViewModels
             PrevStatus.DetailPageNumber = 0;
         }
 
-        private void timerFuncUpdateImage(object sender, EventArgs e)
+        protected override void UpdateCrossSectionImage()
         {
             DrawCrossSectionImage();
-
-            // when generating longitude image is completed
-            if (longitudeFrameInfo != null && (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame))
-            {
-                IsPullbackDone = true;
-            }
         }
-
-        private void threadFuncWaitPullbackDone()
-        { 
-            runWaitPullbackDone = true;
-
-            while (runWaitPullbackDone && !DeviceStatus.IsPullbackDone)
-            {
-                Thread.Sleep((int)Constants.WaitForEventInterval);
-            }
-            runWaitPullbackDone = false;
-
-            GetImageInfo(RaySession.Review);
-            Playback();
-        }
-
     }
 }
