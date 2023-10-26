@@ -81,7 +81,7 @@ namespace RaywattApp.Common.Bases
         /// </summary>
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
-            if (DeviceStatus.IsPaused == false)
+            if (!DeviceStatus.IsPaused)
             {
                 Playback();
             }
@@ -214,7 +214,8 @@ namespace RaywattApp.Common.Bases
             {
                 DeviceStatus.IsPaused = true;
 
-                timerUpdateImage.Stop();
+                if(timerUpdateImage.IsEnabled)
+                    timerUpdateImage.Stop();
             }
 
             IsPaused = DeviceStatus.IsPaused;

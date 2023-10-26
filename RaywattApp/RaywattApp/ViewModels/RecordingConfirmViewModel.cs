@@ -88,11 +88,6 @@ namespace RaywattApp.ViewModels
             DeviceStatus.IsOCTImagingDone = true;
             DeviceStatus.IsPullbackDone = false;
 
-            if (DeviceStatus.IsPaused == false)
-            {
-                Playback();
-            }
-
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
