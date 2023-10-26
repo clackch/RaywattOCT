@@ -307,6 +307,9 @@ namespace RaywattApp.ViewModels
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
 
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
+
+                if (ReviewStatus.IsPlay)
+                    Playback();
             }
         }
 
@@ -613,22 +616,29 @@ namespace RaywattApp.ViewModels
 
             if (action.ToLower().Equals("prev"))
             {
-                if (!DeviceStatus.IsPaused)
-                    Playback();
+                StopPlayback();
 
                 PrevFrame(RaySession.Review);
             }
             else if (action.ToLower().Equals("next"))
             {
-                if (!DeviceStatus.IsPaused)
-                    Playback();
+                StopPlayback();
 
                 NextFrame(RaySession.Review);
             }
             else if (action.ToLower().Equals("play"))
             {
                 Playback();
-                if (!IsPaused) ReviewStatus.IsMeasurementOn = false;
+
+                if (!IsPaused) {
+                    ReviewStatus.IsMeasurementOn = false;
+                    ReviewStatus.IsPlay = true;
+                }
+                else
+                {
+                    ReviewStatus.IsPlay = false;
+                }
+                
             }
         }
 
@@ -693,10 +703,7 @@ namespace RaywattApp.ViewModels
 
         private void ToggleMeasurement()
         {
-            if (DeviceStatus.IsPaused == false)
-            {
-                Playback();
-            }
+            StopPlayback();
 
             ReviewStatus.IsMeasurementOn = !ReviewStatus.IsMeasurementOn;
         }
@@ -1135,8 +1142,7 @@ namespace RaywattApp.ViewModels
             {
                 if (indicator.IsLongitudeClicked)
                 {
-                    if (!DeviceStatus.IsPaused)
-                        Playback();
+                    StopPlayback();
 
                     indicator.IsLongitudeClicked = false;
                     return;
