@@ -499,7 +499,7 @@ RayError COCTSystem::StopLiveView()
 }
 
 /*
-* StopLaser
+* LaserOnOff
 */
 RayError COCTSystem::LaserOnOff(bool isOn)
 {
