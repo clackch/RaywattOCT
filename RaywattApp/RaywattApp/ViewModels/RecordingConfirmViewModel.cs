@@ -49,6 +49,8 @@ namespace RaywattApp.ViewModels
             Constants.CurrentPage = Constants.RecordingConfirmPage;
 
             _sqlManager = sqlManager;
+
+            RayLaserOnOff(false);
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)

@@ -499,6 +499,16 @@ RayError COCTSystem::StopLiveView()
 }
 
 /*
+* StopLaser
+*/
+RayError COCTSystem::LaserOnOff(bool isOn)
+{
+	laserOnOff(isOn);
+
+	return RayError::OK;
+}
+
+/*
 * SetSession
 */
 RayError COCTSystem::SetSession(int session) 
