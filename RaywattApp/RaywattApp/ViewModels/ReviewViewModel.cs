@@ -781,6 +781,8 @@ namespace RaywattApp.ViewModels
 
                 if (IsChangedLumenProfileValue())
                 {
+                    imglumenProfile = null;
+                    imglumenProfileExtra = null;
                     MinimalValueChanged();
                     DrawLumenProfile(longitudeFrameInfo.curFrame - 1);
                     SetLumenProfileValue();
@@ -1001,7 +1003,7 @@ namespace RaywattApp.ViewModels
             int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
             //Test
             List<int> appositionFrames = new List<int>() { 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
-            imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, frameProximal, frameDistal, CommonUtil.IsPostCase(PatientCase.Procedure), appositionFrames, totalFrame);
+            imglumenProfile = CommonUtil.MakeLumenProfileImageOneByOne(imglumenProfile, LumenContours, frameProximal, frameDistal, CommonUtil.IsPostCase(PatientCase.Procedure), appositionFrames, totalFrame);
             DrawLumenProfileImage();
 
             List<int> colorFrames = new List<int>();
@@ -1013,7 +1015,7 @@ namespace RaywattApp.ViewModels
             {
                 colorFrames = CommonUtil.GetExpansionList(LumenContours, frameProximal, frameDistal, Section.RefArea, PatientCase.ExpansionThreshold);
             }
-            imglumenProfileExtra = CommonUtil.MakeLumenProfileImageExtra(ReviewStatus.NumberOfFrames, colorFrames, CommonUtil.IsPreCase(PatientCase.Procedure), totalFrame);
+            imglumenProfileExtra = CommonUtil.MakeLumenProfileImageExtraOneByOne(imglumenProfileExtra, ReviewStatus.NumberOfFrames, colorFrames, CommonUtil.IsPreCase(PatientCase.Procedure), totalFrame);
             DrawLumenProfileImageExtra();
         }
 
@@ -1182,6 +1184,8 @@ namespace RaywattApp.ViewModels
 
                     if (IsChangedLumenProfileValue())
                     {
+                        imglumenProfile = null;
+                        imglumenProfileExtra = null;
                         MinimalValueChanged();
                         DrawLumenProfile(longitudeFrameInfo.curFrame - 1);
                         SetLumenProfileValue();
