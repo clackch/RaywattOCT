@@ -1,5 +1,4 @@
 #include "RayTensorflow.h"
-#pragma warning(disable: 4996)
 
 #define IMG_INPUT_WIDTH 512
 #define IMG_INPUT_HEIGHT 512
