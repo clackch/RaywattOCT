@@ -11,7 +11,6 @@ CTIFFImaging::~CTIFFImaging()
 
 void CTIFFImaging::Initialize()
 {
-	PLOGI.printf("void CTIFFImaging::Initialize()");
 	m_nWidth = m_setting.nAScan;
 	m_nHeight = m_setting.nBScan;
 	m_nChannels = 3;	// RGB
