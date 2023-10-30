@@ -371,9 +371,24 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 			Sleep(DELAY_FOR_WAIT_PROCESS);
 			continue;
 		}
-		pImaging->PostProcess(it->second);
 
-		std::vector<std::vector<cv::Point>> vContours = learning->FindLumen(pImaging->GetCircleImage());
+		cv::Mat contourImage = learning->FindLumen(it->second);
+		pImaging->CircularizeImage(contourImage, contourImage);
+
+		std::vector<std::vector<cv::Point>> vContours;
+		cv::findContours(contourImage, vContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+		double maxArea = 0;
+		std::vector<cv::Point> largestContour;
+		for (const auto& contour : vContours) {
+			double area = cv::contourArea(contour);
+			if (area > maxArea) {
+				maxArea = area;
+				largestContour = contour;
+			}
+		}
+		vContours.push_back(largestContour);
+
 		std::vector<cv::Mat> vLumens;
 		for (int i = 0; i < vContours.size(); i++) {
 			std::vector<cv::Point> contour = vContours.at(i);

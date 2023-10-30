@@ -1,8 +1,5 @@
 #pragma once
 #include "IRayLearning.h"
-#include <iostream>
-#include <vector>
-#include <opencv2/opencv.hpp>
 #include <tensorflow/c/c_api.h>
 #include <tensorflow/c/tf_status.h>
 #include <tensorflow/c/tf_tensor.h>
@@ -40,11 +37,33 @@ typedef void (*TF_DeleteTensorFunction)(TF_Tensor*);
 class CRayUnetr : public IRayLearning {
 private:
 	HINSTANCE m_hGetProcIDDLL;
+	TF_NewStatusFunction m_TFRayStatus;
+	TF_NewGraphFunction m_TFRayGraph;
+	TF_NewSessionOptionsFunction m_TFRaySessionOptions;
+	TF_LoadSessionFromSavedModelFunction m_TFRayLoadSessionFromSavedModel;
+	TF_GetCodeFunction m_TFRayGetCode;
+	TF_GraphOperationByNameFunction m_TFRayGraphOperationByName;
+	TF_NewTensorFunction m_TFRayTensor;
+	TF_SessionRunFunction m_TFRaySessionRun;
+	TF_TensorDataFunction m_TFRayTensorData;
+	TF_MessageFunction m_TFRayMessage;
+	TF_TensorByteSizeFunction m_TFRayTensorByteSize;
+	TF_DeleteStatusFunction m_TFRayDelStatus;
+	TF_DeleteGraphFunction m_TFRayDelGraph;
+	TF_DeleteSessionOptionsFunction m_TFRayDelSessionOptions;
+	TF_DeleteSessionFunction m_TFRayDelSession;
+	TF_DeleteBufferFunction m_TFRayDelBuffer;
+	TF_DeleteTensorFunction m_TFRayDelTensor;
+	TF_Status* m_pStatus;
+	TF_Graph* m_pGraph;
+	TF_SessionOptions* m_pSessionOptions;
+	TF_Buffer* m_pRunOptions;
+	TF_Session* m_pSession;
 
 public:
 	CRayUnetr();
 	virtual ~CRayUnetr();
 	float* RunModel(float* image_data);
 	void Initialize(bool useGPU) override;
-	vector<vector<cv::Point>> FindLumen(cv::Mat image) override;
+	cv::Mat FindLumen(cv::Mat image) override;
 };

@@ -11,6 +11,7 @@ CTIFFImaging::~CTIFFImaging()
 
 void CTIFFImaging::Initialize()
 {
+	PLOGI.printf("void CTIFFImaging::Initialize()");
 	m_nWidth = m_setting.nAScan;
 	m_nHeight = m_setting.nBScan;
 	m_nChannels = 3;	// RGB
@@ -49,6 +50,7 @@ void CTIFFImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth,
 
 void CTIFFImaging::Process(char* fringes)
 {
+	
 	m_end = std::chrono::system_clock::now();
 	cv::Mat imgTIFF(cv::Size(m_setting.nBScan, m_setting.nAScan), CV_8UC4, fringes);
 
@@ -69,11 +71,12 @@ void CTIFFImaging::Process(char* fringes)
 
 void CTIFFImaging::CircularizeImage(cv::Mat& src, cv::Mat& dst)
 {
-	cv::rotate(src, dst, cv::ROTATE_90_COUNTERCLOCKWISE);
-	cv::remap(dst, dst, matXMap, matYMap, cv::INTER_LINEAR);
+	cv::rotate(src, src, cv::ROTATE_180);
+	cv::remap(src, dst, matXMap, matYMap, cv::INTER_LINEAR);
 }
 
 void CTIFFImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst)
 {
-	cv::remap(src, dst, dematXMap, dematYMap, cv::INTER_LINEAR);
+	cv::remap(src, src, dematXMap, dematYMap, cv::INTER_LINEAR);
+	cv::rotate(src, dst, cv::ROTATE_90_COUNTERCLOCKWISE);
 }
