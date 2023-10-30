@@ -387,6 +387,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 				largestContour = contour;
 			}
 		}
+		vContours.clear();
 		vContours.push_back(largestContour);
 
 		std::vector<cv::Mat> vLumens;
