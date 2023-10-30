@@ -226,7 +226,7 @@ namespace RaywattApp.ViewModels.Dialog
                         colorFrames = CommonUtil.GetExpansionList(LumenContours, frameProximal, frameDistal, Section.RefArea, PatientCase.ExpansionThreshold);
                     }
                     imglumenProfileExtra = CommonUtil.MakeLumenProfileImageExtra(LumenContours.Count, colorFrames, CommonUtil.IsPreCase(PatientCase.Procedure));
-                    LumenProfileImageExtra = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileExtra);
+                    DrawLumenProfileImageExtra();
                 }
 
                 if (!fileExport.AngioView)
@@ -411,6 +411,14 @@ namespace RaywattApp.ViewModels.Dialog
             if (imglumenProfile == null) return false;
 
             LumenProfileImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfile);
+            return true;
+        }
+
+        private bool DrawLumenProfileImageExtra()
+        {
+            if (imglumenProfileExtra == null) return false;
+
+            LumenProfileImageExtra = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileExtra);
             return true;
         }
 

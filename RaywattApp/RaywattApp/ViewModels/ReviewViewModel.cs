@@ -43,8 +43,6 @@ namespace RaywattApp.ViewModels
 
         private bool isLumenProfileInit = false;
 
-        private Mat imglumenProfileExtra;
-
         private double originSectionProximalX;
 
         private double originSectionDistalX;
@@ -89,9 +87,6 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private Section _section;
-
-        [ObservableProperty]
-        private BitmapSource _lumenProfileImageExtra;
 
         private int outFrameNumber;
         public int OutFrameNumber
@@ -1019,7 +1014,7 @@ namespace RaywattApp.ViewModels
                 colorFrames = CommonUtil.GetExpansionList(LumenContours, frameProximal, frameDistal, Section.RefArea, PatientCase.ExpansionThreshold);
             }
             imglumenProfileExtra = CommonUtil.MakeLumenProfileImageExtra(ReviewStatus.NumberOfFrames, colorFrames, CommonUtil.IsPreCase(PatientCase.Procedure), totalFrame);
-            LumenProfileImageExtra = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileExtra);
+            DrawLumenProfileImageExtra();
         }
 
         private void DrawCalciumIndicator()

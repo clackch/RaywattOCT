@@ -48,7 +48,12 @@ namespace RaywattApp.Common.Bases
         [ObservableProperty]
         private BitmapSource _lumenProfileImage;
 
+        [ObservableProperty]
+        private BitmapSource _lumenProfileImageExtra;
+
         protected Mat imglumenProfile;
+
+        protected Mat imglumenProfileExtra;
 
         [ObservableProperty]
         private BitmapSource _angioImage;
@@ -140,9 +145,6 @@ namespace RaywattApp.Common.Bases
         {
             if (imgLongitude == null) return false;
 
-            RayScannerState state = (RayScannerState)RayGetProperty(Property.CurrentState);
-            if (state != RayScannerState.Review) return false;
-
             LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgLongitude);
             return true;
         }
@@ -150,13 +152,16 @@ namespace RaywattApp.Common.Bases
         {
             if (imglumenProfile == null) return false;
 
-            RayScannerState state = (RayScannerState)RayGetProperty(Property.CurrentState);
-            if (state != RayScannerState.Review) return false;
-
             LumenProfileImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfile);
             return true;
         }
+        protected bool DrawLumenProfileImageExtra()
+        {
+            if (imglumenProfileExtra == null) return false;
 
+            LumenProfileImageExtra = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileExtra);
+            return true;
+        }
         private BitmapSource DrawCrossSectionWithBackground(Mat image, Scalar background)
         {
             // Background Masking
