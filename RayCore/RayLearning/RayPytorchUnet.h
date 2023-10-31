@@ -9,7 +9,7 @@ private:
 
 public:
 	CRayTorchUnet();
-	~CRayTorchUnet();
-	virtual void Initialize(bool useGPU);
-	virtual cv::Mat FindLumen(cv::Mat image);
+	virtual ~CRayTorchUnet();
+	void Initialize(bool useGPU) override;
+	cv::Mat FindLumen(cv::Mat image) override;
 };

@@ -27,21 +27,25 @@ void CRayTorchUnet::Initialize(bool useGPU) {
 }
 
 cv::Mat CRayTorchUnet::FindLumen(cv::Mat image) {
-    cv::Mat imgInput;
-    cv::cvtColor(image, imgInput, cv::COLOR_GRAY2RGB);
-    
+    cv::Mat imgInput = image.clone();
     bool resize = false;
 
+    if (imgInput.channels() == 1) {
+        cv::cvtColor(imgInput, imgInput, cv::COLOR_GRAY2RGB);
+    }
+    else if (imgInput.channels() == 4) {
+        cv::cvtColor(imgInput, imgInput, cv::COLOR_RGBA2RGB);
+    }
+    
+    cv::rotate(imgInput, imgInput, cv::ROTATE_180);
+    
     try {
         if (image.cols != UNETR_INPUT_WIDTH || image.rows != UNETR_INPUT_HEIGHT) {
-            cv::resize(image, imgInput, cv::Size(UNETR_INPUT_HEIGHT, UNETR_INPUT_WIDTH));
+            cv::resize(imgInput, imgInput, cv::Size(UNETR_INPUT_HEIGHT, UNETR_INPUT_WIDTH));
             resize = true;
         }
-        else {
-            imgInput = image.clone();
-        }
 
-        torch::Tensor img_tensor = torch::from_blob(image.data, { image.rows, image.cols, 3 }, torch::kByte);
+        torch::Tensor img_tensor = torch::from_blob(imgInput.data, { imgInput.rows, imgInput.cols, 3 }, torch::kByte);
         img_tensor = img_tensor.permute({ 2, 0, 1 }); // H x W x C -> C x H x W
         img_tensor = img_tensor.to(torch::kFloat32); // Byte -> Float
         img_tensor = img_tensor.unsqueeze(0);  // Add batch dim
@@ -51,7 +55,7 @@ cv::Mat CRayTorchUnet::FindLumen(cv::Mat image) {
         auto outputs_softmax = torch::softmax(outputs, /*dim=*/1); // 비율로 결과 추리기
         auto prediction_result = torch::argmax(outputs_softmax, /*dim=*/1); // 클래스중 최대값 선택하여 1
         auto squeezed_result = prediction_result.squeeze(); // 차원 줄이고
-        auto cpu_result = squeezed_result.to(torch::kCPU); // CPU로 가져와서 CV작업
+        auto cpu_result = m_useGPU ? squeezed_result.to(torch::kCPU) : squeezed_result; // CPU로 가져와서 CV작업
         auto accessor = cpu_result.accessor<int64_t, 2>();  // 2차원 텐서 = 2차원 배열에 각 class 결과 값 저장.
 
         int height = cpu_result.size(0);
@@ -67,7 +71,7 @@ cv::Mat CRayTorchUnet::FindLumen(cv::Mat image) {
                     lumen_mask.at<uchar>(i, j) = 255;
                 }
                 else if (class_label == 2) {
-                    stent_mask.at<uchar>(i, j) = 255; // todo Stent 데이터 추가 필요
+                    stent_mask.at<uchar>(i, j) = 255; // todo Stent 데이터 어떻게 다룰지 확인 필요
                 }
             }
         }
@@ -76,13 +80,8 @@ cv::Mat CRayTorchUnet::FindLumen(cv::Mat image) {
             cv::resize(lumen_mask, lumen_mask, cv::Size(image.rows, image.cols));
             cv::resize(stent_mask, stent_mask, cv::Size(image.rows, image.cols));
         }
-
-        std::string path;
-        static int cnt = 0;
-        path = ".\\mlimage\\Lumen_mask_torchUnet" + std::to_string(cnt) + ".png";
-        cv::imwrite(path, lumen_mask);
-        path = ".\\mlimage\\stent_mask_torchUnet" + std::to_string(cnt++) + ".png";
-        cv::imwrite(path, stent_mask);
+        
+        cv::rotate(lumen_mask, lumen_mask, cv::ROTATE_180);
         return lumen_mask;
     }
     catch (const std::exception& e) {

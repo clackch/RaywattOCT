@@ -1,5 +1,4 @@
 #include "RayPytorch.h"
-#pragma warning(disable: 4996)
 
 #define COMPNET_INPUT_WIDTH		512
 #define COMPNET_INPUT_HEIGHT	512
