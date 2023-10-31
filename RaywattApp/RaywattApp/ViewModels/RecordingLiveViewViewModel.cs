@@ -33,8 +33,6 @@ namespace RaywattApp.ViewModels
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
-        private bool isRecording = false;
-
         [ObservableProperty]
         private Patient _patient;
 
@@ -241,8 +239,6 @@ namespace RaywattApp.ViewModels
 
                 return;
             }
-
-            isRecording = true;
 
             if (!DeviceStatus.IsLiveView)
             {
