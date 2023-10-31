@@ -409,7 +409,6 @@ namespace RaywattApp.ViewModels
                 LumenContourCommand = Constants.LumenContourCurrentInit;
 
             DeviceStatus.IsLumenLoaded = true;
-            RayStartLumenDetection();
         }
 
         private void InitializeLumenContour()
