@@ -79,14 +79,7 @@ bool CMotorController::PerformRun(int &nVelocity) {
 	int packetLength = 0;
 	bool result = false;
 
-	if (nVelocity < 0) {
-		// negative
-		nVelocity = (nVelocity < -50000) ? -50000 : (nVelocity > -100) ? -100 : nVelocity;
-	}
-	else {
-		// positive
-		nVelocity = (nVelocity > 50000) ? 50000 : (nVelocity < 100) ? 100 : nVelocity;
-	}
+	nVelocity = (nVelocity > 50000) ? 50000 : (nVelocity < 0) ? 0 : nVelocity;
 
 	getMotorPacket(MOTOR_INDEX_TARGETVELOCITY, nVelocity, 4, packet, packetLength);
 	result = writeMotor(packet, packetLength);
