@@ -58,6 +58,8 @@ namespace RaywattApp.Common.Angio
         private Thread threadFuncSaveAngioFrames;
         private bool threadOnSaveAngioFrames;
 
+        public bool isLiveView;
+
         public AngioManager()
         {
             serverIP = "127.0.0.1";
@@ -69,6 +71,7 @@ namespace RaywattApp.Common.Angio
 
             angioConnection = false;
             boardConnection = CommandType.FGUnknown;
+            isLiveView = false;
 
             buffer = new byte[10000000];
             tmpBuffer = new byte[20000000];
@@ -212,6 +215,11 @@ namespace RaywattApp.Common.Angio
                 {
                     angioConnection = false;
                     imgAngio = ShowNoSignal();
+                    if (isLiveView)
+                    {
+                        SendCommandPacket(CommandType.FGStopped);
+                        isLiveView = false;
+                    }
 
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
@@ -221,6 +229,11 @@ namespace RaywattApp.Common.Angio
                 else if (command == (byte)CommandType.FGAngioConnected)
                 {
                     angioConnection = true;
+                    if (!isLiveView)
+                    {
+                        SendCommandPacket(CommandType.FGStarted);
+                        isLiveView = true;
+                    }
 
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {

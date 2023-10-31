@@ -33,6 +33,8 @@ namespace RaywattApp.ViewModels
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
+        private bool isRecording = false;
+
         [ObservableProperty]
         private Patient _patient;
 
@@ -99,7 +101,6 @@ namespace RaywattApp.ViewModels
             get { return _cmdStartRecording ?? (this._cmdStartRecording = new RelayCommand(StartRecording)); }
         }
 
-        private bool isRecording = false;
         public RecordingLiveViewViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager)
         {
             _log.Debug("RecordingLiveViewViewModel");
@@ -162,9 +163,10 @@ namespace RaywattApp.ViewModels
             }
 
             // Send Start Command
-            if (DeviceStatus.IsAngioConnected)
+            if (!_angioManager.isLiveView &&DeviceStatus.IsAngioConnected)
             {
                 _angioManager.SendCommandPacket(CommandType.FGStarted);
+                _angioManager.isLiveView = true;
             }
         }
 
@@ -177,9 +179,10 @@ namespace RaywattApp.ViewModels
                 timerUpdateImage.Stop();
 
             //Send Stop Command
-            if (!isRecording && DeviceStatus.IsAngioConnected)
+            if (_angioManager.isLiveView && DeviceStatus.IsAngioConnected)
             {
                 _angioManager.SendCommandPacket(CommandType.FGStopped);
+                _angioManager.isLiveView= false;
             }
         }
 
