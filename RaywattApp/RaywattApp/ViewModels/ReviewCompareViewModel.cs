@@ -28,8 +28,6 @@ namespace RaywattApp.ViewModels
 
         private int indicatorLockOffset;
 
-        private Mat imglumenProfileExtra;
-
         private Mat imglumenProfileExtraCompare;
 
         [ObservableProperty]
@@ -78,9 +76,6 @@ namespace RaywattApp.ViewModels
         private Zoom _zoom = new Zoom(Constants.CrossSectionCompareSize / Constants.OCTImageSize);
 
         [ObservableProperty]
-        private BitmapSource _lumenProfileImageExtra;
-
-        [ObservableProperty]
         private BitmapSource _lumenProfileImageExtraCompare;
 
         private ICommand _caseSelectCancelCommand;
@@ -121,7 +116,7 @@ namespace RaywattApp.ViewModels
 
             IndicatorLongitude = new Indicator();
             IndicatorLongitude.X = Constants.LongitudeIndicatorWidth / 2;
-            IndicatorLongitude.IsVisible = Visibility.Collapsed;
+            IndicatorLongitude.IsVisible = Visibility.Visible;
 
             IndicatorCompareLongitude = new Indicator();
             IndicatorCompareLongitude.X = Constants.LongitudeIndicatorWidth / 2;
@@ -193,11 +188,6 @@ namespace RaywattApp.ViewModels
                     {
                         ShowLumenProfileCompare();
                     }
-                }
-
-                if (DrawLumenProfileImage())
-                {
-                    IndicatorLongitude.IsVisible = Visibility.Visible;
                 }
             }
 
@@ -547,10 +537,11 @@ namespace RaywattApp.ViewModels
             //Test
             List<int> appositionFrames = new List<int>() { 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
             imglumenProfile = CommonUtil.MakeLumenProfileImage(PostLumenContour, frameProximal, frameDistal, true, appositionFrames);
+            DrawLumenProfileImage();
 
             List<int> colorFrames = CommonUtil.GetExpansionList(PostLumenContour, frameProximal, frameDistal, Section.RefArea, PatientCase.ExpansionThreshold);
             imglumenProfileExtra = CommonUtil.MakeLumenProfileImageExtra(ReviewStatus.NumberOfFrames, colorFrames, false);
-            LumenProfileImageExtra = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileExtra);
+            DrawLumenProfileImageExtra();
 
             Section.Proximal.X = CommonUtil.GetPositionFromFrame(PatientCase.SectionProximal, ReviewStatus.NumberOfFrames, Constants.LongitudeCompareWidth, Constants.SectionIndicatorCenterWidth);
             Section.Distal.X = CommonUtil.GetPositionFromFrame(PatientCase.SectionDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeCompareWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
@@ -575,11 +566,11 @@ namespace RaywattApp.ViewModels
             }
 
             imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(PreLumenContour, frameProximalCompare, frameDistalCompare, false, null);
-            LumenProfileImageCompare = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileCompare);
+            DrawLumenProfileImageCompare();
 
             List<int> colorFrames = CommonUtil.GetCalciumList(ReviewStatus.SelectedPatientCase.LumenContour, ReviewStatus.SelectedPatientCase.CalciumThreshold);
             imglumenProfileExtraCompare = CommonUtil.MakeLumenProfileImageExtra(DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total, colorFrames, true);
-            LumenProfileImageExtraCompare = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileExtraCompare);
+            DrawLumenProfileImageExtraCompare();
 
             SectionCompare.Proximal.X = CommonUtil.GetPositionFromFrame(ReviewStatus.SelectedPatientCase.SectionProximal, DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total, Constants.LongitudeCompareWidth, Constants.SectionIndicatorCenterWidth);            
             SectionCompare.Distal.X = CommonUtil.GetPositionFromFrame(ReviewStatus.SelectedPatientCase.SectionDistal, DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total, Constants.LongitudeCompareWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
@@ -596,6 +587,21 @@ namespace RaywattApp.ViewModels
             SectionCompare.Mld.IsVisible = Visibility.Visible;
             SectionCompare.MlaValue.IsVisible = Visibility.Collapsed;
             SectionCompare.MldValue.IsVisible = Visibility.Collapsed;
+        }
+
+        private bool DrawLumenProfileImageCompare()
+        {
+            if (imglumenProfileCompare == null) return false;
+
+            LumenProfileImageCompare = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileCompare);
+            return true;
+        }
+        private bool DrawLumenProfileImageExtraCompare()
+        {
+            if (imglumenProfileExtraCompare == null) return false;
+
+            LumenProfileImageExtraCompare = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileExtraCompare);
+            return true;
         }
     }
 }

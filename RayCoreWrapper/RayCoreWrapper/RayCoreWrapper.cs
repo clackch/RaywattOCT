@@ -157,6 +157,8 @@ namespace RaywattOCT
         [DllImport("RayCore.dll")]
         public static extern int RayStopLiveView();
         [DllImport("RayCore.dll")]
+        public static extern int RayLaserOnOff(bool isOn);
+        [DllImport("RayCore.dll")]
         public static extern int RaySetSession(RaySession session);
         [DllImport("RayCore.dll")]
         public static extern int RayRegisterImageCallback(IntPtr cbCrossSection, IntPtr cbLongitude);

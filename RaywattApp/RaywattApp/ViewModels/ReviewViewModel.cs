@@ -43,8 +43,6 @@ namespace RaywattApp.ViewModels
 
         private bool isLumenProfileInit = false;
 
-        private Mat imglumenProfileExtra;
-
         private double originSectionProximalX;
 
         private double originSectionDistalX;
@@ -89,9 +87,6 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private Section _section;
-
-        [ObservableProperty]
-        private BitmapSource _lumenProfileImageExtra;
 
         private int outFrameNumber;
         public int OutFrameNumber
@@ -307,6 +302,9 @@ namespace RaywattApp.ViewModels
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
 
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
+
+                if (ReviewStatus.IsPlay)
+                    Playback();
             }
         }
 
@@ -613,22 +611,29 @@ namespace RaywattApp.ViewModels
 
             if (action.ToLower().Equals("prev"))
             {
-                if (!DeviceStatus.IsPaused)
-                    Playback();
+                StopPlayback();
 
                 PrevFrame(RaySession.Review);
             }
             else if (action.ToLower().Equals("next"))
             {
-                if (!DeviceStatus.IsPaused)
-                    Playback();
+                StopPlayback();
 
                 NextFrame(RaySession.Review);
             }
             else if (action.ToLower().Equals("play"))
             {
                 Playback();
-                if (!IsPaused) ReviewStatus.IsMeasurementOn = false;
+
+                if (!IsPaused) {
+                    ReviewStatus.IsMeasurementOn = false;
+                    ReviewStatus.IsPlay = true;
+                }
+                else
+                {
+                    ReviewStatus.IsPlay = false;
+                }
+                
             }
         }
 
@@ -693,10 +698,7 @@ namespace RaywattApp.ViewModels
 
         private void ToggleMeasurement()
         {
-            if (DeviceStatus.IsPaused == false)
-            {
-                Playback();
-            }
+            StopPlayback();
 
             ReviewStatus.IsMeasurementOn = !ReviewStatus.IsMeasurementOn;
         }
@@ -779,6 +781,8 @@ namespace RaywattApp.ViewModels
 
                 if (IsChangedLumenProfileValue())
                 {
+                    imglumenProfile = null;
+                    imglumenProfileExtra = null;
                     MinimalValueChanged();
                     DrawLumenProfile(longitudeFrameInfo.curFrame - 1);
                     SetLumenProfileValue();
@@ -999,7 +1003,7 @@ namespace RaywattApp.ViewModels
             int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
             //Test
             List<int> appositionFrames = new List<int>() { 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
-            imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, frameProximal, frameDistal, CommonUtil.IsPostCase(PatientCase.Procedure), appositionFrames, totalFrame);
+            imglumenProfile = CommonUtil.MakeLumenProfileImageOneByOne(imglumenProfile, LumenContours, frameProximal, frameDistal, CommonUtil.IsPostCase(PatientCase.Procedure), appositionFrames, totalFrame);
             DrawLumenProfileImage();
 
             List<int> colorFrames = new List<int>();
@@ -1011,8 +1015,8 @@ namespace RaywattApp.ViewModels
             {
                 colorFrames = CommonUtil.GetExpansionList(LumenContours, frameProximal, frameDistal, Section.RefArea, PatientCase.ExpansionThreshold);
             }
-            imglumenProfileExtra = CommonUtil.MakeLumenProfileImageExtra(ReviewStatus.NumberOfFrames, colorFrames, CommonUtil.IsPreCase(PatientCase.Procedure), totalFrame);
-            LumenProfileImageExtra = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileExtra);
+            imglumenProfileExtra = CommonUtil.MakeLumenProfileImageExtraOneByOne(imglumenProfileExtra, ReviewStatus.NumberOfFrames, colorFrames, CommonUtil.IsPreCase(PatientCase.Procedure), totalFrame);
+            DrawLumenProfileImageExtra();
         }
 
         private void DrawCalciumIndicator()
@@ -1135,8 +1139,7 @@ namespace RaywattApp.ViewModels
             {
                 if (indicator.IsLongitudeClicked)
                 {
-                    if (!DeviceStatus.IsPaused)
-                        Playback();
+                    StopPlayback();
 
                     indicator.IsLongitudeClicked = false;
                     return;
@@ -1181,6 +1184,8 @@ namespace RaywattApp.ViewModels
 
                     if (IsChangedLumenProfileValue())
                     {
+                        imglumenProfile = null;
+                        imglumenProfileExtra = null;
                         MinimalValueChanged();
                         DrawLumenProfile(longitudeFrameInfo.curFrame - 1);
                         SetLumenProfileValue();

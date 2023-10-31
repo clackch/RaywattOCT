@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Windows.Threading;
 using RaywattApp.Common.Util;
 using static RaywattOCT.RayCoreWrapper;
+using System.Threading;
 
 namespace RaywattApp.ViewModels
 {
@@ -35,7 +36,19 @@ namespace RaywattApp.ViewModels
         private bool _isStep1;
 
         [ObservableProperty]
+        private bool _isReady;
+
+        [ObservableProperty]
+        private bool _isStart;
+
+        [ObservableProperty]
+        private bool _isCancel;
+
+        [ObservableProperty]
         private int _startTime;
+
+        private Thread threadWaitPullbackDone;
+        private bool runWaitPullbackDone;
 
         private DispatcherTimer timer = new DispatcherTimer();
         private DispatcherTimer readyTimer = new DispatcherTimer();
@@ -70,12 +83,20 @@ namespace RaywattApp.ViewModels
             _sqlManager = sqlManager;
 
             IsStep1 = true;
+            IsReady = true;
+            IsStart = true;
+            IsCancel = true;
 
             timer.Interval = TimeSpan.FromMilliseconds(1000);
             timer.Tick += new EventHandler(StartTimer);
 
             readyTimer.Interval = TimeSpan.FromMilliseconds(Constants.TransientTime);
             readyTimer.Tick += new EventHandler(ReadyTimer);
+
+            threadWaitPullbackDone = new Thread(new ThreadStart(threadFuncWaitPullbackDone));
+
+            DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current = 0;
+            DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total = 0;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -125,11 +146,23 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Ready");
 
+            IsReady = false;
+            IsCancel = false;
+
+            Thread threadReadyPullback = new Thread(() => ThreadReadyPullback());
+            threadReadyPullback.Start();
+        }
+
+        private void ThreadReadyPullback()
+        {
             RayReadyPullback();
 
-            isReadyOn = false;
-            (ReadyCommand as RelayCommand).NotifyCanExecuteChanged();
-            readyTimer.Start();
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                isReadyOn = false;
+                (ReadyCommand as RelayCommand).NotifyCanExecuteChanged();
+                readyTimer.Start();
+            });
         }
 
         private bool CanReady()
@@ -142,6 +175,7 @@ namespace RaywattApp.ViewModels
         private void ReadyTimer(object sender, EventArgs e)
         {
             IsStep1 = false;
+            IsCancel = true;
 
             StartTime = Constants.StartTime;
             timer.Start();
@@ -158,6 +192,9 @@ namespace RaywattApp.ViewModels
 
                 IsStep1 = true;
                 isReadyOn = true;
+                IsReady = true;
+                IsStart = true;
+                IsCancel = true;
                 (ReadyCommand as RelayCommand).NotifyCanExecuteChanged();
                 timer.Stop();
             }
@@ -170,16 +207,34 @@ namespace RaywattApp.ViewModels
             if (timer.IsEnabled)
                 timer.Stop();
 
+            IsStart = false;
+            IsCancel = false;
+
             PatientCase.Image = generateFileName("oct");
+            DeviceStatus.IsSaveRawDataDone = false;
             DeviceStatus.IsLumenSaved = false;
-            DeviceStatus.IsPullbackDone = false;
-            DeviceStatus.IsLumenDetected = false;
             DeviceStatus.IsOCTImagingDone = false;
+            DeviceStatus.IsLumenDetected = false;
+            DeviceStatus.IsPullbackDone = false;
+
             RayPullbackScan(PatientCase.ImageFullPath);
+
+            threadWaitPullbackDone.Start();            
+        }
+
+        private void threadFuncWaitPullbackDone()
+        {
+            runWaitPullbackDone = true;
+
+            while (runWaitPullbackDone && !DeviceStatus.IsPullbackDone)
+            {
+                Thread.Sleep((int)Constants.WaitForEventInterval);
+            }
+            runWaitPullbackDone = false;
 
             leaveToPage(Constants.RecordingConfirmPage);
         }
-        
+
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {
             DrawCrossSectionImage();

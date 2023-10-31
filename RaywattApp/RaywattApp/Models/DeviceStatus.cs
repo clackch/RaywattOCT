@@ -37,6 +37,9 @@ namespace RaywattApp.Models
         private bool _isLumenDetected = false;
 
         [ObservableProperty]
+        private bool _isSaveRawDataDone = true;
+
+        [ObservableProperty]
         private bool _isLumenLoaded = true;
 
         [ObservableProperty]

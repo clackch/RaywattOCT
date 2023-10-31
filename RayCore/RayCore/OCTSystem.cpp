@@ -499,6 +499,16 @@ RayError COCTSystem::StopLiveView()
 }
 
 /*
+* LaserOnOff
+*/
+RayError COCTSystem::LaserOnOff(bool isOn)
+{
+	laserOnOff(isOn);
+
+	return RayError::OK;
+}
+
+/*
 * SetSession
 */
 RayError COCTSystem::SetSession(int session) 
@@ -1041,7 +1051,7 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 	for (nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadSaveRaw->isRun; nFrame++) {
 		pDataWriter->WriteFrame(nFrame);
 
-		pSystem->postMessage(WM_UPDATE_SAVE_RAW, nFrame + 1, nNumOfSamples);
+		//pSystem->postMessage(WM_UPDATE_SAVE_RAW, nFrame + 1, nNumOfSamples);
 	}
 	pDataWriter->WriteEOF();
 	pDataWriter->StopSave();
@@ -1271,7 +1281,7 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	CMotorController* pMotor = CMotorController::GetInstance();
 	CArduinoController* pPullbackMotor = pSystem->m_pPullbackMotor;
 
-	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterUnloading);
+	pSystem->postPriorMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterUnloading);
 
 	if (pPullbackMotor->IsOpen()) {
 		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
@@ -1282,7 +1292,7 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 		Sleep(config.GetLoadCatheterTime() / 2);
 	}
 
-	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Unloaded);
+	pSystem->postPriorMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Unloaded);
 
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
