@@ -104,6 +104,8 @@ void CRayUnetr::Initialize(bool useGPU) {
 cv::Mat CRayUnetr::FindLumen(cv::Mat image) {
 	cv::Mat input_image = image.clone();
 	bool resize = false;
+
+	cv::rotate(input_image, input_image, cv::ROTATE_180);
 	
 	if (image.channels() == 1) {
 		cv::cvtColor(input_image, input_image, cv::COLOR_GRAY2RGB);
@@ -136,6 +138,8 @@ cv::Mat CRayUnetr::FindLumen(cv::Mat image) {
 	if (resize) {
 		cv::resize(output_image, output_image, cv::Size(image.rows, image.cols));
 	}
+
+	cv::rotate(output_image, output_image, cv::ROTATE_180);
 
 	return output_image;
 }
