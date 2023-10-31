@@ -108,13 +108,15 @@ RayError COCTSystem::Start() {
 	CUtility::StartThread(threadService, m_pThreadService, this);
 
 	IImaging::Setting settingPullback = config.imaging;
-	settingPullback.Set(settingPullback.nAScan, config.imaging.nBScan); //  config.acquisition.nLaserSpeed / (config.bldcMotor.velocityPullback / 60));
+	settingPullback.Set(settingPullback.nAScan, floor((double)config.acquisition.nLaserSpeed / ((double)config.bldcMotor.velocityPullback / 60.f)));
+	PLOGI.printf("Pullback setting: LaserSpeed=%ld, Velocity=%ldrpm, NumOfAlines=%ld", config.acquisition.nLaserSpeed, config.bldcMotor.velocityPullback, settingPullback.nBScan);
 	m_pImagingPullback = CImagingSession::CreateColorImaging(this, settingPullback, nullptr, ImagingType::Default);
 	m_pImagingPullback->SetSession(SESSION_REALTIME);
 	m_pImagingPullback->Start();
 
 	IImaging::Setting settingLiveView = config.imaging;
-	settingLiveView.Set(settingLiveView.nAScan, 4000); // config.imaging.nBScan); // ceil((double)config.acquisition.nLaserSpeed / ((double)config.bldcMotor.velocityLiveView / 60.f)));
+	settingLiveView.Set(settingLiveView.nAScan, floor((double)config.acquisition.nLaserSpeed / ((double)config.bldcMotor.velocityLiveView / 60.f)));
+	PLOGI.printf("Pullback setting: LaserSpeed=%ld, Velocity=%ldrpm, NumOfAlines=%ld", config.acquisition.nLaserSpeed, config.bldcMotor.velocityLiveView, settingLiveView.nBScan);
 	m_pImagingLiveView = CImagingSession::CreateColorImaging(this, settingLiveView, nullptr, ImagingType::Default);
 	m_pImagingLiveView->SetSession(SESSION_REALTIME);
 	m_pImagingLiveView->Start();
