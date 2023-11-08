@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using System.Windows.Threading;
 using RaywattApp.Common.Util;
 using static RaywattOCT.RayCoreWrapper;
+using RaywattApp.Common.Angio;
+using System.Threading;
 
 namespace RaywattApp.ViewModels
 {
@@ -21,6 +23,7 @@ namespace RaywattApp.ViewModels
         private static readonly ILog _log = LogManager.GetLogger(typeof(RecordingViewModel));
 
         private readonly SqlManager _sqlManager;
+        private readonly AngioManager _angioManager;
 
         [ObservableProperty]
         private PrevStatus _prevStatus;
@@ -43,6 +46,7 @@ namespace RaywattApp.ViewModels
 
         private bool isReadyOn = true;
 
+
         private ICommand _cancelCommand;
         public ICommand CancelCommand
         {
@@ -61,13 +65,14 @@ namespace RaywattApp.ViewModels
             get { return this._startCommand ?? (this._startCommand = new RelayCommand(Start)); }
         }
 
-        public RecordingViewModel(SqlManager sqlManager)
+        public RecordingViewModel(SqlManager sqlManager, AngioManager angioManager)
         {
             _log.Debug("RecordingViewModel");
 
             Constants.CurrentPage = Constants.RecordingPage;
 
             _sqlManager = sqlManager;
+            _angioManager = angioManager;
 
             IsStep1 = true;
 
@@ -176,6 +181,11 @@ namespace RaywattApp.ViewModels
             DeviceStatus.IsLumenDetected = false;
             DeviceStatus.IsOCTImagingDone = false;
             RayPullbackScan(PatientCase.ImageFullPath);
+
+            // Angio 저장 시작
+            _angioManager.readyToRecv = true;
+            _angioManager.StartSaveAngioThread(PatientCase.ImageFullPath.Substring(0, PatientCase.ImageFullPath.Length-3)+"angioframes");
+            Thread.Sleep(1000); // testtesttest
 
             leaveToPage(Constants.RecordingConfirmPage);
         }

@@ -33,6 +33,8 @@ namespace RaywattApp.ViewModels
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
+        private bool isStartRecording;
+
         [ObservableProperty]
         private Patient _patient;
 
@@ -111,6 +113,8 @@ namespace RaywattApp.ViewModels
             _angioManager = angioManager;
             PullbackList = CodeDefinition.Codes["PBTY"];
 
+            isStartRecording = false;
+
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["classification"] = "PBTY";
             pullbackTypes = _sqlManager.SelectCode(sqlParameters);
@@ -161,11 +165,11 @@ namespace RaywattApp.ViewModels
             }
 
             // Send Start Command
-            if (!_angioManager.isLiveView && DeviceStatus.IsAngioConnected)
+            if (!_angioManager.readyToRecv && DeviceStatus.IsAngioConnected)
             {
                 _angioManager.SendCommandPacket(CommandType.FGStarted);
-                _angioManager.isLiveView = true;
             }
+            _angioManager.readyToRecv = true;
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -176,11 +180,13 @@ namespace RaywattApp.ViewModels
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
 
-            //Send Stop Command
-            if (_angioManager.isLiveView && DeviceStatus.IsAngioConnected)
+            String test = navigationEventArgs.ToString();
+
+            // catheter fail
+            if (!isStartRecording && _angioManager.readyToRecv && DeviceStatus.IsAngioConnected)
             {
                 _angioManager.SendCommandPacket(CommandType.FGStopped);
-                _angioManager.isLiveView = false;
+                _angioManager.readyToRecv = false;
             }
         }
 
@@ -197,6 +203,9 @@ namespace RaywattApp.ViewModels
         private void Back()
         {
             _log.Debug("Back");
+            
+            _angioManager.SendCommandPacket(CommandType.FGStopped);
+            _angioManager.readyToRecv = false;
 
             RayStopLiveView();
             leaveToPage(Constants.PatientDetailPage);
@@ -239,6 +248,8 @@ namespace RaywattApp.ViewModels
 
                 return;
             }
+
+            isStartRecording = true;
 
             leaveToPage(Constants.RecordingPage);
         }

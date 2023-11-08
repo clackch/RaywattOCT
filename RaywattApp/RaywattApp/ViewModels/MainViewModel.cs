@@ -458,6 +458,9 @@ namespace RaywattApp.ViewModels
                     break;
                 case RayWorkItem.Pullback:
                     DeviceStatus.IsPullbackDone = true;
+
+                    _angioManager.StopSaveAngioThread();
+
                     Task.Run(() => {
                         Thread.Sleep(3000);
                         RayUnloadCatheter();
