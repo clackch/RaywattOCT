@@ -53,6 +53,7 @@ void CTIFFImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth,
 
 void CTIFFImaging::Process(char* fringes)
 {
+	
 	m_end = std::chrono::system_clock::now();
 	cv::Mat imgTIFF(cv::Size(m_setting.nBScan, m_setting.nAScan), CV_8UC4, fringes);
 
@@ -80,13 +81,8 @@ void CTIFFImaging::Process(char* fringes)
 	m_start = m_end;
 }
 
-void CTIFFImaging::CircularizeImage(cv::Mat& src, cv::Mat& dst)
-{
-	cv::rotate(src, dst, cv::ROTATE_90_COUNTERCLOCKWISE);
-	cv::remap(dst, dst, matXMap, matYMap, cv::INTER_LINEAR);
-}
-
 void CTIFFImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst)
 {
 	cv::remap(src, dst, dematXMap, dematYMap, cv::INTER_LINEAR);
+	cv::rotate(dst, dst, cv::ROTATE_90_COUNTERCLOCKWISE);
 }
