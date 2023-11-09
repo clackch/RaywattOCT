@@ -414,5 +414,6 @@ namespace RaywattApp.Common.Bases
         public const int imageHeaderSize = 7;
         public const int imageTailSize = 2;
         public const int commandPacketSize = 5;
+        public const int deviceInfoPacketSize = 10;
     }
 }

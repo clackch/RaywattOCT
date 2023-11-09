@@ -24,10 +24,12 @@ namespace RaywattApp.Common.Angio
         FGStopped,
         FGAskPort,
         FGAskBoard,
+        FGAskDeviceInfo,
         FGAngioConnected, // Port
         FGAngioDisconnected, // Port
         FGBoardExist,
         FGBoardNotExist,
+        FGDeviceInfo,
         FGNothing,
     };
 
@@ -44,6 +46,7 @@ namespace RaywattApp.Common.Angio
 
         private bool serverConnection; // Server - Client Connection
         private CommandType boardConnection; // FG Board Connection
+        private CommandType portConnection; // FG Port Connection
 
         private byte[] buffer;
         private byte[] tmpBuffer;
@@ -61,6 +64,8 @@ namespace RaywattApp.Common.Angio
 
         private Thread threadFuncSaveAngioFrames;
         private bool threadOnSaveAngioFrames;
+
+        private Thread threadFuncBufferRealloc;
 
         private string angioFramesPath;
         private short angioFrameWidth;
@@ -80,13 +85,12 @@ namespace RaywattApp.Common.Angio
             serverConnection = false;
 
             boardConnection = CommandType.FGUnknown;
+            portConnection = CommandType.FGUnknown;
             readyToRecv = false;
 
-            angioFrameWidth = 100;
-
-            buffer = new byte[10000000];
-            tmpBuffer = new byte[angioFrameWidth];
-            angioSaveBuffer = new byte[200000000];
+            buffer = new byte[100];
+            tmpBuffer = new byte[200];
+            angioSaveBuffer = new byte[10];
 
             Array.Fill<byte>(buffer, 0);
             Array.Fill<byte>(tmpBuffer, 0);
@@ -99,12 +103,16 @@ namespace RaywattApp.Common.Angio
             threadOnLiveAngioImage = false;
             threadOnSaveAngioFrames = false;
 
+            angioFrameHeight = -1;
+            angioFrameWidth = -1;
+            
+
             ConnectToServer();
         }
 
         private void ConnectToServer()
         {
-            // Angio Server On
+            // Angio Server On 
             Process[] processes = Process.GetProcessesByName("FGServer");
             if (processes.Length == 0)
             {
@@ -132,6 +140,7 @@ namespace RaywattApp.Common.Angio
             ActivateClientThreads();
             AskBoardConnection();
             AskAngioConnection();
+            AskDeviceInfo();
         }
 
         private void AskAngioConnection()
@@ -142,6 +151,29 @@ namespace RaywattApp.Common.Angio
         private void AskBoardConnection()
         {
             SendCommandPacket(CommandType.FGAskBoard);
+        }
+        private void AskDeviceInfo()
+        {
+            SendCommandPacket(CommandType.FGAskDeviceInfo);
+        }
+
+        private void ThreadFuncBufferRealloc()
+        {
+            while(true)
+            {
+                if(boardConnection != CommandType.FGUnknown && portConnection != CommandType.FGUnknown && angioFrameHeight != -1 && angioFrameWidth != -1)
+                {
+                    buffer = new byte[angioImageSize * 5];
+                    tmpBuffer = new byte[angioImageSize * 10];
+                    angioSaveBuffer = new byte[angioImageSize * 100];
+
+                    Array.Fill<byte>(buffer, 0);
+                    Array.Fill<byte>(tmpBuffer, 0);
+                    Array.Fill<byte>(angioSaveBuffer, 0);
+
+                    break;
+                }
+            }
         }
 
         private void ThreadFuncLiveAngioImage()
@@ -177,6 +209,10 @@ namespace RaywattApp.Common.Angio
         {
             threadFuncLiveAngioImage = new Thread(() => ThreadFuncLiveAngioImage());
             StartLiveAngioThread();
+
+            threadFuncBufferRealloc = new Thread(() => ThreadFuncBufferRealloc());
+            threadFuncBufferRealloc.Start();
+            
         }
 
         public void CloseAngioManager()
@@ -187,13 +223,15 @@ namespace RaywattApp.Common.Angio
                 StopLiveAngioThread();
             if (threadFuncSaveAngioFrames != null && threadFuncSaveAngioFrames.IsAlive)
                 StopSaveAngioThread();
+            if (threadFuncBufferRealloc != null && threadFuncBufferRealloc.IsAlive)
+                threadFuncBufferRealloc.Join();
         }
 
         private bool ReadPacket()
         {
             try
             {
-                bytesRead = Instance.GetStream().Read(buffer, 0, 10000000);
+                bytesRead = Instance.GetStream().Read(buffer, 0, buffer.Length);
 
                 Array.Copy(buffer, 0, tmpBuffer, tmpBufferLen, bytesRead);
                 tmpBufferLen += bytesRead;
@@ -237,7 +275,7 @@ namespace RaywattApp.Common.Angio
                 char checksum = BitConverter.ToChar(tmpBuffer, offset++);
                 char eof = BitConverter.ToChar(tmpBuffer, offset++);
 
-                Array.Copy(tmpBuffer, angioImageSize + Constants.imageHeaderSize + Constants.imageTailSize, tmpBuffer, 0, 20000000 - angioImageSize - Constants.imageHeaderSize - Constants.imageTailSize);
+                Array.Copy(tmpBuffer, angioImageSize + Constants.imageHeaderSize + Constants.imageTailSize, tmpBuffer, 0, tmpBuffer.Length - angioImageSize - Constants.imageHeaderSize - Constants.imageTailSize);
                 tmpBufferLen -= angioImageSize + Constants.imageHeaderSize + Constants.imageTailSize;
 
                 Cv2.Flip(image, image, 0);
@@ -260,10 +298,22 @@ namespace RaywattApp.Common.Angio
         {
             int offset = 2;
             byte command = tmpBuffer[offset++];
-            char checksum = BitConverter.ToChar(tmpBuffer, offset++);
-            char eof = BitConverter.ToChar(tmpBuffer, offset++);
+            char checksum = (char)tmpBuffer[offset++];
+            char eof = (char)tmpBuffer[offset++];
 
-            if ((byte)checksum == CalcCheckSum(tmpBuffer, 3))
+            if(command == (byte)CommandType.FGDeviceInfo)
+            {
+                checksum = (char)tmpBuffer[Constants.deviceInfoPacketSize - 2];
+                if ((byte)checksum == CalcCheckSum(tmpBuffer, Constants.deviceInfoPacketSize - 2))
+                {
+                    DeviceInfoPacketProcess();
+
+                    Array.Copy(tmpBuffer, Constants.deviceInfoPacketSize, tmpBuffer, 0, tmpBuffer.Length - Constants.deviceInfoPacketSize);
+                    tmpBufferLen -= Constants.deviceInfoPacketSize;
+                }
+            }
+
+            else if ((byte)checksum == CalcCheckSum(tmpBuffer, 3))
             {
                 if (command == (byte)CommandType.FGAngioDisconnected)
                 {
@@ -273,6 +323,7 @@ namespace RaywattApp.Common.Angio
                         SendCommandPacket(CommandType.FGStopped);
                         readyToRecv = false;
                     }
+                    portConnection = CommandType.FGAngioDisconnected;
 
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
@@ -285,6 +336,7 @@ namespace RaywattApp.Common.Angio
                     {
                         SendCommandPacket(CommandType.FGStarted);
                     }
+                    portConnection = CommandType.FGAngioConnected;
 
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
@@ -301,9 +353,21 @@ namespace RaywattApp.Common.Angio
                     threadOnLiveAngioImage = false;
                 }
 
-                Array.Copy(tmpBuffer, Constants.commandPacketSize, tmpBuffer, 0, 20000000 - Constants.commandPacketSize);
+                Array.Copy(tmpBuffer, Constants.commandPacketSize, tmpBuffer, 0, tmpBuffer.Length - Constants.commandPacketSize);
                 tmpBufferLen -= Constants.commandPacketSize;
             }
+        }
+
+        private void DeviceInfoPacketProcess()
+        {
+            int offset = 3;
+            angioFrameHeight = BitConverter.ToInt16(tmpBuffer, offset);
+            offset += sizeof(short);
+            angioFrameWidth = BitConverter.ToInt16(tmpBuffer, offset);
+            offset += sizeof(short);
+            angioBitsPerPixel = (char)tmpBuffer[offset++];
+
+            angioImageSize = angioFrameHeight * angioFrameWidth * angioBitsPerPixel / 8;
         }
 
         private PacketType CheckPacketType(byte[] tmpBuffer)
@@ -314,7 +378,10 @@ namespace RaywattApp.Common.Angio
                 switch (tmpBuffer[offset++])
                 {
                     case (byte)PacketType.Command:
-                        if (tmpBuffer[4] == 0xA3)
+                        if (tmpBuffer[Constants.commandPacketSize-1] == 0xA3)
+                        {
+                            return PacketType.Command;
+                        }else if (tmpBuffer[Constants.deviceInfoPacketSize-1] == 0xA3)
                         {
                             return PacketType.Command;
                         }
@@ -330,7 +397,7 @@ namespace RaywattApp.Common.Angio
 
                         if (tmpBuffer[Constants.imageHeaderSize + imageSize + Constants.imageTailSize - 1] == 0xA3)
                         {
-                            return (int)PacketType.Image;
+                            return PacketType.Image;
                         }
                         break;
 
