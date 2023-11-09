@@ -335,6 +335,8 @@ RayError COCTSystem::ReadyPullback()
 		restartAcqDevice(m_pImagingPullback);
 
 		pMotorCtrl->PerformRun(config.bldcMotor.velocityPullback);
+		m_pPullbackMotor->SetCurrent(StepMotorIndex::Pullback, 0);
+		m_pPullbackMotor->SetCurrent(StepMotorIndex::Hub, 0);
 		m_pPullbackMotor->SetSpeed(StepMotorIndex::Both, config.stepMotor.pullbackSpeed);
 
 		return RayError::OK;
@@ -1172,7 +1174,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	IImaging::Setting settingPullback = pSystem->m_pImagingPullback->GetSetting();
 	int pullbackTime = ((double)config.stepMotor.pullbackDistance / (double)config.stepMotor.pullbackSpeed) * 1000;
 
-	PLOGI.printf("Pullback start - %dmm, %dmm/s - %dsec", config.stepMotor.pullbackDistance, config.stepMotor.pullbackSpeed, pullbackTime);
+	PLOGI.printf("Pullback start - %dmm, %dmm/s - %dmsec", config.stepMotor.pullbackDistance, config.stepMotor.pullbackSpeed, pullbackTime);
 
 	// 1. Start Recording OCT
 	CDataWriter* pDataWriter = new CDataWriter();
@@ -1187,8 +1189,9 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pSystem->m_pAcqDevice->SetWriter(pDataWriter);
 
 	// 2. Pullback Linear Stage
-	if (pPullbackMotor->IsOpen()) {		
-		pPullbackMotor->MoveAbsolute(StepMotorIndex::Both, config.stepMotor.pullbackDistance);
+	if (pPullbackMotor->IsOpen()) {
+		pPullbackMotor->MoveAbsolute(StepMotorIndex::Both, config.stepMotor.pullbackDistance, false);
+#if 0
 		while (pSystem->m_pThreadRotaryJunction->isRun) {
 			if (pPullbackMotor->IsMoving()) {
 				break;
@@ -1197,6 +1200,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 				Sleep(DELAY_FOR_STOP_THREAD);
 			}
 		}
+#endif
 	}
 	else {
 		Sleep(pullbackTime);
@@ -1207,8 +1211,12 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pSystem->m_pAcqDevice->SetWriter(nullptr);
 
 	// 4. Motor OFF
-	Sleep(500);
+	Sleep(1000);
 	pMotor->StopMotor();
+
+	// 5. Homing
+	pPullbackMotor->MoveAbsolute(StepMotorIndex::Both, 0);
+	pPullbackMotor->SetCurrent(StepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 
 	PLOGI.printf("Pullback done.");
 	CImagingSession* pSession = CImagingSession::CreateSession(pSystem, SESSION_REVIEW, settingPullback, pDataWriter);
@@ -1241,6 +1249,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 
 	// 2. Move Step-Motor (Pullback)
 	if (pPullbackMotor->IsOpen()) {
+		pPullbackMotor->SetCurrent(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
 		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_LOAD);
 
@@ -1287,6 +1296,7 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 
 	if (pPullbackMotor->IsOpen()) {
 		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
+		pPullbackMotor->SetCurrent(StepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 	}
 	else if (pSystem->m_isTestMode)
