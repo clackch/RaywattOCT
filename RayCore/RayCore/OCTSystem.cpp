@@ -1457,6 +1457,7 @@ int COCTSystem::connectRotaryJunction() {
 
 	if (!pMotor->IsConnected()) {
 		result &= pMotor->Connect(config.bldcMotor.port);
+		result &= pMotor->SetModeOfOperation(MOTOR_DATA_MODE_VELOCITY);
 		result &= pMotor->SwitchOn();
 	}
 

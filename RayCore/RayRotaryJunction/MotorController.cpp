@@ -50,6 +50,16 @@ void CMotorController::Disconnect() {
 	m_initMotor = false;
 }
 
+bool CMotorController::SetModeOfOperation(char mode) {
+	BYTE packet[MAX_PATH];
+	int packetLength = 0;
+	bool result = false;
+
+	getMotorPacket(MOTOR_INDEX_MODESOFOPERATION, mode, 1, packet, packetLength);
+	result = writeMotor(packet, packetLength);
+
+	return result;
+}
 bool CMotorController::SwitchOn() {
 	BYTE packet[MAX_PATH];
 	int packetLength = 0;
