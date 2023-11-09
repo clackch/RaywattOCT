@@ -133,6 +133,10 @@ RayError COCTSystem::Stop() {
 	PLOGI.printf("Stop threads");
 	CUtility::StopThread(m_pThreadService);
 	CUtility::StopThread(m_pThreadSaveRaw);
+
+	if (m_cathState != CatheterState::Unloaded) {
+		CUtility::StartThread(threadUnloadCatheter, m_pThreadRotaryJunction, this);
+	}
 	CUtility::StopThread(m_pThreadRotaryJunction);
 
 	PLOGI.printf("Close All Sessions");
