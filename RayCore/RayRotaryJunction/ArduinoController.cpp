@@ -51,7 +51,7 @@ bool CArduinoController::SetCurrent(StepMotorIndex idx, int nPosition)
 
 	return result;
 }
-bool CArduinoController::MoveAbsolute(StepMotorIndex idx, int nPos)
+bool CArduinoController::MoveAbsolute(StepMotorIndex idx, int nPos, bool delay)
 {
 	double prevPosition = (idx == StepMotorIndex::Both) ? m_pPosition[(UINT)StepMotorIndex::Pullback] : m_pPosition[(UINT)idx];
 	UINT distance = abs((int)nPos - (int)prevPosition);
@@ -63,7 +63,7 @@ bool CArduinoController::MoveAbsolute(StepMotorIndex idx, int nPos)
 	sprintf(strCommand, "move %d %d\n", idx, (int)nPos);
 
 	bool result = sendCommand(strCommand);
-	Sleep(DELAY_BETWEEN_COMMAND);
+	if (delay) Sleep(DELAY_BETWEEN_COMMAND);
 
 	// wait while moving
 	Sleep((long)time);
@@ -111,7 +111,7 @@ void CArduinoController::readResponse()
 			if (buf == '\n') {
 				m_pReadBuffer[nRead] = '\0';
 				parseResponse((const char*) m_pReadBuffer);
-				PLOGI.printf("[readResponse] %s\n", m_pReadBuffer);
+				PLOGI.printf("[readResponse] %s", m_pReadBuffer);
 				break;
 			}
 		}
@@ -130,6 +130,7 @@ bool CArduinoController::parseResponse(const char* strResponse)
 
 	if (result.size() >= 2) {
 		m_fPosition = atoi(result.at(1).c_str());
+		PLOGI.printf("m_fPosition: %lf", m_fPosition);
 		return true;
 	}
 	return false;
