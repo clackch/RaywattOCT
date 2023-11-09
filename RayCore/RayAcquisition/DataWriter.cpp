@@ -31,12 +31,14 @@ int CDataWriter::StartRecording() {
 
 	m_nNumOfSamples = 0;
 	m_isRecording = true;
+	PLOGI.printf("Start Recording");
 
 	return NOERROR;
 }
 
 void CDataWriter::StopRecording() {
 	m_isRecording = false;
+	PLOGI.printf("Stop Recording");
 }
 
 void CDataWriter::StartSave(tstring strFilePath) {
