@@ -180,7 +180,7 @@ namespace RaywattApp.Models
                 Mld.StrValue = "Right";
                 MlaValue.DValue = mla;
                 MlaValue.NValue = mlaIdx + frameProximal;
-                string text = "MLA " + (mla == 0 ? "0.00" : Math.Round(mla * Constants.MillimeterPerPixel * Constants.MillimeterPerPixel, 2).ToString()) + "㎟";
+                string text = "MLA " + Math.Round(mla * Constants.MillimeterPerPixel * Constants.MillimeterPerPixel, 2).ToString() + "㎟";
                 double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-12", text, 2).Width;
                 MlaValue.X = Mla.X - (width + 18);
                 MldValue.DValue = lumenContours[mldIdx + frameProximal].MeanDiameter;
@@ -229,7 +229,7 @@ namespace RaywattApp.Models
                 MinExp.StrValue = "Right";
                 MsaValue.DValue = msa;
                 MsaValue.NValue = msaIdx + frameProximal;
-                string text = "MSA " + (msa == 0 ? "0.00" : Math.Round(msa * Constants.MillimeterPerPixel  * Constants.MillimeterPerPixel , 2).ToString()) + "㎟";
+                string text = "MSA " + Math.Round(msa * Constants.MillimeterPerPixel  * Constants.MillimeterPerPixel , 2).ToString() + "㎟";
                 double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-12", text, 2).Width;
                 MsaValue.X = Msa.X - (width + 18);
                 MinExpValue.DValue = minExp;

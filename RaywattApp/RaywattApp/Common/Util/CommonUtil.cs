@@ -975,6 +975,15 @@ namespace RaywattApp.Common.Util
                     text = text + "0";
                 }
             }
+            else if(temp != null && temp.Length == 1 && digits > 0)
+            {
+                text += ".";
+
+                for (int i = 0; i < digits; i++)
+                {
+                    text = text + "0";
+                }
+            }
 
             TextBlock textBlock = new TextBlock();
             textBlock.Style = (System.Windows.Style)App.Current.Resources[style];
