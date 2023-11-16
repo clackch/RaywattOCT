@@ -7,6 +7,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.IO;
 using log4net;
+using System.Text;
 
 namespace RaywattApp.Common.Angio
 {
@@ -30,6 +31,9 @@ namespace RaywattApp.Common.Angio
         FGBoardExist,
         FGBoardNotExist,
         FGDeviceInfo,
+        FGChpFile,
+        FGSuccessChangeChp,
+        FGFailChangeChp,
         FGNothing,
     };
 
@@ -64,8 +68,6 @@ namespace RaywattApp.Common.Angio
 
         private Thread threadFuncSaveAngioFrames;
         private bool threadOnSaveAngioFrames;
-
-        private Thread threadFuncBufferRealloc;
 
         private string angioFramesPath;
         private short angioFrameWidth;
@@ -157,25 +159,6 @@ namespace RaywattApp.Common.Angio
             SendCommandPacket(CommandType.FGAskDeviceInfo);
         }
 
-        private void ThreadFuncBufferRealloc()
-        {
-            while(true)
-            {
-                if(boardConnection != CommandType.FGUnknown && portConnection != CommandType.FGUnknown && angioFrameHeight != -1 && angioFrameWidth != -1)
-                {
-                    buffer = new byte[angioImageSize * 5];
-                    tmpBuffer = new byte[angioImageSize * 10];
-                    angioSaveBuffer = new byte[angioImageSize * 100];
-
-                    Array.Fill<byte>(buffer, 0);
-                    Array.Fill<byte>(tmpBuffer, 0);
-                    Array.Fill<byte>(angioSaveBuffer, 0);
-
-                    break;
-                }
-            }
-        }
-
         private void ThreadFuncLiveAngioImage()
         {
             while (threadOnLiveAngioImage)
@@ -209,9 +192,6 @@ namespace RaywattApp.Common.Angio
         {
             threadFuncLiveAngioImage = new Thread(() => ThreadFuncLiveAngioImage());
             StartLiveAngioThread();
-
-            threadFuncBufferRealloc = new Thread(() => ThreadFuncBufferRealloc());
-            threadFuncBufferRealloc.Start();
             
         }
 
@@ -223,8 +203,6 @@ namespace RaywattApp.Common.Angio
                 StopLiveAngioThread();
             if (threadFuncSaveAngioFrames != null && threadFuncSaveAngioFrames.IsAlive)
                 StopSaveAngioThread();
-            if (threadFuncBufferRealloc != null && threadFuncBufferRealloc.IsAlive)
-                threadFuncBufferRealloc.Join();
         }
 
         private bool ReadPacket()
@@ -307,9 +285,6 @@ namespace RaywattApp.Common.Angio
                 if ((byte)checksum == CalcCheckSum(tmpBuffer, Constants.deviceInfoPacketSize - 2))
                 {
                     DeviceInfoPacketProcess();
-
-                    Array.Copy(tmpBuffer, Constants.deviceInfoPacketSize, tmpBuffer, 0, tmpBuffer.Length - Constants.deviceInfoPacketSize);
-                    tmpBufferLen -= Constants.deviceInfoPacketSize;
                 }
             }
 
@@ -321,7 +296,6 @@ namespace RaywattApp.Common.Angio
                     if (readyToRecv)
                     {
                         SendCommandPacket(CommandType.FGStopped);
-                        readyToRecv = false;
                     }
                     portConnection = CommandType.FGAngioDisconnected;
 
@@ -368,6 +342,16 @@ namespace RaywattApp.Common.Angio
             angioBitsPerPixel = (char)tmpBuffer[offset++];
 
             angioImageSize = angioFrameHeight * angioFrameWidth * angioBitsPerPixel / 8;
+
+            buffer = new byte[angioImageSize * 10];
+            tmpBuffer = new byte[angioImageSize * 20];
+            angioSaveBuffer = new byte[angioImageSize * 100];
+
+            Array.Fill<byte>(buffer, 0);
+            Array.Fill<byte>(tmpBuffer, 0);
+            Array.Fill<byte>(angioSaveBuffer, 0);
+
+            tmpBufferLen = 0;
         }
 
         private PacketType CheckPacketType(byte[] tmpBuffer)
@@ -442,6 +426,26 @@ namespace RaywattApp.Common.Angio
             commandBuffer[3] = checksum;
 
             Instance.GetStream().Write(commandBuffer, 0, commandBuffer.Length);
+        }
+
+        public void SendChpFilePacket(String chpFilePath)
+        {
+            byte[] chpFileBuffer = new byte[6 + chpFilePath.Length];
+            int offset = 0;
+            chpFileBuffer[offset++] = 0x3A;
+            chpFileBuffer[offset++] = (byte)PacketType.Command;
+            chpFileBuffer[offset++] = (byte)CommandType.FGChpFile;
+            chpFileBuffer[offset++] = (byte)(6 + chpFilePath.Length);
+
+            byte[] byteChpFilePath = Encoding.UTF8.GetBytes(chpFilePath);
+            Array.Copy(byteChpFilePath, 0, chpFileBuffer, offset, chpFilePath.Length);
+            offset += chpFilePath.Length;
+
+            byte checksum = CalcCheckSum(chpFileBuffer, offset);
+            chpFileBuffer[offset++] = checksum;
+            chpFileBuffer[offset++] = 0xA3;
+
+            Instance.GetStream().Write(chpFileBuffer, 0, chpFileBuffer.Length);
         }
 
         public void StartLiveAngioThread()

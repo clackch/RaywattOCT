@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using log4net;
+using RaywattApp.Common.Angio;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Models;
 using RaywattApp.Services;
@@ -14,6 +15,7 @@ namespace RaywattApp.ViewModels.Dialog
         private static readonly ILog _log = LogManager.GetLogger(typeof(CathRoomDialogViewModel));
 
         private readonly SqlManager _sqlManager;
+        private readonly AngioManager _angioManager;
 
         [ObservableProperty]
         private IList<CathRoom> _cathRoomList;
@@ -21,9 +23,10 @@ namespace RaywattApp.ViewModels.Dialog
         [ObservableProperty]
         private CathRoom _selectedCathRoom;
 
-        public CathRoomDialogViewModel(SqlManager sqlManager)
+        public CathRoomDialogViewModel(SqlManager sqlManager, AngioManager angioManager)
         {
             _sqlManager = sqlManager;
+            _angioManager = angioManager;
 
             CathRoomList = _sqlManager.SelectCathRoomList();
         }
@@ -44,6 +47,8 @@ namespace RaywattApp.ViewModels.Dialog
             DialogResults dialogResults = new();
             dialogResults.DialogAnswer = DialogResults.Answer.Yes;
             dialogResults.DialogReturn = parameter;
+
+            _angioManager.SendChpFilePacket("TESTCHPFILENAME");
 
             CloseDialogWithResult(dialog, dialogResults);
         }
