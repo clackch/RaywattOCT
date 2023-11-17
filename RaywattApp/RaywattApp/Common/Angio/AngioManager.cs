@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.IO;
 using log4net;
 using System.Text;
+using RaywattApp.Common.Annotation;
 
 namespace RaywattApp.Common.Angio
 {
@@ -39,6 +40,8 @@ namespace RaywattApp.Common.Angio
 
     public class AngioManager
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(AngioManager));
+
         private string serverIP;
         private int serverPort;
 
@@ -426,6 +429,7 @@ namespace RaywattApp.Common.Angio
             commandBuffer[3] = checksum;
 
             Instance.GetStream().Write(commandBuffer, 0, commandBuffer.Length);
+            _log.Debug("Send Command: " + (CommandType)commandType);
         }
 
         public void SendChpFilePacket(String chpFilePath)
