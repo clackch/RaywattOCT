@@ -888,6 +888,9 @@ Overwrite existing data?</value>
   <data name="Setting" xml:space="preserve">
     <value>[K]Setting</value>
   </data>
+  <data name="Shutting down" xml:space="preserve">
+    <value>[K]Shutting down</value>
+  </data>
   <data name="Side Branch View" xml:space="preserve">
     <value>[K]Side Branch View</value>
   </data>
@@ -926,6 +929,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Switch User" xml:space="preserve">
     <value>[K]Switch User</value>
+  </data>
+  <data name="Switching user" xml:space="preserve">
+    <value>[K]Switching user</value>
   </data>
   <data name="System File Option" xml:space="preserve">
     <value>[K]System File Option</value>

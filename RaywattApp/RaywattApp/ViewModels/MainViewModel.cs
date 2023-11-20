@@ -244,11 +244,11 @@ namespace RaywattApp.ViewModels
             {
                 if (result.DialogAnswer == DialogResults.Answer.Yes)
                 {
-                    DeviceStatus.PowerOffMsg = _l10n["Power Off"];
+                    DeviceStatus.PowerOffMsg = _l10n["Shutting down"];
                 }
                 else if (result.DialogAnswer == DialogResults.Answer.Extra)
                 {
-                    DeviceStatus.PowerOffMsg = _l10n["Switch User"];
+                    DeviceStatus.PowerOffMsg = _l10n["Switching user"];
                 }
                 CommonUtil.Exit(DeviceStatus);
 

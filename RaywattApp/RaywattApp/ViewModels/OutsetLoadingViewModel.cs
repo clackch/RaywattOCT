@@ -58,7 +58,7 @@ namespace RaywattApp.ViewModels
 
                     if (result != null && result.DialogAnswer == DialogResults.Answer.No)
                     {
-                        DeviceStatus.PowerOffMsg = _l10n["Power Off"];
+                        DeviceStatus.PowerOffMsg = _l10n["Shutting down"];
                         CommonUtil.Exit(DeviceStatus);
                         if (!CommonUtil.IsTestMode(DeviceStatus.TestMode, "Power"))
                             Win32Helper.LogOff();
