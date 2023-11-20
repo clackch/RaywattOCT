@@ -97,12 +97,12 @@ namespace RaywattApp.ViewModels
                 timer.Stop();
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
             }
-            else if (DeviceStatus.IsServiceStarted)
+            else if (DeviceStatus.IsServiceStarted && DeviceStatus.IsDeviceConnected)
             {
                 Progress = 100;
             }
 
-            Progress += 0.5;
+            Progress += 0.25;
         }
 
         private void ThreadCoreInit()
