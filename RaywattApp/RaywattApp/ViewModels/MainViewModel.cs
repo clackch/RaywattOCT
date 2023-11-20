@@ -168,6 +168,8 @@ namespace RaywattApp.ViewModels
                 if ("RJ".Equals(config.Key))
                     RaySetProperty(Property.TestMode, "Y".Equals(config.Value) ? 1.0f : 0.0f);
             }
+
+            DeviceStatus.PowerOffMsg = _l10n["Shutting down"];
         }
 
         private void OnNavigationMessage(object recipient, NavigationMessage message)
@@ -242,11 +244,7 @@ namespace RaywattApp.ViewModels
 
             if (result != null && result.DialogAnswer != DialogResults.Answer.No)
             {
-                if (result.DialogAnswer == DialogResults.Answer.Yes)
-                {
-                    DeviceStatus.PowerOffMsg = _l10n["Shutting down"];
-                }
-                else if (result.DialogAnswer == DialogResults.Answer.Extra)
+                if (result.DialogAnswer == DialogResults.Answer.Extra)
                 {
                     DeviceStatus.PowerOffMsg = _l10n["Switching user"];
                 }
