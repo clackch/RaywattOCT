@@ -17,7 +17,7 @@ void CRayTorchUnet::Initialize(bool useGPU) {
         device = torch::Device(torch::kCUDA, 0);
     }
 
-    std::string model_path = ".\\model_UnetR_torch.pt";
+    std::string model_path = "C:\\Raywatt\\system\\3rdparty\\model_UnetR_torch.pt";
     try {
         m_model = torch::jit::load(model_path, device);
     }

@@ -71,6 +71,10 @@
     </UserControl.Resources>
 
     <Grid Width="{x:Static const:Constants.OCTImageSize}" Height="{x:Static const:Constants.OCTImageSize}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="339*"/>
+            <ColumnDefinition Width="173*"/>
+        </Grid.ColumnDefinitions>
         <Grid.Clip>
             <RectangleGeometry RadiusX="10" RadiusY="10">
                 <RectangleGeometry.Rect>
@@ -78,8 +82,8 @@
                 </RectangleGeometry.Rect>
             </RectangleGeometry>
         </Grid.Clip>
-        <Canvas Name="canvasBackground"/>
-        <Canvas Name="canvas">
+        <Canvas Name="canvasBackground" Grid.ColumnSpan="2"/>
+        <Canvas Name="canvas" Grid.ColumnSpan="2">
             <Canvas.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform ScaleX="{Binding Zoom.ScaleX, ElementName=UserControl}" ScaleY="{Binding Zoom.ScaleY, ElementName=UserControl}"/>

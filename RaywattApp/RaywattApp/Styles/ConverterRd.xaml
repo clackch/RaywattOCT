@@ -122,4 +122,7 @@
     <!--  IsTestMode Converter  -->
     <converters:IsTestModeConverter x:Key="IsTestModeConverter" />
 
+    <!-- CrossSection Scale Converter -->
+    <converters:CoRegistrationConverter x:Key="CoRegistrationConverter" />
+
 </ResourceDictionary>

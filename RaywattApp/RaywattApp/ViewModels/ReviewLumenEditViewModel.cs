@@ -15,6 +15,7 @@ using RaywattApp.Common.Messages;
 using RaywattApp.Common.Annotation.Models;
 using System.Threading;
 using RaywattApp.Common.Util;
+using System.Diagnostics;
 
 namespace RaywattApp.ViewModels
 {

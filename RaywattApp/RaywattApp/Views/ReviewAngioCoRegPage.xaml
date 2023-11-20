@@ -14,7 +14,7 @@
       d:DesignHeight="1024" d:DesignWidth="1280"
       Background="{DynamicResource GrayscaleGray8Brush}"
       Title="ReviewAngioCoRegPage">
-    
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -36,7 +36,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="70"/>
                         <RowDefinition Height="580"/>
-                        <RowDefinition/>
+                        <RowDefinition Height="63"/>
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0">
                         <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Co-Registration], Source={StaticResource L10N}}"/>
@@ -47,15 +47,18 @@
                             <ColumnDefinition/>
                             <ColumnDefinition Width="448"/>
                         </Grid.ColumnDefinitions>
-                        <Image Grid.Column="0" Source="/res/png/angioImage.png" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}" Stretch="Fill" Cursor="Cross">
-                            <Image.Clip>
-                                <RectangleGeometry RadiusX="10" RadiusY="10">
-                                    <RectangleGeometry.Rect>
-                                        <Rect X="0" Y="0" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}"/>
-                                    </RectangleGeometry.Rect>
-                                </RectangleGeometry>
-                            </Image.Clip>
-                        </Image>
+                        <Grid Grid.Column="0">
+                            <Image x:Name="crossSectionAngioImage" Source="{Binding CurrentAngioImage}"  Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}" Stretch="Fill">
+                                <Image.Clip>
+                                    <RectangleGeometry RadiusX="10" RadiusY="10">
+                                        <RectangleGeometry.Rect>
+                                            <Rect X="0" Y="0" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}"/>
+                                        </RectangleGeometry.Rect>
+                                    </RectangleGeometry>
+                                </Image.Clip>
+                            </Image>
+                        </Grid>
+                        <annotation:DrawAngioPathUtil Grid.Column="0" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}" AngioImages="{Binding CrossSectionAngioImages}" FrameNumber="{Binding FrameNumber}" Zoom="{Binding Zoom}" Cursor="Cross"/>
                         <Border Grid.Column="2" CornerRadius="8" Background="{DynamicResource GrayscaleGray6Brush}">
                             <Grid Margin="30,36,30,30" >
                                 <Grid.RowDefinitions>
@@ -94,6 +97,14 @@
                                 </Border>
                             </Grid>
                         </Border>
+                    </Grid>
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="420"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Slider Grid.Column="0" Width="400" Minimum="0" Maximum="{Binding MaxFrames}" Value="{Binding FrameNumber, Mode=TwoWay}" Cursor="Hand" Height="30"/>
                     </Grid>
                 </Grid>
             </Border>
