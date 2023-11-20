@@ -28,8 +28,11 @@ namespace RaywattApp.ViewModels
 
         private DispatcherTimer timer = new DispatcherTimer();
 
+        private bool isError = false;
+
         [ObservableProperty]
         private double _progress;
+
         public OutsetLoadingViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
             _log.Debug("OutsetLoadingViewModel");
@@ -58,6 +61,7 @@ namespace RaywattApp.ViewModels
 
                     if (result != null && result.DialogAnswer == DialogResults.Answer.No)
                     {
+                        DeviceStatus.PowerOffMsg = _l10n["Switching user"];
                         CommonUtil.Exit(DeviceStatus);
                         if (!CommonUtil.IsTestMode(DeviceStatus.TestMode, "Power"))
                             Win32Helper.LogOff();
@@ -101,6 +105,23 @@ namespace RaywattApp.ViewModels
             {
                 Progress = 100;
             }
+            else if (isError)
+            {
+                _log.Error("RayStartSystem Error or RayConnectDevices Error");
+
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["title"] = _l10n["Error"];
+                parameter["message"] = _l10n["$MSG011"];
+                parameter["error"] = true;
+                var resultDialog = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+                if (resultDialog != null && resultDialog.DialogAnswer == DialogResults.Answer.Undefined)
+                {
+                    CommonUtil.Exit(DeviceStatus);
+                    if (!CommonUtil.IsTestMode(DeviceStatus.TestMode, "Power"))
+                        Win32Helper.Shutdown();
+                }
+            }
 
             Progress += 0.25;
         }
@@ -114,7 +135,8 @@ namespace RaywattApp.ViewModels
             result |= (RayError)RayStartSystem();
             result |= (RayError)RayConnectDevices();
 
-            DeviceStatus.IsDeviceConnected = true; // (result == RayError.OK);
+            DeviceStatus.IsDeviceConnected = (result == RayError.OK);
+            isError = (result != RayError.OK);
 
             _log.Debug("ThreadCoreInit - Done");
         }
