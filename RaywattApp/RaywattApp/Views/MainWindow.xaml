@@ -82,6 +82,17 @@
                     </MultiBinding>
                 </component:MenuUnableComponent.Visibility>
             </component:MenuUnableComponent>
+
+            <!-- Power Off/Switch User Msg -->
+            <StackPanel Grid.Row="0" Grid.RowSpan="3" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" Visibility="{Binding DeviceStatus.IsPowerOff, Converter={StaticResource BoolToVisibilityConverter}}"/>
+            <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding DeviceStatus.IsPowerOff, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Width="{x:Static const:Constants.PowerOffDialogWidth}" Height="{x:Static const:Constants.PowerOffDialogHeight}">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <ContentControl Template="{DynamicResource Loading}"/>
+                        <Label FontSize="50" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding DeviceStatus.PowerOffMsg}"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>

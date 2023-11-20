@@ -242,6 +242,14 @@ namespace RaywattApp.ViewModels
 
             if (result != null && result.DialogAnswer != DialogResults.Answer.No)
             {
+                if (result.DialogAnswer == DialogResults.Answer.Yes)
+                {
+                    DeviceStatus.PowerOffMsg = _l10n["Power Off"];
+                }
+                else if (result.DialogAnswer == DialogResults.Answer.Extra)
+                {
+                    DeviceStatus.PowerOffMsg = _l10n["Switch User"];
+                }
                 CommonUtil.Exit(DeviceStatus);
 
                 _angioManager.CloseAngioManager();

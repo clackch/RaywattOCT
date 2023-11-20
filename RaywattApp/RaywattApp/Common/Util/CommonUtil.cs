@@ -25,7 +25,6 @@ using System.Windows.Controls;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
 using Newtonsoft.Json;
-using System.Windows.Shapes;
 
 namespace RaywattApp.Common.Util
 {
@@ -998,6 +997,8 @@ namespace RaywattApp.Common.Util
         {
             if (deviceStatus != null)
             {
+                deviceStatus.IsPowerOff = true;
+
                 deviceStatus.IsPaused = true;
                 while (!deviceStatus.CanExit)
                 {
@@ -1005,12 +1006,21 @@ namespace RaywattApp.Common.Util
                 }
             }
 
+            Thread threadReadyPullback = new Thread(() => ThreadExit());
+            threadReadyPullback.Start();
+        }
+
+        private static void ThreadExit()
+        {
             RayDisconnectDevices();
             RayStopSystem();
 
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
 
-            System.Windows.Application.Current.MainWindow.Close();
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                System.Windows.Application.Current.MainWindow.Close();
+            });                        
         }
 
         public static string LumenContoursToJson(List<LumenContour> lumenContours)
