@@ -79,11 +79,9 @@ namespace RaywattApp.Common.Angio
             Array.Fill<byte>(tmpBuffer, 0);
 
             tmpBufferLen = 0;
-
-            ConnectToServer();
         }
 
-        private void ConnectToServer()
+        public void ConnectToServer()
         {
             // Angio Server On
             Process[] processes = Process.GetProcessesByName("FGServer");

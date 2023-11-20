@@ -25,6 +25,7 @@ using System.Windows.Controls;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
 using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace RaywattApp.Common.Util
 {
@@ -995,6 +996,11 @@ namespace RaywattApp.Common.Util
 
         public static void Exit(DeviceStatus? deviceStatus = null)
         {
+            // Server Off
+            Process[] processes = Process.GetProcessesByName("FGServer");
+            foreach (Process process in processes)
+                process.Kill();
+
             if (deviceStatus != null)
             {
                 deviceStatus.IsPowerOff = true;

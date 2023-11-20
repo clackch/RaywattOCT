@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
+using RaywattApp.Common.Angio;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
@@ -24,22 +25,27 @@ namespace RaywattApp.ViewModels
 
         private readonly SqlManager _sqlManager;
 
+        private readonly AngioManager _angioManager;
+
         private IDialogService _dialogService;
 
         private DispatcherTimer timer = new DispatcherTimer();
 
         private bool isError = false;
 
+        private string errorMsg;
+
         [ObservableProperty]
         private double _progress;
 
-        public OutsetLoadingViewModel(SqlManager sqlManager, IDialogService dialogService)
+        public OutsetLoadingViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager)
         {
             _log.Debug("OutsetLoadingViewModel");
 
             Constants.CurrentPage = Constants.OutsetLoadingPage;
 
             _sqlManager = sqlManager;
+            _angioManager = angioManager;
             _dialogService = dialogService;
         }
 
@@ -70,8 +76,8 @@ namespace RaywattApp.ViewModels
                 }
             }
 
-            Thread threadCoreInit = new Thread(() => ThreadCoreInit());
-            threadCoreInit.Start();
+            Thread threadCoreAndDevideInit = new Thread(() => ThreadCoreAndDeviceInit());
+            threadCoreAndDevideInit.Start();
 
             timer.Interval = TimeSpan.FromMilliseconds(25);
             timer.Tick += new EventHandler(ProgressTest);
@@ -111,7 +117,7 @@ namespace RaywattApp.ViewModels
 
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["title"] = _l10n["Error"];
-                parameter["message"] = _l10n["$MSG011"];
+                parameter["message"] = _l10n[errorMsg];
                 parameter["error"] = true;
                 var resultDialog = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
@@ -126,19 +132,43 @@ namespace RaywattApp.ViewModels
             Progress += 0.25;
         }
 
-        private void ThreadCoreInit()
+        private void ThreadCoreAndDeviceInit()
         {
-            _log.Debug("ThreadCoreInit");
+            _log.Debug("ThreadCoreAndDeviceInit");
 
             RayError result = RayError.OK;
 
             result |= (RayError)RayStartSystem();
-            result |= (RayError)RayConnectDevices();
+            if(result == RayError.OK)
+            {
+                result |= (RayError)RayConnectDevices();
+                if (result == RayError.OK)
+                {
+                    _angioManager.ConnectToServer();
+                    //angio 에러 처리 필요 - return 받게 함수 수정 필요 (에러 - FrameGrabber 없을 경우, FGServer 관련 에러 / Angio 연결 안된 건 에러 아님)
+                    if (true)
+                    {
+                        DeviceStatus.IsDeviceConnected = true;
+                    }
+                    else
+                    {
+                        errorMsg = "$MSG011";//케이스 별 에러 메시지 정의 필요
+                        isError = true;
+                    }
+                }
+                else
+                {
+                    errorMsg = "$MSG011";
+                    isError = true;
+                }
+            }
+            else
+            {
+                errorMsg = "$MSG011";
+                isError = true;
+            }
 
-            DeviceStatus.IsDeviceConnected = (result == RayError.OK);
-            isError = (result != RayError.OK);
-
-            _log.Debug("ThreadCoreInit - Done");
+            _log.Debug("ThreadCoreAndDeviceInit - Done");
         }
     }
 }
