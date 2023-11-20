@@ -993,7 +993,7 @@ namespace RaywattApp.Common.Util
             return textBlock.DesiredSize;
         }
 
-        public static void Exit(DeviceStatus? deviceStatus)
+        public static void Exit(DeviceStatus? deviceStatus = null)
         {
             if (deviceStatus != null)
             {
