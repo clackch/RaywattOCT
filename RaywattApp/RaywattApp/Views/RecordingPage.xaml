@@ -77,11 +77,16 @@
                         </Label>
                     </StackPanel>
                     <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal" Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                        <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG003], Source={StaticResource L10N}}"/>
-                        <StackPanel Width="10"/>
-                        <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding StartTime}"/>
-                        <StackPanel Width="10"/>
-                        <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [sec], Source={StaticResource L10N}}"/>
+                        <StackPanel Orientation="Horizontal" Visibility="{Binding IsStart, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG003], Source={StaticResource L10N}}"/>
+                            <StackPanel Width="10"/>
+                            <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding StartTime}"/>
+                            <StackPanel Width="10"/>
+                            <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [sec], Source={StaticResource L10N}}"/>
+                        </StackPanel>
+                        <StackPanel Visibility="{Binding IsStart, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                            <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [Recording], Source={StaticResource L10N}}"/>
+                        </StackPanel>
                     </StackPanel>
                     <Border Grid.Row="2" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
                         <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill"/>
