@@ -414,5 +414,11 @@ namespace RaywattApp.Common.Bases
         public const int imageHeaderSize = 7;
         public const int imageTailSize = 2;
         public const int commandPacketSize = 5;
+
+        //AngioCoRegistration
+        public const int ellipsePathWidth = 2;
+        public const int ellipsePathHeight = 2;
+        public const int ellipseTrackWidth = 6;
+        public const int ellipseTrackHeight = 6;
     }
 }

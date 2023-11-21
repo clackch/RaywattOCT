@@ -35,7 +35,7 @@ namespace RaywattApp.Common.Annotation.LiveWire
 
         public List<PointF> line;   //점, 선 정보를 저장 (System.Drawing.Point)
         public List<PointF> clickPoint; //ClickPosition 정보를 저장 (System.Drawing.Point)
-        public List<PointF> trackedPoint;
+        public List<PointF> trackPoint;
 
         // converts x, y coordinates to vector index
         private int toIndex(int x, int y)
@@ -49,7 +49,7 @@ namespace RaywattApp.Common.Annotation.LiveWire
         {
             line = new List<PointF>();
             clickPoint = new List<PointF>();
-            trackedPoint = new List<PointF>();
+            trackPoint = new List<PointF>();
 
             //initializes weights for edge cost
             //these are default values

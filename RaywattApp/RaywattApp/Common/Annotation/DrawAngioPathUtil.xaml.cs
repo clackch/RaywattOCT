@@ -87,14 +87,11 @@ namespace RaywattApp.Common.Annotation
         private void DrawSplineCurve(List<PointF> points)
         {
             List<PointF> curvePointFs = splineCurve.GetSplinePoints(points, points.Count() * 2);
+
             foreach (PointF curvexy in curvePointFs)
             {
-                Ellipse path = new Ellipse
-                {
-                    Width = 2,
-                    Height = 2,
-                    Fill = System.Windows.Media.Brushes.Yellow
-                };
+                Ellipse path = new Ellipse();
+                path.Style = (Style)this.Resources["StylePathEllipse"];
                 dijkstraHeap[FrameNumber].line.Add(curvexy);
                 Canvas.SetLeft(path, curvexy.X - path.Width / 2);
                 Canvas.SetTop(path, curvexy.Y - path.Height / 2);
@@ -107,14 +104,11 @@ namespace RaywattApp.Common.Annotation
         void DrawBezierCurve(List<PointF> points, int totalDistance)
         {
             List<PointF> curvePointFs = bezierCurve.GenerateBezierCurve(points[0], points[1], points[2], points[3], totalDistance);
+
             foreach (PointF curvexy in curvePointFs)
             {
-                Ellipse path = new Ellipse
-                {
-                    Width = 2,
-                    Height = 2,
-                    Fill = System.Windows.Media.Brushes.Yellow
-                };
+                Ellipse path = new Ellipse();
+                path.Style = (Style)this.Resources["StylePathEllipse"];
                 dijkstraHeap[FrameNumber].line.Add(curvexy);
                 Canvas.SetLeft(path, curvexy.X - path.Width / 2);
                 Canvas.SetTop(path, curvexy.Y - path.Height / 2);
@@ -210,7 +204,7 @@ namespace RaywattApp.Common.Annotation
         {
             for (int i = this.canvas.Children.Count - 1; i >= 0; i--)
             {
-                if (this.canvas.Children[i] is Ellipse)
+                if (this.canvas.Children[i] is Ellipse || this.canvas.Children[i] is Rectangle)
                 {
                     this.canvas.Children.RemoveAt(i);
                 }
@@ -222,43 +216,31 @@ namespace RaywattApp.Common.Annotation
             //점 그리기
             foreach (PointF clickPoint in dh.clickPoint)
             {
-                Ellipse endPoint = new Ellipse
-                {
-                    Width = 6,
-                    Height = 6,
-                    Fill = System.Windows.Media.Brushes.Red
-                };
-                Canvas.SetLeft(endPoint, clickPoint.X - endPoint.Width / 2);
-                Canvas.SetTop(endPoint, clickPoint.Y - endPoint.Height / 2);
-                this.canvas.Children.Add(endPoint);
+                Rectangle rectangle = new Rectangle();
+                rectangle.Style = (Style)this.Resources["StyleRectangle"];
+                Canvas.SetLeft(rectangle, clickPoint.X - rectangle.Width / 2);
+                Canvas.SetTop(rectangle, clickPoint.Y - rectangle.Height / 2);
+                this.canvas.Children.Add(rectangle);
             }
 
             //선 그리기
             foreach (PointF pathPoint in dh.line)
             {
-                Ellipse path = new Ellipse
-                {
-                    Width = 2,
-                    Height = 2,
-                    Fill = System.Windows.Media.Brushes.Yellow
-                };
+                Ellipse path = new Ellipse();
+                path.Style = (Style)this.Resources["StylePathEllipse"];
                 Canvas.SetLeft(path, pathPoint.X - path.Width / 2);
                 Canvas.SetTop(path, pathPoint.Y - path.Height / 2);
                 this.canvas.Children.Add(path);
             }
 
             // 추적된 점 그리기
-            foreach (PointF tackPoint in dh.trackedPoint)
+            foreach (PointF trackPoint in dh.trackPoint)
             {
-                Ellipse point = new Ellipse
-                {
-                    Width = 8,
-                    Height = 8,
-                    Fill = System.Windows.Media.Brushes.Blue
-                };
-                Canvas.SetLeft(point, tackPoint.X - point.Width / 2);
-                Canvas.SetTop(point, tackPoint.Y - point.Height / 2);
-                this.canvas.Children.Add(point);
+                Ellipse track = new Ellipse();
+                track.Style = (Style)this.Resources["StyleTrackEllipse"];
+                Canvas.SetLeft(track, trackPoint.X - track.Width / 2);
+                Canvas.SetTop(track, trackPoint.Y - track.Height / 2);
+                this.canvas.Children.Add(track);
             }
         }
 
