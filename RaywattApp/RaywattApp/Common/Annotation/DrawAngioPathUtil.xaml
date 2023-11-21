@@ -26,7 +26,7 @@
         <Style TargetType="Ellipse" x:Key="StyleTrackEllipse">
             <Setter Property="Width" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.ellipseTrackWidth}}"/>
             <Setter Property="Height" Value="{Binding Zoom.ScaleY, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.ellipseTrackHeight}}"/>
-            <Setter Property="Fill" Value="Green"/>
+            <Setter Property="Fill" Value="White"/>
         </Style>
 
         <Style TargetType="Line" x:Key="StyleLine">

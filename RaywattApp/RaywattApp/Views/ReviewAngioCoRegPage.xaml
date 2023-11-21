@@ -85,14 +85,13 @@
                                                 </RectangleGeometry.Rect>
                                             </RectangleGeometry>
                                         </Grid.Clip>
-                                        <Image Source="/res/png/angioImage.png" Width="{x:Static const:Constants.CoRegZoomAngioSize}" Height="{x:Static const:Constants.CoRegZoomAngioSize}" Stretch="Fill">
+                                        <Image x:Name="zoomSectionAngioImage" Source="{Binding CurrentAngioImage}" Width="{x:Static const:Constants.CoRegZoomAngioSize}" Height="{x:Static const:Constants.CoRegZoomAngioSize}" Stretch="Fill">
                                             <Image.RenderTransform>
                                                 <TransformGroup>
                                                     <ScaleTransform ScaleX="{x:Static const:Constants.CoRegZoomScale}" ScaleY="{x:Static const:Constants.CoRegZoomScale}"/>
                                                 </TransformGroup>
                                             </Image.RenderTransform>
                                         </Image>
-                                        <Image Source="{svgc:SvgImage Source=/res/icon/angioZoomCenter.svg}" Width="39" Height="39"/>
                                     </Grid>
                                 </Border>
                             </Grid>

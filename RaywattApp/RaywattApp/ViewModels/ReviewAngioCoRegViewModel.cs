@@ -21,6 +21,7 @@ using System.Drawing.Imaging;
 using System.Windows.Media.Imaging;
 using System.Windows.Controls;
 using System.Windows;
+using Point = System.Windows.Point;
 
 namespace RaywattApp.ViewModels
 {
@@ -59,6 +60,12 @@ namespace RaywattApp.ViewModels
             get { return this._okCommand ?? (this._okCommand = new RelayCommand(Ok)); }
         }
 
+        private ICommand _mouseMove;
+        public ICommand MouseMove
+        {
+            get { return this._mouseMove ?? (this._mouseMove = new RelayCommand<Point>(GetMousePoint)); }
+        }
+
         public List<Mat> CrossSectionAngioImages { get; private set; }
         private List<ImageSource> crossSectionAngioImageSources { get; set; }
         public ImageSource CurrentAngioImage
@@ -95,6 +102,7 @@ namespace RaywattApp.ViewModels
                 OnPropertyChanged(nameof(MaxFrames));
             }
         }
+
         public ReviewAngioCoRegViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
             _log.Debug("ReviewAngioCoRegViewModel");
@@ -203,6 +211,11 @@ namespace RaywattApp.ViewModels
                 bitmapImage.Freeze();
                 return bitmapImage;
             }
+        }
+
+        void GetMousePoint(Point point)
+        {
+
         }
     }
 }

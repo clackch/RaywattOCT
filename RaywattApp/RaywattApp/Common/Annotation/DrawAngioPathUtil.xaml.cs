@@ -63,6 +63,7 @@ namespace RaywattApp.Common.Annotation
 
         private List<DijkstraHeap>  dijkstraHeap;
         private List<Point> trackPoints; //Co-Registration 에 쓸 initial 위치
+        private List<Mat> motionVector;
 
         private static readonly DependencyProperty FrameNumberProperty =
         DependencyProperty.Register("FrameNumber", typeof(int), typeof(DrawAngioPathUtil), new PropertyMetadata(-1, OnPropertyChanged));
@@ -78,13 +79,12 @@ namespace RaywattApp.Common.Annotation
             InitializeComponent();
             ActivateEvent();
             dijkstraHeap = new List<DijkstraHeap>();
-            
         }
 
         // ---------------------------------------Method
 
         // Spline
-        private void DrawSplineCurve(List<PointF> points)
+        private void AddSplineCurvePoints(List<PointF> points, int frameIndex)
         {
             List<PointF> curvePointFs = splineCurve.GetSplinePoints(points, points.Count() * 2);
 
@@ -92,16 +92,12 @@ namespace RaywattApp.Common.Annotation
             {
                 Ellipse path = new Ellipse();
                 path.Style = (Style)this.Resources["StylePathEllipse"];
-                dijkstraHeap[FrameNumber].line.Add(curvexy);
-                Canvas.SetLeft(path, curvexy.X - path.Width / 2);
-                Canvas.SetTop(path, curvexy.Y - path.Height / 2);
-                this.canvas.Children.Add(path);
+                dijkstraHeap[frameIndex].line.Add(curvexy);
             }
-            dijkstraHeap[FrameNumber].sy = dijkstraHeap[FrameNumber].sx = -1;
         }
 
         // Bezier
-        void DrawBezierCurve(List<PointF> points, int totalDistance)
+        void AddBezierCurvePoints(List<PointF> points, int frameIndex, int totalDistance)
         {
             List<PointF> curvePointFs = bezierCurve.GenerateBezierCurve(points[0], points[1], points[2], points[3], totalDistance);
 
@@ -109,12 +105,8 @@ namespace RaywattApp.Common.Annotation
             {
                 Ellipse path = new Ellipse();
                 path.Style = (Style)this.Resources["StylePathEllipse"];
-                dijkstraHeap[FrameNumber].line.Add(curvexy);
-                Canvas.SetLeft(path, curvexy.X - path.Width / 2);
-                Canvas.SetTop(path, curvexy.Y - path.Height / 2);
-                this.canvas.Children.Add(path);
+                dijkstraHeap[frameIndex].line.Add(curvexy);
             }
-            dijkstraHeap[FrameNumber].sy = dijkstraHeap[FrameNumber].sx = -1;
         }
 
         private void ActivateEvent()
@@ -131,9 +123,10 @@ namespace RaywattApp.Common.Annotation
 
         private void ImageProcessing(List<Mat> frames)
         {
+            Mat prevEqualImg = null, currEqualImg;
+
             foreach (var frame in frames)
             {
-                Cv2.ImWrite("frame.png", frame);
                 Mat blurredImage = new Mat();
                 Cv2.Blur(frame, blurredImage, new OpenCvSharp.Size(7, 7));
 
@@ -141,12 +134,17 @@ namespace RaywattApp.Common.Annotation
                 Mat equalizedImage = new Mat();
                 var clahe = Cv2.CreateCLAHE(clipLimit: 10, new OpenCvSharp.Size(9, 9));
                 clahe.Apply(blurredImage, equalizedImage);
-                Cv2.ImWrite("equalizedImage.png", equalizedImage);
+
+                currEqualImg = equalizedImage.Clone();
+                if (prevEqualImg != null)
+                {
+                    CalculateMotionVector(prevEqualImg, currEqualImg);
+                }
+                prevEqualImg = equalizedImage.Clone();
 
                 // 픽셀 100 미만 값 -> 255, 픽셀 100 이상 값 -> 0
                 Mat thresholdImage = new Mat();
                 Cv2.Threshold(equalizedImage, thresholdImage, 100, 255, ThresholdTypes.BinaryInv);
-                Cv2.ImWrite("thresholdImage.png", thresholdImage);
 
                 // 이미지 변형(분할 : Segmentation) 처리
                 Mat morphedImage = new Mat();
@@ -156,7 +154,6 @@ namespace RaywattApp.Common.Annotation
                 // 변형 처리 반복 -> 스켈레톤(골격화)
                 Mat skeleton = new Mat();
                 skeleton = Skeletonize(morphedImage);
-                Cv2.ImWrite("skeleton.png", skeleton);
 
                 byte[] imageData = new byte[frame.Rows * frame.Cols * frame.ElemSize()];
                 Marshal.Copy(skeleton.Data, imageData, 0, imageData.Length);
@@ -213,16 +210,6 @@ namespace RaywattApp.Common.Annotation
 
         public void DrawWire(DijkstraHeap dh)
         {
-            //점 그리기
-            foreach (PointF clickPoint in dh.clickPoint)
-            {
-                Rectangle rectangle = new Rectangle();
-                rectangle.Style = (Style)this.Resources["StyleRectangle"];
-                Canvas.SetLeft(rectangle, clickPoint.X - rectangle.Width / 2);
-                Canvas.SetTop(rectangle, clickPoint.Y - rectangle.Height / 2);
-                this.canvas.Children.Add(rectangle);
-            }
-
             //선 그리기
             foreach (PointF pathPoint in dh.line)
             {
@@ -236,11 +223,11 @@ namespace RaywattApp.Common.Annotation
             // 추적된 점 그리기
             foreach (PointF trackPoint in dh.trackPoint)
             {
-                Ellipse track = new Ellipse();
-                track.Style = (Style)this.Resources["StyleTrackEllipse"];
-                Canvas.SetLeft(track, trackPoint.X - track.Width / 2);
-                Canvas.SetTop(track, trackPoint.Y - track.Height / 2);
-                this.canvas.Children.Add(track);
+                Rectangle rectangle = new Rectangle();
+                rectangle.Style = (Style)this.Resources["StyleRectangle"];
+                Canvas.SetLeft(rectangle, trackPoint.X - rectangle.Width / 2);
+                Canvas.SetTop(rectangle, trackPoint.Y - rectangle.Height / 2);
+                this.canvas.Children.Add(rectangle);
             }
         }
 
@@ -252,6 +239,7 @@ namespace RaywattApp.Common.Annotation
             var newImages = (List<Mat>)dependencyPropertyChangedEventArgs.NewValue;
             if (newImages.Count > 0)
             {
+                control.motionVector = new List<Mat>();
                 control.ImageProcessing(newImages);
             }
         }
@@ -272,102 +260,175 @@ namespace RaywattApp.Common.Annotation
             Canvas.SetTop(rectangle, clickPosition.Y - (Constants.AnnotationRectHeight / Zoom.ScaleY) / 2);
             canvas.Children.Add(rectangle);
 
-            int index = FrameNumber;
-            // 경로 반환받을 x, y 좌표, 경로 길이 설정
-            int[] vx = new int[dijkstraHeap[index].width * dijkstraHeap[index].height];
-            int[] vy = new int[dijkstraHeap[index].width * dijkstraHeap[index].height];
-
             // 첫번째 점
-            if (dijkstraHeap[index].sx == -1 && dijkstraHeap[index].sy == -1)
+            if (dijkstraHeap[FrameNumber].trackPoint.Count == 0)
             {
-                dijkstraHeap[index].sx = (int)clickPosition.X;
-                dijkstraHeap[index].sy = (int)clickPosition.Y;
-                dijkstraHeap[index].clickPoint.Add(clickPosition);
-                //PointTracking(motionVectors, frames, point.X, point.Y);
+                dijkstraHeap[FrameNumber].trackPoint.Add(clickPosition);
+                PointTracking(clickPosition.X, clickPosition.Y, 1);
+                PointTracking(clickPosition.X, clickPosition.Y, -1);
                 return;
             }
             // 두번째 점 이후
             else
             {
-                bezierCurve = new BezierCurve();
-                splineCurve = new SplineCurve();
-                int x = (int)clickPosition.X;
-                int y = (int)clickPosition.Y;
-                int[] pixelValue = new int[dijkstraHeap[index].width * dijkstraHeap[index].height];
-                int pathLength = 0;
-
-                List<PointF> points;
-                int prevIndex, currIndex, distanceLimit, totalDistance, numOfPoints;
-
-                dijkstraHeap[index].clickPoint.Add(clickPosition);
-                //PointTracking(motionVectors, frames, x, y);
-
+                dijkstraHeap[FrameNumber].trackPoint.Add(clickPosition);
+                PointTracking(clickPosition.X, clickPosition.Y, 1);
+                PointTracking(clickPosition.X, clickPosition.Y, -1);
+                DrawWire(dijkstraHeap[FrameNumber]);
+                int imageLength = AngioImages.Count;
+                int currFrameNum = FrameNumber;
                 await Task.Run(() =>
                 {
-                    dijkstraHeap[index].run(dijkstraHeap[index].sx, dijkstraHeap[index].sy, x, y);
-                    dijkstraHeap[index].returnPath(x, y, vx, vy, out pathLength, pixelValue);
+                    CalculateAllPath(currFrameNum, imageLength);
                 });
+            }
+        }
 
-                points = new List<PointF>();
-
-                // 모든 점 전달하여 Spline 곡선 형성
-                if (curveType == "Spline")
+        private void CalculateAllPath(int currFrameNum, int imageLength)
+        {
+            int gapMinus = currFrameNum - 10 > 0 ? currFrameNum - 10 : 0;
+            int gapPlus = currFrameNum + 10 < dijkstraHeap.Count - 1 ? currFrameNum + 10 : dijkstraHeap.Count - 1;
+            for (int angioIndex = gapMinus; angioIndex < gapPlus; angioIndex++)
+            {
+                for (int numOfTrackPoint = 0; numOfTrackPoint < dijkstraHeap[angioIndex].trackPoint.Count-1; numOfTrackPoint++)
                 {
-                    for (int i = 0; i < pathLength; i++)
+                    int[] vx = new int[dijkstraHeap[angioIndex].width * dijkstraHeap[angioIndex].height];
+                    int[] vy = new int[dijkstraHeap[angioIndex].width * dijkstraHeap[angioIndex].height];
+                    int startX = (int)dijkstraHeap[angioIndex].trackPoint[numOfTrackPoint].X;
+                    int startY = (int)dijkstraHeap[angioIndex].trackPoint[numOfTrackPoint].Y;
+                    int endX = (int)dijkstraHeap[angioIndex].trackPoint[numOfTrackPoint+1].X;
+                    int endY = (int)dijkstraHeap[angioIndex].trackPoint[numOfTrackPoint+1].Y;
+                    int[] pixelValue = new int[dijkstraHeap[angioIndex].width * dijkstraHeap[angioIndex].height];
+                    int pathLength = 0;
+                    List<PointF> points = new List<PointF>();
+                    int prevIndex, currIndex, distanceLimit, totalDistance, numOfPoints;
+
+                    dijkstraHeap[angioIndex].run(startX, startY, endX, endY);
+                    dijkstraHeap[angioIndex].returnPath(endX, endY, vx, vy, out pathLength, pixelValue);
+
+                    bezierCurve = new BezierCurve();
+                    splineCurve = new SplineCurve();
+
+                    // 모든 점 전달하여 Spline 곡선 형성
+                    if (curveType == "Spline")
                     {
-                        points.Add(new PointF(vx[i], vy[i]));
+                        for (int i = 0; i < pathLength; i++)
+                        {
+                            points.Add(new PointF(vx[i], vy[i]));
+                        }
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            AddSplineCurvePoints(points, angioIndex);
+                        });
                     }
-                    DrawSplineCurve(points);
-                }
-                // 베지어의 경우 점을 4개씩 끊어서 전달하여 곡선 형성
-                else if (curveType == "Bezier")
-                {
-                    double distanceWeight = 0.2; // 보간을 위한 가중치 -> 클수록 보간할 점 개수가 적어져 곡선 표현이 불가능할 수 있음
-                    prevIndex = totalDistance = 0;
-                    numOfPoints = 4; // 가이드 점 개수 (4-2)
-                    distanceLimit = 10; // 점 간격
-                    for (currIndex = 0; currIndex < pathLength; currIndex++)
+                    // 베지어의 경우 점을 4개씩 끊어서 전달하여 곡선 형성
+                    else if (curveType == "Bezier")
                     {
-                        if (points.Count == 0)
-                        {// 가이드 점이 없는 경우 1개 추가
-                            points.Add(new PointF(vx[prevIndex], vy[prevIndex]));
-                        }
-                        else if (currIndex == pathLength - 1 && points.Count < numOfPoints)
-                        {// 가이드 점이 3개 이하인데, 경로의 마지막 인덱스에 도달한 경우
-                            for (int k = points.Count; k < numOfPoints; k++)
-                            {// 가이드 점 마지막 인덱스로 모두 추가 (최대 3개)
-                                points.Add(new PointF(vx[currIndex], vy[currIndex]));
+                        double distanceWeight = 0.2; // 보간을 위한 가중치 -> 클수록 보간할 점 개수가 적어져 곡선 표현이 불가능할 수 있음
+                        prevIndex = totalDistance = 0;
+                        numOfPoints = 4; // 가이드 점 개수 (4-2)
+                        distanceLimit = 10; // 점 간격
+                        for (currIndex = 0; currIndex < pathLength; currIndex++)
+                        {
+                            if (points.Count == 0)
+                            {// 가이드 점이 없는 경우 1개 추가
+                                points.Add(new PointF(vx[prevIndex], vy[prevIndex]));
                             }
-                            DrawBezierCurve(points, totalDistance - (int)(distanceWeight * totalDistance)); // 가이드 점 2개와, 보간에 사용할 점 2개 전달.
-                            points.Clear();
-                        }
-                        else if (pixelValue[currIndex] == 0)
-                        {// 픽셀값이 0인 경우 제외 -> 곡선 보간을 통해 그려지는 부분임.
-                            continue;
-                        }
-                        else
-                        { // 일반적인 가이드 점 추가
-                          // 최근에 추가된 가이드 점과 거리 계산
-                            int tmpDistance = (Math.Abs(vx[prevIndex] - vx[currIndex]) + Math.Abs(vy[prevIndex] - vy[currIndex]));
-                            if (tmpDistance > distanceLimit)
-                            { // 이전 가이드 점과의 거리가 x+y > 10경우에 새로운 가이드 점으로 추가
-                                points.Add(new PointF(vx[currIndex], vy[currIndex]));
-                                //가이드 점 이동
-                                prevIndex = currIndex;
-                                // 총 거리에 추가 -> 추후 곡선 분할 기준으로 사용
-                                totalDistance += tmpDistance;
+                            else if (currIndex == pathLength - 1 && points.Count < numOfPoints)
+                            {// 가이드 점이 3개 이하인데, 경로의 마지막 인덱스에 도달한 경우
+                                for (int k = points.Count; k < numOfPoints; k++)
+                                {// 가이드 점 마지막 인덱스로 모두 추가 (최대 3개)
+                                    points.Add(new PointF(vx[currIndex], vy[currIndex]));
+                                }
+                                Application.Current.Dispatcher.Invoke(() =>
+                                {
+                                    AddBezierCurvePoints(points, angioIndex, totalDistance - (int)(distanceWeight * totalDistance)); // 가이드 점 2개와, 보간에 사용할 점 2개 전달.
+                                });
+                                points.Clear();
+                            }
+                            else if (pixelValue[currIndex] == 0)
+                            {// 픽셀값이 0인 경우 제외 -> 곡선 보간을 통해 그려지는 부분임.
+                                continue;
+                            }
+                            else
+                            { // 일반적인 가이드 점 추가
+                              // 최근에 추가된 가이드 점과 거리 계산
+                                int tmpDistance = (Math.Abs(vx[prevIndex] - vx[currIndex]) + Math.Abs(vy[prevIndex] - vy[currIndex]));
+                                if (tmpDistance > distanceLimit)
+                                { // 이전 가이드 점과의 거리가 x+y > 10경우에 새로운 가이드 점으로 추가
+                                    points.Add(new PointF(vx[currIndex], vy[currIndex]));
+                                    //가이드 점 이동
+                                    prevIndex = currIndex;
+                                    // 총 거리에 추가 -> 추후 곡선 분할 기준으로 사용
+                                    totalDistance += tmpDistance;
 
-                                if (points.Count == numOfPoints)
-                                { // 가이드 점이 2(+2 보간)개인 경우엔 곡선 그리기.
-                                    DrawBezierCurve(points, totalDistance - (int)(distanceWeight * totalDistance));
-                                    points.Clear();
+                                    if (points.Count == numOfPoints)
+                                    { // 가이드 점이 4(2 가이드, 2 보간)개인 경우엔 곡선 그리기.
+                                        Application.Current.Dispatcher.Invoke(() =>
+                                        {
+                                            AddBezierCurvePoints(points, angioIndex, totalDistance - (int)(distanceWeight * totalDistance));
+                                        });
+                                        points.Clear();
+                                    }
                                 }
                             }
                         }
                     }
                 }
-                dijkstraHeap[index].sx = x;
-                dijkstraHeap[index].sy = y;
+            }
+        }
+
+        private void CalculateMotionVector(Mat prevFrame, Mat nextFrame)
+        {
+            Mat flow = new Mat();
+            Cv2.CalcOpticalFlowFarneback(prevFrame, nextFrame, flow, 0.5, 5, 15, 3, 5, 1.1, 0);
+
+            //curr, next: 이전 영상과 현재 영상. 그레이스케일 영상.
+            //flow: (출력)계산된 옵티컬플로우.np.ndarray.shape = (h, w, 2(for x, y vector)), dtype = np.float32.
+            //pyr_scale: 피라미드 영상을 만들 때 축소 비율. (e.g.) 0.5 ~0.7, 클수록 계산량감소, 오차확률 상승
+            //levels: 피라미드 영상 개수. (e.g.) 3
+            //winsize: 평균 윈도우 크기. (e.g.) 15 ~21
+            //iterations: 각 피라미드 레벨에서 알고리즘 반복 횟수. (e.g.) 3 다다익선(tradeOff -> 계산량)
+            //poly_n: 다항식 확장을 위한 이웃 픽셀 크기. 보통 5 또는 7.
+            //poly_sigma: 가우시안 표준편차. 보통 poly_n = 5-> 1.1, poly_n = 7-> 1.5.
+            //flags: 0, cv2.OPTFLOW_USE_INITIAL_FLOW, cv2.OPTFLOW_FARNEBACK_GAUSSIAN.
+
+            motionVector.Add(flow);
+        }
+
+        private void PointTracking(float x, float y, int direction)
+        {
+            PointF prevPoint = new PointF(x, y);
+            int halfSize = 25; // halfSize*2 x halfSize*2 크기
+
+            for (int i = FrameNumber+direction; i < motionVector.Count && i > 0; i+=direction)
+            {
+                Vec2f sumVector = new Vec2f(0, 0);
+                int count = 0;
+
+                // 주어진 점을 중심으로 halfSize*2 x halfSize*2 영역 내의 모션 벡터의 누적합 구하기
+                for (int yy = -halfSize; yy <= halfSize; yy++)
+                {
+                    for (int xx = -halfSize; xx <= halfSize; xx++)
+                    {
+                        int newX = (int)prevPoint.X + xx;
+                        int newY = (int)prevPoint.Y + yy;
+
+                        if (newX >= 0 && newX < motionVector[i].Cols && newY >= 0 && newY < motionVector[i].Rows)
+                        {
+                            Vec2f vector = motionVector[i].At<Vec2f>(newY, newX);
+                            sumVector.Item0 += vector.Item0;
+                            sumVector.Item1 += vector.Item1;
+                            count++;
+                        }
+                    }
+                }
+
+                Vec2f averageVector = new Vec2f(sumVector.Item0 / count, sumVector.Item1 / count);
+                
+                PointF currPoint = new PointF(prevPoint.X + (direction)*averageVector.Item0, prevPoint.Y + (direction)*averageVector.Item1);
+                dijkstraHeap[i].trackPoint.Add(currPoint);
+                prevPoint = currPoint;
             }
         }
     }

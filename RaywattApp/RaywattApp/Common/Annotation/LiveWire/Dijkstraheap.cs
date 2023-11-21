@@ -33,10 +33,9 @@ namespace RaywattApp.Common.Annotation.LiveWire
 
         double[][] pCosts;// for debugging reasons
 
-        public List<PointF> line;   //점, 선 정보를 저장 (System.Drawing.Point)
-        public List<PointF> clickPoint; //ClickPosition 정보를 저장 (System.Drawing.Point)
+        public List<PointF> line;
+        public List<PointF> clickPoint;
         public List<PointF> trackPoint;
-
         // converts x, y coordinates to vector index
         private int toIndex(int x, int y)
         {
@@ -51,36 +50,19 @@ namespace RaywattApp.Common.Annotation.LiveWire
             clickPoint = new List<PointF>();
             trackPoint = new List<PointF>();
 
-            //initializes weights for edge cost
-            //these are default values
             // 최단 경로 계산에 사용되는 가중치 값
             gradientMagnitude = 0.43; // 경로 weight(거리) 가중치
             exponentialWeight = 1; // 경로 edge(간선) 가중치
             potenceWeight = 30; // 경로 pixel 가중치
 
-            // initializes all other matrices
             imagePixels = new int[x * y];
-            //	imageCosts  = new int [x*y];
-            // 경로 cost(비용) 저장(우선순위 큐 이용)
             pixelCosts = new PriorityQueue<PixelNode>();
-            // 이전 픽셀의 인덱스 저장
             whereFrom = new int[x * y];
-            // 방문 여부
             visited = new bool[x * y];
             width = x;
             height = y;
 
-            // for debug reasons
-            // used to store
-            //pCosts = new double[x][];
-
-            //for (int i = 0; i < x; i++)
-            //{
-            //    pCosts[i] = new double[y];
-            //}
-
             gradientr = gradientx = gradienty= new double[x*y];
-            // copy image matrice
             for (int j = 0; j < y; j++)
             {
                 for (int i = 0; i < x; i++)
@@ -92,41 +74,19 @@ namespace RaywattApp.Common.Annotation.LiveWire
             }
         }
 
-        //returns de cost of going from sx,sy to dx,dy
         // 입력 : 시작점, 끝점
         // output : 가중치를 적용하여 edge값 계산
         private double edgeCost(int sx, int sy, int dx, int dy)
         {
-            //fg is the Gradient Magnitude
-
-            //we are dividing by sqrt(2) so that the value won't pass 1
-            //as is stated in United Snakes formule 36
-            //double fg = (1.0 / Math.Sqrt(2) * 
-            //    Math.Sqrt((dx - sx) * (dx - sx) + (dy - sy) * (dy - sy)) *
-            //    (1 - ((gradientr[toIndex(dx, dy)] - grmin) / (grmax - grmin))));
-            //if (grmin == grmax)
-            //    fg = (1.0 / Math.Sqrt(2) * Math.Sqrt((dx - sx) * (dx - sx) + (dy - sy) * (dy - sy)));
-
             double fg = 0;
             if (gradientr[toIndex(dx,dy)] != 255) {
                 fg = Math.Sqrt((dx - sx) * (dx - sx) + (dy - sy) * (dy - sy));
             }
-
-            //this parameter is an attempt to find edges in IVUS images	
-            //double x = (gradientr[toIndex(dx, dy)] - grmin) / (grmax - grmin); // 1(255) or 0(0)
-
-            double x = gradientr[toIndex(dx, dy)] == 255 ? 1 : 0;
-            //double fe = Math.Exp(-potenceWeight * x) * fg;
-
-            //return exponentialWeight * fe + gradientMagnitude * fg + 0.1*Math.Sqrt((dx - sx) * (dx - sx) + (dy - sy) * (dy - sy)); 
-
-            return fg + 0.1 * Math.Sqrt((dx - sx) * (dx - sx) + (dy - sy) * (dy - sy));
-
+            return fg + 0.1 * Math.Sqrt((dx - sx) * (dx - sx) + (dy - sy) * (dy - sy)); // Gray 255 픽셀 11개를 거쳐가는 것 보다 점 1개에 해당하는 Gray 0을 가는게 더 났다.
         }
 
         private void updateCosts(int x, int y, double mycost)
         {
-
             visited[toIndex(x, y)] = true;
             if (pixelCosts.Count > 0)
             {
@@ -181,21 +141,21 @@ namespace RaywattApp.Common.Annotation.LiveWire
         // 마우스 위치(종착점) : x, y
         // 종착점으로 부터 부분 경로 반환 : vx, vy
         // 경로 길이 : mylength
-        public void returnPath(int x, int y, int[] vx, int[] vy, out int length, int [] pixelValue)
+        public void returnPath(int endX, int endY, int[] vx, int[] vy, out int length, int [] pixelValue)
         {
-            if (visited[toIndex(x, y)] == false)
+            if (visited[toIndex(endX, endY)] == false)
             {
                 length = 0;
                 return; // 경로가 너무 짧을 때 오류처리 할 수 있을 듯.
             }
 
-            int myx = x; // 현재 위치
-            int myy = y;
+            int myx = endX; // 현재 위치
+            int myy = endY;
             int nextx; // 다음 위치
             int nexty;
             int count = 0;
             do
-            { //while we haven't found the seed	    	
+            {
                 nextx = whereFrom[toIndex(myx, myy)] % width;
                 nexty = whereFrom[toIndex(myx, myy)] / width;
 
@@ -210,17 +170,19 @@ namespace RaywattApp.Common.Annotation.LiveWire
             } while (!((myx == sx) && (myy == sy)));
 
             length = count;
-            sx = x;
-            sy = y;
+            sx = endX;
+            sy = endY;
         }
 
                 
         public void run(int x, int y, int dx, int dy)
         {
-            
             int nextIndex;
             int nextX;
             int nextY;
+
+            sx = x;
+            sy = y;
 
             for (int i = 0; i < height * width; i++)
             {
@@ -230,7 +192,7 @@ namespace RaywattApp.Common.Annotation.LiveWire
             // init last point
             whereFrom[toIndex(x, y)] = toIndex(x, y);
 
-            //init costs 
+            //init costs
             updateCosts(x, y, 0);
 
             while ((pixelCosts.Count > 0))
