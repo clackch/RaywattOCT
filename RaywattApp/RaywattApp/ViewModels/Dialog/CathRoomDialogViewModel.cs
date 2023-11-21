@@ -48,7 +48,7 @@ namespace RaywattApp.ViewModels.Dialog
             dialogResults.DialogAnswer = DialogResults.Answer.Yes;
             dialogResults.DialogReturn = parameter;
 
-            _angioManager.SendChpFilePacket("TESTCHPFILENAME");
+            _angioManager.SendChpFilePacket("S23_1.chp");
 
             CloseDialogWithResult(dialog, dialogResults);
         }
