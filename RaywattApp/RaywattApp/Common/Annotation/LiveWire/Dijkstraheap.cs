@@ -2,13 +2,17 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Diagnostics.SymbolStore;
 using PointF = System.Drawing.PointF;
+using log4net;
+using RaywattApp.ViewModels;
 
 namespace RaywattApp.Common.Annotation.LiveWire
 {
     public class DijkstraHeap
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(DijkstraHeap));
         private int[] imagePixels; // stores Pixels from original image
         PriorityQueue<PixelNode> pixelCosts;
         double[] gradientx = new double[0]; // stores image gradient modulus 
@@ -68,12 +72,12 @@ namespace RaywattApp.Common.Annotation.LiveWire
 
             // for debug reasons
             // used to store
-            pCosts = new double[x][];
+            //pCosts = new double[x][];
 
-            for (int i = 0; i < x; i++)
-            {
-                pCosts[i] = new double[y];
-            }
+            //for (int i = 0; i < x; i++)
+            //{
+            //    pCosts[i] = new double[y];
+            //}
 
             gradientr = gradientx = gradienty= new double[x*y];
             // copy image matrice
@@ -84,8 +88,6 @@ namespace RaywattApp.Common.Annotation.LiveWire
                     imagePixels[j * x + i] = (int)image[j * x + i];
                     visited[j * x + i] = false;
                     gradientr[j * x + i] = gradientx[j * x + i] = gradienty[j * x + i] = (double)image[j * x + i];
-                    grmax = 255;
-                    grmin = 0;
                 }
             }
         }
@@ -99,32 +101,38 @@ namespace RaywattApp.Common.Annotation.LiveWire
 
             //we are dividing by sqrt(2) so that the value won't pass 1
             //as is stated in United Snakes formule 36
-            double fg = (1.0 / Math.Sqrt(2) * 
-                Math.Sqrt((dx - sx) * (dx - sx) + (dy - sy) * (dy - sy)) *
-                (1 - ((gradientr[toIndex(dx, dy)] - grmin) / (grmax - grmin))));
-            if (grmin == grmax)
-                fg = (1.0 / Math.Sqrt(2) * Math.Sqrt((dx - sx) * (dx - sx) + (dy - sy) * (dy - sy)));
+            //double fg = (1.0 / Math.Sqrt(2) * 
+            //    Math.Sqrt((dx - sx) * (dx - sx) + (dy - sy) * (dy - sy)) *
+            //    (1 - ((gradientr[toIndex(dx, dy)] - grmin) / (grmax - grmin))));
+            //if (grmin == grmax)
+            //    fg = (1.0 / Math.Sqrt(2) * Math.Sqrt((dx - sx) * (dx - sx) + (dy - sy) * (dy - sy)));
+
+            double fg = 0;
+            if (gradientr[toIndex(dx,dy)] != 255) {
+                fg = Math.Sqrt((dx - sx) * (dx - sx) + (dy - sy) * (dy - sy));
+            }
 
             //this parameter is an attempt to find edges in IVUS images	
-            double x = (gradientr[toIndex(dx, dy)] - grmin) / (grmax - grmin);
-            double fe = Math.Exp(-potenceWeight * x) * fg;
+            //double x = (gradientr[toIndex(dx, dy)] - grmin) / (grmax - grmin); // 1(255) or 0(0)
 
-            return exponentialWeight * fe + gradientMagnitude * fg + 0.05*Math.Sqrt((dx - sx) * (dx - sx) + (dy - sy) * (dy - sy)); 
+            double x = gradientr[toIndex(dx, dy)] == 255 ? 1 : 0;
+            //double fe = Math.Exp(-potenceWeight * x) * fg;
+
+            //return exponentialWeight * fe + gradientMagnitude * fg + 0.1*Math.Sqrt((dx - sx) * (dx - sx) + (dy - sy) * (dy - sy)); 
+
+            return fg + 0.1 * Math.Sqrt((dx - sx) * (dx - sx) + (dy - sy) * (dy - sy));
 
         }
 
         private void updateCosts(int x, int y, double mycost)
         {
 
-            // 방문 표시
             visited[toIndex(x, y)] = true;
-            // 가장 작은 cost를 가진 노드 제거
             if (pixelCosts.Count > 0)
             {
                 pixelCosts.Dequeue();
             }
 
-            // 주변 8개의 노드 cost 갱신(edgeCost 사용)
             //upper right
             if ((x < width - 1) && (y > 0))
             {
@@ -173,82 +181,52 @@ namespace RaywattApp.Common.Annotation.LiveWire
         // 마우스 위치(종착점) : x, y
         // 종착점으로 부터 부분 경로 반환 : vx, vy
         // 경로 길이 : mylength
-        public int returnPath(int x, int y, int[] vx, int[] vy, out int length, int [] pixelValue)
+        public void returnPath(int x, int y, int[] vx, int[] vy, out int length, int [] pixelValue)
         {
-            //returns the path given mouse position
-            //System.out.println(pCosts[x][y] + " my cost " + gradientr[toIndex(x,y)]+ " grmin " + grmin + " grmax " + grmax);
-
-            int[] tempx = new int[width * height];
-            int[] tempy = new int[width * height];
-
-            // visited = false => 아직 탐색X => 경로를 찾을 수 없는 위치
             if (visited[toIndex(x, y)] == false)
             {
-                //attempt to get path before creating it 
                 length = 0;
-                return 0;
+                return; // 경로가 너무 짧을 때 오류처리 할 수 있을 듯.
             }
 
-            //add points to vector
             int myx = x; // 현재 위치
             int myy = y;
             int nextx; // 다음 위치
             int nexty;
             int count = 0;
-            tempx[0] = myx;//add last points
-            tempy[0] = myy;
-            //	System.out.println("Caminho ");
             do
             { //while we haven't found the seed	    	
                 nextx = whereFrom[toIndex(myx, myy)] % width;
                 nexty = whereFrom[toIndex(myx, myy)] / width;
-                //System.out.println("("+nextx+","+nexty+")");
+
+                vx[count] = nextx;
+                vy[count] = nexty;
+                pixelValue[count] = imagePixels[toIndex(vx[count], vy[count])];
 
                 count++;
-                tempx[count] = nextx;
-                tempy[count] = nexty;
-
                 myx = nextx;
                 myy = nexty;
 
             } while (!((myx == sx) && (myy == sy)));
 
             length = count;
-            //path is from last point to first
-            //we need to invert it
-            //	System.out.println("Caminho ");
-            for (int i = 0; i <= count; i++)
-            {
-                vx[i] = tempx[count - i]; // 역순
-                vy[i] = tempy[count - i];
-                pixelValue[i] = imagePixels[toIndex(tempx[count - i], tempy[count - i])];
-                //System.out.println("( "+vx[i] + " , " + vy[i] + " )");
-            }
-
             sx = x;
             sy = y;
-
-            return count;
-
         }
 
                 
-        public void run(int x, int y)
+        public void run(int x, int y, int dx, int dy)
         {
             
             int nextIndex;
             int nextX;
             int nextY;
-            sx = x;
-            sy = y;
 
             for (int i = 0; i < height * width; i++)
             {
                 visited[i] = false;
             }
-
-            visited[toIndex(x, y)] = true; 
-
+            
             // init last point
             whereFrom[toIndex(x, y)] = toIndex(x, y);
 
@@ -262,12 +240,13 @@ namespace RaywattApp.Common.Annotation.LiveWire
                 nextY = nextIndex / width;
 
                 whereFrom[nextIndex] = ((PixelNode)pixelCosts.Peek()).GetWhereFrom();
-
-
-                pCosts[nextX][nextY] = ((PixelNode)pixelCosts.Peek()).GetDistance();
-
-
+                                
                 updateCosts(nextX, nextY, ((PixelNode)pixelCosts.Peek()).GetDistance());
+
+                if (nextX == dx && nextY == dy)
+                {
+                    break;
+                }
 
                 //removes pixels that are already visited and went to the queue
                 while (true)

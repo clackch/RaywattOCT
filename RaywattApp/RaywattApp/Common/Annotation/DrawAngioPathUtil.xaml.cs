@@ -84,7 +84,7 @@ namespace RaywattApp.Common.Annotation
         // ---------------------------------------Method
 
         // Spline
-        private void DrawPath(List<PointF> points)
+        private void DrawSplineCurve(List<PointF> points)
         {
             List<PointF> curvePointFs = splineCurve.GetSplinePoints(points, points.Count() * 2);
             foreach (PointF curvexy in curvePointFs)
@@ -104,7 +104,7 @@ namespace RaywattApp.Common.Annotation
         }
 
         // Bezier
-        void DrawPath(List<PointF> points, int totalDistance)
+        void DrawBezierCurve(List<PointF> points, int totalDistance)
         {
             List<PointF> curvePointFs = bezierCurve.GenerateBezierCurve(points[0], points[1], points[2], points[3], totalDistance);
             foreach (PointF curvexy in curvePointFs)
@@ -197,23 +197,88 @@ namespace RaywattApp.Common.Annotation
             return skel;
         }
 
+        private void WireChange(int index)
+        {
+            //frame이 변경 될 때마다 경로 초기화
+            InitializePath();
+
+            //기존에 탐색했던 경로를 다시 그림
+            DrawWire(dijkstraHeap[index]);
+        }
+
+        private void InitializePath()
+        {
+            for (int i = this.canvas.Children.Count - 1; i >= 0; i--)
+            {
+                if (this.canvas.Children[i] is Ellipse)
+                {
+                    this.canvas.Children.RemoveAt(i);
+                }
+            }
+        }
+
+        public void DrawWire(DijkstraHeap dh)
+        {
+            //점 그리기
+            foreach (PointF clickPoint in dh.clickPoint)
+            {
+                Ellipse endPoint = new Ellipse
+                {
+                    Width = 6,
+                    Height = 6,
+                    Fill = System.Windows.Media.Brushes.Red
+                };
+                Canvas.SetLeft(endPoint, clickPoint.X - endPoint.Width / 2);
+                Canvas.SetTop(endPoint, clickPoint.Y - endPoint.Height / 2);
+                this.canvas.Children.Add(endPoint);
+            }
+
+            //선 그리기
+            foreach (PointF pathPoint in dh.line)
+            {
+                Ellipse path = new Ellipse
+                {
+                    Width = 2,
+                    Height = 2,
+                    Fill = System.Windows.Media.Brushes.Yellow
+                };
+                Canvas.SetLeft(path, pathPoint.X - path.Width / 2);
+                Canvas.SetTop(path, pathPoint.Y - path.Height / 2);
+                this.canvas.Children.Add(path);
+            }
+
+            // 추적된 점 그리기
+            foreach (PointF tackPoint in dh.trackedPoint)
+            {
+                Ellipse point = new Ellipse
+                {
+                    Width = 8,
+                    Height = 8,
+                    Fill = System.Windows.Media.Brushes.Blue
+                };
+                Canvas.SetLeft(point, tackPoint.X - point.Width / 2);
+                Canvas.SetTop(point, tackPoint.Y - point.Height / 2);
+                this.canvas.Children.Add(point);
+            }
+        }
+
         // ---------------------------------------Event
 
-        private static void OnAngioImagesPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnAngioImagesPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
-            var control = (DrawAngioPathUtil)d;
-            var newImages = (List<Mat>)e.NewValue;
+            var control = (DrawAngioPathUtil)dependencyObject;
+            var newImages = (List<Mat>)dependencyPropertyChangedEventArgs.NewValue;
             if (newImages.Count > 0)
             {
                 control.ImageProcessing(newImages);
             }
         }
 
-
-        private static void OnPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs e)
+        private static void OnPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
-            int frameNumber = (int)e.NewValue;
-
+            var control = (DrawAngioPathUtil)dependencyObject;
+            int frameNumber = (int)dependencyPropertyChangedEventArgs.NewValue;
+            control.WireChange(frameNumber);
         }
 
         async private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -252,12 +317,12 @@ namespace RaywattApp.Common.Annotation
                 List<PointF> points;
                 int prevIndex, currIndex, distanceLimit, totalDistance, numOfPoints;
 
-                dijkstraHeap[index].clickPoint.Add(new PointF((int)clickPosition.X, (int)clickPosition.Y));
+                dijkstraHeap[index].clickPoint.Add(clickPosition);
                 //PointTracking(motionVectors, frames, x, y);
 
                 await Task.Run(() =>
                 {
-                    dijkstraHeap[index].run(dijkstraHeap[index].sx, dijkstraHeap[index].sy);
+                    dijkstraHeap[index].run(dijkstraHeap[index].sx, dijkstraHeap[index].sy, x, y);
                     dijkstraHeap[index].returnPath(x, y, vx, vy, out pathLength, pixelValue);
                 });
 
@@ -270,7 +335,7 @@ namespace RaywattApp.Common.Annotation
                     {
                         points.Add(new PointF(vx[i], vy[i]));
                     }
-                    DrawPath(points);
+                    DrawSplineCurve(points);
                 }
                 // 베지어의 경우 점을 4개씩 끊어서 전달하여 곡선 형성
                 else if (curveType == "Bezier")
@@ -291,7 +356,7 @@ namespace RaywattApp.Common.Annotation
                             {// 가이드 점 마지막 인덱스로 모두 추가 (최대 3개)
                                 points.Add(new PointF(vx[currIndex], vy[currIndex]));
                             }
-                            DrawPath(points, totalDistance - (int)(distanceWeight * totalDistance)); // 가이드 점 4개와, 보간에 사용할 점 개수 전달.
+                            DrawBezierCurve(points, totalDistance - (int)(distanceWeight * totalDistance)); // 가이드 점 2개와, 보간에 사용할 점 2개 전달.
                             points.Clear();
                         }
                         else if (pixelValue[currIndex] == 0)
@@ -311,8 +376,8 @@ namespace RaywattApp.Common.Annotation
                                 totalDistance += tmpDistance;
 
                                 if (points.Count == numOfPoints)
-                                { // 가이드 점이 4개인 경우엔 곡선 그리기.
-                                    DrawPath(points, totalDistance - (int)(distanceWeight * totalDistance));
+                                { // 가이드 점이 2(+2 보간)개인 경우엔 곡선 그리기.
+                                    DrawBezierCurve(points, totalDistance - (int)(distanceWeight * totalDistance));
                                     points.Clear();
                                 }
                             }

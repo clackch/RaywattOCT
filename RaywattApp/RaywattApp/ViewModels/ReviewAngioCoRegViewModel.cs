@@ -19,6 +19,8 @@ using RaywattApp.Common.Annotation.Models;
 using System.Windows.Media;
 using System.Drawing.Imaging;
 using System.Windows.Media.Imaging;
+using System.Windows.Controls;
+using System.Windows;
 
 namespace RaywattApp.ViewModels
 {
@@ -129,8 +131,6 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("OnNavigating");
         }
-
-
 
         private void Ok()
         {
