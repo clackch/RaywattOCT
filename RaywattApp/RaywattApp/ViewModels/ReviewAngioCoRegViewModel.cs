@@ -93,6 +93,7 @@ namespace RaywattApp.ViewModels
             set
             {
                 _frameNumber = value;
+                OnPropertyChanged(nameof(FrameNumber));
                 OnPropertyChanged(nameof(CurrentAngioImage));
             }
         }

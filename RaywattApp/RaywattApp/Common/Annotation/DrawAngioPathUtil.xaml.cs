@@ -130,6 +130,7 @@ namespace RaywattApp.Common.Annotation
         private void DeactivateEvent()
         {
             canvas.MouseLeftButtonDown -= Canvas_MouseLeftButtonDown;
+            canvas.MouseMove -= Canvas_MouseMove;
             this.canvas.Background = null;
         }
 
@@ -246,7 +247,7 @@ namespace RaywattApp.Common.Annotation
         private void CalculateAllPath(int currFrameNum, int imageLength)
         {
             int gapMinus = currFrameNum - 10 > 0 ? currFrameNum - 10 : 0;
-            int gapPlus = currFrameNum + 10 < dijkstraHeap.Count - 1 ? currFrameNum + 10 : dijkstraHeap.Count - 1;
+            int gapPlus = currFrameNum + 10 < imageLength - 1 ? currFrameNum + 10 : imageLength - 1;
             for (int angioIndex = gapMinus; angioIndex < gapPlus; angioIndex++)
             {
                 for (int numOfTrackPoint = 0; numOfTrackPoint < dijkstraHeap[angioIndex].trackPoint.Count - 1; numOfTrackPoint++)
@@ -340,7 +341,7 @@ namespace RaywattApp.Common.Annotation
         private void CalculateMotionVector(Mat prevFrame, Mat nextFrame)
         {
             Mat flow = new Mat();
-            Cv2.CalcOpticalFlowFarneback(prevFrame, nextFrame, flow, 0.5, 7, 15, 3, 7, 1.5, 0);
+            Cv2.CalcOpticalFlowFarneback(prevFrame, nextFrame, flow, 0.5, 5, 7, 7, 5, 1.1, 0);
 
             //curr, next: 이전 영상과 현재 영상. 그레이스케일 영상.
             //flow: (출력)계산된 옵티컬플로우.np.ndarray.shape = (h, w, 2(for x, y vector)), dtype = np.float32.
@@ -358,7 +359,7 @@ namespace RaywattApp.Common.Annotation
         private void PointTracking(float x, float y, int direction)
         {
             PointF prevPoint = new PointF(x, y);
-            int halfSize = 25; // halfSize*2 x halfSize*2 크기
+            int halfSize = 5; // halfSize*2 x halfSize*2 크기
 
             for (int i = FrameNumber + direction; i < motionVector.Count && i > 0; i += direction)
             {

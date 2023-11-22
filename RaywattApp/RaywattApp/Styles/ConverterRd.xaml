@@ -125,7 +125,4 @@
     <!-- CrossSection Translate Converter -->
     <converters:CoRegistrationTranslateConverter x:Key="CoRegistrationTranslateConverter" />
 
-    <!-- CrossSection Scale Converter -->
-    <converters:CoRegistrationScaleConverter x:Key="CoRegistrationScaleConverter" />
-
 </ResourceDictionary>
