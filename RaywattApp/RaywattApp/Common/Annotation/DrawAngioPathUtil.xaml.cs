@@ -27,6 +27,8 @@ using RaywattApp.Common.Annotation.LiveWire;
 using System.Runtime.CompilerServices;
 using OpenCvSharp.Flann;
 using LiveWire;
+using log4net;
+using RaywattApp.ViewModels;
 
 namespace RaywattApp.Common.Annotation
 {
@@ -35,6 +37,7 @@ namespace RaywattApp.Common.Annotation
     /// </summary>
     public partial class DrawAngioPathUtil : UserControl
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(DrawAngioPathUtil));
         public Zoom Zoom
         {
             get { return (Zoom)GetValue(ZoomProperty); }
@@ -51,6 +54,12 @@ namespace RaywattApp.Common.Annotation
             set { this.SetValue(AngioImagesProperty, value); }
         }
 
+        public Point MousePosition
+        {
+            get { return (Point)GetValue(MousePositionProperty); }
+            set { this.SetValue(MousePositionProperty, value); }
+        }
+
         private String curveType = "Spline";
         private BezierCurve bezierCurve;
         private SplineCurve splineCurve;
@@ -62,17 +71,19 @@ namespace RaywattApp.Common.Annotation
         // DrawPath()에서 TrackedPoint에 대한 Path 그리기
 
         private List<DijkstraHeap>  dijkstraHeap;
-        private List<Point> trackPoints; //Co-Registration 에 쓸 initial 위치
         private List<Mat> motionVector;
 
         private static readonly DependencyProperty FrameNumberProperty =
-        DependencyProperty.Register("FrameNumber", typeof(int), typeof(DrawAngioPathUtil), new PropertyMetadata(-1, OnPropertyChanged));
+        DependencyProperty.Register("FrameNumber", typeof(int), typeof(DrawAngioPathUtil), new PropertyMetadata(-1, OnFrameNumberPropertyChanged));
 
         public static readonly DependencyProperty ZoomProperty =
             DependencyProperty.Register("Zoom", typeof(Zoom), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
 
         public static readonly DependencyProperty AngioImagesProperty =
             DependencyProperty.Register("AngioImages", typeof(List<Mat>), typeof(DrawAngioPathUtil), new PropertyMetadata(null, OnAngioImagesPropertyChanged));
+
+        public static readonly DependencyProperty MousePositionProperty =
+            DependencyProperty.Register("MousePosition", typeof(Point), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
 
         public DrawAngioPathUtil()
         {
@@ -112,6 +123,7 @@ namespace RaywattApp.Common.Annotation
         private void ActivateEvent()
         {
             canvas.MouseLeftButtonDown += Canvas_MouseLeftButtonDown;
+            canvas.MouseMove += Canvas_MouseMove;
             this.canvas.Background = Brushes.Transparent;
         }
 
@@ -231,73 +243,20 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
-        // ---------------------------------------Event
-
-        private static void OnAngioImagesPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
-        {
-            var control = (DrawAngioPathUtil)dependencyObject;
-            var newImages = (List<Mat>)dependencyPropertyChangedEventArgs.NewValue;
-            if (newImages.Count > 0)
-            {
-                control.motionVector = new List<Mat>();
-                control.ImageProcessing(newImages);
-            }
-        }
-
-        private static void OnPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
-        {
-            var control = (DrawAngioPathUtil)dependencyObject;
-            int frameNumber = (int)dependencyPropertyChangedEventArgs.NewValue;
-            control.WireChange(frameNumber);
-        }
-
-        async private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            PointF clickPosition = new PointF((float)e.GetPosition(canvas).X, (float)e.GetPosition(canvas).Y);
-            Rectangle rectangle = new Rectangle();
-            rectangle.Style = (Style)this.Resources["StyleRectangle"];
-            Canvas.SetLeft(rectangle, clickPosition.X - (Constants.AnnotationRectWidth / Zoom.ScaleX) / 2);
-            Canvas.SetTop(rectangle, clickPosition.Y - (Constants.AnnotationRectHeight / Zoom.ScaleY) / 2);
-            canvas.Children.Add(rectangle);
-
-            // 첫번째 점
-            if (dijkstraHeap[FrameNumber].trackPoint.Count == 0)
-            {
-                dijkstraHeap[FrameNumber].trackPoint.Add(clickPosition);
-                PointTracking(clickPosition.X, clickPosition.Y, 1);
-                PointTracking(clickPosition.X, clickPosition.Y, -1);
-                return;
-            }
-            // 두번째 점 이후
-            else
-            {
-                dijkstraHeap[FrameNumber].trackPoint.Add(clickPosition);
-                PointTracking(clickPosition.X, clickPosition.Y, 1);
-                PointTracking(clickPosition.X, clickPosition.Y, -1);
-                DrawWire(dijkstraHeap[FrameNumber]);
-                int imageLength = AngioImages.Count;
-                int currFrameNum = FrameNumber;
-                await Task.Run(() =>
-                {
-                    CalculateAllPath(currFrameNum, imageLength);
-                });
-            }
-        }
-
         private void CalculateAllPath(int currFrameNum, int imageLength)
         {
             int gapMinus = currFrameNum - 10 > 0 ? currFrameNum - 10 : 0;
             int gapPlus = currFrameNum + 10 < dijkstraHeap.Count - 1 ? currFrameNum + 10 : dijkstraHeap.Count - 1;
             for (int angioIndex = gapMinus; angioIndex < gapPlus; angioIndex++)
             {
-                for (int numOfTrackPoint = 0; numOfTrackPoint < dijkstraHeap[angioIndex].trackPoint.Count-1; numOfTrackPoint++)
+                for (int numOfTrackPoint = 0; numOfTrackPoint < dijkstraHeap[angioIndex].trackPoint.Count - 1; numOfTrackPoint++)
                 {
                     int[] vx = new int[dijkstraHeap[angioIndex].width * dijkstraHeap[angioIndex].height];
                     int[] vy = new int[dijkstraHeap[angioIndex].width * dijkstraHeap[angioIndex].height];
                     int startX = (int)dijkstraHeap[angioIndex].trackPoint[numOfTrackPoint].X;
                     int startY = (int)dijkstraHeap[angioIndex].trackPoint[numOfTrackPoint].Y;
-                    int endX = (int)dijkstraHeap[angioIndex].trackPoint[numOfTrackPoint+1].X;
-                    int endY = (int)dijkstraHeap[angioIndex].trackPoint[numOfTrackPoint+1].Y;
+                    int endX = (int)dijkstraHeap[angioIndex].trackPoint[numOfTrackPoint + 1].X;
+                    int endY = (int)dijkstraHeap[angioIndex].trackPoint[numOfTrackPoint + 1].Y;
                     int[] pixelValue = new int[dijkstraHeap[angioIndex].width * dijkstraHeap[angioIndex].height];
                     int pathLength = 0;
                     List<PointF> points = new List<PointF>();
@@ -381,7 +340,7 @@ namespace RaywattApp.Common.Annotation
         private void CalculateMotionVector(Mat prevFrame, Mat nextFrame)
         {
             Mat flow = new Mat();
-            Cv2.CalcOpticalFlowFarneback(prevFrame, nextFrame, flow, 0.5, 5, 15, 3, 5, 1.1, 0);
+            Cv2.CalcOpticalFlowFarneback(prevFrame, nextFrame, flow, 0.5, 7, 15, 3, 7, 1.5, 0);
 
             //curr, next: 이전 영상과 현재 영상. 그레이스케일 영상.
             //flow: (출력)계산된 옵티컬플로우.np.ndarray.shape = (h, w, 2(for x, y vector)), dtype = np.float32.
@@ -401,7 +360,7 @@ namespace RaywattApp.Common.Annotation
             PointF prevPoint = new PointF(x, y);
             int halfSize = 25; // halfSize*2 x halfSize*2 크기
 
-            for (int i = FrameNumber+direction; i < motionVector.Count && i > 0; i+=direction)
+            for (int i = FrameNumber + direction; i < motionVector.Count && i > 0; i += direction)
             {
                 Vec2f sumVector = new Vec2f(0, 0);
                 int count = 0;
@@ -425,15 +384,69 @@ namespace RaywattApp.Common.Annotation
                 }
 
                 Vec2f averageVector = new Vec2f(sumVector.Item0 / count, sumVector.Item1 / count);
-                
-                PointF currPoint = new PointF(prevPoint.X + (direction)*averageVector.Item0, prevPoint.Y + (direction)*averageVector.Item1);
+
+                PointF currPoint = new PointF(prevPoint.X + (direction) * averageVector.Item0, prevPoint.Y + (direction) * averageVector.Item1);
                 dijkstraHeap[i].trackPoint.Add(currPoint);
                 prevPoint = currPoint;
             }
         }
+
+        // ---------------------------------------Event
+
+        private static void OnAngioImagesPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
+        {
+            var control = (DrawAngioPathUtil)dependencyObject;
+            var newImages = (List<Mat>)dependencyPropertyChangedEventArgs.NewValue;
+            if (newImages.Count > 0)
+            {
+                control.motionVector = new List<Mat>();
+                control.ImageProcessing(newImages);
+            }
+        }
+
+        private static void OnFrameNumberPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
+        {
+            var control = (DrawAngioPathUtil)dependencyObject;
+            int frameNumber = (int)dependencyPropertyChangedEventArgs.NewValue;
+            control.WireChange(frameNumber);
+        }
+
+        async private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            PointF clickPosition = new PointF((float)e.GetPosition(canvas).X, (float)e.GetPosition(canvas).Y);
+            Rectangle rectangle = new Rectangle();
+            rectangle.Style = (Style)this.Resources["StyleRectangle"];
+            Canvas.SetLeft(rectangle, clickPosition.X - (Constants.AnnotationRectWidth / Zoom.ScaleX) / 2);
+            Canvas.SetTop(rectangle, clickPosition.Y - (Constants.AnnotationRectHeight / Zoom.ScaleY) / 2);
+            canvas.Children.Add(rectangle);
+
+            // 첫번째 점
+            if (dijkstraHeap[FrameNumber].trackPoint.Count == 0)
+            {
+                dijkstraHeap[FrameNumber].trackPoint.Add(clickPosition);
+                PointTracking(clickPosition.X, clickPosition.Y, 1);
+                PointTracking(clickPosition.X, clickPosition.Y, -1);
+                return;
+            }
+            // 두번째 점 이후
+            else
+            {
+                dijkstraHeap[FrameNumber].trackPoint.Add(clickPosition);
+                PointTracking(clickPosition.X, clickPosition.Y, 1);
+                PointTracking(clickPosition.X, clickPosition.Y, -1);
+                DrawWire(dijkstraHeap[FrameNumber]);
+                int imageLength = AngioImages.Count;
+                int currFrameNum = FrameNumber;
+                await Task.Run(() =>
+                {
+                    CalculateAllPath(currFrameNum, imageLength);
+                });
+            }
+        }
+
+        private void Canvas_MouseMove(object sender, MouseEventArgs e)
+        {
+            MousePosition = e.GetPosition(this.canvas);
+        }
     }
-
-
-
-
 }

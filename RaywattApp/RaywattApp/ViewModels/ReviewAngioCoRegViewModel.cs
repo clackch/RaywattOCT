@@ -60,12 +60,6 @@ namespace RaywattApp.ViewModels
             get { return this._okCommand ?? (this._okCommand = new RelayCommand(Ok)); }
         }
 
-        private ICommand _mouseMove;
-        public ICommand MouseMove
-        {
-            get { return this._mouseMove ?? (this._mouseMove = new RelayCommand<Point>(GetMousePoint)); }
-        }
-
         public List<Mat> CrossSectionAngioImages { get; private set; }
         private List<ImageSource> crossSectionAngioImageSources { get; set; }
         public ImageSource CurrentAngioImage
@@ -80,6 +74,18 @@ namespace RaywattApp.ViewModels
             }
         }
 
+        private Point _crossSectionMousePosition;
+        public Point CrossSectionMousePosition
+        {
+            get => _crossSectionMousePosition;
+            set
+            {
+                _crossSectionMousePosition = value;
+                OnPropertyChanged(nameof(CrossSectionMousePosition));
+                _log.Debug("CrossSetionMousePosition" + CrossSectionMousePosition.X.ToString());
+            }
+        }
+
         private int _frameNumber;
         public int FrameNumber
         {
@@ -87,19 +93,18 @@ namespace RaywattApp.ViewModels
             set
             {
                 _frameNumber = value;
-                OnPropertyChanged(nameof(FrameNumber));
                 OnPropertyChanged(nameof(CurrentAngioImage));
             }
         }
 
-        private int _maxFrames;
-        public int MaxFrames
+        private int _angioFrameLength;
+        public int AngioFrameLength
         {
-            get => _maxFrames;
+            get => _angioFrameLength;
             set
             {
-                _maxFrames = value;
-                OnPropertyChanged(nameof(MaxFrames));
+                _angioFrameLength = value;
+                OnPropertyChanged(nameof(AngioFrameLength));
             }
         }
 
@@ -193,7 +198,7 @@ namespace RaywattApp.ViewModels
                     crossSectionAngioImageSources.Add(ConvertMatsToImageSource(frame));
                 }
             }
-            _maxFrames = crossSectionAngioImageSources.Count-1;
+            AngioFrameLength = crossSectionAngioImageSources.Count-1;
         }
 
         private ImageSource ConvertMatsToImageSource(Mat mat)
@@ -211,11 +216,6 @@ namespace RaywattApp.ViewModels
                 bitmapImage.Freeze();
                 return bitmapImage;
             }
-        }
-
-        void GetMousePoint(Point point)
-        {
-
         }
     }
 }
