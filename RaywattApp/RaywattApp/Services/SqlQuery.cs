@@ -179,7 +179,7 @@ namespace RaywattApp.Services
 
             //SelectCathRoomList
             _query["SelectCathRoomList"] = @$"
-                SELECT id, name, chp_file, rect_left, rect_top, rect_right, rect_bottom, description, create_date, update_date
+                SELECT id, name, setup_chp, app_chp, rect_left, rect_top, rect_right, rect_bottom, description, create_date, update_date
                 FROM rv_schema.cath_room
                 ORDER BY name;
                 ";

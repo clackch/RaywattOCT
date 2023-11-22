@@ -11,7 +11,6 @@ using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Input;
@@ -29,6 +28,8 @@ namespace RaywattApp.ViewModels
         private static readonly ILog _log = LogManager.GetLogger(typeof(MainViewModel));
 
         private readonly SqlManager _sqlManager;
+
+        private readonly AngioManager _angioManager;
 
         private IDialogService _dialogService;
 
@@ -113,8 +114,6 @@ namespace RaywattApp.ViewModels
         private CallbackFunction cbFunction;
         public CallbackFunction CBFunction => (this.cbFunction) ?? (this.cbFunction = new CallbackFunction(OnMsgCallback));
 
-        private readonly AngioManager _angioManager;
-
         /// <summary>
         /// 생성자
         /// </summary>
@@ -123,6 +122,7 @@ namespace RaywattApp.ViewModels
             _log.Debug("MainViewModel");
 
             _sqlManager = sqlManager;
+            _angioManager = angioManager;
             _dialogService = dialogService;
 
             // Code 정의
@@ -152,8 +152,6 @@ namespace RaywattApp.ViewModels
             IsHome = true;
             IsLoading = true;
 
-            _angioManager = angioManager;
-
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["classification"] = "TestMode";
             IList<Configuration> testMode = _sqlManager.SelectConfiguration(sqlParameters);
@@ -168,6 +166,8 @@ namespace RaywattApp.ViewModels
                 if ("RJ".Equals(config.Key))
                     RaySetProperty(Property.TestMode, "Y".Equals(config.Value) ? 1.0f : 0.0f);
             }
+
+            DeviceStatus.PowerOffMsg = _l10n["Shutting down"];
         }
 
         private void OnNavigationMessage(object recipient, NavigationMessage message)
@@ -242,14 +242,13 @@ namespace RaywattApp.ViewModels
 
             if (result != null && result.DialogAnswer != DialogResults.Answer.No)
             {
-                CommonUtil.Exit(DeviceStatus);
-
                 _angioManager.CloseAngioManager();
 
-                // Server Off
-                Process[] processes = Process.GetProcessesByName("FGServer");
-                foreach (Process process in processes)
-                    process.Kill();
+                if (result.DialogAnswer == DialogResults.Answer.Extra)
+                {
+                    DeviceStatus.PowerOffMsg = _l10n["Switching user"];
+                }
+                CommonUtil.Exit(DeviceStatus);
 
                 if (result.DialogAnswer == DialogResults.Answer.Yes && !CommonUtil.IsTestMode(DeviceStatus.TestMode, "Power"))
                 {

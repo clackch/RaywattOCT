@@ -82,6 +82,21 @@
                     </MultiBinding>
                 </component:MenuUnableComponent.Visibility>
             </component:MenuUnableComponent>
+
+            <!-- Power Off/Switch User Msg -->
+            <StackPanel Grid.Row="0" Grid.RowSpan="3" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" Visibility="{Binding DeviceStatus.IsPowerOff, Converter={StaticResource BoolToVisibilityConverter}}"/>
+            <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding DeviceStatus.IsPowerOff, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Width="{x:Static const:Constants.PowerOffDialogWidth}" Height="{x:Static const:Constants.PowerOffDialogHeight}">
+                    <StackPanel HorizontalAlignment="Center" Width="{x:Static const:Constants.PowerOffDialogWidth}">
+                        <StackPanel Height="85"/>
+                        <ContentControl Template="{DynamicResource Loading}"/>
+                        <StackPanel Height="21"/>
+                        <Label HorizontalAlignment="Center" Style="{DynamicResource Pretendard-Medium-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding DeviceStatus.PowerOffMsg}"/>
+                        <StackPanel Height="60"/>
+                        <Image Style="{DynamicResource Raywatt}" Width="49" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,16,0"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>

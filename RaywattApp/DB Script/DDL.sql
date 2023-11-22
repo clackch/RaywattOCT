@@ -215,7 +215,8 @@ CREATE TABLE IF NOT EXISTS rv_schema.cath_room
 (
     id serial NOT NULL,
     name character varying(50) COLLATE pg_catalog."default",
-    chp_file character varying(200) COLLATE pg_catalog."default",
+    setup_chp character varying(200) COLLATE pg_catalog."default",
+    app_chp character varying(200) COLLATE pg_catalog."default",	
     rect_left real,
     rect_top real,
     rect_right real,

@@ -149,6 +149,9 @@ Remove the catheter from patient before proceeding.</value>
   <data name="$MSG010" xml:space="preserve">
     <value>[K]Mark at least two points on the vessel.</value>
   </data>
+  <data name="$MSG011" xml:space="preserve">
+    <value>[K]The system is currently unavailable. Please check your devices and connections.</value>
+  </data>
   <data name="$Terms and Conditions" xml:space="preserve">
     <value>[K]Product Intended Use: Clearly define the intended use of the OCT device, including any limitations or specific conditions for use.
 Product Warranty: Outline the warranty coverage provided for the OCT device, including the duration, scope, and process for claiming warranty services.
@@ -888,6 +891,9 @@ Overwrite existing data?</value>
   <data name="Setting" xml:space="preserve">
     <value>[K]Setting</value>
   </data>
+  <data name="Shutting down" xml:space="preserve">
+    <value>[K]Shutting down</value>
+  </data>
   <data name="Side Branch View" xml:space="preserve">
     <value>[K]Side Branch View</value>
   </data>
@@ -926,6 +932,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Switch User" xml:space="preserve">
     <value>[K]Switch User</value>
+  </data>
+  <data name="Switching user" xml:space="preserve">
+    <value>[K]Switching user</value>
   </data>
   <data name="System File Option" xml:space="preserve">
     <value>[K]System File Option</value>

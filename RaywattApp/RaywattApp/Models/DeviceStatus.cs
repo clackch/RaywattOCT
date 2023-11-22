@@ -16,6 +16,12 @@ namespace RaywattApp.Models
         };
 
         [ObservableProperty]
+        private bool _isPowerOff = false;
+
+        [ObservableProperty]
+        private string _powerOffMsg;
+
+        [ObservableProperty]
         private bool _isDeviceConnected = false;
 
         [ObservableProperty]
