@@ -9,6 +9,11 @@ using System.IO;
 using log4net;
 using System.Text;
 using RaywattApp.Common.Annotation;
+using System.Collections.Generic;
+using RaywattApp.Models;
+using RaywattApp.Services;
+using RaywattApp.Common.Dialog;
+using RaywattApp.Views.Dialog;
 
 namespace RaywattApp.Common.Angio
 {
@@ -41,6 +46,10 @@ namespace RaywattApp.Common.Angio
     public class AngioManager
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(AngioManager));
+
+        private readonly SqlManager? _sqlManager;
+
+        private IDialogService? _dialogService;
 
         private string serverIP;
         private int serverPort;
@@ -80,8 +89,15 @@ namespace RaywattApp.Common.Angio
 
         public bool readyToRecv;
 
-        public AngioManager()
+        private bool isAngioSet;
+
+        public AngioManager(SqlManager sqlManager, IDialogService dialogService)
         {
+            _log.Debug("AngioManager");
+
+            _sqlManager = sqlManager;
+            _dialogService = dialogService;
+
             serverIP = "127.0.0.1";
             serverPort = 8888;
 
@@ -110,7 +126,8 @@ namespace RaywattApp.Common.Angio
 
             angioFrameHeight = -1;
             angioFrameWidth = -1;
-            
+
+            isAngioSet = false;
 
             ConnectToServer();
         }
@@ -194,6 +211,8 @@ namespace RaywattApp.Common.Angio
         private void ActivateClientThreads()
         {
             threadFuncLiveAngioImage = new Thread(() => ThreadFuncLiveAngioImage());
+            threadFuncLiveAngioImage.SetApartmentState(ApartmentState.STA);
+            threadFuncLiveAngioImage.IsBackground = true;
             StartLiveAngioThread();
             
         }
@@ -319,6 +338,15 @@ namespace RaywattApp.Common.Angio
                     {
                         ViewModelBase._deviceStatus.IsAngioConnected = true;
                     });
+
+                    if (ViewModelBase._deviceStatus.IsDeviceConnected)
+                    {
+
+                        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            SelectCathRoom();
+                        });
+                    }
                 }
                 else if (command == (byte)CommandType.FGBoardExist)
                 {
@@ -472,6 +500,22 @@ namespace RaywattApp.Common.Angio
         {
             threadOnSaveAngioFrames = false;
             threadFuncSaveAngioFrames.Join();
+        }
+
+        private void SelectCathRoom()
+        {
+            _log.Debug("SelectCathRoom");
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["selectedCathRoomId"] = ViewModelBase._deviceStatus.SelectedCathRoom == null ? 0 : ViewModelBase._deviceStatus.SelectedCathRoom.Id;
+
+            var result = _dialogService.OpenDialog(new CathRoomDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+            if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
+            {
+                Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
+                ViewModelBase._deviceStatus.SelectedCathRoom = (CathRoom)data["selectedCathRoom"];
+            }
         }
     }
 }

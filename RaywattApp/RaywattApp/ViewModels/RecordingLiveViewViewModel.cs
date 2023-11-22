@@ -164,6 +164,8 @@ namespace RaywattApp.ViewModels
                 SetCondition();
             }
 
+            SelectCathRoom(); // 이전으로 돌아오는 경우 제외
+
             // Send Start Command
             if (!_angioManager.readyToRecv && DeviceStatus.IsAngioConnected)
             {
@@ -298,6 +300,22 @@ namespace RaywattApp.ViewModels
             }
             RaySetProperty(Property.PullbackDistance, Double.Parse(PbLength));
             RaySetProperty(Property.PullbackSpeed, Double.Parse(PbSpeed));
+        }
+
+        private void SelectCathRoom()
+        {
+            _log.Debug("SelectCathRoom");
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["selectedCathRoomId"] = DeviceStatus.SelectedCathRoom == null ? 0 : DeviceStatus.SelectedCathRoom.Id;
+
+            var result = _dialogService.OpenDialog(new CathRoomDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+            if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
+            {
+                Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
+                DeviceStatus.SelectedCathRoom = (CathRoom)data["selectedCathRoom"];
+            }
         }
     }
 }
