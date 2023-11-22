@@ -173,10 +173,10 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <Border Grid.Column="0" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
-                            <Image Name="angioImage" Source="{Binding AngioImage}" Stretch="Uniform"/>
+                            <Image Source="{Binding AngioImage}" Stretch="Uniform"/>
                         </Border>
                         <Border Grid.Column="2" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
-                            <Image Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill"/>
+                            <Image Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Uniform"/>
                         </Border>
                     </Grid>
                 </Grid>
