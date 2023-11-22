@@ -76,8 +76,8 @@ namespace RaywattApp.ViewModels
                 }
             }
 
-            Thread threadCoreAndDevideInit = new Thread(() => ThreadCoreAndDeviceInit());
-            threadCoreAndDevideInit.Start();
+            Thread threadCoreAndDeviceInit = new Thread(() => ThreadCoreAndDeviceInit());
+            threadCoreAndDeviceInit.Start();
 
             timer.Interval = TimeSpan.FromMilliseconds(25);
             timer.Tick += new EventHandler(ProgressTest);
