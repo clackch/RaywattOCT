@@ -82,7 +82,7 @@ namespace RaywattApp.Common.Annotation.LiveWire
             if (gradientr[toIndex(dx,dy)] != 255) {
                 fg = Math.Sqrt((dx - sx) * (dx - sx) + (dy - sy) * (dy - sy));
             }
-            return fg + 0.1 * Math.Sqrt((dx - sx) * (dx - sx) + (dy - sy) * (dy - sy)); // Gray 255 픽셀 11개를 거쳐가는 것 보다 점 1개에 해당하는 Gray 0을 가는게 더 났다.
+            return fg + 0.10 * Math.Sqrt((dx - sx) * (dx - sx) + (dy - sy) * (dy - sy)); // Grey 0 : Grey 255 = 11 : 1.
         }
 
         private void updateCosts(int x, int y, double mycost)
