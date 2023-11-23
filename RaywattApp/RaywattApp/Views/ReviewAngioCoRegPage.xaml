@@ -114,7 +114,10 @@
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" HorizontalAlignment="Left" Margin="16,16,0,0">
-                        <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+                        <Grid>
+                            <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+                            <Button Style="{StaticResource OutlinedBtnType3-Large}" Content="{Binding [Reset], Source={StaticResource L10N}}" Margin="210,0,-210,0"/>
+                        </Grid>
                     </StackPanel>
                     <Grid Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,16,0">
                         <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding OkCommand}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
