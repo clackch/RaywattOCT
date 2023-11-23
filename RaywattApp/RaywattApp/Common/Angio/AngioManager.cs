@@ -13,6 +13,7 @@ using RaywattApp.Models;
 using RaywattApp.Services;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Views.Dialog;
+using RaywattApp.ViewModels.Dialog;
 
 namespace RaywattApp.Common.Angio
 {
@@ -89,6 +90,8 @@ namespace RaywattApp.Common.Angio
         public bool readyToRecv;
 
         private bool isAngioSet;
+
+        public short isChpFileChangeSuccess = 0;
 
         public AngioManager(SqlManager sqlManager, IDialogService dialogService)
         {
@@ -356,7 +359,14 @@ namespace RaywattApp.Common.Angio
                     boardConnection = (CommandType)CommandType.FGBoardNotExist;
                     threadOnLiveAngioImage = false;
                 }
-
+                else if (command == (byte)CommandType.FGSuccessChangeChp)
+                {
+                    isChpFileChangeSuccess = 1;
+                }
+                else if (command == (byte)CommandType.FGFailChangeChp)
+                {
+                    isChpFileChangeSuccess = -1;
+                }
                 Array.Copy(tmpBuffer, Constants.commandPacketSize, tmpBuffer, 0, tmpBuffer.Length - Constants.commandPacketSize);
                 tmpBufferLen -= Constants.commandPacketSize;
             }
