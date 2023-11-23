@@ -237,12 +237,20 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
-        private void CalculateAllPath(int currFrameNum, int imageLength)
+        private void CalculateAllPath(int currFrameNum, int imageLength, int gapValue)
         {
-            int gapMinus = currFrameNum - 10 > 0 ? currFrameNum - 10 : 0;
-            int gapPlus = currFrameNum + 10 < imageLength - 1 ? currFrameNum + 10 : imageLength - 1;
+            int gapMinus = currFrameNum - gapValue > 0 ? currFrameNum - gapValue : 0;
+            int gapPlus = currFrameNum + gapValue < imageLength - 1 ? currFrameNum + gapValue : imageLength - 1;
+
+            if (gapValue == 0) // 현재 프레임 표현을 위한 값조정.
+            {
+                gapPlus += 1;
+            }
+
             for (int angioIndex = gapMinus; angioIndex < gapPlus; angioIndex++)
             {
+                if (gapValue != 0 && angioIndex == currFrameNum) continue; // 현재 프레임은 호출부 밖에서 먼저 계산하고 표현.
+
                 for (int numOfTrackPoint = 0; numOfTrackPoint < dijkstraHeap[angioIndex].trackPoint.Count - 1; numOfTrackPoint++)
                 {
                     int[] vx = new int[dijkstraHeap[angioIndex].width * dijkstraHeap[angioIndex].height];
@@ -414,6 +422,9 @@ namespace RaywattApp.Common.Annotation
             Canvas.SetTop(rectangle, clickPosition.Y - (Constants.AnnotationRectHeight / Zoom.ScaleY) / 2);
             canvas.Children.Add(rectangle);
 
+            int imageLength = AngioImages.Count;
+            int currFrameNum = FrameNumber;
+
             // 첫번째 점
             if (dijkstraHeap[FrameNumber].trackPoint.Count == 0)
             {
@@ -428,12 +439,11 @@ namespace RaywattApp.Common.Annotation
                 dijkstraHeap[FrameNumber].trackPoint.Add(clickPosition);
                 PointTracking(clickPosition.X, clickPosition.Y, 1);
                 PointTracking(clickPosition.X, clickPosition.Y, -1);
+                CalculateAllPath(currFrameNum, imageLength, 0/*현재 프레임만 찾기*/);
                 DrawWire(dijkstraHeap[FrameNumber]);
-                int imageLength = AngioImages.Count;
-                int currFrameNum = FrameNumber;
                 await Task.Run(() =>
                 {
-                    CalculateAllPath(currFrameNum, imageLength);
+                    CalculateAllPath(currFrameNum, imageLength, 10/*현재 프레임 기준으로 앞뒤 몇장까지 경로 찾을지 결정*/);
                 });
             }
         }
