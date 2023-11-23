@@ -63,13 +63,6 @@ namespace RaywattApp.Common.Annotation
         private String curveType = "Spline";
         private BezierCurve bezierCurve;
         private SplineCurve splineCurve;
-
-        // todo
-        // Curr-FrameNum과 해당하는 TrackPoint 2개 
-        // Curr-FrameNum과 Total-FrameNum사이의 비율로 GuidePoint 표시 -> AngioFrmaes : OCTFrames 만큼
-        // 첫번째 Frame에 2개의 Point를 찍는다고 가정하고, 나머지 Frame에 대한 TrackedPoints 구하기
-        // DrawPath()에서 TrackedPoint에 대한 Path 그리기
-
         private List<DijkstraHeap>  dijkstraHeap;
         private List<Mat> motionVector;
 
