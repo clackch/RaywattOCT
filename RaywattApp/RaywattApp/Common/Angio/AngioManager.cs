@@ -13,7 +13,6 @@ using RaywattApp.Models;
 using RaywattApp.Services;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Views.Dialog;
-using RaywattApp.ViewModels.Dialog;
 
 namespace RaywattApp.Common.Angio
 {
@@ -89,8 +88,6 @@ namespace RaywattApp.Common.Angio
 
         public bool readyToRecv;
 
-        private bool isAngioSet;
-
         public short isChpFileChangeSuccess = 0;
 
         public AngioManager(SqlManager sqlManager, IDialogService dialogService)
@@ -128,8 +125,6 @@ namespace RaywattApp.Common.Angio
 
             angioFrameHeight = -1;
             angioFrameWidth = -1;
-
-            isAngioSet = false;
 
             ConnectToServer();
         }
