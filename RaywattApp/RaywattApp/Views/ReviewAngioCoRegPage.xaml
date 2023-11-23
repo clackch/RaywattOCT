@@ -100,11 +100,10 @@
                     </Grid>
                     <Grid Grid.Row="2">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="420"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="580"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Slider Grid.Column="0" Width="400" Minimum="0" Maximum="{Binding AngioFrameLength}" Value="{Binding FrameNumber, Mode=TwoWay}" Cursor="Hand" Height="30"/>
+                        <Slider Grid.Column="0" Width="570" Minimum="0" Maximum="{Binding AngioFrameLength}" Value="{Binding FrameNumber, Mode=TwoWay}" Cursor="Hand" Height="30" Margin="9,16,1,17"/>
                     </Grid>
                 </Grid>
             </Border>
