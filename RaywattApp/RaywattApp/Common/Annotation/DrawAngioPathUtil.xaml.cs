@@ -60,7 +60,7 @@ namespace RaywattApp.Common.Annotation
             set { this.SetValue(MousePositionProperty, value); }
         }
 
-        private String curveType = "Spline";
+        private String curveType = "Spline"; // Bezier or Spline
         private BezierCurve bezierCurve;
         private SplineCurve splineCurve;
         private List<DijkstraHeap>  dijkstraHeap;
@@ -144,7 +144,7 @@ namespace RaywattApp.Common.Annotation
                 currEqualImg = equalizedImage.Clone();
                 if (prevEqualImg != null)
                 {
-                    CalculateMotionVector(prevEqualImg, currEqualImg);
+                    CalculateMotionVector(prevEqualImg, currEqualImg); // Constants.AngioSize Square 
                 }
                 prevEqualImg = equalizedImage.Clone();
 
@@ -334,7 +334,7 @@ namespace RaywattApp.Common.Annotation
         private void CalculateMotionVector(Mat prevFrame, Mat nextFrame)
         {
             Mat flow = new Mat();
-            Cv2.CalcOpticalFlowFarneback(prevFrame, nextFrame, flow, 0.5, 5, 7, 7, 5, 1.1, 0);
+            Cv2.CalcOpticalFlowFarneback(prevFrame, nextFrame, flow, 0.5, 5, 21, 7, 5, 1.1, 0);
 
             //curr, next: 이전 영상과 현재 영상. 그레이스케일 영상.
             //flow: (출력)계산된 옵티컬플로우.np.ndarray.shape = (h, w, 2(for x, y vector)), dtype = np.float32.
