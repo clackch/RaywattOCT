@@ -61,7 +61,7 @@ namespace RaywattApp.Common.Angio
         public Mat ImgAngio {  get { return imgAngio; } }
 
         private bool serverConnection; // Server - Client Connection
-        private CommandType boardConnection; // FG Board Connection
+        private bool boardConnection; // FG Board Connection
 
         private byte[] buffer;
         private byte[] tmpBuffer;
@@ -102,8 +102,7 @@ namespace RaywattApp.Common.Angio
             imgAngio = ShowNoSignal();
 
             serverConnection = false;
-
-            boardConnection = CommandType.FGUnknown;
+            boardConnection = false;
             readyToRecv = false;
 
             buffer = new byte[100];
@@ -156,8 +155,6 @@ namespace RaywattApp.Common.Angio
 
             ActivateClientThreads();
             AskBoardConnection();
-            AskAngioConnection();
-            AskDeviceInfo();
         }
 
         private void AskAngioConnection()
@@ -292,10 +289,6 @@ namespace RaywattApp.Common.Angio
 
                 Cv2.Flip(image, image, 0);
 
-                // crop
-                // int t = 0, l = 0, b = angioFrameHeight/2, r = angioFrameWidth/2;
-                // Rect roi = new Rect(l, t, r - l, b - t);
-                // image = image.SubMat(roi);
 
                 if (threadOnSaveAngioFrames)
                 {
@@ -361,11 +354,14 @@ namespace RaywattApp.Common.Angio
                 }
                 else if (command == (byte)CommandType.FGBoardExist)
                 {
-                    boardConnection = CommandType.FGBoardExist;
+                    boardConnection = true;
+                    threadOnLiveAngioImage = true;
+                    AskAngioConnection();
+                    AskDeviceInfo();
                 }
                 else if (command == (byte)CommandType.FGBoardNotExist)
                 {
-                    boardConnection = (CommandType)CommandType.FGBoardNotExist;
+                    boardConnection = false;
                     threadOnLiveAngioImage = false;
                 }
                 else if (command == (byte)CommandType.FGSuccessChangeChp)
@@ -411,7 +407,7 @@ namespace RaywattApp.Common.Angio
                 switch (tmpBuffer[offset++])
                 {
                     case (byte)PacketType.Command:
-                        if (tmpBuffer[Constants.commandPacketSize-1] == 0xA3)
+                        if (tmpBuffer[Constants.commandPacketSize - 1] == 0xA3)
                         {
                             return PacketType.Command;
                         }else if (tmpBuffer[Constants.deviceInfoPacketSize-1] == 0xA3)
