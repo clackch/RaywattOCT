@@ -62,7 +62,6 @@ namespace RaywattApp.Common.Angio
 
         private bool serverConnection; // Server - Client Connection
         private CommandType boardConnection; // FG Board Connection
-        private CommandType portConnection; // FG Port Connection
 
         private byte[] buffer;
         private byte[] tmpBuffer;
@@ -81,7 +80,6 @@ namespace RaywattApp.Common.Angio
         private Thread threadFuncSaveAngioFrames;
         private bool threadOnSaveAngioFrames;
 
-        private string angioFramesPath;
         private short angioFrameWidth;
         private short angioFrameHeight;
         private char angioBitsPerPixel;
@@ -106,7 +104,6 @@ namespace RaywattApp.Common.Angio
             serverConnection = false;
 
             boardConnection = CommandType.FGUnknown;
-            portConnection = CommandType.FGUnknown;
             readyToRecv = false;
 
             buffer = new byte[100];
@@ -201,40 +198,21 @@ namespace RaywattApp.Common.Angio
                 }
                 fs.Close();
 
-                // .ini 파일 생성
-                //using (StreamWriter sw = new StreamWriter(angioFilePath + "ini"))
-                //{
-                //    sw.WriteLine("[AngioFrames]");
-                //    sw.WriteLine($"AngioFrameHeight={angioFrameHeight}");
-                //    sw.WriteLine($"AngioFrameWidth={angioFrameWidth}");
-                //    sw.WriteLine($"FrameNumber={angioSaveFrameNum}");
-                //    sw.WriteLine($"BitsPerPixel={(int)angioBitsPerPixel}");
-                //    sw.WriteLine($"Frequency=60"); // 임시값
-                //}
-
                 // .params 파일 생성
                 using (XmlWriter xw = XmlWriter.Create(angioFilePath + "params", new XmlWriterSettings { Indent = true }))
                 {
-                    // XML 선언 쓰기
                     xw.WriteStartDocument();
-
-                    // 루트 엘리먼트 시작
                     xw.WriteStartElement("config");
 
-                    // 변수들 쓰기
                     xw.WriteElementString("AngioFrameHeight", angioFrameHeight.ToString());
                     xw.WriteElementString("AngioFrameWidth", angioFrameWidth.ToString());
                     xw.WriteElementString($"FrameNumber", angioSaveFrameNum.ToString());
                     xw.WriteElementString($"BitsPerPixel", ((int)angioBitsPerPixel).ToString());
                     xw.WriteElementString($"Frequency", "60"); // 임시값
 
-                    // 루트 엘리먼트 종료
                     xw.WriteEndElement();
-
-                    // XML 문서 종료
                     xw.WriteEndDocument();
                 }
-
             }
             catch (Exception ex)
             {
@@ -354,7 +332,6 @@ namespace RaywattApp.Common.Angio
                     {
                         SendCommandPacket(CommandType.FGStopped);
                     }
-                    portConnection = CommandType.FGAngioDisconnected;
 
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
@@ -367,7 +344,6 @@ namespace RaywattApp.Common.Angio
                     {
                         SendCommandPacket(CommandType.FGStarted);
                     }
-                    portConnection = CommandType.FGAngioConnected;
 
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
