@@ -158,13 +158,16 @@ namespace RaywattApp.ViewModels
 
             foreach(Configuration config in testMode)
             {
-                if(String.IsNullOrEmpty(config.Key))
+                if(String.IsNullOrEmpty(config.Key) || String.IsNullOrEmpty(config.Buffer))
                     continue;
 
-                DeviceStatus.TestMode.Add(config.Key, "Y".Equals(config.Value) ? true : false);
+                if (config.Buffer.Contains(Environment.UserName))
+                {
+                    DeviceStatus.TestMode.Add(config.Key, "Y".Equals(config.Value) ? true : false);
 
-                if ("RJ".Equals(config.Key))
-                    RaySetProperty(Property.TestMode, "Y".Equals(config.Value) ? 1.0f : 0.0f);
+                    if ("RJ".Equals(config.Key))
+                        RaySetProperty(Property.TestMode, "Y".Equals(config.Value) ? 1.0f : 0.0f);
+                }
             }
 
             DeviceStatus.PowerOffMsg = _l10n["Shutting down"];
