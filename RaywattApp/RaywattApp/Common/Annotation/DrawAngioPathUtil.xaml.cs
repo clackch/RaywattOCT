@@ -418,8 +418,8 @@ namespace RaywattApp.Common.Annotation
             PointF clickPosition = new PointF((float)e.GetPosition(canvas).X, (float)e.GetPosition(canvas).Y);
             Rectangle rectangle = new Rectangle();
             rectangle.Style = (Style)this.Resources["StyleRectangle"];
-            Canvas.SetLeft(rectangle, clickPosition.X - (Constants.AnnotationRectWidth / Zoom.ScaleX) / 2);
-            Canvas.SetTop(rectangle, clickPosition.Y - (Constants.AnnotationRectHeight / Zoom.ScaleY) / 2);
+            Canvas.SetLeft(rectangle, clickPosition.X - Constants.AnnotationRectWidth / 2);
+            Canvas.SetTop(rectangle, clickPosition.Y - Constants.AnnotationRectHeight / 2);
             canvas.Children.Add(rectangle);
 
             int imageLength = AngioImages.Count;

@@ -45,9 +45,6 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private PatientCase _patientCase;
 
-        [ObservableProperty]
-        private Zoom _zoom;
-
         private ICommand _cancleCommand;
         public ICommand CancelCommand
         {
@@ -120,8 +117,6 @@ namespace RaywattApp.ViewModels
 
             CrossSectionAngioImages = new List<Mat>();
             crossSectionAngioImageSources = new List<ImageSource>();
-
-            Zoom = new Zoom();
             ReadAngioFrames();
         }
 

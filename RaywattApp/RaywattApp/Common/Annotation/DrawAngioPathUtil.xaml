@@ -12,29 +12,29 @@
 
     <UserControl.Resources>
         <Style TargetType="Rectangle" x:Key="StyleRectangle">
-            <Setter Property="Width" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationRectWidth}}"/>
-            <Setter Property="Height" Value="{Binding Zoom.ScaleY, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationRectHeight}}"/>
-            <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThickness}}"/>
+            <Setter Property="Width" Value="{x:Static const:Constants.AnnotationRectWidth}"/>
+            <Setter Property="Height" Value="{x:Static const:Constants.AnnotationRectWidth}"/>
+            <Setter Property="StrokeThickness" Value="{x:Static const:Constants.AnnotationRectWidth}"/>
             <Setter Property="Stroke" Value="Black"/>
             <Setter Property="Fill" Value="White"/>
         </Style>
         <Style TargetType="Ellipse" x:Key="StylePathEllipse">
-            <Setter Property="Width" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.ellipsePathWidth}}"/>
-            <Setter Property="Height" Value="{Binding Zoom.ScaleY, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.ellipsePathHeight}}"/>
+            <Setter Property="Width" Value="{x:Static const:Constants.ellipsePathWidth}"/>
+            <Setter Property="Height" Value="{x:Static const:Constants.ellipsePathHeight}"/>
             <Setter Property="Fill" Value="Yellow"/>
         </Style>
         <Style TargetType="Ellipse" x:Key="StyleTrackEllipse">
-            <Setter Property="Width" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.ellipseTrackWidth}}"/>
-            <Setter Property="Height" Value="{Binding Zoom.ScaleY, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.ellipseTrackHeight}}"/>
+            <Setter Property="Width" Value="{x:Static const:Constants.ellipsePathWidth}"/>
+            <Setter Property="Height" Value="{x:Static const:Constants.ellipsePathHeight}"/>
             <Setter Property="Fill" Value="White"/>
         </Style>
 
         <Style TargetType="Line" x:Key="StyleLine">
             <Setter Property="Stroke" Value="White"/>
-            <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, ElementName=UserControl, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThickness}}"/>
+            <Setter Property="StrokeThickness" Value="{x:Static const:Constants.AnnotationStrokeThickness}"/>
         </Style>
         <Style TargetType="Path" x:Key="StylePath">
-            <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThickness}}"/>
+            <Setter Property="StrokeThickness" Value="{x:Static const:Constants.AnnotationStrokeThickness}"/>
             <Setter Property="Stroke" Value="White"/>
         </Style>
     </UserControl.Resources>

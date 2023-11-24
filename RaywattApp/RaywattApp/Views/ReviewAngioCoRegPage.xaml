@@ -59,7 +59,7 @@
                             </Image>
                         </Grid>
                         <annotation:DrawAngioPathUtil Grid.Column="0" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}"
-                                                      AngioImages="{Binding CrossSectionAngioImages}" FrameNumber="{Binding FrameNumber}" Zoom="{Binding Zoom}"
+                                                      AngioImages="{Binding CrossSectionAngioImages}" FrameNumber="{Binding FrameNumber}"
                                                       MousePosition ="{Binding CrossSectionMousePosition, Mode=TwoWay}" Cursor="Cross"/>
                         <Border Grid.Column="2" CornerRadius="8" Background="{DynamicResource GrayscaleGray6Brush}">
                             <Grid Margin="30,36,30,30" >
