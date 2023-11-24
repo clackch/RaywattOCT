@@ -174,10 +174,8 @@ namespace RaywattApp.ViewModels
 
         void ReadAngioFrames()
         {
-            String binPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-
             int x1 = 240, y1 = 70, x2 = 780, y2 = 970;
-            using (BinaryReader reader = new BinaryReader(System.IO.File.Open(binPath + "\\angioSample.angioframes", FileMode.Open)))
+            using (BinaryReader reader = new BinaryReader(System.IO.File.Open("C:\\Raywatt\\system\\3rdparty\\angioSample.angioframes", FileMode.Open)))
             {
                 while (reader.BaseStream.Position != reader.BaseStream.Length)
                 {
