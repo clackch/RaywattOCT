@@ -38,11 +38,6 @@ namespace RaywattApp.Common.Annotation
     public partial class DrawAngioPathUtil : UserControl
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(DrawAngioPathUtil));
-        public Zoom Zoom
-        {
-            get { return (Zoom)GetValue(ZoomProperty); }
-            set { this.SetValue(ZoomProperty, value); }
-        }
         public int FrameNumber
         {
             get { return (int)GetValue(FrameNumberProperty); }
