@@ -277,15 +277,15 @@ namespace RaywattApp.Common.Angio
 
                 Cv2.Flip(image, image, 0);
 
+                int t = 0, l = 0, b = angioFrameHeight/2, r = angioFrameWidth/2;
+                Rect roi = new Rect(l, t, r - l, b - t);
+                image = image.SubMat(roi);
+
                 if (threadOnSaveAngioFrames)
                 {
                     Marshal.Copy(image.Data, angioSaveBuffer, angioSaveFrameTotalNum * angioImageSize, angioImageSize);
                     angioSaveFrameTotalNum++;
                 }
-
-                int t = 0, l = 0, b = angioFrameHeight/2, r = angioFrameWidth/2;
-                Rect roi = new Rect(l, t, r - l, b - t);
-                image = image.SubMat(roi);
 
                 imgAngio = image;
             }
