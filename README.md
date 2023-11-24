@@ -178,3 +178,8 @@ Download & Copy/Paste
 ## Local 환경 설정 참고
 
 - App 종료 시, Power Off/Switch User가 호출되지 않도록 설정 방법(https://github.com/Raywatt/RaywattOCT/pull/173#issue-1892013269)
+
+  ※ 아래와 같이 buffer 컬럼에 본인 windows의 계정 추가 필요
+  
+  ![image](https://github.com/Raywatt/RaywattOCT/assets/110812182/03acbcd1-8f77-40fa-a29d-cfaac5860787)
+
