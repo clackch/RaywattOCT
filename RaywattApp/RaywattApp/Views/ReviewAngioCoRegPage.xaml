@@ -78,23 +78,35 @@
                                         </Label.Content>
                                     </Label>
                                 </Grid>
-                                <Border Grid.Row="2" BorderBrush="{DynamicResource GrayscaleGray1Brush}" BorderThickness="3" CornerRadius="10" Panel.ZIndex="1">
-                                </Border>
-                                <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled" Panel.ZIndex="0">
+                                <Border Grid.Row="2" BorderBrush="{DynamicResource GrayscaleGray1Brush}" BorderThickness="3" CornerRadius="10">
                                     <Grid Width="{x:Static const:Constants.CoRegZoomAngioSize}" Height="{x:Static const:Constants.CoRegZoomAngioSize}">
+                                        <Grid.Clip>
+                                            <RectangleGeometry RadiusX="10" RadiusY="10">
+                                                <RectangleGeometry.Rect>
+                                                    <Rect X="0" Y="0" Width="{x:Static const:Constants.CoRegZoomAngioSize}" Height="{x:Static const:Constants.CoRegZoomAngioSize}"/>
+                                                </RectangleGeometry.Rect>
+                                            </RectangleGeometry>
+                                        </Grid.Clip>
                                         <Image x:Name="zoomSectionAngioImage" Source="{Binding CurrentAngioImage}">
+                                            <Image.Clip>
+                                                <RectangleGeometry RadiusX="10" RadiusY="10">
+                                                    <RectangleGeometry.Rect>
+                                                        <Rect X="0" Y="0" Width="{x:Static const:Constants.CoRegZoomAngioSize}" Height="{x:Static const:Constants.CoRegZoomAngioSize}"/>
+                                                    </RectangleGeometry.Rect>
+                                                </RectangleGeometry>
+                                            </Image.Clip>
                                             <Image.RenderTransform>
                                                 <TransformGroup>
                                                     <ScaleTransform ScaleX="{x:Static const:Constants.CoRegZoomScale}"
-                                                                        ScaleY="{x:Static const:Constants.CoRegZoomScale}"/>
+                                                                            ScaleY="{x:Static const:Constants.CoRegZoomScale}"/>
                                                     <TranslateTransform X="{Binding CrossSectionMousePosition, Converter={StaticResource CoRegistrationTranslateConverter}, ConverterParameter=X}"
-                                                                            Y="{Binding CrossSectionMousePosition, Converter={StaticResource CoRegistrationTranslateConverter}, ConverterParameter=Y}"/>
+                                                                                Y="{Binding CrossSectionMousePosition, Converter={StaticResource CoRegistrationTranslateConverter}, ConverterParameter=Y}"/>
                                                 </TransformGroup>
                                             </Image.RenderTransform>
                                         </Image>
                                         <Image Source="{svgc:SvgImage Source=/res/icon/angioZoomCenter.svg}" Width="39" Height="39"/>
                                     </Grid>
-                                </ScrollViewer>
+                                </Border>
                             </Grid>
                         </Border>
                     </Grid>
