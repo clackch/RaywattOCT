@@ -59,14 +59,15 @@ namespace RaywattApp.ViewModels.Dialog
                 parameter["title"] = _l10n["Information"];
                 parameter["message"] = _l10n["Successfully changed .chp file."];
 
-                _dialogService.OpenDialog(new ConfirmDialogControl(), parameter, Common.Bases.Constants.ApplicationWidth, Common.Bases.Constants.ApplicationHeight);
+                _dialogService.OpenDialog(new AlertDialogControl(), parameter, Common.Bases.Constants.ApplicationWidth, Common.Bases.Constants.ApplicationHeight);
             }
             else if(_angioManager.isChpFileChangeSuccess == -1)
             {
                 parameter["title"] = _l10n["Error"];
                 parameter["message"] = _l10n["Failed to change .chp file."];
+                parameter["error"] = true;
 
-                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Common.Bases.Constants.ApplicationWidth, Common.Bases.Constants.ApplicationHeight);
+                _dialogService.OpenDialog(new AlertDialogControl(), parameter, Common.Bases.Constants.ApplicationWidth, Common.Bases.Constants.ApplicationHeight);
             }
             _angioManager.isChpFileChangeSuccess = 0;
 

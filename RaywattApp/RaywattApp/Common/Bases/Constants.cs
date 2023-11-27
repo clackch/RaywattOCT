@@ -411,6 +411,8 @@ namespace RaywattApp.Common.Bases
         public const int StartTime = 15;
 
         //AngioManager
+        public const byte sof = 0x3A;
+        public const byte eof = 0xA3;
         public const int imageHeaderSize = 7;
         public const int imageTailSize = 2;
         public const int commandPacketSize = 5;
