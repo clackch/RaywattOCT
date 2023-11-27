@@ -48,7 +48,7 @@ namespace RaywattApp.Common.Annotation
         private List<Mat> motionVector;
 
         private static readonly DependencyProperty AngioFrameNumberProperty =
-        DependencyProperty.Register("AngioFrameNumber", typeof(int), typeof(DrawAngioPathUtil), new PropertyMetadata(-1, OnFrameNumberPropertyChanged));
+        DependencyProperty.Register("AngioFrameNumber", typeof(int), typeof(DrawAngioPathUtil), new PropertyMetadata(-1, OnAngioFrameNumberPropertyChanged));
 
         public static readonly DependencyProperty AngioImagesProperty =
             DependencyProperty.Register("AngioImages", typeof(List<Mat>), typeof(DrawAngioPathUtil), new PropertyMetadata(null, OnAngioImagesPropertyChanged));
@@ -374,7 +374,7 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
-        private static void OnFrameNumberPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
+        private static void OnAngioFrameNumberPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
             var control = (DrawAngioPathUtil)dependencyObject;
             int AngioFrameNumber = (int)dependencyPropertyChangedEventArgs.NewValue;
