@@ -59,7 +59,7 @@
                             </Image>
                         </Grid>
                         <annotation:DrawAngioPathUtil Grid.Column="0" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}"
-                                                      AngioImages="{Binding CrossSectionAngioImages}" FrameNumber="{Binding FrameNumber}"
+                                                      AngioImages="{Binding CrossSectionAngioImages}" AngioFrameNumber="{Binding AngioFrameNumber}"
                                                       MousePosition ="{Binding CrossSectionMousePosition, Mode=TwoWay}" Cursor="Cross"/>
                         <Border Grid.Column="2" CornerRadius="8" Background="{DynamicResource GrayscaleGray6Brush}">
                             <Grid Margin="30,36,30,30" >
@@ -78,23 +78,23 @@
                                         </Label.Content>
                                     </Label>
                                 </Grid>
-                                <Border Grid.Row="2" BorderBrush="{DynamicResource GrayscaleGray1Brush}" BorderThickness="3" CornerRadius="10">
-                                    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled">
-                                        <Grid Width="{x:Static const:Constants.CoRegZoomAngioSize}" Height="{x:Static const:Constants.CoRegZoomAngioSize}">
-                                            <Image x:Name="zoomSectionAngioImage" Source="{Binding CurrentAngioImage}">
-                                                <Image.RenderTransform>
-                                                    <TransformGroup>
-                                                        <ScaleTransform ScaleX="{x:Static const:Constants.CoRegZoomScale}"
-                                                                        ScaleY="{x:Static const:Constants.CoRegZoomScale}"/>
-                                                        <TranslateTransform X="{Binding CrossSectionMousePosition, Converter={StaticResource CoRegistrationTranslateConverter}, ConverterParameter=X}"
-                                                                            Y="{Binding CrossSectionMousePosition, Converter={StaticResource CoRegistrationTranslateConverter}, ConverterParameter=Y}"/>
-                                                    </TransformGroup>
-                                                </Image.RenderTransform>
-                                            </Image>
-                                            <Image Source="{svgc:SvgImage Source=/res/icon/angioZoomCenter.svg}" Width="39" Height="39"/>
-                                        </Grid>
-                                    </ScrollViewer>
+                                <Border Grid.Row="2" BorderBrush="{DynamicResource GrayscaleGray1Brush}" BorderThickness="3" CornerRadius="10" Panel.ZIndex="1">
                                 </Border>
+                                <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled" Panel.ZIndex="0">
+                                    <Grid Width="{x:Static const:Constants.CoRegZoomAngioSize}" Height="{x:Static const:Constants.CoRegZoomAngioSize}">
+                                        <Image x:Name="zoomSectionAngioImage" Source="{Binding CurrentAngioImage}">
+                                            <Image.RenderTransform>
+                                                <TransformGroup>
+                                                    <ScaleTransform ScaleX="{x:Static const:Constants.CoRegZoomScale}"
+                                                                        ScaleY="{x:Static const:Constants.CoRegZoomScale}"/>
+                                                    <TranslateTransform X="{Binding CrossSectionMousePosition, Converter={StaticResource CoRegistrationTranslateConverter}, ConverterParameter=X}"
+                                                                            Y="{Binding CrossSectionMousePosition, Converter={StaticResource CoRegistrationTranslateConverter}, ConverterParameter=Y}"/>
+                                                </TransformGroup>
+                                            </Image.RenderTransform>
+                                        </Image>
+                                        <Image Source="{svgc:SvgImage Source=/res/icon/angioZoomCenter.svg}" Width="39" Height="39"/>
+                                    </Grid>
+                                </ScrollViewer>
                             </Grid>
                         </Border>
                     </Grid>
@@ -103,7 +103,7 @@
                             <ColumnDefinition Width="580"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Slider Grid.Column="0" Width="570" Minimum="0" Maximum="{Binding AngioFrameLength}" Value="{Binding FrameNumber, Mode=TwoWay}" Cursor="Hand" Height="30" Margin="9,16,1,17"/>
+                        <Slider Grid.Column="0" Width="570" Minimum="0" Maximum="{Binding AngioFrameLength}" Value="{Binding AngioFrameNumber, Mode=TwoWay}" Cursor="Hand" Height="30" Margin="9,16,1,17"/>
                     </Grid>
                 </Grid>
             </Border>

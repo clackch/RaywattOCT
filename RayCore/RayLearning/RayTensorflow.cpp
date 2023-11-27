@@ -97,7 +97,7 @@ void CRayUnetr::Initialize(bool useGPU) {
 	const char* tags[] = { "serve" };
 	m_pRunOptions = nullptr;
 	m_pSession = m_TFRayLoadSessionFromSavedModel(m_pSessionOptions, m_pRunOptions,
-		"C:\\Raywatt\\system\\3rdparty\\model", tags, 1, m_pGraph, nullptr, m_pStatus);
+		"C:\\Raywatt\\system\\3rdparty\\model\\tensorflow\\", tags, 1, m_pGraph, nullptr, m_pStatus);
 }
 
 cv::Mat CRayUnetr::FindLumen(cv::Mat image) {

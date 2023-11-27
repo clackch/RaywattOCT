@@ -63,9 +63,9 @@ namespace RaywattApp.ViewModels
         {
             get
             {
-                if (crossSectionAngioImageSources != null && _frameNumber >= 0 && _frameNumber < crossSectionAngioImageSources.Count)
+                if (crossSectionAngioImageSources != null && _angioFrameNumber >= 0 && _angioFrameNumber < crossSectionAngioImageSources.Count)
                 {
-                    return crossSectionAngioImageSources[_frameNumber];
+                    return crossSectionAngioImageSources[_angioFrameNumber];
                 }
                 return null;
             }
@@ -83,14 +83,14 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private int _frameNumber;
-        public int FrameNumber
+        private int _angioFrameNumber;
+        public int AngioFrameNumber
         {
-            get => _frameNumber;
+            get => _angioFrameNumber;
             set
             {
-                _frameNumber = value;
-                OnPropertyChanged(nameof(FrameNumber));
+                _angioFrameNumber = value;
+                OnPropertyChanged(nameof(AngioFrameNumber));
                 OnPropertyChanged(nameof(CurrentAngioImage));
             }
         }
@@ -175,24 +175,30 @@ namespace RaywattApp.ViewModels
         void ReadAngioFrames()
         {
             int x1 = 240, y1 = 70, x2 = 780, y2 = 970;
-            using (BinaryReader reader = new BinaryReader(System.IO.File.Open("C:\\Raywatt\\system\\3rdparty\\angioSample.angioframes", FileMode.Open)))
+            string[] filePaths = Directory.GetFiles(@"C:\Raywatt\system\3rdparty\angioSamples", "*.angioframes");
+
+            foreach (string filePath in filePaths)
             {
-                while (reader.BaseStream.Position != reader.BaseStream.Length)
+                using (BinaryReader reader = new BinaryReader(System.IO.File.Open(filePath, FileMode.Open)))
                 {
-                    int width = x2 - x1, height = y2 - y1;
-                    int channels = 1;
+                    while (reader.BaseStream.Position != reader.BaseStream.Length)
+                    {
+                        int width = x2 - x1, height = y2 - y1;
+                        int channels = 1;
 
-                    byte[] data = reader.ReadBytes(1024 * 1024 * channels);
-                    Mat frame = new Mat(1024, 1024, MatType.CV_8UC1, data);
+                        byte[] data = reader.ReadBytes(1024 * 1024 * channels);
+                        Mat frame = new Mat(1024, 1024, MatType.CV_8UC1, data);
 
-                    OpenCvSharp.Rect roi = new OpenCvSharp.Rect(x1, y1, width, height);
-                    frame = new Mat(frame, roi);
-                    Cv2.Resize(frame, frame, new OpenCvSharp.Size(Constants.AngioSize, Constants.AngioSize));
-                    CrossSectionAngioImages.Add(frame);
-                    crossSectionAngioImageSources.Add(ConvertMatsToImageSource(frame));
+                        OpenCvSharp.Rect roi = new OpenCvSharp.Rect(x1, y1, width, height);
+                        frame = new Mat(frame, roi);
+                        Cv2.Resize(frame, frame, new OpenCvSharp.Size(Constants.AngioSize, Constants.AngioSize));
+                        CrossSectionAngioImages.Add(frame);
+                        crossSectionAngioImageSources.Add(ConvertMatsToImageSource(frame));
+                    }
                 }
+                AngioFrameLength = crossSectionAngioImageSources.Count - 1;
+                break;
             }
-            AngioFrameLength = crossSectionAngioImageSources.Count-1;
         }
 
         private ImageSource ConvertMatsToImageSource(Mat mat)

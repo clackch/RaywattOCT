@@ -1,34 +1,20 @@
-﻿using RaywattApp.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Point = System.Windows.Point;
 using PointF = System.Drawing.PointF;
 using RaywattApp.Common.Bases;
-using RaywattApp.Common.Util;
 using OpenCvSharp;
-using System.Diagnostics;
-using OpenCvSharp.Extensions;
-using System.Drawing.Imaging;
-using System.IO;
 using System.Runtime.InteropServices;
 using RaywattApp.Common.Annotation.LiveWire;
-using System.Runtime.CompilerServices;
-using OpenCvSharp.Flann;
 using LiveWire;
 using log4net;
-using RaywattApp.ViewModels;
 
 namespace RaywattApp.Common.Annotation
 {
@@ -38,10 +24,10 @@ namespace RaywattApp.Common.Annotation
     public partial class DrawAngioPathUtil : UserControl
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(DrawAngioPathUtil));
-        public int FrameNumber
+        public int AngioFrameNumber
         {
-            get { return (int)GetValue(FrameNumberProperty); }
-            set { this.SetValue(FrameNumberProperty, value); }
+            get { return (int)GetValue(AngioFrameNumberProperty); }
+            set { this.SetValue(AngioFrameNumberProperty, value); }
         }
         public List<Mat> AngioImages
         {
@@ -61,11 +47,8 @@ namespace RaywattApp.Common.Annotation
         private List<DijkstraHeap>  dijkstraHeap;
         private List<Mat> motionVector;
 
-        private static readonly DependencyProperty FrameNumberProperty =
-        DependencyProperty.Register("FrameNumber", typeof(int), typeof(DrawAngioPathUtil), new PropertyMetadata(-1, OnFrameNumberPropertyChanged));
-
-        public static readonly DependencyProperty ZoomProperty =
-            DependencyProperty.Register("Zoom", typeof(Zoom), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
+        private static readonly DependencyProperty AngioFrameNumberProperty =
+        DependencyProperty.Register("AngioFrameNumber", typeof(int), typeof(DrawAngioPathUtil), new PropertyMetadata(-1, OnFrameNumberPropertyChanged));
 
         public static readonly DependencyProperty AngioImagesProperty =
             DependencyProperty.Register("AngioImages", typeof(List<Mat>), typeof(DrawAngioPathUtil), new PropertyMetadata(null, OnAngioImagesPropertyChanged));
@@ -89,8 +72,6 @@ namespace RaywattApp.Common.Annotation
 
             foreach (PointF curvexy in curvePointFs)
             {
-                Ellipse path = new Ellipse();
-                path.Style = (Style)this.Resources["StylePathEllipse"];
                 dijkstraHeap[frameIndex].line.Add(curvexy);
             }
         }
@@ -102,8 +83,6 @@ namespace RaywattApp.Common.Annotation
 
             foreach (PointF curvexy in curvePointFs)
             {
-                Ellipse path = new Ellipse();
-                path.Style = (Style)this.Resources["StylePathEllipse"];
                 dijkstraHeap[frameIndex].line.Add(curvexy);
             }
         }
@@ -200,13 +179,7 @@ namespace RaywattApp.Common.Annotation
 
         private void InitializePath()
         {
-            for (int i = this.canvas.Children.Count - 1; i >= 0; i--)
-            {
-                if (this.canvas.Children[i] is Ellipse || this.canvas.Children[i] is Rectangle)
-                {
-                    this.canvas.Children.RemoveAt(i);
-                }
-            }
+            this.canvas.Children.Clear();
         }
 
         public void DrawWire(DijkstraHeap dh)
@@ -357,7 +330,7 @@ namespace RaywattApp.Common.Annotation
             PointF prevPoint = new PointF(x, y);
             int halfSize = 5; // halfSize*2 x halfSize*2 크기
 
-            for (int i = FrameNumber + direction; i < motionVector.Count && i > 0; i += direction)
+            for (int i = AngioFrameNumber + direction; i < motionVector.Count && i > 0; i += direction)
             {
                 Vec2f sumVector = new Vec2f(0, 0);
                 int count = 0;
@@ -404,8 +377,8 @@ namespace RaywattApp.Common.Annotation
         private static void OnFrameNumberPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
             var control = (DrawAngioPathUtil)dependencyObject;
-            int frameNumber = (int)dependencyPropertyChangedEventArgs.NewValue;
-            control.WireChange(frameNumber);
+            int AngioFrameNumber = (int)dependencyPropertyChangedEventArgs.NewValue;
+            control.WireChange(AngioFrameNumber);
         }
 
         async private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -418,12 +391,12 @@ namespace RaywattApp.Common.Annotation
             canvas.Children.Add(rectangle);
 
             int imageLength = AngioImages.Count;
-            int currFrameNum = FrameNumber;
+            int currFrameNum = AngioFrameNumber;
 
             // 첫번째 점
-            if (dijkstraHeap[FrameNumber].trackPoint.Count == 0)
+            if (dijkstraHeap[AngioFrameNumber].trackPoint.Count == 0)
             {
-                dijkstraHeap[FrameNumber].trackPoint.Add(clickPosition);
+                dijkstraHeap[AngioFrameNumber].trackPoint.Add(clickPosition);
                 PointTracking(clickPosition.X, clickPosition.Y, 1);
                 PointTracking(clickPosition.X, clickPosition.Y, -1);
                 return;
@@ -431,11 +404,11 @@ namespace RaywattApp.Common.Annotation
             // 두번째 점 이후
             else
             {
-                dijkstraHeap[FrameNumber].trackPoint.Add(clickPosition);
+                dijkstraHeap[AngioFrameNumber].trackPoint.Add(clickPosition);
                 PointTracking(clickPosition.X, clickPosition.Y, 1);
                 PointTracking(clickPosition.X, clickPosition.Y, -1);
                 CalculateAllPath(currFrameNum, imageLength, 0/*현재 프레임만 찾기*/);
-                DrawWire(dijkstraHeap[FrameNumber]);
+                DrawWire(dijkstraHeap[AngioFrameNumber]);
                 await Task.Run(() =>
                 {
                     CalculateAllPath(currFrameNum, imageLength, 10/*현재 프레임 기준으로 앞뒤 몇장까지 경로 찾을지 결정*/);

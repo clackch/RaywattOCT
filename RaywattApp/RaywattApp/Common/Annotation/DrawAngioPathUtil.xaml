@@ -13,8 +13,8 @@
     <UserControl.Resources>
         <Style TargetType="Rectangle" x:Key="StyleRectangle">
             <Setter Property="Width" Value="{x:Static const:Constants.AnnotationRectWidth}"/>
-            <Setter Property="Height" Value="{x:Static const:Constants.AnnotationRectWidth}"/>
-            <Setter Property="StrokeThickness" Value="{x:Static const:Constants.AnnotationRectWidth}"/>
+            <Setter Property="Height" Value="{x:Static const:Constants.AnnotationRectHeight}"/>
+            <Setter Property="StrokeThickness" Value="{x:Static const:Constants.AnnotationStrokeThickness}"/>
             <Setter Property="Stroke" Value="Black"/>
             <Setter Property="Fill" Value="White"/>
         </Style>
