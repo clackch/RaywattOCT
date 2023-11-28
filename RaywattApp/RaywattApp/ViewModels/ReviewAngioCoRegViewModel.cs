@@ -11,6 +11,17 @@ using System.Windows.Input;
 using System.Windows.Navigation;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
+using System.Diagnostics;
+using OpenCvSharp;
+using System.IO;
+using RaywattApp.Common.Converters;
+using RaywattApp.Common.Annotation.Models;
+using System.Windows.Media;
+using System.Drawing.Imaging;
+using System.Windows.Media.Imaging;
+using System.Windows.Controls;
+using System.Windows;
+using Point = System.Windows.Point;
 
 namespace RaywattApp.ViewModels
 {
@@ -46,6 +57,55 @@ namespace RaywattApp.ViewModels
             get { return this._okCommand ?? (this._okCommand = new RelayCommand(Ok)); }
         }
 
+        public List<Mat> CrossSectionAngioImages { get; private set; }
+        private List<ImageSource> crossSectionAngioImageSources { get; set; }
+        public ImageSource CurrentAngioImage
+        {
+            get
+            {
+                if (crossSectionAngioImageSources != null && _angioFrameNumber >= 0 && _angioFrameNumber < crossSectionAngioImageSources.Count)
+                {
+                    return crossSectionAngioImageSources[_angioFrameNumber];
+                }
+                return null;
+            }
+        }
+
+        private Point _crossSectionMousePosition;
+        public Point CrossSectionMousePosition
+        {
+            get => _crossSectionMousePosition;
+            set
+            {
+                _crossSectionMousePosition = value;
+                OnPropertyChanged(nameof(CrossSectionMousePosition));
+                _log.Debug("CrossSetionMousePosition" + CrossSectionMousePosition.X.ToString());
+            }
+        }
+
+        private int _angioFrameNumber;
+        public int AngioFrameNumber
+        {
+            get => _angioFrameNumber;
+            set
+            {
+                _angioFrameNumber = value;
+                OnPropertyChanged(nameof(AngioFrameNumber));
+                OnPropertyChanged(nameof(CurrentAngioImage));
+            }
+        }
+
+        private int _angioFrameLength;
+        public int AngioFrameLength
+        {
+            get => _angioFrameLength;
+            set
+            {
+                _angioFrameLength = value;
+                OnPropertyChanged(nameof(AngioFrameLength));
+            }
+        }
+
         public ReviewAngioCoRegViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
             _log.Debug("ReviewAngioCoRegViewModel");
@@ -54,6 +114,10 @@ namespace RaywattApp.ViewModels
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;
+
+            CrossSectionAngioImages = new List<Mat>();
+            crossSectionAngioImageSources = new List<ImageSource>();
+            ReadAngioFrames();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -106,6 +170,52 @@ namespace RaywattApp.ViewModels
             parameter["prevStatus"] = PrevStatus;
             parameter["reviewStatus"] = ReviewStatus;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(ReviewStatus.CurrentPage) { Parameter = parameter });
+        }
+
+        void ReadAngioFrames()
+        {
+            int x1 = 240, y1 = 70, x2 = 780, y2 = 970;
+            string[] filePaths = Directory.GetFiles(@"C:\Raywatt\system\3rdparty\angioSamples", "*.angioframes");
+
+            foreach (string filePath in filePaths)
+            {
+                using (BinaryReader reader = new BinaryReader(System.IO.File.Open(filePath, FileMode.Open)))
+                {
+                    while (reader.BaseStream.Position != reader.BaseStream.Length)
+                    {
+                        int width = x2 - x1, height = y2 - y1;
+                        int channels = 1;
+
+                        byte[] data = reader.ReadBytes(1024 * 1024 * channels);
+                        Mat frame = new Mat(1024, 1024, MatType.CV_8UC1, data);
+
+                        OpenCvSharp.Rect roi = new OpenCvSharp.Rect(x1, y1, width, height);
+                        frame = new Mat(frame, roi);
+                        Cv2.Resize(frame, frame, new OpenCvSharp.Size(Constants.AngioSize, Constants.AngioSize));
+                        CrossSectionAngioImages.Add(frame);
+                        crossSectionAngioImageSources.Add(ConvertMatsToImageSource(frame));
+                    }
+                }
+                AngioFrameLength = crossSectionAngioImageSources.Count - 1;
+                break;
+            }
+        }
+
+        private ImageSource ConvertMatsToImageSource(Mat mat)
+        {
+            using (var stream = new MemoryStream())
+            {
+
+                mat.WriteToStream(stream, ".bmp");
+
+                var bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.StreamSource = stream;
+                bitmapImage.EndInit();
+                bitmapImage.Freeze();
+                return bitmapImage;
+            }
         }
     }
 }

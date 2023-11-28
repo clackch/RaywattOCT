@@ -22,10 +22,12 @@ namespace RaywattApp.Common.Angio
         FGStopped,
         FGAskPort,
         FGAskBoard,
+        FGAskDeviceInfo,
         FGAngioConnected, // Port
         FGAngioDisconnected, // Port
         FGBoardExist,
         FGBoardNotExist,
+        FGDeviceInfo,
         FGNothing,
     };
 
