@@ -116,7 +116,7 @@ namespace RaywattApp.ViewModels
             PatientCase.Comment = "";
             PatientCase.Vessel = Constants.NotSelectedCode;
             PatientCase.NumOfFrames = numOfFrames;
-            PatientCase.AngioCoRegistration = DeviceStatus.IsAngioConnected;
+            PatientCase.AngioYn = DeviceStatus.IsAngioConnected;
             PatientCase.IndicatorDegree = 90;
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
