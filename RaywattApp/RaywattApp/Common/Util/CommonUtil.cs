@@ -994,7 +994,7 @@ namespace RaywattApp.Common.Util
             return textBlock.DesiredSize;
         }
 
-        public static void Exit(DeviceStatus? deviceStatus = null)
+        public static void Exit(DeviceStatus? deviceStatus = null, bool isShutdown = false)
         {
             // Server Off
             Process[] processes = Process.GetProcessesByName("FGServer");
@@ -1012,11 +1012,11 @@ namespace RaywattApp.Common.Util
                 }
             }
 
-            Thread threadReadyPullback = new Thread(() => ThreadExit());
+            Thread threadReadyPullback = new Thread(() => ThreadExit(deviceStatus, isShutdown));
             threadReadyPullback.Start();
         }
 
-        private static void ThreadExit()
+        private static void ThreadExit(DeviceStatus? deviceStatus, bool isShutdown)
         {
             RayDisconnectDevices();
             RayStopSystem();
@@ -1026,6 +1026,18 @@ namespace RaywattApp.Common.Util
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
                 System.Windows.Application.Current.MainWindow.Close();
+
+                if(deviceStatus == null)
+                {
+                    Win32Helper.Shutdown();
+                }
+                else if(!CommonUtil.IsTestMode(deviceStatus.TestMode, "Power"))
+                {
+                    if(isShutdown)
+                        Win32Helper.Shutdown();
+                    else
+                        Win32Helper.LogOff();
+                }
             });                        
         }
 
