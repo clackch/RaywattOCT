@@ -69,9 +69,6 @@ namespace RaywattApp.ViewModels
                     {
                         DeviceStatus.PowerOffMsg = _l10n["Switching user"];
                         CommonUtil.Exit(DeviceStatus);
-                        if (!CommonUtil.IsTestMode(DeviceStatus.TestMode, "Power"))
-                            Win32Helper.LogOff();
-                        return;
                     }
                 }
             }
@@ -123,9 +120,7 @@ namespace RaywattApp.ViewModels
 
                 if (resultDialog != null && resultDialog.DialogAnswer == DialogResults.Answer.Undefined)
                 {
-                    CommonUtil.Exit(DeviceStatus);
-                    if (!CommonUtil.IsTestMode(DeviceStatus.TestMode, "Power"))
-                        Win32Helper.Shutdown();
+                    CommonUtil.Exit(DeviceStatus, true);
                 }
             }
 

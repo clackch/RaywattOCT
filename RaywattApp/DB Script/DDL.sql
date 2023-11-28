@@ -91,6 +91,7 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case
     image character varying(200) COLLATE pg_catalog."default",
     pullback_type character varying(4) COLLATE pg_catalog."default",	
     pullback_length character varying(4) COLLATE pg_catalog."default",
+	angio_yn boolean,
 	angio_co_registration boolean,
 	indicator_degree real,
 	preset_name character varying(40) COLLATE pg_catalog."default",

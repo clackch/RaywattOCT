@@ -93,6 +93,9 @@ namespace RaywattApp.Models
         private string? _pullbackLength;
 
         [ObservableProperty]
+        private bool _angioYn;
+
+        [ObservableProperty]
         private bool _angioCoRegistration;
 
         [ObservableProperty]
