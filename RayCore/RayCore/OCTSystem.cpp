@@ -134,11 +134,6 @@ RayError COCTSystem::Stop() {
 	CUtility::StopThread(m_pThreadService);
 	CUtility::StopThread(m_pThreadSaveRaw);
 
-	if (m_cathState != CatheterState::Unloaded) {
-		CUtility::StartThread(threadUnloadCatheter, m_pThreadRotaryJunction, this);
-	}
-	CUtility::StopThread(m_pThreadRotaryJunction);
-
 	PLOGI.printf("Close All Sessions");
 	closeAllSessions();
 	if (m_openedSession != nullptr) {
@@ -186,8 +181,6 @@ RayError COCTSystem::Stop() {
 
 	PLOGI.printf("Close COM Ports");
 	if (m_pPullbackMotor->IsOpen()) {
-		m_pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
-		m_pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 		m_pPullbackMotor->Close();
 	}
 	delete m_pPullbackMotor;
@@ -1296,6 +1289,8 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	CMotorController* pMotor = CMotorController::GetInstance();
 	CArduinoController* pPullbackMotor = pSystem->m_pPullbackMotor;
 
+	PLOGI.printf("Unload catheter");
+
 	pSystem->postPriorMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterUnloading);
 
 	if (pPullbackMotor->IsOpen()) {
@@ -1313,6 +1308,8 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
 	}
+
+	PLOGI.printf("Unload catheter done.");
 
 	return NOERROR;
 }
@@ -1489,6 +1486,12 @@ int COCTSystem::disconnectRotaryJunction() {
 	if (pMotor->IsConnected()) {
 		result &= pMotor->SwitchOff();
 	}
+
+	PLOGI.printf("Catheter State : %d", m_cathState);
+	if (m_cathState != CatheterState::Unloaded) {
+		CUtility::StartThread(threadUnloadCatheter, m_pThreadRotaryJunction, this);
+	}
+	CUtility::StopThread(m_pThreadRotaryJunction);
 
 	m_pPullbackMotor->Close();
 	m_pLaserModule->Close();
