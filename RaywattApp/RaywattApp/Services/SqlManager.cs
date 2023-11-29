@@ -451,6 +451,18 @@ namespace RaywattApp.Services
         }
 
         /**
+         * CoRegistration
+         */
+        public int UpsertCoRegistration(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpsertCoRegistration");
+
+            string commandText = SqlQuery.GetQuery("UpsertCoRegistration");
+
+            return _databaseService.InsertData(commandText, sqlParameters);
+        }
+
+        /**
          * Extra
          */
         private string getAdditionalCondition(Dictionary<string, Object> sqlAdditionalCondition)

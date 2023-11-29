@@ -6,15 +6,16 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Windows;
 using System.IO;
+using System.Windows.Media;
 
 namespace RaywattApp.Common.Annotation.Models
 {
-    public partial class AngioPath : ObservableObject
+    public partial class AngioFrame : ObservableObject
     {
         [ObservableProperty]
-        List<Point> guidePoints;
+        public int angioFrameNumber;
 
         [ObservableProperty]
-        Point followPoint;
+        public List<Point> _trackPoints;
     }
 }

@@ -34,6 +34,11 @@ namespace LiveWire
             double[] x = sampledPoints.Select(p => (double)p.X).ToArray();
             double[] y = sampledPoints.Select(p => (double)p.Y).ToArray();
 
+            if(x.Length <= 2 || y.Length <= 2)
+            {
+                return curvePoints;
+            }
+
             var splineX = CubicSpline.InterpolateNatural(t, x);
             var splineY = CubicSpline.InterpolateNatural(t, y);
 

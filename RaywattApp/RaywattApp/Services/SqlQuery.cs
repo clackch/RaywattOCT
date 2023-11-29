@@ -371,6 +371,15 @@ namespace RaywattApp.Services
                 DO UPDATE
                 SET bookmark=@bookmark, longitude=@longitude, cross_section=@cross_section, lumen_contour=@lumen_contour, update_date=now()
                 ";
+
+            //UpsertCoRegistration
+            _query["UpsertCoRegistration"] = @$"
+                INSERT INTO rv_schema.coregistration (id, track_point)
+                VALUES (@id, @track_point)
+                ON CONFLICT (id)
+                DO UPDATE
+                SET track_point = @track_point
+                ";
         }
     }
 }
