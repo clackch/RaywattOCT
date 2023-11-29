@@ -100,7 +100,7 @@ Windows Default Mouse Cursor Setting (※ 필요 시 진행)
 4. "환경 변수 편집" 창이 뜨면 "새로 만들기"를 클릭한 후 C:\Raywatt\system\3rdparty를 추가
 5. 적용까지 완료 하면 OK
 
-## [3drparty]
+## [3rdparty]
 Download & Copy/Paste
 1. (https://github.com/Raywatt/RaywattOCT/issues/170) 에서 Raywatt One-Drive 링크 접속
 2. 3drparty 폴더를 다운로드 한 후, 폴더 자체를 C:\Raywatt\system에 추가
