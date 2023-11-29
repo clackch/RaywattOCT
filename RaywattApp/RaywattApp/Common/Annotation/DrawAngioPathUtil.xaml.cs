@@ -385,7 +385,7 @@ namespace RaywattApp.Common.Annotation
             int halfSize = 5; // halfSize*2 x halfSize*2 크기
             int startIndex;
 
-            if (direction == -1)
+            if (direction == -1) // 방향에 따른 MotionVector의 Index 초기화
             {
                 startIndex = AngioFrameNumber - 1;
             }
@@ -427,7 +427,8 @@ namespace RaywattApp.Common.Annotation
                 if (currPoint.Y < 0) currPoint.Y = 0;
                 if (currPoint.Y > Constants.AngioSize) currPoint.Y = (float)Constants.AngioSize;
 
-                if (direction == 1)
+                // trackPoint의 방향에 따른 인덱싱 처리
+                if (direction == 1) 
                 {
                     dijkstraHeap[i+1].trackPoint.Add(currPoint);
                 }
@@ -503,7 +504,7 @@ namespace RaywattApp.Common.Annotation
                         heap.trackPoint = new List<PointF>();
                     }
                 }
-                foreach (AngioFrame angioFrame in control.AngioTrackPoints)
+                foreach (AngioFrame angioFrame in control.AngioTrackPoints) // DB에 업데이트 할 TrackPoint도 초기화
                 {
                     angioFrame.AngioFrameNumber = 0;
                     angioFrame.TrackPoints = new List<Point>();
