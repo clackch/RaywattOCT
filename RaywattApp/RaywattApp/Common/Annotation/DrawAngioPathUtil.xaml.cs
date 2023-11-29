@@ -128,7 +128,6 @@ namespace RaywattApp.Common.Annotation
         private void ImageProcessing(List<Mat> frames)
         {
             Mat prevEqualImg = null, currEqualImg;
-            Mat prevprevEqualImg = null;
 
             foreach (var frame in frames)
             {
