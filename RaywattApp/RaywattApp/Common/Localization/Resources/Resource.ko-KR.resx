@@ -124,7 +124,7 @@
     <value>[K]Verify the catheter position for flush, Prepare for pullback.</value>
   </data>
   <data name="$MSG003" xml:space="preserve">
-    <value>[K]Injcect flush media</value>
+    <value>[K]Inject flush media</value>
   </data>
   <data name="$MSG004" xml:space="preserve">
     <value>[K]Verify Image Quality</value>
