@@ -204,9 +204,9 @@ namespace RaywattApp.Common.Angio
 
                     xw.WriteElementString("AngioFrameHeight", angioFrameHeight.ToString());
                     xw.WriteElementString("AngioFrameWidth", angioFrameWidth.ToString());
-                    xw.WriteElementString($"FrameNumber", angioSaveFrameNum.ToString());
-                    xw.WriteElementString($"BitsPerPixel", ((int)angioBitsPerPixel).ToString());
-                    xw.WriteElementString($"Frequency", "60"); // 임시값
+                    xw.WriteElementString("AngioFrameNumber", angioSaveFrameNum.ToString());
+                    xw.WriteElementString("BitsPerPixel", ((int)angioBitsPerPixel).ToString());
+                    xw.WriteElementString("Frequency", "60"); // 임시값
 
                     xw.WriteEndElement();
                     xw.WriteEndDocument();
@@ -512,6 +512,8 @@ namespace RaywattApp.Common.Angio
         {
             threadOnSaveAngioFrames = false;
             threadFuncSaveAngioFrames.Join();
+
+            SendCommandPacket(CommandType.FGStopped);
         }
 
         private void SelectCathRoom()

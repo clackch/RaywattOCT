@@ -182,8 +182,6 @@ namespace RaywattApp.ViewModels
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
 
-            String test = navigationEventArgs.ToString();
-
             // catheter fail
             if (!isStartRecording && _angioManager.readyToRecv && DeviceStatus.IsAngioConnected)
             {

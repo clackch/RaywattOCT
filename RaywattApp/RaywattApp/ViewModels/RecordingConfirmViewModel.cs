@@ -92,8 +92,6 @@ namespace RaywattApp.ViewModels
             if(_angioManager.readyToRecv && DeviceStatus.IsAngioConnected)
             {
                 _angioManager.readyToRecv = false;
-                _angioManager.StopSaveAngioThread();
-                _angioManager.SendCommandPacket(CommandType.FGStopped);
             }
         }
 

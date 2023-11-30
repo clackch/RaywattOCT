@@ -185,7 +185,6 @@ namespace RaywattApp.ViewModels
             // Angio 저장 시작
             _angioManager.readyToRecv = true;
             _angioManager.StartSaveAngioThread(PatientCase.ImageFullPath.Substring(0, PatientCase.ImageFullPath.Length-3));
-            Thread.Sleep(1000); // test용 sleep
 
             leaveToPage(Constants.RecordingConfirmPage);
         }
