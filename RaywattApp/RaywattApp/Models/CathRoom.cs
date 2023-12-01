@@ -12,7 +12,10 @@ namespace RaywattApp.Models
         private string _name;
 
         [ObservableProperty]
-        private string _chpFile;
+        private string _setupChp;
+
+        [ObservableProperty]
+        private string _appChp;
 
         [ObservableProperty]
         private double _rectLeft;
