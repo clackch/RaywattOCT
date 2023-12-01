@@ -225,8 +225,6 @@ namespace RaywattApp.ViewModels
 
             if (isSave)
             {
-                DeviceStatus.IsCoRegPointSaved = false;
-                
                 SaveCoRegPoint();
             }
 
@@ -248,8 +246,6 @@ namespace RaywattApp.ViewModels
             {
                 _log.Error("Update Error");
             }
-
-            DeviceStatus.IsCoRegPointSaved = true;
         }
 
         void ReadAngioFrames()
