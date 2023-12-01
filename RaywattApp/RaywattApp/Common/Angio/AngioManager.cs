@@ -14,6 +14,7 @@ using RaywattApp.Services;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Views.Dialog;
 using System.Xml;
+using System.Data;
 
 namespace RaywattApp.Common.Angio
 {
@@ -21,7 +22,7 @@ namespace RaywattApp.Common.Angio
     {
         Image,
         Command,
-        Nothing
+        Nothing,
     };
 
     public enum CommandType
@@ -42,6 +43,14 @@ namespace RaywattApp.Common.Angio
         FGFailChangeChp,
         FGNothing,
     };
+
+    public enum ConnectionStatus
+    {
+        Default,
+        Success,
+        OpenServerFailure,
+        TcpSocketFailure,
+    }
 
     public class AngioManager
     {
@@ -122,23 +131,35 @@ namespace RaywattApp.Common.Angio
             angioFrameWidth = -1;
         }
 
-        public void ConnectToServer()
+        public ConnectionStatus ConnectToServer()
         {
-            // Angio Server On 
-            Process[] processes = Process.GetProcessesByName("FGServer");
-            if (processes.Length == 0)
+            try
             {
-                ProcessStartInfo psi = new ProcessStartInfo();
-                Process p = new Process();
-                psi.FileName = Constants.FGFolderPath + "\\FGServer.exe";
+                Process[] processes = Process.GetProcessesByName("FGServer");
+                if (processes.Length == 0)
+                {
+                    ProcessStartInfo psi = new ProcessStartInfo();
+                    Process p = new Process();
+                    psi.FileName = Constants.FGFolderPath + "\\FGServer.exe";
 
-                psi.CreateNoWindow = true;
-                p.StartInfo = psi;
-                p.Start();
+                    psi.CreateNoWindow = true;
+                    p.StartInfo = psi;
+                    p.Start();
+                }
+            }
+            catch (System.ComponentModel.Win32Exception ex)
+            {
+                return ConnectionStatus.OpenServerFailure;
             }
 
-            // Client On
-            _tcpClient = new TcpClient(serverIP, serverPort);
+            try
+            {
+                _tcpClient = new TcpClient(serverIP, serverPort);
+            }
+            catch (Exception ex)
+            {
+                return ConnectionStatus.TcpSocketFailure;
+            }
 
             int read = 0;
             while (read != 0)
@@ -149,6 +170,8 @@ namespace RaywattApp.Common.Angio
 
             ActivateClientThreads();
             AskBoardConnection();
+
+            return ConnectionStatus.Success;
         }
 
         private void AskAngioConnection()

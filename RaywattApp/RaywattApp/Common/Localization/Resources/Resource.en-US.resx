@@ -155,6 +155,18 @@ Remove the catheter from patient before proceeding.</value>
   <data name="$MSG012" xml:space="preserve">
     <value>Failed to change Cath Room.</value>
   </data>
+  <data name="$MSG013" xml:space="preserve">
+    <value>Failed to open server.</value>
+  </data>
+  <data name="$MSG014" xml:space="preserve">
+    <value>Failed to open socket.</value>
+  </data>
+  <data name="$MSG015" xml:space="preserve">
+    <value>Failed to connect devices.</value>
+  </data>
+  <data name="$MSG016" xml:space="preserve">
+    <value>Failed to start system.</value>
+  </data>
   <data name="$Terms and Conditions" xml:space="preserve">
     <value>Product Intended Use: Clearly define the intended use of the OCT device, including any limitations or specific conditions for use.
 

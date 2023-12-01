@@ -33,6 +33,8 @@ namespace RaywattApp.ViewModels
 
         private bool isError = false;
 
+        private ConnectionStatus connState = ConnectionStatus.Default;
+
         private string errorMsg;
 
         [ObservableProperty]
@@ -126,27 +128,33 @@ namespace RaywattApp.ViewModels
                 result |= (RayError)RayConnectDevices();
                 if (result == RayError.OK)
                 {
-                    _angioManager.ConnectToServer();
-                    //angio 에러 처리 필요 - return 받게 함수 수정 필요 (에러 - FrameGrabber 없을 경우, FGServer 관련 에러 / Angio 연결 안된 건 에러 아님)
-                    if (true)
+                    connState = _angioManager.ConnectToServer();
+                    switch (connState)
                     {
-                        DeviceStatus.IsDeviceConnected = true;
-                    }
-                    else
-                    {
-                        errorMsg = "$MSG011";//케이스 별 에러 메시지 정의 필요
-                        isError = true;
+                        case ConnectionStatus.Success:
+                            DeviceStatus.IsDeviceConnected = true;
+                            break;
+
+                        case ConnectionStatus.OpenServerFailure:
+                            errorMsg = "$MSG013";
+                            isError = true;
+                            break;
+
+                        case ConnectionStatus.TcpSocketFailure:
+                            errorMsg = "$MSG014";
+                            isError = true;
+                            break;
                     }
                 }
                 else
                 {
-                    errorMsg = "$MSG011";
+                    errorMsg = "$MSG015";
                     isError = true;
                 }
             }
             else
             {
-                errorMsg = "$MSG011";
+                errorMsg = "$MSG016";
                 isError = true;
             }
 
