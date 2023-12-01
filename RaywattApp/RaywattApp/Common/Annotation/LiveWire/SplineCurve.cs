@@ -34,6 +34,12 @@ namespace LiveWire
             double[] x = sampledPoints.Select(p => (double)p.X).ToArray();
             double[] y = sampledPoints.Select(p => (double)p.Y).ToArray();
 
+            //PathFinding된 점이 1개 뿐이라면, 경로를 찾지 못했으므로 빈 List 반환
+            if(x.Length <= 2 || y.Length <= 2)
+            {
+                return curvePoints;
+            }
+
             var splineX = CubicSpline.InterpolateNatural(t, x);
             var splineY = CubicSpline.InterpolateNatural(t, y);
 

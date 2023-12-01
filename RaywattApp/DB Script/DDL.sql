@@ -4,7 +4,27 @@
 
 CREATE SCHEMA IF NOT EXISTS rv_schema
     AUTHORIZATION rv_user;
+	
+-- Table: rv_schema.coregistration
 
+-- DROP TABLE IF EXISTS rv_schema.coregistration;
+
+CREATE Table IF Not EXISTS rv_schema.coregistration
+(
+	id character varying(24) COLLATE pg_catalog."default" NOT NULL,
+	track_point text COLLATE pg_catalog."default",	
+	CONSTRAINT coregistration_pkey PRIMARY KEY (id)
+        USING INDEX TABLESPACE rv_tablespace,
+    CONSTRAINT coregistration_id_fkey FOREIGN KEY (id)
+        REFERENCES rv_schema.patient_case (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+)
+
+TABLESPACE rv_tablespace;
+
+ALTER TABLE IF EXISTS rv_schema.coregistration
+    OWNER to rv_user;
 
 -- Table: rv_schema.configuration
 

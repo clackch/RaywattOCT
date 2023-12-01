@@ -52,6 +52,9 @@ namespace RaywattApp.Models
         private bool _isLumenSaved = true;
 
         [ObservableProperty]
+        private bool _isCoRegPointSaved = true;
+
+        [ObservableProperty]
         private bool _isOCTImagingDone = true;
 
         [ObservableProperty]
