@@ -71,7 +71,7 @@ namespace RaywattApp.Common.Angio
         private int angioSaveFrameNum;
         private int angioSaveFrameTotalNum;
 
-        private byte[] commandBuffer = { Constants.sof, (byte)PacketType.Command, (byte)CommandType.FGUnknown, 0x00, Constants.eof };
+        private byte[] commandBuffer = { Constants.SOF, (byte)PacketType.Command, (byte)CommandType.FGUnknown, 0x00, Constants.EOF };
 
         private Thread threadFuncLiveAngioImage;
         private bool threadOnLiveAngioImage;
@@ -275,8 +275,8 @@ namespace RaywattApp.Common.Angio
             Marshal.Copy(tmpBuffer, offset, image.Data, angioImageSize);
             offset += angioImageSize;
 
-            Array.Copy(tmpBuffer, angioImageSize + Constants.imageHeaderSize + Constants.imageTailSize, tmpBuffer, 0, tmpBuffer.Length - angioImageSize - Constants.imageHeaderSize - Constants.imageTailSize);
-            tmpBufferLen -= angioImageSize + Constants.imageHeaderSize + Constants.imageTailSize;
+            Array.Copy(tmpBuffer, angioImageSize + Constants.ImageHeaderSize + Constants.ImageTailSize, tmpBuffer, 0, tmpBuffer.Length - angioImageSize - Constants.ImageHeaderSize - Constants.ImageTailSize);
+            tmpBufferLen -= angioImageSize + Constants.ImageHeaderSize + Constants.ImageTailSize;
 
             Cv2.Flip(image, image, 0);
 
@@ -353,8 +353,8 @@ namespace RaywattApp.Common.Angio
                 {
                     isChpFileChangeSuccess = -1;
                 }
-                Array.Copy(tmpBuffer, Constants.commandPacketSize, tmpBuffer, 0, tmpBuffer.Length - Constants.commandPacketSize);
-                tmpBufferLen -= Constants.commandPacketSize;
+                Array.Copy(tmpBuffer, Constants.CommandPacketSize, tmpBuffer, 0, tmpBuffer.Length - Constants.CommandPacketSize);
+                tmpBufferLen -= Constants.CommandPacketSize;
             }
         }
 
@@ -383,23 +383,23 @@ namespace RaywattApp.Common.Angio
         private PacketType CheckPacketType(byte[] tmpBuffer)
         {
             int offset = 0;
-            if (tmpBuffer[offset++] == Constants.sof)
+            if (tmpBuffer[offset++] == Constants.SOF)
             {
                 switch (tmpBuffer[offset++])
                 {
                     case (byte)PacketType.Command:
-                        if (tmpBuffer[Constants.commandPacketSize - 1] == Constants.eof)
+                        if (tmpBuffer[Constants.CommandPacketSize - 1] == Constants.EOF)
                         {
-                            char checksum = (char)tmpBuffer[Constants.commandPacketSize - 2];
-                            if ((byte)checksum == CalcCheckSum(tmpBuffer, Constants.commandPacketSize - 2))
+                            char checksum = (char)tmpBuffer[Constants.CommandPacketSize - 2];
+                            if ((byte)checksum == CalcCheckSum(tmpBuffer, Constants.CommandPacketSize - 2))
                             {
                                 return PacketType.Command;
                             }
                         }
-                        else if (tmpBuffer[Constants.deviceInfoPacketSize - 1] == Constants.eof)
+                        else if (tmpBuffer[Constants.DeviceInfoPacketSize - 1] == Constants.EOF)
                         {
-                            char checksum = (char)tmpBuffer[Constants.deviceInfoPacketSize - 2];
-                            if ((byte)checksum == CalcCheckSum(tmpBuffer, Constants.deviceInfoPacketSize - 2))
+                            char checksum = (char)tmpBuffer[Constants.DeviceInfoPacketSize - 2];
+                            if ((byte)checksum == CalcCheckSum(tmpBuffer, Constants.DeviceInfoPacketSize - 2))
                             {
                                 return PacketType.Command;
                             }
@@ -414,9 +414,9 @@ namespace RaywattApp.Common.Angio
                         char BitsPerPixel = (char)tmpBuffer[offset++];
                         int imageSize = height * width * BitsPerPixel / 8;
 
-                        if (tmpBuffer[Constants.imageHeaderSize + imageSize + Constants.imageTailSize - 1] == Constants.eof)
+                        if (tmpBuffer[Constants.ImageHeaderSize + imageSize + Constants.ImageTailSize - 1] == Constants.EOF)
                         {
-                            if (tmpBuffer[Constants.imageHeaderSize + imageSize] == CalcCheckSum(tmpBuffer, Constants.imageHeaderSize + imageSize))
+                            if (tmpBuffer[Constants.ImageHeaderSize + imageSize] == CalcCheckSum(tmpBuffer, Constants.ImageHeaderSize + imageSize))
                             {
                                 return PacketType.Image;
                             }
@@ -471,7 +471,7 @@ namespace RaywattApp.Common.Angio
         {
             byte[] chpFileBuffer = new byte[6 + chpFilePath.Length];
             int offset = 0;
-            chpFileBuffer[offset++] = Constants.sof;
+            chpFileBuffer[offset++] = Constants.SOF;
             chpFileBuffer[offset++] = (byte)PacketType.Command;
             chpFileBuffer[offset++] = (byte)CommandType.FGChpFile;
             chpFileBuffer[offset++] = (byte)(6 + chpFilePath.Length);
@@ -482,7 +482,7 @@ namespace RaywattApp.Common.Angio
 
             byte checksum = CalcCheckSum(chpFileBuffer, offset);
             chpFileBuffer[offset++] = checksum;
-            chpFileBuffer[offset++] = Constants.eof;
+            chpFileBuffer[offset++] = Constants.EOF;
 
             Instance.GetStream().Write(chpFileBuffer, 0, chpFileBuffer.Length);
         }

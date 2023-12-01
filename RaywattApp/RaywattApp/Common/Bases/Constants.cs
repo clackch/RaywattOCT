@@ -409,13 +409,15 @@ namespace RaywattApp.Common.Bases
         //Recording
         public const int TransientTime = 3000;
         public const int StartTime = 15;
+        public const int AngioWidth = 420;
+        public const int AngioHeight = 420;
 
         //AngioManager
-        public const byte sof = 0x3A;
-        public const byte eof = 0xA3;
-        public const int imageHeaderSize = 7;
-        public const int imageTailSize = 2;
-        public const int commandPacketSize = 5;
-        public const int deviceInfoPacketSize = 10;
+        public const byte SOF = 0x3A;
+        public const byte EOF = 0xA3;
+        public const int ImageHeaderSize = 7;
+        public const int ImageTailSize = 2;
+        public const int CommandPacketSize = 5;
+        public const int DeviceInfoPacketSize = 10;
     }
 }
