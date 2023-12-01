@@ -149,6 +149,12 @@ Remove the catheter from patient before proceeding.</value>
   <data name="$MSG010" xml:space="preserve">
     <value>Mark at least two points on the vessel.</value>
   </data>
+  <data name="$MSG011" xml:space="preserve">
+    <value>Successfully changed Cath Room.</value>
+  </data>
+  <data name="$MSG012" xml:space="preserve">
+    <value>Failed to change Cath Room.</value>
+  </data>
   <data name="$Terms and Conditions" xml:space="preserve">
     <value>Product Intended Use: Clearly define the intended use of the OCT device, including any limitations or specific conditions for use.
 
