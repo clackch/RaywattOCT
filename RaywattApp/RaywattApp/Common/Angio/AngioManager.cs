@@ -120,11 +120,9 @@ namespace RaywattApp.Common.Angio
 
             angioFrameHeight = -1;
             angioFrameWidth = -1;
-
-            ConnectToServer();
         }
 
-        private void ConnectToServer()
+        public void ConnectToServer()
         {
             // Angio Server On 
             Process[] processes = Process.GetProcessesByName("FGServer");
