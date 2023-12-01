@@ -177,7 +177,7 @@
                                 <Image.Clip>
                                     <RectangleGeometry RadiusX="10" RadiusY="10">
                                         <RectangleGeometry.Rect>
-                                            <Rect X="0" Y="0" Width="420" Height="420"/>
+                                            <Rect X="0" Y="0" Width="{x:Static const:Constants.AngioWidth}" Height="{x:Static const:Constants.AngioHeight}"/>
                                         </RectangleGeometry.Rect>
                                     </RectangleGeometry>
                                 </Image.Clip>

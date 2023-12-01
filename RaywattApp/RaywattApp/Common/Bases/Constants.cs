@@ -409,6 +409,8 @@ namespace RaywattApp.Common.Bases
         //Recording
         public const int TransientTime = 3000;
         public const int StartTime = 15;
+        public const int AngioWidth = 420;
+        public const int AngioHeight = 420;
 
         //AngioManager
         public const byte sof = 0x3A;
