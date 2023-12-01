@@ -350,21 +350,12 @@ namespace RaywattApp.Common.Annotation
         {
             List<PointF> curvePointFs = splineCurve.GetSplinePoints(points, points.Count() * 2/* Spline 곡선을 점 몇개로 표현할 지 설정*/);
             AngioFrame angioFrame = new AngioFrame();
-<<<<<<< Updated upstream
             angioFrame.AngioFrameNumber = frameIndex;
             angioFrame.TrackPoint = new List<Point>();
             foreach (PointF curvexy in curvePointFs)
             {
                 dijkstraHeap[frameIndex].line.Add(curvexy);
                 angioFrame.TrackPoint.Add(new Point(curvexy.X, curvexy.Y));
-=======
-            angioFrame.angioFrameNumber = frameIndex;
-            angioFrame.trackPoints = new List<Point>();
-            foreach (PointF curvexy in curvePointFs)
-            {
-                dijkstraHeap[frameIndex].line.Add(curvexy);
-                angioFrame.trackPoints.Add(new Point(curvexy.X, curvexy.Y));
->>>>>>> Stashed changes
             }
             AngioTrackPoints.Add(angioFrame);
         }
@@ -378,11 +369,7 @@ namespace RaywattApp.Common.Annotation
             foreach (PointF curvexy in curvePointFs)
             {
                 dijkstraHeap[frameIndex].line.Add(curvexy);
-<<<<<<< Updated upstream
                 angioFrame.TrackPoint.Add(new Point(curvexy.X, curvexy.Y));
-=======
-                angioFrame.trackPoints.Add(new Point(curvexy.X, curvexy.Y));
->>>>>>> Stashed changes
             }
             AngioTrackPoints.Add(angioFrame);
         }
