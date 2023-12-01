@@ -13,9 +13,9 @@ namespace RaywattApp.Common.Annotation.Models
     public partial class AngioFrame : ObservableObject
     {
         [ObservableProperty]
-        public int angioFrameNumber;
+        private int _angioFrameNumber;
 
         [ObservableProperty]
-        public List<Point> _trackPoints;
+        private List<Point> _trackPoint;
     }
 }

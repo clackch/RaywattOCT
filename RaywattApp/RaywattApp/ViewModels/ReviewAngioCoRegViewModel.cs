@@ -226,9 +226,8 @@ namespace RaywattApp.ViewModels
             if (isSave)
             {
                 DeviceStatus.IsCoRegPointSaved = false;
-
-                Thread threadSaveTackPoint = new Thread(() => ThreadSaveCoRegPoint());
-                threadSaveTackPoint.Start();
+                
+                SaveCoRegPoint();
             }
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
@@ -239,7 +238,7 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Send(new NavigationMessage(ReviewStatus.CurrentPage) { Parameter = parameter });
         }
 
-        private void ThreadSaveCoRegPoint()
+        private void SaveCoRegPoint()
         {
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;

@@ -10,9 +10,9 @@ namespace RaywattApp.Models
     internal partial class CoRegistration : ObservableObject
     {
         [ObservableProperty]
-        public string _id;
+        private string _id;
 
         [ObservableProperty]
-        public string _trackPoint;
+        private string _trackPoint;
     }
 }
