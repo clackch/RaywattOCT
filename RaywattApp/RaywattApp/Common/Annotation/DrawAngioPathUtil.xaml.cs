@@ -336,12 +336,12 @@ namespace RaywattApp.Common.Annotation
         {
             List<PointF> curvePointFs = splineCurve.GetSplinePoints(points, points.Count() * 2/* Spline 곡선을 점 몇개로 표현할 지 설정*/);
             AngioFrame angioFrame = new AngioFrame();
-            angioFrame.angioFrameNumber = frameIndex;
-            angioFrame._trackPoints = new List<Point>();
+            angioFrame.AngioFrameNumber = frameIndex;
+            angioFrame.TrackPoint = new List<Point>();
             foreach (PointF curvexy in curvePointFs)
             {
                 dijkstraHeap[frameIndex].line.Add(curvexy);
-                angioFrame._trackPoints.Add(new Point(curvexy.X, curvexy.Y));
+                angioFrame.TrackPoint.Add(new Point(curvexy.X, curvexy.Y));
             }
             AngioTrackPoints.Add(angioFrame);
         }
@@ -351,11 +351,11 @@ namespace RaywattApp.Common.Annotation
         {
             List<PointF> curvePointFs = bezierCurve.GenerateBezierCurve(points[0], points[1], points[2], points[3], totalDistance/* Bezier 곡선을 점 몇개로 표현할 지 설정*/);
             AngioFrame angioFrame = new AngioFrame();
-            angioFrame.angioFrameNumber = frameIndex;
+            angioFrame.AngioFrameNumber = frameIndex;
             foreach (PointF curvexy in curvePointFs)
             {
                 dijkstraHeap[frameIndex].line.Add(curvexy);
-                angioFrame._trackPoints.Add(new Point(curvexy.X, curvexy.Y));
+                angioFrame.TrackPoint.Add(new Point(curvexy.X, curvexy.Y));
             }
             AngioTrackPoints.Add(angioFrame);
         }
@@ -506,7 +506,7 @@ namespace RaywattApp.Common.Annotation
                 foreach (AngioFrame angioFrame in control.AngioTrackPoints) // DB에 업데이트 할 TrackPoint도 초기화
                 {
                     angioFrame.AngioFrameNumber = 0;
-                    angioFrame.TrackPoints = new List<Point>();
+                    angioFrame.TrackPoint = new List<Point>();
                 }
                 control.canvas.Children.Clear();
                 control.IsReset = control.IsResetOn = false;
