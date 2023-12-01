@@ -60,7 +60,6 @@ namespace RaywattApp.Common.Angio
         private Mat imgAngio;
         public Mat ImgAngio { get { return imgAngio; } }
 
-        private bool serverConnection; // Server - Client Connection
         private bool boardConnection; // FG Board Connection
 
         private byte[] buffer;
@@ -101,7 +100,6 @@ namespace RaywattApp.Common.Angio
 
             imgAngio = ShowNoSignal();
 
-            serverConnection = false;
             boardConnection = false;
             readyToRecv = false;
 
@@ -143,9 +141,6 @@ namespace RaywattApp.Common.Angio
 
             // Client On
             _tcpClient = new TcpClient(serverIP, serverPort);
-
-            if (Instance.Connected == true)
-                serverConnection = true;
 
             int read = 0;
             while (read != 0)
@@ -530,6 +525,11 @@ namespace RaywattApp.Common.Angio
                 Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
                 ViewModelBase._deviceStatus.SelectedCathRoom = (CathRoom)data["selectedCathRoom"];
             }
+        }
+
+        public bool GetServerConnection()
+        {
+            return Instance.Connected;
         }
     }
 }

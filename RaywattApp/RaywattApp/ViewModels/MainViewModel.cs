@@ -246,9 +246,9 @@ namespace RaywattApp.ViewModels
             {
                 CommonUtil.Exit(DeviceStatus);
 
-                _angioManager.CloseAngioManager();
+                if (_angioManager.GetServerConnection())
+                    _angioManager.CloseAngioManager();
 
-                // Server Off
                 Process[] processes = Process.GetProcessesByName("FGServer");
                 foreach (Process process in processes)
                     process.Kill();
