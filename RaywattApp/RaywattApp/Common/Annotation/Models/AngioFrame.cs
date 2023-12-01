@@ -16,6 +16,10 @@ namespace RaywattApp.Common.Annotation.Models
         private int _angioFrameNumber;
 
         [ObservableProperty]
+<<<<<<< Updated upstream
         private List<Point> _trackPoint;
+=======
+        private List<Point> _trackPoints;
+>>>>>>> Stashed changes
     }
 }

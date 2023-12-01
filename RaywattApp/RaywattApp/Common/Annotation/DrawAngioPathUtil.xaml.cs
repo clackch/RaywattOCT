@@ -16,6 +16,7 @@ using RaywattApp.Common.Annotation.LiveWire;
 using LiveWire;
 using log4net;
 using RaywattApp.Common.Annotation.Models;
+using System.Diagnostics;
 
 namespace RaywattApp.Common.Annotation
 {
@@ -30,11 +31,17 @@ namespace RaywattApp.Common.Annotation
             get { return (int)GetValue(AngioFrameNumberProperty); }
             set { this.SetValue(AngioFrameNumberProperty, value); }
         }
+
+        private static readonly DependencyProperty AngioFrameNumberProperty =
+            DependencyProperty.Register("AngioFrameNumber", typeof(int), typeof(DrawAngioPathUtil), new PropertyMetadata(-1, OnAngioFrameNumberPropertyChanged));
         public List<Mat> AngioImages
         {
             get { return (List<Mat>)GetValue(AngioImagesProperty); }
             set { this.SetValue(AngioImagesProperty, value); }
         }
+
+        public static readonly DependencyProperty AngioImagesProperty =
+            DependencyProperty.Register("AngioImages", typeof(List<Mat>), typeof(DrawAngioPathUtil), new PropertyMetadata(null, OnAngioImagesPropertyChanged));
 
         public Point MousePosition
         {
@@ -42,11 +49,17 @@ namespace RaywattApp.Common.Annotation
             set { this.SetValue(MousePositionProperty, value); }
         }
 
+        public static readonly DependencyProperty MousePositionProperty =
+            DependencyProperty.Register("MousePosition", typeof(Point), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
+
         public List<AngioFrame> AngioTrackPoints
         {
             get { return (List<AngioFrame>)GetValue(AngioTrackPointsProperty); }
             set { this.SetValue(AngioTrackPointsProperty, value); }
         }
+
+        public static readonly DependencyProperty AngioTrackPointsProperty =
+            DependencyProperty.Register("AngioTrackPoints", typeof(List<AngioFrame>), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
 
         public bool IsAngioTrackCompleted
         {
@@ -54,11 +67,18 @@ namespace RaywattApp.Common.Annotation
             set { this.SetValue(IsAngioTrackCompletedProperty, value); }
         }
 
+        public static readonly DependencyProperty IsAngioTrackCompletedProperty =
+            DependencyProperty.Register("IsAngioTrackCompleted", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(true));
+
+
         public bool IsReset
         {
             get { return (bool)GetValue(IsResetProperty); }
             set { this.SetValue(IsResetProperty, value); }
         }
+
+        public static readonly DependencyProperty IsResetProperty =  
+            DependencyProperty.Register("IsReset", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(false, OnResetPropertyChanged));
 
         public bool IsResetOn
         {
@@ -66,11 +86,17 @@ namespace RaywattApp.Common.Annotation
             set { this.SetValue(IsResetOnProperty, value); }
         }
 
+        public static readonly DependencyProperty IsResetOnProperty =
+            DependencyProperty.Register("IsResetOn", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(false));
+
         public bool IsCancel
         {
             get { return (bool)GetValue(IsCancelProperty); }
             set { this.SetValue(IsCancelProperty, value); }
         }
+
+        public static readonly DependencyProperty IsCancelProperty =
+            DependencyProperty.Register("IsCancel", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(false, OnCancelPropertyChanged));
 
         private String curveType = "Spline"; // Bezier or Spline
         private BezierCurve bezierCurve;
@@ -79,37 +105,13 @@ namespace RaywattApp.Common.Annotation
         private List<DijkstraHeap> dijkstraHeapLegacy;
         private List<Mat> motionVector;
 
-        private static readonly DependencyProperty AngioFrameNumberProperty =
-        DependencyProperty.Register("AngioFrameNumber", typeof(int), typeof(DrawAngioPathUtil), new PropertyMetadata(-1, OnAngioFrameNumberPropertyChanged));
-
-        public static readonly DependencyProperty AngioImagesProperty =
-            DependencyProperty.Register("AngioImages", typeof(List<Mat>), typeof(DrawAngioPathUtil), new PropertyMetadata(null, OnAngioImagesPropertyChanged));
-
-        public static readonly DependencyProperty MousePositionProperty =
-            DependencyProperty.Register("MousePosition", typeof(Point), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
-
-        public static readonly DependencyProperty AngioTrackPointsProperty =
-            DependencyProperty.Register("AngioTrackPoints", typeof(List<AngioFrame>), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
-
-        public static readonly DependencyProperty IsAngioTrackCompletedProperty =
-            DependencyProperty.Register("IsAngioTrackCompleted", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(true));
-
-        public static readonly DependencyProperty IsResetProperty =
-            DependencyProperty.Register("IsReset", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(false , OnResetPropertyChanged));
-
-        public static readonly DependencyProperty IsResetOnProperty =
-            DependencyProperty.Register("IsResetOn", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(false));
-
-        public static readonly DependencyProperty IsCancelProperty =
-            DependencyProperty.Register("IsCancel", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(false, OnCancelPropertyChanged));
-
         public DrawAngioPathUtil()
         {
             InitializeComponent();
             ActivateEvent();
         }
 
-        // ---------------------------------------Method
+        #region Method
 
         private void ActivateEvent()
         {
@@ -123,6 +125,16 @@ namespace RaywattApp.Common.Annotation
             canvas.MouseLeftButtonDown -= Canvas_MouseLeftButtonDown;
             canvas.MouseMove -= Canvas_MouseMove;
             this.canvas.Background = null;
+        }
+
+        private void AddRecEvents(Rectangle rectangle)
+        {
+            rectangle.Style = (Style)this.Resources["StyleRectangle"];
+            rectangle.MouseLeftButtonDown += Rectangle_MouseLeftButtonDown;
+            rectangle.MouseLeftButtonUp += Rectangle_MouseLeftButtonUp;
+            rectangle.MouseEnter += Rectangle_MouseEnter;
+            rectangle.MouseLeave += Rectangle_MouseLeave;
+            rectangle.MouseMove += Rectangle_MouseMove;
         }
 
         private void ImageProcessing(List<Mat> frames)
@@ -206,7 +218,7 @@ namespace RaywattApp.Common.Annotation
             this.canvas.Children.Clear();
         }
 
-        public void DrawWire(DijkstraHeap dh)
+        public void DrawWire(DijkstraHeap dh, bool isFirstFrame = false)
         {
             //선 그리기
             foreach (PointF pathPoint in dh.line)
@@ -218,11 +230,13 @@ namespace RaywattApp.Common.Annotation
                 this.canvas.Children.Add(path);
             }
 
+
+            if (isFirstFrame) return;
             // 추적된 점 그리기
             foreach (PointF trackPoint in dh.trackPoint)
             {
                 Rectangle rectangle = new Rectangle();
-                rectangle.Style = (Style)this.Resources["StyleRectangle"];
+                AddRecEvents(rectangle);
                 Canvas.SetLeft(rectangle, trackPoint.X - rectangle.Width / 2);
                 Canvas.SetTop(rectangle, trackPoint.Y - rectangle.Height / 2);
                 this.canvas.Children.Add(rectangle);
@@ -336,12 +350,21 @@ namespace RaywattApp.Common.Annotation
         {
             List<PointF> curvePointFs = splineCurve.GetSplinePoints(points, points.Count() * 2/* Spline 곡선을 점 몇개로 표현할 지 설정*/);
             AngioFrame angioFrame = new AngioFrame();
+<<<<<<< Updated upstream
             angioFrame.AngioFrameNumber = frameIndex;
             angioFrame.TrackPoint = new List<Point>();
             foreach (PointF curvexy in curvePointFs)
             {
                 dijkstraHeap[frameIndex].line.Add(curvexy);
                 angioFrame.TrackPoint.Add(new Point(curvexy.X, curvexy.Y));
+=======
+            angioFrame.angioFrameNumber = frameIndex;
+            angioFrame.trackPoints = new List<Point>();
+            foreach (PointF curvexy in curvePointFs)
+            {
+                dijkstraHeap[frameIndex].line.Add(curvexy);
+                angioFrame.trackPoints.Add(new Point(curvexy.X, curvexy.Y));
+>>>>>>> Stashed changes
             }
             AngioTrackPoints.Add(angioFrame);
         }
@@ -355,7 +378,11 @@ namespace RaywattApp.Common.Annotation
             foreach (PointF curvexy in curvePointFs)
             {
                 dijkstraHeap[frameIndex].line.Add(curvexy);
+<<<<<<< Updated upstream
                 angioFrame.TrackPoint.Add(new Point(curvexy.X, curvexy.Y));
+=======
+                angioFrame.trackPoints.Add(new Point(curvexy.X, curvexy.Y));
+>>>>>>> Stashed changes
             }
             AngioTrackPoints.Add(angioFrame);
         }
@@ -456,7 +483,9 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
-        // ---------------------------------------Event
+        #endregion
+
+        #region PropertyEvent
 
         private static void OnAngioImagesPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
@@ -530,11 +559,15 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
+        #endregion
+
+        #region MouseEvent
+
         async private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             PointF clickPosition = new PointF((float)e.GetPosition(canvas).X, (float)e.GetPosition(canvas).Y);
             Rectangle rectangle = new Rectangle();
-            rectangle.Style = (Style)this.Resources["StyleRectangle"];
+            AddRecEvents(rectangle);
             Canvas.SetLeft(rectangle, clickPosition.X - Constants.AnnotationRectWidth / 2);
             Canvas.SetTop(rectangle, clickPosition.Y - Constants.AnnotationRectHeight / 2);
             canvas.Children.Add(rectangle);
@@ -548,6 +581,7 @@ namespace RaywattApp.Common.Annotation
                 dijkstraHeap[AngioFrameNumber].trackPoint.Add(clickPosition);
                 PointTracking(clickPosition.X, clickPosition.Y, 1);
                 PointTracking(clickPosition.X, clickPosition.Y, -1);
+
                 IsResetOn = true;
                 return;
             }
@@ -561,7 +595,7 @@ namespace RaywattApp.Common.Annotation
                 PointTracking(clickPosition.X, clickPosition.Y, -1);
 
                 CalculateAllPath(currFrameNum, imageLength, 0/*현재 프레임만 찾기*/);
-                DrawWire(dijkstraHeap[AngioFrameNumber]);
+                DrawWire(dijkstraHeap[AngioFrameNumber], true);
 
                 await Task.Run(() =>
                 {
@@ -576,5 +610,48 @@ namespace RaywattApp.Common.Annotation
         {
             MousePosition = e.GetPosition(this.canvas);
         }
+
+        private void Rectangle_MouseEnter(object sender, MouseEventArgs e)
+        {
+            this.canvas.MouseLeftButtonDown -= Canvas_MouseLeftButtonDown;
+        }
+
+        private void Rectangle_MouseLeave(object sender, MouseEventArgs e)
+        {
+            this.canvas.MouseLeftButtonDown += Canvas_MouseLeftButtonDown;
+        }
+
+        private void Rectangle_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var rectangle = sender as Rectangle;
+            if (rectangle != null)
+            {
+                Debug.WriteLine("Rectangle_MouseLeftButtonDown");
+                rectangle.CaptureMouse();
+            }
+        }
+
+        private void Rectangle_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            var rectangle = sender as Rectangle;
+            if (rectangle != null)
+            {
+                Debug.WriteLine("Rectangle_MouseLeftButtonUp");
+                rectangle.ReleaseMouseCapture();
+            }
+        }
+
+        private void Rectangle_MouseMove(object sender, MouseEventArgs e)
+        {
+            var rectangle = sender as Rectangle;
+            if (rectangle != null && rectangle.IsMouseCaptured)
+            {
+                var mousePosition = e.GetPosition(this.canvas);
+                Canvas.SetLeft(rectangle, mousePosition.X - (rectangle.Width / 2));
+                Canvas.SetTop(rectangle, mousePosition.Y - (rectangle.Height / 2));
+            }
+        }
+
+        #endregion
     }
 }
