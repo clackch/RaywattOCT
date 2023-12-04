@@ -249,10 +249,6 @@ namespace RaywattApp.ViewModels
                 if (_angioManager.GetServerConnection())
                     _angioManager.CloseAngioManager();
 
-                Process[] processes = Process.GetProcessesByName("FGServer");
-                foreach (Process process in processes)
-                    process.Kill();
-
                 if (result.DialogAnswer == DialogResults.Answer.Yes && !CommonUtil.IsTestMode(DeviceStatus.TestMode, "Power"))
                 {
                     Win32Helper.Shutdown();

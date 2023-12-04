@@ -57,14 +57,14 @@ namespace RaywattApp.ViewModels.Dialog
             if(_angioManager.isChpFileChangeSuccess == 1)
             {
                 parameter["title"] = _l10n["Information"];
-                parameter["message"] = _l10n["$MSG011"];
+                parameter["message"] = _l10n["$MSG012"];
 
                 _dialogService.OpenDialog(new AlertDialogControl(), parameter, Common.Bases.Constants.ApplicationWidth, Common.Bases.Constants.ApplicationHeight);
             }
             else if(_angioManager.isChpFileChangeSuccess == -1)
             {
                 parameter["title"] = _l10n["Error"];
-                parameter["message"] = _l10n["$MSG012"];
+                parameter["message"] = _l10n["$MSG013"];
                 parameter["error"] = true;
 
                 _dialogService.OpenDialog(new AlertDialogControl(), parameter, Common.Bases.Constants.ApplicationWidth, Common.Bases.Constants.ApplicationHeight);

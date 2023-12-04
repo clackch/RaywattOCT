@@ -149,23 +149,20 @@ Remove the catheter from patient before proceeding.</value>
   <data name="$MSG010" xml:space="preserve">
     <value>[K]Mark at least two points on the vessel.</value>
   </data>
-	<data name="$MSG011" xml:space="preserve">
+  <data name="$MSG011" xml:space="preserve">
+    <value>[K]The system is currently unavailable. Please check your devices and connections.</value>
+  </data>
+  <data name="$MSG012" xml:space="preserve">
     <value>[K]Successfully changed Cath Room.</value>
   </data>
-	<data name="$MSG012" xml:space="preserve">
+  <data name="$MSG013" xml:space="preserve">
     <value>[K]Failed to change Cath Room.</value>
   </data>
-	<data name="$MSG013" xml:space="preserve">
+  <data name="$MSG014" xml:space="preserve">
     <value>[K]Failed to open server.</value>
   </data>
-	<data name="$MSG014" xml:space="preserve">
+  <data name="$MSG015" xml:space="preserve">
     <value>[K]Failed to open socket.</value>
-  </data>
-	<data name="$MSG015" xml:space="preserve">
-    <value>[K]Failed to connect devices.</value>
-  </data>
-	<data name="$MSG016" xml:space="preserve">
-    <value>[K]Failed to start system.</value>
   </data>
   <data name="$Terms and Conditions" xml:space="preserve">
     <value>[K]Product Intended Use: Clearly define the intended use of the OCT device, including any limitations or specific conditions for use.
