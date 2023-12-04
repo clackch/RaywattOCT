@@ -4,7 +4,27 @@
 
 CREATE SCHEMA IF NOT EXISTS rv_schema
     AUTHORIZATION rv_user;
+	
+-- Table: rv_schema.coregistration
 
+-- DROP TABLE IF EXISTS rv_schema.coregistration;
+
+CREATE Table IF Not EXISTS rv_schema.coregistration
+(
+	id character varying(24) COLLATE pg_catalog."default" NOT NULL,
+	track_point text COLLATE pg_catalog."default",	
+	CONSTRAINT coregistration_pkey PRIMARY KEY (id)
+        USING INDEX TABLESPACE rv_tablespace,
+    CONSTRAINT coregistration_id_fkey FOREIGN KEY (id)
+        REFERENCES rv_schema.patient_case (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+)
+
+TABLESPACE rv_tablespace;
+
+ALTER TABLE IF EXISTS rv_schema.coregistration
+    OWNER to rv_user;
 
 -- Table: rv_schema.configuration
 
@@ -91,6 +111,7 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case
     image character varying(200) COLLATE pg_catalog."default",
     pullback_type character varying(4) COLLATE pg_catalog."default",	
     pullback_length character varying(4) COLLATE pg_catalog."default",
+	angio_yn boolean,
 	angio_co_registration boolean,
 	indicator_degree real,
 	preset_name character varying(40) COLLATE pg_catalog."default",
@@ -215,11 +236,12 @@ CREATE TABLE IF NOT EXISTS rv_schema.cath_room
 (
     id serial NOT NULL,
     name character varying(50) COLLATE pg_catalog."default",
-    chp_file character varying(200) COLLATE pg_catalog."default",
-    rect_left real,
-    rect_top real,
-    rect_right real,
-    rect_bottom real,
+    setup_chp character varying(200) COLLATE pg_catalog."default",
+    app_chp character varying(200) COLLATE pg_catalog."default",	
+    rect_left integer,
+    rect_top integer,
+    rect_right integer,
+    rect_bottom integer,
     description character varying(200) COLLATE pg_catalog."default",
     create_date timestamp without time zone,
     update_date timestamp without time zone,

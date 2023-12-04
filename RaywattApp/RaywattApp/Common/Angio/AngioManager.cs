@@ -98,6 +98,7 @@ namespace RaywattApp.Common.Angio
         public short isChpFileChangeSuccess = 0;
 
         public AngioManager(SqlManager sqlManager, IDialogService dialogService)
+
         {
             _log.Debug("AngioManager");
 
@@ -132,6 +133,7 @@ namespace RaywattApp.Common.Angio
         }
 
         public ConnectionStatus ConnectToServer()
+
         {
             try
             {
@@ -327,6 +329,7 @@ namespace RaywattApp.Common.Angio
                 if (command == (byte)CommandType.FGAngioDisconnected)
                 {
                     imgAngio = ShowNoSignal();
+
                     if (readyToRecv)
                     {
                         SendCommandPacket(CommandType.FGStopped);

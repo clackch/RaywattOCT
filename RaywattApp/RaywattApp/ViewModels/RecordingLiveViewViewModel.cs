@@ -168,8 +168,10 @@ namespace RaywattApp.ViewModels
 
             // Send Start Command
             if (!_angioManager.readyToRecv && DeviceStatus.IsAngioConnected)
+
             {
                 _angioManager.SendCommandPacket(CommandType.FGStarted);
+                _angioManager.isLiveView = true;
             }
             _angioManager.readyToRecv = true;
         }
@@ -182,7 +184,6 @@ namespace RaywattApp.ViewModels
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
 
-            // catheter fail
             if (!isStartRecording && _angioManager.readyToRecv && DeviceStatus.IsAngioConnected)
             {
                 _angioManager.SendCommandPacket(CommandType.FGStopped);
@@ -250,6 +251,11 @@ namespace RaywattApp.ViewModels
             }
 
             isStartRecording = true;
+            
+            if (!DeviceStatus.IsLiveView)
+            {
+                RayStartLiveView();
+            }
 
             leaveToPage(Constants.RecordingPage);
         }

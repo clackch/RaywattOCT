@@ -11,11 +11,8 @@ using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
@@ -31,6 +28,8 @@ namespace RaywattApp.ViewModels
         private static readonly ILog _log = LogManager.GetLogger(typeof(MainViewModel));
 
         private readonly SqlManager _sqlManager;
+
+        private readonly AngioManager _angioManager;
 
         private IDialogService _dialogService;
 
@@ -115,8 +114,6 @@ namespace RaywattApp.ViewModels
         private CallbackFunction cbFunction;
         public CallbackFunction CBFunction => (this.cbFunction) ?? (this.cbFunction = new CallbackFunction(OnMsgCallback));
 
-        private readonly AngioManager _angioManager;
-
         /// <summary>
         /// 생성자
         /// </summary>
@@ -125,6 +122,7 @@ namespace RaywattApp.ViewModels
             _log.Debug("MainViewModel");
 
             _sqlManager = sqlManager;
+            _angioManager = angioManager;
             _dialogService = dialogService;
 
             // Code 정의
@@ -154,22 +152,25 @@ namespace RaywattApp.ViewModels
             IsHome = true;
             IsLoading = true;
 
-            _angioManager = angioManager;
-
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["classification"] = "TestMode";
             IList<Configuration> testMode = _sqlManager.SelectConfiguration(sqlParameters);
 
             foreach(Configuration config in testMode)
             {
-                if(String.IsNullOrEmpty(config.Key))
+                if(String.IsNullOrEmpty(config.Key) || String.IsNullOrEmpty(config.Buffer))
                     continue;
 
-                DeviceStatus.TestMode.Add(config.Key, "Y".Equals(config.Value) ? true : false);
+                if (config.Buffer.Contains(Environment.UserName))
+                {
+                    DeviceStatus.TestMode.Add(config.Key, "Y".Equals(config.Value) ? true : false);
 
-                if ("RJ".Equals(config.Key))
-                    RaySetProperty(Property.TestMode, "Y".Equals(config.Value) ? 1.0f : 0.0f);
+                    if ("RJ".Equals(config.Key))
+                        RaySetProperty(Property.TestMode, "Y".Equals(config.Value) ? 1.0f : 0.0f);
+                }
             }
+
+            DeviceStatus.PowerOffMsg = _l10n["Shutting down"];
         }
 
         private void OnNavigationMessage(object recipient, NavigationMessage message)
@@ -244,19 +245,14 @@ namespace RaywattApp.ViewModels
 
             if (result != null && result.DialogAnswer != DialogResults.Answer.No)
             {
-                CommonUtil.Exit(DeviceStatus);
-
                 if (_angioManager.GetServerConnection())
                     _angioManager.CloseAngioManager();
 
-                if (result.DialogAnswer == DialogResults.Answer.Yes && !CommonUtil.IsTestMode(DeviceStatus.TestMode, "Power"))
+                if (result.DialogAnswer == DialogResults.Answer.Extra)
                 {
-                    Win32Helper.Shutdown();
+                    DeviceStatus.PowerOffMsg = _l10n["Switching user"];
                 }
-                else if (result.DialogAnswer == DialogResults.Answer.Extra && !CommonUtil.IsTestMode(DeviceStatus.TestMode, "Power"))
-                {
-                    Win32Helper.LogOff();
-                }
+                CommonUtil.Exit(DeviceStatus, result.DialogAnswer == DialogResults.Answer.Yes ? true : false);
             }
         }
 
@@ -342,7 +338,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("CatheterUnlockReceiver");
 
-            DeviceStatus.CatheterStatus = Constants.CatheterStatusUnloading;   //Unlock Receive
+            DeviceStatus.CatheterStatus = Constants.CatheterStatusUnloading;
 
             LeaveFromRecording();
 
@@ -454,7 +450,7 @@ namespace RaywattApp.ViewModels
                     break;
                 case RayWorkItem.Pullback:
                     DeviceStatus.IsPullbackDone = true;
-
+                    
                     _angioManager.StopSaveAngioThread();
 
                     Task.Run(() => {
@@ -474,6 +470,9 @@ namespace RaywattApp.ViewModels
                     DeviceStatus.IsLumenDetected = true;
                     break;
                 case RayWorkItem.GenerateVolume:
+                    break;
+                case RayWorkItem.SaveRawData:
+                    DeviceStatus.IsSaveRawDataDone = true;
                     break;
                 default:
                     break;

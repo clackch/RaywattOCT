@@ -396,7 +396,7 @@ namespace RaywattApp.Services
                 string str = "Parameters : ";
                 foreach (var param in commandParameters)
                 {
-                    if(param.Key != "cross_section" && param.Key != "longitude" && param.Key != "lumen_contour" && param.Key != "bookmark")
+                    if (param.Key != "cross_section" && param.Key != "longitude" && param.Key != "lumen_contour" && param.Key != "bookmark" && param.Key != "track_point")
                         str += param.Key + " = " + param.Value + ", ";
                 }
                 _log.Debug(str);

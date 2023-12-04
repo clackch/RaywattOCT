@@ -1,11 +1,7 @@
 ﻿using log4net;
 using RaywattApp.Common.Dialog;
-using RaywattApp.Common.Util;
-using RaywattApp.Models;
-using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace RaywattApp.ViewModels.Dialog
 {
