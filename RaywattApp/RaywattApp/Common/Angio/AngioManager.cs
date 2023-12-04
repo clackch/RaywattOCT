@@ -69,7 +69,7 @@ namespace RaywattApp.Common.Angio
         private Mat imgAngio;
         public Mat ImgAngio { get { return imgAngio; } }
 
-        private bool boardConnection; // FG Board Connection
+        private bool boardConnection = false; // FG Board Connection
 
         private byte[] buffer;
         private byte[] tmpBuffer;
@@ -93,9 +93,11 @@ namespace RaywattApp.Common.Angio
         private char angioBitsPerPixel;
         private int angioImageSize;
 
-        public bool readyToRecv;
+        public bool readyToRecv = false;
 
         public short isChpFileChangeSuccess = 0;
+
+        private bool isAngioInit = false;
 
         public AngioManager(SqlManager sqlManager, IDialogService dialogService)
 
@@ -109,9 +111,6 @@ namespace RaywattApp.Common.Angio
             serverPort = 8888;
 
             imgAngio = ShowNoSignal();
-
-            boardConnection = false;
-            readyToRecv = false;
 
             buffer = new byte[100];
             tmpBuffer = new byte[200];
@@ -342,6 +341,7 @@ namespace RaywattApp.Common.Angio
                 }
                 else if (command == (byte)CommandType.FGAngioConnected)
                 {
+
                     if (readyToRecv)
                     {
                         SendCommandPacket(CommandType.FGStarted);
@@ -352,7 +352,8 @@ namespace RaywattApp.Common.Angio
                         ViewModelBase._deviceStatus.IsAngioConnected = true;
                     });
 
-                    if (ViewModelBase._deviceStatus.IsDeviceConnected)
+
+                    if (isAngioInit)
                     {
 
                         System.Windows.Application.Current.Dispatcher.Invoke(() =>
@@ -360,6 +361,7 @@ namespace RaywattApp.Common.Angio
                             SelectCathRoom();
                         });
                     }
+                    isAngioInit = isAngioInit == false ? true : isAngioInit;
                 }
                 else if (command == (byte)CommandType.FGBoardExist)
                 {
