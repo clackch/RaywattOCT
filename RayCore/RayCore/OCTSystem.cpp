@@ -1490,8 +1490,11 @@ int COCTSystem::disconnectRotaryJunction() {
 	PLOGI.printf("Catheter State : %d", m_cathState);
 	if (m_cathState != CatheterState::Unloaded) {
 		CUtility::StartThread(threadUnloadCatheter, m_pThreadRotaryJunction, this);
+		while (m_pThreadRotaryJunction != nullptr)
+		{
+			Sleep(100);
+		}
 	}
-	CUtility::StopThread(m_pThreadRotaryJunction);
 
 	m_pPullbackMotor->Close();
 	m_pLaserModule->Close();
