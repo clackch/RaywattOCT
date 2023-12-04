@@ -104,6 +104,9 @@ namespace RaywattApp.Common.Annotation
         private List<DijkstraHeap> dijkstraHeap;
         private List<DijkstraHeap> dijkstraHeapLegacy;
         private List<Mat> motionVector;
+        private int mainAngioFrameNum;
+        private PointF prevPos;
+        private bool isMoved = false;
 
         public DrawAngioPathUtil()
         {
@@ -204,21 +207,34 @@ namespace RaywattApp.Common.Annotation
             return skel;
         }
 
-        private void WireChange(int index)
+        private void PathChange(int index)
         {
             //frame이 변경 될 때마다 경로 초기화
             InitializePath();
 
             //기존에 탐색했던 경로를 다시 그림
-            DrawWire(dijkstraHeap[index]);
+            DrawPath(dijkstraHeap[index]);
         }
 
-        private void InitializePath()
+        private void InitializePath(bool isPathOnly = false)
         {
-            this.canvas.Children.Clear();
+            if (isPathOnly)
+            {
+                for (int i = this.canvas.Children.Count - 1; i >= 0; i--)
+                {
+                    if (this.canvas.Children[i] is Ellipse)
+                    {
+                        this.canvas.Children.RemoveAt(i);
+                    }
+                }
+            }
+            else
+            {
+                this.canvas.Children.Clear();
+            }
         }
 
-        public void DrawWire(DijkstraHeap dh, bool isFirstFrame = false)
+        public void DrawPath(DijkstraHeap dh, bool isFirstFrame = false)
         {
             //선 그리기
             foreach (PointF pathPoint in dh.line)
@@ -233,13 +249,18 @@ namespace RaywattApp.Common.Annotation
 
             if (isFirstFrame) return;
             // 추적된 점 그리기
+            int count = 0;
             foreach (PointF trackPoint in dh.trackPoint)
             {
                 Rectangle rectangle = new Rectangle();
                 AddRecEvents(rectangle);
+                rectangle.Name = $"rectangle{count:D3}";
+
                 Canvas.SetLeft(rectangle, trackPoint.X - rectangle.Width / 2);
                 Canvas.SetTop(rectangle, trackPoint.Y - rectangle.Height / 2);
                 this.canvas.Children.Add(rectangle);
+
+                count++;
             }
         }
 
@@ -345,6 +366,23 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
+        private void CalculateSubPathWhenModified(float x, float y)
+        {
+            int direction = mainAngioFrameNum - AngioFrameNumber > 0 ? 1 : -1;
+            if (direction > 0) // 수정된 FrameNumber상 높은 이미지(들)만
+            {
+                PointTracking(x, y, 1);
+            }
+            else if (direction < 0) // 수정된 FrameNumber상 낮은 이미지(들)만
+            {
+                PointTracking(x, y, -1);
+            }
+            else // 전체에 대해서
+            {
+                CalculateAllPath(mainAngioFrameNum, AngioImages.Count, 10/*앞뒤 10장; 실제로는 15~20장 -> Angio 샘플의 크기가 너무 커서 임의로 설정*/);
+            }
+        }
+
         // Spline
         private void AddSplineCurvePoints(List<PointF> points, int frameIndex)
         {
@@ -395,7 +433,7 @@ namespace RaywattApp.Common.Annotation
         private void PointTracking(float x, float y, int direction)
         {
             PointF prevPoint = new PointF(x, y);
-            int halfSize = 5; // halfSize*2 x halfSize*2 크기
+            int halfSize = 5; // halfSize*2 x halfSize*2 크기 -> 최적 파라미터 찾을 필요 있음. todo
             int startIndex;
 
             if (direction == -1) // 방향에 따른 MotionVector의 Index 초기화
@@ -491,7 +529,7 @@ namespace RaywattApp.Common.Annotation
         {
             var control = (DrawAngioPathUtil)dependencyObject;
             int AngioFrameNumber = (int)dependencyPropertyChangedEventArgs.NewValue;
-            control.WireChange(AngioFrameNumber);
+            control.PathChange(AngioFrameNumber);
         }
 
         private static void OnResetPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
@@ -507,15 +545,13 @@ namespace RaywattApp.Common.Annotation
                     foreach (DijkstraHeap heap in control.dijkstraHeap) // 새로운 경로 받기 위한 초기화
                     {
                         heap.line = new List<PointF>();
-                        heap.clickPoint = new List<PointF>();
                         heap.trackPoint = new List<PointF>();
                     }
                 }
                 else if (control.dijkstraHeap[currFrameNum].trackPoint.Count == 1) // 경로는 없지만 첫번째 포인트를 찍은 경우
                 {
-                    foreach (DijkstraHeap heap in control.dijkstraHeap) // 새로운 경로 받기 위한 초기화
+                    foreach (DijkstraHeap heap in control.dijkstraHeap) 
                     {
-                        heap.clickPoint = new List<PointF>();
                         heap.trackPoint = new List<PointF>();
                     }
                 }
@@ -560,7 +596,7 @@ namespace RaywattApp.Common.Annotation
             canvas.Children.Add(rectangle);
 
             int imageLength = AngioImages.Count;
-            int currFrameNum = AngioFrameNumber;
+            int currFrameNum = mainAngioFrameNum = AngioFrameNumber;
 
             // 첫번째 점
             if (dijkstraHeap[AngioFrameNumber].trackPoint.Count == 0)
@@ -582,7 +618,7 @@ namespace RaywattApp.Common.Annotation
                 PointTracking(clickPosition.X, clickPosition.Y, -1);
 
                 CalculateAllPath(currFrameNum, imageLength, 0/*현재 프레임만 찾기*/);
-                DrawWire(dijkstraHeap[AngioFrameNumber], true);
+                DrawPath(dijkstraHeap[AngioFrameNumber], true);
 
                 await Task.Run(() =>
                 {
@@ -625,6 +661,20 @@ namespace RaywattApp.Common.Annotation
             {
                 Debug.WriteLine("Rectangle_MouseLeftButtonUp");
                 rectangle.ReleaseMouseCapture();
+
+                if (isMoved)
+                {
+                    string numberPart = rectangle.Name.Substring(rectangle.Name.Length - 3);
+                    int.TryParse(numberPart, out int index);
+                    
+                    float x = (float)(Canvas.GetLeft(rectangle) + rectangle.Width / 2);
+                    float y = (float)(Canvas.GetTop(rectangle) + rectangle.Height / 2);
+                    
+                    dijkstraHeap[AngioFrameNumber].trackPoint[index] = new PointF(x, y);
+
+                    CalculateSubPathWhenModified(x, y);
+                    isMoved = false;
+                }
             }
         }
 
@@ -636,6 +686,12 @@ namespace RaywattApp.Common.Annotation
                 var mousePosition = e.GetPosition(this.canvas);
                 Canvas.SetLeft(rectangle, mousePosition.X - (rectangle.Width / 2));
                 Canvas.SetTop(rectangle, mousePosition.Y - (rectangle.Height / 2));
+
+                if (!isMoved)
+                {
+                    InitializePath(true);
+                }
+                isMoved = true;
             }
         }
 

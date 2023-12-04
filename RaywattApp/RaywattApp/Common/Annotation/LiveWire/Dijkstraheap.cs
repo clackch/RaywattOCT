@@ -34,7 +34,6 @@ namespace RaywattApp.Common.Annotation.LiveWire
         double[][] pCosts;// for debugging reasons
 
         public List<PointF> line;
-        public List<PointF> clickPoint;
         public List<PointF> trackPoint;
         // converts x, y coordinates to vector index
         private int toIndex(int x, int y)
@@ -47,7 +46,6 @@ namespace RaywattApp.Common.Annotation.LiveWire
         public DijkstraHeap(byte[] image, int x, int y)
         {
             line = new List<PointF>();
-            clickPoint = new List<PointF>();
             trackPoint = new List<PointF>();
 
             // 최단 경로 계산에 사용되는 가중치 값
