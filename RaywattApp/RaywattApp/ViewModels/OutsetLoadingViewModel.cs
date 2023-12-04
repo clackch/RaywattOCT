@@ -136,25 +136,25 @@ namespace RaywattApp.ViewModels
                             break;
 
                         case ConnectionStatus.OpenServerFailure:
-                            errorMsg = "$MSG013";
+                            errorMsg = "$MSG014";
                             isError = true;
                             break;
 
                         case ConnectionStatus.TcpSocketFailure:
-                            errorMsg = "$MSG014";
+                            errorMsg = "$MSG015";
                             isError = true;
                             break;
                     }
                 }
                 else
                 {
-                    errorMsg = "$MSG015";
+                    errorMsg = "$MSG011";
                     isError = true;
                 }
             }
             else
             {
-                errorMsg = "$MSG016";
+                errorMsg = "$MSG011";
                 isError = true;
             }
 
