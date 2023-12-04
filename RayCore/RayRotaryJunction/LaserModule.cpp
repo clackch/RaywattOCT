@@ -64,7 +64,14 @@ bool CLaserModule::Open(tstring strPort) {
 
 	Close();
 
-	initPort(&m_hComTx, strPort.c_str(), 500000, 8, timeout);
+	// change COM Port Format
+	size_t offset = strPort.rfind(L"COM");
+	tstring strPortNum = strPort.substr(offset + 3);
+	wchar_t strCOMPort[MAX_PATH];
+	wsprintf(strCOMPort, L"\\\\.\\COM%d", _wtoi(strPortNum.c_str()));
+	PLOGI.printf(L"Connect to %s", strCOMPort);
+
+	initPort(&m_hComTx, strCOMPort, 500000, 8, timeout);
 	if (!IsOpen()) return false;
 
 	min_init_context(&m_ctx, 0);
