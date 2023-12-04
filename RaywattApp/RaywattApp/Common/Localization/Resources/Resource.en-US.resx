@@ -124,7 +124,7 @@
     <value>Verify the catheter position for flush, Prepare for pullback.</value>
   </data>
   <data name="$MSG003" xml:space="preserve">
-    <value>Injcect flush media</value>
+    <value>Inject flush media</value>
   </data>
   <data name="$MSG004" xml:space="preserve">
     <value>Verify Image Quality</value>
@@ -151,6 +151,18 @@ Remove the catheter from patient before proceeding.</value>
   </data>
   <data name="$MSG011" xml:space="preserve">
     <value>The system is currently unavailable. Please check your devices and connections.</value>
+  </data>
+  <data name="$MSG012" xml:space="preserve">
+    <value>Successfully changed Cath Room.</value>
+  </data>
+  <data name="$MSG013" xml:space="preserve">
+    <value>Failed to change Cath Room.</value>
+  </data>
+  <data name="$MSG014" xml:space="preserve">
+    <value>Failed to open server.</value>
+  </data>
+  <data name="$MSG015" xml:space="preserve">
+    <value>Failed to open socket.</value>
   </data>
   <data name="$Terms and Conditions" xml:space="preserve">
     <value>Product Intended Use: Clearly define the intended use of the OCT device, including any limitations or specific conditions for use.

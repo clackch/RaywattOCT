@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using static RaywattOCT.RayCoreWrapper;
 using RaywattOCT;
+using RaywattApp.Common.Angio;
 
 namespace RaywattApp.ViewModels
 {
@@ -20,6 +21,7 @@ namespace RaywattApp.ViewModels
         private static readonly ILog _log = LogManager.GetLogger(typeof(RecordingConfirmViewModel));
 
         private readonly SqlManager _sqlManager;
+        private readonly AngioManager _angioManager;
 
         [ObservableProperty]
         private PrevStatus _prevStatus;
@@ -42,14 +44,15 @@ namespace RaywattApp.ViewModels
             get { return this._confirmCommand ?? (this._confirmCommand = new RelayCommand(Confirm)); }
         }
 
-        public RecordingConfirmViewModel(SqlManager sqlManager)
+        public RecordingConfirmViewModel(SqlManager sqlManager, AngioManager angioManager)
         {
             _log.Debug("RecordingConfirmViewModel");
 
             Constants.CurrentPage = Constants.RecordingConfirmPage;
 
             _sqlManager = sqlManager;
-
+            _angioManager = angioManager;
+            
             RayLaserOnOff(false);
         }
 
@@ -72,6 +75,11 @@ namespace RaywattApp.ViewModels
 
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
                 Playback();
+            }
+
+            if(_angioManager.readyToRecv && DeviceStatus.IsAngioConnected)
+            {
+                _angioManager.readyToRecv = false;
             }
         }
 
