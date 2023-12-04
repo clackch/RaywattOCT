@@ -251,6 +251,10 @@ namespace RaywattApp.Common.Angio
                 StopLiveAngioThread();
             if (threadFuncSaveAngioFrames != null && threadFuncSaveAngioFrames.IsAlive)
                 StopSaveAngioThread();
+
+            Process[] processes = Process.GetProcessesByName("FGServer");
+            foreach (Process process in processes)
+                process.Kill();
         }
 
         private bool ReadPacket()
