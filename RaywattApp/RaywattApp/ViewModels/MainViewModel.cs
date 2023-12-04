@@ -245,7 +245,8 @@ namespace RaywattApp.ViewModels
 
             if (result != null && result.DialogAnswer != DialogResults.Answer.No)
             {
-                _angioManager.CloseAngioManager();
+                if (_angioManager.GetServerConnection())
+                    _angioManager.CloseAngioManager();
 
                 if (result.DialogAnswer == DialogResults.Answer.Extra)
                 {
@@ -405,7 +406,6 @@ namespace RaywattApp.ViewModels
         {
             RayScannerState curState = (RayScannerState)RayGetProperty(Property.CurrentState);
             DeviceStatus.IsLiveView = (bool)(RayGetProperty(Property.MotorOnOff) != 0);
-            //DeviceStatus.IsAngioConnected = false;
         }
         protected void handleProgress(RayCallbackRequest request, int progress, int param) { }
         protected void handleError(RayCallbackRequest request, RayError error, int param) { }
@@ -450,6 +450,7 @@ namespace RaywattApp.ViewModels
                     break;
                 case RayWorkItem.Pullback:
                     DeviceStatus.IsPullbackDone = true;
+                    _angioManager.StopSaveAngioThread();
                     break;
                 case RayWorkItem.OCTImaging:
                     if(param == (int)RaySession.Review)
