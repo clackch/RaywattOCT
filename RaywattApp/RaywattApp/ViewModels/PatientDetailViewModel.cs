@@ -250,9 +250,10 @@ namespace RaywattApp.ViewModels
             fileExport.SelectedItem = selectedItem;
             parameter["fileExport"] = fileExport;
 
+            GetDetailStatus();
+
             var result = _dialogService.OpenDialog(new FileDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
-            Search();
             SetPrevStatus();
         }
 
@@ -301,7 +302,6 @@ namespace RaywattApp.ViewModels
                 }
             }
 
-            Search();
             SetPrevStatus();
         }
 

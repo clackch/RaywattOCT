@@ -11,5 +11,5 @@ public:
 	CRayCompNet();
 	virtual ~CRayCompNet();
 	void Initialize(bool useGPU) override;
-	vector<vector<cv::Point>> FindLumen(cv::Mat image) override;
+	cv::Mat FindLumen(cv::Mat image) override;
 };

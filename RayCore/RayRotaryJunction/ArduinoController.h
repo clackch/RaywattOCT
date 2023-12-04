@@ -19,7 +19,7 @@ public:
 	virtual bool IsMoving();
 
 	bool SetCurrent(StepMotorIndex idx, int nPosition);
-	bool MoveAbsolute(StepMotorIndex idx, int nPos);	// forward (load / unload catheter)
+	bool MoveAbsolute(StepMotorIndex idx, int nPos, bool delay=true);	// forward (load / unload catheter)
 	bool MoveRelative(StepMotorIndex idx, int nOffset);	// pullback
 	bool SetSpeed(StepMotorIndex idx, int nVelocity);
 

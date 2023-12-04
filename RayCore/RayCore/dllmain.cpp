@@ -61,6 +61,9 @@ _declspec(dllexport) RayError RayStartLiveView() {
 _declspec(dllexport) RayError RayStopLiveView() {
     return octSystem.StopLiveView();
 }
+_declspec(dllexport) RayError RayLaserOnOff(bool isOn) {
+    return octSystem.LaserOnOff(isOn);
+}
 _declspec(dllexport) RayError RaySetSession(int session) {
     return octSystem.SetSession(session);
 }

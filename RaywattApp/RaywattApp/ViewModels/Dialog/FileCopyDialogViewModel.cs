@@ -397,6 +397,7 @@ namespace RaywattApp.ViewModels.Dialog
                             sqlParameters["procedure"] = patientCase.Procedure;
                             sqlParameters["pullback_type"] = patientCase.PullbackType;
                             sqlParameters["pullback_length"] = patientCase.PullbackLength;
+                            sqlParameters["angio_yn"] = patientCase.AngioYn;
                             sqlParameters["angio_co_registration"] = patientCase.AngioCoRegistration;
                             sqlParameters["indicator_degree"] = patientCase.IndicatorDegree;
                             sqlParameters["preset_name"] = patientCase.PresetName;

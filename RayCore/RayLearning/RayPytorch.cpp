@@ -17,11 +17,11 @@ void CRayCompNet::Initialize(bool useGPU) {
 		m_useGPU = true;
 	}
 
-	torch::load(m_compNet, (m_useGPU ? ".\\compnet_gpu.pt" : ".\\compnet_cpu.pt"));
+	torch::load(m_compNet, (m_useGPU ? "C:\\Raywatt\\system\\3rdparty\\model\\pytorch\\compnet_gpu.pt" : "C:\\Raywatt\\system\\3rdparty\\model\\pytorch\\compnet_cpu.pt"));
 	m_compNet->eval();
 }
 
-vector<vector<cv::Point>> CRayCompNet::FindLumen(cv::Mat image) {
+cv::Mat CRayCompNet::FindLumen(cv::Mat image) {
 	vector<vector<cv::Point>> contours;
 
 	cv::Mat imgInput;
@@ -65,21 +65,6 @@ vector<vector<cv::Point>> CRayCompNet::FindLumen(cv::Mat image) {
 		cv::resize(imgLumen, imgLumen, cv::Size(image.rows, image.cols));
 	}
 
-	cv::findContours(imgLumen, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-
-	// filtering - erase wrong contours
-	cv::Point ptCenter;
-	ptCenter.x = image.cols / 2;
-	ptCenter.y = image.rows / 2;
-	for (int i = contours.size() - 1; i >= 0; i--)
-	{
-		cv::Rect boundingBox = cv::boundingRect(contours[i]);
-		if (!boundingBox.contains(ptCenter))
-		{
-			contours.erase(contours.begin() + i);
-		}
-	}
-
-	return contours;
+	return imgLumen;
 }
 

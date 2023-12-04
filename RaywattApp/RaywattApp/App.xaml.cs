@@ -26,6 +26,8 @@ namespace RaywattApp
 
         public App()
         {
+            _log.Debug("App");
+
             //Setting Working Directory
             Process process = Process.GetCurrentProcess();
             Environment.CurrentDirectory = Path.GetDirectoryName(process.MainModule.FileName);
@@ -39,7 +41,9 @@ namespace RaywattApp
 
         private void SessionEndingCancelEventHandler(object sender, SessionEndingCancelEventArgs e)
         {
-            CommonUtil.Exit(null);
+            _log.Debug("SessionEndingCancelEventHandler");
+
+            CommonUtil.Exit();
         }
 
         /// <summary>
@@ -57,6 +61,8 @@ namespace RaywattApp
         /// </summary>
         private static IServiceProvider ConfigureServices()
         {
+            _log.Debug("ConfigureServices");
+
             var services = new ServiceCollection();
 
             string connectionString = ConfigurationManager.ConnectionStrings["postgres"].ConnectionString;
@@ -130,6 +136,8 @@ namespace RaywattApp
 
         private void SetupExceptionHandling()
         {
+            _log.Debug("SetupExceptionHandling");
+
             AppDomain.CurrentDomain.UnhandledException += (s, e) => LogUnhandledException((Exception)e.ExceptionObject, "AppDomain.CurrentDomain.UnhandledException");
 
             DispatcherUnhandledException += (s, e) =>
@@ -147,6 +155,8 @@ namespace RaywattApp
 
         private void LogUnhandledException(Exception exception, string source)
         {
+            _log.Debug("LogUnhandledException");
+
             string message = $"Unhandled exception ({source})";
             try
             {

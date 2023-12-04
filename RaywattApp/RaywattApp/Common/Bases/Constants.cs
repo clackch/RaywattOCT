@@ -407,7 +407,7 @@ namespace RaywattApp.Common.Bases
         public const double ZoomScaleMax = ZoomScaleDefault * 2;
 
         //Recording
-        public const int TransientTime = 3000;
+        public const int TransientTime = 1000;
         public const int StartTime = 15;
         public const int AngioWidth = 420;
         public const int AngioHeight = 420;
@@ -419,5 +419,11 @@ namespace RaywattApp.Common.Bases
         public const int ImageTailSize = 2;
         public const int CommandPacketSize = 5;
         public const int DeviceInfoPacketSize = 10;
+
+        //AngioCoRegistration
+        public const double ellipsePathWidth = 2;
+        public const double ellipsePathHeight = 2;
+        public const double ellipseTrackWidth = 6;
+        public const double ellipseTrackHeight = 6;
     }
 }

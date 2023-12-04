@@ -108,13 +108,15 @@ RayError COCTSystem::Start() {
 	CUtility::StartThread(threadService, m_pThreadService, this);
 
 	IImaging::Setting settingPullback = config.imaging;
-	settingPullback.Set(settingPullback.nAScan, config.imaging.nBScan); //  config.acquisition.nLaserSpeed / (config.bldcMotor.velocityPullback / 60));
+	settingPullback.Set(settingPullback.nAScan, floor((double)config.acquisition.nLaserSpeed / ((double)config.bldcMotor.velocityPullback / 60.f)));
+	PLOGI.printf("Pullback setting: LaserSpeed=%ld, Velocity=%ldrpm, NumOfAlines=%ld", config.acquisition.nLaserSpeed, config.bldcMotor.velocityPullback, settingPullback.nBScan);
 	m_pImagingPullback = CImagingSession::CreateColorImaging(this, settingPullback, nullptr, ImagingType::Default);
 	m_pImagingPullback->SetSession(SESSION_REALTIME);
 	m_pImagingPullback->Start();
 
 	IImaging::Setting settingLiveView = config.imaging;
-	settingLiveView.Set(settingLiveView.nAScan, 4000); // config.imaging.nBScan); // ceil((double)config.acquisition.nLaserSpeed / ((double)config.bldcMotor.velocityLiveView / 60.f)));
+	settingLiveView.Set(settingLiveView.nAScan, floor((double)config.acquisition.nLaserSpeed / ((double)config.bldcMotor.velocityLiveView / 60.f)));
+	PLOGI.printf("Pullback setting: LaserSpeed=%ld, Velocity=%ldrpm, NumOfAlines=%ld", config.acquisition.nLaserSpeed, config.bldcMotor.velocityLiveView, settingLiveView.nBScan);
 	m_pImagingLiveView = CImagingSession::CreateColorImaging(this, settingLiveView, nullptr, ImagingType::Default);
 	m_pImagingLiveView->SetSession(SESSION_REALTIME);
 	m_pImagingLiveView->Start();
@@ -131,7 +133,6 @@ RayError COCTSystem::Stop() {
 	PLOGI.printf("Stop threads");
 	CUtility::StopThread(m_pThreadService);
 	CUtility::StopThread(m_pThreadSaveRaw);
-	CUtility::StopThread(m_pThreadRotaryJunction);
 
 	PLOGI.printf("Close All Sessions");
 	closeAllSessions();
@@ -180,8 +181,6 @@ RayError COCTSystem::Stop() {
 
 	PLOGI.printf("Close COM Ports");
 	if (m_pPullbackMotor->IsOpen()) {
-		m_pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
-		m_pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 		m_pPullbackMotor->Close();
 	}
 	delete m_pPullbackMotor;
@@ -333,6 +332,8 @@ RayError COCTSystem::ReadyPullback()
 		restartAcqDevice(m_pImagingPullback);
 
 		pMotorCtrl->PerformRun(config.bldcMotor.velocityPullback);
+		m_pPullbackMotor->SetCurrent(StepMotorIndex::Pullback, 0);
+		m_pPullbackMotor->SetCurrent(StepMotorIndex::Hub, 0);
 		m_pPullbackMotor->SetSpeed(StepMotorIndex::Both, config.stepMotor.pullbackSpeed);
 
 		return RayError::OK;
@@ -496,6 +497,16 @@ RayError COCTSystem::StopLiveView()
 		return RayError::OK;
 	}
 	return RayError::WrongState;
+}
+
+/*
+* LaserOnOff
+*/
+RayError COCTSystem::LaserOnOff(bool isOn)
+{
+	laserOnOff(isOn);
+
+	return RayError::OK;
 }
 
 /*
@@ -1041,7 +1052,7 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 	for (nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadSaveRaw->isRun; nFrame++) {
 		pDataWriter->WriteFrame(nFrame);
 
-		pSystem->postMessage(WM_UPDATE_SAVE_RAW, nFrame + 1, nNumOfSamples);
+		//pSystem->postMessage(WM_UPDATE_SAVE_RAW, nFrame + 1, nNumOfSamples);
 	}
 	pDataWriter->WriteEOF();
 	pDataWriter->StopSave();
@@ -1160,7 +1171,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	IImaging::Setting settingPullback = pSystem->m_pImagingPullback->GetSetting();
 	int pullbackTime = ((double)config.stepMotor.pullbackDistance / (double)config.stepMotor.pullbackSpeed) * 1000;
 
-	PLOGI.printf("Pullback start - %dmm, %dmm/s - %dsec", config.stepMotor.pullbackDistance, config.stepMotor.pullbackSpeed, pullbackTime);
+	PLOGI.printf("Pullback start - %dmm, %dmm/s - %dmsec", config.stepMotor.pullbackDistance, config.stepMotor.pullbackSpeed, pullbackTime);
 
 	// 1. Start Recording OCT
 	CDataWriter* pDataWriter = new CDataWriter();
@@ -1175,8 +1186,9 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pSystem->m_pAcqDevice->SetWriter(pDataWriter);
 
 	// 2. Pullback Linear Stage
-	if (pPullbackMotor->IsOpen()) {		
-		pPullbackMotor->MoveAbsolute(StepMotorIndex::Both, config.stepMotor.pullbackDistance);
+	if (pPullbackMotor->IsOpen()) {
+		pPullbackMotor->MoveAbsolute(StepMotorIndex::Both, config.stepMotor.pullbackDistance, false);
+#if 0
 		while (pSystem->m_pThreadRotaryJunction->isRun) {
 			if (pPullbackMotor->IsMoving()) {
 				break;
@@ -1185,6 +1197,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 				Sleep(DELAY_FOR_STOP_THREAD);
 			}
 		}
+#endif
 	}
 	else {
 		Sleep(pullbackTime);
@@ -1195,8 +1208,12 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pSystem->m_pAcqDevice->SetWriter(nullptr);
 
 	// 4. Motor OFF
-	Sleep(500);
+	Sleep(1000);
 	pMotor->StopMotor();
+
+	// 5. Homing
+	pPullbackMotor->MoveAbsolute(StepMotorIndex::Both, 0);
+	pPullbackMotor->SetCurrent(StepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 
 	PLOGI.printf("Pullback done.");
 	CImagingSession* pSession = CImagingSession::CreateSession(pSystem, SESSION_REVIEW, settingPullback, pDataWriter);
@@ -1229,6 +1246,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 
 	// 2. Move Step-Motor (Pullback)
 	if (pPullbackMotor->IsOpen()) {
+		pPullbackMotor->SetCurrent(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
 		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_LOAD);
 
@@ -1271,10 +1289,13 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	CMotorController* pMotor = CMotorController::GetInstance();
 	CArduinoController* pPullbackMotor = pSystem->m_pPullbackMotor;
 
-	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterUnloading);
+	PLOGI.printf("Unload catheter");
+
+	pSystem->postPriorMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterUnloading);
 
 	if (pPullbackMotor->IsOpen()) {
 		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
+		pPullbackMotor->SetCurrent(StepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 	}
 	else if (pSystem->m_isTestMode)
@@ -1282,11 +1303,13 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 		Sleep(config.GetLoadCatheterTime() / 2);
 	}
 
-	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Unloaded);
+	pSystem->postPriorMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Unloaded);
 
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
 	}
+
+	PLOGI.printf("Unload catheter done.");
 
 	return NOERROR;
 }
@@ -1445,6 +1468,7 @@ int COCTSystem::connectRotaryJunction() {
 
 	if (!pMotor->IsConnected()) {
 		result &= pMotor->Connect(config.bldcMotor.port);
+		result &= pMotor->SetModeOfOperation(MOTOR_DATA_MODE_VELOCITY);
 		result &= pMotor->SwitchOn();
 	}
 
@@ -1462,6 +1486,12 @@ int COCTSystem::disconnectRotaryJunction() {
 	if (pMotor->IsConnected()) {
 		result &= pMotor->SwitchOff();
 	}
+
+	PLOGI.printf("Catheter State : %d", m_cathState);
+	if (m_cathState != CatheterState::Unloaded) {
+		CUtility::StartThread(threadUnloadCatheter, m_pThreadRotaryJunction, this);
+	}
+	CUtility::StopThread(m_pThreadRotaryJunction);
 
 	m_pPullbackMotor->Close();
 	m_pLaserModule->Close();

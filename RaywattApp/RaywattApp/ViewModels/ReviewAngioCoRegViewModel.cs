@@ -11,6 +11,14 @@ using System.Windows.Input;
 using System.Windows.Navigation;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
+using OpenCvSharp;
+using System.IO;
+using RaywattApp.Common.Annotation.Models;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using Point = System.Windows.Point;
+using System.Threading;
+using Newtonsoft.Json;
 
 namespace RaywattApp.ViewModels
 {
@@ -46,6 +54,115 @@ namespace RaywattApp.ViewModels
             get { return this._okCommand ?? (this._okCommand = new RelayCommand(Ok)); }
         }
 
+        private ICommand _resetCommand;
+        public ICommand ResetCommand
+        {
+            get { return this._resetCommand ?? (this._resetCommand = new RelayCommand(Reset)); }
+        }
+
+        public List<Mat> CrossSectionAngioImages { get; private set; }
+        private List<ImageSource> crossSectionAngioImageSources { get; set; }
+        public ImageSource CurrentAngioImage
+        {
+            get
+            {
+                if (crossSectionAngioImageSources != null && _angioFrameNumber >= 0 && _angioFrameNumber < crossSectionAngioImageSources.Count)
+                {
+                    return crossSectionAngioImageSources[_angioFrameNumber];
+                }
+                return null;
+            }
+        }
+
+        private Point _crossSectionMousePosition;
+        public Point CrossSectionMousePosition
+        {
+            get => _crossSectionMousePosition;
+            set
+            {
+                _crossSectionMousePosition = value;
+                OnPropertyChanged(nameof(CrossSectionMousePosition));
+            }
+        }
+
+        private List<AngioFrame> _angioTrackPoints;
+        public List<AngioFrame> AngioTrackPoints
+        {
+            get { return _angioTrackPoints; }
+            set 
+            {
+                _angioTrackPoints = value; 
+                OnPropertyChanged(nameof(AngioTrackPoints));
+            }
+        }
+
+        private int _angioFrameNumber;
+        public int AngioFrameNumber
+        {
+            get => _angioFrameNumber;
+            set
+            {
+                _angioFrameNumber = value;
+                OnPropertyChanged(nameof(AngioFrameNumber));
+                OnPropertyChanged(nameof(CurrentAngioImage));
+            }
+        }
+
+        private int _angioFrameLength;
+        public int AngioFrameLength
+        {
+            get => _angioFrameLength;
+            set
+            {
+                _angioFrameLength = value;
+                OnPropertyChanged(nameof(AngioFrameLength));
+            }
+        }
+
+        private bool _isAngioTrackCompleted;
+        public bool IsAngioTrackCompleted
+        {
+            get => _isAngioTrackCompleted;
+            set
+            {
+                _isAngioTrackCompleted= value;
+                OnPropertyChanged(nameof(IsAngioTrackCompleted));
+            }
+        }
+
+        private bool _isReset;
+        public bool IsReset
+        {
+            get => _isReset;
+            set
+            {
+                _isReset = value;
+                OnPropertyChanged(nameof(IsReset));
+            }
+        }
+
+        private bool _isResetOn;
+        public bool IsResetOn
+        {
+            get => _isResetOn;
+            set
+            {
+                _isResetOn = value;
+                OnPropertyChanged(nameof(IsResetOn));
+            }
+        }
+
+        private bool _isCancel;
+        public bool IsCancel
+        {
+            get => _isCancel;
+            set
+            {
+                _isReset = value;
+                OnPropertyChanged(nameof(IsCancel));
+            }
+        }
+
         public ReviewAngioCoRegViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
             _log.Debug("ReviewAngioCoRegViewModel");
@@ -54,6 +171,11 @@ namespace RaywattApp.ViewModels
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;
+
+            CrossSectionAngioImages = new List<Mat>();
+            crossSectionAngioImageSources = new List<ImageSource>();
+            AngioTrackPoints = new List<AngioFrame>();
+            ReadAngioFrames();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -87,8 +209,14 @@ namespace RaywattApp.ViewModels
         private void Cancel()
         {
             _log.Debug("Cancel");
-
+            IsCancel = true;
             GoToPreviousPage(false);
+        }
+
+        private void Reset()
+        {
+            _log.Debug("Reset");
+            IsReset = true;
         }
 
         private void GoToPreviousPage(bool isSave)
@@ -97,7 +225,7 @@ namespace RaywattApp.ViewModels
 
             if (isSave)
             {
-
+                SaveCoRegPoint();
             }
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
@@ -106,6 +234,64 @@ namespace RaywattApp.ViewModels
             parameter["prevStatus"] = PrevStatus;
             parameter["reviewStatus"] = ReviewStatus;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(ReviewStatus.CurrentPage) { Parameter = parameter });
+        }
+
+        private void SaveCoRegPoint()
+        {
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = PatientCase.Id;
+            sqlParameters["track_point"] = JsonConvert.SerializeObject(AngioTrackPoints, Formatting.Indented);
+            int nRows = _sqlManager.UpsertCoRegistration(sqlParameters);
+            if (nRows == 0)
+            {
+                _log.Error("Update Error");
+            }
+        }
+
+        void ReadAngioFrames()
+        {
+            int x1 = 240, y1 = 70, x2 = 780, y2 = 970;
+            string[] filePaths = Directory.GetFiles(@"C:\Raywatt\system\3rdparty\angioSamples", "*.angioframes");
+
+            foreach (string filePath in filePaths)
+            {
+                using (BinaryReader reader = new BinaryReader(System.IO.File.Open(filePath, FileMode.Open)))
+                {
+                    while (reader.BaseStream.Position != reader.BaseStream.Length)
+                    {
+                        int width = x2 - x1, height = y2 - y1;
+                        int channels = 1;
+
+                        byte[] data = reader.ReadBytes(1024 * 1024 * channels);
+                        Mat frame = new Mat(1024, 1024, MatType.CV_8UC1, data);
+
+                        OpenCvSharp.Rect roi = new OpenCvSharp.Rect(x1, y1, width, height);
+                        frame = new Mat(frame, roi);
+                        Cv2.Resize(frame, frame, new OpenCvSharp.Size(Constants.AngioSize, Constants.AngioSize));
+                        CrossSectionAngioImages.Add(frame);
+                        crossSectionAngioImageSources.Add(ConvertMatsToImageSource(frame));
+                    }
+                }
+                AngioFrameLength = crossSectionAngioImageSources.Count - 1;
+                break;
+            }
+        }
+
+        private ImageSource ConvertMatsToImageSource(Mat mat)
+        {
+            using (var stream = new MemoryStream())
+            {
+
+                mat.WriteToStream(stream, ".bmp");
+
+                var bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.StreamSource = stream;
+                bitmapImage.EndInit();
+                bitmapImage.Freeze();
+                return bitmapImage;
+            }
         }
     }
 }

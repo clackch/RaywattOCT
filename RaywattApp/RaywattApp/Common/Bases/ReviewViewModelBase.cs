@@ -150,8 +150,7 @@ namespace RaywattApp.Common.Bases
         {
             _log.Debug("Export");
 
-            if (!DeviceStatus.IsPaused)
-                Playback();
+            StopPlayback();
 
             //화면 변경 사항에 대해서도 Export 하기 위해서, Save 처리
             Save();
@@ -252,6 +251,16 @@ namespace RaywattApp.Common.Bases
                 default:
                     break;
             }
+        }
+
+        protected void StopPlayback()
+        {
+            if (!DeviceStatus.IsPaused)
+            {
+                Playback();
+                ReviewStatus.IsPlay = false;
+            }
+                
         }
     }
 }

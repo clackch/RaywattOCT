@@ -17,5 +17,5 @@ public:
 	static IRayLearning* GetInstance();
 	virtual ~IRayLearning();
 	virtual void Initialize(bool useGPU) = 0;
-	virtual std::vector<std::vector<cv::Point>> FindLumen(cv::Mat image) = 0;
+	virtual cv::Mat FindLumen(cv::Mat image) = 0;
 };

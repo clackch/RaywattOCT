@@ -100,10 +100,10 @@ Windows Default Mouse Cursor Setting (※ 필요 시 진행)
 4. "환경 변수 편집" 창이 뜨면 "새로 만들기"를 클릭한 후 C:\Raywatt\system\3rdparty를 추가
 5. 적용까지 완료 하면 OK
 
-## [3drparty]
+## [3rdparty]
 Download & Copy/Paste
 1. (https://github.com/Raywatt/RaywattOCT/issues/170) 에서 Raywatt One-Drive 링크 접속
-2. 3drparty 폴더를 다운로드 한 후, 폴더 자체를 C:\Raywatt\system에 추가
+2. 3rdparty 폴더를 다운로드 한 후, 폴더 자체를 C:\Raywatt\system에 추가
 
 ## [Executable file]
 1. Visual Studio Debug/Release Solution Clean > Release Build
@@ -178,3 +178,8 @@ Download & Copy/Paste
 ## Local 환경 설정 참고
 
 - App 종료 시, Power Off/Switch User가 호출되지 않도록 설정 방법(https://github.com/Raywatt/RaywattOCT/pull/173#issue-1892013269)
+
+  ※ 아래와 같이 buffer 컬럼에 본인 windows의 계정 추가 필요
+  
+  ![image](https://github.com/Raywatt/RaywattOCT/assets/110812182/03acbcd1-8f77-40fa-a29d-cfaac5860787)
+

@@ -459,6 +459,7 @@ namespace RaywattApp.ViewModels.File
                             patientCase.Image = GetStrValue(caseObj, "Image");
                             patientCase.PullbackType = GetStrValue(caseObj, "PullbackType");
                             patientCase.PullbackLength = GetStrValue(caseObj, "PullbackLength");
+                            patientCase.AngioYn = GetBoolValue(caseObj, "AngioYn");
                             patientCase.AngioCoRegistration = GetBoolValue(caseObj, "AngioCoRegistration");
                             patientCase.IndicatorDegree = GetDoubleValue(caseObj, "IndicatorDegree");
                             patientCase.PresetName = GetStrValue(caseObj, "PresetName");

@@ -21,6 +21,7 @@ extern "C" {
 	_declspec(dllexport) RayError RayUnloadCatheter();
 	_declspec(dllexport) RayError RayStartLiveView();
 	_declspec(dllexport) RayError RayStopLiveView();
+	_declspec(dllexport) RayError RayLaserOnOff(bool isOn);
 
 	_declspec(dllexport) RayError RayShowCalibrationGuide(bool show);
 	_declspec(dllexport) int RayStartReview(char *strFilePath);

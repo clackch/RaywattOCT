@@ -69,10 +69,8 @@ namespace RaywattApp.ViewModels
 
                     if (result != null && result.DialogAnswer == DialogResults.Answer.No)
                     {
+                        DeviceStatus.PowerOffMsg = _l10n["Switching user"];
                         CommonUtil.Exit(DeviceStatus);
-                        if (!CommonUtil.IsTestMode(DeviceStatus.TestMode, "Power"))
-                            Win32Helper.LogOff();
-                        return;
                     }
                 }
             }
@@ -111,6 +109,21 @@ namespace RaywattApp.ViewModels
             else if (DeviceStatus.IsServiceStarted && DeviceStatus.IsDeviceConnected)
             {
                 Progress = 100;
+            }
+            else if (isError)
+            {
+                _log.Error("RayStartSystem Error or RayConnectDevices Error");
+
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["title"] = _l10n["Error"];
+                parameter["message"] = _l10n[errorMsg];
+                parameter["error"] = true;
+                var resultDialog = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+                if (resultDialog != null && resultDialog.DialogAnswer == DialogResults.Answer.Undefined)
+                {
+                    CommonUtil.Exit(DeviceStatus, true);
+                }
             }
 
             Progress += 0.25;
