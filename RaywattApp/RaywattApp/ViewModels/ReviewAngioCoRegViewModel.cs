@@ -13,11 +13,10 @@ using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
 using OpenCvSharp;
 using System.IO;
-using RaywattApp.Common.Annotation.Models;
+using RaywattApp.Common.Angio;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Point = System.Windows.Point;
-using System.Threading;
 using Newtonsoft.Json;
 
 namespace RaywattApp.ViewModels
@@ -85,8 +84,8 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private List<AngioFrame> _angioTrackPoints;
-        public List<AngioFrame> AngioTrackPoints
+        private List<CoRegistration> _angioTrackPoints;
+        public List<CoRegistration> AngioTrackPoints
         {
             get { return _angioTrackPoints; }
             set 
@@ -174,7 +173,7 @@ namespace RaywattApp.ViewModels
 
             CrossSectionAngioImages = new List<Mat>();
             crossSectionAngioImageSources = new List<ImageSource>();
-            AngioTrackPoints = new List<AngioFrame>();
+            AngioTrackPoints = new List<CoRegistration>();
             ReadAngioFrames();
         }
 

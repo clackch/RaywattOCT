@@ -15,9 +15,8 @@ using System.Runtime.InteropServices;
 using RaywattApp.Common.Annotation.LiveWire;
 using LiveWire;
 using log4net;
-using RaywattApp.Common.Annotation.Models;
+using RaywattApp.Common.Angio;
 using System.Diagnostics;
-using SharpDX.Direct3D11;
 
 namespace RaywattApp.Common.Annotation
 {
@@ -53,14 +52,14 @@ namespace RaywattApp.Common.Annotation
         public static readonly DependencyProperty MousePositionProperty =
             DependencyProperty.Register("MousePosition", typeof(Point), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
 
-        public List<AngioFrame> AngioTrackPoints
+        public List<CoRegistration> AngioTrackPoints
         {
-            get { return (List<AngioFrame>)GetValue(AngioTrackPointsProperty); }
+            get { return (List<CoRegistration>)GetValue(AngioTrackPointsProperty); }
             set { this.SetValue(AngioTrackPointsProperty, value); }
         }
 
         public static readonly DependencyProperty AngioTrackPointsProperty =
-            DependencyProperty.Register("AngioTrackPoints", typeof(List<AngioFrame>), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
+            DependencyProperty.Register("AngioTrackPoints", typeof(List<CoRegistration>), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
 
         public bool IsAngioTrackCompleted
         {
@@ -99,7 +98,7 @@ namespace RaywattApp.Common.Annotation
         public static readonly DependencyProperty IsCancelProperty =
             DependencyProperty.Register("IsCancel", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(false, OnCancelPropertyChanged));
 
-        private String curveType = "Bezier"; // Bezier or Spline
+        private String curveType = "Spline"; // Bezier or Spline
         private BezierCurve bezierCurve;
         private SplineCurve splineCurve;
         private List<DijkstraHeap> dijkstraHeap;
@@ -324,15 +323,18 @@ namespace RaywattApp.Common.Annotation
                     right++;
                 }
 
-                if (left < leftEnd && right >= rightEnd) return;
+                if ((left < leftEnd && leftSideOnly) || (right >= rightEnd && rightSideOnly) || (left < leftEnd && right >= rightEnd)) return;
             }
         }
 
         async private void CalculateSubPathWhenModified(float x, float y, int index, int currFrameNum)
         {
+            IsAngioTrackCompleted = IsResetOn = false;
+
             int direction = currFrameNum - mainAngioFrameNum;
             await Task.Run(() =>
             {
+                
                 if (direction > 0) // 수정된 FrameNumber상 높은 이미지(들)만 -> rightSideOnly
                 {
                     PointTracking(x, y, 1, currFrameNum, index);
@@ -348,32 +350,29 @@ namespace RaywattApp.Common.Annotation
                     CalculateAllPath(currFrameNum, false, false);
                 }
             });
+
+            IsAngioTrackCompleted = IsResetOn = true;
         }
 
         // Spline
-        private void AddSplineCurvePoints(List<PointF> points, int frameIndex, AngioFrame angioFrame)
+        private void AddSplineCurvePoints(List<PointF> points, int frameIndex, CoRegistration coRegistration)
         {
             List<PointF> curvePointFs = splineCurve.GetSplinePoints(points, points.Count() * 2/* Spline 곡선을 점 몇개로 표현할 지 설정*/);
-            angioFrame.AngioFrameNumber = frameIndex;
-            angioFrame.TrackPoint = new List<Point>();
-            dijkstraHeap[frameIndex].line = new List<PointF>();
             foreach (PointF curvexy in curvePointFs)
             {
                 dijkstraHeap[frameIndex].line.Add(curvexy);
-                angioFrame.TrackPoint.Add(new Point(curvexy.X, curvexy.Y));
+                coRegistration.TrackPoint.Add(new Point(curvexy.X, curvexy.Y));
             }
-            AngioTrackPoints.Add(angioFrame);
         }
 
         // Bezier
-        void AddBezierCurvePoints(List<PointF> points, int frameIndex, int totalDistance, AngioFrame angioFrame)
+        void AddBezierCurvePoints(List<PointF> points, int frameIndex, int totalDistance, CoRegistration coRegistration)
         {
             List<PointF> curvePointFs = bezierCurve.GenerateBezierCurve(points[0], points[1], points[2], points[3], totalDistance/* Bezier 곡선을 점 몇개로 표현할 지 설정*/);
-            angioFrame.AngioFrameNumber = frameIndex;
             foreach (PointF curvexy in curvePointFs)
             {
                 dijkstraHeap[frameIndex].line.Add(curvexy);
-                angioFrame.TrackPoint.Add(new Point(curvexy.X, curvexy.Y));
+                coRegistration.TrackPoint.Add(new Point(curvexy.X, curvexy.Y));
             }
         }
 
@@ -383,31 +382,30 @@ namespace RaywattApp.Common.Annotation
             splineCurve = new SplineCurve();
             bezierCurve = new BezierCurve();
             int prevIndex, currIndex, distanceLimit, totalDistance, numOfPoints;
-            AngioFrame angioFrame = new AngioFrame();
 
-            // 모든 점 전달하여 Spline 곡선 형성
-            if (curveType == "Spline")
+            CoRegistration coRegistration = new CoRegistration();
+            coRegistration.TrackPoint = new List<Point>();
+            dijkstraHeap[frameIndex].line = new List<PointF>();
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                for (int i = 0; i < pathLength; i++)
+                // 모든 점 전달하여 Spline 곡선 형성
+                if (curveType == "Spline")
                 {
-                    points.Add(new PointF(vx[i], vy[i]));
+                    for (int i = 0; i < pathLength; i++)
+                    {
+                        points.Add(new PointF(vx[i], vy[i]));
+                    }
+
+                        AddSplineCurvePoints(points, frameIndex, coRegistration);
+
                 }
-                Application.Current.Dispatcher.Invoke(() =>
+                // 베지어의 경우 점을 4개씩 끊어서 전달하여 곡선 형성
+                else if (curveType == "Bezier")
                 {
-                    AddSplineCurvePoints(points, frameIndex, angioFrame);
-                });
-            }
-            // 베지어의 경우 점을 4개씩 끊어서 전달하여 곡선 형성
-            else if (curveType == "Bezier")
-            {
-                double distanceWeight = 0.2; // 보간을 위한 가중치 -> 클수록 보간할 점 개수가 적어져 곡선 표현이 불가능할 수 있음
-                angioFrame.TrackPoint = new List<Point>();
-                dijkstraHeap[frameIndex].line = new List<PointF>();
-                prevIndex = totalDistance = 0;
-                numOfPoints = 4; // 가이드 점 개수 (4-2)
-                distanceLimit = 10; // 점 간격
-                Application.Current.Dispatcher.Invoke(() =>
-                {
+                    double distanceWeight = 0.2; // 보간을 위한 가중치 -> 클수록 보간할 점 개수가 적어져 곡선 표현이 불가능할 수 있음
+                    prevIndex = totalDistance = 0;
+                    numOfPoints = 4; // 가이드 점 개수 (4-2)
+                    distanceLimit = 10; // 점 간격
                     for (currIndex = 0; currIndex < pathLength; currIndex++)
                     {
                         if (points.Count == 0)
@@ -420,7 +418,7 @@ namespace RaywattApp.Common.Annotation
                             {// 가이드 점 마지막 인덱스로 모두 추가 (최대 3개)
                                 points.Add(new PointF(vx[currIndex], vy[currIndex]));
                             }
-                            AddBezierCurvePoints(points, frameIndex, totalDistance - (int)(distanceWeight * totalDistance), angioFrame); // 가이드 점 2개와, 보간에 사용할 점 2개 전달.
+                            AddBezierCurvePoints(points, frameIndex, totalDistance - (int)(distanceWeight * totalDistance), coRegistration); // 가이드 점 2개와, 보간에 사용할 점 2개 전달.
                             points.Clear();
                         }
                         else if (pixelValue[currIndex] == 0)
@@ -429,7 +427,7 @@ namespace RaywattApp.Common.Annotation
                         }
                         else
                         { // 일반적인 가이드 점 추가
-                          // 최근에 추가된 가이드 점과 거리 계산
+                            // 최근에 추가된 가이드 점과 거리 계산
                             int tmpDistance = (Math.Abs(vx[prevIndex] - vx[currIndex]) + Math.Abs(vy[prevIndex] - vy[currIndex]));
                             if (tmpDistance > distanceLimit)
                             { // 이전 가이드 점과의 거리가 x+y > 10경우에 새로운 가이드 점으로 추가
@@ -441,15 +439,15 @@ namespace RaywattApp.Common.Annotation
 
                                 if (points.Count == numOfPoints)
                                 { // 가이드 점이 4(2 가이드, 2 보간)개인 경우엔 곡선 그리기.
-                                    AddBezierCurvePoints(points, frameIndex, totalDistance - (int)(distanceWeight * totalDistance), angioFrame);
+                                    AddBezierCurvePoints(points, frameIndex, totalDistance - (int)(distanceWeight * totalDistance), coRegistration);
                                     points.Clear();
                                 }
                             }
                         }
                     }
-                    AngioTrackPoints.Add(angioFrame);
-                });
-            }
+                }
+                AngioTrackPoints.Add(coRegistration);
+            });
         }
 
         private void CalculateMotionVector(Mat prevFrame, Mat nextFrame)
@@ -601,10 +599,9 @@ namespace RaywattApp.Common.Annotation
                         heap.trackPoint = new List<PointF>();
                     }
                 }
-                foreach (AngioFrame angioFrame in control.AngioTrackPoints) // DB에 업데이트 할 TrackPoint도 초기화
+                foreach (CoRegistration coRegistration in control.AngioTrackPoints) // DB에 업데이트 할 TrackPoint도 초기화
                 {
-                    angioFrame.AngioFrameNumber = 0;
-                    angioFrame.TrackPoint = new List<Point>();
+                    coRegistration.TrackPoint = new List<Point>();
                 }
                 control.canvas.Children.Clear();
                 control.IsReset = control.IsResetOn = false;
@@ -688,7 +685,7 @@ namespace RaywattApp.Common.Annotation
         private void Rectangle_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             var rectangle = sender as Rectangle;
-            if (rectangle != null)
+            if (rectangle != null && IsResetOn)
             {
                 Debug.WriteLine("Rectangle_MouseLeftButtonDown");
                 rectangle.CaptureMouse();
