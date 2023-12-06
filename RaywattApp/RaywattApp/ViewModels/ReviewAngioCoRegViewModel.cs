@@ -173,7 +173,6 @@ namespace RaywattApp.ViewModels
 
             CrossSectionAngioImages = new List<Mat>();
             crossSectionAngioImageSources = new List<ImageSource>();
-            AngioTrackPoints = new List<CoRegistration>();
             ReadAngioFrames();
         }
 
@@ -272,6 +271,11 @@ namespace RaywattApp.ViewModels
                     }
                 }
                 AngioFrameLength = crossSectionAngioImageSources.Count - 1;
+                AngioTrackPoints = new List<CoRegistration>(CrossSectionAngioImages.Count);
+                for (int i = 0; i < CrossSectionAngioImages.Count; i++)
+                {
+                    AngioTrackPoints.Add(new CoRegistration());
+                }
                 break;
             }
         }

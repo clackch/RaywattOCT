@@ -395,9 +395,7 @@ namespace RaywattApp.Common.Annotation
                     {
                         points.Add(new PointF(vx[i], vy[i]));
                     }
-
-                        AddSplineCurvePoints(points, frameIndex, coRegistration);
-
+                    AddSplineCurvePoints(points, frameIndex, coRegistration);
                 }
                 // 베지어의 경우 점을 4개씩 끊어서 전달하여 곡선 형성
                 else if (curveType == "Bezier")
@@ -446,7 +444,7 @@ namespace RaywattApp.Common.Annotation
                         }
                     }
                 }
-                AngioTrackPoints.Add(coRegistration);
+                AngioTrackPoints[frameIndex] = coRegistration;
             });
         }
 
