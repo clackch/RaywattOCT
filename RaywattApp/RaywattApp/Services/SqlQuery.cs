@@ -298,6 +298,13 @@ namespace RaywattApp.Services
                 SET bookmark=@bookmark, longitude=@longitude, cross_section=@cross_section
                 WHERE id = @id
                 ";
+
+            //UpdatePatientCaseAngioCoRegistration
+            _query["UpdatePatientCaseAngioCoRegistration"] = @$"
+                UPDATE rv_schema.patient_case
+                SET angio_co_registration=@angio_co_registration
+                WHERE id=@id
+                ";
         }
 
         private static void SetDeleteQuery()

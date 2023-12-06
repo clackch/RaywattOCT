@@ -223,7 +223,21 @@ namespace RaywattApp.ViewModels
 
             if (isSave)
             {
-                SaveCoRegPoint();
+                bool isCoRegSaved = false;
+                foreach(var coReg in AngioTrackPoints) // todo 지금은 이미지 전체가 아니라서 null이지만, 이미지 전체로 범위를 바꾸면 첫번째 인덱스만 확인하면 됨.
+                {
+                    if(coReg.TrackPoint.Count != 0) { 
+                        SaveCoRegPoint();
+                        UpdateCoRegStatus(true);
+                        isCoRegSaved = true;
+                        break;
+                    }
+                }
+
+                if (!isCoRegSaved)
+                {
+                    UpdateCoRegStatus(false);
+                }
             }
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
@@ -240,6 +254,18 @@ namespace RaywattApp.ViewModels
             sqlParameters["id"] = PatientCase.Id;
             sqlParameters["track_point"] = JsonConvert.SerializeObject(AngioTrackPoints, Formatting.Indented);
             int nRows = _sqlManager.UpsertCoRegistration(sqlParameters);
+            if (nRows == 0)
+            {
+                _log.Error("Update Error");
+            }
+        }
+
+        private void UpdateCoRegStatus(bool angioCoRegSaved)
+        {
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = PatientCase.Id;
+            sqlParameters["angio_co_registration"] = angioCoRegSaved;
+            int nRows = _sqlManager.UpdatePatientCaseAngioCoRegistration(sqlParameters);
             if (nRows == 0)
             {
                 _log.Error("Update Error");
