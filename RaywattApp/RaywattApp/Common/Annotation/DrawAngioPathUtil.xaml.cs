@@ -26,6 +26,7 @@ namespace RaywattApp.Common.Annotation
     public partial class DrawAngioPathUtil : UserControl
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(DrawAngioPathUtil));
+
         public int AngioFrameNumber
         {
             get { return (int)GetValue(AngioFrameNumberProperty); }
@@ -97,6 +98,15 @@ namespace RaywattApp.Common.Annotation
 
         public static readonly DependencyProperty IsCancelProperty =
             DependencyProperty.Register("IsCancel", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(false, OnCancelPropertyChanged));
+
+        public bool IsRendering
+        {
+            get { return (bool)GetValue(IsRenderingProperty); }
+            set { this.SetValue(IsRenderingProperty, value); }
+        }
+
+        public static readonly DependencyProperty IsRenderingProperty =
+            DependencyProperty.Register("IsRendering", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(default));
 
         private String curveType = "Spline"; // Bezier or Spline
         private BezierCurve bezierCurve;
@@ -330,6 +340,7 @@ namespace RaywattApp.Common.Annotation
         async private void CalculateSubPathWhenModified(float x, float y, int index, int currFrameNum)
         {
             IsAngioTrackCompleted = IsResetOn = false;
+            IsRendering = true;
 
             int direction = currFrameNum - mainAngioFrameNum;
             await Task.Run(() =>
@@ -351,6 +362,7 @@ namespace RaywattApp.Common.Annotation
                 }
             });
 
+            IsRendering = false;
             IsAngioTrackCompleted = IsResetOn = true;
         }
 
@@ -651,16 +663,17 @@ namespace RaywattApp.Common.Annotation
             // 두번째 점 이후
             else
             {
-                IsAngioTrackCompleted = IsResetOn = false;
-
                 dijkstraHeap[AngioFrameNumber].trackPoint.Add(clickPosition);
                 PointTracking(clickPosition.X, clickPosition.Y, 1, currFrameNum);
                 PointTracking(clickPosition.X, clickPosition.Y, -1, currFrameNum);
+
+                IsAngioTrackCompleted = IsResetOn = false;
+                IsRendering = true;
                 await Task.Run(() =>
                 {
                     CalculateAllPath(currFrameNum, false, false); // 나머지 프레임은 경로에 대한 정보만 갱신
                 });
-
+                IsRendering = false;
                 IsAngioTrackCompleted = IsResetOn = true;
             }
         }

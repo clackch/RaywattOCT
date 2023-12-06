@@ -57,13 +57,17 @@
                                     </RectangleGeometry>
                                 </Image.Clip>
                             </Image>
-                        </Grid>
-                        <annotation:DrawAngioPathUtil Grid.Column="0" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}"
-                                                      AngioImages="{Binding CrossSectionAngioImages}" AngioFrameNumber="{Binding AngioFrameNumber}" 
+                            <annotation:DrawAngioPathUtil Grid.Column="0" Width="{x:Static const:Constants.AngioSize}" Height ="{x:Static const:Constants.AngioSize}"
+                                                      AngioImages ="{Binding CrossSectionAngioImages}" AngioFrameNumber ="{Binding AngioFrameNumber}" 
                                                       MousePosition ="{Binding CrossSectionMousePosition, Mode=TwoWay}" AngioTrackPoints ="{Binding AngioTrackPoints, Mode=TwoWay}"
-                                                      IsAngioTrackCompleted ="{Binding IsAngioTrackCompleted, Mode=TwoWay}" IsReset="{Binding IsReset, Mode=TwoWay}"
-                                                      IsResetOn ="{Binding IsResetOn, Mode=TwoWay}" IsCancel ="{Binding IsCancel}"
+                                                      IsAngioTrackCompleted ="{Binding IsAngioTrackCompleted, Mode=TwoWay}" IsReset ="{Binding IsReset, Mode=TwoWay}"
+                                                      IsResetOn ="{Binding IsResetOn, Mode=TwoWay}" IsCancel ="{Binding IsCancel}" IsRendering ="{Binding IsRendering, Mode=TwoWay}"
                                                       Cursor="Cross"/>
+                            <Border>
+                                <!-- Loading -->
+                                <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding IsRendering, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            </Border>
+                        </Grid>
                         <Border Grid.Column="2" CornerRadius="8" Background="{DynamicResource GrayscaleGray6Brush}">
                             <Grid Margin="30,36,30,30" >
                                 <Grid.RowDefinitions>

@@ -59,6 +59,17 @@ namespace RaywattApp.ViewModels
             get { return this._resetCommand ?? (this._resetCommand = new RelayCommand(Reset)); }
         }
 
+        private bool _isRendering = false;
+        public bool IsRendering
+        {
+            get { return _isRendering; }
+            set
+            {
+                _isRendering = value;
+                OnPropertyChanged(nameof(IsRendering));
+            }
+        }
+
         public List<Mat> CrossSectionAngioImages { get; private set; }
         private List<ImageSource> crossSectionAngioImageSources { get; set; }
         public ImageSource CurrentAngioImage
