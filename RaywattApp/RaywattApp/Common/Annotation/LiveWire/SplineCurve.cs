@@ -1,10 +1,6 @@
 ﻿using MathNet.Numerics.Interpolation;
-using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Point = System.Windows.Point;
 
 namespace LiveWire

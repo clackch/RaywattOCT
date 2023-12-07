@@ -8,7 +8,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using Point = System.Windows.Point;
-using PointF = System.Drawing.PointF;
 using RaywattApp.Common.Bases;
 using OpenCvSharp;
 using System.Runtime.InteropServices;
@@ -17,8 +16,7 @@ using LiveWire;
 using log4net;
 using RaywattApp.Common.Angio;
 using System.Diagnostics;
-using SharpVectors.Dom.Events;
-using SharpDX.DXGI;
+using System.Threading;
 
 namespace RaywattApp.Common.Annotation
 {
@@ -126,6 +124,7 @@ namespace RaywattApp.Common.Annotation
         private int mainAngioFrameNum, angioImageNum;
         private bool isMoved = false;
         private int trackPointNum;
+        private CancellationTokenSource cancellationTokenSource;
 
         public DrawAngioPathUtil()
         {
@@ -285,7 +284,7 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
-        private void CalculateAllPath(int currFrameNum, bool leftSideOnly, bool rightSideOnly, int movedRecIndex)
+        private void CalculateAllPath(int currFrameNum, bool leftSideOnly, bool rightSideOnly, int movedRecIndex, CancellationToken token)
         {
             int left = currFrameNum, right = currFrameNum;
             int leftEnd, rightEnd;
@@ -317,10 +316,15 @@ namespace RaywattApp.Common.Annotation
                         Stopwatch instop = new Stopwatch();
                         instop.Start();
                         dijkstraHeap[left].run(startX, startY, endX, endY);
-                        dijkstraHeap[left].returnPath(endX, endY, vx, vy, out pathLength, pixelValue);
                         instop.Stop();
+                        dijkstraHeap[left].returnPath(endX, endY, vx, vy, out pathLength, pixelValue);
                         pathTime += instop.ElapsedMilliseconds;
                         GenerateCurvePath(vx, vy, pixelValue, left, pathLength, curveType, trackIndex);
+                    }
+
+                    if (token.IsCancellationRequested)
+                    {
+                        break;
                     }
 
                     if (!firstDraw)
@@ -345,10 +349,15 @@ namespace RaywattApp.Common.Annotation
                         Stopwatch instop = new Stopwatch();
                         instop.Start();
                         dijkstraHeap[right].run(startX, startY, endX, endY);
-                        dijkstraHeap[right].returnPath(endX, endY, vx, vy, out pathLength, pixelValue);
                         instop.Stop();
+                        dijkstraHeap[right].returnPath(endX, endY, vx, vy, out pathLength, pixelValue);
                         pathTime += instop.ElapsedMilliseconds;
                         GenerateCurvePath(vx, vy, pixelValue, right, pathLength, curveType, trackIndex);
+                    }
+
+                    if (token.IsCancellationRequested)
+                    {
+                        break;
                     }
 
                     if (!firstDraw)
@@ -375,24 +384,26 @@ namespace RaywattApp.Common.Annotation
             IsRendering = true;
 
             int direction = currFrameNum - mainAngioFrameNum;
+            cancellationTokenSource = new CancellationTokenSource();
+            var token = cancellationTokenSource.Token;
+
             await Task.Run(() =>
             {
-                
                 if (direction > 0) // 수정된 FrameNumber상 높은 이미지(들)만 -> rightSideOnly
                 {
                     PointTracking(x, y, 1, currFrameNum, index);
-                    CalculateAllPath(currFrameNum, false, true, index);
+                    CalculateAllPath(currFrameNum, false, true, index, token);
                 }
                 else if (direction < 0) // 수정된 FrameNumber상 낮은 이미지(들)만 -> leftSideOnly
                 {
                     PointTracking(x, y, -1, currFrameNum, index);
-                    CalculateAllPath(currFrameNum, true, false, index);
+                    CalculateAllPath(currFrameNum, true, false, index, token);
                 }
                 else // 전체
                 {
-                    CalculateAllPath(currFrameNum, false, false, index);
+                    CalculateAllPath(currFrameNum, false, false, index, token);
                 }
-            });
+            }, token);
 
             IsRendering = false;
             IsAngioTrackCompleted = IsResetOn = true;
@@ -583,7 +594,8 @@ namespace RaywattApp.Common.Annotation
         }
         private void setDHLegacy()
         {
-            for(int i = 0; i < dijkstraHeap.Count; i++)
+            dijkstraHeapLegacy = new List<DijkstraHeap>();
+            for (int i = 0; i < dijkstraHeap.Count; i++)
             {
                 dijkstraHeapLegacy.Add(null);
                 dijkstraHeapLegacy[i] = dijkstraHeap[i];
@@ -598,6 +610,14 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
+        private void CancelTask()
+        {
+            if (cancellationTokenSource != null)
+            {
+                cancellationTokenSource.Cancel();
+            }
+        }
+
         #endregion
 
         #region PropertyEvent
@@ -609,10 +629,8 @@ namespace RaywattApp.Common.Annotation
             if (newImages.Count > 0)
             {
                 control.dijkstraHeap = new List<DijkstraHeap>();
-                control.dijkstraHeapLegacy = new List<DijkstraHeap>();
                 control.motionVector = new List<Mat>();
                 control.angioImageNum = newImages.Count;
-                control.trackPointNum = 0;
                 control.ImageProcessing(newImages);
             }
         }
@@ -638,7 +656,7 @@ namespace RaywattApp.Common.Annotation
                     foreach (DijkstraHeap heap in control.dijkstraHeap) // 새로운 경로 받기 위한 초기화
                     {
                         List<List<Point>> newPoints = new List<List<Point>>();
-                        for (int i = 0; i < control.dijkstraHeap[0].line.Count; i++)
+                        for (int i = 0; i < control.trackPointNum-1; i++)
                         {
                             newPoints.Add(new List<Point>());
                         }
@@ -661,6 +679,7 @@ namespace RaywattApp.Common.Annotation
         private static void OnCancelPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
             var control = (DrawAngioPathUtil)dependencyObject;
+            control.CancelTask();
 
             if ((bool)dependencyPropertyChangedEventArgs.NewValue)
             {
@@ -677,7 +696,7 @@ namespace RaywattApp.Common.Annotation
 
         private static void OnOkPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
-            var control = (DrawAngioPathUtil)(DependencyObject)dependencyObject;
+            var control = (DrawAngioPathUtil)dependencyObject;
             control.AngioTrackPoints.Clear();
 
             for (int i = 0; i<control.angioImageNum; i++)
@@ -716,10 +735,10 @@ namespace RaywattApp.Common.Annotation
             // 첫번째 점
             if (dijkstraHeap[AngioFrameNumber].trackPoint.Count == 0)
             {
+                trackPointNum = 1;
                 dijkstraHeap[AngioFrameNumber].trackPoint.Add(clickPosition);
                 PointTracking(clickPosition.X, clickPosition.Y, 1, currFrameNum);
                 PointTracking(clickPosition.X, clickPosition.Y, -1, currFrameNum);
-                trackPointNum++;
 
                 IsResetOn = true;
                 return;
@@ -734,10 +753,14 @@ namespace RaywattApp.Common.Annotation
 
                 IsAngioTrackCompleted = IsResetOn = false;
                 IsRendering = true;
+
+                cancellationTokenSource = new CancellationTokenSource();
+                var token = cancellationTokenSource.Token;
                 await Task.Run(() =>
                 {
-                    CalculateAllPath(currFrameNum, false, false, trackPointNum-1);
-                });
+                    CalculateAllPath(currFrameNum, false, false, trackPointNum - 1, token);
+                }, token);
+
                 IsRendering = false;
                 IsAngioTrackCompleted = IsResetOn = true;
             }

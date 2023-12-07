@@ -168,7 +168,7 @@ namespace RaywattApp.ViewModels
             get => _isCancel;
             set
             {
-                _isReset = value;
+                _isCancel = value;
                 OnPropertyChanged(nameof(IsCancel));
             }
         }
