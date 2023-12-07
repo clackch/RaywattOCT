@@ -62,7 +62,7 @@
                                                       MousePosition ="{Binding CrossSectionMousePosition, Mode=TwoWay}" AngioTrackPoints ="{Binding AngioTrackPoints, Mode=TwoWay}"
                                                       IsAngioTrackCompleted ="{Binding IsAngioTrackCompleted, Mode=TwoWay}" IsReset ="{Binding IsReset, Mode=TwoWay}"
                                                       IsResetOn ="{Binding IsResetOn, Mode=TwoWay}" IsCancel ="{Binding IsCancel}" IsRendering ="{Binding IsRendering, Mode=TwoWay}"
-                                                      Cursor="Cross"/>
+                                                      IsOk ="{Binding IsOk}" Cursor="Cross"/>
                             <Border>
                                 <!-- Loading -->
                                 <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding IsRendering, Converter={StaticResource BoolToVisibilityConverter}}"/>

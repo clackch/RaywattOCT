@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Diagnostics.SymbolStore;
-using PointF = System.Drawing.PointF;
+using Point = System.Windows.Point;
 using log4net;
 using RaywattApp.ViewModels;
 
@@ -33,8 +33,8 @@ namespace RaywattApp.Common.Annotation.LiveWire
 
         double[][] pCosts;// for debugging reasons
 
-        public List<PointF> line;
-        public List<PointF> trackPoint;
+        public List<List<Point>> line;
+        public List<Point> trackPoint;
         // converts x, y coordinates to vector index
         private int toIndex(int x, int y)
         {
@@ -45,8 +45,12 @@ namespace RaywattApp.Common.Annotation.LiveWire
         // parameter : image data, width, height
         public DijkstraHeap(byte[] image, int x, int y)
         {
-            line = new List<PointF>();
-            trackPoint = new List<PointF>();
+            line = new List<List<Point>>();
+            for (int i = 0; i<9; i++) // Track Point 개수 10개로 제한. 즉, 구간(line)은 총 9개
+            {
+                line.Add(new List<Point>());
+            }
+            trackPoint = new List<Point>();
 
             // 최단 경로 계산에 사용되는 가중치 값
             gradientMagnitude = 0.43; // 경로 weight(거리) 가중치

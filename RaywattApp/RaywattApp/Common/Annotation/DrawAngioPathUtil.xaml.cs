@@ -17,6 +17,8 @@ using LiveWire;
 using log4net;
 using RaywattApp.Common.Angio;
 using System.Diagnostics;
+using SharpVectors.Dom.Events;
+using SharpDX.DXGI;
 
 namespace RaywattApp.Common.Annotation
 {
@@ -106,16 +108,24 @@ namespace RaywattApp.Common.Annotation
         }
 
         public static readonly DependencyProperty IsRenderingProperty =
-            DependencyProperty.Register("IsRendering", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(default));
+            DependencyProperty.Register("IsRendering", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(false));
+
+        public bool IsOk
+        {
+            get { return (bool)GetValue(IsOkProperty); }
+            set { this.SetValue(IsOkProperty, value); }
+        }
+
+        public static readonly DependencyProperty IsOkProperty =
+            DependencyProperty.Register("IsOk", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(false, OnOkPropertyChanged));
 
         private String curveType = "Spline"; // Bezier or Spline
-        private BezierCurve bezierCurve;
-        private SplineCurve splineCurve;
         private List<DijkstraHeap> dijkstraHeap;
         private List<DijkstraHeap> dijkstraHeapLegacy;
         private List<Mat> motionVector;
         private int mainAngioFrameNum, angioImageNum;
         private bool isMoved = false;
+        private int trackPointNum;
 
         public DrawAngioPathUtil()
         {
@@ -247,18 +257,21 @@ namespace RaywattApp.Common.Annotation
         public void DrawPath(DijkstraHeap dh)
         {
             //선 그리기
-            foreach (PointF pathPoint in dh.line)
+            foreach (List<Point> pathPoints in dh.line)
             {
-                Ellipse path = new Ellipse();
-                path.Style = (Style)this.Resources["StylePathEllipse"];
-                Canvas.SetLeft(path, pathPoint.X - path.Width / 2);
-                Canvas.SetTop(path, pathPoint.Y - path.Height / 2);
-                this.canvas.Children.Add(path);
+                foreach (var pathPoint in pathPoints)
+                {
+                    Ellipse path = new Ellipse();
+                    path.Style = (Style)this.Resources["StylePathEllipse"];
+                    Canvas.SetLeft(path, pathPoint.X - path.Width / 2);
+                    Canvas.SetTop(path, pathPoint.Y - path.Height / 2);
+                    this.canvas.Children.Add(path);
+                }
             }
 
             // 추적된 점 그리기
             int count = 0;
-            foreach (PointF trackPoint in dh.trackPoint)
+            foreach (Point trackPoint in dh.trackPoint)
             {
                 Rectangle rectangle = new Rectangle();
                 AddRecEvents(rectangle);
@@ -272,33 +285,42 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
-        private void CalculateAllPath(int currFrameNum, bool leftSideOnly, bool rightSideOnly)
+        private void CalculateAllPath(int currFrameNum, bool leftSideOnly, bool rightSideOnly, int movedRecIndex)
         {
             int left = currFrameNum, right = currFrameNum;
             int leftEnd, rightEnd;
             leftEnd = currFrameNum - 10 >= 0 ? currFrameNum - 10 : 0;
-            rightEnd = currFrameNum + 10 <= angioImageNum ? currFrameNum + 10 : angioImageNum;
+            rightEnd = currFrameNum + 10 <= angioImageNum ? currFrameNum + 10 : angioImageNum; // todo 테스트에 시간이 오래 걸려 최대 약 20장만 Pathfinding -> 전체로 바꿔줘야 함.
             int[] vx, vy, pixelValue;
             int startX, startY, endX, endY, pathLength;
             bool firstDraw = false;
+            long pathTime = 0;
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
 
-            // 현재 프레임 표현을 위한 값조정.
+            int movedRecPrevIndex = movedRecIndex == 0 ? 0 : movedRecIndex - 1; // 첫번째 점 수정 : 마지막 점 수정 or 중간 점 수정, 단 점 추가는 항상
+            int centerPos = trackPointNum - movedRecIndex >= 2 ? 1 : 0 ; // 수정할 점이 중간에 있는 경우엔 Path를 두개 변경해야 하므로, centerPos를 초기화.
+
             while (true)
             {
                 if (left >= leftEnd && !rightSideOnly)
                 {
-                    for (int numOfTrackPoint = 0; numOfTrackPoint < dijkstraHeap[left].trackPoint.Count - 1; numOfTrackPoint++)
+                    for (int trackIndex = movedRecPrevIndex; trackIndex < movedRecIndex + centerPos; trackIndex++)
                     {
                         vx = new int[dijkstraHeap[left].width * dijkstraHeap[left].height];
                         vy = new int[dijkstraHeap[left].width * dijkstraHeap[left].height];
                         pixelValue = new int[dijkstraHeap[left].width * dijkstraHeap[left].height];
-                        startX = (int)dijkstraHeap[left].trackPoint[numOfTrackPoint].X;
-                        startY = (int)dijkstraHeap[left].trackPoint[numOfTrackPoint].Y;
-                        endX = (int)dijkstraHeap[left].trackPoint[numOfTrackPoint + 1].X;
-                        endY = (int)dijkstraHeap[left].trackPoint[numOfTrackPoint + 1].Y;
+                        startX = (int)dijkstraHeap[left].trackPoint[trackIndex].X;
+                        startY = (int)dijkstraHeap[left].trackPoint[trackIndex].Y;
+                        endX = (int)dijkstraHeap[left].trackPoint[trackIndex + 1].X;
+                        endY = (int)dijkstraHeap[left].trackPoint[trackIndex + 1].Y;
+                        Stopwatch instop = new Stopwatch();
+                        instop.Start();
                         dijkstraHeap[left].run(startX, startY, endX, endY);
                         dijkstraHeap[left].returnPath(endX, endY, vx, vy, out pathLength, pixelValue);
-                        GenerateCurvePath(vx, vy, pixelValue, left, pathLength, curveType);
+                        instop.Stop();
+                        pathTime += instop.ElapsedMilliseconds;
+                        GenerateCurvePath(vx, vy, pixelValue, left, pathLength, curveType, trackIndex);
                     }
 
                     if (!firstDraw)
@@ -311,18 +333,22 @@ namespace RaywattApp.Common.Annotation
 
                 if (right < rightEnd && !leftSideOnly)
                 {
-                    for (int numOfTrackPoint = 0; numOfTrackPoint < dijkstraHeap[right].trackPoint.Count - 1; numOfTrackPoint++)
+                    for (int trackIndex = movedRecPrevIndex; trackIndex < movedRecIndex + centerPos; trackIndex++)
                     {
                         vx = new int[dijkstraHeap[right].width * dijkstraHeap[right].height];
                         vy = new int[dijkstraHeap[right].width * dijkstraHeap[right].height];
                         pixelValue = new int[dijkstraHeap[right].width * dijkstraHeap[right].height];
-                        startX = (int)dijkstraHeap[right].trackPoint[numOfTrackPoint].X;
-                        startY = (int)dijkstraHeap[right].trackPoint[numOfTrackPoint].Y;
-                        endX = (int)dijkstraHeap[right].trackPoint[numOfTrackPoint + 1].X;
-                        endY = (int)dijkstraHeap[right].trackPoint[numOfTrackPoint + 1].Y;
+                        startX = (int)dijkstraHeap[right].trackPoint[trackIndex].X;
+                        startY = (int)dijkstraHeap[right].trackPoint[trackIndex].Y;
+                        endX = (int)dijkstraHeap[right].trackPoint[trackIndex + 1].X;
+                        endY = (int)dijkstraHeap[right].trackPoint[trackIndex + 1].Y;
+                        Stopwatch instop = new Stopwatch();
+                        instop.Start();
                         dijkstraHeap[right].run(startX, startY, endX, endY);
                         dijkstraHeap[right].returnPath(endX, endY, vx, vy, out pathLength, pixelValue);
-                        GenerateCurvePath(vx, vy, pixelValue, right, pathLength, curveType);
+                        instop.Stop();
+                        pathTime += instop.ElapsedMilliseconds;
+                        GenerateCurvePath(vx, vy, pixelValue, right, pathLength, curveType, trackIndex);
                     }
 
                     if (!firstDraw)
@@ -333,7 +359,13 @@ namespace RaywattApp.Common.Annotation
                     right++;
                 }
 
-                if ((left < leftEnd && leftSideOnly) || (right >= rightEnd && rightSideOnly) || (left < leftEnd && right >= rightEnd)) return;
+                if ((left < leftEnd && leftSideOnly) || (right >= rightEnd && rightSideOnly) || (left < leftEnd && right >= rightEnd))
+                {
+                    stopwatch.Stop();
+                    Debug.WriteLine("Heap Only 경과 시간: {0}ms", pathTime);
+                    Debug.WriteLine("총 경과 시간: {0}ms", stopwatch.ElapsedMilliseconds);
+                    return;
+                }
             }
         }
 
@@ -349,16 +381,16 @@ namespace RaywattApp.Common.Annotation
                 if (direction > 0) // 수정된 FrameNumber상 높은 이미지(들)만 -> rightSideOnly
                 {
                     PointTracking(x, y, 1, currFrameNum, index);
-                    CalculateAllPath(currFrameNum, false, true);
+                    CalculateAllPath(currFrameNum, false, true, index);
                 }
                 else if (direction < 0) // 수정된 FrameNumber상 낮은 이미지(들)만 -> leftSideOnly
                 {
                     PointTracking(x, y, -1, currFrameNum, index);
-                    CalculateAllPath(currFrameNum, true, false);
+                    CalculateAllPath(currFrameNum, true, false, index);
                 }
                 else // 전체
                 {
-                    CalculateAllPath(currFrameNum, false, false);
+                    CalculateAllPath(currFrameNum, false, false, index);
                 }
             });
 
@@ -367,37 +399,43 @@ namespace RaywattApp.Common.Annotation
         }
 
         // Spline
-        private void AddSplineCurvePoints(List<PointF> points, int frameIndex, CoRegistration coRegistration)
+        private void AddSplineCurvePoints(List<Point> points, int frameIndex, int lineIndex)
         {
-            List<PointF> curvePointFs = splineCurve.GetSplinePoints(points, points.Count() * 2/* Spline 곡선을 점 몇개로 표현할 지 설정*/);
-            foreach (PointF curvexy in curvePointFs)
+            SplineCurve splineCurve = new SplineCurve();
+            List<Point> curvePointFs = splineCurve.GetSplinePoints(points, points.Count() * 2/* Spline 곡선을 점 몇개로 표현할 지 설정*/);
+
+            foreach (Point curvexy in curvePointFs)
             {
-                dijkstraHeap[frameIndex].line.Add(curvexy);
-                coRegistration.TrackPoint.Add(new Point(curvexy.X, curvexy.Y));
+                dijkstraHeap[frameIndex].line[lineIndex].Add(curvexy);
             }
         }
 
         // Bezier
-        void AddBezierCurvePoints(List<PointF> points, int frameIndex, int totalDistance, CoRegistration coRegistration)
+        void AddBezierCurvePoints(List<Point> points, int frameIndex, int totalDistance, int lineIndex)
         {
-            List<PointF> curvePointFs = bezierCurve.GenerateBezierCurve(points[0], points[1], points[2], points[3], totalDistance/* Bezier 곡선을 점 몇개로 표현할 지 설정*/);
-            foreach (PointF curvexy in curvePointFs)
+            BezierCurve bezierCurve = new BezierCurve();
+            List<Point> curvePointFs = bezierCurve.GenerateBezierCurve(points[0], points[1], points[2], points[3], totalDistance/* Bezier 곡선을 점 몇개로 표현할 지 설정*/);
+            foreach (Point curvexy in curvePointFs)
             {
-                dijkstraHeap[frameIndex].line.Add(curvexy);
-                coRegistration.TrackPoint.Add(new Point(curvexy.X, curvexy.Y));
+                dijkstraHeap[frameIndex].line[lineIndex].Add(curvexy);
             }
         }
 
-        private void GenerateCurvePath(int[] vx, int[] vy, int[] pixelValue, int frameIndex, int pathLength, string curveType)
+        private void GenerateCurvePath(int[] vx, int[] vy, int[] pixelValue, int frameIndex, int pathLength, string curveType, int lineIndex)
         {
-            List<PointF> points = new List<PointF>();
-            splineCurve = new SplineCurve();
-            bezierCurve = new BezierCurve();
+            // line 자체를 List로 가지고 있으면서, Index를 조절하여 어디구간의 경로인지 파악하여 처리해야 됨.
+            List<Point> points = new List<Point>();
             int prevIndex, currIndex, distanceLimit, totalDistance, numOfPoints;
 
-            CoRegistration coRegistration = new CoRegistration();
-            coRegistration.TrackPoint = new List<Point>();
-            dijkstraHeap[frameIndex].line = new List<PointF>();
+            if (lineIndex >= dijkstraHeap[frameIndex].line.Count) // 배열 크기를 넘어선 경우 추가 작업
+            {
+                dijkstraHeap[frameIndex].line.Add(new List<Point>());
+            }
+            else // 수정 작업
+            {
+                dijkstraHeap[frameIndex].line[lineIndex] = new List<Point>();
+            }
+
             Application.Current.Dispatcher.Invoke(() =>
             {
                 // 모든 점 전달하여 Spline 곡선 형성
@@ -405,9 +443,9 @@ namespace RaywattApp.Common.Annotation
                 {
                     for (int i = 0; i < pathLength; i++)
                     {
-                        points.Add(new PointF(vx[i], vy[i]));
+                        points.Add(new Point(vx[i], vy[i]));
                     }
-                    AddSplineCurvePoints(points, frameIndex, coRegistration);
+                    AddSplineCurvePoints(points, frameIndex, lineIndex);
                 }
                 // 베지어의 경우 점을 4개씩 끊어서 전달하여 곡선 형성
                 else if (curveType == "Bezier")
@@ -420,15 +458,15 @@ namespace RaywattApp.Common.Annotation
                     {
                         if (points.Count == 0)
                         {// 가이드 점이 없는 경우 1개 추가
-                            points.Add(new PointF(vx[prevIndex], vy[prevIndex]));
+                            points.Add(new Point(vx[prevIndex], vy[prevIndex]));
                         }
                         else if (currIndex == pathLength - 1 && points.Count < numOfPoints)
                         {// 가이드 점이 3개 이하인데, 경로의 마지막 인덱스에 도달한 경우
                             for (int k = points.Count; k < numOfPoints; k++)
                             {// 가이드 점 마지막 인덱스로 모두 추가 (최대 3개)
-                                points.Add(new PointF(vx[currIndex], vy[currIndex]));
+                                points.Add(new Point(vx[currIndex], vy[currIndex]));
                             }
-                            AddBezierCurvePoints(points, frameIndex, totalDistance - (int)(distanceWeight * totalDistance), coRegistration); // 가이드 점 2개와, 보간에 사용할 점 2개 전달.
+                            AddBezierCurvePoints(points, frameIndex, totalDistance - (int)(distanceWeight * totalDistance), lineIndex); // 가이드 점 2개와, 보간에 사용할 점 2개 전달.
                             points.Clear();
                         }
                         else if (pixelValue[currIndex] == 0)
@@ -441,7 +479,7 @@ namespace RaywattApp.Common.Annotation
                             int tmpDistance = (Math.Abs(vx[prevIndex] - vx[currIndex]) + Math.Abs(vy[prevIndex] - vy[currIndex]));
                             if (tmpDistance > distanceLimit)
                             { // 이전 가이드 점과의 거리가 x+y > 10경우에 새로운 가이드 점으로 추가
-                                points.Add(new PointF(vx[currIndex], vy[currIndex]));
+                                points.Add(new Point(vx[currIndex], vy[currIndex]));
                                 //가이드 점 이동
                                 prevIndex = currIndex;
                                 // 총 거리에 추가 -> 추후 곡선 분할 기준으로 사용
@@ -449,14 +487,13 @@ namespace RaywattApp.Common.Annotation
 
                                 if (points.Count == numOfPoints)
                                 { // 가이드 점이 4(2 가이드, 2 보간)개인 경우엔 곡선 그리기.
-                                    AddBezierCurvePoints(points, frameIndex, totalDistance - (int)(distanceWeight * totalDistance), coRegistration);
+                                    AddBezierCurvePoints(points, frameIndex, totalDistance - (int)(distanceWeight * totalDistance), lineIndex);
                                     points.Clear();
                                 }
                             }
                         }
                     }
                 }
-                AngioTrackPoints[frameIndex] = coRegistration;
             });
         }
 
@@ -478,9 +515,9 @@ namespace RaywattApp.Common.Annotation
             motionVector.Add(flow);
         }
 
-        private void PointTracking(float x, float y, int direction, int currFrameNum, int pointPosModifiedIndex = -1)
+        private void PointTracking(double x, double y, int direction, int currFrameNum, int pointPosModifiedIndex = -1)
         {
-            PointF prevPoint = new PointF(x, y);
+            Point prevPoint = new Point(x, y);
             int halfSize = 5; // halfSize*2 x halfSize*2 크기 -> 최적 파라미터 찾을 필요 있음. todo
             int startIndex;
 
@@ -518,7 +555,7 @@ namespace RaywattApp.Common.Annotation
 
                 Vec2f averageVector = new Vec2f(sumVector.Item0 / count, sumVector.Item1 / count);
 
-                PointF currPoint = new PointF(prevPoint.X + (direction) * averageVector.Item0, prevPoint.Y + (direction) * averageVector.Item1);
+                Point currPoint = new Point(prevPoint.X + (direction) * averageVector.Item0, prevPoint.Y + (direction) * averageVector.Item1);
 
                 //Check Boundary
                 if (currPoint.X < 0) currPoint.X = 0;
@@ -575,6 +612,7 @@ namespace RaywattApp.Common.Annotation
                 control.dijkstraHeapLegacy = new List<DijkstraHeap>();
                 control.motionVector = new List<Mat>();
                 control.angioImageNum = newImages.Count;
+                control.trackPointNum = 0;
                 control.ImageProcessing(newImages);
             }
         }
@@ -596,22 +634,24 @@ namespace RaywattApp.Common.Annotation
                 if (control.dijkstraHeap[currFrameNum].trackPoint.Count >= 2) // 경로가 있는 경우
                 {
                     control.setDHLegacy();
+
                     foreach (DijkstraHeap heap in control.dijkstraHeap) // 새로운 경로 받기 위한 초기화
                     {
-                        heap.line = new List<PointF>();
-                        heap.trackPoint = new List<PointF>();
+                        List<List<Point>> newPoints = new List<List<Point>>();
+                        for (int i = 0; i < control.dijkstraHeap[0].line.Count; i++)
+                        {
+                            newPoints.Add(new List<Point>());
+                        }
+                        heap.line = newPoints;
+                        heap.trackPoint = new List<Point>();
                     }
                 }
                 else if (control.dijkstraHeap[currFrameNum].trackPoint.Count == 1) // 경로는 없지만 첫번째 포인트를 찍은 경우
                 {
                     foreach (DijkstraHeap heap in control.dijkstraHeap) 
                     {
-                        heap.trackPoint = new List<PointF>();
+                        heap.trackPoint = new List<Point>();
                     }
-                }
-                foreach (CoRegistration coRegistration in control.AngioTrackPoints) // DB에 업데이트 할 TrackPoint도 초기화
-                {
-                    coRegistration.TrackPoint = new List<Point>();
                 }
                 control.canvas.Children.Clear();
                 control.IsReset = control.IsResetOn = false;
@@ -635,13 +675,34 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
+        private static void OnOkPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
+        {
+            var control = (DrawAngioPathUtil)(DependencyObject)dependencyObject;
+            control.AngioTrackPoints.Clear();
+
+            for (int i = 0; i<control.angioImageNum; i++)
+            {
+                CoRegistration coRegistration= new CoRegistration();
+                coRegistration.TrackPoint = new List<Point>();
+
+                foreach (List<Point> trackPoint in control.dijkstraHeap[i].line)
+                {
+                    foreach(Point point in trackPoint)
+                    {
+                        coRegistration.TrackPoint.Add(point);
+                    }
+                }
+                control.AngioTrackPoints.Add(coRegistration);
+            }
+        }
+
         #endregion
 
         #region MouseEvent
 
         async private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            PointF clickPosition = new PointF((float)e.GetPosition(canvas).X, (float)e.GetPosition(canvas).Y);
+            Point clickPosition = new Point((float)e.GetPosition(canvas).X, (float)e.GetPosition(canvas).Y);
             Rectangle rectangle = new Rectangle();
             AddRecEvents(rectangle);
             Canvas.SetLeft(rectangle, clickPosition.X - Constants.AnnotationRectWidth / 2);
@@ -650,6 +711,7 @@ namespace RaywattApp.Common.Annotation
 
             int imageLength = AngioImages.Count;
             int currFrameNum = mainAngioFrameNum = AngioFrameNumber;
+            
 
             // 첫번째 점
             if (dijkstraHeap[AngioFrameNumber].trackPoint.Count == 0)
@@ -657,6 +719,8 @@ namespace RaywattApp.Common.Annotation
                 dijkstraHeap[AngioFrameNumber].trackPoint.Add(clickPosition);
                 PointTracking(clickPosition.X, clickPosition.Y, 1, currFrameNum);
                 PointTracking(clickPosition.X, clickPosition.Y, -1, currFrameNum);
+                trackPointNum++;
+
                 IsResetOn = true;
                 return;
             }
@@ -666,12 +730,13 @@ namespace RaywattApp.Common.Annotation
                 dijkstraHeap[AngioFrameNumber].trackPoint.Add(clickPosition);
                 PointTracking(clickPosition.X, clickPosition.Y, 1, currFrameNum);
                 PointTracking(clickPosition.X, clickPosition.Y, -1, currFrameNum);
+                trackPointNum++;
 
                 IsAngioTrackCompleted = IsResetOn = false;
                 IsRendering = true;
                 await Task.Run(() =>
                 {
-                    CalculateAllPath(currFrameNum, false, false); // 나머지 프레임은 경로에 대한 정보만 갱신
+                    CalculateAllPath(currFrameNum, false, false, trackPointNum-1);
                 });
                 IsRendering = false;
                 IsAngioTrackCompleted = IsResetOn = true;
@@ -719,7 +784,7 @@ namespace RaywattApp.Common.Annotation
                     float x = (float)(Canvas.GetLeft(rectangle) + rectangle.Width / 2);
                     float y = (float)(Canvas.GetTop(rectangle) + rectangle.Height / 2);
                     
-                    dijkstraHeap[AngioFrameNumber].trackPoint[index] = new PointF(x, y);
+                    dijkstraHeap[AngioFrameNumber].trackPoint[index] = new Point(x, y);
 
                     CalculateSubPathWhenModified(x, y, index, AngioFrameNumber);
                     isMoved = false;

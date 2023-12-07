@@ -5,18 +5,18 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using PointF = System.Drawing.PointF;
+using Point = System.Windows.Point;
 
 namespace LiveWire
 {
     public class SplineCurve
     {
-        public List<PointF> GetSplinePoints(List<PointF> points, int segments)
+        public List<Point> GetSplinePoints(List<Point> points, int segments)
         {
             int distanceLimit = 30; // 점 간격
 
-            List<PointF> sampledPoints = new List<PointF>();
-            List<PointF> curvePoints = new List<PointF>();
+            List<Point> sampledPoints = new List<Point>();
+            List<Point> curvePoints = new List<Point>();
             for (int i = 0; i < points.Count; i += distanceLimit)
             {
                 sampledPoints.Add(points[i]);
@@ -46,7 +46,7 @@ namespace LiveWire
             for (int i = 0; i <= segments; i++)
             {
                 double ti = i / (double)segments * (t.Last() - t.First());
-                curvePoints.Add(new PointF((float)splineX.Interpolate(ti), (float)splineY.Interpolate(ti)));
+                curvePoints.Add(new Point((float)splineX.Interpolate(ti), (float)splineY.Interpolate(ti)));
             }
 
             return curvePoints;

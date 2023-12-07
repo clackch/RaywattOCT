@@ -173,6 +173,18 @@ namespace RaywattApp.ViewModels
             }
         }
 
+        private bool _isOk;
+
+        public bool IsOk
+        {
+            get => _isOk;
+            set
+            {
+                _isOk= value;
+                OnPropertyChanged(nameof(IsOk));
+            }
+        }
+
         public ReviewAngioCoRegViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
             _log.Debug("ReviewAngioCoRegViewModel");
@@ -211,7 +223,7 @@ namespace RaywattApp.ViewModels
         private void Ok()
         {
             _log.Debug("Ok");
-
+            IsOk = true;
             GoToPreviousPage(true);
         }
 
@@ -234,20 +246,23 @@ namespace RaywattApp.ViewModels
 
             if (isSave)
             {
+                SaveCoRegPoint();
+
                 bool isCoRegSaved = false;
                 foreach(var coReg in AngioTrackPoints) // todo 지금은 이미지 전체가 아니라서 null이지만, 이미지 전체로 범위를 바꾸면 첫번째 인덱스만 확인하면 됨.
                 {
-                    if(coReg.TrackPoint.Count != 0) { 
-                        SaveCoRegPoint();
-                        UpdateCoRegStatus(true);
+                    if(coReg.TrackPoint.Count != 0) {
                         isCoRegSaved = true;
                         break;
                     }
                 }
 
-                if (!isCoRegSaved)
+                if (isCoRegSaved)
                 {
-                    UpdateCoRegStatus(false);
+                    UpdateCoRegStatus(isCoRegSaved);
+                }
+                else {
+                    UpdateCoRegStatus(isCoRegSaved);
                 }
             }
 
@@ -309,10 +324,6 @@ namespace RaywattApp.ViewModels
                 }
                 AngioFrameLength = crossSectionAngioImageSources.Count - 1;
                 AngioTrackPoints = new List<CoRegistration>(CrossSectionAngioImages.Count);
-                for (int i = 0; i < CrossSectionAngioImages.Count; i++)
-                {
-                    AngioTrackPoints.Add(new CoRegistration());
-                }
                 break;
             }
         }
