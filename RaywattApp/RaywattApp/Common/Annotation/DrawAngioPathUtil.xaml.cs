@@ -121,7 +121,7 @@ namespace RaywattApp.Common.Annotation
         private List<DijkstraHeap> dijkstraHeap;
         private List<DijkstraHeap> dijkstraHeapLegacy;
         private List<Mat> motionVector;
-        private int mainAngioFrameNum, angioImageNum;
+        private int mainAngioFrameNum, angioImageTotalNum;
         private bool isMoved = false;
         private int trackPointNum;
         private CancellationTokenSource cancellationTokenSource;
@@ -288,8 +288,8 @@ namespace RaywattApp.Common.Annotation
         {
             int left = currFrameNum, right = currFrameNum;
             int leftEnd, rightEnd;
-            leftEnd = currFrameNum - 10 >= 0 ? currFrameNum - 10 : 0;
-            rightEnd = currFrameNum + 10 <= angioImageNum ? currFrameNum + 10 : angioImageNum; // todo 테스트에 시간이 오래 걸려 최대 약 20장만 Pathfinding -> 전체로 바꿔줘야 함.
+            leftEnd = 0;
+            rightEnd = angioImageTotalNum;
             int[] vx, vy, pixelValue;
             int startX, startY, endX, endY, pathLength;
             bool firstDraw = false;
@@ -630,7 +630,7 @@ namespace RaywattApp.Common.Annotation
             {
                 control.dijkstraHeap = new List<DijkstraHeap>();
                 control.motionVector = new List<Mat>();
-                control.angioImageNum = newImages.Count;
+                control.angioImageTotalNum = newImages.Count;
                 control.ImageProcessing(newImages);
             }
         }
@@ -699,7 +699,7 @@ namespace RaywattApp.Common.Annotation
             var control = (DrawAngioPathUtil)dependencyObject;
             control.AngioTrackPoints.Clear();
 
-            for (int i = 0; i<control.angioImageNum; i++)
+            for (int i = 0; i<control.angioImageTotalNum; i++)
             {
                 CoRegistration coRegistration= new CoRegistration();
                 coRegistration.TrackPoint = new List<Point>();

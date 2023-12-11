@@ -85,7 +85,7 @@ namespace RaywattApp.Common.Annotation.LiveWire
             if (gradientr[toIndex(dx,dy)] != 255) {
                 fg = distance;
             }
-            return fg + 0.10 * distance; // Grey 0 : Grey 255 = 11 : 1.
+            return fg + 0.0001 * distance; // Grey 0 : Grey 255 = 11 : 1.
         }
 
         private void updateCosts(int x, int y, double mycost)
