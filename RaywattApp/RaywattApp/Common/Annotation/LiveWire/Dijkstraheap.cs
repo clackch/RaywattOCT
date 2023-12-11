@@ -81,10 +81,11 @@ namespace RaywattApp.Common.Annotation.LiveWire
         private double edgeCost(int sx, int sy, int dx, int dy)
         {
             double fg = 0;
+            double distance = Math.Abs(dx - sx) + Math.Abs(dy - sy) == 2 ? Math.Sqrt(2) : 1;
             if (gradientr[toIndex(dx,dy)] != 255) {
-                fg = Math.Sqrt((dx - sx) * (dx - sx) + (dy - sy) * (dy - sy));
+                fg = distance;
             }
-            return fg + 0.10 * Math.Sqrt((dx - sx) * (dx - sx) + (dy - sy) * (dy - sy)); // Grey 0 : Grey 255 = 11 : 1.
+            return fg + 0.10 * distance; // Grey 0 : Grey 255 = 11 : 1.
         }
 
         private void updateCosts(int x, int y, double mycost)
