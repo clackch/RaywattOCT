@@ -8,6 +8,7 @@ using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace RaywattApp.ViewModels.Dialog
 {
@@ -53,7 +54,10 @@ namespace RaywattApp.ViewModels.Dialog
 
             _angioManager.SendChpFilePacket(SelectedCathRoom.AppChp);
 
-            while (_angioManager.isChpFileChangeSuccess == 0) { }
+            while (_angioManager.isChpFileChangeSuccess == 0) 
+            {
+                Thread.Sleep(500);
+            }
             if(_angioManager.isChpFileChangeSuccess == 1)
             {
                 parameter["title"] = _l10n["Information"];
