@@ -85,7 +85,7 @@ namespace RaywattApp.Common.Annotation.LiveWire
             if (gradientr[toIndex(dx,dy)] != 255) {
                 fg = distance;
             }
-            return fg + 0.0001 * distance; // Grey 0 : Grey 255 = 11 : 1.
+            return fg + 0.1 * distance; // Grey 0 : Grey 255 = 11 : 1.
         }
 
         private void updateCosts(int x, int y, double mycost)
@@ -144,7 +144,7 @@ namespace RaywattApp.Common.Annotation.LiveWire
         // 마우스 위치(종착점) : x, y
         // 종착점으로 부터 부분 경로 반환 : vx, vy
         // 경로 길이 : mylength
-        public void returnPath(int endX, int endY, int[] vx, int[] vy, out int length, int [] pixelValue)
+        public void ReturnPath(int endX, int endY, int[] vx, int[] vy, out int length, int [] pixelValue)
         {
             if (visited[toIndex(endX, endY)] == false)
             {
@@ -178,7 +178,7 @@ namespace RaywattApp.Common.Annotation.LiveWire
         }
 
                 
-        public void run(int x, int y, int dx, int dy)
+        public void CalculatePathCost(int x, int y, int dx, int dy)
         {
             int nextIndex;
             int nextX;
@@ -198,7 +198,7 @@ namespace RaywattApp.Common.Annotation.LiveWire
             //init costs
             updateCosts(x, y, 0);
 
-            while ((pixelCosts.Count > 0))
+            while (pixelCosts.Count > 0)
             {
                 nextIndex = ((PixelNode)pixelCosts.Peek()).GetIndex();
                 nextX = nextIndex % width;

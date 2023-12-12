@@ -122,7 +122,7 @@ namespace RaywattApp.Common.Annotation
         private List<DijkstraHeap> dijkstraHeapLegacy;
         private List<Mat> motionVector;
         private int mainAngioFrameNum, angioImageTotalNum;
-        private bool isMoved = false;
+        private bool isMoved = false, isDrawing = true;
         private int trackPointNum;
         private CancellationTokenSource cancellationTokenSource;
 
@@ -284,87 +284,113 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
-        private void CalculateAllPath(int currFrameNum, bool leftSideOnly, bool rightSideOnly, int movedRecIndex, CancellationToken token)
+        private void ProcessSingleImage(int imageIndex, CancellationToken token, int movedRecIndex)
         {
-            int left = currFrameNum, right = currFrameNum;
-            int leftEnd, rightEnd;
-            leftEnd = 0;
-            rightEnd = angioImageTotalNum;
-            int[] vx, vy, pixelValue;
+            Debug.WriteLine("imageIndex =" + imageIndex.ToString());
             int startX, startY, endX, endY, pathLength;
-            bool firstDraw = false;
+            int[] vx, vy, pixelValue;
 
             int movedRecPrevIndex = movedRecIndex == 0 ? 0 : movedRecIndex - 1; // 첫번째 점 수정 : 마지막 점 수정 or 중간 점 수정, 단 점 추가는 항상
-            int centerPos = trackPointNum - movedRecIndex >= 2 ? 1 : 0 ; // 수정할 점이 중간에 있는 경우엔 Path를 두개 변경해야 하므로, centerPos를 초기화.
+            int centerPos = trackPointNum - movedRecIndex >= 2 ? 1 : 0; // 수정할 점이 중간에 있는 경우엔 Path를 두개 변경해야 하므로, centerPos를 초기화.
 
-            while (true)
+            for (int trackIndex = movedRecPrevIndex; trackIndex < movedRecIndex + centerPos; trackIndex++)
             {
-                if (left >= leftEnd && !rightSideOnly)
-                {
-                    for (int trackIndex = movedRecPrevIndex; trackIndex < movedRecIndex + centerPos; trackIndex++)
-                    {
-                        vx = new int[dijkstraHeap[left].width * dijkstraHeap[left].height];
-                        vy = new int[dijkstraHeap[left].width * dijkstraHeap[left].height];
-                        pixelValue = new int[dijkstraHeap[left].width * dijkstraHeap[left].height];
-                        startX = (int)dijkstraHeap[left].trackPoint[trackIndex].X;
-                        startY = (int)dijkstraHeap[left].trackPoint[trackIndex].Y;
-                        endX = (int)dijkstraHeap[left].trackPoint[trackIndex + 1].X;
-                        endY = (int)dijkstraHeap[left].trackPoint[trackIndex + 1].Y;
-                        dijkstraHeap[left].CalculatePathCost(startX, startY, endX, endY);
-                        dijkstraHeap[left].ReturnPath(endX, endY, vx, vy, out pathLength, pixelValue);
-                        GenerateCurvePath(vx, vy, pixelValue, left, pathLength, curveType, trackIndex);
-                    }
+                if (token.IsCancellationRequested) break;
 
-                    if (token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    if (!firstDraw)
-                    {
-                        PathChange(left);
-                        firstDraw = true;
-                    }
-                    left--;
-                }
-
-                if (right < rightEnd && !leftSideOnly)
-                {
-                    for (int trackIndex = movedRecPrevIndex; trackIndex < movedRecIndex + centerPos; trackIndex++)
-                    {
-                        vx = new int[dijkstraHeap[right].width * dijkstraHeap[right].height];
-                        vy = new int[dijkstraHeap[right].width * dijkstraHeap[right].height];
-                        pixelValue = new int[dijkstraHeap[right].width * dijkstraHeap[right].height];
-                        startX = (int)dijkstraHeap[right].trackPoint[trackIndex].X;
-                        startY = (int)dijkstraHeap[right].trackPoint[trackIndex].Y;
-                        endX = (int)dijkstraHeap[right].trackPoint[trackIndex + 1].X;
-                        endY = (int)dijkstraHeap[right].trackPoint[trackIndex + 1].Y;
-                        dijkstraHeap[right].CalculatePathCost(startX, startY, endX, endY);
-                        dijkstraHeap[right].ReturnPath(endX, endY, vx, vy, out pathLength, pixelValue);
-                        GenerateCurvePath(vx, vy, pixelValue, right, pathLength, curveType, trackIndex);
-                    }
-
-                    if (token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    if (!firstDraw)
-                    {
-                        PathChange(right);
-                        firstDraw = true;
-                    }
-                    right++;
-                }
-
-                if ((left < leftEnd && leftSideOnly) || (right >= rightEnd && rightSideOnly) || (left < leftEnd && right >= rightEnd))
-                {
-                    break;
-                }
+                vx = new int[dijkstraHeap[imageIndex].width * dijkstraHeap[imageIndex].height];
+                vy = new int[dijkstraHeap[imageIndex].width * dijkstraHeap[imageIndex].height];
+                pixelValue = new int[dijkstraHeap[imageIndex].width * dijkstraHeap[imageIndex].height];
+                startX = (int)dijkstraHeap[imageIndex].trackPoint[trackIndex].X;
+                startY = (int)dijkstraHeap[imageIndex].trackPoint[trackIndex].Y;
+                endX = (int)dijkstraHeap[imageIndex].trackPoint[trackIndex + 1].X;
+                endY = (int)dijkstraHeap[imageIndex].trackPoint[trackIndex + 1].Y;
+                dijkstraHeap[imageIndex].CalculatePathCost(startX, startY, endX, endY);
+                dijkstraHeap[imageIndex].ReturnPath(endX, endY, vx, vy, out pathLength, pixelValue);
+                GenerateCurvePath(vx, vy, pixelValue, imageIndex, pathLength, curveType, trackIndex);
             }
         }
 
-        async private void CalculateSubPathWhenModified(float x, float y, int index, int currFrameNum)
+        private async Task ProcessLeftSideAsync(int left, int leftEnd, CancellationToken token, int movedRecIndex)
+        {
+            var tasks = new List<Task>();
+            for (int i = left; i >= leftEnd; i--)
+            {
+                if (token.IsCancellationRequested) break;
+                int currentIndex = i;
+                var tmpTask = Task.Run(() => ProcessSingleImage(currentIndex, token, movedRecIndex));
+                tasks.Add(tmpTask);
+            }
+
+            try
+            {
+                await Task.WhenAll(tasks);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error in ProcessLeftSideAsync: {ex.Message}");
+            }
+        }
+
+        private async Task ProcessRightSideAsync(int right, int rightEnd, CancellationToken token, int movedRecIndex)
+        {
+            var tasks = new List<Task>();
+            for (int i = right; i < rightEnd; i++)
+            {
+                if (token.IsCancellationRequested) break;
+                int currentIndex = i;
+                var tmpTask = Task.Run(() => ProcessSingleImage(currentIndex, token, movedRecIndex));
+                tasks.Add(tmpTask);
+            }
+
+            try
+            {
+                await Task.WhenAll(tasks);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error in ProcessRightSideAsync: {ex.Message}");
+            }
+        }
+
+        private async Task CalculateAllPathAsync(int currFrameNum, bool leftSideOnly, bool rightSideOnly, int movedRecIndex, CancellationToken token)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                IsRendering = true;
+                IsAngioTrackCompleted = IsResetOn = isDrawing = false;
+            });
+
+            Task leftTask = null;
+            Task rightTask = null;
+
+            if (!rightSideOnly)
+            {
+                if (leftSideOnly)
+                    leftTask = ProcessLeftSideAsync(currFrameNum, 0, token, movedRecIndex);
+                else
+                    leftTask = ProcessLeftSideAsync(currFrameNum-1, 0, token, movedRecIndex);
+            }
+
+            if (!leftSideOnly)
+            {
+                rightTask = ProcessRightSideAsync(currFrameNum, angioImageTotalNum, token, movedRecIndex);
+            }
+
+            if (leftTask != null)
+                await leftTask;
+
+            if (rightTask != null)
+                await rightTask;
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                DrawPath(dijkstraHeap[currFrameNum]); // 현재 프레임 경로 표현
+                IsRendering = false;
+                IsAngioTrackCompleted = IsResetOn = isDrawing = true;
+            });
+        }
+
+        private void CalculateSubPathWhenModified(float x, float y, int index, int currFrameNum)
         {
             IsAngioTrackCompleted = IsResetOn = false;
             IsRendering = true;
@@ -373,21 +399,21 @@ namespace RaywattApp.Common.Annotation
             cancellationTokenSource = new CancellationTokenSource();
             var token = cancellationTokenSource.Token;
 
-            await Task.Run(() =>
+            Task.Run(async () =>
             {
                 if (direction > 0) // 수정된 FrameNumber상 높은 이미지(들)만 -> rightSideOnly
                 {
                     PointTracking(x, y, 1, currFrameNum, index);
-                    CalculateAllPath(currFrameNum, false, true, index, token);
+                    await CalculateAllPathAsync(currFrameNum, false, true, index, token);
                 }
                 else if (direction < 0) // 수정된 FrameNumber상 낮은 이미지(들)만 -> leftSideOnly
                 {
                     PointTracking(x, y, -1, currFrameNum, index);
-                    CalculateAllPath(currFrameNum, true, false, index, token);
+                    await CalculateAllPathAsync(currFrameNum, true, false, index, token);
                 }
                 else // 전체
                 {
-                    CalculateAllPath(currFrameNum, false, false, index, token);
+                    await CalculateAllPathAsync(currFrameNum, false, false, index, token);
                 }
             }, token);
 
@@ -705,8 +731,13 @@ namespace RaywattApp.Common.Annotation
 
         #region MouseEvent
 
-        async private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            if(!isDrawing)
+            {
+                return;
+            }
+
             Point clickPosition = new Point((float)e.GetPosition(canvas).X, (float)e.GetPosition(canvas).Y);
             Rectangle rectangle = new Rectangle();
             AddRecEvents(rectangle);
@@ -737,18 +768,17 @@ namespace RaywattApp.Common.Annotation
                 PointTracking(clickPosition.X, clickPosition.Y, -1, currFrameNum);
                 trackPointNum++;
 
-                IsAngioTrackCompleted = IsResetOn = false;
-                IsRendering = true;
+                //IsAngioTrackCompleted = IsResetOn = false;
+                //IsRendering = true;
 
                 cancellationTokenSource = new CancellationTokenSource();
                 var token = cancellationTokenSource.Token;
-                await Task.Run(() =>
-                {
-                    CalculateAllPath(currFrameNum, false, false, trackPointNum - 1, token);
-                }, token);
 
-                IsRendering = false;
-                IsAngioTrackCompleted = IsResetOn = true;
+                Task.Run(async () =>
+                {
+                    await CalculateAllPathAsync(currFrameNum, false, false, trackPointNum - 1, token);
+                }, token);
+                                
             }
         }
 

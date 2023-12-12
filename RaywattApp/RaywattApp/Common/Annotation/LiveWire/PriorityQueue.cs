@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RaywattApp.Common.Annotation.LiveWire
 {
-    public class PriorityQueue<T>
+    public class PriorityQueue<T> where T : IComparable<T>
     {
         private List<T> data;
         private Func<T, T, int> comparison;
@@ -21,7 +21,7 @@ namespace RaywattApp.Common.Annotation.LiveWire
         public PriorityQueue(Func<T, T, int> comparison)
         {
             data = new List<T>();
-            this.comparison = comparison;
+            this.comparison = comparison ?? throw new ArgumentNullException(nameof(comparison));
         }
 
         public void Enqueue(T item)
@@ -31,8 +31,7 @@ namespace RaywattApp.Common.Annotation.LiveWire
             while (childIndex > 0)
             {
                 int parentIndex = (childIndex - 1) / 2;
-                if (comparison(data[childIndex], data[parentIndex]) >= 
-                    0)
+                if (comparison(data[childIndex], data[parentIndex]) >= 0)
                 {
                     break;
                 }
@@ -45,6 +44,11 @@ namespace RaywattApp.Common.Annotation.LiveWire
 
         public T Dequeue()
         {
+            if (data.Count == 0)
+            {
+                throw new InvalidOperationException("The priority queue is empty.");
+            }
+
             int lastIndex = data.Count - 1;
             T frontItem = data[0];
             data[0] = data[lastIndex];
@@ -55,19 +59,15 @@ namespace RaywattApp.Common.Annotation.LiveWire
             while (true)
             {
                 int childIndex = parentIndex * 2 + 1;
-                if (childIndex > lastIndex)
-                {
-                    break;
-                }
+                if (childIndex > lastIndex) break;
+
                 int rightChild = childIndex + 1;
                 if (rightChild <= lastIndex && comparison(data[rightChild], data[childIndex]) < 0)
                 {
                     childIndex = rightChild;
                 }
-                if (comparison(data[parentIndex], data[childIndex]) <= 0)
-                {
-                    break;
-                }
+                if (comparison(data[parentIndex], data[childIndex]) <= 0) break;
+
                 T tmp = data[parentIndex];
                 data[parentIndex] = data[childIndex];
                 data[childIndex] = tmp;
@@ -80,14 +80,11 @@ namespace RaywattApp.Common.Annotation.LiveWire
         {
             if (data.Count == 0)
             {
-                return default(T);
+                throw new InvalidOperationException("The priority queue is empty.");
             }
             return data[0];
         }
 
-        public int Count
-        {
-            get { return data.Count; }
-        }
+        public int Count => data.Count;
     }
 }
