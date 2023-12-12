@@ -293,9 +293,6 @@ namespace RaywattApp.Common.Annotation
             int[] vx, vy, pixelValue;
             int startX, startY, endX, endY, pathLength;
             bool firstDraw = false;
-            long pathTime = 0;
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
 
             int movedRecPrevIndex = movedRecIndex == 0 ? 0 : movedRecIndex - 1; // 첫번째 점 수정 : 마지막 점 수정 or 중간 점 수정, 단 점 추가는 항상
             int centerPos = trackPointNum - movedRecIndex >= 2 ? 1 : 0 ; // 수정할 점이 중간에 있는 경우엔 Path를 두개 변경해야 하므로, centerPos를 초기화.
@@ -313,12 +310,8 @@ namespace RaywattApp.Common.Annotation
                         startY = (int)dijkstraHeap[left].trackPoint[trackIndex].Y;
                         endX = (int)dijkstraHeap[left].trackPoint[trackIndex + 1].X;
                         endY = (int)dijkstraHeap[left].trackPoint[trackIndex + 1].Y;
-                        Stopwatch instop = new Stopwatch();
-                        instop.Start();
-                        dijkstraHeap[left].run(startX, startY, endX, endY);
-                        instop.Stop();
-                        dijkstraHeap[left].returnPath(endX, endY, vx, vy, out pathLength, pixelValue);
-                        pathTime += instop.ElapsedMilliseconds;
+                        dijkstraHeap[left].CalculatePathCost(startX, startY, endX, endY);
+                        dijkstraHeap[left].ReturnPath(endX, endY, vx, vy, out pathLength, pixelValue);
                         GenerateCurvePath(vx, vy, pixelValue, left, pathLength, curveType, trackIndex);
                     }
 
@@ -346,12 +339,8 @@ namespace RaywattApp.Common.Annotation
                         startY = (int)dijkstraHeap[right].trackPoint[trackIndex].Y;
                         endX = (int)dijkstraHeap[right].trackPoint[trackIndex + 1].X;
                         endY = (int)dijkstraHeap[right].trackPoint[trackIndex + 1].Y;
-                        Stopwatch instop = new Stopwatch();
-                        instop.Start();
-                        dijkstraHeap[right].run(startX, startY, endX, endY);
-                        instop.Stop();
-                        dijkstraHeap[right].returnPath(endX, endY, vx, vy, out pathLength, pixelValue);
-                        pathTime += instop.ElapsedMilliseconds;
+                        dijkstraHeap[right].CalculatePathCost(startX, startY, endX, endY);
+                        dijkstraHeap[right].ReturnPath(endX, endY, vx, vy, out pathLength, pixelValue);
                         GenerateCurvePath(vx, vy, pixelValue, right, pathLength, curveType, trackIndex);
                     }
 
@@ -370,10 +359,7 @@ namespace RaywattApp.Common.Annotation
 
                 if ((left < leftEnd && leftSideOnly) || (right >= rightEnd && rightSideOnly) || (left < leftEnd && right >= rightEnd))
                 {
-                    stopwatch.Stop();
-                    Debug.WriteLine("Heap Only 경과 시간: {0}ms", pathTime);
-                    Debug.WriteLine("총 경과 시간: {0}ms", stopwatch.ElapsedMilliseconds);
-                    return;
+                    break;
                 }
             }
         }
