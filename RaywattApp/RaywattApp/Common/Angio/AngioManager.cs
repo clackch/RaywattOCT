@@ -557,6 +557,9 @@ namespace RaywattApp.Common.Angio
 
         public bool GetServerConnection()
         {
+            if (Instance == null)
+                return false;
+
             return Instance.Connected;
         }
     }
