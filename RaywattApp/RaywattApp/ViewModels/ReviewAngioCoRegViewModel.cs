@@ -248,21 +248,13 @@ namespace RaywattApp.ViewModels
             {
                 SaveCoRegPoint();
 
-                bool isCoRegSaved = false;
-                foreach(var coReg in AngioTrackPoints) // todo 지금은 이미지 전체가 아니라서 null이지만, 이미지 전체로 범위를 바꾸면 첫번째 인덱스만 확인하면 됨.
+                if (AngioTrackPoints[0].TrackPoint.Count != 0)
                 {
-                    if(coReg.TrackPoint.Count != 0) {
-                        isCoRegSaved = true;
-                        break;
-                    }
+                    UpdateCoRegStatus(true);
                 }
-
-                if (isCoRegSaved)
+                else
                 {
-                    UpdateCoRegStatus(isCoRegSaved);
-                }
-                else {
-                    UpdateCoRegStatus(isCoRegSaved);
+                    UpdateCoRegStatus(false);
                 }
             }
 
