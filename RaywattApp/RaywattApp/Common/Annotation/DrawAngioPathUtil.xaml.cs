@@ -141,13 +141,6 @@ namespace RaywattApp.Common.Annotation
             this.canvas.Background = Brushes.Transparent;
         }
 
-        private void DeactivateEvent()
-        {
-            canvas.MouseLeftButtonDown -= Canvas_MouseLeftButtonDown;
-            canvas.MouseMove -= Canvas_MouseMove;
-            this.canvas.Background = null;
-        }
-
         private void AddRecEvents(Rectangle rectangle)
         {
             rectangle.Style = (Style)this.Resources["StyleRectangle"];
@@ -188,12 +181,34 @@ namespace RaywattApp.Common.Annotation
                 var kernel = Cv2.GetStructuringElement(MorphShapes.Ellipse, new OpenCvSharp.Size(3, 3));
                 Cv2.MorphologyEx(thresholdImage, morphedImage, MorphTypes.Open, kernel, iterations: 2);
 
-                // 변형 처리 반복 -> 스켈레톤(골격화)
-                Mat skeleton = new Mat();
-                skeleton = Skeletonize(morphedImage);
+                // 스켈레톤 처리
+                Mat skeletonImage = Skeletonize(morphedImage);
+
+                // 255인 픽셀 위치 저장
+                List<OpenCvSharp.Point> pointsToRestore = new List<OpenCvSharp.Point>();
+                for (int y = 0; y < skeletonImage.Rows; y++)
+                {
+                    for (int x = 0; x < skeletonImage.Cols; x++)
+                    {
+                        if (skeletonImage.At<byte>(y, x) == 255)
+                        {
+                            pointsToRestore.Add(new OpenCvSharp.Point(x, y));
+                        }
+                    }
+                }
+                
+                // Skeleton 블러 처리 수행
+                blurredImage = new Mat();
+                Cv2.Blur(skeletonImage, blurredImage, new OpenCvSharp.Size(7, 7));
+
+                // 블러 처리된 이미지에서 255인 픽셀 위치를 다시 255로 설정
+                foreach (var point in pointsToRestore)
+                {
+                    blurredImage.Set<byte>(point.Y, point.X, 255);
+                }
 
                 byte[] imageData = new byte[frame.Rows * frame.Cols * frame.ElemSize()];
-                Marshal.Copy(skeleton.Data, imageData, 0, imageData.Length);
+                Marshal.Copy(blurredImage.Data, imageData, 0, imageData.Length);
 
                 dijkstraHeap.Add(new DijkstraHeap(imageData, frame.Rows, frame.Cols));
             }
@@ -253,9 +268,9 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
-        public void DrawPath(DijkstraHeap dh)
+        public void DrawPath(DijkstraHeap dh, bool currFrame = false)
         {
-            //선 그리기
+            //경로 그리기
             foreach (List<Point> pathPoints in dh.line)
             {
                 foreach (var pathPoint in pathPoints)
@@ -268,19 +283,22 @@ namespace RaywattApp.Common.Annotation
                 }
             }
 
-            // 추적된 점 그리기
-            int count = 0;
-            foreach (Point trackPoint in dh.trackPoint)
+            if (!currFrame)
             {
-                Rectangle rectangle = new Rectangle();
-                AddRecEvents(rectangle);
-                rectangle.Name = $"rectangle{count:D3}";
+                // 추적된 점 그리기
+                int count = 0;
+                foreach (Point trackPoint in dh.trackPoint)
+                {
+                    Rectangle rectangle = new Rectangle();
+                    AddRecEvents(rectangle);
+                    rectangle.Name = $"rectangle{count:D3}";
 
-                Canvas.SetLeft(rectangle, trackPoint.X - rectangle.Width / 2);
-                Canvas.SetTop(rectangle, trackPoint.Y - rectangle.Height / 2);
-                this.canvas.Children.Add(rectangle);
+                    Canvas.SetLeft(rectangle, trackPoint.X - rectangle.Width / 2);
+                    Canvas.SetTop(rectangle, trackPoint.Y - rectangle.Height / 2);
+                    this.canvas.Children.Add(rectangle);
 
-                count++;
+                    count++;
+                }
             }
         }
 
@@ -384,7 +402,7 @@ namespace RaywattApp.Common.Annotation
 
             Application.Current.Dispatcher.Invoke(() =>
             {
-                DrawPath(dijkstraHeap[currFrameNum]); // 현재 프레임 경로 표현
+                DrawPath(dijkstraHeap[currFrameNum], true); // 현재 프레임 경로 표현
                 IsRendering = false;
                 IsAngioTrackCompleted = IsResetOn = isDrawing = true;
             });
@@ -392,9 +410,6 @@ namespace RaywattApp.Common.Annotation
 
         private void CalculateSubPathWhenModified(float x, float y, int index, int currFrameNum)
         {
-            IsAngioTrackCompleted = IsResetOn = false;
-            IsRendering = true;
-
             int direction = currFrameNum - mainAngioFrameNum;
             cancellationTokenSource = new CancellationTokenSource();
             var token = cancellationTokenSource.Token;
@@ -413,12 +428,11 @@ namespace RaywattApp.Common.Annotation
                 }
                 else // 전체
                 {
+                    PointTracking(x, y, 1, currFrameNum, index);
+                    PointTracking(x, y, -1, currFrameNum, index);
                     await CalculateAllPathAsync(currFrameNum, false, false, index, token);
                 }
             }, token);
-
-            IsRendering = false;
-            IsAngioTrackCompleted = IsResetOn = true;
         }
 
         // Spline
@@ -450,74 +464,71 @@ namespace RaywattApp.Common.Annotation
             List<Point> points = new List<Point>();
             int prevIndex, currIndex, distanceLimit, totalDistance, numOfPoints;
 
-            if (lineIndex >= dijkstraHeap[frameIndex].line.Count) // 배열 크기를 넘어선 경우 추가 작업
+            if (lineIndex >= dijkstraHeap[frameIndex].line.Count) // 새로운 line을 추가했을 시 Add로 초기화
             {
                 dijkstraHeap[frameIndex].line.Add(new List<Point>());
             }
-            else // 수정 작업
+            else // 수정 작업 일 때는 Index에 해당하는 line을 초기화
             {
                 dijkstraHeap[frameIndex].line[lineIndex] = new List<Point>();
             }
 
-            Application.Current.Dispatcher.Invoke(() =>
+            // 모든 점 전달하여 Spline 곡선 형성
+            if (curveType == "Spline")
             {
-                // 모든 점 전달하여 Spline 곡선 형성
-                if (curveType == "Spline")
+                for (int i = 0; i < pathLength; i++)
                 {
-                    for (int i = 0; i < pathLength; i++)
-                    {
-                        points.Add(new Point(vx[i], vy[i]));
-                    }
-                    AddSplineCurvePoints(points, frameIndex, lineIndex);
+                    points.Add(new Point(vx[i], vy[i]));
                 }
-                // 베지어의 경우 점을 4개씩 끊어서 전달하여 곡선 형성
-                else if (curveType == "Bezier")
+                AddSplineCurvePoints(points, frameIndex, lineIndex);
+            }
+            // 베지어의 경우 점을 4개씩 끊어서 전달하여 곡선 형성
+            else if (curveType == "Bezier")
+            {
+                double distanceWeight = 0.2; // 보간을 위한 가중치 -> 클수록 보간할 점 개수가 적어져 곡선 표현이 불가능할 수 있음
+                prevIndex = totalDistance = 0;
+                numOfPoints = 4; // 가이드 점 개수 (4-2)
+                distanceLimit = 10; // 점 간격
+                for (currIndex = 0; currIndex < pathLength; currIndex++)
                 {
-                    double distanceWeight = 0.2; // 보간을 위한 가중치 -> 클수록 보간할 점 개수가 적어져 곡선 표현이 불가능할 수 있음
-                    prevIndex = totalDistance = 0;
-                    numOfPoints = 4; // 가이드 점 개수 (4-2)
-                    distanceLimit = 10; // 점 간격
-                    for (currIndex = 0; currIndex < pathLength; currIndex++)
-                    {
-                        if (points.Count == 0)
-                        {// 가이드 점이 없는 경우 1개 추가
-                            points.Add(new Point(vx[prevIndex], vy[prevIndex]));
+                    if (points.Count == 0)
+                    {// 가이드 점이 없는 경우 1개 추가
+                        points.Add(new Point(vx[prevIndex], vy[prevIndex]));
+                    }
+                    else if (currIndex == pathLength - 1 && points.Count < numOfPoints)
+                    {// 가이드 점이 3개 이하인데, 경로의 마지막 인덱스에 도달한 경우
+                        for (int k = points.Count; k < numOfPoints; k++)
+                        {// 가이드 점 마지막 인덱스로 모두 추가 (최대 3개)
+                            points.Add(new Point(vx[currIndex], vy[currIndex]));
                         }
-                        else if (currIndex == pathLength - 1 && points.Count < numOfPoints)
-                        {// 가이드 점이 3개 이하인데, 경로의 마지막 인덱스에 도달한 경우
-                            for (int k = points.Count; k < numOfPoints; k++)
-                            {// 가이드 점 마지막 인덱스로 모두 추가 (최대 3개)
-                                points.Add(new Point(vx[currIndex], vy[currIndex]));
-                            }
-                            AddBezierCurvePoints(points, frameIndex, totalDistance - (int)(distanceWeight * totalDistance), lineIndex); // 가이드 점 2개와, 보간에 사용할 점 2개 전달.
-                            points.Clear();
-                        }
-                        else if (pixelValue[currIndex] == 0)
-                        {// 픽셀값이 0인 경우 제외 -> 곡선 보간을 통해 그려지는 부분임.
-                            continue;
-                        }
-                        else
-                        { // 일반적인 가이드 점 추가
-                            // 최근에 추가된 가이드 점과 거리 계산
-                            int tmpDistance = (Math.Abs(vx[prevIndex] - vx[currIndex]) + Math.Abs(vy[prevIndex] - vy[currIndex]));
-                            if (tmpDistance > distanceLimit)
-                            { // 이전 가이드 점과의 거리가 x+y > 10경우에 새로운 가이드 점으로 추가
-                                points.Add(new Point(vx[currIndex], vy[currIndex]));
-                                //가이드 점 이동
-                                prevIndex = currIndex;
-                                // 총 거리에 추가 -> 추후 곡선 분할 기준으로 사용
-                                totalDistance += tmpDistance;
+                        AddBezierCurvePoints(points, frameIndex, totalDistance - (int)(distanceWeight * totalDistance), lineIndex); // 가이드 점 2개와, 보간에 사용할 점 2개 전달.
+                        points.Clear();
+                    }
+                    else if (pixelValue[currIndex] == 0)
+                    {// 픽셀값이 0인 경우 제외 -> 곡선 보간을 통해 그려지는 부분임.
+                        continue;
+                    }
+                    else
+                    { // 일반적인 가이드 점 추가
+                        // 최근에 추가된 가이드 점과 거리 계산
+                        int tmpDistance = (Math.Abs(vx[prevIndex] - vx[currIndex]) + Math.Abs(vy[prevIndex] - vy[currIndex]));
+                        if (tmpDistance > distanceLimit)
+                        { // 이전 가이드 점과의 거리가 x+y > 10경우에 새로운 가이드 점으로 추가
+                            points.Add(new Point(vx[currIndex], vy[currIndex]));
+                            //가이드 점 이동
+                            prevIndex = currIndex;
+                            // 총 거리에 추가 -> 추후 곡선 분할 기준으로 사용
+                            totalDistance += tmpDistance;
 
-                                if (points.Count == numOfPoints)
-                                { // 가이드 점이 4(2 가이드, 2 보간)개인 경우엔 곡선 그리기.
-                                    AddBezierCurvePoints(points, frameIndex, totalDistance - (int)(distanceWeight * totalDistance), lineIndex);
-                                    points.Clear();
-                                }
+                            if (points.Count == numOfPoints)
+                            { // 가이드 점이 4(2 가이드, 2 보간)개인 경우엔 곡선 그리기.
+                                AddBezierCurvePoints(points, frameIndex, totalDistance - (int)(distanceWeight * totalDistance), lineIndex);
+                                points.Clear();
                             }
                         }
                     }
                 }
-            });
+            }
         }
 
         private void CalculateMotionVector(Mat prevFrame, Mat nextFrame)
@@ -550,7 +561,7 @@ namespace RaywattApp.Common.Annotation
             }
             else
             {
-                startIndex = currFrameNum;
+                startIndex = currFrameNum; // +1이 붙지 않는 이유는, MotionVector가 한장 모자르고, 이를 인덱싱하기 위해서 하지 않음.
             }
 
             for (int i = startIndex; i < motionVector.Count && i >= 0; i += direction)
@@ -737,10 +748,12 @@ namespace RaywattApp.Common.Annotation
             {
                 return;
             }
+            Debug.WriteLine("Canvas_MouseLeftButtonDown");
 
             Point clickPosition = new Point((float)e.GetPosition(canvas).X, (float)e.GetPosition(canvas).Y);
             Rectangle rectangle = new Rectangle();
             AddRecEvents(rectangle);
+            rectangle.Name = $"rectangle{dijkstraHeap[AngioFrameNumber].trackPoint.Count:D3}";
             Canvas.SetLeft(rectangle, clickPosition.X - Constants.AnnotationRectWidth / 2);
             Canvas.SetTop(rectangle, clickPosition.Y - Constants.AnnotationRectHeight / 2);
             canvas.Children.Add(rectangle);
@@ -767,9 +780,6 @@ namespace RaywattApp.Common.Annotation
                 PointTracking(clickPosition.X, clickPosition.Y, 1, currFrameNum);
                 PointTracking(clickPosition.X, clickPosition.Y, -1, currFrameNum);
                 trackPointNum++;
-
-                //IsAngioTrackCompleted = IsResetOn = false;
-                //IsRendering = true;
 
                 cancellationTokenSource = new CancellationTokenSource();
                 var token = cancellationTokenSource.Token;
@@ -802,7 +812,6 @@ namespace RaywattApp.Common.Annotation
             var rectangle = sender as Rectangle;
             if (rectangle != null && IsResetOn)
             {
-                Debug.WriteLine("Rectangle_MouseLeftButtonDown");
                 rectangle.CaptureMouse();
             }
         }
@@ -812,7 +821,6 @@ namespace RaywattApp.Common.Annotation
             var rectangle = sender as Rectangle;
             if (rectangle != null)
             {
-                Debug.WriteLine("Rectangle_MouseLeftButtonUp");
                 rectangle.ReleaseMouseCapture();
 
                 if (isMoved)

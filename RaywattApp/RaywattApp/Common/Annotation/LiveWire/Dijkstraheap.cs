@@ -1,12 +1,10 @@
 ﻿using OpenCvSharp;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Diagnostics;
-using System.Diagnostics.SymbolStore;
 using Point = System.Windows.Point;
 using log4net;
-using RaywattApp.ViewModels;
+using MathNet.Numerics;
+using OpenCvSharp.Flann;
 
 namespace RaywattApp.Common.Annotation.LiveWire
 {
@@ -14,7 +12,7 @@ namespace RaywattApp.Common.Annotation.LiveWire
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(DijkstraHeap));
         private int[] imagePixels; // stores Pixels from original image
-        PriorityQueue<PixelNode> pixelCosts;
+        PriorityQueue<PixelNode, double> pixelCosts;
         double[] gradientx = new double[0]; // stores image gradient modulus 
         double[] gradienty = new double[0]; // stores image gradient modulus 
         public double[] gradientr = new double[0]; // stores image gradient RESULTANT modulus 
@@ -58,7 +56,7 @@ namespace RaywattApp.Common.Annotation.LiveWire
             potenceWeight = 30; // 경로 pixel 가중치
 
             imagePixels = new int[x * y];
-            pixelCosts = new PriorityQueue<PixelNode>();
+            pixelCosts = new PriorityQueue<PixelNode, double>();
             whereFrom = new int[x * y];
             visited = new bool[x * y];
             width = x;
@@ -76,16 +74,20 @@ namespace RaywattApp.Common.Annotation.LiveWire
             }
         }
 
-        // 입력 : 시작점, 끝점
-        // output : 가중치를 적용하여 edge값 계산
         private double edgeCost(int sx, int sy, int dx, int dy)
         {
-            double fg = 0;
-            double distance = Math.Abs(dx - sx) + Math.Abs(dy - sy) == 2 ? Math.Sqrt(2) : 1;
-            if (gradientr[toIndex(dx,dy)] != 255) {
-                fg = distance;
-            }
-            return fg + 0.1 * distance; // Grey 0 : Grey 255 = 11 : 1.
+            double pixelValue = gradientr[toIndex(dx, dy)]; // dx, dy 위치의 픽셀 값
+            double maxPixelValue = 255; // 최대 픽셀 값 (예: 255)
+
+            // 픽셀 값에 따른 cost 계산
+            // 픽셀 값이 높을수록 낮은 cost 부여
+            double cost = maxPixelValue - pixelValue;
+
+            // 추가적으로 거리에 따른 가중치 적용
+            double distance = Math.Sqrt((dx - sx) * (dx - sx) + (dy - sy) * (dy - sy));
+            cost += 0.3 * distance; // 거리에 따른 가중치 추가
+
+            return cost;
         }
 
         private void updateCosts(int x, int y, double mycost)
@@ -96,48 +98,31 @@ namespace RaywattApp.Common.Annotation.LiveWire
                 pixelCosts.Dequeue();
             }
 
-            //upper right
-            if ((x < width - 1) && (y > 0))
+            (int, int)[] directions = new (int, int)[]
             {
-                pixelCosts.Enqueue(new PixelNode(toIndex(x + 1, y - 1), mycost + edgeCost(x, y, x + 1, y - 1), toIndex(x, y)));
-            }
-            //upper left
-            if ((x > 0) && (y > 0))
+                (-1, -1), // upper left
+                (1, -1),  // upper right
+                (-1, 1),  // down left
+                (1, 1),   // down right
+                (-1, 0),  // left
+                (1, 0),   // right
+                (0, -1),  // up
+                (0, 1)    // down
+            };
+
+            foreach (var (dx, dy) in directions)
             {
-                pixelCosts.Enqueue(new PixelNode(toIndex(x - 1, y - 1), mycost + edgeCost(x, y, x - 1, y - 1), toIndex(x, y)));
-            }
-            //down right
-            if ((x < width - 1) && (y < height - 1))
-            {
-                pixelCosts.Enqueue(new PixelNode(toIndex(x + 1, y + 1), mycost + edgeCost(x, y, x + 1, y + 1), toIndex(x, y)));
-            }
-            //down left
-            if ((x > 0) && (y < height - 1))
-            {
-                pixelCosts.Enqueue(new PixelNode(toIndex(x - 1, y + 1), mycost + edgeCost(x, y, x - 1, y + 1), toIndex(x, y)));
+                int newX = x + dx;
+                int newY = y + dy;
+
+                // 이미지 경계값 확인
+                if (newX >= 0 && newX < width && newY >= 0 && newY < height)
+                {
+                    double newCost = mycost + edgeCost(x, y, newX, newY);
+                    pixelCosts.Enqueue(new PixelNode(toIndex(newX, newY), newCost, toIndex(x, y)), newCost);
+                }
             }
 
-            //update left cost
-            if (x > 0)
-            {
-                pixelCosts.Enqueue(new PixelNode(toIndex(x - 1, y), mycost + edgeCost(x, y, x - 1, y), toIndex(x, y)));
-            }
-            //update right cost
-            if (x < width - 1)
-            {
-                pixelCosts.Enqueue(new PixelNode(toIndex(x + 1, y), mycost + edgeCost(x, y, x + 1, y), toIndex(x, y)));
-            }
-
-            //update up cost
-            if (y > 0)
-            {
-                pixelCosts.Enqueue(new PixelNode(toIndex(x, y - 1), mycost + edgeCost(x, y, x, y - 1), toIndex(x, y)));
-            }
-            //update down cost
-            if (y < height - 1)
-            {
-                pixelCosts.Enqueue(new PixelNode(toIndex(x, y + 1), mycost + edgeCost(x, y, x, y + 1), toIndex(x, y)));
-            }
         }
 
         // 시작점 : sx, sy
@@ -241,20 +226,9 @@ namespace RaywattApp.Common.Annotation.LiveWire
             this.whereFrom = whereFrom;
         }
 
-        public double GetDistance()
-        {
-            return myDistance;
-        }
-
-        public int GetIndex()
-        {
-            return myIndex;
-        }
-
-        public int GetWhereFrom()
-        {
-            return whereFrom;
-        }
+        public double GetDistance() => myDistance;
+        public int GetIndex() => myIndex;
+        public int GetWhereFrom() => whereFrom;
 
         public int CompareTo(PixelNode? other)
         {
