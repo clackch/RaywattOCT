@@ -268,8 +268,10 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
-        public void DrawPath(DijkstraHeap dh, bool currFrame = false)
+        public void DrawPath(DijkstraHeap dh)
         {
+            canvas.Children.Clear();
+
             //경로 그리기
             foreach (List<Point> pathPoints in dh.line)
             {
@@ -283,22 +285,19 @@ namespace RaywattApp.Common.Annotation
                 }
             }
 
-            if (!currFrame)
+            // 추적된 점 그리기
+            int count = 0;
+            foreach (Point trackPoint in dh.trackPoint)
             {
-                // 추적된 점 그리기
-                int count = 0;
-                foreach (Point trackPoint in dh.trackPoint)
-                {
-                    Rectangle rectangle = new Rectangle();
-                    AddRecEvents(rectangle);
-                    rectangle.Name = $"rectangle{count:D3}";
+                Rectangle rectangle = new Rectangle();
+                AddRecEvents(rectangle);
+                rectangle.Name = $"rectangle{count:D3}";
 
-                    Canvas.SetLeft(rectangle, trackPoint.X - rectangle.Width / 2);
-                    Canvas.SetTop(rectangle, trackPoint.Y - rectangle.Height / 2);
-                    this.canvas.Children.Add(rectangle);
+                Canvas.SetLeft(rectangle, trackPoint.X - rectangle.Width / 2);
+                Canvas.SetTop(rectangle, trackPoint.Y - rectangle.Height / 2);
+                this.canvas.Children.Add(rectangle);
 
-                    count++;
-                }
+                count++;
             }
         }
 
@@ -401,7 +400,7 @@ namespace RaywattApp.Common.Annotation
 
             Application.Current.Dispatcher.Invoke(() =>
             {
-                DrawPath(dijkstraHeap[currFrameNum], true); // 현재 프레임 경로 표현
+                DrawPath(dijkstraHeap[currFrameNum]); // 현재 프레임 경로 표현
                 IsRendering = false;
                 IsAngioTrackCompleted = IsResetOn = isDrawing = true;
             });
