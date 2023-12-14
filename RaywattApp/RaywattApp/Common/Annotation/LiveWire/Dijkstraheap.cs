@@ -1,10 +1,7 @@
-﻿using OpenCvSharp;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Point = System.Windows.Point;
 using log4net;
-using MathNet.Numerics;
-using OpenCvSharp.Flann;
 
 namespace RaywattApp.Common.Annotation.LiveWire
 {
@@ -85,7 +82,8 @@ namespace RaywattApp.Common.Annotation.LiveWire
 
             // 추가적으로 거리에 따른 가중치 적용
             double distance = Math.Sqrt((dx - sx) * (dx - sx) + (dy - sy) * (dy - sy));
-            cost += 0.3 * distance; // 거리에 따른 가중치 추가
+            double weight = 100;
+            cost += weight * distance; // 거리에 따른 가중치 추가, 최적 weight값 찾을 필요 있음
 
             return cost;
         }

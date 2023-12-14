@@ -304,7 +304,6 @@ namespace RaywattApp.Common.Annotation
 
         private void ProcessSingleImage(int imageIndex, CancellationToken token, int movedRecIndex)
         {
-            Debug.WriteLine("imageIndex =" + imageIndex.ToString());
             int startX, startY, endX, endY, pathLength;
             int[] vx, vy, pixelValue;
 
