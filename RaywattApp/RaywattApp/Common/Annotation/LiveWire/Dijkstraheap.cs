@@ -30,6 +30,7 @@ namespace RaywattApp.Common.Annotation.LiveWire
 
         public List<List<Point>> line;
         public List<Point> trackPoint;
+        private double sqrt2 = 1.41421356237;
         // converts x, y coordinates to vector index
         private int toIndex(int x, int y)
         {
@@ -80,9 +81,13 @@ namespace RaywattApp.Common.Annotation.LiveWire
             // 픽셀 값이 높을수록 낮은 cost 부여
             double cost = maxPixelValue - pixelValue;
 
+            int gap = 0;
+            if (sx != dx) gap++;
+            if (sy != dy) gap++;
+
             // 추가적으로 거리에 따른 가중치 적용
-            double distance = Math.Sqrt((dx - sx) * (dx - sx) + (dy - sy) * (dy - sy));
-            double weight = 100;
+            double distance = gap == 2 ? sqrt2 : 1;
+            double weight = 50;
             cost += weight * distance; // 거리에 따른 가중치 추가, 최적 weight값 찾을 필요 있음
 
             return cost;
@@ -90,7 +95,6 @@ namespace RaywattApp.Common.Annotation.LiveWire
 
         private void updateCosts(int x, int y, double mycost)
         {
-            visited[toIndex(x, y)] = true;
             if (pixelCosts.Count > 0)
             {
                 pixelCosts.Dequeue();
@@ -113,14 +117,14 @@ namespace RaywattApp.Common.Annotation.LiveWire
                 int newX = x + dx;
                 int newY = y + dy;
 
-                // 이미지 경계값 확인
-                if (newX >= 0 && newX < width && newY >= 0 && newY < height)
+                // 이미지 경계값 확인 및 방문하지 않은 노드인지 확인
+                if (newX >= 0 && newX < width && newY >= 0 && newY < height && !visited[toIndex(newX, newY)])
                 {
                     double newCost = mycost + edgeCost(x, y, newX, newY);
                     pixelCosts.Enqueue(new PixelNode(toIndex(newX, newY), newCost, toIndex(x, y)), newCost);
+                    visited[toIndex(newX, newY)] = true;
                 }
             }
-
         }
 
         // 시작점 : sx, sy
@@ -174,12 +178,15 @@ namespace RaywattApp.Common.Annotation.LiveWire
             {
                 visited[i] = false;
             }
+
+            pixelCosts.Clear();
             
             // init last point
             whereFrom[toIndex(x, y)] = toIndex(x, y);
 
             //init costs
             updateCosts(x, y, 0);
+            visited[toIndex(x, y)] = true;
 
             while (pixelCosts.Count > 0)
             {
@@ -195,19 +202,7 @@ namespace RaywattApp.Common.Annotation.LiveWire
                 {
                     break;
                 }
-
-                //removes pixels that are already visited and went to the queue
-                while (true)
-                {
-                    if (pixelCosts.Peek() == null)
-                        break;
-                    if (visited[((PixelNode)pixelCosts.Peek()).GetIndex()] == false)
-                        break;
-                    pixelCosts.Dequeue();
-                }
             }
-            while (pixelCosts.Count > 0)
-                pixelCosts.Dequeue();
         }
     }
 
