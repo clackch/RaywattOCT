@@ -1205,7 +1205,11 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 
 	// 3. Stop Recording OCT
 	pDataWriter->StopRecording();
+	PLOGI.printf("Stop Acquisition");
+	pSystem->m_pAcqDevice->StopAcquisition();
+	PLOGI.printf("Set Writer null");
 	pSystem->m_pAcqDevice->SetWriter(nullptr);
+	PLOGI.printf("Before StopMotor");
 
 	// 4. Motor OFF
 	Sleep(1000);
