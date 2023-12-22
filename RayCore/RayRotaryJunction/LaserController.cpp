@@ -14,8 +14,8 @@ CLaserController::CLaserController() {
 
 	// Enumerate the device list (redo this step whenever devices are connected or disconnected)
 	// More robust architectures would occasionally poll for device list changes or utilize the "OCTDeviceConnectOrDisconnectEvent" callback to re-enumerate devices
-	long numDevices = enumerateDevices(m_pDeviceList, m_pAxsunOCTControl);
-	PLOGI.printf("enumerateDevices - %ld", numDevices);
+	m_numDevices = enumerateDevices(m_pDeviceList, m_pAxsunOCTControl);
+	PLOGI.printf("enumerateDevices - %ld", m_numDevices);
 }
 CLaserController* CLaserController::GetInstance() {
 	if (pInstance == NULL) {

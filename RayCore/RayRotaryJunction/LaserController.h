@@ -12,6 +12,7 @@ private:
 	static CLaserController* pInstance;
 	IAxsunOCTControlPtr m_pAxsunOCTControl;
 	unsigned long m_pDeviceList[AXSUN_MAX_DEVICES];
+	long m_numDevices;
 private:
 	CLaserController();
 
@@ -19,6 +20,7 @@ public:
 	static CLaserController* GetInstance();
 	virtual ~CLaserController();
 
+	long GetNumDevices() { return m_numDevices; }
 	int LaserOnOff(bool on);
 
 private:
