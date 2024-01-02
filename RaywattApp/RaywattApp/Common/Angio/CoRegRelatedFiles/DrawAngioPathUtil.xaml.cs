@@ -11,14 +11,11 @@ using Point = System.Windows.Point;
 using RaywattApp.Common.Bases;
 using OpenCvSharp;
 using System.Runtime.InteropServices;
-using RaywattApp.Common.Annotation.LiveWire;
-using LiveWire;
 using log4net;
-using RaywattApp.Common.Angio;
 using System.Diagnostics;
 using System.Threading;
 
-namespace RaywattApp.Common.Annotation
+namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 {
     /// <summary>
     /// DrawAngioPathUtil.xaml에 대한 상호 작용 논리
@@ -146,8 +143,6 @@ namespace RaywattApp.Common.Annotation
             rectangle.Style = (Style)this.Resources["StyleRectangle"];
             rectangle.MouseLeftButtonDown += Rectangle_MouseLeftButtonDown;
             rectangle.MouseLeftButtonUp += Rectangle_MouseLeftButtonUp;
-            rectangle.MouseEnter += Rectangle_MouseEnter;
-            rectangle.MouseLeave += Rectangle_MouseLeave;
             rectangle.MouseMove += Rectangle_MouseMove;
         }
 
@@ -795,22 +790,13 @@ namespace RaywattApp.Common.Annotation
             MousePosition = e.GetPosition(this.canvas);
         }
 
-        private void Rectangle_MouseEnter(object sender, MouseEventArgs e)
-        {
-            this.canvas.MouseLeftButtonDown -= Canvas_MouseLeftButtonDown;
-        }
-
-        private void Rectangle_MouseLeave(object sender, MouseEventArgs e)
-        {
-            this.canvas.MouseLeftButtonDown += Canvas_MouseLeftButtonDown;
-        }
-
         private void Rectangle_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             var rectangle = sender as Rectangle;
             if (rectangle != null && IsResetOn)
             {
                 rectangle.CaptureMouse();
+                e.Handled = true;
             }
         }
 

@@ -2,7 +2,7 @@
 using System.Drawing;
 using Point = System.Windows.Point;
 
-namespace RaywattApp.Common.Annotation.LiveWire
+namespace RaywattApp.Common.Angio
 {
     public class BezierCurve
     {
@@ -30,8 +30,8 @@ namespace RaywattApp.Common.Annotation.LiveWire
 
             Point p = new Point
                 (
-                    (uuu * p0.X) + (3 * uu * t * p1.X) + (3 * u * tt * p2.X) + (ttt * p3.X),
-                    (uuu * p0.Y) + (3 * uu * t * p1.Y) + (3 * u * tt * p2.Y) + (ttt * p3.Y)
+                    uuu * p0.X + 3 * uu * t * p1.X + 3 * u * tt * p2.X + ttt * p3.X,
+                    uuu * p0.Y + 3 * uu * t * p1.Y + 3 * u * tt * p2.Y + ttt * p3.Y
                 );
 
             return p;

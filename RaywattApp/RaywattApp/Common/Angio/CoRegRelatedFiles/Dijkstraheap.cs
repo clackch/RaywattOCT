@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Point = System.Windows.Point;
 using log4net;
 
-namespace RaywattApp.Common.Annotation.LiveWire
+namespace RaywattApp.Common.Angio
 {
     public class DijkstraHeap
     {
@@ -21,7 +21,7 @@ namespace RaywattApp.Common.Annotation.LiveWire
         public int width;
         public int height;
         public int sx = -1, sy = -1; // seed x and seed y, weight zero for this point
-        
+
         private double gradientMagnitude;// Gradient Magnitude Weight - set by setGWeight
         private double exponentialWeight;// Exponential Weight - set by setEWeight
         private double potenceWeight;// Exponential Potence Weight - set by setPWeight
@@ -34,7 +34,7 @@ namespace RaywattApp.Common.Annotation.LiveWire
         // converts x, y coordinates to vector index
         private int toIndex(int x, int y)
         {
-            return (y * width + x);
+            return y * width + x;
         }
 
         //initializes Dijkstra with the image
@@ -42,7 +42,7 @@ namespace RaywattApp.Common.Annotation.LiveWire
         public DijkstraHeap(byte[] image, int x, int y)
         {
             line = new List<List<Point>>();
-            for (int i = 0; i<9; i++) // Track Point 개수 10개로 제한. 즉, 구간(line)은 총 9개
+            for (int i = 0; i < 9; i++) // Track Point 개수 10개로 제한. 즉, 구간(line)은 총 9개
             {
                 line.Add(new List<Point>());
             }
@@ -60,14 +60,14 @@ namespace RaywattApp.Common.Annotation.LiveWire
             width = x;
             height = y;
 
-            gradientr = gradientx = gradienty= new double[x*y];
+            gradientr = gradientx = gradienty = new double[x * y];
             for (int j = 0; j < y; j++)
             {
                 for (int i = 0; i < x; i++)
                 {
-                    imagePixels[j * x + i] = (int)image[j * x + i];
+                    imagePixels[j * x + i] = image[j * x + i];
                     visited[j * x + i] = false;
-                    gradientr[j * x + i] = gradientx[j * x + i] = gradienty[j * x + i] = (double)image[j * x + i];
+                    gradientr[j * x + i] = gradientx[j * x + i] = gradienty[j * x + i] = image[j * x + i];
                 }
             }
         }
@@ -131,7 +131,7 @@ namespace RaywattApp.Common.Annotation.LiveWire
         // 마우스 위치(종착점) : x, y
         // 종착점으로 부터 부분 경로 반환 : vx, vy
         // 경로 길이 : mylength
-        public void ReturnPath(int endX, int endY, int[] vx, int[] vy, out int length, int [] pixelValue)
+        public void ReturnPath(int endX, int endY, int[] vx, int[] vy, out int length, int[] pixelValue)
         {
             if (visited[toIndex(endX, endY)] == false)
             {
@@ -157,14 +157,14 @@ namespace RaywattApp.Common.Annotation.LiveWire
                 myx = nextx;
                 myy = nexty;
 
-            } while (!((myx == sx) && (myy == sy)));
+            } while (!(myx == sx && myy == sy));
 
             length = count;
             sx = endX;
             sy = endY;
         }
 
-                
+
         public void CalculatePathCost(int x, int y, int dx, int dy)
         {
             int nextIndex;
@@ -180,7 +180,7 @@ namespace RaywattApp.Common.Annotation.LiveWire
             }
 
             pixelCosts.Clear();
-            
+
             // init last point
             whereFrom[toIndex(x, y)] = toIndex(x, y);
 
@@ -190,13 +190,13 @@ namespace RaywattApp.Common.Annotation.LiveWire
 
             while (pixelCosts.Count > 0)
             {
-                nextIndex = ((PixelNode)pixelCosts.Peek()).GetIndex();
+                nextIndex = pixelCosts.Peek().GetIndex();
                 nextX = nextIndex % width;
                 nextY = nextIndex / width;
 
-                whereFrom[nextIndex] = ((PixelNode)pixelCosts.Peek()).GetWhereFrom();
-                                
-                updateCosts(nextX, nextY, ((PixelNode)pixelCosts.Peek()).GetDistance());
+                whereFrom[nextIndex] = pixelCosts.Peek().GetWhereFrom();
+
+                updateCosts(nextX, nextY, pixelCosts.Peek().GetDistance());
 
                 if (nextX == dx && nextY == dy)
                 {
