@@ -40,9 +40,11 @@ int CLaserController::LaserOnOff(bool on) {
 	isConnected = m_pAxsunOCTControl->ConnectToOCTDevice(searchDeviceList(AXSUN_LASER_DEVICE, m_pDeviceList));		// search device list and connect to laser
 	if (isConnected == -1) {
 		if (on) {
+			PLOGI.printf("Laser On");
 			retvallong = m_pAxsunOCTControl->StartScan();
 		}
 		else {
+			PLOGI.printf("Laser Off");
 			retvallong = m_pAxsunOCTControl->StopScan();
 		}
 	}

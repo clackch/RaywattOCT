@@ -222,13 +222,16 @@ RayError COCTSystem::ConnectDevices() {
 	int result = NOERROR;
 
 	if (m_curState == RayScannerState::Initial) {
-		result |= connectAcqDevice();
-		PLOGI.printf("connect DAQ - %s", ((result == NOERROR) ? "Succeed" : "Failed"));
 		result |= connectRotaryJunction();
 		PLOGI.printf("connect Rotary Junction - %s", ((result == NOERROR) ? "Succeed" : "Failed"));
 
-		// Connect to COM Interface first time asynchronous
+		// Connect to COM Interface first time
 		CLaserController* pLaser = CLaserController::GetInstance();
+		pLaser->LaserOnOff(true);
+
+		result |= connectAcqDevice();
+		PLOGI.printf("connect DAQ - %s", ((result == NOERROR) ? "Succeed" : "Failed"));
+
 		pLaser->LaserOnOff(false);
 
 		if (m_isTestMode) {
