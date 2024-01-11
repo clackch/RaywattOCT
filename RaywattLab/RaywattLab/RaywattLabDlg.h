@@ -96,6 +96,7 @@ private:
 	CThread* m_pThreadPullback;
 
 	bool m_bInitialized;
+	bool m_bStartAcquisition;
 
 // 생성입니다.
 public:
@@ -112,6 +113,7 @@ public:
 private:
 	void setLogger(TCHAR* logRootPath);
 	int initializeDevices();
+	int finalizeDevices();
 	void updatePatientDataList();
 	void initScopeViewLayout();
 	void updateBrightnessContrast(CLabImaging *pImaging);
@@ -150,6 +152,7 @@ protected:
 public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	afx_msg void OnBnClickedButtonAdminInitialize();
+	afx_msg void OnBnClickedButtonStartAcquisition();
 	afx_msg void OnBnClickedButtonOpenDataFolder();
 	afx_msg void OnBnClickedButtonLoadSelectedData();
 	afx_msg void OnBnClickedButtonPlayLoadedData();

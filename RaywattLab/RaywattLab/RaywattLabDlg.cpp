@@ -57,6 +57,7 @@ CRaywattLabDlg::CRaywattLabDlg(CWnd* pParent /*=nullptr*/)
 	m_strCurCalibration = _T(".\\CALIBRATION.dat");
 
 	m_bInitialized = false;
+	m_bStartAcquisition = false;
 }
 
 void CRaywattLabDlg::DoDataExchange(CDataExchange* pDX)
@@ -101,20 +102,8 @@ int CRaywattLabDlg::initializeDevices() {
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
 
-	if (m_pAcqDevice == nullptr) {
-		m_pAcqDevice = new CATSDevice(config.acquisition);
-		m_pAcqDevice->SetImaging(m_pImagingRealtime);
-		m_pAcqDevice->SetWriter(m_pDataWriter);
-	}
-
-	if (m_pAcqDevice->InitDevice() != NOERROR) {
-		m_pAcqDevice->CleanUp();
-		return E_FAIL;
-	}
-
 	if (m_chkInitStage) {
 		if (m_pRotaryJunction->Open(config.stepMotor.port) == false) {
-			m_pAcqDevice->CleanUp();
 			return E_FAIL;
 		}
 		m_pRotaryJunction->SetSpeed(StepMotorIndex::Both, config.stepMotor.pullbackSpeed);
@@ -124,11 +113,33 @@ int CRaywattLabDlg::initializeDevices() {
 		if (pMotor->Connect() == false) {
 			m_pRotaryJunction->Close();
 			m_pLaserModule->Close();
-			m_pAcqDevice->CleanUp();
 			return E_FAIL;
 		}
 		pMotor->SwitchOn();
 	}
+
+	if (m_pAcqDevice == nullptr) {
+		m_pAcqDevice = new CATSDevice(config.acquisition);
+		m_pAcqDevice->SetImaging(m_pImagingRealtime);
+		m_pAcqDevice->SetWriter(m_pDataWriter);
+	}
+
+	if (m_pAcqDevice->InitDevice() != NOERROR) {
+		m_pRotaryJunction->Close();
+		m_pLaserModule->Close();
+		m_pAcqDevice->CleanUp();
+		return E_FAIL;
+	}
+
+	return NOERROR;
+}
+int CRaywattLabDlg::finalizeDevices() {
+	if (m_pAcqDevice != nullptr)
+	{
+		m_pAcqDevice->CleanUp();
+	}
+	m_pRotaryJunction->Close();
+	m_pLaserModule->Close();
 
 	return NOERROR;
 }
@@ -476,6 +487,7 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_CHECK_INIT_STAGE, &CRaywattLabDlg::OnBnClickedCheckInitStage)
 	ON_BN_CLICKED(IDC_BUTTON_PULLBACK, &CRaywattLabDlg::OnBnClickedButtonPullback)
 	ON_BN_CLICKED(IDC_BUTTON_RESTART_ACQUISITION, &CRaywattLabDlg::OnBnClickedButtonRestartAcquisition)
+	ON_BN_CLICKED(IDC_BUTTON_START_ACQUISITION, &CRaywattLabDlg::OnBnClickedButtonStartAcquisition)
 END_MESSAGE_MAP()
 
 LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
@@ -792,13 +804,7 @@ void CRaywattLabDlg::OnBnClickedButtonAdminInitialize()
 {
 	if (m_bInitialized)
 	{
-		CLaserController::GetInstance()->LaserOnOff(true);
-		m_pAcqDevice->StartAcquisition();
-
-		GetDlgItem(IDC_BUTTON_ADMIN_INITIALIZE)->EnableWindow(FALSE);
-		GetDlgItem(IDC_BUTTON_SAVE_DATA)->EnableWindow(TRUE);
-		GetDlgItem(IDC_BUTTON_SAVE_CALIBRATION)->EnableWindow(TRUE);
-		GetDlgItem(IDC_BUTTON_RESTART_ACQUISITION)->EnableWindow(TRUE);
+		finalizeDevices();
 	}
 	else {
 		int nNumDevices = CLaserController::GetInstance()->GetNumDevices();
@@ -808,13 +814,15 @@ void CRaywattLabDlg::OnBnClickedButtonAdminInitialize()
 			return;
 		}
 
+		CLaserController::GetInstance()->LaserOnOff(true);
 		int result = initializeDevices();
+		CLaserController::GetInstance()->LaserOnOff(false);
 
 		AfxGetApp()->WriteProfileInt(_T("RECENT_SETTING"), _T("INIT_MOTOR"), m_chkInitMotor);
 		AfxGetApp()->WriteProfileInt(_T("RECENT_SETTING"), _T("INIT_STAGE"), m_chkInitStage);
 
 		if (result == NOERROR) {
-			GetDlgItem(IDC_BUTTON_ADMIN_INITIALIZE)->SetWindowText(_T("Start"));
+			GetDlgItem(IDC_BUTTON_ADMIN_INITIALIZE)->SetWindowText(_T("Finalize"));
 			m_bInitialized = true;
 		}
 		else {
@@ -822,6 +830,34 @@ void CRaywattLabDlg::OnBnClickedButtonAdminInitialize()
 		}
 	}
 }
+
+
+void CRaywattLabDlg::OnBnClickedButtonStartAcquisition()
+{
+	if (m_bStartAcquisition)
+	{
+		m_pAcqDevice->StopAcquisition();
+		CLaserController::GetInstance()->LaserOnOff(false);
+
+		GetDlgItem(IDC_BUTTON_START_ACQUISITION)->SetWindowText(_T("Start Acq."));
+		GetDlgItem(IDC_BUTTON_ADMIN_INITIALIZE)->EnableWindow(TRUE);
+		GetDlgItem(IDC_BUTTON_SAVE_DATA)->EnableWindow(FALSE);
+		GetDlgItem(IDC_BUTTON_SAVE_CALIBRATION)->EnableWindow(FALSE);
+		GetDlgItem(IDC_BUTTON_RESTART_ACQUISITION)->EnableWindow(FALSE);
+	}
+	else {
+		CLaserController::GetInstance()->LaserOnOff(true);
+		m_pAcqDevice->StartAcquisition();
+
+		GetDlgItem(IDC_BUTTON_START_ACQUISITION)->SetWindowText(_T("Stop Acq."));
+		GetDlgItem(IDC_BUTTON_ADMIN_INITIALIZE)->EnableWindow(FALSE);
+		GetDlgItem(IDC_BUTTON_SAVE_DATA)->EnableWindow(TRUE);
+		GetDlgItem(IDC_BUTTON_SAVE_CALIBRATION)->EnableWindow(TRUE);
+		GetDlgItem(IDC_BUTTON_RESTART_ACQUISITION)->EnableWindow(TRUE);
+	}
+	m_bStartAcquisition = !m_bStartAcquisition;
+}
+
 
 void CRaywattLabDlg::OnBnClickedButtonOpenDataFolder()
 {
