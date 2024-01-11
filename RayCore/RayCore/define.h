@@ -80,6 +80,7 @@ enum class RayWorkItem {
 	DetectLumen,
 	GenerateVolume,
 	AutoCalibration,
+	Recording,
 	Pullback,
 	LoadCatheter,
 	UnloadCatheter,

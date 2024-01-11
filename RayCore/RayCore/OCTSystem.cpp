@@ -1213,6 +1213,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	PLOGI.printf("Set Writer null");
 	pSystem->m_pAcqDevice->SetWriter(nullptr);
 	PLOGI.printf("Before StopMotor");
+	pSystem->postPriorMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::Recording);
 
 	// 4. Motor OFF
 	Sleep(1000);
