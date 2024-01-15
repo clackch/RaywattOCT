@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using log4net;
 using RaywattApp.Common.Bases;
+using System.Reflection.Metadata;
 using System.Windows;
 using System.Windows.Input;
 
@@ -80,6 +81,18 @@ namespace RaywattApp.Models
             get { return this._cmdMoveRect ?? (this._cmdMoveRect = new RelayCommand<object>(MoveRect)); }
         }
 
+        private ICommand _manipulationStartingCommand;
+        public ICommand ManipulationStartingCommand
+        {
+            get { return this._manipulationStartingCommand ?? (this._manipulationStartingCommand = new RelayCommand<object>(Window_ManipulationStarting)); }
+        }
+
+        private ICommand _manipulationDeltaCommand;
+        public ICommand ManipulationDeltaCommand
+        {
+            get { return this._manipulationDeltaCommand ?? (this._manipulationDeltaCommand = new RelayCommand<object>(Window_ManipulationDelta)); }
+        }
+
         private void SetCaptured(object param)
         {
             if(param != null)
@@ -132,21 +145,22 @@ namespace RaywattApp.Models
             if (ScaleX >= Constants.ZoomScaleMax)
                 return false;
 
-            double ratio = Constants.CrossSectionSize / Constants.MiniMapCanvasSize;
-            double centerLeft = RectLeft + RectWidth / 2;
-            double centerTop = RectTop + RectHeight / 2;
+            double nextScale = ScaleX * Constants.AnnotationScale;
 
-            RectWidth = RectWidth / Constants.AnnotationScale;
-            RectHeight = RectHeight / Constants.AnnotationScale;
-            RectLeft = centerLeft - RectWidth / 2;
-            RectTop = centerTop - RectHeight / 2;
+            if (nextScale <= Constants.ZoomScaleMax)
+            {
+                ScaleX = nextScale;
+                ScaleY = nextScale;
+                ZoomInSetting(Constants.AnnotationScale);
+            }
 
-            ScaleX *= Constants.AnnotationScale;
-            ScaleY *= Constants.AnnotationScale;
-            TranslateX = -RectLeft * ratio * ScaleX;
-            TranslateY = -RectTop * ratio * ScaleY;
-
-            Visibility = Visibility.Visible;
+            else
+            {
+                double annotationScale = Constants.ZoomScaleMax / ScaleX;
+                ScaleX = Constants.ZoomScaleMax;
+                ScaleY = Constants.ZoomScaleMax;
+                ZoomInSetting(annotationScale);
+            }
 
             return true;
         }
@@ -155,34 +169,98 @@ namespace RaywattApp.Models
         {
             _log.Debug("ZoomOut");
 
-            if (ScaleX == Constants.ZoomScaleDefault)
+            if (ScaleX <= Constants.ZoomScaleDefault)
                 return false;
 
+            double nextScale = ScaleX / Constants.AnnotationScale;
+
+            if (nextScale >= Constants.ZoomScaleDefault)
+            {
+                ScaleX = nextScale;
+                ScaleY = nextScale;
+                ZoomOutSetting(Constants.AnnotationScale);
+            }
+
+            else
+            {
+                double annotationScale = Constants.ZoomScaleDefault / ScaleX;
+                ScaleX = Constants.ZoomScaleDefault;
+                ScaleY = Constants.ZoomScaleDefault;
+                ZoomOutSetting(annotationScale);
+            }
+
+            return true;
+        }
+
+        public void Window_ManipulationStarting(object parameter)
+        {
+            ManipulationStartingEventArgs e = (ManipulationStartingEventArgs)parameter;
+            e.ManipulationContainer = Application.Current.MainWindow;
+            e.Handled = true;
+        }
+
+        public void Window_ManipulationDelta(object parameter)
+        {
+            ManipulationDeltaEventArgs e = (ManipulationDeltaEventArgs)parameter;
+            double annotationScale = e.DeltaManipulation.Scale.X;
+            double newScale = ScaleX * annotationScale;
+
+            if (newScale <= Constants.ZoomScaleMax && newScale >= Constants.ZoomScaleDefault)
+            {
+                ScaleX = newScale;
+                ScaleY = newScale;
+
+                if (annotationScale > 1) //확대
+                    ZoomInSetting(annotationScale);
+
+                else if (annotationScale < 1) //축소
+                    ZoomOutSetting(1/annotationScale);
+            }
+            e.Handled = true;
+        }
+
+        private void ZoomInSetting(double scale)
+        {
+            _log.Debug("zoomin");
             double ratio = Constants.CrossSectionSize / Constants.MiniMapCanvasSize;
             double centerLeft = RectLeft + RectWidth / 2;
             double centerTop = RectTop + RectHeight / 2;
 
-            RectWidth = RectWidth * Constants.AnnotationScale;
-            RectHeight = RectHeight * Constants.AnnotationScale;
+            RectWidth /= scale;
+            RectHeight /= scale;
+            RectLeft = centerLeft - RectWidth / 2;
+            RectTop = centerTop - RectWidth / 2; 
+
+            TranslateX = -RectLeft * ratio * ScaleX; 
+            TranslateY = - RectTop * ratio * ScaleY;
+
+            Visibility = Visibility.Visible;
+        }
+
+        private void ZoomOutSetting(double scale)
+        {
+            _log.Debug("zoomout");
+            double ratio = Constants.CrossSectionSize / Constants.MiniMapCanvasSize;
+            double centerLeft = RectLeft + RectWidth / 2;
+            double centerTop = RectTop + RectHeight / 2;
+
+            RectWidth = RectWidth * scale;
+            RectHeight = RectHeight * scale;
 
             if (centerLeft + RectWidth / 2 > Constants.MiniMapCanvasSize)
                 centerLeft = Constants.MiniMapCanvasSize - RectWidth / 2;
 
-            if(centerTop + RectHeight / 2 > Constants.MiniMapCanvasSize)
+            if (centerTop + RectHeight / 2 > Constants.MiniMapCanvasSize)
                 centerTop = Constants.MiniMapCanvasSize - RectHeight / 2;
 
             RectLeft = centerLeft - RectWidth / 2 < 0 ? 0 : centerLeft - RectWidth / 2;
             RectTop = centerTop - RectHeight / 2 < 0 ? 0 : centerTop - RectHeight / 2;
 
-            ScaleX /= Constants.AnnotationScale;
-            ScaleY /= Constants.AnnotationScale;
             TranslateX = -RectLeft * ratio * ScaleX;
             TranslateY = -RectTop * ratio * ScaleY;
 
-            if (ScaleX == Constants.ZoomScaleDefault)
+            if (ScaleX <= Constants.ZoomScaleDefault)
                 Visibility = Visibility.Collapsed;
-
-            return true;
         }
     }
 }
