@@ -260,7 +260,13 @@ namespace RaywattApp.Models
             TranslateY = -RectTop * ratio * ScaleY;
 
             if (ScaleX <= Constants.ZoomScaleDefault)
+            {
                 Visibility = Visibility.Collapsed;
+                TranslateX = 0; TranslateY = 0;
+                RectTop = 0; RectLeft = 0;
+                RectWidth = Constants.MiniMapCanvasSize;
+                RectHeight = Constants.MiniMapCanvasSize;
+            }
         }
     }
 }
