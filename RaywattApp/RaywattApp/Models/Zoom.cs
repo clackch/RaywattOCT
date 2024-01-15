@@ -216,6 +216,14 @@ namespace RaywattApp.Models
                 else if (annotationScale < 1) //축소
                     ZoomOutSetting(1/annotationScale);
             }
+
+            else if (newScale < Constants.ZoomScaleDefault)
+            {
+                annotationScale = Constants.ZoomScaleDefault / ScaleX;
+                ScaleX = Constants.ZoomScaleDefault;
+                ScaleY = Constants.ZoomScaleDefault;
+                ZoomOutSetting(annotationScale);
+            }
             e.Handled = true;
         }
 
