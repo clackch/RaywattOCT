@@ -140,6 +140,8 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return octSystem.GetImageChannels();
     case RayProperty::ImageDepth:
         return octSystem.GetImageDepth();
+    case RayProperty::ImageResolution:
+        return octSystem.GetImageResolution();
     case RayProperty::LongitudeImageWidth:
         return octSystem.GetLongitudeImageWidth();
     case RayProperty::LongitudeImageHeight:

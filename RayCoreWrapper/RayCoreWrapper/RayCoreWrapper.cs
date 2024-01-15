@@ -38,6 +38,7 @@ namespace RaywattOCT
             ImageHeight,
             ImageChannels,
             ImageDepth,
+            ImageResolution,
             LongitudeImageWidth,
             LongitudeImageHeight,
             LongitudeImageChannels,

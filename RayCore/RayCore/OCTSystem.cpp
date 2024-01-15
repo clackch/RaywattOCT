@@ -873,6 +873,14 @@ UINT COCTSystem::GetImageDepth()
 		return m_reviewSession[m_curSession]->GetImageDepth();
 	}
 }
+/*
+* GetImageResolution
+*/
+double COCTSystem::GetImageResolution()
+{
+	CConfiguration& config = CConfiguration::GetInstance();
+	return (config.measurement.fAxialResolutionScale / 1000.f) * 2;	// Convert polar scale to cartesian scale (mm)
+}
 
 /*
 * GetLongitudeImageWidth
