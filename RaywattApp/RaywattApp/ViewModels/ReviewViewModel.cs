@@ -298,6 +298,11 @@ namespace RaywattApp.ViewModels
                 Degree = PatientCase.IndicatorDegree;
                 Brightness = PatientCase.Brightness;
                 Contrast = PatientCase.Contrast;
+                CrossSectionScale = (1 / PatientCase.ImageResolution) * (Constants.CrossSectionSize / Constants.OCTImageSize);
+                CrossSectionAngioScale = (1 / PatientCase.ImageResolution) * (Constants.CrossSectionAngio / Constants.OCTImageSize);
+                ScaleLength = PatientCase.ImageResolution;
+                ScaleArea = PatientCase.ImageResolution * PatientCase.ImageResolution;
+                
                 SetAnnotation();
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
 
@@ -880,11 +885,11 @@ namespace RaywattApp.ViewModels
 
             PatientCase.FfrFeature.MinimalLumenFrameNumber = minimalLumenFrameNumber;
             PatientCase.FfrFeature.PercentAreaStenosis = Math.Round(percentAreaStenosis * 100, 1);
-            PatientCase.FfrFeature.MinimalLumenArea = Math.Round(minimalLumenArea * Constants.MillimeterPerPixel * Constants.MillimeterPerPixel, 2);
-            PatientCase.FfrFeature.DistalLumenArea = Math.Round(Section.Distal.DValue * Constants.MillimeterPerPixel * Constants.MillimeterPerPixel, 2);
+            PatientCase.FfrFeature.MinimalLumenArea = Math.Round(minimalLumenArea * ScaleArea, 2);
+            PatientCase.FfrFeature.DistalLumenArea = Math.Round(Section.Distal.DValue * ScaleArea, 2);
             PatientCase.FfrFeature.LesionLength = Math.Round(Section.LesionLength.DValue, 1);
             PatientCase.FfrFeature.PlaqueArea = 0.0;
-            PatientCase.FfrFeature.ProximalLumenArea = Math.Round(Section.Proximal.DValue * Constants.MillimeterPerPixel * Constants.MillimeterPerPixel, 2);
+            PatientCase.FfrFeature.ProximalLumenArea = Math.Round(Section.Proximal.DValue * ScaleArea, 2);
         }
 
         private string ConvertMeasurementsToJson(List<Measurement> param)
@@ -1058,14 +1063,14 @@ namespace RaywattApp.ViewModels
 
             if (CommonUtil.IsPreCase(PatientCase.Procedure))
             {
-                if (Section.SetMlaMld(LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength))
+                if (Section.SetMlaMld(LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength, PatientCase.ImageResolution))
                     Section.VisibleMlaMld(true);
                 else
                     Section.VisibleMlaMld(false);
             }
             else
             {
-                if (Section.SetMsaMinExp(LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength))
+                if (Section.SetMsaMinExp(LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength, PatientCase.ImageResolution))
                     Section.VislbleMsaMinExp(true);
                 else
                     Section.VislbleMsaMinExp(false);

@@ -209,7 +209,7 @@
                                             </Style.Triggers>
                                         </Style>
                                     </Grid.Style>
-                                    <ContentControl Template="{DynamicResource IndicatorScale}" Width="455" Height="18" Tag="{x:Static const:Constants.CrossSectionAngio}"/>
+                                    <ContentControl Template="{DynamicResource IndicatorScale}" Width="455" Height="18" Tag="{Binding CrossSectionAngioScale}"/>
                                 </Grid>
                                 <component:IndicatorImage Style="{DynamicResource IndicatorImage}" x:Name="crossSectionAngioIndicator" Width="480" Height="14" Icon="crossSection" IsCaptured="{Binding IndicatorCrossSectionAngio.IsCaptured}" Visibility="{Binding IndicatorCrossSectionAngio.IsVisible}">
                                     <Image.RenderTransform>
@@ -837,7 +837,7 @@
                                     </Style.Triggers>
                                 </Style>
                             </Grid.Style>
-                            <ContentControl Template="{DynamicResource IndicatorScale}" Width="600" Height="18" Tag="{x:Static const:Constants.CrossSectionSize}"/>
+                            <ContentControl Template="{DynamicResource IndicatorScale}" Width="600" Height="18" Tag="{Binding CrossSectionScale}"/>
                         </Grid>
                         <component:IndicatorImage Style="{DynamicResource IndicatorImage}" x:Name="crossSectionIndicator" Height="18" Icon="crossSection" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Visibility="{Binding IndicatorCrossSection.IsVisible}">
                             <Image.RenderTransform>
