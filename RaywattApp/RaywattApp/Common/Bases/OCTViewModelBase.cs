@@ -34,12 +34,6 @@ namespace RaywattApp.Common.Bases
         protected double _crossSectionAngioScale;
 
         [ObservableProperty]
-        protected double _scaleLength;
-
-        [ObservableProperty]
-        protected double _scaleArea;
-
-        [ObservableProperty]
         private double _crossSection3dScale = 28;
 
         [ObservableProperty]

@@ -115,7 +115,7 @@
                                         <StackPanel Orientation="Horizontal" Margin="9,0,9,0" VerticalAlignment="Center">
                                             <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [MLA], Source={StaticResource L10N}}"/>
                                             <StackPanel Width="2"/>
-                                            <TextBlock Style="{DynamicResource TextBlock_Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Text="{Binding SectionCompare.MlaValue.DValue, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleArea}}"/>
+                                            <TextBlock Style="{DynamicResource TextBlock_Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Text="{Binding SectionCompare.MlaValue.DValue, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleAreaCompare}}"/>
                                             <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [㎟], Source={StaticResource L10N}}"/>
                                         </StackPanel>
                                     </Border>
@@ -125,7 +125,7 @@
                                         <StackPanel Orientation="Horizontal" Margin="9,0,9,0" VerticalAlignment="Center">
                                             <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [MLD], Source={StaticResource L10N}}"/>
                                             <StackPanel Width="2"/>
-                                            <TextBlock Style="{DynamicResource TextBlock_Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Text="{Binding SectionCompare.MldValue.DValue, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}"/>
+                                            <TextBlock Style="{DynamicResource TextBlock_Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Text="{Binding SectionCompare.MldValue.DValue, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLengthCompare}}"/>
                                             <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [㎜], Source={StaticResource L10N}}"/>
                                         </StackPanel>
                                     </Border>

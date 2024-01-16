@@ -300,8 +300,6 @@ namespace RaywattApp.ViewModels
                 Contrast = PatientCase.Contrast;
                 CrossSectionScale = (1 / PatientCase.ImageResolution) * (Constants.CrossSectionSize / Constants.OCTImageSize);
                 CrossSectionAngioScale = (1 / PatientCase.ImageResolution) * (Constants.CrossSectionAngio / Constants.OCTImageSize);
-                ScaleLength = PatientCase.ImageResolution;
-                ScaleArea = PatientCase.ImageResolution * PatientCase.ImageResolution;
                 
                 SetAnnotation();
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
@@ -883,13 +881,15 @@ namespace RaywattApp.ViewModels
                 minimalLumenFrameNumber = Section.MsaValue.NValue;
             }
 
+            double scaleArea = PatientCase.ImageResolution * PatientCase.ImageResolution;
+
             PatientCase.FfrFeature.MinimalLumenFrameNumber = minimalLumenFrameNumber;
             PatientCase.FfrFeature.PercentAreaStenosis = Math.Round(percentAreaStenosis * 100, 1);
-            PatientCase.FfrFeature.MinimalLumenArea = Math.Round(minimalLumenArea * ScaleArea, 2);
-            PatientCase.FfrFeature.DistalLumenArea = Math.Round(Section.Distal.DValue * ScaleArea, 2);
+            PatientCase.FfrFeature.MinimalLumenArea = Math.Round(minimalLumenArea * scaleArea, 2);
+            PatientCase.FfrFeature.DistalLumenArea = Math.Round(Section.Distal.DValue * scaleArea, 2);
             PatientCase.FfrFeature.LesionLength = Math.Round(Section.LesionLength.DValue, 1);
             PatientCase.FfrFeature.PlaqueArea = 0.0;
-            PatientCase.FfrFeature.ProximalLumenArea = Math.Round(Section.Proximal.DValue * ScaleArea, 2);
+            PatientCase.FfrFeature.ProximalLumenArea = Math.Round(Section.Proximal.DValue * scaleArea, 2);
         }
 
         private string ConvertMeasurementsToJson(List<Measurement> param)
