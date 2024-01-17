@@ -3,12 +3,8 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:RaywattApp.Views"
       xmlns:const="clr-namespace:RaywattApp.Common.Bases"
-      xmlns:component="clr-namespace:RaywattApp.Views.Component"
-      xmlns:annotation="clr-namespace:RaywattApp.Common.Annotation"
-      xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-      xmlns:behaviors="clr-namespace:RaywattApp.Common.Behaviors"
+      xmlns:CoRegistration="clr-namespace:RaywattApp.Common.Angio.CoRegRelatedFiles"
       xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
       mc:Ignorable="d" 
       d:DesignHeight="1024" d:DesignWidth="1280"
@@ -57,13 +53,17 @@
                                     </RectangleGeometry>
                                 </Image.Clip>
                             </Image>
-                        </Grid>
-                        <annotation:DrawAngioPathUtil Grid.Column="0" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}"
-                                                      AngioImages="{Binding CrossSectionAngioImages}" AngioFrameNumber="{Binding AngioFrameNumber}" 
+                            <CoRegistration:DrawAngioPathUtil Grid.Column="0" Width="{x:Static const:Constants.AngioSize}" Height ="{x:Static const:Constants.AngioSize}"
+                                                      AngioImages ="{Binding CrossSectionAngioImages}" AngioFrameNumber ="{Binding AngioFrameNumber}" 
                                                       MousePosition ="{Binding CrossSectionMousePosition, Mode=TwoWay}" AngioTrackPoints ="{Binding AngioTrackPoints, Mode=TwoWay}"
-                                                      IsAngioTrackCompleted ="{Binding IsAngioTrackCompleted, Mode=TwoWay}" IsReset="{Binding IsReset, Mode=TwoWay}"
-                                                      IsResetOn ="{Binding IsResetOn, Mode=TwoWay}" IsCancel ="{Binding IsCancel}"
-                                                      Cursor="Cross"/>
+                                                      IsAngioTrackCompleted ="{Binding IsAngioTrackCompleted, Mode=TwoWay}" IsReset ="{Binding IsReset, Mode=TwoWay}"
+                                                      IsResetOn ="{Binding IsResetOn, Mode=TwoWay}" IsCancel ="{Binding IsCancel}" IsRendering ="{Binding IsRendering, Mode=TwoWay}"
+                                                      IsOk ="{Binding IsOk}" Cursor="Cross"/>
+                            <Border>
+                                <!-- Loading -->
+                                <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding IsRendering, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            </Border>
+                        </Grid>
                         <Border Grid.Column="2" CornerRadius="8" Background="{DynamicResource GrayscaleGray6Brush}">
                             <Grid Margin="30,36,30,30" >
                                 <Grid.RowDefinitions>

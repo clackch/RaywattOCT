@@ -1,22 +1,18 @@
 ﻿using MathNet.Numerics.Interpolation;
-using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using PointF = System.Drawing.PointF;
+using Point = System.Windows.Point;
 
-namespace LiveWire
+namespace RaywattApp.Common.Angio
 {
     public class SplineCurve
     {
-        public List<PointF> GetSplinePoints(List<PointF> points, int segments)
+        public List<Point> GetSplinePoints(List<Point> points, int segments)
         {
             int distanceLimit = 30; // 점 간격
 
-            List<PointF> sampledPoints = new List<PointF>();
-            List<PointF> curvePoints = new List<PointF>();
+            List<Point> sampledPoints = new List<Point>();
+            List<Point> curvePoints = new List<Point>();
             for (int i = 0; i < points.Count; i += distanceLimit)
             {
                 sampledPoints.Add(points[i]);
@@ -35,7 +31,7 @@ namespace LiveWire
             double[] y = sampledPoints.Select(p => (double)p.Y).ToArray();
 
             //PathFinding된 점이 1개 뿐이라면, 경로를 찾지 못했으므로 빈 List 반환
-            if(x.Length <= 2 || y.Length <= 2)
+            if (x.Length <= 2 || y.Length <= 2)
             {
                 return curvePoints;
             }
@@ -46,7 +42,7 @@ namespace LiveWire
             for (int i = 0; i <= segments; i++)
             {
                 double ti = i / (double)segments * (t.Last() - t.First());
-                curvePoints.Add(new PointF((float)splineX.Interpolate(ti), (float)splineY.Interpolate(ti)));
+                curvePoints.Add(new Point((float)splineX.Interpolate(ti), (float)splineY.Interpolate(ti)));
             }
 
             return curvePoints;

@@ -13,11 +13,10 @@ using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
 using OpenCvSharp;
 using System.IO;
-using RaywattApp.Common.Annotation.Models;
+using RaywattApp.Common.Angio;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Point = System.Windows.Point;
-using System.Threading;
 using Newtonsoft.Json;
 
 namespace RaywattApp.ViewModels
@@ -60,6 +59,17 @@ namespace RaywattApp.ViewModels
             get { return this._resetCommand ?? (this._resetCommand = new RelayCommand(Reset)); }
         }
 
+        private bool _isRendering = false;
+        public bool IsRendering
+        {
+            get { return _isRendering; }
+            set
+            {
+                _isRendering = value;
+                OnPropertyChanged(nameof(IsRendering));
+            }
+        }
+
         public List<Mat> CrossSectionAngioImages { get; private set; }
         private List<ImageSource> crossSectionAngioImageSources { get; set; }
         public ImageSource CurrentAngioImage
@@ -85,8 +95,8 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private List<AngioFrame> _angioTrackPoints;
-        public List<AngioFrame> AngioTrackPoints
+        private List<CoRegistration> _angioTrackPoints;
+        public List<CoRegistration> AngioTrackPoints
         {
             get { return _angioTrackPoints; }
             set 
@@ -158,8 +168,20 @@ namespace RaywattApp.ViewModels
             get => _isCancel;
             set
             {
-                _isReset = value;
+                _isCancel = value;
                 OnPropertyChanged(nameof(IsCancel));
+            }
+        }
+
+        private bool _isOk;
+
+        public bool IsOk
+        {
+            get => _isOk;
+            set
+            {
+                _isOk= value;
+                OnPropertyChanged(nameof(IsOk));
             }
         }
 
@@ -174,7 +196,6 @@ namespace RaywattApp.ViewModels
 
             CrossSectionAngioImages = new List<Mat>();
             crossSectionAngioImageSources = new List<ImageSource>();
-            AngioTrackPoints = new List<AngioFrame>();
             ReadAngioFrames();
         }
 
@@ -202,7 +223,7 @@ namespace RaywattApp.ViewModels
         private void Ok()
         {
             _log.Debug("Ok");
-
+            IsOk = true;
             GoToPreviousPage(true);
         }
 
@@ -226,6 +247,15 @@ namespace RaywattApp.ViewModels
             if (isSave)
             {
                 SaveCoRegPoint();
+
+                if (AngioTrackPoints[0].TrackPoint.Count != 0)
+                {
+                    UpdateCoRegStatus(true);
+                }
+                else
+                {
+                    UpdateCoRegStatus(false);
+                }
             }
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
@@ -242,6 +272,18 @@ namespace RaywattApp.ViewModels
             sqlParameters["id"] = PatientCase.Id;
             sqlParameters["track_point"] = JsonConvert.SerializeObject(AngioTrackPoints, Formatting.Indented);
             int nRows = _sqlManager.UpsertCoRegistration(sqlParameters);
+            if (nRows == 0)
+            {
+                _log.Error("Update Error");
+            }
+        }
+
+        private void UpdateCoRegStatus(bool angioCoRegSaved)
+        {
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = PatientCase.Id;
+            sqlParameters["angio_co_registration"] = angioCoRegSaved;
+            int nRows = _sqlManager.UpdatePatientCaseAngioCoRegistration(sqlParameters);
             if (nRows == 0)
             {
                 _log.Error("Update Error");
@@ -273,6 +315,7 @@ namespace RaywattApp.ViewModels
                     }
                 }
                 AngioFrameLength = crossSectionAngioImageSources.Count - 1;
+                AngioTrackPoints = new List<CoRegistration>(CrossSectionAngioImages.Count);
                 break;
             }
         }

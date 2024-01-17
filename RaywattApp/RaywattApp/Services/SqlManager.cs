@@ -462,6 +462,15 @@ namespace RaywattApp.Services
             return _databaseService.InsertData(commandText, sqlParameters);
         }
 
+        public int UpdatePatientCaseAngioCoRegistration(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpdatePatientCaseAngioCoRegistration");
+
+            string commandText = SqlQuery.GetQuery("UpdatePatientCaseAngioCoRegistration");
+
+            return _databaseService.UpdateData(commandText, sqlParameters);
+        }
+
         /**
          * Extra
          */
