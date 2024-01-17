@@ -402,7 +402,6 @@ namespace RaywattApp.Common.Bases
         //Scale (values from PatientCase.ImageResolution)
         public static double ImageResolution;
         public static double ImageResolutionCompare;
-        public const double MillimeterPerPixel  = 0.0082;
 
         //Mini-Map
         public const double MiniMapBorderSize = 140;
