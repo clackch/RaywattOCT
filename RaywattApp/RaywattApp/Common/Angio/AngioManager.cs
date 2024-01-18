@@ -100,6 +100,7 @@ namespace RaywattApp.Common.Angio
         private bool isAngioInit = false;
 
         public AngioManager(SqlManager sqlManager, IDialogService dialogService)
+
         {
             _log.Debug("AngioManager");
 
@@ -131,6 +132,7 @@ namespace RaywattApp.Common.Angio
         }
 
         public ConnectionStatus ConnectToServer()
+
         {
             try
             {
@@ -557,9 +559,6 @@ namespace RaywattApp.Common.Angio
 
         public bool GetServerConnection()
         {
-            if (Instance == null)
-                return false;
-
             return Instance.Connected;
         }
     }

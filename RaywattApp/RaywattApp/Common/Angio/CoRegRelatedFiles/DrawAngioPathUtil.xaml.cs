@@ -32,12 +32,47 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
         private static readonly DependencyProperty AngioFrameNumberProperty =
             DependencyProperty.Register("AngioFrameNumber", typeof(int), typeof(DrawAngioPathUtil), new PropertyMetadata(-1, OnAngioFrameNumberPropertyChanged));
+		public int CurrentAngioFrameNumber
+        {
+            get { return (int)GetValue(CurrentAngioFrameNumberProperty); }
+            set { this.SetValue(CurrentAngioFrameNumberProperty, value); }
+        }
+        
+        private static readonly DependencyProperty CurrentAngioFrameNumberProperty =
+        DependencyProperty.Register("CurrentAngioFrameNumber", typeof(int), typeof(DrawAngioPathUtil), new PropertyMetadata(-1, OnCurrentAngioFrameNumberPropertyChanged));
+        
         public List<Mat> AngioImages
         {
             get { return (List<Mat>)GetValue(AngioImagesProperty); }
             set { this.SetValue(AngioImagesProperty, value); }
         }
 
+		public CoRegistration CurrentTrackPoint
+        {
+            get { return (CoRegistration)GetValue(CurrentTrackPointProperty); }
+            set { this.SetValue(CurrentTrackPointProperty, value); }
+        }
+            
+        public List<DijkstraHeap> DijkstraHeap
+        {
+            get { return (List<DijkstraHeap>)GetValue(DijkstraHeapProperty); }
+            set { this.SetValue(DijkstraHeapProperty, value); }
+        }
+        public List<Mat> MotionVector
+        {
+            get { return (List<Mat>)GetValue(MotionVectorProperty); }
+            set { this.SetValue(MotionVectorProperty, value); }
+        }
+        
+        public static readonly DependencyProperty CurrentTrackPointProperty =
+            DependencyProperty.Register("CurrentTrackPoint", typeof(CoRegistration), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
+
+        public static readonly DependencyProperty DijkstraHeapProperty =
+            DependencyProperty.Register("DijkstraHeap", typeof(List<DijkstraHeap>), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
+
+        public static readonly DependencyProperty MotionVectorProperty =
+            DependencyProperty.Register("MotionVector", typeof(List<Mat>), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
+            
         public static readonly DependencyProperty AngioImagesProperty =
             DependencyProperty.Register("AngioImages", typeof(List<Mat>), typeof(DrawAngioPathUtil), new PropertyMetadata(null, OnAngioImagesPropertyChanged));
 
@@ -92,6 +127,15 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             get { return (bool)GetValue(IsCancelProperty); }
             set { this.SetValue(IsCancelProperty, value); }
         }
+        
+        public bool IsEditOn
+        {
+            get { return (bool)GetValue(IsEditOnProperty); }
+            set { this.SetValue(IsEditOnProperty, value); }
+        }
+        
+        public static readonly DependencyProperty IsEditOnProperty =
+            DependencyProperty.Register("IsEditOn", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(false));
 
         public static readonly DependencyProperty IsCancelProperty =
             DependencyProperty.Register("IsCancel", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(false, OnCancelPropertyChanged));
@@ -137,6 +181,14 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             canvas.MouseMove += Canvas_MouseMove;
             this.canvas.Background = Brushes.Transparent;
         }
+
+		 private void DeactivateEvent()
+        {
+            canvas.MouseLeftButtonDown -= Canvas_MouseLeftButtonDown;
+            canvas.MouseMove -= Canvas_MouseMove;
+            this.canvas.Background = null;
+        }
+
 
         private void AddRecEvents(Rectangle rectangle)
         {
@@ -245,6 +297,13 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             });
         }
 
+		private void TrackPointChange()
+        {
+            InitializePath();
+
+            DrawTrackPoint();
+        }
+        
         private void InitializePath(bool isPathOnly = false)
         {
             if (isPathOnly)
@@ -296,6 +355,18 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             }
         }
 
+		public void DrawTrackPoint()
+        {
+            foreach (Point tp in CurrentTrackPoint.TrackPoint)
+            {
+                Ellipse path = new Ellipse();
+                path.Style = (Style)this.Resources["StylePathEllipse"];
+                Canvas.SetLeft(path, tp.X - path.Width / 2);
+                Canvas.SetTop(path, tp.Y - path.Height / 2);
+                this.canvas.Children.Add(path);
+            }
+        }
+        
         private void ProcessSingleImage(int imageIndex, CancellationToken token, int movedRecIndex)
         {
             int startX, startY, endX, endY, pathLength;
@@ -649,6 +720,28 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                 control.angioImageTotalNum = newImages.Count;
                 control.ImageProcessing(newImages);
             }
+        }
+
+        private static void OnCurrentAngioFrameNumberPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
+        {
+            int AngioFrameNumber = (int)dependencyPropertyChangedEventArgs.NewValue;
+
+            var drawUtil = dependencyObject as DrawAngioPathUtil;
+
+            if (AngioFrameNumber < 0 || drawUtil == null || drawUtil.AngioTrackPoints == null) return;
+
+            foreach (CoRegistration coReg in drawUtil.AngioTrackPoints)
+            {
+                if (coReg.AngioFrameNumber == AngioFrameNumber)
+                {
+                    drawUtil.CurrentTrackPoint = coReg;
+                    drawUtil.TrackPointChange();
+
+                    return;
+                }
+            }
+
+            drawUtil.InitializePath();
         }
 
         private static void OnAngioFrameNumberPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)

@@ -168,6 +168,7 @@ namespace RaywattApp.ViewModels
 
             // Send Start Command
             if (!_angioManager.readyToRecv && DeviceStatus.IsAngioConnected)
+
             {
                 _angioManager.SendCommandPacket(CommandType.FGStarted);
             }

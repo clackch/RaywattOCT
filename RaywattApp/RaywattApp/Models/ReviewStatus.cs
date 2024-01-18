@@ -31,6 +31,9 @@ namespace RaywattApp.Models
         private bool _isPlay = true;
 
         [ObservableProperty]
+        private bool _isImageProcessingDone = false;
+
+        [ObservableProperty]
         private Zoom _zoom = new Zoom();
 
         //3D

@@ -2,10 +2,12 @@
 using RaywattApp.Common.Angio;
 using System.Collections.Generic;
 using System.Windows.Media;
+using System.Windows;
+using OpenCvSharp;
 
 namespace RaywattApp.Common.Angio
 {
-    internal partial class AngioFrame : ObservableObject
+    public partial class AngioFrame : ObservableObject
     {
         [ObservableProperty]
         private List<CoRegistration> _coRegistration;
@@ -13,6 +15,10 @@ namespace RaywattApp.Common.Angio
         [ObservableProperty]
         private List<ImageSource> _angioImage;
 
-        // 추가 필요한 멤버 및 함수는 여기에.
+        [ObservableProperty]
+        private List<DijkstraHeap> _dijkstraHeap;
+
+        [ObservableProperty]
+        private List<Mat> _motionVector;
     }
 }
