@@ -716,6 +716,7 @@ namespace RaywattApp.ViewModels
                     MeasurementCommand = Constants.MeasureZoomIn;
                 IndicatorCrossSection.IsVisible = Visibility.Collapsed;
                 ReviewStatus.IsCalciumOn = false;
+                ReviewStatus.IsSheathOn = false;
             }
         }
 
@@ -729,6 +730,7 @@ namespace RaywattApp.ViewModels
             if (ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault)
             {
                 ReviewStatus.IsCalciumOn = true;
+                ReviewStatus.IsSheathOn = true;
 
                 if (!ReviewStatus.IsLumenProfile)
                     IndicatorCrossSection.IsVisible = Visibility.Visible;
