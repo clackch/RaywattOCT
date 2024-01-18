@@ -154,6 +154,8 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return config.stepMotor.pullbackDistance;
     case RayProperty::PullbackSpeed:
         return config.stepMotor.pullbackSpeed;
+    case RayProperty::SheathDiameter:
+        return config.measurement.fSheathRadius * 2;
     case RayProperty::TestMode:
         return (double) octSystem.IsTestMode();
     default:

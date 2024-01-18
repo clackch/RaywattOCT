@@ -29,6 +29,9 @@ namespace RaywattApp.Models
         private bool _isCalciumOn = true;
 
         [ObservableProperty]
+        private bool _isSheathOn = true;
+
+        [ObservableProperty]
         private bool _isPlay = true;
 
         [ObservableProperty]

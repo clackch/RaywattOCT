@@ -45,6 +45,7 @@ namespace RaywattOCT
             PullbackRPM,
             PullbackDistance,
             PullbackSpeed,
+            SheathDiameter,
             TestMode
         }
 

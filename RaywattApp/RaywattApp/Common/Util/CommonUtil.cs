@@ -1568,6 +1568,32 @@ namespace RaywattApp.Common.Util
             return bitmap;
         }
 
+        public static BitmapSource DrawSheathIndicator(double resolution, int imageSize, double sheathDiameter)
+        {
+            double pxDiameter = (sheathDiameter / resolution) * imageSize / Constants.OCTImageSize;
+            Mat imgSheath = new Mat(imageSize, imageSize, MatType.CV_8UC4);
+            Point center = new Point(imgSheath.Width / 2, imgSheath.Height / 2);
+            int thickness = 3;
+            int radius = (int)(pxDiameter / 2) + thickness;
+
+            imgSheath.SetTo(new Scalar(0x00, 0x00, 0x00, 0x00));
+            imgSheath.Circle(center, radius, new Scalar(0xff, 0xff, 0xff, 0xff), thickness, LineTypes.AntiAlias);
+
+            for (int i = 1; i<6; i+=2)
+            {
+                imgSheath.Ellipse(center,
+                    new OpenCvSharp.Size(imgSheath.Width / 2, imgSheath.Height / 2),
+                    0,
+                    i * 60,
+                    i * 60 + 60,
+                    new Scalar(0x00, 0x00, 0x00, 0x00),
+                    -1);
+            }
+
+            BitmapSource bitmap = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgSheath);
+            return bitmap;
+        }
+
         public static bool IsTestMode(Dictionary<string, bool> testMode, string key)
         {
             if (!testMode.ContainsKey(key))

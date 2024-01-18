@@ -973,6 +973,8 @@ namespace RaywattApp.ViewModels
 
                 if (CommonUtil.IsPreCase(PatientCase.Procedure))
                     DrawCalciumIndicator();
+
+                DrawSheathIndicator();
             }
         }
 

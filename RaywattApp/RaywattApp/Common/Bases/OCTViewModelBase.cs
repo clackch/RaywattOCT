@@ -59,6 +59,12 @@ namespace RaywattApp.Common.Bases
         private BitmapSource _angioImage;
 
         [ObservableProperty]
+        private BitmapSource _sheathIndicator;
+
+        [ObservableProperty]
+        private BitmapSource _sheathIndicatorAngio;
+
+        [ObservableProperty]
         private bool _isPaused = true;
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
@@ -174,7 +180,13 @@ namespace RaywattApp.Common.Bases
             BitmapSource bitmap = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(image);
 
             return bitmap;
-        }       
+        }
+        protected void DrawSheathIndicator()
+        {
+            double sheathDiameter = RayGetProperty(Property.SheathDiameter);
+            SheathIndicator = CommonUtil.DrawSheathIndicator(Constants.ImageResolution, (int)Constants.CrossSectionSize, sheathDiameter);
+            SheathIndicatorAngio = CommonUtil.DrawSheathIndicator(Constants.ImageResolution, (int)Constants.CrossSectionAngio, sheathDiameter);
+        }
 
         private Mat GenerateMask(Mat image)
         {

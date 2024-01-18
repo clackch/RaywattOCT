@@ -46,6 +46,7 @@ enum class RayProperty {
 	PullbackRPM,
 	PullbackDistance,
 	PullbackSpeed,
+	SheathDiameter,
 	TestMode
 };
 
