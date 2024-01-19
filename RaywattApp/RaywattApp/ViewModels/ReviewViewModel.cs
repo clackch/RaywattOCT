@@ -329,6 +329,9 @@ namespace RaywattApp.ViewModels
                     {
                         PatientCase.AngioFrame = new AngioFrame();
                         PatientCase.AngioFrame.AngioImage = new List<ImageSource>();
+                    }
+                    if(PatientCase.AngioFrame.CoRegistration == null)
+                    {
                         PatientCase.AngioFrame.CoRegistration = new List<CoRegistration>();
                         PatientCase.AngioFrame.DijkstraHeap = new List<DijkstraHeap>();
                         PatientCase.AngioFrame.MotionVector = new List<Mat>();
