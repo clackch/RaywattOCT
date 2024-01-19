@@ -461,6 +461,7 @@ namespace RaywattApp.Services
 
             return _databaseService.InsertData(commandText, sqlParameters);
         }        
+
         public IList<StringModel> SelectCoRegistrationTrackPoint(Dictionary<string, Object> sqlParameters)
         {
             _log.Debug("SelectCoRegistrationTrackPoint");
@@ -469,7 +470,6 @@ namespace RaywattApp.Services
 
             return _databaseService.GetDatas<StringModel>(commandText, sqlParameters);
         }
-
 
         public int UpdatePatientCaseAngioCoRegistration(Dictionary<string, Object> sqlParameters)
         {

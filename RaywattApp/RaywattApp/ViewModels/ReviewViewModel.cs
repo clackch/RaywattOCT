@@ -1370,7 +1370,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["id"] = PatientCase.Id;
 
             IList<StringModel> coRegistrationTrackPoint = _sqlManager.SelectCoRegistrationTrackPoint(sqlParameters);
-            if (coRegistrationTrackPoint[0].ReturnString == null) return;
+            if (coRegistrationTrackPoint == null || coRegistrationTrackPoint.Count == 0 || coRegistrationTrackPoint[0].ReturnString == null) return;
 
             List<CoRegistration> coRegistrations = JsonConvert.DeserializeObject<List<CoRegistration>>(coRegistrationTrackPoint[0].ReturnString);
 
