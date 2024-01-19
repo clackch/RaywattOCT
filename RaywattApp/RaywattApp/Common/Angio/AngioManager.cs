@@ -268,8 +268,6 @@ namespace RaywattApp.Common.Angio
                     xw.WriteEndElement();
                     xw.WriteEndDocument();
                 }
-                angioSaveFrameNum = 0;
-                angioSaveBuffer.Clear();
             }
             catch (Exception ex)
             {
@@ -281,6 +279,8 @@ namespace RaywattApp.Common.Angio
                 patientCase.AngioFrame = new AngioFrame();
             }
             patientCase.AngioFrame.AngioImage = ConvertBytesToImageSources(angioSaveBuffer);
+            angioSaveFrameNum = 0;
+            angioSaveBuffer.Clear();
         }
 
         private List<ImageSource> ConvertBytesToImageSources(List<byte[]> imageBytesList)
