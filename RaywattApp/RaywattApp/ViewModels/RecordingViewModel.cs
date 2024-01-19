@@ -143,7 +143,7 @@ namespace RaywattApp.ViewModels
             _log.Debug("Cancel");
 
             RayStopLiveView();
-            leaveToPage(Constants.RecordingLiveViewPage);
+            leaveToPage(Constants.RecordingLiveViewPage, _cancelCommand);
         }
 
         private void Ready()
@@ -223,8 +223,8 @@ namespace RaywattApp.ViewModels
 
             RayPullbackScan(PatientCase.ImageFullPath);
 
-            _angioManager.readyToRecv = true;
-            _angioManager.StartSaveAngioThread(PatientCase.ImageFullPath.Substring(0, PatientCase.ImageFullPath.Length-3));
+            _angioManager.ReadyToRecv = true;
+            _angioManager.StartSaveAngioThread(PatientCase);
 
             threadWaitPullbackDone.Start();            
         }
@@ -239,7 +239,7 @@ namespace RaywattApp.ViewModels
             }
             runWaitPullbackDone = false;
 
-            leaveToPage(Constants.RecordingConfirmPage);
+            leaveToPage(Constants.RecordingConfirmPage, null);
         }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
@@ -247,7 +247,7 @@ namespace RaywattApp.ViewModels
             DrawCrossSectionImage();
         }
 
-        private void leaveToPage(string viewPage)
+        private void leaveToPage(string viewPage, ICommand command)
         {
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
