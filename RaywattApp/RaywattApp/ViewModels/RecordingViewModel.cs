@@ -253,6 +253,7 @@ namespace RaywattApp.ViewModels
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
             parameter["patientCase"] = PatientCase;
+            parameter["command"] = command;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(viewPage) { Parameter = parameter });
         }
 

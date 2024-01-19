@@ -150,7 +150,7 @@ namespace RaywattApp.ViewModels
                     Brightness = PatientCase.Brightness;
                     Contrast = PatientCase.Contrast;
 
-                    if (PatientCase.ImageFullPath != null)
+                    if (PatientCase.ImageFullPath != null && PatientCase.Image != null)
                     {
                         string path = PatientCase.ImageFullPath.Substring(0, PatientCase.ImageFullPath.Length - 42);
                         string fileName = PatientCase.Image.Substring(0, PatientCase.Image.Length - 3) + "*";
