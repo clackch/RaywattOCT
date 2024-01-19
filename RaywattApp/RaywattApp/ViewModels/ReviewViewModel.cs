@@ -344,6 +344,8 @@ namespace RaywattApp.ViewModels
                         Thread threadImageProcessing = new Thread(() => ThreadImageProcessing());
                         threadImageProcessing.Start();
                     }
+
+                    AngioTrackPoints = PatientCase.AngioFrame.CoRegistration;
                 }
 
                 Degree = PatientCase.IndicatorDegree;
@@ -1376,7 +1378,6 @@ namespace RaywattApp.ViewModels
 
             foreach (CoRegistration coReg in coRegistrations)
             {
-                AngioTrackPoints.Add(coReg);
                 PatientCase.AngioFrame.CoRegistration.Add(coReg);
             }
         }
