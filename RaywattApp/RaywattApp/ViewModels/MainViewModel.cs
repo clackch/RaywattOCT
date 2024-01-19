@@ -431,7 +431,10 @@ namespace RaywattApp.ViewModels
                     break;
                 case RayWorkItem.Pullback:
                     DeviceStatus.IsPullbackDone = true;
-                    _angioManager.StopSaveAngioThread();
+                    if (DeviceStatus.IsAngioConnected)
+                    {
+                        _angioManager.StopSaveAngioThread();
+                    }
                     break;
                 case RayWorkItem.OCTImaging:
                     if(param == (int)RaySession.Review)

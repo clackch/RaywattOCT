@@ -223,8 +223,11 @@ namespace RaywattApp.ViewModels
 
             RayPullbackScan(PatientCase.ImageFullPath);
 
-            _angioManager.ReadyToRecv = true;
-            _angioManager.StartSaveAngioThread(PatientCase);
+            if (DeviceStatus.IsAngioConnected)
+            {
+                _angioManager.ReadyToRecv = true;
+                _angioManager.StartSaveAngioThread(PatientCase);
+            }
 
             threadWaitPullbackDone.Start();            
         }
