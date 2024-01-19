@@ -316,37 +316,14 @@ namespace RaywattApp.ViewModels
                 ToggleAngio(ReviewStatus.IsAngioOn);
                 ToggleLongitude(ReviewStatus.IsLumenProfile);
 
+                SetAngioFrame();
+
                 Section.Proximal.X = CommonUtil.GetPositionFromFrame(PatientCase.SectionProximal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
                 Section.Distal.X = CommonUtil.GetPositionFromFrame(PatientCase.SectionDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
 
                 SetLumenProfileValue();
 
                 GetImageInfo(RaySession.Review);
-
-                if (PatientCase.AngioYn == true)
-                {
-                    if (PatientCase.AngioFrame == null)
-                    {
-                        PatientCase.AngioFrame = new AngioFrame();
-                        PatientCase.AngioFrame.AngioImage = new List<ImageSource>();
-                    }
-                    if(PatientCase.AngioFrame.CoRegistration == null)
-                    {
-                        PatientCase.AngioFrame.CoRegistration = new List<CoRegistration>();
-                        PatientCase.AngioFrame.DijkstraHeap = new List<DijkstraHeap>();
-                        PatientCase.AngioFrame.MotionVector = new List<Mat>();
-                    }
-
-                    if (PatientCase.AngioFrame.AngioImage.Count == 0) ReadAngioFrames();
-                    if (PatientCase.AngioFrame.CoRegistration.Count == 0) ReadTrackPoints();
-                    if (PatientCase.AngioFrame.DijkstraHeap.Count == 0)
-                    {
-                        Thread threadImageProcessing = new Thread(() => ThreadImageProcessing());
-                        threadImageProcessing.Start();
-                    }
-
-                    AngioTrackPoints = PatientCase.AngioFrame.CoRegistration;
-                }
 
                 Degree = PatientCase.IndicatorDegree;
                 Brightness = PatientCase.Brightness;
@@ -374,6 +351,33 @@ namespace RaywattApp.ViewModels
          * Initialize
          */
         #region Initialize
+
+        private void SetAngioFrame()
+        {
+            if (!PatientCase.AngioYn) return;
+
+            if (PatientCase.AngioFrame == null)
+            {
+                PatientCase.AngioFrame = new AngioFrame();
+                PatientCase.AngioFrame.AngioImage = new List<ImageSource>();
+            }
+            if (PatientCase.AngioFrame.CoRegistration == null)
+            {
+                PatientCase.AngioFrame.CoRegistration = new List<CoRegistration>();
+                PatientCase.AngioFrame.DijkstraHeap = new List<DijkstraHeap>();
+                PatientCase.AngioFrame.MotionVector = new List<Mat>();
+            }
+
+            if (PatientCase.AngioFrame.AngioImage.Count == 0) ReadAngioFrames();
+            if (PatientCase.AngioFrame.CoRegistration.Count == 0) ReadTrackPoints();
+            if (PatientCase.AngioFrame.DijkstraHeap.Count == 0)
+            {
+                Thread threadImageProcessing = new Thread(() => ThreadImageProcessing());
+                threadImageProcessing.Start();
+            }
+
+            AngioTrackPoints = PatientCase.AngioFrame.CoRegistration;
+        }
 
         private void SetAnnotation()
         {
