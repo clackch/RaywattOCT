@@ -54,18 +54,18 @@ namespace RaywattApp.ViewModels.Dialog
 
             _angioManager.SendChpFilePacket(SelectedCathRoom.AppChp);
 
-            while (_angioManager.isChpFileChangeSuccess == 0) 
+            while (_angioManager.IsChpFileChangeSuccess == 0) 
             {
                 Thread.Sleep(500);
             }
-            if(_angioManager.isChpFileChangeSuccess == 1)
+            if(_angioManager.IsChpFileChangeSuccess == 1)
             {
                 parameter["title"] = _l10n["Information"];
                 parameter["message"] = _l10n["$MSG012"];
 
                 _dialogService.OpenDialog(new AlertDialogControl(), parameter, Common.Bases.Constants.ApplicationWidth, Common.Bases.Constants.ApplicationHeight);
             }
-            else if(_angioManager.isChpFileChangeSuccess == -1)
+            else if(_angioManager.IsChpFileChangeSuccess == -1)
             {
                 parameter["title"] = _l10n["Error"];
                 parameter["message"] = _l10n["$MSG013"];
@@ -73,7 +73,7 @@ namespace RaywattApp.ViewModels.Dialog
 
                 _dialogService.OpenDialog(new AlertDialogControl(), parameter, Common.Bases.Constants.ApplicationWidth, Common.Bases.Constants.ApplicationHeight);
             }
-            _angioManager.isChpFileChangeSuccess = 0;
+            _angioManager.IsChpFileChangeSuccess = 0;
 
             CloseDialogWithResult(dialog, dialogResults);
         }
