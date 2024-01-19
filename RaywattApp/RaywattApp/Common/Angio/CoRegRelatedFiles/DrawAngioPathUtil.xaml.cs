@@ -47,43 +47,8 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             set { this.SetValue(AngioImagesProperty, value); }
         }
 
-		public CoRegistration CurrentTrackPoint
-        {
-            get { return (CoRegistration)GetValue(CurrentTrackPointProperty); }
-            set { this.SetValue(CurrentTrackPointProperty, value); }
-        }
-            
-        public List<DijkstraHeap> DijkstraHeap
-        {
-            get { return (List<DijkstraHeap>)GetValue(DijkstraHeapProperty); }
-            set { this.SetValue(DijkstraHeapProperty, value); }
-        }
-        public List<Mat> MotionVector
-        {
-            get { return (List<Mat>)GetValue(MotionVectorProperty); }
-            set { this.SetValue(MotionVectorProperty, value); }
-        }
-        
-        public static readonly DependencyProperty CurrentTrackPointProperty =
-            DependencyProperty.Register("CurrentTrackPoint", typeof(CoRegistration), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
-
-        public static readonly DependencyProperty DijkstraHeapProperty =
-            DependencyProperty.Register("DijkstraHeap", typeof(List<DijkstraHeap>), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
-
-        public static readonly DependencyProperty MotionVectorProperty =
-            DependencyProperty.Register("MotionVector", typeof(List<Mat>), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
-            
         public static readonly DependencyProperty AngioImagesProperty =
             DependencyProperty.Register("AngioImages", typeof(List<Mat>), typeof(DrawAngioPathUtil), new PropertyMetadata(null, OnAngioImagesPropertyChanged));
-
-        public Point MousePosition
-        {
-            get { return (Point)GetValue(MousePositionProperty); }
-            set { this.SetValue(MousePositionProperty, value); }
-        }
-
-        public static readonly DependencyProperty MousePositionProperty =
-            DependencyProperty.Register("MousePosition", typeof(Point), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
 
         public List<CoRegistration> AngioTrackPoints
         {
@@ -93,6 +58,42 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
         public static readonly DependencyProperty AngioTrackPointsProperty =
             DependencyProperty.Register("AngioTrackPoints", typeof(List<CoRegistration>), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
+
+        public CoRegistration CurrentTrackPoint
+        {
+            get { return (CoRegistration)GetValue(CurrentTrackPointProperty); }
+            set { this.SetValue(CurrentTrackPointProperty, value); }
+        }
+
+        public static readonly DependencyProperty CurrentTrackPointProperty =
+            DependencyProperty.Register("CurrentTrackPoint", typeof(CoRegistration), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
+
+        public List<DijkstraHeap> DijkstraHeap
+        {
+            get { return (List<DijkstraHeap>)GetValue(DijkstraHeapProperty); }
+            set { this.SetValue(DijkstraHeapProperty, value); }
+        }
+
+        public static readonly DependencyProperty DijkstraHeapProperty =
+            DependencyProperty.Register("DijkstraHeap", typeof(List<DijkstraHeap>), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
+
+        public List<Mat> MotionVector
+        {
+            get { return (List<Mat>)GetValue(MotionVectorProperty); }
+            set { this.SetValue(MotionVectorProperty, value); }
+        }
+       
+        public static readonly DependencyProperty MotionVectorProperty =
+            DependencyProperty.Register("MotionVector", typeof(List<Mat>), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
+            
+        public Point MousePosition
+        {
+            get { return (Point)GetValue(MousePositionProperty); }
+            set { this.SetValue(MousePositionProperty, value); }
+        }
+
+        public static readonly DependencyProperty MousePositionProperty =
+            DependencyProperty.Register("MousePosition", typeof(Point), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
 
         public bool IsAngioTrackCompleted
         {
@@ -127,7 +128,10 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             get { return (bool)GetValue(IsCancelProperty); }
             set { this.SetValue(IsCancelProperty, value); }
         }
-        
+
+        public static readonly DependencyProperty IsCancelProperty =
+            DependencyProperty.Register("IsCancel", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(false, OnCancelPropertyChanged));
+
         public bool IsEditOn
         {
             get { return (bool)GetValue(IsEditOnProperty); }
@@ -136,9 +140,6 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
         
         public static readonly DependencyProperty IsEditOnProperty =
             DependencyProperty.Register("IsEditOn", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(false));
-
-        public static readonly DependencyProperty IsCancelProperty =
-            DependencyProperty.Register("IsCancel", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(false, OnCancelPropertyChanged));
 
         public bool IsRendering
         {
@@ -635,6 +636,13 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             else control.DeactivateEvent();
         }
 
+        private static void OnAngioFrameNumberPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
+        {
+            var control = (DrawAngioPathUtil)dependencyObject;
+            int AngioFrameNumber = (int)dependencyPropertyChangedEventArgs.NewValue;
+            control.PathChange(AngioFrameNumber);
+        }
+
         private static void OnCurrentAngioFrameNumberPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
             int AngioFrameNumber = (int)dependencyPropertyChangedEventArgs.NewValue;
@@ -655,13 +663,6 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             }
 
             drawUtil.InitializePath();
-        }
-
-        private static void OnAngioFrameNumberPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
-        {
-            var control = (DrawAngioPathUtil)dependencyObject;
-            int AngioFrameNumber = (int)dependencyPropertyChangedEventArgs.NewValue;
-            control.PathChange(AngioFrameNumber);
         }
 
         private static void OnResetPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
