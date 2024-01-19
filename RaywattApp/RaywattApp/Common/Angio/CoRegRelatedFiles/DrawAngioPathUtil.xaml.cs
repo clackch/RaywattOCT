@@ -649,7 +649,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
             var drawUtil = dependencyObject as DrawAngioPathUtil;
 
-            if (AngioFrameNumber < 0 || drawUtil == null || drawUtil.AngioTrackPoints == null || drawUtil.AngioTrackPoints.Count < AngioFrameNumber) return;
+            if (AngioFrameNumber < 0 || drawUtil == null || drawUtil.AngioTrackPoints == null || drawUtil.AngioTrackPoints.Count == 0 || drawUtil.AngioTrackPoints.Count < AngioFrameNumber) return;
 
             drawUtil.CurrentTrackPoint = drawUtil.AngioTrackPoints[AngioFrameNumber];
             drawUtil.TrackPointChange();
