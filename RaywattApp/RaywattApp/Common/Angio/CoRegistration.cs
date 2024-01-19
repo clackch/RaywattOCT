@@ -7,9 +7,6 @@ namespace RaywattApp.Common.Angio
     public partial class CoRegistration : ObservableObject
     {
         [ObservableProperty]
-        private int _angioFrameNumber;
-
-        [ObservableProperty]
         private List<Point> _trackPoint;
     }
 }

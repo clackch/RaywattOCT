@@ -32,15 +32,15 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
         private static readonly DependencyProperty AngioFrameNumberProperty =
             DependencyProperty.Register("AngioFrameNumber", typeof(int), typeof(DrawAngioPathUtil), new PropertyMetadata(-1, OnAngioFrameNumberPropertyChanged));
-		public int CurrentAngioFrameNumber
+        public int CurrentAngioFrameNumber
         {
             get { return (int)GetValue(CurrentAngioFrameNumberProperty); }
             set { this.SetValue(CurrentAngioFrameNumberProperty, value); }
         }
-        
+
         private static readonly DependencyProperty CurrentAngioFrameNumberProperty =
         DependencyProperty.Register("CurrentAngioFrameNumber", typeof(int), typeof(DrawAngioPathUtil), new PropertyMetadata(-1, OnCurrentAngioFrameNumberPropertyChanged));
-        
+
         public List<Mat> AngioImages
         {
             get { return (List<Mat>)GetValue(AngioImagesProperty); }
@@ -82,10 +82,10 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             get { return (List<Mat>)GetValue(MotionVectorProperty); }
             set { this.SetValue(MotionVectorProperty, value); }
         }
-       
+
         public static readonly DependencyProperty MotionVectorProperty =
             DependencyProperty.Register("MotionVector", typeof(List<Mat>), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
-            
+
         public Point MousePosition
         {
             get { return (Point)GetValue(MousePositionProperty); }
@@ -111,7 +111,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             set { this.SetValue(IsResetProperty, value); }
         }
 
-        public static readonly DependencyProperty IsResetProperty =  
+        public static readonly DependencyProperty IsResetProperty =
             DependencyProperty.Register("IsReset", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(false, OnResetPropertyChanged));
 
         public bool IsResetOn
@@ -137,7 +137,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             get { return (bool)GetValue(IsEditOnProperty); }
             set { this.SetValue(IsEditOnProperty, value); }
         }
-        
+
         public static readonly DependencyProperty IsEditOnProperty =
             DependencyProperty.Register("IsEditOn", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(false));
 
@@ -180,7 +180,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             this.canvas.Background = Brushes.Transparent;
         }
 
-		 private void DeactivateEvent()
+        private void DeactivateEvent()
         {
             canvas.MouseLeftButtonDown -= Canvas_MouseLeftButtonDown;
             canvas.MouseMove -= Canvas_MouseMove;
@@ -232,13 +232,13 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             });
         }
 
-		private void TrackPointChange()
+        private void TrackPointChange()
         {
             InitializePath();
 
             DrawTrackPoint();
         }
-        
+
         private void InitializePath(bool isPathOnly = false)
         {
             if (isPathOnly)
@@ -290,7 +290,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             }
         }
 
-		public void DrawTrackPoint()
+        public void DrawTrackPoint()
         {
             foreach (Point tp in CurrentTrackPoint.TrackPoint)
             {
@@ -301,7 +301,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                 this.canvas.Children.Add(path);
             }
         }
-        
+
         private void ProcessSingleImage(int imageIndex, CancellationToken token, int movedRecIndex)
         {
             int startX, startY, endX, endY, pathLength;
@@ -385,7 +385,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                 if (leftSideOnly)
                     leftTask = ProcessLeftSideAsync(currFrameNum, 0, token, movedRecIndex);
                 else
-                    leftTask = ProcessLeftSideAsync(currFrameNum-1, 0, token, movedRecIndex);
+                    leftTask = ProcessLeftSideAsync(currFrameNum - 1, 0, token, movedRecIndex);
             }
 
             if (!leftSideOnly)
@@ -579,7 +579,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                 if (currPoint.Y > Constants.AngioSize) currPoint.Y = (float)Constants.AngioSize;
 
                 // trackPoint의 방향에 따른 인덱싱 처리
-                if (direction == 1) 
+                if (direction == 1)
                 {
                     if (pointPosModifiedIndex >= 0)
                         DijkstraHeap[i + 1].trackPoint[pointPosModifiedIndex] = currPoint;
@@ -649,20 +649,10 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
             var drawUtil = dependencyObject as DrawAngioPathUtil;
 
-            if (AngioFrameNumber < 0 || drawUtil == null || drawUtil.AngioTrackPoints == null) return;
+            if (AngioFrameNumber < 0 || drawUtil == null || drawUtil.AngioTrackPoints == null || drawUtil.AngioTrackPoints.Count < AngioFrameNumber) return;
 
-            foreach (CoRegistration coReg in drawUtil.AngioTrackPoints)
-            {
-                if (coReg.AngioFrameNumber == AngioFrameNumber)
-                {
-                    drawUtil.CurrentTrackPoint = coReg;
-                    drawUtil.TrackPointChange();
-
-                    return;
-                }
-            }
-
-            drawUtil.InitializePath();
+            drawUtil.CurrentTrackPoint = drawUtil.AngioTrackPoints[AngioFrameNumber];
+            drawUtil.TrackPointChange();
         }
 
         private static void OnResetPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
