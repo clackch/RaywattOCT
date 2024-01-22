@@ -276,6 +276,7 @@ namespace RaywattApp.ViewModels
 
             if (isSave)
             {
+                PatientCase.AngioFrame.CoRegistration = AngioTrackPoints;
                 SaveCoRegPoint();
 
                 if (AngioTrackPoints[0].TrackPoint.Count != 0)

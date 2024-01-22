@@ -140,7 +140,7 @@
                                 </RectangleGeometry>
                             </Grid.Clip>
                             <Image Grid.Column="0" Source="{Binding CurrentAngioImage}" Stretch="Uniform"></Image>
-                            <CoRegistration:DrawAngioPathUtil AngioTrackPoints ="{Binding AngioTrackPoints}" CurrentTrackPoint="{Binding CurrentTrackPoint, Mode=TwoWay}" CurrentAngioFrameNumber="{Binding CurrentAngioFrameNumber}"/>
+                            <CoRegistration:DrawAngioPathUtil AngioTrackPoints ="{Binding AngioTrackPoints, Mode=TwoWay}" CurrentTrackPoint="{Binding CurrentTrackPoint, Mode=TwoWay}" CurrentAngioFrameNumber="{Binding CurrentAngioFrameNumber}"/>
                         </Grid>
                         <!-- Cross-Section -->
                         <Grid Grid.Column="1" Width="510" Height="510" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,20,10,0">

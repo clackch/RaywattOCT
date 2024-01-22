@@ -160,7 +160,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             DependencyProperty.Register("IsOk", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(false, OnOkPropertyChanged));
 
         private String curveType = "Spline"; // Bezier or Spline
-        private List<DijkstraHeap> dijkstraHeapLegacy, localDijkstraHeap;
+        private List<DijkstraHeap> localDijkstraHeap;
         private List<Mat> localMotionVector;
         private int mainAngioFrameNum, angioImageTotalNum;
         private bool isMoved = false, isDrawing = true;
@@ -598,23 +598,6 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                 prevPoint = currPoint;
             }
         }
-        private void setDHLegacy()
-        {
-            dijkstraHeapLegacy = new List<DijkstraHeap>();
-            for (int i = 0; i < DijkstraHeap.Count; i++)
-            {
-                dijkstraHeapLegacy.Add(null);
-                dijkstraHeapLegacy[i] = DijkstraHeap[i];
-            }
-        }
-
-        private void getDHLegacy()
-        {
-            for (int i = 0; i < dijkstraHeapLegacy.Count; i++)
-            {
-                DijkstraHeap[i] = dijkstraHeapLegacy[i];
-            }
-        }
 
         private void CancelTask()
         {
@@ -670,11 +653,9 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                 var control = (DrawAngioPathUtil)dependencyObject;
                 int currFrameNum = control.AngioFrameNumber;
 
-                if (control.DijkstraHeap[currFrameNum].trackPoint.Count >= 2) // 경로가 있는 경우
+                if (control.localDijkstraHeap[currFrameNum].trackPoint.Count >= 2) // 경로가 있는 경우
                 {
-                    control.setDHLegacy();
-
-                    foreach (DijkstraHeap heap in control.DijkstraHeap) // 새로운 경로 받기 위한 초기화
+                    foreach (DijkstraHeap heap in control.localDijkstraHeap) // 새로운 경로 받기 위한 초기화
                     {
                         List<List<Point>> newPoints = new List<List<Point>>();
                         for (int i = 0; i < control.trackPointNum - 1; i++)
@@ -685,9 +666,9 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                         heap.trackPoint = new List<Point>();
                     }
                 }
-                else if (control.DijkstraHeap[currFrameNum].trackPoint.Count == 1) // 경로는 없지만 첫번째 포인트를 찍은 경우
+                else if (control.localDijkstraHeap[currFrameNum].trackPoint.Count == 1) // 경로는 없지만 첫번째 포인트를 찍은 경우
                 {
-                    foreach (DijkstraHeap heap in control.DijkstraHeap)
+                    foreach (DijkstraHeap heap in control.localDijkstraHeap)
                     {
                         heap.trackPoint = new List<Point>();
                     }
@@ -701,18 +682,6 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
         {
             var control = (DrawAngioPathUtil)dependencyObject;
             control.CancelTask();
-
-            if ((bool)dependencyPropertyChangedEventArgs.NewValue)
-            {
-                if (control.dijkstraHeapLegacy == null)
-                {
-                    return;
-                }
-                else
-                {
-                    control.getDHLegacy();
-                }
-            }
         }
 
         private static void OnOkPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
@@ -725,7 +694,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                 CoRegistration coRegistration = new CoRegistration();
                 coRegistration.TrackPoint = new List<Point>();
 
-                foreach (List<Point> trackPoint in control.DijkstraHeap[i].line)
+                foreach (List<Point> trackPoint in control.localDijkstraHeap[i].line)
                 {
                     foreach (Point point in trackPoint)
                     {
