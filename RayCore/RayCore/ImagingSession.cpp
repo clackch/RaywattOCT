@@ -350,7 +350,6 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 	return NOERROR;
 }
 UINT CImagingSession::threadDetectObject(LPVOID param) {
-	PLOGI.printf("threadDetectObject start\n");
 	CImagingSession* pSession = (CImagingSession*)param;
 	IDataManager* pDataManager = pSession->m_pDataManager;
 	int nSession = pSession->m_nSession;
@@ -371,25 +370,9 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 			Sleep(DELAY_FOR_WAIT_PROCESS);
 			continue;
 		}
+		pImaging->PostProcess(it->second);
 
-		cv::Mat contourImage = learning->FindLumen(it->second);
-		pImaging->CircularizeImage(contourImage, contourImage);
-
-		std::vector<std::vector<cv::Point>> vContours;
-		cv::findContours(contourImage, vContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-
-		double maxArea = 0;
-		std::vector<cv::Point> largestContour;
-		for (const auto& contour : vContours) {
-			double area = cv::contourArea(contour);
-			if (area > maxArea) {
-				maxArea = area;
-				largestContour = contour;
-			}
-		}
-		vContours.clear();
-		vContours.push_back(largestContour);
-
+		std::vector<std::vector<cv::Point>> vContours = learning->FindLumen(pImaging->GetCircleImage());
 		std::vector<cv::Mat> vLumens;
 		for (int i = 0; i < vContours.size(); i++) {
 			std::vector<cv::Point> contour = vContours.at(i);
@@ -400,11 +383,9 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 			vLumens.push_back(matContour);
 		}
 		vLumen.push_back(vLumens);
-
 		pSession->m_pMsg->postMessage(WM_PROCESS_DETECTION, nSession, nFrame);
 	}
 	delete pImaging;
-
 	PLOGI.printf("Session #%d lumen detection done.", pSession->m_nSession);
 	pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::DetectLumen, pSession->m_nSession);
 
