@@ -527,7 +527,7 @@ namespace RaywattApp.Common.Util
             return imglumenProfile;
         }
 
-        public static Mat MakeLumenProfileImage(List<LumenContour> lumenContours, int frameProximal, int frameDistal, bool isPostCase, List<int>? appositionFrames, int currentFrame = -1)
+        public static Mat MakeLumenProfileImage(List<LumenContour> lumenContours, List<LumenSidebranch> lumenSidebranches, List<LumenStent> lumenStents, int frameProximal, int frameDistal, bool isPostCase, int currentFrame = -1)
         {
             if (lumenContours == null || lumenContours.Count <= 0) return null;
 
@@ -536,35 +536,30 @@ namespace RaywattApp.Common.Util
             Mat imglumenProfile = new Mat(200, lumenContours.Count, MatType.CV_8UC3);
             imglumenProfile.SetTo(new Scalar(0x33, 0x33, 0x33));
 
-            int curFrame = 0;
-            foreach (LumenContour lumenContour in lumenContours.GetRange(0, cols))
+            for (int curFrame = 0; curFrame < cols; curFrame++)
             {
-                imglumenProfile = MakeLumenProfile(imglumenProfile, lumenContour, curFrame, frameProximal, frameDistal, isPostCase, appositionFrames);
-
-                curFrame++;
+                imglumenProfile = MakeLumenProfile(imglumenProfile, lumenContours[curFrame], lumenSidebranches[curFrame], lumenStents[curFrame], curFrame, frameProximal, frameDistal, isPostCase);
             }
 
             return imglumenProfile;
         }
 
-        public static Mat MakeLumenProfileImageOneByOne(Mat imglumenProfile, List<LumenContour> lumenContours, int frameProximal, int frameDistal, bool isPostCase, List<int>? appositionFrames, int currentFrame = -1)
+        public static Mat MakeLumenProfileImageOneByOne(Mat imglumenProfile, List<LumenContour> lumenContours, List<LumenSidebranch> lumenSidebranches, List<LumenStent> lumenStents, int frameProximal, int frameDistal, bool isPostCase, int currentFrame = -1)
         {
             if (lumenContours == null || lumenContours.Count <= 0) return null;
 
             if(imglumenProfile == null)
             {
-                imglumenProfile = MakeLumenProfileImage(lumenContours, frameProximal, frameDistal, isPostCase, appositionFrames, currentFrame);
+                imglumenProfile = MakeLumenProfileImage(lumenContours, lumenSidebranches, lumenStents, frameProximal, frameDistal, isPostCase, currentFrame);
             }
 
             int curFrame = currentFrame == -1 ? lumenContours.Count - 1 : currentFrame;
-            LumenContour lumenContour = lumenContours[curFrame];
-
-            imglumenProfile = MakeLumenProfile(imglumenProfile, lumenContour, curFrame, frameProximal, frameDistal, isPostCase, appositionFrames);
+            imglumenProfile = MakeLumenProfile(imglumenProfile, lumenContours[curFrame], lumenSidebranches[curFrame], lumenStents[curFrame], curFrame, frameProximal, frameDistal, isPostCase);
 
             return imglumenProfile;
         }
 
-        private static Mat MakeLumenProfile(Mat imglumenProfile, LumenContour lumenContour, int curFrame, int frameProximal, int frameDistal, bool isPostCase, List<int>? appositionFrames)
+        private static Mat MakeLumenProfile(Mat imglumenProfile, LumenContour lumenContour, LumenSidebranch lumenSidebranch, LumenStent lumenStent, int curFrame, int frameProximal, int frameDistal, bool isPostCase)
         {
             const double radius = Constants.OCTImageSize / 2;
             const double totalArea = radius * radius * Math.PI;
@@ -577,12 +572,19 @@ namespace RaywattApp.Common.Util
             //Lesion Section
             if (curFrame >= frameProximal && curFrame <= frameDistal)
             {
-                //Stent Area
-                if (isPostCase && appositionFrames != null && appositionFrames.Contains(curFrame))
+                Cv2.Line(imglumenProfile, new Point(curFrame, 0), new Point(curFrame, yStart - 1), new Scalar(0x4f, 0x4f, 0x4f));
+                Cv2.Line(imglumenProfile, new Point(curFrame, yStart + lumenArea + 1), new Point(curFrame, imglumenProfile.Rows), new Scalar(0x4f, 0x4f, 0x4f));
+            }
+
+            //Stent Area
+            if (isPostCase && lumenStent.Points != null && lumenStent.Points.Count > 0)
+            {
+                //MalApposition
+                if (lumenStent.MalAppositionIdx != null && lumenStent.MalAppositionIdx.Count > 0)
                     Cv2.Line(imglumenProfile, new Point(curFrame, yStart), new Point(curFrame, yStart + lumenArea), new Scalar(0x3f, 0x41, 0x76));
 
                 //Stent
-                for (int i = 0; isPostCase && i < imglumenProfile.Rows; i++)
+                for (int i = 0; i < imglumenProfile.Rows; i++)
                 {
                     if ((i + curFrame) % 20 == 0)
                     {
@@ -593,13 +595,10 @@ namespace RaywattApp.Common.Util
                         Cv2.Line(imglumenProfile, new Point(curFrame, i), new Point(curFrame, i), new Scalar(0x8d, 0x8d, 0x8d));
                     }
                 }
-
-                Cv2.Line(imglumenProfile, new Point(curFrame, 0), new Point(curFrame, yStart - 1), new Scalar(0x4f, 0x4f, 0x4f));
-                Cv2.Line(imglumenProfile, new Point(curFrame, yStart + lumenArea + 1), new Point(curFrame, imglumenProfile.Rows), new Scalar(0x4f, 0x4f, 0x4f));
             }
 
             //Side Branch
-            if (lumenContour.HasSidebranch)
+            if (lumenSidebranch.Points != null && lumenSidebranch.Points.Count > 0)
             {
                 if (curFrame >= frameProximal && curFrame <= frameDistal)
                     Cv2.Line(imglumenProfile, new Point(curFrame, imglumenProfile.Rows / 2 - 5), new Point(curFrame, imglumenProfile.Rows / 2 + 5), new Scalar(0xe4, 0xe4, 0xe4));
@@ -1216,10 +1215,6 @@ namespace RaywattApp.Common.Util
                         writer.WritePropertyName(nameof(lumenContour.Valid));
                         writer.WriteValue(lumenContour.Valid);
 
-                        //HasSidebranch
-                        writer.WritePropertyName(nameof(lumenContour.HasSidebranch));
-                        writer.WriteValue(lumenContour.HasSidebranch);
-
                         //Calcium
                         {
                             writer.WritePropertyName(nameof(lumenContour.Calcium));
@@ -1324,11 +1319,6 @@ namespace RaywattApp.Common.Util
                                         SetCalcium(reader, currentProperty, lumenContour);
                                     }
                                 }
-                            }
-                            else if (nameof(lumenContour.HasSidebranch).Equals(currentProperty))
-                            {
-                                if (reader.Value != null && reader.TokenType == JsonToken.Boolean)
-                                    lumenContour.HasSidebranch = (bool)reader.Value;
                             }
                             else
                             {

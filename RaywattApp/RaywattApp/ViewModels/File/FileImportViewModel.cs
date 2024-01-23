@@ -475,6 +475,9 @@ namespace RaywattApp.ViewModels.File
                             patientCase.Longitude = GetStrValue(caseObj, "Longitude");
                             patientCase.CrossSection = GetStrValue(caseObj, "CrossSection");
                             patientCase.StrLumenContour = GetStrValue(caseObj, "StrLumenContour");
+                            patientCase.StrLumenSidebranch = GetStrValue(caseObj, "StrLumenSidebranch");
+                            patientCase.StrLumenStent = GetStrValue(caseObj, "StrLumenStent");
+                            patientCase.StrLumenGuidewire = GetStrValue(caseObj, "StrLumenGuidewire");
                             patientCase.CreateDate = GetDateValue(caseObj, "CreateDate");
                             patientCase.UpdateDate = GetDateValue(caseObj, "UpdateDate");
 

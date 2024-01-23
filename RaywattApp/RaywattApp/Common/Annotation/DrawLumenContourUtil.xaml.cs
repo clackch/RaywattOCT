@@ -124,6 +124,24 @@ namespace RaywattApp.Common.Annotation
         public static readonly DependencyProperty CurrentLumenContourProperty =
             DependencyProperty.Register("CurrentLumenContour", typeof(LumenContour), typeof(DrawLumenContourUtil), new PropertyMetadata(null));
 
+        public List<LumenStent> LumenStents
+        {
+            get { return (List<LumenStent>)GetValue(LumenStentsProperty); }
+            set { SetValue(LumenStentsProperty, value); }
+        }
+
+        public static readonly DependencyProperty LumenStentsProperty =
+            DependencyProperty.Register("LumenStents", typeof(List<LumenStent>), typeof(DrawLumenContourUtil), new PropertyMetadata(null));
+
+        public LumenStent CurrentLumenStent
+        {
+            get { return (LumenStent)GetValue(CurrentLumenStentProperty); }
+            set { SetValue(CurrentLumenStentProperty, value); }
+        }
+
+        public static readonly DependencyProperty CurrentLumenStentProperty =
+            DependencyProperty.Register("CurrentLumenStent", typeof(LumenStent), typeof(DrawLumenContourUtil), new PropertyMetadata(null));
+
         public Zoom Zoom
         {
             get { return (Zoom)GetValue(ZoomProperty); }
@@ -191,9 +209,21 @@ namespace RaywattApp.Common.Annotation
             }
 
             drawUtil.CurrentLumenContour = drawUtil.LumenContours[frameNumber];
+            if(drawUtil.LumenStents != null)
+                drawUtil.CurrentLumenStent = drawUtil.LumenStents[frameNumber];
 
             if(drawUtil.IsEditOn || drawUtil.IsDrawOn)
-                drawUtil.DrawLumenContour(drawUtil.LumenContours[frameNumber], drawUtil.IsEditOn);
+            {
+                if (drawUtil.LumenStents == null)
+                {
+                    drawUtil.DrawLumenContour(drawUtil.LumenContours[frameNumber], null, drawUtil.IsEditOn);
+                }
+                else
+                {
+                    drawUtil.DrawLumenContour(drawUtil.LumenContours[frameNumber], drawUtil.LumenStents[frameNumber], drawUtil.IsEditOn);
+                }                
+            }
+                
         }
 
         private static void DrawPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
@@ -207,7 +237,7 @@ namespace RaywattApp.Common.Annotation
 
             if (isDrawOn)
             {
-                drawUtil.DrawLumenContour(drawUtil.CurrentLumenContour, drawUtil.IsEditOn);
+                drawUtil.DrawLumenContour(drawUtil.CurrentLumenContour, drawUtil.CurrentLumenStent, drawUtil.IsEditOn);
             }
             else
             {
@@ -237,7 +267,8 @@ namespace RaywattApp.Common.Annotation
                     if(drawUtil.LumenContours != null && drawUtil.LumenContours.Count > 0 && drawUtil.LumenContours.Count > drawUtil.FrameNumber)
                     {
                         drawUtil.CurrentLumenContour = drawUtil.LumenContours[drawUtil.FrameNumber];
-                        drawUtil.DrawLumenContour(drawUtil.CurrentLumenContour, drawUtil.IsEditOn);
+                        drawUtil.CurrentLumenStent = drawUtil.LumenStents[drawUtil.FrameNumber];
+                        drawUtil.DrawLumenContour(drawUtil.CurrentLumenContour, drawUtil.CurrentLumenStent, drawUtil.IsEditOn);
                     }
                     break;
                 case Constants.LumenContourClear:
@@ -247,6 +278,7 @@ namespace RaywattApp.Common.Annotation
                     if (drawUtil.LumenContours != null && drawUtil.LumenContours.Count > 0 && drawUtil.LumenContours.Count > drawUtil.FrameNumber)
                     {
                         drawUtil.CurrentLumenContour = drawUtil.LumenContours[drawUtil.FrameNumber];
+                        drawUtil.CurrentLumenStent = drawUtil.LumenStents[drawUtil.FrameNumber];
                     }
                     break;
                 default:
@@ -343,7 +375,7 @@ namespace RaywattApp.Common.Annotation
             _log.Debug("Canvas_MouseLeave");
 
             this.newPoints.Clear();
-            DrawLumenContour(LumenContours[FrameNumber], true);
+            DrawLumenContour(LumenContours[FrameNumber], LumenStents[FrameNumber], true);
 
             DeactivateEvent();
             isFirstPoint = true;
@@ -395,7 +427,7 @@ namespace RaywattApp.Common.Annotation
             this.canvas.Background = null;
         }
 
-        private void DrawLumenContour(LumenContour lumenContour, bool isEditOn)
+        private void DrawLumenContour(LumenContour lumenContour, LumenStent lumenStent, bool isEditOn)
         {
             _log.Debug("DrawLumenContour");
 
@@ -406,6 +438,22 @@ namespace RaywattApp.Common.Annotation
             if (pointList == null || pointList.Count < 3)
                 return;
 
+
+            //stent
+            if(lumenStent != null && lumenStent.Points != null && lumenStent.Points.Count > 0)
+            {
+                for(int i=0; i< lumenStent.Points.Count; i++)
+                {
+                    Ellipse ellipse = new Ellipse();
+                    ellipse.Style = (Style)this.Resources["StyleEllipse"];
+                    Canvas.SetLeft(ellipse, lumenStent.Points[i].X - ellipse.Width/2);
+                    Canvas.SetTop(ellipse, lumenStent.Points[i].Y - ellipse.Height/2);
+
+                    this.canvas.Children.Add(ellipse);
+                }
+            }
+
+            //lumen
             if (isEditOn)
             {
                 contourLines.Clear();
@@ -553,7 +601,7 @@ namespace RaywattApp.Common.Annotation
 
             if (!IsValidPathGeometry(finalPathGeometry))
             {
-                DrawLumenContour(LumenContours[FrameNumber], true);
+                DrawLumenContour(LumenContours[FrameNumber], LumenStents[FrameNumber], true);
             }
             else
             {
@@ -571,7 +619,7 @@ namespace RaywattApp.Common.Annotation
 
                 lumenContourHistory[FrameNumber].Push(CopyLumenContourToHistory(LumenContours[FrameNumber]));
 
-                DrawLumenContour(LumenContours[FrameNumber], true);
+                DrawLumenContour(LumenContours[FrameNumber], LumenStents[FrameNumber], true);
             }
         }
 
@@ -720,7 +768,7 @@ namespace RaywattApp.Common.Annotation
 
             lumenContourHistory[FrameNumber].Pop();
             CopyHistoryToLumenContour(lumenContourHistory[FrameNumber].Peek());
-            DrawLumenContour(LumenContours[FrameNumber], true);
+            DrawLumenContour(LumenContours[FrameNumber], LumenStents[FrameNumber], true);
         }
 
         private void Reset()
@@ -733,7 +781,7 @@ namespace RaywattApp.Common.Annotation
             CopyHistoryToLumenContour(lumenContourHistory[FrameNumber].ToArray()[lumenContourHistory[FrameNumber].Count - 1]);
             lumenContourHistory[FrameNumber].Clear();
             lumenContourHistory[FrameNumber].Push(CopyLumenContourToHistory(LumenContours[FrameNumber]));
-            DrawLumenContour(LumenContours[FrameNumber], true);
+            DrawLumenContour(LumenContours[FrameNumber], LumenStents[FrameNumber], true);
         }
 
         private void AutoDetect()
@@ -742,7 +790,7 @@ namespace RaywattApp.Common.Annotation
 
             LumenContours[FrameNumber].ResetLumenContour();
             lumenContourHistory[FrameNumber].Push(CopyLumenContourToHistory(LumenContours[FrameNumber]));
-            DrawLumenContour(LumenContours[FrameNumber], true);
+            DrawLumenContour(LumenContours[FrameNumber], LumenStents[FrameNumber], true);
         }
 
         private LumenContourHistory CopyLumenContourToHistory(LumenContour lumenContour)

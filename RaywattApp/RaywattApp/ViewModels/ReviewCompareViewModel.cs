@@ -58,7 +58,25 @@ namespace RaywattApp.ViewModels
         private List<LumenContour> _preLumenContour = new List<LumenContour>();
 
         [ObservableProperty]
+        private List<LumenSidebranch> _preLumenSidebranches = new List<LumenSidebranch>();
+
+        [ObservableProperty]
+        private List<LumenStent> _preLumenStents = new List<LumenStent>();
+
+        [ObservableProperty]
+        private List<LumenGuidewire> _preLumenGuidewires = new List<LumenGuidewire>();
+
+        [ObservableProperty]
         private List<LumenContour> _postLumenContour = new List<LumenContour>();
+
+        [ObservableProperty]
+        private List<LumenSidebranch> _postLumenSidebranches = new List<LumenSidebranch>();
+
+        [ObservableProperty]
+        private List<LumenStent> _postLumenStents = new List<LumenStent>();
+
+        [ObservableProperty]
+        private List<LumenGuidewire> _postLumenGuidewires = new List<LumenGuidewire>();
 
         [ObservableProperty]
         private LumenContour _currentPreLumenContour = new LumenContour();
@@ -168,7 +186,7 @@ namespace RaywattApp.ViewModels
                 }
                 else
                 {
-                    GetPatientCase(false, ReviewStatus.SelectedPatientCase.LumenContour);
+                    GetPatientCase(false, ReviewStatus.SelectedPatientCase.LumenContours);
                     DeviceStatus.IsOCTImagingCompareDone = true;
                 }
 
@@ -179,7 +197,7 @@ namespace RaywattApp.ViewModels
                 {
                     SetCrossSectionBackground(RaySession.Compare, Constants.CompareBackgroundColor);
 
-                    if(ReviewStatus.SelectedPatientCase.LumenContour == null)
+                    if(ReviewStatus.SelectedPatientCase.LumenContours == null)
                     {
                         Thread threadMakeLumenProfile = new Thread(() => ThreadMakeLumenProfile());
                         threadMakeLumenProfile.Start();
@@ -224,7 +242,7 @@ namespace RaywattApp.ViewModels
 
         private void ThreadMakeLumenProfile()
         {
-            ReviewStatus.SelectedPatientCase.LumenContour = GetLumenContours(ReviewStatus.SelectedPatientCase.Id);
+            ReviewStatus.SelectedPatientCase.LumenContours = GetLumenContours(ReviewStatus.SelectedPatientCase.Id);
             Application.Current.Dispatcher.Invoke(() =>
             {
                 ShowLumenProfileCompare();
@@ -325,7 +343,7 @@ namespace RaywattApp.ViewModels
                 GetImageInfo(RaySession.Compare);
                 MoveToFrame(RaySession.Compare, DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current);
 
-                if (ReviewStatus.SelectedPatientCase.LumenContour == null)
+                if (ReviewStatus.SelectedPatientCase.LumenContours == null)
                 {
                     Thread threadMakeLumenProfile = new Thread(() => ThreadMakeLumenProfile());
                     threadMakeLumenProfile.Start();
@@ -367,7 +385,7 @@ namespace RaywattApp.ViewModels
                 }
 
                 if (lumenContour != null)
-                    ReviewStatus.SelectedPatientCase.LumenContour = lumenContour;
+                    ReviewStatus.SelectedPatientCase.LumenContours = lumenContour;
                 DisplayPatientCase = ReviewStatus.SelectedPatientCase;
             }
         }
@@ -519,10 +537,13 @@ namespace RaywattApp.ViewModels
 
         private void ShowLumenProfile()
         {
-            PostLumenContour = PatientCase.LumenContour;
+            PostLumenContour = PatientCase.LumenContours;
+            PostLumenSidebranches = PatientCase.LumenSidebranches;
+            PostLumenStents = PatientCase.LumenStents;
+            PostLumenGuidewires = PatientCase.LumenGuidewires;
             int frameProximal = PatientCase.SectionProximal;
             int frameDistal = PatientCase.SectionDistal;
-            if(Section.SetMsaMinExp(PatientCase.LumenContour, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeCompareWidth, PatientCase.PullbackLength))
+            if(Section.SetMsaMinExp(PatientCase.LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeCompareWidth, PatientCase.PullbackLength))
             {
                 Section.VislbleMsaMinExp(true);
                 Section.Proximal.IsVisible = Visibility.Visible;
@@ -535,9 +556,7 @@ namespace RaywattApp.ViewModels
                 Section.Distal.IsVisible = Visibility.Collapsed;
             }
 
-            //Test
-            List<int> appositionFrames = new List<int>() { 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
-            imglumenProfile = CommonUtil.MakeLumenProfileImage(PostLumenContour, frameProximal, frameDistal, true, appositionFrames);
+            imglumenProfile = CommonUtil.MakeLumenProfileImage(PostLumenContour, PostLumenSidebranches, PostLumenStents, frameProximal, frameDistal, true);
             DrawLumenProfileImage();
 
             List<int> colorFrames = CommonUtil.GetExpansionList(PostLumenContour, frameProximal, frameDistal, Section.RefArea, PatientCase.ExpansionThreshold);
@@ -550,10 +569,13 @@ namespace RaywattApp.ViewModels
 
         private void ShowLumenProfileCompare()
         {
-            PreLumenContour = ReviewStatus.SelectedPatientCase.LumenContour;
+            PreLumenContour = ReviewStatus.SelectedPatientCase.LumenContours;
+            PreLumenSidebranches = ReviewStatus.SelectedPatientCase.LumenSidebranches;
+            PreLumenStents = ReviewStatus.SelectedPatientCase.LumenStents;
+            PreLumenGuidewires = ReviewStatus.SelectedPatientCase.LumenGuidewires;
             int frameProximalCompare = ReviewStatus.SelectedPatientCase.SectionProximal;
             int frameDistalCompare = ReviewStatus.SelectedPatientCase.SectionDistal;
-            if(SectionCompare.SetMlaMld(ReviewStatus.SelectedPatientCase.LumenContour, frameProximalCompare, frameDistalCompare, DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total, Constants.LongitudeCompareWidth, ReviewStatus.SelectedPatientCase.PullbackLength))
+            if(SectionCompare.SetMlaMld(ReviewStatus.SelectedPatientCase.LumenContours, frameProximalCompare, frameDistalCompare, DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total, Constants.LongitudeCompareWidth, ReviewStatus.SelectedPatientCase.PullbackLength))
             {
                 SectionCompare.VisibleMlaMld(true);
                 SectionCompare.Proximal.IsVisible = Visibility.Visible;
@@ -566,10 +588,10 @@ namespace RaywattApp.ViewModels
                 SectionCompare.Distal.IsVisible = Visibility.Collapsed;
             }
 
-            imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(PreLumenContour, frameProximalCompare, frameDistalCompare, false, null);
+            imglumenProfileCompare = CommonUtil.MakeLumenProfileImage(PreLumenContour, PreLumenSidebranches, PreLumenStents, frameProximalCompare, frameDistalCompare, false);
             DrawLumenProfileImageCompare();
 
-            List<int> colorFrames = CommonUtil.GetCalciumList(ReviewStatus.SelectedPatientCase.LumenContour, ReviewStatus.SelectedPatientCase.CalciumThreshold);
+            List<int> colorFrames = CommonUtil.GetCalciumList(ReviewStatus.SelectedPatientCase.LumenContours, ReviewStatus.SelectedPatientCase.CalciumThreshold);
             imglumenProfileExtraCompare = CommonUtil.MakeLumenProfileImageExtra(DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total, colorFrames, true);
             DrawLumenProfileImageExtraCompare();
 

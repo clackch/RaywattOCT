@@ -44,4 +44,11 @@ extern "C" {
 
 	_declspec(dllexport) void* RayGetLumenContour(int nFrame);
 	_declspec(dllexport) int RayGetNumOfLumenContourPoints(int nFrame);
+	_declspec(dllexport) int RayGetNumOfSidebranchContourSize(int nFrame);
+	_declspec(dllexport) void* RayGetSidebranchContour(int nFrame, int nSb);
+	_declspec(dllexport) int RayGetNumOfSidebranchContourPoints(int nFrame, int nSb);
+	_declspec(dllexport) void* RayGetStentPoints(int nFrame);
+	_declspec(dllexport) int RayGetNumOfStentPoints(int nFrame);
+	_declspec(dllexport) void* RayGetGuidewirePoints(int nFrame);
+	_declspec(dllexport) int RayGetNumOfGuidewirePoints(int nFrame);
 }

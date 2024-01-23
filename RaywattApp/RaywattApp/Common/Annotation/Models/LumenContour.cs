@@ -13,9 +13,6 @@ namespace RaywattApp.Common.Annotation.Models
         [ObservableProperty]
         private Calcium calcium;
 
-        [ObservableProperty]
-        private bool hasSidebranch;
-
         public new List<Point>? Points
         {
             get { return IsContourEdited() ? points : MlContour.Points; }

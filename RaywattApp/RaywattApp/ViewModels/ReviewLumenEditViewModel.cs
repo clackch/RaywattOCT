@@ -143,7 +143,7 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
 
-                LumenContours = PatientCase.LumenContour;
+                LumenContours = PatientCase.LumenContours;
 
                 SetCrossSectionBackground(RaySession.Review, Constants.CardBackgroundColor);
 
@@ -207,7 +207,7 @@ namespace RaywattApp.ViewModels
         {
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
-            sqlParameters["lumen_contour"] = CommonUtil.LumenContoursToJson(PatientCase.LumenContour);
+            sqlParameters["lumen_contour"] = CommonUtil.LumenContoursToJson(PatientCase.LumenContours);
             int nRows = _sqlManager.UpdatePatientCaseAnnotationLumenContour(sqlParameters);
             if (nRows == 0)
             {

@@ -280,6 +280,56 @@ int CImagingSession::GetNumOfLumenContourPoints(int nFrame) {
 	return matContour.cols * matContour.rows;
 }
 
+int CImagingSession::GetNumOfSidebranchContourSize(int nFrame){
+	if (m_vSidebranch.size() <= nFrame) return 0;
+
+	return m_vSidebranch.at(nFrame).size();
+}
+
+void* CImagingSession::GetSidebranchContour(int nFrame, int nSb){
+	if (m_vSidebranch.size() <= nFrame) return nullptr;
+	if (m_vSidebranch.at(nFrame).size() <= 0) return nullptr;
+
+	cv::Mat matContour = m_vSidebranch.at(nFrame).at(nSb);
+	return matContour.ptr();
+}
+
+int CImagingSession::GetNumOfSidebranchContourPoints(int nFrame, int nSb){
+	if (m_vSidebranch.size() <= nFrame) return 0;
+	if (m_vSidebranch.at(nFrame).size() <= 0) return 0;
+
+	cv::Mat matContour = m_vSidebranch.at(nFrame).at(nSb);
+	return matContour.cols * matContour.rows;
+}
+
+void* CImagingSession::GetStentPoints(int nFrame){
+	if (m_vStent.size() <= nFrame) return nullptr;
+
+	cv::Mat mat = m_vStent.at(nFrame);
+	return mat.ptr();
+}
+
+int CImagingSession::GetNumOfStentPoints(int nFrame){
+	if (m_vStent.size() <= nFrame) return 0;
+
+	cv::Mat mat = m_vStent.at(nFrame);
+	return mat.cols * mat.rows;
+}
+
+void* CImagingSession::GetGuidewirePoints(int nFrame){
+	if (m_vGuidewire.size() <= nFrame) return nullptr;
+
+	cv::Mat mat = m_vGuidewire.at(nFrame);
+	return mat.ptr();
+}
+
+int CImagingSession::GetNumOfGuidewirePoints(int nFrame){
+	if (m_vGuidewire.size() <= nFrame) return 0;
+
+	cv::Mat mat = m_vGuidewire.at(nFrame);
+	return mat.cols * mat.rows;
+}
+
 CImagingSession* CImagingSession::createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type) {
 	CImagingSession* pSession = new CImagingSession(pMsg, nSession, deleteData);
 
@@ -350,6 +400,7 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 	return NOERROR;
 }
 UINT CImagingSession::threadDetectObject(LPVOID param) {
+	PLOGI.printf("threadDetectObject start\n");
 	CImagingSession* pSession = (CImagingSession*)param;
 	IDataManager* pDataManager = pSession->m_pDataManager;
 	int nSession = pSession->m_nSession;
@@ -359,10 +410,16 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 
 	IRayLearning* learning = IRayLearning::GetInstance();
 	std::vector<std::vector<cv::Mat>>& vLumen = pSession->m_vLumen;
+	std::vector<std::vector<cv::Mat>>& vSidebranch = pSession->m_vSidebranch;
+	std::vector<cv::Mat>& vStent = pSession->m_vStent;
+	std::vector<cv::Mat>& vGuidewire = pSession->m_vGuidewire;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
 	PLOGI.printf("Session #%d lumen detection start - %d frames", pSession->m_nSession, nNumOfSamples);
 	vLumen.clear();
+	vSidebranch.clear();
+	vStent.clear();
+	vGuidewire.clear();
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadObjectDetection->isRun; nFrame++) {
 		std::map<int, cv::Mat>::iterator it = pSession->m_mapImage.find(nFrame);
 		if (it == pSession->m_mapImage.end()) {
@@ -372,7 +429,27 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		}
 		pImaging->PostProcess(it->second);
 
-		std::vector<std::vector<cv::Point>> vContours = learning->FindLumen(pImaging->GetCircleImage());
+		cv::Mat circleImage;
+		pImaging->CircularizeImage(it->second, circleImage);
+		cv::cvtColor(circleImage, circleImage, cv::COLOR_GRAY2BGR);
+
+		//lumen
+		cv::Mat contourImage = learning->FindLumen(circleImage);		
+		std::vector<std::vector<cv::Point>> vContours;
+		cv::findContours(contourImage, vContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+		double maxArea = 0;
+		std::vector<cv::Point> largestContour;
+		for (const auto& contour : vContours) {
+			double area = cv::contourArea(contour);
+			if (area > maxArea) {
+				maxArea = area;
+				largestContour = contour;
+			}
+		}
+		vContours.clear();
+		vContours.push_back(largestContour);
+
 		std::vector<cv::Mat> vLumens;
 		for (int i = 0; i < vContours.size(); i++) {
 			std::vector<cv::Point> contour = vContours.at(i);
@@ -383,9 +460,44 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 			vLumens.push_back(matContour);
 		}
 		vLumen.push_back(vLumens);
+
+		//sidebranch
+		cv::Mat contourSb = learning->FindSidebranch();
+		std::vector<std::vector<cv::Point>> vSbContours;
+		cv::findContours(contourSb, vSbContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+		std::vector<cv::Mat> vSidebranchs;
+		for (int i = 0; i < vSbContours.size(); i++) {
+			std::vector<cv::Point> contour = vSbContours.at(i);
+			cv::Mat matContour(contour.size(), 1, CV_32SC2);
+			for (size_t row = 0; row < contour.size(); row++) {
+				matContour.at<cv::Point>(row, 0) = contour[row];
+			}
+			vSidebranchs.push_back(matContour);
+		}
+		vSidebranch.push_back(vSidebranchs);
+
+		//stent
+		std::vector<cv::Rect2f> vStents = learning->FindStent(circleImage);
+		cv::Mat mStent(vStents.size(), 1, CV_32SC2);
+		for (size_t row = 0; row < vStents.size(); row++) {
+			mStent.at<cv::Point>(row, 0) = cv::Point(vStents[row].x + vStents[row].width / 2, vStents[row].y + vStents[row].height / 2);
+		}
+		vStent.push_back(mStent);
+
+		//guidewire
+		std::vector<cv::Rect2f> vGuidewires = learning->FindGuidewire();
+		cv::Mat mGuidewire(vGuidewires.size(), 1, CV_32SC2);
+		for (size_t row = 0; row < vGuidewires.size(); row++) {
+			//TODO - Rect 영역 내에서 GW 테두리 분석해서 중점 찾는 로직 필요
+			mGuidewire.at<cv::Point>(row, 0) = cv::Point(vGuidewires[row].x + vGuidewires[row].width / 2, vGuidewires[row].y + vGuidewires[row].height / 2);
+		}
+		vGuidewire.push_back(mGuidewire);
+
 		pSession->m_pMsg->postMessage(WM_PROCESS_DETECTION, nSession, nFrame);
 	}
 	delete pImaging;
+
 	PLOGI.printf("Session #%d lumen detection done.", pSession->m_nSession);
 	pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::DetectLumen, pSession->m_nSession);
 
