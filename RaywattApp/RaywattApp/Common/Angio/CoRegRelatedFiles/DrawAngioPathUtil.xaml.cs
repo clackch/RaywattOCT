@@ -229,7 +229,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             {
                 //frame이 변경 될 때마다 경로 초기화
                 InitializePath();
-                DrawPath(DijkstraHeap[index]);
+                DrawPath(localDijkstraHeap[index]);
             });
         }
 
@@ -402,8 +402,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
             Application.Current.Dispatcher.Invoke(() =>
             {
-                DijkstraHeap = localDijkstraHeap;
-                DrawPath(DijkstraHeap[currFrameNum]); // 현재 프레임 경로 표현
+                DrawPath(localDijkstraHeap[currFrameNum]); // 현재 프레임 경로 표현
                 IsRendering = false;
                 IsAngioTrackCompleted = IsResetOn = isDrawing = true;
             });
@@ -438,7 +437,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
         // Spline
         private void AddSplineCurvePoints(List<Point> points, int frameIndex, int lineIndex)
-        {
+        { 
             SplineCurve splineCurve = new SplineCurve();
             List<Point> curvePointFs = splineCurve.GetSplinePoints(points, points.Count() * 2/* Spline 곡선을 점 몇개로 표현할 지 설정*/);
 
@@ -703,6 +702,9 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                 }
                 control.AngioTrackPoints.Add(coRegistration);
             }
+
+            control.DijkstraHeap = control.localDijkstraHeap;
+            control.MotionVector= control.localMotionVector;
         }
 
         #endregion
@@ -720,7 +722,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             Point clickPosition = new Point((float)e.GetPosition(canvas).X, (float)e.GetPosition(canvas).Y);
             Rectangle rectangle = new Rectangle();
             AddRecEvents(rectangle);
-            rectangle.Name = $"rectangle{DijkstraHeap[AngioFrameNumber].trackPoint.Count:D3}";
+            rectangle.Name = $"rectangle{localDijkstraHeap[AngioFrameNumber].trackPoint.Count:D3}";
             Canvas.SetLeft(rectangle, clickPosition.X - Constants.AnnotationRectWidth / 2);
             Canvas.SetTop(rectangle, clickPosition.Y - Constants.AnnotationRectHeight / 2);
             canvas.Children.Add(rectangle);
@@ -730,10 +732,10 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
 
             // 첫번째 점
-            if (DijkstraHeap[AngioFrameNumber].trackPoint.Count == 0)
+            if (localDijkstraHeap[AngioFrameNumber].trackPoint.Count == 0)
             {
                 trackPointNum = 1;
-                DijkstraHeap[AngioFrameNumber].trackPoint.Add(clickPosition);
+                localDijkstraHeap[AngioFrameNumber].trackPoint.Add(clickPosition);
                 PointTracking(clickPosition.X, clickPosition.Y, 1, currFrameNum);
                 PointTracking(clickPosition.X, clickPosition.Y, -1, currFrameNum);
 
@@ -743,7 +745,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             // 두번째 점 이후
             else
             {
-                DijkstraHeap[AngioFrameNumber].trackPoint.Add(clickPosition);
+                localDijkstraHeap[AngioFrameNumber].trackPoint.Add(clickPosition);
                 PointTracking(clickPosition.X, clickPosition.Y, 1, currFrameNum);
                 PointTracking(clickPosition.X, clickPosition.Y, -1, currFrameNum);
                 trackPointNum++;
@@ -789,7 +791,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                     float x = (float)(Canvas.GetLeft(rectangle) + rectangle.Width / 2);
                     float y = (float)(Canvas.GetTop(rectangle) + rectangle.Height / 2);
 
-                    DijkstraHeap[AngioFrameNumber].trackPoint[index] = new Point(x, y);
+                    localDijkstraHeap[AngioFrameNumber].trackPoint[index] = new Point(x, y);
 
                     CalculateSubPathWhenModified(x, y, index, AngioFrameNumber);
                     isMoved = false;
