@@ -463,6 +463,7 @@ namespace RaywattApp.ViewModels
 
             //Test
             //InitializeLumenData();
+            //DeviceStatus.IsLumenSaved = false;
             //RayStartLumenDetection();
             //this.isLumenContourSave = true;
         }
@@ -550,7 +551,7 @@ namespace RaywattApp.ViewModels
 
             if (ReviewStatus.NumberOfFrames - 1 == frame)
             {
-                //TODO - ML detection에서 Calcium/Sidebranch 가져오도록 개발되면 삭제 필요
+                //TODO - ML detection에서 Calcium 가져오도록 개발되면 삭제 필요
                 GetMlData();
 
                 if (ReviewStatus.IsContourStentOn)
@@ -564,6 +565,7 @@ namespace RaywattApp.ViewModels
                 PatientCase.StrLumenGuidewire = JsonConvert.SerializeObject(LumenGuidewires, Formatting.Indented);
 
                 DeviceStatus.IsLumenSaved = true;
+                SetLumenProfileInit();
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -1176,6 +1178,52 @@ namespace RaywattApp.ViewModels
             this.originSectionProximalX = Section.Proximal.X;
             this.originSectionDistalX = Section.Distal.X;
             this.originProcedure = PatientCase.Procedure;
+        }
+
+        private void SetLumenProfileInit()
+        {
+            imglumenProfile = null;
+            imglumenProfileExtra = null;
+            int proximalIdx = 0;
+            int distalIdx = 0;
+
+            if (CommonUtil.IsPreCase(PatientCase.Procedure))
+            {
+                int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
+                int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
+
+                int count = frameDistal - frameProximal + 1;
+                double mla = LumenContours.GetRange(frameProximal, count).Min(x => x.Area);
+                int mlaIdx = LumenContours.GetRange(frameProximal, count).FindIndex(x => x.Area == mla) + frameProximal;
+
+                int frameDiff = (int)(Constants.PreLesionLengthInitValue * ReviewStatus.NumberOfFrames * 10 / int.Parse(CodeDefinition.Codes["PBLE"][PatientCase.PullbackLength]));
+                proximalIdx = mlaIdx - frameDiff > 0 ? mlaIdx - frameDiff : 0;
+                distalIdx = mlaIdx + frameDiff < ReviewStatus.NumberOfFrames ? mlaIdx + frameDiff : ReviewStatus.NumberOfFrames - 1;
+            }
+            else
+            {
+                int firstStent = -1, lastStent = -1, cnt = 0;
+                foreach(LumenStent lumenStent in LumenStents)
+                {
+                    if(lumenStent.Points != null && lumenStent.Points.Count >= Constants.LumenProfileStentMinCount)
+                    {
+                        if (firstStent == -1)
+                            firstStent = cnt;
+
+                        lastStent = cnt;
+                    }
+                    cnt++;
+                }
+
+                int frameDiff = (int)(Constants.PostLesionLengthInitValue * ReviewStatus.NumberOfFrames * 10 / int.Parse(CodeDefinition.Codes["PBLE"][PatientCase.PullbackLength]));
+                proximalIdx = firstStent - frameDiff > 0 ? firstStent - frameDiff : 0;
+                distalIdx = lastStent + frameDiff < ReviewStatus.NumberOfFrames ? lastStent + frameDiff : ReviewStatus.NumberOfFrames - 1;
+            }
+
+            Section.Proximal.X = CommonUtil.GetPositionFromFrame(proximalIdx, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
+            Section.Distal.X = CommonUtil.GetPositionFromFrame(distalIdx, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
+
+            SetLumenProfileValue();
         }
 
         private bool IsChangedLumenProfileValue()

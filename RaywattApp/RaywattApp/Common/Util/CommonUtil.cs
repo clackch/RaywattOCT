@@ -577,7 +577,7 @@ namespace RaywattApp.Common.Util
             }
 
             //Stent Area
-            if (isPostCase && lumenStent.Points != null && lumenStent.Points.Count > 0)
+            if (isPostCase && lumenStent.Points != null && lumenStent.Points.Count >= Constants.LumenProfileStentMinCount)
             {
                 //MalApposition
                 if (lumenStent.MalAppositionIdx != null && lumenStent.MalAppositionIdx.Count > 0)

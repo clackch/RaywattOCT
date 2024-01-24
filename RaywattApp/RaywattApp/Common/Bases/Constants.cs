@@ -279,6 +279,9 @@ namespace RaywattApp.Common.Bases
         public const double SectionValueWidth = 24;
         public const double SectionValueCenterWidth = 0.25;
         public const double LumenProfileExtraHeight = 6;
+        public const double PreLesionLengthInitValue = 10;
+        public const double PostLesionLengthInitValue = 4;
+        public const int LumenProfileStentMinCount = 5;
 
         //Review - 2D - Side Menu
         public const string LeftUpMenu = "LeftUpMenu";
