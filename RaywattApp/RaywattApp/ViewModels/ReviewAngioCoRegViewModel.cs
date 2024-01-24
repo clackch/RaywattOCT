@@ -239,8 +239,10 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
+
                 DijkstraHeap = PatientCase.AngioFrame.DijkstraHeap;
                 MotionVector = PatientCase.AngioFrame.MotionVector;
+                AngioFrameNumber = ReviewStatus.AngioFrameNumber;
                 ReadAngioFrames();
             }
         }
@@ -288,6 +290,8 @@ namespace RaywattApp.ViewModels
                     UpdateCoRegStatus(false);
                 }
             }
+
+            ReviewStatus.AngioFrameNumber = AngioFrameNumber;
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;

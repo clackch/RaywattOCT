@@ -36,6 +36,9 @@ namespace RaywattApp.Models
         [ObservableProperty]
         private Zoom _zoom = new Zoom();
 
+        [ObservableProperty]
+        private int _angioFrameNumber = -1;
+
         //3D
 
 

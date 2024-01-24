@@ -108,15 +108,10 @@ namespace RaywattApp.ViewModels
         }
 
         private int _currentAngioFrameNumber;
-        public int CurrentAngioFrameNumber
-        {
-            get { return _currentAngioFrameNumber; }
-            set
-            {
-                _currentAngioFrameNumber = value;
-                OnPropertyChanged(nameof(CurrentAngioFrameNumber));
-            }
-        }
+        public int CurrentAngioFrameNumber { get { return _currentAngioFrameNumber; } set { _currentAngioFrameNumber = value; OnPropertyChanged(nameof(CurrentAngioFrameNumber)); } }
+
+        private int _angioFrameNumber;
+        public int AngioFrameNumber { get { return _angioFrameNumber; } set { _angioFrameNumber = value; OnPropertyChanged(nameof(AngioFrameNumber)); syncAngioFrame(value); } }
 
         private string _measurementCommand;
         public string MeasurementCommand { get { return _measurementCommand; } set { _measurementCommand = value; OnPropertyChanged(nameof(MeasurementCommand)); } }
@@ -310,9 +305,9 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
-
+                
                 ReviewStatus.CurrentPage = Constants.ReviewPage;
-
+                
                 ToggleAngio(ReviewStatus.IsAngioOn);
                 ToggleLongitude(ReviewStatus.IsLumenProfile);
 
@@ -331,6 +326,7 @@ namespace RaywattApp.ViewModels
                 SetAnnotation();
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
 
+                AngioFrameNumber = ReviewStatus.AngioFrameNumber;
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
 
                 if (ReviewStatus.IsPlay)
@@ -813,6 +809,7 @@ namespace RaywattApp.ViewModels
         private void CoRegistration()
         {
             _log.Debug("CoRegistration");
+            ReviewStatus.AngioFrameNumber = CurrentAngioFrameNumber;
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
@@ -1038,7 +1035,7 @@ namespace RaywattApp.ViewModels
         {
             if (DrawCrossSectionImage())
             {
-                DeviceStatus.ReviewImageInfo imageInfo = DeviceStatus.ReviewImageInfos[(int)RaySession.Review];
+                DeviceStatus.ReviewImageInfo imageInfo = DeviceStatus.ReviewImageInfos[(int)RaySession.Review];                
                 if (!IndicatorLongitude.IsCaptured) updateNavigator(imageInfo.Current, imageInfo.Total);
 
                 FrameNumber = imageInfo.Current;
@@ -1324,6 +1321,18 @@ namespace RaywattApp.ViewModels
         * CoRegistration
         */
         #region CoRegistration
+        private void syncAngioFrame(int value)
+        {
+            if (value < 0) return;
+
+            int OctFrameLength = ReviewStatus.NumberOfFrames;
+            double FrameNumber = (double)PatientCase.AngioFrame.AngioImage.Count / OctFrameLength / value;
+            FrameNumber = 1 / FrameNumber;
+
+            base.MoveToFrame(RaySession.Review, (int)FrameNumber);
+            CurrentAngioImage = PatientCase.AngioFrame.AngioImage[value];
+        }
+
         private void ReadAngioFrames() 
         {
             int x1 = 240, y1 = 70, x2 = 780, y2 = 970;
