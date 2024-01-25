@@ -205,7 +205,7 @@ namespace RaywattApp.Models
             double annotationScale = e.DeltaManipulation.Scale.X;
             double newScale = ScaleX * annotationScale;
 
-            if (newScale <= Constants.ZoomScaleMax && newScale >= Constants.ZoomScaleDefault)
+            if (newScale <= Constants.ZoomScaleMax && newScale >= Constants.ZoomScaleDefault && newScale != 0)
             {
                 ScaleX = newScale;
                 ScaleY = newScale;
@@ -217,7 +217,7 @@ namespace RaywattApp.Models
                     ZoomOutSetting(1/annotationScale);
             }
 
-            else if (newScale < Constants.ZoomScaleDefault)
+            else if (newScale < Constants.ZoomScaleDefault && newScale != 0)
             {
                 annotationScale = Constants.ZoomScaleDefault / ScaleX;
                 ScaleX = Constants.ZoomScaleDefault;
@@ -237,7 +237,7 @@ namespace RaywattApp.Models
             RectWidth /= scale;
             RectHeight /= scale;
             RectLeft = centerLeft - RectWidth / 2;
-            RectTop = centerTop - RectWidth / 2; 
+            RectTop = centerTop - RectHeight / 2; 
 
             TranslateX = -RectLeft * ratio * ScaleX; 
             TranslateY = - RectTop * ratio * ScaleY;
