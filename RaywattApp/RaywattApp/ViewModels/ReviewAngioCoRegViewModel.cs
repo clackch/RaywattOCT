@@ -21,6 +21,7 @@ using Point = System.Windows.Point;
 using System.Threading;
 using Newtonsoft.Json;
 using RaywattApp.Common.Angio;
+using OpenCvSharp.WpfExtensions;
 
 namespace RaywattApp.ViewModels
 {
@@ -328,28 +329,13 @@ namespace RaywattApp.ViewModels
 
         private void ReadAngioFrames()
         {
-            int x1 = 240, y1 = 70, x2 = 780, y2 = 970;
-
-            string angioFile = PatientCase.Image;
-            angioFile = angioFile.Substring(0, angioFile.Length - 3) + "angioframes";
-            string directoryPath = Path.Combine(Constants.DataRootPath, PatientCase.PatientId); 
-            string filePath = Path.Combine(directoryPath, angioFile);
-            
-            using (BinaryReader reader = new BinaryReader(System.IO.File.Open(filePath, FileMode.Open)))
+            for (int i = 0; i < PatientCase.AngioFrame.AngioImage.Count; i++)
             {
-                while (reader.BaseStream.Position != reader.BaseStream.Length)
+                crossSectionAngioImageSources.Add(PatientCase.AngioFrame.AngioImage[i]);
+
+                if (PatientCase.AngioFrame.AngioImage[i] is BitmapSource bitmapSource)
                 {
-                    int width = x2 - x1, height = y2 - y1;
-                    int channels = 1;
-
-                    byte[] data = reader.ReadBytes(1024 * 1024 * channels);
-                    Mat frame = new Mat(1024, 1024, MatType.CV_8UC1, data);
-
-                    OpenCvSharp.Rect roi = new OpenCvSharp.Rect(x1, y1, width, height);
-                    frame = new Mat(frame, roi);
-                    Cv2.Resize(frame, frame, new OpenCvSharp.Size(Constants.AngioSize, Constants.AngioSize));
-                    CrossSectionAngioImages.Add(frame);
-                    crossSectionAngioImageSources.Add(ConvertMatsToImageSource(frame));
+                    CrossSectionAngioImages.Add(bitmapSource.ToMat());
                 }
             }
             AngioFrameLength = crossSectionAngioImageSources.Count - 1;
@@ -363,23 +349,6 @@ namespace RaywattApp.ViewModels
                 DijkstraHeap[cnt].line = coReg.Line;
                 DijkstraHeap[cnt].trackPoint = coReg.TrackPoint;
                 cnt++;
-            }
-        }
-
-        private ImageSource ConvertMatsToImageSource(Mat mat)
-        {
-            using (var stream = new MemoryStream())
-            {
-
-                mat.WriteToStream(stream, ".bmp");
-
-                var bitmapImage = new BitmapImage();
-                bitmapImage.BeginInit();
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.StreamSource = stream;
-                bitmapImage.EndInit();
-                bitmapImage.Freeze();
-                return bitmapImage;
             }
         }
     }
