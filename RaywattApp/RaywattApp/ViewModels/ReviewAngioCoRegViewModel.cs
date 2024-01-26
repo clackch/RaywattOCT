@@ -153,7 +153,7 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private bool _isResetOn;
+        private bool _isResetOn = true;
         public bool IsResetOn
         {
             get => _isResetOn;
@@ -244,6 +244,7 @@ namespace RaywattApp.ViewModels
                 MotionVector = PatientCase.AngioFrame.MotionVector;
                 AngioFrameNumber = ReviewStatus.AngioFrameNumber;
                 ReadAngioFrames();
+                ReadTrackPoints();
             }
         }
 
@@ -325,7 +326,7 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        void ReadAngioFrames()
+        private void ReadAngioFrames()
         {
             int x1 = 240, y1 = 70, x2 = 780, y2 = 970;
 
@@ -352,6 +353,17 @@ namespace RaywattApp.ViewModels
                 }
             }
             AngioFrameLength = crossSectionAngioImageSources.Count - 1;
+        }
+
+        private void ReadTrackPoints()
+        {
+            int cnt = 0;
+            foreach (CoRegistration coReg in PatientCase.AngioFrame.CoRegistration)
+            {
+                DijkstraHeap[cnt].line = coReg.Line;
+                DijkstraHeap[cnt].trackPoint = coReg.TrackPoint;
+                cnt++;
+            }
         }
 
         private ImageSource ConvertMatsToImageSource(Mat mat)
