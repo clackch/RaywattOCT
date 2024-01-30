@@ -241,8 +241,8 @@ namespace RaywattApp.ViewModels
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
 
-                DijkstraHeap = PatientCase.AngioFrame.DijkstraHeap;
-                MotionVector = PatientCase.AngioFrame.MotionVector;
+                for (int i = 0; i < PatientCase.AngioFrame.DijkstraHeap.Count; i++) DijkstraHeap.Add(PatientCase.AngioFrame.DijkstraHeap[i]);
+                for (int i = 0; i < PatientCase.AngioFrame.MotionVector.Count; i++) MotionVector.Add(PatientCase.AngioFrame.MotionVector[i]);
                 AngioFrameNumber = ReviewStatus.AngioFrameNumber;
                 ReadAngioFrames();
                 ReadTrackPoints();
@@ -346,8 +346,8 @@ namespace RaywattApp.ViewModels
             int cnt = 0;
             foreach (CoRegistration coReg in PatientCase.AngioFrame.CoRegistration)
             {
-                DijkstraHeap[cnt].line = coReg.Line;
-                DijkstraHeap[cnt].trackPoint = coReg.TrackPoint;
+                DijkstraHeap[cnt].line = new List<List<Point>>(coReg.Line);
+                DijkstraHeap[cnt].trackPoint = new List<Point>(coReg.TrackPoint);
                 cnt++;
             }
         }
