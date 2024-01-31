@@ -110,7 +110,11 @@ Download & Copy/Paste
 2. RaywattApp에서 bin 폴더를 외장 저장장치에 복사 및 폴더명 변경(bin -> runtime)
 3. runtime 폴더에서 Release/Debug 폴더 삭제
 4. 외장 장치에서 장비 PC의 C:\Raywatt\system 경로에 runtime 폴더 복사 (※ C:\Raywatt\system\runtime)
-  
+
+## [FrameGrabber]
+1. https://github.com/Raywatt/RaywattOCT/issues/209#issue-2097526663 에서 라이브러리 및 매뉴얼 다운로드
+2. 매뉴얼 파일의 목차 1, 2번 진행
+
 ## [Windows]
 1. 사용자 계정 추가
    
