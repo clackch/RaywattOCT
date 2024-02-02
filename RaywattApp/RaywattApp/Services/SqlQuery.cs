@@ -289,7 +289,7 @@ namespace RaywattApp.Services
             //UpdatePatientCaseAnnotationLumenContour
             _query["UpdatePatientCaseAnnotationLumenContour"] = @$"
                 UPDATE rv_schema.patient_case_annotation
-                SET lumen_contour=@lumen_contour
+                SET lumen_contour=@lumen_contour, lumen_stent=@lumen_stent
                 WHERE id = @id
                 ";
 

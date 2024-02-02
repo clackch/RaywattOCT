@@ -640,13 +640,20 @@ namespace RaywattApp.ViewModels
                 IntPtr contour = RayGetStentPoints(frameInfo);
                 if (contour == IntPtr.Zero) return;
 
-                Mat mat = CommonUtil.ByteMemoryToCvMat(contour, 1, stentHeight, 2);
-
                 LumenStents[frameInfo].Points = new List<Point>();
-                for (int row = 0; row < mat.Rows; row++)
+                LumenStents[frameInfo].AppositionLength = new List<double>();
+
+                Mat mat = CommonUtil.ByteMemoryToCvMat(contour, 1, stentHeight, 2);
+                OpenCvSharp.Point[][] lumenContours = CommonUtil.GetLumenContours(LumenContours[frameInfo].Points);
+
+                if (lumenContours != null)
                 {
-                    Vec2i point = mat.At<Vec2i>(0, row);
-                    LumenStents[frameInfo].Points.Add(new Point(point.Item0, point.Item1));
+                    for (int row = 0; row < mat.Rows; row++)
+                    {
+                        Vec2i point = mat.At<Vec2i>(0, row);
+                        LumenStents[frameInfo].Points.Add(new Point(point.Item0, point.Item1));
+                        LumenStents[frameInfo].AppositionLength.Add(CommonUtil.GetAppositionLength(lumenContours, new OpenCvSharp.Point(point.Item0, point.Item1)));
+                    }
                 }
             }
 
@@ -965,6 +972,9 @@ namespace RaywattApp.ViewModels
             else
             {
                 PatientCase.LumenContours = LumenContours;
+                PatientCase.LumenSidebranches = LumenSidebranches;
+                PatientCase.LumenStents = LumenStents;
+                PatientCase.LumenGuidewires = LumenGuidewires;
 
                 sqlParameters.Clear();
                 sqlParameters["id"] = PatientCase.Id;
@@ -1144,7 +1154,7 @@ namespace RaywattApp.ViewModels
             int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
             int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
 
-            imglumenProfile = CommonUtil.MakeLumenProfileImageOneByOne(imglumenProfile, LumenContours, LumenSidebranches, LumenStents, frameProximal, frameDistal, CommonUtil.IsPostCase(PatientCase.Procedure), totalFrame);
+            imglumenProfile = CommonUtil.MakeLumenProfileImageOneByOne(imglumenProfile, LumenContours, LumenSidebranches, LumenStents, PatientCase.AppositionThreshold, frameProximal, frameDistal, CommonUtil.IsPostCase(PatientCase.Procedure), totalFrame);
             DrawLumenProfileImage();
 
             List<int> colorFrames = new List<int>();
@@ -1154,7 +1164,10 @@ namespace RaywattApp.ViewModels
             }
             else if (CommonUtil.IsPostCase(PatientCase.Procedure))
             {
-                colorFrames = CommonUtil.GetExpansionList(LumenContours, frameProximal, frameDistal, Section.RefArea, PatientCase.ExpansionThreshold);
+                int stentProximal = 0, stentDistal = 0;
+                CommonUtil.GetStentProximalDistal(LumenStents, out stentProximal, out stentDistal);
+
+                colorFrames = CommonUtil.GetExpansionList(LumenContours, frameProximal, frameDistal, stentProximal, stentDistal, Section.RefArea, PatientCase.ExpansionThreshold);
             }
             imglumenProfileExtra = CommonUtil.MakeLumenProfileImageExtraOneByOne(imglumenProfileExtra, ReviewStatus.NumberOfFrames, colorFrames, CommonUtil.IsPreCase(PatientCase.Procedure), totalFrame);
             DrawLumenProfileImageExtra();
@@ -1251,7 +1264,10 @@ namespace RaywattApp.ViewModels
             }
             else
             {
-                if (Section.SetMsaMinExp(LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength))
+                int stentProximal = 0, stentDistal = 0;
+                CommonUtil.GetStentProximalDistal(LumenStents, out stentProximal, out stentDistal);
+
+                if (Section.SetMsaMinExp(LumenContours, frameProximal, frameDistal, stentProximal, stentDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength))
                     Section.VislbleMsaMinExp(true);
                 else
                     Section.VislbleMsaMinExp(false);

@@ -15,6 +15,8 @@ using RaywattApp.Common.Messages;
 using RaywattApp.Common.Annotation.Models;
 using System.Threading;
 using RaywattApp.Common.Util;
+using OpenCvSharp;
+using Newtonsoft.Json;
 
 namespace RaywattApp.ViewModels
 {
@@ -205,9 +207,12 @@ namespace RaywattApp.ViewModels
 
         private void ThreadSaveLumenContour()
         {
+            CalcStentApposition();
+
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
             sqlParameters["lumen_contour"] = CommonUtil.LumenContoursToJson(PatientCase.LumenContours);
+            sqlParameters["lumen_stent"] = JsonConvert.SerializeObject(PatientCase.LumenStents, Formatting.Indented);
             int nRows = _sqlManager.UpdatePatientCaseAnnotationLumenContour(sqlParameters);
             if (nRows == 0)
             {
@@ -218,6 +223,26 @@ namespace RaywattApp.ViewModels
 
             //Thread 종료 시, Review에서 OnRecvLongitude 받아서 Lumen Profile 생성하기 위함
             RaySetProperty(Property.LongitudeDegree, PatientCase.IndicatorDegree);
+        }
+
+        private void CalcStentApposition()
+        {
+            for(int i=0; i < PatientCase.LumenContours.Count; i++)
+            {
+                if (PatientCase.LumenContours[i].IsContourEdited())
+                {
+                    Point[][] lumenContours = CommonUtil.GetLumenContours(PatientCase.LumenContours[i].Points);
+
+                    if (lumenContours != null)
+                    {
+                        PatientCase.LumenStents[i].AppositionLength.Clear();
+                        for (int row = 0; row < PatientCase.LumenStents[i].Points.Count; row++)
+                        {
+                            PatientCase.LumenStents[i].AppositionLength.Add(CommonUtil.GetAppositionLength(lumenContours, new Point(PatientCase.LumenStents[i].Points[row].X, PatientCase.LumenStents[i].Points[row].Y)));
+                        }
+                    }
+                }
+            }
         }
 
         private void Information()

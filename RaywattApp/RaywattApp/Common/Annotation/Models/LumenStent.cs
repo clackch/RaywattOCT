@@ -10,6 +10,6 @@ namespace RaywattApp.Common.Annotation.Models
         protected List<Point>? points;
 
         [ObservableProperty]
-        protected List<int>? malAppositionIdx;
+        protected List<double>? appositionLength;
     }
 }

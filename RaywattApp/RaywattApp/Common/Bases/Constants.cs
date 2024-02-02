@@ -367,8 +367,6 @@ namespace RaywattApp.Common.Bases
         public const double AnnotationTextPointSize = 6;
         public const double AnnotationRectWidth = 6;
         public const double AnnotationRectHeight = 6;
-        public const double AnnotationEllipseWidth = 8;
-        public const double AnnotationEllipseHeight = 8;
         public const double AnnotationStrokeThickness = 1;
         public const double AnnotationStrokeThicknessBold = 3;
         public const double AnnotationScale = 1.2;

@@ -210,7 +210,7 @@ namespace RaywattApp.ViewModels.Dialog
                     int frameProximal = PatientCase.SectionProximal;
                     int frameDistal = PatientCase.SectionDistal;
                     
-                    imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, LumenSidebranches, LumenStents, frameProximal, frameDistal, CommonUtil.IsPostCase(PatientCase.Procedure));
+                    imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, LumenSidebranches, LumenStents, patientCase.AppositionThreshold, frameProximal, frameDistal, CommonUtil.IsPostCase(PatientCase.Procedure));
                     DrawLumenProfileImage();
 
                     List<int> colorFrames = new List<int>();
@@ -225,12 +225,15 @@ namespace RaywattApp.ViewModels.Dialog
                     }
                     else
                     {
-                        if(Section.SetMsaMinExp(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength))
+                        int stentProximal = 0, stentDistal = 0;
+                        CommonUtil.GetStentProximalDistal(LumenStents, out stentProximal, out stentDistal);
+
+                        if (Section.SetMsaMinExp(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, stentProximal, stentDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength))
                             Section.VislbleMsaMinExp(true);
                         else
                             Section.VislbleMsaMinExp(false);
 
-                        colorFrames = CommonUtil.GetExpansionList(LumenContours, frameProximal, frameDistal, Section.RefArea, PatientCase.ExpansionThreshold);
+                        colorFrames = CommonUtil.GetExpansionList(LumenContours, frameProximal, frameDistal, stentProximal, stentDistal, Section.RefArea, PatientCase.ExpansionThreshold);
                     }
                     imglumenProfileExtra = CommonUtil.MakeLumenProfileImageExtra(LumenContours.Count, colorFrames, CommonUtil.IsPreCase(PatientCase.Procedure));
                     DrawLumenProfileImageExtra();

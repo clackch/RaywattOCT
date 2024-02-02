@@ -19,10 +19,9 @@
         </Style>
 
         <Style TargetType="Ellipse" x:Key="StyleEllipse">
-            <Setter Property="Width" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationEllipseWidth}}"/>
-            <Setter Property="Height" Value="{Binding Zoom.ScaleY, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationEllipseHeight}}"/>
+            <Setter Property="Width" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationTextPointSize}}"/>
+            <Setter Property="Height" Value="{Binding Zoom.ScaleY, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationTextPointSize}}"/>
             <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThickness}}"/>
-            <Setter Property="Stroke" Value="Black"/>
             <Setter Property="Fill" Value="White"/>
         </Style>
         <Style TargetType="Rectangle" x:Key="StyleRectangle">

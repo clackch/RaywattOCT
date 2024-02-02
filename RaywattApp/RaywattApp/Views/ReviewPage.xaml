@@ -190,7 +190,7 @@
                             </Grid>
                             <!-- Lumen Contour-->
                             <Grid Width="{x:Static const:Constants.CrossSectionAngio}" Height="{x:Static const:Constants.CrossSectionAngio}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
-                                <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" LumenStents="{Binding LumenStents}" CurrentLumenStent="{Binding CurrentLumenStent, Mode=TwoWay}" FrameNumber="{Binding FrameNumber}" IsDrawOn="{Binding ReviewStatus.IsContourStentOn}" IsEditOn="False" Zoom="{Binding ZoomAngio}" InCommand="{Binding LumenContourCommand, Mode=TwoWay}"/>
+                                <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" LumenStents="{Binding LumenStents}" CurrentLumenStent="{Binding CurrentLumenStent, Mode=TwoWay}" Zoom="{Binding ZoomAngio}" FrameNumber="{Binding FrameNumber}" IsDrawOn="{Binding ReviewStatus.IsContourStentOn}" IsEditOn="False" InCommand="{Binding LumenContourCommand, Mode=TwoWay}"/>
                             </Grid>
                             <!-- Cross-Section Indicator -->
                             <Grid Width="480" Height="480" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding IndicatorLongitude.IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -861,7 +861,7 @@
 
                 <!-- Lumen Contour-->
                 <Grid Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                    <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" LumenStents="{Binding LumenStents}" CurrentLumenStent="{Binding CurrentLumenStent, Mode=TwoWay}" FrameNumber="{Binding FrameNumber}" IsDrawOn="{Binding ReviewStatus.IsContourStentOn}" IsEditOn="False" Zoom="{Binding ReviewStatus.Zoom}" InCommand="{Binding LumenContourCommand, Mode=TwoWay}"/>
+                    <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" LumenStents="{Binding LumenStents}" CurrentLumenStent="{Binding CurrentLumenStent, Mode=TwoWay}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" Zoom="{Binding ReviewStatus.Zoom}" FrameNumber="{Binding FrameNumber}" IsDrawOn="{Binding ReviewStatus.IsContourStentOn}" IsEditOn="False" ZoomScale="{Binding ReviewStatus.Zoom.ScaleX}" InCommand="{Binding LumenContourCommand, Mode=TwoWay}"/>
                 </Grid>
 
                 <!-- Measurement -->
