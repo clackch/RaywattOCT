@@ -186,7 +186,7 @@
                     <!-- Before : Cross-section -->
                     <Grid Grid.Column="1" Margin="0,84,40,85"  Visibility="{Binding ReviewStatus.SelectedPatientCase, Converter={StaticResource NotNullToVisibilityConveter}}">
                         <Image x:Name="crossSectionForCompare" Source="{Binding CrossSectionForCompare}" Width="{x:Static const:Constants.CrossSectionCompareSize}" Height="{x:Static const:Constants.CrossSectionCompareSize}"/>
-                        <annotation:DrawLumenContourUtil Zoom="{Binding Zoom}" LumenContours="{Binding PreLumenContour}" CurrentLumenContour="{Binding CurrentPreLumenContour, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" LumenStents="{Binding PreLumenStents}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" FrameNumber="{Binding FrameNumberCompare}" Visibility="Visible" IsEditOn="False" IsDrawOn="True" InCommand="{Binding LumenContourCommand, Mode=TwoWay}"/>
+                        <annotation:DrawLumenContourUtil Zoom="{Binding Zoom}" LumenContours="{Binding PreLumenContour}" CurrentLumenContour="{Binding CurrentPreLumenContour, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" LumenStents="{Binding PreLumenStents}" AppositionThreshold="{Binding ReviewStatus.SelectedPatientCase.AppositionThreshold}" FrameNumber="{Binding FrameNumberCompare}" Visibility="Visible" IsEditOn="False" IsDrawOn="True" InCommand="{Binding LumenContourCommand, Mode=TwoWay}"/>
                         <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Left">
                             <StackPanel Orientation="Horizontal" Width="50">
                                 <Label Content="F" Style="{DynamicResource Pretendard-ExtraBold-14}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
@@ -371,7 +371,7 @@
                     <!-- After : Cross-section -->
                     <Grid Grid.Column="1" Margin="0,87,40,82">
                         <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionCompareSize}" Height="{x:Static const:Constants.CrossSectionCompareSize}"/>
-                        <annotation:DrawLumenContourUtil Zoom="{Binding Zoom}" LumenContours="{Binding PostLumenContour}" LumenStents="{Binding PostLumenStents}" AppositionThreshold="{Binding ReviewStatus.SelectedPatientCase.AppositionThreshold}" FrameNumber="{Binding FrameNumber}" Visibility="Visible" IsEditOn="False" IsDrawOn="True"/>
+                        <annotation:DrawLumenContourUtil Zoom="{Binding Zoom}" LumenContours="{Binding PostLumenContour}" LumenStents="{Binding PostLumenStents}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" FrameNumber="{Binding FrameNumber}" Visibility="Visible" IsEditOn="False" IsDrawOn="True"/>
                         <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Left">
                             <StackPanel Orientation="Horizontal" Width="50">
                                 <Label Content="F" Style="{DynamicResource Pretendard-ExtraBold-14}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
