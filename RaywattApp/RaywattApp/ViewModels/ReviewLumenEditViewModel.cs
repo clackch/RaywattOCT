@@ -237,7 +237,7 @@ namespace RaywattApp.ViewModels
             {
                 Point[][] lumenContours = CommonUtil.GetLumenContours(PatientCase.LumenContours[i].Points);
 
-                if (lumenContours != null)
+                if (lumenContours != null && PatientCase.LumenStents[i].AppositionLength != null)
                 {
                     PatientCase.LumenStents[i].AppositionLength.Clear();
                     for (int row = 0; row < PatientCase.LumenStents[i].Points.Count; row++)

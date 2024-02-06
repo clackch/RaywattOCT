@@ -484,7 +484,7 @@ namespace RaywattApp.Common.Annotation
                 {
                     Ellipse ellipse = new Ellipse();
                     ellipse.Style = (Style)this.Resources["StyleEllipse"];
-                    if (CommonUtil.IsMalApposition(lumenStent.AppositionLength[i], appositionThreshold))
+                    if (lumenStent.AppositionLength != null && CommonUtil.IsMalApposition(lumenStent.AppositionLength[i], appositionThreshold))
                     {
                         ellipse.Fill = Brushes.Red;
                     }
