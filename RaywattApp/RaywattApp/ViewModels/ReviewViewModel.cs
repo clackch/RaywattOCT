@@ -352,17 +352,8 @@ namespace RaywattApp.ViewModels
         {
             if (!PatientCase.AngioYn) return;
 
-            if (PatientCase.AngioFrame == null)
-            {
-                PatientCase.AngioFrame = new AngioFrame();
-                PatientCase.AngioFrame.AngioImage = new List<ImageSource>();
-            }
-            if (PatientCase.AngioFrame.CoRegistration == null)
-            {
-                PatientCase.AngioFrame.CoRegistration = new List<CoRegistration>();
-                PatientCase.AngioFrame.DijkstraHeap = new List<DijkstraHeap>();
-                PatientCase.AngioFrame.MotionVector = new List<Mat>();
-            }
+            if (PatientCase.AngioFrame == null) PatientCase.AngioFrame = new AngioFrame();
+            if (PatientCase.AngioFrame.CoRegistration == null) PatientCase.AngioFrame.CoRegistration = new List<CoRegistration>();
 
             if (PatientCase.AngioFrame.AngioImage.Count == 0) ReadAngioFrames();
             if (PatientCase.AngioFrame.CoRegistration.Count == 0) ReadTrackPoints();

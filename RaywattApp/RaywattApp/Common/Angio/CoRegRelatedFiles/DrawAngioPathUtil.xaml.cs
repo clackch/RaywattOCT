@@ -727,12 +727,6 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             for (int i = 0; i < control.angioImageTotalNum; i++)
             {
                 CoRegistration coRegistration = new CoRegistration();
-                coRegistration.TrackPoint = new List<Point>();
-                coRegistration.Line = new List<List<Point>>();
-                for (int j = 0; j < 9; j++)
-                {
-                    coRegistration.Line.Add(new List<Point>());
-                }
 
                 foreach(Point point in control.localDijkstraHeap[i].trackPoint)
                 {
@@ -742,11 +736,11 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                 int cnt = 0;
                 foreach (List<Point> line in control.localDijkstraHeap[i].line)
                 {
+                    coRegistration.Line.Add(new List<Point>());
                     foreach (Point point in line)
                     {
-                        coRegistration.Line[cnt].Add(point);
+                        coRegistration.Line[cnt++].Add(point);
                     }
-                    cnt++;
                 }
                 control.AngioTrackPoints.Add(coRegistration);
             }

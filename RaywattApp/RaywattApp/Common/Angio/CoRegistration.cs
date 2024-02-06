@@ -11,5 +11,11 @@ namespace RaywattApp.Common.Angio
 
         [ObservableProperty]
         private List<List<Point>> _line;
+
+        public CoRegistration()
+        {
+            Line = new List<List<Point>>();
+            TrackPoint = new List<Point>();
+        }
     }
 }

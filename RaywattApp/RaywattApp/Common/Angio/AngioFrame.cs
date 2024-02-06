@@ -20,5 +20,13 @@ namespace RaywattApp.Common.Angio
 
         [ObservableProperty]
         private List<Mat> _motionVector;
+
+        public AngioFrame()
+        {
+            CoRegistration = new List<CoRegistration>();
+            AngioImage = new List<ImageSource>();
+            DijkstraHeap = new List<DijkstraHeap>();
+            MotionVector = new List<Mat>();
+        }
     }
 }
