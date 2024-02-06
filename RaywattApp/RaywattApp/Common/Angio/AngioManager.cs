@@ -23,6 +23,7 @@ using System.Windows.Media;
 using System.Reflection.Metadata;
 using System.Linq;
 using System.Windows.Documents;
+using System.Data;
 
 namespace RaywattApp.Common.Angio
 {
@@ -490,7 +491,7 @@ namespace RaywattApp.Common.Angio
                 switch (tmpBuffer[offset++])
                 {
                     case (byte)PacketType.Command:
-                        if (tmpBuffer[Constants.CommandPacketSize - 1] == Constants.EOF)
+                        if (tmpBufferLen >= Constants.CommandPacketSize && tmpBuffer[Constants.CommandPacketSize - 1] == Constants.EOF)
                         {
                             char checksum = (char)tmpBuffer[Constants.CommandPacketSize - 2];
                             if ((byte)checksum == CalcCheckSum(tmpBuffer, Constants.CommandPacketSize - 2))
@@ -498,7 +499,7 @@ namespace RaywattApp.Common.Angio
                                 return PacketType.Command;
                             }
                         }
-                        else if (tmpBuffer[Constants.DeviceInfoPacketSize - 1] == Constants.EOF)
+                        else if (tmpBufferLen >= Constants.DeviceInfoPacketSize && tmpBuffer[Constants.DeviceInfoPacketSize - 1] == Constants.EOF)
                         {
                             char checksum = (char)tmpBuffer[Constants.DeviceInfoPacketSize - 2];
                             if ((byte)checksum == CalcCheckSum(tmpBuffer, Constants.DeviceInfoPacketSize - 2))
@@ -516,16 +517,16 @@ namespace RaywattApp.Common.Angio
                         char BitsPerPixel = (char)tmpBuffer[offset++];
                         int imageSize = height * width * BitsPerPixel / 8;
 
-                        if (tmpBuffer[Constants.ImageHeaderSize + imageSize + Constants.ImageTailSize - 1] == Constants.EOF)
+                        if (tmpBufferLen >= imageSize)
                         {
-                            if (tmpBuffer[Constants.ImageHeaderSize + imageSize] == CalcCheckSum(tmpBuffer, Constants.ImageHeaderSize + imageSize))
+                            if (tmpBuffer[Constants.ImageHeaderSize + imageSize + Constants.ImageTailSize - 1] == Constants.EOF)
                             {
-                                return PacketType.Image;
+                                if (tmpBuffer[Constants.ImageHeaderSize + imageSize] == CalcCheckSum(tmpBuffer, Constants.ImageHeaderSize + imageSize))
+                                {
+                                    return PacketType.Image;
+                                }
                             }
                         }
-                        break;
-
-                    case (byte)PacketType.Nothing:
                         break;
                 }
             }
