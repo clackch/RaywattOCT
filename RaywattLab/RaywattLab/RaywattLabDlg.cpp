@@ -805,6 +805,7 @@ void CRaywattLabDlg::OnBnClickedButtonAdminInitialize()
 	if (m_bInitialized)
 	{
 		finalizeDevices();
+		GetDlgItem(IDC_BUTTON_START_ACQUISITION)->EnableWindow(FALSE);
 	}
 	else {
 		int nNumDevices = CLaserController::GetInstance()->GetNumDevices();
@@ -823,9 +824,11 @@ void CRaywattLabDlg::OnBnClickedButtonAdminInitialize()
 
 		if (result == NOERROR) {
 			GetDlgItem(IDC_BUTTON_ADMIN_INITIALIZE)->SetWindowText(_T("Finalize"));
+			GetDlgItem(IDC_BUTTON_START_ACQUISITION)->EnableWindow(TRUE);
 			m_bInitialized = true;
 		}
 		else {
+			GetDlgItem(IDC_BUTTON_START_ACQUISITION)->EnableWindow(FALSE);
 			AfxMessageBox(_T("[FAILED] Please check the device connection"));
 		}
 	}
