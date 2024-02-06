@@ -28,6 +28,7 @@ using RaywattApp.Views.Dialog;
 using System.IO;
 using System.Windows.Media;
 using RaywattApp.Common.Angio;
+using System.Xml;
 
 namespace RaywattApp.ViewModels
 {
@@ -886,7 +887,7 @@ namespace RaywattApp.ViewModels
                 sqlParameters["cross_section"] = PatientCase.CrossSection;
                 PatientCase.Longitude = ConvertLongitudeToJson();
                 sqlParameters["longitude"] = PatientCase.Longitude;
-                PatientCase.Bookmark = JsonConvert.SerializeObject(Bookmarks, Formatting.Indented);
+                PatientCase.Bookmark = JsonConvert.SerializeObject(Bookmarks, Newtonsoft.Json.Formatting.Indented);
                 sqlParameters["bookmark"] = PatientCase.Bookmark;
 
                 if (this.isLumenContourSave)
@@ -959,7 +960,7 @@ namespace RaywattApp.ViewModels
                 }
             }
 
-            return JsonConvert.SerializeObject(measurements, Formatting.Indented);
+            return JsonConvert.SerializeObject(measurements, Newtonsoft.Json.Formatting.Indented);
         }
 
         private string ConvertLongitudeToJson()
@@ -969,7 +970,7 @@ namespace RaywattApp.ViewModels
             longitudeMeasurement.LengthGeometries = LModeLengthGeometries;
             longitudeMeasurement.TextGeometries = LModeTextGeometries;
 
-            return JsonConvert.SerializeObject(longitudeMeasurement, Formatting.Indented);
+            return JsonConvert.SerializeObject(longitudeMeasurement, Newtonsoft.Json.Formatting.Indented);
         }
 
         #endregion
@@ -1324,27 +1325,34 @@ namespace RaywattApp.ViewModels
             CurrentAngioImage = PatientCase.AngioFrame.AngioImage[value];
         }
 
-        private void ReadAngioFrames() 
-        {
-            int x1 = 240, y1 = 70, x2 = 780, y2 = 970;
+        private void ReadAngioFrames()
+        { 
+            string file = PatientCase.Image;
+            string angioFile = file.Substring(0, file.Length - 3) + "angioframes";
+            string paramsFile = file.Substring(0, file.Length - 3) + "params";
 
-            string angioFile = PatientCase.Image;
-            angioFile = angioFile.Substring(0, angioFile.Length - 3) + "angioframes";
-            string directoryPath = Path.Combine(Constants.DataRootPath, PatientCase.PatientId);
-            string filePath = Path.Combine(directoryPath, angioFile);
+            string directory = Path.Combine(Constants.DataRootPath, PatientCase.PatientId);
+            string angioPath = Path.Combine(directory, angioFile);
+            string paramsPath = Path.Combine(directory, paramsFile);
 
-            using (BinaryReader reader = new BinaryReader(System.IO.File.Open(filePath, FileMode.Open)))
+            //Read .params
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.Load(paramsPath);
+
+            XmlNode configNode = xmlDoc.SelectSingleNode("/config");
+            int angioFrameHeight = int.Parse(configNode.SelectSingleNode("AngioFrameHeight").InnerText);
+            int angioFrameWidth = int.Parse(configNode.SelectSingleNode("AngioFrameWidth").InnerText);
+            int channels = int.Parse(configNode.SelectSingleNode("BitsPerPixel").InnerText) / 8;
+
+
+            //Read .angioframes
+            using (BinaryReader reader = new BinaryReader(System.IO.File.Open(angioPath, FileMode.Open)))
             {
                 while (reader.BaseStream.Position != reader.BaseStream.Length)
                 {
-                    int width = x2 - x1, height = y2 - y1;
-                    int channels = 1;
+                    byte[] data = reader.ReadBytes(angioFrameWidth * angioFrameHeight * channels);
+                    Mat frame = new Mat(angioFrameWidth, angioFrameHeight, MatType.CV_8UC1, data);
 
-                    byte[] data = reader.ReadBytes(1024 * 1024 * channels);
-                    Mat frame = new Mat(1024, 1024, MatType.CV_8UC1, data);
-
-                    OpenCvSharp.Rect roi = new OpenCvSharp.Rect(x1, y1, width, height);
-                    frame = new Mat(frame, roi);
                     Cv2.Resize(frame, frame, new OpenCvSharp.Size(Constants.AngioSize, Constants.AngioSize));
 
                     AngioFrames.Add(frame);
