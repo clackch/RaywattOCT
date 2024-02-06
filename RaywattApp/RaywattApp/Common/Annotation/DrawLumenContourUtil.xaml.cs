@@ -6,6 +6,7 @@ using RaywattApp.Common.Bases;
 using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -187,13 +188,21 @@ namespace RaywattApp.Common.Annotation
         private static readonly DependencyProperty IsDrawOnProperty =
             DependencyProperty.Register("IsDrawOn", typeof(bool), typeof(DrawLumenContourUtil), new PropertyMetadata(DrawPropertyChanged));
 
+        public List<int> ModifiedFrames
+        {
+            get { return (List<int>)GetValue(ModifiedFramesProperty); }
+            set { SetValue(ModifiedFramesProperty, value); }
+        }
+
+        public static readonly DependencyProperty ModifiedFramesProperty =
+            DependencyProperty.Register("ModifiedFrames", typeof(List<int>), typeof(DrawLumenContourUtil), new PropertyMetadata(null));
+
         //---------------------------------------------------------------------------------------------------- Constructor
         public DrawLumenContourUtil()
         {
             InitializeComponent();
 
             isInit = false;
-            AppositionThreshold = -1;
         }
 
         //---------------------------------------------------------------------------------------------------- Event
@@ -653,6 +662,8 @@ namespace RaywattApp.Common.Annotation
                 lumenContourHistory[FrameNumber].Push(CopyLumenContourToHistory(LumenContours[FrameNumber]));
 
                 DrawLumenContour(LumenContours[FrameNumber], null, -1, true);
+
+                ModifiedFrames.Add(FrameNumber);
             }
         }
 
@@ -815,6 +826,9 @@ namespace RaywattApp.Common.Annotation
             lumenContourHistory[FrameNumber].Clear();
             lumenContourHistory[FrameNumber].Push(CopyLumenContourToHistory(LumenContours[FrameNumber]));
             DrawLumenContour(LumenContours[FrameNumber], null, -1, true);
+
+            ModifiedFrames = ModifiedFrames.Distinct().ToList();
+            ModifiedFrames.Remove(FrameNumber);
         }
 
         private void AutoDetect()
@@ -824,6 +838,8 @@ namespace RaywattApp.Common.Annotation
             LumenContours[FrameNumber].ResetLumenContour();
             lumenContourHistory[FrameNumber].Push(CopyLumenContourToHistory(LumenContours[FrameNumber]));
             DrawLumenContour(LumenContours[FrameNumber], null, -1, true);
+
+            ModifiedFrames.Add(FrameNumber);
         }
 
         private LumenContourHistory CopyLumenContourToHistory(LumenContour lumenContour)

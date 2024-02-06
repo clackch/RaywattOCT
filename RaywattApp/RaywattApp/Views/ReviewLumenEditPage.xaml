@@ -89,7 +89,7 @@
                                 </Image.RenderTransform>
                             </Image>
                         </Grid>
-                        <annotation:DrawLumenContourUtil Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" LumenContours="{Binding LumenContours}" FrameNumber="{Binding FrameNumber}" InCommand="{Binding LumenContourCommand, Mode=TwoWay}" IsEditOn="True" Zoom="{Binding Zoom}"/>
+                        <annotation:DrawLumenContourUtil Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" LumenContours="{Binding LumenContours}" FrameNumber="{Binding FrameNumber}" InCommand="{Binding LumenContourCommand, Mode=TwoWay}" IsEditOn="True" Zoom="{Binding Zoom}" ModifiedFrames="{Binding ModifiedFrames}"/>
                         <Grid Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
                             <Border Width="{x:Static const:Constants.MiniMapBorderSize}" Height="{x:Static const:Constants.MiniMapBorderSize}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="16" BorderBrush="{DynamicResource GrayscaleGray8Brush}" BorderThickness="1" CornerRadius="10" Visibility="{Binding Zoom.Visibility}">
                                 <Canvas>

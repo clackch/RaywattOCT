@@ -73,7 +73,7 @@ namespace RaywattApp.Common.Annotation.Models
             Valid = false;
         }
 
-        public bool IsContourEdited()
+        private bool IsContourEdited()
         {
             if (IsOriginData)
                 return true;
