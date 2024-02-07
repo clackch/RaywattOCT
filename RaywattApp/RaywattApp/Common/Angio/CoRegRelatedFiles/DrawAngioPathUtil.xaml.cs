@@ -739,8 +739,9 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                     coRegistration.Line.Add(new List<Point>());
                     foreach (Point point in line)
                     {
-                        coRegistration.Line[cnt++].Add(point);
+                        coRegistration.Line[cnt].Add(point);
                     }
+                    cnt++;
                 }
                 control.AngioTrackPoints.Add(coRegistration);
             }
