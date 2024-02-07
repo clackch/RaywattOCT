@@ -151,6 +151,14 @@ namespace RaywattApp.Common.Angio
                 {
                     StartFGServerProc(psi);
                 }
+                else
+                {
+                    foreach (Process process in Process.GetProcessesByName(processName))
+                    {
+                        process.Kill();
+                    }
+                    StartFGServerProc(psi);
+                }
             }
             catch (System.ComponentModel.Win32Exception ex)
             {
