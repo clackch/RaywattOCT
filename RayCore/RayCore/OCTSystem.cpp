@@ -222,13 +222,16 @@ RayError COCTSystem::ConnectDevices() {
 	int result = NOERROR;
 
 	if (m_curState == RayScannerState::Initial) {
-		result |= connectAcqDevice();
-		PLOGI.printf("connect DAQ - %s", ((result == NOERROR) ? "Succeed" : "Failed"));
 		result |= connectRotaryJunction();
 		PLOGI.printf("connect Rotary Junction - %s", ((result == NOERROR) ? "Succeed" : "Failed"));
 
-		// Connect to COM Interface first time asynchronous
+		// Connect to COM Interface first time
 		CLaserController* pLaser = CLaserController::GetInstance();
+		pLaser->LaserOnOff(true);
+
+		result |= connectAcqDevice();
+		PLOGI.printf("connect DAQ - %s", ((result == NOERROR) ? "Succeed" : "Failed"));
+
 		pLaser->LaserOnOff(false);
 
 		if (m_isTestMode) {
@@ -870,6 +873,14 @@ UINT COCTSystem::GetImageDepth()
 		return m_reviewSession[m_curSession]->GetImageDepth();
 	}
 }
+/*
+* GetImageResolution
+*/
+double COCTSystem::GetImageResolution()
+{
+	CConfiguration& config = CConfiguration::GetInstance();
+	return (config.measurement.fAxialResolutionScale / 1000.f) * 2;	// Convert polar scale to cartesian scale (mm)
+}
 
 /*
 * GetLongitudeImageWidth
@@ -1205,7 +1216,12 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 
 	// 3. Stop Recording OCT
 	pDataWriter->StopRecording();
+	PLOGI.printf("Stop Acquisition");
+	pSystem->m_pAcqDevice->StopAcquisition();
+	PLOGI.printf("Set Writer null");
 	pSystem->m_pAcqDevice->SetWriter(nullptr);
+	PLOGI.printf("Before StopMotor");
+	pSystem->postPriorMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::Recording);
 
 	// 4. Motor OFF
 	Sleep(1000);

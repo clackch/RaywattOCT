@@ -91,6 +91,8 @@
                                         </TransformGroup>
                                     </Image.RenderTransform>
                                 </Image>
+                                <!-- Sheath Indicator -->
+                                <Image x:Name="SheathIndicator" Source="{Binding SheathIndicator}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsSheathOn, Converter={StaticResource BoolToVisibilityConverter}}"/>
                             </Grid>
                             <!-- Cross Section Info. -->
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="50">
@@ -155,6 +157,8 @@
                                         </i:EventTrigger>
                                     </i:Interaction.Triggers>
                                 </Image>
+                                <!-- Sheath Indicator -->
+                                <Image x:Name="SheathIndicatorAngio" Source="{Binding SheathIndicatorAngio}" Width="{x:Static const:Constants.CrossSectionAngio}" Height="{x:Static const:Constants.CrossSectionAngio}" Visibility="{Binding ReviewStatus.IsSheathOn, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
                                 <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10,0,0,0">
                                     <StackPanel Orientation="Horizontal" Width="50">
@@ -209,7 +213,7 @@
                                             </Style.Triggers>
                                         </Style>
                                     </Grid.Style>
-                                    <ContentControl Template="{DynamicResource IndicatorScale}" Width="455" Height="18" Tag="{x:Static const:Constants.CrossSectionAngio}"/>
+                                    <ContentControl Template="{DynamicResource IndicatorScale}" Width="455" Height="18" Tag="{Binding CrossSectionAngioScale}"/>
                                 </Grid>
                                 <component:IndicatorImage Style="{DynamicResource IndicatorImage}" x:Name="crossSectionAngioIndicator" Width="480" Height="14" Icon="crossSection" IsCaptured="{Binding IndicatorCrossSectionAngio.IsCaptured}" Visibility="{Binding IndicatorCrossSectionAngio.IsVisible}">
                                     <Image.RenderTransform>
@@ -837,7 +841,7 @@
                                     </Style.Triggers>
                                 </Style>
                             </Grid.Style>
-                            <ContentControl Template="{DynamicResource IndicatorScale}" Width="600" Height="18" Tag="{x:Static const:Constants.CrossSectionSize}"/>
+                            <ContentControl Template="{DynamicResource IndicatorScale}" Width="600" Height="18" Tag="{Binding CrossSectionScale}"/>
                         </Grid>
                         <component:IndicatorImage Style="{DynamicResource IndicatorImage}" x:Name="crossSectionIndicator" Height="18" Icon="crossSection" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Visibility="{Binding IndicatorCrossSection.IsVisible}">
                             <Image.RenderTransform>
@@ -866,7 +870,7 @@
 
                 <!-- Measurement -->
                 <Grid Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                    <annotation:DrawUtil Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" IsDrawOn="{Binding ReviewStatus.IsMeasurementOn}" Measurements="{Binding Measurements}" FrameNumber="{Binding FrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" CommandOff="{Binding MeasurementCommandOff, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" Zoom="{Binding ReviewStatus.Zoom}" IsEditOn="True"/>
+                    <annotation:DrawUtil Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" IsDrawOn="{Binding ReviewStatus.IsMeasurementOn}" Measurements="{Binding Measurements}" FrameNumber="{Binding FrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" CommandOff="{Binding MeasurementCommandOff, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" Zoom="{Binding ReviewStatus.Zoom}" IsEditOn="True" ImageResolution="{Binding PatientCase.ImageResolution}"/>
                 </Grid>
                 
                 <!-- Mini Map -->

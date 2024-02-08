@@ -396,7 +396,12 @@ namespace RaywattApp.Common.Bases
         //Scale
         public const string ScaleLength = "Length";
         public const string ScaleArea = "Area";
-        public const double MillimeterPerPixel  = 0.0082;
+        public const string ScaleLengthCompare = "LengthCompare";
+        public const string ScaleAreaCompare = "AreaCompare";
+
+        //Scale (values from PatientCase.ImageResolution)
+        public static double ImageResolution;
+        public static double ImageResolutionCompare;
 
         //Mini-Map
         public const double MiniMapBorderSize = 140;

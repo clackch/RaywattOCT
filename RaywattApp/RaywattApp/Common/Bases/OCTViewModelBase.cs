@@ -28,10 +28,10 @@ namespace RaywattApp.Common.Bases
         protected Mat imgCrossSectionMask;
 
         [ObservableProperty]
-        protected double _crossSectionScale = (1 / Constants.MillimeterPerPixel ) * (Constants.CrossSectionSize / Constants.OCTImageSize);
+        protected double _crossSectionScale;
 
         [ObservableProperty]
-        protected double _crossSectionAngioScale = (1 / Constants.MillimeterPerPixel ) * (Constants.CrossSectionAngio / Constants.OCTImageSize);
+        protected double _crossSectionAngioScale;
 
         [ObservableProperty]
         private double _crossSection3dScale = 28;
@@ -57,6 +57,12 @@ namespace RaywattApp.Common.Bases
 
         [ObservableProperty]
         private BitmapSource _angioImage;
+
+        [ObservableProperty]
+        private BitmapSource _sheathIndicator;
+
+        [ObservableProperty]
+        private BitmapSource _sheathIndicatorAngio;
 
         [ObservableProperty]
         private bool _isPaused = true;
@@ -174,7 +180,13 @@ namespace RaywattApp.Common.Bases
             BitmapSource bitmap = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(image);
 
             return bitmap;
-        }       
+        }
+        protected void DrawSheathIndicator()
+        {
+            double sheathDiameter = RayGetProperty(Property.SheathDiameter);
+            SheathIndicator = CommonUtil.DrawSheathIndicator(Constants.ImageResolution, (int)Constants.CrossSectionSize, sheathDiameter);
+            SheathIndicatorAngio = CommonUtil.DrawSheathIndicator(Constants.ImageResolution, (int)Constants.CrossSectionAngio, sheathDiameter);
+        }
 
         private Mat GenerateMask(Mat image)
         {

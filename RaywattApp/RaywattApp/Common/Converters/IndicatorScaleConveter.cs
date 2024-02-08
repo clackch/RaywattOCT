@@ -13,10 +13,8 @@ namespace RaywattApp.Common.Converters
             if (values == null || values[0] == null) 
                 return new Thickness(0, 0, 0, 0);
 
-            double crossSectionSize = Double.Parse(values[0].ToString());
+            double scaleSize = Double.Parse(values[0].ToString());
             double position = Double.Parse(parameter.ToString());
-
-            double scaleSize = (1 / Constants.MillimeterPerPixel ) * (crossSectionSize / Constants.OCTImageSize);
 
             return new Thickness(scaleSize * position, 0, 0, 0);
         }

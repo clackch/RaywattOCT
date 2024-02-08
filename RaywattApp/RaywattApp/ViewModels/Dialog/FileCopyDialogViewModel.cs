@@ -414,6 +414,7 @@ namespace RaywattApp.ViewModels.Dialog
                             sqlParameters["update_date"] = patientCase.UpdateDate;
                             string srcPath = CommonUtil.GetDirectoryPath(path) + "\\" + patientCase.Image;
                             sqlParameters["image"] = System.IO.File.Exists(srcPath) ? patientCase.Image : "";
+                            sqlParameters["image_resolution"] = patientCase.ImageResolution;
 
                             var nRows = _sqlManager.UpsertPatientCase(sqlParameters);
                             if (nRows == 1)

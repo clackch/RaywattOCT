@@ -14,8 +14,8 @@ namespace RaywattApp.Common.Converters
 
             double curScale = (double)value;
             double csSize = (double)parameter;
-            double scaleSize = (1 / Constants.MillimeterPerPixel ) * (Constants.OCTImageSize / csSize);
-            double orgScaleSize = (1 / Constants.MillimeterPerPixel );
+            double scaleSize = (1 / Constants.ImageResolution) * (Constants.OCTImageSize / csSize);
+            double orgScaleSize = (1 / Constants.ImageResolution);
 
             double res = orgScaleSize - curScale * scaleSize;
 
