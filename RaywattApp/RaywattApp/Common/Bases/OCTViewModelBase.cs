@@ -183,6 +183,8 @@ namespace RaywattApp.Common.Bases
         }
         protected void DrawSheathIndicator()
         {
+            if (Constants.ImageResolution == 0.0f) return;
+
             double sheathDiameter = RayGetProperty(Property.SheathDiameter);
             SheathIndicator = CommonUtil.DrawSheathIndicator(Constants.ImageResolution, (int)Constants.CrossSectionSize, sheathDiameter);
             SheathIndicatorAngio = CommonUtil.DrawSheathIndicator(Constants.ImageResolution, (int)Constants.CrossSectionAngio, sheathDiameter);

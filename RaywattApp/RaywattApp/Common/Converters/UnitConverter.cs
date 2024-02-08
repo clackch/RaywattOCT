@@ -18,6 +18,8 @@ namespace RaywattApp.Common.Converters
 
             double resolution = (scale.Contains("Compare")) ? Constants.ImageResolutionCompare : Constants.ImageResolution;
 
+            if (resolution == 0.0f) return Binding.DoNothing;
+
             if(scale.Contains("Length"))
             {
                 realValue = originValue * resolution;
