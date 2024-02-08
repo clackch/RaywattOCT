@@ -9,6 +9,8 @@
 #include <opencv2/opencv.hpp>
 #include <time.h>
 #include "plog/Initializers/RollingFileInitializer.h"
+#include <wbemcli.h>
+#pragma comment(lib, "wbemuuid.lib")
 
 typedef enum {
 	SESSION_UNKNOWN = RaySession::Unknown,
@@ -18,12 +20,61 @@ typedef enum {
 	MAX_SESSION_NUM
 }SessionType;
 
+struct DeviceInfo {
+	TCHAR deviceName[MAX_PATH];
+	TCHAR Service[MAX_PATH];
+	TCHAR manufacturer[MAX_PATH];
+	TCHAR instancePath[MAX_PATH];
+	TCHAR serialPort[MAX_PATH];
+};
+
+
 class CThread;
 class COCTImaging;
 class CVolumeGenerator;
 class IRayLearning;
 class CImagingSession;
 class CLaserModule;
+
+class EventSink : public IWbemObjectSink {
+	LONG m_lRef;
+	bool bDone;
+
+public:
+	IWbemServices* pSvc;
+	EventSink() {
+		m_lRef = 0; pSvc = NULL; hardwareIDs.clear(); tmpHardwareIDs.clear();
+		lstrcpy(m_pPullbackMotorPort, L"\0");
+		lstrcpy(m_pLaserModulePort, L"\0");
+		m_isDIsconnected = false;
+	}
+	~EventSink() { bDone = true; }
+
+	virtual ULONG STDMETHODCALLTYPE AddRef();
+	virtual ULONG STDMETHODCALLTYPE Release();
+	virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppv);
+
+	virtual HRESULT STDMETHODCALLTYPE Indicate(
+		LONG lObjectCount,
+		IWbemClassObject __RPC_FAR* __RPC_FAR* apObjArray
+	);
+
+	virtual HRESULT STDMETHODCALLTYPE SetStatus(
+		LONG lFlags,
+		HRESULT hResult,
+		BSTR strParam,
+		IWbemClassObject __RPC_FAR* pObjParam
+	);
+	void GetUSBDeviceName(bool isAdded, IWbemServices* pSvc);
+	void hardwardidsVectorReset(std::vector<DeviceInfo>* inputVec, IWbemServices* pSvc);
+	std::vector<DeviceInfo> hardwareIDs;
+	std::vector<DeviceInfo> tmpHardwareIDs;
+
+	TCHAR m_pPullbackMotorPort[_MAX_PATH];
+	TCHAR m_pLaserModulePort[_MAX_PATH];
+	bool m_isDIsconnected;
+};
+
 class COCTSystem : public CMessageService
 {
 private:
@@ -44,6 +95,7 @@ private:
 	CThread* m_pThreadService;
 	CThread* m_pThreadSaveRaw;
 	CThread* m_pThreadRotaryJunction;
+	CThread* m_pThreadCheckPortsConnection;
 	
 	// Imaging
 	COCTImaging* m_pImagingRealtime;	// Pullback or LiveView
@@ -83,6 +135,8 @@ private:
 	double m_fDegree;
 	cv::Scalar m_backgroundColor;	// for longitude image
 	bool m_isTestMode;
+	bool m_isConnected;
+	EventSink* m_disconnectionCheckQuery;
 
 public:
 	COCTSystem();
@@ -159,6 +213,10 @@ private:
 	static UINT threadUnloadCatheter(LPVOID param);
 	static UINT threadValidateCatheter(LPVOID param);
 
+	//Check device disconnection
+	static UINT threadCheckDeviceDisconnect(LPVOID param);
+	void InitializeCOM();
+
 	// Imaging & Device
 	bool checkConnection();
 	int connectAcqDevice();
@@ -187,4 +245,3 @@ protected:
 	LRESULT OnMsgDeviceWorkDone(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgNotifyErrorOccured(WPARAM wParam, LPARAM lParam);
 };
-

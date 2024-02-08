@@ -59,6 +59,8 @@ COCTSystem::COCTSystem() {
 	m_fContrast = 0.5f;
 	m_fDegree = 90;
 	m_isTestMode = false;
+	m_isConnected = false;
+	m_disconnectionCheckQuery = nullptr;
 }
 
 /*
@@ -935,6 +937,7 @@ UINT COCTSystem::threadService(LPVOID param) {
 		pSystem->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::StartService);
 	}
 
+	CUtility::StartThread(threadCheckDeviceDisconnect, pSystem->m_pThreadCheckPortsConnection, pSystem);
 	while (pThread->isRun) {
 		std::tuple<int, WPARAM, LPARAM> popMsgThread = pSystem->popMessage();
 		int popMsg = std::get<0>(popMsgThread);
@@ -1315,6 +1318,196 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 }
 
 /*
+* AddRef
+*/
+ULONG EventSink::AddRef() {
+	return InterlockedIncrement(&m_lRef);
+}
+
+/*
+* Release
+*/
+ULONG EventSink::Release() {
+	LONG lRef = InterlockedDecrement(&m_lRef);
+	if (lRef == 0)
+		delete this;
+	return lRef;
+}
+
+/*
+* QueryInterface
+*/
+HRESULT EventSink::QueryInterface(REFIID riid, void** ppv) {
+	if (riid == IID_IUnknown || riid == IID_IWbemObjectSink) {
+		*ppv = (IWbemObjectSink*)this;
+		AddRef();
+		return WBEM_S_NO_ERROR;
+	}
+	else {
+		return E_NOINTERFACE;
+	}
+}
+
+/*
+* Indicate
+*/
+HRESULT EventSink::Indicate(
+	LONG lObjectCount,
+	IWbemClassObject __RPC_FAR* __RPC_FAR* apObjArray
+) {
+	HRESULT hr = S_OK;
+	VARIANT var;
+	for (int i = 0; i < lObjectCount; i++) {
+		IWbemClassObject* pObj = apObjArray[i];
+		hr = pObj->Get(L"__Class", 0, &var, 0, 0);
+		if (wcscmp(var.bstrVal, L"__InstanceCreationEvent") == 0) {
+			hardwardidsVectorReset(&tmpHardwareIDs, pSvc);
+			GetUSBDeviceName(true, pSvc);
+		}
+		else if (wcscmp(var.bstrVal, L"__InstanceDeletionEvent") == 0)
+		{
+			hardwardidsVectorReset(&tmpHardwareIDs, pSvc);
+			GetUSBDeviceName(false, pSvc);
+		}
+
+	}
+
+	return hr;
+}
+
+/*
+* SetStatus
+*/
+HRESULT EventSink::SetStatus(
+	LONG lFlags,
+	HRESULT hResult,
+	BSTR strParam,
+	IWbemClassObject __RPC_FAR* pObjParam
+) {
+	if (lFlags == WBEM_STATUS_COMPLETE) {
+		PLOGI.printf("Call complete. hResult = 0x%x", hResult);
+	}
+	else if (lFlags == WBEM_STATUS_PROGRESS) {
+		PLOGI.printf("Call in progress.");
+	}
+
+	return WBEM_S_NO_ERROR;
+}
+
+/*
+* GetUSBDeviceName
+*/
+void EventSink::GetUSBDeviceName(bool isAdded, IWbemServices* pSvc) {
+	std::vector<DeviceInfo> difference;
+	wchar_t printString[2000] = { 0 };
+	if (isAdded == 1) {
+		wcscat(printString, L"USB Device Connected\n");
+	}
+	else {
+		wcscat(printString, L"USB Device Disconnected\n");
+	}
+	std::sort(hardwareIDs.begin(), hardwareIDs.end(), [](const DeviceInfo& info1, const DeviceInfo& info2) {
+		return std::wstring(info1.instancePath) < std::wstring(info2.instancePath);
+		});
+
+	std::sort(tmpHardwareIDs.begin(), tmpHardwareIDs.end(), [](const DeviceInfo& info1, const DeviceInfo& info2) {
+		return std::wstring(info1.instancePath) < std::wstring(info2.instancePath);
+		});
+
+	std::set_symmetric_difference(
+		hardwareIDs.begin(), hardwareIDs.end(),
+		tmpHardwareIDs.begin(), tmpHardwareIDs.end(),
+		std::back_inserter(difference),
+		[](const DeviceInfo& info1, const DeviceInfo& info2) {
+			return std::wstring(info1.instancePath) < std::wstring(info2.instancePath);
+		}
+	);
+	for (DeviceInfo device : difference) {
+		wcscat(printString, L"USB 장치 설명: ");
+		wchar_t tnsString[MAX_PATH] = { 0 };
+		wcscat(printString, device.deviceName);
+		wcscat(printString, L"\nUSB 제조업체: ");
+		wcscat(printString, device.manufacturer);
+		wcscat(printString, L"\nUSB 서비스: ");
+		wcscat(printString, device.Service);
+		wcscat(printString, L"\nUSB 인스턴스경로: ");
+		wcscat(printString, device.instancePath);
+		wcscat(printString, L"\nUSB serial Port: ");
+		wcscat(printString, device.serialPort);
+		wcscat(printString, L"\n\n");
+		PLOGI.printf(printString);
+		PLOGI.printf(m_pPullbackMotorPort);
+		PLOGI.printf(m_pLaserModulePort);
+		if(!isAdded){
+			if (lstrcmpW(m_pPullbackMotorPort, L"\0") != 0 && std::wcsstr(device.serialPort, m_pPullbackMotorPort) != NULL ||
+				lstrcmpW(m_pLaserModulePort, L"\0") != 0 && std::wcsstr(device.serialPort, m_pLaserModulePort) != NULL) {
+				PLOGI.printf("disconnected");
+				m_isDIsconnected = true;
+			}
+		}
+	}
+
+
+	hardwardidsVectorReset(&hardwareIDs, pSvc);
+
+}
+
+/*
+* hardwardidsVectorReset
+*/
+void EventSink::hardwardidsVectorReset(std::vector<DeviceInfo>* inputVec, IWbemServices* pSvc) {
+	inputVec->clear();
+	IEnumWbemClassObject* pEnumerator = NULL;
+	HRESULT hres;
+	hres = pSvc->ExecQuery(
+		bstr_t("WQL"),
+		bstr_t("SELECT * FROM Win32_PnPEntity"),
+		WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
+		NULL,
+		&pEnumerator);
+	if (SUCCEEDED(hres)) {
+		IWbemClassObject* pclsObj = NULL;
+		ULONG uReturn = 0;
+
+		while (pEnumerator)
+		{
+			HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1,
+				&pclsObj, &uReturn);
+
+			if (0 == uReturn)
+			{
+				break;
+			}
+
+			VARIANT vtProp;
+
+			VariantInit(&vtProp);
+			hr = pclsObj->Get(L"Name", 0, &vtProp, 0, 0);
+			if (hr == S_OK && vtProp.bstrVal != NULL) {
+				TCHAR* index_COM = std::wcsstr(vtProp.bstrVal, L"(COM");
+				if (index_COM != 0) {
+					DeviceInfo deviceInfo;
+					lstrcpy(deviceInfo.deviceName, vtProp.bstrVal);
+
+					hr = pclsObj->Get(L"Service", 0, &vtProp, 0, 0);
+					lstrcpy(deviceInfo.Service, vtProp.bstrVal);
+					hr = pclsObj->Get(L"Manufacturer", 0, &vtProp, 0, 0);
+					lstrcpy(deviceInfo.manufacturer, vtProp.bstrVal);
+					hr = pclsObj->Get(L"DeviceID", 0, &vtProp, 0, 0);
+					lstrcpy(deviceInfo.instancePath, vtProp.bstrVal);
+					lstrcpy(deviceInfo.serialPort, index_COM);
+					inputVec->push_back(deviceInfo);
+				}
+			}
+			VariantClear(&vtProp);
+			pclsObj->Release();
+		}
+		pEnumerator->Release();
+	}
+
+}
+
+/*
 * threadValidateCatheter
 */
 UINT COCTSystem::threadValidateCatheter(LPVOID param) {
@@ -1348,6 +1541,153 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 	}
 
 	return NOERROR;
+}
+
+/*
+* checkDeviceDisconnection
+*/
+UINT COCTSystem::threadCheckDeviceDisconnect(LPVOID param) {
+	COCTSystem* pSystem = (COCTSystem*)param;
+	pSystem->InitializeCOM();
+	while (!pSystem->m_isConnected);
+	CConfiguration& config = CConfiguration::GetInstance();
+	IWbemLocator* pLoc = NULL;
+	IWbemServices* pSvc = NULL;
+	pSystem->m_disconnectionCheckQuery = new EventSink();
+	lstrcpy(pSystem->m_disconnectionCheckQuery->m_pPullbackMotorPort, config.stepMotor.port);
+	lstrcpy(pSystem->m_disconnectionCheckQuery->m_pLaserModulePort, config.laserModule.port);
+	IUnsecuredApartment* pUnsecApp = NULL;
+
+	HRESULT hr = CoCreateInstance(
+		CLSID_WbemLocator,
+		0,
+		CLSCTX_INPROC_SERVER,
+		IID_IWbemLocator,
+		(LPVOID*)&pLoc
+	);
+
+	if (FAILED(hr)) {
+		PLOGI.printf("Failed to create IWbemLocator object. Err code = 0x%x", hr);
+		CoUninitialize();
+		return 1;
+	}
+
+	hr = pLoc->ConnectServer(
+		_bstr_t(L"ROOT\\CIMV2"),
+		NULL,
+		NULL,
+		0,
+		NULL,
+		0,
+		0,
+		&pSvc
+	);
+
+	if (FAILED(hr)) {
+		PLOGI.printf("Could not connect. Error code = 0x%x", hr); 
+		pLoc->Release();
+		CoUninitialize();
+		return 1;
+	}
+
+	hr = CoSetProxyBlanket(
+		pSvc,
+		RPC_C_AUTHN_WINNT,
+		RPC_C_AUTHZ_NONE,
+		NULL,
+		RPC_C_AUTHN_LEVEL_CALL,
+		RPC_C_IMP_LEVEL_IMPERSONATE,
+		NULL,
+		EOAC_NONE
+	);
+
+	if (FAILED(hr)) {
+		PLOGI.printf("Could not set proxy blanket. Error code = 0x%x", hr);
+		pSvc->Release();
+		pLoc->Release();
+		CoUninitialize();
+		return 1;
+	}
+
+	hr = CoCreateInstance(
+		CLSID_UnsecuredApartment,
+		NULL,
+		CLSCTX_LOCAL_SERVER,
+		IID_IUnsecuredApartment,
+		(void**)&pUnsecApp
+	);
+
+	IUnknown* pStubUnk = NULL;
+	pUnsecApp->CreateObjectStub(pSystem->m_disconnectionCheckQuery, &pStubUnk);
+
+	IWbemObjectSink* pStubSink = NULL;
+	pStubUnk->QueryInterface(IID_IWbemObjectSink, (void**)&pStubSink);
+
+	hr = pSvc->ExecNotificationQueryAsync(
+		_bstr_t("WQL"),
+		_bstr_t("SELECT * FROM __InstanceOperationEvent WITHIN 1 WHERE TargetInstance ISA 'Win32_USBControllerDevice'"),
+		WBEM_FLAG_SEND_STATUS,
+		NULL,
+		pStubSink
+	);
+
+	if (FAILED(hr)) {
+		PLOGI.printf("ExecNotificationQueryAsync failed with = 0x%x", hr);
+		pSvc->Release();
+		pLoc->Release();
+		pUnsecApp->Release();
+		pStubUnk->Release();
+		pStubSink->Release();
+		CoUninitialize();
+		return 1;
+	}
+	pSystem->m_disconnectionCheckQuery->pSvc = pSvc;
+	pSystem->m_disconnectionCheckQuery->hardwardidsVectorReset(&(pSystem->m_disconnectionCheckQuery->hardwareIDs), pSvc);
+	PLOGI.printf("ready to receive disconnect event");
+	while (!(pSystem->m_disconnectionCheckQuery->m_isDIsconnected)) {
+		Sleep(1);
+	}
+	pSystem->postMessage(WM_NOTIFY_ERROR_OCCURED, (WPARAM)RayError::DeviceDisconnected);
+	PLOGI.printf("end disconnect check thread");
+	pSvc->Release();
+	pLoc->Release();
+	pUnsecApp->Release();
+	pStubUnk->Release();
+	pStubSink->Release();
+	CoUninitialize();
+	return NOERROR;
+}
+
+/*
+* InitializeCOM
+*/
+void COCTSystem::InitializeCOM() {
+	HRESULT hr;
+
+	hr = CoInitializeEx(0, COINIT_MULTITHREADED);
+	if (FAILED(hr)) {
+		PLOGI.printf("Failed to initialize COM library. Error code = 0x%x", hr);
+		return;
+	}
+
+	hr = CoInitializeSecurity(
+		NULL,
+		-1,
+		NULL,
+		NULL,
+		RPC_C_AUTHN_LEVEL_DEFAULT,
+		RPC_C_IMP_LEVEL_IMPERSONATE,
+		NULL,
+		EOAC_NONE,
+		NULL
+	);
+
+	if (FAILED(hr)) {
+		PLOGI.printf("Failed to initialize security. Error code = 0x%x", hr);
+		CoUninitialize();
+		return;
+	}
+
 }
 
 /*
@@ -1444,6 +1784,7 @@ int COCTSystem::connectRotaryJunction() {
 		m_pPullbackMotor->SetCurrent(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 		Sleep(DELAY_BETWEEN_COMMAND);
 		m_pPullbackMotor->SetCurrent(StepMotorIndex::Hub, HUB_MOTOR_POS_INITIAL);
+		
 	}
 
 	if (!m_pLaserModule->IsOpen()) {
@@ -1465,7 +1806,9 @@ int COCTSystem::connectRotaryJunction() {
 			PLOGE.printf("Failed to connect to laser module");
 		}
 	}
-
+	if (result) {
+		m_isConnected = true;
+	}
 	if (!pMotor->IsConnected()) {
 		result &= pMotor->Connect(config.bldcMotor.port);
 		result &= pMotor->SetModeOfOperation(MOTOR_DATA_MODE_VELOCITY);

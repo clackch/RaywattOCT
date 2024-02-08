@@ -408,7 +408,14 @@ namespace RaywattApp.ViewModels
             DeviceStatus.IsLiveView = (bool)(RayGetProperty(Property.MotorOnOff) != 0);
         }
         protected void handleProgress(RayCallbackRequest request, int progress, int param) { }
-        protected void handleError(RayCallbackRequest request, RayError error, int param) { }
+        protected void handleError(RayCallbackRequest request, RayError error, int param) {
+            switch (error)
+            {
+                case RayError.DeviceDisconnected:
+                    CommonUtil.Exit(DeviceStatus, true);
+                    break;
+            }
+           }
         protected void handleEvent(RayCallbackRequest request, RayEvent e, int param) {
             switch (e)
             {
