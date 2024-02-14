@@ -162,6 +162,8 @@ namespace RaywattApp.Common.Bases
         public const string FileExtension = "dbf";
         public const string AnnotationFileExtension = "annot";
         public const string FileNamePrefix = "Export_";
+        public const string AngioImageExtension = "angioframes";
+        public const string AngioParmasExtension = "params";
 
         //Export Layout
         public const double ExportHeight = 1080;

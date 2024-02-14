@@ -225,13 +225,21 @@ namespace RaywattApp.Common.Bases
 
             IsPaused = DeviceStatus.IsPaused;
         }
-        protected virtual bool MoveToFrame(RaySession session, int nFrame)
+            protected virtual bool MoveToFrame(RaySession session, int nFrame)
         {
             RayError result = (RayError) RaySetSession(session);
-            if (result != RayError.OK) return false;
+            if (result != RayError.OK)
+            {
+                _log.Debug("OCTViewModelBase MoveToFrame : result != RayError.OK");
+                return false;
+            }
 
             IntPtr data = RayGetImageData(nFrame);
-            if (data == IntPtr.Zero) return false;
+            if (data == IntPtr.Zero)
+            {
+                _log.Debug("OCTViewModelBase MoveToFrame : data == IntPtr.Zero");
+                return false;
+            }
 
             DeviceStatus.ReviewImageInfo imageInfo = DeviceStatus.ReviewImageInfos[(int)session];
             Mat img = CommonUtil.ByteMemoryToCvMat(data, imageInfo.Width, imageInfo.Height, imageInfo.Channels);
