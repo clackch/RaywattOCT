@@ -472,7 +472,7 @@ namespace RaywattApp.ViewModels
         {
             LumenContours = CommonUtil.JsonToLumenContours(lumenContour);
 
-            //TODO - Calcium/Sidebranch 추가를 위한 테스트 코드 (추후 삭제 필요)
+            //TODO - Calcium 추가를 위한 테스트 코드 (추후 삭제 필요)
             if (false)
                 GetMlData();
 
