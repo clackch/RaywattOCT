@@ -14,8 +14,8 @@ CLaserController::CLaserController() {
 
 	// Enumerate the device list (redo this step whenever devices are connected or disconnected)
 	// More robust architectures would occasionally poll for device list changes or utilize the "OCTDeviceConnectOrDisconnectEvent" callback to re-enumerate devices
-	long numDevices = enumerateDevices(m_pDeviceList, m_pAxsunOCTControl);
-	PLOGI.printf("enumerateDevices - %ld", numDevices);
+	m_numDevices = enumerateDevices(m_pDeviceList, m_pAxsunOCTControl);
+	PLOGI.printf("enumerateDevices - %ld", m_numDevices);
 }
 CLaserController* CLaserController::GetInstance() {
 	if (pInstance == NULL) {
@@ -40,9 +40,11 @@ int CLaserController::LaserOnOff(bool on) {
 	isConnected = m_pAxsunOCTControl->ConnectToOCTDevice(searchDeviceList(AXSUN_LASER_DEVICE, m_pDeviceList));		// search device list and connect to laser
 	if (isConnected == -1) {
 		if (on) {
+			PLOGI.printf("Laser On");
 			retvallong = m_pAxsunOCTControl->StartScan();
 		}
 		else {
+			PLOGI.printf("Laser Off");
 			retvallong = m_pAxsunOCTControl->StopScan();
 		}
 	}

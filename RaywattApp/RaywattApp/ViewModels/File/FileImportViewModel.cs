@@ -457,6 +457,7 @@ namespace RaywattApp.ViewModels.File
                             patientCase.Procedure = GetStrValue(caseObj, "Procedure");
                             patientCase.NumOfFrames = GetIntValue(caseObj, "NumOfFrames");
                             patientCase.Image = GetStrValue(caseObj, "Image");
+                            patientCase.ImageResolution = GetDoubleValue(caseObj, "ImageResolution");
                             patientCase.PullbackType = GetStrValue(caseObj, "PullbackType");
                             patientCase.PullbackLength = GetStrValue(caseObj, "PullbackLength");
                             patientCase.AngioYn = GetBoolValue(caseObj, "AngioYn");

@@ -8,20 +8,28 @@
 class CConfiguration
 {
 public:
+	class LaserModuleSetting {
+	public:
+		TCHAR port[MAX_PATH];
+		int voaValue;
+		int vldValue;
+		int delayPosition;
+		int polarPosition;
+	};
+
 	class StepMotorSetting {
 	public:
-		TCHAR pullback[MAX_PATH];
-		TCHAR delayline[MAX_PATH];
+		TCHAR port[MAX_PATH];
 		int pullbackDistance;
 		int pullbackSpeed;
-		int pullbackStart;	// pullback start position
 	};
 
 	class BLDCMotorSetting {
 	public:
+		TCHAR port[MAX_PATH];
 		int velocityPullback;
 		int velocityLiveView;
-		int velocityHoming;
+		int velocityLoad;
 		int settleDown;
 	};
 
@@ -49,10 +57,12 @@ public:
 	IAcquisitionDevice::Setting acquisition;
 	IImaging::Setting imaging;
 	COCTMeasurement::Setting measurement;
+	LaserModuleSetting laserModule;
 	StepMotorSetting stepMotor;
 	BLDCMotorSetting bldcMotor;
 	CatheterSetting catheter;
 	Volume volume;
+	TCHAR logRootPath[MAX_PATH];
 	int shutterSerial;
 public:
 	static CConfiguration& GetInstance();
@@ -60,6 +70,7 @@ public:
 	bool IsInit(){ return isInit; }
 	void Initialize(tstring configFile);
 
+	void SaveLaserModuleSettings();
 	void SaveStepMotorSettings();
 	void SaveBLDCMotorSettings();
 

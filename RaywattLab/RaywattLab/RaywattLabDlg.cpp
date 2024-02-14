@@ -20,7 +20,9 @@
 #include "ZaberController.h"
 #include "MotorController.h"
 #include "LaserController.h"
+#include "LookUpTable.h"
 #include "Utility.h"
+#include "plog/Initializers/RollingFileInitializer.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -43,8 +45,8 @@ CRaywattLabDlg::CRaywattLabDlg(CWnd* pParent /*=nullptr*/)
 	m_pFFTFile = nullptr;
 	m_pDataReader = nullptr;
 
-	m_pPullback = nullptr;
-	m_pDelayLine = nullptr;
+	m_pRotaryJunction = nullptr;
+	m_pLaserModule = nullptr;
 
 	m_pThreadCalibration = nullptr;
 	m_pFrameBuffer = nullptr;
@@ -53,6 +55,9 @@ CRaywattLabDlg::CRaywattLabDlg(CWnd* pParent /*=nullptr*/)
 	m_nCurCalibIndex = 0;
 	m_pThreadPullback = nullptr;
 	m_strCurCalibration = _T(".\\CALIBRATION.dat");
+
+	m_bInitialized = false;
+	m_bStartAcquisition = false;
 }
 
 void CRaywattLabDlg::DoDataExchange(CDataExchange* pDX)
@@ -74,9 +79,44 @@ void CRaywattLabDlg::DoDataExchange(CDataExchange* pDX)
 
 // private methods
 
+void CRaywattLabDlg::setLogger(TCHAR* logRootPath) {
+
+	time_t timer = time(nullptr);
+	tm t;
+	errno_t err = localtime_s(&t, &timer);
+
+	char rootPath[MAX_PATH];
+	WideCharToMultiByte(CP_ACP, 0, logRootPath, MAX_PATH, rootPath, MAX_PATH, nullptr, nullptr);
+
+	char logFile[_MAX_PATH];
+	sprintf(logFile, "%s\\lab_%d-%02d-%02d.log", rootPath, (t.tm_year + 1900), (t.tm_mon + 1), t.tm_mday);
+	printf("plog::init - %s\n", logFile);
+
+#ifdef DEBUG
+	plog::init(plog::debug, logFile);
+#else
+	plog::init(plog::info, logFile);
+#endif
+}
 int CRaywattLabDlg::initializeDevices() {
 	CConfiguration& config = CConfiguration::GetInstance();
 	CMotorController* pMotor = CMotorController::GetInstance();
+
+	if (m_chkInitStage) {
+		if (m_pRotaryJunction->Open(config.stepMotor.port) == false) {
+			return E_FAIL;
+		}
+		m_pRotaryJunction->SetSpeed(StepMotorIndex::Both, config.stepMotor.pullbackSpeed);
+	}
+
+	if (m_chkInitMotor) {
+		if (pMotor->Connect() == false) {
+			m_pRotaryJunction->Close();
+			m_pLaserModule->Close();
+			return E_FAIL;
+		}
+		pMotor->SwitchOn();
+	}
 
 	if (m_pAcqDevice == nullptr) {
 		m_pAcqDevice = new CATSDevice(config.acquisition);
@@ -85,30 +125,21 @@ int CRaywattLabDlg::initializeDevices() {
 	}
 
 	if (m_pAcqDevice->InitDevice() != NOERROR) {
+		m_pRotaryJunction->Close();
+		m_pLaserModule->Close();
 		m_pAcqDevice->CleanUp();
 		return E_FAIL;
 	}
 
-	if (m_chkInitStage) {
-		if (m_pPullback->Open(config.stepMotor.pullback) == false) {
-			m_pAcqDevice->CleanUp();
-			return E_FAIL;
-		}
-		m_pPullback->SetSpeed(config.stepMotor.pullbackSpeed);
+	return NOERROR;
+}
+int CRaywattLabDlg::finalizeDevices() {
+	if (m_pAcqDevice != nullptr)
+	{
+		m_pAcqDevice->CleanUp();
 	}
-
-	if (m_chkInitMotor) {
-		if (pMotor->Connect() == false) {
-			m_pPullback->Close();
-			m_pDelayLine->Close();
-			m_pAcqDevice->CleanUp();
-			return E_FAIL;
-		}
-		pMotor->SwitchOn();
-	}
-
-	CLaserController::GetInstance()->LaserOnOff(true);
-	m_pAcqDevice->StartAcquisition();
+	m_pRotaryJunction->Close();
+	m_pLaserModule->Close();
 
 	return NOERROR;
 }
@@ -331,8 +362,9 @@ UINT CRaywattLabDlg::threadService(LPVOID param) {
 }
 UINT CRaywattLabDlg::threadSaveCalibration(LPVOID param) {
 	CRaywattLabDlg* pDlg = (CRaywattLabDlg*)param;
+#if 0
 	CThread *pThread = pDlg->m_pThreadCalibration;
-	CZaberController* pLinearStage = pDlg->m_pPullback;
+	CZaberController* pLinearStage = pDlg->m_pRotaryJunction;
 
 	long long from, step, count = 0;
 
@@ -360,17 +392,18 @@ UINT CRaywattLabDlg::threadSaveCalibration(LPVOID param) {
 		CUtility::SuspendThread(pDlg->m_pThreadCalibration);
 	}
 
+#endif
 	pDlg->PostMessage(WM_SAVE_CALIBRATION_DONE);
 	while (pDlg->m_pThreadCalibration->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
 	}
-
 	return NOERROR;
 }
 UINT CRaywattLabDlg::threadPullback(LPVOID param) {
 	CRaywattLabDlg* pDlg = (CRaywattLabDlg*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
-	CZaberController* pPullbackStage = pDlg->m_pPullback;
+#if 0
+	CZaberController* pPullbackStage = pDlg->m_pRotaryJunction;
 
 	if (pPullbackStage->IsOpen()) {
 		pPullbackStage->SetSpeed(config.stepMotor.pullbackSpeed);
@@ -405,7 +438,7 @@ UINT CRaywattLabDlg::threadPullback(LPVOID param) {
 		}
 		pDataManager->StopSave();
 	}
-
+#endif
 	pDlg->PostMessage(WM_PULLBACK_DONE);
 
 	// wait for StopThread
@@ -454,6 +487,7 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_CHECK_INIT_STAGE, &CRaywattLabDlg::OnBnClickedCheckInitStage)
 	ON_BN_CLICKED(IDC_BUTTON_PULLBACK, &CRaywattLabDlg::OnBnClickedButtonPullback)
 	ON_BN_CLICKED(IDC_BUTTON_RESTART_ACQUISITION, &CRaywattLabDlg::OnBnClickedButtonRestartAcquisition)
+	ON_BN_CLICKED(IDC_BUTTON_START_ACQUISITION, &CRaywattLabDlg::OnBnClickedButtonStartAcquisition)
 END_MESSAGE_MAP()
 
 LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
@@ -479,9 +513,9 @@ LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 	GetDlgItem(IDC_EDIT_FRAME_RATE)->SetWindowText(strFrameRate);
 
 	m_scopeView.SetChannelBuffer(0, scopeData, nScopeLength);
-	m_scopeView.SetChannelBuffer(1, scopeData + nScopeLength, nScopeLength);
+	//m_scopeView.SetChannelBuffer(1, scopeData + nScopeLength, nScopeLength);
 	m_scopeViewFFT.SetChannelBuffer(0, scopeFFTData, nOutputLength);
-	m_scopeViewFFT.SetChannelBuffer(1, scopeFFTData + nOutputLength, nOutputLength);
+	//m_scopeViewFFT.SetChannelBuffer(1, scopeFFTData + nOutputLength, nOutputLength);
 
 	if (m_pDataWriter->IsRecording()) {
 		Ipp16u* pFFTBuffer = new Ipp16u[nOutputLength];
@@ -556,6 +590,11 @@ BOOL CRaywattLabDlg::OnInitDialog()
 		config.Initialize(_T(".\\raywattLab.ini"));
 	}
 
+	setLogger(_T(".\\"));
+
+	CLookUpTable& lut = CLookUpTable::GetInstance();
+	int result = lut.Load("LUT.csv");
+
 	initToggleButton(m_btnLoadData, IDC_BUTTON_LOAD_SELECTED_DATA, _T("Load"), _T("Unload"));
 	initToggleButton(m_btnPlayData, IDC_BUTTON_PLAY_LOADED_DATA, _T("Play"), _T("Pause"));
 	initToggleButton(m_btnSaveData, IDC_BUTTON_SAVE_DATA, _T("Save Data"), _T("Done"));
@@ -621,8 +660,8 @@ BOOL CRaywattLabDlg::OnInitDialog()
 
 	m_pDataReader = new CDataReader();
 
-	m_pPullback = new CZaberController();
-	m_pDelayLine = new CZaberController();
+	m_pRotaryJunction = new CArduinoController();
+	m_pLaserModule = new CLaserModule();
 
 	m_pFrameBuffer = new char[nBufferSize * sizeof(unsigned short)];
 
@@ -733,11 +772,11 @@ void CRaywattLabDlg::OnDestroy() {
 	pMotor->SwitchOff();
 	pMotor->Disconnect();
 
-	m_pPullback->Close();
-	delete m_pPullback;
+	m_pRotaryJunction->Close();
+	delete m_pRotaryJunction;
 
-	m_pDelayLine->Close();
-	delete m_pDelayLine;
+	m_pLaserModule->Close();
+	delete m_pLaserModule;
 }
 
 
@@ -763,21 +802,65 @@ BOOL CRaywattLabDlg::PreTranslateMessage(MSG* pMsg) {
 
 void CRaywattLabDlg::OnBnClickedButtonAdminInitialize()
 {
-	int result = initializeDevices();
+	if (m_bInitialized)
+	{
+		finalizeDevices();
+		GetDlgItem(IDC_BUTTON_START_ACQUISITION)->EnableWindow(FALSE);
+	}
+	else {
+		int nNumDevices = CLaserController::GetInstance()->GetNumDevices();
+		if (nNumDevices <= 0)
+		{
+			AfxMessageBox(_T("[FAILED] Cannot find Laser. Please restart computer"));
+			return;
+		}
 
-	AfxGetApp()->WriteProfileInt(_T("RECENT_SETTING"), _T("INIT_MOTOR"), m_chkInitMotor);
-	AfxGetApp()->WriteProfileInt(_T("RECENT_SETTING"), _T("INIT_STAGE"), m_chkInitStage);
+		CLaserController::GetInstance()->LaserOnOff(true);
+		int result = initializeDevices();
+		CLaserController::GetInstance()->LaserOnOff(false);
 
-	if (result == NOERROR) {
+		AfxGetApp()->WriteProfileInt(_T("RECENT_SETTING"), _T("INIT_MOTOR"), m_chkInitMotor);
+		AfxGetApp()->WriteProfileInt(_T("RECENT_SETTING"), _T("INIT_STAGE"), m_chkInitStage);
+
+		if (result == NOERROR) {
+			GetDlgItem(IDC_BUTTON_ADMIN_INITIALIZE)->SetWindowText(_T("Finalize"));
+			GetDlgItem(IDC_BUTTON_START_ACQUISITION)->EnableWindow(TRUE);
+			m_bInitialized = true;
+		}
+		else {
+			GetDlgItem(IDC_BUTTON_START_ACQUISITION)->EnableWindow(FALSE);
+			AfxMessageBox(_T("[FAILED] Please check the device connection"));
+		}
+	}
+}
+
+
+void CRaywattLabDlg::OnBnClickedButtonStartAcquisition()
+{
+	if (m_bStartAcquisition)
+	{
+		m_pAcqDevice->StopAcquisition();
+		CLaserController::GetInstance()->LaserOnOff(false);
+
+		GetDlgItem(IDC_BUTTON_START_ACQUISITION)->SetWindowText(_T("Start Acq."));
+		GetDlgItem(IDC_BUTTON_ADMIN_INITIALIZE)->EnableWindow(TRUE);
+		GetDlgItem(IDC_BUTTON_SAVE_DATA)->EnableWindow(FALSE);
+		GetDlgItem(IDC_BUTTON_SAVE_CALIBRATION)->EnableWindow(FALSE);
+		GetDlgItem(IDC_BUTTON_RESTART_ACQUISITION)->EnableWindow(FALSE);
+	}
+	else {
+		CLaserController::GetInstance()->LaserOnOff(true);
+		m_pAcqDevice->StartAcquisition();
+
+		GetDlgItem(IDC_BUTTON_START_ACQUISITION)->SetWindowText(_T("Stop Acq."));
 		GetDlgItem(IDC_BUTTON_ADMIN_INITIALIZE)->EnableWindow(FALSE);
 		GetDlgItem(IDC_BUTTON_SAVE_DATA)->EnableWindow(TRUE);
 		GetDlgItem(IDC_BUTTON_SAVE_CALIBRATION)->EnableWindow(TRUE);
 		GetDlgItem(IDC_BUTTON_RESTART_ACQUISITION)->EnableWindow(TRUE);
 	}
-	else {
-		AfxMessageBox(_T("[FAILED] Please check the device connection"));
-	}
+	m_bStartAcquisition = !m_bStartAcquisition;
 }
+
 
 void CRaywattLabDlg::OnBnClickedButtonOpenDataFolder()
 {
@@ -1156,7 +1239,7 @@ void CRaywattLabDlg::OnBnClickedButtonOpenRotaryJunction()
 	bool dlgVisible = m_dlgRotaryJunction.IsWindowVisible();
 
 	if (dlgVisible) {
-		m_dlgRotaryJunction.SetStepMotor(m_pPullback, m_pDelayLine);
+		//m_dlgRotaryJunction.SetStepMotor(m_pRotaryJunction, m_pLaserModule);
 		m_dlgRotaryJunction.ShowWindow(SW_HIDE);
 	}
 	else {
@@ -1168,7 +1251,7 @@ void CRaywattLabDlg::OnBnClickedButtonOpenRotaryJunction()
 
 void CRaywattLabDlg::OnBnClickedButtonSaveCalibration()
 {
-	if (m_pAcqDevice == nullptr || !m_pAcqDevice->IsInit() || !m_pPullback->IsOpen()) {
+	if (m_pAcqDevice == nullptr || !m_pAcqDevice->IsInit() || !m_pRotaryJunction->IsOpen()) {
 		AfxMessageBox(_T("[FAILED] Do initialize first"));
 		return;
 	}
@@ -1312,4 +1395,8 @@ void CRaywattLabDlg::OnBnClickedButtonRestartAcquisition()
 	((CATSDevice*)m_pAcqDevice)->SetSetting(acquire);
 	m_pAcqDevice->SetImaging(m_pImagingRealtime);
 	m_pAcqDevice->StartAcquisition();
+
+	CConfiguration& config = CConfiguration::GetInstance();
+	config.imaging = imaging;
+	config.acquisition = acquire;
 }

@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using RaywattApp.Common.Bases;
 
 namespace RaywattApp.Models
 {
@@ -28,6 +29,9 @@ namespace RaywattApp.Models
         private bool _isCalciumOn = true;
 
         [ObservableProperty]
+        private bool _isSheathOn = true;
+
+        [ObservableProperty]
         private bool _isPlay = true;
 
         [ObservableProperty]
@@ -37,8 +41,19 @@ namespace RaywattApp.Models
 
 
         //Compare
-        [ObservableProperty]
         private PatientCase _selectedPatientCase;
+        public PatientCase SelectedPatientCase
+        { 
+            get { return _selectedPatientCase; }
+            set { 
+                _selectedPatientCase = value;
+                OnPropertyChanged(nameof(SelectedPatientCase));
+                if (_selectedPatientCase != null)
+                {
+                    Constants.ImageResolutionCompare = _selectedPatientCase.ImageResolution;
+                }
+            }
+        }
 
         //FFR
     }

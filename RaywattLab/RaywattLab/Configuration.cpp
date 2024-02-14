@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Configuration.h"
+
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -51,17 +52,23 @@ void CConfiguration::Initialize(tstring configFile)
 	this->acquisition.usBadClockDuration = getPrivateProfileFloat(_T("Acquisition"), _T("BadClockInMicroSecond"), 4.0, configFilePath.c_str());
 	this->acquisition.bUseDES = ::GetPrivateProfileInt(_T("Acquisition"), _T("UseDES"), 0, configFilePath.c_str());
 
+	// [LaserModule]
+	::GetPrivateProfileString(_T("LaserModule"), _T("Port"), _T(""), this->laserModule.port, sizeof(this->laserModule.port), configFilePath.c_str());
+	this->laserModule.voaValue = ::GetPrivateProfileInt(_T("LaserModule"), _T("VOA"), 2960, configFilePath.c_str());
+	this->laserModule.vldValue = ::GetPrivateProfileInt(_T("LaserModule"), _T("VLD"), 2000, configFilePath.c_str());
+	this->laserModule.delayPosition = ::GetPrivateProfileInt(_T("LaserModule"), _T("DelayLine"), 0, configFilePath.c_str());
+	this->laserModule.polarPosition = ::GetPrivateProfileInt(_T("LaserModule"), _T("Polarization"), 0, configFilePath.c_str());
+
 	// [StepMotor]
-	::GetPrivateProfileString(_T("StepMotor"), _T("Pullback"), _T(""), this->stepMotor.pullback, sizeof(this->stepMotor.pullback), configFilePath.c_str());
-	::GetPrivateProfileString(_T("StepMotor"), _T("DelayLine"), _T(""), this->stepMotor.delayline, sizeof(this->stepMotor.delayline), configFilePath.c_str());
+	::GetPrivateProfileString(_T("StepMotor"), _T("Port"), _T(""), this->stepMotor.port, sizeof(this->stepMotor.port), configFilePath.c_str());
 	this->stepMotor.pullbackDistance = ::GetPrivateProfileInt(_T("StepMotor"), _T("PullbackDistance"), 10, configFilePath.c_str());
 	this->stepMotor.pullbackSpeed = ::GetPrivateProfileInt(_T("StepMotor"), _T("PullbackSpeed"), 10, configFilePath.c_str());
-	this->stepMotor.pullbackStart = ::GetPrivateProfileInt(_T("StepMotor"), _T("PullbackStart"), 0, configFilePath.c_str());
-
-	// [Motor]
-	this->bldcMotor.velocityPullback = ::GetPrivateProfileInt(_T("BLDCMotor"), _T("VelocityPullback"), 3005, configFilePath.c_str());
-	this->bldcMotor.velocityLiveView = ::GetPrivateProfileInt(_T("BLDCMotor"), _T("VelocityLiveView"), 3005, configFilePath.c_str());
-	this->bldcMotor.velocityHoming = ::GetPrivateProfileInt(_T("BLDCMotor"), _T("VelocityHoming"), 3005, configFilePath.c_str());
+	
+	// [BLDCMotor]
+	::GetPrivateProfileString(_T("BLDCMotor"), _T("Port"), _T(""), this->bldcMotor.port, sizeof(this->bldcMotor.port), configFilePath.c_str());
+	this->bldcMotor.velocityPullback = ::GetPrivateProfileInt(_T("BLDCMotor"), _T("VelocityPullback"), 24000, configFilePath.c_str());
+	this->bldcMotor.velocityLiveView = ::GetPrivateProfileInt(_T("BLDCMotor"), _T("VelocityLiveView"), 4800, configFilePath.c_str());
+	this->bldcMotor.velocityLoad = ::GetPrivateProfileInt(_T("BLDCMotor"), _T("VelocityLoad"), 600, configFilePath.c_str());
 	this->bldcMotor.settleDown = ::GetPrivateProfileInt(_T("BLDCMotor"), _T("SettleDown"), 1000, configFilePath.c_str());
 
 	// [Shutter]
@@ -71,12 +78,30 @@ void CConfiguration::Initialize(tstring configFile)
 	this->catheter.rotationTime = ::GetPrivateProfileInt(_T("Catheter"), _T("RotationTime"), 10000, configFilePath.c_str());
 
 	// [Volume]
-	this->volume.size = ::GetPrivateProfileInt(_T("Volume"), _T("Size"), 600, configFilePath.c_str());
+	this->volume.size = ::GetPrivateProfileInt(_T("Volume"), _T("Size"), 500, configFilePath.c_str());
 	this->volume.threshold = ::GetPrivateProfileInt(_T("Volume"), _T("Threshold"), 50, configFilePath.c_str());
+
+	// [Log]
+	::GetPrivateProfileString(_T("Log"), _T("LogRootPath"), _T(""), this->logRootPath, sizeof(this->logRootPath), configFilePath.c_str());
 
 	isInit = true;
 }
 
+void CConfiguration::SaveLaserModuleSettings() {
+	tstring strValue = _T("");
+
+	strValue = std::to_wstring(this->laserModule.voaValue);
+	::WritePrivateProfileString(_T("LaserModule"), _T("VOA"), strValue.c_str(), configFilePath.c_str());
+
+	strValue = std::to_wstring(this->laserModule.vldValue);
+	::WritePrivateProfileString(_T("LaserModule"), _T("VLD"), strValue.c_str(), configFilePath.c_str());
+
+	strValue = std::to_wstring(this->laserModule.delayPosition);
+	::WritePrivateProfileString(_T("LaserModule"), _T("DelayLine"), strValue.c_str(), configFilePath.c_str());
+
+	strValue = std::to_wstring(this->laserModule.polarPosition);
+	::WritePrivateProfileString(_T("LaserModule"), _T("Polarization"), strValue.c_str(), configFilePath.c_str());
+}
 void CConfiguration::SaveStepMotorSettings() {
 	tstring strValue = _T("");
 
@@ -94,6 +119,9 @@ void CConfiguration::SaveBLDCMotorSettings() {
 
 	strValue = std::to_wstring(this->bldcMotor.velocityLiveView);
 	::WritePrivateProfileString(_T("BLDCMotor"), _T("VelocityLiveView"), strValue.c_str(), configFilePath.c_str());
+
+	strValue = std::to_wstring(this->bldcMotor.velocityLoad);
+	::WritePrivateProfileString(_T("BLDCMotor"), _T("VelocityLoad"), strValue.c_str(), configFilePath.c_str());
 
 	strValue = std::to_wstring(this->bldcMotor.settleDown);
 	::WritePrivateProfileString(_T("BLDCMotor"), _T("SettleDown"), strValue.c_str(), configFilePath.c_str());

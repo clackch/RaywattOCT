@@ -311,6 +311,9 @@ namespace RaywattApp.ViewModels
                 Degree = PatientCase.IndicatorDegree;
                 Brightness = PatientCase.Brightness;
                 Contrast = PatientCase.Contrast;
+                CrossSectionScale = (1 / PatientCase.ImageResolution) * (Constants.CrossSectionSize / Constants.OCTImageSize);
+                CrossSectionAngioScale = (1 / PatientCase.ImageResolution) * (Constants.CrossSectionAngio / Constants.OCTImageSize);
+                
                 SetAnnotation();
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
 
@@ -858,6 +861,7 @@ namespace RaywattApp.ViewModels
                     MeasurementCommand = Constants.MeasureZoomIn;
                 IndicatorCrossSection.IsVisible = Visibility.Collapsed;
                 ReviewStatus.IsCalciumOn = false;
+                ReviewStatus.IsSheathOn = false;
             }
         }
 
@@ -871,6 +875,7 @@ namespace RaywattApp.ViewModels
             if (ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault)
             {
                 ReviewStatus.IsCalciumOn = true;
+                ReviewStatus.IsSheathOn = true;
 
                 if (!ReviewStatus.IsLumenProfile)
                     IndicatorCrossSection.IsVisible = Visibility.Visible;
@@ -1029,13 +1034,15 @@ namespace RaywattApp.ViewModels
                 minimalLumenFrameNumber = Section.MsaValue.NValue;
             }
 
+            double scaleArea = PatientCase.ImageResolution * PatientCase.ImageResolution;
+
             PatientCase.FfrFeature.MinimalLumenFrameNumber = minimalLumenFrameNumber;
             PatientCase.FfrFeature.PercentAreaStenosis = Math.Round(percentAreaStenosis * 100, 1);
-            PatientCase.FfrFeature.MinimalLumenArea = Math.Round(minimalLumenArea * Constants.MillimeterPerPixel * Constants.MillimeterPerPixel, 2);
-            PatientCase.FfrFeature.DistalLumenArea = Math.Round(Section.Distal.DValue * Constants.MillimeterPerPixel * Constants.MillimeterPerPixel, 2);
+            PatientCase.FfrFeature.MinimalLumenArea = Math.Round(minimalLumenArea * scaleArea, 2);
+            PatientCase.FfrFeature.DistalLumenArea = Math.Round(Section.Distal.DValue * scaleArea, 2);
             PatientCase.FfrFeature.LesionLength = Math.Round(Section.LesionLength.DValue, 1);
             PatientCase.FfrFeature.PlaqueArea = 0.0;
-            PatientCase.FfrFeature.ProximalLumenArea = Math.Round(Section.Proximal.DValue * Constants.MillimeterPerPixel * Constants.MillimeterPerPixel, 2);
+            PatientCase.FfrFeature.ProximalLumenArea = Math.Round(Section.Proximal.DValue * scaleArea, 2);
         }
 
         private string ConvertMeasurementsToJson(List<Measurement> param)
@@ -1119,6 +1126,8 @@ namespace RaywattApp.ViewModels
 
                 if (CommonUtil.IsPreCase(PatientCase.Procedure))
                     DrawCalciumIndicator();
+
+                DrawSheathIndicator();
             }
         }
 
@@ -1257,7 +1266,7 @@ namespace RaywattApp.ViewModels
 
             if (CommonUtil.IsPreCase(PatientCase.Procedure))
             {
-                if (Section.SetMlaMld(LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength))
+                if (Section.SetMlaMld(LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength, PatientCase.ImageResolution))
                     Section.VisibleMlaMld(true);
                 else
                     Section.VisibleMlaMld(false);
@@ -1267,7 +1276,7 @@ namespace RaywattApp.ViewModels
                 int stentProximal = 0, stentDistal = 0;
                 CommonUtil.GetStentProximalDistal(LumenStents, out stentProximal, out stentDistal);
 
-                if (Section.SetMsaMinExp(LumenContours, frameProximal, frameDistal, stentProximal, stentDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength))
+                if (Section.SetMsaMinExp(LumenContours, frameProximal, frameDistal, stentProximal, stentDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength, PatientCase.ImageResolution))
                     Section.VislbleMsaMinExp(true);
                 else
                     Section.VislbleMsaMinExp(false);

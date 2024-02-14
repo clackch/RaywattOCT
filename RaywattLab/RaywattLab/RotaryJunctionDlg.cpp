@@ -140,8 +140,8 @@ void CRotaryJunctionDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 		CConfiguration &config = CConfiguration::GetInstance();
 		CString strBuffer = _T("");
 
-		GetDlgItem(IDC_EDIT_PULLBACK_ZABER_PORT)->SetWindowText(config.stepMotor.pullback);
-		GetDlgItem(IDC_EDIT_INTERFEROMETER_ZABER_PORT)->SetWindowText(config.stepMotor.delayline);
+		GetDlgItem(IDC_EDIT_PULLBACK_ZABER_PORT)->SetWindowText(config.stepMotor.port);
+		GetDlgItem(IDC_EDIT_INTERFEROMETER_ZABER_PORT)->SetWindowText(config.laserModule.port);
 
 		strBuffer.Format(_T("%d"), config.stepMotor.pullbackDistance);
 		GetDlgItem(IDC_EDIT_ZABER_DISTANCE)->SetWindowText(strBuffer);

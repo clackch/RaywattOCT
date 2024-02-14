@@ -156,7 +156,7 @@ namespace RaywattApp.Models
             LesionDistal = lesionDistalTemp - LesionLengthWidth;
         }
 
-        public bool SetMlaMld(List<LumenContour> lumenContours, int frameProximal, int frameDistal, int totalFrame, double longitudeWidth, string pullbackLength)
+        public bool SetMlaMld(List<LumenContour> lumenContours, int frameProximal, int frameDistal, int totalFrame, double longitudeWidth, string pullbackLength, double imageResolution)
         {
             if(lumenContours == null || lumenContours.Count == 0) 
                 return false;
@@ -172,6 +172,8 @@ namespace RaywattApp.Models
             double mld = lumenContours.GetRange(frameProximal, count).Min(x => x.MeanDiameter);
             int mldIdx = lumenContours.GetRange(frameProximal, count).FindIndex(x => x.MeanDiameter == mld);
 
+            double areaScaleMM2 = imageResolution * imageResolution;
+
             if(mlaIdx <= mldIdx)
             {
                 Mla.X = CommonUtil.GetPositionFromFrame(mlaIdx + frameProximal, totalFrame, longitudeWidth, Constants.SectionValueWidth - Constants.SectionValueCenterWidth);
@@ -180,7 +182,7 @@ namespace RaywattApp.Models
                 Mld.StrValue = "Right";
                 MlaValue.DValue = mla;
                 MlaValue.NValue = mlaIdx + frameProximal;
-                string text = "MLA " + Math.Round(mla * Constants.MillimeterPerPixel * Constants.MillimeterPerPixel, 2).ToString() + "㎟";
+                string text = "MLA " + Math.Round(mla * areaScaleMM2, 2).ToString() + "㎟";
                 double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-12", text, 2).Width;
                 MlaValue.X = Mla.X - (width + 18);
                 MldValue.DValue = lumenContours[mldIdx + frameProximal].MeanDiameter;
@@ -196,7 +198,7 @@ namespace RaywattApp.Models
                 MlaValue.NValue = mlaIdx + frameProximal;
                 MlaValue.X = Mla.X + Constants.SectionValueWidth;
                 MldValue.DValue = lumenContours[mldIdx + frameProximal].MeanDiameter;
-                string text = "MLD " + Math.Round(mla * Constants.MillimeterPerPixel * Constants.MillimeterPerPixel, 2).ToString() + "㎜";
+                string text = "MLD " + Math.Round(mla * areaScaleMM2, 2).ToString() + "㎜";
                 double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-12", text, 2).Width;              
                 MldValue.X = Mld.X - (width + 18);
             }
@@ -204,7 +206,7 @@ namespace RaywattApp.Models
             return true;
         }
 
-        public bool SetMsaMinExp(List<LumenContour> lumenContours, int frameProximal, int frameDistal, int stentProximal, int stentDistal, int totalFrame, double longitudeWidth, string pullbackLength)
+        public bool SetMsaMinExp(List<LumenContour> lumenContours, int frameProximal, int frameDistal, int stentProximal, int stentDistal, int totalFrame, double longitudeWidth, string pullbackLength, double imageResolution)
         {
             if (lumenContours == null || lumenContours.Count == 0)
                 return false;
@@ -227,6 +229,8 @@ namespace RaywattApp.Models
             double minExp = msa;
             int minExpIdx = msaIdx;
 
+            double areaScaleMM2 = imageResolution * imageResolution;
+
             if(msaIdx <= minExpIdx)
             {
                 Msa.X = CommonUtil.GetPositionFromFrame(msaIdx + tempProximal, totalFrame, longitudeWidth, Constants.SectionValueWidth - Constants.SectionValueCenterWidth);
@@ -235,7 +239,7 @@ namespace RaywattApp.Models
                 MinExp.StrValue = "Right";
                 MsaValue.DValue = msa;
                 MsaValue.NValue = msaIdx + tempProximal;
-                string text = "MSA " + Math.Round(msa * Constants.MillimeterPerPixel  * Constants.MillimeterPerPixel , 2).ToString() + "㎟";
+                string text = "MSA " + Math.Round(msa * areaScaleMM2, 2).ToString() + "㎟";
                 double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-12", text, 2).Width;
                 MsaValue.X = Msa.X - (width + 18);
                 MinExpValue.DValue = minExp;

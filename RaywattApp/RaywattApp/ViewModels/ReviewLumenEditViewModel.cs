@@ -150,6 +150,7 @@ namespace RaywattApp.ViewModels
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
 
                 LumenContours = PatientCase.LumenContours;
+                CrossSectionScale = (1 / PatientCase.ImageResolution) * (Constants.CrossSectionSize / Constants.OCTImageSize);
 
                 SetCrossSectionBackground(RaySession.Review, Constants.CardBackgroundColor);
 

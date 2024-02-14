@@ -39,12 +39,14 @@ enum class RayProperty {
 	ImageHeight,
 	ImageChannels,
 	ImageDepth,
+	ImageResolution,
 	LongitudeImageWidth,
 	LongitudeImageHeight,
 	LongitudeImageChannels,
 	PullbackRPM,
 	PullbackDistance,
 	PullbackSpeed,
+	SheathDiameter,
 	TestMode
 };
 
@@ -80,6 +82,7 @@ enum class RayWorkItem {
 	DetectLumen,
 	GenerateVolume,
 	AutoCalibration,
+	Recording,
 	Pullback,
 	LoadCatheter,
 	UnloadCatheter,

@@ -47,7 +47,7 @@ namespace RaywattApp.ViewModels.Dialog
         private BitmapSource _crossSectionImage;
 
         [ObservableProperty]
-        private double _crossSectionScale = (1 / Constants.MillimeterPerPixel ) * (Constants.CrossSectionSize / Constants.OCTImageSize);
+        private double _crossSectionScale;
 
         [ObservableProperty]
         private BitmapSource _longitudeImage;
@@ -185,6 +185,7 @@ namespace RaywattApp.ViewModels.Dialog
         {
             PatientCase = patientCase;
             Degree = PatientCase.IndicatorDegree;
+            CrossSectionScale = (1 / PatientCase.ImageResolution) * (Constants.CrossSectionSize / Constants.OCTImageSize);
 
             this.crossSections = crossSections;
             imgCrossSectionMask = GenerateMask(crossSections[0]);
@@ -216,7 +217,7 @@ namespace RaywattApp.ViewModels.Dialog
                     List<int> colorFrames = new List<int>();
                     if (CommonUtil.IsPreCase(patientCase.Procedure))
                     {
-                        if(Section.SetMlaMld(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength))
+                        if(Section.SetMlaMld(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength, patientCase.ImageResolution))
                             Section.VisibleMlaMld(true);
                         else
                             Section.VisibleMlaMld(false);
@@ -228,7 +229,7 @@ namespace RaywattApp.ViewModels.Dialog
                         int stentProximal = 0, stentDistal = 0;
                         CommonUtil.GetStentProximalDistal(LumenStents, out stentProximal, out stentDistal);
 
-                        if (Section.SetMsaMinExp(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, stentProximal, stentDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength))
+                        if (Section.SetMsaMinExp(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, stentProximal, stentDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength, patientCase.ImageResolution))
                             Section.VislbleMsaMinExp(true);
                         else
                             Section.VislbleMsaMinExp(false);

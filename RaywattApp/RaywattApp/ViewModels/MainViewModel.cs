@@ -448,9 +448,11 @@ namespace RaywattApp.ViewModels
                 case RayWorkItem.UnloadCatheter:
                     DeviceStatus.CatheterStatus = Constants.CatheterStatusConnected;
                     break;
+                case RayWorkItem.Recording:
+                    _angioManager.StopSaveAngioThread();
+                    break;
                 case RayWorkItem.Pullback:
                     DeviceStatus.IsPullbackDone = true;
-                    _angioManager.StopSaveAngioThread();
                     break;
                 case RayWorkItem.OCTImaging:
                     if(param == (int)RaySession.Review)

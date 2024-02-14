@@ -146,6 +146,7 @@ public:
 	UINT GetImageHeight();
 	UINT GetImageChannels();
 	UINT GetImageDepth();
+	double GetImageResolution();
 	UINT GetLongitudeImageWidth();
 	UINT GetLongitudeImageHeight();
 	UINT GetLongitudeImageChannels();

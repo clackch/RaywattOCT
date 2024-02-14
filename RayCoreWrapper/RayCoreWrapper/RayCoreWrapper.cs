@@ -38,12 +38,14 @@ namespace RaywattOCT
             ImageHeight,
             ImageChannels,
             ImageDepth,
+            ImageResolution,
             LongitudeImageWidth,
             LongitudeImageHeight,
             LongitudeImageChannels,
             PullbackRPM,
             PullbackDistance,
             PullbackSpeed,
+            SheathDiameter,
             TestMode
         }
 
@@ -82,6 +84,7 @@ namespace RaywattOCT
             DetectLumen,
             GenerateVolume,
             AutoCalibration,
+            Recording,
             Pullback,
             LoadCatheter,
             UnloadCatheter,
