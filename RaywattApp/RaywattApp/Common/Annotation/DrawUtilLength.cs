@@ -337,7 +337,11 @@ namespace RaywattApp.Common.Annotation
             ptLabel.X += unitX * labelWidth / 2 * (flip ? 1 : -1);
             ptLabel.Y += unitY * labelWidth / 2 * (flip ? 1 : -1);
 
-            if (this.canvas.ActualHeight - firstPoint.Y < labelHeight * 2 && this.canvas.ActualHeight - secondPoint.Y < labelHeight * 2)
+            double height = this.canvas.ActualHeight;
+            if (height == 0)
+                height = Constants.OCTImageSize;
+
+            if (height - firstPoint.Y < labelHeight * 2 && height - secondPoint.Y < labelHeight * 2)
             {
                 ptLabel.Y -= labelHeight;
             }

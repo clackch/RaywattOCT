@@ -15,6 +15,9 @@ using RaywattApp.Common.Messages;
 using RaywattApp.Common.Annotation.Models;
 using System.Threading;
 using RaywattApp.Common.Util;
+using OpenCvSharp;
+using Newtonsoft.Json;
+using System.Linq;
 
 namespace RaywattApp.ViewModels
 {
@@ -61,6 +64,9 @@ namespace RaywattApp.ViewModels
 
         private string _lumenContourCommand;
         public string LumenContourCommand { get { return _lumenContourCommand; } set { _lumenContourCommand = value; OnPropertyChanged(nameof(LumenContourCommand)); } }
+
+        [ObservableProperty]
+        private List<int> _modifiedFrames = new List<int>();
 
         private ICommand _okCommand;
         public ICommand OkCommand
@@ -143,7 +149,7 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
 
-                LumenContours = PatientCase.LumenContour;
+                LumenContours = PatientCase.LumenContours;
                 CrossSectionScale = (1 / PatientCase.ImageResolution) * (Constants.CrossSectionSize / Constants.OCTImageSize);
 
                 SetCrossSectionBackground(RaySession.Review, Constants.CardBackgroundColor);
@@ -206,9 +212,12 @@ namespace RaywattApp.ViewModels
 
         private void ThreadSaveLumenContour()
         {
+            CalcStentApposition();
+
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
-            sqlParameters["lumen_contour"] = CommonUtil.LumenContoursToJson(PatientCase.LumenContour);
+            sqlParameters["lumen_contour"] = CommonUtil.LumenContoursToJson(PatientCase.LumenContours);
+            sqlParameters["lumen_stent"] = JsonConvert.SerializeObject(PatientCase.LumenStents, Formatting.Indented);
             int nRows = _sqlManager.UpdatePatientCaseAnnotationLumenContour(sqlParameters);
             if (nRows == 0)
             {
@@ -219,6 +228,25 @@ namespace RaywattApp.ViewModels
 
             //Thread 종료 시, Review에서 OnRecvLongitude 받아서 Lumen Profile 생성하기 위함
             RaySetProperty(Property.LongitudeDegree, PatientCase.IndicatorDegree);
+        }
+
+        private void CalcStentApposition()
+        {
+            ModifiedFrames = ModifiedFrames.Distinct().ToList();
+
+            foreach (int i in ModifiedFrames)
+            {
+                Point[][] lumenContours = CommonUtil.GetLumenContours(PatientCase.LumenContours[i].Points);
+
+                if (lumenContours != null && PatientCase.LumenStents[i].AppositionLength != null)
+                {
+                    PatientCase.LumenStents[i].AppositionLength.Clear();
+                    for (int row = 0; row < PatientCase.LumenStents[i].Points.Count; row++)
+                    {
+                        PatientCase.LumenStents[i].AppositionLength.Add(CommonUtil.GetAppositionLength(lumenContours, new Point(PatientCase.LumenStents[i].Points[row].X, PatientCase.LumenStents[i].Points[row].Y)));
+                    }
+                }
+            }
         }
 
         private void Information()

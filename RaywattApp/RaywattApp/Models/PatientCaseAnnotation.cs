@@ -18,5 +18,14 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private string? _lumenContour;
+
+        [ObservableProperty]
+        private string? _lumenSidebranch;
+
+        [ObservableProperty]
+        private string? _lumenStent;
+
+        [ObservableProperty]
+        private string? _lumenGuidewire;
     }
 }

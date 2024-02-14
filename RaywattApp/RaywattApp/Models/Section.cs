@@ -206,7 +206,7 @@ namespace RaywattApp.Models
             return true;
         }
 
-        public bool SetMsaMinExp(List<LumenContour> lumenContours, int frameProximal, int frameDistal, int totalFrame, double longitudeWidth, string pullbackLength, double imageResolution)
+        public bool SetMsaMinExp(List<LumenContour> lumenContours, int frameProximal, int frameDistal, int stentProximal, int stentDistal, int totalFrame, double longitudeWidth, string pullbackLength, double imageResolution)
         {
             if (lumenContours == null || lumenContours.Count == 0)
                 return false;
@@ -215,9 +215,15 @@ namespace RaywattApp.Models
             SetProximalDisatalArea(lumenContours[frameProximal].Area, lumenContours[frameDistal].Area);
             CalcLesionLength(frameProximal, frameDistal, totalFrame, longitudeWidth, pullbackLength);
 
-            int count = frameDistal - frameProximal + 1;
-            double msa = lumenContours.GetRange(frameProximal, count).Min(x => x.Area);
-            int msaIdx = lumenContours.GetRange(frameProximal, count).FindIndex(x => x.Area == msa);
+            int tempProximal = frameProximal > stentProximal ? frameProximal : stentProximal;
+            int tempDistal = frameDistal < stentDistal ? frameDistal : stentDistal;
+
+            int count = tempDistal - tempProximal + 1;
+            if (count <= 0)
+                return false;
+
+            double msa = lumenContours.GetRange(tempProximal, count).Min(x => x.Area);
+            int msaIdx = lumenContours.GetRange(tempProximal, count).FindIndex(x => x.Area == msa);
 
             //TODO) Min Exp 정의가 되면 Min Exp 변경 필요
             double minExp = msa;
@@ -227,12 +233,12 @@ namespace RaywattApp.Models
 
             if(msaIdx <= minExpIdx)
             {
-                Msa.X = CommonUtil.GetPositionFromFrame(msaIdx + frameProximal, totalFrame, longitudeWidth, Constants.SectionValueWidth - Constants.SectionValueCenterWidth);
-                MinExp.X = CommonUtil.GetPositionFromFrame(minExpIdx + frameProximal, totalFrame, longitudeWidth, - Constants.SectionValueCenterWidth);
+                Msa.X = CommonUtil.GetPositionFromFrame(msaIdx + tempProximal, totalFrame, longitudeWidth, Constants.SectionValueWidth - Constants.SectionValueCenterWidth);
+                MinExp.X = CommonUtil.GetPositionFromFrame(minExpIdx + tempProximal, totalFrame, longitudeWidth, - Constants.SectionValueCenterWidth);
                 Msa.StrValue = "Left";
                 MinExp.StrValue = "Right";
                 MsaValue.DValue = msa;
-                MsaValue.NValue = msaIdx + frameProximal;
+                MsaValue.NValue = msaIdx + tempProximal;
                 string text = "MSA " + Math.Round(msa * areaScaleMM2, 2).ToString() + "㎟";
                 double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-12", text, 2).Width;
                 MsaValue.X = Msa.X - (width + 18);
@@ -241,12 +247,12 @@ namespace RaywattApp.Models
             }
             else
             {
-                Msa.X = CommonUtil.GetPositionFromFrame(msaIdx + frameProximal, totalFrame, longitudeWidth, - Constants.SectionValueCenterWidth);
-                MinExp.X = CommonUtil.GetPositionFromFrame(minExpIdx + frameProximal, totalFrame, longitudeWidth, Constants.SectionValueWidth - Constants.SectionValueCenterWidth);
+                Msa.X = CommonUtil.GetPositionFromFrame(msaIdx + tempProximal, totalFrame, longitudeWidth, - Constants.SectionValueCenterWidth);
+                MinExp.X = CommonUtil.GetPositionFromFrame(minExpIdx + tempProximal, totalFrame, longitudeWidth, Constants.SectionValueWidth - Constants.SectionValueCenterWidth);
                 Msa.StrValue = "Right";
                 MinExp.StrValue = "Left";
                 MsaValue.DValue = msa;
-                MsaValue.NValue = msaIdx + frameProximal;
+                MsaValue.NValue = msaIdx + tempProximal;
                 MsaValue.X = Msa.X + Constants.SectionValueWidth;
                 MinExpValue.DValue = minExp;
                 string text = "Min Exp. " + minExp + "%";

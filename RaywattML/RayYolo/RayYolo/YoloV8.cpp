@@ -359,7 +359,7 @@ YoloV8* InitializeSegment()
     segmentConfig.segH = 256;
     segmentConfig.segW = 256;
     segmentConfig.classNames = { "lumen", "side_branch" };
-    std::string segmentModelPath = "C:\\Raywatt\\system\\3rdparty\\model\\yolo\\best_yolov8n_segment_1024_noSplit.onnx";
+    std::string segmentModelPath = "C:\\Raywatt\\system\\3rdparty\\model\\yolo\\segment.onnx";
     return new YoloV8(segmentModelPath, segmentConfig);
 }
 
@@ -369,7 +369,7 @@ YoloV8* InitializeDetect()
     segmentConfig.segH = 256;
     segmentConfig.segW = 256;
     segmentConfig.classNames = { "stent", "guide_wire" };
-    std::string segmentModelPath = "C:\\Raywatt\\system\\3rdparty\\model\\yolo\\best_yolov8n_detect_1024_noSplit.onnx";
+    std::string segmentModelPath = "C:\\Raywatt\\system\\3rdparty\\model\\yolo\\detect.onnx";
     return new YoloV8(segmentModelPath, segmentConfig);
 }
 

@@ -188,6 +188,27 @@ _declspec(dllexport) void* RayGetLumenContour(int nFrame) {
 _declspec(dllexport) int RayGetNumOfLumenContourPoints(int nFrame) {
     return octSystem.GetNumOfLumenContourPoints(nFrame);
 }
+_declspec(dllexport) int RayGetNumOfSidebranchContourSize(int nFrame){
+    return octSystem.GetNumOfSidebranchContourSize(nFrame);
+}
+_declspec(dllexport) void* RayGetSidebranchContour(int nFrame, int nSb){
+    return octSystem.GetSidebranchContour(nFrame, nSb);
+}
+_declspec(dllexport) int RayGetNumOfSidebranchContourPoints(int nFrame, int nSb){
+    return octSystem.GetNumOfSidebranchContourPoints(nFrame, nSb);
+}
+_declspec(dllexport) void* RayGetStentPoints(int nFrame) {
+    return octSystem.GetStentPoints(nFrame);
+}
+_declspec(dllexport) int RayGetNumOfStentPoints(int nFrame) {
+    return octSystem.GetNumOfStentPoints(nFrame);
+}
+_declspec(dllexport) void* RayGetGuidewirePoints(int nFrame) {
+    return octSystem.GetGuidewirePoints(nFrame);
+}
+_declspec(dllexport) int RayGetNumOfGuidewirePoints(int nFrame) {
+    return octSystem.GetNumOfGuidewirePoints(nFrame);
+}
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,

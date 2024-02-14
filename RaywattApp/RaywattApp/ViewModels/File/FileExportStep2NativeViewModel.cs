@@ -158,12 +158,18 @@ namespace RaywattApp.ViewModels.File
                         annotation.Longitude = patientCase.Longitude;
                         annotation.CrossSection = patientCase.CrossSection;
                         annotation.LumenContour = patientCase.StrLumenContour;
+                        annotation.LumenSidebranch = patientCase.StrLumenSidebranch;
+                        annotation.LumenStent = patientCase.StrLumenStent;
+                        annotation.LumenGuidewire = patientCase.StrLumenGuidewire;
                         annotations.Add(annotation);
 
                         patientCase.Bookmark = null;
                         patientCase.Longitude = null;
                         patientCase.CrossSection = null;
                         patientCase.StrLumenContour = null;
+                        patientCase.StrLumenSidebranch = null;
+                        patientCase.StrLumenStent = null;
+                        patientCase.StrLumenGuidewire = null;
 
                         patient.PatientCaseList.Add(patientCase);
                     }

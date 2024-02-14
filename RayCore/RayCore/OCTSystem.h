@@ -122,6 +122,13 @@ public:
 	void* GetLongitudeData(double fDegree);
 	void* GetLumenContour(int nFrame);
 	int GetNumOfLumenContourPoints(int nFrame);
+	int GetNumOfSidebranchContourSize(int nFrame);
+	void* GetSidebranchContour(int nFrame, int nSb);
+	int GetNumOfSidebranchContourPoints(int nFrame, int nSb);
+	void* GetStentPoints(int nFrame);
+	int GetNumOfStentPoints(int nFrame);
+	void* GetGuidewirePoints(int nFrame);
+	int GetNumOfGuidewirePoints(int nFrame);
 	
 	//Property
 	RayScannerState GetCurrentState() { return m_curState; }

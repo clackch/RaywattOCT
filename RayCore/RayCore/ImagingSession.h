@@ -46,6 +46,9 @@ private:
 	CCutViewManager* m_pCutView;
 
 	std::vector<std::vector<cv::Mat>> m_vLumen;
+	std::vector<std::vector<cv::Mat>> m_vSidebranch;
+	std::vector<cv::Mat> m_vStent;
+	std::vector<cv::Mat> m_vGuidewire;
 	char* m_pVolumeData;
 
 private:
@@ -85,6 +88,13 @@ public:
 	void AddFramesIntoCutView();
 	void* GetLumenContour(int nFrame);
 	int GetNumOfLumenContourPoints(int nFrame);
+	int GetNumOfSidebranchContourSize(int nFrame);
+	void* GetSidebranchContour(int nFrame, int nSb);
+	int GetNumOfSidebranchContourPoints(int nFrame, int nSb);
+	void* GetStentPoints(int nFrame);
+	int GetNumOfStentPoints(int nFrame);
+	void* GetGuidewirePoints(int nFrame);
+	int GetNumOfGuidewirePoints(int nFrame);
 
 private:
 	static CImagingSession* createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type);
