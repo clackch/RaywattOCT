@@ -1654,7 +1654,7 @@ namespace RaywattApp.Common.Util
                         double distanceStent = Math.Sqrt(Math.Pow(centerPoint.X - point.X, 2) + Math.Pow(centerPoint.Y - point.Y, 2));
                         double distanceLumen = Math.Sqrt(Math.Pow(centerPoint.X - intersection.X, 2) + Math.Pow(centerPoint.Y - intersection.Y, 2));
 
-                        return (distanceLumen - distanceStent) * Constants.MillimeterPerPixel;
+                        return (distanceLumen - distanceStent) * Constants.ImageResolution;
                     }
                 }
             }
