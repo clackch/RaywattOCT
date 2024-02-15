@@ -323,18 +323,13 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             }
 
             // 추적된 점 그리기
-            int count = 0;
             foreach (Point trackPoint in CurrentTrackPoint.TrackPoint)
             {
-                Rectangle rectangle = new Rectangle();
-                ActivateRecEvents(rectangle);
-                rectangle.Name = $"rectangle{count:D3}";
-
-                Canvas.SetLeft(rectangle, trackPoint.X - rectangle.Width / 2);
-                Canvas.SetTop(rectangle, trackPoint.Y - rectangle.Height / 2);
-                this.canvas.Children.Add(rectangle);
-
-                count++;
+                Ellipse path = new Ellipse();
+                path.Style = (Style)this.Resources["StylePathEllipse"];
+                Canvas.SetLeft(path, trackPoint.X - path.Width / 2);
+                Canvas.SetTop(path, trackPoint.Y - path.Height / 2);
+                this.canvas.Children.Add(path);
             }
         }
 
