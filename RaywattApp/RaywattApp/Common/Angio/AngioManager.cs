@@ -79,11 +79,11 @@ namespace RaywattApp.Common.Angio
 
         private byte[] buffer;
         private byte[] tmpBuffer;
-        private List<byte[]> angioSaveBuffer;
+        public List<byte[]> angioSaveBuffer;
 
         private int bytesRead;
         private int tmpBufferLen;
-        private int angioSaveFrameNum;
+        public int angioSaveFrameNum;
 
         private byte[] commandBuffer = { Constants.SOF, (byte)PacketType.Command, (byte)CommandType.FGUnknown, 0x00, Constants.EOF };
 
@@ -282,36 +282,6 @@ namespace RaywattApp.Common.Angio
             {
                 Debug.WriteLine("File Creation Error: " + ex.Message);
             }
-
-            if (patientCase.AngioFrame == null)
-            {
-                patientCase.AngioFrame = new AngioFrame();
-            }
-            patientCase.AngioFrame.AngioImage = ConvertBytesToImageSources(angioSaveBuffer);
-            angioSaveFrameNum = 0;
-            angioSaveBuffer.Clear();
-        }
-
-        private List<ImageSource> ConvertBytesToImageSources(List<byte[]> imageBytesList)
-        {
-            List<ImageSource> imageSources = new List<ImageSource>();
-
-            foreach (byte[] imageBytes in imageBytesList)
-            {
-                BitmapSource bitmapSource = ConvertBytesToBitmapSource(imageBytes);
-                ImageSource imageSource = bitmapSource as ImageSource;
-                if (imageSource != null)
-                {
-                    imageSources.Add(imageSource);
-                }
-            }
-
-            return imageSources;
-        }
-
-        private BitmapSource ConvertBytesToBitmapSource(byte[] imageBytes)
-        {
-            return BitmapSource.Create(angioFrameWidth, angioFrameHeight, 96, 96, PixelFormats.Bgr24, null, imageBytes, angioFrameWidth * 3);
         }
         
         private void ActivateClientThreads()

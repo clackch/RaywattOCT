@@ -36,6 +36,8 @@ namespace RaywattApp.ViewModels
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewViewModel));
 
+        private readonly AngioManager _angioManager;
+
         private CallbackFunctionForDetection cbLumenContour;
         public CallbackFunctionForDetection CBLumenContour => (this.cbLumenContour) ?? (this.cbLumenContour = new CallbackFunctionForDetection(OnRecvLumenContour));
 
@@ -258,9 +260,11 @@ namespace RaywattApp.ViewModels
             get { return this._cmdMoveIndicator ?? (this._cmdMoveIndicator = new RelayCommand<object>(MoveIndicator)); }
         }
 
-        public ReviewViewModel(SqlManager sqlManager, IDialogService dialogService) : base(sqlManager, dialogService)
+        public ReviewViewModel(SqlManager sqlManager, AngioManager angioManager, IDialogService dialogService) : base(sqlManager, dialogService)
         {
             _log.Debug("ReviewViewModel");
+
+            _angioManager = angioManager;
 
             Constants.CurrentPage = Constants.ReviewPage;
 
@@ -1344,6 +1348,23 @@ namespace RaywattApp.ViewModels
             int angioFrameWidth = int.Parse(configNode.SelectSingleNode("AngioFrameWidth").InnerText);
             int channels = int.Parse(configNode.SelectSingleNode("BitsPerPixel").InnerText) / 8;
 
+            
+            if (_angioManager.angioSaveBuffer.Count != 0)
+            {
+                foreach (byte[] data in _angioManager.angioSaveBuffer)
+                {
+                    Mat frame = new Mat(angioFrameWidth, angioFrameHeight, MatType.CV_8UC1, data);
+
+                    Cv2.Resize(frame, frame, new OpenCvSharp.Size(Constants.AngioSize, Constants.AngioSize));
+
+                    AngioFrames.Add(frame);
+                    PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(frame));
+                }
+                _angioManager.angioSaveBuffer.Clear();
+                _angioManager.angioSaveFrameNum = 0;
+
+                return;
+            }
 
             //Read .angioframes
             using (BinaryReader reader = new BinaryReader(System.IO.File.Open(angioPath, FileMode.Open)))

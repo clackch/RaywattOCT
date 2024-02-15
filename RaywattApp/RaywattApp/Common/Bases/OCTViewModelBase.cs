@@ -225,7 +225,7 @@ namespace RaywattApp.Common.Bases
 
             IsPaused = DeviceStatus.IsPaused;
         }
-            protected virtual bool MoveToFrame(RaySession session, int nFrame)
+        protected virtual bool MoveToFrame(RaySession session, int nFrame)
         {
             RayError result = (RayError) RaySetSession(session);
             if (result != RayError.OK)
