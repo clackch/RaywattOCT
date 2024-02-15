@@ -79,11 +79,13 @@ namespace RaywattApp.Common.Angio
 
         private byte[] buffer;
         private byte[] tmpBuffer;
-        public List<byte[]> angioSaveBuffer;
+        private List<byte[]> angioSaveBuffer;
+        public List<byte[]> AngioSaveBuffer { get { return angioSaveBuffer; } set { angioSaveBuffer = value; } }
 
         private int bytesRead;
         private int tmpBufferLen;
-        public int angioSaveFrameNum;
+        private int angioSaveFrameNum;
+        public int AngioSaveFrameNum { get { return angioSaveFrameNum; } set { angioSaveFrameNum = value; } }
 
         private byte[] commandBuffer = { Constants.SOF, (byte)PacketType.Command, (byte)CommandType.FGUnknown, 0x00, Constants.EOF };
 
@@ -94,8 +96,11 @@ namespace RaywattApp.Common.Angio
         private bool threadOnSaveAngioFrames;
 
         private short angioFrameWidth;
+        public short AngioFrameWidth { get { return angioFrameWidth; } set { angioFrameWidth = value; } }
         private short angioFrameHeight;
+        public short AngioFrameHeight { get { return angioFrameHeight; } set { angioFrameHeight = value; } }
         private char angioBitsPerPixel;
+        public char AngioBitsPerPixel { get { return angioBitsPerPixel; } set { angioBitsPerPixel = value; } }
         private int angioImageSize;
 
         private bool readyToRecv = false;
@@ -262,8 +267,7 @@ namespace RaywattApp.Common.Angio
                 }
                 fs.Close();
 
-                // .params 파일 생성
-                using (XmlWriter xw = XmlWriter.Create(angioFilePath + "params", new XmlWriterSettings { Indent = true }))
+                using (XmlWriter xw = XmlWriter.Create(angioFilePath + Constants.AngioParmasExtension, new XmlWriterSettings { Indent = true }))
                 {
                     xw.WriteStartDocument();
                     xw.WriteStartElement("config");

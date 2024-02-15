@@ -259,8 +259,7 @@ namespace RaywattApp.ViewModels
         {
             get { return this._cmdMoveIndicator ?? (this._cmdMoveIndicator = new RelayCommand<object>(MoveIndicator)); }
         }
-
-        public ReviewViewModel(SqlManager sqlManager, AngioManager angioManager, IDialogService dialogService) : base(sqlManager, dialogService)
+        public ReviewViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager) : base(sqlManager, dialogService)
         {
             _log.Debug("ReviewViewModel");
 
@@ -361,6 +360,12 @@ namespace RaywattApp.ViewModels
             if (PatientCase.AngioFrame.CoRegistration == null) PatientCase.AngioFrame.CoRegistration = new List<CoRegistration>();
 
             if (PatientCase.AngioFrame.AngioImage.Count == 0) ReadAngioFrames();
+            else
+            {
+                PatientCase.AngioFrame.AngioImage = ConvertBytesToImageSources(_angioManager.AngioSaveBuffer);
+                _angioManager.AngioSaveFrameNum = 0;
+                _angioManager.AngioSaveBuffer.Clear();
+            }
             if (PatientCase.AngioFrame.CoRegistration.Count == 0) ReadTrackPoints();
             if (PatientCase.AngioFrame.DijkstraHeap.Count == 0)
             {
@@ -370,7 +375,43 @@ namespace RaywattApp.ViewModels
 
             AngioTrackPoints = PatientCase.AngioFrame.CoRegistration;
         }
+        private List<ImageSource> ConvertBytesToImageSources(List<byte[]> imageBytesList)
+        {
+            List<ImageSource> imageSources = new List<ImageSource>();
 
+            foreach (byte[] imageBytes in imageBytesList)
+            {
+                BitmapSource bitmapSource = ConvertBytesToBitmapSource(imageBytes);
+                ImageSource imageSource = bitmapSource as ImageSource;
+                if (imageSource != null)
+                {
+                    imageSources.Add(imageSource);
+                }
+            }
+
+            return imageSources;
+        }
+
+        private BitmapSource ConvertBytesToBitmapSource(byte[] imageBytes)
+        {
+            PixelFormat pixelFormat;
+            switch (_angioManager.AngioBitsPerPixel)
+            {
+                case (char)8:
+                    pixelFormat = PixelFormats.Gray8;
+                    break;
+                case (char)24:
+                    pixelFormat = PixelFormats.Bgr24;
+                    break;
+                case (char)32:
+                    pixelFormat = PixelFormats.Bgr32;
+                    break;
+                default:
+                    throw new NotSupportedException("Unsupported bit depth");
+            }
+            return BitmapSource.Create(_angioManager.AngioFrameWidth, _angioManager.AngioFrameHeight, 96, 96, pixelFormat, null, imageBytes, _angioManager.AngioFrameWidth * _angioManager.AngioBitsPerPixel / 8);
+        }
+        
         private void SetAnnotation()
         {
             string tempCrossSection = "[]", tempLongitude = "", tempBookmark = "[]";
@@ -1349,9 +1390,9 @@ namespace RaywattApp.ViewModels
             int channels = int.Parse(configNode.SelectSingleNode("BitsPerPixel").InnerText) / 8;
 
             
-            if (_angioManager.angioSaveBuffer.Count != 0)
+            if (_angioManager.AngioSaveBuffer.Count != 0)
             {
-                foreach (byte[] data in _angioManager.angioSaveBuffer)
+                foreach (byte[] data in _angioManager.AngioSaveBuffer)
                 {
                     Mat frame = new Mat(angioFrameWidth, angioFrameHeight, MatType.CV_8UC1, data);
 
@@ -1360,8 +1401,8 @@ namespace RaywattApp.ViewModels
                     AngioFrames.Add(frame);
                     PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(frame));
                 }
-                _angioManager.angioSaveBuffer.Clear();
-                _angioManager.angioSaveFrameNum = 0;
+                _angioManager.AngioSaveBuffer.Clear();
+                _angioManager.AngioSaveFrameNum = 0;
 
                 return;
             }
