@@ -1428,7 +1428,7 @@ namespace RaywattApp.ViewModels
             using (var stream = new MemoryStream())
             {
 
-                mat.WriteToStream(stream, ".bmp");
+                mat.WriteToStream(stream, "." + Constants.ExportStillFrameBitmap);
 
                 var bitmapImage = new BitmapImage();
                 bitmapImage.BeginInit();
