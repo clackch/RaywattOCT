@@ -1423,7 +1423,7 @@ void EventSink::GetUSBDeviceName(bool isAdded, IWbemServices* pSvc) {
 		}
 	);
 	for (DeviceInfo device : difference) {
-		wcscat(printString, L"USB 장치 설명: ");
+		wcscat(printString, L"\nUSB 장치 설명: ");
 		wchar_t tnsString[MAX_PATH] = { 0 };
 		wcscat(printString, device.deviceName);
 		wcscat(printString, L"\nUSB 제조업체: ");
@@ -1434,14 +1434,12 @@ void EventSink::GetUSBDeviceName(bool isAdded, IWbemServices* pSvc) {
 		wcscat(printString, device.instancePath);
 		wcscat(printString, L"\nUSB serial Port: ");
 		wcscat(printString, device.serialPort);
-		wcscat(printString, L"\n\n");
+		wcscat(printString, L"\n");
 		PLOGI.printf(printString);
-		PLOGI.printf(m_pPullbackMotorPort);
-		PLOGI.printf(m_pLaserModulePort);
 		if(!isAdded){
 			if (lstrcmpW(m_pPullbackMotorPort, L"\0") != 0 && std::wcsstr(device.serialPort, m_pPullbackMotorPort) != NULL ||
 				lstrcmpW(m_pLaserModulePort, L"\0") != 0 && std::wcsstr(device.serialPort, m_pLaserModulePort) != NULL) {
-				PLOGI.printf("disconnected");
+				PLOGI.printf("RotaryJunction Port or Laser Port disconnected");
 				m_isDIsconnected = true;
 			}
 		}

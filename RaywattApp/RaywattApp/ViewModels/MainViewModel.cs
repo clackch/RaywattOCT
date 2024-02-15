@@ -17,6 +17,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
 using RaywattApp.Common.Angio;
+using System.Threading;
 
 namespace RaywattApp.ViewModels
 {
@@ -412,7 +413,10 @@ namespace RaywattApp.ViewModels
             switch (error)
             {
                 case RayError.DeviceDisconnected:
-                    CommonUtil.Exit(DeviceStatus, true);
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        threadDeviceDisconnect();
+                    });
                     break;
             }
            }
@@ -477,6 +481,21 @@ namespace RaywattApp.ViewModels
                     break;
                 default:
                     break;
+            }
+        }
+
+        void threadDeviceDisconnect()
+        {
+            _log.Error("Device disconnected");
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["title"] = _l10n["Configuration Error"];
+            parameter["message"] = _l10n["Invalid hardware configuration. Contact your authorized service representative."];
+            parameter["error"] = true;
+            var resultDialog = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+            if (resultDialog != null && resultDialog.DialogAnswer == DialogResults.Answer.Undefined)
+            {
+                CommonUtil.Exit(DeviceStatus, true);
             }
         }
     }
