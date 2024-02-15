@@ -360,12 +360,6 @@ namespace RaywattApp.ViewModels
             if (PatientCase.AngioFrame.CoRegistration == null) PatientCase.AngioFrame.CoRegistration = new List<CoRegistration>();
 
             if (PatientCase.AngioFrame.AngioImage.Count == 0) ReadAngioFrames();
-            else
-            {
-                PatientCase.AngioFrame.AngioImage = ConvertBytesToImageSources(_angioManager.AngioSaveBuffer);
-                _angioManager.AngioSaveFrameNum = 0;
-                _angioManager.AngioSaveBuffer.Clear();
-            }
             if (PatientCase.AngioFrame.CoRegistration.Count == 0) ReadTrackPoints();
             if (PatientCase.AngioFrame.DijkstraHeap.Count == 0)
             {
@@ -1392,17 +1386,19 @@ namespace RaywattApp.ViewModels
             
             if (_angioManager.AngioSaveBuffer.Count != 0)
             {
-                foreach (byte[] data in _angioManager.AngioSaveBuffer)
-                {
-                    Mat frame = new Mat(angioFrameWidth, angioFrameHeight, MatType.CV_8UC1, data);
+                //foreach (byte[] data in _angioManager.AngioSaveBuffer)
+                //{
+                //    Mat frame = new Mat(angioFrameWidth, angioFrameHeight, MatType.CV_8UC1, data);
+                //
+                //    Cv2.Resize(frame, frame, new OpenCvSharp.Size(Constants.AngioSize, Constants.AngioSize));
+                //
+                //    AngioFrames.Add(frame);
+                //    PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(frame));
+                //}
 
-                    Cv2.Resize(frame, frame, new OpenCvSharp.Size(Constants.AngioSize, Constants.AngioSize));
-
-                    AngioFrames.Add(frame);
-                    PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(frame));
-                }
-                _angioManager.AngioSaveBuffer.Clear();
+                PatientCase.AngioFrame.AngioImage = ConvertBytesToImageSources(_angioManager.AngioSaveBuffer);
                 _angioManager.AngioSaveFrameNum = 0;
+                _angioManager.AngioSaveBuffer.Clear();
 
                 return;
             }
@@ -1413,9 +1409,17 @@ namespace RaywattApp.ViewModels
                 while (reader.BaseStream.Position != reader.BaseStream.Length)
                 {
                     byte[] data = reader.ReadBytes(angioFrameWidth * angioFrameHeight * channels);
-                    Mat frame = new Mat(angioFrameWidth, angioFrameHeight, MatType.CV_8UC1, data);
+                    Mat frame = new Mat(angioFrameHeight, angioFrameWidth, MatType.CV_8UC(channels), data);
+                    switch (channels)
+                    {
+                        case 3:
+                            Cv2.CvtColor(frame, frame, ColorConversionCodes.BGR2GRAY);
+                            break;
 
-                    Cv2.Resize(frame, frame, new OpenCvSharp.Size(Constants.AngioSize, Constants.AngioSize));
+                        case 4:
+                            Cv2.CvtColor(frame, frame, ColorConversionCodes.RGBA2GRAY);
+                            break;
+                    }
 
                     AngioFrames.Add(frame);
                     PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(frame));
