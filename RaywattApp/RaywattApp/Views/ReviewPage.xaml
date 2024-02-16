@@ -83,13 +83,21 @@
                                     </RectangleGeometry>
                                 </Grid.Clip>
                                 <!-- Cross Seciton Image -->
-                                <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
+                                <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" IsManipulationEnabled="true">
                                     <Image.RenderTransform>
                                         <TransformGroup>
                                             <ScaleTransform ScaleX="{Binding ReviewStatus.Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding ReviewStatus.Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
                                             <TranslateTransform X="{Binding ReviewStatus.Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding ReviewStatus.Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}}"/>
                                         </TransformGroup>
                                     </Image.RenderTransform>
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="ManipulationStarting">
+                                            <i:InvokeCommandAction Command="{Binding ReviewStatus.Zoom.ManipulationStartingCommand}" PassEventArgsToCommand="True"/>
+                                        </i:EventTrigger>
+                                        <i:EventTrigger EventName="ManipulationDelta">
+                                            <i:InvokeCommandAction Command="{Binding ManipulationDeltaCommand}" PassEventArgsToCommand="True"/>
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
                                 </Image>
                                 <!-- Sheath Indicator -->
                                 <Image x:Name="SheathIndicator" Source="{Binding SheathIndicator}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsSheathOn, Converter={StaticResource BoolToVisibilityConverter}}"/>
@@ -239,7 +247,7 @@
                 </Grid>
 
                 <!-- Calcium Indicator -->
-                <Grid Grid.Row="0" Grid.RowSpan="3" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$001}">
+                <Grid Grid.Row="0" Grid.RowSpan="3" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$001}" IsManipulationEnabled="true">
                     <Grid Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                         <Grid Visibility="{Binding ReviewStatus.IsCalciumOn, Converter={StaticResource BoolToVisibilityConverter}}">
                             <Image x:Name="CalciumIndicator" Width="{x:Static const:Constants.CalciumIndicatorSize}" Height="{x:Static const:Constants.CalciumIndicatorSize}" Source="{Binding CalciumIndicator}"/>
@@ -251,9 +259,18 @@
                                 <Grid.RenderTransform>
                                     <RotateTransform CenterX="{x:Static const:Constants.CalciumThicknessIndicatorCenter}" CenterY="{x:Static const:Constants.CalciumThicknessIndicatorCenter}" Angle="{Binding MaxCalciumDegree}"/>
                                 </Grid.RenderTransform>
+                                
                             </Grid>
                         </Grid>
                     </Grid>
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="ManipulationStarting">
+                            <i:InvokeCommandAction Command="{Binding ReviewStatus.Zoom.ManipulationStartingCommand}" PassEventArgsToCommand="True"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="ManipulationDelta">
+                            <i:InvokeCommandAction Command="{Binding ManipulationDeltaCommand}" PassEventArgsToCommand="True"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
                 </Grid>
 
                 <!-- Menu -->

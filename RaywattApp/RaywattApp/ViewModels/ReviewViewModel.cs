@@ -249,6 +249,12 @@ namespace RaywattApp.ViewModels
             get { return this._cmdMoveIndicator ?? (this._cmdMoveIndicator = new RelayCommand<object>(MoveIndicator)); }
         }
 
+        private ICommand _manipulationDeltaCommand;
+        public ICommand ManipulationDeltaCommand
+        {
+            get { return this._manipulationDeltaCommand ?? (this._manipulationDeltaCommand = new RelayCommand<object>(Window_ManipulationDelta)); }
+        }
+
         public ReviewViewModel(SqlManager sqlManager, IDialogService dialogService) : base(sqlManager, dialogService)
         {
             _log.Debug("ReviewViewModel");
@@ -849,6 +855,29 @@ namespace RaywattApp.ViewModels
             StopPlayback();
 
             ReviewStatus.IsMeasurementOn = !ReviewStatus.IsMeasurementOn;
+        }
+
+        public void Window_ManipulationDelta(object parameter)
+        {
+            double prevScale = ReviewStatus.Zoom.ScaleX;
+
+            ReviewStatus.Zoom.Window_ManipulationDelta(parameter);
+
+            if (ReviewStatus.Zoom.ScaleX > Constants.ZoomScaleDefault)
+            {
+                IndicatorCrossSection.IsVisible = Visibility.Collapsed;
+                ReviewStatus.IsCalciumOn = false;
+            }
+            
+            if (ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault)
+            {
+                ReviewStatus.IsCalciumOn = true;
+
+                if (!ReviewStatus.IsLumenProfile)
+                    IndicatorCrossSection.IsVisible = Visibility.Visible;
+            }
+
+            MeasurementCommand = (prevScale < ReviewStatus.Zoom.ScaleX) ? Constants.MeasureZoomIn : Constants.MeasureZoomOut;
         }
 
         private void ZoomIn()
