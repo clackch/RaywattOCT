@@ -867,11 +867,13 @@ namespace RaywattApp.ViewModels
             {
                 IndicatorCrossSection.IsVisible = Visibility.Collapsed;
                 ReviewStatus.IsCalciumOn = false;
+                ReviewStatus.IsSheathOn = false;
             }
-            
+
             if (ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault)
             {
                 ReviewStatus.IsCalciumOn = true;
+                ReviewStatus.IsSheathOn = true;
 
                 if (!ReviewStatus.IsLumenProfile)
                     IndicatorCrossSection.IsVisible = Visibility.Visible;
