@@ -94,6 +94,9 @@
                                     <i:EventTrigger EventName="ManipulationDelta">
                                         <i:InvokeCommandAction Command="{Binding Zoom.ManipulationDeltaCommand}" PassEventArgsToCommand="True"/>
                                     </i:EventTrigger>
+                                    <i:EventTrigger EventName="ManipulationCompleted">
+                                        <i:InvokeCommandAction Command="{Binding Zoom.ManipulationCompletedCommand}" PassEventArgsToCommand="True"/>
+                                    </i:EventTrigger>
                                 </i:Interaction.Triggers>
                             </Image>
                         </Grid>

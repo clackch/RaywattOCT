@@ -97,6 +97,9 @@
                                         <i:EventTrigger EventName="ManipulationDelta">
                                             <i:InvokeCommandAction Command="{Binding ManipulationDeltaCommand}" PassEventArgsToCommand="True"/>
                                         </i:EventTrigger>
+                                        <i:EventTrigger EventName="ManipulationCompleted">
+                                            <i:InvokeCommandAction Command="{Binding ReviewStatus.Zoom.ManipulationCompletedCommand}" PassEventArgsToCommand="True"/>
+                                        </i:EventTrigger>
                                     </i:Interaction.Triggers>
                                 </Image>
                             </Grid>
@@ -265,6 +268,9 @@
                         </i:EventTrigger>
                         <i:EventTrigger EventName="ManipulationDelta">
                             <i:InvokeCommandAction Command="{Binding ManipulationDeltaCommand}" PassEventArgsToCommand="True"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="ManipulationCompleted">
+                            <i:InvokeCommandAction Command="{Binding ReviewStatus.Zoom.ManipulationCompletedCommand}" PassEventArgsToCommand="True"/>
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                 </Grid>

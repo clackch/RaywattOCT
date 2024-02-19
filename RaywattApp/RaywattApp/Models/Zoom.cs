@@ -93,6 +93,12 @@ namespace RaywattApp.Models
             get { return this._manipulationDeltaCommand ?? (this._manipulationDeltaCommand = new RelayCommand<object>(Window_ManipulationDelta)); }
         }
 
+        private ICommand _manipulationCompletedCommand;
+        public ICommand ManipulationCompletedCommand
+        {
+            get { return this._manipulationCompletedCommand ?? (this._manipulationCompletedCommand = new RelayCommand<object>(Window_ManipulationCompleted)); }
+        }
+
         private void SetCaptured(object param)
         {
             if(param != null)
@@ -224,6 +230,13 @@ namespace RaywattApp.Models
                 ScaleY = Constants.ZoomScaleDefault;
                 ZoomOutSetting(annotationScale);
             }
+            e.Handled = true;
+        }
+
+        public void Window_ManipulationCompleted(object parameter)
+        {
+            _log.Debug("Manipulation Completed");
+            ManipulationCompletedEventArgs e = (ManipulationCompletedEventArgs)parameter;
             e.Handled = true;
         }
 
