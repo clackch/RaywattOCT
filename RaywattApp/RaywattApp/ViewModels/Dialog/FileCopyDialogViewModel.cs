@@ -350,14 +350,14 @@ namespace RaywattApp.ViewModels.Dialog
                         foreach(JObject obj in arr)
                         {
                             PatientCaseAnnotation patientCaseAnnotation = new PatientCaseAnnotation();
-                            patientCaseAnnotation.Id = obj["Id"].ToString();
-                            patientCaseAnnotation.Bookmark = obj["Bookmark"].ToString();
-                            patientCaseAnnotation.Longitude = obj["Longitude"].ToString();
-                            patientCaseAnnotation.CrossSection = obj["CrossSection"].ToString();
-                            patientCaseAnnotation.LumenContour = obj["LumenContour"].ToString();
-                            patientCaseAnnotation.LumenSidebranch = obj["LumenSidebranch"].ToString();
-                            patientCaseAnnotation.LumenStent = obj["LumenStent"].ToString();
-                            patientCaseAnnotation.LumenGuidewire = obj["LumenGuidewire"].ToString();
+                            patientCaseAnnotation.Id = obj["Id"]?.ToString() ?? "null";
+                            patientCaseAnnotation.Bookmark = obj["Bookmark"]?.ToString() ?? "null";
+                            patientCaseAnnotation.Longitude = obj["Longitude"]?.ToString() ?? "null";
+                            patientCaseAnnotation.CrossSection = obj["CrossSection"]?.ToString() ?? "null";
+                            patientCaseAnnotation.LumenContour = obj["LumenContour"]?.ToString() ?? "null";
+                            patientCaseAnnotation.LumenSidebranch = obj["LumenSidebranch"]?.ToString() ?? "null";
+                            patientCaseAnnotation.LumenStent = obj["LumenStent"]?.ToString() ?? "null";
+                            patientCaseAnnotation.LumenGuidewire = obj["LumenGuidewire"]?.ToString() ?? "null";
                             annotations.Add(patientCaseAnnotation);
                         }
                     }
