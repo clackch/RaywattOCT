@@ -44,16 +44,15 @@
                             <ColumnDefinition Width="448"/>
                         </Grid.ColumnDefinitions>
                         <Grid Grid.Column="0">
-                            <Image x:Name="crossSectionAngioImage" Source="{Binding CurrentAngioImage}"  Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}" Stretch="Fill">
-                                <Image.Clip>
-                                    <RectangleGeometry RadiusX="10" RadiusY="10">
-                                        <RectangleGeometry.Rect>
-                                            <Rect X="0" Y="0" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}"/>
-                                        </RectangleGeometry.Rect>
-                                    </RectangleGeometry>
-                                </Image.Clip>
-                            </Image>
-                            <CoRegistration:DrawAngioPathUtil Grid.Column="0" Width="{x:Static const:Constants.AngioSize}" Height ="{x:Static const:Constants.AngioSize}"
+                            <Grid.Clip>
+                                <RectangleGeometry RadiusX="10" RadiusY="10">
+                                    <RectangleGeometry.Rect>
+                                        <Rect X="0" Y="0" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}"/>
+                                    </RectangleGeometry.Rect>
+                                </RectangleGeometry>
+                            </Grid.Clip>
+                            <Image x:Name="crossSectionAngioImage" Source="{Binding CurrentAngioImage}"  Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}" Stretch="Uniform"></Image>
+                            <CoRegistration:DrawAngioPathUtil Grid.Column="0" Width="{Binding ElementName=crossSectionAngioImage, Path=ActualWidth}" Height ="{Binding ElementName=crossSectionAngioImage, Path=ActualHeight}"
                             						  DijkstraHeap="{Binding DijkstraHeap}" MotionVector="{Binding MotionVector}"
                                                       AngioImages ="{Binding CrossSectionAngioImages}" AngioFrameNumber ="{Binding AngioFrameNumber}" 
                                                       MousePosition ="{Binding CrossSectionMousePosition, Mode=TwoWay}" AngioTrackPoints ="{Binding AngioTrackPoints, Mode=TwoWay}"
@@ -93,7 +92,7 @@
                                         </Grid.Clip>
                                         <Image x:Name="zoomSectionAngioImage" Source="{Binding CurrentAngioImage}">
                                             <Image.Clip>
-                                                <RectangleGeometry RadiusX="10" RadiusY="10">
+                                                <RectangleGeometry>
                                                     <RectangleGeometry.Rect>
                                                         <Rect X="0" Y="0" Width="{x:Static const:Constants.CoRegZoomAngioSize}" Height="{x:Static const:Constants.CoRegZoomAngioSize}"/>
                                                     </RectangleGeometry.Rect>
