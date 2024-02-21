@@ -57,7 +57,7 @@ CUDA
 ## [Axsun]
 
 Download & Install OCT Host
-1. [OCT Host (.exe)](https://docs.axsun.com/axsun-technologies-knowledge-base/other/downloads) 다운로드 후 설치
+1. [OCT Host (.exe)](https://docs.axsun.com/axsun-technologies-knowledge-base/other/downloads) 다운로드 후 설치 (ver 1.17.15)
 2. DLL Register
 
     (a) Command Prompt 관리자 권한으로 실행
