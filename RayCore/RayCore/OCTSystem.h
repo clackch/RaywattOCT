@@ -66,7 +66,7 @@ public:
 		IWbemClassObject __RPC_FAR* pObjParam
 	);
 	void GetUSBDeviceName(bool isAdded, IWbemServices* pSvc);
-	void hardwardidsVectorReset(std::vector<DeviceInfo>* inputVec, IWbemServices* pSvc);
+	void hardwareidsVectorReset(std::vector<DeviceInfo>* inputVec, IWbemServices* pSvc);
 	std::vector<DeviceInfo> hardwareIDs;
 	std::vector<DeviceInfo> tmpHardwareIDs;
 

@@ -1361,12 +1361,12 @@ HRESULT EventSink::Indicate(
 		IWbemClassObject* pObj = apObjArray[i];
 		hr = pObj->Get(L"__Class", 0, &var, 0, 0);
 		if (wcscmp(var.bstrVal, L"__InstanceCreationEvent") == 0) {
-			hardwardidsVectorReset(&tmpHardwareIDs, pSvc);
+			hardwareidsVectorReset(&tmpHardwareIDs, pSvc);
 			GetUSBDeviceName(true, pSvc);
 		}
 		else if (wcscmp(var.bstrVal, L"__InstanceDeletionEvent") == 0)
 		{
-			hardwardidsVectorReset(&tmpHardwareIDs, pSvc);
+			hardwareidsVectorReset(&tmpHardwareIDs, pSvc);
 			GetUSBDeviceName(false, pSvc);
 		}
 
@@ -1446,14 +1446,14 @@ void EventSink::GetUSBDeviceName(bool isAdded, IWbemServices* pSvc) {
 	}
 
 
-	hardwardidsVectorReset(&hardwareIDs, pSvc);
+	hardwareidsVectorReset(&hardwareIDs, pSvc);
 
 }
 
 /*
-* hardwardidsVectorReset
+* hardwareidsVectorReset 
 */
-void EventSink::hardwardidsVectorReset(std::vector<DeviceInfo>* inputVec, IWbemServices* pSvc) {
+void EventSink::hardwareidsVectorReset(std::vector<DeviceInfo>* inputVec, IWbemServices* pSvc) {
 	inputVec->clear();
 	IEnumWbemClassObject* pEnumerator = NULL;
 	HRESULT hres;
@@ -1640,7 +1640,7 @@ UINT COCTSystem::threadCheckDeviceDisconnect(LPVOID param) {
 		return 1;
 	}
 	pSystem->m_disconnectionCheckQuery->pSvc = pSvc;
-	pSystem->m_disconnectionCheckQuery->hardwardidsVectorReset(&(pSystem->m_disconnectionCheckQuery->hardwareIDs), pSvc);
+	pSystem->m_disconnectionCheckQuery->hardwareidsVectorReset(&(pSystem->m_disconnectionCheckQuery->hardwareIDs), pSvc);
 	PLOGI.printf("ready to receive disconnect event");
 	while (!(pSystem->m_disconnectionCheckQuery->m_isDIsconnected)) {
 		Sleep(1);
@@ -1667,25 +1667,6 @@ void COCTSystem::InitializeCOM() {
 		PLOGI.printf("Failed to initialize COM library. Error code = 0x%x", hr);
 		return;
 	}
-
-	hr = CoInitializeSecurity(
-		NULL,
-		-1,
-		NULL,
-		NULL,
-		RPC_C_AUTHN_LEVEL_DEFAULT,
-		RPC_C_IMP_LEVEL_IMPERSONATE,
-		NULL,
-		EOAC_NONE,
-		NULL
-	);
-
-	if (FAILED(hr)) {
-		PLOGI.printf("Failed to initialize security. Error code = 0x%x", hr);
-		CoUninitialize();
-		return;
-	}
-
 }
 
 /*
