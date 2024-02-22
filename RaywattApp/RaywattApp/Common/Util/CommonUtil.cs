@@ -1367,6 +1367,7 @@ namespace RaywattApp.Common.Util
                     Cv2.DrawContours(imgLumen, contours, -1, Scalar.White, -1);
                 }
                 Cv2.Resize(imgLumen, imgResize, imgResize.Size());
+                Cv2.Blur(imgResize, imgResize, new Size(13, 13) /* 필터 크기 */, new Point(-1, -1) /* 필터 중심*/);
 
                 Buffer.MemoryCopy((void*)imgResize.Data, (void*)(IntPtr.Add(buffer, i * frameSize)), frameSize, frameSize);
             }
