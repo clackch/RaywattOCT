@@ -1386,17 +1386,24 @@ namespace RaywattApp.ViewModels
             
             if (_angioManager.AngioSaveBuffer.Count != 0)
             {
-                //foreach (byte[] data in _angioManager.AngioSaveBuffer)
-                //{
-                //    Mat frame = new Mat(angioFrameWidth, angioFrameHeight, MatType.CV_8UC1, data);
-                //
-                //    Cv2.Resize(frame, frame, new OpenCvSharp.Size(Constants.AngioSize, Constants.AngioSize));
-                //
-                //    AngioFrames.Add(frame);
-                //    PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(frame));
-                //}
+                foreach (byte[] data in _angioManager.AngioSaveBuffer)
+                {
+                    Mat frame = new Mat(angioFrameHeight, angioFrameWidth, MatType.CV_8UC(channels), data);
+                    switch (channels)
+                    {
+                        case 3:
+                            Cv2.CvtColor(frame, frame, ColorConversionCodes.BGR2GRAY);
+                            break;
 
-                PatientCase.AngioFrame.AngioImage = ConvertBytesToImageSources(_angioManager.AngioSaveBuffer);
+                        case 4:
+                            Cv2.CvtColor(frame, frame, ColorConversionCodes.RGBA2GRAY);
+                            break;
+                    }
+
+                    AngioFrames.Add(frame);
+                    PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(frame));
+                }
+
                 _angioManager.AngioSaveFrameNum = 0;
                 _angioManager.AngioSaveBuffer.Clear();
 
