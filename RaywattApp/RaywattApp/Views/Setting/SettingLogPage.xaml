@@ -81,8 +81,8 @@
                 </StackPanel>
             </StackPanel>
         </Grid>
-        <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding LogExportCommand}" CommandParameter="{Binding ElementName=logFileList, Path=SelectedItems}" Content="{Binding [Export], Source={StaticResource L10N}}"/>
+        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding LogExportCommand}" CommandParameter="{Binding ElementName=logFileList, Path=SelectedItems}" Content="{Binding [Export], Source={StaticResource L10N}}"/>
         </StackPanel>
     </Grid>
 </Page>

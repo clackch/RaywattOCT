@@ -33,15 +33,10 @@
                 <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Setting], Source={StaticResource L10N}, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
             </StackPanel>
 
-            <StackPanel Grid.Row="1" Grid.Column="2" HorizontalAlignment="Right">
-                <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding RefreshCommand}" Content="{Binding [Refresh], Source={StaticResource L10N}}"/>
-            </StackPanel>
-
             <StackPanel Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left">
-                <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingPhysicianPage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingPhysicianPage}" Content="{Binding [Physician], Source={StaticResource L10N}}"/>
-                <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingDatabasePage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingDatabasePage}" Content="{Binding [Database], Source={StaticResource L10N}}"/>
-                <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingLogPage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingLogPage}" Content="{Binding [Log], Source={StaticResource L10N}}"/>
-                <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingTermsConditionsPage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingTermsConditionsPage}" Content="{Binding [Terms and Conditions], Source={StaticResource L10N}}"/>
+                <Button Style="{Binding CurrentMenu, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingDatabasePage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingDatabasePage}" Content="{Binding [Database], Source={StaticResource L10N}}"/>
+                <Button Style="{Binding CurrentMenu, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingLogPage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingLogPage}" Content="{Binding [Log], Source={StaticResource L10N}}"/>
+                <Button Style="{Binding CurrentMenu, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingTermsConditionsPage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingTermsConditionsPage}" Content="{Binding [Terms and Conditions], Source={StaticResource L10N}}"/>
                 <!--
                 <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingLocalizationPage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingLocalizationPage}" Content="{Binding [Localization], Source={StaticResource L10N}}"/>
                 <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingServicePage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingServicePage}" Content="{Binding [Service], Source={StaticResource L10N}}"/>
@@ -49,10 +44,25 @@
                 -->
             </StackPanel>
 
-            <StackPanel Grid.Row="2" Grid.Column="2" Grid.RowSpan="4">
-                <Frame NavigationUIVisibility="Hidden">
+            <StackPanel Grid.Row="2" Grid.Column="2" Grid.RowSpan="2">
+                <Frame NavigationUIVisibility="Hidden" Visibility="{Binding Visibility}">
                     <b:Interaction.Behaviors>
-                        <behaviors:FrameBehavior Parameter="{Binding PopupNavigationParameter, Mode=TwoWay}" Navigation="{Binding PopupNavigationSource, Mode=TwoWay}" />
+                        <behaviors:FrameBehavior Navigation="{Binding PopupNavigationSource, Mode=TwoWay}" />
+                    </b:Interaction.Behaviors>
+                </Frame>
+                <Frame NavigationUIVisibility="Hidden" Visibility="{Binding Visibility2}">
+                    <b:Interaction.Behaviors>
+                        <behaviors:FrameBehavior Navigation="{Binding PopupNavigationSource2, Mode=TwoWay}" />
+                    </b:Interaction.Behaviors>
+                </Frame>
+                <Frame NavigationUIVisibility="Hidden" Visibility="{Binding Visibility3}">
+                    <b:Interaction.Behaviors>
+                        <behaviors:FrameBehavior Navigation="{Binding PopupNavigationSource3, Mode=TwoWay}" />
+                    </b:Interaction.Behaviors>
+                </Frame>
+                <Frame NavigationUIVisibility="Hidden" Visibility="{Binding Visibility4}">
+                    <b:Interaction.Behaviors>
+                        <behaviors:FrameBehavior Navigation="{Binding PopupNavigationSource4, Mode=TwoWay}" />
                     </b:Interaction.Behaviors>
                 </Frame>
             </StackPanel>
@@ -61,6 +71,12 @@
 
             <StackPanel Grid.Row="5" Grid.Column="1" HorizontalAlignment="Left">
                 <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding CancelCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+            </StackPanel>
+            
+            <StackPanel Grid.Row="5" Grid.Column="2" HorizontalAlignment="Right" Orientation="Horizontal">
+                <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding ApplyCommand}" Content="{Binding [Apply], Source={StaticResource L10N}}"/>
+                <StackPanel Width="16"/>
+                <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding OkayCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
             </StackPanel>
         </Grid>
     </Border>

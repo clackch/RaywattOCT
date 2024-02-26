@@ -93,7 +93,6 @@ namespace RaywattApp
             services.AddTransient(typeof(SettingAcquisitionViewModel));
             services.AddTransient(typeof(SettingLocalizationViewModel));
             services.AddTransient(typeof(SettingDatabaseViewModel));
-            services.AddTransient(typeof(SettingPhysicianViewModel));
             services.AddTransient(typeof(SettingServiceViewModel));
             services.AddTransient(typeof(SettingLogViewModel));
             services.AddTransient(typeof(SettingTermsConditionsViewModel));
@@ -118,7 +117,6 @@ namespace RaywattApp
             services.AddTransient(typeof(FileCopyDialogViewModel));
             services.AddTransient(typeof(FileAlternateIdDialogViewModel));
             services.AddTransient(typeof(FileExportDialogViewModel));
-            services.AddTransient(typeof(SettingEditPhysicianDialogViewModel));
             services.AddTransient(typeof(TermsConditionsDialogViewModel));
             services.AddTransient(typeof(Review3dViewMenuViewModel));
             services.AddTransient(typeof(Review3dPatientMenuViewModel));

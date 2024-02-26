@@ -4,7 +4,6 @@ using RaywattApp.Common.Bases;
 using RaywattApp.Common.Setting;
 using RaywattApp.Common.Util;
 using System.IO;
-using System.Windows.Navigation;
 
 namespace RaywattApp.ViewModels.Setting
 {
