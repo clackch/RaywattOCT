@@ -25,12 +25,18 @@ using RaywattApp.Common.Annotation.Util;
 using System.Runtime.InteropServices;
 using System.Windows.Media.Imaging;
 using RaywattApp.Views.Dialog;
+using System.IO;
+using System.Windows.Media;
+using RaywattApp.Common.Angio;
+using System.Xml;
 
 namespace RaywattApp.ViewModels
 {
     public partial class ReviewViewModel : ReviewViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewViewModel));
+
+        private readonly AngioManager _angioManager;
 
         private CallbackFunctionForDetection cbLumenContour;
         public CallbackFunctionForDetection CBLumenContour => (this.cbLumenContour) ?? (this.cbLumenContour = new CallbackFunctionForDetection(OnRecvLumenContour));
@@ -61,6 +67,8 @@ namespace RaywattApp.ViewModels
             }
         }
 
+        private List<Mat> AngioFrames;
+
         [ObservableProperty]
         private BitmapSource _calciumIndicator;
 
@@ -88,6 +96,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private Section _section;
 
+        [ObservableProperty]
+        private ImageSource _currentAngioImage;
+
         private int outFrameNumber;
         public int OutFrameNumber
         {
@@ -98,6 +109,12 @@ namespace RaywattApp.ViewModels
                 MoveToFrame(RaySession.Review, value);
             }
         }
+
+        private int _currentAngioFrameNumber;
+        public int CurrentAngioFrameNumber { get { return _currentAngioFrameNumber; } set { _currentAngioFrameNumber = value; OnPropertyChanged(nameof(CurrentAngioFrameNumber)); } }
+
+        private int _angioFrameNumber;
+        public int AngioFrameNumber { get { return _angioFrameNumber; } set { _angioFrameNumber = value; OnPropertyChanged(nameof(AngioFrameNumber)); syncAngioFrame(value); } }
 
         private string _measurementCommand;
         public string MeasurementCommand { get { return _measurementCommand; } set { _measurementCommand = value; OnPropertyChanged(nameof(MeasurementCommand)); } }
@@ -122,6 +139,12 @@ namespace RaywattApp.ViewModels
 
         private string _lumenContourCommand;
         public string LumenContourCommand { get { return _lumenContourCommand; } set { _lumenContourCommand = value; OnPropertyChanged(nameof(LumenContourCommand)); } }
+
+        [ObservableProperty]
+        private CoRegistration _currentTrackPoint;
+
+        private List<CoRegistration> _angioTrackPoints;
+        public List<CoRegistration> AngioTrackPoints { get { return _angioTrackPoints; } set { _angioTrackPoints = value; OnPropertyChanged(nameof(AngioTrackPoints)); } }
 
         [ObservableProperty]
         private Zoom _zoomAngio = new Zoom(Constants.CrossSectionAngio / Constants.OCTImageSize);
@@ -236,10 +259,11 @@ namespace RaywattApp.ViewModels
         {
             get { return this._cmdMoveIndicator ?? (this._cmdMoveIndicator = new RelayCommand<object>(MoveIndicator)); }
         }
-
-        public ReviewViewModel(SqlManager sqlManager, IDialogService dialogService) : base(sqlManager, dialogService)
+        public ReviewViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager) : base(sqlManager, dialogService)
         {
             _log.Debug("ReviewViewModel");
+
+            _angioManager = angioManager;
 
             Constants.CurrentPage = Constants.ReviewPage;
 
@@ -263,6 +287,9 @@ namespace RaywattApp.ViewModels
             MenuExpand(true);
 
             CurrentLumenContour = new LumenContour();
+            AngioFrames = new List<Mat>();
+            AngioTrackPoints = new List<CoRegistration>();
+            CurrentTrackPoint = new CoRegistration();
 
             UpdateCrossSectionImage();
         }
@@ -282,11 +309,13 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
-
+                
                 ReviewStatus.CurrentPage = Constants.ReviewPage;
-
+                
                 ToggleAngio(ReviewStatus.IsAngioOn);
                 ToggleLongitude(ReviewStatus.IsLumenProfile);
+
+                SetAngioFrame();
 
                 Section.Proximal.X = CommonUtil.GetPositionFromFrame(PatientCase.SectionProximal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
                 Section.Distal.X = CommonUtil.GetPositionFromFrame(PatientCase.SectionDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
@@ -301,6 +330,7 @@ namespace RaywattApp.ViewModels
                 SetAnnotation();
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
 
+                AngioFrameNumber = ReviewStatus.AngioFrameNumber;
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
 
                 if (ReviewStatus.IsPlay)
@@ -322,6 +352,60 @@ namespace RaywattApp.ViewModels
          */
         #region Initialize
 
+        private void SetAngioFrame()
+        {
+            if (!PatientCase.AngioYn) return;
+
+            if (PatientCase.AngioFrame == null) PatientCase.AngioFrame = new AngioFrame();
+            if (PatientCase.AngioFrame.CoRegistration == null) PatientCase.AngioFrame.CoRegistration = new List<CoRegistration>();
+
+            if (PatientCase.AngioFrame.AngioImage.Count == 0) ReadAngioFrames();
+            if (PatientCase.AngioFrame.CoRegistration.Count == 0) ReadTrackPoints();
+            if (PatientCase.AngioFrame.DijkstraHeap.Count == 0)
+            {
+                Thread threadImageProcessing = new Thread(() => ThreadImageProcessing());
+                threadImageProcessing.Start();
+            }
+
+            AngioTrackPoints = PatientCase.AngioFrame.CoRegistration;
+        }
+        private List<ImageSource> ConvertBytesToImageSources(List<byte[]> imageBytesList)
+        {
+            List<ImageSource> imageSources = new List<ImageSource>();
+
+            foreach (byte[] imageBytes in imageBytesList)
+            {
+                BitmapSource bitmapSource = ConvertBytesToBitmapSource(imageBytes);
+                ImageSource imageSource = bitmapSource as ImageSource;
+                if (imageSource != null)
+                {
+                    imageSources.Add(imageSource);
+                }
+            }
+
+            return imageSources;
+        }
+
+        private BitmapSource ConvertBytesToBitmapSource(byte[] imageBytes)
+        {
+            PixelFormat pixelFormat;
+            switch (_angioManager.AngioBitsPerPixel)
+            {
+                case (char)8:
+                    pixelFormat = PixelFormats.Gray8;
+                    break;
+                case (char)24:
+                    pixelFormat = PixelFormats.Bgr24;
+                    break;
+                case (char)32:
+                    pixelFormat = PixelFormats.Bgr32;
+                    break;
+                default:
+                    throw new NotSupportedException("Unsupported bit depth");
+            }
+            return BitmapSource.Create(_angioManager.AngioFrameWidth, _angioManager.AngioFrameHeight, 96, 96, pixelFormat, null, imageBytes, _angioManager.AngioFrameWidth * _angioManager.AngioBitsPerPixel / 8);
+        }
+        
         private void SetAnnotation()
         {
             string tempCrossSection = "[]", tempLongitude = "", tempBookmark = "[]";
@@ -391,6 +475,13 @@ namespace RaywattApp.ViewModels
                 Measurements.Add(measurement);
             }
             Measurements = Measurements.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
+        }
+
+        private void ThreadImageProcessing()
+        {
+            ImageProcessing(AngioFrames);
+
+            ReviewStatus.IsImageProcessingDone = true;
         }
 
         private void ThreadMakeLumenProfile(string lumenContour)
@@ -749,6 +840,7 @@ namespace RaywattApp.ViewModels
         private void CoRegistration()
         {
             _log.Debug("CoRegistration");
+            ReviewStatus.AngioFrameNumber = CurrentAngioFrameNumber;
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
@@ -834,7 +926,7 @@ namespace RaywattApp.ViewModels
                 sqlParameters["cross_section"] = PatientCase.CrossSection;
                 PatientCase.Longitude = ConvertLongitudeToJson();
                 sqlParameters["longitude"] = PatientCase.Longitude;
-                PatientCase.Bookmark = JsonConvert.SerializeObject(Bookmarks, Formatting.Indented);
+                PatientCase.Bookmark = JsonConvert.SerializeObject(Bookmarks, Newtonsoft.Json.Formatting.Indented);
                 sqlParameters["bookmark"] = PatientCase.Bookmark;
 
                 if (this.isLumenContourSave)
@@ -907,7 +999,7 @@ namespace RaywattApp.ViewModels
                 }
             }
 
-            return JsonConvert.SerializeObject(measurements, Formatting.Indented);
+            return JsonConvert.SerializeObject(measurements, Newtonsoft.Json.Formatting.Indented);
         }
 
         private string ConvertLongitudeToJson()
@@ -917,7 +1009,7 @@ namespace RaywattApp.ViewModels
             longitudeMeasurement.LengthGeometries = LModeLengthGeometries;
             longitudeMeasurement.TextGeometries = LModeTextGeometries;
 
-            return JsonConvert.SerializeObject(longitudeMeasurement, Formatting.Indented);
+            return JsonConvert.SerializeObject(longitudeMeasurement, Newtonsoft.Json.Formatting.Indented);
         }
 
         #endregion
@@ -956,12 +1048,25 @@ namespace RaywattApp.ViewModels
                 }
             }
         }
+        protected override bool MoveToFrame(RaySession session, int nFrame)
+        {
+            bool ret = base.MoveToFrame(session, nFrame);
 
+            if (ret == false || PatientCase.AngioYn == false) return false;
+
+            int OctFrameLength = ReviewStatus.NumberOfFrames;
+            double ratio = (double) PatientCase.AngioFrame.AngioImage.Count / OctFrameLength * FrameNumber;
+            CurrentAngioFrameNumber = (int)ratio;
+
+            CurrentAngioImage = PatientCase.AngioFrame.AngioImage[CurrentAngioFrameNumber];
+
+            return true;
+        }
         protected override void UpdateCrossSectionImage()
         {
             if (DrawCrossSectionImage())
             {
-                DeviceStatus.ReviewImageInfo imageInfo = DeviceStatus.ReviewImageInfos[(int)RaySession.Review];
+                DeviceStatus.ReviewImageInfo imageInfo = DeviceStatus.ReviewImageInfos[(int)RaySession.Review];                
                 if (!IndicatorLongitude.IsCaptured) updateNavigator(imageInfo.Current, imageInfo.Total);
 
                 FrameNumber = imageInfo.Current;
@@ -1239,6 +1344,211 @@ namespace RaywattApp.ViewModels
                 curPosition = Math.Round(curPosition);
                 MoveToFrame(RaySession.Review, (int)curPosition);
             }
+        }
+
+        #endregion
+
+        /*
+        * CoRegistration
+        */
+        #region CoRegistration
+        private void syncAngioFrame(int value)
+        {
+            if (value < 0) return;
+
+            int OctFrameLength = ReviewStatus.NumberOfFrames;
+            double FrameNumber = (double)PatientCase.AngioFrame.AngioImage.Count / OctFrameLength / value;
+            FrameNumber = 1 / FrameNumber;
+
+            base.MoveToFrame(RaySession.Review, (int)FrameNumber);
+            CurrentAngioImage = PatientCase.AngioFrame.AngioImage[value];
+        }
+
+        private void ReadAngioFrames()
+        { 
+            string file = PatientCase.Image;
+            string angioFile = file.Substring(0, file.Length - 3) + "angioframes";
+            string paramsFile = file.Substring(0, file.Length - 3) + "params";
+
+            string directory = Path.Combine(Constants.DataRootPath, PatientCase.PatientId);
+            string angioPath = Path.Combine(directory, angioFile);
+            string paramsPath = Path.Combine(directory, paramsFile);
+
+            //Read .params
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.Load(paramsPath);
+
+            XmlNode configNode = xmlDoc.SelectSingleNode("/config");
+            int angioFrameHeight = int.Parse(configNode.SelectSingleNode("AngioFrameHeight").InnerText);
+            int angioFrameWidth = int.Parse(configNode.SelectSingleNode("AngioFrameWidth").InnerText);
+            int channels = int.Parse(configNode.SelectSingleNode("BitsPerPixel").InnerText) / 8;
+
+            
+            if (_angioManager.AngioSaveBuffer.Count != 0)
+            {
+                foreach (byte[] data in _angioManager.AngioSaveBuffer)
+                {
+                    Mat frame = new Mat(angioFrameHeight, angioFrameWidth, MatType.CV_8UC(channels), data);
+                    switch (channels)
+                    {
+                        case 3:
+                            Cv2.CvtColor(frame, frame, ColorConversionCodes.BGR2GRAY);
+                            break;
+
+                        case 4:
+                            Cv2.CvtColor(frame, frame, ColorConversionCodes.RGBA2GRAY);
+                            break;
+                    }
+
+                    AngioFrames.Add(frame);
+                    PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(frame));
+                }
+
+                _angioManager.AngioSaveFrameNum = 0;
+                _angioManager.AngioSaveBuffer.Clear();
+
+                return;
+            }
+
+            //Read .angioframes
+            using (BinaryReader reader = new BinaryReader(System.IO.File.Open(angioPath, FileMode.Open)))
+            {
+                while (reader.BaseStream.Position != reader.BaseStream.Length)
+                {
+                    byte[] data = reader.ReadBytes(angioFrameWidth * angioFrameHeight * channels);
+                    Mat frame = new Mat(angioFrameHeight, angioFrameWidth, MatType.CV_8UC(channels), data);
+                    switch (channels)
+                    {
+                        case 3:
+                            Cv2.CvtColor(frame, frame, ColorConversionCodes.BGR2GRAY);
+                            break;
+
+                        case 4:
+                            Cv2.CvtColor(frame, frame, ColorConversionCodes.RGBA2GRAY);
+                            break;
+                    }
+
+                    AngioFrames.Add(frame);
+                    PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(frame));
+                }
+            }
+        }
+
+        private ImageSource ConvertMatsToImageSource(Mat mat)
+        {
+            using (var stream = new MemoryStream())
+            {
+
+                mat.WriteToStream(stream, "." + Constants.ExportStillFrameBitmap);
+
+                var bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.StreamSource = stream;
+                bitmapImage.EndInit();
+                bitmapImage.Freeze();
+                return bitmapImage;
+            }
+        }
+
+        private void ReadTrackPoints()
+        {
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = PatientCase.Id;
+
+            IList<StringModel> coRegistrationTrackPoint = _sqlManager.SelectCoRegistrationTrackPoint(sqlParameters);
+            if (coRegistrationTrackPoint == null || coRegistrationTrackPoint.Count == 0 || coRegistrationTrackPoint[0].ReturnString == null) return;
+
+            List<CoRegistration> coRegistrations = JsonConvert.DeserializeObject<List<CoRegistration>>(coRegistrationTrackPoint[0].ReturnString);
+
+            foreach (CoRegistration coReg in coRegistrations)
+            {
+                PatientCase.AngioFrame.CoRegistration.Add(coReg);
+            }
+        }
+
+        private void ImageProcessing(List<Mat> frames)
+        {
+            Mat prevEqualImg = null, currEqualImg;
+
+            foreach (var frame in frames)
+            {
+                Mat blurredImage = new Mat();
+                Cv2.Blur(frame, blurredImage, new OpenCvSharp.Size(7, 7));
+
+                // HE 영역 분할 처리
+                Mat equalizedImage = new Mat();
+                var clahe = Cv2.CreateCLAHE(clipLimit: 10, new OpenCvSharp.Size(9, 9));
+                clahe.Apply(blurredImage, equalizedImage);
+
+                currEqualImg = equalizedImage.Clone();
+                if (prevEqualImg != null)
+                {
+                    CalculateMotionVector(prevEqualImg, currEqualImg); // Constants.AngioSize Square 
+                }
+                prevEqualImg = equalizedImage.Clone();
+
+                // 픽셀 100 미만 값 -> 255, 픽셀 100 이상 값 -> 0
+                Mat thresholdImage = new Mat();
+                Cv2.Threshold(equalizedImage, thresholdImage, 100, 255, ThresholdTypes.BinaryInv);
+
+                // 이미지 변형(분할 : Segmentation) 처리
+                Mat morphedImage = new Mat();
+                var kernel = Cv2.GetStructuringElement(MorphShapes.Ellipse, new OpenCvSharp.Size(3, 3));
+                Cv2.MorphologyEx(thresholdImage, morphedImage, MorphTypes.Open, kernel, iterations: 2);
+
+                // 변형 처리 반복 -> 스켈레톤(골격화)
+                Mat skeleton = new Mat();
+                skeleton = Skeletonize(morphedImage);
+
+                byte[] imageData = new byte[frame.Rows * frame.Cols * frame.ElemSize()];
+                Marshal.Copy(skeleton.Data, imageData, 0, imageData.Length);
+
+                PatientCase.AngioFrame.DijkstraHeap.Add(new DijkstraHeap(imageData, frame.Rows, frame.Cols));
+            }
+        }
+        private void CalculateMotionVector(Mat prevFrame, Mat nextFrame)
+        {
+            Mat flow = new Mat();
+            Cv2.CalcOpticalFlowFarneback(prevFrame, nextFrame, flow, 0.5, 5, 21, 7, 5, 1.1, 0);
+
+            //curr, next: 이전 영상과 현재 영상. 그레이스케일 영상.
+            //flow: (출력)계산된 옵티컬플로우.np.ndarray.shape = (h, w, 2(for x, y vector)), dtype = np.float32.
+            //pyr_scale: 피라미드 영상을 만들 때 축소 비율. (e.g.) 0.5 ~0.7, 클수록 계산량감소, 오차확률 상승
+            //levels: 피라미드 영상 개수. (e.g.) 3
+            //winsize: 평균 윈도우 크기. (e.g.) 15 ~21
+            //iterations: 각 피라미드 레벨에서 알고리즘 반복 횟수. (e.g.) 3 다다익선(tradeOff -> 계산량)
+            //poly_n: 다항식 확장을 위한 이웃 픽셀 크기. 보통 5 또는 7.
+            //poly_sigma: 가우시안 표준편차. 보통 poly_n = 5-> 1.1, poly_n = 7-> 1.5.
+            //flags: 0, cv2.OPTFLOW_USE_INITIAL_FLOW, cv2.OPTFLOW_FARNEBACK_GAUSSIAN.
+
+            PatientCase.AngioFrame.MotionVector.Add(flow);
+        }
+
+        private Mat Skeletonize(Mat img)
+        {
+            Mat skel = Mat.Zeros(img.Size(), MatType.CV_8UC1);
+            Mat temp = new Mat();
+            Mat eroded = new Mat();
+            int i = 0;
+
+            var element = Cv2.GetStructuringElement(MorphShapes.Cross, new OpenCvSharp.Size(3, 3));
+
+            bool done;
+            do
+            {
+                i++;
+                Cv2.MorphologyEx(img, eroded, MorphTypes.Erode, element); // 침식(Erode)
+                Cv2.MorphologyEx(eroded, temp, MorphTypes.Dilate, element); // 팽창(Dilate)
+                Cv2.Subtract(img, temp, temp);
+                Cv2.BitwiseOr(skel, temp, skel);
+                eroded.CopyTo(img);
+                if (i == 100) break; // 검은 화면의 경우 무한반복 탈출
+
+                done = (Cv2.CountNonZero(img) == 0);
+            } while (!done);
+
+            return skel;
         }
         #endregion
     }

@@ -16,5 +16,8 @@ namespace RaywattApp.Views.Component
 
         public static DependencyProperty IsOCTImagingDoneProperty = DependencyProperty.Register("IsOCTImagingDone", typeof(bool), typeof(ButtonUnableComponent));
         public bool IsOCTImagingDone { get => (bool)GetValue(IsOCTImagingDoneProperty); set => SetValue(IsOCTImagingDoneProperty, value); }
+
+        public static DependencyProperty IsImageProcessingDoneProperty = DependencyProperty.Register("IsImageProcessingDone", typeof(bool), typeof(ButtonUnableComponent));
+        public bool IsImageProcessingDone { get => (bool)GetValue(IsImageProcessingDoneProperty); set => SetValue(IsImageProcessingDoneProperty, value); }
     }
 }

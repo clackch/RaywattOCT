@@ -87,7 +87,7 @@ namespace RaywattApp.Common.Angio
 
             // 추가적으로 거리에 따른 가중치 적용
             double distance = gap == 2 ? sqrt2 : 1;
-            double weight = 50;
+            double weight = 20;
             cost += weight * distance; // 거리에 따른 가중치 추가, 최적 weight값 찾을 필요 있음
 
             return cost;

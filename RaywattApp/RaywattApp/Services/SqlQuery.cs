@@ -183,6 +183,13 @@ namespace RaywattApp.Services
                 FROM rv_schema.cath_room
                 ORDER BY name;
                 ";
+
+            //SelectCoRegistrationTrackTrackPoint
+            _query["SelectCoRegistrationTrackPoint"] = @$"
+                SELECT track_point return_string
+                FROM rv_schema.coregistration
+                WHERE id = @id
+                ";
         }
 
         private static void SetInsertQuery()

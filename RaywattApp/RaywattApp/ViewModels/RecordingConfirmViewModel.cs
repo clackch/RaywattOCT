@@ -77,10 +77,7 @@ namespace RaywattApp.ViewModels
                 Playback();
             }
 
-            if(_angioManager.readyToRecv && DeviceStatus.IsAngioConnected)
-            {
-                _angioManager.readyToRecv = false;
-            }
+            _angioManager.ReadyToRecv = true ? false : false;
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -102,6 +99,7 @@ namespace RaywattApp.ViewModels
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
             parameter["patientCase"] = PatientCase;
+            parameter["command"] = RedoPullbackCommand;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingLiveViewPage) { Parameter = parameter });
         }
 

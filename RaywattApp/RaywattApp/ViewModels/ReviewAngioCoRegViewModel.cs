@@ -13,11 +13,15 @@ using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
 using OpenCvSharp;
 using System.IO;
+using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Angio;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Point = System.Windows.Point;
+using System.Threading;
 using Newtonsoft.Json;
+using RaywattApp.Common.Angio;
+using OpenCvSharp.WpfExtensions;
 
 namespace RaywattApp.ViewModels
 {
@@ -69,7 +73,6 @@ namespace RaywattApp.ViewModels
                 OnPropertyChanged(nameof(IsRendering));
             }
         }
-
         public List<Mat> CrossSectionAngioImages { get; private set; }
         private List<ImageSource> crossSectionAngioImageSources { get; set; }
         public ImageSource CurrentAngioImage
@@ -151,7 +154,7 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private bool _isResetOn;
+        private bool _isResetOn = true;
         public bool IsResetOn
         {
             get => _isResetOn;
@@ -173,6 +176,29 @@ namespace RaywattApp.ViewModels
             }
         }
 
+
+        private List<Mat> _motionVector;
+        public List<Mat> MotionVector
+        {
+            get { return _motionVector; }
+            set
+            {
+                _motionVector = value;
+                OnPropertyChanged(nameof(MotionVector));
+            }
+        }
+
+        private List<DijkstraHeap> _dijkstraHeap;
+        public List<DijkstraHeap> DijkstraHeap
+        {
+            get { return _dijkstraHeap; }
+            set
+            {
+                _dijkstraHeap = value;
+                OnPropertyChanged(nameof(DijkstraHeap));
+            }
+        }
+        
         private bool _isOk;
 
         public bool IsOk
@@ -196,7 +222,9 @@ namespace RaywattApp.ViewModels
 
             CrossSectionAngioImages = new List<Mat>();
             crossSectionAngioImageSources = new List<ImageSource>();
-            ReadAngioFrames();
+            AngioTrackPoints = new List<CoRegistration>();
+            DijkstraHeap = new List<DijkstraHeap>();
+            MotionVector = new List<Mat>();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -212,6 +240,12 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
+
+                for (int i = 0; i < PatientCase.AngioFrame.DijkstraHeap.Count; i++) DijkstraHeap.Add(PatientCase.AngioFrame.DijkstraHeap[i]);
+                for (int i = 0; i < PatientCase.AngioFrame.MotionVector.Count; i++) MotionVector.Add(PatientCase.AngioFrame.MotionVector[i]);
+                AngioFrameNumber = ReviewStatus.AngioFrameNumber;
+                ReadAngioFrames();
+                ReadTrackPoints();
             }
         }
 
@@ -246,6 +280,7 @@ namespace RaywattApp.ViewModels
 
             if (isSave)
             {
+                PatientCase.AngioFrame.CoRegistration = AngioTrackPoints;
                 SaveCoRegPoint();
 
                 if (AngioTrackPoints[0].TrackPoint.Count != 0)
@@ -257,6 +292,8 @@ namespace RaywattApp.ViewModels
                     UpdateCoRegStatus(false);
                 }
             }
+
+            ReviewStatus.AngioFrameNumber = AngioFrameNumber;
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
@@ -290,50 +327,28 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        void ReadAngioFrames()
+        private void ReadAngioFrames()
         {
-            int x1 = 240, y1 = 70, x2 = 780, y2 = 970;
-            string[] filePaths = Directory.GetFiles(@"C:\Raywatt\system\3rdparty\angioSamples", "*.angioframes");
-
-            foreach (string filePath in filePaths)
+            for (int i = 0; i < PatientCase.AngioFrame.AngioImage.Count; i++)
             {
-                using (BinaryReader reader = new BinaryReader(System.IO.File.Open(filePath, FileMode.Open)))
+                crossSectionAngioImageSources.Add(PatientCase.AngioFrame.AngioImage[i]);
+
+                if (PatientCase.AngioFrame.AngioImage[i] is BitmapSource bitmapSource)
                 {
-                    while (reader.BaseStream.Position != reader.BaseStream.Length)
-                    {
-                        int width = x2 - x1, height = y2 - y1;
-                        int channels = 1;
-
-                        byte[] data = reader.ReadBytes(1024 * 1024 * channels);
-                        Mat frame = new Mat(1024, 1024, MatType.CV_8UC1, data);
-
-                        OpenCvSharp.Rect roi = new OpenCvSharp.Rect(x1, y1, width, height);
-                        frame = new Mat(frame, roi);
-                        Cv2.Resize(frame, frame, new OpenCvSharp.Size(Constants.AngioSize, Constants.AngioSize));
-                        CrossSectionAngioImages.Add(frame);
-                        crossSectionAngioImageSources.Add(ConvertMatsToImageSource(frame));
-                    }
+                    CrossSectionAngioImages.Add(bitmapSource.ToMat());
                 }
-                AngioFrameLength = crossSectionAngioImageSources.Count - 1;
-                AngioTrackPoints = new List<CoRegistration>(CrossSectionAngioImages.Count);
-                break;
             }
+            AngioFrameLength = crossSectionAngioImageSources.Count - 1;
         }
 
-        private ImageSource ConvertMatsToImageSource(Mat mat)
+        private void ReadTrackPoints()
         {
-            using (var stream = new MemoryStream())
+            int cnt = 0;
+            foreach (CoRegistration coReg in PatientCase.AngioFrame.CoRegistration)
             {
-
-                mat.WriteToStream(stream, ".bmp");
-
-                var bitmapImage = new BitmapImage();
-                bitmapImage.BeginInit();
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.StreamSource = stream;
-                bitmapImage.EndInit();
-                bitmapImage.Freeze();
-                return bitmapImage;
+                DijkstraHeap[cnt].line = new List<List<Point>>(coReg.Line);
+                DijkstraHeap[cnt].trackPoint = new List<Point>(coReg.TrackPoint);
+                cnt++;
             }
         }
     }
