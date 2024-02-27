@@ -32,6 +32,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
         private static readonly DependencyProperty AngioFrameNumberProperty =
             DependencyProperty.Register("AngioFrameNumber", typeof(int), typeof(DrawAngioPathUtil), new PropertyMetadata(-1, OnAngioFrameNumberPropertyChanged));
+
         public int CurrentAngioFrameNumber
         {
             get { return (int)GetValue(CurrentAngioFrameNumberProperty); }
@@ -211,32 +212,6 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             }
         }
 
-        public Mat Skeletonize(Mat img)
-        {
-            Mat skel = Mat.Zeros(img.Size(), MatType.CV_8UC1);
-            Mat temp = new Mat();
-            Mat eroded = new Mat();
-            int i = 0;
-
-            var element = Cv2.GetStructuringElement(MorphShapes.Cross, new OpenCvSharp.Size(3, 3));
-
-            bool done;
-            do
-            {
-                i++;
-                Cv2.MorphologyEx(img, eroded, MorphTypes.Erode, element); // 침식(Erode)
-                Cv2.MorphologyEx(eroded, temp, MorphTypes.Dilate, element); // 팽창(Dilate)
-                Cv2.Subtract(img, temp, temp);
-                Cv2.BitwiseOr(skel, temp, skel);
-                eroded.CopyTo(img);
-                if (i == 100) break; // 검은 화면의 경우 무한반복 탈출
-
-                done = (Cv2.CountNonZero(img) == 0);
-            } while (!done);
-
-            return skel;
-        }
-
         private void PathChange(int index)
         {
             Application.Current.Dispatcher.Invoke(() =>
@@ -250,7 +225,6 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
         private void TrackPointChange()
         {
             InitializePath();
-
             DrawTrackPoint();
         }
 

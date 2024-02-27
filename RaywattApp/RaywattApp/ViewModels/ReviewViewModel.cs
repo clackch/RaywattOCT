@@ -369,42 +369,6 @@ namespace RaywattApp.ViewModels
 
             AngioTrackPoints = PatientCase.AngioFrame.CoRegistration;
         }
-        private List<ImageSource> ConvertBytesToImageSources(List<byte[]> imageBytesList)
-        {
-            List<ImageSource> imageSources = new List<ImageSource>();
-
-            foreach (byte[] imageBytes in imageBytesList)
-            {
-                BitmapSource bitmapSource = ConvertBytesToBitmapSource(imageBytes);
-                ImageSource imageSource = bitmapSource as ImageSource;
-                if (imageSource != null)
-                {
-                    imageSources.Add(imageSource);
-                }
-            }
-
-            return imageSources;
-        }
-
-        private BitmapSource ConvertBytesToBitmapSource(byte[] imageBytes)
-        {
-            PixelFormat pixelFormat;
-            switch (_angioManager.AngioBitsPerPixel)
-            {
-                case (char)8:
-                    pixelFormat = PixelFormats.Gray8;
-                    break;
-                case (char)24:
-                    pixelFormat = PixelFormats.Bgr24;
-                    break;
-                case (char)32:
-                    pixelFormat = PixelFormats.Bgr32;
-                    break;
-                default:
-                    throw new NotSupportedException("Unsupported bit depth");
-            }
-            return BitmapSource.Create(_angioManager.AngioFrameWidth, _angioManager.AngioFrameHeight, 96, 96, pixelFormat, null, imageBytes, _angioManager.AngioFrameWidth * _angioManager.AngioBitsPerPixel / 8);
-        }
         
         private void SetAnnotation()
         {
@@ -1383,7 +1347,7 @@ namespace RaywattApp.ViewModels
             int angioFrameWidth = int.Parse(configNode.SelectSingleNode("AngioFrameWidth").InnerText);
             int channels = int.Parse(configNode.SelectSingleNode("BitsPerPixel").InnerText) / 8;
 
-            
+            //Recording -> Review
             if (_angioManager.AngioSaveBuffer.Count != 0)
             {
                 foreach (byte[] data in _angioManager.AngioSaveBuffer)
@@ -1410,7 +1374,7 @@ namespace RaywattApp.ViewModels
                 return;
             }
 
-            //Read .angioframes
+            //PatientCaseList -> Review
             using (BinaryReader reader = new BinaryReader(System.IO.File.Open(angioPath, FileMode.Open)))
             {
                 while (reader.BaseStream.Position != reader.BaseStream.Length)
@@ -1438,7 +1402,6 @@ namespace RaywattApp.ViewModels
         {
             using (var stream = new MemoryStream())
             {
-
                 mat.WriteToStream(stream, "." + Constants.ExportStillFrameBitmap);
 
                 var bitmapImage = new BitmapImage();

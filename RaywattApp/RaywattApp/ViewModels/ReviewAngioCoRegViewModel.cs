@@ -18,9 +18,7 @@ using RaywattApp.Common.Angio;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Point = System.Windows.Point;
-using System.Threading;
 using Newtonsoft.Json;
-using RaywattApp.Common.Angio;
 using OpenCvSharp.WpfExtensions;
 
 namespace RaywattApp.ViewModels
