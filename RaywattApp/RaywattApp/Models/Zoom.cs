@@ -200,6 +200,7 @@ namespace RaywattApp.Models
 
         public void Window_ManipulationStarting(object parameter)
         {
+            _log.Debug("Manipulation Starting");
             ManipulationStartingEventArgs e = (ManipulationStartingEventArgs)parameter;
             e.ManipulationContainer = Application.Current.MainWindow;
             e.Handled = true;
@@ -242,7 +243,7 @@ namespace RaywattApp.Models
 
         private void ZoomInSetting(double scale)
         {
-            _log.Debug("zoomin");
+            //_log.Debug("zoomin");
             double ratio = Constants.CrossSectionSize / Constants.MiniMapCanvasSize;
             double centerLeft = RectLeft + RectWidth / 2;
             double centerTop = RectTop + RectHeight / 2;
@@ -260,7 +261,7 @@ namespace RaywattApp.Models
 
         private void ZoomOutSetting(double scale)
         {
-            _log.Debug("zoomout");
+            //_log.Debug("zoomout");
             double ratio = Constants.CrossSectionSize / Constants.MiniMapCanvasSize;
             double centerLeft = RectLeft + RectWidth / 2;
             double centerTop = RectTop + RectHeight / 2;

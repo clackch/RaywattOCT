@@ -712,24 +712,30 @@ namespace RaywattApp.ViewModels
         public void Window_ManipulationDelta(object parameter)
         {
             double prevScale = ReviewStatus.Zoom.ScaleX;
+            ManipulationDeltaEventArgs e = (ManipulationDeltaEventArgs)parameter;
+            int touchPoints = e.Manipulators.Count();
 
-            ReviewStatus.Zoom.Window_ManipulationDelta(parameter);
-
-            if (ReviewStatus.Zoom.ScaleX > Constants.ZoomScaleDefault)
+            if (!ReviewStatus.IsMeasurementOn || touchPoints > 1)
             {
-                IndicatorCrossSection.IsVisible = Visibility.Collapsed;
-                ReviewStatus.IsCalciumOn = false;
-            }
-            
-            if (ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault)
-            {
-                ReviewStatus.IsCalciumOn = true;
+                ReviewStatus.Zoom.Window_ManipulationDelta(parameter);
 
-                if (!ReviewStatus.IsLumenProfile)
-                    IndicatorCrossSection.IsVisible = Visibility.Visible;
+                if (ReviewStatus.Zoom.ScaleX > Constants.ZoomScaleDefault)
+                {
+                    IndicatorCrossSection.IsVisible = Visibility.Collapsed;
+                    ReviewStatus.IsCalciumOn = false;
+                }
+
+                if (ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault)
+                {
+                    ReviewStatus.IsCalciumOn = true;
+
+                    if (!ReviewStatus.IsLumenProfile)
+                        IndicatorCrossSection.IsVisible = Visibility.Visible;
+                }
             }
 
-            MeasurementCommand = (prevScale < ReviewStatus.Zoom.ScaleX) ? Constants.MeasureZoomIn : Constants.MeasureZoomOut;
+            if (ReviewStatus.IsMeasurementOn)
+                MeasurementCommand = (prevScale < ReviewStatus.Zoom.ScaleX) ? Constants.MeasureZoomIn : Constants.MeasureZoomOut;
         }
 
         private void ZoomIn()
