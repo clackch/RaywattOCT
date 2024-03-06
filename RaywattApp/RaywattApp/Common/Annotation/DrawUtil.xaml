@@ -6,7 +6,10 @@
              xmlns:const="clr-namespace:RaywattApp.Common.Bases"
              mc:Ignorable="d" 
              x:Name="UserControl"
-             d:DesignHeight="640" d:DesignWidth="640">
+             d:DesignHeight="640" d:DesignWidth="640"
+             ManipulationStarting="Window_ManipulationStarting"
+             ManipulationDelta="Window_ManipulationDelta"
+             ManipulationCompleted="Window_ManipulationCompleted">
 
     <UserControl.Resources>
         <Style TargetType="Canvas">
@@ -149,7 +152,7 @@
             </RectangleGeometry>
         </Grid.Clip>
         <Canvas Name="canvasBackground" Width="{x:Static const:Constants.OCTImageSize}" Height="{x:Static const:Constants.OCTImageSize}"/>
-        <Canvas Name="canvas">
+        <Canvas Name="canvas" IsManipulationEnabled="true">
             <Canvas.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform ScaleX="{Binding Zoom.ScaleX, ElementName=UserControl}" ScaleY="{Binding Zoom.ScaleY, ElementName=UserControl}"/>

@@ -77,6 +77,9 @@ namespace RaywattApp.ViewModels
         private double _maxThickness;
 
         [ObservableProperty]
+        private double _prevScale;
+
+        [ObservableProperty]
         private Indicator _indicatorCrossSection;
 
         [ObservableProperty]
@@ -237,11 +240,24 @@ namespace RaywattApp.ViewModels
             get { return this._cmdMoveIndicator ?? (this._cmdMoveIndicator = new RelayCommand<object>(MoveIndicator)); }
         }
 
+        private ICommand _manipulationStartingCommand;
+        public ICommand ManipulationStartingCommand
+        {
+            get { return this._manipulationStartingCommand ?? (this._manipulationStartingCommand = new RelayCommand<object>(Window_ManipulationStarting)); }
+        }
+
         private ICommand _manipulationDeltaCommand;
         public ICommand ManipulationDeltaCommand
         {
             get { return this._manipulationDeltaCommand ?? (this._manipulationDeltaCommand = new RelayCommand<object>(Window_ManipulationDelta)); }
         }
+
+        private ICommand _manipulationCompletedCommand;
+        public ICommand ManipulationCompletedCommand
+        {
+            get { return this._manipulationCompletedCommand ?? (this._manipulationCompletedCommand = new RelayCommand<object>(Window_ManipulationCompleted)); }
+        }
+
 
         public ReviewViewModel(SqlManager sqlManager, IDialogService dialogService) : base(sqlManager, dialogService)
         {
@@ -709,13 +725,22 @@ namespace RaywattApp.ViewModels
             ReviewStatus.IsMeasurementOn = !ReviewStatus.IsMeasurementOn;
         }
 
+        public void Window_ManipulationStarting(object parameter)
+        {
+            _log.Debug("Manipulation Starting");
+            ManipulationStartingEventArgs e = (ManipulationStartingEventArgs)parameter;
+            e.ManipulationContainer = Application.Current.MainWindow;
+            PrevScale = ReviewStatus.Zoom.ScaleX;
+            MeasurementCommand = Constants.MeasureZooming;
+            e.Handled = true;
+        }
+
         public void Window_ManipulationDelta(object parameter)
         {
-            double prevScale = ReviewStatus.Zoom.ScaleX;
             ManipulationDeltaEventArgs e = (ManipulationDeltaEventArgs)parameter;
             int touchPoints = e.Manipulators.Count();
 
-            if (!ReviewStatus.IsMeasurementOn || touchPoints > 1)
+            if (!ReviewStatus.IsMeasurementOn || (touchPoints > 1 && MeasurementCommand == Constants.MeasureZooming))
             {
                 ReviewStatus.Zoom.Window_ManipulationDelta(parameter);
 
@@ -733,9 +758,17 @@ namespace RaywattApp.ViewModels
                         IndicatorCrossSection.IsVisible = Visibility.Visible;
                 }
             }
+        }
+
+        public void Window_ManipulationCompleted(object parameter)
+        {
+            _log.Debug("Manipulation Completed");
+            ManipulationCompletedEventArgs e = (ManipulationCompletedEventArgs)parameter;
 
             if (ReviewStatus.IsMeasurementOn)
-                MeasurementCommand = (prevScale < ReviewStatus.Zoom.ScaleX) ? Constants.MeasureZoomIn : Constants.MeasureZoomOut;
+                MeasurementCommand = (PrevScale < ReviewStatus.Zoom.ScaleX) ? Constants.MeasureZoomIn : Constants.MeasureZoomOut;
+
+            e.Handled = true;
         }
 
         private void ZoomIn()

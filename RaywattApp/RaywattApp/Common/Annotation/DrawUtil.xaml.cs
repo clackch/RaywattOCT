@@ -2,6 +2,7 @@
 using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
 using RaywattApp.Models;
+using RaywattApp.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -221,6 +222,26 @@ namespace RaywattApp.Common.Annotation
             CommandOff = true;
         }
 
+        public void Window_ManipulationStarting(object parameter, ManipulationStartingEventArgs e)
+        {
+            var reviewViewModel = (ReviewViewModel)this.DataContext;
+            reviewViewModel.Window_ManipulationStarting(e);
+            e.Handled = true;
+        }
+
+        public void Window_ManipulationDelta(object parameter, ManipulationDeltaEventArgs e)
+        {
+            var reviewViewModel = (ReviewViewModel)this.DataContext;
+            reviewViewModel.Window_ManipulationDelta(e);
+            e.Handled = true;
+        }
+
+        public void Window_ManipulationCompleted(object parameter, ManipulationCompletedEventArgs e)
+        {
+            var reviewViewModel = (ReviewViewModel)this.DataContext;
+            reviewViewModel.Window_ManipulationCompleted(e);
+            e.Handled = true;
+        }
 
         //---------------------------------------------------------------------------------------------------- Function
         private void DrawAll()
