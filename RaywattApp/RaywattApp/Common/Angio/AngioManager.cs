@@ -352,7 +352,6 @@ namespace RaywattApp.Common.Angio
 
             Mat image = new Mat(angioFrameHeight, angioFrameWidth, MatType.CV_8UC(angioBitsPerPixel / 8));
             Marshal.Copy(tmpBuffer, offset, image.Data, angioImageSize);
-            offset += angioImageSize;
 
             int shiftSize = angioImageSize + Constants.ImageHeaderSize + Constants.ImageTailSize;
             Array.Copy(tmpBuffer, shiftSize, tmpBuffer, 0, tmpBufferLen - shiftSize);

@@ -77,7 +77,7 @@ namespace RaywattApp.ViewModels
                 Playback();
             }
 
-            _angioManager.ReadyToRecv = true ? false : false;
+            _angioManager.ReadyToRecv = false;
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
