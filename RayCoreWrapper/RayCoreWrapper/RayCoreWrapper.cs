@@ -38,12 +38,14 @@ namespace RaywattOCT
             ImageHeight,
             ImageChannels,
             ImageDepth,
+            ImageResolution,
             LongitudeImageWidth,
             LongitudeImageHeight,
             LongitudeImageChannels,
             PullbackRPM,
             PullbackDistance,
             PullbackSpeed,
+            SheathDiameter,
             TestMode
         }
 
@@ -82,6 +84,7 @@ namespace RaywattOCT
             DetectLumen,
             GenerateVolume,
             AutoCalibration,
+            Recording,
             Pullback,
             LoadCatheter,
             UnloadCatheter,
@@ -188,5 +191,19 @@ namespace RaywattOCT
         public static extern IntPtr RayGetLumenContour(int nFrame);
         [DllImport("RayCore.dll")]
         public static extern int RayGetNumOfLumenContourPoints(int nFrame);
+        [DllImport("RayCore.dll")]
+        public static extern int RayGetNumOfSidebranchContourSize(int nFrame);
+        [DllImport("RayCore.dll")]
+        public static extern IntPtr RayGetSidebranchContour(int nFrame, int nSb);
+        [DllImport("RayCore.dll")]
+        public static extern int RayGetNumOfSidebranchContourPoints(int nFrame, int nSb);
+        [DllImport("RayCore.dll")]
+        public static extern IntPtr RayGetStentPoints(int nFrame);
+        [DllImport("RayCore.dll")]
+        public static extern int RayGetNumOfStentPoints(int nFrame);
+        [DllImport("RayCore.dll")]
+        public static extern IntPtr RayGetGuidewirePoints(int nFrame);
+        [DllImport("RayCore.dll")]
+        public static extern int RayGetNumOfGuidewirePoints(int nFrame);
     }
 }

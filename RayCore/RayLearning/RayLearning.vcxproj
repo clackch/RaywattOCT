@@ -159,6 +159,7 @@
     <ClCompile Include="RayPytorchUnet.cpp" />
     <ClCompile Include="RayTensorflow.cpp" />
     <ClCompile Include="RayPytorch.cpp" />
+    <ClCompile Include="RayYolo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CompNet.h" />
@@ -166,6 +167,7 @@
     <ClInclude Include="RayPytorchUnet.h" />
     <ClInclude Include="RayTensorflow.h" />
     <ClInclude Include="RayPytorch.h" />
+    <ClInclude Include="RayYolo.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

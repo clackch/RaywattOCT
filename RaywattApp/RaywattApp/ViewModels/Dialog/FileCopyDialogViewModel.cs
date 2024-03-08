@@ -365,11 +365,14 @@ namespace RaywattApp.ViewModels.Dialog
                         foreach(JObject obj in arr)
                         {
                             PatientCaseAnnotation patientCaseAnnotation = new PatientCaseAnnotation();
-                            patientCaseAnnotation.Id = obj["Id"].ToString();
-                            patientCaseAnnotation.Bookmark = obj["Bookmark"].ToString();
-                            patientCaseAnnotation.Longitude = obj["Longitude"].ToString();
-                            patientCaseAnnotation.CrossSection = obj["CrossSection"].ToString();
-                            patientCaseAnnotation.LumenContour = obj["LumenContour"].ToString();
+                            patientCaseAnnotation.Id = obj["Id"]?.ToString() ?? "null";
+                            patientCaseAnnotation.Bookmark = obj["Bookmark"]?.ToString() ?? "null";
+                            patientCaseAnnotation.Longitude = obj["Longitude"]?.ToString() ?? "null";
+                            patientCaseAnnotation.CrossSection = obj["CrossSection"]?.ToString() ?? "null";
+                            patientCaseAnnotation.LumenContour = obj["LumenContour"]?.ToString() ?? "null";
+                            patientCaseAnnotation.LumenSidebranch = obj["LumenSidebranch"]?.ToString() ?? "null";
+                            patientCaseAnnotation.LumenStent = obj["LumenStent"]?.ToString() ?? "null";
+                            patientCaseAnnotation.LumenGuidewire = obj["LumenGuidewire"]?.ToString() ?? "null";
                             annotations.Add(patientCaseAnnotation);
                         }
                     }
@@ -429,6 +432,7 @@ namespace RaywattApp.ViewModels.Dialog
                             sqlParameters["update_date"] = patientCase.UpdateDate;
                             string srcPath = CommonUtil.GetDirectoryPath(path) + "\\" + patientCase.Image;
                             sqlParameters["image"] = System.IO.File.Exists(srcPath) ? patientCase.Image : "";
+                            sqlParameters["image_resolution"] = patientCase.ImageResolution;
 
                             var nRows = _sqlManager.UpsertPatientCase(sqlParameters);
                             if (nRows == 1)
@@ -443,6 +447,9 @@ namespace RaywattApp.ViewModels.Dialog
                                         sqlParameters["longitude"] = annotation.Longitude;
                                         sqlParameters["bookmark"] = annotation.Bookmark;
                                         sqlParameters["lumen_contour"] = annotation.LumenContour;
+                                        sqlParameters["lumen_sidebranch"] = annotation.LumenSidebranch;
+                                        sqlParameters["lumen_stent"] = annotation.LumenStent;
+                                        sqlParameters["lumen_guidewire"] = annotation.LumenGuidewire;
                                         nRows = _sqlManager.UpsertPatientCaseAnnotation(sqlParameters);
                                         if (nRows == 0)
                                             _log.Error("Upsert Error");

@@ -281,6 +281,9 @@ namespace RaywattApp.Common.Bases
         public const double SectionValueWidth = 24;
         public const double SectionValueCenterWidth = 0.25;
         public const double LumenProfileExtraHeight = 6;
+        public const double PreLesionLengthInitValue = 15;
+        public const double PostLesionLengthInitValue = 4;
+        public const int LumenProfileStentMinCount = 5;
 
         //Review - 2D - Side Menu
         public const string LeftUpMenu = "LeftUpMenu";
@@ -398,7 +401,12 @@ namespace RaywattApp.Common.Bases
         //Scale
         public const string ScaleLength = "Length";
         public const string ScaleArea = "Area";
-        public const double MillimeterPerPixel  = 0.0082;
+        public const string ScaleLengthCompare = "LengthCompare";
+        public const string ScaleAreaCompare = "AreaCompare";
+
+        //Scale (values from PatientCase.ImageResolution)
+        public static double ImageResolution;
+        public static double ImageResolutionCompare;
 
         //Mini-Map
         public const double MiniMapBorderSize = 140;

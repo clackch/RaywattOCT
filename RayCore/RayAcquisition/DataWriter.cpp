@@ -91,6 +91,7 @@ char* CDataWriter::GetSample(int nFrame) {
 void CDataWriter::AddFrame(void* pFrame) {
 	if (m_isRecording == false) return;
 	if (m_nNumOfSamples >= m_nBufferSize) return;
+	if (pFrame == nullptr) return;
 
 	unsigned long long ulOffset = (unsigned long long) m_nNumOfSamples * (unsigned long long) m_nElementSize;
 	memcpy(m_pRecordBuffer + ulOffset, pFrame, m_nElementSize);

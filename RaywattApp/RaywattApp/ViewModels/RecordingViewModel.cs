@@ -215,6 +215,7 @@ namespace RaywattApp.ViewModels
             IsCancel = false;
 
             PatientCase.Image = generateFileName("oct");
+            PatientCase.ImageResolution = RayGetProperty(Property.ImageResolution);
             DeviceStatus.IsSaveRawDataDone = false;
             DeviceStatus.IsLumenSaved = false;
             DeviceStatus.IsOCTImagingDone = false;

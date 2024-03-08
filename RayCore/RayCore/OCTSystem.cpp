@@ -222,13 +222,16 @@ RayError COCTSystem::ConnectDevices() {
 	int result = NOERROR;
 
 	if (m_curState == RayScannerState::Initial) {
-		result |= connectAcqDevice();
-		PLOGI.printf("connect DAQ - %s", ((result == NOERROR) ? "Succeed" : "Failed"));
 		result |= connectRotaryJunction();
 		PLOGI.printf("connect Rotary Junction - %s", ((result == NOERROR) ? "Succeed" : "Failed"));
 
-		// Connect to COM Interface first time asynchronous
+		// Connect to COM Interface first time
 		CLaserController* pLaser = CLaserController::GetInstance();
+		pLaser->LaserOnOff(true);
+
+		result |= connectAcqDevice();
+		PLOGI.printf("connect DAQ - %s", ((result == NOERROR) ? "Succeed" : "Failed"));
+
 		pLaser->LaserOnOff(false);
 
 		if (m_isTestMode) {
@@ -698,6 +701,64 @@ int COCTSystem::GetNumOfLumenContourPoints(int nFrame) {
 	return m_reviewSession[SESSION_REVIEW]->GetNumOfLumenContourPoints(nFrame);
 }
 
+/*
+* GetNumOfSidebranchContourSize
+*/
+int COCTSystem::GetNumOfSidebranchContourSize(int nFrame){
+	if (m_reviewSession[SESSION_REVIEW] == nullptr) return 0;
+
+	return m_reviewSession[SESSION_REVIEW]->GetNumOfSidebranchContourSize(nFrame);
+}
+
+/*
+* GetSidebranchContour
+*/
+void* COCTSystem::GetSidebranchContour(int nFrame, int nSb){
+	if (m_reviewSession[SESSION_REVIEW] == nullptr) return nullptr;
+
+	return m_reviewSession[SESSION_REVIEW]->GetSidebranchContour(nFrame, nSb);
+}
+
+/*
+* GetNumOfSidebranchContourPoints
+*/
+int COCTSystem::GetNumOfSidebranchContourPoints(int nFrame, int nSb){
+	if (m_reviewSession[SESSION_REVIEW] == nullptr) return 0;
+
+	return m_reviewSession[SESSION_REVIEW]->GetNumOfSidebranchContourPoints(nFrame, nSb);
+}
+/*
+* GetStentPoints
+*/
+void* COCTSystem::GetStentPoints(int nFrame){
+	if (m_reviewSession[SESSION_REVIEW] == nullptr) return nullptr;
+
+	return m_reviewSession[SESSION_REVIEW]->GetStentPoints(nFrame);
+}
+/*
+* GetNumOfStentPoints
+*/
+int COCTSystem::GetNumOfStentPoints(int nFrame){
+	if (m_reviewSession[SESSION_REVIEW] == nullptr) return 0;
+
+	return m_reviewSession[SESSION_REVIEW]->GetNumOfStentPoints(nFrame);
+}
+/*
+* GetGuidewirePoints
+*/
+void* COCTSystem::GetGuidewirePoints(int nFrame){
+	if (m_reviewSession[SESSION_REVIEW] == nullptr) return nullptr;
+
+	return m_reviewSession[SESSION_REVIEW]->GetGuidewirePoints(nFrame);
+}
+/*
+* GetNumOfGuidewirePoints
+*/
+int COCTSystem::GetNumOfGuidewirePoints(int nFrame){
+	if (m_reviewSession[SESSION_REVIEW] == nullptr) return 0;
+
+	return m_reviewSession[SESSION_REVIEW]->GetNumOfGuidewirePoints(nFrame);
+}
 
 /*
 * GetBrightness
@@ -870,6 +931,14 @@ UINT COCTSystem::GetImageDepth()
 		return m_reviewSession[m_curSession]->GetImageDepth();
 	}
 }
+/*
+* GetImageResolution
+*/
+double COCTSystem::GetImageResolution()
+{
+	CConfiguration& config = CConfiguration::GetInstance();
+	return (config.measurement.fAxialResolutionScale / 1000.f) * 2;	// Convert polar scale to cartesian scale (mm)
+}
 
 /*
 * GetLongitudeImageWidth
@@ -922,13 +991,58 @@ UINT COCTSystem::threadService(LPVOID param) {
 	int result = lut.Load("LUT.csv");
 	PLOGI.printf("read LUT : %s", (result > 0) ? "Succeed" : "Failed");
 
-	// Initialize (first prediction)
-	cv::Mat imgSample = cv::imread(".\\oct_sample.png");
+	// Initialize
 	IRayLearning* learning = IRayLearning::GetInstance();
 	learning->Initialize(true);
-	learning->FindLumen(imgSample);
+
+#ifdef DEBUG
+	cv::Mat imgSample = cv::imread(".\\oct_sample.png");
+
+	//lumen
+	cv::Mat testLumen = learning->FindLumen(imgSample);
+	if (!testLumen.empty()) {
+		cv::imshow("lumen", testLumen);
+		cv::waitKey();
+	}
+	//sidebranch
+	cv::Mat testSb = learning->FindSidebranch();
+	if (!testSb.empty()) {
+		cv::imshow("side_branch", testSb);
+		cv::waitKey();
+	}
+	//stent
+	std::vector<cv::Rect2f> testStent = learning->FindStent(imgSample);
+	if (!testStent.empty()) {
+		cv::Mat mask = imgSample.clone();
+
+		for (auto& rect : testStent) {
+			cv::Point point(rect.x + rect.width / 2, rect.y + rect.height / 2);
+			cv::circle(mask, point, 1, cv::Scalar(255, 255, 255), 3);
+		}
+
+		if (testStent.size() > 0) {
+			cv::imshow("stent", mask);
+			cv::waitKey();
+		}
+	}
+	//guidewire
+	std::vector<cv::Rect2f> testGw = learning->FindGuidewire();
+	if (!testGw.empty()) {
+		cv::Mat mask = imgSample.clone();
+
+		for (auto& rect : testGw) {
+			cv::Point point(rect.x + rect.width / 2, rect.y + rect.height / 2);
+			cv::circle(mask, point, 1, cv::Scalar(255, 255, 255), 3);
+		}
+
+		if (testGw.size() > 0) {
+			cv::imshow("guide_wire", mask);
+			cv::waitKey();
+		}
+	}
 
 	PLOGI.printf("sample lumen detection done.");
+#endif	
 
 	if (pSystem->m_callback != nullptr)
 	{
@@ -1205,7 +1319,12 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 
 	// 3. Stop Recording OCT
 	pDataWriter->StopRecording();
+	PLOGI.printf("Stop Acquisition");
+	pSystem->m_pAcqDevice->StopAcquisition();
+	PLOGI.printf("Set Writer null");
 	pSystem->m_pAcqDevice->SetWriter(nullptr);
+	PLOGI.printf("Before StopMotor");
+	pSystem->postPriorMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::Recording);
 
 	// 4. Motor OFF
 	Sleep(1000);

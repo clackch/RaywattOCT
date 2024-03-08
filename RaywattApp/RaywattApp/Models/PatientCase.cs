@@ -85,6 +85,9 @@ namespace RaywattApp.Models
         }
 
         [ObservableProperty]
+        private double imageResolution;
+
+        [ObservableProperty]
         private bool isAnonymize;
 
         [ObservableProperty]
@@ -164,10 +167,28 @@ namespace RaywattApp.Models
         private string? _crossSection;
 
         [ObservableProperty]
-        private List<LumenContour>? _lumenContour;
+        private List<LumenContour>? _lumenContours;
 
         [ObservableProperty]
         private string _strLumenContour;
+
+        [ObservableProperty]
+        private List<LumenSidebranch>? _lumenSidebranches;
+
+        [ObservableProperty]
+        private string _strLumenSidebranch;
+
+        [ObservableProperty]
+        private List<LumenStent>? _lumenStents;
+
+        [ObservableProperty]
+        private string _strLumenStent;
+
+        [ObservableProperty]
+        private List<LumenGuidewire>? _lumenGuidewires;
+
+        [ObservableProperty]
+        private string _strLumenGuidewire;
 
         [ObservableProperty]
         private FfrFeature _ffrFeature;

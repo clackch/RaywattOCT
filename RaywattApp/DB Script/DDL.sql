@@ -88,6 +88,7 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case
     procedure character varying(20) COLLATE pg_catalog."default",
     num_of_frames integer,
     image character varying(200) COLLATE pg_catalog."default",
+    image_resolution real,
     pullback_type character varying(4) COLLATE pg_catalog."default",	
     pullback_length character varying(4) COLLATE pg_catalog."default",
 	angio_yn boolean,
@@ -150,6 +151,9 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case_annotation
     longitude text COLLATE pg_catalog."default",
     cross_section text COLLATE pg_catalog."default",
     lumen_contour text COLLATE pg_catalog."default",
+    lumen_sidebranch text COLLATE pg_catalog."default",
+    lumen_stent text COLLATE pg_catalog."default",
+    lumen_guidewire text COLLATE pg_catalog."default",	
 	create_date timestamp without time zone,
     update_date timestamp without time zone,
     CONSTRAINT patient_case_annotation_pkey PRIMARY KEY (id)

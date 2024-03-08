@@ -18,4 +18,7 @@ public:
 	virtual ~IRayLearning();
 	virtual void Initialize(bool useGPU) = 0;
 	virtual cv::Mat FindLumen(cv::Mat image) = 0;
+	virtual cv::Mat FindSidebranch() = 0;
+	virtual std::vector<cv::Rect2f> FindStent(cv::Mat image) = 0;
+	virtual std::vector<cv::Rect2f> FindGuidewire() = 0;
 };
