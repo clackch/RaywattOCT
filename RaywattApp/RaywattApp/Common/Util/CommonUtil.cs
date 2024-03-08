@@ -1234,10 +1234,13 @@ namespace RaywattApp.Common.Util
 
                             writer.WriteStartArray();
 
-                            foreach (Tuple<double, double> calcium in lumenContour.Calcium.List)
+                            if (lumenContour.Calcium != null)
                             {
-                                strPoint = calcium.Item1 + "," + calcium.Item2;
-                                writer.WriteValue(strPoint);
+                                foreach (Tuple<double, double> calcium in lumenContour.Calcium.List)
+                                {
+                                    strPoint = calcium.Item1 + "," + calcium.Item2;
+                                    writer.WriteValue(strPoint);
+                                }
                             }
                             writer.WriteEndArray();
 
