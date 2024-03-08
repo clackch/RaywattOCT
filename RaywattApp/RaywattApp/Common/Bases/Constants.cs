@@ -1,4 +1,5 @@
 ﻿using RaywattApp.Common.Angio;
+using RaywattApp.Models;
 using System;
 using System.Windows.Media;
 
@@ -154,8 +155,9 @@ namespace RaywattApp.Common.Bases
         //Export Image
         public const int ExportAnnotationFontSize = 12;
         
-        //Export DICOM Prefic
+        //Export DICOM Prefix
         public const string ExportDicomPrefix = "IMG";
+        public const double DICOMPhysicalDeltaXY = 0.0289256198347107; // mm
 
         //File Import/Export
         public const string FileImageExtension = "bin";
