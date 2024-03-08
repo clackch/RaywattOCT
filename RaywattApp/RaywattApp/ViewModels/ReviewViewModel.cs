@@ -140,6 +140,7 @@ namespace RaywattApp.ViewModels
         private string _lumenContourCommand;
         public string LumenContourCommand { get { return _lumenContourCommand; } set { _lumenContourCommand = value; OnPropertyChanged(nameof(LumenContourCommand)); } }
 
+        [ObservableProperty]
         private CoRegistration _currentTrackPoint;
 
         private List<CoRegistration> _angioTrackPoints;
@@ -624,9 +625,9 @@ namespace RaywattApp.ViewModels
                     LumenContourCommand = Constants.LumenContourCurrentInit;
 
                 PatientCase.StrLumenContour = CommonUtil.LumenContoursToJson(LumenContours);
-                PatientCase.StrLumenSidebranch = JsonConvert.SerializeObject(LumenSidebranches, Formatting.Indented);
-                PatientCase.StrLumenStent = JsonConvert.SerializeObject(LumenStents, Formatting.Indented);
-                PatientCase.StrLumenGuidewire = JsonConvert.SerializeObject(LumenGuidewires, Formatting.Indented);
+                PatientCase.StrLumenSidebranch = JsonConvert.SerializeObject(LumenSidebranches, Newtonsoft.Json.Formatting.Indented);
+                PatientCase.StrLumenStent = JsonConvert.SerializeObject(LumenStents, Newtonsoft.Json.Formatting.Indented);
+                PatientCase.StrLumenGuidewire = JsonConvert.SerializeObject(LumenGuidewires, Newtonsoft.Json.Formatting.Indented);
 
                 DeviceStatus.IsLumenSaved = true;
                 SetLumenProfileInit();
