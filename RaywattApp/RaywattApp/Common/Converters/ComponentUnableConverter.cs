@@ -8,15 +8,16 @@ namespace RaywattApp.Common.Converters
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values == null || values[0] == null || values[1] == null || values[2] == null || values[3] == null || values.Length != 4)
+            if (values == null || values[0] == null || values[1] == null || values[2] == null || values[3] == null || values[4] == null || values.Length != 5)
                 return true;
 
             bool value0 = (bool)values[0];
             bool value1 = (bool)values[1];
             bool value2 = (bool)values[2];
             bool value3 = (bool)values[3];
+            bool value4 = (bool)values[4];
 
-            bool res = value0 && value1 && value2 && value3;
+            bool res = value0 && value1 && value2 && value3 && value4;
 
             return res;
         }

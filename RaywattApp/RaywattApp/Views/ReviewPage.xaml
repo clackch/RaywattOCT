@@ -6,6 +6,7 @@
       xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
       xmlns:local="clr-namespace:RaywattApp.Views"
       xmlns:annotation="clr-namespace:RaywattApp.Common.Annotation"
+      xmlns:CoRegistration="clr-namespace:RaywattApp.Common.Angio.CoRegRelatedFiles"
       xmlns:behaviors="clr-namespace:RaywattApp.Common.Behaviors"
       xmlns:System="clr-namespace:System;assembly=mscorlib"
       xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
@@ -141,15 +142,16 @@
                         </Grid.ColumnDefinitions>
                         <!-- Angio -->
                         <Grid Grid.Column="0" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}" HorizontalAlignment="Left" Margin="125,0,0,0">
-                            <Image Grid.Column="0" Source="/res/png/angioImage.png" Stretch="Fill">
-                                <Image.Clip>
-                                    <RectangleGeometry RadiusX="10" RadiusY="10">
-                                        <RectangleGeometry.Rect>
-                                            <Rect X="0" Y="0" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}"/>
-                                        </RectangleGeometry.Rect>
-                                    </RectangleGeometry>
-                                </Image.Clip>
-                            </Image>
+                            <Grid.Clip>
+                                <RectangleGeometry RadiusX="10" RadiusY="10">
+                                    <RectangleGeometry.Rect>
+                                        <Rect X="0" Y="0" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}"/>
+                                    </RectangleGeometry.Rect>
+                                </RectangleGeometry>
+                            </Grid.Clip>
+                            <Image x:Name="currentAngioImage" Grid.Column="0" Source="{Binding CurrentAngioImage}" Stretch="Uniform"></Image>
+                            <CoRegistration:DrawAngioPathUtil Grid.Column="0" Width="{Binding ElementName=currentAngioImage, Path=ActualWidth}" Height ="{Binding ElementName=currentAngioImage, Path=ActualHeight}"
+                                                              AngioTrackPoints ="{Binding AngioTrackPoints, Mode=TwoWay}" CurrentTrackPoint="{Binding CurrentTrackPoint, Mode=TwoWay}" CurrentAngioFrameNumber="{Binding CurrentAngioFrameNumber}"/>
                         </Grid>
                         <!-- Cross-Section -->
                         <Grid Grid.Column="1" Width="510" Height="510" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,20,10,0">
@@ -280,7 +282,7 @@
                         <ColumnDefinition/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    
+
                     <!-- Left Menu  -->
                     <Grid Grid.Column="0" Width="{x:Static const:Constants.SideBarExpandSize}">
                         <Grid.RowDefinitions>
@@ -313,7 +315,7 @@
                                             <RowDefinition/>
                                         </Grid.RowDefinitions>
                                         <ToggleButton Grid.Row="1" IsChecked="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource InverseBooleanConverter}}" Style="{DynamicResource ContainedToggleBtnType2}" Command="{Binding ToggleAngioCommand}" CommandParameter="{StaticResource FalseValue}" Content="{Binding [OCT], Source={StaticResource L10N}}"/>
-                                        <ToggleButton Grid.Row="2" IsChecked="{Binding ReviewStatus.IsAngioOn}" Style="{DynamicResource ContainedToggleBtnType2}" Command="{Binding ToggleAngioCommand}" CommandParameter="{StaticResource TrueValue}" Content="{Binding [OCT + Angio], Source={StaticResource L10N}}"/>
+                                        <ToggleButton Grid.Row="2" IsChecked="{Binding ReviewStatus.IsAngioOn}" IsEnabled="{Binding PatientCase.AngioYn}" Style="{DynamicResource ContainedToggleBtnType2}" Command="{Binding ToggleAngioCommand}" CommandParameter="{StaticResource TrueValue}" Content="{Binding [OCT + Angio], Source={StaticResource L10N}}"/>
                                         <Separator Grid.Row="4" Margin="0,0,0,0" Background="{DynamicResource SeparatorBrush}"/>
                                         <Grid Grid.Row="5">
                                             <Grid.ColumnDefinitions>
@@ -354,13 +356,14 @@
                                             </StackPanel>
                                         </Grid>
                                         <Grid Grid.Row="7" Margin="0,0,0,0" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
-                                            <component:ButtonUnableComponent Grid.Row="1" Style="{StaticResource OutlinedBtnType1-Medium}" Height="26" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding CoRegistrationCommand}" Content="{Binding [Co-Registration], Source={StaticResource L10N}}" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}">
+                                            <component:ButtonUnableComponent Grid.Row="1" Style="{StaticResource OutlinedBtnType1-Medium}" Height="26" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding CoRegistrationCommand}" Content="{Binding [Co-Registration], Source={StaticResource L10N}}" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}" IsImageProcessingDone="{Binding ReviewStatus.IsImageProcessingDone}">
                                                 <component:ButtonUnableComponent.IsEnabled>
                                                     <MultiBinding Converter="{StaticResource ComponentUnableConverter}">
                                                         <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSaveRawDataDone"/>
                                                         <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
                                                         <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
                                                         <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
+                                                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsImageProcessingDone"/>
                                                     </MultiBinding>
                                                 </component:ButtonUnableComponent.IsEnabled>
                                             </component:ButtonUnableComponent>
@@ -889,7 +892,7 @@
                 <Grid Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                     <annotation:DrawUtil Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Zoom="{Binding ReviewStatus.Zoom}" ImageResolution="{Binding PatientCase.ImageResolution}" IsDrawOn="{Binding ReviewStatus.IsMeasurementOn}" Measurements="{Binding Measurements}" FrameNumber="{Binding FrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" CommandOff="{Binding MeasurementCommandOff, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEditOn="True"/>
                 </Grid>
-                
+
                 <!-- Mini Map -->
                 <Grid Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                     <Border Width="{x:Static const:Constants.MiniMapBorderSize}" Height="{x:Static const:Constants.MiniMapBorderSize}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="16" BorderBrush="{DynamicResource GrayscaleGray8Brush}" BorderThickness="1" CornerRadius="10" Visibility="{Binding ReviewStatus.Zoom.Visibility}">
@@ -1194,7 +1197,7 @@
 
                             <!-- Bookmark Scale -->
                             <ContentControl Grid.Row="2" Template="{DynamicResource LongitudeScaleBar}" Width="{x:Static const:Constants.LongitudeWidth}" Tag="{Binding PatientCase.PullbackLength}"/>
-                            
+
                             <!-- Lumen Profile Extra : Calcium, Expansion -->
                             <Image Grid.Row="4" Source="{Binding LumenProfileImageExtra}" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LumenProfileExtraHeight}" Stretch="Fill"/>
                         </Grid>
@@ -1258,7 +1261,7 @@
             <i:Interaction.Behaviors>
                 <behaviors:MouseBehavior MouseX="{Binding IndicatorLongitude.PointLongitudeX, Mode=OneWayToSource}"/>
             </i:Interaction.Behaviors>
-            
+
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="MouseLeave" >
                     <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
@@ -1307,7 +1310,7 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </component:IndicatorAreaGrid>
-        
+
         <i:Interaction.Behaviors>
             <behaviors:MouseBehavior MouseX="{Binding ReviewStatus.Zoom.MouseX, Mode=OneWayToSource}" MouseY="{Binding ReviewStatus.Zoom.MouseY, Mode=OneWayToSource}" />
         </i:Interaction.Behaviors>

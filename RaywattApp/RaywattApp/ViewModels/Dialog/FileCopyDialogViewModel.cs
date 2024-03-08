@@ -161,6 +161,21 @@ namespace RaywattApp.ViewModels.Dialog
                 string fileName = CommonUtil.GetFileName(patientCase.ImageFullPath);
                 string dstFilePath = SaveFolder + "\\" + fileName;
                 fileCopyInfo.Add(patientCase.ImageFullPath, dstFilePath);
+
+
+                if (patientCase.AngioYn)
+                {
+                    List<string> extensions = new List<string> { Constants.AngioImageExtension, Constants.AngioParmasExtension };
+                    fileName = fileName.Substring(0, patientCase.Image.Length - 3);
+                    string srcFilePath = patientCase.ImageFullPath.Substring(0, patientCase.ImageFullPath.Length - 3);
+                    foreach(string ext in extensions)
+                    {
+                        string tmpFileName = fileName + ext;
+                        string tmpSrcFilePath = srcFilePath + ext;
+                        dstFilePath = SaveFolder + "\\" + tmpFileName;
+                        fileCopyInfo.Add(tmpSrcFilePath, dstFilePath);
+                    }
+                }
             }
 
             await CommonUtil.CopyFiles(fileCopyInfo, prog => Progress = prog, progressSize, progText => ProgressText = progText);

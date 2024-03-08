@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
 using RaywattApp.Common.Angio;
+using System.IO;
 
 namespace RaywattApp.ViewModels
 {
@@ -148,6 +149,18 @@ namespace RaywattApp.ViewModels
                     SelectedPullbackType = PatientCase.PullbackType;
                     Brightness = PatientCase.Brightness;
                     Contrast = PatientCase.Contrast;
+
+                    if (PatientCase.ImageFullPath != null && PatientCase.Image != null)
+                    {
+                        string path = PatientCase.ImageFullPath.Substring(0, PatientCase.ImageFullPath.Length - 42);
+                        string fileName = PatientCase.Image.Substring(0, PatientCase.Image.Length - 3) + "*";
+                        string[] files = Directory.GetFiles(path, fileName);
+
+                        foreach (string file in files)
+                        {
+                            System.IO.File.Delete(file);
+                        }
+                    }
                 }
                 else
                 {
@@ -162,16 +175,19 @@ namespace RaywattApp.ViewModels
                 timerUpdateImage.Start();
 
                 SetCondition();
+
+                if (DeviceStatus.IsAngioConnected && !data.ContainsKey("command"))
+                {
+                    _angioManager.SelectCathRoom();
+                }
             }
-
-            SelectCathRoom(); // 이전으로 돌아오는 경우 제외
-
-            // Send Start Command
-            if (!_angioManager.readyToRecv && DeviceStatus.IsAngioConnected)
+            
+            if (!_angioManager.ReadyToRecv)
             {
                 _angioManager.SendCommandPacket(CommandType.FGStarted);
             }
-            _angioManager.readyToRecv = true;
+            _angioManager.ReadyToRecv = true;
+            _angioManager.ImgAngio = _angioManager.ShowNoSignal();
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -182,10 +198,10 @@ namespace RaywattApp.ViewModels
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
 
-            if (!isStartRecording && _angioManager.readyToRecv && DeviceStatus.IsAngioConnected)
+            if (!isStartRecording && _angioManager.ReadyToRecv && DeviceStatus.IsAngioConnected)
             {
                 _angioManager.SendCommandPacket(CommandType.FGStopped);
-                _angioManager.readyToRecv = false;
+                _angioManager.ReadyToRecv = false;
             }
         }
 
@@ -204,7 +220,7 @@ namespace RaywattApp.ViewModels
             _log.Debug("Back");
             
             _angioManager.SendCommandPacket(CommandType.FGStopped);
-            _angioManager.readyToRecv = false;
+            _angioManager.ReadyToRecv = false;
 
             RayStopLiveView();
             leaveToPage(Constants.PatientDetailPage);
@@ -302,22 +318,6 @@ namespace RaywattApp.ViewModels
             }
             RaySetProperty(Property.PullbackDistance, Double.Parse(PbLength));
             RaySetProperty(Property.PullbackSpeed, Double.Parse(PbSpeed));
-        }
-
-        private void SelectCathRoom()
-        {
-            _log.Debug("SelectCathRoom");
-
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["selectedCathRoomId"] = DeviceStatus.SelectedCathRoom == null ? 0 : DeviceStatus.SelectedCathRoom.Id;
-
-            var result = _dialogService.OpenDialog(new CathRoomDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-
-            if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
-            {
-                Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
-                DeviceStatus.SelectedCathRoom = (CathRoom)data["selectedCathRoom"];
-            }
         }
     }
 }

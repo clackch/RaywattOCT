@@ -17,6 +17,7 @@ using RaywattApp.Common.Dialog;
 using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System.Linq;
+using OpenCvSharp;
 
 namespace RaywattApp.ViewModels.File
 {
@@ -289,6 +290,19 @@ namespace RaywattApp.ViewModels.File
                             {
                                 string destPath = CommonUtil.CreateFolder(Constants.DataRootPath + "\\" + patientCase.PatientId) + "\\" + patientCase.Image;
                                 importfiles.Add(srcPath, destPath);
+                                if (patientCase.AngioYn)
+                                {
+                                    srcPath = srcPath.Substring(0, srcPath.Length - 3);
+                                    destPath = destPath.Substring(0, destPath.Length - 3);
+
+                                    List<string> extensions = new List<string> { Constants.AngioImageExtension, Constants.AngioParmasExtension };
+                                    string fileName = patientCase.Image.Substring(0, patientCase.Image.Length - Constants.AngioImageExtension.Length - 1) + ".";
+                                    string srcFilePath = patientCase.ImageFullPath.Substring(0, patientCase.ImageFullPath.Length - Constants.AngioImageExtension.Length - 1) + ".";
+                                    foreach (string ext in extensions)
+                                    {
+                                        importfiles.Add(srcPath + ext, destPath + ext);
+                                    }
+                                }
                             }
                         }
                     }

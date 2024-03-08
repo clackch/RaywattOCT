@@ -460,6 +460,24 @@ namespace RaywattApp.Services
             string commandText = SqlQuery.GetQuery("UpsertCoRegistration");
 
             return _databaseService.InsertData(commandText, sqlParameters);
+        }        
+
+        public IList<StringModel> SelectCoRegistrationTrackPoint(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("SelectCoRegistrationTrackPoint");
+
+            string commandText = SqlQuery.GetQuery("SelectCoRegistrationTrackPoint");
+
+            return _databaseService.GetDatas<StringModel>(commandText, sqlParameters);
+        }
+
+        public int UpdatePatientCaseAngioCoRegistration(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpdatePatientCaseAngioCoRegistration");
+
+            string commandText = SqlQuery.GetQuery("UpdatePatientCaseAngioCoRegistration");
+
+            return _databaseService.UpdateData(commandText, sqlParameters);
         }
 
         /**

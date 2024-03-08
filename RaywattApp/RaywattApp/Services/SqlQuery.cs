@@ -184,6 +184,13 @@ namespace RaywattApp.Services
                 FROM rv_schema.cath_room
                 ORDER BY name;
                 ";
+
+            //SelectCoRegistrationTrackTrackPoint
+            _query["SelectCoRegistrationTrackPoint"] = @$"
+                SELECT track_point return_string
+                FROM rv_schema.coregistration
+                WHERE id = @id
+                ";
         }
 
         private static void SetInsertQuery()
@@ -298,6 +305,13 @@ namespace RaywattApp.Services
                 UPDATE rv_schema.patient_case_annotation
                 SET bookmark=@bookmark, longitude=@longitude, cross_section=@cross_section
                 WHERE id = @id
+                ";
+
+            //UpdatePatientCaseAngioCoRegistration
+            _query["UpdatePatientCaseAngioCoRegistration"] = @$"
+                UPDATE rv_schema.patient_case
+                SET angio_co_registration=@angio_co_registration
+                WHERE id=@id
                 ";
         }
 
