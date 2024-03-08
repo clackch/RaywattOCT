@@ -31,11 +31,17 @@ int CATSDevice::InitDevice() {
 		return E_FAIL;
 	}
 
-	configureBoard(m_hATSBoard);
+	int retry = 0;
+	BOOL result = FALSE;
+	do {
+		result = configureBoard(m_hATSBoard);
+		if (result) break;
+		retry++;
+	} while (retry < 10);
 
-	m_isInit = true;
+	m_isInit = result;
 
-	return NOERROR;
+	return (result) ? NOERROR : E_FAIL;
 }
 int CATSDevice::CleanUp() {
 	// Free all memory allocated
@@ -261,7 +267,7 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 		PLOGI.printf("AlazarOCTIgnoreBadClock : %s, cycleTime : %lf, pulseWidth : %lf\n", AlazarErrorToText(retCode), triggerCycleTime, triggerPulseWidth);
 	}
 
-	return TRUE;
+	return (retCode == ApiSuccess);
 }
 
 BOOL CATSDevice::configureAcquisition(HANDLE boardHandle) {
