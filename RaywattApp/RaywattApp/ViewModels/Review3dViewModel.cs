@@ -300,7 +300,7 @@ namespace RaywattApp.ViewModels
                     lengthB = 60; break;
 
             }
-            double zValue = lengthB / PatientCase.NumOfFrames / 0.0289256198347107;//DICOM Physical Delta X,Y = 0.0289256198347107mm
+            double zValue = lengthB / PatientCase.NumOfFrames / Constants.DICOMPhysicalDeltaXY;
             return zValue;
         }
 
