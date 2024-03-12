@@ -5,6 +5,7 @@
 #define MOTOR_INDEX_CONTROLWORD			0x6040
 #define MOTOR_INDEX_STATUSWORD			0x6041
 #define MOTOR_INDEX_MODESOFOPERATION	0x6060
+#define MOTOR_INDEX_ACTUALVELOCITY		0x606C
 #define MOTOR_INDEX_TARGETVELOCITY		0x60ff
 #define MOTOR_DATA_SWITCH_ON			0x0006
 #define MOTOR_DATA_ENABLE_OPERATION		0x000F
@@ -19,6 +20,7 @@ protected:
 	IConnection* m_pConnection;
 	bool m_initMotor;
 	bool m_isRun;
+	int m_nActualVelocity;
 	CThread* m_pThread;
 
 	static CMotorController* pInstance;
@@ -28,22 +30,25 @@ public:
 	virtual ~CMotorController();
 
 	bool IsConnected() { return m_initMotor; }
-	bool Connect(void* param = nullptr);
-	void Disconnect();
+	virtual bool Connect(void* param = nullptr);
+	virtual void Disconnect();
 
 	bool SetModeOfOperation(char mode);
 	bool SwitchOn();
 	virtual bool PerformRun(int &nVelocity);
 	virtual bool StopMotor();
 	bool SwitchOff();
+	bool ReadActualVelocity();
 	
 	bool IsRun() { return m_isRun; }
+	int GetActualVelocity() { return m_nActualVelocity; }
 
-private:
+protected:
 	static UINT threadReadMotor(LPVOID param);
 	BYTE calcCRCByte(BYTE u8Byte, BYTE u8CRC);
-	bool writeMotor(BYTE* packet, int size);
+	virtual bool writeMotor(BYTE* packet, int size);
 	void getMotorPacket(unsigned short command, unsigned int data, unsigned int dataSize, BYTE* packet, int& packetLength);
+	bool parsePacket(BYTE* packet, int size);
 };
 
 class CMotorControllerStub
