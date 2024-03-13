@@ -56,17 +56,17 @@ void CRJController::Disconnect() {
 	CUtility::StopThread(m_pThreadState);
 	m_state = RJState::Disconnected;
 }
-bool CRJController::Current(int idxMotor, int posMM) {
-	if (!m_initMotor || idxMotor < 0 || idxMotor > 2) return false;
+bool CRJController::Current(eStepMotorIndex idxMotor, int posMM) {
+	if (!m_initMotor) return false;
 
 	int posStep = ((double)posMM / MM_PER_STEP);
 
-	if (idxMotor == 0) {
+	if (idxMotor == eStepMotorIndex::Both) {
 		m_nStepPosition[0] = posStep;
 		m_nStepPosition[1] = posStep;
 	}
 	else {
-		m_nStepPosition[idxMotor - 1] = posStep;
+		m_nStepPosition[(int)idxMotor - 1] = posStep;
 	}
 
 	BYTE serialPacket[MAX_PATH];
@@ -85,16 +85,16 @@ bool CRJController::Current(int idxMotor, int posMM) {
 
 	return (written == packetLength);
 }
-bool CRJController::Move(int idxMotor, int posMM) {
-	if (!m_initMotor || idxMotor < 0 || idxMotor > 2) return false;
+bool CRJController::Move(eStepMotorIndex idxMotor, int posMM, bool delay) {
+	if (!m_initMotor) return false;
 	int posStep = ((double)posMM / MM_PER_STEP);
 
-	if (idxMotor == 0) {
+	if (idxMotor == eStepMotorIndex::Both) {
 		m_nStepPosition[0] = posStep;
 		m_nStepPosition[1] = posStep;
 	}
 	else {
-		m_nStepPosition[idxMotor - 1] = posStep;
+		m_nStepPosition[(int)idxMotor - 1] = posStep;
 	}
 
 	BYTE serialPacket[MAX_PATH];
@@ -117,16 +117,16 @@ bool CRJController::Move(int idxMotor, int posMM) {
 
 	return (written == packetLength);
 }
-bool CRJController::Set(int idxMotor, int velocity) {
-	if (!m_initMotor || idxMotor < 0 || idxMotor > 2) return false;
+bool CRJController::Set(eStepMotorIndex idxMotor, int velocity) {
+	if (!m_initMotor) return false;
 	int velStep = ((double)velocity / MM_PER_STEP);
 
-	if (idxMotor == 0) {
+	if (idxMotor == eStepMotorIndex::Both) {
 		m_nStepSpeed[0] = velStep;
 		m_nStepSpeed[1] = velStep;
 	}
 	else {
-		m_nStepSpeed[idxMotor - 1] = velStep;
+		m_nStepSpeed[(int)idxMotor - 1] = velStep;
 	}
 
 	return true;

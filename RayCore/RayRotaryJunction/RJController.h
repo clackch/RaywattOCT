@@ -1,6 +1,7 @@
 #pragma once
 #include "Config.h"
 #include "MotorController.h"
+#include "StepMotorController.h"
 #include <vector>
 
 #define RJ_STX		0xA3
@@ -68,7 +69,8 @@ enum class eLCDImage : USHORT {
 };
 
 class CRJController
-	: public CMotorController
+	: public CMotorController,
+	public IStepMotorAction
 {
 public:
 	enum class RJState {
@@ -101,9 +103,9 @@ public:
 	virtual bool Connect(void* strPort);
 	virtual void Disconnect();
 
-	bool Current(int idxMotor, int posMM);
-	bool Move(int idxMotor, int posMM);
-	bool Set(int idxMotor, int velocity);
+	virtual bool Current(eStepMotorIndex idxMotor, int posMM);
+	virtual bool Move(eStepMotorIndex idxMotor, int posMM, bool delay=false);
+	virtual bool Set(eStepMotorIndex idxMotor, int velocity);
 
 	bool AutoStatePeriod(USHORT interval);
 	bool DisplayLCD(eLCDImage image);
