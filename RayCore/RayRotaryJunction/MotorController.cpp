@@ -3,21 +3,12 @@
 #include "COMConnection.h"
 #include "Utility.h"
 
-CMotorController* CMotorController::pInstance = nullptr;
-
 CMotorController::CMotorController() {
-	m_pConnection = new CUSBConnection();
 	m_initMotor = false;
 	m_isRun = false;
 
+	m_pConnection = nullptr;
 	m_pThread = nullptr;
-}
-
-CMotorController* CMotorController::GetInstance() {
-	if (pInstance == nullptr) {
-		pInstance = new CMotorController();
-	}
-	return pInstance;
 }
 
 CMotorController::~CMotorController() {	
@@ -29,6 +20,7 @@ CMotorController::~CMotorController() {
 bool CMotorController::Connect(void* param) {
 	if (m_initMotor) return m_initMotor;
 
+	m_pConnection = new CUSBConnection();
 	m_initMotor = m_pConnection->Connect(param);
 	if (m_initMotor) {
 		BOOL result = FALSE;
@@ -45,8 +37,13 @@ bool CMotorController::Connect(void* param) {
 
 void CMotorController::Disconnect() {
 
-	m_pConnection->Disconnect();
 	CUtility::StopThread(m_pThread);
+
+	if (m_pConnection != nullptr) {
+		m_pConnection->Disconnect();
+		delete m_pConnection;
+		m_pConnection = nullptr;
+	}
 	m_initMotor = false;
 }
 

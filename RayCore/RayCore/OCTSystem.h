@@ -24,6 +24,7 @@ class CVolumeGenerator;
 class IRayLearning;
 class CImagingSession;
 class CLaserModule;
+class CMotorController;
 class COCTSystem : public CMessageService
 {
 private:
@@ -67,6 +68,9 @@ private:
 	CRITICAL_SECTION m_csSession;
 
 	// Rotary Junction
+	bool m_isRJMode;
+	CMotorController* m_pRJController;
+	CMotorController* m_pBLDCMotor;
 	CArduinoController* m_pPullbackMotor;
 
 	// Laser Module

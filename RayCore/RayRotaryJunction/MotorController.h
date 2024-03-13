@@ -23,10 +23,8 @@ protected:
 	int m_nActualVelocity;
 	CThread* m_pThread;
 
-	static CMotorController* pInstance;
-	CMotorController();
 public:
-	static CMotorController* GetInstance();
+	CMotorController();
 	virtual ~CMotorController();
 
 	bool IsConnected() { return m_initMotor; }
@@ -60,6 +58,4 @@ public:
 
 	virtual bool PerformRun(int& nVelocity) { m_isRun = true; return true; }
 	virtual bool StopMotor() { m_isRun = false; return true; }
-
-	void EnableStub() { pInstance = this; }
 };
