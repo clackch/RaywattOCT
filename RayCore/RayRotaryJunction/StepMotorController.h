@@ -10,7 +10,7 @@
 #define HUB_MOTOR_POS_INITIAL			0
 #define STEP_MOTOR_SPEED_DEFAULT		30
 #define STEP_MOTOR_SPEED_LOAD			4
-enum class StepMotorIndex : UINT
+enum class eStepMotorIndex : UINT
 {
 	Both = 0,
 	Pullback = 1,
@@ -41,3 +41,10 @@ protected:
 	virtual void readResponse() = 0;
 };
 
+class IStepMotorAction
+{
+public:
+	virtual bool Current(eStepMotorIndex idx, int posMM) = 0;
+	virtual bool Move(eStepMotorIndex idx, int posMM, bool delay) = 0;
+	virtual bool Set(eStepMotorIndex idx, int velocity) = 0;
+};

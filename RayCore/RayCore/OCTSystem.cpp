@@ -346,9 +346,9 @@ RayError COCTSystem::ReadyPullback()
 		restartAcqDevice(m_pImagingPullback);
 
 		pMotor->PerformRun(config.bldcMotor.velocityPullback);
-		m_pPullbackMotor->SetCurrent(StepMotorIndex::Pullback, 0);
-		m_pPullbackMotor->SetCurrent(StepMotorIndex::Hub, 0);
-		m_pPullbackMotor->SetSpeed(StepMotorIndex::Both, config.stepMotor.pullbackSpeed);
+		m_pPullbackMotor->Current(eStepMotorIndex::Pullback, 0);
+		m_pPullbackMotor->Current(eStepMotorIndex::Hub, 0);
+		m_pPullbackMotor->Set(eStepMotorIndex::Both, config.stepMotor.pullbackSpeed);
 
 		return RayError::OK;
 	}
@@ -1323,7 +1323,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 
 	// 2. Pullback Linear Stage
 	if (pPullbackMotor->IsOpen()) {
-		pPullbackMotor->MoveAbsolute(StepMotorIndex::Both, config.stepMotor.pullbackDistance, false);
+		pPullbackMotor->Move(eStepMotorIndex::Both, config.stepMotor.pullbackDistance, false);
 #if 0
 		while (pSystem->m_pThreadRotaryJunction->isRun) {
 			if (pPullbackMotor->IsMoving()) {
@@ -1353,8 +1353,8 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pMotor->StopMotor();
 
 	// 5. Homing
-	pPullbackMotor->MoveAbsolute(StepMotorIndex::Both, 0);
-	pPullbackMotor->SetCurrent(StepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
+	pPullbackMotor->Move(eStepMotorIndex::Both, 0);
+	pPullbackMotor->Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 
 	PLOGI.printf("Pullback done.");
 	CImagingSession* pSession = CImagingSession::CreateSession(pSystem, SESSION_REVIEW, settingPullback, pDataWriter);
@@ -1387,13 +1387,13 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 
 	// 2. Move Step-Motor (Pullback)
 	if (pPullbackMotor->IsOpen()) {
-		pPullbackMotor->SetCurrent(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
-		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
-		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_LOAD);
+		pPullbackMotor->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
+		pPullbackMotor->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
+		pPullbackMotor->Move(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_LOAD);
 
-		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_LOAD);
-		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, 0);
-		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
+		pPullbackMotor->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_LOAD);
+		pPullbackMotor->Move(eStepMotorIndex::Pullback, 0);
+		pPullbackMotor->Move(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 	}
 	else if (pSystem->m_isTestMode)
 	{
@@ -1435,9 +1435,9 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	pSystem->postPriorMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterUnloading);
 
 	if (pPullbackMotor->IsOpen()) {
-		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
-		pPullbackMotor->SetCurrent(StepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
-		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
+		pPullbackMotor->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
+		pPullbackMotor->Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
+		pPullbackMotor->Move(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 	}
 	else if (pSystem->m_isTestMode)
 	{
@@ -1582,9 +1582,9 @@ int COCTSystem::connectRotaryJunction() {
 	if (!m_pPullbackMotor->IsOpen()) {
 		m_pPullbackMotor->Open(config.stepMotor.port);
 		Sleep(DELAY_BETWEEN_COMMAND);
-		m_pPullbackMotor->SetCurrent(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
+		m_pPullbackMotor->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 		Sleep(DELAY_BETWEEN_COMMAND);
-		m_pPullbackMotor->SetCurrent(StepMotorIndex::Hub, HUB_MOTOR_POS_INITIAL);
+		m_pPullbackMotor->Current(eStepMotorIndex::Hub, HUB_MOTOR_POS_INITIAL);
 	}
 
 	if (!m_pLaserModule->IsOpen()) {
