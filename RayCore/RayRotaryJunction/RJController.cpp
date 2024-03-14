@@ -13,6 +13,8 @@ CRJController::CRJController()
 	m_nStepSpeed[0] = 0;
 	m_nStepSpeed[1] = 0;
 	
+	m_isSMMoving[0] = false;
+	m_isSMMoving[1] = false;
 	for (int i = 0; i < 6; i++) {
 		m_bPhotoSensor[i] = false;
 	}
@@ -41,7 +43,7 @@ bool CRJController::Connect(void *param) {
 			m_initMotor = false;
 		}
 	}
-	AutoStatePeriod(100);
+	AutoStatePeriod(50);
 	DisplayLCD(eLCDImage::LCD_IMAGE_UNLOADED);
 
 	m_state = RJState::Disconnected;
@@ -56,10 +58,34 @@ void CRJController::Disconnect() {
 	CUtility::StopThread(m_pThreadState);
 	m_state = RJState::Disconnected;
 }
+bool CRJController::IsMoving() {
+	PLOGI.printf("IsMoving: %d %d", m_isSMMoving[0], m_isSMMoving[1]);
+	if (m_isSMMoving[0] || m_isSMMoving[1]) {
+		ReadPosition();
+		return true;
+	}
+	return false;
+}
+bool CRJController::ReadPosition() {
+	if (!m_initMotor) return false;
+
+	BYTE serialPacket[MAX_PATH];
+
+	int packetLength;
+	getSerialPacket(eFID::FID_SM_GET_STATE, 0, serialPacket, packetLength);
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	return (written == packetLength);	
+}
 bool CRJController::Current(eStepMotorIndex idxMotor, int posMM) {
 	if (!m_initMotor) return false;
 
 	int posStep = ((double)posMM / MM_PER_STEP);
+	PLOGI.printf("StepMotor #%d Current: %d", idxMotor, posStep);
 
 	if (idxMotor == eStepMotorIndex::Both) {
 		m_nStepPosition[0] = posStep;
@@ -87,14 +113,19 @@ bool CRJController::Current(eStepMotorIndex idxMotor, int posMM) {
 }
 bool CRJController::Move(eStepMotorIndex idxMotor, int posMM, bool delay) {
 	if (!m_initMotor) return false;
+
 	int posStep = ((double)posMM / MM_PER_STEP);
+	PLOGI.printf("StepMotor #%d Move: %d", idxMotor, posStep);
 
 	if (idxMotor == eStepMotorIndex::Both) {
 		m_nStepPosition[0] = posStep;
 		m_nStepPosition[1] = posStep;
+		m_isSMMoving[0] = true;
+		m_isSMMoving[1] = true;
 	}
 	else {
 		m_nStepPosition[(int)idxMotor - 1] = posStep;
+		m_isSMMoving[(int)idxMotor - 1] = true;
 	}
 
 	BYTE serialPacket[MAX_PATH];
@@ -338,6 +369,19 @@ bool CRJController::parseSerialPacket() {
 
 	return true;
 }
+void CRJController::parseSMPacket(BYTE* packet, int size) {
+	int offset = 0;
+	for (int i = 0; i < 2; i++) {
+		m_isSMMoving[i] = packet[offset]; offset++;
+		
+		int curPos = 0;
+		for (int j = 0; j < 4; j++) {
+			curPos |= (packet[offset+j] << j);
+		}
+		PLOGI.printf("StepMotor #%d (%s): %d", i, ((m_isSMMoving[i]) ? "Moving" : "Stop"), curPos);
+		offset += 12;	// current pos (4byte), target pos (4byte), current speed (4byte)
+	}
+}
 void CRJController::parseRFIDPacket(BYTE* packet, int size) {
 	m_nRFIDLength = packet[1];
 	memcpy(m_RFID, packet + 2, m_nRFIDLength);
@@ -371,6 +415,9 @@ void CRJController::handlePacket() {
 	printf("\tButton: %02d %02d %02d\n", m_bButton[0], m_bButton[1], m_bLimitSwitch);
 
 	switch(fid) {
+	case eFID::FID_SM_GET_STATE:
+		parseSMPacket(&m_vPacket[RJ_DATA_IDX], dataLength);
+		break;
 	case eFID::FID_BLDC_PASS:
 		parsePacket(&m_vPacket[RJ_DATA_IDX], dataLength);
 		break;

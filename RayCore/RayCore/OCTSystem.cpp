@@ -1301,6 +1301,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	// 2. Pullback Linear Stage
 	if (pRJController->IsConnected()) {
 		pRJController->Move(eStepMotorIndex::Both, config.stepMotor.pullbackDistance, false);
+		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 #if 0
 		while (pSystem->m_pThreadRotaryJunction->isRun) {
 			if (pPullbackMotor->IsMoving()) {
@@ -1331,6 +1332,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 
 	// 5. Homing
 	pRJController->Move(eStepMotorIndex::Both, 0);
+	pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 	pRJController->Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 
 	PLOGI.printf("Pullback done.");
@@ -1366,10 +1368,13 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 		pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
 		pRJController->Move(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_LOAD);
+		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 
 		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_LOAD);
 		pRJController->Move(eStepMotorIndex::Pullback, 0);
+		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 		pRJController->Move(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
+		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 	}
 	else if (pSystem->m_isTestMode)
 	{
@@ -1413,6 +1418,7 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
 		pRJController->Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 		pRJController->Move(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
+		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 	}
 	else if (pSystem->m_isTestMode)
 	{
@@ -1762,6 +1768,16 @@ void COCTSystem::laserOnOff(bool isOn) {
 		int vldPower = (isOn) ? config.laserModule.vldValue : 0;
 		m_pLaserModule->SetVLD(vldPower);
 	}
+}
+bool COCTSystem::waitForStepMotors(bool& runFlag) {
+	if (!m_pRJController->IsConnected()) return false;
+
+	Sleep(100);
+	while (m_pRJController->IsMoving() && runFlag) {
+		Sleep(30);
+	}
+
+	return m_pRJController->IsMoving();
 }
 /*
 * OnMsgUpdateScannerState

@@ -87,9 +87,11 @@ private:
 	RJState m_state;
 	RJState m_nextState;
 
-	std::vector<BYTE> m_vPacket;
 	int m_nStepPosition[2];
 	int m_nStepSpeed[2];
+
+	std::vector<BYTE> m_vPacket;
+	bool m_isSMMoving[2];
 	bool m_bPhotoSensor[6];
 	bool m_bButton[2];	// 0: UNLOCK, 1: STOP
 	bool m_bLimitSwitch;
@@ -103,6 +105,8 @@ public:
 	virtual bool Connect(void* strPort);
 	virtual void Disconnect();
 
+	virtual bool IsMoving();
+	virtual bool ReadPosition();
 	virtual bool Current(eStepMotorIndex idxMotor, int posMM);
 	virtual bool Move(eStepMotorIndex idxMotor, int posMM, bool delay=false);
 	virtual bool Set(eStepMotorIndex idxMotor, int velocity);
@@ -118,6 +122,7 @@ protected:
 	void addPacket(BYTE* packet, int size);
 	bool sliceUntilSTX(int index);
 	bool parseSerialPacket();
+	void parseSMPacket(BYTE*packet, int size);
 	void parseRFIDPacket(BYTE*packet, int size);
 	void handlePacket();
 	void getSerialPacket(eFID fid, int dataSize, BYTE* packet, int &packetLength);
