@@ -300,9 +300,9 @@ namespace RaywattApp.Common.Bases
 
         //Review - 3D - Cut View
         public const double CutView3dX = 98;
-        public const double CutView3dY = 120;
-        public const double CutView3dWidth = 736;
-        public const double CutView3dHeight = 560;
+        public const double CutView3dY = 130; // 140 - 10 (for View Edge Round)
+        public const double CutView3dWidth = 734;
+        public const double CutView3dHeight = 540; // 560 - 20 (for View Edge Round)
 
         //Review - 3D - Fly Through View
         public const double FlyThroughView3dX = 886;

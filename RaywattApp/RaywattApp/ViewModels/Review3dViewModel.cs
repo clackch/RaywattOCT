@@ -17,6 +17,8 @@ using static RaywattOCT.Ray3DWrapper;
 using System.Runtime.InteropServices;
 using RaywattApp.Common.Util;
 using System.Threading;
+using Newtonsoft.Json.Linq;
+using System.Diagnostics;
 
 namespace RaywattApp.ViewModels
 {
@@ -82,6 +84,7 @@ namespace RaywattApp.ViewModels
                 OnPropertyChanged(nameof(IsIndicatorOn));
 
                 ray3DStatus.IsIndicatorOn = value;
+                change3DIndicatorVisibility(value);
             }
         }
 
@@ -216,6 +219,7 @@ namespace RaywattApp.ViewModels
                 // set default values without rendering
                 _isCutViewOn = ray3DStatus.CutViewOn;
                 _isIndicatorOn = ray3DStatus.IsIndicatorOn;
+                change3DIndicatorVisibility(IsIndicatorOn);
                 _isPtoD = ray3DStatus.IsPtoD;
                 _isSideBranchView = false;
             }
@@ -240,6 +244,7 @@ namespace RaywattApp.ViewModels
                 timerShowData.Stop();
 
             Save();
+            TurnOffAll3DActors();
             ODSOCT_HideAllWindows();
         }
 
@@ -376,7 +381,10 @@ namespace RaywattApp.ViewModels
                 ray3DStatus.ShowObject(obj, ray3DStatus.ObjectVisibility[(int)obj]);
             }
 
-            IsRendering = true;
+            if (!IsRendering)
+            {
+                IsRendering = true;
+            }
         }
 
         private void updateNavigator(int curFrame, int totalFrame)
@@ -397,6 +405,12 @@ namespace RaywattApp.ViewModels
             {
                 ray3DStatus.ShowObject(obj, mode);
             }
+        }
+
+        private void change3DIndicatorVisibility(bool show)
+        {
+            ray3DStatus.ShowIndicator(show);
+            Debug.WriteLine("ray3DStatus.ShowIndicator(show), show = " + show);
         }
 
         private void RotateIndicator(object param)
@@ -555,6 +569,16 @@ namespace RaywattApp.ViewModels
                 curPosition = Math.Round(curPosition);
                 MoveToFrame(RaySession.Review, (int)curPosition);
                 ODSOCT_MoveToFrame((int)curPosition);
+            }
+        }
+
+        private void TurnOffAll3DActors()
+        {
+            change3DIndicatorVisibility(false);
+            for (Ray3DObject obj = Ray3DObject.Tissue; obj < Ray3DObject.Count; obj++)
+            {
+                if (ray3DStatus.ObjectVisibility[(int)obj] != Ray3DObjectMode.Hide)
+                    ray3DStatus.ShowObject(obj, Ray3DObjectMode.Hide, true);
             }
         }
     }
