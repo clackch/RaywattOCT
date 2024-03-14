@@ -68,24 +68,29 @@ enum class eLCDImage : USHORT {
 	, LCD_IMAGE_ERROR
 };
 
+enum class eRJState {
+	Disconnected = 0,
+	Connected,
+	Validating,
+	Loading,
+	Loaded,
+	Unloading,
+	Unloaded,
+	Error
+};
+
+class CMessageService;
 class CRJController
 	: public CMotorController,
 	public IStepMotorAction
 {
-public:
-	enum class RJState {
-		Disconnected = 0,
-		Connected,
-		Ready,
-		Loading,
-		Loaded,
-		Unloading,
-		Error
-	};
 private:
+	CMessageService* m_pMsg;
 	CThread* m_pThreadState;
-	RJState m_state;
-	RJState m_nextState;
+	eRJState m_state;
+	eRJState m_nextState;
+	eRJState m_recvState;
+	bool m_bStateReceived;
 
 	int m_nStepPosition[2];
 	int m_nStepSpeed[2];
@@ -102,6 +107,9 @@ public:
 	CRJController();
 	virtual ~CRJController();
 
+	virtual void SetMessage(CMessageService* pMsg) { m_pMsg = pMsg; }
+	virtual void UpdateState(eRJState state);
+
 	virtual bool Connect(void* strPort);
 	virtual void Disconnect();
 
@@ -114,11 +122,12 @@ public:
 	bool AutoStatePeriod(USHORT interval);
 	bool DisplayLCD(eLCDImage image);
 	bool ReadRFID();
+	UINT GetRFIDInfo(BYTE* pRFIDInfo);
 protected:
 	static UINT threadRJState(LPVOID param);
 	static UINT threadReadPacket(LPVOID param);
 	void updateState();
-	void updateState(RJState state);
+	void updateState(eRJState state);
 	void addPacket(BYTE* packet, int size);
 	bool sliceUntilSTX(int index);
 	bool parseSerialPacket();

@@ -1,12 +1,16 @@
 #include "RJController.h"
 #include "COMConnection.h"
 #include "Utility.h"
+#include "MessageService.h"
 
 CRJController::CRJController()
 {
+	m_pMsg = nullptr;
 	m_pThreadState = nullptr;
-	m_state = RJState::Disconnected;
-	m_nextState = RJState::Disconnected;
+	m_state = eRJState::Disconnected;
+	m_nextState = eRJState::Disconnected;
+	m_recvState = eRJState::Disconnected;
+	m_bStateReceived = false;
 
 	m_nStepPosition[0] = 0;
 	m_nStepPosition[1] = 0;
@@ -26,8 +30,13 @@ CRJController::CRJController()
 
 CRJController::~CRJController()
 {
+	Disconnect();
 }
-
+void CRJController::UpdateState(eRJState state)
+{
+	m_recvState = state;
+	m_bStateReceived = true;
+}
 bool CRJController::Connect(void *param) {
 	if (m_initMotor) return m_initMotor;
 
@@ -46,8 +55,8 @@ bool CRJController::Connect(void *param) {
 	AutoStatePeriod(50);
 	DisplayLCD(eLCDImage::LCD_IMAGE_UNLOADED);
 
-	m_state = RJState::Disconnected;
-	m_nextState = RJState::Disconnected;
+	m_state = eRJState::Disconnected;
+	m_nextState = eRJState::Disconnected;
 
 	return m_initMotor;
 }
@@ -56,7 +65,7 @@ void CRJController::Disconnect() {
 	CMotorController::Disconnect();
 
 	CUtility::StopThread(m_pThreadState);
-	m_state = RJState::Disconnected;
+	m_state = eRJState::Disconnected;
 }
 bool CRJController::IsMoving() {
 	if (m_isSMMoving[0] || m_isSMMoving[1]) {
@@ -208,11 +217,24 @@ bool CRJController::ReadRFID() {
 
 	return (written == packetLength);
 }
+UINT CRJController::GetRFIDInfo(BYTE* pRFIDInfo) {
+	if (pRFIDInfo == nullptr) return 0;
+	if (m_nRFIDLength == 0) return 0;
+
+	memcpy(pRFIDInfo, m_RFID, m_nRFIDLength);
+	return m_nRFIDLength;
+}
 UINT CRJController::threadRJState(LPVOID param) {
 	CRJController* pRJController = (CRJController*)param;
 
 	while (pRJController->m_pThreadState->isRun) {
-		pRJController->updateState();
+		if (pRJController->m_bStateReceived) {
+			pRJController->updateState(pRJController->m_recvState);
+			pRJController->m_bStateReceived = false;
+		}
+		else {
+			pRJController->updateState();
+		}
 		Sleep(50);
 	}
 
@@ -237,48 +259,55 @@ UINT CRJController::threadReadPacket(LPVOID param) {
 }
 void CRJController::updateState() {
 	switch (m_state) {
-	case RJState::Disconnected:
+	case eRJState::Disconnected:
 		if (m_bLimitSwitch) {
-			m_nextState = RJState::Connected;
+			m_nextState = eRJState::Connected;
 		}
 		break;
-	case RJState::Connected:
+	case eRJState::Connected:
 		if (m_bLimitSwitch) {
 			if (m_nRFIDLength == 0) {
 				ReadRFID();
 			}
 			else {
-				m_nextState = RJState::Loading;
+				m_nextState = eRJState::Validating;
 			}
 		}
 		else {
-			m_nextState = RJState::Disconnected;
+			m_nextState = eRJState::Disconnected;
 		}
 		break;
-	case RJState::Loading:
+	case eRJState::Validating:
+		break;
+	case eRJState::Loading:
 		if (m_bButton[1]) {
-			m_nextState = RJState::Error;
+			m_nextState = eRJState::Error;
 		}
 		else if (!m_bLimitSwitch) {
-			m_nextState = RJState::Unloading;
+			m_nextState = eRJState::Unloading;
 		}
 		break;
-	case RJState::Loaded:
+	case eRJState::Loaded:
 		if (!m_bLimitSwitch || m_bButton[0]) {
-			m_nextState = RJState::Unloading;
+			m_nextState = eRJState::Unloading;
 		}
 		break;
-	case RJState::Unloading:
+	case eRJState::Unloading:
 		if (m_bButton[1]) {
-			m_nextState = RJState::Error;
+			m_nextState = eRJState::Error;
 		}
 		else if (m_bButton[0]) {	// for test
-			m_nextState = RJState::Disconnected;
+			m_nextState = eRJState::Unloaded;
 		}
 		break;
-	case RJState::Error:
+	case eRJState::Unloaded:
+		if (!m_bLimitSwitch) {
+			m_nextState = eRJState::Disconnected;
+		}
+		break;
+	case eRJState::Error:
 		if (m_bButton[0]) {	// for test
-			m_nextState = RJState::Disconnected;
+			m_nextState = eRJState::Disconnected;
 		}
 		break;
 	default:
@@ -290,32 +319,34 @@ void CRJController::updateState() {
 	}
 }
 
-void CRJController::updateState(RJState state) {
-	// postMessage
-
+void CRJController::updateState(eRJState state) {
 	switch (state) {
-	case RJState::Disconnected:
+	case eRJState::Disconnected:
+	case eRJState::Unloaded:
 		DisplayLCD(eLCDImage::LCD_IMAGE_UNLOADED);
 		break;
-	case RJState::Connected:
+	case eRJState::Connected:
 		m_nRFIDLength = 0;	// clear RFID info.
 		break;
-	case RJState::Loading:
+	case eRJState::Validating:
+		break;
+	case eRJState::Loading:
 		DisplayLCD(eLCDImage::LCD_IMAGE_LOADING);
 		break;
-	case RJState::Loaded:
+	case eRJState::Loaded:
 		DisplayLCD(eLCDImage::LCD_IMAGE_STANDBY_OFF);
 		break;
-	case RJState::Unloading:
+	case eRJState::Unloading:
 		DisplayLCD(eLCDImage::LCD_IMAGE_UNLOADING);
 		break;
-	case RJState::Error:
+	case eRJState::Error:
 		DisplayLCD(eLCDImage::LCD_IMAGE_ERROR);
 		break;
 	default:
 		break;
 	}
-	m_state = m_nextState;
+	m_state = m_nextState = state;
+	if (m_pMsg != nullptr) m_pMsg->postMessage(WM_UPDATE_RJ_STATE, (WPARAM)m_state);
 }
 void CRJController::addPacket(BYTE* packet, int size) {
 	for (int i = 0; i < size; i++) {
@@ -385,11 +416,7 @@ void CRJController::parseRFIDPacket(BYTE* packet, int size) {
 	m_nRFIDLength = packet[1];
 	memcpy(m_RFID, packet + 2, m_nRFIDLength);
 
-	printf("RFID: ");
-	for (int i = 0; i < m_nRFIDLength; i++) {
-		printf("0x%x ", m_RFID[i]);
-	}
-	printf("\n");
+	PLOGI.printf("read RFID: %d bytes", m_nRFIDLength);
 }
 void CRJController::handlePacket() {
 	BYTE length = m_vPacket[RJ_LENGTH_IDX];

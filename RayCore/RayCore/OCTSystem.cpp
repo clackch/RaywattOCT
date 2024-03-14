@@ -47,6 +47,7 @@ COCTSystem::COCTSystem() {
 	InitializeCriticalSection(&m_csSession);
 
 	m_pRJController = new CRJController();
+	m_pRJController->SetMessage(this);
 	m_pLaserModule = new CLaserModule();
 
 	m_prevState = RayScannerState::Initial;
@@ -357,13 +358,14 @@ RayError COCTSystem::PullbackScan(char *strFilePath) {
 */
 RayError COCTSystem::LoadCatheter() {
 	if (m_curState == RayScannerState::Default || m_curState == RayScannerState::Review) {
-		//To-Do: check catheter
-
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 
-		CUtility::StartThread(threadLoadCatheter, m_pThreadRotaryJunction, this);
-
-		return RayError::OK;
+		if (controlRotaryJunction(eRJState::Loading) == NOERROR) {
+			return RayError::OK;
+		}
+		else {
+			return RayError::DeviceNotConnected;
+		}
 	}
 
 	return RayError::WrongState;
@@ -374,10 +376,14 @@ RayError COCTSystem::LoadCatheter() {
 */
 RayError COCTSystem::UnloadCatheter() {
 	if (m_curState == RayScannerState::Default || m_curState == RayScannerState::Review) {
-
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 
-		CUtility::StartThread(threadUnloadCatheter, m_pThreadRotaryJunction, this);
+		if (controlRotaryJunction(eRJState::Unloading) == NOERROR) {
+			return RayError::OK;
+		}
+		else {
+			return RayError::DeviceNotConnected;
+		}
 
 		return RayError::OK;
 	}
@@ -1117,6 +1123,11 @@ UINT COCTSystem::threadService(LPVOID param) {
 			pSystem->OnMsgStartReviewSession(wParam, lParam);
 			break;
 		}
+		case WM_UPDATE_RJ_STATE:
+		{
+			pSystem->OnMsgUpdateRJState(wParam, lParam);
+			break;
+		}
 		case WM_IGNORE_MESSAGES:
 		{
 			ignoreMsg = true;
@@ -1384,6 +1395,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Unloaded);
 	}
 	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::LoadCatheter);
+	pSystem->m_pRJController->UpdateState(eRJState::Loaded);
 
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
@@ -1416,6 +1428,7 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	}
 
 	pSystem->postPriorMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Unloaded);
+	pSystem->m_pRJController->UpdateState(eRJState::Unloaded);
 
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
@@ -1601,6 +1614,17 @@ int COCTSystem::disconnectRotaryJunction() {
 	m_pLaserModule->Close();
 
 	return (result) ? NOERROR : E_FAIL;
+}
+
+/*
+* controlRotaryJunction
+*/
+int COCTSystem::controlRotaryJunction(eRJState state) {
+	if (m_pRJController == nullptr || !m_pRJController->IsConnected()) return E_FAIL;
+
+	m_pRJController->UpdateState(state);
+
+	return NOERROR;
 }
 
 /*
@@ -1839,6 +1863,58 @@ LRESULT COCTSystem::OnMsgUpdateCatheterState(WPARAM wParam, LPARAM lParam) {
 		break;
 	default:
 		break;
+	}
+
+	return NOERROR;
+}
+
+/*
+* OnMsgUpdateRJState
+*/
+LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
+	eRJState state = (eRJState)wParam;
+
+	PLOGI.printf("RJState: %d", state);
+	switch (state) {
+	case eRJState::Disconnected:
+		break;
+	case eRJState::Connected:
+		break;
+	case eRJState::Validating:
+	{
+		BYTE RFIDInfo[MAX_PATH];
+		UINT nRFIDLength = m_pRJController->GetRFIDInfo(RFIDInfo);
+
+		if (nRFIDLength != 0) {
+			// To-Do: Validation
+			bool isValid = true;
+			
+			if (isValid) {
+				m_pRJController->UpdateState(eRJState::Loading);
+			}
+			else {
+				m_pRJController->UpdateState(eRJState::Error);
+			}
+		}
+		break;
+	}
+	case eRJState::Loading:
+	{
+		CUtility::StartThread(threadLoadCatheter, m_pThreadRotaryJunction, this);
+		break;
+	}
+	case eRJState::Loaded:
+		break;
+	case eRJState::Unloading:
+	{
+		CUtility::StartThread(threadUnloadCatheter, m_pThreadRotaryJunction, this);
+		break;
+	}
+	case eRJState::Unloaded:
+		break;
+	case eRJState::Error:
+		break;
+
 	}
 
 	return NOERROR;

@@ -2,6 +2,7 @@
 #include "define.h"
 #include "AcquisitionDevice.h"
 #include "MessageService.h"
+#include "RJController.h"
 #include <vector>
 #include <mutex>
 #include <tuple>
@@ -23,7 +24,6 @@ class CVolumeGenerator;
 class IRayLearning;
 class CImagingSession;
 class CLaserModule;
-class CRJController;
 class COCTSystem : public CMessageService
 {
 private:
@@ -176,6 +176,7 @@ private:
 	int restartAcqDevice(COCTImaging* pImaging);
 	int connectRotaryJunction();
 	int disconnectRotaryJunction();
+	int controlRotaryJunction(eRJState state);
 	void stopAllSessions();
 	void closeAllSessions();
 	void setBrightnessContrastAllSessions();
@@ -190,6 +191,7 @@ protected:
 	LRESULT OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgUpdateSaveRaw(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgUpdateCatheterState(WPARAM wParam, LPARAM lParam);
+	LRESULT OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgStartReviewSession(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgNotifyProcessDone(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgNotifyEventOccured(WPARAM wParam, LPARAM lParam);
