@@ -9,10 +9,8 @@
 #include "ATSDevice.h"
 #include "SimulateDevice.h"
 #include "LaserController.h"
-#include "MotorController.h"
 #include "RJController.h"
 #include "ZaberController.h"
-#include "ArduinoController.h"
 #include "IRayLearning.h"
 #include "ImagingSession.h"
 #include "LaserModule.h"
@@ -48,10 +46,7 @@ COCTSystem::COCTSystem() {
 	m_openedSession = nullptr;
 	InitializeCriticalSection(&m_csSession);
 
-	m_isRJMode = false;
 	m_pRJController = new CRJController();
-	m_pBLDCMotor = new CMotorController();
-	m_pPullbackMotor = new CArduinoController();
 	m_pLaserModule = new CLaserModule();
 
 	m_prevState = RayScannerState::Initial;
@@ -178,26 +173,15 @@ RayError COCTSystem::Stop() {
 	pLaser->LaserOnOff(false);
 
 	PLOGI.printf("Stop Motor");
-	CMotorController* pMotor = (m_isRJMode) ? m_pRJController : m_pBLDCMotor;
-	pMotor->StopMotor();
-	pMotor->SwitchOff();
-	pMotor->Disconnect();
+	m_pRJController->StopMotor();
+	m_pRJController->SwitchOff();
+	m_pRJController->Disconnect();
 	if (m_pRJController != nullptr) {
 		delete m_pRJController;
 		m_pRJController = nullptr;
 	}
-	if (m_pBLDCMotor != nullptr) {
-		delete m_pBLDCMotor;
-		m_pBLDCMotor = nullptr;
-	}
 
 	PLOGI.printf("Close COM Ports");
-	if (m_pPullbackMotor->IsOpen()) {
-		m_pPullbackMotor->Close();
-	}
-	delete m_pPullbackMotor;
-	m_pPullbackMotor = nullptr;
-
 	if (m_pLaserModule->IsOpen()) {
 		m_pLaserModule->SetVLD(0);
 		m_pLaserModule->SetVOA(0);
@@ -247,10 +231,9 @@ RayError COCTSystem::ConnectDevices() {
 		pLaser->LaserOnOff(false);
 
 		if (m_isTestMode) {
-			CMotorController*& pMotor = (m_isRJMode) ? m_pRJController : m_pBLDCMotor;
-			if (pMotor->IsConnected() == false)
+			if (m_pRJController->IsConnected() == false)
 			{
-				pMotor = new CMotorControllerStub();
+				//pMotor = new CMotorControllerStub();
 				PLOGI.printf("Use MotorControllerStub instaed of MotorController");
 			}
 
@@ -339,16 +322,15 @@ RayError COCTSystem::ReadyPullback()
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 
-		CMotorController* pMotor = (m_isRJMode) ? m_pRJController : m_pBLDCMotor;
 		CConfiguration& config = CConfiguration::GetInstance();
 
 		laserOnOff(true);
 		restartAcqDevice(m_pImagingPullback);
 
-		pMotor->PerformRun(config.bldcMotor.velocityPullback);
-		m_pPullbackMotor->Current(eStepMotorIndex::Pullback, 0);
-		m_pPullbackMotor->Current(eStepMotorIndex::Hub, 0);
-		m_pPullbackMotor->Set(eStepMotorIndex::Both, config.stepMotor.pullbackSpeed);
+		m_pRJController->PerformRun(config.bldcMotor.velocityPullback);
+		m_pRJController->Current(eStepMotorIndex::Pullback, 0);
+		m_pRJController->Current(eStepMotorIndex::Hub, 0);
+		m_pRJController->Set(eStepMotorIndex::Both, config.stepMotor.pullbackSpeed);
 
 		return RayError::OK;
 	}
@@ -482,10 +464,9 @@ RayError COCTSystem::StartLiveView()
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 
-		CMotorController* pMotor = (m_isRJMode) ? m_pRJController : m_pBLDCMotor;
 		CConfiguration& config = CConfiguration::GetInstance();
 
-		pMotor->PerformRun(config.bldcMotor.velocityLiveView);
+		m_pRJController->PerformRun(config.bldcMotor.velocityLiveView);
 
 		laserOnOff(true);
 		restartAcqDevice(m_pImagingLiveView);
@@ -503,10 +484,8 @@ RayError COCTSystem::StopLiveView()
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 
-		CMotorController* pMotor = (m_isRJMode) ? m_pRJController : m_pBLDCMotor;
-
 		laserOnOff(false);
-		pMotor->StopMotor();
+		m_pRJController->StopMotor();
 
 		return RayError::OK;
 	}
@@ -902,8 +881,7 @@ UINT COCTSystem::GetVolumeDepth() {
 */
 bool COCTSystem::GetMotorOnOff()
 {
-	CMotorController* pMotor = (m_isRJMode) ? m_pRJController : m_pBLDCMotor;
-	return pMotor->IsRun();
+	return m_pRJController->IsRun();
 }
 
 /*
@@ -1302,8 +1280,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
-	CMotorController* pMotor = (pSystem->m_isRJMode) ? pSystem->m_pRJController : pSystem->m_pBLDCMotor;
-	CArduinoController* pPullbackMotor = pSystem->m_pPullbackMotor;
+	CRJController* pRJController = pSystem->m_pRJController;
 	IImaging::Setting settingPullback = pSystem->m_pImagingPullback->GetSetting();
 	int pullbackTime = ((double)config.stepMotor.pullbackDistance / (double)config.stepMotor.pullbackSpeed) * 1000;
 
@@ -1322,8 +1299,8 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pSystem->m_pAcqDevice->SetWriter(pDataWriter);
 
 	// 2. Pullback Linear Stage
-	if (pPullbackMotor->IsOpen()) {
-		pPullbackMotor->Move(eStepMotorIndex::Both, config.stepMotor.pullbackDistance, false);
+	if (pRJController->IsConnected()) {
+		pRJController->Move(eStepMotorIndex::Both, config.stepMotor.pullbackDistance, false);
 #if 0
 		while (pSystem->m_pThreadRotaryJunction->isRun) {
 			if (pPullbackMotor->IsMoving()) {
@@ -1350,11 +1327,11 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 
 	// 4. Motor OFF
 	Sleep(1000);
-	pMotor->StopMotor();
+	pRJController->StopMotor();
 
 	// 5. Homing
-	pPullbackMotor->Move(eStepMotorIndex::Both, 0);
-	pPullbackMotor->Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
+	pRJController->Move(eStepMotorIndex::Both, 0);
+	pRJController->Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 
 	PLOGI.printf("Pullback done.");
 	CImagingSession* pSession = CImagingSession::CreateSession(pSystem, SESSION_REVIEW, settingPullback, pDataWriter);
@@ -1377,23 +1354,22 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
-	CMotorController* pMotor = (pSystem->m_isRJMode) ? pSystem->m_pRJController : pSystem->m_pBLDCMotor;
-	CArduinoController* pPullbackMotor = pSystem->m_pPullbackMotor;
+	CRJController* pRJController = pSystem->m_pRJController;
 
 	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterLoading);
 
 	// 1. Rotate BLDC Motor
-	pMotor->PerformRun(config.bldcMotor.velocityLoad);
+	pRJController->PerformRun(config.bldcMotor.velocityLoad);
 
 	// 2. Move Step-Motor (Pullback)
-	if (pPullbackMotor->IsOpen()) {
-		pPullbackMotor->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
-		pPullbackMotor->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
-		pPullbackMotor->Move(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_LOAD);
+	if (pRJController->IsConnected()) {
+		pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
+		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
+		pRJController->Move(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_LOAD);
 
-		pPullbackMotor->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_LOAD);
-		pPullbackMotor->Move(eStepMotorIndex::Pullback, 0);
-		pPullbackMotor->Move(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
+		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_LOAD);
+		pRJController->Move(eStepMotorIndex::Pullback, 0);
+		pRJController->Move(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 	}
 	else if (pSystem->m_isTestMode)
 	{
@@ -1401,7 +1377,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	}
 
 	// 3. Stop BLDC Motor
-	pMotor->StopMotor();
+	pRJController->StopMotor();
 
 	// To-Do: Check Catheter Connection
 	bool loaded = true;
@@ -1409,7 +1385,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loaded);
 	}
 	else {
-		pMotor->StopMotor();
+		pRJController->StopMotor();
 		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Unloaded);
 	}
 	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::LoadCatheter);
@@ -1427,17 +1403,16 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
-	CMotorController* pMotor = (pSystem->m_isRJMode) ? pSystem->m_pRJController : pSystem->m_pBLDCMotor;
-	CArduinoController* pPullbackMotor = pSystem->m_pPullbackMotor;
+	CRJController* pRJController = pSystem->m_pRJController;
 
 	PLOGI.printf("Unload catheter");
 
 	pSystem->postPriorMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterUnloading);
 
-	if (pPullbackMotor->IsOpen()) {
-		pPullbackMotor->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
-		pPullbackMotor->Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
-		pPullbackMotor->Move(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
+	if (pRJController->IsConnected()) {
+		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
+		pRJController->Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
+		pRJController->Move(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 	}
 	else if (pSystem->m_isTestMode)
 	{
@@ -1461,18 +1436,18 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
-	CMotorController* pMotor = (pSystem->m_isRJMode) ? pSystem->m_pRJController : pSystem->m_pBLDCMotor;
+	CRJController* pRJController = pSystem->m_pRJController;
 
 	PLOGI.printf("Catheter Validation");
 
 	pSystem->laserOnOff(true);
 	pSystem->restartAcqDevice(pSystem->m_pImagingLiveView);
-	pMotor->PerformRun(config.bldcMotor.velocityLiveView);
+	pRJController->PerformRun(config.bldcMotor.velocityLiveView);
 
 	// To-Do: determine image verification
 	bool verified = true;
 
-	pMotor->StopMotor();
+	pRJController->StopMotor();
 	pSystem->laserOnOff(false);
 
 	if (verified) {
@@ -1496,11 +1471,9 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 */
 bool COCTSystem::checkConnection() {
 	bool result = true;
-	CMotorController* pMotor = (m_isRJMode) ? m_pRJController : m_pBLDCMotor;
 	
 	result &= m_pAcqDevice->IsInit();
-	result &= pMotor->IsConnected();
-	result &= m_pPullbackMotor->IsOpen();
+	result &= m_pRJController->IsConnected();
 	result &= m_pLaserModule->IsOpen();
 
 	return result;
@@ -1575,16 +1548,15 @@ int COCTSystem::restartAcqDevice(COCTImaging* pImaging) {
 */
 int COCTSystem::connectRotaryJunction() {
 	CConfiguration& config = CConfiguration::GetInstance();
-	CMotorController* pMotor = (m_isRJMode) ? m_pRJController : m_pBLDCMotor;
 
 	bool result = true;
 
-	if (!m_pPullbackMotor->IsOpen()) {
-		m_pPullbackMotor->Open(config.stepMotor.port);
-		Sleep(DELAY_BETWEEN_COMMAND);
-		m_pPullbackMotor->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
-		Sleep(DELAY_BETWEEN_COMMAND);
-		m_pPullbackMotor->Current(eStepMotorIndex::Hub, HUB_MOTOR_POS_INITIAL);
+	if (!m_pRJController->IsConnected()) {
+		result &= m_pRJController->Connect(config.bldcMotor.port);
+		result &= m_pRJController->SetModeOfOperation(MOTOR_DATA_MODE_VELOCITY);
+		result &= m_pRJController->SwitchOn();
+		result &= m_pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
+		result &= m_pRJController->Current(eStepMotorIndex::Hub, HUB_MOTOR_POS_INITIAL);
 	}
 
 	if (!m_pLaserModule->IsOpen()) {
@@ -1607,12 +1579,6 @@ int COCTSystem::connectRotaryJunction() {
 		}
 	}
 
-	if (!pMotor->IsConnected()) {
-		result &= pMotor->Connect(config.bldcMotor.port);
-		result &= pMotor->SetModeOfOperation(MOTOR_DATA_MODE_VELOCITY);
-		result &= pMotor->SwitchOn();
-	}
-
 	return (result) ? NOERROR : E_FAIL;
 }
 
@@ -1620,12 +1586,10 @@ int COCTSystem::connectRotaryJunction() {
 * disconnectRotaryJunction
 */
 int COCTSystem::disconnectRotaryJunction() {
-	CMotorController* pMotor = (m_isRJMode) ? m_pRJController : m_pBLDCMotor;
-
 	bool result = true;
 	
-	if (pMotor->IsConnected()) {
-		result &= pMotor->SwitchOff();
+	if (m_pRJController->IsConnected()) {
+		result &= m_pRJController->SwitchOff();
 	}
 
 	PLOGI.printf("Catheter State : %d", m_cathState);
@@ -1637,7 +1601,7 @@ int COCTSystem::disconnectRotaryJunction() {
 		}
 	}
 
-	m_pPullbackMotor->Close();
+	m_pRJController->Disconnect();
 	m_pLaserModule->Close();
 
 	return (result) ? NOERROR : E_FAIL;

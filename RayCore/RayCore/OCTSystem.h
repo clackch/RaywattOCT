@@ -1,7 +1,6 @@
 #pragma once
 #include "define.h"
 #include "AcquisitionDevice.h"
-#include "ArduinoController.h"
 #include "MessageService.h"
 #include <vector>
 #include <mutex>
@@ -24,7 +23,7 @@ class CVolumeGenerator;
 class IRayLearning;
 class CImagingSession;
 class CLaserModule;
-class CMotorController;
+class CRJController;
 class COCTSystem : public CMessageService
 {
 private:
@@ -68,10 +67,7 @@ private:
 	CRITICAL_SECTION m_csSession;
 
 	// Rotary Junction
-	bool m_isRJMode;
-	CMotorController* m_pRJController;
-	CMotorController* m_pBLDCMotor;
-	CArduinoController* m_pPullbackMotor;
+	CRJController* m_pRJController;
 
 	// Laser Module
 	CLaserModule* m_pLaserModule;
