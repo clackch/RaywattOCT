@@ -1302,16 +1302,6 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	if (pRJController->IsConnected()) {
 		pRJController->Move(eStepMotorIndex::Both, config.stepMotor.pullbackDistance, false);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
-#if 0
-		while (pSystem->m_pThreadRotaryJunction->isRun) {
-			if (pPullbackMotor->IsMoving()) {
-				break;
-			}
-			else {
-				Sleep(DELAY_FOR_STOP_THREAD);
-			}
-		}
-#endif
 	}
 	else {
 		Sleep(pullbackTime);

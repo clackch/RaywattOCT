@@ -59,7 +59,6 @@ void CRJController::Disconnect() {
 	m_state = RJState::Disconnected;
 }
 bool CRJController::IsMoving() {
-	PLOGI.printf("IsMoving: %d %d", m_isSMMoving[0], m_isSMMoving[1]);
 	if (m_isSMMoving[0] || m_isSMMoving[1]) {
 		ReadPosition();
 		return true;
