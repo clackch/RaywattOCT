@@ -1003,7 +1003,7 @@ UINT COCTSystem::threadService(LPVOID param) {
 
 	// Initialize
 	IRayLearning* learning = IRayLearning::GetInstance();
-	learning->Initialize(true);
+	//learning->Initialize(true);
 
 #ifdef DEBUG
 	cv::Mat imgSample = cv::imread(".\\oct_sample.png");
