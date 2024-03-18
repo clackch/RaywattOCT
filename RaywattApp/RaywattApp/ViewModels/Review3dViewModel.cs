@@ -350,11 +350,13 @@ namespace RaywattApp.ViewModels
                     if(PullTypeZoom == selectedPullbackType.Unselected)
                     {
                         ODSOCT_CutViewZoom(1);
+                        ODSOCT_CutViewZoom(-1);
                         PullTypeZoom = selectedPullbackType.Short;
                     }
                     else if (PullTypeZoom == selectedPullbackType.Long)
                     {
                         ODSOCT_CutViewZoom(1);
+                        ODSOCT_CutViewZoom(-1);
                         PullTypeZoom = selectedPullbackType.Short;
                     }
                     break;
@@ -362,11 +364,13 @@ namespace RaywattApp.ViewModels
                     if (PullTypeZoom == selectedPullbackType.Unselected)
                     {
                         ODSOCT_CutViewZoom(1);
+                        ODSOCT_CutViewZoom(-1);
                         PullTypeZoom = selectedPullbackType.Long;
                     }
                     else if (PullTypeZoom == selectedPullbackType.Short)
                     {
                         ODSOCT_CutViewZoom(1);
+                        ODSOCT_CutViewZoom(-1);
                         PullTypeZoom = selectedPullbackType.Long;
                     }
                     break;
