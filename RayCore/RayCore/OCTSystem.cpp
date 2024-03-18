@@ -328,6 +328,7 @@ RayError COCTSystem::ReadyPullback()
 		laserOnOff(true);
 		restartAcqDevice(m_pImagingPullback);
 
+		m_pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_PULLBACK);
 		m_pRJController->PerformRun(config.bldcMotor.velocityPullback);
 		m_pRJController->Current(eStepMotorIndex::Pullback, 0);
 		m_pRJController->Current(eStepMotorIndex::Hub, 0);
@@ -472,6 +473,7 @@ RayError COCTSystem::StartLiveView()
 
 		CConfiguration& config = CConfiguration::GetInstance();
 
+		m_pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_LIVEVIEW);
 		m_pRJController->PerformRun(config.bldcMotor.velocityLiveView);
 
 		laserOnOff(true);
@@ -491,6 +493,7 @@ RayError COCTSystem::StopLiveView()
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 
 		laserOnOff(false);
+		m_pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_STANDBY_OFF);
 		m_pRJController->StopMotor();
 
 		return RayError::OK;
@@ -1335,6 +1338,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pRJController->Move(eStepMotorIndex::Both, 0);
 	pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 	pRJController->Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
+	pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_STANDBY_OFF);
 
 	PLOGI.printf("Pullback done.");
 	CImagingSession* pSession = CImagingSession::CreateSession(pSystem, SESSION_REVIEW, settingPullback, pDataWriter);
@@ -1395,7 +1399,6 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Unloaded);
 	}
 	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::LoadCatheter);
-	pSystem->m_pRJController->UpdateState(eRJState::Loaded);
 
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
@@ -1448,20 +1451,24 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 
 	PLOGI.printf("Catheter Validation");
 
+	pSystem->m_pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_STANDBY_ON);
 	pSystem->laserOnOff(true);
 	pSystem->restartAcqDevice(pSystem->m_pImagingLiveView);
 	pRJController->PerformRun(config.bldcMotor.velocityLiveView);
 
 	// To-Do: determine image verification
+	Sleep(1000);
 	bool verified = true;
 
 	pRJController->StopMotor();
 	pSystem->laserOnOff(false);
 
 	if (verified) {
+		pSystem->m_pRJController->UpdateState(eRJState::Loaded);
 		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Enable);
 	}
 	else {
+		pSystem->m_pRJController->UpdateState(eRJState::Error);
 		pSystem->postMessage(WM_NOTIFY_ERROR_OCCURED, (WPARAM)RayError::CatheterNotValid);
 	}
 
@@ -1912,6 +1919,7 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 	case eRJState::Unloaded:
 		break;
 	case eRJState::Error:
+		laserOnOff(false);
 		break;
 
 	}
