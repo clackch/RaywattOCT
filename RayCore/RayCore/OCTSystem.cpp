@@ -1418,7 +1418,6 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 
 	if (pRJController->IsConnected()) {
 		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
-		pRJController->Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 		pRJController->Move(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 	}

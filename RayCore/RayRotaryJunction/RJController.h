@@ -120,6 +120,7 @@ public:
 	virtual bool Set(eStepMotorIndex idxMotor, int velocity);
 
 	bool AutoStatePeriod(USHORT interval);
+	bool StopStepMotors();
 	bool DisplayLCD(eLCDImage image);
 	bool ReadRFID();
 	UINT GetRFIDInfo(BYTE* pRFIDInfo);

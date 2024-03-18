@@ -34,6 +34,7 @@ CRJController::~CRJController()
 }
 void CRJController::UpdateState(eRJState state)
 {
+	if (m_state == eRJState::Error) return;
 	m_recvState = state;
 	m_bStateReceived = true;
 }
@@ -91,6 +92,7 @@ bool CRJController::ReadPosition() {
 }
 bool CRJController::Current(eStepMotorIndex idxMotor, int posMM) {
 	if (!m_initMotor) return false;
+	if (m_state == eRJState::Error) return false;
 
 	int posStep = ((double)posMM / MM_PER_STEP);
 	PLOGI.printf("StepMotor #%d Current: %d", idxMotor, posStep);
@@ -121,6 +123,7 @@ bool CRJController::Current(eStepMotorIndex idxMotor, int posMM) {
 }
 bool CRJController::Move(eStepMotorIndex idxMotor, int posMM, bool delay) {
 	if (!m_initMotor) return false;
+	if (m_state == eRJState::Error) return false;
 
 	int posStep = ((double)posMM / MM_PER_STEP);
 	PLOGI.printf("StepMotor #%d Move: %d", idxMotor, posStep);
@@ -158,6 +161,8 @@ bool CRJController::Move(eStepMotorIndex idxMotor, int posMM, bool delay) {
 }
 bool CRJController::Set(eStepMotorIndex idxMotor, int velocity) {
 	if (!m_initMotor) return false;
+	if (m_state == eRJState::Error) return false;
+
 	int velStep = ((double)velocity / MM_PER_STEP);
 
 	if (idxMotor == eStepMotorIndex::Both) {
@@ -185,7 +190,23 @@ bool CRJController::AutoStatePeriod(USHORT interval) {
 	int written = m_pConnection->Write(serialPacket, packetLength);
 
 	return (written == packetLength);
+}
+bool CRJController::StopStepMotors() {
+	if (!m_initMotor) return false;
 
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	getSerialPacket(eFID::FID_SM_STOP, sizeof(BYTE) * 2, serialPacket, packetLength);
+
+	BYTE stopIdx[2] = { 0x02, 0x02 };	// 0x02: Stop Immediately
+	memcpy(serialPacket + RJ_DATA_IDX, stopIdx, sizeof(BYTE) * 2);
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	return (written == packetLength);
 }
 bool CRJController::DisplayLCD(eLCDImage image) {
 	if (!m_initMotor) return false;
@@ -280,24 +301,19 @@ void CRJController::updateState() {
 	case eRJState::Validating:
 		break;
 	case eRJState::Loading:
-		if (m_bButton[1]) {
+		if (m_bButton[1] || !m_bLimitSwitch) {
 			m_nextState = eRJState::Error;
-		}
-		else if (!m_bLimitSwitch) {
-			m_nextState = eRJState::Unloading;
 		}
 		break;
 	case eRJState::Loaded:
 		if (!m_bLimitSwitch || m_bButton[0]) {
+			Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 			m_nextState = eRJState::Unloading;
 		}
 		break;
 	case eRJState::Unloading:
 		if (m_bButton[1]) {
 			m_nextState = eRJState::Error;
-		}
-		else if (m_bButton[0]) {	// for test
-			m_nextState = eRJState::Unloaded;
 		}
 		break;
 	case eRJState::Unloaded:
@@ -306,8 +322,8 @@ void CRJController::updateState() {
 		}
 		break;
 	case eRJState::Error:
-		if (m_bButton[0]) {	// for test
-			m_nextState = eRJState::Disconnected;
+		if (m_bButton[0]) {
+			m_nextState = eRJState::Unloading;
 		}
 		break;
 	default:
@@ -341,6 +357,8 @@ void CRJController::updateState(eRJState state) {
 		break;
 	case eRJState::Error:
 		DisplayLCD(eLCDImage::LCD_IMAGE_ERROR);
+		StopMotor();
+		StopStepMotors();
 		break;
 	default:
 		break;
@@ -406,7 +424,7 @@ void CRJController::parseSMPacket(BYTE* packet, int size) {
 		
 		int curPos = 0;
 		for (int j = 0; j < 4; j++) {
-			curPos |= (packet[offset+j] << j);
+			curPos |= (packet[offset + j] << (j * 8));
 		}
 		PLOGI.printf("StepMotor #%d (%s): %d", i, ((m_isSMMoving[i]) ? "Moving" : "Stop"), curPos);
 		offset += 12;	// current pos (4byte), target pos (4byte), current speed (4byte)
@@ -415,8 +433,6 @@ void CRJController::parseSMPacket(BYTE* packet, int size) {
 void CRJController::parseRFIDPacket(BYTE* packet, int size) {
 	m_nRFIDLength = packet[1];
 	memcpy(m_RFID, packet + 2, m_nRFIDLength);
-
-	PLOGI.printf("read RFID: %d bytes", m_nRFIDLength);
 }
 void CRJController::handlePacket() {
 	BYTE length = m_vPacket[RJ_LENGTH_IDX];
