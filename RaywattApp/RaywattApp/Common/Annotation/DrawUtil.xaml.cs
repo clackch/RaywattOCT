@@ -261,9 +261,8 @@ namespace RaywattApp.Common.Annotation
         {
             _log.Debug("DeleteAll");
 
-            if (this.isDrawing)
-                return;
-
+            this.isDrawing = false;     
+            
             this.canvas.Children.Clear();
             this.canvasBackground.Children.Clear();
             this.areaGeometrys.Clear();
