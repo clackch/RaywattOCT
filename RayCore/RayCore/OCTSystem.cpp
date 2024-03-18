@@ -1815,6 +1815,7 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 		// To-Do: unload catheter
 		break;
 	case RayScannerState::Default:
+		m_pRJController->StartControl();
 		closeAllSessions();
 		break;
 	case RayScannerState::Scanning:

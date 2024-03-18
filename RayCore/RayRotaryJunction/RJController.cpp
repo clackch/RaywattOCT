@@ -44,17 +44,14 @@ bool CRJController::Connect(void *param) {
 	m_pConnection = new CCOMConnection();
 	m_initMotor = m_pConnection->Connect(param);
 	if (m_initMotor) {
-		BOOL result = TRUE;
-		result &= CUtility::StartThread(threadReadPacket, m_pThread, (LPVOID)this);
-		result &= CUtility::StartThread(threadRJState, m_pThreadState, (LPVOID)this);
+		BOOL result = CUtility::StartThread(threadReadPacket, m_pThread, (LPVOID)this);
 
 		if (result == FALSE) {
 			Disconnect();
 			m_initMotor = false;
 		}
 	}
-	AutoStatePeriod(50);
-	displayLCD(eLCDImage::LCD_IMAGE_UNLOADED);
+	displayLCD(eLCDImage::LCD_IMAGE_BOOTING);
 
 	m_state = eRJState::Disconnected;
 	m_nextState = eRJState::Disconnected;
@@ -174,6 +171,16 @@ bool CRJController::Set(eStepMotorIndex idxMotor, int velocity) {
 	}
 
 	return true;
+}
+bool CRJController::StartControl() {
+	if (!m_initMotor) return false;
+	if (m_pThreadState != nullptr) return true;
+
+	AutoStatePeriod(50);
+	displayLCD(eLCDImage::LCD_IMAGE_UNLOADED);
+	bool result = CUtility::StartThread(threadRJState, m_pThreadState, (LPVOID)this);
+
+	return result;
 }
 bool CRJController::AutoStatePeriod(USHORT interval) {
 	if (!m_initMotor) return false;

@@ -119,6 +119,7 @@ public:
 	virtual bool Move(eStepMotorIndex idxMotor, int posMM, bool delay=false);
 	virtual bool Set(eStepMotorIndex idxMotor, int velocity);
 
+	bool StartControl();
 	bool AutoStatePeriod(USHORT interval);
 	bool StopStepMotors();
 	bool DisplayLCD(eLCDImage image);
