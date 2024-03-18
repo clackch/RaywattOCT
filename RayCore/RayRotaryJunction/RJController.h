@@ -129,6 +129,7 @@ protected:
 	static UINT threadReadPacket(LPVOID param);
 	void updateState();
 	void updateState(eRJState state);
+	bool displayLCD(eLCDImage image);
 	void addPacket(BYTE* packet, int size);
 	bool sliceUntilSTX(int index);
 	bool parseSerialPacket();

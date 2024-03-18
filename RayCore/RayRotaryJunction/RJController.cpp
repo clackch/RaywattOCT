@@ -54,7 +54,7 @@ bool CRJController::Connect(void *param) {
 		}
 	}
 	AutoStatePeriod(50);
-	DisplayLCD(eLCDImage::LCD_IMAGE_UNLOADED);
+	displayLCD(eLCDImage::LCD_IMAGE_UNLOADED);
 
 	m_state = eRJState::Disconnected;
 	m_nextState = eRJState::Disconnected;
@@ -210,19 +210,9 @@ bool CRJController::StopStepMotors() {
 }
 bool CRJController::DisplayLCD(eLCDImage image) {
 	if (!m_initMotor) return false;
+	if (m_state == eRJState::Error) return false;
 
-	BYTE serialPacket[MAX_PATH];
-	int packetLength;
-	getSerialPacket(eFID::FID_LCD_DISP_IMAGE, sizeof(unsigned short), serialPacket, packetLength);
-
-	memcpy(serialPacket + RJ_DATA_IDX, &image, sizeof(unsigned short));
-
-	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
-	serialPacket[packetLength - 2] = checksum;
-
-	int written = m_pConnection->Write(serialPacket, packetLength);
-
-	return (written == packetLength);
+	return displayLCD(image);
 }
 bool CRJController::ReadRFID() {
 	if (!m_initMotor) return false;
@@ -339,7 +329,7 @@ void CRJController::updateState(eRJState state) {
 	switch (state) {
 	case eRJState::Disconnected:
 	case eRJState::Unloaded:
-		DisplayLCD(eLCDImage::LCD_IMAGE_UNLOADED);
+		displayLCD(eLCDImage::LCD_IMAGE_UNLOADED);
 		break;
 	case eRJState::Connected:
 		m_nRFIDLength = 0;	// clear RFID info.
@@ -347,16 +337,16 @@ void CRJController::updateState(eRJState state) {
 	case eRJState::Validating:
 		break;
 	case eRJState::Loading:
-		DisplayLCD(eLCDImage::LCD_IMAGE_LOADING);
+		displayLCD(eLCDImage::LCD_IMAGE_LOADING);
 		break;
 	case eRJState::Loaded:
-		DisplayLCD(eLCDImage::LCD_IMAGE_STANDBY_OFF);
+		displayLCD(eLCDImage::LCD_IMAGE_STANDBY_OFF);
 		break;
 	case eRJState::Unloading:
-		DisplayLCD(eLCDImage::LCD_IMAGE_UNLOADING);
+		displayLCD(eLCDImage::LCD_IMAGE_UNLOADING);
 		break;
 	case eRJState::Error:
-		DisplayLCD(eLCDImage::LCD_IMAGE_ERROR);
+		displayLCD(eLCDImage::LCD_IMAGE_ERROR);
 		StopMotor();
 		StopStepMotors();
 		break;
@@ -365,6 +355,20 @@ void CRJController::updateState(eRJState state) {
 	}
 	m_state = m_nextState = state;
 	if (m_pMsg != nullptr) m_pMsg->postMessage(WM_UPDATE_RJ_STATE, (WPARAM)m_state);
+}
+bool CRJController::displayLCD(eLCDImage image) {
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	getSerialPacket(eFID::FID_LCD_DISP_IMAGE, sizeof(unsigned short), serialPacket, packetLength);
+
+	memcpy(serialPacket + RJ_DATA_IDX, &image, sizeof(unsigned short));
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	return (written == packetLength);
 }
 void CRJController::addPacket(BYTE* packet, int size) {
 	for (int i = 0; i < size; i++) {
