@@ -370,9 +370,11 @@ namespace RaywattApp.ViewModels
         { 
             if (timerShowData.IsEnabled)
                 timerShowData.Stop();
+
             ODSOCT_RotateAngle((float)CameraDegree);
             ODSOCT_MoveToFrame(DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
             ODSOCT_ShowAllWindows();
+
             for (Ray3DObject obj = Ray3DObject.Tissue; obj < Ray3DObject.Count; obj++)
             {
                 ray3DStatus.ShowObject(obj, ray3DStatus.ObjectVisibility[(int)obj]);
