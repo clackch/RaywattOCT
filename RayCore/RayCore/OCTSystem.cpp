@@ -1371,12 +1371,12 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	// 2. Move Step-Motor (Pullback)
 	if (pRJController->IsConnected()) {
 		pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
-		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
+		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_LOAD);
 		pRJController->Move(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_LOAD);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 
-		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_LOAD);
-		pRJController->Move(eStepMotorIndex::Pullback, 0);
+		pRJController->StopMotor();
+		pRJController->Move(eStepMotorIndex::Pullback, 6);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 		pRJController->Move(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
@@ -1450,6 +1450,7 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 	CRJController* pRJController = pSystem->m_pRJController;
 
 	PLOGI.printf("Catheter Validation");
+	Sleep(2000);
 
 	pSystem->m_pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_STANDBY_ON);
 	pSystem->laserOnOff(true);
