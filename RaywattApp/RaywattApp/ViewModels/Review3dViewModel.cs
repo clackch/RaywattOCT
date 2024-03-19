@@ -414,7 +414,6 @@ namespace RaywattApp.ViewModels
         private void change3DIndicatorVisibility(bool show)
         {
             ray3DStatus.ShowIndicator(show);
-            Debug.WriteLine("ray3DStatus.ShowIndicator(show), show = " + show);
         }
 
         private void RotateIndicator(object param)
