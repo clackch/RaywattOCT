@@ -334,6 +334,32 @@ namespace RaywattApp.ViewModels
             ODSOCT_InputSurfaceParameter(Ray3DObject.Lumen, 10, 50, ".\\data\\lumen_tex.jpg");
             ODSOCT_InputData(Ray3DObject.Lumen, buffer, diameter, diameter, depth, 1, 1, zVal);
             ODSOCT_ProcessingDatas();
+
+            switch (PatientCase.PullbackLength)
+            { // to-do 5 Pullback Types need to be set
+                case "SHOR":
+                    if (PullTypeZoom == selectedPullbackType.Unselected)
+                    {
+                        PullTypeZoom = selectedPullbackType.Short;
+                    }
+                    else if (PullTypeZoom == selectedPullbackType.Long)
+                    {
+                        PullTypeZoom = selectedPullbackType.Short;
+                    }
+                    break;
+                case "LONG":
+                    if (PullTypeZoom == selectedPullbackType.Unselected)
+                    {
+                        PullTypeZoom = selectedPullbackType.Long;
+                    }
+                    else if (PullTypeZoom == selectedPullbackType.Short)
+                    {
+
+                        PullTypeZoom = selectedPullbackType.Long;
+                    }
+                    break;
+            }
+
             Marshal.FreeHGlobal(buffer);
             timerShowData.Interval = TimeSpan.FromMilliseconds(MinWaitingDelay);
             timerShowData.Tick += new EventHandler(timerFuncShowData);
@@ -344,42 +370,9 @@ namespace RaywattApp.ViewModels
         { 
             if (timerShowData.IsEnabled)
                 timerShowData.Stop();
-            switch (PatientCase.PullbackLength)
-            {
-                case "SHOR":
-                    if(PullTypeZoom == selectedPullbackType.Unselected)
-                    {
-                        ODSOCT_CutViewZoom(1);
-                        ODSOCT_CutViewZoom(-1);
-                        PullTypeZoom = selectedPullbackType.Short;
-                    }
-                    else if (PullTypeZoom == selectedPullbackType.Long)
-                    {
-                        ODSOCT_CutViewZoom(1);
-                        ODSOCT_CutViewZoom(-1);
-                        PullTypeZoom = selectedPullbackType.Short;
-                    }
-                    break;
-                case "LONG":
-                    if (PullTypeZoom == selectedPullbackType.Unselected)
-                    {
-                        ODSOCT_CutViewZoom(1);
-                        ODSOCT_CutViewZoom(-1);
-                        PullTypeZoom = selectedPullbackType.Long;
-                    }
-                    else if (PullTypeZoom == selectedPullbackType.Short)
-                    {
-                        ODSOCT_CutViewZoom(1);
-                        ODSOCT_CutViewZoom(-1);
-                        PullTypeZoom = selectedPullbackType.Long;
-                    }
-                    break;
-
-            }
             ODSOCT_RotateAngle((float)CameraDegree);
             ODSOCT_MoveToFrame(DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
             ODSOCT_ShowAllWindows();
-
             for (Ray3DObject obj = Ray3DObject.Tissue; obj < Ray3DObject.Count; obj++)
             {
                 ray3DStatus.ShowObject(obj, ray3DStatus.ObjectVisibility[(int)obj]);
