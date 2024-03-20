@@ -1,0 +1,206 @@
+﻿<Page x:Class="RaywattApp.Views.PhysicianEditPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:RaywattApp.Views"
+      xmlns:component="clr-namespace:RaywattApp.Views.Component"
+      mc:Ignorable="d" 
+      d:DesignHeight="1024" d:DesignWidth="1280"
+      Background="{DynamicResource GrayscaleGray8Brush}"
+      Title="PhysicianEditPage">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Height="60" Background="{DynamicResource GrayscaleGray7Brush}">
+            <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Margin="75,20,0,19" Content="{Binding [Physician], Source={StaticResource L10N}}"/>
+        </Grid>
+
+        <Grid Grid.Row="1" Margin="60,40,60,40">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="770"/>
+                <RowDefinition Height="74"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" CornerRadius="10,10,0,0" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray7Brush}">
+                <Grid>
+                    <Border Margin="19" CornerRadius="8" BorderThickness="0" Background="{DynamicResource GrayscaleGray8Brush}">
+                        <StackPanel>
+                            <Grid Margin="30,0,0,0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="159"/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <!-- Physician Info. -->
+                                <Grid Grid.Row="0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="59"/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">
+                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Last Name], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="1" HorizontalAlignment="Left">
+                                        <TextBox Style="{DynamicResource TextBoxBase}" Width="336" Text="{Binding Physician.Lastname, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter Last Name], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="0" Grid.Column="1" VerticalAlignment="Center">
+                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [First Name], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="1" HorizontalAlignment="Left">
+                                        <TextBox Style="{DynamicResource TextBoxBase}" Width="336" Text="{Binding Physician.Firstname, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter First Name], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
+                                    <component:IconButton Grid.Row="0" Grid.Column="1" Style="{DynamicResource IconButton}" Icon="delete" Command="{Binding DeleteCommand}" HorizontalAlignment="Right" Margin="10"/>
+                                </Grid>
+                                <!-- Case Default Settings -->
+                                <Grid Grid.Row="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="208"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="39"/>
+                                        <RowDefinition Height="54"/>
+                                        <RowDefinition Height="64"/>
+                                        <RowDefinition Height="54"/>
+                                        <RowDefinition Height="45"/>
+                                        <RowDefinition Height="54"/>
+                                        <RowDefinition Height="70"/>
+                                        <RowDefinition Height="70"/>
+                                        <RowDefinition Height="70"/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Left">
+                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Case Default Settings], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">
+                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Flush Media], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left">
+                                        <ComboBox Width="485" ItemsSource="{Binding FlushMediaList}" SelectedValue="{Binding SelectedFlushMedia, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" Tag="{Binding [Select Flush Media], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="2" Grid.Column="0" VerticalAlignment="Center">
+                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Trigger], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <StackPanel>
+                                            <RadioButton IsChecked="{Binding Physician.PullbackTrigger, Converter={StaticResource RadioButtonConverter}, ConverterParameter=MANL}" Content="{Binding [Manual], Source={StaticResource L10N}}" />
+                                        </StackPanel>
+                                        <StackPanel Margin="100,0,0,0">
+                                            <RadioButton IsChecked="{Binding Physician.PullbackTrigger, Converter={StaticResource RadioButtonConverter}, ConverterParameter=AUTO}" Content="{Binding [Auto], Source={StaticResource L10N}}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="3" Grid.Column="0" VerticalAlignment="Center">
+                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Type], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="3" Grid.Column="1" HorizontalAlignment="Left">
+                                        <ComboBox Width="485" ItemsSource="{Binding PullbackTypeList}" SelectedValue="{Binding SelectedPullbackType, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" Tag="{Binding [Select Pullback Type], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="4" Grid.Column="1">
+                                        <StackPanel Orientation="Horizontal" Margin="20,10,0,0">
+                                            <StackPanel Orientation="Horizontal">
+                                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Length], Source={StaticResource L10N}}"/>
+                                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content=" : "/>
+                                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray1Brush}" Content="{Binding PbLength}"/>
+                                                <StackPanel Width="5"/>
+                                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [㎜], Source={StaticResource L10N}}"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Speed], Source={StaticResource L10N}}"/>
+                                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content=" : "/>
+                                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray1Brush}" Content="{Binding PbSpeed}"/>
+                                                <StackPanel Width="5"/>
+                                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [㎜/s], Source={StaticResource L10N}}"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Time], Source={StaticResource L10N}}"/>
+                                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content=" : "/>
+                                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray1Brush}" Content="{Binding PbTime}"/>
+                                                <StackPanel Width="5"/>
+                                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [s], Source={StaticResource L10N}}"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="5" Grid.Column="0" VerticalAlignment="Center">
+                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [OCT Colormap], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="5" Grid.Column="1" HorizontalAlignment="Left">
+                                        <ComboBox Width="485" ItemsSource="{Binding ColormapList}" SelectedValue="{Binding SelectedColormap, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" Tag="{Binding [Select OCT Colormap], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="6" Grid.Column="0" VerticalAlignment="Center">
+                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Calcium Threshold], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
+                                    <Grid Grid.Row="6" Grid.Column="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="390"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="5,0,0,0">
+                                            <Slider Value="{Binding Physician.CalciumThreshold}" Maximum="{Binding MaxCalciumThreshold}" Minimum="{Binding MinCalciumThreshold}"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="30,0,0,0">
+                                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Physician.CalciumThreshold}"/>
+                                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="º"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    <StackPanel Grid.Row="7" Grid.Column="0" VerticalAlignment="Center">
+                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Expansion Threshold], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
+                                    <Grid Grid.Row="7" Grid.Column="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="390"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="5,0,0,0">
+                                            <Slider Value="{Binding Physician.ExpansionThreshold}" Maximum="{Binding MaxExpansionThreshold}" Minimum="{Binding MinExpansionThreshold}"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="30,0,0,0">
+                                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Physician.ExpansionThreshold}"/>
+                                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="%"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    <StackPanel Grid.Row="8" Grid.Column="0" VerticalAlignment="Center">
+                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Apposition Threshold], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
+                                    <Grid Grid.Row="8" Grid.Column="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="390"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="5,0,0,0">
+                                            <Slider Value="{Binding Physician.AppositionThreshold}" Maximum="{Binding MaxAppositionThreshold}" Minimum="{Binding MinAppositionThreshold}" TickFrequency="0.01" IsSnapToTickEnabled="True" LargeChange="0.01" SmallChange="0.01"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="30,0,0,0">
+                                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Physician.AppositionThreshold}"/>
+                                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="㎜"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+            <Border Grid.Row="1" CornerRadius="0,0,10,10" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray6Brush}">
+                <Grid>
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" Margin="15,0,0,0">
+                        <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,15,0">
+                        <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding SaveCommand}" Content="{Binding [Ok], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="2" Height="40" Background="{DynamicResource GrayscaleBlackBrush}"/>
+    </Grid>
+</Page>
