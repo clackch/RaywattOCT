@@ -233,10 +233,21 @@ namespace RaywattApp.ViewModels
             _log.Debug("NewRecording");
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
+
+            if (Patient.PhysicianId == 0)
+            {
+                parameter["title"] = _l10n["Information"];
+                parameter["message"] = _l10n["Add physician information on the edit patient screen."];
+                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+                return;
+            }
+
+            parameter.Clear();
             parameter["patient"] = Patient;
             GetDetailStatus();
             parameter["prevStatus"] = PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingPresetPage) { Parameter = parameter });
         }
 
         private void Export()
