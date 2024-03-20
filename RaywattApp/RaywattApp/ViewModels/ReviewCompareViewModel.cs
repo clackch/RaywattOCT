@@ -260,11 +260,12 @@ namespace RaywattApp.ViewModels
             sqlParameters["accession_number"] = PatientCase.AccessionNumber;
             sqlParameters["comment"] = PatientCase.Comment;
             sqlParameters["vessel"] = PatientCase.Vessel;
+            sqlParameters["location"] = PatientCase.Location;
             sqlParameters["procedure"] = PatientCase.Procedure;
             sqlParameters["angio_yn"] = PatientCase.AngioYn;
             sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
             sqlParameters["indicator_degree"] = PatientCase.IndicatorDegree;
-            sqlParameters["preset_name"] = PatientCase.PresetName;
+            sqlParameters["colormap"] = PatientCase.Colormap;
             sqlParameters["calcium_threshold"] = PatientCase.CalciumThreshold;
             sqlParameters["expansion_calculation"] = PatientCase.ExpansionCalculation;
             sqlParameters["expansion_threshold"] = PatientCase.ExpansionThreshold;

@@ -35,7 +35,7 @@
                         <StackPanel Height="9"/>
                         <!-- design guide : 12px -->
                         <Separator Height="1" Background="{DynamicResource SeparatorBrush}"/>
-                        <StackPanel Height="18"/>
+                        <StackPanel Height="10"/>
                         <!-- design guide : 20px -->
                         <StackPanel Orientation="Vertical">
                             <StackPanel Orientation="Horizontal">
@@ -52,11 +52,6 @@
                                 <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
                                 <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
                             </StackPanel>
-                            <StackPanel Height="12"/>
-                            <StackPanel Orientation="Horizontal">
-                                <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Vessel], Source={StaticResource L10N}}"/>
-                                <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding PatientCase.Vessel, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}"/>
-                            </StackPanel>
                             <StackPanel Height="4"/>
                             <StackPanel Orientation="Horizontal">
                                 <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Physician], Source={StaticResource L10N}}"/>
@@ -64,8 +59,23 @@
                             </StackPanel>
                             <StackPanel Height="12"/>
                             <StackPanel Orientation="Horizontal">
+                                <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Vessel], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding PatientCase.Vessel, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}"/>
+                            </StackPanel>
+                            <StackPanel Height="4"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Location], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding PatientCase.Location, Converter={StaticResource CodeConverter}, ConverterParameter='LOCT'}"/>
+                            </StackPanel>
+                            <StackPanel Height="4"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Accession No.], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding PatientCase.AccessionNumber}"/>
+                            </StackPanel>
+                            <StackPanel Height="4"/>
+                            <StackPanel Orientation="Horizontal">
                                 <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Comment], Source={StaticResource L10N}}"/>
-                                <TextBlock Width="112" Height="42" Text="{Binding PatientCase.Comment}" TextWrapping="WrapWithOverflow" FontFamily="Pretendard" FontWeight="Medium" FontSize="12" Foreground="{DynamicResource CaseValueBrush}"/>
+                                <TextBlock Width="102" Height="42" Text="{Binding PatientCase.Comment}" TextWrapping="WrapWithOverflow" FontFamily="Pretendard" FontWeight="Medium" FontSize="12" Foreground="{DynamicResource CaseValueBrush}"/>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
