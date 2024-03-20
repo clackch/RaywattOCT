@@ -1,0 +1,54 @@
+﻿<UserControl x:Class="RaywattApp.Views.Dialog.PhysicianDialogControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:const="clr-namespace:RaywattApp.Common.Bases"
+             xmlns:local="clr-namespace:RaywattApp.Views.Dialog"
+             mc:Ignorable="d" 
+             Width="{Binding DialogWidth}" Height="{Binding DialogHeight}">
+
+    <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Width="{x:Static const:Constants.PhysicianDialogHeight}" Height="{x:Static const:Constants.PhysicianDialogWidth}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="31"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="31"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="35"/>
+                <RowDefinition Height="70"/>
+                <RowDefinition Height="70"/>
+                <RowDefinition Height="340"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="71"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center">
+                <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Select Physician], Source={StaticResource L10N}}"/>
+            </StackPanel>
+
+            <Grid Grid.Row="2" Grid.Column="1" Width="408">
+                <TextBox Style="{DynamicResource PatientSearch}" Width="408" x:Name="PatientSearchName" Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}" Margin="0,3,0,0">
+                    <TextBox.InputBindings>
+                        <KeyBinding Command="{Binding SearchCommand}" Key="Enter"/>
+                    </TextBox.InputBindings>
+                </TextBox>
+                <Label Style="{DynamicResource PatientSearchPlaceholder}" Content="{Binding [Search Name], Source={StaticResource L10N}}"/>
+                <Button Style="{DynamicResource SearchOpacity_Icon}" Command="{Binding SearchCommand}"/>
+            </Grid>
+
+            <DataGrid Grid.Row="3" Grid.Column="1" ItemsSource="{Binding PhysicianList}" SelectedItem="{Binding SelectedPhysician}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" Height="300">
+                <DataGrid.Columns>
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Name}" Header="{Binding [Name], Source={StaticResource L10N}}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+                <StackPanel Width="8"/>
+                <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>
