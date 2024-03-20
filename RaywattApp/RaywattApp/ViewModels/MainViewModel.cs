@@ -300,6 +300,7 @@ namespace RaywattApp.ViewModels
             {
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["patient"] = Patient;
+                parameter["patientCase"] = PatientCase;
                 parameter["prevStatus"] = PrevStatus;
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
             }
@@ -329,6 +330,7 @@ namespace RaywattApp.ViewModels
             {
                 parameter.Clear();
                 parameter["patient"] = Patient;
+                parameter["patientCase"] = PatientCase;
                 parameter["prevStatus"] = PrevStatus;
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingCatheterFailPage) { Parameter = parameter });
             }
