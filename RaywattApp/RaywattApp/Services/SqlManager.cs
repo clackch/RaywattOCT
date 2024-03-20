@@ -340,45 +340,6 @@ namespace RaywattApp.Services
         }
 
         /**
-         * Patient Case Preset
-         */
-        public IList<PatientCasePreset> SelectPatientCasePresetList()
-        {
-            _log.Debug("SelectPatientCasePresetList");
-
-            string commandText = SqlQuery.GetQuery("SelectPatientCasePresetList");
-
-            return _databaseService.GetDatas<PatientCasePreset>(commandText);
-        }
-
-        public int DeletePatientCasePreset(Dictionary<string, Object> sqlParameters)
-        {
-            _log.Debug("DeletePatientCasePreset");
-
-            string commandText = SqlQuery.GetQuery("DeletePatientCasePreset");
-
-            return _databaseService.DeleteData(commandText, sqlParameters);
-        }
-
-        public int InsertPatientCasePreset(Dictionary<string, Object> sqlParameters)
-        {
-            _log.Debug("InsertPatientCasePreset");
-
-            string commandText = SqlQuery.GetQuery("InsertPatientCasePreset");
-
-            return _databaseService.InsertData(commandText, sqlParameters);
-        }
-
-        public int UpdatePatientCasePreset(Dictionary<string, Object> sqlParameters)
-        {
-            _log.Debug("UpdatePatientCasePreset");
-
-            string commandText = SqlQuery.GetQuery("UpdatePatientCasePreset");
-
-            return _databaseService.UpdateData(commandText, sqlParameters);
-        }
-
-        /**
          * Patient Case Annotation
          */
         public int UpdatePatientCaseAnnotationLumenContour(Dictionary<string, Object> sqlParameters)
@@ -411,13 +372,26 @@ namespace RaywattApp.Services
         /**
          * Pysician
          */
-        public IList<Physician> SelectPhysicianList()
+        public IList<Physician> SelectPhysician(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("SelectPhysician");
+
+            string commandText = SqlQuery.GetQuery("SelectPhysician");
+
+            return _databaseService.GetDatas<Physician>(commandText, sqlParameters);
+        }
+
+        public IList<Physician> SelectPhysicianList(Dictionary<string, Object> sqlParameters)
         {
             _log.Debug("SelectPhysicianList");
 
             string commandText = SqlQuery.GetQuery("SelectPhysicianList");
 
-            return _databaseService.GetDatas<Physician>(commandText);
+            Dictionary<string, Object> commandParameters = new Dictionary<string, Object>();
+            commandParameters["lastname"] = "%" + sqlParameters["SearchKeyword"] + "%";
+            commandParameters["firstname"] = "%" + sqlParameters["SearchKeyword"] + "%";
+
+            return _databaseService.GetDatas<Physician>(commandText, commandParameters);
         }
 
         public int InsertPhysician(Dictionary<string, Object> sqlParameters)
@@ -429,13 +403,22 @@ namespace RaywattApp.Services
             return _databaseService.InsertData(commandText, sqlParameters);
         }
 
-        public int DeletePhysician()
+        public int UpdatePhysician(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpdatePhysician");
+
+            string commandText = SqlQuery.GetQuery("UpdatePhysician");
+
+            return _databaseService.UpdateData(commandText, sqlParameters);
+        }
+
+        public int DeletePhysician(Dictionary<string, Object> sqlParameters)
         {
             _log.Debug("DeletePhysician");
 
             string commandText = SqlQuery.GetQuery("DeletePhysician");
 
-            return _databaseService.DeleteData(commandText);
+            return _databaseService.DeleteData(commandText, sqlParameters);
         }
 
         /**
