@@ -1,10 +1,9 @@
 ﻿using log4net;
-using RaywattApp.Common.Setting;
-using System.Windows.Navigation;
+using RaywattApp.Common.Bases;
 
 namespace RaywattApp.ViewModels.Setting
 {
-    public class SettingAcquisitionViewModel : SettingBase
+    public class SettingAcquisitionViewModel : ViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(SettingAcquisitionViewModel));
 
@@ -16,16 +15,6 @@ namespace RaywattApp.ViewModels.Setting
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
             _log.Debug("OnNavigating");
-        }
-
-        protected override void Okay()
-        {
-            _log.Debug("Okay");
-        }
-
-        protected override void Apply()
-        {
-            _log.Debug("Apply");
         }
     }
 }

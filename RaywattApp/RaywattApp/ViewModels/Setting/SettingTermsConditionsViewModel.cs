@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using log4net;
-using RaywattApp.Common.Setting;
+using RaywattApp.Common.Bases;
 using RaywattApp.Models;
 using RaywattApp.Services;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.Windows.Input;
 
 namespace RaywattApp.ViewModels.Setting
 {
-    public partial class SettingTermsConditionsViewModel : SettingBase
+    public partial class SettingTermsConditionsViewModel : ViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(SettingTermsConditionsViewModel));
 
@@ -64,27 +64,6 @@ namespace RaywattApp.ViewModels.Setting
 
             if (Validate())
                 Save();
-        }
-
-        protected override void Okay()
-        {
-            _log.Debug("Okay");
-            
-            if (!Validate())
-                return;
-
-            Save();
-            CloseDialog();
-        }
-
-        protected override void Apply()
-        {
-            _log.Debug("Apply");
-
-            if (!Validate())
-                return;
-
-            Save();            
         }
 
         private void Init()

@@ -1,21 +1,21 @@
 ﻿using log4net;
+using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
-using RaywattApp.Common.Setting;
 using RaywattApp.Services;
 
 namespace RaywattApp.ViewModels.Setting
 {
-    public class SettingServiceViewModel : SettingBase
+    public class SettingAboutViewModel : ViewModelBase
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(SettingServiceViewModel));
+        private static readonly ILog _log = LogManager.GetLogger(typeof(SettingAboutViewModel));
 
         private readonly SqlManager _sqlManager;
 
         private IDialogService _dialogService;
 
-        public SettingServiceViewModel(SqlManager sqlManager, IDialogService dialogService)
+        public SettingAboutViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
-            _log.Debug("SettingServiceViewModel");
+            _log.Debug("SettingAboutViewModel");
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;
@@ -29,16 +29,6 @@ namespace RaywattApp.ViewModels.Setting
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
             _log.Debug("OnNavigating");
-        }
-
-        protected override void Okay()
-        {
-            _log.Debug("Okay");
-        }
-
-        protected override void Apply()
-        {
-            _log.Debug("Apply");
         }
     }
 }

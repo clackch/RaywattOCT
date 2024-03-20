@@ -3,14 +3,13 @@ using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Messages;
-using RaywattApp.Common.Setting;
 using RaywattApp.Models;
 using RaywattApp.Services;
 using System.Collections.Generic;
 
 namespace RaywattApp.ViewModels.Setting
 {
-    public partial class SettingLocalizationViewModel : SettingBase
+    public partial class SettingLocalizationViewModel : ViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(SettingLocalizationViewModel));
 
@@ -54,25 +53,6 @@ namespace RaywattApp.ViewModels.Setting
             _log.Debug("OnNavigating");
 
             ApplyChange();
-        }
-
-        protected override void Okay()
-        {
-            _log.Debug("Okay");
-
-            ApplyChange();
-
-            //Close Popup
-            CloseDialog();
-        }
-
-        protected override void Apply()
-        {
-            _log.Debug("Apply");
-
-            ApplyChange();
-
-            WeakReferenceMessenger.Default.Send(new PopupNavigationMessage("Refresh"));
         }
 
         private void ApplyChange()
