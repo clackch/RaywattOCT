@@ -142,7 +142,7 @@ namespace RaywattApp.Models
 
         private void CalcLesionLength(int frameProximal, int frameDistal, int totalFrame, double longitudeWidth, string pullbackLength)
         {
-            int frameCnt = int.Parse(CodeDefinition.Codes["PBLE"][pullbackLength]);
+            int frameCnt = int.Parse(pullbackLength);
 
             LesionLength.DValue = Math.Round(((frameDistal - frameProximal + 1) * frameCnt / 10) / (double)totalFrame, 1);
             double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-10", LesionLength.DValue + "㎜", 1).Width + 1;
