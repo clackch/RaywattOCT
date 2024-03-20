@@ -75,6 +75,7 @@ namespace RaywattApp.ViewModels.Dialog
             PopupNavigationSource = Constants.SettingDatabasePage;
             PopupNavigationSource2 = Constants.SettingLogPage;
             PopupNavigationSource3 = Constants.SettingTermsConditionsPage;
+            PopupNavigationSource4 = Constants.SettingAboutPage;
 
             Visibility = Visibility.Visible;
             CurrentMenu = Constants.SettingDatabasePage;
@@ -86,8 +87,7 @@ namespace RaywattApp.ViewModels.Dialog
 
             //저장 기능이 있는 페이지만 추가
             string pageUri = message.Value;
-            PopupNavigationSource = pageUri;
-            PopupNavigationSource4 = pageUri;
+            PopupNavigationSource3 = pageUri;//SettingTermsConditionsPage
         }
 
         private void OnPopupNavigate(string pageUri)
@@ -109,6 +109,9 @@ namespace RaywattApp.ViewModels.Dialog
                     break;
                 case Constants.SettingTermsConditionsPage:
                     Visibility3 = Visibility.Visible;
+                    break;
+                case Constants.SettingAboutPage:
+                    Visibility4 = Visibility.Visible;
                     break;
                 default:
                     break;
