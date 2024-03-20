@@ -451,9 +451,9 @@ namespace RaywattApp.ViewModels.File
                             patientCase.PatientId = GetStrValue(caseObj, "PatientId");
                             patientCase.PhysicianName = GetStrValue(caseObj, "PhysicianName");
                             patientCase.AccessionNumber = GetStrValue(caseObj, "AccessionNumber");
-                            patientCase.AccessionName = GetStrValue(caseObj, "AccessionName");
                             patientCase.Comment = GetStrValue(caseObj, "Comment");
                             patientCase.Vessel = GetStrValue(caseObj, "Vessel");
+                            patientCase.Location = GetStrValue(caseObj, "Location");
                             patientCase.Procedure = GetStrValue(caseObj, "Procedure");
                             patientCase.NumOfFrames = GetIntValue(caseObj, "NumOfFrames");
                             patientCase.Image = GetStrValue(caseObj, "Image");
@@ -463,7 +463,9 @@ namespace RaywattApp.ViewModels.File
                             patientCase.AngioYn = GetBoolValue(caseObj, "AngioYn");
                             patientCase.AngioCoRegistration = GetBoolValue(caseObj, "AngioCoRegistration");
                             patientCase.IndicatorDegree = GetDoubleValue(caseObj, "IndicatorDegree");
-                            patientCase.PresetName = GetStrValue(caseObj, "PresetName");
+                            patientCase.FlushMedia = GetStrValue(caseObj, "FlushMedia");
+                            patientCase.PullbackTrigger = GetStrValue(caseObj, "PullbackTrigger");
+                            patientCase.Colormap = GetStrValue(caseObj, "Colormap");
                             patientCase.CalciumThreshold = GetIntValue(caseObj, "CalciumThreshold");
                             patientCase.ExpansionCalculation = GetStrValue(caseObj, "ExpansionCalculation");
                             patientCase.ExpansionThreshold = GetIntValue(caseObj, "ExpansionThreshold");
