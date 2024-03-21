@@ -14,11 +14,11 @@
             <StackPanel Margin="20">
                 <Label Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Software Name], Source={StaticResource L10N}}"/>
                 <StackPanel Height="10"/>
-                <Label Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [FasterDx], Source={StaticResource L10N}}"/>
+                <Label Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding SoftwareName}"/>
                 <StackPanel Height="30"/>
                 <Label Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Software Version], Source={StaticResource L10N}}"/>
                 <StackPanel Height="10"/>
-                <Label Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [1.00.00], Source={StaticResource L10N}}"/>
+                <Label Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding SoftwareVersion}"/>
             </StackPanel>
         </Border>
     </Grid>
