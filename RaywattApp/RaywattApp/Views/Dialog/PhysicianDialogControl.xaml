@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:const="clr-namespace:RaywattApp.Common.Bases"
+             xmlns:inter="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:local="clr-namespace:RaywattApp.Views.Dialog"
              mc:Ignorable="d" 
              Width="{Binding DialogWidth}" Height="{Binding DialogHeight}">
@@ -38,7 +39,12 @@
                 <Button Style="{DynamicResource SearchOpacity_Icon}" Command="{Binding SearchCommand}"/>
             </Grid>
 
-            <DataGrid Grid.Row="3" Grid.Column="1" ItemsSource="{Binding PhysicianList}" SelectedItem="{Binding SelectedPhysician}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" Height="300">
+            <DataGrid Grid.Row="3" Grid.Column="1" Name="physicianList" ItemsSource="{Binding PhysicianList}" SelectedItem="{Binding SelectedPhysician}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" Height="300">
+                <inter:Interaction.Triggers>
+                    <inter:EventTrigger EventName="SelectionChanged">
+                        <inter:InvokeCommandAction Command="{Binding SelectionChangedCommand}" CommandParameter="{Binding ElementName=physicianList, Path=SelectedItem}"/>
+                    </inter:EventTrigger>
+                </inter:Interaction.Triggers>
                 <DataGrid.Columns>
                     <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Name}" Header="{Binding [Name], Source={StaticResource L10N}}"/>
                 </DataGrid.Columns>
@@ -47,7 +53,7 @@
             <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
                 <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
                 <StackPanel Width="8"/>
-                <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
+                <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding SelectCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
             </StackPanel>
         </Grid>
     </Border>
