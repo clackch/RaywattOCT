@@ -1365,19 +1365,20 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 
 	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterLoading);
 
-	// 1. Rotate BLDC Motor
-	pRJController->PerformRun(config.bldcMotor.velocityLoad);
-
-	// 2. Move Step-Motor (Pullback)
 	if (pRJController->IsConnected()) {
+		pRJController->PerformRun(config.bldcMotor.velocityLoad);
+
 		pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
-		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
+		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_LOAD);
+
 		pRJController->Move(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_LOAD);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 
-		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_LOAD);
+		pRJController->StopMotor();
+
 		pRJController->Move(eStepMotorIndex::Pullback, 0);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+		
 		pRJController->Move(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 	}
@@ -1385,9 +1386,6 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	{
 		Sleep(config.GetLoadCatheterTime());
 	}
-
-	// 3. Stop BLDC Motor
-	pRJController->StopMotor();
 
 	// To-Do: Check Catheter Connection
 	bool loaded = true;
