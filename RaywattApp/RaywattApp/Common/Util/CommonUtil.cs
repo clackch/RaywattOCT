@@ -25,8 +25,8 @@ using System.Windows.Controls;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
 using Newtonsoft.Json;
-using System.Diagnostics;
 using RaywattApp.Common.Angio;
+using System.Xml;
 
 namespace RaywattApp.Common.Util
 {
@@ -1743,6 +1743,74 @@ namespace RaywattApp.Common.Util
                 return false;
 
             return testMode[key];
+        }
+
+        public static void ReadAngioParams(PatientCase patientCase)
+        {
+            string file = patientCase.Image;
+            string paramsFile = file.Substring(0, file.Length - 3) + "params";
+
+            string directory = Path.Combine(Constants.DataRootPath, patientCase.PatientId);
+            string paramsPath = Path.Combine(directory, paramsFile);
+
+            //Read .params
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.Load(paramsPath);
+
+            XmlNode configNode = xmlDoc.SelectSingleNode("/config");
+            if (patientCase.AngioFrame == null) patientCase.AngioFrame = new AngioFrame();
+            patientCase.AngioFrame.AngioFrameHeight = int.Parse(configNode.SelectSingleNode("AngioFrameHeight").InnerText);
+            patientCase.AngioFrame.AngioFrameWidth = int.Parse(configNode.SelectSingleNode("AngioFrameWidth").InnerText);
+            patientCase.AngioFrame.Channels = int.Parse(configNode.SelectSingleNode("BitsPerPixel").InnerText) / 8;
+        }
+
+        public static void ReadAngioImages(PatientCase patientCase, List<Mat>? angioFrames = null)
+        {
+            string file = patientCase.Image;
+            string angioFile = file.Substring(0, file.Length - 3) + "angioframes";
+
+            string directory = Path.Combine(Constants.DataRootPath, patientCase.PatientId);
+            string angioPath = Path.Combine(directory, angioFile);
+
+            int angioHeight = patientCase.AngioFrame.AngioFrameHeight;
+            int angioWidth = patientCase.AngioFrame.AngioFrameWidth;
+            int angioChannels = patientCase.AngioFrame.Channels;
+
+            using (BinaryReader reader = new BinaryReader(System.IO.File.Open(angioPath, FileMode.Open)))
+            {
+                while (reader.BaseStream.Position != reader.BaseStream.Length)
+                {
+                    byte[] data = reader.ReadBytes(angioWidth * angioHeight * angioChannels);
+                    Mat frame = new Mat(angioHeight, angioWidth, MatType.CV_8UC(angioChannels), data);
+                    switch (angioChannels)
+                    {
+                        case 3:
+                            Cv2.CvtColor(frame, frame, ColorConversionCodes.BGR2GRAY);
+                            break;
+
+                        case 4:
+                            Cv2.CvtColor(frame, frame, ColorConversionCodes.RGBA2GRAY);
+                            break;
+                    }
+                    if (angioFrames != null) angioFrames.Add(frame);
+                    patientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(frame));
+                }
+            }
+        }
+        public static ImageSource ConvertMatsToImageSource(Mat mat)
+        {
+            using (var stream = new MemoryStream())
+            {
+                mat.WriteToStream(stream, "." + Constants.ExportStillFrameBitmap);
+
+                var bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.StreamSource = stream;
+                bitmapImage.EndInit();
+                bitmapImage.Freeze();
+                return bitmapImage;
+            }
         }
     }
 }

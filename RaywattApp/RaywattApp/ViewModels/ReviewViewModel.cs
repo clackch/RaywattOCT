@@ -1572,31 +1572,16 @@ namespace RaywattApp.ViewModels
         }
 
         private void ReadAngioFrames()
-        { 
-            string file = PatientCase.Image;
-            string angioFile = file.Substring(0, file.Length - 3) + "angioframes";
-            string paramsFile = file.Substring(0, file.Length - 3) + "params";
-
-            string directory = Path.Combine(Constants.DataRootPath, PatientCase.PatientId);
-            string angioPath = Path.Combine(directory, angioFile);
-            string paramsPath = Path.Combine(directory, paramsFile);
-
-            //Read .params
-            XmlDocument xmlDoc = new XmlDocument();
-            xmlDoc.Load(paramsPath);
-
-            XmlNode configNode = xmlDoc.SelectSingleNode("/config");
-            int angioFrameHeight = int.Parse(configNode.SelectSingleNode("AngioFrameHeight").InnerText);
-            int angioFrameWidth = int.Parse(configNode.SelectSingleNode("AngioFrameWidth").InnerText);
-            int channels = int.Parse(configNode.SelectSingleNode("BitsPerPixel").InnerText) / 8;
+        {
+            CommonUtil.ReadAngioParams(PatientCase);
 
             //Recording -> Review
             if (_angioManager.AngioSaveBuffer.Count != 0)
             {
                 foreach (byte[] data in _angioManager.AngioSaveBuffer)
                 {
-                    Mat frame = new Mat(angioFrameHeight, angioFrameWidth, MatType.CV_8UC(channels), data);
-                    switch (channels)
+                    Mat frame = new Mat(PatientCase.AngioFrame.AngioFrameHeight, PatientCase.AngioFrame.AngioFrameWidth, MatType.CV_8UC(PatientCase.AngioFrame.Channels), data);
+                    switch (PatientCase.AngioFrame.Channels)
                     {
                         case 3:
                             Cv2.CvtColor(frame, frame, ColorConversionCodes.BGR2GRAY);
@@ -1608,7 +1593,7 @@ namespace RaywattApp.ViewModels
                     }
 
                     AngioFrames.Add(frame);
-                    PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(frame));
+                    PatientCase.AngioFrame.AngioImage.Add(CommonUtil.ConvertMatsToImageSource(frame));
                 }
 
                 _angioManager.AngioSaveFrameNum = 0;
@@ -1618,43 +1603,7 @@ namespace RaywattApp.ViewModels
             }
 
             //PatientCaseList -> Review
-            using (BinaryReader reader = new BinaryReader(System.IO.File.Open(angioPath, FileMode.Open)))
-            {
-                while (reader.BaseStream.Position != reader.BaseStream.Length)
-                {
-                    byte[] data = reader.ReadBytes(angioFrameWidth * angioFrameHeight * channels);
-                    Mat frame = new Mat(angioFrameHeight, angioFrameWidth, MatType.CV_8UC(channels), data);
-                    switch (channels)
-                    {
-                        case 3:
-                            Cv2.CvtColor(frame, frame, ColorConversionCodes.BGR2GRAY);
-                            break;
-
-                        case 4:
-                            Cv2.CvtColor(frame, frame, ColorConversionCodes.RGBA2GRAY);
-                            break;
-                    }
-
-                    AngioFrames.Add(frame);
-                    PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(frame));
-                }
-            }
-        }
-
-        private ImageSource ConvertMatsToImageSource(Mat mat)
-        {
-            using (var stream = new MemoryStream())
-            {
-                mat.WriteToStream(stream, "." + Constants.ExportStillFrameBitmap);
-
-                var bitmapImage = new BitmapImage();
-                bitmapImage.BeginInit();
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.StreamSource = stream;
-                bitmapImage.EndInit();
-                bitmapImage.Freeze();
-                return bitmapImage;
-            }
+            CommonUtil.ReadAngioImages(PatientCase, AngioFrames);
         }
 
         private void ReadTrackPoints()

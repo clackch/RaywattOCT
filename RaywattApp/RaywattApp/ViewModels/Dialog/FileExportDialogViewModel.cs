@@ -13,6 +13,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using static RaywattOCT.RayCoreWrapper;
 using Point = System.Windows.Point;
@@ -31,6 +32,7 @@ namespace RaywattApp.ViewModels.Dialog
         public UserControl userControl;
 
         private List<Mat> crossSections;
+        private List<ImageSource> angioImages;
 
         private Mat imglumenProfile;
         private Mat imgCrossSectionBackground;
@@ -45,6 +47,9 @@ namespace RaywattApp.ViewModels.Dialog
 
         [ObservableProperty]
         private BitmapSource _crossSectionImage;
+
+        [ObservableProperty]
+        private BitmapSource _angioImage;
 
         [ObservableProperty]
         private double _crossSectionScale;
@@ -123,6 +128,12 @@ namespace RaywattApp.ViewModels.Dialog
         private double _crossSectionImageSize;
 
         [ObservableProperty]
+        private double _angioWidth;
+
+        [ObservableProperty]
+        private double _angioHeight;
+
+        [ObservableProperty]
         private Visibility _measureSeparator;
 
         [ObservableProperty]
@@ -188,6 +199,13 @@ namespace RaywattApp.ViewModels.Dialog
             CrossSectionScale = (1 / PatientCase.ImageResolution) * (Constants.CrossSectionSize / Constants.OCTImageSize);
 
             this.crossSections = crossSections;
+            if (fileExport.AngioView)
+            {
+                CommonUtil.ReadAngioParams(PatientCase);
+                CommonUtil.ReadAngioImages(PatientCase);
+                this.angioImages = PatientCase.AngioFrame.AngioImage;
+            }
+
             imgCrossSectionMask = GenerateMask(crossSections[0]);
             imgCrossSectionBackground = crossSections[0].EmptyClone();
             LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(lMode);
@@ -303,6 +321,13 @@ namespace RaywattApp.ViewModels.Dialog
         public void SetFrameNumber(int frameNumber)
         {
             CrossSectionImage = DrawCrossSectionWithBackground(crossSections[frameNumber], new Scalar(0x0d, 0x0d, 0x0d));
+
+            double ratio = (double)PatientCase.AngioFrame.AngioImage.Count / crossSections.Count() * frameNumber ;
+            int currentAngioFrameNumber = (int)ratio;
+            if (FileExport.AngioView)
+            {
+                AngioImage = (BitmapSource)angioImages[currentAngioFrameNumber];
+            }
 
             FrameNumber = frameNumber;
             DisplayFrameNumber = frameNumber + 1;
