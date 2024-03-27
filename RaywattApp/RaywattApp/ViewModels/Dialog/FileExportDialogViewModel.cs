@@ -322,10 +322,10 @@ namespace RaywattApp.ViewModels.Dialog
         {
             CrossSectionImage = DrawCrossSectionWithBackground(crossSections[frameNumber], new Scalar(0x0d, 0x0d, 0x0d));
 
-            double ratio = (double)PatientCase.AngioFrame.AngioImage.Count / crossSections.Count() * frameNumber ;
-            int currentAngioFrameNumber = (int)ratio;
             if (FileExport.AngioView)
             {
+                double ratio = (double)PatientCase.AngioFrame.AngioImage.Count / crossSections.Count() * frameNumber ;
+                int currentAngioFrameNumber = (int)ratio;
                 AngioImage = (BitmapSource)angioImages[currentAngioFrameNumber];
             }
 

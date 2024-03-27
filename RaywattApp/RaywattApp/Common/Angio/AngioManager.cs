@@ -259,7 +259,7 @@ namespace RaywattApp.Common.Angio
                     Thread.Sleep(500);
                 }
 
-                FileStream fs = new FileStream(angioFilePath + "angioframes", FileMode.Create, FileAccess.Write);
+                FileStream fs = new FileStream(angioFilePath + Constants.AngioImageExtension, FileMode.Create, FileAccess.Write);
                 while (angioSaveBuffer.Count > angioSaveFrameNum)
                 {
                     fs.Write(angioSaveBuffer[angioSaveFrameNum], 0, angioImageSize);

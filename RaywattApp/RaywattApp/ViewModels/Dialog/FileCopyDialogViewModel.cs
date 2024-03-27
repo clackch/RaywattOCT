@@ -189,9 +189,7 @@ namespace RaywattApp.ViewModels.Dialog
         {        
             // test data
             Mat lumenProfile = new Mat(100, 100, MatType.CV_8UC3);
-            Mat angio = new Mat(100, 100, MatType.CV_8UC3);
             lumenProfile.SetTo(new Scalar(0xfe, 0xfe, 0xfe));
-            angio.SetTo(new Scalar(0xee, 0xee, 0xee));
             
             //DICOMDIR Input Folder
             string dicomDirFolder = CommonUtil.CreateFolder(SaveFolder + "\\" + DateTime.Now.ToString("yyyyMMddHHmmss"));
