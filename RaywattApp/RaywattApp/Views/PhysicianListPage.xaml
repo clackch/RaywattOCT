@@ -51,7 +51,7 @@
                             <StackPanel Height="49">
                                 <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="28,18,0,12" Content="{Binding [Physician], Source={StaticResource L10N}}"/>
                             </StackPanel>
-                            <Separator Foreground="{DynamicResource GrayscaleGray5Brush}"/>
+                            <Separator Background="{DynamicResource GrayscaleGray5Brush}"/>
                             <StackPanel Height="563">
                                 <DataGrid Name="physicianList" ItemsSource="{Binding PhysicianList}" SelectedIndex="{Binding PresetIndex}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" HorizontalGridLinesBrush="{DynamicResource GrayscaleGray7Brush}"  HeadersVisibility="None" Margin="0,5,0,0" Height="624" SelectionMode="Single">
                                     <i:Interaction.Triggers>

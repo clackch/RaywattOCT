@@ -62,7 +62,7 @@
                             <Button Style="{StaticResource OutlinedBtnType3-Large}" Width="130" Command="{Binding AutoDetectCommand}" Content="{Binding [Auto Detect], Source={StaticResource L10N}}"/>
                         </StackPanel>
                     </Grid>
-                    <Separator Grid.Row="1" Foreground="{DynamicResource GrayscaleGray5Brush}"/>
+                    <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
                     <Grid Grid.Row="2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>

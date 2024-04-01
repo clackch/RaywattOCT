@@ -93,7 +93,7 @@
                     </Border>
                 </Grid>
             </Border>
-            <Separator Grid.Row="1" Foreground="{DynamicResource GrayscaleGray5Brush}"/>
+            <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
             <Border Grid.Row="2" CornerRadius="0,0,10,10" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray6Brush}">
                 <Grid>
                     <Grid.ColumnDefinitions>
