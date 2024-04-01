@@ -571,6 +571,8 @@ namespace RaywattApp.ViewModels.Dialog
             RayExportWrapper.DicomAddProperty(0x00181019, dicomProperty["00181019"], 0);
             //(0018, 1020)	Software Version(s)	-	C	LO
             RayExportWrapper.DicomAddProperty(0x00181020, dicomProperty["00181020"], 0);
+            //(0018, 0025)  Angio Flag	-	?	CS
+            RayExportWrapper.DicomAddProperty(0x00180025, dicomProperty["00181020"], 0);
             //(0018, 1063)	Frame Time	-	U	DS
             //(0018, 3101)	IVUS Pullback Rate	-	U	DS
             //(0020, 000d)	Study Instance UID	-	M	UI
@@ -645,8 +647,14 @@ namespace RaywattApp.ViewModels.Dialog
 
             for (int i = 0; i < itemnum; i++)
             {
+                //(0018, 6018)  Region Location Min X0	-	?	UL
                 RayExportWrapper.DicomAddSequenceProperty(i, 0x00186018, "11");
+                //(0018, 601a)  Region Location Min Y0	-	?	UL
                 RayExportWrapper.DicomAddSequenceProperty(i, 0x0018601a, "22");
+                //(0018, 602c)  Physical Delta X	-	?	FD
+                RayExportWrapper.DicomAddSequenceProperty(i, 0x0018602c, "33");
+                //(0018, 602e)  Physical Delta Y	-	?	FD
+                RayExportWrapper.DicomAddSequenceProperty(i, 0x0018602e, "44");
             }
         }
 
