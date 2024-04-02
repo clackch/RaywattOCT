@@ -17,6 +17,8 @@ using static RaywattOCT.Ray3DWrapper;
 using System.Runtime.InteropServices;
 using RaywattApp.Common.Util;
 using System.Threading;
+using Newtonsoft.Json.Linq;
+using System.Diagnostics;
 
 namespace RaywattApp.ViewModels
 {
@@ -29,15 +31,6 @@ namespace RaywattApp.ViewModels
             Unselected,
             Short,
             Long
-        }
-
-        private selectedPullbackType _pullTypeZoom = selectedPullbackType.Unselected;
-        public selectedPullbackType PullTypeZoom
-        {
-            get { return _pullTypeZoom; }
-            set { _pullTypeZoom = value;
-                OnPropertyChanged(nameof(PullTypeZoom));
-            }
         }
 
         private bool _isRendering = false;
@@ -82,6 +75,7 @@ namespace RaywattApp.ViewModels
                 OnPropertyChanged(nameof(IsIndicatorOn));
 
                 ray3DStatus.IsIndicatorOn = value;
+                change3DIndicatorVisibility(value);
             }
         }
 
@@ -113,7 +107,7 @@ namespace RaywattApp.ViewModels
                 RaySetProperty(Property.LongitudeDegree, degree);
 
                 CameraDegree = degree + 90;
-                ODSOCT_RotateAngle((float)CameraDegree);
+                ODSOCT_RotateAngle((float)CameraDegree, true);
             }
         }
 
@@ -216,6 +210,7 @@ namespace RaywattApp.ViewModels
                 // set default values without rendering
                 _isCutViewOn = ray3DStatus.CutViewOn;
                 _isIndicatorOn = ray3DStatus.IsIndicatorOn;
+                change3DIndicatorVisibility(IsIndicatorOn);
                 _isPtoD = ray3DStatus.IsPtoD;
                 _isSideBranchView = false;
             }
@@ -240,6 +235,7 @@ namespace RaywattApp.ViewModels
                 timerShowData.Stop();
 
             Save();
+            TurnOffAll3DActors();
             ODSOCT_HideAllWindows();
         }
 
@@ -287,20 +283,21 @@ namespace RaywattApp.ViewModels
         private double zValueForPullbackType()
         {
             double lengthB;
-            double NumOfFrame;
+
             switch (PatientCase.PullbackLength)
-            {
+            { // to-do 5 Pullback Types need to be set
                 case "SHOR":
-                    lengthB = 60;
+                    lengthB = Constants.PullbackLengthShortSize;
                     break;
                 case "LONG":
-                    lengthB = 100;
+                    lengthB = Constants.PullbackLengthLongSize;
                     break;
                 default:
-                    lengthB = 60; break;
-
+                    lengthB = Constants.PullbackLengthShortSize;
+                    break;
             }
             double zValue = lengthB / PatientCase.NumOfFrames / Constants.DICOMPhysicalDeltaXY;
+            Debug.WriteLine("zValue =" +  zValue);
             return zValue;
         }
 
@@ -325,10 +322,10 @@ namespace RaywattApp.ViewModels
                 ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(buffer), diameter, diameter, depth, 1, 1, zVal);
             }
 
-
             ODSOCT_InputSurfaceParameter(Ray3DObject.Lumen, 10, 50, ".\\data\\lumen_tex.jpg");
             ODSOCT_InputData(Ray3DObject.Lumen, buffer, diameter, diameter, depth, 1, 1, zVal);
             ODSOCT_ProcessingDatas();
+
             Marshal.FreeHGlobal(buffer);
             timerShowData.Interval = TimeSpan.FromMilliseconds(MinWaitingDelay);
             timerShowData.Tick += new EventHandler(timerFuncShowData);
@@ -339,35 +336,8 @@ namespace RaywattApp.ViewModels
         { 
             if (timerShowData.IsEnabled)
                 timerShowData.Stop();
-            switch (PatientCase.PullbackLength)
-            {
-                case "SHOR":
-                    if(PullTypeZoom == selectedPullbackType.Unselected)
-                    {
-                        ODSOCT_CutViewZoom(1);
-                        PullTypeZoom = selectedPullbackType.Short;
-                    }
-                    else if (PullTypeZoom == selectedPullbackType.Long)
-                    {
-                        ODSOCT_CutViewZoom(1);
-                        PullTypeZoom = selectedPullbackType.Short;
-                    }
-                    break;
-                case "LONG":
-                    if (PullTypeZoom == selectedPullbackType.Unselected)
-                    {
-                        ODSOCT_CutViewZoom(1);
-                        PullTypeZoom = selectedPullbackType.Long;
-                    }
-                    else if (PullTypeZoom == selectedPullbackType.Short)
-                    {
-                        ODSOCT_CutViewZoom(1);
-                        PullTypeZoom = selectedPullbackType.Long;
-                    }
-                    break;
 
-            }
-            ODSOCT_RotateAngle((float)CameraDegree);
+            ODSOCT_RotateAngle((float)CameraDegree, false);
             ODSOCT_MoveToFrame(DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
             ODSOCT_ShowAllWindows();
 
@@ -376,7 +346,10 @@ namespace RaywattApp.ViewModels
                 ray3DStatus.ShowObject(obj, ray3DStatus.ObjectVisibility[(int)obj]);
             }
 
-            IsRendering = true;
+            if (!IsRendering)
+            {
+                IsRendering = true;
+            }
         }
 
         private void updateNavigator(int curFrame, int totalFrame)
@@ -397,6 +370,11 @@ namespace RaywattApp.ViewModels
             {
                 ray3DStatus.ShowObject(obj, mode);
             }
+        }
+
+        private void change3DIndicatorVisibility(bool show)
+        {
+            ray3DStatus.ShowIndicator(show);
         }
 
         private void RotateIndicator(object param)
@@ -555,6 +533,16 @@ namespace RaywattApp.ViewModels
                 curPosition = Math.Round(curPosition);
                 MoveToFrame(RaySession.Review, (int)curPosition);
                 ODSOCT_MoveToFrame((int)curPosition);
+            }
+        }
+
+        private void TurnOffAll3DActors()
+        {
+            change3DIndicatorVisibility(false);
+            for (Ray3DObject obj = Ray3DObject.Tissue; obj < Ray3DObject.Count; obj++)
+            {
+                if (ray3DStatus.ObjectVisibility[(int)obj] != Ray3DObjectMode.Hide)
+                    ray3DStatus.ShowObject(obj, Ray3DObjectMode.Hide, true);
             }
         }
     }

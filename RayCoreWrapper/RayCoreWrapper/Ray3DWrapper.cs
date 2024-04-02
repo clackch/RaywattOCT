@@ -24,12 +24,7 @@ namespace RaywattOCT
             public bool IsIndicatorOn
             { 
                 get { return _isIndicatorOn; }
-                set 
-                {
-                    _isIndicatorOn = value;
-                    ODSOCT_ShowIndicatorCutView(value);
-                    ODSOCT_ShowCuttingline(value);
-                }
+                set { _isIndicatorOn = value; }
             }
 
             private bool _isPtoD = true;
@@ -50,15 +45,24 @@ namespace RaywattOCT
                 IsPtoD = true;
             }
 
-            public int ShowObject(Ray3DObject obj, Ray3DObjectMode mode)
+            public int ShowObject(Ray3DObject obj, Ray3DObjectMode mode, bool isPageConverted = false)
             {
-                ObjectVisibility[(int)obj] = mode;
+                if (!isPageConverted)
+                    ObjectVisibility[(int)obj] = mode;
                 return ODSOCT_SetViewData(obj, mode);
             }
 
             public bool IsObjectVisible(Ray3DObject obj)
             {
                 return (ObjectVisibility[(int)obj] != Ray3DObjectMode.Hide);
+            }
+
+            public int ShowIndicator(bool show)
+            {
+
+                int sum = ODSOCT_ShowIndicatorCutView(show);
+                sum += ODSOCT_ShowCuttingline(show);
+                return sum == 2 ? 1 : 0;
             }
         }
 
@@ -139,7 +143,7 @@ namespace RaywattOCT
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_MoveSliceAngle(int direction);
         [DllImport("OCT3d.dll")]
-        public static extern int ODSOCT_RotateAngle(float angle);
+        public static extern int ODSOCT_RotateAngle(float angle, bool isRender);
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_CutViewZoom(int zoomDirection);
         [DllImport("OCT3d.dll")]
