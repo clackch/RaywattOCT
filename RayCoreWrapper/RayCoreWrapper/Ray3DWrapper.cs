@@ -143,7 +143,7 @@ namespace RaywattOCT
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_MoveSliceAngle(int direction);
         [DllImport("OCT3d.dll")]
-        public static extern int ODSOCT_RotateAngle(float angle);
+        public static extern int ODSOCT_RotateAngle(float angle, bool isRender);
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_CutViewZoom(int zoomDirection);
         [DllImport("OCT3d.dll")]

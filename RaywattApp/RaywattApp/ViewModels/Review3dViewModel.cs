@@ -33,15 +33,6 @@ namespace RaywattApp.ViewModels
             Long
         }
 
-        private selectedPullbackType _pullTypeZoom = selectedPullbackType.Unselected;
-        public selectedPullbackType PullTypeZoom
-        {
-            get { return _pullTypeZoom; }
-            set { _pullTypeZoom = value;
-                OnPropertyChanged(nameof(PullTypeZoom));
-            }
-        }
-
         private bool _isRendering = false;
         public bool IsRendering
         { 
@@ -116,7 +107,7 @@ namespace RaywattApp.ViewModels
                 RaySetProperty(Property.LongitudeDegree, degree);
 
                 CameraDegree = degree + 90;
-                ODSOCT_RotateAngle((float)CameraDegree);
+                ODSOCT_RotateAngle((float)CameraDegree, true);
             }
         }
 
@@ -292,20 +283,21 @@ namespace RaywattApp.ViewModels
         private double zValueForPullbackType()
         {
             double lengthB;
-            double NumOfFrame;
+
             switch (PatientCase.PullbackLength)
-            {
+            { // to-do 5 Pullback Types need to be set
                 case "SHOR":
-                    lengthB = 60;
+                    lengthB = Constants.PullbackLengthShortSize;
                     break;
                 case "LONG":
-                    lengthB = 100;
+                    lengthB = Constants.PullbackLengthLongSize;
                     break;
                 default:
-                    lengthB = 60; break;
-
+                    lengthB = Constants.PullbackLengthShortSize;
+                    break;
             }
             double zValue = lengthB / PatientCase.NumOfFrames / Constants.DICOMPhysicalDeltaXY;
+            Debug.WriteLine("zValue =" +  zValue);
             return zValue;
         }
 
@@ -330,35 +322,9 @@ namespace RaywattApp.ViewModels
                 ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(buffer), diameter, diameter, depth, 1, 1, zVal);
             }
 
-
             ODSOCT_InputSurfaceParameter(Ray3DObject.Lumen, 10, 50, ".\\data\\lumen_tex.jpg");
             ODSOCT_InputData(Ray3DObject.Lumen, buffer, diameter, diameter, depth, 1, 1, zVal);
             ODSOCT_ProcessingDatas();
-
-            switch (PatientCase.PullbackLength)
-            { // to-do 5 Pullback Types need to be set
-                case "SHOR":
-                    if (PullTypeZoom == selectedPullbackType.Unselected)
-                    {
-                        PullTypeZoom = selectedPullbackType.Short;
-                    }
-                    else if (PullTypeZoom == selectedPullbackType.Long)
-                    {
-                        PullTypeZoom = selectedPullbackType.Short;
-                    }
-                    break;
-                case "LONG":
-                    if (PullTypeZoom == selectedPullbackType.Unselected)
-                    {
-                        PullTypeZoom = selectedPullbackType.Long;
-                    }
-                    else if (PullTypeZoom == selectedPullbackType.Short)
-                    {
-
-                        PullTypeZoom = selectedPullbackType.Long;
-                    }
-                    break;
-            }
 
             Marshal.FreeHGlobal(buffer);
             timerShowData.Interval = TimeSpan.FromMilliseconds(MinWaitingDelay);
@@ -371,7 +337,7 @@ namespace RaywattApp.ViewModels
             if (timerShowData.IsEnabled)
                 timerShowData.Stop();
 
-            ODSOCT_RotateAngle((float)CameraDegree);
+            ODSOCT_RotateAngle((float)CameraDegree, false);
             ODSOCT_MoveToFrame(DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
             ODSOCT_ShowAllWindows();
 
