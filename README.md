@@ -52,7 +52,7 @@ Database Initial Setting
 ## [CUDA]
 
 CUDA
-* CUDA Toolkit 11.7.0 Download(https://pytorch.org/get-started/locally/) & 설치
+* CUDA Toolkit 11.8.0 Download(https://pytorch.org/get-started/locally/) & 설치
 
 ## [Axsun]
 
@@ -69,7 +69,7 @@ Download & Install OCT Host
     (d) ```C:\Program Files\Axsun\Axsun OCT Control\AxsunOCTControl.tlb``` 파일 생성 확인
 
 ## [DAQ]
-* ATS9371_Driver_V7.8.6.exe 파일 설치
+* ATS9371_Driver_V7.11.1.exe 파일 설치
 
 ## [Font]
 
