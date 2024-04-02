@@ -51,8 +51,8 @@ Database Initial Setting
 
 ## [CUDA]
 
-CUDA
-//* CUDA Toolkit 11.8.0 Download(https://pytorch.org/get-started/locally/) & 설치
+* CUDA Toolkit 11.8.0 Download(https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64&target_version=11&target_type=exe_local) & 설치
+<!--* CUDA Toolkit 11.8.0 Download(https://pytorch.org/get-started/locally/) & 설치 -->
 
 ## [Axsun]
 
