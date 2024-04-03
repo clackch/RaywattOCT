@@ -57,8 +57,6 @@ namespace RaywattApp.Common.Angio
     {
         Default,
         Success,
-        OpenServerFailure,
-        TcpSocketFailure,
         BoardFailure,
     }
 
@@ -144,40 +142,26 @@ namespace RaywattApp.Common.Angio
 
         public ConnectionStatus ConnectToServer()
         {
-            try
-            {
-                Process[] processes;
-                ProcessStartInfo psi = new ProcessStartInfo();
-                string processName = CommonUtil.IsTestMode(ViewModelBase._deviceStatus.TestMode, "FG") ? "FGServerTestStub" : "FGServer";
-                processes = Process.GetProcessesByName(processName);
-                psi.FileName = Constants.FGFolderPath + "\\" + processName + ".exe";
+            Process[] processes;
+            ProcessStartInfo psi = new ProcessStartInfo();
+            string processName = CommonUtil.IsTestMode(ViewModelBase._deviceStatus.TestMode, "FG") ? "FGServerTestStub" : "FGServer";
+            processes = Process.GetProcessesByName(processName);
+            psi.FileName = Constants.FGFolderPath + "\\" + processName + ".exe";
 
-                if (processes.Length == 0)
-                {
-                    StartFGServerProc(psi);
-                }
-                else
-                {
-                    foreach (Process process in Process.GetProcessesByName(processName))
-                    {
-                        process.Kill();
-                    }
-                    StartFGServerProc(psi);
-                }
-            }
-            catch (System.ComponentModel.Win32Exception ex)
+            if (processes.Length == 0)
             {
-                return ConnectionStatus.OpenServerFailure;
+                StartFGServerProc(psi);
+            }
+            else
+            {
+                foreach (Process process in Process.GetProcessesByName(processName))
+                {
+                    process.Kill();
+                }
+                StartFGServerProc(psi);
             }
 
-            try
-            {
-                _tcpClient = new TcpClient(Constants.ServerIP, Constants.ServerPort);
-            }
-            catch (Exception ex)
-            {
-                return ConnectionStatus.TcpSocketFailure;
-            }
+            _tcpClient = new TcpClient(Constants.ServerIP, Constants.ServerPort);
 
             int read = 0;
             while (read != 0)

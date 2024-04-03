@@ -158,12 +158,6 @@ Remove the catheter from patient before proceeding.</value>
   <data name="$MSG013" xml:space="preserve">
     <value>[K]Failed to change Cath Room.</value>
   </data>
-  <data name="$MSG014" xml:space="preserve">
-    <value>[K]Failed to open server.</value>
-  </data>
-  <data name="$MSG015" xml:space="preserve">
-    <value>[K]Failed to open socket.</value>
-  </data>
   <data name="$Terms and Conditions" xml:space="preserve">
     <value>[K]Product Intended Use: Clearly define the intended use of the OCT device, including any limitations or specific conditions for use.
 Product Warranty: Outline the warranty coverage provided for the OCT device, including the duration, scope, and process for claiming warranty services.
