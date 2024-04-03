@@ -446,12 +446,12 @@ ALTER FUNCTION rv_schema.fn_displaylastcase(character varying)
     OWNER TO rv_user;
 
 
--- FUNCTION: rv_schema.fn_physician(character varying)
+-- FUNCTION: rv_schema.fn_physician(integer)
 
--- DROP FUNCTION IF EXISTS rv_schema.fn_physician(character varying);
+-- DROP FUNCTION IF EXISTS rv_schema.fn_physician(integer);
 
 CREATE OR REPLACE FUNCTION rv_schema.fn_physician(
-	arg_id character varying)
+	arg_id integer)
     RETURNS character varying
     LANGUAGE 'plpgsql'
     COST 100
@@ -460,12 +460,12 @@ AS $BODY$
 	DECLARE
 	res_value character varying;
 	BEGIN
-		SELECT concat("lastname", ', ', "firstname") into res_value
+		SELECT concat("firstname", ', ', "lastname") into res_value
 		FROM rv_schema.physician
 		WHERE "id" = arg_id;
 	RETURN res_value;
 	END;
 $BODY$;
 
-ALTER FUNCTION rv_schema.fn_physician(character varying)
+ALTER FUNCTION rv_schema.fn_physician(integer)
     OWNER TO rv_user;
