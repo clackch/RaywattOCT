@@ -19,145 +19,126 @@
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0" Height="60" Background="{DynamicResource GrayscaleGray7Brush}">
-            <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Margin="75,20,0,19" Content="{Binding [Review Settings], Source={StaticResource L10N}}"/>
+            <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Margin="75,20,0,19" Content="{Binding [Review], Source={StaticResource L10N}}"/>
         </Grid>
 
-        <Grid Grid.Row="1" Margin="60,40,60,40">
+        <Grid Grid.Row="1" Margin="160,62,160,62">
             <Grid.RowDefinitions>
-                <RowDefinition Height="770"/>
+                <RowDefinition Height="725"/>
+                <RowDefinition Height="1"/>
                 <RowDefinition Height="74"/>
             </Grid.RowDefinitions>
-            <Border Grid.Row="0" CornerRadius="10,10,0,0" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray7Brush}">
-                <Grid>
-                    <Border Margin="19" CornerRadius="8" BorderThickness="0" Background="{DynamicResource GrayscaleGray8Brush}">
-                        <StackPanel>
-                            <Grid Margin="30,30,0,0">
-                                <!-- Case Default Settings -->
-                                <Grid Grid.Row="1">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="208"/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="39"/>
-                                        <RowDefinition Height="54"/>
-                                        <RowDefinition Height="64"/>
-                                        <RowDefinition Height="54"/>
-                                        <RowDefinition Height="45"/>
-                                        <RowDefinition Height="54"/>
-                                        <RowDefinition Height="70"/>
-                                        <RowDefinition Height="70"/>
-                                        <RowDefinition Height="70"/>
-                                        <RowDefinition/>
-                                    </Grid.RowDefinitions>
-                                    <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Left">
-                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Review Settings], Source={StaticResource L10N}}"/>
+            <Border Grid.Row="0" CornerRadius="10,10,0,0" BorderThickness="0" Background="{DynamicResource GrayscaleGray6Brush}">
+                <StackPanel Margin="50,70,50,40">
+                    <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Review Settings], Source={StaticResource L10N}}"/>
+                    <Border Height="553" Margin="0,24,0,0" CornerRadius="8" BorderThickness="0" Background="{DynamicResource GrayscaleGray7Brush}">
+                        <Grid Margin="0,1,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="270"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="61"/>
+                                <RowDefinition Height="1"/>
+                                <RowDefinition Height="61"/>
+                                <RowDefinition Height="1"/>
+                                <RowDefinition Height="85"/>
+                                <RowDefinition Height="1"/>
+                                <RowDefinition Height="90"/>
+                                <RowDefinition Height="1"/>
+                                <RowDefinition Height="61"/>
+                                <RowDefinition Height="1"/>
+                                <RowDefinition Height="61"/>
+                                <RowDefinition Height="1"/>
+                                <RowDefinition Height="61"/>
+                                <RowDefinition Height="1"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Label Grid.Row="0" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Flush Media], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="28,0,0,0"/>
+                            <Label Grid.Row="0" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FlushMedia, Converter={StaticResource CodeConverter}, ConverterParameter='FLMD'}" VerticalAlignment="Center"/>
+                            <Separator Grid.Row="1" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray5Brush}"/>
+                            <Label Grid.Row="2" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Trigger], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="28,0,0,0"/>
+                            <Label Grid.Row="2" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.PullbackTrigger, Converter={StaticResource CodeConverter}, ConverterParameter='PBTG'}" VerticalAlignment="Center"/>
+                            <Separator Grid.Row="3" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray5Brush}"/>
+                            <Label Grid.Row="4" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Type], Source={StaticResource L10N}}" Margin="28,20,0,0"/>
+                            <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,20,0,0">
+                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.PullbackType, Converter={StaticResource CodeConverter}, ConverterParameter='PBTY'}"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,7,0,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Length], Source={StaticResource L10N}}"/>
+                                        <StackPanel Width="5"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PbLength}"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [㎜], Source={StaticResource L10N}}"/>
                                     </StackPanel>
-                                    <StackPanel Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">
-                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Flush Media], Source={StaticResource L10N}}"/>
+                                    <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Speed], Source={StaticResource L10N}}"/>
+                                        <StackPanel Width="5"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PbSpeed}"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [㎜/s], Source={StaticResource L10N}}"/>
                                     </StackPanel>
-                                    <StackPanel Grid.Row="1" Grid.Column="1" VerticalAlignment="Center">
-                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding PatientCase.FlushMedia, Converter={StaticResource CodeConverter}, ConverterParameter='FLMD'}"/>
+                                    <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Time], Source={StaticResource L10N}}"/>
+                                        <StackPanel Width="5"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PbTime}"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [s], Source={StaticResource L10N}}"/>
                                     </StackPanel>
-                                    <StackPanel Grid.Row="2" Grid.Column="0" VerticalAlignment="Center">
-                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Trigger], Source={StaticResource L10N}}"/>
-                                    </StackPanel>
-                                    <StackPanel Grid.Row="2" Grid.Column="1" VerticalAlignment="Center">
-                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding PatientCase.PullbackTrigger, Converter={StaticResource CodeConverter}, ConverterParameter='PBTG'}"/>
-                                    </StackPanel>
-                                    <StackPanel Grid.Row="3" Grid.Column="0" VerticalAlignment="Center">
-                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Type], Source={StaticResource L10N}}"/>
-                                    </StackPanel>
-                                    <StackPanel Grid.Row="3" Grid.Column="1" VerticalAlignment="Center">
-                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding PatientCase.PullbackType, Converter={StaticResource CodeConverter}, ConverterParameter='PBTY'}"/>
-                                    </StackPanel>
-                                    <StackPanel Grid.Row="4" Grid.Column="1">
-                                        <StackPanel Orientation="Horizontal">
-                                            <StackPanel Orientation="Horizontal">
-                                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Length], Source={StaticResource L10N}}"/>
-                                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content=" : "/>
-                                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray1Brush}" Content="{Binding PbLength}"/>
-                                                <StackPanel Width="5"/>
-                                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [㎜], Source={StaticResource L10N}}"/>
-                                            </StackPanel>
-                                            <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
-                                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Speed], Source={StaticResource L10N}}"/>
-                                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content=" : "/>
-                                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray1Brush}" Content="{Binding PbSpeed}"/>
-                                                <StackPanel Width="5"/>
-                                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [㎜/s], Source={StaticResource L10N}}"/>
-                                            </StackPanel>
-                                            <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
-                                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Time], Source={StaticResource L10N}}"/>
-                                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content=" : "/>
-                                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray1Brush}" Content="{Binding PbTime}"/>
-                                                <StackPanel Width="5"/>
-                                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [s], Source={StaticResource L10N}}"/>
-                                            </StackPanel>
-                                        </StackPanel>
-                                    </StackPanel>
-                                    <StackPanel Grid.Row="5" Grid.Column="0" VerticalAlignment="Center">
-                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [OCT Colormap], Source={StaticResource L10N}}"/>
-                                    </StackPanel>
-                                    <StackPanel Grid.Row="5" Grid.Column="1" HorizontalAlignment="Left">
-                                        <ComboBox Width="485" ItemsSource="{Binding ColormapList}" SelectedValue="{Binding SelectedColormap, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" Tag="{Binding [Select OCT Colormap], Source={StaticResource L10N}}"/>
-                                    </StackPanel>
-
-                                    <StackPanel Grid.Row="6" Grid.Column="0" VerticalAlignment="Center">
-                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Calcium Threshold], Source={StaticResource L10N}}"/>
-                                    </StackPanel>
-                                    <Grid Grid.Row="6" Grid.Column="1">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="390"/>
-                                            <ColumnDefinition/>
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="5,0,0,0">
-                                            <Slider Value="{Binding PatientCase.CalciumThreshold}" Maximum="{Binding MaxCalciumThreshold}" Minimum="{Binding MinCalciumThreshold}"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="30,0,0,0">
-                                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.CalciumThreshold}"/>
-                                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="º"/>
-                                        </StackPanel>
-                                    </Grid>
-                                    <StackPanel Grid.Row="7" Grid.Column="0" VerticalAlignment="Center">
-                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Expansion Threshold], Source={StaticResource L10N}}"/>
-                                    </StackPanel>
-                                    <Grid Grid.Row="7" Grid.Column="1">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="390"/>
-                                            <ColumnDefinition/>
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="5,0,0,0">
-                                            <Slider Value="{Binding PatientCase.ExpansionThreshold}" Maximum="{Binding MaxExpansionThreshold}" Minimum="{Binding MinExpansionThreshold}"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="30,0,0,0">
-                                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.ExpansionThreshold}"/>
-                                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="%"/>
-                                        </StackPanel>
-                                    </Grid>
-                                    <StackPanel Grid.Row="8" Grid.Column="0" VerticalAlignment="Center">
-                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Apposition Threshold], Source={StaticResource L10N}}"/>
-                                    </StackPanel>
-                                    <Grid Grid.Row="8" Grid.Column="1">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="390"/>
-                                            <ColumnDefinition/>
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="5,0,0,0">
-                                            <Slider Value="{Binding PatientCase.AppositionThreshold}" Maximum="{Binding MaxAppositionThreshold}" Minimum="{Binding MinAppositionThreshold}" TickFrequency="0.01" IsSnapToTickEnabled="True" LargeChange="0.01" SmallChange="0.01"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="30,0,0,0">
-                                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.AppositionThreshold}"/>
-                                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="㎜"/>
-                                        </StackPanel>
-                                    </Grid>
-                                </Grid>
+                                </StackPanel>
+                            </StackPanel>
+                            <Separator Grid.Row="5" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray5Brush}"/>
+                            <Label Grid.Row="6" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [OCT Colormap], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="28,0,0,0"/>
+                            <ComboBox Grid.Row="6" Grid.Column="1" Width="480" ItemsSource="{Binding ColormapList}" SelectedValue="{Binding SelectedColormap, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" Tag="{Binding [Select OCT Colormap], Source={StaticResource L10N}}" HorizontalAlignment="Left"/>
+                            <Separator Grid.Row="7" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray5Brush}"/>
+                            <Label Grid.Row="8" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Calcium Threshold], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="28,0,0,0"/>
+                            <Grid Grid.Row="8" Grid.Column="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="480"/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="5,0,0,0">
+                                    <Slider Value="{Binding PatientCase.CalciumThreshold}" Maximum="{Binding MaxCalciumThreshold}" Minimum="{Binding MinCalciumThreshold}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0,0,0">
+                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.CalciumThreshold}"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="º"/>
+                                </StackPanel>
                             </Grid>
-                        </StackPanel>
+                            <Separator Grid.Row="9" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray5Brush}"/>
+                            <Label Grid.Row="10" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Expansion Threshold], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="28,0,0,0"/>
+                            <Grid Grid.Row="10" Grid.Column="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="480"/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="5,0,0,0">
+                                    <Slider Value="{Binding PatientCase.ExpansionThreshold}" Maximum="{Binding MaxExpansionThreshold}" Minimum="{Binding MinExpansionThreshold}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0,0,0">
+                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.ExpansionThreshold}"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="%"/>
+                                </StackPanel>
+                            </Grid>
+                            <Separator Grid.Row="11" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray5Brush}"/>
+                            <Label Grid.Row="12" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Apposition Threshold], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="28,0,0,0"/>
+                            <Grid Grid.Row="12" Grid.Column="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="480"/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="5,0,0,0">
+                                    <Slider Value="{Binding PatientCase.AppositionThreshold}" Maximum="{Binding MaxAppositionThreshold}" Minimum="{Binding MinAppositionThreshold}" TickFrequency="0.01" IsSnapToTickEnabled="True" LargeChange="0.01" SmallChange="0.01"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0,0,0">
+                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.AppositionThreshold}"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="㎜"/>
+                                </StackPanel>
+                            </Grid>
+                            <Separator Grid.Row="13" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray5Brush}"/>
+                        </Grid>
                     </Border>
-                </Grid>
+                </StackPanel>
             </Border>
-            <Border Grid.Row="1" CornerRadius="0,0,10,10" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray6Brush}">
+            <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
+            <Border Grid.Row="2" CornerRadius="0,0,10,10" BorderThickness="0" Background="{DynamicResource GrayscaleGray6Brush}">
                 <Grid>
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" Margin="15,0,0,0">
                         <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>

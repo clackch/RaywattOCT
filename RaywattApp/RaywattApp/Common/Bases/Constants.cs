@@ -90,7 +90,7 @@ namespace RaywattApp.Common.Bases
         public const double CathRoomDialogHeight = 472;
         public const double CathRoomDialogWidth = 472;
         public const double PhysicianDialogHeight = 472;
-        public const double PhysicianDialogWidth = 600;
+        public const double PhysicianDialogWidth = 659;
 
         //Max Length
         public const int MaxPatientId = 9;

@@ -37,7 +37,7 @@ namespace RaywattApp.ViewModels
         private string _searchKeyword;
 
         [ObservableProperty]
-        private int _presetIndex;
+        private Physician _selectedPhysician;
 
         [ObservableProperty]
         private Visibility visibilityPhysician;
@@ -179,6 +179,10 @@ namespace RaywattApp.ViewModels
 
             VisibilityPhysician = Visibility.Collapsed;
 
+            int physicianId = 0;
+            if (SelectedPhysician != null)
+                physicianId = SelectedPhysician.Id;
+
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["SearchKeyword"] = SearchKeyword.Trim();
 
@@ -186,8 +190,12 @@ namespace RaywattApp.ViewModels
             if (PhysicianList != null && PhysicianList.Count > 0)
             {
                 VisibilityPhysician = Visibility.Visible;
-                PresetIndex = 0;
-                ShowPhysician(PhysicianList[PresetIndex]);
+                SelectedPhysician = PhysicianList.FirstOrDefault(x => x.Id == physicianId);
+
+                if(SelectedPhysician == null)
+                    SelectedPhysician = PhysicianList[0];
+
+                ShowPhysician(SelectedPhysician);
             }
         }
     }
