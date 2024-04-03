@@ -58,10 +58,7 @@ namespace RaywattApp.ViewModels
                 OnPropertyChanged(nameof(IsCutViewOn));
 
                 ray3DStatus.CutViewOn = value;
-                for(Ray3DObject obj = Ray3DObject.Tissue; obj < Ray3DObject.Count; obj++)
-                {
-                    changeCutVisibility(obj, value);
-                }
+                changeCutVisibility(value);
             }
         }
 
@@ -107,7 +104,8 @@ namespace RaywattApp.ViewModels
                 RaySetProperty(Property.LongitudeDegree, degree);
 
                 CameraDegree = degree + 90;
-                ODSOCT_RotateAngle((float)CameraDegree, true);
+                ODSOCT_RotateAngle((float)CameraDegree);
+                ODSOCT_Render();
             }
         }
 
@@ -326,6 +324,8 @@ namespace RaywattApp.ViewModels
             ODSOCT_InputData(Ray3DObject.Lumen, buffer, diameter, diameter, depth, 1, 1, zVal);
             ODSOCT_ProcessingDatas();
 
+            ODSOCT_SetRenderMode(true);
+
             Marshal.FreeHGlobal(buffer);
             timerShowData.Interval = TimeSpan.FromMilliseconds(MinWaitingDelay);
             timerShowData.Tick += new EventHandler(timerFuncShowData);
@@ -336,15 +336,16 @@ namespace RaywattApp.ViewModels
         { 
             if (timerShowData.IsEnabled)
                 timerShowData.Stop();
-
-            ODSOCT_RotateAngle((float)CameraDegree, false);
+            
+            ODSOCT_RotateAngle((float)CameraDegree);
             ODSOCT_MoveToFrame(DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
-            ODSOCT_ShowAllWindows();
-
             for (Ray3DObject obj = Ray3DObject.Tissue; obj < Ray3DObject.Count; obj++)
             {
                 ray3DStatus.ShowObject(obj, ray3DStatus.ObjectVisibility[(int)obj]);
             }
+            ODSOCT_ShowAllWindows();
+            ODSOCT_Render();
+            _log.Debug("TimerFunc Call");
 
             if (!IsRendering)
             {
@@ -363,18 +364,16 @@ namespace RaywattApp.ViewModels
             IndicatorLongitude.CenterX = curPosition;
         }
 
-        private void changeCutVisibility(Ray3DObject obj, bool isCutView)
+        private void changeCutVisibility(bool isCutView)
         {
-            Ray3DObjectMode mode = (isCutView) ? Ray3DObjectMode.Cut : Ray3DObjectMode.Full;
-            if (ray3DStatus.IsObjectVisible(obj))
-            {
-                ray3DStatus.ShowObject(obj, mode);
-            }
+            ODSOCT_CutViewOn(isCutView);
+            ODSOCT_Render();
         }
 
         private void change3DIndicatorVisibility(bool show)
         {
             ray3DStatus.ShowIndicator(show);
+            ODSOCT_Render();
         }
 
         private void RotateIndicator(object param)
@@ -533,6 +532,7 @@ namespace RaywattApp.ViewModels
                 curPosition = Math.Round(curPosition);
                 MoveToFrame(RaySession.Review, (int)curPosition);
                 ODSOCT_MoveToFrame((int)curPosition);
+                ODSOCT_Render();
             }
         }
 
@@ -544,6 +544,7 @@ namespace RaywattApp.ViewModels
                 if (ray3DStatus.ObjectVisibility[(int)obj] != Ray3DObjectMode.Hide)
                     ray3DStatus.ShowObject(obj, Ray3DObjectMode.Hide, true);
             }
+            ODSOCT_Render();
         }
     }
 }

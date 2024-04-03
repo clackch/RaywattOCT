@@ -133,7 +133,7 @@ namespace RaywattOCT
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_MoveCameraPosition(int direction, bool inverse);
         [DllImport("OCT3d.dll")]
-        public static extern int ODSOCT_MoveToFrame(int frame);
+        public static extern int ODSOCT_MoveToFrame(int frame); 
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_SetFov(int angle);
         [DllImport("OCT3d.dll")]
@@ -143,7 +143,7 @@ namespace RaywattOCT
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_MoveSliceAngle(int direction);
         [DllImport("OCT3d.dll")]
-        public static extern int ODSOCT_RotateAngle(float angle, bool isRender);
+        public static extern int ODSOCT_RotateAngle(float angle);
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_CutViewZoom(int zoomDirection);
         [DllImport("OCT3d.dll")]
@@ -152,5 +152,11 @@ namespace RaywattOCT
         public static extern int ODSOCT_ShowIndicatorCutView(bool show);
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_ShowCuttingline(bool show);
+        [DllImport("OCT3d.dll")]
+        public static extern int ODSOCT_Render();
+        [DllImport("OCT3d.dll")]
+        public static extern int ODSOCT_SetRenderMode(bool isRaywattApp);
+        [DllImport("OCT3d.dll")]
+        public static extern int ODSOCT_CutViewOn(bool isRaywattApp);
     }
 }
