@@ -835,7 +835,7 @@ namespace RaywattApp.Common.Annotation
         {
             _log.Debug("AutoDetect");
 
-            if (LumenContours == null || LumenContours.Count == 0)
+            if (LumenContours == null || LumenContours.Count < FrameNumber + 1)
                 return;
 
             LumenContours[FrameNumber].ResetLumenContour();
