@@ -572,7 +572,7 @@ namespace RaywattApp.ViewModels.Dialog
             //(0018, 1020)	Software Version(s)	-	C	LO
             RayExportWrapper.DicomAddProperty(0x00181020, dicomProperty["00181020"], 0);
             //(0018, 0025)  Angio Flag	-	?	CS
-            RayExportWrapper.DicomAddProperty(0x00180025, dicomProperty["00181020"], 0);
+            RayExportWrapper.DicomAddProperty(0x00180025, FileExport.AngioView ? "Y" : "N", 0);
             //(0018, 1063)	Frame Time	-	U	DS
             //(0018, 3101)	IVUS Pullback Rate	-	U	DS
             //(0020, 000d)	Study Instance UID	-	M	UI
