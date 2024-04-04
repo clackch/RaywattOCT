@@ -177,7 +177,7 @@
                         <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
                     </StackPanel>
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,15,0">
-                        <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding SaveCommand}" Content="{Binding [Ok], Source={StaticResource L10N}}"/>
+                        <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding SaveCommand}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
                     </StackPanel>
                 </Grid>
             </Border>

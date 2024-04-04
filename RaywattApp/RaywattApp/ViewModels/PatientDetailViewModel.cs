@@ -237,7 +237,7 @@ namespace RaywattApp.ViewModels
             if (Patient.PhysicianId == 0)
             {
                 parameter["title"] = _l10n["Information"];
-                parameter["message"] = _l10n["Add physician information on the edit patient screen."];
+                parameter["message"] = _l10n["$MSG016"];
                 var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
                 return;
