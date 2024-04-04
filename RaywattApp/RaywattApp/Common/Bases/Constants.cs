@@ -222,6 +222,7 @@ namespace RaywattApp.Common.Bases
         //Background Color
         public const int BackgroundColor = 0x161616;
         public const int CardBackgroundColor = 0x232323;
+        public const int LumenEditBackgroundColor = 0x333333;
         public const int CompareBackgroundColor = 0x0d0d0d;
 
         //Playback Interval (msec)
