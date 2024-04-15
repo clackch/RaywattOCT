@@ -49,6 +49,33 @@ TABLESPACE rv_tablespace;
 ALTER TABLE IF EXISTS rv_schema.code
     OWNER to rv_user;
 
+-- Table: rv_schema.physician
+
+-- DROP TABLE IF EXISTS rv_schema.physician;
+
+CREATE TABLE IF NOT EXISTS rv_schema.physician
+(
+    id serial NOT NULL,
+    lastname character varying(20) COLLATE pg_catalog."default",
+    firstname character varying(200) COLLATE pg_catalog."default",
+	flush_media character varying(4) COLLATE pg_catalog."default",
+	pullback_trigger character varying(4) COLLATE pg_catalog."default",
+    pullback_type character varying(4) COLLATE pg_catalog."default",
+	colormap character varying(4) COLLATE pg_catalog."default",
+    calcium_threshold integer,
+    expansion_threshold integer,
+    apposition_threshold real,
+    create_date timestamp without time zone,
+    update_date timestamp without time zone,
+    CONSTRAINT physician_pkey PRIMARY KEY (id)
+        USING INDEX TABLESPACE rv_tablespace
+)
+
+TABLESPACE rv_tablespace;
+
+ALTER TABLE IF EXISTS rv_schema.physician
+    OWNER to rv_user;
+
 
 -- Table: rv_schema.patient
 
@@ -66,7 +93,7 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient
     update_date timestamp without time zone,    
     CONSTRAINT patient_pkey PRIMARY KEY (id)
         USING INDEX TABLESPACE rv_tablespace,
-    CONSTRAINT patient_physician_fkey FOREIGN KEY (physician)
+    CONSTRAINT patient_physician_fkey FOREIGN KEY (physician_id)
         REFERENCES rv_schema.physician (id) MATCH SIMPLE
         ON UPDATE CASCADE
         ON DELETE SET NULL
@@ -176,35 +203,6 @@ TABLESPACE rv_tablespace;
 
 ALTER TABLE IF EXISTS rv_schema.patient_case_annotation
     OWNER to rv_user;
-
-
--- Table: rv_schema.physician
-
--- DROP TABLE IF EXISTS rv_schema.physician;
-
-CREATE TABLE IF NOT EXISTS rv_schema.physician
-(
-    id serial NOT NULL,
-    lastname character varying(20) COLLATE pg_catalog."default",
-    firstname character varying(200) COLLATE pg_catalog."default",
-	flush_media character varying(4) COLLATE pg_catalog."default",
-	pullback_trigger character varying(4) COLLATE pg_catalog."default",
-    pullback_type character varying(4) COLLATE pg_catalog."default",
-	colormap character varying(4) COLLATE pg_catalog."default",
-    calcium_threshold integer,
-    expansion_threshold integer,
-    apposition_threshold real,
-    create_date timestamp without time zone,
-    update_date timestamp without time zone,
-    CONSTRAINT physician_pkey PRIMARY KEY (id)
-        USING INDEX TABLESPACE rv_tablespace
-)
-
-TABLESPACE rv_tablespace;
-
-ALTER TABLE IF EXISTS rv_schema.physician
-    OWNER to rv_user;
-
 
 -- Table: rv_schema.dicom_property
 
