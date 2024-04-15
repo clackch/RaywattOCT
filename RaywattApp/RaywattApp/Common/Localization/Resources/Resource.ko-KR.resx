@@ -164,6 +164,9 @@ Remove the catheter from patient before proceeding.</value>
   <data name="$MSG015" xml:space="preserve">
     <value>[K]Failed to open socket.</value>
   </data>
+  <data name="$MSG016" xml:space="preserve">
+    <value>[K]Add physician information on the edit patient screen.</value>
+  </data>
   <data name="$Terms and Conditions" xml:space="preserve">
     <value>[K]Product Intended Use: Clearly define the intended use of the OCT device, including any limitations or specific conditions for use.
 Product Warranty: Outline the warranty coverage provided for the OCT device, including the duration, scope, and process for claiming warranty services.
@@ -302,6 +305,9 @@ Acceptance of Terms: Require users to explicitly accept the terms and conditions
   <data name="Calcium" xml:space="preserve">
     <value>[K]Calcium</value>
   </data>
+  <data name="Calcium Threshold" xml:space="preserve">
+    <value>[K]Calcium Threshold</value>
+  </data>
   <data name="Calibration" xml:space="preserve">
     <value>[K]Calibration</value>
   </data>
@@ -310,6 +316,9 @@ Acceptance of Terms: Require users to explicitly accept the terms and conditions
   </data>
   <data name="Case" xml:space="preserve">
     <value>[K]Case</value>
+  </data>
+  <data name="Case Default Settings" xml:space="preserve">
+    <value>[K]Case Default Settings</value>
   </data>
   <data name="Case Edit" xml:space="preserve">
     <value>[K]Case Edit</value>
@@ -488,6 +497,9 @@ Overwrite existing data?</value>
   </data>
   <data name="First Name" xml:space="preserve">
     <value>[K]First Name</value>
+  </data>
+  <data name="Flush Media" xml:space="preserve">
+    <value>[K]Flush Media</value>
   </data>
   <data name="Fly-Through" xml:space="preserve">
     <value>[K]Fly-Through</value>
@@ -708,6 +720,9 @@ Overwrite existing data?</value>
   <data name="New Patient" xml:space="preserve">
     <value>[K]New Patient</value>
   </data>
+  <data name="New Physician" xml:space="preserve">
+    <value>[K]New Physician</value>
+  </data>
   <data name="New Recording" xml:space="preserve">
     <value>[K]New Recording</value>
   </data>
@@ -734,6 +749,9 @@ Overwrite existing data?</value>
   </data>
   <data name="OCT + Angio" xml:space="preserve">
     <value>[K]OCT + Angio</value>
+  </data>
+  <data name="OCT Colormap" xml:space="preserve">
+    <value>[K]OCT Colormap</value>
   </data>
   <data name="OK" xml:space="preserve">
     <value>[K]OK</value>
@@ -777,6 +795,12 @@ Overwrite existing data?</value>
   <data name="Physician ID" xml:space="preserve">
     <value>[K]Physician ID</value>
   </data>
+  <data name="Physician Info." xml:space="preserve">
+    <value>[K]Physician Info.</value>
+  </data>
+  <data name="Physician List" xml:space="preserve">
+    <value>[K]Physician List</value>
+  </data>
   <data name="Physician Name" xml:space="preserve">
     <value>[K]Physician Name</value>
   </data>
@@ -815,6 +839,12 @@ Overwrite existing data?</value>
   </data>
   <data name="Pullback Setting" xml:space="preserve">
     <value>[K]Pullback Setting</value>
+  </data>
+  <data name="Pullback Trigger" xml:space="preserve">
+    <value>[K]Pullback Trigger</value>
+  </data>
+  <data name="Pullback Type" xml:space="preserve">
+    <value>[K]Pullback Type</value>
   </data>
   <data name="Purpose" xml:space="preserve">
     <value>[K]Purpose</value>
@@ -858,6 +888,9 @@ Overwrite existing data?</value>
   <data name="Review Preset" xml:space="preserve">
     <value>[K]Review Preset</value>
   </data>
+  <data name="Review Settings" xml:space="preserve">
+    <value>[K]Review Settings</value>
+  </data>
   <data name="Save" xml:space="preserve">
     <value>[K]Save</value>
   </data>
@@ -866,6 +899,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Search ID or Name" xml:space="preserve">
     <value>[K]Search ID or Name</value>
+  </data>
+  <data name="Search Name" xml:space="preserve">
+    <value>[K]Search Name</value>
   </data>
   <data name="sec" xml:space="preserve">
     <value>[K]sec</value>
@@ -879,6 +915,9 @@ Overwrite existing data?</value>
   <data name="Select Drive" xml:space="preserve">
     <value>[K]Select Drive</value>
   </data>
+  <data name="Select Flush Media" xml:space="preserve">
+    <value>[K]Select Flush Media</value>
+  </data>
   <data name="Select Folder" xml:space="preserve">
     <value>[K]Select Folder</value>
   </data>
@@ -888,6 +927,12 @@ Overwrite existing data?</value>
   <data name="Select Language" xml:space="preserve">
     <value>[K]Select Language</value>
   </data>
+  <data name="Select OCT Colormap" xml:space="preserve">
+    <value>[K]Select OCT Colormap</value>
+  </data>
+  <data name="Select Physician" xml:space="preserve">
+    <value>[K]Select Physician</value>
+  </data>
   <data name="Select Pre-Case" xml:space="preserve">
     <value>[K]Select Pre-Case</value>
   </data>
@@ -896,6 +941,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Select Pullback" xml:space="preserve">
     <value>[K]Select Pullback</value>
+  </data>
+  <data name="Select Pullback Type" xml:space="preserve">
+    <value>[K]Select Pullback Type</value>
   </data>
   <data name="Service" xml:space="preserve">
     <value>[K]Service</value>

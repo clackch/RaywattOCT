@@ -61,9 +61,15 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient
     firstname character varying(20) COLLATE pg_catalog."default",
     birthdate date,
     gender character varying(1) COLLATE pg_catalog."default",
+	physician_id integer,
     create_date timestamp without time zone,
-    update_date timestamp without time zone,
+    update_date timestamp without time zone,    
     CONSTRAINT patient_pkey PRIMARY KEY (id)
+        USING INDEX TABLESPACE rv_tablespace,
+    CONSTRAINT patient_physician_fkey FOREIGN KEY (physician)
+        REFERENCES rv_schema.physician (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE SET NULL
 )
 
 TABLESPACE rv_tablespace;
@@ -80,21 +86,23 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case
 (
     id character varying(24) COLLATE pg_catalog."default" NOT NULL,
     patient_id character varying(9) COLLATE pg_catalog."default",
-    physician_name character varying(40) COLLATE pg_catalog."default",
     accession_number character varying(6) COLLATE pg_catalog."default",
-    accession_name character varying(40) COLLATE pg_catalog."default",
     comment character varying(200) COLLATE pg_catalog."default",
-    vessel character varying(20) COLLATE pg_catalog."default",
-    procedure character varying(20) COLLATE pg_catalog."default",
+    procedure character varying(4) COLLATE pg_catalog."default",
+    vessel character varying(4) COLLATE pg_catalog."default",
+    location character varying(4) COLLATE pg_catalog."default",
     num_of_frames integer,
     image character varying(200) COLLATE pg_catalog."default",
     image_resolution real,
-    pullback_type character varying(4) COLLATE pg_catalog."default",	
-    pullback_length character varying(4) COLLATE pg_catalog."default",
 	angio_yn boolean,
 	angio_co_registration boolean,
 	indicator_degree real,
-	preset_name character varying(40) COLLATE pg_catalog."default",
+    physician_name character varying(50) COLLATE pg_catalog."default",	
+    flush_media character varying(4) COLLATE pg_catalog."default",
+    pullback_trigger character varying(4) COLLATE pg_catalog."default",
+    pullback_type character varying(4) COLLATE pg_catalog."default",
+	pullback_length character varying(4) COLLATE pg_catalog."default",	
+    colormap character varying(4) COLLATE pg_catalog."default",
     calcium_threshold integer,
     expansion_calculation character varying(4) COLLATE pg_catalog."default",
     expansion_threshold integer,
@@ -176,9 +184,19 @@ ALTER TABLE IF EXISTS rv_schema.patient_case_annotation
 
 CREATE TABLE IF NOT EXISTS rv_schema.physician
 (
-    name character varying(40) COLLATE pg_catalog."default" NOT NULL,
+    id serial NOT NULL,
+    lastname character varying(20) COLLATE pg_catalog."default",
+    firstname character varying(200) COLLATE pg_catalog."default",
+	flush_media character varying(4) COLLATE pg_catalog."default",
+	pullback_trigger character varying(4) COLLATE pg_catalog."default",
+    pullback_type character varying(4) COLLATE pg_catalog."default",
+	colormap character varying(4) COLLATE pg_catalog."default",
+    calcium_threshold integer,
+    expansion_threshold integer,
+    apposition_threshold real,
     create_date timestamp without time zone,
-    CONSTRAINT physician_pkey PRIMARY KEY (name)
+    update_date timestamp without time zone,
+    CONSTRAINT physician_pkey PRIMARY KEY (id)
         USING INDEX TABLESPACE rv_tablespace
 )
 
@@ -186,32 +204,7 @@ TABLESPACE rv_tablespace;
 
 ALTER TABLE IF EXISTS rv_schema.physician
     OWNER to rv_user;
-	
 
--- Table: rv_schema.patient_case_preset
-
--- DROP TABLE IF EXISTS rv_schema.patient_case_preset;
-
-CREATE TABLE IF NOT EXISTS rv_schema.patient_case_preset
-(
-    id character varying(24) COLLATE pg_catalog."default" NOT NULL,
-    preset_name character varying(40) COLLATE pg_catalog."default",
-    calcium_threshold integer,
-    expansion_calculation character varying(4) COLLATE pg_catalog."default",
-    expansion_threshold integer,
-    apposition_threshold real,
-    default_set boolean,
-	create_date timestamp without time zone,
-    update_date timestamp without time zone,
-    CONSTRAINT patient_case_set_pkey PRIMARY KEY (id)
-        USING INDEX TABLESPACE rv_tablespace
-)
-
-TABLESPACE rv_tablespace;
-
-ALTER TABLE IF EXISTS rv_schema.patient_case_preset
-    OWNER to rv_user;
-	
 
 -- Table: rv_schema.dicom_property
 
@@ -450,4 +443,29 @@ AS $BODY$
 $BODY$;
 
 ALTER FUNCTION rv_schema.fn_displaylastcase(character varying)
+    OWNER TO rv_user;
+
+
+-- FUNCTION: rv_schema.fn_physician(integer)
+
+-- DROP FUNCTION IF EXISTS rv_schema.fn_physician(integer);
+
+CREATE OR REPLACE FUNCTION rv_schema.fn_physician(
+	arg_id integer)
+    RETURNS character varying
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+AS $BODY$
+	DECLARE
+	res_value character varying;
+	BEGIN
+		SELECT concat("firstname", ', ', "lastname") into res_value
+		FROM rv_schema.physician
+		WHERE "id" = arg_id;
+	RETURN res_value;
+	END;
+$BODY$;
+
+ALTER FUNCTION rv_schema.fn_physician(integer)
     OWNER TO rv_user;

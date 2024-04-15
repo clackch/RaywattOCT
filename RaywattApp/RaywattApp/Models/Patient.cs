@@ -37,7 +37,7 @@ namespace RaywattApp.Models
             get { return _lastname; }
             set
             {
-                if (value.Length <= Constants.MaxPatientLastname)
+                if (value.Length <= Constants.MaxLastname)
                 {
                     if (!CommonUtil.ValidateText(value))
                         return;
@@ -54,7 +54,7 @@ namespace RaywattApp.Models
             get { return _firstname; }
             set
             {
-                if (value.Length <= Constants.MaxPatientFirstname)
+                if (value.Length <= Constants.MaxFirstname)
                 {
                     if (!CommonUtil.ValidateText(value))
                         return;
@@ -92,7 +92,13 @@ namespace RaywattApp.Models
         private DateTime? birthdate;
 
         [ObservableProperty]
-        private string gender;
+        private string? gender;
+
+        [ObservableProperty]
+        private int physicianId;
+
+        [ObservableProperty]
+        private string? physicianName;
 
         [ObservableProperty]
         private DateTime createDate;

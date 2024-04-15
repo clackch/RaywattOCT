@@ -72,7 +72,7 @@ namespace RaywattApp.ViewModels.File
             {
                 foreach (PatientCase patientCase in PatientCases)
                 {
-                    ExportSize += frameSize * int.Parse(CodeDefinition.Codes["PBLE"][patientCase.PullbackLength]);
+                    ExportSize += frameSize * int.Parse(patientCase.PullbackLength);
                 }
             }
             else if(FileExport.Material == Constants.ExportMaterialBookmarked)

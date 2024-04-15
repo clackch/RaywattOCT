@@ -48,9 +48,6 @@ namespace RaywattApp.Models
             }
         }
 
-        [ObservableProperty]
-        private string accessionName;
-
         private string _comment;
         public string Comment
         {
@@ -66,10 +63,13 @@ namespace RaywattApp.Models
         }
 
         [ObservableProperty]
+        private string procedure;
+
+        [ObservableProperty]
         private string vessel;
 
         [ObservableProperty]
-        private string procedure;
+        private string location;
 
         [ObservableProperty]
         private int numOfFrames;
@@ -108,19 +108,14 @@ namespace RaywattApp.Models
         [ObservableProperty]
         private double _indicatorDegree;
 
-        private string? _presetName;
-        public string PresetName
-        {
-            get { return _presetName; }
-            set
-            {
-                if (value.Length <= Constants.MaxPatientCasePresetName)
-                {
-                    _presetName = value;
-                    OnPropertyChanged(nameof(PresetName));
-                }
-            }
-        }
+        [ObservableProperty]
+        private string? _flushMedia;
+
+        [ObservableProperty]
+        private string? _pullbackTrigger;
+
+        [ObservableProperty]
+        private string? _colormap;
 
         [ObservableProperty]
         private int _calciumThreshold;

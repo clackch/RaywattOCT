@@ -40,21 +40,28 @@
                 <RowDefinition Height="78"/>
                 <RowDefinition Height="25"/>
                 <RowDefinition Height="78"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="78"/>
                 <RowDefinition Height="42"/>
                 <RowDefinition Height="237"/>
             </Grid.RowDefinitions>
             <Label Grid.Row="1" Grid.Column="1" Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Add Patient], Source={StaticResource L10N}}"/>
             <Label Grid.Row="2" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [ID], Source={StaticResource L10N}}"/>
             <TextBox Grid.Row="3" Grid.Column="1" Style="{DynamicResource TextBoxValidator}" Text="{Binding Patient.Id, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter ID], Source={StaticResource L10N}}" ToolTip="{Binding Patient.ValidateId}" Margin="0,0,0,8"/>
-            <Label Grid.Row="4" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Last Name], Source={StaticResource L10N}}"/>
-            <TextBox Grid.Row="5" Grid.Column="1" Style="{DynamicResource TextBoxBase}" Text="{Binding Patient.Lastname, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter Last Name], Source={StaticResource L10N}}" Margin="0,0,0,8"/>
-            <Label Grid.Row="6" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [First Name], Source={StaticResource L10N}}"/>
-            <TextBox Grid.Row="7" Grid.Column="1" Style="{DynamicResource TextBoxBase}" Text="{Binding Patient.Firstname, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter First Name], Source={StaticResource L10N}}" Margin="0,0,0,8"/>
+            <Label Grid.Row="4" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [First Name], Source={StaticResource L10N}}"/>
+            <TextBox Grid.Row="5" Grid.Column="1" Style="{DynamicResource TextBoxBase}" Text="{Binding Patient.Firstname, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter First Name], Source={StaticResource L10N}}" Margin="0,0,0,8"/>
+            <Label Grid.Row="6" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Last Name], Source={StaticResource L10N}}"/>
+            <TextBox Grid.Row="7" Grid.Column="1" Style="{DynamicResource TextBoxBase}" Text="{Binding Patient.Lastname, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter Last Name], Source={StaticResource L10N}}" Margin="0,0,0,8"/>
             <Label Grid.Row="8" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Birth Date], Source={StaticResource L10N}}"/>
             <DatePicker Grid.Row="9" Grid.Column="1" Style="{DynamicResource DatePickerStyle}" SelectedDate="{Binding Patient.Birthdate, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter Birth Date], Source={StaticResource L10N}}" Margin="0,0,0,24"/>
             <Label Grid.Row="10" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
             <ComboBox Grid.Row="11" Grid.Column="1" ItemsSource="{Binding GenderComboBox}" SelectedValue="{Binding SelectedGender, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" Margin="0,0,0,24" Tag="{Binding [Select Gender], Source={StaticResource L10N}}"/>
-            <StackPanel Grid.Row="12" Grid.Column="1" Orientation="Horizontal">
+            <Label Grid.Row="12" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Physician], Source={StaticResource L10N}}"/>
+            <StackPanel Grid.Row="13" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                <TextBox Style="{DynamicResource TextBoxWithCorner}" Width="268" IsReadOnly="True" Text="{Binding Patient.PhysicianName}" Tag="{Binding [Select Physician], Source={StaticResource L10N}}" Margin="0,0,0,8"/>
+                <Button Style="{StaticResource OutlinedBtnType1-Large}" Width="134" Height="54" VerticalAlignment="Top" Command="{Binding SelectPhysicianCommand}" Content="{Binding [Select], Source={StaticResource L10N}}" Margin="6,0,0,0"/>
+            </StackPanel>
+            <StackPanel Grid.Row="14" Grid.Column="1" Orientation="Horizontal">
                 <Button Style="{StaticResource OutlinedBtnType1-Large}" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
                 <StackPanel Width="8"/>
                 <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding NewRecordingCommand}" Content="{Binding [OK], Source={StaticResource L10N}}"/>

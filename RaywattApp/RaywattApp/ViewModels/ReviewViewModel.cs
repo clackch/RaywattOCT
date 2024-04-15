@@ -1003,7 +1003,7 @@ namespace RaywattApp.ViewModels
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["vessel"] = PatientCase.Vessel;
             parameter["procedure"] = PatientCase.Procedure;
-            parameter["physicianName"] = PatientCase.PhysicianName;
+            parameter["location"] = PatientCase.Location;
             parameter["accessionNumber"] = PatientCase.AccessionNumber;
             parameter["comment"] = PatientCase.Comment;
             var result = _dialogService.OpenDialog(new EditCaseInfoDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
@@ -1013,7 +1013,7 @@ namespace RaywattApp.ViewModels
                 Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
                 PatientCase.Vessel = data["vessel"].ToString();
                 PatientCase.Procedure = data["procedure"].ToString();
-                PatientCase.PhysicianName = data["physicianName"].ToString();
+                PatientCase.Location = data["location"].ToString();
                 PatientCase.AccessionNumber = data["accessionNumber"].ToString();
                 PatientCase.Comment = data["comment"].ToString();
 
@@ -1038,12 +1038,13 @@ namespace RaywattApp.ViewModels
             sqlParameters["accession_number"] = PatientCase.AccessionNumber;
             sqlParameters["comment"] = PatientCase.Comment;
             sqlParameters["vessel"] = PatientCase.Vessel;
+            sqlParameters["location"] = PatientCase.Location;
             sqlParameters["procedure"] = PatientCase.Procedure;
             sqlParameters["angio_yn"] = PatientCase.AngioYn;
             sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
             PatientCase.IndicatorDegree = Degree;
             sqlParameters["indicator_degree"] = PatientCase.IndicatorDegree;
-            sqlParameters["preset_name"] = PatientCase.PresetName;
+            sqlParameters["colormap"] = PatientCase.Colormap;
             sqlParameters["calcium_threshold"] = PatientCase.CalciumThreshold;
             sqlParameters["expansion_calculation"] = PatientCase.ExpansionCalculation;
             sqlParameters["expansion_threshold"] = PatientCase.ExpansionThreshold;
@@ -1319,7 +1320,7 @@ namespace RaywattApp.ViewModels
                 double mla = LumenContours.GetRange(frameProximal, count).Min(x => x.Area);
                 int mlaIdx = LumenContours.GetRange(frameProximal, count).FindIndex(x => x.Area == mla) + frameProximal;
 
-                int frameDiff = (int)(Constants.PreLesionLengthInitValue * ReviewStatus.NumberOfFrames * 10 / int.Parse(CodeDefinition.Codes["PBLE"][PatientCase.PullbackLength]));
+                int frameDiff = (int)(Constants.PreLesionLengthInitValue * ReviewStatus.NumberOfFrames * 10 / int.Parse(PatientCase.PullbackLength));
                 proximalIdx = mlaIdx - frameDiff > 0 ? mlaIdx - frameDiff : 0;
                 distalIdx = mlaIdx + frameDiff < ReviewStatus.NumberOfFrames ? mlaIdx + frameDiff : ReviewStatus.NumberOfFrames - 1;
             }
@@ -1338,7 +1339,7 @@ namespace RaywattApp.ViewModels
                     cnt++;
                 }
 
-                int frameDiff = (int)(Constants.PostLesionLengthInitValue * ReviewStatus.NumberOfFrames * 10 / int.Parse(CodeDefinition.Codes["PBLE"][PatientCase.PullbackLength]));
+                int frameDiff = (int)(Constants.PostLesionLengthInitValue * ReviewStatus.NumberOfFrames * 10 / int.Parse(PatientCase.PullbackLength));
                 proximalIdx = firstStent - frameDiff > 0 ? firstStent - frameDiff : 0;
                 distalIdx = lastStent + frameDiff < ReviewStatus.NumberOfFrames ? lastStent + frameDiff : ReviewStatus.NumberOfFrames - 1;
             }

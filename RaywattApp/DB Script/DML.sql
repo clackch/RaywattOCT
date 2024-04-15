@@ -14,6 +14,25 @@ DELETE FROM rv_schema.code;
 -- GENDER
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('GEND', 'M', 'Male', 1, 'Gender Male', now(), now());
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('GEND', 'F', 'Female', 2, 'Gender Female', now(), now());
+-- FLUSH MEDIA
+INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('FLMD', 'SALI', 'Saline', 1, 'Flush Media Saline', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('FLMD', 'CONT', 'Contrast', 2, 'Flush Media Contrast', now(), now());
+-- PULLBACK TRIGGER
+INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PBTG', 'MANL', 'Manual', 1, 'Pullback Trigger Manual', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PBTG', 'AUTO', 'Auto', 2, 'Pullback Trigger Auto', now(), now());
+-- PULLBACK TYPE
+INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'STSH', 'Standard', '60|60|1', 1, 'Pullback Type Standard', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'STLO', 'Standard - Long', '100|100|1', 2, 'Pullback Type Standard - Long', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'HISH', 'High Resolution', '60|20|3', 3, 'Pullback Type High Resolution', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'HILO', 'High Resolution - Long', '100|40|2.5', 4, 'Pullback Type High Resolution - Long', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'FAST', 'Faster for specialized care', '60|120|0.5', 5, 'Pullback Type Faster for specialized care', now(), now());
+-- COLORMAP
+INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('CLMP', 'GRGR', 'Green-gray', 1, 'Colormap Green-gray', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('CLMP', 'GRAY', 'Gray', 2, 'Colormap Gray', now(), now());
+-- PROCEDURE
+INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PROC', '$001', 'Pre-PCI', 1, 'Procedure Pre-PCI', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PROC', '$002', 'Post-PCI', 2, 'Procedure Post-PCI', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PROC', '$003', 'Follow-Up', 3, 'Procedure Follow-Up', now(), now());
 -- VESSEL
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('VESS', '$000', 'Not Selected', 0, 'Vessel Not Selected', now(), now());
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('VESS', '$001', 'RCA Prox', 1, 'Vessel RCA Prox', now(), now());
@@ -32,19 +51,14 @@ INSERT INTO rv_schema.code( classification, key, value, sort_order, description,
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('VESS', '$014', 'LCX OM2', 14, 'Vessel LCX OM2', now(), now());
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('VESS', '$015', 'LCX Distal', 15, 'Vessel LCX Distal', now(), now());
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('VESS', '$OTH', 'Other', 16, 'Vessel Other', now(), now());
--- PROCEDURE
-INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PROC', '$001', 'Pre-PCI', 1, 'Procedure Pre-PCI', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PROC', '$002', 'Post-PCI', 2, 'Procedure Post-PCI', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PROC', '$003', 'Follow-Up', 3, 'Procedure Follow-Up', now(), now());
--- PULLBACK TYPE
-INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'STSH', 'Standard', '60|60|1', 1, 'Pullback Type Standard', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'STLO', 'Standard - Long', '100|100|1', 2, 'Pullback Type Standard - Long', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'HISH', 'High Resolution', '60|20|3', 3, 'Pullback Type High Resolution', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'HILO', 'High Resolution - Long', '100|40|2.5', 4, 'Pullback Type High Resolution - Long', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'FAST', 'Faster for specialized care', '60|120|0.5', 5, 'Pullback Type Faster for specialized care', now(), now());
--- PULLBACK LENGTH
-INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PBLE', 'SHOR', '600', 1, 'Pullback Length Short', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PBLE', 'LONG', '1000', 2, 'Pullback Length Long', now(), now());
+-- LOCATION
+INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('LOCT', '$000', 'Not Selected', 0, 'Location Not Selected', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('LOCT', '$001', 'Proximal', 1, 'Location Proximal', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('LOCT', '$002', 'Proximal-Mid', 2, 'Location Proximal-Mid', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('LOCT', '$003', 'Mid', 3, 'Location Mid', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('LOCT', '$004', 'Mid-Distal', 4, 'Location Mid-Distal', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('LOCT', '$005', 'Distal', 5, 'Location Distal', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('LOCT', '$006', 'Other', 6, 'Location Other', now(), now());
 
 -- rv_schema.patient_case_preset
 DELETE FROM rv_schema.patient_case_preset WHERE id = 'Default';
