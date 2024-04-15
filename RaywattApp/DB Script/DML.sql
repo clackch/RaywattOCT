@@ -60,10 +60,6 @@ INSERT INTO rv_schema.code( classification, key, value, sort_order, description,
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('LOCT', '$005', 'Distal', 5, 'Location Distal', now(), now());
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('LOCT', '$006', 'Other', 6, 'Location Other', now(), now());
 
--- rv_schema.patient_case_preset
-DELETE FROM rv_schema.patient_case_preset WHERE id = 'Default';
-INSERT INTO rv_schema.patient_case_preset(id, preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold, default_set, create_date, update_date) VALUES ('Default', 'Default', 180, 'TAPE', 90, 0.3, TRUE, now(), now());
-
 -- rv_schema.dicom_property
 DELETE FROM rv_schema.dicom_property;
 INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('ORG_RT', 'Organization Root', '1.2.410.200124');
