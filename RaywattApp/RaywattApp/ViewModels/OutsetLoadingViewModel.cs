@@ -122,7 +122,7 @@ namespace RaywattApp.ViewModels
 
                 if (resultDialog != null && resultDialog.DialogAnswer == DialogResults.Answer.Undefined)
                 {
-                    CommonUtil.Exit(DeviceStatus, true);
+                    CommonUtil.Exit(DeviceStatus, _angioManager, true);
                 }
             }
 

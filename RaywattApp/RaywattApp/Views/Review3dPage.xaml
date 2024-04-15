@@ -67,7 +67,7 @@
                             <ColumnDefinition Width="420"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Background="{DynamicResource GrayscaleGray8Brush}">
-                            <Grid Margin="98,21,27,8">
+                            <Grid Margin="98,21,28,8">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="29"/>
                                     <RowDefinition Height="560"/>

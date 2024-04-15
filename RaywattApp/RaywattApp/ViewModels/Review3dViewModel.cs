@@ -17,12 +17,21 @@ using static RaywattOCT.Ray3DWrapper;
 using System.Runtime.InteropServices;
 using RaywattApp.Common.Util;
 using System.Threading;
+using Newtonsoft.Json.Linq;
+using System.Diagnostics;
 
 namespace RaywattApp.ViewModels
 {
+    
     public partial class Review3dViewModel : ReviewViewModelBase, IModelessPatient
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(Review3dViewModel));
+        public enum selectedPullbackType
+        {
+            Unselected,
+            Short,
+            Long
+        }
 
         private bool _isRendering = false;
         public bool IsRendering
@@ -66,6 +75,7 @@ namespace RaywattApp.ViewModels
                 OnPropertyChanged(nameof(IsIndicatorOn));
 
                 ray3DStatus.IsIndicatorOn = value;
+                change3DIndicatorVisibility(value);
             }
         }
 
@@ -97,7 +107,7 @@ namespace RaywattApp.ViewModels
                 RaySetProperty(Property.LongitudeDegree, degree);
 
                 CameraDegree = degree + 90;
-                ODSOCT_RotateAngle((float)CameraDegree);
+                ODSOCT_RotateAngle((float)CameraDegree, true);
             }
         }
 
@@ -200,6 +210,7 @@ namespace RaywattApp.ViewModels
                 // set default values without rendering
                 _isCutViewOn = ray3DStatus.CutViewOn;
                 _isIndicatorOn = ray3DStatus.IsIndicatorOn;
+                change3DIndicatorVisibility(IsIndicatorOn);
                 _isPtoD = ray3DStatus.IsPtoD;
                 _isSideBranchView = false;
             }
@@ -224,6 +235,7 @@ namespace RaywattApp.ViewModels
                 timerShowData.Stop();
 
             Save();
+            TurnOffAll3DActors();
             ODSOCT_HideAllWindows();
         }
 
@@ -269,10 +281,32 @@ namespace RaywattApp.ViewModels
             }
         }
 
+        private double zValueForPullbackType()
+        {
+            double lengthB;
+
+            switch (PatientCase.PullbackLength)
+            { // to-do 5 Pullback Types need to be set
+                case "SHOR":
+                    lengthB = Constants.PullbackLengthShortSize;
+                    break;
+                case "LONG":
+                    lengthB = Constants.PullbackLengthLongSize;
+                    break;
+                default:
+                    lengthB = Constants.PullbackLengthShortSize;
+                    break;
+            }
+            double zValue = lengthB / PatientCase.NumOfFrames / Constants.DICOMPhysicalDeltaXY;
+            Debug.WriteLine("zValue =" +  zValue);
+            return zValue;
+        }
+
         private void threadFuncInitialize()
         {
             int diameter = (int)RayGetProperty(Property.VolumeWidth);
             int depth = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total;
+            double zVal = zValueForPullbackType();
             IntPtr buffer = Marshal.AllocHGlobal(diameter * diameter * depth);
 
             CommonUtil.ContoursToMemory(PatientCase.LumenContours, 
@@ -280,13 +314,20 @@ namespace RaywattApp.ViewModels
                 buffer, 
                 new OpenCvSharp.Size(diameter, diameter));
 
-            ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(buffer), diameter, diameter, depth, 1, 1, 12.5);
+            if (CommonUtil.IsPostCase(PatientCase.Procedure))
+            {
+                ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(System.IntPtr.Zero), diameter, diameter, depth, 1, 1, zVal);
+            }
+            else
+            {
+                ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(buffer), diameter, diameter, depth, 1, 1, zVal);
+            }
 
             ODSOCT_InputSurfaceParameter(Ray3DObject.Lumen, 10, 50, ".\\data\\lumen_tex.jpg");
-            ODSOCT_InputData(Ray3DObject.Lumen, buffer, diameter, diameter, depth, 1, 1, 12.5);
+            ODSOCT_InputData(Ray3DObject.Lumen, buffer, diameter, diameter, depth, 1, 1, zVal);
             ODSOCT_ProcessingDatas();
-            Marshal.FreeHGlobal(buffer);
 
+            Marshal.FreeHGlobal(buffer);
             timerShowData.Interval = TimeSpan.FromMilliseconds(MinWaitingDelay);
             timerShowData.Tick += new EventHandler(timerFuncShowData);
             timerShowData.Start();
@@ -297,7 +338,7 @@ namespace RaywattApp.ViewModels
             if (timerShowData.IsEnabled)
                 timerShowData.Stop();
 
-            ODSOCT_RotateAngle((float)CameraDegree);
+            ODSOCT_RotateAngle((float)CameraDegree, false);
             ODSOCT_MoveToFrame(DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
             ODSOCT_ShowAllWindows();
 
@@ -306,7 +347,10 @@ namespace RaywattApp.ViewModels
                 ray3DStatus.ShowObject(obj, ray3DStatus.ObjectVisibility[(int)obj]);
             }
 
-            IsRendering = true;
+            if (!IsRendering)
+            {
+                IsRendering = true;
+            }
         }
 
         private void updateNavigator(int curFrame, int totalFrame)
@@ -327,6 +371,11 @@ namespace RaywattApp.ViewModels
             {
                 ray3DStatus.ShowObject(obj, mode);
             }
+        }
+
+        private void change3DIndicatorVisibility(bool show)
+        {
+            ray3DStatus.ShowIndicator(show);
         }
 
         private void RotateIndicator(object param)
@@ -485,6 +534,16 @@ namespace RaywattApp.ViewModels
                 curPosition = Math.Round(curPosition);
                 MoveToFrame(RaySession.Review, (int)curPosition);
                 ODSOCT_MoveToFrame((int)curPosition);
+            }
+        }
+
+        private void TurnOffAll3DActors()
+        {
+            change3DIndicatorVisibility(false);
+            for (Ray3DObject obj = Ray3DObject.Tissue; obj < Ray3DObject.Count; obj++)
+            {
+                if (ray3DStatus.ObjectVisibility[(int)obj] != Ray3DObjectMode.Hide)
+                    ray3DStatus.ShowObject(obj, Ray3DObjectMode.Hide, true);
             }
         }
     }

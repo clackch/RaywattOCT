@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using RaywattApp.Common.Angio;
 using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Util;
@@ -9,6 +10,9 @@ namespace RaywattApp.Models
 {
     public partial class PatientCase : ObservableObject
     {
+        [ObservableProperty]
+        private AngioFrame angioFrame;
+
         [ObservableProperty]
         private string id;
 

@@ -196,6 +196,13 @@ namespace RaywattApp.Services
                 FROM rv_schema.cath_room
                 ORDER BY name;
                 ";
+
+            //SelectCoRegistrationTrackTrackPoint
+            _query["SelectCoRegistrationTrackPoint"] = @$"
+                SELECT track_point return_string
+                FROM rv_schema.coregistration
+                WHERE id = @id
+                ";
         }
 
         private static void SetInsertQuery()
@@ -313,6 +320,13 @@ namespace RaywattApp.Services
 	            , calcium_threshold=@calcium_threshold, expansion_threshold=@expansion_threshold, apposition_threshold=@apposition_threshold
 	            , update_date=now()
 	            WHERE id=@id
+                ";
+              
+            //UpdatePatientCaseAngioCoRegistration
+            _query["UpdatePatientCaseAngioCoRegistration"] = @$"
+                UPDATE rv_schema.patient_case
+                SET angio_co_registration=@angio_co_registration
+                WHERE id=@id
                 ";
         }
 

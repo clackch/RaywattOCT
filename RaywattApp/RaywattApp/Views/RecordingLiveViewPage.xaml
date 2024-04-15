@@ -175,17 +175,16 @@
                             <ColumnDefinition Width="20"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
-                            <Image Source="{Binding AngioImage}" Stretch="Uniform">
-                                <Image.Clip>
-                                    <RectangleGeometry RadiusX="10" RadiusY="10">
-                                        <RectangleGeometry.Rect>
-                                            <Rect X="0" Y="0" Width="{x:Static const:Constants.AngioWidth}" Height="{x:Static const:Constants.AngioHeight}"/>
-                                        </RectangleGeometry.Rect>
-                                    </RectangleGeometry>
-                                </Image.Clip>
-                            </Image>
-                        </Border>
+                        <Grid Grid.Column="0" Background="{DynamicResource AdditionalColor5Brush}">
+                            <Grid.Clip>
+                                <RectangleGeometry RadiusX="10" RadiusY="10">
+                                    <RectangleGeometry.Rect>
+                                        <Rect X="0" Y="0" Width="{x:Static const:Constants.AngioWidth}" Height="{x:Static const:Constants.AngioHeight}"/>
+                                    </RectangleGeometry.Rect>
+                                </RectangleGeometry>
+                            </Grid.Clip>
+                            <Image Source="{Binding AngioImage}" Stretch="Uniform"/>
+                        </Grid>
                         <Border Grid.Column="2" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
                             <Image Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Uniform"/>
                         </Border>

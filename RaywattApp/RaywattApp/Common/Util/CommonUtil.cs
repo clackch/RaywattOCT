@@ -26,6 +26,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using RaywattApp.Common.Angio;
 
 namespace RaywattApp.Common.Util
 {
@@ -1002,12 +1003,11 @@ namespace RaywattApp.Common.Util
             return textBlock.DesiredSize;
         }
 
-        public static void Exit(DeviceStatus? deviceStatus = null, bool isShutdown = false)
+        public static void Exit(DeviceStatus? deviceStatus = null, AngioManager? angioManager = null, bool isShutdown = false)
         {
-            // Server Off
-            Process[] processes = Process.GetProcessesByName("FGServer");
-            foreach (Process process in processes)
-                process.Kill();
+
+            if (angioManager != null && angioManager.GetServerConnection())
+                angioManager.CloseAngioManager();
 
             if (deviceStatus != null)
             {
@@ -1234,10 +1234,13 @@ namespace RaywattApp.Common.Util
 
                             writer.WriteStartArray();
 
-                            foreach (Tuple<double, double> calcium in lumenContour.Calcium.List)
+                            if (lumenContour.Calcium != null)
                             {
-                                strPoint = calcium.Item1 + "," + calcium.Item2;
-                                writer.WriteValue(strPoint);
+                                foreach (Tuple<double, double> calcium in lumenContour.Calcium.List)
+                                {
+                                    strPoint = calcium.Item1 + "," + calcium.Item2;
+                                    writer.WriteValue(strPoint);
+                                }
                             }
                             writer.WriteEndArray();
 

@@ -576,13 +576,13 @@ void* COCTSystem::GetVolumeData(void* pLumenContours) {
 		if (m_reviewSession[SESSION_REVIEW] != nullptr) {
 			void* pVolumeData = m_reviewSession[SESSION_REVIEW]->GetVolumeData();
 
+			CConfiguration& config = CConfiguration::GetInstance();
+			int nDiameter = config.volume.size;
+			int nFrames = m_reviewSession[SESSION_REVIEW]->GetImageDepth();
+
 			// remove lumen area from volume data
 			if (pLumenContours != nullptr)
 			{
-				CConfiguration& config = CConfiguration::GetInstance();
-				int nDiameter = config.volume.size;
-				int nFrames = m_reviewSession[SESSION_REVIEW]->GetImageDepth();
-
 				for (int i = 0; i < nFrames; i++) {
 					int nOffset = (nDiameter * nDiameter) * i;
 					cv::Mat imgOCT = cv::Mat(nDiameter, nDiameter, CV_8UC1, ((char*)pVolumeData) + nOffset);
@@ -596,7 +596,17 @@ void* COCTSystem::GetVolumeData(void* pLumenContours) {
 					cv::copyTo(imgOrigin, imgOCT, imgMask);
 				}
 			}
+			else { // remove center sheath only to get Stent with volume data
+				for (int i = 0; i < nFrames; i++) {
+					int nOffset = (nDiameter * nDiameter) * i;
+					cv::Mat imgOCT = cv::Mat(nDiameter, nDiameter, CV_8UC1, ((char*)pVolumeData) + nOffset);
 
+					cv::Point center(nDiameter/2, nDiameter/2);
+					cv::Size axes(45, 45);
+					cv::Scalar color(0, 0, 0);
+					cv::ellipse(imgOCT, center, axes, 0, 0, 360, color, -1/*색상 채우기 = -1*/);
+				}
+			}
 			return pVolumeData;
 		}
 	}

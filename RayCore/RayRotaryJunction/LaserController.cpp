@@ -48,6 +48,9 @@ int CLaserController::LaserOnOff(bool on) {
 			retvallong = m_pAxsunOCTControl->StopScan();
 		}
 	}
+	else {
+		PLOGI.printf("Laser not connected");
+	}
 
 	return NOERROR;
 }

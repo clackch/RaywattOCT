@@ -1,4 +1,5 @@
 ﻿using RaywattApp.Common.Angio;
+using RaywattApp.Models;
 using System;
 using System.Windows.Media;
 
@@ -158,14 +159,17 @@ namespace RaywattApp.Common.Bases
         //Export Image
         public const int ExportAnnotationFontSize = 12;
         
-        //Export DICOM Prefic
+        //Export DICOM Prefix
         public const string ExportDicomPrefix = "IMG";
+        public const double DICOMPhysicalDeltaXY = 0.0289256198347107; // mm
 
         //File Import/Export
         public const string FileImageExtension = "bin";
         public const string FileExtension = "dbf";
         public const string AnnotationFileExtension = "annot";
         public const string FileNamePrefix = "Export_";
+        public const string AngioImageExtension = "angioframes";
+        public const string AngioParmasExtension = "params";
 
         //Export Layout
         public const double ExportHeight = 1080;
@@ -198,6 +202,8 @@ namespace RaywattApp.Common.Bases
         //Pullback Length
         public const string PullbackLengthLong = "LONG";
         public const string PullbackLengthShort = "SHOR";
+        public const int PullbackLengthLongSize = 100;
+        public const int PullbackLengthShortSize = 60;
 
         //Not Selected
         public const string NotSelected = "Not Selected";
@@ -301,9 +307,9 @@ namespace RaywattApp.Common.Bases
 
         //Review - 3D - Cut View
         public const double CutView3dX = 98;
-        public const double CutView3dY = 120;
-        public const double CutView3dWidth = 736;
-        public const double CutView3dHeight = 560;
+        public const double CutView3dY = 130; // 140 - 10 (for View Edge Round)
+        public const double CutView3dWidth = 734;
+        public const double CutView3dHeight = 540; // 560 - 20 (for View Edge Round)
 
         //Review - 3D - Fly Through View
         public const double FlyThroughView3dX = 886;
@@ -422,10 +428,12 @@ namespace RaywattApp.Common.Bases
         //Recording
         public const int TransientTime = 1000;
         public const int StartTime = 15;
-        public const int AngioWidth = 420;
-        public const int AngioHeight = 420;
+        public const double AngioWidth = 420;
+        public const double AngioHeight = 420;
 
         //AngioManager
+        public const string ServerIP = "127.0.0.1";
+        public const int ServerPort = 8888;
         public const byte SOF = 0x3A;
         public const byte EOF = 0xA3;
         public const int ImageHeaderSize = 7;
