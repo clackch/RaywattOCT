@@ -492,7 +492,7 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="34"/>
                                     <RowDefinition Height="1"/>
-                                    <RowDefinition Height="88"/>
+                                    <RowDefinition Height="98"/>
                                     <RowDefinition Height="136"/>
                                     <RowDefinition Height="136"/>
                                 </Grid.RowDefinitions>
@@ -503,7 +503,7 @@
                                 </StackPanel>
                                 <Separator Grid.Row="1" Height="1" Background="{DynamicResource SeparatorBrush}"/>
                                 <StackPanel Grid.Row="2">
-                                    <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                                         <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [ID], Source={StaticResource L10N}}"/>
                                         <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding Patient.Id}"/>
                                     </StackPanel>
@@ -515,6 +515,10 @@
                                         <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
                                         <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
                                     </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                        <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Physician], Source={StaticResource L10N}}"/>
+                                        <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding PatientCase.PhysicianName}"/>
+                                    </StackPanel>
                                 </StackPanel>
                                 <StackPanel Grid.Row="3">
                                     <Label Style="{DynamicResource ProcedureLabel}" Content="{Binding ReviewStatus.SelectedPatientCase.Procedure, Converter={StaticResource CodeConverter}, ConverterParameter='PROC'}" Tag="{Binding ReviewStatus.SelectedPatientCase.Procedure}" HorizontalAlignment="Left"/>
@@ -523,12 +527,12 @@
                                         <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding ReviewStatus.SelectedPatientCase.Vessel, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}"/>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                        <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Physician], Source={StaticResource L10N}}"/>
-                                        <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding ReviewStatus.SelectedPatientCase.PhysicianName}"/>
+                                        <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Location], Source={StaticResource L10N}}"/>
+                                        <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding ReviewStatus.SelectedPatientCase.Location, Converter={StaticResource CodeConverter}, ConverterParameter='LOCT'}"/>
                                     </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                                         <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Comment], Source={StaticResource L10N}}"/>
-                                        <TextBlock Width="112" Height="42" Text="{Binding ReviewStatus.SelectedPatientCase.Comment}" TextWrapping="WrapWithOverflow" FontFamily="Pretendard" FontWeight="Medium" FontSize="12" Foreground="{DynamicResource CaseValueBrush}"/>
+                                        <TextBlock Width="102" Height="42" Text="{Binding ReviewStatus.SelectedPatientCase.Comment}" TextWrapping="WrapWithOverflow" FontFamily="Pretendard" FontWeight="Medium" FontSize="12" Foreground="{DynamicResource CaseValueBrush}"/>
                                     </StackPanel>
                                 </StackPanel>
                                 <StackPanel Grid.Row="4">
@@ -540,12 +544,12 @@
                                         <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding PatientCase.Vessel, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}"/>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                        <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Physician], Source={StaticResource L10N}}"/>
-                                        <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding PatientCase.PhysicianName}"/>
+                                        <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Location], Source={StaticResource L10N}}"/>
+                                        <Label Style="{DynamicResource InfoValueLabel}" Content="{Binding PatientCase.Location, Converter={StaticResource CodeConverter}, ConverterParameter='LOCT'}"/>
                                     </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                                         <Label Style="{DynamicResource InfoTitleLabel}" Content="{Binding [Comment], Source={StaticResource L10N}}"/>
-                                        <TextBlock Width="112" Height="42" Text="{Binding PatientCase.Comment}" TextWrapping="WrapWithOverflow" FontFamily="Pretendard" FontWeight="Medium" FontSize="12" Foreground="{DynamicResource CaseValueBrush}"/>
+                                        <TextBlock Width="102" Height="42" Text="{Binding PatientCase.Comment}" TextWrapping="WrapWithOverflow" FontFamily="Pretendard" FontWeight="Medium" FontSize="12" Foreground="{DynamicResource CaseValueBrush}"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Grid>

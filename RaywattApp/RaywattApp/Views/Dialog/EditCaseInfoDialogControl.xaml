@@ -27,9 +27,9 @@
                     </DataGrid.Columns>
                 </DataGrid>
                 <StackPanel Width="10"/>
-                <DataGrid Width="260" ItemsSource="{Binding PhysicianList}" SelectedItem="{Binding CurrentPhysician}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" FontSize="16">
+                <DataGrid Width="260" ItemsSource="{Binding LocationList}" SelectedItem="{Binding CurrentLocation}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" FontSize="16">
                     <DataGrid.Columns>
-                        <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Name}" Header="{Binding [Physician], Source={StaticResource L10N}}"/>
+                        <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Value}" Header="{Binding [Location], Source={StaticResource L10N}}"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </StackPanel>

@@ -7,30 +7,82 @@ namespace RaywattApp.Models
 {
     public partial class Physician : ObservableObject
     {
-        private string _name;
-        public string Name
+        [ObservableProperty]
+        private int _id;
+
+        private string _lastname;
+        public string Lastname
         {
-            get { return _name; }
-            set 
-            { 
-                if(value.Length <= Constants.MaxPhysicianName)
+            get { return _lastname; }
+            set
+            {
+                if (value.Length <= Constants.MaxLastname)
                 {
                     if (!CommonUtil.ValidateText(value))
                         return;
 
-                    _name = value;
-                    OnPropertyChanged(nameof(Name));
+                    _lastname = value;
+                    OnPropertyChanged(nameof(Lastname));
+                }
+            }
+        }
 
-                    _validateName = "";
-                    OnPropertyChanged(nameof(ValidateName));
+        private string _firstname;
+        public string Firstname
+        {
+            get { return _firstname; }
+            set
+            {
+                if (value.Length <= Constants.MaxFirstname)
+                {
+                    if (!CommonUtil.ValidateText(value))
+                        return;
+
+                    _firstname = value;
+                    OnPropertyChanged(nameof(Firstname));
                 }
             }
         }
 
         [ObservableProperty]
-        private string _validateName;
+        private string? _name;
 
         [ObservableProperty]
-        private DateTime createDate;
+        private string? _flushMedia;
+
+        [ObservableProperty]
+        private string? _pullbackTrigger;
+
+        [ObservableProperty]
+        private string? _pullbackType;
+
+        [ObservableProperty]
+        private string? _colormap;
+
+        [ObservableProperty]
+        private int _calciumThreshold;
+
+        [ObservableProperty]
+        private int _expansionThreshold;
+
+        private double _appositionThreshold;
+        public double AppositionThreshold
+        {
+            get { return _appositionThreshold; }
+            set
+            {
+                if (value >= 0.0 && value <= 1.0)
+                {
+                    _appositionThreshold = Math.Round(value, 2);
+                    OnPropertyChanged(nameof(AppositionThreshold));
+                }
+            }
+        }
+
+        [ObservableProperty]
+        private DateTime _createDate;
+
+        [ObservableProperty]
+        private DateTime _updateDate;
     }
 }

@@ -52,6 +52,12 @@ namespace RaywattApp.ViewModels
             get { return this._searchCommand ?? (this._searchCommand = new RelayCommand(Search)); }
         }
 
+        private ICommand _physicianCommand;
+        public ICommand PhysicianCommand
+        {
+            get { return this._physicianCommand ?? (this._physicianCommand = new RelayCommand(Physician)); }
+        }
+
         private ICommand _gridDoubleClickCommand;
         public ICommand GridDoubleClickCommand
         {
@@ -263,6 +269,15 @@ namespace RaywattApp.ViewModels
             prevStatus.ListPageNumber = PagingNoIdx;
 
             return prevStatus;
+        }
+
+        private void Physician()
+        {
+            _log.Debug("Physician");
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["prevStatus"] = GetListStatus();
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PhysicianListPage) { Parameter = parameter });
         }
     }
 }

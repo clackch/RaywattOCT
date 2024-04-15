@@ -54,6 +54,7 @@
                         <ColumnDefinition Width="174"/>
                         <ColumnDefinition Width="136"/>
                         <ColumnDefinition Width="112"/>
+                        <ColumnDefinition Width="300"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="32,26,0,0">
@@ -73,7 +74,11 @@
                         <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
                         <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="8,0,0,0" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
                     </StackPanel>
-                    <StackPanel Grid.Row="1" Grid.Column="3" HorizontalAlignment="Right">
+                    <StackPanel Grid.Row="1" Grid.Column="3" Orientation="Horizontal" Margin="0,13,0,0">
+                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Physician], Source={StaticResource L10N}}"/>
+                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="8,0,0,0" Content="{Binding Patient.PhysicianName}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" Grid.Column="4" HorizontalAlignment="Right">
                         <component:IconButton Style="{DynamicResource IconButton}" Icon="editSimple" HorizontalAlignment="Right" Margin="0,0,20,20" Command="{Binding PatientEditCommand}"/>
                     </StackPanel>
                 </Grid>

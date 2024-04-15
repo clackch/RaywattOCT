@@ -21,7 +21,11 @@ namespace RaywattApp.Common.Bases
         public const string PatientDetailPage = "Views/PatientDetailPage.xaml";
         public const string PatientNewPage = "Views/PatientNewPage.xaml";
         public const string PatientEditPage = "Views/PatientEditPage.xaml";
+        //Physician
+        public const string PhysicianListPage = "Views/PhysicianListPage.xaml";
+        public const string PhysicianEditPage = "Views/PhysicianEditPage.xaml";
         //Recording
+        public const string RecordingPresetPage = "Views/RecordingPresetPage.xaml";
         public const string RecordingSetupPage = "Views/RecordingSetupPage.xaml";
         public const string RecordingLiveViewPage = "Views/RecordingLiveViewPage.xaml";
         public const string RecordingCalibrationPage = "Views/RecordingCalibrationPage.xaml";
@@ -47,8 +51,7 @@ namespace RaywattApp.Common.Bases
         public const string SettingAcquisitionPage = "Views/Setting/SettingAcquisitionPage.xaml";
         public const string SettingLocalizationPage = "Views/Setting/SettingLocalizationPage.xaml";
         public const string SettingDatabasePage = "Views/Setting/SettingDatabasePage.xaml";
-        public const string SettingPhysicianPage = "Views/Setting/SettingPhysicianPage.xaml";
-        public const string SettingServicePage = "Views/Setting/SettingServicePage.xaml";
+        public const string SettingAboutPage = "Views/Setting/SettingAboutPage.xaml";
         public const string SettingLogPage = "Views/Setting/SettingLogPage.xaml";
         public const string SettingTermsConditionsPage = "Views/Setting/SettingTermsConditionsPage.xaml";
 
@@ -76,7 +79,7 @@ namespace RaywattApp.Common.Bases
         public const double FileCopyDialogWidth = 460;
         public const double FileCopyDialogHeight = 219;
         public const double SettingInsideDialogWidth = 584;
-        public const double SettingInsideDialogHeight = 583;
+        public const double SettingInsideDialogHeight = 500;
         public const double SettingEditPhysicianDialogWidth = 472;
         public const double SettingEditPhysicianDialogHeight = 279;
         public const double PatientCaseEditDialogWidth = 860;
@@ -87,14 +90,15 @@ namespace RaywattApp.Common.Bases
         public const double PowerOffDialogHeight = 269;
         public const double CathRoomDialogHeight = 472;
         public const double CathRoomDialogWidth = 472;
+        public const double PhysicianDialogHeight = 472;
+        public const double PhysicianDialogWidth = 659;
 
         //Max Length
         public const int MaxPatientId = 9;
-        public const int MaxPatientLastname = 20;
-        public const int MaxPatientFirstname = 20;
+        public const int MaxLastname = 20;
+        public const int MaxFirstname = 20;
         public const int MaxPatientCaseAccessionNumber = 6;
         public const int MaxPatientCaseComment = 200;
-        public const int MaxPhysicianName = 40;
         public const int MaxVolumeLabel = 15;
 
         //Page
@@ -224,6 +228,7 @@ namespace RaywattApp.Common.Bases
         //Background Color
         public const int BackgroundColor = 0x161616;
         public const int CardBackgroundColor = 0x232323;
+        public const int LumenEditBackgroundColor = 0x333333;
         public const int CompareBackgroundColor = 0x0d0d0d;
 
         //Playback Interval (msec)

@@ -52,7 +52,7 @@
                     </Border>
                 </Grid>
             </Border>
-            <Separator Grid.Row="1" Foreground="{DynamicResource GrayscaleGray5Brush}"/>
+            <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
             <Border Grid.Row="2" CornerRadius="0,0,10,10" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray6Brush}">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -60,7 +60,7 @@
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" HorizontalAlignment="Left" Margin="16,16,0,0">
-                        <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+                        <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding CancelCommand}" Content="{Binding [Back], Source={StaticResource L10N}}"/>
                     </StackPanel>
                 </Grid>
             </Border>
