@@ -87,6 +87,7 @@ namespace RaywattApp.ViewModels
 
                 ray3DStatus.IsPtoD = value;
                 ODSOCT_MoveCameraPosition(0, !value);
+                ODSOCT_Render();
             }
         }
 
