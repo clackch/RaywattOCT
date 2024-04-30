@@ -45,9 +45,9 @@ namespace RaywattOCT
                 IsPtoD = true;
             }
 
-            public int ShowObject(Ray3DObject obj, Ray3DObjectMode mode, bool isPageConverted = false)
+            public int ShowObject(Ray3DObject obj, Ray3DObjectMode mode, bool isPageChanged = false)
             {
-                if (!isPageConverted)
+                if (!isPageChanged)
                     ObjectVisibility[(int)obj] = mode;
                 return ODSOCT_SetViewData(obj, mode);
             }
