@@ -27,12 +27,6 @@ namespace RaywattApp.ViewModels
     public partial class Review3dViewModel : ReviewViewModelBase, IModelessPatient
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(Review3dViewModel));
-        public enum selectedPullbackType
-        {
-            Unselected,
-            Short,
-            Long
-        }
 
         private bool _isRendering = false;
         public bool IsRendering
