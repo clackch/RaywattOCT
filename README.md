@@ -69,7 +69,7 @@ Download & Install OCT Host
     (d) ```C:\Program Files\Axsun\Axsun OCT Control\AxsunOCTControl.tlb``` 파일 생성 확인
 
 ## [DAQ]
-* ATS9371_Driver_V7.11.1.exe 파일 설치
+* ATS9371_Driver_V7.11.1.exe(https://www.alazartech.com/en/product/ats9371/4/) 파일 설치
 
 ## [Font]
 
