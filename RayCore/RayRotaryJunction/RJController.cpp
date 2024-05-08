@@ -91,7 +91,7 @@ bool CRJController::Current(eStepMotorIndex idxMotor, int posMM) {
 	if (!m_initMotor) return false;
 	if (m_state == eRJState::Error) return false;
 
-	int posStep = ((double)posMM / MM_PER_STEP);
+	int posStep = posMM; // ((double)posMM / MM_PER_STEP);
 	PLOGI.printf("StepMotor #%d Current: %d", idxMotor, posStep);
 
 	if (idxMotor == eStepMotorIndex::Both) {
@@ -122,7 +122,7 @@ bool CRJController::Move(eStepMotorIndex idxMotor, int posMM, bool delay) {
 	if (!m_initMotor) return false;
 	if (m_state == eRJState::Error) return false;
 
-	int posStep = ((double)posMM / MM_PER_STEP);
+	int posStep = posMM; // ((double)posMM / MM_PER_STEP);
 	PLOGI.printf("StepMotor #%d Move: %d", idxMotor, posStep);
 
 	if (idxMotor == eStepMotorIndex::Both) {
@@ -160,7 +160,7 @@ bool CRJController::Set(eStepMotorIndex idxMotor, int velocity) {
 	if (!m_initMotor) return false;
 	if (m_state == eRJState::Error) return false;
 
-	int velStep = ((double)velocity / MM_PER_STEP);
+	int velStep = velocity; // ((double)velocity / MM_PER_STEP);
 
 	if (idxMotor == eStepMotorIndex::Both) {
 		m_nStepSpeed[0] = velStep;
@@ -305,7 +305,7 @@ void CRJController::updateState() {
 	case eRJState::Loaded:
 		if (!m_bLimitSwitch || m_bButton[0]) {
 			Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
-			m_nextState = eRJState::Unloading;
+			m_nextState = eRJState::Error;
 		}
 		break;
 	case eRJState::Unloading:

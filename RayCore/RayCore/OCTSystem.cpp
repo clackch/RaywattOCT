@@ -365,6 +365,9 @@ RayError COCTSystem::LoadCatheter() {
 			return RayError::OK;
 		}
 		else {
+			if (m_isTestMode) {
+				postMessage(WM_UPDATE_RJ_STATE, (WPARAM) eRJState::Loading);
+			}
 			return RayError::DeviceNotConnected;
 		}
 	}
@@ -1376,7 +1379,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 
 		pRJController->StopMotor();
 
-		pRJController->Move(eStepMotorIndex::Pullback, 0);
+		pRJController->Move(eStepMotorIndex::Pullback, 1500);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 		
 		pRJController->Move(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
