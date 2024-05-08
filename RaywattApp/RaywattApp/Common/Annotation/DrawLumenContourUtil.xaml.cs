@@ -807,7 +807,7 @@ namespace RaywattApp.Common.Annotation
         {
             _log.Debug("Restore");
 
-            if (lumenContourHistory[FrameNumber].Count < 2)
+            if (lumenContourHistory == null || lumenContourHistory[FrameNumber].Count < 2)
                 return;
 
             lumenContourHistory[FrameNumber].Pop();
@@ -819,7 +819,7 @@ namespace RaywattApp.Common.Annotation
         {
             _log.Debug("Reset");
 
-            if (lumenContourHistory[FrameNumber].Count < 2)
+            if (lumenContourHistory == null || lumenContourHistory[FrameNumber].Count < 2)
                 return;
 
             CopyHistoryToLumenContour(lumenContourHistory[FrameNumber].ToArray()[lumenContourHistory[FrameNumber].Count - 1]);
@@ -834,6 +834,9 @@ namespace RaywattApp.Common.Annotation
         private void AutoDetect()
         {
             _log.Debug("AutoDetect");
+
+            if (LumenContours == null || LumenContours.Count < FrameNumber + 1)
+                return;
 
             LumenContours[FrameNumber].ResetLumenContour();
             lumenContourHistory[FrameNumber].Push(CopyLumenContourToHistory(LumenContours[FrameNumber]));

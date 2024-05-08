@@ -58,6 +58,12 @@ namespace RaywattApp.ViewModels
             get { return this._patiendEditSaveCommand ?? (this._patiendEditSaveCommand = new RelayCommand(SavePatientEdit, CanSavePatient)); }
         }
 
+        private ICommand _selectPhysicianCommand;
+        public ICommand SelectPhysicianCommand
+        {
+            get { return this._selectPhysicianCommand ?? (this._selectPhysicianCommand = new RelayCommand(SelectPhysician)); }
+        }
+
         public PatientEditViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
             _log.Debug("PatientEditViewModel");
@@ -146,6 +152,7 @@ namespace RaywattApp.ViewModels
             {
                 sqlParameters["gender"] = "";
             }
+            sqlParameters["physician_id"] = PatientEdit.PhysicianId;
 
             int nRows = _sqlManager.UpdatePatient(sqlParameters);
 
@@ -172,7 +179,7 @@ namespace RaywattApp.ViewModels
 
         private bool CanSavePatient()
         {
-            _log.Debug("CanNewRecording");
+            _log.Debug("CanSavePatient");
 
             return ValidatePatient();
         }
@@ -197,6 +204,9 @@ namespace RaywattApp.ViewModels
             if (string.IsNullOrEmpty(PatientEdit.Firstname.Trim()))
                 return false;
 
+            if (PatientEdit.PhysicianId == 0)
+                return false;
+
             return true;
         }
 
@@ -209,6 +219,8 @@ namespace RaywattApp.ViewModels
             dest.Firstname = src.Firstname.Trim();
             dest.Birthdate = src.Birthdate;
             dest.Gender = src.Gender;
+            dest.PhysicianId = src.PhysicianId;
+            dest.PhysicianName = src.PhysicianName;
         }
 
         private void Delete()
@@ -235,6 +247,24 @@ namespace RaywattApp.ViewModels
                 {
                     _log.Error("Delete Error : id=" + Patient.Id);
                 }
+            }
+        }
+
+        private void SelectPhysician()
+        {
+            _log.Debug("SelectPhysician");
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["selectedPhysicianId"] = PatientEdit.PhysicianId;
+
+            var result = _dialogService.OpenDialog(new PhysicianDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+            if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
+            {
+                Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
+                Physician physician = (Physician)data["selectedPhysician"];
+                PatientEdit.PhysicianId = physician.Id;
+                PatientEdit.PhysicianName = physician.Name;
             }
         }
     }

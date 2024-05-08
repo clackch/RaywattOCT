@@ -56,6 +56,7 @@ namespace RaywattApp.ViewModels.Dialog
 
             Ray3DObjectMode mode = (visible) ? ((ray3DStatus.CutViewOn) ? Ray3DObjectMode.Cut : Ray3DObjectMode.Full) : Ray3DObjectMode.Hide;
             ray3DStatus.ShowObject(obj, mode);
+            ODSOCT_Render();
         }
 
         public override void SetParameter(IModelessPatient parent, object parameter)

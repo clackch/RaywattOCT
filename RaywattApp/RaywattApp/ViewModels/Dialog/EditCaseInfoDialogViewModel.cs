@@ -20,10 +20,10 @@ namespace RaywattApp.ViewModels.Dialog
         private PatientCase _patientCase;
 
         [ObservableProperty]
-        private IList<Physician> _physicianList;
+        private Dictionary<string, string> _vesselList;
 
         [ObservableProperty]
-        private Dictionary<string, string> _vesselList;
+        private Dictionary<string, string> _locationList;
 
         [ObservableProperty]
         private Dictionary<string, string> _procedureList;
@@ -32,48 +32,46 @@ namespace RaywattApp.ViewModels.Dialog
         private KeyValuePair<string, string> _currentVessel;
 
         [ObservableProperty]
-        private KeyValuePair<string, string> _currentProcedure;
+        private KeyValuePair<string, string> _currentLocation;
 
         [ObservableProperty]
-        private Physician _currentPhysician;
+        private KeyValuePair<string, string> _currentProcedure;
+
 
         public EditCaseInfoDialogViewModel(SqlManager sqlManager)
         {
             _sqlManager = sqlManager;
 
             PatientCase = new PatientCase();
-
-            PhysicianList = _sqlManager.SelectPhysicianList();
-            Physician notSelected = new Physician();
-            notSelected.Name = _l10n[Constants.NotSelected];
-            PhysicianList.Insert(0, notSelected);
             
             VesselList = CodeDefinition.Codes["VESS"];
             ProcedureList = CodeDefinition.Codes["PROC"];
+            LocationList = CodeDefinition.Codes["LOCT"];
         }
 
         public override void SetParameter(object parameter)
         {
             Dictionary<string, Object> data = (Dictionary<string, Object>)parameter;
             PatientCase.Vessel = data["vessel"].ToString();
+            PatientCase.Location = data["location"].ToString();
             PatientCase.Procedure = data["procedure"].ToString();
-            PatientCase.PhysicianName = data["physicianName"].ToString();
             PatientCase.AccessionNumber = data["accessionNumber"].ToString();
             PatientCase.Comment = data["comment"].ToString();
 
-            if (CodeDefinition.Codes["VESS"].ContainsKey(PatientCase.Vessel))
-                CurrentVessel = new KeyValuePair<string, string>(PatientCase.Vessel, CodeDefinition.Codes["VESS"][PatientCase.Vessel]);
             if (CodeDefinition.Codes["PROC"].ContainsKey(PatientCase.Procedure))
                 CurrentProcedure = new KeyValuePair<string, string>(PatientCase.Procedure, CodeDefinition.Codes["PROC"][PatientCase.Procedure]);
-            CurrentPhysician = PhysicianList.FirstOrDefault(x => x.Name == PatientCase.PhysicianName);
+            if (CodeDefinition.Codes["VESS"].ContainsKey(PatientCase.Vessel))
+                CurrentVessel = new KeyValuePair<string, string>(PatientCase.Vessel, CodeDefinition.Codes["VESS"][PatientCase.Vessel]);
+            if (CodeDefinition.Codes["LOCT"].ContainsKey(PatientCase.Location))
+                CurrentLocation = new KeyValuePair<string, string>(PatientCase.Location, CodeDefinition.Codes["LOCT"][PatientCase.Location]);
         }
 
         protected override void AnswerYes(IDialogWindow dialog)
         {
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["vessel"] = CurrentVessel.Key;
+            parameter["location"] = CurrentLocation.Key;
             parameter["procedure"] = CurrentProcedure.Key;
-            parameter["physicianName"] = CurrentPhysician != null ? CurrentPhysician.Name : PatientCase.PhysicianName;
             parameter["accessionNumber"] = PatientCase.AccessionNumber.Trim();
             parameter["comment"] = PatientCase.Comment.Trim();
 
