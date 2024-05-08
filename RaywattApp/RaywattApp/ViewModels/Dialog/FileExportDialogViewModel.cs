@@ -462,6 +462,9 @@ namespace RaywattApp.ViewModels.Dialog
 
         private void DrawCalciumIndicator(int calciumIndicatorSize)
         {
+            if (LumenContours[FrameNumber].Calcium == null)
+                return;
+
             CalciumIndicator = CommonUtil.DrawCalciumIndicator(LumenContours[FrameNumber].Calcium.List, Constants.CalciumIndicatorColor, calciumIndicatorSize);
 
             TotalAngle = LumenContours[FrameNumber].Calcium.TotalAngle;
