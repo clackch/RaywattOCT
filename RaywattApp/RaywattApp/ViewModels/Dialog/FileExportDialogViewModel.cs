@@ -113,7 +113,7 @@ namespace RaywattApp.ViewModels.Dialog
         private List<LumenGuidewire> _lumenGuidewires = new List<LumenGuidewire>();
 
         [ObservableProperty]
-        private double _ImagePartWidth;
+        private double _imagePartWidth;
 
         [ObservableProperty]
         private double _crossSectionPartWidth;
@@ -487,6 +487,7 @@ namespace RaywattApp.ViewModels.Dialog
 
         private void DrawCalciumIndicator(int calciumIndicatorSize)
         {
+            if (LumenContours[FrameNumber].Calcium == null) return;
             CalciumIndicator = CommonUtil.DrawCalciumIndicator(LumenContours[FrameNumber].Calcium.List, Constants.CalciumIndicatorColor, calciumIndicatorSize);
 
             TotalAngle = LumenContours[FrameNumber].Calcium.TotalAngle;
