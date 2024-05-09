@@ -1396,6 +1396,7 @@ namespace RaywattApp.Common.Util
 
                 foreach (System.Windows.Point point in stentList[i].Points)
                 {
+                    //TODO - 실제 스텐트 두께에 맞춰서 Size( , )를 설정해 주어야 함.
                     imgLumen.Ellipse(new OpenCvSharp.Point(point.X, point.Y), new Size(5, 5), 0, 0, 360, Scalar.White, 1);
                 }
                 
@@ -1412,32 +1413,39 @@ namespace RaywattApp.Common.Util
             }
         }
 
-        unsafe public static void GuideWireToMemory(List<LumenGuidewire>? stentList, Size sizeContour, IntPtr buffer, Size sizeBuffer)
+        unsafe public static void GuideWireToMemory(List<LumenGuidewire>? guidewireList, Size sizeContour, IntPtr buffer, Size sizeBuffer)
         {
-            if (stentList == null) return;
+            if (guidewireList == null) return;
 
             int frameSize = sizeBuffer.Width * sizeBuffer.Height;
-            for (int i = 0; i < stentList.Count; i++)
+            for (int i = 0; i < guidewireList.Count; i++)
             {
                 Mat imgLumen = new Mat(sizeContour, MatType.CV_8UC1);
                 Mat imgResize = new Mat(sizeBuffer, MatType.CV_8UC1);
-                List<List<Point>> contours = new List<List<Point>>();
+                Point[][] contours;
                 List<Point> contour = new List<Point>();
-                foreach (System.Windows.Point point in stentList[i].Points)
-                {
-                    contour.Add(new OpenCvSharp.Point(point.X, point.Y));
-                }
-                if (contour.Count > 0)
-                {
-                    contours.Add(contour);
-                }
 
                 imgLumen.SetTo(Scalar.Black);
-                if (contours.Count > 0)
+
+                if (guidewireList[i].Points == null)
+                    continue;
+
+                foreach (System.Windows.Point point in guidewireList[i].Points)
                 {
-                    Cv2.DrawContours(imgLumen, contours, -1, Scalar.White, -1);
+                    //TODO - 실제 Guidewire 반지름에 맞춰서 Size( , )를 설정해 주어야 함.
+                    imgLumen.Ellipse(new OpenCvSharp.Point(point.X, point.Y), new Size(50, 50), 0, 0, 360, Scalar.White, 1);
                 }
+
+                Mat binary = new Mat();
+                Cv2.Threshold(imgLumen, binary, 128, 255, ThresholdTypes.Binary);
+
+                Cv2.FindContours(binary, out contours, out HierarchyIndex[] hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
+
+                Cv2.DrawContours(imgLumen, contours, -1, Scalar.White, 1);
+
                 Cv2.Resize(imgLumen, imgResize, imgResize.Size());
+
+                Cv2.Blur(imgResize, imgResize, new Size(7, 7) /* 필터 크기 */, new Point(-1, -1) /* 필터 중심*/);
                 Buffer.MemoryCopy((void*)imgResize.Data, (void*)(IntPtr.Add(buffer, i * frameSize)), frameSize, frameSize);
             }
         }
