@@ -415,6 +415,14 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	std::vector<cv::Mat>& vGuidewire = pSession->m_vGuidewire;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
+	int imgSize = 1024;
+	cv::Mat prevLumen = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+	cv::Point center(imgSize / 2, imgSize / 2);
+	cv::circle(prevLumen, center, imgSize / 5, cv::Scalar(255));
+	std::vector<std::vector<cv::Point>> vPrevLumens;
+	cv::findContours(prevLumen, vPrevLumens, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	std::vector<cv::Point> vPrevLumen = vPrevLumens.at(0);
+
 	PLOGI.printf("Session #%d lumen detection start - %d frames", pSession->m_nSession, nNumOfSamples);
 	vLumen.clear();
 	vSidebranch.clear();
@@ -438,17 +446,50 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		std::vector<std::vector<cv::Point>> vContours;
 		cv::findContours(contourImage, vContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
-		double maxArea = 0;
-		std::vector<cv::Point> largestContour;
-		for (const auto& contour : vContours) {
-			double area = cv::contourArea(contour);
-			if (area > maxArea) {
-				maxArea = area;
-				largestContour = contour;
+		if (vContours.size() == 0) {
+			vContours.clear();
+			vContours.push_back(vPrevLumen);
+		}
+		else {
+			double maxArea = 0;
+			int idx = 0, seq = 0;
+			std::vector<cv::Point> largestContour;
+			for (const auto& contour : vContours) {
+				double area = cv::contourArea(contour);
+				if (area > maxArea) {
+					maxArea = area;
+					largestContour = contour;
+					idx = seq;
+				}
+				seq++;
+			}
+
+			cv::Mat mask1 = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+			cv::Point center(imgSize / 2, imgSize / 2);
+			cv::circle(mask1, center, imgSize / 2, cv::Scalar(255), cv::FILLED);
+
+			cv::Mat mask2 = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+			cv::drawContours(mask2, vContours, idx, cv::Scalar(255), cv::FILLED);
+
+			cv::Mat andResult;
+			cv::bitwise_and(mask2, mask1, andResult);
+
+			cv::Mat xorResult;
+			cv::bitwise_xor(mask2, andResult, xorResult);
+			bool isCompletelyContained = cv::countNonZero(xorResult) == 0;
+
+			vContours.clear();
+			if (isCompletelyContained) {
+				vContours.push_back(largestContour);
+				vPrevLumen = largestContour;
+			}
+			else {
+				std::vector<std::vector<cv::Point>> vCircle;
+				cv::findContours(andResult, vCircle, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+				vContours.push_back(vCircle.at(0));
+				vPrevLumen = vCircle.at(0);
 			}
 		}
-		vContours.clear();
-		vContours.push_back(largestContour);
 
 		std::vector<cv::Mat> vLumens;
 		for (int i = 0; i < vContours.size(); i++) {
