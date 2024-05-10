@@ -102,5 +102,7 @@ private:
 
 extern "C" __declspec(dllexport) YoloV8 * InitializeSegment();
 extern "C" __declspec(dllexport) YoloV8 * InitializeDetect();
+extern "C" __declspec(dllexport) YoloV8 * InitializeCalciumSegment();
 extern "C" __declspec(dllexport) void * GetSegmentObjects(YoloV8 * obj, cv::Mat img);
 extern "C" __declspec(dllexport) void * GetDetectObjects(YoloV8* obj, cv::Mat img);
+extern "C" __declspec(dllexport) void* GetCalciumSegmentObjects(YoloV8 * obj, cv::Mat img);
