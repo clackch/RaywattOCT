@@ -373,6 +373,16 @@ YoloV8* InitializeDetect()
     return new YoloV8(segmentModelPath, segmentConfig);
 }
 
+YoloV8* InitializeCalciumSegment() 
+{
+    YoloV8Config segmentConfig;
+    segmentConfig.segH = 256;
+    segmentConfig.segW = 256;
+    segmentConfig.classNames = { "calcium" };
+    std::string segmentModelPath = "C:\\Raywatt\\system\\3rdparty\\model\\yolo\\calcium.onnx";
+    return new YoloV8(segmentModelPath, segmentConfig);
+}
+
 void* GetSegmentObjects(YoloV8* obj, cv::Mat img)
 {
     const auto objectsSegment = obj->detectObjects(img);
@@ -391,5 +401,12 @@ void* GetDetectObjects(YoloV8* obj, cv::Mat img)
 	return static_cast<void*>(&obj->resDetect);
 }
 
+void* GetCalciumSegmentObjects(YoloV8* obj, cv::Mat img)
+{
+    const auto objectsSegment = obj->detectObjects(img);
 
+    obj->resSegment = obj->getSegmentObjects(objectsSegment, img.rows, img.cols);
+
+    return static_cast<void*>(&obj->resSegment);
+}
 

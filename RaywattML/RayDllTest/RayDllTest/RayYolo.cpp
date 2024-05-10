@@ -13,9 +13,13 @@ void RayYolo::LoadDLL()
 
 	InitializeDetect = (pInitializeDetect)GetProcAddress(hDll, "InitializeDetect");
 
+	InitializeCalciumSegment = (pInitializeCalciumSegment)GetProcAddress(hDll, "InitializeCalciumSegment");
+
 	GetSegmentObjects = (pGetSegmentObjects)GetProcAddress(hDll, "GetSegmentObjects");
 	
 	GetDetectObjects = (pGetDetectObjects)GetProcAddress(hDll, "GetDetectObjects");
+
+	GetCalciumSegmentObjects = (pGetCalciumSegmentObjects)GetProcAddress(hDll, "GetCalciumSegmentObjects");
 }
 
 void RayYolo::FreeDLL()
