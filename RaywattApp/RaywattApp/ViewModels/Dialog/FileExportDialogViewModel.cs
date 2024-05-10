@@ -199,7 +199,7 @@ namespace RaywattApp.ViewModels.Dialog
             CrossSectionScale = (1 / PatientCase.ImageResolution) * (Constants.CrossSectionSize / Constants.OCTImageSize);
 
             this.crossSections = crossSections;
-            if (fileExport.AngioView)
+            if (fileExport.AngioView && patientCase.AngioYn)
             {
                 CommonUtil.ReadAngioParams(PatientCase);
                 CommonUtil.ReadAngioImages(PatientCase);
@@ -215,7 +215,7 @@ namespace RaywattApp.ViewModels.Dialog
             if(fileExport.Longitude || fileExport.MeasureAuto || fileExport.MeasureManual)
                 SetAnnotation();
 
-            if (fileExport.AngioView || fileExport.Longitude)
+            if ((fileExport.AngioView && patientCase.AngioYn) || fileExport.Longitude)
             {
                 CrossSectionPartWidth = Constants.ExportCrossSectionSmall;
                 CrossSectionSize = Constants.ExportCrossSectionSmall;
@@ -258,7 +258,7 @@ namespace RaywattApp.ViewModels.Dialog
                     DrawLumenProfileImageExtra();
                 }
 
-                if (!fileExport.AngioView)
+                if (!fileExport.AngioView || !patientCase.AngioYn)
                     CrossSectionPartWidth = Constants.ExportLongitudeWidth;
             }
             else
@@ -291,7 +291,7 @@ namespace RaywattApp.ViewModels.Dialog
             //for Calcium
             if (CommonUtil.IsPreCase(PatientCase.Procedure))
             {
-                if (FileExport.Longitude || FileExport.AngioView)
+                if (FileExport.Longitude || (FileExport.AngioView && PatientCase.AngioYn))
                 {
                     CalciumIndicatorSize = Constants.CalciumIndicatorExportSize;
                     CalciumThicknessIndicatorSize = Constants.CalciumThicknessIndicatorExportSize;
@@ -322,7 +322,7 @@ namespace RaywattApp.ViewModels.Dialog
         {
             CrossSectionImage = DrawCrossSectionWithBackground(crossSections[frameNumber], new Scalar(0x0d, 0x0d, 0x0d));
 
-            if (FileExport.AngioView)
+            if (FileExport.AngioView && PatientCase.AngioYn)
             {
                 double ratio = (double)PatientCase.AngioFrame.AngioImage.Count / crossSections.Count() * frameNumber ;
                 int currentAngioFrameNumber = (int)ratio;
