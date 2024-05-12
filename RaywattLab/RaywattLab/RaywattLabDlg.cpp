@@ -795,6 +795,7 @@ void CRaywattLabDlg::OnBnClickedButtonAdminInitialize()
 	if (m_bInitialized)
 	{
 		finalizeDevices();
+		GetDlgItem(IDC_BUTTON_ADMIN_INITIALIZE)->SetWindowText(_T("Initialize"));
 		GetDlgItem(IDC_BUTTON_START_ACQUISITION)->EnableWindow(FALSE);
 	}
 	else {
