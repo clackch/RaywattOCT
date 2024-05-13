@@ -1317,7 +1317,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 
 	// 2. Pullback Linear Stage
 	if (pRJController->IsConnected()) {
-		pRJController->Move(eStepMotorIndex::Both, config.stepMotor.pullbackDistance, false);
+		pRJController->Move(eStepMotorIndex::Both, config.stepMotor.pullbackDistance / MM_PER_STEP, false);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 	}
 	else {
