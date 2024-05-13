@@ -411,6 +411,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	IRayLearning* learning = IRayLearning::GetInstance();
 	std::vector<std::vector<cv::Mat>>& vLumen = pSession->m_vLumen;
 	std::vector<std::vector<cv::Mat>>& vSidebranch = pSession->m_vSidebranch;
+	std::vector<std::vector<cv::Mat>>& vCalcium = pSession->m_vCalcium;
 	std::vector<cv::Mat>& vStent = pSession->m_vStent;
 	std::vector<cv::Mat>& vGuidewire = pSession->m_vGuidewire;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
@@ -418,6 +419,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	PLOGI.printf("Session #%d lumen detection start - %d frames", pSession->m_nSession, nNumOfSamples);
 	vLumen.clear();
 	vSidebranch.clear();
+	vCalcium.clear();
 	vStent.clear();
 	vGuidewire.clear();
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadObjectDetection->isRun; nFrame++) {
@@ -497,6 +499,19 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 			mGuidewire.at<cv::Point>(row, 0) = cv::Point(vGuidewires[row].x + vGuidewires[row].width / 2, vGuidewires[row].y + vGuidewires[row].height / 2);
 		}
 		vGuidewire.push_back(mGuidewire);
+
+		//calcium
+
+		// Start finding calcium
+		PLOGI.printf("FindCalcium Start");
+		cv::Mat contourCalcium = learning->FindCalcium(circleImage);
+
+		std::vector<std::vector<cv::Point>> vCalciumContours;
+		cv::findContours(contourCalcium, vCalciumContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+		pImaging->SetCalciumAngle(vCalciumContours, nFrame);
+
+		PLOGI.printf("FindCalcium Done");
 
 		pSession->m_pMsg->postMessage(WM_PROCESS_DETECTION, nSession, nFrame);
 	}

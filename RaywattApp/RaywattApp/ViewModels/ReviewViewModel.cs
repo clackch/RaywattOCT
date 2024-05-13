@@ -520,10 +520,10 @@ namespace RaywattApp.ViewModels
             Measurements = Measurements.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
 
             //Test
-            //InitializeLumenData();
-            //DeviceStatus.IsLumenSaved = false;
-            //RayStartLumenDetection();
-            //this.isLumenContourSave = true;
+            InitializeLumenData();
+            DeviceStatus.IsLumenSaved = false;
+            RayStartLumenDetection();
+            this.isLumenContourSave = true;
         }
 
         private void ThreadImageProcessing()

@@ -21,8 +21,8 @@ void CTIFFImaging::Initialize()
 	imageMask.create(m_setting.nBScan, m_setting.nAScan, CV_8UC1);
 	memset(imageMask.data, 0x00, m_setting.nBScan * m_setting.nAScan);
 	cv::circle(imageMask, cv::Point(imageMask.cols / 2, imageMask.rows / 2), imageMask.cols / 2, cv::Scalar(0xff, 0xff, 0xff), -1);
-
 	initCircularizeMap(m_setting.nAScan, m_setting.nBScan, m_setting.nAScan, m_setting.nBScan, m_setting.nAScan, 2.0f);
+  calciumData = new Calcium[m_nTotalFrame];
 }
 
 void CTIFFImaging::Process(char* fringes)
@@ -110,7 +110,7 @@ void CTIFFImaging::EraseStentOutLier(cv::Mat& stent) {
 	int width = m_nWidth;
 	int height = m_nHeight;
 
-	// Lumen Offset ¼³Á¤
+	// Lumen Offset ì„¤ì •
 	std::vector<cv::Point> LumenOffsetPoints;
 	for (int i = 0; i < height; i++) {
 		LumenOffsetPoints.push_back(cv::Point(0, 0));
@@ -138,7 +138,7 @@ void CTIFFImaging::EraseStentOutLier(cv::Mat& stent) {
 		stent.pop_back();
 	}
 
-	// Stent Outlier¸¦ Á¦¿ÜÇÑ Stent Point¸¸ Push
+	// Stent Outlierë¥¼ ì œì™¸í•œ Stent Pointë§Œ Push
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
 			if (remappedImage.at<uchar>(y, x) == 255 && LumenOffsetPoints[y].x < x) {
@@ -163,7 +163,7 @@ void CTIFFImaging::EraseStentOutLier(cv::Mat& stent) {
 		stent.pop_back();
 	}
 
-	// ±ØÁÂÇ¥ º¯È¯µÈ Stent Push
+	// ê·¹ì¢Œí‘œ ë³€í™˜ëœ Stent Push
 	for (int y = 0; y < remappedImage.rows; y++) {
 		for (int x = 0; x < remappedImage.cols; x++) {
 			if (remappedImage.at<uchar>(y, x) == 255) {
@@ -195,7 +195,7 @@ void CTIFFImaging::SetLumenContourOffset(std::vector<cv::Point> lumenContour) {
 
 	cv::rotate(blackImage, blackImage, cv::ROTATE_90_COUNTERCLOCKWISE);
 
-	//Rectangle ContourÀÇ °¢ Row¿¡ ÇØ´çÇÏ´Â XÁÂÇ¥ ¼³Á¤ (Æò±Õ°ª)
+	//Rectangle Contourì˜ ê° Rowì— í•´ë‹¹í•˜ëŠ” Xì¢Œí‘œ ì„¤ì • (í‰ê· ê°’)
 	inversedContourYPoints.clear();
 	for (int y = 0; y < height; y++) {
 		double sumOfx= 0;
@@ -222,9 +222,36 @@ void CTIFFImaging::GetLumenOffsetPoints(std::vector<cv::Point>& lumenOffsetBound
 	for (int i = 0; i < inversedContourYPoints.size(); i++) {
 		cv::Point point = inversedContourYPoints[i];
 		int x, y;
-		x = point.x - 50;  //TODO - offset °ªÀ» OCT Lumen °ª Æò±ÕÀ» È°¿ëÇÏ¿© ±×¸²ÀÚ ¿µ¿ª ÆÇº°ÇÒ ¼ö ÀÖ´Â Offset ¸¸µé±â
+		x = point.x - 50;  //TODO - offset ê°’ì„ OCT Lumen ê°’ í‰ê· ì„ í™œìš©í•˜ì—¬ ê·¸ë¦¼ì ì˜ì—­ íŒë³„í•  ìˆ˜ ìˆëŠ” Offset ë§Œë“¤ê¸°
 		y = point.y;
 
 		lumenOffsetBoundary[i] = cv::Point(x, y);
+	}
+}
+
+void CTIFFImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int currFrame) {
+	if (calciumContours.empty()) {
+		return;
+	}
+
+	// ê°€ì¥ í° ì»¨íˆ¬ì–´ ì°¾ê¸°
+	double maxArea = 0;
+	for (const auto& contour : calciumContours) {
+		double area = cv::contourArea(contour);
+		if (area > maxArea) {
+			maxArea = area;
+		}
+	}
+
+	// ìµœì†Œ ë„“ì´ ì„¤ì • : 400(20x20)ë³´ë‹¤ ì‘ì€ ì»¨íˆ¬ì–´ëŠ” ì œê±°
+	double minArea = 400.0;
+
+	// ë„“ì´ì— ë”°ë¼ í•„í„°ë§
+	std::vector<std::vector<cv::Point>> filteredContours;
+	for (const auto& contour : calciumContours) {
+		double area = cv::contourArea(contour);
+		if (area >= minArea) {
+			filteredContours.push_back(contour);
+		}
 	}
 }

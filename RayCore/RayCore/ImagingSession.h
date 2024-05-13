@@ -47,6 +47,7 @@ private:
 
 	std::vector<std::vector<cv::Mat>> m_vLumen;
 	std::vector<std::vector<cv::Mat>> m_vSidebranch;
+	std::vector<std::vector<cv::Mat>> m_vCalcium;
 	std::vector<cv::Mat> m_vStent;
 	std::vector<cv::Mat> m_vGuidewire;
 	char* m_pVolumeData;

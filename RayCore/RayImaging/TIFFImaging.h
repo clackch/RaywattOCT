@@ -12,6 +12,13 @@ private:
 	cv::Mat inverseMatYMap;
 	std::vector<cv::Point> inversedContourYPoints;
 
+	struct Calcium {
+		int angleNum = 0;
+		double* startAngle = nullptr;
+		double* endAngle = nullptr;
+	};
+	Calcium* calciumData;
+
 public:
 	CTIFFImaging(Setting, CMessageService*);
 	virtual ~CTIFFImaging();
@@ -21,6 +28,7 @@ public:
 	virtual void PostProcess(cv::Mat image);
 	virtual void CircularizeImage(cv::Mat& src, cv::Mat& dst);
 	virtual cv::Mat GetProcessedImage() { return imageConvert; }
+	virtual void SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int currFrame);
 	virtual void initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale);
 	virtual void InverseCircularizeImage(cv::Mat& src, cv::Mat& dst);
 	virtual void EraseStentOutLier(cv::Mat& stent);
