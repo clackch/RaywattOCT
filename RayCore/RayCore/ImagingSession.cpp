@@ -451,6 +451,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		}
 		vContours.clear();
 		vContours.push_back(largestContour);
+		pImaging->SetLumenContourOffset(largestContour);
 
 		std::vector<cv::Mat> vLumens;
 		for (int i = 0; i < vContours.size(); i++) {
@@ -485,6 +486,9 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		for (size_t row = 0; row < vStents.size(); row++) {
 			mStent.at<cv::Point>(row, 0) = cv::Point(vStents[row].x + vStents[row].width / 2, vStents[row].y + vStents[row].height / 2);
 		}
+		
+		pImaging->EraseStentOutLier(mStent);
+		
 		vStent.push_back(mStent);
 
 		//guidewire
@@ -547,7 +551,7 @@ UINT CImagingSession::threadGenerateVolume(LPVOID param) {
 			Sleep(DELAY_FOR_WAIT_PROCESS);
 			continue;
 		}
-
+		
 		cv::Mat imgRect = it->second.clone();
 		pImaging->CircularizeImage(imgRect, imgCircle);
 
