@@ -210,6 +210,7 @@ namespace RaywattApp.ViewModels
             }
 
             IsRendering = false;
+            ODSOCT_SetRenderMode(true);
 
             threadInitialize = new Thread(() => threadFuncInitialize());
             threadInitialize.Start();
@@ -339,7 +340,6 @@ namespace RaywattApp.ViewModels
             //ODSOCT_InputData(Ray3DObject.GuideWire, buffer, diameter, diameter, depth, 1, 1, zVal);
 
             ODSOCT_ProcessingDatas();
-            ODSOCT_SetRenderMode(true);
 
             Marshal.FreeHGlobal(buffer);
             timerShowData.Interval = TimeSpan.FromMilliseconds(MinWaitingDelay);
