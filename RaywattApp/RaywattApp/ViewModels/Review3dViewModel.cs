@@ -181,6 +181,8 @@ namespace RaywattApp.ViewModels
             base.OnNavigated(sender, navigatedEventArgs);
             _log.Debug("OnNavigated");
 
+            ODSOCT_SetRenderMode(true);
+
             var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
 
             if (extraData != null)
@@ -208,9 +210,7 @@ namespace RaywattApp.ViewModels
                 _isPtoD = ray3DStatus.IsPtoD;
                 _isSideBranchView = false;
             }
-
             IsRendering = false;
-            ODSOCT_SetRenderMode(true);
 
             threadInitialize = new Thread(() => threadFuncInitialize());
             threadInitialize.Start();
@@ -359,6 +359,8 @@ namespace RaywattApp.ViewModels
                 ray3DStatus.ShowObject(obj, ray3DStatus.ObjectVisibility[(int)obj]);
             }
             ODSOCT_ShowAllWindows();
+
+            IsCutViewOn = ray3DStatus.CutViewOn;
             ODSOCT_Render();
             _log.Debug("TimerFunc Call");
 
