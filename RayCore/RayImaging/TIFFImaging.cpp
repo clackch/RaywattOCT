@@ -21,6 +21,8 @@ void CTIFFImaging::Initialize()
 	imageMask.create(m_setting.nBScan, m_setting.nAScan, CV_8UC1);
 	memset(imageMask.data, 0x00, m_setting.nBScan * m_setting.nAScan);
 	cv::circle(imageMask, cv::Point(imageMask.cols / 2, imageMask.rows / 2), imageMask.cols / 2, cv::Scalar(0xff, 0xff, 0xff), -1);
+
+	calciumData = new Calcium[m_nTotalFrame];
 }
 
 void CTIFFImaging::Process(char* fringes)
@@ -68,4 +70,31 @@ void CTIFFImaging::PostProcess(cv::Mat image)
 void CTIFFImaging::CircularizeImage(cv::Mat& src, cv::Mat& dst) {
 	dst = src.clone();
 	return;
+}
+
+void CTIFFImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int currFrame) {
+	if (calciumContours.empty()) {
+		return;
+	}
+
+	// 가장 큰 컨투어 찾기
+	double maxArea = 0;
+	for (const auto& contour : calciumContours) {
+		double area = cv::contourArea(contour);
+		if (area > maxArea) {
+			maxArea = area;
+		}
+	}
+
+	// 최소 넓이 설정 : 400(20x20)보다 작은 컨투어는 제거
+	double minArea = 400.0;
+
+	// 넓이에 따라 필터링
+	std::vector<std::vector<cv::Point>> filteredContours;
+	for (const auto& contour : calciumContours) {
+		double area = cv::contourArea(contour);
+		if (area >= minArea) {
+			filteredContours.push_back(contour);
+		}
+	}
 }

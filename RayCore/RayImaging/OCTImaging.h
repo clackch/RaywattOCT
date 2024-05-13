@@ -87,6 +87,8 @@ public:
 	int GetFoundSheathPosition() { return m_nSheathPosition; }
 	virtual void CircularizeImage(cv::Mat& src, cv::Mat& dst);
 
+	virtual void SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int currFrame);
+
 	int GetSheathPosition() { return m_nSheathPosition; }
 protected:
 	void allocateMemory();
