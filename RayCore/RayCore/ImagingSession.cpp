@@ -449,7 +449,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		if (vContours.size() == 0) {
 			vContours.clear();
 			vContours.push_back(vPrevLumen);
-      pImaging->SetLumenContourOffset(vPrevLumen);
+			pImaging->SetLumenContourOffset(vPrevLumen);
 		}
 		else {
 			double maxArea = 0;
@@ -483,14 +483,14 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 			if (isCompletelyContained) {
 				vContours.push_back(largestContour);
 				vPrevLumen = largestContour;
-        pImaging->SetLumenContourOffset(largestContour);
+				pImaging->SetLumenContourOffset(largestContour);
 			}
 			else {
 				std::vector<std::vector<cv::Point>> vCircle;
 				cv::findContours(andResult, vCircle, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 				vContours.push_back(vCircle.at(0));
 				vPrevLumen = vCircle.at(0);
-        pImaging->SetLumenContourOffset(vCircle.at(0));
+				pImaging->SetLumenContourOffset(vCircle.at(0));
 			}
 		}
 
