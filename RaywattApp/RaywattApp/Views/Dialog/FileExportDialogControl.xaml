@@ -53,7 +53,7 @@
                             <!-- Lumen Contour-->
                             <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}"  FrameNumber="{Binding MeasureAutoFrameNumber}" IsEditOn="False" IsDrawOn="{Binding FileExport.MeasureAuto}" Zoom="{Binding Zoom}"/>
                             <!-- Measurement -->
-                            <annotation:DrawUtil Measurements="{Binding Measurements}" FrameNumber="{Binding MeasureManualFrameNumber}" Zoom="{Binding Zoom}" IsEditOn="False" IsDrawOn="{Binding FileExport.MeasureManual}"/>
+                            <annotation:DrawUtil Measurements="{Binding Measurements}" FrameNumber="{Binding MeasureManualFrameNumber}" Zoom="{Binding Zoom}" IsEditOn="False" IsDrawOn="{Binding FileExport.MeasureManual}" ImageResolution="{Binding PatientCase.ImageResolution}"/>
                         </Grid>
                         <!-- Calcium Indicator -->
                         <Grid Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$001}">

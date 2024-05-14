@@ -18,8 +18,6 @@
             <RowDefinition Height="27"/>
             <RowDefinition Height="54"/>
             <RowDefinition Height="57"/>
-            <RowDefinition Height="43"/>
-            <RowDefinition Height="42"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0" VerticalAlignment="Top">
@@ -81,8 +79,8 @@
                 </StackPanel>
             </StackPanel>
         </Grid>
-        <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding LogExportCommand}" CommandParameter="{Binding ElementName=logFileList, Path=SelectedItems}" Content="{Binding [Export], Source={StaticResource L10N}}"/>
+        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding LogExportCommand}" CommandParameter="{Binding ElementName=logFileList, Path=SelectedItems}" Content="{Binding [Export], Source={StaticResource L10N}}"/>
         </StackPanel>
     </Grid>
 </Page>

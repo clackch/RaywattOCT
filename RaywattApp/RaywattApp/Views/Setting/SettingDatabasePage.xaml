@@ -11,12 +11,6 @@
       Title="SettingDatabasePage">
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="500"/>
-            <RowDefinition Height="41"/>
-            <RowDefinition Height="42"/>
-        </Grid.RowDefinitions>
-
         <Border Grid.Row="0" CornerRadius="10" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray8Brush}">
             <Grid>
                 <Grid.RowDefinitions>
@@ -51,9 +45,5 @@
                 </Grid>
             </Grid>
         </Border>
-
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding OkayCommand}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
-        </StackPanel>
     </Grid>
 </Page>

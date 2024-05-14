@@ -47,7 +47,7 @@ namespace RaywattApp.ViewModels.Dialog
         private BitmapSource _crossSectionImage;
 
         [ObservableProperty]
-        private double _crossSectionScale = (1 / Constants.MillimeterPerPixel ) * (Constants.CrossSectionSize / Constants.OCTImageSize);
+        private double _crossSectionScale;
 
         [ObservableProperty]
         private BitmapSource _longitudeImage;
@@ -97,6 +97,15 @@ namespace RaywattApp.ViewModels.Dialog
 
         private List<LumenContour> _lumenContours = new List<LumenContour>();
         public List<LumenContour> LumenContours { get { return _lumenContours; } set { _lumenContours = value; OnPropertyChanged(nameof(LumenContours)); } }
+
+        [ObservableProperty]
+        private List<LumenSidebranch> _lumenSidebranches = new List<LumenSidebranch>();
+
+        [ObservableProperty]
+        private List<LumenStent> _lumenStents = new List<LumenStent>();
+
+        [ObservableProperty]
+        private List<LumenGuidewire> _lumenGuidewires = new List<LumenGuidewire>();
 
         [ObservableProperty]
         private double _ImagePartWidth;
@@ -176,6 +185,7 @@ namespace RaywattApp.ViewModels.Dialog
         {
             PatientCase = patientCase;
             Degree = PatientCase.IndicatorDegree;
+            CrossSectionScale = (1 / PatientCase.ImageResolution) * (Constants.CrossSectionSize / Constants.OCTImageSize);
 
             this.crossSections = crossSections;
             imgCrossSectionMask = GenerateMask(crossSections[0]);
@@ -201,15 +211,13 @@ namespace RaywattApp.ViewModels.Dialog
                     int frameProximal = PatientCase.SectionProximal;
                     int frameDistal = PatientCase.SectionDistal;
                     
-                    //Test
-                    List<int> appositionFrames = new List<int>() { 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370 };
-                    imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, frameProximal, frameDistal, CommonUtil.IsPostCase(PatientCase.Procedure), appositionFrames);
+                    imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, LumenSidebranches, LumenStents, patientCase.AppositionThreshold, frameProximal, frameDistal, CommonUtil.IsPostCase(PatientCase.Procedure));
                     DrawLumenProfileImage();
 
                     List<int> colorFrames = new List<int>();
                     if (CommonUtil.IsPreCase(patientCase.Procedure))
                     {
-                        if(Section.SetMlaMld(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength))
+                        if(Section.SetMlaMld(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength, patientCase.ImageResolution))
                             Section.VisibleMlaMld(true);
                         else
                             Section.VisibleMlaMld(false);
@@ -218,12 +226,15 @@ namespace RaywattApp.ViewModels.Dialog
                     }
                     else
                     {
-                        if(Section.SetMsaMinExp(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength))
+                        int stentProximal = 0, stentDistal = 0;
+                        CommonUtil.GetStentProximalDistal(LumenStents, out stentProximal, out stentDistal);
+
+                        if (Section.SetMsaMinExp(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, stentProximal, stentDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength, patientCase.ImageResolution))
                             Section.VislbleMsaMinExp(true);
                         else
                             Section.VislbleMsaMinExp(false);
 
-                        colorFrames = CommonUtil.GetExpansionList(LumenContours, frameProximal, frameDistal, Section.RefArea, PatientCase.ExpansionThreshold);
+                        colorFrames = CommonUtil.GetExpansionList(LumenContours, frameProximal, frameDistal, stentProximal, stentDistal, Section.RefArea, PatientCase.ExpansionThreshold);
                     }
                     imglumenProfileExtra = CommonUtil.MakeLumenProfileImageExtra(LumenContours.Count, colorFrames, CommonUtil.IsPreCase(PatientCase.Procedure));
                     DrawLumenProfileImageExtra();
@@ -367,6 +378,18 @@ namespace RaywattApp.ViewModels.Dialog
                 lumenContour.MinDiameter = diameterInfo;
 
                 LumenContours.Add(lumenContour);
+
+                //sidebranch
+                LumenSidebranch lumenSidebranch = new LumenSidebranch();
+                LumenSidebranches.Add(lumenSidebranch);
+
+                //stent
+                LumenStent lumenStent = new LumenStent();
+                LumenStents.Add(lumenStent);
+
+                //guidewire
+                LumenGuidewire lumenGuidewire = new LumenGuidewire();
+                LumenGuidewires.Add(lumenGuidewire);
             }
 
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
@@ -390,6 +413,21 @@ namespace RaywattApp.ViewModels.Dialog
                 if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenContour))
                 {
                     LumenContours = CommonUtil.JsonToLumenContours(patientCaseAnnotations[0].LumenContour);
+                }
+
+                if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenSidebranch))
+                {
+                    LumenSidebranches = JsonConvert.DeserializeObject<List<LumenSidebranch>>(patientCaseAnnotations[0].LumenSidebranch);
+                }
+
+                if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenStent))
+                {
+                    LumenStents = JsonConvert.DeserializeObject<List<LumenStent>>(patientCaseAnnotations[0].LumenStent);
+                }
+
+                if (!string.IsNullOrEmpty(patientCaseAnnotations[0].LumenGuidewire))
+                {
+                    LumenGuidewires = JsonConvert.DeserializeObject<List<LumenGuidewire>>(patientCaseAnnotations[0].LumenGuidewire);
                 }
             }
 
@@ -424,6 +462,9 @@ namespace RaywattApp.ViewModels.Dialog
 
         private void DrawCalciumIndicator(int calciumIndicatorSize)
         {
+            if (LumenContours[FrameNumber].Calcium == null)
+                return;
+
             CalciumIndicator = CommonUtil.DrawCalciumIndicator(LumenContours[FrameNumber].Calcium.List, Constants.CalciumIndicatorColor, calciumIndicatorSize);
 
             TotalAngle = LumenContours[FrameNumber].Calcium.TotalAngle;

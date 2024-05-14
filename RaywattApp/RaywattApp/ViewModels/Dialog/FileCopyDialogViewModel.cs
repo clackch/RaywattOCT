@@ -161,6 +161,21 @@ namespace RaywattApp.ViewModels.Dialog
                 string fileName = CommonUtil.GetFileName(patientCase.ImageFullPath);
                 string dstFilePath = SaveFolder + "\\" + fileName;
                 fileCopyInfo.Add(patientCase.ImageFullPath, dstFilePath);
+
+
+                if (patientCase.AngioYn)
+                {
+                    List<string> extensions = new List<string> { Constants.AngioImageExtension, Constants.AngioParmasExtension };
+                    fileName = fileName.Substring(0, patientCase.Image.Length - 3);
+                    string srcFilePath = patientCase.ImageFullPath.Substring(0, patientCase.ImageFullPath.Length - 3);
+                    foreach(string ext in extensions)
+                    {
+                        string tmpFileName = fileName + ext;
+                        string tmpSrcFilePath = srcFilePath + ext;
+                        dstFilePath = SaveFolder + "\\" + tmpFileName;
+                        fileCopyInfo.Add(tmpSrcFilePath, dstFilePath);
+                    }
+                }
             }
 
             await CommonUtil.CopyFiles(fileCopyInfo, prog => Progress = prog, progressSize, progText => ProgressText = progText);
@@ -350,11 +365,14 @@ namespace RaywattApp.ViewModels.Dialog
                         foreach(JObject obj in arr)
                         {
                             PatientCaseAnnotation patientCaseAnnotation = new PatientCaseAnnotation();
-                            patientCaseAnnotation.Id = obj["Id"].ToString();
-                            patientCaseAnnotation.Bookmark = obj["Bookmark"].ToString();
-                            patientCaseAnnotation.Longitude = obj["Longitude"].ToString();
-                            patientCaseAnnotation.CrossSection = obj["CrossSection"].ToString();
-                            patientCaseAnnotation.LumenContour = obj["LumenContour"].ToString();
+                            patientCaseAnnotation.Id = obj["Id"]?.ToString() ?? "null";
+                            patientCaseAnnotation.Bookmark = obj["Bookmark"]?.ToString() ?? "null";
+                            patientCaseAnnotation.Longitude = obj["Longitude"]?.ToString() ?? "null";
+                            patientCaseAnnotation.CrossSection = obj["CrossSection"]?.ToString() ?? "null";
+                            patientCaseAnnotation.LumenContour = obj["LumenContour"]?.ToString() ?? "null";
+                            patientCaseAnnotation.LumenSidebranch = obj["LumenSidebranch"]?.ToString() ?? "null";
+                            patientCaseAnnotation.LumenStent = obj["LumenStent"]?.ToString() ?? "null";
+                            patientCaseAnnotation.LumenGuidewire = obj["LumenGuidewire"]?.ToString() ?? "null";
                             annotations.Add(patientCaseAnnotation);
                         }
                     }
@@ -391,16 +409,18 @@ namespace RaywattApp.ViewModels.Dialog
                             sqlParameters["patient_id"] = patientCase.PatientId;
                             sqlParameters["physician_name"] = patientCase.PhysicianName;
                             sqlParameters["accession_number"] = patientCase.AccessionNumber;
-                            sqlParameters["accession_name"] = patientCase.AccessionName;
                             sqlParameters["comment"] = patientCase.Comment;
                             sqlParameters["vessel"] = patientCase.Vessel;
+                            sqlParameters["location"] = patientCase.Location;
                             sqlParameters["procedure"] = patientCase.Procedure;
                             sqlParameters["pullback_type"] = patientCase.PullbackType;
                             sqlParameters["pullback_length"] = patientCase.PullbackLength;
                             sqlParameters["angio_yn"] = patientCase.AngioYn;
                             sqlParameters["angio_co_registration"] = patientCase.AngioCoRegistration;
                             sqlParameters["indicator_degree"] = patientCase.IndicatorDegree;
-                            sqlParameters["preset_name"] = patientCase.PresetName;
+                            sqlParameters["flush_media"] = patientCase.FlushMedia;
+                            sqlParameters["pullback_trigger"] = patientCase.PullbackTrigger;
+                            sqlParameters["colormap"] = patientCase.Colormap;
                             sqlParameters["calcium_threshold"] = patientCase.CalciumThreshold;
                             sqlParameters["expansion_calculation"] = patientCase.ExpansionCalculation;
                             sqlParameters["expansion_threshold"] = patientCase.ExpansionThreshold;
@@ -414,6 +434,7 @@ namespace RaywattApp.ViewModels.Dialog
                             sqlParameters["update_date"] = patientCase.UpdateDate;
                             string srcPath = CommonUtil.GetDirectoryPath(path) + "\\" + patientCase.Image;
                             sqlParameters["image"] = System.IO.File.Exists(srcPath) ? patientCase.Image : "";
+                            sqlParameters["image_resolution"] = patientCase.ImageResolution;
 
                             var nRows = _sqlManager.UpsertPatientCase(sqlParameters);
                             if (nRows == 1)
@@ -428,6 +449,9 @@ namespace RaywattApp.ViewModels.Dialog
                                         sqlParameters["longitude"] = annotation.Longitude;
                                         sqlParameters["bookmark"] = annotation.Bookmark;
                                         sqlParameters["lumen_contour"] = annotation.LumenContour;
+                                        sqlParameters["lumen_sidebranch"] = annotation.LumenSidebranch;
+                                        sqlParameters["lumen_stent"] = annotation.LumenStent;
+                                        sqlParameters["lumen_guidewire"] = annotation.LumenGuidewire;
                                         nRows = _sqlManager.UpsertPatientCaseAnnotation(sqlParameters);
                                         if (nRows == 0)
                                             _log.Error("Upsert Error");

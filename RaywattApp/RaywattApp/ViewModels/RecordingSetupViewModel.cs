@@ -23,6 +23,9 @@ namespace RaywattApp.ViewModels
         private Patient _patient;
 
         [ObservableProperty]
+        private PatientCase _patientCase;
+
+        [ObservableProperty]
         private PrevStatus _prevStatus;
 
         private ICommand _cancelCommand;
@@ -52,6 +55,7 @@ namespace RaywattApp.ViewModels
             {
                 Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
                 this.Patient = (Patient)data["patient"];
+                this.PatientCase = (PatientCase)data["patientCase"];
                 this.PrevStatus = (PrevStatus)data["prevStatus"];
 
                 if (DeviceStatus.CatheterStatus == Constants.CatheterStatusLoaded)
@@ -75,8 +79,9 @@ namespace RaywattApp.ViewModels
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = this.Patient;
+            parameter["patientCase"] = PatientCase;
             parameter["prevStatus"] = this.PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientDetailPage) { Parameter = parameter });
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingPresetPage) { Parameter = parameter });
         }
 
         private void Next()
@@ -85,6 +90,7 @@ namespace RaywattApp.ViewModels
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = this.Patient;
+            parameter["patientCase"] = PatientCase;
             parameter["prevStatus"] = this.PrevStatus;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingLiveViewPage) { Parameter = parameter });
         }

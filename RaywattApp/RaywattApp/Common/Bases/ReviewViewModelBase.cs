@@ -33,8 +33,20 @@ namespace RaywattApp.Common.Bases
         [ObservableProperty]
         private Patient _patient;
 
-        [ObservableProperty]
         private PatientCase _patientCase;
+        public PatientCase PatientCase
+        { 
+            get { return _patientCase; }
+            set 
+            {
+                _patientCase = value; 
+                OnPropertyChanged(nameof(PatientCase));
+                if (_patientCase != null)
+                {
+                    Constants.ImageResolution = _patientCase.ImageResolution;
+                }
+            }
+        }
 
         [ObservableProperty]
         private bool _expandLeftUpMenu;
@@ -232,7 +244,7 @@ namespace RaywattApp.Common.Bases
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingPresetPage) { Parameter = parameter });
         }
 
         private void ExpandCollapseMenu(string param)

@@ -17,6 +17,7 @@ using RaywattApp.Common.Dialog;
 using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System.Linq;
+using OpenCvSharp;
 
 namespace RaywattApp.ViewModels.File
 {
@@ -289,6 +290,19 @@ namespace RaywattApp.ViewModels.File
                             {
                                 string destPath = CommonUtil.CreateFolder(Constants.DataRootPath + "\\" + patientCase.PatientId) + "\\" + patientCase.Image;
                                 importfiles.Add(srcPath, destPath);
+                                if (patientCase.AngioYn)
+                                {
+                                    srcPath = srcPath.Substring(0, srcPath.Length - 3);
+                                    destPath = destPath.Substring(0, destPath.Length - 3);
+
+                                    List<string> extensions = new List<string> { Constants.AngioImageExtension, Constants.AngioParmasExtension };
+                                    string fileName = patientCase.Image.Substring(0, patientCase.Image.Length - Constants.AngioImageExtension.Length - 1) + ".";
+                                    string srcFilePath = patientCase.ImageFullPath.Substring(0, patientCase.ImageFullPath.Length - Constants.AngioImageExtension.Length - 1) + ".";
+                                    foreach (string ext in extensions)
+                                    {
+                                        importfiles.Add(srcPath + ext, destPath + ext);
+                                    }
+                                }
                             }
                         }
                     }
@@ -451,18 +465,21 @@ namespace RaywattApp.ViewModels.File
                             patientCase.PatientId = GetStrValue(caseObj, "PatientId");
                             patientCase.PhysicianName = GetStrValue(caseObj, "PhysicianName");
                             patientCase.AccessionNumber = GetStrValue(caseObj, "AccessionNumber");
-                            patientCase.AccessionName = GetStrValue(caseObj, "AccessionName");
                             patientCase.Comment = GetStrValue(caseObj, "Comment");
                             patientCase.Vessel = GetStrValue(caseObj, "Vessel");
+                            patientCase.Location = GetStrValue(caseObj, "Location");
                             patientCase.Procedure = GetStrValue(caseObj, "Procedure");
                             patientCase.NumOfFrames = GetIntValue(caseObj, "NumOfFrames");
                             patientCase.Image = GetStrValue(caseObj, "Image");
+                            patientCase.ImageResolution = GetDoubleValue(caseObj, "ImageResolution");
                             patientCase.PullbackType = GetStrValue(caseObj, "PullbackType");
                             patientCase.PullbackLength = GetStrValue(caseObj, "PullbackLength");
                             patientCase.AngioYn = GetBoolValue(caseObj, "AngioYn");
                             patientCase.AngioCoRegistration = GetBoolValue(caseObj, "AngioCoRegistration");
                             patientCase.IndicatorDegree = GetDoubleValue(caseObj, "IndicatorDegree");
-                            patientCase.PresetName = GetStrValue(caseObj, "PresetName");
+                            patientCase.FlushMedia = GetStrValue(caseObj, "FlushMedia");
+                            patientCase.PullbackTrigger = GetStrValue(caseObj, "PullbackTrigger");
+                            patientCase.Colormap = GetStrValue(caseObj, "Colormap");
                             patientCase.CalciumThreshold = GetIntValue(caseObj, "CalciumThreshold");
                             patientCase.ExpansionCalculation = GetStrValue(caseObj, "ExpansionCalculation");
                             patientCase.ExpansionThreshold = GetIntValue(caseObj, "ExpansionThreshold");
@@ -475,6 +492,9 @@ namespace RaywattApp.ViewModels.File
                             patientCase.Longitude = GetStrValue(caseObj, "Longitude");
                             patientCase.CrossSection = GetStrValue(caseObj, "CrossSection");
                             patientCase.StrLumenContour = GetStrValue(caseObj, "StrLumenContour");
+                            patientCase.StrLumenSidebranch = GetStrValue(caseObj, "StrLumenSidebranch");
+                            patientCase.StrLumenStent = GetStrValue(caseObj, "StrLumenStent");
+                            patientCase.StrLumenGuidewire = GetStrValue(caseObj, "StrLumenGuidewire");
                             patientCase.CreateDate = GetDateValue(caseObj, "CreateDate");
                             patientCase.UpdateDate = GetDateValue(caseObj, "UpdateDate");
 

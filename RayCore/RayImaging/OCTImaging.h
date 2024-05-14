@@ -86,6 +86,9 @@ public:
 	void* GetCalibrationData();
 	int GetFoundSheathPosition() { return m_nSheathPosition; }
 	virtual void CircularizeImage(cv::Mat& src, cv::Mat& dst);
+	virtual void InverseCircularizeImage(cv::Mat& src, cv::Mat& dst);
+	virtual void EraseStentOutLier(cv::Mat& stent);
+	virtual void SetLumenContourOffset(std::vector<cv::Point> lumenContour);
 
 	int GetSheathPosition() { return m_nSheathPosition; }
 protected:

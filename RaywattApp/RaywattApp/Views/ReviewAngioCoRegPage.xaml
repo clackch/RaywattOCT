@@ -3,12 +3,8 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:RaywattApp.Views"
       xmlns:const="clr-namespace:RaywattApp.Common.Bases"
-      xmlns:component="clr-namespace:RaywattApp.Views.Component"
-      xmlns:annotation="clr-namespace:RaywattApp.Common.Annotation"
-      xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-      xmlns:behaviors="clr-namespace:RaywattApp.Common.Behaviors"
+      xmlns:CoRegistration="clr-namespace:RaywattApp.Common.Angio.CoRegRelatedFiles"
       xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
       mc:Ignorable="d" 
       d:DesignHeight="1024" d:DesignWidth="1280"
@@ -48,22 +44,26 @@
                             <ColumnDefinition Width="448"/>
                         </Grid.ColumnDefinitions>
                         <Grid Grid.Column="0">
-                            <Image x:Name="crossSectionAngioImage" Source="{Binding CurrentAngioImage}"  Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}" Stretch="Fill">
-                                <Image.Clip>
-                                    <RectangleGeometry RadiusX="10" RadiusY="10">
-                                        <RectangleGeometry.Rect>
-                                            <Rect X="0" Y="0" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}"/>
-                                        </RectangleGeometry.Rect>
-                                    </RectangleGeometry>
-                                </Image.Clip>
-                            </Image>
-                        </Grid>
-                        <annotation:DrawAngioPathUtil Grid.Column="0" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}"
-                                                      AngioImages="{Binding CrossSectionAngioImages}" AngioFrameNumber="{Binding AngioFrameNumber}" 
+                            <Grid.Clip>
+                                <RectangleGeometry RadiusX="10" RadiusY="10">
+                                    <RectangleGeometry.Rect>
+                                        <Rect X="0" Y="0" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}"/>
+                                    </RectangleGeometry.Rect>
+                                </RectangleGeometry>
+                            </Grid.Clip>
+                            <Image x:Name="crossSectionAngioImage" Source="{Binding CurrentAngioImage}"  Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}" Stretch="Uniform"></Image>
+                            <CoRegistration:DrawAngioPathUtil Grid.Column="0" Width="{Binding ElementName=crossSectionAngioImage, Path=ActualWidth}" Height ="{Binding ElementName=crossSectionAngioImage, Path=ActualHeight}"
+                            						  DijkstraHeap="{Binding DijkstraHeap}" MotionVector="{Binding MotionVector}"
+                                                      AngioImages ="{Binding CrossSectionAngioImages}" AngioFrameNumber ="{Binding AngioFrameNumber}" 
                                                       MousePosition ="{Binding CrossSectionMousePosition, Mode=TwoWay}" AngioTrackPoints ="{Binding AngioTrackPoints, Mode=TwoWay}"
-                                                      IsAngioTrackCompleted ="{Binding IsAngioTrackCompleted, Mode=TwoWay}" IsReset="{Binding IsReset, Mode=TwoWay}"
-                                                      IsResetOn ="{Binding IsResetOn, Mode=TwoWay}" IsCancel ="{Binding IsCancel}"
-                                                      Cursor="Cross"/>
+                                                      IsAngioTrackCompleted ="{Binding IsAngioTrackCompleted, Mode=TwoWay}" IsReset ="{Binding IsReset, Mode=TwoWay}"
+                                                      IsResetOn ="{Binding IsResetOn, Mode=TwoWay}" IsCancel ="{Binding IsCancel}" IsRendering ="{Binding IsRendering, Mode=TwoWay}"
+                                                      IsOk ="{Binding IsOk}" IsEditOn = "True" Cursor="Cross"/>
+                            <Border>
+                                <!-- Loading -->
+                                <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding IsRendering, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            </Border>
+                        </Grid>
                         <Border Grid.Column="2" CornerRadius="8" Background="{DynamicResource GrayscaleGray6Brush}">
                             <Grid Margin="30,36,30,30" >
                                 <Grid.RowDefinitions>
@@ -92,7 +92,7 @@
                                         </Grid.Clip>
                                         <Image x:Name="zoomSectionAngioImage" Source="{Binding CurrentAngioImage}">
                                             <Image.Clip>
-                                                <RectangleGeometry RadiusX="10" RadiusY="10">
+                                                <RectangleGeometry>
                                                     <RectangleGeometry.Rect>
                                                         <Rect X="0" Y="0" Width="{x:Static const:Constants.CoRegZoomAngioSize}" Height="{x:Static const:Constants.CoRegZoomAngioSize}"/>
                                                     </RectangleGeometry.Rect>

@@ -28,10 +28,10 @@ namespace RaywattApp.Common.Bases
         protected Mat imgCrossSectionMask;
 
         [ObservableProperty]
-        protected double _crossSectionScale = (1 / Constants.MillimeterPerPixel ) * (Constants.CrossSectionSize / Constants.OCTImageSize);
+        protected double _crossSectionScale;
 
         [ObservableProperty]
-        protected double _crossSectionAngioScale = (1 / Constants.MillimeterPerPixel ) * (Constants.CrossSectionAngio / Constants.OCTImageSize);
+        protected double _crossSectionAngioScale;
 
         [ObservableProperty]
         private double _crossSection3dScale = 28;
@@ -57,6 +57,12 @@ namespace RaywattApp.Common.Bases
 
         [ObservableProperty]
         private BitmapSource _angioImage;
+
+        [ObservableProperty]
+        private BitmapSource _sheathIndicator;
+
+        [ObservableProperty]
+        private BitmapSource _sheathIndicatorAngio;
 
         [ObservableProperty]
         private bool _isPaused = true;
@@ -174,7 +180,15 @@ namespace RaywattApp.Common.Bases
             BitmapSource bitmap = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(image);
 
             return bitmap;
-        }       
+        }
+        protected void DrawSheathIndicator()
+        {
+            if (Constants.ImageResolution == 0.0f) return;
+
+            double sheathDiameter = RayGetProperty(Property.SheathDiameter);
+            SheathIndicator = CommonUtil.DrawSheathIndicator(Constants.ImageResolution, (int)Constants.CrossSectionSize, sheathDiameter);
+            SheathIndicatorAngio = CommonUtil.DrawSheathIndicator(Constants.ImageResolution, (int)Constants.CrossSectionAngio, sheathDiameter);
+        }
 
         private Mat GenerateMask(Mat image)
         {
@@ -225,13 +239,21 @@ namespace RaywattApp.Common.Bases
 
             IsPaused = DeviceStatus.IsPaused;
         }
-        protected bool MoveToFrame(RaySession session, int nFrame)
+        protected virtual bool MoveToFrame(RaySession session, int nFrame)
         {
             RayError result = (RayError) RaySetSession(session);
-            if (result != RayError.OK) return false;
+            if (result != RayError.OK)
+            {
+                _log.Debug("OCTViewModelBase MoveToFrame : result != RayError.OK");
+                return false;
+            }
 
             IntPtr data = RayGetImageData(nFrame);
-            if (data == IntPtr.Zero) return false;
+            if (data == IntPtr.Zero)
+            {
+                _log.Debug("OCTViewModelBase MoveToFrame : data == IntPtr.Zero");
+                return false;
+            }
 
             DeviceStatus.ReviewImageInfo imageInfo = DeviceStatus.ReviewImageInfos[(int)session];
             Mat img = CommonUtil.ByteMemoryToCvMat(data, imageInfo.Width, imageInfo.Height, imageInfo.Channels);

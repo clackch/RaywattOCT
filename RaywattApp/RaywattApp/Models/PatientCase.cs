@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using RaywattApp.Common.Angio;
 using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Util;
@@ -9,6 +10,9 @@ namespace RaywattApp.Models
 {
     public partial class PatientCase : ObservableObject
     {
+        [ObservableProperty]
+        private AngioFrame angioFrame;
+
         [ObservableProperty]
         private string id;
 
@@ -44,9 +48,6 @@ namespace RaywattApp.Models
             }
         }
 
-        [ObservableProperty]
-        private string accessionName;
-
         private string _comment;
         public string Comment
         {
@@ -62,10 +63,13 @@ namespace RaywattApp.Models
         }
 
         [ObservableProperty]
+        private string procedure;
+
+        [ObservableProperty]
         private string vessel;
 
         [ObservableProperty]
-        private string procedure;
+        private string location;
 
         [ObservableProperty]
         private int numOfFrames;
@@ -79,6 +83,9 @@ namespace RaywattApp.Models
             get { return IsAnonymize ? imageFullPath : Constants.DataRootPath + "\\" + PatientId + "\\" + Image; }
             set { imageFullPath = value; }
         }
+
+        [ObservableProperty]
+        private double imageResolution;
 
         [ObservableProperty]
         private bool isAnonymize;
@@ -101,19 +108,14 @@ namespace RaywattApp.Models
         [ObservableProperty]
         private double _indicatorDegree;
 
-        private string? _presetName;
-        public string PresetName
-        {
-            get { return _presetName; }
-            set
-            {
-                if (value.Length <= Constants.MaxPatientCasePresetName)
-                {
-                    _presetName = value;
-                    OnPropertyChanged(nameof(PresetName));
-                }
-            }
-        }
+        [ObservableProperty]
+        private string? _flushMedia;
+
+        [ObservableProperty]
+        private string? _pullbackTrigger;
+
+        [ObservableProperty]
+        private string? _colormap;
 
         [ObservableProperty]
         private int _calciumThreshold;
@@ -160,10 +162,28 @@ namespace RaywattApp.Models
         private string? _crossSection;
 
         [ObservableProperty]
-        private List<LumenContour>? _lumenContour;
+        private List<LumenContour>? _lumenContours;
 
         [ObservableProperty]
         private string _strLumenContour;
+
+        [ObservableProperty]
+        private List<LumenSidebranch>? _lumenSidebranches;
+
+        [ObservableProperty]
+        private string _strLumenSidebranch;
+
+        [ObservableProperty]
+        private List<LumenStent>? _lumenStents;
+
+        [ObservableProperty]
+        private string _strLumenStent;
+
+        [ObservableProperty]
+        private List<LumenGuidewire>? _lumenGuidewires;
+
+        [ObservableProperty]
+        private string _strLumenGuidewire;
 
         [ObservableProperty]
         private FfrFeature _ffrFeature;

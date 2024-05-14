@@ -51,13 +51,13 @@ Database Initial Setting
 
 ## [CUDA]
 
-CUDA
-* CUDA Toolkit 11.7.0 Download(https://pytorch.org/get-started/locally/) & 설치
+* CUDA Toolkit 11.8.0 Download(https://developer.nvidia.com/cuda-11-8-0-download-archive?target_os=Windows&target_arch=x86_64&target_version=11&target_type=exe_local) & 설치
+<!--* CUDA Toolkit 11.8.0 Download(https://pytorch.org/get-started/locally/) & 설치 -->
 
 ## [Axsun]
 
 Download & Install OCT Host
-1. [OCT Host (.exe)](https://docs.axsun.com/axsun-technologies-knowledge-base/other/downloads) 다운로드 후 설치
+1. [OCT Host (.exe)](https://docs.axsun.com/axsun-technologies-knowledge-base/other/downloads) 다운로드 후 설치 (ver 1.17.15)
 2. DLL Register
 
     (a) Command Prompt 관리자 권한으로 실행
@@ -69,7 +69,7 @@ Download & Install OCT Host
     (d) ```C:\Program Files\Axsun\Axsun OCT Control\AxsunOCTControl.tlb``` 파일 생성 확인
 
 ## [DAQ]
-* ATS9371_Driver_V7.8.6.exe 파일 설치
+* ATS9371_Driver_V7.11.1.exe(https://www.alazartech.com/en/product/ats9371/4/) 파일 설치
 
 ## [Font]
 
@@ -110,7 +110,13 @@ Download & Copy/Paste
 2. RaywattApp에서 bin 폴더를 외장 저장장치에 복사 및 폴더명 변경(bin -> runtime)
 3. runtime 폴더에서 Release/Debug 폴더 삭제
 4. 외장 장치에서 장비 PC의 C:\Raywatt\system 경로에 runtime 폴더 복사 (※ C:\Raywatt\system\runtime)
-  
+
+## [FrameGrabber]
+1. (https://github.com/Raywatt/RaywattOCT/issues/170) 에서 Raywatt One-Drive 링크 접속
+2. FrameGrabber 폴더를 다운로드 한 후, 폴더를 C:\Raywatt에 추가
+3. https://github.com/Raywatt/RaywattOCT/issues/209#issue-2097526663 에서 라이브러리 및 매뉴얼 다운로드
+4. 매뉴얼 파일의 목차 1, 2번 진행
+
 ## [Windows]
 1. 사용자 계정 추가
    

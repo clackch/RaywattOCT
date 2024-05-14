@@ -1,11 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Models;
 using System;
 using System.Collections.Generic;
-using System.Windows.Input;
 using System.Windows.Navigation;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
@@ -21,6 +19,9 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private Patient _patient;
+
+        [ObservableProperty]
+        private PatientCase _patientCase;
 
         [ObservableProperty]
         private PrevStatus _prevStatus;
@@ -47,6 +48,7 @@ namespace RaywattApp.ViewModels
             {
                 Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
                 this.Patient = (Patient)data["patient"];
+                this.PatientCase = (PatientCase)data["patientCase"];
                 this.PrevStatus = (PrevStatus)data["prevStatus"];
 
                 if (DeviceStatus.CatheterStatus == Constants.CatheterStatusConnected)
@@ -70,12 +72,20 @@ namespace RaywattApp.ViewModels
             {
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
             }
-            else
+            else if(PatientCase == null)
             {
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["patient"] = this.Patient;
                 parameter["prevStatus"] = this.PrevStatus;
-                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientDetailPage) { Parameter = parameter });
+            }
+            else
+            {
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["patient"] = this.Patient;
+                parameter["patientCase"] = this.PatientCase;
+                parameter["prevStatus"] = this.PrevStatus;
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingPresetPage) { Parameter = parameter });
             }
         }
 

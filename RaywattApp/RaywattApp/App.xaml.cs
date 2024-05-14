@@ -74,10 +74,13 @@ namespace RaywattApp
             services.AddTransient(typeof(PatientNewViewModel));
             services.AddTransient(typeof(PatientEditViewModel));
             services.AddTransient(typeof(PatientDetailViewModel));
+            services.AddTransient(typeof(PhysicianListViewModel));
+            services.AddTransient(typeof(PhysicianEditViewModel));
             services.AddTransient(typeof(RecordingLiveViewViewModel));
             services.AddTransient(typeof(RecordingCalibrationViewModel));
             services.AddTransient(typeof(RecordingViewModel));
             services.AddTransient(typeof(RecordingConfirmViewModel));
+            services.AddTransient(typeof(RecordingPresetViewModel));
             services.AddTransient(typeof(RecordingSetupViewModel));
             services.AddTransient(typeof(RecordingCatheterFailViewModel));
             services.AddTransient(typeof(ReviewViewModel));
@@ -93,8 +96,7 @@ namespace RaywattApp
             services.AddTransient(typeof(SettingAcquisitionViewModel));
             services.AddTransient(typeof(SettingLocalizationViewModel));
             services.AddTransient(typeof(SettingDatabaseViewModel));
-            services.AddTransient(typeof(SettingPhysicianViewModel));
-            services.AddTransient(typeof(SettingServiceViewModel));
+            services.AddTransient(typeof(SettingAboutViewModel));
             services.AddTransient(typeof(SettingLogViewModel));
             services.AddTransient(typeof(SettingTermsConditionsViewModel));
 
@@ -118,12 +120,12 @@ namespace RaywattApp
             services.AddTransient(typeof(FileCopyDialogViewModel));
             services.AddTransient(typeof(FileAlternateIdDialogViewModel));
             services.AddTransient(typeof(FileExportDialogViewModel));
-            services.AddTransient(typeof(SettingEditPhysicianDialogViewModel));
             services.AddTransient(typeof(TermsConditionsDialogViewModel));
             services.AddTransient(typeof(Review3dViewMenuViewModel));
             services.AddTransient(typeof(Review3dPatientMenuViewModel));
             services.AddTransient(typeof(PowerOffDialogViewModel));
             services.AddTransient(typeof(CathRoomDialogViewModel));
+            services.AddTransient(typeof(PhysicianDialogViewModel));
 
             //IDatabaseService 등록 (Singleton 사용 안함 => Connection Pooling을 Default로 사용)
             services.AddTransient<IDatabaseService, SqlService>(obj => new SqlService(connectionString));

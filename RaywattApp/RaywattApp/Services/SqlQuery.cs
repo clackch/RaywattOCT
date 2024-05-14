@@ -77,7 +77,9 @@ namespace RaywattApp.Services
 
             //SelectPatientList
             _query["SelectPatientList"] = @$"
-                SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, gender, create_date, update_date
+                SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, gender
+                , physician_id, rv_schema.fn_physician(physician_id) physician_name
+                , create_date, update_date
                 , rv_schema.fn_lastcase(id) last_case, rv_schema.fn_displayLastcase(id) display_last_case
                 FROM rv_schema.patient
                 WHERE id LIKE @id OR lastname LIKE @lastname OR firstname LIKE @firstname
@@ -117,11 +119,12 @@ namespace RaywattApp.Services
             //SelectPatientCaseListByDate - create_data 기준
             _query["SelectPatientCaseListByDate"] = @$"
                 SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name, physician_name
-                , accession_number, accession_name, comment
-                , vessel, procedure
-                , num_of_frames, image
+                , accession_number, comment
+                , vessel, location, procedure
+                , num_of_frames, image, image_resolution
                 , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
-                , preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
+                , flush_media, pullback_trigger, colormap
+                , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
                 , brightness, contrast, section_proximal, section_distal
                 , create_date, update_date
                 FROM rv_schema.patient_case
@@ -132,11 +135,12 @@ namespace RaywattApp.Services
             //SelectPatientCaseList - create_data 기준
             _query["SelectPatientCaseList"] = @$"
                 SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name, physician_name
-                , accession_number, accession_name, comment
-                , vessel, procedure
-                , num_of_frames, image
+                , accession_number, comment
+                , vessel, location, procedure
+                , num_of_frames, image, image_resolution
                 , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
-                , preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
+                , flush_media, pullback_trigger, colormap
+                , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
                 , brightness, contrast, section_proximal, section_distal
                 , create_date, update_date
                 FROM rv_schema.patient_case
@@ -145,34 +149,43 @@ namespace RaywattApp.Services
 
             //SelectPatientCaseByList
             _query["SelectPatientCaseByList"] = @$"
-                SELECT T1.id, patient_id, physician_name, accession_number, accession_name, comment, vessel, procedure, num_of_frames, image
+                SELECT T1.id, patient_id, physician_name, accession_number, comment, vessel, location, procedure, num_of_frames, image, image_resolution
                 , rv_schema.fn_patient(patient_id) patient_name
                 , rv_schema.fn_patient_gender(patient_id) gender, rv_schema.fn_patient_birth(patient_id) birthdate
                 , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
-                , preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
+                , flush_media, pullback_trigger, colormap
+                , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
                 , brightness, contrast, section_proximal, section_distal
                 , T1.create_date, T1.update_date
-                , bookmark, longitude, cross_section, lumen_contour as str_lumen_contour
+                , bookmark, longitude, cross_section
+                , lumen_contour as str_lumen_contour, lumen_sidebranch as str_lumen_sidebranch, lumen_stent as str_lumen_stent, lumen_guidewire as str_lumen_guidewire
                 FROM rv_schema.patient_case T1 LEFT JOIN rv_schema.patient_case_annotation T2 ON T1.id = T2.id
+                ";
+
+            //SelectPhysician
+            _query["SelectPhysician"] = @$"
+                SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name
+                , flush_media, pullback_trigger, pullback_type, colormap
+                , calcium_threshold, expansion_threshold, apposition_threshold
+                , create_date, update_date
+                FROM rv_schema.physician
+                WHERE id=@id
                 ";
 
             //SelectPhysicianList
             _query["SelectPhysicianList"] = @$"
-                SELECT name, create_date
+                SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name
+                , flush_media, pullback_trigger, pullback_type, colormap
+                , calcium_threshold, expansion_threshold, apposition_threshold
+                , create_date, update_date
                 FROM rv_schema.physician
+                WHERE LOWER(lastname) LIKE LOWER(@lastname) OR LOWER(firstname) LIKE LOWER(@firstname)
                 ORDER BY name
-                ";
-
-            //SelectPatientCasePresetList
-            _query["SelectPatientCasePresetList"] = @$"
-                SELECT id, preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold, default_set, create_date, update_date
-                FROM rv_schema.patient_case_preset
-                ORDER BY default_set DESC, preset_name
                 ";
 
             //SelectPatientCaseAnnotation
             _query["SelectPatientCaseAnnotation"] = @$"
-                SELECT id, bookmark, longitude, cross_section, lumen_contour
+                SELECT id, bookmark, longitude, cross_section, lumen_contour, lumen_sidebranch, lumen_stent, lumen_guidewire
                 FROM rv_schema.patient_case_annotation
                 WHERE id = @id
                 ";
@@ -183,6 +196,13 @@ namespace RaywattApp.Services
                 FROM rv_schema.cath_room
                 ORDER BY name;
                 ";
+
+            //SelectCoRegistrationTrackTrackPoint
+            _query["SelectCoRegistrationTrackPoint"] = @$"
+                SELECT track_point return_string
+                FROM rv_schema.coregistration
+                WHERE id = @id
+                ";
         }
 
         private static void SetInsertQuery()
@@ -191,44 +211,44 @@ namespace RaywattApp.Services
 
             //InsertPatient
             _query["InsertPatient"] = @$"
-                INSERT INTO rv_schema.patient(id, lastname, firstname, birthdate, gender, create_date, update_date)
-                VALUES (@id, @lastname, @firstname, @birthdate, @gender, now(), now())
+                INSERT INTO rv_schema.patient(id, lastname, firstname, birthdate, gender, physician_id, create_date, update_date)
+                VALUES (@id, @lastname, @firstname, @birthdate, @gender, @physician_id, now(), now())
                 ";
 
             //InsertPatientWithoutBirth
             _query["InsertPatientWithoutBirth"] = @$"
-                INSERT INTO rv_schema.patient(id, lastname, firstname, gender, create_date, update_date)
-                VALUES (@id, @lastname, @firstname, @gender, now(), now())
+                INSERT INTO rv_schema.patient(id, lastname, firstname, gender, physician_id, create_date, update_date)
+                VALUES (@id, @lastname, @firstname, @gender, @physician_id, now(), now())
                 ";
 
             //InsertPatientCase
             _query["InsertPatientCase"] = @$"
-                INSERT INTO rv_schema.patient_case(id, patient_id, physician_name, accession_number, accession_name
-                , comment, vessel, procedure, num_of_frames, image
+                INSERT INTO rv_schema.patient_case(id, patient_id, physician_name, accession_number
+                , comment, vessel, location, procedure, num_of_frames, image, image_resolution
                 , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
-                , preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
+                , flush_media, pullback_trigger, colormap
+                , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
                 , brightness, contrast, section_proximal, section_distal
                 , create_date, update_date)
-                VALUES (@id, @patient_id, @physician_name, @accession_number, @accession_name
-                , @comment, @vessel, @procedure, @num_of_frames, @image
+                VALUES (@id, @patient_id, @physician_name, @accession_number
+                , @comment, @vessel, @location, @procedure, @num_of_frames, @image, @image_resolution
                 , @pullback_type, @pullback_length, @angio_yn, @angio_co_registration, @indicator_degree
-                , @preset_name, @calcium_threshold, @expansion_calculation, @expansion_threshold, @apposition_threshold
+                , @flush_media, @pullback_trigger, @colormap
+                , @calcium_threshold, @expansion_calculation, @expansion_threshold, @apposition_threshold
                 , @brightness, @contrast, @section_proximal, @section_distal
                 , now(), now())
                 ";
 
             //InsertPhysician
             _query["InsertPhysician"] = @$"
-                INSERT INTO rv_schema.physician(name, create_date)
-                VALUES (@name, now())
-                ";
-
-            //InsertPatientCasePreset
-            _query["InsertPatientCasePreset"] = @$"
-                INSERT INTO rv_schema.patient_case_preset(id, preset_name, calcium_threshold, expansion_calculation, expansion_threshold
-                , apposition_threshold, default_set, create_date, update_date)
-                VALUES (@id, @preset_name, @calcium_threshold, @expansion_calculation, @expansion_threshold
-                , @apposition_threshold, FALSE, now(), now())
+                INSERT INTO rv_schema.physician(lastname, firstname
+	            , flush_media, pullback_trigger, pullback_type, colormap
+	            , calcium_threshold, expansion_threshold, apposition_threshold
+	            , create_date, update_date)
+	            VALUES (@lastname, @firstname
+	            , @flush_media, @pullback_trigger, @pullback_type, @colormap
+	            , @calcium_threshold, @expansion_threshold, @apposition_threshold
+	            , now(), now())
                 ";
         }
 
@@ -253,14 +273,14 @@ namespace RaywattApp.Services
             //UpdatePatient
             _query["UpdatePatient"] = @$"
                 UPDATE rv_schema.patient
-                SET id=@id, lastname=@lastname, firstname=@firstname, birthdate=@birthdate, gender=@gender, update_date=now()
+                SET id=@id, lastname=@lastname, firstname=@firstname, birthdate=@birthdate, gender=@gender, physician_id=@physician_id, update_date=now()
                 WHERE id=@originId
                 ";
 
             //UpdatePatientWithoutBirth
             _query["UpdatePatientWithoutBirth"] = @$"
                 UPDATE rv_schema.patient
-                SET id=@id, lastname=@lastname, firstname=@firstname, gender=@gender, update_date=now()
+                SET id=@id, lastname=@lastname, firstname=@firstname, gender=@gender, physician_id=@physician_id, update_date=now()
                 WHERE id=@originId
                 ";
 
@@ -268,27 +288,20 @@ namespace RaywattApp.Services
             _query["UpdatePatientCase"] = @$"
                 UPDATE rv_schema.patient_case
                 SET physician_name=@physician_name, accession_number=@accession_number
-                , comment=@comment, vessel=@vessel, procedure=@procedure
+                , comment=@comment, vessel=@vessel, location=@location, procedure=@procedure
                 , angio_yn=@angio_yn, angio_co_registration=@angio_co_registration, indicator_degree=@indicator_degree
-                , preset_name=@preset_name, calcium_threshold=@calcium_threshold, expansion_calculation=@expansion_calculation
+                , colormap=@colormap
+                , calcium_threshold=@calcium_threshold, expansion_calculation=@expansion_calculation
                 , expansion_threshold=@expansion_threshold, apposition_threshold=@apposition_threshold
                 , brightness=@brightness, contrast=@contrast, section_proximal=@section_proximal, section_distal=@section_distal
                 , update_date=now()
                 WHERE id=@id
                 ";
 
-            //UpdatePatientCasePreset
-            _query["UpdatePatientCasePreset"] = @$"
-                UPDATE rv_schema.patient_case_preset
-                SET preset_name=@preset_name, calcium_threshold=@calcium_threshold, expansion_calculation=@expansion_calculation
-                , expansion_threshold=@expansion_threshold, apposition_threshold=@apposition_threshold, update_date=now()
-                WHERE id=@id
-                ";
-
             //UpdatePatientCaseAnnotationLumenContour
             _query["UpdatePatientCaseAnnotationLumenContour"] = @$"
                 UPDATE rv_schema.patient_case_annotation
-                SET lumen_contour=@lumen_contour
+                SET lumen_contour=@lumen_contour, lumen_stent=@lumen_stent
                 WHERE id = @id
                 ";
 
@@ -297,6 +310,23 @@ namespace RaywattApp.Services
                 UPDATE rv_schema.patient_case_annotation
                 SET bookmark=@bookmark, longitude=@longitude, cross_section=@cross_section
                 WHERE id = @id
+                ";
+
+            //UpdatePhysician
+            _query["UpdatePhysician"] = @$"
+                UPDATE rv_schema.physician
+	            SET lastname=@lastname, firstname=@firstname
+	            , flush_media=@flush_media, pullback_trigger=@pullback_trigger, pullback_type=@pullback_type, colormap=@colormap
+	            , calcium_threshold=@calcium_threshold, expansion_threshold=@expansion_threshold, apposition_threshold=@apposition_threshold
+	            , update_date=now()
+	            WHERE id=@id
+                ";
+              
+            //UpdatePatientCaseAngioCoRegistration
+            _query["UpdatePatientCaseAngioCoRegistration"] = @$"
+                UPDATE rv_schema.patient_case
+                SET angio_co_registration=@angio_co_registration
+                WHERE id=@id
                 ";
         }
 
@@ -319,11 +349,6 @@ namespace RaywattApp.Services
             //DeletePhysician
             _query["DeletePhysician"] = @$"
                 DELETE FROM rv_schema.physician
-                ";
-
-            //DeletePatientCasePreset
-            _query["DeletePatientCasePreset"] = @$"
-                DELETE FROM rv_schema.patient_case_preset
                 WHERE id=@id
                 ";
         }
@@ -343,20 +368,23 @@ namespace RaywattApp.Services
 
             //UpsertPatientCase
             _query["UpsertPatientCase"] = @$"
-                INSERT INTO rv_schema.patient_case(id, patient_id, physician_name, accession_number, accession_name, comment, vessel, procedure
-                , num_of_frames, image, pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
-                , preset_name, calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
+                INSERT INTO rv_schema.patient_case(id, patient_id, physician_name, accession_number, comment, vessel, location, procedure
+                , num_of_frames, image, image_resolution, pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
+                , flush_media, pullback_trigger, colormap
+                , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
                 , brightness, contrast, section_proximal, section_distal, create_date, update_date)
-                VALUES (@id, @patient_id, @physician_name, @accession_number, @accession_name, @comment, @vessel, @procedure
-                , @num_of_frames, @image, @pullback_type, @pullback_length, @angio_yn, @angio_co_registration, @indicator_degree
-                , @preset_name, @calcium_threshold, @expansion_calculation, @expansion_threshold, @apposition_threshold
+                VALUES (@id, @patient_id, @physician_name, @accession_number, @comment, @vessel, @location, @procedure
+                , @num_of_frames, @image, @image_resolution, @pullback_type, @pullback_length, @angio_yn, @angio_co_registration, @indicator_degree
+                , @flush_media, @pullback_trigger, @colormap
+                , @calcium_threshold, @expansion_calculation, @expansion_threshold, @apposition_threshold
                 , @brightness, @contrast, @section_proximal, @section_distal, @create_date, @update_date)
                 ON CONFLICT (id)
                 DO UPDATE
                 SET patient_id=@patient_id, physician_name=@physician_name, accession_number=@accession_number, comment=@comment
-                , vessel=@vessel, procedure=@procedure, num_of_frames=@num_of_frames, image=@image
+                , vessel=@vessel, location=@location, procedure=@procedure, num_of_frames=@num_of_frames, image=@image, image_resolution=@image_resolution
                 , pullback_type=@pullback_type, pullback_length=@pullback_length, angio_yn=@angio_yn, angio_co_registration=@angio_co_registration
-                , indicator_degree=@indicator_degree, preset_name=@preset_name
+                , indicator_degree=@indicator_degree
+                , flush_media=@flush_media, pullback_trigger=@pullback_trigger, colormap=@colormap
                 , calcium_threshold=@calcium_threshold, expansion_calculation=@expansion_calculation, expansion_threshold=@expansion_threshold
                 , apposition_threshold=@apposition_threshold, brightness=@brightness, contrast=@contrast
                 , section_proximal=@section_proximal, section_distal=@section_distal
@@ -365,11 +393,12 @@ namespace RaywattApp.Services
 
             //UpsertPatientCaseAnnotation
             _query["UpsertPatientCaseAnnotation"] = @$"
-                INSERT INTO rv_schema.patient_case_annotation(id, bookmark, longitude, cross_section, lumen_contour, create_date, update_date)
-                VALUES (@id, @bookmark, @longitude, @cross_section, @lumen_contour, now(), now())
+                INSERT INTO rv_schema.patient_case_annotation(id, bookmark, longitude, cross_section, lumen_contour, lumen_sidebranch, lumen_stent, lumen_guidewire, create_date, update_date)
+                VALUES (@id, @bookmark, @longitude, @cross_section, @lumen_contour, @lumen_sidebranch, @lumen_stent, @lumen_guidewire, now(), now())
                 ON CONFLICT (id)
                 DO UPDATE
-                SET bookmark=@bookmark, longitude=@longitude, cross_section=@cross_section, lumen_contour=@lumen_contour, update_date=now()
+                SET bookmark=@bookmark, longitude=@longitude, cross_section=@cross_section
+                , lumen_contour=@lumen_contour, lumen_sidebranch=@lumen_sidebranch, lumen_stent=@lumen_stent, lumen_guidewire=@lumen_guidewire, update_date=now()
                 ";
 
             //UpsertCoRegistration

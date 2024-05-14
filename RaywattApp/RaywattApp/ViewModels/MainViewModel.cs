@@ -80,7 +80,7 @@ namespace RaywattApp.ViewModels
         private ICommand _angioIndicatorCommand;
         public ICommand AngioIndicatorCommand
         {
-            get { return this._angioIndicatorCommand ?? (this._angioIndicatorCommand = new RelayCommand(SelectCathRoom)); }
+            get { return this._angioIndicatorCommand ?? (this._angioIndicatorCommand = new RelayCommand(_angioManager.SelectCathRoom)); }
         }
 
         private ICommand _catheterIndicatorCommand;
@@ -245,30 +245,11 @@ namespace RaywattApp.ViewModels
 
             if (result != null && result.DialogAnswer != DialogResults.Answer.No)
             {
-                if (_angioManager.GetServerConnection())
-                    _angioManager.CloseAngioManager();
-
                 if (result.DialogAnswer == DialogResults.Answer.Extra)
                 {
                     DeviceStatus.PowerOffMsg = _l10n["Switching user"];
                 }
-                CommonUtil.Exit(DeviceStatus, result.DialogAnswer == DialogResults.Answer.Yes ? true : false);
-            }
-        }
-
-        private void SelectCathRoom()
-        {
-            _log.Debug("SelectCathRoom");
-
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["selectedCathRoomId"] = DeviceStatus.SelectedCathRoom == null ? 0 : DeviceStatus.SelectedCathRoom.Id;
-
-            var result = _dialogService.OpenDialog(new CathRoomDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-
-            if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
-            {
-                Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
-                DeviceStatus.SelectedCathRoom = (CathRoom)data["selectedCathRoom"];
+                CommonUtil.Exit(DeviceStatus, _angioManager, result.DialogAnswer == DialogResults.Answer.Yes ? true : false);
             }
         }
 
@@ -300,6 +281,7 @@ namespace RaywattApp.ViewModels
             {
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["patient"] = Patient;
+                parameter["patientCase"] = PatientCase;
                 parameter["prevStatus"] = PrevStatus;
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
             }
@@ -329,6 +311,7 @@ namespace RaywattApp.ViewModels
             {
                 parameter.Clear();
                 parameter["patient"] = Patient;
+                parameter["patientCase"] = PatientCase;
                 parameter["prevStatus"] = PrevStatus;
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingCatheterFailPage) { Parameter = parameter });
             }
@@ -448,9 +431,17 @@ namespace RaywattApp.ViewModels
                 case RayWorkItem.UnloadCatheter:
                     DeviceStatus.CatheterStatus = Constants.CatheterStatusConnected;
                     break;
+                case RayWorkItem.Recording:
+                    _angioManager.StopSaveAngioThread();
+                    break;
                 case RayWorkItem.Pullback:
                     DeviceStatus.IsPullbackDone = true;
-                    _angioManager.StopSaveAngioThread();
+                    
+                    if (DeviceStatus.IsAngioConnected)
+                    {
+                        _angioManager.StopSaveAngioThread();
+                    }
+                    
                     break;
                 case RayWorkItem.OCTImaging:
                     if(param == (int)RaySession.Review)

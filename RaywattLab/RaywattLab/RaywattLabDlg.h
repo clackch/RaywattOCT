@@ -6,11 +6,13 @@
 #include "CommonDlg.h"
 #include "Imaging.h"
 #include "AcquisitionDevice.h"
-#include "ZaberController.h"
+#include "ArduinoController.h"
+#include "LaserModule.h"
 #include "ScopeView.h"
 #include "RotaryJunctionDlg.h"
 #include "MessageService.h"
 #include <opencv2/opencv.hpp>
+#include <plog/Log.h>
 
 #define WM_SAVE_CALIBRATION_FRAME		(WM_USER + 0x2001)
 #define WM_SAVE_CALIBRATION_DONE		(WM_USER + 0x2002)
@@ -49,8 +51,8 @@ private:
 	CDataReader* m_pDataReader;
 
 	// Rotary Junction
-	CZaberController* m_pPullback;
-	CZaberController* m_pDelayLine;
+	CArduinoController* m_pRotaryJunction;
+	CLaserModule* m_pLaserModule;
 
 	// UI Components
 	CListBox m_listPatientData;
@@ -93,6 +95,9 @@ private:
 	// Pullback
 	CThread* m_pThreadPullback;
 
+	bool m_bInitialized;
+	bool m_bStartAcquisition;
+
 // 생성입니다.
 public:
 	CRaywattLabDlg(CWnd* pParent = nullptr);	// 표준 생성자입니다.
@@ -106,7 +111,9 @@ public:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 지원입니다.
 
 private:
+	void setLogger(TCHAR* logRootPath);
 	int initializeDevices();
+	int finalizeDevices();
 	void updatePatientDataList();
 	void initScopeViewLayout();
 	void updateBrightnessContrast(CLabImaging *pImaging);
@@ -145,6 +152,7 @@ protected:
 public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	afx_msg void OnBnClickedButtonAdminInitialize();
+	afx_msg void OnBnClickedButtonStartAcquisition();
 	afx_msg void OnBnClickedButtonOpenDataFolder();
 	afx_msg void OnBnClickedButtonLoadSelectedData();
 	afx_msg void OnBnClickedButtonPlayLoadedData();

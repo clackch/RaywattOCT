@@ -24,12 +24,7 @@ namespace RaywattOCT
             public bool IsIndicatorOn
             { 
                 get { return _isIndicatorOn; }
-                set 
-                {
-                    _isIndicatorOn = value;
-                    ODSOCT_ShowIndicatorCutView(value);
-                    ODSOCT_ShowCuttingline(value);
-                }
+                set { _isIndicatorOn = value; }
             }
 
             private bool _isPtoD = true;
@@ -50,15 +45,24 @@ namespace RaywattOCT
                 IsPtoD = true;
             }
 
-            public int ShowObject(Ray3DObject obj, Ray3DObjectMode mode)
+            public int ShowObject(Ray3DObject obj, Ray3DObjectMode mode, bool isPageChanged = false)
             {
-                ObjectVisibility[(int)obj] = mode;
+                if (!isPageChanged)
+                    ObjectVisibility[(int)obj] = mode;
                 return ODSOCT_SetViewData(obj, mode);
             }
 
             public bool IsObjectVisible(Ray3DObject obj)
             {
                 return (ObjectVisibility[(int)obj] != Ray3DObjectMode.Hide);
+            }
+
+            public int ShowIndicator(bool show)
+            {
+
+                int sum = ODSOCT_ShowIndicatorCutView(show);
+                sum += ODSOCT_ShowCuttingline(show);
+                return sum == 2 ? 1 : 0;
             }
         }
 
@@ -129,7 +133,7 @@ namespace RaywattOCT
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_MoveCameraPosition(int direction, bool inverse);
         [DllImport("OCT3d.dll")]
-        public static extern int ODSOCT_MoveToFrame(int frame);
+        public static extern int ODSOCT_MoveToFrame(int frame); 
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_SetFov(int angle);
         [DllImport("OCT3d.dll")]
@@ -148,5 +152,11 @@ namespace RaywattOCT
         public static extern int ODSOCT_ShowIndicatorCutView(bool show);
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_ShowCuttingline(bool show);
+        [DllImport("OCT3d.dll")]
+        public static extern int ODSOCT_Render();
+        [DllImport("OCT3d.dll")]
+        public static extern int ODSOCT_SetRenderMode(bool isRaywattApp);
+        [DllImport("OCT3d.dll")]
+        public static extern int ODSOCT_CutViewOn(bool isRaywattApp);
     }
 }

@@ -16,7 +16,7 @@ namespace RaywattApp.Common.Converters
             double dValue = 0;
             int frameCnt = int.Parse(parameter.ToString());
 
-            int pullbackLength = int.Parse(CodeDefinition.Codes["PBLE"][values[0].ToString()]);
+            int pullbackLength = int.Parse(values[0].ToString());
 
             if(pullbackLength >= frameCnt)
             {

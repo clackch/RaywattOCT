@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using RaywattApp.Common.Bases;
 
 namespace RaywattApp.Models
 {
@@ -28,17 +29,37 @@ namespace RaywattApp.Models
         private bool _isCalciumOn = true;
 
         [ObservableProperty]
+        private bool _isSheathOn = true;
+
+        [ObservableProperty]
         private bool _isPlay = true;
 
         [ObservableProperty]
+        private bool _isImageProcessingDone = false;
+
+        [ObservableProperty]
         private Zoom _zoom = new Zoom();
+
+        [ObservableProperty]
+        private int _angioFrameNumber = -1;
 
         //3D
 
 
         //Compare
-        [ObservableProperty]
         private PatientCase _selectedPatientCase;
+        public PatientCase SelectedPatientCase
+        { 
+            get { return _selectedPatientCase; }
+            set { 
+                _selectedPatientCase = value;
+                OnPropertyChanged(nameof(SelectedPatientCase));
+                if (_selectedPatientCase != null)
+                {
+                    Constants.ImageResolutionCompare = _selectedPatientCase.ImageResolution;
+                }
+            }
+        }
 
         //FFR
     }

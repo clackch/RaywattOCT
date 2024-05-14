@@ -26,6 +26,9 @@ using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using RaywattApp.Common.Angio;
+using System.Reflection.Metadata.Ecma335;
+using System.Windows.Documents;
 
 namespace RaywattApp.Common.Util
 {
@@ -527,7 +530,7 @@ namespace RaywattApp.Common.Util
             return imglumenProfile;
         }
 
-        public static Mat MakeLumenProfileImage(List<LumenContour> lumenContours, int frameProximal, int frameDistal, bool isPostCase, List<int>? appositionFrames, int currentFrame = -1)
+        public static Mat MakeLumenProfileImage(List<LumenContour> lumenContours, List<LumenSidebranch> lumenSidebranches, List<LumenStent> lumenStents, double appositionThreshold, int frameProximal, int frameDistal, bool isPostCase, int currentFrame = -1)
         {
             if (lumenContours == null || lumenContours.Count <= 0) return null;
 
@@ -536,35 +539,30 @@ namespace RaywattApp.Common.Util
             Mat imglumenProfile = new Mat(200, lumenContours.Count, MatType.CV_8UC3);
             imglumenProfile.SetTo(new Scalar(0x33, 0x33, 0x33));
 
-            int curFrame = 0;
-            foreach (LumenContour lumenContour in lumenContours.GetRange(0, cols))
+            for (int curFrame = 0; curFrame < cols; curFrame++)
             {
-                imglumenProfile = MakeLumenProfile(imglumenProfile, lumenContour, curFrame, frameProximal, frameDistal, isPostCase, appositionFrames);
-
-                curFrame++;
+                imglumenProfile = MakeLumenProfile(imglumenProfile, lumenContours[curFrame], lumenSidebranches[curFrame], lumenStents[curFrame], appositionThreshold, curFrame, frameProximal, frameDistal, isPostCase);
             }
 
             return imglumenProfile;
         }
 
-        public static Mat MakeLumenProfileImageOneByOne(Mat imglumenProfile, List<LumenContour> lumenContours, int frameProximal, int frameDistal, bool isPostCase, List<int>? appositionFrames, int currentFrame = -1)
+        public static Mat MakeLumenProfileImageOneByOne(Mat imglumenProfile, List<LumenContour> lumenContours, List<LumenSidebranch> lumenSidebranches, List<LumenStent> lumenStents, double appositionThreshold, int frameProximal, int frameDistal, bool isPostCase, int currentFrame = -1)
         {
             if (lumenContours == null || lumenContours.Count <= 0) return null;
 
             if(imglumenProfile == null)
             {
-                imglumenProfile = MakeLumenProfileImage(lumenContours, frameProximal, frameDistal, isPostCase, appositionFrames, currentFrame);
+                imglumenProfile = MakeLumenProfileImage(lumenContours, lumenSidebranches, lumenStents, appositionThreshold, frameProximal, frameDistal, isPostCase, currentFrame);
             }
 
             int curFrame = currentFrame == -1 ? lumenContours.Count - 1 : currentFrame;
-            LumenContour lumenContour = lumenContours[curFrame];
-
-            imglumenProfile = MakeLumenProfile(imglumenProfile, lumenContour, curFrame, frameProximal, frameDistal, isPostCase, appositionFrames);
+            imglumenProfile = MakeLumenProfile(imglumenProfile, lumenContours[curFrame], lumenSidebranches[curFrame], lumenStents[curFrame], appositionThreshold, curFrame, frameProximal, frameDistal, isPostCase);
 
             return imglumenProfile;
         }
 
-        private static Mat MakeLumenProfile(Mat imglumenProfile, LumenContour lumenContour, int curFrame, int frameProximal, int frameDistal, bool isPostCase, List<int>? appositionFrames)
+        private static Mat MakeLumenProfile(Mat imglumenProfile, LumenContour lumenContour, LumenSidebranch lumenSidebranch, LumenStent lumenStent, double appositionThreshold, int curFrame, int frameProximal, int frameDistal, bool isPostCase)
         {
             const double radius = Constants.OCTImageSize / 2;
             const double totalArea = radius * radius * Math.PI;
@@ -577,12 +575,25 @@ namespace RaywattApp.Common.Util
             //Lesion Section
             if (curFrame >= frameProximal && curFrame <= frameDistal)
             {
-                //Stent Area
-                if (isPostCase && appositionFrames != null && appositionFrames.Contains(curFrame))
-                    Cv2.Line(imglumenProfile, new Point(curFrame, yStart), new Point(curFrame, yStart + lumenArea), new Scalar(0x3f, 0x41, 0x76));
+                Cv2.Line(imglumenProfile, new Point(curFrame, 0), new Point(curFrame, yStart - 1), new Scalar(0x4f, 0x4f, 0x4f));
+                Cv2.Line(imglumenProfile, new Point(curFrame, yStart + lumenArea + 1), new Point(curFrame, imglumenProfile.Rows), new Scalar(0x4f, 0x4f, 0x4f));
+            }
+
+            //Stent Area
+            if (isPostCase && lumenStent.Points != null && lumenStent.Points.Count >= Constants.LumenProfileStentMinCount)
+            {
+                //MalApposition
+                foreach(double appositionLength in lumenStent.AppositionLength)
+                {
+                    if(CommonUtil.IsMalApposition(appositionLength, appositionThreshold))
+                    {
+                        Cv2.Line(imglumenProfile, new Point(curFrame, yStart), new Point(curFrame, yStart + lumenArea), new Scalar(0x3f, 0x41, 0x76));
+                        break;
+                    }
+                }
 
                 //Stent
-                for (int i = 0; isPostCase && i < imglumenProfile.Rows; i++)
+                for (int i = 0; i < imglumenProfile.Rows; i++)
                 {
                     if ((i + curFrame) % 20 == 0)
                     {
@@ -593,13 +604,10 @@ namespace RaywattApp.Common.Util
                         Cv2.Line(imglumenProfile, new Point(curFrame, i), new Point(curFrame, i), new Scalar(0x8d, 0x8d, 0x8d));
                     }
                 }
-
-                Cv2.Line(imglumenProfile, new Point(curFrame, 0), new Point(curFrame, yStart - 1), new Scalar(0x4f, 0x4f, 0x4f));
-                Cv2.Line(imglumenProfile, new Point(curFrame, yStart + lumenArea + 1), new Point(curFrame, imglumenProfile.Rows), new Scalar(0x4f, 0x4f, 0x4f));
             }
 
             //Side Branch
-            if (lumenContour.HasSidebranch)
+            if (lumenSidebranch.Points != null && lumenSidebranch.Points.Count > 0)
             {
                 if (curFrame >= frameProximal && curFrame <= frameDistal)
                     Cv2.Line(imglumenProfile, new Point(curFrame, imglumenProfile.Rows / 2 - 5), new Point(curFrame, imglumenProfile.Rows / 2 + 5), new Scalar(0xe4, 0xe4, 0xe4));
@@ -663,11 +671,14 @@ namespace RaywattApp.Common.Util
             return calciumList;
         }
 
-        public static List<int> GetExpansionList(List<LumenContour> lumenContours, int frameProximal, int frameDistal, double refArea, int expansionThreshold)
+        public static List<int> GetExpansionList(List<LumenContour> lumenContours, int frameProximal, int frameDistal, int stentProximal, int stentDistal, double refArea, int expansionThreshold)
         {
             List<int> expansionList = new List<int>();
 
-            for (int i = frameProximal; i <= frameDistal && refArea != 0; i++)
+            int tempProximal = frameProximal > stentProximal ? frameProximal : stentProximal;
+            int tempDistal = frameDistal < stentDistal ? frameDistal : stentDistal;
+
+            for (int i = tempProximal; i <= tempDistal && refArea != 0; i++)
             {
                 double expansion = lumenContours[i].Area / refArea * 100;
                 if (expansion <= expansionThreshold)
@@ -994,12 +1005,11 @@ namespace RaywattApp.Common.Util
             return textBlock.DesiredSize;
         }
 
-        public static void Exit(DeviceStatus? deviceStatus = null, bool isShutdown = false)
+        public static void Exit(DeviceStatus? deviceStatus = null, AngioManager? angioManager = null, bool isShutdown = false)
         {
-            // Server Off
-            Process[] processes = Process.GetProcessesByName("FGServer");
-            foreach (Process process in processes)
-                process.Kill();
+
+            if (angioManager != null && angioManager.GetServerConnection())
+                angioManager.CloseAngioManager();
 
             if (deviceStatus != null)
             {
@@ -1216,10 +1226,6 @@ namespace RaywattApp.Common.Util
                         writer.WritePropertyName(nameof(lumenContour.Valid));
                         writer.WriteValue(lumenContour.Valid);
 
-                        //HasSidebranch
-                        writer.WritePropertyName(nameof(lumenContour.HasSidebranch));
-                        writer.WriteValue(lumenContour.HasSidebranch);
-
                         //Calcium
                         {
                             writer.WritePropertyName(nameof(lumenContour.Calcium));
@@ -1230,10 +1236,13 @@ namespace RaywattApp.Common.Util
 
                             writer.WriteStartArray();
 
-                            foreach (Tuple<double, double> calcium in lumenContour.Calcium.List)
+                            if (lumenContour.Calcium != null)
                             {
-                                strPoint = calcium.Item1 + "," + calcium.Item2;
-                                writer.WriteValue(strPoint);
+                                foreach (Tuple<double, double> calcium in lumenContour.Calcium.List)
+                                {
+                                    strPoint = calcium.Item1 + "," + calcium.Item2;
+                                    writer.WriteValue(strPoint);
+                                }
                             }
                             writer.WriteEndArray();
 
@@ -1325,11 +1334,6 @@ namespace RaywattApp.Common.Util
                                     }
                                 }
                             }
-                            else if (nameof(lumenContour.HasSidebranch).Equals(currentProperty))
-                            {
-                                if (reader.Value != null && reader.TokenType == JsonToken.Boolean)
-                                    lumenContour.HasSidebranch = (bool)reader.Value;
-                            }
                             else
                             {
                                 SetContour(reader, currentProperty, lumenContour);
@@ -1368,11 +1372,83 @@ namespace RaywattApp.Common.Util
                     Cv2.DrawContours(imgLumen, contours, -1, Scalar.White, -1);
                 }
                 Cv2.Resize(imgLumen, imgResize, imgResize.Size());
+                Cv2.Blur(imgResize, imgResize, new Size(13, 13) /* 필터 크기 */, new Point(-1, -1) /* 필터 중심*/);
 
                 Buffer.MemoryCopy((void*)imgResize.Data, (void*)(IntPtr.Add(buffer, i * frameSize)), frameSize, frameSize);
             }
         }
+        unsafe public static void StentsToMemory(List<LumenStent>? stentList, Size sizeContour, IntPtr buffer, Size sizeBuffer)
+        {
+            if (stentList == null) return;
+            
+            int frameSize = sizeBuffer.Width * sizeBuffer.Height;
+            for (int i = 0; i < stentList.Count; i++)
+            {
+                Mat imgLumen = new Mat(sizeContour, MatType.CV_8UC1);
+                Mat imgResize = new Mat(sizeBuffer, MatType.CV_8UC1);
+                Point[][] contours;
+                List<Point> contour = new List<Point>();
 
+                if (stentList[i].Points == null || stentList[i].Points.Count < 3)
+                    continue;
+
+                imgLumen.SetTo(Scalar.Black);
+
+                foreach (System.Windows.Point point in stentList[i].Points)
+                {
+                    //TODO - 실제 스텐트 두께에 맞춰서 Size( , )를 설정해 주어야 함.
+                    imgLumen.Ellipse(new OpenCvSharp.Point(point.X, point.Y), new Size(5, 5), 0, 0, 360, Scalar.White, 1);
+                }
+                
+                Mat binary = new Mat();
+                Cv2.Threshold(imgLumen, binary, 128, 255, ThresholdTypes.Binary);
+
+                Cv2.FindContours(binary, out contours, out HierarchyIndex[] hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
+
+                Cv2.DrawContours(imgLumen, contours, -1, Scalar.White, 1);
+
+                Cv2.Resize(imgLumen, imgResize, imgResize.Size());
+                Cv2.Blur(imgResize, imgResize, new Size(7, 7) /* 필터 크기 */, new Point(-1, -1) /* 필터 중심*/);
+                Buffer.MemoryCopy((void*)imgResize.Data, (void*)(IntPtr.Add(buffer, i * frameSize)), frameSize, frameSize);
+            }
+        }
+
+        unsafe public static void GuideWireToMemory(List<LumenGuidewire>? guidewireList, Size sizeContour, IntPtr buffer, Size sizeBuffer)
+        {
+            if (guidewireList == null) return;
+
+            int frameSize = sizeBuffer.Width * sizeBuffer.Height;
+            for (int i = 0; i < guidewireList.Count; i++)
+            {
+                Mat imgLumen = new Mat(sizeContour, MatType.CV_8UC1);
+                Mat imgResize = new Mat(sizeBuffer, MatType.CV_8UC1);
+                Point[][] contours;
+                List<Point> contour = new List<Point>();
+
+                imgLumen.SetTo(Scalar.Black);
+
+                if (guidewireList[i].Points == null)
+                    continue;
+
+                foreach (System.Windows.Point point in guidewireList[i].Points)
+                {
+                    //TODO - 실제 Guidewire 반지름에 맞춰서 Size( , )를 설정해 주어야 함.
+                    imgLumen.Ellipse(new OpenCvSharp.Point(point.X, point.Y), new Size(50, 50), 0, 0, 360, Scalar.White, 1);
+                }
+
+                Mat binary = new Mat();
+                Cv2.Threshold(imgLumen, binary, 128, 255, ThresholdTypes.Binary);
+
+                Cv2.FindContours(binary, out contours, out HierarchyIndex[] hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
+
+                Cv2.DrawContours(imgLumen, contours, -1, Scalar.White, 1);
+
+                Cv2.Resize(imgLumen, imgResize, imgResize.Size());
+
+                Cv2.Blur(imgResize, imgResize, new Size(7, 7) /* 필터 크기 */, new Point(-1, -1) /* 필터 중심*/);
+                Buffer.MemoryCopy((void*)imgResize.Data, (void*)(IntPtr.Add(buffer, i * frameSize)), frameSize, frameSize);
+            }
+        }
         private static System.Windows.Point StrToPoint(string str)
         {
             string[] temp = str.Split(",");
@@ -1565,6 +1641,172 @@ namespace RaywattApp.Common.Util
             }
 
             BitmapSource bitmap = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgCalcium);
+            return bitmap;
+        }
+
+        public static OpenCvSharp.Point[][] GetLumenContours(List<System.Windows.Point> pointList)
+        {
+            Mat img = new Mat(1024, 1024, MatType.CV_8UC1, new Scalar(0, 0, 0));
+
+            OpenCvSharp.Point[] cvPoints = new OpenCvSharp.Point[pointList.Count];
+            for (int i = 0; i < pointList.Count; i++)
+            {
+                cvPoints[i] = new OpenCvSharp.Point(Convert.ToInt32(Math.Round(pointList[i].X)), Convert.ToInt32(Math.Round(pointList[i].Y)));
+            }                       
+
+            if (cvPoints.Length > 0)
+            {
+                Cv2.DrawContours(img, new OpenCvSharp.Point[][] { cvPoints }, contourIdx: -1, color: new Scalar(255, 255, 255), thickness: 1);
+
+                OpenCvSharp.Point[][] contours;
+                HierarchyIndex[] hierarchy;
+                Cv2.FindContours(img, out contours, out hierarchy, RetrievalModes.Tree, ContourApproximationModes.ApproxSimple);
+                return contours;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public static bool IsMalApposition(double appositionLength, double appositionThreshold)
+        {
+            if (appositionThreshold == -1)
+                return false;
+
+            if (appositionLength >= appositionThreshold)
+                return true;
+            else
+                return false;
+        }
+
+        public static double GetAppositionLength(OpenCvSharp.Point[][] contours, OpenCvSharp.Point point)
+        {
+            OpenCvSharp.Point centerPoint = new OpenCvSharp.Point(512, 512);
+            int x = centerPoint.X;
+            int y = centerPoint.Y;
+            int diffX = Math.Abs(centerPoint.X - point.X);
+            int diffY = Math.Abs(centerPoint.Y - point.Y);
+
+            if (point.X > centerPoint.X)
+            {
+                x = point.X + diffX;
+            }
+            else if (point.X < centerPoint.X)
+            {
+                x = point.X - diffX;
+            }
+
+            if (point.Y > centerPoint.Y)
+            {
+                y = point.Y + diffY;
+            }
+            else if (point.Y < centerPoint.Y)
+            {
+                y = point.Y - diffY;
+            }
+
+            OpenCvSharp.Point lineStart = centerPoint;
+            OpenCvSharp.Point lineEnd = new OpenCvSharp.Point(x, y);
+
+            foreach (var contour in contours)
+            {
+                for (int i = 0; i < contour.Length - 1; i++)
+                {
+                    OpenCvSharp.Point intersection;
+                    if (LineIntersects(lineStart, lineEnd, contour[i], contour[i + 1], out intersection))
+                    {
+                        //_log.Debug($"교차점: {intersection}");
+                        //// 교차점에 대한 추가 처리
+                        //
+                        //Cv2.Line(matLumenContour, lineStart, point, new Scalar(255, 255, 255), 1);
+                        //Cv2.Line(matLumenContour, lineStart, lineEnd, new Scalar(255, 255, 255), 1);
+                        //
+                        //Cv2.Circle(matLumenContour, point, radius: 1, color: new Scalar(255, 255, 255), thickness: -1);
+                        //
+                        //Cv2.Circle(matLumenContour, intersection, radius: 1, color: new Scalar(0, 0, 0), thickness: -1);
+                        //Cv2.ImShow("Test", matLumenContour);
+                        //Cv2.WaitKey(0);
+
+                        double distanceStent = Math.Sqrt(Math.Pow(centerPoint.X - point.X, 2) + Math.Pow(centerPoint.Y - point.Y, 2));
+                        double distanceLumen = Math.Sqrt(Math.Pow(centerPoint.X - intersection.X, 2) + Math.Pow(centerPoint.Y - intersection.Y, 2));
+
+                        return (distanceLumen - distanceStent) * Constants.ImageResolution;
+                    }
+                }
+            }
+
+            return 0;
+        }
+
+        // 선분 간의 교차점 계산 함수
+        static bool LineIntersects(OpenCvSharp.Point p1, OpenCvSharp.Point p2, OpenCvSharp.Point p3, OpenCvSharp.Point p4, out OpenCvSharp.Point intersection)
+        {
+            intersection = new OpenCvSharp.Point();
+
+            float denom = ((p4.Y - p3.Y) * (p2.X - p1.X)) - ((p4.X - p3.X) * (p2.Y - p1.Y));
+            if (denom == 0) return false; // 평행 혹은 일치
+
+            float num1 = ((p4.X - p3.X) * (p1.Y - p3.Y)) - ((p4.Y - p3.Y) * (p1.X - p3.X));
+            float num2 = ((p2.X - p1.X) * (p1.Y - p3.Y)) - ((p2.Y - p1.Y) * (p1.X - p3.X));
+
+            float r = num1 / denom;
+            float s = num2 / denom;
+
+            if (r < 0 || r > 1 || s < 0 || s > 1) return false; // 선분이 교차하지 않음
+
+            // 교차점 계산
+            intersection = new OpenCvSharp.Point(p1.X + (r * (p2.X - p1.X)), p1.Y + (r * (p2.Y - p1.Y)));
+            return true;
+        }
+
+        public static void GetStentProximalDistal(List<LumenStent> lumenStents, out int proximal, out int distal)
+        {
+            bool isProximal = true;
+            proximal = 0;
+            distal = 0;
+
+            for(int i=0; i < lumenStents.Count; i++)
+            {
+                if (lumenStents[i].Points == null)
+                    continue;
+
+                if(isProximal && lumenStents[i].Points.Count >= Constants.LumenProfileStentMinCount)
+                {
+                    proximal = i;
+                    isProximal = false;
+                }
+
+                if(lumenStents[i].Points.Count >= Constants.LumenProfileStentMinCount)
+                {
+                    distal = i;
+                }
+            }
+        }
+      
+        public static BitmapSource DrawSheathIndicator(double resolution, int imageSize, double sheathDiameter)
+        {
+            double pxDiameter = (sheathDiameter / resolution) * imageSize / Constants.OCTImageSize;
+            Mat imgSheath = new Mat(imageSize, imageSize, MatType.CV_8UC4);
+            Point center = new Point(imgSheath.Width / 2, imgSheath.Height / 2);
+            int thickness = 3;
+            int radius = (int)(pxDiameter / 2) + thickness;
+
+            imgSheath.SetTo(new Scalar(0x00, 0x00, 0x00, 0x00));
+            imgSheath.Circle(center, radius, new Scalar(0xff, 0xff, 0xff, 0xff), thickness, LineTypes.AntiAlias);
+
+            for (int i = 1; i<6; i+=2)
+            {
+                imgSheath.Ellipse(center,
+                    new OpenCvSharp.Size(imgSheath.Width / 2, imgSheath.Height / 2),
+                    0,
+                    i * 60,
+                    i * 60 + 60,
+                    new Scalar(0x00, 0x00, 0x00, 0x00),
+                    -1);
+            }
+
+            BitmapSource bitmap = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgSheath);
             return bitmap;
         }
 

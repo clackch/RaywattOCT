@@ -30,17 +30,18 @@
             <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Margin="75,20,0,19" Content="{Binding [Review], Source={StaticResource L10N}}"/>
         </Grid>
 
-        <Grid Grid.Row="1" Margin="60,40,60,40">
+        <Grid Grid.Row="1" Margin="160,62,160,62">
             <Grid.RowDefinitions>
-                <RowDefinition Height="769"/>
-                <RowDefinition Height="75"/>
+                <RowDefinition Height="725"/>
+                <RowDefinition Height="1"/>
+                <RowDefinition Height="74"/>
             </Grid.RowDefinitions>
-            <Border Grid.Row="0" CornerRadius="10,10,0,0" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray7Brush}">
+            <Border Grid.Row="0" CornerRadius="10,10,0,0" BorderThickness="0" Background="{DynamicResource GrayscaleGray6Brush}">
                 <Grid Margin="42,0,42,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="84"/>
                         <RowDefinition Height="1"/>
-                        <RowDefinition Height="684"/>
+                        <RowDefinition Height="635"/>
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0">
                         <Grid.ColumnDefinitions>
@@ -62,7 +63,7 @@
                             <Button Style="{StaticResource OutlinedBtnType3-Large}" Width="130" Command="{Binding AutoDetectCommand}" Content="{Binding [Auto Detect], Source={StaticResource L10N}}"/>
                         </StackPanel>
                     </Grid>
-                    <Separator Grid.Row="1" Foreground="{DynamicResource GrayscaleGray5Brush}"/>
+                    <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
                     <Grid Grid.Row="2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
@@ -100,7 +101,7 @@
                                 </i:Interaction.Triggers>
                             </Image>
                         </Grid>
-                        <annotation:DrawLumenContourUtil Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" LumenContours="{Binding LumenContours}" FrameNumber="{Binding FrameNumber}" InCommand="{Binding LumenContourCommand, Mode=TwoWay}" IsEditOn="True" Zoom="{Binding Zoom}"/>
+                        <annotation:DrawLumenContourUtil Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" LumenContours="{Binding LumenContours}" FrameNumber="{Binding FrameNumber}" InCommand="{Binding LumenContourCommand, Mode=TwoWay}" IsEditOn="True" Zoom="{Binding Zoom}" ModifiedFrames="{Binding ModifiedFrames}"/>
                         <Grid Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
                             <Border Width="{x:Static const:Constants.MiniMapBorderSize}" Height="{x:Static const:Constants.MiniMapBorderSize}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="16" BorderBrush="{DynamicResource GrayscaleGray8Brush}" BorderThickness="1" CornerRadius="10" Visibility="{Binding Zoom.Visibility}">
                                 <Canvas>
@@ -164,7 +165,8 @@
                     </Grid>
                 </Grid>
             </Border>
-            <Border Grid.Row="1" CornerRadius="0,0,10,10" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray6Brush}">
+            <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
+            <Border Grid.Row="2" CornerRadius="0,0,10,10" BorderThickness="0" Background="{DynamicResource GrayscaleGray6Brush}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>

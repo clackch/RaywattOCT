@@ -143,7 +143,7 @@ namespace RaywattApp.ViewModels
             _log.Debug("Cancel");
 
             RayStopLiveView();
-            leaveToPage(Constants.RecordingLiveViewPage);
+            leaveToPage(Constants.RecordingLiveViewPage, _cancelCommand);
         }
 
         private void Ready()
@@ -215,6 +215,7 @@ namespace RaywattApp.ViewModels
             IsCancel = false;
 
             PatientCase.Image = generateFileName("oct");
+            PatientCase.ImageResolution = RayGetProperty(Property.ImageResolution);
             DeviceStatus.IsSaveRawDataDone = false;
             DeviceStatus.IsLumenSaved = false;
             DeviceStatus.IsOCTImagingDone = false;
@@ -223,8 +224,11 @@ namespace RaywattApp.ViewModels
 
             RayPullbackScan(PatientCase.ImageFullPath);
 
-            _angioManager.readyToRecv = true;
-            _angioManager.StartSaveAngioThread(PatientCase.ImageFullPath.Substring(0, PatientCase.ImageFullPath.Length-3));
+            if (DeviceStatus.IsAngioConnected)
+            {
+                _angioManager.ReadyToRecv = true;
+                _angioManager.StartSaveAngioThread(PatientCase);
+            }
 
             threadWaitPullbackDone.Start();            
         }
@@ -239,7 +243,7 @@ namespace RaywattApp.ViewModels
             }
             runWaitPullbackDone = false;
 
-            leaveToPage(Constants.RecordingConfirmPage);
+            leaveToPage(Constants.RecordingConfirmPage, null);
         }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
@@ -247,12 +251,13 @@ namespace RaywattApp.ViewModels
             DrawCrossSectionImage();
         }
 
-        private void leaveToPage(string viewPage)
+        private void leaveToPage(string viewPage, ICommand command)
         {
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
             parameter["patientCase"] = PatientCase;
+            parameter["command"] = command;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(viewPage) { Parameter = parameter });
         }
 
