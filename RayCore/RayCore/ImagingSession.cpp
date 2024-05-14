@@ -11,6 +11,7 @@
 #include "Configuration.h"
 #include "CutViewManager.h"
 #include "IRayLearning.h"
+#include "LookUpTable.h"
 
 CImagingSession::CImagingSession(CMessageService* pMsg, int nSession, bool deleteData) :
 	m_pMsg(pMsg),
@@ -416,6 +417,11 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	std::vector<cv::Mat>& vGuidewire = pSession->m_vGuidewire;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
+	//TODO - Son Lookuptable 공유 받으면 설정하기
+	//CLookUpTable& lut = CLookUpTable::GetInstance();
+	//int result = lut.Load("LUT_Orange.csv");
+	//lut.Apply(circleImage, 1); -> For문 내부에 추가.
+
 	PLOGI.printf("Session #%d lumen detection start - %d frames", pSession->m_nSession, nNumOfSamples);
 	vLumen.clear();
 	vSidebranch.clear();
@@ -435,7 +441,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 
 		cv::Mat circleImage;
 		pImaging->CircularizeImage(it->second, circleImage);
-		cv::cvtColor(circleImage, circleImage, cv::COLOR_GRAY2BGR);
+		cv::cvtColor(circleImage, circleImage, cv::COLOR_GRAY2RGB);
 
 		//lumen
 		cv::Mat contourImage = learning->FindLumen(circleImage);		
@@ -503,17 +509,12 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		vGuidewire.push_back(mGuidewire);
 
 		//calcium
-
-		// Start finding calcium
-		PLOGI.printf("FindCalcium Start");
 		cv::Mat contourCalcium = learning->FindCalcium(circleImage);
 
 		std::vector<std::vector<cv::Point>> vCalciumContours;
 		cv::findContours(contourCalcium, vCalciumContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
-		pImaging->SetCalciumAngle(vCalciumContours, nFrame);
-
-		PLOGI.printf("FindCalcium Done");
+		pImaging->SetCalciumAngle(vCalciumContours);
 
 		pSession->m_pMsg->postMessage(WM_PROCESS_DETECTION, nSession, nFrame);
 	}

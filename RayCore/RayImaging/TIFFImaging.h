@@ -1,5 +1,6 @@
 #pragma once
 #include "OCTImaging.h"
+#include <cmath>
 
 class CTIFFImaging : public COCTImaging
 {
@@ -28,7 +29,7 @@ public:
 	virtual void PostProcess(cv::Mat image);
 	virtual void CircularizeImage(cv::Mat& src, cv::Mat& dst);
 	virtual cv::Mat GetProcessedImage() { return imageConvert; }
-	virtual void SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int currFrame);
+	virtual void SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours);
 	virtual void initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale);
 	virtual void InverseCircularizeImage(cv::Mat& src, cv::Mat& dst);
 	virtual void EraseStentOutLier(cv::Mat& stent);
@@ -36,6 +37,8 @@ public:
 
 protected:
 	void GetLumenOffsetPoints(std::vector<cv::Point>& lumenOffsetBoundary);
-	void ProcessCalciumAsRectangle(cv::Mat contourImage, int currFrame);
+	void FindCalciumAngles(cv::Mat contourImage, const std::vector<std::vector<cv::Point>>& filteredContours);
+	cv::Point2f AngleToPoint(float angle, float length, cv::Point2f center);
+	std::vector<std::pair<float, bool>> FindIntersections(const std::vector<std::vector<cv::Point>>& contours, cv::Point2f center, float length, cv::Mat binary);
 };
 

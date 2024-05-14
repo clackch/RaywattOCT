@@ -228,7 +228,7 @@ void CTIFFImaging::GetLumenOffsetPoints(std::vector<cv::Point>& lumenOffsetBound
 	}
 }
 
-void CTIFFImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int currFrame) {
+void CTIFFImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours) {
 	if (calciumContours.empty()) {
 		return;
 	}
@@ -249,29 +249,106 @@ void CTIFFImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumCo
 	// 최소 넓이 설정
 	double minArea = maxArea/10 > 400.0 ? maxArea/10 : 400.0;
 
+	// 컨투어 필터링
+	std::vector<std::vector<cv::Point>> filteredContours;
+	filteredContours.clear();
 	for (const auto& contour : calciumContours) {
 		double area = cv::contourArea(contour);
 		if (area >= minArea) {
-			calciumData[currFrame].angleNum += 1;
-			PLOGI.printf("currFrame = %d, angleNum = %d, TotalFrame = %d", currFrame, calciumData[currFrame].angleNum, m_nTotalFrame);
+			filteredContours.push_back(contour);
+		}
+	}
+	
+	// 컨투어 그리기
+	cv::Mat contourImage = cv::Mat::zeros(imageCircle.size() , CV_8UC1);
+	cv::drawContours(contourImage, calciumContours, -1, cv::Scalar(255), 2);
 
-			// 각 컨투어를 이미지에 그리기
-			cv::Mat contourImage = imageCircle.clone();
-			cv::drawContours(contourImage, std::vector<std::vector<cv::Point>>{contour}, -1, cv::Scalar(255), 2);
+	//cv::imwrite("ContourIamge_" + std::to_string(m_nCurFrame) + ".png", contourImage);
 
-			// contourImage에 그려진 컨투어를 사용하여 이미지 처리 수행
-			ProcessCalciumAsRectangle(contourImage, currFrame);
+	FindCalciumAngles(contourImage, filteredContours);
+}
+
+void CTIFFImaging::FindCalciumAngles(cv::Mat contourImage, const std::vector<std::vector<cv::Point>>& filteredContours) {
+	cv::Mat binary;
+	cv::threshold(contourImage, binary, 127, 255, cv::THRESH_BINARY);
+
+	//cv::imwrite("binary_" + std::to_string(m_nCurFrame) + ".png", contourImage);
+
+	cv::Point2f center(contourImage.cols / 2.0f, contourImage.rows / 2.0f);
+
+	std::vector<std::pair<float, bool>> intersections = FindIntersections(filteredContours, center, std::max(contourImage.cols, contourImage.rows), binary);
+
+	bool foundStart = false;
+	float startAngle = 0, endAngle = 0;
+
+	int index = 0;
+	for (const auto& intersection : intersections) {
+		if (intersection.second && !foundStart) {
+			startAngle = intersection.first;
+			foundStart = true;
+		}
+		if (foundStart && !intersection.second) {
+			endAngle = index;
+			break;
+		}
+		index++;
+	}
+
+	if (foundStart) {
+		float contourAngle = fmod(endAngle - startAngle, 360);
+
+		PLOGI.printf("Frame%d -> Start Angle : %f", m_nCurFrame, startAngle);
+		PLOGI.printf("Frame%d -> End Angle: %f", m_nCurFrame, endAngle);
+		PLOGI.printf("Frame%d -> Contour Angle: %f", m_nCurFrame, contourAngle);
+	}
+	else {
+		PLOGI.printf("Frame%d No intersections found", m_nCurFrame);
+	}
+}
+
+cv::Point2f CTIFFImaging::AngleToPoint(float angle, float length, cv::Point2f center) {
+	float rad = angle * CV_PI / 180.0;
+	float x = center.x + length * sin(rad);
+	float y = center.y - length * cos(rad);
+
+	if (x < 0) x = 0;
+	if (x >= length) x = length - 1;
+	if (y < 0) y = 0;
+	if (y >= length) y = length - 1;
+	return cv::Point2f(x, y);
+}
+
+std::vector<std::pair<float, bool>> CTIFFImaging::FindIntersections(const std::vector<std::vector<cv::Point>>& contours, cv::Point2f center, float length, cv::Mat binary) {
+	std::vector<std::pair<float, bool>> intersections(360, { 0, false });
+	static int myint = 0;
+
+	cv::Mat tmpImg = binary.clone();
+
+	for (int angle = 0; angle < 360; ++angle) {
+		cv::Point2f lineEnd = AngleToPoint(angle, length, center);
+		cv::LineIterator it(binary, center, lineEnd, 8);
+
+		cv::line(tmpImg, center, lineEnd, cv::Scalar(255), 1);
+
+		bool foundIntersection = false;
+		for (int i = 0; i < it.count; i++, ++it) {
+			cv::Point pt = it.pos();
+			if (binary.at<uchar>(pt) == 255) {
+				intersections[angle] = { static_cast<float>(angle), true };
+				foundIntersection = true;
+				break;
+			}
+		}
+
+		if (foundIntersection) {
+			cv::line(tmpImg, center, lineEnd, cv::Scalar(100), 1);
 		}
 	}
 
-}
+	if (myint == 0) {
+		cv::imwrite("result.png", tmpImg);
+		myint += 1;
+	}
 
-void CTIFFImaging::ProcessCalciumAsRectangle(cv::Mat contourImage, int currFrame) {
-	cv::imwrite("Calcium_Contour" + std::to_string(currFrame) + "_Num_" + std::to_string(calciumData[currFrame].angleNum) + ".png", contourImage);
-
-	cv::Mat remappedImage;
-	cv::remap(contourImage, remappedImage, inverseMatXMap, inverseMatYMap, cv::INTER_NEAREST);
-	cv::rotate(remappedImage, remappedImage, cv::ROTATE_90_COUNTERCLOCKWISE);
-
-	cv::imwrite("Calcium_inverseContour" + std::to_string(currFrame) + "_Num_" + std::to_string(calciumData[currFrame].angleNum) + ".png", remappedImage);
+	return intersections;
 }
