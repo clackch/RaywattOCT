@@ -93,10 +93,13 @@
                                     </Image.RenderTransform>
                                     <i:Interaction.Triggers>
                                         <i:EventTrigger EventName="ManipulationStarting">
-                                            <i:InvokeCommandAction Command="{Binding ReviewStatus.Zoom.ManipulationStartingCommand}" PassEventArgsToCommand="True"/>
+                                            <i:InvokeCommandAction Command="{Binding ManipulationStartingCommand}" PassEventArgsToCommand="True"/>
                                         </i:EventTrigger>
                                         <i:EventTrigger EventName="ManipulationDelta">
                                             <i:InvokeCommandAction Command="{Binding ManipulationDeltaCommand}" PassEventArgsToCommand="True"/>
+                                        </i:EventTrigger>
+                                        <i:EventTrigger EventName="ManipulationCompleted">
+                                            <i:InvokeCommandAction Command="{Binding ManipulationCompletedCommand}" PassEventArgsToCommand="True"/>
                                         </i:EventTrigger>
                                     </i:Interaction.Triggers>
                                 </Image>
@@ -267,10 +270,13 @@
                     </Grid>
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="ManipulationStarting">
-                            <i:InvokeCommandAction Command="{Binding ReviewStatus.Zoom.ManipulationStartingCommand}" PassEventArgsToCommand="True"/>
+                            <i:InvokeCommandAction Command="{Binding ManipulationStartingCommand}" PassEventArgsToCommand="True"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="ManipulationDelta">
                             <i:InvokeCommandAction Command="{Binding ManipulationDeltaCommand}" PassEventArgsToCommand="True"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="ManipulationCompleted">
+                            <i:InvokeCommandAction Command="{Binding ManipulationCompletedCommand}" PassEventArgsToCommand="True"/>
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                 </Grid>

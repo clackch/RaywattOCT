@@ -360,6 +360,7 @@ namespace RaywattApp.Common.Bases
         public const string MeasureDisableErase = "DisableErase";  //Disable Erase
         public const string MeasureZoomIn = "ZoomIn";  //ZoomIn
         public const string MeasureZoomOut = "ZoomOut";  //ZoomOut
+        public const string MeasureZooming = "Zooming";
 
         //Draw Annotation
         public static Brush[] AnnotationBrushes = {
