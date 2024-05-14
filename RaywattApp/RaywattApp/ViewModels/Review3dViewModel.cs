@@ -19,6 +19,7 @@ using RaywattApp.Common.Util;
 using System.Threading;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
+using RaywattApp.Common.Annotation.Models;
 
 namespace RaywattApp.ViewModels
 {
@@ -26,12 +27,6 @@ namespace RaywattApp.ViewModels
     public partial class Review3dViewModel : ReviewViewModelBase, IModelessPatient
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(Review3dViewModel));
-        public enum selectedPullbackType
-        {
-            Unselected,
-            Short,
-            Long
-        }
 
         private bool _isRendering = false;
         public bool IsRendering
@@ -152,7 +147,7 @@ namespace RaywattApp.ViewModels
         private IDialogWindow viewMenuWindow;
         private ICommand _cmdExpandLeftViewMenu;
         public ICommand CmdExpandLeftViewMenu
-        { 
+        {  
             get { return this._cmdExpandLeftViewMenu ?? (this._cmdExpandLeftViewMenu = new RelayCommand(ExpandLeftViewMenu)); }
         }
 
@@ -186,6 +181,8 @@ namespace RaywattApp.ViewModels
             base.OnNavigated(sender, navigatedEventArgs);
             _log.Debug("OnNavigated");
 
+            ODSOCT_SetRenderMode(true);
+
             var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
 
             if (extraData != null)
@@ -213,7 +210,6 @@ namespace RaywattApp.ViewModels
                 _isPtoD = ray3DStatus.IsPtoD;
                 _isSideBranchView = false;
             }
-
             IsRendering = false;
 
             threadInitialize = new Thread(() => threadFuncInitialize());
@@ -312,7 +308,7 @@ namespace RaywattApp.ViewModels
                 new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize), 
                 buffer, 
                 new OpenCvSharp.Size(diameter, diameter));
-
+            
             if (CommonUtil.IsPostCase(PatientCase.Procedure))
             {
                 ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(System.IntPtr.Zero), diameter, diameter, depth, 1, 1, zVal);
@@ -324,9 +320,26 @@ namespace RaywattApp.ViewModels
 
             ODSOCT_InputSurfaceParameter(Ray3DObject.Lumen, 10, 50, ".\\data\\lumen_tex.jpg");
             ODSOCT_InputData(Ray3DObject.Lumen, buffer, diameter, diameter, depth, 1, 1, zVal);
-            ODSOCT_ProcessingDatas();
 
-            ODSOCT_SetRenderMode(true);
+            if (CommonUtil.IsPostCase(PatientCase.Procedure))
+            {
+                buffer = Marshal.AllocHGlobal(diameter * diameter * depth);
+                CommonUtil.StentsToMemory(PatientCase.LumenStents,
+                    new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize),
+                    buffer,
+                    new OpenCvSharp.Size(diameter, diameter));
+                ODSOCT_InputSurfaceParameter(Ray3DObject.Stent, 10, 15, ".\\data\\stent_tex.jpg");
+                ODSOCT_InputData(Ray3DObject.Stent, buffer, diameter, diameter, depth, 1, 1, zVal);
+            }
+
+            //CommonUtil.GuideWireToMemory(PatientCase.LumenGuidewires,
+            //new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize),
+            //buffer,
+            //new OpenCvSharp.Size(diameter, diameter));
+            //ODSOCT_InputSurfaceParameter(Ray3DObject.GuideWire, 10, 15, ".\\data\\guidewire_tex.jpg");
+            //ODSOCT_InputData(Ray3DObject.GuideWire, buffer, diameter, diameter, depth, 1, 1, zVal);
+
+            ODSOCT_ProcessingDatas();
 
             Marshal.FreeHGlobal(buffer);
             timerShowData.Interval = TimeSpan.FromMilliseconds(MinWaitingDelay);
@@ -346,6 +359,8 @@ namespace RaywattApp.ViewModels
                 ray3DStatus.ShowObject(obj, ray3DStatus.ObjectVisibility[(int)obj]);
             }
             ODSOCT_ShowAllWindows();
+
+            IsCutViewOn = ray3DStatus.CutViewOn;
             ODSOCT_Render();
             _log.Debug("TimerFunc Call");
 
@@ -493,7 +508,10 @@ namespace RaywattApp.ViewModels
         {
             if (!IsRendering) return;
 
-            viewMenuWindow = _dialogService.OpenChildWindow(new Review3dViewMenuControl(), this, null, Constants.SideBarExpandSize, Constants.LeftSideBarExpand3dSize, 0, Constants.ViewMenu3dY);
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patientCase"] = PatientCase;
+
+            viewMenuWindow = _dialogService.OpenChildWindow(new Review3dViewMenuControl(), this, parameter, Constants.SideBarExpandSize, Constants.LeftSideBarExpand3dSize, 0, Constants.ViewMenu3dY);
         }
         private void ExpandLeftPatientMenu()
         {

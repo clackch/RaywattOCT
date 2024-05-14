@@ -449,6 +449,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		if (vContours.size() == 0) {
 			vContours.clear();
 			vContours.push_back(vPrevLumen);
+      pImaging->SetLumenContourOffset(vPrevLumen);
 		}
 		else {
 			double maxArea = 0;
@@ -482,12 +483,14 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 			if (isCompletelyContained) {
 				vContours.push_back(largestContour);
 				vPrevLumen = largestContour;
+        pImaging->SetLumenContourOffset(largestContour);
 			}
 			else {
 				std::vector<std::vector<cv::Point>> vCircle;
 				cv::findContours(andResult, vCircle, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 				vContours.push_back(vCircle.at(0));
 				vPrevLumen = vCircle.at(0);
+        pImaging->SetLumenContourOffset(vCircle.at(0));
 			}
 		}
 
@@ -524,13 +527,16 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		for (size_t row = 0; row < vStents.size(); row++) {
 			mStent.at<cv::Point>(row, 0) = cv::Point(vStents[row].x + vStents[row].width / 2, vStents[row].y + vStents[row].height / 2);
 		}
+		
+		pImaging->EraseStentOutLier(mStent);
+		
 		vStent.push_back(mStent);
 
 		//guidewire
 		std::vector<cv::Rect2f> vGuidewires = learning->FindGuidewire();
 		cv::Mat mGuidewire(vGuidewires.size(), 1, CV_32SC2);
 		for (size_t row = 0; row < vGuidewires.size(); row++) {
-			//TODO - Rect ¿µ¿ª ³»¿¡¼­ GW Å×µÎ¸® ºÐ¼®ÇØ¼­ ÁßÁ¡ Ã£´Â ·ÎÁ÷ ÇÊ¿ä
+			//TODO - Rect ì˜ì—­ ë‚´ì—ì„œ GW í…Œë‘ë¦¬ ë¶„ì„í•´ì„œ ì¤‘ì  ì°¾ëŠ” ë¡œì§ í•„ìš”
 			mGuidewire.at<cv::Point>(row, 0) = cv::Point(vGuidewires[row].x + vGuidewires[row].width / 2, vGuidewires[row].y + vGuidewires[row].height / 2);
 		}
 		vGuidewire.push_back(mGuidewire);
@@ -573,7 +579,7 @@ UINT CImagingSession::threadGenerateVolume(LPVOID param) {
 			Sleep(DELAY_FOR_WAIT_PROCESS);
 			continue;
 		}
-
+		
 		cv::Mat imgRect = it->second.clone();
 		pImaging->CircularizeImage(imgRect, imgCircle);
 

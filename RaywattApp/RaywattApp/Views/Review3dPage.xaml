@@ -81,7 +81,7 @@
                                     <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding IsRendering, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
                                 </Border>
                                 <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                                    <component:IconToggleButton Style="{DynamicResource ToggleButtonWithText}" Icon="cutView" Content="{Binding [Cut-View], Source={StaticResource L10N}}" IsChecked="{Binding IsCutViewOn}" IsEnabled="{Binding IsRendering}"/>
+                                    <component:IconToggleButton Style="{DynamicResource ToggleButtonWithText}" Icon="cutView" Content="{Binding [Cut-View], Source={StaticResource L10N}}" IsChecked="{Binding IsCutViewOn, Mode=TwoWay}" IsEnabled="{Binding IsRendering}"/>
                                     <StackPanel Width="6"/>
                                     <component:IconToggleButton Style="{DynamicResource ToggleButtonWithText}" Icon="currentFrameIndicator3D" Content="{Binding [Current Frame Indicator], Source={StaticResource L10N}}" IsChecked="{Binding IsIndicatorOn}" IsEnabled="{Binding IsRendering}"/>
                                 </StackPanel>
