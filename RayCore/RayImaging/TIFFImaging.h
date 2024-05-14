@@ -14,8 +14,8 @@ private:
 
 	struct Calcium {
 		int angleNum = 0;
-		double* startAngle = nullptr;
-		double* endAngle = nullptr;
+		std::vector<double> startAngle;
+		std::vector<double> endAngle;
 	};
 	Calcium* calciumData;
 
@@ -36,5 +36,6 @@ public:
 
 protected:
 	void GetLumenOffsetPoints(std::vector<cv::Point>& lumenOffsetBoundary);
+	void ProcessCalciumAsRectangle(cv::Mat contourImage, int currFrame);
 };
 

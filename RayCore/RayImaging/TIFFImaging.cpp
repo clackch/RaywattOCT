@@ -22,7 +22,6 @@ void CTIFFImaging::Initialize()
 	memset(imageMask.data, 0x00, m_setting.nBScan * m_setting.nAScan);
 	cv::circle(imageMask, cv::Point(imageMask.cols / 2, imageMask.rows / 2), imageMask.cols / 2, cv::Scalar(0xff, 0xff, 0xff), -1);
 	initCircularizeMap(m_setting.nAScan, m_setting.nBScan, m_setting.nAScan, m_setting.nBScan, m_setting.nAScan, 2.0f);
-  calciumData = new Calcium[m_nTotalFrame];
 }
 
 void CTIFFImaging::Process(char* fringes)
@@ -234,6 +233,10 @@ void CTIFFImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumCo
 		return;
 	}
 
+	if (calciumData == nullptr) {
+		calciumData = new Calcium[m_nTotalFrame];
+	}
+
 	// 가장 큰 컨투어 찾기
 	double maxArea = 0;
 	for (const auto& contour : calciumContours) {
@@ -242,16 +245,33 @@ void CTIFFImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumCo
 			maxArea = area;
 		}
 	}
+	
+	// 최소 넓이 설정
+	double minArea = maxArea/10 > 400.0 ? maxArea/10 : 400.0;
 
-	// 최소 넓이 설정 : 400(20x20)보다 작은 컨투어는 제거
-	double minArea = 400.0;
-
-	// 넓이에 따라 필터링
-	std::vector<std::vector<cv::Point>> filteredContours;
 	for (const auto& contour : calciumContours) {
 		double area = cv::contourArea(contour);
 		if (area >= minArea) {
-			filteredContours.push_back(contour);
+			calciumData[currFrame].angleNum += 1;
+			PLOGI.printf("currFrame = %d, angleNum = %d, TotalFrame = %d", currFrame, calciumData[currFrame].angleNum, m_nTotalFrame);
+
+			// 각 컨투어를 이미지에 그리기
+			cv::Mat contourImage = imageCircle.clone();
+			cv::drawContours(contourImage, std::vector<std::vector<cv::Point>>{contour}, -1, cv::Scalar(255), 2);
+
+			// contourImage에 그려진 컨투어를 사용하여 이미지 처리 수행
+			ProcessCalciumAsRectangle(contourImage, currFrame);
 		}
 	}
+
+}
+
+void CTIFFImaging::ProcessCalciumAsRectangle(cv::Mat contourImage, int currFrame) {
+	cv::imwrite("Calcium_Contour" + std::to_string(currFrame) + "_Num_" + std::to_string(calciumData[currFrame].angleNum) + ".png", contourImage);
+
+	cv::Mat remappedImage;
+	cv::remap(contourImage, remappedImage, inverseMatXMap, inverseMatYMap, cv::INTER_NEAREST);
+	cv::rotate(remappedImage, remappedImage, cv::ROTATE_90_COUNTERCLOCKWISE);
+
+	cv::imwrite("Calcium_inverseContour" + std::to_string(currFrame) + "_Num_" + std::to_string(calciumData[currFrame].angleNum) + ".png", remappedImage);
 }

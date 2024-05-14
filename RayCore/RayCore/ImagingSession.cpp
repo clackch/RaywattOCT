@@ -407,7 +407,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 
 	// prepare imaging (without message)
 	COCTImaging* pImaging = CreateColorImaging(nullptr, pSession->m_pImaging->GetSetting(), pDataManager, pSession->GetImagingType());
-
+	
 	IRayLearning* learning = IRayLearning::GetInstance();
 	std::vector<std::vector<cv::Mat>>& vLumen = pSession->m_vLumen;
 	std::vector<std::vector<cv::Mat>>& vSidebranch = pSession->m_vSidebranch;
@@ -429,6 +429,8 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 			Sleep(DELAY_FOR_WAIT_PROCESS);
 			continue;
 		}
+		pImaging->SetFrameInfo(nFrame, nNumOfSamples);
+
 		pImaging->PostProcess(it->second);
 
 		cv::Mat circleImage;
