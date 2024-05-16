@@ -209,6 +209,12 @@ _declspec(dllexport) void* RayGetGuidewirePoints(int nFrame) {
 _declspec(dllexport) int RayGetNumOfGuidewirePoints(int nFrame) {
     return octSystem.GetNumOfGuidewirePoints(nFrame);
 }
+_declspec(dllexport) void* RayGetCalciumAngles(int nFrame) {
+    return octSystem.GetCalciumAngles(nFrame);
+}
+_declspec(dllexport) int RayGetCalciumLength(int nFrame) {
+    return octSystem.GetCalciumLength(nFrame);
+}
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,

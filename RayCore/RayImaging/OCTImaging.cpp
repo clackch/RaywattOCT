@@ -138,7 +138,7 @@ void COCTImaging::CircularizeImage(cv::Mat& src, cv::Mat& dst)
 	cv::remap(src, dst, matXMap, matYMap, cv::INTER_LINEAR);
 }
 
-void COCTImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours) {}
+void COCTImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int& angleNum, std::vector<int>& startAngle, std::vector<int>& endAngle) {}
 
 void COCTImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst) {}
 

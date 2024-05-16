@@ -331,6 +331,28 @@ int CImagingSession::GetNumOfGuidewirePoints(int nFrame){
 	return mat.cols * mat.rows;
 }
 
+void* CImagingSession::GetCalciumAngles(int nFrame) {
+	if (m_vCalcium.size() <= nFrame) return nullptr;
+
+	Calcium calcium = m_vCalcium.at(nFrame);
+	int length = calcium.angleNum * 2;
+	int* calciumAngles = new int[length];
+	for (int i = 0; i < calcium.angleNum; i++) {
+		calciumAngles[i * 2] = calcium.startAngle[i];
+		calciumAngles[i * 2 + 1] = calcium.endAngle[i];
+
+		PLOGI.printf("nFrame %d-%d : AngleSize %d = endAngle %d - starAngle %d", nFrame, i, calcium.endAngle[i]- calcium.startAngle[i], calcium.endAngle[i], calcium.startAngle[i]);
+	}
+	return calciumAngles;
+}
+
+int CImagingSession::GetCalciumLength(int nFrame) {
+	if (m_vCalcium.size() <= nFrame) return 0;
+
+	int length = m_vCalcium.at(nFrame).angleNum;
+	return length;
+}
+
 CImagingSession* CImagingSession::createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type) {
 	CImagingSession* pSession = new CImagingSession(pMsg, nSession, deleteData);
 
@@ -412,7 +434,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	IRayLearning* learning = IRayLearning::GetInstance();
 	std::vector<std::vector<cv::Mat>>& vLumen = pSession->m_vLumen;
 	std::vector<std::vector<cv::Mat>>& vSidebranch = pSession->m_vSidebranch;
-	std::vector<std::vector<cv::Mat>>& vCalcium = pSession->m_vCalcium;
+	std::vector<Calcium>& vCalcium = pSession->m_vCalcium;
 	std::vector<cv::Mat>& vStent = pSession->m_vStent;
 	std::vector<cv::Mat>& vGuidewire = pSession->m_vGuidewire;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
@@ -425,9 +447,9 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	PLOGI.printf("Session #%d lumen detection start - %d frames", pSession->m_nSession, nNumOfSamples);
 	vLumen.clear();
 	vSidebranch.clear();
-	vCalcium.clear();
 	vStent.clear();
 	vGuidewire.clear();
+	vCalcium.clear();
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadObjectDetection->isRun; nFrame++) {
 		std::map<int, cv::Mat>::iterator it = pSession->m_mapImage.find(nFrame);
 		if (it == pSession->m_mapImage.end()) {
@@ -514,7 +536,9 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		std::vector<std::vector<cv::Point>> vCalciumContours;
 		cv::findContours(contourCalcium, vCalciumContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
-		pImaging->SetCalciumAngle(vCalciumContours);
+		Calcium calcium;
+		pImaging->SetCalciumAngle(vCalciumContours, calcium.angleNum, calcium.startAngle, calcium.endAngle);
+		vCalcium.push_back(calcium);
 
 		pSession->m_pMsg->postMessage(WM_PROCESS_DETECTION, nSession, nFrame);
 	}

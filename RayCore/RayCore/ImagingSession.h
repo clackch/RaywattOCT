@@ -47,9 +47,16 @@ private:
 
 	std::vector<std::vector<cv::Mat>> m_vLumen;
 	std::vector<std::vector<cv::Mat>> m_vSidebranch;
-	std::vector<std::vector<cv::Mat>> m_vCalcium;
 	std::vector<cv::Mat> m_vStent;
 	std::vector<cv::Mat> m_vGuidewire;
+
+	struct Calcium {
+		int angleNum = 0;
+		std::vector<int> startAngle;
+		std::vector<int> endAngle;
+	};
+	std::vector<Calcium> m_vCalcium;
+
 	char* m_pVolumeData;
 
 private:
@@ -96,6 +103,8 @@ public:
 	int GetNumOfStentPoints(int nFrame);
 	void* GetGuidewirePoints(int nFrame);
 	int GetNumOfGuidewirePoints(int nFrame);
+	void* GetCalciumAngles(int nFrame);
+	int GetCalciumLength(int nFrame);
 
 private:
 	static CImagingSession* createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type);

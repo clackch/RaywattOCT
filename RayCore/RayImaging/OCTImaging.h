@@ -90,7 +90,7 @@ public:
 	virtual void EraseStentOutLier(cv::Mat& stent);
 	virtual void SetLumenContourOffset(std::vector<cv::Point> lumenContour);
 
-	virtual void SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours);
+	virtual void SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int& angleNum, std::vector<int>& startAngle, std::vector<int>& endAngle);
 
 	int GetSheathPosition() { return m_nSheathPosition; }
 protected:
