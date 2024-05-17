@@ -176,7 +176,7 @@ namespace RaywattApp.ViewModels
 
                 SetCondition();
 
-                if (DeviceStatus.IsAngioConnected && !data.ContainsKey("command"))
+                if (!_angioManager.IsAngioInit)
                 {
                     _angioManager.SelectCathRoom();
                 }

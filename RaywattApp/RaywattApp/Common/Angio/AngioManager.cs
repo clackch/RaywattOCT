@@ -108,6 +108,7 @@ namespace RaywattApp.Common.Angio
         public short IsChpFileChangeSuccess { get { return isChpFileChangeSuccess; } set { isChpFileChangeSuccess = value; } }
 
         private bool isAngioInit = false;
+        public bool IsAngioInit { get { return isAngioInit; } set { isAngioInit = value; } }
 
         public AngioManager(IDialogService dialogService)
         {
@@ -198,7 +199,8 @@ namespace RaywattApp.Common.Angio
         {
             AskBoardConnection();
 
-            while (!isAngioInit)
+
+            while (!boardConnection)
             {
                 Thread.Sleep(500);
             }
@@ -375,8 +377,7 @@ namespace RaywattApp.Common.Angio
                     {
                         ViewModelBase._deviceStatus.IsAngioConnected = false;
                     });
-
-                    isAngioInit = isAngioInit == false ? true : isAngioInit;
+                    isAngioInit = false;
                 }
                 else if (command == (byte)CommandType.FGAngioConnected)
                 {
@@ -390,7 +391,7 @@ namespace RaywattApp.Common.Angio
                         ViewModelBase._deviceStatus.IsAngioConnected = true;
                     });
 
-                    if (isAngioInit)
+                    if (!isAngioInit)
                     {
                         Task.Run(() =>
                         {
@@ -400,7 +401,6 @@ namespace RaywattApp.Common.Angio
                             });
                         });
                     }
-                    isAngioInit = isAngioInit == false ? true : isAngioInit;
                 }
                 else if (command == (byte)CommandType.FGBoardExist)
                 {
@@ -411,9 +411,7 @@ namespace RaywattApp.Common.Angio
                 }
                 else if (command == (byte)CommandType.FGBoardNotExist)
                 {
-                    boardConnection = false;
                     threadOnLiveAngioImage = false;
-                    isAngioInit = true;
                 }
                 else if (command == (byte)CommandType.FGSuccessChangeChp)
                 {
@@ -599,6 +597,7 @@ namespace RaywattApp.Common.Angio
             {
                 Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
                 ViewModelBase._deviceStatus.SelectedCathRoom = (CathRoom)data["selectedCathRoom"];
+                isAngioInit = true;
             }
         }
 
