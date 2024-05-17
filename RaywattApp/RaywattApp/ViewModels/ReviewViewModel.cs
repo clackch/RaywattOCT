@@ -1364,22 +1364,12 @@ namespace RaywattApp.ViewModels
             }
             else
             {
-                int firstStent = -1, lastStent = -1, cnt = 0;
-                foreach(LumenStent lumenStent in LumenStents)
-                {
-                    if(lumenStent.Points != null && lumenStent.Points.Count >= Constants.LumenProfileStentMinCount)
-                    {
-                        if (firstStent == -1)
-                            firstStent = cnt;
-
-                        lastStent = cnt;
-                    }
-                    cnt++;
-                }
+                int stentProximal = 0, stentDistal = 0;
+                CommonUtil.GetStentProximalDistal(LumenStents, out stentProximal, out stentDistal);
 
                 int frameDiff = (int)(Constants.PostLesionLengthInitValue * ReviewStatus.NumberOfFrames * 10 / int.Parse(PatientCase.PullbackLength));
-                proximalIdx = firstStent - frameDiff > 0 ? firstStent - frameDiff : 0;
-                distalIdx = lastStent + frameDiff < ReviewStatus.NumberOfFrames ? lastStent + frameDiff : ReviewStatus.NumberOfFrames - 1;
+                proximalIdx = stentProximal - frameDiff > 0 ? stentProximal - frameDiff : 0;
+                distalIdx = stentDistal + frameDiff < ReviewStatus.NumberOfFrames ? stentDistal + frameDiff : ReviewStatus.NumberOfFrames - 1;
             }
 
             Section.Proximal.X = CommonUtil.GetPositionFromFrame(proximalIdx, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
