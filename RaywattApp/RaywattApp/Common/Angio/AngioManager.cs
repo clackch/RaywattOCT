@@ -378,11 +378,12 @@ namespace RaywattApp.Common.Angio
                         SendCommandPacket(CommandType.FGStopped);
                     }
 
+                    isAngioInit = false;
+
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
                         ViewModelBase._deviceStatus.IsAngioConnected = false;
                     });
-                    isAngioInit = false;
                 }
                 else if (command == (byte)CommandType.FGAngioConnected)
                 {
@@ -391,12 +392,7 @@ namespace RaywattApp.Common.Angio
                         SendCommandPacket(CommandType.FGStarted);
                     }
 
-                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        ViewModelBase._deviceStatus.IsAngioConnected = true;
-                    });
-
-                    if (!isAngioInit)
+                    if (!isAngioInit && !ViewModelBase._deviceStatus.IsAngioConnected)
                     {
                         Task.Run(() =>
                         {
@@ -406,6 +402,11 @@ namespace RaywattApp.Common.Angio
                             });
                         });
                     }
+
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        ViewModelBase._deviceStatus.IsAngioConnected = true;
+                    });
                 }
                 else if (command == (byte)CommandType.FGBoardExist)
                 {
