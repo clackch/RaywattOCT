@@ -25,10 +25,7 @@ using System.Windows.Controls;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
 using Newtonsoft.Json;
-using System.Diagnostics;
 using RaywattApp.Common.Angio;
-using System.Reflection.Metadata.Ecma335;
-using System.Windows.Documents;
 
 namespace RaywattApp.Common.Util
 {
@@ -580,7 +577,7 @@ namespace RaywattApp.Common.Util
             }
 
             //Stent Area
-            if (isPostCase && lumenStent.Points != null && lumenStent.Points.Count >= Constants.LumenProfileStentMinCount)
+            if (isPostCase && lumenStent.Points != null && lumenStent.IsStent)
             {
                 //MalApposition
                 foreach(double appositionLength in lumenStent.AppositionLength)
@@ -1389,7 +1386,7 @@ namespace RaywattApp.Common.Util
                 Point[][] contours;
                 List<Point> contour = new List<Point>();
 
-                if (stentList[i].Points == null || stentList[i].Points.Count < 3)
+                if (stentList[i].Points == null || !stentList[i].IsStent)
                     continue;
 
                 imgLumen.SetTo(Scalar.Black);
@@ -1762,25 +1759,116 @@ namespace RaywattApp.Common.Util
 
         public static void GetStentProximalDistal(List<LumenStent> lumenStents, out int proximal, out int distal)
         {
-            bool isProximal = true;
             proximal = 0;
             distal = 0;
 
-            for(int i=0; i < lumenStents.Count; i++)
+            int[] numbers = new int[lumenStents.Count];
+
+            bool isValid = false;
+
+            for (int i = 0; i < lumenStents.Count; i++)
             {
+                lumenStents[i].IsStent = false;
+
                 if (lumenStents[i].Points == null)
-                    continue;
-
-                if(isProximal && lumenStents[i].Points.Count >= Constants.LumenProfileStentMinCount)
                 {
-                    proximal = i;
-                    isProximal = false;
+                    lumenStents[i].Points = new List<System.Windows.Point>();
+                    lumenStents[i].AppositionLength = new List<double>();
+                    numbers[i] = 0;
+                }
+                else
+                {
+                    numbers[i] = lumenStents[i].Points.Count;
+
+                    if (lumenStents[i].Points.Count > 0 && !isValid)
+                        isValid = true;
+                }                    
+            }
+
+            if (!isValid)
+                return;
+            
+            List<(List<int> sequence, int startIndex, int endIndex)> sequences = new List<(List<int> sequence, int startIndex, int endIndex)>();
+            List<int> currentSequence = new List<int>();
+            int startIndex = -1;
+
+            // 연속된 0 이상의 숫자 그룹 찾기
+            for (int i = 0; i < numbers.Length; i++)
+            {
+                int number = numbers[i];
+
+                if (number != 0)
+                {
+                    if (startIndex == -1)
+                    {
+                        startIndex = i;
+                    }
+                    currentSequence.Add(number);
+                }
+                else
+                {
+                    if (currentSequence.Count > 0)
+                    {
+                        sequences.Add((new List<int>(currentSequence), startIndex, i - 1));
+                        currentSequence.Clear();
+                        startIndex = -1;
+                    }
+                }
+            }
+
+            // 마지막 시퀀스를 추가
+            if (currentSequence.Count > 0)
+            {
+                sequences.Add((currentSequence, startIndex, numbers.Length - 1));
+            }
+
+            // 그룹 간의 간격이 3 이하면 합치기
+            List<(List<int> sequence, int startIndex, int endIndex)> mergedSequences = new List<(List<int> sequence, int startIndex, int endIndex)>();
+
+            if (sequences.Count > 0)
+            {
+                var currentMergedSequence = sequences[0].sequence;
+                int currentMergedStartIndex = sequences[0].startIndex;
+                int currentMergedEndIndex = sequences[0].endIndex;
+
+                for (int i = 1; i < sequences.Count; i++)
+                {
+                    var (nextSequence, nextStartIndex, nextEndIndex) = sequences[i];
+
+                    if (nextStartIndex - currentMergedEndIndex <= 3)
+                    {
+                        currentMergedSequence.AddRange(nextSequence);
+                        currentMergedEndIndex = nextEndIndex;
+                    }
+                    else
+                    {
+                        mergedSequences.Add((new List<int>(currentMergedSequence), currentMergedStartIndex, currentMergedEndIndex));
+                        currentMergedSequence = nextSequence;
+                        currentMergedStartIndex = nextStartIndex;
+                        currentMergedEndIndex = nextEndIndex;
+                    }
                 }
 
-                if(lumenStents[i].Points.Count >= Constants.LumenProfileStentMinCount)
+                // 마지막 시퀀스를 추가
+                mergedSequences.Add((new List<int>(currentMergedSequence), currentMergedStartIndex, currentMergedEndIndex));
+            }
+
+            // 가장 큰 그룹 찾기
+            var largestSequence = mergedSequences[0];
+            foreach (var sequenceInfo in mergedSequences)
+            {
+                if (sequenceInfo.sequence.Count > largestSequence.sequence.Count)
                 {
-                    distal = i;
+                    largestSequence = sequenceInfo;
                 }
+            }
+
+            proximal = largestSequence.startIndex;
+            distal = largestSequence.endIndex;
+
+            for(int i = proximal; i <= distal; i++)
+            {
+                lumenStents[i].IsStent = true;
             }
         }
       
@@ -1808,6 +1896,25 @@ namespace RaywattApp.Common.Util
 
             BitmapSource bitmap = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgSheath);
             return bitmap;
+        }
+
+        public static void SetColormap(string? colorCode)
+        {
+            if (colorCode == null)
+                return;
+
+            if ("GRGR".Equals(colorCode))
+            {
+                RaySetProperty(Property.Colormap, 1);
+            }
+            else if ("GRAY".Equals(colorCode))
+            {
+                RaySetProperty(Property.Colormap, 2);
+            }
+            else if ("ORNG".Equals(colorCode))
+            {
+                RaySetProperty(Property.Colormap, 3);
+            }
         }
 
         public static bool IsTestMode(Dictionary<string, bool> testMode, string key)
