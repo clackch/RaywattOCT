@@ -179,6 +179,11 @@ namespace RaywattApp.ViewModels
                 if (!_angioManager.IsAngioInit)
                 {
                     _angioManager.SelectCathRoom();
+                    while(!_angioManager.UpdateDeviceInfo)
+                    {
+                        System.Threading.Thread.Sleep(500);
+                    }
+                    _angioManager.UpdateDeviceInfo = false;
                 }
             }
             

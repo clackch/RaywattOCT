@@ -110,6 +110,9 @@ namespace RaywattApp.Common.Angio
         private bool isAngioInit = false;
         public bool IsAngioInit { get { return isAngioInit; } set { isAngioInit = value; } }
 
+        private bool updateDeviceInfo = false;
+        public bool UpdateDeviceInfo { get { return updateDeviceInfo; } set { updateDeviceInfo = value; } }
+
         public AngioManager(IDialogService dialogService)
         {
             _log.Debug("AngioManager");
@@ -120,7 +123,7 @@ namespace RaywattApp.Common.Angio
             imgAngio = ShowNoSignal();
 
             buffer = new byte[256];
-            tmpBuffer = new byte[256];
+            tmpBuffer = new byte[512];
             angioSaveBuffer = new List<byte[]>();
 
             Array.Fill<byte>(buffer, 0);
@@ -198,7 +201,6 @@ namespace RaywattApp.Common.Angio
         private bool InitAngioBoard()
         {
             AskBoardConnection();
-
 
             while (!boardConnection)
             {
@@ -301,10 +303,12 @@ namespace RaywattApp.Common.Angio
         {
             try
             {
-                bytesRead = _tcpClient.GetStream().Read(buffer, 0, buffer.Length);
-
-                Array.Copy(buffer, 0, tmpBuffer, tmpBufferLen, bytesRead);
-                tmpBufferLen += bytesRead;
+                if (tmpBuffer.Length >= tmpBufferLen + buffer.Length)
+                {
+                    bytesRead = _tcpClient.GetStream().Read(buffer, 0, buffer.Length);
+                    Array.Copy(buffer, 0, tmpBuffer, tmpBufferLen, bytesRead);
+                    tmpBufferLen += bytesRead;
+                }
 
                 while (true)
                 {
@@ -361,6 +365,7 @@ namespace RaywattApp.Common.Angio
             if (command == (byte)CommandType.FGDeviceInfo)
             {
                 DeviceInfoPacketProcess();
+                updateDeviceInfo = true;
             }
             else
             {
@@ -407,7 +412,6 @@ namespace RaywattApp.Common.Angio
                     boardConnection = true;
                     threadOnLiveAngioImage = true;
                     AskAngioConnection();
-                    AskDeviceInfo();
                 }
                 else if (command == (byte)CommandType.FGBoardNotExist)
                 {
@@ -415,6 +419,7 @@ namespace RaywattApp.Common.Angio
                 }
                 else if (command == (byte)CommandType.FGSuccessChangeChp)
                 {
+                    AskDeviceInfo();
                     isChpFileChangeSuccess = 1;
                 }
                 else if (command == (byte)CommandType.FGFailChangeChp)
