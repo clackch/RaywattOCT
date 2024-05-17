@@ -45,6 +45,15 @@ namespace RaywattApp.ViewModels.Dialog
 
         protected override void AnswerYes(IDialogWindow dialog)
         {
+            if(SelectedCathRoom == null)
+            {
+                Dictionary<string, object> param = new Dictionary<string, object>();
+                param["title"] = _l10n["CathRoom"];
+                param["message"] = _l10n["Please select Cath Room."];
+                var result = _dialogService.OpenDialog(new AlertDialogControl(), param, Common.Bases.Constants.CathRoomDialogWidth, Common.Bases.Constants.CathRoomDialogHeight);
+                return;
+            }
+
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["selectedCathRoom"] = SelectedCathRoom;
 
