@@ -81,6 +81,7 @@ private:
 	double m_fBrightness;
 	double m_fContrast;
 	double m_fDegree;
+	double m_fColormap;
 	cv::Scalar m_backgroundColor;	// for longitude image
 	bool m_isTestMode;
 
@@ -136,6 +137,8 @@ public:
 	RayError SetBrightness(double value);
 	double GetContrast();
 	RayError SetContrast(double value);
+	double GetColormap();
+	RayError SetColormap(double value);
 	double GetDegree();
 	RayError SetDegree(double value);
 	UINT GetLongitudeBackgroundColor();

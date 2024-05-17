@@ -87,6 +87,8 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
         return octSystem.SetBrightness(value);
     case RayProperty::Contrast:
         return octSystem.SetContrast(value);
+    case RayProperty::Colormap:
+        return octSystem.SetColormap(value);
     case RayProperty::LongitudeBackgroundColor:
         return octSystem.SetLongitudeBackgroundColor(value);
     case RayProperty::LongitudeDegree:
@@ -118,6 +120,8 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return octSystem.GetBrightness();
     case RayProperty::Contrast:
         return octSystem.GetContrast();
+    case RayProperty::Colormap:
+        return octSystem.GetColormap();
     case RayProperty::LongitudeBackgroundColor:
         return octSystem.GetLongitudeBackgroundColor();
     case RayProperty::LongitudeDegree:

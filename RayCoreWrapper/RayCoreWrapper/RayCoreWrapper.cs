@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace RaywattOCT
 {
@@ -27,6 +26,7 @@ namespace RaywattOCT
             CurrentState = 1,
             Brightness,
             Contrast,
+            Colormap,
             LongitudeBackgroundColor,
             LongitudeDegree,
             MotorOnOff,

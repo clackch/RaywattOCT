@@ -18,6 +18,7 @@ using static RaywattOCT.RayCoreWrapper;
 using System.Windows;
 using System.Threading;
 using RaywattOCT;
+using RaywattApp.Common.Util;
 
 namespace RaywattApp.ViewModels
 {
@@ -362,6 +363,7 @@ namespace RaywattApp.ViewModels
                 return;
 
             RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+            CommonUtil.SetColormap(patientCase.Colormap);
             int numOfFrames = RayStartReview(patientCase.ImageFullPath);
 
             if (numOfFrames < (int)RayError.OK)
