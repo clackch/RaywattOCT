@@ -29,6 +29,7 @@ using System.IO;
 using System.Windows.Media;
 using RaywattApp.Common.Angio;
 using System.Xml;
+using System.Diagnostics;
 
 namespace RaywattApp.ViewModels
 {
@@ -1629,12 +1630,32 @@ namespace RaywattApp.ViewModels
             int angioFrameWidth = int.Parse(configNode.SelectSingleNode("AngioFrameWidth").InnerText);
             int channels = int.Parse(configNode.SelectSingleNode("BitsPerPixel").InnerText) / 8;
 
+            Debug.WriteLine("channels = " + channels);
+
+            float Scale = angioFrameHeight > angioFrameWidth ? (float)Constants.AngioSize / angioFrameHeight : (float)Constants.AngioSize / angioFrameWidth;
+
+            int newHeight, newWidth;
+            if (Scale >= 1.0)
+            {
+                newHeight = (int)(angioFrameHeight / Scale);
+                newWidth = (int)(angioFrameWidth / Scale);
+            }
+            else
+            {
+                newHeight = (int)(angioFrameHeight * Scale);
+                newWidth = (int)(angioFrameWidth * Scale);
+            }
+
+            int frameNum = 0;
+
             //Recording -> Review
             if (_angioManager.AngioSaveBuffer.Count != 0)
             {
                 foreach (byte[] data in _angioManager.AngioSaveBuffer)
                 {
                     Mat frame = new Mat(angioFrameHeight, angioFrameWidth, MatType.CV_8UC(channels), data);
+                    Cv2.Resize(frame, frame, new OpenCvSharp.Size(newWidth, newHeight));
+
                     switch (channels)
                     {
                         case 3:
@@ -1646,13 +1667,23 @@ namespace RaywattApp.ViewModels
                             break;
                     }
 
-                    AngioFrames.Add(frame);
-                    PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(frame));
+                    Mat paddedFrame = new Mat((int)Constants.AngioSize, (int)Constants.AngioSize, MatType.CV_8UC1, Scalar.Black);
+
+                    int top = ((int)Constants.AngioSize - newHeight) / 2;
+                    int left = ((int)Constants.AngioSize - newWidth) / 2;
+                    OpenCvSharp.Rect roi = new OpenCvSharp.Rect(left, top, newWidth, newHeight);
+                    Mat destinationROI = new Mat(paddedFrame, roi);
+                    frame.CopyTo(destinationROI);
+
+                    Cv2.ImWrite($"destinationROI_{frameNum}.png", paddedFrame);
+
+                    AngioFrames.Add(paddedFrame);
+                    PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(paddedFrame));
+                    frameNum++;
                 }
 
                 _angioManager.AngioSaveFrameNum = 0;
                 _angioManager.AngioSaveBuffer.Clear();
-
                 return;
             }
 
@@ -1662,7 +1693,12 @@ namespace RaywattApp.ViewModels
                 while (reader.BaseStream.Position != reader.BaseStream.Length)
                 {
                     byte[] data = reader.ReadBytes(angioFrameWidth * angioFrameHeight * channels);
+
                     Mat frame = new Mat(angioFrameHeight, angioFrameWidth, MatType.CV_8UC(channels), data);
+                    Cv2.ImWrite($"destinationROI_{frameNum}.png", frame);
+
+                    Cv2.Resize(frame, frame, new OpenCvSharp.Size(newWidth, newHeight));
+
                     switch (channels)
                     {
                         case 3:
@@ -1674,8 +1710,19 @@ namespace RaywattApp.ViewModels
                             break;
                     }
 
-                    AngioFrames.Add(frame);
-                    PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(frame));
+                    Mat paddedFrame = new Mat((int)Constants.AngioSize, (int)Constants.AngioSize, MatType.CV_8UC1, Scalar.Black);
+
+                    int top = ((int)Constants.AngioSize - newHeight) / 2;
+                    int left = ((int)Constants.AngioSize - newWidth) / 2;
+                    OpenCvSharp.Rect roi = new OpenCvSharp.Rect(left, top, newWidth, newHeight);
+                    Mat destinationROI = new Mat(paddedFrame, roi);
+                    frame.CopyTo(destinationROI);
+
+                    //Cv2.ImWrite($"destinationROI_{frameNum}.png", paddedFrame);
+
+                    AngioFrames.Add(paddedFrame);
+                    PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(paddedFrame));
+                    frameNum++;
                 }
             }
         }
@@ -1733,9 +1780,21 @@ namespace RaywattApp.ViewModels
                 }
                 prevEqualImg = equalizedImage.Clone();
 
-                // 픽셀 100 미만 값 -> 255, 픽셀 100 이상 값 -> 0
-                Mat thresholdImage = new Mat();
-                Cv2.Threshold(equalizedImage, thresholdImage, 100, 255, ThresholdTypes.BinaryInv);
+                // thresholdImage 초기화
+                Mat thresholdImage = new Mat(equalizedImage.Size(), equalizedImage.Type(), Scalar.All(255));
+
+                // 이진화 (픽셀 값이 100 미만인 경우 -> 255, 그 외에는 그대로 둠)
+                for (int y = 0; y < equalizedImage.Rows; y++)
+                {
+                    for (int x = 0; x < equalizedImage.Cols; x++)
+                    {
+                        byte pixelValue = equalizedImage.At<byte>(y, x);
+                        if (pixelValue > 0)
+                        {
+                            thresholdImage.Set<byte>(y, x, pixelValue < 100 ? (byte)255 : (byte)0);
+                        }
+                    }
+                }
 
                 // 이미지 변형(분할 : Segmentation) 처리
                 Mat morphedImage = new Mat();
