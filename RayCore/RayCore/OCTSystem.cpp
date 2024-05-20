@@ -842,13 +842,13 @@ RayError COCTSystem::SetColormap(double value)
 	int result;
 
 	switch ((int)value) {
-	case 1:
+	case 0:
 		result = lut.Load("LUT_green.csv");
 		break;
-	case 2:
+	case 1:
 		result = lut.Load("LUT_gray.csv");
 		break;
-	case 3:
+	case 2:
 		result = lut.Load("LUT_orange.csv");
 		break;
 	default:

@@ -1905,15 +1905,15 @@ namespace RaywattApp.Common.Util
 
             if ("GRGR".Equals(colorCode))
             {
-                RaySetProperty(Property.Colormap, 1);
+                RaySetProperty(Property.Colormap, 0);
             }
             else if ("GRAY".Equals(colorCode))
             {
-                RaySetProperty(Property.Colormap, 2);
+                RaySetProperty(Property.Colormap, 1);
             }
             else if ("ORNG".Equals(colorCode))
             {
-                RaySetProperty(Property.Colormap, 3);
+                RaySetProperty(Property.Colormap, 2);
             }
         }
 
