@@ -852,10 +852,13 @@ RayError COCTSystem::SetColormap(double value)
 		result = lut.Load("LUT_orange.csv");
 		break;
 	default:
+		result = lut.Load("LUT_green.csv");
 		break;
 	}
 	
 	PLOGI.printf("read LUT :%d %s", (int)value, (result > 0) ? "Succeed" : "Failed");
+
+	m_fColormap = value;
 
 	return RayError::OK;
 }
