@@ -1806,8 +1806,6 @@ namespace RaywattApp.ViewModels
                 Mat skeleton = new Mat();
                 skeleton = Skeletonize(morphedImage);
 
-                Cv2.ImWrite("skeleton" + frameNum++ + ".png", skeleton);
-
                 byte[] imageData = new byte[frame.Rows * frame.Cols * frame.ElemSize()];
                 Marshal.Copy(skeleton.Data, imageData, 0, imageData.Length);
 
