@@ -398,13 +398,23 @@ namespace RaywattApp.ViewModels
             if (PatientCase.AngioFrame == null) PatientCase.AngioFrame = new AngioFrame();
             if (PatientCase.AngioFrame.CoRegistration == null) PatientCase.AngioFrame.CoRegistration = new List<CoRegistration>();
 
-            if (PatientCase.AngioFrame.AngioImage.Count == 0) ReadAngioFrames();
-            if (PatientCase.AngioFrame.CoRegistration.Count == 0) ReadTrackPoints();
-            if (PatientCase.AngioFrame.DijkstraHeap.Count == 0)
+            if (PatientCase.AngioFrame.AngioImage.Count == 0)
             {
-                Thread threadImageProcessing = new Thread(() => ThreadImageProcessing());
-                threadImageProcessing.Start();
+                Thread threadReadAngioFrames = new Thread(() => ThreadReadAngioFrames());
+                threadReadAngioFrames.Start();
+
+                if (PatientCase.AngioFrame.DijkstraHeap.Count == 0)
+                {
+                    while(threadReadAngioFrames.IsAlive) {
+                        Thread.Sleep(1000);
+                    }
+                    Thread threadImageProcessing = new Thread(() => ThreadImageProcessing());
+                    threadImageProcessing.Start();
+                }
             }
+            if (PatientCase.AngioFrame.CoRegistration.Count == 0) ReadTrackPoints();
+
+            
 
             AngioTrackPoints = PatientCase.AngioFrame.CoRegistration;
         }
@@ -1612,8 +1622,8 @@ namespace RaywattApp.ViewModels
             CurrentAngioImage = PatientCase.AngioFrame.AngioImage[value];
         }
 
-        private void ReadAngioFrames()
-        { 
+        private void ThreadReadAngioFrames()
+        {
             string file = PatientCase.Image;
             string angioFile = file.Substring(0, file.Length - 3) + "angioframes";
             string paramsFile = file.Substring(0, file.Length - 3) + "params";
@@ -1631,8 +1641,6 @@ namespace RaywattApp.ViewModels
             int angioFrameWidth = int.Parse(configNode.SelectSingleNode("AngioFrameWidth").InnerText);
             int channels = int.Parse(configNode.SelectSingleNode("BitsPerPixel").InnerText) / 8;
 
-            Debug.WriteLine("channels = " + channels);
-
             float Scale = angioFrameHeight > angioFrameWidth ? (float)Constants.AngioSize / angioFrameHeight : (float)Constants.AngioSize / angioFrameWidth;
 
             int newHeight, newWidth;
@@ -1646,8 +1654,6 @@ namespace RaywattApp.ViewModels
                 newHeight = (int)(angioFrameHeight * Scale);
                 newWidth = (int)(angioFrameWidth * Scale);
             }
-
-            int frameNum = 0;
 
             //Recording -> Review
             if (_angioManager.AngioSaveBuffer.Count != 0)
@@ -1676,11 +1682,8 @@ namespace RaywattApp.ViewModels
                     Mat destinationROI = new Mat(paddedFrame, roi);
                     frame.CopyTo(destinationROI);
 
-                    Cv2.ImWrite($"destinationROI_{frameNum}.png", paddedFrame);
-
                     AngioFrames.Add(paddedFrame);
                     PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(paddedFrame));
-                    frameNum++;
                 }
 
                 _angioManager.AngioSaveFrameNum = 0;
@@ -1696,8 +1699,6 @@ namespace RaywattApp.ViewModels
                     byte[] data = reader.ReadBytes(angioFrameWidth * angioFrameHeight * channels);
 
                     Mat frame = new Mat(angioFrameHeight, angioFrameWidth, MatType.CV_8UC(channels), data);
-                    Cv2.ImWrite($"destinationROI_{frameNum}.png", frame);
-
                     Cv2.Resize(frame, frame, new OpenCvSharp.Size(newWidth, newHeight));
 
                     switch (channels)
@@ -1719,12 +1720,11 @@ namespace RaywattApp.ViewModels
                     Mat destinationROI = new Mat(paddedFrame, roi);
                     frame.CopyTo(destinationROI);
 
-                    //Cv2.ImWrite($"destinationROI_{frameNum}.png", paddedFrame);
-
                     AngioFrames.Add(paddedFrame);
                     PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(paddedFrame));
-                    frameNum++;
                 }
+
+                reader.Close();
             }
         }
 
@@ -1763,7 +1763,7 @@ namespace RaywattApp.ViewModels
         private void ImageProcessing(List<Mat> frames)
         {
             Mat prevEqualImg = null, currEqualImg;
-
+            int frameNum = 0;
             foreach (var frame in frames)
             {
                 Mat blurredImage = new Mat();
@@ -1805,6 +1805,8 @@ namespace RaywattApp.ViewModels
                 // 변형 처리 반복 -> 스켈레톤(골격화)
                 Mat skeleton = new Mat();
                 skeleton = Skeletonize(morphedImage);
+
+                Cv2.ImWrite("skeleton" + frameNum++ + ".png", skeleton);
 
                 byte[] imageData = new byte[frame.Rows * frame.Cols * frame.ElemSize()];
                 Marshal.Copy(skeleton.Data, imageData, 0, imageData.Length);
