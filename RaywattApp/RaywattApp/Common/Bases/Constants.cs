@@ -1,7 +1,4 @@
-﻿using RaywattApp.Common.Angio;
-using RaywattApp.Models;
-using System;
-using System.Windows.Media;
+﻿using System.Windows.Media;
 
 namespace RaywattApp.Common.Bases
 {
@@ -253,6 +250,9 @@ namespace RaywattApp.Common.Bases
         //FrameGrabber Folder
         public const string FGFolderPath = SystemRootPath + "\\Raywatt\\FrameGrabber";
 
+        //ML Model Folder
+        public const string MlModelFolderPath = SystemRootPath + "\\Raywatt\\system\\3rdparty\\model";
+
         //Encrypt, Decrypt Public Key
         public const string PublicKey = "raywatt07_hwjckklls_298-87-01441";
 
@@ -292,7 +292,6 @@ namespace RaywattApp.Common.Bases
         public const double LumenProfileExtraHeight = 6;
         public const double PreLesionLengthInitValue = 15;
         public const double PostLesionLengthInitValue = 4;
-        public const int LumenProfileStentMinCount = 5;
 
         //Review - 2D - Side Menu
         public const string LeftUpMenu = "LeftUpMenu";

@@ -411,6 +411,12 @@ Overwrite existing data?</value>
   <data name="Display Modes" xml:space="preserve">
     <value>[K]Display Modes</value>
   </data>
+  <data name="Distal" xml:space="preserve">
+    <value>[K]Distal</value>
+  </data>
+  <data name="Distal Lumen Area" xml:space="preserve">
+    <value>[K]Distal Lumen Area</value>
+  </data>
   <data name="Done" xml:space="preserve">
     <value>[K]Done</value>
   </data>
@@ -615,6 +621,9 @@ Overwrite existing data?</value>
   <data name="Length" xml:space="preserve">
     <value>[K]Length</value>
   </data>
+  <data name="Lesion Length" xml:space="preserve">
+    <value>[K]Lesion Length</value>
+  </data>
   <data name="Live" xml:space="preserve">
     <value>[K]Live</value>
   </data>
@@ -686,6 +695,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Min Exp." xml:space="preserve">
     <value>[K]Min Exp.</value>
+  </data>
+  <data name="Minimal Lumen Area" xml:space="preserve">
+    <value>[K]Minimal Lumen Area</value>
   </data>
   <data name="MLA" xml:space="preserve">
     <value>[K]MLA</value>
@@ -789,6 +801,9 @@ Overwrite existing data?</value>
   <data name="PDA" xml:space="preserve">
     <value>[K]PDA</value>
   </data>
+  <data name="Percent Area Stenosis" xml:space="preserve">
+    <value>[K]Percent Area Stenosis</value>
+  </data>
   <data name="Physician" xml:space="preserve">
     <value>[K]Physician</value>
   </data>
@@ -830,6 +845,12 @@ Overwrite existing data?</value>
   </data>
   <data name="Procedure" xml:space="preserve">
     <value>[K]Procedure</value>
+  </data>
+  <data name="Proximal" xml:space="preserve">
+    <value>[K]Proximal</value>
+  </data>
+  <data name="Proximal Lumen Area" xml:space="preserve">
+    <value>[K]Proximal Lumen Area</value>
   </data>
   <data name="Pullback" xml:space="preserve">
     <value>[K]Pullback</value>
