@@ -18,7 +18,7 @@
 #include "VideoWriter.h"
 #include "TIFFWriter.h"
 #include "ZaberController.h"
-#include "MotorController.h"
+#include "RJController.h"
 #include "LaserController.h"
 #include "LookUpTable.h"
 #include "Utility.h"
@@ -45,7 +45,7 @@ CRaywattLabDlg::CRaywattLabDlg(CWnd* pParent /*=nullptr*/)
 	m_pFFTFile = nullptr;
 	m_pDataReader = nullptr;
 
-	m_pRotaryJunction = nullptr;
+	m_pRJController = nullptr;
 	m_pLaserModule = nullptr;
 
 	m_pThreadCalibration = nullptr;
@@ -100,22 +100,13 @@ void CRaywattLabDlg::setLogger(TCHAR* logRootPath) {
 }
 int CRaywattLabDlg::initializeDevices() {
 	CConfiguration& config = CConfiguration::GetInstance();
-	CMotorController* pMotor = CMotorController::GetInstance();
 
-	if (m_chkInitStage) {
-		if (m_pRotaryJunction->Open(config.stepMotor.port) == false) {
+	if (m_chkInitStage || m_chkInitMotor) {
+		if (m_pRJController->Connect(config.bldcMotor.port) == false) {
 			return E_FAIL;
 		}
-		m_pRotaryJunction->SetSpeed(StepMotorIndex::Both, config.stepMotor.pullbackSpeed);
-	}
-
-	if (m_chkInitMotor) {
-		if (pMotor->Connect() == false) {
-			m_pRotaryJunction->Close();
-			m_pLaserModule->Close();
-			return E_FAIL;
-		}
-		pMotor->SwitchOn();
+		m_pRJController->Set(eStepMotorIndex::Both, config.stepMotor.pullbackSpeed);
+		m_pRJController->SwitchOn();
 	}
 
 	if (m_pAcqDevice == nullptr) {
@@ -125,7 +116,7 @@ int CRaywattLabDlg::initializeDevices() {
 	}
 
 	if (m_pAcqDevice->InitDevice() != NOERROR) {
-		m_pRotaryJunction->Close();
+		m_pRJController->Disconnect();
 		m_pLaserModule->Close();
 		m_pAcqDevice->CleanUp();
 		return E_FAIL;
@@ -138,7 +129,7 @@ int CRaywattLabDlg::finalizeDevices() {
 	{
 		m_pAcqDevice->CleanUp();
 	}
-	m_pRotaryJunction->Close();
+	m_pRJController->Disconnect();
 	m_pLaserModule->Close();
 
 	return NOERROR;
@@ -660,7 +651,7 @@ BOOL CRaywattLabDlg::OnInitDialog()
 
 	m_pDataReader = new CDataReader();
 
-	m_pRotaryJunction = new CArduinoController();
+	m_pRJController = new CRJController();
 	m_pLaserModule = new CLaserModule();
 
 	m_pFrameBuffer = new char[nBufferSize * sizeof(unsigned short)];
@@ -767,13 +758,12 @@ void CRaywattLabDlg::OnDestroy() {
 		delete[] m_pFrameBuffer;
 	}
 
-	CMotorController* pMotor = CMotorController::GetInstance();
-	pMotor->StopMotor();
-	pMotor->SwitchOff();
-	pMotor->Disconnect();
+	m_pRJController->StopMotor();
+	m_pRJController->SwitchOff();
+	m_pRJController->Disconnect();
 
-	m_pRotaryJunction->Close();
-	delete m_pRotaryJunction;
+	m_pRJController->Disconnect();
+	delete m_pRJController;
 
 	m_pLaserModule->Close();
 	delete m_pLaserModule;
@@ -805,6 +795,7 @@ void CRaywattLabDlg::OnBnClickedButtonAdminInitialize()
 	if (m_bInitialized)
 	{
 		finalizeDevices();
+		GetDlgItem(IDC_BUTTON_ADMIN_INITIALIZE)->SetWindowText(_T("Initialize"));
 		GetDlgItem(IDC_BUTTON_START_ACQUISITION)->EnableWindow(FALSE);
 	}
 	else {
@@ -973,8 +964,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveData()
 		m_pDataWriter->StopRecording();
 		GetDlgItem(IDC_BUTTON_SAVE_DATA)->SetWindowText(_T("Saving"));
 
-		CMotorController* pMotorCtrl = CMotorController::GetInstance();
-		pMotorCtrl->StopMotor();
+		m_pRJController->StopMotor();
 
 		// Write Raw, FFT Data
 		m_pImagingRealtime->Stop();
@@ -1251,7 +1241,7 @@ void CRaywattLabDlg::OnBnClickedButtonOpenRotaryJunction()
 
 void CRaywattLabDlg::OnBnClickedButtonSaveCalibration()
 {
-	if (m_pAcqDevice == nullptr || !m_pAcqDevice->IsInit() || !m_pRotaryJunction->IsOpen()) {
+	if (m_pAcqDevice == nullptr || !m_pAcqDevice->IsInit() || !m_pRJController->IsConnected()) {
 		AfxMessageBox(_T("[FAILED] Do initialize first"));
 		return;
 	}

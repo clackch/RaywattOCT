@@ -31,6 +31,24 @@ int CATSDevice::InitDevice() {
 		return E_FAIL;
 	}
 
+	calibrateBoard(m_hATSBoard);
+	if (false)
+	{
+		Setting setting = m_setting;
+		m_setting.bUseKClock = false;
+		m_setting.bUseDES = false;
+
+		configureBoard(m_hATSBoard);
+		configureAcquisition(m_hATSBoard);
+		AlazarStartCapture(m_hATSBoard);
+		int nCurFrame = 0, nTotalFrame = 0;
+		acquire(nCurFrame, nTotalFrame);
+		PLOGI.printf("acquire - curFrame: %d, totalFrame: %d", nCurFrame, nTotalFrame);
+		stop();
+
+		m_setting = setting;
+	}
+
 	int retry = 0;
 	BOOL result = FALSE;
 	do {
@@ -134,6 +152,85 @@ char *CATSDevice::acquire(int& nCurFrame, int& nTotalFrame) {
 	return (char *)m_pCurBuffer;
 }
 
+BOOL CATSDevice::calibrateBoard(HANDLE boardHandle)
+{
+	RETURN_CODE retCode = ApiSuccess;
+	U32 preTriggerSamples = 4096;
+	U32 postTriggerSamples = 4096;
+	U32 samplesPerRecord = preTriggerSamples + postTriggerSamples;
+
+	U16* pAcqBuffer = (U16*)VirtualAlloc(NULL, samplesPerRecord * sizeof(U16), MEM_COMMIT, PAGE_READWRITE);
+
+	AlazarSetRecordSize(boardHandle,
+		preTriggerSamples,
+		postTriggerSamples);
+
+	AlazarSetParameterUL(boardHandle, CHANNEL_A, SET_ADC_MODE, ADC_MODE_DEFAULT);
+
+	retCode = AlazarSetCaptureClock(boardHandle,
+		INTERNAL_CLOCK,
+		SAMPLE_RATE_200MSPS,
+		CLOCK_EDGE_RISING,
+		0);
+	PLOGI.printf("AlazarSetCaptureClock 0x%x %d -- %s", INTERNAL_CLOCK, SAMPLE_RATE_200MSPS, AlazarErrorToText(retCode));
+
+	retCode = AlazarInputControlEx(boardHandle,
+		CHANNEL_A,
+		DC_COUPLING,
+		INPUT_RANGE_PM_400_MV,
+		IMPEDANCE_50_OHM);
+	PLOGI.printf("AlazarInputControlEx -- %s", AlazarErrorToText(retCode));
+
+	retCode = AlazarSetTriggerOperation(boardHandle,
+		TRIG_ENGINE_OP_J,
+		TRIG_ENGINE_J,
+		TRIG_EXTERNAL,
+		TRIGGER_SLOPE_POSITIVE,
+		150,
+		TRIG_ENGINE_K,
+		TRIG_DISABLE,
+		TRIGGER_SLOPE_POSITIVE,
+		128);
+	PLOGI.printf("AlazarSetTriggerOperation -- %s", AlazarErrorToText(retCode));
+
+	retCode = AlazarSetExternalTrigger(boardHandle,
+		DC_COUPLING,
+		ETR_TTL);
+	PLOGI.printf("AlazarSetExternalTrigger -- %s", AlazarErrorToText(retCode));
+
+	retCode = AlazarSetTriggerDelay(boardHandle, 0);
+	PLOGI.printf("AlazarSetTriggerDelay -- %s", AlazarErrorToText(retCode));
+
+	double triggerTimeout_sec = 0;
+	U32 triggerTimeout_clocks = (U32)(triggerTimeout_sec / 10.e-6 + 0.5);
+
+	retCode = AlazarSetTriggerTimeOut(boardHandle, triggerTimeout_clocks);
+	PLOGI.printf("AlazarSetTriggerTimeOut -- %s", AlazarErrorToText(retCode));
+
+	retCode = AlazarConfigureAuxIO(boardHandle, AUX_OUT_TRIGGER, AUX_OUT_TRIGGER);
+	PLOGI.printf("AlazarConfigureAuxIO -- %s", AlazarErrorToText(retCode));
+
+	U32 admaFlags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_NPT | ADMA_FIFO_ONLY_STREAMING;
+
+	retCode = AlazarBeforeAsyncRead(boardHandle, CHANNEL_A, (long) -1 * preTriggerSamples,
+		samplesPerRecord, 1, 1,
+		admaFlags);
+	PLOGI.printf("AlazarBeforeAsyncRead(%d, %d, %d) -- %s", (-1 * preTriggerSamples), samplesPerRecord, admaFlags, AlazarErrorToText(retCode));
+
+	OVERLAPPED overlapped;
+	AlazarAsyncRead(boardHandle, pAcqBuffer, samplesPerRecord, &overlapped);
+	PLOGI.printf("AlazarAsyncRead -- %s", AlazarErrorToText(retCode));
+
+	AlazarStartCapture(boardHandle);
+
+	AlazarTriggered(boardHandle);
+
+	AlazarAbortAsyncRead(boardHandle);
+
+	VirtualFree(pAcqBuffer, 0, MEM_RELEASE);
+
+	return TRUE;
+}
 BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 {
 	RETURN_CODE retCode;

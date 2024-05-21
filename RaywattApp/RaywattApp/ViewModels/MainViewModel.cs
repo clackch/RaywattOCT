@@ -400,12 +400,14 @@ namespace RaywattApp.ViewModels
                     break;
                 case RayEvent.CatheterLoading:
                     //Test
+                    DeviceStatus.CatheterStatus = Constants.CatheterStatusLoading;
                     CatheterProgress = 0;
                     if(!timer.IsEnabled)
                         timer.Start();
                     break;
                 case RayEvent.CatheterUnloading:
                     //Test
+                    DeviceStatus.CatheterStatus = Constants.CatheterStatusUnloading;
                     CatheterProgress = 100;
                     if(!timerUnload.IsEnabled)
                         timerUnload.Start();

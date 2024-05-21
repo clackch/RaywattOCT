@@ -5,8 +5,8 @@
 
 CArduinoController::CArduinoController()
 {
-	m_pPosition[(UINT)StepMotorIndex::Pullback] = 0;
-	m_pPosition[(UINT)StepMotorIndex::Hub] = 0;
+	m_pPosition[(UINT)eStepMotorIndex::Pullback] = 0;
+	m_pPosition[(UINT)eStepMotorIndex::Hub] = 0;
 	m_fTargetPosition = 0.0f;
 	m_nSpeed = 1.f;
 }
@@ -35,7 +35,7 @@ bool CArduinoController::IsMoving()
 
 	return (m_fPosition == m_fTargetPosition);
 }
-bool CArduinoController::SetCurrent(StepMotorIndex idx, int nPosition)
+bool CArduinoController::Current(eStepMotorIndex idx, int nPosition)
 {
 	char strCommand[MAX_PATH];
 	sprintf(strCommand, "current %d %d\n", idx, (int)nPosition);
@@ -44,16 +44,16 @@ bool CArduinoController::SetCurrent(StepMotorIndex idx, int nPosition)
 	Sleep(DELAY_BETWEEN_COMMAND);
 
 	m_pPosition[(UINT)idx] = nPosition;
-	if (idx == StepMotorIndex::Both) {
-		m_pPosition[(UINT)StepMotorIndex::Pullback] = nPosition;
-		m_pPosition[(UINT)StepMotorIndex::Hub] = nPosition;
+	if (idx == eStepMotorIndex::Both) {
+		m_pPosition[(UINT)eStepMotorIndex::Pullback] = nPosition;
+		m_pPosition[(UINT)eStepMotorIndex::Hub] = nPosition;
 	}
 
 	return result;
 }
-bool CArduinoController::MoveAbsolute(StepMotorIndex idx, int nPos, bool delay)
+bool CArduinoController::Move(eStepMotorIndex idx, int nPos, bool delay)
 {
-	double prevPosition = (idx == StepMotorIndex::Both) ? m_pPosition[(UINT)StepMotorIndex::Pullback] : m_pPosition[(UINT)idx];
+	double prevPosition = (idx == eStepMotorIndex::Both) ? m_pPosition[(UINT)eStepMotorIndex::Pullback] : m_pPosition[(UINT)idx];
 	UINT distance = abs((int)nPos - (int)prevPosition);
 	double time = ((double)distance / (double)m_nSpeed) * 1000.f;
 
@@ -71,22 +71,14 @@ bool CArduinoController::MoveAbsolute(StepMotorIndex idx, int nPos, bool delay)
 
 	m_fTargetPosition = nPos;	// unit: 1mm
 	m_pPosition[(UINT)idx] = nPos;
-	if (idx == StepMotorIndex::Both) {
-		m_pPosition[(UINT)StepMotorIndex::Pullback] = nPos;
-		m_pPosition[(UINT)StepMotorIndex::Hub] = nPos;
+	if (idx == eStepMotorIndex::Both) {
+		m_pPosition[(UINT)eStepMotorIndex::Pullback] = nPos;
+		m_pPosition[(UINT)eStepMotorIndex::Hub] = nPos;
 	}
 
 	return result;
 }
-bool CArduinoController::MoveRelative(StepMotorIndex idx, int nOffset)
-{
-	double prevPosition = (idx == StepMotorIndex::Both) ? m_pPosition[(UINT)StepMotorIndex::Pullback] : m_pPosition[(UINT)idx];
-	UINT nPosition = prevPosition + nOffset;
-	PLOGI.printf("prevPosition : %d, offset : %d", (int)prevPosition, nOffset);
-
-	return MoveAbsolute(idx, nPosition);
-}
-bool CArduinoController::SetSpeed(StepMotorIndex idx, int nVelocity)
+bool CArduinoController::Set(eStepMotorIndex idx, int nVelocity)
 {
 	char strCommand[MAX_PATH];
 	sprintf(strCommand, "set %d %d\n", idx, nVelocity);

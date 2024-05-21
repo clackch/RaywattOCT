@@ -1,8 +1,8 @@
 #pragma once
 #include "define.h"
 #include "AcquisitionDevice.h"
-#include "ArduinoController.h"
 #include "MessageService.h"
+#include "RJController.h"
 #include <vector>
 #include <mutex>
 #include <tuple>
@@ -67,7 +67,7 @@ private:
 	CRITICAL_SECTION m_csSession;
 
 	// Rotary Junction
-	CArduinoController* m_pPullbackMotor;
+	CRJController* m_pRJController;
 
 	// Laser Module
 	CLaserModule* m_pLaserModule;
@@ -179,11 +179,13 @@ private:
 	int restartAcqDevice(COCTImaging* pImaging);
 	int connectRotaryJunction();
 	int disconnectRotaryJunction();
+	int controlRotaryJunction(eRJState state);
 	void stopAllSessions();
 	void closeAllSessions();
 	void setBrightnessContrastAllSessions();
 	void redrawCutView();
 	void laserOnOff(bool isOn);
+	bool waitForStepMotors(bool& runFlag);
 
 protected:
 	LRESULT OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam);
@@ -192,6 +194,7 @@ protected:
 	LRESULT OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgUpdateSaveRaw(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgUpdateCatheterState(WPARAM wParam, LPARAM lParam);
+	LRESULT OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgStartReviewSession(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgNotifyProcessDone(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgNotifyEventOccured(WPARAM wParam, LPARAM lParam);
