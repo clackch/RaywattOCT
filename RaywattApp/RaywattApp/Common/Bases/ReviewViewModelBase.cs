@@ -128,6 +128,13 @@ namespace RaywattApp.Common.Bases
             _log.Debug("ReviewViewModelBase");
         }
 
+        public ReviewViewModelBase(IDialogService dialogService)
+        {
+            _log.Debug("ReviewViewModelBase");
+
+            _dialogService = dialogService;
+        }
+
         public ReviewViewModelBase(SqlManager sqlManager, IDialogService dialogService)
         {
             _log.Debug("ReviewViewModelBase");

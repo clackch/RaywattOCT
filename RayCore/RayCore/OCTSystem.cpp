@@ -825,6 +825,45 @@ RayError COCTSystem::SetContrast(double value) {
 }
 
 /*
+* GetColormap
+*/
+double COCTSystem::GetColormap()
+{
+	return m_fColormap;
+}
+
+/*
+* SetColormap
+*/
+RayError COCTSystem::SetColormap(double value)
+{
+	// Read LUT from File
+	CLookUpTable& lut = CLookUpTable::GetInstance();
+	int result;
+
+	switch ((int)value) {
+	case 0:
+		result = lut.Load("LUT_green.csv");
+		break;
+	case 1:
+		result = lut.Load("LUT_gray.csv");
+		break;
+	case 2:
+		result = lut.Load("LUT_orange.csv");
+		break;
+	default:
+		result = lut.Load("LUT_green.csv");
+		break;
+	}
+	
+	PLOGI.printf("read LUT :%d %s", (int)value, (result > 0) ? "Succeed" : "Failed");
+
+	m_fColormap = value;
+
+	return RayError::OK;
+}
+
+/*
 * GetDegree
 */
 double COCTSystem::GetDegree() {
@@ -995,11 +1034,6 @@ UINT COCTSystem::threadService(LPVOID param) {
 	bool ignoreMsg = false;
 
 	PLOGI.printf("Service Start");
-
-	// Read LUT from File
-	CLookUpTable& lut = CLookUpTable::GetInstance();
-	int result = lut.Load("LUT.csv");
-	PLOGI.printf("read LUT : %s", (result > 0) ? "Succeed" : "Failed");
 
 	// Initialize
 	IRayLearning* learning = IRayLearning::GetInstance();
