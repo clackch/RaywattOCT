@@ -4,8 +4,10 @@ using log4net;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using RaywattApp.Common.Bases;
+using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Util;
 using RaywattApp.Models;
+using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,7 +65,7 @@ namespace RaywattApp.ViewModels
             get { return this._ffrPredictCommand ?? (this._ffrPredictCommand = new RelayCommand(FfrPredict)); }
         }
 
-        public ReviewFfrViewModel()
+        public ReviewFfrViewModel(IDialogService dialogService) : base(dialogService)
         {
             _log.Debug("ReviewFfrViewModel");
 
@@ -78,9 +80,8 @@ namespace RaywattApp.ViewModels
 
             sess = new InferenceSession(modelPath);
 
-            //Test
             opacityTimer.Interval = TimeSpan.FromMilliseconds(50);
-            opacityTimer.Tick += new EventHandler(OpacityTest);
+            opacityTimer.Tick += new EventHandler(OpacityTimer);
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -131,6 +132,15 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("FfrPredict");
 
+            if(vessel == -1)
+            {
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["title"] = _l10n["Information"];
+                parameter["message"] = _l10n["$MSG017"];
+                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                return;
+            }
+
             FfrResult = 0;
             OpacityResult = 0.0;
             VisibilityResult = Visibility.Visible;
@@ -143,29 +153,31 @@ namespace RaywattApp.ViewModels
 
         private void SetVessel()
         {
+            _log.Debug("SetVessel");
+
             /*
-                ■ Vessel 구분
-                LAD (Left Anterior Descending artery)
-                    LAD Prox (LAD 근위부)
-                    LAD Mid (LAD 중간부)
-                    LAD Distal (LAD 원위부)
-                    Diagonal 1 (첫 번째 대각가지)
-                    Diagonal 2 (두 번째 대각가지)
-                LCX (Left Circumflex artery)
-                    Left Main (좌주간부, 좌주관 동맥)
-                    LCX Prox (LCX 근위부)
-                    LCX OM1 (첫 번째 Obtuse Marginal branch)
-                    LCX Mid (LCX 중간부)
-                    LCX OM2 (두 번째 Obtuse Marginal branch)
-                    LCX Distal (LCX 원위부)
-                RCA (Right Coronary artery)
-                    RCA Prox (RCA 근위부)
-                    RCA Mid (RCA 중간부)
-                    RCA Distal (RCA 원위부)
-                    PDA (Posterior Descending artery)
-                Other
-                    Other (기타)
-                 */
+            ■ Vessel 구분
+            LAD (Left Anterior Descending artery)
+                LAD Prox (LAD 근위부)
+                LAD Mid (LAD 중간부)
+                LAD Distal (LAD 원위부)
+                Diagonal 1 (첫 번째 대각가지)
+                Diagonal 2 (두 번째 대각가지)
+            LCX (Left Circumflex artery)
+                Left Main (좌주간부, 좌주관 동맥)
+                LCX Prox (LCX 근위부)
+                LCX OM1 (첫 번째 Obtuse Marginal branch)
+                LCX Mid (LCX 중간부)
+                LCX OM2 (두 번째 Obtuse Marginal branch)
+                LCX Distal (LCX 원위부)
+            RCA (Right Coronary artery)
+                RCA Prox (RCA 근위부)
+                RCA Mid (RCA 중간부)
+                RCA Distal (RCA 원위부)
+                PDA (Posterior Descending artery)
+            Other
+                Other (기타)
+            */
             if (PatientCase.Vessel == "$006" || PatientCase.Vessel == "$007" || PatientCase.Vessel == "$008" || PatientCase.Vessel == "$009" || PatientCase.Vessel == "$010")
             {
                 VesselType = "LAD";
@@ -181,15 +193,15 @@ namespace RaywattApp.ViewModels
                 VesselType = "RCA";
                 vessel = 2;
             }
+            else
+            {
+                vessel = -1;
+            }
         }
 
         private void CalcFfrResult()
         {
-            /*
-            ■ 참고
-            PatientCase.FfrFeature.PercentAreaStenosis / PatientCase.FfrFeature.LesionLength / PatientCase.FfrFeature.MinimalLumenArea
-            PatientCase.FfrFeature.PlaqueArea / PatientCase.FfrFeature.DistalLumenArea / PatientCase.FfrFeature.ProximalLumenArea
-             */
+            _log.Debug("CalcFfrResult");
 
             Tensor<float> input = new DenseTensor<float>(new[] { 1, 6 });
             input[0, 0] = (float)PatientCase.FfrFeature.ProximalLumenArea;
@@ -212,6 +224,8 @@ namespace RaywattApp.ViewModels
 
         private void ShowLumenProfile()
         {
+            _log.Debug("ShowLumenProfile");
+
             int frameProximal = PatientCase.SectionProximal;
             int frameDistal = PatientCase.SectionDistal;
             int stentProximal = 0, stentDistal = 0;
@@ -242,7 +256,7 @@ namespace RaywattApp.ViewModels
             MlaX = CommonUtil.GetPositionFromFrame(PatientCase.FfrFeature.MinimalLumenFrameNumber, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, 4);
         }
 
-        private void OpacityTest(object sender, EventArgs e)
+        private void OpacityTimer(object sender, EventArgs e)
         {
             if(OpacityResult >= 1.0)
             {

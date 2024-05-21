@@ -167,6 +167,9 @@ Remove the catheter from patient before proceeding.</value>
   <data name="$MSG016" xml:space="preserve">
     <value>Add physician information on the edit patient screen.</value>
   </data>
+  <data name="$MSG017" xml:space="preserve">
+    <value>Select the vessel from the case information on the 2D screen.</value>
+  </data>
   <data name="$Terms and Conditions" xml:space="preserve">
     <value>Product Intended Use: Clearly define the intended use of the OCT device, including any limitations or specific conditions for use.
 
