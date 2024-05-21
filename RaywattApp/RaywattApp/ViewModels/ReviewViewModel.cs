@@ -814,6 +814,7 @@ namespace RaywattApp.ViewModels
                 lumenContour.Calcium.List.Add(new Tuple<double, double>(samples[2], thirdSize));
 
                 lumenContour.Calcium.TotalAngle = (int)(firstSize + secondSize + thirdSize);
+                lumenContour.Calcium.TotalAngle = 0; // TODO - 동물실험 후 삭제
                 lumenContour.Calcium.MaxThickness = Math.Round(lumenContour.Calcium.TotalAngle / 200.0, 2);
 
                 int idx = firstSize > secondSize ? firstSize > thirdSize ? 0 : 2 : secondSize > thirdSize ? 1 : 2;
