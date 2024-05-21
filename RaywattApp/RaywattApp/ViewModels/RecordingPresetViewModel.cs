@@ -143,6 +143,8 @@ namespace RaywattApp.ViewModels
                     PatientCase.CalciumThreshold = physicians[0].CalciumThreshold;
                     PatientCase.ExpansionThreshold = physicians[0].ExpansionThreshold;
                     PatientCase.AppositionThreshold = physicians[0].AppositionThreshold;
+                    PatientCase.AccessionNumber = "";
+                    PatientCase.Comment = "";
 
                     sqlParameters.Clear();
                     sqlParameters["classification"] = "Present";

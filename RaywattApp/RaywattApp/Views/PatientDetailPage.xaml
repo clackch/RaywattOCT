@@ -54,7 +54,7 @@
                         <ColumnDefinition Width="174"/>
                         <ColumnDefinition Width="136"/>
                         <ColumnDefinition Width="112"/>
-                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="450"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="32,26,0,0">

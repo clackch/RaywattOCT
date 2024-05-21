@@ -78,11 +78,6 @@
                                     <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
                                     <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="8,0,0,0" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
                                 </StackPanel>
-                                <StackPanel Width="12"/>
-                                <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Physician], Source={StaticResource L10N}}"/>
-                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="8,0,0,0" Content="{Binding Patient.PhysicianName}"/>
-                                </StackPanel>
                             </StackPanel>
                         </StackPanel>
                     </Grid>
