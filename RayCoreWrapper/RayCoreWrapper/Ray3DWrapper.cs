@@ -106,6 +106,13 @@ namespace RaywattOCT
             FlyThrough
         };
 
+        public enum Ray3DColorMap : int
+        {
+            Unkown = 0,
+            GreenGray,
+            Orange
+        };
+
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_CreateDll(IntPtr hWnd);
         [DllImport("OCT3d.dll")]
@@ -158,5 +165,7 @@ namespace RaywattOCT
         public static extern int ODSOCT_SetRenderMode(bool isRaywattApp);
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_CutViewOn(bool isRaywattApp);
+        [DllImport("OCT3d.dll")]
+        public static extern int ODSOCT_UpdateColorTable(int mode);
     }
 }
