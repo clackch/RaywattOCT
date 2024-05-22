@@ -478,7 +478,7 @@ namespace RaywattApp.Common.Annotation
 
 
             //stent
-            if(lumenStent != null && lumenStent.Points != null && lumenStent.Points.Count > 0)
+            if(lumenStent != null && lumenStent.Points != null && lumenStent.Points.Count > 0 && lumenStent.IsStent)
             {
                 for(int i=0; i< lumenStent.Points.Count; i++)
                 {

@@ -78,11 +78,6 @@
                                     <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
                                     <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="8,0,0,0" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
                                 </StackPanel>
-                                <StackPanel Width="12"/>
-                                <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Physician], Source={StaticResource L10N}}"/>
-                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="8,0,0,0" Content="{Binding Patient.PhysicianName}"/>
-                                </StackPanel>
                             </StackPanel>
                         </StackPanel>
                     </Grid>
@@ -165,11 +160,11 @@
                         </Grid>
                     </Grid>
                     <!-- Without Angio -->
-                    <Border Grid.Row="4" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}" Visibility="{Binding DeviceStatus.IsAngioConnected, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                    <Border Grid.Row="4" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}" Visibility="{Binding DeviceStatus.IsAngioInitialized, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                         <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill"/>
                     </Border>
                     <!-- With Angio -->
-                    <Grid Grid.Row="4" Visibility="{Binding DeviceStatus.IsAngioConnected, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Grid Grid.Row="4" Visibility="{Binding DeviceStatus.IsAngioInitialized, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
                             <ColumnDefinition Width="20"/>

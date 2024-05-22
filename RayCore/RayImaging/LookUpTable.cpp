@@ -43,6 +43,7 @@ int CLookUpTable::Load(const char* strLUTPath) {
 			}
 		}
 		if (lut.size() == 256) {
+			m_vLUT.clear();
 			m_vLUT.push_back(lut);
 			return m_vLUT.size();
 		}

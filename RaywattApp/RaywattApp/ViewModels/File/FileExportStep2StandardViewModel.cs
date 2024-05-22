@@ -82,11 +82,12 @@ namespace RaywattApp.ViewModels.File
 
             ExportSize = 0;
 
-            double frameSize = GetFrameSize();
+            double frameSize;
             if (FileExport.Material == Constants.ExportMaterialPullback)
             {
                 foreach (PatientCase patientCase in PatientCases)
                 {
+                    frameSize = GetFrameSize(patientCase.AngioYn);
                     int numOfFrames = patientCase.NumOfFrames;
                     if (FileExport.Pullback == Constants.ExportPullbackAVI)
                     {
@@ -100,6 +101,7 @@ namespace RaywattApp.ViewModels.File
             }
             else
             {
+                frameSize = GetFrameSize();
                 int numOfFrames = (FileExport.Material == Constants.ExportMaterialBookmarked) ? FileExport.BookmarkedFrames.Count : 1;
                 double compression = (FileExport.StillFrame == Constants.ExportStillFrameJPEG) ? Constants.ExportJpegCompression : 1;
                 ExportSize = frameSize * numOfFrames * compression;
@@ -108,7 +110,7 @@ namespace RaywattApp.ViewModels.File
             UpdateFileSize(ExportSize);
         }
 
-        private double GetFrameSize()
+        private double GetFrameSize(bool angioYn = false)
         {
             double frameSize = 0;
 
@@ -119,11 +121,11 @@ namespace RaywattApp.ViewModels.File
                 {
                     frameSize = 145;
                 }
-                else if((FileExport.Longitude || FileExport.AngioView) && (FileExport.MeasureAuto || FileExport.MeasureManual))//Check All, Longitude + Measure, Angio + Measure
+                else if((FileExport.Longitude || (FileExport.AngioView && angioYn)) && (FileExport.MeasureAuto || FileExport.MeasureManual))//Check All, Longitude + Measure, Angio + Measure
                 {
                     frameSize = 240;
                 }
-                else if((FileExport.Longitude || FileExport.AngioView) && (!FileExport.MeasureAuto && !FileExport.MeasureManual))//Longitude, Angio (Measure X)
+                else if((FileExport.Longitude || (FileExport.AngioView && angioYn)) && (!FileExport.MeasureAuto && !FileExport.MeasureManual))//Longitude, Angio (Measure X)
                 {
                     frameSize = 170;
                 }

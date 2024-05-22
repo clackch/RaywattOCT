@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Messages;
+using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.Services;
 using System;
@@ -142,6 +143,8 @@ namespace RaywattApp.ViewModels
                     PatientCase.CalciumThreshold = physicians[0].CalciumThreshold;
                     PatientCase.ExpansionThreshold = physicians[0].ExpansionThreshold;
                     PatientCase.AppositionThreshold = physicians[0].AppositionThreshold;
+                    PatientCase.AccessionNumber = "";
+                    PatientCase.Comment = "";
 
                     sqlParameters.Clear();
                     sqlParameters["classification"] = "Present";
@@ -151,6 +154,7 @@ namespace RaywattApp.ViewModels
                         PatientCase.Brightness = int.Parse(presents.FirstOrDefault(x => x.Key == "brightness").Value);
                         PatientCase.Contrast = int.Parse(presents.FirstOrDefault(x => x.Key == "contrast").Value);
                     }
+                    CommonUtil.SetColormap(PatientCase.Colormap);
 
                     CurrentProcedure = new KeyValuePair<string, string>("$001", CodeDefinition.Codes["PROC"]["$001"]);
                     CurrentVessel = new KeyValuePair<string, string>("$000", CodeDefinition.Codes["VESS"]["$000"]);

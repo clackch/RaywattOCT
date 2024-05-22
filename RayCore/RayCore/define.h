@@ -28,6 +28,7 @@ enum class RayProperty {
 	CurrentState = 1,
 	Brightness,
 	Contrast,
+	Colormap,
 	LongitudeBackgroundColor,
 	LongitudeDegree,
 	MotorOnOff,

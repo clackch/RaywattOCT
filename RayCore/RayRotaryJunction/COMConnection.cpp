@@ -17,7 +17,7 @@ bool CCOMConnection::Connect(void* param) {
 
 	if (result) {
 		result &= m_pPort->ConfigurePort(115200, 8, FALSE, NOPARITY, ONESTOPBIT);
-		result &= m_pPort->SetCommunicationTimeouts(MAXWORD, MAXWORD, 100, 0, 100);
+		result &= m_pPort->SetCommunicationTimeouts(50, 100, 10, 50, 10); // MAXWORD, MAXWORD, 100, 0, 100);
 	}
 
 	return result;
