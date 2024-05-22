@@ -176,18 +176,13 @@ namespace RaywattApp.ViewModels
 
                 SetCondition();
 
-                if (!_angioManager.IsAngioInit)
+                if (!DeviceStatus.IsAngioInitialized)
                 {
                     _angioManager.SelectCathRoom();
-                    while(!_angioManager.UpdateDeviceInfo)
-                    {
-                        System.Threading.Thread.Sleep(500);
-                    }
-                    _angioManager.UpdateDeviceInfo = false;
                 }
             }
             
-            if (!_angioManager.ReadyToRecv)
+            if (DeviceStatus.IsAngioInitialized && !_angioManager.ReadyToRecv)
             {
                 _angioManager.SendCommandPacket(CommandType.FGStarted);
             }

@@ -162,11 +162,11 @@
                         </StackPanel>
                     </Grid>
                     <!-- Without Angio -->
-                    <Border Grid.Row="4" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}" Visibility="{Binding DeviceStatus.IsAngioConnected, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                    <Border Grid.Row="4" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}" Visibility="{Binding DeviceStatus.IsAngioInitialized, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                         <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill"/>
                     </Border>
                     <!-- With Angio -->
-                    <Grid Grid.Row="4" Visibility="{Binding DeviceStatus.IsAngioConnected, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Grid Grid.Row="4" Visibility="{Binding DeviceStatus.IsAngioInitialized, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
                             <ColumnDefinition Width="20"/>

@@ -63,6 +63,11 @@ namespace RaywattApp.ViewModels.Dialog
                 parameter["title"] = _l10n["Information"];
                 parameter["message"] = _l10n["$MSG012"];
 
+                if (_angioManager.ReadyToRecv)
+                {
+                    _angioManager.SendCommandPacket(CommandType.FGStarted);
+                }
+
                 _dialogService.OpenDialog(new AlertDialogControl(), parameter, Common.Bases.Constants.ApplicationWidth, Common.Bases.Constants.ApplicationHeight);
             }
             else if(_angioManager.IsChpFileChangeSuccess == -1)

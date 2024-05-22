@@ -107,12 +107,6 @@ namespace RaywattApp.Common.Angio
         private short isChpFileChangeSuccess = 0;
         public short IsChpFileChangeSuccess { get { return isChpFileChangeSuccess; } set { isChpFileChangeSuccess = value; } }
 
-        private bool isAngioInit = false;
-        public bool IsAngioInit { get { return isAngioInit; } set { isAngioInit = value; } }
-
-        private bool updateDeviceInfo = false;
-        public bool UpdateDeviceInfo { get { return updateDeviceInfo; } set { updateDeviceInfo = value; } }
-
         public AngioManager(IDialogService dialogService)
         {
             _log.Debug("AngioManager");
@@ -365,7 +359,6 @@ namespace RaywattApp.Common.Angio
             if (command == (byte)CommandType.FGDeviceInfo)
             {
                 DeviceInfoPacketProcess();
-                updateDeviceInfo = true;
             }
             else
             {
@@ -378,7 +371,7 @@ namespace RaywattApp.Common.Angio
                         SendCommandPacket(CommandType.FGStopped);
                     }
 
-                    isAngioInit = false;
+                    ViewModelBase._deviceStatus.IsAngioInitialized = false;
 
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
@@ -392,7 +385,7 @@ namespace RaywattApp.Common.Angio
                         SendCommandPacket(CommandType.FGStarted);
                     }
 
-                    if (!isAngioInit && !ViewModelBase._deviceStatus.IsAngioConnected)
+                    if (!ViewModelBase._deviceStatus.IsAngioInitialized && !ViewModelBase._deviceStatus.IsAngioConnected)
                     {
                         Task.Run(() =>
                         {
@@ -422,6 +415,8 @@ namespace RaywattApp.Common.Angio
                 {
                     AskDeviceInfo();
                     isChpFileChangeSuccess = 1;
+
+                    ViewModelBase._deviceStatus.IsAngioInitialized = true;
                 }
                 else if (command == (byte)CommandType.FGFailChangeChp)
                 {
@@ -603,7 +598,6 @@ namespace RaywattApp.Common.Angio
             {
                 Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
                 ViewModelBase._deviceStatus.SelectedCathRoom = (CathRoom)data["selectedCathRoom"];
-                isAngioInit = true;
             }
         }
 
