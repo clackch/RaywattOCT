@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Point = System.Windows.Point;
 using log4net;
+using System.Reflection.Metadata;
 
 namespace RaywattApp.Common.Angio
 {
@@ -133,6 +134,11 @@ namespace RaywattApp.Common.Angio
         // 경로 길이 : mylength
         public void ReturnPath(int endX, int endY, int[] vx, int[] vy, out int length, int[] pixelValue)
         {
+            endX = endX > width ? width - 1 : endX;
+            endX = endX < 0 ? 0 : endX;
+            endY = endY > height ? height - 1 : endY;
+            endY = endY < 0 ? 0 : endY;
+
             if (visited[toIndex(endX, endY)] == false)
             {
                 length = 0;

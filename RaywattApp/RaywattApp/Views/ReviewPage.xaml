@@ -192,7 +192,7 @@
                                 </StackPanel>
                             </Grid>
                             <!-- Calcium Indicator -->
-                            <Grid Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$001}">
+                            <!--<Grid Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$001}">
                                 <Grid Visibility="{Binding ReviewStatus.IsCalciumOn, Converter={StaticResource BoolToVisibilityConverter}}">
                                     <Image x:Name="CalciumIndicatorAngio" Width="{x:Static const:Constants.CalciumIndicatorAngioSize}" Height="{x:Static const:Constants.CalciumIndicatorAngioSize}" Source="{Binding CalciumIndicator}"/>
                                     <Grid Width="{x:Static const:Constants.CalciumThicknessIndicatorAngioSize}" Height="{x:Static const:Constants.CalciumThicknessIndicatorAngioSize}" Background="Transparent" Visibility="{Binding MaxCalciumDegree, Converter={StaticResource MaxThicknessVisibilityConverter}}">
@@ -205,7 +205,7 @@
                                         </Grid.RenderTransform>
                                     </Grid>
                                 </Grid>
-                            </Grid>
+                            </Grid>-->
                             <!-- Lumen Contour-->
                             <Grid Width="{x:Static const:Constants.CrossSectionAngio}" Height="{x:Static const:Constants.CrossSectionAngio}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" LumenStents="{Binding LumenStents}" CurrentLumenStent="{Binding CurrentLumenStent, Mode=TwoWay}" Zoom="{Binding ZoomAngio}" FrameNumber="{Binding FrameNumber}" IsDrawOn="{Binding ReviewStatus.IsContourStentOn}" IsEditOn="False" InCommand="{Binding LumenContourCommand, Mode=TwoWay}"/>
@@ -253,7 +253,7 @@
 
                 <!-- Calcium Indicator -->
                 <Grid Grid.Row="0" Grid.RowSpan="3" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$001}" IsManipulationEnabled="true">
-                    <Grid Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                    <!--<Grid Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                         <Grid Visibility="{Binding ReviewStatus.IsCalciumOn, Converter={StaticResource BoolToVisibilityConverter}}">
                             <Image x:Name="CalciumIndicator" Width="{x:Static const:Constants.CalciumIndicatorSize}" Height="{x:Static const:Constants.CalciumIndicatorSize}" Source="{Binding CalciumIndicator}"/>
                             <Grid Width="{x:Static const:Constants.CalciumThicknessIndicatorSize}" Height="{x:Static const:Constants.CalciumThicknessIndicatorSize}" Background="Transparent" Visibility="{Binding MaxCalciumDegree, Converter={StaticResource MaxThicknessVisibilityConverter}}">
@@ -266,8 +266,9 @@
                                 </Grid.RenderTransform>
                             </Grid>
                         </Grid>
-                    </Grid>
-                    <!-- Touch -->
+                    </Grid>-->
+                    
+                     <!--Touch--> 
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="ManipulationStarting">
                             <i:InvokeCommandAction Command="{Binding ManipulationStartingCommand}" PassEventArgsToCommand="True"/>
@@ -653,12 +654,12 @@
                                                     <Label Content="{Binding [º], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource SubPointColor1Brush}" VerticalAlignment="Center"/>
                                                 </StackPanel>
                                                 <StackPanel Height="12"/>
-                                                <Label Content="{Binding [Max Thickness], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left" MinWidth="120"/>
+                                                <!--<Label Content="{Binding [Max Thickness], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left" MinWidth="120"/>
                                                 <StackPanel Height="64" Orientation="Horizontal">
                                                     <Label Content="{Binding MaxThickness}" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
                                                     <StackPanel Width="10"/>
                                                     <Label Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom" Margin="0,0,0,5"/>
-                                                </StackPanel>
+                                                </StackPanel>-->
                                             </StackPanel>
                                             <!-- Stent Info. -->
                                             <StackPanel Orientation="Vertical" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$002|$003}">
@@ -794,14 +795,14 @@
                                                         <Label Content="{Binding [º], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource SubPointColor1Brush}" VerticalAlignment="Center"/>
                                                     </StackPanel>
                                                 </StackPanel>
-                                                <StackPanel Grid.Column="1" Orientation="Vertical">
+                                                <!--<StackPanel Grid.Column="1" Orientation="Vertical">
                                                     <Label Content="{Binding [Max Thickness], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                     <StackPanel Height="40" Orientation="Horizontal">
                                                         <Label Content="{Binding MaxThickness}" Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
                                                         <StackPanel Width="6"/>
                                                         <Label Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom" Margin="0,0,0,7"/>
                                                     </StackPanel>
-                                                </StackPanel>
+                                                </StackPanel>-->
                                             </Grid>
                                         </StackPanel>
                                         <!-- Stent Info. (Angio) -->

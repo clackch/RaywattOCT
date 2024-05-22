@@ -278,21 +278,20 @@ namespace RaywattApp.ViewModels
 
         private double zValueForPullbackType()
         {
-            double lengthB;
+            double pullbackLength;
 
-            switch (PatientCase.PullbackLength)
-            { // to-do 5 Pullback Types need to be set
-                case "SHOR":
-                    lengthB = Constants.PullbackLengthShortSize;
-                    break;
-                case "LONG":
-                    lengthB = Constants.PullbackLengthLongSize;
-                    break;
+            switch(PatientCase.PullbackLength)
+            {
+                case "1000":
+                    pullbackLength = Constants.PullbackLengthLongSize; break;
+                case "600":
+                    pullbackLength = Constants.PullbackLengthShortSize; break;
                 default:
-                    lengthB = Constants.PullbackLengthShortSize;
-                    break;
+                    pullbackLength = Constants.PullbackLengthShortSize; break;
+
             }
-            double zValue = lengthB / PatientCase.NumOfFrames / Constants.DICOMPhysicalDeltaXY;
+            double frameInterval = pullbackLength / PatientCase.NumOfFrames;
+            double zValue = (frameInterval / (Constants.ImageResolution * Constants.XYScale3D)); // 1024에서 500으로 xy 데이터를 축소(속도 이슈)했으므로, 길이 보정 : Constants.XYScale3D
             Debug.WriteLine("zValue =" +  zValue);
             return zValue;
         }
@@ -340,6 +339,7 @@ namespace RaywattApp.ViewModels
             //ODSOCT_InputData(Ray3DObject.GuideWire, buffer, diameter, diameter, depth, 1, 1, zVal);
 
             ODSOCT_ProcessingDatas();
+            ODSOCT_UpdateColorTable((int)RayGetProperty(Property.Colormap));
 
             Marshal.FreeHGlobal(buffer);
             timerShowData.Interval = TimeSpan.FromMilliseconds(MinWaitingDelay);

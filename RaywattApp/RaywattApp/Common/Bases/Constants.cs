@@ -158,7 +158,7 @@ namespace RaywattApp.Common.Bases
         
         //Export DICOM Prefix
         public const string ExportDicomPrefix = "IMG";
-        public const double DICOMPhysicalDeltaXY = 0.0289256198347107; // mm
+        public const double DICOMPhysicalDeltaXY = 0.00684931506849; /*0.0289256198347107;*/ // mm
 
         //File Import/Export
         public const string FileImageExtension = "bin";
@@ -309,6 +309,7 @@ namespace RaywattApp.Common.Bases
         public const double CutView3dY = 130; // 140 - 10 (for View Edge Round)
         public const double CutView3dWidth = 734;
         public const double CutView3dHeight = 540; // 560 - 20 (for View Edge Round)
+        public const double XYScale3D = 1024/500;
 
         //Review - 3D - Fly Through View
         public const double FlyThroughView3dX = 886;
