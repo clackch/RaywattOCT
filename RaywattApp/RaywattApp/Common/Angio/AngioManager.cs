@@ -152,7 +152,7 @@ namespace RaywattApp.Common.Angio
             }
             else
             {
-                foreach (Process process in Process.GetProcessesByName(processName))
+                foreach (Process process in processes)
                 {
                     process.Kill();
                 }
