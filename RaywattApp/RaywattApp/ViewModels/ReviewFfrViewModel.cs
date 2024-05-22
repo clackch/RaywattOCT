@@ -228,27 +228,39 @@ namespace RaywattApp.ViewModels
 
             int frameProximal = PatientCase.SectionProximal;
             int frameDistal = PatientCase.SectionDistal;
-            int stentProximal = 0, stentDistal = 0;
-            CommonUtil.GetStentProximalDistal(PatientCase.LumenStents, out stentProximal, out stentDistal);
-            if (Section.SetMsaMinExp(PatientCase.LumenContours, frameProximal, frameDistal, stentProximal, stentDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength, PatientCase.ImageResolution))
+
+            if (CommonUtil.IsPreCase(PatientCase.Procedure))
             {
-                Section.VislbleMsaMinExp(true);
-                Section.Proximal.IsVisible = Visibility.Visible;
-                Section.Distal.IsVisible = Visibility.Visible;
+                if (Section.SetMlaMld(PatientCase.LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength, PatientCase.ImageResolution))
+                {
+                    Section.Proximal.IsVisible = Visibility.Visible;
+                    Section.Distal.IsVisible = Visibility.Visible;
+                }
+                else
+                {
+                    Section.Proximal.IsVisible = Visibility.Collapsed;
+                    Section.Distal.IsVisible = Visibility.Collapsed;
+                }
             }
             else
             {
-                Section.VislbleMsaMinExp(false);
-                Section.Proximal.IsVisible = Visibility.Collapsed;
-                Section.Distal.IsVisible = Visibility.Collapsed;
+                int stentProximal = 0, stentDistal = 0;
+                CommonUtil.GetStentProximalDistal(PatientCase.LumenStents, out stentProximal, out stentDistal);
+
+                if (Section.SetMsaMinExp(PatientCase.LumenContours, frameProximal, frameDistal, stentProximal, stentDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength, PatientCase.ImageResolution))
+                {
+                    Section.Proximal.IsVisible = Visibility.Visible;
+                    Section.Distal.IsVisible = Visibility.Visible;
+                }
+                else
+                {
+                    Section.Proximal.IsVisible = Visibility.Collapsed;
+                    Section.Distal.IsVisible = Visibility.Collapsed;
+                }
             }
 
             imglumenProfile = CommonUtil.MakeLumenProfileImage(PatientCase.LumenContours, PatientCase.LumenSidebranches, PatientCase.LumenStents, PatientCase.AppositionThreshold, frameProximal, frameDistal, CommonUtil.IsPostCase(PatientCase.Procedure));
             DrawLumenProfileImage();
-
-            List<int> colorFrames = CommonUtil.GetExpansionList(PatientCase.LumenContours, frameProximal, frameDistal, stentProximal, stentDistal, Section.RefArea, PatientCase.ExpansionThreshold);
-            imglumenProfileExtra = CommonUtil.MakeLumenProfileImageExtra(ReviewStatus.NumberOfFrames, colorFrames, false);
-            DrawLumenProfileImageExtra();
 
             Section.Proximal.X = CommonUtil.GetPositionFromFrame(PatientCase.SectionProximal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
             Section.Distal.X = CommonUtil.GetPositionFromFrame(PatientCase.SectionDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
