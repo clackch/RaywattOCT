@@ -56,7 +56,7 @@
                     </Grid.ColumnDefinitions>
                     <Label Grid.Row="0" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Margin="20,28,0,20" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [View], Source={StaticResource L10N}}"/>
                     <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="0,23,0,15">
-                        <CheckBox IsChecked="{Binding FileExport.AngioView}" Content="{Binding [Angio Co-Registration], Source={StaticResource L10N}}"/>
+                        <CheckBox IsChecked="{Binding FileExport.AngioView}" Content="{Binding [Angio Co-Registration], Source={StaticResource L10N}}" IsEnabled="{Binding FileExport.AngioEnabled}"/>
                         <CheckBox IsChecked="{Binding FileExport.Longitude}" Content="{Binding [Longitude], Source={StaticResource L10N}}" Margin="35,0,0,0"/>
                     </StackPanel>
                     <Separator Grid.Row="1" Grid.ColumnSpan="3" Background="{DynamicResource GrayscaleGray5Brush}" Width="760" Height="1"/>

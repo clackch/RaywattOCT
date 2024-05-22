@@ -26,8 +26,8 @@
             </Grid.RowDefinitions>
             <Grid Width="{Binding ImagePartWidth}">
                 <!-- Angio -->
-                <Grid Width="{x:Static const:Constants.ExportAngioSize}" Height="{x:Static const:Constants.ExportAngioSize}" Visibility="{Binding FileExport.AngioView, Converter={StaticResource BoolToVisibilityConverter}}" HorizontalAlignment="Left">
-                    <Image Source="/res/png/angioImage.png" Stretch="Fill"/>
+                <Grid Visibility="{Binding FileExport.AngioView, Converter={StaticResource BoolToVisibilityConverter}}" HorizontalAlignment="Left">
+                    <Image x:Name="angioImage" Source="{Binding AngioImage}" Width="{Binding CrossSectionImageSize}"/>
                 </Grid>
                 <!-- Cross-Section -->
                 <Grid Width="{Binding CrossSectionPartWidth}" HorizontalAlignment="Right">

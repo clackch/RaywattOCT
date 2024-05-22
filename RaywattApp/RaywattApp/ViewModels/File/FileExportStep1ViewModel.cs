@@ -114,6 +114,9 @@ namespace RaywattApp.ViewModels.File
             else
                 FileExport.PatientList.Clear();
 
+
+            bool prevAngioEnabled = FileExport.AngioEnabled;
+            FileExport.AngioEnabled = false;
             foreach (Patient patient in PatientList)
             {
                 if (patient.PatientCaseList == null)
@@ -127,9 +130,12 @@ namespace RaywattApp.ViewModels.File
                         if(!FileExport.PatientList.Contains(patient.Id))
                             FileExport.PatientList.Add(patient.Id);
                         FileExport.SelectedItem.Add(patientCase.Id);
+
+                        if (patientCase.AngioYn) FileExport.AngioEnabled = true;
                     }
                 }
             }
+            if(prevAngioEnabled != FileExport.AngioEnabled) FileExport.AngioView = false;
 
             if(FileExport.SelectedItem.Count == 0)
             {

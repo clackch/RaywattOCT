@@ -147,16 +147,6 @@ namespace RaywattApp.ViewModels
                         case ConnectionStatus.Success:
                             DeviceStatus.IsDeviceConnected = true;
                             break;
-
-                        case ConnectionStatus.OpenServerFailure:
-                            errorMsg = "$MSG014";
-                            isError = true;
-                            break;
-
-                        case ConnectionStatus.TcpSocketFailure:
-                            errorMsg = "$MSG015";
-                            isError = true;
-                            break;
                     }
                 }
                 else
