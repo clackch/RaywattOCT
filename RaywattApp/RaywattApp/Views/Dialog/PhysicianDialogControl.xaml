@@ -1,0 +1,61 @@
+﻿<UserControl x:Class="RaywattApp.Views.Dialog.PhysicianDialogControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:const="clr-namespace:RaywattApp.Common.Bases"
+             xmlns:inter="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:local="clr-namespace:RaywattApp.Views.Dialog"
+             mc:Ignorable="d" 
+             Width="{Binding DialogWidth}" Height="{Binding DialogHeight}">
+
+    <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Width="{x:Static const:Constants.PhysicianDialogHeight}" Height="{x:Static const:Constants.PhysicianDialogWidth}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="32"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="32"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="36"/>
+                <RowDefinition Height="70"/>
+                <RowDefinition Height="42"/>
+                <RowDefinition Height="19"/>
+                <RowDefinition Height="409"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="71"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center">
+                <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Select Physician], Source={StaticResource L10N}}"/>
+            </StackPanel>
+
+            <Grid Grid.Row="2" Grid.Column="1" Width="406">
+                <TextBox Style="{DynamicResource PatientSearch}" Width="406" Height="42" x:Name="PatientSearchName" Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox.InputBindings>
+                        <KeyBinding Command="{Binding SearchCommand}" Key="Enter"/>
+                    </TextBox.InputBindings>
+                </TextBox>
+                <Label Style="{DynamicResource PatientSearchPlaceholder}" TextBlock.FontSize="16" Content="{Binding [Search Name], Source={StaticResource L10N}}" Margin="60,0,0,0"/>
+                <Button Style="{DynamicResource SearchOpacity_Icon}" Command="{Binding SearchCommand}" Margin="18,0,0,0"/>
+            </Grid>
+
+            <DataGrid Grid.Row="4" Grid.Column="1" Name="physicianList" ItemsSource="{Binding PhysicianList}" SelectedItem="{Binding SelectedPhysician}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" Height="409">
+                <inter:Interaction.Triggers>
+                    <inter:EventTrigger EventName="SelectionChanged">
+                        <inter:InvokeCommandAction Command="{Binding SelectionChangedCommand}" CommandParameter="{Binding ElementName=physicianList, Path=SelectedItem}"/>
+                    </inter:EventTrigger>
+                </inter:Interaction.Triggers>
+                <DataGrid.Columns>
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Name}" Header="{Binding [Name], Source={StaticResource L10N}}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+                <StackPanel Width="8"/>
+                <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding SelectCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

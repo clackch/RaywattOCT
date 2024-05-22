@@ -277,7 +277,7 @@ namespace RaywattApp.Common.Annotation
         {
             var drawUtil = dependencyObject as DrawLumenContourUtil;
 
-            if (drawUtil == null || drawUtil.LumenContours == null || drawUtil.FrameNumber < 0)
+            if (drawUtil == null || drawUtil.LumenContours == null || drawUtil.FrameNumber < 0 || !drawUtil.IsDrawOn)
                 return;
 
             drawUtil.DrawLumenContour(drawUtil.CurrentLumenContour, drawUtil.CurrentLumenStent, drawUtil.AppositionThreshold, drawUtil.IsEditOn);
@@ -478,7 +478,7 @@ namespace RaywattApp.Common.Annotation
 
 
             //stent
-            if(lumenStent != null && lumenStent.Points != null && lumenStent.Points.Count > 0)
+            if(lumenStent != null && lumenStent.Points != null && lumenStent.Points.Count > 0 && lumenStent.IsStent)
             {
                 for(int i=0; i< lumenStent.Points.Count; i++)
                 {
@@ -807,7 +807,7 @@ namespace RaywattApp.Common.Annotation
         {
             _log.Debug("Restore");
 
-            if (lumenContourHistory[FrameNumber].Count < 2)
+            if (lumenContourHistory == null || lumenContourHistory[FrameNumber].Count < 2)
                 return;
 
             lumenContourHistory[FrameNumber].Pop();
@@ -819,7 +819,7 @@ namespace RaywattApp.Common.Annotation
         {
             _log.Debug("Reset");
 
-            if (lumenContourHistory[FrameNumber].Count < 2)
+            if (lumenContourHistory == null || lumenContourHistory[FrameNumber].Count < 2)
                 return;
 
             CopyHistoryToLumenContour(lumenContourHistory[FrameNumber].ToArray()[lumenContourHistory[FrameNumber].Count - 1]);
@@ -834,6 +834,9 @@ namespace RaywattApp.Common.Annotation
         private void AutoDetect()
         {
             _log.Debug("AutoDetect");
+
+            if (LumenContours == null || LumenContours.Count < FrameNumber + 1)
+                return;
 
             LumenContours[FrameNumber].ResetLumenContour();
             lumenContourHistory[FrameNumber].Push(CopyLumenContourToHistory(LumenContours[FrameNumber]));

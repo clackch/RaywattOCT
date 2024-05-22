@@ -1,7 +1,4 @@
-﻿using RaywattApp.Common.Angio;
-using RaywattApp.Models;
-using System;
-using System.Windows.Media;
+﻿using System.Windows.Media;
 
 namespace RaywattApp.Common.Bases
 {
@@ -21,7 +18,11 @@ namespace RaywattApp.Common.Bases
         public const string PatientDetailPage = "Views/PatientDetailPage.xaml";
         public const string PatientNewPage = "Views/PatientNewPage.xaml";
         public const string PatientEditPage = "Views/PatientEditPage.xaml";
+        //Physician
+        public const string PhysicianListPage = "Views/PhysicianListPage.xaml";
+        public const string PhysicianEditPage = "Views/PhysicianEditPage.xaml";
         //Recording
+        public const string RecordingPresetPage = "Views/RecordingPresetPage.xaml";
         public const string RecordingSetupPage = "Views/RecordingSetupPage.xaml";
         public const string RecordingLiveViewPage = "Views/RecordingLiveViewPage.xaml";
         public const string RecordingCalibrationPage = "Views/RecordingCalibrationPage.xaml";
@@ -47,8 +48,7 @@ namespace RaywattApp.Common.Bases
         public const string SettingAcquisitionPage = "Views/Setting/SettingAcquisitionPage.xaml";
         public const string SettingLocalizationPage = "Views/Setting/SettingLocalizationPage.xaml";
         public const string SettingDatabasePage = "Views/Setting/SettingDatabasePage.xaml";
-        public const string SettingPhysicianPage = "Views/Setting/SettingPhysicianPage.xaml";
-        public const string SettingServicePage = "Views/Setting/SettingServicePage.xaml";
+        public const string SettingAboutPage = "Views/Setting/SettingAboutPage.xaml";
         public const string SettingLogPage = "Views/Setting/SettingLogPage.xaml";
         public const string SettingTermsConditionsPage = "Views/Setting/SettingTermsConditionsPage.xaml";
 
@@ -76,7 +76,7 @@ namespace RaywattApp.Common.Bases
         public const double FileCopyDialogWidth = 460;
         public const double FileCopyDialogHeight = 219;
         public const double SettingInsideDialogWidth = 584;
-        public const double SettingInsideDialogHeight = 583;
+        public const double SettingInsideDialogHeight = 500;
         public const double SettingEditPhysicianDialogWidth = 472;
         public const double SettingEditPhysicianDialogHeight = 279;
         public const double PatientCaseEditDialogWidth = 860;
@@ -87,14 +87,15 @@ namespace RaywattApp.Common.Bases
         public const double PowerOffDialogHeight = 269;
         public const double CathRoomDialogHeight = 472;
         public const double CathRoomDialogWidth = 472;
+        public const double PhysicianDialogHeight = 472;
+        public const double PhysicianDialogWidth = 659;
 
         //Max Length
         public const int MaxPatientId = 9;
-        public const int MaxPatientLastname = 20;
-        public const int MaxPatientFirstname = 20;
+        public const int MaxLastname = 20;
+        public const int MaxFirstname = 20;
         public const int MaxPatientCaseAccessionNumber = 6;
         public const int MaxPatientCaseComment = 200;
-        public const int MaxPhysicianName = 40;
         public const int MaxVolumeLabel = 15;
 
         //Page
@@ -198,6 +199,8 @@ namespace RaywattApp.Common.Bases
         //Pullback Length
         public const string PullbackLengthLong = "LONG";
         public const string PullbackLengthShort = "SHOR";
+        public const int PullbackLengthLongSize = 100;
+        public const int PullbackLengthShortSize = 60;
 
         //Not Selected
         public const string NotSelected = "Not Selected";
@@ -222,6 +225,7 @@ namespace RaywattApp.Common.Bases
         //Background Color
         public const int BackgroundColor = 0x161616;
         public const int CardBackgroundColor = 0x232323;
+        public const int LumenEditBackgroundColor = 0x333333;
         public const int CompareBackgroundColor = 0x0d0d0d;
 
         //Playback Interval (msec)
@@ -245,6 +249,9 @@ namespace RaywattApp.Common.Bases
 
         //FrameGrabber Folder
         public const string FGFolderPath = SystemRootPath + "\\Raywatt\\FrameGrabber";
+
+        //ML Model Folder
+        public const string MlModelFolderPath = SystemRootPath + "\\Raywatt\\system\\3rdparty\\model";
 
         //Encrypt, Decrypt Public Key
         public const string PublicKey = "raywatt07_hwjckklls_298-87-01441";
@@ -285,7 +292,6 @@ namespace RaywattApp.Common.Bases
         public const double LumenProfileExtraHeight = 6;
         public const double PreLesionLengthInitValue = 15;
         public const double PostLesionLengthInitValue = 4;
-        public const int LumenProfileStentMinCount = 5;
 
         //Review - 2D - Side Menu
         public const string LeftUpMenu = "LeftUpMenu";
@@ -300,9 +306,9 @@ namespace RaywattApp.Common.Bases
 
         //Review - 3D - Cut View
         public const double CutView3dX = 98;
-        public const double CutView3dY = 120;
-        public const double CutView3dWidth = 736;
-        public const double CutView3dHeight = 560;
+        public const double CutView3dY = 130; // 140 - 10 (for View Edge Round)
+        public const double CutView3dWidth = 734;
+        public const double CutView3dHeight = 540; // 560 - 20 (for View Edge Round)
 
         //Review - 3D - Fly Through View
         public const double FlyThroughView3dX = 886;
@@ -353,6 +359,7 @@ namespace RaywattApp.Common.Bases
         public const string MeasureDisableErase = "DisableErase";  //Disable Erase
         public const string MeasureZoomIn = "ZoomIn";  //ZoomIn
         public const string MeasureZoomOut = "ZoomOut";  //ZoomOut
+        public const string MeasureZooming = "Zooming";
 
         //Draw Annotation
         public static Brush[] AnnotationBrushes = {

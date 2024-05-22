@@ -6,7 +6,8 @@ int main()
     rayYolo.LoadDLL();
 
     void* yoloSegment = rayYolo.InitializeSegment();
-    void* yoloDetect = rayYolo.InitializeDetect();        
+    void* yoloDetect = rayYolo.InitializeDetect();       
+    void* yoloCalciumSegment = rayYolo.InitializeCalciumSegment();
 
     //std::vector<std::string> fileList = {"test_img1.png"};
     std::vector<std::string> fileList = { "test_img1.png", "test_img2.png", "test_img3.png", "test_img4.png", "ffrCrossSectionImage.png" };
@@ -49,6 +50,17 @@ int main()
                 cv::imshow(classNameDetect[iterDetect->first], mask);
                 cv::waitKey();
             }
+        }
+
+        //Get Calcium Segment Objects
+        std::map<int, cv::Mat>* mapCalciumSegment = static_cast<std::map<int, cv::Mat>*>(rayYolo.GetCalciumSegmentObjects(yoloCalciumSegment, img));
+
+        //Show
+        std::vector<std::string> classNameCalciumSegment = { "calcium" };
+        std::map<int, cv::Mat>::iterator iterCalciumSegment;
+        for (iterCalciumSegment = mapCalciumSegment->begin(); iterCalciumSegment != mapCalciumSegment->end(); iterCalciumSegment++) {
+            cv::imshow(classNameCalciumSegment[iterCalciumSegment->first], iterCalciumSegment->second);
+            cv::waitKey();
         }
     }
 

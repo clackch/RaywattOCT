@@ -138,6 +138,12 @@ void COCTImaging::CircularizeImage(cv::Mat& src, cv::Mat& dst)
 	cv::remap(src, dst, matXMap, matYMap, cv::INTER_LINEAR);
 }
 
+void COCTImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst) {}
+
+void COCTImaging::EraseStentOutLier(cv::Mat& stent) {}
+
+void COCTImaging::SetLumenContourOffset(std::vector<cv::Point> lumenContour) {}
+
 void COCTImaging::allocateMemory() {
 	// ORDER = 11, nFFTLength = 2^11
 	// nScans 보다 큰 2^n 중에서 제일 작은 수

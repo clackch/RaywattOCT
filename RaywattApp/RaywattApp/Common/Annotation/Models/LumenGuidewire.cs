@@ -7,6 +7,6 @@ namespace RaywattApp.Common.Annotation.Models
     public partial class LumenGuidewire : ObservableObject
     {
         [ObservableProperty]
-        protected List<Point>? points;
+        private List<Point>? points;
     }
 }

@@ -1,8 +1,8 @@
 #pragma once
 #include "define.h"
 #include "AcquisitionDevice.h"
-#include "ArduinoController.h"
 #include "MessageService.h"
+#include "RJController.h"
 #include <vector>
 #include <mutex>
 #include <tuple>
@@ -67,7 +67,7 @@ private:
 	CRITICAL_SECTION m_csSession;
 
 	// Rotary Junction
-	CArduinoController* m_pPullbackMotor;
+	CRJController* m_pRJController;
 
 	// Laser Module
 	CLaserModule* m_pLaserModule;
@@ -81,6 +81,7 @@ private:
 	double m_fBrightness;
 	double m_fContrast;
 	double m_fDegree;
+	double m_fColormap;
 	cv::Scalar m_backgroundColor;	// for longitude image
 	bool m_isTestMode;
 
@@ -136,6 +137,8 @@ public:
 	RayError SetBrightness(double value);
 	double GetContrast();
 	RayError SetContrast(double value);
+	double GetColormap();
+	RayError SetColormap(double value);
 	double GetDegree();
 	RayError SetDegree(double value);
 	UINT GetLongitudeBackgroundColor();
@@ -176,11 +179,13 @@ private:
 	int restartAcqDevice(COCTImaging* pImaging);
 	int connectRotaryJunction();
 	int disconnectRotaryJunction();
+	int controlRotaryJunction(eRJState state);
 	void stopAllSessions();
 	void closeAllSessions();
 	void setBrightnessContrastAllSessions();
 	void redrawCutView();
 	void laserOnOff(bool isOn);
+	bool waitForStepMotors(bool& runFlag);
 
 protected:
 	LRESULT OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam);
@@ -189,6 +194,7 @@ protected:
 	LRESULT OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgUpdateSaveRaw(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgUpdateCatheterState(WPARAM wParam, LPARAM lParam);
+	LRESULT OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgStartReviewSession(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgNotifyProcessDone(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgNotifyEventOccured(WPARAM wParam, LPARAM lParam);

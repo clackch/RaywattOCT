@@ -24,7 +24,7 @@ UINT CLaserModule::threadReadStatus(LPVOID param) {
 	while (pModule->m_pThread->isRun)
 	{
 		pModule->readStatus();
-		Sleep(5);
+		Sleep(100);
 	}
 
 	return NOERROR;
@@ -38,9 +38,6 @@ void CLaserModule::readStatus() {
 	DWORD errmask = 0, eventmask = EV_RXCHAR, ret;
 	OVERLAPPED ov;
 	int r;
-
-	delay_line_GetActualPos(1);
-	delay_line_GetActualPos(2);
 
 	// first, request comm event when characters arrive
 	if (!SetCommMask(m_hComTx, EV_RXCHAR)) return;
@@ -87,7 +84,7 @@ bool CLaserModule::Open(tstring strPort) {
 	delay_line_Set_Velocity((uint8_t)MotorIndex::Polarization, velocity);
 	delay_line_Set_Velocity((uint8_t)MotorIndex::DelayLine, velocity);
 
-	delay_line_GetDelayLineObj(0); //NEED SET (1) AT BEGIN TO SET UP MAINBOARD TO  CONTINOUS MODE (MEAN SEND ALL DATA OF MAINBOARD CONTINUOUS).
+	delay_line_GetDelayLineObj(1); //NEED SET (1) AT BEGIN TO SET UP MAINBOARD TO  CONTINOUS MODE (MEAN SEND ALL DATA OF MAINBOARD CONTINUOUS).
 
 	return true;
 }

@@ -12,6 +12,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using RaywattApp.Services;
 using Newtonsoft.Json.Linq;
+using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels.Dialog
 {
@@ -233,6 +234,10 @@ namespace RaywattApp.ViewModels.Dialog
                             exportIndices = FileExport.BookmarkedFrames;
                         }
 
+                        RaySetProperty(Property.Brightness, patientCase.Brightness);
+                        RaySetProperty(Property.Contrast, patientCase.Contrast);
+                        CommonUtil.SetColormap(patientCase.Colormap);
+                        Constants.ImageResolution = patientCase.ImageResolution;
                         List<Mat> imgCrossSections = new List<Mat>();
                         Mat? imgLongitude = await CommonUtil.ConvertImage(patientCase.ImageFullPath, patientCase.IndicatorDegree, imgCrossSections, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
                         List<Mat> convertedImages = await CommonUtil.MakeImageForExport(patientCase, imgCrossSections, imgLongitude, exportIndices, FileExport, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
@@ -308,6 +313,10 @@ namespace RaywattApp.ViewModels.Dialog
                     exportIndices = FileExport.BookmarkedFrames;
                 }
 
+                RaySetProperty(Property.Brightness, patientCase.Brightness);
+                RaySetProperty(Property.Contrast, patientCase.Contrast);
+                CommonUtil.SetColormap(patientCase.Colormap);
+                Constants.ImageResolution = patientCase.ImageResolution;
                 List<Mat> imgCrossSections = new List<Mat>();
                 Mat? imgLongitude = await CommonUtil.ConvertImage(patientCase.ImageFullPath, patientCase.IndicatorDegree, imgCrossSections, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
                 List<Mat> convertedImages = await CommonUtil.MakeImageForExport(patientCase, imgCrossSections, imgLongitude, exportIndices, FileExport, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
@@ -407,16 +416,18 @@ namespace RaywattApp.ViewModels.Dialog
                             sqlParameters["patient_id"] = patientCase.PatientId;
                             sqlParameters["physician_name"] = patientCase.PhysicianName;
                             sqlParameters["accession_number"] = patientCase.AccessionNumber;
-                            sqlParameters["accession_name"] = patientCase.AccessionName;
                             sqlParameters["comment"] = patientCase.Comment;
                             sqlParameters["vessel"] = patientCase.Vessel;
+                            sqlParameters["location"] = patientCase.Location;
                             sqlParameters["procedure"] = patientCase.Procedure;
                             sqlParameters["pullback_type"] = patientCase.PullbackType;
                             sqlParameters["pullback_length"] = patientCase.PullbackLength;
                             sqlParameters["angio_yn"] = patientCase.AngioYn;
                             sqlParameters["angio_co_registration"] = patientCase.AngioCoRegistration;
                             sqlParameters["indicator_degree"] = patientCase.IndicatorDegree;
-                            sqlParameters["preset_name"] = patientCase.PresetName;
+                            sqlParameters["flush_media"] = patientCase.FlushMedia;
+                            sqlParameters["pullback_trigger"] = patientCase.PullbackTrigger;
+                            sqlParameters["colormap"] = patientCase.Colormap;
                             sqlParameters["calcium_threshold"] = patientCase.CalciumThreshold;
                             sqlParameters["expansion_calculation"] = patientCase.ExpansionCalculation;
                             sqlParameters["expansion_threshold"] = patientCase.ExpansionThreshold;

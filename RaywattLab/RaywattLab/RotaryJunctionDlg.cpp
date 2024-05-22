@@ -113,7 +113,6 @@ void CRotaryJunctionDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 	if (bShow) {
 		CZaberController* pPullback = m_pPullback;
 		CZaberController* pDelayLine = m_pDelayLine;
-		CMotorController* pMotorCtrl = CMotorController::GetInstance();
 
 		bool zaberConnected = (pPullback != nullptr && pPullback->IsOpen());
 		if (zaberConnected) {
@@ -122,7 +121,7 @@ void CRotaryJunctionDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 			GetDlgItem(IDC_BUTTON_ZABER_PULLBACK)->EnableWindow(TRUE);
 		}
 
-		bool motorConnected = (pMotorCtrl != nullptr && pMotorCtrl->IsConnected());
+		bool motorConnected = false;
 		if (motorConnected) {
 			GetDlgItem(IDC_BUTTON_MOTOR_PERFORM_RUN)->EnableWindow(TRUE);
 			GetDlgItem(IDC_BUTTON_MOTOR_STOP)->EnableWindow(TRUE);
@@ -203,14 +202,13 @@ void CRotaryJunctionDlg::OnBnClickedButtonZaberPullback()
 
 void CRotaryJunctionDlg::OnBnClickedButtonMotorPerformRun()
 {
-	CMotorController* pMotorCtrl = CMotorController::GetInstance();
 	CString strVelocity = _T("");
 	int nVelocity = 0;
 
 	GetDlgItem(IDC_EDIT_MOTOR_VELOCITY)->GetWindowText(strVelocity);
 	nVelocity = _ttoi(strVelocity);
 
-	pMotorCtrl->PerformRun(nVelocity);
+	// Perform Run
 
 	strVelocity.Format(_T("%d"), nVelocity);
 	GetDlgItem(IDC_EDIT_MOTOR_VELOCITY)->SetWindowText(strVelocity);
@@ -219,9 +217,7 @@ void CRotaryJunctionDlg::OnBnClickedButtonMotorPerformRun()
 
 void CRotaryJunctionDlg::OnBnClickedButtonMotorStop()
 {
-	CMotorController* pMotorCtrl = CMotorController::GetInstance();
-
-	pMotorCtrl->StopMotor();
+	// Stop Motor
 }
 
 void CRotaryJunctionDlg::OnBnClickedButtonSaveSettings()

@@ -5,10 +5,11 @@
 #define DELAY_BETWEEN_COMMAND	2000
 
 class CArduinoController
-	: public CStepMotorController
+	: public CStepMotorController,
+	public IStepMotorAction
 {
 private:
-	double m_pPosition[(UINT)StepMotorIndex::Max];
+	double m_pPosition[(UINT)eStepMotorIndex::Max];
 	double m_fTargetPosition;
 	UINT m_nSpeed;
 public:
@@ -18,10 +19,9 @@ public:
 	virtual bool Open(tstring strPort);
 	virtual bool IsMoving();
 
-	bool SetCurrent(StepMotorIndex idx, int nPosition);
-	bool MoveAbsolute(StepMotorIndex idx, int nPos, bool delay=true);	// forward (load / unload catheter)
-	bool MoveRelative(StepMotorIndex idx, int nOffset);	// pullback
-	bool SetSpeed(StepMotorIndex idx, int nVelocity);
+	virtual bool Current(eStepMotorIndex idx, int nPosition);
+	virtual bool Move(eStepMotorIndex idx, int nPos, bool delay=true);	// forward (load / unload catheter)
+	virtual bool Set(eStepMotorIndex idx, int nVelocity);
 
 protected:
 	virtual void readResponse();

@@ -15,7 +15,7 @@ namespace RaywattApp.Common.Converters
 
             int frameCnt = int.Parse(parameter.ToString());
 
-            if (int.Parse(CodeDefinition.Codes["PBLE"][value.ToString()]) >= frameCnt)
+            if (int.Parse(value.ToString()) >= frameCnt)
                 return Visibility.Visible;
             else
                 return Visibility.Collapsed;

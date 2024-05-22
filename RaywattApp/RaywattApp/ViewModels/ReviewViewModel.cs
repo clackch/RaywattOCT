@@ -85,6 +85,9 @@ namespace RaywattApp.ViewModels
         private double _maxThickness;
 
         [ObservableProperty]
+        private double _prevScale;
+
+        [ObservableProperty]
         private Indicator _indicatorCrossSection;
 
         [ObservableProperty]
@@ -272,10 +275,22 @@ namespace RaywattApp.ViewModels
             get { return this._cmdMoveIndicator ?? (this._cmdMoveIndicator = new RelayCommand<object>(MoveIndicator)); }
         }
         
+        private ICommand _manipulationStartingCommand;
+        public ICommand ManipulationStartingCommand
+        {
+            get { return this._manipulationStartingCommand ?? (this._manipulationStartingCommand = new RelayCommand<object>(Window_ManipulationStarting)); }
+        }
+
         private ICommand _manipulationDeltaCommand;
         public ICommand ManipulationDeltaCommand
         {
             get { return this._manipulationDeltaCommand ?? (this._manipulationDeltaCommand = new RelayCommand<object>(Window_ManipulationDelta)); }
+        }
+
+        private ICommand _manipulationCompletedCommand;
+        public ICommand ManipulationCompletedCommand
+        {
+            get { return this._manipulationCompletedCommand ?? (this._manipulationCompletedCommand = new RelayCommand<object>(Window_ManipulationCompleted)); }
         }
 
         public ReviewViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager) : base(sqlManager, dialogService)
@@ -913,29 +928,52 @@ namespace RaywattApp.ViewModels
             ReviewStatus.IsMeasurementOn = !ReviewStatus.IsMeasurementOn;
         }
 
+        public void Window_ManipulationStarting(object parameter)
+        {
+            _log.Debug("Manipulation Starting");
+            ManipulationStartingEventArgs e = (ManipulationStartingEventArgs)parameter;
+            e.ManipulationContainer = Application.Current.MainWindow;
+            PrevScale = ReviewStatus.Zoom.ScaleX;
+            MeasurementCommand = Constants.MeasureZooming;
+            e.Handled = true;
+        }
+
         public void Window_ManipulationDelta(object parameter)
         {
-            double prevScale = ReviewStatus.Zoom.ScaleX;
+            ManipulationDeltaEventArgs e = (ManipulationDeltaEventArgs)parameter;
+            int touchPoints = e.Manipulators.Count();
 
-            ReviewStatus.Zoom.Window_ManipulationDelta(parameter);
-
-            if (ReviewStatus.Zoom.ScaleX > Constants.ZoomScaleDefault)
+            if (!ReviewStatus.IsMeasurementOn || (touchPoints > 1 && MeasurementCommand == Constants.MeasureZooming))
             {
-                IndicatorCrossSection.IsVisible = Visibility.Collapsed;
-                ReviewStatus.IsCalciumOn = false;
-                ReviewStatus.IsSheathOn = false;
+                ReviewStatus.Zoom.Window_ManipulationDelta(parameter);
+
+                if (ReviewStatus.Zoom.ScaleX > Constants.ZoomScaleDefault)
+                {
+                    IndicatorCrossSection.IsVisible = Visibility.Collapsed;
+                    ReviewStatus.IsCalciumOn = false;
+                    ReviewStatus.IsSheathOn = false;
+                }
+
+                if (ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault)
+                {
+                    ReviewStatus.IsCalciumOn = true;
+                    ReviewStatus.IsSheathOn = true;
+
+                    if (!ReviewStatus.IsLumenProfile)
+                        IndicatorCrossSection.IsVisible = Visibility.Visible;
+                }
             }
+        }
 
-            if (ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault)
-            {
-                ReviewStatus.IsCalciumOn = true;
-                ReviewStatus.IsSheathOn = true;
+        public void Window_ManipulationCompleted(object parameter)
+        {
+            _log.Debug("Manipulation Completed");
+            ManipulationCompletedEventArgs e = (ManipulationCompletedEventArgs)parameter;
 
-                if (!ReviewStatus.IsLumenProfile)
-                    IndicatorCrossSection.IsVisible = Visibility.Visible;
-            }
+            if (ReviewStatus.IsMeasurementOn)
+                MeasurementCommand = (PrevScale < ReviewStatus.Zoom.ScaleX) ? Constants.MeasureZoomIn : Constants.MeasureZoomOut;
 
-            MeasurementCommand = (prevScale < ReviewStatus.Zoom.ScaleX) ? Constants.MeasureZoomIn : Constants.MeasureZoomOut;
+            e.Handled = true;
         }
 
         private void ZoomIn()
@@ -1003,7 +1041,7 @@ namespace RaywattApp.ViewModels
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["vessel"] = PatientCase.Vessel;
             parameter["procedure"] = PatientCase.Procedure;
-            parameter["physicianName"] = PatientCase.PhysicianName;
+            parameter["location"] = PatientCase.Location;
             parameter["accessionNumber"] = PatientCase.AccessionNumber;
             parameter["comment"] = PatientCase.Comment;
             var result = _dialogService.OpenDialog(new EditCaseInfoDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
@@ -1013,7 +1051,7 @@ namespace RaywattApp.ViewModels
                 Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
                 PatientCase.Vessel = data["vessel"].ToString();
                 PatientCase.Procedure = data["procedure"].ToString();
-                PatientCase.PhysicianName = data["physicianName"].ToString();
+                PatientCase.Location = data["location"].ToString();
                 PatientCase.AccessionNumber = data["accessionNumber"].ToString();
                 PatientCase.Comment = data["comment"].ToString();
 
@@ -1038,12 +1076,13 @@ namespace RaywattApp.ViewModels
             sqlParameters["accession_number"] = PatientCase.AccessionNumber;
             sqlParameters["comment"] = PatientCase.Comment;
             sqlParameters["vessel"] = PatientCase.Vessel;
+            sqlParameters["location"] = PatientCase.Location;
             sqlParameters["procedure"] = PatientCase.Procedure;
             sqlParameters["angio_yn"] = PatientCase.AngioYn;
             sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
             PatientCase.IndicatorDegree = Degree;
             sqlParameters["indicator_degree"] = PatientCase.IndicatorDegree;
-            sqlParameters["preset_name"] = PatientCase.PresetName;
+            sqlParameters["colormap"] = PatientCase.Colormap;
             sqlParameters["calcium_threshold"] = PatientCase.CalciumThreshold;
             sqlParameters["expansion_calculation"] = PatientCase.ExpansionCalculation;
             sqlParameters["expansion_threshold"] = PatientCase.ExpansionThreshold;
@@ -1319,28 +1358,18 @@ namespace RaywattApp.ViewModels
                 double mla = LumenContours.GetRange(frameProximal, count).Min(x => x.Area);
                 int mlaIdx = LumenContours.GetRange(frameProximal, count).FindIndex(x => x.Area == mla) + frameProximal;
 
-                int frameDiff = (int)(Constants.PreLesionLengthInitValue * ReviewStatus.NumberOfFrames * 10 / int.Parse(CodeDefinition.Codes["PBLE"][PatientCase.PullbackLength]));
+                int frameDiff = (int)(Constants.PreLesionLengthInitValue * ReviewStatus.NumberOfFrames * 10 / int.Parse(PatientCase.PullbackLength));
                 proximalIdx = mlaIdx - frameDiff > 0 ? mlaIdx - frameDiff : 0;
                 distalIdx = mlaIdx + frameDiff < ReviewStatus.NumberOfFrames ? mlaIdx + frameDiff : ReviewStatus.NumberOfFrames - 1;
             }
             else
             {
-                int firstStent = -1, lastStent = -1, cnt = 0;
-                foreach(LumenStent lumenStent in LumenStents)
-                {
-                    if(lumenStent.Points != null && lumenStent.Points.Count >= Constants.LumenProfileStentMinCount)
-                    {
-                        if (firstStent == -1)
-                            firstStent = cnt;
+                int stentProximal = 0, stentDistal = 0;
+                CommonUtil.GetStentProximalDistal(LumenStents, out stentProximal, out stentDistal);
 
-                        lastStent = cnt;
-                    }
-                    cnt++;
-                }
-
-                int frameDiff = (int)(Constants.PostLesionLengthInitValue * ReviewStatus.NumberOfFrames * 10 / int.Parse(CodeDefinition.Codes["PBLE"][PatientCase.PullbackLength]));
-                proximalIdx = firstStent - frameDiff > 0 ? firstStent - frameDiff : 0;
-                distalIdx = lastStent + frameDiff < ReviewStatus.NumberOfFrames ? lastStent + frameDiff : ReviewStatus.NumberOfFrames - 1;
+                int frameDiff = (int)(Constants.PostLesionLengthInitValue * ReviewStatus.NumberOfFrames * 10 / int.Parse(PatientCase.PullbackLength));
+                proximalIdx = stentProximal - frameDiff > 0 ? stentProximal - frameDiff : 0;
+                distalIdx = stentDistal + frameDiff < ReviewStatus.NumberOfFrames ? stentDistal + frameDiff : ReviewStatus.NumberOfFrames - 1;
             }
 
             Section.Proximal.X = CommonUtil.GetPositionFromFrame(proximalIdx, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);

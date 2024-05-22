@@ -1,14 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using log4net;
 using RaywattApp.Common.Bases;
-using RaywattApp.Common.Setting;
 using RaywattApp.Common.Util;
 using System.IO;
-using System.Windows.Navigation;
 
 namespace RaywattApp.ViewModels.Setting
 {
-    public partial class SettingDatabaseViewModel : SettingBase
+    public partial class SettingDatabaseViewModel : ViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(SettingDatabaseViewModel));
 
@@ -31,18 +29,6 @@ namespace RaywattApp.ViewModels.Setting
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
             _log.Debug("OnNavigating");
-        }
-
-        protected override void Okay()
-        {
-            _log.Debug("Okay");
-
-            CloseDialog();
-        }
-
-        protected override void Apply()
-        {
-            _log.Debug("Apply");
         }
 
         private void GetDbSize()

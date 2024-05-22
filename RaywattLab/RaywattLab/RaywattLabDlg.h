@@ -24,6 +24,7 @@ class CLabImaging;
 class CDataWriter;
 class CDataReader;
 class CVideoWriter;
+class CRJController;
 // CRaywattLabDlg 대화 상자
 class CRaywattLabDlg : public CDialogEx, CCommonDlg, CMessageService
 {
@@ -51,7 +52,7 @@ private:
 	CDataReader* m_pDataReader;
 
 	// Rotary Junction
-	CArduinoController* m_pRotaryJunction;
+	CRJController* m_pRJController;
 	CLaserModule* m_pLaserModule;
 
 	// UI Components

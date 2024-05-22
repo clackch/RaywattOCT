@@ -1,0 +1,25 @@
+﻿<Page x:Class="RaywattApp.Views.Setting.SettingAboutPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:RaywattApp.Views.Setting"
+      xmlns:const="clr-namespace:RaywattApp.Common.Bases"
+      mc:Ignorable="d" 
+      Width="{x:Static const:Constants.SettingInsideDialogWidth}" Height="{x:Static const:Constants.SettingInsideDialogHeight}"
+      Title="SettingAboutPage">
+
+    <Grid>
+        <Border Grid.Row="0" CornerRadius="10" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray8Brush}">
+            <StackPanel Margin="20">
+                <Label Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Software Name], Source={StaticResource L10N}}"/>
+                <StackPanel Height="10"/>
+                <Label Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding SoftwareName}"/>
+                <StackPanel Height="30"/>
+                <Label Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Software Version], Source={StaticResource L10N}}"/>
+                <StackPanel Height="10"/>
+                <Label Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding SoftwareVersion}"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Page>

@@ -46,9 +46,6 @@ namespace RaywattApp.ViewModels
         private PrevStatus _prevStatus;
 
         [ObservableProperty]
-        private Dictionary<string, string> _pullbackList;
-
-        [ObservableProperty]
         private string _pbLength;
 
         [ObservableProperty]
@@ -56,13 +53,6 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private string _pbTime;
-
-        private string _selectedPullbackType;
-        public string SelectedPullbackType
-        {
-            get { return _selectedPullbackType; }
-            set { _selectedPullbackType = value; SetPullback(); }
-        }
 
         private int _brightness;
         public int Brightness
@@ -112,22 +102,12 @@ namespace RaywattApp.ViewModels
             _dialogService = dialogService;
 
             _angioManager = angioManager;
-            PullbackList = CodeDefinition.Codes["PBTY"];
 
             isStartRecording = false;
 
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["classification"] = "PBTY";
             pullbackTypes = _sqlManager.SelectCode(sqlParameters);
-
-            sqlParameters.Clear();
-            sqlParameters["classification"] = "Present";
-            IList<Configuration> presents = _sqlManager.SelectConfiguration(sqlParameters);
-            if (presents != null && presents.Count > 0)
-            {
-                Brightness = int.Parse(presents.FirstOrDefault(x => x.Key == "brightness").Value);
-                Contrast = int.Parse(presents.FirstOrDefault(x => x.Key == "contrast").Value);
-            }
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -142,30 +122,20 @@ namespace RaywattApp.ViewModels
                 Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
                 this.Patient = (Patient)data["patient"];
                 this.PrevStatus = (PrevStatus)data["prevStatus"];
-
-                if (data.ContainsKey("patientCase"))
+                PatientCase = (PatientCase)data["patientCase"];
+                Brightness = PatientCase.Brightness;
+                Contrast = PatientCase.Contrast;
+                
+                if (PatientCase.ImageFullPath != null && PatientCase.Image != null)
                 {
-                    PatientCase = (PatientCase)data["patientCase"];
-                    SelectedPullbackType = PatientCase.PullbackType;
-                    Brightness = PatientCase.Brightness;
-                    Contrast = PatientCase.Contrast;
+                    string path = PatientCase.ImageFullPath.Substring(0, PatientCase.ImageFullPath.Length - 42);
+                    string fileName = PatientCase.Image.Substring(0, PatientCase.Image.Length - 3) + "*";
+                    string[] files = Directory.GetFiles(path, fileName);
 
-                    if (PatientCase.ImageFullPath != null && PatientCase.Image != null)
+                    foreach (string file in files)
                     {
-                        string path = PatientCase.ImageFullPath.Substring(0, PatientCase.ImageFullPath.Length - 42);
-                        string fileName = PatientCase.Image.Substring(0, PatientCase.Image.Length - 3) + "*";
-                        string[] files = Directory.GetFiles(path, fileName);
-
-                        foreach (string file in files)
-                        {
-                            System.IO.File.Delete(file);
-                        }
+                        System.IO.File.Delete(file);
                     }
-                }
-                else
-                {
-                    PatientCase = new PatientCase();
-                    PatientCase.PatientId = Patient.Id;
                 }
 
                 RayShowCalibrationGuide(true);
@@ -173,8 +143,19 @@ namespace RaywattApp.ViewModels
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
                 timerUpdateImage.Start();
+                
+                DeviceStatus.IsLiveView = (RayGetProperty(Property.MotorOnOff) != 0);
 
-                SetCondition();
+                Code pullback = pullbackTypes.FirstOrDefault(x => x.Key == PatientCase.PullbackType);
+                if (pullback != null)
+                {
+                    string[] temp = pullback.Buffer1.Split("|");
+                    PbLength = temp[0];
+                    PbSpeed = temp[1];
+                    PbTime = temp[2];
+                }
+                RaySetProperty(Property.PullbackDistance, Double.Parse(PbLength));
+                RaySetProperty(Property.PullbackSpeed, Double.Parse(PbSpeed));
 
                 if (!DeviceStatus.IsAngioInitialized)
                 {
@@ -205,16 +186,6 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private void SetCondition()
-        {
-            _log.Debug("SetCondition");
-
-            DeviceStatus.IsLiveView = (RayGetProperty(Property.MotorOnOff) != 0);
-
-            if (PatientCase.Procedure == null)
-                PatientCase.Procedure = "$001";
-        }
-
         private void Back()
         {
             _log.Debug("Back");
@@ -223,7 +194,7 @@ namespace RaywattApp.ViewModels
             _angioManager.ReadyToRecv = false;
 
             RayStopLiveView();
-            leaveToPage(Constants.PatientDetailPage);
+            leaveToPage(Constants.RecordingPresetPage);
         }
 
         private void ChangeViewMode()
@@ -253,16 +224,6 @@ namespace RaywattApp.ViewModels
         private void StartRecording()
         {
             _log.Debug("StartRecording");
-
-            if (String.IsNullOrEmpty(PatientCase.PullbackType))
-            {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["title"] = _l10n["Information"];
-                parameter["message"] = _l10n["Select Pullback"];
-                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-
-                return;
-            }
 
             isStartRecording = true;
             
@@ -298,26 +259,6 @@ namespace RaywattApp.ViewModels
             AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(_angioManager.ImgAngio);
 
             return true;
-        }
-
-        private void SetPullback()
-        {
-            if (SelectedPullbackType == null) return;
-
-            PatientCase.PullbackType = SelectedPullbackType;
-            PatientCase.PullbackLength = SelectedPullbackType.IndexOf("LO") > 0 ? Constants.PullbackLengthLong : Constants.PullbackLengthShort;
-
-            Code pullback = pullbackTypes.FirstOrDefault(x => x.Key == SelectedPullbackType);
-
-            if (pullback != null)
-            {
-                string[] temp = pullback.Buffer1.Split("|");
-                PbLength = temp[0];
-                PbSpeed = temp[1];
-                PbTime = temp[2];
-            }
-            RaySetProperty(Property.PullbackDistance, Double.Parse(PbLength));
-            RaySetProperty(Property.PullbackSpeed, Double.Parse(PbSpeed));
         }
     }
 }

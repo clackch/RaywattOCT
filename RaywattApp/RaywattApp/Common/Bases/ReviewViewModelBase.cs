@@ -128,6 +128,13 @@ namespace RaywattApp.Common.Bases
             _log.Debug("ReviewViewModelBase");
         }
 
+        public ReviewViewModelBase(IDialogService dialogService)
+        {
+            _log.Debug("ReviewViewModelBase");
+
+            _dialogService = dialogService;
+        }
+
         public ReviewViewModelBase(SqlManager sqlManager, IDialogService dialogService)
         {
             _log.Debug("ReviewViewModelBase");
@@ -244,7 +251,7 @@ namespace RaywattApp.Common.Bases
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingPresetPage) { Parameter = parameter });
         }
 
         private void ExpandCollapseMenu(string param)

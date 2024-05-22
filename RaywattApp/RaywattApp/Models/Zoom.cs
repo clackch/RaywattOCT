@@ -93,6 +93,12 @@ namespace RaywattApp.Models
             get { return this._manipulationDeltaCommand ?? (this._manipulationDeltaCommand = new RelayCommand<object>(Window_ManipulationDelta)); }
         }
 
+        private ICommand _manipulationCompletedCommand;
+        public ICommand ManipulationCompletedCommand
+        {
+            get { return this._manipulationCompletedCommand ?? (this._manipulationCompletedCommand = new RelayCommand<object>(Window_ManipulationCompleted)); }
+        }
+
         private void SetCaptured(object param)
         {
             if(param != null)
@@ -194,6 +200,7 @@ namespace RaywattApp.Models
 
         public void Window_ManipulationStarting(object parameter)
         {
+            _log.Debug("Manipulation Starting");
             ManipulationStartingEventArgs e = (ManipulationStartingEventArgs)parameter;
             e.ManipulationContainer = Application.Current.MainWindow;
             e.Handled = true;
@@ -227,9 +234,16 @@ namespace RaywattApp.Models
             e.Handled = true;
         }
 
+        public void Window_ManipulationCompleted(object parameter)
+        {
+            _log.Debug("Manipulation Completed");
+            ManipulationCompletedEventArgs e = (ManipulationCompletedEventArgs)parameter;
+            e.Handled = true;
+        }
+
         private void ZoomInSetting(double scale)
         {
-            _log.Debug("zoomin");
+            //_log.Debug("zoomin");
             double ratio = Constants.CrossSectionSize / Constants.MiniMapCanvasSize;
             double centerLeft = RectLeft + RectWidth / 2;
             double centerTop = RectTop + RectHeight / 2;
@@ -247,7 +261,7 @@ namespace RaywattApp.Models
 
         private void ZoomOutSetting(double scale)
         {
-            _log.Debug("zoomout");
+            //_log.Debug("zoomout");
             double ratio = Constants.CrossSectionSize / Constants.MiniMapCanvasSize;
             double centerLeft = RectLeft + RectWidth / 2;
             double centerTop = RectTop + RectHeight / 2;

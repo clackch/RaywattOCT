@@ -32,6 +32,7 @@ protected:
 	virtual char *acquire(int& nCurFrame, int& nTotalFrame);
 
 private:
+	BOOL calibrateBoard(HANDLE boardHandle);
 	BOOL configureBoard(HANDLE boardHandle);
 	BOOL configureAcquisition(HANDLE boardHandle);
 };
