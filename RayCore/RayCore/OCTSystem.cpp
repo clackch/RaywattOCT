@@ -1874,6 +1874,56 @@ bool COCTSystem::waitForStepMotors(bool& runFlag) {
 
 	return m_pRJController->IsMoving();
 }
+void COCTSystem::calculateIntensity(cv::Mat image) {
+	CConfiguration& config = CConfiguration::GetInstance();
+	double sheathRadius = config.measurement.fSheathRadius * 2;
+	double resolution = (config.measurement.fAxialResolutionScale / 1000.f) * 2;
+	double radius = sheathRadius / resolution;
+
+	cv::Mat imgGray, imgRoi;
+	cv::cvtColor(image, imgGray, cv::COLOR_BGR2GRAY);
+
+	// find circle (sheath)
+	std::vector<cv::Vec3f> circles;
+	circles.push_back(cv::Vec3f(imgGray.cols / 2, imgGray.rows / 2, radius));
+	//cv::HoughCircles(imgGray, circles, cv::HOUGH_GRADIENT, 2, imgGray.rows / 4, 200, 100, 10, 50);	
+
+	// make ROI
+	cv::Mat imgMask = cv::Mat::zeros(imgGray.rows, imgGray.cols, CV_8UC1);
+	cv::Point center;
+	if (circles.size() > 0)
+	{
+		cv::Vec3f c = circles[0];
+		center.x = c[0];
+		center.y = c[1];
+		int radius = c[2];
+
+		circle(imgMask, center, radius * m_fImageRoi, cv::Scalar(255, 255, 255), -1);
+		circle(imgMask, center, radius, cv::Scalar(0, 0, 0), -1);
+
+		circle(image, center, radius * m_fImageRoi, cv::Scalar(0, 255, 0), 2);
+		circle(image, center, radius, cv::Scalar(0, 255, 255), 2);
+	}
+	cv::copyTo(imgGray, imgRoi, imgMask);
+
+	// divide quadrants & calculate intensity
+	cv::Rect quadrants[4];
+	quadrants[0].x = 0;
+	quadrants[0].y = 0;
+	quadrants[1].x = center.x;
+	quadrants[1].y = 0;
+	quadrants[2].x = 0;
+	quadrants[2].y = center.y;
+	quadrants[3].x = center.x;
+	quadrants[3].y = center.y;
+
+	for (int i = 0; i < 4; i++) {
+		quadrants[i].width = center.x;
+		quadrants[i].height = center.y;
+		cv::Mat quad = imgRoi(quadrants[i]);
+		m_fCurrentIntensity[i] = cv::mean(quad).val[0];
+	}
+}
 /*
 * OnMsgUpdateScannerState
 */
