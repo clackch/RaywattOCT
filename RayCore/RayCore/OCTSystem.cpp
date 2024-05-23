@@ -1028,6 +1028,42 @@ UINT COCTSystem::GetLongitudeImageChannels()
 }
 
 /*
+* GetImageThreshold
+*/
+double COCTSystem::GetImageThreshold()
+{
+	return m_fImageThreshold;
+}
+
+/*
+* SetImageThreshold
+*/
+RayError COCTSystem::SetImageThreshold(double value)
+{
+	m_fImageThreshold = value;
+
+	return RayError::OK;
+}
+
+/*
+* GetImageRoi
+*/
+double COCTSystem::GetImageRoi()
+{
+	return m_fImageRoi;
+}
+
+/*
+* SetImageRoi
+*/
+RayError COCTSystem::SetImageRoi(double value)
+{
+	m_fImageRoi = value;
+
+	return RayError::OK;
+}
+
+/*
 * threadService
 */
 UINT COCTSystem::threadService(LPVOID param) {
@@ -1676,6 +1712,7 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 	int nSession = wParam;
 	int nFrameInfo = lParam;	// 0 if real time frame
 	bool isRealTime = (nFrameInfo == 0);
+	double intensity = 0.0;
 
 	if (m_curState == RayScannerState::Review) {
 		if (isRealTime) return NOERROR;
@@ -1688,6 +1725,9 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 		if (isRealTime == false) return NOERROR;
 
 		image = m_pImagingRealtime->GetCircleImage();
+
+		//calculate intensity - m_fImageThreshold/m_fImageRoi
+		intensity = 77.77;
 
 		switch (m_cathState)
 		{
@@ -1718,7 +1758,7 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 		}
 	}
 
-	if (m_cbCrossSection != nullptr) m_cbCrossSection(nSession, image.data, image.cols, image.rows, image.channels(), nFrameInfo);
+	if (m_cbCrossSection != nullptr) m_cbCrossSection(nSession, image.data, image.cols, image.rows, image.channels(), nFrameInfo, intensity);
 
 	return NOERROR;
 }
@@ -1739,7 +1779,7 @@ LRESULT COCTSystem::OnMsgProcessCutView(WPARAM wParam, LPARAM lParam) {
 	int nTotalFrame = pCutView->GetNumOfSamples();
 	int nFrameInfo = (nDrawSamples << 16) | (nTotalFrame);
 
-	if (m_cbLongitude != nullptr) m_cbLongitude(nSession, imgCutView.data, imgCutView.cols, imgCutView.rows, imgCutView.channels(), nFrameInfo);
+	if (m_cbLongitude != nullptr) m_cbLongitude(nSession, imgCutView.data, imgCutView.cols, imgCutView.rows, imgCutView.channels(), nFrameInfo, 0.0);
 
 	return NOERROR;
 }

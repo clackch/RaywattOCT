@@ -56,8 +56,37 @@
                     <Button Style="{DynamicResource BtnForTest}" Command="{Binding CatheterFailTestCommmand}" Width="100" Height="15" FontSize="9" Content="Catheter Fail"/>
                     <Button Style="{DynamicResource BtnForTest}" Command="{Binding CatheterUnlockTestCommmand}" Width="100" Height="15" FontSize="9" Content="Unlock Catheter"/>
                 </StackPanel>
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" Margin="310,0,0,0" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=RJ}">
+                <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" Margin="310,5,0,0" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=RJ}">
                     <Button Style="{DynamicResource BtnForTest}" Command="{Binding CatheterConnectTestCommmand}" Width="100" Height="15" FontSize="9" Content="Catheter Connect"/>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="310,0,0,5" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=Image}">
+                    <Button Style="{DynamicResource BtnForTest}" Command="{Binding ImageAnalysisTestCommmand}" Width="100" Height="15" FontSize="9" Content="Image Analysis"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="800,0,0,0" Visibility="{Binding IsImageAnalysisTest, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Style="{DynamicResource BtnForTest2}" Command="{Binding ImageAnalysisToggleCommmand}" Width="50" Height="15" FontSize="9" Content="Intensity"/>
+                        <StackPanel Width="5"/>
+                        <Label Content="{Binding DeviceStatus.ImageIntensity}" Width="30" Height="15" FontSize="9" VerticalContentAlignment="Center" Foreground="White"/>
+                    </StackPanel>
+                    <StackPanel Width="10"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Visibility="{Binding IsImageAnalysisToggle, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="Threshold" Width="40" Height="15" FontSize="9" VerticalContentAlignment="Center" Foreground="White"/>
+                                <StackPanel Width="5"/>
+                                <TextBox Width="30" Text="{Binding ImageThreshold, UpdateSourceTrigger=PropertyChanged}" Height="15" FontSize="9" Foreground="White" Background="Transparent" BorderThickness="0"/>
+                                <StackPanel Width="5"/>
+                                <Button Style="{DynamicResource BtnForTest2}" Command="{Binding ImageAnalysisReloadCommmand}" Width="40" Height="15" FontSize="9" Content="Reload"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="ROI" Width="40" Height="15" FontSize="9" VerticalContentAlignment="Center" Foreground="White"/>
+                                <StackPanel Width="5"/>
+                                <TextBox Width="30" Text="{Binding ImageRoi}" Height="15" FontSize="9" Foreground="White" Background="Transparent" BorderThickness="0"/>
+                                <StackPanel Width="5"/>
+                                <Button Style="{DynamicResource BtnForTest2}" Command="{Binding ImageAnalysisApplyCommmand}" Width="40" Height="15" FontSize="9" Content="Apply"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
                 </StackPanel>
             </Grid>
 
