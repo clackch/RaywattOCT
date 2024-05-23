@@ -1727,7 +1727,11 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 		image = m_pImagingRealtime->GetCircleImage();
 
 		//calculate intensity - m_fImageThreshold/m_fImageRoi
-		intensity = 77.77;
+		calculateIntensity(image);
+		for (int i = 0; i < 4; i++) {
+			intensity += m_fCurrentIntensity[i];
+		}
+		intensity /= 4.f;
 
 		switch (m_cathState)
 		{
