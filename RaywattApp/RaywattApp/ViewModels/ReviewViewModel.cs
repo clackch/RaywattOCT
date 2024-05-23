@@ -30,10 +30,10 @@ using System.Windows.Media;
 using RaywattApp.Common.Angio;
 using System.Xml;
 using System.Diagnostics;
+using System.Security.Cryptography.X509Certificates;
 
 namespace RaywattApp.ViewModels
 {
-    public delegate void AngioFramesReadEventHandler();
     public partial class ReviewViewModel : ReviewViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewViewModel));
@@ -103,6 +103,8 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private ImageSource _currentAngioImage;
+
+        public delegate void AngioFramesReadEventHandler();
 
         public static event AngioFramesReadEventHandler AngioFramesRead;
 
@@ -403,13 +405,17 @@ namespace RaywattApp.ViewModels
 
             if (PatientCase.AngioFrame.AngioImage.Count == 0)
             {
+                PatientCase.AngioFrame.AngioFrameNum = 0;
                 AngioFramesRead += OnAngioFramesRead;
                 Thread threadReadAngioFrames = new Thread(() => ThreadReadAngioFrames());
                 threadReadAngioFrames.IsBackground = true;
                 threadReadAngioFrames.Start();
             }
-            if (PatientCase.AngioFrame.CoRegistration.Count == 0) ReadTrackPoints();
-            AngioTrackPoints = PatientCase.AngioFrame.CoRegistration;
+            if (PatientCase.AngioFrame.CoRegistration.Count == 0)
+            {
+                Thread threadReadTrackPoints = new Thread(() => ThreadReadTrackPoints());
+                threadReadTrackPoints.Start();
+            }
         }
         
         private void SetAnnotation()
@@ -1258,10 +1264,12 @@ namespace RaywattApp.ViewModels
         {
             bool ret = base.MoveToFrame(session, nFrame);
 
-            if (ret == false || PatientCase.AngioYn == false) return false;
+            if (ret == false || PatientCase.AngioYn == false || PatientCase.AngioFrame.AngioImage.Count == 0) return false;
 
             int OctFrameLength = ReviewStatus.NumberOfFrames;
-            double ratio = (double) PatientCase.AngioFrame.AngioImage.Count / OctFrameLength * FrameNumber;
+            int angioTotalFrameNum = PatientCase.AngioFrame.AngioFrameNum;
+            
+            double ratio = (double)angioTotalFrameNum / OctFrameLength * FrameNumber;
             CurrentAngioFrameNumber = (int)ratio;
 
             CurrentAngioImage = PatientCase.AngioFrame.AngioImage[CurrentAngioFrameNumber];
@@ -1618,7 +1626,7 @@ namespace RaywattApp.ViewModels
             string file = PatientCase.Image;
             string angioFile = file.Substring(0, file.Length - 3) + "angioframes";
             string paramsFile = file.Substring(0, file.Length - 3) + "params";
-
+            
             string directory = Path.Combine(Constants.DataRootPath, PatientCase.PatientId);
             string angioPath = Path.Combine(directory, angioFile);
             string paramsPath = Path.Combine(directory, paramsFile);
@@ -1630,6 +1638,7 @@ namespace RaywattApp.ViewModels
             XmlNode configNode = xmlDoc.SelectSingleNode("/config");
             int angioFrameHeight = int.Parse(configNode.SelectSingleNode("AngioFrameHeight").InnerText);
             int angioFrameWidth = int.Parse(configNode.SelectSingleNode("AngioFrameWidth").InnerText);
+            PatientCase.AngioFrame.AngioFrameNum = int.Parse(configNode.SelectSingleNode("AngioFrameNumber").InnerText);
             int channels = int.Parse(configNode.SelectSingleNode("BitsPerPixel").InnerText) / 8;
 
             float Scale = angioFrameHeight > angioFrameWidth ? (float)Constants.AngioSize / angioFrameHeight : (float)Constants.AngioSize / angioFrameWidth;
@@ -1737,7 +1746,7 @@ namespace RaywattApp.ViewModels
 
         }
 
-        private void ReadTrackPoints()
+        private void ThreadReadTrackPoints()
         {
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
@@ -1751,6 +1760,8 @@ namespace RaywattApp.ViewModels
             {
                 PatientCase.AngioFrame.CoRegistration.Add(coReg);
             }
+
+            AngioTrackPoints = PatientCase.AngioFrame.CoRegistration;
         }
 
         private void ImageProcessing(List<Mat> frames)

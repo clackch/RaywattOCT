@@ -10,6 +10,9 @@ namespace RaywattApp.Common.Angio
     public partial class AngioFrame : ObservableObject
     {
         [ObservableProperty]
+        private int _angioFrameNum;
+
+        [ObservableProperty]
         private List<CoRegistration> _coRegistration;
 
         [ObservableProperty]
