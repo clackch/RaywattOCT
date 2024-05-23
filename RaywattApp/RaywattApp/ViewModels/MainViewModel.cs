@@ -199,13 +199,13 @@ namespace RaywattApp.ViewModels
                     PatientCase = null;
             }
 
-            //Review 화면에서 나가는 경우, RayEndReivew 호출
+            //Review 화면에서 나가는 경우, RayEndReview 호출
             if (reviewPages.Contains(Constants.CurrentPage))
             {
                 if (!reviewPages.Contains(pageUri))
                     RayEndReview();
             }
-            //Recording(Confirm) 화면에서 나가는 경우, RayEndReivew 호출
+            //Recording(Confirm) 화면에서 나가는 경우, RayEndReview 호출
             if (Constants.CurrentPage == Constants.RecordingConfirmPage)
             {
                 if (!pageUri.Equals(Constants.ReviewPresetPage))

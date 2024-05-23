@@ -399,17 +399,17 @@ namespace RaywattApp.ViewModels
             if (PatientCase.AngioFrame == null) PatientCase.AngioFrame = new AngioFrame();
             if (PatientCase.AngioFrame.CoRegistration == null) PatientCase.AngioFrame.CoRegistration = new List<CoRegistration>();
 
+            if (PatientCase.AngioFrame.CoRegistration.Count == 0)
+            {
+                ReadTrackPoints();
+            }
+
             if (PatientCase.AngioFrame.AngioImage.Count == 0)
             {
                 PatientCase.AngioFrame.AngioFrameNum = 0;
                 Thread threadReadAngioFrames = new Thread(() => ThreadReadAngioFrames());
                 threadReadAngioFrames.IsBackground = true;
                 threadReadAngioFrames.Start();
-            }
-            if (PatientCase.AngioFrame.CoRegistration.Count == 0)
-            {
-                Thread threadReadTrackPoints = new Thread(() => ThreadReadTrackPoints());
-                threadReadTrackPoints.Start();
             }
         }
         
@@ -540,10 +540,10 @@ namespace RaywattApp.ViewModels
             Measurements = Measurements.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
 
             //Test
-            InitializeLumenData();
-            DeviceStatus.IsLumenSaved = false;
-            RayStartLumenDetection();
-            this.isLumenContourSave = true;
+            //InitializeLumenData();
+            //DeviceStatus.IsLumenSaved = false;
+            //RayStartLumenDetection();
+            //this.isLumenContourSave = true;
         }
 
         private void AngioImageProcessing()
@@ -1733,7 +1733,7 @@ namespace RaywattApp.ViewModels
 
         }
 
-        private void ThreadReadTrackPoints()
+        private void ReadTrackPoints()
         {
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
