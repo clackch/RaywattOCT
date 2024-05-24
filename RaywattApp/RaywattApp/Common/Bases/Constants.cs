@@ -199,8 +199,6 @@ namespace RaywattApp.Common.Bases
         //Pullback Length
         public const string PullbackLengthLong = "LONG";
         public const string PullbackLengthShort = "SHOR";
-        public const int PullbackLengthLongSize = 100;
-        public const int PullbackLengthShortSize = 60;
 
         //Not Selected
         public const string NotSelected = "Not Selected";

@@ -20,6 +20,7 @@ using System.Threading;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 using RaywattApp.Common.Annotation.Models;
+using SharpDX;
 
 namespace RaywattApp.ViewModels
 {
@@ -278,19 +279,8 @@ namespace RaywattApp.ViewModels
 
         private double zValueForPullbackType()
         {
-            double pullbackLength;
-
-            switch(PatientCase.PullbackLength)
-            {
-                case "1000":
-                    pullbackLength = Constants.PullbackLengthLongSize; break;
-                case "600":
-                    pullbackLength = Constants.PullbackLengthShortSize; break;
-                default:
-                    pullbackLength = Constants.PullbackLengthShortSize; break;
-
-            }
-            double frameInterval = pullbackLength / PatientCase.NumOfFrames;
+            int pullbackLength = int.Parse(PatientCase.PullbackLength);
+            double frameInterval = (double)pullbackLength / PatientCase.NumOfFrames;
             double zValue = (frameInterval / (Constants.ImageResolution * Constants.XYScale3D)); // 1024에서 500으로 xy 데이터를 축소(속도 이슈)했으므로, 길이 보정 : Constants.XYScale3D
             Debug.WriteLine("zValue =" +  zValue);
             return zValue;
