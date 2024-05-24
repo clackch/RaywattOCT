@@ -425,8 +425,8 @@ namespace RaywattApp.Common.Bases
         public const double ZoomScaleMax = ZoomScaleDefault * 2;
 
         //Recording
-        public const int TransientTime = 1000;
-        public const int StartTime = 15;
+        public const int TransientTime = 100;
+        public const int StartTime = 10;
         public const double AngioWidth = 420;
         public const double AngioHeight = 420;
 

@@ -188,6 +188,8 @@ bool CMotorController::writeMotor(BYTE* packet, int size) {
 
 	int written = m_pConnection->Write(packet, size);
 
+	Sleep(50);
+
 	return (written == size);
 }
 

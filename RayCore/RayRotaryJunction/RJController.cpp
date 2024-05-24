@@ -118,7 +118,7 @@ bool CRJController::Current(eStepMotorIndex idxMotor, int posMM) {
 
 	return (written == packetLength);
 }
-bool CRJController::Move(eStepMotorIndex idxMotor, int posMM, bool delay) {
+bool CRJController::Move(eStepMotorIndex idxMotor, int posMM, bool delay, char sensor) {
 	if (!m_initMotor) return false;
 	if (m_state == eRJState::Error) return false;
 
@@ -148,6 +148,8 @@ bool CRJController::Move(eStepMotorIndex idxMotor, int posMM, bool delay) {
 	memcpy(serialPacket + idxData, &m_nStepSpeed[0], sizeof(int));
 	idxData += sizeof(int);
 	memcpy(serialPacket + idxData, &m_nStepSpeed[1], sizeof(int));
+
+	serialPacket[RJ_PHOTO_IDX] = sensor;
 
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
@@ -241,6 +243,9 @@ UINT CRJController::GetRFIDInfo(BYTE* pRFIDInfo) {
 
 	memcpy(pRFIDInfo, m_RFID, m_nRFIDLength);
 	return m_nRFIDLength;
+}
+int CRJController::ConvertMMtoStep(UINT mm) {
+	return floor((float)mm / (float)PULLBACK_MOTOR_RESOLUTION * (float)MOTOR_CONTROL_RESOLUTION);
 }
 UINT CRJController::threadRJState(LPVOID param) {
 	CRJController* pRJController = (CRJController*)param;
@@ -410,9 +415,10 @@ bool CRJController::parseSerialPacket() {
 				if (m_vPacket[idxETX] == RJ_ETX)
 				{
 					BYTE length = m_vPacket[RJ_LENGTH_IDX];
-					BYTE checksum = calcChecksum(&m_vPacket[0], length - 2);
+					if (idxETX != (length - 1)) continue;
 
-					if (idxETX == (length - 1) && checksum == m_vPacket[length - 2]) {
+					BYTE checksum = calcChecksum(&m_vPacket[0], length - 2);
+					if (checksum == m_vPacket[length - 2]) {
 						handlePacket();
 						sliceUntilSTX(idxETX);
 					}

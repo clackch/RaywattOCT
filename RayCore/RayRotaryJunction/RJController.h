@@ -116,7 +116,7 @@ public:
 	virtual bool IsMoving();
 	virtual bool ReadPosition();
 	virtual bool Current(eStepMotorIndex idxMotor, int posMM);
-	virtual bool Move(eStepMotorIndex idxMotor, int posMM, bool delay=false);
+	virtual bool Move(eStepMotorIndex idxMotor, int posMM, bool delay=false, char sensor=0);
 	virtual bool Set(eStepMotorIndex idxMotor, int velocity);
 
 	bool StartControl();
@@ -125,6 +125,8 @@ public:
 	bool DisplayLCD(eLCDImage image);
 	bool ReadRFID();
 	UINT GetRFIDInfo(BYTE* pRFIDInfo);
+
+	int ConvertMMtoStep(UINT mm);
 protected:
 	static UINT threadRJState(LPVOID param);
 	static UINT threadReadPacket(LPVOID param);

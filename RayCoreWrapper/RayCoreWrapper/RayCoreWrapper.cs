@@ -39,6 +39,8 @@ namespace RaywattOCT
             ImageChannels,
             ImageDepth,
             ImageResolution,
+            ImageThreshold,
+            ImageRoi,
             LongitudeImageWidth,
             LongitudeImageHeight,
             LongitudeImageChannels,
@@ -120,7 +122,7 @@ namespace RaywattOCT
         public static double ContrastMax = 3.0f;
 
         public delegate void CallbackFunction(int request, int response, int param);
-        public delegate void CallbackFunctionWithImage(int session, IntPtr data, int width, int height, int channel, int frameInfo);
+        public delegate void CallbackFunctionWithImage(int session, IntPtr data, int width, int height, int channel, int frameInfo, double intensity);
         public delegate void CallbackFunctionForDetection(int frame);
 
         [DllImport("RayCore.dll")]
