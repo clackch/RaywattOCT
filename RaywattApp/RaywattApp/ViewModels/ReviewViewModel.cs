@@ -403,6 +403,10 @@ namespace RaywattApp.ViewModels
             {
                 ReadTrackPoints();
             }
+            else
+            {
+                AngioTrackPoints = PatientCase.AngioFrame.CoRegistration;
+            }
 
             if (PatientCase.AngioFrame.AngioImage.Count == 0)
             {

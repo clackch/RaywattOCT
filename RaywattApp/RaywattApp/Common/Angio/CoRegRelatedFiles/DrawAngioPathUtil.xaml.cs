@@ -14,6 +14,9 @@ using System.Runtime.InteropServices;
 using log4net;
 using System.Diagnostics;
 using System.Threading;
+using System.IO;
+using System.Windows.Documents;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 {
@@ -167,6 +170,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
         private bool isMoved = false, isDrawing = true;
         private int trackPointNum;
         private CancellationTokenSource cancellationTokenSource;
+        private int maxPathLength = 0;
 
         public DrawAngioPathUtil()
         {
@@ -283,28 +287,65 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
         {
             canvas.Children.Clear();
 
-            //경로 그리기
-            foreach (List<Point> pathPoints in CurrentTrackPoint.Line)
+            ////경로 그리기
+            //foreach (List<Point> pathPoints in CurrentTrackPoint.Line)
+            //{
+            //    foreach (var pathPoint in pathPoints)
+            //    {
+            //        Ellipse path = new Ellipse();
+            //        path.Style = (Style)this.Resources["StylePathEllipse"];
+            //        Canvas.SetLeft(path, pathPoint.X - path.Width / 2);
+            //        Canvas.SetTop(path, pathPoint.Y - path.Height / 2);
+            //        this.canvas.Children.Add(path);
+            //    }
+            //}
+
+            //// 추적된 점 그리기
+            //foreach (Point trackPoint in CurrentTrackPoint.TrackPoint)
+            //{
+            //    Ellipse path = new Ellipse();
+            //    path.Style = (Style)this.Resources["StylePathEllipse"];
+            //    Canvas.SetLeft(path, trackPoint.X - path.Width / 2);
+            //    Canvas.SetTop(path, trackPoint.Y - path.Height / 2);
+            //    this.canvas.Children.Add(path);
+            //}
+
+            List<Point> path = new List<Point>();
+            foreach (var list in CurrentTrackPoint.Line)
             {
-                foreach (var pathPoint in pathPoints)
-                {
-                    Ellipse path = new Ellipse();
-                    path.Style = (Style)this.Resources["StylePathEllipse"];
-                    Canvas.SetLeft(path, pathPoint.X - path.Width / 2);
-                    Canvas.SetTop(path, pathPoint.Y - path.Height / 2);
-                    this.canvas.Children.Add(path);
-                }
+                path.AddRange(list);
             }
 
-            // 추적된 점 그리기
-            foreach (Point trackPoint in CurrentTrackPoint.TrackPoint)
-            {
-                Ellipse path = new Ellipse();
-                path.Style = (Style)this.Resources["StylePathEllipse"];
-                Canvas.SetLeft(path, trackPoint.X - path.Width / 2);
-                Canvas.SetTop(path, trackPoint.Y - path.Height / 2);
-                this.canvas.Children.Add(path);
+            int pathLength = path.Count;
+
+            if (maxPathLength == 0 || maxPathLength < pathLength) {
+                maxPathLength = pathLength;
             }
+
+            double pathLostScale = 2.0 / 3.0;
+            if(pathLostScale * maxPathLength > pathLength ) // 길이 값으로 path 잘못 찾았을 경우 거르기
+            {
+                return;
+            }
+
+            //마커 그리기
+            Ellipse marker = new Ellipse();
+            marker.Style = (Style)this.Resources["StyleTrackEllipse"];
+            double rate = (double)CurrentAngioFrameNumber / AngioTrackPoints.Count;
+            
+            if(pathLength < 0)
+            {
+                pathLength = 0;
+            }
+            if (pathLength == path.Count)
+            {
+                pathLength -= 1;
+            }
+            int currPos = (int)(pathLength - pathLength * rate);
+
+            Canvas.SetLeft(marker, path[currPos].X - marker.Width / 2);
+            Canvas.SetTop(marker, path[currPos].Y - marker.Height / 2);
+            this.canvas.Children.Add(marker);
         }
 
         private void ProcessSingleImage(int imageIndex, CancellationToken token, int movedRecIndex)
