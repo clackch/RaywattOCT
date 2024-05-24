@@ -10,20 +10,13 @@ using log4net;
 using System.Text;
 using System.Collections.Generic;
 using RaywattApp.Models;
-using RaywattApp.Services;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Views.Dialog;
 using System.Xml;
 using System.Threading.Tasks;
 using RaywattApp.Common.Localization;
 using RaywattApp.Common.Util;
-using CommunityToolkit.Mvvm.ComponentModel;
-using System.Windows.Media.Imaging;
-using System.Windows.Media;
-using System.Reflection.Metadata;
 using System.Linq;
-using System.Windows.Documents;
-using System.Data;
 
 namespace RaywattApp.Common.Angio
 {
@@ -106,6 +99,8 @@ namespace RaywattApp.Common.Angio
 
         private short isChpFileChangeSuccess = 0;
         public short IsChpFileChangeSuccess { get { return isChpFileChangeSuccess; } set { isChpFileChangeSuccess = value; } }
+
+        private bool isCathRoomDialogOpen = false;
 
         public AngioManager(IDialogService dialogService)
         {
@@ -589,6 +584,11 @@ namespace RaywattApp.Common.Angio
         {
             _log.Debug("SelectCathRoom");
 
+            if (isCathRoomDialogOpen)
+                return;
+
+            isCathRoomDialogOpen = true;
+
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["selectedCathRoomId"] = ViewModelBase._deviceStatus.SelectedCathRoom == null ? 0 : ViewModelBase._deviceStatus.SelectedCathRoom.Id;
 
@@ -598,6 +598,7 @@ namespace RaywattApp.Common.Angio
             {
                 Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
                 ViewModelBase._deviceStatus.SelectedCathRoom = (CathRoom)data["selectedCathRoom"];
+                isCathRoomDialogOpen = false;
             }
         }
 
