@@ -104,10 +104,6 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private ImageSource _currentAngioImage;
 
-        public delegate void AngioFramesReadEventHandler();
-
-        public static event AngioFramesReadEventHandler AngioFramesRead;
-
         private int outFrameNumber;
         public int OutFrameNumber
         {
@@ -403,18 +399,17 @@ namespace RaywattApp.ViewModels
             if (PatientCase.AngioFrame == null) PatientCase.AngioFrame = new AngioFrame();
             if (PatientCase.AngioFrame.CoRegistration == null) PatientCase.AngioFrame.CoRegistration = new List<CoRegistration>();
 
+            if (PatientCase.AngioFrame.CoRegistration.Count == 0)
+            {
+                ReadTrackPoints();
+            }
+
             if (PatientCase.AngioFrame.AngioImage.Count == 0)
             {
                 PatientCase.AngioFrame.AngioFrameNum = 0;
-                AngioFramesRead += OnAngioFramesRead;
                 Thread threadReadAngioFrames = new Thread(() => ThreadReadAngioFrames());
                 threadReadAngioFrames.IsBackground = true;
                 threadReadAngioFrames.Start();
-            }
-            if (PatientCase.AngioFrame.CoRegistration.Count == 0)
-            {
-                Thread threadReadTrackPoints = new Thread(() => ThreadReadTrackPoints());
-                threadReadTrackPoints.Start();
             }
         }
         
@@ -551,15 +546,7 @@ namespace RaywattApp.ViewModels
             //this.isLumenContourSave = true;
         }
 
-        private void OnAngioFramesRead()
-        {
-            AngioFramesRead -= OnAngioFramesRead;
-            Thread threadImageProcessing = new Thread(() => ThreadImageProcessing());
-            threadImageProcessing.IsBackground = true;
-            threadImageProcessing.Start();
-        }
-
-        private void ThreadImageProcessing()
+        private void AngioImageProcessing()
         {
             ImageProcessing(AngioFrames);
 
@@ -1726,7 +1713,7 @@ namespace RaywattApp.ViewModels
 
                 reader.Close();
             }
-            AngioFramesRead.Invoke();
+            AngioImageProcessing();
         }
 
         private ImageSource ConvertMatsToImageSource(Mat mat)
@@ -1746,7 +1733,7 @@ namespace RaywattApp.ViewModels
 
         }
 
-        private void ThreadReadTrackPoints()
+        private void ReadTrackPoints()
         {
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
