@@ -670,7 +670,7 @@ namespace RaywattApp.ViewModels
         {
             //lumen
             int num = RayGetNumOfLumenContourPoints(frameInfo);
-            if (num > 0)
+            if (num > 2)
             {
                 IntPtr contour = RayGetLumenContour(frameInfo);
                 if (contour == IntPtr.Zero) return;
