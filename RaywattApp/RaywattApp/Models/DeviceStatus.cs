@@ -73,6 +73,9 @@ namespace RaywattApp.Models
         private CathRoom _selectedCathRoom;
 
         [ObservableProperty]
+        private double _imageIntensity;
+
+        [ObservableProperty]
         private Dictionary<string, bool> _testMode = new Dictionary<string, bool>();
 
         [ObservableProperty]

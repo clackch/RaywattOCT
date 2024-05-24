@@ -77,12 +77,18 @@ private:
 	RayScannerState m_curState;
 	CatheterState m_cathState;
 
+	// Auto Pullback (Flushing Detection)
+	double m_fReferenceIntensity[4];
+	double m_fCurrentIntensity[4];
+
 	//Property
 	double m_fBrightness;
 	double m_fContrast;
 	double m_fDegree;
 	double m_fColormap;
 	cv::Scalar m_backgroundColor;	// for longitude image
+	double m_fImageThreshold = 99.99;
+	double m_fImageRoi = 2.f;
 	bool m_isTestMode;
 
 public:
@@ -153,6 +159,10 @@ public:
 	UINT GetLongitudeImageWidth();
 	UINT GetLongitudeImageHeight();
 	UINT GetLongitudeImageChannels();
+	double GetImageThreshold();
+	RayError SetImageThreshold(double value);
+	double GetImageRoi();
+	RayError SetImageRoi(double value);
 	void SetTestMode(bool isTestMode) { m_isTestMode = isTestMode; }
 	bool IsTestMode() { return m_isTestMode; }
 
@@ -186,6 +196,7 @@ private:
 	void redrawCutView();
 	void laserOnOff(bool isOn);
 	bool waitForStepMotors(bool& runFlag);
+	void calculateIntensity(cv::Mat image);
 
 protected:
 	LRESULT OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam);

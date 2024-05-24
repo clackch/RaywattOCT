@@ -1028,6 +1028,42 @@ UINT COCTSystem::GetLongitudeImageChannels()
 }
 
 /*
+* GetImageThreshold
+*/
+double COCTSystem::GetImageThreshold()
+{
+	return m_fImageThreshold;
+}
+
+/*
+* SetImageThreshold
+*/
+RayError COCTSystem::SetImageThreshold(double value)
+{
+	m_fImageThreshold = value;
+
+	return RayError::OK;
+}
+
+/*
+* GetImageRoi
+*/
+double COCTSystem::GetImageRoi()
+{
+	return m_fImageRoi;
+}
+
+/*
+* SetImageRoi
+*/
+RayError COCTSystem::SetImageRoi(double value)
+{
+	m_fImageRoi = value;
+
+	return RayError::OK;
+}
+
+/*
 * threadService
 */
 UINT COCTSystem::threadService(LPVOID param) {
@@ -1682,6 +1718,7 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 	int nSession = wParam;
 	int nFrameInfo = lParam;	// 0 if real time frame
 	bool isRealTime = (nFrameInfo == 0);
+	double intensity = 0.0;
 
 	if (m_curState == RayScannerState::Review) {
 		if (isRealTime) return NOERROR;
@@ -1694,6 +1731,13 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 		if (isRealTime == false) return NOERROR;
 
 		image = m_pImagingRealtime->GetCircleImage();
+
+		//calculate intensity - m_fImageThreshold/m_fImageRoi
+		calculateIntensity(image);
+		for (int i = 0; i < 4; i++) {
+			intensity += m_fCurrentIntensity[i];
+		}
+		intensity /= 4.f;
 
 		switch (m_cathState)
 		{
@@ -1724,7 +1768,7 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 		}
 	}
 
-	if (m_cbCrossSection != nullptr) m_cbCrossSection(nSession, image.data, image.cols, image.rows, image.channels(), nFrameInfo);
+	if (m_cbCrossSection != nullptr) m_cbCrossSection(nSession, image.data, image.cols, image.rows, image.channels(), nFrameInfo, intensity);
 
 	return NOERROR;
 }
@@ -1745,7 +1789,7 @@ LRESULT COCTSystem::OnMsgProcessCutView(WPARAM wParam, LPARAM lParam) {
 	int nTotalFrame = pCutView->GetNumOfSamples();
 	int nFrameInfo = (nDrawSamples << 16) | (nTotalFrame);
 
-	if (m_cbLongitude != nullptr) m_cbLongitude(nSession, imgCutView.data, imgCutView.cols, imgCutView.rows, imgCutView.channels(), nFrameInfo);
+	if (m_cbLongitude != nullptr) m_cbLongitude(nSession, imgCutView.data, imgCutView.cols, imgCutView.rows, imgCutView.channels(), nFrameInfo, 0.0);
 
 	return NOERROR;
 }
@@ -1839,6 +1883,56 @@ bool COCTSystem::waitForStepMotors(bool& runFlag) {
 	}
 
 	return m_pRJController->IsMoving();
+}
+void COCTSystem::calculateIntensity(cv::Mat image) {
+	CConfiguration& config = CConfiguration::GetInstance();
+	double sheathRadius = config.measurement.fSheathRadius * 2;
+	double resolution = (config.measurement.fAxialResolutionScale / 1000.f) * 2;
+	double radius = sheathRadius / resolution;	// sheath radius as pixel scale
+
+	cv::Mat imgGray, imgRoi;
+	cv::cvtColor(image, imgGray, cv::COLOR_BGR2GRAY);
+
+	// find circle (sheath)
+	std::vector<cv::Vec3f> circles;
+	circles.push_back(cv::Vec3f(imgGray.cols / 2, imgGray.rows / 2, radius));
+	//cv::HoughCircles(imgGray, circles, cv::HOUGH_GRADIENT, 2, imgGray.rows / 4, 200, 100, 10, 50);	
+
+	// make ROI
+	cv::Mat imgMask = cv::Mat::zeros(imgGray.rows, imgGray.cols, CV_8UC1);
+	cv::Point center;
+	int roiSize = 0;
+	if (circles.size() > 0)
+	{
+		cv::Vec3f c = circles[0];
+		center.x = c[0];
+		center.y = c[1];
+		radius = c[2];
+		roiSize = radius * m_fImageRoi;
+
+		circle(imgMask, center, roiSize, cv::Scalar(255, 255, 255), -1);
+		circle(imgMask, center, radius, cv::Scalar(0, 0, 0), -1);
+	}
+	cv::copyTo(imgGray, imgRoi, imgMask);
+
+	// divide quadrants & calculate intensity
+	cv::Rect quadrants[4];
+	quadrants[0].x = center.x - roiSize;
+	quadrants[0].y = center.y - roiSize;
+	quadrants[1].x = center.x;
+	quadrants[1].y = center.y - roiSize;
+	quadrants[2].x = center.x - roiSize;
+	quadrants[2].y = center.y;
+	quadrants[3].x = center.x;
+	quadrants[3].y = center.y;
+
+	for (int i = 0; i < 4; i++) {
+		quadrants[i].width = roiSize;
+		quadrants[i].height = roiSize;
+
+		cv::Mat quad = imgRoi(quadrants[i]);
+		m_fCurrentIntensity[i] = cv::mean(quad).val[0];
+	}
 }
 /*
 * OnMsgUpdateScannerState
