@@ -34,9 +34,9 @@
             <Setter Property="Fill" Value="Yellow"/>
         </Style>
         <Style TargetType="Ellipse" x:Key="StyleTrackEllipse">
-            <Setter Property="Width" Value="{x:Static const:Constants.ellipsePathWidth}"/>
-            <Setter Property="Height" Value="{x:Static const:Constants.ellipsePathHeight}"/>
-            <Setter Property="Fill" Value="White"/>
+            <Setter Property="Width" Value="{x:Static const:Constants.ellipseTrackWidth}"/>
+            <Setter Property="Height" Value="{x:Static const:Constants.ellipseTrackHeight}"/>
+            <Setter Property="Fill" Value="Yellow"/>
         </Style>
 
         <Style TargetType="Line" x:Key="StyleLine">
