@@ -1241,6 +1241,8 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 		extraData |= (UCHAR)OCTHeader::ExtraData::Background;
 	}
 
+	PLOGI.printf("Save Start (%d frames)", nNumOfSamples);
+
 	pDataWriter->StartSave(strSaveFilePath);
 	pDataWriter->WriteHeader(OCTHeader::Type::TimeSignal, OCTHeader::DataType::UShort, OCTHeader::Channels::Single, settingPullback.nAScan, settingPullback.nBScan, extraData);
 	pDataWriter->WriteExtraData(pImaging->GetCalibrationData(), settingPullback.nAScan * 2 * sizeof(int));
@@ -1259,7 +1261,7 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 	pDataWriter->StopSave();
 
 	pSystem->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::SaveRawData);
-	printf("[threadSaveRaw] done.\n");
+	PLOGI.printf("Save done.\n");
 
 	while (pSystem->m_pThreadSaveRaw->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
