@@ -279,8 +279,8 @@ namespace RaywattApp.ViewModels
 
         private double zValueForPullbackType()
         {
-            int pullbackLength = int.Parse(PatientCase.PullbackLength);
-            double frameInterval = (double)pullbackLength / PatientCase.NumOfFrames;
+            double pullbackLength = int.Parse(PatientCase.PullbackLength)/10.0;
+            double frameInterval = pullbackLength / PatientCase.NumOfFrames;
             double zValue = (frameInterval / (Constants.ImageResolution * Constants.XYScale3D)); // 1024에서 500으로 xy 데이터를 축소(속도 이슈)했으므로, 길이 보정 : Constants.XYScale3D
             Debug.WriteLine("zValue =" +  zValue);
             return zValue;
