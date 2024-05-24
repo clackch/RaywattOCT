@@ -281,7 +281,7 @@ namespace RaywattApp.ViewModels
             //Recording(Confirm) 화면에서 나가는 경우, RayEndReview 호출
             if (Constants.CurrentPage == Constants.RecordingConfirmPage)
             {
-                if (!pageUri.Equals(Constants.ReviewPresetPage))
+                if (!pageUri.Equals(Constants.ReviewPage))
                     RayEndReview();
             }
 
