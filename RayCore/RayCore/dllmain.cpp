@@ -102,6 +102,12 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
     case RayProperty::PullbackSpeed:
         config.stepMotor.pullbackSpeed = value;
         break;
+    case RayProperty::ImageThreshold:
+        octSystem.SetImageThreshold(value);
+        break;
+    case RayProperty::ImageRoi:
+        octSystem.SetImageRoi(value);
+        break;
     case RayProperty::TestMode:
         octSystem.SetTestMode((bool) value);
         break;
@@ -160,6 +166,10 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return config.stepMotor.pullbackSpeed;
     case RayProperty::SheathDiameter:
         return config.measurement.fSheathRadius * 2;
+    case RayProperty::ImageThreshold:
+        return octSystem.GetImageThreshold();
+    case RayProperty::ImageRoi:
+        return octSystem.GetImageRoi();
     case RayProperty::TestMode:
         return (double) octSystem.IsTestMode();
     default:

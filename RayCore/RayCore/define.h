@@ -5,7 +5,7 @@
 #define DELAY_FOR_STOP_THREAD			50
 
 typedef void (*FunctionPtr)(int, int, int);
-typedef void (*FunctionImgPtr)(int, void*, int, int, int, int);
+typedef void (*FunctionImgPtr)(int, void*, int, int, int, int, double);
 typedef void (*FunctionObjPtr)(int);
 
 enum class RayError {
@@ -41,6 +41,8 @@ enum class RayProperty {
 	ImageChannels,
 	ImageDepth,
 	ImageResolution,
+	ImageThreshold,
+	ImageRoi,
 	LongitudeImageWidth,
 	LongitudeImageHeight,
 	LongitudeImageChannels,

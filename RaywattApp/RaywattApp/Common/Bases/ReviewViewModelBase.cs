@@ -250,6 +250,17 @@ namespace RaywattApp.Common.Bases
             _log.Debug("NewRecording");
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
+
+            if (Patient.PhysicianId == 0)
+            {
+                parameter["title"] = _l10n["Information"];
+                parameter["message"] = _l10n["$MSG016"];
+                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+                return;
+            }
+
+            parameter.Clear();
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingPresetPage) { Parameter = parameter });
