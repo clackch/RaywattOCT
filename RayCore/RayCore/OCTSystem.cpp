@@ -1335,6 +1335,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	IImaging::Setting settingPullback = pSystem->m_pImagingPullback->GetSetting();
 	int pullbackTime = ((double)config.stepMotor.pullbackDistance / (double)config.stepMotor.pullbackSpeed) * 1000;
 
+	pullbackTime = (pullbackTime <= 0) ? 3000 : pullbackTime;
 	PLOGI.printf("Pullback start - %dmm, %dmm/s - %dmsec", config.stepMotor.pullbackDistance, config.stepMotor.pullbackSpeed, pullbackTime);
 
 	// 1. Start Recording OCT
@@ -1350,7 +1351,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pSystem->m_pAcqDevice->SetWriter(pDataWriter);
 
 	// 2. Pullback Linear Stage
-	if (pRJController->IsConnected()) {
+	if (pRJController->IsConnected() && config.stepMotor.pullbackDistance > 0) {
 		pRJController->Move(eStepMotorIndex::Both, config.stepMotor.pullbackDistance / MM_PER_STEP, false);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 	}
