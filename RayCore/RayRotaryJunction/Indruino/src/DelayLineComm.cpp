@@ -14,6 +14,7 @@ void delay_line_Move_single_axis_abs_pos(uint8_t idMotor, int32_t pos)
 	dataConfig.marshall.pos = pos;
 
 	min_send_frame(&min_ctx, CTRL_CODE_MOVE_SINGLE_AXIS_ABS_POS, (const uint8_t*)(dataConfig.unmarshall), sizeof(Move_single_axis_abs_pos_t));
+	min_send_frame(&min_ctx, CTRL_CODE_MOVE_SINGLE_AXIS_ABS_POS, (const uint8_t*)(dataConfig.unmarshall), sizeof(Move_single_axis_abs_pos_t));
 }
 
 void delay_line_Set_voltage_voa(uint16_t value)
@@ -22,6 +23,7 @@ void delay_line_Set_voltage_voa(uint16_t value)
 	data.marshall = value;
 
 	min_send_frame(&min_ctx, CTRL_CODE_SET_VOLTAGE_VOA_RAW, (const uint8_t*)(data.unmarshall), sizeof(convertData_u<uint16_t>));
+	min_send_frame(&min_ctx, CTRL_CODE_SET_VOLTAGE_VOA_RAW, (const uint8_t*)(data.unmarshall), sizeof(convertData_u<uint16_t>));
 }
 
 void delay_line_Set_voltage_ld(uint16_t value)
@@ -29,6 +31,7 @@ void delay_line_Set_voltage_ld(uint16_t value)
 	convertData_u<uint16_t> data;
 	data.marshall = value;
 
+	min_send_frame(&min_ctx, CTRL_CODE_SET_VOLTAGE_LD_RAW, (const uint8_t*)(data.unmarshall), sizeof(convertData_u<uint16_t>));
 	min_send_frame(&min_ctx, CTRL_CODE_SET_VOLTAGE_LD_RAW, (const uint8_t*)(data.unmarshall), sizeof(convertData_u<uint16_t>));
 }
 
@@ -74,12 +77,14 @@ void delay_line_ClearPosition(uint8_t idMotor)
 	data.marshall = idMotor;
 
 	min_send_frame(&min_ctx, CTRL_CODE_CLEAR_POSITION, (const uint8_t*)(data.unmarshall), sizeof(convertData_u<uint8_t>));
+	min_send_frame(&min_ctx, CTRL_CODE_CLEAR_POSITION, (const uint8_t*)(data.unmarshall), sizeof(convertData_u<uint8_t>));
 }
 
 void delay_line_SetStop(uint8_t idMotor)
 {
 	convertData_u<uint8_t> data;
 	data.marshall = idMotor;
+	min_send_frame(&min_ctx, CTRL_CODE_STOP, (const uint8_t*)(data.unmarshall), sizeof(convertData_u<uint8_t>));
 	min_send_frame(&min_ctx, CTRL_CODE_STOP, (const uint8_t*)(data.unmarshall), sizeof(convertData_u<uint8_t>));
 }
 

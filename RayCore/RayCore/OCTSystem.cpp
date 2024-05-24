@@ -220,7 +220,7 @@ RayError COCTSystem::ConnectDevices() {
 
 	if (m_curState == RayScannerState::Initial) {
 		result |= connectRotaryJunction();
-		PLOGI.printf("connect Rotary Junction - %s", ((result == NOERROR) ? "Succeed" : "Failed"));
+		PLOGI.printf("connect Rotary Junction and Laser Module - %s", ((result == NOERROR) ? "Succeed" : "Failed"));
 
 		// Connect to COM Interface first time
 		CLaserController* pLaser = CLaserController::GetInstance();
@@ -1651,10 +1651,12 @@ int COCTSystem::connectRotaryJunction() {
 		result &= m_pRJController->SwitchOn();
 		result &= m_pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 		result &= m_pRJController->Current(eStepMotorIndex::Hub, HUB_MOTOR_POS_INITIAL);
+
+		if (!result) PLOGI.printf("Failed to connect to Rotary Junction");
 	}
 
 	if (!m_pLaserModule->IsOpen()) {
-		result &= m_pLaserModule->Open(config.laserModule.port);
+		result = m_pLaserModule->Open(config.laserModule.port);
 		if (result) {
 			m_pLaserModule->SetVLD(0);
 			Sleep(500);
@@ -1693,6 +1695,10 @@ int COCTSystem::disconnectRotaryJunction() {
 		{
 			Sleep(100);
 		}
+	}
+
+	if (m_pLaserModule->IsOpen()) {
+		m_pLaserModule->Home(-100000, 10000);
 	}
 
 	m_pRJController->Disconnect();
