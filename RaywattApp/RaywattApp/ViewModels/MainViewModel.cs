@@ -521,6 +521,7 @@ namespace RaywattApp.ViewModels
         }
         protected void handleWorkDone(RayCallbackRequest request, RayWorkItem work, int param)
         {
+            _log.Debug("Done - " + work.ToString());
             switch (work)
             {
                 case RayWorkItem.StartService:
@@ -537,16 +538,13 @@ namespace RaywattApp.ViewModels
                     DeviceStatus.CatheterStatus = Constants.CatheterStatusConnected;
                     break;
                 case RayWorkItem.Recording:
-                    _angioManager.StopSaveAngioThread();
-                    break;
-                case RayWorkItem.Pullback:
-                    DeviceStatus.IsPullbackDone = true;
-                    
                     if (DeviceStatus.IsAngioConnected)
                     {
                         _angioManager.StopSaveAngioThread();
                     }
-                    
+                    break;
+                case RayWorkItem.Pullback:
+                    DeviceStatus.IsPullbackDone = true;                                        
                     break;
                 case RayWorkItem.OCTImaging:
                     if(param == (int)RaySession.Review)

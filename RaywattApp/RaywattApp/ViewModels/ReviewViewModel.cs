@@ -1259,7 +1259,10 @@ namespace RaywattApp.ViewModels
             double ratio = (double)angioTotalFrameNum / OctFrameLength * FrameNumber;
             CurrentAngioFrameNumber = (int)ratio;
 
-            CurrentAngioImage = PatientCase.AngioFrame.AngioImage[CurrentAngioFrameNumber];
+            if (CurrentAngioFrameNumber < PatientCase.AngioFrame.AngioImage.Count)
+            {
+                CurrentAngioImage = PatientCase.AngioFrame.AngioImage[CurrentAngioFrameNumber];
+            }
 
             return true;
         }
