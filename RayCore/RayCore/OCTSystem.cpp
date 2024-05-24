@@ -332,7 +332,7 @@ RayError COCTSystem::ReadyPullback()
 		m_pRJController->PerformRun(config.bldcMotor.velocityPullback);
 		m_pRJController->Current(eStepMotorIndex::Pullback, 0);
 		m_pRJController->Current(eStepMotorIndex::Hub, 0);
-		m_pRJController->Set(eStepMotorIndex::Both, config.stepMotor.pullbackSpeed);
+		m_pRJController->Set(eStepMotorIndex::Both, m_pRJController->ConvertMMtoStep(config.stepMotor.pullbackSpeed));
 
 		return RayError::OK;
 	}
@@ -1403,9 +1403,13 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterLoading);
 
 	if (pRJController->IsConnected()) {
+		pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
+		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
+		pRJController->Move(eStepMotorIndex::Pullback, 9000);
+		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+
 		pRJController->PerformRun(config.bldcMotor.velocityLoad);
 
-		pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_LOAD);
 
 		pRJController->Move(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_LOAD);
@@ -1413,7 +1417,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 
 		pRJController->StopMotor();
 
-		pRJController->Move(eStepMotorIndex::Pullback, 1500);
+		pRJController->Move(eStepMotorIndex::Pullback, 2070);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 		
 		pRJController->Move(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
@@ -1456,7 +1460,7 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 
 	if (pRJController->IsConnected()) {
 		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
-		pRJController->Move(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
+		pRJController->Move(eStepMotorIndex::Pullback, 20000, false, 0x08 /* photo-sensor #4 */);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 	}
 	else if (pSystem->m_isTestMode)
@@ -1485,6 +1489,7 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 	CRJController* pRJController = pSystem->m_pRJController;
 
 	PLOGI.printf("Catheter Validation");
+	Sleep(1500);
 
 	pSystem->m_pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_STANDBY_ON);
 	pSystem->laserOnOff(true);
@@ -1492,7 +1497,7 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 	pRJController->PerformRun(config.bldcMotor.velocityLiveView);
 
 	// To-Do: determine image verification
-	Sleep(1000);
+	Sleep(2000);
 	bool verified = true;
 
 	pRJController->StopMotor();
