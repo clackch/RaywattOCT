@@ -128,7 +128,6 @@ int CLaserModule::MoveRelative(MotorIndex idx, int nOffset) {
 
 	int nLastTargetPos = (m_lastTargetPosition[(int)idx - 1] < 0) ? actualPosition : m_lastTargetPosition[(int)idx - 1];
 	int nPosition = nLastTargetPos + nOffset;
-	nPosition = (nPosition < 0) ? 0 : nPosition;
 
 	MoveAbsolute(idx, nPosition);
 
@@ -183,7 +182,6 @@ void CLaserModule::min_application_handler(uint8_t min_id, uint8_t const* min_pa
 	static int prevU2 = 0;
 	static int prevU4 = 0;
 	static int prevU7 = 0;
-	static int pos1 = 0;
 
 	switch (min_id)
 	{
@@ -205,10 +203,11 @@ void CLaserModule::min_application_handler(uint8_t min_id, uint8_t const* min_pa
 		prevU7 = m_RAM.marshall.input_sensor.marshall.U7;
 #endif
 #if 1
-		if (pos1 != m_RAM.marshall.position_motor1_actual) {
+		if (m_prevPosition[0] != m_RAM.marshall.position_motor1_actual) {
 			PLOGI.printf(" POS1 : %d", m_RAM.marshall.position_motor1_actual);
 		}
-		pos1 = m_RAM.marshall.position_motor1_actual;
+		m_prevPosition[0] = m_RAM.marshall.position_motor1_actual;
+		m_prevPosition[1] = m_RAM.marshall.position_motor2_actual;
 #endif
 	}
 	break;
