@@ -24,7 +24,7 @@ UINT CLaserModule::threadReadStatus(LPVOID param) {
 	while (pModule->m_pThread->isRun)
 	{
 		pModule->readStatus();
-		Sleep(100);
+		Sleep(1);
 	}
 
 	return NOERROR;
