@@ -289,12 +289,16 @@ void CRJController::updateState() {
 		break;
 	case eRJState::Connected:
 		if (m_bLimitSwitch) {
+#if ENABLE_RFID
 			if (m_nRFIDLength == 0) {
 				ReadRFID();
 			}
 			else {
 				m_nextState = eRJState::Validating;
 			}
+#else
+			m_nextState = eRJState::Validating;
+#endif
 		}
 		else {
 			m_nextState = eRJState::Disconnected;
@@ -471,7 +475,7 @@ void CRJController::handlePacket() {
 	m_bButton[1] = m_vPacket[RJ_KEY_IDX] & 0x2;
 	m_bLimitSwitch = m_vPacket[RJ_KEY_IDX] & 0x4;
 
-	printf("\tButton: %02d %02d %02d\n", m_bButton[0], m_bButton[1], m_bLimitSwitch);
+	//PLOGI.printf("\tButton: %02d %02d %02d\n", m_bButton[0], m_bButton[1], m_bLimitSwitch);
 
 	switch(fid) {
 	case eFID::FID_SM_GET_STATE:

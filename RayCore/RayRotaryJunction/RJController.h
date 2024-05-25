@@ -4,6 +4,8 @@
 #include "StepMotorController.h"
 #include <vector>
 
+#define ENABLE_RFID		false
+
 #define RJ_STX		0xA3
 #define RJ_ETX		0xE4
 #define RJ_LENGTH_IDX	1

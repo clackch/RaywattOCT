@@ -1390,7 +1390,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 
 	// 2. Pullback Linear Stage
 	if (pRJController->IsConnected() && config.stepMotor.pullbackDistance > 0) {
-		pRJController->Move(eStepMotorIndex::Both, config.stepMotor.pullbackDistance / MM_PER_STEP, false);
+		pRJController->Move(eStepMotorIndex::Both, pRJController->ConvertMMtoStep(config.stepMotor.pullbackDistance), false);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 	}
 	else {
@@ -2035,7 +2035,10 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 		BYTE RFIDInfo[MAX_PATH];
 		UINT nRFIDLength = m_pRJController->GetRFIDInfo(RFIDInfo);
 
-		if (nRFIDLength != 0) {
+#if ENABLE_RFID
+		if (nRFIDLength != 0) 
+#endif
+		{
 			// To-Do: Validation
 			bool isValid = true;
 			
