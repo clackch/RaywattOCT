@@ -575,7 +575,7 @@ namespace RaywattApp.Common.Angio
         public void StopSaveAngioThread()
         {
             threadOnSaveAngioFrames = false;
-            threadFuncSaveAngioFrames.Join();
+            if (threadFuncSaveAngioFrames != null) threadFuncSaveAngioFrames.Join();
 
             SendCommandPacket(CommandType.FGStopped);
         }

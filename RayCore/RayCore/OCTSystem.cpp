@@ -220,7 +220,7 @@ RayError COCTSystem::ConnectDevices() {
 
 	if (m_curState == RayScannerState::Initial) {
 		result |= connectRotaryJunction();
-		PLOGI.printf("connect Rotary Junction - %s", ((result == NOERROR) ? "Succeed" : "Failed"));
+		PLOGI.printf("connect Rotary Junction and Laser Module - %s", ((result == NOERROR) ? "Succeed" : "Failed"));
 
 		// Connect to COM Interface first time
 		CLaserController* pLaser = CLaserController::GetInstance();
@@ -1241,6 +1241,8 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 		extraData |= (UCHAR)OCTHeader::ExtraData::Background;
 	}
 
+	PLOGI.printf("Save Start (%d frames)", nNumOfSamples);
+
 	pDataWriter->StartSave(strSaveFilePath);
 	pDataWriter->WriteHeader(OCTHeader::Type::TimeSignal, OCTHeader::DataType::UShort, OCTHeader::Channels::Single, settingPullback.nAScan, settingPullback.nBScan, extraData);
 	pDataWriter->WriteExtraData(pImaging->GetCalibrationData(), settingPullback.nAScan * 2 * sizeof(int));
@@ -1259,7 +1261,7 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 	pDataWriter->StopSave();
 
 	pSystem->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::SaveRawData);
-	printf("[threadSaveRaw] done.\n");
+	PLOGI.printf("Save done.\n");
 
 	while (pSystem->m_pThreadSaveRaw->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
@@ -1649,10 +1651,12 @@ int COCTSystem::connectRotaryJunction() {
 		result &= m_pRJController->SwitchOn();
 		result &= m_pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 		result &= m_pRJController->Current(eStepMotorIndex::Hub, HUB_MOTOR_POS_INITIAL);
+
+		if (!result) PLOGI.printf("Failed to connect to Rotary Junction");
 	}
 
 	if (!m_pLaserModule->IsOpen()) {
-		result &= m_pLaserModule->Open(config.laserModule.port);
+		result = m_pLaserModule->Open(config.laserModule.port);
 		if (result) {
 			m_pLaserModule->SetVLD(0);
 			Sleep(500);
@@ -1691,6 +1695,10 @@ int COCTSystem::disconnectRotaryJunction() {
 		{
 			Sleep(100);
 		}
+	}
+
+	if (m_pLaserModule->IsOpen()) {
+		m_pLaserModule->Home(-100000, 10000);
 	}
 
 	m_pRJController->Disconnect();

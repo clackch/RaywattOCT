@@ -674,7 +674,7 @@ namespace RaywattApp.ViewModels
         {
             //lumen
             int num = RayGetNumOfLumenContourPoints(frameInfo);
-            if (num > 0)
+            if (num > 2)
             {
                 IntPtr contour = RayGetLumenContour(frameInfo);
                 if (contour == IntPtr.Zero) return;
@@ -1263,7 +1263,10 @@ namespace RaywattApp.ViewModels
             double ratio = (double)angioTotalFrameNum / OctFrameLength * FrameNumber;
             CurrentAngioFrameNumber = (int)ratio;
 
-            CurrentAngioImage = PatientCase.AngioFrame.AngioImage[CurrentAngioFrameNumber];
+            if (CurrentAngioFrameNumber < PatientCase.AngioFrame.AngioImage.Count)
+            {
+                CurrentAngioImage = PatientCase.AngioFrame.AngioImage[CurrentAngioFrameNumber];
+            }
 
             return true;
         }

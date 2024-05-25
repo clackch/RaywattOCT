@@ -133,7 +133,7 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 	case ImagingType::LabImaging:
 		pImaging = new CLabImaging(setting, msg);
 		((CLabImaging *)pImaging)->Initialize(calibration, background);
-		((CLabImaging *)pImaging)->SetBackgroundSubtract(true);
+		((CLabImaging *)pImaging)->SetBackgroundSubtract(false);
 		break;
 	case ImagingType::TIFFImaging:
 		pImaging = new CTIFFImaging(setting, msg);
