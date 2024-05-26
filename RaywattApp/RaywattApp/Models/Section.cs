@@ -112,7 +112,7 @@ namespace RaywattApp.Models
 
         public void CalcMean(List<LumenContour> lumenContours, int frameProximal, int frameDistal)
         {
-            if (lumenContours == null || lumenContours.Count == 0)
+            if (lumenContours == null || lumenContours.Count == 0 || frameProximal < 0 || frameDistal < 0 || frameProximal >= frameDistal)
                 return;
 
             int count = frameDistal - frameProximal + 1;
