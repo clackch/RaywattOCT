@@ -514,6 +514,7 @@ namespace RaywattApp.ViewModels
                     CatheterProgress = 100;
                     if(!timerUnload.IsEnabled)
                         timerUnload.Start();
+                    LeaveFromRecording();
                     break;
                 default:
                     break;
