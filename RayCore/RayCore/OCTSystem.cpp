@@ -1407,10 +1407,12 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pSystem->postPriorMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::Recording);
 
 	// 4. Motor OFF
-	Sleep(1000);
+	Sleep(500);
 	pRJController->StopMotor();
 
 	// 5. Homing
+	Sleep(2000);
+	pRJController->Set(eStepMotorIndex::Both, STEP_MOTOR_SPEED_DEFAULT);
 	pRJController->Move(eStepMotorIndex::Both, 0);
 	pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 	pRJController->Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
@@ -2141,7 +2143,11 @@ LRESULT COCTSystem::OnMsgNotifyEventOccured(WPARAM wParam, LPARAM lParam) {
 * OnMsgDeviceWorkDone
 */
 LRESULT COCTSystem::OnMsgDeviceWorkDone(WPARAM wParam, LPARAM lParam) {
-	CUtility::StopThread(m_pThreadRotaryJunction);
+	RayWorkItem item = (RayWorkItem)wParam;
+
+	if (item != RayWorkItem::Recording) {
+		CUtility::StopThread(m_pThreadRotaryJunction);
+	}
 
 	if (m_callback != nullptr) m_callback((int)RayCallbackRequest::WorkDone, wParam, lParam);
 
