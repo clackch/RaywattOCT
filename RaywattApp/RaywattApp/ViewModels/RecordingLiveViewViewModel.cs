@@ -157,7 +157,7 @@ namespace RaywattApp.ViewModels
                 RaySetProperty(Property.PullbackDistance, Double.Parse(PbLength));
                 RaySetProperty(Property.PullbackSpeed, Double.Parse(PbSpeed));
 
-                if (!DeviceStatus.IsAngioInitialized)
+                if (!DeviceStatus.IsAngioInitialized && DeviceStatus.IsAngioConnected)
                 {
                     _angioManager.SelectCathRoom();
                 }
