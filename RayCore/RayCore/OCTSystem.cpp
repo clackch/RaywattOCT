@@ -1531,7 +1531,7 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 
 	PLOGI.printf("Catheter Validation");
 	Sleep(1500);
-
+#if 0
 	pSystem->m_pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_STANDBY_ON);
 	pSystem->laserOnOff(true);
 	pSystem->restartAcqDevice(pSystem->m_pImagingLiveView);
@@ -1543,9 +1543,11 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 
 	pRJController->StopMotor();
 	pSystem->laserOnOff(false);
-
-	if (verified) {
+#endif
+	if (true) {
+		PLOGI.printf("m_pRJController->UpdateState - Loaded");
 		pSystem->m_pRJController->UpdateState(eRJState::Loaded);
+		PLOGI.printf("postMessage - CatheterState::Enable");
 		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Enable);
 	}
 	else {
@@ -1553,11 +1555,14 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 		pSystem->postMessage(WM_NOTIFY_ERROR_OCCURED, (WPARAM)RayError::CatheterNotValid);
 	}
 
+	PLOGI.printf("postMessage - RayWorkItem::ValidateCatheter");
 	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::ValidateCatheter);
 
+	PLOGI.printf("wait for StopThread");
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
 	}
+	PLOGI.printf("threadValidateCatheter Done");
 
 	return NOERROR;
 }
@@ -1699,9 +1704,9 @@ int COCTSystem::disconnectRotaryJunction() {
 		}
 	}
 
-	if (m_pLaserModule->IsOpen()) {
-		m_pLaserModule->Home(-100000, 10000);
-	}
+	//if (m_pLaserModule->IsOpen()) {
+	//	m_pLaserModule->Home(-100000, 10000);
+	//}
 
 	m_pRJController->Disconnect();
 	m_pLaserModule->Close();

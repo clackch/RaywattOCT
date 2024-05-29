@@ -1888,7 +1888,7 @@ namespace RaywattApp.Common.Util
             double pxDiameter = (sheathDiameter / resolution) * imageSize / Constants.OCTImageSize;
             Mat imgSheath = new Mat(imageSize, imageSize, MatType.CV_8UC4);
             Point center = new Point(imgSheath.Width / 2, imgSheath.Height / 2);
-            int thickness = 3;
+            int thickness = 2;
             int radius = (int)(pxDiameter / 2) + thickness;
 
             imgSheath.SetTo(new Scalar(0x00, 0x00, 0x00, 0x00));
