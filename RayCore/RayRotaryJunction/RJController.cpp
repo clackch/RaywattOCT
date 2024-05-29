@@ -342,6 +342,7 @@ void CRJController::updateState() {
 }
 
 void CRJController::updateState(eRJState state) {
+	PLOGI.printf("state: %d", state);
 	switch (state) {
 	case eRJState::Disconnected:
 	case eRJState::Unloaded:

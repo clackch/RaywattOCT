@@ -490,12 +490,15 @@ namespace RaywattApp.ViewModels
 
         private void handleState(RayCallbackRequest request, RayScannerState state, int param)
         {
+            _log.Debug("state: " + state.ToString());
             RayScannerState curState = (RayScannerState)RayGetProperty(Property.CurrentState);
             DeviceStatus.IsLiveView = (bool)(RayGetProperty(Property.MotorOnOff) != 0);
         }
         protected void handleProgress(RayCallbackRequest request, int progress, int param) { }
         protected void handleError(RayCallbackRequest request, RayError error, int param) { }
-        protected void handleEvent(RayCallbackRequest request, RayEvent e, int param) {
+        protected void handleEvent(RayCallbackRequest request, RayEvent e, int param)
+        {
+            _log.Debug("event: " + e.ToString());
             switch (e)
             {
                 case RayEvent.CatheterConnected:
@@ -522,7 +525,7 @@ namespace RaywattApp.ViewModels
         }
         protected void handleWorkDone(RayCallbackRequest request, RayWorkItem work, int param)
         {
-            _log.Debug("Done - " + work.ToString());
+            _log.Debug("workItem - " + work.ToString());
             switch (work)
             {
                 case RayWorkItem.StartService:

@@ -166,6 +166,7 @@ void CLaserModule::SetVLD(unsigned short nValue) {
 	PLOGI.printf("Visible Laser Power - %d", nValue);
 	delay_line_Set_voltage_ld(nValue);
 	m_nVLDValue = nValue;
+	PLOGI.printf("Visible Laser Power done");
 }
 void CLaserModule::SetVOA(unsigned short nValue) {
 	if (!IsOpen()) return;

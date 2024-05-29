@@ -106,14 +106,14 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Confirm");
 
-            RayError result = (RayError) RayUnloadCatheter();
-            if (result == RayError.OK)
-            {
-                DeviceStatus.CatheterStatus = Constants.CatheterStatusUnloading;
-            }
-            else {
-                _log.Debug("RayUnloadCatheter - " + result);
-            }
+            //RayError result = (RayError) RayUnloadCatheter();
+            //if (result == RayError.OK)
+            //{
+            //    DeviceStatus.CatheterStatus = Constants.CatheterStatusUnloading;
+            //}
+            //else {
+            //    _log.Debug("RayUnloadCatheter - " + result);
+            //}
 
             RaySetSession(RaySession.Review);
             int numOfFrames = (int) RayGetProperty(Property.ImageDepth);
