@@ -6,17 +6,22 @@ namespace RaywattApp.Common.Converters
 {
     internal class BoolToEnableConverter : IValueConverter
     {
+        public bool TrueValue { get; set; } = true;
+
+        public bool FalseValue { get; set; } = false;
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if(value is bool boolValue)
+            
+            if (value is bool boolValue)
             {
                 if (boolValue)
-                    return true;
+                    return TrueValue;
                 else
-                    return false;
+                    return FalseValue;
             }
 
-            return false;
+            return FalseValue;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -373,6 +373,8 @@ namespace RaywattApp.ViewModels
                 AngioFrameNumber = ReviewStatus.AngioFrameNumber;
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
 
+                ReviewStatus.IsNoPullback = PatientCase.PullbackType == "TEST" ? true : false;
+
                 if (ReviewStatus.IsPlay)
                     Playback();
             }
