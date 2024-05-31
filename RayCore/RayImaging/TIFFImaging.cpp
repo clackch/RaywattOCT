@@ -61,7 +61,7 @@ void CTIFFImaging::PostProcess(cv::Mat image)
 	cv::cvtColor(image, imageCircle, cv::COLOR_GRAY2RGB);
 	if (bColor) {
 		CLookUpTable& lut = CLookUpTable::GetInstance();
-		lut.Apply(imageCircle, 0);
+		lut.Apply(imageCircle, lut.GetCurrentColormap());
 	}
 
 	cv::convertScaleAbs(imageCircle, imageCircle, m_setting.contrast, m_setting.brightness);
