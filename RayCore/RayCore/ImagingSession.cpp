@@ -416,12 +416,18 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
 	int imgSize = 1024;
-	cv::Mat prevLumen = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
 	cv::Point center(imgSize / 2, imgSize / 2);
+
+	//initial lumen
+	cv::Mat prevLumen = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);	
 	cv::circle(prevLumen, center, imgSize / 5, cv::Scalar(255));
 	std::vector<std::vector<cv::Point>> vPrevLumens;
 	cv::findContours(prevLumen, vPrevLumens, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 	std::vector<cv::Point> vPrevLumen = vPrevLumens.at(0);
+
+	//center point mask
+	cv::Mat centerMask = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+	cv::circle(centerMask, center, 1, cv::Scalar(255), cv::FILLED);
 
 	PLOGI.printf("Session #%d lumen detection start - %d frames", pSession->m_nSession, nNumOfSamples);
 	vLumen.clear();
@@ -452,45 +458,86 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 			pImaging->SetLumenContourOffset(vPrevLumen);
 		}
 		else {
-			double maxArea = 0;
-			int idx = 0, seq = 0;
-			std::vector<cv::Point> largestContour;
-			for (const auto& contour : vContours) {
-				double area = cv::contourArea(contour);
-				if (area > maxArea) {
-					maxArea = area;
-					largestContour = contour;
-					idx = seq;
+			std::vector<cv::Point> validContour;
+			cv::Mat andResult;
+			cv::Mat xorResult;
+
+			//find contour which contains center point
+			int idx = -1;
+			for (int i = 0; i < vContours.size(); i++) {
+				cv::Mat curContour = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+				cv::drawContours(curContour, vContours, i, cv::Scalar(255), cv::FILLED);
+
+				cv::bitwise_and(centerMask, curContour, andResult);
+				cv::bitwise_xor(centerMask, andResult, xorResult);
+
+				if (cv::countNonZero(xorResult) == 0) {
+					validContour = vContours[i];
+					idx = i;
+					break;
 				}
-				seq++;
 			}
 
-			cv::Mat mask1 = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
-			cv::Point center(imgSize / 2, imgSize / 2);
-			cv::circle(mask1, center, imgSize / 2, cv::Scalar(255), cv::FILLED);
+			if (idx != -1) {
+				//removal of the outer part of the circle(OCT cross-section)
+				cv::Mat mask1 = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+				cv::Point center(imgSize / 2, imgSize / 2);
+				cv::circle(mask1, center, imgSize / 2, cv::Scalar(255), cv::FILLED);
 
-			cv::Mat mask2 = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
-			cv::drawContours(mask2, vContours, idx, cv::Scalar(255), cv::FILLED);
+				cv::Mat mask2 = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+				cv::drawContours(mask2, vContours, idx, cv::Scalar(255), cv::FILLED);
 
-			cv::Mat andResult;
-			cv::bitwise_and(mask2, mask1, andResult);
+				cv::bitwise_and(mask2, mask1, andResult);
+				cv::bitwise_xor(mask2, andResult, xorResult);
+				bool isCompletelyContained = cv::countNonZero(xorResult) == 0;
 
-			cv::Mat xorResult;
-			cv::bitwise_xor(mask2, andResult, xorResult);
-			bool isCompletelyContained = cv::countNonZero(xorResult) == 0;
+				vContours.clear();
+				if (isCompletelyContained) {
+					vContours.push_back(validContour);
+					vPrevLumen = validContour;
+					pImaging->SetLumenContourOffset(validContour);
+				}
+				else {
+					std::vector<std::vector<cv::Point>> vCircle;
+					cv::findContours(andResult, vCircle, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
-			vContours.clear();
-			if (isCompletelyContained) {
-				vContours.push_back(largestContour);
-				vPrevLumen = largestContour;
-				pImaging->SetLumenContourOffset(largestContour);
+					if (vCircle.size() == 0) {
+						vContours.push_back(vPrevLumen);
+						pImaging->SetLumenContourOffset(vPrevLumen);
+					}
+					else {
+						//find contour which contains center point
+						idx = -1;
+						for (int i = 0; i < vCircle.size(); i++) {
+							cv::Mat curContour = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+							cv::drawContours(curContour, vCircle, i, cv::Scalar(255), cv::FILLED);
+
+							cv::bitwise_and(centerMask, curContour, andResult);
+							cv::bitwise_xor(centerMask, andResult, xorResult);
+
+							if (cv::countNonZero(xorResult) == 0) {
+								validContour = vCircle[i];
+								idx = i;
+								break;
+							}
+						}
+
+						if (idx != -1) {
+							vContours.push_back(validContour);
+							vPrevLumen = validContour;
+							pImaging->SetLumenContourOffset(validContour);
+						}
+						else {
+							vContours.push_back(vPrevLumen);
+							pImaging->SetLumenContourOffset(vPrevLumen);
+						}
+					}
+				}
 			}
 			else {
-				std::vector<std::vector<cv::Point>> vCircle;
-				cv::findContours(andResult, vCircle, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-				vContours.push_back(vCircle.at(0));
-				vPrevLumen = vCircle.at(0);
-				pImaging->SetLumenContourOffset(vCircle.at(0));
+				vContours.clear();
+				vContours.push_back(vPrevLumen);
+				pImaging->SetLumenContourOffset(vPrevLumen);
 			}
 		}
 
