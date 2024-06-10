@@ -11,6 +11,7 @@
 #include "Configuration.h"
 #include "CutViewManager.h"
 #include "IRayLearning.h"
+#include "LookUpTable.h"
 
 CImagingSession::CImagingSession(CMessageService* pMsg, int nSession, bool deleteData) :
 	m_pMsg(pMsg),
@@ -424,6 +425,8 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	std::vector<std::vector<cv::Point>> vPrevLumens;
 	cv::findContours(prevLumen, vPrevLumens, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 	std::vector<cv::Point> vPrevLumen = vPrevLumens.at(0);
+	
+	CLookUpTable& lut = CLookUpTable::GetInstance();
 
 	//center point mask
 	cv::Mat centerMask = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
@@ -446,6 +449,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		cv::Mat circleImage;
 		pImaging->CircularizeImage(it->second, circleImage);
 		cv::cvtColor(circleImage, circleImage, cv::COLOR_GRAY2BGR);
+		lut.Apply(circleImage, 3/*ML LUT*/);
 
 		//lumen
 		cv::Mat contourImage = learning->FindLumen(circleImage);		

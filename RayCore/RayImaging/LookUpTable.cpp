@@ -43,7 +43,6 @@ int CLookUpTable::Load(const char* strLUTPath) {
 			}
 		}
 		if (lut.size() == 256) {
-			m_vLUT.clear();
 			m_vLUT.push_back(lut);
 			return m_vLUT.size();
 		}
@@ -72,4 +71,12 @@ void CLookUpTable::Apply(cv::Mat& image, uint nIdxLUT) {
 			image.at<cv::Vec3b>(y, x) = cvtColor;
 		}
 	}
+}
+
+void CLookUpTable::SetCurrentColormap(int colormapIndex) {
+	this->m_fCurrentColorMapIndex = colormapIndex;
+}
+
+int CLookUpTable::GetCurrentColormap() {
+	return this->m_fCurrentColorMapIndex;
 }

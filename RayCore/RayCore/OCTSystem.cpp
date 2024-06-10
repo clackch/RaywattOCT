@@ -841,26 +841,9 @@ RayError COCTSystem::SetColormap(double value)
 {
 	// Read LUT from File
 	CLookUpTable& lut = CLookUpTable::GetInstance();
-	int result;
-
-	switch ((int)value) {
-	case 0:
-		result = lut.Load("LUT_green.csv");
-		break;
-	case 1:
-		result = lut.Load("LUT_gray.csv");
-		break;
-	case 2:
-		result = lut.Load("LUT_orange.csv");
-		break;
-	default:
-		result = lut.Load("LUT_green.csv");
-		break;
-	}
-	
-	PLOGI.printf("read LUT :%d %s", (int)value, (result > 0) ? "Succeed" : "Failed");
-
+	lut.SetCurrentColormap((int)value);
 	m_fColormap = value;
+	PLOGI.printf("read LUT :%d %s", (int)value, (m_fColormap >= 0) ? "Succeed" : "Failed");
 
 	return RayError::OK;
 }
@@ -1076,6 +1059,13 @@ UINT COCTSystem::threadService(LPVOID param) {
 	// Initialize
 	IRayLearning* learning = IRayLearning::GetInstance();
 	learning->Initialize(true);
+
+	// LUT Load
+	CLookUpTable& lut = CLookUpTable::GetInstance();
+	lut.Load("LUT_green.csv");
+	lut.Load("LUT_gray.csv");
+	lut.Load("LUT_orange.csv");
+	lut.Load("LUT_ML.csv");
 
 #ifdef DEBUG
 	cv::Mat imgSample = cv::imread(".\\oct_sample.png");

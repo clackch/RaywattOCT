@@ -94,7 +94,7 @@ void COCTImaging::PostProcess(cv::Mat image) {
 	if (bInvert) cv::bitwise_not(imageResultColor, imageResultColor);
 	if (bColor) {
 		CLookUpTable& lut = CLookUpTable::GetInstance();
-		lut.Apply(imageResultColor, 0);
+		lut.Apply(imageResultColor, lut.GetCurrentColormap());
 	}
 
 	cv::convertScaleAbs(imageResultColor, imageResultColor, m_setting.contrast, m_setting.brightness);
