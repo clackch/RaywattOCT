@@ -1065,7 +1065,7 @@ UINT COCTSystem::threadService(LPVOID param) {
 	lut.Load("LUT_green.csv");
 	lut.Load("LUT_gray.csv");
 	lut.Load("LUT_orange.csv");
-	lut.Load("LUT_ML.csv");
+	//lut.Load("LUT_ML.csv");
 
 #ifdef DEBUG
 	cv::Mat imgSample = cv::imread(".\\oct_sample.png");

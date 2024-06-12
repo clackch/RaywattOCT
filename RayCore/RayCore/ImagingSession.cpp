@@ -449,7 +449,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		cv::Mat circleImage;
 		pImaging->CircularizeImage(it->second, circleImage);
 		cv::cvtColor(circleImage, circleImage, cv::COLOR_GRAY2BGR);
-		lut.Apply(circleImage, 3/*ML LUT*/);
+		//lut.Apply(circleImage, 3/*ML LUT*/);
 
 		//lumen
 		cv::Mat contourImage = learning->FindLumen(circleImage);		
