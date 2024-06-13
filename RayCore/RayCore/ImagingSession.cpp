@@ -330,6 +330,14 @@ int CImagingSession::GetNumOfGuidewirePoints(int nFrame){
 	return mat.cols * mat.rows;
 }
 
+void* CImagingSession::GetGuidewireRadius(int nFrame) {
+	if (m_vGuidewireRadius.size() <= nFrame) return 0;
+
+	auto& vRadius = m_vGuidewireRadius.at(nFrame);
+
+	return static_cast<void*>(vRadius.data());
+}
+
 CImagingSession* CImagingSession::createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type) {
 	CImagingSession* pSession = new CImagingSession(pMsg, nSession, deleteData);
 
@@ -413,6 +421,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	std::vector<std::vector<cv::Mat>>& vSidebranch = pSession->m_vSidebranch;
 	std::vector<cv::Mat>& vStent = pSession->m_vStent;
 	std::vector<cv::Mat>& vGuidewire = pSession->m_vGuidewire;
+	std::vector<std::vector<double>>& vGuidewireRadius = pSession->m_vGuidewireRadius;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
 	int imgSize = 1024;
@@ -534,12 +543,17 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 
 		//guidewire
 		std::vector<cv::Rect2f> vGuidewires = learning->FindGuidewire();
+		std::vector<cv::Point> centerPoints;
+		std::vector<double> Radius;
 		cv::Mat mGuidewire(vGuidewires.size(), 1, CV_32SC2);
+		
+		pImaging->GetGuideWireCenterPoint(circleImage, vGuidewires, centerPoints, Radius);
+
 		for (size_t row = 0; row < vGuidewires.size(); row++) {
-			//TODO - Rect 영역 내에서 GW 테두리 분석해서 중점 찾는 로직 필요
-			mGuidewire.at<cv::Point>(row, 0) = cv::Point(vGuidewires[row].x + vGuidewires[row].width / 2, vGuidewires[row].y + vGuidewires[row].height / 2);
+			mGuidewire.at<cv::Point>(row, 0) = cv::Point(centerPoints[row].x, centerPoints[row].y);
 		}
 		vGuidewire.push_back(mGuidewire);
+		vGuidewireRadius.push_back(Radius);
 
 		pSession->m_pMsg->postMessage(WM_PROCESS_DETECTION, nSession, nFrame);
 	}

@@ -116,14 +116,14 @@ namespace RaywattApp.Services
                 GROUP BY key
                 ";
 
-            //SelectPatientCaseListByDate - create_data 기준
+            //SelectPatientCaseListByDate - create_data 기준  Radius
             _query["SelectPatientCaseListByDate"] = @$"
                 SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name, physician_name
                 , accession_number, comment
                 , vessel, location, procedure
                 , num_of_frames, image, image_resolution
                 , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
-                , flush_media, pullback_trigger, colormap
+                , flush_media, pullback_trigger, colormap, guidewire_radius
                 , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
                 , brightness, contrast, section_proximal, section_distal
                 , create_date, update_date
@@ -139,7 +139,7 @@ namespace RaywattApp.Services
                 , vessel, location, procedure
                 , num_of_frames, image, image_resolution
                 , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
-                , flush_media, pullback_trigger, colormap
+                , flush_media, pullback_trigger, colormap, guidewire_radius
                 , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
                 , brightness, contrast, section_proximal, section_distal
                 , create_date, update_date
@@ -153,7 +153,7 @@ namespace RaywattApp.Services
                 , rv_schema.fn_patient(patient_id) patient_name
                 , rv_schema.fn_patient_gender(patient_id) gender, rv_schema.fn_patient_birth(patient_id) birthdate
                 , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
-                , flush_media, pullback_trigger, colormap
+                , flush_media, pullback_trigger, colormap, guidewire_radius
                 , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
                 , brightness, contrast, section_proximal, section_distal
                 , T1.create_date, T1.update_date
@@ -226,14 +226,14 @@ namespace RaywattApp.Services
                 INSERT INTO rv_schema.patient_case(id, patient_id, physician_name, accession_number
                 , comment, vessel, location, procedure, num_of_frames, image, image_resolution
                 , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
-                , flush_media, pullback_trigger, colormap
+                , flush_media, pullback_trigger, colormap, guidewire_radius
                 , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
                 , brightness, contrast, section_proximal, section_distal
                 , create_date, update_date)
                 VALUES (@id, @patient_id, @physician_name, @accession_number
                 , @comment, @vessel, @location, @procedure, @num_of_frames, @image, @image_resolution
                 , @pullback_type, @pullback_length, @angio_yn, @angio_co_registration, @indicator_degree
-                , @flush_media, @pullback_trigger, @colormap
+                , @flush_media, @pullback_trigger, @colormap, @guidewire_radius
                 , @calcium_threshold, @expansion_calculation, @expansion_threshold, @apposition_threshold
                 , @brightness, @contrast, @section_proximal, @section_distal
                 , now(), now())
@@ -290,7 +290,7 @@ namespace RaywattApp.Services
                 SET physician_name=@physician_name, accession_number=@accession_number
                 , comment=@comment, vessel=@vessel, location=@location, procedure=@procedure
                 , angio_yn=@angio_yn, angio_co_registration=@angio_co_registration, indicator_degree=@indicator_degree
-                , colormap=@colormap
+                , colormap=@colormap, guidewire_radius=@guidewire_radius
                 , calcium_threshold=@calcium_threshold, expansion_calculation=@expansion_calculation
                 , expansion_threshold=@expansion_threshold, apposition_threshold=@apposition_threshold
                 , brightness=@brightness, contrast=@contrast, section_proximal=@section_proximal, section_distal=@section_distal
@@ -370,12 +370,12 @@ namespace RaywattApp.Services
             _query["UpsertPatientCase"] = @$"
                 INSERT INTO rv_schema.patient_case(id, patient_id, physician_name, accession_number, comment, vessel, location, procedure
                 , num_of_frames, image, image_resolution, pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
-                , flush_media, pullback_trigger, colormap
+                , flush_media, pullback_trigger, colormap, guidewire_radius
                 , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
                 , brightness, contrast, section_proximal, section_distal, create_date, update_date)
                 VALUES (@id, @patient_id, @physician_name, @accession_number, @comment, @vessel, @location, @procedure
                 , @num_of_frames, @image, @image_resolution, @pullback_type, @pullback_length, @angio_yn, @angio_co_registration, @indicator_degree
-                , @flush_media, @pullback_trigger, @colormap
+                , @flush_media, @pullback_trigger, @colormap, @guidewire_radius
                 , @calcium_threshold, @expansion_calculation, @expansion_threshold, @apposition_threshold
                 , @brightness, @contrast, @section_proximal, @section_distal, @create_date, @update_date)
                 ON CONFLICT (id)
@@ -383,7 +383,7 @@ namespace RaywattApp.Services
                 SET patient_id=@patient_id, physician_name=@physician_name, accession_number=@accession_number, comment=@comment
                 , vessel=@vessel, location=@location, procedure=@procedure, num_of_frames=@num_of_frames, image=@image, image_resolution=@image_resolution
                 , pullback_type=@pullback_type, pullback_length=@pullback_length, angio_yn=@angio_yn, angio_co_registration=@angio_co_registration
-                , indicator_degree=@indicator_degree
+                , indicator_degree=@indicator_degree, guidewire_radius=@guidewire_radius
                 , flush_media=@flush_media, pullback_trigger=@pullback_trigger, colormap=@colormap
                 , calcium_threshold=@calcium_threshold, expansion_calculation=@expansion_calculation, expansion_threshold=@expansion_threshold
                 , apposition_threshold=@apposition_threshold, brightness=@brightness, contrast=@contrast

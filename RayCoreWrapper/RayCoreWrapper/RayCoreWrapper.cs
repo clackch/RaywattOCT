@@ -207,5 +207,8 @@ namespace RaywattOCT
         public static extern IntPtr RayGetGuidewirePoints(int nFrame);
         [DllImport("RayCore.dll")]
         public static extern int RayGetNumOfGuidewirePoints(int nFrame);
+        [DllImport("RayCore.dll")]
+        public static extern IntPtr RayGetGuidewireRadius(int nFrame);
+
     }
 }

@@ -260,6 +260,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["contrast"] = PatientCase.Contrast;
             sqlParameters["section_proximal"] = PatientCase.SectionProximal;
             sqlParameters["section_distal"] = PatientCase.SectionDistal;
+            sqlParameters["guidewire_radius"] = PatientCase.GuidewireRadius;
 
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
             if (nRows == 0)
@@ -321,12 +322,13 @@ namespace RaywattApp.ViewModels
                 ODSOCT_InputData(Ray3DObject.Stent, buffer, diameter, diameter, depth, 1, 1, zVal);
             }
 
-            //CommonUtil.GuideWireToMemory(PatientCase.LumenGuidewires,
-            //new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize),
-            //buffer,
-            //new OpenCvSharp.Size(diameter, diameter));
-            //ODSOCT_InputSurfaceParameter(Ray3DObject.GuideWire, 10, 15, ".\\data\\guidewire_tex.jpg");
-            //ODSOCT_InputData(Ray3DObject.GuideWire, buffer, diameter, diameter, depth, 1, 1, zVal);
+            buffer = Marshal.AllocHGlobal(diameter * diameter * depth);
+            CommonUtil.GuideWireToMemory(PatientCase.LumenGuidewires,
+            new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize),
+            buffer,
+            new OpenCvSharp.Size(diameter, diameter), PatientCase.GuidewireRadius);
+            ODSOCT_InputSurfaceParameter(Ray3DObject.GuideWire, 10, 15, ".\\data\\guidewire_tex.jpg");
+            ODSOCT_InputData(Ray3DObject.GuideWire, buffer, diameter, diameter, depth, 1, 1, zVal);
 
             ODSOCT_ProcessingDatas();
             ODSOCT_UpdateColorTable((int)RayGetProperty(Property.Colormap));

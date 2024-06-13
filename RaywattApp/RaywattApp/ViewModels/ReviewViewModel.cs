@@ -31,6 +31,8 @@ using RaywattApp.Common.Angio;
 using System.Xml;
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
+using System.Windows.Automation.Provider;
+using Newtonsoft.Json.Linq;
 
 namespace RaywattApp.ViewModels
 {
@@ -162,6 +164,9 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private List<LumenGuidewire> _lumenGuidewires;
+
+        [ObservableProperty]
+        private List<double> _guideWireRadiusList;
 
         [ObservableProperty]
         private Zoom _zoomAngio = new Zoom(Constants.CrossSectionAngio / Constants.OCTImageSize);
@@ -579,6 +584,7 @@ namespace RaywattApp.ViewModels
             LumenSidebranches = new List<LumenSidebranch>();
             LumenStents = new List<LumenStent>();
             LumenGuidewires = new List<LumenGuidewire>();
+            GuideWireRadiusList = new List<double>();
 
             for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)
             {
@@ -642,6 +648,8 @@ namespace RaywattApp.ViewModels
             {
                 //TODO - ML detection에서 Calcium 가져오도록 개발되면 삭제 필요
                 GetMlData();
+
+                PatientCase.GuidewireRadius = GetGuidewireAverageRadius();
 
                 if (ReviewStatus.IsContourStentOn)
                     LumenContourCommand = Constants.LumenContourDraw;
@@ -753,13 +761,21 @@ namespace RaywattApp.ViewModels
                 IntPtr contour = RayGetGuidewirePoints(frameInfo);
                 if (contour == IntPtr.Zero) return;
 
-                Mat mat = CommonUtil.ByteMemoryToCvMat(contour, 1, guidewireHeight, 2);
+                IntPtr radius = RayGetGuidewireRadius(frameInfo);
+                if (radius == IntPtr.Zero) return;
 
+                Mat mat = CommonUtil.ByteMemoryToCvMat(contour, 1, guidewireHeight, 2);
                 LumenGuidewires[frameInfo].Points = new List<Point>();
-                for (int row = 0; row < mat.Rows; row++)
+
+                unsafe
                 {
-                    Vec2i point = mat.At<Vec2i>(0, row);
-                    LumenGuidewires[frameInfo].Points.Add(new Point(point.Item0, point.Item1));
+                    double* doublePtr = (double*)radius.ToPointer();
+                    for (int row = 0; row < mat.Rows; row++)
+                    {
+                        Vec2i point = mat.At<Vec2i>(0, row);
+                        LumenGuidewires[frameInfo].Points.Add(new Point(point.Item0, point.Item1));
+                        GuideWireRadiusList.Add(*(doublePtr + row));
+                    }
                 }
             }
         }
@@ -831,6 +847,38 @@ namespace RaywattApp.ViewModels
                 if (firstSize + secondSize + thirdSize == 0)
                     lumenContour.Calcium.MaxThicknessDegree = -1;
             }
+        }
+
+        private double GetGuidewireAverageRadius()
+        {
+            // 0보다 작은 값들을 제거
+            List<double> validRadiusList = GuideWireRadiusList.Where(v => v >= 0).ToList();
+
+            if (validRadiusList.Count == 0)
+            {
+                _log.Debug("No valid radius values.");
+                return 0.0;
+            }
+
+            double mean = validRadiusList.Average();
+            double stdDev = Math.Sqrt(validRadiusList.Average(v => Math.Pow(v - mean, 2)));
+
+            // 정규화된 값 계산
+            List<double> normalizedValues = GuideWireRadiusList.Select(v => (v - mean) / stdDev).ToList();
+
+            // 편차가 ±2 이하인 값들만 선택(95%)하고 ±3 이상인 값들을 제거
+            List<double> filteredValues = GuideWireRadiusList.Where((v, index) =>
+            {
+                double normalizedValue = normalizedValues[index];
+                return normalizedValue >= -2 && normalizedValue <= 2;
+            }).ToList();
+
+
+            double filteredAverage = filteredValues.Average();
+
+            _log.Debug("Average Radius Value" + filteredAverage.ToString());
+
+            return filteredAverage;
         }
 
         #endregion
@@ -1105,6 +1153,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["section_proximal"] = PatientCase.SectionProximal;
             PatientCase.SectionDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
             sqlParameters["section_distal"] = PatientCase.SectionDistal;
+            sqlParameters["guidewire_radius"] = PatientCase.GuidewireRadius;
 
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
             if (nRows == 0)
@@ -1133,6 +1182,7 @@ namespace RaywattApp.ViewModels
                     sqlParameters["lumen_sidebranch"] = PatientCase.StrLumenSidebranch;
                     sqlParameters["lumen_stent"] = PatientCase.StrLumenStent;
                     sqlParameters["lumen_guidewire"] = PatientCase.StrLumenGuidewire;
+                    // GuideWireRadius Save
                     nRows = _sqlManager.UpsertPatientCaseAnnotation(sqlParameters);
                 }
                 else

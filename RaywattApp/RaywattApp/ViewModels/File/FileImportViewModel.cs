@@ -512,6 +512,7 @@ namespace RaywattApp.ViewModels.File
                             patientCase.StrLumenGuidewire = GetStrValue(caseObj, "StrLumenGuidewire");
                             patientCase.CreateDate = GetDateValue(caseObj, "CreateDate");
                             patientCase.UpdateDate = GetDateValue(caseObj, "UpdateDate");
+                            patientCase.GuidewireRadius = GetDoubleValue(caseObj, "GuidewireRadius");
 
                             patient.PatientCaseList.Add(patientCase);
                         }

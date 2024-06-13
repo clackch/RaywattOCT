@@ -144,6 +144,8 @@ void COCTImaging::EraseStentOutLier(cv::Mat& stent) {}
 
 void COCTImaging::SetLumenContourOffset(std::vector<cv::Point> lumenContour) {}
 
+void COCTImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& centerPoints, std::vector<double>& radius) {}
+
 void COCTImaging::allocateMemory() {
 	// ORDER = 11, nFFTLength = 2^11
 	// nScans 보다 큰 2^n 중에서 제일 작은 수

@@ -49,6 +49,7 @@ private:
 	std::vector<std::vector<cv::Mat>> m_vSidebranch;
 	std::vector<cv::Mat> m_vStent;
 	std::vector<cv::Mat> m_vGuidewire;
+	std::vector<std::vector<double>> m_vGuidewireRadius;
 	char* m_pVolumeData;
 
 private:
@@ -95,6 +96,7 @@ public:
 	int GetNumOfStentPoints(int nFrame);
 	void* GetGuidewirePoints(int nFrame);
 	int GetNumOfGuidewirePoints(int nFrame);
+	void* GetGuidewireRadius(int nFrame);
 
 private:
 	static CImagingSession* createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type);

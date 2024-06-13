@@ -136,6 +136,7 @@ public:
 	int GetNumOfStentPoints(int nFrame);
 	void* GetGuidewirePoints(int nFrame);
 	int GetNumOfGuidewirePoints(int nFrame);
+	void* GetGuidewireRadius(int nFrame);
 	
 	//Property
 	RayScannerState GetCurrentState() { return m_curState; }

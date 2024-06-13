@@ -442,6 +442,7 @@ namespace RaywattApp.ViewModels.Dialog
                             string srcPath = CommonUtil.GetDirectoryPath(path) + "\\" + patientCase.Image;
                             sqlParameters["image"] = System.IO.File.Exists(srcPath) ? patientCase.Image : "";
                             sqlParameters["image_resolution"] = patientCase.ImageResolution;
+                            sqlParameters["guidewire_radius"] = patientCase.GuidewireRadius;
 
                             var nRows = _sqlManager.UpsertPatientCase(sqlParameters);
                             if (nRows == 1)

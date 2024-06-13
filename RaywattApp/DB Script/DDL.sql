@@ -124,6 +124,7 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case
 	angio_yn boolean,
 	angio_co_registration boolean,
 	indicator_degree real,
+	guidewire_radius real,
     physician_name character varying(50) COLLATE pg_catalog."default",	
     flush_media character varying(4) COLLATE pg_catalog."default",
     pullback_trigger character varying(4) COLLATE pg_catalog."default",
