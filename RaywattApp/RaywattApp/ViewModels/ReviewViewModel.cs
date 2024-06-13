@@ -120,9 +120,6 @@ namespace RaywattApp.ViewModels
         private int _currentAngioFrameNumber;
         public int CurrentAngioFrameNumber { get { return _currentAngioFrameNumber; } set { _currentAngioFrameNumber = value; OnPropertyChanged(nameof(CurrentAngioFrameNumber)); } }
 
-        private int _angioFrameNumber;
-        public int AngioFrameNumber { get { return _angioFrameNumber; } set { _angioFrameNumber = value; OnPropertyChanged(nameof(AngioFrameNumber)); syncAngioFrame(value); } }
-
         private string _measurementCommand;
         public string MeasurementCommand { get { return _measurementCommand; } set { _measurementCommand = value; OnPropertyChanged(nameof(MeasurementCommand)); } }
 
@@ -375,7 +372,6 @@ namespace RaywattApp.ViewModels
                 SetAnnotation();
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
 
-                AngioFrameNumber = ReviewStatus.AngioFrameNumber;
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
 
                 if (ReviewStatus.IsPlay)
@@ -1306,18 +1302,7 @@ namespace RaywattApp.ViewModels
             bool ret = base.MoveToFrame(session, nFrame);
 
             if (ret == false || PatientCase.AngioYn == false || PatientCase.AngioFrame.AngioImage.Count == 0) return false;
-
-            int OctFrameLength = ReviewStatus.NumberOfFrames;
-            int angioTotalFrameNum = PatientCase.AngioFrame.AngioFrameNum;
-            
-            double ratio = (double)angioTotalFrameNum / OctFrameLength * FrameNumber;
-            CurrentAngioFrameNumber = (int)ratio;
-
-            if (CurrentAngioFrameNumber < PatientCase.AngioFrame.AngioImage.Count)
-            {
-                CurrentAngioImage = PatientCase.AngioFrame.AngioImage[CurrentAngioFrameNumber];
-            }
-
+            syncAngioFrame(nFrame);
             return true;
         }
         protected override void UpdateCrossSectionImage()
@@ -1655,14 +1640,16 @@ namespace RaywattApp.ViewModels
         #region CoRegistration
         private void syncAngioFrame(int value)
         {
-            if (value < 0) return;
-
             int OctFrameLength = ReviewStatus.NumberOfFrames;
-            double FrameNumber = (double)PatientCase.AngioFrame.AngioImage.Count / OctFrameLength / value;
-            FrameNumber = 1 / FrameNumber;
+            int angioTotalFrameNum = PatientCase.AngioFrame.AngioFrameNum;
 
-            base.MoveToFrame(RaySession.Review, (int)FrameNumber);
-            CurrentAngioImage = PatientCase.AngioFrame.AngioImage[value];
+            double ratio = (double)angioTotalFrameNum / OctFrameLength * value;
+            CurrentAngioFrameNumber = (int)ratio;
+
+            if (CurrentAngioFrameNumber < PatientCase.AngioFrame.AngioImage.Count)
+            {
+                CurrentAngioImage = PatientCase.AngioFrame.AngioImage[CurrentAngioFrameNumber];
+            }
         }
 
         private void ThreadReadAngioFrames()
