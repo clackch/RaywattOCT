@@ -124,16 +124,6 @@ namespace RaywattApp.ViewModels
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["classification"] = "PBTY";
             pullbackTypes = _sqlManager.SelectCode(sqlParameters);
-
-            sqlParameters.Clear();
-            sqlParameters["classification"] = "Present";
-            IList<Configuration> presents = _sqlManager.SelectConfiguration(sqlParameters);
-            if (presents != null && presents.Count > 0)
-            {
-                Brightness = int.Parse(presents.FirstOrDefault(x => x.Key == "brightness").Value);
-                Contrast = int.Parse(presents.FirstOrDefault(x => x.Key == "contrast").Value);
-                FieldOfView = double.Parse(presents.FirstOrDefault(x => x.Key == "FoV").Value);
-            }
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
