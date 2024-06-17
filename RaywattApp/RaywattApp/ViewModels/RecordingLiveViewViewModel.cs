@@ -54,6 +54,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private string _pbTime;
 
+        [ObservableProperty]
+        private bool _isOctExpanded = true;
+
         private int _brightness;
         public int Brightness
         {
@@ -66,6 +69,13 @@ namespace RaywattApp.ViewModels
         {
             get { return _contrast; }
             set { _contrast = value; OnPropertyChanged(nameof(Contrast)); RaySetProperty(Property.Contrast, value); }
+        }
+
+        private double _fieldOfView;
+        public double FieldOfView
+        {
+            get { return _fieldOfView; }
+            set { _fieldOfView = value; OnPropertyChanged(nameof(FieldOfView)); RaySetProperty(Property.FieldOfView, value); }
         }
 
         private ICommand _cmdBack;
@@ -92,6 +102,12 @@ namespace RaywattApp.ViewModels
             get { return _cmdStartRecording ?? (this._cmdStartRecording = new RelayCommand(StartRecording)); }
         }
 
+        private ICommand _screenExpandCommand;
+        public ICommand ScreenExpandCommand
+        {
+            get { return _screenExpandCommand ?? (this._screenExpandCommand = new RelayCommand(ScreenExpand)); }
+        }
+
         public RecordingLiveViewViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager)
         {
             _log.Debug("RecordingLiveViewViewModel");
@@ -108,6 +124,16 @@ namespace RaywattApp.ViewModels
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["classification"] = "PBTY";
             pullbackTypes = _sqlManager.SelectCode(sqlParameters);
+
+            sqlParameters.Clear();
+            sqlParameters["classification"] = "Present";
+            IList<Configuration> presents = _sqlManager.SelectConfiguration(sqlParameters);
+            if (presents != null && presents.Count > 0)
+            {
+                Brightness = int.Parse(presents.FirstOrDefault(x => x.Key == "brightness").Value);
+                Contrast = int.Parse(presents.FirstOrDefault(x => x.Key == "contrast").Value);
+                FieldOfView = double.Parse(presents.FirstOrDefault(x => x.Key == "FoV").Value);
+            }
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -125,7 +151,8 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 Brightness = PatientCase.Brightness;
                 Contrast = PatientCase.Contrast;
-                
+                FieldOfView = PatientCase.FieldOfView;
+
                 if (PatientCase.ImageFullPath != null && PatientCase.Image != null)
                 {
                     string path = PatientCase.ImageFullPath.Substring(0, PatientCase.ImageFullPath.Length - 42);
@@ -235,6 +262,13 @@ namespace RaywattApp.ViewModels
             leaveToPage(Constants.RecordingPage);
         }
 
+        private void ScreenExpand()
+        {
+            _log.Debug("ScreenExpand : " + IsOctExpanded);
+
+            IsOctExpanded = !IsOctExpanded;
+        }
+
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {
             DrawCrossSectionImage();
@@ -250,6 +284,7 @@ namespace RaywattApp.ViewModels
             parameter["prevStatus"] = this.PrevStatus;
             PatientCase.Brightness = Brightness;
             PatientCase.Contrast = Contrast;
+            PatientCase.FieldOfView = FieldOfView;
             parameter["patientCase"] = PatientCase;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(viewPage) { Parameter = parameter });
         }
