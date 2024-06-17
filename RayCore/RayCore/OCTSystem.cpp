@@ -1047,6 +1047,24 @@ RayError COCTSystem::SetImageRoi(double value)
 }
 
 /*
+* GetFieldOfView
+*/
+double COCTSystem::GetFieldOfView()
+{
+	return m_fFieldOfView;
+}
+
+/*
+* SetFieldOfView
+*/
+RayError COCTSystem::SetFieldOfView(double value)
+{
+	m_fFieldOfView = value;
+
+	return RayError::OK;
+}
+
+/*
 * threadService
 */
 UINT COCTSystem::threadService(LPVOID param) {

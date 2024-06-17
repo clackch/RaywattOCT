@@ -504,6 +504,9 @@ Overwrite existing data?</value>
   <data name="Female" xml:space="preserve">
     <value>[K]Female</value>
   </data>
+  <data name="Field of View" xml:space="preserve">
+    <value>[K]Field of View</value>
+  </data>
   <data name="First Name" xml:space="preserve">
     <value>[K]First Name</value>
   </data>
@@ -641,6 +644,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Localization" xml:space="preserve">
     <value>[K]Localization</value>
+  </data>
+  <data name="Location" xml:space="preserve">
+    <value>[K]Location</value>
   </data>
   <data name="Log" xml:space="preserve">
     <value>[K]Log</value>

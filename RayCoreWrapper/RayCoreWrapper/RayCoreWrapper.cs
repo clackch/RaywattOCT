@@ -41,6 +41,7 @@ namespace RaywattOCT
             ImageResolution,
             ImageThreshold,
             ImageRoi,
+            FieldOfView,
             LongitudeImageWidth,
             LongitudeImageHeight,
             LongitudeImageChannels,

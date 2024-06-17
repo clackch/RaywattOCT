@@ -145,6 +145,7 @@ namespace RaywattApp.ViewModels
                     PatientCase.AppositionThreshold = physicians[0].AppositionThreshold;
                     PatientCase.AccessionNumber = "";
                     PatientCase.Comment = "";
+                    PatientCase.FieldOfView = 10.0;
 
                     sqlParameters.Clear();
                     sqlParameters["classification"] = "Present";
