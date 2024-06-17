@@ -307,7 +307,7 @@ namespace RaywattApp.ViewModels.Dialog
                 }
             }
 
-            Zoom = new Zoom(CrossSectionImageSize / Constants.OCTImageSize);
+            Zoom = new Zoom(CrossSectionImageSize);
             LongitudeZoom = new Zoom();
             LongitudeZoom.ScaleX = Constants.ExportLongitudeImageWidth / Constants.LongitudeWidth;
             LongitudeZoom.ScaleY = Constants.ExportLongitudeImageHeight / Constants.LongitudeHeight;

@@ -129,7 +129,7 @@ namespace RaywattApp.Common.Annotation
                 drawLmodeUtil.textGeometries = drawLmodeUtil.LModeTextGeometries;
 
             if (drawLmodeUtil.Zoom == null)
-                drawLmodeUtil.Zoom = new Zoom(1);
+                drawLmodeUtil.Zoom = new Zoom(Constants.OCTImageSize);
 
             string[] command = drawLmodeUtil.InCommand.Split("|");
 

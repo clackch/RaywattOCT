@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RaywattApp.Common.Annotation"
              xmlns:const="clr-namespace:RaywattApp.Common.Bases"
+             xmlns:lconst="clr-namespace:RaywattApp.Common.Annotation"
              mc:Ignorable="d" 
              x:Name="UserControl"
              d:DesignHeight="640" d:DesignWidth="640">
@@ -86,10 +87,26 @@
         </Grid.Clip>
         <Canvas Name="canvasBackground"/>
         <Canvas Name="canvas">
+            <UserControl x:Name="screenSize" Tag="{Binding ScreenSize, ElementName=UserControl}"/>
+            <UserControl x:Name="zoomTranslateX" Tag="{Binding Zoom.TranslateX, ElementName=UserControl}"/>
+            <UserControl x:Name="zoomTranslateY" Tag="{Binding Zoom.TranslateY, ElementName=UserControl}"/>
             <Canvas.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform ScaleX="{Binding Zoom.ScaleX, ElementName=UserControl}" ScaleY="{Binding Zoom.ScaleY, ElementName=UserControl}"/>
-                    <TranslateTransform X="{Binding Zoom.TranslateX, ElementName=UserControl, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding Zoom.TranslateY, ElementName=UserControl, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                    <TranslateTransform>
+                        <TranslateTransform.X>
+                            <MultiBinding Converter="{StaticResource CrossSectionScaleMultiConverter}">
+                                <Binding Path="Tag" ElementName="zoomTranslateX"/>
+                                <Binding Path="Tag" ElementName="screenSize"/>
+                            </MultiBinding>
+                        </TranslateTransform.X>
+                        <TranslateTransform.Y>
+                            <MultiBinding Converter="{StaticResource CrossSectionScaleMultiConverter}">
+                                <Binding Path="Tag" ElementName="zoomTranslateY"/>
+                                <Binding Path="Tag" ElementName="screenSize"/>
+                            </MultiBinding>
+                        </TranslateTransform.Y>
+                    </TranslateTransform>
                 </TransformGroup>
             </Canvas.RenderTransform>
         </Canvas>

@@ -2,7 +2,6 @@
 using CommunityToolkit.Mvvm.Input;
 using log4net;
 using RaywattApp.Common.Bases;
-using System.Reflection.Metadata;
 using System.Windows;
 using System.Windows.Input;
 
@@ -52,21 +51,30 @@ namespace RaywattApp.Models
         private double _offsetY;
 
         [ObservableProperty]
-        public bool _isCaptured = false;
+        private bool _isCaptured = false;
 
-        public Zoom() : this(Constants.ZoomScaleDefault)
-        {
-        }
+        private double ratio;
 
-        public Zoom(double defaultScale)
+        private double minimapSize;
+
+        private double zoomScaleDefault;
+
+        private double zoomScaleMax;
+
+        public Zoom(double imageSize = Constants.CrossSectionSize, double minimapSize = Constants.MiniMapCanvasSize)
         {
-            ScaleX = defaultScale;
-            ScaleY = defaultScale;
+            this.minimapSize = minimapSize;
+            this.ratio = imageSize / this.minimapSize;
+            this.zoomScaleDefault = imageSize / Constants.OCTImageSize;
+            this.zoomScaleMax = this.zoomScaleDefault * 2;
+
+            ScaleX = this.zoomScaleDefault;
+            ScaleY = this.zoomScaleDefault;
             RectLeft = 0;
             RectTop = 0;
-            RectWidth = Constants.MiniMapCanvasSize;
-            RectHeight = Constants.MiniMapCanvasSize;
-            Visibility = Visibility.Collapsed;
+            RectWidth = this.minimapSize;
+            RectHeight = this.minimapSize;
+            Visibility = Visibility.Collapsed;            
         }
 
         private ICommand _cmdSetCaptured;
@@ -84,19 +92,19 @@ namespace RaywattApp.Models
         private ICommand _manipulationStartingCommand;
         public ICommand ManipulationStartingCommand
         {
-            get { return this._manipulationStartingCommand ?? (this._manipulationStartingCommand = new RelayCommand<object>(Window_ManipulationStarting)); }
+            get { return this._manipulationStartingCommand ?? (this._manipulationStartingCommand = new RelayCommand<ManipulationStartingEventArgs>(Window_ManipulationStarting)); }
         }
 
         private ICommand _manipulationDeltaCommand;
         public ICommand ManipulationDeltaCommand
         {
-            get { return this._manipulationDeltaCommand ?? (this._manipulationDeltaCommand = new RelayCommand<object>(Window_ManipulationDelta)); }
+            get { return this._manipulationDeltaCommand ?? (this._manipulationDeltaCommand = new RelayCommand<ManipulationDeltaEventArgs>(Window_ManipulationDelta)); }
         }
 
         private ICommand _manipulationCompletedCommand;
         public ICommand ManipulationCompletedCommand
         {
-            get { return this._manipulationCompletedCommand ?? (this._manipulationCompletedCommand = new RelayCommand<object>(Window_ManipulationCompleted)); }
+            get { return this._manipulationCompletedCommand ?? (this._manipulationCompletedCommand = new RelayCommand<ManipulationCompletedEventArgs>(Window_ManipulationCompleted)); }
         }
 
         private void SetCaptured(object param)
@@ -126,21 +134,20 @@ namespace RaywattApp.Models
 
                 if (nextX < 0)
                     RectLeft = 0;
-                else if(nextX + RectWidth > Constants.MiniMapCanvasSize)
-                    RectLeft = Constants.MiniMapCanvasSize - RectWidth;
+                else if(nextX + RectWidth > this.minimapSize)
+                    RectLeft = this.minimapSize - RectWidth;
                 else
                     RectLeft = nextX;
 
                 if (nextY < 0)
                     RectTop = 0;
-                else if (nextY + RectHeight > Constants.MiniMapCanvasSize)
-                    RectTop = Constants.MiniMapCanvasSize - RectHeight;
+                else if (nextY + RectHeight > this.minimapSize)
+                    RectTop = this.minimapSize - RectHeight;
                 else
                     RectTop = nextY;
 
-                double ratio = Constants.CrossSectionSize / Constants.MiniMapCanvasSize;
-                TranslateX = -RectLeft * ratio * ScaleX;
-                TranslateY = -RectTop * ratio * ScaleY;
+                TranslateX = -RectLeft * this.ratio * ScaleX;
+                TranslateY = -RectTop * this.ratio * ScaleY;
             }
         }
 
@@ -148,12 +155,12 @@ namespace RaywattApp.Models
         {
             _log.Debug("ZoomIn");
 
-            if (ScaleX >= Constants.ZoomScaleMax)
+            if (ScaleX >= this.zoomScaleMax)
                 return false;
 
             double nextScale = ScaleX * Constants.AnnotationScale;
 
-            if (nextScale <= Constants.ZoomScaleMax)
+            if (nextScale <= this.zoomScaleMax)
             {
                 ScaleX = nextScale;
                 ScaleY = nextScale;
@@ -162,9 +169,9 @@ namespace RaywattApp.Models
 
             else
             {
-                double annotationScale = Constants.ZoomScaleMax / ScaleX;
-                ScaleX = Constants.ZoomScaleMax;
-                ScaleY = Constants.ZoomScaleMax;
+                double annotationScale = this.zoomScaleMax / ScaleX;
+                ScaleX = this.zoomScaleMax;
+                ScaleY = this.zoomScaleMax;
                 ZoomInSetting(annotationScale);
             }
 
@@ -175,12 +182,12 @@ namespace RaywattApp.Models
         {
             _log.Debug("ZoomOut");
 
-            if (ScaleX <= Constants.ZoomScaleDefault)
+            if (ScaleX <= this.zoomScaleDefault)
                 return false;
 
             double nextScale = ScaleX / Constants.AnnotationScale;
 
-            if (nextScale >= Constants.ZoomScaleDefault)
+            if (nextScale >= this.zoomScaleDefault)
             {
                 ScaleX = nextScale;
                 ScaleY = nextScale;
@@ -189,62 +196,61 @@ namespace RaywattApp.Models
 
             else
             {
-                double annotationScale = Constants.ZoomScaleDefault / ScaleX;
-                ScaleX = Constants.ZoomScaleDefault;
-                ScaleY = Constants.ZoomScaleDefault;
+                double annotationScale = this.zoomScaleDefault / ScaleX;
+                ScaleX = this.zoomScaleDefault;
+                ScaleY = this.zoomScaleDefault;
                 ZoomOutSetting(annotationScale);
             }
 
             return true;
         }
 
-        public void Window_ManipulationStarting(object parameter)
+        public void Window_ManipulationStarting(ManipulationStartingEventArgs e)
         {
             _log.Debug("Manipulation Starting");
-            ManipulationStartingEventArgs e = (ManipulationStartingEventArgs)parameter;
-            e.ManipulationContainer = Application.Current.MainWindow;
             e.Handled = true;
         }
 
-        public void Window_ManipulationDelta(object parameter)
+        public void Window_ManipulationDelta(ManipulationDeltaEventArgs e)
         {
-            ManipulationDeltaEventArgs e = (ManipulationDeltaEventArgs)parameter;
-            double annotationScale = e.DeltaManipulation.Scale.X;
-            double newScale = ScaleX * annotationScale;
+            double deltaScale = e.DeltaManipulation.Scale.X;           
 
-            if (newScale <= Constants.ZoomScaleMax && newScale >= Constants.ZoomScaleDefault && newScale != 0)
+            if(deltaScale != 1)
             {
-                ScaleX = newScale;
-                ScaleY = newScale;
+                double newScale = ScaleX * deltaScale;
 
-                if (annotationScale > 1) //확대
-                    ZoomInSetting(annotationScale);
+                if (newScale <= this.zoomScaleMax && newScale >= this.zoomScaleDefault)
+                {
+                    ScaleX = newScale;
+                    ScaleY = newScale;
 
-                else if (annotationScale < 1) //축소
-                    ZoomOutSetting(1/annotationScale);
+                    if (deltaScale > 1) //확대
+                        ZoomInSetting(deltaScale);
+
+                    else if (deltaScale < 1) //축소
+                        ZoomOutSetting(1 / deltaScale);
+                }
+                else if (newScale < this.zoomScaleDefault)
+                {                   
+                    ScaleX = this.zoomScaleDefault;
+                    ScaleY = this.zoomScaleDefault;
+                    deltaScale = this.zoomScaleDefault / ScaleX;
+                    ZoomOutSetting(deltaScale);
+                }
             }
 
-            else if (newScale < Constants.ZoomScaleDefault && newScale != 0)
-            {
-                annotationScale = Constants.ZoomScaleDefault / ScaleX;
-                ScaleX = Constants.ZoomScaleDefault;
-                ScaleY = Constants.ZoomScaleDefault;
-                ZoomOutSetting(annotationScale);
-            }
             e.Handled = true;
         }
 
-        public void Window_ManipulationCompleted(object parameter)
+        public void Window_ManipulationCompleted(ManipulationCompletedEventArgs e)
         {
             _log.Debug("Manipulation Completed");
-            ManipulationCompletedEventArgs e = (ManipulationCompletedEventArgs)parameter;
             e.Handled = true;
         }
 
         private void ZoomInSetting(double scale)
         {
             //_log.Debug("zoomin");
-            double ratio = Constants.CrossSectionSize / Constants.MiniMapCanvasSize;
             double centerLeft = RectLeft + RectWidth / 2;
             double centerTop = RectTop + RectHeight / 2;
 
@@ -253,8 +259,8 @@ namespace RaywattApp.Models
             RectLeft = centerLeft - RectWidth / 2;
             RectTop = centerTop - RectHeight / 2; 
 
-            TranslateX = -RectLeft * ratio * ScaleX; 
-            TranslateY = - RectTop * ratio * ScaleY;
+            TranslateX = -RectLeft * this.ratio * ScaleX; 
+            TranslateY = - RectTop * this.ratio * ScaleY;
 
             Visibility = Visibility.Visible;
         }
@@ -262,32 +268,31 @@ namespace RaywattApp.Models
         private void ZoomOutSetting(double scale)
         {
             //_log.Debug("zoomout");
-            double ratio = Constants.CrossSectionSize / Constants.MiniMapCanvasSize;
             double centerLeft = RectLeft + RectWidth / 2;
             double centerTop = RectTop + RectHeight / 2;
 
             RectWidth = RectWidth * scale;
             RectHeight = RectHeight * scale;
 
-            if (centerLeft + RectWidth / 2 > Constants.MiniMapCanvasSize)
-                centerLeft = Constants.MiniMapCanvasSize - RectWidth / 2;
+            if (centerLeft + RectWidth / 2 > this.minimapSize)
+                centerLeft = this.minimapSize - RectWidth / 2;
 
-            if (centerTop + RectHeight / 2 > Constants.MiniMapCanvasSize)
-                centerTop = Constants.MiniMapCanvasSize - RectHeight / 2;
+            if (centerTop + RectHeight / 2 > this.minimapSize)
+                centerTop = this.minimapSize - RectHeight / 2;
 
             RectLeft = centerLeft - RectWidth / 2 < 0 ? 0 : centerLeft - RectWidth / 2;
             RectTop = centerTop - RectHeight / 2 < 0 ? 0 : centerTop - RectHeight / 2;
 
-            TranslateX = -RectLeft * ratio * ScaleX;
-            TranslateY = -RectTop * ratio * ScaleY;
+            TranslateX = -RectLeft * this.ratio * ScaleX;
+            TranslateY = -RectTop * this.ratio * ScaleY;
 
-            if (ScaleX <= Constants.ZoomScaleDefault)
+            if (ScaleX <= this.zoomScaleDefault)
             {
                 Visibility = Visibility.Collapsed;
                 TranslateX = 0; TranslateY = 0;
                 RectTop = 0; RectLeft = 0;
-                RectWidth = Constants.MiniMapCanvasSize;
-                RectHeight = Constants.MiniMapCanvasSize;
+                RectWidth = this.minimapSize;
+                RectHeight = this.minimapSize;
             }
         }
     }

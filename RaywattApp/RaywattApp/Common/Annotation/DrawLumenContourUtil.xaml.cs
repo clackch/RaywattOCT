@@ -197,6 +197,15 @@ namespace RaywattApp.Common.Annotation
         public static readonly DependencyProperty ModifiedFramesProperty =
             DependencyProperty.Register("ModifiedFrames", typeof(List<int>), typeof(DrawLumenContourUtil), new PropertyMetadata(null));
 
+        public double ScreenSize
+        {
+            get { return (double)GetValue(ScreenSizeProperty); }
+            set { SetValue(ScreenSizeProperty, value); }
+        }
+
+        public static readonly DependencyProperty ScreenSizeProperty =
+            DependencyProperty.Register("ScreenSize", typeof(double), typeof(DrawLumenContourUtil), new PropertyMetadata(null));
+
         //---------------------------------------------------------------------------------------------------- Constructor
         public DrawLumenContourUtil()
         {
