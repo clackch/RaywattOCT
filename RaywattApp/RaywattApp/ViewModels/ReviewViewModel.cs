@@ -1818,9 +1818,9 @@ namespace RaywattApp.ViewModels
                 Cv2.CopyMakeBorder(innerImage, borderedImage, borderSize, borderSize, borderSize, borderSize, BorderTypes.Constant, Scalar.All(0));
 
                 byte[] imageData = new byte[frame.Rows * frame.Cols * frame.ElemSize()];
-                Marshal.Copy(skeleton.Data, imageData, 0, imageData.Length);
+                Marshal.Copy(borderedImage.Data, imageData, 0, imageData.Length);
                 //string imgName = "skeletonImg" + frameNum.ToString()+".jpg";
-                //Cv2.ImWrite(imgName, skeleton);
+                //Cv2.ImWrite(imgName, borderedImage);
                 PatientCase.AngioFrame.DijkstraHeap.Add(new DijkstraHeap(imageData, frame.Rows, frame.Cols));
                 //frameNum += 1;
             }
