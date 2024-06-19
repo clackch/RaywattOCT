@@ -37,7 +37,7 @@ namespace RaywattApp.ViewModels
 {
     public partial class ReviewViewModel : ReviewViewModelBase
     {
-        [DllImport("HessianMatrixTest.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("HessianMatrixDll.dll", CallingConvention = CallingConvention.Cdecl)]
         static extern void useFrangi2d(IntPtr imageData, out IntPtr outputData, int width, int height, int channels, out int outwidth, out int outheight, out int outchannels);
 
         private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewViewModel));
@@ -1686,7 +1686,7 @@ namespace RaywattApp.ViewModels
         private void ImageProcessing(List<Mat> frames)
         {
             Mat prevEqualImg = null, currEqualImg;
-
+            //int frameNum = 0;
             foreach (var frame in frames)
             {
                 Mat blurredImage = new Mat();
@@ -1734,8 +1734,10 @@ namespace RaywattApp.ViewModels
 
                 byte[] imageData = new byte[frame.Rows * frame.Cols * frame.ElemSize()];
                 Marshal.Copy(skeleton.Data, imageData, 0, imageData.Length);
-
+                //string imgName = "skeletonImg" + frameNum.ToString()+".jpg";
+                //Cv2.ImWrite(imgName, skeleton);
                 PatientCase.AngioFrame.DijkstraHeap.Add(new DijkstraHeap(imageData, frame.Rows, frame.Cols));
+                //frameNum += 1;
             }
         }
         private void CalculateMotionVector(Mat prevFrame, Mat nextFrame)
