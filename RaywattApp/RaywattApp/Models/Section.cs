@@ -112,7 +112,7 @@ namespace RaywattApp.Models
 
         public void CalcMean(List<LumenContour> lumenContours, int frameProximal, int frameDistal)
         {
-            if (lumenContours == null || lumenContours.Count == 0)
+            if (lumenContours == null || lumenContours.Count == 0 || frameProximal < 0 || frameDistal < 0 || frameProximal >= frameDistal)
                 return;
 
             int count = frameDistal - frameProximal + 1;
@@ -158,7 +158,7 @@ namespace RaywattApp.Models
 
         public bool SetMlaMld(List<LumenContour> lumenContours, int frameProximal, int frameDistal, int totalFrame, double longitudeWidth, string pullbackLength, double imageResolution)
         {
-            if(lumenContours == null || lumenContours.Count == 0) 
+            if(lumenContours == null || lumenContours.Count == 0 || frameProximal < 0 || frameDistal < 0 || frameProximal >= frameDistal) 
                 return false;
 
             CalcMean(lumenContours, frameProximal, frameDistal);
@@ -208,7 +208,7 @@ namespace RaywattApp.Models
 
         public bool SetMsaMinExp(List<LumenContour> lumenContours, int frameProximal, int frameDistal, int stentProximal, int stentDistal, int totalFrame, double longitudeWidth, string pullbackLength, double imageResolution)
         {
-            if (lumenContours == null || lumenContours.Count == 0)
+            if (lumenContours == null || lumenContours.Count == 0 || frameProximal < 0 || frameDistal < 0 || frameProximal >= frameDistal)
                 return false;
 
             CalcMean(lumenContours, frameProximal, frameDistal);

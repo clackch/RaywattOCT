@@ -11,6 +11,7 @@
 #include "Configuration.h"
 #include "CutViewManager.h"
 #include "IRayLearning.h"
+#include "LookUpTable.h"
 
 CImagingSession::CImagingSession(CMessageService* pMsg, int nSession, bool deleteData) :
 	m_pMsg(pMsg),
@@ -133,7 +134,7 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 	case ImagingType::LabImaging:
 		pImaging = new CLabImaging(setting, msg);
 		((CLabImaging *)pImaging)->Initialize(calibration, background);
-		((CLabImaging *)pImaging)->SetBackgroundSubtract(true);
+		((CLabImaging *)pImaging)->SetBackgroundSubtract(false);
 		break;
 	case ImagingType::TIFFImaging:
 		pImaging = new CTIFFImaging(setting, msg);
@@ -415,6 +416,22 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	std::vector<cv::Mat>& vGuidewire = pSession->m_vGuidewire;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 
+	int imgSize = 1024;
+	cv::Point center(imgSize / 2, imgSize / 2);
+
+	//initial lumen
+	cv::Mat prevLumen = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);	
+	cv::circle(prevLumen, center, imgSize / 5, cv::Scalar(255));
+	std::vector<std::vector<cv::Point>> vPrevLumens;
+	cv::findContours(prevLumen, vPrevLumens, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	std::vector<cv::Point> vPrevLumen = vPrevLumens.at(0);
+	
+	CLookUpTable& lut = CLookUpTable::GetInstance();
+
+	//center point mask
+	cv::Mat centerMask = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+	cv::circle(centerMask, center, 1, cv::Scalar(255), cv::FILLED);
+
 	PLOGI.printf("Session #%d lumen detection start - %d frames", pSession->m_nSession, nNumOfSamples);
 	vLumen.clear();
 	vSidebranch.clear();
@@ -432,23 +449,101 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		cv::Mat circleImage;
 		pImaging->CircularizeImage(it->second, circleImage);
 		cv::cvtColor(circleImage, circleImage, cv::COLOR_GRAY2BGR);
+		//lut.Apply(circleImage, 3/*ML LUT*/);
 
 		//lumen
 		cv::Mat contourImage = learning->FindLumen(circleImage);		
 		std::vector<std::vector<cv::Point>> vContours;
 		cv::findContours(contourImage, vContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
-		double maxArea = 0;
-		std::vector<cv::Point> largestContour;
-		for (const auto& contour : vContours) {
-			double area = cv::contourArea(contour);
-			if (area > maxArea) {
-				maxArea = area;
-				largestContour = contour;
+		if (vContours.size() == 0) {
+			vContours.clear();
+			vContours.push_back(vPrevLumen);
+			pImaging->SetLumenContourOffset(vPrevLumen);
+		}
+		else {
+			std::vector<cv::Point> validContour;
+			cv::Mat andResult;
+			cv::Mat xorResult;
+
+			//find contour which contains center point
+			int idx = -1;
+			for (int i = 0; i < vContours.size(); i++) {
+				cv::Mat curContour = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+				cv::drawContours(curContour, vContours, i, cv::Scalar(255), cv::FILLED);
+
+				cv::bitwise_and(centerMask, curContour, andResult);
+				cv::bitwise_xor(centerMask, andResult, xorResult);
+
+				if (cv::countNonZero(xorResult) == 0) {
+					validContour = vContours[i];
+					idx = i;
+					break;
+				}
+			}
+
+			if (idx != -1) {
+				//removal of the outer part of the circle(OCT cross-section)
+				cv::Mat mask1 = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+				cv::Point center(imgSize / 2, imgSize / 2);
+				cv::circle(mask1, center, imgSize / 2, cv::Scalar(255), cv::FILLED);
+
+				cv::Mat mask2 = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+				cv::drawContours(mask2, vContours, idx, cv::Scalar(255), cv::FILLED);
+
+				cv::bitwise_and(mask2, mask1, andResult);
+				cv::bitwise_xor(mask2, andResult, xorResult);
+				bool isCompletelyContained = cv::countNonZero(xorResult) == 0;
+
+				vContours.clear();
+				if (isCompletelyContained) {
+					vContours.push_back(validContour);
+					vPrevLumen = validContour;
+					pImaging->SetLumenContourOffset(validContour);
+				}
+				else {
+					std::vector<std::vector<cv::Point>> vCircle;
+					cv::findContours(andResult, vCircle, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+					if (vCircle.size() == 0) {
+						vContours.push_back(vPrevLumen);
+						pImaging->SetLumenContourOffset(vPrevLumen);
+					}
+					else {
+						//find contour which contains center point
+						idx = -1;
+						for (int i = 0; i < vCircle.size(); i++) {
+							cv::Mat curContour = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+							cv::drawContours(curContour, vCircle, i, cv::Scalar(255), cv::FILLED);
+
+							cv::bitwise_and(centerMask, curContour, andResult);
+							cv::bitwise_xor(centerMask, andResult, xorResult);
+
+							if (cv::countNonZero(xorResult) == 0) {
+								validContour = vCircle[i];
+								idx = i;
+								break;
+							}
+						}
+
+						if (idx != -1) {
+							vContours.push_back(validContour);
+							vPrevLumen = validContour;
+							pImaging->SetLumenContourOffset(validContour);
+						}
+						else {
+							vContours.push_back(vPrevLumen);
+							pImaging->SetLumenContourOffset(vPrevLumen);
+						}
+					}
+				}
+			}
+			else {
+				vContours.clear();
+				vContours.push_back(vPrevLumen);
+				pImaging->SetLumenContourOffset(vPrevLumen);
 			}
 		}
-		vContours.clear();
-		vContours.push_back(largestContour);
 
 		std::vector<cv::Mat> vLumens;
 		for (int i = 0; i < vContours.size(); i++) {
@@ -483,13 +578,16 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		for (size_t row = 0; row < vStents.size(); row++) {
 			mStent.at<cv::Point>(row, 0) = cv::Point(vStents[row].x + vStents[row].width / 2, vStents[row].y + vStents[row].height / 2);
 		}
+		
+		pImaging->EraseStentOutLier(mStent);
+		
 		vStent.push_back(mStent);
 
 		//guidewire
 		std::vector<cv::Rect2f> vGuidewires = learning->FindGuidewire();
 		cv::Mat mGuidewire(vGuidewires.size(), 1, CV_32SC2);
 		for (size_t row = 0; row < vGuidewires.size(); row++) {
-			//TODO - Rect ¿µ¿ª ³»¿¡¼­ GW Å×µÎ¸® ºÐ¼®ÇØ¼­ ÁßÁ¡ Ã£´Â ·ÎÁ÷ ÇÊ¿ä
+			//TODO - Rect ì˜ì—­ ë‚´ì—ì„œ GW í…Œë‘ë¦¬ ë¶„ì„í•´ì„œ ì¤‘ì  ì°¾ëŠ” ë¡œì§ í•„ìš”
 			mGuidewire.at<cv::Point>(row, 0) = cv::Point(vGuidewires[row].x + vGuidewires[row].width / 2, vGuidewires[row].y + vGuidewires[row].height / 2);
 		}
 		vGuidewire.push_back(mGuidewire);
@@ -532,7 +630,7 @@ UINT CImagingSession::threadGenerateVolume(LPVOID param) {
 			Sleep(DELAY_FOR_WAIT_PROCESS);
 			continue;
 		}
-
+		
 		cv::Mat imgRect = it->second.clone();
 		pImaging->CircularizeImage(imgRect, imgCircle);
 

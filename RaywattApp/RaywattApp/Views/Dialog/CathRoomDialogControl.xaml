@@ -36,7 +36,7 @@
             <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
                 <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
                 <StackPanel Width="8"/>
-                <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
+                <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}" IsEnabled="{Binding SelectedCathRoom, Converter={StaticResource NotNullToEnableConverter}}"/>
             </StackPanel>
         </Grid>
     </Border>

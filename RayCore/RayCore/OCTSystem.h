@@ -1,8 +1,8 @@
 #pragma once
 #include "define.h"
 #include "AcquisitionDevice.h"
-#include "ArduinoController.h"
 #include "MessageService.h"
+#include "RJController.h"
 #include <vector>
 #include <mutex>
 #include <tuple>
@@ -67,7 +67,7 @@ private:
 	CRITICAL_SECTION m_csSession;
 
 	// Rotary Junction
-	CArduinoController* m_pPullbackMotor;
+	CRJController* m_pRJController;
 
 	// Laser Module
 	CLaserModule* m_pLaserModule;
@@ -77,11 +77,18 @@ private:
 	RayScannerState m_curState;
 	CatheterState m_cathState;
 
+	// Auto Pullback (Flushing Detection)
+	double m_fReferenceIntensity[4];
+	double m_fCurrentIntensity[4];
+
 	//Property
 	double m_fBrightness;
 	double m_fContrast;
 	double m_fDegree;
+	double m_fColormap;
 	cv::Scalar m_backgroundColor;	// for longitude image
+	double m_fImageThreshold = 99.99;
+	double m_fImageRoi = 2.f;
 	bool m_isTestMode;
 
 public:
@@ -136,6 +143,8 @@ public:
 	RayError SetBrightness(double value);
 	double GetContrast();
 	RayError SetContrast(double value);
+	double GetColormap();
+	RayError SetColormap(double value);
 	double GetDegree();
 	RayError SetDegree(double value);
 	UINT GetLongitudeBackgroundColor();
@@ -150,6 +159,10 @@ public:
 	UINT GetLongitudeImageWidth();
 	UINT GetLongitudeImageHeight();
 	UINT GetLongitudeImageChannels();
+	double GetImageThreshold();
+	RayError SetImageThreshold(double value);
+	double GetImageRoi();
+	RayError SetImageRoi(double value);
 	void SetTestMode(bool isTestMode) { m_isTestMode = isTestMode; }
 	bool IsTestMode() { return m_isTestMode; }
 
@@ -176,11 +189,14 @@ private:
 	int restartAcqDevice(COCTImaging* pImaging);
 	int connectRotaryJunction();
 	int disconnectRotaryJunction();
+	int controlRotaryJunction(eRJState state);
 	void stopAllSessions();
 	void closeAllSessions();
 	void setBrightnessContrastAllSessions();
 	void redrawCutView();
 	void laserOnOff(bool isOn);
+	bool waitForStepMotors(bool& runFlag);
+	void calculateIntensity(cv::Mat image);
 
 protected:
 	LRESULT OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam);
@@ -189,6 +205,7 @@ protected:
 	LRESULT OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgUpdateSaveRaw(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgUpdateCatheterState(WPARAM wParam, LPARAM lParam);
+	LRESULT OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgStartReviewSession(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgNotifyProcessDone(WPARAM wParam, LPARAM lParam);
 	LRESULT OnMsgNotifyEventOccured(WPARAM wParam, LPARAM lParam);

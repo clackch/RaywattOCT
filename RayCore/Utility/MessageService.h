@@ -18,6 +18,8 @@
 #define WM_IGNORE_MESSAGES			(WM_USER + 0x1009)
 #define WM_STOP_IGNORE_MESSAGES		(WM_USER + 0x1010)
 
+#define WM_UPDATE_RJ_STATE			(WM_USER + 0x2001)
+
 class CMessageService
 {
 private:

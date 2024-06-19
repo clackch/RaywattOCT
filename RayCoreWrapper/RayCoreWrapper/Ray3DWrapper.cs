@@ -45,9 +45,9 @@ namespace RaywattOCT
                 IsPtoD = true;
             }
 
-            public int ShowObject(Ray3DObject obj, Ray3DObjectMode mode, bool isPageConverted = false)
+            public int ShowObject(Ray3DObject obj, Ray3DObjectMode mode, bool isPageChanged = false)
             {
-                if (!isPageConverted)
+                if (!isPageChanged)
                     ObjectVisibility[(int)obj] = mode;
                 return ODSOCT_SetViewData(obj, mode);
             }
@@ -105,7 +105,7 @@ namespace RaywattOCT
             CutView = 0,
             FlyThrough
         };
-
+        
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_CreateDll(IntPtr hWnd);
         [DllImport("OCT3d.dll")]
@@ -158,5 +158,7 @@ namespace RaywattOCT
         public static extern int ODSOCT_SetRenderMode(bool isRaywattApp);
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_CutViewOn(bool isRaywattApp);
+        [DllImport("OCT3d.dll")]
+        public static extern int ODSOCT_UpdateColorTable(int mode);
     }
 }

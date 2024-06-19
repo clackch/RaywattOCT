@@ -18,6 +18,7 @@ using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System.Linq;
 using OpenCvSharp;
+using System.Management;
 
 namespace RaywattApp.ViewModels.File
 {
@@ -356,24 +357,38 @@ namespace RaywattApp.ViewModels.File
 
             ExternalDriveList.Clear();
 
-            DriveInfo[] allDrives = DriveInfo.GetDrives();
+            var searcher = new ManagementObjectSearcher(@"Select * From Win32_DiskDrive");
 
-            foreach (DriveInfo d in allDrives)
+            foreach (var drive in searcher.Get())
             {
-                if (d.IsReady == true)
+                var mediaType = drive["MediaType"]?.ToString();
+                var interfaceType = drive["InterfaceType"]?.ToString();
+
+                if (interfaceType == "USB" || mediaType == "Removable Media" || mediaType == "External hard disk media")
                 {
-                    if (d.DriveType == DriveType.Removable)
+                    //디스크 드라이브에 있는 모든 파티션 반환
+                    var partitionsQuery = new ManagementObjectSearcher($"ASSOCIATORS OF {{Win32_DiskDrive.DeviceID='{drive["DeviceID"]}'}} WHERE AssocClass=Win32_DiskDriveToDiskPartition");
+                    foreach (var partition in partitionsQuery.Get())
                     {
-                        string driveName = d.Name.Replace("\\", "");
-
-                        currExternalDrive[driveName] = driveName;
-                        long[] data = { d.TotalSize, d.AvailableFreeSpace };
-                        ExternalDriveList.Add(driveName, data);
-
-                        if (isFirstExternalDrive)
+                        //각 파티션에 부여된 드라이브 이름 반환 (C, D, E)
+                        var logicalDisksQuery = new ManagementObjectSearcher($"ASSOCIATORS OF {{Win32_DiskPartition.DeviceID='{partition["DeviceID"]}'}} WHERE AssocClass=Win32_LogicalDiskToPartition");
+                        foreach (var logicalDisk in logicalDisksQuery.Get())
                         {
-                            firstExternalDrive = driveName;
-                            isFirstExternalDrive = false;
+                            var d = new DriveInfo(logicalDisk["Name"].ToString());
+                            if (d.IsReady)
+                            {
+                                string driveName = d.Name.Replace("\\", "");
+
+                                currExternalDrive[driveName] = driveName;
+                                long[] data = { d.TotalSize, d.AvailableFreeSpace };
+                                ExternalDriveList.Add(driveName, data);
+
+                                if (isFirstExternalDrive)
+                                {
+                                    firstExternalDrive = driveName;
+                                    isFirstExternalDrive = false;
+                                }
+                            }
                         }
                     }
                 }

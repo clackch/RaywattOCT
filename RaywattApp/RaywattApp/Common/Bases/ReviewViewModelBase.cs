@@ -11,6 +11,7 @@ using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading;
 using System.Windows.Input;
 using static RaywattOCT.RayCoreWrapper;
 
@@ -128,6 +129,13 @@ namespace RaywattApp.Common.Bases
             _log.Debug("ReviewViewModelBase");
         }
 
+        public ReviewViewModelBase(IDialogService dialogService)
+        {
+            _log.Debug("ReviewViewModelBase");
+
+            _dialogService = dialogService;
+        }
+
         public ReviewViewModelBase(SqlManager sqlManager, IDialogService dialogService)
         {
             _log.Debug("ReviewViewModelBase");
@@ -242,6 +250,17 @@ namespace RaywattApp.Common.Bases
             _log.Debug("NewRecording");
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
+
+            if (Patient.PhysicianId == 0)
+            {
+                parameter["title"] = _l10n["Information"];
+                parameter["message"] = _l10n["$MSG016"];
+                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+                return;
+            }
+
+            parameter.Clear();
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingPresetPage) { Parameter = parameter });

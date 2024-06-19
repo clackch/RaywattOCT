@@ -10,6 +10,9 @@ namespace RaywattApp.Common.Angio
     public partial class AngioFrame : ObservableObject
     {
         [ObservableProperty]
+        private int _angioFrameNum;
+
+        [ObservableProperty]
         private List<CoRegistration> _coRegistration;
 
         [ObservableProperty]
@@ -20,6 +23,10 @@ namespace RaywattApp.Common.Angio
 
         [ObservableProperty]
         private List<Mat> _motionVector;
+
+        public int AngioFrameHeight { get; set;}
+        public int AngioFrameWidth { get; set; }
+        public int Channels { get; set; }
 
         public AngioFrame()
         {

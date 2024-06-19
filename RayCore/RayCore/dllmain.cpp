@@ -87,6 +87,8 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
         return octSystem.SetBrightness(value);
     case RayProperty::Contrast:
         return octSystem.SetContrast(value);
+    case RayProperty::Colormap:
+        return octSystem.SetColormap(value);
     case RayProperty::LongitudeBackgroundColor:
         return octSystem.SetLongitudeBackgroundColor(value);
     case RayProperty::LongitudeDegree:
@@ -99,6 +101,12 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
         break;
     case RayProperty::PullbackSpeed:
         config.stepMotor.pullbackSpeed = value;
+        break;
+    case RayProperty::ImageThreshold:
+        octSystem.SetImageThreshold(value);
+        break;
+    case RayProperty::ImageRoi:
+        octSystem.SetImageRoi(value);
         break;
     case RayProperty::TestMode:
         octSystem.SetTestMode((bool) value);
@@ -118,6 +126,8 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return octSystem.GetBrightness();
     case RayProperty::Contrast:
         return octSystem.GetContrast();
+    case RayProperty::Colormap:
+        return octSystem.GetColormap();
     case RayProperty::LongitudeBackgroundColor:
         return octSystem.GetLongitudeBackgroundColor();
     case RayProperty::LongitudeDegree:
@@ -156,6 +166,10 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return config.stepMotor.pullbackSpeed;
     case RayProperty::SheathDiameter:
         return config.measurement.fSheathRadius * 2;
+    case RayProperty::ImageThreshold:
+        return octSystem.GetImageThreshold();
+    case RayProperty::ImageRoi:
+        return octSystem.GetImageRoi();
     case RayProperty::TestMode:
         return (double) octSystem.IsTestMode();
     default:

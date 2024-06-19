@@ -1,5 +1,10 @@
-﻿using log4net;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using log4net;
 using RaywattApp.Common.Dialog;
+using RaywattApp.Models;
+using System.Collections.Generic;
+using System;
+using RaywattApp.Common.Util;
 using static RaywattOCT.Ray3DWrapper;
 
 namespace RaywattApp.ViewModels.Dialog
@@ -28,6 +33,13 @@ namespace RaywattApp.ViewModels.Dialog
             set { isStentOn = value; OnPropertyChanged(nameof(IsStentOn)); updateVisibility(Ray3DObject.Stent, value); }
         }
 
+        private bool isPostCase;
+        public bool IsPostCase
+        {
+            get { return isPostCase; }
+            set { isPostCase = value; OnPropertyChanged(nameof(isPostCase));}
+        }
+
         private bool isGuidewireOneOn;
         public bool IsGuidewireOneOn
         {
@@ -41,6 +53,9 @@ namespace RaywattApp.ViewModels.Dialog
             get { return isGuidewireTwoOn; }
             set { isGuidewireTwoOn = value; OnPropertyChanged(nameof(IsGuidewireTwoOn)); updateVisibility(Ray3DObject.GuideWire2, value); }
         }
+
+        [ObservableProperty]
+        private PatientCase _patientCase;
 
         public Review3dViewMenuViewModel()
         {
@@ -61,7 +76,23 @@ namespace RaywattApp.ViewModels.Dialog
 
         public override void SetParameter(IModelessPatient parent, object parameter)
         {
+            _log.Debug("3D public override void SetParameter(IModelessPatient parent, object parameter)");
             Parent = parent;
+            Dictionary<string, Object> data = (Dictionary<string, Object>)parameter;
+            PatientCase = (PatientCase)data["patientCase"];
+            updateStentToggleButton();
+        }
+
+        public void updateStentToggleButton()
+        {
+            if (CommonUtil.IsPostCase(PatientCase.Procedure))
+            {
+                isPostCase = true;
+            }
+            else
+            {
+                isPostCase = false;
+            }
         }
     }
 }

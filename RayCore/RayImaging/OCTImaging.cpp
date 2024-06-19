@@ -94,7 +94,7 @@ void COCTImaging::PostProcess(cv::Mat image) {
 	if (bInvert) cv::bitwise_not(imageResultColor, imageResultColor);
 	if (bColor) {
 		CLookUpTable& lut = CLookUpTable::GetInstance();
-		lut.Apply(imageResultColor, 0);
+		lut.Apply(imageResultColor, lut.GetCurrentColormap());
 	}
 
 	cv::convertScaleAbs(imageResultColor, imageResultColor, m_setting.contrast, m_setting.brightness);
@@ -137,6 +137,12 @@ void COCTImaging::CircularizeImage(cv::Mat& src, cv::Mat& dst)
 {
 	cv::remap(src, dst, matXMap, matYMap, cv::INTER_LINEAR);
 }
+
+void COCTImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst) {}
+
+void COCTImaging::EraseStentOutLier(cv::Mat& stent) {}
+
+void COCTImaging::SetLumenContourOffset(std::vector<cv::Point> lumenContour) {}
 
 void COCTImaging::allocateMemory() {
 	// ORDER = 11, nFFTLength = 2^11

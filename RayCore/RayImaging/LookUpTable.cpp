@@ -72,3 +72,11 @@ void CLookUpTable::Apply(cv::Mat& image, uint nIdxLUT) {
 		}
 	}
 }
+
+void CLookUpTable::SetCurrentColormap(int colormapIndex) {
+	this->m_fCurrentColorMapIndex = colormapIndex;
+}
+
+int CLookUpTable::GetCurrentColormap() {
+	return this->m_fCurrentColorMapIndex;
+}

@@ -31,7 +31,8 @@ using RaywattApp.Common.Angio;
 using System.Xml;
 using Microsoft.VisualBasic.FileIO;
 using System.Threading.Channels;
-
+using System.Diagnostics;
+using System.Security.Cryptography.X509Certificates;
 
 namespace RaywattApp.ViewModels
 {
@@ -89,6 +90,9 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private double _maxThickness;
+
+        [ObservableProperty]
+        private double _prevScale;
 
         [ObservableProperty]
         private Indicator _indicatorCrossSection;
@@ -278,13 +282,23 @@ namespace RaywattApp.ViewModels
             get { return this._cmdMoveIndicator ?? (this._cmdMoveIndicator = new RelayCommand<object>(MoveIndicator)); }
         }
         
+        private ICommand _manipulationStartingCommand;
+        public ICommand ManipulationStartingCommand
+        {
+            get { return this._manipulationStartingCommand ?? (this._manipulationStartingCommand = new RelayCommand<object>(Window_ManipulationStarting)); }
+        }
+
         private ICommand _manipulationDeltaCommand;
         public ICommand ManipulationDeltaCommand
         {
             get { return this._manipulationDeltaCommand ?? (this._manipulationDeltaCommand = new RelayCommand<object>(Window_ManipulationDelta)); }
         }
 
-
+        private ICommand _manipulationCompletedCommand;
+        public ICommand ManipulationCompletedCommand
+        {
+            get { return this._manipulationCompletedCommand ?? (this._manipulationCompletedCommand = new RelayCommand<object>(Window_ManipulationCompleted)); }
+        }
 
         public ReviewViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager) : base(sqlManager, dialogService)
         {
@@ -364,6 +378,8 @@ namespace RaywattApp.ViewModels
                 AngioFrameNumber = ReviewStatus.AngioFrameNumber;
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
 
+                ReviewStatus.IsNoPullback = PatientCase.PullbackType == "TEST" ? true : false;
+
                 if (ReviewStatus.IsPlay)
                     Playback();
             }
@@ -390,15 +406,22 @@ namespace RaywattApp.ViewModels
             if (PatientCase.AngioFrame == null) PatientCase.AngioFrame = new AngioFrame();
             if (PatientCase.AngioFrame.CoRegistration == null) PatientCase.AngioFrame.CoRegistration = new List<CoRegistration>();
 
-            if (PatientCase.AngioFrame.AngioImage.Count == 0) ReadAngioFrames();
-            if (PatientCase.AngioFrame.CoRegistration.Count == 0) ReadTrackPoints();
-            if (PatientCase.AngioFrame.DijkstraHeap.Count == 0)
+            if (PatientCase.AngioFrame.CoRegistration.Count == 0)
             {
-                Thread threadImageProcessing = new Thread(() => ThreadImageProcessing());
-                threadImageProcessing.Start();
+                ReadTrackPoints();
+            }
+            else
+            {
+                AngioTrackPoints = PatientCase.AngioFrame.CoRegistration;
             }
 
-            AngioTrackPoints = PatientCase.AngioFrame.CoRegistration;
+            if (PatientCase.AngioFrame.AngioImage.Count == 0)
+            {
+                PatientCase.AngioFrame.AngioFrameNum = 0;
+                Thread threadReadAngioFrames = new Thread(() => ThreadReadAngioFrames());
+                threadReadAngioFrames.IsBackground = true;
+                threadReadAngioFrames.Start();
+            }
         }
         
         private void SetAnnotation()
@@ -534,7 +557,7 @@ namespace RaywattApp.ViewModels
             //this.isLumenContourSave = true;
         }
 
-        private void ThreadImageProcessing()
+        private void AngioImageProcessing()
         {
             ImageProcessing(AngioFrames);
 
@@ -658,7 +681,7 @@ namespace RaywattApp.ViewModels
         {
             //lumen
             int num = RayGetNumOfLumenContourPoints(frameInfo);
-            if (num > 0)
+            if (num > 2)
             {
                 IntPtr contour = RayGetLumenContour(frameInfo);
                 if (contour == IntPtr.Zero) return;
@@ -806,6 +829,7 @@ namespace RaywattApp.ViewModels
                 lumenContour.Calcium.List.Add(new Tuple<double, double>(samples[2], thirdSize));
 
                 lumenContour.Calcium.TotalAngle = (int)(firstSize + secondSize + thirdSize);
+                lumenContour.Calcium.TotalAngle = 0; // TODO - 동물실험 후 삭제
                 lumenContour.Calcium.MaxThickness = Math.Round(lumenContour.Calcium.TotalAngle / 200.0, 2);
 
                 int idx = firstSize > secondSize ? firstSize > thirdSize ? 0 : 2 : secondSize > thirdSize ? 1 : 2;
@@ -921,29 +945,52 @@ namespace RaywattApp.ViewModels
             ReviewStatus.IsMeasurementOn = !ReviewStatus.IsMeasurementOn;
         }
 
+        public void Window_ManipulationStarting(object parameter)
+        {
+            _log.Debug("Manipulation Starting");
+            ManipulationStartingEventArgs e = (ManipulationStartingEventArgs)parameter;
+            e.ManipulationContainer = Application.Current.MainWindow;
+            PrevScale = ReviewStatus.Zoom.ScaleX;
+            MeasurementCommand = Constants.MeasureZooming;
+            e.Handled = true;
+        }
+
         public void Window_ManipulationDelta(object parameter)
         {
-            double prevScale = ReviewStatus.Zoom.ScaleX;
+            ManipulationDeltaEventArgs e = (ManipulationDeltaEventArgs)parameter;
+            int touchPoints = e.Manipulators.Count();
 
-            ReviewStatus.Zoom.Window_ManipulationDelta(parameter);
-
-            if (ReviewStatus.Zoom.ScaleX > Constants.ZoomScaleDefault)
+            if (!ReviewStatus.IsMeasurementOn || (touchPoints > 1 && MeasurementCommand == Constants.MeasureZooming))
             {
-                IndicatorCrossSection.IsVisible = Visibility.Collapsed;
-                ReviewStatus.IsCalciumOn = false;
-                ReviewStatus.IsSheathOn = false;
+                ReviewStatus.Zoom.Window_ManipulationDelta(parameter);
+
+                if (ReviewStatus.Zoom.ScaleX > Constants.ZoomScaleDefault)
+                {
+                    IndicatorCrossSection.IsVisible = Visibility.Collapsed;
+                    ReviewStatus.IsCalciumOn = false;
+                    ReviewStatus.IsSheathOn = false;
+                }
+
+                if (ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault)
+                {
+                    ReviewStatus.IsCalciumOn = true;
+                    ReviewStatus.IsSheathOn = true;
+
+                    if (!ReviewStatus.IsLumenProfile)
+                        IndicatorCrossSection.IsVisible = Visibility.Visible;
+                }
             }
+        }
 
-            if (ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault)
-            {
-                ReviewStatus.IsCalciumOn = true;
-                ReviewStatus.IsSheathOn = true;
+        public void Window_ManipulationCompleted(object parameter)
+        {
+            _log.Debug("Manipulation Completed");
+            ManipulationCompletedEventArgs e = (ManipulationCompletedEventArgs)parameter;
 
-                if (!ReviewStatus.IsLumenProfile)
-                    IndicatorCrossSection.IsVisible = Visibility.Visible;
-            }
+            if (ReviewStatus.IsMeasurementOn)
+                MeasurementCommand = (PrevScale < ReviewStatus.Zoom.ScaleX) ? Constants.MeasureZoomIn : Constants.MeasureZoomOut;
 
-            MeasurementCommand = (prevScale < ReviewStatus.Zoom.ScaleX) ? Constants.MeasureZoomIn : Constants.MeasureZoomOut;
+            e.Handled = true;
         }
 
         private void ZoomIn()
@@ -1215,13 +1262,18 @@ namespace RaywattApp.ViewModels
         {
             bool ret = base.MoveToFrame(session, nFrame);
 
-            if (ret == false || PatientCase.AngioYn == false) return false;
+            if (ret == false || PatientCase.AngioYn == false || PatientCase.AngioFrame.AngioImage.Count == 0) return false;
 
             int OctFrameLength = ReviewStatus.NumberOfFrames;
-            double ratio = (double) PatientCase.AngioFrame.AngioImage.Count / OctFrameLength * FrameNumber;
+            int angioTotalFrameNum = PatientCase.AngioFrame.AngioFrameNum;
+            
+            double ratio = (double)angioTotalFrameNum / OctFrameLength * FrameNumber;
             CurrentAngioFrameNumber = (int)ratio;
 
-            CurrentAngioImage = PatientCase.AngioFrame.AngioImage[CurrentAngioFrameNumber];
+            if (CurrentAngioFrameNumber < PatientCase.AngioFrame.AngioImage.Count)
+            {
+                CurrentAngioImage = PatientCase.AngioFrame.AngioImage[CurrentAngioFrameNumber];
+            }
 
             return true;
         }
@@ -1334,26 +1386,18 @@ namespace RaywattApp.ViewModels
             }
             else
             {
-                int firstStent = -1, lastStent = -1, cnt = 0;
-                foreach(LumenStent lumenStent in LumenStents)
-                {
-                    if(lumenStent.Points != null && lumenStent.Points.Count >= Constants.LumenProfileStentMinCount)
-                    {
-                        if (firstStent == -1)
-                            firstStent = cnt;
-
-                        lastStent = cnt;
-                    }
-                    cnt++;
-                }
+                int stentProximal = 0, stentDistal = 0;
+                CommonUtil.GetStentProximalDistal(LumenStents, out stentProximal, out stentDistal);
 
                 int frameDiff = (int)(Constants.PostLesionLengthInitValue * ReviewStatus.NumberOfFrames * 10 / int.Parse(PatientCase.PullbackLength));
-                proximalIdx = firstStent - frameDiff > 0 ? firstStent - frameDiff : 0;
-                distalIdx = lastStent + frameDiff < ReviewStatus.NumberOfFrames ? lastStent + frameDiff : ReviewStatus.NumberOfFrames - 1;
+                proximalIdx = stentProximal - frameDiff > 0 ? stentProximal - frameDiff : 0;
+                distalIdx = stentDistal + frameDiff < ReviewStatus.NumberOfFrames ? stentDistal + frameDiff : ReviewStatus.NumberOfFrames - 1;
             }
 
-            Section.Proximal.X = CommonUtil.GetPositionFromFrame(proximalIdx, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
-            Section.Distal.X = CommonUtil.GetPositionFromFrame(distalIdx, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
+            if(proximalIdx >= 0)
+                Section.Proximal.X = CommonUtil.GetPositionFromFrame(proximalIdx, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
+            if(distalIdx >= 0)
+                Section.Distal.X = CommonUtil.GetPositionFromFrame(distalIdx, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
 
             SetLumenProfileValue();
         }
@@ -1580,12 +1624,12 @@ namespace RaywattApp.ViewModels
             CurrentAngioImage = PatientCase.AngioFrame.AngioImage[value];
         }
 
-        private void ReadAngioFrames()
-        { 
+        private void ThreadReadAngioFrames()
+        {
             string file = PatientCase.Image;
             string angioFile = file.Substring(0, file.Length - 3) + "angioframes";
             string paramsFile = file.Substring(0, file.Length - 3) + "params";
-
+            
             string directory = Path.Combine(Constants.DataRootPath, PatientCase.PatientId);
             string angioPath = Path.Combine(directory, angioFile);
             string paramsPath = Path.Combine(directory, paramsFile);
@@ -1597,7 +1641,22 @@ namespace RaywattApp.ViewModels
             XmlNode configNode = xmlDoc.SelectSingleNode("/config");
             int angioFrameHeight = int.Parse(configNode.SelectSingleNode("AngioFrameHeight").InnerText);
             int angioFrameWidth = int.Parse(configNode.SelectSingleNode("AngioFrameWidth").InnerText);
+            PatientCase.AngioFrame.AngioFrameNum = int.Parse(configNode.SelectSingleNode("AngioFrameNumber").InnerText);
             int channels = int.Parse(configNode.SelectSingleNode("BitsPerPixel").InnerText) / 8;
+
+            float Scale = angioFrameHeight > angioFrameWidth ? (float)Constants.AngioSize / angioFrameHeight : (float)Constants.AngioSize / angioFrameWidth;
+
+            int newHeight, newWidth;
+            if (Scale >= 1.0)
+            {
+                newHeight = (int)(angioFrameHeight / Scale);
+                newWidth = (int)(angioFrameWidth / Scale);
+            }
+            else
+            {
+                newHeight = (int)(angioFrameHeight * Scale);
+                newWidth = (int)(angioFrameWidth * Scale);
+            }
 
             //Recording -> Review
             if (_angioManager.AngioSaveBuffer.Count != 0)
@@ -1605,6 +1664,8 @@ namespace RaywattApp.ViewModels
                 foreach (byte[] data in _angioManager.AngioSaveBuffer)
                 {
                     Mat frame = new Mat(angioFrameHeight, angioFrameWidth, MatType.CV_8UC(channels), data);
+                    Cv2.Resize(frame, frame, new OpenCvSharp.Size(newWidth, newHeight));
+
                     switch (channels)
                     {
                         case 3:
@@ -1616,13 +1677,20 @@ namespace RaywattApp.ViewModels
                             break;
                     }
 
-                    AngioFrames.Add(frame);
-                    PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(frame));
+                    Mat paddedFrame = new Mat((int)Constants.AngioSize, (int)Constants.AngioSize, MatType.CV_8UC1, Scalar.Black);
+
+                    int top = ((int)Constants.AngioSize - newHeight) / 2;
+                    int left = ((int)Constants.AngioSize - newWidth) / 2;
+                    OpenCvSharp.Rect roi = new OpenCvSharp.Rect(left, top, newWidth, newHeight);
+                    Mat destinationROI = new Mat(paddedFrame, roi);
+                    frame.CopyTo(destinationROI);
+
+                    AngioFrames.Add(paddedFrame);
+                    PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(paddedFrame));
                 }
 
                 _angioManager.AngioSaveFrameNum = 0;
                 _angioManager.AngioSaveBuffer.Clear();
-
                 return;
             }
 
@@ -1632,7 +1700,10 @@ namespace RaywattApp.ViewModels
                 while (reader.BaseStream.Position != reader.BaseStream.Length)
                 {
                     byte[] data = reader.ReadBytes(angioFrameWidth * angioFrameHeight * channels);
+
                     Mat frame = new Mat(angioFrameHeight, angioFrameWidth, MatType.CV_8UC(channels), data);
+                    Cv2.Resize(frame, frame, new OpenCvSharp.Size(newWidth, newHeight));
+
                     switch (channels)
                     {
                         case 3:
@@ -1644,10 +1715,21 @@ namespace RaywattApp.ViewModels
                             break;
                     }
 
-                    AngioFrames.Add(frame);
-                    PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(frame));
+                    Mat paddedFrame = new Mat((int)Constants.AngioSize, (int)Constants.AngioSize, MatType.CV_8UC1, Scalar.Black);
+
+                    int top = ((int)Constants.AngioSize - newHeight) / 2;
+                    int left = ((int)Constants.AngioSize - newWidth) / 2;
+                    OpenCvSharp.Rect roi = new OpenCvSharp.Rect(left, top, newWidth, newHeight);
+                    Mat destinationROI = new Mat(paddedFrame, roi);
+                    frame.CopyTo(destinationROI);
+
+                    AngioFrames.Add(paddedFrame);
+                    PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(paddedFrame));
                 }
+
+                reader.Close();
             }
+            AngioImageProcessing();
         }
 
         private ImageSource ConvertMatsToImageSource(Mat mat)
@@ -1664,6 +1746,7 @@ namespace RaywattApp.ViewModels
                 bitmapImage.Freeze();
                 return bitmapImage;
             }
+
         }
 
         private void ReadTrackPoints()
@@ -1680,13 +1763,15 @@ namespace RaywattApp.ViewModels
             {
                 PatientCase.AngioFrame.CoRegistration.Add(coReg);
             }
+
+            AngioTrackPoints = PatientCase.AngioFrame.CoRegistration;
         }
 
 
         private void ImageProcessing(List<Mat> frames)
         {
             Mat prevEqualImg = null, currEqualImg;
-            //int frameNum = 0;
+            int frameNum = 0;
             foreach (var frame in frames)
             {
                 Mat blurredImage = new Mat();

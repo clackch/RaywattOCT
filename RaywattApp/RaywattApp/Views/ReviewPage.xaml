@@ -37,7 +37,7 @@
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
                     <StackPanel Width="70"/>
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [2D], Source={StaticResource L10N}}" IsChecked="True" IsEnabled="False"/>
-                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [3D], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.Review3dPage}"/>
+                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [3D], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.Review3dPage}" IsEnabled="{Binding ReviewStatus.IsNoPullback, Converter={StaticResource BoolToEnableReverseConverter}}"/>
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [Compare], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewComparePage}" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$002|$003}"/>
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [AI FFR], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrPage}"/>
                 </StackPanel>
@@ -66,7 +66,7 @@
                     <!-- OCT Mode -->
                     <Grid Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                         <!-- Cross-Section -->
-                        <Grid Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
+                        <Grid Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" IsManipulationEnabled="true">
                             <Grid x:Name="crossSectionImage">
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="Loaded">
@@ -84,21 +84,13 @@
                                     </RectangleGeometry>
                                 </Grid.Clip>
                                 <!-- Cross Seciton Image -->
-                                <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" IsManipulationEnabled="true">
+                                <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
                                     <Image.RenderTransform>
                                         <TransformGroup>
                                             <ScaleTransform ScaleX="{Binding ReviewStatus.Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding ReviewStatus.Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
                                             <TranslateTransform X="{Binding ReviewStatus.Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding ReviewStatus.Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}}"/>
                                         </TransformGroup>
                                     </Image.RenderTransform>
-                                    <i:Interaction.Triggers>
-                                        <i:EventTrigger EventName="ManipulationStarting">
-                                            <i:InvokeCommandAction Command="{Binding ReviewStatus.Zoom.ManipulationStartingCommand}" PassEventArgsToCommand="True"/>
-                                        </i:EventTrigger>
-                                        <i:EventTrigger EventName="ManipulationDelta">
-                                            <i:InvokeCommandAction Command="{Binding ManipulationDeltaCommand}" PassEventArgsToCommand="True"/>
-                                        </i:EventTrigger>
-                                    </i:Interaction.Triggers>
                                 </Image>
                                 <!-- Sheath Indicator -->
                                 <Image x:Name="SheathIndicator" Source="{Binding SheathIndicator}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsSheathOn, Converter={StaticResource BoolToVisibilityConverter}}"/>
@@ -132,6 +124,18 @@
                                     <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="5" Width="1" Margin="0" HorizontalAlignment="Right"/>
                                 </Grid>
                             </StackPanel>
+                            <!-- Touch -->
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="ManipulationStarting">
+                                    <i:InvokeCommandAction Command="{Binding ManipulationStartingCommand}" PassEventArgsToCommand="True"/>
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="ManipulationDelta">
+                                    <i:InvokeCommandAction Command="{Binding ManipulationDeltaCommand}" PassEventArgsToCommand="True"/>
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="ManipulationCompleted">
+                                    <i:InvokeCommandAction Command="{Binding ManipulationCompletedCommand}" PassEventArgsToCommand="True"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
                         </Grid>
                     </Grid>
                     <!-- OCT + Angio Mode -->
@@ -188,7 +192,7 @@
                                 </StackPanel>
                             </Grid>
                             <!-- Calcium Indicator -->
-                            <Grid Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$001}">
+                            <!--<Grid Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$001}">
                                 <Grid Visibility="{Binding ReviewStatus.IsCalciumOn, Converter={StaticResource BoolToVisibilityConverter}}">
                                     <Image x:Name="CalciumIndicatorAngio" Width="{x:Static const:Constants.CalciumIndicatorAngioSize}" Height="{x:Static const:Constants.CalciumIndicatorAngioSize}" Source="{Binding CalciumIndicator}"/>
                                     <Grid Width="{x:Static const:Constants.CalciumThicknessIndicatorAngioSize}" Height="{x:Static const:Constants.CalciumThicknessIndicatorAngioSize}" Background="Transparent" Visibility="{Binding MaxCalciumDegree, Converter={StaticResource MaxThicknessVisibilityConverter}}">
@@ -201,7 +205,7 @@
                                         </Grid.RenderTransform>
                                     </Grid>
                                 </Grid>
-                            </Grid>
+                            </Grid>-->
                             <!-- Lumen Contour-->
                             <Grid Width="{x:Static const:Constants.CrossSectionAngio}" Height="{x:Static const:Constants.CrossSectionAngio}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" LumenStents="{Binding LumenStents}" CurrentLumenStent="{Binding CurrentLumenStent, Mode=TwoWay}" Zoom="{Binding ZoomAngio}" FrameNumber="{Binding FrameNumber}" IsDrawOn="{Binding ReviewStatus.IsContourStentOn}" IsEditOn="False" InCommand="{Binding LumenContourCommand, Mode=TwoWay}"/>
@@ -245,12 +249,11 @@
                             </Grid>
                         </Grid>
                     </Grid>
-
                 </Grid>
 
                 <!-- Calcium Indicator -->
                 <Grid Grid.Row="0" Grid.RowSpan="3" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$001}" IsManipulationEnabled="true">
-                    <Grid Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                    <!--<Grid Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                         <Grid Visibility="{Binding ReviewStatus.IsCalciumOn, Converter={StaticResource BoolToVisibilityConverter}}">
                             <Image x:Name="CalciumIndicator" Width="{x:Static const:Constants.CalciumIndicatorSize}" Height="{x:Static const:Constants.CalciumIndicatorSize}" Source="{Binding CalciumIndicator}"/>
                             <Grid Width="{x:Static const:Constants.CalciumThicknessIndicatorSize}" Height="{x:Static const:Constants.CalciumThicknessIndicatorSize}" Background="Transparent" Visibility="{Binding MaxCalciumDegree, Converter={StaticResource MaxThicknessVisibilityConverter}}">
@@ -261,16 +264,20 @@
                                 <Grid.RenderTransform>
                                     <RotateTransform CenterX="{x:Static const:Constants.CalciumThicknessIndicatorCenter}" CenterY="{x:Static const:Constants.CalciumThicknessIndicatorCenter}" Angle="{Binding MaxCalciumDegree}"/>
                                 </Grid.RenderTransform>
-                                
                             </Grid>
                         </Grid>
-                    </Grid>
+                    </Grid>-->
+                    
+                     <!--Touch--> 
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="ManipulationStarting">
-                            <i:InvokeCommandAction Command="{Binding ReviewStatus.Zoom.ManipulationStartingCommand}" PassEventArgsToCommand="True"/>
+                            <i:InvokeCommandAction Command="{Binding ManipulationStartingCommand}" PassEventArgsToCommand="True"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="ManipulationDelta">
                             <i:InvokeCommandAction Command="{Binding ManipulationDeltaCommand}" PassEventArgsToCommand="True"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="ManipulationCompleted">
+                            <i:InvokeCommandAction Command="{Binding ManipulationCompletedCommand}" PassEventArgsToCommand="True"/>
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                 </Grid>
@@ -647,12 +654,12 @@
                                                     <Label Content="{Binding [º], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource SubPointColor1Brush}" VerticalAlignment="Center"/>
                                                 </StackPanel>
                                                 <StackPanel Height="12"/>
-                                                <Label Content="{Binding [Max Thickness], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left" MinWidth="120"/>
+                                                <!--<Label Content="{Binding [Max Thickness], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left" MinWidth="120"/>
                                                 <StackPanel Height="64" Orientation="Horizontal">
                                                     <Label Content="{Binding MaxThickness}" Style="{DynamicResource Pretendard-Bold-54}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
                                                     <StackPanel Width="10"/>
                                                     <Label Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom" Margin="0,0,0,5"/>
-                                                </StackPanel>
+                                                </StackPanel>-->
                                             </StackPanel>
                                             <!-- Stent Info. -->
                                             <StackPanel Orientation="Vertical" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$002|$003}">
@@ -788,14 +795,14 @@
                                                         <Label Content="{Binding [º], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource SubPointColor1Brush}" VerticalAlignment="Center"/>
                                                     </StackPanel>
                                                 </StackPanel>
-                                                <StackPanel Grid.Column="1" Orientation="Vertical">
+                                                <!--<StackPanel Grid.Column="1" Orientation="Vertical">
                                                     <Label Content="{Binding [Max Thickness], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                                     <StackPanel Height="40" Orientation="Horizontal">
                                                         <Label Content="{Binding MaxThickness}" Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource ValueInfoValueBrush}" VerticalAlignment="Center"/>
                                                         <StackPanel Width="6"/>
                                                         <Label Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom" Margin="0,0,0,7"/>
                                                     </StackPanel>
-                                                </StackPanel>
+                                                </StackPanel>-->
                                             </Grid>
                                         </StackPanel>
                                         <!-- Stent Info. (Angio) -->

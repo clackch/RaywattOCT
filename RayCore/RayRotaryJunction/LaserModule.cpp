@@ -24,7 +24,7 @@ UINT CLaserModule::threadReadStatus(LPVOID param) {
 	while (pModule->m_pThread->isRun)
 	{
 		pModule->readStatus();
-		Sleep(5);
+		Sleep(1);
 	}
 
 	return NOERROR;
@@ -38,9 +38,6 @@ void CLaserModule::readStatus() {
 	DWORD errmask = 0, eventmask = EV_RXCHAR, ret;
 	OVERLAPPED ov;
 	int r;
-
-	delay_line_GetActualPos(1);
-	delay_line_GetActualPos(2);
 
 	// first, request comm event when characters arrive
 	if (!SetCommMask(m_hComTx, EV_RXCHAR)) return;
@@ -87,7 +84,7 @@ bool CLaserModule::Open(tstring strPort) {
 	delay_line_Set_Velocity((uint8_t)MotorIndex::Polarization, velocity);
 	delay_line_Set_Velocity((uint8_t)MotorIndex::DelayLine, velocity);
 
-	delay_line_GetDelayLineObj(0); //NEED SET (1) AT BEGIN TO SET UP MAINBOARD TO  CONTINOUS MODE (MEAN SEND ALL DATA OF MAINBOARD CONTINUOUS).
+	delay_line_GetDelayLineObj(1); //NEED SET (1) AT BEGIN TO SET UP MAINBOARD TO  CONTINOUS MODE (MEAN SEND ALL DATA OF MAINBOARD CONTINUOUS).
 
 	return true;
 }
@@ -105,37 +102,62 @@ void CLaserModule::Close() {
 }
 
 bool CLaserModule::IsMoving(MotorIndex idx) {
-	int index = (int)idx - 1;
-	if (idx == MotorIndex::DelayLine) {
-		return (m_prevPosition[index] != m_RAM.marshall.position_motor2_actual);
-	}
-	else if (idx == MotorIndex::Polarization) {
-		return (m_prevPosition[index] != m_RAM.marshall.position_motor1_actual);
-	}
+	if (idx != MotorIndex::DelayLine && idx != MotorIndex::Polarization) return false;
 
-	return false;
+	int index = (int)idx - 1;
+	int actualPosition = (index == 0) ? m_RAM.marshall.position_motor1_actual : m_RAM.marshall.position_motor2_actual;
+
+	return (m_prevPosition[index] != actualPosition);
 }
 bool CLaserModule::MoveAbsolute(MotorIndex idx, int nPosition) {
 	if (!IsOpen()) return false;
+	if (idx != MotorIndex::DelayLine && idx != MotorIndex::Polarization) return false;
 
 	PLOGI.printf("Move Motor #%d - %d", idx, nPosition);
 	delay_line_Move_single_axis_abs_pos((uint8_t) idx, nPosition);
-	min_poll(&m_ctx, nullptr, 0);
 
 	m_lastTargetPosition[(int)idx - 1] = nPosition;
 
 	return true;
 }
 int CLaserModule::MoveRelative(MotorIndex idx, int nOffset) {
-	int nCurPosition = (idx == MotorIndex::DelayLine) ? m_RAM.marshall.position_motor2_actual : m_RAM.marshall.position_motor1_actual;
-	int nLastTargetPos = (m_lastTargetPosition[(int)idx - 1] < 0) ? nCurPosition : m_lastTargetPosition[(int)idx - 1];
+	if (idx != MotorIndex::DelayLine && idx != MotorIndex::Polarization) return 0;
 
+	int index = (int)idx - 1;
+	int actualPosition = (index == 0) ? m_RAM.marshall.position_motor1_actual : m_RAM.marshall.position_motor2_actual;
+
+	int nLastTargetPos = (m_lastTargetPosition[(int)idx - 1] < 0) ? actualPosition : m_lastTargetPosition[(int)idx - 1];
 	int nPosition = nLastTargetPos + nOffset;
-	nPosition = (nPosition < 0) ? 0 : nPosition;
 
 	MoveAbsolute(idx, nPosition);
 
 	return nPosition;
+}
+void CLaserModule::Home(int nPosition, int nTimeout) {
+	delay_line_Move_single_axis_abs_pos((int) MotorIndex::DelayLine, nPosition);
+	int index = ((int)MotorIndex::DelayLine) - 1;
+	bool sendStop = false;
+
+	int pos = (index == 0) ? m_RAM.marshall.position_motor1_actual : m_RAM.marshall.position_motor2_actual;
+	for (int i = 0; i < nTimeout / 10; i++) {
+		if (m_RAM.marshall.input_sensor.marshall.U4 == 0) {
+			if (!sendStop) {
+				pos = (index == 0) ? m_RAM.marshall.position_motor1_actual : m_RAM.marshall.position_motor2_actual;
+				PLOGI.printf("Stop! U4: %d - pos: %d", m_RAM.marshall.input_sensor.marshall.U4, pos);
+
+				delay_line_SetStop((int)MotorIndex::DelayLine);
+				sendStop = true;
+			}
+			else {
+				delay_line_ClearPosition((int)MotorIndex::DelayLine);
+				pos = (index == 0) ? m_RAM.marshall.position_motor1_actual : m_RAM.marshall.position_motor2_actual;
+
+				if (pos == 0) break;
+				PLOGI.printf("ClearPosition - pos: %d", pos);
+			}
+		}
+		Sleep(10);
+	}
 }
 void CLaserModule::SetVLD(unsigned short nValue) {
 	if (!IsOpen()) return;
@@ -144,6 +166,7 @@ void CLaserModule::SetVLD(unsigned short nValue) {
 	PLOGI.printf("Visible Laser Power - %d", nValue);
 	delay_line_Set_voltage_ld(nValue);
 	m_nVLDValue = nValue;
+	PLOGI.printf("Visible Laser Power done");
 }
 void CLaserModule::SetVOA(unsigned short nValue) {
 	if (!IsOpen()) return;
@@ -157,11 +180,36 @@ void CLaserModule::SetVOA(unsigned short nValue) {
 
 // CALLBACK. Handle incoming MIN frame
 void CLaserModule::min_application_handler(uint8_t min_id, uint8_t const* min_payload, uint8_t len_payload, uint8_t port) {
+	static int prevU2 = 0;
+	static int prevU4 = 0;
+	static int prevU7 = 0;
+
 	switch (min_id)
 	{
 	case CTRL_CODE_GET_DELAY_LINE_OBJ:
 	{
 		memcpy(m_RAM.unmarshall, min_payload, len_payload);
+
+#if 1
+		if (prevU2 != m_RAM.marshall.input_sensor.marshall.U2 ||
+			prevU4 != m_RAM.marshall.input_sensor.marshall.U4 ||
+			prevU7 != m_RAM.marshall.input_sensor.marshall.U7) {
+			PLOGI.printf("U4: %d U7: %d U2: %d",
+				m_RAM.marshall.input_sensor.marshall.U4,
+				m_RAM.marshall.input_sensor.marshall.U7,
+				m_RAM.marshall.input_sensor.marshall.U2);
+		}
+		prevU2 = m_RAM.marshall.input_sensor.marshall.U2;
+		prevU4 = m_RAM.marshall.input_sensor.marshall.U4;
+		prevU7 = m_RAM.marshall.input_sensor.marshall.U7;
+#endif
+#if 1
+		if (m_prevPosition[0] != m_RAM.marshall.position_motor1_actual) {
+			PLOGI.printf(" POS1 : %d", m_RAM.marshall.position_motor1_actual);
+		}
+		m_prevPosition[0] = m_RAM.marshall.position_motor1_actual;
+		m_prevPosition[1] = m_RAM.marshall.position_motor2_actual;
+#endif
 	}
 	break;
 	case CTRL_CODE_GET_ACTUAL_POS:

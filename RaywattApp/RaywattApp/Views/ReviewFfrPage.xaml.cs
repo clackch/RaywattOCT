@@ -13,16 +13,6 @@ namespace RaywattApp.Views
         {
             InitializeComponent();
             DataContext = App.Current.Services.GetService(typeof(ReviewFfrViewModel));
-
-            mediaElement.MediaEnded += MediaElement_MediaEnded;
-            mediaElement.Play();
-        }
-
-        private void MediaElement_MediaEnded(object sender, System.Windows.RoutedEventArgs e)
-        {
-            this.mediaElement.Stop();
-            this.mediaElement.Position = TimeSpan.FromSeconds(0);
-            this.mediaElement.Play();
         }
     }
 }

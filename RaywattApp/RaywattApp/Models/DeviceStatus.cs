@@ -34,7 +34,10 @@ namespace RaywattApp.Models
         private bool _canExecuteCalibration = true;
 
         [ObservableProperty]
-        private bool _isAngioConnected = false;
+        private bool _isAngioConnected = true;
+
+        [ObservableProperty]
+        private bool _isAngioInitialized = false;
 
         [ObservableProperty]
         private bool _isPullbackDone = false;
@@ -68,6 +71,9 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private CathRoom _selectedCathRoom;
+
+        [ObservableProperty]
+        private double _imageIntensity;
 
         [ObservableProperty]
         private Dictionary<string, bool> _testMode = new Dictionary<string, bool>();

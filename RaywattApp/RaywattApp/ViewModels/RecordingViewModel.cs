@@ -143,7 +143,7 @@ namespace RaywattApp.ViewModels
             _log.Debug("Cancel");
 
             RayStopLiveView();
-            leaveToPage(Constants.RecordingLiveViewPage, _cancelCommand);
+            leaveToPage(Constants.RecordingLiveViewPage);
         }
 
         private void Ready()
@@ -243,7 +243,7 @@ namespace RaywattApp.ViewModels
             }
             runWaitPullbackDone = false;
 
-            leaveToPage(Constants.RecordingConfirmPage, null);
+            leaveToPage(Constants.RecordingConfirmPage);
         }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
@@ -251,13 +251,12 @@ namespace RaywattApp.ViewModels
             DrawCrossSectionImage();
         }
 
-        private void leaveToPage(string viewPage, ICommand command)
+        private void leaveToPage(string viewPage)
         {
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
             parameter["patientCase"] = PatientCase;
-            parameter["command"] = command;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(viewPage) { Parameter = parameter });
         }
 

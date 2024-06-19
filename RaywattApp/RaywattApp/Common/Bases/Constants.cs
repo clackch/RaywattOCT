@@ -1,7 +1,4 @@
-﻿using RaywattApp.Common.Angio;
-using RaywattApp.Models;
-using System;
-using System.Windows.Media;
+﻿using System.Windows.Media;
 
 namespace RaywattApp.Common.Bases
 {
@@ -161,7 +158,7 @@ namespace RaywattApp.Common.Bases
         
         //Export DICOM Prefix
         public const string ExportDicomPrefix = "IMG";
-        public const double DICOMPhysicalDeltaXY = 0.0289256198347107; // mm
+        public const double DICOMPhysicalDeltaXY = 0.00684931506849; /*0.0289256198347107;*/ // mm
 
         //File Import/Export
         public const string FileImageExtension = "bin";
@@ -202,8 +199,6 @@ namespace RaywattApp.Common.Bases
         //Pullback Length
         public const string PullbackLengthLong = "LONG";
         public const string PullbackLengthShort = "SHOR";
-        public const int PullbackLengthLongSize = 100;
-        public const int PullbackLengthShortSize = 60;
 
         //Not Selected
         public const string NotSelected = "Not Selected";
@@ -253,6 +248,9 @@ namespace RaywattApp.Common.Bases
         //FrameGrabber Folder
         public const string FGFolderPath = SystemRootPath + "\\Raywatt\\FrameGrabber";
 
+        //ML Model Folder
+        public const string MlModelFolderPath = SystemRootPath + "\\Raywatt\\system\\3rdparty\\model";
+
         //Encrypt, Decrypt Public Key
         public const string PublicKey = "raywatt07_hwjckklls_298-87-01441";
 
@@ -292,7 +290,6 @@ namespace RaywattApp.Common.Bases
         public const double LumenProfileExtraHeight = 6;
         public const double PreLesionLengthInitValue = 15;
         public const double PostLesionLengthInitValue = 4;
-        public const int LumenProfileStentMinCount = 5;
 
         //Review - 2D - Side Menu
         public const string LeftUpMenu = "LeftUpMenu";
@@ -310,6 +307,7 @@ namespace RaywattApp.Common.Bases
         public const double CutView3dY = 130; // 140 - 10 (for View Edge Round)
         public const double CutView3dWidth = 734;
         public const double CutView3dHeight = 540; // 560 - 20 (for View Edge Round)
+        public const double XYScale3D = 1024/500;
 
         //Review - 3D - Fly Through View
         public const double FlyThroughView3dX = 886;
@@ -360,6 +358,7 @@ namespace RaywattApp.Common.Bases
         public const string MeasureDisableErase = "DisableErase";  //Disable Erase
         public const string MeasureZoomIn = "ZoomIn";  //ZoomIn
         public const string MeasureZoomOut = "ZoomOut";  //ZoomOut
+        public const string MeasureZooming = "Zooming";
 
         //Draw Annotation
         public static Brush[] AnnotationBrushes = {
@@ -426,8 +425,8 @@ namespace RaywattApp.Common.Bases
         public const double ZoomScaleMax = ZoomScaleDefault * 2;
 
         //Recording
-        public const int TransientTime = 1000;
-        public const int StartTime = 15;
+        public const int TransientTime = 100;
+        public const int StartTime = 10;
         public const double AngioWidth = 420;
         public const double AngioHeight = 420;
 

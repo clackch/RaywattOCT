@@ -25,8 +25,8 @@ using System.Windows.Controls;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
 using Newtonsoft.Json;
-using System.Diagnostics;
 using RaywattApp.Common.Angio;
+using System.Xml;
 
 namespace RaywattApp.Common.Util
 {
@@ -57,6 +57,16 @@ namespace RaywattApp.Common.Util
         public static bool ValidateNumber(string input)
         {
             var regex = new Regex(@"^[0-9]+$");
+
+            if (input.Length == 0)
+                return true;
+
+            return regex.IsMatch(input);
+        }
+
+        public static bool ValidateRealNumber(string input)
+        {
+            var regex = new Regex(@"^[-+]?\d*\.?\d*$");
 
             if (input.Length == 0)
                 return true;
@@ -578,7 +588,7 @@ namespace RaywattApp.Common.Util
             }
 
             //Stent Area
-            if (isPostCase && lumenStent.Points != null && lumenStent.Points.Count >= Constants.LumenProfileStentMinCount)
+            if (isPostCase && lumenStent.Points != null && lumenStent.IsStent)
             {
                 //MalApposition
                 foreach(double appositionLength in lumenStent.AppositionLength)
@@ -1375,7 +1385,78 @@ namespace RaywattApp.Common.Util
                 Buffer.MemoryCopy((void*)imgResize.Data, (void*)(IntPtr.Add(buffer, i * frameSize)), frameSize, frameSize);
             }
         }
+        unsafe public static void StentsToMemory(List<LumenStent>? stentList, Size sizeContour, IntPtr buffer, Size sizeBuffer)
+        {
+            if (stentList == null) return;
+            
+            int frameSize = sizeBuffer.Width * sizeBuffer.Height;
+            for (int i = 0; i < stentList.Count; i++)
+            {
+                Mat imgLumen = new Mat(sizeContour, MatType.CV_8UC1);
+                Mat imgResize = new Mat(sizeBuffer, MatType.CV_8UC1);
+                Point[][] contours;
+                List<Point> contour = new List<Point>();
 
+                if (stentList[i].Points == null || !stentList[i].IsStent)
+                    continue;
+
+                imgLumen.SetTo(Scalar.Black);
+
+                foreach (System.Windows.Point point in stentList[i].Points)
+                {
+                    //TODO - 실제 스텐트 두께에 맞춰서 Size( , )를 설정해 주어야 함.
+                    imgLumen.Ellipse(new OpenCvSharp.Point(point.X, point.Y), new Size(5, 5), 0, 0, 360, Scalar.White, 1);
+                }
+                
+                Mat binary = new Mat();
+                Cv2.Threshold(imgLumen, binary, 128, 255, ThresholdTypes.Binary);
+
+                Cv2.FindContours(binary, out contours, out HierarchyIndex[] hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
+
+                Cv2.DrawContours(imgLumen, contours, -1, Scalar.White, 1);
+
+                Cv2.Resize(imgLumen, imgResize, imgResize.Size());
+                Cv2.Blur(imgResize, imgResize, new Size(7, 7) /* 필터 크기 */, new Point(-1, -1) /* 필터 중심*/);
+                Buffer.MemoryCopy((void*)imgResize.Data, (void*)(IntPtr.Add(buffer, i * frameSize)), frameSize, frameSize);
+            }
+        }
+
+        unsafe public static void GuideWireToMemory(List<LumenGuidewire>? guidewireList, Size sizeContour, IntPtr buffer, Size sizeBuffer)
+        {
+            if (guidewireList == null) return;
+
+            int frameSize = sizeBuffer.Width * sizeBuffer.Height;
+            for (int i = 0; i < guidewireList.Count; i++)
+            {
+                Mat imgLumen = new Mat(sizeContour, MatType.CV_8UC1);
+                Mat imgResize = new Mat(sizeBuffer, MatType.CV_8UC1);
+                Point[][] contours;
+                List<Point> contour = new List<Point>();
+
+                imgLumen.SetTo(Scalar.Black);
+
+                if (guidewireList[i].Points == null)
+                    continue;
+
+                foreach (System.Windows.Point point in guidewireList[i].Points)
+                {
+                    //TODO - 실제 Guidewire 반지름에 맞춰서 Size( , )를 설정해 주어야 함.
+                    imgLumen.Ellipse(new OpenCvSharp.Point(point.X, point.Y), new Size(50, 50), 0, 0, 360, Scalar.White, 1);
+                }
+
+                Mat binary = new Mat();
+                Cv2.Threshold(imgLumen, binary, 128, 255, ThresholdTypes.Binary);
+
+                Cv2.FindContours(binary, out contours, out HierarchyIndex[] hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
+
+                Cv2.DrawContours(imgLumen, contours, -1, Scalar.White, 1);
+
+                Cv2.Resize(imgLumen, imgResize, imgResize.Size());
+
+                Cv2.Blur(imgResize, imgResize, new Size(7, 7) /* 필터 크기 */, new Point(-1, -1) /* 필터 중심*/);
+                Buffer.MemoryCopy((void*)imgResize.Data, (void*)(IntPtr.Add(buffer, i * frameSize)), frameSize, frameSize);
+            }
+        }
         private static System.Windows.Point StrToPoint(string str)
         {
             string[] temp = str.Split(",");
@@ -1689,25 +1770,116 @@ namespace RaywattApp.Common.Util
 
         public static void GetStentProximalDistal(List<LumenStent> lumenStents, out int proximal, out int distal)
         {
-            bool isProximal = true;
             proximal = 0;
             distal = 0;
 
-            for(int i=0; i < lumenStents.Count; i++)
+            int[] numbers = new int[lumenStents.Count];
+
+            bool isValid = false;
+
+            for (int i = 0; i < lumenStents.Count; i++)
             {
+                lumenStents[i].IsStent = false;
+
                 if (lumenStents[i].Points == null)
-                    continue;
-
-                if(isProximal && lumenStents[i].Points.Count >= Constants.LumenProfileStentMinCount)
                 {
-                    proximal = i;
-                    isProximal = false;
+                    lumenStents[i].Points = new List<System.Windows.Point>();
+                    lumenStents[i].AppositionLength = new List<double>();
+                    numbers[i] = 0;
+                }
+                else
+                {
+                    numbers[i] = lumenStents[i].Points.Count;
+
+                    if (lumenStents[i].Points.Count > 0 && !isValid)
+                        isValid = true;
+                }                    
+            }
+
+            if (!isValid)
+                return;
+            
+            List<(List<int> sequence, int startIndex, int endIndex)> sequences = new List<(List<int> sequence, int startIndex, int endIndex)>();
+            List<int> currentSequence = new List<int>();
+            int startIndex = -1;
+
+            // 연속된 0 이상의 숫자 그룹 찾기
+            for (int i = 0; i < numbers.Length; i++)
+            {
+                int number = numbers[i];
+
+                if (number != 0)
+                {
+                    if (startIndex == -1)
+                    {
+                        startIndex = i;
+                    }
+                    currentSequence.Add(number);
+                }
+                else
+                {
+                    if (currentSequence.Count > 0)
+                    {
+                        sequences.Add((new List<int>(currentSequence), startIndex, i - 1));
+                        currentSequence.Clear();
+                        startIndex = -1;
+                    }
+                }
+            }
+
+            // 마지막 시퀀스를 추가
+            if (currentSequence.Count > 0)
+            {
+                sequences.Add((currentSequence, startIndex, numbers.Length - 1));
+            }
+
+            // 그룹 간의 간격이 3 이하면 합치기
+            List<(List<int> sequence, int startIndex, int endIndex)> mergedSequences = new List<(List<int> sequence, int startIndex, int endIndex)>();
+
+            if (sequences.Count > 0)
+            {
+                var currentMergedSequence = sequences[0].sequence;
+                int currentMergedStartIndex = sequences[0].startIndex;
+                int currentMergedEndIndex = sequences[0].endIndex;
+
+                for (int i = 1; i < sequences.Count; i++)
+                {
+                    var (nextSequence, nextStartIndex, nextEndIndex) = sequences[i];
+
+                    if (nextStartIndex - currentMergedEndIndex <= 3)
+                    {
+                        currentMergedSequence.AddRange(nextSequence);
+                        currentMergedEndIndex = nextEndIndex;
+                    }
+                    else
+                    {
+                        mergedSequences.Add((new List<int>(currentMergedSequence), currentMergedStartIndex, currentMergedEndIndex));
+                        currentMergedSequence = nextSequence;
+                        currentMergedStartIndex = nextStartIndex;
+                        currentMergedEndIndex = nextEndIndex;
+                    }
                 }
 
-                if(lumenStents[i].Points.Count >= Constants.LumenProfileStentMinCount)
+                // 마지막 시퀀스를 추가
+                mergedSequences.Add((new List<int>(currentMergedSequence), currentMergedStartIndex, currentMergedEndIndex));
+            }
+
+            // 가장 큰 그룹 찾기
+            var largestSequence = mergedSequences[0];
+            foreach (var sequenceInfo in mergedSequences)
+            {
+                if (sequenceInfo.sequence.Count > largestSequence.sequence.Count)
                 {
-                    distal = i;
+                    largestSequence = sequenceInfo;
                 }
+            }
+
+            proximal = largestSequence.startIndex;
+            distal = largestSequence.endIndex;
+
+            for(int i = proximal; i <= distal; i++)
+            {
+                lumenStents[i].IsStent = true;
             }
         }
       
@@ -1716,7 +1888,7 @@ namespace RaywattApp.Common.Util
             double pxDiameter = (sheathDiameter / resolution) * imageSize / Constants.OCTImageSize;
             Mat imgSheath = new Mat(imageSize, imageSize, MatType.CV_8UC4);
             Point center = new Point(imgSheath.Width / 2, imgSheath.Height / 2);
-            int thickness = 3;
+            int thickness = 2;
             int radius = (int)(pxDiameter / 2) + thickness;
 
             imgSheath.SetTo(new Scalar(0x00, 0x00, 0x00, 0x00));
@@ -1737,12 +1909,99 @@ namespace RaywattApp.Common.Util
             return bitmap;
         }
 
+        public static void SetColormap(string? colorCode)
+        {
+            if (colorCode == null)
+                return;
+
+            if ("GRGR".Equals(colorCode))
+            {
+                RaySetProperty(Property.Colormap, 0);
+            }
+            else if ("GRAY".Equals(colorCode))
+            {
+                RaySetProperty(Property.Colormap, 1);
+            }
+            else if ("ORNG".Equals(colorCode))
+            {
+                RaySetProperty(Property.Colormap, 2);
+            }
+        }
+
         public static bool IsTestMode(Dictionary<string, bool> testMode, string key)
         {
             if (!testMode.ContainsKey(key))
                 return false;
 
             return testMode[key];
+        }
+
+        public static void ReadAngioParams(PatientCase patientCase)
+        {
+            string file = patientCase.Image;
+            string paramsFile = file.Substring(0, file.Length - 3) + "params";
+
+            string directory = Path.Combine(Constants.DataRootPath, patientCase.PatientId);
+            string paramsPath = Path.Combine(directory, paramsFile);
+
+            //Read .params
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.Load(paramsPath);
+
+            XmlNode configNode = xmlDoc.SelectSingleNode("/config");
+            if (patientCase.AngioFrame == null) patientCase.AngioFrame = new AngioFrame();
+            patientCase.AngioFrame.AngioFrameHeight = int.Parse(configNode.SelectSingleNode("AngioFrameHeight").InnerText);
+            patientCase.AngioFrame.AngioFrameWidth = int.Parse(configNode.SelectSingleNode("AngioFrameWidth").InnerText);
+            patientCase.AngioFrame.Channels = int.Parse(configNode.SelectSingleNode("BitsPerPixel").InnerText) / 8;
+        }
+
+        public static void ReadAngioImages(PatientCase patientCase, List<Mat>? angioFrames = null)
+        {
+            string file = patientCase.Image;
+            string angioFile = file.Substring(0, file.Length - 3) + "angioframes";
+
+            string directory = Path.Combine(Constants.DataRootPath, patientCase.PatientId);
+            string angioPath = Path.Combine(directory, angioFile);
+
+            int angioHeight = patientCase.AngioFrame.AngioFrameHeight;
+            int angioWidth = patientCase.AngioFrame.AngioFrameWidth;
+            int angioChannels = patientCase.AngioFrame.Channels;
+
+            using (BinaryReader reader = new BinaryReader(System.IO.File.Open(angioPath, FileMode.Open)))
+            {
+                while (reader.BaseStream.Position != reader.BaseStream.Length)
+                {
+                    byte[] data = reader.ReadBytes(angioWidth * angioHeight * angioChannels);
+                    Mat frame = new Mat(angioHeight, angioWidth, MatType.CV_8UC(angioChannels), data);
+                    switch (angioChannels)
+                    {
+                        case 3:
+                            Cv2.CvtColor(frame, frame, ColorConversionCodes.BGR2GRAY);
+                            break;
+
+                        case 4:
+                            Cv2.CvtColor(frame, frame, ColorConversionCodes.RGBA2GRAY);
+                            break;
+                    }
+                    if (angioFrames != null) angioFrames.Add(frame);
+                    patientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(frame));
+                }
+            }
+        }
+        public static ImageSource ConvertMatsToImageSource(Mat mat)
+        {
+            using (var stream = new MemoryStream())
+            {
+                mat.WriteToStream(stream, "." + Constants.ExportStillFrameBitmap);
+
+                var bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.StreamSource = stream;
+                bitmapImage.EndInit();
+                bitmapImage.Freeze();
+                return bitmapImage;
+            }
         }
     }
 }

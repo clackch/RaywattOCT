@@ -99,16 +99,21 @@ namespace RaywattApp.ViewModels
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
             parameter["patientCase"] = PatientCase;
-            parameter["command"] = RedoPullbackCommand;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingLiveViewPage) { Parameter = parameter });
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
         }
 
         private void Confirm()
         {
             _log.Debug("Confirm");
 
-            DeviceStatus.CatheterStatus = Constants.CatheterStatusUnloading;
-            RayUnloadCatheter();
+            //RayError result = (RayError) RayUnloadCatheter();
+            //if (result == RayError.OK)
+            //{
+            //    DeviceStatus.CatheterStatus = Constants.CatheterStatusUnloading;
+            //}
+            //else {
+            //    _log.Debug("RayUnloadCatheter - " + result);
+            //}
 
             RaySetSession(RaySession.Review);
             int numOfFrames = (int) RayGetProperty(Property.ImageDepth);

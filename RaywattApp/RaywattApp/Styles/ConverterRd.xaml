@@ -11,6 +11,9 @@
     <!--  Bool To Enable Converter  -->
     <converters:BoolToEnableConverter x:Key="BoolToEnableConverter" />
 
+    <!--  Bool To Enable Reverse Converter  -->
+    <converters:BoolToEnableConverter x:Key="BoolToEnableReverseConverter" FalseValue="True" TrueValue="False" />
+
     <!-- Radio Button Converter -->
     <converters:RadioButtonConverter x:Key="RadioButtonConverter" />
 

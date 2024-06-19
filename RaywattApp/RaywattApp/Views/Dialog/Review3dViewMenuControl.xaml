@@ -49,7 +49,7 @@
                     <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Stent], Source={StaticResource L10N}}"/>
                 </StackPanel>
                 <StackPanel Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right">
-                    <ToggleButton Style="{DynamicResource IconToggleBtn-Small}" IsChecked="{Binding IsStentOn}" HorizontalAlignment="Right"/>
+                    <ToggleButton Style="{DynamicResource IconToggleBtn-Small}" IsChecked="{Binding IsStentOn}" HorizontalAlignment="Right" IsEnabled="{Binding IsPostCase}"/>
                 </StackPanel>
                 <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
                     <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Guidewires], Source={StaticResource L10N}}"/>

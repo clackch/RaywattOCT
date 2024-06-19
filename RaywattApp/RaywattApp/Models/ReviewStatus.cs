@@ -43,6 +43,9 @@ namespace RaywattApp.Models
         [ObservableProperty]
         private int _angioFrameNumber = -1;
 
+        [ObservableProperty]
+        private bool _isNoPullback = false;
+
         //3D
 
 

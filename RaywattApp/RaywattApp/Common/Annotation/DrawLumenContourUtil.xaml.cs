@@ -277,7 +277,7 @@ namespace RaywattApp.Common.Annotation
         {
             var drawUtil = dependencyObject as DrawLumenContourUtil;
 
-            if (drawUtil == null || drawUtil.LumenContours == null || drawUtil.FrameNumber < 0)
+            if (drawUtil == null || drawUtil.LumenContours == null || drawUtil.FrameNumber < 0 || !drawUtil.IsDrawOn)
                 return;
 
             drawUtil.DrawLumenContour(drawUtil.CurrentLumenContour, drawUtil.CurrentLumenStent, drawUtil.AppositionThreshold, drawUtil.IsEditOn);
@@ -478,7 +478,7 @@ namespace RaywattApp.Common.Annotation
 
 
             //stent
-            if(lumenStent != null && lumenStent.Points != null && lumenStent.Points.Count > 0)
+            if(lumenStent != null && lumenStent.Points != null && lumenStent.Points.Count > 0 && lumenStent.IsStent)
             {
                 for(int i=0; i< lumenStent.Points.Count; i++)
                 {

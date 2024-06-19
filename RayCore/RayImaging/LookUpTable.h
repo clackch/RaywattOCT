@@ -3,9 +3,10 @@
 #include <vector>
 
 class CLookUpTable
-{	
+{
 private:
 	std::vector<std::vector<cv::Vec3b>> m_vLUT;
+	int m_fCurrentColorMapIndex = 0;
 
 private:
 	CLookUpTable();
@@ -17,5 +18,7 @@ public:
 	static CLookUpTable& GetInstance();
 	int Load(const char* strLUTPath);
 	void Apply(cv::Mat& image, uint nIdxLUT);
+	void SetCurrentColormap(int colomapIndex);
+	int GetCurrentColormap();
 };
 

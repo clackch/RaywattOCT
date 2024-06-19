@@ -17,6 +17,9 @@ namespace RaywattApp.Models
         private List<string> selectedItem;
 
         [ObservableProperty]
+        private bool angioEnabled;
+
+        [ObservableProperty]
         private bool isFromReview;
 
         [ObservableProperty]

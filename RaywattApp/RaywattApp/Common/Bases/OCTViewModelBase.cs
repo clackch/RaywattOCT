@@ -109,13 +109,14 @@ namespace RaywattApp.Common.Bases
                 Marshal.GetFunctionPointerForDelegate(CBLongitude));
         }
 
-        private void OnRecvCrossSection(int session, IntPtr data, int width, int height, int ch, int frameInfo)
+        private void OnRecvCrossSection(int session, IntPtr data, int width, int height, int ch, int frameInfo, double intensity)
         {
             Mat imgRecv = CommonUtil.ByteMemoryToCvMat(data, width, height, ch);
             imgCrossSection[session] = imgRecv;
+            DeviceStatus.ImageIntensity = intensity;
         }
 
-        private void OnRecvLongitude(int session, IntPtr data, int width, int height, int ch, int frameInfo)
+        private void OnRecvLongitude(int session, IntPtr data, int width, int height, int ch, int frameInfo, double intensity)
         {
             Mat imgRecv = CommonUtil.ByteMemoryToCvMat(data, width, height, ch);
             imgLongitude = imgRecv;

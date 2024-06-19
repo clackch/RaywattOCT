@@ -6,8 +6,8 @@
 #define MAX_VOLTAGE_RAW_VALUE	4095
 
 enum class MotorIndex {
-	DelayLine = 2,
-	Polarization = 1,
+	DelayLine = 1,
+	Polarization = 2,
 };
 
 class CThread;
@@ -45,6 +45,7 @@ public:
 	int GetPosition(MotorIndex idx) { return (idx == MotorIndex::DelayLine) ? m_RAM.marshall.position_motor2_actual : m_RAM.marshall.position_motor1_actual; }
 	bool MoveAbsolute(MotorIndex idx, int nPosition);
 	int MoveRelative(MotorIndex idx, int nOffset);
+	void Home(int nPosition, int nTimeout /* msec */);
 
 	// VLD
 	void SetVLD(unsigned short nValue);

@@ -9,9 +9,8 @@
 #include "ATSDevice.h"
 #include "SimulateDevice.h"
 #include "LaserController.h"
-#include "MotorController.h"
+#include "RJController.h"
 #include "ZaberController.h"
-#include "ArduinoController.h"
 #include "IRayLearning.h"
 #include "ImagingSession.h"
 #include "LaserModule.h"
@@ -47,7 +46,8 @@ COCTSystem::COCTSystem() {
 	m_openedSession = nullptr;
 	InitializeCriticalSection(&m_csSession);
 
-	m_pPullbackMotor = new CArduinoController();
+	m_pRJController = new CRJController();
+	m_pRJController->SetMessage(this);
 	m_pLaserModule = new CLaserModule();
 
 	m_prevState = RayScannerState::Initial;
@@ -174,18 +174,15 @@ RayError COCTSystem::Stop() {
 	pLaser->LaserOnOff(false);
 
 	PLOGI.printf("Stop Motor");
-	CMotorController* pMotor = CMotorController::GetInstance();
-	pMotor->StopMotor();
-	pMotor->SwitchOff();
-	pMotor->Disconnect();
+	m_pRJController->StopMotor();
+	m_pRJController->SwitchOff();
+	m_pRJController->Disconnect();
+	if (m_pRJController != nullptr) {
+		delete m_pRJController;
+		m_pRJController = nullptr;
+	}
 
 	PLOGI.printf("Close COM Ports");
-	if (m_pPullbackMotor->IsOpen()) {
-		m_pPullbackMotor->Close();
-	}
-	delete m_pPullbackMotor;
-	m_pPullbackMotor = nullptr;
-
 	if (m_pLaserModule->IsOpen()) {
 		m_pLaserModule->SetVLD(0);
 		m_pLaserModule->SetVOA(0);
@@ -223,7 +220,7 @@ RayError COCTSystem::ConnectDevices() {
 
 	if (m_curState == RayScannerState::Initial) {
 		result |= connectRotaryJunction();
-		PLOGI.printf("connect Rotary Junction - %s", ((result == NOERROR) ? "Succeed" : "Failed"));
+		PLOGI.printf("connect Rotary Junction and Laser Module - %s", ((result == NOERROR) ? "Succeed" : "Failed"));
 
 		// Connect to COM Interface first time
 		CLaserController* pLaser = CLaserController::GetInstance();
@@ -235,12 +232,10 @@ RayError COCTSystem::ConnectDevices() {
 		pLaser->LaserOnOff(false);
 
 		if (m_isTestMode) {
-			CMotorController *pMotor = CMotorController::GetInstance();
-			if (pMotor->IsConnected() == false)
+			if (m_pRJController->IsConnected() == false)
 			{
-				delete pMotor;
-				CMotorControllerStub* pMotorStub = new CMotorControllerStub();
-				pMotorStub->EnableStub();
+				//pMotor = new CMotorControllerStub();
+				PLOGI.printf("Use MotorControllerStub instaed of MotorController");
 			}
 
 			result = NOERROR;
@@ -328,16 +323,16 @@ RayError COCTSystem::ReadyPullback()
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 
-		CMotorController* pMotorCtrl = CMotorController::GetInstance();
 		CConfiguration& config = CConfiguration::GetInstance();
 
 		laserOnOff(true);
 		restartAcqDevice(m_pImagingPullback);
 
-		pMotorCtrl->PerformRun(config.bldcMotor.velocityPullback);
-		m_pPullbackMotor->SetCurrent(StepMotorIndex::Pullback, 0);
-		m_pPullbackMotor->SetCurrent(StepMotorIndex::Hub, 0);
-		m_pPullbackMotor->SetSpeed(StepMotorIndex::Both, config.stepMotor.pullbackSpeed);
+		m_pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_PULLBACK);
+		m_pRJController->PerformRun(config.bldcMotor.velocityPullback);
+		m_pRJController->Current(eStepMotorIndex::Pullback, 0);
+		m_pRJController->Current(eStepMotorIndex::Hub, 0);
+		m_pRJController->Set(eStepMotorIndex::Both, m_pRJController->ConvertMMtoStep(config.stepMotor.pullbackSpeed));
 
 		return RayError::OK;
 	}
@@ -364,13 +359,17 @@ RayError COCTSystem::PullbackScan(char *strFilePath) {
 */
 RayError COCTSystem::LoadCatheter() {
 	if (m_curState == RayScannerState::Default || m_curState == RayScannerState::Review) {
-		//To-Do: check catheter
-
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 
-		CUtility::StartThread(threadLoadCatheter, m_pThreadRotaryJunction, this);
-
-		return RayError::OK;
+		if (controlRotaryJunction(eRJState::Loading) == NOERROR) {
+			return RayError::OK;
+		}
+		else {
+			if (m_isTestMode) {
+				postMessage(WM_UPDATE_RJ_STATE, (WPARAM) eRJState::Loading);
+			}
+			return RayError::DeviceNotConnected;
+		}
 	}
 
 	return RayError::WrongState;
@@ -381,10 +380,14 @@ RayError COCTSystem::LoadCatheter() {
 */
 RayError COCTSystem::UnloadCatheter() {
 	if (m_curState == RayScannerState::Default || m_curState == RayScannerState::Review) {
-
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 
-		CUtility::StartThread(threadUnloadCatheter, m_pThreadRotaryJunction, this);
+		if (controlRotaryJunction(eRJState::Unloading) == NOERROR) {
+			return RayError::OK;
+		}
+		else {
+			return RayError::DeviceNotConnected;
+		}
 
 		return RayError::OK;
 	}
@@ -471,10 +474,10 @@ RayError COCTSystem::StartLiveView()
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 
-		CMotorController* pMotorCtrl = CMotorController::GetInstance();
 		CConfiguration& config = CConfiguration::GetInstance();
 
-		pMotorCtrl->PerformRun(config.bldcMotor.velocityLiveView);
+		m_pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_LIVEVIEW);
+		m_pRJController->PerformRun(config.bldcMotor.velocityLiveView);
 
 		laserOnOff(true);
 		restartAcqDevice(m_pImagingLiveView);
@@ -492,10 +495,9 @@ RayError COCTSystem::StopLiveView()
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 
-		CMotorController* pMotorCtrl = CMotorController::GetInstance();
-
 		laserOnOff(false);
-		pMotorCtrl->StopMotor();
+		m_pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_STANDBY_OFF);
+		m_pRJController->StopMotor();
 
 		return RayError::OK;
 	}
@@ -825,6 +827,28 @@ RayError COCTSystem::SetContrast(double value) {
 }
 
 /*
+* GetColormap
+*/
+double COCTSystem::GetColormap()
+{
+	return m_fColormap;
+}
+
+/*
+* SetColormap
+*/
+RayError COCTSystem::SetColormap(double value)
+{
+	// Read LUT from File
+	CLookUpTable& lut = CLookUpTable::GetInstance();
+	lut.SetCurrentColormap((int)value);
+	m_fColormap = value;
+	PLOGI.printf("read LUT :%d %s", (int)value, (m_fColormap >= 0) ? "Succeed" : "Failed");
+
+	return RayError::OK;
+}
+
+/*
 * GetDegree
 */
 double COCTSystem::GetDegree() {
@@ -891,7 +915,7 @@ UINT COCTSystem::GetVolumeDepth() {
 */
 bool COCTSystem::GetMotorOnOff()
 {
-	return CMotorController::GetInstance()->IsRun();
+	return m_pRJController->IsRun();
 }
 
 /*
@@ -987,6 +1011,42 @@ UINT COCTSystem::GetLongitudeImageChannels()
 }
 
 /*
+* GetImageThreshold
+*/
+double COCTSystem::GetImageThreshold()
+{
+	return m_fImageThreshold;
+}
+
+/*
+* SetImageThreshold
+*/
+RayError COCTSystem::SetImageThreshold(double value)
+{
+	m_fImageThreshold = value;
+
+	return RayError::OK;
+}
+
+/*
+* GetImageRoi
+*/
+double COCTSystem::GetImageRoi()
+{
+	return m_fImageRoi;
+}
+
+/*
+* SetImageRoi
+*/
+RayError COCTSystem::SetImageRoi(double value)
+{
+	m_fImageRoi = value;
+
+	return RayError::OK;
+}
+
+/*
 * threadService
 */
 UINT COCTSystem::threadService(LPVOID param) {
@@ -996,14 +1056,16 @@ UINT COCTSystem::threadService(LPVOID param) {
 
 	PLOGI.printf("Service Start");
 
-	// Read LUT from File
-	CLookUpTable& lut = CLookUpTable::GetInstance();
-	int result = lut.Load("LUT.csv");
-	PLOGI.printf("read LUT : %s", (result > 0) ? "Succeed" : "Failed");
-
 	// Initialize
 	IRayLearning* learning = IRayLearning::GetInstance();
 	learning->Initialize(true);
+
+	// LUT Load
+	CLookUpTable& lut = CLookUpTable::GetInstance();
+	lut.Load("LUT_green.csv");
+	lut.Load("LUT_gray.csv");
+	lut.Load("LUT_orange.csv");
+	//lut.Load("LUT_ML.csv");
 
 #ifdef DEBUG
 	cv::Mat imgSample = cv::imread(".\\oct_sample.png");
@@ -1127,6 +1189,11 @@ UINT COCTSystem::threadService(LPVOID param) {
 			pSystem->OnMsgStartReviewSession(wParam, lParam);
 			break;
 		}
+		case WM_UPDATE_RJ_STATE:
+		{
+			pSystem->OnMsgUpdateRJState(wParam, lParam);
+			break;
+		}
 		case WM_IGNORE_MESSAGES:
 		{
 			ignoreMsg = true;
@@ -1164,6 +1231,8 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 		extraData |= (UCHAR)OCTHeader::ExtraData::Background;
 	}
 
+	PLOGI.printf("Save Start (%d frames)", nNumOfSamples);
+
 	pDataWriter->StartSave(strSaveFilePath);
 	pDataWriter->WriteHeader(OCTHeader::Type::TimeSignal, OCTHeader::DataType::UShort, OCTHeader::Channels::Single, settingPullback.nAScan, settingPullback.nBScan, extraData);
 	pDataWriter->WriteExtraData(pImaging->GetCalibrationData(), settingPullback.nAScan * 2 * sizeof(int));
@@ -1182,7 +1251,7 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 	pDataWriter->StopSave();
 
 	pSystem->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::SaveRawData);
-	printf("[threadSaveRaw] done.\n");
+	PLOGI.printf("Save done.\n");
 
 	while (pSystem->m_pThreadSaveRaw->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
@@ -1290,11 +1359,11 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
-	CMotorController* pMotor = CMotorController::GetInstance();
-	CArduinoController* pPullbackMotor = pSystem->m_pPullbackMotor;
+	CRJController* pRJController = pSystem->m_pRJController;
 	IImaging::Setting settingPullback = pSystem->m_pImagingPullback->GetSetting();
 	int pullbackTime = ((double)config.stepMotor.pullbackDistance / (double)config.stepMotor.pullbackSpeed) * 1000;
 
+	pullbackTime = (pullbackTime <= 0) ? 3000 : pullbackTime;
 	PLOGI.printf("Pullback start - %dmm, %dmm/s - %dmsec", config.stepMotor.pullbackDistance, config.stepMotor.pullbackSpeed, pullbackTime);
 
 	// 1. Start Recording OCT
@@ -1310,18 +1379,9 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pSystem->m_pAcqDevice->SetWriter(pDataWriter);
 
 	// 2. Pullback Linear Stage
-	if (pPullbackMotor->IsOpen()) {
-		pPullbackMotor->MoveAbsolute(StepMotorIndex::Both, config.stepMotor.pullbackDistance, false);
-#if 0
-		while (pSystem->m_pThreadRotaryJunction->isRun) {
-			if (pPullbackMotor->IsMoving()) {
-				break;
-			}
-			else {
-				Sleep(DELAY_FOR_STOP_THREAD);
-			}
-		}
-#endif
+	if (pRJController->IsConnected() && config.stepMotor.pullbackDistance > 0) {
+		pRJController->Move(eStepMotorIndex::Both, pRJController->ConvertMMtoStep(config.stepMotor.pullbackDistance), false);
+		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 	}
 	else {
 		Sleep(pullbackTime);
@@ -1337,12 +1397,16 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pSystem->postPriorMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::Recording);
 
 	// 4. Motor OFF
-	Sleep(1000);
-	pMotor->StopMotor();
+	Sleep(500);
+	pRJController->StopMotor();
 
 	// 5. Homing
-	pPullbackMotor->MoveAbsolute(StepMotorIndex::Both, 0);
-	pPullbackMotor->SetCurrent(StepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
+	Sleep(2000);
+	pRJController->Set(eStepMotorIndex::Both, STEP_MOTOR_SPEED_DEFAULT);
+	pRJController->Move(eStepMotorIndex::Both, 0);
+	pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+	pRJController->Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
+	pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_STANDBY_OFF);
 
 	PLOGI.printf("Pullback done.");
 	CImagingSession* pSession = CImagingSession::CreateSession(pSystem, SESSION_REVIEW, settingPullback, pDataWriter);
@@ -1365,31 +1429,35 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
-	CMotorController* pMotor = CMotorController::GetInstance();
-	CArduinoController* pPullbackMotor = pSystem->m_pPullbackMotor;
+	CRJController* pRJController = pSystem->m_pRJController;
 
 	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterLoading);
 
-	// 1. Rotate BLDC Motor
-	pMotor->PerformRun(config.bldcMotor.velocityLoad);
+	if (pRJController->IsConnected()) {
+		pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
+		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
+		pRJController->Move(eStepMotorIndex::Pullback, 9000);
+		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 
-	// 2. Move Step-Motor (Pullback)
-	if (pPullbackMotor->IsOpen()) {
-		pPullbackMotor->SetCurrent(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
-		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
-		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_LOAD);
+		pRJController->PerformRun(config.bldcMotor.velocityLoad);
 
-		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_LOAD);
-		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, 0);
-		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
+		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_LOAD);
+
+		pRJController->Move(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_LOAD);
+		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+
+		pRJController->StopMotor();
+
+		pRJController->Move(eStepMotorIndex::Pullback, 2070);
+		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+		
+		pRJController->Move(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
+		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 	}
 	else if (pSystem->m_isTestMode)
 	{
 		Sleep(config.GetLoadCatheterTime());
 	}
-
-	// 3. Stop BLDC Motor
-	pMotor->StopMotor();
 
 	// To-Do: Check Catheter Connection
 	bool loaded = true;
@@ -1397,7 +1465,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loaded);
 	}
 	else {
-		pMotor->StopMotor();
+		pRJController->StopMotor();
 		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Unloaded);
 	}
 	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::LoadCatheter);
@@ -1415,17 +1483,16 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
-	CMotorController* pMotor = CMotorController::GetInstance();
-	CArduinoController* pPullbackMotor = pSystem->m_pPullbackMotor;
+	CRJController* pRJController = pSystem->m_pRJController;
 
 	PLOGI.printf("Unload catheter");
 
 	pSystem->postPriorMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterUnloading);
 
-	if (pPullbackMotor->IsOpen()) {
-		pPullbackMotor->SetSpeed(StepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
-		pPullbackMotor->SetCurrent(StepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
-		pPullbackMotor->MoveAbsolute(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
+	if (pRJController->IsConnected()) {
+		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
+		pRJController->Move(eStepMotorIndex::Pullback, 20000, false, 0x08 /* photo-sensor #4 */);
+		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 	}
 	else if (pSystem->m_isTestMode)
 	{
@@ -1433,6 +1500,7 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	}
 
 	pSystem->postPriorMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Unloaded);
+	pSystem->m_pRJController->UpdateState(eRJState::Unloaded);
 
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
@@ -1449,32 +1517,42 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
-	CMotorController* pMotor = CMotorController::GetInstance();
+	CRJController* pRJController = pSystem->m_pRJController;
 
 	PLOGI.printf("Catheter Validation");
-
+	Sleep(1500);
+#if 0
+	pSystem->m_pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_STANDBY_ON);
 	pSystem->laserOnOff(true);
 	pSystem->restartAcqDevice(pSystem->m_pImagingLiveView);
-	pMotor->PerformRun(config.bldcMotor.velocityLiveView);
+	pRJController->PerformRun(config.bldcMotor.velocityLiveView);
 
 	// To-Do: determine image verification
+	Sleep(2000);
 	bool verified = true;
 
-	pMotor->StopMotor();
+	pRJController->StopMotor();
 	pSystem->laserOnOff(false);
-
-	if (verified) {
+#endif
+	if (true) {
+		PLOGI.printf("m_pRJController->UpdateState - Loaded");
+		pSystem->m_pRJController->UpdateState(eRJState::Loaded);
+		PLOGI.printf("postMessage - CatheterState::Enable");
 		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Enable);
 	}
 	else {
+		pSystem->m_pRJController->UpdateState(eRJState::Error);
 		pSystem->postMessage(WM_NOTIFY_ERROR_OCCURED, (WPARAM)RayError::CatheterNotValid);
 	}
 
+	PLOGI.printf("postMessage - RayWorkItem::ValidateCatheter");
 	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::ValidateCatheter);
 
+	PLOGI.printf("wait for StopThread");
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
 	}
+	PLOGI.printf("threadValidateCatheter Done");
 
 	return NOERROR;
 }
@@ -1484,11 +1562,9 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 */
 bool COCTSystem::checkConnection() {
 	bool result = true;
-	CMotorController* pMotor = CMotorController::GetInstance();
 	
 	result &= m_pAcqDevice->IsInit();
-	result &= pMotor->IsConnected();
-	result &= m_pPullbackMotor->IsOpen();
+	result &= m_pRJController->IsConnected();
 	result &= m_pLaserModule->IsOpen();
 
 	return result;
@@ -1563,20 +1639,21 @@ int COCTSystem::restartAcqDevice(COCTImaging* pImaging) {
 */
 int COCTSystem::connectRotaryJunction() {
 	CConfiguration& config = CConfiguration::GetInstance();
-	CMotorController* pMotor = CMotorController::GetInstance();
 
 	bool result = true;
 
-	if (!m_pPullbackMotor->IsOpen()) {
-		m_pPullbackMotor->Open(config.stepMotor.port);
-		Sleep(DELAY_BETWEEN_COMMAND);
-		m_pPullbackMotor->SetCurrent(StepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
-		Sleep(DELAY_BETWEEN_COMMAND);
-		m_pPullbackMotor->SetCurrent(StepMotorIndex::Hub, HUB_MOTOR_POS_INITIAL);
+	if (!m_pRJController->IsConnected()) {
+		result &= m_pRJController->Connect(config.bldcMotor.port);
+		result &= m_pRJController->SetModeOfOperation(MOTOR_DATA_MODE_VELOCITY);
+		result &= m_pRJController->SwitchOn();
+		result &= m_pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
+		result &= m_pRJController->Current(eStepMotorIndex::Hub, HUB_MOTOR_POS_INITIAL);
+
+		if (!result) PLOGI.printf("Failed to connect to Rotary Junction");
 	}
 
 	if (!m_pLaserModule->IsOpen()) {
-		result &= m_pLaserModule->Open(config.laserModule.port);
+		result = m_pLaserModule->Open(config.laserModule.port);
 		if (result) {
 			m_pLaserModule->SetVLD(0);
 			Sleep(500);
@@ -1595,12 +1672,6 @@ int COCTSystem::connectRotaryJunction() {
 		}
 	}
 
-	if (!pMotor->IsConnected()) {
-		result &= pMotor->Connect(config.bldcMotor.port);
-		result &= pMotor->SetModeOfOperation(MOTOR_DATA_MODE_VELOCITY);
-		result &= pMotor->SwitchOn();
-	}
-
 	return (result) ? NOERROR : E_FAIL;
 }
 
@@ -1608,12 +1679,10 @@ int COCTSystem::connectRotaryJunction() {
 * disconnectRotaryJunction
 */
 int COCTSystem::disconnectRotaryJunction() {
-	CMotorController* pMotor = CMotorController::GetInstance();
-
 	bool result = true;
 	
-	if (pMotor->IsConnected()) {
-		result &= pMotor->SwitchOff();
+	if (m_pRJController->IsConnected()) {
+		result &= m_pRJController->SwitchOff();
 	}
 
 	PLOGI.printf("Catheter State : %d", m_cathState);
@@ -1625,10 +1694,25 @@ int COCTSystem::disconnectRotaryJunction() {
 		}
 	}
 
-	m_pPullbackMotor->Close();
+	//if (m_pLaserModule->IsOpen()) {
+	//	m_pLaserModule->Home(-100000, 10000);
+	//}
+
+	m_pRJController->Disconnect();
 	m_pLaserModule->Close();
 
 	return (result) ? NOERROR : E_FAIL;
+}
+
+/*
+* controlRotaryJunction
+*/
+int COCTSystem::controlRotaryJunction(eRJState state) {
+	if (m_pRJController == nullptr || !m_pRJController->IsConnected()) return E_FAIL;
+
+	m_pRJController->UpdateState(state);
+
+	return NOERROR;
 }
 
 /*
@@ -1639,6 +1723,7 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 	int nSession = wParam;
 	int nFrameInfo = lParam;	// 0 if real time frame
 	bool isRealTime = (nFrameInfo == 0);
+	double intensity = 0.0;
 
 	if (m_curState == RayScannerState::Review) {
 		if (isRealTime) return NOERROR;
@@ -1651,6 +1736,13 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 		if (isRealTime == false) return NOERROR;
 
 		image = m_pImagingRealtime->GetCircleImage();
+
+		//calculate intensity - m_fImageThreshold/m_fImageRoi
+		calculateIntensity(image);
+		for (int i = 0; i < 4; i++) {
+			intensity += m_fCurrentIntensity[i];
+		}
+		intensity /= 4.f;
 
 		switch (m_cathState)
 		{
@@ -1681,7 +1773,7 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 		}
 	}
 
-	if (m_cbCrossSection != nullptr) m_cbCrossSection(nSession, image.data, image.cols, image.rows, image.channels(), nFrameInfo);
+	if (m_cbCrossSection != nullptr) m_cbCrossSection(nSession, image.data, image.cols, image.rows, image.channels(), nFrameInfo, intensity);
 
 	return NOERROR;
 }
@@ -1702,7 +1794,7 @@ LRESULT COCTSystem::OnMsgProcessCutView(WPARAM wParam, LPARAM lParam) {
 	int nTotalFrame = pCutView->GetNumOfSamples();
 	int nFrameInfo = (nDrawSamples << 16) | (nTotalFrame);
 
-	if (m_cbLongitude != nullptr) m_cbLongitude(nSession, imgCutView.data, imgCutView.cols, imgCutView.rows, imgCutView.channels(), nFrameInfo);
+	if (m_cbLongitude != nullptr) m_cbLongitude(nSession, imgCutView.data, imgCutView.cols, imgCutView.rows, imgCutView.channels(), nFrameInfo, 0.0);
 
 	return NOERROR;
 }
@@ -1787,6 +1879,66 @@ void COCTSystem::laserOnOff(bool isOn) {
 		m_pLaserModule->SetVLD(vldPower);
 	}
 }
+bool COCTSystem::waitForStepMotors(bool& runFlag) {
+	if (!m_pRJController->IsConnected()) return false;
+
+	Sleep(100);
+	while (m_pRJController->IsMoving() && runFlag) {
+		Sleep(30);
+	}
+
+	return m_pRJController->IsMoving();
+}
+void COCTSystem::calculateIntensity(cv::Mat image) {
+	CConfiguration& config = CConfiguration::GetInstance();
+	double sheathRadius = config.measurement.fSheathRadius * 2;
+	double resolution = (config.measurement.fAxialResolutionScale / 1000.f) * 2;
+	double radius = sheathRadius / resolution;	// sheath radius as pixel scale
+
+	cv::Mat imgGray, imgRoi;
+	cv::cvtColor(image, imgGray, cv::COLOR_BGR2GRAY);
+
+	// find circle (sheath)
+	std::vector<cv::Vec3f> circles;
+	circles.push_back(cv::Vec3f(imgGray.cols / 2, imgGray.rows / 2, radius));
+	//cv::HoughCircles(imgGray, circles, cv::HOUGH_GRADIENT, 2, imgGray.rows / 4, 200, 100, 10, 50);	
+
+	// make ROI
+	cv::Mat imgMask = cv::Mat::zeros(imgGray.rows, imgGray.cols, CV_8UC1);
+	cv::Point center;
+	int roiSize = 0;
+	if (circles.size() > 0)
+	{
+		cv::Vec3f c = circles[0];
+		center.x = c[0];
+		center.y = c[1];
+		radius = c[2];
+		roiSize = radius * m_fImageRoi;
+
+		circle(imgMask, center, roiSize, cv::Scalar(255, 255, 255), -1);
+		circle(imgMask, center, radius, cv::Scalar(0, 0, 0), -1);
+	}
+	cv::copyTo(imgGray, imgRoi, imgMask);
+
+	// divide quadrants & calculate intensity
+	cv::Rect quadrants[4];
+	quadrants[0].x = center.x - roiSize;
+	quadrants[0].y = center.y - roiSize;
+	quadrants[1].x = center.x;
+	quadrants[1].y = center.y - roiSize;
+	quadrants[2].x = center.x - roiSize;
+	quadrants[2].y = center.y;
+	quadrants[3].x = center.x;
+	quadrants[3].y = center.y;
+
+	for (int i = 0; i < 4; i++) {
+		quadrants[i].width = roiSize;
+		quadrants[i].height = roiSize;
+
+		cv::Mat quad = imgRoi(quadrants[i]);
+		m_fCurrentIntensity[i] = cv::mean(quad).val[0];
+	}
+}
 /*
 * OnMsgUpdateScannerState
 */
@@ -1803,6 +1955,7 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 		// To-Do: unload catheter
 		break;
 	case RayScannerState::Default:
+		m_pRJController->StartControl();
 		closeAllSessions();
 		break;
 	case RayScannerState::Scanning:
@@ -1857,6 +2010,62 @@ LRESULT COCTSystem::OnMsgUpdateCatheterState(WPARAM wParam, LPARAM lParam) {
 		break;
 	default:
 		break;
+	}
+
+	return NOERROR;
+}
+
+/*
+* OnMsgUpdateRJState
+*/
+LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
+	eRJState state = (eRJState)wParam;
+
+	PLOGI.printf("RJState: %d", state);
+	switch (state) {
+	case eRJState::Disconnected:
+		break;
+	case eRJState::Connected:
+		break;
+	case eRJState::Validating:
+	{
+		BYTE RFIDInfo[MAX_PATH];
+		UINT nRFIDLength = m_pRJController->GetRFIDInfo(RFIDInfo);
+
+#if ENABLE_RFID
+		if (nRFIDLength != 0) 
+#endif
+		{
+			// To-Do: Validation
+			bool isValid = true;
+			
+			if (isValid) {
+				m_pRJController->UpdateState(eRJState::Loading);
+			}
+			else {
+				m_pRJController->UpdateState(eRJState::Error);
+			}
+		}
+		break;
+	}
+	case eRJState::Loading:
+	{
+		CUtility::StartThread(threadLoadCatheter, m_pThreadRotaryJunction, this);
+		break;
+	}
+	case eRJState::Loaded:
+		break;
+	case eRJState::Unloading:
+	{
+		CUtility::StartThread(threadUnloadCatheter, m_pThreadRotaryJunction, this);
+		break;
+	}
+	case eRJState::Unloaded:
+		break;
+	case eRJState::Error:
+		laserOnOff(false);
+		break;
+
 	}
 
 	return NOERROR;
@@ -1929,7 +2138,11 @@ LRESULT COCTSystem::OnMsgNotifyEventOccured(WPARAM wParam, LPARAM lParam) {
 * OnMsgDeviceWorkDone
 */
 LRESULT COCTSystem::OnMsgDeviceWorkDone(WPARAM wParam, LPARAM lParam) {
-	CUtility::StopThread(m_pThreadRotaryJunction);
+	RayWorkItem item = (RayWorkItem)wParam;
+
+	if (item != RayWorkItem::Recording) {
+		CUtility::StopThread(m_pThreadRotaryJunction);
+	}
 
 	if (m_callback != nullptr) m_callback((int)RayCallbackRequest::WorkDone, wParam, lParam);
 
