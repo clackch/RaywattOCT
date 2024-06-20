@@ -5,8 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RaywattApp.Common.Annotation"
              xmlns:const="clr-namespace:RaywattApp.Common.Bases"
-             xmlns:lconst="clr-namespace:RaywattApp.Common.Annotation"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
              x:Name="UserControl"
              d:DesignHeight="640" d:DesignWidth="640">
 
