@@ -161,15 +161,6 @@ namespace RaywattApp.Common.Annotation
         public static readonly DependencyProperty ZoomProperty =
             DependencyProperty.Register("Zoom", typeof(Zoom), typeof(DrawLumenContourUtil), new PropertyMetadata(null));
 
-        public double ZoomScale
-        {
-            get { return (double)GetValue(ZoomScaleProperty); }
-            set { SetValue(ZoomScaleProperty, value); }
-        }
-
-        public static readonly DependencyProperty ZoomScaleProperty =
-            DependencyProperty.Register("ZoomScale", typeof(double), typeof(DrawLumenContourUtil), new PropertyMetadata(ZoomScalePropertyChanged));
-
         public string? InCommand
         {
             get { return (string)GetValue(InCommandProperty); }
@@ -280,16 +271,6 @@ namespace RaywattApp.Common.Annotation
             {
                 drawUtil.canvas.Children.Clear();
             }
-        }
-
-        private static void ZoomScalePropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
-        {
-            var drawUtil = dependencyObject as DrawLumenContourUtil;
-
-            if (drawUtil == null || drawUtil.LumenContours == null || drawUtil.FrameNumber < 0 || !drawUtil.IsDrawOn)
-                return;
-
-            drawUtil.DrawLumenContour(drawUtil.CurrentLumenContour, drawUtil.CurrentLumenStent, drawUtil.AppositionThreshold, drawUtil.IsEditOn);
         }
 
         private static void ReceiveCommand(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
