@@ -1898,6 +1898,22 @@ namespace RaywattApp.ViewModels
             //flags: 0, cv2.OPTFLOW_USE_INITIAL_FLOW, cv2.OPTFLOW_FARNEBACK_GAUSSIAN.
 
             PatientCase.AngioFrame.MotionVector.Add(flow);
+            //Mat flowImage = DrawOpticalFlowArrows(prevFrame, flow);
+            //Cv2.ImWrite("optical_flow" + PatientCase.AngioFrame.MotionVector.Count.ToString() + ".png", flowImage);
+        }
+
+        private static Mat DrawOpticalFlowArrows(Mat image, Mat flow, int step = 16)
+        {
+            Mat flowImage = image.CvtColor(ColorConversionCodes.GRAY2BGR);
+            for (int y = 0; y < image.Rows; y += step)
+            {
+                for (int x = 0; x < image.Cols; x += step)
+                {
+                    Point2f fxy = flow.At<Point2f>(y, x);
+                    Cv2.ArrowedLine(flowImage, new OpenCvSharp.Point(x, y), new OpenCvSharp.Point(x + fxy.X, y + fxy.Y), Scalar.Green, 1, LineTypes.Link8, 0, 0.3);
+                }
+            }
+            return flowImage;
         }
 
         private Mat Skeletonize(Mat img)
