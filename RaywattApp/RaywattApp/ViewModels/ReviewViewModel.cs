@@ -33,6 +33,7 @@ using Microsoft.VisualBasic.FileIO;
 using System.Threading.Channels;
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography;
 
 namespace RaywattApp.ViewModels
 {
@@ -1790,17 +1791,63 @@ namespace RaywattApp.ViewModels
                 prevEqualImg = equalizedImage.Clone();
                 Mat scale = new Mat();
                 Mat angles = new Mat();
-                IntPtr inputImage = frame.Data;
+                int imgX = frame.Width - 1;
+                int imgY = frame.Height - 1;
+                int imgMaxX = 0;
+                int imgMaxY = 0;
+
+                for (int y = 0; y < frame.Rows; y++)
+                {
+                    for (int x = 0; x < frame.Cols; x++)
+                    {
+                        byte pixelValue = frame.At<byte>(y, x);
+
+                        if (pixelValue != 0)
+                        {
+                            if(x<imgX)
+                            {
+                                imgX = x;
+                            }
+                            if (x>imgMaxX)
+                            {
+                                imgMaxX = x;
+                            }
+                            if(y<imgY)
+                            {
+                                imgY = y;
+                            }
+                            if (y > imgMaxY)
+                            {
+                                imgMaxY = y;
+                            }
+                        }
+                    }
+                }
+                Mat noBlackSpace = new Mat(imgMaxY - imgY + 1, imgMaxX - imgX + 1, frame.Type());
+                for (int y = imgY; y <= imgMaxY; y++)
+                {
+                    for (int x = imgX; x <= imgMaxX; x++)
+                    {
+                        byte pixelValue = frame.At<byte>(y, x);
+                        noBlackSpace.Set<byte>(y-imgY, x-imgX, pixelValue);
+                    }
+                }
+                IntPtr inputImage = noBlackSpace.Data;
+                //string imgName = "blackImg" + frameNum.ToString() + ".jpg";
+                //Cv2.ImWrite(imgName, noBlackSpace);
+
                 IntPtr imagePointer;
-                int widthIn = frame.Width;
-                int heightIn = frame.Height;
+                int widthIn = imgMaxX - imgX + 1;
+                int heightIn = imgMaxY - imgY + 1;
                 int channelsIn = frame.Channels();
                 int widthOut, heightOut, channelsOut;
+
                 useFrangi2d(inputImage, out imagePointer, widthIn, heightIn, channelsIn, out widthOut, out heightOut, out channelsOut);
                 Mat frangiImage = new Mat(heightOut, widthOut, channelsOut == 1 ? MatType.CV_8UC1 : MatType.CV_8UC3, imagePointer);
-                // 픽셀 100 미만 값 -> 255, 픽셀 100 이상 값 -> 0
+
                 Mat thresholdImage = new Mat();
                 Cv2.Threshold(frangiImage, thresholdImage, 0.03, 255, ThresholdTypes.Binary);
+
                 // 이미지 변형(분할 : Segmentation) 처리
                 /*Mat morphedImage = new Mat();
                 var kernel = Cv2.GetStructuringElement(MorphShapes.Ellipse, new OpenCvSharp.Size(3, 3));
@@ -1816,11 +1863,21 @@ namespace RaywattApp.ViewModels
                 Mat innerImage = skeleton.SubMat(rect).Clone();
                 Mat borderedImage = new Mat();
                 Cv2.CopyMakeBorder(innerImage, borderedImage, borderSize, borderSize, borderSize, borderSize, BorderTypes.Constant, Scalar.All(0));
+                
+                Mat processedImg = frame.Clone();
+                for (int y = 0; y < borderedImage.Rows; y++)
+                {
+                    for (int x = 0; x < borderedImage.Cols; x++)
+                    {
+                        byte pixelValue = borderedImage.At<byte>(y, x);
+                        processedImg.Set<byte>(y+imgY, x+imgX, pixelValue);
+                    }
+                }
 
                 byte[] imageData = new byte[frame.Rows * frame.Cols * frame.ElemSize()];
-                Marshal.Copy(borderedImage.Data, imageData, 0, imageData.Length);
+                Marshal.Copy(processedImg.Data, imageData, 0, imageData.Length);
                 //string imgName = "skeletonImg" + frameNum.ToString()+".jpg";
-                //Cv2.ImWrite(imgName, borderedImage);
+                //Cv2.ImWrite(imgName, processedImg);
                 PatientCase.AngioFrame.DijkstraHeap.Add(new DijkstraHeap(imageData, frame.Rows, frame.Cols));
                 //frameNum += 1;
             }
