@@ -353,12 +353,11 @@ void COCTImaging::generateImage(Ipp32f* logaritihmData, bool bInvert){
 	const int nFFTLength = m_setting.nFFTLength;
 	const int nOutputLength = m_setting.nOutputLength;
 
-	for (int i = 0; i < nBScan; i++)
-	{
-		ippsSubC_32f(logaritihmData + i * nOutputLength, (m_setting.lowLevel + fLowLevel), fOutput + i * nOutputLength, nOutputLength);
-		ippsMulC_32f_I(UCHAR_MAX / (m_setting.highLevel - fHighLevel), fOutput + i * nOutputLength, nOutputLength);
-		ippsConvert_32f8u_Sfs(fOutput + i * nOutputLength, imageResult.data + i * nOutputLength /*stepBytes*/, nOutputLength, ippRndNear, 0);
-	}
+	cv::Mat imgLog(cv::Size(nOutputLength, nBScan), CV_32FC1, logaritihmData);
+	imgLog -= m_setting.lowLevel;
+	imgLog *= (UCHAR_MAX / m_setting.highLevel);
+	imgLog.convertTo(imageResult, CV_8UC1);
+
 	cv::flip(imageResult, imageResult, 1);
 }
 
