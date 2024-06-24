@@ -237,10 +237,12 @@ namespace RaywattApp.Common.Angio
                 }
 
                 FileStream fs = new FileStream(angioFilePath + Constants.AngioImageExtension, FileMode.Create, FileAccess.Write);
-                while (angioSaveBuffer.Count > angioSaveFrameNum)
+
+                angioSaveFrameNum = angioSaveBuffer.Count - 1;
+
+                while (angioSaveFrameNum >= 0)
                 {
-                    fs.Write(angioSaveBuffer[angioSaveFrameNum], 0, angioImageSize);
-                    angioSaveFrameNum++;
+                    fs.Write(angioSaveBuffer[angioSaveFrameNum--], 0, angioImageSize);
                 }
                 fs.Close();
 
@@ -251,7 +253,7 @@ namespace RaywattApp.Common.Angio
 
                     xw.WriteElementString("AngioFrameHeight", angioFrameHeight.ToString());
                     xw.WriteElementString("AngioFrameWidth", angioFrameWidth.ToString());
-                    xw.WriteElementString("AngioFrameNumber", angioSaveFrameNum.ToString());
+                    xw.WriteElementString("AngioFrameNumber", angioSaveBuffer.Count.ToString());
                     xw.WriteElementString("BitsPerPixel", ((int)angioBitsPerPixel).ToString());
                     xw.WriteElementString("Frequency", "60"); // 임시값
 
