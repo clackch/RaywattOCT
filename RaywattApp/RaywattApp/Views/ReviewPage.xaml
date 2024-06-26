@@ -507,10 +507,10 @@
                                 <StackPanel Grid.Row="1" Width="192" HorizontalAlignment="Center">
                                     <Grid>
                                         <Grid.RowDefinitions>
-                                            <RowDefinition Height="20"/>
+                                            <RowDefinition Height="6"/>
                                             <RowDefinition Height="32"/>
                                             <RowDefinition Height="32"/>
-                                            <RowDefinition Height="10"/>
+                                            <RowDefinition Height="6"/>
                                             <RowDefinition Height="1"/>
                                             <RowDefinition Height="68"/>
                                             <RowDefinition Height="1"/>
@@ -583,9 +583,9 @@
                                                 </Grid.ColumnDefinitions>
                                                 <Grid.RowDefinitions>
                                                     <RowDefinition Height="38"/>
-                                                    <RowDefinition Height="19"/>
-                                                    <RowDefinition Height="19"/>
-                                                    <RowDefinition Height="19"/>
+                                                    <RowDefinition Height="20"/>
+                                                    <RowDefinition Height="20"/>
+                                                    <RowDefinition Height="20"/>
                                                 </Grid.RowDefinitions>
                                                 <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center">
                                                     <Label Content="{Binding [Presentation], Source={StaticResource L10N}}" Foreground="{DynamicResource SideMenuTitleBrush}" Style="{DynamicResource Pretendard-Medium-12}" VerticalAlignment="Center"/>
