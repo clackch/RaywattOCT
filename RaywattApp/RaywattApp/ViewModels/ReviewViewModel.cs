@@ -1264,13 +1264,13 @@ namespace RaywattApp.ViewModels
 
             if (CommonUtil.IsPreCase(PatientCase.Procedure))
             {
-                percentAreaStenosis = Section.MlaValue.DValue / Section.MeanArea;
+                percentAreaStenosis = (1 - Section.MlaValue.DValue / Section.RefArea) * 100;
                 minimalLumenArea = Section.MlaValue.DValue;
                 minimalLumenFrameNumber = Section.MlaValue.NValue;
             }
             else
             {
-                percentAreaStenosis = Section.MsaValue.DValue / Section.MeanArea;
+                percentAreaStenosis = (1 - Section.MsaValue.DValue / Section.RefArea) * 100;
                 minimalLumenArea = Section.MsaValue.DValue;
                 minimalLumenFrameNumber = Section.MsaValue.NValue;
             }
@@ -1278,7 +1278,7 @@ namespace RaywattApp.ViewModels
             double scaleArea = PatientCase.ImageResolution * PatientCase.ImageResolution;
 
             PatientCase.FfrFeature.MinimalLumenFrameNumber = minimalLumenFrameNumber;
-            PatientCase.FfrFeature.PercentAreaStenosis = Math.Round(percentAreaStenosis * 100, 1);
+            PatientCase.FfrFeature.PercentAreaStenosis = Math.Round(percentAreaStenosis, 1);
             PatientCase.FfrFeature.MinimalLumenArea = Math.Round(minimalLumenArea * scaleArea, 2);
             PatientCase.FfrFeature.DistalLumenArea = Math.Round(Section.Distal.DValue * scaleArea, 2);
             PatientCase.FfrFeature.LesionLength = Math.Round(Section.LesionLength.DValue, 1);
