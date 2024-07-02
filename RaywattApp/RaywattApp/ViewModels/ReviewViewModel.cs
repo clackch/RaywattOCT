@@ -546,7 +546,15 @@ namespace RaywattApp.ViewModels
                             LumenGuidewires.Add(lumenGuidewire);
                         }
                     }
-                    
+
+                    //Test - Lumen Detection
+                    if (false)
+                    {
+                        InitializeLumenData();
+                        DeviceStatus.IsLumenSaved = false;
+                        RayStartLumenDetection();
+                        this.isLumenContourSave = true;
+                    }
                 }
                 else//From Recording
                 {
@@ -577,12 +585,6 @@ namespace RaywattApp.ViewModels
                 Measurements.Add(measurement);
             }
             Measurements = Measurements.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
-
-            //Test
-            //InitializeLumenData();
-            //DeviceStatus.IsLumenSaved = false;
-            //RayStartLumenDetection();
-            //this.isLumenContourSave = true;
         }
 
         private void AngioImageProcessing()
@@ -739,7 +741,7 @@ namespace RaywattApp.ViewModels
                 for (int i = 0; i < sbSize; i++)
                 {
                     int height = RayGetNumOfSidebranchContourPoints(frameInfo, i);
-                    if (height > 0)
+                    if (height > 2)
                     {
                         IntPtr contour = RayGetSidebranchContour(frameInfo, i);
                         if (contour == IntPtr.Zero) return;
