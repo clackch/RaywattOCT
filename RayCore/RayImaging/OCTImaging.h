@@ -6,6 +6,10 @@
 #include "Imaging.h"
 #include "OCTMeasurement.h"
 
+constexpr auto LUT_START_INDEX = 10;
+constexpr auto LUT_END_INDEX = 244;
+constexpr auto LUT_SCALE = (LUT_END_INDEX - LUT_START_INDEX + 1);
+
 class CCalibration;
 class CThread;
 class CMessageService;
