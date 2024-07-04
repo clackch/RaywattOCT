@@ -10,6 +10,7 @@ INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES (
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'RJ', 'Y', 'Raywatt;');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'FG', 'Y', 'Raywatt;');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'Image', 'Y', 'Raywatt;');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'ML', 'N', 'Raywatt;');
 
 -- rv_schema.code
 DELETE FROM rv_schema.code;

@@ -548,8 +548,9 @@ namespace RaywattApp.ViewModels
                     }
 
                     //Test - Lumen Detection
-                    if (false)
+                    if(CommonUtil.IsTestMode(DeviceStatus.TestMode, "ML"))
                     {
+                        threadMakeLumenProfile.Join();
                         InitializeLumenData();
                         DeviceStatus.IsLumenSaved = false;
                         RayStartLumenDetection();
