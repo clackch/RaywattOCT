@@ -520,7 +520,7 @@ namespace RaywattApp.Common.Util
 
             int cols = currentFrame == -1 ? lumenContours.Count : currentFrame + 1;
 
-            Mat imglumenProfile = new Mat(100, lumenContours.Count, MatType.CV_8UC3);
+            Mat imglumenProfile = new Mat(100, lumenContours.Count * 2 - 2, MatType.CV_8UC3);
             imglumenProfile.SetTo(new Scalar(0x4f, 0x4f, 0x4f));
 
             int curFrame = 0;
@@ -544,12 +544,12 @@ namespace RaywattApp.Common.Util
 
             int cols = currentFrame == -1 ? lumenContours.Count : currentFrame + 1;
 
-            Mat imglumenProfile = new Mat(200, lumenContours.Count, MatType.CV_8UC3);
+            Mat imglumenProfile = new Mat(200, lumenContours.Count * 2 - 2, MatType.CV_8UC3);
             imglumenProfile.SetTo(new Scalar(0x33, 0x33, 0x33));
 
             for (int curFrame = 0; curFrame < cols; curFrame++)
             {
-                imglumenProfile = MakeLumenProfile(imglumenProfile, lumenContours[curFrame], lumenSidebranches[curFrame], lumenStents[curFrame], appositionThreshold, curFrame, frameProximal, frameDistal, isPostCase);
+                imglumenProfile = MakeLumenProfile(imglumenProfile, lumenContours[curFrame], lumenSidebranches[curFrame], lumenStents[curFrame], appositionThreshold, curFrame, frameProximal, frameDistal, isPostCase, (curFrame == lumenContours.Count - 1));
             }
 
             return imglumenProfile;
@@ -565,12 +565,12 @@ namespace RaywattApp.Common.Util
             }
 
             int curFrame = currentFrame == -1 ? lumenContours.Count - 1 : currentFrame;
-            imglumenProfile = MakeLumenProfile(imglumenProfile, lumenContours[curFrame], lumenSidebranches[curFrame], lumenStents[curFrame], appositionThreshold, curFrame, frameProximal, frameDistal, isPostCase);
+            imglumenProfile = MakeLumenProfile(imglumenProfile, lumenContours[curFrame], lumenSidebranches[curFrame], lumenStents[curFrame], appositionThreshold, curFrame, frameProximal, frameDistal, isPostCase, (curFrame == lumenContours.Count - 1));
 
             return imglumenProfile;
         }
 
-        private static Mat MakeLumenProfile(Mat imglumenProfile, LumenContour lumenContour, LumenSidebranch lumenSidebranch, LumenStent lumenStent, double appositionThreshold, int curFrame, int frameProximal, int frameDistal, bool isPostCase)
+        private static Mat MakeLumenProfile(Mat imglumenProfile, LumenContour lumenContour, LumenSidebranch lumenSidebranch, LumenStent lumenStent, double appositionThreshold, int curFrame, int frameProximal, int frameDistal, bool isPostCase, bool isEdge)
         {
             const double radius = Constants.OCTImageSize / 2;
             const double totalArea = radius * radius * Math.PI;
@@ -578,14 +578,36 @@ namespace RaywattApp.Common.Util
             int lumenArea = (int)(area / totalArea * imglumenProfile.Rows);
             int yStart = (imglumenProfile.Rows - lumenArea) / 2;
 
-            Cv2.Line(imglumenProfile, new Point(curFrame, yStart), new Point(curFrame, yStart + lumenArea), new Scalar(0x16, 0x16, 0x16));
+            int position = 0;
 
-            //Lesion Section
-            if (curFrame >= frameProximal && curFrame <= frameDistal)
+            if(curFrame != 0)
+                position = curFrame * 2 - 1;
+
+            if (area > 0)
             {
-                Cv2.Line(imglumenProfile, new Point(curFrame, 0), new Point(curFrame, yStart - 1), new Scalar(0x4f, 0x4f, 0x4f));
-                Cv2.Line(imglumenProfile, new Point(curFrame, yStart + lumenArea + 1), new Point(curFrame, imglumenProfile.Rows), new Scalar(0x4f, 0x4f, 0x4f));
+                //Lumen Area
+                Cv2.Line(imglumenProfile, new Point(position, yStart), new Point(position, yStart + lumenArea), new Scalar(0x16, 0x16, 0x16));
+                if (!isEdge)
+                    Cv2.Line(imglumenProfile, new Point(position + 1, yStart), new Point(position + 1, yStart + lumenArea), new Scalar(0x16, 0x16, 0x16));
+
+                //Lesion Section
+                if (curFrame >= frameProximal && curFrame <= frameDistal)
+                {
+                    Cv2.Line(imglumenProfile, new Point(position, 0), new Point(position, yStart - 1), new Scalar(0x4f, 0x4f, 0x4f));
+                    Cv2.Line(imglumenProfile, new Point(position, yStart + lumenArea + 1), new Point(position, imglumenProfile.Rows), new Scalar(0x4f, 0x4f, 0x4f));
+                    if (!isEdge)
+                        Cv2.Line(imglumenProfile, new Point(position + 1, 0), new Point(position + 1, yStart - 1), new Scalar(0x4f, 0x4f, 0x4f));
+                    if (!isEdge)
+                        Cv2.Line(imglumenProfile, new Point(position + 1, yStart + lumenArea + 1), new Point(position + 1, imglumenProfile.Rows), new Scalar(0x4f, 0x4f, 0x4f));
+                }
             }
+            /* TO-DO : 문제있는 frame(area = 0, 이상한 lumen) 처리 필요
+            else
+            {
+                Cv2.Line(imglumenProfile, new Point(position, 0), new Point(position, imglumenProfile.Rows), new Scalar(0x3f, 0x41, 0x76));
+                if (!isEdge)
+                    Cv2.Line(imglumenProfile, new Point(position + 1, 0), new Point(position + 1, imglumenProfile.Rows), new Scalar(0x3f, 0x41, 0x76));
+            }*/
 
             //Stent Area
             if (isPostCase && lumenStent.Points != null && lumenStent.IsStent)
@@ -595,7 +617,9 @@ namespace RaywattApp.Common.Util
                 {
                     if(CommonUtil.IsMalApposition(appositionLength, appositionThreshold))
                     {
-                        Cv2.Line(imglumenProfile, new Point(curFrame, yStart), new Point(curFrame, yStart + lumenArea), new Scalar(0x3f, 0x41, 0x76));
+                        Cv2.Line(imglumenProfile, new Point(position, yStart), new Point(position, yStart + lumenArea), new Scalar(0x3f, 0x41, 0x76));
+                        if (!isEdge)
+                            Cv2.Line(imglumenProfile, new Point(position + 1, yStart), new Point(position + 1, yStart + lumenArea), new Scalar(0x3f, 0x41, 0x76));
                         break;
                     }
                 }
@@ -605,11 +629,15 @@ namespace RaywattApp.Common.Util
                 {
                     if ((i + curFrame) % 20 == 0)
                     {
-                        Cv2.Line(imglumenProfile, new Point(curFrame, i), new Point(curFrame, i), new Scalar(0x8d, 0x8d, 0x8d));
+                        Cv2.Line(imglumenProfile, new Point(position, i), new Point(position, i), new Scalar(0x8d, 0x8d, 0x8d));
+                        if (!isEdge)
+                            Cv2.Line(imglumenProfile, new Point(position + 1, i), new Point(position + 1, i), new Scalar(0x8d, 0x8d, 0x8d));
                     }
                     if ((i - curFrame) % 20 == 0)
                     {
-                        Cv2.Line(imglumenProfile, new Point(curFrame, i), new Point(curFrame, i), new Scalar(0x8d, 0x8d, 0x8d));
+                        Cv2.Line(imglumenProfile, new Point(position, i), new Point(position, i), new Scalar(0x8d, 0x8d, 0x8d));
+                        if (!isEdge)
+                            Cv2.Line(imglumenProfile, new Point(position + 1, i), new Point(position + 1, i), new Scalar(0x8d, 0x8d, 0x8d));
                     }
                 }
             }
@@ -618,11 +646,19 @@ namespace RaywattApp.Common.Util
             if (lumenSidebranch.Points != null && lumenSidebranch.Points.Count > 0)
             {
                 if (curFrame >= frameProximal && curFrame <= frameDistal)
-                    Cv2.Line(imglumenProfile, new Point(curFrame, imglumenProfile.Rows / 2 - 5), new Point(curFrame, imglumenProfile.Rows / 2 + 5), new Scalar(0xe4, 0xe4, 0xe4));
+                {
+                    Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - 5), new Point(position, imglumenProfile.Rows / 2 + 5), new Scalar(0xe4, 0xe4, 0xe4));
+                    if (!isEdge)
+                        Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - 5), new Point(position + 1, imglumenProfile.Rows / 2 + 5), new Scalar(0xe4, 0xe4, 0xe4));
+                }
                 else
-                    Cv2.Line(imglumenProfile, new Point(curFrame, imglumenProfile.Rows / 2 - 5), new Point(curFrame, imglumenProfile.Rows / 2 + 5), new Scalar(0x7d, 0x7d, 0x7d));
+                {
+                    Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - 5), new Point(position, imglumenProfile.Rows / 2 + 5), new Scalar(0x7d, 0x7d, 0x7d));
+                    if (!isEdge)
+                        Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - 5), new Point(position + 1, imglumenProfile.Rows / 2 + 5), new Scalar(0x7d, 0x7d, 0x7d));
+                }
             }
-
+            
             return imglumenProfile;
         }
 
@@ -630,12 +666,12 @@ namespace RaywattApp.Common.Util
         {
             int cols = currentFrame == -1 ? frameCnt : currentFrame + 1;
 
-            Mat imglumenProfile = new Mat(20, frameCnt, MatType.CV_8UC3);
+            Mat imglumenProfile = new Mat(20, frameCnt * 2 - 2, MatType.CV_8UC3);
             imglumenProfile.SetTo(new Scalar(0x33, 0x33, 0x33));
 
             for (int i = 0; i < cols; i++)
             {
-                MakeLumenProfileExtra(imglumenProfile, i, frameCnt, colorFrames, isPreCase);
+                MakeLumenProfileExtra(imglumenProfile, i, frameCnt, colorFrames, isPreCase, (i == frameCnt - 1));
             }
 
             return imglumenProfile;
@@ -650,15 +686,24 @@ namespace RaywattApp.Common.Util
 
             int curFrame = currentFrame == -1 ? frameCnt - 1 : currentFrame;
 
-            imglumenProfile = MakeLumenProfileExtra(imglumenProfile, curFrame, frameCnt, colorFrames, isPreCase);
+            imglumenProfile = MakeLumenProfileExtra(imglumenProfile, curFrame, frameCnt, colorFrames, isPreCase, (curFrame == frameCnt - 1));
 
             return imglumenProfile;
         }
 
-        private static Mat MakeLumenProfileExtra(Mat imglumenProfile, int curFrame, int frameCnt, List<int> colorFrames, bool isPreCase)
+        private static Mat MakeLumenProfileExtra(Mat imglumenProfile, int curFrame, int frameCnt, List<int> colorFrames, bool isPreCase, bool isEdge)
         {
+            int position = 0;
+
+            if (curFrame != 0)
+                position = curFrame * 2 - 1;
+
             if (colorFrames.Contains(curFrame))
-                Cv2.Line(imglumenProfile, new Point(curFrame, 0), new Point(curFrame, imglumenProfile.Rows), isPreCase ? new Scalar(0xeb, 0xfe, 0x75) : new Scalar(0x00, 0xd8, 0xff));
+            {
+                Cv2.Line(imglumenProfile, new Point(position, 0), new Point(position, imglumenProfile.Rows), isPreCase ? new Scalar(0xeb, 0xfe, 0x75) : new Scalar(0x00, 0xd8, 0xff));
+                if(!isEdge)
+                    Cv2.Line(imglumenProfile, new Point(position + 1, 0), new Point(position + 1, imglumenProfile.Rows), isPreCase ? new Scalar(0xeb, 0xfe, 0x75) : new Scalar(0x00, 0xd8, 0xff));
+            }                
 
             return imglumenProfile;
         }
