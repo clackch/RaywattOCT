@@ -59,6 +59,12 @@ namespace RaywattApp.Common.Annotation
 
         bool isInit;
 
+        bool isEmptyLumen;
+
+        bool isEmptyLumenClicked;
+
+        bool isEmptyLumenDrawFail;
+
         bool isFirstPoint;
 
         int firstPointIndex;
@@ -202,7 +208,12 @@ namespace RaywattApp.Common.Annotation
         {
             InitializeComponent();
 
-            isInit = false;
+            this.isInit = false;
+            this.isEmptyLumen = false;
+            this.isEmptyLumenClicked = false;
+            this.isEmptyLumenDrawFail = false;
+
+            this.canvas.MouseEnter += Canvas_MouseEnter;
         }
 
         //---------------------------------------------------------------------------------------------------- Event
@@ -249,9 +260,21 @@ namespace RaywattApp.Common.Annotation
                 else
                 {
                     drawUtil.DrawLumenContour(drawUtil.LumenContours[frameNumber], drawUtil.LumenStents[frameNumber], drawUtil.AppositionThreshold, drawUtil.IsEditOn);
-                }                
+                }
+
+                //for Empty Lumen
+                if (drawUtil.IsEditOn && drawUtil.LumenContours[frameNumber].Points.Count == 0)
+                {
+                    drawUtil.isEmptyLumen = true;
+                    drawUtil.isEmptyLumenClicked = false;
+                    drawUtil.canvas.Background = Brushes.Transparent;
+                }
+                else
+                {
+                    drawUtil.isEmptyLumen = false;
+                    drawUtil.canvas.Background = null;
+                }
             }
-                
         }
 
         private static void DrawPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
@@ -332,7 +355,6 @@ namespace RaywattApp.Common.Annotation
                 isFirstPoint = false;
 
                 Point point = e.GetPosition(this.canvas);
-                this.newPoints.Clear();
                 this.newPoints.Add(point);
                 ActivateEvent();
 
@@ -354,14 +376,30 @@ namespace RaywattApp.Common.Annotation
         private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             _log.Debug("Canvas_MouseLeftButtonDown");
-            DrawLumenContourPoint(this.newPoints[this.newPoints.Count - 1], this.newPoints.Count);
+
+            if (this.isEmptyLumenDrawFail)
+            {
+                this.isEmptyLumenDrawFail = false;
+                return;
+            }
 
             Point point = e.GetPosition(this.canvas);
+
+            if (this.isEmptyLumen && !this.isEmptyLumenClicked)
+            {
+                this.newPoints.Add(point);
+                this.isEmptyLumenClicked = true;
+            }
+
+            DrawLumenContourPoint(this.newPoints[this.newPoints.Count - 1], this.newPoints.Count - 1, this.isEmptyLumen);
             this.newPoints.Add(point);
         }
 
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
+            if (this.isEmptyLumen && !this.isEmptyLumenClicked)
+                return;
+
             Point point = e.GetPosition(this.canvas);
 
             if (this.lastPointX == point.X && this.lastPointY == point.Y)
@@ -378,24 +416,46 @@ namespace RaywattApp.Common.Annotation
         private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             _log.Debug("Canvas_MouseRightButtonDown");
+            
+            if (this.newPoints.Count == 0)
+                return;
 
             if (this.newPoints.Count > 2)
             {
                 this.newPoints.RemoveAt(this.newPoints.Count - 1);
                 this.newPoints[this.newPoints.Count - 1] = e.GetPosition(this.canvas);
-                DeleteLumenContourPoint(this.newPoints.Count);
+                DeleteLumenContourPoint(this.newPoints.Count - 1);
                 DrawLumenContourCurve();
             }
             else
             {
                 this.newPoints.RemoveAt(this.newPoints.Count - 1);
-                DeleteLumenContourPoint(this.newPoints.Count);
+                DeleteLumenContourPoint(this.newPoints.Count - 1);
                 DeleteLumenContourCurve();
 
-                DeactivateEvent();
-                isFirstPoint = true;
-                IsContourMouseOver = false;
+                if (this.isEmptyLumen)
+                {                   
+                    this.newPoints.Clear();
+                    isEmptyLumenClicked = false;
+                }
+                else
+                {
+                    DeactivateEvent();
+                    isFirstPoint = true;
+                    IsContourMouseOver = false;
+                }
             }
+        }
+
+        private void Canvas_MouseEnter(object sender, MouseEventArgs e)
+        {
+            _log.Debug("Canvas_MouseEnter");
+
+            if (this.isEmptyLumen)
+            {
+                ActivateEvent();
+                CommandType = 1;
+            }            
         }
 
         private void Canvas_MouseLeave(object sender, MouseEventArgs e)
@@ -406,8 +466,17 @@ namespace RaywattApp.Common.Annotation
             DrawLumenContour(LumenContours[FrameNumber], null, -1, true);
 
             DeactivateEvent();
-            isFirstPoint = true;
-            IsContourMouseOver = false;
+
+            if (this.isEmptyLumen)
+            {
+                this.canvas.Background = Brushes.Transparent;
+                this.isEmptyLumenClicked = false;
+            }
+            else
+            {
+                isFirstPoint = true;
+                IsContourMouseOver = false;
+            }            
         }
 
         private void Line_MouseEnter(object sender, MouseEventArgs e)
@@ -428,6 +497,31 @@ namespace RaywattApp.Common.Annotation
         private void Polygon_MouseLeave(object sender, MouseEventArgs e)
         {
             IsContourMouseOver = false;
+        }
+
+        private void Rectangle_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            _log.Debug("Rectangle_MouseLeftButtonDown");
+
+            if (this.newPoints.Count < 4)
+                return;          
+
+            this.newPoints.RemoveAt(this.newPoints.Count - 1);
+            DrawLumenContourCurve(true);
+
+            if (ReDrawLumenContour())
+            {
+                DeactivateEvent();
+                CommandType = 0;
+            }                
+            else
+            {
+                SetEmptyLumenIfNothing();
+                this.isEmptyLumenDrawFail = true;
+            }
+
+            this.isEmptyLumenClicked = false;
+            IsContourMouseOver = false;            
         }
 
         //---------------------------------------------------------------------------------------------------- Function
@@ -465,7 +559,6 @@ namespace RaywattApp.Common.Annotation
 
             if (pointList == null || pointList.Count < 3)
                 return;
-
 
             //stent
             if(lumenStent != null && lumenStent.Points != null && lumenStent.Points.Count > 0 && lumenStent.IsStent)
@@ -541,9 +634,11 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
-        private void ReDrawLumenContour()
+        private bool ReDrawLumenContour()
         {
             _log.Debug("ReDrawLumenContour");
+
+            this.newPoints.Clear();
 
             List<Point> points = new List<Point>();
             List<Point> reversePoints = new List<Point>();
@@ -573,67 +668,80 @@ namespace RaywattApp.Common.Annotation
                 }
             }
 
-            if (firstPointIndex > secondPointIndex)
-            {
-                for (int i = secondPointIndex + 1; i < firstPointIndex; i++)
-                {
-                    points.Add(new Point(contourLines[i].X2, contourLines[i].Y2));
-                }
-            }
-            else
-            {
-                for (int i = secondPointIndex + 1; i < contourLines.Count; i++)
-                {
-                    points.Add(new Point(contourLines[i].X2, contourLines[i].Y2));
-                }
-
-                for (int i = 0; i < firstPointIndex; i++)
-                {
-                    points.Add(new Point(contourLines[i].X2, contourLines[i].Y2));
-                }
-            }
-
-            reversePoints.Reverse();
-
-            if (secondPointIndex > firstPointIndex)
-            {
-                for (int i = firstPointIndex + 1; i < secondPointIndex; i++)
-                {
-                    reversePoints.Add(new Point(contourLines[i].X2, contourLines[i].Y2));
-                }
-            }
-            else
-            {
-                for (int i = firstPointIndex + 1; i < contourLines.Count; i++)
-                {
-                    reversePoints.Add(new Point(contourLines[i].X2, contourLines[i].Y2));
-                }
-
-                for (int i = 0; i < secondPointIndex; i++)
-                {
-                    reversePoints.Add(new Point(contourLines[i].X2, contourLines[i].Y2));
-                }
-            }
-
-            PathGeometry pathGeometry = GetPathGeometry(points);
-            PathGeometry reversePathGeometry = GetPathGeometry(reversePoints);
             PathGeometry finalPathGeometry;
             List<Point> finalPoint;
 
-            if (pathGeometry.GetArea() > reversePathGeometry.GetArea())
+            if (this.isEmptyLumen)
             {
-                finalPathGeometry = pathGeometry;
+                this.isEmptyLumen = false;
+                finalPathGeometry = GetPathGeometry(points);
                 finalPoint = points;
             }
             else
             {
-                finalPathGeometry = reversePathGeometry;
-                finalPoint = reversePoints;
-            }
+                if (firstPointIndex > secondPointIndex)
+                {
+                    for (int i = secondPointIndex + 1; i < firstPointIndex; i++)
+                    {
+                        points.Add(new Point(contourLines[i].X2, contourLines[i].Y2));
+                    }
+                }
+                else
+                {
+                    for (int i = secondPointIndex + 1; i < contourLines.Count; i++)
+                    {
+                        points.Add(new Point(contourLines[i].X2, contourLines[i].Y2));
+                    }
+
+                    for (int i = 0; i < firstPointIndex; i++)
+                    {
+                        points.Add(new Point(contourLines[i].X2, contourLines[i].Y2));
+                    }
+                }
+
+                reversePoints.Reverse();
+
+                if (secondPointIndex > firstPointIndex)
+                {
+                    for (int i = firstPointIndex + 1; i < secondPointIndex; i++)
+                    {
+                        reversePoints.Add(new Point(contourLines[i].X2, contourLines[i].Y2));
+                    }
+                }
+                else
+                {
+                    for (int i = firstPointIndex + 1; i < contourLines.Count; i++)
+                    {
+                        reversePoints.Add(new Point(contourLines[i].X2, contourLines[i].Y2));
+                    }
+
+                    for (int i = 0; i < secondPointIndex; i++)
+                    {
+                        reversePoints.Add(new Point(contourLines[i].X2, contourLines[i].Y2));
+                    }
+                }
+
+                PathGeometry pathGeometry = GetPathGeometry(points);
+                PathGeometry reversePathGeometry = GetPathGeometry(reversePoints);
+
+
+                if (pathGeometry.GetArea() > reversePathGeometry.GetArea())
+                {
+                    finalPathGeometry = pathGeometry;
+                    finalPoint = points;
+                }
+                else
+                {
+                    finalPathGeometry = reversePathGeometry;
+                    finalPoint = reversePoints;
+                }
+            }            
 
             if (!IsValidPathGeometry(finalPathGeometry))
             {
                 DrawLumenContour(LumenContours[FrameNumber], null, -1, true);
+
+                return false;
             }
             else
             {
@@ -655,6 +763,8 @@ namespace RaywattApp.Common.Annotation
 
                 ModifiedFrames.Add(FrameNumber);
             }
+
+            return true;
         }
 
         private PathGeometry GetPathGeometry(List<Point> points)
@@ -714,7 +824,7 @@ namespace RaywattApp.Common.Annotation
             return contourCnt == 1 ? true : false;
         }
 
-        private void DrawLumenContourPoint(Point point, int index)
+        private void DrawLumenContourPoint(Point point, int index, bool isEmptyLumen)
         {
             _log.Debug("DrawLumenContourPoint");
 
@@ -723,6 +833,13 @@ namespace RaywattApp.Common.Annotation
             rectangle.Style = (Style)this.Resources["StyleRectangle"];
             Canvas.SetLeft(rectangle, point.X - (Constants.AnnotationRectWidth / Zoom.ScaleX) / 2);
             Canvas.SetTop(rectangle, point.Y - (Constants.AnnotationRectHeight / Zoom.ScaleY) / 2);
+
+            if(isEmptyLumen && index == 0)
+            {
+                rectangle.MouseLeftButtonDown += Rectangle_MouseLeftButtonDown;
+                rectangle.MouseEnter += Polygon_MouseEnter;
+                rectangle.MouseLeave += Polygon_MouseLeave;
+            }
 
             this.canvas.Children.Add(rectangle);
         }
@@ -746,7 +863,7 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
-        private void DrawLumenContourCurve()
+        private void DrawLumenContourCurve(bool isClosed = false)
         {
             DeleteLumenContourCurve();
 
@@ -756,7 +873,7 @@ namespace RaywattApp.Common.Annotation
                 this.curPath.Name = constContourCurve;
                 this.curPath.Style = (Style)this.Resources["StylePath"];
             }                        
-            this.curPath.Data = CommonUtil.GetBezierCurve(this.newPoints, false);
+            this.curPath.Data = CommonUtil.GetBezierCurve(this.newPoints, isClosed);
 
             //Lumen Contour 보다 아래쪽에 배치되도록 Index 0에 추가(마우스 클릭 이벤트 처리 때문)
             this.canvas.Children.Insert(0, this.curPath);
@@ -803,6 +920,8 @@ namespace RaywattApp.Common.Annotation
             lumenContourHistory[FrameNumber].Pop();
             CopyHistoryToLumenContour(lumenContourHistory[FrameNumber].Peek());
             DrawLumenContour(LumenContours[FrameNumber], null, -1, true);
+
+            SetEmptyLumenIfNothing();
         }
 
         private void Reset()
@@ -819,6 +938,8 @@ namespace RaywattApp.Common.Annotation
 
             ModifiedFrames = ModifiedFrames.Distinct().ToList();
             ModifiedFrames.Remove(FrameNumber);
+
+            SetEmptyLumenIfNothing();
         }
 
         private void AutoDetect()
@@ -833,6 +954,19 @@ namespace RaywattApp.Common.Annotation
             DrawLumenContour(LumenContours[FrameNumber], null, -1, true);
 
             ModifiedFrames.Add(FrameNumber);
+
+            SetEmptyLumenIfNothing();
+        }
+
+        private void SetEmptyLumenIfNothing()
+        {
+            if (LumenContours[FrameNumber].Points.Count == 0)
+            {
+                this.newPoints.Clear();
+                this.canvas.Background = Brushes.Transparent;
+                this.isEmptyLumen = true;
+                this.isEmptyLumenClicked = false;
+            }
         }
 
         private LumenContourHistory CopyLumenContourToHistory(LumenContour lumenContour)
