@@ -232,9 +232,8 @@ namespace RaywattApp.Common.Annotation
                 if (point.Y > this.canvas.ActualHeight - rectangle.Height / 2 || point.Y < rectangle.Height / 2)
                     point.Y = rectPoint.Y;
 
-                Canvas.SetLeft(rectangle, point.X - rectangle.Width / 2);
-                Canvas.SetTop(rectangle, point.Y - rectangle.Height / 2);
-
+                Canvas.SetLeft(rectangle, point.X);
+                Canvas.SetTop(rectangle, point.Y);
 
                 rectPoint.X = point.X;
                 rectPoint.Y = point.Y;
@@ -480,8 +479,8 @@ namespace RaywattApp.Common.Annotation
                 rectangle.Style = (Style)this.Resources["StyleRectangle"];
                 rectangle.Stroke = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
                 rectangle.Name = constRectangle + "_" + group + "_" + i;
-                Canvas.SetLeft(rectangle, pointList[i].X - (Constants.AnnotationRectWidth / Zoom.ScaleX) / 2);
-                Canvas.SetTop(rectangle, pointList[i].Y - (Constants.AnnotationRectHeight / Zoom.ScaleY) / 2);
+                Canvas.SetLeft(rectangle, pointList[i].X);
+                Canvas.SetTop(rectangle, pointList[i].Y);
 
                 if (i == 0 && !isClosed)
                 {

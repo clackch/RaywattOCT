@@ -121,7 +121,7 @@ namespace RaywattApp.Services
                 SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name, physician_name
                 , accession_number, comment
                 , vessel, location, procedure
-                , num_of_frames, image, image_resolution
+                , num_of_frames, image, image_resolution, field_of_view
                 , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
                 , flush_media, pullback_trigger, colormap
                 , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
@@ -137,7 +137,7 @@ namespace RaywattApp.Services
                 SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name, physician_name
                 , accession_number, comment
                 , vessel, location, procedure
-                , num_of_frames, image, image_resolution
+                , num_of_frames, image, image_resolution, field_of_view
                 , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
                 , flush_media, pullback_trigger, colormap
                 , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
@@ -149,7 +149,7 @@ namespace RaywattApp.Services
 
             //SelectPatientCaseByList
             _query["SelectPatientCaseByList"] = @$"
-                SELECT T1.id, patient_id, physician_name, accession_number, comment, vessel, location, procedure, num_of_frames, image, image_resolution
+                SELECT T1.id, patient_id, physician_name, accession_number, comment, vessel, location, procedure, num_of_frames, image, image_resolution, field_of_view
                 , rv_schema.fn_patient(patient_id) patient_name
                 , rv_schema.fn_patient_gender(patient_id) gender, rv_schema.fn_patient_birth(patient_id) birthdate
                 , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
@@ -224,14 +224,14 @@ namespace RaywattApp.Services
             //InsertPatientCase
             _query["InsertPatientCase"] = @$"
                 INSERT INTO rv_schema.patient_case(id, patient_id, physician_name, accession_number
-                , comment, vessel, location, procedure, num_of_frames, image, image_resolution
+                , comment, vessel, location, procedure, num_of_frames, image, image_resolution, field_of_view
                 , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
                 , flush_media, pullback_trigger, colormap
                 , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
                 , brightness, contrast, section_proximal, section_distal
                 , create_date, update_date)
                 VALUES (@id, @patient_id, @physician_name, @accession_number
-                , @comment, @vessel, @location, @procedure, @num_of_frames, @image, @image_resolution
+                , @comment, @vessel, @location, @procedure, @num_of_frames, @image, @image_resolution, @field_of_view
                 , @pullback_type, @pullback_length, @angio_yn, @angio_co_registration, @indicator_degree
                 , @flush_media, @pullback_trigger, @colormap
                 , @calcium_threshold, @expansion_calculation, @expansion_threshold, @apposition_threshold
@@ -369,19 +369,19 @@ namespace RaywattApp.Services
             //UpsertPatientCase
             _query["UpsertPatientCase"] = @$"
                 INSERT INTO rv_schema.patient_case(id, patient_id, physician_name, accession_number, comment, vessel, location, procedure
-                , num_of_frames, image, image_resolution, pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
+                , num_of_frames, image, image_resolution, field_of_view, pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
                 , flush_media, pullback_trigger, colormap
                 , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
                 , brightness, contrast, section_proximal, section_distal, create_date, update_date)
                 VALUES (@id, @patient_id, @physician_name, @accession_number, @comment, @vessel, @location, @procedure
-                , @num_of_frames, @image, @image_resolution, @pullback_type, @pullback_length, @angio_yn, @angio_co_registration, @indicator_degree
+                , @num_of_frames, @image, @image_resolution, @field_of_view, @pullback_type, @pullback_length, @angio_yn, @angio_co_registration, @indicator_degree
                 , @flush_media, @pullback_trigger, @colormap
                 , @calcium_threshold, @expansion_calculation, @expansion_threshold, @apposition_threshold
                 , @brightness, @contrast, @section_proximal, @section_distal, @create_date, @update_date)
                 ON CONFLICT (id)
                 DO UPDATE
                 SET patient_id=@patient_id, physician_name=@physician_name, accession_number=@accession_number, comment=@comment
-                , vessel=@vessel, location=@location, procedure=@procedure, num_of_frames=@num_of_frames, image=@image, image_resolution=@image_resolution
+                , vessel=@vessel, location=@location, procedure=@procedure, num_of_frames=@num_of_frames, image=@image, image_resolution=@image_resolution, field_of_view=@field_of_view
                 , pullback_type=@pullback_type, pullback_length=@pullback_length, angio_yn=@angio_yn, angio_co_registration=@angio_co_registration
                 , indicator_degree=@indicator_degree
                 , flush_media=@flush_media, pullback_trigger=@pullback_trigger, colormap=@colormap

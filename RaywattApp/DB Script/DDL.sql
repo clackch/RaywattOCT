@@ -121,6 +121,7 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case
     num_of_frames integer,
     image character varying(200) COLLATE pg_catalog."default",
     image_resolution real,
+	field_of_view real,
 	angio_yn boolean,
 	angio_co_registration boolean,
 	indicator_degree real,

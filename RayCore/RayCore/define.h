@@ -43,6 +43,7 @@ enum class RayProperty {
 	ImageResolution,
 	ImageThreshold,
 	ImageRoi,
+	FieldOfView,
 	LongitudeImageWidth,
 	LongitudeImageHeight,
 	LongitudeImageChannels,

@@ -55,11 +55,12 @@ void CTIFFReader::finalize()
 bool CTIFFReader::readFrame(int nIndex)
 {
 	if (nIndex < 0 || nIndex >= m_nNumOfSamples) return false;
-
+	
 	if (m_pReadSamples[nIndex] == NULL) {
 		m_pReadSamples[nIndex] = new char[m_nDataSize * sizeof(unsigned int)];
 
-		TIFFSetDirectory(m_pTif, nIndex);
+		int revertedIndex = (m_nNumOfSamples - nIndex - 1);
+		TIFFSetDirectory(m_pTif, revertedIndex);
 		int result = TIFFReadRGBAImage(m_pTif, m_nWidth, m_nHeight, (uint32*)m_pReadSamples[nIndex]);
 	}
 

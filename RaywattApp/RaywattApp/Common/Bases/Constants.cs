@@ -358,7 +358,6 @@ namespace RaywattApp.Common.Bases
         public const string MeasureDisableErase = "DisableErase";  //Disable Erase
         public const string MeasureZoomIn = "ZoomIn";  //ZoomIn
         public const string MeasureZoomOut = "ZoomOut";  //ZoomOut
-        public const string MeasureZooming = "Zooming";
 
         //Draw Annotation
         public static Brush[] AnnotationBrushes = {
@@ -423,12 +422,13 @@ namespace RaywattApp.Common.Bases
         //Zoom
         public const double ZoomScaleDefault = CrossSectionSize / OCTImageSize;
         public const double ZoomScaleMax = ZoomScaleDefault * 2;
+        public const double ZoomAngioCsScaleDefault = CrossSectionAngio / OCTImageSize;
+        public const double ZoomAngioCsScaleMax = ZoomAngioCsScaleDefault * 2;
 
         //Recording
         public const int TransientTime = 100;
         public const int StartTime = 10;
-        public const double AngioWidth = 420;
-        public const double AngioHeight = 420;
+        public const double SmallCrossSectionSize = 318;        
 
         //AngioManager
         public const string ServerIP = "127.0.0.1";

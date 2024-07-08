@@ -108,6 +108,9 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
     case RayProperty::ImageRoi:
         octSystem.SetImageRoi(value);
         break;
+    case RayProperty::FieldOfView:
+        octSystem.SetFieldOfView(value);
+        break;
     case RayProperty::TestMode:
         octSystem.SetTestMode((bool) value);
         break;
@@ -170,6 +173,8 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return octSystem.GetImageThreshold();
     case RayProperty::ImageRoi:
         return octSystem.GetImageRoi();
+    case RayProperty::FieldOfView:
+        return octSystem.GetFieldOfView();
     case RayProperty::TestMode:
         return (double) octSystem.IsTestMode();
     default:

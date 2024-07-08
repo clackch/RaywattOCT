@@ -88,9 +88,6 @@ namespace RaywattApp.ViewModels
         private double _maxThickness;
 
         [ObservableProperty]
-        private double _prevScale;
-
-        [ObservableProperty]
         private Indicator _indicatorCrossSection;
 
         [ObservableProperty]
@@ -165,7 +162,7 @@ namespace RaywattApp.ViewModels
         private List<LumenGuidewire> _lumenGuidewires;
 
         [ObservableProperty]
-        private Zoom _zoomAngio = new Zoom(Constants.CrossSectionAngio / Constants.OCTImageSize);
+        private Zoom _zoomAngio = new Zoom(Constants.CrossSectionAngio);
 
         private double _lModeIndicatorX;
         public double LModeIndicatorX
@@ -196,6 +193,19 @@ namespace RaywattApp.ViewModels
                 _contrast = value;
                 OnPropertyChanged(nameof(Contrast));
                 RaySetProperty(Property.Contrast, value);
+                MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
+            }
+        }
+
+        private double _fieldOfView;
+        public double FieldOfView
+        {
+            get { return _fieldOfView; }
+            set 
+            { 
+                _fieldOfView = value; 
+                OnPropertyChanged(nameof(FieldOfView)); 
+                RaySetProperty(Property.FieldOfView, value);
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
             }
         }
@@ -242,6 +252,30 @@ namespace RaywattApp.ViewModels
             get { return this._zoomOutCommand ?? (this._zoomOutCommand = new RelayCommand(ZoomOut)); }
         }
 
+        private ICommand _zoomInAngioCsCommand;
+        public ICommand ZoomInAngioCsCommand
+        {
+            get { return this._zoomInAngioCsCommand ?? (this._zoomInAngioCsCommand = new RelayCommand(ZoomInAngioCs)); }
+        }
+
+        private ICommand _zoomOutAngioCsCommand;
+        public ICommand ZoomOutAngioCsCommand
+        {
+            get { return this._zoomOutAngioCsCommand ?? (this._zoomOutAngioCsCommand = new RelayCommand(ZoomOutAngioCs)); }
+        }
+
+        private ICommand _zoomInAngioCommand;
+        public ICommand ZoomInAngioCommand
+        {
+            get { return this._zoomInAngioCommand ?? (this._zoomInAngioCommand = new RelayCommand(ZoomInAngio)); }
+        }
+
+        private ICommand _zoomOutAngioCommand;
+        public ICommand ZoomOutAngioCommand
+        {
+            get { return this._zoomOutAngioCommand ?? (this._zoomOutAngioCommand = new RelayCommand(ZoomOutAngio)); }
+        }
+
         private ICommand _adjustResetCommand;
         public ICommand AdjustResetCommand
         {
@@ -281,19 +315,19 @@ namespace RaywattApp.ViewModels
         private ICommand _manipulationStartingCommand;
         public ICommand ManipulationStartingCommand
         {
-            get { return this._manipulationStartingCommand ?? (this._manipulationStartingCommand = new RelayCommand<object>(Window_ManipulationStarting)); }
+            get { return this._manipulationStartingCommand ?? (this._manipulationStartingCommand = new RelayCommand<ManipulationStartingEventArgs>(Window_ManipulationStarting)); }
         }
 
         private ICommand _manipulationDeltaCommand;
         public ICommand ManipulationDeltaCommand
         {
-            get { return this._manipulationDeltaCommand ?? (this._manipulationDeltaCommand = new RelayCommand<object>(Window_ManipulationDelta)); }
+            get { return this._manipulationDeltaCommand ?? (this._manipulationDeltaCommand = new RelayCommand<ManipulationDeltaEventArgs>(Window_ManipulationDelta)); }
         }
 
         private ICommand _manipulationCompletedCommand;
         public ICommand ManipulationCompletedCommand
         {
-            get { return this._manipulationCompletedCommand ?? (this._manipulationCompletedCommand = new RelayCommand<object>(Window_ManipulationCompleted)); }
+            get { return this._manipulationCompletedCommand ?? (this._manipulationCompletedCommand = new RelayCommand<ManipulationCompletedEventArgs>(Window_ManipulationCompleted)); }
         }
 
         public ReviewViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager) : base(sqlManager, dialogService)
@@ -365,8 +399,9 @@ namespace RaywattApp.ViewModels
                 Degree = PatientCase.IndicatorDegree;
                 Brightness = PatientCase.Brightness;
                 Contrast = PatientCase.Contrast;
-                CrossSectionScale = (1 / PatientCase.ImageResolution) * (Constants.CrossSectionSize / Constants.OCTImageSize);
-                CrossSectionAngioScale = (1 / PatientCase.ImageResolution) * (Constants.CrossSectionAngio / Constants.OCTImageSize);
+                FieldOfView = PatientCase.FieldOfView;
+                CrossSectionScale = (1 / PatientCase.ImageResolution) * (Constants.ZoomScaleDefault);
+                CrossSectionAngioScale = (1 / PatientCase.ImageResolution) * (Constants.ZoomAngioCsScaleDefault);
                 
                 SetAnnotation();
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
@@ -514,7 +549,16 @@ namespace RaywattApp.ViewModels
                             LumenGuidewires.Add(lumenGuidewire);
                         }
                     }
-                    
+
+                    //Test - Lumen Detection
+                    if(CommonUtil.IsTestMode(DeviceStatus.TestMode, "ML"))
+                    {
+                        threadMakeLumenProfile.Join();
+                        InitializeLumenData();
+                        DeviceStatus.IsLumenSaved = false;
+                        RayStartLumenDetection();
+                        this.isLumenContourSave = true;
+                    }
                 }
                 else//From Recording
                 {
@@ -545,12 +589,6 @@ namespace RaywattApp.ViewModels
                 Measurements.Add(measurement);
             }
             Measurements = Measurements.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
-
-            //Test
-            //InitializeLumenData();
-            //DeviceStatus.IsLumenSaved = false;
-            //RayStartLumenDetection();
-            //this.isLumenContourSave = true;
         }
 
         private void AngioImageProcessing()
@@ -707,7 +745,7 @@ namespace RaywattApp.ViewModels
                 for (int i = 0; i < sbSize; i++)
                 {
                     int height = RayGetNumOfSidebranchContourPoints(frameInfo, i);
-                    if (height > 0)
+                    if (height > 2)
                     {
                         IntPtr contour = RayGetSidebranchContour(frameInfo, i);
                         if (contour == IntPtr.Zero) return;
@@ -880,7 +918,7 @@ namespace RaywattApp.ViewModels
             ReviewStatus.IsLumenProfile = isLumenProfile;
 
             if (ReviewStatus.IsAngioOn)
-                IndicatorCrossSectionAngio.IsVisible = isLumenProfile ? Visibility.Collapsed : Visibility.Visible;
+                IndicatorCrossSectionAngio.IsVisible = (!isLumenProfile && ReviewStatus.ZoomAngioCs.ScaleX == (Constants.ZoomAngioCsScaleDefault)) ? Visibility.Visible : Visibility.Collapsed;
             else
                 IndicatorCrossSection.IsVisible = (!isLumenProfile && ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault) ? Visibility.Visible : Visibility.Collapsed;
         }
@@ -892,11 +930,20 @@ namespace RaywattApp.ViewModels
             if (ReviewStatus.IsAngioOn)
             {
                 ReviewStatus.IsMeasurementOn = false;
-                ReviewStatus.IsCalciumOn = true;
-                if (ReviewStatus.IsLumenProfile)
-                    IndicatorCrossSectionAngio.IsVisible = Visibility.Collapsed;
+
+                if (ReviewStatus.ZoomAngioCs.ScaleX == (Constants.ZoomAngioCsScaleDefault))
+                {
+                    ReviewStatus.IsCalciumOn = true;
+                    if (ReviewStatus.IsLumenProfile)
+                        IndicatorCrossSectionAngio.IsVisible = Visibility.Collapsed;
+                    else
+                        IndicatorCrossSectionAngio.IsVisible = Visibility.Visible;
+                }
                 else
-                    IndicatorCrossSectionAngio.IsVisible = Visibility.Visible;
+                {
+                    ReviewStatus.IsCalciumOn = false;
+                    IndicatorCrossSectionAngio.IsVisible = Visibility.Collapsed;
+                }
 
                 MenuExpand(false);
             }
@@ -941,24 +988,20 @@ namespace RaywattApp.ViewModels
             ReviewStatus.IsMeasurementOn = !ReviewStatus.IsMeasurementOn;
         }
 
-        public void Window_ManipulationStarting(object parameter)
+        public void Window_ManipulationStarting(ManipulationStartingEventArgs e)
         {
             _log.Debug("Manipulation Starting");
-            ManipulationStartingEventArgs e = (ManipulationStartingEventArgs)parameter;
-            e.ManipulationContainer = Application.Current.MainWindow;
-            PrevScale = ReviewStatus.Zoom.ScaleX;
-            MeasurementCommand = Constants.MeasureZooming;
             e.Handled = true;
         }
 
-        public void Window_ManipulationDelta(object parameter)
+        public void Window_ManipulationDelta(ManipulationDeltaEventArgs e)
         {
-            ManipulationDeltaEventArgs e = (ManipulationDeltaEventArgs)parameter;
-            int touchPoints = e.Manipulators.Count();
+            System.Windows.Controls.Grid touchGrid = e.Source as System.Windows.Controls.Grid;
+            string touchName = touchGrid.Name;
 
-            if (!ReviewStatus.IsMeasurementOn || (touchPoints > 1 && MeasurementCommand == Constants.MeasureZooming))
+            if ("TouchCs".Equals(touchName))
             {
-                ReviewStatus.Zoom.Window_ManipulationDelta(parameter);
+                ReviewStatus.Zoom.Window_ManipulationDelta(e);
 
                 if (ReviewStatus.Zoom.ScaleX > Constants.ZoomScaleDefault)
                 {
@@ -976,16 +1019,35 @@ namespace RaywattApp.ViewModels
                         IndicatorCrossSection.IsVisible = Visibility.Visible;
                 }
             }
+            else if ("TouchAngio".Equals(touchName))
+            {
+                ReviewStatus.ZoomAngio.Window_ManipulationDelta(e);
+            }
+            else if ("TouchAngioCs".Equals(touchName))
+            {
+                ReviewStatus.ZoomAngioCs.Window_ManipulationDelta(e);
+
+                if (ReviewStatus.ZoomAngioCs.ScaleX > Constants.ZoomAngioCsScaleDefault)
+                {
+                    IndicatorCrossSectionAngio.IsVisible = Visibility.Collapsed;
+                    ReviewStatus.IsCalciumOnAngioCs = false;
+                    ReviewStatus.IsSheathOnAngioCs = false;
+                }
+
+                if (ReviewStatus.ZoomAngioCs.ScaleX == Constants.ZoomAngioCsScaleDefault)
+                {
+                    ReviewStatus.IsCalciumOnAngioCs = true;
+                    ReviewStatus.IsSheathOnAngioCs = true;
+
+                    if (!ReviewStatus.IsLumenProfile)
+                        IndicatorCrossSectionAngio.IsVisible = Visibility.Visible;
+                }
+            }
         }
 
-        public void Window_ManipulationCompleted(object parameter)
+        public void Window_ManipulationCompleted(ManipulationCompletedEventArgs e)
         {
             _log.Debug("Manipulation Completed");
-            ManipulationCompletedEventArgs e = (ManipulationCompletedEventArgs)parameter;
-
-            if (ReviewStatus.IsMeasurementOn)
-                MeasurementCommand = (PrevScale < ReviewStatus.Zoom.ScaleX) ? Constants.MeasureZoomIn : Constants.MeasureZoomOut;
-
             e.Handled = true;
         }
 
@@ -1020,6 +1082,48 @@ namespace RaywattApp.ViewModels
             }
         }
 
+        private void ZoomInAngioCs()
+        {
+            _log.Debug("ZoomInAngioCs");
+
+            if (ReviewStatus.ZoomAngioCs.ZoomIn())
+            {
+                IndicatorCrossSectionAngio.IsVisible = Visibility.Collapsed;
+                ReviewStatus.IsCalciumOnAngioCs = false;
+                ReviewStatus.IsSheathOnAngioCs = false;
+            }
+        }
+
+        private void ZoomOutAngioCs()
+        {
+            _log.Debug("ZoomOutAngioCs");
+
+            ReviewStatus.ZoomAngioCs.ZoomOut();
+
+            if(ReviewStatus.ZoomAngioCs.ScaleX == (Constants.ZoomAngioCsScaleDefault))
+            {
+                ReviewStatus.IsCalciumOnAngioCs = true;
+                ReviewStatus.IsSheathOnAngioCs = true;
+
+                if (!ReviewStatus.IsLumenProfile)
+                    IndicatorCrossSectionAngio.IsVisible = Visibility.Visible;
+            }
+        }
+
+        private void ZoomInAngio()
+        {
+            _log.Debug("ZoomInAngio");
+
+            ReviewStatus.ZoomAngio.ZoomIn();
+        }
+
+        private void ZoomOutAngio()
+        {
+            _log.Debug("ZoomOutAngio");
+
+            ReviewStatus.ZoomAngio.ZoomOut();
+        }
+
         private void AdjustReset()
         {
             _log.Debug("AdjustReset");
@@ -1031,6 +1135,7 @@ namespace RaywattApp.ViewModels
             {
                 Brightness = int.Parse(presents.FirstOrDefault(x => x.Key == "brightness").Value);
                 Contrast = int.Parse(presents.FirstOrDefault(x => x.Key == "contrast").Value);
+                FieldOfView = double.Parse(presents.FirstOrDefault(x => x.Key == "FoV").Value);
             }
         }
 
@@ -1104,6 +1209,8 @@ namespace RaywattApp.ViewModels
             sqlParameters["brightness"] = PatientCase.Brightness;
             PatientCase.Contrast = Contrast;
             sqlParameters["contrast"] = PatientCase.Contrast;
+            PatientCase.FieldOfView = FieldOfView;
+            sqlParameters["field_of_view"] = PatientCase.FieldOfView;
             PatientCase.SectionProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
             sqlParameters["section_proximal"] = PatientCase.SectionProximal;
             PatientCase.SectionDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
@@ -1163,13 +1270,13 @@ namespace RaywattApp.ViewModels
 
             if (CommonUtil.IsPreCase(PatientCase.Procedure))
             {
-                percentAreaStenosis = Section.MlaValue.DValue / Section.MeanArea;
+                percentAreaStenosis = (1 - Section.MlaValue.DValue / Section.RefArea) * 100;
                 minimalLumenArea = Section.MlaValue.DValue;
                 minimalLumenFrameNumber = Section.MlaValue.NValue;
             }
             else
             {
-                percentAreaStenosis = Section.MsaValue.DValue / Section.MeanArea;
+                percentAreaStenosis = (1 - Section.MsaValue.DValue / Section.RefArea) * 100;
                 minimalLumenArea = Section.MsaValue.DValue;
                 minimalLumenFrameNumber = Section.MsaValue.NValue;
             }
@@ -1177,7 +1284,7 @@ namespace RaywattApp.ViewModels
             double scaleArea = PatientCase.ImageResolution * PatientCase.ImageResolution;
 
             PatientCase.FfrFeature.MinimalLumenFrameNumber = minimalLumenFrameNumber;
-            PatientCase.FfrFeature.PercentAreaStenosis = Math.Round(percentAreaStenosis * 100, 1);
+            PatientCase.FfrFeature.PercentAreaStenosis = Math.Round(percentAreaStenosis, 1);
             PatientCase.FfrFeature.MinimalLumenArea = Math.Round(minimalLumenArea * scaleArea, 2);
             PatientCase.FfrFeature.DistalLumenArea = Math.Round(Section.Distal.DValue * scaleArea, 2);
             PatientCase.FfrFeature.LesionLength = Math.Round(Section.LesionLength.DValue, 1);

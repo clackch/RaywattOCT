@@ -88,6 +88,9 @@ namespace RaywattApp.Models
         private double imageResolution;
 
         [ObservableProperty]
+        private double fieldOfView;
+
+        [ObservableProperty]
         private bool isAnonymize;
 
         [ObservableProperty]
