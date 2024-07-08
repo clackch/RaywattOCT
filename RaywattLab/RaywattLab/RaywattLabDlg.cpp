@@ -584,7 +584,7 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	setLogger(_T(".\\"));
 
 	CLookUpTable& lut = CLookUpTable::GetInstance();
-	int result = lut.Load("LUT.csv");
+	int result = lut.Load("LUT_abbott.csv");
 
 	initToggleButton(m_btnLoadData, IDC_BUTTON_LOAD_SELECTED_DATA, _T("Load"), _T("Unload"));
 	initToggleButton(m_btnPlayData, IDC_BUTTON_PLAY_LOADED_DATA, _T("Play"), _T("Pause"));
@@ -627,10 +627,10 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	int lowLevel = AfxGetApp()->GetProfileInt(_T("RECENT_SETTING"), _T("LOWLEVEL"), 50);
 	int highLevel = AfxGetApp()->GetProfileInt(_T("RECENT_SETTING"), _T("HIGHLEVEL"), 51);
 
-	m_sliderLowLevel.SetRange(50, 199);
+	m_sliderLowLevel.SetRange(50, 299);
 	m_sliderLowLevel.SetPos(lowLevel);
 
-	m_sliderHighLevel.SetRange(51, 200);
+	m_sliderHighLevel.SetRange(51, 300);
 	m_sliderHighLevel.SetPos(highLevel);
 
 	int goodClockStart = 0;
@@ -1009,6 +1009,9 @@ void CRaywattLabDlg::OnBnClickedButtonSaveData()
 		updatePatientDataList();
 	}
 	else {
+		IImaging::Setting setting = m_pImagingRealtime->GetSetting();
+		int nBufferSize = setting.nAScan * setting.nBScan;
+		m_pDataWriter->Initialize(nBufferSize * sizeof(unsigned short));
 		result = m_pDataWriter->StartRecording();
 		if (result != NOERROR) {
 			AfxMessageBox(_T("Failed to save raw file"));
@@ -1120,6 +1123,7 @@ void CRaywattLabDlg::OnBnClickedButtonSavePng()
 	bool isCircle = (m_radioImageShape == 0);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
 		pImaging->Process(pReader->GetSample(i));
+		pImaging->PostProcess(pImaging->GetProcessedImage());
 
 		CStringA strPngDirectory(strPngDirectoryW);
 		char strPngName[MAX_PATH];
