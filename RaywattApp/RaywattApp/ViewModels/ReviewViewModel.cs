@@ -29,11 +29,6 @@ using System.IO;
 using System.Windows.Media;
 using RaywattApp.Common.Angio;
 using System.Xml;
-using Microsoft.VisualBasic.FileIO;
-using System.Threading.Channels;
-using System.Diagnostics;
-using System.Security.Cryptography.X509Certificates;
-using System.Security.Cryptography;
 
 namespace RaywattApp.ViewModels
 {
