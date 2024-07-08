@@ -18,6 +18,7 @@ public:
 	static CLookUpTable& GetInstance();
 	int Load(const char* strLUTPath);
 	void Apply(cv::Mat& image, uint nIdxLUT);
+	void Revert(cv::Mat image, uint nIdxLUT, cv::Mat& image1ch);
 	void SetCurrentColormap(int colomapIndex);
 	int GetCurrentColormap();
 };
