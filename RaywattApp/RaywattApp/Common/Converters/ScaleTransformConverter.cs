@@ -1,26 +1,20 @@
-﻿using RaywattApp.Common.Bases;
-using System;
+﻿using System;
 using System.Globalization;
 using System.Windows.Data;
 
 namespace RaywattApp.Common.Converters
 {
-    internal class CrossSectionScaleConverter : IValueConverter
+    internal class ScaleTransformConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null)
+            if (value == null || parameter == null)
                 return Binding.DoNothing;
 
-            double size = Constants.CrossSectionSize;
+            double scale = (double)value;
+            double diff = Double.Parse(parameter.ToString()) / scale / 2 * -1;
 
-            if (parameter != null)
-                size = (double)parameter;
-
-            double originValue = (double)value;
-            double scale = Constants.OCTImageSize / size;
-
-            return (originValue * scale);
+            return diff;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

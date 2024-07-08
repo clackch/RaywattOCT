@@ -418,19 +418,15 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 
 	int imgSize = 1024;
 	cv::Point center(imgSize / 2, imgSize / 2);
-
-	//initial lumen
-	cv::Mat prevLumen = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);	
-	cv::circle(prevLumen, center, imgSize / 5, cv::Scalar(255));
-	std::vector<std::vector<cv::Point>> vPrevLumens;
-	cv::findContours(prevLumen, vPrevLumens, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-	std::vector<cv::Point> vPrevLumen = vPrevLumens.at(0);
 	
-	CLookUpTable& lut = CLookUpTable::GetInstance();
+	//empty lumen
+	std::vector<cv::Point> vEmptyLumen;
 
 	//center point mask
 	cv::Mat centerMask = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
 	cv::circle(centerMask, center, 1, cv::Scalar(255), cv::FILLED);
+	
+	CLookUpTable& lut = CLookUpTable::GetInstance();
 
 	PLOGI.printf("Session #%d lumen detection start - %d frames", pSession->m_nSession, nNumOfSamples);
 	vLumen.clear();
@@ -458,8 +454,8 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 
 		if (vContours.size() == 0) {
 			vContours.clear();
-			vContours.push_back(vPrevLumen);
-			pImaging->SetLumenContourOffset(vPrevLumen);
+			vContours.push_back(vEmptyLumen);
+			pImaging->SetLumenContourOffset(vEmptyLumen);
 		}
 		else {
 			std::vector<cv::Point> validContour;
@@ -498,7 +494,6 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 				vContours.clear();
 				if (isCompletelyContained) {
 					vContours.push_back(validContour);
-					vPrevLumen = validContour;
 					pImaging->SetLumenContourOffset(validContour);
 				}
 				else {
@@ -506,8 +501,8 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 					cv::findContours(andResult, vCircle, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
 					if (vCircle.size() == 0) {
-						vContours.push_back(vPrevLumen);
-						pImaging->SetLumenContourOffset(vPrevLumen);
+						vContours.push_back(vEmptyLumen);
+						pImaging->SetLumenContourOffset(vEmptyLumen);
 					}
 					else {
 						//find contour which contains center point
@@ -528,20 +523,19 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 
 						if (idx != -1) {
 							vContours.push_back(validContour);
-							vPrevLumen = validContour;
 							pImaging->SetLumenContourOffset(validContour);
 						}
 						else {
-							vContours.push_back(vPrevLumen);
-							pImaging->SetLumenContourOffset(vPrevLumen);
+							vContours.push_back(vEmptyLumen);
+							pImaging->SetLumenContourOffset(vEmptyLumen);
 						}
 					}
 				}
 			}
 			else {
 				vContours.clear();
-				vContours.push_back(vPrevLumen);
-				pImaging->SetLumenContourOffset(vPrevLumen);
+				vContours.push_back(vEmptyLumen);
+				pImaging->SetLumenContourOffset(vEmptyLumen);
 			}
 		}
 

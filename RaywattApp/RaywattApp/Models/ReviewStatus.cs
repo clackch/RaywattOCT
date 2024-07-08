@@ -32,6 +32,12 @@ namespace RaywattApp.Models
         private bool _isSheathOn = true;
 
         [ObservableProperty]
+        private bool _isCalciumOnAngioCs = true;
+
+        [ObservableProperty]
+        private bool _isSheathOnAngioCs = true;
+
+        [ObservableProperty]
         private bool _isPlay = true;
 
         [ObservableProperty]
@@ -39,6 +45,12 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private Zoom _zoom = new Zoom();
+
+        [ObservableProperty]
+        private Zoom _zoomAngioCs = new Zoom(Constants.CrossSectionAngio);
+
+        [ObservableProperty]
+        private Zoom _zoomAngio = new Zoom(Constants.AngioSize);
 
         [ObservableProperty]
         private int _angioFrameNumber = -1;

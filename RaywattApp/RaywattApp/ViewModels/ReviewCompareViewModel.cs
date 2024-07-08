@@ -92,7 +92,7 @@ namespace RaywattApp.ViewModels
         private int _frameNumberCompare = -1;
 
         [ObservableProperty]
-        private Zoom _zoom = new Zoom(Constants.CrossSectionCompareSize / Constants.OCTImageSize);
+        private Zoom _zoom = new Zoom(Constants.CrossSectionCompareSize);
 
         [ObservableProperty]
         private BitmapSource _lumenProfileImageExtraCompare;

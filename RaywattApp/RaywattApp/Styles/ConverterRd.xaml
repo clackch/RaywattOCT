@@ -89,11 +89,17 @@
     <!-- Scale Converter -->
     <converters:ScaleConverter x:Key="ScaleConverter" />
 
+    <!-- Scale Transform Converter -->
+    <converters:ScaleTransformConverter x:Key="ScaleTransformConverter" />
+
     <!-- Unit Converter -->
     <converters:UnitConverter x:Key="UnitConverter" />
 
     <!-- CrossSection Scale Converter -->
     <converters:CrossSectionScaleConverter x:Key="CrossSectionScaleConverter" />
+
+    <!-- CrossSection Scale MultiConverter -->
+    <converters:CrossSectionScaleMultiConverter x:Key="CrossSectionScaleMultiConverter" />
 
     <!-- Procedure Visibility Converter -->
     <converters:ProcedureVisibilityConverter x:Key="ProcedureVisibilityConverter" />

@@ -121,14 +121,21 @@ namespace RaywattApp.Models
             double meanArea = 0;
             double meanDiameter = 0;
 
+            int areaZeroCnt = 0;
+            int diameterZeroCnt = 0;
+
             foreach(LumenContour contour in temp)
             {
                 meanArea += contour.Area;
+                if (contour.Area == 0)
+                    areaZeroCnt++;
                 meanDiameter += contour.MeanDiameter;
+                if(contour.MeanDiameter == 0)
+                    diameterZeroCnt++;
             }
 
-            MeanArea = meanArea / temp.Count;
-            MeanDiameter = meanDiameter / temp.Count;
+            MeanArea = meanArea / (temp.Count - areaZeroCnt);
+            MeanDiameter = meanDiameter / (temp.Count - diameterZeroCnt);
 
             RefArea = (lumenContours[frameProximal].Area + lumenContours[frameDistal].Area) / 2;
             RefDiameter = (lumenContours[frameProximal].MeanDiameter + lumenContours[frameDistal].MeanDiameter) / 2;
@@ -166,10 +173,10 @@ namespace RaywattApp.Models
             CalcLesionLength(frameProximal, frameDistal, totalFrame, longitudeWidth, pullbackLength);
 
             int count = frameDistal - frameProximal + 1;
-            double mla = lumenContours.GetRange(frameProximal, count).Min(x => x.Area);
+            double mla = lumenContours.GetRange(frameProximal, count).Where(x => x.Area > 0).Min(x => x.Area);
             int mlaIdx = lumenContours.GetRange(frameProximal, count).FindIndex(x => x.Area == mla);
 
-            double mld = lumenContours.GetRange(frameProximal, count).Min(x => x.MeanDiameter);
+            double mld = lumenContours.GetRange(frameProximal, count).Where(x => x.MeanDiameter > 0).Min(x => x.MeanDiameter);
             int mldIdx = lumenContours.GetRange(frameProximal, count).FindIndex(x => x.MeanDiameter == mld);
 
             double areaScaleMM2 = imageResolution * imageResolution;

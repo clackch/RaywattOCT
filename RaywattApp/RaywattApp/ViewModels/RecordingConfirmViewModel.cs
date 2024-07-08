@@ -139,6 +139,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["num_of_frames"] = PatientCase.NumOfFrames;
             sqlParameters["image"] = PatientCase.Image;
             sqlParameters["image_resolution"] = PatientCase.ImageResolution;
+            sqlParameters["field_of_view"] = PatientCase.FieldOfView;
             sqlParameters["pullback_type"] = PatientCase.PullbackType;
             sqlParameters["pullback_length"] = PatientCase.PullbackLength;
             sqlParameters["angio_yn"] = PatientCase.AngioYn;

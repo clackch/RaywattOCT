@@ -153,6 +153,7 @@ namespace RaywattApp.ViewModels
                     {
                         PatientCase.Brightness = int.Parse(presents.FirstOrDefault(x => x.Key == "brightness").Value);
                         PatientCase.Contrast = int.Parse(presents.FirstOrDefault(x => x.Key == "contrast").Value);
+                        PatientCase.FieldOfView = double.Parse(presents.FirstOrDefault(x => x.Key == "FoV").Value);
                     }
                     CommonUtil.SetColormap(PatientCase.Colormap);
 
