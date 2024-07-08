@@ -28,9 +28,12 @@ void CTIFFImaging::Initialize()
 void CTIFFImaging::Process(char* fringes)
 {
 	m_end = std::chrono::system_clock::now();
+	CLookUpTable& lut = CLookUpTable::GetInstance();
 	cv::Mat imgTIFF(cv::Size(m_setting.nBScan, m_setting.nAScan), CV_8UC4, fringes);
+	cv::Mat imgBGR;
 
-	cv::cvtColor(imgTIFF, imageOrigin, cv::COLOR_BGRA2GRAY);
+	cv::cvtColor(imgTIFF, imgBGR, cv::COLOR_BGRA2RGB);
+	lut.Revert(imgBGR, 2, imageOrigin);
 	cv::flip(imageOrigin, imageOrigin, 0);
 
 	// remove indicator

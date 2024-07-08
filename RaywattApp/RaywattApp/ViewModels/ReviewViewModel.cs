@@ -34,6 +34,9 @@ namespace RaywattApp.ViewModels
 {
     public partial class ReviewViewModel : ReviewViewModelBase
     {
+        [DllImport("HessianMatrixDll.dll", CallingConvention = CallingConvention.Cdecl)]
+        static extern void useFrangi2d(IntPtr imageData, out IntPtr outputData, int width, int height, int channels, out int outwidth, out int outheight, out int outchannels);
+
         private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewViewModel));
 
         private readonly AngioManager _angioManager;
@@ -1867,6 +1870,7 @@ namespace RaywattApp.ViewModels
             AngioTrackPoints = PatientCase.AngioFrame.CoRegistration;
         }
 
+
         private void ImageProcessing(List<Mat> frames)
         {
             Mat prevEqualImg = null, currEqualImg;
@@ -1887,36 +1891,97 @@ namespace RaywattApp.ViewModels
                     CalculateMotionVector(prevEqualImg, currEqualImg); // Constants.AngioSize Square 
                 }
                 prevEqualImg = equalizedImage.Clone();
+                Mat scale = new Mat();
+                Mat angles = new Mat();
+                int imgX = frame.Width - 1;
+                int imgY = frame.Height - 1;
+                int imgMaxX = 0;
+                int imgMaxY = 0;
 
-                // thresholdImage 초기화
-                Mat thresholdImage = new Mat(equalizedImage.Size(), equalizedImage.Type(), Scalar.All(255));
-
-                // 이진화 (픽셀 값이 100 미만인 경우 -> 255, 그 외에는 그대로 둠)
-                for (int y = 0; y < equalizedImage.Rows; y++)
+                for (int y = 0; y < frame.Rows; y++)
                 {
-                    for (int x = 0; x < equalizedImage.Cols; x++)
+                    for (int x = 0; x < frame.Cols; x++)
                     {
-                        byte pixelValue = equalizedImage.At<byte>(y, x);
-                        if (pixelValue > 0)
+                        byte pixelValue = frame.At<byte>(y, x);
+
+                        if (pixelValue != 0)
                         {
-                            thresholdImage.Set<byte>(y, x, pixelValue < 100 ? (byte)255 : (byte)0);
+                            if(x<imgX)
+                            {
+                                imgX = x;
+                            }
+                            if (x>imgMaxX)
+                            {
+                                imgMaxX = x;
+                            }
+                            if(y<imgY)
+                            {
+                                imgY = y;
+                            }
+                            if (y > imgMaxY)
+                            {
+                                imgMaxY = y;
+                            }
                         }
                     }
                 }
+                Mat noBlackSpace = new Mat(imgMaxY - imgY + 1, imgMaxX - imgX + 1, frame.Type());
+                for (int y = imgY; y <= imgMaxY; y++)
+                {
+                    for (int x = imgX; x <= imgMaxX; x++)
+                    {
+                        byte pixelValue = frame.At<byte>(y, x);
+                        noBlackSpace.Set<byte>(y-imgY, x-imgX, pixelValue);
+                    }
+                }
+                IntPtr inputImage = noBlackSpace.Data;
+                //string imgName = "blackImg" + frameNum.ToString() + ".jpg";
+                //Cv2.ImWrite(imgName, noBlackSpace);
+
+                IntPtr imagePointer;
+                int widthIn = imgMaxX - imgX + 1;
+                int heightIn = imgMaxY - imgY + 1;
+                int channelsIn = frame.Channels();
+                int widthOut, heightOut, channelsOut;
+
+                useFrangi2d(inputImage, out imagePointer, widthIn, heightIn, channelsIn, out widthOut, out heightOut, out channelsOut);
+                Mat frangiImage = new Mat(heightOut, widthOut, channelsOut == 1 ? MatType.CV_8UC1 : MatType.CV_8UC3, imagePointer);
+
+                Mat thresholdImage = new Mat();
+                Cv2.Threshold(frangiImage, thresholdImage, 0.03, 255, ThresholdTypes.Binary);
 
                 // 이미지 변형(분할 : Segmentation) 처리
-                Mat morphedImage = new Mat();
+                /*Mat morphedImage = new Mat();
                 var kernel = Cv2.GetStructuringElement(MorphShapes.Ellipse, new OpenCvSharp.Size(3, 3));
                 Cv2.MorphologyEx(thresholdImage, morphedImage, MorphTypes.Open, kernel, iterations: 2);
-
+*/
                 // 변형 처리 반복 -> 스켈레톤(골격화)
                 Mat skeleton = new Mat();
-                skeleton = Skeletonize(morphedImage);
+                skeleton = Skeletonize(thresholdImage);
+
+
+                int borderSize = 30;
+                OpenCvSharp.Rect rect = new OpenCvSharp.Rect(borderSize, borderSize, skeleton.Cols -2 * borderSize, skeleton.Rows - 2 * borderSize);
+                Mat innerImage = skeleton.SubMat(rect).Clone();
+                Mat borderedImage = new Mat();
+                Cv2.CopyMakeBorder(innerImage, borderedImage, borderSize, borderSize, borderSize, borderSize, BorderTypes.Constant, Scalar.All(0));
+                
+                Mat processedImg = frame.Clone();
+                for (int y = 0; y < borderedImage.Rows; y++)
+                {
+                    for (int x = 0; x < borderedImage.Cols; x++)
+                    {
+                        byte pixelValue = borderedImage.At<byte>(y, x);
+                        processedImg.Set<byte>(y+imgY, x+imgX, pixelValue);
+                    }
+                }
 
                 byte[] imageData = new byte[frame.Rows * frame.Cols * frame.ElemSize()];
-                Marshal.Copy(skeleton.Data, imageData, 0, imageData.Length);
-
+                Marshal.Copy(processedImg.Data, imageData, 0, imageData.Length);
+                //string imgName = "skeletonImg" + frameNum.ToString()+".jpg";
+                //Cv2.ImWrite(imgName, processedImg);
                 PatientCase.AngioFrame.DijkstraHeap.Add(new DijkstraHeap(imageData, frame.Rows, frame.Cols));
+                //frameNum += 1;
             }
         }
         private void CalculateMotionVector(Mat prevFrame, Mat nextFrame)
@@ -1935,6 +2000,22 @@ namespace RaywattApp.ViewModels
             //flags: 0, cv2.OPTFLOW_USE_INITIAL_FLOW, cv2.OPTFLOW_FARNEBACK_GAUSSIAN.
 
             PatientCase.AngioFrame.MotionVector.Add(flow);
+            //Mat flowImage = DrawOpticalFlowArrows(prevFrame, flow);
+            //Cv2.ImWrite("optical_flow" + PatientCase.AngioFrame.MotionVector.Count.ToString() + ".png", flowImage);
+        }
+
+        private static Mat DrawOpticalFlowArrows(Mat image, Mat flow, int step = 16)
+        {
+            Mat flowImage = image.CvtColor(ColorConversionCodes.GRAY2BGR);
+            for (int y = 0; y < image.Rows; y += step)
+            {
+                for (int x = 0; x < image.Cols; x += step)
+                {
+                    Point2f fxy = flow.At<Point2f>(y, x);
+                    Cv2.ArrowedLine(flowImage, new OpenCvSharp.Point(x, y), new OpenCvSharp.Point(x + fxy.X, y + fxy.Y), Scalar.Green, 1, LineTypes.Link8, 0, 0.3);
+                }
+            }
+            return flowImage;
         }
 
         private Mat Skeletonize(Mat img)

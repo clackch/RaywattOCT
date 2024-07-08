@@ -348,17 +348,17 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 
 void COCTImaging::generateImage(Ipp32f* logaritihmData, bool bInvert){
 	const int nBScan = m_setting.nBScan;
-	const float fHighLevel = (bInvert) ? m_setting.highLevel : 0.0f;
-	const float fLowLevel = (bInvert) ? m_setting.lowLevel : 0.0f;
-	const int nFFTLength = m_setting.nFFTLength;
 	const int nOutputLength = m_setting.nOutputLength;
 
-	for (int i = 0; i < nBScan; i++)
-	{
-		ippsSubC_32f(logaritihmData + i * nOutputLength, (m_setting.lowLevel + fLowLevel), fOutput + i * nOutputLength, nOutputLength);
-		ippsMulC_32f_I(UCHAR_MAX / (m_setting.highLevel - fHighLevel), fOutput + i * nOutputLength, nOutputLength);
-		ippsConvert_32f8u_Sfs(fOutput + i * nOutputLength, imageResult.data + i * nOutputLength /*stepBytes*/, nOutputLength, ippRndNear, 0);
-	}
+	cv::Mat imgLog(cv::Size(nOutputLength, nBScan), CV_32FC1, logaritihmData);
+	imgLog -= m_setting.lowLevel;
+	imgLog *= (LUT_SCALE / m_setting.highLevel);
+	cv::threshold(imgLog, imgLog, LUT_SCALE, LUT_SCALE, cv::THRESH_TRUNC);
+	imgLog.convertTo(imageResult, CV_8UC1);
+
+	cv::convertScaleAbs(imageResult, imageResult, 1.f / 80.f * LUT_SCALE, 0);
+	imageResult += LUT_START_INDEX;
+
 	cv::flip(imageResult, imageResult, 1);
 }
 

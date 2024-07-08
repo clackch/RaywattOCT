@@ -1082,7 +1082,7 @@ UINT COCTSystem::threadService(LPVOID param) {
 	CLookUpTable& lut = CLookUpTable::GetInstance();
 	lut.Load("LUT_green.csv");
 	lut.Load("LUT_gray.csv");
-	lut.Load("LUT_orange.csv");
+	lut.Load("LUT_abbott.csv");
 	//lut.Load("LUT_ML.csv");
 
 #ifdef DEBUG
@@ -1676,6 +1676,7 @@ int COCTSystem::connectRotaryJunction() {
 			m_pLaserModule->SetVLD(0);
 			Sleep(500);
 			m_pLaserModule->SetVOA(config.laserModule.voaValue);
+#ifdef DELAY_LINE_HOMING_WORKS
 			Sleep(500);
 			m_pLaserModule->MoveAbsolute(MotorIndex::DelayLine, config.laserModule.delayPosition);
 			while (m_pLaserModule->IsMoving(MotorIndex::DelayLine)) {
@@ -1683,6 +1684,7 @@ int COCTSystem::connectRotaryJunction() {
 			}
 			Sleep(500);
 			m_pLaserModule->MoveAbsolute(MotorIndex::Polarization, config.laserModule.polarPosition);
+#endif
 		}
 		else
 		{
