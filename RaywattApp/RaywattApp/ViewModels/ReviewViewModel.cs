@@ -1792,7 +1792,6 @@ namespace RaywattApp.ViewModels
                     PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(paddedFrame));
                 }
 
-                _angioManager.AngioSaveFrameNum = 0;
                 _angioManager.AngioSaveBuffer.Clear();
                 return;
             }
