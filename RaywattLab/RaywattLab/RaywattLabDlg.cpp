@@ -73,8 +73,6 @@ void CRaywattLabDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SLIDER_CONTRAST, m_sliderContrast);
 	DDX_Control(pDX, IDC_SLIDER_LOWLEVEL, m_sliderLowLevel);
 	DDX_Control(pDX, IDC_SLIDER_HIGHLEVEL, m_sliderHighLevel);
-	DDX_Check(pDX, IDC_CHECK_INIT_MOTOR, m_chkInitMotor);
-	DDX_Check(pDX, IDC_CHECK_INIT_STAGE, m_chkInitStage);
 }
 
 // private methods
@@ -145,7 +143,7 @@ void CRaywattLabDlg::updatePatientDataList() {
 	GetDlgItem(IDC_EDIT_CURRENT_PATH)->SetWindowText(m_strPatientPath);
 
 	CString strQuery = _T("");
-	strQuery.Format(_T("%s\\*.bin"), m_strPatientPath.GetBuffer(), m_strPatientPath.GetBuffer());
+	strQuery.Format(_T("%s\\*.*"), m_strPatientPath.GetBuffer(), m_strPatientPath.GetBuffer());
 
 	CFileFind fileFind;
 	BOOL find = fileFind.FindFile(strQuery);
@@ -156,13 +154,22 @@ void CRaywattLabDlg::updatePatientDataList() {
 		CString strFileName = fileFind.GetFileName();
 
 		CString strExt = strFileName.Right(strFileName.GetLength() - strFileName.ReverseFind('.') - 1);
-		if (strExt.Compare(_T("bin")) == 0) {
+		if (strExt.Compare(_T("bin")) == 0 || strExt.Compare(_T("oct")) == 0) {
 			m_listPatientData.AddString(strFileName);
 		}
 	}
 
 	m_strPatientName = m_strPatientPath.Right(m_strPatientPath.GetLength() - m_strPatientPath.ReverseFind('\\') - 1);
 	GetDlgItem(IDC_EDIT_CURRENT_PATIENT)->SetWindowText(m_strPatientName);
+}
+
+void CRaywattLabDlg::initOCTViewLayout() {
+	const int crossSectionSize = 620;
+	RECT rect;
+	GetDlgItem(IDC_PICT_OCT_IMAGE)->GetWindowRect(&rect);
+	rect.right = rect.left + crossSectionSize;
+	rect.bottom = rect.top + crossSectionSize;
+	GetDlgItem(IDC_PICT_OCT_IMAGE)->MoveWindow(&rect);
 }
 
 void CRaywattLabDlg::initScopeViewLayout() {
@@ -178,13 +185,13 @@ void CRaywattLabDlg::initScopeViewLayout() {
 	int height = (rect.bottom - rect.top);
 	int heightScope = (height - nPaddingBetweenScopeViews - nPaddingBottom) / 2;
 
-	x = x + width + nPaddingLeft;
+	x = (m_largeMonitorMode) ? x + width + nPaddingLeft : x;
 	m_scopeView.MoveWindow(x, y, width, heightScope);
 	y = y + heightScope + nPaddingBetweenScopeViews;
 	m_scopeViewFFT.MoveWindow(x, y, width, heightScope);
 
-	m_scopeView.ShowWindow(SW_SHOW);
-	m_scopeViewFFT.ShowWindow(SW_SHOW);
+	m_scopeView.ShowWindow((m_largeMonitorMode) ? SW_SHOW : SW_HIDE);
+	m_scopeViewFFT.ShowWindow((m_largeMonitorMode) ? SW_SHOW : SW_HIDE);
 }
 void CRaywattLabDlg::updateBrightnessContrast(CLabImaging* pImaging) {
 	const double rangeB[] = { 0.0f, 100.0f };
@@ -278,6 +285,22 @@ USHORT* CRaywattLabDlg::readBackground(const char* strBackgroundFile, IImaging::
 	fclose(fp);
 
 	return pBackground;
+}
+int CRaywattLabDlg::initReader(tstring strFilePath, CDataReader* pReader)
+{
+	if (pReader == nullptr) return -1;
+
+	CConfiguration& config = CConfiguration::GetInstance();
+	IImaging::Setting setting = config.imaging;
+
+	OCTHeader header = pReader->ReadHeader(strFilePath);
+	if (header.type != OCTHeader::Type::Unknown)
+	{
+		setting.Set(header.width, header.height);
+	}
+	pReader->Initialize(strFilePath, setting.nBufferSize);
+
+	return NOERROR;
 }
 void CRaywattLabDlg::findFileByExtension(CString strFolder, CString strExt, std::vector<CString>& vList) {
 	CString strQuery = _T("");
@@ -479,6 +502,7 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_PULLBACK, &CRaywattLabDlg::OnBnClickedButtonPullback)
 	ON_BN_CLICKED(IDC_BUTTON_RESTART_ACQUISITION, &CRaywattLabDlg::OnBnClickedButtonRestartAcquisition)
 	ON_BN_CLICKED(IDC_BUTTON_START_ACQUISITION, &CRaywattLabDlg::OnBnClickedButtonStartAcquisition)
+	ON_BN_CLICKED(IDC_BUTTON_SHOW_SCOPE, &CRaywattLabDlg::OnBnClickedButtonShowScope)
 END_MESSAGE_MAP()
 
 LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
@@ -586,6 +610,25 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	CLookUpTable& lut = CLookUpTable::GetInstance();
 	int result = lut.Load("LUT_abbott.csv");
 
+	m_largeMonitorMode = false;
+	m_showScope = false;
+
+	RECT rect;
+	GetDesktopWindow()->GetWindowRect(&rect);
+	printf("%d %d %d %d\n", rect.left, rect.top, rect.right, rect.bottom);
+
+	if ((rect.right - rect.left) > 1280) m_largeMonitorMode = true;
+
+	::GetWindowRect(this->m_hWnd, &rect);
+	if (m_largeMonitorMode) {
+		GetDlgItem(IDC_BUTTON_SHOW_SCOPE)->EnableWindow(FALSE);
+		::MoveWindow(this->m_hWnd, rect.left, rect.top, 1550, 1024, TRUE);
+	}
+	else {
+		GetDlgItem(IDC_BUTTON_SHOW_SCOPE)->EnableWindow(TRUE);
+		::MoveWindow(this->m_hWnd, rect.left, rect.top, 1024, 1024, TRUE);
+	}
+
 	initToggleButton(m_btnLoadData, IDC_BUTTON_LOAD_SELECTED_DATA, _T("Load"), _T("Unload"));
 	initToggleButton(m_btnPlayData, IDC_BUTTON_PLAY_LOADED_DATA, _T("Play"), _T("Pause"));
 	initToggleButton(m_btnSaveData, IDC_BUTTON_SAVE_DATA, _T("Save Data"), _T("Done"));
@@ -593,6 +636,8 @@ BOOL CRaywattLabDlg::OnInitDialog()
 
 	m_strPatientPath = AfxGetApp()->GetProfileString(_T("RECENT_SETTING"), _T("PATIENT_PATH"), _T(""));
 	updatePatientDataList();
+
+	initOCTViewLayout();
 
 	int nScopeLength = config.imaging.nAScan;
 	m_scopeView.Create(this, 0);
@@ -610,8 +655,8 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	m_radioImageColor = 0;
 	m_chkImageHotColor = TRUE;
 	m_chkShowGuide = FALSE;
-	m_chkInitMotor = AfxGetApp()->GetProfileInt(_T("RECENT_SETTING"), _T("INIT_MOTOR"), TRUE);
-	m_chkInitStage = AfxGetApp()->GetProfileInt(_T("RECENT_SETTING"), _T("INIT_STAGE"), TRUE);
+	m_chkInitMotor = AfxGetApp()->GetProfileInt(_T("RECENT_SETTING"), _T("INIT_MOTOR"), FALSE);
+	m_chkInitStage = AfxGetApp()->GetProfileInt(_T("RECENT_SETTING"), _T("INIT_STAGE"), FALSE);
 	
 	UpdateData(FALSE);
 
@@ -888,14 +933,13 @@ void CRaywattLabDlg::OnBnClickedButtonLoadSelectedData()
 	else {
 		m_isRealtime = false;
 
-		CConfiguration& config = CConfiguration::GetInstance();
 		CString strFilePath = _T("");
 		CString strFileName = _T("");
 		int nSelected = m_listPatientData.GetCurSel();
 		m_listPatientData.GetText(nSelected, strFileName);
 		strFilePath.Format(_T("%s/%s"), m_strPatientPath, strFileName);
 
-		m_pDataReader->Initialize(strFilePath.GetBuffer(), config.imaging.nBufferSize);
+		initReader(strFilePath.GetBuffer(), m_pDataReader);
 		if (m_pSimDevice == nullptr) {
 			m_pSimDevice = new CSimulateDevice(m_pDataReader);
 			m_pSimDevice->SetImaging(m_pImagingSimulate);
@@ -920,6 +964,7 @@ void CRaywattLabDlg::OnBnClickedButtonLoadSelectedData()
 		GetDlgItem(IDC_BUTTON_SAVE_VIDEO)->EnableWindow(dataLoaded);
 		GetDlgItem(IDC_BUTTON_SAVE_TIF)->EnableWindow(dataLoaded);
 		GetDlgItem(IDC_BUTTON_SAVE_PNG)->EnableWindow(dataLoaded);
+		GetDlgItem(IDC_BUTTON_RESTART_ACQUISITION)->EnableWindow(dataLoaded || m_bStartAcquisition);
 	}
 }
 
@@ -1118,7 +1163,7 @@ void CRaywattLabDlg::OnBnClickedButtonSavePng()
 	CLabImaging* pImaging = createImaging(config.imaging);
 
 	CDataReader* pReader = new CDataReader();
-	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nAScan * config.acquisition.nBScan);
+	initReader(strDataPath.GetBuffer(), pReader);
 
 	bool isCircle = (m_radioImageShape == 0);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
@@ -1371,26 +1416,71 @@ void CRaywattLabDlg::OnBnClickedButtonRestartAcquisition()
 
 	if (nBScan <= 0) return;
 
-	IImaging::Setting imaging = m_pImagingRealtime->GetSetting();
-	imaging.Set(imaging.nAScan, nBScan);
+	if (m_btnLoadData.pushed)
+	{
+		CConfiguration& config = CConfiguration::GetInstance();
+		config.imaging.Set(config.imaging.nAScan, nBScan);
+		
+		int result = m_pSimDevice->StopAcquisition();
+		m_pImagingSimulate->Stop();
+		delete m_pImagingSimulate;
 
-	// stop acquisition & imaging
-	m_pAcqDevice->StopAcquisition();
-	m_pImagingRealtime->Stop();
-	delete m_pImagingRealtime;
-	
-	// re-allocate imaging
-	m_pImagingRealtime = createImaging(imaging);
-	m_pImagingRealtime->Start();
+		m_pImagingSimulate = createImaging(config.imaging);
+		m_pImagingSimulate->Start();
 
-	CATSDevice::Setting acquire = ((CATSDevice*)m_pAcqDevice)->GetSetting();
-	acquire.nAScan = imaging.nAScan;
-	acquire.nBScan = imaging.nBScan;
-	((CATSDevice*)m_pAcqDevice)->SetSetting(acquire);
-	m_pAcqDevice->SetImaging(m_pImagingRealtime);
-	m_pAcqDevice->StartAcquisition();
+		if (m_btnPlayData.pushed) {
+			toggleButton(this, m_btnPlayData);
+		}
 
-	CConfiguration& config = CConfiguration::GetInstance();
-	config.imaging = imaging;
-	config.acquisition = acquire;
+		CString strFilePath = _T("");
+		CString strFileName = _T("");
+		int nSelected = m_listPatientData.GetCurSel();
+		m_listPatientData.GetText(nSelected, strFileName);
+		strFilePath.Format(_T("%s/%s"), m_strPatientPath, strFileName);
+
+		initReader(strFilePath.GetBuffer(), m_pDataReader);
+		m_pSimDevice->SetImaging(m_pImagingSimulate);
+
+		result = m_pSimDevice->InitDevice();
+		((CSimulateDevice*)m_pSimDevice)->SetPause(true);
+		result = m_pSimDevice->StartAcquisition();
+
+		return;
+	}
+
+	if (m_bStartAcquisition) {
+		IImaging::Setting imaging = m_pImagingRealtime->GetSetting();
+		imaging.Set(imaging.nAScan, nBScan);
+
+		// stop acquisition & imaging
+		m_pAcqDevice->StopAcquisition();
+		m_pImagingRealtime->Stop();
+		delete m_pImagingRealtime;
+
+		// re-allocate imaging
+		m_pImagingRealtime = createImaging(imaging);
+		m_pImagingRealtime->Start();
+
+		CATSDevice::Setting acquire = ((CATSDevice*)m_pAcqDevice)->GetSetting();
+		acquire.nAScan = imaging.nAScan;
+		acquire.nBScan = imaging.nBScan;
+		((CATSDevice*)m_pAcqDevice)->SetSetting(acquire);
+		m_pAcqDevice->SetImaging(m_pImagingRealtime);
+		m_pAcqDevice->StartAcquisition();
+
+		CConfiguration& config = CConfiguration::GetInstance();
+		config.imaging = imaging;
+		config.acquisition = acquire;
+	}
+}
+
+void CRaywattLabDlg::OnBnClickedButtonShowScope()
+{
+	m_showScope = !m_showScope;
+
+	m_pictOCTImage.ShowWindow((m_showScope ? SW_HIDE : SW_SHOW));
+	m_scopeView.ShowWindow((m_showScope ? SW_SHOW : SW_HIDE));
+	m_scopeViewFFT.ShowWindow((m_showScope ? SW_SHOW : SW_HIDE));
+
+	GetDlgItem(IDC_BUTTON_SHOW_SCOPE)->SetWindowText((m_showScope ? L"Show Image" : L"Show Scope"));
 }

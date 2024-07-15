@@ -56,6 +56,8 @@ private:
 	CLaserModule* m_pLaserModule;
 
 	// UI Components
+	bool m_largeMonitorMode;
+	bool m_showScope;
 	CListBox m_listPatientData;
 	ToggleButton m_btnLoadData;
 	ToggleButton m_btnPlayData;
@@ -116,6 +118,7 @@ private:
 	int initializeDevices();
 	int finalizeDevices();
 	void updatePatientDataList();
+	void initOCTViewLayout();
 	void initScopeViewLayout();
 	void updateBrightnessContrast(CLabImaging *pImaging);
 	void updateLevel(CLabImaging* pImaging);
@@ -124,6 +127,7 @@ private:
 	CString splitFileName(CString strFilePath);
 	CLabImaging* createImaging(IImaging::Setting imaging);
 	USHORT* readBackground(const char* strBackgroundFile, IImaging::Setting setting);
+	int initReader(tstring strFilePath, CDataReader* pReader);
 	void findFileByExtension(CString strFolder, CString strExt, std::vector<CString>& vList);
 	void updateMeasurement(USHORT nPeakValue, int nPeakIndex, int nLineWidth, USHORT nNoisePower);
 	void drawGuideLine(cv::Mat image);
@@ -181,4 +185,5 @@ public:
 	afx_msg void OnBnClickedCheckInitStage();
 	afx_msg void OnBnClickedButtonPullback();
 	afx_msg void OnBnClickedButtonRestartAcquisition();
+	afx_msg void OnBnClickedButtonShowScope();
 };
