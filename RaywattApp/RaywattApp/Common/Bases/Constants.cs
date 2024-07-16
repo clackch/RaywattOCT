@@ -33,6 +33,7 @@ namespace RaywattApp.Common.Bases
         public const string ReviewPage = "Views/ReviewPage.xaml";
         public const string Review3dPage = "Views/Review3dPage.xaml";
         public const string ReviewComparePage = "Views/ReviewComparePage.xaml";
+        public const string ReviewFfrSettingPage = "Views/ReviewFfrSettingPage.xaml";
         public const string ReviewFfrPage = "Views/ReviewFfrPage.xaml";
         public const string ReviewPresetPage = "Views/ReviewPresetPage.xaml";
         public const string ReviewAngioCoRegPage = "Views/ReviewAngioCoRegPage.xaml";
@@ -284,7 +285,9 @@ namespace RaywattApp.Common.Bases
         public const double LongitudeIndicatorWidth = 22;
         public const double LongitudeIndicatorHeight = 116;
         public const double SectionIndicatorWidth = 7.5;
+        public const double SectionIndicatorMoveWidth = 28;
         public const double SectionIndicatorCenterWidth = 1;
+        public const double SectionIndicatorMoveCenterWidth = SectionIndicatorMoveWidth/2;
         public const double SectionValueWidth = 24;
         public const double SectionValueCenterWidth = 0.25;
         public const double LumenProfileExtraHeight = 6;
@@ -333,7 +336,6 @@ namespace RaywattApp.Common.Bases
 
         //Review - Compare - Cross Section
         public const double CrossSectionCompareSize = 278;
-        public const double CrossSectionCompareCenter = CrossSectionCompareSize / 2;
 
         //Review - Compare - Longitude
         public const double LongitudeCompareWidth = 780;
@@ -344,6 +346,17 @@ namespace RaywattApp.Common.Bases
 
         //Review - Compare - Side Menu
         public const double SelectPreCaseExpandSize = 460;
+
+        //Review - AI FFR
+        public const double LongitudeFfrWidth = 1080;
+        public const double LongitudeFfrHeight = 90;
+        public const double LongitudeFfrImageClipHeight = LongitudeFfrHeight + 10;
+        public const string FfrStep1 = "FfrStep1";
+        public const string FfrStep2 = "FfrStep2";
+        public const string FfrStep3 = "FfrStep3";
+        public const string FfrStep4 = "FfrStep4";
+        public const string FfrStep5 = "FfrStep5";
+        public const double CrossSectionFfrSize = 344;
 
         //Measurement
         public const string MeasureDrawAll = "DrawAll";  //Draw All
@@ -358,14 +371,15 @@ namespace RaywattApp.Common.Bases
         public const string MeasureDisableErase = "DisableErase";  //Disable Erase
         public const string MeasureZoomIn = "ZoomIn";  //ZoomIn
         public const string MeasureZoomOut = "ZoomOut";  //ZoomOut
+        public const string MeasureReDraw = "MeasureReDraw";    //MeasureReDraw
 
         //Draw Annotation
         public static Brush[] AnnotationBrushes = {
+            new SolidColorBrush(Color.FromRgb(0x56, 0xBD, 0x7C)),
             new SolidColorBrush(Color.FromRgb(0xEE, 0x6C, 0x4F)),
             new SolidColorBrush(Color.FromRgb(0xF7, 0xC9, 0x61)),
             new SolidColorBrush(Color.FromRgb(0x47, 0x4F, 0xEB)),
-            new SolidColorBrush(Color.FromRgb(0xE9, 0x8C, 0x33)),
-            new SolidColorBrush(Color.FromRgb(0x56, 0xBD, 0x7C)),
+            new SolidColorBrush(Color.FromRgb(0xE9, 0x8C, 0x33)),            
             new SolidColorBrush(Color.FromRgb(0x21, 0x24, 0x83)),
             new SolidColorBrush(Color.FromRgb(0xF3, 0xAB, 0x97)),
             new SolidColorBrush(Color.FromRgb(0x3D, 0x85, 0x51)),
