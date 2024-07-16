@@ -87,11 +87,10 @@ bool CRJController::ReadPosition() {
 
 	return (written == packetLength);	
 }
-bool CRJController::Current(eStepMotorIndex idxMotor, int posMM) {
+bool CRJController::Current(eStepMotorIndex idxMotor, int posStep) {
 	if (!m_initMotor) return false;
 	if (m_state == eRJState::Error) return false;
 
-	int posStep = posMM; // ((double)posMM / MM_PER_STEP);
 	PLOGI.printf("StepMotor #%d Current: %d", idxMotor, posStep);
 
 	if (idxMotor == eStepMotorIndex::Both) {
@@ -106,7 +105,7 @@ bool CRJController::Current(eStepMotorIndex idxMotor, int posMM) {
 	int packetLength;
 	getSerialPacket(eFID::FID_SM_SET_POS, sizeof(int) * 2, serialPacket, packetLength);
 
-	int idxData = RJ_DATA_IDX;
+	int idxData = DATA_IDX;
 	memcpy(serialPacket + idxData, &m_nStepPosition[0], sizeof(int));
 	idxData += sizeof(int);
 	memcpy(serialPacket + idxData, &m_nStepPosition[1], sizeof(int));
@@ -118,11 +117,10 @@ bool CRJController::Current(eStepMotorIndex idxMotor, int posMM) {
 
 	return (written == packetLength);
 }
-bool CRJController::Move(eStepMotorIndex idxMotor, int posMM, bool delay, char sensor) {
+bool CRJController::Move(eStepMotorIndex idxMotor, int posStep, bool delay, char sensor) {
 	if (!m_initMotor) return false;
 	if (m_state == eRJState::Error) return false;
 
-	int posStep = posMM; // ((double)posMM / MM_PER_STEP);
 	PLOGI.printf("StepMotor #%d Move: %d", idxMotor, posStep);
 
 	if (idxMotor == eStepMotorIndex::Both) {
@@ -140,7 +138,7 @@ bool CRJController::Move(eStepMotorIndex idxMotor, int posMM, bool delay, char s
 	int packetLength;
 	getSerialPacket(eFID::FID_SM_RUN, sizeof(int) * 4, serialPacket, packetLength);
 
-	int idxData = RJ_DATA_IDX;
+	int idxData = DATA_IDX;
 	memcpy(serialPacket + idxData, &m_nStepPosition[0], sizeof(int));
 	idxData += sizeof(int);
 	memcpy(serialPacket + idxData, &m_nStepPosition[1], sizeof(int));
@@ -149,7 +147,7 @@ bool CRJController::Move(eStepMotorIndex idxMotor, int posMM, bool delay, char s
 	idxData += sizeof(int);
 	memcpy(serialPacket + idxData, &m_nStepSpeed[1], sizeof(int));
 
-	serialPacket[RJ_PHOTO_IDX] = sensor;
+	serialPacket[PHOTO_IDX] = sensor;
 
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
@@ -158,11 +156,9 @@ bool CRJController::Move(eStepMotorIndex idxMotor, int posMM, bool delay, char s
 
 	return (written == packetLength);
 }
-bool CRJController::Set(eStepMotorIndex idxMotor, int velocity) {
+bool CRJController::Set(eStepMotorIndex idxMotor, int velStep) {
 	if (!m_initMotor) return false;
 	if (m_state == eRJState::Error) return false;
-
-	int velStep = velocity; // ((double)velocity / MM_PER_STEP);
 
 	if (idxMotor == eStepMotorIndex::Both) {
 		m_nStepSpeed[0] = velStep;
@@ -191,7 +187,7 @@ bool CRJController::AutoStatePeriod(USHORT interval) {
 	int packetLength;
 	getSerialPacket(eFID::FID_SET_AUTO_PERIOD, sizeof(unsigned short), serialPacket, packetLength);
 
-	memcpy(serialPacket + RJ_DATA_IDX, &interval, sizeof(unsigned short));
+	memcpy(serialPacket + DATA_IDX, &interval, sizeof(unsigned short));
 
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
@@ -208,7 +204,7 @@ bool CRJController::StopStepMotors() {
 	getSerialPacket(eFID::FID_SM_STOP, sizeof(BYTE) * 2, serialPacket, packetLength);
 
 	BYTE stopIdx[2] = { 0x02, 0x02 };	// 0x02: Stop Immediately
-	memcpy(serialPacket + RJ_DATA_IDX, stopIdx, sizeof(BYTE) * 2);
+	memcpy(serialPacket + DATA_IDX, stopIdx, sizeof(BYTE) * 2);
 
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
@@ -378,7 +374,7 @@ bool CRJController::displayLCD(eLCDImage image) {
 	int packetLength;
 	getSerialPacket(eFID::FID_LCD_DISP_IMAGE, sizeof(unsigned short), serialPacket, packetLength);
 
-	memcpy(serialPacket + RJ_DATA_IDX, &image, sizeof(unsigned short));
+	memcpy(serialPacket + DATA_IDX, &image, sizeof(unsigned short));
 
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
@@ -386,58 +382,6 @@ bool CRJController::displayLCD(eLCDImage image) {
 	int written = m_pConnection->Write(serialPacket, packetLength);
 
 	return (written == packetLength);
-}
-void CRJController::addPacket(BYTE* packet, int size) {
-	for (int i = 0; i < size; i++) {
-		m_vPacket.push_back(packet[i]);
-	}
-}
-bool CRJController::sliceUntilSTX(int index) {
-	bool findSTX = false;
-	std::vector<char> vPacket;
-	for (int i = index; i < m_vPacket.size(); i++) {
-		if (m_vPacket[i] == RJ_STX) findSTX = true;
-		if (findSTX) vPacket.push_back(m_vPacket[i]);
-	}
-
-	m_vPacket.clear();
-	if (findSTX) {
-		m_vPacket.resize(vPacket.size());
-		std::copy(vPacket.begin(), vPacket.end(), m_vPacket.begin());
-	}
-
-	return findSTX;
-}
-bool CRJController::parseSerialPacket() {
-	if (m_vPacket.size() > 0) {
-		bool findSTX = true;
-		if (m_vPacket[0] != RJ_STX) {
-			findSTX = sliceUntilSTX(1);
-		}
-
-		if (findSTX) {
-			for (int idxETX = 0; idxETX < m_vPacket.size(); idxETX++) {
-				if (m_vPacket[idxETX] == RJ_ETX)
-				{
-					BYTE length = m_vPacket[RJ_LENGTH_IDX];
-					if (idxETX != (length - 1)) continue;
-
-					BYTE checksum = calcChecksum(&m_vPacket[0], length - 2);
-					if (checksum == m_vPacket[length - 2]) {
-						handlePacket();
-						sliceUntilSTX(idxETX);
-					}
-					else {
-						sliceUntilSTX(1);
-					}
-
-					break;
-				}
-			}
-		}
-	}
-
-	return true;
 }
 void CRJController::parseSMPacket(BYTE* packet, int size) {
 	int offset = 0;
@@ -457,9 +401,9 @@ void CRJController::parseRFIDPacket(BYTE* packet, int size) {
 	memcpy(m_RFID, packet + 2, m_nRFIDLength);
 }
 void CRJController::handlePacket() {
-	BYTE length = m_vPacket[RJ_LENGTH_IDX];
-	int dataLength = length - RJ_HEADER_LEN;
-	eFID fid = (eFID) m_vPacket[RJ_FID_IDX];
+	BYTE length = m_vPacket[LENGTH_IDX];
+	int dataLength = length - HEADER_LEN;
+	eFID fid = (eFID) m_vPacket[FID_IDX];
 
 	char strTime[MAX_PATH];
 	CUtility::GetCurTime(strTime);
@@ -467,52 +411,30 @@ void CRJController::handlePacket() {
 	printf("%s\tFID: 0x%02x Sensor: ", strTime, fid);
 	// photo sensor state
 	for (int i = 0; i < 6; i++) {
-		m_bPhotoSensor[i] = m_vPacket[RJ_PHOTO_IDX] & (0x1 << i);
+		m_bPhotoSensor[i] = m_vPacket[PHOTO_IDX] & (0x1 << i);
 		printf(" %02d", m_bPhotoSensor[i]);
 	}
 	
 	// button, switch state
-	m_bButton[0] = m_vPacket[RJ_KEY_IDX] & 0x1;
-	m_bButton[1] = m_vPacket[RJ_KEY_IDX] & 0x2;
-	m_bLimitSwitch = m_vPacket[RJ_KEY_IDX] & 0x4;
+	m_bButton[0] = m_vPacket[KEY_IDX] & 0x1;
+	m_bButton[1] = m_vPacket[KEY_IDX] & 0x2;
+	m_bLimitSwitch = m_vPacket[KEY_IDX] & 0x4;
 
 	//PLOGI.printf("\tButton: %02d %02d %02d\n", m_bButton[0], m_bButton[1], m_bLimitSwitch);
 
 	switch(fid) {
 	case eFID::FID_SM_GET_STATE:
-		parseSMPacket(&m_vPacket[RJ_DATA_IDX], dataLength);
+		parseSMPacket(&m_vPacket[DATA_IDX], dataLength);
 		break;
 	case eFID::FID_BLDC_PASS:
-		parsePacket(&m_vPacket[RJ_DATA_IDX], dataLength);
+		parsePacket(&m_vPacket[DATA_IDX], dataLength);
 		break;
 	case eFID::FID_RFID_GET_STATE:
-		parseRFIDPacket(&m_vPacket[RJ_DATA_IDX], dataLength);
+		parseRFIDPacket(&m_vPacket[DATA_IDX], dataLength);
 		break;
 	default:
 		break;
 	}
-}
-void CRJController::getSerialPacket(eFID fid, int dataSize, BYTE* packet, int& packetLength) {
-	if (packet == nullptr || dataSize < 0) return;
-
-	packetLength = dataSize + RJ_HEADER_LEN;
-
-	packet[0] = RJ_STX;
-	packet[RJ_LENGTH_IDX] = (BYTE) packetLength;
-	packet[RJ_FID_IDX] = (BYTE) fid;
-	packet[RJ_RET_IDX] = 0;
-	packet[RJ_PHOTO_IDX] = 0;
-	packet[RJ_KEY_IDX] = 0;
-	packet[packetLength - 1] = RJ_ETX;
-}
-BYTE CRJController::calcChecksum(BYTE* packet, int length) {
-	unsigned int crc = 0x00;
-	for (int i = 1; i < length; i++)
-	{
-		crc += packet[i];
-	}
-
-	return (BYTE)crc;
 }
 bool CRJController::writeMotor(BYTE* packet, int size) {
 	if (!m_initMotor) return false;
@@ -520,7 +442,7 @@ bool CRJController::writeMotor(BYTE* packet, int size) {
 	BYTE serialPacket[MAX_PATH];
 	int packetLength;
 	getSerialPacket(eFID::FID_BLDC_PASS, size, serialPacket, packetLength);
-	memcpy(serialPacket + RJ_DATA_IDX, packet, size);
+	memcpy(serialPacket + DATA_IDX, packet, size);
 
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;

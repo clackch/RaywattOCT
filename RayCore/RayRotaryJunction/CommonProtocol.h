@@ -1,0 +1,102 @@
+#pragma once
+
+#include "Config.h"
+#include <vector>
+
+#define STX		0xA3
+#define ETX		0xE4
+#define LENGTH_IDX	1
+#define FID_IDX		2
+#define RET_IDX		3
+#define PHOTO_IDX	4
+#define KEY_IDX		5
+#define DATA_IDX	6
+#define HEADER_LEN	8
+
+enum class eCOMM_RJ : BYTE {
+	COMM_SUCCESS = 0
+	, COMM_CSUM_FAIL
+	, COMM_UNKNOWN_FID
+	, COMM_PARAM_ERROR
+	, COMM_TIMEOUT
+	, COMM_DOWN_STATE_ERR
+	, COMM_DOWN_SERIAL_ERR
+	, COMM_DOWN_SIZE_ERR
+	, COMM_FLASH_ERASE_ERR
+	, COMM_FLASH_WRITE_ERR
+};
+
+enum class eFID : BYTE {
+	FID_AUTO_REPORT = 0x01
+	, FID_GET_MAIN_STATE
+	, FID_SET_VOAVLD
+	, FID_GET_AUTO_PERIOD = 0x10
+	, FID_SET_AUTO_PERIOD = 0x11
+	, FID_GET_VERSION = 0x12
+	, FID_FW_DOWNLOAD = 0x13
+	, FID_SM_GET_CONFIG = 0x20
+	, FID_SM_SET_CONFIG
+	, FID_SM_GET_STATE
+	, FID_SM_RUN
+	, FID_SM_STOP
+	, FID_SM_SET_POS
+	, FID_SM_CLEAR_ALMHIS
+	, FID_BLDC_GET_STATE = 0x30
+	, FID_BLDC_RUN
+	, FID_BLDC_STOP
+	, FID_BLDC_PASS
+	, FID_LCD_GET_STATE = 0x40
+	, FID_LCD_SET_STATE
+	, FID_LCD_DOWN_IMAGE
+	, FID_LCD_DISP_IMAGE
+	, FID_RFID_GET_STATE = 0x50
+};
+
+enum class eSFID : BYTE {
+	SFID_LCD_BL_OFF = 0
+	, SFID_LCD_BL_ON
+	, SFID_LCD_SETUP
+};
+
+enum class eLCDImage : USHORT {
+	LCD_IMAGE_BOOTING = 0
+	, LCD_IMAGE_UNLOADED
+	, LCD_IMAGE_LOADING
+	, LCD_IMAGE_STANDBY_ON
+	, LCD_IMAGE_STANDBY_OFF
+	, LCD_IMAGE_LIVEVIEW
+	, LCD_IMAGE_PULLBACK
+	, LCD_IMAGE_UNLOADING
+	, LCD_IMAGE_ERROR
+};
+
+enum class eStepMotorIndex : UINT
+{
+	Both = 0,
+	Pullback = 1,
+	DelayLine = 1,
+	Hub = 2,
+	Polarization = 2,
+	Max
+};
+
+class ICommonProtocol {
+protected:
+	std::vector<BYTE> m_vPacket;
+
+protected:
+	virtual void handlePacket() = 0;
+	void addPacket(BYTE* packet, int size);
+	bool sliceUntilSTX(int index);
+	bool parseSerialPacket();
+	void getSerialPacket(eFID fid, int dataSize, BYTE* packet, int& packetLength);
+	BYTE calcChecksum(BYTE* packet, int length);
+};
+
+class IStepMotorAction
+{
+public:
+	virtual bool Current(eStepMotorIndex idx, int posMM) = 0;
+	virtual bool Move(eStepMotorIndex idx, int posMM, bool delay, char sensor) = 0;
+	virtual bool Set(eStepMotorIndex idx, int velocity) = 0;
+};
