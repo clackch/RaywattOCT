@@ -1,7 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="7.5" height="105" viewBox="0 0 7.5 105">
-    <g data-name="그룹 10420">
-        <path data-name="선 24" transform="translate(1)" style="fill:none;stroke:#fff;opacity:0.3;stroke-width:2px" d="M0 0v105"/>
-        <path data-name="사각형 2505" transform="rotate(90 -47.75 55.25)" style="fill:#fff;opacity:0.3;" d="M0 0h2v6H0z"/>
-        <path data-name="사각형 2506" transform="rotate(90 3.75 3.75)" style="fill:#fff;opacity:0.3;" d="M0 0h2v6H0z"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="28" height="105" viewBox="0 0 28 105">
+    <g data-name="그룹 11859">
+        <g data-name="그룹 11814" transform="translate(-745.149 -1317)">
+            <g data-name="그룹 11812">
+                <path data-name="사각형 3337" transform="rotate(90 -275.75 1041.25)" style="fill:#4f4f4f" d="M0 0h2v7.5H0z"/>
+                <path data-name="사각형 3338" transform="rotate(90 -327.25 1092.75)" style="fill:#4f4f4f" d="M0 0h2v7.5H0z"/>
+                <path data-name="사각형 3339" transform="translate(758 1317)" style="fill:#4f4f4f" d="M0 0h2v105H0z"/>
+            </g>
+            <g data-name="그룹 11739">
+                <path data-name="패스 8173" d="M10 0A10 10 0 1 1 0 10 10 10 0 0 1 10 0z" transform="translate(749.15 1360)" style="fill:#4f4f4f"/>
+                <path data-name="다각형 35" d="m5 0 5 5H0z" transform="rotate(-90 1064.075 310.925)" style="fill:#232323"/>
+                <path data-name="다각형 36" d="m5 0 5 5H0z" transform="rotate(90 -299.925 1065.075)" style="fill:#232323"/>
+            </g>
+            <circle data-name="타원 344" cx="14" cy="14" r="14" transform="translate(745.149 1356)" style="fill:none"/>
+        </g>
+        <path data-name="사각형 3414" style="opacity:0" d="M0 0h28v105H0z"/>
     </g>
 </svg>
