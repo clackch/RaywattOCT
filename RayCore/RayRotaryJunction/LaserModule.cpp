@@ -190,9 +190,6 @@ bool CLaserModule::StopStepMotors() {
 
 	return (written == packetLength);
 }
-int CLaserModule::ConvertMMtoStep(UINT mm) {
-	return floor((float)mm / (float)19300 * (float)4000);
-}
 UINT CLaserModule::threadReadPacket(LPVOID param) {
 	CLaserModule* pRJController = (CLaserModule*)param;
 	BYTE recvBuf[MAX_PATH];
@@ -249,19 +246,4 @@ void CLaserModule::handlePacket() {
 	default:
 		break;
 	}
-}
-bool CLaserModule::writeMotor(BYTE* packet, int size) {
-	if (!m_initMotor) return false;
-
-	BYTE serialPacket[MAX_PATH];
-	int packetLength;
-	getSerialPacket(eFID::FID_BLDC_PASS, size, serialPacket, packetLength);
-	memcpy(serialPacket + DATA_IDX, packet, size);
-
-	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
-	serialPacket[packetLength - 2] = checksum;
-
-	int written = m_pConnection->Write(serialPacket, packetLength);
-
-	return (written == packetLength);
 }

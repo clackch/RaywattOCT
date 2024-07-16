@@ -40,12 +40,9 @@ public:
 
 	bool AutoStatePeriod(USHORT interval);
 	bool StopStepMotors();
-
-	int ConvertMMtoStep(UINT mm);
 protected:
 	static UINT threadReadPacket(LPVOID param);
 	void parseSMPacket(BYTE* packet, int size);
 	virtual void handlePacket();
-	virtual bool writeMotor(BYTE* packet, int size);
 };
 
