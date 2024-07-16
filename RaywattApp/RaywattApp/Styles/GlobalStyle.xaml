@@ -142,12 +142,12 @@
         <Setter Property="FontSize" Value="80"/>
     </Style>
 
-    <Style TargetType="Control" x:Key="Pretendard-Bold-74">
+    <Style TargetType="Control" x:Key="Pretendard-Bold-72">
         <Setter Property="Padding" Value="0,0,0,0"/>
         <Setter Property="FontFamily" Value="Pretendard"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="FontStyle" Value="Normal"/>
-        <Setter Property="FontSize" Value="74"/>
+        <Setter Property="FontSize" Value="72"/>
     </Style>
 
     <Style TargetType="Control" x:Key="Pretendard-Bold-64">
@@ -188,6 +188,14 @@
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="FontStyle" Value="Normal"/>
         <Setter Property="FontSize" Value="38"/>
+    </Style>
+
+    <Style TargetType="Control" x:Key="Pretendard-Bold-36">
+        <Setter Property="Padding" Value="0,0,0,0"/>
+        <Setter Property="FontFamily" Value="Pretendard"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontStyle" Value="Normal"/>
+        <Setter Property="FontSize" Value="36"/>
     </Style>
 
     <Style TargetType="Control" x:Key="Pretendard-Bold-32">
@@ -420,6 +428,22 @@
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="FontStyle" Value="Normal"/>
         <Setter Property="FontSize" Value="40"/>
+    </Style>
+
+    <Style TargetType="TextBlock" x:Key="TextBlock_Pretendard-Bold-28">
+        <Setter Property="Padding" Value="0,0,0,0"/>
+        <Setter Property="FontFamily" Value="Pretendard"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontStyle" Value="Normal"/>
+        <Setter Property="FontSize" Value="28"/>
+    </Style>
+
+    <Style TargetType="TextBlock" x:Key="TextBlock_Pretendard-Bold-26">
+        <Setter Property="Padding" Value="0,0,0,0"/>
+        <Setter Property="FontFamily" Value="Pretendard"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontStyle" Value="Normal"/>
+        <Setter Property="FontSize" Value="26"/>
     </Style>
 
     <Style TargetType="TextBlock" x:Key="TextBlock_Pretendard-Bold-24">
