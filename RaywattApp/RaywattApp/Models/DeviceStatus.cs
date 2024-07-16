@@ -61,6 +61,9 @@ namespace RaywattApp.Models
         private bool _isOCTImagingCompareDone = true;
 
         [ObservableProperty]
+        private bool _isFfrCalculated = true;
+
+        [ObservableProperty]
         private bool _isPaused = true;
 
         [ObservableProperty]

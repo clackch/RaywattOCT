@@ -16,5 +16,8 @@ namespace RaywattApp.Views.Component
 
         public static DependencyProperty IsOCTImagingDoneProperty = DependencyProperty.Register("IsOCTImagingDone", typeof(bool), typeof(MenuUnableComponent));
         public bool IsOCTImagingDone { get => (bool)GetValue(IsOCTImagingDoneProperty); set => SetValue(IsOCTImagingDoneProperty, value); }
+
+        public static DependencyProperty IsFfrCalculatedProperty = DependencyProperty.Register("IsFfrCalculated", typeof(bool), typeof(MenuUnableComponent));
+        public bool IsFfrCalculated { get => (bool)GetValue(IsFfrCalculatedProperty); set => SetValue(IsFfrCalculatedProperty, value); }
     }
 }
