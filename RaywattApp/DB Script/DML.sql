@@ -38,17 +38,17 @@ INSERT INTO rv_schema.code( classification, key, value, sort_order, description,
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PROC', '$002', 'Post-PCI', 2, 'Procedure Post-PCI', now(), now());
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PROC', '$003', 'Follow-Up', 3, 'Procedure Follow-Up', now(), now());
 -- VESSEL
-INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('VESS', '$000', 'Not Selected', 0, 'Vessel Not Selected', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('VESS', '$001', 'Left Main', 1, 'Vessel Left Main', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('VESS', '$002', 'LAD', 2, 'Vessel LAD', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('VESS', '$003', 'Diagonal 1', 3, 'Vessel Diagonal 1', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('VESS', '$004', 'Diagonal 2', 4, 'Vessel Diagonal 2', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('VESS', '$005', 'LCX', 5, 'Vessel LCX', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('VESS', '$006', 'LCX OM1', 6, 'Vessel LCX OM1', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('VESS', '$007', 'LCX OM2', 7, 'Vessel LCX OM2', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('VESS', '$008', 'RCA', 8, 'Vessel RCA', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('VESS', '$009', 'PDA', 9, 'Vessel PDA', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('VESS', '$OTH', 'Other', 10, 'Vessel Other', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, buffer1, buffer2, sort_order, description, create_date, update_date) VALUES ('VESS', '$000', 'Not Selected', '$000', '', 0, 'Vessel Not Selected', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, buffer1, buffer2, sort_order, description, create_date, update_date) VALUES ('VESS', '$001', 'Left Main', '$001', '', 1, 'Vessel Left Main', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, buffer1, buffer2, sort_order, description, create_date, update_date) VALUES ('VESS', '$002', 'LAD', '$002', '', 2, 'Vessel LAD', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, buffer1, buffer2, sort_order, description, create_date, update_date) VALUES ('VESS', '$003', 'Diagonal 1', '$002', 'D1', 3, 'Vessel Diagonal 1', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, buffer1, buffer2, sort_order, description, create_date, update_date) VALUES ('VESS', '$004', 'Diagonal 2', '$002', 'D2', 4, 'Vessel Diagonal 2', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, buffer1, buffer2, sort_order, description, create_date, update_date) VALUES ('VESS', '$005', 'LCX', '$005', '', 5, 'Vessel LCX', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, buffer1, buffer2, sort_order, description, create_date, update_date) VALUES ('VESS', '$006', 'Obtuse Marginal 1', '$005', 'OM1', 6, 'Vessel LCX OM1', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, buffer1, buffer2, sort_order, description, create_date, update_date) VALUES ('VESS', '$007', 'Obtuse Marginal 2', '$005', 'OM2', 7, 'Vessel LCX OM2', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, buffer1, buffer2, sort_order, description, create_date, update_date) VALUES ('VESS', '$008', 'RCA', '$008', '', 8, 'Vessel RCA', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, buffer1, buffer2, sort_order, description, create_date, update_date) VALUES ('VESS', '$009', 'PDA', '$008', 'PDA', 9, 'Vessel PDA', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, buffer1, buffer2, sort_order, description, create_date, update_date) VALUES ('VESS', '$OTH', 'Other', '$OTH', '', 10, 'Vessel Other', now(), now());
 -- LOCATION
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('LOCT', '$000', 'Not Selected', 0, 'Location Not Selected', now(), now());
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('LOCT', '$001', 'Proximal', 1, 'Location Proximal', now(), now());
