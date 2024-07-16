@@ -134,4 +134,7 @@
     <!-- CrossSection Translate Converter -->
     <converters:CoRegistrationTranslateConverter x:Key="CoRegistrationTranslateConverter" />
 
+    <!--  FFR Step Visibility Conveter  -->
+    <converters:FfrStepVisibilityConveter x:Key="FfrStepVisibilityConveter" />
+
 </ResourceDictionary>
