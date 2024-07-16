@@ -116,8 +116,11 @@ namespace RaywattApp.Common.Annotation
                 }
                 else//Point 없을 경우, Disable Command 처리
                 {
-                    DisableCommand();
-                    CommandOff = true;
+                    if (!IsFfr)
+                    {
+                        DisableCommand();
+                        CommandOff = true;
+                    }
                 }
             }
         }
@@ -312,6 +315,11 @@ namespace RaywattApp.Common.Annotation
                 this.areaGeometrys.RemoveAt(group);
 
                 DrawAreaAll();
+
+                if (IsFfr)
+                {
+                    AddArea("True");
+                }
             }
         }
 
@@ -387,7 +395,8 @@ namespace RaywattApp.Common.Annotation
             foreach (var areaGeometry in this.areaGeometrys)
             {
                 DrawCurve(areaGeometry, false);
-                if(IsEditOn)
+
+                if (IsEditOn)
                     DrawRectangle(areaGeometry);
                 else
                     DrawLabel(areaGeometry);
@@ -397,7 +406,7 @@ namespace RaywattApp.Common.Annotation
         private void DrawCurve(AreaGeometry areaGeometry, bool isCurrentEditOn = true) {
             areaGeometry.Path = DrawCurve(areaGeometry.Points, areaGeometry.IsClosed, areaGeometry.Group);
 
-            if (IsEditOn && isCurrentEditOn)
+            if (IsFfr)
             {
                 if (areaGeometry.IsClosed)
                 {
@@ -408,15 +417,40 @@ namespace RaywattApp.Common.Annotation
                     ContourMeasurement measurement = new ContourMeasurement();
                     measurement.Measure(areaGeometry, imageContour);
 
-                    measurement.CalculateDiameter(areaGeometry);
-                    DrawDiameter(areaGeometry.MinDiameter.point1, areaGeometry.MinDiameter.point2, areaGeometry.Group, constMinDiameter);
-                    DrawDiameter(areaGeometry.MaxDiameter.point1, areaGeometry.MaxDiameter.point2, areaGeometry.Group, constMaxDiameter);
+                    FfrFeature.IsPlaqueAreaValid = false;
+
+                    if (areaGeometry.Valid)
+                    {
+                        FfrFeature.PlaqueArea = areaGeometry.Area;
+                        FfrFeature.PercentAreaStenosis = (FfrFeature.PlaqueArea - FfrFeature.MinimalLumenArea) / FfrFeature.PlaqueArea * 100;
+                        if(FfrFeature.PercentAreaStenosis > 0)
+                            FfrFeature.IsPlaqueAreaValid = true;
+                    }
                 }
             }
             else
             {
-                DrawDiameter(areaGeometry.MinDiameter.point1, areaGeometry.MinDiameter.point2, areaGeometry.Group, constMinDiameter);
-                DrawDiameter(areaGeometry.MaxDiameter.point1, areaGeometry.MaxDiameter.point2, areaGeometry.Group, constMaxDiameter);
+                if (IsEditOn && isCurrentEditOn)
+                {
+                    if (areaGeometry.IsClosed)
+                    {
+                        areaGeometry.MaxDiameter = new DiameterInfo();
+                        areaGeometry.MinDiameter = new DiameterInfo();
+                        areaGeometry.MeanDiameter = 0.0f;
+
+                        ContourMeasurement measurement = new ContourMeasurement();
+                        measurement.Measure(areaGeometry, imageContour);
+
+                        measurement.CalculateDiameter(areaGeometry);
+                        DrawDiameter(areaGeometry.MinDiameter.point1, areaGeometry.MinDiameter.point2, areaGeometry.Group, constMinDiameter);
+                        DrawDiameter(areaGeometry.MaxDiameter.point1, areaGeometry.MaxDiameter.point2, areaGeometry.Group, constMaxDiameter);
+                    }
+                }
+                else
+                {
+                    DrawDiameter(areaGeometry.MinDiameter.point1, areaGeometry.MinDiameter.point2, areaGeometry.Group, constMinDiameter);
+                    DrawDiameter(areaGeometry.MaxDiameter.point1, areaGeometry.MaxDiameter.point2, areaGeometry.Group, constMaxDiameter);
+                }
             }
         }
 
@@ -506,6 +540,9 @@ namespace RaywattApp.Common.Annotation
 
         private void DrawLabel(AreaGeometry areaGeometry)
         {
+            if (IsFfr)
+                return;
+
             //Label 삭제
             DeleteLabel(constArea, areaGeometry.Group);
 
@@ -545,6 +582,13 @@ namespace RaywattApp.Common.Annotation
                 DeleteLabel(constArea, areaGeometry.Group);
             }
             this.canvasBackground.Children.Clear();
+
+            if (IsFfr)
+            {
+                FfrFeature.PlaqueArea = 0;
+                FfrFeature.PercentAreaStenosis = 0;
+                FfrFeature.IsPlaqueAreaValid = false;
+            }
         }
 
         private void DeleteCurve(int group)
