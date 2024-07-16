@@ -17,14 +17,10 @@ using static RaywattOCT.Ray3DWrapper;
 using System.Runtime.InteropServices;
 using RaywattApp.Common.Util;
 using System.Threading;
-using Newtonsoft.Json.Linq;
-using System.Diagnostics;
-using RaywattApp.Common.Annotation.Models;
-using SharpDX;
 
 namespace RaywattApp.ViewModels
 {
-    
+
     public partial class Review3dViewModel : ReviewViewModelBase, IModelessPatient
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(Review3dViewModel));
