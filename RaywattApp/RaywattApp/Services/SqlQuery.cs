@@ -298,7 +298,7 @@ namespace RaywattApp.Services
                 SET physician_name=@physician_name, accession_number=@accession_number
                 , comment=@comment, vessel=@vessel, location=@location, procedure=@procedure
                 , angio_yn=@angio_yn, angio_co_registration=@angio_co_registration, indicator_degree=@indicator_degree
-                , colormap=@colormap
+                , colormap=@colormap, field_of_view=@field_of_view
                 , calcium_threshold=@calcium_threshold, expansion_calculation=@expansion_calculation
                 , expansion_threshold=@expansion_threshold, apposition_threshold=@apposition_threshold
                 , brightness=@brightness, contrast=@contrast, section_proximal=@section_proximal, section_distal=@section_distal
