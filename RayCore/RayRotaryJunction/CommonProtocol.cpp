@@ -12,7 +12,7 @@ bool ICommonProtocol::sliceUntilSTX(int index)
 	bool findSTX = false;
 	std::vector<char> vPacket;
 	for (int i = index; i < m_vPacket.size(); i++) {
-		if (m_vPacket[i] == STX) findSTX = true;
+		if (m_vPacket[i] == m_stx) findSTX = true;
 		if (findSTX) vPacket.push_back(m_vPacket[i]);
 	}
 
@@ -27,13 +27,13 @@ bool ICommonProtocol::sliceUntilSTX(int index)
 bool ICommonProtocol::parseSerialPacket() {
 	if (m_vPacket.size() > 0) {
 		bool findSTX = true;
-		if (m_vPacket[0] != STX) {
+		if (m_vPacket[0] != m_stx) {
 			findSTX = sliceUntilSTX(1);
 		}
 
 		if (findSTX) {
 			for (int idxETX = 0; idxETX < m_vPacket.size(); idxETX++) {
-				if (m_vPacket[idxETX] == ETX)
+				if (m_vPacket[idxETX] == m_etx)
 				{
 					BYTE length = m_vPacket[LENGTH_IDX];
 					if (idxETX != (length - 1)) continue;
@@ -60,13 +60,13 @@ void ICommonProtocol::getSerialPacket(eFID fid, int dataSize, BYTE* packet, int&
 
 	packetLength = dataSize + HEADER_LEN;
 
-	packet[0] = STX;
+	packet[0] = m_stx;
 	packet[LENGTH_IDX] = (BYTE)packetLength;
 	packet[FID_IDX] = (BYTE)fid;
 	packet[RET_IDX] = 0;
 	packet[PHOTO_IDX] = 0;
 	packet[KEY_IDX] = 0;
-	packet[packetLength - 1] = ETX;
+	packet[packetLength - 1] = m_etx;
 }
 BYTE ICommonProtocol::calcChecksum(BYTE* packet, int length) {
 	unsigned int crc = 0x00;

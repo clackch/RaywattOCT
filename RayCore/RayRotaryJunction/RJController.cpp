@@ -4,6 +4,7 @@
 #include "MessageService.h"
 
 CRJController::CRJController()
+	:ICommonProtocol(RJ_STX, RJ_ETX)
 {
 	m_pMsg = nullptr;
 	m_pThreadState = nullptr;
@@ -408,11 +409,9 @@ void CRJController::handlePacket() {
 	char strTime[MAX_PATH];
 	CUtility::GetCurTime(strTime);
 
-	printf("%s\tFID: 0x%02x Sensor: ", strTime, fid);
 	// photo sensor state
 	for (int i = 0; i < 6; i++) {
 		m_bPhotoSensor[i] = m_vPacket[PHOTO_IDX] & (0x1 << i);
-		printf(" %02d", m_bPhotoSensor[i]);
 	}
 	
 	// button, switch state

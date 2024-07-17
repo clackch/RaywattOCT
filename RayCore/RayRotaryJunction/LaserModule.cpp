@@ -4,11 +4,13 @@
 #include <chrono>
 
 CLaserModule::CLaserModule()
+	:ICommonProtocol(CM_STX, CM_ETX)
 {
 	m_nStepPosition[0] = 0;
 	m_nStepPosition[1] = 0;
 	m_nStepSpeed[0] = 0;
 	m_nStepSpeed[1] = 0;
+	m_nVOA = m_nVLD = 0;
 
 	m_nActualPosition[0] = 0;
 	m_nActualPosition[1] = 0;
@@ -29,6 +31,7 @@ bool CLaserModule::Connect(void* param) {
 	m_pConnection = new CCOMConnection();
 	m_initMotor = m_pConnection->Connect(param);
 	if (m_initMotor) {
+		AutoStatePeriod(10);
 		BOOL result = CUtility::StartThread(threadReadPacket, m_pThread, (LPVOID)this);
 
 		if (result == FALSE) {
@@ -96,22 +99,26 @@ bool CLaserModule::Current(eStepMotorIndex idxMotor, int posStep) {
 bool CLaserModule::Move(eStepMotorIndex idxMotor, int posStep, bool delay, char sensor) {
 	if (!m_initMotor) return false;
 
-	PLOGI.printf("StepMotor #%d Move: %d", idxMotor, posStep);
+	PLOGI.printf("StepMotor #%d Move: %d (Speed - #1: %d, #2: %d step/s", idxMotor, posStep, m_nStepSpeed[0], m_nStepSpeed[1]);
 
+	char sensorStop[2] = { 0x00, 0x00 };
 	if (idxMotor == eStepMotorIndex::Both) {
 		m_nStepPosition[0] = posStep;
 		m_nStepPosition[1] = posStep;
 		m_isSMMoving[0] = true;
 		m_isSMMoving[1] = true;
+		sensorStop[0] = sensor;
+		sensorStop[1] = sensor;
 	}
 	else {
 		m_nStepPosition[(int)idxMotor - 1] = posStep;
 		m_isSMMoving[(int)idxMotor - 1] = true;
+		sensorStop[(int)idxMotor - 1] = sensor;
 	}
 
 	BYTE serialPacket[MAX_PATH];
 	int packetLength;
-	getSerialPacket(eFID::FID_SM_RUN, sizeof(int) * 4, serialPacket, packetLength);
+	getSerialPacket(eFID::FID_SM_RUN, sizeof(int) * 4 + 2, serialPacket, packetLength);
 
 	int idxData = DATA_IDX;
 	memcpy(serialPacket + idxData, &m_nStepPosition[0], sizeof(int));
@@ -121,8 +128,10 @@ bool CLaserModule::Move(eStepMotorIndex idxMotor, int posStep, bool delay, char 
 	memcpy(serialPacket + idxData, &m_nStepSpeed[0], sizeof(int));
 	idxData += sizeof(int);
 	memcpy(serialPacket + idxData, &m_nStepSpeed[1], sizeof(int));
-
-	serialPacket[PHOTO_IDX] = sensor;
+	idxData += sizeof(char);
+	memcpy(serialPacket + idxData, &sensorStop[0], sizeof(char));
+	idxData += sizeof(char);
+	memcpy(serialPacket + idxData, &sensorStop[1], sizeof(char));
 
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
@@ -157,14 +166,30 @@ int CLaserModule::MoveRelative(eStepMotorIndex idxMotor, int nOffset) {
 
 	return nPosition;
 }
+void CLaserModule::SetVOA(unsigned short voa) {
+	m_nVOA = voa;
+	setVOAVLD();
+}
+void CLaserModule::SetVLD(unsigned short vld) {
+	m_nVLD = vld;
+	setVOAVLD();
+}
 bool CLaserModule::AutoStatePeriod(USHORT interval) {
 	if (!m_initMotor) return false;
 
 	BYTE serialPacket[MAX_PATH];
 	int packetLength;
-	getSerialPacket(eFID::FID_SET_AUTO_PERIOD, sizeof(unsigned short), serialPacket, packetLength);
+	getSerialPacket(eFID::FID_SET_AUTO_PERIOD, sizeof(unsigned short) * 2 + 1, serialPacket, packetLength);
 
-	memcpy(serialPacket + DATA_IDX, &interval, sizeof(unsigned short));
+	const char chkAutoByChanged = false;
+	const unsigned short autoHoldOff = 10;
+
+	int idxData = DATA_IDX;
+	memcpy(serialPacket + idxData, &interval, sizeof(unsigned short));
+	idxData += sizeof(unsigned short);
+	memcpy(serialPacket + idxData, &chkAutoByChanged, sizeof(char));
+	idxData += sizeof(char);
+	memcpy(serialPacket + idxData, &autoHoldOff, sizeof(unsigned short));
 
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
@@ -222,6 +247,26 @@ void CLaserModule::parseSMPacket(BYTE* packet, int size) {
 		offset += 12;	// current pos (4byte), target pos (4byte), current speed (4byte)
 	}
 }
+void CLaserModule::setVOAVLD()
+{
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	getSerialPacket(eFID::FID_SET_VOAVLD, sizeof(unsigned short) * 2, serialPacket, packetLength);
+
+	memcpy(serialPacket + DATA_IDX, &m_nVOA, sizeof(unsigned short));
+	memcpy(serialPacket + DATA_IDX + 2, &m_nVLD, sizeof(unsigned short));
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	PLOGI.printf("VOA: %d, VLD: %d", m_nVOA, m_nVLD);
+	if (written != packetLength)
+	{
+		PLOGI.printf("Written size is not matched. (%d / %d bytes)", written, packetLength);
+	}
+}
 void CLaserModule::handlePacket() {
 	BYTE length = m_vPacket[LENGTH_IDX];
 	int dataLength = length - HEADER_LEN;
@@ -230,14 +275,10 @@ void CLaserModule::handlePacket() {
 	char strTime[MAX_PATH];
 	CUtility::GetCurTime(strTime);
 
-	printf("%s\tFID: 0x%02x Sensor: ", strTime, fid);
 	// photo sensor state
 	for (int i = 0; i < 6; i++) {
 		m_bPhotoSensor[i] = m_vPacket[PHOTO_IDX] & (0x1 << i);
-		printf(" %02d", m_bPhotoSensor[i]);
 	}
-
-	//PLOGI.printf("\tButton: %02d %02d %02d\n", m_bButton[0], m_bButton[1], m_bLimitSwitch);
 
 	switch (fid) {
 	case eFID::FID_SM_GET_STATE:

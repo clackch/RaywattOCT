@@ -3,8 +3,10 @@
 #include "Config.h"
 #include <vector>
 
-#define STX		0xA3
-#define ETX		0xE4
+#define RJ_STX		0xA3
+#define RJ_ETX		0xE4
+#define CM_STX		0xA4
+#define CM_ETX		0xE3
 #define LENGTH_IDX	1
 #define FID_IDX		2
 #define RET_IDX		3
@@ -82,7 +84,12 @@ enum class eStepMotorIndex : UINT
 
 class ICommonProtocol {
 protected:
+	BYTE m_stx, m_etx;
 	std::vector<BYTE> m_vPacket;
+
+public:
+	ICommonProtocol(BYTE stx, BYTE etx) { m_stx = stx; m_etx = etx; }
+	virtual ~ICommonProtocol() {}
 
 protected:
 	virtual void handlePacket() = 0;
