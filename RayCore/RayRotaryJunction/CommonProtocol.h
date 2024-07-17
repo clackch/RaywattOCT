@@ -76,9 +76,9 @@ enum class eStepMotorIndex : UINT
 {
 	Both = 0,
 	Pullback = 1,
-	DelayLine = 1,
+	Polarization = 1,
 	Hub = 2,
-	Polarization = 2,
+	DelayLine = 2,
 	Max
 };
 
