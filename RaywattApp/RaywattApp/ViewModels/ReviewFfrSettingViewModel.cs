@@ -16,6 +16,8 @@ using RaywattApp.Common.Annotation.Models;
 using System.Collections.ObjectModel;
 using RaywattApp.Services;
 using System.Linq;
+using Newtonsoft.Json;
+using System.Diagnostics.Metrics;
 
 namespace RaywattApp.ViewModels
 {
@@ -186,7 +188,15 @@ namespace RaywattApp.ViewModels
                 //PlaqueAreaList
                 if (FfrFeature.PlaqueAreaList == null)
                 {
-                    PlaqueAreaList = new List<Measurement>();
+                    Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+                    sqlParameters["id"] = PatientCase.Id;
+                    IList<StringModel> ffrPlaques = _sqlManager.SelectPatientCaseFfrPlaque(sqlParameters);
+
+                    if (ffrPlaques[0].ReturnString == null)
+                        PlaqueAreaList = new List<Measurement>();
+                    else
+                        PlaqueAreaList = JsonConvert.DeserializeObject<List<Measurement>>(ffrPlaques[0].ReturnString);
+                    
                     for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)
                     {
                         Measurement measurement = new Measurement();
@@ -196,6 +206,7 @@ namespace RaywattApp.ViewModels
                         measurement.TextGeometries = new List<TextGeometry>();
                         PlaqueAreaList.Add(measurement);
                     }
+                    PlaqueAreaList = PlaqueAreaList.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
                 }
                 else
                 {
@@ -292,6 +303,8 @@ namespace RaywattApp.ViewModels
                     IsDrawOn = true;
                     if (PlaqueAreaList[FrameNumber].AreaGeometries.Count == 0)
                         MeasurementCommand = Constants.MeasureAddArea + "|" + true;
+                    else
+                        MeasurementCommand = Constants.MeasureReDraw;
                     MeasurementCommand = null;
 
                     FfrStep = Constants.FfrStep4;
@@ -362,13 +375,46 @@ namespace RaywattApp.ViewModels
             PatientCase.FfrFeature.PercentAreaStenosis = FfrFeature.PercentAreaStenosis;
             PatientCase.FfrFeature.PlaqueAreaList = PlaqueAreaList;
 
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["patient"] = Patient;
-            parameter["patientCase"] = PatientCase;
-            parameter["prevStatus"] = PrevStatus;
-            parameter["reviewStatus"] = ReviewStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewFfrPage) { Parameter = parameter });
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["id"] = PatientCase.Id;
+            sqlParameters["ffr_plaque"] = ConvertMeasurementsToJson(PlaqueAreaList);
+            int nRows = _sqlManager.UpdatePatientCaseFfrPlaque(sqlParameters);
+            
+            if(nRows == 0)
+            {
+                _log.Error("Update Error");
+            }
+            else
+            {
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["patient"] = Patient;
+                parameter["patientCase"] = PatientCase;
+                parameter["prevStatus"] = PrevStatus;
+                parameter["reviewStatus"] = ReviewStatus;
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewFfrPage) { Parameter = parameter });
+            }
         }
+
+        private string ConvertMeasurementsToJson(List<Measurement> param)
+        {
+            List<Measurement> measurements = new List<Measurement>();
+
+            //Cross-section
+            foreach (Measurement measurement in param)
+            {
+                if (measurement.AreaGeometries.Count > 0)
+                {
+                    foreach (AreaGeometry geometry in measurement.AreaGeometries)
+                    {
+                        geometry.Path = null;
+                    }
+                    measurements.Add(measurement);
+                }
+            }
+
+            return JsonConvert.SerializeObject(measurements, Newtonsoft.Json.Formatting.Indented);
+        }
+
 
         private void Delete()
         {

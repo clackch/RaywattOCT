@@ -159,6 +159,7 @@ namespace RaywattApp.Services
                 , T1.create_date, T1.update_date
                 , bookmark, longitude, cross_section
                 , lumen_contour as str_lumen_contour, lumen_sidebranch as str_lumen_sidebranch, lumen_stent as str_lumen_stent, lumen_guidewire as str_lumen_guidewire
+                , ffr_plaque
                 FROM rv_schema.patient_case T1 LEFT JOIN rv_schema.patient_case_annotation T2 ON T1.id = T2.id
                 ";
 
@@ -186,6 +187,13 @@ namespace RaywattApp.Services
             //SelectPatientCaseAnnotation
             _query["SelectPatientCaseAnnotation"] = @$"
                 SELECT id, bookmark, longitude, cross_section, lumen_contour, lumen_sidebranch, lumen_stent, lumen_guidewire
+                FROM rv_schema.patient_case_annotation
+                WHERE id = @id
+                ";
+
+            //SelectPatientCaseFfrPlaque
+            _query["SelectPatientCaseFfrPlaque"] = @$"
+                SELECT ffr_plaque return_string
                 FROM rv_schema.patient_case_annotation
                 WHERE id = @id
                 ";
@@ -312,6 +320,13 @@ namespace RaywattApp.Services
                 WHERE id = @id
                 ";
 
+            //UpdatePatientCaseAnnotationLumenContour
+            _query["UpdatePatientCaseFfrPlaque"] = @$"
+                UPDATE rv_schema.patient_case_annotation
+                SET ffr_plaque=@ffr_plaque
+                WHERE id = @id
+                ";
+
             //UpdatePhysician
             _query["UpdatePhysician"] = @$"
                 UPDATE rv_schema.physician
@@ -393,12 +408,12 @@ namespace RaywattApp.Services
 
             //UpsertPatientCaseAnnotation
             _query["UpsertPatientCaseAnnotation"] = @$"
-                INSERT INTO rv_schema.patient_case_annotation(id, bookmark, longitude, cross_section, lumen_contour, lumen_sidebranch, lumen_stent, lumen_guidewire, create_date, update_date)
-                VALUES (@id, @bookmark, @longitude, @cross_section, @lumen_contour, @lumen_sidebranch, @lumen_stent, @lumen_guidewire, now(), now())
+                INSERT INTO rv_schema.patient_case_annotation(id, bookmark, longitude, cross_section, lumen_contour, lumen_sidebranch, lumen_stent, lumen_guidewire, ffr_plaque, create_date, update_date)
+                VALUES (@id, @bookmark, @longitude, @cross_section, @lumen_contour, @lumen_sidebranch, @lumen_stent, @lumen_guidewire, @ffr_plaque, now(), now())
                 ON CONFLICT (id)
                 DO UPDATE
                 SET bookmark=@bookmark, longitude=@longitude, cross_section=@cross_section
-                , lumen_contour=@lumen_contour, lumen_sidebranch=@lumen_sidebranch, lumen_stent=@lumen_stent, lumen_guidewire=@lumen_guidewire, update_date=now()
+                , lumen_contour=@lumen_contour, lumen_sidebranch=@lumen_sidebranch, lumen_stent=@lumen_stent, lumen_guidewire=@lumen_guidewire, ffr_plaque=@ffr_plaque, update_date=now()
                 ";
 
             //UpsertCoRegistration

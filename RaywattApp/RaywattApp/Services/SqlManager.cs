@@ -330,6 +330,9 @@ namespace RaywattApp.Services
             return _databaseService.InsertData(commandText, sqlParameters);
         }
 
+        /**
+         * Patient Case Annotation
+         */
         public IList<PatientCaseAnnotation> SelectPatientCaseAnnotation(Dictionary<string, Object> sqlParameters)
         {
             _log.Debug("SelectPatientCaseAnnotation");
@@ -339,9 +342,6 @@ namespace RaywattApp.Services
             return _databaseService.GetDatas<PatientCaseAnnotation>(commandText, sqlParameters);
         }
 
-        /**
-         * Patient Case Annotation
-         */
         public int UpdatePatientCaseAnnotationLumenContour(Dictionary<string, Object> sqlParameters)
         {
             _log.Debug("UpdatePatientCaseAnnotationLumenContour");
@@ -365,6 +365,24 @@ namespace RaywattApp.Services
             _log.Debug("UpsertPatientCaseAnnotation");
 
             string commandText = SqlQuery.GetQuery("UpsertPatientCaseAnnotation");
+
+            return _databaseService.InsertData(commandText, sqlParameters);
+        }
+
+        public IList<StringModel> SelectPatientCaseFfrPlaque(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("SelectPatientCaseFfrPlaque");
+
+            string commandText = SqlQuery.GetQuery("SelectPatientCaseFfrPlaque");
+
+            return _databaseService.GetDatas<StringModel>(commandText, sqlParameters);
+        }
+
+        public int UpdatePatientCaseFfrPlaque(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpdatePatientCaseFfrPlaque");
+
+            string commandText = SqlQuery.GetQuery("UpdatePatientCaseFfrPlaque");
 
             return _databaseService.InsertData(commandText, sqlParameters);
         }

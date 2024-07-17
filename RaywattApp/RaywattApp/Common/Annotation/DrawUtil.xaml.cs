@@ -256,13 +256,24 @@ namespace RaywattApp.Common.Annotation
         {
             _log.Debug("DrawAll");
 
-            if (this.areaGeometrys == null || this.lengthGeometries == null || this.textGeometries == null)
-                return;
+            if (IsFfr)
+            {
+                if (this.areaGeometrys == null)
+                    return;
 
-            this.canvas.Children.Clear();
-            DrawAreaAll();
-            DrawLengthAll();
-            DrawTextAll();
+                this.canvas.Children.Clear();
+                DrawAreaAll();
+            }
+            else
+            {
+                if (this.areaGeometrys == null || this.lengthGeometries == null || this.textGeometries == null)
+                    return;
+
+                this.canvas.Children.Clear();
+                DrawAreaAll();
+                DrawLengthAll();
+                DrawTextAll();
+            }
         }
 
         private void DeleteAll()

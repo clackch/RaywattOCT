@@ -27,5 +27,8 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private string? _lumenGuidewire;
+
+        [ObservableProperty]
+        private string? _ffrPlaque;
     }
 }
