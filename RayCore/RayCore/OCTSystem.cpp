@@ -168,27 +168,17 @@ RayError COCTSystem::Stop() {
 		m_pVolume = nullptr;
 	}
 
-	PLOGI.printf("Laser Off");
-	CLaserController* pLaser = CLaserController::GetInstance();
-	pLaser->LaserOnOff(false);
-
-	PLOGI.printf("Stop Motor");
-	m_pRJController->StopMotor();
-	m_pRJController->SwitchOff();
-	m_pRJController->Disconnect();
+	PLOGI.printf("Finalize Motor");
 	if (m_pRJController != nullptr) {
 		delete m_pRJController;
 		m_pRJController = nullptr;
 	}
 
-	PLOGI.printf("Close COM Ports");
-	if (m_pLaserModule->IsConnected()) {
-		m_pLaserModule->SetVLD(0);
-		m_pLaserModule->SetVOA(0);
-		m_pLaserModule->Disconnect();
+	PLOGI.printf("Finalize LaserModule");
+	if (m_pLaserModule != nullptr) {
+		delete m_pLaserModule;
+		m_pLaserModule = nullptr;
 	}
-	delete m_pLaserModule;
-	m_pLaserModule = nullptr;
 
 	return RayError::OK;
 }
@@ -1672,6 +1662,7 @@ int COCTSystem::connectRotaryJunction() {
 	if (!m_pLaserModule->IsConnected()) {
 		result = m_pLaserModule->Connect(config.laserModule.port);
 		if (result) {
+			m_pLaserModule->Set(eStepMotorIndex::Both, CALIBRATION_MODULE_SM_DEFAULT_SPEED);
 			m_pLaserModule->SetVLD(0);
 			Sleep(500);
 			m_pLaserModule->SetVOA(config.laserModule.voaValue);
@@ -1699,8 +1690,13 @@ int COCTSystem::connectRotaryJunction() {
 */
 int COCTSystem::disconnectRotaryJunction() {
 	bool result = true;
+
+	PLOGI.printf("Laser Off");
+	CLaserController* pLaser = CLaserController::GetInstance();
+	pLaser->LaserOnOff(false);
 	
 	if (m_pRJController->IsConnected()) {
+		result &= m_pRJController->StopMotor();
 		result &= m_pRJController->SwitchOff();
 	}
 
@@ -1713,9 +1709,11 @@ int COCTSystem::disconnectRotaryJunction() {
 		}
 	}
 
-	//if (m_pLaserModule->IsOpen()) {
-	//	m_pLaserModule->Home(-100000, 10000);
-	//}
+	if (m_pLaserModule->IsConnected()) {
+		//m_pLaserModule->Home(-100000, 10000);
+		m_pLaserModule->SetVLD(0);
+		m_pLaserModule->SetVOA(0);
+	}
 
 	m_pRJController->Disconnect();
 	m_pLaserModule->Disconnect();
