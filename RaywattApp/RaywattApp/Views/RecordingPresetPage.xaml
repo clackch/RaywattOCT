@@ -3,6 +3,8 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+      xmlns:behaviors="clr-namespace:RaywattApp.Common.Behaviors"
       xmlns:local="clr-namespace:RaywattApp.Views"
       mc:Ignorable="d" 
       d:DesignHeight="1024" d:DesignWidth="1280"
@@ -20,118 +22,142 @@
             <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Margin="75,20,0,19" Content="{Binding [New Recording], Source={StaticResource L10N}}"/>
         </Grid>
 
-        <Grid Grid.Row="1" Margin="160,62,160,62">
+        <Grid Grid.Row="1" Margin="60,40,60,40">
             <Grid.RowDefinitions>
-                <RowDefinition Height="725"/>
+                <RowDefinition Height="769"/>
                 <RowDefinition Height="1"/>
                 <RowDefinition Height="74"/>
             </Grid.RowDefinitions>
-            <Border Grid.Row="0" CornerRadius="10,10,0,0" BorderThickness="0" Background="{DynamicResource GrayscaleGray6Brush}">
-                <Grid Margin="50,56,50,0">
+            <Border Grid.Row="0" CornerRadius="10,10,0,0" Background="{DynamicResource GrayscaleGray7Brush}">
+                <Grid Margin="40,44,40,0">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="189"/>
+                        <RowDefinition Height="38"/>
+                        <RowDefinition Height="14"/>
                         <RowDefinition Height="1"/>
+                        <RowDefinition Height="24"/>
                         <RowDefinition/>
+                        <RowDefinition Height="30"/>
                     </Grid.RowDefinitions>
-                    <!-- Pullback -->
                     <Grid Grid.Row="0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="451"/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="46"/>
-                            <RowDefinition Height="25"/>
-                            <RowDefinition Height="54"/>
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <Label Grid.Row="0" Style="{DynamicResource Pretendard-Semibold-22}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Pullback], Source={StaticResource L10N}}"/>
-                        <Label Grid.Row="1" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Flush Media], Source={StaticResource L10N}}"/>
-                        <Label Grid.Row="1" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Type], Source={StaticResource L10N}}"/>
-                        <ComboBox Grid.Row="2" Grid.Column="0" Width="408" ItemsSource="{Binding FlushMediaList}" SelectedValue="{Binding SelectedFlushMedia, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" Tag="{Binding [Select Flush Media], Source={StaticResource L10N}}" HorizontalAlignment="Left"/>
-                        <ComboBox Grid.Row="2" Grid.Column="1" Width="408" ItemsSource="{Binding PullbackTypeList}" SelectedValue="{Binding SelectedPullbackType, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" Tag="{Binding [Select Pullback Type], Source={StaticResource L10N}}" HorizontalAlignment="Left"/>
-                        <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Trigger], Source={StaticResource L10N}}" VerticalAlignment="Center"/>
-                            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="37,0,0,0">
-                                <StackPanel>
-                                    <RadioButton IsChecked="{Binding PatientCase.PullbackTrigger, Converter={StaticResource RadioButtonConverter}, ConverterParameter=MANL}" Content="{Binding [Manual], Source={StaticResource L10N}}" />
-                                </StackPanel>
-                                <StackPanel Margin="28,0,0,0">
-                                    <RadioButton IsChecked="{Binding PatientCase.PullbackTrigger, Converter={StaticResource RadioButtonConverter}, ConverterParameter=AUTO}" Content="{Binding [Auto], Source={StaticResource L10N}}" />
-                                </StackPanel>
-                            </StackPanel>
-                        </StackPanel>
-                        <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,8,0,0">
-                            <StackPanel Orientation="Horizontal">
-                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Length], Source={StaticResource L10N}}"/>
-                                <StackPanel Width="5"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PbLength}"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [㎜], Source={StaticResource L10N}}"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
-                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Speed], Source={StaticResource L10N}}"/>
-                                <StackPanel Width="5"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PbSpeed}"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [㎜/s], Source={StaticResource L10N}}"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
-                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Time], Source={StaticResource L10N}}"/>
-                                <StackPanel Width="5"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PbTime}"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [s], Source={StaticResource L10N}}"/>
-                            </StackPanel>
+                        <StackPanel>
+                            <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Recording Settings], Source={StaticResource L10N}}"/>
                         </StackPanel>
                     </Grid>
-                    <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
-                    <!-- Case Info. -->
-                    <Grid Grid.Row="2" Margin="0,24,0,0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="43"/>
-                            <RowDefinition Height="270"/>
-                            <RowDefinition Height="48"/>
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <Label Grid.Row="0" Style="{DynamicResource Pretendard-Semibold-22}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Case Info.], Source={StaticResource L10N}}"/>
-                        <StackPanel Grid.Row="1" Width="860" Orientation="Horizontal">
-                            <DataGrid Width="280" ItemsSource="{Binding ProcedureList}" SelectedItem="{Binding CurrentProcedure}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" FontSize="16">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Value}" Header="{Binding [Procedure], Source={StaticResource L10N}}"/>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                            <StackPanel Width="10"/>
-                            <DataGrid Width="280" ItemsSource="{Binding VesselList}" SelectedItem="{Binding CurrentVessel}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" FontSize="16">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Value}" Header="{Binding [Vessel], Source={StaticResource L10N}}"/>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                            <StackPanel Width="10"/>
-                            <DataGrid Width="280" ItemsSource="{Binding LocationList}" SelectedItem="{Binding CurrentLocation}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" FontSize="16">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Value}" Header="{Binding [Location], Source={StaticResource L10N}}"/>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </StackPanel>
-                        <Grid Grid.Row="2" Margin="0,23,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="290"/>
-                                <ColumnDefinition/>
-                            </Grid.ColumnDefinitions>
-                            <Label Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Accession Number], Source={StaticResource L10N}}"/>
-                            <Label Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Comment], Source={StaticResource L10N}}"/>
+                    <Separator Grid.Row="2" Background="{DynamicResource GrayscaleGray5Brush}"/>
+                    <Border Grid.Row="4" CornerRadius="8" BorderThickness="0" Background="{DynamicResource GrayscaleGray8Brush}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="205"/>
+                                <RowDefinition Height="1"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <!-- Pullback -->
+                            <Grid Grid.Row="0" Margin="28,24,28,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="524"/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="46"/>
+                                    <RowDefinition Height="25"/>
+                                    <RowDefinition Height="54"/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Label Grid.Row="0" Style="{DynamicResource Pretendard-Semibold-22}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Pullback], Source={StaticResource L10N}}"/>
+                                <Label Grid.Row="1" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Flush Media], Source={StaticResource L10N}}"/>
+                                <Label Grid.Row="1" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Type], Source={StaticResource L10N}}"/>
+                                <ComboBox Grid.Row="2" Grid.Column="0" Width="500" ItemsSource="{Binding FlushMediaList}" SelectedValue="{Binding SelectedFlushMedia, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" Tag="{Binding [Select Flush Media], Source={StaticResource L10N}}" HorizontalAlignment="Left"/>
+                                <ComboBox Grid.Row="2" Grid.Column="1" Width="500" ItemsSource="{Binding PullbackTypeList}" SelectedValue="{Binding SelectedPullbackType, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" Tag="{Binding [Select Pullback Type], Source={StaticResource L10N}}" HorizontalAlignment="Left"/>
+                                <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Trigger], Source={StaticResource L10N}}" VerticalAlignment="Center"/>
+                                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="37,0,0,0">
+                                        <StackPanel>
+                                            <RadioButton IsChecked="{Binding PatientCase.PullbackTrigger, Converter={StaticResource RadioButtonConverter}, ConverterParameter=MANL}" Content="{Binding [Manual], Source={StaticResource L10N}}" />
+                                        </StackPanel>
+                                        <StackPanel Margin="28,0,0,0">
+                                            <RadioButton IsChecked="{Binding PatientCase.PullbackTrigger, Converter={StaticResource RadioButtonConverter}, ConverterParameter=AUTO}" Content="{Binding [Auto], Source={StaticResource L10N}}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,8,0,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Length], Source={StaticResource L10N}}"/>
+                                        <StackPanel Width="5"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PbLength}"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [㎜], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                        <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Speed], Source={StaticResource L10N}}"/>
+                                        <StackPanel Width="5"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PbSpeed}"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [㎜/s], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                        <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Time], Source={StaticResource L10N}}"/>
+                                        <StackPanel Width="5"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PbTime}"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [s], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                            <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}" Margin="28,0,28,0"/>
+                            <!-- Case Info. -->
+                            <Grid Grid.Row="2" Margin="28,24,28,0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="43"/>
+                                    <RowDefinition Height="230"/>
+                                    <RowDefinition Height="43"/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Label Grid.Row="0" Style="{DynamicResource Pretendard-Semibold-22}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Case Info.], Source={StaticResource L10N}}"/>
+                                <StackPanel Grid.Row="1" Orientation="Horizontal">
+                                    <DataGrid Width="330" ItemsSource="{Binding ProcedureList}" SelectedItem="{Binding CurrentProcedure}" Style="{StaticResource DataGridDialogBlack}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" FontSize="16">
+                                        <i:Interaction.Behaviors>
+                                            <behaviors:DataGridLoadedBehavior />
+                                        </i:Interaction.Behaviors>
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Value}" Header="{Binding [Procedure], Source={StaticResource L10N}}"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                    <StackPanel Width="17"/>
+                                    <DataGrid Width="330" ItemsSource="{Binding VesselList}" SelectedItem="{Binding CurrentVessel}" Style="{StaticResource DataGridDialogBlack}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" FontSize="16">
+                                        <i:Interaction.Behaviors>
+                                            <behaviors:DataGridLoadedBehavior />
+                                        </i:Interaction.Behaviors>
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Value}" Header="{Binding [Vessel], Source={StaticResource L10N}}"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                    <StackPanel Width="17"/>
+                                    <DataGrid Width="330" ItemsSource="{Binding LocationList}" SelectedItem="{Binding CurrentLocation}" Style="{StaticResource DataGridDialogBlack}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" FontSize="16">
+                                        <i:Interaction.Behaviors>
+                                            <behaviors:DataGridLoadedBehavior />
+                                        </i:Interaction.Behaviors>
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Value}" Header="{Binding [Location], Source={StaticResource L10N}}"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </StackPanel>
+                                <Grid Grid.Row="2" Margin="0,15,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="347"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Accession Number], Source={StaticResource L10N}}"/>
+                                    <Label Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Comment], Source={StaticResource L10N}}"/>
+                                </Grid>
+                                <StackPanel Grid.Row="3" Orientation="Horizontal">
+                                    <TextBox Style="{DynamicResource TextBoxBase}" Width="330" Text="{Binding PatientCase.AccessionNumber, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                    <StackPanel Width="17"/>
+                                    <TextBox Style="{DynamicResource TextBoxBase}" Width="677" Text="{Binding PatientCase.Comment, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                </StackPanel>
+                            </Grid>
                         </Grid>
-                        <Grid Grid.Row="3">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="290"/>
-                                <ColumnDefinition/>
-                            </Grid.ColumnDefinitions>
-                            <TextBox Grid.Column="0" Style="{DynamicResource TextBoxBase}" Width="280" Text="{Binding PatientCase.AccessionNumber, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                            <TextBox Grid.Column="1" Style="{DynamicResource TextBoxBase}" Width="570" Text="{Binding PatientCase.Comment, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                        </Grid>
-                    </Grid>
+                    </Border>
                 </Grid>
             </Border>
             <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
-            <Border Grid.Row="2" CornerRadius="0,0,10,10" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray6Brush}">
+            <Border Grid.Row="2" CornerRadius="0,0,10,10" Background="{DynamicResource GrayscaleGray6Brush}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>

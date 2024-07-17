@@ -14,11 +14,10 @@
     <Page.Resources>
         <System:Boolean x:Key="TrueValue">True</System:Boolean>
         <System:Boolean x:Key="FalseValue">False</System:Boolean>
-        <System:Double x:Key="CrossSectionSize">400</System:Double>
-        <System:Double x:Key="LongitudeWidth">860</System:Double>
+        <System:Double x:Key="CrossSectionSize">475</System:Double>
+        <System:Double x:Key="LongitudeWidth">1080</System:Double>
         <System:Double x:Key="LongitudeHeight">105</System:Double>
         <System:Double x:Key="LongitudeClipHeight">125</System:Double>
-        <System:Double x:Key="LongitudeScale">86</System:Double>
     </Page.Resources>
 
     <Grid>
@@ -32,94 +31,105 @@
             <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Margin="75,20,0,19" Content="{Binding [New Recording], Source={StaticResource L10N}}"/>
         </Grid>
 
-        <Grid Grid.Row="1" Margin="160,62,160,62">
+        <Grid Grid.Row="1" Margin="60,40,60,40">
             <Grid.RowDefinitions>
-                <RowDefinition Height="725"/>
+                <RowDefinition Height="769"/>
                 <RowDefinition Height="1"/>
                 <RowDefinition Height="74"/>
             </Grid.RowDefinitions>
-            <Border Grid.Row="0" CornerRadius="10,10,0,0" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray6Brush}">
-                <Grid Margin="0,35,0,0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="60"/>
-                        <RowDefinition Height="52"/>
-                        <RowDefinition Height="400"/>
-                        <RowDefinition Height="12"/>
-                        <RowDefinition Height="125"/>
-                        <RowDefinition Height="40"/>
-                    </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" Margin="211,0,211,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="60"/>
-                            <ColumnDefinition/>
-                            <ColumnDefinition Width="60"/>
-                            <ColumnDefinition/>
-                            <ColumnDefinition Width="60"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid Grid.Column="0" VerticalAlignment="Center">
-                            <Image Source="{svgc:SvgImage Source=/res/icon/recordingStep1.svg}" Width="47.8" Height="37"/>
-                        </Grid>
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <Image Source="{svgc:SvgImage Source=/res/icon/recordingBar.svg}" Width="138" Height="3"/>
-                        </StackPanel>
-                        <Grid Grid.Column="2" VerticalAlignment="Center">
-                            <Image Source="{svgc:SvgImage Source=/res/icon/recordingStep2.svg}" Width="30.9" Height="36"/>
-                        </Grid>
-                        <StackPanel Grid.Column="3" VerticalAlignment="Center">
-                            <Image Source="{svgc:SvgImage Source=/res/icon/recordingBar.svg}" Width="138" Height="3"/>
-                        </StackPanel>
-                        <Grid Grid.Column="4" VerticalAlignment="Center">
-                            <Image Source="{svgc:SvgImage Source=/res/icon/recordingStep3_active.svg}"/>
-                        </Grid>
-                    </Grid>
-                    <Grid Grid.Row="2" Margin="49,0,49,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="400"/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
-                            <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill">
-                                <Image.Clip>
-                                    <RectangleGeometry RadiusX="10" RadiusY="10">
-                                        <RectangleGeometry.Rect>
-                                            <Rect X="0" Y="0" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}"/>
-                                        </RectangleGeometry.Rect>
-                                    </RectangleGeometry>
-                                </Image.Clip>
-                            </Image>
-                        </Border>
-                        <Grid Grid.Column="1" Margin="60,109,52,109">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="38"/>
-                                <RowDefinition Height="37"/>
-                                <RowDefinition/>
-                            </Grid.RowDefinitions>
-                            <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [$MSG004], Source={StaticResource L10N}}"/>
-                            </StackPanel>
-                            <StackPanel Grid.Row="2">
-                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}">
-                                    <Label.Content>
-                                        <AccessText TextWrapping="Wrap" Text="{Binding [$MSG005], Source={StaticResource L10N}}"/>
-                                    </Label.Content>
-                                </Label>
+            <Border Grid.Row="0" CornerRadius="10,10,0,0" Background="{DynamicResource GrayscaleGray7Brush}">
+                <StackPanel>
+                    <Grid Margin="40,44,40,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="38"/>
+                            <RowDefinition Height="14"/>
+                            <RowDefinition Height="1"/>
+                            <RowDefinition Height="24"/>
+                            <RowDefinition Height="475"/>
+                            <RowDefinition Height="20"/>
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0">
+                            <StackPanel>
+                                <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Image Quality Check], Source={StaticResource L10N}}"/>
                             </StackPanel>
                         </Grid>
+                        <Separator Grid.Row="2" Background="{DynamicResource GrayscaleGray5Brush}"/>
+                        <Grid Grid.Row="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="620"/>
+                                <ColumnDefinition Width="36"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}" Visibility="{Binding DeviceStatus.IsAngioInitialized, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                                <Grid>
+                                    <Image Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill"/>
+                                </Grid>
+                            </Border>
+                            <Grid Grid.Column="2">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="70"/>
+                                    <RowDefinition Height="100"/>
+                                    <RowDefinition Height="205"/>
+                                    <RowDefinition Height="100"/>
+                                </Grid.RowDefinitions>
+                                <Grid Grid.Row="0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="60"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid Grid.Column="0" VerticalAlignment="Center">
+                                        <Image Source="{svgc:SvgImage Source=/res/icon/recordingStep1.svg}" Width="47.8" Height="37"/>
+                                    </Grid>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <Image Source="{svgc:SvgImage Source=/res/icon/recordingBar.svg}" Width="138" Height="3"/>
+                                    </StackPanel>
+                                    <Grid Grid.Column="2" VerticalAlignment="Center">
+                                        <Image Source="{svgc:SvgImage Source=/res/icon/recordingStep2.svg}" Width="30.9" Height="36"/>
+                                    </Grid>
+                                    <StackPanel Grid.Column="3" VerticalAlignment="Center">
+                                        <Image Source="{svgc:SvgImage Source=/res/icon/recordingBar.svg}" Width="138" Height="3"/>
+                                    </StackPanel>
+                                    <Grid Grid.Column="4" VerticalAlignment="Center">
+                                        <Image Source="{svgc:SvgImage Source=/res/icon/recordingStep3_active.svg}"/>
+                                    </Grid>
+                                </Grid>
+                                <Grid Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="38"/>
+                                        <RowDefinition Height="37"/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [$MSG004], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="2">
+                                        <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}">
+                                            <Label.Content>
+                                                <AccessText TextWrapping="Wrap" Text="{Binding [$MSG005], Source={StaticResource L10N}}"/>
+                                            </Label.Content>
+                                        </Label>
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+                        </Grid>
                     </Grid>
-                    <Grid Grid.Row="4">
+                    <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="49"/>
+                            <ColumnDefinition Width="40"/>
                             <ColumnDefinition/>
-                            <ColumnDefinition Width="49"/>
+                            <ColumnDefinition Width="40"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition/>
+                            <RowDefinition Height="105"/>
+                            <RowDefinition Height="20"/>
                         </Grid.RowDefinitions>
-                        <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="12,0,0,0">
+                        <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5,0,0,0">
                             <Label Content="P" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" Opacity="0.5"/>
                         </StackPanel>
-                        <StackPanel Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,12,0">
+                        <StackPanel Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,5,0">
                             <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" Opacity="0.5"/>
                         </StackPanel>
                         <Border Grid.Row="0" Grid.Column="1" CornerRadius="8,8,0,0" Background="{DynamicResource GrayscaleGray7Brush}">
@@ -135,7 +145,7 @@
                         </Border>
                         <ContentControl Grid.Row="1" Grid.Column="1" Template="{DynamicResource LongitudeScaleBar}" Width="{StaticResource LongitudeWidth}" Tag="{Binding PatientCase.PullbackLength}"/>
                     </Grid>
-                </Grid>
+                </StackPanel>
             </Border>
             <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
             <Border Grid.Row="2" CornerRadius="0,0,10,10" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray6Brush}">
