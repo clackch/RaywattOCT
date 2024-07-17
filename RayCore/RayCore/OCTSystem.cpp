@@ -1083,6 +1083,7 @@ UINT COCTSystem::threadService(LPVOID param) {
 	lut.Load("LUT_green.csv");
 	lut.Load("LUT_gray.csv");
 	lut.Load("LUT_abbott.csv");
+	lut.Load("LUT_enhenced.csv");
 	//lut.Load("LUT_ML.csv");
 
 #ifdef DEBUG
