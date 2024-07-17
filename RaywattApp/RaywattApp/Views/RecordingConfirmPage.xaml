@@ -60,7 +60,7 @@
                                 <ColumnDefinition Width="36"/>
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
-                            <Border Grid.Column="0" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}" Visibility="{Binding DeviceStatus.IsAngioInitialized, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                            <Border Grid.Column="0" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
                                 <Grid>
                                     <Image Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill"/>
                                 </Grid>
