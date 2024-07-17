@@ -93,15 +93,6 @@
         <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource GrayscaleGray7Brush}"/>
     </Style>
 
-    <Style TargetType="DataGrid" x:Key="DataGridDialogBlack" BasedOn="{StaticResource DataGridBase}">
-        <Style.Resources>
-            <SolidColorBrush x:Key="GridBackground" Color="{DynamicResource GrayscaleBlack}" />
-        </Style.Resources>
-        <Setter Property="TextBlock.FontSize" Value="14"/>
-        <Setter Property="RowHeight" Value="42"/>
-        <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource GrayscaleGray7Brush}"/>
-    </Style>
-
     <Style TargetType="DataGrid" x:Key="DataGridSelectPreCase" BasedOn="{StaticResource DataGridDialog}">
         <Style.Resources>
             <CornerRadius x:Key="CornerRadius" TopLeft="4" TopRight="4" BottomLeft="4" BottomRight="4"/>

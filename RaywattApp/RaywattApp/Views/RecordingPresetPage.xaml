@@ -44,7 +44,7 @@
                         </StackPanel>
                     </Grid>
                     <Separator Grid.Row="2" Background="{DynamicResource GrayscaleGray5Brush}"/>
-                    <Border Grid.Row="4" CornerRadius="8" BorderThickness="0" Background="{DynamicResource GrayscaleGray8Brush}">
+                    <Border Grid.Row="4" CornerRadius="8" Background="{DynamicResource GrayscaleGray6Brush}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="205"/>
@@ -111,7 +111,7 @@
                                 </Grid.RowDefinitions>
                                 <Label Grid.Row="0" Style="{DynamicResource Pretendard-Semibold-22}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Case Info.], Source={StaticResource L10N}}"/>
                                 <StackPanel Grid.Row="1" Orientation="Horizontal">
-                                    <DataGrid Width="330" ItemsSource="{Binding ProcedureList}" SelectedItem="{Binding CurrentProcedure}" Style="{StaticResource DataGridDialogBlack}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" FontSize="16">
+                                    <DataGrid Width="330" ItemsSource="{Binding ProcedureList}" SelectedItem="{Binding CurrentProcedure}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" FontSize="16">
                                         <i:Interaction.Behaviors>
                                             <behaviors:DataGridLoadedBehavior />
                                         </i:Interaction.Behaviors>
@@ -120,7 +120,7 @@
                                         </DataGrid.Columns>
                                     </DataGrid>
                                     <StackPanel Width="17"/>
-                                    <DataGrid Width="330" ItemsSource="{Binding VesselList}" SelectedItem="{Binding CurrentVessel}" Style="{StaticResource DataGridDialogBlack}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" FontSize="16">
+                                    <DataGrid Width="330" ItemsSource="{Binding VesselList}" SelectedItem="{Binding CurrentVessel}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" FontSize="16">
                                         <i:Interaction.Behaviors>
                                             <behaviors:DataGridLoadedBehavior />
                                         </i:Interaction.Behaviors>
@@ -129,7 +129,7 @@
                                         </DataGrid.Columns>
                                     </DataGrid>
                                     <StackPanel Width="17"/>
-                                    <DataGrid Width="330" ItemsSource="{Binding LocationList}" SelectedItem="{Binding CurrentLocation}" Style="{StaticResource DataGridDialogBlack}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" FontSize="16">
+                                    <DataGrid Width="330" ItemsSource="{Binding LocationList}" SelectedItem="{Binding CurrentLocation}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" FontSize="16">
                                         <i:Interaction.Behaviors>
                                             <behaviors:DataGridLoadedBehavior />
                                         </i:Interaction.Behaviors>
