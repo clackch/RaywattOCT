@@ -195,6 +195,9 @@ Plaque Area</value>
 the features
 for FFR</value>
   </data>
+  <data name="$MSG023" xml:space="preserve">
+    <value>[K]The angiography device is not connected.</value>
+  </data>
   <data name="$Terms and Conditions" xml:space="preserve">
     <value>[K]Product Intended Use: Clearly define the intended use of the OCT device, including any limitations or specific conditions for use.
 Product Warranty: Outline the warranty coverage provided for the OCT device, including the duration, scope, and process for claiming warranty services.

@@ -85,7 +85,7 @@
                             <ColumnDefinition Width="36"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}" Visibility="{Binding DeviceStatus.IsAngioInitialized, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                        <Border Grid.Column="0" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
                             <Grid>
                                 <Grid Visibility="{Binding IsOctExpanded, Converter={StaticResource BoolToVisibilityConverter}}">
                                     <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Stretch="Fill"/>
@@ -193,7 +193,7 @@
                             <Border Grid.Row="5" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
                                 <Grid>
                                     <Grid Visibility="{Binding DeviceStatus.IsAngioInitialized, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Angio is not connected], Source={StaticResource L10N}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG023], Source={StaticResource L10N}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                     </Grid>
                                     <Grid Visibility="{Binding DeviceStatus.IsAngioInitialized, Converter={StaticResource BoolToVisibilityConverter}}">
                                         <Grid Visibility="{Binding IsOctExpanded, Converter={StaticResource BoolToVisibilityReverseConverter}}">
