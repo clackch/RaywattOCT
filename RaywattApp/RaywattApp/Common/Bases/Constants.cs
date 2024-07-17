@@ -334,10 +334,10 @@ namespace RaywattApp.Common.Bases
         public const double PatientMenu3dY = 409;
 
         //Review - Compare - Cross Section
-        public const double CrossSectionCompareSize = 278;
+        public const double CrossSectionCompareSize = 344;
 
         //Review - Compare - Longitude
-        public const double LongitudeCompareWidth = 780;
+        public const double LongitudeCompareWidth = 720;
         public const double LongitudeCompareHeight = 170;
         public const double LongitudeCompareScale = (LongitudeCompareWidth - 1) / 10;
         public const double LongitudeIndicatorCompareHeight = 177;

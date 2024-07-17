@@ -265,7 +265,7 @@
                     </Grid.ColumnDefinitions>
                     <Button Grid.Column="0" Style="{StaticResource FfrPredictBtn}" Command="{Binding FfrPredictCommand}" Content="{Binding [Predict FFR], Source={StaticResource L10N}}" HorizontalAlignment="Left" Margin="50,0,0,0" IsEnabled="{Binding BtnFfrEnabled}"/>
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
-                        <Label Style="{DynamicResource Pretendard-Bold-40}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [FFR], Source={StaticResource L10N}}" VerticalAlignment="Center"/>
+                        <Label Style="{DynamicResource Pretendard-Bold-40}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [FFR], Source={StaticResource L10N}}" VerticalAlignment="Center" Opacity="{Binding OpacityResult}" Visibility="{Binding VisibilityResult}"/>
                         <StackPanel Width="38"/>
                         <Label Style="{DynamicResource Pretendard-Bold-72}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding FfrResult}" VerticalAlignment="Center" Opacity="{Binding OpacityResult}" Visibility="{Binding VisibilityResult}"/>
                     </StackPanel>
