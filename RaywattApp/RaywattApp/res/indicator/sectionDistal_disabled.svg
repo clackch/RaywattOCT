@@ -4,12 +4,6 @@
             <path data-name="사각형 3340" transform="rotate(90 -258.5 1058.5)" style="fill:#4f4f4f" d="M0 0h2v7.5H0z"/>
             <path data-name="사각형 3341" transform="rotate(90 -310 1110)" style="fill:#4f4f4f" d="M0 0h2v7.5H0z"/>
             <path data-name="사각형 3342" transform="rotate(180 400 711)" style="fill:#4f4f4f" d="M0 0h2v105H0z"/>
-            <g data-name="그룹 11740">
-                <path data-name="패스 8173" d="M10 0A10 10 0 1 1 0 10 10 10 0 0 1 10 0z" transform="translate(789 1360)" style="fill:#4f4f4f"/>
-                <path data-name="다각형 35" d="m5 0 5 5H0z" transform="rotate(-90 1084 291)" style="fill:#232323"/>
-                <path data-name="다각형 36" d="m5 0 5 5H0z" transform="rotate(90 -280 1085)" style="fill:#232323"/>
-            </g>
-            <circle data-name="타원 345" cx="14" cy="14" r="14" transform="translate(785 1356)" style="fill:none"/>
         </g>
         <path data-name="사각형 3415" style="opacity:0" d="M0 0h28v105H0z"/>
     </g>
