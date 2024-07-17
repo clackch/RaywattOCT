@@ -74,7 +74,7 @@ cv::Mat CCutViewManager::DrawLongitudeImage(int nDrawSamples, double brightness,
 	
 	CLookUpTable& lut = CLookUpTable::GetInstance();
 	cv::cvtColor(m_imgCutView, m_imgConvertedCutView, cv::COLOR_GRAY2RGB);
-	if (lut.GetCurrentColormap() == 3 /*LUT_inhenced.csv*/) {
+	if (lut.GetCurrentColormap() == 3 /*LUT_enhanced.csv*/) {
 		lut.Apply(m_imgConvertedCutView, lut.GetCurrentColormap());
 		lut.Apply(m_imgConvertedCutView, 2 /*LUT_abbott.csv*/);
 	}

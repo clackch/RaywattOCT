@@ -94,7 +94,7 @@ void COCTImaging::PostProcess(cv::Mat image) {
 	if (bInvert) cv::bitwise_not(imageResultColor, imageResultColor);
 	if (bColor) {
 		CLookUpTable& lut = CLookUpTable::GetInstance();
-		if (lut.GetCurrentColormap() == 3 /*LUT_inhenced.csv*/) {
+		if (lut.GetCurrentColormap() == 3 /*LUT_enhanced.csv*/) {
 			lut.Apply(imageResultColor, lut.GetCurrentColormap());
 			lut.Apply(imageResultColor, 2 /*LUT_abbott.csv*/);
 		}
