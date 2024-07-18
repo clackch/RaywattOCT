@@ -1971,6 +1971,10 @@ namespace RaywattApp.Common.Util
             {
                 RaySetProperty(Property.Colormap, 2);
             }
+            else if ("SPEC".Equals(colorCode))
+            {
+                RaySetProperty(Property.Colormap, 3);
+            }
         }
 
         public static bool IsTestMode(Dictionary<string, bool> testMode, string key)
