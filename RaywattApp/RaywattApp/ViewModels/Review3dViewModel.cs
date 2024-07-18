@@ -116,6 +116,8 @@ namespace RaywattApp.ViewModels
 
         private DispatcherTimer timerShowData = new DispatcherTimer();
 
+        private bool isFirstRendering = true;
+
         private ICommand _cmdRotateIndicator;
         public ICommand CmdRotateIndicator
         {
@@ -206,6 +208,7 @@ namespace RaywattApp.ViewModels
                 change3DIndicatorVisibility(IsIndicatorOn);
                 _isPtoD = ray3DStatus.IsPtoD;
                 _isSideBranchView = false;
+                isFirstRendering = ray3DStatus.IsFirstRendering;
             }
             IsRendering = false;
 
@@ -317,15 +320,21 @@ namespace RaywattApp.ViewModels
                 ODSOCT_InputData(Ray3DObject.Stent, buffer, diameter, diameter, depth, 1, 1, zVal);
             }
 
+            ODSOCT_ProcessingDatas();
+            ODSOCT_UpdateColorTable((int)RayGetProperty(Property.Colormap));
+
+            if (isFirstRendering)
+            {
+                bugTestFunc();
+                ray3DStatus.IsFirstRendering = false;
+            }
+            
             //CommonUtil.GuideWireToMemory(PatientCase.LumenGuidewires,
             //new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize),
             //buffer,
             //new OpenCvSharp.Size(diameter, diameter));
             //ODSOCT_InputSurfaceParameter(Ray3DObject.GuideWire, 10, 15, ".\\data\\guidewire_tex.jpg");
             //ODSOCT_InputData(Ray3DObject.GuideWire, buffer, diameter, diameter, depth, 1, 1, zVal);
-
-            ODSOCT_ProcessingDatas();
-            ODSOCT_UpdateColorTable((int)RayGetProperty(Property.Colormap));
 
             Marshal.FreeHGlobal(buffer);
             timerShowData.Interval = TimeSpan.FromMilliseconds(MinWaitingDelay);
@@ -551,6 +560,45 @@ namespace RaywattApp.ViewModels
                     ray3DStatus.ShowObject(obj, Ray3DObjectMode.Hide, true);
             }
             ODSOCT_Render();
+        }
+
+        private void bugTestFunc()
+        {
+            int diameter = (int)RayGetProperty(Property.VolumeWidth);
+            int depth = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total;
+            double zVal = zValueForPullbackType();
+            IntPtr buffer = Marshal.AllocHGlobal(diameter * diameter * depth);
+
+            CommonUtil.ContoursToMemory(PatientCase.LumenContours,
+                new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize),
+                buffer,
+                new OpenCvSharp.Size(diameter, diameter));
+
+            if (CommonUtil.IsPostCase(PatientCase.Procedure))
+            {
+                ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(System.IntPtr.Zero), diameter, diameter, depth, 1, 1, zVal);
+            }
+            else
+            {
+                ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(buffer), diameter, diameter, depth, 1, 1, zVal);
+            }
+
+            ODSOCT_InputSurfaceParameter(Ray3DObject.Lumen, 10, 50, ".\\data\\lumen_tex.jpg");
+            ODSOCT_InputData(Ray3DObject.Lumen, buffer, diameter, diameter, depth, 1, 1, zVal);
+
+            if (CommonUtil.IsPostCase(PatientCase.Procedure))
+            {
+                buffer = Marshal.AllocHGlobal(diameter * diameter * depth);
+                CommonUtil.StentsToMemory(PatientCase.LumenStents,
+                    new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize),
+                    buffer,
+                    new OpenCvSharp.Size(diameter, diameter));
+                ODSOCT_InputSurfaceParameter(Ray3DObject.Stent, 10, 15, ".\\data\\stent_tex.jpg");
+                ODSOCT_InputData(Ray3DObject.Stent, buffer, diameter, diameter, depth, 1, 1, zVal);
+            }
+
+            ODSOCT_ProcessingDatas();
+            ODSOCT_UpdateColorTable((int)RayGetProperty(Property.Colormap));
         }
     }
 }

@@ -34,6 +34,13 @@ namespace RaywattOCT
                 set { _isPtoD = value; }
             }
 
+            private bool _isFirstRendering = true;
+            public bool IsFirstRendering
+            {
+                get { return _isFirstRendering; }
+                set { _isFirstRendering = value; }
+            }
+
             public Ray3DStatus()
             {
                 for (Ray3DObject obj = Ray3DObject.Tissue; obj < Ray3DObject.Count; obj++) 
