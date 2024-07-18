@@ -1248,6 +1248,7 @@ namespace RaywattApp.ViewModels
                     sqlParameters["lumen_sidebranch"] = PatientCase.StrLumenSidebranch;
                     sqlParameters["lumen_stent"] = PatientCase.StrLumenStent;
                     sqlParameters["lumen_guidewire"] = PatientCase.StrLumenGuidewire;
+                    sqlParameters["ffr_plaque"] = "";
                     nRows = _sqlManager.UpsertPatientCaseAnnotation(sqlParameters);
                 }
                 else

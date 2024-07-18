@@ -320,7 +320,7 @@ namespace RaywattApp.Services
                 WHERE id = @id
                 ";
 
-            //UpdatePatientCaseAnnotationLumenContour
+            //UpdatePatientCaseFfrPlaque
             _query["UpdatePatientCaseFfrPlaque"] = @$"
                 UPDATE rv_schema.patient_case_annotation
                 SET ffr_plaque=@ffr_plaque
