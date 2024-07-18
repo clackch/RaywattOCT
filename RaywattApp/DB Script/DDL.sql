@@ -190,6 +190,7 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case_annotation
     lumen_sidebranch text COLLATE pg_catalog."default",
     lumen_stent text COLLATE pg_catalog."default",
     lumen_guidewire text COLLATE pg_catalog."default",	
+	ffr_plaque text COLLATE pg_catalog."default",	
 	create_date timestamp without time zone,
     update_date timestamp without time zone,
     CONSTRAINT patient_case_annotation_pkey PRIMARY KEY (id)

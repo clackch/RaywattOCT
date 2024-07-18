@@ -11,7 +11,6 @@ using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Threading;
 using System.Windows.Input;
 using static RaywattOCT.RayCoreWrapper;
 

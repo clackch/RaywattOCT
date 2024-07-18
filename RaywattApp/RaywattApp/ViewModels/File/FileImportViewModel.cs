@@ -511,6 +511,7 @@ namespace RaywattApp.ViewModels.File
                             patientCase.StrLumenSidebranch = GetStrValue(caseObj, "StrLumenSidebranch");
                             patientCase.StrLumenStent = GetStrValue(caseObj, "StrLumenStent");
                             patientCase.StrLumenGuidewire = GetStrValue(caseObj, "StrLumenGuidewire");
+                            patientCase.FfrPlaque = GetStrValue(caseObj, "FfrPlaque");
                             patientCase.CreateDate = GetDateValue(caseObj, "CreateDate");
                             patientCase.UpdateDate = GetDateValue(caseObj, "UpdateDate");
 

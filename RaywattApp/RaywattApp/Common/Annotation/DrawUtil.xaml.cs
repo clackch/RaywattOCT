@@ -2,7 +2,6 @@
 using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
 using RaywattApp.Models;
-using RaywattApp.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -117,6 +116,24 @@ namespace RaywattApp.Common.Annotation
         private static readonly DependencyProperty ImageResolutionProperty =
             DependencyProperty.Register("ImageResolution", typeof(double), typeof(DrawUtil), new PropertyMetadata(default(double)));
 
+        public bool IsFfr
+        {
+            get { return (bool)GetValue(IsFfrProperty); }
+            set { this.SetValue(IsFfrProperty, value); }
+        }
+
+        private static readonly DependencyProperty IsFfrProperty =
+            DependencyProperty.Register("IsFfr", typeof(bool), typeof(DrawUtil), new PropertyMetadata(default(bool)));
+
+        public FfrFeature FfrFeature
+        {
+            get { return (FfrFeature)GetValue(FfrFeatureProperty); }
+            set { SetValue(FfrFeatureProperty, value); }
+        }
+
+        private static readonly DependencyProperty FfrFeatureProperty =
+            DependencyProperty.Register("FfrFeature", typeof(FfrFeature), typeof(DrawUtil), new PropertyMetadata(null));
+
         //---------------------------------------------------------------------------------------------------- Constructor
         public DrawUtil()
         {
@@ -174,6 +191,9 @@ namespace RaywattApp.Common.Annotation
                     drawUtil.DrawAll();
                     break;
                 case Constants.MeasureZoomOut:
+                    drawUtil.DrawAll();
+                    break;
+                case Constants.MeasureReDraw:
                     drawUtil.DrawAll();
                     break;
                 default:
@@ -236,13 +256,24 @@ namespace RaywattApp.Common.Annotation
         {
             _log.Debug("DrawAll");
 
-            if (this.areaGeometrys == null || this.lengthGeometries == null || this.textGeometries == null)
-                return;
+            if (IsFfr)
+            {
+                if (this.areaGeometrys == null)
+                    return;
 
-            this.canvas.Children.Clear();
-            DrawAreaAll();
-            DrawLengthAll();
-            DrawTextAll();
+                this.canvas.Children.Clear();
+                DrawAreaAll();
+            }
+            else
+            {
+                if (this.areaGeometrys == null || this.lengthGeometries == null || this.textGeometries == null)
+                    return;
+
+                this.canvas.Children.Clear();
+                DrawAreaAll();
+                DrawLengthAll();
+                DrawTextAll();
+            }
         }
 
         private void DeleteAll()
@@ -258,6 +289,13 @@ namespace RaywattApp.Common.Annotation
             this.textGeometries.Clear();
 
             DisableCommand();
+
+            if (IsFfr)
+            {
+                FfrFeature.PlaqueArea = 0;
+                FfrFeature.PercentAreaStenosis = 0;
+                FfrFeature.IsPlaqueAreaValid = false;
+            }
         }
 
         private void DeleteArea(string param)

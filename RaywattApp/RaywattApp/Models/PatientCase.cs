@@ -189,6 +189,9 @@ namespace RaywattApp.Models
         private string _strLumenGuidewire;
 
         [ObservableProperty]
+        private string _ffrPlaque;
+
+        [ObservableProperty]
         private FfrFeature _ffrFeature;
 
         [ObservableProperty]

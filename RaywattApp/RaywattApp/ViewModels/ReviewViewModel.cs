@@ -389,8 +389,8 @@ namespace RaywattApp.ViewModels
 
                 SetAngioFrame();
 
-                Section.Proximal.X = CommonUtil.GetPositionFromFrame(PatientCase.SectionProximal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
-                Section.Distal.X = CommonUtil.GetPositionFromFrame(PatientCase.SectionDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
+                Section.Proximal.X = CommonUtil.GetPositionFromFrame(PatientCase.SectionProximal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveCenterWidth);
+                Section.Distal.X = CommonUtil.GetPositionFromFrame(PatientCase.SectionDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveWidth - Constants.SectionIndicatorMoveCenterWidth);
 
                 SetLumenProfileValue();
 
@@ -1211,9 +1211,9 @@ namespace RaywattApp.ViewModels
             sqlParameters["contrast"] = PatientCase.Contrast;
             PatientCase.FieldOfView = FieldOfView;
             sqlParameters["field_of_view"] = PatientCase.FieldOfView;
-            PatientCase.SectionProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
+            PatientCase.SectionProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveCenterWidth);
             sqlParameters["section_proximal"] = PatientCase.SectionProximal;
-            PatientCase.SectionDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
+            PatientCase.SectionDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveWidth - Constants.SectionIndicatorMoveCenterWidth);
             sqlParameters["section_distal"] = PatientCase.SectionDistal;
 
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
@@ -1255,41 +1255,6 @@ namespace RaywattApp.ViewModels
                     _log.Error("Update Error");
                 }
             }
-
-            SaveFfrValues();
-        }
-
-        private void SaveFfrValues()
-        {
-            if (PatientCase.FfrFeature == null)
-                PatientCase.FfrFeature = new FfrFeature();
-
-            double percentAreaStenosis = 0;
-            double minimalLumenArea = 0;
-            int minimalLumenFrameNumber = 0;
-
-            if (CommonUtil.IsPreCase(PatientCase.Procedure))
-            {
-                percentAreaStenosis = (1 - Section.MlaValue.DValue / Section.RefArea) * 100;
-                minimalLumenArea = Section.MlaValue.DValue;
-                minimalLumenFrameNumber = Section.MlaValue.NValue;
-            }
-            else
-            {
-                percentAreaStenosis = (1 - Section.MsaValue.DValue / Section.RefArea) * 100;
-                minimalLumenArea = Section.MsaValue.DValue;
-                minimalLumenFrameNumber = Section.MsaValue.NValue;
-            }
-
-            double scaleArea = PatientCase.ImageResolution * PatientCase.ImageResolution;
-
-            PatientCase.FfrFeature.MinimalLumenFrameNumber = minimalLumenFrameNumber;
-            PatientCase.FfrFeature.PercentAreaStenosis = Math.Round(percentAreaStenosis, 1);
-            PatientCase.FfrFeature.MinimalLumenArea = Math.Round(minimalLumenArea * scaleArea, 2);
-            PatientCase.FfrFeature.DistalLumenArea = Math.Round(Section.Distal.DValue * scaleArea, 2);
-            PatientCase.FfrFeature.LesionLength = Math.Round(Section.LesionLength.DValue, 1);
-            PatientCase.FfrFeature.PlaqueArea = 0.0;
-            PatientCase.FfrFeature.ProximalLumenArea = Math.Round(Section.Proximal.DValue * scaleArea, 2);
         }
 
         private string ConvertMeasurementsToJson(List<Measurement> param)
@@ -1413,8 +1378,8 @@ namespace RaywattApp.ViewModels
                 }
                 else if (!this.isLumenLoadedInit)
                 {
-                    int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
-                    int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
+                    int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveCenterWidth);
+                    int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveWidth - Constants.SectionIndicatorMoveCenterWidth);
                     Section.CalcMean(LumenContours, frameProximal, frameDistal);
                     this.isLumenLoadedInit = true;
                 }
@@ -1425,8 +1390,8 @@ namespace RaywattApp.ViewModels
 
         private void DrawLumenProfile(int totalFrame)
         {
-            int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
-            int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
+            int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveCenterWidth);
+            int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveWidth - Constants.SectionIndicatorMoveCenterWidth);
 
             imglumenProfile = CommonUtil.MakeLumenProfileImageOneByOne(imglumenProfile, LumenContours, LumenSidebranches, LumenStents, PatientCase.AppositionThreshold, frameProximal, frameDistal, CommonUtil.IsPostCase(PatientCase.Procedure), totalFrame);
             DrawLumenProfileImage();
@@ -1476,8 +1441,8 @@ namespace RaywattApp.ViewModels
 
             if (CommonUtil.IsPreCase(PatientCase.Procedure))
             {
-                int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
-                int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
+                int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveCenterWidth);
+                int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveWidth - Constants.SectionIndicatorMoveCenterWidth);
 
                 int count = frameDistal - frameProximal + 1;
                 double mla = LumenContours.GetRange(frameProximal, count).Min(x => x.Area);
@@ -1498,9 +1463,9 @@ namespace RaywattApp.ViewModels
             }
 
             if(proximalIdx >= 0)
-                Section.Proximal.X = CommonUtil.GetPositionFromFrame(proximalIdx, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
+                Section.Proximal.X = CommonUtil.GetPositionFromFrame(proximalIdx, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveCenterWidth);
             if(distalIdx >= 0)
-                Section.Distal.X = CommonUtil.GetPositionFromFrame(distalIdx, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
+                Section.Distal.X = CommonUtil.GetPositionFromFrame(distalIdx, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveWidth - Constants.SectionIndicatorMoveCenterWidth);
 
             SetLumenProfileValue();
         }
@@ -1515,8 +1480,8 @@ namespace RaywattApp.ViewModels
 
         private void MinimalValueChanged()
         {
-            int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorCenterWidth);
-            int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
+            int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveCenterWidth);
+            int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveWidth - Constants.SectionIndicatorMoveCenterWidth);
 
             Section.VisibleMlaMld(false);
             Section.VislbleMsaMinExp(false);
@@ -1624,7 +1589,7 @@ namespace RaywattApp.ViewModels
 
                 if (indicator.IsSectionIndicator)
                 {
-                    double sectionIndicatorCenter = Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth;
+                    double sectionIndicatorCenter = Constants.SectionIndicatorMoveWidth - Constants.SectionIndicatorMoveCenterWidth;
 
                     if (indicator.IsSectionProximal && (indicatorX >= Section.Distal.X - sectionIndicatorCenter))
                     {
@@ -1638,9 +1603,9 @@ namespace RaywattApp.ViewModels
                         return;
                     }
 
-                    if (indicatorX < -Constants.SectionIndicatorCenterWidth)
+                    if (indicatorX < -Constants.SectionIndicatorMoveCenterWidth)
                     {
-                        indicator.X = -Constants.SectionIndicatorCenterWidth;
+                        indicator.X = -Constants.SectionIndicatorMoveCenterWidth;
                     }
                     else if (indicatorX > Constants.LongitudeWidth - sectionIndicatorCenter)
                     {

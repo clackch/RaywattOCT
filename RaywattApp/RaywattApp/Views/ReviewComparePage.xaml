@@ -38,7 +38,7 @@
                     <ToggleButton Style="{StaticResource TabToggleBtn}" Content="{Binding [2D], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewPage}"/>
                     <ToggleButton Style="{StaticResource TabToggleBtn}" Content="{Binding [3D], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.Review3dPage}"/>
                     <ToggleButton Style="{StaticResource TabToggleBtn}" Content="{Binding [Compare], Source={StaticResource L10N}}" IsChecked="True" IsEnabled="False"/>
-                    <ToggleButton Style="{StaticResource TabToggleBtn}" Content="{Binding [AI FFR], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrPage}"/>
+                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [AI FFR], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrSettingPage}"/>
                 </StackPanel>
             </Grid>
 
@@ -57,7 +57,7 @@
                 <Grid Grid.Row="1" Background="{DynamicResource GrayscaleBlackBrush}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
-                        <ColumnDefinition Width="318"/>
+                        <ColumnDefinition Width="380"/>
                     </Grid.ColumnDefinitions>
                     <!-- Before : Lumen Profile -->
                     <StackPanel Grid.Column="0" Margin="70,0,0,0" Visibility="{Binding ReviewStatus.SelectedPatientCase, Converter={StaticResource NotNullToVisibilityConveter}}">
@@ -163,7 +163,7 @@
                             </Grid>
                             
                             <!-- Scale Bar -->
-                            <ContentControl Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" Margin="0,9,0,0" Template="{DynamicResource LongitudeCompareScaleBar}" Width="{x:Static const:Constants.LongitudeCompareWidth}" Tag="{Binding ReviewStatus.SelectedPatientCase.PullbackLength}"/>
+                            <ContentControl Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" Margin="-10,9,-10,0" Template="{DynamicResource LongitudeCompareScaleBar}" Width="{x:Static const:Constants.LongitudeCompareWidth}" Tag="{Binding ReviewStatus.SelectedPatientCase.PullbackLength}"/>
 
                             <!-- Lumen Profile Extra : Calcium -->
                             <Image Grid.Row="2" Grid.Column="1" VerticalAlignment="Top" Margin="0,9,0,0" Source="{Binding LumenProfileImageExtraCompare}" Width="{x:Static const:Constants.LongitudeCompareWidth}" Height="{x:Static const:Constants.LumenProfileExtraCompareHeight}" Stretch="Fill"/>
@@ -184,7 +184,7 @@
                         </StackPanel>
                     </StackPanel>
                     <!-- Before : Cross-section -->
-                    <Grid Grid.Column="1" Margin="0,84,40,85"  Visibility="{Binding ReviewStatus.SelectedPatientCase, Converter={StaticResource NotNullToVisibilityConveter}}">
+                    <Grid Grid.Column="1" Margin="0,50,36,50"  Visibility="{Binding ReviewStatus.SelectedPatientCase, Converter={StaticResource NotNullToVisibilityConveter}}">
                         <Image x:Name="crossSectionForCompare" Source="{Binding CrossSectionForCompare}" Width="{x:Static const:Constants.CrossSectionCompareSize}" Height="{x:Static const:Constants.CrossSectionCompareSize}"/>
                         <annotation:DrawLumenContourUtil Zoom="{Binding Zoom}" LumenContours="{Binding PreLumenContour}" CurrentLumenContour="{Binding CurrentPreLumenContour, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" LumenStents="{Binding PreLumenStents}" AppositionThreshold="{Binding ReviewStatus.SelectedPatientCase.AppositionThreshold}" FrameNumber="{Binding FrameNumberCompare}" Visibility="Visible" IsEditOn="False" IsDrawOn="True" InCommand="{Binding LumenContourCommand, Mode=TwoWay}"/>
                         <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Left">
@@ -224,7 +224,7 @@
                 <Grid Grid.Row="3" Background="{DynamicResource GrayscaleGray8Brush}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
-                        <ColumnDefinition Width="318"/>
+                        <ColumnDefinition Width="380"/>
                     </Grid.ColumnDefinitions>
                     <!-- After : Lumen Profile -->
                     <StackPanel Grid.Column="0" Margin="70,0,0,0">
@@ -335,7 +335,7 @@
                                 </Canvas>
                             </Grid>
                             <!-- Scale Bar -->
-                            <ContentControl Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" Margin="0,9,0,0" Template="{DynamicResource LongitudeCompareScaleBar}" Width="{x:Static const:Constants.LongitudeCompareWidth}" Tag="{Binding PatientCase.PullbackLength}"/>
+                            <ContentControl Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" Margin="-10,9,-10,0" Template="{DynamicResource LongitudeCompareScaleBar}" Width="{x:Static const:Constants.LongitudeCompareWidth}" Tag="{Binding PatientCase.PullbackLength}"/>
                             
                             <!-- Lumen Profile Extra : Expansion -->
                             <Image Grid.Row="2" Grid.Column="1" VerticalAlignment="Top" Margin="0,9,0,0" Source="{Binding LumenProfileImageExtra}" Width="{x:Static const:Constants.LongitudeCompareWidth}" Height="{x:Static const:Constants.LumenProfileExtraCompareHeight}" Stretch="Fill"/>
@@ -369,7 +369,7 @@
                         </StackPanel>
                     </StackPanel>
                     <!-- After : Cross-section -->
-                    <Grid Grid.Column="1" Margin="0,87,40,82">
+                    <Grid Grid.Column="1" Margin="0,50,36,50">
                         <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionCompareSize}" Height="{x:Static const:Constants.CrossSectionCompareSize}"/>
                         <annotation:DrawLumenContourUtil Zoom="{Binding Zoom}" LumenContours="{Binding PostLumenContour}" LumenStents="{Binding PostLumenStents}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" FrameNumber="{Binding FrameNumber}" Visibility="Visible" IsEditOn="False" IsDrawOn="True"/>
                         <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Left">

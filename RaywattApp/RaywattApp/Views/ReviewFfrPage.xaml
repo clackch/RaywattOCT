@@ -7,6 +7,7 @@
       xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
       xmlns:const="clr-namespace:RaywattApp.Common.Bases"
       xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+      xmlns:annotation="clr-namespace:RaywattApp.Common.Annotation"
       mc:Ignorable="d" 
       d:DesignHeight="1024" d:DesignWidth="1280"
       Background="{DynamicResource GrayscaleGray8Brush}"
@@ -33,41 +34,157 @@
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Row="1" Margin="0,50,0,40">
+        <Grid Grid.Row="1" Margin="0,40,0,40" Panel.ZIndex="1" Background="{StaticResource GrayscaleGray8Brush}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="60"/>
+                <RowDefinition Height="70"/>
+                <RowDefinition Height="412"/>
                 <RowDefinition Height="199"/>
-                <RowDefinition Height="466"/>
-                <RowDefinition Height="109"/>
+                <RowDefinition Height="108"/>
             </Grid.RowDefinitions>
             <Border Grid.Row="0" Margin="70,0,70,0" CornerRadius="10" Background="{DynamicResource GrayscaleGray7Brush}">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="715"/>
                         <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="28,0,0,0" VerticalAlignment="Center">
-                        <Label Style="{DynamicResource Pretendard-Bold-22}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Patient.Firstname}"/>
-                        <Label Style="{DynamicResource Pretendard-Bold-22}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content=", "/>
-                        <Label Style="{DynamicResource Pretendard-Bold-22}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Patient.Lastname}"/>
+                    <StackPanel Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="28,0,0,0">
+                        <Button Style="{StaticResource OutlinedBtnType3-Medium}" Width="184" Command="{Binding FfrSettingCommand}" Content="{Binding [Feature Parameters], Source={StaticResource L10N}}"/>
                     </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [ID], Source={StaticResource L10N}}"/>
-                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="8,0,0,0" Content="{Binding Patient.Id}"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Birth], Source={StaticResource L10N}}"/>
-                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="8,0,0,0" Content="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
-                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="8,0,0,0" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,20,0">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Patient.Firstname}"/>
+                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content=", "/>
+                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Patient.Lastname}"/>
+                        </StackPanel>
+                        <StackPanel Height="2"/>
+                        <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Horizontal">
+                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [ID], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="8,0,0,0" Content="{Binding Patient.Id}"/>
+                            </StackPanel>
+                            <StackPanel Width="12"/>
+                            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Birth], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="8,0,0,0" Content="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}"/>
+                            </StackPanel>
+                            <StackPanel Width="12"/>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="8,0,0,0" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
+                            </StackPanel>
+                        </StackPanel>
                     </StackPanel>
                 </Grid>
             </Border>
-            <Grid Grid.Row="1">
+            <Grid Grid.Row="1" Margin="70,16,70,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="515"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <Border Width="200" Height="54" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray3Brush}" HorizontalAlignment="Right" Margin="0,0,40,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" VerticalAlignment="Center" Margin="20,0,0,0">
+                                <Label.Content>
+                                    <AccessText TextWrapping="Wrap" Text="{Binding [Proximal Lumen Area], Source={StaticResource L10N}}"/>
+                                </Label.Content>
+                            </Label>
+                            <Label Grid.Column="1" Style="{DynamicResource Pretendard-Bold-28}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FfrFeature.ProximalLumenArea, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleArea}}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,20,0"/>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+                <StackPanel Grid.Column="1">
+                    <Border Width="515" Height="54" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource MainPrimaryColorBrush}" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <Label Grid.Column="0" Style="{DynamicResource Pretendard-Medium-12}" Width="66" Foreground="{DynamicResource GrayscaleWhiteBrush}" VerticalAlignment="Center" Margin="25,0,0,0">
+                                <Label.Content>
+                                    <AccessText TextWrapping="Wrap" Text="{Binding [Minimal Lumen Area], Source={StaticResource L10N}}"/>
+                                </Label.Content>
+                            </Label>
+                            <Label Grid.Column="1" Style="{DynamicResource Pretendard-Bold-28}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FfrFeature.MinimalLumenArea, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleArea}}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10,0,0,0"/>
+                            <Label Grid.Column="2" Style="{DynamicResource Pretendard-Medium-12}" Width="38" Foreground="{DynamicResource GrayscaleWhiteBrush}" VerticalAlignment="Center" Margin="25,0,0,0">
+                                <Label.Content>
+                                    <AccessText TextWrapping="Wrap" Text="{Binding [Plaque Area], Source={StaticResource L10N}}"/>
+                                </Label.Content>
+                            </Label>
+                            <Label Grid.Column="3" Style="{DynamicResource Pretendard-Bold-28}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FfrFeature.PlaqueArea, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleArea}}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10,0,0,0"/>
+                            <Label Grid.Column="4" Style="{DynamicResource Pretendard-Medium-12}" Width="71" Foreground="{DynamicResource GrayscaleWhiteBrush}" VerticalAlignment="Center" Margin="25,0,0,0">
+                                <Label.Content>
+                                    <AccessText TextWrapping="Wrap" Text="{Binding [Percent Area Stenosis], Source={StaticResource L10N}}"/>
+                                </Label.Content>
+                            </Label>
+                            <TextBlock Grid.Column="5" Style="{DynamicResource TextBlock_Pretendard-Bold-28}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Text="{Binding PatientCase.FfrFeature.PercentAreaStenosis, StringFormat={}{0:N2}}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10,0,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <Border Width="200" Height="54" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray3Brush}" HorizontalAlignment="Left" Margin="40,0,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Width="70" VerticalAlignment="Center" Margin="20,0,0,0">
+                                <Label.Content>
+                                    <AccessText TextWrapping="Wrap" Text="{Binding [Distal Lumen Area], Source={StaticResource L10N}}"/>
+                                </Label.Content>
+                            </Label>
+                            <Label Grid.Column="1" Style="{DynamicResource Pretendard-Bold-28}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FfrFeature.DistalLumenArea, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleArea}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Grid>
+            <Grid Grid.Row="2" Margin="70,0,70,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="344"/>
+                    <ColumnDefinition Width="452"/>
+                    <ColumnDefinition Width="344"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="10" Width="1" Background="{DynamicResource GrayscaleGray3Brush}" Margin="0"/>
+                    <Border Width="60" Height="21" CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray3Brush}" Background="{DynamicResource GrayscaleGray5Brush}">
+                        <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Proximal], Source={StaticResource L10N}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="10" Width="1" Background="{DynamicResource GrayscaleGray3Brush}" Margin="0"/>
+                    <Grid Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}">
+                        <Image Source="{Binding ProximalOctImage}" Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}"/>
+                        <Image Source="{svgc:SvgImage Source=/res/icon/ffrCircleGray.svg}" Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}"/>
+                        <annotation:DrawLumenContourUtil Zoom="{Binding Zoom}" LumenContours="{Binding PatientCase.LumenContours}" LumenStents="{Binding PatientCase.LumenStents}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" FrameNumber="{Binding PatientCase.SectionProximal}" Visibility="Visible" IsEditOn="False" IsDrawOn="True" IsFfr="True"/>
+                    </Grid>
+                </StackPanel>
+                <StackPanel Grid.Column="1">
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="10" Width="1" Background="{DynamicResource MainPrimaryColorBrush}" Margin="0"/>
+                    <Border Width="60" Height="21" CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource MainPrimaryColorBrush}" Background="{DynamicResource AdditionalColor2Brush}">
+                        <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [MLA], Source={StaticResource L10N}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="10" Width="1" Background="{DynamicResource MainPrimaryColorBrush}" Margin="0"/>
+                    <Grid Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}">
+                        <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}"/>
+                        <Image Source="{svgc:SvgImage Source=/res/icon/ffrCircleGreen.svg}" Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}"/>
+                        <annotation:DrawLumenContourUtil Zoom="{Binding Zoom}" LumenContours="{Binding PatientCase.LumenContours}" LumenStents="{Binding PatientCase.LumenStents}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" FrameNumber="{Binding PatientCase.FfrFeature.MinimalLumenFrameNumber}" Visibility="Visible" IsEditOn="False" IsDrawOn="True" IsFfr="True"/>
+                        <annotation:DrawUtil Zoom="{Binding Zoom}" ImageResolution="{Binding PatientCase.ImageResolution}" Measurements="{Binding PatientCase.FfrFeature.PlaqueAreaList}" FfrFeature="{Binding PatientCase.FfrFeature}" FrameNumber="{Binding PatientCase.FfrFeature.MinimalLumenFrameNumber}" IsEditOn="False" IsFfr="True" IsDrawOn="True"/>
+                    </Grid>
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="10" Width="1" Background="{DynamicResource GrayscaleGray3Brush}" Margin="0"/>
+                    <Border Width="60" Height="21" CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray3Brush}" Background="{DynamicResource GrayscaleGray5Brush}">
+                        <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Distal], Source={StaticResource L10N}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="10" Width="1" Background="{DynamicResource GrayscaleGray3Brush}" Margin="0"/>
+                    <Grid Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}">
+                        <Image Source="{Binding DistalOctImage}" Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}"/>
+                        <Image Source="{svgc:SvgImage Source=/res/icon/ffrCircleGray.svg}" Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}"/>
+                        <annotation:DrawLumenContourUtil Zoom="{Binding Zoom}" LumenContours="{Binding PatientCase.LumenContours}" LumenStents="{Binding PatientCase.LumenStents}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" FrameNumber="{Binding PatientCase.SectionDistal}" Visibility="Visible" IsEditOn="False" IsDrawOn="True" IsFfr="True"/>
+                    </Grid>
+                </StackPanel>
+            </Grid>
+            <Grid Grid.Row="3">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="69"/>
                     <ColumnDefinition/>
@@ -98,7 +215,6 @@
 
                     <Canvas>
                         <!-- Section Lesion Length -->
-                        <!-- 
                         <Line Canvas.Left="{Binding Section.LesionProximal}" HorizontalAlignment="Stretch" Stroke="{StaticResource GrayscaleGray2Brush}" StrokeDashArray="2 3" StrokeThickness="1" X1="{Binding Section.LesionLengthWidth}" Margin="0,100,0,0"/>
                         <Line Canvas.Left="{Binding Section.LesionDistal}" HorizontalAlignment="Stretch" Stroke="{StaticResource GrayscaleGray2Brush}" StrokeDashArray="2 3" StrokeThickness="1" X1="{Binding Section.LesionLengthWidth}" Margin="0,100,0,0"/>
                         <StackPanel Orientation="Horizontal" Margin="0,93,0,0" Canvas.Left="{Binding Section.LesionLength.X}" Visibility="{Binding Section.LesionLength.IsVisible}">
@@ -106,18 +222,17 @@
                             <StackPanel Width="1"/>
                             <Label Style="{DynamicResource Pretendard-Medium-10}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [㎜], Source={StaticResource L10N}}"/>
                         </StackPanel>
-                        -->
                         <!-- Section Proximal -->
-                        <Image Height="105" Source="{svgc:SvgImage Source=/res/indicator/sectionProximal.svg}" Canvas.Left="{Binding Section.Proximal.X}" Visibility="{Binding Section.Proximal.IsVisible}"/>
+                        <Image Height="105" Source="{svgc:SvgImage Source=/res/indicator/sectionProximalFfr.svg}" Canvas.Left="{Binding Section.Proximal.X}" Visibility="{Binding Section.Proximal.IsVisible}"/>
                         <!-- Section Distal -->
-                        <Image Height="105" Source="{svgc:SvgImage Source=/res/indicator/sectionDistal.svg}" Canvas.Left="{Binding Section.Distal.X}" Visibility="{Binding Section.Distal.IsVisible}"/>
+                        <Image Height="105" Source="{svgc:SvgImage Source=/res/indicator/sectionDistalFfr.svg}" Canvas.Left="{Binding Section.Distal.X}" Visibility="{Binding Section.Distal.IsVisible}"/>
                         <!-- MLA -->
                         <Image Height="109" Width="8" Source="{svgc:SvgImage Source=/res/indicator/ffrMla.svg}" Canvas.Left="{Binding MlaX}" Margin="0,-4,0,0"/>
                     </Canvas>
                 </Grid>
                 <StackPanel Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center">
-                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="13" Width="1" Background="{DynamicResource GrayscaleGray5Brush}" Margin="0"/>
-                    <Border Width="452" Height="60" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray5Brush}">
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="10" Width="1" Background="{DynamicResource GrayscaleGray5Brush}" Margin="0"/>
+                    <Border Width="460" Height="54" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray5Brush}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition/>
@@ -125,110 +240,24 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Orientation="Horizontal">
                                 <StackPanel Width="24"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Vessel], Source={StaticResource L10N}}" VerticalAlignment="Center"/>
+                                <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Vessel], Source={StaticResource L10N}}" VerticalAlignment="Center"/>
                                 <StackPanel Width="20"/>
-                                <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding VesselType}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Style="{DynamicResource Pretendard-Bold-28}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FfrFeature.VesselType, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    <StackPanel Width="5"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FfrFeature.ActualVesselType, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,13"/>
+                                </StackPanel>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Lesion Length], Source={StaticResource L10N}}" VerticalAlignment="Center"/>
+                                <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Lesion Length], Source={StaticResource L10N}}" VerticalAlignment="Center"/>
                                 <StackPanel Width="20"/>
-                                <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FfrFeature.LesionLength}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                <Label Style="{DynamicResource Pretendard-Bold-28}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FfrFeature.LesionLength}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Grid>
                     </Border>
                 </StackPanel>
             </Grid>
-            <Grid Grid.Row="2" Margin="70,0,70,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="344"/>
-                    <ColumnDefinition Width="452"/>
-                    <ColumnDefinition Width="344"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0">
-                    <Border Width="60" Height="21" CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray3Brush}" Background="{DynamicResource GrayscaleGray5Brush}">
-                        <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Proximal], Source={StaticResource L10N}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                    </Border>
-                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="13" Width="1" Background="{DynamicResource GrayscaleGray3Brush}" Margin="0"/>
-                    <Grid>
-                        <Image Source="{Binding ProximalOctImage}" Width="344" Height="344"/>
-                        <Image Source="{svgc:SvgImage Source=/res/icon/ffrCircleGray.svg}" Width="344" Height="344"/>
-                    </Grid>
-                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="13" Width="1" Background="{DynamicResource GrayscaleGray3Brush}" Margin="0"/>
-                    <Border Width="250" Height="60" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray3Brush}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                            </Grid.ColumnDefinitions>
-                            <Label Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Width="90" VerticalAlignment="Center">
-                                <Label.Content>
-                                    <AccessText TextWrapping="Wrap" Text="{Binding [Proximal Lumen Area], Source={StaticResource L10N}}"/>
-                                </Label.Content>
-                            </Label>
-                            <Label Grid.Column="1" Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FfrFeature.ProximalLumenArea}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        </Grid>
-                    </Border>
-                </StackPanel>
-                <StackPanel Grid.Column="1">
-                    <Border Width="60" Height="21" CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource MainPrimaryColorBrush}" Background="{DynamicResource AdditionalColor2Brush}">
-                        <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [MLA], Source={StaticResource L10N}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                    </Border>
-                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="13" Width="1" Background="{DynamicResource MainPrimaryColorBrush}" Margin="0"/>
-                    <Grid>
-                        <Image Source="{Binding CrossSectionImage}" Width="344" Height="344"/>
-                        <Image Source="{svgc:SvgImage Source=/res/icon/ffrCircleGreen.svg}" Width="344" Height="344"/>
-                    </Grid>
-                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="13" Width="1" Background="{DynamicResource MainPrimaryColorBrush}" Margin="0"/>
-                    <Border Width="452" Height="60" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource MainPrimaryColorBrush}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="5*"/>
-                                <ColumnDefinition Width="4*"/>
-                                <ColumnDefinition Width="5*"/>
-                                <ColumnDefinition Width="4*"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Width="100" VerticalAlignment="Center">
-                                <Label.Content>
-                                    <AccessText TextWrapping="Wrap" Text="{Binding [Percent Area Stenosis], Source={StaticResource L10N}}"/>
-                                </Label.Content>
-                            </Label>
-                            <Label Grid.Column="1" Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FfrFeature.PercentAreaStenosis}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                            <Label Grid.Column="2" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Width="100" VerticalAlignment="Center">
-                                <Label.Content>
-                                    <AccessText TextWrapping="Wrap" Text="{Binding [Minimal Lumen Area], Source={StaticResource L10N}}"/>
-                                </Label.Content>
-                            </Label>
-                            <Label Grid.Column="3" Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FfrFeature.MinimalLumenArea}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        </Grid>
-                    </Border>
-                </StackPanel>
-                <StackPanel Grid.Column="2">
-                    <Border Width="60" Height="21" CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray3Brush}" Background="{DynamicResource GrayscaleGray5Brush}">
-                        <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Distal], Source={StaticResource L10N}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                    </Border>
-                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="13" Width="1" Background="{DynamicResource GrayscaleGray3Brush}" Margin="0"/>
-                    <Grid>
-                        <Image Source="{Binding DistalOctImage}" Width="344" Height="344"/>
-                        <Image Source="{svgc:SvgImage Source=/res/icon/ffrCircleGray.svg}" Width="344" Height="344"/>
-                    </Grid>
-                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="13" Width="1" Background="{DynamicResource GrayscaleGray3Brush}" Margin="0"/>
-                    <Border Width="250" Height="60" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray3Brush}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                            </Grid.ColumnDefinitions>
-                            <Label Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Width="90" VerticalAlignment="Center">
-                                <Label.Content>
-                                    <AccessText TextWrapping="Wrap" Text="{Binding [Distal Lumen Area], Source={StaticResource L10N}}"/>
-                                </Label.Content>
-                            </Label>
-                            <Label Grid.Column="1" Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FfrFeature.DistalLumenArea}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        </Grid>
-                    </Border>
-                </StackPanel>
-            </Grid>
-            <Border Grid.Row="3" Margin="70,0,70,0" CornerRadius="10" Background="{DynamicResource GrayscaleGray7Brush}">
+            <Border Grid.Row="4" Margin="70,0,70,0" CornerRadius="10" Background="{DynamicResource GrayscaleGray7Brush}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="820"/>
@@ -236,9 +265,9 @@
                     </Grid.ColumnDefinitions>
                     <Button Grid.Column="0" Style="{StaticResource FfrPredictBtn}" Command="{Binding FfrPredictCommand}" Content="{Binding [Predict FFR], Source={StaticResource L10N}}" HorizontalAlignment="Left" Margin="50,0,0,0" IsEnabled="{Binding BtnFfrEnabled}"/>
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
-                        <Label Style="{DynamicResource Pretendard-Bold-48}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [FFR], Source={StaticResource L10N}}" VerticalAlignment="Center"/>
+                        <Label Style="{DynamicResource Pretendard-Bold-40}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [FFR], Source={StaticResource L10N}}" VerticalAlignment="Center" Opacity="{Binding OpacityResult}" Visibility="{Binding VisibilityResult}"/>
                         <StackPanel Width="38"/>
-                        <Label Style="{DynamicResource Pretendard-Bold-74}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding FfrResult}" VerticalAlignment="Center" Opacity="{Binding OpacityResult}" Visibility="{Binding VisibilityResult}"/>
+                        <Label Style="{DynamicResource Pretendard-Bold-72}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding FfrResult}" VerticalAlignment="Center" Opacity="{Binding OpacityResult}" Visibility="{Binding VisibilityResult}"/>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -250,6 +279,40 @@
                 <StackPanel Width="8"/>
                 <Button Style="{StaticResource OutlinedBtnType1-Small-Medium}" Command="{Binding EndReviewCommand}" Content="{Binding [End Review], Source={StaticResource L10N}}"/>
                 <StackPanel Width="16"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.RowSpan="3" Panel.ZIndex="{Binding ZIndex}" Background="Black" Opacity="0.8" Visibility="{Binding DeviceStatus.IsFfrCalculated, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+        <Grid Grid.RowSpan="3" Panel.ZIndex="{Binding ZIndex}" Opacity="{Binding OpacityPopup}">
+            <MediaElement x:Name="mediaElement" Source="res/media/ffr-508px.mp4" Width="508" Height="508" LoadedBehavior="Manual" MediaEnded="MediaElement_MediaEnded">
+                <MediaElement.Clip>
+                    <EllipseGeometry Center="254,254" RadiusX="254" RadiusY="254"/>
+                </MediaElement.Clip>
+            </MediaElement>
+            <Image Source="{svgc:SvgImage Source=/res/icon/ffrResultInnerCircle.svg}" Width="508" Height="508"/>
+            <Image Source="{svgc:SvgImage Source=/res/icon/ffrResultOuterCircleDotted.svg}" Width="545" Height="545">
+                <Image.Triggers>
+                    <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation
+                                Storyboard.TargetName="rotateTransform"
+                                Storyboard.TargetProperty="Angle"
+                                From="0" To="360"
+                                Duration="0:0:50"
+                                RepeatBehavior="Forever"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Image.Triggers>
+                <Image.RenderTransform>
+                    <RotateTransform x:Name="rotateTransform" CenterX="272.5" CenterY="272.5"/>
+                </Image.RenderTransform>
+            </Image>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Label Style="{DynamicResource Pretendard-Bold-40}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Predicting], Source={StaticResource L10N}}"/>
+                <StackPanel Width="10"/>
+                <Label Style="{DynamicResource Pretendard-Bold-40}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [FFR Value], Source={StaticResource L10N}}"/>
             </StackPanel>
         </Grid>
     </Grid>

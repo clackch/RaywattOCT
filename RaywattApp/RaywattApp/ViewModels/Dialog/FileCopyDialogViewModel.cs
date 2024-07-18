@@ -380,6 +380,7 @@ namespace RaywattApp.ViewModels.Dialog
                             patientCaseAnnotation.LumenSidebranch = obj["LumenSidebranch"]?.ToString() ?? "null";
                             patientCaseAnnotation.LumenStent = obj["LumenStent"]?.ToString() ?? "null";
                             patientCaseAnnotation.LumenGuidewire = obj["LumenGuidewire"]?.ToString() ?? "null";
+                            patientCaseAnnotation.FfrPlaque = obj["FfrPlaque"]?.ToString() ?? "null";
                             annotations.Add(patientCaseAnnotation);
                         }
                     }
@@ -460,6 +461,7 @@ namespace RaywattApp.ViewModels.Dialog
                                         sqlParameters["lumen_sidebranch"] = annotation.LumenSidebranch;
                                         sqlParameters["lumen_stent"] = annotation.LumenStent;
                                         sqlParameters["lumen_guidewire"] = annotation.LumenGuidewire;
+                                        sqlParameters["ffr_plaque"] = annotation.FfrPlaque;
                                         nRows = _sqlManager.UpsertPatientCaseAnnotation(sqlParameters);
                                         if (nRows == 0)
                                             _log.Error("Upsert Error");

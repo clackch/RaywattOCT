@@ -211,6 +211,7 @@ namespace RaywattApp.ViewModels
             reviewPages.Add(Constants.ReviewPage);
             reviewPages.Add(Constants.Review3dPage);
             reviewPages.Add(Constants.ReviewComparePage);
+            reviewPages.Add(Constants.ReviewFfrSettingPage);
             reviewPages.Add(Constants.ReviewFfrPage);
             reviewPages.Add(Constants.ReviewPresetPage);
             reviewPages.Add(Constants.ReviewAngioCoRegPage);

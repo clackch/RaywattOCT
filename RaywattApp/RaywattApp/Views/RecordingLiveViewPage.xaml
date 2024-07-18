@@ -29,7 +29,7 @@
                 <RowDefinition Height="1"/>
                 <RowDefinition Height="74"/>
             </Grid.RowDefinitions>
-            <Border Grid.Row="0" CornerRadius="10,10,0,0" Background="{DynamicResource GrayscaleGray6Brush}">
+            <Border Grid.Row="0" CornerRadius="10,10,0,0" Background="{DynamicResource GrayscaleGray7Brush}">
                 <Grid Margin="40,44,40,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="38"/>
@@ -54,13 +54,13 @@
                             </StackPanel>
                         </StackPanel>
                         <StackPanel Grid.Column="1">
-                            <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                 <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Patient.Firstname}"/>
                                 <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content=", "/>
                                 <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Patient.Lastname}"/>
                             </StackPanel>
                             <StackPanel Height="2"/>
-                            <StackPanel Grid.Row="1" Orientation="Horizontal">
+                            <StackPanel Orientation="Horizontal">
                                 <StackPanel Orientation="Horizontal">
                                     <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [ID], Source={StaticResource L10N}}"/>
                                     <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="8,0,0,0" Content="{Binding Patient.Id}"/>
@@ -85,7 +85,7 @@
                             <ColumnDefinition Width="36"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}" Visibility="{Binding DeviceStatus.IsAngioInitialized, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                        <Border Grid.Column="0" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
                             <Grid>
                                 <Grid Visibility="{Binding IsOctExpanded, Converter={StaticResource BoolToVisibilityConverter}}">
                                     <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Stretch="Fill"/>
@@ -178,13 +178,13 @@
                                 </Grid.RowDefinitions>
                                 <Label Grid.Row="0" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Presentation], Source={StaticResource L10N}}"/>
                                 <Label Grid.Row="0" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Brightness], Source={StaticResource L10N}}"/>
-                                <Slider Grid.Row="0" Grid.Column="2" Style="{DynamicResource SliderSimpleBlack}" Value="{Binding Brightness}" Maximum="100" Minimum="0" TickFrequency="1" IsSnapToTickEnabled="True" LargeChange="1" SmallChange="1" VerticalAlignment="Center"/>
+                                <Slider Grid.Row="0" Grid.Column="2" Style="{DynamicResource SliderSimple}" Value="{Binding Brightness}" Maximum="100" Minimum="0" TickFrequency="1" IsSnapToTickEnabled="True" LargeChange="1" SmallChange="1" VerticalAlignment="Center"/>
                                 <Label Grid.Row="0" Grid.Column="3" Content="{Binding Brightness}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Style="{DynamicResource Pretendard-Medium-12}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                 <Label Grid.Row="1" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Contrast], Source={StaticResource L10N}}"/>
-                                <Slider Grid.Row="1" Grid.Column="2" Style="{DynamicResource SliderSimpleBlack}" Value="{Binding Contrast}" Maximum="100" Minimum="0" TickFrequency="1" IsSnapToTickEnabled="True" LargeChange="1" SmallChange="1" VerticalAlignment="Center"/>
+                                <Slider Grid.Row="1" Grid.Column="2" Style="{DynamicResource SliderSimple}" Value="{Binding Contrast}" Maximum="100" Minimum="0" TickFrequency="1" IsSnapToTickEnabled="True" LargeChange="1" SmallChange="1" VerticalAlignment="Center"/>
                                 <Label Grid.Row="1" Grid.Column="3" Content="{Binding Contrast}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Style="{DynamicResource Pretendard-Medium-12}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                 <Label Grid.Row="2" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Field of View], Source={StaticResource L10N}}"/>
-                                <Slider Grid.Row="2" Grid.Column="2" Style="{DynamicResource SliderSimpleBlack}" Value="{Binding FieldOfView}" Maximum="10.0" Minimum="5.0" TickFrequency="1.0" IsSnapToTickEnabled="True" LargeChange="1.0" SmallChange="1.0" VerticalAlignment="Center"/>
+                                <Slider Grid.Row="2" Grid.Column="2" Style="{DynamicResource SliderSimple}" Value="{Binding FieldOfView}" Maximum="10.0" Minimum="5.0" TickFrequency="1.0" IsSnapToTickEnabled="True" LargeChange="1.0" SmallChange="1.0" VerticalAlignment="Center"/>
                                 <StackPanel Grid.Row="2" Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                     <Label Content="{Binding FieldOfView}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Style="{DynamicResource Pretendard-Medium-12}"/>
                                     <Label Content="{Binding [㎜], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Style="{DynamicResource Pretendard-Medium-12}"/>
@@ -193,7 +193,7 @@
                             <Border Grid.Row="5" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
                                 <Grid>
                                     <Grid Visibility="{Binding DeviceStatus.IsAngioInitialized, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Angio is not connected], Source={StaticResource L10N}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG023], Source={StaticResource L10N}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                     </Grid>
                                     <Grid Visibility="{Binding DeviceStatus.IsAngioInitialized, Converter={StaticResource BoolToVisibilityConverter}}">
                                         <Grid Visibility="{Binding IsOctExpanded, Converter={StaticResource BoolToVisibilityReverseConverter}}">

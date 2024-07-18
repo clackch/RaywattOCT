@@ -203,6 +203,15 @@ namespace RaywattApp.Common.Annotation
         public static readonly DependencyProperty ScreenSizeProperty =
             DependencyProperty.Register("ScreenSize", typeof(double), typeof(DrawLumenContourUtil), new PropertyMetadata(null));
 
+        public bool IsFfr
+        {
+            get { return (bool)GetValue(IsFfrProperty); }
+            set { this.SetValue(IsFfrProperty, value); }
+        }
+
+        private static readonly DependencyProperty IsFfrProperty =
+            DependencyProperty.Register("IsFfr", typeof(bool), typeof(DrawLumenContourUtil), new PropertyMetadata(default(bool)));
+
         //---------------------------------------------------------------------------------------------------- Constructor
         public DrawLumenContourUtil()
         {
@@ -626,7 +635,7 @@ namespace RaywattApp.Common.Annotation
                 polygon.MouseLeave += Polygon_MouseLeave;
                 this.canvas.Children.Add(polygon);
 
-                if (lumenContour.Valid)
+                if (lumenContour.Valid && !IsFfr)
                 {
                     DrawDiameter(lumenContour.MinDiameter.point1, lumenContour.MinDiameter.point2, constMinDiameter);
                     DrawDiameter(lumenContour.MaxDiameter.point1, lumenContour.MaxDiameter.point2, constMaxDiameter);

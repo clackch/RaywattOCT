@@ -86,6 +86,7 @@ namespace RaywattApp
             services.AddTransient(typeof(ReviewViewModel));
             services.AddTransient(typeof(Review3dViewModel));
             services.AddTransient(typeof(ReviewCompareViewModel));
+            services.AddTransient(typeof(ReviewFfrSettingViewModel));
             services.AddTransient(typeof(ReviewFfrViewModel));
             services.AddTransient(typeof(ReviewPresetViewModel));
             services.AddTransient(typeof(ReviewAngioCoRegViewModel));

@@ -161,6 +161,7 @@ namespace RaywattApp.ViewModels.File
                         annotation.LumenSidebranch = patientCase.StrLumenSidebranch;
                         annotation.LumenStent = patientCase.StrLumenStent;
                         annotation.LumenGuidewire = patientCase.StrLumenGuidewire;
+                        annotation.FfrPlaque = patientCase.FfrPlaque;
                         annotations.Add(annotation);
 
                         patientCase.Bookmark = null;
@@ -170,6 +171,7 @@ namespace RaywattApp.ViewModels.File
                         patientCase.StrLumenSidebranch = null;
                         patientCase.StrLumenStent = null;
                         patientCase.StrLumenGuidewire = null;
+                        patientCase.FfrPlaque = null;
 
                         patient.PatientCaseList.Add(patientCase);
                     }
