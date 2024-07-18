@@ -17,7 +17,6 @@ using System.Collections.ObjectModel;
 using RaywattApp.Services;
 using System.Linq;
 using Newtonsoft.Json;
-using System.Diagnostics.Metrics;
 
 namespace RaywattApp.ViewModels
 {
@@ -65,6 +64,9 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private bool _isNextEnabled;
+
+        [ObservableProperty]
+        private bool _isMlaEnabled;
 
         private ICommand _zoomInCommand;
         public ICommand ZoomInCommand
@@ -192,7 +194,7 @@ namespace RaywattApp.ViewModels
                     sqlParameters["id"] = PatientCase.Id;
                     IList<StringModel> ffrPlaques = _sqlManager.SelectPatientCaseFfrPlaque(sqlParameters);
 
-                    if (ffrPlaques[0].ReturnString == null)
+                    if (String.IsNullOrEmpty(ffrPlaques[0].ReturnString))
                         PlaqueAreaList = new List<Measurement>();
                     else
                         PlaqueAreaList = JsonConvert.DeserializeObject<List<Measurement>>(ffrPlaques[0].ReturnString);
@@ -552,9 +554,16 @@ namespace RaywattApp.ViewModels
             if (CommonUtil.IsPreCase(PatientCase.Procedure))
             {
                 if (Section.SetMlaMld(PatientCase.LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeFfrWidth, PatientCase.PullbackLength, PatientCase.ImageResolution))
+                {
                     Section.VisibleMlaMld(true);
+                    IsMlaEnabled = true;
+                }
                 else
+                {
                     Section.VisibleMlaMld(false);
+                    IsMlaEnabled = false;
+                }
+                    
             }
             else
             {
@@ -562,9 +571,15 @@ namespace RaywattApp.ViewModels
                 CommonUtil.GetStentProximalDistal(PatientCase.LumenStents, out stentProximal, out stentDistal);
 
                 if (Section.SetMsaMinExp(PatientCase.LumenContours, frameProximal, frameDistal, stentProximal, stentDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeFfrWidth, PatientCase.PullbackLength, PatientCase.ImageResolution))
+                {
                     Section.VislbleMsaMinExp(true);
+                    IsMlaEnabled = true;
+                }
                 else
+                {
                     Section.VislbleMsaMinExp(false);
+                    IsMlaEnabled = false;
+                }                    
             }
 
             if (FfrStep.Equals(Constants.FfrStep2))

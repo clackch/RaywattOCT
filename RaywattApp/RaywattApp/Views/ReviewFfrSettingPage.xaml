@@ -62,7 +62,7 @@
                                     <RowDefinition/>
                                     <RowDefinition Height="64"/>
                                 </Grid.RowDefinitions>
-                                <Label Grid.Row="0" Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Feature Parameters], Source={StaticResource L10N}}" VerticalAlignment="Bottom"/>
+                                <Label Grid.Row="0" Style="{DynamicResource Pretendard-Bold-22}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Feature Parameters], Source={StaticResource L10N}}" VerticalAlignment="Center"/>
                                 <!-- Step 1 : Select Vessel Type -->
                                 <Grid Grid.Row="1" VerticalAlignment="Center" Visibility="{Binding FfrStep, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FfrStep1}}">
                                     <StackPanel>
@@ -433,7 +433,7 @@
                         <StackPanel Grid.Column="1" HorizontalAlignment="Right" Margin="0,16,16,0">
                             <Button Style="{StaticResource OutlinedBtnType4-Large}" Command="{Binding NextCommand}" Content="{Binding [Next], Source={StaticResource L10N}}" Visibility="{Binding FfrStep, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FfrStep1}}" IsEnabled="{Binding IsNextEnabled}"/>
                             <Button Style="{StaticResource OutlinedBtnType4-Large}" Command="{Binding NextCommand}" Content="{Binding [Next], Source={StaticResource L10N}}" Visibility="{Binding FfrStep, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FfrStep2}}"/>
-                            <Button Style="{StaticResource OutlinedBtnType4-Large}" Command="{Binding NextCommand}" Content="{Binding [Next], Source={StaticResource L10N}}" Visibility="{Binding FfrStep, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FfrStep3}}"/>
+                            <Button Style="{StaticResource OutlinedBtnType4-Large}" Command="{Binding NextCommand}" Content="{Binding [Next], Source={StaticResource L10N}}" Visibility="{Binding FfrStep, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FfrStep3}}" IsEnabled="{Binding IsMlaEnabled}"/>
                             <Button Style="{StaticResource OutlinedBtnType4-Large}" Command="{Binding NextCommand}" Content="{Binding [Next], Source={StaticResource L10N}}" Visibility="{Binding FfrStep, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FfrStep4}}" IsEnabled="{Binding FfrFeature.IsPlaqueAreaValid}"/>
                             <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding ConfirmCommand}" Content="{Binding [Confirm], Source={StaticResource L10N}}" Visibility="{Binding FfrStep, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FfrStep5}}"/>
                         </StackPanel>
