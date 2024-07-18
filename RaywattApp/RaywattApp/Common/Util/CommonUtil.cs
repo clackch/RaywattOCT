@@ -1971,7 +1971,7 @@ namespace RaywattApp.Common.Util
             {
                 RaySetProperty(Property.Colormap, 2);
             }
-            else if ("SPEC".Equals(colorCode))
+            else if ("EHOR".Equals(colorCode))
             {
                 RaySetProperty(Property.Colormap, 3);
             }
