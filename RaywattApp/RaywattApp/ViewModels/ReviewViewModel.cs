@@ -576,9 +576,13 @@ namespace RaywattApp.ViewModels
 
             //Bookmark
             Bookmarks = JsonConvert.DeserializeObject<ObservableCollection<Bookmark>>(tempBookmark);
+            if (Bookmarks == null)
+                Bookmarks = new ObservableCollection<Bookmark>();
 
             //Cross-Section
             Measurements = JsonConvert.DeserializeObject<List<Measurement>>(tempCrossSection);
+            if (Measurements == null)
+                Measurements = new List<Measurement>();
             for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)
             {
                 Measurement measurement = new Measurement();
@@ -682,7 +686,8 @@ namespace RaywattApp.ViewModels
             if (ReviewStatus.NumberOfFrames - 1 == frame)
             {
                 //TODO - ML detection에서 Calcium 가져오도록 개발되면 삭제 필요
-                GetMlData();
+                if (false)
+                    GetMlData();
 
                 if (ReviewStatus.IsContourStentOn)
                     LumenContourCommand = Constants.LumenContourDraw;
@@ -1445,21 +1450,36 @@ namespace RaywattApp.ViewModels
                 int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveWidth - Constants.SectionIndicatorMoveCenterWidth);
 
                 int count = frameDistal - frameProximal + 1;
-                double mla = LumenContours.GetRange(frameProximal, count).Min(x => x.Area);
-                int mlaIdx = LumenContours.GetRange(frameProximal, count).FindIndex(x => x.Area == mla) + frameProximal;
+                var mlaSubset = LumenContours.GetRange(frameProximal, count).Where(x => x.Area > 0);
+                if (mlaSubset.Any())
+                {
+                    double mla = mlaSubset.Min(x => x.Area);
+                    int mlaIdx = LumenContours.GetRange(frameProximal, count).FindIndex(x => x.Area == mla) + frameProximal;
 
-                int frameDiff = (int)(Constants.PreLesionLengthInitValue * ReviewStatus.NumberOfFrames * 10 / int.Parse(PatientCase.PullbackLength));
-                proximalIdx = mlaIdx - frameDiff > 0 ? mlaIdx - frameDiff : 0;
-                distalIdx = mlaIdx + frameDiff < ReviewStatus.NumberOfFrames ? mlaIdx + frameDiff : ReviewStatus.NumberOfFrames - 1;
+                    int frameDiff = (int)(Constants.PreLesionLengthInitValue * ReviewStatus.NumberOfFrames * 10 / int.Parse(PatientCase.PullbackLength));
+                    proximalIdx = mlaIdx - frameDiff > 0 ? mlaIdx - frameDiff : 0;
+                    distalIdx = mlaIdx + frameDiff < ReviewStatus.NumberOfFrames ? mlaIdx + frameDiff : ReviewStatus.NumberOfFrames - 1;
+                }
+                else
+                {
+                    proximalIdx = 0;
+                    distalIdx = ReviewStatus.NumberOfFrames - 1;
+                }
             }
             else
             {
                 int stentProximal = 0, stentDistal = 0;
-                CommonUtil.GetStentProximalDistal(LumenStents, out stentProximal, out stentDistal);
-
-                int frameDiff = (int)(Constants.PostLesionLengthInitValue * ReviewStatus.NumberOfFrames * 10 / int.Parse(PatientCase.PullbackLength));
-                proximalIdx = stentProximal - frameDiff > 0 ? stentProximal - frameDiff : 0;
-                distalIdx = stentDistal + frameDiff < ReviewStatus.NumberOfFrames ? stentDistal + frameDiff : ReviewStatus.NumberOfFrames - 1;
+                if(CommonUtil.GetStentProximalDistal(LumenStents, out stentProximal, out stentDistal))
+                {
+                    int frameDiff = (int)(Constants.PostLesionLengthInitValue * ReviewStatus.NumberOfFrames * 10 / int.Parse(PatientCase.PullbackLength));
+                    proximalIdx = stentProximal - frameDiff > 0 ? stentProximal - frameDiff : 0;
+                    distalIdx = stentDistal + frameDiff < ReviewStatus.NumberOfFrames ? stentDistal + frameDiff : ReviewStatus.NumberOfFrames - 1;
+                }
+                else
+                {
+                    proximalIdx = 0;
+                    distalIdx = ReviewStatus.NumberOfFrames - 1;
+                }
             }
 
             if(proximalIdx >= 0)

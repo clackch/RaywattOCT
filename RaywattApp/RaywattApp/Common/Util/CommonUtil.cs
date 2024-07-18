@@ -1813,7 +1813,7 @@ namespace RaywattApp.Common.Util
             return true;
         }
 
-        public static void GetStentProximalDistal(List<LumenStent> lumenStents, out int proximal, out int distal)
+        public static bool GetStentProximalDistal(List<LumenStent> lumenStents, out int proximal, out int distal)
         {
             proximal = 0;
             distal = 0;
@@ -1842,7 +1842,7 @@ namespace RaywattApp.Common.Util
             }
 
             if (!isValid)
-                return;
+                return false;
             
             List<(List<int> sequence, int startIndex, int endIndex)> sequences = new List<(List<int> sequence, int startIndex, int endIndex)>();
             List<int> currentSequence = new List<int>();
@@ -1926,6 +1926,8 @@ namespace RaywattApp.Common.Util
             {
                 lumenStents[i].IsStent = true;
             }
+
+            return true;
         }
       
         public static BitmapSource DrawSheathIndicator(double resolution, int imageSize, double sheathDiameter)

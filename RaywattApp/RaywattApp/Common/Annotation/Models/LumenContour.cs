@@ -11,7 +11,7 @@ namespace RaywattApp.Common.Annotation.Models
         private Contour mlContour = new Contour();
 
         [ObservableProperty]
-        private Calcium calcium;
+        private Calcium calcium = new Calcium();
 
         public new List<Point>? Points
         {
