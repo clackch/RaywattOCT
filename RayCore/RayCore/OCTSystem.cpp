@@ -841,6 +841,12 @@ RayError COCTSystem::SetColormap(double value)
 {
 	// Read LUT from File
 	CLookUpTable& lut = CLookUpTable::GetInstance();
+
+	if (value == 3 /*enhancedLUT.csv*/) {
+		lut.Load("LUT_enhanced.csv", true);
+		lut.SetEnhancedLUT(!(lut.GetEnhancedLUT()));
+		return RayError::OK;
+	}
 	lut.SetCurrentColormap((int)value);
 	m_fColormap = value;
 	PLOGI.printf("read LUT :%d %s", (int)value, (m_fColormap >= 0) ? "Succeed" : "Failed");

@@ -158,6 +158,13 @@ namespace RaywattApp.ViewModels
         }
 
         //Test
+        private ICommand _enhancedLUTTest;
+        public ICommand EnhancedLUTTestCommand
+        {
+            get { return this._enhancedLUTTest ?? (this._enhancedLUTTest = new RelayCommand(EnhancedLUTTest)); }
+        }
+
+        //Test
         private ICommand _imageAnalysisToggle;
         public ICommand ImageAnalysisToggleCommmand
         {
@@ -429,6 +436,13 @@ namespace RaywattApp.ViewModels
             IsImageAnalysisTest = !IsImageAnalysisTest;
         }
 
+        private void EnhancedLUTTest()
+        {
+            _log.Debug("EnhancedLUTTest");
+
+            RaySetProperty(Property.Colormap, 3);
+        }
+
         private void ImageAnalysisToggle()
         {
             _log.Debug("ImageAnalysisToggle");
@@ -443,7 +457,7 @@ namespace RaywattApp.ViewModels
             ImageThreshold = RayGetProperty(Property.ImageThreshold).ToString();
             ImageRoi = RayGetProperty(Property.ImageRoi).ToString();
         }
-
+        
         private void ImageAnalysisApply()
         {
             _log.Debug("ImageAnalysisApply");

@@ -64,9 +64,9 @@ void CTIFFImaging::PostProcess(cv::Mat image)
 	cv::cvtColor(image, imageCircle, cv::COLOR_GRAY2RGB);
 	if (bColor) {
 		CLookUpTable& lut = CLookUpTable::GetInstance();
-		if (lut.GetCurrentColormap() == 3 /*LUT_enhanced.csv*/) {
+		if (lut.GetEnhancedLUT()) {
+			lut.Apply(imageCircle, 3 /*LUT_enhanced.csv*/);
 			lut.Apply(imageCircle, lut.GetCurrentColormap());
-			lut.Apply(imageCircle, 2 /*LUT_abbott.csv*/);
 		}
 		else {
 			lut.Apply(imageCircle, lut.GetCurrentColormap());

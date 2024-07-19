@@ -1973,10 +1973,6 @@ namespace RaywattApp.Common.Util
             {
                 RaySetProperty(Property.Colormap, 2);
             }
-            else if ("EHOR".Equals(colorCode))
-            {
-                RaySetProperty(Property.Colormap, 3);
-            }
         }
 
         public static bool IsTestMode(Dictionary<string, bool> testMode, string key)

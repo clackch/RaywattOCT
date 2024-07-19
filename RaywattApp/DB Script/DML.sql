@@ -11,6 +11,7 @@ INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES (
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'FG', 'Y', 'Raywatt;');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'Image', 'Y', 'Raywatt;');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'ML', 'N', 'Raywatt;');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'LUT', 'Y', 'Raywatt;');
 
 -- rv_schema.code
 DELETE FROM rv_schema.code;
@@ -33,7 +34,7 @@ INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, des
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('CLMP', 'GRGR', 'Green-gray', 1, 'Colormap Green-gray', now(), now());
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('CLMP', 'GRAY', 'Gray', 2, 'Colormap Gray', now(), now());
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('CLMP', 'ORNG', 'Orange', 3, 'Colormap Orange', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('CLMP', 'EHOR', 'Enhanced-orange', 4, 'Colormap Enhanced-gray (acting in app as orange LUT but actually it is gray converting LUT)', now(), now());
+-- INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('CLMP', 'EHOR', 'Enhanced-orange', 4, 'Colormap Enhanced-gray (acting in app as orange LUT but actually it is gray converting LUT)', now(), now());
 -- PROCEDURE
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PROC', '$001', 'Pre-PCI', 1, 'Procedure Pre-PCI', now(), now());
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PROC', '$002', 'Post-PCI', 2, 'Procedure Post-PCI', now(), now());
