@@ -1087,7 +1087,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveVideo()
 	CLabImaging* pImaging = createImaging(config.imaging);
 
 	CDataReader* pReader = new CDataReader();
-	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nAScan * config.acquisition.nBScan);
+	initReader(strDataPath.GetBuffer(), pReader);
 
 	CVideoWriter videoWriter;
 	bool isCircle = (m_radioImageShape == 0);
@@ -1096,6 +1096,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveVideo()
 	videoWriter.StartRecording(strAviPath, width, height);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
 		pImaging->Process(pReader->GetSample(i));
+		pImaging->PostProcess(pImaging->GetProcessedImage());
 		videoWriter.PushToBuffer(((isCircle) ? pImaging->GetCircleImage() : pImaging->GetRectangleImage()));
 	}
 	videoWriter.StopRecording();
@@ -1126,12 +1127,13 @@ void CRaywattLabDlg::OnBnClickedButtonSaveTif()
 	CLabImaging* pImaging = createImaging(config.imaging);
 
 	CDataReader* pReader = new CDataReader();
-	pReader->Initialize(strDataPath.GetBuffer(), config.acquisition.nAScan * config.acquisition.nBScan);
+	initReader(strDataPath.GetBuffer(), pReader);
 
 	CTIFFWriter tiffWriter(strTifPath);
 	bool isCircle = (m_radioImageShape == 0);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
 		pImaging->Process(pReader->GetSample(i));
+		pImaging->PostProcess(pImaging->GetProcessedImage());
 
 		tiffWriter.SaveFrame(((isCircle) ? pImaging->GetCircleImage() : pImaging->GetRectangleImage()));
 	}
