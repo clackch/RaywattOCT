@@ -79,6 +79,9 @@ namespace RaywattApp.Models
         private double _imageIntensity;
 
         [ObservableProperty]
+        private bool _enhancedLUT;
+
+        [ObservableProperty]
         private Dictionary<string, bool> _testMode = new Dictionary<string, bool>();
 
         [ObservableProperty]
