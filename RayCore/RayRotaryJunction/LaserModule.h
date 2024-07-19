@@ -6,8 +6,8 @@
 #define MAX_VOLTAGE_RAW_VALUE	4095
 
 enum class MotorIndex {
-	DelayLine = 1,
-	Polarization = 2,
+	Polarization = 1,
+	DelayLine = 2,
 };
 
 class CThread;
