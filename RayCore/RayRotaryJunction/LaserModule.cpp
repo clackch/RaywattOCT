@@ -126,8 +126,7 @@ int CLaserModule::MoveRelative(MotorIndex idx, int nOffset) {
 	int index = (int)idx - 1;
 	int actualPosition = (index == 0) ? m_RAM.marshall.position_motor1_actual : m_RAM.marshall.position_motor2_actual;
 
-	int nLastTargetPos = (m_lastTargetPosition[(int)idx - 1] < 0) ? actualPosition : m_lastTargetPosition[(int)idx - 1];
-	int nPosition = nLastTargetPos + nOffset;
+	int nPosition = m_lastTargetPosition[(int)idx - 1] + nOffset;
 
 	MoveAbsolute(idx, nPosition);
 
