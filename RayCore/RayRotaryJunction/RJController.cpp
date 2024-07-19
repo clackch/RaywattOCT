@@ -313,6 +313,7 @@ void CRJController::updateState() {
 		break;
 	case eRJState::Loaded:
 		if (!m_bLimitSwitch || m_bButton[0]) {
+			PLOGI.printf("Error occured: limitSwitch(%d), unlockButton(%d)", m_bLimitSwitch, m_bButton[0]);
 			Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 			m_nextState = eRJState::Error;
 		}
