@@ -361,7 +361,7 @@
                                     </Image.Clip>
                                 </Image>
                                 <!-- Lesion Section -->
-                                <Canvas HorizontalAlignment="Right" Width="{x:Static const:Constants.LongitudeFfrWidth}">
+                                <Canvas Width="{x:Static const:Constants.LongitudeFfrWidth}">
                                     <!-- Section MLA -->
                                     <Grid Canvas.Left="{Binding Section.Mla.X}" Visibility="{Binding Section.Mla.IsVisible}" Margin="20,-4,0,0">
                                         <Image Height="95.2" Width="8" Source="{svgc:SvgImage Source=/res/indicator/ffrMlaSmall.svg}" Visibility="{Binding FfrStep, Converter={StaticResource RadioButtonVisibilityReverseConverter}, ConverterParameter={x:Static const:Constants.FfrStep4}}"/>
