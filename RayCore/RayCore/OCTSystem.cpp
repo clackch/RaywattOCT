@@ -184,8 +184,6 @@ RayError COCTSystem::Stop() {
 
 	PLOGI.printf("Close COM Ports");
 	if (m_pLaserModule->IsOpen()) {
-		m_pLaserModule->SetVLD(0);
-		m_pLaserModule->SetVOA(0);
 		m_pLaserModule->Close();
 	}
 	delete m_pLaserModule;
@@ -1509,10 +1507,15 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
 	CRJController* pRJController = pSystem->m_pRJController;
+	CLaserModule* pLaserModule = pSystem->m_pLaserModule;
 
 	PLOGI.printf("Unload catheter");
 
 	pSystem->postPriorMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterUnloading);
+
+	if (pLaserModule != nullptr && pLaserModule->IsOpen()) {
+		pLaserModule->SetVLD(0);
+	}
 
 	if (pRJController->IsConnected()) {
 		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
@@ -1900,11 +1903,6 @@ void COCTSystem::laserOnOff(bool isOn) {
 	CLaserController* pLaser = CLaserController::GetInstance();
 
 	pLaser->LaserOnOff(isOn);
-	
-	if (m_pLaserModule != nullptr && m_pLaserModule->IsOpen()) {
-		int vldPower = (isOn) ? config.laserModule.vldValue : 0;
-		m_pLaserModule->SetVLD(vldPower);
-	}
 }
 bool COCTSystem::waitForStepMotors(bool& runFlag) {
 	if (!m_pRJController->IsConnected()) return false;
@@ -2081,6 +2079,10 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 		break;
 	}
 	case eRJState::Loaded:
+		if (m_pLaserModule != nullptr && m_pLaserModule->IsOpen()) {
+			CConfiguration& config = CConfiguration::GetInstance();
+			m_pLaserModule->SetVLD(config.laserModule.vldValue);
+		}
 		break;
 	case eRJState::Unloading:
 	{

@@ -372,7 +372,7 @@ void CRJController::updateState(eRJState state) {
 		break;
 	}
 	m_state = m_nextState = state;
-	if (m_pMsg != nullptr) m_pMsg->postMessage(WM_UPDATE_RJ_STATE, (WPARAM)m_state);
+	if (m_pMsg != nullptr) m_pMsg->postPriorMessage(WM_UPDATE_RJ_STATE, (WPARAM)m_state);
 }
 bool CRJController::displayLCD(eLCDImage image) {
 	BYTE serialPacket[MAX_PATH];
