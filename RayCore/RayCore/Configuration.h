@@ -36,6 +36,7 @@ public:
 	class CatheterSetting {
 	public:
 		int rotationTime;	// To-Do: remove
+		bool manualLoad;
 	};
 
 	class Volume {
