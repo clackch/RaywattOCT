@@ -95,6 +95,7 @@ void CLaserModule::Close() {
 	CUtility::StopThread(m_pThread);
 
 	if (IsOpen()) {
+		SetVOA(0);
 		SetVLD(0);
 		CloseHandle(m_hComTx);
 		m_hComTx = INVALID_HANDLE_VALUE;
