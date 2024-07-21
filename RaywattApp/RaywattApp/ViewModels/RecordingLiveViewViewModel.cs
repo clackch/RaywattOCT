@@ -261,10 +261,12 @@ namespace RaywattApp.ViewModels
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {
+            if (!DeviceStatus.IsAngioConnected)
+            {
+                IsOctExpanded =  true;
+            }
             DrawCrossSectionImage();
-
-            if (DeviceStatus.IsAngioConnected)
-                DrawAngioImage();
+            DrawAngioImage();
         }
 
         private void leaveToPage(string viewPage)
@@ -282,7 +284,6 @@ namespace RaywattApp.ViewModels
         private bool DrawAngioImage()
         {
             AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(_angioManager.ImgAngio);
-
             return true;
         }
     }
