@@ -76,6 +76,7 @@ enum class eRJState {
 	Validating,
 	Loading,
 	WaitManualLoad,
+	WaitManualLoad2,
 	Loaded,
 	Unloading,
 	Unloaded,

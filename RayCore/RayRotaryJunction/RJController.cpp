@@ -368,6 +368,17 @@ void CRJController::updateStateManualMode() {
 	case eRJState::WaitManualLoad:
 		if (m_bButton[1]) {	// Press STOP Button to confirm Loading
 			Current(eStepMotorIndex::Pullback, 0);
+			Move(eStepMotorIndex::Pullback, 1000);
+			Sleep(500);
+			m_nextState = eRJState::WaitManualLoad2;
+		}
+		if (m_bButton[0]) {
+			m_nextState = eRJState::Unloading;
+		}
+		break;
+	case eRJState::WaitManualLoad2:
+		if (m_bButton[1]) {	// Press STOP Button to confirm Loading
+			Current(eStepMotorIndex::Pullback, 0);
 			Move(eStepMotorIndex::Pullback, 500);
 			Sleep(500);
 			m_nextState = eRJState::Loaded;
@@ -425,6 +436,8 @@ void CRJController::updateState(eRJState state) {
 		displayLCD(eLCDImage::LCD_IMAGE_LOADING);
 		break;
 	case eRJState::WaitManualLoad:
+		break;
+	case eRJState::WaitManualLoad2:
 		break;
 	case eRJState::Loaded:
 		displayLCD(eLCDImage::LCD_IMAGE_STANDBY_OFF);

@@ -1605,7 +1605,7 @@ UINT COCTSystem::threadManualLoadCatheter(LPVOID param)
 	if (pRJController->IsConnected()) {
 		pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
-		pRJController->Move(eStepMotorIndex::Pullback, 0, false, 0x02 /* photo-sensor #2 */);
+		pRJController->Move(eStepMotorIndex::Pullback, 0);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 	}
 	else if (pSystem->m_isTestMode)
