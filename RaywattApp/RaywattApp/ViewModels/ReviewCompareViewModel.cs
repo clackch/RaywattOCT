@@ -219,7 +219,6 @@ namespace RaywattApp.ViewModels
         {
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
-            Save();
         }
 
         private void GetAnnotation()
@@ -248,36 +247,6 @@ namespace RaywattApp.ViewModels
             });
 
             LumenContourCommand = Constants.LumenContourDraw;
-        }
-
-        protected override void Save()
-        {
-            _log.Debug("Save");
-
-            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-            sqlParameters["id"] = PatientCase.Id;
-            sqlParameters["physician_name"] = PatientCase.PhysicianName;
-            sqlParameters["accession_number"] = PatientCase.AccessionNumber;
-            sqlParameters["comment"] = PatientCase.Comment;
-            sqlParameters["vessel"] = PatientCase.Vessel;
-            sqlParameters["location"] = PatientCase.Location;
-            sqlParameters["procedure"] = PatientCase.Procedure;
-            sqlParameters["angio_yn"] = PatientCase.AngioYn;
-            sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
-            sqlParameters["indicator_degree"] = PatientCase.IndicatorDegree;
-            sqlParameters["colormap"] = PatientCase.Colormap;
-            sqlParameters["calcium_threshold"] = PatientCase.CalciumThreshold;
-            sqlParameters["expansion_calculation"] = PatientCase.ExpansionCalculation;
-            sqlParameters["expansion_threshold"] = PatientCase.ExpansionThreshold;
-            sqlParameters["apposition_threshold"] = PatientCase.AppositionThreshold;
-            sqlParameters["brightness"] = PatientCase.Brightness;
-            sqlParameters["contrast"] = PatientCase.Contrast;
-            sqlParameters["section_proximal"] = PatientCase.SectionProximal;
-            sqlParameters["section_distal"] = PatientCase.SectionDistal;
-
-            int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
-            if (nRows == 0)
-                _log.Error("Update Error");
         }
 
         protected override void UpdateCrossSectionImage()

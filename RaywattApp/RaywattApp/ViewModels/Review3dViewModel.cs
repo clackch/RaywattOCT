@@ -257,6 +257,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["apposition_threshold"] = PatientCase.AppositionThreshold;
             sqlParameters["brightness"] = PatientCase.Brightness;
             sqlParameters["contrast"] = PatientCase.Contrast;
+            sqlParameters["field_of_view"] = PatientCase.FieldOfView;
             sqlParameters["section_proximal"] = PatientCase.SectionProximal;
             sqlParameters["section_distal"] = PatientCase.SectionDistal;
 
