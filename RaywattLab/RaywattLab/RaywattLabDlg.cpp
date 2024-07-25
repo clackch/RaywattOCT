@@ -286,21 +286,21 @@ USHORT* CRaywattLabDlg::readBackground(const char* strBackgroundFile, IImaging::
 
 	return pBackground;
 }
-int CRaywattLabDlg::initReader(tstring strFilePath, CDataReader* pReader)
+IImaging::Setting CRaywattLabDlg::initReader(tstring strFilePath, CDataReader* pReader)
 {
-	if (pReader == nullptr) return -1;
-
 	CConfiguration& config = CConfiguration::GetInstance();
 	IImaging::Setting setting = config.imaging;
 
-	OCTHeader header = pReader->ReadHeader(strFilePath);
-	if (header.type != OCTHeader::Type::Unknown)
-	{
-		setting.Set(header.width, header.height);
+	if (pReader != nullptr) {
+		OCTHeader header = pReader->ReadHeader(strFilePath);
+		if (header.type != OCTHeader::Type::Unknown)
+		{
+			setting.Set(header.width, header.height);
+		}
+		pReader->Initialize(strFilePath, setting.nBufferSize);
 	}
-	pReader->Initialize(strFilePath, setting.nBufferSize);
 
-	return NOERROR;
+	return setting;
 }
 void CRaywattLabDlg::findFileByExtension(CString strFolder, CString strExt, std::vector<CString>& vList) {
 	CString strQuery = _T("");
@@ -939,11 +939,19 @@ void CRaywattLabDlg::OnBnClickedButtonLoadSelectedData()
 		m_listPatientData.GetText(nSelected, strFileName);
 		strFilePath.Format(_T("%s/%s"), m_strPatientPath, strFileName);
 
-		initReader(strFilePath.GetBuffer(), m_pDataReader);
+		IImaging::Setting setting = initReader(strFilePath.GetBuffer(), m_pDataReader);
+		if (m_pImagingSimulate != nullptr) {
+			m_pImagingSimulate->Stop();
+			delete m_pImagingSimulate;
+		}
+		m_pImagingSimulate = createImaging(setting);
+		m_pImagingSimulate->Start();
+
 		if (m_pSimDevice == nullptr) {
 			m_pSimDevice = new CSimulateDevice(m_pDataReader);
-			m_pSimDevice->SetImaging(m_pImagingSimulate);
 		}
+		m_pSimDevice->SetImaging(m_pImagingSimulate);
+
 		result = m_pSimDevice->InitDevice();
 		((CSimulateDevice*)m_pSimDevice)->SetPause(!dataPlayed);
 		result = m_pSimDevice->StartAcquisition();

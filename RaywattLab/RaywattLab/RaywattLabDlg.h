@@ -127,7 +127,7 @@ private:
 	CString splitFileName(CString strFilePath);
 	CLabImaging* createImaging(IImaging::Setting imaging);
 	USHORT* readBackground(const char* strBackgroundFile, IImaging::Setting setting);
-	int initReader(tstring strFilePath, CDataReader* pReader);
+	IImaging::Setting initReader(tstring strFilePath, CDataReader* pReader);
 	void findFileByExtension(CString strFolder, CString strExt, std::vector<CString>& vList);
 	void updateMeasurement(USHORT nPeakValue, int nPeakIndex, int nLineWidth, USHORT nNoisePower);
 	void drawGuideLine(cv::Mat image);
