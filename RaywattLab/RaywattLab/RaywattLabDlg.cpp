@@ -73,6 +73,7 @@ void CRaywattLabDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SLIDER_CONTRAST, m_sliderContrast);
 	DDX_Control(pDX, IDC_SLIDER_LOWLEVEL, m_sliderLowLevel);
 	DDX_Control(pDX, IDC_SLIDER_HIGHLEVEL, m_sliderHighLevel);
+	DDX_Control(pDX, IDC_SLIDER_FRAME, m_sliderFrame);
 }
 
 // private methods
@@ -503,6 +504,7 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_RESTART_ACQUISITION, &CRaywattLabDlg::OnBnClickedButtonRestartAcquisition)
 	ON_BN_CLICKED(IDC_BUTTON_START_ACQUISITION, &CRaywattLabDlg::OnBnClickedButtonStartAcquisition)
 	ON_BN_CLICKED(IDC_BUTTON_SHOW_SCOPE, &CRaywattLabDlg::OnBnClickedButtonShowScope)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_FRAME, &CRaywattLabDlg::OnNMCustomdrawSliderFrame)
 END_MESSAGE_MAP()
 
 LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
@@ -514,6 +516,17 @@ LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 	
 	if (m_isRealtime && m_pAcqDevice != nullptr) {
 		strFrameRate.Format(_T("%.2lf"), m_pAcqDevice->GetFPS());
+	}
+	else if (!m_isRealtime && m_btnPlayData.pushed) {
+		int nFrameInfo = lParam;	// 0 if real time frame
+		int nCurFrame = (nFrameInfo >> 16) & 0xFFFF;
+		int nTotalFrame = (nFrameInfo & 0xFFFF);
+
+		CString strFrameNum = _T("");
+		strFrameNum.Format(_T("%04d / %04d"), nCurFrame + 1, nTotalFrame);
+		GetDlgItem(IDC_STATIC_FRAME_NUM)->SetWindowText(strFrameNum);
+
+		m_sliderFrame.SetPos(nCurFrame);
 	}
 
 	CConfiguration& config = CConfiguration::GetInstance();
@@ -598,6 +611,9 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	//  when the application's main window is not a dialog
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
+
+	//AllocConsole();
+	//freopen("CONOUT$", "w", stdout);
 
 	// TODO: Add extra initialization here
 	CConfiguration& config = CConfiguration::GetInstance();
@@ -928,6 +944,9 @@ void CRaywattLabDlg::OnBnClickedButtonLoadSelectedData()
 		result = m_pSimDevice->StopAcquisition();
 		m_isRealtime = true;
 
+		GetDlgItem(IDC_STATIC_FRAME_NUM)->SetWindowText(_T("0000 / 0000"));
+		m_sliderFrame.SetPos(0);
+
 		GetDlgItem(IDC_BUTTON_SAVE_CALIBRATION)->EnableWindow(TRUE);
 	}
 	else {
@@ -955,6 +974,12 @@ void CRaywattLabDlg::OnBnClickedButtonLoadSelectedData()
 		result = m_pSimDevice->InitDevice();
 		((CSimulateDevice*)m_pSimDevice)->SetPause(!dataPlayed);
 		result = m_pSimDevice->StartAcquisition();
+
+		m_sliderFrame.SetRange(0, m_pDataReader->GetNumOfSamples() - 1);
+
+		CString strFrameNum = _T("");
+		strFrameNum.Format(_T("0001 / %04d"), m_pDataReader->GetNumOfSamples());
+		GetDlgItem(IDC_STATIC_FRAME_NUM)->SetWindowText(strFrameNum);
 
 		GetDlgItem(IDC_BUTTON_SAVE_CALIBRATION)->EnableWindow(FALSE);
 	}
@@ -1278,6 +1303,23 @@ void CRaywattLabDlg::OnNMCustomdrawSliderHighlevel(NMHDR* pNMHDR, LRESULT* pResu
 	UpdateData(TRUE);
 	updateLevel(m_pImagingRealtime);
 	updateLevel(m_pImagingSimulate);
+	*pResult = 0;
+}
+
+
+void CRaywattLabDlg::OnNMCustomdrawSliderFrame(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	UpdateData(TRUE);
+
+	if (m_pSimDevice != nullptr && !m_btnPlayData.pushed) {
+		((CSimulateDevice*)m_pSimDevice)->SetFrame(m_sliderFrame.GetPos());
+
+		CString strFrameNum = _T("");
+		strFrameNum.Format(_T("%04d / %04d"), m_sliderFrame.GetPos() + 1, m_pDataReader->GetNumOfSamples());
+		GetDlgItem(IDC_STATIC_FRAME_NUM)->SetWindowText(strFrameNum);
+	}
+
 	*pResult = 0;
 }
 

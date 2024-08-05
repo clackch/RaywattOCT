@@ -74,6 +74,7 @@ private:
 	CSliderCtrl m_sliderContrast;
 	CSliderCtrl m_sliderLowLevel;
 	CSliderCtrl m_sliderHighLevel;
+	CSliderCtrl m_sliderFrame;
 	BOOL m_chkInitMotor;
 	BOOL m_chkInitStage;
 
@@ -175,6 +176,7 @@ public:
 	afx_msg void OnNMCustomdrawSliderContrast(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNMCustomdrawSliderLowlevel(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNMCustomdrawSliderHighlevel(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnNMCustomdrawSliderFrame(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBnClickedButtonOpenRotaryJunction();
 	afx_msg void OnBnClickedButtonSaveCalibration();
 	afx_msg void OnBnClickedButtonChangeCalibration();
