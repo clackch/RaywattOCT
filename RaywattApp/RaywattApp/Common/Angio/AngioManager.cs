@@ -156,13 +156,6 @@ namespace RaywattApp.Common.Angio
 
             _tcpClient = new TcpClient(Constants.ServerIP, Constants.ServerPort);
 
-            int read = 0;
-            while (read != 0)
-            {
-                read = _tcpClient.GetStream().Read(buffer, 0, buffer.Length);
-            }
-            Array.Fill<byte>(buffer, 0);
-
             ActivateClientThreads();
             bool init = InitAngioBoard();
             if (init)
