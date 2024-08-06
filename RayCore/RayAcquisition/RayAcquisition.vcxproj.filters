@@ -36,6 +36,9 @@
     <ClInclude Include="TIFFReader.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="ATSDSPDevice.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AcquisitionDevice.cpp">
@@ -54,6 +57,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="TIFFReader.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ATSDSPDevice.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
