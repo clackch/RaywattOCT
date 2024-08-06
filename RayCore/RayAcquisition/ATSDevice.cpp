@@ -9,6 +9,7 @@ CATSDevice::CATSDevice(Setting setting)
 	m_pAcqBuffers = NULL;
 	m_pCurBuffer = NULL;
 	m_pPrevBuffer = NULL;
+	m_nAdmaFlags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_NPT | ADMA_FIFO_ONLY_STREAMING;
 }
 CATSDevice::~CATSDevice() {
 	CleanUp();
@@ -53,7 +54,10 @@ int CATSDevice::InitDevice() {
 	BOOL result = FALSE;
 	do {
 		result = configureBoard(m_hATSBoard);
-		if (result) break;
+		if (result) {
+			configureFPGA(m_hATSBoard);
+			break;
+		}
 		retry++;
 	} while (retry < 10);
 
@@ -210,12 +214,10 @@ BOOL CATSDevice::calibrateBoard(HANDLE boardHandle)
 	retCode = AlazarConfigureAuxIO(boardHandle, AUX_OUT_TRIGGER, AUX_OUT_TRIGGER);
 	PLOGI.printf("AlazarConfigureAuxIO -- %s", AlazarErrorToText(retCode));
 
-	U32 admaFlags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_NPT | ADMA_FIFO_ONLY_STREAMING;
-
 	retCode = AlazarBeforeAsyncRead(boardHandle, CHANNEL_A, (long) -1 * preTriggerSamples,
 		samplesPerRecord, 1, 1,
-		admaFlags);
-	PLOGI.printf("AlazarBeforeAsyncRead(%d, %d, %d) -- %s", (-1 * preTriggerSamples), samplesPerRecord, admaFlags, AlazarErrorToText(retCode));
+		m_nAdmaFlags);
+	PLOGI.printf("AlazarBeforeAsyncRead(%d, %d, %d) -- %s", (-1 * preTriggerSamples), samplesPerRecord, m_nAdmaFlags, AlazarErrorToText(retCode));
 
 	OVERLAPPED overlapped;
 	AlazarAsyncRead(boardHandle, pAcqBuffer, samplesPerRecord, &overlapped);
@@ -380,51 +382,12 @@ BOOL CATSDevice::configureAcquisition(HANDLE boardHandle) {
 	// Acquisition Setting
 	//==========================================================================================================
 
-	// There are no pre-trigger samples in NPT mode
-	U32 preTriggerSamples = 0;
-
-	// TODO: Select the number of post-trigger samples per record
-	U32 postTriggerSamples = nAScan;
-
-	// TODO: Specify the number of records per DMA buffer
-	U32 recordsPerBuffer = nBScan;
-
-	// TODO: Specify the total number of buffers to capture
-	U32 buffersPerAcquisition = nAcqBufCount;
-
 	// TODO: Select which channels to capture (A, B, or both)
 	U32 channelMask = CHANNEL_A; // | CHANNEL_B;
-
-	// TODO: Select if you wish to save the sample data to a file
-	BOOL saveData = true;
-
-	// Calculate the number of enabled channels from the channel mask
-	int channelCount = 0;
-	int channelsPerBoard = 2;
-	for (int channel = 0; channel < channelsPerBoard; channel++)
-	{
-		U32 channelId = 1U << channel;
-		if (channelMask & channelId)
-			channelCount++;
-	}
-
-	// Get the sample size in bits, and the on-board memory size in samples per channel
-	U8 bitsPerSample;
-	U32 maxSamplesPerChannel;
-	retCode = AlazarGetChannelInfo(boardHandle, &maxSamplesPerChannel, &bitsPerSample);
-	if (retCode != ApiSuccess)
-	{
-		PLOGI.printf("Error: AlazarGetChannelInfo failed -- %s\n", AlazarErrorToText(retCode));
-		return FALSE;
-	}
-
-	// Calculate the size of each DMA buffer in bytes
-	float bytesPerSample = (float)((bitsPerSample + 7) / 8);
-	U32 samplesPerRecord = preTriggerSamples + postTriggerSamples;
-	U32 bytesPerRecord = (U32)(bytesPerSample * samplesPerRecord +
-		0.5); // 0.5 compensates for double to integer conversion 
-	U32 bytesPerBuffer = bytesPerRecord * recordsPerBuffer * channelCount;
-	PLOGI.printf("samplesPerRecord : %d, recordsPerBuffer : %d, channelCount : %d\n", samplesPerRecord, recordsPerBuffer, channelCount);
+	U32 recordsPerBuffer = nBScan;
+	U32 samplesPerRecord = 0;
+	U32 bytesPerBuffer = 0;
+	calculateMemorySize(boardHandle, channelMask, nBScan, samplesPerRecord, bytesPerBuffer);
 
 	// Allocate memory for DMA buffers
 	if (m_pAcqBuffers == nullptr) {
@@ -445,19 +408,11 @@ BOOL CATSDevice::configureAcquisition(HANDLE boardHandle) {
 		}
 	}
 
-	// Configure the record size
 	if (success)
 	{
-		retCode = AlazarSetRecordSize(boardHandle, preTriggerSamples, postTriggerSamples);
-		if (retCode != ApiSuccess)
-		{
-			PLOGI.printf("Error: AlazarSetRecordSize failed -- %s\n", AlazarErrorToText(retCode));
-			success = FALSE;
-		}
-	}
+		// There are no pre-trigger samples in NPT mode
+		U32 preTriggerSamples = 0;
 
-	if (success)
-	{
 		U32 recordsPerAcquisition = 0x7FFFFFFF; // recordsPerBuffer * buffersPerAcquisition;
 
 		U32 admaFlags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_NPT | ADMA_FIFO_ONLY_STREAMING;
@@ -490,4 +445,49 @@ BOOL CATSDevice::configureAcquisition(HANDLE boardHandle) {
 	m_pPrevBuffer = NULL;
 
 	return success;
+}
+
+BOOL CATSDevice::calculateMemorySize(HANDLE boardHandle, U16 channelMask, U32 recordsPerBuffer, U32& samplesPerRecord, U32& bytesPerBuffer) {
+	RETURN_CODE retCode = ApiSuccess;
+	const int nAScan = m_setting.nAScan;
+
+	// Calculate the number of enabled channels from the channel mask
+	int channelCount = 0;
+	int channelsPerBoard = 2;
+	for (int channel = 0; channel < channelsPerBoard; channel++)
+	{
+		U32 channelId = 1U << channel;
+		if (channelMask & channelId)
+			channelCount++;
+	}
+
+	// Get the sample size in bits, and the on-board memory size in samples per channel
+	U8 bitsPerSample;
+	U32 maxSamplesPerChannel;
+	retCode = AlazarGetChannelInfo(boardHandle, &maxSamplesPerChannel, &bitsPerSample);
+	if (retCode != ApiSuccess)
+	{
+		printf("Error: AlazarGetChannelInfo failed -- %s\n", AlazarErrorToText(retCode));
+		return FALSE;
+	}
+
+	// TODO: Select the number of post-trigger samples per record
+	samplesPerRecord = nAScan;
+
+	// Calculate the size of each DMA buffer in bytes
+	float bytesPerSample = (float)((bitsPerSample + 7) / 8);
+	U32 bytesPerRecord = (U32)(bytesPerSample * samplesPerRecord + 0.5); // 0.5 compensates for double to integer conversion 
+
+	bytesPerBuffer = bytesPerRecord * recordsPerBuffer * channelCount;
+	printf("samplesPerRecord : %d, recordsPerBuffer : %d, channelCount : %d\n", samplesPerRecord, recordsPerBuffer, channelCount);
+
+	// Configure the record size
+	retCode = AlazarSetRecordSize(boardHandle, 0, samplesPerRecord);
+	if (retCode != ApiSuccess)
+	{
+		printf("Error: AlazarSetRecordSize failed -- %s\n", AlazarErrorToText(retCode));
+		return FALSE;
+	}
+
+	return TRUE;
 }
