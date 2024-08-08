@@ -21,9 +21,6 @@ namespace RaywattApp.Common.Angio
         [ObservableProperty]
         private List<DijkstraHeap> _dijkstraHeap;
 
-        [ObservableProperty]
-        private List<Mat> _motionVector;
-
         public int AngioFrameHeight { get; set;}
         public int AngioFrameWidth { get; set; }
         public int Channels { get; set; }
@@ -33,7 +30,6 @@ namespace RaywattApp.Common.Angio
             CoRegistration = new List<CoRegistration>();
             AngioImage = new List<ImageSource>();
             DijkstraHeap = new List<DijkstraHeap>();
-            MotionVector = new List<Mat>();
         }
     }
 }

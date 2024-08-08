@@ -1858,7 +1858,6 @@ namespace RaywattApp.ViewModels
 
         private void ImageProcessing(List<Mat> frames)
         {
-            Mat prevEqualImg = null, currEqualImg;
             int frameNum = 0;
             foreach (var frame in frames)
             {
@@ -1868,76 +1867,41 @@ namespace RaywattApp.ViewModels
                 // HE 영역 분할 처리
                 Mat equalizedImage = new Mat();
                 var clahe = Cv2.CreateCLAHE(clipLimit: 10, new OpenCvSharp.Size(9, 9));
-                clahe.Apply(blurredImage, equalizedImage);
+                clahe.Apply(frame, equalizedImage);
 
-                currEqualImg = equalizedImage.Clone();
-                if (prevEqualImg != null)
+                Mat thresholdImage = new Mat(equalizedImage.Size(), equalizedImage.Type(), Scalar.All(255));
+
+                // 이진화 (픽셀 값이 100 미만인 경우 -> 255, 그 외에는 그대로 둠)
+                for (int y = 0; y < equalizedImage.Rows; y++)
                 {
-                    CalculateMotionVector(prevEqualImg, currEqualImg); // Constants.AngioSize Square 
+                    for (int x = 0; x < equalizedImage.Cols; x++)
+                    {
+                        byte pixelValue = equalizedImage.At<byte>(y, x);
+                        if (pixelValue > 0)
+                        {
+                            thresholdImage.Set<byte>(y, x, pixelValue < 100 ? (byte)255 : (byte)0);
+                        }
+                    }
                 }
-                prevEqualImg = equalizedImage.Clone();
 
-                Mat phansalkarImg = new Mat();
-                phansalkarImg = CommonUtil.ApplyPhansalkarThreshold(equalizedImage);
+                Mat morphedImage = new Mat();
+                var kernel = Cv2.GetStructuringElement(MorphShapes.Ellipse, new OpenCvSharp.Size(3, 3));
+                Cv2.MorphologyEx(thresholdImage, morphedImage, MorphTypes.Open, kernel, iterations: 2);
 
-                Mat bitreverseImg = new Mat();
-                Cv2.BitwiseNot(phansalkarImg, bitreverseImg);
-                Cv2.ImWrite(".\\stent\\phansalkarImg_" + frameNum + ".png", bitreverseImg);
+                //Mat bitreverseImg = new Mat();
+                //Cv2.BitwiseNot(phansalkarImg, bitreverseImg);
 
                 //변형 처리 반복->스켈레톤(골격화)
                 Mat skeleton = new Mat();
-                skeleton = Skeletonize(bitreverseImg);
-                Cv2.ImWrite(".\\stent\\skeleton_" + frameNum++ + ".png", skeleton);
+                skeleton = Skeletonize(morphedImage);
 
-                byte[] imageData = new byte[frame.Rows * frame.Cols * frame.ElemSize()];
+                byte[] imageData = 
+                    new byte[frame.Rows * frame.Cols * frame.ElemSize()];
                 Marshal.Copy(skeleton.Data, imageData, 0, imageData.Length);
                 PatientCase.AngioFrame.DijkstraHeap.Add(new DijkstraHeap(imageData, frame.Rows, frame.Cols));
             }
         }
-       
-        private void CalculateMotionVector(Mat prevFrame, Mat nextFrame)
-        {
-            Mat flow = new Mat();
-            Cv2.CalcOpticalFlowFarneback(
-                prevFrame, // curr
-                nextFrame, // next
-                flow, // flow
-                0.5, // pyr_scale
-                5, // levels
-                21, // winsize
-                7, // iterations
-                5, // poly_n
-                1.1, // poly_sigma
-                0); // flags
 
-            //curr, next: 이전 영상과 현재 영상. 그레이스케일 영상.
-            //flow: (출력)계산된 옵티컬플로우.np.ndarray.shape = (h, w, 2(for x, y vector)), dtype = np.float32.
-            //pyr_scale: 피라미드 영상을 만들 때 축소 비율. (e.g.) 0.5 ~0.7, 클수록 계산량감소, 오차확률 상승
-            //levels: 피라미드 영상 개수. (e.g.) 3
-            //winsize: 평균 윈도우 크기. (e.g.) 15 ~21
-            //iterations: 각 피라미드 레벨에서 알고리즘 반복 횟수. (e.g.) 3 다다익선(tradeOff -> 계산량)
-            //poly_n: 다항식 확장을 위한 이웃 픽셀 크기. 보통 5 또는 7.
-            //poly_sigma: 가우시안 표준편차. 보통 poly_n = 5-> 1.1, poly_n = 7-> 1.5.
-            //flags: 0, cv2.OPTFLOW_USE_INITIAL_FLOW, cv2.OPTFLOW_FARNEBACK_GAUSSIAN.
-
-            PatientCase.AngioFrame.MotionVector.Add(flow);
-            //Mat flowImage = DrawOpticalFlowArrows(prevFrame, flow);
-            //Cv2.ImWrite("optical_flow" + PatientCase.AngioFrame.MotionVector.Count.ToString() + ".png", flowImage);
-        }
-
-        private static Mat DrawOpticalFlowArrows(Mat image, Mat flow, int step = 16)
-        {
-            Mat flowImage = image.CvtColor(ColorConversionCodes.GRAY2BGR);
-            for (int y = 0; y < image.Rows; y += step)
-            {
-                for (int x = 0; x < image.Cols; x += step)
-                {
-                    Point2f fxy = flow.At<Point2f>(y, x);
-                    Cv2.ArrowedLine(flowImage, new OpenCvSharp.Point(x, y), new OpenCvSharp.Point(x + fxy.X, y + fxy.Y), Scalar.Green, 1, LineTypes.Link8, 0, 0.3);
-                }
-            }
-            return flowImage;
-        }
         private Mat Skeletonize(Mat img)
         {
             Mat skel = Mat.Zeros(img.Size(), MatType.CV_8UC1);
