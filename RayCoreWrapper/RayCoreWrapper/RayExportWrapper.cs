@@ -65,5 +65,8 @@ namespace RayCoreWrapper
         public static extern DICOMDIRRWError DICOMDIRWrite();
         [DllImport("makedcmDLL.dll")]
         public static extern long DicomApprSize();
+
+        [DllImport("HessianMatrixDll.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void useFrangi2d(IntPtr imageData, out IntPtr outputData, int width, int height, int channels, out int outwidth, out int outheight, out int outchannels);
     }
 }

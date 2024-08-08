@@ -34,9 +34,6 @@ namespace RaywattApp.ViewModels
 {
     public partial class ReviewViewModel : ReviewViewModelBase
     {
-        [DllImport("HessianMatrixDll.dll", CallingConvention = CallingConvention.Cdecl)]
-        static extern void useFrangi2d(IntPtr imageData, out IntPtr outputData, int width, int height, int channels, out int outwidth, out int outheight, out int outchannels);
-
         private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewViewModel));
 
         private readonly AngioManager _angioManager;
@@ -1879,103 +1876,39 @@ namespace RaywattApp.ViewModels
                     CalculateMotionVector(prevEqualImg, currEqualImg); // Constants.AngioSize Square 
                 }
                 prevEqualImg = equalizedImage.Clone();
-                Mat scale = new Mat();
-                Mat angles = new Mat();
-                int imgX = frame.Width - 1;
-                int imgY = frame.Height - 1;
-                int imgMaxX = 0;
-                int imgMaxY = 0;
 
-                for (int y = 0; y < frame.Rows; y++)
-                {
-                    for (int x = 0; x < frame.Cols; x++)
-                    {
-                        byte pixelValue = frame.At<byte>(y, x);
+                Mat phansalkarImg = new Mat();
+                phansalkarImg = CommonUtil.ApplyPhansalkarThreshold(equalizedImage);
 
-                        if (pixelValue != 0)
-                        {
-                            if(x<imgX)
-                            {
-                                imgX = x;
-                            }
-                            if (x>imgMaxX)
-                            {
-                                imgMaxX = x;
-                            }
-                            if(y<imgY)
-                            {
-                                imgY = y;
-                            }
-                            if (y > imgMaxY)
-                            {
-                                imgMaxY = y;
-                            }
-                        }
-                    }
-                }
-                Mat noBlackSpace = new Mat(imgMaxY - imgY + 1, imgMaxX - imgX + 1, frame.Type());
-                for (int y = imgY; y <= imgMaxY; y++)
-                {
-                    for (int x = imgX; x <= imgMaxX; x++)
-                    {
-                        byte pixelValue = frame.At<byte>(y, x);
-                        noBlackSpace.Set<byte>(y-imgY, x-imgX, pixelValue);
-                    }
-                }
-                IntPtr inputImage = noBlackSpace.Data;
-                //string imgName = "blackImg" + frameNum.ToString() + ".jpg";
-                //Cv2.ImWrite(imgName, noBlackSpace);
+                Mat bitreverseImg = new Mat();
+                Cv2.BitwiseNot(phansalkarImg, bitreverseImg);
+                Cv2.ImWrite(".\\stent\\phansalkarImg_" + frameNum + ".png", bitreverseImg);
 
-                IntPtr imagePointer;
-                int widthIn = imgMaxX - imgX + 1;
-                int heightIn = imgMaxY - imgY + 1;
-                int channelsIn = frame.Channels();
-                int widthOut, heightOut, channelsOut;
-
-                useFrangi2d(inputImage, out imagePointer, widthIn, heightIn, channelsIn, out widthOut, out heightOut, out channelsOut);
-                Mat frangiImage = new Mat(heightOut, widthOut, channelsOut == 1 ? MatType.CV_8UC1 : MatType.CV_8UC3, imagePointer);
-
-                Mat thresholdImage = new Mat();
-                Cv2.Threshold(frangiImage, thresholdImage, 0.03, 255, ThresholdTypes.Binary);
-
-                // 이미지 변형(분할 : Segmentation) 처리
-                /*Mat morphedImage = new Mat();
-                var kernel = Cv2.GetStructuringElement(MorphShapes.Ellipse, new OpenCvSharp.Size(3, 3));
-                Cv2.MorphologyEx(thresholdImage, morphedImage, MorphTypes.Open, kernel, iterations: 2);
-*/
-                // 변형 처리 반복 -> 스켈레톤(골격화)
+                //변형 처리 반복->스켈레톤(골격화)
                 Mat skeleton = new Mat();
-                skeleton = Skeletonize(thresholdImage);
-
-
-                int borderSize = 30;
-                OpenCvSharp.Rect rect = new OpenCvSharp.Rect(borderSize, borderSize, skeleton.Cols -2 * borderSize, skeleton.Rows - 2 * borderSize);
-                Mat innerImage = skeleton.SubMat(rect).Clone();
-                Mat borderedImage = new Mat();
-                Cv2.CopyMakeBorder(innerImage, borderedImage, borderSize, borderSize, borderSize, borderSize, BorderTypes.Constant, Scalar.All(0));
-                
-                Mat processedImg = frame.Clone();
-                for (int y = 0; y < borderedImage.Rows; y++)
-                {
-                    for (int x = 0; x < borderedImage.Cols; x++)
-                    {
-                        byte pixelValue = borderedImage.At<byte>(y, x);
-                        processedImg.Set<byte>(y+imgY, x+imgX, pixelValue);
-                    }
-                }
+                skeleton = Skeletonize(bitreverseImg);
+                Cv2.ImWrite(".\\stent\\skeleton_" + frameNum++ + ".png", skeleton);
 
                 byte[] imageData = new byte[frame.Rows * frame.Cols * frame.ElemSize()];
-                Marshal.Copy(processedImg.Data, imageData, 0, imageData.Length);
-                //string imgName = "skeletonImg" + frameNum.ToString()+".jpg";
-                //Cv2.ImWrite(imgName, processedImg);
+                Marshal.Copy(skeleton.Data, imageData, 0, imageData.Length);
                 PatientCase.AngioFrame.DijkstraHeap.Add(new DijkstraHeap(imageData, frame.Rows, frame.Cols));
-                //frameNum += 1;
             }
         }
+       
         private void CalculateMotionVector(Mat prevFrame, Mat nextFrame)
         {
             Mat flow = new Mat();
-            Cv2.CalcOpticalFlowFarneback(prevFrame, nextFrame, flow, 0.5, 5, 21, 7, 5, 1.1, 0);
+            Cv2.CalcOpticalFlowFarneback(
+                prevFrame, // curr
+                nextFrame, // next
+                flow, // flow
+                0.5, // pyr_scale
+                5, // levels
+                21, // winsize
+                7, // iterations
+                5, // poly_n
+                1.1, // poly_sigma
+                0); // flags
 
             //curr, next: 이전 영상과 현재 영상. 그레이스케일 영상.
             //flow: (출력)계산된 옵티컬플로우.np.ndarray.shape = (h, w, 2(for x, y vector)), dtype = np.float32.
@@ -2005,7 +1938,6 @@ namespace RaywattApp.ViewModels
             }
             return flowImage;
         }
-
         private Mat Skeletonize(Mat img)
         {
             Mat skel = Mat.Zeros(img.Size(), MatType.CV_8UC1);
@@ -2031,6 +1963,7 @@ namespace RaywattApp.ViewModels
 
             return skel;
         }
+
         #endregion
     }
 }
