@@ -149,8 +149,10 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
 
+                Zoom.SetFieldOfView(PatientCase.FieldOfView);
+
                 LumenContours = PatientCase.LumenContours;
-                CrossSectionScale = (1 / PatientCase.ImageResolution) * (Constants.CrossSectionSize / Constants.OCTImageSize);
+                CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.CrossSectionSize / Constants.OCTImageSize);
 
                 SetCrossSectionBackground(RaySession.Review, Constants.CardBackgroundColor);
 

@@ -33,20 +33,8 @@ namespace RaywattApp.Common.Bases
         [ObservableProperty]
         private Patient _patient;
 
+        [ObservableProperty]
         private PatientCase _patientCase;
-        public PatientCase PatientCase
-        { 
-            get { return _patientCase; }
-            set 
-            {
-                _patientCase = value; 
-                OnPropertyChanged(nameof(PatientCase));
-                if (_patientCase != null)
-                {
-                    Constants.ImageResolution = _patientCase.ImageResolution;
-                }
-            }
-        }
 
         [ObservableProperty]
         private bool _expandLeftUpMenu;

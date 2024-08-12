@@ -203,7 +203,7 @@
                             </Grid>
                             <!-- Measurement -->
                             <Grid Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
-                                <annotation:DrawUtil Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Zoom="{Binding ReviewStatus.ZoomFfr}" ImageResolution="{Binding PatientCase.ImageResolution}" IsDrawOn="{Binding IsDrawOn}" Measurements="{Binding PlaqueAreaList}" FrameNumber="{Binding FrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" IsEditOn="{Binding IsEditOn}" IsFfr="True" FfrFeature="{Binding FfrFeature}"/>
+                                <annotation:DrawUtil Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Zoom="{Binding ReviewStatus.ZoomFfr}" ImageResolution="{x:Static const:Constants.ImageResolution}" IsDrawOn="{Binding IsDrawOn}" Measurements="{Binding PlaqueAreaList}" FrameNumber="{Binding FrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" IsEditOn="{Binding IsEditOn}" IsFfr="True" FfrFeature="{Binding FfrFeature}"/>
                             </Grid>
                             <!-- Mini Map -->
                             <Grid Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">

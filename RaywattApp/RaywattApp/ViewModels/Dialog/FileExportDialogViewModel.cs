@@ -196,7 +196,7 @@ namespace RaywattApp.ViewModels.Dialog
         {
             PatientCase = patientCase;
             Degree = PatientCase.IndicatorDegree;
-            CrossSectionScale = (1 / PatientCase.ImageResolution) * (Constants.CrossSectionSize / Constants.OCTImageSize);
+            CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.CrossSectionSize / Constants.OCTImageSize);
 
             this.crossSections = crossSections;
             if (fileExport.AngioView && patientCase.AngioYn)

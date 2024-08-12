@@ -168,7 +168,7 @@
                         <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}"/>
                         <Image Source="{svgc:SvgImage Source=/res/icon/ffrCircleGreen.svg}" Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}"/>
                         <annotation:DrawLumenContourUtil Zoom="{Binding Zoom}" LumenContours="{Binding PatientCase.LumenContours}" LumenStents="{Binding PatientCase.LumenStents}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" FrameNumber="{Binding PatientCase.FfrFeature.MinimalLumenFrameNumber}" Visibility="Visible" IsEditOn="False" IsDrawOn="True" IsFfr="True"/>
-                        <annotation:DrawUtil Zoom="{Binding Zoom}" ImageResolution="{Binding PatientCase.ImageResolution}" Measurements="{Binding PatientCase.FfrFeature.PlaqueAreaList}" FfrFeature="{Binding PatientCase.FfrFeature}" FrameNumber="{Binding PatientCase.FfrFeature.MinimalLumenFrameNumber}" IsEditOn="False" IsFfr="True" IsDrawOn="True"/>
+                        <annotation:DrawUtil Zoom="{Binding Zoom}" ImageResolution="{x:Static const:Constants.ImageResolution}" Measurements="{Binding PatientCase.FfrFeature.PlaqueAreaList}" FfrFeature="{Binding PatientCase.FfrFeature}" FrameNumber="{Binding PatientCase.FfrFeature.MinimalLumenFrameNumber}" IsEditOn="False" IsFfr="True" IsDrawOn="True"/>
                     </Grid>
                 </StackPanel>
                 <StackPanel Grid.Column="2">

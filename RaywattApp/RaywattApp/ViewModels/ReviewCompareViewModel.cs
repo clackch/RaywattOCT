@@ -520,7 +520,7 @@ namespace RaywattApp.ViewModels
             int frameDistal = PatientCase.SectionDistal;
             int stentProximal = 0, stentDistal = 0;
             CommonUtil.GetStentProximalDistal(PatientCase.LumenStents, out stentProximal, out stentDistal);
-            if (Section.SetMsaMinExp(PatientCase.LumenContours, frameProximal, frameDistal, stentProximal, stentDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeCompareWidth, PatientCase.PullbackLength, PatientCase.ImageResolution))
+            if (Section.SetMsaMinExp(PatientCase.LumenContours, frameProximal, frameDistal, stentProximal, stentDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeCompareWidth, PatientCase.PullbackLength, Constants.ImageResolution))
             {
                 Section.VislbleMsaMinExp(true);
                 Section.Proximal.IsVisible = Visibility.Visible;
@@ -552,7 +552,7 @@ namespace RaywattApp.ViewModels
             PreLumenGuidewires = ReviewStatus.SelectedPatientCase.LumenGuidewires;
             int frameProximalCompare = ReviewStatus.SelectedPatientCase.SectionProximal;
             int frameDistalCompare = ReviewStatus.SelectedPatientCase.SectionDistal;
-            if(SectionCompare.SetMlaMld(ReviewStatus.SelectedPatientCase.LumenContours, frameProximalCompare, frameDistalCompare, DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total, Constants.LongitudeCompareWidth, ReviewStatus.SelectedPatientCase.PullbackLength, PatientCase.ImageResolution))
+            if(SectionCompare.SetMlaMld(ReviewStatus.SelectedPatientCase.LumenContours, frameProximalCompare, frameDistalCompare, DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total, Constants.LongitudeCompareWidth, ReviewStatus.SelectedPatientCase.PullbackLength, Constants.ImageResolution))
             {
                 SectionCompare.VisibleMlaMld(true);
                 SectionCompare.Proximal.IsVisible = Visibility.Visible;
