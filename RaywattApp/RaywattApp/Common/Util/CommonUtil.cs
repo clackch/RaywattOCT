@@ -2050,5 +2050,10 @@ namespace RaywattApp.Common.Util
                 return bitmapImage;
             }
         }
+
+        public static double GetRoundScale(double value)
+        {
+            return Math.Round(value, 5);
+        }
     }
 }
