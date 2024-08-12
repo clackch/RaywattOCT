@@ -98,6 +98,12 @@
     <!-- CrossSection Scale Converter -->
     <converters:CrossSectionScaleConverter x:Key="CrossSectionScaleConverter" />
 
+    <!-- CrossSection Scale Reverse Converter -->
+    <converters:CrossSectionScaleReverseConverter x:Key="CrossSectionScaleReverseConverter" />
+
+    <!-- CrossSection Translate Reverse Converter -->
+    <converters:CrossSectionTranslateReverseConverter x:Key="CrossSectionTranslateReverseConverter" />
+
     <!-- CrossSection Scale MultiConverter -->
     <converters:CrossSectionScaleMultiConverter x:Key="CrossSectionScaleMultiConverter" />
 
