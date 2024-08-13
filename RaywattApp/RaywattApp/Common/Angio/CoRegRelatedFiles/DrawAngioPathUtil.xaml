@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
     xmlns:const="clr-namespace:RaywattApp.Common.Bases"
     
     mc:Ignorable="d" 
@@ -47,6 +48,19 @@
             <Setter Property="StrokeThickness" Value="{x:Static const:Constants.AnnotationStrokeThickness}"/>
             <Setter Property="Stroke" Value="White"/>
         </Style>
+
+        <Style TargetType="Image" x:Key="AngioProximalIcon">
+            <Setter Property="Width" Value="33"/>
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="Source" Value="{svgc:SvgImage Source=/res/icon/Coregistration_Proximal.svg}"/>
+        </Style>
+
+        <Style TargetType="Image" x:Key="AngioDistalIcon">
+            <Setter Property="Width" Value="33"/>
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="Source" Value="{svgc:SvgImage Source=/res/icon/Coregistration_Distal.svg}"/>
+        </Style>
+
     </UserControl.Resources>
 
     <Grid Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}">

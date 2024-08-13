@@ -248,7 +248,6 @@ namespace RaywattApp.ViewModels
         private void Cancel()
         {
             _log.Debug("Cancel");
-            IsCancel = true;
             GoToPreviousPage(false);
         }
 

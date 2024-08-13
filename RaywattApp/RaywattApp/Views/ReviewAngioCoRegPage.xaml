@@ -56,7 +56,7 @@
                             						  DijkstraHeap="{Binding DijkstraHeap}" AngioImages ="{Binding CrossSectionAngioImages}" AngioFrameNumber ="{Binding AngioFrameNumber}" 
                                                       MousePosition ="{Binding CrossSectionMousePosition, Mode=TwoWay}" AngioTrackPoints ="{Binding AngioTrackPoints, Mode=TwoWay}"
                                                       IsAngioTrackCompleted ="{Binding IsAngioTrackCompleted, Mode=TwoWay}" IsReset ="{Binding IsReset, Mode=TwoWay}"
-                                                      IsResetOn ="{Binding IsResetOn, Mode=TwoWay}" IsCancel ="{Binding IsCancel}" IsRendering ="{Binding IsRendering, Mode=TwoWay}"
+                                                      IsResetOn ="{Binding IsResetOn, Mode=TwoWay}" IsRendering ="{Binding IsRendering, Mode=TwoWay}"
                                                       IsOk ="{Binding IsOk}" IsEditOn = "True" Cursor="Cross"/>
                             <Border>
                                 <!-- Loading -->

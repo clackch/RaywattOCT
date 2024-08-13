@@ -10,6 +10,7 @@
     <Cursor x:Key="measureLength">C:\Raywatt\system\image\cursor\measureLength.cur</Cursor>
     <Cursor x:Key="measureText">C:\Raywatt\system\image\cursor\measureText.cur</Cursor>
     <Cursor x:Key="measureErase">C:\Raywatt\system\image\cursor\measureErase.cur</Cursor>
+    <Cursor x:Key="coregistration">C:\Raywatt\system\image\cursor\coregistration.cur</Cursor>
 
     <Style TargetType="Separator">
         <Setter Property="Margin" Value="0"/>

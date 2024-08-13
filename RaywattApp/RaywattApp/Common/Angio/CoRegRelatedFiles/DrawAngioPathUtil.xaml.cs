@@ -119,15 +119,6 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
         public static readonly DependencyProperty IsResetOnProperty =
             DependencyProperty.Register("IsResetOn", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(false));
 
-        public bool IsCancel
-        {
-            get { return (bool)GetValue(IsCancelProperty); }
-            set { this.SetValue(IsCancelProperty, value); }
-        }
-
-        public static readonly DependencyProperty IsCancelProperty =
-            DependencyProperty.Register("IsCancel", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(false, OnCancelPropertyChanged));
-
         public bool IsEditOn
         {
             get { return (bool)GetValue(IsEditOnProperty); }
@@ -157,10 +148,9 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
         private String curveType = "Spline"; // Bezier or Spline
         private List<DijkstraHeap> localDijkstraHeap;
-        private int mainAngioFrameNum, angioImageTotalNum;
+        private int angioImageTotalNum;
         private bool isMoved = false, isDrawing = true;
         private int trackPointNum;
-        private CancellationTokenSource cancellationTokenSource;
         private int maxPathLength = 0;
 
         public DrawAngioPathUtil()
@@ -214,6 +204,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                 //frame이 변경 될 때마다 경로 초기화
                 InitializePath();
                 DrawPath(localDijkstraHeap[index]);
+                DrawPDICon(localDijkstraHeap[index]);
             });
         }
 
@@ -221,6 +212,37 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
         {
             InitializePath();
             DrawTrackPoint();
+        }
+
+        private void DrawPDICon(DijkstraHeap dh)
+        {
+            if(dh.trackPoint.Count < 1)
+            {
+                return;
+            }
+
+            double px, py, dx, dy;
+            px = dh.trackPoint[0].X;
+            py = dh.trackPoint[0].Y;
+            Image proximalImage = new Image();
+            proximalImage.Style = (Style)this.FindResource("AngioProximalIcon");
+
+            Canvas.SetLeft(proximalImage, px - proximalImage.Width/2);
+            Canvas.SetTop(proximalImage, py - proximalImage.Height);
+
+            if (dh.trackPoint.Count > 1/* 시작점을 제외한 이후 추가 점을 찍은 경우*/)
+            {
+                dx = dh.trackPoint[dh.trackPoint.Count - 1].X;
+                dy = dh.trackPoint[dh.trackPoint.Count - 1].Y;
+                Image distalImage = new Image();
+                distalImage.Style = (Style)this.FindResource("AngioDistalIcon");
+
+                Canvas.SetLeft(distalImage,dx - distalImage.Width/2);
+                Canvas.SetTop(distalImage, dy - distalImage.Height);
+                this.canvas.Children.Add(distalImage);
+            }
+            // Canvas에 이미지 추가
+            this.canvas.Children.Add(proximalImage);
         }
 
         private void InitializePath(bool isPathOnly = false)
@@ -325,8 +347,8 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
         {
             int initialPointX = (int)x;
             int initialPointY = (int)y;
-            int templateSize = 150;
-            int searchRange = 150;
+            int templateSize = 100;
+            int searchRange = 200;
 
             List<Mat> Images = new List<Mat>();
             Images.AddRange(AngioImages);
@@ -376,7 +398,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             }
         }
 
-        private void ProcessSingleImage(int imageIndex, CancellationToken token, int movedRecIndex)
+        private void ProcessSingleImage(int imageIndex, int movedRecIndex)
         {
             int startX, startY, endX, endY, pathLength;
             int[] vx, vy, pixelValue;
@@ -386,8 +408,6 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
             for (int trackIndex = movedRecPrevIndex; trackIndex < movedRecIndex + centerPos; trackIndex++)
             {
-                if (token.IsCancellationRequested) break;
-
                 vx = new int[localDijkstraHeap[imageIndex].width * localDijkstraHeap[imageIndex].height];
                 vy = new int[localDijkstraHeap[imageIndex].width * localDijkstraHeap[imageIndex].height];
                 pixelValue = new int[localDijkstraHeap[imageIndex].width * localDijkstraHeap[imageIndex].height];
@@ -401,14 +421,13 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             }
         }
 
-        private async Task ProcessLeftSideAsync(int left, int leftEnd, CancellationToken token, int movedRecIndex)
+        private async Task ProcessLeftSideAsync(int left, int leftEnd, int movedRecIndex)
         {
             var tasks = new List<Task>();
             for (int i = left; i >= leftEnd; i--)
             {
-                if (token.IsCancellationRequested) break;
                 int currentIndex = i;
-                var tmpTask = Task.Run(() => ProcessSingleImage(currentIndex, token, movedRecIndex));
+                var tmpTask = Task.Run(() => ProcessSingleImage(currentIndex, movedRecIndex));
                 tasks.Add(tmpTask);
             }
 
@@ -422,14 +441,13 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             }
         }
 
-        private async Task ProcessRightSideAsync(int right, int rightEnd, CancellationToken token, int movedRecIndex)
+        private async Task ProcessRightSideAsync(int right, int rightEnd, int movedRecIndex)
         {
             var tasks = new List<Task>();
             for (int i = right; i < rightEnd; i++)
             {
-                if (token.IsCancellationRequested) break;
                 int currentIndex = i;
-                var tmpTask = Task.Run(() => ProcessSingleImage(currentIndex, token, movedRecIndex));
+                var tmpTask = Task.Run(() => ProcessSingleImage(currentIndex, movedRecIndex));
                 tasks.Add(tmpTask);
             }
 
@@ -443,7 +461,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             }
         }
 
-        private async Task CalculateAllPathAsync(int currFrameNum, bool leftSideOnly, bool rightSideOnly, int movedRecIndex, CancellationToken token)
+        private async Task CalculateAllPathAsync(int currFrameNum, bool leftSideOnly, bool rightSideOnly, int movedRecIndex)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -457,14 +475,14 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             if (!rightSideOnly)
             {
                 if (leftSideOnly)
-                    leftTask = ProcessLeftSideAsync(currFrameNum, 0, token, movedRecIndex);
+                    leftTask = ProcessLeftSideAsync(currFrameNum, 0, movedRecIndex);
                 else
-                    leftTask = ProcessLeftSideAsync(currFrameNum - 1, 0, token, movedRecIndex);
+                    leftTask = ProcessLeftSideAsync(currFrameNum - 1, 0, movedRecIndex);
             }
 
             if (!leftSideOnly)
             {
-                rightTask = ProcessRightSideAsync(currFrameNum, angioImageTotalNum, token, movedRecIndex);
+                rightTask = ProcessRightSideAsync(currFrameNum, angioImageTotalNum, movedRecIndex);
             }
 
             if (leftTask != null)
@@ -473,9 +491,10 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             if (rightTask != null)
                 await rightTask;
 
+            PathChange(currFrameNum); // 현재 프레임 경로 표현
+
             Application.Current.Dispatcher.Invoke(() =>
             {
-                DrawPath(localDijkstraHeap[currFrameNum]); // 현재 프레임 경로 표현
                 IsRendering = false;
                 IsAngioTrackCompleted = IsResetOn = isDrawing = true;
             });
@@ -577,14 +596,6 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             }
         }
 
-        private void CancelTask()
-        {
-            if (cancellationTokenSource != null)
-            {
-                cancellationTokenSource.Cancel();
-            }
-        }
-
         #endregion
 
         #region PropertyEvent
@@ -656,12 +667,6 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             }
         }
 
-        private static void OnCancelPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
-        {
-            var control = (DrawAngioPathUtil)dependencyObject;
-            control.CancelTask();
-        }
-
         private static void OnOkPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
             var control = (DrawAngioPathUtil)dependencyObject;
@@ -704,43 +709,43 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             }
             Debug.WriteLine("Canvas_MouseLeftButtonDown");
 
+            int currAngioFrameNumber = AngioFrameNumber;
             Point clickPosition = new Point((float)e.GetPosition(canvas).X, (float)e.GetPosition(canvas).Y);
             Rectangle rectangle = new Rectangle();
             ActivateRecEvents(rectangle);
-            rectangle.Name = $"rectangle{localDijkstraHeap[AngioFrameNumber].trackPoint.Count:D3}";
+            rectangle.Name = $"rectangle{localDijkstraHeap[currAngioFrameNumber].trackPoint.Count:D3}";
             Canvas.SetLeft(rectangle, clickPosition.X - Constants.AnnotationRectWidth / 2);
             Canvas.SetTop(rectangle, clickPosition.Y - Constants.AnnotationRectHeight / 2);
             canvas.Children.Add(rectangle);
 
-            int imageLength = AngioImages.Count;
-            int currFrameNum = mainAngioFrameNum = AngioFrameNumber;
+            
 
             // 첫번째 점
-            if (localDijkstraHeap[AngioFrameNumber].trackPoint.Count == 0)
+            if (localDijkstraHeap[currAngioFrameNumber].trackPoint.Count == 0)
             {
                 trackPointNum = 1;
-                localDijkstraHeap[AngioFrameNumber].trackPoint.Add(clickPosition);
-                PointTracking(clickPosition.X, clickPosition.Y, currFrameNum);
+                localDijkstraHeap[currAngioFrameNumber].trackPoint.Add(clickPosition);
 
                 IsResetOn = true;
+
+                PointTracking(clickPosition.X, clickPosition.Y, currAngioFrameNumber);
+                PathChange(AngioFrameNumber);
                 return;
             }
             // 두번째 점 이후
             else
             {
-                trackPointNum = localDijkstraHeap[currFrameNum].trackPoint.Count;
-
-                localDijkstraHeap[AngioFrameNumber].trackPoint.Add(clickPosition);
-                PointTracking(clickPosition.X, clickPosition.Y, currFrameNum);
+                trackPointNum = localDijkstraHeap[currAngioFrameNumber].trackPoint.Count;
+                _log.Debug("current Track Point Count = " + trackPointNum);
+                localDijkstraHeap[currAngioFrameNumber].trackPoint.Add(clickPosition);
+                PointTracking(clickPosition.X, clickPosition.Y, currAngioFrameNumber);
+                PathChange(currAngioFrameNumber);
                 trackPointNum++;
 
-                cancellationTokenSource = new CancellationTokenSource();
-                var token = cancellationTokenSource.Token;
-
-                Task.Run(async () =>
+                Task.Run(async ()=>
                 {
-                    await CalculateAllPathAsync(currFrameNum, false, false, trackPointNum - 1, token);
-                }, token);
+                    await CalculateAllPathAsync(currAngioFrameNumber, false, false, trackPointNum - 1);
+                });
 
             }
         }
@@ -777,10 +782,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
                     localDijkstraHeap[AngioFrameNumber].trackPoint[index] = new Point(x, y);
 
-                    cancellationTokenSource = new CancellationTokenSource();
-                    var token = cancellationTokenSource.Token;
-
-                    ProcessSingleImage(AngioFrameNumber, token, index);
+                    ProcessSingleImage(AngioFrameNumber, index);
                     PathChange(AngioFrameNumber);
 
                     IsOk = true;
