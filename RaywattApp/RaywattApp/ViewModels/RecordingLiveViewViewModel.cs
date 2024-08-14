@@ -57,6 +57,12 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private bool _isOctExpanded = true;
 
+        [ObservableProperty]
+        private Zoom _zoom = new Zoom();
+
+        [ObservableProperty]
+        private Zoom _zoomSmall = new Zoom(Constants.SmallCrossSectionSize);
+
         private int _brightness;
         public int Brightness
         {
@@ -75,7 +81,16 @@ namespace RaywattApp.ViewModels
         public double FieldOfView
         {
             get { return _fieldOfView; }
-            set { _fieldOfView = value; OnPropertyChanged(nameof(FieldOfView)); RaySetProperty(Property.FieldOfView, value); }
+            set 
+            { 
+                _fieldOfView = value;
+                OnPropertyChanged(nameof(FieldOfView));
+                RaySetProperty(Property.FieldOfView, value);
+                
+                PatientCase.FieldOfView = value;
+                Zoom.SetFieldOfView(10.0 / PatientCase.FieldOfView);
+                ZoomSmall.SetFieldOfView(10.0 / PatientCase.FieldOfView);
+            }
         }
 
         private ICommand _cmdBack;

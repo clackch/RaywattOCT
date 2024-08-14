@@ -363,6 +363,10 @@ namespace RaywattApp.Common.Bases
         public const string FfrStep5 = "FfrStep5";
         public const double CrossSectionFfrSize = 344;
 
+        //Recording - Confirm
+        public const double CrossSectionConfirmSize = 475;
+        public const double LongitudeConfirmWidth = 1080;
+
         //Measurement
         public const string MeasureDrawAll = "DrawAll";  //Draw All
         public const string MeasureDeleteAll = "DeleteAll";  //Delete All

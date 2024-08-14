@@ -61,7 +61,19 @@
                     </Grid>
                     <Separator Grid.Row="2" Background="{DynamicResource GrayscaleGray5Brush}"/>
                     <Border Grid.Row="4" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
-                        <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Stretch="Fill"/>
+                        <Grid Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
+                            <Grid.Clip>
+                                <EllipseGeometry Center="{x:Static const:Constants.CrossSectionPointCenter}" RadiusX="{x:Static const:Constants.CrossSectionRadius}" RadiusY="{x:Static const:Constants.CrossSectionRadius}"/>
+                            </Grid.Clip>
+                            <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Stretch="Fill">
+                                <Image.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                        <TranslateTransform X="{Binding Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                    </TransformGroup>
+                                </Image.RenderTransform>
+                            </Image>
+                        </Grid>
                     </Border>
                 </Grid>
             </Border>

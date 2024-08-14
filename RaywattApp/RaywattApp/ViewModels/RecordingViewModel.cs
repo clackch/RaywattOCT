@@ -49,6 +49,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private int _startTime;
 
+        [ObservableProperty]
+        private Zoom _zoom = new Zoom();
+
         private Thread threadWaitPullbackDone;
         private bool runWaitPullbackDone;
 
@@ -116,6 +119,8 @@ namespace RaywattApp.ViewModels
                 Patient = (Patient)data["patient"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 PatientCase = (PatientCase)data["patientCase"];
+
+                Zoom.SetFieldOfView(10.0 / PatientCase.FieldOfView);
 
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);

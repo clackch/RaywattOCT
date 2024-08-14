@@ -163,9 +163,6 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private List<LumenGuidewire> _lumenGuidewires;
 
-        [ObservableProperty]
-        private Zoom _zoomAngio = new Zoom(Constants.CrossSectionAngio);
-
         private double _lModeIndicatorX;
         public double LModeIndicatorX
         {

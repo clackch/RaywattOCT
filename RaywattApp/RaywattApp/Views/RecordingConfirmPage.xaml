@@ -11,14 +11,6 @@
       d:DesignHeight="1024" d:DesignWidth="1280"
       Background="{DynamicResource GrayscaleGray8Brush}"
       Title="RecordingConfirmPage">
-    <Page.Resources>
-        <System:Boolean x:Key="TrueValue">True</System:Boolean>
-        <System:Boolean x:Key="FalseValue">False</System:Boolean>
-        <System:Double x:Key="CrossSectionSize">475</System:Double>
-        <System:Double x:Key="LongitudeWidth">1080</System:Double>
-        <System:Double x:Key="LongitudeHeight">105</System:Double>
-        <System:Double x:Key="LongitudeClipHeight">125</System:Double>
-    </Page.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -61,8 +53,18 @@
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
                             <Border Grid.Column="0" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
-                                <Grid>
-                                    <Image Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill"/>
+                                <Grid Width="{x:Static const:Constants.CrossSectionConfirmSize}" Height="{x:Static const:Constants.CrossSectionConfirmSize}">
+                                    <Grid.Clip>
+                                        <EllipseGeometry Center="237.5, 237.5" RadiusX="237.5" RadiusY="237.5"/>
+                                    </Grid.Clip>
+                                    <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionConfirmSize}" Height="{x:Static const:Constants.CrossSectionConfirmSize}" Stretch="Fill">
+                                        <Image.RenderTransform>
+                                            <TransformGroup>
+                                                <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionConfirmSize}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionConfirmSize}}"/>
+                                                <TranslateTransform X="{Binding Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionConfirmSize}}" Y="{Binding Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionConfirmSize}}"/>
+                                            </TransformGroup>
+                                        </Image.RenderTransform>
+                                    </Image>
                                 </Grid>
                             </Border>
                             <Grid Grid.Column="2">
@@ -133,17 +135,17 @@
                             <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" Opacity="0.5"/>
                         </StackPanel>
                         <Border Grid.Row="0" Grid.Column="1" CornerRadius="8,8,0,0" Background="{DynamicResource GrayscaleGray7Brush}">
-                            <Image x:Name="longitudeImage" Source="{Binding LongitudeImage}" Width="{StaticResource LongitudeWidth}" Height="{StaticResource LongitudeHeight}" Stretch="Fill">
+                            <Image x:Name="longitudeImage" Source="{Binding LongitudeImage}" Width="{x:Static const:Constants.LongitudeConfirmWidth}" Height="{x:Static const:Constants.LongitudeHeight}" Stretch="Fill">
                                 <Image.Clip>
                                     <RectangleGeometry RadiusX="8" RadiusY="8">
                                         <RectangleGeometry.Rect>
-                                            <Rect X="0" Y="0" Width="{StaticResource LongitudeWidth}" Height="{StaticResource LongitudeClipHeight}"/>
+                                            <Rect X="0" Y="0" Width="{x:Static const:Constants.LongitudeConfirmWidth}" Height="{x:Static const:Constants.LongitudeImageClipHeight}"/>
                                         </RectangleGeometry.Rect>
                                     </RectangleGeometry>
                                 </Image.Clip>
                             </Image>
                         </Border>
-                        <ContentControl Grid.Row="1" Grid.Column="1" Template="{DynamicResource LongitudeScaleBar}" Width="{StaticResource LongitudeWidth}" Tag="{Binding PatientCase.PullbackLength}"/>
+                        <ContentControl Grid.Row="1" Grid.Column="1" Template="{DynamicResource LongitudeScaleBar}" Width="{x:Static const:Constants.LongitudeConfirmWidth}" Tag="{Binding PatientCase.PullbackLength}"/>
                     </Grid>
                 </StackPanel>
             </Border>

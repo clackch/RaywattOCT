@@ -70,36 +70,20 @@
                                 </RectangleGeometry>
                             </Grid.Clip>
                             <Grid>
-                                <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Stretch="Fill"/>
-                                <Image Source="{Binding SheathIndicator}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}"/>
-                                <Grid.RenderTransform>
-                                    <TransformGroup>
-                                        <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
-                                        <TranslateTransform X="{Binding Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}}"/>
-                                    </TransformGroup>
-                                </Grid.RenderTransform>
-                            </Grid>                            
-                            <!-- Circle Mask -->
-                            <Grid>
-                                <Path Fill="{StaticResource GrayscaleGray7Brush}">
-                                    <Path.Data>
-                                        <CombinedGeometry GeometryCombineMode="Exclude">
-                                            <CombinedGeometry.Geometry1>
-                                                <RectangleGeometry Rect="{x:Static const:Constants.CrossSectionRect}" />
-                                            </CombinedGeometry.Geometry1>
-                                            <CombinedGeometry.Geometry2>
-                                                <EllipseGeometry Center="{x:Static const:Constants.CrossSectionPointCenter}" RadiusX="{x:Static const:Constants.CrossSectionRadius}" RadiusY="{x:Static const:Constants.CrossSectionRadius}"/>
-                                            </CombinedGeometry.Geometry2>
-                                        </CombinedGeometry>
-                                    </Path.Data>
-                                </Path>
-                                <Grid.RenderTransform>
-                                    <TransformGroup>
-                                        <ScaleTransform ScaleX="{Binding Zoom.ZoomScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding Zoom.ZoomScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
-                                        <TranslateTransform X="{Binding Zoom.ZoomTranslateX, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding Zoom.ZoomTranslateY, Converter={StaticResource CrossSectionScaleConverter}}"/>
-                                    </TransformGroup>
-                                </Grid.RenderTransform>
-                            </Grid>
+                                <Grid.Clip>
+                                    <EllipseGeometry Center="{x:Static const:Constants.CrossSectionPointCenter}" RadiusX="{x:Static const:Constants.CrossSectionRadius}" RadiusY="{x:Static const:Constants.CrossSectionRadius}"/>
+                                </Grid.Clip>
+                                <Grid>
+                                    <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Stretch="Fill"/>
+                                    <Image Source="{Binding SheathIndicator}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}"/>
+                                    <Grid.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                            <TranslateTransform X="{Binding Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                        </TransformGroup>
+                                    </Grid.RenderTransform>
+                                </Grid>
+                            </Grid>                          
                         </Grid>
                     </Border>
                 </Grid>

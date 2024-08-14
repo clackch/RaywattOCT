@@ -32,6 +32,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private PatientCase _patientCase;
 
+        [ObservableProperty]
+        private Zoom _zoom = new Zoom(Constants.CrossSectionConfirmSize);
+
         private ICommand _redoPullbackCommand;
         public ICommand RedoPullbackCommand
         {
@@ -69,6 +72,8 @@ namespace RaywattApp.ViewModels
                 Patient = (Patient)data["patient"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 PatientCase = (PatientCase)data["patientCase"];
+
+                Zoom.SetFieldOfView(10.0 / PatientCase.FieldOfView);
 
                 GetImageInfo(RaySession.Review);
                 RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
