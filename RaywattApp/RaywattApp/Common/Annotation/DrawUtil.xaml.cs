@@ -134,6 +134,15 @@ namespace RaywattApp.Common.Annotation
         private static readonly DependencyProperty FfrFeatureProperty =
             DependencyProperty.Register("FfrFeature", typeof(FfrFeature), typeof(DrawUtil), new PropertyMetadata(null));
 
+        public double ScreenSize
+        {
+            get { return (double)GetValue(ScreenSizeProperty); }
+            set { SetValue(ScreenSizeProperty, value); }
+        }
+
+        public static readonly DependencyProperty ScreenSizeProperty =
+            DependencyProperty.Register("ScreenSize", typeof(double), typeof(DrawUtil), new PropertyMetadata(null));
+
         //---------------------------------------------------------------------------------------------------- Constructor
         public DrawUtil()
         {
