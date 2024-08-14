@@ -174,6 +174,8 @@ namespace RaywattApp.ViewModels
                 FfrFeature.PercentAreaStenosis = 0;
                 FfrFeature.IsPlaqueAreaValid = false;
 
+                ReviewStatus.ZoomFfr.SetFieldOfView(10.0 / PatientCase.FieldOfView);
+
                 if (CodeDefinition.Codes["VESS"].ContainsKey(PatientCase.Vessel))
                     CurrentVessel = VesselList.FirstOrDefault(x => x.Key == PatientCase.Vessel);
 
@@ -227,7 +229,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ZoomIn");
 
-            if(ReviewStatus.ZoomFfr.ZoomIn())
+            if(ReviewStatus.ZoomFfr.ZoomIn() && (Constants.FfrStep4.Equals(FfrStep) || Constants.FfrStep5.Equals(FfrStep)))
                 MeasurementCommand = Constants.MeasureZoomIn;
         }
 
@@ -235,7 +237,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ZoomOut");
 
-            if(ReviewStatus.ZoomFfr.ZoomOut())
+            if(ReviewStatus.ZoomFfr.ZoomOut() && (Constants.FfrStep4.Equals(FfrStep) || Constants.FfrStep5.Equals(FfrStep)))
                 MeasurementCommand = Constants.MeasureZoomOut;
         }
 

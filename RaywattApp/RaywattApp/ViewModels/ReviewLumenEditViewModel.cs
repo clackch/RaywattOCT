@@ -149,7 +149,7 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
 
-                Zoom.SetFieldOfView(PatientCase.FieldOfView);
+                Zoom.SetFieldOfView(10.0 / PatientCase.FieldOfView);
 
                 LumenContours = PatientCase.LumenContours;
                 CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.CrossSectionSize / Constants.OCTImageSize);

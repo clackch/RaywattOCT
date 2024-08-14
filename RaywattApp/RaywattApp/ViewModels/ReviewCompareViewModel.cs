@@ -153,6 +153,8 @@ namespace RaywattApp.ViewModels
             IsIndicatorLockOn = false;
 
             DeviceStatus.IsOCTImagingCompareDone = false;
+
+            Zoom = new Zoom(Constants.CrossSectionCompareSize);
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -170,6 +172,8 @@ namespace RaywattApp.ViewModels
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
                 ReviewStatus.CurrentPage = Constants.ReviewComparePage;
+
+                Zoom.SetFieldOfView(10.0 / PatientCase.FieldOfView);
 
                 if (ReviewStatus.SelectedPatientCase == null)
                 {

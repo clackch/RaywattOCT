@@ -36,8 +36,6 @@ namespace RaywattApp.ViewModels
 
         private InferenceSession sess;
 
-        private float vessel;
-
         [ObservableProperty]
         private double _ffrResult;
 
@@ -123,6 +121,8 @@ namespace RaywattApp.ViewModels
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
                 ReviewStatus.CurrentPage = Constants.ReviewFfrPage;
+
+                Zoom.SetFieldOfView(10.0 / PatientCase.FieldOfView);
 
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
                 int currentFrameNumber = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current;

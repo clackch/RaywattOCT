@@ -251,17 +251,28 @@
                             <ContentControl Grid.Row="1" Grid.Column="1" Template="{DynamicResource LongitudeScaleBar}" Width="{x:Static const:Constants.Longitude3dWidth}" Tag="{Binding PatientCase.PullbackLength}"/>
                         </Grid>
                     </Grid>
-                    <Grid Grid.Column="1" Background="{DynamicResource GrayscaleGray8Brush}">
-                        <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSection3dSize}" Height="{x:Static const:Constants.CrossSection3dSize}">
+                    <Grid Grid.Column="1">
+                        <Grid x:Name="crossSectionImage" Width="{x:Static const:Constants.CrossSection3dSize}" Height="{x:Static const:Constants.CrossSection3dSize}">
                             <i:Interaction.Triggers>
                                 <i:EventTrigger EventName="Loaded">
-                                    <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
+                                    <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Grid}}"/>
                                 </i:EventTrigger>
                                 <i:EventTrigger EventName="SizeChanged">
-                                    <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
+                                    <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Grid}}"/>
                                 </i:EventTrigger>
                             </i:Interaction.Triggers>
-                        </Image>
+                            <Grid.Clip>
+                                <EllipseGeometry Center="90,90" RadiusX="90" RadiusY="90"/>
+                            </Grid.Clip>
+                            <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSection3dSize}" Height="{x:Static const:Constants.CrossSection3dSize}">
+                                <Image.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSection3dSize}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSection3dSize}}"/>
+                                        <TranslateTransform X="{Binding Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSection3dSize}}" Y="{Binding Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSection3dSize}}"/>
+                                    </TransformGroup>
+                                </Image.RenderTransform>
+                            </Image>
+                        </Grid>
                         <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="42,0,0,5">
                             <StackPanel Orientation="Horizontal" Width="50">
                                 <Label Content="F" Style="{DynamicResource Pretendard-ExtraBold-14}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
@@ -316,11 +327,8 @@
                             </component:IndicatorImage>
                         </Grid>
                     </Grid>
-
                 </Grid>
-
             </Grid>
-
 
             <Grid Grid.Row="2" Height="40" Background="{DynamicResource GrayscaleBlackBrush}">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" >
