@@ -3,6 +3,7 @@
 #include "ATSDevice.h"
 #include "AlazarDSP.h"
 
+class CCalibration;
 class CATSDSPDevice : public CATSDevice
 {
 private:
@@ -10,8 +11,10 @@ private:
 	U32 m_bytesPerBuffer;
 	unsigned short* m_pBackgroundFringes;
 
+	CCalibration* m_calibration;
+
 public:
-	CATSDSPDevice(Setting);
+	CATSDSPDevice(Setting, CCalibration*);
 	virtual ~CATSDSPDevice();
 
 protected:

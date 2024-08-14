@@ -1,5 +1,4 @@
 #pragma once
-#include <ipp.h>
 #include "Config.h"
 
 enum Windows { None, Hanning, Hamming, Gauss1 };
@@ -19,6 +18,8 @@ public:
 	// from calibration file
 	char* data;
 	complex_t *dispersion;
+	float* dispersionReal;
+	float* dispersionImag;
 	
 	float *window;
 public:

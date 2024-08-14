@@ -1,15 +1,17 @@
 #include "Config.h"
 #include "ATSDSPDevice.h"
+#include "Calibration.h"
 #include <stdio.h>
 #include <vector>
 
-CATSDSPDevice::CATSDSPDevice(Setting setting)
+CATSDSPDevice::CATSDSPDevice(Setting setting, CCalibration* calibration)
 	: CATSDevice(setting)
 {
 	m_fftHandle = nullptr;
 	m_bytesPerBuffer = 0;
 	m_pBackgroundFringes = nullptr;
 	m_nAdmaFlags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_NPT | ADMA_FIFO_ONLY_STREAMING | ADMA_DSP;
+	m_calibration = calibration;
 }
 CATSDSPDevice::~CATSDSPDevice() {}
 
@@ -95,12 +97,31 @@ BOOL CATSDSPDevice::configureFPGA(HANDLE boardHandle) {
 		nAScan,
 		nFFTLength - nAScan);
 
+	// TODO: Select the real, imaginary part of the dispersion compensation window
+
+	std::vector<float> dispersionWindowReal(nFFTLength, 1.f);
+	std::vector<float> dispersionWindowImag(nFFTLength, 0.f);
+	if (m_calibration != nullptr)
+	{
+		for (int i = 0; i < m_setting.nAScan; i++) {
+			dispersionWindowReal.at(i) = m_calibration->dispersionReal[i];
+			dispersionWindowImag.at(i) = m_calibration->dispersionImag[i];
+		}
+	}
+
+	// Compute the dot product with the standard window function
+
+	for (size_t i = 0; i < nFFTLength; i++) {
+		dispersionWindowReal[i] *= window[i];
+		dispersionWindowImag[i] *= window[i];
+	}
+
 	// Set the window function
 
 	retCode = AlazarFFTSetWindowFunction(m_fftHandle,
 		nFFTLength,
-		&window[0],
-		nullptr);
+		&dispersionWindowReal[0],
+		&dispersionWindowImag[0]);
 
 	// Background subtraction
 	if (m_pBackgroundFringes != nullptr) {

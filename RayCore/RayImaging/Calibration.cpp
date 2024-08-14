@@ -1,5 +1,6 @@
 ﻿#include <Windows.h>
 #include <math.h>
+#include <ipp.h>
 #include "Calibration.h"
 
 CCalibration::CCalibration(int nAScan, int nFFTLength) :
@@ -7,7 +8,9 @@ CCalibration::CCalibration(int nAScan, int nFFTLength) :
 	nFFTLength(nFFTLength),
 	data(nullptr),
 	window(nullptr),
-	dispersion(nullptr)
+	dispersion(nullptr),
+	dispersionReal(nullptr),
+	dispersionImag(nullptr)
 {
 	allocateMemory();
 	setWindow(Hanning);
@@ -36,15 +39,13 @@ bool CCalibration::Initialize(char* data)
 }
 
 bool CCalibration::loadCalibration() {
-	float* dispersionReal = new float[nAScan * 2];
+	const int dataSize = nAScan * sizeof(float);
 
-	int offset = 0;
-	memcpy(dispersionReal, data + offset, nAScan * 2 * sizeof(float)); offset += (nAScan * 2 * sizeof(float));
+	memcpy(dispersionReal, data, dataSize);
+	memcpy(dispersionImag, data + dataSize, dataSize);
 
 	// 실수 허수부를 복합하여 리턴
-	ippsRealToCplx_32f(dispersionReal, dispersionReal + nAScan, (Ipp32fc*)dispersion, nAScan);
-
-	delete[] dispersionReal;
+	ippsRealToCplx_32f(dispersionReal, dispersionImag, (Ipp32fc*)dispersion, nAScan);
 
 	return true;
 }
@@ -105,11 +106,15 @@ void CCalibration::allocateMemory() {
 	// memory allocate
 	data = new char[nAScan * sizeof(float) * 2];
 	dispersion = new complex_t[nAScan];
+	dispersionReal = new float[nAScan];
+	dispersionImag = new float[nAScan];
 	window = new float[nFFTLength];
 }
 
 void CCalibration::releaseMemory() {
 	if (data) { delete[] data; data = nullptr; }
 	if (dispersion) { delete[] dispersion; dispersion = nullptr; }
+	if (dispersionReal) { delete[] dispersionReal; dispersionReal = nullptr; }
+	if (dispersionImag) { delete[] dispersionImag; dispersionImag = nullptr; }
 	if (window) { delete[] window; window = nullptr; }
 }
