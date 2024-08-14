@@ -177,7 +177,7 @@ void COCTImaging::allocateMemory() {
 	// Prepare FFT
 	ippsFFTInitAlloc_R_32f(&fftSpecFirst, nFFTOrder, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
 	ippsFFTInitAlloc_C_32fc(&ifftSpec, nFFTOrder, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
-	ippsFFTInitAlloc_C_32fc(&fftSpecSecond, nFFTOrder - 1, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
+	ippsFFTInitAlloc_C_32fc(&fftSpecSecond, nFFTOrder, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
 }
 void COCTImaging::releaseMemory() {
 	if (fringes32f) { ippsFree(fringes32f); fringes32f = nullptr; }
@@ -276,15 +276,11 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f) {
 				// 5. Inverse FFT
 				ippsFFTInv_CToC_32fc_I(fcBuffer_IFFT, ifftSpec, nullptr);
 
-				// 6. Interpolation
-				ippsZero_32fc(fcBuffer_FFT, nOutputLength);
-				for (int j = 0; j < nAScan / 2; j++) {
-					fcBuffer_FFT[j].re = (calibration->weightMap[j] * fcBuffer_IFFT[calibration->indexMap[j]].re + (1.0f - calibration->weightMap[j]) * fcBuffer_IFFT[calibration->indexMap[j] + 1].re);
-					fcBuffer_FFT[j].im = (calibration->weightMap[j] * fcBuffer_IFFT[calibration->indexMap[j]].im + (1.0f - calibration->weightMap[j]) * fcBuffer_IFFT[calibration->indexMap[j] + 1].im);
-				}
+				// 6. Copy (no interpolation)
+				ippsCopy_32fc(fcBuffer_IFFT, fcBuffer_FFT, nFFTLength);
 
 				// 7. Numerical Dispersion Compensation
-				ippsMul_32fc_I((Ipp32fc*)calibration->dispersion, fcBuffer_FFT, nAScan / 2);
+				ippsMul_32fc_I((Ipp32fc*)calibration->dispersion, fcBuffer_FFT, nAScan);
 
 				// 8. FFT Again
 				ippsFFTFwd_CToC_32fc_I(fcBuffer_FFT, fftSpecSecond, nullptr);

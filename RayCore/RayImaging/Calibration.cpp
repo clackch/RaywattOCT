@@ -6,8 +6,6 @@ CCalibration::CCalibration(int nAScan, int nFFTLength) :
 	nAScan(nAScan),
 	nFFTLength(nFFTLength),
 	data(nullptr),
-	indexMap(nullptr),
-	weightMap(nullptr),
 	window(nullptr),
 	dispersion(nullptr)
 {
@@ -29,7 +27,7 @@ bool CCalibration::Initialize(tstring calibFile)
 }
 bool CCalibration::Initialize(char* data)
 {
-	const int calibrationSize = nAScan * sizeof(int) * 2;
+	const int calibrationSize = nAScan * sizeof(float) * 2;	// dispersion map (real, imag)
 	if (data == nullptr) return false;
 
 	memcpy(this->data, data, calibrationSize);
@@ -38,22 +36,20 @@ bool CCalibration::Initialize(char* data)
 }
 
 bool CCalibration::loadCalibration() {
-	float* dispersionReal = new float[nAScan];
+	float* dispersionReal = new float[nAScan * 2];
 
 	int offset = 0;
-	memcpy(indexMap, data + offset, nAScan / 2 * sizeof(int)); offset += (nAScan / 2 * sizeof(int));
-	memcpy(weightMap, data + offset, nAScan / 2 * sizeof(float)); offset += (nAScan / 2 * sizeof(float));
-	memcpy(dispersionReal, data + offset, nAScan * sizeof(float)); offset += (nAScan * sizeof(float));
+	memcpy(dispersionReal, data + offset, nAScan * 2 * sizeof(float)); offset += (nAScan * 2 * sizeof(float));
 
 	// 실수 허수부를 복합하여 리턴
-	ippsRealToCplx_32f(dispersionReal, dispersionReal + nAScan / 2, (Ipp32fc*)dispersion, nAScan / 2);
+	ippsRealToCplx_32f(dispersionReal, dispersionReal + nAScan, (Ipp32fc*)dispersion, nAScan);
 
 	delete[] dispersionReal;
 
 	return true;
 }
 bool CCalibration::readCalibration(LPCTSTR calibrationFileName){
-	const int calibrationSize = nAScan * sizeof(int) * 2;
+	const int calibrationSize = nAScan * sizeof(int) * 2;	// dispersion map (real, imag)
 
 	// open calibration file
 	HANDLE hCalibFile = CreateFile(calibrationFileName, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
@@ -107,17 +103,13 @@ void CCalibration::setWindow(enum Windows eWindow)
 
 void CCalibration::allocateMemory() {
 	// memory allocate
-	data = new char[nAScan * sizeof(int) * 2];
-	indexMap = new int[nAScan / 2];
-	weightMap = new float[nAScan / 2];
-	dispersion = new complex_t[nAScan / 2];
+	data = new char[nAScan * sizeof(float) * 2];
+	dispersion = new complex_t[nAScan];
 	window = new float[nFFTLength];
 }
 
 void CCalibration::releaseMemory() {
 	if (data) { delete[] data; data = nullptr; }
-	if (indexMap) { delete[] indexMap; indexMap = nullptr; }
-	if (weightMap) { delete[] weightMap; weightMap = nullptr;}
 	if (dispersion) { delete[] dispersion; dispersion = nullptr; }
 	if (window) { delete[] window; window = nullptr; }
 }

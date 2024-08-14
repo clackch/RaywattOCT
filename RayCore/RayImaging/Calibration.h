@@ -18,8 +18,6 @@ private:
 public:
 	// from calibration file
 	char* data;
-	int *indexMap;
-	float *weightMap;
 	complex_t *dispersion;
 	
 	float *window;
