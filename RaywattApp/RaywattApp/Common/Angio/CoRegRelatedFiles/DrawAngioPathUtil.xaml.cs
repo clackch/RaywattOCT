@@ -10,13 +10,8 @@ using System.Windows.Shapes;
 using Point = System.Windows.Point;
 using RaywattApp.Common.Bases;
 using OpenCvSharp;
-using System.Runtime.InteropServices;
 using log4net;
 using System.Diagnostics;
-using System.Threading;
-using System.IO;
-using System.Windows.Documents;
-using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 {
@@ -152,10 +147,19 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
         private bool isMoved = false, isDrawing = true;
         private int trackPointNum;
         private int maxPathLength = 0;
+        private Image coregiCursor_cross;
+        private Image coregiCursor_no_cross;
 
         public DrawAngioPathUtil()
         {
             InitializeComponent();
+
+            coregiCursor_cross= new Image();
+            coregiCursor_cross.Style = (Style)this.FindResource("CoregistrationCursorCross");
+            coregiCursor_cross.IsHitTestVisible = false;
+            coregiCursor_no_cross = new Image();
+            coregiCursor_no_cross.Style = (Style)this.FindResource("CoregistrationCursorNoCross");
+            coregiCursor_no_cross.IsHitTestVisible = false;
         }
 
         #region Method
@@ -596,6 +600,19 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             }
         }
 
+        private void MoveCoregistrationCursor(Point mousePosition, Image cursorImg)
+        {
+            this.canvas.Children.Remove(coregiCursor_cross);
+            this.canvas.Children.Remove(coregiCursor_no_cross);
+
+            double x, y;
+            x = mousePosition.X;
+            y = mousePosition.Y;
+            Canvas.SetLeft(cursorImg, x - Constants.coregistrationCursorSize / 2);
+            Canvas.SetTop(cursorImg, y - Constants.coregistrationCursorSize / 2);
+            this.canvas.Children.Add(cursorImg);
+        }
+
         #endregion
 
         #region PropertyEvent
@@ -718,8 +735,6 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             Canvas.SetTop(rectangle, clickPosition.Y - Constants.AnnotationRectHeight / 2);
             canvas.Children.Add(rectangle);
 
-            
-
             // 첫번째 점
             if (localDijkstraHeap[currAngioFrameNumber].trackPoint.Count == 0)
             {
@@ -753,6 +768,13 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
             MousePosition = e.GetPosition(this.canvas);
+
+            if(!isMoved)
+                MoveCoregistrationCursor(e.GetPosition(this.canvas), coregiCursor_cross);
+            else
+            {
+                MoveCoregistrationCursor(e.GetPosition(this.canvas), coregiCursor_no_cross);
+            }
         }
 
         private void Rectangle_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -774,6 +796,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
                 if (isMoved)
                 {
+                    rectangle.Opacity = 1.0; //visible
                     string numberPart = rectangle.Name.Substring(rectangle.Name.Length - 3);
                     int.TryParse(numberPart, out int index);
 
@@ -796,6 +819,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             var rectangle = sender as Rectangle;
             if (rectangle != null && rectangle.IsMouseCaptured)
             {
+                rectangle.Opacity = 0; //invisible
                 var mousePosition = e.GetPosition(this.canvas);
                 Canvas.SetLeft(rectangle, mousePosition.X - (rectangle.Width / 2));
                 Canvas.SetTop(rectangle, mousePosition.Y - (rectangle.Height / 2));

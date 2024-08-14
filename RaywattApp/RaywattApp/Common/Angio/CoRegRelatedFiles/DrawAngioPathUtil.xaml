@@ -29,11 +29,13 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
         <Style TargetType="Ellipse" x:Key="StylePathEllipse">
             <Setter Property="Width" Value="{x:Static const:Constants.ellipsePathWidth}"/>
             <Setter Property="Height" Value="{x:Static const:Constants.ellipsePathHeight}"/>
             <Setter Property="Fill" Value="Yellow"/>
         </Style>
+        
         <Style TargetType="Ellipse" x:Key="StyleTrackEllipse">
             <Setter Property="Width" Value="{x:Static const:Constants.ellipseTrackWidth}"/>
             <Setter Property="Height" Value="{x:Static const:Constants.ellipseTrackHeight}"/>
@@ -44,6 +46,7 @@
             <Setter Property="Stroke" Value="White"/>
             <Setter Property="StrokeThickness" Value="{x:Static const:Constants.AnnotationStrokeThickness}"/>
         </Style>
+        
         <Style TargetType="Path" x:Key="StylePath">
             <Setter Property="StrokeThickness" Value="{x:Static const:Constants.AnnotationStrokeThickness}"/>
             <Setter Property="Stroke" Value="White"/>
@@ -52,14 +55,35 @@
         <Style TargetType="Image" x:Key="AngioProximalIcon">
             <Setter Property="Width" Value="33"/>
             <Setter Property="Height" Value="42"/>
-            <Setter Property="Source" Value="{svgc:SvgImage Source=/res/icon/Coregistration_Proximal.svg}"/>
+            <Setter Property="Source" Value="{svgc:SvgImage Source=/res/icon/Coregistration_proximal.svg}"/>
         </Style>
 
         <Style TargetType="Image" x:Key="AngioDistalIcon">
             <Setter Property="Width" Value="33"/>
             <Setter Property="Height" Value="42"/>
-            <Setter Property="Source" Value="{svgc:SvgImage Source=/res/icon/Coregistration_Distal.svg}"/>
+            <Setter Property="Source" Value="{svgc:SvgImage Source=/res/icon/Coregistration_distal.svg}"/>
         </Style>
+
+        <Style TargetType="Image" x:Key="CoregistrationCursorCross">
+            <Setter Property="Width" Value="113"/>
+            <Setter Property="Height" Value="113"/>
+            <Setter Property="Source" Value="{svgc:SvgImage Source=/res/icon/Coregistration_cursor_cross.svg}"/>
+        </Style>
+
+        <Style TargetType="Image" x:Key="CoregistrationCursorNoCross">
+            <Setter Property="Width" Value="113"/>
+            <Setter Property="Height" Value="113"/>
+            <Setter Property="Source" Value="{svgc:SvgImage Source=/res/icon/Coregistration_cursor_no_cross.svg}"/>
+        </Style>
+
+        <Style TargetType="Canvas">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Cursor" Value="{StaticResource coregistration}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
 
     </UserControl.Resources>
 

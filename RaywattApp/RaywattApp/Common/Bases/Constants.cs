@@ -1,4 +1,5 @@
-﻿using System.Windows.Media;
+﻿using System.Runtime.InteropServices;
+using System.Windows.Media;
 
 namespace RaywattApp.Common.Bases
 {
@@ -458,5 +459,6 @@ namespace RaywattApp.Common.Bases
         public const double ellipsePathHeight = 2;
         public const double ellipseTrackWidth = 6;
         public const double ellipseTrackHeight = 6;
+        public const double coregistrationCursorSize = 113;
     }
 }
