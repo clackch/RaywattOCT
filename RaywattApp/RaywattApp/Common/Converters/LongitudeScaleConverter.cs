@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RaywattApp.Common.Bases;
+using System;
 using System.Globalization;
 using System.Windows.Data;
 
@@ -11,7 +12,7 @@ namespace RaywattApp.Common.Converters
             if (value == null)
                 return Binding.DoNothing;
 
-            return 10.0 / (double)value;
+            return Constants.DefaultFoV / (double)value;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

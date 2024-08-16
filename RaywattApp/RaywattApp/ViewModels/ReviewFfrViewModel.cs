@@ -122,7 +122,7 @@ namespace RaywattApp.ViewModels
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
                 ReviewStatus.CurrentPage = Constants.ReviewFfrPage;
 
-                Zoom.SetFieldOfView(10.0 / PatientCase.FieldOfView);
+                Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
 
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
                 int currentFrameNumber = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current;

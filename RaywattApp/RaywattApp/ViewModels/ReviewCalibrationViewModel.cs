@@ -80,7 +80,7 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
 
-                Zoom.SetFieldOfView(10.0 / 5);
+                Zoom.SetFieldOfView(Constants.DefaultFoV / 5);
 
                 SetCrossSectionBackground(RaySession.Review, Constants.CardBackgroundColor);
 

@@ -210,7 +210,7 @@ namespace RaywattApp.ViewModels
                 RaySetProperty(Property.FieldOfView, value);
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
 
-                this.convertedFoV = 10.0 / value;
+                this.convertedFoV = Constants.DefaultFoV / value;
                 ReviewStatus.Zoom.SetFieldOfView(this.convertedFoV);
                 ReviewStatus.ZoomAngioCs.SetFieldOfView(this.convertedFoV);
 

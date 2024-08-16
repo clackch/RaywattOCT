@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RaywattApp.Common.Bases;
+using System;
 using System.Globalization;
 using System.Windows.Data;
 
@@ -11,7 +12,7 @@ namespace RaywattApp.Common.Converters
             if (value == null || parameter == null)
                 return Binding.DoNothing;
 
-            double scale = 10.0 / (double)value;
+            double scale = Constants.DefaultFoV / (double)value;
             double height = (double)parameter;
 
             return -1 * (scale - 1) * height / 2;

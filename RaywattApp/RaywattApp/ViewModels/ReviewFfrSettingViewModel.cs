@@ -174,7 +174,7 @@ namespace RaywattApp.ViewModels
                 FfrFeature.PercentAreaStenosis = 0;
                 FfrFeature.IsPlaqueAreaValid = false;
 
-                ReviewStatus.ZoomFfr.SetFieldOfView(10.0 / PatientCase.FieldOfView);
+                ReviewStatus.ZoomFfr.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
 
                 if (CodeDefinition.Codes["VESS"].ContainsKey(PatientCase.Vessel))
                     CurrentVessel = VesselList.FirstOrDefault(x => x.Key == PatientCase.Vessel);
