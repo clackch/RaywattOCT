@@ -122,6 +122,9 @@
     <!-- ScaleBar Scale Converter -->
     <converters:ScaleBarScaleConverter x:Key="ScaleBarScaleConverter" />
 
+    <!-- ScaleBar Scale MultiConverter -->
+    <converters:ScaleBarScaleMultiConverter x:Key="ScaleBarScaleMultiConverter" />
+
     <!-- Halve Converter -->
     <converters:HalveConverter x:Key="HalveConverter" />
 

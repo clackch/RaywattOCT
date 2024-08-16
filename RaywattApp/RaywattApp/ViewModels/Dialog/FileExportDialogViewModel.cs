@@ -170,8 +170,13 @@ namespace RaywattApp.ViewModels.Dialog
         private double _calciumThicknessIndicatorCenter;
 
         [ObservableProperty]
-        private System.Windows.Point _calciumThicknessIndicatorPointCenter;
+        private Point _calciumThicknessIndicatorPointCenter;
 
+        [ObservableProperty]
+        private double _crossSectionClipRadius;
+
+        [ObservableProperty]
+        private Point _crossSectionClipCenter;
 
         public FileExportDialogViewModel(SqlManager sqlManager)
         {
@@ -195,8 +200,7 @@ namespace RaywattApp.ViewModels.Dialog
         public void SetInitialize(PatientCase patientCase, List<Mat> crossSections, Mat lMode, FileExport fileExport)
         {
             PatientCase = patientCase;
-            Degree = PatientCase.IndicatorDegree;
-            CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.CrossSectionSize / Constants.OCTImageSize);
+            Degree = PatientCase.IndicatorDegree;            
 
             this.crossSections = crossSections;
             if (fileExport.AngioView && patientCase.AngioYn)
@@ -307,10 +311,14 @@ namespace RaywattApp.ViewModels.Dialog
                 }
             }
 
+            CrossSectionScale = (1 / Constants.ImageResolution) * (CrossSectionImageSize / Constants.OCTImageSize);
             Zoom = new Zoom(CrossSectionImageSize);
+            Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
             LongitudeZoom = new Zoom();
             LongitudeZoom.ScaleX = Constants.ExportLongitudeImageWidth / Constants.LongitudeWidth;
             LongitudeZoom.ScaleY = Constants.ExportLongitudeImageHeight / Constants.LongitudeHeight;
+            CrossSectionClipRadius = CrossSectionImageSize / 2;
+            CrossSectionClipCenter = new Point(CrossSectionClipRadius, CrossSectionClipRadius);
         }
 
         public void SetFinalize()
