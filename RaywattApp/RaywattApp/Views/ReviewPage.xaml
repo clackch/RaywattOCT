@@ -1358,23 +1358,31 @@
                                     </Image.Clip>
                                 </Image>
                                 <!-- L-Mode -->
-                                <Image x:Name="lMode" Source="{Binding LongitudeImage}" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" Stretch="Fill" Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                                    <i:Interaction.Triggers>
-                                        <i:EventTrigger EventName="Loaded">
-                                            <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
-                                        </i:EventTrigger>
-                                        <i:EventTrigger EventName="SizeChanged">
-                                            <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
-                                        </i:EventTrigger>
-                                    </i:Interaction.Triggers>
-                                    <Image.Clip>
+                                <Grid Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                                    <Grid.Clip>
                                         <RectangleGeometry RadiusX="8" RadiusY="8">
                                             <RectangleGeometry.Rect>
                                                 <Rect X="0" Y="0" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeImageClipHeight}"/>
                                             </RectangleGeometry.Rect>
                                         </RectangleGeometry>
-                                    </Image.Clip>
-                                </Image>
+                                    </Grid.Clip>
+                                    <Image x:Name="lMode" Source="{Binding LongitudeImage}" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" Stretch="Fill">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="Loaded">
+                                                <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
+                                            </i:EventTrigger>
+                                            <i:EventTrigger EventName="SizeChanged">
+                                                <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                        <Image.RenderTransform>
+                                            <TransformGroup>
+                                                <ScaleTransform ScaleY="{Binding FieldOfView, Converter={StaticResource LongitudeScaleConverter}}"/>
+                                                <TranslateTransform Y="{Binding FieldOfView, Converter={StaticResource LongitudeTranslateConverter}, ConverterParameter={x:Static const:Constants.LongitudeHeight}}"/>
+                                            </TransformGroup>
+                                        </Image.RenderTransform>
+                                    </Image>
+                                </Grid>               
                                 <!-- Loading -->
                                 <Grid Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityConverter}}">
                                     <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding DeviceStatus.IsLumenLoaded, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>

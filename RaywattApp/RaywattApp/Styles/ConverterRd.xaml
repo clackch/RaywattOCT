@@ -107,6 +107,12 @@
     <!-- CrossSection Scale MultiConverter -->
     <converters:CrossSectionScaleMultiConverter x:Key="CrossSectionScaleMultiConverter" />
 
+    <!-- Longitude Scale Converter -->
+    <converters:LongitudeScaleConverter x:Key="LongitudeScaleConverter" />
+    
+    <!-- Longitude Translate Converter -->
+    <converters:LongitudeTranslateConverter x:Key="LongitudeTranslateConverter" />
+
     <!-- Procedure Visibility Converter -->
     <converters:ProcedureVisibilityConverter x:Key="ProcedureVisibilityConverter" />
 

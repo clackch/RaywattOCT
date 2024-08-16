@@ -208,24 +208,32 @@
                                 <StackPanel Width="5"/>
                                 <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" VerticalAlignment="Center" Opacity="0.5"/>
                             </StackPanel>
-                            <Grid Grid.Row="0" Grid.Column="1" >
-                                <Image x:Name="lMode" Source="{Binding LongitudeImage}" Width="{x:Static const:Constants.Longitude3dWidth}" Height="{x:Static const:Constants.Longitude3dHeight}" Stretch="Fill">
-                                    <i:Interaction.Triggers>
-                                        <i:EventTrigger EventName="Loaded">
-                                            <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
-                                        </i:EventTrigger>
-                                        <i:EventTrigger EventName="SizeChanged">
-                                            <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
-                                        </i:EventTrigger>
-                                    </i:Interaction.Triggers>
-                                    <Image.Clip>
+                            <Grid Grid.Row="0" Grid.Column="1">
+                                <Grid>
+                                    <Grid.Clip>
                                         <RectangleGeometry RadiusX="8" RadiusY="8">
                                             <RectangleGeometry.Rect>
                                                 <Rect X="0" Y="0" Width="{x:Static const:Constants.Longitude3dWidth}" Height="{x:Static const:Constants.Longitude3dImageClipHeight}"/>
                                             </RectangleGeometry.Rect>
                                         </RectangleGeometry>
-                                    </Image.Clip>
-                                </Image>
+                                    </Grid.Clip>
+                                    <Image x:Name="lMode" Source="{Binding LongitudeImage}" Width="{x:Static const:Constants.Longitude3dWidth}" Height="{x:Static const:Constants.Longitude3dHeight}" Stretch="Fill">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="Loaded">
+                                                <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
+                                            </i:EventTrigger>
+                                            <i:EventTrigger EventName="SizeChanged">
+                                                <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                        <Image.RenderTransform>
+                                            <TransformGroup>
+                                                <ScaleTransform ScaleY="{Binding PatientCase.FieldOfView, Converter={StaticResource LongitudeScaleConverter}}"/>
+                                                <TranslateTransform Y="{Binding PatientCase.FieldOfView, Converter={StaticResource LongitudeTranslateConverter}, ConverterParameter={x:Static const:Constants.Longitude3dHeight}}"/>
+                                            </TransformGroup>
+                                        </Image.RenderTransform>
+                                    </Image>
+                                </Grid>
 
                                 <!-- L-Mode Indicator -->
                                 <Canvas>
