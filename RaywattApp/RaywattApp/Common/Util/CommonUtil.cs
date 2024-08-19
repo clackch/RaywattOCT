@@ -325,9 +325,9 @@ namespace RaywattApp.Common.Util
             }
         }
 
-        public static async Task<Mat> ConvertImage(string filePath, double degree, List<Mat> convertedImages, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
+        public static async Task<Mat> ConvertImage(string filePath, double imageResolution, double degree, List<Mat> convertedImages, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
         {
-            RayOpenImage(filePath);
+            RayOpenImage(filePath, imageResolution);
 
             int numOfFrames = (int)RayGetProperty(Property.ImageDepth);
             int width = (int)RayGetProperty(Property.ImageWidth);

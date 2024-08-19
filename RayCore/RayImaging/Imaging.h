@@ -16,6 +16,8 @@ public:
 		float contrast;
 		float lowLevel;
 		float highLevel;
+
+		double distPerPixel;	// um per pixel (1024 x bscan)
 		
 		void Set(int nAScan, int nBScan)
 		{

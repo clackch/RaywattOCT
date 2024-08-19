@@ -181,7 +181,7 @@ namespace RaywattApp.ViewModels
 
                     if (ReviewStatus.SelectedPatientCase != null)
                     {
-                        RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath);
+                        RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath, ReviewStatus.SelectedPatientCase.ImageResolution);
                         Thread.Sleep(500);
                     }
                     else
@@ -309,7 +309,7 @@ namespace RaywattApp.ViewModels
                 HideLumenProfileCompare();
 
                 DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current = 0;
-                RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath);
+                RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath, ReviewStatus.SelectedPatientCase.ImageResolution);
                 DeviceStatus.IsOCTImagingCompareDone = false;
                 Thread.Sleep(500);
 
