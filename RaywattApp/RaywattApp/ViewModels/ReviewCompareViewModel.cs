@@ -153,8 +153,6 @@ namespace RaywattApp.ViewModels
             IsIndicatorLockOn = false;
 
             DeviceStatus.IsOCTImagingCompareDone = false;
-
-            Zoom = new Zoom(Constants.CrossSectionCompareSize);
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)

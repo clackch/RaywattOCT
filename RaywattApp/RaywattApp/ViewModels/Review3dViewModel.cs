@@ -115,7 +115,7 @@ namespace RaywattApp.ViewModels
         private bool _isPaused;
 
         [ObservableProperty]
-        private Zoom _zoom;
+        private Zoom _zoom = new Zoom(Constants.CrossSection3dSize);
 
         private DispatcherTimer timerShowData = new DispatcherTimer();
 
@@ -176,8 +176,6 @@ namespace RaywattApp.ViewModels
             IndicatorLongitude = new Indicator();
             IndicatorLongitude.X = Constants.LongitudeIndicatorWidth / 2;
             IndicatorLongitude.IsVisible = Visibility.Visible;
-
-            Zoom = new Zoom(Constants.CrossSection3dSize);
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
