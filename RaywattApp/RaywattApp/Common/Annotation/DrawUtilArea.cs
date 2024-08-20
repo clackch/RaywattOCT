@@ -549,7 +549,7 @@ namespace RaywattApp.Common.Annotation
             Label label = new Label();
             label.Style = (Style)this.Resources["StyleLabel"];
             label.Name = constArea + "_" + areaGeometry.Group;
-            label.Content = DrawAnnotation.GetLabelText(areaGeometry.Group, areaGeometry.Area * ImageResolution * ImageResolution);
+            label.Content = DrawAnnotation.GetLabelText(areaGeometry.Group, areaGeometry.Area * Constants.ImageResolution * Constants.ImageResolution);
 
             Point centerdPoint = areaGeometry.CenterOfMass;
 

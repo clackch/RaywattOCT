@@ -453,7 +453,7 @@ namespace RaywattApp.ViewModels
 
             if (CommonUtil.IsPreCase(PatientCase.Procedure))
             {
-                if (Section.SetMlaMld(PatientCase.LumenContours, PatientCase.SectionProximal, PatientCase.SectionDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeFfrWidth, PatientCase.PullbackLength, Constants.ImageResolution))
+                if (Section.SetMlaMld(PatientCase.LumenContours, PatientCase.SectionProximal, PatientCase.SectionDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeFfrWidth, PatientCase.PullbackLength))
                 {
                     Section.Proximal.IsVisible = Visibility.Visible;
                     Section.Distal.IsVisible = Visibility.Visible;
@@ -469,7 +469,7 @@ namespace RaywattApp.ViewModels
                 int stentProximal = 0, stentDistal = 0;
                 CommonUtil.GetStentProximalDistal(PatientCase.LumenStents, out stentProximal, out stentDistal);
 
-                if (Section.SetMsaMinExp(PatientCase.LumenContours, PatientCase.SectionProximal, PatientCase.SectionDistal, stentProximal, stentDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeFfrWidth, PatientCase.PullbackLength, Constants.ImageResolution))
+                if (Section.SetMsaMinExp(PatientCase.LumenContours, PatientCase.SectionProximal, PatientCase.SectionDistal, stentProximal, stentDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeFfrWidth, PatientCase.PullbackLength))
                 {
                     Section.Proximal.IsVisible = Visibility.Visible;
                     Section.Distal.IsVisible = Visibility.Visible;
@@ -555,7 +555,7 @@ namespace RaywattApp.ViewModels
 
             if (CommonUtil.IsPreCase(PatientCase.Procedure))
             {
-                if (Section.SetMlaMld(PatientCase.LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeFfrWidth, PatientCase.PullbackLength, Constants.ImageResolution))
+                if (Section.SetMlaMld(PatientCase.LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeFfrWidth, PatientCase.PullbackLength))
                 {
                     Section.VisibleMlaMld(true);
                     IsMlaEnabled = true;
@@ -572,7 +572,7 @@ namespace RaywattApp.ViewModels
                 int stentProximal = 0, stentDistal = 0;
                 CommonUtil.GetStentProximalDistal(PatientCase.LumenStents, out stentProximal, out stentDistal);
 
-                if (Section.SetMsaMinExp(PatientCase.LumenContours, frameProximal, frameDistal, stentProximal, stentDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeFfrWidth, PatientCase.PullbackLength, Constants.ImageResolution))
+                if (Section.SetMsaMinExp(PatientCase.LumenContours, frameProximal, frameDistal, stentProximal, stentDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeFfrWidth, PatientCase.PullbackLength))
                 {
                     Section.VislbleMsaMinExp(true);
                     IsMlaEnabled = true;

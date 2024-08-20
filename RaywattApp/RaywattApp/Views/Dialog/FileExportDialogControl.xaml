@@ -76,7 +76,7 @@
                                     <!-- Lumen Contour-->
                                     <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}"  FrameNumber="{Binding MeasureAutoFrameNumber}" IsEditOn="False" IsDrawOn="{Binding FileExport.MeasureAuto}" Zoom="{Binding Zoom}" ScreenSize="{Binding CrossSectionImageSize}"/>
                                     <!-- Measurement -->
-                                    <annotation:DrawUtil Measurements="{Binding Measurements}" FrameNumber="{Binding MeasureManualFrameNumber}" Zoom="{Binding Zoom}" IsEditOn="False" IsDrawOn="{Binding FileExport.MeasureManual}" ImageResolution="{x:Static const:Constants.ImageResolution}" ScreenSize="{Binding CrossSectionImageSize}"/>
+                                    <annotation:DrawUtil Measurements="{Binding Measurements}" FrameNumber="{Binding MeasureManualFrameNumber}" Zoom="{Binding Zoom}" IsEditOn="False" IsDrawOn="{Binding FileExport.MeasureManual}" ScreenSize="{Binding CrossSectionImageSize}"/>
                                 </Grid>
 
                             </Grid>

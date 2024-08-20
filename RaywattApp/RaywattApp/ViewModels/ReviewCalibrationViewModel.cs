@@ -30,7 +30,7 @@ namespace RaywattApp.ViewModels
         private ReviewStatus _reviewStatus;
 
         [ObservableProperty]
-        private Zoom _zoom;
+        private Zoom _zoom = new Zoom();
 
         private ICommand _okCommand;
         public ICommand OkCommand
@@ -61,8 +61,6 @@ namespace RaywattApp.ViewModels
             _log.Debug("ReviewCalibrationViewModel");
 
             Constants.CurrentPage = Constants.RecordingCalibrationPage;
-
-            Zoom = new Zoom();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
