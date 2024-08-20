@@ -107,15 +107,6 @@ namespace RaywattApp.Common.Annotation
         private static readonly DependencyProperty IsDrawOnProperty =
             DependencyProperty.Register("IsDrawOn", typeof(bool), typeof(DrawUtil), new PropertyMetadata(DrawPropertyChanged));
 
-        public double ImageResolution
-        { 
-            get { return (double)GetValue(ImageResolutionProperty); }
-            set { SetValue(ImageResolutionProperty, value); }
-        }
-
-        private static readonly DependencyProperty ImageResolutionProperty =
-            DependencyProperty.Register("ImageResolution", typeof(double), typeof(DrawUtil), new PropertyMetadata(default(double)));
-
         public bool IsFfr
         {
             get { return (bool)GetValue(IsFfrProperty); }

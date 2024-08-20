@@ -191,7 +191,7 @@
                                 </Image.RenderTransform>
                             </Image>
                             <annotation:DrawLumenContourUtil Zoom="{Binding Zoom}" LumenContours="{Binding PatientCase.LumenContours}" LumenStents="{Binding PatientCase.LumenStents}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" FrameNumber="{Binding PatientCase.FfrFeature.MinimalLumenFrameNumber}" Visibility="Visible" IsEditOn="False" IsDrawOn="True" IsFfr="True" ScreenSize="{x:Static const:Constants.CrossSectionFfrSize}"/>
-                            <annotation:DrawUtil Zoom="{Binding Zoom}" ImageResolution="{x:Static const:Constants.ImageResolution}" Measurements="{Binding PatientCase.FfrFeature.PlaqueAreaList}" FfrFeature="{Binding PatientCase.FfrFeature}" FrameNumber="{Binding PatientCase.FfrFeature.MinimalLumenFrameNumber}" IsEditOn="False" IsFfr="True" IsDrawOn="True" ScreenSize="{x:Static const:Constants.CrossSectionFfrSize}"/>
+                            <annotation:DrawUtil Zoom="{Binding Zoom}" Measurements="{Binding PatientCase.FfrFeature.PlaqueAreaList}" FfrFeature="{Binding PatientCase.FfrFeature}" FrameNumber="{Binding PatientCase.FfrFeature.MinimalLumenFrameNumber}" IsEditOn="False" IsFfr="True" IsDrawOn="True" ScreenSize="{x:Static const:Constants.CrossSectionFfrSize}"/>
                         </Grid>
                     </Grid>
                 </StackPanel>

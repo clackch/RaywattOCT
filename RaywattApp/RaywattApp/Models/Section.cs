@@ -163,7 +163,7 @@ namespace RaywattApp.Models
             LesionDistal = lesionDistalTemp - LesionLengthWidth;
         }
 
-        public bool SetMlaMld(List<LumenContour> lumenContours, int frameProximal, int frameDistal, int totalFrame, double longitudeWidth, string pullbackLength, double imageResolution)
+        public bool SetMlaMld(List<LumenContour> lumenContours, int frameProximal, int frameDistal, int totalFrame, double longitudeWidth, string pullbackLength)
         {
             if(lumenContours == null || lumenContours.Count == 0 || frameProximal < 0 || frameDistal < 0 || frameProximal >= frameDistal) 
                 return false;
@@ -188,7 +188,7 @@ namespace RaywattApp.Models
             if (mla == -1 || mld == -1)
                 return false;
 
-            double areaScaleMM2 = imageResolution * imageResolution;
+            double areaScaleMM2 = Constants.ImageResolution * Constants.ImageResolution;
 
             if(mlaIdx <= mldIdx)
             {
@@ -222,7 +222,7 @@ namespace RaywattApp.Models
             return true;
         }
 
-        public bool SetMsaMinExp(List<LumenContour> lumenContours, int frameProximal, int frameDistal, int stentProximal, int stentDistal, int totalFrame, double longitudeWidth, string pullbackLength, double imageResolution)
+        public bool SetMsaMinExp(List<LumenContour> lumenContours, int frameProximal, int frameDistal, int stentProximal, int stentDistal, int totalFrame, double longitudeWidth, string pullbackLength)
         {
             if (lumenContours == null || lumenContours.Count == 0 || frameProximal < 0 || frameDistal < 0 || frameProximal >= frameDistal)
                 return false;
@@ -251,7 +251,7 @@ namespace RaywattApp.Models
             double minExp = msa;
             int minExpIdx = msaIdx;
 
-            double areaScaleMM2 = imageResolution * imageResolution;
+            double areaScaleMM2 = Constants.ImageResolution * Constants.ImageResolution;
 
             if(msaIdx <= minExpIdx)
             {
