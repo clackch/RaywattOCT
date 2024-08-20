@@ -1,5 +1,7 @@
 #pragma once
 
+#define MAX_FIELD_OF_VIEW	10.0f
+
 class IImaging {
 public:
 	class Setting {
