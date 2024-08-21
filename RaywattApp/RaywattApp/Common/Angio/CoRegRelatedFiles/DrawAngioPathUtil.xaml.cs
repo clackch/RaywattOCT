@@ -347,7 +347,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             this.canvas.Children.Add(marker);
         }
 
-        private void PointTracking(double x, double y, int currFrameNum, int pointPosModifiedIndex = -1 /* all Tracking Point has ID If not -1*/)
+        private void PointTracking(double x, double y, int currFrameNum)
         {
             int initialPointX = (int)x;
             int initialPointY = (int)y;
@@ -391,14 +391,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                 int trackPointX = (int)top_left.X + adjustedTemplateWidth / 2;
                 int trackPointY = (int)top_left.Y + adjustedTemplateHeight / 2;
 
-                if (pointPosModifiedIndex >= 0 /*Coregi Point 위치 수정의 경우*/)
-                {
-                    localDijkstraHeap[i].trackPoint[pointPosModifiedIndex] = new Point(trackPointX, trackPointY);
-                }
-                else
-                { /*Coregi Point 추가의 경우 */
-                    localDijkstraHeap[i].trackPoint.Add(new Point(trackPointX, trackPointY));
-                }
+                localDijkstraHeap[i].trackPoint.Add(new Point(trackPointX, trackPointY));
             }
         }
 
