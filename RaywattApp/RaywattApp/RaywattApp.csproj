@@ -321,10 +321,10 @@
     <None Update="res\icon\catheterIndicator_hover.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="res\icon\Coregistration_Distal.svg">
+    <None Update="res\icon\Coregistration_distal.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="res\icon\Coregistration_Proximal.svg">
+    <None Update="res\icon\Coregistration_proximal.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="res\icon\currentFrameIndicator3D.svg">
