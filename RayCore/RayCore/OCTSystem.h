@@ -111,8 +111,8 @@ public:
 	RayError PullbackScan(char *strFilePath);
 	RayError LoadCatheter();
 	RayError UnloadCatheter();
-	int StartReview(char* strFilePath);
-	RayError StartCompare(char* strFilePath);
+	int StartReview(char* strFilePath, double imageResolution);
+	RayError StartCompare(char* strFilePath, double imageResolution);
 	RayError EndReview();
 	RayError StartLiveView();
 	RayError StopLiveView();
@@ -124,7 +124,7 @@ public:
 	RayError UnregisterDetectionCallback();
 	void* GetVolumeData(void* pLumenContours = nullptr);
 	RayError StartLumenDetection();
-	RayError OpenImage(char* strFilePath);
+	RayError OpenImage(char* strFilePath, double imageResolution);
 	RayError CloseImage();
 	void* GetImageData(int nFrame);
 	void* GetLongitudeData(double fDegree);

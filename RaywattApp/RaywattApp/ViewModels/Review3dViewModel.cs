@@ -114,6 +114,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private bool _isPaused;
 
+        [ObservableProperty]
+        private Zoom _zoom = new Zoom(Constants.CrossSection3dSize);
+
         private DispatcherTimer timerShowData = new DispatcherTimer();
 
         private bool isFirstRendering = true;
@@ -192,6 +195,8 @@ namespace RaywattApp.ViewModels
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
                 ReviewStatus.CurrentPage = Constants.Review3dPage;
+
+                Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
 
                 RaySetSession(RaySession.Review);
                 RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);

@@ -237,9 +237,8 @@ namespace RaywattApp.ViewModels.Dialog
                         RaySetProperty(Property.Brightness, patientCase.Brightness);
                         RaySetProperty(Property.Contrast, patientCase.Contrast);
                         CommonUtil.SetColormap(patientCase.Colormap);
-                        Constants.ImageResolution = patientCase.ImageResolution;
                         List<Mat> imgCrossSections = new List<Mat>();
-                        Mat? imgLongitude = await CommonUtil.ConvertImage(patientCase.ImageFullPath, patientCase.IndicatorDegree, imgCrossSections, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
+                        Mat? imgLongitude = await CommonUtil.ConvertImage(patientCase.ImageFullPath, patientCase.ImageResolution, patientCase.IndicatorDegree, imgCrossSections, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
                         List<Mat> convertedImages = await CommonUtil.MakeImageForExport(patientCase, imgCrossSections, imgLongitude, exportIndices, FileExport, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
 
                         await Task.Run(() =>
@@ -316,9 +315,8 @@ namespace RaywattApp.ViewModels.Dialog
                 RaySetProperty(Property.Brightness, patientCase.Brightness);
                 RaySetProperty(Property.Contrast, patientCase.Contrast);
                 CommonUtil.SetColormap(patientCase.Colormap);
-                Constants.ImageResolution = patientCase.ImageResolution;
                 List<Mat> imgCrossSections = new List<Mat>();
-                Mat? imgLongitude = await CommonUtil.ConvertImage(patientCase.ImageFullPath, patientCase.IndicatorDegree, imgCrossSections, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
+                Mat? imgLongitude = await CommonUtil.ConvertImage(patientCase.ImageFullPath, patientCase.ImageResolution, patientCase.IndicatorDegree, imgCrossSections, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
                 List<Mat> convertedImages = await CommonUtil.MakeImageForExport(patientCase, imgCrossSections, imgLongitude, exportIndices, FileExport, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
 
                 if (format == Constants.ExportPullbackAVI)

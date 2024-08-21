@@ -5,15 +5,15 @@ using System.Windows.Data;
 
 namespace RaywattApp.Common.Converters
 {
-    internal class ScaleBarScaleConverter : IValueConverter
+    internal class ScaleBarScaleMultiConverter : IMultiValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null)
+            if(values == null || values[0] == null || values[1] == null || values.Length < 2)
                 return Binding.DoNothing;
 
-            double curScale = (double)value;
-            double csSize = (double)parameter;
+            double curScale = (double)values[0];
+            double csSize = (double)values[1];
             double scaleSize = (1 / Constants.ImageResolution) * (Constants.OCTImageSize / csSize);
             double orgScaleSize = (1 / Constants.ImageResolution);
 
@@ -22,7 +22,7 @@ namespace RaywattApp.Common.Converters
             return res * (csSize / Constants.OCTImageSize);
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }

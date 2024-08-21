@@ -5,21 +5,22 @@ using System.Windows.Data;
 
 namespace RaywattApp.Common.Converters
 {
-    internal class ScaleBarScaleConverter : IValueConverter
+    internal class CrossSectionScaleReverseConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value == null)
                 return Binding.DoNothing;
 
-            double curScale = (double)value;
-            double csSize = (double)parameter;
-            double scaleSize = (1 / Constants.ImageResolution) * (Constants.OCTImageSize / csSize);
-            double orgScaleSize = (1 / Constants.ImageResolution);
+            double size = Constants.CrossSectionSize;
 
-            double res = orgScaleSize - curScale * scaleSize;
+            if (parameter != null)
+                size = (double)parameter;
 
-            return res * (csSize / Constants.OCTImageSize);
+            double originValue = (double)value;
+            double scale = Constants.OCTImageSize / size;
+
+            return 1 / (originValue * scale);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

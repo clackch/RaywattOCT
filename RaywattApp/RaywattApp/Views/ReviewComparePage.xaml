@@ -185,8 +185,21 @@
                     </StackPanel>
                     <!-- Before : Cross-section -->
                     <Grid Grid.Column="1" Margin="0,50,36,50"  Visibility="{Binding ReviewStatus.SelectedPatientCase, Converter={StaticResource NotNullToVisibilityConveter}}">
-                        <Image x:Name="crossSectionForCompare" Source="{Binding CrossSectionForCompare}" Width="{x:Static const:Constants.CrossSectionCompareSize}" Height="{x:Static const:Constants.CrossSectionCompareSize}"/>
-                        <annotation:DrawLumenContourUtil Zoom="{Binding Zoom}" LumenContours="{Binding PreLumenContour}" CurrentLumenContour="{Binding CurrentPreLumenContour, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" LumenStents="{Binding PreLumenStents}" AppositionThreshold="{Binding ReviewStatus.SelectedPatientCase.AppositionThreshold}" FrameNumber="{Binding FrameNumberCompare}" Visibility="Visible" IsEditOn="False" IsDrawOn="True" InCommand="{Binding LumenContourCommand, Mode=TwoWay}"/>
+                        <Grid>
+                            <Grid.Clip>
+                                <EllipseGeometry Center="172,172" RadiusX="172" RadiusY="172"/>
+                            </Grid.Clip>
+                            <Image x:Name="crossSectionForCompare" Source="{Binding CrossSectionForCompare}" Width="{x:Static const:Constants.CrossSectionCompareSize}" Height="{x:Static const:Constants.CrossSectionCompareSize}">
+                                <Image.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}"/>
+                                        <TranslateTransform X="{Binding Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}" Y="{Binding Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}"/>
+                                    </TransformGroup>
+                                </Image.RenderTransform>
+                            </Image>
+                            <annotation:DrawLumenContourUtil Zoom="{Binding Zoom}" LumenContours="{Binding PreLumenContour}" CurrentLumenContour="{Binding CurrentPreLumenContour, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" LumenStents="{Binding PreLumenStents}" AppositionThreshold="{Binding ReviewStatus.SelectedPatientCase.AppositionThreshold}" FrameNumber="{Binding FrameNumberCompare}" Visibility="Visible" IsEditOn="False" IsDrawOn="True" InCommand="{Binding LumenContourCommand, Mode=TwoWay}" ScreenSize="{x:Static const:Constants.CrossSectionCompareSize}"/>
+                        </Grid>
+
                         <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Left">
                             <StackPanel Orientation="Horizontal" Width="50">
                                 <Label Content="F" Style="{DynamicResource Pretendard-ExtraBold-14}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
@@ -370,8 +383,20 @@
                     </StackPanel>
                     <!-- After : Cross-section -->
                     <Grid Grid.Column="1" Margin="0,50,36,50">
-                        <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionCompareSize}" Height="{x:Static const:Constants.CrossSectionCompareSize}"/>
-                        <annotation:DrawLumenContourUtil Zoom="{Binding Zoom}" LumenContours="{Binding PostLumenContour}" LumenStents="{Binding PostLumenStents}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" FrameNumber="{Binding FrameNumber}" Visibility="Visible" IsEditOn="False" IsDrawOn="True"/>
+                        <Grid Width="{x:Static const:Constants.CrossSectionCompareSize}" Height="{x:Static const:Constants.CrossSectionCompareSize}">
+                            <Grid.Clip>
+                                <EllipseGeometry Center="172,172" RadiusX="172" RadiusY="172"/>
+                            </Grid.Clip>
+                            <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionCompareSize}" Height="{x:Static const:Constants.CrossSectionCompareSize}">
+                                <Image.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}"/>
+                                        <TranslateTransform X="{Binding Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}" Y="{Binding Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}"/>
+                                    </TransformGroup>
+                                </Image.RenderTransform>
+                            </Image>
+                            <annotation:DrawLumenContourUtil Zoom="{Binding Zoom}" LumenContours="{Binding PostLumenContour}" LumenStents="{Binding PostLumenStents}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" FrameNumber="{Binding FrameNumber}" Visibility="Visible" IsEditOn="False" IsDrawOn="True" ScreenSize="{x:Static const:Constants.CrossSectionCompareSize}"/>
+                        </Grid>
                         <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Left">
                             <StackPanel Orientation="Horizontal" Width="50">
                                 <Label Content="F" Style="{DynamicResource Pretendard-ExtraBold-14}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>

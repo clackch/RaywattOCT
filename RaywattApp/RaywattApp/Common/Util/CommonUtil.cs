@@ -325,9 +325,9 @@ namespace RaywattApp.Common.Util
             }
         }
 
-        public static async Task<Mat> ConvertImage(string filePath, double degree, List<Mat> convertedImages, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
+        public static async Task<Mat> ConvertImage(string filePath, double imageResolution, double degree, List<Mat> convertedImages, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
         {
-            RayOpenImage(filePath);
+            RayOpenImage(filePath, imageResolution);
 
             int numOfFrames = (int)RayGetProperty(Property.ImageDepth);
             int width = (int)RayGetProperty(Property.ImageWidth);
@@ -1930,17 +1930,17 @@ namespace RaywattApp.Common.Util
             return true;
         }
       
-        public static BitmapSource DrawSheathIndicator(double resolution, int imageSize, double sheathDiameter)
+        public static BitmapSource DrawSheathIndicator(int imageSize, double sheathDiameter)
         {
-            double pxDiameter = (sheathDiameter / resolution) * imageSize / Constants.OCTImageSize;
+            double pxDiameter = (sheathDiameter / Constants.ImageResolution) * imageSize / Constants.OCTImageSize;
             Mat imgSheath = new Mat(imageSize, imageSize, MatType.CV_8UC4);
             Point center = new Point(imgSheath.Width / 2, imgSheath.Height / 2);
-            int thickness = 2;
+            int thickness = 1;
             int radius = (int)(pxDiameter / 2) + thickness;
 
             imgSheath.SetTo(new Scalar(0x00, 0x00, 0x00, 0x00));
             imgSheath.Circle(center, radius, new Scalar(0xff, 0xff, 0xff, 0xff), thickness, LineTypes.AntiAlias);
-
+            
             for (int i = 1; i<6; i+=2)
             {
                 imgSheath.Ellipse(center,
@@ -2049,6 +2049,11 @@ namespace RaywattApp.Common.Util
                 bitmapImage.Freeze();
                 return bitmapImage;
             }
+        }
+
+        public static double GetRoundScale(double value)
+        {
+            return Math.Round(value, 5);
         }
     }
 }

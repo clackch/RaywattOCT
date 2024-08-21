@@ -95,7 +95,17 @@
                                     </RectangleGeometry>
                                 </Grid.Clip>
                                 <Grid Visibility="{Binding IsOctExpanded, Converter={StaticResource BoolToVisibilityConverter}}">
-                                    <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Stretch="Fill"/>
+                                    <Grid.Clip>
+                                        <EllipseGeometry Center="{x:Static const:Constants.CrossSectionPointCenter}" RadiusX="{x:Static const:Constants.CrossSectionRadius}" RadiusY="{x:Static const:Constants.CrossSectionRadius}"/>
+                                    </Grid.Clip>
+                                    <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Stretch="Fill">
+                                        <Image.RenderTransform>
+                                            <TransformGroup>
+                                                <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                                <TranslateTransform X="{Binding Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                            </TransformGroup>
+                                        </Image.RenderTransform>
+                                    </Image>
                                 </Grid>
                                 <Grid Visibility="{Binding IsOctExpanded, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                                     <Image Source="{Binding AngioImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Stretch="Uniform"/>
@@ -190,14 +200,12 @@
                                 <Label Grid.Row="1" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Contrast], Source={StaticResource L10N}}"/>
                                 <Slider Grid.Row="1" Grid.Column="2" Style="{DynamicResource SliderSimple}" Value="{Binding Contrast}" Maximum="100" Minimum="0" TickFrequency="1" IsSnapToTickEnabled="True" LargeChange="1" SmallChange="1" VerticalAlignment="Center"/>
                                 <Label Grid.Row="1" Grid.Column="3" Content="{Binding Contrast}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Style="{DynamicResource Pretendard-Medium-12}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                <!--
                                 <Label Grid.Row="2" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Field of View], Source={StaticResource L10N}}"/>
                                 <Slider Grid.Row="2" Grid.Column="2" Style="{DynamicResource SliderSimple}" Value="{Binding FieldOfView}" Maximum="10.0" Minimum="5.0" TickFrequency="1.0" IsSnapToTickEnabled="True" LargeChange="1.0" SmallChange="1.0" VerticalAlignment="Center"/>
                                 <StackPanel Grid.Row="2" Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                     <Label Content="{Binding FieldOfView}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Style="{DynamicResource Pretendard-Medium-12}"/>
                                     <Label Content="{Binding [㎜], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Style="{DynamicResource Pretendard-Medium-12}"/>
                                 </StackPanel>
-                                -->
                             </Grid>
                             <Border Grid.Row="5" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
                                 <Grid>
@@ -205,8 +213,18 @@
                                         <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG023], Source={StaticResource L10N}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                     </Grid>
                                     <Grid Visibility="{Binding DeviceStatus.IsAngioInitialized, Converter={StaticResource BoolToVisibilityConverter}}">
-                                        <Grid Visibility="{Binding IsOctExpanded, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                                            <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.SmallCrossSectionSize}" Height="{x:Static const:Constants.SmallCrossSectionSize}" Stretch="Fill"/>
+                                        <Grid Width="{x:Static const:Constants.SmallCrossSectionSize}" Height="{x:Static const:Constants.SmallCrossSectionSize}" Visibility="{Binding IsOctExpanded, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                                            <Grid.Clip>
+                                                <EllipseGeometry Center="156,156" RadiusX="156" RadiusY="156"/>
+                                            </Grid.Clip>
+                                            <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.SmallCrossSectionSize}" Height="{x:Static const:Constants.SmallCrossSectionSize}" Stretch="Fill">
+                                                <Image.RenderTransform>
+                                                    <TransformGroup>
+                                                        <ScaleTransform ScaleX="{Binding ZoomSmall.ScaleX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.SmallCrossSectionSize}}" ScaleY="{Binding ZoomSmall.ScaleY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.SmallCrossSectionSize}}"/>
+                                                        <TranslateTransform X="{Binding ZoomSmall.TranslateX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.SmallCrossSectionSize}}" Y="{Binding ZoomSmall.TranslateY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.SmallCrossSectionSize}}"/>
+                                                    </TransformGroup>
+                                                </Image.RenderTransform>
+                                            </Image>
                                         </Grid>
                                         <Grid Visibility="{Binding IsOctExpanded, Converter={StaticResource BoolToVisibilityConverter}}">
                                             <Image Source="{Binding AngioImage}" Width="{x:Static const:Constants.SmallCrossSectionSize}" Height="{x:Static const:Constants.SmallCrossSectionSize}" Stretch="Uniform"/>

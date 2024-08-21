@@ -42,7 +42,7 @@ namespace RaywattApp.ViewModels
         private PatientCase _patientCase;
 
         [ObservableProperty]
-        private Zoom _zoom;
+        private Zoom _zoom = new Zoom();
 
         private int frameNumber = -1;
         public int FrameNumber
@@ -130,8 +130,6 @@ namespace RaywattApp.ViewModels
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;
-
-            Zoom = new Zoom();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -149,8 +147,10 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
 
+                Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
+
                 LumenContours = PatientCase.LumenContours;
-                CrossSectionScale = (1 / PatientCase.ImageResolution) * (Constants.CrossSectionSize / Constants.OCTImageSize);
+                CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.CrossSectionSize / Constants.OCTImageSize);
 
                 SetCrossSectionBackground(RaySession.Review, Constants.CardBackgroundColor);
 

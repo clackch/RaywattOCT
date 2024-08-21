@@ -5,21 +5,14 @@ using System.Windows.Data;
 
 namespace RaywattApp.Common.Converters
 {
-    internal class ScaleBarScaleConverter : IValueConverter
+    internal class LongitudeScaleConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value == null)
                 return Binding.DoNothing;
 
-            double curScale = (double)value;
-            double csSize = (double)parameter;
-            double scaleSize = (1 / Constants.ImageResolution) * (Constants.OCTImageSize / csSize);
-            double orgScaleSize = (1 / Constants.ImageResolution);
-
-            double res = orgScaleSize - curScale * scaleSize;
-
-            return res * (csSize / Constants.OCTImageSize);
+            return Constants.DefaultFoV / (double)value;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
