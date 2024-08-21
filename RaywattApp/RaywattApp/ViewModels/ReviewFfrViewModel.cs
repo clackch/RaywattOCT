@@ -36,8 +36,6 @@ namespace RaywattApp.ViewModels
 
         private InferenceSession sess;
 
-        private float vessel;
-
         [ObservableProperty]
         private double _ffrResult;
 
@@ -123,6 +121,8 @@ namespace RaywattApp.ViewModels
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
                 ReviewStatus.CurrentPage = Constants.ReviewFfrPage;
+
+                Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
 
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
                 int currentFrameNumber = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current;
@@ -236,7 +236,7 @@ namespace RaywattApp.ViewModels
 
             if (CommonUtil.IsPreCase(PatientCase.Procedure))
             {
-                if (Section.SetMlaMld(PatientCase.LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength, PatientCase.ImageResolution))
+                if (Section.SetMlaMld(PatientCase.LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength))
                 {
                     Section.Proximal.IsVisible = Visibility.Visible;
                     Section.Distal.IsVisible = Visibility.Visible;
@@ -252,7 +252,7 @@ namespace RaywattApp.ViewModels
                 int stentProximal = 0, stentDistal = 0;
                 CommonUtil.GetStentProximalDistal(PatientCase.LumenStents, out stentProximal, out stentDistal);
 
-                if (Section.SetMsaMinExp(PatientCase.LumenContours, frameProximal, frameDistal, stentProximal, stentDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength, PatientCase.ImageResolution))
+                if (Section.SetMsaMinExp(PatientCase.LumenContours, frameProximal, frameDistal, stentProximal, stentDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength))
                 {
                     Section.Proximal.IsVisible = Visibility.Visible;
                     Section.Distal.IsVisible = Visibility.Visible;
@@ -325,6 +325,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["apposition_threshold"] = PatientCase.AppositionThreshold;
             sqlParameters["brightness"] = PatientCase.Brightness;
             sqlParameters["contrast"] = PatientCase.Contrast;
+            sqlParameters["field_of_view"] = PatientCase.FieldOfView;
             sqlParameters["section_proximal"] = PatientCase.SectionProximal;
             sqlParameters["section_distal"] = PatientCase.SectionDistal;
 

@@ -364,7 +364,7 @@ namespace RaywattApp.ViewModels
 
             RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
             CommonUtil.SetColormap(patientCase.Colormap);
-            int numOfFrames = RayStartReview(patientCase.ImageFullPath);
+            int numOfFrames = RayStartReview(patientCase.ImageFullPath, patientCase.ImageResolution);
 
             if (numOfFrames < (int)RayError.OK)
             {

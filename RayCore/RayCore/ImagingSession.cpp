@@ -47,7 +47,7 @@ CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSess
 	return createSession(pMsg, setting, nSession,  pWriter, true, ImagingType::Default);
 }
 
-CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSession, const char* strFilePath) {
+CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSession, const char* strFilePath, double imageResolution) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	IImaging::Setting setting = config.imaging;
 	int nHeaderSize = 0;
@@ -84,6 +84,7 @@ CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSess
 		((CTIFFReader*)pReader)->GetImageSize(nWidth, nHeight);
 		setting.Set(nWidth, nHeight);
 	}
+	setting.distPerPixel = (imageResolution * 1000.f / 2.f);	// imageResolution: 1024x1024 circle 기준 (mm per pixel)
 
 	if (nNumOfSamples <= 0) {
 		if(pReader != nullptr) delete pReader;

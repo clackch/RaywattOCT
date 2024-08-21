@@ -57,7 +57,7 @@ public:
 	virtual ~CImagingSession();
 
 	static CImagingSession* CreateSession(CMessageService* pMsg, int nSession, IImaging::Setting setting, IDataManager *pWriter);
-	static CImagingSession* CreateSession(CMessageService* pMsg, int nSession, const char* strFilePath);
+	static CImagingSession* CreateSession(CMessageService* pMsg, int nSession, const char* strFilePath, double imageResolution);
 	static COCTImaging* CreateColorImaging(CMessageService* msg, IImaging::Setting setting, IDataManager* pData, ImagingType type);
 
 	ImagingType GetImagingType() { return m_imagingType; }

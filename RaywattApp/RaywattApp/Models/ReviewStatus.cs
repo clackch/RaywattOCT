@@ -65,19 +65,8 @@ namespace RaywattApp.Models
 
 
         //Compare
+        [ObservableProperty]
         private PatientCase _selectedPatientCase;
-        public PatientCase SelectedPatientCase
-        { 
-            get { return _selectedPatientCase; }
-            set { 
-                _selectedPatientCase = value;
-                OnPropertyChanged(nameof(SelectedPatientCase));
-                if (_selectedPatientCase != null)
-                {
-                    Constants.ImageResolutionCompare = _selectedPatientCase.ImageResolution;
-                }
-            }
-        }
 
         //FFR
     }

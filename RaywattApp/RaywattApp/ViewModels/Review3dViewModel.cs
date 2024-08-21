@@ -114,6 +114,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private bool _isPaused;
 
+        [ObservableProperty]
+        private Zoom _zoom = new Zoom(Constants.CrossSection3dSize);
+
         private DispatcherTimer timerShowData = new DispatcherTimer();
 
         private bool isFirstRendering = true;
@@ -193,6 +196,8 @@ namespace RaywattApp.ViewModels
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
                 ReviewStatus.CurrentPage = Constants.Review3dPage;
 
+                Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
+
                 RaySetSession(RaySession.Review);
                 RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
@@ -257,6 +262,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["apposition_threshold"] = PatientCase.AppositionThreshold;
             sqlParameters["brightness"] = PatientCase.Brightness;
             sqlParameters["contrast"] = PatientCase.Contrast;
+            sqlParameters["field_of_view"] = PatientCase.FieldOfView;
             sqlParameters["section_proximal"] = PatientCase.SectionProximal;
             sqlParameters["section_distal"] = PatientCase.SectionDistal;
 

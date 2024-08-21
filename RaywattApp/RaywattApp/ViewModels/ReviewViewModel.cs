@@ -55,6 +55,8 @@ namespace RaywattApp.ViewModels
 
         private string originProcedure;
 
+        private double convertedFoV;
+
         private double degree;
         public double Degree
         {
@@ -158,9 +160,6 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private List<LumenGuidewire> _lumenGuidewires;
 
-        [ObservableProperty]
-        private Zoom _zoomAngio = new Zoom(Constants.CrossSectionAngio);
-
         private double _lModeIndicatorX;
         public double LModeIndicatorX
         {
@@ -194,6 +193,9 @@ namespace RaywattApp.ViewModels
             }
         }
 
+        [ObservableProperty]
+        protected double _crossSectionScaleTest;
+
         private double _fieldOfView;
         public double FieldOfView
         {
@@ -204,6 +206,22 @@ namespace RaywattApp.ViewModels
                 OnPropertyChanged(nameof(FieldOfView)); 
                 RaySetProperty(Property.FieldOfView, value);
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
+
+                this.convertedFoV = Constants.DefaultFoV / value;
+                ReviewStatus.Zoom.SetFieldOfView(this.convertedFoV);
+                ReviewStatus.ZoomAngioCs.SetFieldOfView(this.convertedFoV);
+
+                CrossSectionScaleIndicator = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault * this.convertedFoV);
+                CrossSectionAngioScaleIndicator = (1 / Constants.ImageResolution) * (Constants.ZoomAngioCsScaleDefault * this.convertedFoV);
+
+                ReviewStatus.IsCalciumOn = true;
+                ReviewStatus.IsSheathOn = true;
+                ReviewStatus.IsCalciumOnAngioCs = true;
+                ReviewStatus.IsSheathOnAngioCs = true;
+                if (ReviewStatus.IsLumenProfile)
+                    IndicatorCrossSection.IsVisible = Visibility.Collapsed;
+                else
+                    IndicatorCrossSection.IsVisible = Visibility.Visible;
             }
         }
 
@@ -397,8 +415,8 @@ namespace RaywattApp.ViewModels
                 Brightness = PatientCase.Brightness;
                 Contrast = PatientCase.Contrast;
                 FieldOfView = PatientCase.FieldOfView;
-                CrossSectionScale = (1 / PatientCase.ImageResolution) * (Constants.ZoomScaleDefault);
-                CrossSectionAngioScale = (1 / PatientCase.ImageResolution) * (Constants.ZoomAngioCsScaleDefault);
+                CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault);
+                CrossSectionAngioScale = (1 / Constants.ImageResolution) * (Constants.ZoomAngioCsScaleDefault);
                 
                 SetAnnotation();
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
@@ -920,9 +938,9 @@ namespace RaywattApp.ViewModels
             ReviewStatus.IsLumenProfile = isLumenProfile;
 
             if (ReviewStatus.IsAngioOn)
-                IndicatorCrossSectionAngio.IsVisible = (!isLumenProfile && ReviewStatus.ZoomAngioCs.ScaleX == (Constants.ZoomAngioCsScaleDefault)) ? Visibility.Visible : Visibility.Collapsed;
+                IndicatorCrossSectionAngio.IsVisible = (!isLumenProfile && CommonUtil.GetRoundScale(ReviewStatus.ZoomAngioCs.ScaleX) == CommonUtil.GetRoundScale(Constants.ZoomAngioCsScaleDefault * this.convertedFoV)) ? Visibility.Visible : Visibility.Collapsed;
             else
-                IndicatorCrossSection.IsVisible = (!isLumenProfile && ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault) ? Visibility.Visible : Visibility.Collapsed;
+                IndicatorCrossSection.IsVisible = (!isLumenProfile && CommonUtil.GetRoundScale(ReviewStatus.Zoom.ScaleX) == CommonUtil.GetRoundScale(Constants.ZoomScaleDefault * this.convertedFoV)) ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void ToggleAngio(bool isAngioOn)
@@ -933,7 +951,7 @@ namespace RaywattApp.ViewModels
             {
                 ReviewStatus.IsMeasurementOn = false;
 
-                if (ReviewStatus.ZoomAngioCs.ScaleX == (Constants.ZoomAngioCsScaleDefault))
+                if (CommonUtil.GetRoundScale(ReviewStatus.ZoomAngioCs.ScaleX) == CommonUtil.GetRoundScale(Constants.ZoomAngioCsScaleDefault * this.convertedFoV))
                 {
                     ReviewStatus.IsCalciumOn = true;
                     if (ReviewStatus.IsLumenProfile)
@@ -951,7 +969,7 @@ namespace RaywattApp.ViewModels
             }
             else
             {
-                if (ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault)
+                if (CommonUtil.GetRoundScale(ReviewStatus.Zoom.ScaleX) == CommonUtil.GetRoundScale(Constants.ZoomScaleDefault * this.convertedFoV))
                 {
                     ReviewStatus.IsCalciumOn = true;
                     if (ReviewStatus.IsLumenProfile)
@@ -1005,14 +1023,14 @@ namespace RaywattApp.ViewModels
             {
                 ReviewStatus.Zoom.Window_ManipulationDelta(e);
 
-                if (ReviewStatus.Zoom.ScaleX > Constants.ZoomScaleDefault)
+                if (CommonUtil.GetRoundScale(ReviewStatus.Zoom.ScaleX) > CommonUtil.GetRoundScale(Constants.ZoomScaleDefault * this.convertedFoV))
                 {
                     IndicatorCrossSection.IsVisible = Visibility.Collapsed;
                     ReviewStatus.IsCalciumOn = false;
                     ReviewStatus.IsSheathOn = false;
                 }
 
-                if (ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault)
+                if (CommonUtil.GetRoundScale(ReviewStatus.Zoom.ScaleX) == CommonUtil.GetRoundScale(Constants.ZoomScaleDefault * this.convertedFoV))
                 {
                     ReviewStatus.IsCalciumOn = true;
                     ReviewStatus.IsSheathOn = true;
@@ -1029,14 +1047,14 @@ namespace RaywattApp.ViewModels
             {
                 ReviewStatus.ZoomAngioCs.Window_ManipulationDelta(e);
 
-                if (ReviewStatus.ZoomAngioCs.ScaleX > Constants.ZoomAngioCsScaleDefault)
+                if (CommonUtil.GetRoundScale(ReviewStatus.ZoomAngioCs.ScaleX) > CommonUtil.GetRoundScale(Constants.ZoomAngioCsScaleDefault * this.convertedFoV))
                 {
                     IndicatorCrossSectionAngio.IsVisible = Visibility.Collapsed;
                     ReviewStatus.IsCalciumOnAngioCs = false;
                     ReviewStatus.IsSheathOnAngioCs = false;
                 }
 
-                if (ReviewStatus.ZoomAngioCs.ScaleX == Constants.ZoomAngioCsScaleDefault)
+                if (CommonUtil.GetRoundScale(ReviewStatus.ZoomAngioCs.ScaleX) == CommonUtil.GetRoundScale(Constants.ZoomAngioCsScaleDefault * this.convertedFoV))
                 {
                     ReviewStatus.IsCalciumOnAngioCs = true;
                     ReviewStatus.IsSheathOnAngioCs = true;
@@ -1074,7 +1092,7 @@ namespace RaywattApp.ViewModels
             if (ReviewStatus.Zoom.ZoomOut() && ReviewStatus.IsMeasurementOn)
                 MeasurementCommand = Constants.MeasureZoomOut;
 
-            if (ReviewStatus.Zoom.ScaleX == Constants.ZoomScaleDefault)
+            if (CommonUtil.GetRoundScale(ReviewStatus.Zoom.ScaleX) == CommonUtil.GetRoundScale(Constants.ZoomScaleDefault * this.convertedFoV))
             {
                 ReviewStatus.IsCalciumOn = true;
                 ReviewStatus.IsSheathOn = true;
@@ -1102,7 +1120,7 @@ namespace RaywattApp.ViewModels
 
             ReviewStatus.ZoomAngioCs.ZoomOut();
 
-            if(ReviewStatus.ZoomAngioCs.ScaleX == (Constants.ZoomAngioCsScaleDefault))
+            if(CommonUtil.GetRoundScale(ReviewStatus.ZoomAngioCs.ScaleX) == CommonUtil.GetRoundScale(Constants.ZoomAngioCsScaleDefault * this.convertedFoV))
             {
                 ReviewStatus.IsCalciumOnAngioCs = true;
                 ReviewStatus.IsSheathOnAngioCs = true;
@@ -1506,7 +1524,7 @@ namespace RaywattApp.ViewModels
 
             if (CommonUtil.IsPreCase(PatientCase.Procedure))
             {
-                if (Section.SetMlaMld(LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength, PatientCase.ImageResolution))
+                if (Section.SetMlaMld(LumenContours, frameProximal, frameDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength))
                     Section.VisibleMlaMld(true);
                 else
                     Section.VisibleMlaMld(false);
@@ -1516,7 +1534,7 @@ namespace RaywattApp.ViewModels
                 int stentProximal = 0, stentDistal = 0;
                 CommonUtil.GetStentProximalDistal(LumenStents, out stentProximal, out stentDistal);
 
-                if (Section.SetMsaMinExp(LumenContours, frameProximal, frameDistal, stentProximal, stentDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength, PatientCase.ImageResolution))
+                if (Section.SetMsaMinExp(LumenContours, frameProximal, frameDistal, stentProximal, stentDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength))
                     Section.VislbleMsaMinExp(true);
                 else
                     Section.VislbleMsaMinExp(false);

@@ -153,9 +153,9 @@ namespace RaywattOCT
         [DllImport("RayCore.dll")]
         public static extern int RayUnloadCatheter();
         [DllImport("RayCore.dll")]
-        public static extern int RayStartReview(string filePath);
+        public static extern int RayStartReview(string filePath, double imageResolution);
         [DllImport("RayCore.dll")]
-        public static extern int RayStartCompare(string filePath);
+        public static extern int RayStartCompare(string filePath, double imageResolution);
         [DllImport("RayCore.dll")]
         public static extern int RayEndReview();
         [DllImport("RayCore.dll")]
@@ -183,7 +183,7 @@ namespace RaywattOCT
         [DllImport("RayCore.dll")]
         public static extern int RayStartLumenDetection();
         [DllImport("RayCore.dll")]
-        public static extern int RayOpenImage(string filePath);
+        public static extern int RayOpenImage(string filePath, double imageResolution);
         [DllImport("RayCore.dll")]
         public static extern int RayCloseImage();
         [DllImport("RayCore.dll")]
