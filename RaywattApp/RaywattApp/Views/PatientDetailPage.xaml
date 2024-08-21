@@ -136,7 +136,7 @@
                                             </DataGridTemplateColumn>
                                             <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding PhysicianName}" Header="{Binding [Physician], Source={StaticResource L10N}}"/>
                                             <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="2*" Binding="{Binding Comment}" Header="{Binding [Comment], Source={StaticResource L10N}}"/>
-                                            <DataGridTemplateColumn CellStyle="{StaticResource DataGridCellDelete}" Width="0.5*">
+                                            <DataGridTemplateColumn CellStyle="{StaticResource DataGridCellDelete}" Width="0.6*">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
                                                         <Button Style="{DynamicResource DataGridDelete}" Command="{Binding DataContext.DeleteCommand, Source={x:Reference ProxyElement}}" CommandParameter="{Binding ElementName=patientCase, Path=CurrentItem}"/>
