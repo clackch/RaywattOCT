@@ -305,6 +305,8 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Home");
 
+            DeviceStatus.IsOCTImagingDone = true;
+
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
         }
 

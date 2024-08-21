@@ -226,6 +226,8 @@ namespace RaywattApp.Common.Bases
         {
             _log.Debug("EndReview");
 
+            DeviceStatus.IsOCTImagingDone = true;
+
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
