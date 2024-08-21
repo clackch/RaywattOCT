@@ -2035,6 +2035,7 @@ namespace RaywattApp.Common.Util
                 }
             }
         }
+      
         public static ImageSource ConvertMatsToImageSource(Mat mat)
         {
             using (var stream = new MemoryStream())
@@ -2051,6 +2052,182 @@ namespace RaywattApp.Common.Util
             }
         }
 
+        public static Mat ApplyNiblackThreshold(Mat img, int windowSize, double k)
+        {
+            Mat mean = new Mat();
+            Mat stddev = new Mat();
+            Mat thresholdImg = new Mat(img.Size(), MatType.CV_8UC1);
+
+            // 평균 및 표준 편차 계산
+            Cv2.Blur(img, mean, new OpenCvSharp.Size(windowSize, windowSize));
+            Mat sqrMean = new Mat();
+            Cv2.SqrBoxFilter(img, sqrMean, MatType.CV_32F, new OpenCvSharp.Size(windowSize, windowSize));
+            Cv2.Sqrt(sqrMean, stddev);
+
+            for (int y = 0; y < img.Rows; y++)
+            {
+                for (int x = 0; x < img.Cols; x++)
+                {
+                    double threshold = mean.At<byte>(y, x) + k * stddev.At<byte>(y, x);
+                    thresholdImg.Set(y, x, img.At<byte>(y, x) > threshold ? (byte)255 : (byte)0);
+                }
+            }
+
+            return thresholdImg;
+        }
+
+        public static Mat ApplyLocalOtsuThreshold(Mat img, int windowSize)
+        {
+            Mat thresholdImg = new Mat(img.Size(), MatType.CV_8UC1);
+
+            for (int y = 0; y < img.Rows; y += windowSize)
+            {
+                for (int x = 0; x < img.Cols; x += windowSize)
+                {
+                    // 로컬 영역 설정
+                    OpenCvSharp.Rect rect = new OpenCvSharp.Rect(x, y, Math.Min(windowSize, img.Cols - x), Math.Min(windowSize, img.Rows - y));
+                    Mat localRegion = new Mat(img, rect);
+
+                    // Otsu Thresholding 적용
+                    Mat localThreshold = new Mat();
+                    Cv2.Threshold(localRegion, localThreshold, 0, 255, ThresholdTypes.Binary | ThresholdTypes.Otsu);
+
+                    // 결과를 전체 이미지에 반영
+                    localThreshold.CopyTo(new Mat(thresholdImg, rect));
+                }
+            }
+
+            return thresholdImg;
+        }
+
+        public static Mat ApplyPhansalkarThreshold(Mat img, int windowSize = 9)
+        {
+            double k = 0.05;
+            // K값 커지면 임계값 증가 Default = 0.25
+            double r = 0.5;
+            // r값 커지면 임계값 감소 Default = 0.5
+
+            double p = 2.0;
+            //고정
+            double q = 10.0;
+            //고정
+
+            Mat convertedImg = new Mat();
+            Mat mean = new Mat();
+            Mat XminusM = new Mat();
+            Mat XminusMSquared = new Mat();
+            Mat variance = new Mat();
+            Mat thresholdImg = new Mat(img.Size(), MatType.CV_8UC1);
+
+            img.CopyTo(convertedImg);
+            convertedImg.ConvertTo(convertedImg, MatType.CV_32F);
+            // 평균 계산
+            Cv2.Blur(convertedImg, mean, new OpenCvSharp.Size(windowSize, windowSize));
+
+            // (표본 - 평균)
+            Cv2.Subtract(convertedImg, mean, XminusM);
+
+            // (표본 - 평균)^2
+            Cv2.Pow(XminusM, 2, XminusMSquared);
+
+            // 분산 계산
+            Cv2.Blur(XminusMSquared, variance, new OpenCvSharp.Size(windowSize, windowSize));
+
+            // 표준 편차 계산
+            Mat stdDev = new Mat();
+            Cv2.Sqrt(variance, stdDev);
+
+            // stdDev의 최대 값 찾기
+            double minVal, maxVal;
+            Cv2.MinMaxLoc(stdDev, out minVal, out maxVal);
+            r = maxVal; // r 값을 stdDev의 최대 값으로 설정
+
+            for (int y = 0; y < img.Rows; y++)
+            {
+                for (int x = 0; x < img.Cols; x++)
+                {
+                    float meanValue = mean.At<float>(y, x);
+                    float stdDevValue = stdDev.At<float>(y, x);
+
+                    // Phansalkar 임계값 계산
+                    //double threshold = meanValue * (1.0 + k * ((stdDevValue / r) - 1.0));
+                    double threshold = meanValue * (1.0 + Math.Exp(-q * meanValue) + k * ((stdDevValue / r) - 1.0));
+
+                    // 이진화 적용
+                    thresholdImg.Set(y, x, img.At<byte>(y, x) >= threshold ? (byte)255 : (byte)0);
+                }
+            }
+            return thresholdImg;
+        }
+
+        public static Mat ApplyMidGreyThreshold(Mat img, int windowSize)
+        {
+            int halfWindowSize = windowSize / 2;
+            Mat thresholdImg = new Mat(img.Size(), MatType.CV_8UC1);
+
+            for (int y = 0; y < img.Rows; y++)
+            {
+                for (int x = 0; x < img.Cols; x++)
+                {
+                    // 지역 창의 범위 설정
+                    int xStart = Math.Max(0, x - halfWindowSize);
+                    int xEnd = Math.Min(img.Cols - 1, x + halfWindowSize);
+                    int yStart = Math.Max(0, y - halfWindowSize);
+                    int yEnd = Math.Min(img.Rows - 1, y + halfWindowSize);
+
+                    byte minVal = byte.MaxValue;
+                    byte maxVal = byte.MinValue;
+
+                    // 지역 창 내의 최소값과 최대값 계산
+                    for (int j = yStart; j <= yEnd; j++)
+                    {
+                        for (int i = xStart; i <= xEnd; i++)
+                        {
+                            byte pixelVal = img.At<byte>(j, i);
+                            if (pixelVal < minVal)
+                            {
+                                minVal = pixelVal;
+                            }
+                            if (pixelVal > maxVal)
+                            {
+                                maxVal = pixelVal;
+                            }
+                        }
+                    }
+
+                    // Mid Grey 임계값 계산
+                    byte threshold = (byte)((minVal + maxVal) / 2);
+
+                    // 이진화 적용
+                    thresholdImg.Set(y, x, img.At<byte>(y, x) > threshold ? (byte)255 : (byte)0);
+                }
+            }
+
+            return thresholdImg;
+        }
+
+        public static Mat ApplyMedianThreshold(Mat img, int windowSize)
+        {
+            Mat medianImg = new Mat();
+            Cv2.MedianBlur(img, medianImg, windowSize);
+
+            // Median Thresholding 적용
+            Mat thresholdImg = new Mat();
+            Cv2.Threshold(img, thresholdImg, 0, 255, ThresholdTypes.Binary | ThresholdTypes.Otsu);
+
+            // Median 값을 임계값으로 사용하여 이진화
+            thresholdImg = new Mat(img.Size(), MatType.CV_8UC1);
+            for (int y = 0; y < img.Rows; y++)
+            {
+                for (int x = 0; x < img.Cols; x++)
+                {
+                    thresholdImg.Set(y, x, img.At<byte>(y, x) > medianImg.At<byte>(y, x) ? (byte)255 : (byte)0);
+                }
+            }
+
+            return thresholdImg;
+        }
+      
         public static double GetRoundScale(double value)
         {
             return Math.Round(value, 5);
