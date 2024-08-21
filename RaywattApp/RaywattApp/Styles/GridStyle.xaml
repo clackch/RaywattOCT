@@ -886,9 +886,20 @@
                         <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsSelected}" Value="true">
                             <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/gridRowDelete_active.svg}"/>
                         </DataTrigger>
-                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="true">
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsSelected}" Value="true"/>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="true"/>
+                            </MultiDataTrigger.Conditions>
                             <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/gridRowDelete_hover.svg}"/>
-                        </DataTrigger>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsSelected}" Value="false"/>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="true"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/gridRowDelete_hover_notSelected.svg}"/>
+                        </MultiDataTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
