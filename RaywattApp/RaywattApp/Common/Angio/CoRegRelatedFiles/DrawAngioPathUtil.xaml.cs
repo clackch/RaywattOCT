@@ -310,14 +310,14 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                 path.InsertRange(0, list);
             }
 
-            if (path.Count == 0)
+            if(path.Count == 0)
             {
                 return;
             }
 
             int pathLength = path.Count;
 
-            if (maxPathLength == 0 || maxPathLength < pathLength) {
+            if(maxPathLength == 0 || maxPathLength < pathLength) {
                 maxPathLength = pathLength;
             }
 
