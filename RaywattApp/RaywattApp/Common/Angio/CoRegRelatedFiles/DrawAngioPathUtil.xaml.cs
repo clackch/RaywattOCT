@@ -234,7 +234,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             Canvas.SetLeft(proximalImage, px - proximalImage.Width/2);
             Canvas.SetTop(proximalImage, py - proximalImage.Height);
 
-            if (dh.trackPoint.Count > 1/* 시작점을 제외한 이후 추가 점을 찍은 경우*/)
+            if (dh.trackPoint.Count > 1/* 시작점 외 추가 점을 찍은 경우*/)
             {
                 dx = dh.trackPoint[dh.trackPoint.Count - 1].X;
                 dy = dh.trackPoint[dh.trackPoint.Count - 1].Y;
