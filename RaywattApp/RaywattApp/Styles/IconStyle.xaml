@@ -336,6 +336,13 @@
             </Separator>
             <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="{TemplateBinding Height, Converter={StaticResource HalveConverter}}" Width="2">
                 <Separator.Margin>
+                    <MultiBinding Converter="{StaticResource IndicatorScaleConveter}" ConverterParameter="-9">
+                        <Binding ElementName="indicatorScale" Path="Tag"/>
+                    </MultiBinding>
+                </Separator.Margin>
+            </Separator>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="{TemplateBinding Height, Converter={StaticResource HalveConverter}}" Width="1">
+                <Separator.Margin>
                     <MultiBinding Converter="{StaticResource IndicatorScaleConveter}" ConverterParameter="-7">
                         <Binding ElementName="indicatorScale" Path="Tag"/>
                     </MultiBinding>
