@@ -575,9 +575,9 @@
     </Style>
 
     <Style TargetType="Button" x:Key="DataGridDelete">
-        <Setter Property="Width" Value="10"/>
-        <Setter Property="Height" Value="10"/>
-        <Setter Property="Margin" Value="35,17,35,15"/>
+        <Setter Property="Width" Value="20"/>
+        <Setter Property="Height" Value="20"/>
+        <Setter Property="Margin" Value="0"/>
         <Setter Property="Padding" Value="0"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
