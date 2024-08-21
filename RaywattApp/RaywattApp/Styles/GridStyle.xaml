@@ -481,6 +481,33 @@
         </Setter>
     </Style>
 
+    <Style TargetType="CheckBox" x:Key="DataGridDisplayCheckBox">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <Grid>
+                        <Image x:Name="img" Source="{svgc:SvgImage Source=/res/button/check/displayCheckboxUnchecked.svg}" Width="12" Height="12"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" Value="true"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/button/check/displayCheckboxChecked.svg}"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" Value="true"/>
+                                <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridCell}, Path=IsSelected}" Value="true"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/button/check/diplayCheckboxChecked_active.svg}"/>
+                        </MultiDataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style TargetType="CheckBox" x:Key="DataGridCheckList">
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="HorizontalAlignment" Value="Right"/>
@@ -539,7 +566,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="DataGridCell">
-                    <Grid>
+                    <Grid Background="Transparent">
                         <ContentPresenter/>
                     </Grid>
                 </ControlTemplate>
