@@ -116,6 +116,18 @@ namespace RaywattApp.ViewModels
                 _angioFrameNumber = value;
                 OnPropertyChanged(nameof(AngioFrameNumber));
                 OnPropertyChanged(nameof(CurrentAngioImage));
+                AngioDisplayNumber = AngioFrameNumber + 1;
+                OnPropertyChanged(nameof(AngioDisplayNumber));
+            }
+        }
+
+        private int _angioDisplayNumber;
+        public int AngioDisplayNumber
+        {
+            get => _angioDisplayNumber;
+            set
+            {
+                _angioDisplayNumber = value;
             }
         }
 
