@@ -41,6 +41,13 @@ namespace RaywattOCT
                 set { _isFirstRendering = value; }
             }
 
+            private int _zoomFactor;
+            public int ZoomFactor
+            {
+                get { return _zoomFactor; }
+                set { _zoomFactor = value; }
+            }
+
             public Ray3DStatus()
             {
                 for (Ray3DObject obj = Ray3DObject.Tissue; obj < Ray3DObject.Count; obj++) 

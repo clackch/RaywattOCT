@@ -84,6 +84,10 @@
                                     <component:IconToggleButton Style="{DynamicResource ToggleButtonWithText}" Icon="cutView" Content="{Binding [Cut-View], Source={StaticResource L10N}}" IsChecked="{Binding IsCutViewOn, Mode=TwoWay}" IsEnabled="{Binding IsRendering}"/>
                                     <StackPanel Width="6"/>
                                     <component:IconToggleButton Style="{DynamicResource ToggleButtonWithText}" Icon="currentFrameIndicator3D" Content="{Binding [Current Frame Indicator], Source={StaticResource L10N}}" IsChecked="{Binding IsIndicatorOn}" IsEnabled="{Binding IsRendering}"/>
+                                    <StackPanel Width="240"/>
+                                    <component:IconButton Style="{StaticResource IconButton}" Icon="zoomIn" Command="{Binding ZoomIn3DCommand}"/>
+                                    <StackPanel Width="6"/>
+                                    <component:IconButton Style="{StaticResource IconButton}" Icon="zoomOut" Command="{Binding ZoomOut3DCommand}"/>
                                 </StackPanel>
                             </Grid>
                         </StackPanel>

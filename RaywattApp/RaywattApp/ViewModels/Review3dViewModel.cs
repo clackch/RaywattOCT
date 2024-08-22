@@ -157,6 +157,17 @@ namespace RaywattApp.ViewModels
         { 
             get { return this._cmdExpandLeftPatientMenu ?? (this._cmdExpandLeftPatientMenu = new RelayCommand(ExpandLeftPatientMenu)); }
         }
+        private ICommand _zoomIn3DCommand;
+        public ICommand ZoomIn3DCommand
+        {
+            get { return this._zoomIn3DCommand ?? (this._zoomIn3DCommand = new RelayCommand(ZoomIn3D)); }
+        }
+
+        private ICommand _zoomOut3DCommand;
+        public ICommand ZoomOut3DCommand
+        {
+            get { return this._zoomOut3DCommand ?? (this._zoomOut3DCommand = new RelayCommand(ZoomOut3D)); }
+        }
 
         private Thread threadInitialize;
 
@@ -209,6 +220,7 @@ namespace RaywattApp.ViewModels
                 _isPtoD = ray3DStatus.IsPtoD;
                 _isSideBranchView = false;
                 isFirstRendering = ray3DStatus.IsFirstRendering;
+                ray3DStatus.ZoomFactor = 0;
             }
             IsRendering = false;
 
@@ -300,7 +312,7 @@ namespace RaywattApp.ViewModels
             
             if (CommonUtil.IsPostCase(PatientCase.Procedure))
             {
-                ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(System.IntPtr.Zero), diameter, diameter, depth, 1, 1, zVal);
+                ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(buffer), diameter, diameter, depth, 1, 1, zVal);
             }
             else
             {
@@ -520,6 +532,30 @@ namespace RaywattApp.ViewModels
             patientMenuWindow = _dialogService.OpenChildWindow(new Review3dPatientMenuControl(), this, parameter, Constants.SideBarExpandSize, Constants.LeftSideBarExpand3dSize, 0, Constants.PatientMenu3dY);
         }
 
+        private void ZoomIn3D()
+        {
+            if (!IsRendering) return;
+            _log.Debug("zoomFactor = " + ray3DStatus.ZoomFactor);
+            if (ray3DStatus.ZoomFactor < 2/*최대 Zoom in 2번*/)
+            {
+                ODSOCT_CutViewZoom(1);
+                ray3DStatus.ZoomFactor += 1;
+                ODSOCT_Render();
+            }
+        }
+
+        private void ZoomOut3D() {
+            if (!IsRendering) return;
+            _log.Debug("zoomFactor = " + ray3DStatus.ZoomFactor);
+            if (ray3DStatus.ZoomFactor > 0/*최대 Zoom out 2번*/)
+            {
+                ODSOCT_CutViewZoom(-1);
+                ray3DStatus.ZoomFactor -= 1;
+                ODSOCT_Render();
+            }
+        }
+
+
         public void SetResult(object result)
         {
             Dictionary<string, Object> data = (Dictionary<string, Object>)result;
@@ -537,6 +573,7 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
             }
         }
+
 
         private void setCurrentFrame(double navigatorPosition)
         {
