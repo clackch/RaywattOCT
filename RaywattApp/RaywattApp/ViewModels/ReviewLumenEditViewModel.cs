@@ -176,7 +176,7 @@ namespace RaywattApp.ViewModels
         private void Ok()
         {
             _log.Debug("Ok");
-
+            
             GoToPreviousPage(true);
         }
 
@@ -207,6 +207,9 @@ namespace RaywattApp.ViewModels
             parameter["patientCase"] = PatientCase;
             parameter["prevStatus"] = PrevStatus;
             parameter["reviewStatus"] = ReviewStatus;
+
+            ReviewStatus.IsLumenEdited = isSave;
+
             WeakReferenceMessenger.Default.Send(new NavigationMessage(ReviewStatus.CurrentPage) { Parameter = parameter });
         }
 

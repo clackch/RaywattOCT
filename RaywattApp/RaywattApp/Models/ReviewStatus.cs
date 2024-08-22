@@ -61,6 +61,9 @@ namespace RaywattApp.Models
         [ObservableProperty]
         private bool _isNoPullback = false;
 
+        [ObservableProperty]
+        private bool _isLumenEdited = true;
+
         //3D
 
 
