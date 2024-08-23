@@ -56,6 +56,8 @@ private:
 	CLaserModule* m_pLaserModule;
 
 	// UI Components
+	bool m_largeMonitorMode;
+	bool m_showScope;
 	CListBox m_listPatientData;
 	ToggleButton m_btnLoadData;
 	ToggleButton m_btnPlayData;
@@ -72,6 +74,7 @@ private:
 	CSliderCtrl m_sliderContrast;
 	CSliderCtrl m_sliderLowLevel;
 	CSliderCtrl m_sliderHighLevel;
+	CSliderCtrl m_sliderFrame;
 	BOOL m_chkInitMotor;
 	BOOL m_chkInitStage;
 
@@ -116,6 +119,7 @@ private:
 	int initializeDevices();
 	int finalizeDevices();
 	void updatePatientDataList();
+	void initOCTViewLayout();
 	void initScopeViewLayout();
 	void updateBrightnessContrast(CLabImaging *pImaging);
 	void updateLevel(CLabImaging* pImaging);
@@ -124,6 +128,7 @@ private:
 	CString splitFileName(CString strFilePath);
 	CLabImaging* createImaging(IImaging::Setting imaging);
 	USHORT* readBackground(const char* strBackgroundFile, IImaging::Setting setting);
+	IImaging::Setting initReader(tstring strFilePath, CDataReader* pReader);
 	void findFileByExtension(CString strFolder, CString strExt, std::vector<CString>& vList);
 	void updateMeasurement(USHORT nPeakValue, int nPeakIndex, int nLineWidth, USHORT nNoisePower);
 	void drawGuideLine(cv::Mat image);
@@ -171,6 +176,7 @@ public:
 	afx_msg void OnNMCustomdrawSliderContrast(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNMCustomdrawSliderLowlevel(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNMCustomdrawSliderHighlevel(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnNMCustomdrawSliderFrame(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBnClickedButtonOpenRotaryJunction();
 	afx_msg void OnBnClickedButtonSaveCalibration();
 	afx_msg void OnBnClickedButtonChangeCalibration();
@@ -181,4 +187,5 @@ public:
 	afx_msg void OnBnClickedCheckInitStage();
 	afx_msg void OnBnClickedButtonPullback();
 	afx_msg void OnBnClickedButtonRestartAcquisition();
+	afx_msg void OnBnClickedButtonShowScope();
 };

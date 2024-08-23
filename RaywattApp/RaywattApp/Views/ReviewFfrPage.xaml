@@ -153,9 +153,21 @@
                     </Border>
                     <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="10" Width="1" Background="{DynamicResource GrayscaleGray3Brush}" Margin="0"/>
                     <Grid Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}">
-                        <Image Source="{Binding ProximalOctImage}" Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}"/>
                         <Image Source="{svgc:SvgImage Source=/res/icon/ffrCircleGray.svg}" Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}"/>
-                        <annotation:DrawLumenContourUtil Zoom="{Binding Zoom}" LumenContours="{Binding PatientCase.LumenContours}" LumenStents="{Binding PatientCase.LumenStents}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" FrameNumber="{Binding PatientCase.SectionProximal}" Visibility="Visible" IsEditOn="False" IsDrawOn="True" IsFfr="True"/>
+                        <Grid>
+                            <Grid.Clip>
+                                <EllipseGeometry Center="172,172" RadiusX="171" RadiusY="171"/>
+                            </Grid.Clip>
+                            <Image Source="{Binding ProximalOctImage}" Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}">
+                                <Image.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}"/>
+                                        <TranslateTransform X="{Binding Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}" Y="{Binding Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}"/>
+                                    </TransformGroup>
+                                </Image.RenderTransform>
+                            </Image>
+                            <annotation:DrawLumenContourUtil Zoom="{Binding Zoom}" LumenContours="{Binding PatientCase.LumenContours}" LumenStents="{Binding PatientCase.LumenStents}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" FrameNumber="{Binding PatientCase.SectionProximal}" Visibility="Visible" IsEditOn="False" IsDrawOn="True" IsFfr="True" ScreenSize="{x:Static const:Constants.CrossSectionFfrSize}"/>
+                        </Grid>
                     </Grid>
                 </StackPanel>
                 <StackPanel Grid.Column="1">
@@ -165,10 +177,22 @@
                     </Border>
                     <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="10" Width="1" Background="{DynamicResource MainPrimaryColorBrush}" Margin="0"/>
                     <Grid Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}">
-                        <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}"/>
                         <Image Source="{svgc:SvgImage Source=/res/icon/ffrCircleGreen.svg}" Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}"/>
-                        <annotation:DrawLumenContourUtil Zoom="{Binding Zoom}" LumenContours="{Binding PatientCase.LumenContours}" LumenStents="{Binding PatientCase.LumenStents}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" FrameNumber="{Binding PatientCase.FfrFeature.MinimalLumenFrameNumber}" Visibility="Visible" IsEditOn="False" IsDrawOn="True" IsFfr="True"/>
-                        <annotation:DrawUtil Zoom="{Binding Zoom}" ImageResolution="{Binding PatientCase.ImageResolution}" Measurements="{Binding PatientCase.FfrFeature.PlaqueAreaList}" FfrFeature="{Binding PatientCase.FfrFeature}" FrameNumber="{Binding PatientCase.FfrFeature.MinimalLumenFrameNumber}" IsEditOn="False" IsFfr="True" IsDrawOn="True"/>
+                        <Grid>
+                            <Grid.Clip>
+                                <EllipseGeometry Center="172,172" RadiusX="171" RadiusY="171"/>
+                            </Grid.Clip>
+                            <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}">
+                                <Image.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}"/>
+                                        <TranslateTransform X="{Binding Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}" Y="{Binding Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}"/>
+                                    </TransformGroup>
+                                </Image.RenderTransform>
+                            </Image>
+                            <annotation:DrawLumenContourUtil Zoom="{Binding Zoom}" LumenContours="{Binding PatientCase.LumenContours}" LumenStents="{Binding PatientCase.LumenStents}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" FrameNumber="{Binding PatientCase.FfrFeature.MinimalLumenFrameNumber}" Visibility="Visible" IsEditOn="False" IsDrawOn="True" IsFfr="True" ScreenSize="{x:Static const:Constants.CrossSectionFfrSize}"/>
+                            <annotation:DrawUtil Zoom="{Binding Zoom}" Measurements="{Binding PatientCase.FfrFeature.PlaqueAreaList}" FfrFeature="{Binding PatientCase.FfrFeature}" FrameNumber="{Binding PatientCase.FfrFeature.MinimalLumenFrameNumber}" IsEditOn="False" IsFfr="True" IsDrawOn="True" ScreenSize="{x:Static const:Constants.CrossSectionFfrSize}"/>
+                        </Grid>
                     </Grid>
                 </StackPanel>
                 <StackPanel Grid.Column="2">
@@ -178,9 +202,21 @@
                     </Border>
                     <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="10" Width="1" Background="{DynamicResource GrayscaleGray3Brush}" Margin="0"/>
                     <Grid Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}">
-                        <Image Source="{Binding DistalOctImage}" Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}"/>
                         <Image Source="{svgc:SvgImage Source=/res/icon/ffrCircleGray.svg}" Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}"/>
-                        <annotation:DrawLumenContourUtil Zoom="{Binding Zoom}" LumenContours="{Binding PatientCase.LumenContours}" LumenStents="{Binding PatientCase.LumenStents}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" FrameNumber="{Binding PatientCase.SectionDistal}" Visibility="Visible" IsEditOn="False" IsDrawOn="True" IsFfr="True"/>
+                        <Grid>
+                            <Grid.Clip>
+                                <EllipseGeometry Center="172,172" RadiusX="171" RadiusY="171"/>
+                            </Grid.Clip>
+                            <Image Source="{Binding DistalOctImage}" Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}">
+                                <Image.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}"/>
+                                        <TranslateTransform X="{Binding Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}" Y="{Binding Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}"/>
+                                    </TransformGroup>
+                                </Image.RenderTransform>
+                            </Image>
+                            <annotation:DrawLumenContourUtil Zoom="{Binding Zoom}" LumenContours="{Binding PatientCase.LumenContours}" LumenStents="{Binding PatientCase.LumenStents}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" FrameNumber="{Binding PatientCase.SectionDistal}" Visibility="Visible" IsEditOn="False" IsDrawOn="True" IsFfr="True" ScreenSize="{x:Static const:Constants.CrossSectionFfrSize}"/>
+                        </Grid>
                     </Grid>
                 </StackPanel>
             </Grid>

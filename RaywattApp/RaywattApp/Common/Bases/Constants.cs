@@ -258,6 +258,9 @@ namespace RaywattApp.Common.Bases
         public const double OCTImageSize = 1024;
         public const double CrossSectionSize = 620;
         public const double CrossSectionCenter = CrossSectionSize / 2;
+        public const double CrossSectionRadius = CrossSectionCenter;
+        public static System.Windows.Point CrossSectionPointCenter = new System.Windows.Point(CrossSectionRadius, CrossSectionRadius);
+        public static System.Windows.Rect CrossSectionRect = new System.Windows.Rect(0, 0, CrossSectionSize, CrossSectionSize);
         public const double CalciumIndicatorSize = 645;
         public const double CalciumIndicatorAngioSize = 490;
         public const double CalciumThicknessIndicatorSize = 681;
@@ -272,6 +275,9 @@ namespace RaywattApp.Common.Bases
         public const double AngioSize = 580;
         public const double CrossSectionAngio = 470;
         public const double CrossSectionAngioCenter = CrossSectionAngio / 2;
+        public const double CrossSectionAngioRadius = CrossSectionAngioCenter;
+        public static System.Windows.Point CrossSectionAngioPointCenter = new System.Windows.Point(CrossSectionAngioRadius, CrossSectionAngioRadius);
+        public static System.Windows.Rect CrossSectionAngioRect = new System.Windows.Rect(0, 0, CrossSectionAngio, CrossSectionAngio);
         public const double CrossSectionAngioScale = CrossSectionAngio / CrossSectionSize;
         public const double CoRegZoomAngioSize = 382;
         public const double CoRegZoomScale = 5;
@@ -357,6 +363,10 @@ namespace RaywattApp.Common.Bases
         public const string FfrStep5 = "FfrStep5";
         public const double CrossSectionFfrSize = 344;
 
+        //Recording - Confirm
+        public const double CrossSectionConfirmSize = 475;
+        public const double LongitudeConfirmWidth = 1080;
+
         //Measurement
         public const string MeasureDrawAll = "DrawAll";  //Draw All
         public const string MeasureDeleteAll = "DeleteAll";  //Delete All
@@ -424,13 +434,17 @@ namespace RaywattApp.Common.Bases
         public const string ScaleLengthCompare = "LengthCompare";
         public const string ScaleAreaCompare = "AreaCompare";
 
-        //Scale (values from PatientCase.ImageResolution)
-        public static double ImageResolution;
-        public static double ImageResolutionCompare;
+        //Field of View
+        public const double DefaultFoV = 10.0f;
+
+        //Image Resolution
+        public const double ImageResolution = DefaultFoV / 1024;        
 
         //Mini-Map
         public const double MiniMapBorderSize = 140;
         public const double MiniMapCanvasSize = 138;
+        public const double MiniMapRadius = MiniMapCanvasSize / 2;
+        public static System.Windows.Point MiniMapPointCenter = new System.Windows.Point(MiniMapRadius, MiniMapRadius);
 
         //Zoom
         public const double ZoomScaleDefault = CrossSectionSize / OCTImageSize;
@@ -458,5 +472,6 @@ namespace RaywattApp.Common.Bases
         public const double ellipsePathHeight = 2;
         public const double ellipseTrackWidth = 6;
         public const double ellipseTrackHeight = 6;
+        public const double coregistrationCursorSize = 113;
     }
 }

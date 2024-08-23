@@ -32,6 +32,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private PatientCase _patientCase;
 
+        [ObservableProperty]
+        private Zoom _zoom = new Zoom(Constants.CrossSectionConfirmSize);
+
         private ICommand _redoPullbackCommand;
         public ICommand RedoPullbackCommand
         {
@@ -69,6 +72,8 @@ namespace RaywattApp.ViewModels
                 Patient = (Patient)data["patient"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 PatientCase = (PatientCase)data["patientCase"];
+
+                Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
 
                 GetImageInfo(RaySession.Review);
                 RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
@@ -124,7 +129,7 @@ namespace RaywattApp.ViewModels
             PatientCase.Id = Patient.Id + "_" + DateTime.Now.ToString("yyyyMMddHHmmss");
             PatientCase.PatientId = Patient.Id;
             PatientCase.NumOfFrames = numOfFrames;
-            PatientCase.AngioYn = DeviceStatus.IsAngioConnected;
+            PatientCase.AngioYn = DeviceStatus.IsAngioInitialized;
             PatientCase.IndicatorDegree = 90;            
 
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();

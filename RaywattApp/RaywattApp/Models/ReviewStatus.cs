@@ -61,23 +61,15 @@ namespace RaywattApp.Models
         [ObservableProperty]
         private bool _isNoPullback = false;
 
+        [ObservableProperty]
+        private bool _isLumenEdited = true;
+
         //3D
 
 
         //Compare
+        [ObservableProperty]
         private PatientCase _selectedPatientCase;
-        public PatientCase SelectedPatientCase
-        { 
-            get { return _selectedPatientCase; }
-            set { 
-                _selectedPatientCase = value;
-                OnPropertyChanged(nameof(SelectedPatientCase));
-                if (_selectedPatientCase != null)
-                {
-                    Constants.ImageResolutionCompare = _selectedPatientCase.ImageResolution;
-                }
-            }
-        }
 
         //FFR
     }

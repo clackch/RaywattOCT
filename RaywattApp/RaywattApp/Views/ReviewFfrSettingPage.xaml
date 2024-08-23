@@ -153,6 +153,47 @@
                                         </TransformGroup>
                                     </Image.RenderTransform>
                                 </Image>
+                                <!-- Lumen Contour-->
+                                <Grid Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
+                                    <annotation:DrawLumenContourUtil LumenContours="{Binding PatientCase.LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" LumenStents="{Binding PatientCase.LumenStents}" CurrentLumenStent="{Binding CurrentLumenStent, Mode=TwoWay}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" Zoom="{Binding ReviewStatus.ZoomFfr}" FrameNumber="{Binding FrameNumber}" IsEditOn="False" IsDrawOn="True" IsFfr="True"/>
+                                </Grid>
+                                <!-- Measurement -->
+                                <Grid Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
+                                    <annotation:DrawUtil Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Zoom="{Binding ReviewStatus.ZoomFfr}" IsDrawOn="{Binding IsDrawOn}" Measurements="{Binding PlaqueAreaList}" FrameNumber="{Binding FrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" IsEditOn="{Binding IsEditOn}" IsFfr="True" FfrFeature="{Binding FfrFeature}"/>
+                                </Grid>
+                                <!-- Circle Mask -->
+                                <Grid>
+                                    <Path Fill="{StaticResource GrayscaleGray7Brush}">
+                                        <Path.Data>
+                                            <CombinedGeometry GeometryCombineMode="Exclude">
+                                                <CombinedGeometry.Geometry1>
+                                                    <RectangleGeometry Rect="{x:Static const:Constants.CrossSectionRect}" />
+                                                </CombinedGeometry.Geometry1>
+                                                <CombinedGeometry.Geometry2>
+                                                    <EllipseGeometry Center="{x:Static const:Constants.CrossSectionPointCenter}" RadiusX="{x:Static const:Constants.CrossSectionRadius}" RadiusY="{x:Static const:Constants.CrossSectionRadius}"/>
+                                                </CombinedGeometry.Geometry2>
+                                            </CombinedGeometry>
+                                        </Path.Data>
+                                    </Path>
+                                    <Grid.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform ScaleX="{Binding ReviewStatus.ZoomFfr.ZoomScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding ReviewStatus.ZoomFfr.ZoomScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                            <TranslateTransform X="{Binding ReviewStatus.ZoomFfr.ZoomTranslateX, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding ReviewStatus.ZoomFfr.ZoomTranslateY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                        </TransformGroup>
+                                    </Grid.RenderTransform>
+                                </Grid>
+                                <!--Touch-->
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="ManipulationStarting">
+                                        <i:InvokeCommandAction Command="{Binding ManipulationStartingCommand}" PassEventArgsToCommand="True"/>
+                                    </i:EventTrigger>
+                                    <i:EventTrigger EventName="ManipulationDelta">
+                                        <i:InvokeCommandAction Command="{Binding ManipulationDeltaCommand}" PassEventArgsToCommand="True"/>
+                                    </i:EventTrigger>
+                                    <i:EventTrigger EventName="ManipulationCompleted">
+                                        <i:InvokeCommandAction Command="{Binding ManipulationCompletedCommand}" PassEventArgsToCommand="True"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
                             </Grid>
                             <!-- Cross Section Info. -->
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="50">
@@ -183,28 +224,6 @@
                                     <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="5" Width="1" Margin="0" HorizontalAlignment="Right"/>
                                 </Grid>
                             </StackPanel>
-                            <!--Touch-->
-                            <Grid Grid.Column="1" Name="TouchCs" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Background="Transparent" IsManipulationEnabled="true">
-                                <i:Interaction.Triggers>
-                                    <i:EventTrigger EventName="ManipulationStarting">
-                                        <i:InvokeCommandAction Command="{Binding ManipulationStartingCommand}" PassEventArgsToCommand="True"/>
-                                    </i:EventTrigger>
-                                    <i:EventTrigger EventName="ManipulationDelta">
-                                        <i:InvokeCommandAction Command="{Binding ManipulationDeltaCommand}" PassEventArgsToCommand="True"/>
-                                    </i:EventTrigger>
-                                    <i:EventTrigger EventName="ManipulationCompleted">
-                                        <i:InvokeCommandAction Command="{Binding ManipulationCompletedCommand}" PassEventArgsToCommand="True"/>
-                                    </i:EventTrigger>
-                                </i:Interaction.Triggers>
-                            </Grid>
-                            <!-- Lumen Contour-->
-                            <Grid Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
-                                <annotation:DrawLumenContourUtil LumenContours="{Binding PatientCase.LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" LumenStents="{Binding PatientCase.LumenStents}" CurrentLumenStent="{Binding CurrentLumenStent, Mode=TwoWay}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" Zoom="{Binding ReviewStatus.ZoomFfr}" FrameNumber="{Binding FrameNumber}" IsEditOn="False" IsDrawOn="True" IsFfr="True"/>
-                            </Grid>
-                            <!-- Measurement -->
-                            <Grid Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
-                                <annotation:DrawUtil Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Zoom="{Binding ReviewStatus.ZoomFfr}" ImageResolution="{Binding PatientCase.ImageResolution}" IsDrawOn="{Binding IsDrawOn}" Measurements="{Binding PlaqueAreaList}" FrameNumber="{Binding FrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" IsEditOn="{Binding IsEditOn}" IsFfr="True" FfrFeature="{Binding FfrFeature}"/>
-                            </Grid>
                             <!-- Mini Map -->
                             <Grid Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
                                 <Border Width="{x:Static const:Constants.MiniMapBorderSize}" Height="{x:Static const:Constants.MiniMapBorderSize}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="1" BorderBrush="{DynamicResource GrayscaleGray8Brush}" BorderThickness="1" CornerRadius="10" Visibility="{Binding ReviewStatus.ZoomFfr.Visibility}">
