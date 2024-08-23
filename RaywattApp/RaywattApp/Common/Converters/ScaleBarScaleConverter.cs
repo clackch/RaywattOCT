@@ -12,8 +12,6 @@ namespace RaywattApp.Common.Converters
             if (value == null)
                 return Binding.DoNothing;
 
-            if (Constants.ImageResolution == 0.0f) return Binding.DoNothing;
-
             double curScale = (double)value;
             double csSize = (double)parameter;
             double scaleSize = (1 / Constants.ImageResolution) * (Constants.OCTImageSize / csSize);

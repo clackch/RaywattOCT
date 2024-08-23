@@ -29,6 +29,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private ReviewStatus _reviewStatus;
 
+        [ObservableProperty]
+        private Zoom _zoom = new Zoom();
+
         private ICommand _okCommand;
         public ICommand OkCommand
         {
@@ -75,10 +78,14 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
 
+                Zoom.SetFieldOfView(Constants.DefaultFoV / 5);
+
                 SetCrossSectionBackground(RaySession.Review, Constants.CardBackgroundColor);
 
                 GetImageInfo(RaySession.Review);
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
+
+                DrawSheathIndicator();
             }
         }
 

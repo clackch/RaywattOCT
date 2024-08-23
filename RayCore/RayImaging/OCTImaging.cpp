@@ -142,6 +142,9 @@ void COCTImaging::DoAsyncRender(char* fringes) {
 void COCTImaging::CircularizeImage(cv::Mat& src, cv::Mat& dst)
 {
 	cv::remap(src, dst, matXMap, matYMap, cv::INTER_LINEAR);
+
+	cv::Mat imgFoV = getFoVImage(dst, MAX_FIELD_OF_VIEW);
+	memcpy(dst.data, imgFoV.data, sizeof(char) * dst.cols * dst.rows * imgFoV.channels());
 }
 
 void COCTImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst) {}
@@ -382,6 +385,21 @@ void COCTImaging::drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color)
 		lineStart += (lineSize * 2);
 	}
 	cv::line(image, cv::Point(posDraw, lineStart), cv::Point(posDraw, (lineStart + lineSize / 2) - 1), color, 2);
+}
+
+cv::Mat COCTImaging::getFoVImage(cv::Mat image, double fov) {
+	cv::Rect roi;
+	roi.width = (int)(floor(round(fov * 1000.f / m_setting.distPerPixel))) * 2;
+	roi.height = roi.width;
+	roi.x = (image.cols - roi.width) / 2;
+	roi.y = (image.rows - roi.height) / 2;
+
+	if (roi.x < 0 || roi.y < 0) return image.clone();	// out of original FoV
+
+	cv::Mat imgROI;
+	cv::resize(image(roi), imgROI, cv::Size(image.cols, image.rows));
+
+	return imgROI;
 }
 
 UINT COCTImaging::threadRender(LPVOID param) {

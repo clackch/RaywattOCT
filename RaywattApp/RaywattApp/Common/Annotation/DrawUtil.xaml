@@ -165,10 +165,26 @@
         </Grid.Clip>
         <Canvas Name="canvasBackground" Width="{x:Static const:Constants.OCTImageSize}" Height="{x:Static const:Constants.OCTImageSize}"/>
         <Canvas Name="canvas" IsManipulationEnabled="true">
+            <UserControl x:Name="screenSize" Tag="{Binding ScreenSize, ElementName=UserControl}"/>
+            <UserControl x:Name="zoomTranslateX" Tag="{Binding Zoom.TranslateX, ElementName=UserControl}"/>
+            <UserControl x:Name="zoomTranslateY" Tag="{Binding Zoom.TranslateY, ElementName=UserControl}"/>
             <Canvas.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform ScaleX="{Binding Zoom.ScaleX, ElementName=UserControl}" ScaleY="{Binding Zoom.ScaleY, ElementName=UserControl}"/>
-                    <TranslateTransform X="{Binding Zoom.TranslateX, ElementName=UserControl, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding Zoom.TranslateY, ElementName=UserControl, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                    <TranslateTransform>
+                        <TranslateTransform.X>
+                            <MultiBinding Converter="{StaticResource CrossSectionScaleMultiConverter}">
+                                <Binding Path="Tag" ElementName="zoomTranslateX"/>
+                                <Binding Path="Tag" ElementName="screenSize"/>
+                            </MultiBinding>
+                        </TranslateTransform.X>
+                        <TranslateTransform.Y>
+                            <MultiBinding Converter="{StaticResource CrossSectionScaleMultiConverter}">
+                                <Binding Path="Tag" ElementName="zoomTranslateY"/>
+                                <Binding Path="Tag" ElementName="screenSize"/>
+                            </MultiBinding>
+                        </TranslateTransform.Y>
+                    </TranslateTransform>
                 </TransformGroup>
             </Canvas.RenderTransform>
         </Canvas>

@@ -27,6 +27,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private PrevStatus _prevStatus;
 
+        [ObservableProperty]
+        private Zoom _zoom = new Zoom();
+
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
         private ICommand _cmdBack;
@@ -67,6 +70,8 @@ namespace RaywattApp.ViewModels
                 this.Patient = (Patient)data["patient"];
                 this.PrevStatus = (PrevStatus)data["prevStatus"];
                 PatientCase = (PatientCase)data["patientCase"];
+
+                Zoom.SetFieldOfView(Constants.DefaultFoV / 5);
 
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);

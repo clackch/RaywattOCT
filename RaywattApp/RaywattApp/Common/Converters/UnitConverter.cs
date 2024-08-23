@@ -16,17 +16,13 @@ namespace RaywattApp.Common.Converters
             string scale = parameter.ToString();
             double realValue = 0;
 
-            double resolution = (scale.Contains("Compare")) ? Constants.ImageResolutionCompare : Constants.ImageResolution;
-
-            if (resolution == 0.0f) return Binding.DoNothing;
-
             if(scale.Contains("Length"))
             {
-                realValue = originValue * resolution;
+                realValue = originValue * Constants.ImageResolution;
             }
             else
             {
-                realValue = originValue * resolution * resolution;
+                realValue = originValue * Constants.ImageResolution * Constants.ImageResolution;
             }
 
             return Math.Round(realValue, 2);

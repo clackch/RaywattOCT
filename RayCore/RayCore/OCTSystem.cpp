@@ -398,9 +398,11 @@ RayError COCTSystem::UnloadCatheter() {
 * return N (>0) when current state & argument is right.
 * return Error Code (<0) when something is wrong.
 */
-int COCTSystem::StartReview(char* strFilePath) {
+int COCTSystem::StartReview(char* strFilePath, double imageResolution) {
 	if (m_curState == RayScannerState::Initial || m_curState == RayScannerState::Default) {
-		CImagingSession *pSession = CImagingSession::CreateSession(this, SESSION_REVIEW, strFilePath);
+		if (imageResolution == 0.0f) return (int)RayError::InvalidArgument;
+
+		CImagingSession *pSession = CImagingSession::CreateSession(this, SESSION_REVIEW, strFilePath, imageResolution);
 		if (pSession == nullptr) {
 			PLOGE.printf("InvalidArgument : %s", strFilePath);
 			return (int)RayError::InvalidArgument;
@@ -419,10 +421,10 @@ int COCTSystem::StartReview(char* strFilePath) {
 /*
 * StartCompare
 */
-RayError COCTSystem::StartCompare(char* strFilePath) {
+RayError COCTSystem::StartCompare(char* strFilePath, double imageResolution) {
 	if (m_curState != RayScannerState::Review) return RayError::WrongState;
 
-	CImagingSession* pSession = CImagingSession::CreateSession(this, SESSION_COMPARE, strFilePath);
+	CImagingSession* pSession = CImagingSession::CreateSession(this, SESSION_COMPARE, strFilePath, imageResolution);
 	if (pSession == nullptr) {
 		return RayError::InvalidArgument;
 	}
@@ -630,10 +632,10 @@ RayError COCTSystem::StartLumenDetection() {
 /*
 * OpenImage
 */
-RayError COCTSystem::OpenImage(char* strFilePath) {
+RayError COCTSystem::OpenImage(char* strFilePath, double imageResolution) {
 	CloseImage();
 
-	CImagingSession *pSession = CImagingSession::CreateSession(this, SESSION_UNKNOWN, strFilePath);
+	CImagingSession *pSession = CImagingSession::CreateSession(this, SESSION_UNKNOWN, strFilePath, imageResolution);
 	if (pSession == nullptr) {
 		return RayError::InvalidArgument;
 	}

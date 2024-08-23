@@ -123,13 +123,20 @@
                                             <DataGridTextColumn Width="*" Binding="{Binding Id}" Visibility="Collapsed"/>
                                             <DataGridTextColumn Width="*" Binding="{Binding PatientId}" Visibility="Collapsed"/>
                                             <DataGridTextColumn Width="*" Binding="{Binding PatientName}" Visibility="Collapsed"/>
-                                            <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding CreateDate, StringFormat=t, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Create Time], Source={StaticResource L10N}}"/>
+                                            <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding CreateDate, StringFormat=t, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Recording], Source={StaticResource L10N}}"/>
                                             <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Procedure, Converter={StaticResource CodeConverter}, ConverterParameter='PROC'}" Header="{Binding [Procedure], Source={StaticResource L10N}}"/>
                                             <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Vessel, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}" Header="{Binding [Vessel], Source={StaticResource L10N}}"/>
-                                            <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding PhysicianName}" Header="{Binding [Physician Name], Source={StaticResource L10N}}"/>
-                                            <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding AccessionNumber}" Header="{Binding [Accession Number], Source={StaticResource L10N}}"/>
-                                            <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Comment}" Header="{Binding [Comment], Source={StaticResource L10N}}"/>
-                                            <DataGridTemplateColumn CellStyle="{StaticResource DataGridCellDelete}">
+                                            <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Location, Converter={StaticResource CodeConverter}, ConverterParameter='LOCT'}" Header="{Binding [Location], Source={StaticResource L10N}}"/>
+                                            <DataGridTemplateColumn CellStyle="{StaticResource DataGridCellCheckbox}" Width="*" Header="{Binding [Angio], Source={StaticResource L10N}}">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <CheckBox Style="{StaticResource DataGridDisplayCheckBox}" IsChecked="{Binding AngioYn}" IsEnabled="False" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+                                            <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding PhysicianName}" Header="{Binding [Physician], Source={StaticResource L10N}}"/>
+                                            <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="2*" Binding="{Binding Comment}" Header="{Binding [Comment], Source={StaticResource L10N}}"/>
+                                            <DataGridTemplateColumn CellStyle="{StaticResource DataGridCellDelete}" Width="0.6*">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
                                                         <Button Style="{DynamicResource DataGridDelete}" Command="{Binding DataContext.DeleteCommand, Source={x:Reference ProxyElement}}" CommandParameter="{Binding ElementName=patientCase, Path=CurrentItem}"/>
