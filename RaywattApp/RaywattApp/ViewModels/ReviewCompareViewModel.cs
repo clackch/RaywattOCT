@@ -95,6 +95,9 @@ namespace RaywattApp.ViewModels
         private Zoom _zoom = new Zoom(Constants.CrossSectionCompareSize);
 
         [ObservableProperty]
+        private Zoom _zoomCompare = new Zoom(Constants.CrossSectionCompareSize);
+
+        [ObservableProperty]
         private BitmapSource _lumenProfileImageExtraCompare;
 
         private ICommand _caseSelectCancelCommand;
@@ -179,7 +182,8 @@ namespace RaywattApp.ViewModels
 
                     if (ReviewStatus.SelectedPatientCase != null)
                     {
-                        RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath, ReviewStatus.SelectedPatientCase.ImageResolution);
+                        RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath);
+                        ZoomCompare.SetFieldOfView(Constants.OCTImageSize * ReviewStatus.SelectedPatientCase.ImageResolution / PatientCase.FieldOfView);
                         Thread.Sleep(500);
                     }
                     else
@@ -190,6 +194,7 @@ namespace RaywattApp.ViewModels
                 else
                 {
                     GetPatientCase(false, ReviewStatus.SelectedPatientCase.LumenContours, ReviewStatus.SelectedPatientCase.LumenSidebranches, ReviewStatus.SelectedPatientCase.LumenStents, ReviewStatus.SelectedPatientCase.LumenGuidewires);
+                    ZoomCompare.SetFieldOfView(Constants.OCTImageSize * ReviewStatus.SelectedPatientCase.ImageResolution / PatientCase.FieldOfView);
                     DeviceStatus.IsOCTImagingCompareDone = true;
                 }
 
@@ -307,7 +312,8 @@ namespace RaywattApp.ViewModels
                 HideLumenProfileCompare();
 
                 DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current = 0;
-                RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath, ReviewStatus.SelectedPatientCase.ImageResolution);
+                RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath);
+                ZoomCompare.SetFieldOfView(Constants.OCTImageSize * ReviewStatus.SelectedPatientCase.ImageResolution / PatientCase.FieldOfView);
                 DeviceStatus.IsOCTImagingCompareDone = false;
                 Thread.Sleep(500);
 
