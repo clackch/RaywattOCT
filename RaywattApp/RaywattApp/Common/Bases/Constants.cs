@@ -435,10 +435,14 @@ namespace RaywattApp.Common.Bases
         public const string ScaleAreaCompare = "AreaCompare";
 
         //Field of View
-        public const double DefaultFoV = 10.0f;
+        public static double DefaultFoV;
 
         //Image Resolution
-        public const double ImageResolution = DefaultFoV / 1024;        
+        public static double ImageResolution;
+
+        //Manual Calibration
+        public const double ManualCalibrationRatio = 1.05;
+        public const int ManualCalibrationLimit = 20;
 
         //Mini-Map
         public const double MiniMapBorderSize = 140;
