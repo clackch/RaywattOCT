@@ -325,9 +325,11 @@ namespace RaywattApp.Common.Util
             }
         }
 
-        public static async Task<Mat> ConvertImage(string filePath, double imageResolution, double degree, List<Mat> convertedImages, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
+        public static async Task<Mat> ConvertImage(string filePath, double imageResolution, int manualCalibration, double degree, List<Mat> convertedImages, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
         {
-            RayOpenImage(filePath, imageResolution);
+            RayOpenImage(filePath);
+            Constants.DefaultFoV = Constants.OCTImageSize * imageResolution * CommonUtil.GetCalibrationRatio(manualCalibration, true);
+            Constants.ImageResolution = imageResolution * CommonUtil.GetCalibrationRatio(manualCalibration, true);
 
             int numOfFrames = (int)RayGetProperty(Property.ImageDepth);
             int width = (int)RayGetProperty(Property.ImageWidth);
@@ -1939,7 +1941,7 @@ namespace RaywattApp.Common.Util
             int radius = (int)(pxDiameter / 2) + thickness;
 
             imgSheath.SetTo(new Scalar(0x00, 0x00, 0x00, 0x00));
-            imgSheath.Circle(center, radius, new Scalar(0xff, 0xff, 0xff, 0xff), thickness, LineTypes.AntiAlias);
+            imgSheath.Circle(center, radius, new Scalar(0x60, 0xd7, 0x1e, 0xff), thickness, LineTypes.AntiAlias);
             
             for (int i = 1; i<6; i+=2)
             {
@@ -2231,6 +2233,20 @@ namespace RaywattApp.Common.Util
         public static double GetRoundScale(double value)
         {
             return Math.Round(value, 5);
+        }
+
+        public static double GetCalibrationRatio(int calibration, bool isReverse)
+        {
+            double ratio = Math.Round(Math.Pow(Constants.ManualCalibrationRatio, calibration), 5);
+
+            if (!isReverse)
+            {
+                return ratio;
+            }
+            else
+            {
+                return 1 / ratio;
+            }
         }
     }
 }
