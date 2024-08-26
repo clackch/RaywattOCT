@@ -1,7 +1,5 @@
 #pragma once
 
-#define MAX_FIELD_OF_VIEW	10.0f
-
 class IImaging {
 public:
 	class Setting {
@@ -18,8 +16,6 @@ public:
 		float contrast;
 		float lowLevel;
 		float highLevel;
-
-		double distPerPixel;	// um per pixel (1024 x bscan)
 		
 		void Set(int nAScan, int nBScan)
 		{
