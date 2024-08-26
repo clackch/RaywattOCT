@@ -88,6 +88,9 @@ namespace RaywattApp.Models
         private double imageResolution;
 
         [ObservableProperty]
+        private int _manualCalibration;
+
+        [ObservableProperty]
         private double fieldOfView;
 
         [ObservableProperty]
