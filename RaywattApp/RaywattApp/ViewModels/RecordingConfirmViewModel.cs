@@ -130,7 +130,7 @@ namespace RaywattApp.ViewModels
             PatientCase.PatientId = Patient.Id;
             PatientCase.NumOfFrames = numOfFrames;
             PatientCase.AngioYn = DeviceStatus.IsAngioInitialized;
-            PatientCase.IndicatorDegree = 90;            
+            PatientCase.IndicatorDegree = 90;
 
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
@@ -144,6 +144,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["num_of_frames"] = PatientCase.NumOfFrames;
             sqlParameters["image"] = PatientCase.Image;
             sqlParameters["image_resolution"] = PatientCase.ImageResolution;
+            sqlParameters["manual_calibration"] = PatientCase.ManualCalibration;
             sqlParameters["field_of_view"] = PatientCase.FieldOfView;
             sqlParameters["pullback_type"] = PatientCase.PullbackType;
             sqlParameters["pullback_length"] = PatientCase.PullbackLength;
