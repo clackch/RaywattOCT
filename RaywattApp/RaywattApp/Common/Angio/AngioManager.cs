@@ -64,7 +64,7 @@ namespace RaywattApp.Common.Angio
         private TcpClient _tcpClient;
 
         private Mat imgAngio;
-        public Mat ImgAngio { get { return imgAngio; } set { imgAngio = value; }  }
+        public Mat ImgAngio { get { return imgAngio; } set { imgAngio = value; } }
 
         private bool isBoardInited = false;
         private bool boardConnection = false;
@@ -139,21 +139,15 @@ namespace RaywattApp.Common.Angio
             Process[] processes;
             ProcessStartInfo psi = new ProcessStartInfo();
             string processName = CommonUtil.IsTestMode(ViewModelBase._deviceStatus.TestMode, "FG") ? "FGServerTestStub" : "FGServer";
-            processes = Process.GetProcessesByName(processName);
+            processes = Process.GetProcessesByName("FGServer");
+            processes = processes.Concat(Process.GetProcessesByName("FGServerTestStub")).ToArray();
             psi.FileName = Constants.FGFolderPath + "\\" + processName + ".exe";
 
-            if (processes.Length == 0)
+            foreach (Process process in processes)
             {
-                StartFGServerProc(psi);
+                process.Kill();
             }
-            else
-            {
-                foreach (Process process in processes)
-                {
-                    process.Kill();
-                }
-                StartFGServerProc(psi);
-            }
+            StartFGServerProc(psi);
 
             _tcpClient = new TcpClient(Constants.ServerIP, Constants.ServerPort);
 
@@ -252,7 +246,7 @@ namespace RaywattApp.Common.Angio
                 Debug.WriteLine("File Creation Error: " + ex.Message);
             }
         }
-        
+
         private void ActivateClientThreads()
         {
             threadFuncLiveAngioImage = new Thread(() => ThreadFuncLiveAngioImage());
