@@ -455,12 +455,12 @@ void TCPSocket::CheckClientThread() {
 }
 
 void TCPSocket::StartInitThreads(FrameGrabber& fg) {
+	thread portEvent;
 	if (fg.boardConnection) {
 		// FrameGrabber 보드의 이벤트를 감지하는 Thread
-		thread portEvent(&TCPSocket::PortEventThread, this, ref(fg));
+		portEvent = thread(&TCPSocket::PortEventThread, this, ref(fg));
 		PLOGI.printf("Start port thread");
 
-		portEvent.join();
 	}
 
 	thread receiveCmd(&TCPSocket::ReceiveCmdThread, this, ref(fg));
@@ -470,6 +470,7 @@ void TCPSocket::StartInitThreads(FrameGrabber& fg) {
 	thread checkClient(&TCPSocket::CheckClientThread, this);
 	PLOGI.printf("Start check bthread");
 
+	if (fg.boardConnection) { portEvent.join(); }
 	receiveCmd.join();
 	checkClient.join();
 }
