@@ -66,6 +66,7 @@ namespace RaywattApp.Common.Angio
         private Mat imgAngio;
         public Mat ImgAngio { get { return imgAngio; } set { imgAngio = value; }  }
 
+        private bool isBoardInited = false;
         private bool boardConnection = false;
 
         private byte[] buffer;
@@ -164,19 +165,11 @@ namespace RaywattApp.Common.Angio
             }
             else
             {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["title"] = _l10n["FG Failure"];
-                parameter["message"] = _l10n["FG Board is not exist."];
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                {
-                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-                });
                 if (!CommonUtil.IsTestMode(ViewModelBase._deviceStatus.TestMode, "FG"))
                 {
-                    CommonUtil.Exit(ViewModelBase._deviceStatus, this, true);
                     return ConnectionStatus.BoardFailure;
                 }
-                return ConnectionStatus.Success;
+                return ConnectionStatus.BoardFailure;
             }
         }
 
@@ -184,7 +177,7 @@ namespace RaywattApp.Common.Angio
         {
             AskBoardConnection();
 
-            while (!boardConnection)
+            while (!isBoardInited)
             {
                 Thread.Sleep(500);
             }
@@ -393,12 +386,14 @@ namespace RaywattApp.Common.Angio
                 }
                 else if (command == (byte)CommandType.FGBoardExist)
                 {
+                    isBoardInited = true;
                     boardConnection = true;
                     threadOnLiveAngioImage = true;
                     AskAngioConnection();
                 }
                 else if (command == (byte)CommandType.FGBoardNotExist)
                 {
+                    isBoardInited = true;
                     threadOnLiveAngioImage = false;
                 }
                 else if (command == (byte)CommandType.FGSuccessChangeChp)
