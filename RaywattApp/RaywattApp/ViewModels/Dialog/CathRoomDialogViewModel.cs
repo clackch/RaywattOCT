@@ -33,6 +33,13 @@ namespace RaywattApp.ViewModels.Dialog
             _angioManager = angioManager;
 
             CathRoomList = _sqlManager.SelectCathRoomList();
+
+            var notSelectedItem = new RaywattApp.Models.CathRoom
+            {
+                Id = -1,
+                Name = "Not Selected"
+            };
+            CathRoomList.Insert(0, notSelectedItem);
         }
 
         public override void SetParameter(object parameter)
@@ -52,33 +59,37 @@ namespace RaywattApp.ViewModels.Dialog
             dialogResults.DialogAnswer = DialogResults.Answer.Yes;
             dialogResults.DialogReturn = parameter;
 
-            _angioManager.SendChpFilePacket(SelectedCathRoom.AppChp);
-
-            while (_angioManager.IsChpFileChangeSuccess == 0) 
+            if (SelectedCathRoom.Id != -1)
             {
-                Thread.Sleep(500);
-            }
-            if(_angioManager.IsChpFileChangeSuccess == 1)
-            {
-                parameter["title"] = _l10n["Information"];
-                parameter["message"] = _l10n["$MSG012"];
 
-                if (_angioManager.ReadyToRecv)
+                _angioManager.SendChpFilePacket(SelectedCathRoom.AppChp);
+
+                while (_angioManager.IsChpFileChangeSuccess == 0)
                 {
-                    _angioManager.SendCommandPacket(CommandType.FGStarted);
+                    Thread.Sleep(500);
                 }
+                if (_angioManager.IsChpFileChangeSuccess == 1)
+                {
+                    parameter["title"] = _l10n["Information"];
+                    parameter["message"] = _l10n["$MSG012"];
 
-                _dialogService.OpenDialog(new AlertDialogControl(), parameter, Common.Bases.Constants.ApplicationWidth, Common.Bases.Constants.ApplicationHeight);
-            }
-            else if(_angioManager.IsChpFileChangeSuccess == -1)
-            {
-                parameter["title"] = _l10n["Error"];
-                parameter["message"] = _l10n["$MSG013"];
-                parameter["error"] = true;
+                    if (_angioManager.ReadyToRecv)
+                    {
+                        _angioManager.SendCommandPacket(CommandType.FGStarted);
+                    }
 
-                _dialogService.OpenDialog(new AlertDialogControl(), parameter, Common.Bases.Constants.ApplicationWidth, Common.Bases.Constants.ApplicationHeight);
+                    _dialogService.OpenDialog(new AlertDialogControl(), parameter, Common.Bases.Constants.ApplicationWidth, Common.Bases.Constants.ApplicationHeight);
+                }
+                else if (_angioManager.IsChpFileChangeSuccess == -1)
+                {
+                    parameter["title"] = _l10n["Error"];
+                    parameter["message"] = _l10n["$MSG013"];
+                    parameter["error"] = true;
+
+                    _dialogService.OpenDialog(new AlertDialogControl(), parameter, Common.Bases.Constants.ApplicationWidth, Common.Bases.Constants.ApplicationHeight);
+                }
+                _angioManager.IsChpFileChangeSuccess = 0;
             }
-            _angioManager.IsChpFileChangeSuccess = 0;
 
             CloseDialogWithResult(dialog, dialogResults);
         }
