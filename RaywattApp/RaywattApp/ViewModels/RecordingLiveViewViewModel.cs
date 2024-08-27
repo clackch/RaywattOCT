@@ -189,13 +189,13 @@ namespace RaywattApp.ViewModels
                 RaySetProperty(Property.PullbackDistance, Double.Parse(PbLength));
                 RaySetProperty(Property.PullbackSpeed, Double.Parse(PbSpeed));
 
-                if (!DeviceStatus.IsAngioInitialized && DeviceStatus.IsAngioConnected && DeviceStatus.SelectedCathRoom.Id != -1)
+                if (!_angioManager.isAngioInitialized && DeviceStatus.IsAngioConnected && DeviceStatus.SelectedCathRoom.Id != -1)
                 {
                     _angioManager.SelectCathRoom();
                 }
             }
             
-            if (DeviceStatus.IsAngioInitialized && !_angioManager.ReadyToRecv)
+            if (_angioManager.isAngioInitialized && !_angioManager.ReadyToRecv)
             {
                 _angioManager.SendCommandPacket(CommandType.FGStarted);
             }

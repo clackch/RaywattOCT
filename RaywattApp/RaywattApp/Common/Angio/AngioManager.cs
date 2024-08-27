@@ -102,7 +102,7 @@ namespace RaywattApp.Common.Angio
         public short IsChpFileChangeSuccess { get { return isChpFileChangeSuccess; } set { isChpFileChangeSuccess = value; } }
 
         private bool isCathRoomDialogOpen = false;
-        public bool isCathRoomSelected = false; // CathRoom 선택 여부
+        public bool isAngioInitialized = false; // CathRoom 선택 여부
 
         public AngioManager(IDialogService dialogService)
         {
@@ -349,7 +349,7 @@ namespace RaywattApp.Common.Angio
                         SendCommandPacket(CommandType.FGStopped);
                     }
 
-                    ViewModelBase._deviceStatus.IsAngioInitialized = false;
+                    isAngioInitialized = false;
 
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
@@ -363,7 +363,7 @@ namespace RaywattApp.Common.Angio
                         SendCommandPacket(CommandType.FGStarted);
                     }
 
-                    if (!ViewModelBase._deviceStatus.IsAngioInitialized && !ViewModelBase._deviceStatus.IsAngioConnected)
+                    if (!isAngioInitialized && !ViewModelBase._deviceStatus.IsAngioConnected)
                     {
                         Task.Run(() =>
                         {
@@ -396,7 +396,7 @@ namespace RaywattApp.Common.Angio
                     AskDeviceInfo();
                     isChpFileChangeSuccess = 1;
 
-                    ViewModelBase._deviceStatus.IsAngioInitialized = true;
+                    isAngioInitialized = true;
                 }
                 else if (command == (byte)CommandType.FGFailChangeChp)
                 {

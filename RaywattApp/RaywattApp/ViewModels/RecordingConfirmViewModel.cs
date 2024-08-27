@@ -129,7 +129,7 @@ namespace RaywattApp.ViewModels
             PatientCase.Id = Patient.Id + "_" + DateTime.Now.ToString("yyyyMMddHHmmss");
             PatientCase.PatientId = Patient.Id;
             PatientCase.NumOfFrames = numOfFrames;
-            PatientCase.AngioYn = DeviceStatus.IsAngioInitialized;
+            PatientCase.AngioYn = _angioManager.isAngioInitialized;
             PatientCase.IndicatorDegree = 90;            
 
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();

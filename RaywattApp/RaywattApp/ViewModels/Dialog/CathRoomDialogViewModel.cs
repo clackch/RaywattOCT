@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using log4net;
-using MathNet.Numerics;
 using RaywattApp.Common.Angio;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Models;
@@ -62,7 +61,7 @@ namespace RaywattApp.ViewModels.Dialog
 
             if (SelectedCathRoom.Id == -1)
             {
-                _angioManager.isCathRoomSelected = false;
+                _angioManager.isAngioInitialized  = false;
             }
             else
             {
@@ -76,8 +75,6 @@ namespace RaywattApp.ViewModels.Dialog
                 {
                     parameter["title"] = _l10n["Information"];
                     parameter["message"] = _l10n["$MSG012"];
-
-                    _angioManager.isCathRoomSelected = true;
 
                     if (_angioManager.ReadyToRecv)
                     {
