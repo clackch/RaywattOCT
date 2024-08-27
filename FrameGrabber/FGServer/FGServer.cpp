@@ -27,13 +27,14 @@ int main(int argc, char** argv)
 	FGError error = fg.InitBoard();
 	if (error) {
 		PLOGI.printf("Failed to init board");
+		fg.boardConnection = false;
 
-		return 1;
+
 	}
 	else {
 
 		PLOGI.printf("Success to init board");
-		fg.boardConnection = 1;
+		fg.boardConnection = true;
 
 		char initChpFileName[] = R"(C:\Program Files\Foresight\IDEA\Chp\VESACHP\DVI.chp)";
 		ERRTYPE e = fg.ReadFormatFile(initChpFileName);
@@ -46,9 +47,9 @@ int main(int argc, char** argv)
 			PLOGI.printf("Success to read .chp file");
 			fg.CreateFromFG();
 		}
-
-		fg.CheckPortConnection();
-
-		ts->StartInitThreads(fg);
 	}
+
+	fg.CheckPortConnection();
+
+	ts->StartInitThreads(fg);
 }
