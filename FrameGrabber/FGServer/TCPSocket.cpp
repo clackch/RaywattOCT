@@ -211,10 +211,12 @@ void TCPSocket::ReceivePacket(FrameGrabber& fg) {
 				if (fg.boardConnection == 0) {
 					SetCommandPacket(CommandType::FGBoardNotExist);
 					sendResult = send(clientSocket, commandBuffer, 5, 0);
+					PLOGI.printf("Send FGBoardNotExist");
 				}
 				else {
 					SetCommandPacket(CommandType::FGBoardExist);
 					sendResult = send(clientSocket, commandBuffer, 5, 0);
+					PLOGI.printf("Send FGBoardExist");
 				}
 				break;
 			case CommandType::FGAskDeviceInfo:
@@ -453,9 +455,13 @@ void TCPSocket::CheckClientThread() {
 }
 
 void TCPSocket::StartInitThreads(FrameGrabber& fg) {
-	// FrameGrabber 보드의 이벤트를 감지하는 Thread
-	thread portEvent(&TCPSocket::PortEventThread, this, ref(fg));
-	PLOGI.printf("Start port thread");
+	if (fg.boardConnection) {
+		// FrameGrabber 보드의 이벤트를 감지하는 Thread
+		thread portEvent(&TCPSocket::PortEventThread, this, ref(fg));
+		PLOGI.printf("Start port thread");
+
+		portEvent.join();
+	}
 
 	thread receiveCmd(&TCPSocket::ReceiveCmdThread, this, ref(fg));
 	PLOGI.printf("Start receive thread");
@@ -464,7 +470,6 @@ void TCPSocket::StartInitThreads(FrameGrabber& fg) {
 	thread checkClient(&TCPSocket::CheckClientThread, this);
 	PLOGI.printf("Start check bthread");
 
-	portEvent.join();
 	receiveCmd.join();
 	checkClient.join();
 }
