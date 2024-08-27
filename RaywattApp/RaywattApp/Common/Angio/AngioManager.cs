@@ -102,6 +102,7 @@ namespace RaywattApp.Common.Angio
         public short IsChpFileChangeSuccess { get { return isChpFileChangeSuccess; } set { isChpFileChangeSuccess = value; } }
 
         private bool isCathRoomDialogOpen = false;
+        public bool isCathRoomSelected = false; // CathRoom 선택 여부
 
         public AngioManager(IDialogService dialogService)
         {
