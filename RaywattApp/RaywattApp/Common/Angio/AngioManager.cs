@@ -363,7 +363,7 @@ namespace RaywattApp.Common.Angio
                         SendCommandPacket(CommandType.FGStarted);
                     }
 
-                    if (!isAngioInitialized && !ViewModelBase._deviceStatus.IsAngioConnected)
+                    if (!isAngioInitialized && !ViewModelBase._deviceStatus.IsAngioConnected && readyToRecv)
                     {
                         Task.Run(() =>
                         {
