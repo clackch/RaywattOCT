@@ -195,6 +195,12 @@ namespace RaywattApp.Common.Bases
             SheathIndicatorAngio = CommonUtil.DrawSheathIndicator((int)Constants.CrossSectionAngio, sheathDiameter);
         }
 
+        protected void DrawSheathIndicator(double ratio)
+        {
+            double sheathDiameter = RayGetProperty(Property.SheathDiameter);
+            SheathIndicator = CommonUtil.DrawSheathIndicator((int)Constants.CrossSectionSize, sheathDiameter * ratio);
+        }
+
         private Mat GenerateMask(Mat image)
         {
             Mat mask = image.EmptyClone();

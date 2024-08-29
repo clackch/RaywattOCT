@@ -1229,6 +1229,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["brightness"] = PatientCase.Brightness;
             PatientCase.Contrast = Contrast;
             sqlParameters["contrast"] = PatientCase.Contrast;
+            sqlParameters["manual_calibration"] = PatientCase.ManualCalibration;
             PatientCase.FieldOfView = FieldOfView;
             sqlParameters["field_of_view"] = PatientCase.FieldOfView;
             PatientCase.SectionProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveCenterWidth);

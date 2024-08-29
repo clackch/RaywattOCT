@@ -393,6 +393,9 @@ Acceptance of Terms: Require users to explicitly accept the terms and conditions
   <data name="Confirm import of selected file" xml:space="preserve">
     <value>[K]Confirm import of selected file</value>
   </data>
+  <data name="Confirm reversion to original calibration" xml:space="preserve">
+    <value>[K]Confirm reversion to original calibration</value>
+  </data>
   <data name="Contrast" xml:space="preserve">
     <value>[K]Contrast</value>
   </data>
@@ -954,6 +957,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Reset" xml:space="preserve">
     <value>[K]Reset</value>
+  </data>
+  <data name="Revert Changes" xml:space="preserve">
+    <value>[K]Revert Changes</value>
   </data>
   <data name="Review" xml:space="preserve">
     <value>[K]Review</value>

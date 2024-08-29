@@ -107,7 +107,6 @@ protected:
 	void generateImage(Ipp32f* logaritihmData, bool bInvert);
 	void findSheath(Ipp32f* logaritihmData);
 	void drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color);
-	cv::Mat getFoVImage(cv::Mat image, double fov);
 
 	static UINT threadRender(LPVOID param);
 };
