@@ -329,15 +329,11 @@ namespace RaywattApp.ViewModels
                 }
 
                 ODSOCT_ProcessingDatas();
-                ODSOCT_UpdateColorTable((int)RayGetProperty(Property.Colormap));
-
                 if (isFirstRendering)
                 {
                     bugTestFunc();
                     ray3DStatus.IsFirstRendering = false;
                 }
-
-
                 //CommonUtil.GuideWireToMemory(PatientCase.LumenGuidewires,
                 //new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize),
                 //buffer,
@@ -348,7 +344,9 @@ namespace RaywattApp.ViewModels
                 Marshal.FreeHGlobal(buffer);
                 ReviewStatus.IsLumenEdited = false;
             }
-            
+
+            ODSOCT_UpdateColorTable((int)RayGetProperty(Property.Colormap));
+
             timerShowData.Interval = TimeSpan.FromMilliseconds(MinWaitingDelay);
             timerShowData.Tick += new EventHandler(timerFuncShowData);
             timerShowData.Start();
@@ -594,23 +592,6 @@ namespace RaywattApp.ViewModels
             {
                 ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(buffer), diameter, diameter, depth, 1, 1, zVal);
             }
-
-            ODSOCT_InputSurfaceParameter(Ray3DObject.Lumen, 10, 50, ".\\data\\lumen_tex.jpg");
-            ODSOCT_InputData(Ray3DObject.Lumen, buffer, diameter, diameter, depth, 1, 1, zVal);
-
-            if (CommonUtil.IsPostCase(PatientCase.Procedure))
-            {
-                buffer = Marshal.AllocHGlobal(diameter * diameter * depth);
-                CommonUtil.StentsToMemory(PatientCase.LumenStents,
-                    new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize),
-                    buffer,
-                    new OpenCvSharp.Size(diameter, diameter));
-                ODSOCT_InputSurfaceParameter(Ray3DObject.Stent, 10, 15, ".\\data\\stent_tex.jpg");
-                ODSOCT_InputData(Ray3DObject.Stent, buffer, diameter, diameter, depth, 1, 1, zVal);
-            }
-
-            ODSOCT_ProcessingDatas();
-            ODSOCT_UpdateColorTable((int)RayGetProperty(Property.Colormap));
         }
     }
 }
