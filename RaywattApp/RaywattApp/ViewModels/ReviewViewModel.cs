@@ -203,9 +203,7 @@ namespace RaywattApp.ViewModels
             set 
             { 
                 _fieldOfView = value; 
-                OnPropertyChanged(nameof(FieldOfView)); 
-                RaySetProperty(Property.FieldOfView, value);
-                MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
+                OnPropertyChanged(nameof(FieldOfView));
 
                 this.convertedFoV = Constants.DefaultFoV / value;
                 ReviewStatus.Zoom.SetFieldOfView(this.convertedFoV);
@@ -428,6 +426,8 @@ namespace RaywattApp.ViewModels
 
                 if (ReviewStatus.IsPlay)
                     Playback();
+
+                DrawSheathIndicator();
             }
         }
 
@@ -1378,8 +1378,6 @@ namespace RaywattApp.ViewModels
 
                 if (CommonUtil.IsPreCase(PatientCase.Procedure))
                     DrawCalciumIndicator();
-
-                DrawSheathIndicator();
             }
         }
 
