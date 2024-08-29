@@ -1060,8 +1060,7 @@ namespace RaywattApp.Common.Util
 
         public static void Exit(DeviceStatus? deviceStatus = null, AngioManager? angioManager = null, bool isShutdown = false)
         {
-
-            if (angioManager != null && angioManager.GetServerConnection())
+            if (angioManager != null)
                 angioManager.CloseAngioManager();
 
             if (deviceStatus != null)

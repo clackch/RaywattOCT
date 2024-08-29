@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using RaywattApp.Common.Localization;
 using RaywattApp.Common.Util;
 using System.Linq;
+using MathNet.Numerics.Statistics;
 
 namespace RaywattApp.Common.Angio
 {
@@ -83,6 +84,9 @@ namespace RaywattApp.Common.Angio
 
         private Thread threadFuncLiveAngioImage;
         private bool threadOnLiveAngioImage;
+
+        private Thread isSocketConnected;
+        public bool isSocketAlive;
 
         private Thread threadFuncSaveAngioFrames;
         private bool threadOnSaveAngioFrames;
@@ -153,6 +157,7 @@ namespace RaywattApp.Common.Angio
             _tcpClient = new TcpClient(Constants.ServerIP, Constants.ServerPort);
 
             ActivateClientThreads();
+            SoketCheckThreads();
             bool init = InitAngioBoard();
             if (init)
             {
@@ -206,6 +211,14 @@ namespace RaywattApp.Common.Angio
                 ReadPacket();
             }
         }
+        private void IsSocketConnected()
+        {
+            while (isSocketAlive)
+            {
+                Thread.Sleep(500);
+                checksoket();
+            }
+        }
 
         private void ThreadFuncSaveAngioFrames(PatientCase patientCase)
         {
@@ -254,10 +267,18 @@ namespace RaywattApp.Common.Angio
             StartLiveAngioThread();
         }
 
+        private void SoketCheckThreads()
+        {
+            isSocketConnected = new Thread(() => IsSocketConnected());
+            StartSoketCheck();
+        }
+
         public void CloseAngioManager()
         {
-            _tcpClient.GetStream().Close();
-
+            if (GetServerConnection())
+            {
+                _tcpClient.GetStream().Close();
+            }
             if (threadFuncLiveAngioImage != null && threadFuncLiveAngioImage.IsAlive)
                 StopLiveAngioThread();
             if (threadFuncSaveAngioFrames != null && threadFuncSaveAngioFrames.IsAlive)
@@ -297,6 +318,29 @@ namespace RaywattApp.Common.Angio
             {
                 Debug.WriteLine(ex.Message);
                 return false;
+            }
+
+            return true;
+        }
+
+        private bool checksoket()
+        {
+            try
+            {
+                bytesRead = _tcpClient.GetStream().Read(buffer, 0, buffer.Length);
+            }
+            catch (Exception ex)
+            {
+                if (ex.InnerException is System.Net.Sockets.SocketException socketException)
+                {
+                    int errorCode = socketException.ErrorCode;
+                    if (errorCode == 10054) // 연결이 끊어졌을 때의 에러 코드
+                    {
+                        CommonUtil.Exit(ViewModelBase._deviceStatus, this, true);
+                        isSocketAlive = false;
+                    }
+                }
+                return false; 
             }
 
             return true;
@@ -546,10 +590,20 @@ namespace RaywattApp.Common.Angio
             threadOnLiveAngioImage = true;
             threadFuncLiveAngioImage.Start();
         }
-        private void StopLiveAngioThread()
+        private void StopLiveAngioThread() 
         {
             threadOnLiveAngioImage = false;
             threadFuncLiveAngioImage.Join();
+        }
+        private void StartSoketCheck()
+        {
+            isSocketAlive = true;
+            isSocketConnected.Start();
+        }
+        public void StopSoketCheck()
+        {
+            isSocketAlive = false;
+            isSocketConnected.Join();
         }
         public void StartSaveAngioThread(PatientCase patientCase)
         {

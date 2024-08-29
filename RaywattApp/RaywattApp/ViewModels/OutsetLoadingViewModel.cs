@@ -71,6 +71,7 @@ namespace RaywattApp.ViewModels
                     {
                         DeviceStatus.PowerOffMsg = _l10n["Switching user"];
                         CommonUtil.Exit(DeviceStatus);
+                        _angioManager.StopSoketCheck();
                     }
                 }
             }
@@ -123,6 +124,7 @@ namespace RaywattApp.ViewModels
                 if (resultDialog != null && resultDialog.DialogAnswer == DialogResults.Answer.Undefined)
                 {
                     CommonUtil.Exit(DeviceStatus, _angioManager, true);
+                    _angioManager.StopSoketCheck();
                 }
             }
 
