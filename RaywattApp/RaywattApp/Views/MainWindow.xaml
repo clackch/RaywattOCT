@@ -62,6 +62,10 @@
                 <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="310,0,0,5" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=Image}">
                     <Button Style="{DynamicResource BtnForTest}" Command="{Binding ImageAnalysisTestCommmand}" Width="100" Height="15" FontSize="9" Content="Image Analysis"/>
                 </StackPanel>
+                <!--EnhancedLUT-->
+                <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" Margin="420,5,0,0" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=LUT}">
+                    <Button Style="{DynamicResource BtnForTest}" Command="{Binding EnhancedLUTTestCommand}" Width="100" Height="15" FontSize="9" Content="LUT Apply"/>
+                </StackPanel>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="800,0,0,0" Visibility="{Binding IsImageAnalysisTest, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel Orientation="Horizontal">
                         <Button Style="{DynamicResource BtnForTest2}" Command="{Binding ImageAnalysisToggleCommmand}" Width="50" Height="15" FontSize="9" Content="Intensity"/>
@@ -90,27 +94,104 @@
                 </StackPanel>
             </Grid>
 
-            <component:MenuUnableComponent Grid.Row="0" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}">
-                <component:MenuUnableComponent.Visibility>
-                    <MultiBinding Converter="{StaticResource ComponentVisibilityConverter}">
-                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSaveRawDataDone"/>
-                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
-                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
-                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
-                    </MultiBinding>
-                </component:MenuUnableComponent.Visibility>
-            </component:MenuUnableComponent>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="56"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <component:MenuUnableComponent Grid.Column="0" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="True" IsFfrCalculated="{Binding DeviceStatus.IsFfrCalculated}">
+                    <component:MenuUnableComponent.Visibility>
+                        <MultiBinding Converter="{StaticResource ComponentVisibilityConverter}">
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSaveRawDataDone"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFfrCalculated"/>
+                        </MultiBinding>
+                    </component:MenuUnableComponent.Visibility>
+                </component:MenuUnableComponent>
+                <component:MenuUnableComponent Grid.Column="1" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}" IsFfrCalculated="{Binding DeviceStatus.IsFfrCalculated}">
+                    <component:MenuUnableComponent.Visibility>
+                        <MultiBinding Converter="{StaticResource ComponentVisibilityConverter}">
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSaveRawDataDone"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFfrCalculated"/>
+                        </MultiBinding>
+                    </component:MenuUnableComponent.Visibility>
+                </component:MenuUnableComponent>
+            </Grid>
 
-            <component:MenuUnableComponent Grid.Row="2" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}">
-                <component:MenuUnableComponent.Visibility>
-                    <MultiBinding Converter="{StaticResource ComponentVisibilityConverter}">
-                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSaveRawDataDone"/>
-                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
-                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
-                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
-                    </MultiBinding>
-                </component:MenuUnableComponent.Visibility>
-            </component:MenuUnableComponent>
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="96"/>
+                    <ColumnDefinition Width="16"/>
+                </Grid.ColumnDefinitions>
+                <component:MenuUnableComponent Grid.Column="0" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}" IsFfrCalculated="{Binding DeviceStatus.IsFfrCalculated}">
+                    <component:MenuUnableComponent.Visibility>
+                        <MultiBinding Converter="{StaticResource ComponentVisibilityConverter}">
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSaveRawDataDone"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFfrCalculated"/>
+                        </MultiBinding>
+                    </component:MenuUnableComponent.Visibility>
+                </component:MenuUnableComponent>
+                <Grid Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="26"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <component:MenuUnableComponent Grid.Row="0" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}" IsFfrCalculated="{Binding DeviceStatus.IsFfrCalculated}">
+                        <component:MenuUnableComponent.Visibility>
+                            <MultiBinding Converter="{StaticResource ComponentVisibilityConverter}">
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSaveRawDataDone"/>
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFfrCalculated"/>
+                            </MultiBinding>
+                        </component:MenuUnableComponent.Visibility>
+                    </component:MenuUnableComponent>
+                    <component:MenuUnableComponent Grid.Row="1" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="True" IsFfrCalculated="{Binding DeviceStatus.IsFfrCalculated}">
+                        <component:MenuUnableComponent.Visibility>
+                            <MultiBinding Converter="{StaticResource ComponentVisibilityConverter}">
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSaveRawDataDone"/>
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFfrCalculated"/>
+                            </MultiBinding>
+                        </component:MenuUnableComponent.Visibility>
+                    </component:MenuUnableComponent>
+                    <component:MenuUnableComponent Grid.Row="2" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}" IsFfrCalculated="{Binding DeviceStatus.IsFfrCalculated}">
+                        <component:MenuUnableComponent.Visibility>
+                            <MultiBinding Converter="{StaticResource ComponentVisibilityConverter}">
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSaveRawDataDone"/>
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFfrCalculated"/>
+                            </MultiBinding>
+                        </component:MenuUnableComponent.Visibility>
+                    </component:MenuUnableComponent>
+                </Grid>
+                <component:MenuUnableComponent Grid.Column="2" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}" IsFfrCalculated="{Binding DeviceStatus.IsFfrCalculated}">
+                    <component:MenuUnableComponent.Visibility>
+                        <MultiBinding Converter="{StaticResource ComponentVisibilityConverter}">
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSaveRawDataDone"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFfrCalculated"/>
+                        </MultiBinding>
+                    </component:MenuUnableComponent.Visibility>
+                </component:MenuUnableComponent>
+            </Grid>
 
             <!-- Power Off/Switch User Msg -->
             <StackPanel Grid.Row="0" Grid.RowSpan="3" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" Visibility="{Binding DeviceStatus.IsPowerOff, Converter={StaticResource BoolToVisibilityConverter}}"/>

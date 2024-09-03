@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:RaywattApp.Views"
+      xmlns:const="clr-namespace:RaywattApp.Common.Bases"
       xmlns:System="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d" 
       xmlns:component="clr-namespace:RaywattApp.Views.Component"
@@ -13,7 +14,6 @@
     <Page.Resources>
         <System:Boolean x:Key="TrueValue">True</System:Boolean>
         <System:Boolean x:Key="FalseValue">False</System:Boolean>
-        <System:Double x:Key="CrossSectionSize">553</System:Double>
     </Page.Resources>
 
     <Grid>
@@ -27,18 +27,21 @@
             <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Margin="75,20,0,19" Content="{Binding [Review], Source={StaticResource L10N}}"/>
         </Grid>
 
-        <Grid Grid.Row="1" Margin="160,62,160,62">
+        <Grid Grid.Row="1" Margin="60,40,60,40">
             <Grid.RowDefinitions>
-                <RowDefinition Height="725"/>
+                <RowDefinition Height="769"/>
                 <RowDefinition Height="1"/>
                 <RowDefinition Height="74"/>
             </Grid.RowDefinitions>
-            <Border Grid.Row="0" CornerRadius="10,10,0,0" BorderThickness="0" Background="{DynamicResource GrayscaleGray6Brush}">
-                <Grid Margin="49,69,49,0">
+            <Border Grid.Row="0" CornerRadius="10,10,0,0" Background="{DynamicResource GrayscaleGray7Brush}">
+                <Grid Margin="40,44,40,0">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="62"/>
-                        <RowDefinition Height="553"/>
-                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="42"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="1"/>
+                        <RowDefinition Height="24"/>
+                        <RowDefinition Height="620"/>
+                        <RowDefinition Height="30"/>
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0">
                         <Grid.ColumnDefinitions>
@@ -54,15 +57,41 @@
                             <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="calibrationZoomOut" Width="42" Height="42" Command="{Binding CmdManualZoomIn}" CommandParameter="{StaticResource FalseValue}" IsEnabled="{Binding DeviceStatus.CanExecuteCalibration}"/>
                             <StackPanel Width="10"/>
                             <component:IconButton Style="{StaticResource IconButtonLarge}" Icon="reset" Command="{Binding ResetCommand}" IsEnabled="{Binding DeviceStatus.CanExecuteCalibration}"/>
+                            <StackPanel Width="10"/>
+                            <Button Style="{StaticResource OutlinedBtnType3-Large}" Width="150" Command="{Binding RecalibrateCommand}" Content="{Binding [Revert Changes], Source={StaticResource L10N}}"/>
                         </StackPanel>
                     </Grid>
-                    <Border Grid.Row="1" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
-                        <Image Grid.Row="1" x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill"/>
+                    <Separator Grid.Row="2" Background="{DynamicResource GrayscaleGray5Brush}"/>
+                    <Border Grid.Row="4">
+                        <Grid Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
+                            <Grid.Clip>
+                                <RectangleGeometry RadiusX="10" RadiusY="10">
+                                    <RectangleGeometry.Rect>
+                                        <Rect X="0" Y="0" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}"/>
+                                    </RectangleGeometry.Rect>
+                                </RectangleGeometry>
+                            </Grid.Clip>
+                            <Grid>
+                                <Grid.Clip>
+                                    <EllipseGeometry Center="{x:Static const:Constants.CrossSectionPointCenter}" RadiusX="{x:Static const:Constants.CrossSectionRadius}" RadiusY="{x:Static const:Constants.CrossSectionRadius}"/>
+                                </Grid.Clip>
+                                <Grid>
+                                    <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Stretch="Fill"/>
+                                    <Image Source="{Binding SheathIndicator}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}"/>
+                                    <Grid.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                            <TranslateTransform X="{Binding Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                        </TransformGroup>
+                                    </Grid.RenderTransform>
+                                </Grid>
+                            </Grid>                          
+                        </Grid>
                     </Border>
                 </Grid>
             </Border>
             <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
-            <Border Grid.Row="2" CornerRadius="0,0,10,10" BorderThickness="0" Background="{DynamicResource GrayscaleGray6Brush}">
+            <Border Grid.Row="2" CornerRadius="0,0,10,10" Background="{DynamicResource GrayscaleGray6Brush}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>

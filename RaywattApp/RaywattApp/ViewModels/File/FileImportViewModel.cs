@@ -487,6 +487,7 @@ namespace RaywattApp.ViewModels.File
                             patientCase.NumOfFrames = GetIntValue(caseObj, "NumOfFrames");
                             patientCase.Image = GetStrValue(caseObj, "Image");
                             patientCase.ImageResolution = GetDoubleValue(caseObj, "ImageResolution");
+                            patientCase.ManualCalibration = GetIntValue(caseObj, "ManualCalibration");
                             patientCase.FieldOfView = GetDoubleValue(caseObj, "FieldOfView");
                             patientCase.PullbackType = GetStrValue(caseObj, "PullbackType");
                             patientCase.PullbackLength = GetStrValue(caseObj, "PullbackLength");
@@ -511,6 +512,7 @@ namespace RaywattApp.ViewModels.File
                             patientCase.StrLumenSidebranch = GetStrValue(caseObj, "StrLumenSidebranch");
                             patientCase.StrLumenStent = GetStrValue(caseObj, "StrLumenStent");
                             patientCase.StrLumenGuidewire = GetStrValue(caseObj, "StrLumenGuidewire");
+                            patientCase.FfrPlaque = GetStrValue(caseObj, "FfrPlaque");
                             patientCase.CreateDate = GetDateValue(caseObj, "CreateDate");
                             patientCase.UpdateDate = GetDateValue(caseObj, "UpdateDate");
 

@@ -21,6 +21,7 @@ enum class eRJState {
 	Connected,
 	Validating,
 	Loading,
+	WaitManualLoad,
 	Loaded,
 	Unloading,
 	Unloaded,
@@ -51,6 +52,8 @@ private:
 	BYTE m_RFID[MAX_PATH];
 	int m_nRFIDLength;
 
+	bool m_bManualMode;	// Manual Load Catheter
+
 public:
 	CRJController();
 	virtual ~CRJController();
@@ -75,10 +78,12 @@ public:
 	UINT GetRFIDInfo(BYTE* pRFIDInfo);
 
 	int ConvertMMtoStep(UINT mm);
+	void SetManualMode(bool on) { m_bManualMode = on; }
 protected:
 	static UINT threadRJState(LPVOID param);
 	static UINT threadReadPacket(LPVOID param);
 	void updateState();
+	void updateStateManualMode();
 	void updateState(eRJState state);
 	bool displayLCD(eLCDImage image);
 	void parseSMPacket(BYTE*packet, int size);

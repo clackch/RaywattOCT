@@ -7,7 +7,7 @@ namespace RaywattApp.Models
     public partial class Calcium : ObservableObject
     {
         [ObservableProperty]
-        private List<Tuple<double, double>> _list;
+        private List<Tuple<double, double>> _list = new List<Tuple<double, double>>();
 
         [ObservableProperty]
         private int _totalAngle;

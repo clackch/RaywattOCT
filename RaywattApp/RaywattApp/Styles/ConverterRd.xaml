@@ -98,8 +98,20 @@
     <!-- CrossSection Scale Converter -->
     <converters:CrossSectionScaleConverter x:Key="CrossSectionScaleConverter" />
 
+    <!-- CrossSection Scale Reverse Converter -->
+    <converters:CrossSectionScaleReverseConverter x:Key="CrossSectionScaleReverseConverter" />
+
+    <!-- CrossSection Translate Reverse Converter -->
+    <converters:CrossSectionTranslateReverseConverter x:Key="CrossSectionTranslateReverseConverter" />
+
     <!-- CrossSection Scale MultiConverter -->
     <converters:CrossSectionScaleMultiConverter x:Key="CrossSectionScaleMultiConverter" />
+
+    <!-- Longitude Scale Converter -->
+    <converters:LongitudeScaleConverter x:Key="LongitudeScaleConverter" />
+    
+    <!-- Longitude Translate Converter -->
+    <converters:LongitudeTranslateConverter x:Key="LongitudeTranslateConverter" />
 
     <!-- Procedure Visibility Converter -->
     <converters:ProcedureVisibilityConverter x:Key="ProcedureVisibilityConverter" />
@@ -109,6 +121,9 @@
 
     <!-- ScaleBar Scale Converter -->
     <converters:ScaleBarScaleConverter x:Key="ScaleBarScaleConverter" />
+
+    <!-- ScaleBar Scale MultiConverter -->
+    <converters:ScaleBarScaleMultiConverter x:Key="ScaleBarScaleMultiConverter" />
 
     <!-- Halve Converter -->
     <converters:HalveConverter x:Key="HalveConverter" />
@@ -133,5 +148,8 @@
 
     <!-- CrossSection Translate Converter -->
     <converters:CoRegistrationTranslateConverter x:Key="CoRegistrationTranslateConverter" />
+
+    <!--  FFR Step Visibility Conveter  -->
+    <converters:FfrStepVisibilityConveter x:Key="FfrStepVisibilityConveter" />
 
 </ResourceDictionary>

@@ -88,6 +88,9 @@ namespace RaywattApp.Models
         private double imageResolution;
 
         [ObservableProperty]
+        private int _manualCalibration;
+
+        [ObservableProperty]
         private double fieldOfView;
 
         [ObservableProperty]
@@ -187,6 +190,9 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private string _strLumenGuidewire;
+
+        [ObservableProperty]
+        private string _ffrPlaque;
 
         [ObservableProperty]
         private FfrFeature _ffrFeature;

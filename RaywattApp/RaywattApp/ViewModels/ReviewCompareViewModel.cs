@@ -95,6 +95,9 @@ namespace RaywattApp.ViewModels
         private Zoom _zoom = new Zoom(Constants.CrossSectionCompareSize);
 
         [ObservableProperty]
+        private Zoom _zoomCompare = new Zoom(Constants.CrossSectionCompareSize);
+
+        [ObservableProperty]
         private BitmapSource _lumenProfileImageExtraCompare;
 
         private ICommand _caseSelectCancelCommand;
@@ -171,6 +174,8 @@ namespace RaywattApp.ViewModels
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
                 ReviewStatus.CurrentPage = Constants.ReviewComparePage;
 
+                Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
+
                 if (ReviewStatus.SelectedPatientCase == null)
                 {
                     GetPatientCase(true);
@@ -178,6 +183,7 @@ namespace RaywattApp.ViewModels
                     if (ReviewStatus.SelectedPatientCase != null)
                     {
                         RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath);
+                        ZoomCompare.SetFieldOfView(Constants.OCTImageSize * ReviewStatus.SelectedPatientCase.ImageResolution / PatientCase.FieldOfView);
                         Thread.Sleep(500);
                     }
                     else
@@ -188,6 +194,7 @@ namespace RaywattApp.ViewModels
                 else
                 {
                     GetPatientCase(false, ReviewStatus.SelectedPatientCase.LumenContours, ReviewStatus.SelectedPatientCase.LumenSidebranches, ReviewStatus.SelectedPatientCase.LumenStents, ReviewStatus.SelectedPatientCase.LumenGuidewires);
+                    ZoomCompare.SetFieldOfView(Constants.OCTImageSize * ReviewStatus.SelectedPatientCase.ImageResolution / PatientCase.FieldOfView);
                     DeviceStatus.IsOCTImagingCompareDone = true;
                 }
 
@@ -219,7 +226,6 @@ namespace RaywattApp.ViewModels
         {
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
-            Save();
         }
 
         private void GetAnnotation()
@@ -248,36 +254,6 @@ namespace RaywattApp.ViewModels
             });
 
             LumenContourCommand = Constants.LumenContourDraw;
-        }
-
-        protected override void Save()
-        {
-            _log.Debug("Save");
-
-            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-            sqlParameters["id"] = PatientCase.Id;
-            sqlParameters["physician_name"] = PatientCase.PhysicianName;
-            sqlParameters["accession_number"] = PatientCase.AccessionNumber;
-            sqlParameters["comment"] = PatientCase.Comment;
-            sqlParameters["vessel"] = PatientCase.Vessel;
-            sqlParameters["location"] = PatientCase.Location;
-            sqlParameters["procedure"] = PatientCase.Procedure;
-            sqlParameters["angio_yn"] = PatientCase.AngioYn;
-            sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
-            sqlParameters["indicator_degree"] = PatientCase.IndicatorDegree;
-            sqlParameters["colormap"] = PatientCase.Colormap;
-            sqlParameters["calcium_threshold"] = PatientCase.CalciumThreshold;
-            sqlParameters["expansion_calculation"] = PatientCase.ExpansionCalculation;
-            sqlParameters["expansion_threshold"] = PatientCase.ExpansionThreshold;
-            sqlParameters["apposition_threshold"] = PatientCase.AppositionThreshold;
-            sqlParameters["brightness"] = PatientCase.Brightness;
-            sqlParameters["contrast"] = PatientCase.Contrast;
-            sqlParameters["section_proximal"] = PatientCase.SectionProximal;
-            sqlParameters["section_distal"] = PatientCase.SectionDistal;
-
-            int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
-            if (nRows == 0)
-                _log.Error("Update Error");
         }
 
         protected override void UpdateCrossSectionImage()
@@ -337,6 +313,7 @@ namespace RaywattApp.ViewModels
 
                 DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current = 0;
                 RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath);
+                ZoomCompare.SetFieldOfView(Constants.OCTImageSize * ReviewStatus.SelectedPatientCase.ImageResolution / PatientCase.FieldOfView);
                 DeviceStatus.IsOCTImagingCompareDone = false;
                 Thread.Sleep(500);
 
@@ -551,7 +528,7 @@ namespace RaywattApp.ViewModels
             int frameDistal = PatientCase.SectionDistal;
             int stentProximal = 0, stentDistal = 0;
             CommonUtil.GetStentProximalDistal(PatientCase.LumenStents, out stentProximal, out stentDistal);
-            if (Section.SetMsaMinExp(PatientCase.LumenContours, frameProximal, frameDistal, stentProximal, stentDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeCompareWidth, PatientCase.PullbackLength, PatientCase.ImageResolution))
+            if (Section.SetMsaMinExp(PatientCase.LumenContours, frameProximal, frameDistal, stentProximal, stentDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeCompareWidth, PatientCase.PullbackLength))
             {
                 Section.VislbleMsaMinExp(true);
                 Section.Proximal.IsVisible = Visibility.Visible;
@@ -583,7 +560,7 @@ namespace RaywattApp.ViewModels
             PreLumenGuidewires = ReviewStatus.SelectedPatientCase.LumenGuidewires;
             int frameProximalCompare = ReviewStatus.SelectedPatientCase.SectionProximal;
             int frameDistalCompare = ReviewStatus.SelectedPatientCase.SectionDistal;
-            if(SectionCompare.SetMlaMld(ReviewStatus.SelectedPatientCase.LumenContours, frameProximalCompare, frameDistalCompare, DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total, Constants.LongitudeCompareWidth, ReviewStatus.SelectedPatientCase.PullbackLength, PatientCase.ImageResolution))
+            if(SectionCompare.SetMlaMld(ReviewStatus.SelectedPatientCase.LumenContours, frameProximalCompare, frameDistalCompare, DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total, Constants.LongitudeCompareWidth, ReviewStatus.SelectedPatientCase.PullbackLength))
             {
                 SectionCompare.VisibleMlaMld(true);
                 SectionCompare.Proximal.IsVisible = Visibility.Visible;

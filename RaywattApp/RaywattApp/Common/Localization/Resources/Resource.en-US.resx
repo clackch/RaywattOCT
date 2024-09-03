@@ -170,6 +170,34 @@ Remove the catheter from patient before proceeding.</value>
   <data name="$MSG017" xml:space="preserve">
     <value>Select the vessel from the case information on the 2D screen.</value>
   </data>
+  <data name="$MSG018" xml:space="preserve">
+    <value>Select
+Vessel Type</value>
+  </data>
+  <data name="$MSG019" xml:space="preserve">
+    <value>Define
+Reference
+Proximal
+Lumen</value>
+  </data>
+  <data name="$MSG020" xml:space="preserve">
+    <value>Define
+Reference
+Distal
+Lumen</value>
+  </data>
+  <data name="$MSG021" xml:space="preserve">
+    <value>Measure
+Plaque Area</value>
+  </data>
+  <data name="$MSG022" xml:space="preserve">
+    <value>Verify
+the features
+for FFR</value>
+  </data>
+  <data name="$MSG023" xml:space="preserve">
+    <value>The angiography device is not connected.</value>
+  </data>
   <data name="$Terms and Conditions" xml:space="preserve">
     <value>Product Intended Use: Clearly define the intended use of the OCT device, including any limitations or specific conditions for use.
 
@@ -206,6 +234,9 @@ Acceptance of Terms: Require users to explicitly accept the terms and conditions
   </data>
   <data name="%DS" xml:space="preserve">
     <value>%DS</value>
+  </data>
+  <data name="* Vessel type not supported" xml:space="preserve">
+    <value>* Vessel type not supported</value>
   </data>
   <data name="2D" xml:space="preserve">
     <value>2D</value>
@@ -376,6 +407,9 @@ Acceptance of Terms: Require users to explicitly accept the terms and conditions
   <data name="Confirm import of selected file" xml:space="preserve">
     <value>Confirm import of selected file</value>
   </data>
+  <data name="Confirm reversion to original calibration" xml:space="preserve">
+    <value>Confirm reversion to original calibration</value>
+  </data>
   <data name="Contrast" xml:space="preserve">
     <value>Contrast</value>
   </data>
@@ -515,8 +549,14 @@ Overwrite existing data?</value>
   <data name="Faster for specialized care" xml:space="preserve">
     <value>Faster for specialized care</value>
   </data>
+  <data name="Feature Parameters" xml:space="preserve">
+    <value>Feature Parameters</value>
+  </data>
   <data name="Female" xml:space="preserve">
     <value>Female</value>
+  </data>
+  <data name="FFR" xml:space="preserve">
+    <value>FFR</value>
   </data>
   <data name="Field of View" xml:space="preserve">
     <value>Field of View</value>
@@ -842,6 +882,9 @@ Overwrite existing data?</value>
   <data name="Physician Name" xml:space="preserve">
     <value>Physician Name</value>
   </data>
+  <data name="Plaque Area" xml:space="preserve">
+    <value>Plaque Area</value>
+  </data>
   <data name="Post" xml:space="preserve">
     <value>Post</value>
   </data>
@@ -856,6 +899,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Pre-PCI" xml:space="preserve">
     <value>Pre-PCI</value>
+  </data>
+  <data name="Predict FFR" xml:space="preserve">
+    <value>Predict FFR</value>
   </data>
   <data name="Presentation" xml:space="preserve">
     <value>Presentation</value>
@@ -925,6 +971,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Reset" xml:space="preserve">
     <value>Reset</value>
+  </data>
+  <data name="Revert Changes" xml:space="preserve">
+    <value>Revert Changes</value>
   </data>
   <data name="Review" xml:space="preserve">
     <value>Review</value>
@@ -1030,6 +1079,15 @@ Overwrite existing data?</value>
   </data>
   <data name="Step 2." xml:space="preserve">
     <value>Step 2.</value>
+  </data>
+  <data name="Step 3." xml:space="preserve">
+    <value>Step 3.</value>
+  </data>
+  <data name="Step 4." xml:space="preserve">
+    <value>Step 4.</value>
+  </data>
+  <data name="Step 5." xml:space="preserve">
+    <value>Step 5.</value>
   </data>
   <data name="Survey (100㎜)" xml:space="preserve">
     <value>Survey (100㎜)</value>

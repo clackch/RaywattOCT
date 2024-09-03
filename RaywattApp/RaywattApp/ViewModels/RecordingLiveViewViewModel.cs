@@ -57,6 +57,12 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private bool _isOctExpanded = true;
 
+        [ObservableProperty]
+        private Zoom _zoom = new Zoom();
+
+        [ObservableProperty]
+        private Zoom _zoomSmall = new Zoom(Constants.SmallCrossSectionSize);
+
         private int _brightness;
         public int Brightness
         {
@@ -75,7 +81,16 @@ namespace RaywattApp.ViewModels
         public double FieldOfView
         {
             get { return _fieldOfView; }
-            set { _fieldOfView = value; OnPropertyChanged(nameof(FieldOfView)); RaySetProperty(Property.FieldOfView, value); }
+            set 
+            { 
+                _fieldOfView = value;
+                OnPropertyChanged(nameof(FieldOfView));
+                RaySetProperty(Property.FieldOfView, value);
+                
+                PatientCase.FieldOfView = value;
+                Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
+                ZoomSmall.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
+            }
         }
 
         private ICommand _cmdBack;
@@ -261,10 +276,12 @@ namespace RaywattApp.ViewModels
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {
+            if (!DeviceStatus.IsAngioConnected)
+            {
+                IsOctExpanded =  true;
+            }
             DrawCrossSectionImage();
-
-            if (DeviceStatus.IsAngioConnected)
-                DrawAngioImage();
+            DrawAngioImage();
         }
 
         private void leaveToPage(string viewPage)
@@ -282,7 +299,6 @@ namespace RaywattApp.ViewModels
         private bool DrawAngioImage()
         {
             AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(_angioManager.ImgAngio);
-
             return true;
         }
     }

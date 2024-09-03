@@ -11,7 +11,6 @@ using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Threading;
 using System.Windows.Input;
 using static RaywattOCT.RayCoreWrapper;
 
@@ -34,20 +33,8 @@ namespace RaywattApp.Common.Bases
         [ObservableProperty]
         private Patient _patient;
 
+        [ObservableProperty]
         private PatientCase _patientCase;
-        public PatientCase PatientCase
-        { 
-            get { return _patientCase; }
-            set 
-            {
-                _patientCase = value; 
-                OnPropertyChanged(nameof(PatientCase));
-                if (_patientCase != null)
-                {
-                    Constants.ImageResolution = _patientCase.ImageResolution;
-                }
-            }
-        }
 
         [ObservableProperty]
         private bool _expandLeftUpMenu;
@@ -238,6 +225,8 @@ namespace RaywattApp.Common.Bases
         private void EndReview()
         {
             _log.Debug("EndReview");
+
+            DeviceStatus.IsOCTImagingDone = true;
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;

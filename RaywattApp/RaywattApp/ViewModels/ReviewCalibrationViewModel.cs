@@ -3,8 +3,11 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
+using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
+using RaywattApp.Common.Util;
 using RaywattApp.Models;
+using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
 using System.Windows.Input;
@@ -17,6 +20,8 @@ namespace RaywattApp.ViewModels
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewCalibrationViewModel));
 
+        private IDialogService _dialogService;
+
         [ObservableProperty]
         private Patient _patient;
 
@@ -28,6 +33,11 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private ReviewStatus _reviewStatus;
+
+        [ObservableProperty]
+        private Zoom _zoom = new Zoom();
+
+        private int manualCalibration;
 
         private ICommand _okCommand;
         public ICommand OkCommand
@@ -53,11 +63,19 @@ namespace RaywattApp.ViewModels
             get { return _cmdManualZoomIn ?? (this._cmdManualZoomIn = new RelayCommand<bool>(ManualZoomIn)); }
         }
 
-        public ReviewCalibrationViewModel()
+        private ICommand _recalibrateCommand;
+        public ICommand RecalibrateCommand
+        {
+            get { return this._recalibrateCommand ?? (this._recalibrateCommand = new RelayCommand(Recalibrate)); }
+        }
+
+        public ReviewCalibrationViewModel(IDialogService dialogService)
         {
             _log.Debug("ReviewCalibrationViewModel");
 
             Constants.CurrentPage = Constants.RecordingCalibrationPage;
+
+            _dialogService = dialogService;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -75,8 +93,14 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
 
+                Zoom.SetFieldOfView(Constants.DefaultFoV / 5);
+
+                SetCrossSectionBackground(RaySession.Review, Constants.CardBackgroundColor);
+
                 GetImageInfo(RaySession.Review);
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
+
+                DrawSheathIndicator();
             }
         }
 
@@ -89,11 +113,58 @@ namespace RaywattApp.ViewModels
         private void ManualZoomIn(bool zoomIn)
         {
             _log.Debug("ManualZoomIn : " + ((zoomIn) ? "IN" : "OUT"));
+
+            if (zoomIn)
+            {
+                this.manualCalibration += 1;
+
+                if(PatientCase.ManualCalibration + this.manualCalibration > Constants.ManualCalibrationLimit)
+                {
+                    this.manualCalibration -= 1;
+                    return;
+                }
+            }
+            else
+            {
+                this.manualCalibration -= 1;
+
+                if (PatientCase.ManualCalibration + this.manualCalibration < -1 * Constants.ManualCalibrationLimit)
+                {
+                    this.manualCalibration += 1;
+                    return;
+                }
+            }
+
+            DrawSheathIndicator(CommonUtil.GetCalibrationRatio(this.manualCalibration, false));
         }
 
         private void Reset()
         {
             _log.Debug("Reset");
+
+            this.manualCalibration = 0;
+
+            DrawSheathIndicator(CommonUtil.GetCalibrationRatio(this.manualCalibration, false));
+        }
+
+        private void Recalibrate()
+        {
+            _log.Debug("Recalibrate");
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            DialogResults? result = null;
+
+            parameter["title"] = _l10n["Information"];
+            parameter["message"] = _l10n["Confirm reversion to original calibration"];
+            result = _dialogService.OpenDialog(new ConfirmDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+            if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
+            {
+                this.manualCalibration = 0;
+                PatientCase.ManualCalibration = 0;
+
+                Ok();
+            }
         }
 
         private void Cancel()
@@ -106,6 +177,11 @@ namespace RaywattApp.ViewModels
         private void Ok()
         {
             _log.Debug("Ok");
+
+            PatientCase.ManualCalibration += this.manualCalibration;
+
+            Constants.DefaultFoV = Constants.OCTImageSize * PatientCase.ImageResolution * CommonUtil.GetCalibrationRatio(PatientCase.ManualCalibration, true);
+            Constants.ImageResolution = PatientCase.ImageResolution * CommonUtil.GetCalibrationRatio(PatientCase.ManualCalibration, true);
 
             GoToPreviousPage(true);
         }

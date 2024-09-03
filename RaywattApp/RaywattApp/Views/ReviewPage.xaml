@@ -39,7 +39,7 @@
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [2D], Source={StaticResource L10N}}" IsChecked="True" IsEnabled="False"/>
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [3D], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.Review3dPage}" IsEnabled="{Binding ReviewStatus.IsNoPullback, Converter={StaticResource BoolToEnableReverseConverter}}"/>
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [Compare], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewComparePage}" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$002|$003}"/>
-                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [AI FFR], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrPage}"/>
+                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [AI FFR], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrSettingPage}"/>
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                     <component:IconButton Style="{StaticResource IconButton}" Icon="editLumenContourSimple" Width="42" Height="42" Command="{Binding EditLumenContourCommand}"/>
@@ -83,17 +83,39 @@
                                         </RectangleGeometry.Rect>
                                     </RectangleGeometry>
                                 </Grid.Clip>
-                                <!-- Cross Seciton Image -->
-                                <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
-                                    <Image.RenderTransform>
+                                <Grid>
+                                    <!-- Cross Seciton Image -->
+                                    <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}"/>
+                                    <!-- Sheath Indicator -->
+                                    <Image x:Name="SheathIndicator" Source="{Binding SheathIndicator}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsSheathOn, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                    <Grid.RenderTransform>
                                         <TransformGroup>
                                             <ScaleTransform ScaleX="{Binding ReviewStatus.Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding ReviewStatus.Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
                                             <TranslateTransform X="{Binding ReviewStatus.Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding ReviewStatus.Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}}"/>
                                         </TransformGroup>
-                                    </Image.RenderTransform>
-                                </Image>
-                                <!-- Sheath Indicator -->
-                                <Image x:Name="SheathIndicator" Source="{Binding SheathIndicator}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsSheathOn, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                    </Grid.RenderTransform>
+                                </Grid>
+                                <!-- Circle Mask -->
+                                <Grid>
+                                    <Path Fill="{StaticResource GrayscaleGray8Brush}">
+                                        <Path.Data>
+                                            <CombinedGeometry GeometryCombineMode="Exclude">
+                                                <CombinedGeometry.Geometry1>
+                                                    <RectangleGeometry Rect="{x:Static const:Constants.CrossSectionRect}" />
+                                                </CombinedGeometry.Geometry1>
+                                                <CombinedGeometry.Geometry2>
+                                                    <EllipseGeometry Center="{x:Static const:Constants.CrossSectionPointCenter}" RadiusX="{x:Static const:Constants.CrossSectionRadius}" RadiusY="{x:Static const:Constants.CrossSectionRadius}"/>
+                                                </CombinedGeometry.Geometry2>
+                                            </CombinedGeometry>
+                                        </Path.Data>
+                                    </Path>
+                                    <Grid.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform ScaleX="{Binding ReviewStatus.Zoom.ZoomScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding ReviewStatus.Zoom.ZoomScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                            <TranslateTransform X="{Binding ReviewStatus.Zoom.ZoomTranslateX, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding ReviewStatus.Zoom.ZoomTranslateY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                        </TransformGroup>
+                                    </Grid.RenderTransform>
+                                </Grid>
                             </Grid>
                             <!-- Cross Section Info. -->
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="50">
@@ -168,7 +190,7 @@
                         </Grid>
                         <!-- Mini Map -->
                         <Grid Grid.Column="0" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}" HorizontalAlignment="Left" Margin="125,0,0,0" Visibility="{Binding ReviewStatus.ZoomAngio.Visibility}">
-                            <Border Width="{x:Static const:Constants.MiniMapBorderSize}" Height="{x:Static const:Constants.MiniMapBorderSize}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="1" BorderBrush="{DynamicResource GrayscaleGray8Brush}" BorderThickness="1" CornerRadius="10">
+                            <Border Width="{x:Static const:Constants.MiniMapBorderSize}" Height="{x:Static const:Constants.MiniMapBorderSize}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="1" BorderBrush="{DynamicResource GrayscaleGray8Brush}" BorderThickness="1" Background="{DynamicResource GrayscaleGray8Brush}" CornerRadius="10">
                                 <Canvas>
                                     <Canvas.Background>
                                         <ImageBrush ImageSource="{Binding CurrentAngioImage}" Stretch="Uniform"/>
@@ -215,17 +237,41 @@
                                         </RectangleGeometry.Rect>
                                     </RectangleGeometry>
                                 </Grid.Clip>
-                                <!-- Cross Seciton Image -->
-                                <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionAngio}" Height="{x:Static const:Constants.CrossSectionAngio}">
-                                    <Image.RenderTransform>
-                                        <TransformGroup>
-                                            <ScaleTransform ScaleX="{Binding ReviewStatus.ZoomAngioCs.ScaleX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionAngio}}" ScaleY="{Binding ReviewStatus.ZoomAngioCs.ScaleY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionAngio}}"/>
-                                            <TranslateTransform X="{Binding ReviewStatus.ZoomAngioCs.TranslateX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionAngio}}" Y="{Binding ReviewStatus.ZoomAngioCs.TranslateY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionAngio}}"/>
-                                        </TransformGroup>
-                                    </Image.RenderTransform>
-                                </Image>
-                                <!-- Sheath Indicator -->
-                                <Image x:Name="SheathIndicatorAngio" Source="{Binding SheathIndicatorAngio}" Width="{x:Static const:Constants.CrossSectionAngio}" Height="{x:Static const:Constants.CrossSectionAngio}" Visibility="{Binding ReviewStatus.IsSheathOnAngioCs, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                <Grid Width="{x:Static const:Constants.CrossSectionAngio}" Height="{x:Static const:Constants.CrossSectionAngio}">
+                                    <Grid>
+                                        <!-- Cross Seciton Image -->
+                                        <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionAngio}" Height="{x:Static const:Constants.CrossSectionAngio}"/>
+                                        <!-- Sheath Indicator -->
+                                        <Image x:Name="SheathIndicatorAngio" Source="{Binding SheathIndicatorAngio}" Width="{x:Static const:Constants.CrossSectionAngio}" Height="{x:Static const:Constants.CrossSectionAngio}" Visibility="{Binding ReviewStatus.IsSheathOnAngioCs, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                        <Grid.RenderTransform>
+                                            <TransformGroup>
+                                                <ScaleTransform ScaleX="{Binding ReviewStatus.ZoomAngioCs.ScaleX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionAngio}}" ScaleY="{Binding ReviewStatus.ZoomAngioCs.ScaleY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionAngio}}"/>
+                                                <TranslateTransform X="{Binding ReviewStatus.ZoomAngioCs.TranslateX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionAngio}}" Y="{Binding ReviewStatus.ZoomAngioCs.TranslateY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionAngio}}"/>
+                                            </TransformGroup>
+                                        </Grid.RenderTransform>
+                                    </Grid>
+                                    <!-- Circle Mask -->
+                                    <Grid>
+                                        <Path Fill="{StaticResource GrayscaleGray8Brush}">
+                                            <Path.Data>
+                                                <CombinedGeometry GeometryCombineMode="Exclude">
+                                                    <CombinedGeometry.Geometry1>
+                                                        <RectangleGeometry Rect="{x:Static const:Constants.CrossSectionAngioRect}" />
+                                                    </CombinedGeometry.Geometry1>
+                                                    <CombinedGeometry.Geometry2>
+                                                        <EllipseGeometry Center="{x:Static const:Constants.CrossSectionAngioPointCenter}" RadiusX="{x:Static const:Constants.CrossSectionAngioRadius}" RadiusY="{x:Static const:Constants.CrossSectionAngioRadius}"/>
+                                                    </CombinedGeometry.Geometry2>
+                                                </CombinedGeometry>
+                                            </Path.Data>
+                                        </Path>
+                                        <Grid.RenderTransform>
+                                            <TransformGroup>
+                                                <ScaleTransform ScaleX="{Binding ReviewStatus.ZoomAngioCs.ZoomScaleX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionAngio}}" ScaleY="{Binding ReviewStatus.ZoomAngioCs.ZoomScaleY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionAngio}}"/>
+                                                <TranslateTransform X="{Binding ReviewStatus.ZoomAngioCs.ZoomTranslateX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionAngio}}" Y="{Binding ReviewStatus.ZoomAngioCs.ZoomTranslateY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionAngio}}"/>
+                                            </TransformGroup>
+                                        </Grid.RenderTransform>
+                                    </Grid>
+                                </Grid>
                             </Grid>
                             <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10,0,0,0">
                                 <StackPanel Orientation="Horizontal" Width="50">
@@ -289,7 +335,32 @@
                             </Grid>
                             <!-- Lumen Contour-->
                             <Grid Width="{x:Static const:Constants.CrossSectionAngio}" Height="{x:Static const:Constants.CrossSectionAngio}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
-                                <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" LumenStents="{Binding LumenStents}" CurrentLumenStent="{Binding CurrentLumenStent, Mode=TwoWay}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" Zoom="{Binding ReviewStatus.ZoomAngioCs}" FrameNumber="{Binding FrameNumber}" IsDrawOn="{Binding ReviewStatus.IsContourStentOn}" IsEditOn="False" InCommand="{Binding LumenContourCommand, Mode=TwoWay}" ScreenSize="{x:Static const:Constants.CrossSectionAngio}"/>
+                                <Grid.Clip>
+                                    <RectangleGeometry RadiusX="10" RadiusY="10">
+                                        <RectangleGeometry.Rect>
+                                            <Rect X="0" Y="0" Width="{x:Static const:Constants.CrossSectionAngio}" Height="{x:Static const:Constants.CrossSectionAngio}"/>
+                                        </RectangleGeometry.Rect>
+                                    </RectangleGeometry>
+                                </Grid.Clip>
+                                <Grid>
+                                    <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" LumenStents="{Binding LumenStents}" CurrentLumenStent="{Binding CurrentLumenStent, Mode=TwoWay}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" Zoom="{Binding ReviewStatus.ZoomAngioCs}" FrameNumber="{Binding FrameNumber}" IsDrawOn="{Binding ReviewStatus.IsContourStentOn}" IsEditOn="False" InCommand="{Binding LumenContourCommand, Mode=TwoWay}" ScreenSize="{x:Static const:Constants.CrossSectionAngio}">
+                                        <annotation:DrawLumenContourUtil.RenderTransform>
+                                            <TransformGroup>
+                                                <TranslateTransform X="{Binding ReviewStatus.ZoomAngioCs.ZoomTranslateX, Converter={StaticResource CrossSectionTranslateReverseConverter}, ConverterParameter={x:Static const:Constants.CrossSectionAngio}}" Y="{Binding ReviewStatus.ZoomAngioCs.ZoomTranslateY, Converter={StaticResource CrossSectionTranslateReverseConverter}, ConverterParameter={x:Static const:Constants.CrossSectionAngio}}"/>
+                                                <ScaleTransform ScaleX="{Binding ReviewStatus.ZoomAngioCs.ZoomScaleX, Converter={StaticResource CrossSectionScaleReverseConverter}, ConverterParameter={x:Static const:Constants.CrossSectionAngio}}" ScaleY="{Binding ReviewStatus.ZoomAngioCs.ZoomScaleY, Converter={StaticResource CrossSectionScaleReverseConverter}, ConverterParameter={x:Static const:Constants.CrossSectionAngio}}"/>
+                                            </TransformGroup>
+                                        </annotation:DrawLumenContourUtil.RenderTransform>
+                                    </annotation:DrawLumenContourUtil>
+                                    <Grid.Clip>
+                                        <EllipseGeometry Center="{x:Static const:Constants.CrossSectionAngioPointCenter}" RadiusX="{x:Static const:Constants.CrossSectionAngioRadius}" RadiusY="{x:Static const:Constants.CrossSectionAngioRadius}"/>
+                                    </Grid.Clip>
+                                    <Grid.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform ScaleX="{Binding ReviewStatus.ZoomAngioCs.ZoomScaleX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionAngio}}" ScaleY="{Binding ReviewStatus.ZoomAngioCs.ZoomScaleY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionAngio}}"/>
+                                            <TranslateTransform X="{Binding ReviewStatus.ZoomAngioCs.ZoomTranslateX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionAngio}}" Y="{Binding ReviewStatus.ZoomAngioCs.ZoomTranslateY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionAngio}}"/>
+                                        </TransformGroup>
+                                    </Grid.RenderTransform>
+                                </Grid>
                             </Grid>
                             <!-- Cross-Section Indicator -->
                             <Grid Width="480" Height="480" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding IndicatorLongitude.IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -308,13 +379,12 @@
                                             </Style.Triggers>
                                         </Style>
                                     </Grid.Style>
-                                    <ContentControl Template="{DynamicResource IndicatorScale}" Width="455" Height="18" Tag="{Binding CrossSectionAngioScale}"/>
+                                    <ContentControl Template="{DynamicResource IndicatorScale}" Width="455" Height="18" Tag="{Binding CrossSectionAngioScaleIndicator}"/>
                                 </Grid>
                                 <component:IndicatorImage Style="{DynamicResource IndicatorImage}" x:Name="crossSectionAngioIndicator" Width="480" Height="14" Icon="crossSection" IsCaptured="{Binding IndicatorCrossSectionAngio.IsCaptured}" Visibility="{Binding IndicatorCrossSectionAngio.IsVisible}">
                                     <Image.RenderTransform>
                                         <RotateTransform CenterX="240" CenterY="7" Angle="{Binding Degree}"/>
                                     </Image.RenderTransform>
-
                                     <i:Interaction.Triggers>
                                         <i:EventTrigger EventName="PreviewMouseDown" >
                                             <i:InvokeCommandAction Command="{Binding IndicatorCrossSectionAngio.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
@@ -327,36 +397,44 @@
                                         </i:EventTrigger>
                                     </i:Interaction.Triggers>
                                 </component:IndicatorImage>
+                                <Grid.Clip>
+                                    <EllipseGeometry Center="240,240" RadiusX="240" RadiusY="240"/>
+                                </Grid.Clip>
                             </Grid>
                             <!-- Mini Map -->
                             <Grid Width="510" Height="510" Visibility="{Binding ReviewStatus.ZoomAngioCs.Visibility}">
-                                <Border Width="{x:Static const:Constants.MiniMapBorderSize}" Height="{x:Static const:Constants.MiniMapBorderSize}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="21" BorderBrush="{DynamicResource GrayscaleGray8Brush}" BorderThickness="1" CornerRadius="10">
-                                    <Canvas>
-                                        <Canvas.Background>
-                                            <ImageBrush ImageSource="{Binding CrossSectionImage}" Stretch="Fill"/>
-                                        </Canvas.Background>
-                                        <Canvas.Clip>
-                                            <RectangleGeometry RadiusX="10" RadiusY="10">
-                                                <RectangleGeometry.Rect>
-                                                    <Rect X="0" Y="0" Width="{x:Static const:Constants.MiniMapCanvasSize}" Height="{x:Static const:Constants.MiniMapCanvasSize}"/>
-                                                </RectangleGeometry.Rect>
-                                            </RectangleGeometry>
-                                        </Canvas.Clip>
-
-                                        <Rectangle Style="{DynamicResource MiniMapRect}" Canvas.Left="{Binding ReviewStatus.ZoomAngioCs.RectLeft}" Canvas.Top="{Binding ReviewStatus.ZoomAngioCs.RectTop}" Width="{Binding ReviewStatus.ZoomAngioCs.RectWidth}" Height="{Binding ReviewStatus.ZoomAngioCs.RectHeight}" Tag="{Binding ReviewStatus.ZoomAngioCs.IsCaptured}">
-                                            <i:Interaction.Triggers>
-                                                <i:EventTrigger EventName="PreviewMouseDown">
-                                                    <i:InvokeCommandAction Command="{Binding ReviewStatus.ZoomAngioCs.CmdSetCaptured}" CommandParameter="{Binding ReviewStatus.ZoomAngioCs}"/>
-                                                </i:EventTrigger>
-                                                <i:EventTrigger EventName="PreviewMouseUp">
-                                                    <i:InvokeCommandAction Command="{Binding ReviewStatus.ZoomAngioCs.CmdSetCaptured}"/>
-                                                </i:EventTrigger>
-                                                <i:EventTrigger EventName="PreviewMouseMove">
-                                                    <i:InvokeCommandAction Command="{Binding ReviewStatus.ZoomAngioCs.CmdMoveRect}" CommandParameter="{Binding ReviewStatus.ZoomAngioCs}"/>
-                                                </i:EventTrigger>
-                                            </i:Interaction.Triggers>
-                                        </Rectangle>
-                                    </Canvas>
+                                <Border Width="{x:Static const:Constants.MiniMapBorderSize}" Height="{x:Static const:Constants.MiniMapBorderSize}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="21" BorderBrush="{DynamicResource GrayscaleGray8Brush}" BorderThickness="1" Background="{DynamicResource GrayscaleGray8Brush}" CornerRadius="10">
+                                    <Grid>
+                                        <!-- Cross Seciton Image -->
+                                        <Grid>
+                                            <Image Source="{Binding CrossSectionImage}">
+                                                <Image.RenderTransform>
+                                                    <TransformGroup>
+                                                        <ScaleTransform ScaleX="{Binding ReviewStatus.Zoom.FoVScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding ReviewStatus.Zoom.FoVScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                                        <TranslateTransform X="{Binding ReviewStatus.Zoom.MiniMapTranslateX}" Y="{Binding ReviewStatus.Zoom.MiniMapTranslateY}"/>
+                                                    </TransformGroup>
+                                                </Image.RenderTransform>
+                                            </Image>
+                                            <Grid.Clip>
+                                                <EllipseGeometry Center="{x:Static const:Constants.MiniMapPointCenter}" RadiusX="{x:Static const:Constants.MiniMapRadius}" RadiusY="{x:Static const:Constants.MiniMapRadius}"/>
+                                            </Grid.Clip>
+                                        </Grid>
+                                        <Canvas>
+                                            <Rectangle Style="{DynamicResource MiniMapRect}" Canvas.Left="{Binding ReviewStatus.ZoomAngioCs.RectLeft}" Canvas.Top="{Binding ReviewStatus.ZoomAngioCs.RectTop}" Width="{Binding ReviewStatus.ZoomAngioCs.RectWidth}" Height="{Binding ReviewStatus.ZoomAngioCs.RectHeight}" Tag="{Binding ReviewStatus.ZoomAngioCs.IsCaptured}">
+                                                <i:Interaction.Triggers>
+                                                    <i:EventTrigger EventName="PreviewMouseDown">
+                                                        <i:InvokeCommandAction Command="{Binding ReviewStatus.ZoomAngioCs.CmdSetCaptured}" CommandParameter="{Binding ReviewStatus.ZoomAngioCs}"/>
+                                                    </i:EventTrigger>
+                                                    <i:EventTrigger EventName="PreviewMouseUp">
+                                                        <i:InvokeCommandAction Command="{Binding ReviewStatus.ZoomAngioCs.CmdSetCaptured}"/>
+                                                    </i:EventTrigger>
+                                                    <i:EventTrigger EventName="PreviewMouseMove">
+                                                        <i:InvokeCommandAction Command="{Binding ReviewStatus.ZoomAngioCs.CmdMoveRect}" CommandParameter="{Binding ReviewStatus.ZoomAngioCs}"/>
+                                                    </i:EventTrigger>
+                                                </i:Interaction.Triggers>
+                                            </Rectangle>
+                                        </Canvas>
+                                    </Grid>                                    
                                 </Border>
                             </Grid>
                         </Grid>
@@ -415,13 +493,12 @@
                                     </Style.Triggers>
                                 </Style>
                             </Grid.Style>
-                            <ContentControl Template="{DynamicResource IndicatorScale}" Width="600" Height="18" Tag="{Binding CrossSectionScale}"/>
+                            <ContentControl Template="{DynamicResource IndicatorScale}" Width="600" Height="18" Tag="{Binding CrossSectionScaleIndicator}"/>
                         </Grid>
                         <component:IndicatorImage Style="{DynamicResource IndicatorImage}" x:Name="crossSectionIndicator" Height="18" Icon="crossSection" IsCaptured="{Binding IndicatorCrossSection.IsCaptured}" Visibility="{Binding IndicatorCrossSection.IsVisible}">
                             <Image.RenderTransform>
                                 <RotateTransform CenterX="316" CenterY="9" Angle="{Binding Degree}"/>
                             </Image.RenderTransform>
-
                             <i:Interaction.Triggers>
                                 <i:EventTrigger EventName="PreviewMouseDown" >
                                     <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
@@ -434,48 +511,106 @@
                                 </i:EventTrigger>
                             </i:Interaction.Triggers>
                         </component:IndicatorImage>
+                        <Grid.Clip>
+                            <EllipseGeometry Center="640,334" RadiusX="320" RadiusY="320"/>
+                        </Grid.Clip>
                     </Grid>
                 </Grid>
 
                 <!-- Lumen Contour-->
                 <Grid Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                    <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" LumenStents="{Binding LumenStents}" CurrentLumenStent="{Binding CurrentLumenStent, Mode=TwoWay}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" Zoom="{Binding ReviewStatus.Zoom}" FrameNumber="{Binding FrameNumber}" IsDrawOn="{Binding ReviewStatus.IsContourStentOn}" IsEditOn="False" InCommand="{Binding LumenContourCommand, Mode=TwoWay}"/>
+                    <Grid.Clip>
+                        <RectangleGeometry RadiusX="10" RadiusY="10">
+                            <RectangleGeometry.Rect>
+                                <Rect X="0" Y="0" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}"/>
+                            </RectangleGeometry.Rect>
+                        </RectangleGeometry>
+                    </Grid.Clip>
+                    <Grid>
+                        <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" LumenStents="{Binding LumenStents}" CurrentLumenStent="{Binding CurrentLumenStent, Mode=TwoWay}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" Zoom="{Binding ReviewStatus.Zoom}" FrameNumber="{Binding FrameNumber}" IsDrawOn="{Binding ReviewStatus.IsContourStentOn}" IsEditOn="False" InCommand="{Binding LumenContourCommand, Mode=TwoWay}">
+                            <annotation:DrawLumenContourUtil.RenderTransform>
+                                <TransformGroup>
+                                    <TranslateTransform X="{Binding ReviewStatus.Zoom.ZoomTranslateX, Converter={StaticResource CrossSectionTranslateReverseConverter}}" Y="{Binding ReviewStatus.Zoom.ZoomTranslateY, Converter={StaticResource CrossSectionTranslateReverseConverter}}"/>
+                                    <ScaleTransform ScaleX="{Binding ReviewStatus.Zoom.ZoomScaleX, Converter={StaticResource CrossSectionScaleReverseConverter}}" ScaleY="{Binding ReviewStatus.Zoom.ZoomScaleY, Converter={StaticResource CrossSectionScaleReverseConverter}}"/>
+                                </TransformGroup>
+                            </annotation:DrawLumenContourUtil.RenderTransform>
+                        </annotation:DrawLumenContourUtil>
+                        <Grid.Clip>
+                            <EllipseGeometry Center="{x:Static const:Constants.CrossSectionPointCenter}" RadiusX="{x:Static const:Constants.CrossSectionRadius}" RadiusY="{x:Static const:Constants.CrossSectionRadius}"/>
+                        </Grid.Clip>
+                        <Grid.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="{Binding ReviewStatus.Zoom.ZoomScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding ReviewStatus.Zoom.ZoomScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                <TranslateTransform X="{Binding ReviewStatus.Zoom.ZoomTranslateX, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding ReviewStatus.Zoom.ZoomTranslateY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                            </TransformGroup>
+                        </Grid.RenderTransform>
+                    </Grid>
                 </Grid>
 
                 <!-- Measurement -->
                 <Grid Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                    <annotation:DrawUtil Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Zoom="{Binding ReviewStatus.Zoom}" ImageResolution="{Binding PatientCase.ImageResolution}" IsDrawOn="{Binding ReviewStatus.IsMeasurementOn}" Measurements="{Binding Measurements}" FrameNumber="{Binding FrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" CommandOff="{Binding MeasurementCommandOff, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEditOn="True"/>
+                    <Grid.Clip>
+                        <RectangleGeometry RadiusX="10" RadiusY="10">
+                            <RectangleGeometry.Rect>
+                                <Rect X="0" Y="0" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}"/>
+                            </RectangleGeometry.Rect>
+                        </RectangleGeometry>
+                    </Grid.Clip>
+                    <Grid>
+                        <annotation:DrawUtil Zoom="{Binding ReviewStatus.Zoom}" IsDrawOn="{Binding ReviewStatus.IsMeasurementOn}" Measurements="{Binding Measurements}" FrameNumber="{Binding FrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" CommandOff="{Binding MeasurementCommandOff, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEditOn="True">
+                            <annotation:DrawUtil.RenderTransform>
+                                <TransformGroup>
+                                    <TranslateTransform X="{Binding ReviewStatus.Zoom.ZoomTranslateX, Converter={StaticResource CrossSectionTranslateReverseConverter}}" Y="{Binding ReviewStatus.Zoom.ZoomTranslateY, Converter={StaticResource CrossSectionTranslateReverseConverter}}"/>
+                                    <ScaleTransform ScaleX="{Binding ReviewStatus.Zoom.ZoomScaleX, Converter={StaticResource CrossSectionScaleReverseConverter}}" ScaleY="{Binding ReviewStatus.Zoom.ZoomScaleY, Converter={StaticResource CrossSectionScaleReverseConverter}}"/>
+                                </TransformGroup>
+                            </annotation:DrawUtil.RenderTransform>
+                        </annotation:DrawUtil>
+                        <Grid.Clip>
+                            <EllipseGeometry Center="{x:Static const:Constants.CrossSectionPointCenter}" RadiusX="{x:Static const:Constants.CrossSectionRadius}" RadiusY="{x:Static const:Constants.CrossSectionRadius}"/>
+                        </Grid.Clip>
+                        <Grid.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="{Binding ReviewStatus.Zoom.ZoomScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding ReviewStatus.Zoom.ZoomScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                <TranslateTransform X="{Binding ReviewStatus.Zoom.ZoomTranslateX, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding ReviewStatus.Zoom.ZoomTranslateY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                            </TransformGroup>
+                        </Grid.RenderTransform>
+                    </Grid>
                 </Grid>
 
                 <!-- Mini Map -->
                 <Grid Grid.Row="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                    <Border Width="{x:Static const:Constants.MiniMapBorderSize}" Height="{x:Static const:Constants.MiniMapBorderSize}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="1" BorderBrush="{DynamicResource GrayscaleGray8Brush}" BorderThickness="1" CornerRadius="10" Visibility="{Binding ReviewStatus.Zoom.Visibility}">
-                        <Canvas>
-                            <Canvas.Background>
-                                <ImageBrush ImageSource="{Binding CrossSectionImage}" Stretch="Fill"/>
-                            </Canvas.Background>
-                            <Canvas.Clip>
-                                <RectangleGeometry RadiusX="10" RadiusY="10">
-                                    <RectangleGeometry.Rect>
-                                        <Rect X="0" Y="0" Width="{x:Static const:Constants.MiniMapCanvasSize}" Height="{x:Static const:Constants.MiniMapCanvasSize}"/>
-                                    </RectangleGeometry.Rect>
-                                </RectangleGeometry>
-                            </Canvas.Clip>
-
-                            <Rectangle Style="{DynamicResource MiniMapRect}" Canvas.Left="{Binding ReviewStatus.Zoom.RectLeft}" Canvas.Top="{Binding ReviewStatus.Zoom.RectTop}" Width="{Binding ReviewStatus.Zoom.RectWidth}" Height="{Binding ReviewStatus.Zoom.RectHeight}" Tag="{Binding ReviewStatus.Zoom.IsCaptured}">
-                                <i:Interaction.Triggers>
-                                    <i:EventTrigger EventName="PreviewMouseDown">
-                                        <i:InvokeCommandAction Command="{Binding ReviewStatus.Zoom.CmdSetCaptured}" CommandParameter="{Binding ReviewStatus.Zoom}"/>
-                                    </i:EventTrigger>
-                                    <i:EventTrigger EventName="PreviewMouseUp">
-                                        <i:InvokeCommandAction Command="{Binding ReviewStatus.Zoom.CmdSetCaptured}"/>
-                                    </i:EventTrigger>
-                                    <i:EventTrigger EventName="PreviewMouseMove">
-                                        <i:InvokeCommandAction Command="{Binding ReviewStatus.Zoom.CmdMoveRect}" CommandParameter="{Binding ReviewStatus.Zoom}"/>
-                                    </i:EventTrigger>
-                                </i:Interaction.Triggers>
-                            </Rectangle>
-                        </Canvas>
+                    <Border Width="{x:Static const:Constants.MiniMapBorderSize}" Height="{x:Static const:Constants.MiniMapBorderSize}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="1" BorderBrush="{DynamicResource GrayscaleGray8Brush}" BorderThickness="1" Background="{DynamicResource GrayscaleGray8Brush}" CornerRadius="10" Visibility="{Binding ReviewStatus.Zoom.Visibility}">
+                        <Grid>
+                            <!-- Cross Seciton Image -->
+                            <Grid>
+                                <Image Source="{Binding CrossSectionImage}">
+                                    <Image.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform ScaleX="{Binding ReviewStatus.Zoom.FoVScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding ReviewStatus.Zoom.FoVScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                            <TranslateTransform X="{Binding ReviewStatus.Zoom.MiniMapTranslateX}" Y="{Binding ReviewStatus.Zoom.MiniMapTranslateY}"/>
+                                        </TransformGroup>
+                                    </Image.RenderTransform>
+                                </Image>
+                                <Grid.Clip>
+                                    <EllipseGeometry Center="{x:Static const:Constants.MiniMapPointCenter}" RadiusX="{x:Static const:Constants.MiniMapRadius}" RadiusY="{x:Static const:Constants.MiniMapRadius}"/>
+                                </Grid.Clip>
+                            </Grid>                            
+                            <Canvas>
+                                <Rectangle Style="{DynamicResource MiniMapRect}" Canvas.Left="{Binding ReviewStatus.Zoom.RectLeft}" Canvas.Top="{Binding ReviewStatus.Zoom.RectTop}" Width="{Binding ReviewStatus.Zoom.RectWidth}" Height="{Binding ReviewStatus.Zoom.RectHeight}" Tag="{Binding ReviewStatus.Zoom.IsCaptured}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="PreviewMouseDown">
+                                            <i:InvokeCommandAction Command="{Binding ReviewStatus.Zoom.CmdSetCaptured}" CommandParameter="{Binding ReviewStatus.Zoom}"/>
+                                        </i:EventTrigger>
+                                        <i:EventTrigger EventName="PreviewMouseUp">
+                                            <i:InvokeCommandAction Command="{Binding ReviewStatus.Zoom.CmdSetCaptured}"/>
+                                        </i:EventTrigger>
+                                        <i:EventTrigger EventName="PreviewMouseMove">
+                                            <i:InvokeCommandAction Command="{Binding ReviewStatus.Zoom.CmdMoveRect}" CommandParameter="{Binding ReviewStatus.Zoom}"/>
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </Rectangle>
+                            </Canvas>
+                        </Grid>
                     </Border>
                 </Grid>
 
@@ -1223,23 +1358,31 @@
                                     </Image.Clip>
                                 </Image>
                                 <!-- L-Mode -->
-                                <Image x:Name="lMode" Source="{Binding LongitudeImage}" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" Stretch="Fill" Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                                    <i:Interaction.Triggers>
-                                        <i:EventTrigger EventName="Loaded">
-                                            <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
-                                        </i:EventTrigger>
-                                        <i:EventTrigger EventName="SizeChanged">
-                                            <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
-                                        </i:EventTrigger>
-                                    </i:Interaction.Triggers>
-                                    <Image.Clip>
+                                <Grid Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                                    <Grid.Clip>
                                         <RectangleGeometry RadiusX="8" RadiusY="8">
                                             <RectangleGeometry.Rect>
                                                 <Rect X="0" Y="0" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeImageClipHeight}"/>
                                             </RectangleGeometry.Rect>
                                         </RectangleGeometry>
-                                    </Image.Clip>
-                                </Image>
+                                    </Grid.Clip>
+                                    <Image x:Name="lMode" Source="{Binding LongitudeImage}" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" Stretch="Fill">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="Loaded">
+                                                <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
+                                            </i:EventTrigger>
+                                            <i:EventTrigger EventName="SizeChanged">
+                                                <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                        <Image.RenderTransform>
+                                            <TransformGroup>
+                                                <ScaleTransform ScaleY="{Binding FieldOfView, Converter={StaticResource LongitudeScaleConverter}}"/>
+                                                <TranslateTransform Y="{Binding FieldOfView, Converter={StaticResource LongitudeTranslateConverter}, ConverterParameter={x:Static const:Constants.LongitudeHeight}}"/>
+                                            </TransformGroup>
+                                        </Image.RenderTransform>
+                                    </Image>
+                                </Grid>               
                                 <!-- Loading -->
                                 <Grid Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityConverter}}">
                                     <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding DeviceStatus.IsLumenLoaded, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>

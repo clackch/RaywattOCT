@@ -160,8 +160,7 @@ int CLaserModule::MoveRelative(eStepMotorIndex idxMotor, int nOffset) {
 	int index = (int)idxMotor - 1;
 	int actualPosition = m_nActualPosition[index];
 
-	int nLastTargetPos = m_nStepPosition[index];
-	int nPosition = nLastTargetPos + nOffset;
+	int nPosition = m_lastTargetPosition[(int)idx - 1] + nOffset;
 
 	Move(idxMotor, nPosition);
 

@@ -175,9 +175,8 @@ RayError COCTSystem::Stop() {
 	}
 
 	PLOGI.printf("Finalize LaserModule");
-	if (m_pLaserModule != nullptr) {
-		delete m_pLaserModule;
-		m_pLaserModule = nullptr;
+	if (m_pLaserModule->IsOpen()) {
+		m_pLaserModule->Close();
 	}
 
 	return RayError::OK;
@@ -391,6 +390,7 @@ RayError COCTSystem::UnloadCatheter() {
 */
 int COCTSystem::StartReview(char* strFilePath) {
 	if (m_curState == RayScannerState::Initial || m_curState == RayScannerState::Default) {
+
 		CImagingSession *pSession = CImagingSession::CreateSession(this, SESSION_REVIEW, strFilePath);
 		if (pSession == nullptr) {
 			PLOGE.printf("InvalidArgument : %s", strFilePath);
@@ -595,7 +595,7 @@ void* COCTSystem::GetVolumeData(void* pLumenContours) {
 					cv::Point center(nDiameter/2, nDiameter/2);
 					cv::Size axes(45, 45);
 					cv::Scalar color(0, 0, 0);
-					cv::ellipse(imgOCT, center, axes, 0, 0, 360, color, -1/*»ö»ó Ã¤¿ì±â = -1*/);
+					cv::ellipse(imgOCT, center, axes, 0, 0, 360, color, -1/*Â»Ã¶Â»Ã³ ÃƒÂ¤Â¿Ã¬Â±Ã¢ = -1*/);
 				}
 			}
 			return pVolumeData;
@@ -830,6 +830,12 @@ RayError COCTSystem::SetColormap(double value)
 {
 	// Read LUT from File
 	CLookUpTable& lut = CLookUpTable::GetInstance();
+
+	if (value == 3 /*enhancedLUT.csv*/) {
+		lut.Load("LUT_enhanced.csv", true);
+		lut.SetEnhancedLUT(!(lut.GetEnhancedLUT()));
+		return RayError::OK;
+	}
 	lut.SetCurrentColormap((int)value);
 	m_fColormap = value;
 	PLOGI.printf("read LUT :%d %s", (int)value, (m_fColormap >= 0) ? "Succeed" : "Failed");
@@ -1072,6 +1078,7 @@ UINT COCTSystem::threadService(LPVOID param) {
 	lut.Load("LUT_green.csv");
 	lut.Load("LUT_gray.csv");
 	lut.Load("LUT_abbott.csv");
+	lut.Load("LUT_enhanced.csv");
 	//lut.Load("LUT_ML.csv");
 
 #ifdef DEBUG
@@ -1491,10 +1498,15 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
 	CRJController* pRJController = pSystem->m_pRJController;
+	CLaserModule* pLaserModule = pSystem->m_pLaserModule;
 
 	PLOGI.printf("Unload catheter");
 
 	pSystem->postPriorMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterUnloading);
+
+	if (pLaserModule != nullptr && pLaserModule->IsOpen()) {
+		pLaserModule->SetVLD(0);
+	}
 
 	if (pRJController->IsConnected()) {
 		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
@@ -1542,8 +1554,14 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 	pSystem->laserOnOff(false);
 #endif
 	if (true) {
-		PLOGI.printf("m_pRJController->UpdateState - Loaded");
-		pSystem->m_pRJController->UpdateState(eRJState::Loaded);
+		if (config.catheter.manualLoad) {
+			PLOGI.printf("m_pRJController->UpdateState - WaitManualLoad");
+			pSystem->m_pRJController->UpdateState(eRJState::WaitManualLoad);
+		}
+		else {
+			PLOGI.printf("m_pRJController->UpdateState - Loaded");
+			pSystem->m_pRJController->UpdateState(eRJState::Loaded);
+		}
 		PLOGI.printf("postMessage - CatheterState::Enable");
 		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Enable);
 	}
@@ -1560,6 +1578,38 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 		Sleep(DELAY_FOR_STOP_THREAD);
 	}
 	PLOGI.printf("threadValidateCatheter Done");
+
+	return NOERROR;
+}
+
+/*
+* threadValidateCatheter
+*/
+UINT COCTSystem::threadManualLoadCatheter(LPVOID param)
+{
+	COCTSystem* pSystem = (COCTSystem*)param;
+	CConfiguration& config = CConfiguration::GetInstance();
+	CRJController* pRJController = pSystem->m_pRJController;
+
+	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterLoading);
+
+	if (pRJController->IsConnected()) {
+		pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
+		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
+		pRJController->Move(eStepMotorIndex::Pullback, 0, false, 0x02 /* photo-sensor #2 */);
+		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+	}
+	else if (pSystem->m_isTestMode)
+	{
+		Sleep(config.GetLoadCatheterTime());
+	}
+
+	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loaded);
+	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::LoadCatheter);
+
+	while (pSystem->m_pThreadRotaryJunction->isRun) {
+		Sleep(DELAY_FOR_STOP_THREAD);
+	}
 
 	return NOERROR;
 }
@@ -1652,11 +1702,13 @@ int COCTSystem::connectRotaryJunction() {
 	if (!m_pRJController->IsConnected()) {
 		result &= m_pRJController->Connect(config.bldcMotor.port);
 		result &= m_pRJController->SetModeOfOperation(MOTOR_DATA_MODE_VELOCITY);
+		result &= m_pRJController->SwitchOff();
 		result &= m_pRJController->SwitchOn();
 		result &= m_pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 		result &= m_pRJController->Current(eStepMotorIndex::Hub, HUB_MOTOR_POS_INITIAL);
 
 		if (!result) PLOGI.printf("Failed to connect to Rotary Junction");
+		m_pRJController->SetManualMode(config.catheter.manualLoad);
 	}
 
 	if (!m_pLaserModule->IsConnected()) {
@@ -1890,11 +1942,6 @@ void COCTSystem::laserOnOff(bool isOn) {
 	CLaserController* pLaser = CLaserController::GetInstance();
 
 	pLaser->LaserOnOff(isOn);
-	
-	if (m_pLaserModule != nullptr && m_pLaserModule->IsConnected()) {
-		int vldPower = (isOn) ? config.laserModule.vldValue : 0;
-		m_pLaserModule->SetVLD(vldPower);
-	}
 }
 bool COCTSystem::waitForStepMotors(bool& runFlag) {
 	if (!m_pRJController->IsConnected()) return false;
@@ -2067,10 +2114,22 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 	}
 	case eRJState::Loading:
 	{
-		CUtility::StartThread(threadLoadCatheter, m_pThreadRotaryJunction, this);
+		CConfiguration &config = CConfiguration::GetInstance();
+		if (config.catheter.manualLoad) {
+			CUtility::StartThread(threadManualLoadCatheter, m_pThreadRotaryJunction, this);
+		}
+		else {
+			CUtility::StartThread(threadLoadCatheter, m_pThreadRotaryJunction, this);
+		}
 		break;
 	}
+	case eRJState::WaitManualLoad:
+		break;
 	case eRJState::Loaded:
+		if (m_pLaserModule != nullptr && m_pLaserModule->IsOpen()) {
+			CConfiguration& config = CConfiguration::GetInstance();
+			m_pLaserModule->SetVLD(config.laserModule.vldValue);
+		}
 		break;
 	case eRJState::Unloading:
 	{

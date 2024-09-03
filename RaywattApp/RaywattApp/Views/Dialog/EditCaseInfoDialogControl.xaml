@@ -18,6 +18,9 @@
             <StackPanel Height="20"/>
             <StackPanel Width="800" Height="414" Orientation="Horizontal">
                 <DataGrid Width="260" ItemsSource="{Binding ProcedureList}" SelectedItem="{Binding CurrentProcedure}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" FontSize="16">
+                    <b:Interaction.Behaviors>
+                        <behaviors:DataGridLoadedBehavior />
+                    </b:Interaction.Behaviors>
                     <DataGrid.Columns>
                         <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Value}" Header="{Binding [Procedure], Source={StaticResource L10N}}"/>
                     </DataGrid.Columns>
@@ -33,6 +36,9 @@
                 </DataGrid>
                 <StackPanel Width="10"/>
                 <DataGrid Width="260" ItemsSource="{Binding LocationList}" SelectedItem="{Binding CurrentLocation}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" FontSize="16">
+                    <b:Interaction.Behaviors>
+                        <behaviors:DataGridLoadedBehavior />
+                    </b:Interaction.Behaviors>
                     <DataGrid.Columns>
                         <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Value}" Header="{Binding [Location], Source={StaticResource L10N}}"/>
                     </DataGrid.Columns>

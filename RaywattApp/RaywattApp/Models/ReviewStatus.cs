@@ -53,28 +53,23 @@ namespace RaywattApp.Models
         private Zoom _zoomAngio = new Zoom(Constants.AngioSize);
 
         [ObservableProperty]
+        private Zoom _zoomFfr = new Zoom();
+
+        [ObservableProperty]
         private int _angioFrameNumber = -1;
 
         [ObservableProperty]
         private bool _isNoPullback = false;
 
+        [ObservableProperty]
+        private bool _isLumenEdited = true;
+
         //3D
 
 
         //Compare
+        [ObservableProperty]
         private PatientCase _selectedPatientCase;
-        public PatientCase SelectedPatientCase
-        { 
-            get { return _selectedPatientCase; }
-            set { 
-                _selectedPatientCase = value;
-                OnPropertyChanged(nameof(SelectedPatientCase));
-                if (_selectedPatientCase != null)
-                {
-                    Constants.ImageResolutionCompare = _selectedPatientCase.ImageResolution;
-                }
-            }
-        }
 
         //FFR
     }

@@ -163,7 +163,7 @@ namespace RaywattApp.Models
             LesionDistal = lesionDistalTemp - LesionLengthWidth;
         }
 
-        public bool SetMlaMld(List<LumenContour> lumenContours, int frameProximal, int frameDistal, int totalFrame, double longitudeWidth, string pullbackLength, double imageResolution)
+        public bool SetMlaMld(List<LumenContour> lumenContours, int frameProximal, int frameDistal, int totalFrame, double longitudeWidth, string pullbackLength)
         {
             if(lumenContours == null || lumenContours.Count == 0 || frameProximal < 0 || frameDistal < 0 || frameProximal >= frameDistal) 
                 return false;
@@ -173,13 +173,22 @@ namespace RaywattApp.Models
             CalcLesionLength(frameProximal, frameDistal, totalFrame, longitudeWidth, pullbackLength);
 
             int count = frameDistal - frameProximal + 1;
-            double mla = lumenContours.GetRange(frameProximal, count).Where(x => x.Area > 0).Min(x => x.Area);
+            var mlaSubset = lumenContours.GetRange(frameProximal, count).Where(x => x.Area > 0);
+            double mla = -1;
+            if (mlaSubset.Any())
+                mla = mlaSubset.Min(x => x.Area);
             int mlaIdx = lumenContours.GetRange(frameProximal, count).FindIndex(x => x.Area == mla);
 
-            double mld = lumenContours.GetRange(frameProximal, count).Where(x => x.MeanDiameter > 0).Min(x => x.MeanDiameter);
+            var mldSubset = lumenContours.GetRange(frameProximal, count).Where(x => x.MeanDiameter > 0);
+            double mld = -1;
+            if (mldSubset.Any())
+                mld = mldSubset.Min(x => x.MeanDiameter);
             int mldIdx = lumenContours.GetRange(frameProximal, count).FindIndex(x => x.MeanDiameter == mld);
 
-            double areaScaleMM2 = imageResolution * imageResolution;
+            if (mla == -1 || mld == -1)
+                return false;
+
+            double areaScaleMM2 = Constants.ImageResolution * Constants.ImageResolution;
 
             if(mlaIdx <= mldIdx)
             {
@@ -213,7 +222,7 @@ namespace RaywattApp.Models
             return true;
         }
 
-        public bool SetMsaMinExp(List<LumenContour> lumenContours, int frameProximal, int frameDistal, int stentProximal, int stentDistal, int totalFrame, double longitudeWidth, string pullbackLength, double imageResolution)
+        public bool SetMsaMinExp(List<LumenContour> lumenContours, int frameProximal, int frameDistal, int stentProximal, int stentDistal, int totalFrame, double longitudeWidth, string pullbackLength)
         {
             if (lumenContours == null || lumenContours.Count == 0 || frameProximal < 0 || frameDistal < 0 || frameProximal >= frameDistal)
                 return false;
@@ -229,14 +238,20 @@ namespace RaywattApp.Models
             if (count <= 0)
                 return false;
 
-            double msa = lumenContours.GetRange(tempProximal, count).Min(x => x.Area);
+            var msaSubset = lumenContours.GetRange(tempProximal, count).Where(x => x.Area > 0);
+            double msa = -1;
+            if(msaSubset.Any())
+                msa = msaSubset.Min(x => x.Area);
             int msaIdx = lumenContours.GetRange(tempProximal, count).FindIndex(x => x.Area == msa);
+
+            if (msa == -1)
+                return false;
 
             //TODO) Min Exp 정의가 되면 Min Exp 변경 필요
             double minExp = msa;
             int minExpIdx = msaIdx;
 
-            double areaScaleMM2 = imageResolution * imageResolution;
+            double areaScaleMM2 = Constants.ImageResolution * Constants.ImageResolution;
 
             if(msaIdx <= minExpIdx)
             {

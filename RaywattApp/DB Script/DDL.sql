@@ -121,6 +121,7 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case
     num_of_frames integer,
     image character varying(200) COLLATE pg_catalog."default",
     image_resolution real,
+	manual_calibration integer,
 	field_of_view real,
 	angio_yn boolean,
 	angio_co_registration boolean,
@@ -190,6 +191,7 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case_annotation
     lumen_sidebranch text COLLATE pg_catalog."default",
     lumen_stent text COLLATE pg_catalog."default",
     lumen_guidewire text COLLATE pg_catalog."default",	
+	ffr_plaque text COLLATE pg_catalog."default",	
 	create_date timestamp without time zone,
     update_date timestamp without time zone,
     CONSTRAINT patient_case_annotation_pkey PRIMARY KEY (id)

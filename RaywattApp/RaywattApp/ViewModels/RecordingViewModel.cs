@@ -49,6 +49,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private int _startTime;
 
+        [ObservableProperty]
+        private Zoom _zoom = new Zoom();
+
         private Thread threadWaitPullbackDone;
         private bool runWaitPullbackDone;
 
@@ -116,6 +119,8 @@ namespace RaywattApp.ViewModels
                 Patient = (Patient)data["patient"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 PatientCase = (PatientCase)data["patientCase"];
+
+                Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
 
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
@@ -249,6 +254,9 @@ namespace RaywattApp.ViewModels
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {
             DrawCrossSectionImage();
+
+            if (DeviceStatus.IsAngioConnected)
+                DrawAngioImage();
         }
 
         private void leaveToPage(string viewPage)
@@ -273,6 +281,13 @@ namespace RaywattApp.ViewModels
             _log.Debug("generateFileName : " + filename);
 
             return filename;
+        }
+
+        private bool DrawAngioImage()
+        {
+            AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(_angioManager.ImgAngio);
+
+            return true;
         }
     }
 }
