@@ -175,8 +175,8 @@ RayError COCTSystem::Stop() {
 	}
 
 	PLOGI.printf("Finalize LaserModule");
-	if (m_pLaserModule->IsOpen()) {
-		m_pLaserModule->Close();
+	if (m_pLaserModule->IsConnected()) {
+		m_pLaserModule->Disconnect();
 	}
 
 	return RayError::OK;
@@ -1504,7 +1504,7 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 
 	pSystem->postPriorMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterUnloading);
 
-	if (pLaserModule != nullptr && pLaserModule->IsOpen()) {
+	if (pLaserModule != nullptr && pLaserModule->IsConnected()) {
 		pLaserModule->SetVLD(0);
 	}
 
@@ -2126,7 +2126,7 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 	case eRJState::WaitManualLoad:
 		break;
 	case eRJState::Loaded:
-		if (m_pLaserModule != nullptr && m_pLaserModule->IsOpen()) {
+		if (m_pLaserModule != nullptr && m_pLaserModule->IsConnected()) {
 			CConfiguration& config = CConfiguration::GetInstance();
 			m_pLaserModule->SetVLD(config.laserModule.vldValue);
 		}
