@@ -1,288 +1,327 @@
 #include "LaserModule.h"
-#include "RS232Comm.h"
-#include "DelayLineComm.h"
+#include "COMConnection.h"
 #include "Utility.h"
 #include <chrono>
 
-extern struct min_context min_ctx;
+CLaserModule::CLaserModule()
+	:ICommonProtocol(CM_STX, CM_ETX)
+{
+	m_nStepPosition[0] = 0;
+	m_nStepPosition[1] = 0;
+	m_nStepSpeed[0] = 0;
+	m_nStepSpeed[1] = 0;
+	m_nVOA = m_nVLD = 0;
 
-CLaserModule::CLaserModule() {
-	m_pThread = nullptr;
-	m_hComTx = INVALID_HANDLE_VALUE;
-	m_prevPosition[0] = 0;
-	m_prevPosition[1] = 0;
-	m_lastTargetPosition[0] = -1;
-	m_lastTargetPosition[1] = -1;
+	m_nActualPosition[0] = 0;
+	m_nActualPosition[1] = 0;
+	m_isSMMoving[0] = false;
+	m_isSMMoving[1] = false;
+	for (int i = 0; i < 6; i++) {
+		m_bPhotoSensor[i] = false;
+	}
 }
-CLaserModule::~CLaserModule() {
-	Close();
+
+CLaserModule::~CLaserModule()
+{
+	Disconnect();
 }
+bool CLaserModule::Connect(void* param) {
+	if (m_initMotor) return m_initMotor;
 
-UINT CLaserModule::threadReadStatus(LPVOID param) {
-	CLaserModule* pModule = (CLaserModule*)param;
+	m_pConnection = new CCOMConnection();
+	m_initMotor = m_pConnection->Connect(param);
+	if (m_initMotor) {
+		AutoStatePeriod(10);
+		initSetting();
+		BOOL result = CUtility::StartThread(threadReadPacket, m_pThread, (LPVOID)this);
 
-	while (pModule->m_pThread->isRun)
-	{
-		pModule->readStatus();
+		if (result == FALSE) {
+			Disconnect();
+			m_initMotor = false;
+		}
+	}
+
+	return m_initMotor;
+}
+void CLaserModule::Disconnect() {
+	CMotorController::Disconnect();
+}
+bool CLaserModule::IsMoving(eStepMotorIndex idxMotor) {
+	bool isMoving = (idxMotor == eStepMotorIndex::Both) ? (m_isSMMoving[0] || m_isSMMoving[1]) : m_isSMMoving[(int)idxMotor - 1];
+	if (isMoving) {
+		ReadPosition();
+	}
+	return isMoving;
+}
+bool CLaserModule::ReadPosition() {
+	if (!m_initMotor) return false;
+
+	BYTE serialPacket[MAX_PATH];
+
+	int packetLength;
+	getSerialPacket(eFID::FID_SM_GET_STATE, 0, serialPacket, packetLength);
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	return (written == packetLength);
+}
+bool CLaserModule::Current(eStepMotorIndex idxMotor, int posStep) {
+	if (!m_initMotor) return false;
+
+	PLOGI.printf("StepMotor #%d Current: %d", idxMotor, posStep);
+
+	if (idxMotor == eStepMotorIndex::Both) {
+		m_nStepPosition[0] = posStep;
+		m_nStepPosition[1] = posStep;
+	}
+	else {
+		m_nStepPosition[(int)idxMotor - 1] = posStep;
+	}
+
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	getSerialPacket(eFID::FID_SM_SET_POS, sizeof(int) * 2, serialPacket, packetLength);
+
+	int idxData = DATA_IDX;
+	memcpy(serialPacket + idxData, &m_nStepPosition[0], sizeof(int));
+	idxData += sizeof(int);
+	memcpy(serialPacket + idxData, &m_nStepPosition[1], sizeof(int));
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	return (written == packetLength);
+}
+bool CLaserModule::Move(eStepMotorIndex idxMotor, int posStep, bool delay, char sensor) {
+	if (!m_initMotor) return false;
+
+	PLOGI.printf("StepMotor #%d Move: %d (Speed - #1: %d, #2: %d step/s", idxMotor, posStep, m_nStepSpeed[0], m_nStepSpeed[1]);
+
+	char sensorStop[2] = { 0x00, 0x00 };
+	if (idxMotor == eStepMotorIndex::Both) {
+		m_nStepPosition[0] = posStep;
+		m_nStepPosition[1] = posStep;
+		m_isSMMoving[0] = true;
+		m_isSMMoving[1] = true;
+		sensorStop[0] = sensor;
+		sensorStop[1] = sensor;
+	}
+	else {
+		m_nStepPosition[(int)idxMotor - 1] = posStep;
+		m_isSMMoving[(int)idxMotor - 1] = true;
+		sensorStop[(int)idxMotor - 1] = sensor;
+	}
+
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	getSerialPacket(eFID::FID_SM_RUN, sizeof(int) * 4 + 2, serialPacket, packetLength);
+
+	int idxData = DATA_IDX;
+	memcpy(serialPacket + idxData, &m_nStepPosition[0], sizeof(int));
+	idxData += sizeof(int);
+	memcpy(serialPacket + idxData, &m_nStepPosition[1], sizeof(int));
+	idxData += sizeof(int);
+	memcpy(serialPacket + idxData, &m_nStepSpeed[0], sizeof(int));
+	idxData += sizeof(int);
+	memcpy(serialPacket + idxData, &m_nStepSpeed[1], sizeof(int));
+	idxData += sizeof(char);
+	memcpy(serialPacket + idxData, &sensorStop[0], sizeof(char));
+	idxData += sizeof(char);
+	memcpy(serialPacket + idxData, &sensorStop[1], sizeof(char));
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	return (written == packetLength);
+}
+bool CLaserModule::Set(eStepMotorIndex idxMotor, int velStep) {
+	if (!m_initMotor) return false;
+
+	if (idxMotor == eStepMotorIndex::Both) {
+		m_nStepSpeed[0] = velStep;
+		m_nStepSpeed[1] = velStep;
+	}
+	else {
+		m_nStepSpeed[(int)idxMotor - 1] = velStep;
+	}
+
+	return true;
+}
+int CLaserModule::MoveRelative(eStepMotorIndex idxMotor, int nOffset) {
+	if (idxMotor != eStepMotorIndex::DelayLine && idxMotor != eStepMotorIndex::Polarization) return 0;
+
+	int index = (int)idxMotor - 1;
+	int actualPosition = m_nActualPosition[index];
+
+	int nPosition = m_lastTargetPosition[(int)idx - 1] + nOffset;
+
+	Move(idxMotor, nPosition);
+
+	return nPosition;
+}
+void CLaserModule::SetVOA(unsigned short voa) {
+	m_nVOA = voa;
+	setVOAVLD();
+}
+void CLaserModule::SetVLD(unsigned short vld) {
+	m_nVLD = vld;
+	setVOAVLD();
+}
+bool CLaserModule::AutoStatePeriod(USHORT interval) {
+	if (!m_initMotor) return false;
+
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	getSerialPacket(eFID::FID_SET_AUTO_PERIOD, sizeof(unsigned short) * 2 + 1, serialPacket, packetLength);
+
+	const char chkAutoByChanged = false;
+	const unsigned short autoHoldOff = 10;
+
+	int idxData = DATA_IDX;
+	memcpy(serialPacket + idxData, &interval, sizeof(unsigned short));
+	idxData += sizeof(unsigned short);
+	memcpy(serialPacket + idxData, &chkAutoByChanged, sizeof(char));
+	idxData += sizeof(char);
+	memcpy(serialPacket + idxData, &autoHoldOff, sizeof(unsigned short));
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	return (written == packetLength);
+}
+bool CLaserModule::StopStepMotors() {
+	if (!m_initMotor) return false;
+
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	getSerialPacket(eFID::FID_SM_STOP, sizeof(BYTE) * 2, serialPacket, packetLength);
+
+	BYTE stopIdx[2] = { 0x02, 0x02 };	// 0x02: Stop Immediately
+	memcpy(serialPacket + DATA_IDX, stopIdx, sizeof(BYTE) * 2);
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	return (written == packetLength);
+}
+UINT CLaserModule::threadReadPacket(LPVOID param) {
+	CLaserModule* pRJController = (CLaserModule*)param;
+	BYTE recvBuf[MAX_PATH];
+	int offset = 0;
+
+	while (pRJController->m_pThread->isRun) {
+		int readSize = pRJController->m_pConnection->Read(recvBuf + offset);
+		if (readSize > 0) {
+			pRJController->addPacket(recvBuf, readSize);
+			pRJController->parseSerialPacket();
+		}
+
 		Sleep(1);
 	}
 
 	return NOERROR;
 }
 
-void CLaserModule::readStatus() {
-	char msgIn[MAX_PATH] = { 0 };
-	size_t buf_len = 0;
+void CLaserModule::initSetting() {
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	getSerialPacket(eFID::FID_SM_SET_CONFIG, (sizeof(int) * 7 + sizeof(char) * 2) * 2, serialPacket, packetLength);
 
-	COMSTAT st;
-	DWORD errmask = 0, eventmask = EV_RXCHAR, ret;
-	OVERLAPPED ov;
-	int r;
+	const int minSpeed = 100;
+	const int maxSpeed = 5000;
+	const int accTime = 1;
+	const int accStep = 100;
+	const int decTime = 1;
+	const int decStep = 1000;
+	const int minStep = 10;
+	const char accType = 1;	// profile
+	const char decType = 0; // linear
 
-	// first, request comm event when characters arrive
-	if (!SetCommMask(m_hComTx, EV_RXCHAR)) return;
-	// look if there are characters in the buffer already
-	if (!ClearCommError(m_hComTx, &errmask, &st)) return;
+	int offset = 0;
+	for (int i = 0; i < 2; i++) {
+		memcpy(serialPacket + DATA_IDX + offset, &minSpeed, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &maxSpeed, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &accTime, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &accStep, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &decTime, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &decStep, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &minStep, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &accType, sizeof(char)); offset += sizeof(char);
+		memcpy(serialPacket + DATA_IDX + offset, &decType, sizeof(char)); offset += sizeof(char);
+	}
 
-	DWORD bytesRead;
-	if (st.cbInQue > 0)
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+	if (written != packetLength)
 	{
-		buf_len = inputFromPort(&m_hComTx, msgIn, MAX_PATH);
-	}
-	else
-	{
-		buf_len = 0;
-	}
-	min_poll(&min_ctx, (uint8_t*)msgIn, (uint32_t)buf_len);
-}
-
-bool CLaserModule::Open(tstring strPort) {
-	COMMTIMEOUTS timeout{}; // A commtimeout struct variable
-
-	Close();
-
-	// change COM Port Format
-	size_t offset = strPort.rfind(L"COM");
-	tstring strPortNum = strPort.substr(offset + 3);
-	wchar_t strCOMPort[MAX_PATH];
-	wsprintf(strCOMPort, L"\\\\.\\COM%d", _wtoi(strPortNum.c_str()));
-	PLOGI.printf(L"Connect to %s", strCOMPort);
-
-	initPort(&m_hComTx, strCOMPort, 500000, 8, timeout);
-	if (!IsOpen()) return false;
-
-	min_init_context(&m_ctx, 0);
-	m_ctx.cb = this;
-	min_ctx = m_ctx;
-
-	CUtility::StartThread(threadReadStatus, m_pThread, this);
-
-	const uint32_t accTime = 250000;
-	const uint32_t velocity = 19200;
-	delay_line_Set_Acc_Time((uint8_t) MotorIndex::Polarization, accTime);
-	delay_line_Set_Acc_Time((uint8_t) MotorIndex::DelayLine, accTime);
-	delay_line_Set_Velocity((uint8_t)MotorIndex::Polarization, velocity);
-	delay_line_Set_Velocity((uint8_t)MotorIndex::DelayLine, velocity);
-
-	delay_line_GetDelayLineObj(1); //NEED SET (1) AT BEGIN TO SET UP MAINBOARD TO  CONTINOUS MODE (MEAN SEND ALL DATA OF MAINBOARD CONTINUOUS).
-
-	return true;
-}
-bool CLaserModule::IsOpen() {
-	return (m_hComTx != INVALID_HANDLE_VALUE);
-}
-void CLaserModule::Close() {
-	CUtility::StopThread(m_pThread);
-
-	if (IsOpen()) {
-		SetVOA(0);
-		SetVLD(0);
-		CloseHandle(m_hComTx);
-		m_hComTx = INVALID_HANDLE_VALUE;
+		PLOGI.printf("Written size is not matched. (%d / %d bytes)", written, packetLength);
 	}
 }
+void CLaserModule::parseSMPacket(BYTE* packet, int size) {
+	int offset = 0;
+	for (int i = 0; i < 2; i++) {
+		m_isSMMoving[i] = packet[offset]; offset++;
 
-bool CLaserModule::IsMoving(MotorIndex idx) {
-	if (idx != MotorIndex::DelayLine && idx != MotorIndex::Polarization) return false;
-
-	int index = (int)idx - 1;
-	int actualPosition = (index == 0) ? m_RAM.marshall.position_motor1_actual : m_RAM.marshall.position_motor2_actual;
-
-	return (m_prevPosition[index] != actualPosition);
-}
-bool CLaserModule::MoveAbsolute(MotorIndex idx, int nPosition) {
-	if (!IsOpen()) return false;
-	if (idx != MotorIndex::DelayLine && idx != MotorIndex::Polarization) return false;
-
-	PLOGI.printf("Move Motor #%d - %d", idx, nPosition);
-	delay_line_Move_single_axis_abs_pos((uint8_t) idx, nPosition);
-
-	m_lastTargetPosition[(int)idx - 1] = nPosition;
-
-	return true;
-}
-int CLaserModule::MoveRelative(MotorIndex idx, int nOffset) {
-	if (idx != MotorIndex::DelayLine && idx != MotorIndex::Polarization) return 0;
-
-	int index = (int)idx - 1;
-	int actualPosition = (index == 0) ? m_RAM.marshall.position_motor1_actual : m_RAM.marshall.position_motor2_actual;
-
-	int nPosition = m_lastTargetPosition[(int)idx - 1] + nOffset;
-
-	MoveAbsolute(idx, nPosition);
-
-	return nPosition;
-}
-void CLaserModule::Home(int nPosition, int nTimeout) {
-	delay_line_Move_single_axis_abs_pos((int) MotorIndex::DelayLine, nPosition);
-	int index = ((int)MotorIndex::DelayLine) - 1;
-	bool sendStop = false;
-
-	int pos = (index == 0) ? m_RAM.marshall.position_motor1_actual : m_RAM.marshall.position_motor2_actual;
-	for (int i = 0; i < nTimeout / 10; i++) {
-		if (m_RAM.marshall.input_sensor.marshall.U4 == 0) {
-			if (!sendStop) {
-				pos = (index == 0) ? m_RAM.marshall.position_motor1_actual : m_RAM.marshall.position_motor2_actual;
-				PLOGI.printf("Stop! U4: %d - pos: %d", m_RAM.marshall.input_sensor.marshall.U4, pos);
-
-				delay_line_SetStop((int)MotorIndex::DelayLine);
-				sendStop = true;
-			}
-			else {
-				delay_line_ClearPosition((int)MotorIndex::DelayLine);
-				pos = (index == 0) ? m_RAM.marshall.position_motor1_actual : m_RAM.marshall.position_motor2_actual;
-
-				if (pos == 0) break;
-				PLOGI.printf("ClearPosition - pos: %d", pos);
-			}
+		int curPos = 0;
+		for (int j = 0; j < 4; j++) {
+			curPos |= (packet[offset + j] << (j * 8));
 		}
-		Sleep(10);
+		PLOGI.printf("StepMotor #%d (%s): %d", i, ((m_isSMMoving[i]) ? "Moving" : "Stop"), curPos);
+		m_nActualPosition[i] = curPos;
+		offset += 13;	// current pos (4byte), target pos (4byte), current speed (4byte), stop condition (1byte, photo-sensor)
 	}
 }
-void CLaserModule::SetVLD(unsigned short nValue) {
-	if (!IsOpen()) return;
-	nValue = (nValue < 0) ? 0 : (nValue > MAX_VOLTAGE_RAW_VALUE) ? MAX_VOLTAGE_RAW_VALUE : nValue;
+void CLaserModule::setVOAVLD()
+{
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	getSerialPacket(eFID::FID_SET_VOAVLD, sizeof(unsigned short) * 2, serialPacket, packetLength);
 
-	PLOGI.printf("Visible Laser Power - %d", nValue);
-	delay_line_Set_voltage_ld(nValue);
-	m_nVLDValue = nValue;
-	PLOGI.printf("Visible Laser Power done");
+	memcpy(serialPacket + DATA_IDX, &m_nVOA, sizeof(unsigned short));
+	memcpy(serialPacket + DATA_IDX + 2, &m_nVLD, sizeof(unsigned short));
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	PLOGI.printf("VOA: %d, VLD: %d", m_nVOA, m_nVLD);
+	if (written != packetLength)
+	{
+		PLOGI.printf("Written size is not matched. (%d / %d bytes)", written, packetLength);
+	}
 }
-void CLaserModule::SetVOA(unsigned short nValue) {
-	if (!IsOpen()) return;
-	nValue = (nValue < 0) ? 0 : (nValue > MAX_VOLTAGE_RAW_VALUE) ? MAX_VOLTAGE_RAW_VALUE : nValue;
+void CLaserModule::handlePacket() {
+	BYTE length = m_vPacket[LENGTH_IDX];
+	int dataLength = length - HEADER_LEN;
+	eFID fid = (eFID)m_vPacket[FID_IDX];
 
-	PLOGI.printf("VOA Power - %d", nValue);
-	delay_line_Set_voltage_voa(nValue);
-	m_nVOAValue = nValue;
+	char strTime[MAX_PATH];
+	CUtility::GetCurTime(strTime);
 
-}
-
-// CALLBACK. Handle incoming MIN frame
-void CLaserModule::min_application_handler(uint8_t min_id, uint8_t const* min_payload, uint8_t len_payload, uint8_t port) {
-	static int prevU2 = 0;
-	static int prevU4 = 0;
-	static int prevU7 = 0;
-
-	switch (min_id)
-	{
-	case CTRL_CODE_GET_DELAY_LINE_OBJ:
-	{
-		memcpy(m_RAM.unmarshall, min_payload, len_payload);
-
-#if 1
-		if (prevU2 != m_RAM.marshall.input_sensor.marshall.U2 ||
-			prevU4 != m_RAM.marshall.input_sensor.marshall.U4 ||
-			prevU7 != m_RAM.marshall.input_sensor.marshall.U7) {
-			PLOGI.printf("U4: %d U7: %d U2: %d",
-				m_RAM.marshall.input_sensor.marshall.U4,
-				m_RAM.marshall.input_sensor.marshall.U7,
-				m_RAM.marshall.input_sensor.marshall.U2);
-		}
-		prevU2 = m_RAM.marshall.input_sensor.marshall.U2;
-		prevU4 = m_RAM.marshall.input_sensor.marshall.U4;
-		prevU7 = m_RAM.marshall.input_sensor.marshall.U7;
-#endif
-#if 1
-		if (m_prevPosition[0] != m_RAM.marshall.position_motor1_actual) {
-			PLOGI.printf(" POS1 : %d", m_RAM.marshall.position_motor1_actual);
-		}
-		m_prevPosition[0] = m_RAM.marshall.position_motor1_actual;
-		m_prevPosition[1] = m_RAM.marshall.position_motor2_actual;
-#endif
+	// photo sensor state
+	for (int i = 0; i < 6; i++) {
+		m_bPhotoSensor[i] = m_vPacket[PHOTO_IDX] & (0x1 << i);
 	}
-	break;
-	case CTRL_CODE_GET_ACTUAL_POS:
-	{
-		Move_single_axis_abs_pos_u data;
-		memcpy(data.unmarshall, min_payload, len_payload);
 
-		if (data.marshall.idMotor == 1) {
-			m_prevPosition[0] = m_RAM.marshall.position_motor1_actual;
-			m_RAM.marshall.position_motor1_actual = data.marshall.pos;
-		}
-		if (data.marshall.idMotor == 2) {
-			m_prevPosition[1] = m_RAM.marshall.position_motor2_actual;
-			m_RAM.marshall.position_motor2_actual = data.marshall.pos;
-		}
-	}
-	break;
-	case CTRL_CODE_GET_ACTUAL_VOLTAGE_VOA_RAW:
-	{
-		convertData_u<uint16_t> data;
-		memcpy(data.unmarshall, min_payload, len_payload);
-
-		m_RAM.marshall.voltage_VOA_actual = data.marshall;
-	}
-	break;
-	case CTRL_CODE_GET_ACTUAL_VOLTAGE_LD_RAW:
-	{
-		convertData_u<uint16_t> data;
-		memcpy(data.unmarshall, min_payload, len_payload);
-
-		m_RAM.marshall.voltage_LD_actual = data.marshall;
-	}
-	break;
-	case CTRL_CODE_GET_STATUS:
-	{
-		ObjDelayStatus_u data;
-		memcpy(data.unmarshall, min_payload, len_payload);
-
-		m_RAM.marshall.status = data;
-	}
-	break;
-	case CTRL_CODE_PING:
-	{
-		PLOGI.printf("PING Received.");
-	}
-	break;
+	switch (fid) {
+	case eFID::FID_SM_GET_STATE:
+		parseSMPacket(&m_vPacket[DATA_IDX], dataLength);
+		break;
 	default:
 		break;
 	}
 }
-
-uint32_t CLaserModule::min_time_ms(void) {
-	static auto init_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()); //dont change this value
-
-	std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch() - init_time);
-	return ms.count();
-}
-
-uint16_t CLaserModule::min_tx_space(uint8_t port) {
-	// Ignore 'port' because we have just one context. But in a bigger application
-	// with multiple ports we could make an array indexed by port to select the serial
-	// port we need to use.
-	//uint16_t n = UART_USE.availableForWrite();
-
-	uint16_t n = 256;
-
-	return n;
-}
-
-void CLaserModule::min_tx_byte(uint8_t port, uint8_t byte) {
-	// Ignore 'port' because we have just one context.
-	outputToPort(&m_hComTx, &byte, 1);
-}
-
-void CLaserModule::min_tx_start(uint8_t port) {}
-void CLaserModule::min_tx_finished(uint8_t port) {}

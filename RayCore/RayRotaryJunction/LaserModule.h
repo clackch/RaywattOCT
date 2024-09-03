@@ -1,74 +1,52 @@
 #pragma once
 #include "Config.h"
-#include "min.h"
-#include "MemoryStruct.h"
+#include "CommonProtocol.h"
+#include "MotorController.h"
 
-#define MAX_VOLTAGE_RAW_VALUE	4095
+#define MAX_VOLTAGE_RAW_VALUE					4095
+#define CALIBRATION_MODULE_SM_DEFAULT_SPEED		1000
+#define DELAYLINE_BACKWARD_POSITION				(-50)
+#define DELAYLINE_FORWARD_POSITION				(50)
 
-enum class MotorIndex {
-	Polarization = 1,
-	DelayLine = 2,
-};
-
-class CThread;
-class CLaserModule : public min_callback
+class CLaserModule
+	: public CMotorController,
+	public IStepMotorAction,
+	public ICommonProtocol
 {
 private:
-	CThread* m_pThread;
+	int m_nStepPosition[2];
+	int m_nStepSpeed[2];
+	unsigned short m_nVOA, m_nVLD;
 
-	struct min_context m_ctx;
-
-	HANDLE m_hComTx;
-	ObjDelayLineData_u m_RAM;
-
-	BYTE m_pReadBuffer[MAX_PATH];
-	int m_prevPosition[2];
-	int m_lastTargetPosition[2];
-	int m_nVLDValue;
-	int m_nVOAValue;
-
-private:
-	static UINT threadReadStatus(LPVOID param);
-	void readStatus();
+	int m_nActualPosition[2];
+	bool m_isSMMoving[2];
+	bool m_bPhotoSensor[6];
 
 public:
 	CLaserModule();
 	virtual ~CLaserModule();
 
-	// Common
-	bool Open(tstring strPort);
-	bool IsOpen();
-	void Close();
+	virtual bool Connect(void* strPort);
+	virtual void Disconnect();
 
-	// Step Motor (Delay-line & Polarization Control)
-	bool IsMoving(MotorIndex idx);
-	int GetPosition(MotorIndex idx) { return (idx == MotorIndex::DelayLine) ? m_RAM.marshall.position_motor2_actual : m_RAM.marshall.position_motor1_actual; }
-	bool MoveAbsolute(MotorIndex idx, int nPosition);
-	int MoveRelative(MotorIndex idx, int nOffset);
-	void Home(int nPosition, int nTimeout /* msec */);
+	virtual bool IsMoving(eStepMotorIndex idxMotor);
+	virtual bool ReadPosition();
+	virtual bool Current(eStepMotorIndex idxMotor, int posStep);
+	virtual bool Move(eStepMotorIndex idxMotor, int posStep, bool delay = false, char sensor = 0);
+	virtual bool Set(eStepMotorIndex idxMotor, int velStep);
 
-	// VLD
-	void SetVLD(unsigned short nValue);
-	
-	// VOA
-	void SetVOA(unsigned short nValue);
+	int GetPosition(eStepMotorIndex idxMotor) { return m_nStepPosition[(int)idxMotor]; }
+	int MoveRelative(eStepMotorIndex idxMotor, int nOffset);
+	void SetVOA(unsigned short voa);
+	void SetVLD(unsigned short vld);
 
-public:
-	// CALLBACK. Handle incoming MIN frame
-	virtual void min_application_handler(uint8_t min_id, uint8_t const* min_payload, uint8_t len_payload, uint8_t port);
-
-	// CALLBACK. Must return current time in milliseconds.
-	// Typically a tick timer interrupt will increment a 32-bit variable every 1ms (e.g. SysTick on Cortex M ARM devices).
-	virtual uint32_t min_time_ms(void);
-
-	// CALLBACK. Must return current buffer space in the given port. Used to check that a frame can be
-	// queued.
-	virtual uint16_t min_tx_space(uint8_t port);
-
-	// CALLBACK. Send a byte on the given line.
-	virtual void min_tx_byte(uint8_t port, uint8_t byte);
-
-	// CALLBACK. Indcates when frame transmission is finished; useful for buffering bytes into a single serial call.
-	virtual void min_tx_start(uint8_t port);
-	virtual void min_tx_finished(uint8_t port);
+	bool AutoStatePeriod(USHORT interval);
+	bool StopStepMotors();
+protected:
+	static UINT threadReadPacket(LPVOID param);
+	void initSetting();
+	void parseSMPacket(BYTE* packet, int size);
+	void setVOAVLD();
+	virtual void handlePacket();
 };
+

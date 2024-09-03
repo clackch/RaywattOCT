@@ -10,7 +10,6 @@
 #include "SimulateDevice.h"
 #include "LaserController.h"
 #include "RJController.h"
-#include "ZaberController.h"
 #include "IRayLearning.h"
 #include "ImagingSession.h"
 #include "LaserModule.h"
@@ -169,25 +168,16 @@ RayError COCTSystem::Stop() {
 		m_pVolume = nullptr;
 	}
 
-	PLOGI.printf("Laser Off");
-	CLaserController* pLaser = CLaserController::GetInstance();
-	pLaser->LaserOnOff(false);
-
-	PLOGI.printf("Stop Motor");
-	m_pRJController->StopMotor();
-	m_pRJController->SwitchOff();
-	m_pRJController->Disconnect();
+	PLOGI.printf("Finalize Motor");
 	if (m_pRJController != nullptr) {
 		delete m_pRJController;
 		m_pRJController = nullptr;
 	}
 
-	PLOGI.printf("Close COM Ports");
+	PLOGI.printf("Finalize LaserModule");
 	if (m_pLaserModule->IsOpen()) {
 		m_pLaserModule->Close();
 	}
-	delete m_pLaserModule;
-	m_pLaserModule = nullptr;
 
 	return RayError::OK;
 }
@@ -290,10 +280,10 @@ RayError COCTSystem::AutoCalibration() {
 */
 RayError COCTSystem::ManualCalibration(bool forward) {
 	if (m_curState == RayScannerState::Default) {
-		if (m_pLaserModule->IsOpen() == false) return RayError::DeviceNotConnected;
-		if (m_pLaserModule->IsMoving(MotorIndex::DelayLine)) return RayError::DeviceBusy;
+		if (m_pLaserModule->IsConnected() == false) return RayError::DeviceNotConnected;
+		if (m_pLaserModule->IsMoving(eStepMotorIndex::DelayLine)) return RayError::DeviceBusy;
 
-		m_pLaserModule->MoveRelative(MotorIndex::DelayLine, (forward ? DELAYLINE_FORWARD_POSITION : DELAYLINE_BACKWARD_POSITION));
+		m_pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, (forward ? DELAYLINE_FORWARD_POSITION : DELAYLINE_BACKWARD_POSITION));
 
 		return RayError::OK;
 	}
@@ -605,7 +595,7 @@ void* COCTSystem::GetVolumeData(void* pLumenContours) {
 					cv::Point center(nDiameter/2, nDiameter/2);
 					cv::Size axes(45, 45);
 					cv::Scalar color(0, 0, 0);
-					cv::ellipse(imgOCT, center, axes, 0, 0, 360, color, -1/*»ö»ó Ã¤¿ì±â = -1*/);
+					cv::ellipse(imgOCT, center, axes, 0, 0, 360, color, -1/*Â»Ã¶Â»Ã³ ÃƒÂ¤Â¿Ã¬Â±Ã¢ = -1*/);
 				}
 			}
 			return pVolumeData;
@@ -1292,24 +1282,24 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 	CLaserModule* pLaserModule = pSystem->m_pLaserModule;
 	int nTargetPos = 0;
 
-	if (pLaserModule != nullptr && pLaserModule->IsOpen())
+	if (pLaserModule != nullptr && pLaserModule->IsConnected())
 	{
 		// 1. Start Finding Sheath
 		pSystem->m_vCalibrationInfo.clear();
 		pSystem->m_cathState = CatheterState::FindingSheath;
 		
 		// 1-1. Move Delay-line & Find Sheath
-		nTargetPos = pLaserModule->MoveRelative(MotorIndex::DelayLine, DELAYLINE_BACKWARD_POSITION * 50);
+		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, DELAYLINE_BACKWARD_POSITION * 50);
 		do {
 			Sleep(10);
-			if (!pLaserModule->IsMoving(MotorIndex::DelayLine)) pLaserModule->MoveAbsolute(MotorIndex::DelayLine, nTargetPos);
-		} while (pLaserModule->GetPosition(MotorIndex::DelayLine) != nTargetPos);
+			if (!pLaserModule->IsMoving(eStepMotorIndex::DelayLine)) pLaserModule->Move(eStepMotorIndex::DelayLine, nTargetPos);
+		} while (pLaserModule->GetPosition(eStepMotorIndex::DelayLine) != nTargetPos);
 
-		nTargetPos = pLaserModule->MoveRelative(MotorIndex::DelayLine, DELAYLINE_FORWARD_POSITION * 100);
+		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, DELAYLINE_FORWARD_POSITION * 100);
 		do {
 			Sleep(10);
-			if (!pLaserModule->IsMoving(MotorIndex::DelayLine)) pLaserModule->MoveAbsolute(MotorIndex::DelayLine, nTargetPos);
-		} while (pLaserModule->GetPosition(MotorIndex::DelayLine) != nTargetPos);
+			if (!pLaserModule->IsMoving(eStepMotorIndex::DelayLine)) pLaserModule->Move(eStepMotorIndex::DelayLine, nTargetPos);
+		} while (pLaserModule->GetPosition(eStepMotorIndex::DelayLine) != nTargetPos);
 
 		// 1-2. Find Z-Offset Position
 		const int nSheathPosition = CConfiguration::GetInstance().measurement.nSheathPosition;
@@ -1325,28 +1315,28 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 
 		// 1-3. Move to calibrated position
 		nTargetPos = nZOffset;
-		pLaserModule->MoveAbsolute(MotorIndex::DelayLine, nZOffset);
+		pLaserModule->Move(eStepMotorIndex::DelayLine, nZOffset);
 		do {
 			Sleep(10);
-			if (!pLaserModule->IsMoving(MotorIndex::DelayLine)) pLaserModule->MoveAbsolute(MotorIndex::DelayLine, nTargetPos);
-		} while (pLaserModule->GetPosition(MotorIndex::DelayLine) != nTargetPos);
+			if (!pLaserModule->IsMoving(eStepMotorIndex::DelayLine)) pLaserModule->Move(eStepMotorIndex::DelayLine, nTargetPos);
+		} while (pLaserModule->GetPosition(eStepMotorIndex::DelayLine) != nTargetPos);
 
 		// 2. Start Finding Peak
 		pSystem->m_vCalibrationInfo.clear();
 		pSystem->m_cathState = CatheterState::FindingPeak;
 
 		// 2-1. Move Polarization-control & Find Peak
-		nTargetPos = pLaserModule->MoveAbsolute(MotorIndex::Polarization, 0);
+		nTargetPos = pLaserModule->Move(eStepMotorIndex::Polarization, 0);
 		do {
 			Sleep(10);
-			if (!pLaserModule->IsMoving(MotorIndex::Polarization)) pLaserModule->MoveAbsolute(MotorIndex::Polarization, nTargetPos);
-		} while (pLaserModule->GetPosition(MotorIndex::Polarization) != nTargetPos);
+			if (!pLaserModule->IsMoving(eStepMotorIndex::Polarization)) pLaserModule->Move(eStepMotorIndex::Polarization, nTargetPos);
+		} while (pLaserModule->GetPosition(eStepMotorIndex::Polarization) != nTargetPos);
 
-		nTargetPos = pLaserModule->MoveRelative(MotorIndex::Polarization, 3240);
+		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::Polarization, 3240);
 		do {
 			Sleep(10);
-			if (!pLaserModule->IsMoving(MotorIndex::Polarization)) pLaserModule->MoveAbsolute(MotorIndex::Polarization, nTargetPos);
-		} while (pLaserModule->GetPosition(MotorIndex::Polarization) != nTargetPos);
+			if (!pLaserModule->IsMoving(eStepMotorIndex::Polarization)) pLaserModule->Move(eStepMotorIndex::Polarization, nTargetPos);
+		} while (pLaserModule->GetPosition(eStepMotorIndex::Polarization) != nTargetPos);
 
 		// 2-2. Find Max Peak
 		int nMaxPeak = INT_MIN;
@@ -1360,11 +1350,11 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 
 		// 2-3. Move to calibrated position
 		nTargetPos = nMaxPeakPos;
-		pLaserModule->MoveAbsolute(MotorIndex::DelayLine, nTargetPos);
+		pLaserModule->Move(eStepMotorIndex::DelayLine, nTargetPos);
 		do {
 			Sleep(10);
-			if (!pLaserModule->IsMoving(MotorIndex::DelayLine)) pLaserModule->MoveAbsolute(MotorIndex::DelayLine, nTargetPos);
-		} while (pLaserModule->GetPosition(MotorIndex::DelayLine) != nTargetPos);
+			if (!pLaserModule->IsMoving(eStepMotorIndex::DelayLine)) pLaserModule->Move(eStepMotorIndex::DelayLine, nTargetPos);
+		} while (pLaserModule->GetPosition(eStepMotorIndex::DelayLine) != nTargetPos);
 	}
 	
 	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Calibrated);
@@ -1632,7 +1622,7 @@ bool COCTSystem::checkConnection() {
 	
 	result &= m_pAcqDevice->IsInit();
 	result &= m_pRJController->IsConnected();
-	result &= m_pLaserModule->IsOpen();
+	result &= m_pLaserModule->IsConnected();
 
 	return result;
 }
@@ -1721,20 +1711,21 @@ int COCTSystem::connectRotaryJunction() {
 		m_pRJController->SetManualMode(config.catheter.manualLoad);
 	}
 
-	if (!m_pLaserModule->IsOpen()) {
-		result = m_pLaserModule->Open(config.laserModule.port);
+	if (!m_pLaserModule->IsConnected()) {
+		result = m_pLaserModule->Connect(config.laserModule.port);
 		if (result) {
+			m_pLaserModule->Set(eStepMotorIndex::Both, CALIBRATION_MODULE_SM_DEFAULT_SPEED);
 			m_pLaserModule->SetVLD(0);
 			Sleep(500);
 			m_pLaserModule->SetVOA(config.laserModule.voaValue);
 #ifdef DELAY_LINE_HOMING_WORKS
 			Sleep(500);
-			m_pLaserModule->MoveAbsolute(MotorIndex::DelayLine, config.laserModule.delayPosition);
+			m_pLaserModule->Move(MotorIndex::DelayLine, config.laserModule.delayPosition);
 			while (m_pLaserModule->IsMoving(MotorIndex::DelayLine)) {
 				Sleep(10);
 			}
 			Sleep(500);
-			m_pLaserModule->MoveAbsolute(MotorIndex::Polarization, config.laserModule.polarPosition);
+			m_pLaserModule->Move(MotorIndex::Polarization, config.laserModule.polarPosition);
 #endif
 		}
 		else
@@ -1751,8 +1742,13 @@ int COCTSystem::connectRotaryJunction() {
 */
 int COCTSystem::disconnectRotaryJunction() {
 	bool result = true;
+
+	PLOGI.printf("Laser Off");
+	CLaserController* pLaser = CLaserController::GetInstance();
+	pLaser->LaserOnOff(false);
 	
 	if (m_pRJController->IsConnected()) {
+		result &= m_pRJController->StopMotor();
 		result &= m_pRJController->SwitchOff();
 	}
 
@@ -1765,12 +1761,14 @@ int COCTSystem::disconnectRotaryJunction() {
 		}
 	}
 
-	//if (m_pLaserModule->IsOpen()) {
-	//	m_pLaserModule->Home(-100000, 10000);
-	//}
+	if (m_pLaserModule->IsConnected()) {
+		//m_pLaserModule->Home(-100000, 10000);
+		m_pLaserModule->SetVLD(0);
+		m_pLaserModule->SetVOA(0);
+	}
 
 	m_pRJController->Disconnect();
-	m_pLaserModule->Close();
+	m_pLaserModule->Disconnect();
 
 	return (result) ? NOERROR : E_FAIL;
 }
@@ -1820,7 +1818,7 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 		case CatheterState::FindingSheath:
 		{
 			int nSheathPosition = m_pImagingRealtime->GetSheathPosition();
-			int nDelayLinePos = m_pLaserModule->GetPosition(MotorIndex::DelayLine);
+			int nDelayLinePos = m_pLaserModule->GetPosition(eStepMotorIndex::DelayLine);
 			m_vCalibrationInfo.push_back(std::make_pair(nSheathPosition, nDelayLinePos));
 			PLOGI.printf("FindingSheath - %d, %d", nSheathPosition, nDelayLinePos);
 		}
@@ -1834,7 +1832,7 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 			int nPeakIndex, nLineWidth;
 			measurement.CalculateAxialResolution(((CLabImaging *)m_pImagingRealtime)->GetScopeFFTData(), config.imaging.nOutputLength, config.measurement, nPeakValue, nPeakIndex, nLineWidth);
 
-			int nPolarizationPos = m_pLaserModule->GetPosition(MotorIndex::Polarization);
+			int nPolarizationPos = m_pLaserModule->GetPosition(eStepMotorIndex::Polarization);
 			m_vCalibrationInfo.push_back(std::make_pair(nPeakValue, nPolarizationPos));
 			PLOGI.printf("FindingPeak - %d, %d", nPeakValue, nPolarizationPos);
 		}
