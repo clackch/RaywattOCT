@@ -44,6 +44,7 @@ public:
 	bool StopStepMotors();
 protected:
 	static UINT threadReadPacket(LPVOID param);
+	void initSetting();
 	void parseSMPacket(BYTE* packet, int size);
 	void setVOAVLD();
 	virtual void handlePacket();

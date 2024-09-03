@@ -32,6 +32,7 @@ bool CLaserModule::Connect(void* param) {
 	m_initMotor = m_pConnection->Connect(param);
 	if (m_initMotor) {
 		AutoStatePeriod(10);
+		initSetting();
 		BOOL result = CUtility::StartThread(threadReadPacket, m_pThread, (LPVOID)this);
 
 		if (result == FALSE) {
@@ -233,6 +234,43 @@ UINT CLaserModule::threadReadPacket(LPVOID param) {
 	return NOERROR;
 }
 
+void CLaserModule::initSetting() {
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	getSerialPacket(eFID::FID_SM_SET_CONFIG, (sizeof(int) * 7 + sizeof(char) * 2) * 2, serialPacket, packetLength);
+
+	const int minSpeed = 100;
+	const int maxSpeed = 5000;
+	const int accTime = 1;
+	const int accStep = 100;
+	const int decTime = 1;
+	const int decStep = 1000;
+	const int minStep = 10;
+	const char accType = 1;	// profile
+	const char decType = 0; // linear
+
+	int offset = 0;
+	for (int i = 0; i < 2; i++) {
+		memcpy(serialPacket + DATA_IDX + offset, &minSpeed, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &maxSpeed, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &accTime, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &accStep, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &decTime, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &decStep, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &minStep, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &accType, sizeof(char)); offset += sizeof(char);
+		memcpy(serialPacket + DATA_IDX + offset, &decType, sizeof(char)); offset += sizeof(char);
+	}
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+	if (written != packetLength)
+	{
+		PLOGI.printf("Written size is not matched. (%d / %d bytes)", written, packetLength);
+	}
+}
 void CLaserModule::parseSMPacket(BYTE* packet, int size) {
 	int offset = 0;
 	for (int i = 0; i < 2; i++) {
@@ -244,7 +282,7 @@ void CLaserModule::parseSMPacket(BYTE* packet, int size) {
 		}
 		PLOGI.printf("StepMotor #%d (%s): %d", i, ((m_isSMMoving[i]) ? "Moving" : "Stop"), curPos);
 		m_nActualPosition[i] = curPos;
-		offset += 12;	// current pos (4byte), target pos (4byte), current speed (4byte)
+		offset += 13;	// current pos (4byte), target pos (4byte), current speed (4byte), stop condition (1byte, photo-sensor)
 	}
 }
 void CLaserModule::setVOAVLD()
