@@ -225,7 +225,6 @@ namespace RaywattApp.ViewModels
                 _isPtoD = ray3DStatus.IsPtoD;
                 _isSideBranchView = false;
                 isFirstRendering = ray3DStatus.IsFirstRendering;
-                ray3DStatus.ZoomFactor = 0;
             }
             IsRendering = false;
 
@@ -340,7 +339,6 @@ namespace RaywattApp.ViewModels
                 }
 
                 ODSOCT_ProcessingDatas();
-                ODSOCT_UpdateColorTable((int)RayGetProperty(Property.Colormap));
 
                 if (isFirstRendering)
                 {
@@ -356,10 +354,14 @@ namespace RaywattApp.ViewModels
                 //ODSOCT_InputSurfaceParameter(Ray3DObject.GuideWire, 10, 15, ".\\data\\guidewire_tex.jpg");
                 //ODSOCT_InputData(Ray3DObject.GuideWire, buffer, diameter, diameter, depth, 1, 1, zVal);
 
+                
+
                 Marshal.FreeHGlobal(buffer);
                 ReviewStatus.IsLumenEdited = false;
             }
-            
+
+            ODSOCT_UpdateColorTable((int)RayGetProperty(Property.Colormap));
+
             timerShowData.Interval = TimeSpan.FromMilliseconds(MinWaitingDelay);
             timerShowData.Tick += new EventHandler(timerFuncShowData);
             timerShowData.Start();

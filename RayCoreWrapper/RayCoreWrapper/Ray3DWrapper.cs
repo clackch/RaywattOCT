@@ -41,7 +41,7 @@ namespace RaywattOCT
                 set { _isFirstRendering = value; }
             }
 
-            private int _zoomFactor;
+            private int _zoomFactor = 0;
             public int ZoomFactor
             {
                 get { return _zoomFactor; }
