@@ -7,7 +7,6 @@ using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Services;
-using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
 using System.Linq;

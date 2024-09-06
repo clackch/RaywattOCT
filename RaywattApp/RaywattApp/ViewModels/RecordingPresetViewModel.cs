@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
 using System.Windows.Navigation;
+using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels
 {
@@ -144,6 +145,10 @@ namespace RaywattApp.ViewModels
                     PatientCase.AppositionThreshold = physicians[0].AppositionThreshold;
                     PatientCase.AccessionNumber = "";
                     PatientCase.Comment = "";
+
+                    PatientCase.ImageResolution = RayGetProperty(Property.ImageResolution);
+                    Constants.DefaultFoV = Constants.OCTImageSize * PatientCase.ImageResolution;
+                    Constants.ImageResolution = PatientCase.ImageResolution;
 
                     sqlParameters.Clear();
                     sqlParameters["classification"] = "Present";
