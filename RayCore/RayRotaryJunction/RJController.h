@@ -7,7 +7,7 @@
 #define ENABLE_RFID		false
 
 // position: step, speed: step/s
-#define DISTANCE_BETWEEN_MOTORS			2500
+#define DISTANCE_BETWEEN_MOTORS			2050
 #define PULLBACK_MOTOR_POS_INITIAL		19300
 #define PULLBACK_MOTOR_POS_LOAD			4000
 #define HUB_MOTOR_POS_INITIAL			0

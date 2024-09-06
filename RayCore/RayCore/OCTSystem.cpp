@@ -1462,7 +1462,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 
 		pRJController->StopMotor();
 
-		pRJController->Move(eStepMotorIndex::Pullback, 2070);
+		pRJController->Move(eStepMotorIndex::Pullback, 1600);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 		
 		pRJController->Move(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
