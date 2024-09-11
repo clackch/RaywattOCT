@@ -416,6 +416,15 @@ namespace RaywattApp.ViewModels
                 CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault);
                 CrossSectionAngioScale = (1 / Constants.ImageResolution) * (Constants.ZoomAngioCsScaleDefault);
                 
+                if (PatientCase.MeasureUIElements == null)
+                {
+                    PatientCase.MeasureUIElements = new List<List<UIElement>>(ReviewStatus.NumberOfFrames);
+                    for(int i = 0; i < ReviewStatus.NumberOfFrames; i++)
+                    {
+                        PatientCase.MeasureUIElements.Add(new List<UIElement>());
+                    }
+                }                    
+
                 SetAnnotation();
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
 
@@ -1395,6 +1404,7 @@ namespace RaywattApp.ViewModels
                     MinimalValueChanged();
 
                     this.isLumenProfileInit = true;
+                    ReviewStatus.IsMeasureInit = true;
                 }
                 else if (!this.isLumenLoadedInit)
                 {

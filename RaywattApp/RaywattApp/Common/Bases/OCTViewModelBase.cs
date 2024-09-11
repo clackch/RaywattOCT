@@ -73,6 +73,9 @@ namespace RaywattApp.Common.Bases
         [ObservableProperty]
         private bool _isPaused = true;
 
+        [ObservableProperty]
+        private int _frameNumberForInit;
+
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
         // to avoid garbage collection
@@ -127,6 +130,8 @@ namespace RaywattApp.Common.Bases
             Mat imgRecv = CommonUtil.ByteMemoryToCvMat(data, width, height, ch);
             imgLongitude = imgRecv;
             longitudeFrameInfo = new FrameInfo(frameInfo);
+
+            FrameNumberForInit = longitudeFrameInfo.curFrame - 1;
 
             Application.Current.Dispatcher.Invoke(() =>
             {

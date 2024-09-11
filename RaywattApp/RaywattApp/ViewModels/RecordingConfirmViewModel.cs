@@ -176,6 +176,7 @@ namespace RaywattApp.ViewModels
                 parameter["prevStatus"] = PrevStatus;
                 ReviewStatus reviewStatus = new ReviewStatus();
                 reviewStatus.NumberOfFrames = numOfFrames;
+                reviewStatus.IsMeasureInit = true;
                 parameter["reviewStatus"] = reviewStatus;
                 Ray3DWrapper.ray3DStatus = new Ray3DWrapper.Ray3DStatus();
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewPage) { Parameter = parameter });

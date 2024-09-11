@@ -64,6 +64,9 @@ namespace RaywattApp.Models
         [ObservableProperty]
         private bool _isLumenEdited = true;
 
+        [ObservableProperty]
+        private bool _isMeasureInit = false;
+
         //3D
 
 
