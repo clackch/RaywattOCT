@@ -6,7 +6,7 @@ TCPSocket::TCPSocket() {
 	{
 		PLOGI.printf("Failed to initialize winsock. Error code: %d", WSAGetLastError());
 		WSACleanup();
-		exit(0);
+		//exit(0);
 	}
 
 	serverSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -15,8 +15,8 @@ TCPSocket::TCPSocket() {
 		PLOGI.printf("Failed to create socket. Error code: %d", WSAGetLastError());
 		closesocket(serverSocket);
 		WSACleanup();
-		exit(0);
-	}
+		//exit(0);
+	}		
 
 	serverAddress.sin_family = AF_INET;
 	serverAddress.sin_port = htons(8888); // host to network short
@@ -27,7 +27,7 @@ TCPSocket::TCPSocket() {
 		PLOGI.printf("Failed to bind socket. Error code: %d", WSAGetLastError());
 		closesocket(serverSocket);
 		WSACleanup();
-		exit(0);
+		//exit(0);
 	}
 
 	listen(serverSocket, 1);
@@ -128,11 +128,10 @@ void TCPSocket::ConnectClient(FrameGrabber& fg, int arg) {
 void TCPSocket::SnapFrame(FrameGrabber& fg) {
 
 	int offset = IMAGE_HEADER_SIZE;
-
 	ERRTYPE e = eHD_SnapToBuffer(fg.m_ImageHandle, &fg.sc);
 	if (e) {
 		PLOGI.printf("Failed to snap frame");
-		exit(0);
+		//exit(0);
 	}
 
 	memcpy(sendBuffer + offset, fg.sc.pRecvBuf, fg.lHeight * fg.lWidth * fg.wBitsPerPixel / 8 * sizeof(uchar));
@@ -147,7 +146,7 @@ void TCPSocket::SnapFrame(FrameGrabber& fg) {
 	if (sendResult == SOCKET_ERROR)
 	{
 		PLOGI.printf("Failed to send data to client. Error code: %d", WSAGetLastError());
-		exit(0);
+		//exit(0);
 	}
 }
 
@@ -155,8 +154,8 @@ void TCPSocket::ReceivePacket(FrameGrabber& fg) {
 	int bytesReceived = recv(clientSocket, recvBuffer, 100, 0);
 	if (bytesReceived == SOCKET_ERROR)
 	{
-		PLOGI.printf("Failed to receive data from client. Error code : %d", WSAGetLastError());
-		exit(1);
+		PLOGI.printf("Failed to receive data from client. Error code : %d, %d", WSAGetLastError(), bytesReceived); //
+		//exit(1);
 	}
 	else if (bytesReceived > 0)
 	{
@@ -169,6 +168,7 @@ void TCPSocket::ReceivePacket(FrameGrabber& fg) {
 			int sendResult;
 			switch (commandType) {
 			case CommandType::FGStarted:
+				
 				PLOGI.printf("FGStarted");
 				tmpRecvBufferLen -= 5;
 				memmove(tmpRecvBuffer, tmpRecvBuffer + 5, tmpRecvBufferLen);
@@ -232,6 +232,7 @@ void TCPSocket::ReceivePacket(FrameGrabber& fg) {
 				break;
 			case CommandType::FGChpFile:
 				PLOGI.printf("FGChpFile");
+				StopSnapFrameThread();
 				ChpFilePacketProcess(fg);
 				break;
 			case CommandType::FGNothing:
@@ -314,6 +315,7 @@ void TCPSocket::ChpFilePacketProcess(FrameGrabber& fg) {
 		PLOGI.printf("Send SuccessChangeChp Info: " + sendResult);
 		sendResult = send(clientSocket, deviceInfoBuffer, 10, 0);
 		PLOGI.printf("Send Device Info: " + sendResult);
+		PLOGI.printf("Send Device Info: %d", sendResult);
 	}
 
 	tmpRecvBufferLen -= packetLen;
