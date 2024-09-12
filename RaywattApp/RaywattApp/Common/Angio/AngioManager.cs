@@ -18,6 +18,8 @@ using RaywattApp.Common.Localization;
 using RaywattApp.Common.Util;
 using System.Linq;
 using MathNet.Numerics.Statistics;
+using System.Windows.Controls;
+using RaywattApp.ViewModels.Dialog;
 
 namespace RaywattApp.Common.Angio
 {
@@ -86,7 +88,8 @@ namespace RaywattApp.Common.Angio
         private bool threadOnLiveAngioImage;
 
         private Thread isSocketConnected;
-        public bool isSocketAlive;
+        private bool isSocketAlive;
+        private bool servercheck = true;
 
         private Thread threadFuncSaveAngioFrames;
         private bool threadOnSaveAngioFrames;
@@ -216,7 +219,11 @@ namespace RaywattApp.Common.Angio
             while (isSocketAlive)
             {
                 Thread.Sleep(500);
-                checksoket();
+                if(servercheck == false)
+                {
+                    CommonUtil.Exit(ViewModelBase._deviceStatus, this, true);
+                    isSocketAlive = false;
+                }
             }
         }
 
@@ -306,8 +313,11 @@ namespace RaywattApp.Common.Angio
                 while (true)
                 {
                     PacketType type = CheckPacketType(tmpBuffer);
-                    if (type == PacketType.Command)
+                    if (type == PacketType.Command) {
                         CommandPacketProcess();
+                        _log.Debug("packet end");
+                    }
+                        
                     else if (type == PacketType.Image)
                         ImagePacketProcess();
                     else if (type == PacketType.Nothing)
@@ -317,32 +327,17 @@ namespace RaywattApp.Common.Angio
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
-                return false;
-            }
-
-            return true;
-        }
-
-        private bool checksoket()
-        {
-            try
-            {
-                bytesRead = _tcpClient.GetStream().Read(buffer, 0, buffer.Length);
-            }
-            catch (Exception ex)
-            {
                 if (ex.InnerException is System.Net.Sockets.SocketException socketException)
                 {
                     int errorCode = socketException.ErrorCode;
-                    if (errorCode == 10054) // 연결이 끊어졌을 때의 에러 코드
+                    if (errorCode == 10054) // 서버 연결이 끊어졌을 때의 에러 코드
                     {
-                        CommonUtil.Exit(ViewModelBase._deviceStatus, this, true);
-                        isSocketAlive = false;
+                        threadOnLiveAngioImage = false;
+                        servercheck = false;
                     }
                 }
-                return false; 
+                return false;
             }
-
             return true;
         }
 
@@ -377,7 +372,7 @@ namespace RaywattApp.Common.Angio
         private void CommandPacketProcess()
         {
             byte command = tmpBuffer[2];
-
+            _log.Debug(command);
             if (command == (byte)CommandType.FGDeviceInfo)
             {
                 DeviceInfoPacketProcess();
@@ -386,9 +381,15 @@ namespace RaywattApp.Common.Angio
             {
                 if (command == (byte)CommandType.FGAngioDisconnected)
                 {
-                    imgAngio = ShowNoSignal();
+                    imgAngio = ShowNoSignal();// 실행 X
+                    _log.Debug("FGAngio Disconnected command");
+                    if (isCathRoomDialogOpen)
+                    {
+                        _log.Debug("FGAngio Disconnected command");
+                       
+                    }
 
-                    if (readyToRecv)
+                    if (readyToRecv) 
                     {
                         SendCommandPacket(CommandType.FGStopped);
                     }
@@ -420,7 +421,7 @@ namespace RaywattApp.Common.Angio
 
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
-                        ViewModelBase._deviceStatus.IsAngioConnected = true;
+                        ViewModelBase._deviceStatus.IsAngioConnected = true; 
                     });
                 }
                 else if (command == (byte)CommandType.FGBoardExist)
@@ -428,7 +429,7 @@ namespace RaywattApp.Common.Angio
                     isBoardInited = true;
                     boardConnection = true;
                     threadOnLiveAngioImage = true;
-                    AskAngioConnection();
+                    AskAngioConnection();  
                 }
                 else if (command == (byte)CommandType.FGBoardNotExist)
                 {
@@ -448,6 +449,7 @@ namespace RaywattApp.Common.Angio
                 }
                 Array.Copy(tmpBuffer, Constants.CommandPacketSize, tmpBuffer, 0, tmpBuffer.Length - Constants.CommandPacketSize);
                 tmpBufferLen -= Constants.CommandPacketSize;
+                
             }
         }
 
@@ -523,6 +525,7 @@ namespace RaywattApp.Common.Angio
 
         public Mat ShowNoSignal()
         {
+            _log.Debug("No signal");
             Mat image = new Mat(1080, 1920, MatType.CV_8UC3);
             image.SetTo(new Scalar(0, 0, 0));
 
@@ -627,7 +630,6 @@ namespace RaywattApp.Common.Angio
                 return;
 
             isCathRoomDialogOpen = true;
-
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["selectedCathRoomId"] = ViewModelBase._deviceStatus.SelectedCathRoom == null ? 0 : ViewModelBase._deviceStatus.SelectedCathRoom.Id;
 
