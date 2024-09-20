@@ -323,7 +323,7 @@ namespace RaywattApp.Common.Annotation
 
         private void Draw(int frameNumber)
         {
-            if (!this.IsFfr && this.MeasureUIElements[frameNumber] != null && this.MeasureUIElements[frameNumber].Count > 0)
+            if (!this.IsFfr && this.MeasureUIElements != null && this.MeasureUIElements[frameNumber] != null && this.MeasureUIElements[frameNumber].Count > 0)
             {
                 this.canvas.Children.Clear();
 
@@ -340,6 +340,9 @@ namespace RaywattApp.Common.Annotation
 
         private void SaveUIElement(int frameNumber)
         {
+            if (this.MeasureUIElements == null)
+                return;
+
             this.MeasureUIElements[frameNumber].Clear();
 
             foreach (UIElement element in this.canvas.Children)
