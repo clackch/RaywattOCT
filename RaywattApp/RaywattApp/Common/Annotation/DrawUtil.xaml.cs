@@ -292,6 +292,8 @@ namespace RaywattApp.Common.Annotation
 
             if (drawUtil.IsDrawOn)
             {
+                drawUtil.Visibility = Visibility.Visible;
+
                 int prevFrameNumber = int.Parse((string)drawUtil.prevFrameNumber.Content);
                 if (prevFrameNumber >= 0)
                     drawUtil.SaveUIElement(prevFrameNumber);
@@ -313,6 +315,8 @@ namespace RaywattApp.Common.Annotation
 
             if (isDrawOn)
             {
+                drawUtil.Visibility = Visibility.Visible;
+
                 drawUtil.Draw(drawUtil.FrameNumber);
             }
             else
