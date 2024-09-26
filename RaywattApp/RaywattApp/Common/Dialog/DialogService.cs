@@ -1,4 +1,5 @@
-﻿using RaywattApp.Models;
+﻿using RaywattApp.Common.Bases;
+using RaywattApp.Models;
 using RaywattApp.Views.Dialog;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,8 +42,9 @@ namespace RaywattApp.Common.Dialog
 
             if (parameter != null)
                 dialogDataContext.SetParameter(parameter);
-
+            
             window.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
+            if(window.Content is RaywattApp.Views.Dialog.CathRoomDialogControl) ViewModelBase._deviceStatus.DialogWindow = window;
             window.ShowDialog();
 
             return dialogDataContext.DialogResult;

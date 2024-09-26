@@ -20,6 +20,13 @@ using System.Linq;
 using MathNet.Numerics.Statistics;
 using System.Windows.Controls;
 using RaywattApp.ViewModels.Dialog;
+using RaywattApp.ViewModels;
+using System.Windows;
+using System.Reflection.Metadata;
+using CommunityToolkit.Mvvm.Messaging;
+using RaywattApp.Common.Messages;
+
+
 
 namespace RaywattApp.Common.Angio
 {
@@ -119,7 +126,6 @@ namespace RaywattApp.Common.Angio
             _dialogService = dialogService;
 
             imgAngio = ShowNoSignal();
-
             buffer = new byte[256];
             tmpBuffer = new byte[512];
             angioSaveBuffer = new List<byte[]>();
@@ -365,6 +371,7 @@ namespace RaywattApp.Common.Angio
                 angioSaveBuffer.Add(new byte[angioImageSize]);
                 Marshal.Copy(image.Data, angioSaveBuffer.Last(), 0, angioImageSize);
             }
+            if (!ViewModelBase._deviceStatus.IsAngioConnected) image = ShowNoSignal();
 
             imgAngio = image;
         }
@@ -381,12 +388,19 @@ namespace RaywattApp.Common.Angio
             {
                 if (command == (byte)CommandType.FGAngioDisconnected)
                 {
-                    imgAngio = ShowNoSignal();// 실행 X
+                    imgAngio = ShowNoSignal();
                     _log.Debug("FGAngio Disconnected command");
                     if (isCathRoomDialogOpen)
                     {
-                        _log.Debug("FGAngio Disconnected command");
-                       
+                        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            ViewModelBase._deviceStatus.IsAngioConnected = false;
+                            Dictionary<string, object> parameter = new Dictionary<string, object>();
+                            parameter["title"] = _l10n["Error"];
+                            parameter["message"] = _l10n["$MSG023"];
+                            _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                        });
+                        isCathRoomDialogOpen = false;
                     }
 
                     if (readyToRecv) 
@@ -400,6 +414,7 @@ namespace RaywattApp.Common.Angio
                     {
                         ViewModelBase._deviceStatus.IsAngioConnected = false;
                     });
+
                 }
                 else if (command == (byte)CommandType.FGAngioConnected)
                 {
@@ -534,9 +549,9 @@ namespace RaywattApp.Common.Angio
             double fontScale = 20;
             int thickness = 10;
 
-            Size textSize = Cv2.GetTextSize("No Signal", fontFace, fontScale, thickness, out int baseline);
+            OpenCvSharp.Size textSize = Cv2.GetTextSize("No Signal", fontFace, fontScale, thickness, out int baseline);
 
-            Point textPosition = new Point(
+            OpenCvSharp.Point textPosition = new OpenCvSharp.Point(
                 (image.Width - textSize.Width) / 2,
                 (image.Height + textSize.Height) / 2
             );
@@ -625,7 +640,7 @@ namespace RaywattApp.Common.Angio
         public void SelectCathRoom()
         {
             _log.Debug("SelectCathRoom");
-
+            
             if (isCathRoomDialogOpen)
                 return;
 
