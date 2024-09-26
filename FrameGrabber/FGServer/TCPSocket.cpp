@@ -2,35 +2,46 @@
 
 TCPSocket::TCPSocket() {
 
-	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-	{
-		PLOGI.printf("Failed to initialize winsock. Error code: %d", WSAGetLastError());
-		WSACleanup();
-		//exit(0);
+	try {
+		if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+		{
+			PLOGI.printf("Failed to initialize winsock. Error code: %d", WSAGetLastError());
+			WSACleanup();
+			//exit(0);
+			throw std::runtime_error("WSAStartup failed");
+		}
+
+		serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+		if (serverSocket == INVALID_SOCKET)
+		{
+			PLOGI.printf("Failed to create socket. Error code: %d", WSAGetLastError());
+			closesocket(serverSocket);
+			WSACleanup();
+			//exit(0);
+			throw std::runtime_error("Failed to create socket");
+		}
+
+		serverAddress.sin_family = AF_INET;
+		serverAddress.sin_port = htons(8888); // host to network short
+		serverAddress.sin_addr.s_addr = INADDR_ANY;
+
+		if (::bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR)
+		{
+			PLOGI.printf("Failed to bind socket. Error code: %d", WSAGetLastError());
+			closesocket(serverSocket);
+			WSACleanup();
+			//exit(0);
+			throw std::runtime_error("Failed to bind socket");
+		}
+
+		listen(serverSocket, 1);
 	}
-
-	serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-	if (serverSocket == INVALID_SOCKET)
-	{
-		PLOGI.printf("Failed to create socket. Error code: %d", WSAGetLastError());
-		closesocket(serverSocket);
-		WSACleanup();
-		//exit(0);
-	}		
-
-	serverAddress.sin_family = AF_INET;
-	serverAddress.sin_port = htons(8888); // host to network short
-	serverAddress.sin_addr.s_addr = INADDR_ANY;
-
-	if (::bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR)
-	{
-		PLOGI.printf("Failed to bind socket. Error code: %d", WSAGetLastError());
-		closesocket(serverSocket);
-		WSACleanup();
-		//exit(0);
+	catch (const std::exception& ex) {
+		PLOGI.printf("Exception occurred: %s", ex.what());
+		if (serverSocket != INVALID_SOCKET)
+			closesocket(serverSocket);  
+		throw;
 	}
-
-	listen(serverSocket, 1);
 }
 
 TCPSocket::~TCPSocket()
@@ -132,6 +143,8 @@ void TCPSocket::SnapFrame(FrameGrabber& fg) {
 	if (e) {
 		PLOGI.printf("Failed to snap frame");
 		//exit(0);
+		isStarted = false;
+		return;
 	}
 
 	memcpy(sendBuffer + offset, fg.sc.pRecvBuf, fg.lHeight * fg.lWidth * fg.wBitsPerPixel / 8 * sizeof(uchar));
@@ -147,6 +160,7 @@ void TCPSocket::SnapFrame(FrameGrabber& fg) {
 	{
 		PLOGI.printf("Failed to send data to client. Error code: %d", WSAGetLastError());
 		//exit(0);
+		return;
 	}
 }
 
@@ -156,6 +170,7 @@ void TCPSocket::ReceivePacket(FrameGrabber& fg) {
 	{
 		PLOGI.printf("Failed to receive data from client. Error code : %d, %d", WSAGetLastError(), bytesReceived); //
 		//exit(1);
+		return;
 	}
 	else if (bytesReceived > 0)
 	{
@@ -450,7 +465,10 @@ void TCPSocket::CheckClientThread() {
 		int sendResult = send(clientSocket, empty, emptySize, 0);
 		if (sendResult == SOCKET_ERROR)
 		{
-			exit(0);
+			int errorCode = WSAGetLastError();
+			PLOGI.printf("Failed to send data to client. Error code: %d", errorCode);
+			//exit(0);
+			return;
 		}
 		Sleep(1000);
 	}
@@ -517,7 +535,8 @@ void TCPSocket::LiveFrame(FrameGrabber& fg) {
 		if (sendResult == SOCKET_ERROR)
 		{
 			PLOGI.printf("Failed to send data to client. Error code: %d", WSAGetLastError());
-			exit(0);
+			//exit(0);
+			return;
 		}
 
 		eHD_ReleaseStreamBuffer(fg.m_ImageHandle, pBufferHeader);
