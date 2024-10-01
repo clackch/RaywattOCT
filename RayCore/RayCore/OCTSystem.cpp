@@ -1449,6 +1449,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 
 	if (pRJController->IsConnected()) {
 		pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
+
 		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
 		pRJController->Move(eStepMotorIndex::Pullback, 9000);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
@@ -1456,15 +1457,16 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 		pRJController->PerformRun(config.bldcMotor.velocityLoad);
 
 		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_LOAD);
-
 		pRJController->Move(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_LOAD);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 
 		pRJController->StopMotor();
 
-		pRJController->Move(eStepMotorIndex::Pullback, 1600);
+		pRJController->Set(eStepMotorIndex::Pullback, 30000);
+		pRJController->Move(eStepMotorIndex::Pullback, 1400);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
-		
+
+		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_LOAD);
 		pRJController->Move(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 	}
