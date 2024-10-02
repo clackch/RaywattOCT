@@ -404,7 +404,7 @@ namespace RaywattApp.Common.Annotation
         }
 
         private void DrawCurve(AreaGeometry areaGeometry, bool isCurrentEditOn = true) {
-            areaGeometry.Path = DrawCurve(areaGeometry.Points, areaGeometry.IsClosed, areaGeometry.Group);
+            areaGeometry.Path = DrawCurve(areaGeometry.Points, areaGeometry.IsClosed, areaGeometry.Group, isCurrentEditOn);
 
             if (IsFfr)
             {
@@ -442,6 +442,7 @@ namespace RaywattApp.Common.Annotation
                         measurement.Measure(areaGeometry, imageContour);
 
                         measurement.CalculateDiameter(areaGeometry);
+
                         DrawDiameter(areaGeometry.MinDiameter.point1, areaGeometry.MinDiameter.point2, areaGeometry.Group, constMinDiameter);
                         DrawDiameter(areaGeometry.MaxDiameter.point1, areaGeometry.MaxDiameter.point2, areaGeometry.Group, constMaxDiameter);
                     }
@@ -454,7 +455,7 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
-        private Path DrawCurve(List<Point> pointList, bool isClosed, int group)
+        private Path DrawCurve(List<Point> pointList, bool isClosed, int group, bool isCurrentEditOn = false)
         {
             Path path = null;
             DeleteCurve(group);
@@ -481,7 +482,10 @@ namespace RaywattApp.Common.Annotation
                     if (IsEditOn)
                     {
                         path.MouseLeftButtonDown += path_MouseLeftButtonDown;
-                        DrawContourToBackBuffer(path);
+                        if (isCurrentEditOn)
+                        {
+                            DrawContourToBackBuffer(path);
+                        }
                     }
                 }
 

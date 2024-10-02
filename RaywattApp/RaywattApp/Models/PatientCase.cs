@@ -5,6 +5,7 @@ using RaywattApp.Common.Bases;
 using RaywattApp.Common.Util;
 using System;
 using System.Collections.Generic;
+using System.Windows;
 
 namespace RaywattApp.Models
 {
@@ -196,6 +197,9 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private FfrFeature _ffrFeature;
+
+        [ObservableProperty]
+        private List<List<UIElement>> _measureUIElements;
 
         [ObservableProperty]
         private DateTime createDate;

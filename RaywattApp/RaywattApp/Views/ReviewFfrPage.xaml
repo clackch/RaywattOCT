@@ -348,7 +348,7 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Label Style="{DynamicResource Pretendard-Bold-40}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Predicting], Source={StaticResource L10N}}"/>
                 <StackPanel Width="10"/>
-                <Label Style="{DynamicResource Pretendard-Bold-40}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [FFR Value], Source={StaticResource L10N}}"/>
+                <Label Style="{DynamicResource Pretendard-Bold-40}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [FFR], Source={StaticResource L10N}}"/>
             </StackPanel>
         </Grid>
     </Grid>
