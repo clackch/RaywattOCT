@@ -216,7 +216,7 @@ void* CImagingSession::GetImageData(int nFrame) {
 
 	char* pBuffer = m_pDataManager->GetSample(nFrame);
 	m_pImaging->Process(pBuffer);
-	cv::Mat imgResult = m_pImaging->GetProcessedImage().clone();
+	cv::Mat imgResult = m_pImaging->GetProcessedImage(true).clone();
 
 	m_pImaging->PostProcess(imgResult);
 
@@ -354,7 +354,7 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 	{
 		char* pBuffer = pDataManager->GetSample(nFrame);
 		pImaging->Process(pBuffer);
-		cv::Mat imgResult = pImaging->GetProcessedImage().clone();
+		cv::Mat imgResult = pImaging->GetProcessedImage(true).clone();
 		pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult));
 		pSession->m_mapSheathPosition.insert(std::make_pair(nFrame, pImaging->GetFoundSheathPosition()));
 	}

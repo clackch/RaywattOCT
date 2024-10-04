@@ -96,6 +96,9 @@ void CLabImaging::Process(char* fringes) {
 	}
 	
 	generateImage(logData, false);
+
+	if(true)
+		adaptive_compensation();
 }
 void CLabImaging::PostProcess(cv::Mat image) {
 	COCTImaging::PostProcess(image);

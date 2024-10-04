@@ -2,6 +2,7 @@
 #include <ipp.h>
 #include <opencv2/opencv.hpp>
 #include <vector>
+#include <omp.h>
 #include "Config.h"
 #include "Imaging.h"
 #include "OCTMeasurement.h"
@@ -9,6 +10,8 @@
 constexpr auto LUT_START_INDEX = 10;
 constexpr auto LUT_END_INDEX = 244;
 constexpr auto LUT_SCALE = (LUT_END_INDEX - LUT_START_INDEX + 1);
+
+const float exponentialFactor = 2.0f;
 
 class CCalibration;
 class CThread;
@@ -32,6 +35,7 @@ protected:
 	cv::Mat imageResult;
 	cv::Mat imageResultColor;
 	cv::Mat imageCircle;
+	cv::Mat imageCompensated;
 
 	// using in GenerateBackground
 	Ipp32f* fringes32f;
@@ -82,7 +86,7 @@ public:
 		m_nTotalFrame = nTotalFrame;
 	}
 
-	virtual cv::Mat GetProcessedImage() { return imageResult; }
+	virtual cv::Mat GetProcessedImage(bool isCompensated = false) { return isCompensated ? imageCompensated : imageResult; }
 	cv::Mat GetCircleImage() { return imageCircle; }
 	USHORT* GetFringesBuffer() { return m_pFringesBuffer; }
 	Setting GetSetting() { return m_setting; }
@@ -107,6 +111,12 @@ protected:
 	void generateImage(Ipp32f* logaritihmData, bool bInvert);
 	void findSheath(Ipp32f* logaritihmData);
 	void drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color);
+
+	void adaptive_compensation();
+	void min_max_normalization(const cv::Mat& img, cv::Mat& normalized_img, double& min_val, double& max_val);
+	void linear_contrast_stretching(cv::Mat& img, float lower_percentile = 1.0f, float upper_percentile = 99.0f);	
+	void create_inverse_circularize_map(int src_width, int src_height, int dst_width, int dst_height, float scale, cv::Mat& inverse_mat_x_map, cv::Mat& inverse_mat_y_map);
+	void init_circularize_map(int diameter, int src_height, int src_width, int dst_height, int dst_width, float scale, cv::Mat& mat_x_map, cv::Mat& mat_y_map);
 
 	static UINT threadRender(LPVOID param);
 };
