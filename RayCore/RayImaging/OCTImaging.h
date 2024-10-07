@@ -11,8 +11,6 @@ constexpr auto LUT_START_INDEX = 10;
 constexpr auto LUT_END_INDEX = 244;
 constexpr auto LUT_SCALE = (LUT_END_INDEX - LUT_START_INDEX + 1);
 
-const float exponentialFactor = 2.0f;
-
 class CCalibration;
 class CThread;
 class CMessageService;
@@ -88,7 +86,7 @@ public:
 		m_nTotalFrame = nTotalFrame;
 	}
 
-	virtual cv::Mat GetProcessedImage(bool isCompensated = false) { return isCompensated ? imageCompensated : imageResult; }
+	virtual cv::Mat GetProcessedImage();
 	cv::Mat GetCircleImage() { return imageCircle; }
 	USHORT* GetFringesBuffer() { return m_pFringesBuffer; }
 	Setting GetSetting() { return m_setting; }
@@ -101,6 +99,8 @@ public:
 	virtual void SetLumenContourOffset(std::vector<cv::Point> lumenContour);
 
 	int GetSheathPosition() { return m_nSheathPosition; }
+
+	static void SetImageCompensation(bool ImageCompensated);
 protected:
 	void allocateMemory();
 	void releaseMemory();

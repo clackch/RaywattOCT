@@ -1042,6 +1042,26 @@ RayError COCTSystem::SetImageRoi(double value)
 }
 
 /*
+* GetImageCompensation
+*/
+bool COCTSystem::GetImageCompensation()
+{
+	return m_bImageCompensation;
+}
+
+/*
+* SetImageCompensation
+*/
+RayError COCTSystem::SetImageCompensation(bool value)
+{
+	m_bImageCompensation = value;
+
+	COCTImaging::SetImageCompensation(m_bImageCompensation);
+
+	return RayError::OK;
+}
+
+/*
 * GetFieldOfView
 */
 double COCTSystem::GetFieldOfView()

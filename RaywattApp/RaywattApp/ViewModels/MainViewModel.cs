@@ -158,10 +158,10 @@ namespace RaywattApp.ViewModels
         }
 
         //Test
-        private ICommand _enhancedLUTTest;
-        public ICommand EnhancedLUTTestCommand
+        private ICommand _compensationTest;
+        public ICommand CompensationTestCommand
         {
-            get { return this._enhancedLUTTest ?? (this._enhancedLUTTest = new RelayCommand(EnhancedLUTTest)); }
+            get { return this._compensationTest ?? (this._compensationTest = new RelayCommand(CompensationTest)); }
         }
 
         //Test
@@ -438,11 +438,13 @@ namespace RaywattApp.ViewModels
             IsImageAnalysisTest = !IsImageAnalysisTest;
         }
 
-        private void EnhancedLUTTest()
+        private void CompensationTest()
         {
-            _log.Debug("EnhancedLUTTest");
+            _log.Debug("CompensationTest");
 
-            RaySetProperty(Property.Colormap, 3);
+            bool bImageCompensation = (bool)(RayGetProperty(Property.ImageCompensation) != 0);
+
+            RaySetProperty(Property.ImageCompensation, bImageCompensation ? 0 : 1);
         }
 
         private void ImageAnalysisToggle()

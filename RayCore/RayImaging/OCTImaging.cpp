@@ -9,6 +9,9 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+const float EXPONENTIAL_FACTOR = 2.0f;
+static bool bCompensated;
+
 void ippsRelease(void *&ptr) {
 	if (ptr) {
 		ippsFree(ptr);
@@ -86,8 +89,7 @@ void COCTImaging::Process(char* fringes) {
 	computeLogarithm(fFFTResult, fFFTResult);
 	findSheath(fFFTResult);
 	generateImage(fFFTResult, false);
-	if (true)
-		adaptive_compensation();
+	adaptive_compensation();		
 }
 void COCTImaging::PostProcess(cv::Mat image) {
 	const bool bInvert = m_bInvert;
@@ -153,6 +155,14 @@ void COCTImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst) {}
 void COCTImaging::EraseStentOutLier(cv::Mat& stent) {}
 
 void COCTImaging::SetLumenContourOffset(std::vector<cv::Point> lumenContour) {}
+
+cv::Mat COCTImaging::GetProcessedImage() {
+	return bCompensated ? imageCompensated : imageResult; 
+}
+
+void COCTImaging::SetImageCompensation(bool ImageCompensated) { 
+	bCompensated = ImageCompensated;
+}
 
 void COCTImaging::allocateMemory() {
 	// ORDER = 11, nFFTLength = 2^11
@@ -399,7 +409,7 @@ UINT COCTImaging::threadRender(LPVOID param) {
 
 		if (pImaging->m_pThread->isRun) {
 			pImaging->Process((char *)pImaging->m_pFringesBuffer);
-			pImaging->PostProcess(pImaging->GetProcessedImage(true));
+			pImaging->PostProcess(pImaging->GetProcessedImage());
 			
 			// To-Do
 			// double buffering 필요?
@@ -417,7 +427,10 @@ UINT COCTImaging::threadRender(LPVOID param) {
 
 void COCTImaging::adaptive_compensation()
 {
-	PLOGI.printf("[Start] adaptive_compensation");
+	if (!bCompensated)
+		return;
+
+	//PLOGI.printf("[Start] adaptive_compensation");
 
 	//rotate the image
 	cv::Mat rotated_img;
@@ -441,7 +454,7 @@ void COCTImaging::adaptive_compensation()
 		cv::Mat I_n = normalized_img.col(x).clone(); // clone() 사용으로 독립적인 메모리
 
 		// pow 적용
-		cv::pow(I_n, exponentialFactor, I_n);
+		cv::pow(I_n, EXPONENTIAL_FACTOR, I_n);
 
 		// 누적 합 계산
 		std::vector<float> cumulativeSum(rows, 0.0f);
@@ -472,7 +485,7 @@ void COCTImaging::adaptive_compensation()
 		cv::Mat I_n = normalized_img.col(x);
 
 		// pow 적용
-		cv::pow(I_n, exponentialFactor, I_n);
+		cv::pow(I_n, EXPONENTIAL_FACTOR, I_n);
 
 		// 누적 합 계산
 		std::vector<float> cumulativeSum(rows, 0.0f);
@@ -507,7 +520,7 @@ void COCTImaging::adaptive_compensation()
 	// Rotate back to original angle
 	cv::rotate(result_img_clahe, imageCompensated, cv::ROTATE_90_CLOCKWISE);
 
-	PLOGI.printf("[End] adaptive_compensation");
+	//PLOGI.printf("[End] adaptive_compensation");
 }
 
 void COCTImaging::min_max_normalization(const cv::Mat& img, cv::Mat& normalized_img, double& min_val, double& max_val)

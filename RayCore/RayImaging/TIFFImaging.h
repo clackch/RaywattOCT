@@ -20,7 +20,7 @@ public:
 	virtual void Process(char* fringes);
 	virtual void PostProcess(cv::Mat image);
 	virtual void CircularizeImage(cv::Mat& src, cv::Mat& dst);
-	virtual cv::Mat GetProcessedImage(bool isCompensated = false) { return imageConvert; }
+	virtual cv::Mat GetProcessedImage() { return imageConvert; }
 	virtual void initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale);
 	virtual void InverseCircularizeImage(cv::Mat& src, cv::Mat& dst);
 	virtual void EraseStentOutLier(cv::Mat& stent);
