@@ -58,6 +58,8 @@ protected:
 	int m_nTotalFrame;
 
 	int m_nSheathPosition;
+
+	cv::Ptr<cv::CLAHE> clahe;
 public:
 	COCTImaging(Setting, CMessageService*);
 	virtual ~COCTImaging(void);
@@ -114,9 +116,7 @@ protected:
 
 	void adaptive_compensation();
 	void min_max_normalization(const cv::Mat& img, cv::Mat& normalized_img, double& min_val, double& max_val);
-	void linear_contrast_stretching(cv::Mat& img, float lower_percentile = 1.0f, float upper_percentile = 99.0f);	
-	void create_inverse_circularize_map(int src_width, int src_height, int dst_width, int dst_height, float scale, cv::Mat& inverse_mat_x_map, cv::Mat& inverse_mat_y_map);
-	void init_circularize_map(int diameter, int src_height, int src_width, int dst_height, int dst_width, float scale, cv::Mat& mat_x_map, cv::Mat& mat_y_map);
+	void linear_contrast_stretching(cv::Mat& img, float lower_percentile = 1.0f, float upper_percentile = 99.0f);
 
 	static UINT threadRender(LPVOID param);
 };

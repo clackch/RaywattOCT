@@ -56,6 +56,8 @@ COCTImaging::COCTImaging(Setting setting, CMessageService* pMsg) {
 	m_nTotalFrame = 0;
 
 	m_nSheathPosition = 0;
+
+	clahe = cv::createCLAHE(0.02, cv::Size(8, 8));
 }
 
 COCTImaging::~COCTImaging() {
@@ -416,47 +418,46 @@ UINT COCTImaging::threadRender(LPVOID param) {
 void COCTImaging::adaptive_compensation()
 {
 	PLOGI.printf("[Start] adaptive_compensation");
-	cv::Mat rotated_img, normalized_img, result_img, energy_all;
-	double min_val, max_val;
 
 	//rotate the image
+	cv::Mat rotated_img;
 	cv::rotate(imageResult, rotated_img, cv::ROTATE_90_COUNTERCLOCKWISE);
 
 	// Normalize the image
+	cv::Mat normalized_img;
 	rotated_img.convertTo(normalized_img, CV_32F);
+	double min_val, max_val;
 	min_max_normalization(normalized_img, normalized_img, min_val, max_val);
 
 	int rows = normalized_img.rows;
 	int cols = normalized_img.cols;
-	result_img = cv::Mat::zeros(normalized_img.size(), CV_32F);
-	energy_all = cv::Mat::zeros(normalized_img.size(), CV_32F);
+
+	cv::Mat energy_all = cv::Mat::zeros(normalized_img.size(), CV_32F);
+	cv::Mat result_img = cv::Mat::zeros(normalized_img.size(), CV_32F);
 
 	// Compute energy using cumulative sum (with OpenMP)
 #pragma omp parallel for
 	for (int x = 0; x < cols; ++x) {
-		// 각 스레드가 고유의 지역 변수 사용
 		cv::Mat I_n = normalized_img.col(x).clone(); // clone() 사용으로 독립적인 메모리
 
-		// pow 적용 (벡터화된 연산)
+		// pow 적용
 		cv::pow(I_n, exponentialFactor, I_n);
 
-		// 누적 합 계산 (cumulative sum)
+		// 누적 합 계산
 		std::vector<float> cumulativeSum(rows, 0.0f);
 		cumulativeSum[rows - 1] = I_n.at<float>(rows - 1);
 		for (int i = rows - 2; i >= 0; --i) {
 			cumulativeSum[i] = cumulativeSum[i + 1] + I_n.at<float>(i);
 		}
 
-		// 전체 에너지 계산
-		float* energy_ptr = energy_all.ptr<float>(0) + x; // 포인터 사용
+		// 에너지 계산
 		for (int z = 0; z < rows; ++z) {
 			float sum_val = cumulativeSum[z];
-			// 각 스레드가 고유의 energy_all 메모리에 접근
 			energy_all.at<float>(z, x) = sum_val * sum_val;
 		}
 	}
 
-	// 전체 Row의 평균 에너지 계산 (벡터화된 연산 사용)
+	// 전체 Row의 평균 에너지 계산
 	cv::Mat mean_energy;
 	cv::reduce(energy_all, mean_energy, 1, cv::REDUCE_AVG);
 
@@ -470,7 +471,7 @@ void COCTImaging::adaptive_compensation()
 	for (int x = 0; x < cols; ++x) {
 		cv::Mat I_n = normalized_img.col(x);
 
-		// pow 적용 (벡터화된 연산)
+		// pow 적용
 		cv::pow(I_n, exponentialFactor, I_n);
 
 		// 누적 합 계산
@@ -481,17 +482,16 @@ void COCTImaging::adaptive_compensation()
 		}
 
 		// 결과 계산
-		float* result_ptr = result_img.ptr<float>(0) + x; // 포인터 사용
 		for (int z = 0; z < rows; ++z) {
 			float sum_val = cumulativeSum[z];
 
 			if (mean_energy.at<float>(z) >= adaptive_threshold) {
 				if (sum_val != 0) {
-					result_ptr[z * cols] = I_n.at<float>(z) / (2 * sum_val);
+					result_img.at<float>(z, x) = I_n.at<float>(z) / (2 * sum_val);
 				}
 			}
 			else {
-				result_ptr[z * cols] = I_n.at<float>(z) * adaptive_threshold;
+				result_img.at<float>(z, x) = I_n.at<float>(z) * adaptive_threshold;
 			}
 		}
 	}
@@ -500,12 +500,11 @@ void COCTImaging::adaptive_compensation()
 	linear_contrast_stretching(result_img);
 	result_img.convertTo(result_img, CV_8U, 255);
 
-	// Apply CLAHE
-	cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(0.02, cv::Size(8, 8));
+	// Apply CLAHE (객체 재사용)
 	cv::Mat result_img_clahe;
 	clahe->apply(result_img, result_img_clahe);
 
-	// rotate the image (back to origin angle)
+	// Rotate back to original angle
 	cv::rotate(result_img_clahe, imageCompensated, cv::ROTATE_90_CLOCKWISE);
 
 	PLOGI.printf("[End] adaptive_compensation");
@@ -549,56 +548,4 @@ void COCTImaging::linear_contrast_stretching(cv::Mat& img, float lower_percentil
 
 	// 6. 0-1로 정규화 (선형적으로 값 조정)
 	img = (img - lower_bound) / (upper_bound - lower_bound + 1e-8);
-}
-
-void COCTImaging::create_inverse_circularize_map(int src_width, int src_height, int dst_width, int dst_height, float scale, cv::Mat& inverse_mat_x_map, cv::Mat& inverse_mat_y_map)
-{
-	float radius = (dst_width / 2.0f) - 0.5f;
-
-	inverse_mat_x_map = cv::Mat::zeros(dst_height, dst_width, CV_32F);
-	inverse_mat_y_map = cv::Mat::zeros(dst_height, dst_width, CV_32F);
-
-	float two_pi = 2 * CV_PI;
-
-#pragma omp parallel for
-	for (int y = 0; y < dst_height; ++y) {
-		float* ptr_x_map = inverse_mat_x_map.ptr<float>(y);
-		float* ptr_y_map = inverse_mat_y_map.ptr<float>(y);
-
-		for (int x = 0; x < dst_width; ++x) {
-			float r = (src_height - y) / scale;
-			float theta = (x / static_cast<float>(dst_width)) * two_pi;
-
-			float fx = r * cos(theta) + radius;
-			float fy = r * sin(theta) + radius;
-
-			ptr_x_map[x] = fx;
-			ptr_y_map[x] = fy;
-		}
-	}
-}
-
-void COCTImaging::init_circularize_map(int diameter, int src_height, int src_width, int dst_height, int dst_width, float scale, cv::Mat& mat_x_map, cv::Mat& mat_y_map)
-{
-	float radius = (diameter / 2.0f) - 0.5f;
-
-	mat_x_map = cv::Mat::zeros(dst_height, dst_width, CV_32F);
-	mat_y_map = cv::Mat::zeros(dst_height, dst_width, CV_32F);
-
-#pragma omp parallel for
-	for (int y = 0; y < dst_height; ++y) {
-		float* ptr_x_map = mat_x_map.ptr<float>(y);
-		float* ptr_y_map = mat_y_map.ptr<float>(y);
-
-		for (int x = 0; x < dst_width; ++x) {
-			float fy = y - radius;
-			float fx = x - radius;
-
-			float rvalue = (src_width - scale * sqrt(fy * fy + fx * fx));
-			float theta = atan2(fy, fx);
-
-			ptr_x_map[x] = rvalue;
-			ptr_y_map[x] = ((theta / CV_PI) + 1.0f) * 0.5f * (src_height - 1);
-		}
-	}
 }
