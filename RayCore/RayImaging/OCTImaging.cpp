@@ -531,34 +531,32 @@ void COCTImaging::min_max_normalization(const cv::Mat& img, cv::Mat& normalized_
 
 void COCTImaging::linear_contrast_stretching(cv::Mat& img, float lower_percentile, float upper_percentile)
 {
-	// 1. 행렬을 벡터로 변환하여 퍼센타일 계산 준비
+	// 1. 1D 벡터로 변환 없이 퍼센타일 계산
+	cv::Mat img_reshaped = img.reshape(1, img.rows * img.cols);  // 1D로 변환
 	std::vector<float> img_values;
-	img_values.reserve(img.rows * img.cols);
+	img_values.assign((float*)img_reshaped.datastart, (float*)img_reshaped.dataend);
 
-	// 2. img 값을 벡터에 복사 (1채널 이미지 가정)
-	for (int i = 0; i < img.rows; ++i) {
-		for (int j = 0; j < img.cols; ++j) {
-			img_values.push_back(img.at<float>(i, j));
-		}
-	}
-
-	// 3. 벡터 정렬
+	// 2. 벡터 정렬
 	std::sort(img_values.begin(), img_values.end());
 
-	// 4. 퍼센타일 값 계산
-	int lower_idx = static_cast<int>(lower_percentile / 100.0 * img_values.size());
-	int upper_idx = static_cast<int>(upper_percentile / 100.0 * img_values.size());
+	// 3. 퍼센타일 값 계산
+	int total_elements = img_values.size();
+	int lower_idx = static_cast<int>(lower_percentile / 100.0 * total_elements);
+	int upper_idx = static_cast<int>(upper_percentile / 100.0 * total_elements);
 
 	float lower_bound = img_values[lower_idx];
 	float upper_bound = img_values[upper_idx];
 
-	// 5. 클리핑: lower_bound 및 upper_bound로 img 값을 제한
+	// 4. OpenMP 병렬 처리로 클리핑 및 정규화
+#pragma omp parallel for
 	for (int i = 0; i < img.rows; ++i) {
+		float* img_ptr = img.ptr<float>(i);  // 한 번에 한 row의 데이터에 접근
 		for (int j = 0; j < img.cols; ++j) {
-			img.at<float>(i, j) = std::min(std::max(img.at<float>(i, j), lower_bound), upper_bound);
+			// 클리핑
+			img_ptr[j] = std::min(std::max(img_ptr[j], lower_bound), upper_bound);
+			// 0-1로 정규화
+			img_ptr[j] = (img_ptr[j] - lower_bound) / (upper_bound - lower_bound + 1e-8);
 		}
 	}
-
-	// 6. 0-1로 정규화 (선형적으로 값 조정)
-	img = (img - lower_bound) / (upper_bound - lower_bound + 1e-8);
 }
+
