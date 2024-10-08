@@ -409,7 +409,7 @@ UINT COCTImaging::threadRender(LPVOID param) {
 
 		if (pImaging->m_pThread->isRun) {
 			pImaging->Process((char *)pImaging->m_pFringesBuffer);
-			pImaging->PostProcess(pImaging->GetProcessedImage());			
+			pImaging->PostProcess(pImaging->GetProcessedImage());
 			// To-Do
 			// double buffering 필요?
 			// Invert, coloring 을 View (Dialog) 쪽으로 뺄 수 없을까?
