@@ -160,6 +160,9 @@ namespace RaywattApp.Models
         private int _sectionDistal;
 
         [ObservableProperty]
+        private double _sheathDiameter;
+
+        [ObservableProperty]
         private string? _bookmark;
 
         [ObservableProperty]

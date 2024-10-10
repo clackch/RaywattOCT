@@ -435,6 +435,7 @@ namespace RaywattApp.ViewModels.Dialog
                             sqlParameters["field_of_view"] = patientCase.FieldOfView;
                             sqlParameters["brightness"] = patientCase.Brightness;
                             sqlParameters["contrast"] = patientCase.Contrast;
+                            sqlParameters["sheath_diameter"] = patientCase.SheathDiameter;
                             sqlParameters["section_proximal"] = patientCase.SectionProximal;
                             sqlParameters["section_distal"] = patientCase.SectionDistal;
                             sqlParameters["create_date"] = patientCase.CreateDate;
