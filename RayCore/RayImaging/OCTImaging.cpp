@@ -9,7 +9,8 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-const float EXPONENTIAL_FACTOR = 2.0f;
+const float EXPONENTIAL_FACTOR = 1.5f;
+const float EXPONENTIAL_CONTROL = 0.6f;
 static bool bCompensated;
 
 void ippsRelease(void *&ptr) {
@@ -481,9 +482,9 @@ void COCTImaging::adaptive_compensation()
 	if (!bCompensated)
 		return;
 
-	//PLOGI.printf("[Start] adaptive_compensation");
+	// PLOGI.printf("[Start] adaptive_compensation");
 
-	//rotate the image
+	// Rotate the image
 	cv::Mat rotated_img;
 	cv::rotate(imageResult, rotated_img, cv::ROTATE_90_COUNTERCLOCKWISE);
 
@@ -504,8 +505,11 @@ void COCTImaging::adaptive_compensation()
 	for (int x = 0; x < cols; ++x) {
 		cv::Mat I_n = normalized_img.col(x).clone(); // clone() 사용으로 독립적인 메모리
 
-		// pow 적용
-		cv::pow(I_n, EXPONENTIAL_FACTOR, I_n);
+		// 자연 로그 계산 후 지수 연산 적용
+		cv::Mat log_img, exp_img;
+		cv::log(I_n + 1e-6, log_img);  // 1e-6을 추가해 로그 계산에서 0을 피함
+		cv::exp(EXPONENTIAL_FACTOR * log_img, exp_img);  // EXPONENTIAL_FACTOR 적용 후 exp 사용
+		I_n = exp_img.clone();  // 결과 저장
 
 		// 누적 합 계산
 		std::vector<float> cumulativeSum(rows, 0.0f);
@@ -530,13 +534,25 @@ void COCTImaging::adaptive_compensation()
 	cv::minMaxLoc(mean_energy, &minVal, &maxVal);
 	double adaptive_threshold = 0.0001 * maxVal;
 
+	// threshold_row 계산: adaptive_threshold 이하인 첫 번째 행 찾기
+	int threshold_row = 0;
+	for (int z = 0; z < mean_energy.rows; ++z) {
+		if (mean_energy.at<float>(z) <= adaptive_threshold) {
+			threshold_row = z;
+			break;
+		}
+	}
+
 	// 각 열에 대해 계산 (OpenMP 사용)
 #pragma omp parallel for
 	for (int x = 0; x < cols; ++x) {
 		cv::Mat I_n = normalized_img.col(x);
 
-		// pow 적용
-		cv::pow(I_n, EXPONENTIAL_FACTOR, I_n);
+		// 자연 로그 계산 후 지수 연산 적용
+		cv::Mat log_img, exp_img;
+		cv::log(I_n + 1e-6, log_img);  // 로그 계산에서 0을 피하기 위해 1e-6을 추가
+		cv::exp(EXPONENTIAL_FACTOR * log_img, exp_img);  // EXPONENTIAL_FACTOR 적용 후 exp 사용
+		I_n = exp_img.clone();  // 결과 저장
 
 		// 누적 합 계산
 		std::vector<float> cumulativeSum(rows, 0.0f);
@@ -545,23 +561,28 @@ void COCTImaging::adaptive_compensation()
 			cumulativeSum[i] = cumulativeSum[i + 1] + I_n.at<float>(i);
 		}
 
+		double stop_threshold = 0;
+
 		// 결과 계산
 		for (int z = 0; z < rows; ++z) {
 			float sum_val = cumulativeSum[z];
 
-			if (mean_energy.at<float>(z) >= adaptive_threshold) {
+			// threshold_row를 기준으로 보정 적용
+			if (z + 100 <= threshold_row) {
+				float sum_val_pow = std::exp(EXPONENTIAL_CONTROL * std::log(sum_val));
 				if (sum_val != 0) {
-					result_img.at<float>(z, x) = I_n.at<float>(z) / (2 * sum_val);
+					result_img.at<float>(z, x) = I_n.at<float>(z) / (2 * sum_val_pow);
+					stop_threshold = (2 * sum_val_pow);
 				}
 			}
 			else {
-				result_img.at<float>(z, x) = I_n.at<float>(z) * adaptive_threshold;
+				result_img.at<float>(z, x) = I_n.at<float>(z) / stop_threshold;
 			}
 		}
 	}
 
 	// Linear contrast stretching
-	linear_contrast_stretching(result_img);
+	logarithmic_contrast_stretching(result_img);
 	result_img.convertTo(result_img, CV_8U, 255);
 
 	// Apply CLAHE (객체 재사용)
@@ -571,8 +592,10 @@ void COCTImaging::adaptive_compensation()
 	// Rotate back to original angle
 	cv::rotate(result_img_clahe, imageCompensated, cv::ROTATE_90_CLOCKWISE);
 
-	//PLOGI.printf("[End] adaptive_compensation");
+	// PLOGI.printf("[End] adaptive_compensation");
 }
+
+
 
 void COCTImaging::min_max_normalization(const cv::Mat& img, cv::Mat& normalized_img, double& min_val, double& max_val)
 {
@@ -611,3 +634,37 @@ void COCTImaging::linear_contrast_stretching(cv::Mat& img, float lower_percentil
 	}
 }
 
+void COCTImaging::logarithmic_contrast_stretching(cv::Mat& img, float lower_percentile, float upper_percentile)
+{
+	// 1. 1D 벡터로 변환하여 퍼센타일 계산
+	cv::Mat img_reshaped = img.reshape(1, img.rows * img.cols);  // 1D로 변환
+	std::vector<float> img_values;
+	img_values.assign((float*)img_reshaped.datastart, (float*)img_reshaped.dataend);
+
+	// 2. 벡터 정렬
+	std::sort(img_values.begin(), img_values.end());
+
+	// 3. 퍼센타일 값 계산
+	int total_elements = img_values.size();
+	int lower_idx = static_cast<int>(lower_percentile / 100.0 * total_elements);
+	int upper_idx = static_cast<int>(upper_percentile / 100.0 * total_elements);
+
+	float lower_bound = img_values[lower_idx];
+	float upper_bound = img_values[upper_idx] * 1.5;
+
+	// 4. OpenMP 병렬 처리로 로그 변환 및 정규화
+#pragma omp parallel for
+	for (int i = 0; i < img.rows; ++i) {
+		float* img_ptr = img.ptr<float>(i);  // 한 번에 한 row의 데이터에 접근
+		for (int j = 0; j < img.cols; ++j) {
+			// 5. 클리핑: 퍼센타일에 맞게 값 클리핑
+			img_ptr[j] = std::min(std::max(img_ptr[j], lower_bound), upper_bound);
+
+			// 6. 로그 변환: 클리핑된 값을 기반으로 로그 변환
+			img_ptr[j] = std::log1p(img_ptr[j] - lower_bound + 1e-8);  // log(1 + x) 계산 (offset 추가)
+
+			// 7. 0-1로 정규화: 로그 변환 후 결과를 0-1 범위로 맞춤
+			img_ptr[j] = (img_ptr[j] - std::log1p(0)) / (std::log1p(upper_bound - lower_bound) + 1e-8);
+		}
+	}
+}
