@@ -9,6 +9,9 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+const float EXPONENTIAL_FACTOR = 2.0f;
+static bool bCompensated;
+
 void ippsRelease(void *&ptr) {
 	if (ptr) {
 		ippsFree(ptr);
@@ -56,6 +59,8 @@ COCTImaging::COCTImaging(Setting setting, CMessageService* pMsg) {
 	m_nTotalFrame = 0;
 
 	m_nSheathPosition = 0;
+
+	clahe = cv::createCLAHE(0.02, cv::Size(8, 8));
 }
 
 COCTImaging::~COCTImaging() {
@@ -84,6 +89,7 @@ void COCTImaging::Process(char* fringes) {
 	computeLogarithm(fFFTResult, fFFTResult);
 	findSheath(fFFTResult);
 	generateImage(fFFTResult, false);
+	adaptive_compensation();		
 }
 void COCTImaging::PostProcess(cv::Mat image) {
 	const bool bInvert = m_bInvert;
@@ -149,6 +155,14 @@ void COCTImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst) {}
 void COCTImaging::EraseStentOutLier(cv::Mat& stent) {}
 
 void COCTImaging::SetLumenContourOffset(std::vector<cv::Point> lumenContour) {}
+
+cv::Mat COCTImaging::GetProcessedImage() {
+	return bCompensated ? imageCompensated : imageResult; 
+}
+
+void COCTImaging::SetImageCompensation(bool ImageCompensated) { 
+	bCompensated = ImageCompensated;
+}
 
 void COCTImaging::allocateMemory() {
 	// ORDER = 11, nFFTLength = 2^11
@@ -409,3 +423,139 @@ UINT COCTImaging::threadRender(LPVOID param) {
 
 	return NOERROR;
 }
+
+void COCTImaging::adaptive_compensation()
+{
+	if (!bCompensated)
+		return;
+
+	//PLOGI.printf("[Start] adaptive_compensation");
+
+	//rotate the image
+	cv::Mat rotated_img;
+	cv::rotate(imageResult, rotated_img, cv::ROTATE_90_COUNTERCLOCKWISE);
+
+	// Normalize the image
+	cv::Mat normalized_img;
+	rotated_img.convertTo(normalized_img, CV_32F);
+	double min_val, max_val;
+	min_max_normalization(normalized_img, normalized_img, min_val, max_val);
+
+	int rows = normalized_img.rows;
+	int cols = normalized_img.cols;
+
+	cv::Mat energy_all = cv::Mat::zeros(normalized_img.size(), CV_32F);
+	cv::Mat result_img = cv::Mat::zeros(normalized_img.size(), CV_32F);
+
+	// Compute energy using cumulative sum (with OpenMP)
+#pragma omp parallel for
+	for (int x = 0; x < cols; ++x) {
+		cv::Mat I_n = normalized_img.col(x).clone(); // clone() 사용으로 독립적인 메모리
+
+		// pow 적용
+		cv::pow(I_n, EXPONENTIAL_FACTOR, I_n);
+
+		// 누적 합 계산
+		std::vector<float> cumulativeSum(rows, 0.0f);
+		cumulativeSum[rows - 1] = I_n.at<float>(rows - 1);
+		for (int i = rows - 2; i >= 0; --i) {
+			cumulativeSum[i] = cumulativeSum[i + 1] + I_n.at<float>(i);
+		}
+
+		// 에너지 계산
+		for (int z = 0; z < rows; ++z) {
+			float sum_val = cumulativeSum[z];
+			energy_all.at<float>(z, x) = sum_val * sum_val;
+		}
+	}
+
+	// 전체 Row의 평균 에너지 계산
+	cv::Mat mean_energy;
+	cv::reduce(energy_all, mean_energy, 1, cv::REDUCE_AVG);
+
+	// Adaptive threshold 설정
+	double minVal, maxVal;
+	cv::minMaxLoc(mean_energy, &minVal, &maxVal);
+	double adaptive_threshold = 0.0001 * maxVal;
+
+	// 각 열에 대해 계산 (OpenMP 사용)
+#pragma omp parallel for
+	for (int x = 0; x < cols; ++x) {
+		cv::Mat I_n = normalized_img.col(x);
+
+		// pow 적용
+		cv::pow(I_n, EXPONENTIAL_FACTOR, I_n);
+
+		// 누적 합 계산
+		std::vector<float> cumulativeSum(rows, 0.0f);
+		cumulativeSum[rows - 1] = I_n.at<float>(rows - 1);
+		for (int i = rows - 2; i >= 0; --i) {
+			cumulativeSum[i] = cumulativeSum[i + 1] + I_n.at<float>(i);
+		}
+
+		// 결과 계산
+		for (int z = 0; z < rows; ++z) {
+			float sum_val = cumulativeSum[z];
+
+			if (mean_energy.at<float>(z) >= adaptive_threshold) {
+				if (sum_val != 0) {
+					result_img.at<float>(z, x) = I_n.at<float>(z) / (2 * sum_val);
+				}
+			}
+			else {
+				result_img.at<float>(z, x) = I_n.at<float>(z) * adaptive_threshold;
+			}
+		}
+	}
+
+	// Linear contrast stretching
+	linear_contrast_stretching(result_img);
+	result_img.convertTo(result_img, CV_8U, 255);
+
+	// Apply CLAHE (객체 재사용)
+	cv::Mat result_img_clahe;
+	clahe->apply(result_img, result_img_clahe);
+
+	// Rotate back to original angle
+	cv::rotate(result_img_clahe, imageCompensated, cv::ROTATE_90_CLOCKWISE);
+
+	//PLOGI.printf("[End] adaptive_compensation");
+}
+
+void COCTImaging::min_max_normalization(const cv::Mat& img, cv::Mat& normalized_img, double& min_val, double& max_val)
+{
+	cv::minMaxLoc(img, &min_val, &max_val);
+	normalized_img = (img - min_val) / (max_val - min_val);
+}
+
+void COCTImaging::linear_contrast_stretching(cv::Mat& img, float lower_percentile, float upper_percentile)
+{
+	// 1. 1D 벡터로 변환 없이 퍼센타일 계산
+	cv::Mat img_reshaped = img.reshape(1, img.rows * img.cols);  // 1D로 변환
+	std::vector<float> img_values;
+	img_values.assign((float*)img_reshaped.datastart, (float*)img_reshaped.dataend);
+
+	// 2. 벡터 정렬
+	std::sort(img_values.begin(), img_values.end());
+
+	// 3. 퍼센타일 값 계산
+	int total_elements = img_values.size();
+	int lower_idx = static_cast<int>(lower_percentile / 100.0 * total_elements);
+	int upper_idx = static_cast<int>(upper_percentile / 100.0 * total_elements);
+
+	float lower_bound = img_values[lower_idx];
+	float upper_bound = img_values[upper_idx];
+
+	// 4. OpenMP 병렬 처리로 클리핑 및 정규화
+#pragma omp parallel for
+	for (int i = 0; i < img.rows; ++i) {
+		float* img_ptr = img.ptr<float>(i);  // 한 번에 한 row의 데이터에 접근
+		for (int j = 0; j < img.cols; ++j) {
+			// 클리핑
+			img_ptr[j] = std::min(std::max(img_ptr[j], lower_bound), upper_bound);
+			// 0-1로 정규화
+			img_ptr[j] = (img_ptr[j] - lower_bound) / (upper_bound - lower_bound + 1e-8);
+		}
+	}
+}
+

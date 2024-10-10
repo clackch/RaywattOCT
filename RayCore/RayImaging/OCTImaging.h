@@ -2,6 +2,7 @@
 #include <ipp.h>
 #include <opencv2/opencv.hpp>
 #include <vector>
+#include <omp.h>
 #include "Config.h"
 #include "Imaging.h"
 #include "OCTMeasurement.h"
@@ -32,6 +33,7 @@ protected:
 	cv::Mat imageResult;
 	cv::Mat imageResultColor;
 	cv::Mat imageCircle;
+	cv::Mat imageCompensated;
 
 	// using in GenerateBackground
 	Ipp32f* fringes32f;
@@ -54,6 +56,8 @@ protected:
 	int m_nTotalFrame;
 
 	int m_nSheathPosition;
+
+	cv::Ptr<cv::CLAHE> clahe;
 public:
 	COCTImaging(Setting, CMessageService*);
 	virtual ~COCTImaging(void);
@@ -82,7 +86,7 @@ public:
 		m_nTotalFrame = nTotalFrame;
 	}
 
-	virtual cv::Mat GetProcessedImage() { return imageResult; }
+	virtual cv::Mat GetProcessedImage();
 	cv::Mat GetCircleImage() { return imageCircle; }
 	USHORT* GetFringesBuffer() { return m_pFringesBuffer; }
 	Setting GetSetting() { return m_setting; }
@@ -95,6 +99,8 @@ public:
 	virtual void SetLumenContourOffset(std::vector<cv::Point> lumenContour);
 
 	int GetSheathPosition() { return m_nSheathPosition; }
+
+	static void SetImageCompensation(bool ImageCompensated);
 protected:
 	void allocateMemory();
 	void releaseMemory();
@@ -107,6 +113,10 @@ protected:
 	void generateImage(Ipp32f* logaritihmData, bool bInvert);
 	void findSheath(Ipp32f* logaritihmData);
 	void drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color);
+
+	void adaptive_compensation();
+	void min_max_normalization(const cv::Mat& img, cv::Mat& normalized_img, double& min_val, double& max_val);
+	void linear_contrast_stretching(cv::Mat& img, float lower_percentile = 1.0f, float upper_percentile = 99.0f);
 
 	static UINT threadRender(LPVOID param);
 };
