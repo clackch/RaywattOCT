@@ -102,6 +102,9 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
     case RayProperty::PullbackSpeed:
         config.stepMotor.pullbackSpeed = value;
         break;
+    case RayProperty::SheathDiameter:
+        octSystem.SetSheathDiameter(value);
+        break;
     case RayProperty::ImageThreshold:
         octSystem.SetImageThreshold(value);
         break;
