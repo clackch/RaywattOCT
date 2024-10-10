@@ -485,8 +485,8 @@ void CRJController::handlePacket() {
 	}
 	
 	// button, switch state
-	m_bButton[0] = m_vPacket[KEY_IDX] & 0x1;
-	m_bButton[1] = m_vPacket[KEY_IDX] & 0x2;
+	m_bButton[0] = false; //m_vPacket[KEY_IDX] & 0x1;
+	m_bButton[1] = false; //m_vPacket[KEY_IDX] & 0x2;
 	m_bLimitSwitch = m_vPacket[KEY_IDX] & 0x4;
 
 	//PLOGI.printf("\tButton: %02d %02d %02d\n", m_bButton[0], m_bButton[1], m_bLimitSwitch);
