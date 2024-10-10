@@ -161,6 +161,7 @@ public:
 	UINT GetLongitudeImageWidth();
 	UINT GetLongitudeImageHeight();
 	UINT GetLongitudeImageChannels();
+	RayError SetSheathDiameter(double value);
 	double GetImageThreshold();
 	RayError SetImageThreshold(double value);
 	double GetImageRoi();

@@ -1005,6 +1005,21 @@ UINT COCTSystem::GetLongitudeImageChannels()
 	}
 }
 
+RayError COCTSystem::SetSheathDiameter(double value)
+{
+	CConfiguration& config = CConfiguration::GetInstance();
+	
+	if (value == 0.0) {
+		config.measurement.fSheathRadius = config.measurement.fSheathRadiusOnePointSix;		
+	}
+	else {
+		config.measurement.fSheathRadius = config.measurement.fSheathRadiusTwoPointSix;
+	}
+	config.measurement.nSheathPosition = config.measurement.fSheathRadius * 1000.f / config.measurement.fAxialResolutionScale;
+
+	return RayError::OK;
+}
+
 /*
 * GetImageThreshold
 */

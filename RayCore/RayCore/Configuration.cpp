@@ -27,6 +27,9 @@ void CConfiguration::Initialize(tstring configFile)
 	this->measurement.fAxialResolutionScale = getPrivateProfileFloat(_T("Measurement"), _T("AxialResolutionScale"), 8.3, configFilePath.c_str());
 	this->measurement.nNoiseSkip = ::GetPrivateProfileInt(_T("Measurement"), _T("NoiseSkip"), 300, configFilePath.c_str());
 	this->measurement.nNoiseAverage = ::GetPrivateProfileInt(_T("Measurement"), _T("NoiseAverage"), 100, configFilePath.c_str());
+	
+	this->measurement.fSheathRadiusOnePointSix = getPrivateProfileFloat(_T("Measurement"), _T("SheathRadius1.6"), 0.28, configFilePath.c_str());
+	this->measurement.fSheathRadiusTwoPointSix = getPrivateProfileFloat(_T("Measurement"), _T("SheathRadius2.6"), 0.43, configFilePath.c_str());	
 	this->measurement.fSheathRadius = getPrivateProfileFloat(_T("Measurement"), _T("SheathRadius"), 0.43, configFilePath.c_str());
 	this->measurement.nSheathPosition = measurement.fSheathRadius * 1000.f / measurement.fAxialResolutionScale;
 
