@@ -262,8 +262,6 @@ namespace RaywattApp.ViewModels
             sqlParameters["vessel"] = PatientCase.Vessel;
             sqlParameters["location"] = PatientCase.Location;
             sqlParameters["procedure"] = PatientCase.Procedure;
-            sqlParameters["angio_yn"] = PatientCase.AngioYn;
-            sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
             PatientCase.IndicatorDegree = Degree;
             sqlParameters["indicator_degree"] = PatientCase.IndicatorDegree;
             sqlParameters["colormap"] = PatientCase.Colormap;

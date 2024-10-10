@@ -187,6 +187,12 @@ namespace RaywattApp.ViewModels
                 }
                 RaySetProperty(Property.PullbackDistance, Double.Parse(PbLength));
                 RaySetProperty(Property.PullbackSpeed, Double.Parse(PbSpeed));
+                PatientCase.SheathDiameter = RayGetProperty(Property.SheathDiameter);
+                double sheathType = 1;
+                if (PatientCase.AccessionNumber.Equals("0"))
+                    sheathType = 0;
+                RaySetProperty(Property.SheathDiameter, sheathType);
+                PatientCase.SheathDiameter = RayGetProperty(Property.SheathDiameter);
 
                 if (!DeviceStatus.IsAngioInitialized && DeviceStatus.IsAngioConnected)
                 {

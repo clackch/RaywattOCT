@@ -138,6 +138,7 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case
     apposition_threshold real,
 	brightness integer,
     contrast integer,
+	sheath_diameter real,
 	section_proximal integer,
     section_distal integer,
     create_date timestamp without time zone,
