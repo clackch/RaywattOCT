@@ -17,7 +17,6 @@
 #include "DataReader.h"
 #include "VideoWriter.h"
 #include "TIFFWriter.h"
-#include "ZaberController.h"
 #include "RJController.h"
 #include "LaserController.h"
 #include "LookUpTable.h"
@@ -116,7 +115,7 @@ int CRaywattLabDlg::initializeDevices() {
 
 	if (m_pAcqDevice->InitDevice() != NOERROR) {
 		m_pRJController->Disconnect();
-		m_pLaserModule->Close();
+		m_pLaserModule->Disconnect();
 		m_pAcqDevice->CleanUp();
 		return E_FAIL;
 	}
@@ -129,7 +128,7 @@ int CRaywattLabDlg::finalizeDevices() {
 		m_pAcqDevice->CleanUp();
 	}
 	m_pRJController->Disconnect();
-	m_pLaserModule->Close();
+	m_pLaserModule->Disconnect();
 
 	return NOERROR;
 }
@@ -826,7 +825,7 @@ void CRaywattLabDlg::OnDestroy() {
 	m_pRJController->Disconnect();
 	delete m_pRJController;
 
-	m_pLaserModule->Close();
+	m_pLaserModule->Disconnect();
 	delete m_pLaserModule;
 }
 
@@ -1128,7 +1127,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveVideo()
 	int height = (isCircle) ? config.imaging.nCircleSize : config.imaging.nOutputLength;
 	videoWriter.StartRecording(strAviPath, width, height);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
-		pImaging->Process(pReader->GetSample(i));
+		pImaging->Process(pReader->GetSample(pReader->GetNumOfSamples() - i - 1));
 		pImaging->PostProcess(pImaging->GetProcessedImage());
 		videoWriter.PushToBuffer(((isCircle) ? pImaging->GetCircleImage() : pImaging->GetRectangleImage()));
 	}

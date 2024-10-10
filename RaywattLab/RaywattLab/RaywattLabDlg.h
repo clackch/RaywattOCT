@@ -6,7 +6,6 @@
 #include "CommonDlg.h"
 #include "Imaging.h"
 #include "AcquisitionDevice.h"
-#include "ArduinoController.h"
 #include "LaserModule.h"
 #include "ScopeView.h"
 #include "RotaryJunctionDlg.h"
