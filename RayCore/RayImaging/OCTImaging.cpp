@@ -95,6 +95,8 @@ void COCTImaging::PostProcess(cv::Mat image) {
 	const bool bInvert = m_bInvert;
 	const bool bColor = m_bColor;
 
+	findSheath(image);
+
 	cv::cvtColor(image, imageResultColor, cv::COLOR_GRAY2RGB);
 
 	if (bInvert) cv::bitwise_not(imageResultColor, imageResultColor);
@@ -364,6 +366,56 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 	if (sheathPoints.size() > 0) {
 		m_nSheathPosition = sheathPointSum / sheathPoints.size();
 	}
+}
+
+void COCTImaging::findSheath(cv::Mat img) {
+	cv::Mat image;
+	cv::rotate(img, image, cv::ROTATE_90_COUNTERCLOCKWISE);
+
+	// 행의 평균과 분산 계산
+	std::vector<double> mean_values;
+	std::vector<double> variance_values;
+
+	for (int i = 0; i < image.rows; ++i) {
+		cv::Mat row = image.row(i);
+		cv::Scalar mean, stddev;
+		cv::meanStdDev(row, mean, stddev);
+		mean_values.push_back(mean[0]);
+		variance_values.push_back(stddev[0] * stddev[0]);  // 분산은 표준편차의 제곱
+	}
+
+	// 평균 값을 0~1로 정규화
+	std::vector<double> mean_values_norm = normalize(mean_values);
+
+	// 정규화된 평균이 0.9 이상인 행 필터링
+	std::vector<std::tuple<int, double, double>> valid_rows;
+	for (int i = 0; i < mean_values_norm.size(); ++i) {
+		if (mean_values_norm[i] >= 0.9) {
+			valid_rows.emplace_back(i, mean_values[i], variance_values[i]);
+		}
+	}
+
+	if (!valid_rows.empty()) {
+		// 분산이 가장 작은 행 찾기
+		auto min_variance_row = *std::min_element(valid_rows.begin(), valid_rows.end(),
+			[](const auto& a, const auto& b) { return std::get<2>(a) < std::get<2>(b); });
+		m_nSheathPosition = std::get<0>(min_variance_row);
+	}
+	else {
+		m_nSheathPosition = 0;
+	}
+}
+
+// 정규화를 위한 함수
+std::vector<double> COCTImaging::normalize(const std::vector<double>& values) {
+	double min_val = *std::min_element(values.begin(), values.end());
+	double max_val = *std::max_element(values.begin(), values.end());
+	std::vector<double> normalized;
+
+	for (double val : values) {
+		normalized.push_back((val - min_val) / (max_val - min_val));
+	}
+	return normalized;
 }
 
 void COCTImaging::generateImage(Ipp32f* logaritihmData, bool bInvert){

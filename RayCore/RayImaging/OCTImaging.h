@@ -92,7 +92,6 @@ public:
 	Setting GetSetting() { return m_setting; }
 	void GetFrameInfo(int& nCurFrame, int& nTotalFrame) { nCurFrame = m_nCurFrame; nTotalFrame = m_nTotalFrame; }
 	void* GetCalibrationData();
-	int GetFoundSheathPosition() { return m_nSheathPosition; }
 	virtual void CircularizeImage(cv::Mat& src, cv::Mat& dst);
 	virtual void InverseCircularizeImage(cv::Mat& src, cv::Mat& dst);
 	virtual void EraseStentOutLier(cv::Mat& stent);
@@ -112,6 +111,8 @@ protected:
 	void computeLogarithm(Ipp32f* src, Ipp32f* dst);
 	void generateImage(Ipp32f* logaritihmData, bool bInvert);
 	void findSheath(Ipp32f* logaritihmData);
+	void findSheath(cv::Mat img);
+	std::vector<double> normalize(const std::vector<double>& values);
 	void drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color);
 
 	void adaptive_compensation();
