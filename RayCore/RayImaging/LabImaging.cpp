@@ -79,7 +79,6 @@ void CLabImaging::Process(char* fringes) {
 
 	fftProcessing(fringes32f);
 	computeLogarithm(fFFTResult, logData);
-	findSheath(logData);
 
 	if (subtract) {
 		subtractBackground<float>(fFFTResult, backgroundFFT, backgroundSubtracted, nOutputLength * nBScan);
