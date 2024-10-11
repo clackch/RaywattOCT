@@ -35,7 +35,7 @@ public:
 	virtual bool Move(eStepMotorIndex idxMotor, int posStep, bool delay = false, char sensor = 0);
 	virtual bool Set(eStepMotorIndex idxMotor, int velStep);
 
-	int GetPosition(eStepMotorIndex idxMotor) { return m_nStepPosition[(int)idxMotor]; }
+	int GetPosition(eStepMotorIndex idxMotor) { return m_nActualPosition[(int)idxMotor - 1]; }
 	int MoveRelative(eStepMotorIndex idxMotor, int nOffset);
 	void SetVOA(unsigned short voa);
 	void SetVLD(unsigned short vld);
@@ -45,6 +45,7 @@ public:
 protected:
 	static UINT threadReadPacket(LPVOID param);
 	void initSetting();
+	void parseAutoReportPacket(BYTE* packet, int size);
 	void parseSMPacket(BYTE* packet, int size);
 	void setVOAVLD();
 	virtual void handlePacket();

@@ -204,6 +204,7 @@ private:
 	void redrawCutView();
 	void laserOnOff(bool isOn);
 	bool waitForStepMotors(bool& runFlag);
+	bool waitForStepMotors(eStepMotorIndex idxMotor, bool& runFlag);
 	void calculateIntensity(cv::Mat image);
 
 protected:

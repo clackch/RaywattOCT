@@ -1319,16 +1319,19 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 
 	if (pLaserModule != nullptr && pLaserModule->IsConnected())
 	{
+		// 0. Speed Up
+		pLaserModule->Set(eStepMotorIndex::Both, CALIBRATION_MODULE_SM_DEFAULT_SPEED * 5);
+
 		// 1. Start Finding Sheath
 		pSystem->m_vCalibrationInfo.clear();
 		pSystem->m_cathState = CatheterState::FindingSheath;
 		
 		// 1-1. Move Delay-line & Find Sheath
-		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, -5000);
-		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, -1000);
+		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
-		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, 10000);
-		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, 2000);
+		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
 		// 1-2. Find Z-Offset Position
 		const int nSheathPosition = CConfiguration::GetInstance().measurement.nSheathPosition;
@@ -1341,22 +1344,24 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 				nZOffset = pSystem->m_vCalibrationInfo.at(i).second;
 			}
 		}
+		PLOGI.printf("Calibrated zOffset: %d", nZOffset);
 
 		// 1-3. Move to calibrated position
 		nTargetPos = nZOffset;
 		pLaserModule->Move(eStepMotorIndex::DelayLine, nZOffset);
-		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
+#if 1
 		// 2. Start Finding Peak
 		pSystem->m_vCalibrationInfo.clear();
 		pSystem->m_cathState = CatheterState::FindingPeak;
 
 		// 2-1. Move Polarization-control & Find Peak
 		nTargetPos = pLaserModule->Move(eStepMotorIndex::Polarization, 0);
-		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
 
 		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::Polarization, 3240);
-		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
 
 		// 2-2. Find Max Peak
 		int nMaxPeak = INT_MIN;
@@ -1370,8 +1375,11 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 
 		// 2-3. Move to calibrated position
 		nTargetPos = nMaxPeakPos;
-		pLaserModule->Move(eStepMotorIndex::DelayLine, nTargetPos);
-		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+		pLaserModule->Move(eStepMotorIndex::Polarization, nTargetPos);
+		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
+#endif
+		// 3. Default Speed
+		pLaserModule->Set(eStepMotorIndex::Both, CALIBRATION_MODULE_SM_DEFAULT_SPEED);
 	}
 	
 	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Calibrated);
@@ -1975,6 +1983,16 @@ bool COCTSystem::waitForStepMotors(bool& runFlag) {
 	}
 
 	return m_pRJController->IsMoving();
+}
+bool COCTSystem::waitForStepMotors(eStepMotorIndex idxMotor, bool& runFlag) {
+	if (!m_pLaserModule->IsConnected()) return false;
+
+	Sleep(100);
+	while (m_pLaserModule->IsMoving(idxMotor) && runFlag) {
+		Sleep(30);
+	}
+
+	return m_pLaserModule->IsMoving(idxMotor);
 }
 void COCTSystem::calculateIntensity(cv::Mat image) {
 	CConfiguration& config = CConfiguration::GetInstance();
