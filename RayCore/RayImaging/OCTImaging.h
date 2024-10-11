@@ -119,6 +119,9 @@ protected:
 	void min_max_normalization(const cv::Mat& img, cv::Mat& normalized_img, double& min_val, double& max_val);
 	void linear_contrast_stretching(cv::Mat& img, float lower_percentile = 1.0f, float upper_percentile = 99.0f);
 	void logarithmic_contrast_stretching(cv::Mat& img, float lower_percentile = 1.0f, float upper_percentile = 99.0f);
+	void lumen_detection_processing(cv::Mat& img);
+	void apply_piecewise_linear_contrast(cv::Mat& img, int low_in, int high_in, int low_out, int high_out);
+	double euclidean_distance(cv::Point2f pt1, cv::Point2f pt2);
 
 	static UINT threadRender(LPVOID param);
 };

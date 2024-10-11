@@ -8,10 +8,14 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <cmath>
 
-const float EXPONENTIAL_FACTOR = 1.5f;
+const float EXPONENTIAL_FACTOR = 1.8f;
 const float EXPONENTIAL_CONTROL = 0.6f;
+const int OUTER_SHEATH_OFFSET = 40;
+const int SEARCH_LENGTH = 100;
 static bool bCompensated;
+static int myint = 0;
 
 void ippsRelease(void *&ptr) {
 	if (ptr) {
@@ -497,6 +501,8 @@ void COCTImaging::adaptive_compensation()
 	int rows = normalized_img.rows;
 	int cols = normalized_img.cols;
 
+	lumen_detection_processing(normalized_img);
+
 	cv::Mat energy_all = cv::Mat::zeros(normalized_img.size(), CV_32F);
 	cv::Mat result_img = cv::Mat::zeros(normalized_img.size(), CV_32F);
 
@@ -532,7 +538,7 @@ void COCTImaging::adaptive_compensation()
 	// Adaptive threshold 설정
 	double minVal, maxVal;
 	cv::minMaxLoc(mean_energy, &minVal, &maxVal);
-	double adaptive_threshold = 0.0001 * maxVal;
+	double adaptive_threshold = 0.001 * maxVal;
 
 	// threshold_row 계산: adaptive_threshold 이하인 첫 번째 행 찾기
 	int threshold_row = 0;
@@ -594,8 +600,6 @@ void COCTImaging::adaptive_compensation()
 
 	// PLOGI.printf("[End] adaptive_compensation");
 }
-
-
 
 void COCTImaging::min_max_normalization(const cv::Mat& img, cv::Mat& normalized_img, double& min_val, double& max_val)
 {
@@ -667,4 +671,162 @@ void COCTImaging::logarithmic_contrast_stretching(cv::Mat& img, float lower_perc
 			img_ptr[j] = (img_ptr[j] - std::log1p(0)) / (std::log1p(upper_bound - lower_bound) + 1e-8);
 		}
 	}
+}
+
+void COCTImaging::lumen_detection_processing(cv::Mat& img)
+{
+	return;
+	PLOGI.printf("Start Lumen_Detection");
+	// 행의 평균 및 분산 계산	
+	std::vector<double> mean_values, variance_values;
+
+	// 컬러로 변환하여 파란 선을 그릴 수 있도록 준비
+	cv::Mat color_image;
+	cv::cvtColor(img, color_image, cv::COLOR_GRAY2BGR);
+
+	for (int i = 0; i < img.rows; i++) {
+		cv::Mat row = img.row(i);
+		double mean = cv::mean(row)[0];
+		cv::Scalar mean_scalar, stddev_scalar;
+		cv::meanStdDev(row, mean_scalar, stddev_scalar);
+		double variance = stddev_scalar[0] * stddev_scalar[0]; // 분산 계산
+		mean_values.push_back(mean);
+		variance_values.push_back(variance);
+	}
+
+	PLOGI.printf("mean, variance end1");
+
+	// 평균 값 정규화 (0~1 사이 값으로)
+	cv::Mat mean_values_mat = cv::Mat(mean_values);
+	cv::normalize(mean_values_mat, mean_values_mat, 0, 1, cv::NORM_MINMAX, CV_32F);
+
+	// 정규화된 평균이 0.9 이상인 행만 필터링하고, 그 행의 분산 값도 함께 추출
+	std::vector<int> valid_row_indices;
+	std::vector<double> valid_row_variances;
+
+	for (int i = 0; i < mean_values.size(); i++) {
+		if (mean_values[i] >= 0.9) {
+			valid_row_indices.push_back(i);
+			valid_row_variances.push_back(variance_values[i]);  // 해당 행의 분산 값도 저장
+		}
+	}
+	
+	if (valid_row_indices.empty()) {
+		PLOGI.printf("No valid rows found with normalized mean >= 0.9.");
+		return;
+	}
+
+	// valid_row_variances에서 분산이 가장 작은 행 찾기
+	auto min_variance_it = std::min_element(valid_row_variances.begin(), valid_row_variances.end());
+	int min_variance_index = std::distance(valid_row_variances.begin(), min_variance_it);
+
+	// 분산이 가장 작은 행의 인덱스를 valid_row_indices에서 가져오기
+	int min_variance_row1 = valid_row_indices[min_variance_index];
+
+	// 기준 row에서 40픽셀 아래의 시작 row 설정
+	int start_row = min_variance_row1 + OUTER_SHEATH_OFFSET;
+	if (start_row >= img.rows) {
+		PLOGI.printf("Start row is out of image bounds.");
+		return;
+	}
+
+	PLOGI.printf("mean, variance end2");
+
+	// 이미지 영역 선택
+	cv::Mat selected_region = img(cv::Range(start_row, img.rows), cv::Range::all());
+
+	cv::imwrite(std::string(".\\test\\sellected Image") + std::to_string(myint) + ".png", selected_region);
+
+	// Piecewise Linear Contrast 적용
+	apply_piecewise_linear_contrast(selected_region, 48, 184, 0, 255);
+
+	PLOGI.printf("linear Contrast done");
+
+	// Gaussian Blur 적용
+	cv::GaussianBlur(selected_region, selected_region, cv::Size(9, 9), 0);
+	
+	// Canny Edge 적용
+	cv::Mat edges;
+	cv::Canny(selected_region, edges, 100, 220);
+
+	PLOGI.printf("edge, blur, processing done");
+
+	// 에지 결과를 사용하여 빨간 점 표시
+	std::vector<cv::Point> red_points;
+	for (int col = 0; col < selected_region.cols; col++) {
+		std::vector<double> col_values;
+		for (int row = 10; row < selected_region.rows - 10; row++) {
+			double sum_value = cv::sum(selected_region(cv::Range(row - 10, row + 11), cv::Range(col, col + 1)))[0];
+			col_values.push_back(sum_value);
+		}
+		// 0.8 이상인 row 선택
+		for (int i = 0; i < col_values.size(); i++) {
+			if (col_values[i] >= 0.8) {
+				red_points.push_back(cv::Point(col, i + start_row));
+				break;
+			}
+		}
+	}
+
+	PLOGI.printf("new red Point");
+
+	// 직선을 그리기 위한 좌표들
+	std::vector<cv::Point> refined_curve_points;
+	refined_curve_points.push_back(red_points[0]);
+
+	for (int i = 0; i < red_points.size() - 1; i++) {
+		cv::Point last_point = refined_curve_points.back();
+		std::vector<cv::Point> possible_candidates;
+		for (int j = i + 2; j <= i + 60 && j < red_points.size(); j += 2) {
+			if (euclidean_distance(last_point, red_points[j]) <= SEARCH_LENGTH * 2) {
+				possible_candidates.push_back(red_points[j]);
+			}
+		}
+
+		if (possible_candidates.empty()) {
+			break;
+		}
+
+		// 유클리드 거리가 가장 작은 후보 선택
+		cv::Point closest_point = *std::min_element(possible_candidates.begin(), possible_candidates.end(),
+			[&](cv::Point a, cv::Point b) {
+				return euclidean_distance(last_point, a) <
+					euclidean_distance(last_point, b);
+			});
+		refined_curve_points.push_back(closest_point);
+	}
+
+	PLOGI.printf("curve points extracting done");
+
+	// 마지막 점 추가
+	refined_curve_points.push_back(cv::Point(img.cols - 1, refined_curve_points.back().y));
+
+	// 직선 그리기
+	for (int i = 0; i < refined_curve_points.size() - 1; i++) {
+		cv::line(color_image, refined_curve_points[i], refined_curve_points[i + 1], cv::Scalar(0, 255, 0), 2);
+	}
+
+	PLOGI.printf("draw lines in the image");
+
+	cv::imwrite(std::string(".\\test\\Processed Image") + std::to_string(myint++) + ".png", color_image);
+}
+
+void COCTImaging::apply_piecewise_linear_contrast(cv::Mat& img, int low_in, int high_in, int low_out, int high_out) {
+	cv::Mat result = cv::Mat::zeros(img.size(), CV_8U);
+
+	// 첫 구간
+	result.setTo(low_out, img <= low_in);
+
+	// 마지막 구간
+	result.setTo(high_out, img >= high_in);
+
+	// 중간 구간 선형 변환
+	cv::Mat mask = (img > low_in) & (img < high_in);
+	result.setTo((img - low_in) * (high_out - low_out) / (high_in - low_in) + low_out, mask);
+
+	result.copyTo(img);
+}
+
+double COCTImaging::euclidean_distance(cv::Point2f pt1, cv::Point2f pt2) {
+	return std::sqrt(std::pow(pt1.x - pt2.x, 2) + std::pow(pt1.y - pt2.y, 2));
 }
