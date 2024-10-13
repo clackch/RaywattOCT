@@ -241,7 +241,7 @@ void CLaserModule::initSetting() {
 	getSerialPacket(eFID::FID_SM_SET_CONFIG, (sizeof(int) * 7 + sizeof(char) * 2) * 2, serialPacket, packetLength);
 
 	const int minSpeed = 100;
-	const int maxSpeed = 5000;
+	const int maxSpeed = 10000;
 	const int accTime = 1;
 	const int accStep = 100;
 	const int decTime = 1;

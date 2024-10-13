@@ -283,6 +283,7 @@ RayError COCTSystem::ManualCalibration(bool forward) {
 		if (m_pLaserModule->IsConnected() == false) return RayError::DeviceNotConnected;
 		if (m_pLaserModule->IsMoving(eStepMotorIndex::DelayLine)) return RayError::DeviceBusy;
 
+		m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_DEFAULT);
 		m_pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, (forward ? DELAYLINE_FORWARD_POSITION : DELAYLINE_BACKWARD_POSITION));
 
 		return RayError::OK;
@@ -1011,7 +1012,8 @@ UINT COCTSystem::GetLongitudeImageChannels()
 RayError COCTSystem::SetSheathDiameter(double value)
 {
 	CConfiguration& config = CConfiguration::GetInstance();
-	
+
+	m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX);	
 	if (value == 0.0) {
 		config.measurement.fSheathRadius = config.measurement.fSheathRadiusOnePointSix;
 		config.measurement.fSheathThickness = config.measurement.fSheathThicknessOnePointSix;
@@ -1333,7 +1335,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 	if (pLaserModule != nullptr && pLaserModule->IsConnected())
 	{
 		// 0. Speed Up
-		pLaserModule->Set(eStepMotorIndex::Both, CALIBRATION_MODULE_SM_DEFAULT_SPEED * 5);
+		pLaserModule->Set(eStepMotorIndex::Both, CM_SM_SPEED_AUTO);
 
 		// 1. Start Finding Sheath
 		pSystem->m_vCalibrationInfo.clear();
@@ -1392,7 +1394,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
 #endif
 		// 3. Default Speed
-		pLaserModule->Set(eStepMotorIndex::Both, CALIBRATION_MODULE_SM_DEFAULT_SPEED);
+		pLaserModule->Set(eStepMotorIndex::Both, CM_SM_SPEED_DEFAULT);
 	}
 	
 	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Calibrated);
@@ -1758,7 +1760,7 @@ int COCTSystem::connectRotaryJunction() {
 	if (!m_pLaserModule->IsConnected()) {
 		result = m_pLaserModule->Connect(config.laserModule.port);
 		if (result) {
-			m_pLaserModule->Set(eStepMotorIndex::Both, CALIBRATION_MODULE_SM_DEFAULT_SPEED);
+			m_pLaserModule->Set(eStepMotorIndex::Both, CM_SM_SPEED_DEFAULT);
 			m_pLaserModule->SetVLD(0);
 			Sleep(500);
 			m_pLaserModule->SetVOA(config.laserModule.voaValue);
@@ -1807,10 +1809,14 @@ int COCTSystem::disconnectRotaryJunction() {
 
 	if (m_pLaserModule->IsConnected()) {
 		//m_pLaserModule->Home(-100000, 10000);
+		m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX);
 		m_pLaserModule->Move(eStepMotorIndex::DelayLine, 0);
 		m_pLaserModule->Move(eStepMotorIndex::Polarization, 0);
 		m_pLaserModule->SetVLD(0);
 		m_pLaserModule->SetVOA(0);
+
+		bool run = true;
+		waitForStepMotors(eStepMotorIndex::DelayLine, run);
 	}
 
 	m_pRJController->Disconnect();

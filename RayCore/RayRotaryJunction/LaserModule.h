@@ -3,10 +3,12 @@
 #include "CommonProtocol.h"
 #include "MotorController.h"
 
-#define MAX_VOLTAGE_RAW_VALUE					4095
-#define CALIBRATION_MODULE_SM_DEFAULT_SPEED		1000
-#define DELAYLINE_BACKWARD_POSITION				(-50)
-#define DELAYLINE_FORWARD_POSITION				(50)
+#define MAX_VOLTAGE_RAW_VALUE			4095
+#define CM_SM_SPEED_DEFAULT				1000
+#define CM_SM_SPEED_MAX					10000
+#define CM_SM_SPEED_AUTO				2500
+#define DELAYLINE_BACKWARD_POSITION		(-50)
+#define DELAYLINE_FORWARD_POSITION		(50)
 
 class CLaserModule
 	: public CMotorController,
