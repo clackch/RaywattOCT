@@ -462,6 +462,7 @@ RayError COCTSystem::StartLiveView()
 {
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
+		m_pImagingLiveView->Start();
 
 		CConfiguration& config = CConfiguration::GetInstance();
 
@@ -483,6 +484,8 @@ RayError COCTSystem::StopLiveView()
 {
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
+		m_pImagingLiveView->Stop();
+		Sleep(500);
 
 		laserOnOff(false);
 		m_pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_STANDBY_OFF);
@@ -1012,10 +1015,14 @@ RayError COCTSystem::SetSheathDiameter(double value)
 	if (value == 0.0) {
 		config.measurement.fSheathRadius = config.measurement.fSheathRadiusOnePointSix;
 		config.measurement.fSheathThickness = config.measurement.fSheathThicknessOnePointSix;
+
+		m_pLaserModule->Move(eStepMotorIndex::DelayLine, config.catheter.length);
 	}
 	else {
 		config.measurement.fSheathRadius = config.measurement.fSheathRadiusTwoPointSix;
 		config.measurement.fSheathThickness = config.measurement.fSheathThicknessTwoPointSix;
+
+		m_pLaserModule->Move(eStepMotorIndex::DelayLine, 0);
 	}
 	config.measurement.nSheathPosition = config.measurement.fSheathRadius * 1000.f / config.measurement.fAxialResolutionScale;
 	config.measurement.nSheathThickness = config.measurement.fSheathThickness * 1000.f / config.measurement.fAxialResolutionScale;
@@ -1800,6 +1807,8 @@ int COCTSystem::disconnectRotaryJunction() {
 
 	if (m_pLaserModule->IsConnected()) {
 		//m_pLaserModule->Home(-100000, 10000);
+		m_pLaserModule->Move(eStepMotorIndex::DelayLine, 0);
+		m_pLaserModule->Move(eStepMotorIndex::Polarization, 0);
 		m_pLaserModule->SetVLD(0);
 		m_pLaserModule->SetVOA(0);
 	}
