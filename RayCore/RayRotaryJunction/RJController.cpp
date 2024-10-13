@@ -374,8 +374,8 @@ void CRJController::updateStateManualMode() {
 		}
 		break;
 	case eRJState::Loaded:
-		if (m_bButton[1]) {
-			PLOGI.printf("Error occured: limitSwitch(%d), stopButton(%d)", m_bLimitSwitch, m_bButton[0]);
+		if (!m_bLimitSwitch || m_bButton[1]) {
+			PLOGI.printf("Error occured: limitSwitch(%d), stopButton(%d)", m_bLimitSwitch, m_bButton[1]);
 			Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 			m_nextState = eRJState::Error;
 		}
@@ -407,7 +407,8 @@ void CRJController::updateStateManualMode() {
 	}
 }
 void CRJController::updateState(eRJState state) {
-	PLOGI.printf("state: %d", state);
+	const char* strState[] = {"Disconnected", "Unloaded", "Connected", "Validating", "Loading", "WaitManualLoad", "Loaded", "Unloading", "Error"};
+	PLOGI.printf("state: %s", strState[(int)state]);
 	switch (state) {
 	case eRJState::Disconnected:
 	case eRJState::Unloaded:
@@ -485,8 +486,8 @@ void CRJController::handlePacket() {
 	}
 	
 	// button, switch state
-	m_bButton[0] = false; //m_vPacket[KEY_IDX] & 0x1;
-	m_bButton[1] = false; //m_vPacket[KEY_IDX] & 0x2;
+	m_bButton[0] = m_vPacket[KEY_IDX] & 0x1;
+	m_bButton[1] = m_vPacket[KEY_IDX] & 0x2;
 	m_bLimitSwitch = m_vPacket[KEY_IDX] & 0x4;
 
 	//PLOGI.printf("\tButton: %02d %02d %02d\n", m_bButton[0], m_bButton[1], m_bLimitSwitch);
