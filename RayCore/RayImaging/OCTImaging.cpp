@@ -430,7 +430,6 @@ void COCTImaging::generateImage(Ipp32f* logaritihmData, bool bInvert){
 	imgLog.convertTo(imageResult, CV_8UC1);
 
 	cv::convertScaleAbs(imageResult, imageResult, 1.f / 80.f * LUT_SCALE, 0);
-	imageResult += LUT_START_INDEX;
 
 	cv::flip(imageResult, imageResult, 1);
 }
