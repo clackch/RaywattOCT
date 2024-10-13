@@ -1010,12 +1010,18 @@ RayError COCTSystem::SetSheathDiameter(double value)
 	CConfiguration& config = CConfiguration::GetInstance();
 	
 	if (value == 0.0) {
-		config.measurement.fSheathRadius = config.measurement.fSheathRadiusOnePointSix;		
+		config.measurement.fSheathRadius = config.measurement.fSheathRadiusOnePointSix;
+		config.measurement.fSheathThickness = config.measurement.fSheathThicknessOnePointSix;
 	}
 	else {
 		config.measurement.fSheathRadius = config.measurement.fSheathRadiusTwoPointSix;
+		config.measurement.fSheathThickness = config.measurement.fSheathThicknessTwoPointSix;
 	}
 	config.measurement.nSheathPosition = config.measurement.fSheathRadius * 1000.f / config.measurement.fAxialResolutionScale;
+	config.measurement.nSheathThickness = config.measurement.fSheathThickness * 1000.f / config.measurement.fAxialResolutionScale;
+
+	m_pImagingPullback->SetMeasurementSetting(config.measurement);
+	m_pImagingLiveView->SetMeasurementSetting(config.measurement);
 
 	return RayError::OK;
 }

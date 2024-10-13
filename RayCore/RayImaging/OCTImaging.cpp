@@ -400,7 +400,7 @@ void COCTImaging::findSheath(cv::Mat img) {
 		// 분산이 가장 작은 행 찾기
 		auto min_variance_row = *std::min_element(valid_rows.begin(), valid_rows.end(),
 			[](const auto& a, const auto& b) { return std::get<2>(a) < std::get<2>(b); });
-		m_nSheathPosition = std::get<0>(min_variance_row);
+		m_nSheathPosition = std::get<0>(min_variance_row) + m_measureSetting.nSheathThickness;
 	}
 	else {
 		m_nSheathPosition = 0;
