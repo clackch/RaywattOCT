@@ -946,12 +946,7 @@ void COCTImaging::lumen_detection_processing(cv::Mat& img)
 	if (!pixel_values_above_curve.empty()) {
 		// 평균 계산 (정확도를 위해 accumulate의 초기값을 double로 설정)
 		selected_mean = std::accumulate(pixel_values_above_curve.begin(), pixel_values_above_curve.end(), 0.0) / pixel_values_above_curve.size();
-		PLOGI.printf("selected_mean %.5f", selected_mean);
 	}
-	else {
-		PLOGI.printf("No pixels found above the curve, unable to calculate mean.");
-	}
-
 
 	// 수집된 픽셀 값들의 분포를 계산
 	double threshold_70 = 0, threshold_90 = 0;
@@ -977,8 +972,6 @@ void COCTImaging::lumen_detection_processing(cv::Mat& img)
 			}
 		}
 	}
-
-	cv::imwrite(std::string(".\\test\\sellected Image") + std::to_string(myint++) + ".png", img);
 }
 
 void COCTImaging::apply_piecewise_linear_contrast(cv::Mat& img, int low_in, int high_in, int low_out, int high_out) {
