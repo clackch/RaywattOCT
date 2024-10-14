@@ -929,8 +929,6 @@ void COCTImaging::lumen_detection_processing(cv::Mat& img)
 		}
 	}
 
-	cv::imwrite(std::string(".\\test\\Processed Image") + std::to_string(myint++) + ".png", output_image);
-
 	// y좌표마다 경계선 높이를 가진 array 생성
 	std::vector<int> curve_y(img.cols, 0);
 
