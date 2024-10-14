@@ -165,6 +165,13 @@ namespace RaywattApp.ViewModels
         }
 
         //Test
+        private ICommand _vignettingTest;
+        public ICommand VignettingTestCommand
+        {
+            get { return this._vignettingTest ?? (this._vignettingTest = new RelayCommand(VignettingTest)); }
+        }
+
+        //Test
         private ICommand _imageAnalysisToggle;
         public ICommand ImageAnalysisToggleCommmand
         {
@@ -445,6 +452,15 @@ namespace RaywattApp.ViewModels
             bool bImageCompensation = (bool)(RayGetProperty(Property.ImageCompensation) != 0);
 
             RaySetProperty(Property.ImageCompensation, bImageCompensation ? 0 : 1);
+        }
+
+        private void VignettingTest()
+        {
+            _log.Debug("VignettingTest");
+
+            bool bImageLumenVignetting = (bool)(RayGetProperty(Property.ImageLumenVignetting) != 0);
+
+            RaySetProperty(Property.ImageLumenVignetting, bImageLumenVignetting ? 0 : 1);
         }
 
         private void ImageAnalysisToggle()
