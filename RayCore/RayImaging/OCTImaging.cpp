@@ -9,10 +9,11 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <cmath>
+#include <numeric>
 
 const float EXPONENTIAL_FACTOR = 1.8f;
 const float EXPONENTIAL_CONTROL = 0.6f;
-const int OUTER_SHEATH_OFFSET = 40;
+const int SHEATH_OFFSET = 15;
 const int SEARCH_LENGTH = 100;
 static bool bCompensated;
 static int myint = 0;
@@ -492,6 +493,8 @@ void COCTImaging::adaptive_compensation()
 	cv::Mat rotated_img;
 	cv::rotate(imageResult, rotated_img, cv::ROTATE_90_COUNTERCLOCKWISE);
 
+	lumen_detection_processing(rotated_img);
+
 	// Normalize the image
 	cv::Mat normalized_img;
 	rotated_img.convertTo(normalized_img, CV_32F);
@@ -500,8 +503,6 @@ void COCTImaging::adaptive_compensation()
 
 	int rows = normalized_img.rows;
 	int cols = normalized_img.cols;
-
-	lumen_detection_processing(normalized_img);
 
 	cv::Mat energy_all = cv::Mat::zeros(normalized_img.size(), CV_32F);
 	cv::Mat result_img = cv::Mat::zeros(normalized_img.size(), CV_32F);
@@ -675,158 +676,376 @@ void COCTImaging::logarithmic_contrast_stretching(cv::Mat& img, float lower_perc
 
 void COCTImaging::lumen_detection_processing(cv::Mat& img)
 {
-	return;
-	PLOGI.printf("Start Lumen_Detection");
+	// 첫 30개 행을 0으로 설정
+	img(cv::Range(0, 30), cv::Range::all()).setTo(cv::Scalar(0));
+
 	// 행의 평균 및 분산 계산	
-	std::vector<double> mean_values, variance_values;
+	std::vector<double> mean_values(img.rows), variance_values(img.rows);
 
-	// 컬러로 변환하여 파란 선을 그릴 수 있도록 준비
-	cv::Mat color_image;
-	cv::cvtColor(img, color_image, cv::COLOR_GRAY2BGR);
-
-	for (int i = 0; i < img.rows; i++) {
+	// 행 단위로 평균과 분산 계산 (OpenMP 병렬 처리)
+#pragma omp parallel for
+	for (int i = 0; i < img.rows; ++i) {
 		cv::Mat row = img.row(i);
-		double mean = cv::mean(row)[0];
 		cv::Scalar mean_scalar, stddev_scalar;
 		cv::meanStdDev(row, mean_scalar, stddev_scalar);
-		double variance = stddev_scalar[0] * stddev_scalar[0]; // 분산 계산
-		mean_values.push_back(mean);
-		variance_values.push_back(variance);
+		mean_values[i] = mean_scalar[0];
+		variance_values[i] = stddev_scalar[0] * stddev_scalar[0];
 	}
 
-	PLOGI.printf("mean, variance end1");
+	// 최소값과 최대값 찾기 (병렬화된 반복 작업이 아니므로 유지)
+	auto minmax_mean = std::minmax_element(mean_values.begin(), mean_values.end());
+	double min_mean = *minmax_mean.first;
+	double max_mean = *minmax_mean.second;
 
-	// 평균 값 정규화 (0~1 사이 값으로)
-	cv::Mat mean_values_mat = cv::Mat(mean_values);
-	cv::normalize(mean_values_mat, mean_values_mat, 0, 1, cv::NORM_MINMAX, CV_32F);
+	std::vector<double> mean_values_norm;
+	mean_values_norm.reserve(mean_values.size());
 
-	// 정규화된 평균이 0.9 이상인 행만 필터링하고, 그 행의 분산 값도 함께 추출
+	// 0~1 사이로 정규화 (병렬 처리)
+#pragma omp parallel for
+	for (int i = 0; i < mean_values.size(); ++i) {
+		if (max_mean - min_mean == 0) {
+			mean_values_norm[i] = 0.0;
+		}
+		else {
+			mean_values_norm[i] = (mean_values[i] - min_mean) / (max_mean - min_mean);
+		}
+	}
+
 	std::vector<int> valid_row_indices;
 	std::vector<double> valid_row_variances;
 
-	for (int i = 0; i < mean_values.size(); i++) {
-		if (mean_values[i] >= 0.9) {
+	for (int i = 0; i < mean_values.size(); ++i) {
+		if (mean_values_norm[i] >= 0.8) {
 			valid_row_indices.push_back(i);
-			valid_row_variances.push_back(variance_values[i]);  // 해당 행의 분산 값도 저장
+			valid_row_variances.push_back(variance_values[i]);
 		}
 	}
-	
+
 	if (valid_row_indices.empty()) {
-		PLOGI.printf("No valid rows found with normalized mean >= 0.9.");
+		PLOGI.printf("No valid rows found with normalized mean >= 0.8.");
 		return;
 	}
 
 	// valid_row_variances에서 분산이 가장 작은 행 찾기
 	auto min_variance_it = std::min_element(valid_row_variances.begin(), valid_row_variances.end());
 	int min_variance_index = std::distance(valid_row_variances.begin(), min_variance_it);
-
-	// 분산이 가장 작은 행의 인덱스를 valid_row_indices에서 가져오기
 	int min_variance_row1 = valid_row_indices[min_variance_index];
-
-	// 기준 row에서 40픽셀 아래의 시작 row 설정
-	int start_row = min_variance_row1 + OUTER_SHEATH_OFFSET;
-	if (start_row >= img.rows) {
-		PLOGI.printf("Start row is out of image bounds.");
-		return;
-	}
-
-	PLOGI.printf("mean, variance end2");
-
+	
 	// 이미지 영역 선택
-	cv::Mat selected_region = img(cv::Range(start_row, img.rows), cv::Range::all());
+	cv::Mat selected_region = img.clone();
 
-	cv::imwrite(std::string(".\\test\\sellected Image") + std::to_string(myint) + ".png", selected_region);
+	// 첫 30개 행을 0으로 설정
+	for (int i = 0; i < min_variance_row1 + SHEATH_OFFSET; ++i) {
+		selected_region.row(i).setTo(cv::Scalar(0));  // 각 행의 모든 값을 0으로 설정
+	}
 
 	// Piecewise Linear Contrast 적용
 	apply_piecewise_linear_contrast(selected_region, 48, 184, 0, 255);
 
-	PLOGI.printf("linear Contrast done");
-
-	// Gaussian Blur 적용
-	cv::GaussianBlur(selected_region, selected_region, cv::Size(9, 9), 0);
-	
-	// Canny Edge 적용
-	cv::Mat edges;
-	cv::Canny(selected_region, edges, 100, 220);
-
-	PLOGI.printf("edge, blur, processing done");
-
-	// 에지 결과를 사용하여 빨간 점 표시
 	std::vector<cv::Point> red_points;
-	for (int col = 0; col < selected_region.cols; col++) {
+
+	// 각 열의 값 계산 및 정규화 (병렬 처리 가능)
+#pragma omp parallel for
+	for (int col = 0; col < selected_region.cols; ++col) {
 		std::vector<double> col_values;
-		for (int row = 10; row < selected_region.rows - 10; row++) {
+		for (int row = 10; row < selected_region.rows - 10; ++row) {
 			double sum_value = cv::sum(selected_region(cv::Range(row - 10, row + 11), cv::Range(col, col + 1)))[0];
 			col_values.push_back(sum_value);
 		}
-		// 0.8 이상인 row 선택
-		for (int i = 0; i < col_values.size(); i++) {
-			if (col_values[i] >= 0.8) {
-				red_points.push_back(cv::Point(col, i + start_row));
+
+		// 각 col 값 정규화
+		auto minmax_col = std::minmax_element(col_values.begin(), col_values.end());
+		double min_col = *minmax_col.first;
+		double max_col = *minmax_col.second;
+
+		std::vector<double> normalized_col_values(col_values.size());
+		for (int i = 0; i < col_values.size(); ++i) {
+			if (max_col - min_col == 0) {
+				normalized_col_values[i] = 0.0;
+			}
+			else {
+				normalized_col_values[i] = (col_values[i] - min_col) / (max_col - min_col);
+			}
+		}
+
+		// 첫 번째 정규화된 값이 0.6 이상인 행 선택
+		for (int i = 0; i < normalized_col_values.size(); ++i) {
+			if (normalized_col_values[i] >= 0.6) {
+#pragma omp critical
+				{
+					red_points.push_back(cv::Point(col, i));
+				}
 				break;
 			}
 		}
 	}
 
-	PLOGI.printf("new red Point");
+	// red_points를 col 값을 기준으로 정렬
+	std::sort(red_points.begin(), red_points.end(), [](const cv::Point& a, const cv::Point& b) {
+		return a.x < b.x;
+	});
 
-	// 직선을 그리기 위한 좌표들
 	std::vector<cv::Point> refined_curve_points;
-	refined_curve_points.push_back(red_points[0]);
 
-	for (int i = 0; i < red_points.size() - 1; i++) {
-		cv::Point last_point = refined_curve_points.back();
+	// 시작점 선택: red_points의 0~20 인덱스의 y 좌표 평균값에 가장 가까운 점 선택
+	std::vector<cv::Point> first_20_points(red_points.begin(), red_points.begin() + 20);
+	double avg_y = std::accumulate(first_20_points.begin(), first_20_points.end(), 0.0, [](double sum, const cv::Point& p) { return sum + p.y; }) / first_20_points.size();
+	cv::Point start_point = *std::min_element(first_20_points.begin(), first_20_points.end(), [&](cv::Point a, cv::Point b) {
+		return std::abs(a.y - avg_y) < std::abs(b.y - avg_y);
+		});
+	start_point.x = 0;  // x 좌표는 0으로 설정
+	start_point.y = (int)start_point.y;
+
+	// 시작점을 refined_curve_points에 추가
+	refined_curve_points.push_back(start_point);
+
+	int i = 0;
+
+	// 중간 점들을 찾기 위한 루프
+	while (i < red_points.size() - 1) {
+		cv::Point last_point = refined_curve_points.back();  // 마지막으로 선택된 점
 		std::vector<cv::Point> possible_candidates;
-		for (int j = i + 2; j <= i + 60 && j < red_points.size(); j += 2) {
-			if (euclidean_distance(last_point, red_points[j]) <= SEARCH_LENGTH * 2) {
-				possible_candidates.push_back(red_points[j]);
+		int closest_index = -1;
+		int min_distance = SEARCH_LENGTH * SEARCH_LENGTH * 4;  // 최소 거리를 초기화
+
+		// i+2부터 SEARCH_LENGTH만큼의 범위 탐색
+		for (int j = i + 2; j <= i + SEARCH_LENGTH && j < red_points.size(); j += 2) {
+			int distance_squared = (last_point.x - red_points[j].x) * (last_point.x - red_points[j].x)
+				+ (last_point.y - red_points[j].y) * (last_point.y - red_points[j].y);
+
+			if (distance_squared < min_distance) {  // 제곱된 거리 조건
+				min_distance = distance_squared;
+				closest_index = j;
 			}
 		}
 
-		if (possible_candidates.empty()) {
+		if (closest_index == -1) {
 			break;
 		}
 
-		// 유클리드 거리가 가장 작은 후보 선택
-		cv::Point closest_point = *std::min_element(possible_candidates.begin(), possible_candidates.end(),
-			[&](cv::Point a, cv::Point b) {
-				return euclidean_distance(last_point, a) <
-					euclidean_distance(last_point, b);
-			});
-		refined_curve_points.push_back(closest_point);
+		// 가장 가까운 점을 추가하고 i를 갱신
+		refined_curve_points.push_back(red_points[closest_index]);
+		i = closest_index;  // i를 가장 가까운 점의 인덱스로 갱신
 	}
 
-	PLOGI.printf("curve points extracting done");
+	// 마지막 5개의 y 좌표의 평균 계산
+	int num_points_to_average = std::min(5, (int)refined_curve_points.size());
+	double sum_y = 0.0;
+	for (int i = refined_curve_points.size() - num_points_to_average; i < refined_curve_points.size(); ++i) {
+		sum_y += refined_curve_points[i].y;
+	}
+	double avg_y_last_points = sum_y / num_points_to_average;
 
-	// 마지막 점 추가
-	refined_curve_points.push_back(cv::Point(img.cols - 1, refined_curve_points.back().y));
-
-	// 직선 그리기
-	for (int i = 0; i < refined_curve_points.size() - 1; i++) {
-		cv::line(color_image, refined_curve_points[i], refined_curve_points[i + 1], cv::Scalar(0, 255, 0), 2);
+	// 마지막 점 확인 후 추가: 마지막 점이 (img.cols - 1)이 아닐 경우에만 추가
+	if (refined_curve_points.back().x != img.cols - 1) {
+		// 마지막 점 추가: (img.cols - 1, 평균 y 값)
+		refined_curve_points.push_back(cv::Point(img.cols - 1, static_cast<int>(avg_y_last_points)));
 	}
 
-	PLOGI.printf("draw lines in the image");
+	// 모든 col에 대해 y 값 저장, -1로 초기화하여 y 값이 없는 상태를 표시
+	std::vector<cv::Point> full_curve_points(img.cols, cv::Point(-1, -1));
 
-	cv::imwrite(std::string(".\\test\\Processed Image") + std::to_string(myint++) + ".png", color_image);
+	// 먼저 refined_curve_points의 기존 값을 full_curve_points에 복사
+	for (const auto& point : refined_curve_points) {
+		full_curve_points[point.x] = point;  // 이미 존재하는 점을 그대로 유지
+	}
+
+	// 없는 col 인덱스에 대해 보간 또는 복사 수행
+	for (int col = 0; col < img.cols; ++col) {
+		// 이미 해당 col에 점이 있으면 건너뜀
+		if (full_curve_points[col].y != -1) {
+			continue;
+		}
+
+		bool point_added = false;  // y값이 추가되었는지 여부
+
+		// 현재 col에 대해 가까운 두 점을 찾아 보간
+		for (int i = 0; i < refined_curve_points.size() - 1; ++i) {
+			int x0 = refined_curve_points[i].x;
+			int x1 = refined_curve_points[i + 1].x;
+
+			// col이 두 점 사이에 위치하면, 선형 보간을 수행
+			if (col >= x0 && col <= x1) {
+				double y0 = refined_curve_points[i].y;
+				double y1 = refined_curve_points[i + 1].y;
+
+				// 선형 보간으로 y 값 계산
+				double interpolated_y = y0 + (y1 - y0) * (col - x0) / (x1 - x0);
+
+				// 보간된 점을 추가
+				full_curve_points[col] = cv::Point(col, static_cast<int>(interpolated_y));
+				point_added = true;  // y 값이 추가되었음을 기록
+				break;
+			}
+		}
+
+		// 양쪽 보간할 점이 없는 경우, 가까운 값을 복사
+		if (!point_added) {
+			// 왼쪽 점 찾기
+			int left_index = -1;
+			for (int i = col - 1; i >= 0; --i) {
+				if (full_curve_points[i].y != -1) {
+					left_index = i;
+					break;
+				}
+			}
+
+			// 오른쪽 점 찾기
+			int right_index = -1;
+			for (int i = col + 1; i < img.cols; ++i) {
+				if (full_curve_points[i].y != -1) {
+					right_index = i;
+					break;
+				}
+			}
+
+			// 왼쪽과 오른쪽 중 하나만 있으면 그 값을 사용
+			if (left_index != -1) {
+				full_curve_points[col] = full_curve_points[left_index];  // 왼쪽 값 복사
+			}
+			else if (right_index != -1) {
+				full_curve_points[col] = full_curve_points[right_index];  // 오른쪽 값 복사
+			}
+			else {
+				// 만약 양쪽에 값이 전혀 없다면 refined_curve_points[0]을 사용 (첫 점 사용)
+				full_curve_points[col] = refined_curve_points[0];
+			}
+		}
+	}
+
+	// y좌표마다 경계선 높이를 가진 array 생성
+	std::vector<int> curve_y(img.cols, 0);
+
+	// 각 col에 대한 경계선을 full_curve_points의 y값을 사용하여 설정
+	for (int col = 0; col < img.cols; ++col) {
+		if (full_curve_points[col].y != -1) {
+			curve_y[col] = full_curve_points[col].y;  // 각 col의 y 값을 경계선으로 설정
+		}
+	}
+
+	// 스레드마다 고유한 벡터를 사용하여 중간 결과 저장 (타입을 uchar로 변경)
+	std::vector<std::vector<uchar>> thread_pixel_values(omp_get_max_threads());
+
+#pragma omp parallel for
+	for (int col = 0; col < img.cols; ++col) {
+		int thread_id = omp_get_thread_num();  // 각 스레드 ID를 가져옴
+		for (int row = 0; row < curve_y[col]; ++row) {
+			thread_pixel_values[thread_id].push_back(img.at<uchar>(row, col));  // 각 스레드별로 픽셀 값 저장
+		}
+	}
+
+	// 벡터 병합
+	std::vector<uchar> pixel_values_above_curve;
+	for (const auto& thread_values : thread_pixel_values) {
+		pixel_values_above_curve.insert(pixel_values_above_curve.end(), thread_values.begin(), thread_values.end());  // 스레드별 값을 병합
+	}
+
+	double selected_mean = 0;
+
+	// 빈 벡터인지 확인 후 평균 계산
+	if (!pixel_values_above_curve.empty()) {
+		// 평균 계산 (정확도를 위해 accumulate의 초기값을 double로 설정)
+		selected_mean = std::accumulate(pixel_values_above_curve.begin(), pixel_values_above_curve.end(), 0.0) / pixel_values_above_curve.size();
+		PLOGI.printf("selected_mean %.5f", selected_mean);
+	}
+	else {
+		PLOGI.printf("No pixels found above the curve, unable to calculate mean.");
+	}
+
+
+	// 수집된 픽셀 값들의 분포를 계산
+	double threshold_70 = 0, threshold_90 = 0;
+	if (!pixel_values_above_curve.empty()) {
+		std::sort(pixel_values_above_curve.begin(), pixel_values_above_curve.end());
+		size_t idx_70 = pixel_values_above_curve.size() * 70 / 100;
+		size_t idx_90 = pixel_values_above_curve.size() * 90 / 100;
+		threshold_70 = pixel_values_above_curve[idx_70];
+		threshold_90 = pixel_values_above_curve[idx_90];
+	}
+
+	// 각 픽셀의 밝기 조정 (임계값 이상인 경우에만 비선형 조정 적용)
+	for (int col = 0; col < img.cols; ++col) {
+		for (int row = 0; row < curve_y[col]; ++row) {
+			uchar pixel_value = img.at<uchar>(row, col);
+
+			// 비선형 조정 적용
+			if (pixel_value >= threshold_90) {
+				img.at<uchar>(row, col) = static_cast<uchar>(selected_mean);
+			}
+			else if (pixel_value >= threshold_70) {
+				img.at<uchar>(row, col) = static_cast<uchar>(selected_mean);
+			}
+		}
+	}
+
+	cv::imwrite(std::string(".\\test\\sellected Image") + std::to_string(myint++) + ".png", img);
 }
 
 void COCTImaging::apply_piecewise_linear_contrast(cv::Mat& img, int low_in, int high_in, int low_out, int high_out) {
+	// 결과 행렬 초기화
 	cv::Mat result = cv::Mat::zeros(img.size(), CV_8U);
 
-	// 첫 구간
-	result.setTo(low_out, img <= low_in);
+	// img를 CV_32F로 변환하여 연산 처리
+	cv::Mat img_float;
+	img.convertTo(img_float, CV_32F);
 
-	// 마지막 구간
-	result.setTo(high_out, img >= high_in);
+	// 첫 구간 (low_in 이하의 값은 low_out으로 설정)
+	result.setTo(low_out, img_float <= low_in);
+
+	// 마지막 구간 (high_in 이상의 값은 high_out으로 설정)
+	result.setTo(high_out, img_float >= high_in);
 
 	// 중간 구간 선형 변환
-	cv::Mat mask = (img > low_in) & (img < high_in);
-	result.setTo((img - low_in) * (high_out - low_out) / (high_in - low_in) + low_out, mask);
+	cv::Mat mask = (img_float > low_in) & (img_float < high_in);
 
+	// 마스크 값 확인 (0 또는 255로 변환)
+	mask.convertTo(mask, CV_8U, 255.0);
+
+	// 중간 구간 계산 및 값 확인
+	cv::Mat intermediate_result = (img_float - low_in) * (high_out - low_out) / (high_in - low_in) + low_out;
+
+	// intermediate_result 값을 0~255 범위로 클램핑
+	cv::Mat clamped_result;
+	cv::threshold(intermediate_result, clamped_result, 255, 255, cv::THRESH_TRUNC); // 255로 클램핑
+	cv::threshold(clamped_result, clamped_result, 0, 0, cv::THRESH_TOZERO);         // 0으로 클램핑
+
+	// intermediate_result를 CV_8U로 변환
+	clamped_result.convertTo(clamped_result, CV_8U);
+
+	// mask와 clamped_result의 크기 및 자료형이 일치하는지 확인
+	if (mask.size() == clamped_result.size() && mask.type() == CV_8U && clamped_result.type() == CV_8U) {
+		// setTo 대신 copyTo 사용
+		clamped_result.copyTo(result, mask);
+	}
+
+	// 최종 결과를 img에 복사
 	result.copyTo(img);
 }
 
 double COCTImaging::euclidean_distance(cv::Point2f pt1, cv::Point2f pt2) {
 	return std::sqrt(std::pow(pt1.x - pt2.x, 2) + std::pow(pt1.y - pt2.y, 2));
+}
+
+std::vector<int> COCTImaging::find_outliers(const std::vector<int>& y_values) {
+	std::vector<int> sorted_values = y_values;
+	std::sort(sorted_values.begin(), sorted_values.end());
+
+	// 1사분위수(Q1)와 3사분위수(Q3)를 계산
+	int q1 = sorted_values[sorted_values.size() / 4];
+	int q3 = sorted_values[3 * sorted_values.size() / 4];
+	int iqr = q3 - q1;
+
+	// 아웃라이어의 범위는 Q1 - 1.5 * IQR 이하이거나, Q3 + 1.5 * IQR 이상인 값
+	int lower_bound = q1 - 1.5 * iqr;
+	int upper_bound = q3 + 1.5 * iqr;
+
+	// 아웃라이어 인덱스를 찾음
+	std::vector<int> outlier_indices;
+	for (int i = 0; i < y_values.size(); ++i) {
+		if (y_values[i] < lower_bound || y_values[i] > upper_bound) {
+			outlier_indices.push_back(i);
+		}
+	}
+
+	return outlier_indices;
 }
