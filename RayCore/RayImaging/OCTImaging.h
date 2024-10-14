@@ -101,6 +101,7 @@ public:
 
 	static void SetImageCompensation(bool ImageCompensated);
 	static void SetImageLumenVignetting(bool ImageLumenVignetted);
+	static void SetImageCompensationControlWindow(bool ImageCompensationControlWindowOn);
 protected:
 	void allocateMemory();
 	void releaseMemory();
@@ -124,6 +125,7 @@ protected:
 	void apply_piecewise_linear_contrast(cv::Mat& img, int low_in, int high_in, int low_out, int high_out);
 	double euclidean_distance(cv::Point2f pt1, cv::Point2f pt2);
 	std::vector<int> find_outliers(const std::vector<int>& y_values);
+	static void on_trackbar(int, void*);
 
 	static UINT threadRender(LPVOID param);
 };

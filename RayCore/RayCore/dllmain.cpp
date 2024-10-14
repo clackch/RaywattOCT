@@ -114,6 +114,9 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
     case RayProperty::ImageCompensation:
         octSystem.SetImageCompensation(value);
         break;
+    case RayProperty::ImageCompensationControlWindow:
+        octSystem.SetImageCompensationControlWindow(value);
+        break;
     case RayProperty::ImageLumenVignetting:
         octSystem.SetImageLumenVignetting(value);
         break;

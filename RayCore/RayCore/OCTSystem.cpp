@@ -1092,6 +1092,20 @@ RayError COCTSystem::SetImageCompensation(bool value)
 }
 
 /*
+* SetImageCompensation
+*/
+RayError COCTSystem::SetImageCompensationControlWindow(bool value)
+{
+	m_bImageCompensationControlWindow = value;
+
+	COCTImaging::SetImageCompensationControlWindow(m_bImageCompensationControlWindow);
+
+	m_bImageCompensationControlWindow = 0;
+
+	return RayError::OK;
+}
+
+/*
 * GetImageLumenVignetting
 */
 bool COCTSystem::GetImageLumenVignetting()

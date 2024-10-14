@@ -89,6 +89,7 @@ private:
 	cv::Scalar m_backgroundColor;	// for longitude image
 	double m_fImageThreshold = 99.99;
 	bool m_bImageCompensation;
+	bool m_bImageCompensationControlWindow;
 	bool m_bImageLumenVignetting;
 	double m_fImageRoi = 2.f;
 	double m_fFieldOfView;
@@ -170,6 +171,7 @@ public:
 	bool GetImageCompensation();
 	RayError SetImageCompensation(bool value);
 	bool GetImageLumenVignetting();
+	RayError SetImageCompensationControlWindow(bool value);
 	RayError SetImageLumenVignetting(bool value);
 	double GetFieldOfView();
 	RayError SetFieldOfView(double value);
