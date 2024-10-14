@@ -89,6 +89,7 @@ private:
 	cv::Scalar m_backgroundColor;	// for longitude image
 	double m_fImageThreshold = 99.99;
 	bool m_bImageCompensation;
+	bool m_bImageLumenVignetting;
 	double m_fImageRoi = 2.f;
 	double m_fFieldOfView;
 	bool m_isTestMode;
@@ -168,6 +169,8 @@ public:
 	RayError SetImageRoi(double value);
 	bool GetImageCompensation();
 	RayError SetImageCompensation(bool value);
+	bool GetImageLumenVignetting();
+	RayError SetImageLumenVignetting(bool value);
 	double GetFieldOfView();
 	RayError SetFieldOfView(double value);
 	void SetTestMode(bool isTestMode) { m_isTestMode = isTestMode; }

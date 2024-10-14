@@ -16,6 +16,7 @@ const float EXPONENTIAL_CONTROL = 0.6f;
 const int SHEATH_OFFSET = 15;
 const int SEARCH_LENGTH = 100;
 static bool bCompensated;
+static bool bVignetted;
 static int myint = 0;
 
 void ippsRelease(void *&ptr) {
@@ -170,6 +171,10 @@ cv::Mat COCTImaging::GetProcessedImage() {
 
 void COCTImaging::SetImageCompensation(bool ImageCompensated) { 
 	bCompensated = ImageCompensated;
+}
+
+void COCTImaging::SetImageLumenVignetting(bool ImageLumenVignetted) {
+	bVignetted = ImageLumenVignetted;
 }
 
 void COCTImaging::allocateMemory() {
@@ -492,8 +497,9 @@ void COCTImaging::adaptive_compensation()
 	// Rotate the image
 	cv::Mat rotated_img;
 	cv::rotate(imageResult, rotated_img, cv::ROTATE_90_COUNTERCLOCKWISE);
-
-	lumen_detection_processing(rotated_img);
+	
+	if(!bVignetted)
+		lumen_detection_processing(rotated_img);
 
 	// Normalize the image
 	cv::Mat normalized_img;
@@ -912,6 +918,19 @@ void COCTImaging::lumen_detection_processing(cv::Mat& img)
 			}
 		}
 	}
+
+	// 이미지 복사본 생성
+	cv::Mat output_image = img.clone();
+
+	// full_curve_points를 원으로 표시 (반지름 1의 circle)
+	for (int col = 0; col < img.cols; ++col) {
+		if (full_curve_points[col].y != -1) {
+			// 점 그리기 (반지름 1, 색상은 빨간색 (BGR: 0, 0, 255))
+			cv::circle(output_image, full_curve_points[col], 1, cv::Scalar(0, 0, 255), -1);
+		}
+	}
+
+	cv::imwrite(std::string(".\\test\\Processed Image") + std::to_string(myint++) + ".png", output_image);
 
 	// y좌표마다 경계선 높이를 가진 array 생성
 	std::vector<int> curve_y(img.cols, 0);

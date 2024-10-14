@@ -100,6 +100,7 @@ public:
 	int GetSheathPosition() { return m_nSheathPosition; }
 
 	static void SetImageCompensation(bool ImageCompensated);
+	static void SetImageLumenVignetting(bool ImageLumenVignetted);
 protected:
 	void allocateMemory();
 	void releaseMemory();
