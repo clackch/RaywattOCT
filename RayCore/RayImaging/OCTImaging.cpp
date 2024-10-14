@@ -11,8 +11,9 @@
 #include <cmath>
 #include <numeric>
 
-const float EXPONENTIAL_FACTOR = 1.8f;
-const float EXPONENTIAL_CONTROL = 0.6f;
+float EXPONENTIAL_FACTOR = 1.8f;
+float EXPONENTIAL_CONTROL = 0.6f;
+float ENERGY_THRESHOLD = 0.001f;
 const int SHEATH_OFFSET = 15;
 const int SEARCH_LENGTH = 100;
 static bool bCompensated;
@@ -175,6 +176,46 @@ void COCTImaging::SetImageCompensation(bool ImageCompensated) {
 
 void COCTImaging::SetImageLumenVignetting(bool ImageLumenVignetted) {
 	bVignetted = ImageLumenVignetted;
+}
+
+void COCTImaging::SetImageCompensationControlWindow(bool ImageCompensationControlWindowOn) {
+	try {
+		if (ImageCompensationControlWindowOn == 1) {
+			cv::namedWindow("Window", cv::WINDOW_AUTOSIZE);
+
+			// 슬라이더 값 범위는 정수로만 가능하므로, 원하는 범위로 매핑
+			int exponential_factor_slider = 18;
+			int exponential_control_slider = 6;
+			int energy_threshold_slider = 10;
+
+			cv::createTrackbar("Cont", "Window", &exponential_factor_slider, 100, on_trackbar);
+			cv::createTrackbar("Bright", "Window", &exponential_control_slider, 100, on_trackbar);
+			cv::createTrackbar("Eng", "Window", &energy_threshold_slider, 100, on_trackbar);
+
+			// 초기 콜백 호출
+			on_trackbar(0, 0);
+
+			// 슬라이더와 함께 창 유지 (ESC로 종료)
+			while (true) {
+				int key = cv::waitKey(50);
+				if (key == 27) {  // ESC key
+					cv::destroyAllWindows();
+					break;
+				}
+			}
+
+			cv::destroyAllWindows();
+		}
+	}
+	catch (const cv::Exception& e) {
+		PLOGI.printf("OpenCV Error: %s", e.what());  // OpenCV 관련 에러 처리
+	}
+	catch (const std::exception& e) {
+		PLOGI.printf("Standard Error: %s", e.what());  // 다른 표준 라이브러리 예외 처리
+	}
+	catch (...) {
+		PLOGI.printf("Unknown error occurred in SetImageCompensationControlWindow");  // 예기치 않은 에러 처리
+	}
 }
 
 void COCTImaging::allocateMemory() {
@@ -544,7 +585,7 @@ void COCTImaging::adaptive_compensation()
 	// Adaptive threshold 설정
 	double minVal, maxVal;
 	cv::minMaxLoc(mean_energy, &minVal, &maxVal);
-	double adaptive_threshold = 0.001 * maxVal;
+	double adaptive_threshold = ENERGY_THRESHOLD * maxVal;
 
 	// threshold_row 계산: adaptive_threshold 이하인 첫 번째 행 찾기
 	int threshold_row = 0;
@@ -1057,4 +1098,23 @@ std::vector<int> COCTImaging::find_outliers(const std::vector<int>& y_values) {
 	}
 
 	return outlier_indices;
+}
+
+void COCTImaging::on_trackbar(int, void*) {
+	try {
+		// 트랙바 값은 int로만 입력 가능하므로, 이를 원하는 범위로 변환
+		EXPONENTIAL_FACTOR = cv::getTrackbarPos("Cont", "Window") / 10.0f;
+		EXPONENTIAL_CONTROL = cv::getTrackbarPos("Bright", "Window") / 10.0f;
+		ENERGY_THRESHOLD = cv::getTrackbarPos("Eng", "Window") / 10000.0f;
+
+	}
+	catch (const cv::Exception& e) {
+		PLOGI.printf("OpenCV Error in on_trackbar: %s", e.what());  // OpenCV 관련 에러 처리
+	}
+	catch (const std::exception& e) {
+		PLOGI.printf("Standard Error in on_trackbar: %s", e.what());  // 다른 표준 라이브러리 예외 처리
+	}
+	catch (...) {
+		PLOGI.printf("Unknown error occurred in on_trackbar");  // 예기치 않은 에러 처리
+	}
 }

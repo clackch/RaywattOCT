@@ -165,6 +165,13 @@ namespace RaywattApp.ViewModels
         }
 
         //Test
+        private ICommand _compensationWindowTest;
+        public ICommand CompensationWindowTestCommand
+        {
+            get { return this._compensationWindowTest ?? (this._compensationWindowTest = new RelayCommand(CompensationControlWindowTest)); }
+        }
+
+        //Test
         private ICommand _vignettingTest;
         public ICommand VignettingTestCommand
         {
@@ -452,6 +459,13 @@ namespace RaywattApp.ViewModels
             bool bImageCompensation = (bool)(RayGetProperty(Property.ImageCompensation) != 0);
 
             RaySetProperty(Property.ImageCompensation, bImageCompensation ? 0 : 1);
+        }
+
+        private void CompensationControlWindowTest()
+        {
+            _log.Debug("CompensationControlWindowTest");
+
+            RaySetProperty(Property.ImageCompensationControlWindow, 1);
         }
 
         private void VignettingTest()
