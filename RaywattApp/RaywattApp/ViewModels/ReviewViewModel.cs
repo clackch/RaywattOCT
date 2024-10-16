@@ -1010,8 +1010,6 @@ namespace RaywattApp.ViewModels
         private void ToggleMeasurement()
         {
             StopPlayback();
-
-            ReviewStatus.IsMeasurementOn = !ReviewStatus.IsMeasurementOn;
         }
 
         public void Window_ManipulationStarting(ManipulationStartingEventArgs e)
