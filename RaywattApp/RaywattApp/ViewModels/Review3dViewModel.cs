@@ -544,7 +544,7 @@ namespace RaywattApp.ViewModels
         {
             if (!IsRendering) return;
             _log.Debug("zoomFactor = " + ray3DStatus.ZoomFactor);
-            if (ray3DStatus.ZoomFactor < 2/*최대 Zoom in 2번*/)
+            if (ray3DStatus.ZoomFactor < Constants.Zoom3DScaleMax)
             {
                 ODSOCT_CutViewZoom(1);
                 ray3DStatus.ZoomFactor += 1;
@@ -555,7 +555,7 @@ namespace RaywattApp.ViewModels
         private void ZoomOut3D() {
             if (!IsRendering) return;
             _log.Debug("zoomFactor = " + ray3DStatus.ZoomFactor);
-            if (ray3DStatus.ZoomFactor > 0/*최대 Zoom out 2번*/)
+            if (ray3DStatus.ZoomFactor > - Constants.Zoom3DScaleMax)
             {
                 ODSOCT_CutViewZoom(-1);
                 ray3DStatus.ZoomFactor -= 1;
