@@ -12,12 +12,12 @@
 #include <numeric>
 
 float EXPONENTIAL_FACTOR = 1.8f;
-float EXPONENTIAL_CONTROL = 0.6f;
+float EXPONENTIAL_CONTROL = 0.8f;
 float ENERGY_THRESHOLD = 0.001f;
 const int SHEATH_OFFSET = 15;
 const int SEARCH_LENGTH = 100;
-static bool bCompensated;
-static bool bVignetted;
+static bool bCompensated = false;
+static bool bVignetted = true;
 static int myint = 0;
 
 void ippsRelease(void *&ptr) {
