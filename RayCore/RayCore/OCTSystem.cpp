@@ -397,6 +397,7 @@ int COCTSystem::StartReview(char* strFilePath) {
 			PLOGE.printf("InvalidArgument : %s", strFilePath);
 			return (int)RayError::InvalidArgument;
 		}
+		pSession->LoadZOffset(strFilePath);
 
 		postPriorMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
 		postPriorMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
@@ -418,6 +419,7 @@ RayError COCTSystem::StartCompare(char* strFilePath) {
 	if (pSession == nullptr) {
 		return RayError::InvalidArgument;
 	}
+	pSession->LoadZOffset(strFilePath);
 
 	if (m_reviewSession[SESSION_COMPARE] != nullptr) {
 		m_reviewSession[SESSION_COMPARE]->Stop();
@@ -632,6 +634,7 @@ RayError COCTSystem::OpenImage(char* strFilePath) {
 	if (pSession == nullptr) {
 		return RayError::InvalidArgument;
 	}
+	pSession->LoadZOffset(strFilePath);
 
 	m_openedSession = pSession;
 	m_openedSession->InitCutView(cv::Scalar(0x00, 0x00, 0x00));
