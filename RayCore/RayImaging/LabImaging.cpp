@@ -95,6 +95,7 @@ void CLabImaging::Process(char* fringes) {
 	}
 	
 	generateImage(logData, false);
+	applyZOffset();
 
 	adaptive_compensation();
 }

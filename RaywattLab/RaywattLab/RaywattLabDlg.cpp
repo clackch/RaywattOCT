@@ -57,6 +57,9 @@ CRaywattLabDlg::CRaywattLabDlg(CWnd* pParent /*=nullptr*/)
 
 	m_bInitialized = false;
 	m_bStartAcquisition = false;
+
+	m_chkShowSheathGuide = false;
+	m_chkCompensation = false;
 }
 
 void CRaywattLabDlg::DoDataExchange(CDataExchange* pDX)
@@ -66,13 +69,15 @@ void CRaywattLabDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PICT_OCT_IMAGE, m_pictOCTImage);
 	DDX_Radio(pDX, IDC_RADIO_IMAGE_CIRCLE, m_radioImageShape);
 	DDX_Radio(pDX, IDC_RADIO_COLOR_BLACK, m_radioImageColor);
-	DDX_Check(pDX, IDC_CHECK_HOT_COLOR, m_chkImageHotColor);
+	DDX_Radio(pDX, IDC_RADIO_GRAY, m_radioImageLUT);
 	DDX_Check(pDX, IDC_CHECK_SHOW_GUIDE, m_chkShowGuide);
 	DDX_Control(pDX, IDC_SLIDER_BRIGHTNESS, m_sliderBrightness);
 	DDX_Control(pDX, IDC_SLIDER_CONTRAST, m_sliderContrast);
 	DDX_Control(pDX, IDC_SLIDER_LOWLEVEL, m_sliderLowLevel);
 	DDX_Control(pDX, IDC_SLIDER_HIGHLEVEL, m_sliderHighLevel);
 	DDX_Control(pDX, IDC_SLIDER_FRAME, m_sliderFrame);
+	DDX_Check(pDX, IDC_CHECK_SHOW_SHEATH_GUIDE, m_chkShowSheathGuide);
+	DDX_Check(pDX, IDC_CHECK_COMPENSATION, m_chkCompensation);
 }
 
 // private methods
@@ -263,7 +268,7 @@ CLabImaging* CRaywattLabDlg::createImaging(IImaging::Setting imaging) {
 	USHORT* background = readBackground(BACKGROUND_FILEPATH, imaging);
 
 	pImaging->Initialize(calibration, background);
-	pImaging->SetColor(m_chkImageHotColor);
+	pImaging->SetColor(m_radioImageLUT != 0);
 
 	int subtract = ((CButton*)GetDlgItem(IDC_CHECK_BACKGROUND_SUBTRACT))->GetCheck();
 	pImaging->SetBackgroundSubtract(subtract);
@@ -483,7 +488,6 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_RADIO_IMAGE_RECTANGLE, &CRaywattLabDlg::OnBnClickedRadioImageRectangle)
 	ON_BN_CLICKED(IDC_RADIO_COLOR_BLACK, &CRaywattLabDlg::OnBnClickedRadioColorBlack)
 	ON_BN_CLICKED(IDC_RADIO_COLOR_WHITE, &CRaywattLabDlg::OnBnClickedRadioColorWhite)
-	ON_BN_CLICKED(IDC_CHECK_HOT_COLOR, &CRaywattLabDlg::OnBnClickedCheckHotColor)
 	ON_BN_CLICKED(IDC_CHECK_SHOW_GUIDE, &CRaywattLabDlg::OnBnClickedCheckShowGuide)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_BRIGHTNESS, &CRaywattLabDlg::OnNMCustomdrawSliderBrightness)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_CONTRAST, &CRaywattLabDlg::OnNMCustomdrawSliderContrast)
@@ -504,6 +508,17 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_START_ACQUISITION, &CRaywattLabDlg::OnBnClickedButtonStartAcquisition)
 	ON_BN_CLICKED(IDC_BUTTON_SHOW_SCOPE, &CRaywattLabDlg::OnBnClickedButtonShowScope)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_FRAME, &CRaywattLabDlg::OnNMCustomdrawSliderFrame)
+	ON_BN_CLICKED(IDC_BUTTON_ZOFFSET_INC, &CRaywattLabDlg::OnBnClickedButtonZoffsetInc)
+	ON_BN_CLICKED(IDC_BUTTON_ZOFFSET_DEC, &CRaywattLabDlg::OnBnClickedButtonZoffsetDec)
+	ON_BN_CLICKED(IDC_BUTTON_ZOFFSET_SAVE, &CRaywattLabDlg::OnBnClickedButtonZoffsetSave)
+	ON_BN_CLICKED(IDC_CHECK_SHOW_SHEATH_GUIDE, &CRaywattLabDlg::OnBnClickedCheckShowSheathGuide)
+	ON_BN_CLICKED(IDC_CHECK_COMPENSATION, &CRaywattLabDlg::OnBnClickedCheckCompensation)
+	ON_BN_CLICKED(IDC_BUTTON_PREV_FRAME, &CRaywattLabDlg::OnBnClickedButtonPrevFrame)
+	ON_BN_CLICKED(IDC_BUTTON_NEXT_FRAME, &CRaywattLabDlg::OnBnClickedButtonNextFrame)
+	ON_BN_CLICKED(IDC_BUTTON_COPY_ZOFFSET, &CRaywattLabDlg::OnBnClickedButtonCopyZoffset)
+	ON_BN_CLICKED(IDC_RADIO_GRAY, &CRaywattLabDlg::OnBnClickedRadioGray)
+	ON_BN_CLICKED(IDC_RADIO_GREEN, &CRaywattLabDlg::OnBnClickedRadioGreen)
+	ON_BN_CLICKED(IDC_RADIO_ORANGE, &CRaywattLabDlg::OnBnClickedRadioOrange)
 END_MESSAGE_MAP()
 
 LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
@@ -526,6 +541,7 @@ LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 		GetDlgItem(IDC_STATIC_FRAME_NUM)->SetWindowText(strFrameNum);
 
 		m_sliderFrame.SetPos(nCurFrame);
+		m_nCurFrame = nCurFrame;
 	}
 
 	CConfiguration& config = CConfiguration::GetInstance();
@@ -623,7 +639,8 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	setLogger(_T(".\\"));
 
 	CLookUpTable& lut = CLookUpTable::GetInstance();
-	int result = lut.Load("LUT_abbott.csv");
+	lut.Load("LUT_green.csv");
+	lut.Load("LUT_abbott.csv");
 
 	m_largeMonitorMode = false;
 	m_showScope = false;
@@ -668,7 +685,7 @@ BOOL CRaywattLabDlg::OnInitDialog()
 
 	m_radioImageShape = 0;
 	m_radioImageColor = 0;
-	m_chkImageHotColor = TRUE;
+	m_radioImageLUT = 0;
 	m_chkShowGuide = FALSE;
 	m_chkInitMotor = AfxGetApp()->GetProfileInt(_T("RECENT_SETTING"), _T("INIT_MOTOR"), FALSE);
 	m_chkInitStage = AfxGetApp()->GetProfileInt(_T("RECENT_SETTING"), _T("INIT_STAGE"), FALSE);
@@ -980,6 +997,28 @@ void CRaywattLabDlg::OnBnClickedButtonLoadSelectedData()
 		strFrameNum.Format(_T("0001 / %04d"), m_pDataReader->GetNumOfSamples());
 		GetDlgItem(IDC_STATIC_FRAME_NUM)->SetWindowText(strFrameNum);
 
+		m_vZOffset.clear();
+		{
+			CString strOffsetPath = strFilePath;
+			strOffsetPath.Replace(strFilePath.Right(3), _T("cal"));
+
+			CStringA offsetName(strOffsetPath);
+			FILE* fp = fopen(offsetName, "r");
+
+			for (int i = 0; i < m_pDataReader->GetNumOfSamples(); i++) {
+				int offset = 0;
+				if (fp) {
+					fscanf(fp, "%d,", &offset);
+				}
+				m_vZOffset.push_back(offset);
+			}
+
+			if (fp) {
+				fclose(fp);
+			}		
+		}
+		m_pImagingSimulate->SetZOffset(m_vZOffset.at(0));
+
 		GetDlgItem(IDC_BUTTON_SAVE_CALIBRATION)->EnableWindow(FALSE);
 	}
 
@@ -1114,9 +1153,10 @@ void CRaywattLabDlg::OnBnClickedButtonSaveVideo()
 
 	CString strDataPath = getLoadedFilePath();
 	CString strAviPath = strDataPath;
-	strAviPath.Replace(_T(".bin"), _T(".avi"));
+	strAviPath.Replace(strDataPath.Right(3), _T("avi"));
 
 	CLabImaging* pImaging = createImaging(config.imaging);
+	pImaging->SetImageCompensation(m_chkCompensation);
 
 	CDataReader* pReader = new CDataReader();
 	initReader(strDataPath.GetBuffer(), pReader);
@@ -1154,12 +1194,13 @@ void CRaywattLabDlg::OnBnClickedButtonSaveTif()
 
 	CString strDataPath = getLoadedFilePath();
 	CString strTifPath = strDataPath;
-	strTifPath.Replace(_T(".bin"), _T(".tif"));
-
-	CLabImaging* pImaging = createImaging(config.imaging);
+	strTifPath.Replace(strTifPath.Right(3), _T("tif"));
 
 	CDataReader* pReader = new CDataReader();
-	initReader(strDataPath.GetBuffer(), pReader);
+	IImaging::Setting setting = initReader(strDataPath.GetBuffer(), pReader);
+
+	CLabImaging* pImaging = createImaging(setting);
+	pImaging->SetImageCompensation(m_chkCompensation);
 
 	CTIFFWriter tiffWriter(strTifPath);
 	bool isCircle = (m_radioImageShape == 0);
@@ -1195,6 +1236,7 @@ void CRaywattLabDlg::OnBnClickedButtonSavePng()
 	_tmkdir(strPngDirectoryW.GetBuffer());
 
 	CLabImaging* pImaging = createImaging(config.imaging);
+	pImaging->SetImageCompensation(m_chkCompensation);
 
 	CDataReader* pReader = new CDataReader();
 	initReader(strDataPath.GetBuffer(), pReader);
@@ -1251,18 +1293,10 @@ void CRaywattLabDlg::OnBnClickedRadioColorWhite()
 }
 
 
-void CRaywattLabDlg::OnBnClickedCheckHotColor()
-{
-	UpdateData(TRUE);
-	if (m_pImagingRealtime != nullptr) m_pImagingRealtime->SetColor(m_chkImageHotColor);
-	if (m_pImagingSimulate != nullptr) m_pImagingSimulate->SetColor(m_chkImageHotColor);
-}
 
 void CRaywattLabDlg::OnBnClickedCheckShowGuide()
 {
 	UpdateData(TRUE);
-	if (m_pImagingRealtime != nullptr) m_pImagingRealtime->ShowCalibGuide(m_chkShowGuide);
-	if (m_pImagingSimulate != nullptr) m_pImagingSimulate->ShowCalibGuide(m_chkShowGuide);
 }
 
 
@@ -1312,10 +1346,12 @@ void CRaywattLabDlg::OnNMCustomdrawSliderFrame(NMHDR* pNMHDR, LRESULT* pResult)
 	UpdateData(TRUE);
 
 	if (m_pSimDevice != nullptr && !m_btnPlayData.pushed) {
-		((CSimulateDevice*)m_pSimDevice)->SetFrame(m_sliderFrame.GetPos());
+		m_nCurFrame = m_sliderFrame.GetPos();
+		((CSimulateDevice*)m_pSimDevice)->SetFrame(m_nCurFrame);
+		m_pImagingSimulate->SetZOffset(m_vZOffset.at(m_nCurFrame));
 
 		CString strFrameNum = _T("");
-		strFrameNum.Format(_T("%04d / %04d"), m_sliderFrame.GetPos() + 1, m_pDataReader->GetNumOfSamples());
+		strFrameNum.Format(_T("%04d / %04d"), m_nCurFrame + 1, m_pDataReader->GetNumOfSamples());
 		GetDlgItem(IDC_STATIC_FRAME_NUM)->SetWindowText(strFrameNum);
 	}
 
@@ -1534,4 +1570,138 @@ void CRaywattLabDlg::OnBnClickedButtonShowScope()
 	m_scopeViewFFT.ShowWindow((m_showScope ? SW_SHOW : SW_HIDE));
 
 	GetDlgItem(IDC_BUTTON_SHOW_SCOPE)->SetWindowText((m_showScope ? L"Show Image" : L"Show Scope"));
+}
+
+
+void CRaywattLabDlg::OnBnClickedButtonZoffsetInc()
+{
+	int curOffset = m_vZOffset.at(m_nCurFrame);
+
+	m_pImagingSimulate->SetZOffset(curOffset + 1);
+	m_vZOffset.at(m_nCurFrame) = curOffset + 1;
+
+	m_nPrevFrame = m_nCurFrame;
+}
+
+
+void CRaywattLabDlg::OnBnClickedButtonZoffsetDec()
+{
+	int curOffset = m_vZOffset.at(m_nCurFrame);
+
+	m_pImagingSimulate->SetZOffset(curOffset - 1);
+	m_vZOffset.at(m_nCurFrame) = curOffset - 1;
+
+	m_nPrevFrame = m_nCurFrame;
+}
+
+
+void CRaywattLabDlg::OnBnClickedButtonZoffsetSave()
+{
+	CString strDataPath = getLoadedFilePath();
+	CString strOffsetPath = strDataPath;
+	strOffsetPath.Replace(strDataPath.Right(3), _T("cal"));
+
+	CStringA offsetName(strOffsetPath);
+	FILE* fp = fopen(offsetName, "w+");
+
+	if (fp) {
+		for (int i = 0; i < m_vZOffset.size(); i++) {
+			fprintf(fp, "%d,", m_vZOffset.at(i));
+		}
+	
+		fclose(fp);
+	}
+}
+
+
+void CRaywattLabDlg::OnBnClickedCheckShowSheathGuide()
+{
+	UpdateData(TRUE);
+
+	CConfiguration& config = CConfiguration::GetInstance();
+	if (m_pImagingSimulate != nullptr) {
+		m_pImagingSimulate->SetMeasurementSetting(config.measurement);
+		m_pImagingSimulate->ShowCalibGuide(m_chkShowSheathGuide);
+	}
+}
+
+
+void CRaywattLabDlg::OnBnClickedCheckCompensation()
+{
+	UpdateData(TRUE);
+
+	if (m_pImagingSimulate == nullptr) return;
+	m_pImagingSimulate->SetImageCompensation(m_chkCompensation);
+}
+
+
+void CRaywattLabDlg::OnBnClickedButtonPrevFrame()
+{
+	if (m_pDataReader == nullptr) return;
+
+	int pos = (m_nCurFrame == 0) ? m_pDataReader->GetNumOfSamples() - 1 : m_nCurFrame - 1;
+	m_sliderFrame.SetPos(pos);
+
+	NMHDR nmhdr;
+	nmhdr.hwndFrom = GetDlgItem(IDC_SLIDER_FRAME)->m_hWnd;
+	nmhdr.idFrom = IDC_SLIDER_FRAME;
+	nmhdr.code = NM_CUSTOMDRAW;
+	PostMessage(WM_NOTIFY, nmhdr.idFrom, reinterpret_cast<LPARAM>(&nmhdr));
+}
+
+
+void CRaywattLabDlg::OnBnClickedButtonNextFrame()
+{
+	if (m_pDataReader == nullptr) return;
+
+	int pos = (m_nCurFrame == m_pDataReader->GetNumOfSamples() - 1) ? 0 : m_nCurFrame + 1;
+	m_sliderFrame.SetPos(pos);
+
+	NMHDR nmhdr;
+	nmhdr.hwndFrom = GetDlgItem(IDC_SLIDER_FRAME)->m_hWnd;
+	nmhdr.idFrom = IDC_SLIDER_FRAME;
+	nmhdr.code = NM_CUSTOMDRAW;
+	PostMessage(WM_NOTIFY, nmhdr.idFrom, reinterpret_cast<LPARAM>(&nmhdr));
+}
+
+
+void CRaywattLabDlg::OnBnClickedButtonCopyZoffset()
+{
+	int prevOffset = m_vZOffset.at(m_nPrevFrame);
+
+	m_pImagingSimulate->SetZOffset(prevOffset);
+	m_vZOffset.at(m_nCurFrame) = prevOffset;
+}
+
+
+void CRaywattLabDlg::OnBnClickedRadioGray()
+{
+	UpdateData(TRUE);
+
+	if (m_pImagingRealtime != nullptr) m_pImagingRealtime->SetColor(false);
+	if (m_pImagingSimulate != nullptr) m_pImagingSimulate->SetColor(false);
+}
+
+
+void CRaywattLabDlg::OnBnClickedRadioGreen()
+{
+	UpdateData(TRUE);
+
+	CLookUpTable& lut = CLookUpTable::GetInstance();
+	lut.SetCurrentColormap(0);
+
+	if (m_pImagingRealtime != nullptr) m_pImagingRealtime->SetColor(true);
+	if (m_pImagingSimulate != nullptr) m_pImagingSimulate->SetColor(true);
+}
+
+
+void CRaywattLabDlg::OnBnClickedRadioOrange()
+{
+	UpdateData(TRUE);
+
+	CLookUpTable& lut = CLookUpTable::GetInstance();
+	lut.SetCurrentColormap(1);
+
+	if (m_pImagingRealtime != nullptr) m_pImagingRealtime->SetColor(true);
+	if (m_pImagingSimulate != nullptr) m_pImagingSimulate->SetColor(true);
 }

@@ -67,6 +67,7 @@ COCTImaging::COCTImaging(Setting setting, CMessageService* pMsg) {
 	m_nTotalFrame = 0;
 
 	m_nSheathPosition = 0;
+	m_nZOffset = 0;
 
 	clahe = cv::createCLAHE(0.02, cv::Size(8, 8));
 }
@@ -97,6 +98,7 @@ void COCTImaging::Process(char* fringes) {
 	computeLogarithm(fFFTResult, fFFTResult);
 	findSheath(fFFTResult);
 	generateImage(fFFTResult, false);
+	applyZOffset();
 	adaptive_compensation();		
 }
 void COCTImaging::PostProcess(cv::Mat image) {
@@ -483,6 +485,13 @@ void COCTImaging::generateImage(Ipp32f* logaritihmData, bool bInvert){
 	cv::convertScaleAbs(imageResult, imageResult, 1.f / 80.f * LUT_SCALE, 0);
 
 	cv::flip(imageResult, imageResult, 1);
+}
+
+void COCTImaging::applyZOffset() {
+	cv::Mat img = imageResult.clone();
+
+	cv::Mat translation_matrix = (cv::Mat_<double>(2, 3) << 1, 0, m_nZOffset * -1, 0, 1, 0);
+	cv::warpAffine(img, imageResult, translation_matrix, img.size());
 }
 
 void COCTImaging::drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color) {
