@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using RaywattApp.Common.Dialog;
 using System.Collections.Generic;
 using static RaywattOCT.RayCoreWrapper;
 
@@ -84,13 +83,6 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private ReviewImageInfo[] _reviewImageInfos = new ReviewImageInfo[2];
-
-        [ObservableProperty]
-        IDialogWindow _dialogWindow;
-
-        [ObservableProperty]
-        private bool _isErrorDialogClosed = false;
-
         public DeviceStatus()
         {
             ReviewImageInfos[(int)RaySession.Review] = new ReviewImageInfo();

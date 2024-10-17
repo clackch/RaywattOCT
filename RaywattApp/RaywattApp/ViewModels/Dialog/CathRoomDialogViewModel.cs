@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using log4net;
 using RaywattApp.Common.Angio;
+using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Models;
 using RaywattApp.Services;
@@ -9,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Timers;
+using System.Windows;
 
 namespace RaywattApp.ViewModels.Dialog
 {
@@ -26,6 +29,7 @@ namespace RaywattApp.ViewModels.Dialog
         [ObservableProperty]
         private CathRoom _selectedCathRoom;
 
+        private System.Timers.Timer _connectionCheckTimer;
         public CathRoomDialogViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager)
         {
             _sqlManager = sqlManager;
@@ -40,6 +44,23 @@ namespace RaywattApp.ViewModels.Dialog
                 Name = "Not Selected"
             };
             CathRoomList.Insert(0, notSelectedItem);
+            _connectionCheckTimer = new System.Timers.Timer(1000); // 1초마다 실행
+            _connectionCheckTimer.Elapsed += OnConnectionCheck;
+            _connectionCheckTimer.Start();
+        }
+
+        private void OnConnectionCheck(object sender, ElapsedEventArgs e)
+        {
+            App.Current.Dispatcher.Invoke(() =>
+            {
+                if (!ViewModelBase._deviceStatus.IsAngioConnected && !Application.Current.Windows.OfType<Window>().Any(w => w.Content is AlertDialogControl))//ViewModelBase._deviceStatus.IsErrorDialogClosed)
+                {
+                    var targetWindow = Application.Current.Windows.OfType<Window>().SingleOrDefault(w => w.DataContext is CathRoomDialogViewModel) as IDialogWindow;
+                    AnswerNo(targetWindow);
+                    _connectionCheckTimer.Stop();
+                }
+                else if (this._selectedCathRoom == null && this.DialogResult != null) _connectionCheckTimer.Stop();
+            });
         }
 
         public override void SetParameter(object parameter)
@@ -93,7 +114,7 @@ namespace RaywattApp.ViewModels.Dialog
                 }
                 _angioManager.IsChpFileChangeSuccess = 0;
             }
-
+            _connectionCheckTimer.Stop();
             CloseDialogWithResult(dialog, dialogResults);
         }
     }

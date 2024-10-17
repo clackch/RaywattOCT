@@ -1,12 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using log4net;
-using RaywattApp.Common.Bases;
 using RaywattApp.Common.Localization;
 using RaywattApp.Models;
 using System.Windows.Input;
-using System.Timers;
-using RaywattApp.Common.Angio;
 
 namespace RaywattApp.Common.Dialog
 {
@@ -15,8 +12,6 @@ namespace RaywattApp.Common.Dialog
         private static readonly ILog _log = LogManager.GetLogger(typeof(DialogViewModelBase));
 
         protected readonly DynamicResource _l10n;
-
-        private Timer _connectionCheckTimer; 
         public string? Title { get; set; }
 
         public string? Message { get; set; }
@@ -59,23 +54,7 @@ namespace RaywattApp.Common.Dialog
         {
             _l10n = (DynamicResource)App.Current.Resources["L10N"];
             Title = "";
-            _connectionCheckTimer = new Timer(1000); // 1초마다 실행
-            _connectionCheckTimer.Elapsed += OnConnectionCheck;
-            _connectionCheckTimer.Start();
         }
-
-        private void OnConnectionCheck(object sender, ElapsedEventArgs e)
-        {
-            App.Current.Dispatcher.Invoke(() =>
-            {
-                if (!ViewModelBase._deviceStatus.IsAngioConnected && ViewModelBase._deviceStatus.IsErrorDialogClosed)
-                {
-                    AnswerNo(ViewModelBase._deviceStatus.DialogWindow);
-                    ViewModelBase._deviceStatus.IsErrorDialogClosed = false;
-                }
-            });
-        }
-
         public virtual void SetParameter(object parameter) { }
 
         protected virtual void AnswerYes(IDialogWindow dialog)
@@ -102,7 +81,6 @@ namespace RaywattApp.Common.Dialog
 
             DialogResults dialogResults = new();
             dialogResults.DialogAnswer = DialogResults.Answer.Undefined;
-            if(!ViewModelBase._deviceStatus.IsAngioConnected) ViewModelBase._deviceStatus.IsErrorDialogClosed = true; 
             CloseDialogWithResult(dialog, dialogResults);
         }
 
