@@ -241,12 +241,6 @@ namespace RaywattApp.ViewModels
             get { return this._toggleAngioCommand ?? (this._toggleAngioCommand = new RelayCommand<bool>(ToggleAngio)); }
         }
 
-        private ICommand _toggleContourStentCommand;
-        public ICommand ToggleContourStentCommand
-        {
-            get { return this._toggleContourStentCommand ?? (this._toggleContourStentCommand = new RelayCommand(ToggleContourStent)); }
-        }
-
         private ICommand _toggleMeasurementCommand;
         public ICommand ToggleMeasurementCommand
         {
@@ -1002,16 +996,9 @@ namespace RaywattApp.ViewModels
             ExpandRightMenu = isExpand;
         }
 
-        private void ToggleContourStent()
-        {
-            ReviewStatus.IsContourStentOn = !ReviewStatus.IsContourStentOn;
-        }
-
         private void ToggleMeasurement()
         {
             StopPlayback();
-
-            ReviewStatus.IsMeasurementOn = !ReviewStatus.IsMeasurementOn;
         }
 
         public void Window_ManipulationStarting(ManipulationStartingEventArgs e)

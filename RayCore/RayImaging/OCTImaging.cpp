@@ -15,6 +15,7 @@ float EXPONENTIAL_FACTOR = 1.8f;
 float EXPONENTIAL_CONTROL = 0.8f;
 float ENERGY_THRESHOLD = 0.001f;
 const int SHEATH_OFFSET = 15;
+const int SHEATH_SEARCH_RANGE = 200;
 const int SEARCH_LENGTH = 100;
 static bool bCompensated = false;
 static bool bVignetted = true;
@@ -550,6 +551,8 @@ void COCTImaging::adaptive_compensation()
 	if(!bVignetted)
 		lumen_detection_processing(rotated_img);
 
+	rotated_img(cv::Range(rotated_img.rows - 60, rotated_img.rows), cv::Range::all()).setTo(cv::Scalar(0));
+
 	// Normalize the image
 	cv::Mat normalized_img;
 	rotated_img.convertTo(normalized_img, CV_32F);
@@ -740,7 +743,7 @@ void COCTImaging::lumen_detection_processing(cv::Mat& img)
 
 		// 행 단위로 평균과 분산 계산 (OpenMP 병렬 처리)
 #pragma omp parallel for
-		for (int i = 0; i < img.rows; ++i) {
+		for (int i = 0; i < SHEATH_SEARCH_RANGE; ++i) {
 			cv::Mat row = img.row(i);
 			cv::Scalar mean_scalar, stddev_scalar;
 			cv::meanStdDev(row, mean_scalar, stddev_scalar);
