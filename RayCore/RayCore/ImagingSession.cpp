@@ -345,12 +345,10 @@ bool CImagingSession::LoadZOffset(const char* strDataFilePath) {
 		for (int i = 0; i < nNumOfSamples; i++) {
 			int offset = 0;
 			fscanf(fp, "%d,", &offset);
-			PLOGI.printf("%d", offset);
 
 			m_vZOffset.push_back(offset);
 		}
 		fclose(fp);
-		PLOGI.printf("ZOffset file loaded: %s done.", strZOffsetFilePath.c_str());
 
 		return true;
 	}
