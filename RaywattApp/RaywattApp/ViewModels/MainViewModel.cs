@@ -178,6 +178,12 @@ namespace RaywattApp.ViewModels
             get { return this._vignettingTest ?? (this._vignettingTest = new RelayCommand(VignettingTest)); }
         }
 
+        private ICommand _SaveVTIFileTest;
+        public ICommand SaveVTIFileTestCommand
+        {
+            get { return this._SaveVTIFileTest ?? (this._SaveVTIFileTest = new RelayCommand(SaveVTIFileTest)); }
+        }
+
         //Test
         private ICommand _imageAnalysisToggle;
         public ICommand ImageAnalysisToggleCommmand
@@ -475,6 +481,19 @@ namespace RaywattApp.ViewModels
             bool bImageLumenVignetting = (bool)(RayGetProperty(Property.ImageLumenVignetting) != 0);
 
             RaySetProperty(Property.ImageLumenVignetting, bImageLumenVignetting ? 0 : 1);
+        }
+
+        private void SaveVTIFileTest()
+        {
+            _log.Debug("SaveVTIFileTest");
+
+            CommonUtil.isVTIFileSave = !CommonUtil.isVTIFileSave;
+            if(CommonUtil.isVTIFileSave)
+                _log.Debug("SaveVTIFileTest True");
+            else
+            {
+                _log.Debug("SaveVTIFileTest False");
+            }
         }
 
         private void ImageAnalysisToggle()
