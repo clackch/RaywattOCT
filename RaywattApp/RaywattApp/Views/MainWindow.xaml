@@ -71,6 +71,9 @@
                 <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" Margin="870,5,0,0" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=Compensate}">
                     <Button Style="{DynamicResource BtnForTest}" Command="{Binding CompensationWindowTestCommand}" Width="100" Height="15" FontSize="9" Content="CompensationWindow"/>
                 </StackPanel>
+                <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="870,0,0,5" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=Compensate}">
+                    <Button Style="{DynamicResource BtnForTest}" Command="{Binding SaveVTIFileTestCommand}" Width="100" Height="15" FontSize="9" Content="Save3DVITFile"/>
+                </StackPanel>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="800,0,0,0" Visibility="{Binding IsImageAnalysisTest, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel Orientation="Horizontal">
                         <Button Style="{DynamicResource BtnForTest2}" Command="{Binding ImageAnalysisToggleCommmand}" Width="50" Height="15" FontSize="9" Content="Intensity"/>

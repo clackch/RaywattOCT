@@ -188,7 +188,7 @@ void COCTImaging::SetImageCompensationControlWindow(bool ImageCompensationContro
 
 			// 슬라이더 값 범위는 정수로만 가능하므로, 원하는 범위로 매핑
 			int exponential_factor_slider = 18;
-			int exponential_control_slider = 6;
+			int exponential_control_slider = 8;
 			int energy_threshold_slider = 10;
 
 			cv::createTrackbar("Cont", "Window", &exponential_factor_slider, 100, on_trackbar);

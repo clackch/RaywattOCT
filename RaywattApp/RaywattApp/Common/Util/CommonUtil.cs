@@ -34,6 +34,8 @@ namespace RaywattApp.Common.Util
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(CommonUtil));
 
+        public static bool isVTIFileSave = false;
+
         public static bool ValidateText(string input)
         {
             var regex = new Regex(@"^[a-zA-Z0-9ㄱ-ㅎ가-힣\s,.]+$");

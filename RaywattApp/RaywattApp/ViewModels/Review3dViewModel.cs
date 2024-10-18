@@ -317,10 +317,21 @@ namespace RaywattApp.ViewModels
                 if (CommonUtil.IsPostCase(PatientCase.Procedure))
                 {
                     ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(System.IntPtr.Zero), diameter, diameter, depth, 1, 1, zVal);
+
+                    if (CommonUtil.isVTIFileSave)
+                    {
+                        _log.Debug("VTIFileSave");
+                        ODSOCT_Export3DVTIFile(RayGetVolumeData(System.IntPtr.Zero), "test");
+                    }
                 }
                 else
                 {
                     ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(buffer), diameter, diameter, depth, 1, 1, zVal);
+                    if (CommonUtil.isVTIFileSave)
+                    {
+                        _log.Debug("VTIFileSave");
+                        ODSOCT_Export3DVTIFile(RayGetVolumeData(buffer), "test");
+                    }
                 }
 
                 ODSOCT_InputSurfaceParameter(Ray3DObject.Lumen, 10, 50, ".\\data\\lumen_tex.jpg");
@@ -349,8 +360,6 @@ namespace RaywattApp.ViewModels
                 //new OpenCvSharp.Size(diameter, diameter));
                 //ODSOCT_InputSurfaceParameter(Ray3DObject.GuideWire, 10, 15, ".\\data\\guidewire_tex.jpg");
                 //ODSOCT_InputData(Ray3DObject.GuideWire, buffer, diameter, diameter, depth, 1, 1, zVal);
-
-                
 
                 Marshal.FreeHGlobal(buffer);
                 ReviewStatus.IsLumenEdited = false;
