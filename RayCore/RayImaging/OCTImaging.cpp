@@ -654,6 +654,8 @@ void COCTImaging::adaptive_compensation()
 	cv::Mat result_img_clahe;
 	clahe->apply(result_img, result_img_clahe);
 
+	result_img_clahe(cv::Range(result_img_clahe.rows-70, result_img_clahe.rows), cv::Range::all()).setTo(cv::Scalar(0));
+
 	// Rotate back to original angle
 	cv::rotate(result_img_clahe, imageCompensated, cv::ROTATE_90_CLOCKWISE);
 
