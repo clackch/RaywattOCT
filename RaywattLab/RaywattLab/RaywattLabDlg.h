@@ -139,6 +139,7 @@ private:
 	void findFileByExtension(CString strFolder, CString strExt, std::vector<CString>& vList);
 	void updateMeasurement(USHORT nPeakValue, int nPeakIndex, int nLineWidth, USHORT nNoisePower);
 	void drawGuideLine(cv::Mat image);
+	cv::Mat getFoVImage(cv::Mat image, double fov);
 
 	/*
 	* threadService

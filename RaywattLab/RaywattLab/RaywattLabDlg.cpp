@@ -358,6 +358,26 @@ void CRaywattLabDlg::drawGuideLine(cv::Mat image) {
 			cv::Point(centerX + actualDist / 2, markerTo), lineColor, lineThickness * 2);
 	}
 }
+cv::Mat CRaywattLabDlg::getFoVImage(cv::Mat image, double fov) {
+	CConfiguration& config = CConfiguration::GetInstance();
+	cv::Mat imgFov;
+
+	if (fov == 0.0f) {
+		imgFov = image.clone();
+	}
+	else {
+		double fovWidth = (fov / 2) / (config.measurement.fAxialResolutionScale);
+		cv::Rect fovArea;
+		fovArea.x = image.cols - fovWidth;
+		fovArea.y = 0;
+		fovArea.width = fovWidth;
+		fovArea.height = image.rows;
+
+		cv::resize(image(fovArea), imgFov, cv::Size(image.cols, image.rows));
+	}
+
+	return imgFov;
+}
 
 
 /*
@@ -1167,6 +1187,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveVideo()
 	int height = (isCircle) ? config.imaging.nCircleSize : config.imaging.nOutputLength;
 	videoWriter.StartRecording(strAviPath, width, height);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
+		pImaging->SetZOffset(m_vZOffset.at(i));
 		pImaging->Process(pReader->GetSample(pReader->GetNumOfSamples() - i - 1));
 		pImaging->PostProcess(pImaging->GetProcessedImage());
 		videoWriter.PushToBuffer(((isCircle) ? pImaging->GetCircleImage() : pImaging->GetRectangleImage()));
@@ -1205,8 +1226,11 @@ void CRaywattLabDlg::OnBnClickedButtonSaveTif()
 	CTIFFWriter tiffWriter(strTifPath);
 	bool isCircle = (m_radioImageShape == 0);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
+		pImaging->SetZOffset(m_vZOffset.at(i));
 		pImaging->Process(pReader->GetSample(i));
-		pImaging->PostProcess(pImaging->GetProcessedImage());
+
+		cv::Mat imgRect = getFoVImage(pImaging->GetProcessedImage(), 9000.f);
+		pImaging->PostProcess(imgRect);
 
 		tiffWriter.SaveFrame(((isCircle) ? pImaging->GetCircleImage() : pImaging->GetRectangleImage()));
 	}
@@ -1243,6 +1267,7 @@ void CRaywattLabDlg::OnBnClickedButtonSavePng()
 
 	bool isCircle = (m_radioImageShape == 0);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
+		pImaging->SetZOffset(m_vZOffset.at(i));
 		pImaging->Process(pReader->GetSample(i));
 		pImaging->PostProcess(pImaging->GetProcessedImage());
 
