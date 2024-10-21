@@ -227,6 +227,7 @@ namespace RaywattApp.Common.Angio
                 Thread.Sleep(500);
                 if(servercheck == false)
                 {
+                    _log.Debug("server down");
                     CommonUtil.Exit(ViewModelBase._deviceStatus, this, true);
                     isSocketAlive = false;
                 }

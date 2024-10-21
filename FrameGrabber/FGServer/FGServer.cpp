@@ -50,6 +50,5 @@ int main(int argc, char** argv)
 	}
 
 	fg.CheckPortConnection();
-
 	ts->StartInitThreads(fg);
 }

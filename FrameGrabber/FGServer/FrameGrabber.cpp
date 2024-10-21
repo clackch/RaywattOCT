@@ -173,74 +173,26 @@ void FrameGrabber::InitializeLiveStreamInfo() {
 	memset(&m_LiveStreamInfo, 0, sizeof(LIVESTREAM_INFO));
 	m_LiveStreamInfo.dwSize = sizeof(LIVESTREAM_INFO);
 	m_LiveStreamInfo.dwNumberOfBuffers = STREAM_FRAMES;
-
-	switch (m_dwCaptureFormatSelect)
+	m_LiveStreamInfo.nDataType = IDEA_TYPE_RGB_24; 
+	m_LiveStreamInfo.bDIBTarget = TRUE; 
+	for (DWORD i = 0; i < m_LiveStreamInfo.dwNumberOfBuffers; ++i)
 	{
-	case FormatYOnly_8:
-		if (UV.lValue)
-		{
-			m_LiveStreamInfo.nDataType = IDEA_TYPE_MONO_8;
-			m_LiveStreamInfo.bDIBTarget = TRUE;
-		}
-		else
-		{
-			m_LiveStreamInfo.nDataType = IDEA_TYPE_YONLY_8;
-			m_LiveStreamInfo.bDIBTarget = TRUE;
-		}
-		break;
-
-	case FormatYUY2_16:
-		if (UV.lValue) // is mono mode
-		{
-			m_LiveStreamInfo.nDataType = IDEA_TYPE_YONLY_16;
-			m_LiveStreamInfo.bDIBTarget = FALSE;
-		}
-		else
-		{
-			m_LiveStreamInfo.nDataType = IDEA_TYPE_YCBCR_16;
-			m_LiveStreamInfo.bDIBTarget = FALSE;
-		}
-		break;
-
-	default:
-
-	case FormatRGB555_16:
-		m_LiveStreamInfo.nDataType = IDEA_TYPE_RGB555_16;
-		m_LiveStreamInfo.bDIBTarget = TRUE;
-		break;
-
-	case FormatRGB888_24:
-		m_LiveStreamInfo.nDataType = IDEA_TYPE_RGB_24;
-		m_LiveStreamInfo.bDIBTarget = TRUE;
-		break;
-
-	case FormatRGB888_32:
-		m_LiveStreamInfo.nDataType = IDEA_TYPE_RGB_32;
-		m_LiveStreamInfo.bDIBTarget = TRUE;
-		break;
-
-	case FormatRGB888_Gray_On_Red:
-	case FormatRGB888_Gray_On_Green:
-	case FormatRGB888_Gray_On_Blue:
-		m_LiveStreamInfo.nDataType = IDEA_TYPE_MONO_8;
-		m_LiveStreamInfo.bDIBTarget = TRUE;
-		break;
+		m_LiveStreamInfo.pBufferList[i] = new char[m_LiveStreamInfo.nDestinationWidth * m_LiveStreamInfo.nDestinationHeight * (wBitsPerPixel / 8)];
 	}
 
-	m_LiveStreamInfo.nDestinationWidth = m_RSet.lRegs[HPR_WIDTH];
-	m_LiveStreamInfo.nDestinationHeight = m_RSet.lRegs[HPR_HEIGHT];
+	m_LiveStreamInfo.nDestinationWidth = m_RSet.lRegs[HPR_WIDTH];   
+	m_LiveStreamInfo.nDestinationHeight = m_RSet.lRegs[HPR_HEIGHT]; 
 
-	m_LiveStreamInfo.nDecimateFrames = 0; // m_nFramesToSkip
+	m_LiveStreamInfo.nDecimateFrames = 0;
 
 	m_LiveStreamInfo.bFieldUpdate = FALSE;
 
 	m_LiveStreamInfo.hLUT = m_hVPLUT;
+
 	m_LiveStreamInfo.nTop = 0;
 	m_LiveStreamInfo.nBottom = m_RSet.lRegs[HPR_HEIGHT];
 	m_LiveStreamInfo.nLeft = 0;
 	m_LiveStreamInfo.nRight = m_RSet.lRegs[HPR_WIDTH];
-
-	// Don't use named events if there may be more than one instance of the application
 	m_LiveStreamInfo.hStartEvent = CreateEvent(0, TRUE, FALSE, NULL);
 	m_LiveStreamInfo.hStopEvent = CreateEvent(0, TRUE, FALSE, NULL);
 	m_LiveStreamInfo.hBufferEvent = CreateEvent(0, TRUE, FALSE, NULL);

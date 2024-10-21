@@ -189,7 +189,8 @@ void TCPSocket::ReceivePacket(FrameGrabber& fg) {
 				memmove(tmpRecvBuffer, tmpRecvBuffer + 5, tmpRecvBufferLen);
 				tmpRecvBuffer[tmpRecvBufferLen] = '\0';
 				isStarted = true;
-				StartSnapFrameThread(fg);
+				//StartSnapFrameThread(fg);
+				StartLiveFrameThread(fg);
 				break;
 			case CommandType::FGStopped:
 				PLOGI.printf("FGStopped");
@@ -515,19 +516,19 @@ void TCPSocket::LiveFrame(FrameGrabber& fg) {
 
 	int offset = IMAGE_HEADER_SIZE;
 
-	HDVID_HEADER* pBufferHeader;
-	while (eHD_GetStreamBuffer(fg.m_ImageHandle, &pBufferHeader) == 0)
+	HDVID_HEADER* pVidHeader = nullptr;
+	PLOGI.printf("Success GetDisplayBuffer.");
+	while (eHD_GetDisplayBuffer(fg.m_ImageHandle, &pVidHeader) == 0)
 	{
-		PLOGI.printf("Success GetStreamBuffer.");
-		memcpy(sendBuffer + offset, pBufferHeader->pBuffer, fg.lHeight * fg.lWidth * fg.wBitsPerPixel / 8 * sizeof(uchar));
-		offset += fg.lHeight * fg.lWidth * fg.wBitsPerPixel / 8 * sizeof(uchar);
+		PLOGI.printf("Success GetDisplayBuffer.");
 
-		// checkSum
+		memcpy(sendBuffer + offset, pVidHeader->pBuffer, fg.lHeight * fg.lWidth * fg.wBitsPerPixel / 8);
+		offset += fg.lHeight * fg.lWidth * fg.wBitsPerPixel / 8;
+
 		checkSum = CalcCheckSum(sendBuffer, offset);
 		memcpy(sendBuffer + offset, &checkSum, sizeof(checkSum));
 		offset += sizeof(checkSum);
 
-		// eof
 		memcpy(sendBuffer + offset, &eof, sizeof(eof));
 		offset += sizeof(eof);
 
@@ -535,20 +536,26 @@ void TCPSocket::LiveFrame(FrameGrabber& fg) {
 		if (sendResult == SOCKET_ERROR)
 		{
 			PLOGI.printf("Failed to send data to client. Error code: %d", WSAGetLastError());
-			//exit(0);
-			return;
+			return;  
 		}
 
-		eHD_ReleaseStreamBuffer(fg.m_ImageHandle, pBufferHeader);
+		eHD_ReleaseDisplayBuffer(fg.m_ImageHandle, pVidHeader);
 
-		offset = IMAGE_HEADER_SIZE;
+		offset = IMAGE_HEADER_SIZE;  
 		PLOGI.printf("Success Catching LiveFrame.");
 	}
 }
 
 void TCPSocket::StartLiveFrameThread(FrameGrabber& fg) {
 	if (!liveFrameThreadRunning) {
-		m_ErrorCode = eHD_LiveStreamInit(fg.m_ImageHandle, &fg.m_LiveStreamInfo);
+		fg.InitializeLiveStreamInfo();
+		PLOGI.printf("LiveFrameThread started.");
+		ERRTYPE result = eHD_LiveStreamMode(fg.m_ImageHandle, 1);
+		if (result != 0)
+		{
+		 	PLOGI.printf("Failed to set live stream mode. Error code: %d", result);
+			return;
+		}
 
 		liveFrameThreadRunning = true;
 		liveFrameThreadHandle = thread(&TCPSocket::LiveFrameThread, this, ref(fg));
