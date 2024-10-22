@@ -99,8 +99,8 @@ void COCTImaging::Process(char* fringes) {
 	computeLogarithm(fFFTResult, fFFTResult);
 	findSheath(fFFTResult);
 	generateImage(fFFTResult, false);
+	adaptive_compensation();
 	applyZOffset();
-	adaptive_compensation();		
 }
 void COCTImaging::PostProcess(cv::Mat image) {
 	const bool bInvert = m_bInvert;
