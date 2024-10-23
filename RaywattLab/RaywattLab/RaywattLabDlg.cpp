@@ -60,6 +60,7 @@ CRaywattLabDlg::CRaywattLabDlg(CWnd* pParent /*=nullptr*/)
 
 	m_chkShowSheathGuide = false;
 	m_chkCompensation = false;
+	m_pThreadCompParamWin = nullptr;
 }
 
 void CRaywattLabDlg::DoDataExchange(CDataExchange* pDX)
@@ -488,6 +489,19 @@ UINT CRaywattLabDlg::threadPullback(LPVOID param) {
 	return NOERROR;
 }
 
+UINT CRaywattLabDlg::threadCompensationParamWindow(LPVOID param) {
+	CRaywattLabDlg* pDlg = (CRaywattLabDlg*)param;
+
+	pDlg->m_pImagingSimulate->SetImageCompensationControlWindow(true);
+
+	while (pDlg->m_pThreadCompParamWin->isRun) {
+		cv::waitKey(1);
+	}
+
+	pDlg->m_pImagingSimulate->SetImageCompensationControlWindow(false);
+	
+	return NOERROR;
+}
 
 BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
@@ -831,6 +845,7 @@ void CRaywattLabDlg::OnDestroy() {
 	CUtility::StopThread(m_pThreadCalibration);
 	CUtility::StopThread(m_pThreadPullback);
 	CUtility::StopThread(m_pThreadService);
+	CUtility::StopThread(m_pThreadCompParamWin);
 
 	// free memories
 	if (m_pAcqDevice != nullptr) {
@@ -1657,6 +1672,13 @@ void CRaywattLabDlg::OnBnClickedCheckCompensation()
 
 	if (m_pImagingSimulate == nullptr) return;
 	m_pImagingSimulate->SetImageCompensation(m_chkCompensation);
+
+	if (m_chkCompensation) {
+		CUtility::StartThread(threadCompensationParamWindow, m_pThreadCompParamWin, this);
+	}
+	else {
+		CUtility::StopThread(m_pThreadCompParamWin);
+	}
 }
 
 

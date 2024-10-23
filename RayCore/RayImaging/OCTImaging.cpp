@@ -182,32 +182,25 @@ void COCTImaging::SetImageLumenVignetting(bool ImageLumenVignetted) {
 }
 
 void COCTImaging::SetImageCompensationControlWindow(bool ImageCompensationControlWindowOn) {
+	const char* strWindowName = "Compensation";
 	try {
 		if (ImageCompensationControlWindowOn == 1) {
-			cv::namedWindow("Window", cv::WINDOW_AUTOSIZE);
+			cv::namedWindow(strWindowName, cv::WINDOW_AUTOSIZE);
 
 			// 슬라이더 값 범위는 정수로만 가능하므로, 원하는 범위로 매핑
 			int exponential_factor_slider = 18;
 			int exponential_control_slider = 8;
 			int energy_threshold_slider = 10;
 
-			cv::createTrackbar("Cont", "Window", &exponential_factor_slider, 100, on_trackbar);
-			cv::createTrackbar("Bright", "Window", &exponential_control_slider, 100, on_trackbar);
-			cv::createTrackbar("Eng", "Window", &energy_threshold_slider, 100, on_trackbar);
+			cv::createTrackbar("Cont", strWindowName, &exponential_factor_slider, 100, on_trackbar);
+			cv::createTrackbar("Bright", strWindowName, &exponential_control_slider, 100, on_trackbar);
+			cv::createTrackbar("Eng", strWindowName, &energy_threshold_slider, 100, on_trackbar);
 
 			// 초기 콜백 호출
 			on_trackbar(0, 0);
-
-			// 슬라이더와 함께 창 유지 (ESC로 종료)
-			while (true) {
-				int key = cv::waitKey(50);
-				if (key == 27) {  // ESC key
-					cv::destroyAllWindows();
-					break;
-				}
-			}
-
-			cv::destroyAllWindows();
+		}
+		else {
+			cv::destroyWindow(strWindowName);
 		}
 	}
 	catch (const cv::Exception& e) {

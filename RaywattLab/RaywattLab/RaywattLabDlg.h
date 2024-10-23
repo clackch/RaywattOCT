@@ -108,6 +108,7 @@ private:
 	BOOL m_chkShowSheathGuide;
 
 	BOOL m_chkCompensation;
+	CThread* m_pThreadCompParamWin;
 
 // 생성입니다.
 public:
@@ -147,6 +148,7 @@ private:
 	static UINT threadService(LPVOID param);
 	static UINT threadSaveCalibration(LPVOID param);
 	static UINT threadPullback(LPVOID param);
+	static UINT threadCompensationParamWindow(LPVOID param);
 
 // 구현입니다.
 protected:

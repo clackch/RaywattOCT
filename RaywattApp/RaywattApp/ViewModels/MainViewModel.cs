@@ -17,6 +17,8 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
 using RaywattApp.Common.Angio;
+using System.Threading;
+using OpenCvSharp;
 
 namespace RaywattApp.ViewModels
 {
@@ -170,6 +172,9 @@ namespace RaywattApp.ViewModels
         {
             get { return this._compensationWindowTest ?? (this._compensationWindowTest = new RelayCommand(CompensationControlWindowTest)); }
         }
+
+        private Thread threadCompensationWindow = null;
+        private bool showCompensationWindow = false;
 
         //Test
         private ICommand _vignettingTest;
@@ -348,6 +353,12 @@ namespace RaywattApp.ViewModels
 
             if (result != null && result.DialogAnswer != DialogResults.Answer.No)
             {
+                if (threadCompensationWindow != null)
+                {
+                    showCompensationWindow = false;
+                    threadCompensationWindow.Join();
+                }
+
                 if (result.DialogAnswer == DialogResults.Answer.Extra)
                 {
                     DeviceStatus.PowerOffMsg = _l10n["Switching user"];
@@ -471,7 +482,33 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("CompensationControlWindowTest");
 
+            if (threadCompensationWindow == null)
+            {
+                threadCompensationWindow = new Thread(() => ThreadCompensationWindow(this));
+                threadCompensationWindow.Start();
+            }
+            else {
+                showCompensationWindow = false;
+                threadCompensationWindow.Join();
+                threadCompensationWindow = null;
+            }
+        }
+
+        private static void ThreadCompensationWindow(MainViewModel model)
+        {
+            _log.Debug("ThreadCompensationWindow");
+
+            model.showCompensationWindow = true;
             RaySetProperty(Property.ImageCompensationControlWindow, 1);
+
+            while (model.showCompensationWindow) 
+            {
+                Cv2.WaitKey(1);
+            }
+
+            RaySetProperty(Property.ImageCompensationControlWindow, 0);
+
+            _log.Debug("ThreadCompensationWindow done.");
         }
 
         private void VignettingTest()
