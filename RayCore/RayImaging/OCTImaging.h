@@ -33,7 +33,6 @@ protected:
 	cv::Mat imageResult;
 	cv::Mat imageResultColor;
 	cv::Mat imageCircle;
-	cv::Mat imageCompensated;
 
 	// using in GenerateBackground
 	Ipp32f* fringes32f;

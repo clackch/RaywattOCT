@@ -170,7 +170,7 @@ void COCTImaging::EraseStentOutLier(cv::Mat& stent) {}
 void COCTImaging::SetLumenContourOffset(std::vector<cv::Point> lumenContour) {}
 
 cv::Mat COCTImaging::GetProcessedImage() {
-	return bCompensated ? imageCompensated : imageResult; 
+	return imageResult; 
 }
 
 void COCTImaging::SetImageCompensation(bool ImageCompensated) { 
@@ -489,7 +489,7 @@ void COCTImaging::generateImage(Ipp32f* logaritihmData, bool bInvert){
 }
 
 void COCTImaging::applyZOffset() {
-	cv::Mat img = (bCompensated) ? imageCompensated.clone() : imageResult.clone();
+	cv::Mat img = imageResult.clone();
 
 	cv::Mat translation_matrix = (cv::Mat_<double>(2, 3) << 1, 0, m_nZOffset * -1, 0, 1, 0);
 	cv::warpAffine(img, imageResult, translation_matrix, img.size());
@@ -657,7 +657,7 @@ void COCTImaging::adaptive_compensation()
 	result_img_clahe(cv::Range(result_img_clahe.rows-70, result_img_clahe.rows), cv::Range::all()).setTo(cv::Scalar(0));
 
 	// Rotate back to original angle
-	cv::rotate(result_img_clahe, imageCompensated, cv::ROTATE_90_CLOCKWISE);
+	cv::rotate(result_img_clahe, imageResult, cv::ROTATE_90_CLOCKWISE);
 
 	// PLOGI.printf("[End] adaptive_compensation");
 }
