@@ -576,7 +576,7 @@ namespace RaywattApp.Common.Util
 
         private static Mat MakeLumenProfile(Mat imglumenProfile, LumenContour lumenContour, LumenSidebranch lumenSidebranch, LumenStent lumenStent, double appositionThreshold, int curFrame, int frameProximal, int frameDistal, bool isPostCase, bool isEdge)
         {
-            const double radius = Constants.OCTImageSize / 2;
+            const double radius = Constants.OCTImageSize / 3;
             const double totalArea = radius * radius * Math.PI;
             double area = lumenContour.Area;
             int lumenArea = (int)(area / totalArea * imglumenProfile.Rows);
@@ -649,17 +649,21 @@ namespace RaywattApp.Common.Util
             //Side Branch
             if (lumenSidebranch.Points != null && lumenSidebranch.Points.Count > 0)
             {
+                int sbThickness = 5;
+                if(lumenArea/2 < sbThickness)
+                    sbThickness = lumenArea/2 - 1;
+
                 if (curFrame >= frameProximal && curFrame <= frameDistal)
                 {
-                    Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - 5), new Point(position, imglumenProfile.Rows / 2 + 5), new Scalar(0xe4, 0xe4, 0xe4));
+                    Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - sbThickness), new Point(position, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0xe4, 0xe4, 0xe4));
                     if (!isEdge)
-                        Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - 5), new Point(position + 1, imglumenProfile.Rows / 2 + 5), new Scalar(0xe4, 0xe4, 0xe4));
+                        Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - sbThickness), new Point(position + 1, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0xe4, 0xe4, 0xe4));
                 }
                 else
                 {
-                    Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - 5), new Point(position, imglumenProfile.Rows / 2 + 5), new Scalar(0x7d, 0x7d, 0x7d));
+                    Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - sbThickness), new Point(position, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0x7d, 0x7d, 0x7d));
                     if (!isEdge)
-                        Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - 5), new Point(position + 1, imglumenProfile.Rows / 2 + 5), new Scalar(0x7d, 0x7d, 0x7d));
+                        Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - sbThickness), new Point(position + 1, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0x7d, 0x7d, 0x7d));
                 }
             }
             
