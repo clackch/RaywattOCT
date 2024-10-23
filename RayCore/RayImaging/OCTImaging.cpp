@@ -17,7 +17,7 @@ float ENERGY_THRESHOLD = 0.001f;
 const int SHEATH_OFFSET = 15;
 const int SHEATH_SEARCH_RANGE = 200;
 const int SEARCH_LENGTH = 100;
-static bool bCompensated = false;
+static bool bCompensated = true;
 static bool bVignetted = true;
 static int myint = 0;
 

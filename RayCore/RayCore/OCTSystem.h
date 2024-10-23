@@ -88,7 +88,7 @@ private:
 	double m_fColormap;
 	cv::Scalar m_backgroundColor;	// for longitude image
 	double m_fImageThreshold = 99.99;
-	bool m_bImageCompensation;
+	bool m_bImageCompensation = true;
 	bool m_bImageCompensationControlWindow;
 	bool m_bImageLumenVignetting;
 	double m_fImageRoi = 2.f;
