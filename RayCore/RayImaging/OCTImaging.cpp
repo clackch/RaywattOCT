@@ -489,7 +489,7 @@ void COCTImaging::generateImage(Ipp32f* logaritihmData, bool bInvert){
 }
 
 void COCTImaging::applyZOffset() {
-	cv::Mat img = imageResult.clone();
+	cv::Mat img = (bCompensated) ? imageCompensated.clone() : imageResult.clone();
 
 	cv::Mat translation_matrix = (cv::Mat_<double>(2, 3) << 1, 0, m_nZOffset * -1, 0, 1, 0);
 	cv::warpAffine(img, imageResult, translation_matrix, img.size());
