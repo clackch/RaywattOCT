@@ -599,9 +599,9 @@ void* COCTSystem::GetVolumeData(void* pLumenContours) {
 					cv::Mat imgOCT = cv::Mat(nDiameter, nDiameter, CV_8UC1, ((char*)pVolumeData) + nOffset);
 
 					cv::Point center(nDiameter/2, nDiameter/2);
-					cv::Size axes(45, 45);
+					cv::Size axes(30, 30);
 					cv::Scalar color(0, 0, 0);
-					cv::ellipse(imgOCT, center, axes, 0, 0, 360, color, -1/*»ö»ó Ã¤¿ì±â = -1*/);
+					cv::ellipse(imgOCT, center, axes, 0, 0, 360, color, -1);
 				}
 			}
 			return pVolumeData;
