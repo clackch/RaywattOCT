@@ -11,9 +11,9 @@
 #include <cmath>
 #include <numeric>
 
-float EXPONENTIAL_FACTOR = 1.8f;
-float EXPONENTIAL_CONTROL = 0.8f;
-float ENERGY_THRESHOLD = 0.001f;
+float EXPONENTIAL_FACTOR = 2.2f;
+float EXPONENTIAL_CONTROL = 0.7f;
+float ENERGY_THRESHOLD = 0.1f;
 const int SHEATH_OFFSET = 15;
 const int SHEATH_SEARCH_RANGE = 200;
 const int SEARCH_LENGTH = 100;
@@ -188,9 +188,9 @@ void COCTImaging::SetImageCompensationControlWindow(bool ImageCompensationContro
 			cv::namedWindow(strWindowName, cv::WINDOW_AUTOSIZE);
 
 			// 슬라이더 값 범위는 정수로만 가능하므로, 원하는 범위로 매핑
-			int exponential_factor_slider = 18;
-			int exponential_control_slider = 8;
-			int energy_threshold_slider = 10;
+			int exponential_factor_slider = 22;
+			int exponential_control_slider = 7;
+			int energy_threshold_slider = 100;
 
 			cv::createTrackbar("Cont", strWindowName, &exponential_factor_slider, 100, on_trackbar);
 			cv::createTrackbar("Bright", strWindowName, &exponential_control_slider, 100, on_trackbar);
