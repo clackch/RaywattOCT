@@ -202,6 +202,9 @@ namespace RaywattApp.Models
         private FfrFeature _ffrFeature;
 
         [ObservableProperty]
+        private string _strCoRegistration;
+
+        [ObservableProperty]
         private List<List<UIElement>> _measureUIElements;
 
         [ObservableProperty]

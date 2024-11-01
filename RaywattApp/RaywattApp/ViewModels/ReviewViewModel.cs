@@ -452,7 +452,7 @@ namespace RaywattApp.ViewModels
             if (PatientCase.AngioFrame == null) PatientCase.AngioFrame = new AngioFrame();
             if (PatientCase.AngioFrame.CoRegistration == null) PatientCase.AngioFrame.CoRegistration = new List<CoRegistration>();
 
-            if (PatientCase.AngioFrame.CoRegistration.Count == 0)
+            if (PatientCase.AngioFrame.CoRegistration.Count == 0 && PatientCase.AngioCoRegistration)
             {
                 ReadTrackPoints();
             }
@@ -1851,17 +1851,17 @@ namespace RaywattApp.ViewModels
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
 
-            IList<StringModel> coRegistrationTrackPoint = _sqlManager.SelectCoRegistrationTrackPoint(sqlParameters);
-            if (coRegistrationTrackPoint == null || coRegistrationTrackPoint.Count == 0 || coRegistrationTrackPoint[0].ReturnString == null) return;
+            IList<PatientCaseAnnotation> annotations = _sqlManager.SelectCoRegistration(sqlParameters);
 
-            List<CoRegistration> coRegistrations = JsonConvert.DeserializeObject<List<CoRegistration>>(coRegistrationTrackPoint[0].ReturnString);
-
-            foreach (CoRegistration coReg in coRegistrations)
+            if(annotations != null && annotations.Count == 1 )
             {
-                PatientCase.AngioFrame.CoRegistration.Add(coReg);
+                if (!string.IsNullOrEmpty(annotations[0].CoRegistration))
+                    PatientCase.StrCoRegistration = annotations[0].CoRegistration;
             }
 
-            AngioTrackPoints = PatientCase.AngioFrame.CoRegistration;
+            List<CoRegistration> coRegistrations = CommonUtil.JsonToCoregistrations(PatientCase.StrCoRegistration);
+
+            AngioTrackPoints = PatientCase.AngioFrame.CoRegistration = coRegistrations;
         }
 
 
