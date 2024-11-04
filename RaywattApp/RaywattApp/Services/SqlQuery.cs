@@ -409,7 +409,7 @@ namespace RaywattApp.Services
             //UpsertPatientCaseAnnotation
             _query["UpsertPatientCaseAnnotation"] = @$"
                 INSERT INTO rv_schema.patient_case_annotation(id, bookmark, longitude, cross_section, lumen_contour, lumen_sidebranch, lumen_stent, lumen_guidewire, ffr_plaque, co_registration, create_date, update_date)
-                VALUES (@id, @bookmark, @longitude, @cross_section, @lumen_contour, @lumen_sidebranch, @lumen_stent, @lumen_guidewire, @ffr_plaque, now(), now())
+                VALUES (@id, @bookmark, @longitude, @cross_section, @lumen_contour, @lumen_sidebranch, @lumen_stent, @lumen_guidewire, @ffr_plaque, @co_registration, now(), now())
                 ON CONFLICT (id)
                 DO UPDATE
                 SET bookmark=@bookmark, longitude=@longitude, cross_section=@cross_section
