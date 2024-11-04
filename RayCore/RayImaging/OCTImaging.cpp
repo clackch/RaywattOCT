@@ -11,8 +11,8 @@
 #include <cmath>
 #include <numeric>
 
-float EXPONENTIAL_FACTOR = 2.2f;
-float EXPONENTIAL_CONTROL = 0.7f;
+float EXPONENTIAL_FACTOR = 2.4f;
+float EXPONENTIAL_CONTROL = 0.8f;
 float ENERGY_THRESHOLD = 0.1f;
 const int SHEATH_OFFSET = 15;
 const int SHEATH_SEARCH_RANGE = 200;
@@ -540,6 +540,8 @@ void COCTImaging::adaptive_compensation()
 	// Rotate the image
 	cv::Mat rotated_img;
 	cv::rotate(imageResult, rotated_img, cv::ROTATE_90_COUNTERCLOCKWISE);
+
+	PLOGI.printf("cont = %.2f, Birght = %.2f, Eng = %.2f", EXPONENTIAL_FACTOR, EXPONENTIAL_CONTROL, ENERGY_THRESHOLD);
 	
 	if(!bVignetted)
 		lumen_detection_processing(rotated_img);
@@ -1134,11 +1136,12 @@ std::vector<int> COCTImaging::find_outliers(const std::vector<int>& y_values) {
 }
 
 void COCTImaging::on_trackbar(int, void*) {
+	const char* strWindowName = "Compensation";
 	try {
 		// 트랙바 값은 int로만 입력 가능하므로, 이를 원하는 범위로 변환
-		EXPONENTIAL_FACTOR = cv::getTrackbarPos("Cont", "Window") / 10.0f;
-		EXPONENTIAL_CONTROL = cv::getTrackbarPos("Bright", "Window") / 10.0f;
-		ENERGY_THRESHOLD = cv::getTrackbarPos("Eng", "Window") / 10000.0f;
+		EXPONENTIAL_FACTOR = cv::getTrackbarPos("Cont", strWindowName) / 10.0f;
+		EXPONENTIAL_CONTROL = cv::getTrackbarPos("Bright", strWindowName) / 10.0f;
+		ENERGY_THRESHOLD = cv::getTrackbarPos("Eng", strWindowName) / 10000.0f;
 
 	}
 	catch (const cv::Exception& e) {
