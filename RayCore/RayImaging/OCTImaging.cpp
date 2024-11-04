@@ -11,9 +11,9 @@
 #include <cmath>
 #include <numeric>
 
-float EXPONENTIAL_FACTOR = 2.4f;
-float EXPONENTIAL_CONTROL = 0.8f;
-float ENERGY_THRESHOLD = 0.1f;
+float EXPONENTIAL_FACTOR = 2.0f;
+float EXPONENTIAL_CONTROL = 1.0f;
+float ENERGY_THRESHOLD = 5.0f;
 const int SHEATH_OFFSET = 15;
 const int SHEATH_SEARCH_RANGE = 200;
 const int SEARCH_LENGTH = 100;
@@ -188,9 +188,9 @@ void COCTImaging::SetImageCompensationControlWindow(bool ImageCompensationContro
 			cv::namedWindow(strWindowName, cv::WINDOW_AUTOSIZE);
 
 			// 슬라이더 값 범위는 정수로만 가능하므로, 원하는 범위로 매핑
-			int exponential_factor_slider = 22;
-			int exponential_control_slider = 7;
-			int energy_threshold_slider = 100;
+			int exponential_factor_slider = 20;
+			int exponential_control_slider = 10;
+			int energy_threshold_slider = 5;
 
 			cv::createTrackbar("Cont", strWindowName, &exponential_factor_slider, 100, on_trackbar);
 			cv::createTrackbar("Bright", strWindowName, &exponential_control_slider, 100, on_trackbar);
@@ -540,30 +540,25 @@ void COCTImaging::adaptive_compensation()
 	// Rotate the image
 	cv::Mat rotated_img;
 	cv::rotate(imageResult, rotated_img, cv::ROTATE_90_COUNTERCLOCKWISE);
-
-	PLOGI.printf("cont = %.2f, Birght = %.2f, Eng = %.2f", EXPONENTIAL_FACTOR, EXPONENTIAL_CONTROL, ENERGY_THRESHOLD);
+	rotated_img.convertTo(rotated_img, CV_32F);
 	
 	if(!bVignetted)
 		lumen_detection_processing(rotated_img);
 
 	rotated_img(cv::Range(rotated_img.rows - 60, rotated_img.rows), cv::Range::all()).setTo(cv::Scalar(0));
 
-	// Normalize the image
-	cv::Mat normalized_img;
-	rotated_img.convertTo(normalized_img, CV_32F);
-	double min_val, max_val;
-	min_max_normalization(normalized_img, normalized_img, min_val, max_val);
+	int rows = rotated_img.rows;
+	int cols = rotated_img.cols;
 
-	int rows = normalized_img.rows;
-	int cols = normalized_img.cols;
+	cv::Mat energy_all = cv::Mat::zeros(rotated_img.size(), CV_32F);
+	cv::Mat result_img = cv::Mat::zeros(rotated_img.size(), CV_32F);
 
-	cv::Mat energy_all = cv::Mat::zeros(normalized_img.size(), CV_32F);
-	cv::Mat result_img = cv::Mat::zeros(normalized_img.size(), CV_32F);
+	std::vector<int> stop_rows(cols, 0);
 
 	// Compute energy using cumulative sum (with OpenMP)
 #pragma omp parallel for
 	for (int x = 0; x < cols; ++x) {
-		cv::Mat I_n = normalized_img.col(x).clone(); // clone() 사용으로 독립적인 메모리
+		cv::Mat I_n = rotated_img.col(x).clone(); // clone() 사용으로 독립적인 메모리
 
 		// 자연 로그 계산 후 지수 연산 적용
 		cv::Mat log_img, exp_img;
@@ -582,61 +577,29 @@ void COCTImaging::adaptive_compensation()
 		for (int z = 0; z < rows; ++z) {
 			float sum_val = cumulativeSum[z];
 			energy_all.at<float>(z, x) = sum_val * sum_val;
-		}
-	}
 
-	// 전체 Row의 평균 에너지 계산
-	cv::Mat mean_energy;
-	cv::reduce(energy_all, mean_energy, 1, cv::REDUCE_AVG);
-
-	// Adaptive threshold 설정
-	double minVal, maxVal;
-	cv::minMaxLoc(mean_energy, &minVal, &maxVal);
-	double adaptive_threshold = ENERGY_THRESHOLD * maxVal;
-
-	// threshold_row 계산: adaptive_threshold 이하인 첫 번째 행 찾기
-	int threshold_row = 0;
-	for (int z = 0; z < mean_energy.rows; ++z) {
-		if (mean_energy.at<float>(z) <= adaptive_threshold) {
-			threshold_row = z;
-			break;
-		}
-	}
-
-	// 각 열에 대해 계산 (OpenMP 사용)
-#pragma omp parallel for
-	for (int x = 0; x < cols; ++x) {
-		cv::Mat I_n = normalized_img.col(x);
-
-		// 자연 로그 계산 후 지수 연산 적용
-		cv::Mat log_img, exp_img;
-		cv::log(I_n + 1e-6, log_img);  // 로그 계산에서 0을 피하기 위해 1e-6을 추가
-		cv::exp(EXPONENTIAL_FACTOR * log_img, exp_img);  // EXPONENTIAL_FACTOR 적용 후 exp 사용
-		I_n = exp_img.clone();  // 결과 저장
-
-		// 누적 합 계산
-		std::vector<float> cumulativeSum(rows, 0.0f);
-		cumulativeSum[rows - 1] = I_n.at<float>(rows - 1);
-		for (int i = rows - 2; i >= 0; --i) {
-			cumulativeSum[i] = cumulativeSum[i + 1] + I_n.at<float>(i);
+			if (sum_val < energy_all.at<float>(0, x) / std::pow(10.0, ENERGY_THRESHOLD)) {
+				stop_rows[x] = z;
+				PLOGI.printf("current col : %d, stop Row = %d", x, z);
+				break;
+			}
 		}
 
-		double stop_threshold = 0;
+		double stop_cumsum = 0;
 
 		// 결과 계산
 		for (int z = 0; z < rows; ++z) {
 			float sum_val = cumulativeSum[z];
-
 			// threshold_row를 기준으로 보정 적용
-			if (z + 100 <= threshold_row) {
-				float sum_val_pow = std::exp(EXPONENTIAL_CONTROL * std::log(sum_val));
+			if (z <= stop_rows[x]) {
+				float sum_val_pow = std::exp(EXPONENTIAL_CONTROL * std::log(sum_val)) * 2;
 				if (sum_val != 0) {
-					result_img.at<float>(z, x) = I_n.at<float>(z) / (2 * sum_val_pow);
-					stop_threshold = (2 * sum_val_pow);
+					result_img.at<float>(z, x) = I_n.at<float>(z) / sum_val_pow;
+					stop_cumsum = sum_val_pow;
 				}
 			}
 			else {
-				result_img.at<float>(z, x) = I_n.at<float>(z) / stop_threshold;
+				result_img.at<float>(z, x) = I_n.at<float>(z) / stop_cumsum;
 			}
 		}
 	}
@@ -648,8 +611,6 @@ void COCTImaging::adaptive_compensation()
 	// Apply CLAHE (객체 재사용)
 	cv::Mat result_img_clahe;
 	clahe->apply(result_img, result_img_clahe);
-
-	result_img_clahe(cv::Range(result_img_clahe.rows-70, result_img_clahe.rows), cv::Range::all()).setTo(cv::Scalar(0));
 
 	// Rotate back to original angle
 	cv::rotate(result_img_clahe, imageResult, cv::ROTATE_90_CLOCKWISE);
@@ -1141,7 +1102,7 @@ void COCTImaging::on_trackbar(int, void*) {
 		// 트랙바 값은 int로만 입력 가능하므로, 이를 원하는 범위로 변환
 		EXPONENTIAL_FACTOR = cv::getTrackbarPos("Cont", strWindowName) / 10.0f;
 		EXPONENTIAL_CONTROL = cv::getTrackbarPos("Bright", strWindowName) / 10.0f;
-		ENERGY_THRESHOLD = cv::getTrackbarPos("Eng", strWindowName) / 10000.0f;
+		ENERGY_THRESHOLD = cv::getTrackbarPos("Eng", strWindowName);
 
 	}
 	catch (const cv::Exception& e) {

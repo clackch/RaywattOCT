@@ -2,6 +2,7 @@
 using System;
 using log4net;
 using RaywattApp.Models;
+using RaywattApp.Common.Angio;
 
 namespace RaywattApp.Services
 {
@@ -472,13 +473,13 @@ namespace RaywattApp.Services
             return _databaseService.InsertData(commandText, sqlParameters);
         }        
 
-        public IList<StringModel> SelectCoRegistrationTrackPoint(Dictionary<string, Object> sqlParameters)
+        public IList<PatientCaseAnnotation> SelectCoRegistration(Dictionary<string, Object> sqlParameters)
         {
-            _log.Debug("SelectCoRegistrationTrackPoint");
+            _log.Debug("SelectCoRegistration");
 
-            string commandText = SqlQuery.GetQuery("SelectCoRegistrationTrackPoint");
+            string commandText = SqlQuery.GetQuery("SelectCoRegistration");
 
-            return _databaseService.GetDatas<StringModel>(commandText, sqlParameters);
+            return _databaseService.GetDatas<PatientCaseAnnotation>(commandText, sqlParameters);
         }
 
         public int UpdatePatientCaseAngioCoRegistration(Dictionary<string, Object> sqlParameters)
