@@ -163,6 +163,44 @@ namespace RaywattApp.Services
                 FROM rv_schema.patient_case T1 LEFT JOIN rv_schema.patient_case_annotation T2 ON T1.id = T2.id
                 ";
 
+            //SelectPrePatientCase
+            _query["SelectPrePatientCase"] = @$"
+                SELECT A.* 
+                FROM (
+                    SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name, physician_name
+                    , accession_number, comment
+                    , vessel, location, procedure
+                    , num_of_frames, image, image_resolution, manual_calibration, field_of_view
+                    , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
+                    , flush_media, pullback_trigger, colormap
+                    , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
+                    , brightness, contrast, sheath_diameter, section_proximal, section_distal
+                    , create_date, update_date
+                    FROM rv_schema.patient_case
+                    WHERE patient_id = @id
+                    AND procedure='$001'
+                    AND create_date < @create_date
+                    ORDER BY create_date DESC) A
+                UNION ALL
+                SELECT B.* 
+                FROM (
+                    SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name, physician_name
+                    , accession_number, comment
+                    , vessel, location, procedure
+                    , num_of_frames, image, image_resolution, manual_calibration, field_of_view
+                    , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
+                    , flush_media, pullback_trigger, colormap
+                    , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
+                    , brightness, contrast, sheath_diameter, section_proximal, section_distal
+                    , create_date, update_date
+                    FROM rv_schema.patient_case
+                    WHERE patient_id = @id
+                    AND procedure='$001'
+                    AND create_date > @create_date
+                    ORDER BY create_date ASC) B
+                LIMIT 1
+                ";
+
             //SelectPhysician
             _query["SelectPhysician"] = @$"
                 SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name

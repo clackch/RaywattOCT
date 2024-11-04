@@ -55,6 +55,9 @@ _declspec(dllexport) RayError RayStartCompare(char* strFilePath) {
 _declspec(dllexport) RayError RayEndReview() {
     return octSystem.EndReview();
 }
+_declspec(dllexport) RayError RayEndCompare() {
+    return octSystem.EndCompare();
+}
 _declspec(dllexport) RayError RayStartLiveView() {
     return octSystem.StartLiveView();
 }

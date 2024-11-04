@@ -117,6 +117,7 @@ public:
 	int StartReview(char* strFilePath);
 	RayError StartCompare(char* strFilePath);
 	RayError EndReview();
+	RayError EndCompare();
 	RayError StartLiveView();
 	RayError StopLiveView();
 	RayError LaserOnOff(bool isOn);

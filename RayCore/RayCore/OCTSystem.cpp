@@ -458,6 +458,15 @@ RayError COCTSystem::EndReview()
 	return RayError::WrongState;
 }
 
+RayError COCTSystem::EndCompare()
+{
+	if (m_reviewSession[SESSION_COMPARE] != nullptr) {
+		m_reviewSession[SESSION_COMPARE]->Stop();
+	}
+
+	return RayError::OK;
+}
+
 /*
 * StartLiveView
 */

@@ -294,6 +294,15 @@ namespace RaywattApp.Services
             return _databaseService.GetDatas<PatientCase>(commandText, sqlParameters);
         }
 
+        public IList<PatientCase> SelectPrePatientCase(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("SelectPrePatientCase");
+
+            string commandText = SqlQuery.GetQuery("SelectPrePatientCase");
+
+            return _databaseService.GetDatas<PatientCase>(commandText, sqlParameters);
+        }
+
         public int DeletePatientCase(Dictionary<string, Object> sqlParameters)
         {
             _log.Debug("DeletePatientCase");

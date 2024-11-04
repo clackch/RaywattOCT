@@ -154,8 +154,6 @@ namespace RaywattApp.ViewModels
             ExpandLeftDownMenu = false;
 
             IsIndicatorLockOn = false;
-
-            DeviceStatus.IsOCTImagingCompareDone = false;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -184,6 +182,7 @@ namespace RaywattApp.ViewModels
                     {
                         RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath);
                         ZoomCompare.SetFieldOfView(Constants.OCTImageSize * ReviewStatus.SelectedPatientCase.ImageResolution / PatientCase.FieldOfView);
+                        DeviceStatus.IsOCTImagingCompareDone = false;
                         Thread.Sleep(500);
                     }
                     else
@@ -195,7 +194,6 @@ namespace RaywattApp.ViewModels
                 {
                     GetPatientCase(false, ReviewStatus.SelectedPatientCase.LumenContours, ReviewStatus.SelectedPatientCase.LumenSidebranches, ReviewStatus.SelectedPatientCase.LumenStents, ReviewStatus.SelectedPatientCase.LumenGuidewires);
                     ZoomCompare.SetFieldOfView(Constants.OCTImageSize * ReviewStatus.SelectedPatientCase.ImageResolution / PatientCase.FieldOfView);
-                    DeviceStatus.IsOCTImagingCompareDone = true;
                 }
 
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
@@ -307,10 +305,10 @@ namespace RaywattApp.ViewModels
             ExpandLeftUpMenu = false;
 
             if (ReviewStatus.SelectedPatientCase != null) {
-
                 LumenContourCommand = Constants.LumenContourClear;
                 HideLumenProfileCompare();
 
+                RayEndCompare();
                 DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current = 0;
                 RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath);
                 ZoomCompare.SetFieldOfView(Constants.OCTImageSize * ReviewStatus.SelectedPatientCase.ImageResolution / PatientCase.FieldOfView);
@@ -347,7 +345,20 @@ namespace RaywattApp.ViewModels
             {
                 if(isNullPatientCase)
                 {
-                    ReviewStatus.SelectedPatientCase = PatientCases[0];
+                    sqlParameters.Clear();
+                    sqlParameters["id"] = Patient.Id;
+                    sqlParameters["create_date"] = PatientCase.CreateDate;
+
+                    IList<PatientCase> prePatientCase = _sqlManager.SelectPrePatientCase(sqlParameters);
+
+                    foreach(PatientCase patientCase in PatientCases)
+                    {
+                        if(patientCase.Id == prePatientCase[0].Id)
+                        {
+                            ReviewStatus.SelectedPatientCase = patientCase;
+                            break;
+                        }
+                    }                    
                 }
                 else
                 {
