@@ -5,7 +5,6 @@
 #include "MessageService.h"
 #include "opencv2/opencv.hpp"
 #include <omp.h>
-#include <algorithm>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
