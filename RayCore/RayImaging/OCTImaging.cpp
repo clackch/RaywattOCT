@@ -5,6 +5,7 @@
 #include "MessageService.h"
 #include "opencv2/opencv.hpp"
 #include <omp.h>
+#include <algorithm>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -19,7 +20,10 @@ const int SHEATH_SEARCH_RANGE = 200;
 const int SEARCH_LENGTH = 100;
 static bool bCompensated = true;
 static bool bVignetted = true;
-static int myint = 0;
+double last_entropy = 0;
+double alpha = 0.4;
+double entropy_threshold = 0.05;
+std::vector<double> cdf_i(256, 1.0);
 
 void ippsRelease(void *&ptr) {
 	if (ptr) {
@@ -191,10 +195,12 @@ void COCTImaging::SetImageCompensationControlWindow(bool ImageCompensationContro
 			int exponential_factor_slider = 20;
 			int exponential_control_slider = 10;
 			int energy_threshold_slider = 5;
+			int alpha_slider = 4;
 
 			cv::createTrackbar("Cont", strWindowName, &exponential_factor_slider, 100, on_trackbar);
 			cv::createTrackbar("Bright", strWindowName, &exponential_control_slider, 100, on_trackbar);
 			cv::createTrackbar("Eng", strWindowName, &energy_threshold_slider, 100, on_trackbar);
+			cv::createTrackbar("Alpha", strWindowName, &alpha_slider, 100, on_trackbar);
 
 			// 초기 콜백 호출
 			on_trackbar(0, 0);
@@ -535,8 +541,6 @@ void COCTImaging::adaptive_compensation()
 	if (!bCompensated)
 		return;
 
-	// PLOGI.printf("[Start] adaptive_compensation");
-
 	// Rotate the image
 	cv::Mat rotated_img;
 	cv::rotate(imageResult, rotated_img, cv::ROTATE_90_COUNTERCLOCKWISE);
@@ -608,12 +612,10 @@ void COCTImaging::adaptive_compensation()
 	logarithmic_contrast_stretching(result_img);
 	result_img.convertTo(result_img, CV_8U, 255);
 
-	// Apply CLAHE (객체 재사용)
-	cv::Mat result_img_clahe;
-	clahe->apply(result_img, result_img_clahe);
+	adaptive_gamma_correction(result_img);
 
 	// Rotate back to original angle
-	cv::rotate(result_img_clahe, imageResult, cv::ROTATE_90_CLOCKWISE);
+	cv::rotate(result_img, imageResult, cv::ROTATE_90_CLOCKWISE);
 
 	// PLOGI.printf("[End] adaptive_compensation");
 }
@@ -1096,6 +1098,92 @@ std::vector<int> COCTImaging::find_outliers(const std::vector<int>& y_values) {
 	return outlier_indices;
 }
 
+void COCTImaging::adaptive_gamma_correction(cv::Mat& img) {
+	bool AGCWD_apply = false;
+	std::vector<double> pdf_i;
+
+	get_PDF_array(img, pdf_i, AGCWD_apply);
+
+	if (AGCWD_apply) {
+		get_CDF_array(pdf_i, cdf_i);
+	}
+
+	double max_intensity = 255.0;
+	double calculated_max_intensity = *std::max_element(img.begin<uchar>(), img.end<uchar>());
+	if (calculated_max_intensity > 0) {
+		max_intensity = calculated_max_intensity;
+	}
+
+	cv::Mat output_image = img.clone();
+	for (int y = 0; y < img.rows; y++) {
+		for (int x = 0; x < img.cols; x++) {
+			int intensity = img.at<uchar>(y, x);
+			double intensity_ratio = intensity / max_intensity;
+			double new_intensity = max_intensity * std::pow(intensity_ratio, 1 - cdf_i[intensity]);
+
+			new_intensity = new_intensity > 255 ? 255 : (new_intensity < 0 ? 0 : new_intensity);
+			output_image.at<uchar>(y, x) = static_cast<uchar>(new_intensity);
+		}
+	}
+	img = output_image;
+}
+
+void COCTImaging::get_PDF_array(cv::Mat& img, std::vector<double>& pdf_i, bool& AGCWD_apply) {
+	int number_of_pixels = img.rows * img.cols;
+	pdf_i.assign(256, 0);
+
+	// Histogram 계산
+	for (int y = 0; y < img.rows; y++) {
+		for (int x = 0; x < img.cols; x++) {
+			int intensity = img.at<uchar>(y, x);
+			pdf_i[intensity]++;
+		}
+	}
+
+	// PDF를 위한 Histogram 정규화
+	for (int i = 0; i < 256; i++) {
+		pdf_i[i] /= number_of_pixels;
+	}
+
+	// Entropy를 활용하여 CDF 계산 필요 여부 확인
+	double current_entropy = 0.0;
+	for (double p : pdf_i) {
+		if (p > 0) {
+			current_entropy -= p * std::log(p);
+		}
+	}
+
+	AGCWD_apply = false;
+	double entropy_difference = std::abs(current_entropy - last_entropy);
+	if (last_entropy == 0 || entropy_difference > entropy_threshold) {
+		last_entropy = current_entropy;
+		AGCWD_apply = true;
+	}
+}
+
+void COCTImaging::get_CDF_array(std::vector<double> pdf_i, std::vector<double>& cdf_i) {
+	cdf_i.resize(256);
+
+	double pdf_min_val = *std::min_element(pdf_i.begin(), pdf_i.end(), [](double a, double b) { return (a > 0 && (b == 0 || a < b)); });
+	double pdf_max_val = *std::max_element(pdf_i.begin(), pdf_i.end());
+
+	// AGCWD에 알맞게 PDF를 PDFw로 계산
+	std::vector<double> pdfw_i(256, pdf_min_val);
+	for (int i = 0; i < 256; i++) {
+		if (pdf_i[i] > 0) {
+			pdfw_i[i] = pdf_min_val * std::pow((pdf_i[i] - pdf_min_val) / (pdf_max_val - pdf_min_val), alpha);
+		}
+	}
+
+	// cumulative distribution function (CDF) 계산
+	double pdf_sum = std::accumulate(pdfw_i.begin(), pdfw_i.end(), 0.0);
+	double cumulative = 0.0;
+	for (int i = 0; i < 256; i++) {
+		cumulative += pdfw_i[i] / pdf_sum;
+		cdf_i[i] = cumulative;
+	}
+}
+
 void COCTImaging::on_trackbar(int, void*) {
 	const char* strWindowName = "Compensation";
 	try {
@@ -1103,6 +1191,7 @@ void COCTImaging::on_trackbar(int, void*) {
 		EXPONENTIAL_FACTOR = cv::getTrackbarPos("Cont", strWindowName) / 10.0f;
 		EXPONENTIAL_CONTROL = cv::getTrackbarPos("Bright", strWindowName) / 10.0f;
 		ENERGY_THRESHOLD = cv::getTrackbarPos("Eng", strWindowName);
+		alpha = cv::getTrackbarPos("Alpha", strWindowName) / 10.f;
 
 	}
 	catch (const cv::Exception& e) {

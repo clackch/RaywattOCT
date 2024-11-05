@@ -1859,7 +1859,7 @@ namespace RaywattApp.ViewModels
                     PatientCase.StrCoRegistration = annotations[0].CoRegistration;
             }
 
-            List<CoRegistration> coRegistrations = CommonUtil.JsonToCoregistrations(PatientCase.StrCoRegistration);
+            List<CoRegistration> coRegistrations = CommonUtil.JsonToCoRegistrations(PatientCase.StrCoRegistration);
 
             AngioTrackPoints = PatientCase.AngioFrame.CoRegistration = coRegistrations;
         }
