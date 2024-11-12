@@ -713,6 +713,7 @@ namespace RaywattApp.ViewModels
                 PatientCase.StrLumenSidebranch = JsonConvert.SerializeObject(LumenSidebranches, Newtonsoft.Json.Formatting.Indented);
                 PatientCase.StrLumenStent = JsonConvert.SerializeObject(LumenStents, Newtonsoft.Json.Formatting.Indented);
                 PatientCase.StrLumenGuidewire = JsonConvert.SerializeObject(LumenGuidewires, Newtonsoft.Json.Formatting.Indented);
+                PatientCase.StrCoRegistration = "";
 
                 DeviceStatus.IsLumenSaved = true;
                 SetLumenProfileInit();
@@ -1256,6 +1257,7 @@ namespace RaywattApp.ViewModels
                     sqlParameters["lumen_stent"] = PatientCase.StrLumenStent;
                     sqlParameters["lumen_guidewire"] = PatientCase.StrLumenGuidewire;
                     sqlParameters["ffr_plaque"] = "";
+                    sqlParameters["co_registration"] = PatientCase.StrCoRegistration;
                     nRows = _sqlManager.UpsertPatientCaseAnnotation(sqlParameters);
                 }
                 else
