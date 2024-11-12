@@ -5,6 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
       xmlns:behaviors="clr-namespace:RaywattApp.Common.Behaviors"
+      xmlns:trigger="clr-namespace:RaywattApp.Common.TriggerAction"
       xmlns:local="clr-namespace:RaywattApp.Views"
       xmlns:const="clr-namespace:RaywattApp.Common.Bases"
       xmlns:System="clr-namespace:System;assembly=mscorlib"
@@ -214,6 +215,17 @@
                             </StackPanel>
                             <Grid Grid.Row="0" Grid.Column="1">
                                 <Grid>
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="MouseDown">
+                                            <i:InvokeCommandAction Command="{Binding CmdTouchMoveIndicator}" PassEventArgsToCommand="True" IsEnabled="{Binding IndicatorLongitude.IsEnabled}"/>
+                                        </i:EventTrigger>
+                                        <i:EventTrigger EventName="MouseDown">
+                                            <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}" IsEnabled="{Binding IndicatorLongitude.IsEnabled}"/>
+                                        </i:EventTrigger>
+                                        <i:EventTrigger EventName="MouseUp">
+                                            <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}" IsEnabled="{Binding IndicatorLongitude.IsEnabled}"/>
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
                                     <Grid.Clip>
                                         <RectangleGeometry RadiusX="8" RadiusY="8">
                                             <RectangleGeometry.Rect>
@@ -244,16 +256,16 @@
                                     <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitude3d" IsCaptured="{Binding IndicatorLongitude.IsCaptured}" IsEnabled="{Binding IndicatorLongitude.IsEnabled}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="{x:Static const:Constants.LongitudeIndicator3dHeight}" Stretch="None" Canvas.Left="{Binding IndicatorLongitude.X}" Margin="0,-11,0,0" Visibility="{Binding IndicatorLongitude.IsVisible}">
                                         <!-- Trigger -->
                                         <i:Interaction.Triggers>
-                                            <!--PreviewMouseDown : Image 영역에서 MouseDown 할 경우, Indicator 동작 가능 상태로 변경 -->
-                                            <i:EventTrigger EventName="PreviewMouseDown" >
-                                                <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
+                                            <!--MouseDown : Image 영역에서 MouseDown 할 경우, Indicator 동작 가능 상태로 변경 -->
+                                            <i:EventTrigger EventName="MouseDown" >
+                                                <trigger:CustomInvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
                                             </i:EventTrigger>
-                                            <!--PreviewMouseUp : Image 영역에서 MouseUp 할 경우, Indicator 멈춤 -->
-                                            <i:EventTrigger EventName="PreviewMouseUp" >
+                                            <!--MouseUp : Image 영역에서 MouseUp 할 경우, Indicator 멈춤 -->
+                                            <i:EventTrigger EventName="MouseUp" >
                                                 <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
                                             </i:EventTrigger>
-                                            <!--PreviewMouseMove : Image 영역에서 MouseMove 할 경우, Indicator 동작(단, Indicator가 동작 가능 상태 일때) -->
-                                            <i:EventTrigger EventName="PreviewMouseMove" >
+                                            <!--MouseMove : Image 영역에서 MouseMove 할 경우, Indicator 동작(단, Indicator가 동작 가능 상태 일때) -->
+                                            <i:EventTrigger EventName="MouseMove" >
                                                 <i:InvokeCommandAction Command="{Binding CmdMoveIndicator}" CommandParameter="{Binding IndicatorLongitude}"/>
                                             </i:EventTrigger>
                                         </i:Interaction.Triggers>
@@ -308,6 +320,18 @@
                             <Grid.RenderTransform>
                                 <RotateTransform CenterX="107" CenterY="107" Angle="{Binding CameraDegree}"/>
                             </Grid.RenderTransform>
+
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="PreviewMouseDown" >
+                                    <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="PreviewMouseUp" >
+                                    <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="PreviewMouseMove" >
+                                    <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
                         </Grid>
 
                         <!-- camera View Part -->
@@ -316,6 +340,18 @@
                             <Grid.RenderTransform>
                                 <RotateTransform CenterX="91" CenterY="91" Angle="{Binding CameraDegree}"/>
                             </Grid.RenderTransform>
+
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="PreviewMouseDown" >
+                                    <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="PreviewMouseUp" >
+                                    <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="PreviewMouseMove" >
+                                    <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
                         </Grid>
 
                         <!-- Indicator  -->

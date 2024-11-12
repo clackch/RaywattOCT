@@ -318,7 +318,13 @@ namespace RaywattApp.ViewModels
         {
             get { return this._cmdMoveIndicator ?? (this._cmdMoveIndicator = new RelayCommand<object>(MoveIndicator)); }
         }
-        
+
+        private ICommand _cmdTouchMoveIndicator;
+        public ICommand CmdTouchMoveIndicator
+        {
+            get { return this._cmdTouchMoveIndicator ?? (this._cmdTouchMoveIndicator = new RelayCommand<object>(TouchMoveIndicator)); }
+        }
+
         private ICommand _manipulationStartingCommand;
         public ICommand ManipulationStartingCommand
         {
@@ -390,7 +396,8 @@ namespace RaywattApp.ViewModels
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
                 
                 ReviewStatus.CurrentPage = Constants.ReviewPage;
-                
+
+                FieldOfView = PatientCase.FieldOfView;
                 ToggleAngio(ReviewStatus.IsAngioOn);
                 ToggleLongitude(ReviewStatus.IsLumenProfile);
 
@@ -405,8 +412,7 @@ namespace RaywattApp.ViewModels
 
                 Degree = PatientCase.IndicatorDegree;
                 Brightness = PatientCase.Brightness;
-                Contrast = PatientCase.Contrast;
-                FieldOfView = PatientCase.FieldOfView;
+                Contrast = PatientCase.Contrast;                
                 CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault);
                 CrossSectionAngioScale = (1 / Constants.ImageResolution) * (Constants.ZoomAngioCsScaleDefault);
 
@@ -1623,12 +1629,14 @@ namespace RaywattApp.ViewModels
                     if (indicator.IsSectionProximal && (indicatorX >= Section.Distal.X - sectionIndicatorCenter))
                     {
                         indicator.X = Section.Distal.X - sectionIndicatorCenter;
+                        setCurrentFrame(indicator.X + Constants.SectionIndicatorMoveCenterWidth);
                         return;
                     }
 
                     if (!indicator.IsSectionProximal && (indicatorX <= Section.Proximal.X + sectionIndicatorCenter))
                     {
                         indicator.X = Section.Proximal.X + sectionIndicatorCenter;
+                        setCurrentFrame(indicator.X + Constants.SectionIndicatorMoveCenterWidth);
                         return;
                     }
 
@@ -1645,6 +1653,8 @@ namespace RaywattApp.ViewModels
                         indicator.X = indicatorX;
                     }
 
+                    setCurrentFrame(indicator.X + Constants.SectionIndicatorMoveCenterWidth);
+
                     if (IsChangedLumenProfileValue())
                     {
                         imglumenProfile = null;
@@ -1656,6 +1666,7 @@ namespace RaywattApp.ViewModels
                 }
                 else
                 {
+                    indicatorX = indicatorX + indicator.IndicatorDiff - Constants.LongitudeIndicatorWidth / 2;
                     double indicatorCenterX = indicatorX + Constants.LongitudeIndicatorWidth / 2;
 
                     if (indicatorCenterX < 0)
@@ -1678,6 +1689,18 @@ namespace RaywattApp.ViewModels
                     }
                 }
             }
+        }
+
+        private void TouchMoveIndicator(object param)
+        {
+            StopPlayback();
+
+            MouseEventArgs e = (MouseEventArgs)param;
+            var position = e.GetPosition((IInputElement)e.Source);
+
+            IndicatorLongitude.X = position.X - Constants.LongitudeIndicatorWidth / 2;
+            IndicatorLongitude.CenterX = IndicatorLongitude.X + Constants.LongitudeIndicatorWidth / 2;
+            setCurrentFrame(IndicatorLongitude.CenterX);
         }
 
         private void updateNavigator(int curFrame, int totalFrame)
