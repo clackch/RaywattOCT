@@ -1339,10 +1339,7 @@
                             </Grid.RowDefinitions>
 
                             <!-- Longitude Image -->
-                            <Grid x:Name="longitude" Grid.Row="1">
-                                <i:Interaction.Behaviors>
-                                    <behaviors:IgnoreMouseDownBehavior IgnoreElement="{Binding ElementName=drawLmodeUtil}"/>
-                                </i:Interaction.Behaviors>
+                            <Grid x:Name="longitude" Grid.Row="1" MouseDown="longitude_MouseDown">
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="MouseDown">
                                         <i:InvokeCommandAction Command="{Binding CmdTouchMoveIndicator}" PassEventArgsToCommand="True" IsEnabled="{Binding IndicatorLongitude.IsEnabled}"/>
