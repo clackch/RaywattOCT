@@ -45,7 +45,8 @@ private:
 	void ReceivePacket(FrameGrabber& fg);
 	void SetDeviceInfoPacket(FrameGrabber& fg, char* buffer);
 	void ChpFilePacketProcess(FrameGrabber& fg);
-	byte CalcCheckSum(char* sendBuffer, int size);
+	void RefreshLiveStream(FrameGrabber& fg);
+	byte CalcCheckSum(char* sendBuffer, int size); 
 	CommandType CheckCommandType(const char* receivedBuffer);
 
 	// thread
@@ -80,6 +81,8 @@ private:
 	char tmpRecvBuffer[200];
 	int tmpRecvBufferLen = 0;
 	int imagePacketSize;
+	bool Chp_selected;
+	int retryCount;
 
 	// thread
 	bool receiveCmdThreadRunning = true;

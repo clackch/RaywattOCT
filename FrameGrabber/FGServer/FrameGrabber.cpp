@@ -172,23 +172,19 @@ void FrameGrabber::CreateFromFG() {
 void FrameGrabber::InitializeLiveStreamInfo() {
 	memset(&m_LiveStreamInfo, 0, sizeof(LIVESTREAM_INFO));
 	m_LiveStreamInfo.dwSize = sizeof(LIVESTREAM_INFO);
+	m_LiveStreamInfo.nDestinationWidth = m_RSet.lRegs[HPR_WIDTH];
+	m_LiveStreamInfo.nDestinationHeight = m_RSet.lRegs[HPR_HEIGHT];
 	m_LiveStreamInfo.dwNumberOfBuffers = STREAM_FRAMES;
-	m_LiveStreamInfo.nDataType = IDEA_TYPE_RGB_24; 
-	m_LiveStreamInfo.bDIBTarget = TRUE; 
+	m_LiveStreamInfo.nDataType = IDEA_TYPE_RGB_24;
+	m_LiveStreamInfo.bDIBTarget = TRUE; // 상하 반전
+	m_LiveStreamInfo.pBufferList = new void* [m_LiveStreamInfo.dwNumberOfBuffers];
 	for (DWORD i = 0; i < m_LiveStreamInfo.dwNumberOfBuffers; ++i)
 	{
-		m_LiveStreamInfo.pBufferList[i] = new char[m_LiveStreamInfo.nDestinationWidth * m_LiveStreamInfo.nDestinationHeight * (wBitsPerPixel / 8)];
+		m_LiveStreamInfo.pBufferList[i] = new char[m_LiveStreamInfo.nDestinationWidth * m_LiveStreamInfo.nDestinationHeight * 3];
 	}
-
-	m_LiveStreamInfo.nDestinationWidth = m_RSet.lRegs[HPR_WIDTH];   
-	m_LiveStreamInfo.nDestinationHeight = m_RSet.lRegs[HPR_HEIGHT]; 
-
 	m_LiveStreamInfo.nDecimateFrames = 0;
-
 	m_LiveStreamInfo.bFieldUpdate = FALSE;
-
 	m_LiveStreamInfo.hLUT = m_hVPLUT;
-
 	m_LiveStreamInfo.nTop = 0;
 	m_LiveStreamInfo.nBottom = m_RSet.lRegs[HPR_HEIGHT];
 	m_LiveStreamInfo.nLeft = 0;
