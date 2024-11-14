@@ -1858,7 +1858,13 @@ namespace RaywattApp.ViewModels
             if(annotations != null && annotations.Count == 1 )
             {
                 if (!string.IsNullOrEmpty(annotations[0].CoRegistration))
+                {
                     PatientCase.StrCoRegistration = annotations[0].CoRegistration;
+                }
+                else
+                {
+                    PatientCase.StrCoRegistration = "";
+                }
             }
 
             List<CoRegistration> coRegistrations = CommonUtil.JsonToCoregistrations(PatientCase.StrCoRegistration);
