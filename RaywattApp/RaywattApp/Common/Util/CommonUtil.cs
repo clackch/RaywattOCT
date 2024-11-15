@@ -814,7 +814,7 @@ namespace RaywattApp.Common.Util
                             tiff.SetField(TiffTag.SAMPLESPERPIXEL, img.Channels());
                             tiff.SetField(TiffTag.BITSPERSAMPLE, 8);
                             tiff.SetField(TiffTag.ROWSPERSTRIP, img.Rows);
-                            tiff.SetField(TiffTag.COMPRESSION, Compression.NONE);
+                            tiff.SetField(TiffTag.COMPRESSION, Compression.LZW);
                             tiff.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
 
                             tiff.WriteEncodedStrip(0, managedArray, managedArray.Length);
