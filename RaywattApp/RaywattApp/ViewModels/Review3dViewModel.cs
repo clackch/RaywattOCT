@@ -133,12 +133,6 @@ namespace RaywattApp.ViewModels
             get { return this._cmdMoveIndicator ?? (this._cmdMoveIndicator = new RelayCommand<object>(MoveIndicator)); }
         }
 
-        private ICommand _cmdTouchMoveIndicator;
-        public ICommand CmdTouchMoveIndicator
-        {
-            get { return this._cmdTouchMoveIndicator ?? (this._cmdTouchMoveIndicator = new RelayCommand<object>(TouchMoveIndicator)); }
-        }
-
         private ICommand _cmdViewSizeChanged;
         public ICommand CmdViewSizeChanged
         {
@@ -268,6 +262,8 @@ namespace RaywattApp.ViewModels
             sqlParameters["vessel"] = PatientCase.Vessel;
             sqlParameters["location"] = PatientCase.Location;
             sqlParameters["procedure"] = PatientCase.Procedure;
+            sqlParameters["angio_yn"] = PatientCase.AngioYn;
+            sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
             PatientCase.IndicatorDegree = Degree;
             sqlParameters["indicator_degree"] = PatientCase.IndicatorDegree;
             sqlParameters["colormap"] = PatientCase.Colormap;
@@ -323,21 +319,10 @@ namespace RaywattApp.ViewModels
                 if (CommonUtil.IsPostCase(PatientCase.Procedure))
                 {
                     ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(System.IntPtr.Zero), diameter, diameter, depth, 1, 1, zVal);
-
-                    if (CommonUtil.isVTIFileSave)
-                    {
-                        _log.Debug("VTIFileSave");
-                        ODSOCT_Export3DVTIFile(RayGetVolumeData(System.IntPtr.Zero), "test");
-                    }
                 }
                 else
                 {
                     ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(buffer), diameter, diameter, depth, 1, 1, zVal);
-                    if (CommonUtil.isVTIFileSave)
-                    {
-                        _log.Debug("VTIFileSave");
-                        ODSOCT_Export3DVTIFile(RayGetVolumeData(buffer), "test");
-                    }
                 }
 
                 ODSOCT_InputSurfaceParameter(Ray3DObject.Lumen, 10, 50, ".\\data\\lumen_tex.jpg");
@@ -366,6 +351,8 @@ namespace RaywattApp.ViewModels
                 //new OpenCvSharp.Size(diameter, diameter));
                 //ODSOCT_InputSurfaceParameter(Ray3DObject.GuideWire, 10, 15, ".\\data\\guidewire_tex.jpg");
                 //ODSOCT_InputData(Ray3DObject.GuideWire, buffer, diameter, diameter, depth, 1, 1, zVal);
+
+                
 
                 Marshal.FreeHGlobal(buffer);
                 ReviewStatus.IsLumenEdited = false;
@@ -482,7 +469,13 @@ namespace RaywattApp.ViewModels
                     return;
                 }
 
-                double indicatorX = indicator.PointLongitudeX - indicator.Coordinate.X - Constants.LongitudeIndicatorWidth / 2;
+                if (indicator.IsLongitudeMove)
+                {
+                    indicator.IndicatorDiff = indicator.PointLongitudeX - indicator.Coordinate.X - indicator.X;
+                    indicator.IsLongitudeMove = false;
+                }
+
+                double indicatorX = indicator.PointLongitudeX - indicator.Coordinate.X - indicator.IndicatorDiff;
                 double indicatorCenterX = indicatorX + Constants.LongitudeIndicatorWidth / 2;
 
                 if (indicatorCenterX < 0)
@@ -504,16 +497,6 @@ namespace RaywattApp.ViewModels
                     setCurrentFrame(indicatorCenterX);
                 }
             }
-        }
-
-        private void TouchMoveIndicator(object param)
-        {
-            MouseEventArgs e = (MouseEventArgs)param;
-            var position = e.GetPosition((IInputElement)e.Source);
-
-            IndicatorLongitude.X = position.X - Constants.LongitudeIndicatorWidth / 2;
-            IndicatorLongitude.CenterX = IndicatorLongitude.X + Constants.LongitudeIndicatorWidth / 2;
-            setCurrentFrame(IndicatorLongitude.CenterX);
         }
 
         private void ViewSizeChanged(object param)
@@ -563,7 +546,7 @@ namespace RaywattApp.ViewModels
         {
             if (!IsRendering) return;
             _log.Debug("zoomFactor = " + ray3DStatus.ZoomFactor);
-            if (ray3DStatus.ZoomFactor < Constants.Zoom3DScaleMax)
+            if (ray3DStatus.ZoomFactor < 2/*최대 Zoom in 2번*/)
             {
                 ODSOCT_CutViewZoom(1);
                 ray3DStatus.ZoomFactor += 1;
@@ -574,7 +557,7 @@ namespace RaywattApp.ViewModels
         private void ZoomOut3D() {
             if (!IsRendering) return;
             _log.Debug("zoomFactor = " + ray3DStatus.ZoomFactor);
-            if (ray3DStatus.ZoomFactor > - Constants.Zoom3DScaleMax)
+            if (ray3DStatus.ZoomFactor > 0/*최대 Zoom out 2번*/)
             {
                 ODSOCT_CutViewZoom(-1);
                 ray3DStatus.ZoomFactor -= 1;

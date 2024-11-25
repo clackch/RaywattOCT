@@ -88,9 +88,6 @@ private:
 	double m_fColormap;
 	cv::Scalar m_backgroundColor;	// for longitude image
 	double m_fImageThreshold = 99.99;
-	bool m_bImageCompensation = true;
-	bool m_bImageCompensationControlWindow;
-	bool m_bImageLumenVignetting;
 	double m_fImageRoi = 2.f;
 	double m_fFieldOfView;
 	bool m_isTestMode;
@@ -117,7 +114,6 @@ public:
 	int StartReview(char* strFilePath);
 	RayError StartCompare(char* strFilePath);
 	RayError EndReview();
-	RayError EndCompare();
 	RayError StartLiveView();
 	RayError StopLiveView();
 	RayError LaserOnOff(bool isOn);
@@ -164,16 +160,10 @@ public:
 	UINT GetLongitudeImageWidth();
 	UINT GetLongitudeImageHeight();
 	UINT GetLongitudeImageChannels();
-	RayError SetSheathDiameter(double value);
 	double GetImageThreshold();
 	RayError SetImageThreshold(double value);
 	double GetImageRoi();
 	RayError SetImageRoi(double value);
-	bool GetImageCompensation();
-	RayError SetImageCompensation(bool value);
-	bool GetImageLumenVignetting();
-	RayError SetImageCompensationControlWindow(bool value);
-	RayError SetImageLumenVignetting(bool value);
 	double GetFieldOfView();
 	RayError SetFieldOfView(double value);
 	void SetTestMode(bool isTestMode) { m_isTestMode = isTestMode; }
@@ -210,7 +200,6 @@ private:
 	void redrawCutView();
 	void laserOnOff(bool isOn);
 	bool waitForStepMotors(bool& runFlag);
-	bool waitForStepMotors(eStepMotorIndex idxMotor, bool& runFlag);
 	void calculateIntensity(cv::Mat image);
 
 protected:

@@ -125,7 +125,7 @@ namespace RaywattApp.Services
                 , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
                 , flush_media, pullback_trigger, colormap
                 , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
-                , brightness, contrast, sheath_diameter, section_proximal, section_distal
+                , brightness, contrast, section_proximal, section_distal
                 , create_date, update_date
                 FROM rv_schema.patient_case
                 WHERE patient_id = @id AND to_char(create_date, 'YYYY-MM-DD') = @date
@@ -141,7 +141,7 @@ namespace RaywattApp.Services
                 , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
                 , flush_media, pullback_trigger, colormap
                 , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
-                , brightness, contrast, sheath_diameter, section_proximal, section_distal
+                , brightness, contrast, section_proximal, section_distal
                 , create_date, update_date
                 FROM rv_schema.patient_case
                 WHERE patient_id = @id
@@ -155,50 +155,12 @@ namespace RaywattApp.Services
                 , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
                 , flush_media, pullback_trigger, colormap
                 , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
-                , brightness, contrast, sheath_diameter, section_proximal, section_distal
+                , brightness, contrast, section_proximal, section_distal
                 , T1.create_date, T1.update_date
                 , bookmark, longitude, cross_section
                 , lumen_contour as str_lumen_contour, lumen_sidebranch as str_lumen_sidebranch, lumen_stent as str_lumen_stent, lumen_guidewire as str_lumen_guidewire
-                , ffr_plaque, co_registration as str_co_registration
+                , ffr_plaque
                 FROM rv_schema.patient_case T1 LEFT JOIN rv_schema.patient_case_annotation T2 ON T1.id = T2.id
-                ";
-
-            //SelectPrePatientCase
-            _query["SelectPrePatientCase"] = @$"
-                SELECT A.* 
-                FROM (
-                    SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name, physician_name
-                    , accession_number, comment
-                    , vessel, location, procedure
-                    , num_of_frames, image, image_resolution, manual_calibration, field_of_view
-                    , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
-                    , flush_media, pullback_trigger, colormap
-                    , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
-                    , brightness, contrast, sheath_diameter, section_proximal, section_distal
-                    , create_date, update_date
-                    FROM rv_schema.patient_case
-                    WHERE patient_id = @id
-                    AND procedure='$001'
-                    AND create_date < @create_date
-                    ORDER BY create_date DESC) A
-                UNION ALL
-                SELECT B.* 
-                FROM (
-                    SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name, physician_name
-                    , accession_number, comment
-                    , vessel, location, procedure
-                    , num_of_frames, image, image_resolution, manual_calibration, field_of_view
-                    , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
-                    , flush_media, pullback_trigger, colormap
-                    , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
-                    , brightness, contrast, sheath_diameter, section_proximal, section_distal
-                    , create_date, update_date
-                    FROM rv_schema.patient_case
-                    WHERE patient_id = @id
-                    AND procedure='$001'
-                    AND create_date > @create_date
-                    ORDER BY create_date ASC) B
-                LIMIT 1
                 ";
 
             //SelectPhysician
@@ -224,7 +186,7 @@ namespace RaywattApp.Services
 
             //SelectPatientCaseAnnotation
             _query["SelectPatientCaseAnnotation"] = @$"
-                SELECT id, bookmark, longitude, cross_section, lumen_contour, lumen_sidebranch, lumen_stent, lumen_guidewire, co_registration
+                SELECT id, bookmark, longitude, cross_section, lumen_contour, lumen_sidebranch, lumen_stent, lumen_guidewire
                 FROM rv_schema.patient_case_annotation
                 WHERE id = @id
                 ";
@@ -243,10 +205,10 @@ namespace RaywattApp.Services
                 ORDER BY name;
                 ";
 
-            //SelectCoRegistration
-            _query["SelectCoRegistration"] = @$"
-                SELECT id,  co_registration
-                FROM rv_schema.patient_case_annotation
+            //SelectCoRegistrationTrackTrackPoint
+            _query["SelectCoRegistrationTrackPoint"] = @$"
+                SELECT track_point return_string
+                FROM rv_schema.coregistration
                 WHERE id = @id
                 ";
         }
@@ -274,14 +236,14 @@ namespace RaywattApp.Services
                 , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
                 , flush_media, pullback_trigger, colormap
                 , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
-                , brightness, contrast, sheath_diameter, section_proximal, section_distal
+                , brightness, contrast, section_proximal, section_distal
                 , create_date, update_date)
                 VALUES (@id, @patient_id, @physician_name, @accession_number
                 , @comment, @vessel, @location, @procedure, @num_of_frames, @image, @image_resolution, @manual_calibration, @field_of_view
                 , @pullback_type, @pullback_length, @angio_yn, @angio_co_registration, @indicator_degree
                 , @flush_media, @pullback_trigger, @colormap
                 , @calcium_threshold, @expansion_calculation, @expansion_threshold, @apposition_threshold
-                , @brightness, @contrast, @sheath_diameter, @section_proximal, @section_distal
+                , @brightness, @contrast, @section_proximal, @section_distal
                 , now(), now())
                 ";
 
@@ -335,7 +297,7 @@ namespace RaywattApp.Services
                 UPDATE rv_schema.patient_case
                 SET physician_name=@physician_name, accession_number=@accession_number
                 , comment=@comment, vessel=@vessel, location=@location, procedure=@procedure
-                , indicator_degree=@indicator_degree
+                , angio_yn=@angio_yn, angio_co_registration=@angio_co_registration, indicator_degree=@indicator_degree
                 , colormap=@colormap, manual_calibration=@manual_calibration, field_of_view=@field_of_view
                 , calcium_threshold=@calcium_threshold, expansion_calculation=@expansion_calculation
                 , expansion_threshold=@expansion_threshold, apposition_threshold=@apposition_threshold
@@ -425,12 +387,12 @@ namespace RaywattApp.Services
                 , num_of_frames, image, image_resolution, manual_calibration, field_of_view, pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
                 , flush_media, pullback_trigger, colormap
                 , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
-                , brightness, contrast, sheath_diameter, section_proximal, section_distal, create_date, update_date)
+                , brightness, contrast, section_proximal, section_distal, create_date, update_date)
                 VALUES (@id, @patient_id, @physician_name, @accession_number, @comment, @vessel, @location, @procedure
                 , @num_of_frames, @image, @image_resolution, @manual_calibration, @field_of_view, @pullback_type, @pullback_length, @angio_yn, @angio_co_registration, @indicator_degree
                 , @flush_media, @pullback_trigger, @colormap
                 , @calcium_threshold, @expansion_calculation, @expansion_threshold, @apposition_threshold
-                , @brightness, @contrast, @sheath_diameter, @section_proximal, @section_distal, @create_date, @update_date)
+                , @brightness, @contrast, @section_proximal, @section_distal, @create_date, @update_date)
                 ON CONFLICT (id)
                 DO UPDATE
                 SET patient_id=@patient_id, physician_name=@physician_name, accession_number=@accession_number, comment=@comment
@@ -439,28 +401,28 @@ namespace RaywattApp.Services
                 , indicator_degree=@indicator_degree
                 , flush_media=@flush_media, pullback_trigger=@pullback_trigger, colormap=@colormap
                 , calcium_threshold=@calcium_threshold, expansion_calculation=@expansion_calculation, expansion_threshold=@expansion_threshold
-                , apposition_threshold=@apposition_threshold, brightness=@brightness, contrast=@contrast, sheath_diameter=@sheath_diameter
+                , apposition_threshold=@apposition_threshold, brightness=@brightness, contrast=@contrast
                 , section_proximal=@section_proximal, section_distal=@section_distal
                 , create_date=@create_date, update_date=@update_date
                 ";
 
             //UpsertPatientCaseAnnotation
             _query["UpsertPatientCaseAnnotation"] = @$"
-                INSERT INTO rv_schema.patient_case_annotation(id, bookmark, longitude, cross_section, lumen_contour, lumen_sidebranch, lumen_stent, lumen_guidewire, ffr_plaque, co_registration, create_date, update_date)
-                VALUES (@id, @bookmark, @longitude, @cross_section, @lumen_contour, @lumen_sidebranch, @lumen_stent, @lumen_guidewire, @ffr_plaque, @co_registration, now(), now())
+                INSERT INTO rv_schema.patient_case_annotation(id, bookmark, longitude, cross_section, lumen_contour, lumen_sidebranch, lumen_stent, lumen_guidewire, ffr_plaque, create_date, update_date)
+                VALUES (@id, @bookmark, @longitude, @cross_section, @lumen_contour, @lumen_sidebranch, @lumen_stent, @lumen_guidewire, @ffr_plaque, now(), now())
                 ON CONFLICT (id)
                 DO UPDATE
                 SET bookmark=@bookmark, longitude=@longitude, cross_section=@cross_section
-                , lumen_contour=@lumen_contour, lumen_sidebranch=@lumen_sidebranch, lumen_stent=@lumen_stent, lumen_guidewire=@lumen_guidewire, ffr_plaque=@ffr_plaque, co_registration=@co_registration, update_date=now()
+                , lumen_contour=@lumen_contour, lumen_sidebranch=@lumen_sidebranch, lumen_stent=@lumen_stent, lumen_guidewire=@lumen_guidewire, ffr_plaque=@ffr_plaque, update_date=now()
                 ";
 
             //UpsertCoRegistration
             _query["UpsertCoRegistration"] = @$"
-                INSERT INTO rv_schema.patient_case_annotation (id, co_registration)
-                VALUES (@id, @co_registration)
+                INSERT INTO rv_schema.coregistration (id, track_point)
+                VALUES (@id, @track_point)
                 ON CONFLICT (id)
                 DO UPDATE
-                SET co_registration = @co_registration
+                SET track_point = @track_point
                 ";
         }
     }

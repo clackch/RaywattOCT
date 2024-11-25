@@ -374,8 +374,8 @@ void CRJController::updateStateManualMode() {
 		}
 		break;
 	case eRJState::Loaded:
-		if (!m_bLimitSwitch || m_bButton[1]) {
-			PLOGI.printf("Error occured: limitSwitch(%d), stopButton(%d)", m_bLimitSwitch, m_bButton[1]);
+		if (m_bButton[1]) {
+			PLOGI.printf("Error occured: limitSwitch(%d), stopButton(%d)", m_bLimitSwitch, m_bButton[0]);
 			Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 			m_nextState = eRJState::Error;
 		}
@@ -407,8 +407,7 @@ void CRJController::updateStateManualMode() {
 	}
 }
 void CRJController::updateState(eRJState state) {
-	const char* strState[] = {"Disconnected", "Unloaded", "Connected", "Validating", "Loading", "WaitManualLoad", "Loaded", "Unloading", "Error"};
-	PLOGI.printf("state: %s", strState[(int)state]);
+	PLOGI.printf("state: %d", state);
 	switch (state) {
 	case eRJState::Disconnected:
 	case eRJState::Unloaded:

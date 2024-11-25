@@ -9,15 +9,8 @@ public:
 		double fAxialResolutionScale;	// um per pixel
 		int nNoiseSkip;
 		int nNoiseAverage;
-		double fSheathRadiusOnePointSix;	// mm
-		double fSheathRadiusTwoPointSix;	// mm
-		double fSheathThicknessOnePointSix;	// mm
-		double fSheathThicknessTwoPointSix;	// mm
 		double fSheathRadius;	// mm
-		double fSheathThickness;	// mm
-
 		int nSheathPosition;	// pixel
-		int nSheathThickness;	// pixel
 	};
 public:
 	COCTMeasurement();

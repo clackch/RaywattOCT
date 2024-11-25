@@ -132,9 +132,17 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
         public static readonly DependencyProperty IsRenderingProperty =
             DependencyProperty.Register("IsRendering", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(false));
 
+        public bool IsOk
+        {
+            get { return (bool)GetValue(IsOkProperty); }
+            set { this.SetValue(IsOkProperty, value); }
+        }
+
+        public static readonly DependencyProperty IsOkProperty =
+            DependencyProperty.Register("IsOk", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(false, OnOkPropertyChanged));
+
         private String curveType = "Spline"; // Bezier or Spline
         private List<DijkstraHeap> localDijkstraHeap;
-        private List<CoRegistration> localAngioTrackPoints;
         private int angioImageTotalNum;
         private bool isMoved = false, isDrawing = true;
         private int trackPointNum;
@@ -322,7 +330,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             //마커 그리기
             Ellipse marker = new Ellipse();
             marker.Style = (Style)this.Resources["StyleTrackEllipse"];
-            double rate = (double)(CurrentAngioFrameNumber + 1) / AngioTrackPoints.Count;
+            double rate = (double)CurrentAngioFrameNumber / AngioTrackPoints.Count;
             
             if(pathLength < 0)
             {
@@ -484,7 +492,6 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
             Application.Current.Dispatcher.Invoke(() =>
             {
-                CoregistrationCompleted();
                 IsRendering = false;
                 IsAngioTrackCompleted = IsResetOn = isDrawing = true;
             });
@@ -609,10 +616,14 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             var newImages = (List<Mat>)dependencyPropertyChangedEventArgs.NewValue;
             if (newImages.Count > 0) control.angioImageTotalNum = newImages.Count;
 
-            control.ActivateEvent();
+            if (control.IsEditOn) control.ActivateEvent();
+            else
+            {
+                control.DeactivateEvent();
+                control.DeactivateRecEvents();
+            }
 
             control.localDijkstraHeap = new List<DijkstraHeap>(control.DijkstraHeap);
-            control.localAngioTrackPoints = new List<CoRegistration>();
         }
 
         private static void OnAngioFrameNumberPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
@@ -666,21 +677,22 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             }
         }
 
-        private void CoregistrationCompleted()
+        private static void OnOkPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
-            _log.Debug("CoregistrationCompleted()");
-            localAngioTrackPoints = new List<CoRegistration>();
-            for (int i = 0; i < angioImageTotalNum; i++)
+            var control = (DrawAngioPathUtil)dependencyObject;
+            control.AngioTrackPoints.Clear();
+
+            for (int i = 0; i < control.angioImageTotalNum; i++)
             {
                 CoRegistration coRegistration = new CoRegistration();
 
-                foreach(Point point in localDijkstraHeap[i].trackPoint)
+                foreach(Point point in control.localDijkstraHeap[i].trackPoint)
                 {
                     coRegistration.TrackPoint.Add(point);
                 }
 
                 int cnt = 0;
-                foreach (List<Point> line in localDijkstraHeap[i].line)
+                foreach (List<Point> line in control.localDijkstraHeap[i].line)
                 {
                     coRegistration.Line.Add(new List<Point>());
                     foreach (Point point in line)
@@ -689,34 +701,10 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                     }
                     cnt++;
                 }
-                localAngioTrackPoints.Add(coRegistration);
-            }
-            AngioTrackPoints = localAngioTrackPoints;
-            DijkstraHeap = localDijkstraHeap;
-        }
-
-        private void CoregistrationCompleted(int index)
-        {
-            CoRegistration coRegistration = new CoRegistration();
-
-            foreach (Point point in localDijkstraHeap[index].trackPoint)
-            {
-                coRegistration.TrackPoint.Add(point);
+                control.AngioTrackPoints.Add(coRegistration);
             }
 
-            int cnt = 0;
-            foreach (List<Point> line in localDijkstraHeap[index].line)
-            {
-                coRegistration.Line.Add(new List<Point>());
-                foreach (Point point in line)
-                {
-                    coRegistration.Line[cnt].Add(point);
-                }
-                cnt++;
-            }
-            localAngioTrackPoints[index] = coRegistration;
-            AngioTrackPoints[index] = localAngioTrackPoints[index];
-            DijkstraHeap[index] = localDijkstraHeap[index];
+            control.DijkstraHeap = control.localDijkstraHeap;
         }
 
         #endregion
@@ -756,6 +744,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             else
             {
                 trackPointNum = localDijkstraHeap[currAngioFrameNumber].trackPoint.Count;
+                _log.Debug("current Track Point Count = " + trackPointNum);
                 localDijkstraHeap[currAngioFrameNumber].trackPoint.Add(clickPosition);
                 PointTracking(clickPosition.X, clickPosition.Y, currAngioFrameNumber);
                 PathChange(currAngioFrameNumber);
@@ -765,6 +754,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                 {
                     await CalculateAllPathAsync(currAngioFrameNumber, false, false, trackPointNum - 1);
                 });
+
             }
         }
 
@@ -811,9 +801,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                     ProcessSingleImage(AngioFrameNumber, index);
                     PathChange(AngioFrameNumber);
 
-                    CoregistrationCompleted();
-                    //CoregistrationCompleted(AngioFrameNumber);
-                    IsAngioTrackCompleted = true;
+                    IsOk = true;
                     isMoved = false;
                 }
             }

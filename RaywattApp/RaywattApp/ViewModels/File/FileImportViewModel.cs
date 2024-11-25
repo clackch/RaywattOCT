@@ -503,7 +503,6 @@ namespace RaywattApp.ViewModels.File
                             patientCase.AppositionThreshold = GetDoubleValue(caseObj, "AppositionThreshold");
                             patientCase.Brightness = GetIntValue(caseObj, "Brightness");
                             patientCase.Contrast = GetIntValue(caseObj, "Contrast");
-                            patientCase.SheathDiameter = GetDoubleValue(caseObj, "SheathDiameter");
                             patientCase.SectionProximal = GetIntValue(caseObj, "SectionProximal");
                             patientCase.SectionDistal = GetIntValue(caseObj, "SectionDistal");
                             patientCase.Bookmark = GetStrValue(caseObj, "Bookmark");
@@ -514,7 +513,6 @@ namespace RaywattApp.ViewModels.File
                             patientCase.StrLumenStent = GetStrValue(caseObj, "StrLumenStent");
                             patientCase.StrLumenGuidewire = GetStrValue(caseObj, "StrLumenGuidewire");
                             patientCase.FfrPlaque = GetStrValue(caseObj, "FfrPlaque");
-                            patientCase.StrCoRegistration = GetStrValue(caseObj, "StrCoRegistration");
                             patientCase.CreateDate = GetDateValue(caseObj, "CreateDate");
                             patientCase.UpdateDate = GetDateValue(caseObj, "UpdateDate");
 

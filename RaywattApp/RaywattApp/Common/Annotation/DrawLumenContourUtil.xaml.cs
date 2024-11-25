@@ -442,10 +442,9 @@ namespace RaywattApp.Common.Annotation
                 DeleteLumenContourPoint(this.newPoints.Count - 1);
                 DeleteLumenContourCurve();
 
-                this.newPoints.Clear();
-
                 if (this.isEmptyLumen)
-                {
+                {                   
+                    this.newPoints.Clear();
                     isEmptyLumenClicked = false;
                 }
                 else

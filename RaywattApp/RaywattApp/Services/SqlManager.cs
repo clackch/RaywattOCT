@@ -294,15 +294,6 @@ namespace RaywattApp.Services
             return _databaseService.GetDatas<PatientCase>(commandText, sqlParameters);
         }
 
-        public IList<PatientCase> SelectPrePatientCase(Dictionary<string, Object> sqlParameters)
-        {
-            _log.Debug("SelectPrePatientCase");
-
-            string commandText = SqlQuery.GetQuery("SelectPrePatientCase");
-
-            return _databaseService.GetDatas<PatientCase>(commandText, sqlParameters);
-        }
-
         public int DeletePatientCase(Dictionary<string, Object> sqlParameters)
         {
             _log.Debug("DeletePatientCase");
@@ -472,13 +463,13 @@ namespace RaywattApp.Services
             return _databaseService.InsertData(commandText, sqlParameters);
         }        
 
-        public IList<PatientCaseAnnotation> SelectCoRegistration(Dictionary<string, Object> sqlParameters)
+        public IList<StringModel> SelectCoRegistrationTrackPoint(Dictionary<string, Object> sqlParameters)
         {
-            _log.Debug("SelectCoRegistration");
+            _log.Debug("SelectCoRegistrationTrackPoint");
 
-            string commandText = SqlQuery.GetQuery("SelectCoRegistration");
+            string commandText = SqlQuery.GetQuery("SelectCoRegistrationTrackPoint");
 
-            return _databaseService.GetDatas<PatientCaseAnnotation>(commandText, sqlParameters);
+            return _databaseService.GetDatas<StringModel>(commandText, sqlParameters);
         }
 
         public int UpdatePatientCaseAngioCoRegistration(Dictionary<string, Object> sqlParameters)

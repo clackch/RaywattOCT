@@ -24,6 +24,7 @@
 #define IDC_RADIO_IMAGE_RECTANGLE       1018
 #define IDC_RADIO_COLOR_BLACK           1019
 #define IDC_RADIO_COLOR_WHITE           1020
+#define IDC_CHECK_HOT_COLOR             1021
 #define IDC_BUTTON_CLOSE_SHUTTER        1022
 #define IDC_SLIDER_BRIGHTNESS           1023
 #define IDC_SLIDER_CONTRAST             1024
@@ -95,17 +96,6 @@
 #define IDC_BUTTON_SHOW_SCOPE           1095
 #define IDC_SLIDER_FRAME                1096
 #define IDC_STATIC_FRAME_NUM            1097
-#define IDC_BUTTON_ZOFFSET_INC          1098
-#define IDC_BUTTON_ZOFFSET_DEC          1099
-#define IDC_BUTTON_ZOFFSET_SAVE         1100
-#define IDC_CHECK_SHOW_SHEATH_GUIDE     1101
-#define IDC_CHECK_COMPENSATION          1102
-#define IDC_BUTTON_PREV_FRAME           1103
-#define IDC_BUTTON_NEXT_FRAME           1104
-#define IDC_BUTTON_COPY_ZOFFSET         1105
-#define IDC_RADIO_GRAY                  1106
-#define IDC_RADIO_GREEN                 1107
-#define IDC_RADIO_ORANGE                1108
 
 // Next default values for new objects
 // 
@@ -113,7 +103,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        107
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1109
+#define _APS_NEXT_CONTROL_VALUE         1098
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

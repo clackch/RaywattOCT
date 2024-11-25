@@ -75,8 +75,6 @@ namespace RaywattApp.Common.Annotation
                     this.isCanvasClicked = true;
 
                     DrawEllipse(this.firstPoint, this.lengthGeometries.Count, true);
-
-                    LModeIndicatorX = this.firstPoint.X;
                 }
                 else
                 {
@@ -357,9 +355,6 @@ namespace RaywattApp.Common.Annotation
 
             double labelHeight = GetLabelSize("StyleLabel").Height;
             double labelWidth = GetLabelSize("StyleLabel", label.Content.ToString()).Width;
-
-            if (length == 0)
-                return;
 
             // move label point along the line
             double unitX = deltaX / length;

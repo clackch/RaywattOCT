@@ -34,8 +34,6 @@ namespace RaywattApp.Common.Util
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(CommonUtil));
 
-        public static bool isVTIFileSave = false;
-
         public static bool ValidateText(string input)
         {
             var regex = new Regex(@"^[a-zA-Z0-9ㄱ-ㅎ가-힣\s,.]+$");
@@ -576,7 +574,7 @@ namespace RaywattApp.Common.Util
 
         private static Mat MakeLumenProfile(Mat imglumenProfile, LumenContour lumenContour, LumenSidebranch lumenSidebranch, LumenStent lumenStent, double appositionThreshold, int curFrame, int frameProximal, int frameDistal, bool isPostCase, bool isEdge)
         {
-            const double radius = Constants.OCTImageSize / 3;
+            const double radius = Constants.OCTImageSize / 2;
             const double totalArea = radius * radius * Math.PI;
             double area = lumenContour.Area;
             int lumenArea = (int)(area / totalArea * imglumenProfile.Rows);
@@ -649,21 +647,17 @@ namespace RaywattApp.Common.Util
             //Side Branch
             if (lumenSidebranch.Points != null && lumenSidebranch.Points.Count > 0)
             {
-                int sbThickness = 5;
-                if(lumenArea/2 < sbThickness)
-                    sbThickness = lumenArea/2 - 1;
-
                 if (curFrame >= frameProximal && curFrame <= frameDistal)
                 {
-                    Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - sbThickness), new Point(position, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0xe4, 0xe4, 0xe4));
+                    Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - 5), new Point(position, imglumenProfile.Rows / 2 + 5), new Scalar(0xe4, 0xe4, 0xe4));
                     if (!isEdge)
-                        Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - sbThickness), new Point(position + 1, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0xe4, 0xe4, 0xe4));
+                        Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - 5), new Point(position + 1, imglumenProfile.Rows / 2 + 5), new Scalar(0xe4, 0xe4, 0xe4));
                 }
                 else
                 {
-                    Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - sbThickness), new Point(position, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0x7d, 0x7d, 0x7d));
+                    Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - 5), new Point(position, imglumenProfile.Rows / 2 + 5), new Scalar(0x7d, 0x7d, 0x7d));
                     if (!isEdge)
-                        Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - sbThickness), new Point(position + 1, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0x7d, 0x7d, 0x7d));
+                        Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - 5), new Point(position + 1, imglumenProfile.Rows / 2 + 5), new Scalar(0x7d, 0x7d, 0x7d));
                 }
             }
             
@@ -814,7 +808,7 @@ namespace RaywattApp.Common.Util
                             tiff.SetField(TiffTag.SAMPLESPERPIXEL, img.Channels());
                             tiff.SetField(TiffTag.BITSPERSAMPLE, 8);
                             tiff.SetField(TiffTag.ROWSPERSTRIP, img.Rows);
-                            tiff.SetField(TiffTag.COMPRESSION, Compression.LZW);
+                            tiff.SetField(TiffTag.COMPRESSION, Compression.NONE);
                             tiff.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
 
                             tiff.WriteEncodedStrip(0, managedArray, managedArray.Length);
@@ -1407,103 +1401,6 @@ namespace RaywattApp.Common.Util
             return lumenContours;
         }
 
-        public static string CoRegistrationsToJson(List<CoRegistration> coRegistrations)
-        {
-            StringBuilder sb = new StringBuilder();
-            StringWriter sw = new StringWriter(sb);
-
-            using (JsonWriter writer = new JsonTextWriter(sw))
-            {
-                writer.WriteStartArray();
-                
-                foreach (CoRegistration coRegistration in coRegistrations)
-                {
-                    //Tracking Points (Proximal, Distal and additional connetion Points)
-                    writer.WriteStartObject();
-                    writer.WritePropertyName(nameof(coRegistration.TrackPoint));
-                    writer.WriteStartArray();
-                    
-                    foreach(System.Windows.Point point in  coRegistration.TrackPoint)
-                    {
-                        string strPoint = (int)point.X + "," + (int)point.Y;
-                        writer.WriteValue(strPoint);
-                    }
-
-                    writer.WriteEndArray();
-
-                    writer.WritePropertyName(nameof(coRegistration.Line));
-                    writer.WriteStartArray();
-
-                    foreach (List<System.Windows.Point> points in coRegistration.Line)
-                    {
-                        if (points.Count > 0)
-                        {
-                            writer.WriteStartArray();
-                            foreach (System.Windows.Point point in points)
-                            {
-                                string strPoint = (int)point.X + "," + (int)point.Y;
-                                writer.WriteValue(strPoint);
-                            }
-                            writer.WriteEndArray();
-                        }
-                    }
-
-                    writer.WriteEndArray();
-                    writer.WriteEndObject();
-                }
-                writer.WriteEndArray();
-            }
-
-            return sb.ToString();
-        }
-
-        public static List<CoRegistration> JsonToCoRegistrations(string strCoRegistration)
-        {
-            List<CoRegistration> coRegistrations = new List<CoRegistration>();
-
-            JsonTextReader reader = new JsonTextReader(new StringReader(strCoRegistration));
-
-            string currentProperty = string.Empty;
-
-            while(reader.Read())
-            {
-                if(reader.Depth == 1 && reader.TokenType == JsonToken.StartObject)
-                {
-                    CoRegistration coRegistration = new CoRegistration();
-
-                    while(reader.Read())
-                    {
-                        if(reader.Depth == 1 && reader.TokenType == JsonToken.EndObject)
-                        {
-                            coRegistrations.Add(coRegistration);
-                            break;
-                        }
-
-                        if(reader.TokenType == JsonToken.PropertyName)
-                        {
-                            currentProperty = reader.Value.ToString();
-                        }
-
-                        if(reader.Depth > 1 /*이유는 모르겠으나, Array 첫번째 요소가 depth 2로 출력됨. 같은 Array의 나머지 요소는 depth 3*/)
-                        {
-                            if(nameof(coRegistration.TrackPoint).Equals(currentProperty))
-                            {
-                                coRegistration.TrackPoint = new List<System.Windows.Point>();
-                                SetContour(reader, currentProperty, null, coRegistration);
-                            }
-                            else if(nameof(coRegistration.Line).Equals(currentProperty))
-                            {
-                                coRegistration.Line = new List<List<System.Windows.Point>>();
-                                SetContour(reader, currentProperty, null, coRegistration);
-                            }
-                        }
-                    }
-                }
-            }
-
-            return coRegistrations;
-        }
-
         unsafe public static void ContoursToMemory(List<LumenContour>? contourList, Size sizeContour, IntPtr buffer, Size sizeBuffer)
         {
             if (contourList == null) return;
@@ -1619,7 +1516,7 @@ namespace RaywattApp.Common.Util
             return new Tuple<double, double>(double.Parse(temp[0]), double.Parse(temp[1]));
         }
 
-        private static void SetContour(JsonTextReader reader, string currentProperty, Contour lumenContour, CoRegistration coRegistration = null)
+        private static void SetContour(JsonTextReader reader, string currentProperty, Contour lumenContour)
         {
             switch (currentProperty)
             {
@@ -1650,12 +1547,6 @@ namespace RaywattApp.Common.Util
                 case nameof(lumenContour.Valid):
                     if (reader.Value != null && reader.TokenType == JsonToken.Boolean)
                         lumenContour.Valid = (bool)reader.Value;
-                    break;
-                case nameof(coRegistration.TrackPoint):
-                    SetPoints(reader, coRegistration.TrackPoint);
-                    break;
-                case nameof(coRegistration.Line):
-                    SetMultiDimensionalPoints(reader, coRegistration.Line);
                     break;
                 default:
                     break;
@@ -1696,22 +1587,6 @@ namespace RaywattApp.Common.Util
 
                 if (reader.Value != null)
                     points.Add(StrToPoint(reader.Value.ToString()));
-            }
-        }
-
-        private static void SetMultiDimensionalPoints(JsonTextReader reader, List<List<System.Windows.Point>> multiDimensionalPoints)
-        {
-            while (reader.Read())
-            {
-                if (reader.TokenType == JsonToken.EndArray)
-                    break;
-
-                if (reader.Value != null)
-                {
-                    List<System.Windows.Point> innerPoints = new List<System.Windows.Point>();
-                    SetPoints(reader, innerPoints);
-                    multiDimensionalPoints.Add(innerPoints);
-                }
             }
         }
 

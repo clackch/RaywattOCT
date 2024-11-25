@@ -2,11 +2,10 @@
 #include "resource.h"
 #include "CommonDlg.h"
 #include "Utility.h"
+#include "ZaberController.h"
 
 // CRotaryJunctionDlg dialog
 
-class CRJController;
-class CLaserModule;
 class CRotaryJunctionDlg : public CDialogEx, CCommonDlg
 {
 	DECLARE_DYNAMIC(CRotaryJunctionDlg)
@@ -18,8 +17,8 @@ private:
 	CThread* m_pThreadInterferometer;
 
 	// Rotary Junction
-	CRJController* m_pPullback;
-	CLaserModule* m_pDelayLine;
+	CZaberController* m_pPullback;
+	CZaberController* m_pDelayLine;
 
 	// Shutter
 	void* m_pShutter;
@@ -29,7 +28,7 @@ public:
 	CRotaryJunctionDlg(CWnd* pParent = nullptr);   // standard constructor
 	virtual ~CRotaryJunctionDlg();
 
-	void SetStepMotor(CRJController* pPullback, CLaserModule* pDelayLine) { m_pPullback = pPullback; m_pDelayLine = pDelayLine; }
+	void SetStepMotor(CZaberController* pPullback, CZaberController* pDelayLine) { m_pPullback = pPullback; m_pDelayLine = pDelayLine; }
 
 // Dialog Data
 #ifdef AFX_DESIGN_TIME

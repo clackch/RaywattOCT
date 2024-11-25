@@ -127,7 +127,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>..\lib;..\extern\opencv\lib;..\extern\ATS\Library\x64;..\extern\ipp\lib\intel64;..\extern\libusb\lib\x64;..\extern\libtiff\lib;..\extern\libtorch\lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(TargetDir)raycore.ini" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d
@@ -158,7 +157,6 @@ xcopy "$(TargetDir)RayCore.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" 
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>..\lib;..\extern\opencv\lib;..\extern\ATS\Library\x64;..\extern\ipp\lib\intel64;..\extern\libusb\lib\x64;..\extern\libtiff\lib;..\extern\libtorch\lib\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(TargetDir)raycore.ini" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" /y /d

@@ -41,9 +41,6 @@ namespace RaywattOCT
             ImageResolution,
             ImageThreshold,
             ImageRoi,
-            ImageCompensation,
-            ImageCompensationControlWindow,
-            ImageLumenVignetting,
             FieldOfView,
             LongitudeImageWidth,
             LongitudeImageHeight,
@@ -161,8 +158,6 @@ namespace RaywattOCT
         public static extern int RayStartCompare(string filePath);
         [DllImport("RayCore.dll")]
         public static extern int RayEndReview();
-        [DllImport("RayCore.dll")]
-        public static extern int RayEndCompare();
         [DllImport("RayCore.dll")]
         public static extern int RayStartLiveView();
         [DllImport("RayCore.dll")]

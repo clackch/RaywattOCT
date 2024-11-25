@@ -55,9 +55,6 @@ _declspec(dllexport) RayError RayStartCompare(char* strFilePath) {
 _declspec(dllexport) RayError RayEndReview() {
     return octSystem.EndReview();
 }
-_declspec(dllexport) RayError RayEndCompare() {
-    return octSystem.EndCompare();
-}
 _declspec(dllexport) RayError RayStartLiveView() {
     return octSystem.StartLiveView();
 }
@@ -105,23 +102,11 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
     case RayProperty::PullbackSpeed:
         config.stepMotor.pullbackSpeed = value;
         break;
-    case RayProperty::SheathDiameter:
-        octSystem.SetSheathDiameter(value);
-        break;
     case RayProperty::ImageThreshold:
         octSystem.SetImageThreshold(value);
         break;
     case RayProperty::ImageRoi:
         octSystem.SetImageRoi(value);
-        break;
-    case RayProperty::ImageCompensation:
-        octSystem.SetImageCompensation(value);
-        break;
-    case RayProperty::ImageCompensationControlWindow:
-        octSystem.SetImageCompensationControlWindow(value);
-        break;
-    case RayProperty::ImageLumenVignetting:
-        octSystem.SetImageLumenVignetting(value);
         break;
     case RayProperty::FieldOfView:
         octSystem.SetFieldOfView(value);
@@ -188,10 +173,6 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return octSystem.GetImageThreshold();
     case RayProperty::ImageRoi:
         return octSystem.GetImageRoi();
-    case RayProperty::ImageCompensation:
-        return octSystem.GetImageCompensation();
-    case RayProperty::ImageLumenVignetting:
-        return octSystem.GetImageLumenVignetting();
     case RayProperty::FieldOfView:
         return octSystem.GetFieldOfView();
     case RayProperty::TestMode:

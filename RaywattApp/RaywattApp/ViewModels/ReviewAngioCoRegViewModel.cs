@@ -20,7 +20,6 @@ using System.Windows.Media.Imaging;
 using Point = System.Windows.Point;
 using Newtonsoft.Json;
 using OpenCvSharp.WpfExtensions;
-using RaywattApp.Common.Util;
 
 namespace RaywattApp.ViewModels
 {
@@ -303,7 +302,7 @@ namespace RaywattApp.ViewModels
         {
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
-            sqlParameters["co_registration"] = CommonUtil.CoRegistrationsToJson(AngioTrackPoints);
+            sqlParameters["track_point"] = JsonConvert.SerializeObject(AngioTrackPoints, Formatting.Indented);
             int nRows = _sqlManager.UpsertCoRegistration(sqlParameters);
             if (nRows == 0)
             {

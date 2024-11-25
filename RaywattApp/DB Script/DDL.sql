@@ -138,7 +138,6 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case
     apposition_threshold real,
 	brightness integer,
     contrast integer,
-	sheath_diameter real,
 	section_proximal integer,
     section_distal integer,
     create_date timestamp without time zone,
@@ -155,6 +154,28 @@ TABLESPACE rv_tablespace;
 
 ALTER TABLE IF EXISTS rv_schema.patient_case
     OWNER to rv_user;
+			
+-- Table: rv_schema.coregistration
+
+-- DROP TABLE IF EXISTS rv_schema.coregistration;
+
+CREATE Table IF Not EXISTS rv_schema.coregistration
+(
+	id character varying(24) COLLATE pg_catalog."default" NOT NULL,
+	track_point text COLLATE pg_catalog."default",	
+	CONSTRAINT coregistration_pkey PRIMARY KEY (id)
+        USING INDEX TABLESPACE rv_tablespace,
+    CONSTRAINT coregistration_id_fkey FOREIGN KEY (id)
+        REFERENCES rv_schema.patient_case (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+)
+
+TABLESPACE rv_tablespace;
+
+ALTER TABLE IF EXISTS rv_schema.coregistration
+    OWNER to rv_user;
+
 
 -- Table: rv_schema.patient_case_annotation
 
@@ -171,7 +192,6 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case_annotation
     lumen_stent text COLLATE pg_catalog."default",
     lumen_guidewire text COLLATE pg_catalog."default",	
 	ffr_plaque text COLLATE pg_catalog."default",	
-    co_registration text COLLATE pg_catalog."default",
 	create_date timestamp without time zone,
     update_date timestamp without time zone,
     CONSTRAINT patient_case_annotation_pkey PRIMARY KEY (id)
