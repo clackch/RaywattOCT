@@ -1407,7 +1407,7 @@ namespace RaywattApp.Common.Util
             return lumenContours;
         }
 
-        public static string CoregistrationsToJson(List<CoRegistration> coRegistrations)
+        public static string CoRegistrationsToJson(List<CoRegistration> coRegistrations)
         {
             StringBuilder sb = new StringBuilder();
             StringWriter sw = new StringWriter(sb);
@@ -1457,7 +1457,7 @@ namespace RaywattApp.Common.Util
             return sb.ToString();
         }
 
-        public static List<CoRegistration> JsonToCoregistrations(string strCoRegistration)
+        public static List<CoRegistration> JsonToCoRegistrations(string strCoRegistration)
         {
             List<CoRegistration> coRegistrations = new List<CoRegistration>();
 
