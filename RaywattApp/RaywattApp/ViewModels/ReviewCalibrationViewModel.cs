@@ -100,7 +100,7 @@ namespace RaywattApp.ViewModels
                 GetImageInfo(RaySession.Review);
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
 
-                DrawSheathIndicator(PatientCase.SheathDiameter);
+                DrawSheathIndicator();
             }
         }
 
@@ -135,7 +135,7 @@ namespace RaywattApp.ViewModels
                 }
             }
 
-            DrawSheathIndicator(PatientCase.SheathDiameter, CommonUtil.GetCalibrationRatio(this.manualCalibration, false));
+            DrawSheathIndicator();
         }
 
         private void Reset()
@@ -144,7 +144,7 @@ namespace RaywattApp.ViewModels
 
             this.manualCalibration = 0;
 
-            DrawSheathIndicator(PatientCase.SheathDiameter, CommonUtil.GetCalibrationRatio(this.manualCalibration, false));
+            DrawSheathIndicator();
         }
 
         private void Recalibrate()
@@ -179,9 +179,6 @@ namespace RaywattApp.ViewModels
             _log.Debug("Ok");
 
             PatientCase.ManualCalibration += this.manualCalibration;
-
-            Constants.DefaultFoV = Constants.OCTImageSize * PatientCase.ImageResolution * CommonUtil.GetCalibrationRatio(PatientCase.ManualCalibration, true);
-            Constants.ImageResolution = PatientCase.ImageResolution * CommonUtil.GetCalibrationRatio(PatientCase.ManualCalibration, true);
 
             GoToPreviousPage(true);
         }

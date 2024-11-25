@@ -74,6 +74,9 @@ void CTIFFImaging::PostProcess(cv::Mat image)
 	}
 
 	cv::convertScaleAbs(imageCircle, imageCircle, m_setting.contrast, m_setting.brightness);
+
+	cv::Mat imgFoV = getFoVImage(imageCircle, MAX_FIELD_OF_VIEW);
+	memcpy(imageCircle.data, imgFoV.data, sizeof(char) * imageCircle.cols * imageCircle.rows * imageCircle.channels());
 }
 
 void CTIFFImaging::CircularizeImage(cv::Mat& src, cv::Mat& dst) {

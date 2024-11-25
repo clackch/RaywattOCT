@@ -192,7 +192,7 @@ namespace RaywattApp.ViewModels
 
                     if (ReviewStatus.SelectedPatientCase != null)
                     {
-                        RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath);
+                        RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath, ReviewStatus.SelectedPatientCase.ImageResolution);
                         ZoomCompare.SetFieldOfView(Constants.OCTImageSize * ReviewStatus.SelectedPatientCase.ImageResolution / PatientCase.FieldOfView);
                         DeviceStatus.IsOCTImagingCompareDone = false;
                         Thread.Sleep(500);
@@ -322,7 +322,7 @@ namespace RaywattApp.ViewModels
 
                 RayEndCompare();
                 DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current = 0;
-                RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath);
+                RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath, ReviewStatus.SelectedPatientCase.ImageResolution);
                 ZoomCompare.SetFieldOfView(Constants.OCTImageSize * ReviewStatus.SelectedPatientCase.ImageResolution / PatientCase.FieldOfView);
                 DeviceStatus.IsOCTImagingCompareDone = false;
                 Thread.Sleep(500);
@@ -568,14 +568,10 @@ namespace RaywattApp.ViewModels
             if (Section.SetMsaMinExp(PatientCase.LumenContours, frameProximal, frameDistal, stentProximal, stentDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeCompareWidth, PatientCase.PullbackLength))
             {
                 Section.VislbleMsaMinExp(true);
-                Section.Proximal.IsVisible = Visibility.Visible;
-                Section.Distal.IsVisible = Visibility.Visible;
             }
             else
             {
                 Section.VislbleMsaMinExp(false);
-                Section.Proximal.IsVisible = Visibility.Collapsed;
-                Section.Distal.IsVisible = Visibility.Collapsed;
             }
 
             imglumenProfile = CommonUtil.MakeLumenProfileImage(PostLumenContour, PostLumenSidebranches, PostLumenStents, PatientCase.AppositionThreshold, frameProximal, frameDistal, true);

@@ -118,6 +118,7 @@ protected:
 	void findSheath(cv::Mat img);
 	std::vector<double> normalize(const std::vector<double>& values);
 	void drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color);
+	cv::Mat getFoVImage(cv::Mat image, double fov);
 
 	void adaptive_compensation();
 	void min_max_normalization(const cv::Mat& img, cv::Mat& normalized_img, double& min_val, double& max_val);

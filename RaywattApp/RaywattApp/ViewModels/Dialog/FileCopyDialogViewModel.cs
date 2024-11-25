@@ -238,7 +238,7 @@ namespace RaywattApp.ViewModels.Dialog
                         RaySetProperty(Property.Contrast, patientCase.Contrast);
                         CommonUtil.SetColormap(patientCase.Colormap);
                         List<Mat> imgCrossSections = new List<Mat>();
-                        Mat? imgLongitude = await CommonUtil.ConvertImage(patientCase.ImageFullPath, patientCase.ImageResolution, patientCase.ManualCalibration, patientCase.IndicatorDegree, imgCrossSections, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
+                        Mat? imgLongitude = await CommonUtil.ConvertImage(patientCase.ImageFullPath, patientCase.ImageResolution, patientCase.IndicatorDegree, imgCrossSections, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
                         List<Mat> convertedImages = await CommonUtil.MakeImageForExport(patientCase, imgCrossSections, imgLongitude, exportIndices, FileExport, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
 
                         await Task.Run(() =>
@@ -316,7 +316,7 @@ namespace RaywattApp.ViewModels.Dialog
                 RaySetProperty(Property.Contrast, patientCase.Contrast);
                 CommonUtil.SetColormap(patientCase.Colormap);
                 List<Mat> imgCrossSections = new List<Mat>();
-                Mat? imgLongitude = await CommonUtil.ConvertImage(patientCase.ImageFullPath, patientCase.ImageResolution, patientCase.ManualCalibration, patientCase.IndicatorDegree, imgCrossSections, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
+                Mat? imgLongitude = await CommonUtil.ConvertImage(patientCase.ImageFullPath, patientCase.ImageResolution, patientCase.IndicatorDegree, imgCrossSections, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
                 List<Mat> convertedImages = await CommonUtil.MakeImageForExport(patientCase, imgCrossSections, imgLongitude, exportIndices, FileExport, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
 
                 if (format == Constants.ExportPullbackAVI)
