@@ -241,12 +241,6 @@ namespace RaywattApp.ViewModels
             get { return this._toggleAngioCommand ?? (this._toggleAngioCommand = new RelayCommand<bool>(ToggleAngio)); }
         }
 
-        private ICommand _toggleContourStentCommand;
-        public ICommand ToggleContourStentCommand
-        {
-            get { return this._toggleContourStentCommand ?? (this._toggleContourStentCommand = new RelayCommand(ToggleContourStent)); }
-        }
-
         private ICommand _toggleMeasurementCommand;
         public ICommand ToggleMeasurementCommand
         {
@@ -324,7 +318,13 @@ namespace RaywattApp.ViewModels
         {
             get { return this._cmdMoveIndicator ?? (this._cmdMoveIndicator = new RelayCommand<object>(MoveIndicator)); }
         }
-        
+
+        private ICommand _cmdTouchMoveIndicator;
+        public ICommand CmdTouchMoveIndicator
+        {
+            get { return this._cmdTouchMoveIndicator ?? (this._cmdTouchMoveIndicator = new RelayCommand<object>(TouchMoveIndicator)); }
+        }
+
         private ICommand _manipulationStartingCommand;
         public ICommand ManipulationStartingCommand
         {
@@ -396,7 +396,8 @@ namespace RaywattApp.ViewModels
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
                 
                 ReviewStatus.CurrentPage = Constants.ReviewPage;
-                
+
+                FieldOfView = PatientCase.FieldOfView;
                 ToggleAngio(ReviewStatus.IsAngioOn);
                 ToggleLongitude(ReviewStatus.IsLumenProfile);
 
@@ -411,8 +412,7 @@ namespace RaywattApp.ViewModels
 
                 Degree = PatientCase.IndicatorDegree;
                 Brightness = PatientCase.Brightness;
-                Contrast = PatientCase.Contrast;
-                FieldOfView = PatientCase.FieldOfView;
+                Contrast = PatientCase.Contrast;                
                 CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault);
                 CrossSectionAngioScale = (1 / Constants.ImageResolution) * (Constants.ZoomAngioCsScaleDefault);
 
@@ -433,7 +433,7 @@ namespace RaywattApp.ViewModels
                 if (ReviewStatus.IsPlay)
                     Playback();
 
-                DrawSheathIndicator();
+                DrawSheathIndicator(PatientCase.SheathDiameter);
             }
         }
 
@@ -458,7 +458,7 @@ namespace RaywattApp.ViewModels
             if (PatientCase.AngioFrame == null) PatientCase.AngioFrame = new AngioFrame();
             if (PatientCase.AngioFrame.CoRegistration == null) PatientCase.AngioFrame.CoRegistration = new List<CoRegistration>();
 
-            if (PatientCase.AngioFrame.CoRegistration.Count == 0)
+            if (PatientCase.AngioFrame.CoRegistration.Count == 0 && PatientCase.AngioCoRegistration)
             {
                 ReadTrackPoints();
             }
@@ -719,6 +719,7 @@ namespace RaywattApp.ViewModels
                 PatientCase.StrLumenSidebranch = JsonConvert.SerializeObject(LumenSidebranches, Newtonsoft.Json.Formatting.Indented);
                 PatientCase.StrLumenStent = JsonConvert.SerializeObject(LumenStents, Newtonsoft.Json.Formatting.Indented);
                 PatientCase.StrLumenGuidewire = JsonConvert.SerializeObject(LumenGuidewires, Newtonsoft.Json.Formatting.Indented);
+                PatientCase.StrCoRegistration = "";
 
                 DeviceStatus.IsLumenSaved = true;
                 SetLumenProfileInit();
@@ -1002,16 +1003,9 @@ namespace RaywattApp.ViewModels
             ExpandRightMenu = isExpand;
         }
 
-        private void ToggleContourStent()
-        {
-            ReviewStatus.IsContourStentOn = !ReviewStatus.IsContourStentOn;
-        }
-
         private void ToggleMeasurement()
         {
             StopPlayback();
-
-            ReviewStatus.IsMeasurementOn = !ReviewStatus.IsMeasurementOn;
         }
 
         public void Window_ManipulationStarting(ManipulationStartingEventArgs e)
@@ -1222,8 +1216,6 @@ namespace RaywattApp.ViewModels
             sqlParameters["vessel"] = PatientCase.Vessel;
             sqlParameters["location"] = PatientCase.Location;
             sqlParameters["procedure"] = PatientCase.Procedure;
-            sqlParameters["angio_yn"] = PatientCase.AngioYn;
-            sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
             PatientCase.IndicatorDegree = Degree;
             sqlParameters["indicator_degree"] = PatientCase.IndicatorDegree;
             sqlParameters["colormap"] = PatientCase.Colormap;
@@ -1271,6 +1263,7 @@ namespace RaywattApp.ViewModels
                     sqlParameters["lumen_stent"] = PatientCase.StrLumenStent;
                     sqlParameters["lumen_guidewire"] = PatientCase.StrLumenGuidewire;
                     sqlParameters["ffr_plaque"] = "";
+                    sqlParameters["co_registration"] = PatientCase.StrCoRegistration;
                     nRows = _sqlManager.UpsertPatientCaseAnnotation(sqlParameters);
                 }
                 else
@@ -1636,12 +1629,14 @@ namespace RaywattApp.ViewModels
                     if (indicator.IsSectionProximal && (indicatorX >= Section.Distal.X - sectionIndicatorCenter))
                     {
                         indicator.X = Section.Distal.X - sectionIndicatorCenter;
+                        setCurrentFrame(indicator.X + Constants.SectionIndicatorMoveCenterWidth);
                         return;
                     }
 
                     if (!indicator.IsSectionProximal && (indicatorX <= Section.Proximal.X + sectionIndicatorCenter))
                     {
                         indicator.X = Section.Proximal.X + sectionIndicatorCenter;
+                        setCurrentFrame(indicator.X + Constants.SectionIndicatorMoveCenterWidth);
                         return;
                     }
 
@@ -1658,6 +1653,8 @@ namespace RaywattApp.ViewModels
                         indicator.X = indicatorX;
                     }
 
+                    setCurrentFrame(indicator.X + Constants.SectionIndicatorMoveCenterWidth);
+
                     if (IsChangedLumenProfileValue())
                     {
                         imglumenProfile = null;
@@ -1669,6 +1666,7 @@ namespace RaywattApp.ViewModels
                 }
                 else
                 {
+                    indicatorX = indicatorX + indicator.IndicatorDiff - Constants.LongitudeIndicatorWidth / 2;
                     double indicatorCenterX = indicatorX + Constants.LongitudeIndicatorWidth / 2;
 
                     if (indicatorCenterX < 0)
@@ -1691,6 +1689,18 @@ namespace RaywattApp.ViewModels
                     }
                 }
             }
+        }
+
+        private void TouchMoveIndicator(object param)
+        {
+            StopPlayback();
+
+            MouseEventArgs e = (MouseEventArgs)param;
+            var position = e.GetPosition((IInputElement)e.Source);
+
+            IndicatorLongitude.X = position.X - Constants.LongitudeIndicatorWidth / 2;
+            IndicatorLongitude.CenterX = IndicatorLongitude.X + Constants.LongitudeIndicatorWidth / 2;
+            setCurrentFrame(IndicatorLongitude.CenterX);
         }
 
         private void updateNavigator(int curFrame, int totalFrame)
@@ -1866,17 +1876,23 @@ namespace RaywattApp.ViewModels
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
 
-            IList<StringModel> coRegistrationTrackPoint = _sqlManager.SelectCoRegistrationTrackPoint(sqlParameters);
-            if (coRegistrationTrackPoint == null || coRegistrationTrackPoint.Count == 0 || coRegistrationTrackPoint[0].ReturnString == null) return;
+            IList<PatientCaseAnnotation> annotations = _sqlManager.SelectCoRegistration(sqlParameters);
 
-            List<CoRegistration> coRegistrations = JsonConvert.DeserializeObject<List<CoRegistration>>(coRegistrationTrackPoint[0].ReturnString);
-
-            foreach (CoRegistration coReg in coRegistrations)
+            if(annotations != null && annotations.Count == 1 )
             {
-                PatientCase.AngioFrame.CoRegistration.Add(coReg);
+                if (!string.IsNullOrEmpty(annotations[0].CoRegistration))
+                {
+                    PatientCase.StrCoRegistration = annotations[0].CoRegistration;
+                }
+                else
+                {
+                    PatientCase.StrCoRegistration = "";
+                }
             }
 
-            AngioTrackPoints = PatientCase.AngioFrame.CoRegistration;
+            List<CoRegistration> coRegistrations = CommonUtil.JsonToCoRegistrations(PatientCase.StrCoRegistration);
+
+            AngioTrackPoints = PatientCase.AngioFrame.CoRegistration = coRegistrations;
         }
 
 

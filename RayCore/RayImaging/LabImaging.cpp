@@ -79,7 +79,6 @@ void CLabImaging::Process(char* fringes) {
 
 	fftProcessing(fringes32f);
 	computeLogarithm(fFFTResult, logData);
-	findSheath(logData);
 
 	if (subtract) {
 		subtractBackground<float>(fFFTResult, backgroundFFT, backgroundSubtracted, nOutputLength * nBScan);
@@ -96,7 +95,12 @@ void CLabImaging::Process(char* fringes) {
 	}
 	
 	generateImage(logData, false);
+
+	adaptive_compensation();
+
+	applyZOffset();
 }
+
 void CLabImaging::PostProcess(cv::Mat image) {
 	COCTImaging::PostProcess(image);
 	cv::rotate(imageResultColor, imageRectangle, cv::ROTATE_90_COUNTERCLOCKWISE);

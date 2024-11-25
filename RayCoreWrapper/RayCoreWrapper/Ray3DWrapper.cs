@@ -175,6 +175,9 @@ namespace RaywattOCT
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_UpdateColorTable(int mode);
         [DllImport("OCT3d.dll")]
-        public static extern int ODSOCT_Export3DVITFile(IntPtr raw, string fileName); // the file will be saved in bin folder
+        public static extern int ODSOCT_Export3DVTIFile(IntPtr raw, string fileName); // the file will be saved in bin folder
+
+        [DllImport("OCT3d.dll")]
+        public static extern int ODSOCT_ShowTFWindow(int isShow);
     }
 }

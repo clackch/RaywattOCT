@@ -462,6 +462,12 @@ namespace RaywattApp.ViewModels.Dialog
                 {
                     LumenGuidewires = JsonConvert.DeserializeObject<List<LumenGuidewire>>(patientCaseAnnotations[0].LumenGuidewire);
                 }
+
+                if (!string.IsNullOrEmpty(patientCaseAnnotations[0].CoRegistration))
+                {
+                    PatientCase.StrCoRegistration = patientCaseAnnotations[0].CoRegistration;
+                }
+
             }
 
             for (int i = 0; i < this.crossSections.Count; i++)

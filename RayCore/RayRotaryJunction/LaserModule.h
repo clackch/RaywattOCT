@@ -3,10 +3,12 @@
 #include "CommonProtocol.h"
 #include "MotorController.h"
 
-#define MAX_VOLTAGE_RAW_VALUE					4095
-#define CALIBRATION_MODULE_SM_DEFAULT_SPEED		1000
-#define DELAYLINE_BACKWARD_POSITION				(-50)
-#define DELAYLINE_FORWARD_POSITION				(50)
+#define MAX_VOLTAGE_RAW_VALUE			4095
+#define CM_SM_SPEED_DEFAULT				1000
+#define CM_SM_SPEED_MAX					10000
+#define CM_SM_SPEED_AUTO				2500
+#define DELAYLINE_BACKWARD_POSITION		(-50)
+#define DELAYLINE_FORWARD_POSITION		(50)
 
 class CLaserModule
 	: public CMotorController,
@@ -35,7 +37,7 @@ public:
 	virtual bool Move(eStepMotorIndex idxMotor, int posStep, bool delay = false, char sensor = 0);
 	virtual bool Set(eStepMotorIndex idxMotor, int velStep);
 
-	int GetPosition(eStepMotorIndex idxMotor) { return m_nStepPosition[(int)idxMotor]; }
+	int GetPosition(eStepMotorIndex idxMotor) { return m_nActualPosition[(int)idxMotor - 1]; }
 	int MoveRelative(eStepMotorIndex idxMotor, int nOffset);
 	void SetVOA(unsigned short voa);
 	void SetVLD(unsigned short vld);
@@ -45,6 +47,7 @@ public:
 protected:
 	static UINT threadReadPacket(LPVOID param);
 	void initSetting();
+	void parseAutoReportPacket(BYTE* packet, int size);
 	void parseSMPacket(BYTE* packet, int size);
 	void setVOAVLD();
 	virtual void handlePacket();

@@ -231,6 +231,12 @@ namespace RaywattApp.ViewModels
             PatientCase.Vessel = CurrentVessel.Key;
             PatientCase.Location = CurrentLocation.Key;
 
+            double sheathType = 1;
+            if (PatientCase.AccessionNumber.Equals("0"))
+                sheathType = 0;
+            RaySetProperty(Property.SheathDiameter, sheathType);
+            PatientCase.SheathDiameter = RayGetProperty(Property.SheathDiameter);
+
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
             parameter["patientCase"] = PatientCase;

@@ -36,6 +36,8 @@ public:
 	class CatheterSetting {
 	public:
 		int rotationTime;	// To-Do: remove
+		bool manualLoad;
+		int length;			// 2.6fr -> 1.6fr
 	};
 
 	class Volume {
@@ -49,7 +51,7 @@ private:
 	CConfiguration(const CConfiguration& ref) {};
 	CConfiguration& operator=(const CConfiguration& ref) {};
 	~CConfiguration();
-	
+
 public:
 	bool isInit;
 	tstring configFilePath;
@@ -67,7 +69,7 @@ public:
 public:
 	static CConfiguration& GetInstance();
 
-	bool IsInit(){ return isInit; }
+	bool IsInit() { return isInit; }
 	void Initialize(tstring configFile);
 
 	void SaveLaserModuleSettings();

@@ -215,6 +215,7 @@ void* CImagingSession::GetImageData(int nFrame) {
 	if (nFrame < 0 || nFrame >= m_pDataManager->GetNumOfSamples()) return nullptr;
 
 	char* pBuffer = m_pDataManager->GetSample(nFrame);
+	m_pImaging->SetZOffset(GetZOffset(nFrame));
 	m_pImaging->Process(pBuffer);
 	cv::Mat imgResult = m_pImaging->GetProcessedImage().clone();
 
@@ -331,6 +332,37 @@ int CImagingSession::GetNumOfGuidewirePoints(int nFrame){
 	return mat.cols * mat.rows;
 }
 
+bool CImagingSession::LoadZOffset(const char* strDataFilePath) {
+	std::string strPath(strDataFilePath);
+	std::string strZOffsetFilePath = strPath.substr(0, strPath.size() - 3).append("cal");
+
+	int nNumOfSamples = (m_pDataManager == nullptr) ? 0 : m_pDataManager->GetNumOfSamples();
+	m_vZOffset.clear();
+
+	FILE* fp = fopen(strZOffsetFilePath.c_str(), "r");
+	if (fp) {
+		PLOGI.printf("ZOffset file loaded: %s", strZOffsetFilePath.c_str());
+		for (int i = 0; i < nNumOfSamples; i++) {
+			int offset = 0;
+			fscanf(fp, "%d,", &offset);
+
+			m_vZOffset.push_back(offset);
+		}
+		fclose(fp);
+
+		return true;
+	}
+
+	return true;
+}
+
+int CImagingSession::GetZOffset(int nFrame) {
+	if (m_pDataManager == nullptr) return 0;
+	if (m_vZOffset.size() != m_pDataManager->GetNumOfSamples()) return 0;
+
+	return m_vZOffset.at(nFrame);
+}
+
 CImagingSession* CImagingSession::createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type) {
 	CImagingSession* pSession = new CImagingSession(pMsg, nSession, deleteData);
 
@@ -353,10 +385,11 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadImaging->isRun; nFrame++)
 	{
 		char* pBuffer = pDataManager->GetSample(nFrame);
+		pImaging->SetZOffset(pSession->GetZOffset(nFrame));
 		pImaging->Process(pBuffer);
 		cv::Mat imgResult = pImaging->GetProcessedImage().clone();
 		pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult));
-		pSession->m_mapSheathPosition.insert(std::make_pair(nFrame, pImaging->GetFoundSheathPosition()));
+		pSession->m_mapSheathPosition.insert(std::make_pair(nFrame, pImaging->GetSheathPosition()));
 	}
 	PLOGI.printf("Session #%d process oct imaging done.", pSession->m_nSession);
 	pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::OCTImaging, pSession->m_nSession);

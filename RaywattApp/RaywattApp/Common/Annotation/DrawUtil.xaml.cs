@@ -333,6 +333,10 @@ namespace RaywattApp.Common.Annotation
 
                 foreach (UIElement element in this.MeasureUIElements[frameNumber])
                 {
+                    var parent = VisualTreeHelper.GetParent(element) as Panel;
+                    if (parent != null)
+                        parent.Children.Remove(element);
+
                     this.canvas.Children.Add(element);
                 }
             }

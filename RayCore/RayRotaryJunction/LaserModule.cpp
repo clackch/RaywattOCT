@@ -129,7 +129,7 @@ bool CLaserModule::Move(eStepMotorIndex idxMotor, int posStep, bool delay, char 
 	memcpy(serialPacket + idxData, &m_nStepSpeed[0], sizeof(int));
 	idxData += sizeof(int);
 	memcpy(serialPacket + idxData, &m_nStepSpeed[1], sizeof(int));
-	idxData += sizeof(char);
+	idxData += sizeof(int);
 	memcpy(serialPacket + idxData, &sensorStop[0], sizeof(char));
 	idxData += sizeof(char);
 	memcpy(serialPacket + idxData, &sensorStop[1], sizeof(char));
@@ -144,6 +144,7 @@ bool CLaserModule::Move(eStepMotorIndex idxMotor, int posStep, bool delay, char 
 bool CLaserModule::Set(eStepMotorIndex idxMotor, int velStep) {
 	if (!m_initMotor) return false;
 
+	PLOGI.printf("velocity: %d", velStep);
 	if (idxMotor == eStepMotorIndex::Both) {
 		m_nStepSpeed[0] = velStep;
 		m_nStepSpeed[1] = velStep;
@@ -161,7 +162,7 @@ int CLaserModule::MoveRelative(eStepMotorIndex idxMotor, int nOffset) {
 	int actualPosition = m_nActualPosition[index];
 
 	int nLastTargetPos = m_nStepPosition[index];
-	int nPosition = nLastTargetPos + nOffset;
+	int nPosition = actualPosition + nOffset;
 
 	Move(idxMotor, nPosition);
 
@@ -240,7 +241,7 @@ void CLaserModule::initSetting() {
 	getSerialPacket(eFID::FID_SM_SET_CONFIG, (sizeof(int) * 7 + sizeof(char) * 2) * 2, serialPacket, packetLength);
 
 	const int minSpeed = 100;
-	const int maxSpeed = 5000;
+	const int maxSpeed = 10000;
 	const int accTime = 1;
 	const int accStep = 100;
 	const int decTime = 1;
@@ -270,6 +271,23 @@ void CLaserModule::initSetting() {
 	{
 		PLOGI.printf("Written size is not matched. (%d / %d bytes)", written, packetLength);
 	}
+}
+void CLaserModule::parseAutoReportPacket(BYTE* packet, int size) {
+	int offset = 0;
+	for (int i = 0; i < 2; i++) {
+		m_isSMMoving[i] = packet[offset]; offset++;
+
+		int curPos = 0;
+		for (int j = 0; j < 4; j++) {
+			curPos |= (packet[offset + j] << (j * 8));
+		}
+		m_nActualPosition[i] = curPos;
+		offset += 4;
+	}
+	memcpy(&m_nVOA, packet + offset, sizeof(unsigned short));
+	offset += sizeof(unsigned short) * 2;	// voa output (2byte), voa input (2byte)
+	memcpy(&m_nVLD, packet + offset, sizeof(unsigned short));
+	offset += sizeof(unsigned short) * 2;	// vld output (2byte), vld input (2byte)
 }
 void CLaserModule::parseSMPacket(BYTE* packet, int size) {
 	int offset = 0;
@@ -319,6 +337,9 @@ void CLaserModule::handlePacket() {
 	}
 
 	switch (fid) {
+	case eFID::FID_AUTO_REPORT:
+		parseAutoReportPacket(&m_vPacket[DATA_IDX], dataLength);
+		break;
 	case eFID::FID_SM_GET_STATE:
 		parseSMPacket(&m_vPacket[DATA_IDX], dataLength);
 		break;

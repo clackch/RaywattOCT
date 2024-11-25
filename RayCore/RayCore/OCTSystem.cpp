@@ -283,6 +283,7 @@ RayError COCTSystem::ManualCalibration(bool forward) {
 		if (m_pLaserModule->IsConnected() == false) return RayError::DeviceNotConnected;
 		if (m_pLaserModule->IsMoving(eStepMotorIndex::DelayLine)) return RayError::DeviceBusy;
 
+		m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_DEFAULT);
 		m_pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, (forward ? DELAYLINE_FORWARD_POSITION : DELAYLINE_BACKWARD_POSITION));
 
 		return RayError::OK;
@@ -396,6 +397,7 @@ int COCTSystem::StartReview(char* strFilePath) {
 			PLOGE.printf("InvalidArgument : %s", strFilePath);
 			return (int)RayError::InvalidArgument;
 		}
+		pSession->LoadZOffset(strFilePath);
 
 		postPriorMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
 		postPriorMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
@@ -417,6 +419,7 @@ RayError COCTSystem::StartCompare(char* strFilePath) {
 	if (pSession == nullptr) {
 		return RayError::InvalidArgument;
 	}
+	pSession->LoadZOffset(strFilePath);
 
 	if (m_reviewSession[SESSION_COMPARE] != nullptr) {
 		m_reviewSession[SESSION_COMPARE]->Stop();
@@ -455,6 +458,15 @@ RayError COCTSystem::EndReview()
 	return RayError::WrongState;
 }
 
+RayError COCTSystem::EndCompare()
+{
+	if (m_reviewSession[SESSION_COMPARE] != nullptr) {
+		m_reviewSession[SESSION_COMPARE]->Stop();
+	}
+
+	return RayError::OK;
+}
+
 /*
 * StartLiveView
 */
@@ -462,6 +474,7 @@ RayError COCTSystem::StartLiveView()
 {
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
+		m_pImagingLiveView->Start();
 
 		CConfiguration& config = CConfiguration::GetInstance();
 
@@ -483,6 +496,8 @@ RayError COCTSystem::StopLiveView()
 {
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
+		m_pImagingLiveView->Stop();
+		Sleep(500);
 
 		laserOnOff(false);
 		m_pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_STANDBY_OFF);
@@ -593,9 +608,9 @@ void* COCTSystem::GetVolumeData(void* pLumenContours) {
 					cv::Mat imgOCT = cv::Mat(nDiameter, nDiameter, CV_8UC1, ((char*)pVolumeData) + nOffset);
 
 					cv::Point center(nDiameter/2, nDiameter/2);
-					cv::Size axes(45, 45);
+					cv::Size axes(30, 30);
 					cv::Scalar color(0, 0, 0);
-					cv::ellipse(imgOCT, center, axes, 0, 0, 360, color, -1/*»ö»ó Ã¤¿ì±â = -1*/);
+					cv::ellipse(imgOCT, center, axes, 0, 0, 360, color, -1);
 				}
 			}
 			return pVolumeData;
@@ -628,6 +643,7 @@ RayError COCTSystem::OpenImage(char* strFilePath) {
 	if (pSession == nullptr) {
 		return RayError::InvalidArgument;
 	}
+	pSession->LoadZOffset(strFilePath);
 
 	m_openedSession = pSession;
 	m_openedSession->InitCutView(cv::Scalar(0x00, 0x00, 0x00));
@@ -1005,6 +1021,32 @@ UINT COCTSystem::GetLongitudeImageChannels()
 	}
 }
 
+RayError COCTSystem::SetSheathDiameter(double value)
+{
+	CConfiguration& config = CConfiguration::GetInstance();
+
+	m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX);	
+	if (value == 0.0) {
+		config.measurement.fSheathRadius = config.measurement.fSheathRadiusOnePointSix;
+		config.measurement.fSheathThickness = config.measurement.fSheathThicknessOnePointSix;
+
+		m_pLaserModule->Move(eStepMotorIndex::DelayLine, config.catheter.length);
+	}
+	else {
+		config.measurement.fSheathRadius = config.measurement.fSheathRadiusTwoPointSix;
+		config.measurement.fSheathThickness = config.measurement.fSheathThicknessTwoPointSix;
+
+		m_pLaserModule->Move(eStepMotorIndex::DelayLine, 0);
+	}
+	config.measurement.nSheathPosition = config.measurement.fSheathRadius * 1000.f / config.measurement.fAxialResolutionScale;
+	config.measurement.nSheathThickness = config.measurement.fSheathThickness * 1000.f / config.measurement.fAxialResolutionScale;
+
+	m_pImagingPullback->SetMeasurementSetting(config.measurement);
+	m_pImagingLiveView->SetMeasurementSetting(config.measurement);
+
+	return RayError::OK;
+}
+
 /*
 * GetImageThreshold
 */
@@ -1037,6 +1079,60 @@ double COCTSystem::GetImageRoi()
 RayError COCTSystem::SetImageRoi(double value)
 {
 	m_fImageRoi = value;
+
+	return RayError::OK;
+}
+
+/*
+* GetImageCompensation
+*/
+bool COCTSystem::GetImageCompensation()
+{
+	return m_bImageCompensation;
+}
+
+/*
+* SetImageCompensation
+*/
+RayError COCTSystem::SetImageCompensation(bool value)
+{
+	m_bImageCompensation = value;
+
+	COCTImaging::SetImageCompensation(m_bImageCompensation);
+
+	return RayError::OK;
+}
+
+/*
+* SetImageCompensation
+*/
+RayError COCTSystem::SetImageCompensationControlWindow(bool value)
+{
+	m_bImageCompensationControlWindow = value;
+
+	COCTImaging::SetImageCompensationControlWindow(m_bImageCompensationControlWindow);
+
+	m_bImageCompensationControlWindow = 0;
+
+	return RayError::OK;
+}
+
+/*
+* GetImageLumenVignetting
+*/
+bool COCTSystem::GetImageLumenVignetting()
+{
+	return m_bImageLumenVignetting;
+}
+
+/*
+* SetImageLumenVignetting
+*/
+RayError COCTSystem::SetImageLumenVignetting(bool value)
+{
+	m_bImageLumenVignetting = value;
+
+	COCTImaging::SetImageLumenVignetting(m_bImageLumenVignetting);
 
 	return RayError::OK;
 }
@@ -1284,22 +1380,19 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 
 	if (pLaserModule != nullptr && pLaserModule->IsConnected())
 	{
+		// 0. Speed Up
+		pLaserModule->Set(eStepMotorIndex::Both, CM_SM_SPEED_AUTO);
+
 		// 1. Start Finding Sheath
 		pSystem->m_vCalibrationInfo.clear();
 		pSystem->m_cathState = CatheterState::FindingSheath;
 		
 		// 1-1. Move Delay-line & Find Sheath
-		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, DELAYLINE_BACKWARD_POSITION * 50);
-		do {
-			Sleep(10);
-			if (!pLaserModule->IsMoving(eStepMotorIndex::DelayLine)) pLaserModule->Move(eStepMotorIndex::DelayLine, nTargetPos);
-		} while (pLaserModule->GetPosition(eStepMotorIndex::DelayLine) != nTargetPos);
+		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, -1000);
+		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
-		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, DELAYLINE_FORWARD_POSITION * 100);
-		do {
-			Sleep(10);
-			if (!pLaserModule->IsMoving(eStepMotorIndex::DelayLine)) pLaserModule->Move(eStepMotorIndex::DelayLine, nTargetPos);
-		} while (pLaserModule->GetPosition(eStepMotorIndex::DelayLine) != nTargetPos);
+		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, 2000);
+		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
 		// 1-2. Find Z-Offset Position
 		const int nSheathPosition = CConfiguration::GetInstance().measurement.nSheathPosition;
@@ -1312,31 +1405,24 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 				nZOffset = pSystem->m_vCalibrationInfo.at(i).second;
 			}
 		}
+		PLOGI.printf("Calibrated zOffset: %d", nZOffset);
 
 		// 1-3. Move to calibrated position
 		nTargetPos = nZOffset;
 		pLaserModule->Move(eStepMotorIndex::DelayLine, nZOffset);
-		do {
-			Sleep(10);
-			if (!pLaserModule->IsMoving(eStepMotorIndex::DelayLine)) pLaserModule->Move(eStepMotorIndex::DelayLine, nTargetPos);
-		} while (pLaserModule->GetPosition(eStepMotorIndex::DelayLine) != nTargetPos);
+		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
+#if 1
 		// 2. Start Finding Peak
 		pSystem->m_vCalibrationInfo.clear();
 		pSystem->m_cathState = CatheterState::FindingPeak;
 
 		// 2-1. Move Polarization-control & Find Peak
 		nTargetPos = pLaserModule->Move(eStepMotorIndex::Polarization, 0);
-		do {
-			Sleep(10);
-			if (!pLaserModule->IsMoving(eStepMotorIndex::Polarization)) pLaserModule->Move(eStepMotorIndex::Polarization, nTargetPos);
-		} while (pLaserModule->GetPosition(eStepMotorIndex::Polarization) != nTargetPos);
+		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
 
 		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::Polarization, 3240);
-		do {
-			Sleep(10);
-			if (!pLaserModule->IsMoving(eStepMotorIndex::Polarization)) pLaserModule->Move(eStepMotorIndex::Polarization, nTargetPos);
-		} while (pLaserModule->GetPosition(eStepMotorIndex::Polarization) != nTargetPos);
+		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
 
 		// 2-2. Find Max Peak
 		int nMaxPeak = INT_MIN;
@@ -1350,11 +1436,11 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 
 		// 2-3. Move to calibrated position
 		nTargetPos = nMaxPeakPos;
-		pLaserModule->Move(eStepMotorIndex::DelayLine, nTargetPos);
-		do {
-			Sleep(10);
-			if (!pLaserModule->IsMoving(eStepMotorIndex::DelayLine)) pLaserModule->Move(eStepMotorIndex::DelayLine, nTargetPos);
-		} while (pLaserModule->GetPosition(eStepMotorIndex::DelayLine) != nTargetPos);
+		pLaserModule->Move(eStepMotorIndex::Polarization, nTargetPos);
+		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
+#endif
+		// 3. Default Speed
+		pLaserModule->Set(eStepMotorIndex::Both, CM_SM_SPEED_DEFAULT);
 	}
 	
 	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Calibrated);
@@ -1416,7 +1502,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 
 	// 5. Homing
 	Sleep(2000);
-	pRJController->Set(eStepMotorIndex::Both, STEP_MOTOR_SPEED_DEFAULT);
+	pRJController->Set(eStepMotorIndex::Both, STEP_MOTOR_SPEED_DEFAULT / 2);
 	pRJController->Move(eStepMotorIndex::Both, 0);
 	pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 	pRJController->Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
@@ -1511,6 +1597,10 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	}
 
 	if (pRJController->IsConnected()) {
+		if (pRJController->IsRun()) {
+			pRJController->StopMotor();
+			Sleep(2000);
+		}
 		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
 		pRJController->Move(eStepMotorIndex::Pullback, 20000, false, 0x08 /* photo-sensor #4 */);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
@@ -1716,7 +1806,7 @@ int COCTSystem::connectRotaryJunction() {
 	if (!m_pLaserModule->IsConnected()) {
 		result = m_pLaserModule->Connect(config.laserModule.port);
 		if (result) {
-			m_pLaserModule->Set(eStepMotorIndex::Both, CALIBRATION_MODULE_SM_DEFAULT_SPEED);
+			m_pLaserModule->Set(eStepMotorIndex::Both, CM_SM_SPEED_DEFAULT);
 			m_pLaserModule->SetVLD(0);
 			Sleep(500);
 			m_pLaserModule->SetVOA(config.laserModule.voaValue);
@@ -1765,8 +1855,14 @@ int COCTSystem::disconnectRotaryJunction() {
 
 	if (m_pLaserModule->IsConnected()) {
 		//m_pLaserModule->Home(-100000, 10000);
+		m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX);
+		m_pLaserModule->Move(eStepMotorIndex::DelayLine, 0);
+		m_pLaserModule->Move(eStepMotorIndex::Polarization, 0);
 		m_pLaserModule->SetVLD(0);
 		m_pLaserModule->SetVOA(0);
+
+		bool run = true;
+		waitForStepMotors(eStepMotorIndex::DelayLine, run);
 	}
 
 	m_pRJController->Disconnect();
@@ -1954,6 +2050,16 @@ bool COCTSystem::waitForStepMotors(bool& runFlag) {
 	}
 
 	return m_pRJController->IsMoving();
+}
+bool COCTSystem::waitForStepMotors(eStepMotorIndex idxMotor, bool& runFlag) {
+	if (!m_pLaserModule->IsConnected()) return false;
+
+	Sleep(100);
+	while (m_pLaserModule->IsMoving(idxMotor) && runFlag) {
+		Sleep(30);
+	}
+
+	return m_pLaserModule->IsMoving(idxMotor);
 }
 void COCTSystem::calculateIntensity(cv::Mat image) {
 	CConfiguration& config = CConfiguration::GetInstance();

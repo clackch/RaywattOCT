@@ -455,6 +455,7 @@ namespace RaywattApp.Common.Bases
         public const double ZoomScaleMax = ZoomScaleDefault * 2;
         public const double ZoomAngioCsScaleDefault = CrossSectionAngio / OCTImageSize;
         public const double ZoomAngioCsScaleMax = ZoomAngioCsScaleDefault * 2;
+        public const int Zoom3DScaleMax = 5;
 
         //Recording
         public const int TransientTime = 100;

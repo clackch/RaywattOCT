@@ -379,6 +379,7 @@ namespace RaywattApp.ViewModels.Dialog
                             patientCaseAnnotation.LumenStent = obj["LumenStent"]?.ToString() ?? "null";
                             patientCaseAnnotation.LumenGuidewire = obj["LumenGuidewire"]?.ToString() ?? "null";
                             patientCaseAnnotation.FfrPlaque = obj["FfrPlaque"]?.ToString() ?? "null";
+                            patientCaseAnnotation.CoRegistration = obj["CoRegistration"]?.ToString() ?? "null";
                             annotations.Add(patientCaseAnnotation);
                         }
                     }
@@ -435,6 +436,7 @@ namespace RaywattApp.ViewModels.Dialog
                             sqlParameters["field_of_view"] = patientCase.FieldOfView;
                             sqlParameters["brightness"] = patientCase.Brightness;
                             sqlParameters["contrast"] = patientCase.Contrast;
+                            sqlParameters["sheath_diameter"] = patientCase.SheathDiameter;
                             sqlParameters["section_proximal"] = patientCase.SectionProximal;
                             sqlParameters["section_distal"] = patientCase.SectionDistal;
                             sqlParameters["create_date"] = patientCase.CreateDate;
@@ -461,6 +463,7 @@ namespace RaywattApp.ViewModels.Dialog
                                         sqlParameters["lumen_stent"] = annotation.LumenStent;
                                         sqlParameters["lumen_guidewire"] = annotation.LumenGuidewire;
                                         sqlParameters["ffr_plaque"] = annotation.FfrPlaque;
+                                        sqlParameters["co_registration"] = annotation.CoRegistration;
                                         nRows = _sqlManager.UpsertPatientCaseAnnotation(sqlParameters);
                                         if (nRows == 0)
                                             _log.Error("Upsert Error");

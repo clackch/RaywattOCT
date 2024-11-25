@@ -6,7 +6,6 @@
 #include "CommonDlg.h"
 #include "Imaging.h"
 #include "AcquisitionDevice.h"
-#include "ArduinoController.h"
 #include "LaserModule.h"
 #include "ScopeView.h"
 #include "RotaryJunctionDlg.h"
@@ -68,7 +67,7 @@ private:
 	ScopeView m_scopeViewFFT;
 	int m_radioImageShape;
 	int m_radioImageColor;
-	BOOL m_chkImageHotColor;
+	int m_radioImageLUT;
 	BOOL m_chkShowGuide;
 	CSliderCtrl m_sliderBrightness;
 	CSliderCtrl m_sliderContrast;
@@ -102,6 +101,15 @@ private:
 	bool m_bInitialized;
 	bool m_bStartAcquisition;
 
+	// Z-Offset Calibration
+	int m_nCurFrame;
+	int m_nPrevFrame;
+	std::vector<int> m_vZOffset;
+	BOOL m_chkShowSheathGuide;
+
+	BOOL m_chkCompensation;
+	CThread* m_pThreadCompParamWin;
+
 // 생성입니다.
 public:
 	CRaywattLabDlg(CWnd* pParent = nullptr);	// 표준 생성자입니다.
@@ -132,6 +140,7 @@ private:
 	void findFileByExtension(CString strFolder, CString strExt, std::vector<CString>& vList);
 	void updateMeasurement(USHORT nPeakValue, int nPeakIndex, int nLineWidth, USHORT nNoisePower);
 	void drawGuideLine(cv::Mat image);
+	cv::Mat getFoVImage(cv::Mat image, double fov);
 
 	/*
 	* threadService
@@ -139,6 +148,7 @@ private:
 	static UINT threadService(LPVOID param);
 	static UINT threadSaveCalibration(LPVOID param);
 	static UINT threadPullback(LPVOID param);
+	static UINT threadCompensationParamWindow(LPVOID param);
 
 // 구현입니다.
 protected:
@@ -170,7 +180,6 @@ public:
 	afx_msg void OnBnClickedRadioImageRectangle();
 	afx_msg void OnBnClickedRadioColorBlack();
 	afx_msg void OnBnClickedRadioColorWhite();
-	afx_msg void OnBnClickedCheckHotColor();
 	afx_msg void OnBnClickedCheckShowGuide();
 	afx_msg void OnNMCustomdrawSliderBrightness(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNMCustomdrawSliderContrast(NMHDR* pNMHDR, LRESULT* pResult);
@@ -188,4 +197,15 @@ public:
 	afx_msg void OnBnClickedButtonPullback();
 	afx_msg void OnBnClickedButtonRestartAcquisition();
 	afx_msg void OnBnClickedButtonShowScope();
+	afx_msg void OnBnClickedButtonZoffsetInc();
+	afx_msg void OnBnClickedButtonZoffsetDec();
+	afx_msg void OnBnClickedButtonZoffsetSave();
+	afx_msg void OnBnClickedCheckShowSheathGuide();
+	afx_msg void OnBnClickedCheckCompensation();
+	afx_msg void OnBnClickedButtonPrevFrame();
+	afx_msg void OnBnClickedButtonNextFrame();
+	afx_msg void OnBnClickedButtonCopyZoffset();
+	afx_msg void OnBnClickedRadioGray();
+	afx_msg void OnBnClickedRadioGreen();
+	afx_msg void OnBnClickedRadioOrange();
 };

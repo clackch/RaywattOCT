@@ -17,6 +17,8 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
 using RaywattApp.Common.Angio;
+using System.Threading;
+using OpenCvSharp;
 
 namespace RaywattApp.ViewModels
 {
@@ -158,10 +160,33 @@ namespace RaywattApp.ViewModels
         }
 
         //Test
-        private ICommand _enhancedLUTTest;
-        public ICommand EnhancedLUTTestCommand
+        private ICommand _compensationTest;
+        public ICommand CompensationTestCommand
         {
-            get { return this._enhancedLUTTest ?? (this._enhancedLUTTest = new RelayCommand(EnhancedLUTTest)); }
+            get { return this._compensationTest ?? (this._compensationTest = new RelayCommand(CompensationTest)); }
+        }
+
+        //Test
+        private ICommand _compensationWindowTest;
+        public ICommand CompensationWindowTestCommand
+        {
+            get { return this._compensationWindowTest ?? (this._compensationWindowTest = new RelayCommand(CompensationControlWindowTest)); }
+        }
+
+        private Thread threadCompensationWindow = null;
+        private bool showCompensationWindow = false;
+
+        //Test
+        private ICommand _vignettingTest;
+        public ICommand VignettingTestCommand
+        {
+            get { return this._vignettingTest ?? (this._vignettingTest = new RelayCommand(VignettingTest)); }
+        }
+
+        private ICommand _SaveVTIFileTest;
+        public ICommand SaveVTIFileTestCommand
+        {
+            get { return this._SaveVTIFileTest ?? (this._SaveVTIFileTest = new RelayCommand(SaveVTIFileTest)); }
         }
 
         //Test
@@ -328,6 +353,12 @@ namespace RaywattApp.ViewModels
 
             if (result != null && result.DialogAnswer != DialogResults.Answer.No)
             {
+                if (threadCompensationWindow != null)
+                {
+                    showCompensationWindow = false;
+                    threadCompensationWindow.Join();
+                }
+
                 if (result.DialogAnswer == DialogResults.Answer.Extra)
                 {
                     DeviceStatus.PowerOffMsg = _l10n["Switching user"];
@@ -438,11 +469,68 @@ namespace RaywattApp.ViewModels
             IsImageAnalysisTest = !IsImageAnalysisTest;
         }
 
-        private void EnhancedLUTTest()
+        private void CompensationTest()
         {
-            _log.Debug("EnhancedLUTTest");
+            _log.Debug("CompensationTest");
 
-            RaySetProperty(Property.Colormap, 3);
+            bool bImageCompensation = (bool)(RayGetProperty(Property.ImageCompensation) != 0);
+
+            RaySetProperty(Property.ImageCompensation, bImageCompensation ? 0 : 1);
+        }
+
+        private void CompensationControlWindowTest()
+        {
+            _log.Debug("CompensationControlWindowTest");
+
+            if (threadCompensationWindow == null)
+            {
+                threadCompensationWindow = new Thread(() => ThreadCompensationWindow(this));
+                threadCompensationWindow.Start();
+            }
+            else {
+                showCompensationWindow = false;
+                threadCompensationWindow.Join();
+                threadCompensationWindow = null;
+            }
+        }
+
+        private static void ThreadCompensationWindow(MainViewModel model)
+        {
+            _log.Debug("ThreadCompensationWindow");
+
+            model.showCompensationWindow = true;
+            RaySetProperty(Property.ImageCompensationControlWindow, 1);
+
+            while (model.showCompensationWindow) 
+            {
+                Cv2.WaitKey(1);
+            }
+
+            RaySetProperty(Property.ImageCompensationControlWindow, 0);
+
+            _log.Debug("ThreadCompensationWindow done.");
+        }
+
+        private void VignettingTest()
+        {
+            _log.Debug("VignettingTest");
+
+            bool bImageLumenVignetting = (bool)(RayGetProperty(Property.ImageLumenVignetting) != 0);
+
+            RaySetProperty(Property.ImageLumenVignetting, bImageLumenVignetting ? 0 : 1);
+        }
+
+        private void SaveVTIFileTest()
+        {
+            _log.Debug("SaveVTIFileTest");
+
+            CommonUtil.isVTIFileSave = !CommonUtil.isVTIFileSave;
+            if(CommonUtil.isVTIFileSave)
+                _log.Debug("SaveVTIFileTest True");
+            else
+            {
+                _log.Debug("SaveVTIFileTest False");
+            }
         }
 
         private void ImageAnalysisToggle()

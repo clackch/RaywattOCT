@@ -118,6 +118,18 @@ namespace RaywattApp.ViewModels
             get { return this._cmdMoveIndicator ?? (this._cmdMoveIndicator = new RelayCommand<object>(MoveIndicator)); }
         }
 
+        private ICommand _cmdTouchMoveIndicator;
+        public ICommand CmdTouchMoveIndicator
+        {
+            get { return this._cmdTouchMoveIndicator ?? (this._cmdTouchMoveIndicator = new RelayCommand<object>(TouchMoveIndicator)); }
+        }
+
+        private ICommand _cmdTouchMoveCompareIndicator;
+        public ICommand CmdTouchMoveCompareIndicator
+        {
+            get { return this._cmdTouchMoveCompareIndicator ?? (this._cmdTouchMoveCompareIndicator = new RelayCommand<object>(TouchMoveCompareIndicator)); }
+        }
+
         private ICommand _cmdViewSizeChanged;
         public ICommand CmdViewSizeChanged
         {
@@ -154,8 +166,6 @@ namespace RaywattApp.ViewModels
             ExpandLeftDownMenu = false;
 
             IsIndicatorLockOn = false;
-
-            DeviceStatus.IsOCTImagingCompareDone = false;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -184,6 +194,7 @@ namespace RaywattApp.ViewModels
                     {
                         RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath);
                         ZoomCompare.SetFieldOfView(Constants.OCTImageSize * ReviewStatus.SelectedPatientCase.ImageResolution / PatientCase.FieldOfView);
+                        DeviceStatus.IsOCTImagingCompareDone = false;
                         Thread.Sleep(500);
                     }
                     else
@@ -195,7 +206,6 @@ namespace RaywattApp.ViewModels
                 {
                     GetPatientCase(false, ReviewStatus.SelectedPatientCase.LumenContours, ReviewStatus.SelectedPatientCase.LumenSidebranches, ReviewStatus.SelectedPatientCase.LumenStents, ReviewStatus.SelectedPatientCase.LumenGuidewires);
                     ZoomCompare.SetFieldOfView(Constants.OCTImageSize * ReviewStatus.SelectedPatientCase.ImageResolution / PatientCase.FieldOfView);
-                    DeviceStatus.IsOCTImagingCompareDone = true;
                 }
 
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
@@ -307,10 +317,10 @@ namespace RaywattApp.ViewModels
             ExpandLeftUpMenu = false;
 
             if (ReviewStatus.SelectedPatientCase != null) {
-
                 LumenContourCommand = Constants.LumenContourClear;
                 HideLumenProfileCompare();
 
+                RayEndCompare();
                 DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current = 0;
                 RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath);
                 ZoomCompare.SetFieldOfView(Constants.OCTImageSize * ReviewStatus.SelectedPatientCase.ImageResolution / PatientCase.FieldOfView);
@@ -347,7 +357,20 @@ namespace RaywattApp.ViewModels
             {
                 if(isNullPatientCase)
                 {
-                    ReviewStatus.SelectedPatientCase = PatientCases[0];
+                    sqlParameters.Clear();
+                    sqlParameters["id"] = Patient.Id;
+                    sqlParameters["create_date"] = PatientCase.CreateDate;
+
+                    IList<PatientCase> prePatientCase = _sqlManager.SelectPrePatientCase(sqlParameters);
+
+                    foreach(PatientCase patientCase in PatientCases)
+                    {
+                        if(patientCase.Id == prePatientCase[0].Id)
+                        {
+                            ReviewStatus.SelectedPatientCase = patientCase;
+                            break;
+                        }
+                    }                    
                 }
                 else
                 {
@@ -413,13 +436,7 @@ namespace RaywattApp.ViewModels
                     return;
                 }
 
-                if (indicator.IsLongitudeMove)
-                {
-                    indicator.IndicatorDiff = indicator.PointLongitudeX - indicator.Coordinate.X - indicator.X;
-                    indicator.IsLongitudeMove = false;
-                }
-
-                double indicatorX = indicator.PointLongitudeX - indicator.Coordinate.X - indicator.IndicatorDiff;
+                double indicatorX = indicator.PointLongitudeX - indicator.Coordinate.X - Constants.LongitudeIndicatorWidth / 2;
                 double indicatorCenterX = indicatorX + Constants.LongitudeIndicatorWidth / 2;
 
                 if (indicatorCenterX < 0)
@@ -435,6 +452,26 @@ namespace RaywattApp.ViewModels
                     setCurrentFrame(indicator, indicatorCenterX);
                 }
             }
+        }
+
+        private void TouchMoveIndicator(object param)
+        {
+            MouseEventArgs e = (MouseEventArgs)param;
+            var position = e.GetPosition((IInputElement)e.Source);
+
+            IndicatorLongitude.X = position.X - Constants.LongitudeIndicatorWidth / 2;
+            IndicatorLongitude.CenterX = IndicatorLongitude.X + Constants.LongitudeIndicatorWidth / 2;
+            setCurrentFrame(IndicatorLongitude, IndicatorLongitude.CenterX);
+        }
+
+        private void TouchMoveCompareIndicator(object param)
+        {
+            MouseEventArgs e = (MouseEventArgs)param;
+            var position = e.GetPosition((IInputElement)e.Source);
+
+            IndicatorCompareLongitude.X = position.X - Constants.LongitudeIndicatorWidth / 2;
+            IndicatorCompareLongitude.CenterX = IndicatorCompareLongitude.X + Constants.LongitudeIndicatorWidth / 2;
+            setCurrentFrame(IndicatorCompareLongitude, IndicatorCompareLongitude.CenterX);
         }
 
         private void ViewSizeChanged(object param)

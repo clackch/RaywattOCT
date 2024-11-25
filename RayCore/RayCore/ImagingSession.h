@@ -51,6 +51,8 @@ private:
 	std::vector<cv::Mat> m_vGuidewire;
 	char* m_pVolumeData;
 
+	std::vector<int> m_vZOffset;
+
 private:
 	CImagingSession(CMessageService* pMsg, int nSession, bool deleteData = true);
 public:
@@ -95,6 +97,9 @@ public:
 	int GetNumOfStentPoints(int nFrame);
 	void* GetGuidewirePoints(int nFrame);
 	int GetNumOfGuidewirePoints(int nFrame);
+
+	bool LoadZOffset(const char* strDataFilePath);
+	int GetZOffset(int nFrame);
 
 private:
 	static CImagingSession* createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type);
