@@ -5,7 +5,6 @@ using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
-using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.Views.Dialog;
 using System;
@@ -37,7 +36,7 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private Zoom _zoom = new Zoom();
 
-        private int manualCalibration;
+        private int zOffset;
 
         private ICommand _okCommand;
         public ICommand OkCommand
@@ -63,10 +62,10 @@ namespace RaywattApp.ViewModels
             get { return _cmdManualZoomIn ?? (this._cmdManualZoomIn = new RelayCommand<bool>(ManualZoomIn)); }
         }
 
-        private ICommand _recalibrateCommand;
-        public ICommand RecalibrateCommand
+        private ICommand _revertCalibrateCommand;
+        public ICommand RevertCalibrateCommand
         {
-            get { return this._recalibrateCommand ?? (this._recalibrateCommand = new RelayCommand(Recalibrate)); }
+            get { return this._revertCalibrateCommand ?? (this._revertCalibrateCommand = new RelayCommand(RevertCalibrate)); }
         }
 
         public ReviewCalibrationViewModel(IDialogService dialogService)
@@ -116,40 +115,39 @@ namespace RaywattApp.ViewModels
 
             if (zoomIn)
             {
-                this.manualCalibration += 1;
+                this.zOffset += 1;
 
-                if(PatientCase.ManualCalibration + this.manualCalibration > Constants.ManualCalibrationLimit)
+                if(PatientCase.ZOffset + this.zOffset > Constants.ZOffsetLimit)
                 {
-                    this.manualCalibration -= 1;
+                    this.zOffset -= 1;
                     return;
                 }
             }
             else
             {
-                this.manualCalibration -= 1;
+                this.zOffset -= 1;
 
-                if (PatientCase.ManualCalibration + this.manualCalibration < -1 * Constants.ManualCalibrationLimit)
+                if (PatientCase.ZOffset + this.zOffset < -1 * Constants.ZOffsetLimit)
                 {
-                    this.manualCalibration += 1;
+                    this.zOffset += 1;
                     return;
                 }
             }
 
-            DrawSheathIndicator();
+            RaySetProperty(Property.ZOffset, PatientCase.ZOffset + this.zOffset);
+            MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
         }
 
         private void Reset()
         {
             _log.Debug("Reset");
 
-            this.manualCalibration = 0;
-
-            DrawSheathIndicator();
+            this.zOffset = 0;
         }
 
-        private void Recalibrate()
+        private void RevertCalibrate()
         {
-            _log.Debug("Recalibrate");
+            _log.Debug("RevertCalibrate");
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             DialogResults? result = null;
@@ -160,8 +158,8 @@ namespace RaywattApp.ViewModels
 
             if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
             {
-                this.manualCalibration = 0;
-                PatientCase.ManualCalibration = 0;
+                this.zOffset = 0;
+                PatientCase.ZOffset = 0;
 
                 Ok();
             }
@@ -178,7 +176,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Ok");
 
-            PatientCase.ManualCalibration += this.manualCalibration;
+            PatientCase.ZOffset += this.zOffset;
 
             GoToPreviousPage(true);
         }

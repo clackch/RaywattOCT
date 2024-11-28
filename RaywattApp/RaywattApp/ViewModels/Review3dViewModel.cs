@@ -280,7 +280,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["field_of_view"] = PatientCase.FieldOfView;
             sqlParameters["section_proximal"] = PatientCase.SectionProximal;
             sqlParameters["section_distal"] = PatientCase.SectionDistal;
-            sqlParameters["manual_calibration"] = PatientCase.ManualCalibration;
+            sqlParameters["z_offset"] = PatientCase.ZOffset;
 
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
             if (nRows == 0)

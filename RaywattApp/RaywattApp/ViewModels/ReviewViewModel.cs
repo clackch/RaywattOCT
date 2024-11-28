@@ -193,9 +193,6 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        [ObservableProperty]
-        protected double _crossSectionScaleTest;
-
         private double _fieldOfView;
         public double FieldOfView
         {
@@ -1227,7 +1224,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["brightness"] = PatientCase.Brightness;
             PatientCase.Contrast = Contrast;
             sqlParameters["contrast"] = PatientCase.Contrast;
-            sqlParameters["manual_calibration"] = PatientCase.ManualCalibration;
+            sqlParameters["z_offset"] = PatientCase.ZOffset;
             PatientCase.FieldOfView = FieldOfView;
             sqlParameters["field_of_view"] = PatientCase.FieldOfView;
             PatientCase.SectionProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveCenterWidth);

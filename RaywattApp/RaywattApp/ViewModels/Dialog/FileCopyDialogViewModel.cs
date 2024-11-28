@@ -238,7 +238,7 @@ namespace RaywattApp.ViewModels.Dialog
                         RaySetProperty(Property.Contrast, patientCase.Contrast);
                         CommonUtil.SetColormap(patientCase.Colormap);
                         List<Mat> imgCrossSections = new List<Mat>();
-                        Mat? imgLongitude = await CommonUtil.ConvertImage(patientCase.ImageFullPath, patientCase.ImageResolution, patientCase.IndicatorDegree, imgCrossSections, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
+                        Mat? imgLongitude = await CommonUtil.ConvertImage(patientCase.ImageFullPath, patientCase.ImageResolution, patientCase.ZOffset, patientCase.IndicatorDegree, imgCrossSections, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
                         List<Mat> convertedImages = await CommonUtil.MakeImageForExport(patientCase, imgCrossSections, imgLongitude, exportIndices, FileExport, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
 
                         await Task.Run(() =>
@@ -316,7 +316,7 @@ namespace RaywattApp.ViewModels.Dialog
                 RaySetProperty(Property.Contrast, patientCase.Contrast);
                 CommonUtil.SetColormap(patientCase.Colormap);
                 List<Mat> imgCrossSections = new List<Mat>();
-                Mat? imgLongitude = await CommonUtil.ConvertImage(patientCase.ImageFullPath, patientCase.ImageResolution, patientCase.IndicatorDegree, imgCrossSections, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
+                Mat? imgLongitude = await CommonUtil.ConvertImage(patientCase.ImageFullPath, patientCase.ImageResolution, patientCase.ZOffset, patientCase.IndicatorDegree, imgCrossSections, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
                 List<Mat> convertedImages = await CommonUtil.MakeImageForExport(patientCase, imgCrossSections, imgLongitude, exportIndices, FileExport, prog => Progress += prog, progressConvert, progText => ProgressText = progText);
 
                 if (format == Constants.ExportPullbackAVI)
@@ -444,7 +444,7 @@ namespace RaywattApp.ViewModels.Dialog
                             string srcPath = CommonUtil.GetDirectoryPath(path) + "\\" + patientCase.Image;
                             sqlParameters["image"] = System.IO.File.Exists(srcPath) ? patientCase.Image : "";
                             sqlParameters["image_resolution"] = patientCase.ImageResolution;
-                            sqlParameters["manual_calibration"] = patientCase.ManualCalibration;
+                            sqlParameters["z_offset"] = patientCase.ZOffset;
 
                             var nRows = _sqlManager.UpsertPatientCase(sqlParameters);
                             if (nRows == 1)

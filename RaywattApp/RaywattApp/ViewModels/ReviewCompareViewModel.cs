@@ -192,7 +192,7 @@ namespace RaywattApp.ViewModels
 
                     if (ReviewStatus.SelectedPatientCase != null)
                     {
-                        RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath, ReviewStatus.SelectedPatientCase.ImageResolution);
+                        RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath, ReviewStatus.SelectedPatientCase.ImageResolution, ReviewStatus.SelectedPatientCase.ZOffset);
                         ZoomCompare.SetFieldOfView(Constants.OCTImageSize * ReviewStatus.SelectedPatientCase.ImageResolution / PatientCase.FieldOfView);
                         DeviceStatus.IsOCTImagingCompareDone = false;
                         Thread.Sleep(500);
@@ -322,7 +322,7 @@ namespace RaywattApp.ViewModels
 
                 RayEndCompare();
                 DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current = 0;
-                RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath, ReviewStatus.SelectedPatientCase.ImageResolution);
+                RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath, ReviewStatus.SelectedPatientCase.ImageResolution, ReviewStatus.SelectedPatientCase.ZOffset);
                 ZoomCompare.SetFieldOfView(Constants.OCTImageSize * ReviewStatus.SelectedPatientCase.ImageResolution / PatientCase.FieldOfView);
                 DeviceStatus.IsOCTImagingCompareDone = false;
                 Thread.Sleep(500);

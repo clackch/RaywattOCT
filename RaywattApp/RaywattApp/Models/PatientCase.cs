@@ -89,7 +89,7 @@ namespace RaywattApp.Models
         private double imageResolution;
 
         [ObservableProperty]
-        private int _manualCalibration;
+        private int _zOffset;
 
         [ObservableProperty]
         private double fieldOfView;
