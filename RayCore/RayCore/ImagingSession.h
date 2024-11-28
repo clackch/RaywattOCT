@@ -98,7 +98,7 @@ public:
 	void* GetGuidewirePoints(int nFrame);
 	int GetNumOfGuidewirePoints(int nFrame);
 
-	bool LoadZOffset(const char* strDataFilePath);
+	bool LoadZOffset(int zOffset);
 	int GetZOffset(int nFrame);
 
 private:

@@ -46,11 +46,11 @@ _declspec(dllexport) RayError RayLoadCatheter() {
 _declspec(dllexport) RayError RayUnloadCatheter() {
     return octSystem.UnloadCatheter();
 }
-_declspec(dllexport) int RayStartReview(char* strFilePath, double imageResolution) {
-    return octSystem.StartReview(strFilePath, imageResolution);
+_declspec(dllexport) int RayStartReview(char* strFilePath, double imageResolution, double zOffset) {
+    return octSystem.StartReview(strFilePath, imageResolution, zOffset);
 }
-_declspec(dllexport) RayError RayStartCompare(char* strFilePath, double imageResolution) {
-    return octSystem.StartCompare(strFilePath, imageResolution);
+_declspec(dllexport) RayError RayStartCompare(char* strFilePath, double imageResolution, double zOffset) {
+    return octSystem.StartCompare(strFilePath, imageResolution, zOffset);
 }
 _declspec(dllexport) RayError RayEndReview() {
     return octSystem.EndReview();
@@ -125,6 +125,9 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
         break;
     case RayProperty::FieldOfView:
         octSystem.SetFieldOfView(value);
+        break;
+    case RayProperty::ZOffset:
+        octSystem.SetZOffset(value);
         break;
     case RayProperty::TestMode:
         octSystem.SetTestMode((bool) value);
@@ -208,8 +211,8 @@ _declspec(dllexport) RayError RayStartLumenDetection() {
     return octSystem.StartLumenDetection();
 }
 
-_declspec(dllexport) RayError RayOpenImage(char* strFilePath, double imageResolution) {
-    return octSystem.OpenImage(strFilePath, imageResolution);
+_declspec(dllexport) RayError RayOpenImage(char* strFilePath, double imageResolution, double zOffset) {
+    return octSystem.OpenImage(strFilePath, imageResolution, zOffset);
 }
 _declspec(dllexport) RayError RayCloseImage() {
     return octSystem.CloseImage();
