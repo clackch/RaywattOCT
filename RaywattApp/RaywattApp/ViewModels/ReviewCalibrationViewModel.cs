@@ -113,25 +113,15 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ManualZoomIn : " + ((zoomIn) ? "IN" : "OUT"));
 
-            if (zoomIn)
-            {
-                this.zOffset += 1;
 
-                if(PatientCase.ZOffset + this.zOffset > Constants.ZOffsetLimit)
-                {
-                    this.zOffset -= 1;
-                    return;
-                }
-            }
-            else
-            {
-                this.zOffset -= 1;
+            int sign = zoomIn ? 1 : -1;
 
-                if (PatientCase.ZOffset + this.zOffset < -1 * Constants.ZOffsetLimit)
-                {
-                    this.zOffset += 1;
-                    return;
-                }
+            this.zOffset += sign;
+
+            if (PatientCase.ZOffset + this.zOffset > Constants.ZOffsetLimit || PatientCase.ZOffset + this.zOffset < -1 * Constants.ZOffsetLimit)
+            {
+                this.zOffset += sign * -1;
+                return;
             }
 
             RaySetProperty(Property.ZOffset, PatientCase.ZOffset + this.zOffset);
@@ -143,6 +133,8 @@ namespace RaywattApp.ViewModels
             _log.Debug("Reset");
 
             this.zOffset = 0;
+            RaySetProperty(Property.ZOffset, PatientCase.ZOffset + this.zOffset);
+            MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
         }
 
         private void RevertCalibrate()
@@ -158,10 +150,18 @@ namespace RaywattApp.ViewModels
 
             if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
             {
-                this.zOffset = 0;
-                PatientCase.ZOffset = 0;
-
-                Ok();
+                if(PatientCase.ZOffset != 0)
+                {
+                    PatientCase.ZOffset = 0;
+                    RaySetProperty(Property.ZOffset, PatientCase.ZOffset);
+                    RestartReview();
+                }
+                else
+                {
+                    RaySetProperty(Property.ZOffset, PatientCase.ZOffset);
+                }
+                
+                GoToPreviousPage();
             }
         }
 
@@ -169,26 +169,38 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Cancel");
 
-            GoToPreviousPage(false);
+            Reset();
+
+            GoToPreviousPage();
         }
 
         private void Ok()
         {
             _log.Debug("Ok");
 
-            PatientCase.ZOffset += this.zOffset;
+            if(this.zOffset != 0)
+            {
+                PatientCase.ZOffset += this.zOffset;
+                RestartReview();
+            }
 
-            GoToPreviousPage(true);
+            GoToPreviousPage();
         }
 
-        private void GoToPreviousPage(bool isSave)
+        private void RestartReview()
+        {
+            _log.Debug("RestartReview");
+
+            RayRestartReview();
+
+            DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current = 0;
+            ReviewStatus.IsRestartLumenDetection = true;
+            ReviewStatus.IsLumenEdited = true;
+        }
+
+        private void GoToPreviousPage()
         {
             _log.Debug("GoToPreviousPage");
-
-            if (!isSave)
-            {
-                Reset();
-            }
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;

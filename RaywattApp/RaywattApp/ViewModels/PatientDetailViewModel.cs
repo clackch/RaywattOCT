@@ -374,9 +374,10 @@ namespace RaywattApp.ViewModels
             else
             {
                 // Wait for Review to start
-                for (int i = 0; i < 10; i++)
+                while (true)
                 {
-                    if ((RayScannerState)RayGetProperty(Property.CurrentState) == RayScannerState.Review) break;
+                    if ((RayScannerState)RayGetProperty(Property.CurrentState) == RayScannerState.Review)
+                        break;
                     Thread.Sleep(5);
                 }
             }

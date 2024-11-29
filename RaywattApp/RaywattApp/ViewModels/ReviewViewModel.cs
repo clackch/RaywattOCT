@@ -500,6 +500,17 @@ namespace RaywattApp.ViewModels
 
                 //Guidewire
                 LumenGuidewires = PatientCase.LumenGuidewires;
+
+                //Restart Lumen detection when re-calibrated
+                if (ReviewStatus.IsRestartLumenDetection)
+                {
+                    InitializeLumenData();
+                    DeviceStatus.IsLumenSaved = false;
+                    this.isLumenContourSave = true;
+                    ReviewStatus.IsRestartLumenDetection = false;
+                    ReviewStatus.IsMeasurementOn = false;
+                    ReviewStatus.IsPlay = true;
+                }
             }
             else
             {

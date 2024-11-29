@@ -53,9 +53,6 @@ namespace RaywattApp.Models
         private Zoom _zoomAngio = new Zoom(Constants.AngioSize);
 
         [ObservableProperty]
-        private Zoom _zoomFfr = new Zoom();
-
-        [ObservableProperty]
         private int _angioFrameNumber = -1;
 
         [ObservableProperty]
@@ -67,6 +64,9 @@ namespace RaywattApp.Models
         [ObservableProperty]
         private bool _isMeasureInit = false;
 
+        [ObservableProperty]
+        private bool _isRestartLumenDetection = false;
+
         //3D
 
 
@@ -75,5 +75,7 @@ namespace RaywattApp.Models
         private PatientCase _selectedPatientCase;
 
         //FFR
+        [ObservableProperty]
+        private Zoom _zoomFfr = new Zoom();
     }
 }
