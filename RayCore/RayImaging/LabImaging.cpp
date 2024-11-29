@@ -97,8 +97,6 @@ void CLabImaging::Process(char* fringes) {
 	generateImage(logData, false);
 
 	adaptive_compensation();
-
-	applyZOffset();
 }
 
 void CLabImaging::PostProcess(cv::Mat image) {

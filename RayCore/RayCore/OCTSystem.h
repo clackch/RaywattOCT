@@ -118,6 +118,7 @@ public:
 	RayError StartCompare(char* strFilePath, double imageResolution, double zOffset);
 	RayError EndReview();
 	RayError EndCompare();
+	RayError RestartReview();
 	RayError StartLiveView();
 	RayError StopLiveView();
 	RayError LaserOnOff(bool isOn);

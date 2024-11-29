@@ -389,7 +389,7 @@ RayError COCTSystem::UnloadCatheter() {
 * return N (>0) when current state & argument is right.
 * return Error Code (<0) when something is wrong.
 */
-int COCTSystem::StartReview(char* strFilePath, double imageResolution) {
+int COCTSystem::StartReview(char* strFilePath, double imageResolution, double zOffset) {
 	if (m_curState == RayScannerState::Initial || m_curState == RayScannerState::Default) {
 		if (imageResolution == 0.0f) return (int)RayError::InvalidArgument;
 
@@ -398,7 +398,7 @@ int COCTSystem::StartReview(char* strFilePath, double imageResolution) {
 			PLOGE.printf("InvalidArgument : %s", strFilePath);
 			return (int)RayError::InvalidArgument;
 		}
-		pSession->LoadZOffset(strFilePath);
+		pSession->SetZOffset((int)zOffset);
 
 		postPriorMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
 		postPriorMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
@@ -413,14 +413,14 @@ int COCTSystem::StartReview(char* strFilePath, double imageResolution) {
 /*
 * StartCompare
 */
-RayError COCTSystem::StartCompare(char* strFilePath, double imageResolution) {
+RayError COCTSystem::StartCompare(char* strFilePath, double imageResolution, double zOffset) {
 	if (m_curState != RayScannerState::Review) return RayError::WrongState;
 
 	CImagingSession* pSession = CImagingSession::CreateSession(this, SESSION_COMPARE, strFilePath, imageResolution);
 	if (pSession == nullptr) {
 		return RayError::InvalidArgument;
 	}
-	pSession->LoadZOffset(strFilePath);
+	pSession->SetZOffset((int)zOffset);
 
 	if (m_reviewSession[SESSION_COMPARE] != nullptr) {
 		m_reviewSession[SESSION_COMPARE]->Stop();
@@ -466,6 +466,21 @@ RayError COCTSystem::EndCompare()
 	}
 
 	return RayError::OK;
+}
+
+RayError COCTSystem::RestartReview()
+{
+	if (m_curState == RayScannerState::Review) {
+
+		m_reviewSession[SESSION_REVIEW]->StopThreadForRestart();
+		m_reviewSession[SESSION_REVIEW]->StartCutViewUpdate(m_backgroundColor);
+		m_reviewSession[SESSION_REVIEW]->StartVolumeGeneration();
+		m_reviewSession[SESSION_REVIEW]->StartObjectDetection();
+
+		return RayError::OK;
+	}
+
+	return RayError::WrongState;
 }
 
 /*
@@ -637,14 +652,14 @@ RayError COCTSystem::StartLumenDetection() {
 /*
 * OpenImage
 */
-RayError COCTSystem::OpenImage(char* strFilePath, double imageResolution) {
+RayError COCTSystem::OpenImage(char* strFilePath, double imageResolution, double zOffset) {
 	CloseImage();
 
 	CImagingSession *pSession = CImagingSession::CreateSession(this, SESSION_UNKNOWN, strFilePath, imageResolution);
 	if (pSession == nullptr) {
 		return RayError::InvalidArgument;
 	}
-	pSession->LoadZOffset(strFilePath);
+	pSession->SetZOffset((int)zOffset);
 
 	m_openedSession = pSession;
 	m_openedSession->InitCutView(cv::Scalar(0x00, 0x00, 0x00));
@@ -1152,6 +1167,22 @@ double COCTSystem::GetFieldOfView()
 RayError COCTSystem::SetFieldOfView(double value)
 {
 	m_fFieldOfView = value;
+
+	return RayError::OK;
+}
+
+/*
+* SetZOffset
+*/
+RayError COCTSystem::SetZOffset(double value)
+{
+	if (m_reviewSession[SESSION_REVIEW] != nullptr)
+	{
+		if (m_reviewSession[SESSION_REVIEW]->GetImaging() != nullptr)
+		{
+			m_reviewSession[SESSION_REVIEW]->SetZOffset((int)value);
+		}
+	}
 
 	return RayError::OK;
 }

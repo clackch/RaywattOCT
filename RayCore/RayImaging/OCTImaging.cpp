@@ -71,7 +71,6 @@ COCTImaging::COCTImaging(Setting setting, CMessageService* pMsg) {
 	m_nTotalFrame = 0;
 
 	m_nSheathPosition = 0;
-	m_nZOffset = 0;
 
 	clahe = cv::createCLAHE(0.02, cv::Size(8, 8));
 }
@@ -103,7 +102,6 @@ void COCTImaging::Process(char* fringes) {
 	findSheath(fFFTResult);
 	generateImage(fFFTResult, false);
 	adaptive_compensation();
-	applyZOffset();
 }
 void COCTImaging::PostProcess(cv::Mat image) {
 	const bool bInvert = m_bInvert;
@@ -134,8 +132,12 @@ void COCTImaging::PostProcess(cv::Mat image) {
 
 	CircularizeImage(imageResultColor, imageCircle);
 }
+void COCTImaging::ApplyZOffset(const cv::Mat& src, cv::Mat& dst, int zOffset) {
+	cv::Mat img = src.clone();
 
-
+	cv::Mat translation_matrix = (cv::Mat_<double>(2, 3) << 1, 0, zOffset * -1, 0, 1, 0);
+	cv::warpAffine(img, dst, translation_matrix, img.size());
+}
 int COCTImaging::Start() {
 	BOOL result = FALSE;
 	result = CUtility::StartThread(threadRender, m_pThread, (LPVOID)this);
@@ -489,13 +491,6 @@ void COCTImaging::generateImage(Ipp32f* logaritihmData, bool bInvert){
 	cv::flip(imageResult, imageResult, 1);
 }
 
-void COCTImaging::applyZOffset() {
-	cv::Mat img = imageResult.clone();
-
-	cv::Mat translation_matrix = (cv::Mat_<double>(2, 3) << 1, 0, m_nZOffset * -1, 0, 1, 0);
-	cv::warpAffine(img, imageResult, translation_matrix, img.size());
-}
-
 void COCTImaging::drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color) {
 	int posDraw = image.cols - nPosition - 1;
 
@@ -601,7 +596,6 @@ void COCTImaging::adaptive_compensation()
 
 			if (sum_val < energy_all.at<float>(0, x) / std::pow(10.0, ENERGY_THRESHOLD)) {
 				stop_rows[x] = z;
-				PLOGI.printf("current col : %d, stop Row = %d", x, z);
 				break;
 			}
 		}

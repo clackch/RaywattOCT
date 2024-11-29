@@ -28,6 +28,7 @@ extern "C" {
 	_declspec(dllexport) RayError RayStartCompare(char* strFilePath, double imageResolution, double zOffset);
 	_declspec(dllexport) RayError RayEndReview();
 	_declspec(dllexport) RayError RayEndCompare();
+	_declspec(dllexport) RayError RayRestartReview();
 	_declspec(dllexport) RayError RaySetSession(int session);
 	_declspec(dllexport) RayError RayRegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude);
 	_declspec(dllexport) RayError RayUnregisterImageCallback();

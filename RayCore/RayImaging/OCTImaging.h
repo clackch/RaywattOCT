@@ -55,7 +55,6 @@ protected:
 	int m_nTotalFrame;
 
 	int m_nSheathPosition;
-	int m_nZOffset;
 
 	cv::Ptr<cv::CLAHE> clahe;
 public:
@@ -65,6 +64,7 @@ public:
 	virtual void Initialize(CCalibration* calibration);
 	virtual void Process(char* fringes);
 	virtual void PostProcess(cv::Mat image);
+	void ApplyZOffset(const cv::Mat& src, cv::Mat& dst, int zOffset);
 
 	int Start();
 	int Stop();
@@ -98,7 +98,6 @@ public:
 	virtual void SetLumenContourOffset(std::vector<cv::Point> lumenContour);
 
 	int GetSheathPosition() { return m_nSheathPosition; }
-	void SetZOffset(int nOffset) { m_nZOffset = nOffset; }
 
 	static void SetImageCompensation(bool ImageCompensated);
 	static void SetImageLumenVignetting(bool ImageLumenVignetted);
@@ -113,7 +112,6 @@ protected:
 	void fftProcessing(const Ipp32f* fringes32f);
 	void computeLogarithm(Ipp32f* src, Ipp32f* dst);
 	void generateImage(Ipp32f* logaritihmData, bool bInvert);
-	void applyZOffset();
 	void findSheath(Ipp32f* logaritihmData);
 	void findSheath(cv::Mat img);
 	std::vector<double> normalize(const std::vector<double>& values);

@@ -58,6 +58,9 @@ _declspec(dllexport) RayError RayEndReview() {
 _declspec(dllexport) RayError RayEndCompare() {
     return octSystem.EndCompare();
 }
+_declspec(dllexport) RayError RayRestartReview() {
+    return octSystem.RestartReview();
+}
 _declspec(dllexport) RayError RayStartLiveView() {
     return octSystem.StartLiveView();
 }
