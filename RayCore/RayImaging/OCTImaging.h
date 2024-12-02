@@ -55,6 +55,7 @@ protected:
 	int m_nTotalFrame;
 
 	int m_nSheathPosition;
+	int m_nZOffset;
 
 	cv::Ptr<cv::CLAHE> clahe;
 public:
@@ -98,6 +99,7 @@ public:
 	virtual void SetLumenContourOffset(std::vector<cv::Point> lumenContour);
 
 	int GetSheathPosition() { return m_nSheathPosition; }
+	void SetZOffset(int nOffset) { m_nZOffset = nOffset; }
 
 	static void SetImageCompensation(bool ImageCompensated);
 	static void SetImageLumenVignetting(bool ImageLumenVignetted);
