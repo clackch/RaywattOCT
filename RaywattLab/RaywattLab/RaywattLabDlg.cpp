@@ -1052,7 +1052,7 @@ void CRaywattLabDlg::OnBnClickedButtonLoadSelectedData()
 				fclose(fp);
 			}		
 		}
-		m_pImagingSimulate->SetZOffset(m_vZOffset.at(0));
+		//m_pImagingSimulate->SetZOffset(m_vZOffset.at(0));
 
 		GetDlgItem(IDC_BUTTON_SAVE_CALIBRATION)->EnableWindow(FALSE);
 	}
@@ -1202,9 +1202,11 @@ void CRaywattLabDlg::OnBnClickedButtonSaveVideo()
 	int height = (isCircle) ? config.imaging.nCircleSize : config.imaging.nOutputLength;
 	videoWriter.StartRecording(strAviPath, width, height);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
-		pImaging->SetZOffset(m_vZOffset.at(i));
+		//pImaging->SetZOffset(m_vZOffset.at(i));
 		pImaging->Process(pReader->GetSample(pReader->GetNumOfSamples() - i - 1));
-		pImaging->PostProcess(pImaging->GetProcessedImage());
+		cv::Mat imgZOffset;
+		pImaging->ApplyZOffset(pImaging->GetProcessedImage(), imgZOffset, m_vZOffset.at(i));
+		pImaging->PostProcess(imgZOffset);
 		videoWriter.PushToBuffer(((isCircle) ? pImaging->GetCircleImage() : pImaging->GetRectangleImage()));
 	}
 	videoWriter.StopRecording();
@@ -1241,10 +1243,11 @@ void CRaywattLabDlg::OnBnClickedButtonSaveTif()
 	CTIFFWriter tiffWriter(strTifPath);
 	bool isCircle = (m_radioImageShape == 0);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
-		pImaging->SetZOffset(m_vZOffset.at(i));
+		//pImaging->SetZOffset(m_vZOffset.at(i));
 		pImaging->Process(pReader->GetSample(i));
-
-		cv::Mat imgRect = getFoVImage(pImaging->GetProcessedImage(), 9000.f);
+		cv::Mat imgZOffset;
+		pImaging->ApplyZOffset(pImaging->GetProcessedImage(), imgZOffset, m_vZOffset.at(i));
+		cv::Mat imgRect = getFoVImage(imgZOffset, 9000.f);
 		pImaging->PostProcess(imgRect);
 
 		tiffWriter.SaveFrame(((isCircle) ? pImaging->GetCircleImage() : pImaging->GetRectangleImage()));
@@ -1282,9 +1285,11 @@ void CRaywattLabDlg::OnBnClickedButtonSavePng()
 
 	bool isCircle = (m_radioImageShape == 0);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
-		pImaging->SetZOffset(m_vZOffset.at(i));
+		//pImaging->SetZOffset(m_vZOffset.at(i));
 		pImaging->Process(pReader->GetSample(i));
-		pImaging->PostProcess(pImaging->GetProcessedImage());
+		cv::Mat imgZOffset;
+		pImaging->ApplyZOffset(pImaging->GetProcessedImage(), imgZOffset, m_vZOffset.at(i));
+		pImaging->PostProcess(imgZOffset);
 
 		CStringA strPngDirectory(strPngDirectoryW);
 		char strPngName[MAX_PATH];
@@ -1388,7 +1393,7 @@ void CRaywattLabDlg::OnNMCustomdrawSliderFrame(NMHDR* pNMHDR, LRESULT* pResult)
 	if (m_pSimDevice != nullptr && !m_btnPlayData.pushed) {
 		m_nCurFrame = m_sliderFrame.GetPos();
 		((CSimulateDevice*)m_pSimDevice)->SetFrame(m_nCurFrame);
-		m_pImagingSimulate->SetZOffset(m_vZOffset.at(m_nCurFrame));
+		//m_pImagingSimulate->SetZOffset(m_vZOffset.at(m_nCurFrame));
 
 		CString strFrameNum = _T("");
 		strFrameNum.Format(_T("%04d / %04d"), m_nCurFrame + 1, m_pDataReader->GetNumOfSamples());
@@ -1617,7 +1622,7 @@ void CRaywattLabDlg::OnBnClickedButtonZoffsetInc()
 {
 	int curOffset = m_vZOffset.at(m_nCurFrame);
 
-	m_pImagingSimulate->SetZOffset(curOffset + 1);
+	//m_pImagingSimulate->SetZOffset(curOffset + 1);
 	m_vZOffset.at(m_nCurFrame) = curOffset + 1;
 
 	m_nPrevFrame = m_nCurFrame;
@@ -1628,7 +1633,7 @@ void CRaywattLabDlg::OnBnClickedButtonZoffsetDec()
 {
 	int curOffset = m_vZOffset.at(m_nCurFrame);
 
-	m_pImagingSimulate->SetZOffset(curOffset - 1);
+	//m_pImagingSimulate->SetZOffset(curOffset - 1);
 	m_vZOffset.at(m_nCurFrame) = curOffset - 1;
 
 	m_nPrevFrame = m_nCurFrame;
@@ -1716,7 +1721,7 @@ void CRaywattLabDlg::OnBnClickedButtonCopyZoffset()
 {
 	int prevOffset = m_vZOffset.at(m_nPrevFrame);
 
-	m_pImagingSimulate->SetZOffset(prevOffset);
+	//m_pImagingSimulate->SetZOffset(prevOffset);
 	m_vZOffset.at(m_nCurFrame) = prevOffset;
 }
 
