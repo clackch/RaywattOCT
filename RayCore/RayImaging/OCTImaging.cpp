@@ -514,7 +514,12 @@ cv::Mat COCTImaging::getFoVImage(cv::Mat image, double fov) {
 	roi.x = (image.cols - roi.width) / 2;
 	roi.y = (image.rows - roi.height) / 2;
 
-	if (roi.x < 0 || roi.y < 0) return image.clone();	// out of original FoV
+	if (roi.x < 0 || roi.y < 0 ||
+		roi.width <= 0 || roi.height <= 0 ||
+		roi.x + roi.width > image.cols ||
+		roi.y + roi.height > image.rows) {
+		return image.clone();
+	}
 
 	cv::Mat imgROI;
 	cv::resize(image(roi), imgROI, cv::Size(image.cols, image.rows));
