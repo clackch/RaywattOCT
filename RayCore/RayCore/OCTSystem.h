@@ -214,6 +214,7 @@ private:
 	bool waitForStepMotors(bool& runFlag);
 	bool waitForStepMotors(eStepMotorIndex idxMotor, bool& runFlag);
 	void calculateIntensity(cv::Mat image);
+	std::vector<std::vector<std::string>> readLoadSequence();
 
 protected:
 	LRESULT OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam);

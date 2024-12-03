@@ -1563,30 +1563,39 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	CRJController* pRJController = pSystem->m_pRJController;
 
+	std::vector<std::vector<std::string>> loadCommands = pSystem->readLoadSequence();
+
 	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterLoading);
 
 	if (pRJController->IsConnected()) {
 		pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 
-		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
-		pRJController->Move(eStepMotorIndex::Pullback, 9000);
-		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+		for (const auto& commands : loadCommands) {
+			if (commands.size() != 3) {
+				PLOGI.printf("Invalid command format.");
+				continue;
+			}
 
-		pRJController->PerformRun(config.bldcMotor.velocityLoad);
+			std::string command = commands[0];
+			std::transform(command.begin(), command.end(), command.begin(), ::toupper);
 
-		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_LOAD);
-		pRJController->Move(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_LOAD);
-		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+			if (command == "SM") {
+				int position = std::stoi(commands[1]); // 문자열을 정수로 변환
+				int speed = std::stoi(commands[2]);
 
-		pRJController->StopMotor();
+				pRJController->Set(eStepMotorIndex::Pullback, speed);
+				pRJController->Move(eStepMotorIndex::Pullback, position);
 
-		pRJController->Set(eStepMotorIndex::Pullback, 30000);
-		pRJController->Move(eStepMotorIndex::Pullback, 1400);
-		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+				pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+			}
+			else if (command == "BLDC") {
+				int velocity = std::stoi(commands[1]);
+				int delay = std::stoi(commands[2]);
 
-		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_LOAD);
-		pRJController->Move(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
-		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+				pRJController->PerformRun(velocity);
+				Sleep(delay);
+			}
+		}
 	}
 	else if (pSystem->m_isTestMode)
 	{
@@ -2143,6 +2152,35 @@ void COCTSystem::calculateIntensity(cv::Mat image) {
 		m_fCurrentIntensity[i] = cv::mean(quad).val[0];
 	}
 }
+std::vector<std::vector<std::string>> COCTSystem::readLoadSequence()
+{
+	std::ifstream reader("./LoadSequence.txt");
+	std::vector<std::vector<std::string>> loadCommands;
+
+	if (reader.is_open()) {
+		std::string line;
+		while (std::getline(reader, line)) {
+			std::vector<std::string> commands;
+			std::stringstream ss(line);
+			std::string token;
+
+			while (std::getline(ss, token, ',')) {
+				commands.push_back(token);
+			}
+
+			if (commands.size() == 3) {
+				loadCommands.push_back(commands);
+			}
+		}
+		reader.close();
+	}
+	else {
+		std::cerr << "Cannot open LoadSequence.txt" << std::endl;
+	}
+
+	return loadCommands;
+}
+
 /*
 * OnMsgUpdateScannerState
 */
