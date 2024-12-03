@@ -327,11 +327,9 @@ namespace RaywattApp.Common.Util
             }
         }
 
-        public static async Task<Mat> ConvertImage(string filePath, double imageResolution, int manualCalibration, double degree, List<Mat> convertedImages, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
+        public static async Task<Mat> ConvertImage(string filePath, double imageResolution, int zOffset, double degree, List<Mat> convertedImages, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
         {
-            RayOpenImage(filePath);
-            Constants.DefaultFoV = Constants.OCTImageSize * imageResolution * CommonUtil.GetCalibrationRatio(manualCalibration, true);
-            Constants.ImageResolution = imageResolution * CommonUtil.GetCalibrationRatio(manualCalibration, true);
+            RayOpenImage(filePath, imageResolution, zOffset);
 
             int numOfFrames = (int)RayGetProperty(Property.ImageDepth);
             int width = (int)RayGetProperty(Property.ImageWidth);
@@ -2358,20 +2356,6 @@ namespace RaywattApp.Common.Util
         public static double GetRoundScale(double value)
         {
             return Math.Round(value, 5);
-        }
-
-        public static double GetCalibrationRatio(int calibration, bool isReverse)
-        {
-            double ratio = Math.Round(Math.Pow(Constants.ManualCalibrationRatio, calibration), 5);
-
-            if (!isReverse)
-            {
-                return ratio;
-            }
-            else
-            {
-                return 1 / ratio;
-            }
         }
     }
 }

@@ -364,9 +364,7 @@ namespace RaywattApp.ViewModels
 
             RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
             CommonUtil.SetColormap(patientCase.Colormap);
-            int numOfFrames = RayStartReview(patientCase.ImageFullPath);
-            Constants.DefaultFoV = Constants.OCTImageSize * patientCase.ImageResolution * CommonUtil.GetCalibrationRatio(patientCase.ManualCalibration, true);
-            Constants.ImageResolution = patientCase.ImageResolution * CommonUtil.GetCalibrationRatio(patientCase.ManualCalibration, true);
+            int numOfFrames = RayStartReview(patientCase.ImageFullPath, patientCase.ImageResolution, patientCase.ZOffset);
 
             if (numOfFrames < (int)RayError.OK)
             {
@@ -376,9 +374,10 @@ namespace RaywattApp.ViewModels
             else
             {
                 // Wait for Review to start
-                for (int i = 0; i < 10; i++)
+                while (true)
                 {
-                    if ((RayScannerState)RayGetProperty(Property.CurrentState) == RayScannerState.Review) break;
+                    if ((RayScannerState)RayGetProperty(Property.CurrentState) == RayScannerState.Review)
+                        break;
                     Thread.Sleep(5);
                 }
             }

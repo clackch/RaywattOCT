@@ -24,10 +24,11 @@ extern "C" {
 	_declspec(dllexport) RayError RayLaserOnOff(bool isOn);
 
 	_declspec(dllexport) RayError RayShowCalibrationGuide(bool show);
-	_declspec(dllexport) int RayStartReview(char *strFilePath);
-	_declspec(dllexport) RayError RayStartCompare(char* strFilePath);
+	_declspec(dllexport) int RayStartReview(char *strFilePath, double imageResolution, double zOffset);
+	_declspec(dllexport) RayError RayStartCompare(char* strFilePath, double imageResolution, double zOffset);
 	_declspec(dllexport) RayError RayEndReview();
 	_declspec(dllexport) RayError RayEndCompare();
+	_declspec(dllexport) RayError RayRestartReview();
 	_declspec(dllexport) RayError RaySetSession(int session);
 	_declspec(dllexport) RayError RayRegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude);
 	_declspec(dllexport) RayError RayUnregisterImageCallback();
@@ -38,7 +39,7 @@ extern "C" {
 	_declspec(dllexport) void* RayGetVolumeData(void* pLumenContours);
 	_declspec(dllexport) RayError RayStartLumenDetection();
 
-	_declspec(dllexport) RayError RayOpenImage(char* strFilePath);
+	_declspec(dllexport) RayError RayOpenImage(char* strFilePath, double imageResolution, double zOffset);
 	_declspec(dllexport) RayError RayCloseImage();
 	_declspec(dllexport) void *RayGetImageData(int nFrame);
 	_declspec(dllexport) void *RayGetLongitudeData(double fDegree);

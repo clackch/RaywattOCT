@@ -84,7 +84,6 @@ namespace RaywattApp.ViewModels
             { 
                 _fieldOfView = value;
                 OnPropertyChanged(nameof(FieldOfView));
-                RaySetProperty(Property.FieldOfView, value);
                 
                 PatientCase.FieldOfView = value;
                 Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);

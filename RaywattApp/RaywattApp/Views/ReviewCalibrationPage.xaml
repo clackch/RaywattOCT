@@ -58,7 +58,7 @@
                             <StackPanel Width="10"/>
                             <component:IconButton Style="{StaticResource IconButtonLarge}" Icon="reset" Command="{Binding ResetCommand}" IsEnabled="{Binding DeviceStatus.CanExecuteCalibration}"/>
                             <StackPanel Width="10"/>
-                            <Button Style="{StaticResource OutlinedBtnType3-Large}" Width="150" Command="{Binding RecalibrateCommand}" Content="{Binding [Revert Changes], Source={StaticResource L10N}}"/>
+                            <Button Style="{StaticResource OutlinedBtnType3-Large}" Width="150" Command="{Binding RevertCalibrateCommand}" Content="{Binding [Revert Changes], Source={StaticResource L10N}}"/>
                         </StackPanel>
                     </Grid>
                     <Separator Grid.Row="2" Background="{DynamicResource GrayscaleGray5Brush}"/>

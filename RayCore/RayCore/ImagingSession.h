@@ -36,7 +36,6 @@ private:
 
 	CThread* m_pThreadImaging;
 	std::map<int, cv::Mat> m_mapImage;
-	std::map<int, int> m_mapSheathPosition;
 
 	bool m_deleteData;
 
@@ -51,7 +50,7 @@ private:
 	std::vector<cv::Mat> m_vGuidewire;
 	char* m_pVolumeData;
 
-	std::vector<int> m_vZOffset;
+	int m_zOffset;
 
 private:
 	CImagingSession(CMessageService* pMsg, int nSession, bool deleteData = true);
@@ -59,7 +58,7 @@ public:
 	virtual ~CImagingSession();
 
 	static CImagingSession* CreateSession(CMessageService* pMsg, int nSession, IImaging::Setting setting, IDataManager *pWriter);
-	static CImagingSession* CreateSession(CMessageService* pMsg, int nSession, const char* strFilePath);
+	static CImagingSession* CreateSession(CMessageService* pMsg, int nSession, const char* strFilePath, double imageResolution);
 	static COCTImaging* CreateColorImaging(CMessageService* msg, IImaging::Setting setting, IDataManager* pData, ImagingType type);
 
 	ImagingType GetImagingType() { return m_imagingType; }
@@ -71,6 +70,7 @@ public:
 	// Asynchronous functions
 	RayError Start();
 	RayError Stop();
+	void StopThreadForRestart();
 	void StartCutViewUpdate(cv::Scalar backgroundColor);
 	void StartObjectDetection();
 	void StartVolumeGeneration();
@@ -98,8 +98,8 @@ public:
 	void* GetGuidewirePoints(int nFrame);
 	int GetNumOfGuidewirePoints(int nFrame);
 
-	bool LoadZOffset(const char* strDataFilePath);
-	int GetZOffset(int nFrame);
+	void SetZOffset(int zOffset) { m_zOffset = zOffset; }
+	int GetZOffset() { return m_zOffset; }
 
 private:
 	static CImagingSession* createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type);
