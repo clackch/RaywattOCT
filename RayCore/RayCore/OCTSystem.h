@@ -68,6 +68,7 @@ private:
 
 	// Rotary Junction
 	CRJController* m_pRJController;
+	bool m_bFirstLoad;	// To-Do: RFID 연동해서 동일한 카테터 재연결시에도 FirstLoad 로 인식되게 수정 필요
 
 	// Laser Module
 	CLaserModule* m_pLaserModule;

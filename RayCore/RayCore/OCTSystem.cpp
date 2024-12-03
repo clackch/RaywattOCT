@@ -1041,6 +1041,9 @@ RayError COCTSystem::SetSheathDiameter(double value)
 {
 	CConfiguration& config = CConfiguration::GetInstance();
 
+	if (!m_bFirstLoad) return RayError::OK;
+	m_bFirstLoad = false;
+
 	m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX);	
 	if (value == 0.0) {
 		config.measurement.fSheathRadius = config.measurement.fSheathRadiusOnePointSix;
@@ -1605,6 +1608,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	// To-Do: Check Catheter Connection
 	bool loaded = true;
 	if (loaded) {
+		pSystem->m_bFirstLoad = true;
 		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loaded);
 	}
 	else {
