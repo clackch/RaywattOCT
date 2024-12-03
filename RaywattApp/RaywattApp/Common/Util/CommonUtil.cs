@@ -378,11 +378,12 @@ namespace RaywattApp.Common.Util
 
             var dialogFE = dialog as System.Windows.FrameworkElement;
             var dialogDataContext = dialogFE.DataContext as FileExportDialogViewModel;
-            dialogDataContext.SetInitialize(patientCase, imgCrossSections, imgLongitude, fileExport);
+            double dialogWidth = dialogDataContext.SetInitialize(patientCase, imgCrossSections, imgLongitude, fileExport);
 
             window.Show();
             window.Hide();
-            dialog.Width = originWidth;
+
+            dialog.Width = dialogWidth;
             dialog.Height = originHeight;
 
             int totalCnt = imgCrossSections.Count;
@@ -397,8 +398,12 @@ namespace RaywattApp.Common.Util
 
                 dialogDataContext.SetFrameNumber(index);
                 dialog.UpdateLayout();
-                        
-                RenderTargetBitmap rtb = new RenderTargetBitmap((int)dialog.ActualWidth, (int)dialog.ActualHeight, 96, 96, PixelFormats.Pbgra32);
+
+                Size originalSize = new Size(dialog.ActualWidth, dialog.ActualHeight);
+                dialog.Measure(new System.Windows.Size(double.PositiveInfinity, double.PositiveInfinity));
+                dialog.Arrange(new System.Windows.Rect(0, 0, dialog.DesiredSize.Width, dialog.DesiredSize.Height));
+
+                RenderTargetBitmap rtb = new RenderTargetBitmap((int)dialog.DesiredSize.Width, (int)dialog.DesiredSize.Height, 96, 96, PixelFormats.Pbgra32);
                 System.Windows.Rect bounds = VisualTreeHelper.GetDescendantBounds(dialog);
                 DrawingVisual dv = new DrawingVisual();
                 using (DrawingContext ctx = dv.RenderOpen())
@@ -407,6 +412,9 @@ namespace RaywattApp.Common.Util
                     ctx.DrawRectangle(vb, null, bounds);
                 }
                 rtb.Render(dv);
+
+                dialog.Measure(new System.Windows.Size(originalSize.Width, originalSize.Height));
+                dialog.Arrange(new System.Windows.Rect(0, 0, originalSize.Width, originalSize.Height));
 
                 PngBitmapEncoder png = new PngBitmapEncoder();
                 png.Frames.Add(BitmapFrame.Create(rtb));

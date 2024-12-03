@@ -197,7 +197,7 @@ namespace RaywattApp.ViewModels.Dialog
             Section.Distal.IsVisible = Visibility.Visible;
         }
 
-        public void SetInitialize(PatientCase patientCase, List<Mat> crossSections, Mat lMode, FileExport fileExport)
+        public double SetInitialize(PatientCase patientCase, List<Mat> crossSections, Mat lMode, FileExport fileExport)
         {
             PatientCase = patientCase;
             Degree = PatientCase.IndicatorDegree;            
@@ -319,6 +319,8 @@ namespace RaywattApp.ViewModels.Dialog
             LongitudeZoom.ScaleY = Constants.ExportLongitudeImageHeight / Constants.LongitudeHeight;
             CrossSectionClipRadius = CrossSectionImageSize / 2;
             CrossSectionClipCenter = new Point(CrossSectionClipRadius, CrossSectionClipRadius);
+
+            return ImagePartWidth + TextPartWidth;
         }
 
         public void SetFinalize()
