@@ -374,7 +374,7 @@ namespace RaywattApp.ViewModels
             else
             {
                 // Wait for Review to start
-                while (true)
+                for (int i = 0; i < 100; i++)
                 {
                     if ((RayScannerState)RayGetProperty(Property.CurrentState) == RayScannerState.Review)
                         break;
