@@ -55,6 +55,10 @@ void CTIFFImaging::Process(char* fringes)
 	}
 
 	m_start = m_end;
+
+	InverseCircularizeImage(imageConvert, imageConvert);
+
+	imageResultWithoutCompensation = imageConvert.clone();
 }
 
 void CTIFFImaging::PostProcess(cv::Mat image)
@@ -75,14 +79,9 @@ void CTIFFImaging::PostProcess(cv::Mat image)
 
 	cv::convertScaleAbs(imageCircle, imageCircle, m_setting.contrast, m_setting.brightness);
 
-	cv::Mat imgFoV = getFoVImage(imageCircle, MAX_FIELD_OF_VIEW);
-	memcpy(imageCircle.data, imgFoV.data, sizeof(char) * imageCircle.cols * imageCircle.rows * imageCircle.channels());
+	CircularizeImage(imageCircle, imageCircle);
 }
 
-void CTIFFImaging::CircularizeImage(cv::Mat& src, cv::Mat& dst) {
-	dst = src.clone();
-	return;
-}
 
 void CTIFFImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale) {
 	COCTImaging::initCircularizeMap(diameter, srcHeight, srcWidth, dstHeight, dstWidth, scale);
@@ -116,6 +115,8 @@ void CTIFFImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth,
 void CTIFFImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst) {
 	dst = src.clone();
 	cv::remap(dst, dst, inverseMatXMap, inverseMatYMap, cv::INTER_LINEAR);
+
+	cv::rotate(dst, dst, cv::ROTATE_90_COUNTERCLOCKWISE);
 }
 
 void CTIFFImaging::EraseStentOutLier(cv::Mat& stent) {

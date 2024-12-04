@@ -33,6 +33,7 @@ protected:
 	cv::Mat imageResult;
 	cv::Mat imageResultColor;
 	cv::Mat imageCircle;
+	cv::Mat imageResultWithoutCompensation;
 
 	// using in GenerateBackground
 	Ipp32f* fringes32f;
@@ -88,12 +89,13 @@ public:
 	}
 
 	virtual cv::Mat GetProcessedImage();
+	cv::Mat GetWithoutCompensationImage() { return imageResultWithoutCompensation; }
 	cv::Mat GetCircleImage() { return imageCircle; }
 	USHORT* GetFringesBuffer() { return m_pFringesBuffer; }
 	Setting GetSetting() { return m_setting; }
 	void GetFrameInfo(int& nCurFrame, int& nTotalFrame) { nCurFrame = m_nCurFrame; nTotalFrame = m_nTotalFrame; }
 	void* GetCalibrationData();
-	virtual void CircularizeImage(cv::Mat& src, cv::Mat& dst);
+	void CircularizeImage(cv::Mat& src, cv::Mat& dst);
 	virtual void InverseCircularizeImage(cv::Mat& src, cv::Mat& dst);
 	virtual void EraseStentOutLier(cv::Mat& stent);
 	virtual void SetLumenContourOffset(std::vector<cv::Point> lumenContour);

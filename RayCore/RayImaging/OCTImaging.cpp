@@ -241,6 +241,7 @@ void COCTImaging::allocateMemory() {
 	imageResult.create(nBScan, nOutputLength, CV_8UC1);
 	imageResultColor.create(nBScan, nOutputLength, CV_8UC3);
 	imageCircle.create(nCircleSize, nCircleSize, CV_8UC3);
+	imageResultWithoutCompensation.create(nBScan, nOutputLength, CV_8UC1);
 
 	fBuffer_Window = ippsMalloc_32f(nFFTLength);
 	fcBuffer_FFT = ippsMalloc_32fc(nFFTLength);
@@ -260,6 +261,7 @@ void COCTImaging::releaseMemory() {
 	imageResult.release();
 	imageResultColor.release();
 	imageCircle.release();
+	imageResultWithoutCompensation.release();
 
 	ippsRelease((void*&)fBuffer_Window);
 	ippsRelease((void*&)fcBuffer_FFT);
@@ -489,6 +491,8 @@ void COCTImaging::generateImage(Ipp32f* logaritihmData, bool bInvert){
 	cv::convertScaleAbs(imageResult, imageResult, 1.f / 80.f * LUT_SCALE, 0);
 
 	cv::flip(imageResult, imageResult, 1);
+
+	imageResultWithoutCompensation = imageResult.clone();
 }
 
 void COCTImaging::drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color) {
