@@ -251,6 +251,9 @@ namespace RaywattApp.Common.Bases
         //ML Model Folder
         public const string MlModelFolderPath = SystemRootPath + "\\Raywatt\\system\\3rdparty\\model";
 
+        //Storage Limit (GB)
+        public const int StorageLimit = 10;
+
         //Encrypt, Decrypt Public Key
         public const string PublicKey = "raywatt07_hwjckklls_298-87-01441";
 
@@ -363,6 +366,11 @@ namespace RaywattApp.Common.Bases
         public const string FfrStep5 = "FfrStep5";
         public const double CrossSectionFfrSize = 344;
 
+        //Recording
+        public const int TransientTime = 100;
+        public const int StartTime = 10;
+        public const double SmallCrossSectionSize = 318;
+
         //Recording - Confirm
         public const double CrossSectionConfirmSize = 475;
         public const double LongitudeConfirmWidth = 1080;
@@ -454,12 +462,7 @@ namespace RaywattApp.Common.Bases
         public const double ZoomScaleMax = ZoomScaleDefault * 2;
         public const double ZoomAngioCsScaleDefault = CrossSectionAngio / OCTImageSize;
         public const double ZoomAngioCsScaleMax = ZoomAngioCsScaleDefault * 2;
-        public const int Zoom3DScaleMax = 5;
-
-        //Recording
-        public const int TransientTime = 100;
-        public const int StartTime = 10;
-        public const double SmallCrossSectionSize = 318;        
+        public const int Zoom3DScaleMax = 5;    
 
         //AngioManager
         public const string ServerIP = "127.0.0.1";

@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Reflection;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Views.Dialog;
+using RaywattApp.Common.Util;
 
 namespace RaywattApp.ViewModels
 {
@@ -213,6 +214,17 @@ namespace RaywattApp.ViewModels
         private void Import()
         {
             _log.Debug("Import");
+
+            Dictionary<string, object> popupParameter = new Dictionary<string, object>();
+
+            if (!CommonUtil.IsStorageAvailable())
+            {
+                popupParameter["title"] = _l10n["Information"];
+                popupParameter["message"] = _l10n["$MSG024"];
+                var popupResult = _dialogService.OpenDialog(new AlertDialogControl(), popupParameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+                return;
+            }
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["fileType"] = Constants.FileTypeImport;
