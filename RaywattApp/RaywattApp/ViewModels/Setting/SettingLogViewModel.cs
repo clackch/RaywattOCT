@@ -73,6 +73,7 @@ namespace RaywattApp.ViewModels.Setting
 
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
+            base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
         }
 

@@ -41,6 +41,12 @@ namespace RaywattApp.ViewModels.Dialog
         [ObservableProperty]
         private Visibility _visibility4 = Visibility.Collapsed;
 
+        [ObservableProperty]
+        private string _popupNavigationSource5;
+
+        [ObservableProperty]
+        private Visibility _visibility5 = Visibility.Collapsed;
+
         private ICommand _popupNavigateCommand;
 
         public ICommand PopupNavigateCommand
@@ -75,7 +81,8 @@ namespace RaywattApp.ViewModels.Dialog
             PopupNavigationSource = Constants.SettingDatabasePage;
             PopupNavigationSource2 = Constants.SettingLogPage;
             PopupNavigationSource3 = Constants.SettingTermsConditionsPage;
-            PopupNavigationSource4 = Constants.SettingAboutPage;
+            PopupNavigationSource4 = Constants.SettingMaintenancePage;
+            PopupNavigationSource5 = Constants.SettingAboutPage;
 
             Visibility = Visibility.Visible;
             CurrentMenu = Constants.SettingDatabasePage;
@@ -98,6 +105,7 @@ namespace RaywattApp.ViewModels.Dialog
             Visibility2 = Visibility.Collapsed;
             Visibility3 = Visibility.Collapsed;
             Visibility4 = Visibility.Collapsed;
+            Visibility5 = Visibility.Collapsed;
 
             switch (pageUri)
             {
@@ -110,8 +118,11 @@ namespace RaywattApp.ViewModels.Dialog
                 case Constants.SettingTermsConditionsPage:
                     Visibility3 = Visibility.Visible;
                     break;
-                case Constants.SettingAboutPage:
+                case Constants.SettingMaintenancePage:
                     Visibility4 = Visibility.Visible;
+                    break;
+                case Constants.SettingAboutPage:
+                    Visibility5 = Visibility.Visible;
                     break;
                 default:
                     break;
@@ -144,6 +155,9 @@ namespace RaywattApp.ViewModels.Dialog
             {
                 dialog.DialogResult = true;
             }
+
+            //OnNavigating 호출을 위해, 다른 페이지 입력
+            PopupNavigationSource2 = Constants.SettingAboutPage; //Log 화면에서, FileExportStep2Base의 Timer 종료를 위해 추가
 
             WeakReferenceMessenger.Default.Unregister<PopupNavigationMessage>(this);
         }
