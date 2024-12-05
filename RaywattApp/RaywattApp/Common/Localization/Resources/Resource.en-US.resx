@@ -198,6 +198,9 @@ for FFR</value>
   <data name="$MSG023" xml:space="preserve">
     <value>The angiography device is not connected.</value>
   </data>
+  <data name="$MSG024" xml:space="preserve">
+    <value>Not enough storage space. Please free up space and try again.</value>
+  </data>
   <data name="$Terms and Conditions" xml:space="preserve">
     <value>Product Intended Use: Clearly define the intended use of the OCT device, including any limitations or specific conditions for use.
 
@@ -437,9 +440,6 @@ Acceptance of Terms: Require users to explicitly accept the terms and conditions
   <data name="Data already exists. Overwrite existing data?" xml:space="preserve">
     <value>Data already exists.
 Overwrite existing data?</value>
-  </data>
-  <data name="Database" xml:space="preserve">
-    <value>Database</value>
   </data>
   <data name="Delete" xml:space="preserve">
     <value>Delete</value>
@@ -1088,6 +1088,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Step 5." xml:space="preserve">
     <value>Step 5.</value>
+  </data>
+  <data name="Storage" xml:space="preserve">
+    <value>Storage</value>
   </data>
   <data name="Survey (100㎜)" xml:space="preserve">
     <value>Survey (100㎜)</value>
