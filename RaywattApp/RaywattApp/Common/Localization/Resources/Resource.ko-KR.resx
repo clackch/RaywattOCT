@@ -445,6 +445,9 @@ Overwrite existing data?</value>
   <data name="DICOM" xml:space="preserve">
     <value>[K]DICOM</value>
   </data>
+  <data name="Disable Cleaning" xml:space="preserve">
+    <value>[K]Disable Cleaning</value>
+  </data>
   <data name="Display Modes" xml:space="preserve">
     <value>[K]Display Modes</value>
   </data>
@@ -471,6 +474,9 @@ Overwrite existing data?</value>
   </data>
   <data name="en-US" xml:space="preserve">
     <value>[K]English</value>
+  </data>
+  <data name="Enable Cleaning" xml:space="preserve">
+    <value>[K]Enable Cleaning</value>
   </data>
   <data name="End Review" xml:space="preserve">
     <value>[K]End Review</value>
@@ -969,6 +975,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Review Settings" xml:space="preserve">
     <value>[K]Review Settings</value>
+  </data>
+  <data name="Rotary Junction" xml:space="preserve">
+    <value>[K]Rotary Junction</value>
   </data>
   <data name="Save" xml:space="preserve">
     <value>[K]Save</value>

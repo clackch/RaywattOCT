@@ -52,6 +52,7 @@ namespace RaywattApp.Common.Bases
         public const string SettingAboutPage = "Views/Setting/SettingAboutPage.xaml";
         public const string SettingLogPage = "Views/Setting/SettingLogPage.xaml";
         public const string SettingTermsConditionsPage = "Views/Setting/SettingTermsConditionsPage.xaml";
+        public const string SettingMaintenancePage = "Views/Setting/SettingMaintenancePage.xaml";
 
         //Resolution
         public const double ApplicationWidth = 1280;

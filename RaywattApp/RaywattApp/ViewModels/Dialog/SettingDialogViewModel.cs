@@ -92,9 +92,9 @@ namespace RaywattApp.ViewModels.Dialog
         {
             _log.Debug("OnPopupNavigationMessage : " + message.Value);
 
-            //저장 기능이 있는 페이지만 추가
+            //Apply/Save 시, 페이지에 저장할 기능(or 내용)이 있으면 아래 추가
             string pageUri = message.Value;
-            PopupNavigationSource3 = pageUri;//SettingTermsConditionsPage
+            PopupNavigationSource3 = pageUri;//[SettingTermsConditionsPage]
         }
 
         private void OnPopupNavigate(string pageUri)
@@ -155,9 +155,10 @@ namespace RaywattApp.ViewModels.Dialog
             {
                 dialog.DialogResult = true;
             }
-
-            //OnNavigating 호출을 위해, 다른 페이지 입력
-            PopupNavigationSource2 = Constants.SettingAboutPage; //Log 화면에서, FileExportStep2Base의 Timer 종료를 위해 추가
+            
+            //OnNavigating 호출을 위해, 다른 페이지 입력 - Popup이 닫힐 때, 각 페이지별로 처리해야하는 부분이 있는 경우 아래 추가
+            PopupNavigationSource2 = Constants.SettingAboutPage;//[SettingLogPage] FileExportStep2Base의 Timer 종료를 위해 추가
+            PopupNavigationSource4 = Constants.SettingAboutPage;//[SettingMaintenancePage] RJ의 BLDC Step Motor 원위치를 위해 추가
 
             WeakReferenceMessenger.Default.Unregister<PopupNavigationMessage>(this);
         }

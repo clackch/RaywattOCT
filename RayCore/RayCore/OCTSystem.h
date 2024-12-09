@@ -122,6 +122,7 @@ public:
 	RayError StartLiveView();
 	RayError StopLiveView();
 	RayError LaserOnOff(bool isOn);
+	RayError RJCleanModeOnOff(bool isOn);
 	RayError SetSession(int session);
 	RayError RegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude);
 	RayError UnregisterImageCallback();

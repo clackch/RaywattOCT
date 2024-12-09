@@ -534,6 +534,25 @@ RayError COCTSystem::LaserOnOff(bool isOn)
 	return RayError::OK;
 }
 
+RayError COCTSystem::RJCleanModeOnOff(bool isOn)
+{
+	PLOGI.printf("RJCleanModeOnOff : %d", isOn);	
+
+	if (m_pRJController->IsConnected()) {
+
+		m_pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
+
+		if (isOn) {
+			m_pRJController->Move(eStepMotorIndex::Pullback, 0, false, 0x02 /* photo-sensor #2 */);
+		}
+		else {
+			m_pRJController->Move(eStepMotorIndex::Pullback, 20000, false, 0x08 /* photo-sensor #4 */);
+		}
+	}
+
+	return RayError::OK;
+}
+
 /*
 * SetSession
 */
