@@ -17,6 +17,7 @@ float ENERGY_THRESHOLD = 5.0f;
 const int SHEATH_OFFSET = 15;
 const int SHEATH_SEARCH_RANGE = 200;
 const int SEARCH_LENGTH = 100;
+static int INTENSITY_THRESHOLD = 220;
 static bool bCompensated = true;
 static bool bVignetted = true;
 double last_entropy = 0;
@@ -195,11 +196,13 @@ void COCTImaging::SetImageCompensationControlWindow(bool ImageCompensationContro
 			int exponential_control_slider = 10;
 			int energy_threshold_slider = 5;
 			int alpha_slider = 4;
+			int intensity_threshold = 220;
 
 			cv::createTrackbar("Cont", strWindowName, &exponential_factor_slider, 100, on_trackbar);
 			cv::createTrackbar("Bright", strWindowName, &exponential_control_slider, 100, on_trackbar);
 			cv::createTrackbar("Eng", strWindowName, &energy_threshold_slider, 100, on_trackbar);
 			cv::createTrackbar("Alpha", strWindowName, &alpha_slider, 100, on_trackbar);
+			cv::createTrackbar("GCTH", strWindowName, &intensity_threshold, 255, on_trackbar);
 
 			// 초기 콜백 호출
 			on_trackbar(0, 0);
@@ -609,9 +612,9 @@ void COCTImaging::adaptive_compensation()
 
 	// Linear contrast stretching
 	logarithmic_contrast_stretching(result_img);
-	result_img.convertTo(result_img, CV_8U, 255);
+	result_img.convertTo(result_img, CV_8U, INTENSITY_THRESHOLD);
 
-	adaptive_gamma_correction(result_img);
+	adaptive_gamma_correction(result_img, INTENSITY_THRESHOLD);
 
 	// Rotate back to original angle
 	cv::rotate(result_img, imageResult, cv::ROTATE_90_CLOCKWISE);
@@ -1097,7 +1100,7 @@ std::vector<int> COCTImaging::find_outliers(const std::vector<int>& y_values) {
 	return outlier_indices;
 }
 
-void COCTImaging::adaptive_gamma_correction(cv::Mat& img) {
+void COCTImaging::adaptive_gamma_correction(cv::Mat& img, int maxIntensity) {
 	bool AGCWD_apply = false;
 	std::vector<double> pdf_i;
 
@@ -1107,7 +1110,7 @@ void COCTImaging::adaptive_gamma_correction(cv::Mat& img) {
 		get_CDF_array(pdf_i, cdf_i);
 	}
 
-	double max_intensity = 255.0;
+	double max_intensity = maxIntensity;
 	double calculated_max_intensity = *std::max_element(img.begin<uchar>(), img.end<uchar>());
 	if (calculated_max_intensity > 0) {
 		max_intensity = calculated_max_intensity;
@@ -1120,7 +1123,7 @@ void COCTImaging::adaptive_gamma_correction(cv::Mat& img) {
 			double intensity_ratio = intensity / max_intensity;
 			double new_intensity = max_intensity * std::pow(intensity_ratio, 1 - cdf_i[intensity]);
 
-			new_intensity = new_intensity > 255 ? 255 : (new_intensity < 0 ? 0 : new_intensity);
+			new_intensity = new_intensity > maxIntensity ? maxIntensity : (new_intensity < 0 ? 0 : new_intensity);
 			output_image.at<uchar>(y, x) = static_cast<uchar>(new_intensity);
 		}
 	}
@@ -1191,6 +1194,7 @@ void COCTImaging::on_trackbar(int, void*) {
 		EXPONENTIAL_CONTROL = cv::getTrackbarPos("Bright", strWindowName) / 10.0f;
 		ENERGY_THRESHOLD = cv::getTrackbarPos("Eng", strWindowName);
 		alpha = cv::getTrackbarPos("Alpha", strWindowName) / 10.f;
+		INTENSITY_THRESHOLD = cv::getTrackbarPos("GCTH", strWindowName);
 
 	}
 	catch (const cv::Exception& e) {

@@ -129,7 +129,7 @@ protected:
 	std::vector<int> find_outliers(const std::vector<int>& y_values);
 	static void on_trackbar(int, void*);
 
-	void adaptive_gamma_correction(cv::Mat& img);
+	void adaptive_gamma_correction(cv::Mat& img, int maxIntensity);
 	void get_PDF_array(cv::Mat& img, std::vector<double>& pdf_i, bool& AGCWD_apply);
 	void get_CDF_array(std::vector<double> pdf_i, std::vector<double>& cdf_i);
 
