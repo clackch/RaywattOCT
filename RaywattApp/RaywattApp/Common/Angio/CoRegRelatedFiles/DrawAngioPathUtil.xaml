@@ -42,12 +42,6 @@
             <Setter Property="Fill" Value="Yellow"/>
         </Style>
 
-        <Style TargetType="Ellipse" x:Key="StyleMarkerEllipse">
-            <Setter Property="Width" Value="{x:Static const:Constants.ellipseTrackWidth}"/>
-            <Setter Property="Height" Value="{x:Static const:Constants.ellipseTrackHeight}"/>
-            <Setter Property="Fill" Value="Red"/>
-        </Style>
-
         <Style TargetType="Line" x:Key="StyleLine">
             <Setter Property="Stroke" Value="White"/>
             <Setter Property="StrokeThickness" Value="{x:Static const:Constants.AnnotationStrokeThickness}"/>
