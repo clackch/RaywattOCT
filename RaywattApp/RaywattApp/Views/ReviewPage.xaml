@@ -172,7 +172,8 @@
                                 </Image.RenderTransform>
                             </Image>
                             <CoRegistration:DrawAngioPathUtil Grid.Column="0" Width="{Binding ElementName=currentAngioImage, Path=ActualWidth}" Height ="{Binding ElementName=currentAngioImage, Path=ActualHeight}"
-                                                              AngioTrackPoints ="{Binding AngioTrackPoints, Mode=TwoWay}" CurrentTrackPoint="{Binding CurrentTrackPoint, Mode=TwoWay}" CurrentAngioFrameNumber="{Binding CurrentAngioFrameNumber}"/>
+                                                              PullbackType = "{Binding PatientCase.PullbackType}" NumberOfFrames ="{Binding ReviewStatus.NumberOfFrames}" CoRegistrations ="{Binding CoRegistrations, Mode=TwoWay}" 
+                                                              CurrentAngioFrameNumber="{Binding CurrentAngioFrameNumber}" FrameNumber="{Binding FrameNumber}" CurrentCoRegistration ="{Binding CurrentCoRegistration}"/>
                             <!--Touch-->
                             <Grid Name="TouchAngio" Background="Transparent" IsManipulationEnabled="true">
                                 <i:Interaction.Triggers>

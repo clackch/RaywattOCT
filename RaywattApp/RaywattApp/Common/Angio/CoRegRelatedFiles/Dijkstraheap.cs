@@ -30,7 +30,7 @@ namespace RaywattApp.Common.Angio
         double[][] pCosts;// for debugging reasons
 
         public List<List<Point>> line;
-        public List<Point> trackPoint;
+        public List<Point> trackPoints;
         private double sqrt2 = 1.41421356237;
         // converts x, y coordinates to vector index
         private int toIndex(int x, int y)
@@ -47,7 +47,7 @@ namespace RaywattApp.Common.Angio
             {
                 line.Add(new List<Point>());
             }
-            trackPoint = new List<Point>();
+            trackPoints = new List<Point>();
 
             // 최단 경로 계산에 사용되는 가중치 값
             gradientMagnitude = 0.43; // 경로 weight(거리) 가중치
