@@ -539,14 +539,29 @@ RayError COCTSystem::RJCleanModeOnOff(bool isOn)
 	PLOGI.printf("RJCleanModeOnOff : %d", isOn);	
 
 	if (m_pRJController->IsConnected()) {
-
-		m_pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
-
 		if (isOn) {
-			m_pRJController->Move(eStepMotorIndex::Pullback, 0, false, 0x02 /* photo-sensor #2 */);
+			if (m_pRJController->GetState() == eRJState::Disconnected) {
+				controlRotaryJunction(eRJState::Cleaning);
+			}
+			else {
+				return RayError::WrongState;
+			}
 		}
 		else {
-			m_pRJController->Move(eStepMotorIndex::Pullback, 20000, false, 0x08 /* photo-sensor #4 */);
+			if (m_pRJController->GetState() == eRJState::Cleaning) {
+				postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::CleanRotaryJunction);
+			}
+			else {
+				return RayError::WrongState;
+			}
+		}
+	}
+	else {
+		if (isOn) {
+			CUtility::StartThread(threadCleanCatheter, m_pThreadRotaryJunction, this);
+		}
+		else {
+			postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::CleanRotaryJunction);
 		}
 	}
 
@@ -1758,6 +1773,50 @@ UINT COCTSystem::threadManualLoadCatheter(LPVOID param)
 }
 
 /*
+* threadCleanCatheter
+*/
+UINT COCTSystem::threadCleanCatheter(LPVOID param)
+{
+	COCTSystem* pSystem = (COCTSystem*)param;
+	CConfiguration& config = CConfiguration::GetInstance();
+	CRJController* pRJController = pSystem->m_pRJController;
+
+	PLOGI.printf("Clean rotary junction start.");
+
+	if (pRJController->IsConnected()) {
+		pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
+		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
+		pRJController->Move(eStepMotorIndex::Pullback, 0, false, 0x02 /* photo-sensor #2 */);
+
+		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+	}
+	else {
+		Sleep(3000);
+	}
+
+	PLOGI.printf("Clean rotary junction - wait for stop cleaning");
+	while (pSystem->m_pThreadRotaryJunction->isRun) {
+		Sleep(DELAY_FOR_STOP_THREAD);
+	}
+
+	if (pRJController->IsConnected()) {
+		pRJController->StopStepMotors();
+		pRJController->Move(eStepMotorIndex::Pullback, 20000, false, 0x08 /* photo-sensor #4 */);
+
+		bool isHoming = true;
+		pSystem->waitForStepMotors(isHoming);
+	}
+	else {
+		Sleep(5000);
+	}
+
+	pSystem->controlRotaryJunction(eRJState::Disconnected);
+	PLOGI.printf("Clean rotary junction done.");
+
+	return NOERROR;
+}
+
+/*
 * createColorImaging
 */
 bool COCTSystem::checkConnection() {
@@ -2247,6 +2306,9 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 	PLOGI.printf("RJState: %d", state);
 	switch (state) {
 	case eRJState::Disconnected:
+		break;
+	case eRJState::Cleaning:
+		CUtility::StartThread(threadCleanCatheter, m_pThreadRotaryJunction, this);
 		break;
 	case eRJState::Connected:
 		break;

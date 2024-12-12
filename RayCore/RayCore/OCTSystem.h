@@ -68,6 +68,7 @@ private:
 
 	// Rotary Junction
 	CRJController* m_pRJController;
+	bool m_isRJCleaning;
 
 	// Laser Module
 	CLaserModule* m_pLaserModule;
@@ -196,6 +197,7 @@ private:
 	static UINT threadUnloadCatheter(LPVOID param);
 	static UINT threadValidateCatheter(LPVOID param);
 	static UINT threadManualLoadCatheter(LPVOID param);
+	static UINT threadCleanCatheter(LPVOID param);
 
 	// Imaging & Device
 	bool checkConnection();

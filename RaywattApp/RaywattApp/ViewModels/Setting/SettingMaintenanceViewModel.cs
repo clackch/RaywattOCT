@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using log4net;
 using RaywattApp.Common.Bases;
+using System.Threading;
 using System.Windows.Input;
 using static RaywattOCT.RayCoreWrapper;
 
@@ -42,13 +43,25 @@ namespace RaywattApp.ViewModels.Setting
             _log.Debug("RJCleanModeOnOff");
 
             isRJCleanModeOnOff = !isRJCleanModeOnOff;
+            DeviceStatus.IsCleaningDone = isRJCleanModeOnOff;
 
-            if (isRJCleanModeOnOff)
-                BtnName = _l10n["Disable Cleaning"]; 
-            else
-                BtnName = _l10n["Enable Cleaning"];
+            RayError ret = (RayError) RayRJCleanModeOnOff(isRJCleanModeOnOff);
 
-            RayRJCleanModeOnOff(isRJCleanModeOnOff);
+            if (ret == RayError.OK)
+            {
+                if (isRJCleanModeOnOff)
+                {
+                    BtnName = _l10n["Disable Cleaning"];
+                }
+                else
+                {
+                    BtnName = _l10n["Enable Cleaning"];
+                }
+            }
+            else {
+                isRJCleanModeOnOff = !isRJCleanModeOnOff;
+                DeviceStatus.IsCleaningDone = isRJCleanModeOnOff;
+            }
         }
     }
 }

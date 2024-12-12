@@ -671,6 +671,9 @@ namespace RaywattApp.ViewModels
                 case RayWorkItem.SaveRawData:
                     DeviceStatus.IsSaveRawDataDone = true;
                     break;
+                case RayWorkItem.CleanRotaryJunction:
+                    DeviceStatus.IsCleaningDone = true;
+                    break;
                 default:
                     break;
             }
