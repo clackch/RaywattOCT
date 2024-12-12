@@ -94,7 +94,8 @@ enum class RayWorkItem {
 	Pullback,
 	LoadCatheter,
 	UnloadCatheter,
-	ValidateCatheter
+	ValidateCatheter,
+	CleanRotaryJunction
 };
 
 enum class RaySession {

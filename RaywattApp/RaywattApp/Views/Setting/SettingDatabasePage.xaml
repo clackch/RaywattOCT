@@ -21,7 +21,7 @@
                 <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="28,0,28,0">
                     <Image Source="{svgc:SvgImage Source=/res/icon/drive_fold.svg}" Width="100"/>
                     <StackPanel Width="50"/>
-                    <ProgressBar Value="{Binding DbProgress}" Width="376" Height="70"/>
+                    <ProgressBar Value="{Binding StorageProgress}" Width="376" Height="70"/>
                 </StackPanel>
                 <Grid Grid.Row="1" Margin="178,0,28,0">
                     <Grid.ColumnDefinitions>
@@ -31,14 +31,14 @@
                     <StackPanel Grid.Column="0" Orientation="Horizontal">
                         <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Total], Source={StaticResource L10N}}"/>
                         <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
-                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding DbTotalSize}"/>
+                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding StorageTotalSize}"/>
                             <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [GB], Source={StaticResource L10N}}" Margin="5,0,0,0"/>
                         </StackPanel>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                         <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Free], Source={StaticResource L10N}}"/>
                         <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
-                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding DbAvailableFreeSpace}"/>
+                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding StorageFreeSize}"/>
                             <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [GB], Source={StaticResource L10N}}" Margin="5,0,0,0"/>
                         </StackPanel>
                     </StackPanel>

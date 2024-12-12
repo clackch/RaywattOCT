@@ -22,6 +22,7 @@ extern "C" {
 	_declspec(dllexport) RayError RayStartLiveView();
 	_declspec(dllexport) RayError RayStopLiveView();
 	_declspec(dllexport) RayError RayLaserOnOff(bool isOn);
+	_declspec(dllexport) RayError RayRJCleanModeOnOff(bool isOn);
 
 	_declspec(dllexport) RayError RayShowCalibrationGuide(bool show);
 	_declspec(dllexport) int RayStartReview(char *strFilePath, double imageResolution, double zOffset);

@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
+using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
@@ -239,6 +240,15 @@ namespace RaywattApp.Common.Bases
             _log.Debug("NewRecording");
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
+
+            if (!CommonUtil.IsStorageAvailable())
+            {
+                parameter["title"] = _l10n["Information"];
+                parameter["message"] = _l10n["$MSG024"];
+                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+                return;
+            }
 
             if (Patient.PhysicianId == 0)
             {

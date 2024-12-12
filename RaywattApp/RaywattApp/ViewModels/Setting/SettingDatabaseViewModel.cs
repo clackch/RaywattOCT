@@ -2,7 +2,6 @@
 using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Util;
-using System.IO;
 
 namespace RaywattApp.ViewModels.Setting
 {
@@ -11,42 +10,29 @@ namespace RaywattApp.ViewModels.Setting
         private static readonly ILog _log = LogManager.GetLogger(typeof(SettingDatabaseViewModel));
 
         [ObservableProperty]
-        private double _dbProgress;
+        private double _storageProgress;
 
         [ObservableProperty]
-        public double _dbTotalSize;
+        public double _storageTotalSize;
 
         [ObservableProperty]
-        public double _dbAvailableFreeSpace;
+        public double _storageFreeSize;
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
             _log.Debug("OnNavigated");
 
-            GetDbSize();
+            double storageTotalSize, storageFreeSize;
+            CommonUtil.GetStorageSize(out storageTotalSize, out storageFreeSize);
+            StorageTotalSize = storageTotalSize;
+            StorageFreeSize = storageFreeSize;
+
+            StorageProgress = (StorageTotalSize - StorageFreeSize) / StorageTotalSize * 100;
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
             _log.Debug("OnNavigating");
-        }
-
-        private void GetDbSize()
-        {
-            string configDrive = Constants.SystemRootPath + "\\";
-
-            DriveInfo[] allDrives = DriveInfo.GetDrives();
-            foreach (DriveInfo drive in allDrives)
-            {
-                if (drive.Name.Equals(configDrive))
-                {
-                    DbTotalSize = CommonUtil.ByteToGB(drive.TotalSize);
-                    DbAvailableFreeSpace = CommonUtil.ByteToGB(drive.AvailableFreeSpace);
-                    break;
-                }
-            }
-
-            DbProgress = (DbTotalSize - DbAvailableFreeSpace) / DbTotalSize * 100;
         }
     }
 }

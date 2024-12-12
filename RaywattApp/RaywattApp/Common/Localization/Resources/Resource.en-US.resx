@@ -198,6 +198,9 @@ for FFR</value>
   <data name="$MSG023" xml:space="preserve">
     <value>The angiography device is not connected.</value>
   </data>
+  <data name="$MSG024" xml:space="preserve">
+    <value>Not enough storage space. Please free up space and try again.</value>
+  </data>
   <data name="$Terms and Conditions" xml:space="preserve">
     <value>Product Intended Use: Clearly define the intended use of the OCT device, including any limitations or specific conditions for use.
 
@@ -438,9 +441,6 @@ Acceptance of Terms: Require users to explicitly accept the terms and conditions
     <value>Data already exists.
 Overwrite existing data?</value>
   </data>
-  <data name="Database" xml:space="preserve">
-    <value>Database</value>
-  </data>
   <data name="Delete" xml:space="preserve">
     <value>Delete</value>
   </data>
@@ -458,6 +458,9 @@ Overwrite existing data?</value>
   </data>
   <data name="DICOM" xml:space="preserve">
     <value>DICOM</value>
+  </data>
+  <data name="Disable Cleaning" xml:space="preserve">
+    <value>Disable Cleaning</value>
   </data>
   <data name="Display Modes" xml:space="preserve">
     <value>Display Modes</value>
@@ -485,6 +488,9 @@ Overwrite existing data?</value>
   </data>
   <data name="en-US" xml:space="preserve">
     <value>English</value>
+  </data>
+  <data name="Enable Cleaning" xml:space="preserve">
+    <value>Enable Cleaning</value>
   </data>
   <data name="End Review" xml:space="preserve">
     <value>End Review</value>
@@ -984,6 +990,9 @@ Overwrite existing data?</value>
   <data name="Review Settings" xml:space="preserve">
     <value>Review Settings</value>
   </data>
+  <data name="Rotary Junction" xml:space="preserve">
+    <value>Rotary Junction</value>
+  </data>
   <data name="Save" xml:space="preserve">
     <value>Save</value>
   </data>
@@ -1088,6 +1097,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Step 5." xml:space="preserve">
     <value>Step 5.</value>
+  </data>
+  <data name="Storage" xml:space="preserve">
+    <value>Storage</value>
   </data>
   <data name="Survey (100㎜)" xml:space="preserve">
     <value>Survey (100㎜)</value>

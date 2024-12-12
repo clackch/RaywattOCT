@@ -235,6 +235,15 @@ namespace RaywattApp.ViewModels
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
 
+            if (!CommonUtil.IsStorageAvailable())
+            {
+                parameter["title"] = _l10n["Information"];
+                parameter["message"] = _l10n["$MSG024"];
+                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+                return;
+            }
+
             if (Patient.PhysicianId == 0)
             {
                 parameter["title"] = _l10n["Information"];

@@ -159,7 +159,13 @@ namespace RaywattApp.ViewModels
                 parameter["patient"] = Patient;
                 SetListStatusInit();
                 parameter["prevStatus"] = PrevStatus;
-                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingPresetPage) { Parameter = parameter });
+
+                Dictionary<string, object> popupParameter = new Dictionary<string, object>();
+
+                if (CommonUtil.IsStorageAvailable())                    
+                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingPresetPage) { Parameter = parameter });
+                else
+                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientDetailPage) { Parameter = parameter });
             }
             else
             {

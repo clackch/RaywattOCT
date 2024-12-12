@@ -95,7 +95,8 @@ namespace RaywattOCT
             Pullback,
             LoadCatheter,
             UnloadCatheter,
-            ValidateCatheter
+            ValidateCatheter,
+            CleanRotaryJunction
         };
 
         public enum RaySession : int
@@ -172,6 +173,8 @@ namespace RaywattOCT
         public static extern int RayStopLiveView();
         [DllImport("RayCore.dll")]
         public static extern int RayLaserOnOff(bool isOn);
+        [DllImport("RayCore.dll")]
+        public static extern int RayRJCleanModeOnOff(bool isOn);
         [DllImport("RayCore.dll")]
         public static extern int RaySetSession(RaySession session);
         [DllImport("RayCore.dll")]

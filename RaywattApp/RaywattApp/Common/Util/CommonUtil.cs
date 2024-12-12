@@ -2365,5 +2365,34 @@ namespace RaywattApp.Common.Util
         {
             return Math.Round(value, 5);
         }
+
+        public static void GetStorageSize(out double totalSize, out double freeSize)
+        {
+            string configDrive = Constants.SystemRootPath + "\\";
+            totalSize = 0;
+            freeSize = 0;
+
+            DriveInfo[] allDrives = DriveInfo.GetDrives();
+            foreach (DriveInfo drive in allDrives)
+            {
+                if (drive.Name.Equals(configDrive))
+                {
+                    totalSize = CommonUtil.ByteToGB(drive.TotalSize);
+                    freeSize = CommonUtil.ByteToGB(drive.AvailableFreeSpace);
+                    break;
+                }
+            }
+        }
+
+        public static bool IsStorageAvailable()
+        {
+            double storageTotalSize, storageFreeSize;
+            GetStorageSize(out storageTotalSize, out storageFreeSize);
+
+            if (storageFreeSize < Constants.StorageLimit)
+                return false;
+
+            return true;
+        }
     }
 }

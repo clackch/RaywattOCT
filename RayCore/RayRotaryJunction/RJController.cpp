@@ -291,6 +291,11 @@ void CRJController::updateState() {
 			m_nextState = eRJState::Connected;
 		}
 		break;
+	case eRJState::Cleaning:
+		if (m_bLimitSwitch || m_bButton[1]) {
+			m_nextState = eRJState::Error;
+		}
+		break;
 	case eRJState::Connected:
 		if (m_bLimitSwitch) {
 #if ENABLE_RFID
@@ -407,12 +412,16 @@ void CRJController::updateStateManualMode() {
 	}
 }
 void CRJController::updateState(eRJState state) {
-	const char* strState[] = {"Disconnected", "Unloaded", "Connected", "Validating", "Loading", "WaitManualLoad", "Loaded", "Unloading", "Error"};
+	const char* strState[] = {"Disconnected", "Cleaning", "Connected", "Validating", "Loading", "WaitManualLoad", "Loaded", "Unloading", "Unloaded", "Error"};
+
 	PLOGI.printf("state: %s", strState[(int)state]);
 	switch (state) {
 	case eRJState::Disconnected:
 	case eRJState::Unloaded:
 		displayLCD(eLCDImage::LCD_IMAGE_UNLOADED);
+		break;
+	case eRJState::Cleaning:
+		displayLCD(eLCDImage::LCD_IMAGE_BOOTING);	// To-Do: change LCD image
 		break;
 	case eRJState::Connected:
 		m_nRFIDLength = 0;	// clear RFID info.
@@ -464,7 +473,7 @@ void CRJController::parseSMPacket(BYTE* packet, int size) {
 		for (int j = 0; j < 4; j++) {
 			curPos |= (packet[offset + j] << (j * 8));
 		}
-		PLOGI.printf("StepMotor #%d (%s): %d", i, ((m_isSMMoving[i]) ? "Moving" : "Stop"), curPos);
+		//PLOGI.printf("StepMotor #%d (%s): %d", i, ((m_isSMMoving[i]) ? "Moving" : "Stop"), curPos);
 		offset += 12;	// current pos (4byte), target pos (4byte), current speed (4byte)
 	}
 }

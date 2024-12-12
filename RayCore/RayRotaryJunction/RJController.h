@@ -18,6 +18,7 @@
 
 enum class eRJState {
 	Disconnected = 0,
+	Cleaning,
 	Connected,
 	Validating,
 	Loading,
@@ -58,6 +59,7 @@ public:
 	CRJController();
 	virtual ~CRJController();
 
+	eRJState GetState() { return m_state; }
 	virtual void SetMessage(CMessageService* pMsg) { m_pMsg = pMsg; }
 	virtual void UpdateState(eRJState state);
 
