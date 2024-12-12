@@ -199,7 +199,7 @@ cv::Mat CImagingSession::PostProcess(int nFrame) {
 	std::map<int, cv::Mat>::iterator it = m_mapImage.find(nFrame);
 	if (it != m_mapImage.end()) {
 		cv::Mat imgZOffset;
-		m_pImaging->ApplyZOffset(it->second, imgZOffset, GetZOffset());
+		m_pImaging->ApplyZOffset(it->second, imgZOffset, GetZOffset(nFrame));
 		m_pImaging->PostProcess(imgZOffset);
 	}
 	return m_pImaging->GetCircleImage();
@@ -239,7 +239,7 @@ void* CImagingSession::GetImageData(int nFrame) {
 	}
 
 	cv::Mat imgZOffset;
-	m_pImaging->ApplyZOffset(imgResult, imgZOffset, GetZOffset());
+	m_pImaging->ApplyZOffset(imgResult, imgZOffset, GetZOffset(nFrame));
 	m_pImaging->PostProcess(imgZOffset);
 
 	return m_pImaging->GetCircleImage().data;
@@ -274,7 +274,7 @@ void CImagingSession::AddFramesIntoCutView() {
 		std::map<int, cv::Mat>::iterator it = m_mapImage.find(nFrame);
 		if (it != m_mapImage.end())
 		{
-			m_pImaging->ApplyZOffset(it->second, imgZOffset, GetZOffset());
+			m_pImaging->ApplyZOffset(it->second, imgZOffset, GetZOffset(nFrame));
 			m_pImaging->CircularizeImage(imgZOffset, imgCircle);
 			m_pCutView->AddRecord(imgCircle, nFrame);
 		}
@@ -345,6 +345,39 @@ int CImagingSession::GetNumOfGuidewirePoints(int nFrame){
 	return mat.cols * mat.rows;
 }
 
+bool CImagingSession::LoadZOffset(const char* strDataFilePath) {
+	std::string strPath(strDataFilePath);
+	std::string strZOffsetFilePath = strPath.substr(0, strPath.size() - 3).append("cal");
+
+	int nNumOfSamples = (m_pDataManager == nullptr) ? 0 : m_pDataManager->GetNumOfSamples();
+	m_vZOffset.clear();
+
+	FILE* fp = fopen(strZOffsetFilePath.c_str(), "r");
+	if (fp) {
+		PLOGI.printf("ZOffset file loaded: %s", strZOffsetFilePath.c_str());
+		for (int i = 0; i < nNumOfSamples; i++) {
+			int offset = 0;
+			fscanf(fp, "%d,", &offset);
+			PLOGI.printf("%d", offset);
+
+			m_vZOffset.push_back(offset);
+		}
+		fclose(fp);
+		PLOGI.printf("ZOffset file loaded: %s done.", strZOffsetFilePath.c_str());
+
+		return true;
+	}
+
+	return true;
+}
+
+int CImagingSession::GetZOffset(int nFrame) {
+	if (m_pDataManager == nullptr) return 0;
+	if (m_vZOffset.size() != m_pDataManager->GetNumOfSamples()) return GetZOffset();
+
+	return m_vZOffset.at(nFrame);
+}
+
 CImagingSession* CImagingSession::createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type) {
 	CImagingSession* pSession = new CImagingSession(pMsg, nSession, deleteData);
 
@@ -402,7 +435,7 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 			continue;
 		}
 
-		pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetZOffset());
+		pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetZOffset(nFrame));
 		pImaging->CircularizeImage(imgZOffset, imgCircle);
 		pCutView->AddRecord(imgCircle, nFrame);
 
@@ -457,7 +490,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 			continue;
 		}
 
-		pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetZOffset());
+		pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetZOffset(nFrame));
 		pImaging->CircularizeImage(imgZOffset, circleImage);
 		cv::cvtColor(circleImage, circleImage, cv::COLOR_GRAY2BGR);
 
@@ -639,7 +672,7 @@ UINT CImagingSession::threadGenerateVolume(LPVOID param) {
 			continue;
 		}
 		
-		pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetZOffset());
+		pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetZOffset(nFrame));
 		pImaging->CircularizeImage(imgZOffset, imgCircle);
 
 		// remove sheath

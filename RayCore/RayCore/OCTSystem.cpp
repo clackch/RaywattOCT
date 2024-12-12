@@ -398,6 +398,7 @@ int COCTSystem::StartReview(char* strFilePath, double imageResolution, double zO
 			PLOGE.printf("InvalidArgument : %s", strFilePath);
 			return (int)RayError::InvalidArgument;
 		}
+		pSession->LoadZOffset(strFilePath);
 		pSession->SetZOffset((int)zOffset);
 
 		postPriorMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
@@ -420,6 +421,7 @@ RayError COCTSystem::StartCompare(char* strFilePath, double imageResolution, dou
 	if (pSession == nullptr) {
 		return RayError::InvalidArgument;
 	}
+	pSession->LoadZOffset(strFilePath);
 	pSession->SetZOffset((int)zOffset);
 
 	if (m_reviewSession[SESSION_COMPARE] != nullptr) {
@@ -659,6 +661,7 @@ RayError COCTSystem::OpenImage(char* strFilePath, double imageResolution, double
 	if (pSession == nullptr) {
 		return RayError::InvalidArgument;
 	}
+	pSession->LoadZOffset(strFilePath);
 	pSession->SetZOffset((int)zOffset);
 
 	m_openedSession = pSession;
