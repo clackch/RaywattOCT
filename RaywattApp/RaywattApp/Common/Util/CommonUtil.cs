@@ -614,7 +614,7 @@ namespace RaywattApp.Common.Util
             }*/
 
             //Stent Area
-            if (isPostCase && lumenStent.Points != null && lumenStent.IsStent)
+            if (isPostCase && (curFrame >= 741 && curFrame <= 1141))
             {
                 //MalApposition
                 foreach(double appositionLength in lumenStent.AppositionLength)

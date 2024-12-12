@@ -324,9 +324,9 @@
                                         <Label Style="{DynamicResource Pretendard-Medium-10}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [㎜], Source={StaticResource L10N}}"/>
                                     </StackPanel>
                                     <!-- Section Proximal -->
-                                    <Image Height="170" Source="{svgc:SvgImage Source=/res/indicator/sectionProximalCompare.svg}" Canvas.Left="{Binding Section.Proximal.X}" Visibility="{Binding Section.Proximal.IsVisible}"/>
+                                    <Image Height="170" Source="{svgc:SvgImage Source=/res/indicator/sectionProximalCompare.svg}" Canvas.Left="{Binding Section.Proximal.X}" />
                                     <!-- Section Distal -->
-                                    <Image Height="170" Source="{svgc:SvgImage Source=/res/indicator/sectionDistalCompare.svg}" Canvas.Left="{Binding Section.Distal.X}" Visibility="{Binding Section.Distal.IsVisible}"/>
+                                    <Image Height="170" Source="{svgc:SvgImage Source=/res/indicator/sectionDistalCompare.svg}" Canvas.Left="{Binding Section.Distal.X}" />
                                     <!-- L-Mode Indicator -->
                                     <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitudeCompare" IsCaptured="{Binding IndicatorLongitude.IsCaptured}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="181" Stretch="None" Canvas.Left="{Binding IndicatorLongitude.X}" Visibility="{Binding IndicatorLongitude.IsVisible}" HorizontalAlignment="Center" Canvas.Top="-11" VerticalAlignment="Top">
                                         <!-- Trigger -->

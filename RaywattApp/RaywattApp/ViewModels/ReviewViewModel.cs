@@ -1533,7 +1533,7 @@ namespace RaywattApp.ViewModels
                 int stentProximal = 0, stentDistal = 0;
                 CommonUtil.GetStentProximalDistal(LumenStents, out stentProximal, out stentDistal);
 
-                if (Section.SetMsaMinExp(LumenContours, frameProximal, frameDistal, stentProximal, stentDistal, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength))
+                if (Section.SetMsaMinExp(LumenContours, frameProximal, frameDistal, 742, 1100, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength))
                     Section.VislbleMsaMinExp(true);
                 else
                     Section.VislbleMsaMinExp(false);

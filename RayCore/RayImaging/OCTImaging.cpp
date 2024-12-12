@@ -611,7 +611,7 @@ void COCTImaging::adaptive_compensation()
 	logarithmic_contrast_stretching(result_img);
 	result_img.convertTo(result_img, CV_8U, 255);
 
-	adaptive_gamma_correction(result_img);
+	//adaptive_gamma_correction(result_img);
 
 	// Rotate back to original angle
 	cv::rotate(result_img, imageResult, cv::ROTATE_90_CLOCKWISE);
@@ -1107,7 +1107,7 @@ void COCTImaging::adaptive_gamma_correction(cv::Mat& img) {
 		get_CDF_array(pdf_i, cdf_i);
 	}
 
-	double max_intensity = 255.0;
+	double max_intensity = 230;
 	double calculated_max_intensity = *std::max_element(img.begin<uchar>(), img.end<uchar>());
 	if (calculated_max_intensity > 0) {
 		max_intensity = calculated_max_intensity;
@@ -1120,7 +1120,7 @@ void COCTImaging::adaptive_gamma_correction(cv::Mat& img) {
 			double intensity_ratio = intensity / max_intensity;
 			double new_intensity = max_intensity * std::pow(intensity_ratio, 1 - cdf_i[intensity]);
 
-			new_intensity = new_intensity > 255 ? 255 : (new_intensity < 0 ? 0 : new_intensity);
+			new_intensity = new_intensity > max_intensity ? max_intensity : (new_intensity < 0 ? 0 : new_intensity);
 			output_image.at<uchar>(y, x) = static_cast<uchar>(new_intensity);
 		}
 	}
