@@ -68,7 +68,6 @@ private:
 
 	// Rotary Junction
 	CRJController* m_pRJController;
-	bool m_isRJCleaning;
 
 	// Laser Module
 	CLaserModule* m_pLaserModule;
