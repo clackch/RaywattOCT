@@ -197,7 +197,7 @@ private:
 	static UINT threadUnloadCatheter(LPVOID param);
 	static UINT threadValidateCatheter(LPVOID param);
 	static UINT threadManualLoadCatheter(LPVOID param);
-	static UINT threadCleanCatheter(LPVOID param);
+	static UINT threadCleanRotaryJunction(LPVOID param);
 
 	// Imaging & Device
 	bool checkConnection();
