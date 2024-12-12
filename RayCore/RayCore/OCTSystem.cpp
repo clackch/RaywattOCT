@@ -558,7 +558,7 @@ RayError COCTSystem::RJCleanModeOnOff(bool isOn)
 	}
 	else {
 		if (isOn) {
-			CUtility::StartThread(threadCleanCatheter, m_pThreadRotaryJunction, this);
+			CUtility::StartThread(threadCleanRotaryJunction, m_pThreadRotaryJunction, this);
 		}
 		else {
 			postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::CleanRotaryJunction);
@@ -1773,9 +1773,9 @@ UINT COCTSystem::threadManualLoadCatheter(LPVOID param)
 }
 
 /*
-* threadCleanCatheter
+* threadCleanRotaryJunction
 */
-UINT COCTSystem::threadCleanCatheter(LPVOID param)
+UINT COCTSystem::threadCleanRotaryJunction(LPVOID param)
 {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
@@ -2308,7 +2308,7 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 	case eRJState::Disconnected:
 		break;
 	case eRJState::Cleaning:
-		CUtility::StartThread(threadCleanCatheter, m_pThreadRotaryJunction, this);
+		CUtility::StartThread(threadCleanRotaryJunction, m_pThreadRotaryJunction, this);
 		break;
 	case eRJState::Connected:
 		break;
