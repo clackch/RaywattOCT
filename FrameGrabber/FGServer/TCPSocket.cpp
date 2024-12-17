@@ -459,21 +459,21 @@ void TCPSocket::LiveFrame(FrameGrabber& fg) {
 	if (bufferResult != 0 || pVidHeader == nullptr) {
 		retryCount++; 
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		if (retryCount > 300) { // 이미지를 0.3초 이상 받아오지 못하는 경우 새로고침
+		if (retryCount > 100) { // 이미지를 0.3초 이상 받아오지 못하는 경우 새로고침
 			RefreshLiveStream(fg);
 			retryCount = 0;
 		}
 		return;
 	}
 	int offset = IMAGE_HEADER_SIZE; 
-	memcpy(sendBuffer + offset, pVidHeader->pBuffer, fg.m_LiveStreamInfo.nDestinationWidth * fg.m_LiveStreamInfo.nDestinationHeight * 3); 
-	offset += fg.m_LiveStreamInfo.nDestinationWidth * fg.m_LiveStreamInfo.nDestinationHeight * 3;
+	memcpy(sendBuffer + offset, pVidHeader->pBuffer, fg.m_LiveStreamInfo.nDestinationWidth * fg.m_LiveStreamInfo.nDestinationHeight * fg.wBitsPerPixel / 8);
+	offset += fg.m_LiveStreamInfo.nDestinationWidth * fg.m_LiveStreamInfo.nDestinationHeight * fg.wBitsPerPixel / 8;
 	checkSum = CalcCheckSum(sendBuffer, offset); 
 	memcpy(sendBuffer + offset, &checkSum, sizeof(checkSum)); 
 	offset += sizeof(checkSum); 
 	memcpy(sendBuffer + offset, &eof, sizeof(eof)); 
 	offset += sizeof(eof); 
-	int sendResult = send(clientSocket, sendBuffer, imagePacketSize, 0);  
+	int sendResult = send(clientSocket, sendBuffer, imagePacketSize, 0);
 	if (sendResult == SOCKET_ERROR) { 
 		PLOGI.printf("Failed to send data to client. Error code: %d", WSAGetLastError()); 
 	}
@@ -484,11 +484,7 @@ void TCPSocket::LiveFrame(FrameGrabber& fg) {
 
 void TCPSocket::StartLiveFrameThread(FrameGrabber& fg) {
 	if (!liveFrameThreadRunning) {
-		fg.InitializeLiveStreamInfo(); // Liveinfo 기본값 초기화
-		if (eHD_LiveStreamInit(fg.m_ImageHandle, &fg.m_LiveStreamInfo) != 0 || !Chp_selected) { // INIT이 실패하거나 AngioSetup에서 Chp을 고르지 않고 Thread가 돌아가는 경우 방지
-			PLOGI.printf("Initialization of live stream info failed.");
-			return;
-		}
+		 
 		ERRTYPE result = eHD_LiveStreamMode(fg.m_ImageHandle, LVM_RUN); // LiveMode_RUN
 		if (result != 0)
 		{
@@ -510,24 +506,26 @@ void TCPSocket::StopLiveFrameThread(FrameGrabber& fg) {
 		}
 		PLOGI.printf("LiveFrameThread stopped.");
 	}
+	// Recording 변수 
 }
 
-void TCPSocket::LiveFrameThread(FrameGrabber& fg) {
+void TCPSocket::LiveFrameThread(FrameGrabber& fg) {	
 	while (liveFrameThreadRunning && isStarted && fg.portConnection) {
 		LiveFrame(fg);
 	}
 }
 
 void TCPSocket::RefreshLiveStream(FrameGrabber& fg) { 
-	PLOGI.printf("RefreshLiveStream");
 	ERRTYPE result = eHD_LiveStreamMode(fg.m_ImageHandle, LVM_STOP);
 	if (result != 0)return;
 	eHD_LiveStreamClose(fg.m_ImageHandle, &fg.m_LiveStreamInfo);
+	eHD_ReleaseStreamBuffer(fg.m_ImageHandle, fg.m_LiveStreamInfo.pVidHeaders);
 	fg.InitializeLiveStreamInfo();
 	result = eHD_LiveStreamInit(fg.m_ImageHandle, &fg.m_LiveStreamInfo);
 	if (result != 0)return;
 	result = eHD_LiveStreamMode(fg.m_ImageHandle, LVM_RUN);
 	if (result != 0)return;
+	PLOGI.printf("RefreshLiveStream");
 }
 
 // --------------------------------Snap 관련 함수--------------------------------------//

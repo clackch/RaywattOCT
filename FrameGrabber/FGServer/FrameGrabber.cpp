@@ -68,7 +68,6 @@ ERRTYPE FrameGrabber::ReadFormatFile(char* m_CHPFilePath) {
 	DWORD dwBoardCaps;
 	// read .chp 
 	e = eHP_RSET_FRead(m_BoardHandle, m_CHPFilePath, &m_RSet, FALSE);
-
 	if (e) return e;
 
 	if (m_ImageHandle)
@@ -138,7 +137,6 @@ void FrameGrabber::CreateFromFG() {
 	{
 		wBitsPerPixel = 24;
 	}
-
 	WORD wMode;
 	ERRTYPE e;
 
@@ -175,12 +173,12 @@ void FrameGrabber::InitializeLiveStreamInfo() {
 	m_LiveStreamInfo.nDestinationWidth = m_RSet.lRegs[HPR_WIDTH];
 	m_LiveStreamInfo.nDestinationHeight = m_RSet.lRegs[HPR_HEIGHT];
 	m_LiveStreamInfo.dwNumberOfBuffers = STREAM_FRAMES;
-	m_LiveStreamInfo.nDataType = IDEA_TYPE_RGB_24;
+	m_LiveStreamInfo.nDataType = IDEA_TYPE_RGB_24; 
 	m_LiveStreamInfo.bDIBTarget = TRUE; // 상하 반전
 	m_LiveStreamInfo.pBufferList = new void* [m_LiveStreamInfo.dwNumberOfBuffers];
 	for (DWORD i = 0; i < m_LiveStreamInfo.dwNumberOfBuffers; ++i)
 	{
-		m_LiveStreamInfo.pBufferList[i] = new char[m_LiveStreamInfo.nDestinationWidth * m_LiveStreamInfo.nDestinationHeight * 3];
+		m_LiveStreamInfo.pBufferList[i] = new char[m_LiveStreamInfo.nDestinationWidth * m_LiveStreamInfo.nDestinationHeight * (wBitsPerPixel / 8)];
 	}
 	m_LiveStreamInfo.nDecimateFrames = 0;
 	m_LiveStreamInfo.bFieldUpdate = FALSE;

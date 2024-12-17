@@ -237,6 +237,7 @@ namespace RaywattApp.Common.Angio
         private void ThreadFuncSaveAngioFrames(PatientCase patientCase)
         {
             string angioFilePath = patientCase.ImageFullPath.Substring(0, patientCase.ImageFullPath.Length - 3);
+            _log.Debug(angioFilePath);
             try
             {
                 while (threadOnSaveAngioFrames)
@@ -250,6 +251,15 @@ namespace RaywattApp.Common.Angio
 
                 while (angioSaveFrameNum >= 0)
                 {
+                    if (!ViewModelBase._deviceStatus.IsAngioConnected)
+                    {
+                        fs.Close();
+                        if (System.IO.File.Exists(angioFilePath + Constants.AngioImageExtension))
+                        {
+                            System.IO.File.Delete(angioFilePath + Constants.AngioImageExtension);
+                        }
+                        return;
+                    }
                     fs.Write(angioSaveBuffer[angioSaveFrameNum--], 0, angioImageSize);
                 }
                 fs.Close();
@@ -629,6 +639,7 @@ namespace RaywattApp.Common.Angio
             threadFuncSaveAngioFrames = new Thread(() => ThreadFuncSaveAngioFrames(patientCase));
             threadOnSaveAngioFrames = true;
             threadFuncSaveAngioFrames.Start();
+            //SendCommandPacket(CommandType.FGRecordingStart);
         }
         public void StopSaveAngioThread()
         {
