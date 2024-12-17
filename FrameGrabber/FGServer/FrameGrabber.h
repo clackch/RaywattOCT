@@ -42,6 +42,7 @@ public:
 	void CreateFromFG();
 	void CheckPortConnection();
 	void InitializeLiveStreamInfo();
+	void DecodeError(char* szErrMsg, ERRTYPE e);
 
 	IDEA_INFO* pIdeaInfo;
 	BOOL m_bSyncValid;
@@ -53,7 +54,7 @@ public:
 	short lHeight;
 	char wBitsPerPixel = 0;
 
-	int portConnection;
+	int portConnection; // init : -1, Connected : 1, Disconnected : 0
 	int oldPortConnection;
 	bool boardConnection = 0;
 

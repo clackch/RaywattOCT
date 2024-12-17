@@ -1,4 +1,5 @@
 #include "FrameGrabber.h"
+
 FrameGrabber::FrameGrabber() {
 	lHeight = 0;
 	lWidth = 0;
@@ -50,6 +51,11 @@ void FrameGrabber::CheckPortConnection() {
 	pIdeaInfo = 0;
 	if (eHP_GetInfoStruct(m_BoardHandle, &pIdeaInfo) == 0)
 	{
+		UpdateVideoSettingLong	uvsl;
+		uvsl.lValue = 0;
+		uvsl.pRSet = 0;
+		eHP_SetControlValue(m_BoardHandle, "ContinuousGrabEnable", sizeof(uvsl), (void*)&uvsl);
+
 		pIdeaInfo->hInfoEvent = CreateEvent(0, TRUE, FALSE, NULL);
 		m_bSyncValid = bHP_CSyncDetect(m_BoardHandle);
 		if (m_bSyncValid) {
@@ -68,7 +74,14 @@ ERRTYPE FrameGrabber::ReadFormatFile(char* m_CHPFilePath) {
 	DWORD dwBoardCaps;
 	// read .chp 
 	e = eHP_RSET_FRead(m_BoardHandle, m_CHPFilePath, &m_RSet, FALSE);
-	if (e) return e;
+
+	if (e) {
+		char errMsg[2048];
+		DecodeError(errMsg, e);
+		PLOGI.printf("m_BoardHandle init Fail %s", m_CHPFilePath);
+		PLOGI.printf(errMsg);
+		return e;
+	}
 
 	if (m_ImageHandle)
 	{
@@ -76,13 +89,20 @@ ERRTYPE FrameGrabber::ReadFormatFile(char* m_CHPFilePath) {
 	}
 
 	m_ImageHandle = ihHD_Allocate(m_BoardHandle, HDAL_DEFRAG, &m_RSet);
-
+	strcpy(m_RSet.szCHPFile, m_CHPFilePath);
+	
 	e = eHD_RSET_Set(m_ImageHandle, &m_RSet, HDSET_SYNCHR_ON);
-	if (e) return e;
-
-	eHP_GetControlValue(m_BoardHandle, (char*)"BoardCaps", sizeof(dwBoardCaps), (void*)&dwBoardCaps);
+	if (e) {
+		char errMsg[2048];
+		DecodeError(errMsg, e);
+		PLOGI.printf("Unable to load hardware profile : %s", m_CHPFilePath);
+		PLOGI.printf(errMsg);
+		return e;
+	}
 
 	eHD_SetIHDMALUT(m_ImageHandle, m_hVPLUT);
+
+	eHP_GetControlValue(m_BoardHandle, (char*)"BoardCaps", sizeof(dwBoardCaps), (void*)&dwBoardCaps);
 
 	if ((dwBoardCaps & FSCAPS_RGB_WITH_MONO) != 0)
 	{
@@ -110,8 +130,6 @@ ERRTYPE FrameGrabber::ReadFormatFile(char* m_CHPFilePath) {
 void FrameGrabber::CreateFromFG() {
 
 	DWORD		dwBoardCaps;
-
-	eHD_SetIHDMALUT(m_ImageHandle, m_hVPLUT);
 
 	lHeight = m_RSet.lRegs[HPR_HEIGHT];
 	lWidth = m_RSet.lRegs[HPR_WIDTH];
@@ -168,17 +186,28 @@ void FrameGrabber::CreateFromFG() {
 }
 
 void FrameGrabber::InitializeLiveStreamInfo() {
+	int channel = 0;
+
 	memset(&m_LiveStreamInfo, 0, sizeof(LIVESTREAM_INFO));
 	m_LiveStreamInfo.dwSize = sizeof(LIVESTREAM_INFO);
 	m_LiveStreamInfo.nDestinationWidth = m_RSet.lRegs[HPR_WIDTH];
 	m_LiveStreamInfo.nDestinationHeight = m_RSet.lRegs[HPR_HEIGHT];
 	m_LiveStreamInfo.dwNumberOfBuffers = STREAM_FRAMES;
-	m_LiveStreamInfo.nDataType = IDEA_TYPE_RGB_24; 
+
+	if (wBitsPerPixel == 24) {
+		m_LiveStreamInfo.nDataType = IDEA_TYPE_RGB_24;
+		channel = 3;
+	}
+	else {
+		m_LiveStreamInfo.nDataType = IDEA_TYPE_MONO_8;
+		channel = 1;
+	}
+
 	m_LiveStreamInfo.bDIBTarget = TRUE; // 상하 반전
 	m_LiveStreamInfo.pBufferList = new void* [m_LiveStreamInfo.dwNumberOfBuffers];
 	for (DWORD i = 0; i < m_LiveStreamInfo.dwNumberOfBuffers; ++i)
 	{
-		m_LiveStreamInfo.pBufferList[i] = new char[m_LiveStreamInfo.nDestinationWidth * m_LiveStreamInfo.nDestinationHeight * (wBitsPerPixel / 8)];
+		m_LiveStreamInfo.pBufferList[i] = new char[m_LiveStreamInfo.nDestinationWidth * m_LiveStreamInfo.nDestinationHeight * channel];
 	}
 	m_LiveStreamInfo.nDecimateFrames = 0;
 	m_LiveStreamInfo.bFieldUpdate = FALSE;
@@ -191,4 +220,24 @@ void FrameGrabber::InitializeLiveStreamInfo() {
 	m_LiveStreamInfo.hStopEvent = CreateEvent(0, TRUE, FALSE, NULL);
 	m_LiveStreamInfo.hBufferEvent = CreateEvent(0, TRUE, FALSE, NULL);
 	m_LiveStreamInfo.hErrorEvent = CreateEvent(0, TRUE, FALSE, NULL);
+}
+
+
+void FrameGrabber::DecodeError(char* szErrMsg, ERRTYPE e)
+{
+	char		szErrText[1024];
+	int			nErrSize;
+
+	if (e == 0) return;
+
+	//
+	// Call nHP_ErrMessage() to read from hdperror.dat
+	//
+	nErrSize = nHP_ErrMessage(e, 1023, szErrText);
+	if (nErrSize > 0)
+	{
+		sprintf(szErrMsg, "%s %s\n", szErrMsg, szErrText);
+	}
+
+	sprintf(szErrMsg, "%s [Error Code = %d]", szErrMsg, e);
 }
