@@ -91,7 +91,7 @@ bool CMotorController::PerformRun(int &nVelocity) {
 	getMotorPacket(MOTOR_INDEX_TARGETVELOCITY, nVelocity, 4, packet, packetLength);
 	result = writeMotor(packet, packetLength);
 
-	m_isRun = result;
+	m_isRun = (result && nVelocity != 0);
 	return result;
 }
 bool CMotorController::StopMotor() {
