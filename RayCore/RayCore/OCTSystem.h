@@ -90,7 +90,6 @@ private:
 	double m_fImageThreshold = 99.99;
 	bool m_bImageCompensation = true;
 	bool m_bImageCompensationControlWindow;
-	bool m_bImageLumenVignetting;
 	double m_fImageRoi = 2.f;
 	double m_fFieldOfView;
 	bool m_isTestMode;
@@ -171,9 +170,7 @@ public:
 	RayError SetImageRoi(double value);
 	bool GetImageCompensation();
 	RayError SetImageCompensation(bool value);
-	bool GetImageLumenVignetting();
 	RayError SetImageCompensationControlWindow(bool value);
-	RayError SetImageLumenVignetting(bool value);
 	double GetFieldOfView();
 	RayError SetFieldOfView(double value);
 	void SetTestMode(bool isTestMode) { m_isTestMode = isTestMode; }

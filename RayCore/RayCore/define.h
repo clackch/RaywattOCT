@@ -45,7 +45,6 @@ enum class RayProperty {
 	ImageRoi,
 	ImageCompensation,
 	ImageCompensationControlWindow,
-	ImageLumenVignetting,
 	FieldOfView,
 	LongitudeImageWidth,
 	LongitudeImageHeight,

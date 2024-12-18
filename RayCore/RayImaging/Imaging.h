@@ -16,7 +16,15 @@ public:
 		float contrast;
 		float lowLevel;
 		float highLevel;
-		
+
+		int applyCompensation;
+		int applyGammaCorrection;
+		int intensityThreshold;
+		float exponentialFactor;
+		float brightnessControl;
+		float energyThreshold;
+		float GCAlpha;
+
 		void Set(int nAScan, int nBScan)
 		{
 			this->nAScan = nAScan;

@@ -1104,35 +1104,17 @@ RayError COCTSystem::SetImageCompensation(bool value)
 }
 
 /*
-* SetImageCompensation
+* SetImageCompensationControlWindow
 */
 RayError COCTSystem::SetImageCompensationControlWindow(bool value)
 {
 	m_bImageCompensationControlWindow = value;
 
-	COCTImaging::SetImageCompensationControlWindow(m_bImageCompensationControlWindow);
+	CConfiguration& config = CConfiguration::GetInstance();
+
+	COCTImaging::SetImageCompensationControlWindow(m_bImageCompensationControlWindow, config.imaging);
 
 	m_bImageCompensationControlWindow = 0;
-
-	return RayError::OK;
-}
-
-/*
-* GetImageLumenVignetting
-*/
-bool COCTSystem::GetImageLumenVignetting()
-{
-	return m_bImageLumenVignetting;
-}
-
-/*
-* SetImageLumenVignetting
-*/
-RayError COCTSystem::SetImageLumenVignetting(bool value)
-{
-	m_bImageLumenVignetting = value;
-
-	COCTImaging::SetImageLumenVignetting(m_bImageLumenVignetting);
 
 	return RayError::OK;
 }
