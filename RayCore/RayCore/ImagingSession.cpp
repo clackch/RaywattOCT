@@ -65,7 +65,6 @@ CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSess
 		OCTHeader header = pReader->ReadHeader(CUtility::StringToWstring(strFilePath));
 		setting.Set(header.width, header.height);
 		nNumOfSamples = pReader->Initialize(CUtility::StringToWstring(strFilePath), setting.nBufferSize);
-		PLOGI.printf("%s opened - %d x %d (%d frames)", strFilePath, header.width, header.height, nNumOfSamples);
 	}
 	else if (ext.compare(FILE_EXTENSION_RAW) == 0)
 	{
@@ -85,6 +84,7 @@ CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSess
 		setting.Set(nWidth, nHeight);
 	}
 	setting.distPerPixel = (imageResolution * 1000.f / 2.f); // imageResolution: 1024x1024 circle 기준 (mm per pixel)
+	PLOGI.printf("%s opened - %d x %d (%d frames)", strFilePath, setting.nAScan, setting.nBScan, nNumOfSamples);
 
 	if (nNumOfSamples <= 0) {
 		if(pReader != nullptr) delete pReader;
@@ -358,7 +358,7 @@ bool CImagingSession::LoadZOffset(const char* strDataFilePath) {
 		for (int i = 0; i < nNumOfSamples; i++) {
 			int offset = 0;
 			fscanf(fp, "%d,", &offset);
-			PLOGI.printf("%d", offset);
+			//PLOGI.printf("%d", offset);
 
 			m_vZOffset.push_back(offset);
 		}

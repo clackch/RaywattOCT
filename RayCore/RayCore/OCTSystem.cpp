@@ -1044,6 +1044,8 @@ RayError COCTSystem::SetSheathDiameter(double value)
 {
 	CConfiguration& config = CConfiguration::GetInstance();
 
+	PLOGI.printf("Set catheter size as %.1f (%d)", (value == 0.0f ? 1.7f : 2.6f), m_bFirstLoad);
+
 	if (!m_bFirstLoad) return RayError::OK;
 	m_bFirstLoad = false;
 
