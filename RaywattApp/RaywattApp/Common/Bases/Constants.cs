@@ -393,15 +393,9 @@ namespace RaywattApp.Common.Bases
 
         //Draw Annotation
         public static Brush[] AnnotationBrushes = {
-            new SolidColorBrush(Color.FromRgb(0x56, 0xBD, 0x7C)),
-            new SolidColorBrush(Color.FromRgb(0xEE, 0x6C, 0x4F)),
-            new SolidColorBrush(Color.FromRgb(0xF7, 0xC9, 0x61)),
-            new SolidColorBrush(Color.FromRgb(0x47, 0x4F, 0xEB)),
-            new SolidColorBrush(Color.FromRgb(0xE9, 0x8C, 0x33)),            
-            new SolidColorBrush(Color.FromRgb(0x21, 0x24, 0x83)),
-            new SolidColorBrush(Color.FromRgb(0xF3, 0xAB, 0x97)),
-            new SolidColorBrush(Color.FromRgb(0x3D, 0x85, 0x51)),
-            new SolidColorBrush(Color.FromRgb(0xA9, 0xA9, 0xF9))
+            new SolidColorBrush(Color.FromRgb(0x57, 0xFE, 0xEB)),
+            new SolidColorBrush(Color.FromRgb(0xFF, 0xD8, 0x00)),
+            new SolidColorBrush(Color.FromRgb(0xFF, 0x7D, 0x77))
         };
         public static DashStyle AnnotationDashLarge = new DashStyle(new double[] { 7, 7 }, 0);
         public static DashStyle AnnotationDashSmall = new DashStyle(new double[] { 2, 5 }, 0);
