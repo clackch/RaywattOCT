@@ -808,7 +808,7 @@ void COCTImaging::on_trackbar(int, void*) {
 		// 트랙바 값은 int로만 입력 가능하므로, 이를 원하는 범위로 변환
 		EXPONENTIAL_FACTOR = cv::getTrackbarPos("Cont", strWindowName) / 10.0f;
 		BRIGHTNESS_CONTROL = cv::getTrackbarPos("Bright", strWindowName) / 10.0f;
-		ENERGY_THRESHOLD = cv::getTrackbarPos("Eng", strWindowName);
+		ENERGY_THRESHOLD = cv::getTrackbarPos("Eng", strWindowName) / 10.0f;
 		alpha = cv::getTrackbarPos("Alpha", strWindowName) / 10.f;
 		INTENSITY_THRESHOLD = cv::getTrackbarPos("GCTH", strWindowName);
 
