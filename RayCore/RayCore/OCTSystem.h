@@ -189,6 +189,7 @@ private:
 	// Work Thread (stop in OnMsgNotifyProcessDone func)
 	static UINT threadSaveRaw(LPVOID param);	
 	// Rotary Junction Thread (stop in OnMsgDeviceWorkDone func)
+	static UINT threadInitializeRotaryJunction(LPVOID param);
 	static UINT threadAutoCalibration(LPVOID param);
 	static UINT threadPullbackScan(LPVOID param);
 	// Catheter related Thread (stop in OnMsgUpdateCatheterState func)

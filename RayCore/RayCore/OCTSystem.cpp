@@ -1410,6 +1410,66 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 	return NOERROR;
 }
 
+UINT COCTSystem::threadInitializeRotaryJunction(LPVOID param) {
+	COCTSystem* pSystem = (COCTSystem*)param;
+	CRJController* pRJController = pSystem->m_pRJController;
+	CConfiguration& config = CConfiguration::GetInstance();
+
+	pRJController->SetModeOfOperation(MOTOR_DATA_MODE_VELOCITY);
+	pRJController->SwitchOff();
+	pRJController->SwitchOn();
+	pRJController->SetManualMode(config.catheter.manualLoad);
+	pRJController->Set(eStepMotorIndex::Both, STEP_MOTOR_SPEED_DEFAULT);
+
+	while (pSystem->m_pThreadRotaryJunction->isRun && !pRJController->InitialStatusReceived()) {
+		Sleep(DELAY_FOR_STOP_THREAD);
+	}
+
+	PLOGI.printf("photoSensor %d %d %d %d %d %d", pRJController->GetPhotoSensorOnOff(0), pRJController->GetPhotoSensorOnOff(1), pRJController->GetPhotoSensorOnOff(2)
+		, pRJController->GetPhotoSensorOnOff(3), pRJController->GetPhotoSensorOnOff(4), pRJController->GetPhotoSensorOnOff(5));
+	// SM (Hub) > Sensor #1
+	if (pSystem->m_pThreadRotaryJunction->isRun && !pRJController->GetPhotoSensorOnOff(0)) {
+		pRJController->Current(eStepMotorIndex::Hub, pRJController->ConvertMMtoStep(PULLBACK_MAX_DISTANCE));
+		pRJController->Move(eStepMotorIndex::Hub, HUB_MOTOR_POS_INITIAL, false, 0x1 /* photo-sensor #1 */);
+		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+	}
+	pRJController->Current(eStepMotorIndex::Hub, HUB_MOTOR_POS_INITIAL);
+
+	PLOGI.printf("photoSensor %d %d %d %d %d %d", pRJController->GetPhotoSensorOnOff(0), pRJController->GetPhotoSensorOnOff(1), pRJController->GetPhotoSensorOnOff(2)
+		, pRJController->GetPhotoSensorOnOff(3), pRJController->GetPhotoSensorOnOff(4), pRJController->GetPhotoSensorOnOff(5));
+	// SM (Pullback) > Sensor #4
+	if (pSystem->m_pThreadRotaryJunction->isRun && (pRJController->GetPhotoSensorOnOff(1) || !pRJController->GetPhotoSensorOnOff(3))) {
+		pRJController->Current(eStepMotorIndex::Pullback, 0);
+		pRJController->Move(eStepMotorIndex::Pullback, pRJController->ConvertMMtoStep(PULLBACK_MAX_DISTANCE), false, 0x28 /* photo-sensor #4, #6 */);
+		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+	}
+
+	PLOGI.printf("photoSensor %d %d %d %d %d %d", pRJController->GetPhotoSensorOnOff(0), pRJController->GetPhotoSensorOnOff(1), pRJController->GetPhotoSensorOnOff(2)
+		, pRJController->GetPhotoSensorOnOff(3), pRJController->GetPhotoSensorOnOff(4), pRJController->GetPhotoSensorOnOff(5));
+	// SM (Pullback) > Sensor #2 > Sensor #4
+	if (pSystem->m_pThreadRotaryJunction->isRun && pRJController->GetPhotoSensorOnOff(5)) {
+		pRJController->Current(eStepMotorIndex::Pullback, pRJController->ConvertMMtoStep(PULLBACK_MAX_DISTANCE));
+		pRJController->Move(eStepMotorIndex::Pullback, 0, false, 0x2 /* photo-sensor #2 */);
+		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+
+		pRJController->Current(eStepMotorIndex::Pullback, 0);
+		pRJController->Move(eStepMotorIndex::Pullback, pRJController->ConvertMMtoStep(PULLBACK_MAX_DISTANCE), false, 0x8 /* photo-sensor #4 */);
+		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+	}
+	pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
+
+	if (pRJController->GetState() == eRJState::Initializing) {
+		pRJController->UpdateState(eRJState::Disconnected);
+	}
+	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::InitializeRotaryJunction);
+
+	while (pSystem->m_pThreadRotaryJunction->isRun) {
+		Sleep(DELAY_FOR_STOP_THREAD);
+	}
+
+	return NOERROR;
+}
+
 /*
 * threadAutoCalibration
 */
@@ -1843,14 +1903,13 @@ int COCTSystem::connectRotaryJunction() {
 
 	if (!m_pRJController->IsConnected()) {
 		result &= m_pRJController->Connect(config.bldcMotor.port);
-		result &= m_pRJController->SetModeOfOperation(MOTOR_DATA_MODE_VELOCITY);
-		result &= m_pRJController->SwitchOff();
-		result &= m_pRJController->SwitchOn();
-		result &= m_pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
-		result &= m_pRJController->Current(eStepMotorIndex::Hub, HUB_MOTOR_POS_INITIAL);
 
-		if (!result) PLOGI.printf("Failed to connect to Rotary Junction");
-		m_pRJController->SetManualMode(config.catheter.manualLoad);
+		if (result) {
+			CUtility::StartThread(threadInitializeRotaryJunction, m_pThreadRotaryJunction, this);
+		}
+		else {
+			PLOGI.printf("Failed to connect to Rotary Junction");
+		}
 	}
 
 	if (!m_pLaserModule->IsConnected()) {
@@ -2274,6 +2333,8 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 
 	PLOGI.printf("RJState: %d", state);
 	switch (state) {
+	case eRJState::Initializing:
+		break;
 	case eRJState::Disconnected:
 		break;
 	case eRJState::Connected:
@@ -2326,9 +2387,9 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 	case eRJState::Unloaded:
 		break;
 	case eRJState::Error:
+		if (m_pThreadRotaryJunction != nullptr) m_pThreadRotaryJunction->isRun = false;
 		laserOnOff(false);
 		break;
-
 	}
 
 	return NOERROR;

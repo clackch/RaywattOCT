@@ -95,7 +95,8 @@ namespace RaywattOCT
             Pullback,
             LoadCatheter,
             UnloadCatheter,
-            ValidateCatheter
+            ValidateCatheter,
+            InitializeRotaryJunction
         };
 
         public enum RaySession : int

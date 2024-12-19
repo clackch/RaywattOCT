@@ -8,10 +8,11 @@ CRJController::CRJController()
 {
 	m_pMsg = nullptr;
 	m_pThreadState = nullptr;
-	m_state = eRJState::Disconnected;
-	m_nextState = eRJState::Disconnected;
-	m_recvState = eRJState::Disconnected;
+	m_state = eRJState::Initializing;
+	m_nextState = eRJState::Initializing;
+	m_recvState = eRJState::Initializing;
 	m_bStateReceived = false;
+	m_bReadInitStatus = false;
 
 	m_nStepPosition[0] = 0;
 	m_nStepPosition[1] = 0;
@@ -56,8 +57,8 @@ bool CRJController::Connect(void *param) {
 	}
 	displayLCD(eLCDImage::LCD_IMAGE_BOOTING);
 
-	m_state = eRJState::Disconnected;
-	m_nextState = eRJState::Disconnected;
+	m_state = eRJState::Initializing;
+	m_nextState = eRJState::Initializing;
 
 	return m_initMotor;
 }
@@ -286,6 +287,11 @@ UINT CRJController::threadReadPacket(LPVOID param) {
 }
 void CRJController::updateState() {
 	switch (m_state) {
+	case eRJState::Initializing:
+		if (m_bLimitSwitch) {
+			m_nextState = eRJState::Error;
+		}
+		break;
 	case eRJState::Disconnected:
 		if (m_bLimitSwitch) {
 			m_nextState = eRJState::Connected;
@@ -351,6 +357,8 @@ void CRJController::updateState() {
 
 void CRJController::updateStateManualMode() {
 	switch (m_state) {
+	case eRJState::Initializing:
+		break;
 	case eRJState::Disconnected:
 		break;
 	case eRJState::Connected:
@@ -407,9 +415,12 @@ void CRJController::updateStateManualMode() {
 	}
 }
 void CRJController::updateState(eRJState state) {
-	const char* strState[] = {"Disconnected", "Unloaded", "Connected", "Validating", "Loading", "WaitManualLoad", "Loaded", "Unloading", "Error"};
+	const char* strState[] = {"Initializing", "Disconnected", "Unloaded", "Connected", "Validating", "Loading", "WaitManualLoad", "Loaded", "Unloading", "Error"};
 	PLOGI.printf("state: %s", strState[(int)state]);
 	switch (state) {
+	case eRJState::Initializing:
+		displayLCD(eLCDImage::LCD_IMAGE_BOOTING);
+		break;
 	case eRJState::Disconnected:
 	case eRJState::Unloaded:
 		displayLCD(eLCDImage::LCD_IMAGE_UNLOADED);
@@ -505,6 +516,8 @@ void CRJController::handlePacket() {
 	default:
 		break;
 	}
+
+	m_bReadInitStatus = true;
 }
 bool CRJController::writeMotor(BYTE* packet, int size) {
 	if (!m_initMotor) return false;

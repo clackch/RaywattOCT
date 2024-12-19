@@ -7,6 +7,7 @@
 #define ENABLE_RFID		false
 
 // position: step, speed: step/s
+#define PULLBACK_MAX_DISTANCE			100		/* mm */	
 #define DISTANCE_BETWEEN_MOTORS			1950
 #define PULLBACK_MOTOR_POS_INITIAL		19300
 #define PULLBACK_MOTOR_POS_LOAD			4000
@@ -17,7 +18,8 @@
 #define MOTOR_CONTROL_RESOLUTION		8
 
 enum class eRJState {
-	Disconnected = 0,
+	Initializing = 0,
+	Disconnected,
 	Connected,
 	Validating,
 	Loading,
@@ -41,6 +43,7 @@ private:
 	eRJState m_nextState;
 	eRJState m_recvState;
 	bool m_bStateReceived;
+	bool m_bReadInitStatus;
 
 	int m_nStepPosition[2];
 	int m_nStepSpeed[2];
@@ -70,12 +73,15 @@ public:
 	virtual bool Move(eStepMotorIndex idxMotor, int posStep, bool delay=false, char sensor=0);
 	virtual bool Set(eStepMotorIndex idxMotor, int velStep);
 
+	eRJState GetState() { return m_state; }
+	bool InitialStatusReceived() { return m_bReadInitStatus; }
 	bool StartControl();
 	bool AutoStatePeriod(USHORT interval);
 	bool StopStepMotors();
 	bool DisplayLCD(eLCDImage image);
 	bool ReadRFID();
 	UINT GetRFIDInfo(BYTE* pRFIDInfo);
+	bool GetPhotoSensorOnOff(int index) { return m_bPhotoSensor[index]; }
 
 	int ConvertMMtoStep(UINT mm);
 	void SetManualMode(bool on) { m_bManualMode = on; }
