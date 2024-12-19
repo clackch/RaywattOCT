@@ -314,95 +314,44 @@ void TCPSocket::ChpFilePacketProcess(FrameGrabber& fg) {
 void TCPSocket::PortEventThread(FrameGrabber& fg) {
 	while (portEventThreadRunning)
 	{
-		switch (WaitForSingleObject(fg.pIdeaInfo->hInfoEvent, 100))
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		DWORD status = WaitForSingleObject(fg.pIdeaInfo->hInfoEvent, 100);
+		
+		switch (status)
 		{
+			PLOGI.printf("PortEventThread called");
+
 			case WAIT_TIMEOUT:
 			{
-				continue;
+
+				PLOGI.printf("WAIT_TIMEOUT called");
+				break;
 			}
 
-			case WAIT_OBJECT_0:
+			default:
 			{
 				ResetEvent(fg.pIdeaInfo->hInfoEvent);
-
-				switch (fg.pIdeaInfo->dwInfoCode)
+				fg.pIdeaInfo->bNewInfo = FALSE;
+				fg.m_bSyncValid = bHP_CSyncDetect(fg.m_BoardHandle);
+				PLOGI.printf("Port Event...");
+				if (fg.m_bSyncValid && fg.portConnection != 1)
 				{
-					case IDEA_INFO_SYNC:
-					{
-						PLOGI.printf("IDEA_INFO_SYNC callback start");
-						fg.m_bSyncValid = fg.pIdeaInfo->dwInfoExtra;
-						fg.pIdeaInfo->bNewInfo = FALSE;
-
-						if (fg.m_bSyncValid)
-						{
-							fg.portConnection = 1;
-							if (fg.oldPortConnection != fg.portConnection) {
-								SetCommandPacket(CommandType::FGAngioConnected);
-								int sendResult = send(clientSocket, commandBuffer, 5, 0);
-								PLOGI.printf("Send Port Connected");
-							}
-						}
-						else
-						{
-							fg.portConnection = 0;
-							if (fg.oldPortConnection != fg.portConnection) {
-								SetCommandPacket(CommandType::FGAngioDisconnected);
-								int sendResult = send(clientSocket, commandBuffer, 5, 0);
-								PLOGI.printf("Send Port Disconnected");
-							}
-						}
-						fg.oldPortConnection = fg.portConnection;
-						break;
-					}
-					case IDEA_INFO_CONNECTION:
-					{
-						PLOGI.printf("IDEA_INFO_CONNECTION callback start");
-						SYNC_INFO* pSyncInfo = (SYNC_INFO*)fg.pIdeaInfo->pInfoObject;
-						fg.pIdeaInfo->bNewInfo = FALSE;
-
-						PLOGI.printf("SYNC_INFO: DVI=%d,HDMI=%d,ACS=%d,AHS=%d,AVS=%d,SDTV=%d,SDI=%d\n",
-							pSyncInfo->bDVIClockActive, pSyncInfo->bHDMIClockActive, pSyncInfo->bAnalogCompositeSyncActive,
-							pSyncInfo->bAnalogHorizontalSyncActive, pSyncInfo->bAnalogVerticalSyncActive,
-							pSyncInfo->bSDTVSyncActive, pSyncInfo->bSDIActive);
-
-						if (pSyncInfo->bDVIClockActive || pSyncInfo->bHDMIClockActive) {
-							if (fg.portConnection == -1) {
-								fg.portConnection = 1;
-								PLOGI.printf("fg.portConnection == -1");
-								break;
-							}
-
-							fg.portConnection = 1;
-							if (fg.oldPortConnection != fg.portConnection) {
-								SetCommandPacket(CommandType::FGAngioConnected);
-								int sendResult = send(clientSocket, commandBuffer, 5, 0);
-								PLOGI.printf("Send Port Connected");
-							}
-						}
-						else {
-							if (fg.portConnection == -1) {
-								fg.portConnection = 0;
-								break;
-							}
-
-							fg.portConnection = 0;
-							if (fg.oldPortConnection != fg.portConnection) {
-								SetCommandPacket(CommandType::FGAngioDisconnected);
-								int sendResult = send(clientSocket, commandBuffer, 5, 0);
-								PLOGI.printf("Send Port Disconnected");
-							}
-						}
-						fg.oldPortConnection = fg.portConnection;
-						break;
-					}
-					default:
-						fg.pIdeaInfo->bNewInfo = FALSE;
-						break;
+					fg.portConnection = 1;
+					SetCommandPacket(CommandType::FGAngioConnected);
+					int sendResult = send(clientSocket, commandBuffer, 5, 0);
+					PLOGI.printf("Send Port Connected");
+				}
+				else if (!fg.m_bSyncValid && fg.portConnection != 0)
+				{
+					fg.portConnection = 0;
+					SetCommandPacket(CommandType::FGAngioDisconnected);
+					int sendResult = send(clientSocket, commandBuffer, 5, 0);
+					PLOGI.printf("Send Port Disconnected");
 				}
 
-			default:
 				if (fg.pIdeaInfo)
 				{
+					PLOGI.printf("fg.pIdealInfo true called");
 					HANDLE	hInfoEvent = fg.pIdeaInfo->hInfoEvent;
 					if (hInfoEvent)
 					{
@@ -410,6 +359,7 @@ void TCPSocket::PortEventThread(FrameGrabber& fg) {
 						fg.pIdeaInfo->hInfoEvent = 0;
 						CloseHandle(hInfoEvent);
 					}
+
 				}
 				break;
 			}
@@ -479,7 +429,7 @@ void TCPSocket::LiveFrame(FrameGrabber& fg) {
 	if (bufferResult != 0 || pVidHeader == nullptr) {
 		retryCount++; 
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		if (retryCount > 100) { // 이미지를 0.3초 이상 받아오지 못하는 경우 새로고침
+		if (retryCount > 10) { // 이미지를 0.3초 이상 받아오지 못하는 경우 새로고침
 			RefreshLiveStream(fg);
 			retryCount = 0;
 		}
@@ -497,7 +447,6 @@ void TCPSocket::LiveFrame(FrameGrabber& fg) {
 	if (sendResult == SOCKET_ERROR) { 
 		PLOGI.printf("Failed to send data to client. Error code: %d", WSAGetLastError()); 
 	}
-
 	eHD_ReleaseStreamBuffer(fg.m_ImageHandle, pVidHeader); //버퍼 할당 해제
 	retryCount = 0; 
 }

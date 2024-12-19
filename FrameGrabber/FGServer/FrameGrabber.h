@@ -49,6 +49,7 @@ public:
 	SNAP_CONTROL sc;
 	ImageHandle m_ImageHandle;
 	LIVESTREAM_INFO m_LiveStreamInfo;
+	BoardHandle m_BoardHandle;
 
 	short lWidth;
 	short lHeight;
@@ -66,7 +67,6 @@ private:
 	HD_sReport m_BoardReport;
 	DWORD m_dwCaptureFormatSelect;
 	RSET m_RSet;
-	BoardHandle m_BoardHandle;
 	UpdateVideoSettingLong UV;
 	HD_LUTHandle m_hVPLUT;
 };
