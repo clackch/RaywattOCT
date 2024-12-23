@@ -1796,6 +1796,7 @@ namespace RaywattApp.ViewModels
                 PatientCase.AngioFrame.AngioImage.Reverse();
 
                 _angioManager.AngioSaveBuffer.Clear();
+                _angioManager.angioSaveTimes.Clear();
                 return;
             }
 

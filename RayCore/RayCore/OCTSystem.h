@@ -93,6 +93,7 @@ private:
 	double m_fImageRoi = 2.f;
 	double m_fFieldOfView;
 	bool m_isTestMode;
+	double m_fPullbackStartTime; // XXX.XXX sec
 
 public:
 	COCTSystem();
@@ -175,6 +176,8 @@ public:
 	RayError SetFieldOfView(double value);
 	void SetTestMode(bool isTestMode) { m_isTestMode = isTestMode; }
 	bool IsTestMode() { return m_isTestMode; }
+	void SetPullbackStartTime(double value) { m_fPullbackStartTime = value; }
+	double GetPullbackStartTime() { return m_fPullbackStartTime; }
 
 private:
 	// Main Thread

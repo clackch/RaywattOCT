@@ -1463,6 +1463,15 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	// 2. Pullback Linear Stage
 	if (pRJController->IsConnected() && config.stepMotor.pullbackDistance > 0) {
 		pRJController->Move(eStepMotorIndex::Both, pRJController->ConvertMMtoStep(config.stepMotor.pullbackDistance), false);
+
+		auto now = std::chrono::system_clock::now();
+		std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
+		std::tm localTime;
+		localtime_s(&localTime , &currentTime);
+		auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
+		double duration = localTime.tm_hour * 3600.0 + localTime.tm_min * 60.0 + localTime.tm_sec + milliseconds.count() / 1000.0;
+		pSystem->SetPullbackStartTime(duration);
+
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 	}
 	else {
