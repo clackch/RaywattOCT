@@ -555,7 +555,6 @@ void COCTImaging::adaptive_compensation()
 	BRIGHTNESS_CONTROL = BRIGHTNESS_CONTROL <= -1.00f ? m_setting.brightnessControl : BRIGHTNESS_CONTROL;
 	ENERGY_THRESHOLD = ENERGY_THRESHOLD <= -1.00f ? m_setting.energyThreshold : ENERGY_THRESHOLD;
 	INTENSITY_THRESHOLD = INTENSITY_THRESHOLD <= -1 ? m_setting.intensityThreshold : INTENSITY_THRESHOLD;
-	
 	// Compute energy using cumulative sum (with OpenMP)
 #pragma omp parallel for
 	for (int x = 0; x < cols; ++x) {
@@ -604,7 +603,6 @@ void COCTImaging::adaptive_compensation()
 			}
 		}
 	}
-
 	// Linear contrast stretching
 	logarithmic_contrast_stretching(result_img);
 	result_img.convertTo(result_img, CV_8U, INTENSITY_THRESHOLD);
@@ -660,16 +658,21 @@ void COCTImaging::logarithmic_contrast_stretching(cv::Mat& img, float lower_perc
 	std::vector<float> img_values;
 	img_values.assign((float*)img_reshaped.datastart, (float*)img_reshaped.dataend);
 
-	// 2. 벡터 정렬
-	std::sort(img_values.begin(), img_values.end());
+	//// 2. 벡터 정렬
+	//std::sort(img_values.begin(), img_values.end());
 
 	// 3. 퍼센타일 값 계산
 	int total_elements = img_values.size();
 	int lower_idx = static_cast<int>(lower_percentile / 100.0 * total_elements);
 	int upper_idx = static_cast<int>(upper_percentile / 100.0 * total_elements);
 
+	// 전체를 정렬하지 않고 표준 정규분포 상 표준 편차가 +-3(99%)인 값의 index만 추출
+	std::nth_element(img_values.begin(), img_values.begin() + lower_idx, img_values.end());
 	float lower_bound = img_values[lower_idx];
+
+	std::nth_element(img_values.begin(), img_values.begin() + upper_idx, img_values.end());
 	float upper_bound = img_values[upper_idx] * 1.5;
+
 
 	// 4. OpenMP 병렬 처리로 로그 변환 및 정규화
 #pragma omp parallel for

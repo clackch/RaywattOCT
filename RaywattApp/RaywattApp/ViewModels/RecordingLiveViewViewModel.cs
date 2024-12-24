@@ -295,10 +295,9 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Send(new NavigationMessage(viewPage) { Parameter = parameter });
         }
 
-        private bool DrawAngioImage()
+        private void DrawAngioImage()
         {
             AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(_angioManager.ImgAngio);
-            return true;
         }
     }
 }
