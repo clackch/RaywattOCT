@@ -1905,7 +1905,8 @@ int COCTSystem::connectRotaryJunction() {
 		result &= m_pRJController->Connect(config.bldcMotor.port);
 
 		if (result) {
-			CUtility::StartThread(threadInitializeRotaryJunction, m_pThreadRotaryJunction, this);
+			m_pRJController->StartControl();
+			m_pRJController->UpdateState(eRJState::Initializing);
 		}
 		else {
 			PLOGI.printf("Failed to connect to Rotary Junction");
@@ -2265,7 +2266,6 @@ LRESULT COCTSystem::OnMsgUpdateScannerState(WPARAM wParam, LPARAM lParam) {
 		// To-Do: unload catheter
 		break;
 	case RayScannerState::Default:
-		m_pRJController->StartControl();
 		closeAllSessions();
 		break;
 	case RayScannerState::Scanning:
@@ -2331,9 +2331,12 @@ LRESULT COCTSystem::OnMsgUpdateCatheterState(WPARAM wParam, LPARAM lParam) {
 LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 	eRJState state = (eRJState)wParam;
 
-	PLOGI.printf("RJState: %d", state);
+	PLOGI.printf("RJState: %s", m_pRJController->GetStateString(state));
 	switch (state) {
+	case eRJState::None:
+		break;
 	case eRJState::Initializing:
+		CUtility::StartThread(threadInitializeRotaryJunction, m_pThreadRotaryJunction, this);
 		break;
 	case eRJState::Disconnected:
 		break;

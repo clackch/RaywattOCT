@@ -18,7 +18,8 @@
 #define MOTOR_CONTROL_RESOLUTION		8
 
 enum class eRJState {
-	Initializing = 0,
+	None = 0,
+	Initializing,
 	Disconnected,
 	Connected,
 	Validating,
@@ -44,6 +45,7 @@ private:
 	eRJState m_recvState;
 	bool m_bStateReceived;
 	bool m_bReadInitStatus;
+	bool m_isInit;
 
 	int m_nStepPosition[2];
 	int m_nStepSpeed[2];
@@ -73,6 +75,7 @@ public:
 	virtual bool Move(eStepMotorIndex idxMotor, int posStep, bool delay=false, char sensor=0);
 	virtual bool Set(eStepMotorIndex idxMotor, int velStep);
 
+	const char* GetStateString(eRJState state);
 	eRJState GetState() { return m_state; }
 	bool InitialStatusReceived() { return m_bReadInitStatus; }
 	bool StartControl();
