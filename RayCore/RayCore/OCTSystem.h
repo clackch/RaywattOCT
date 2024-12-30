@@ -123,6 +123,7 @@ public:
 	RayError StartLiveView();
 	RayError StopLiveView();
 	RayError LaserOnOff(bool isOn);
+	RayError RJCleanModeOnOff(bool isOn);
 	RayError SetSession(int session);
 	RayError RegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude);
 	RayError UnregisterImageCallback();
@@ -197,6 +198,7 @@ private:
 	static UINT threadUnloadCatheter(LPVOID param);
 	static UINT threadValidateCatheter(LPVOID param);
 	static UINT threadManualLoadCatheter(LPVOID param);
+	static UINT threadCleanRotaryJunction(LPVOID param);
 
 	// Imaging & Device
 	bool checkConnection();

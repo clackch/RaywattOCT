@@ -52,6 +52,7 @@ namespace RaywattApp.Common.Bases
         public const string SettingAboutPage = "Views/Setting/SettingAboutPage.xaml";
         public const string SettingLogPage = "Views/Setting/SettingLogPage.xaml";
         public const string SettingTermsConditionsPage = "Views/Setting/SettingTermsConditionsPage.xaml";
+        public const string SettingMaintenancePage = "Views/Setting/SettingMaintenancePage.xaml";
 
         //Resolution
         public const double ApplicationWidth = 1280;
@@ -251,6 +252,9 @@ namespace RaywattApp.Common.Bases
         //ML Model Folder
         public const string MlModelFolderPath = SystemRootPath + "\\Raywatt\\system\\3rdparty\\model";
 
+        //Storage Limit (GB)
+        public const int StorageLimit = 10;
+
         //Encrypt, Decrypt Public Key
         public const string PublicKey = "raywatt07_hwjckklls_298-87-01441";
 
@@ -363,6 +367,11 @@ namespace RaywattApp.Common.Bases
         public const string FfrStep5 = "FfrStep5";
         public const double CrossSectionFfrSize = 344;
 
+        //Recording
+        public const int TransientTime = 100;
+        public const int StartTime = 10;
+        public const double SmallCrossSectionSize = 318;
+
         //Recording - Confirm
         public const double CrossSectionConfirmSize = 475;
         public const double LongitudeConfirmWidth = 1080;
@@ -384,15 +393,9 @@ namespace RaywattApp.Common.Bases
 
         //Draw Annotation
         public static Brush[] AnnotationBrushes = {
-            new SolidColorBrush(Color.FromRgb(0x56, 0xBD, 0x7C)),
-            new SolidColorBrush(Color.FromRgb(0xEE, 0x6C, 0x4F)),
-            new SolidColorBrush(Color.FromRgb(0xF7, 0xC9, 0x61)),
-            new SolidColorBrush(Color.FromRgb(0x47, 0x4F, 0xEB)),
-            new SolidColorBrush(Color.FromRgb(0xE9, 0x8C, 0x33)),            
-            new SolidColorBrush(Color.FromRgb(0x21, 0x24, 0x83)),
-            new SolidColorBrush(Color.FromRgb(0xF3, 0xAB, 0x97)),
-            new SolidColorBrush(Color.FromRgb(0x3D, 0x85, 0x51)),
-            new SolidColorBrush(Color.FromRgb(0xA9, 0xA9, 0xF9))
+            new SolidColorBrush(Color.FromRgb(0x57, 0xFE, 0xEB)),
+            new SolidColorBrush(Color.FromRgb(0xFF, 0xD8, 0x00)),
+            new SolidColorBrush(Color.FromRgb(0xFF, 0x7D, 0x77))
         };
         public static DashStyle AnnotationDashLarge = new DashStyle(new double[] { 7, 7 }, 0);
         public static DashStyle AnnotationDashSmall = new DashStyle(new double[] { 2, 5 }, 0);
@@ -454,12 +457,7 @@ namespace RaywattApp.Common.Bases
         public const double ZoomScaleMax = ZoomScaleDefault * 2;
         public const double ZoomAngioCsScaleDefault = CrossSectionAngio / OCTImageSize;
         public const double ZoomAngioCsScaleMax = ZoomAngioCsScaleDefault * 2;
-        public const int Zoom3DScaleMax = 5;
-
-        //Recording
-        public const int TransientTime = 100;
-        public const int StartTime = 10;
-        public const double SmallCrossSectionSize = 318;        
+        public const int Zoom3DScaleMax = 5;    
 
         //AngioManager
         public const string ServerIP = "127.0.0.1";

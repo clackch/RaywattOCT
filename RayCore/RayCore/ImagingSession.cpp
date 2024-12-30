@@ -395,6 +395,7 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 	CMessageService* pMsg = pSession->m_pMsg;
 
 	pSession->m_mapImage.clear();
+	pSession->m_mapImageWithoutCompensation.clear();
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 	PLOGI.printf("Session #%d process oct imaging - %d frames", pSession->m_nSession, nNumOfSamples);
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadImaging->isRun; nFrame++)
@@ -403,6 +404,8 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 		pImaging->Process(pBuffer);
 		cv::Mat imgResult = pImaging->GetProcessedImage().clone();
 		pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult));
+		cv::Mat imgResultWithoutCompensation = pImaging->GetWithoutCompensationImage().clone();
+		pSession->m_mapImageWithoutCompensation.insert(std::make_pair(nFrame, imgResultWithoutCompensation));
 	}
 	PLOGI.printf("Session #%d process oct imaging done.", pSession->m_nSession);
 	pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::OCTImaging, pSession->m_nSession);
@@ -483,8 +486,8 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	vStent.clear();
 	vGuidewire.clear();
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadObjectDetection->isRun; nFrame++) {
-		std::map<int, cv::Mat>::iterator it = pSession->m_mapImage.find(nFrame);
-		if (it == pSession->m_mapImage.end()) {
+		std::map<int, cv::Mat>::iterator it = pSession->m_mapImageWithoutCompensation.find(nFrame);
+		if (it == pSession->m_mapImageWithoutCompensation.end()) {
 			nFrame--;
 			Sleep(DELAY_FOR_WAIT_PROCESS);
 			continue;
