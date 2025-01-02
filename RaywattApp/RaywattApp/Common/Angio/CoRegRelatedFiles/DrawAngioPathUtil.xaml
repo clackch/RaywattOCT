@@ -33,23 +33,13 @@
         <Style TargetType="Ellipse" x:Key="StylePathEllipse">
             <Setter Property="Width" Value="{x:Static const:Constants.ellipsePathWidth}"/>
             <Setter Property="Height" Value="{x:Static const:Constants.ellipsePathHeight}"/>
-            <Setter Property="Fill" Value="Yellow"/>
+            <Setter Property="Fill" Value="White"/>
         </Style>
         
         <Style TargetType="Ellipse" x:Key="StyleTrackEllipse">
             <Setter Property="Width" Value="{x:Static const:Constants.ellipseTrackWidth}"/>
             <Setter Property="Height" Value="{x:Static const:Constants.ellipseTrackHeight}"/>
             <Setter Property="Fill" Value="Yellow"/>
-        </Style>
-
-        <Style TargetType="Line" x:Key="StyleLine">
-            <Setter Property="Stroke" Value="White"/>
-            <Setter Property="StrokeThickness" Value="{x:Static const:Constants.AnnotationStrokeThickness}"/>
-        </Style>
-        
-        <Style TargetType="Path" x:Key="StylePath">
-            <Setter Property="StrokeThickness" Value="{x:Static const:Constants.AnnotationStrokeThickness}"/>
-            <Setter Property="Stroke" Value="White"/>
         </Style>
 
         <Style TargetType="Image" x:Key="AngioProximalIcon">
