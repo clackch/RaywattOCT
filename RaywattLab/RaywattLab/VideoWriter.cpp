@@ -9,10 +9,14 @@ CVideoWriter::CVideoWriter() {
 	m_nVideoHeight = 0;
 	
 	m_nSavedFrame = 0;
+
+	InitializeCriticalSection(&m_csQueue);
 }
 CVideoWriter::~CVideoWriter() {
 	StopRecording();
 	finalize();
+
+	DeleteCriticalSection(&m_csQueue);
 }
 
 int CVideoWriter::StartRecording(CString strFilePath, int nWidth, int nHeight) {
@@ -50,7 +54,10 @@ void CVideoWriter::PushToBuffer(cv::Mat image) {
 	else {
 		imgCopy = image.clone();
 	}
+
+	EnterCriticalSection(&m_csQueue);
 	m_vFrameQueue.push_back(imgCopy);
+	LeaveCriticalSection(&m_csQueue);
 }
 
 void CVideoWriter::finalize() {
@@ -61,7 +68,13 @@ void CVideoWriter::finalize() {
 	m_nSavedFrame = 0; 
 }
 bool CVideoWriter::popFromBuffer(int& nPopIndex) {
-	if (m_nSavedFrame != m_vFrameQueue.size()) {
+	int nQueueSize = 0;
+
+	EnterCriticalSection(&m_csQueue);
+	nQueueSize = m_vFrameQueue.size();
+	LeaveCriticalSection(&m_csQueue);
+
+	if (m_nSavedFrame != nQueueSize) {
 		nPopIndex = m_nSavedFrame;
 		m_nSavedFrame++;
 

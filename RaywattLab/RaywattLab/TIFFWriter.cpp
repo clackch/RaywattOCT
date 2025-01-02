@@ -11,7 +11,11 @@ CTIFFWriter::~CTIFFWriter() {
 bool CTIFFWriter::SaveFrame(cv::Mat image) {
 	cv::Mat imageConvert;
 
-	cv::cvtColor(image, imageConvert, cv::COLOR_RGB2BGR);
+	if (image.channels() == 3) {
+		cv::cvtColor(image, imageConvert, cv::COLOR_RGB2BGR);
+	}
+	else imageConvert = image.clone();
+
 	TIFFSetField(m_pImageTIFF, TIFFTAG_IMAGEWIDTH, imageConvert.cols);
 	TIFFSetField(m_pImageTIFF, TIFFTAG_IMAGELENGTH, imageConvert.rows);
 	TIFFSetField(m_pImageTIFF, TIFFTAG_SAMPLESPERPIXEL, imageConvert.channels());

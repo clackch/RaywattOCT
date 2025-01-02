@@ -33,6 +33,7 @@ protected:
 	cv::Mat imageResult;
 	cv::Mat imageResultColor;
 	cv::Mat imageCircle;
+	cv::Mat imageResultWithoutCompensation;
 
 	// using in GenerateBackground
 	Ipp32f* fringes32f;
@@ -65,6 +66,7 @@ public:
 	virtual void Initialize(CCalibration* calibration);
 	virtual void Process(char* fringes);
 	virtual void PostProcess(cv::Mat image);
+	void ApplyZOffset(const cv::Mat& src, cv::Mat& dst, int zOffset);
 
 	int Start();
 	int Stop();
@@ -87,12 +89,13 @@ public:
 	}
 
 	virtual cv::Mat GetProcessedImage();
+	cv::Mat GetWithoutCompensationImage() { return imageResultWithoutCompensation; }
 	cv::Mat GetCircleImage() { return imageCircle; }
 	USHORT* GetFringesBuffer() { return m_pFringesBuffer; }
 	Setting GetSetting() { return m_setting; }
 	void GetFrameInfo(int& nCurFrame, int& nTotalFrame) { nCurFrame = m_nCurFrame; nTotalFrame = m_nTotalFrame; }
 	void* GetCalibrationData();
-	virtual void CircularizeImage(cv::Mat& src, cv::Mat& dst);
+	void CircularizeImage(cv::Mat& src, cv::Mat& dst);
 	virtual void InverseCircularizeImage(cv::Mat& src, cv::Mat& dst);
 	virtual void EraseStentOutLier(cv::Mat& stent);
 	virtual void SetLumenContourOffset(std::vector<cv::Point> lumenContour);
@@ -112,11 +115,11 @@ protected:
 	void fftProcessing(const Ipp32f* fringes32f);
 	void computeLogarithm(Ipp32f* src, Ipp32f* dst);
 	void generateImage(Ipp32f* logaritihmData, bool bInvert);
-	void applyZOffset();
 	void findSheath(Ipp32f* logaritihmData);
 	void findSheath(cv::Mat img);
 	std::vector<double> normalize(const std::vector<double>& values);
 	void drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color);
+	cv::Mat getFoVImage(cv::Mat image, double fov);
 
 	void adaptive_compensation();
 	void min_max_normalization(const cv::Mat& img, cv::Mat& normalized_img, double& min_val, double& max_val);

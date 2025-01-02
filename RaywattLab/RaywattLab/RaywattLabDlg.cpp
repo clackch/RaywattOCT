@@ -1242,8 +1242,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveTif()
 	bool isCircle = (m_radioImageShape == 0);
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
 		pImaging->SetZOffset(m_vZOffset.at(i));
-		pImaging->Process(pReader->GetSample(i));
-
+		pImaging->Process(pReader->GetSample(i));		
 		cv::Mat imgRect = getFoVImage(pImaging->GetProcessedImage(), 9000.f);
 		pImaging->PostProcess(imgRect);
 

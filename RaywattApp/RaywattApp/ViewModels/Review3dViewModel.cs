@@ -133,6 +133,12 @@ namespace RaywattApp.ViewModels
             get { return this._cmdMoveIndicator ?? (this._cmdMoveIndicator = new RelayCommand<object>(MoveIndicator)); }
         }
 
+        private ICommand _cmdTouchMoveIndicator;
+        public ICommand CmdTouchMoveIndicator
+        {
+            get { return this._cmdTouchMoveIndicator ?? (this._cmdTouchMoveIndicator = new RelayCommand<object>(TouchMoveIndicator)); }
+        }
+
         private ICommand _cmdViewSizeChanged;
         public ICommand CmdViewSizeChanged
         {
@@ -274,7 +280,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["field_of_view"] = PatientCase.FieldOfView;
             sqlParameters["section_proximal"] = PatientCase.SectionProximal;
             sqlParameters["section_distal"] = PatientCase.SectionDistal;
-            sqlParameters["manual_calibration"] = PatientCase.ManualCalibration;
+            sqlParameters["z_offset"] = PatientCase.ZOffset;
 
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
             if (nRows == 0)
@@ -476,13 +482,7 @@ namespace RaywattApp.ViewModels
                     return;
                 }
 
-                if (indicator.IsLongitudeMove)
-                {
-                    indicator.IndicatorDiff = indicator.PointLongitudeX - indicator.Coordinate.X - indicator.X;
-                    indicator.IsLongitudeMove = false;
-                }
-
-                double indicatorX = indicator.PointLongitudeX - indicator.Coordinate.X - indicator.IndicatorDiff;
+                double indicatorX = indicator.PointLongitudeX - indicator.Coordinate.X - Constants.LongitudeIndicatorWidth / 2;
                 double indicatorCenterX = indicatorX + Constants.LongitudeIndicatorWidth / 2;
 
                 if (indicatorCenterX < 0)
@@ -504,6 +504,16 @@ namespace RaywattApp.ViewModels
                     setCurrentFrame(indicatorCenterX);
                 }
             }
+        }
+
+        private void TouchMoveIndicator(object param)
+        {
+            MouseEventArgs e = (MouseEventArgs)param;
+            var position = e.GetPosition((IInputElement)e.Source);
+
+            IndicatorLongitude.X = position.X - Constants.LongitudeIndicatorWidth / 2;
+            IndicatorLongitude.CenterX = IndicatorLongitude.X + Constants.LongitudeIndicatorWidth / 2;
+            setCurrentFrame(IndicatorLongitude.CenterX);
         }
 
         private void ViewSizeChanged(object param)

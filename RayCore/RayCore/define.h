@@ -54,7 +54,8 @@ enum class RayProperty {
 	PullbackSpeed,
 	SheathDiameter,
 	TestMode,
-	PullbackStartTime
+  ZOffset,
+  PullbackStartTime
 };
 
 enum class RayCallbackRequest {
@@ -93,7 +94,9 @@ enum class RayWorkItem {
 	Pullback,
 	LoadCatheter,
 	UnloadCatheter,
-	ValidateCatheter
+	ValidateCatheter,
+	InitializeRotaryJunction,
+	CleanRotaryJunction
 };
 
 enum class RaySession {

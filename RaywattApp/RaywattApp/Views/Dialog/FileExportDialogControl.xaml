@@ -24,7 +24,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <Grid Width="{Binding ImagePartWidth}">
+            <Grid Width="{Binding ImagePartWidth}" Height="{Binding ImagePartHeight}">
                 <!-- Angio -->
                 <Grid Visibility="{Binding FileExport.AngioView, Converter={StaticResource BoolToVisibilityConverter}}" HorizontalAlignment="Left">
                     <Image x:Name="angioImage" Source="{Binding AngioImage}" Width="{Binding CrossSectionImageSize}"/>
@@ -38,9 +38,12 @@
                                     <EllipseGeometry Center="{Binding CrossSectionClipCenter}" RadiusX="{Binding CrossSectionClipRadius}" RadiusY="{Binding CrossSectionClipRadius}"/>
                                 </Grid.Clip>
                                 <Grid>
-                                    <!-- Cross Seciton Image -->
-                                    <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{Binding CrossSectionImageSize}" Height="{Binding CrossSectionImageSize}">
-                                        <Image.RenderTransform>
+                                    <Grid>
+                                        <!-- Cross Seciton Image -->
+                                        <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{Binding CrossSectionImageSize}" Height="{Binding CrossSectionImageSize}"/>
+                                        <!-- Sheath Indicator -->
+                                        <Image x:Name="SheathIndicator" Source="{Binding SheathIndicator}" Width="{Binding CrossSectionImageSize}" Height="{Binding CrossSectionImageSize}"/>
+                                        <Grid.RenderTransform>
                                             <TransformGroup>
                                                 <ScaleTransform>
                                                     <ScaleTransform.ScaleX>
@@ -71,10 +74,10 @@
                                                     </TranslateTransform.Y>
                                                 </TranslateTransform>
                                             </TransformGroup>
-                                        </Image.RenderTransform>
-                                    </Image>
+                                        </Grid.RenderTransform>
+                                    </Grid>
                                     <!-- Lumen Contour-->
-                                    <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}"  FrameNumber="{Binding MeasureAutoFrameNumber}" IsEditOn="False" IsDrawOn="{Binding FileExport.MeasureAuto}" Zoom="{Binding Zoom}" ScreenSize="{Binding CrossSectionImageSize}"/>
+                                    <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" LumenStents="{Binding LumenStents}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}"  FrameNumber="{Binding MeasureAutoFrameNumber}" IsEditOn="False" IsDrawOn="{Binding FileExport.MeasureAuto}" Zoom="{Binding Zoom}" ScreenSize="{Binding CrossSectionImageSize}"/>
                                     <!-- Measurement -->
                                     <annotation:DrawUtil Measurements="{Binding Measurements}" FrameNumber="{Binding MeasureManualFrameNumber}" Zoom="{Binding Zoom}" IsEditOn="False" IsDrawOn="{Binding FileExport.MeasureManual}" ScreenSize="{Binding CrossSectionImageSize}"/>
                                 </Grid>

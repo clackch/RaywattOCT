@@ -68,6 +68,7 @@ private:
 
 	// Rotary Junction
 	CRJController* m_pRJController;
+	bool m_bFirstLoad;	// To-Do: RFID 연동해서 동일한 카테터 재연결시에도 FirstLoad 로 인식되게 수정 필요
 
 	// Laser Module
 	CLaserModule* m_pLaserModule;
@@ -114,13 +115,15 @@ public:
 	RayError PullbackScan(char *strFilePath);
 	RayError LoadCatheter();
 	RayError UnloadCatheter();
-	int StartReview(char* strFilePath);
-	RayError StartCompare(char* strFilePath);
+	int StartReview(char* strFilePath, double imageResolution, double zOffset);
+	RayError StartCompare(char* strFilePath, double imageResolution, double zOffset);
 	RayError EndReview();
 	RayError EndCompare();
+	RayError RestartReview();
 	RayError StartLiveView();
 	RayError StopLiveView();
 	RayError LaserOnOff(bool isOn);
+	RayError RJCleanModeOnOff(bool isOn);
 	RayError SetSession(int session);
 	RayError RegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude);
 	RayError UnregisterImageCallback();
@@ -128,7 +131,7 @@ public:
 	RayError UnregisterDetectionCallback();
 	void* GetVolumeData(void* pLumenContours = nullptr);
 	RayError StartLumenDetection();
-	RayError OpenImage(char* strFilePath);
+	RayError OpenImage(char* strFilePath, double imageResolution, double zOffset);
 	RayError CloseImage();
 	void* GetImageData(int nFrame);
 	void* GetLongitudeData(double fDegree);
@@ -174,6 +177,7 @@ public:
 	RayError SetImageCompensationControlWindow(bool value);
 	double GetFieldOfView();
 	RayError SetFieldOfView(double value);
+	RayError SetZOffset(double value);
 	void SetTestMode(bool isTestMode) { m_isTestMode = isTestMode; }
 	bool IsTestMode() { return m_isTestMode; }
 	void SetPullbackStartTime(double value) { m_fPullbackStartTime = value; }
@@ -186,6 +190,7 @@ private:
 	// Work Thread (stop in OnMsgNotifyProcessDone func)
 	static UINT threadSaveRaw(LPVOID param);	
 	// Rotary Junction Thread (stop in OnMsgDeviceWorkDone func)
+	static UINT threadInitializeRotaryJunction(LPVOID param);
 	static UINT threadAutoCalibration(LPVOID param);
 	static UINT threadPullbackScan(LPVOID param);
 	// Catheter related Thread (stop in OnMsgUpdateCatheterState func)
@@ -193,6 +198,7 @@ private:
 	static UINT threadUnloadCatheter(LPVOID param);
 	static UINT threadValidateCatheter(LPVOID param);
 	static UINT threadManualLoadCatheter(LPVOID param);
+	static UINT threadCleanRotaryJunction(LPVOID param);
 
 	// Imaging & Device
 	bool checkConnection();
@@ -212,6 +218,7 @@ private:
 	bool waitForStepMotors(bool& runFlag);
 	bool waitForStepMotors(eStepMotorIndex idxMotor, bool& runFlag);
 	void calculateIntensity(cv::Mat image);
+	std::vector<std::vector<std::string>> readLoadSequence();
 
 protected:
 	LRESULT OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam);

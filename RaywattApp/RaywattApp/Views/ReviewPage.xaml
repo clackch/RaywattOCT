@@ -8,6 +8,7 @@
       xmlns:annotation="clr-namespace:RaywattApp.Common.Annotation"
       xmlns:CoRegistration="clr-namespace:RaywattApp.Common.Angio.CoRegRelatedFiles"
       xmlns:behaviors="clr-namespace:RaywattApp.Common.Behaviors"
+      xmlns:trigger="clr-namespace:RaywattApp.Common.TriggerAction"
       xmlns:System="clr-namespace:System;assembly=mscorlib"
       xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
       xmlns:const="clr-namespace:RaywattApp.Common.Bases"
@@ -1339,7 +1340,19 @@
                             </Grid.RowDefinitions>
 
                             <!-- Longitude Image -->
-                            <Grid x:Name="longitude" Grid.Row="1">
+                            <Grid x:Name="longitude" Grid.Row="1" MouseDown="longitude_MouseDown">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="MouseDown">
+                                        <i:InvokeCommandAction Command="{Binding CmdTouchMoveIndicator}" PassEventArgsToCommand="True" IsEnabled="{Binding IndicatorLongitude.IsEnabled}"/>
+                                    </i:EventTrigger>
+                                    <i:EventTrigger EventName="MouseDown">
+                                        <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}" IsEnabled="{Binding IndicatorLongitude.IsEnabled}"/>
+                                    </i:EventTrigger>
+                                    <i:EventTrigger EventName="MouseUp">
+                                        <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}" IsEnabled="{Binding IndicatorLongitude.IsEnabled}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+
                                 <!-- Lumen Profile -->
                                 <Image x:Name="lumenProfile" Source="{Binding LumenProfileImage}" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" Stretch="Fill" Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityConverter}}">
                                     <i:Interaction.Triggers>
@@ -1395,8 +1408,8 @@
                                 <!-- Lesion Section -->
                                 <Canvas Visibility="{Binding ReviewStatus.IsLumenProfile, Converter={StaticResource BoolToVisibilityConverter}}">
                                     <!-- Section MLA -->
-                                    <Image Style="{DynamicResource SectionLeftRight}" Canvas.Left="{Binding Section.Mla.X}" Visibility="{Binding Section.Mla.IsVisible}" Tag="{Binding Section.Mla.StrValue}"/>
-                                    <Border Margin="0,-27,0,9" Canvas.Left="{Binding Section.MlaValue.X}" Visibility="{Binding Section.MlaValue.IsVisible}" CornerRadius="4" BorderBrush="{StaticResource GrayscaleGray2Brush}" BorderThickness="0.5">
+                                    <Image Style="{DynamicResource SectionLeftRight}" Canvas.Left="{Binding Section.Mla.X}" Visibility="{Binding Section.Mla.IsVisible}" Tag="{Binding Section.Mla.StrValue}" IsEnabled="False"/>
+                                    <Border Margin="0,-27,0,9" Canvas.Left="{Binding Section.MlaValue.X}" Visibility="{Binding Section.MlaValue.IsVisible}" CornerRadius="4" BorderBrush="{StaticResource GrayscaleGray2Brush}" BorderThickness="0.5" IsEnabled="False">
                                         <StackPanel Orientation="Horizontal" Margin="9,0,9,0" VerticalAlignment="Center">
                                             <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [MLA], Source={StaticResource L10N}}"/>
                                             <StackPanel Width="2"/>
@@ -1405,8 +1418,8 @@
                                         </StackPanel>
                                     </Border>
                                     <!-- Section MLD -->
-                                    <Image Style="{DynamicResource SectionLeftRight}" Canvas.Left="{Binding Section.Mld.X}" Visibility="{Binding Section.Mld.IsVisible}" Tag="{Binding Section.Mld.StrValue}"/>
-                                    <Border Margin="0,-27,0,9" Canvas.Left="{Binding Section.MldValue.X}" Visibility="{Binding Section.MldValue.IsVisible}" CornerRadius="4" BorderBrush="{StaticResource GrayscaleGray2Brush}" BorderThickness="0.5">
+                                    <Image Style="{DynamicResource SectionLeftRight}" Canvas.Left="{Binding Section.Mld.X}" Visibility="{Binding Section.Mld.IsVisible}" Tag="{Binding Section.Mld.StrValue}" IsEnabled="False"/>
+                                    <Border Margin="0,-27,0,9" Canvas.Left="{Binding Section.MldValue.X}" Visibility="{Binding Section.MldValue.IsVisible}" CornerRadius="4" BorderBrush="{StaticResource GrayscaleGray2Brush}" BorderThickness="0.5" IsEnabled="False">
                                         <StackPanel Orientation="Horizontal" Margin="9,0,9,0" VerticalAlignment="Center">
                                             <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [MLD], Source={StaticResource L10N}}"/>
                                             <StackPanel Width="2"/>
@@ -1415,8 +1428,8 @@
                                         </StackPanel>
                                     </Border>
                                     <!-- Section MSA -->
-                                    <Image Style="{DynamicResource SectionLeftRight}" Canvas.Left="{Binding Section.Msa.X}" Visibility="{Binding Section.Msa.IsVisible}" Tag="{Binding Section.Msa.StrValue}"/>
-                                    <Border Margin="0,-27,0,9" Canvas.Left="{Binding Section.MsaValue.X}" Visibility="{Binding Section.MsaValue.IsVisible}" CornerRadius="4" BorderBrush="{StaticResource GrayscaleGray2Brush}" BorderThickness="0.5">
+                                    <Image Style="{DynamicResource SectionLeftRight}" Canvas.Left="{Binding Section.Msa.X}" Visibility="{Binding Section.Msa.IsVisible}" Tag="{Binding Section.Msa.StrValue}" IsEnabled="False"/>
+                                    <Border Margin="0,-27,0,9" Canvas.Left="{Binding Section.MsaValue.X}" Visibility="{Binding Section.MsaValue.IsVisible}" CornerRadius="4" BorderBrush="{StaticResource GrayscaleGray2Brush}" BorderThickness="0.5" IsEnabled="False">
                                         <StackPanel Orientation="Horizontal" Margin="9,0,9,0" VerticalAlignment="Center">
                                             <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [MSA], Source={StaticResource L10N}}"/>
                                             <StackPanel Width="2"/>
@@ -1425,8 +1438,8 @@
                                         </StackPanel>
                                     </Border>
                                     <!-- Section Min Exp -->
-                                    <Image Style="{DynamicResource SectionLeftRight}" Canvas.Left="{Binding Section.MinExp.X}" Visibility="{Binding Section.MinExp.IsVisible}" Tag="{Binding Section.MinExp.StrValue}"/>
-                                    <Border Margin="0,-27,0,9" Canvas.Left="{Binding Section.MinExpValue.X}" Visibility="{Binding Section.MinExpValue.IsVisible}" CornerRadius="4" BorderBrush="{StaticResource GrayscaleGray2Brush}" BorderThickness="0.5">
+                                    <Image Style="{DynamicResource SectionLeftRight}" Canvas.Left="{Binding Section.MinExp.X}" Visibility="{Binding Section.MinExp.IsVisible}" Tag="{Binding Section.MinExp.StrValue}" IsEnabled="False"/>
+                                    <Border Margin="0,-27,0,9" Canvas.Left="{Binding Section.MinExpValue.X}" Visibility="{Binding Section.MinExpValue.IsVisible}" CornerRadius="4" BorderBrush="{StaticResource GrayscaleGray2Brush}" BorderThickness="0.5" IsEnabled="False">
                                         <StackPanel Orientation="Horizontal" Margin="9,0,9,0" VerticalAlignment="Center">
                                             <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Min Exp.], Source={StaticResource L10N}}"/>
                                             <StackPanel Width="2"/>
@@ -1442,9 +1455,9 @@
                                         </StackPanel>
                                     </Border>
                                     <!-- Section Lesion Length -->
-                                    <Line Canvas.Left="{Binding Section.LesionProximal}" HorizontalAlignment="Stretch" Stroke="{StaticResource GrayscaleGray2Brush}" StrokeDashArray="2 3" StrokeThickness="1" X1="{Binding Section.LesionLengthWidth}" Margin="0,100,0,0"/>
-                                    <Line Canvas.Left="{Binding Section.LesionDistal}" HorizontalAlignment="Stretch" Stroke="{StaticResource GrayscaleGray2Brush}" StrokeDashArray="2 3" StrokeThickness="1" X1="{Binding Section.LesionLengthWidth}" Margin="0,100,0,0"/>
-                                    <StackPanel Orientation="Horizontal" Margin="0,93,0,0" Canvas.Left="{Binding Section.LesionLength.X}" Visibility="{Binding Section.LesionLength.IsVisible}">
+                                    <Line Canvas.Left="{Binding Section.LesionProximal}" HorizontalAlignment="Stretch" Stroke="{StaticResource GrayscaleGray2Brush}" StrokeDashArray="2 3" StrokeThickness="1" X1="{Binding Section.LesionLengthWidth}" Margin="0,100,0,0" IsEnabled="False"/>
+                                    <Line Canvas.Left="{Binding Section.LesionDistal}" HorizontalAlignment="Stretch" Stroke="{StaticResource GrayscaleGray2Brush}" StrokeDashArray="2 3" StrokeThickness="1" X1="{Binding Section.LesionLengthWidth}" Margin="0,100,0,0" IsEnabled="False"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,93,0,0" Canvas.Left="{Binding Section.LesionLength.X}" Visibility="{Binding Section.LesionLength.IsVisible}" IsEnabled="False">
                                         <TextBlock Style="{DynamicResource TextBlock_Pretendard-Semibold-10}" Foreground="{DynamicResource GrayscaleGray2Brush}" Text="{Binding Section.LesionLength.DValue, StringFormat={}{0:N1}}"/>
                                         <StackPanel Width="1"/>
                                         <Label Style="{DynamicResource Pretendard-Medium-10}" Foreground="{DynamicResource GrayscaleGray2Brush}" Content="{Binding [㎜], Source={StaticResource L10N}}"/>
@@ -1452,13 +1465,13 @@
                                     <!-- Section Proximal -->
                                     <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="sectionProximal" IsCaptured="{Binding Section.Proximal.IsCaptured}" Stretch="None" Canvas.Left="{Binding Section.Proximal.X}" IsEnabled="{Binding Section.Proximal.IsEnabled}">
                                         <i:Interaction.Triggers>
-                                            <i:EventTrigger EventName="PreviewMouseDown" >
-                                                <i:InvokeCommandAction Command="{Binding Section.Proximal.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
+                                            <i:EventTrigger EventName="MouseDown" >
+                                                <trigger:CustomInvokeCommandAction Command="{Binding Section.Proximal.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
                                             </i:EventTrigger>
-                                            <i:EventTrigger EventName="PreviewMouseUp" >
+                                            <i:EventTrigger EventName="MouseUp" >
                                                 <i:InvokeCommandAction Command="{Binding Section.Proximal.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
                                             </i:EventTrigger>
-                                            <i:EventTrigger EventName="PreviewMouseMove" >
+                                            <i:EventTrigger EventName="MouseMove" >
                                                 <i:InvokeCommandAction Command="{Binding CmdMoveIndicator}" CommandParameter="{Binding Section.Proximal}"/>
                                             </i:EventTrigger>
                                         </i:Interaction.Triggers>
@@ -1466,13 +1479,13 @@
                                     <!-- Section Distal -->
                                     <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="sectionDistal" IsCaptured="{Binding Section.Distal.IsCaptured}" Stretch="None" Canvas.Left="{Binding Section.Distal.X}" IsEnabled="{Binding Section.Distal.IsEnabled}">
                                         <i:Interaction.Triggers>
-                                            <i:EventTrigger EventName="PreviewMouseDown" >
-                                                <i:InvokeCommandAction Command="{Binding Section.Distal.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
+                                            <i:EventTrigger EventName="MouseDown" >
+                                                <trigger:CustomInvokeCommandAction Command="{Binding Section.Distal.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
                                             </i:EventTrigger>
-                                            <i:EventTrigger EventName="PreviewMouseUp" >
+                                            <i:EventTrigger EventName="MouseUp" >
                                                 <i:InvokeCommandAction Command="{Binding Section.Distal.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
                                             </i:EventTrigger>
-                                            <i:EventTrigger EventName="PreviewMouseMove" >
+                                            <i:EventTrigger EventName="MouseMove" >
                                                 <i:InvokeCommandAction Command="{Binding CmdMoveIndicator}" CommandParameter="{Binding Section.Distal}"/>
                                             </i:EventTrigger>
                                         </i:Interaction.Triggers>
@@ -1484,16 +1497,16 @@
                                     <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitude" IsCaptured="{Binding IndicatorLongitude.IsCaptured}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="{x:Static const:Constants.LongitudeIndicatorHeight}" Stretch="None" Canvas.Left="{Binding IndicatorLongitude.X}" Margin="0,-11,0,0" IsEnabled="{Binding IndicatorLongitude.IsEnabled}">
                                         <!-- Trigger -->
                                         <i:Interaction.Triggers>
-                                            <!--PreviewMouseDown : Image 영역에서 MouseDown 할 경우, Indicator 동작 가능 상태로 변경 -->
-                                            <i:EventTrigger EventName="PreviewMouseDown" >
-                                                <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
+                                            <!--MouseDown : Image 영역에서 MouseDown 할 경우, Indicator 동작 가능 상태로 변경 -->
+                                            <i:EventTrigger EventName="MouseDown" >
+                                                <trigger:CustomInvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
                                             </i:EventTrigger>
-                                            <!--PreviewMouseUp : Image 영역에서 MouseUp 할 경우, Indicator 멈춤 -->
-                                            <i:EventTrigger EventName="PreviewMouseUp" >
+                                            <!--MouseUp : Image 영역에서 MouseUp 할 경우, Indicator 멈춤 -->
+                                            <i:EventTrigger EventName="MouseUp" >
                                                 <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
                                             </i:EventTrigger>
-                                            <!--PreviewMouseMove : Image 영역에서 MouseMove 할 경우, Indicator 동작(단, Indicator가 동작 가능 상태 일때) -->
-                                            <i:EventTrigger EventName="PreviewMouseMove" >
+                                            <!--MouseMove : Image 영역에서 MouseMove 할 경우, Indicator 동작(단, Indicator가 동작 가능 상태 일때) -->
+                                            <i:EventTrigger EventName="MouseMove" >
                                                 <i:InvokeCommandAction Command="{Binding CmdMoveIndicator}" CommandParameter="{Binding IndicatorLongitude}"/>
                                             </i:EventTrigger>
                                         </i:Interaction.Triggers>
@@ -1502,7 +1515,7 @@
 
                                 <!-- Measurement -->
                                 <Grid>
-                                    <annotation:DrawLmodeUtil Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" LModeLengthGeometries="{Binding LModeLengthGeometries}" LModeTextGeometries="{Binding LModeTextGeometries}" LModeIndicatorX="{Binding LModeIndicatorX, Mode=TwoWay}" CommandOff="{Binding MeasurementCommandOff, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorLongitude.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorLongitude.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" PullbackLength="{Binding PatientCase.PullbackLength}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}"/>
+                                    <annotation:DrawLmodeUtil x:Name="drawLmodeUtil" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}" LModeLengthGeometries="{Binding LModeLengthGeometries}" LModeTextGeometries="{Binding LModeTextGeometries}" LModeIndicatorX="{Binding LModeIndicatorX, Mode=TwoWay}" CommandOff="{Binding MeasurementCommandOff, Mode=TwoWay}" IsHitTestVisible="True" IsEnabled="{Binding IndicatorLongitude.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" PullbackLength="{Binding PatientCase.PullbackLength}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}"/>
                                 </Grid>
                             </Grid>
 

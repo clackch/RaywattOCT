@@ -327,11 +327,9 @@ namespace RaywattApp.Common.Util
             }
         }
 
-        public static async Task<Mat> ConvertImage(string filePath, double imageResolution, int manualCalibration, double degree, List<Mat> convertedImages, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
+        public static async Task<Mat> ConvertImage(string filePath, double imageResolution, int zOffset, double degree, List<Mat> convertedImages, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
         {
-            RayOpenImage(filePath);
-            Constants.DefaultFoV = Constants.OCTImageSize * imageResolution * CommonUtil.GetCalibrationRatio(manualCalibration, true);
-            Constants.ImageResolution = imageResolution * CommonUtil.GetCalibrationRatio(manualCalibration, true);
+            RayOpenImage(filePath, imageResolution, zOffset);
 
             int numOfFrames = (int)RayGetProperty(Property.ImageDepth);
             int width = (int)RayGetProperty(Property.ImageWidth);
@@ -380,11 +378,12 @@ namespace RaywattApp.Common.Util
 
             var dialogFE = dialog as System.Windows.FrameworkElement;
             var dialogDataContext = dialogFE.DataContext as FileExportDialogViewModel;
-            dialogDataContext.SetInitialize(patientCase, imgCrossSections, imgLongitude, fileExport);
+            double dialogWidth = dialogDataContext.SetInitialize(patientCase, imgCrossSections, imgLongitude, fileExport);
 
             window.Show();
             window.Hide();
-            dialog.Width = originWidth;
+
+            dialog.Width = dialogWidth;
             dialog.Height = originHeight;
 
             int totalCnt = imgCrossSections.Count;
@@ -399,8 +398,12 @@ namespace RaywattApp.Common.Util
 
                 dialogDataContext.SetFrameNumber(index);
                 dialog.UpdateLayout();
-                        
-                RenderTargetBitmap rtb = new RenderTargetBitmap((int)dialog.ActualWidth, (int)dialog.ActualHeight, 96, 96, PixelFormats.Pbgra32);
+
+                Size originalSize = new Size(dialog.ActualWidth, dialog.ActualHeight);
+                dialog.Measure(new System.Windows.Size(double.PositiveInfinity, double.PositiveInfinity));
+                dialog.Arrange(new System.Windows.Rect(0, 0, dialog.DesiredSize.Width, dialog.DesiredSize.Height));
+
+                RenderTargetBitmap rtb = new RenderTargetBitmap((int)dialog.DesiredSize.Width, (int)dialog.DesiredSize.Height, 96, 96, PixelFormats.Pbgra32);
                 System.Windows.Rect bounds = VisualTreeHelper.GetDescendantBounds(dialog);
                 DrawingVisual dv = new DrawingVisual();
                 using (DrawingContext ctx = dv.RenderOpen())
@@ -409,6 +412,9 @@ namespace RaywattApp.Common.Util
                     ctx.DrawRectangle(vb, null, bounds);
                 }
                 rtb.Render(dv);
+
+                dialog.Measure(new System.Windows.Size(originalSize.Width, originalSize.Height));
+                dialog.Arrange(new System.Windows.Rect(0, 0, originalSize.Width, originalSize.Height));
 
                 PngBitmapEncoder png = new PngBitmapEncoder();
                 png.Frames.Add(BitmapFrame.Create(rtb));
@@ -814,7 +820,6 @@ namespace RaywattApp.Common.Util
                             tiff.SetField(TiffTag.SAMPLESPERPIXEL, img.Channels());
                             tiff.SetField(TiffTag.BITSPERSAMPLE, 8);
                             tiff.SetField(TiffTag.ROWSPERSTRIP, img.Rows);
-                            tiff.SetField(TiffTag.COMPRESSION, Compression.NONE);
                             tiff.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
 
                             tiff.WriteEncodedStrip(0, managedArray, managedArray.Length);
@@ -2379,18 +2384,33 @@ namespace RaywattApp.Common.Util
             return Math.Round(value, 5);
         }
 
-        public static double GetCalibrationRatio(int calibration, bool isReverse)
+        public static void GetStorageSize(out double totalSize, out double freeSize)
         {
-            double ratio = Math.Round(Math.Pow(Constants.ManualCalibrationRatio, calibration), 5);
+            string configDrive = Constants.SystemRootPath + "\\";
+            totalSize = 0;
+            freeSize = 0;
 
-            if (!isReverse)
+            DriveInfo[] allDrives = DriveInfo.GetDrives();
+            foreach (DriveInfo drive in allDrives)
             {
-                return ratio;
+                if (drive.Name.Equals(configDrive))
+                {
+                    totalSize = CommonUtil.ByteToGB(drive.TotalSize);
+                    freeSize = CommonUtil.ByteToGB(drive.AvailableFreeSpace);
+                    break;
+                }
             }
-            else
-            {
-                return 1 / ratio;
-            }
+        }
+
+        public static bool IsStorageAvailable()
+        {
+            double storageTotalSize, storageFreeSize;
+            GetStorageSize(out storageTotalSize, out storageFreeSize);
+
+            if (storageFreeSize < Constants.StorageLimit)
+                return false;
+
+            return true;
         }
     }
 }

@@ -68,7 +68,6 @@ COCTImaging::COCTImaging(Setting setting, CMessageService* pMsg) {
 	m_nTotalFrame = 0;
 
 	m_nSheathPosition = 0;
-	m_nZOffset = 0;
 
 	clahe = cv::createCLAHE(0.02, cv::Size(8, 8));
 }
@@ -100,7 +99,6 @@ void COCTImaging::Process(char* fringes) {
 	findSheath(fFFTResult);
 	generateImage(fFFTResult, false);
 	adaptive_compensation();
-	applyZOffset();
 }
 void COCTImaging::PostProcess(cv::Mat image) {
 	const bool bInvert = m_bInvert;
@@ -131,8 +129,12 @@ void COCTImaging::PostProcess(cv::Mat image) {
 
 	CircularizeImage(imageResultColor, imageCircle);
 }
+void COCTImaging::ApplyZOffset(const cv::Mat& src, cv::Mat& dst, int zOffset) {
+	cv::Mat img = src.clone();
 
-
+	cv::Mat translation_matrix = (cv::Mat_<double>(2, 3) << 1, 0, zOffset * -1, 0, 1, 0);
+	cv::warpAffine(img, dst, translation_matrix, img.size());
+}
 int COCTImaging::Start() {
 	BOOL result = FALSE;
 	result = CUtility::StartThread(threadRender, m_pThread, (LPVOID)this);
@@ -161,6 +163,9 @@ void COCTImaging::DoAsyncRender(char* fringes) {
 void COCTImaging::CircularizeImage(cv::Mat& src, cv::Mat& dst)
 {
 	cv::remap(src, dst, matXMap, matYMap, cv::INTER_LINEAR);
+
+	cv::Mat imgFoV = getFoVImage(dst, MAX_FIELD_OF_VIEW);
+	memcpy(dst.data, imgFoV.data, sizeof(char) * dst.cols * dst.rows * imgFoV.channels());
 }
 
 void COCTImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst) {}
@@ -231,6 +236,7 @@ void COCTImaging::allocateMemory() {
 	imageResult.create(nBScan, nOutputLength, CV_8UC1);
 	imageResultColor.create(nBScan, nOutputLength, CV_8UC3);
 	imageCircle.create(nCircleSize, nCircleSize, CV_8UC3);
+	imageResultWithoutCompensation.create(nBScan, nOutputLength, CV_8UC1);
 
 	fBuffer_Window = ippsMalloc_32f(nFFTLength);
 	fcBuffer_FFT = ippsMalloc_32fc(nFFTLength);
@@ -250,6 +256,7 @@ void COCTImaging::releaseMemory() {
 	imageResult.release();
 	imageResultColor.release();
 	imageCircle.release();
+	imageResultWithoutCompensation.release();
 
 	ippsRelease((void*&)fBuffer_Window);
 	ippsRelease((void*&)fcBuffer_FFT);
@@ -479,13 +486,8 @@ void COCTImaging::generateImage(Ipp32f* logaritihmData, bool bInvert){
 	cv::convertScaleAbs(imageResult, imageResult, 1.f / 80.f * LUT_SCALE, 0);
 
 	cv::flip(imageResult, imageResult, 1);
-}
 
-void COCTImaging::applyZOffset() {
-	cv::Mat img = imageResult.clone();
-
-	cv::Mat translation_matrix = (cv::Mat_<double>(2, 3) << 1, 0, m_nZOffset * -1, 0, 1, 0);
-	cv::warpAffine(img, imageResult, translation_matrix, img.size());
+	imageResultWithoutCompensation = imageResult.clone();
 }
 
 void COCTImaging::drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color) {
@@ -502,6 +504,26 @@ void COCTImaging::drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color)
 		lineStart += (lineSize * 2);
 	}
 	cv::line(image, cv::Point(posDraw, lineStart), cv::Point(posDraw, (lineStart + lineSize / 2) - 1), color, 2);
+}
+
+cv::Mat COCTImaging::getFoVImage(cv::Mat image, double fov) {
+	cv::Rect roi;
+	roi.width = (int)(floor(round(fov * 1000.f / m_setting.distPerPixel))) * 2;
+	roi.height = roi.width;
+	roi.x = (image.cols - roi.width) / 2;
+	roi.y = (image.rows - roi.height) / 2;
+
+	if (roi.x < 0 || roi.y < 0 ||
+		roi.width <= 0 || roi.height <= 0 ||
+		roi.x + roi.width > image.cols ||
+		roi.y + roi.height > image.rows) {
+		return image.clone();
+	}
+
+	cv::Mat imgROI;
+	cv::resize(image(roi), imgROI, cv::Size(image.cols, image.rows));
+
+	return imgROI;
 }
 
 UINT COCTImaging::threadRender(LPVOID param) {
@@ -580,7 +602,7 @@ void COCTImaging::adaptive_compensation()
 
 			if (sum_val < energy_all.at<float>(0, x) / std::pow(10.0, ENERGY_THRESHOLD)) {
 				stop_rows[x] = z;
-				//PLOGI.printf("current col : %d, stop Row = %d", x, z);
+
 				break;
 			}
 		}

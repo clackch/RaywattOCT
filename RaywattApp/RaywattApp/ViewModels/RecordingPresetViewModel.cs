@@ -145,10 +145,7 @@ namespace RaywattApp.ViewModels
                     PatientCase.AppositionThreshold = physicians[0].AppositionThreshold;
                     PatientCase.AccessionNumber = "";
                     PatientCase.Comment = "";
-
                     PatientCase.ImageResolution = RayGetProperty(Property.ImageResolution);
-                    Constants.DefaultFoV = Constants.OCTImageSize * PatientCase.ImageResolution;
-                    Constants.ImageResolution = PatientCase.ImageResolution;
 
                     sqlParameters.Clear();
                     sqlParameters["classification"] = "Present";

@@ -100,6 +100,7 @@ namespace RaywattApp
             services.AddTransient(typeof(SettingAboutViewModel));
             services.AddTransient(typeof(SettingLogViewModel));
             services.AddTransient(typeof(SettingTermsConditionsViewModel));
+            services.AddTransient(typeof(SettingMaintenanceViewModel));
 
             //File
             services.AddTransient(typeof(FileExportStep1ViewModel));
