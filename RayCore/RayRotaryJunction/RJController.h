@@ -78,7 +78,6 @@ public:
 	virtual bool Set(eStepMotorIndex idxMotor, int velStep);
 
 	const char* GetStateString(eRJState state);
-	eRJState GetState() { return m_state; }
 	bool InitialStatusReceived() { return m_bReadInitStatus; }
 	bool StartControl();
 	bool AutoStatePeriod(USHORT interval);

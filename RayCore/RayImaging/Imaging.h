@@ -19,7 +19,7 @@ public:
 		float lowLevel;
 		float highLevel;
 
-    double distPerPixel; // um per pixel (1024 x bscan)
+		double distPerPixel; // um per pixel (1024 x bscan)
     
 		int applyCompensation;
 		int applyGammaCorrection;
