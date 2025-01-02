@@ -29,30 +29,8 @@ void CTIFFImaging::Process(char* fringes)
 {
 	m_end = std::chrono::system_clock::now();
 	CLookUpTable& lut = CLookUpTable::GetInstance();
-	cv::Mat imgTIFF(cv::Size(m_setting.nBScan, m_setting.nAScan), CV_8UC4, fringes);
-	cv::Mat imgBGR;
-
-	cv::cvtColor(imgTIFF, imgBGR, cv::COLOR_BGRA2RGB);
-	lut.Revert(imgBGR, 2, imageOrigin);
-	cv::flip(imageOrigin, imageOrigin, 0);
-
-	// remove indicator
-	cv::copyTo(imageOrigin, imageConvert, imageMask);
-
-	for (int y = 955; y <= 970; y++) {
-		for (int x = 740; x <= 750; x++) {
-			if (x < imageConvert.cols && y < imageConvert.rows) {
-				imageConvert.at<char>(y, x) = 0x00;
-			}
-		}
-	}
-
-	std::chrono::milliseconds total_time = std::chrono::duration_cast<std::chrono::milliseconds>(m_end - m_start);
-	long long msec = total_time.count();
-	if (msec < 30)
-	{
-		Sleep(30 - msec);
-	}
+	cv::Mat imgTIFF(cv::Size(m_setting.nBScan, m_setting.nAScan), CV_8UC1, fringes);
+	imageConvert = imgTIFF.clone();
 
 	m_start = m_end;
 

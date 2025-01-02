@@ -96,6 +96,7 @@ namespace RaywattOCT
             LoadCatheter,
             UnloadCatheter,
             ValidateCatheter,
+            InitializeRotaryJunction,
             CleanRotaryJunction
         };
 

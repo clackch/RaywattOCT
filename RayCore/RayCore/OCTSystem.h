@@ -68,6 +68,7 @@ private:
 
 	// Rotary Junction
 	CRJController* m_pRJController;
+	bool m_bFirstLoad;	// To-Do: RFID 연동해서 동일한 카테터 재연결시에도 FirstLoad 로 인식되게 수정 필요
 
 	// Laser Module
 	CLaserModule* m_pLaserModule;
@@ -189,6 +190,7 @@ private:
 	// Work Thread (stop in OnMsgNotifyProcessDone func)
 	static UINT threadSaveRaw(LPVOID param);	
 	// Rotary Junction Thread (stop in OnMsgDeviceWorkDone func)
+	static UINT threadInitializeRotaryJunction(LPVOID param);
 	static UINT threadAutoCalibration(LPVOID param);
 	static UINT threadPullbackScan(LPVOID param);
 	// Catheter related Thread (stop in OnMsgUpdateCatheterState func)
@@ -216,6 +218,7 @@ private:
 	bool waitForStepMotors(bool& runFlag);
 	bool waitForStepMotors(eStepMotorIndex idxMotor, bool& runFlag);
 	void calculateIntensity(cv::Mat image);
+	std::vector<std::vector<std::string>> readLoadSequence();
 
 protected:
 	LRESULT OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam);

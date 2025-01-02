@@ -52,6 +52,7 @@ private:
 	char* m_pVolumeData;
 
 	int m_zOffset;
+	std::vector<int> m_vZOffset;
 
 private:
 	CImagingSession(CMessageService* pMsg, int nSession, bool deleteData = true);
@@ -99,8 +100,10 @@ public:
 	void* GetGuidewirePoints(int nFrame);
 	int GetNumOfGuidewirePoints(int nFrame);
 
+	bool LoadZOffset(const char* strDataFilePath);
 	void SetZOffset(int zOffset) { m_zOffset = zOffset; }
 	int GetZOffset() { return m_zOffset; }
+	int GetZOffset(int nFrame);
 
 private:
 	static CImagingSession* createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type);
