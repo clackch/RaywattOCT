@@ -680,10 +680,7 @@ void COCTImaging::logarithmic_contrast_stretching(cv::Mat& img, float lower_perc
 	std::vector<float> img_values;
 	img_values.assign((float*)img_reshaped.datastart, (float*)img_reshaped.dataend);
 
-	//// 2. 벡터 정렬
-	//std::sort(img_values.begin(), img_values.end());
-
-	// 3. 퍼센타일 값 계산
+	// 2. 퍼센타일 값 계산
 	int total_elements = img_values.size();
 	int lower_idx = static_cast<int>(lower_percentile / 100.0 * total_elements);
 	int upper_idx = static_cast<int>(upper_percentile / 100.0 * total_elements);
@@ -696,18 +693,18 @@ void COCTImaging::logarithmic_contrast_stretching(cv::Mat& img, float lower_perc
 	float upper_bound = img_values[upper_idx] * 1.5;
 
 
-	// 4. OpenMP 병렬 처리로 로그 변환 및 정규화
+	// 3. OpenMP 병렬 처리로 로그 변환 및 정규화
 #pragma omp parallel for
 	for (int i = 0; i < img.rows; ++i) {
 		float* img_ptr = img.ptr<float>(i);  // 한 번에 한 row의 데이터에 접근
 		for (int j = 0; j < img.cols; ++j) {
-			// 5. 클리핑: 퍼센타일에 맞게 값 클리핑
+			// 4. 클리핑: 퍼센타일에 맞게 값 클리핑
 			img_ptr[j] = std::min(std::max(img_ptr[j], lower_bound), upper_bound);
 
-			// 6. 로그 변환: 클리핑된 값을 기반으로 로그 변환
+			// 5. 로그 변환: 클리핑된 값을 기반으로 로그 변환
 			img_ptr[j] = std::log1p(img_ptr[j] - lower_bound + 1e-8);  // log(1 + x) 계산 (offset 추가)
 
-			// 7. 0-1로 정규화: 로그 변환 후 결과를 0-1 범위로 맞춤
+			// 6. 0-1로 정규화: 로그 변환 후 결과를 0-1 범위로 맞춤
 			img_ptr[j] = (img_ptr[j] - std::log1p(0)) / (std::log1p(upper_bound - lower_bound) + 1e-8);
 		}
 	}

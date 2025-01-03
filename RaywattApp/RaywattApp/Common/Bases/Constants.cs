@@ -472,8 +472,8 @@ namespace RaywattApp.Common.Bases
         //AngioCoRegistration
         public const double ellipsePathWidth = 1;
         public const double ellipsePathHeight = 1;
-        public const double ellipseTrackWidth = 6;
-        public const double ellipseTrackHeight = 6;
+        public const double ellipseTrackWidth = 5;
+        public const double ellipseTrackHeight = 5;
         public const double coregistrationCursorSize = 113;
         public const string objectSeedPath = "..\\bin\\Data\\Object.png";
         public const string backgroundSeedPath = "..\\bin\\Data\\Background.png";

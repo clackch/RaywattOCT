@@ -1599,12 +1599,10 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 		pRJController->Move(eStepMotorIndex::Both, pRJController->ConvertMMtoStep(config.stepMotor.pullbackDistance), false);
 
 		auto now = std::chrono::system_clock::now();
-		std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
-		std::tm localTime;
-		localtime_s(&localTime , &currentTime);
-		auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
-		double duration = localTime.tm_hour * 3600.0 + localTime.tm_min * 60.0 + localTime.tm_sec + milliseconds.count() / 1000.0;
-		pSystem->SetPullbackStartTime(duration);
+		auto duration = now.time_since_epoch();
+		double seconds_since_epoch = std::chrono::duration_cast<std::chrono::seconds>(duration).count() + 
+			std::chrono::duration_cast<std::chrono::microseconds>(duration).count() / 1'000'000.0;
+		pSystem->SetPullbackStartTime(seconds_since_epoch);
 
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 	}

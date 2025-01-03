@@ -39,7 +39,7 @@
         <Style TargetType="Ellipse" x:Key="StyleTrackEllipse">
             <Setter Property="Width" Value="{x:Static const:Constants.ellipseTrackWidth}"/>
             <Setter Property="Height" Value="{x:Static const:Constants.ellipseTrackHeight}"/>
-            <Setter Property="Fill" Value="Yellow"/>
+            <Setter Property="Fill" Value="#FF1ED760"/>
         </Style>
 
         <Style TargetType="Image" x:Key="AngioProximalIcon">

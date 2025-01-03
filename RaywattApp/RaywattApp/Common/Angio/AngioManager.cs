@@ -73,7 +73,7 @@ namespace RaywattApp.Common.Angio
         private byte[] tmpBuffer;
         private List<byte[]> angioSaveBuffer;
         public List<byte[]> AngioSaveBuffer { get { return angioSaveBuffer; } set { angioSaveBuffer = value; } }
-        public List<DateTime> angioSaveTimes;
+        public List<DateTimeOffset> angioSaveTimes;
         private int bytesRead;
         private int tmpBufferLen;
         private int angioSaveFrameNum;
@@ -115,7 +115,7 @@ namespace RaywattApp.Common.Angio
             buffer = new byte[256];
             tmpBuffer = new byte[512];
             angioSaveBuffer = new List<byte[]>();
-            angioSaveTimes = new List<DateTime>();
+            angioSaveTimes = new List<DateTimeOffset>();
 
             Array.Fill<byte>(buffer, 0);
             Array.Fill<byte>(tmpBuffer, 0);
@@ -239,21 +239,9 @@ namespace RaywattApp.Common.Angio
                 double angioTime = double.MaxValue;
                 for (int i = angioSaveFrameNum; i > angioSaveFrameNum - searchRange; i--)
                 {
-                    DateTime time = angioSaveTimes[i];
-                    angioTime = time.Hour * 3600 + time.Minute * 60 + time.Second + time.Millisecond / 1000.0;
+                    DateTimeOffset time = angioSaveTimes[i];
+                    angioTime = time.ToUnixTimeMilliseconds() / 1000.0;
                     double gap = Math.Abs(angioTime - OCTStartTime);
-
-                    if(gap >= 86399 /*23시 59분 59초 - 00시 00분 00초 에러 처리*/)
-                    {
-                        if(angioTime > OCTStartTime)
-                        {
-                            gap = OCTStartTime + 86400 - angioTime;
-                        }
-                        else
-                        {
-                            gap = angioTime + 86400 - OCTStartTime;
-                        }
-                    }
 
                     if(gap <= minGap)
                     {
@@ -369,7 +357,7 @@ namespace RaywattApp.Common.Angio
             if (threadOnSaveAngioFrames)
             {
                 angioSaveBuffer.Add(new byte[angioImageSize]);
-                angioSaveTimes.Add(DateTime.Now);
+                angioSaveTimes.Add(DateTimeOffset.UtcNow);
                 Marshal.Copy(image.Data, angioSaveBuffer.Last(), 0, angioImageSize);
             }
 
