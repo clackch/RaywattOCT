@@ -176,6 +176,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
         private double markerDrawInterval = 0;
         private Point distalPoint = new Point();
         private int prevOCTFrameNum = 0;
+        private int playDirection = 0;
         
         public DrawAngioPathUtil()
         {
@@ -348,14 +349,13 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             if(markerIndex == -1)
             {
                 path.Reverse();
-                _log.Debug($"Point {CurrentCoRegistration.MarkerPoint} found at index {markerIndex}");
-
                 double minDistance = double.MaxValue;
-                for(int i = 0; i< path.Count; i++)
+                for (int i = 0; i < path.Count; i++)
                 {
-                    double tmpDistance = GetDistance(path[i], CurrentCoRegistration.MarkerPoint);
-                    if(minDistance > tmpDistance)
+                    double tmp = GetDistance(path[i], CurrentCoRegistration.MarkerPoint);
+                    if (minDistance > tmp)
                     {
+                        minDistance = tmp;
                         CurrentCoRegistration.MarkerPoint = path[i];
                         markerIndex = i;
                     }
@@ -380,7 +380,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             int initialPointX = (int)x;
             int initialPointY = (int)y;
             int templateSize = 100;
-            int searchRange = 200;
+            int searchRange = 100;
 
             List<Mat> Images = new List<Mat>();
             Images.AddRange(AngioImages);
@@ -534,6 +534,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             {
                 localDijkstraHeap[frameIndex].line[lineIndex].Add(curvexy);
             }
+            localDijkstraHeap[frameIndex].line[lineIndex].Reverse();
         }
 
         // Bezier
@@ -1061,6 +1062,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                     {
                         currPath.AddRange(line);
                     }
+                    currPath.Reverse();
 
                     Point nextMarkerPoint = currPath[Math.Min(currPath.Count - 1, currPath.IndexOf(prevMarkerPoint) + (int)pathInterval)];
 
@@ -1069,6 +1071,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                     {
                         nextPath.AddRange(line);
                     }
+                    nextPath.Reverse();
 
                     double minDistance = double.MaxValue;
                     for (int j = 0; j < nextPath.Count; j++)
@@ -1144,8 +1147,8 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                             List<Tuple<float, float, Point>> next3x3Mean = new List<Tuple<float, float, Point>>(); 
 
                             int roiStep = 5;
-                            int roiCenterX = nextX - (nextX - currX);
-                            int roiCenterY = nextY - (nextY - currY);
+                            int roiCenterX = currX;
+                            int roiCenterY = currY;
                             int xStart = MinMax(width, roiCenterX - roiStep);
                             int yStart = MinMax(height, roiCenterY - roiStep);
                             int xEnd = MinMax(width, roiCenterX + roiStep);
@@ -1276,7 +1279,9 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             if (drawUtil.CoRegistrations == null || drawUtil.CoRegistrations.Count == 0)
                 return;
 
-            int direction = control.prevOCTFrameNum - drawUtil.FrameNumber;
+            int direction = drawUtil.FrameNumber - control.prevOCTFrameNum;
+
+            drawUtil.playDirection = direction > 0 ? 1 : -1;
 
             if(drawUtil.FrameNumber == 0 && drawUtil.NumberOfFrames - 1 == drawUtil.prevOCTFrameNum)
             {
@@ -1473,6 +1478,12 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
                 if (isMoved)
                 {
+                    int currFrameNum = 0;
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        currFrameNum = AngioFrameNumber;
+                    });
+
                     rectangle.Opacity = 1.0; //visible
                     string numberPart = rectangle.Name.Substring(rectangle.Name.Length - 3);
                     int.TryParse(numberPart, out int index);
@@ -1480,14 +1491,11 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                     float x = (float)(Canvas.GetLeft(rectangle) + rectangle.Width / 2);
                     float y = (float)(Canvas.GetTop(rectangle) + rectangle.Height / 2);
 
-                    localDijkstraHeap[AngioFrameNumber].trackPoints[index] = new Point(x, y);
-                    TrackPointCorrection();
+                    localDijkstraHeap[currFrameNum].trackPoints[index] = new Point(x, y);
 
-                    ProcessSingleImage(AngioFrameNumber, index);
-                    PathChange(AngioFrameNumber);
-
+                    ProcessSingleImage(currFrameNum, index);
+                    PathChange(currFrameNum);
                     CoregistrationCompleted();
-
 
                     List<CoRegistration> coRegistrations = null;
                     Task.Run(async () =>
