@@ -333,7 +333,7 @@ void TCPSocket::PortEventThread(FrameGrabber& fg) {
 				ResetEvent(fg.pIdeaInfo->hInfoEvent);
 				fg.pIdeaInfo->bNewInfo = FALSE;
 				fg.m_bSyncValid = bHP_CSyncDetect(fg.m_BoardHandle);
-				PLOGI.printf("Port Event...");
+				//PLOGI.printf("Port Event...");
 				if (fg.m_bSyncValid && fg.portConnection != 1)
 				{
 					fg.portConnection = 1;
@@ -351,7 +351,7 @@ void TCPSocket::PortEventThread(FrameGrabber& fg) {
 
 				if (fg.pIdeaInfo)
 				{
-					PLOGI.printf("fg.pIdealInfo true called");
+					//PLOGI.printf("fg.pIdealInfo true called");
 					HANDLE	hInfoEvent = fg.pIdeaInfo->hInfoEvent;
 					if (hInfoEvent)
 					{
@@ -429,13 +429,14 @@ void TCPSocket::LiveFrame(FrameGrabber& fg) {
 	if (bufferResult != 0 || pVidHeader == nullptr) {
 		retryCount++; 
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		if (retryCount > 10) { // 이미지를 0.3초 이상 받아오지 못하는 경우 새로고침
+		if (retryCount > 100) { // 이미지를 0.1초 이상 받아오지 못하는 경우 새로고침
 			RefreshLiveStream(fg);
 			retryCount = 0;
 		}
 		return;
 	}
-	int offset = IMAGE_HEADER_SIZE; 
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	int offset = IMAGE_HEADER_SIZE;
 	memcpy(sendBuffer + offset, pVidHeader->pBuffer, fg.m_LiveStreamInfo.nDestinationWidth * fg.m_LiveStreamInfo.nDestinationHeight * fg.wBitsPerPixel / 8);
 	offset += fg.m_LiveStreamInfo.nDestinationWidth * fg.m_LiveStreamInfo.nDestinationHeight * fg.wBitsPerPixel / 8;
 	checkSum = CalcCheckSum(sendBuffer, offset); 
@@ -450,7 +451,6 @@ void TCPSocket::LiveFrame(FrameGrabber& fg) {
 	eHD_ReleaseStreamBuffer(fg.m_ImageHandle, pVidHeader); //버퍼 할당 해제
 	retryCount = 0; 
 }
-
 
 void TCPSocket::StartLiveFrameThread(FrameGrabber& fg) {
 	if (!liveFrameThreadRunning) {
@@ -476,13 +476,12 @@ void TCPSocket::StopLiveFrameThread(FrameGrabber& fg) {
 		}
 		PLOGI.printf("LiveFrameThread stopped.");
 	}
-	// Recording 변수 
 }
 
 void TCPSocket::LiveFrameThread(FrameGrabber& fg) {	
 	while (liveFrameThreadRunning && isStarted && fg.portConnection) {
 		LiveFrame(fg);
-		std::this_thread::sleep_for(std::chrono::milliseconds(20));
+		//std::this_thread::sleep_for(std::chrono::milliseconds(20));
 	}
 }
 
