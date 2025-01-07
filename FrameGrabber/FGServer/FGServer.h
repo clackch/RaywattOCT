@@ -19,5 +19,5 @@
 
 using namespace std;
 
-#define IMAGE_HEADER_SIZE 7
+#define IMAGE_HEADER_SIZE 15
 #define IMAGE_TAIL_SIZE 2

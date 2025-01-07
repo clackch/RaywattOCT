@@ -423,9 +423,17 @@ byte TCPSocket::CalcCheckSum(char* sendBuffer, int size) {
 	return (byte)~csum;
 }
 
+long long TCPSocket::timeSelect() {
+	auto now = std::chrono::system_clock::now();
+	auto epochDuration = now.time_since_epoch();
+	auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(epochDuration).count();
+	return milliseconds;
+}
+
 void TCPSocket::LiveFrame(FrameGrabber& fg) {
 	HDVID_HEADER* pVidHeader = nullptr; 
 	ERRTYPE bufferResult = eHD_GetStreamBuffer(fg.m_ImageHandle, &pVidHeader); // 이미지 버퍼헤더 가져오는 함수
+	long long livetime = timeSelect();
 	if (bufferResult != 0 || pVidHeader == nullptr) {
 		retryCount++; 
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -436,7 +444,9 @@ void TCPSocket::LiveFrame(FrameGrabber& fg) {
 		return;
 	}
 	std::this_thread::sleep_for(std::chrono::milliseconds(10));
-	int offset = IMAGE_HEADER_SIZE;
+	int offset = 7; 
+	memcpy(sendBuffer + offset, &livetime, sizeof(livetime));
+	offset += sizeof(livetime);
 	memcpy(sendBuffer + offset, pVidHeader->pBuffer, fg.m_LiveStreamInfo.nDestinationWidth * fg.m_LiveStreamInfo.nDestinationHeight * fg.wBitsPerPixel / 8);
 	offset += fg.m_LiveStreamInfo.nDestinationWidth * fg.m_LiveStreamInfo.nDestinationHeight * fg.wBitsPerPixel / 8;
 	checkSum = CalcCheckSum(sendBuffer, offset); 

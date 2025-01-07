@@ -48,6 +48,7 @@ private:
 	void RefreshLiveStream(FrameGrabber& fg);
 	byte CalcCheckSum(char* sendBuffer, int size); 
 	CommandType CheckCommandType(const char* receivedBuffer);
+	long long timeSelect();
 
 	// thread
 	void StartSnapFrameThread(FrameGrabber& fg);
