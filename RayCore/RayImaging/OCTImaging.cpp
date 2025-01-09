@@ -428,52 +428,147 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 	}
 }
 
+static int myint = 0;
 void COCTImaging::findSheath(cv::Mat img) {
+	
+	std::chrono::system_clock::time_point start, end;
+	start = std::chrono::system_clock::now();
+	m_nSheathSearchRange = 300; /*1mm 오차 범위 탐색 수행*/
+
 	cv::Mat image;
 	cv::rotate(img, image, cv::ROTATE_90_COUNTERCLOCKWISE);
+	image = image(cv::Range(0, m_nSheathSearchRange), cv::Range::all());
+	cv::resize(image, image, cv::Size(1080, image.rows));
+
+	cv::Mat edge_image;
+	cv::Sobel(image.clone(), edge_image, CV_64F, 0 /*dy*/, 1 /*dx*/, 3 /*kernel size*/, 1, 0, cv::BORDER_CONSTANT);
+	cv::convertScaleAbs(edge_image, edge_image);
+
+	/*char* name = new char[100];
+	sprintf(name, "image_edge_%d.png", myint);
+	cv::imwrite(name, edge_image);
+	name = new char[100];
+	sprintf(name, "image_%d.png", myint++);
+	cv::imwrite(name, image);*/
 
 	// 행의 평균과 분산 계산
-	std::vector<double> mean_values;
-	std::vector<double> variance_values;
+	std::vector<double> origin_mean_values;
+	std::vector<double> edge_mean_values;
+	std::vector<double> edge_variance_values;
+	double max_variance = 0;
 
 	for (int i = 0; i < image.rows; ++i) {
 		cv::Mat row = image.row(i);
-		cv::Scalar mean, stddev;
-		cv::meanStdDev(row, mean, stddev);
-		mean_values.push_back(mean[0]);
-		variance_values.push_back(stddev[0] * stddev[0]);  // 분산은 표준편차의 제곱
+		cv::Scalar mean;
+		mean = cv::mean(row);
+		origin_mean_values.push_back(mean[0]);
+
+		cv::Mat row_edge = edge_image.row(i);
+		cv::Scalar edge_mean, edge_stddev;
+		cv::meanStdDev(row_edge, edge_mean, edge_stddev);
+		edge_mean_values.push_back(edge_mean[0]);
+		edge_variance_values.push_back(edge_stddev[0] * edge_stddev[0]);  // 분산은 표준편차의 제곱
 	}
+	
+	std::vector<double> origin_mean_values_norm = normalize(origin_mean_values, 1);
+	std::vector<double> edge_mean_values_norm = normalize(edge_mean_values, 1);
+	std::vector<double> edge_variance_values_norm = normalize(edge_variance_values, 1);
 
-	// 평균 값을 0~1로 정규화
-	std::vector<double> mean_values_norm = normalize(mean_values);
-
-	// 정규화된 평균이 0.9 이상인 행 필터링
+	// 정규화된 평균이 65 이상, 분산이 150 이상인 행 필터링
 	std::vector<std::tuple<int, double, double>> valid_rows;
-	for (int i = 0; i < mean_values_norm.size(); ++i) {
-		if (mean_values_norm[i] >= 0.9) {
-			valid_rows.emplace_back(i, mean_values[i], variance_values[i]);
+	for (int i = 0; i < edge_mean_values_norm.size(); ++i) {
+		if (edge_mean_values_norm[i] >= 0.3 &&
+			edge_variance_values_norm[i] >= 0.7 &&
+			origin_mean_values_norm[i] >= 0.8 )
+		{
+			valid_rows.emplace_back(i, edge_mean_values_norm[i], edge_variance_values_norm[i]);
+			PLOGI.printf("valid_row = %d", i);
+		}
+	}
+	PLOGI.printf("valid_rows.count origin = %d", valid_rows.size());
+
+	// 필터링 행들 중 sheath 경계 후보들 추출
+	std::vector<int> sheath_boundaries;
+	while (!valid_rows.empty()) {
+		auto max_variance_row = *std::max_element(valid_rows.begin(), valid_rows.end(),
+			[](const auto& a, const auto& b) { return std::get<2>(a) < std::get<2>(b); });
+		int tmp_row = std::get<0>(max_variance_row);
+
+		
+		sheath_boundaries.emplace_back(tmp_row);
+
+		int erase_range = 10;
+
+		valid_rows.erase(
+			std::remove_if(valid_rows.begin(), valid_rows.end(),
+				[tmp_row, erase_range](const auto& item) {
+					return (tmp_row - erase_range <= std::get<0>(item) &&
+						std::get<0>(item) <= tmp_row + erase_range);
+				}),
+			valid_rows.end());
+	}
+	PLOGI.printf("sheath_boundaries.count filter 1 = %d", sheath_boundaries.size());
+
+	// 최종 후보 추출
+	std::vector<std::tuple<int, int, int>> result_rows;
+	for (int i = 0; i < sheath_boundaries.size(); i++) {
+		for (int j = i + 1; j < sheath_boundaries.size(); j++) {
+			int row1 = sheath_boundaries[i]; //inner
+			int row2 = sheath_boundaries[j]; //outer
+
+			if (row1 > row2) // always row2 bigger than row1
+				std::swap(row1, row2);
+
+			if (m_measureSetting.nSheathThickness * 2 * 0.5 <= row2 - row1 && row2 - row1 <= m_measureSetting.nSheathThickness * 2 * 1.1) {
+				int count = 0;
+				for (int row = row1; row < row2; row++) {
+					if (edge_mean_values_norm[row] <= 0.2 &&
+						edge_variance_values_norm[row] <= 0.4 &&
+						origin_mean_values_norm[row] <= 0.7 &&
+						origin_mean_values_norm[row] >= 0.55 )
+					{
+						count++;
+					}
+				}
+
+				if (count != 0) {
+					result_rows.emplace_back(row1, row2, count);
+				}
+			}
 		}
 	}
 
-	if (!valid_rows.empty()) {
-		// 분산이 가장 작은 행 찾기
-		auto min_variance_row = *std::min_element(valid_rows.begin(), valid_rows.end(),
-			[](const auto& a, const auto& b) { return std::get<2>(a) < std::get<2>(b); });
-		m_nSheathPosition = std::get<0>(min_variance_row) + m_measureSetting.nSheathThickness;
+	int inner, outer, count; //row1, row2
+	inner = outer = count = 0;
+
+	end = std::chrono::system_clock::now();
+	if (!result_rows.empty()) {
+		auto result_row = *std::max_element(result_rows.begin(), result_rows.end(),
+			[](const auto& a, const auto& b) {return std::get<2>(a) < std::get<2>(b); });
+		inner = std::get<0>(result_row);
+		outer = std::get<1>(result_row);
+		count = std::get<2>(result_row);
+		m_nSheathPosition = inner + m_measureSetting.nSheathThickness * 2;
+		std::chrono::milliseconds total_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+		PLOGI.printf("Success Auto-Calibration time duration = %.3f, inner %d, outer = %d, count = %d", total_time.count() / 1000.0, inner, outer, count);
+		//return m_nSheathPosition;
 	}
 	else {
 		m_nSheathPosition = 0;
+		std::chrono::milliseconds total_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+		PLOGI.printf("Fail Auto-Calibration time duration = %.3f", total_time.count() / 1000.0);
+		//return -1;
 	}
 }
 
 // 정규화를 위한 함수
-std::vector<double> COCTImaging::normalize(const std::vector<double>& values) {
+std::vector<double> COCTImaging::normalize(const std::vector<double>& values, double scale) {
 	double min_val = *std::min_element(values.begin(), values.end());
 	double max_val = *std::max_element(values.begin(), values.end());
 	std::vector<double> normalized;
 
 	for (double val : values) {
-		normalized.push_back((val - min_val) / (max_val - min_val));
+		normalized.push_back((val - min_val) / (max_val - min_val) * scale);
 	}
 	return normalized;
 }

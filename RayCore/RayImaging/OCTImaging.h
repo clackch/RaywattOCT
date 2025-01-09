@@ -56,6 +56,7 @@ protected:
 	int m_nTotalFrame;
 
 	int m_nSheathPosition;
+	int m_nSheathSearchRange;
 	int m_nZOffset;
 
 	cv::Ptr<cv::CLAHE> clahe;
@@ -118,7 +119,7 @@ protected:
 	void generateImage(Ipp32f* logaritihmData, bool bInvert);
 	void findSheath(Ipp32f* logaritihmData);
 	void findSheath(cv::Mat img);
-	std::vector<double> normalize(const std::vector<double>& values);
+	std::vector<double> normalize(const std::vector<double>& values, double scale = 1.0);
 	void drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color);
 	cv::Mat getFoVImage(cv::Mat image, double fov);
 
