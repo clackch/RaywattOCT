@@ -428,13 +428,9 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 	}
 }
 
-static int myint = 0;
 void COCTImaging::findSheath(cv::Mat img) {
-	
-	std::chrono::system_clock::time_point start, end;
-	start = std::chrono::system_clock::now();
-	m_nSheathSearchRange = 300; /*1mm 오차 범위 탐색 수행*/
 
+	m_nSheathSearchRange = 300; /*1mm 오차 범위 설정*/
 	cv::Mat image;
 	cv::rotate(img, image, cv::ROTATE_90_COUNTERCLOCKWISE);
 	image = image(cv::Range(0, m_nSheathSearchRange), cv::Range::all());
@@ -443,13 +439,6 @@ void COCTImaging::findSheath(cv::Mat img) {
 	cv::Mat edge_image;
 	cv::Sobel(image.clone(), edge_image, CV_64F, 0 /*dy*/, 1 /*dx*/, 3 /*kernel size*/, 1, 0, cv::BORDER_CONSTANT);
 	cv::convertScaleAbs(edge_image, edge_image);
-
-	/*char* name = new char[100];
-	sprintf(name, "image_edge_%d.png", myint);
-	cv::imwrite(name, edge_image);
-	name = new char[100];
-	sprintf(name, "image_%d.png", myint++);
-	cv::imwrite(name, image);*/
 
 	// 행의 평균과 분산 계산
 	std::vector<double> origin_mean_values;
@@ -474,7 +463,7 @@ void COCTImaging::findSheath(cv::Mat img) {
 	std::vector<double> edge_mean_values_norm = normalize(edge_mean_values, 1);
 	std::vector<double> edge_variance_values_norm = normalize(edge_variance_values, 1);
 
-	// 정규화된 평균이 65 이상, 분산이 150 이상인 행 필터링
+	// 정규화된 Edge 평균이 0.3 이상, 분산이 0.7 이상이고, 원본 이미지의 평균이 0.8 이상인 행 필터링
 	std::vector<std::tuple<int, double, double>> valid_rows;
 	for (int i = 0; i < edge_mean_values_norm.size(); ++i) {
 		if (edge_mean_values_norm[i] >= 0.3 &&
@@ -482,11 +471,9 @@ void COCTImaging::findSheath(cv::Mat img) {
 			origin_mean_values_norm[i] >= 0.8 )
 		{
 			valid_rows.emplace_back(i, edge_mean_values_norm[i], edge_variance_values_norm[i]);
-			PLOGI.printf("valid_row = %d", i);
 		}
 	}
-	PLOGI.printf("valid_rows.count origin = %d", valid_rows.size());
-
+	
 	// 필터링 행들 중 sheath 경계 후보들 추출
 	std::vector<int> sheath_boundaries;
 	while (!valid_rows.empty()) {
@@ -507,9 +494,8 @@ void COCTImaging::findSheath(cv::Mat img) {
 				}),
 			valid_rows.end());
 	}
-	PLOGI.printf("sheath_boundaries.count filter 1 = %d", sheath_boundaries.size());
 
-	// 최종 후보 추출
+	// 최종 후보 필터링
 	std::vector<std::tuple<int, int, int>> result_rows;
 	for (int i = 0; i < sheath_boundaries.size(); i++) {
 		for (int j = i + 1; j < sheath_boundaries.size(); j++) {
@@ -537,11 +523,9 @@ void COCTImaging::findSheath(cv::Mat img) {
 			}
 		}
 	}
-
+	
 	int inner, outer, count; //row1, row2
 	inner = outer = count = 0;
-
-	end = std::chrono::system_clock::now();
 	if (!result_rows.empty()) {
 		auto result_row = *std::max_element(result_rows.begin(), result_rows.end(),
 			[](const auto& a, const auto& b) {return std::get<2>(a) < std::get<2>(b); });
@@ -549,14 +533,10 @@ void COCTImaging::findSheath(cv::Mat img) {
 		outer = std::get<1>(result_row);
 		count = std::get<2>(result_row);
 		m_nSheathPosition = inner + m_measureSetting.nSheathThickness * 2;
-		std::chrono::milliseconds total_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-		PLOGI.printf("Success Auto-Calibration time duration = %.3f, inner %d, outer = %d, count = %d", total_time.count() / 1000.0, inner, outer, count);
 		//return m_nSheathPosition;
 	}
 	else {
 		m_nSheathPosition = 0;
-		std::chrono::milliseconds total_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-		PLOGI.printf("Fail Auto-Calibration time duration = %.3f", total_time.count() / 1000.0);
 		//return -1;
 	}
 }
