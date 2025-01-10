@@ -444,7 +444,6 @@ void COCTImaging::findSheath(cv::Mat img) {
 	std::vector<double> origin_mean_values;
 	std::vector<double> edge_mean_values;
 	std::vector<double> edge_variance_values;
-	double max_variance = 0;
 
 	for (int i = 0; i < image.rows; ++i) {
 		cv::Mat row = image.row(i);
