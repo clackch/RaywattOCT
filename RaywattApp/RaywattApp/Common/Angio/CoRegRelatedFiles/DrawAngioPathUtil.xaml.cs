@@ -1099,115 +1099,112 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             }
         }
 
-        private void TrackPointCorrection()
+        private void ProcessFrameCorrection(int currAngioFrameNumber, List<Mat> angioImages)
         {
-            List<Mat> angioImages = null;
-            angioImages = AngioImages;
-
-            try
+            for (int i = currAngioFrameNumber; i > 0; i--)
             {
-                for (int i = angioImages.Count - 1; i > 1; i--)
+                TrackPointCorrection(i, -1, angioImages);
+            }
+
+            for (int i = currAngioFrameNumber; i < angioImages.Count - 1; i++)
+            {
+                TrackPointCorrection(i, 1, angioImages);
+            }
+        }
+
+        private void TrackPointCorrection(int i, int direction, List<Mat> angioImages)
+        {
+            int numTrackPoints = localDijkstraHeap[i].trackPoints.Count;
+            int currX = (int)localDijkstraHeap[i].trackPoints[numTrackPoints - 1].X;
+            int currY = (int)localDijkstraHeap[i].trackPoints[numTrackPoints - 1].Y;
+            int nextX = (int)localDijkstraHeap[i + direction].trackPoints[numTrackPoints - 1].X;
+            int nextY = (int)localDijkstraHeap[i + direction].trackPoints[numTrackPoints - 1].Y;
+
+            int currIntensity = angioImages[i].At<byte>(currY, currX);
+            int nextIntensity = angioImages[i + direction].At<byte>(nextY, nextX);
+
+            if (Math.Abs(nextIntensity - currIntensity) > 30 || nextIntensity >= 90)
+            {
+                int width = angioImages[i].Cols;
+                int height = angioImages[i].Rows;
+
+                // gradient, pixelMean for curr Image
+                float curr3x3Mean = 0;
+                float curr3x3GradientMean = 0;
+                Mat currMagnitudeImg = GetGradientMagnitude(angioImages[i].Clone());
+
+                for (int y = currY; y < currY + 3; y++)
                 {
-                    int numTrackPoints = localDijkstraHeap[i].trackPoints.Count;
-
-                    for (int j = 0; j < numTrackPoints; j++)
+                    for (int x = currX; x < currX + 3; x++)
                     {
-                        int currX = (int)localDijkstraHeap[i].trackPoints[j].X;
-                        int currY = (int)localDijkstraHeap[i].trackPoints[j].Y;
-                        int nextX = (int)localDijkstraHeap[i-1].trackPoints[j].X;
-                        int nextY = (int)localDijkstraHeap[i-1].trackPoints[j].Y;
-
-                        int currIntensity = angioImages[i].At<byte>(currY, currX);
-                        int nextIntensity = angioImages[i - 1].At<byte>(nextY, nextX);
-                        if (Math.Abs(nextIntensity - currIntensity) > 30 || nextIntensity >= 90) 
-                        {
-                            int width = angioImages[i].Cols;
-                            int height = angioImages[i].Rows;
-
-                            //gradient, pixelMean for curr Image
-                            float curr3x3Mean = 0;
-                            float curr3x3GradientMean = 0;
-                            Mat currMagnitudeImg = GetGradientMagnitude(angioImages[i].Clone());
-
-                            for (int y = currY; y < currY + 3; y++)
-                            {
-                                for (int x = currX; x < currX + 3; x++)
-                                {
-                                    curr3x3Mean += angioImages[i].At<byte>(y, x);
-                                    curr3x3GradientMean += currMagnitudeImg.At<byte>(y, x);
-                                }
-                            }
-                            curr3x3Mean /= 9.0f;
-                            curr3x3GradientMean /= 9.0f;
-
-                            //gradient, pixelMean for next Image
-                            Mat nextMagnitudeImg = GetGradientMagnitude(angioImages[i-1].Clone());
-
-                            // pixel Mean, Gradient Mean, XY Position
-                            List<Tuple<float, float, Point>> next3x3Mean = new List<Tuple<float, float, Point>>(); 
-
-                            int roiStep = 5;
-                            int roiCenterX = currX;
-                            int roiCenterY = currY;
-                            int xStart = MinMax(width, roiCenterX - roiStep);
-                            int yStart = MinMax(height, roiCenterY - roiStep);
-                            int xEnd = MinMax(width, roiCenterX + roiStep);
-                            int yEnd = MinMax(height, roiCenterY + roiStep);
-
-                            if(xEnd - xStart < 5 || yEnd - yStart < 5)
-                            {
-                                // 변위가 충분히 크지 않으면 Pass
-                                continue;
-                            }
-
-                            for (int y = yStart + 1; y < yEnd - 1; y++)
-                            {
-                                for (int x = xStart + 1; x < xEnd - 1; x++)
-                                {
-                                    float pixelSum = 0.0f;
-                                    float gradSum = 0.0f;
-                                    for (int dy = -1; dy <= 1; dy++)
-                                    {
-                                        for (int dx = -1; dx <= 1; dx++)
-                                        {
-                                            pixelSum += angioImages[i - 1].At<byte>(y + dy, x + dx);
-                                            gradSum += nextMagnitudeImg.At<float>(y + dy, x + dx);
-                                        }
-                                    }
-                                    next3x3Mean.Add(new Tuple<float, float, Point>(pixelSum / 9.0f, gradSum / 9.0f, new Point(x, y)));
-                                }
-                            }
-
-                            float minWeight = float.MaxValue;
-                            Point minPosition = new Point(0, 0);
-
-                            for(int k = 0; k < next3x3Mean.Count; k++)
-                            {
-                                float tmpWeight = Math.Abs(next3x3Mean[k].Item1 - curr3x3Mean) + Math.Abs(next3x3Mean[k].Item2 - curr3x3GradientMean);
-
-                                if(tmpWeight < minWeight && 
-                                    next3x3Mean[k].Item1 < 100 &&
-                                    angioImages[i-1].At<byte>((int)next3x3Mean[k].Item3.Y, (int)next3x3Mean[k].Item3.X) < 50)
-                                {
-                                    minPosition = next3x3Mean[k].Item3;
-                                }
-                            }
-
-                            if (minPosition.X == 0 && minPosition.X == 0)
-                            {
-                                localDijkstraHeap[i - 1].trackPoints[j] = new Point(roiCenterX, roiCenterY);
-                            }
-                            else
-                            {
-                                localDijkstraHeap[i - 1].trackPoints[j] = new Point((int)minPosition.X, (int)minPosition.Y);
-                            }
-                        }
+                        curr3x3Mean += angioImages[i].At<byte>(y, x);
+                        curr3x3GradientMean += currMagnitudeImg.At<byte>(y, x);
                     }
                 }
-            }
-            catch (Exception ex) 
-            {
-                _log.Debug($"TrackPointCorrection Error : {ex.Message}");
+                curr3x3Mean /= 9.0f;
+                curr3x3GradientMean /= 9.0f;
+
+                // gradient, pixelMean for next Image
+                Mat nextMagnitudeImg = GetGradientMagnitude(angioImages[i + direction].Clone());
+
+                // pixel Mean, Gradient Mean, XY Position
+                List<Tuple<float, float, Point>> next3x3Mean = new List<Tuple<float, float, Point>>();
+
+                int roiStep = 5;
+                int roiCenterX = currX;
+                int roiCenterY = currY;
+                int xStart = MinMax(width, roiCenterX - roiStep);
+                int yStart = MinMax(height, roiCenterY - roiStep);
+                int xEnd = MinMax(width, roiCenterX + roiStep);
+                int yEnd = MinMax(height, roiCenterY + roiStep);
+
+                if (xEnd - xStart < 5 || yEnd - yStart < 5)
+                {
+                    // 변위가 충분히 크지 않으면 Pass
+                    return;
+                }
+
+                for (int y = yStart + 1; y < yEnd - 1; y++)
+                {
+                    for (int x = xStart + 1; x < xEnd - 1; x++)
+                    {
+                        float pixelSum = 0.0f;
+                        float gradSum = 0.0f;
+                        for (int dy = -1; dy <= 1; dy++)
+                        {
+                            for (int dx = -1; dx <= 1; dx++)
+                            {
+                                pixelSum += angioImages[i + direction].At<byte>(y + dy, x + dx);
+                                gradSum += nextMagnitudeImg.At<float>(y + dy, x + dx);
+                            }
+                        }
+                        next3x3Mean.Add(new Tuple<float, float, Point>(pixelSum / 9.0f, gradSum / 9.0f, new Point(x, y)));
+                    }
+                }
+
+                float minWeight = float.MaxValue;
+                Point minPosition = new Point(0, 0);
+
+                for (int k = 0; k < next3x3Mean.Count; k++)
+                {
+                    float tmpWeight = Math.Abs(next3x3Mean[k].Item1 - curr3x3Mean) + Math.Abs(next3x3Mean[k].Item2 - curr3x3GradientMean);
+
+                    if (tmpWeight < minWeight &&
+                        next3x3Mean[k].Item1 < 100 &&
+                        angioImages[i + direction].At<byte>((int)next3x3Mean[k].Item3.Y, (int)next3x3Mean[k].Item3.X) < 50)
+                    {
+                        minPosition = next3x3Mean[k].Item3;
+                    }
+                }
+
+                if (minPosition.X == 0 && minPosition.X == 0)
+                {
+                    localDijkstraHeap[i + direction].trackPoints[numTrackPoints - 1] = new Point(roiCenterX, roiCenterY);
+                }
+                else
+                {
+                    localDijkstraHeap[i + direction].trackPoints[numTrackPoints - 1] = new Point((int)minPosition.X, (int)minPosition.Y);
+                }
             }
         }
 
@@ -1418,6 +1415,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                 IsResetOn = true;
 
                 PointTracking(clickPosition.X, clickPosition.Y, currAngioFrameNumber);
+                ProcessFrameCorrection(currAngioFrameNumber, AngioImages);
                 PathChange(AngioFrameNumber);
                 return;
             }
@@ -1428,7 +1426,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                 localDijkstraHeap[currAngioFrameNumber].trackPoints.Add(clickPosition);
                 distalPoint = new Point(clickPosition.X, clickPosition.Y);
                 PointTracking(clickPosition.X, clickPosition.Y, currAngioFrameNumber);
-                TrackPointCorrection();
+                ProcessFrameCorrection(currAngioFrameNumber, AngioImages);
                 PathChange(currAngioFrameNumber);
                 trackPointNum++;
 
