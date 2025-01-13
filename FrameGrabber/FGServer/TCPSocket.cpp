@@ -491,7 +491,6 @@ void TCPSocket::StopLiveFrameThread(FrameGrabber& fg) {
 void TCPSocket::LiveFrameThread(FrameGrabber& fg) {	
 	while (liveFrameThreadRunning && isStarted && fg.portConnection) {
 		LiveFrame(fg);
-		//std::this_thread::sleep_for(std::chrono::milliseconds(20));
 	}
 }
 
