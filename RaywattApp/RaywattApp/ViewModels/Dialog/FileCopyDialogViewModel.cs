@@ -13,6 +13,9 @@ using System.Threading.Tasks;
 using RaywattApp.Services;
 using Newtonsoft.Json.Linq;
 using static RaywattOCT.RayCoreWrapper;
+using System.IO.Pipes;
+using System.IO;
+using System.Threading;
 
 namespace RaywattApp.ViewModels.Dialog
 {
@@ -85,7 +88,7 @@ namespace RaywattApp.ViewModels.Dialog
                     AnnotationFilePath = data["annotationFilePath"].ToString();
                     Annotations = data["annotations"].ToString();
                 }
-                else if(FileExport.Type == Constants.ExportTypeDicom)
+                else if (FileExport.Type == Constants.ExportTypeDicom)
                 {
                     dicomProperty = (Dictionary<string, string>)data["dicomProperty"];
                 }
@@ -113,8 +116,8 @@ namespace RaywattApp.ViewModels.Dialog
         }
 
         private async void FileExportAction()
-        {           
-            SaveFolder = FileExport.ExternalDrivePath;            
+        {
+            SaveFolder = FileExport.ExternalDrivePath;
 
             if (FileExport.Type == Constants.ExportTypeNative)
             {
@@ -169,7 +172,7 @@ namespace RaywattApp.ViewModels.Dialog
                     List<string> extensions = new List<string> { Constants.AngioImageExtension, Constants.AngioParmasExtension };
                     fileName = fileName.Substring(0, patientCase.Image.Length - 3);
                     string srcFilePath = patientCase.ImageFullPath.Substring(0, patientCase.ImageFullPath.Length - 3);
-                    foreach(string ext in extensions)
+                    foreach (string ext in extensions)
                     {
                         string tmpFileName = fileName + ext;
                         string tmpSrcFilePath = srcFilePath + ext;
@@ -187,11 +190,11 @@ namespace RaywattApp.ViewModels.Dialog
         }
 
         private async Task FileSaveDicom()
-        {        
+        {
             // test data
             Mat lumenProfile = new Mat(100, 100, MatType.CV_8UC3);
             lumenProfile.SetTo(new Scalar(0xfe, 0xfe, 0xfe));
-            
+
             //DICOMDIR Input Folder
             string dicomDirFolder = CommonUtil.CreateFolder(SaveFolder + "\\" + DateTime.Now.ToString("yyyyMMddHHmmss"));
             RayExportWrapper.DICOMDIRInputFolder(dicomDirFolder);
@@ -327,7 +330,12 @@ namespace RaywattApp.ViewModels.Dialog
                 else if (format == Constants.ExportPullbackTIFF)
                 {
                     string fileName = CreateStandardUniqueName(patientCase);
-                    await CommonUtil.SaveMultipleFrames(convertedImages, SaveFolder, fileName, format, prog => Progress += prog, progressSave, progText => ProgressText = progText);
+                    CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+
+                    Thread threadTiffProcessByPython = new Thread(() => CommonUtil.TiffProcessByPython(convertedImages, SaveFolder, fileName, format, _cancellationTokenSource));
+                    threadTiffProcessByPython.Start();
+
+                    await Task.Run(() => ProgressPipeWithPython(_cancellationTokenSource.Token, convertedImages.Count, progressSave));
                 }
                 else
                 {
@@ -340,6 +348,69 @@ namespace RaywattApp.ViewModels.Dialog
                     }
                 }
             }
+        }
+
+        private void ProgressPipeWithPython(CancellationToken token, int totalNum, double progressLeft)
+        {
+            _log.Debug("[START]ThreadProgressPipe");
+
+            ProgressText = Constants.ExportStatusSaveMultipleFrames;
+            double progressBase = Progress;
+            double convertProgressCnt = 0;
+
+            while (!token.IsCancellationRequested)
+            {
+                using (var pipeServer = new NamedPipeServerStream("progress_pipe", PipeDirection.InOut, NamedPipeServerStream.MaxAllowedServerInstances))
+                {
+                    try
+                    {
+                        // WaitForConnection 호출 시 CancellationToken을 감안
+                        var waitTask = Task.Run(() => pipeServer.WaitForConnection(), token);
+
+                        // CancellationToken에 따라 대기
+                        waitTask.Wait(token);
+
+                        // 연결이 성공적으로 완료된 경우
+                        using (StreamReader reader = new StreamReader(pipeServer))
+                        {
+                            string message;
+                            while ((message = reader.ReadLine()) != null)
+                            {
+                                _log.Debug($"Progress update: {message}");
+
+                                if (message.Contains("#"))
+                                {
+                                    Progress = progressBase + (progressLeft / 2) * (++convertProgressCnt / totalNum);                                    
+                                }
+                                else if (message.Contains("[SAVE]"))
+                                {
+                                    Progress = progressBase + (progressLeft / 2);
+                                }
+                                else if (message.Contains("[MOVE]"))
+                                {
+                                    Progress = progressBase + (progressLeft / 2) + (progressLeft / 4);
+                                }
+                                else if (message.Contains("[END]"))
+                                {
+                                    Progress = 100;
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        _log.Debug("Cancellation requested. Exiting loop.");
+                        break;
+                    }
+                    catch (IOException ex)
+                    {
+                        _log.Debug($"Connection error: {ex.Message}");
+                    }
+                }
+            }
+
+            _log.Debug("[END]ThreadProgressPipe");
         }
 
         private async Task FileImport()
@@ -367,7 +438,7 @@ namespace RaywattApp.ViewModels.Dialog
                     if (!String.IsNullOrEmpty(json))
                     {
                         JArray arr = JArray.Parse(json);
-                        foreach(JObject obj in arr)
+                        foreach (JObject obj in arr)
                         {
                             PatientCaseAnnotation patientCaseAnnotation = new PatientCaseAnnotation();
                             patientCaseAnnotation.Id = obj["Id"]?.ToString() ?? "null";
@@ -481,10 +552,10 @@ namespace RaywattApp.ViewModels.Dialog
                             progressTextCallback(Constants.ExportStatusSaveFile);
                         });
                     }
-                }                          
+                }
             }
 
-            if(cnt == 0)
+            if (cnt == 0)
             {
                 await Task.Run(() => {
                     progressCallback(progress);
