@@ -392,7 +392,7 @@ namespace RaywattApp.ViewModels.Dialog
                                 }
                                 else if (message.Contains("[END]"))
                                 {
-                                    Progress = 100;
+                                    Progress = progressBase + progressLeft;
                                     return;
                                 }
                             }
