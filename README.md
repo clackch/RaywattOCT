@@ -77,8 +77,13 @@ Download & Install OCT Host
    - https://www.python.org/downloads/
 
     ※ 설치 시, 환경변수 추가 (Add Python 3.XX to PATH 선택)
-2. Python Library Install
+2. Python Package Install
    - cmd에서 pip install numpy pillow scipy imageio pywin32 실행
+     
+     ※ 인터넷 연결이 안되어 있을 경우 처리방안
+     
+     [인터넷 없는 환경 package 설치.docx](https://github.com/user-attachments/files/18434123/package.docx)
+
 3. 환경 변수 추가
    - 시스템 변수에 PYTHON_DLL - C:\Users\Raywatt\AppData\Local\Programs\Python\Python312\python312.dll 추가
 
