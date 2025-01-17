@@ -28,6 +28,7 @@ using Newtonsoft.Json;
 using RaywattApp.Common.Angio;
 using System.Xml;
 using Python.Runtime;
+using FFMpegCore;
 
 namespace RaywattApp.Common.Util
 {
@@ -773,12 +774,13 @@ namespace RaywattApp.Common.Util
         public static async Task SaveVideo(List<Mat> images, string rootPath, string fileName, string format, double fps, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
         {
             string filePath = rootPath + "\\" + fileName + "." + format.ToLower();
+            string tempPath = ".\\temp.mp4";
 
             if (images == null || images.Count == 0) return;
 
             Size szVideo = images[0].Size();
 
-            VideoWriter videoWriter = new VideoWriter(filePath, FourCC.H264, fps, szVideo);
+            VideoWriter videoWriter = new VideoWriter(tempPath, FourCC.H264, fps, szVideo);
             if (videoWriter != null)
             {
                 int totalNum = images.Count;
@@ -793,6 +795,18 @@ namespace RaywattApp.Common.Util
                 }
                 videoWriter.Release();
             }
+
+            // FFmpeg 명령 구성 및 실행
+            // FourCC.H264 압축 사용하면, 비트레이트가 해상도/FPS/복잡성에 따라 달라져서 12Mbps로 변경 처리해서 예상 용량에 맞추기 위함(정확하게 12Mbps로 맞춰지지는 않음)
+            await FFMpegArguments
+                .FromFileInput(tempPath)
+                .OutputToFile(filePath, true, options => options
+                .WithCustomArgument("-b:v 12M") // 비디오 비트레이트 명시적 설정
+                .ForceFormat("mp4"))
+                .ProcessAsynchronously();
+
+            if (System.IO.File.Exists(tempPath))
+                System.IO.File.Delete(tempPath);
         }
 
         public static async Task SaveMultipleFrames(List<Mat> images, string rootPath, string fileName, string format, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
@@ -957,22 +971,18 @@ namespace RaywattApp.Common.Util
             }
         }
 
-        /*
-         * https://github.com/Raywatt/Sejong/issues/27
-         */
-        public static double GetVideoSize(int width, int height, double frameRate, double targetMbps, double frameNum)
+        public static double GetVideoSize(double frameRate, double targetMbps, double frameNum)
         {
-            int numOfChannel = 3;
-            int bytesPerRow = width * numOfChannel;
-            double totalBytes = bytesPerRow * height * frameNum;
+            // 동영상 길이 (초)
+            double videoDuration = frameNum / frameRate;
 
-            double eachImageSize = totalBytes / frameNum;
-            double needBitrate = eachImageSize * frameRate * 8 / (1024 * 1024) /* MB */;
-            double compressionRatio = needBitrate / targetMbps;
-            double compressedImages = totalBytes / compressionRatio;
-            double fileSize = compressedImages;
+            // 비트레이트 (bps로 변환)
+            double bitrateBps = targetMbps * 1_000_000;
 
-            return fileSize;
+            // 예상 파일 크기 (바이트)
+            double totalBytes = (bitrateBps * videoDuration) / 8;
+
+            return totalBytes;
         }
 
         public static async Task CopyStream(Stream from, Stream to, Action<long> progress)
