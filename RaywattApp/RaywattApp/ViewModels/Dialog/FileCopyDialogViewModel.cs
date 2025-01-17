@@ -354,7 +354,6 @@ namespace RaywattApp.ViewModels.Dialog
         {
             _log.Debug("[START]ThreadProgressPipe");
 
-            ProgressText = Constants.ExportStatusSaveMultipleFrames;
             double progressBase = Progress;
             double convertProgressCnt = 0;
 
@@ -378,21 +377,32 @@ namespace RaywattApp.ViewModels.Dialog
                             {
                                 _log.Debug($"Progress update: {message}");
 
-                                if (message.Contains("#"))
+                                if (message.StartsWith("_converting_"))
                                 {
                                     Progress = progressBase + (progressLeft / 2) * (++convertProgressCnt / totalNum);                                    
                                 }
-                                else if (message.Contains("[SAVE]"))
+                                else if (message.StartsWith("_save_"))
                                 {
+                                    ProgressText = Constants.ExportStatusSaveMultipleFrames;
                                     Progress = progressBase + (progressLeft / 2);
                                 }
-                                else if (message.Contains("[MOVE]"))
+                                else if (message.StartsWith("_move_"))
                                 {
                                     Progress = progressBase + (progressLeft / 2) + (progressLeft / 4);
                                 }
-                                else if (message.Contains("[END]"))
+                                else if (message.StartsWith("_moving_"))
+                                {
+                                    double moveProgress = double.Parse(message.Substring(9));
+                                    Progress = progressBase + (progressLeft / 2) + (progressLeft / 4) + (progressLeft / 4) * moveProgress;
+                                }
+                                else if (message.StartsWith("_end_"))
                                 {
                                     Progress = progressBase + progressLeft;
+                                    return;
+                                }
+                                else if (message.StartsWith("_error_"))
+                                {
+                                    _log.Error(message);
                                     return;
                                 }
                             }

@@ -46,7 +46,7 @@ def convert_24bit_to_8bit(image, tree, idx):
     reshaped_image = image.reshape(-1, 3)
     _, indices = tree.query(reshaped_image, workers=-1)
     
-    send_progress_to_csharp("#" + str(idx))
+    send_progress_to_csharp("_converting_ " + str(idx))
 
     return indices.reshape(image.shape[:2]).astype(np.uint8)
 
@@ -56,8 +56,49 @@ def apply_palette(image, colormap):
     result.putpalette(palette)
     return result
 
+def move_file_with_progress(source_path, destination_path, buffer_size=1024 * 1024 * 16, min_update_interval=0.01):
+    """
+    파일 이동 중 진행 상태를 표시하는 함수 (작은 파일에서도 적절히 동작).
+
+    Parameters:
+        source_path (str): 원본 파일 경로.
+        destination_path (str): 대상 파일 경로.
+        buffer_size (int): 파일을 읽고 쓰는 버퍼 크기 (기본값: 16MB).
+        min_update_interval (float): 진행 상태를 업데이트하는 최소 간격(초, 기본값: 1).
+    """
+    try:
+        # 파일 크기 확인
+        total_size = os.path.getsize(source_path)
+        copied_size = 0
+
+        # 복사 상태 변수 초기화
+        last_update_progress = -0.01
+
+        # 파일 복사
+        with open(source_path, "rb") as src, open(destination_path, "wb") as dest:
+            while chunk := src.read(buffer_size):
+                dest.write(chunk)
+                copied_size += len(chunk)
+
+                # 진행 상태 계산
+                progress = copied_size / total_size
+
+                # 상태 업데이트 (변화가 1% 이상일 때만 출력)
+                if progress - last_update_progress >= min_update_interval:
+                    send_progress_to_csharp(f"_moving_ {progress:.2f}")
+                    last_update_progress = progress
+
+        # 복사 완료 후 원본 삭제
+        os.remove(source_path)
+
+    except Exception as e:
+        send_progress_to_csharp(f"_error_ Error occurred: {e}")
+        # 복사가 실패한 경우, 복사된 파일 삭제
+        if os.path.exists(destination_path):
+            os.remove(destination_path)
+
 def process_images(py_list, width, height, output_tiff_path):
-    send_progress_to_csharp("[START] Processing images...")
+    send_progress_to_csharp("_start_ Processing images...")
 
     # Python List 데이터를 NumPy 배열로 변환
     all_images = [np.array(mat_data, dtype=np.uint8).reshape((height, width, 3)) for mat_data in py_list]
@@ -77,7 +118,7 @@ def process_images(py_list, width, height, output_tiff_path):
     # 전체 이미지를 8비트로 변환
     converted_images = []
     max_workers = get_max_workers()
-    send_progress_to_csharp(f"Converting all images to 8-bit...\nUsing max_workers={max_workers} based on system performance")
+    send_progress_to_csharp(f"_convert_ Converting all images to 8-bit... Using max_workers={max_workers} based on system performance")
 
     # 저장할 결과를 인덱스와 함께 관리
     results = [None] * len(all_images)
@@ -95,18 +136,19 @@ def process_images(py_list, width, height, output_tiff_path):
             try:
                 results[idx] = future.result()
             except Exception as e:
-                send_progress_to_csharp(f"[ERROR] Failed to process image at index {idx}: {e}")
+                send_progress_to_csharp(f"_error_ Failed to process image at index {idx}: {e}")
 
     # 순서가 유지된 결과를 converted_images에 저장
     converted_images = results
 
     # 팔레트 적용 후 최종 TIFF 저장
-    send_progress_to_csharp("[SAVE] Saving final TIFF...")
+    send_progress_to_csharp("_save_ Saving final TIFF...")
     pil_images = [apply_palette(img, colormap) for img in converted_images]
-    pil_images[0].save(".\\temp.tif", save_all=True, append_images=pil_images[1:], compression="tiff_deflate")
-    send_progress_to_csharp("[MOVE] Moving final TIFF...")
-    shutil.move(".\\temp.tif", output_tiff_path)
-    send_progress_to_csharp(f"[END] Final 8-bit TIFF saved to: {output_tiff_path}")
+    pil_images[0].save(".\\temp.tif", save_all=True, append_images=pil_images[1:])
+    send_progress_to_csharp("_move_ Moving final TIFF...")
+    #shutil.move(".\\temp.tif", output_tiff_path)
+    move_file_with_progress(".\\temp.tif", output_tiff_path)
+    send_progress_to_csharp(f"_end_ Final 8-bit TIFF saved to: {output_tiff_path}")
 
     return "success"
 
@@ -125,4 +167,4 @@ def send_progress_to_csharp(progress_message):
         win32file.WriteFile(handle, f"{progress_message}\n".encode("utf-8"))
         win32file.CloseHandle(handle)
     except Exception as e:
-        print(f"[ERROR] Failed to send progress to C#: {e}")
+        print(f"_error_ Failed to send progress to C#: {e}")
