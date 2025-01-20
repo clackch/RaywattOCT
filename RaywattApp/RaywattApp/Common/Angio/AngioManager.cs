@@ -17,14 +17,6 @@ using System.Threading.Tasks;
 using RaywattApp.Common.Localization;
 using RaywattApp.Common.Util;
 using System.Linq;
-using MathNet.Numerics.Statistics;
-using System.Windows.Controls;
-using RaywattApp.ViewModels.Dialog;
-using RaywattApp.ViewModels;
-using System.Windows;
-using System.Reflection.Metadata;
-using CommunityToolkit.Mvvm.Messaging;
-using RaywattApp.Common.Messages;
 using System.Collections.Concurrent;
 
 
@@ -97,7 +89,6 @@ namespace RaywattApp.Common.Angio
 
         private Thread isSocketConnected;
         private bool isSocketAlive;
-        private bool servercheck = true;
 
         private Thread threadFuncSaveAngioFrames;
         private bool threadOnSaveAngioFrames;
@@ -232,7 +223,7 @@ namespace RaywattApp.Common.Angio
             while (isSocketAlive)
             {
                 Thread.Sleep(500);
-                if(servercheck == false)
+                if(GetServerConnection() == false)
                 {
                     _log.Debug("server down");
                     CommonUtil.Exit(ViewModelBase._deviceStatus, this, true);
@@ -372,10 +363,9 @@ namespace RaywattApp.Common.Angio
                 if (ex.InnerException is System.Net.Sockets.SocketException socketException)
                 {
                     int errorCode = socketException.ErrorCode;
-                    if (errorCode == 10054) // 서버 연결이 끊어졌을 때의 에러 코드
+                    if (GetServerConnection() == false) // 서버 연결이 끊어졌을 때의 에러 코드
                     {
                         threadOnLiveAngioImage = false;
-                        servercheck = false;
                     }
                 }
                 return false;
@@ -409,7 +399,7 @@ namespace RaywattApp.Common.Angio
                 angioSaveBuffer.Add(new byte[angioImageSize]);
                 Marshal.Copy(image.Data, angioSaveBuffer.Last(), 0, angioImageSize);
             }
-            if (!ViewModelBase._deviceStatus.IsAngioConnected) image = ShowNoSignal();
+            if (!ViewModelBase._deviceStatus.IsAngioConnected)return;
 
             imageList.Enqueue(image);
         }
