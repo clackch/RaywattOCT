@@ -467,7 +467,7 @@ void COCTImaging::findSheath(cv::Mat img) {
 	for (int i = 0; i < edge_mean_values_norm.size(); ++i) {
 		if (edge_mean_values_norm[i] >= 0.3 &&
 			edge_variance_values_norm[i] >= 0.7 &&
-			origin_mean_values_norm[i] >= 0.8 )
+			origin_mean_values_norm[i] >= 0.7 )
 		{
 			valid_rows.emplace_back(i, edge_mean_values_norm[i], edge_variance_values_norm[i]);
 		}
