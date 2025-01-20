@@ -235,6 +235,15 @@ namespace RaywattApp.ViewModels
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
 
+            if (!CommonUtil.IsStorageAvailable())
+            {
+                parameter["title"] = _l10n["Information"];
+                parameter["message"] = _l10n["$MSG024"];
+                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+                return;
+            }
+
             if (Patient.PhysicianId == 0)
             {
                 parameter["title"] = _l10n["Information"];
@@ -364,18 +373,20 @@ namespace RaywattApp.ViewModels
 
             RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
             CommonUtil.SetColormap(patientCase.Colormap);
-            int numOfFrames = RayStartReview(patientCase.ImageFullPath);
+            int numOfFrames = RayStartReview(patientCase.ImageFullPath, patientCase.ImageResolution, patientCase.ZOffset);
 
             if (numOfFrames < (int)RayError.OK)
             {
                 // To-Do: Error
+                _log.Error("numOfFrames < (int)RayError.OK");
             }
             else
             {
                 // Wait for Review to start
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 100; i++)
                 {
-                    if ((RayScannerState)RayGetProperty(Property.CurrentState) == RayScannerState.Review) break;
+                    if ((RayScannerState)RayGetProperty(Property.CurrentState) == RayScannerState.Review)
+                        break;
                     Thread.Sleep(5);
                 }
             }

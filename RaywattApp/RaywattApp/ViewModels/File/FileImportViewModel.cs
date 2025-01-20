@@ -487,6 +487,8 @@ namespace RaywattApp.ViewModels.File
                             patientCase.NumOfFrames = GetIntValue(caseObj, "NumOfFrames");
                             patientCase.Image = GetStrValue(caseObj, "Image");
                             patientCase.ImageResolution = GetDoubleValue(caseObj, "ImageResolution");
+                            patientCase.ZOffset = GetIntValue(caseObj, "ZOffset");
+                            patientCase.FieldOfView = GetDoubleValue(caseObj, "FieldOfView");
                             patientCase.PullbackType = GetStrValue(caseObj, "PullbackType");
                             patientCase.PullbackLength = GetStrValue(caseObj, "PullbackLength");
                             patientCase.AngioYn = GetBoolValue(caseObj, "AngioYn");
@@ -501,6 +503,7 @@ namespace RaywattApp.ViewModels.File
                             patientCase.AppositionThreshold = GetDoubleValue(caseObj, "AppositionThreshold");
                             patientCase.Brightness = GetIntValue(caseObj, "Brightness");
                             patientCase.Contrast = GetIntValue(caseObj, "Contrast");
+                            patientCase.SheathDiameter = GetDoubleValue(caseObj, "SheathDiameter");
                             patientCase.SectionProximal = GetIntValue(caseObj, "SectionProximal");
                             patientCase.SectionDistal = GetIntValue(caseObj, "SectionDistal");
                             patientCase.Bookmark = GetStrValue(caseObj, "Bookmark");
@@ -510,6 +513,8 @@ namespace RaywattApp.ViewModels.File
                             patientCase.StrLumenSidebranch = GetStrValue(caseObj, "StrLumenSidebranch");
                             patientCase.StrLumenStent = GetStrValue(caseObj, "StrLumenStent");
                             patientCase.StrLumenGuidewire = GetStrValue(caseObj, "StrLumenGuidewire");
+                            patientCase.FfrPlaque = GetStrValue(caseObj, "FfrPlaque");
+                            patientCase.StrCoRegistration = GetStrValue(caseObj, "StrCoRegistration");
                             patientCase.CreateDate = GetDateValue(caseObj, "CreateDate");
                             patientCase.UpdateDate = GetDateValue(caseObj, "UpdateDate");
                             patientCase.GuidewireRadius = GetDoubleValue(caseObj, "GuidewireRadius");

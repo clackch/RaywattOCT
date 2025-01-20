@@ -116,6 +116,9 @@ namespace RaywattApp.ViewModels.Dialog
         private double _imagePartWidth;
 
         [ObservableProperty]
+        private double _imagePartHeight;
+
+        [ObservableProperty]
         private double _crossSectionPartWidth;
 
         [ObservableProperty]
@@ -170,8 +173,16 @@ namespace RaywattApp.ViewModels.Dialog
         private double _calciumThicknessIndicatorCenter;
 
         [ObservableProperty]
-        private System.Windows.Point _calciumThicknessIndicatorPointCenter;
+        private Point _calciumThicknessIndicatorPointCenter;
 
+        [ObservableProperty]
+        private double _crossSectionClipRadius;
+
+        [ObservableProperty]
+        private Point _crossSectionClipCenter;
+
+        [ObservableProperty]
+        private BitmapSource _sheathIndicator;
 
         public FileExportDialogViewModel(SqlManager sqlManager)
         {
@@ -182,6 +193,7 @@ namespace RaywattApp.ViewModels.Dialog
             IndicatorLongitude.IsVisible = Visibility.Visible;
 
             ImagePartWidth = Constants.ExportLongitudeWidth;
+            ImagePartHeight = Constants.ExportHeight;
             TextPartWidth = 0;
             MeasureSeparator = Visibility.Collapsed;
 
@@ -192,11 +204,10 @@ namespace RaywattApp.ViewModels.Dialog
             Section.Distal.IsVisible = Visibility.Visible;
         }
 
-        public void SetInitialize(PatientCase patientCase, List<Mat> crossSections, Mat lMode, FileExport fileExport)
+        public double SetInitialize(PatientCase patientCase, List<Mat> crossSections, Mat lMode, FileExport fileExport)
         {
             PatientCase = patientCase;
-            Degree = PatientCase.IndicatorDegree;
-            CrossSectionScale = (1 / PatientCase.ImageResolution) * (Constants.CrossSectionSize / Constants.OCTImageSize);
+            Degree = PatientCase.IndicatorDegree;            
 
             this.crossSections = crossSections;
             if (fileExport.AngioView && patientCase.AngioYn)
@@ -223,6 +234,8 @@ namespace RaywattApp.ViewModels.Dialog
 
                 if (fileExport.Longitude)
                 {
+                    ImagePartHeight = Constants.ExportHeight - Constants.ExportLongitudeHeight;
+
                     Section.Proximal.X = CommonUtil.GetPositionFromFrame(patientCase.SectionProximal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, Constants.SectionIndicatorCenterWidth);
                     Section.Distal.X = CommonUtil.GetPositionFromFrame(patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
 
@@ -235,7 +248,7 @@ namespace RaywattApp.ViewModels.Dialog
                     List<int> colorFrames = new List<int>();
                     if (CommonUtil.IsPreCase(patientCase.Procedure))
                     {
-                        if(Section.SetMlaMld(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength, patientCase.ImageResolution))
+                        if(Section.SetMlaMld(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength))
                             Section.VisibleMlaMld(true);
                         else
                             Section.VisibleMlaMld(false);
@@ -247,7 +260,7 @@ namespace RaywattApp.ViewModels.Dialog
                         int stentProximal = 0, stentDistal = 0;
                         CommonUtil.GetStentProximalDistal(LumenStents, out stentProximal, out stentDistal);
 
-                        if (Section.SetMsaMinExp(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, stentProximal, stentDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength, patientCase.ImageResolution))
+                        if (Section.SetMsaMinExp(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, stentProximal, stentDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength))
                             Section.VislbleMsaMinExp(true);
                         else
                             Section.VislbleMsaMinExp(false);
@@ -307,10 +320,19 @@ namespace RaywattApp.ViewModels.Dialog
                 }
             }
 
-            Zoom = new Zoom(CrossSectionImageSize / Constants.OCTImageSize);
+            CrossSectionScale = (1 / Constants.ImageResolution) * (CrossSectionImageSize / Constants.OCTImageSize);
+            Zoom = new Zoom(CrossSectionImageSize);
+            Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
             LongitudeZoom = new Zoom();
             LongitudeZoom.ScaleX = Constants.ExportLongitudeImageWidth / Constants.LongitudeWidth;
             LongitudeZoom.ScaleY = Constants.ExportLongitudeImageHeight / Constants.LongitudeHeight;
+            CrossSectionClipRadius = CrossSectionImageSize / 2;
+            CrossSectionClipCenter = new Point(CrossSectionClipRadius, CrossSectionClipRadius);
+
+            double sheathDiameter = RayGetProperty(Property.SheathDiameter);
+            SheathIndicator = CommonUtil.DrawSheathIndicator((int)CrossSectionImageSize, sheathDiameter);
+
+            return ImagePartWidth + TextPartWidth;
         }
 
         public void SetFinalize()
@@ -454,6 +476,12 @@ namespace RaywattApp.ViewModels.Dialog
                 {
                     LumenGuidewires = JsonConvert.DeserializeObject<List<LumenGuidewire>>(patientCaseAnnotations[0].LumenGuidewire);
                 }
+
+                if (!string.IsNullOrEmpty(patientCaseAnnotations[0].CoRegistration))
+                {
+                    PatientCase.StrCoRegistration = patientCaseAnnotations[0].CoRegistration;
+                }
+
             }
 
             for (int i = 0; i < this.crossSections.Count; i++)

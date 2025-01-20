@@ -20,6 +20,9 @@ namespace RaywattApp.Common.Annotation.Util
             HierarchyIndex[] hierarchy;
             Cv2.FindContours(contourImage, out contours, out hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
 
+            if (contours.Length == 0)
+                return;
+
             contourBounds = Cv2.BoundingRect(contours[0]);
 
             calculateArea(contour, contours[0]);

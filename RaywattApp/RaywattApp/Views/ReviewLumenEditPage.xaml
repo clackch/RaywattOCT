@@ -30,28 +30,31 @@
             <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Margin="75,20,0,19" Content="{Binding [Review], Source={StaticResource L10N}}"/>
         </Grid>
 
-        <Grid Grid.Row="1" Margin="160,62,160,62">
+        <Grid Grid.Row="1" Margin="60,40,60,40">
             <Grid.RowDefinitions>
-                <RowDefinition Height="725"/>
+                <RowDefinition Height="769"/>
                 <RowDefinition Height="1"/>
                 <RowDefinition Height="74"/>
             </Grid.RowDefinitions>
-            <Border Grid.Row="0" CornerRadius="10,10,0,0" BorderThickness="0" Background="{DynamicResource GrayscaleGray6Brush}">
-                <Grid Margin="42,0,42,0">
+            <Border Grid.Row="0" CornerRadius="10,10,0,0" Background="{DynamicResource GrayscaleGray7Brush}">
+                <Grid Margin="40,44,40,0">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="84"/>
+                        <RowDefinition Height="42"/>
+                        <RowDefinition Height="10"/>
                         <RowDefinition Height="1"/>
-                        <RowDefinition Height="635"/>
+                        <RowDefinition Height="24"/>
+                        <RowDefinition Height="620"/>
+                        <RowDefinition Height="30"/>
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Margin="0,32,0,10" Orientation="Horizontal" VerticalAlignment="Center">
+                        <StackPanel Grid.Column="0">
                             <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Lumen Contour], Source={StaticResource L10N}}"/>
                         </StackPanel>
-                        <StackPanel Grid.Column="1" Margin="0,32,0,10" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
                             <component:IconButton Style="{StaticResource IconButtonLarge}" Icon="zoomIn" Command="{Binding ZoomInCommand}"/>
                             <StackPanel Width="10"/>
                             <component:IconButton Style="{StaticResource IconButtonLarge}" Icon="zoomOut" Command="{Binding ZoomOutCommand}"/>
@@ -63,17 +66,19 @@
                             <Button Style="{StaticResource OutlinedBtnType3-Large}" Width="130" Command="{Binding AutoDetectCommand}" Content="{Binding [Auto Detect], Source={StaticResource L10N}}"/>
                         </StackPanel>
                     </Grid>
-                    <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
-                    <Grid Grid.Row="2">
+                    <Separator Grid.Row="2" Background="{DynamicResource GrayscaleGray5Brush}"/>
+                    <Grid Grid.Row="4">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
+                        <!-- Prev Button -->
                         <StackPanel Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,50,0">
                             <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="prev" Width="40" Height="35.5" Command="{Binding CmdPlayback}" CommandParameter="prev" />
                         </StackPanel>
-                        <Grid Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
+                        <!-- Cross-section Image -->
+                        <Grid Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" IsManipulationEnabled="true">
                             <Grid.Clip>
                                 <RectangleGeometry RadiusX="10" RadiusY="10">
                                     <RectangleGeometry.Rect>
@@ -81,29 +86,52 @@
                                     </RectangleGeometry.Rect>
                                 </RectangleGeometry>
                             </Grid.Clip>
-                            <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Stretch="Fill" IsManipulationEnabled="true">
+                            <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Stretch="Fill">
                                 <Image.RenderTransform>
                                     <TransformGroup>
                                         <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
                                         <TranslateTransform X="{Binding Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}}"/>
                                     </TransformGroup>
                                 </Image.RenderTransform>
-                                <i:Interaction.Triggers>
-                                    <i:EventTrigger EventName="ManipulationStarting">
-                                        <i:InvokeCommandAction Command="{Binding Zoom.ManipulationStartingCommand}" PassEventArgsToCommand="True"/>
-                                    </i:EventTrigger>
-                                    <i:EventTrigger EventName="ManipulationDelta">
-                                        <i:InvokeCommandAction Command="{Binding Zoom.ManipulationDeltaCommand}" PassEventArgsToCommand="True"/>
-                                    </i:EventTrigger>
-                                    <i:EventTrigger EventName="ManipulationCompleted">
-                                        <i:InvokeCommandAction Command="{Binding Zoom.ManipulationCompletedCommand}" PassEventArgsToCommand="True"/>
-                                    </i:EventTrigger>
-                                </i:Interaction.Triggers>
                             </Image>
+                            <annotation:DrawLumenContourUtil Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" LumenContours="{Binding LumenContours}" FrameNumber="{Binding FrameNumber}" InCommand="{Binding LumenContourCommand, Mode=TwoWay}" IsEditOn="True" Zoom="{Binding Zoom}" ModifiedFrames="{Binding ModifiedFrames}"/>
+                            <!-- Circle Mask -->
+                            <Grid>
+                                <Path Fill="{StaticResource GrayscaleGray7Brush}">
+                                    <Path.Data>
+                                        <CombinedGeometry GeometryCombineMode="Exclude">
+                                            <CombinedGeometry.Geometry1>
+                                                <RectangleGeometry Rect="{x:Static const:Constants.CrossSectionRect}" />
+                                            </CombinedGeometry.Geometry1>
+                                            <CombinedGeometry.Geometry2>
+                                                <EllipseGeometry Center="{x:Static const:Constants.CrossSectionPointCenter}" RadiusX="{x:Static const:Constants.CrossSectionRadius}" RadiusY="{x:Static const:Constants.CrossSectionRadius}"/>
+                                            </CombinedGeometry.Geometry2>
+                                        </CombinedGeometry>
+                                    </Path.Data>
+                                </Path>
+                                <Grid.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleX="{Binding Zoom.ZoomScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding Zoom.ZoomScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                        <TranslateTransform X="{Binding Zoom.ZoomTranslateX, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding Zoom.ZoomTranslateY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                    </TransformGroup>
+                                </Grid.RenderTransform>
+                            </Grid>
+                            <!-- Touch -->
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="ManipulationStarting">
+                                    <i:InvokeCommandAction Command="{Binding Zoom.ManipulationStartingCommand}" PassEventArgsToCommand="True"/>
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="ManipulationDelta">
+                                    <i:InvokeCommandAction Command="{Binding Zoom.ManipulationDeltaCommand}" PassEventArgsToCommand="True"/>
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="ManipulationCompleted">
+                                    <i:InvokeCommandAction Command="{Binding Zoom.ManipulationCompletedCommand}" PassEventArgsToCommand="True"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
                         </Grid>
-                        <annotation:DrawLumenContourUtil Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" LumenContours="{Binding LumenContours}" FrameNumber="{Binding FrameNumber}" InCommand="{Binding LumenContourCommand, Mode=TwoWay}" IsEditOn="True" Zoom="{Binding Zoom}" ModifiedFrames="{Binding ModifiedFrames}"/>
+                        <!-- Mini Map -->
                         <Grid Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
-                            <Border Width="{x:Static const:Constants.MiniMapBorderSize}" Height="{x:Static const:Constants.MiniMapBorderSize}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="16" BorderBrush="{DynamicResource GrayscaleGray8Brush}" BorderThickness="1" CornerRadius="10" Visibility="{Binding Zoom.Visibility}">
+                            <Border Width="{x:Static const:Constants.MiniMapBorderSize}" Height="{x:Static const:Constants.MiniMapBorderSize}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="1" BorderBrush="{DynamicResource GrayscaleGray8Brush}" BorderThickness="1" CornerRadius="10" Visibility="{Binding Zoom.Visibility}">
                                 <Canvas>
                                     <Canvas.Background>
                                         <ImageBrush ImageSource="{Binding CrossSectionImage}" Stretch="Fill"/>
@@ -115,7 +143,6 @@
                                             </RectangleGeometry.Rect>
                                         </RectangleGeometry>
                                     </Canvas.Clip>
-
                                     <Rectangle Style="{DynamicResource MiniMapRect}" Canvas.Left="{Binding Zoom.RectLeft}" Canvas.Top="{Binding Zoom.RectTop}" Width="{Binding Zoom.RectWidth}" Height="{Binding Zoom.RectHeight}" Tag="{Binding Zoom.IsCaptured}">
                                         <i:Interaction.Triggers>
                                             <i:EventTrigger EventName="PreviewMouseDown">
@@ -131,6 +158,9 @@
                                     </Rectangle>
                                 </Canvas>
                             </Border>
+                        </Grid>
+                        <!-- Frame Number & Scale Bar -->
+                        <Grid Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="50">
                                 <Label Content="F" Style="{DynamicResource Pretendard-ExtraBold-14}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
                                 <StackPanel Width="6"/>
@@ -159,6 +189,7 @@
                                 </Grid>
                             </StackPanel>
                         </Grid>
+                        <!-- Next Button -->
                         <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="50,0,0,0">
                             <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="next"  Width="40" Height="35.5" Command="{Binding CmdPlayback}" CommandParameter="next"/>
                         </StackPanel>
@@ -166,7 +197,7 @@
                 </Grid>
             </Border>
             <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
-            <Border Grid.Row="2" CornerRadius="0,0,10,10" BorderThickness="0" Background="{DynamicResource GrayscaleGray6Brush}">
+            <Border Grid.Row="2" CornerRadius="0,0,10,10" Background="{DynamicResource GrayscaleGray6Brush}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>

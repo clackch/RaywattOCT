@@ -6,7 +6,7 @@ class CTIFFReader : public CDataReader
 {
 private:
 	TIFF* m_pTif;
-	int m_nWidth, m_nHeight;
+	int m_nWidth, m_nHeight, m_nChannels;
 public:
 	CTIFFReader();
 	virtual ~CTIFFReader();

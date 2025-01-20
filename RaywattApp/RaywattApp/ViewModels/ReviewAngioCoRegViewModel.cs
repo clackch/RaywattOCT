@@ -20,6 +20,7 @@ using System.Windows.Media.Imaging;
 using Point = System.Windows.Point;
 using Newtonsoft.Json;
 using OpenCvSharp.WpfExtensions;
+using RaywattApp.Common.Util;
 
 namespace RaywattApp.ViewModels
 {
@@ -116,6 +117,18 @@ namespace RaywattApp.ViewModels
                 _angioFrameNumber = value;
                 OnPropertyChanged(nameof(AngioFrameNumber));
                 OnPropertyChanged(nameof(CurrentAngioImage));
+                AngioDisplayNumber = AngioFrameNumber + 1;
+                OnPropertyChanged(nameof(AngioDisplayNumber));
+            }
+        }
+
+        private int _angioDisplayNumber;
+        public int AngioDisplayNumber
+        {
+            get => _angioDisplayNumber;
+            set
+            {
+                _angioDisplayNumber = value;
             }
         }
 
@@ -174,18 +187,6 @@ namespace RaywattApp.ViewModels
             }
         }
 
-
-        private List<Mat> _motionVector;
-        public List<Mat> MotionVector
-        {
-            get { return _motionVector; }
-            set
-            {
-                _motionVector = value;
-                OnPropertyChanged(nameof(MotionVector));
-            }
-        }
-
         private List<DijkstraHeap> _dijkstraHeap;
         public List<DijkstraHeap> DijkstraHeap
         {
@@ -222,7 +223,6 @@ namespace RaywattApp.ViewModels
             crossSectionAngioImageSources = new List<ImageSource>();
             AngioTrackPoints = new List<CoRegistration>();
             DijkstraHeap = new List<DijkstraHeap>();
-            MotionVector = new List<Mat>();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -240,7 +240,6 @@ namespace RaywattApp.ViewModels
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
 
                 for (int i = 0; i < PatientCase.AngioFrame.DijkstraHeap.Count; i++) DijkstraHeap.Add(PatientCase.AngioFrame.DijkstraHeap[i]);
-                for (int i = 0; i < PatientCase.AngioFrame.MotionVector.Count; i++) MotionVector.Add(PatientCase.AngioFrame.MotionVector[i]);
                 AngioFrameNumber = ReviewStatus.AngioFrameNumber;
                 ReadAngioFrames();
                 ReadTrackPoints();
@@ -262,7 +261,6 @@ namespace RaywattApp.ViewModels
         private void Cancel()
         {
             _log.Debug("Cancel");
-            IsCancel = true;
             GoToPreviousPage(false);
         }
 
@@ -305,7 +303,7 @@ namespace RaywattApp.ViewModels
         {
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
-            sqlParameters["track_point"] = JsonConvert.SerializeObject(AngioTrackPoints, Formatting.Indented);
+            sqlParameters["co_registration"] = CommonUtil.CoRegistrationsToJson(AngioTrackPoints);
             int nRows = _sqlManager.UpsertCoRegistration(sqlParameters);
             if (nRows == 0)
             {

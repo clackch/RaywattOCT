@@ -11,6 +11,7 @@
 #include "Configuration.h"
 #include "CutViewManager.h"
 #include "IRayLearning.h"
+#include "LookUpTable.h"
 
 CImagingSession::CImagingSession(CMessageService* pMsg, int nSession, bool deleteData) :
 	m_pMsg(pMsg),
@@ -46,7 +47,7 @@ CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSess
 	return createSession(pMsg, setting, nSession,  pWriter, true, ImagingType::Default);
 }
 
-CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSession, const char* strFilePath) {
+CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSession, const char* strFilePath, double imageResolution) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	IImaging::Setting setting = config.imaging;
 	int nHeaderSize = 0;
@@ -64,7 +65,6 @@ CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSess
 		OCTHeader header = pReader->ReadHeader(CUtility::StringToWstring(strFilePath));
 		setting.Set(header.width, header.height);
 		nNumOfSamples = pReader->Initialize(CUtility::StringToWstring(strFilePath), setting.nBufferSize);
-		PLOGI.printf("%s opened - %d x %d (%d frames)", strFilePath, header.width, header.height, nNumOfSamples);
 	}
 	else if (ext.compare(FILE_EXTENSION_RAW) == 0)
 	{
@@ -83,6 +83,8 @@ CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSess
 		((CTIFFReader*)pReader)->GetImageSize(nWidth, nHeight);
 		setting.Set(nWidth, nHeight);
 	}
+	setting.distPerPixel = (imageResolution * 1000.f / 2.f); // imageResolution: 1024x1024 circle 기준 (mm per pixel)
+	PLOGI.printf("%s opened - %d x %d (%d frames)", strFilePath, setting.nAScan, setting.nBScan, nNumOfSamples);
 
 	if (nNumOfSamples <= 0) {
 		if(pReader != nullptr) delete pReader;
@@ -167,6 +169,13 @@ RayError CImagingSession::Stop() {
 	return RayError::OK;
 }
 
+void CImagingSession::StopThreadForRestart()
+{
+	CUtility::StopThread(m_pThreadUpdateCutView);
+	CUtility::StopThread(m_pThreadObjectDetection);
+	CUtility::StopThread(m_pThreadVolumeGeneration);
+}
+
 void CImagingSession::StartCutViewUpdate(cv::Scalar backgroundColor) {
 	if (m_pThreadUpdateCutView != nullptr) return;
 
@@ -189,7 +198,9 @@ bool CImagingSession::IsProcessed(int nFrame) {
 cv::Mat CImagingSession::PostProcess(int nFrame) {
 	std::map<int, cv::Mat>::iterator it = m_mapImage.find(nFrame);
 	if (it != m_mapImage.end()) {
-		m_pImaging->PostProcess(it->second);
+		cv::Mat imgZOffset;
+		m_pImaging->ApplyZOffset(it->second, imgZOffset, GetZOffset(nFrame));
+		m_pImaging->PostProcess(imgZOffset);
 	}
 	return m_pImaging->GetCircleImage();
 }
@@ -214,10 +225,9 @@ void* CImagingSession::GetImageData(int nFrame) {
 	if (nFrame < 0 || nFrame >= m_pDataManager->GetNumOfSamples()) return nullptr;
 
 	char* pBuffer = m_pDataManager->GetSample(nFrame);
+
 	m_pImaging->Process(pBuffer);
 	cv::Mat imgResult = m_pImaging->GetProcessedImage().clone();
-
-	m_pImaging->PostProcess(imgResult);
 
 	std::map<int, cv::Mat>::iterator it = m_mapImage.find(nFrame);
 	if (it != m_mapImage.end())
@@ -227,6 +237,10 @@ void* CImagingSession::GetImageData(int nFrame) {
 	else {
 		m_mapImage.insert(std::make_pair(nFrame, imgResult));
 	}
+
+	cv::Mat imgZOffset;
+	m_pImaging->ApplyZOffset(imgResult, imgZOffset, GetZOffset(nFrame));
+	m_pImaging->PostProcess(imgZOffset);
 
 	return m_pImaging->GetCircleImage().data;
 }
@@ -254,13 +268,14 @@ UINT CImagingSession::GetCutViewChannels() {
 void CImagingSession::AddFramesIntoCutView() {
 	if (m_pCutView == nullptr) return;
 
-	cv::Mat imgCircle;
+	cv::Mat imgZOffset, imgCircle;
 	for (int nFrame = 0; nFrame < m_pCutView->GetNumOfSamples(); nFrame++)
 	{
 		std::map<int, cv::Mat>::iterator it = m_mapImage.find(nFrame);
 		if (it != m_mapImage.end())
 		{
-			m_pImaging->CircularizeImage(it->second, imgCircle);
+			m_pImaging->ApplyZOffset(it->second, imgZOffset, GetZOffset(nFrame));
+			m_pImaging->CircularizeImage(imgZOffset, imgCircle);
 			m_pCutView->AddRecord(imgCircle, nFrame);
 		}
 	}
@@ -330,13 +345,47 @@ int CImagingSession::GetNumOfGuidewirePoints(int nFrame){
 	return mat.cols * mat.rows;
 }
 
-void* CImagingSession::GetGuidewireRadius(int nFrame) {
+bool CImagingSession::LoadZOffset(const char* strDataFilePath) {
+	std::string strPath(strDataFilePath);
+	std::string strZOffsetFilePath = strPath.substr(0, strPath.size() - 3).append("cal");
+
+	int nNumOfSamples = (m_pDataManager == nullptr) ? 0 : m_pDataManager->GetNumOfSamples();
+	m_vZOffset.clear();
+
+	FILE* fp = fopen(strZOffsetFilePath.c_str(), "r");
+	if (fp) {
+		PLOGI.printf("ZOffset file loaded: %s", strZOffsetFilePath.c_str());
+		for (int i = 0; i < nNumOfSamples; i++) {
+			int offset = 0;
+			fscanf(fp, "%d,", &offset);
+			//PLOGI.printf("%d", offset);
+
+			m_vZOffset.push_back(offset);
+		}
+		fclose(fp);
+		PLOGI.printf("ZOffset file loaded: %s done.", strZOffsetFilePath.c_str());
+
+		return true;
+	}
+
+	return true;
+}
+
+int CImagingSession::GetZOffset(int nFrame) {
+	if (m_pDataManager == nullptr) return 0;
+	if (m_vZOffset.size() != m_pDataManager->GetNumOfSamples()) return GetZOffset();
+
+	return m_vZOffset.at(nFrame);
+
+}
+
+ void* CImagingSession::GetGuidewireRadius(int nFrame) {
 	if (m_vGuidewireRadius.size() <= nFrame) return 0;
 
 	auto& vRadius = m_vGuidewireRadius.at(nFrame);
 
 	return static_cast<void*>(vRadius.data());
-}
+ }
 
 CImagingSession* CImagingSession::createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type) {
 	CImagingSession* pSession = new CImagingSession(pMsg, nSession, deleteData);
@@ -355,6 +404,7 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 	CMessageService* pMsg = pSession->m_pMsg;
 
 	pSession->m_mapImage.clear();
+	pSession->m_mapImageWithoutCompensation.clear();
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 	PLOGI.printf("Session #%d process oct imaging - %d frames", pSession->m_nSession, nNumOfSamples);
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadImaging->isRun; nFrame++)
@@ -363,7 +413,8 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 		pImaging->Process(pBuffer);
 		cv::Mat imgResult = pImaging->GetProcessedImage().clone();
 		pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult));
-		pSession->m_mapSheathPosition.insert(std::make_pair(nFrame, pImaging->GetFoundSheathPosition()));
+		cv::Mat imgResultWithoutCompensation = pImaging->GetWithoutCompensationImage().clone();
+		pSession->m_mapImageWithoutCompensation.insert(std::make_pair(nFrame, imgResultWithoutCompensation));
 	}
 	PLOGI.printf("Session #%d process oct imaging done.", pSession->m_nSession);
 	pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::OCTImaging, pSession->m_nSession);
@@ -385,7 +436,7 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 
 	CCutViewManager* pCutView = pSession->m_pCutView;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
-	cv::Mat imgCircle;
+	cv::Mat imgCircle, imgZOffset;
 
 	PLOGI.printf("Session #%d update cutview - %d frames", pSession->m_nSession, nNumOfSamples);
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadUpdateCutView->isRun; nFrame++) {
@@ -395,7 +446,9 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 			Sleep(DELAY_FOR_WAIT_PROCESS);
 			continue;
 		}
-		pImaging->CircularizeImage(it->second, imgCircle);
+
+		pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetZOffset(nFrame));
+		pImaging->CircularizeImage(imgZOffset, imgCircle);
 		pCutView->AddRecord(imgCircle, nFrame);
 
 		pSession->m_pMsg->postMessage(WM_PROCESS_CUTVIEW, nSession, nFrame);
@@ -423,14 +476,19 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	std::vector<cv::Mat>& vGuidewire = pSession->m_vGuidewire;
 	std::vector<std::vector<double>>& vGuidewireRadius = pSession->m_vGuidewireRadius;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
+	cv::Mat circleImage, imgZOffset;
 
 	int imgSize = 1024;
-	cv::Mat prevLumen = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
 	cv::Point center(imgSize / 2, imgSize / 2);
-	cv::circle(prevLumen, center, imgSize / 5, cv::Scalar(255));
-	std::vector<std::vector<cv::Point>> vPrevLumens;
-	cv::findContours(prevLumen, vPrevLumens, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-	std::vector<cv::Point> vPrevLumen = vPrevLumens.at(0);
+	
+	//empty lumen
+	std::vector<cv::Point> vEmptyLumen;
+
+	//center point mask
+	cv::Mat centerMask = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+	cv::circle(centerMask, center, 1, cv::Scalar(255), cv::FILLED);
+	
+	CLookUpTable& lut = CLookUpTable::GetInstance();
 
 	PLOGI.printf("Session #%d lumen detection start - %d frames", pSession->m_nSession, nNumOfSamples);
 	vLumen.clear();
@@ -438,16 +496,15 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	vStent.clear();
 	vGuidewire.clear();
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadObjectDetection->isRun; nFrame++) {
-		std::map<int, cv::Mat>::iterator it = pSession->m_mapImage.find(nFrame);
-		if (it == pSession->m_mapImage.end()) {
+		std::map<int, cv::Mat>::iterator it = pSession->m_mapImageWithoutCompensation.find(nFrame);
+		if (it == pSession->m_mapImageWithoutCompensation.end()) {
 			nFrame--;
 			Sleep(DELAY_FOR_WAIT_PROCESS);
 			continue;
 		}
-		pImaging->PostProcess(it->second);
 
-		cv::Mat circleImage;
-		pImaging->CircularizeImage(it->second, circleImage);
+		pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetZOffset(nFrame));
+		pImaging->CircularizeImage(imgZOffset, circleImage);
 		cv::cvtColor(circleImage, circleImage, cv::COLOR_GRAY2BGR);
 
 		//lumen
@@ -457,49 +514,88 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 
 		if (vContours.size() == 0) {
 			vContours.clear();
-			vContours.push_back(vPrevLumen);
-			pImaging->SetLumenContourOffset(vPrevLumen);
+			vContours.push_back(vEmptyLumen);
+			pImaging->SetLumenContourOffset(vEmptyLumen);
 		}
 		else {
-			double maxArea = 0;
-			int idx = 0, seq = 0;
-			std::vector<cv::Point> largestContour;
-			for (const auto& contour : vContours) {
-				double area = cv::contourArea(contour);
-				if (area > maxArea) {
-					maxArea = area;
-					largestContour = contour;
-					idx = seq;
+			std::vector<cv::Point> validContour;
+			cv::Mat andResult;
+			cv::Mat xorResult;
+
+			//find contour which contains center point
+			int idx = -1;
+			for (int i = 0; i < vContours.size(); i++) {
+				cv::Mat curContour = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+				cv::drawContours(curContour, vContours, i, cv::Scalar(255), cv::FILLED);
+
+				cv::bitwise_and(centerMask, curContour, andResult);
+				cv::bitwise_xor(centerMask, andResult, xorResult);
+
+				if (cv::countNonZero(xorResult) == 0) {
+					validContour = vContours[i];
+					idx = i;
+					break;
 				}
-				seq++;
 			}
 
-			cv::Mat mask1 = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
-			cv::Point center(imgSize / 2, imgSize / 2);
-			cv::circle(mask1, center, imgSize / 2, cv::Scalar(255), cv::FILLED);
+			if (idx != -1) {
+				//removal of the outer part of the circle(OCT cross-section)
+				cv::Mat mask1 = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+				cv::Point center(imgSize / 2, imgSize / 2);
+				cv::circle(mask1, center, imgSize / 2, cv::Scalar(255), cv::FILLED);
 
-			cv::Mat mask2 = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
-			cv::drawContours(mask2, vContours, idx, cv::Scalar(255), cv::FILLED);
+				cv::Mat mask2 = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+				cv::drawContours(mask2, vContours, idx, cv::Scalar(255), cv::FILLED);
 
-			cv::Mat andResult;
-			cv::bitwise_and(mask2, mask1, andResult);
+				cv::bitwise_and(mask2, mask1, andResult);
+				cv::bitwise_xor(mask2, andResult, xorResult);
+				bool isCompletelyContained = cv::countNonZero(xorResult) == 0;
 
-			cv::Mat xorResult;
-			cv::bitwise_xor(mask2, andResult, xorResult);
-			bool isCompletelyContained = cv::countNonZero(xorResult) == 0;
+				vContours.clear();
+				if (isCompletelyContained) {
+					vContours.push_back(validContour);
+					pImaging->SetLumenContourOffset(validContour);
+				}
+				else {
+					std::vector<std::vector<cv::Point>> vCircle;
+					cv::findContours(andResult, vCircle, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
-			vContours.clear();
-			if (isCompletelyContained) {
-				vContours.push_back(largestContour);
-				vPrevLumen = largestContour;
-				pImaging->SetLumenContourOffset(largestContour);
+					if (vCircle.size() == 0) {
+						vContours.push_back(vEmptyLumen);
+						pImaging->SetLumenContourOffset(vEmptyLumen);
+					}
+					else {
+						//find contour which contains center point
+						idx = -1;
+						for (int i = 0; i < vCircle.size(); i++) {
+							cv::Mat curContour = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+							cv::drawContours(curContour, vCircle, i, cv::Scalar(255), cv::FILLED);
+
+							cv::bitwise_and(centerMask, curContour, andResult);
+							cv::bitwise_xor(centerMask, andResult, xorResult);
+
+							if (cv::countNonZero(xorResult) == 0) {
+								validContour = vCircle[i];
+								idx = i;
+								break;
+							}
+						}
+
+						if (idx != -1) {
+							vContours.push_back(validContour);
+							pImaging->SetLumenContourOffset(validContour);
+						}
+						else {
+							vContours.push_back(vEmptyLumen);
+							pImaging->SetLumenContourOffset(vEmptyLumen);
+						}
+					}
+				}
 			}
 			else {
-				std::vector<std::vector<cv::Point>> vCircle;
-				cv::findContours(andResult, vCircle, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-				vContours.push_back(vCircle.at(0));
-				vPrevLumen = vCircle.at(0);
-				pImaging->SetLumenContourOffset(vCircle.at(0));
+				vContours.clear();
+				vContours.push_back(vEmptyLumen);
+				pImaging->SetLumenContourOffset(vEmptyLumen);
 			}
 		}
 
@@ -577,7 +673,7 @@ UINT CImagingSession::threadGenerateVolume(LPVOID param) {
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 	const int nDiameter = config.volume.size;
 	const int nImageSize = nDiameter * nDiameter;
-	cv::Mat imgCircle, imgResize;
+	cv::Mat imgCircle, imgResize, imgZOffset;
 
 	if (pSession->m_pVolumeData != nullptr)
 	{
@@ -594,12 +690,11 @@ UINT CImagingSession::threadGenerateVolume(LPVOID param) {
 			continue;
 		}
 		
-		cv::Mat imgRect = it->second.clone();
-		pImaging->CircularizeImage(imgRect, imgCircle);
+		pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetZOffset(nFrame));
+		pImaging->CircularizeImage(imgZOffset, imgCircle);
 
 		// remove sheath
 		int nSheathPos = config.measurement.nSheathPosition + 15;
-		//int nSheathPos = pSession->m_mapSheathPosition.find(nFrame)->second;
 		cv::circle(imgCircle, cv::Point(imgCircle.cols / 2, imgCircle.rows / 2), nSheathPos / 2, cv::Scalar(0, 0, 0), -1);
 
 		cv::resize(imgCircle, imgResize, cv::Size(nDiameter, nDiameter));

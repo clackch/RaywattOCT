@@ -32,6 +32,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private PatientCase _patientCase;
 
+        [ObservableProperty]
+        private Zoom _zoom = new Zoom(Constants.CrossSectionConfirmSize);
+
         private ICommand _redoPullbackCommand;
         public ICommand RedoPullbackCommand
         {
@@ -69,6 +72,8 @@ namespace RaywattApp.ViewModels
                 Patient = (Patient)data["patient"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 PatientCase = (PatientCase)data["patientCase"];
+
+                Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
 
                 GetImageInfo(RaySession.Review);
                 RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
@@ -124,8 +129,8 @@ namespace RaywattApp.ViewModels
             PatientCase.Id = Patient.Id + "_" + DateTime.Now.ToString("yyyyMMddHHmmss");
             PatientCase.PatientId = Patient.Id;
             PatientCase.NumOfFrames = numOfFrames;
-            PatientCase.AngioYn = DeviceStatus.IsAngioConnected;
-            PatientCase.IndicatorDegree = 90;            
+            PatientCase.AngioYn = DeviceStatus.IsAngioInitialized;
+            PatientCase.IndicatorDegree = 90;
 
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
@@ -139,6 +144,8 @@ namespace RaywattApp.ViewModels
             sqlParameters["num_of_frames"] = PatientCase.NumOfFrames;
             sqlParameters["image"] = PatientCase.Image;
             sqlParameters["image_resolution"] = PatientCase.ImageResolution;
+            sqlParameters["z_offset"] = PatientCase.ZOffset;
+            sqlParameters["field_of_view"] = PatientCase.FieldOfView;
             sqlParameters["pullback_type"] = PatientCase.PullbackType;
             sqlParameters["pullback_length"] = PatientCase.PullbackLength;
             sqlParameters["angio_yn"] = PatientCase.AngioYn;
@@ -153,6 +160,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["apposition_threshold"] = PatientCase.AppositionThreshold;
             sqlParameters["brightness"] = PatientCase.Brightness;
             sqlParameters["contrast"] = PatientCase.Contrast;
+            sqlParameters["sheath_diameter"] = PatientCase.SheathDiameter;
             PatientCase.SectionProximal = 0;
             sqlParameters["section_proximal"] = PatientCase.SectionProximal;
             PatientCase.SectionDistal = PatientCase.NumOfFrames - 1;
@@ -170,6 +178,7 @@ namespace RaywattApp.ViewModels
                 parameter["prevStatus"] = PrevStatus;
                 ReviewStatus reviewStatus = new ReviewStatus();
                 reviewStatus.NumberOfFrames = numOfFrames;
+                reviewStatus.IsMeasureInit = true;
                 parameter["reviewStatus"] = reviewStatus;
                 Ray3DWrapper.ray3DStatus = new Ray3DWrapper.Ray3DStatus();
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewPage) { Parameter = parameter });

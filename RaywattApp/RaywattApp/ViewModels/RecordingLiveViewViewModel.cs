@@ -7,7 +7,6 @@ using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Services;
-using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,6 +53,15 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private string _pbTime;
 
+        [ObservableProperty]
+        private bool _isOctExpanded = true;
+
+        [ObservableProperty]
+        private Zoom _zoom = new Zoom();
+
+        [ObservableProperty]
+        private Zoom _zoomSmall = new Zoom(Constants.SmallCrossSectionSize);
+
         private int _brightness;
         public int Brightness
         {
@@ -66,6 +74,21 @@ namespace RaywattApp.ViewModels
         {
             get { return _contrast; }
             set { _contrast = value; OnPropertyChanged(nameof(Contrast)); RaySetProperty(Property.Contrast, value); }
+        }
+
+        private double _fieldOfView;
+        public double FieldOfView
+        {
+            get { return _fieldOfView; }
+            set 
+            { 
+                _fieldOfView = value;
+                OnPropertyChanged(nameof(FieldOfView));
+                
+                PatientCase.FieldOfView = value;
+                Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
+                ZoomSmall.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
+            }
         }
 
         private ICommand _cmdBack;
@@ -90,6 +113,12 @@ namespace RaywattApp.ViewModels
         public ICommand CmdStartRecording
         {
             get { return _cmdStartRecording ?? (this._cmdStartRecording = new RelayCommand(StartRecording)); }
+        }
+
+        private ICommand _screenExpandCommand;
+        public ICommand ScreenExpandCommand
+        {
+            get { return _screenExpandCommand ?? (this._screenExpandCommand = new RelayCommand(ScreenExpand)); }
         }
 
         public RecordingLiveViewViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager)
@@ -125,7 +154,8 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 Brightness = PatientCase.Brightness;
                 Contrast = PatientCase.Contrast;
-                
+                FieldOfView = PatientCase.FieldOfView;
+
                 if (PatientCase.ImageFullPath != null && PatientCase.Image != null)
                 {
                     string path = PatientCase.ImageFullPath.Substring(0, PatientCase.ImageFullPath.Length - 42);
@@ -157,7 +187,7 @@ namespace RaywattApp.ViewModels
                 RaySetProperty(Property.PullbackDistance, Double.Parse(PbLength));
                 RaySetProperty(Property.PullbackSpeed, Double.Parse(PbSpeed));
 
-                if (!DeviceStatus.IsAngioInitialized)
+                if (!DeviceStatus.IsAngioInitialized && DeviceStatus.IsAngioConnected)
                 {
                     _angioManager.SelectCathRoom();
                 }
@@ -235,12 +265,21 @@ namespace RaywattApp.ViewModels
             leaveToPage(Constants.RecordingPage);
         }
 
+        private void ScreenExpand()
+        {
+            _log.Debug("ScreenExpand : " + IsOctExpanded);
+
+            IsOctExpanded = !IsOctExpanded;
+        }
+
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {
+            if (!DeviceStatus.IsAngioConnected)
+            {
+                IsOctExpanded =  true;
+            }
             DrawCrossSectionImage();
-
-            if (DeviceStatus.IsAngioConnected)
-                DrawAngioImage();
+            DrawAngioImage();
         }
 
         private void leaveToPage(string viewPage)
@@ -250,6 +289,7 @@ namespace RaywattApp.ViewModels
             parameter["prevStatus"] = this.PrevStatus;
             PatientCase.Brightness = Brightness;
             PatientCase.Contrast = Contrast;
+            PatientCase.FieldOfView = FieldOfView;
             parameter["patientCase"] = PatientCase;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(viewPage) { Parameter = parameter });
         }
@@ -257,7 +297,6 @@ namespace RaywattApp.ViewModels
         private bool DrawAngioImage()
         {
             AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(_angioManager.ImgAngio);
-
             return true;
         }
     }

@@ -5,6 +5,7 @@ using RaywattApp.Common.Bases;
 using RaywattApp.Common.Util;
 using System;
 using System.Collections.Generic;
+using System.Windows;
 
 namespace RaywattApp.Models
 {
@@ -88,6 +89,12 @@ namespace RaywattApp.Models
         private double imageResolution;
 
         [ObservableProperty]
+        private int _zOffset;
+
+        [ObservableProperty]
+        private double fieldOfView;
+
+        [ObservableProperty]
         private bool isAnonymize;
 
         [ObservableProperty]
@@ -153,6 +160,9 @@ namespace RaywattApp.Models
         private int _sectionDistal;
 
         [ObservableProperty]
+        private double _sheathDiameter;
+
+        [ObservableProperty]
         private string? _bookmark;
 
         [ObservableProperty]
@@ -187,9 +197,18 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private double _guidewireRadius;
+        
+        [ObservableProperty]
+        private string _ffrPlaque;
 
         [ObservableProperty]
         private FfrFeature _ffrFeature;
+
+        [ObservableProperty]
+        private string _strCoRegistration;
+
+        [ObservableProperty]
+        private List<List<UIElement>> _measureUIElements;
 
         [ObservableProperty]
         private DateTime createDate;

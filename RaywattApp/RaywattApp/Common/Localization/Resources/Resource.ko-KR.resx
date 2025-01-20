@@ -170,6 +170,37 @@ Remove the catheter from patient before proceeding.</value>
   <data name="$MSG017" xml:space="preserve">
     <value>[K]Select the vessel from the case information on the 2D screen.</value>
   </data>
+  <data name="$MSG018" xml:space="preserve">
+    <value>[K]Select
+Vessel Type</value>
+  </data>
+  <data name="$MSG019" xml:space="preserve">
+    <value>[K]Define
+Reference
+Proximal
+Lumen</value>
+  </data>
+  <data name="$MSG020" xml:space="preserve">
+    <value>[K]Define
+Reference
+Distal
+Lumen</value>
+  </data>
+  <data name="$MSG021" xml:space="preserve">
+    <value>[K]Measure
+Plaque Area</value>
+  </data>
+  <data name="$MSG022" xml:space="preserve">
+    <value>[K]Verify
+the features
+for FFR</value>
+  </data>
+  <data name="$MSG023" xml:space="preserve">
+    <value>[K]The angiography device is not connected.</value>
+  </data>
+  <data name="$MSG024" xml:space="preserve">
+    <value>[K]Not enough storage space. Please free up space and try again.</value>
+  </data>
   <data name="$Terms and Conditions" xml:space="preserve">
     <value>[K]Product Intended Use: Clearly define the intended use of the OCT device, including any limitations or specific conditions for use.
 Product Warranty: Outline the warranty coverage provided for the OCT device, including the duration, scope, and process for claiming warranty services.
@@ -192,6 +223,9 @@ Acceptance of Terms: Require users to explicitly accept the terms and conditions
   </data>
   <data name="%DS" xml:space="preserve">
     <value>[K]%DS</value>
+  </data>
+  <data name="* Vessel type not supported" xml:space="preserve">
+    <value>[K]* Vessel type not supported</value>
   </data>
   <data name="2D" xml:space="preserve">
     <value>[K]2D</value>
@@ -362,6 +396,9 @@ Acceptance of Terms: Require users to explicitly accept the terms and conditions
   <data name="Confirm import of selected file" xml:space="preserve">
     <value>[K]Confirm import of selected file</value>
   </data>
+  <data name="Confirm reversion to original calibration" xml:space="preserve">
+    <value>[K]Confirm reversion to original calibration</value>
+  </data>
   <data name="Contrast" xml:space="preserve">
     <value>[K]Contrast</value>
   </data>
@@ -390,9 +427,6 @@ Acceptance of Terms: Require users to explicitly accept the terms and conditions
     <value>[K]Data already exists.
 Overwrite existing data?</value>
   </data>
-  <data name="Database" xml:space="preserve">
-    <value>[K]Database</value>
-  </data>
   <data name="Delete" xml:space="preserve">
     <value>[K]Delete</value>
   </data>
@@ -410,6 +444,9 @@ Overwrite existing data?</value>
   </data>
   <data name="DICOM" xml:space="preserve">
     <value>[K]DICOM</value>
+  </data>
+  <data name="Disable Cleaning" xml:space="preserve">
+    <value>[K]Disable Cleaning</value>
   </data>
   <data name="Display Modes" xml:space="preserve">
     <value>[K]Display Modes</value>
@@ -437,6 +474,9 @@ Overwrite existing data?</value>
   </data>
   <data name="en-US" xml:space="preserve">
     <value>[K]English</value>
+  </data>
+  <data name="Enable Cleaning" xml:space="preserve">
+    <value>[K]Enable Cleaning</value>
   </data>
   <data name="End Review" xml:space="preserve">
     <value>[K]End Review</value>
@@ -501,8 +541,17 @@ Overwrite existing data?</value>
   <data name="Faster for specialized care" xml:space="preserve">
     <value>[K]Faster for specialized care</value>
   </data>
+  <data name="Feature Parameters" xml:space="preserve">
+    <value>[K]Feature Parameters</value>
+  </data>
   <data name="Female" xml:space="preserve">
     <value>[K]Female</value>
+  </data>
+  <data name="FFR" xml:space="preserve">
+    <value>[K]FFR</value>
+  </data>
+  <data name="Field of View" xml:space="preserve">
+    <value>[K]Field of View</value>
   </data>
   <data name="First Name" xml:space="preserve">
     <value>[K]First Name</value>
@@ -641,6 +690,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Localization" xml:space="preserve">
     <value>[K]Localization</value>
+  </data>
+  <data name="Location" xml:space="preserve">
+    <value>[K]Location</value>
   </data>
   <data name="Log" xml:space="preserve">
     <value>[K]Log</value>
@@ -822,6 +874,9 @@ Overwrite existing data?</value>
   <data name="Physician Name" xml:space="preserve">
     <value>[K]Physician Name</value>
   </data>
+  <data name="Plaque Area" xml:space="preserve">
+    <value>[K]Plaque Area</value>
+  </data>
   <data name="Post" xml:space="preserve">
     <value>[K]Post</value>
   </data>
@@ -836,6 +891,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Pre-PCI" xml:space="preserve">
     <value>[K]Pre-PCI</value>
+  </data>
+  <data name="Predict FFR" xml:space="preserve">
+    <value>[K]Predict FFR</value>
   </data>
   <data name="Presentation" xml:space="preserve">
     <value>[K]Presentation</value>
@@ -906,6 +964,9 @@ Overwrite existing data?</value>
   <data name="Reset" xml:space="preserve">
     <value>[K]Reset</value>
   </data>
+  <data name="Revert Changes" xml:space="preserve">
+    <value>[K]Revert Changes</value>
+  </data>
   <data name="Review" xml:space="preserve">
     <value>[K]Review</value>
   </data>
@@ -914,6 +975,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Review Settings" xml:space="preserve">
     <value>[K]Review Settings</value>
+  </data>
+  <data name="Rotary Junction" xml:space="preserve">
+    <value>[K]Rotary Junction</value>
   </data>
   <data name="Save" xml:space="preserve">
     <value>[K]Save</value>
@@ -1010,6 +1074,18 @@ Overwrite existing data?</value>
   </data>
   <data name="Step 2." xml:space="preserve">
     <value>[K]Step 2.</value>
+  </data>
+  <data name="Step 3." xml:space="preserve">
+    <value>[K]Step 3.</value>
+  </data>
+  <data name="Step 4." xml:space="preserve">
+    <value>[K]Step 4.</value>
+  </data>
+  <data name="Step 5." xml:space="preserve">
+    <value>[K]Step 5.</value>
+  </data>
+  <data name="Storage" xml:space="preserve">
+    <value>[K]Storage</value>
   </data>
   <data name="Survey (100㎜)" xml:space="preserve">
     <value>[K]Survey (100㎜)</value>

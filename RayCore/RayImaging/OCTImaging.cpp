@@ -8,6 +8,21 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <cmath>
+#include <numeric>
+
+float EXPONENTIAL_FACTOR = 2.0f;
+float EXPONENTIAL_CONTROL = 1.0f;
+float ENERGY_THRESHOLD = 5.0f;
+const int SHEATH_OFFSET = 15;
+const int SHEATH_SEARCH_RANGE = 200;
+const int SEARCH_LENGTH = 100;
+static bool bCompensated = true;
+static bool bVignetted = true;
+double last_entropy = 0;
+double alpha = 0.4;
+double entropy_threshold = 0.05;
+std::vector<double> cdf_i(256, 1.0);
 
 void ippsRelease(void *&ptr) {
 	if (ptr) {
@@ -56,6 +71,8 @@ COCTImaging::COCTImaging(Setting setting, CMessageService* pMsg) {
 	m_nTotalFrame = 0;
 
 	m_nSheathPosition = 0;
+
+	clahe = cv::createCLAHE(0.02, cv::Size(8, 8));
 }
 
 COCTImaging::~COCTImaging() {
@@ -84,17 +101,26 @@ void COCTImaging::Process(char* fringes) {
 	computeLogarithm(fFFTResult, fFFTResult);
 	findSheath(fFFTResult);
 	generateImage(fFFTResult, false);
+	adaptive_compensation();
 }
 void COCTImaging::PostProcess(cv::Mat image) {
 	const bool bInvert = m_bInvert;
 	const bool bColor = m_bColor;
+
+	findSheath(image);
 
 	cv::cvtColor(image, imageResultColor, cv::COLOR_GRAY2RGB);
 
 	if (bInvert) cv::bitwise_not(imageResultColor, imageResultColor);
 	if (bColor) {
 		CLookUpTable& lut = CLookUpTable::GetInstance();
-		lut.Apply(imageResultColor, 0);
+		if (lut.GetEnhancedLUT()) {
+			lut.Apply(imageResultColor, 3 /*LUT_enhanced.csv*/);
+			lut.Apply(imageResultColor, lut.GetCurrentColormap());
+		}
+		else {
+			lut.Apply(imageResultColor, lut.GetCurrentColormap());
+		}
 	}
 
 	cv::convertScaleAbs(imageResultColor, imageResultColor, m_setting.contrast, m_setting.brightness);
@@ -106,8 +132,12 @@ void COCTImaging::PostProcess(cv::Mat image) {
 
 	CircularizeImage(imageResultColor, imageCircle);
 }
+void COCTImaging::ApplyZOffset(const cv::Mat& src, cv::Mat& dst, int zOffset) {
+	cv::Mat img = src.clone();
 
-
+	cv::Mat translation_matrix = (cv::Mat_<double>(2, 3) << 1, 0, zOffset * -1, 0, 1, 0);
+	cv::warpAffine(img, dst, translation_matrix, img.size());
+}
 int COCTImaging::Start() {
 	BOOL result = FALSE;
 	result = CUtility::StartThread(threadRender, m_pThread, (LPVOID)this);
@@ -136,6 +166,9 @@ void COCTImaging::DoAsyncRender(char* fringes) {
 void COCTImaging::CircularizeImage(cv::Mat& src, cv::Mat& dst)
 {
 	cv::remap(src, dst, matXMap, matYMap, cv::INTER_LINEAR);
+
+	cv::Mat imgFoV = getFoVImage(dst, MAX_FIELD_OF_VIEW);
+	memcpy(dst.data, imgFoV.data, sizeof(char) * dst.cols * dst.rows * imgFoV.channels());
 }
 
 void COCTImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst) {}
@@ -145,6 +178,49 @@ void COCTImaging::EraseStentOutLier(cv::Mat& stent) {}
 void COCTImaging::SetLumenContourOffset(std::vector<cv::Point> lumenContour) {}
 
 void COCTImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& centerPoints, std::vector<double>& radius) {}
+
+cv::Mat COCTImaging::GetProcessedImage() {
+	return imageResult; 
+}
+
+void COCTImaging::SetImageCompensation(bool ImageCompensated) { 
+	bCompensated = ImageCompensated;
+}
+
+void COCTImaging::SetImageCompensationControlWindow(bool ImageCompensationControlWindowOn) {
+	const char* strWindowName = "Compensation";
+	try {
+		if (ImageCompensationControlWindowOn == 1) {
+			cv::namedWindow(strWindowName, cv::WINDOW_AUTOSIZE);
+
+			// 슬라이더 값 범위는 정수로만 가능하므로, 원하는 범위로 매핑
+			int exponential_factor_slider = 20;
+			int exponential_control_slider = 10;
+			int energy_threshold_slider = 5;
+			int alpha_slider = 4;
+
+			cv::createTrackbar("Cont", strWindowName, &exponential_factor_slider, 100, on_trackbar);
+			cv::createTrackbar("Bright", strWindowName, &exponential_control_slider, 100, on_trackbar);
+			cv::createTrackbar("Eng", strWindowName, &energy_threshold_slider, 100, on_trackbar);
+			cv::createTrackbar("Alpha", strWindowName, &alpha_slider, 100, on_trackbar);
+
+			// 초기 콜백 호출
+			on_trackbar(0, 0);
+		}
+		else {
+			cv::destroyWindow(strWindowName);
+		}
+	}
+	catch (const cv::Exception& e) {
+		PLOGI.printf("OpenCV Error: %s", e.what());  // OpenCV 관련 에러 처리
+	}
+	catch (const std::exception& e) {
+		PLOGI.printf("Standard Error: %s", e.what());  // 다른 표준 라이브러리 예외 처리
+	}
+	catch (...) {
+		PLOGI.printf("Unknown error occurred in SetImageCompensationControlWindow");  // 예기치 않은 에러 처리
+	}
+}
 
 void COCTImaging::allocateMemory() {
 	// ORDER = 11, nFFTLength = 2^11
@@ -163,6 +239,7 @@ void COCTImaging::allocateMemory() {
 	imageResult.create(nBScan, nOutputLength, CV_8UC1);
 	imageResultColor.create(nBScan, nOutputLength, CV_8UC3);
 	imageCircle.create(nCircleSize, nCircleSize, CV_8UC3);
+	imageResultWithoutCompensation.create(nBScan, nOutputLength, CV_8UC1);
 
 	fBuffer_Window = ippsMalloc_32f(nFFTLength);
 	fcBuffer_FFT = ippsMalloc_32fc(nFFTLength);
@@ -182,6 +259,7 @@ void COCTImaging::releaseMemory() {
 	imageResult.release();
 	imageResultColor.release();
 	imageCircle.release();
+	imageResultWithoutCompensation.release();
 
 	ippsRelease((void*&)fBuffer_Window);
 	ippsRelease((void*&)fcBuffer_FFT);
@@ -348,20 +426,71 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 	}
 }
 
+void COCTImaging::findSheath(cv::Mat img) {
+	cv::Mat image;
+	cv::rotate(img, image, cv::ROTATE_90_COUNTERCLOCKWISE);
+
+	// 행의 평균과 분산 계산
+	std::vector<double> mean_values;
+	std::vector<double> variance_values;
+
+	for (int i = 0; i < image.rows; ++i) {
+		cv::Mat row = image.row(i);
+		cv::Scalar mean, stddev;
+		cv::meanStdDev(row, mean, stddev);
+		mean_values.push_back(mean[0]);
+		variance_values.push_back(stddev[0] * stddev[0]);  // 분산은 표준편차의 제곱
+	}
+
+	// 평균 값을 0~1로 정규화
+	std::vector<double> mean_values_norm = normalize(mean_values);
+
+	// 정규화된 평균이 0.9 이상인 행 필터링
+	std::vector<std::tuple<int, double, double>> valid_rows;
+	for (int i = 0; i < mean_values_norm.size(); ++i) {
+		if (mean_values_norm[i] >= 0.9) {
+			valid_rows.emplace_back(i, mean_values[i], variance_values[i]);
+		}
+	}
+
+	if (!valid_rows.empty()) {
+		// 분산이 가장 작은 행 찾기
+		auto min_variance_row = *std::min_element(valid_rows.begin(), valid_rows.end(),
+			[](const auto& a, const auto& b) { return std::get<2>(a) < std::get<2>(b); });
+		m_nSheathPosition = std::get<0>(min_variance_row) + m_measureSetting.nSheathThickness;
+	}
+	else {
+		m_nSheathPosition = 0;
+	}
+}
+
+// 정규화를 위한 함수
+std::vector<double> COCTImaging::normalize(const std::vector<double>& values) {
+	double min_val = *std::min_element(values.begin(), values.end());
+	double max_val = *std::max_element(values.begin(), values.end());
+	std::vector<double> normalized;
+
+	for (double val : values) {
+		normalized.push_back((val - min_val) / (max_val - min_val));
+	}
+	return normalized;
+}
+
 void COCTImaging::generateImage(Ipp32f* logaritihmData, bool bInvert){
 	const int nBScan = m_setting.nBScan;
-	const float fHighLevel = (bInvert) ? m_setting.highLevel : 0.0f;
-	const float fLowLevel = (bInvert) ? m_setting.lowLevel : 0.0f;
-	const int nFFTLength = m_setting.nFFTLength;
 	const int nOutputLength = m_setting.nOutputLength;
 
-	for (int i = 0; i < nBScan; i++)
-	{
-		ippsSubC_32f(logaritihmData + i * nOutputLength, (m_setting.lowLevel + fLowLevel), fOutput + i * nOutputLength, nOutputLength);
-		ippsMulC_32f_I(UCHAR_MAX / (m_setting.highLevel - fHighLevel), fOutput + i * nOutputLength, nOutputLength);
-		ippsConvert_32f8u_Sfs(fOutput + i * nOutputLength, imageResult.data + i * nOutputLength /*stepBytes*/, nOutputLength, ippRndNear, 0);
-	}
+	cv::Mat imgLog(cv::Size(nOutputLength, nBScan), CV_32FC1, logaritihmData);
+	imgLog -= m_setting.lowLevel;
+	imgLog *= (LUT_SCALE / m_setting.highLevel);
+	cv::threshold(imgLog, imgLog, LUT_SCALE, LUT_SCALE, cv::THRESH_TRUNC);
+	imgLog.convertTo(imageResult, CV_8UC1);
+
+	cv::convertScaleAbs(imageResult, imageResult, 1.f / 80.f * LUT_SCALE, 0);
+
 	cv::flip(imageResult, imageResult, 1);
+
+	imageResultWithoutCompensation = imageResult.clone();
 }
 
 void COCTImaging::drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color) {
@@ -378,6 +507,26 @@ void COCTImaging::drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color)
 		lineStart += (lineSize * 2);
 	}
 	cv::line(image, cv::Point(posDraw, lineStart), cv::Point(posDraw, (lineStart + lineSize / 2) - 1), color, 2);
+}
+
+cv::Mat COCTImaging::getFoVImage(cv::Mat image, double fov) {
+	cv::Rect roi;
+	roi.width = (int)(floor(round(fov * 1000.f / m_setting.distPerPixel))) * 2;
+	roi.height = roi.width;
+	roi.x = (image.cols - roi.width) / 2;
+	roi.y = (image.rows - roi.height) / 2;
+
+	if (roi.x < 0 || roi.y < 0 ||
+		roi.width <= 0 || roi.height <= 0 ||
+		roi.x + roi.width > image.cols ||
+		roi.y + roi.height > image.rows) {
+		return image.clone();
+	}
+
+	cv::Mat imgROI;
+	cv::resize(image(roi), imgROI, cv::Size(image.cols, image.rows));
+
+	return imgROI;
 }
 
 UINT COCTImaging::threadRender(LPVOID param) {
@@ -404,4 +553,672 @@ UINT COCTImaging::threadRender(LPVOID param) {
 	}
 
 	return NOERROR;
+}
+
+void COCTImaging::adaptive_compensation()
+{
+	if (!bCompensated)
+		return;
+
+	// Rotate the image
+	cv::Mat rotated_img;
+	cv::rotate(imageResult, rotated_img, cv::ROTATE_90_COUNTERCLOCKWISE);
+	rotated_img.convertTo(rotated_img, CV_32F);
+	
+	if(!bVignetted)
+		lumen_detection_processing(rotated_img);
+
+	rotated_img(cv::Range(rotated_img.rows - 60, rotated_img.rows), cv::Range::all()).setTo(cv::Scalar(0));
+
+	int rows = rotated_img.rows;
+	int cols = rotated_img.cols;
+
+	cv::Mat energy_all = cv::Mat::zeros(rotated_img.size(), CV_32F);
+	cv::Mat result_img = cv::Mat::zeros(rotated_img.size(), CV_32F);
+
+	std::vector<int> stop_rows(cols, 0);
+
+	// Compute energy using cumulative sum (with OpenMP)
+#pragma omp parallel for
+	for (int x = 0; x < cols; ++x) {
+		cv::Mat I_n = rotated_img.col(x).clone(); // clone() 사용으로 독립적인 메모리
+
+		// 자연 로그 계산 후 지수 연산 적용
+		cv::Mat log_img, exp_img;
+		cv::log(I_n + 1e-6, log_img);  // 1e-6을 추가해 로그 계산에서 0을 피함
+		cv::exp(EXPONENTIAL_FACTOR * log_img, exp_img);  // EXPONENTIAL_FACTOR 적용 후 exp 사용
+		I_n = exp_img.clone();  // 결과 저장
+
+		// 누적 합 계산
+		std::vector<float> cumulativeSum(rows, 0.0f);
+		cumulativeSum[rows - 1] = I_n.at<float>(rows - 1);
+		for (int i = rows - 2; i >= 0; --i) {
+			cumulativeSum[i] = cumulativeSum[i + 1] + I_n.at<float>(i);
+		}
+
+		// 에너지 계산
+		for (int z = 0; z < rows; ++z) {
+			float sum_val = cumulativeSum[z];
+			energy_all.at<float>(z, x) = sum_val * sum_val;
+
+			if (sum_val < energy_all.at<float>(0, x) / std::pow(10.0, ENERGY_THRESHOLD)) {
+				stop_rows[x] = z;
+				break;
+			}
+		}
+
+		double stop_cumsum = 0;
+
+		// 결과 계산
+		for (int z = 0; z < rows; ++z) {
+			float sum_val = cumulativeSum[z];
+			// threshold_row를 기준으로 보정 적용
+			if (z <= stop_rows[x]) {
+				float sum_val_pow = std::exp(EXPONENTIAL_CONTROL * std::log(sum_val)) * 2;
+				if (sum_val != 0) {
+					result_img.at<float>(z, x) = I_n.at<float>(z) / sum_val_pow;
+					stop_cumsum = sum_val_pow;
+				}
+			}
+			else {
+				result_img.at<float>(z, x) = I_n.at<float>(z) / stop_cumsum;
+			}
+		}
+	}
+
+	// Linear contrast stretching
+	logarithmic_contrast_stretching(result_img);
+	result_img.convertTo(result_img, CV_8U, 255);
+
+	adaptive_gamma_correction(result_img);
+
+	// Rotate back to original angle
+	cv::rotate(result_img, imageResult, cv::ROTATE_90_CLOCKWISE);
+
+	// PLOGI.printf("[End] adaptive_compensation");
+}
+
+void COCTImaging::min_max_normalization(const cv::Mat& img, cv::Mat& normalized_img, double& min_val, double& max_val)
+{
+	cv::minMaxLoc(img, &min_val, &max_val);
+	normalized_img = (img - min_val) / (max_val - min_val);
+}
+
+void COCTImaging::linear_contrast_stretching(cv::Mat& img, float lower_percentile, float upper_percentile)
+{
+	// 1. 1D 벡터로 변환 없이 퍼센타일 계산
+	cv::Mat img_reshaped = img.reshape(1, img.rows * img.cols);  // 1D로 변환
+	std::vector<float> img_values;
+	img_values.assign((float*)img_reshaped.datastart, (float*)img_reshaped.dataend);
+
+	// 2. 벡터 정렬
+	std::sort(img_values.begin(), img_values.end());
+
+	// 3. 퍼센타일 값 계산
+	int total_elements = img_values.size();
+	int lower_idx = static_cast<int>(lower_percentile / 100.0 * total_elements);
+	int upper_idx = static_cast<int>(upper_percentile / 100.0 * total_elements);
+
+	float lower_bound = img_values[lower_idx];
+	float upper_bound = img_values[upper_idx];
+
+	// 4. OpenMP 병렬 처리로 클리핑 및 정규화
+#pragma omp parallel for
+	for (int i = 0; i < img.rows; ++i) {
+		float* img_ptr = img.ptr<float>(i);  // 한 번에 한 row의 데이터에 접근
+		for (int j = 0; j < img.cols; ++j) {
+			// 클리핑
+			img_ptr[j] = std::min(std::max(img_ptr[j], lower_bound), upper_bound);
+			// 0-1로 정규화
+			img_ptr[j] = (img_ptr[j] - lower_bound) / (upper_bound - lower_bound + 1e-8);
+		}
+	}
+}
+
+void COCTImaging::logarithmic_contrast_stretching(cv::Mat& img, float lower_percentile, float upper_percentile)
+{
+	// 1. 1D 벡터로 변환하여 퍼센타일 계산
+	cv::Mat img_reshaped = img.reshape(1, img.rows * img.cols);  // 1D로 변환
+	std::vector<float> img_values;
+	img_values.assign((float*)img_reshaped.datastart, (float*)img_reshaped.dataend);
+
+	// 2. 벡터 정렬
+	std::sort(img_values.begin(), img_values.end());
+
+	// 3. 퍼센타일 값 계산
+	int total_elements = img_values.size();
+	int lower_idx = static_cast<int>(lower_percentile / 100.0 * total_elements);
+	int upper_idx = static_cast<int>(upper_percentile / 100.0 * total_elements);
+
+	float lower_bound = img_values[lower_idx];
+	float upper_bound = img_values[upper_idx] * 1.5;
+
+	// 4. OpenMP 병렬 처리로 로그 변환 및 정규화
+#pragma omp parallel for
+	for (int i = 0; i < img.rows; ++i) {
+		float* img_ptr = img.ptr<float>(i);  // 한 번에 한 row의 데이터에 접근
+		for (int j = 0; j < img.cols; ++j) {
+			// 5. 클리핑: 퍼센타일에 맞게 값 클리핑
+			img_ptr[j] = std::min(std::max(img_ptr[j], lower_bound), upper_bound);
+
+			// 6. 로그 변환: 클리핑된 값을 기반으로 로그 변환
+			img_ptr[j] = std::log1p(img_ptr[j] - lower_bound + 1e-8);  // log(1 + x) 계산 (offset 추가)
+
+			// 7. 0-1로 정규화: 로그 변환 후 결과를 0-1 범위로 맞춤
+			img_ptr[j] = (img_ptr[j] - std::log1p(0)) / (std::log1p(upper_bound - lower_bound) + 1e-8);
+		}
+	}
+}
+
+void COCTImaging::lumen_detection_processing(cv::Mat& img)
+{
+	try {
+		// 첫 30개 행을 0으로 설정
+		img(cv::Range(0, 30), cv::Range::all()).setTo(cv::Scalar(0));
+
+		// 행의 평균 및 분산 계산	
+		std::vector<double> mean_values(img.rows), variance_values(img.rows);
+
+		// 행 단위로 평균과 분산 계산 (OpenMP 병렬 처리)
+#pragma omp parallel for
+		for (int i = 0; i < SHEATH_SEARCH_RANGE; ++i) {
+			cv::Mat row = img.row(i);
+			cv::Scalar mean_scalar, stddev_scalar;
+			cv::meanStdDev(row, mean_scalar, stddev_scalar);
+			mean_values[i] = mean_scalar[0];
+			variance_values[i] = stddev_scalar[0] * stddev_scalar[0];
+		}
+
+		// 최소값과 최대값 찾기 (병렬화된 반복 작업이 아니므로 유지)
+		auto minmax_mean = std::minmax_element(mean_values.begin(), mean_values.end());
+		double min_mean = *minmax_mean.first;
+		double max_mean = *minmax_mean.second;
+
+		std::vector<double> mean_values_norm;
+		mean_values_norm.reserve(mean_values.size());
+
+		// 0~1 사이로 정규화 (병렬 처리)
+#pragma omp parallel for
+		for (int i = 0; i < mean_values.size(); ++i) {
+			if (max_mean - min_mean == 0) {
+				mean_values_norm[i] = 0.0;
+			}
+			else {
+				mean_values_norm[i] = (mean_values[i] - min_mean) / (max_mean - min_mean);
+			}
+		}
+
+		std::vector<int> valid_row_indices;
+		std::vector<double> valid_row_variances;
+
+		for (int i = 0; i < mean_values.size(); ++i) {
+			if (mean_values_norm[i] >= 0.8) {
+				valid_row_indices.push_back(i);
+				valid_row_variances.push_back(variance_values[i]);
+			}
+		}
+
+		if (valid_row_indices.empty()) {
+			PLOGI.printf("No valid rows found with normalized mean >= 0.8.");
+			return;
+		}
+
+		// valid_row_variances에서 분산이 가장 작은 행 찾기
+		auto min_variance_it = std::min_element(valid_row_variances.begin(), valid_row_variances.end());
+		int min_variance_index = std::distance(valid_row_variances.begin(), min_variance_it);
+		int min_variance_row1 = valid_row_indices[min_variance_index];
+
+		// 이미지 영역 선택
+		cv::Mat selected_region = img.clone();
+
+		int sheath_boundary = min_variance_row1 + SHEATH_OFFSET;
+
+		if (sheath_boundary >= img.rows) {
+			PLOGI.printf("The image have some noises at the end of each aline");
+			return;
+		}
+
+		selected_region(cv::Range(0, sheath_boundary), cv::Range::all()).setTo(cv::Scalar(0));
+
+		// Piecewise Linear Contrast 적용
+		apply_piecewise_linear_contrast(selected_region, 48, 184, 0, 255);
+
+		std::vector<cv::Point> red_points;
+
+		// 각 열의 값 계산 및 정규화 (병렬 처리 가능)
+#pragma omp parallel for
+		for (int col = 0; col < selected_region.cols; ++col) {
+			std::vector<double> col_values;
+			for (int row = 10; row < selected_region.rows - 10; ++row) {
+				double sum_value = cv::sum(selected_region(cv::Range(row - 10, row + 11), cv::Range(col, col + 1)))[0];
+				col_values.push_back(sum_value);
+			}
+
+			// 각 col 값 정규화
+			auto minmax_col = std::minmax_element(col_values.begin(), col_values.end());
+			double min_col = *minmax_col.first;
+			double max_col = *minmax_col.second;
+
+			std::vector<double> normalized_col_values(col_values.size());
+			for (int i = 0; i < col_values.size(); ++i) {
+				if (max_col - min_col == 0) {
+					normalized_col_values[i] = 0.0;
+				}
+				else {
+					normalized_col_values[i] = (col_values[i] - min_col) / (max_col - min_col);
+				}
+			}
+
+			// 첫 번째 정규화된 값이 0.6 이상인 행 선택
+			for (int i = 0; i < normalized_col_values.size(); ++i) {
+				if (normalized_col_values[i] >= 0.6) {
+#pragma omp critical
+					{
+						red_points.push_back(cv::Point(col, i));
+					}
+					break;
+				}
+			}
+		}
+
+		// red_points를 col 값을 기준으로 정렬
+		std::sort(red_points.begin(), red_points.end(), [](const cv::Point& a, const cv::Point& b) {
+			return a.x < b.x;
+			});
+
+		std::vector<cv::Point> refined_curve_points;
+
+		// 시작점 선택: red_points의 0~20 인덱스의 y 좌표 평균값에 가장 가까운 점 선택
+		std::vector<cv::Point> first_20_points(red_points.begin(), red_points.begin() + 20);
+		double avg_y = std::accumulate(first_20_points.begin(), first_20_points.end(), 0.0, [](double sum, const cv::Point& p) { return sum + p.y; }) / first_20_points.size();
+		cv::Point start_point = *std::min_element(first_20_points.begin(), first_20_points.end(), [&](cv::Point a, cv::Point b) {
+			return std::abs(a.y - avg_y) < std::abs(b.y - avg_y);
+			});
+		start_point.x = 0;  // x 좌표는 0으로 설정
+		start_point.y = (int)start_point.y;
+
+		// 시작점을 refined_curve_points에 추가
+		refined_curve_points.push_back(start_point);
+
+		int i = 0;
+
+		// 중간 점들을 찾기 위한 루프
+		while (i < red_points.size() - 1) {
+			cv::Point last_point = refined_curve_points.back();  // 마지막으로 선택된 점
+			std::vector<cv::Point> possible_candidates;
+			int closest_index = -1;
+			int min_distance = SEARCH_LENGTH * SEARCH_LENGTH * 4;  // 최소 거리를 초기화
+
+			// i+2부터 SEARCH_LENGTH만큼의 범위 탐색
+			for (int j = i + 2; j <= i + SEARCH_LENGTH && j < red_points.size(); j += 2) {
+				int distance_squared = (last_point.x - red_points[j].x) * (last_point.x - red_points[j].x)
+					+ (last_point.y - red_points[j].y) * (last_point.y - red_points[j].y);
+
+				if (distance_squared < min_distance) {  // 제곱된 거리 조건
+					min_distance = distance_squared;
+					closest_index = j;
+				}
+			}
+
+			if (closest_index == -1) {
+				break;
+			}
+
+			// 가장 가까운 점을 추가하고 i를 갱신
+			refined_curve_points.push_back(red_points[closest_index]);
+			i = closest_index;  // i를 가장 가까운 점의 인덱스로 갱신
+		}
+
+		// 마지막 5개의 y 좌표의 평균 계산
+		int num_points_to_average = std::min(5, (int)refined_curve_points.size());
+		double sum_y = 0.0;
+		for (int i = refined_curve_points.size() - num_points_to_average; i < refined_curve_points.size(); ++i) {
+			sum_y += refined_curve_points[i].y;
+		}
+		double avg_y_last_points = sum_y / num_points_to_average;
+
+		// 마지막 점 확인 후 추가: 마지막 점이 (img.cols - 1)이 아닐 경우에만 추가
+		if (refined_curve_points.back().x != img.cols - 1) {
+			// 마지막 점 추가: (img.cols - 1, 평균 y 값)
+			refined_curve_points.push_back(cv::Point(img.cols - 1, static_cast<int>(avg_y_last_points)));
+		}
+
+		// 모든 col에 대해 y 값 저장, -1로 초기화하여 y 값이 없는 상태를 표시
+		std::vector<cv::Point> full_curve_points(img.cols, cv::Point(-1, -1));
+
+		// 먼저 refined_curve_points의 기존 값을 full_curve_points에 복사
+		for (const auto& point : refined_curve_points) {
+			full_curve_points[point.x] = point;  // 이미 존재하는 점을 그대로 유지
+		}
+
+		// 없는 col 인덱스에 대해 보간 또는 복사 수행
+		for (int col = 0; col < img.cols; ++col) {
+			// 이미 해당 col에 점이 있으면 건너뜀
+			if (full_curve_points[col].y != -1) {
+				continue;
+			}
+
+			bool point_added = false;  // y값이 추가되었는지 여부
+
+			// 현재 col에 대해 가까운 두 점을 찾아 보간
+			for (int i = 0; i < refined_curve_points.size() - 1; ++i) {
+				int x0 = refined_curve_points[i].x;
+				int x1 = refined_curve_points[i + 1].x;
+
+				// col이 두 점 사이에 위치하면, 선형 보간을 수행
+				if (col >= x0 && col <= x1) {
+					double y0 = refined_curve_points[i].y;
+					double y1 = refined_curve_points[i + 1].y;
+
+					// 선형 보간으로 y 값 계산
+					double interpolated_y = y0 + (y1 - y0) * (col - x0) / (x1 - x0);
+
+					// 보간된 점을 추가
+					full_curve_points[col] = cv::Point(col, static_cast<int>(interpolated_y));
+					point_added = true;  // y 값이 추가되었음을 기록
+					break;
+				}
+			}
+
+			// 양쪽 보간할 점이 없는 경우, 가까운 값을 복사
+			if (!point_added) {
+				// 왼쪽 점 찾기
+				int left_index = -1;
+				for (int i = col - 1; i >= 0; --i) {
+					if (full_curve_points[i].y != -1) {
+						left_index = i;
+						break;
+					}
+				}
+
+				// 오른쪽 점 찾기
+				int right_index = -1;
+				for (int i = col + 1; i < img.cols; ++i) {
+					if (full_curve_points[i].y != -1) {
+						right_index = i;
+						break;
+					}
+				}
+
+				// 왼쪽과 오른쪽 중 하나만 있으면 그 값을 사용
+				if (left_index != -1) {
+					full_curve_points[col] = full_curve_points[left_index];  // 왼쪽 값 복사
+				}
+				else if (right_index != -1) {
+					full_curve_points[col] = full_curve_points[right_index];  // 오른쪽 값 복사
+				}
+				else {
+					// 만약 양쪽에 값이 전혀 없다면 refined_curve_points[0]을 사용 (첫 점 사용)
+					full_curve_points[col] = refined_curve_points[0];
+				}
+			}
+		}
+
+		// 이미지 복사본 생성
+		cv::Mat output_image = img.clone();
+
+		// full_curve_points를 원으로 표시 (반지름 1의 circle)
+		for (int col = 0; col < img.cols; ++col) {
+			if (full_curve_points[col].y != -1) {
+				// 점 그리기 (반지름 1, 색상은 빨간색 (BGR: 0, 0, 255))
+				cv::circle(output_image, full_curve_points[col], 1, cv::Scalar(0, 0, 255), -1);
+			}
+		}
+
+		// y좌표마다 경계선 높이를 가진 array 생성
+		std::vector<int> curve_y(img.cols, 0);
+
+		// 각 col에 대한 경계선을 full_curve_points의 y값을 사용하여 설정
+		for (int col = 0; col < img.cols; ++col) {
+			if (full_curve_points[col].y != -1) {
+				curve_y[col] = full_curve_points[col].y;  // 각 col의 y 값을 경계선으로 설정
+			}
+		}
+
+		// 스레드마다 고유한 벡터를 사용하여 중간 결과 저장 (타입을 uchar로 변경)
+		std::vector<std::vector<uchar>> thread_pixel_values(omp_get_max_threads());
+
+#pragma omp parallel for
+		for (int col = 0; col < img.cols; ++col) {
+			int thread_id = omp_get_thread_num();  // 각 스레드 ID를 가져옴
+			for (int row = 0; row < curve_y[col]; ++row) {
+				thread_pixel_values[thread_id].push_back(img.at<uchar>(row, col));  // 각 스레드별로 픽셀 값 저장
+			}
+		}
+
+		// 벡터 병합
+		std::vector<uchar> pixel_values_above_curve;
+		for (const auto& thread_values : thread_pixel_values) {
+			pixel_values_above_curve.insert(pixel_values_above_curve.end(), thread_values.begin(), thread_values.end());  // 스레드별 값을 병합
+		}
+
+		double selected_mean = 0;
+
+		// 빈 벡터인지 확인 후 평균 계산
+		if (!pixel_values_above_curve.empty()) {
+			// 평균 계산 (정확도를 위해 accumulate의 초기값을 double로 설정)
+			selected_mean = std::accumulate(pixel_values_above_curve.begin(), pixel_values_above_curve.end(), 0.0) / pixel_values_above_curve.size();
+		}
+
+		// 수집된 픽셀 값들의 분포를 계산
+		double threshold_70 = 0, threshold_90 = 0;
+		if (!pixel_values_above_curve.empty()) {
+			std::sort(pixel_values_above_curve.begin(), pixel_values_above_curve.end());
+			size_t idx_70 = pixel_values_above_curve.size() * 70 / 100;
+			size_t idx_90 = pixel_values_above_curve.size() * 90 / 100;
+			threshold_70 = pixel_values_above_curve[idx_70];
+			threshold_90 = pixel_values_above_curve[idx_90];
+		}
+
+		// 각 픽셀의 밝기 조정 (임계값 이상인 경우에만 비선형 조정 적용)
+		for (int col = 0; col < img.cols; ++col) {
+			for (int row = 0; row < curve_y[col]; ++row) {
+				uchar pixel_value = img.at<uchar>(row, col);
+
+				// 비선형 조정 적용
+				if (pixel_value >= threshold_90) {
+					img.at<uchar>(row, col) = static_cast<uchar>(selected_mean);
+				}
+				else if (pixel_value >= threshold_70) {
+					img.at<uchar>(row, col) = static_cast<uchar>(selected_mean);
+				}
+			}
+		}
+	}
+	catch (const cv::Exception& e) {
+		PLOGI.printf("OpenCV Error: %s", e.what());  // OpenCV 관련 에러 처리
+	}
+	catch (const std::exception& e) {
+		PLOGI.printf("Standard Error: %s", e.what());  // 다른 표준 라이브러리 예외 처리
+	}
+	catch (...) {
+		PLOGI.printf("Unknown error occurred in SetImageCompensationControlWindow");  // 예기치 않은 에러 처리
+	}
+}
+
+void COCTImaging::apply_piecewise_linear_contrast(cv::Mat& img, int low_in, int high_in, int low_out, int high_out) {
+
+	try {
+		// 결과 행렬 초기화
+		cv::Mat result = cv::Mat::zeros(img.size(), CV_8U);
+
+		// img를 CV_32F로 변환하여 연산 처리
+		cv::Mat img_float;
+		img.convertTo(img_float, CV_32F);
+
+		// 첫 구간 (low_in 이하의 값은 low_out으로 설정)
+		result.setTo(low_out, img_float <= low_in);
+
+		// 마지막 구간 (high_in 이상의 값은 high_out으로 설정)
+		result.setTo(high_out, img_float >= high_in);
+
+		// 중간 구간 선형 변환
+		cv::Mat mask = (img_float > low_in) & (img_float < high_in);
+
+		// 마스크 값 확인 (0 또는 255로 변환)
+		mask.convertTo(mask, CV_8U, 255.0);
+
+		// 중간 구간 계산 및 값 확인
+		cv::Mat intermediate_result = (img_float - low_in) * (high_out - low_out) / (high_in - low_in) + low_out;
+
+		// intermediate_result 값을 0~255 범위로 클램핑
+		cv::Mat clamped_result;
+		cv::threshold(intermediate_result, clamped_result, 255, 255, cv::THRESH_TRUNC); // 255로 클램핑
+		cv::threshold(clamped_result, clamped_result, 0, 0, cv::THRESH_TOZERO);         // 0으로 클램핑
+
+		// intermediate_result를 CV_8U로 변환
+		clamped_result.convertTo(clamped_result, CV_8U);
+
+		// mask와 clamped_result의 크기 및 자료형이 일치하는지 확인
+		if (mask.size() == clamped_result.size() && mask.type() == CV_8U && clamped_result.type() == CV_8U) {
+			// setTo 대신 copyTo 사용
+			clamped_result.copyTo(result, mask);
+		}
+
+		// 최종 결과를 img에 복사
+		result.copyTo(img);
+	}
+	catch (const cv::Exception& e) {
+		PLOGI.printf("OpenCV Error: %s", e.what());
+		return;
+	}
+	catch (...) {
+		PLOGI.printf("Unknown error occurred in SetImageCompensationControlWindow");
+		return;
+	}
+}
+
+double COCTImaging::euclidean_distance(cv::Point2f pt1, cv::Point2f pt2) {
+	return std::sqrt(std::pow(pt1.x - pt2.x, 2) + std::pow(pt1.y - pt2.y, 2));
+}
+
+std::vector<int> COCTImaging::find_outliers(const std::vector<int>& y_values) {
+	std::vector<int> sorted_values = y_values;
+	std::sort(sorted_values.begin(), sorted_values.end());
+
+	// 1사분위수(Q1)와 3사분위수(Q3)를 계산
+	int q1 = sorted_values[sorted_values.size() / 4];
+	int q3 = sorted_values[3 * sorted_values.size() / 4];
+	int iqr = q3 - q1;
+
+	// 아웃라이어의 범위는 Q1 - 1.5 * IQR 이하이거나, Q3 + 1.5 * IQR 이상인 값
+	int lower_bound = q1 - 1.5 * iqr;
+	int upper_bound = q3 + 1.5 * iqr;
+
+	// 아웃라이어 인덱스를 찾음
+	std::vector<int> outlier_indices;
+	for (int i = 0; i < y_values.size(); ++i) {
+		if (y_values[i] < lower_bound || y_values[i] > upper_bound) {
+			outlier_indices.push_back(i);
+		}
+	}
+
+	return outlier_indices;
+}
+
+void COCTImaging::adaptive_gamma_correction(cv::Mat& img) {
+	bool AGCWD_apply = false;
+	std::vector<double> pdf_i;
+
+	get_PDF_array(img, pdf_i, AGCWD_apply);
+
+	if (AGCWD_apply) {
+		get_CDF_array(pdf_i, cdf_i);
+	}
+
+	double max_intensity = 255.0;
+	double calculated_max_intensity = *std::max_element(img.begin<uchar>(), img.end<uchar>());
+	if (calculated_max_intensity > 0) {
+		max_intensity = calculated_max_intensity;
+	}
+
+	cv::Mat output_image = img.clone();
+	for (int y = 0; y < img.rows; y++) {
+		for (int x = 0; x < img.cols; x++) {
+			int intensity = img.at<uchar>(y, x);
+			double intensity_ratio = intensity / max_intensity;
+			double new_intensity = max_intensity * std::pow(intensity_ratio, 1 - cdf_i[intensity]);
+
+			new_intensity = new_intensity > 255 ? 255 : (new_intensity < 0 ? 0 : new_intensity);
+			output_image.at<uchar>(y, x) = static_cast<uchar>(new_intensity);
+		}
+	}
+	img = output_image;
+}
+
+void COCTImaging::get_PDF_array(cv::Mat& img, std::vector<double>& pdf_i, bool& AGCWD_apply) {
+	int number_of_pixels = img.rows * img.cols;
+	pdf_i.assign(256, 0);
+
+	// Histogram 계산
+	for (int y = 0; y < img.rows; y++) {
+		for (int x = 0; x < img.cols; x++) {
+			int intensity = img.at<uchar>(y, x);
+			pdf_i[intensity]++;
+		}
+	}
+
+	// PDF를 위한 Histogram 정규화
+	for (int i = 0; i < 256; i++) {
+		pdf_i[i] /= number_of_pixels;
+	}
+
+	// Entropy를 활용하여 CDF 계산 필요 여부 확인
+	double current_entropy = 0.0;
+	for (double p : pdf_i) {
+		if (p > 0) {
+			current_entropy -= p * std::log(p);
+		}
+	}
+
+	AGCWD_apply = false;
+	double entropy_difference = std::abs(current_entropy - last_entropy);
+	if (last_entropy == 0 || entropy_difference > entropy_threshold) {
+		last_entropy = current_entropy;
+		AGCWD_apply = true;
+	}
+}
+
+void COCTImaging::get_CDF_array(std::vector<double> pdf_i, std::vector<double>& cdf_i) {
+	cdf_i.resize(256);
+
+	double pdf_min_val = *std::min_element(pdf_i.begin(), pdf_i.end(), [](double a, double b) { return (a > 0 && (b == 0 || a < b)); });
+	double pdf_max_val = *std::max_element(pdf_i.begin(), pdf_i.end());
+
+	// AGCWD에 알맞게 PDF를 PDFw로 계산
+	std::vector<double> pdfw_i(256, pdf_min_val);
+	for (int i = 0; i < 256; i++) {
+		if (pdf_i[i] > 0) {
+			pdfw_i[i] = pdf_min_val * std::pow((pdf_i[i] - pdf_min_val) / (pdf_max_val - pdf_min_val), alpha);
+		}
+	}
+
+	// cumulative distribution function (CDF) 계산
+	double pdf_sum = std::accumulate(pdfw_i.begin(), pdfw_i.end(), 0.0);
+	double cumulative = 0.0;
+	for (int i = 0; i < 256; i++) {
+		cumulative += pdfw_i[i] / pdf_sum;
+		cdf_i[i] = cumulative;
+	}
+}
+
+void COCTImaging::on_trackbar(int, void*) {
+	const char* strWindowName = "Compensation";
+	try {
+		// 트랙바 값은 int로만 입력 가능하므로, 이를 원하는 범위로 변환
+		EXPONENTIAL_FACTOR = cv::getTrackbarPos("Cont", strWindowName) / 10.0f;
+		EXPONENTIAL_CONTROL = cv::getTrackbarPos("Bright", strWindowName) / 10.0f;
+		ENERGY_THRESHOLD = cv::getTrackbarPos("Eng", strWindowName);
+		alpha = cv::getTrackbarPos("Alpha", strWindowName) / 10.f;
+
+	}
+	catch (const cv::Exception& e) {
+		PLOGI.printf("OpenCV Error in on_trackbar: %s", e.what());  // OpenCV 관련 에러 처리
+	}
+	catch (const std::exception& e) {
+		PLOGI.printf("Standard Error in on_trackbar: %s", e.what());  // 다른 표준 라이브러리 예외 처리
+	}
+	catch (...) {
+		PLOGI.printf("Unknown error occurred in on_trackbar");  // 예기치 않은 에러 처리
+	}
 }

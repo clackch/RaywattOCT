@@ -33,6 +33,7 @@ namespace RaywattApp.Common.Bases
         public const string ReviewPage = "Views/ReviewPage.xaml";
         public const string Review3dPage = "Views/Review3dPage.xaml";
         public const string ReviewComparePage = "Views/ReviewComparePage.xaml";
+        public const string ReviewFfrSettingPage = "Views/ReviewFfrSettingPage.xaml";
         public const string ReviewFfrPage = "Views/ReviewFfrPage.xaml";
         public const string ReviewPresetPage = "Views/ReviewPresetPage.xaml";
         public const string ReviewAngioCoRegPage = "Views/ReviewAngioCoRegPage.xaml";
@@ -51,6 +52,7 @@ namespace RaywattApp.Common.Bases
         public const string SettingAboutPage = "Views/Setting/SettingAboutPage.xaml";
         public const string SettingLogPage = "Views/Setting/SettingLogPage.xaml";
         public const string SettingTermsConditionsPage = "Views/Setting/SettingTermsConditionsPage.xaml";
+        public const string SettingMaintenancePage = "Views/Setting/SettingMaintenancePage.xaml";
 
         //Resolution
         public const double ApplicationWidth = 1280;
@@ -223,7 +225,6 @@ namespace RaywattApp.Common.Bases
         //Background Color
         public const int BackgroundColor = 0x161616;
         public const int CardBackgroundColor = 0x232323;
-        public const int LumenEditBackgroundColor = 0x333333;
         public const int CompareBackgroundColor = 0x0d0d0d;
 
         //Playback Interval (msec)
@@ -251,6 +252,9 @@ namespace RaywattApp.Common.Bases
         //ML Model Folder
         public const string MlModelFolderPath = SystemRootPath + "\\Raywatt\\system\\3rdparty\\model";
 
+        //Storage Limit (GB)
+        public const int StorageLimit = 10;
+
         //Encrypt, Decrypt Public Key
         public const string PublicKey = "raywatt07_hwjckklls_298-87-01441";
 
@@ -258,6 +262,9 @@ namespace RaywattApp.Common.Bases
         public const double OCTImageSize = 1024;
         public const double CrossSectionSize = 620;
         public const double CrossSectionCenter = CrossSectionSize / 2;
+        public const double CrossSectionRadius = CrossSectionCenter;
+        public static System.Windows.Point CrossSectionPointCenter = new System.Windows.Point(CrossSectionRadius, CrossSectionRadius);
+        public static System.Windows.Rect CrossSectionRect = new System.Windows.Rect(0, 0, CrossSectionSize, CrossSectionSize);
         public const double CalciumIndicatorSize = 645;
         public const double CalciumIndicatorAngioSize = 490;
         public const double CalciumThicknessIndicatorSize = 681;
@@ -272,6 +279,9 @@ namespace RaywattApp.Common.Bases
         public const double AngioSize = 580;
         public const double CrossSectionAngio = 470;
         public const double CrossSectionAngioCenter = CrossSectionAngio / 2;
+        public const double CrossSectionAngioRadius = CrossSectionAngioCenter;
+        public static System.Windows.Point CrossSectionAngioPointCenter = new System.Windows.Point(CrossSectionAngioRadius, CrossSectionAngioRadius);
+        public static System.Windows.Rect CrossSectionAngioRect = new System.Windows.Rect(0, 0, CrossSectionAngio, CrossSectionAngio);
         public const double CrossSectionAngioScale = CrossSectionAngio / CrossSectionSize;
         public const double CoRegZoomAngioSize = 382;
         public const double CoRegZoomScale = 5;
@@ -284,7 +294,9 @@ namespace RaywattApp.Common.Bases
         public const double LongitudeIndicatorWidth = 22;
         public const double LongitudeIndicatorHeight = 116;
         public const double SectionIndicatorWidth = 7.5;
+        public const double SectionIndicatorMoveWidth = 28;
         public const double SectionIndicatorCenterWidth = 1;
+        public const double SectionIndicatorMoveCenterWidth = SectionIndicatorMoveWidth/2;
         public const double SectionValueWidth = 24;
         public const double SectionValueCenterWidth = 0.25;
         public const double LumenProfileExtraHeight = 6;
@@ -332,11 +344,10 @@ namespace RaywattApp.Common.Bases
         public const double PatientMenu3dY = 409;
 
         //Review - Compare - Cross Section
-        public const double CrossSectionCompareSize = 278;
-        public const double CrossSectionCompareCenter = CrossSectionCompareSize / 2;
+        public const double CrossSectionCompareSize = 344;
 
         //Review - Compare - Longitude
-        public const double LongitudeCompareWidth = 780;
+        public const double LongitudeCompareWidth = 720;
         public const double LongitudeCompareHeight = 170;
         public const double LongitudeCompareScale = (LongitudeCompareWidth - 1) / 10;
         public const double LongitudeIndicatorCompareHeight = 177;
@@ -344,6 +355,26 @@ namespace RaywattApp.Common.Bases
 
         //Review - Compare - Side Menu
         public const double SelectPreCaseExpandSize = 460;
+
+        //Review - AI FFR
+        public const double LongitudeFfrWidth = 1080;
+        public const double LongitudeFfrHeight = 90;
+        public const double LongitudeFfrImageClipHeight = LongitudeFfrHeight + 10;
+        public const string FfrStep1 = "FfrStep1";
+        public const string FfrStep2 = "FfrStep2";
+        public const string FfrStep3 = "FfrStep3";
+        public const string FfrStep4 = "FfrStep4";
+        public const string FfrStep5 = "FfrStep5";
+        public const double CrossSectionFfrSize = 344;
+
+        //Recording
+        public const int TransientTime = 100;
+        public const int StartTime = 10;
+        public const double SmallCrossSectionSize = 318;
+
+        //Recording - Confirm
+        public const double CrossSectionConfirmSize = 475;
+        public const double LongitudeConfirmWidth = 1080;
 
         //Measurement
         public const string MeasureDrawAll = "DrawAll";  //Draw All
@@ -358,19 +389,13 @@ namespace RaywattApp.Common.Bases
         public const string MeasureDisableErase = "DisableErase";  //Disable Erase
         public const string MeasureZoomIn = "ZoomIn";  //ZoomIn
         public const string MeasureZoomOut = "ZoomOut";  //ZoomOut
-        public const string MeasureZooming = "Zooming";
+        public const string MeasureReDraw = "MeasureReDraw";    //MeasureReDraw
 
         //Draw Annotation
         public static Brush[] AnnotationBrushes = {
-            new SolidColorBrush(Color.FromRgb(0xEE, 0x6C, 0x4F)),
-            new SolidColorBrush(Color.FromRgb(0xF7, 0xC9, 0x61)),
-            new SolidColorBrush(Color.FromRgb(0x47, 0x4F, 0xEB)),
-            new SolidColorBrush(Color.FromRgb(0xE9, 0x8C, 0x33)),
-            new SolidColorBrush(Color.FromRgb(0x56, 0xBD, 0x7C)),
-            new SolidColorBrush(Color.FromRgb(0x21, 0x24, 0x83)),
-            new SolidColorBrush(Color.FromRgb(0xF3, 0xAB, 0x97)),
-            new SolidColorBrush(Color.FromRgb(0x3D, 0x85, 0x51)),
-            new SolidColorBrush(Color.FromRgb(0xA9, 0xA9, 0xF9))
+            new SolidColorBrush(Color.FromRgb(0x57, 0xFE, 0xEB)),
+            new SolidColorBrush(Color.FromRgb(0xFF, 0xD8, 0x00)),
+            new SolidColorBrush(Color.FromRgb(0xFF, 0x7D, 0x77))
         };
         public static DashStyle AnnotationDashLarge = new DashStyle(new double[] { 7, 7 }, 0);
         public static DashStyle AnnotationDashSmall = new DashStyle(new double[] { 2, 5 }, 0);
@@ -412,23 +437,27 @@ namespace RaywattApp.Common.Bases
         public const string ScaleLengthCompare = "LengthCompare";
         public const string ScaleAreaCompare = "AreaCompare";
 
-        //Scale (values from PatientCase.ImageResolution)
-        public static double ImageResolution;
-        public static double ImageResolutionCompare;
+        //Field of View
+        public const double DefaultFoV = 10.0f;
+
+        //Image Resolution
+        public const double ImageResolution = DefaultFoV / 1024;
+
+        //Manual Calibration
+        public const int ZOffsetLimit = 100;
 
         //Mini-Map
         public const double MiniMapBorderSize = 140;
         public const double MiniMapCanvasSize = 138;
+        public const double MiniMapRadius = MiniMapCanvasSize / 2;
+        public static System.Windows.Point MiniMapPointCenter = new System.Windows.Point(MiniMapRadius, MiniMapRadius);
 
         //Zoom
         public const double ZoomScaleDefault = CrossSectionSize / OCTImageSize;
         public const double ZoomScaleMax = ZoomScaleDefault * 2;
-
-        //Recording
-        public const int TransientTime = 100;
-        public const int StartTime = 10;
-        public const double AngioWidth = 420;
-        public const double AngioHeight = 420;
+        public const double ZoomAngioCsScaleDefault = CrossSectionAngio / OCTImageSize;
+        public const double ZoomAngioCsScaleMax = ZoomAngioCsScaleDefault * 2;
+        public const int Zoom3DScaleMax = 5;    
 
         //AngioManager
         public const string ServerIP = "127.0.0.1";
@@ -445,5 +474,6 @@ namespace RaywattApp.Common.Bases
         public const double ellipsePathHeight = 2;
         public const double ellipseTrackWidth = 6;
         public const double ellipseTrackHeight = 6;
+        public const double coregistrationCursorSize = 113;
     }
 }

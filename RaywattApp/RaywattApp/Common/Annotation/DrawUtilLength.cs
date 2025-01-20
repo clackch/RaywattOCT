@@ -222,8 +222,8 @@ namespace RaywattApp.Common.Annotation
                     lengthGeometry.SecondPoint = point;
                 }
 
-                Canvas.SetLeft(ellipse, point.X - ellipse.Width / 2);
-                Canvas.SetTop(ellipse, point.Y - ellipse.Height / 2);
+                Canvas.SetLeft(ellipse, point.X);
+                Canvas.SetTop(ellipse, point.Y);
 
                 DeleteLine(group);
                 DrawLine(lengthGeometry.FirstPoint, lengthGeometry.SecondPoint, group, true);
@@ -325,7 +325,7 @@ namespace RaywattApp.Common.Annotation
             Label label = new Label();
             label.Style = (Style)this.Resources["StyleLabel"];
             label.Name = constLength + "_" + group;
-            label.Content = DrawAnnotation.GetLabelText(length * ImageResolution);
+            label.Content = DrawAnnotation.GetLabelText(length * Constants.ImageResolution);
             label.RenderTransform = new RotateTransform(angle);
 
             double labelHeight = GetLabelSize("StyleLabel").Height;
@@ -358,8 +358,8 @@ namespace RaywattApp.Common.Annotation
             ellipse.Name = constEllipse + "_" + group + "_" + isFirst;
             ellipse.Style = (Style)this.Resources["StyleEllipse"];
             ellipse.Stroke = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
-            Canvas.SetLeft(ellipse, point.X - (Constants.AnnotationTextPointSize / Zoom.ScaleX) / 2);
-            Canvas.SetTop(ellipse, point.Y - (Constants.AnnotationTextPointSize / Zoom.ScaleY) / 2);
+            Canvas.SetLeft(ellipse, point.X);
+            Canvas.SetTop(ellipse, point.Y);
 
             if (IsEditOn)
             {

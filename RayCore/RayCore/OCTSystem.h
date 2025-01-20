@@ -68,6 +68,7 @@ private:
 
 	// Rotary Junction
 	CRJController* m_pRJController;
+	bool m_bFirstLoad;	// To-Do: RFID 연동해서 동일한 카테터 재연결시에도 FirstLoad 로 인식되게 수정 필요
 
 	// Laser Module
 	CLaserModule* m_pLaserModule;
@@ -88,7 +89,11 @@ private:
 	double m_fColormap;
 	cv::Scalar m_backgroundColor;	// for longitude image
 	double m_fImageThreshold = 99.99;
+	bool m_bImageCompensation = true;
+	bool m_bImageCompensationControlWindow;
+	bool m_bImageLumenVignetting;
 	double m_fImageRoi = 2.f;
+	double m_fFieldOfView;
 	bool m_isTestMode;
 
 public:
@@ -110,12 +115,15 @@ public:
 	RayError PullbackScan(char *strFilePath);
 	RayError LoadCatheter();
 	RayError UnloadCatheter();
-	int StartReview(char* strFilePath);
-	RayError StartCompare(char* strFilePath);
+	int StartReview(char* strFilePath, double imageResolution, double zOffset);
+	RayError StartCompare(char* strFilePath, double imageResolution, double zOffset);
 	RayError EndReview();
+	RayError EndCompare();
+	RayError RestartReview();
 	RayError StartLiveView();
 	RayError StopLiveView();
 	RayError LaserOnOff(bool isOn);
+	RayError RJCleanModeOnOff(bool isOn);
 	RayError SetSession(int session);
 	RayError RegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude);
 	RayError UnregisterImageCallback();
@@ -123,7 +131,7 @@ public:
 	RayError UnregisterDetectionCallback();
 	void* GetVolumeData(void* pLumenContours = nullptr);
 	RayError StartLumenDetection();
-	RayError OpenImage(char* strFilePath);
+	RayError OpenImage(char* strFilePath, double imageResolution, double zOffset);
 	RayError CloseImage();
 	void* GetImageData(int nFrame);
 	void* GetLongitudeData(double fDegree);
@@ -160,10 +168,19 @@ public:
 	UINT GetLongitudeImageWidth();
 	UINT GetLongitudeImageHeight();
 	UINT GetLongitudeImageChannels();
+	RayError SetSheathDiameter(double value);
 	double GetImageThreshold();
 	RayError SetImageThreshold(double value);
 	double GetImageRoi();
 	RayError SetImageRoi(double value);
+	bool GetImageCompensation();
+	RayError SetImageCompensation(bool value);
+	bool GetImageLumenVignetting();
+	RayError SetImageCompensationControlWindow(bool value);
+	RayError SetImageLumenVignetting(bool value);
+	double GetFieldOfView();
+	RayError SetFieldOfView(double value);
+	RayError SetZOffset(double value);
 	void SetTestMode(bool isTestMode) { m_isTestMode = isTestMode; }
 	bool IsTestMode() { return m_isTestMode; }
 
@@ -174,12 +191,15 @@ private:
 	// Work Thread (stop in OnMsgNotifyProcessDone func)
 	static UINT threadSaveRaw(LPVOID param);	
 	// Rotary Junction Thread (stop in OnMsgDeviceWorkDone func)
+	static UINT threadInitializeRotaryJunction(LPVOID param);
 	static UINT threadAutoCalibration(LPVOID param);
 	static UINT threadPullbackScan(LPVOID param);
 	// Catheter related Thread (stop in OnMsgUpdateCatheterState func)
 	static UINT threadLoadCatheter(LPVOID param);
 	static UINT threadUnloadCatheter(LPVOID param);
 	static UINT threadValidateCatheter(LPVOID param);
+	static UINT threadManualLoadCatheter(LPVOID param);
+	static UINT threadCleanRotaryJunction(LPVOID param);
 
 	// Imaging & Device
 	bool checkConnection();
@@ -197,7 +217,9 @@ private:
 	void redrawCutView();
 	void laserOnOff(bool isOn);
 	bool waitForStepMotors(bool& runFlag);
+	bool waitForStepMotors(eStepMotorIndex idxMotor, bool& runFlag);
 	void calculateIntensity(cv::Mat image);
+	std::vector<std::vector<std::string>> readLoadSequence();
 
 protected:
 	LRESULT OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam);

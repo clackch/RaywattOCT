@@ -61,6 +61,9 @@ namespace RaywattApp.Models
         private bool _isOCTImagingCompareDone = true;
 
         [ObservableProperty]
+        private bool _isFfrCalculated = true;
+
+        [ObservableProperty]
         private bool _isPaused = true;
 
         [ObservableProperty]
@@ -74,6 +77,12 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private double _imageIntensity;
+
+        [ObservableProperty]
+        private bool _enhancedLUT;
+
+        [ObservableProperty]
+        private bool _isCleaningDone = true;
 
         [ObservableProperty]
         private Dictionary<string, bool> _testMode = new Dictionary<string, bool>();

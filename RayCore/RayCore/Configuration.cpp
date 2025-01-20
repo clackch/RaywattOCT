@@ -23,6 +23,18 @@ void CConfiguration::Initialize(tstring configFile)
 
 	configFilePath = configFile;
 
+	// [Measurement]
+	this->measurement.fAxialResolutionScale = getPrivateProfileFloat(_T("Measurement"), _T("AxialResolutionScale"), 8.3, configFilePath.c_str());
+	this->measurement.nNoiseSkip = ::GetPrivateProfileInt(_T("Measurement"), _T("NoiseSkip"), 300, configFilePath.c_str());
+	this->measurement.nNoiseAverage = ::GetPrivateProfileInt(_T("Measurement"), _T("NoiseAverage"), 100, configFilePath.c_str());
+	
+	this->measurement.fSheathRadiusOnePointSix = getPrivateProfileFloat(_T("Measurement"), _T("SheathRadius1.6"), 0.28, configFilePath.c_str());
+	this->measurement.fSheathRadiusTwoPointSix = getPrivateProfileFloat(_T("Measurement"), _T("SheathRadius2.6"), 0.43, configFilePath.c_str());	
+	this->measurement.fSheathThicknessOnePointSix = getPrivateProfileFloat(_T("Measurement"), _T("SheathThickness1.6"), 0.045, configFilePath.c_str());
+	this->measurement.fSheathThicknessTwoPointSix = getPrivateProfileFloat(_T("Measurement"), _T("SheathThickness2.6"), 0.1, configFilePath.c_str());	
+	this->measurement.fSheathRadius = getPrivateProfileFloat(_T("Measurement"), _T("SheathRadius"), 0.43, configFilePath.c_str());
+	this->measurement.nSheathPosition = measurement.fSheathRadius * 1000.f / measurement.fAxialResolutionScale;
+
 	// [Imaging]
 	int nAScan = ::GetPrivateProfileInt(_T("Imaging"), _T("AScan"), 1920, configFilePath.c_str());
 	int nBScan = ::GetPrivateProfileInt(_T("Imaging"), _T("BScan"), 500, configFilePath.c_str());
@@ -31,13 +43,7 @@ void CConfiguration::Initialize(tstring configFile)
 	this->imaging.highLevel = getPrivateProfileFloat(_T("Imaging"), _T("HighLevel"), 65.0f, configFilePath.c_str());
 	this->imaging.brightness = getPrivateProfileFloat(_T("Imaging"), _T("Brightness"), 0.f, configFilePath.c_str());
 	this->imaging.contrast = getPrivateProfileFloat(_T("Imaging"), _T("Contrast"), 0.875f, configFilePath.c_str());
-
-	// [Measurement]
-	this->measurement.fAxialResolutionScale = getPrivateProfileFloat(_T("Measurement"), _T("AxialResolutionScale"), 8.3, configFilePath.c_str());
-	this->measurement.nNoiseSkip = ::GetPrivateProfileInt(_T("Measurement"), _T("NoiseSkip"), 300, configFilePath.c_str());
-	this->measurement.nNoiseAverage = ::GetPrivateProfileInt(_T("Measurement"), _T("NoiseAverage"), 100, configFilePath.c_str());
-	this->measurement.fSheathRadius = getPrivateProfileFloat(_T("Measurement"), _T("SheathRadius"), 0.43, configFilePath.c_str());
-	this->measurement.nSheathPosition = measurement.fSheathRadius * 1000.f / measurement.fAxialResolutionScale;
+	this->imaging.distPerPixel = measurement.fAxialResolutionScale;
 
 	// [Acquisition]
 	this->acquisition.nAScan = imaging.nAScan;
@@ -75,6 +81,8 @@ void CConfiguration::Initialize(tstring configFile)
 
 	// [Catheter]
 	this->catheter.rotationTime = ::GetPrivateProfileInt(_T("Catheter"), _T("RotationTime"), 10000, configFilePath.c_str());
+	this->catheter.manualLoad = ::GetPrivateProfileInt(_T("Catheter"), _T("ManualLoad"), 0, configFilePath.c_str());
+	this->catheter.length = ::GetPrivateProfileInt(_T("Catheter"), _T("Length1.6"), -45000, configFilePath.c_str());
 
 	// [Volume]
 	this->volume.size = ::GetPrivateProfileInt(_T("Volume"), _T("Size"), 500, configFilePath.c_str());

@@ -1,7 +1,7 @@
 #include "TIFFReader.h"
 
 CTIFFReader::CTIFFReader()
-	: m_pTif(nullptr), m_nWidth(0), m_nHeight(0)
+	: m_pTif(nullptr), m_nWidth(0), m_nHeight(0), m_nChannels(0)
 {
 }
 CTIFFReader::~CTIFFReader()
@@ -27,6 +27,7 @@ int CTIFFReader::Initialize(const char* strDataFilePath)
 
 	TIFFGetField(m_pTif, TIFFTAG_IMAGEWIDTH, &m_nWidth);
 	TIFFGetField(m_pTif, TIFFTAG_IMAGELENGTH, &m_nHeight);
+	TIFFGetField(m_pTif, TIFFTAG_SAMPLESPERPIXEL, &m_nChannels);
 
 	m_nDataSize = m_nWidth * m_nHeight;
 	m_pReadSamples = new char* [m_nNumOfSamples];
@@ -55,12 +56,16 @@ void CTIFFReader::finalize()
 bool CTIFFReader::readFrame(int nIndex)
 {
 	if (nIndex < 0 || nIndex >= m_nNumOfSamples) return false;
-
+	
 	if (m_pReadSamples[nIndex] == NULL) {
-		m_pReadSamples[nIndex] = new char[m_nDataSize * sizeof(unsigned int)];
+		m_pReadSamples[nIndex] = new char[m_nDataSize * sizeof(char)];
 
+		int revertedIndex = (m_nNumOfSamples - nIndex - 1);
 		TIFFSetDirectory(m_pTif, nIndex);
-		int result = TIFFReadRGBAImage(m_pTif, m_nWidth, m_nHeight, (uint32*)m_pReadSamples[nIndex]);
+
+		for (int y = 0; y < m_nHeight; y++) {
+			TIFFReadScanline(m_pTif, m_pReadSamples[nIndex] + (y * m_nWidth), y);
+		}
 	}
 
 	return true;

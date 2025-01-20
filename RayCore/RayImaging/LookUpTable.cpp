@@ -17,7 +17,7 @@ CLookUpTable& CLookUpTable::GetInstance() {
 /*
 * return: Size of LUT list or zero if loading from file is failed.
 */
-int CLookUpTable::Load(const char* strLUTPath) {
+int CLookUpTable::Load(const char* strLUTPath, bool isTest) {
 	std::vector<cv::Vec3b> lut;
 
 	FILE* fpLUT = fopen(strLUTPath, "r");
@@ -42,9 +42,12 @@ int CLookUpTable::Load(const char* strLUTPath) {
 				lut.push_back(color);
 			}
 		}
-		if (lut.size() == 256) {
-			m_vLUT.clear();
+		if (lut.size() == 256 && !isTest) {
 			m_vLUT.push_back(lut);
+			return m_vLUT.size();
+		}
+		else {
+			m_vLUT.at(3) = lut;
 			return m_vLUT.size();
 		}
 	}
@@ -72,4 +75,51 @@ void CLookUpTable::Apply(cv::Mat& image, uint nIdxLUT) {
 			image.at<cv::Vec3b>(y, x) = cvtColor;
 		}
 	}
+}
+
+/*
+* image: CV_8U3C Format
+* nIdxLUT: LUT Index
+* image1ch: empty or CV_8UC1 Format
+*/
+void CLookUpTable::Revert(cv::Mat image, uint nIdxLUT, cv::Mat& image1ch) {
+	if (image1ch.empty()) {
+		image1ch = cv::Mat(cv::Size(image.cols, image.rows), CV_8UC1);
+	}
+
+	for (int y = 0; y < image.rows; y++) {
+		for (int x = 0; x < image.cols; x++) {
+			cv::Vec3b color = image.at<cv::Vec3b>(y, x);
+
+			char idxColor = 0;
+			for (int idx = 0; idx < m_vLUT.at(nIdxLUT).size(); idx++) {
+				cv::Vec3b bgrColor = m_vLUT.at(nIdxLUT).at(idx);
+
+				if (bgrColor.val[0] == color.val[2] &&
+					bgrColor.val[1] == color.val[1] &&
+					bgrColor.val[2] == color.val[0]) {
+					idxColor = idx;
+					break;
+				}
+			}
+
+			image1ch.at<char>(y, x) = idxColor;
+		}
+	}
+}
+
+void CLookUpTable::SetCurrentColormap(int colormapIndex) {
+	this->m_fCurrentColorMapIndex = colormapIndex;
+}
+
+int CLookUpTable::GetCurrentColormap() {
+	return this->m_fCurrentColorMapIndex;
+}
+
+void CLookUpTable::SetEnhancedLUT(bool applyOrNot) {
+	this->m_enhancedLUTApplied = applyOrNot;
+}
+
+bool CLookUpTable::GetEnhancedLUT() {
+	return this->m_enhancedLUTApplied;
 }

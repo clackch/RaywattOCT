@@ -28,73 +28,119 @@
             <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Margin="75,20,0,19" Content="{Binding [New Recording], Source={StaticResource L10N}}"/>
         </Grid>
 
-        <Grid Grid.Row="1" Margin="160,62,160,62">
+        <Grid Grid.Row="1" Margin="60,40,60,40">
             <Grid.RowDefinitions>
-                <RowDefinition Height="725"/>
+                <RowDefinition Height="769"/>
                 <RowDefinition Height="1"/>
                 <RowDefinition Height="74"/>
             </Grid.RowDefinitions>
-            <Border Grid.Row="0" CornerRadius="10,10,0,0" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray6Brush}">
-                <Grid Margin="49,35,49,0">
+            <Border Grid.Row="0" CornerRadius="10,10,0,0" Background="{DynamicResource GrayscaleGray7Brush}">
+                <Grid Margin="40,44,40,0">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="60"/>
-                        <RowDefinition Height="115"/>
-                        <RowDefinition Height="474"/>
-                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="38"/>
+                        <RowDefinition Height="14"/>
+                        <RowDefinition Height="1"/>
+                        <RowDefinition Height="24"/>
+                        <RowDefinition Height="620"/>
+                        <RowDefinition Height="30"/>
                     </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" Margin="162,0,162,0">
+                    <Grid Grid.Row="0">
+                        <StackPanel>
+                            <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Recording], Source={StaticResource L10N}}"/>
+                        </StackPanel>
+                    </Grid>
+                    <Separator Grid.Row="2" Background="{DynamicResource GrayscaleGray5Brush}"/>
+                    <Grid Grid.Row="4">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="60"/>
+                            <ColumnDefinition Width="620"/>
+                            <ColumnDefinition Width="36"/>
                             <ColumnDefinition/>
-                            <ColumnDefinition Width="60"/>
-                            <ColumnDefinition/>
-                            <ColumnDefinition Width="60"/>
                         </Grid.ColumnDefinitions>
-                        <Grid Grid.Column="0" VerticalAlignment="Center">
-                            <Image Source="{svgc:SvgImage Source=/res/icon/recordingStep1.svg}" Width="47.8" Height="37"/>
-                            <Image Source="{svgc:SvgImage Source=/res/icon/recordingStep1_active.svg}" Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                        </Grid>
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <Image Source="{svgc:SvgImage Source=/res/icon/recordingBar.svg}" Width="138" Height="3"/>
-                        </StackPanel>
-                        <Grid Grid.Column="2" VerticalAlignment="Center">
-                            <Image Source="{svgc:SvgImage Source=/res/icon/recordingStep2.svg}" Width="30.9" Height="36"/>
-                            <Image Source="{svgc:SvgImage Source=/res/icon/recordingStep2_active.svg}" Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
-                        </Grid>
-                        <StackPanel Grid.Column="3" VerticalAlignment="Center">
-                            <Image Source="{svgc:SvgImage Source=/res/icon/recordingBar.svg}" Width="138" Height="3"/>
-                        </StackPanel>
-                        <Grid Grid.Column="4" VerticalAlignment="Center">
-                            <Image Source="{svgc:SvgImage Source=/res/icon/recordingStep3.svg}" Width="32" Height="32"/>
-                            <Image Source="{svgc:SvgImage Source=/res/icon/recordingStep3_active.svg}" Visibility="Collapsed"/>
+                        <Border Grid.Column="0" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
+                            <Grid Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
+                                <Grid.Clip>
+                                    <EllipseGeometry Center="{x:Static const:Constants.CrossSectionPointCenter}" RadiusX="{x:Static const:Constants.CrossSectionRadius}" RadiusY="{x:Static const:Constants.CrossSectionRadius}"/>
+                                </Grid.Clip>
+                                <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Stretch="Fill">
+                                    <Image.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                            <TranslateTransform X="{Binding Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                        </TransformGroup>
+                                    </Image.RenderTransform>
+                                </Image>
+                            </Grid>
+                        </Border>
+                        <Grid Grid.Column="2">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="70"/>
+                                <RowDefinition Height="51"/>
+                                <RowDefinition Height="130"/>
+                                <RowDefinition Height="51"/>
+                                <RowDefinition Height="318"/>
+                            </Grid.RowDefinitions>
+                            <Grid Grid.Row="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="60"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid Grid.Column="0" VerticalAlignment="Center">
+                                    <Image Source="{svgc:SvgImage Source=/res/icon/recordingStep1.svg}" Width="47.8" Height="37"/>
+                                    <Image Source="{svgc:SvgImage Source=/res/icon/recordingStep1_active.svg}" Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                </Grid>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <Image Source="{svgc:SvgImage Source=/res/icon/recordingBar.svg}" Width="138" Height="3"/>
+                                </StackPanel>
+                                <Grid Grid.Column="2" VerticalAlignment="Center">
+                                    <Image Source="{svgc:SvgImage Source=/res/icon/recordingStep2.svg}" Width="30.9" Height="36"/>
+                                    <Image Source="{svgc:SvgImage Source=/res/icon/recordingStep2_active.svg}" Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                                </Grid>
+                                <StackPanel Grid.Column="3" VerticalAlignment="Center">
+                                    <Image Source="{svgc:SvgImage Source=/res/icon/recordingBar.svg}" Width="138" Height="3"/>
+                                </StackPanel>
+                                <Grid Grid.Column="4" VerticalAlignment="Center">
+                                    <Image Source="{svgc:SvgImage Source=/res/icon/recordingStep3.svg}" Width="32" Height="32"/>
+                                    <Image Source="{svgc:SvgImage Source=/res/icon/recordingStep3_active.svg}" Visibility="Collapsed"/>
+                                </Grid>
+                            </Grid>
+                            <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleGray3Brush}" TextBlock.TextAlignment="Center">
+                                    <Label.Content>
+                                        <AccessText TextWrapping="Wrap" Text="{Binding [$MSG002], Source={StaticResource L10N}}"/>
+                                    </Label.Content>
+                                </Label>
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal" Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                                <StackPanel Orientation="Horizontal" Visibility="{Binding IsStart, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG003], Source={StaticResource L10N}}"/>
+                                    <StackPanel Width="10"/>
+                                    <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding StartTime}"/>
+                                    <StackPanel Width="10"/>
+                                    <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [sec], Source={StaticResource L10N}}"/>
+                                </StackPanel>
+                                <StackPanel Visibility="{Binding IsStart, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                                    <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [Recording], Source={StaticResource L10N}}"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <Border Grid.Row="4" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
+                                <Grid>
+                                    <Grid Visibility="{Binding DeviceStatus.IsAngioInitialized, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG023], Source={StaticResource L10N}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    </Grid>
+                                    <Grid Visibility="{Binding DeviceStatus.IsAngioInitialized, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <Image Source="{Binding AngioImage}" Width="{x:Static const:Constants.SmallCrossSectionSize}" Height="{x:Static const:Constants.SmallCrossSectionSize}" Stretch="Uniform"/>
+                                    </Grid>
+                                </Grid>
+                            </Border>
                         </Grid>
                     </Grid>
-                    <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleGray3Brush}" TextBlock.TextAlignment="Center">
-                            <Label.Content>
-                                <AccessText TextWrapping="Wrap" Text="{Binding [$MSG002], Source={StaticResource L10N}}"/>
-                            </Label.Content>
-                        </Label>
-                    </StackPanel>
-                    <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal" Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                        <StackPanel Orientation="Horizontal" Visibility="{Binding IsStart, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG003], Source={StaticResource L10N}}"/>
-                            <StackPanel Width="10"/>
-                            <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding StartTime}"/>
-                            <StackPanel Width="10"/>
-                            <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [sec], Source={StaticResource L10N}}"/>
-                        </StackPanel>
-                        <StackPanel Visibility="{Binding IsStart, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                            <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [Recording], Source={StaticResource L10N}}"/>
-                        </StackPanel>
-                    </StackPanel>
-                    <Border Grid.Row="2" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
-                        <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{StaticResource CrossSectionSize}" Height="{StaticResource CrossSectionSize}" Stretch="Fill"/>
-                    </Border>
                 </Grid>
             </Border>
             <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
-            <Border Grid.Row="2" CornerRadius="0,0,10,10" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray6Brush}">
+            <Border Grid.Row="2" CornerRadius="0,0,10,10" Background="{DynamicResource GrayscaleGray6Brush}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
