@@ -45,7 +45,6 @@ enum class RayProperty {
 	ImageRoi,
 	ImageCompensation,
 	ImageCompensationControlWindow,
-	ImageLumenVignetting,
 	FieldOfView,
 	LongitudeImageWidth,
 	LongitudeImageHeight,
@@ -55,7 +54,8 @@ enum class RayProperty {
 	PullbackSpeed,
 	SheathDiameter,
 	TestMode,
-	ZOffset
+  ZOffset,
+  PullbackStartTime
 };
 
 enum class RayCallbackRequest {

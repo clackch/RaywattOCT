@@ -126,9 +126,6 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
     case RayProperty::ImageCompensationControlWindow:
         octSystem.SetImageCompensationControlWindow(value);
         break;
-    case RayProperty::ImageLumenVignetting:
-        octSystem.SetImageLumenVignetting(value);
-        break;
     case RayProperty::FieldOfView:
         octSystem.SetFieldOfView(value);
         break;
@@ -137,6 +134,9 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
         break;
     case RayProperty::TestMode:
         octSystem.SetTestMode((bool) value);
+        break;
+    case RayProperty::PullbackStartTime:
+        octSystem.SetPullbackStartTime(value);
         break;
     default:
         return RayError::InvalidArgument;
@@ -199,12 +199,12 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return octSystem.GetImageRoi();
     case RayProperty::ImageCompensation:
         return octSystem.GetImageCompensation();
-    case RayProperty::ImageLumenVignetting:
-        return octSystem.GetImageLumenVignetting();
     case RayProperty::FieldOfView:
         return octSystem.GetFieldOfView();
     case RayProperty::TestMode:
         return (double) octSystem.IsTestMode();
+    case RayProperty::PullbackStartTime:
+        return octSystem.GetPullbackStartTime();
     default:
         return (int)RayError::InvalidArgument;
     }

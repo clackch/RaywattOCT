@@ -12,6 +12,7 @@ using RaywattApp.Common.Bases;
 using OpenCvSharp;
 using log4net;
 using System.Diagnostics;
+using OpenCvSharp.LineDescriptor;
 
 namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 {
@@ -32,6 +33,27 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
         private static readonly DependencyProperty AngioFrameNumberProperty =
             DependencyProperty.Register("AngioFrameNumber", typeof(int), typeof(DrawAngioPathUtil), new PropertyMetadata(-1, OnAngioFrameNumberPropertyChanged));
 
+        // OCT Frame Number
+        public int FrameNumber
+        {
+            get { return (int)GetValue(FrameNumberProperty); }
+            set { this.SetValue(FrameNumberProperty, value); }
+        }
+
+        private static readonly DependencyProperty FrameNumberProperty =
+            DependencyProperty.Register("FrameNumber", typeof(int), typeof(DrawAngioPathUtil), new PropertyMetadata(-1, OnFrameNumberPropertyChanged));
+
+        // OCT Number Of Frames
+        public int NumberOfFrames
+        {
+            get { return (int)GetValue(NumberOfFramesProperty); }
+            set { this.SetValue(NumberOfFramesProperty, value); }
+        }
+
+        private static readonly DependencyProperty NumberOfFramesProperty =
+            DependencyProperty.Register("NumberOfFrames", typeof(int), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
+
+
         public int CurrentAngioFrameNumber
         {
             get { return (int)GetValue(CurrentAngioFrameNumberProperty); }
@@ -50,23 +72,24 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
         public static readonly DependencyProperty AngioImagesProperty =
             DependencyProperty.Register("AngioImages", typeof(List<Mat>), typeof(DrawAngioPathUtil), new PropertyMetadata(null, OnAngioImagesPropertyChanged));
 
-        public List<CoRegistration> AngioTrackPoints
+        public List<CoRegistration> CoRegistrations
         {
-            get { return (List<CoRegistration>)GetValue(AngioTrackPointsProperty); }
-            set { this.SetValue(AngioTrackPointsProperty, value); }
+            get { return (List<CoRegistration>)GetValue(CoRegistrationsProperty); }
+            set { this.SetValue(CoRegistrationsProperty, value); }
         }
 
-        public static readonly DependencyProperty AngioTrackPointsProperty =
-            DependencyProperty.Register("AngioTrackPoints", typeof(List<CoRegistration>), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
+        public static readonly DependencyProperty CoRegistrationsProperty =
+            DependencyProperty.Register("CoRegistrations", typeof(List<CoRegistration>), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
 
-        public CoRegistration CurrentTrackPoint
+        public CoRegistration CurrentCoRegistration
         {
-            get { return (CoRegistration)GetValue(CurrentTrackPointProperty); }
-            set { this.SetValue(CurrentTrackPointProperty, value); }
+            get { return (CoRegistration)GetValue(CurrentCoRegistrationProperty); }
+            set { this.SetValue(CurrentCoRegistrationProperty, value); }
         }
 
-        public static readonly DependencyProperty CurrentTrackPointProperty =
-            DependencyProperty.Register("CurrentTrackPoint", typeof(CoRegistration), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
+        public static readonly DependencyProperty CurrentCoRegistrationProperty =
+            DependencyProperty.Register("CurrentCoRegistration", typeof(CoRegistration), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
+
 
         public List<DijkstraHeap> DijkstraHeap
         {
@@ -132,16 +155,29 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
         public static readonly DependencyProperty IsRenderingProperty =
             DependencyProperty.Register("IsRendering", typeof(bool), typeof(DrawAngioPathUtil), new PropertyMetadata(false));
 
+       public string PullbackType
+        {
+            get { return (string)GetValue(PullbackTypeProperty); }
+            set { this.SetValue(PullbackTypeProperty, value); }
+        }
+
+        public static readonly DependencyProperty PullbackTypeProperty =
+            DependencyProperty.Register("PullbackType", typeof(string), typeof(DrawAngioPathUtil), new PropertyMetadata(null));
+
         private String curveType = "Spline"; // Bezier or Spline
         private List<DijkstraHeap> localDijkstraHeap;
-        private List<CoRegistration> localAngioTrackPoints;
+        private List<CoRegistration> localCoRegistrations;
         private int angioImageTotalNum;
         private bool isMoved = false, isDrawing = true;
         private int trackPointNum;
-        private int maxPathLength = 0;
         private Image coregiCursor_cross;
         private Image coregiCursor_no_cross;
-
+        private List<Superpixel> superpixelList;
+        private double markerDrawInterval = 0;
+        private Point distalPoint = new Point();
+        private int prevOCTFrameNum = 0;
+        private int playDirection = 0;
+        
         public DrawAngioPathUtil()
         {
             InitializeComponent();
@@ -204,7 +240,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             });
         }
 
-        private void TrackPointChange()
+        private void MarkerChange()
         {
             InitializePath();
             DrawTrackPoint();
@@ -212,24 +248,24 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
         private void DrawPDICon(DijkstraHeap dh)
         {
-            if(dh.trackPoint.Count < 1)
+            if(dh.trackPoints.Count < 1)
             {
                 return;
             }
 
             double px, py, dx, dy;
-            px = dh.trackPoint[0].X;
-            py = dh.trackPoint[0].Y;
+            px = dh.trackPoints[0].X;
+            py = dh.trackPoints[0].Y;
             Image proximalImage = new Image();
             proximalImage.Style = (Style)this.FindResource("AngioProximalIcon");
 
             Canvas.SetLeft(proximalImage, px - proximalImage.Width/2);
             Canvas.SetTop(proximalImage, py - proximalImage.Height);
 
-            if (dh.trackPoint.Count > 1/* 시작점 외 추가 점을 찍은 경우*/)
+            if (dh.trackPoints.Count > 1/* 시작점 외 추가 점을 찍은 경우*/)
             {
-                dx = dh.trackPoint[dh.trackPoint.Count - 1].X;
-                dy = dh.trackPoint[dh.trackPoint.Count - 1].Y;
+                dx = dh.trackPoints[dh.trackPoints.Count - 1].X;
+                dy = dh.trackPoints[dh.trackPoints.Count - 1].Y;
                 Image distalImage = new Image();
                 distalImage.Style = (Style)this.FindResource("AngioDistalIcon");
 
@@ -278,7 +314,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
             // 추적된 점 그리기
             int count = 0;
-            foreach (Point trackPoint in dh.trackPoint)
+            foreach (Point trackPoint in dh.trackPoints)
             {
                 Rectangle rectangle = new Rectangle();
                 ActivateRecEvents(rectangle);
@@ -297,45 +333,45 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             canvas.Children.Clear();
 
             List<Point> path = new List<Point>();
-            foreach (var list in CurrentTrackPoint.Line)
+            foreach (var list in CurrentCoRegistration.Line)
             {
-                path.InsertRange(0, list);
+                path.AddRange(list);
             }
 
-            if(path.Count == 0)
-            {
-                return;
-            }
-
-            int pathLength = path.Count;
-
-            if(maxPathLength == 0 || maxPathLength < pathLength) {
-                maxPathLength = pathLength;
-            }
-
-            double pathLostScale = 2.0 / 3.0;
-            if(pathLostScale * maxPathLength > pathLength ) // 길이 값으로 path 잘못 찾았을 경우 거르기
+            //Superpixel의 Index수로 Ratio 다시 설정
+            if (path.Count == 0 || (CurrentCoRegistration.MarkerPoint.X == 0 && CurrentCoRegistration.MarkerPoint.Y == 0))
             {
                 return;
+            }
+
+            int markerIndex = path.IndexOf(CurrentCoRegistration.MarkerPoint);
+
+            if(markerIndex == -1)
+            {
+                path.Reverse();
+                double minDistance = double.MaxValue;
+                for (int i = 0; i < path.Count; i++)
+                {
+                    double tmp = GetDistance(path[i], CurrentCoRegistration.MarkerPoint);
+                    if (minDistance > tmp)
+                    {
+                        minDistance = tmp;
+                        CurrentCoRegistration.MarkerPoint = path[i];
+                        markerIndex = i;
+                    }
+                }
             }
 
             //마커 그리기
             Ellipse marker = new Ellipse();
             marker.Style = (Style)this.Resources["StyleTrackEllipse"];
-            double rate = (double)(CurrentAngioFrameNumber + 1) / AngioTrackPoints.Count;
-            
-            if(pathLength < 0)
-            {
-                pathLength = 0;
-            }
-            if (pathLength == path.Count)
-            {
-                pathLength -= 1;
-            }
-            int currPos = (int)(pathLength - pathLength * rate);
 
-            Canvas.SetLeft(marker, path[currPos].X - marker.Width / 2);
-            Canvas.SetTop(marker, path[currPos].Y - marker.Height / 2);
+            int pathIndex = markerIndex + (int)markerDrawInterval >= path.Count ? path.Count - 1 : 
+                markerIndex + (int)markerDrawInterval < 0 ? 0 : markerIndex + (int)markerDrawInterval;
+
+            Canvas.SetLeft(marker, path[pathIndex].X - marker.Width / 2);
+            Canvas.SetTop(marker, path[pathIndex].Y - marker.Height / 2);
+
             this.canvas.Children.Add(marker);
         }
 
@@ -344,7 +380,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             int initialPointX = (int)x;
             int initialPointY = (int)y;
             int templateSize = 100;
-            int searchRange = 200;
+            int searchRange = 100;
 
             List<Mat> Images = new List<Mat>();
             Images.AddRange(AngioImages);
@@ -383,7 +419,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                 int trackPointX = (int)top_left.X + adjustedTemplateWidth / 2;
                 int trackPointY = (int)top_left.Y + adjustedTemplateHeight / 2;
 
-                localDijkstraHeap[i].trackPoint.Add(new Point(trackPointX, trackPointY));
+                localDijkstraHeap[i].trackPoints.Add(new Point(trackPointX, trackPointY));
             }
         }
 
@@ -393,17 +429,17 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             int[] vx, vy, pixelValue;
 
             int movedRecPrevIndex = movedRecIndex == 0 ? 0 : movedRecIndex - 1; // 첫번째 점 수정 : 마지막 점 수정 or 중간 점 수정, 단 점 추가는 항상
-            int centerPos = localDijkstraHeap[imageIndex].trackPoint.Count - movedRecIndex >= 2 ? 1 : 0; // 수정할 점이 중간에 있는 경우엔 Path를 두개 변경해야 하므로, centerPos를 초기화.
+            int centerPos = localDijkstraHeap[imageIndex].trackPoints.Count - movedRecIndex >= 2 ? 1 : 0; // 수정할 점이 중간에 있는 경우엔 Path를 두개 변경해야 하므로, centerPos를 초기화.
 
             for (int trackIndex = movedRecPrevIndex; trackIndex < movedRecIndex + centerPos; trackIndex++)
             {
                 vx = new int[localDijkstraHeap[imageIndex].width * localDijkstraHeap[imageIndex].height];
                 vy = new int[localDijkstraHeap[imageIndex].width * localDijkstraHeap[imageIndex].height];
                 pixelValue = new int[localDijkstraHeap[imageIndex].width * localDijkstraHeap[imageIndex].height];
-                startX = (int)localDijkstraHeap[imageIndex].trackPoint[trackIndex].X;
-                startY = (int)localDijkstraHeap[imageIndex].trackPoint[trackIndex].Y;
-                endX = (int)localDijkstraHeap[imageIndex].trackPoint[trackIndex + 1].X;
-                endY = (int)localDijkstraHeap[imageIndex].trackPoint[trackIndex + 1].Y;
+                startX = (int)localDijkstraHeap[imageIndex].trackPoints[trackIndex].X;
+                startY = (int)localDijkstraHeap[imageIndex].trackPoints[trackIndex].Y;
+                endX = (int)localDijkstraHeap[imageIndex].trackPoints[trackIndex + 1].X;
+                endY = (int)localDijkstraHeap[imageIndex].trackPoints[trackIndex + 1].Y;
                 localDijkstraHeap[imageIndex].CalculatePathCost(startX, startY, endX, endY);
                 localDijkstraHeap[imageIndex].ReturnPath(endX, endY, vx, vy, out pathLength, pixelValue);
                 GenerateCurvePath(vx, vy, pixelValue, imageIndex, pathLength, curveType, trackIndex);
@@ -485,8 +521,6 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             Application.Current.Dispatcher.Invoke(() =>
             {
                 CoregistrationCompleted();
-                IsRendering = false;
-                IsAngioTrackCompleted = IsResetOn = isDrawing = true;
             });
         }
 
@@ -500,6 +534,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             {
                 localDijkstraHeap[frameIndex].line[lineIndex].Add(curvexy);
             }
+            localDijkstraHeap[frameIndex].line[lineIndex].Reverse();
         }
 
         // Bezier
@@ -598,6 +633,605 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             Canvas.SetTop(cursorImg, y - Constants.coregistrationCursorSize / 2);
             this.canvas.Children.Add(cursorImg);
         }
+         
+        public static void SetCoRegistrationMarkers(List<CoRegistration> coRegistrations, List<Mat> angioImages)
+        {
+            int angioImageNum = coRegistrations.Count;
+            List<System.Windows.Point> path = new List<System.Windows.Point>();
+
+            for (int i = 0; i < angioImageNum; i++)
+            {
+                foreach (List<System.Windows.Point> line in coRegistrations[i].Line)
+                {
+                    line.Reverse();
+                    path.AddRange(line);
+                }
+
+                if (i == 0)
+                {
+                    coRegistrations[i].MarkerPoint = GetMarkerPosition(coRegistrations[i].TrackPoints[0/*Proximal Point*/], path, angioImages[i]);
+                }
+                else
+                {
+                    int ratio = path.Count / angioImageNum * i;
+                    coRegistrations[i].MarkerPoint = GetMarkerPosition(path[ratio - 1], path, angioImages[i]);
+                }
+            }
+        }
+
+        private static System.Windows.Point GetMarkerPosition(System.Windows.Point centerPoint, List<System.Windows.Point> path, Mat angioImage)
+        {
+            int searchBoxXY = 15;
+
+            List<(System.Windows.Point position, double avgValue)> list3x3 = new List<(System.Windows.Point, double)>();
+            List<(System.Windows.Point position, double avgValue)> list5x5 = new List<(System.Windows.Point, double)>();
+
+            for (int x = (int)centerPoint.X - searchBoxXY; x <= centerPoint.X + searchBoxXY; x++)
+            {
+                for (int y = (int)centerPoint.Y - searchBoxXY; y <= centerPoint.Y + searchBoxXY; y++)
+                {
+                    if (x >= 0 && y >= 0 && x < angioImage.Width && y < angioImage.Height)
+                    {
+                        byte pixelValue = angioImage.At<byte>(y, x);
+
+                        if (pixelValue >= 10 && pixelValue <= 60)
+                        {
+                            double avg3x3 = CalculateMaskAverage(angioImage, x, y, 3);
+                            double avg5x5 = CalculateMaskAverage(angioImage, x, y, 5);
+
+                            list3x3.Add((new System.Windows.Point(x, y), avg3x3));
+                            list5x5.Add((new System.Windows.Point(x, y), avg5x5));
+                        }
+                    }
+                }
+            }
+
+            if (list3x3.Count == 0 || list5x5.Count == 0)
+            {
+                return new System.Windows.Point(0, 0);
+            }
+
+            list3x3.Sort((a, b) => a.avgValue.CompareTo(b.avgValue));
+            list5x5.Sort((a, b) => a.avgValue.CompareTo(b.avgValue));
+
+            Point pos3x3 = list3x3[0].position;
+            Point pos5x5 = list5x5[0].position;
+            Point marker;
+
+            double taxiDistance = Math.Abs(pos3x3.X - pos5x5.X) + Math.Abs(pos3x3.Y - pos5x5.Y);
+            if (taxiDistance >= 4)
+            {
+                marker = pos3x3;
+            }
+            else
+            {
+                double avgX = (pos3x3.X + pos5x5.X) / 2;
+                double avgY = (pos3x3.Y + pos5x5.Y) / 2;
+                marker = new Point(avgX, avgY);
+            }
+
+            Point closestPoint = path[0];
+            double minDistance = GetDistance(marker, closestPoint);
+
+            foreach (Point point in path)
+            {
+                double distance = GetDistance(marker, point);
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    closestPoint = point;
+                }
+            }
+
+            return closestPoint;
+        }
+
+        private static double CalculateMaskAverage(Mat image, int centerX, int centerY, int maskSize)
+        {
+            int halfSize = maskSize / 2;
+            double sum = 0;
+            int count = 0;
+
+            for (int x = centerX - halfSize; x <= centerX + halfSize; x++)
+            {
+                for (int y = centerY - halfSize; y <= centerY + halfSize; y++)
+                {
+                    if (x >= 0 && y >= 0 && x < image.Width && y < image.Height)
+                    {
+                        sum += image.At<byte>(y, x);
+                        count++;
+                    }
+                }
+            }
+
+            return sum / count;
+        }
+
+        private static double GetDistance(System.Windows.Point p1, System.Windows.Point p2)
+        {
+            return Math.Sqrt(Math.Pow(p1.X - p2.X, 2) + Math.Pow(p1.Y - p2.Y, 2));
+        }
+
+        private async Task SPProcessingAsync(List<Mat> frames)
+        {
+            int numSuperpixels = 20 * 20;
+            float compactness = 2;
+            int maxIterations = 5;
+            float alpha = 50;
+
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            superpixelList = new List<Superpixel>();
+            for (int i = 0; i<frames.Count; i++)
+            {
+                superpixelList.Add(new Superpixel());
+            }
+
+            try
+            {
+                Parallel.For(0, frames.Count, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, frameNumber =>
+                {
+                    Mat frame = frames[frameNumber];
+                    Superpixel superpixel = new Superpixel();
+                    superpixel.Initialize(numSuperpixels, compactness, maxIterations);
+                    superpixel.Fit(frame);
+                    superpixelList[frameNumber] = superpixel;
+
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        CoRegistrations[frameNumber].MarkerPoint = FindMarkerPosition(frameNumber, CoRegistrations[frameNumber].Line);
+                    });
+                });
+            }
+            catch (Exception ex)
+            {
+                _log.Debug("outer Error message: " + ex.Message);
+                _log.Debug("outer Stack trace: " + ex.StackTrace);
+            }
+
+            stopwatch.Stop();
+            _log.Debug($"Total Running Time : {stopwatch.Elapsed.TotalSeconds} seconds");
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                IsRendering = false;
+                IsAngioTrackCompleted = IsResetOn = isDrawing = true;
+            });
+        }
+
+        private Point FindMarkerPosition(int currentFrameIdx, List<List<Point>> coregPath)
+        {
+            try
+            {
+                // Superpixel의 Segments 지나가는 Path 확인
+                List<List<Point>> segmentsList = superpixelList[currentFrameIdx].GetSegmentsPoints();
+                int[,] labels = superpixelList[currentFrameIdx].GetLabels();
+                List<int> labelList = new List<int>();
+                Dictionary<int, List<Point>> labelToPointsMap = new Dictionary<int, List<Point>>();
+
+                foreach (var segment in segmentsList)
+                {
+                    foreach (var partPath in coregPath)
+                    {
+                        foreach (var point in partPath)
+                        {
+                            if (segment.Contains(point))
+                            {
+                                int label = labels[(int)point.Y, (int)point.X];
+
+                                if (!labelList.Contains(label))
+                                {
+                                    labelList.Add(label);
+                                }
+
+                                if (!labelToPointsMap.ContainsKey(label))
+                                {
+                                    labelToPointsMap[label] = new List<Point>();
+                                }
+                                labelToPointsMap[label].Add(point);
+                            }
+                        }
+                    }
+                }
+
+                float searchRange = ((float)currentFrameIdx / (float)angioImageTotalNum) * (labelList.Count-1);
+                _log.Debug($"currentFrameIdx = {currentFrameIdx}, searchRange = {searchRange}");
+                int lowerIndex = Math.Max(0, (int)Math.Floor(searchRange));
+                int upperIndex = Math.Min(labelList.Count-1, lowerIndex + labelList.Count/angioImageTotalNum + 4);
+                int xMax = int.MinValue, yMax = int.MinValue;
+                int xMin = int.MaxValue, yMin = int.MaxValue;
+
+                Mat angioImage = AngioImages[currentFrameIdx].Clone();
+                List<OpenCvSharp.Point> extractedPoints = new List<OpenCvSharp.Point>();
+                List<Point> pathROI = new List<Point>();
+
+                for (int index = lowerIndex; index <= upperIndex; index++)
+                {
+                    int selectedSemgentLabel = labelList[index];
+                    List<Point> segmentPoints = segmentsList[selectedSemgentLabel];
+
+                    pathROI.AddRange(labelToPointsMap[selectedSemgentLabel]);
+
+                    for (int i = 0; i < segmentPoints.Count; i++)
+                    {
+                        var point = segmentPoints[i];
+                        int x = (int)point.X;
+                        int y = (int)point.Y;
+
+                        xMax = Math.Max(x, xMax);
+                        xMin = Math.Min(x, xMin);
+                        yMax = Math.Max(y, yMax);
+                        yMin = Math.Min(y, yMin);
+
+                        int intensity = angioImage.At<byte>(y, x);
+
+                        if (intensity >= 35 && intensity <= 65)
+                        {
+                            extractedPoints.Add(new OpenCvSharp.Point((int)point.X, (int)point.Y));
+                        }
+                    }
+                }
+
+                Mat roi = new Mat(angioImage, new OpenCvSharp.Rect(xMin, yMin, xMax - xMin, yMax - yMin));
+                _log.Debug($"roi x = {xMin}, y = {yMin} , width = {xMax - xMin}, height = {yMax - yMin}");
+                Cv2.ImWrite($".\\angio\\roi_{currentFrameIdx}.png", roi);
+
+                Mat sobelX = new Mat();
+                Mat sobelY = new Mat();
+                Cv2.Sobel(roi, sobelX, MatType.CV_64F, 1, 0, ksize: 3);
+                Cv2.Sobel(roi, sobelY, MatType.CV_64F, 0, 1, ksize: 3);
+
+                Mat magnitude = new Mat();
+                Cv2.Magnitude(sobelX, sobelY, magnitude);
+
+                Cv2.ImWrite($".\\angio\\gredient_{currentFrameIdx}.png", magnitude);
+
+                Point grediantPosition = new Point();
+                double maxWeight = 0;
+
+                foreach (var point in extractedPoints)
+                {
+                    int roiX = point.X - xMin;
+                    int roiY = point.Y - yMin;
+
+                    double sumMagnitude = 0;
+                    int count = 0;
+
+                    for (int dy = -1; dy <= 1; dy++)
+                    {
+                        for (int dx = -1; dx <= 1; dx++)
+                        {
+                            int neighborX = roiX + dx;
+                            int neighborY = roiY + dy;
+
+                            if (neighborX >= 0 && neighborX < magnitude.Cols && neighborY >= 0 && neighborY < magnitude.Rows)
+                            {
+                                double intensity = magnitude.At<double>(neighborY, neighborX);
+                                if (intensity >= 200) continue;
+
+                                sumMagnitude += magnitude.At<double>(neighborY, neighborX);
+                                count++;
+                            }
+                        }
+                    }
+
+                    double meanMagnitude = sumMagnitude / count;
+                    double weight = meanMagnitude / angioImage.At<byte>(point.Y, point.X);
+
+                    if (weight > maxWeight)
+                    {
+                        maxWeight = weight;
+                        grediantPosition = new Point(point.X, point.Y);
+                    }
+                }
+
+                double minDistance = double.MaxValue;
+                Point markerPoint = new Point();
+
+                foreach (var point in pathROI)
+                {
+                    double distance = GetDistance(point, grediantPosition);
+                    if (distance < minDistance)
+                    {
+                        minDistance = distance;
+                        markerPoint = point;
+                    }
+                }
+
+                return new Point((int)markerPoint.X, (int)markerPoint.Y);
+            }
+            catch (Exception ex)
+            {
+                _log.Debug("Error message: " + ex.Message);
+                _log.Debug("Stack trace: " + ex.StackTrace);
+                return new Point(0, 0);
+            }
+        }
+
+        private void MarkerRelocation()
+        {
+            List<CoRegistration> coregistrations = new List<CoRegistration>();
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                coregistrations = CoRegistrations;
+            });
+
+            Point prevMarkerPoint, currentMarkerPoint;
+            prevMarkerPoint = coregistrations[angioImageTotalNum - 1].MarkerPoint;
+            for (int i = coregistrations.Count - 1; i >= 0; i--)
+            {
+                currentMarkerPoint = coregistrations[i].MarkerPoint;
+                if (prevMarkerPoint == currentMarkerPoint) continue;
+
+                double distance = GetDistance(prevMarkerPoint, currentMarkerPoint);
+
+                int pointIndex = -1;
+                int lineIndex = -1;
+
+                for (int j = 0; j < coregistrations[i].Line.Count; j++)
+                {
+                    pointIndex = coregistrations[i].Line[j].IndexOf(currentMarkerPoint);
+                    if (pointIndex > 0)
+                    {
+                        lineIndex = j;
+                        break;
+                    }
+                }
+
+                if (distance > 45)
+                {
+                    double gap = double.MaxValue;
+                    while (gap > 30)
+                    {
+                        Point tmpPoint = coregistrations[i].Line[lineIndex][pointIndex++];
+                        gap = GetDistance(tmpPoint, prevMarkerPoint);
+                        if (gap <= 30 || pointIndex == coregistrations[i].Line[lineIndex].Count - 1)
+                        {
+                            coregistrations[i].MarkerPoint = prevMarkerPoint = tmpPoint;
+                            break;
+                        }
+                    }
+                }
+                else if(distance < 15)
+                {
+                    double gap = 0;
+                    while (gap < 20)
+                    {
+                        Point tmpPoint = coregistrations[i].Line[lineIndex][pointIndex--];
+                        gap = GetDistance(tmpPoint, prevMarkerPoint);
+                        if (gap >= 20 || pointIndex == 0)
+                        {
+                            coregistrations[i].MarkerPoint = prevMarkerPoint = tmpPoint;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                CoRegistrations = coregistrations;
+            });
+        }
+
+        private async Task PredictMarkers(List<CoRegistration> coRegistrations)
+        {
+            try
+            {
+                if (coRegistrations == null || coRegistrations.Count == 0)
+                {
+                    _log.Debug("coRegistrations is null or empty.");
+                    return;
+                }
+
+                double pathInterval = 8;
+                string pullbackType = "";
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    pullbackType = PullbackType;
+                });
+
+                switch (pullbackType)
+                {
+                    case "HISH":
+                        pathInterval = pathInterval;
+                        break;
+                    case "HILO":
+                        pathInterval = pathInterval * 2;
+                        break;
+                    case "STSH":
+                        pathInterval = pathInterval * 3;
+                        break;
+                    case "STLO":
+                        pathInterval = pathInterval * 5;
+                        break;
+                    case "FAST":
+                        pathInterval = pathInterval * 12;
+                        break;
+                }
+
+                coRegistrations[coRegistrations.Count - 1].MarkerPoint = distalPoint;
+
+                for (int i = coRegistrations.Count - 1; i > 0; i--)
+                {
+                    Point prevMarkerPoint = coRegistrations[i].MarkerPoint;
+
+                    List<Point> currPath = new List<Point>();
+                    foreach (var line in coRegistrations[i].Line)
+                    {
+                        currPath.AddRange(line);
+                    }
+                    currPath.Reverse();
+
+                    Point nextMarkerPoint = currPath[Math.Min(currPath.Count - 1, currPath.IndexOf(prevMarkerPoint) + (int)pathInterval)];
+
+                    List<Point> nextPath = new List<Point>();
+                    foreach (var line in coRegistrations[i - 1].Line)
+                    {
+                        nextPath.AddRange(line);
+                    }
+                    nextPath.Reverse();
+
+                    double minDistance = double.MaxValue;
+                    for (int j = 0; j < nextPath.Count; j++)
+                    {
+                        double tmp = GetDistance(nextPath[j], nextMarkerPoint);
+                        if (minDistance > tmp)
+                        {
+                            minDistance = tmp;
+                            coRegistrations[i - 1].MarkerPoint = nextPath[j];
+                        }
+                    }
+                }
+
+
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    CoRegistrations = coRegistrations;
+                    IsRendering = false;
+                    IsAngioTrackCompleted = IsResetOn = isDrawing = true;
+                });
+            }
+            catch (Exception ex)
+            {
+                _log.Debug($"Error : {ex.Message}");
+            }
+        }
+
+        private void ProcessFrameCorrection(int currAngioFrameNumber, List<Mat> angioImages)
+        {
+            for (int i = currAngioFrameNumber; i > 0; i--)
+            {
+                TrackPointCorrection(i, -1, angioImages);
+            }
+
+            for (int i = currAngioFrameNumber; i < angioImages.Count - 1; i++)
+            {
+                TrackPointCorrection(i, 1, angioImages);
+            }
+        }
+
+        private void TrackPointCorrection(int i, int direction, List<Mat> angioImages)
+        {
+            int numTrackPoints = localDijkstraHeap[i].trackPoints.Count;
+            int currX = (int)localDijkstraHeap[i].trackPoints[numTrackPoints - 1].X;
+            int currY = (int)localDijkstraHeap[i].trackPoints[numTrackPoints - 1].Y;
+            int nextX = (int)localDijkstraHeap[i + direction].trackPoints[numTrackPoints - 1].X;
+            int nextY = (int)localDijkstraHeap[i + direction].trackPoints[numTrackPoints - 1].Y;
+
+            int currIntensity = angioImages[i].At<byte>(currY, currX);
+            int nextIntensity = angioImages[i + direction].At<byte>(nextY, nextX);
+
+            if (Math.Abs(nextIntensity - currIntensity) > 30 || nextIntensity >= 90)
+            {
+                int width = angioImages[i].Cols;
+                int height = angioImages[i].Rows;
+
+                // gradient, pixelMean for curr Image
+                float curr3x3Mean = 0;
+                float curr3x3GradientMean = 0;
+                Mat currMagnitudeImg = GetGradientMagnitude(angioImages[i].Clone());
+
+                for (int y = currY; y < currY + 3; y++)
+                {
+                    for (int x = currX; x < currX + 3; x++)
+                    {
+                        curr3x3Mean += angioImages[i].At<byte>(y, x);
+                        curr3x3GradientMean += currMagnitudeImg.At<byte>(y, x);
+                    }
+                }
+                curr3x3Mean /= 9.0f;
+                curr3x3GradientMean /= 9.0f;
+
+                // gradient, pixelMean for next Image
+                Mat nextMagnitudeImg = GetGradientMagnitude(angioImages[i + direction].Clone());
+
+                // pixel Mean, Gradient Mean, XY Position
+                List<Tuple<float, float, Point>> next3x3Mean = new List<Tuple<float, float, Point>>();
+
+                int roiStep = 5;
+                int roiCenterX = currX;
+                int roiCenterY = currY;
+                int xStart = MinMax(width, roiCenterX - roiStep);
+                int yStart = MinMax(height, roiCenterY - roiStep);
+                int xEnd = MinMax(width, roiCenterX + roiStep);
+                int yEnd = MinMax(height, roiCenterY + roiStep);
+
+                if (xEnd - xStart < 5 || yEnd - yStart < 5)
+                {
+                    // 변위가 충분히 크지 않으면 Pass
+                    return;
+                }
+
+                for (int y = yStart + 1; y < yEnd - 1; y++)
+                {
+                    for (int x = xStart + 1; x < xEnd - 1; x++)
+                    {
+                        float pixelSum = 0.0f;
+                        float gradSum = 0.0f;
+                        for (int dy = -1; dy <= 1; dy++)
+                        {
+                            for (int dx = -1; dx <= 1; dx++)
+                            {
+                                pixelSum += angioImages[i + direction].At<byte>(y + dy, x + dx);
+                                gradSum += nextMagnitudeImg.At<float>(y + dy, x + dx);
+                            }
+                        }
+                        next3x3Mean.Add(new Tuple<float, float, Point>(pixelSum / 9.0f, gradSum / 9.0f, new Point(x, y)));
+                    }
+                }
+
+                float minWeight = float.MaxValue;
+                Point minPosition = new Point(0, 0);
+
+                for (int k = 0; k < next3x3Mean.Count; k++)
+                {
+                    float tmpWeight = Math.Abs(next3x3Mean[k].Item1 - curr3x3Mean) + Math.Abs(next3x3Mean[k].Item2 - curr3x3GradientMean);
+
+                    if (tmpWeight < minWeight &&
+                        next3x3Mean[k].Item1 < 100 &&
+                        angioImages[i + direction].At<byte>((int)next3x3Mean[k].Item3.Y, (int)next3x3Mean[k].Item3.X) < 50)
+                    {
+                        minPosition = next3x3Mean[k].Item3;
+                    }
+                }
+
+                if (minPosition.X == 0 && minPosition.X == 0)
+                {
+                    localDijkstraHeap[i + direction].trackPoints[numTrackPoints - 1] = new Point(roiCenterX, roiCenterY);
+                }
+                else
+                {
+                    localDijkstraHeap[i + direction].trackPoints[numTrackPoints - 1] = new Point((int)minPosition.X, (int)minPosition.Y);
+                }
+            }
+        }
+
+        private int MinMax(int threshold, int value)
+        {
+            if (value > threshold)
+            {
+                return threshold;
+            }
+            else if (value < 0)
+            {
+                return 0;
+            }
+            return value;
+        }
+
+        private Mat GetGradientMagnitude(Mat roi)
+        {
+            Mat sobelX = roi.Clone();
+            Mat sobelY = roi.Clone();
+            Cv2.Sobel(sobelX, sobelX, MatType.CV_64F, 1, 0, ksize: 3);
+            Cv2.Sobel(sobelY, sobelY, MatType.CV_64F, 0, 1, ksize: 3);
+
+            Mat gradMagnitude = new Mat();
+            Cv2.Magnitude(sobelX, sobelY, gradMagnitude);
+            return gradMagnitude;
+        }
 
         #endregion
 
@@ -612,7 +1246,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             control.ActivateEvent();
 
             control.localDijkstraHeap = new List<DijkstraHeap>(control.DijkstraHeap);
-            control.localAngioTrackPoints = new List<CoRegistration>();
+            control.localCoRegistrations = new List<CoRegistration>();
         }
 
         private static void OnAngioFrameNumberPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
@@ -628,10 +1262,40 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
             var drawUtil = dependencyObject as DrawAngioPathUtil;
 
-            if (AngioFrameNumber < 0 || drawUtil == null || drawUtil.AngioTrackPoints == null || drawUtil.AngioTrackPoints.Count == 0 || drawUtil.AngioTrackPoints.Count < AngioFrameNumber) return;
+            if (AngioFrameNumber < 0 || drawUtil == null || drawUtil.CoRegistrations == null || drawUtil.CoRegistrations.Count == 0 || drawUtil.CoRegistrations.Count < AngioFrameNumber) return;
 
-            drawUtil.CurrentTrackPoint = drawUtil.AngioTrackPoints[AngioFrameNumber];
-            drawUtil.TrackPointChange();
+            drawUtil.CurrentCoRegistration = drawUtil.CoRegistrations[AngioFrameNumber];
+            drawUtil.markerDrawInterval = 0;
+        }
+         
+        private static void OnFrameNumberPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
+        {
+            var control = (DrawAngioPathUtil)dependencyObject;
+            var drawUtil = dependencyObject as DrawAngioPathUtil;
+
+            if (drawUtil.CoRegistrations == null || drawUtil.CoRegistrations.Count == 0)
+                return;
+
+            int direction = drawUtil.FrameNumber - control.prevOCTFrameNum;
+
+            drawUtil.playDirection = direction > 0 ? 1 : -1;
+
+            if(drawUtil.FrameNumber == 0 && drawUtil.NumberOfFrames - 1 == drawUtil.prevOCTFrameNum)
+            {
+                /*FrameNum = 0, prevOCTFrameNum = 500*/
+                direction = -1;
+                drawUtil.CurrentCoRegistration = drawUtil.CoRegistrations[0];
+            }
+            else if (drawUtil.prevOCTFrameNum == 0 && drawUtil.FrameNumber == drawUtil.NumberOfFrames - 1)
+            {
+                /*FrameNum = 500, prevOCTFrameNum = 0*/
+                direction = 1;
+                drawUtil.CurrentCoRegistration = drawUtil.CoRegistrations[drawUtil.CoRegistrations.Count - 1];
+            } 
+
+            drawUtil.markerDrawInterval += drawUtil.GetMarkerInterval() * direction;
+            drawUtil.MarkerChange();
+            control.prevOCTFrameNum = drawUtil.FrameNumber;
         }
 
         private static void OnResetPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
@@ -641,42 +1305,41 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                 var control = (DrawAngioPathUtil)dependencyObject;
                 int currFrameNum = control.AngioFrameNumber;
 
-                if (control.localDijkstraHeap[currFrameNum].trackPoint.Count >= 2) // 경로가 있는 경우
+                if (control.localDijkstraHeap[currFrameNum].trackPoints.Count >= 2) // 경로가 있는 경우
                 {
                     foreach (DijkstraHeap heap in control.localDijkstraHeap) // 새로운 경로 받기 위한 초기화
                     {
                         List<List<Point>> newPoints = new List<List<Point>>();
-                        for (int i = 0; i < control.localDijkstraHeap[currFrameNum].trackPoint.Count - 1; i++)
+                        for (int i = 0; i < control.localDijkstraHeap[currFrameNum].trackPoints.Count - 1; i++)
                         {
                             newPoints.Add(new List<Point>());
                         }
                         heap.line = newPoints;
-                        heap.trackPoint = new List<Point>();
+                        heap.trackPoints = new List<Point>();
                     }
                 }
-                else if (control.localDijkstraHeap[currFrameNum].trackPoint.Count == 1) // 경로는 없지만 첫번째 포인트를 찍은 경우
+                else if (control.localDijkstraHeap[currFrameNum].trackPoints.Count == 1) // 경로는 없지만 첫번째 포인트를 찍은 경우
                 {
                     foreach (DijkstraHeap heap in control.localDijkstraHeap)
                     {
-                        heap.trackPoint = new List<Point>();
+                        heap.trackPoints = new List<Point>();
                     }
                 }
                 control.canvas.Children.Clear();
                 control.IsReset = control.IsResetOn = false;
             }
         }
-
+        
         private void CoregistrationCompleted()
         {
             _log.Debug("CoregistrationCompleted()");
-            localAngioTrackPoints = new List<CoRegistration>();
+            localCoRegistrations = new List<CoRegistration>();
             for (int i = 0; i < angioImageTotalNum; i++)
             {
                 CoRegistration coRegistration = new CoRegistration();
-
-                foreach(Point point in localDijkstraHeap[i].trackPoint)
+                foreach(Point point in localDijkstraHeap[i].trackPoints)
                 {
-                    coRegistration.TrackPoint.Add(point);
+                    coRegistration.TrackPoints.Add(point);
                 }
 
                 int cnt = 0;
@@ -685,38 +1348,41 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                     coRegistration.Line.Add(new List<Point>());
                     foreach (Point point in line)
                     {
-                        coRegistration.Line[cnt].Add(point);
+                        coRegistration.Line[cnt].Add(new Point((int)point.X, (int)point.Y));
                     }
                     cnt++;
                 }
-                localAngioTrackPoints.Add(coRegistration);
+                localCoRegistrations.Add(coRegistration);
             }
-            AngioTrackPoints = localAngioTrackPoints;
+            CoRegistrations = localCoRegistrations;
             DijkstraHeap = localDijkstraHeap;
+
+            //SetCoRegistrationMarkers(CoRegistrations, AngioImages);
         }
 
-        private void CoregistrationCompleted(int index)
+        public double GetMarkerInterval()
         {
-            CoRegistration coRegistration = new CoRegistration();
-
-            foreach (Point point in localDijkstraHeap[index].trackPoint)
+            string pullbacktype = "";
+            double pathInterval = 0.4;
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                coRegistration.TrackPoint.Add(point);
-            }
+                pullbacktype = PullbackType;
+            });
 
-            int cnt = 0;
-            foreach (List<Point> line in localDijkstraHeap[index].line)
+            switch (pullbacktype)
             {
-                coRegistration.Line.Add(new List<Point>());
-                foreach (Point point in line)
-                {
-                    coRegistration.Line[cnt].Add(point);
-                }
-                cnt++;
+                case "HISH":
+                    return pathInterval;
+                case "HILO":
+                    return pathInterval * 2;
+                case "STSH":
+                    return pathInterval * 3;
+                case "STLO":
+                    return pathInterval * 5;
+                case "FAST":
+                    return pathInterval * 12;
             }
-            localAngioTrackPoints[index] = coRegistration;
-            AngioTrackPoints[index] = localAngioTrackPoints[index];
-            DijkstraHeap[index] = localDijkstraHeap[index];
+            return 1.0;
         }
 
         #endregion
@@ -735,35 +1401,46 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             Point clickPosition = new Point((float)e.GetPosition(canvas).X, (float)e.GetPosition(canvas).Y);
             Rectangle rectangle = new Rectangle();
             ActivateRecEvents(rectangle);
-            rectangle.Name = $"rectangle{localDijkstraHeap[currAngioFrameNumber].trackPoint.Count:D3}";
+            rectangle.Name = $"rectangle{localDijkstraHeap[currAngioFrameNumber].trackPoints.Count:D3}";
             Canvas.SetLeft(rectangle, clickPosition.X - Constants.AnnotationRectWidth / 2);
             Canvas.SetTop(rectangle, clickPosition.Y - Constants.AnnotationRectHeight / 2);
             canvas.Children.Add(rectangle);
 
             // 첫번째 점
-            if (localDijkstraHeap[currAngioFrameNumber].trackPoint.Count == 0)
+            if (localDijkstraHeap[currAngioFrameNumber].trackPoints.Count == 0)
             {
                 trackPointNum = 1;
-                localDijkstraHeap[currAngioFrameNumber].trackPoint.Add(clickPosition);
+                localDijkstraHeap[currAngioFrameNumber].trackPoints.Add(clickPosition);
 
                 IsResetOn = true;
 
                 PointTracking(clickPosition.X, clickPosition.Y, currAngioFrameNumber);
+                ProcessFrameCorrection(currAngioFrameNumber, AngioImages);
                 PathChange(AngioFrameNumber);
                 return;
             }
             // 두번째 점 이후
             else
             {
-                trackPointNum = localDijkstraHeap[currAngioFrameNumber].trackPoint.Count;
-                localDijkstraHeap[currAngioFrameNumber].trackPoint.Add(clickPosition);
+                trackPointNum = localDijkstraHeap[currAngioFrameNumber].trackPoints.Count;
+                localDijkstraHeap[currAngioFrameNumber].trackPoints.Add(clickPosition);
+                distalPoint = new Point(clickPosition.X, clickPosition.Y);
                 PointTracking(clickPosition.X, clickPosition.Y, currAngioFrameNumber);
+                ProcessFrameCorrection(currAngioFrameNumber, AngioImages);
                 PathChange(currAngioFrameNumber);
                 trackPointNum++;
 
-                Task.Run(async ()=>
+                List<CoRegistration> coRegistrations = null;
+                Task.Run(async () =>
                 {
                     await CalculateAllPathAsync(currAngioFrameNumber, false, false, trackPointNum - 1);
+
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        coRegistrations = CoRegistrations.ToList();
+                    });
+
+                    await PredictMarkers(coRegistrations);
                 });
             }
         }
@@ -799,6 +1476,12 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
                 if (isMoved)
                 {
+                    int currFrameNum = 0;
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        currFrameNum = AngioFrameNumber;
+                    });
+
                     rectangle.Opacity = 1.0; //visible
                     string numberPart = rectangle.Name.Substring(rectangle.Name.Length - 3);
                     int.TryParse(numberPart, out int index);
@@ -806,13 +1489,23 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                     float x = (float)(Canvas.GetLeft(rectangle) + rectangle.Width / 2);
                     float y = (float)(Canvas.GetTop(rectangle) + rectangle.Height / 2);
 
-                    localDijkstraHeap[AngioFrameNumber].trackPoint[index] = new Point(x, y);
+                    localDijkstraHeap[currFrameNum].trackPoints[index] = new Point(x, y);
 
-                    ProcessSingleImage(AngioFrameNumber, index);
-                    PathChange(AngioFrameNumber);
-
+                    ProcessSingleImage(currFrameNum, index);
+                    PathChange(currFrameNum);
                     CoregistrationCompleted();
-                    //CoregistrationCompleted(AngioFrameNumber);
+
+                    List<CoRegistration> coRegistrations = null;
+                    Task.Run(async () =>
+                    {
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            coRegistrations = CoRegistrations.ToList();
+                        });
+
+                        await PredictMarkers(coRegistrations);
+                    });
+
                     IsAngioTrackCompleted = true;
                     isMoved = false;
                 }

@@ -91,6 +91,15 @@ void CConfiguration::Initialize(tstring configFile)
 	// [Log]
 	::GetPrivateProfileString(_T("Log"), _T("LogRootPath"), _T(""), this->logRootPath, sizeof(this->logRootPath), configFilePath.c_str());
 
+	// [Compensation]
+	this->imaging.applyCompensation = ::GetPrivateProfileInt(_T("Compensation"), _T("ApplyCompensation"), 0, configFilePath.c_str());
+	this->imaging.exponentialFactor = getPrivateProfileFloat(_T("Compensation"), _T("ExponentialFactor"), 1.8f, configFilePath.c_str());
+	this->imaging.brightnessControl = getPrivateProfileFloat(_T("Compensation"), _T("BrightnessControl"), 0.7f, configFilePath.c_str());
+	this->imaging.energyThreshold = getPrivateProfileFloat(_T("Compensation"), _T("EnergyThreshold"), 0.7f, configFilePath.c_str());
+	this->imaging.applyGammaCorrection = ::GetPrivateProfileInt(_T("Compensation"), _T("ApplyGammaCorrection"), 0, configFilePath.c_str());
+	this->imaging.GCAlpha = getPrivateProfileFloat(_T("Compensation"), _T("GCAlpha"), 0.4f, configFilePath.c_str());
+	this->imaging.intensityThreshold = ::GetPrivateProfileInt(_T("Compensation"), _T("IntensityThreshold"), 255, configFilePath.c_str());
+
 	isInit = true;
 }
 

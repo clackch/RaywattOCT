@@ -104,8 +104,7 @@ public:
 	void SetZOffset(int nOffset) { m_nZOffset = nOffset; }
 
 	static void SetImageCompensation(bool ImageCompensated);
-	static void SetImageLumenVignetting(bool ImageLumenVignetted);
-	static void SetImageCompensationControlWindow(bool ImageCompensationControlWindowOn);
+	static void SetImageCompensationControlWindow(bool ImageCompensationControlWindowOn, Setting setting);
 protected:
 	void allocateMemory();
 	void releaseMemory();
@@ -126,13 +125,11 @@ protected:
 	void min_max_normalization(const cv::Mat& img, cv::Mat& normalized_img, double& min_val, double& max_val);
 	void linear_contrast_stretching(cv::Mat& img, float lower_percentile = 1.0f, float upper_percentile = 99.0f);
 	void logarithmic_contrast_stretching(cv::Mat& img, float lower_percentile = 1.0f, float upper_percentile = 99.0f);
-	void lumen_detection_processing(cv::Mat& img);
-	void apply_piecewise_linear_contrast(cv::Mat& img, int low_in, int high_in, int low_out, int high_out);
 	double euclidean_distance(cv::Point2f pt1, cv::Point2f pt2);
 	std::vector<int> find_outliers(const std::vector<int>& y_values);
 	static void on_trackbar(int, void*);
 
-	void adaptive_gamma_correction(cv::Mat& img);
+	void adaptive_gamma_correction(cv::Mat& img, int maxIntensity);
 	void get_PDF_array(cv::Mat& img, std::vector<double>& pdf_i, bool& AGCWD_apply);
 	void get_CDF_array(std::vector<double> pdf_i, std::vector<double>& cdf_i);
 
