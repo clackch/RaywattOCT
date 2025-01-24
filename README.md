@@ -209,3 +209,9 @@ Download & Copy/Paste
   
   ![image](https://github.com/Raywatt/RaywattOCT/assets/110812182/03acbcd1-8f77-40fa-a29d-cfaac5860787)
 
+
+## 설정 후, 꼭 확인해야 하는 항목 (App Test)
+
+- Manual Calibration 실행해서 ML 기능 확인
+  - 첫 실행이면 C:\Raywatt\system\3rdparty\model\yolo에서 engine 파일이 실행일자로 생성되었는지 확인
+- Tiff 저장 기능 확인
