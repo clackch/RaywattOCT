@@ -107,6 +107,9 @@ namespace RaywattApp.ViewModels.Dialog
         private List<LumenSidebranch> _lumenSidebranches = new List<LumenSidebranch>();
 
         [ObservableProperty]
+        private bool _isDrawLumenSideBranch = false;
+
+        [ObservableProperty]
         private List<LumenStent> _lumenStents = new List<LumenStent>();
 
         [ObservableProperty]
@@ -202,6 +205,9 @@ namespace RaywattApp.ViewModels.Dialog
             Section = new Section();
             Section.Proximal.IsVisible = Visibility.Visible;
             Section.Distal.IsVisible = Visibility.Visible;
+
+            if (CommonUtil.IsTestMode(DeviceStatus.TestMode, "Sidebranch"))
+                IsDrawLumenSideBranch = true;
         }
 
         public double SetInitialize(PatientCase patientCase, List<Mat> crossSections, Mat lMode, FileExport fileExport)
