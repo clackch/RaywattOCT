@@ -429,114 +429,53 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 }
 
 void COCTImaging::findSheath(cv::Mat img) {
-
 	m_nSheathSearchRange = 300; /*1mm 오차 범위 설정*/
 	cv::Mat image;
+
+	img.convertTo(img, CV_32F, 1 / 255.f);
 	cv::rotate(img, image, cv::ROTATE_90_COUNTERCLOCKWISE);
 	image = image(cv::Range(0, m_nSheathSearchRange), cv::Range::all());
 	cv::resize(image, image, cv::Size(1080, image.rows));
 
+	//horizontal line formed 노이즈 제거
 	cv::Mat edge_image;
-	cv::Sobel(image.clone(), edge_image, CV_64F, 0 /*dy*/, 1 /*dx*/, 3 /*kernel size*/, 1, 0, cv::BORDER_CONSTANT);
-	cv::convertScaleAbs(edge_image, edge_image);
+	cv::Sobel(image, edge_image, CV_64F, 1 /*dx*/, 0 /*dy*/, 3 /*kernel size*/, 1, 0, cv::BORDER_CONSTANT);
 
-	// 행의 평균과 분산 계산
-	std::vector<double> origin_mean_values;
-	std::vector<double> edge_mean_values;
-	std::vector<double> edge_variance_values;
-
-	for (int i = 0; i < image.rows; ++i) {
-		cv::Mat row = image.row(i);
-		cv::Scalar mean;
-		mean = cv::mean(row);
-		origin_mean_values.push_back(mean[0]);
-
-		cv::Mat row_edge = edge_image.row(i);
-		cv::Scalar edge_mean, edge_stddev;
-		cv::meanStdDev(row_edge, edge_mean, edge_stddev);
-		edge_mean_values.push_back(edge_mean[0]);
-		edge_variance_values.push_back(edge_stddev[0] * edge_stddev[0]);  // 분산은 표준편차의 제곱
+	cv::Mat temp = image.clone();
+	for (int i = 0; i < m_nSheathSearchRange; i++) for (int j = 0; j < temp.cols; j++) {
+		temp.at<float>(i, j) -= (0.5 - edge_image.at<float>(i, j));
 	}
-	
-	std::vector<double> origin_mean_values_norm = normalize(origin_mean_values, 1);
-	std::vector<double> edge_mean_values_norm = normalize(edge_mean_values, 1);
-	std::vector<double> edge_variance_values_norm = normalize(edge_variance_values, 1);
 
-	// 정규화된 Edge 평균이 0.3 이상, 분산이 0.7 이상이고, 원본 이미지의 평균이 0.8 이상인 행 필터링
-	std::vector<std::tuple<int, double, double>> valid_rows;
-	for (int i = 0; i < edge_mean_values_norm.size(); ++i) {
-		if (edge_mean_values_norm[i] >= 0.3 &&
-			edge_variance_values_norm[i] >= 0.7 &&
-			origin_mean_values_norm[i] >= 0.7 )
-		{
-			valid_rows.emplace_back(i, edge_mean_values_norm[i], edge_variance_values_norm[i]);
+	// 행마다의 일정 밝기 이상의 픽셀 계수, 가장 많은 행 2개 저장
+	std::vector<int> pixelNum(m_nSheathSearchRange);
+	int maxIndex[2] = { 0, 0 };
+
+	for (int i = 0; i < m_nSheathSearchRange; i++) {
+		int tmp = 0;
+		for (int j = 0; j < 1080; j++) {
+			if (temp.at<float>(i, j) >= 0.67)
+				tmp++;
+		}
+		pixelNum[i] = tmp;
+		if (i == 0) continue;
+		else if (pixelNum[maxIndex[0]] < pixelNum[i]) {
+			maxIndex[0] = i;
 		}
 	}
-	
-	// 필터링 행들 중 sheath 경계 후보들 추출
-	std::vector<int> sheath_boundaries;
-	while (!valid_rows.empty()) {
-		auto max_variance_row = *std::max_element(valid_rows.begin(), valid_rows.end(),
-			[](const auto& a, const auto& b) { return std::get<2>(a) < std::get<2>(b); });
-		int tmp_row = std::get<0>(max_variance_row);
 
-		
-		sheath_boundaries.emplace_back(tmp_row);
-
-		int erase_range = 10;
-
-		valid_rows.erase(
-			std::remove_if(valid_rows.begin(), valid_rows.end(),
-				[tmp_row, erase_range](const auto& item) {
-					return (tmp_row - erase_range <= std::get<0>(item) &&
-						std::get<0>(item) <= tmp_row + erase_range);
-				}),
-			valid_rows.end());
-	}
-
-	// 최종 후보 필터링
-	std::vector<std::tuple<int, int, int>> result_rows;
-	for (int i = 0; i < sheath_boundaries.size(); i++) {
-		for (int j = i + 1; j < sheath_boundaries.size(); j++) {
-			int row1 = sheath_boundaries[i]; //inner
-			int row2 = sheath_boundaries[j]; //outer
-
-			if (row1 > row2) // always row2 bigger than row1
-				std::swap(row1, row2);
-
-			if (m_measureSetting.nSheathThickness * 2 * 0.5 <= row2 - row1 && row2 - row1 <= m_measureSetting.nSheathThickness * 2 * 1.1) {
-				int count = 0;
-				for (int row = row1; row < row2; row++) {
-					if (edge_mean_values_norm[row] <= 0.2 &&
-						edge_variance_values_norm[row] <= 0.4 &&
-						origin_mean_values_norm[row] <= 0.7 &&
-						origin_mean_values_norm[row] >= 0.55 )
-					{
-						count++;
-					}
-				}
-
-				if (count != 0) {
-					result_rows.emplace_back(row1, row2, count);
-				}
-			}
+	for (int i = 0; i < m_nSheathSearchRange; i++) {
+		if (i == 0 || std::abs(maxIndex[0] - i) <= 10) continue;
+		else if (pixelNum[maxIndex[1]] < pixelNum[i]) {
+			maxIndex[1] = i;
 		}
 	}
-	
-	int inner, outer, count; //row1, row2
-	inner = outer = count = 0;
-	if (!result_rows.empty()) {
-		auto result_row = *std::max_element(result_rows.begin(), result_rows.end(),
-			[](const auto& a, const auto& b) {return std::get<2>(a) < std::get<2>(b); });
-		inner = std::get<0>(result_row);
-		outer = std::get<1>(result_row);
-		count = std::get<2>(result_row);
-		m_nSheathPosition = inner + m_measureSetting.nSheathThickness * 2;
-		//return m_nSheathPosition;
+
+	int diff = abs(maxIndex[0] - maxIndex[1]);
+	if (diff < 30 || diff > 55) {
+		m_nSheathPosition = 0;
 	}
 	else {
-		m_nSheathPosition = 0;
-		//return -1;
+		m_nSheathPosition = std::max(maxIndex[0], maxIndex[1]);
 	}
 }
 
