@@ -1913,6 +1913,7 @@ namespace RaywattApp.ViewModels
 
         private void ImageProcessing(List<Mat> frames)
         {
+            int frameNum = 0;
             foreach (var frame in frames)
             {
                 Mat blurredImage = new Mat();
@@ -1947,6 +1948,9 @@ namespace RaywattApp.ViewModels
                 byte[] imageData = new byte[frame.Rows * frame.Cols * frame.ElemSize()];
                 Marshal.Copy(skeleton.Data, imageData, 0, imageData.Length);
                 PatientCase.AngioFrame.DijkstraHeap.Add(new DijkstraHeap(imageData, frame.Rows, frame.Cols));
+                frameNum++;
+                
+                Cv2.ImWrite("check" + frameNum.ToString() + ".png", skeleton);
             }
         }
 
