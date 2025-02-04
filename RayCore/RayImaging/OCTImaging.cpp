@@ -470,6 +470,7 @@ void COCTImaging::findSheath(cv::Mat img) {
 		}
 	}
 
+	// outer line 행 위치를 return
 	int diff = abs(maxIndex[0] - maxIndex[1]);
 	if (diff < 30 || diff > 55) {
 		m_nSheathPosition = 0;
