@@ -104,7 +104,7 @@ Download & Install Font
 
 ## [Cursor]
 Download & Create Folder, Copy/Paste
-1. [cursor.zip]([cursor.zip](https://github.com/user-attachments/files/18683414/cursor.zip)) 다운로드 후 압축 해제
+1. [cursor.zip](https://github.com/user-attachments/files/18683414/cursor.zip) 다운로드 후 압축 해제
 2. C:\Raywatt\system\image\cursor 폴더 생성 및 복사/붙여넣기
 
 Windows Default Mouse Cursor Setting (※ 필요 시 진행)
