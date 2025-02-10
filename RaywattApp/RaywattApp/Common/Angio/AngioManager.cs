@@ -111,7 +111,6 @@ namespace RaywattApp.Common.Angio
         public short IsChpFileChangeSuccess { get { return isChpFileChangeSuccess; } set { isChpFileChangeSuccess = value; } }
 
         private bool isCathRoomDialogOpen = false;
-        public bool isAngioInitialized = false; // CathRoom 선택 여부
         private long live_time;
 
         public AngioManager(IDialogService dialogService)
@@ -277,8 +276,6 @@ namespace RaywattApp.Common.Angio
                 }
                 _log.Debug($"gap = {minGap} Angio Time = {angioTime}, OCT Time = {OCTStartTime} closestIndex = {closestIndex}" +
                     $"maxIndex = {angioSaveFrameNum}");
-
-                FileStream fs = new FileStream(angioFilePath + Constants.AngioImageExtension, FileMode.Create, FileAccess.Write);
 
                 while (closestIndex >= 0)
                 {
@@ -457,8 +454,7 @@ namespace RaywattApp.Common.Angio
                     {
                         SendCommandPacket(CommandType.FGStopped);
                     }
-
-                    isAngioInitialized = false;
+                    ViewModelBase._deviceStatus.IsAngioInitialized = false;
 
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
@@ -473,7 +469,7 @@ namespace RaywattApp.Common.Angio
                         SendCommandPacket(CommandType.FGStarted);
                     }
 
-                    if (!isAngioInitialized && !ViewModelBase._deviceStatus.IsAngioConnected && readyToRecv)
+                    if (!ViewModelBase._deviceStatus.IsAngioInitialized && !ViewModelBase._deviceStatus.IsAngioConnected && readyToRecv)
                     {
                         Task.Run(() =>
                         {
@@ -505,8 +501,7 @@ namespace RaywattApp.Common.Angio
                 {
                     AskDeviceInfo();
                     isChpFileChangeSuccess = 1;
-
-                    isAngioInitialized = true;
+                    ViewModelBase._deviceStatus.IsAngioInitialized = true;
                 }
                 else if (command == (byte)CommandType.FGFailChangeChp)
                 {

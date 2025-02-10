@@ -82,7 +82,7 @@ namespace RaywattApp.ViewModels.Dialog
 
             if (SelectedCathRoom.Id == -1)
             {
-                _angioManager.isAngioInitialized  = false;
+                ViewModelBase._deviceStatus.IsAngioInitialized = false;
             }
             else
             {
