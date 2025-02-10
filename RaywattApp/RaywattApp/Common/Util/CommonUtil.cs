@@ -34,6 +34,8 @@ namespace RaywattApp.Common.Util
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(CommonUtil));
 
+        public static bool isVTIFileSave = false;
+
         public static bool ValidateText(string input)
         {
             var regex = new Regex(@"^[a-zA-Z0-9ㄱ-ㅎ가-힣\s,.]+$");
@@ -325,9 +327,9 @@ namespace RaywattApp.Common.Util
             }
         }
 
-        public static async Task<Mat> ConvertImage(string filePath, double imageResolution, double degree, List<Mat> convertedImages, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
+        public static async Task<Mat> ConvertImage(string filePath, double imageResolution, int zOffset, double degree, List<Mat> convertedImages, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
         {
-            RayOpenImage(filePath, imageResolution);
+            RayOpenImage(filePath, imageResolution, zOffset);
 
             int numOfFrames = (int)RayGetProperty(Property.ImageDepth);
             int width = (int)RayGetProperty(Property.ImageWidth);
@@ -376,11 +378,12 @@ namespace RaywattApp.Common.Util
 
             var dialogFE = dialog as System.Windows.FrameworkElement;
             var dialogDataContext = dialogFE.DataContext as FileExportDialogViewModel;
-            dialogDataContext.SetInitialize(patientCase, imgCrossSections, imgLongitude, fileExport);
+            double dialogWidth = dialogDataContext.SetInitialize(patientCase, imgCrossSections, imgLongitude, fileExport);
 
             window.Show();
             window.Hide();
-            dialog.Width = originWidth;
+
+            dialog.Width = dialogWidth;
             dialog.Height = originHeight;
 
             int totalCnt = imgCrossSections.Count;
@@ -395,8 +398,12 @@ namespace RaywattApp.Common.Util
 
                 dialogDataContext.SetFrameNumber(index);
                 dialog.UpdateLayout();
-                        
-                RenderTargetBitmap rtb = new RenderTargetBitmap((int)dialog.ActualWidth, (int)dialog.ActualHeight, 96, 96, PixelFormats.Pbgra32);
+
+                Size originalSize = new Size(dialog.ActualWidth, dialog.ActualHeight);
+                dialog.Measure(new System.Windows.Size(double.PositiveInfinity, double.PositiveInfinity));
+                dialog.Arrange(new System.Windows.Rect(0, 0, dialog.DesiredSize.Width, dialog.DesiredSize.Height));
+
+                RenderTargetBitmap rtb = new RenderTargetBitmap((int)dialog.DesiredSize.Width, (int)dialog.DesiredSize.Height, 96, 96, PixelFormats.Pbgra32);
                 System.Windows.Rect bounds = VisualTreeHelper.GetDescendantBounds(dialog);
                 DrawingVisual dv = new DrawingVisual();
                 using (DrawingContext ctx = dv.RenderOpen())
@@ -405,6 +412,9 @@ namespace RaywattApp.Common.Util
                     ctx.DrawRectangle(vb, null, bounds);
                 }
                 rtb.Render(dv);
+
+                dialog.Measure(new System.Windows.Size(originalSize.Width, originalSize.Height));
+                dialog.Arrange(new System.Windows.Rect(0, 0, originalSize.Width, originalSize.Height));
 
                 PngBitmapEncoder png = new PngBitmapEncoder();
                 png.Frames.Add(BitmapFrame.Create(rtb));
@@ -572,7 +582,7 @@ namespace RaywattApp.Common.Util
 
         private static Mat MakeLumenProfile(Mat imglumenProfile, LumenContour lumenContour, LumenSidebranch lumenSidebranch, LumenStent lumenStent, double appositionThreshold, int curFrame, int frameProximal, int frameDistal, bool isPostCase, bool isEdge)
         {
-            const double radius = Constants.OCTImageSize / 2;
+            const double radius = Constants.OCTImageSize / 3;
             const double totalArea = radius * radius * Math.PI;
             double area = lumenContour.Area;
             int lumenArea = (int)(area / totalArea * imglumenProfile.Rows);
@@ -645,17 +655,21 @@ namespace RaywattApp.Common.Util
             //Side Branch
             if (lumenSidebranch.Points != null && lumenSidebranch.Points.Count > 0)
             {
+                int sbThickness = 5;
+                if(lumenArea/2 < sbThickness)
+                    sbThickness = lumenArea/2 - 1;
+
                 if (curFrame >= frameProximal && curFrame <= frameDistal)
                 {
-                    Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - 5), new Point(position, imglumenProfile.Rows / 2 + 5), new Scalar(0xe4, 0xe4, 0xe4));
+                    Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - sbThickness), new Point(position, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0xe4, 0xe4, 0xe4));
                     if (!isEdge)
-                        Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - 5), new Point(position + 1, imglumenProfile.Rows / 2 + 5), new Scalar(0xe4, 0xe4, 0xe4));
+                        Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - sbThickness), new Point(position + 1, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0xe4, 0xe4, 0xe4));
                 }
                 else
                 {
-                    Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - 5), new Point(position, imglumenProfile.Rows / 2 + 5), new Scalar(0x7d, 0x7d, 0x7d));
+                    Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - sbThickness), new Point(position, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0x7d, 0x7d, 0x7d));
                     if (!isEdge)
-                        Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - 5), new Point(position + 1, imglumenProfile.Rows / 2 + 5), new Scalar(0x7d, 0x7d, 0x7d));
+                        Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - sbThickness), new Point(position + 1, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0x7d, 0x7d, 0x7d));
                 }
             }
             
@@ -806,7 +820,6 @@ namespace RaywattApp.Common.Util
                             tiff.SetField(TiffTag.SAMPLESPERPIXEL, img.Channels());
                             tiff.SetField(TiffTag.BITSPERSAMPLE, 8);
                             tiff.SetField(TiffTag.ROWSPERSTRIP, img.Rows);
-                            tiff.SetField(TiffTag.COMPRESSION, Compression.NONE);
                             tiff.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
 
                             tiff.WriteEncodedStrip(0, managedArray, managedArray.Length);
@@ -1398,6 +1411,122 @@ namespace RaywattApp.Common.Util
             return lumenContours;
         }
 
+        public static string CoRegistrationsToJson(List<CoRegistration> coRegistrations)
+        {
+            StringBuilder sb = new StringBuilder();
+            StringWriter sw = new StringWriter(sb);
+
+            using (JsonWriter writer = new JsonTextWriter(sw))
+            {
+                writer.WriteStartArray();
+                
+                foreach (CoRegistration coRegistration in coRegistrations)
+                {
+                    //Tracking Points (Proximal, Distal and additional connetion Points)
+                    writer.WriteStartObject();
+                    writer.WritePropertyName(nameof(coRegistration.TrackPoints));
+                    writer.WriteStartArray();
+                    
+                    foreach(System.Windows.Point point in  coRegistration.TrackPoints)
+                    {
+                        string strPoint = (int)point.X + "," + (int)point.Y;
+                        writer.WriteValue(strPoint);
+                    }
+
+                    writer.WriteEndArray();
+
+                    //Path Points
+                    writer.WritePropertyName(nameof(coRegistration.Line));
+                    writer.WriteStartArray();
+
+                    foreach (List<System.Windows.Point> points in coRegistration.Line)
+                    {
+                        if (points.Count > 0)
+                        {
+                            writer.WriteStartArray();
+                            foreach (System.Windows.Point point in points)
+                            {
+                                string strPoint = (int)point.X + "," + (int)point.Y;
+                                writer.WriteValue(strPoint);
+                            }
+                            writer.WriteEndArray();
+                        }
+                    }
+
+                    writer.WriteEndArray();
+
+                    //Marker Point
+                    writer.WritePropertyName(nameof(coRegistration.MarkerPoint));
+                    string strMarkerPoint = (int)coRegistration.MarkerPoint.X + "," + (int)coRegistration.MarkerPoint.Y;
+                    writer.WriteValue(strMarkerPoint);
+
+                    writer.WriteEndObject();
+                }
+                writer.WriteEndArray();
+            }
+
+            return sb.ToString();
+        }
+
+        public static List<CoRegistration> JsonToCoRegistrations(string strCoRegistration)
+        {
+            List<CoRegistration> coRegistrations = new List<CoRegistration>();
+
+            JsonTextReader reader = new JsonTextReader(new StringReader(strCoRegistration));
+
+            string currentProperty = string.Empty;
+
+            while(reader.Read())
+            {
+                if(reader.Depth == 1 && reader.TokenType == JsonToken.StartObject)
+                {
+                    CoRegistration coRegistration = new CoRegistration();
+
+                    while(reader.Read())
+                    {
+                        if(reader.Depth == 1 && reader.TokenType == JsonToken.EndObject)
+                        {
+                            coRegistrations.Add(coRegistration);
+                            break;
+                        }
+
+                        if(reader.TokenType == JsonToken.PropertyName)
+                        {
+                            currentProperty = reader.Value.ToString();
+                        }
+
+                        if (reader.Depth > 1 /*이유는 모르겠으나, Array 첫번째 요소가 depth 2로 출력됨. 같은 Array의 나머지 요소는 depth 3*/)
+                        {
+                            if (nameof(coRegistration.TrackPoints).Equals(currentProperty))
+                            {
+                                coRegistration.TrackPoints = new List<System.Windows.Point>();
+                                SetContour(reader, currentProperty, null, coRegistration);
+                            }
+                            else if (nameof(coRegistration.Line).Equals(currentProperty))
+                            {
+                                coRegistration.Line = new List<List<System.Windows.Point>>();
+                                SetContour(reader, currentProperty, null, coRegistration);
+                            }
+                            else if (nameof(coRegistration.MarkerPoint).Equals(currentProperty))
+                            {
+                                coRegistration.MarkerPoint = new System.Windows.Point();
+                                while (reader.Read())
+                                {
+                                    if (reader.Value != null)
+                                    {
+                                        coRegistration.MarkerPoint = StrToPoint(reader.Value.ToString());
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return coRegistrations;
+        }
+
         unsafe public static void ContoursToMemory(List<LumenContour>? contourList, Size sizeContour, IntPtr buffer, Size sizeBuffer)
         {
             if (contourList == null) return;
@@ -1513,7 +1642,7 @@ namespace RaywattApp.Common.Util
             return new Tuple<double, double>(double.Parse(temp[0]), double.Parse(temp[1]));
         }
 
-        private static void SetContour(JsonTextReader reader, string currentProperty, Contour lumenContour)
+        private static void SetContour(JsonTextReader reader, string currentProperty, Contour lumenContour, CoRegistration coRegistration = null)
         {
             switch (currentProperty)
             {
@@ -1544,6 +1673,12 @@ namespace RaywattApp.Common.Util
                 case nameof(lumenContour.Valid):
                     if (reader.Value != null && reader.TokenType == JsonToken.Boolean)
                         lumenContour.Valid = (bool)reader.Value;
+                    break;
+                case nameof(coRegistration.TrackPoints):
+                    SetPoints(reader, coRegistration.TrackPoints);
+                    break;
+                case nameof(coRegistration.Line):
+                    SetMultiDimensionalPoints(reader, coRegistration.Line);
                     break;
                 default:
                     break;
@@ -1584,6 +1719,22 @@ namespace RaywattApp.Common.Util
 
                 if (reader.Value != null)
                     points.Add(StrToPoint(reader.Value.ToString()));
+            }
+        }
+
+        private static void SetMultiDimensionalPoints(JsonTextReader reader, List<List<System.Windows.Point>> multiDimensionalPoints)
+        {
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonToken.EndArray)
+                    break;
+
+                if (reader.Value != null)
+                {
+                    List<System.Windows.Point> innerPoints = new List<System.Windows.Point>();
+                    SetPoints(reader, innerPoints);
+                    multiDimensionalPoints.Add(innerPoints);
+                }
             }
         }
 
@@ -1938,7 +2089,7 @@ namespace RaywattApp.Common.Util
             int radius = (int)(pxDiameter / 2) + thickness;
 
             imgSheath.SetTo(new Scalar(0x00, 0x00, 0x00, 0x00));
-            imgSheath.Circle(center, radius, new Scalar(0xff, 0xff, 0xff, 0xff), thickness, LineTypes.AntiAlias);
+            imgSheath.Circle(center, radius, new Scalar(0x60, 0xd7, 0x1e, 0xff), thickness, LineTypes.AntiAlias);
             
             for (int i = 1; i<6; i+=2)
             {
@@ -2230,6 +2381,35 @@ namespace RaywattApp.Common.Util
         public static double GetRoundScale(double value)
         {
             return Math.Round(value, 5);
+        }
+
+        public static void GetStorageSize(out double totalSize, out double freeSize)
+        {
+            string configDrive = Constants.SystemRootPath + "\\";
+            totalSize = 0;
+            freeSize = 0;
+
+            DriveInfo[] allDrives = DriveInfo.GetDrives();
+            foreach (DriveInfo drive in allDrives)
+            {
+                if (drive.Name.Equals(configDrive))
+                {
+                    totalSize = CommonUtil.ByteToGB(drive.TotalSize);
+                    freeSize = CommonUtil.ByteToGB(drive.AvailableFreeSpace);
+                    break;
+                }
+            }
+        }
+
+        public static bool IsStorageAvailable()
+        {
+            double storageTotalSize, storageFreeSize;
+            GetStorageSize(out storageTotalSize, out storageFreeSize);
+
+            if (storageFreeSize < Constants.StorageLimit)
+                return false;
+
+            return true;
         }
     }
 }

@@ -43,6 +43,8 @@ enum class RayProperty {
 	ImageResolution,
 	ImageThreshold,
 	ImageRoi,
+	ImageCompensation,
+	ImageCompensationControlWindow,
 	FieldOfView,
 	LongitudeImageWidth,
 	LongitudeImageHeight,
@@ -51,7 +53,9 @@ enum class RayProperty {
 	PullbackDistance,
 	PullbackSpeed,
 	SheathDiameter,
-	TestMode
+	TestMode,
+  ZOffset,
+  PullbackStartTime
 };
 
 enum class RayCallbackRequest {
@@ -90,7 +94,9 @@ enum class RayWorkItem {
 	Pullback,
 	LoadCatheter,
 	UnloadCatheter,
-	ValidateCatheter
+	ValidateCatheter,
+	InitializeRotaryJunction,
+	CleanRotaryJunction
 };
 
 enum class RaySession {

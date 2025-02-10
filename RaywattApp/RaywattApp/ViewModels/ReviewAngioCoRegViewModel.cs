@@ -12,14 +12,12 @@ using System.Windows.Navigation;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattApp.Common.Messages;
 using OpenCvSharp;
-using System.IO;
-using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Angio;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Point = System.Windows.Point;
-using Newtonsoft.Json;
 using OpenCvSharp.WpfExtensions;
+using RaywattApp.Common.Util;
 
 namespace RaywattApp.ViewModels
 {
@@ -97,13 +95,13 @@ namespace RaywattApp.ViewModels
         }
 
         private List<CoRegistration> _angioTrackPoints;
-        public List<CoRegistration> AngioTrackPoints
+        public List<CoRegistration> CoRegistrations
         {
             get { return _angioTrackPoints; }
             set 
             {
                 _angioTrackPoints = value; 
-                OnPropertyChanged(nameof(AngioTrackPoints));
+                OnPropertyChanged(nameof(CoRegistrations));
             }
         }
 
@@ -220,7 +218,7 @@ namespace RaywattApp.ViewModels
 
             CrossSectionAngioImages = new List<Mat>();
             crossSectionAngioImageSources = new List<ImageSource>();
-            AngioTrackPoints = new List<CoRegistration>();
+            CoRegistrations = new List<CoRegistration>();
             DijkstraHeap = new List<DijkstraHeap>();
         }
 
@@ -241,7 +239,7 @@ namespace RaywattApp.ViewModels
                 for (int i = 0; i < PatientCase.AngioFrame.DijkstraHeap.Count; i++) DijkstraHeap.Add(PatientCase.AngioFrame.DijkstraHeap[i]);
                 AngioFrameNumber = ReviewStatus.AngioFrameNumber;
                 ReadAngioFrames();
-                ReadTrackPoints();
+                InitDHTrackPoints();
             }
         }
 
@@ -254,6 +252,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Ok");
             IsOk = true;
+            ReviewStatus.AngioFrameNumber = AngioFrameNumber = 0;
             GoToPreviousPage(true);
         }
 
@@ -266,6 +265,7 @@ namespace RaywattApp.ViewModels
         private void Reset()
         {
             _log.Debug("Reset");
+            AngioFrameNumber = 0;
             IsReset = true;
         }
 
@@ -275,10 +275,10 @@ namespace RaywattApp.ViewModels
 
             if (isSave)
             {
-                PatientCase.AngioFrame.CoRegistration = AngioTrackPoints;
+                PatientCase.AngioFrame.CoRegistration = CoRegistrations;
                 SaveCoRegPoint();
 
-                if (AngioTrackPoints[0].TrackPoint.Count != 0)
+                if (CoRegistrations[0].TrackPoints.Count != 0)
                 {
                     UpdateCoRegStatus(true);
                 }
@@ -302,7 +302,7 @@ namespace RaywattApp.ViewModels
         {
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
-            sqlParameters["track_point"] = JsonConvert.SerializeObject(AngioTrackPoints, Formatting.Indented);
+            sqlParameters["co_registration"] = CommonUtil.CoRegistrationsToJson(CoRegistrations);
             int nRows = _sqlManager.UpsertCoRegistration(sqlParameters);
             if (nRows == 0)
             {
@@ -330,19 +330,20 @@ namespace RaywattApp.ViewModels
 
                 if (PatientCase.AngioFrame.AngioImage[i] is BitmapSource bitmapSource)
                 {
+
                     CrossSectionAngioImages.Add(bitmapSource.ToMat());
                 }
             }
             AngioFrameLength = crossSectionAngioImageSources.Count - 1;
         }
 
-        private void ReadTrackPoints()
+        private void InitDHTrackPoints()
         {
             int cnt = 0;
             foreach (CoRegistration coReg in PatientCase.AngioFrame.CoRegistration)
             {
                 DijkstraHeap[cnt].line = new List<List<Point>>(coReg.Line);
-                DijkstraHeap[cnt].trackPoint = new List<Point>(coReg.TrackPoint);
+                DijkstraHeap[cnt].trackPoints = new List<Point>(coReg.TrackPoints);
                 cnt++;
             }
         }

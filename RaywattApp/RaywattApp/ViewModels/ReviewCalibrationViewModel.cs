@@ -3,8 +3,10 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
+using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
+using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
 using System.Windows.Input;
@@ -16,6 +18,8 @@ namespace RaywattApp.ViewModels
     public partial class ReviewCalibrationViewModel : OCTViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewCalibrationViewModel));
+
+        private IDialogService _dialogService;
 
         [ObservableProperty]
         private Patient _patient;
@@ -31,6 +35,8 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private Zoom _zoom = new Zoom();
+
+        private int zOffset;
 
         private ICommand _okCommand;
         public ICommand OkCommand
@@ -56,11 +62,19 @@ namespace RaywattApp.ViewModels
             get { return _cmdManualZoomIn ?? (this._cmdManualZoomIn = new RelayCommand<bool>(ManualZoomIn)); }
         }
 
-        public ReviewCalibrationViewModel()
+        private ICommand _revertCalibrateCommand;
+        public ICommand RevertCalibrateCommand
+        {
+            get { return this._revertCalibrateCommand ?? (this._revertCalibrateCommand = new RelayCommand(RevertCalibrate)); }
+        }
+
+        public ReviewCalibrationViewModel(IDialogService dialogService)
         {
             _log.Debug("ReviewCalibrationViewModel");
 
             Constants.CurrentPage = Constants.RecordingCalibrationPage;
+
+            _dialogService = dialogService;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -98,35 +112,95 @@ namespace RaywattApp.ViewModels
         private void ManualZoomIn(bool zoomIn)
         {
             _log.Debug("ManualZoomIn : " + ((zoomIn) ? "IN" : "OUT"));
+
+
+            int sign = zoomIn ? 1 : -1;
+
+            this.zOffset += sign;
+
+            if (PatientCase.ZOffset + this.zOffset > Constants.ZOffsetLimit || PatientCase.ZOffset + this.zOffset < -1 * Constants.ZOffsetLimit)
+            {
+                this.zOffset += sign * -1;
+                return;
+            }
+
+            RaySetProperty(Property.ZOffset, PatientCase.ZOffset + this.zOffset);
+            MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
         }
 
         private void Reset()
         {
             _log.Debug("Reset");
+
+            this.zOffset = 0;
+            RaySetProperty(Property.ZOffset, PatientCase.ZOffset + this.zOffset);
+            MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
+        }
+
+        private void RevertCalibrate()
+        {
+            _log.Debug("RevertCalibrate");
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            DialogResults? result = null;
+
+            parameter["title"] = _l10n["Information"];
+            parameter["message"] = _l10n["Confirm reversion to original calibration"];
+            result = _dialogService.OpenDialog(new ConfirmDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+            if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
+            {
+                if(PatientCase.ZOffset != 0)
+                {
+                    PatientCase.ZOffset = 0;
+                    RaySetProperty(Property.ZOffset, PatientCase.ZOffset);
+                    RestartReview();
+                }
+                else
+                {
+                    RaySetProperty(Property.ZOffset, PatientCase.ZOffset);
+                }
+                
+                GoToPreviousPage();
+            }
         }
 
         private void Cancel()
         {
             _log.Debug("Cancel");
 
-            GoToPreviousPage(false);
+            Reset();
+
+            GoToPreviousPage();
         }
 
         private void Ok()
         {
             _log.Debug("Ok");
 
-            GoToPreviousPage(true);
+            if(this.zOffset != 0)
+            {
+                PatientCase.ZOffset += this.zOffset;
+                RestartReview();
+            }
+
+            GoToPreviousPage();
         }
 
-        private void GoToPreviousPage(bool isSave)
+        private void RestartReview()
+        {
+            _log.Debug("RestartReview");
+
+            RayRestartReview();
+
+            DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current = 0;
+            ReviewStatus.IsRestartLumenDetection = true;
+            ReviewStatus.IsLumenEdited = true;
+        }
+
+        private void GoToPreviousPage()
         {
             _log.Debug("GoToPreviousPage");
-
-            if (!isSave)
-            {
-                Reset();
-            }
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;

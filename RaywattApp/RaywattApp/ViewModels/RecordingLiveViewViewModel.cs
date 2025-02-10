@@ -7,7 +7,6 @@ using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Services;
-using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -85,7 +84,6 @@ namespace RaywattApp.ViewModels
             { 
                 _fieldOfView = value;
                 OnPropertyChanged(nameof(FieldOfView));
-                RaySetProperty(Property.FieldOfView, value);
                 
                 PatientCase.FieldOfView = value;
                 Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
@@ -296,10 +294,9 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Send(new NavigationMessage(viewPage) { Parameter = parameter });
         }
 
-        private bool DrawAngioImage()
+        private void DrawAngioImage()
         {
             AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(_angioManager.ImgAngio);
-            return true;
         }
     }
 }

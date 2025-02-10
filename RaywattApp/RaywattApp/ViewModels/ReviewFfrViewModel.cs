@@ -315,8 +315,6 @@ namespace RaywattApp.ViewModels
             sqlParameters["vessel"] = PatientCase.Vessel;
             sqlParameters["location"] = PatientCase.Location;
             sqlParameters["procedure"] = PatientCase.Procedure;
-            sqlParameters["angio_yn"] = PatientCase.AngioYn;
-            sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
             sqlParameters["indicator_degree"] = PatientCase.IndicatorDegree;
             sqlParameters["colormap"] = PatientCase.Colormap;
             sqlParameters["calcium_threshold"] = PatientCase.CalciumThreshold;
@@ -328,6 +326,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["field_of_view"] = PatientCase.FieldOfView;
             sqlParameters["section_proximal"] = PatientCase.SectionProximal;
             sqlParameters["section_distal"] = PatientCase.SectionDistal;
+            sqlParameters["z_offset"] = PatientCase.ZOffset;
 
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
             if (nRows == 0)

@@ -16,9 +16,6 @@
     <Filter Include="Utility">
       <UniqueIdentifier>{46ddccb9-29c1-4295-8270-0d1882a45e72}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Indruino">
-      <UniqueIdentifier>{224dbe0d-dbc8-4e26-8955-e732036a973c}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LaserController.h">
@@ -30,9 +27,6 @@
     <ClInclude Include="SerialPort.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="ZaberController.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="..\Utility\Config.h">
       <Filter>Utility</Filter>
     </ClInclude>
@@ -41,12 +35,6 @@
     </ClInclude>
     <ClInclude Include="..\Utility\Utility.h">
       <Filter>Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="StepMotorController.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ArduinoController.h">
-      <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="LaserModule.h">
       <Filter>헤더 파일</Filter>
@@ -63,6 +51,9 @@
     <ClInclude Include="RJController.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="CommonProtocol.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LaserController.cpp">
@@ -74,29 +65,11 @@
     <ClCompile Include="SerialPort.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="ZaberController.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="..\Utility\MessageService.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
     <ClCompile Include="..\Utility\Utility.cpp">
       <Filter>Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="StepMotorController.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="ArduinoController.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Indruino\src\DelayLineComm.cpp">
-      <Filter>Indruino</Filter>
-    </ClCompile>
-    <ClCompile Include="Indruino\src\min.cpp">
-      <Filter>Indruino</Filter>
-    </ClCompile>
-    <ClCompile Include="Indruino\src\RS232Comm.cpp">
-      <Filter>Indruino</Filter>
     </ClCompile>
     <ClCompile Include="LaserModule.cpp">
       <Filter>소스 파일</Filter>
@@ -108,6 +81,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="RJController.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="CommonProtocol.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

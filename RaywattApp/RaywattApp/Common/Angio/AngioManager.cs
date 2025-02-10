@@ -18,8 +18,7 @@ using RaywattApp.Common.Localization;
 using RaywattApp.Common.Util;
 using System.Linq;
 using System.Collections.Concurrent;
-
-
+using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.Common.Angio
 {
@@ -76,7 +75,7 @@ namespace RaywattApp.Common.Angio
         private byte[] tmpBuffer;
         private List<byte[]> angioSaveBuffer;
         public List<byte[]> AngioSaveBuffer { get { return angioSaveBuffer; } set { angioSaveBuffer = value; } }
-
+        public List<DateTimeOffset> angioSaveTimes;
         private int bytesRead;
         private int tmpBufferLen;
         private int angioSaveFrameNum;
@@ -126,6 +125,7 @@ namespace RaywattApp.Common.Angio
             buffer = new byte[256];
             tmpBuffer = new byte[512];
             angioSaveBuffer = new List<byte[]>();
+            angioSaveTimes = new List<DateTimeOffset>();
 
             Array.Fill<byte>(buffer, 0);
             Array.Fill<byte>(tmpBuffer, 0);
@@ -258,8 +258,29 @@ namespace RaywattApp.Common.Angio
                 FileStream fs = new FileStream(angioFilePath + Constants.AngioImageExtension, FileMode.Create, FileAccess.Write);
 
                 angioSaveFrameNum = angioSaveBuffer.Count - 1;
+                int closestIndex = angioSaveFrameNum;
+                int searchRange = angioSaveFrameNum / 3;
+                double OCTStartTime = RayGetProperty(Property.PullbackStartTime);
+                double minGap = double.MaxValue;
+                double angioTime = double.MaxValue;
+                for (int i = angioSaveFrameNum; i > angioSaveFrameNum - searchRange; i--)
+                {
+                    DateTimeOffset time = angioSaveTimes[i];
+                    angioTime = time.ToUnixTimeMilliseconds() / 1000.0;
+                    double gap = Math.Abs(angioTime - OCTStartTime);
 
-                while (angioSaveFrameNum >= 0)
+                    if(gap <= minGap)
+                    {
+                        minGap = gap;
+                        closestIndex = i;
+                    }
+                }
+                _log.Debug($"gap = {minGap} Angio Time = {angioTime}, OCT Time = {OCTStartTime} closestIndex = {closestIndex}" +
+                    $"maxIndex = {angioSaveFrameNum}");
+
+                FileStream fs = new FileStream(angioFilePath + Constants.AngioImageExtension, FileMode.Create, FileAccess.Write);
+
+                while (closestIndex >= 0)
                 {
                     if (!ViewModelBase._deviceStatus.IsAngioConnected)
                     {
@@ -397,6 +418,7 @@ namespace RaywattApp.Common.Angio
             if (threadOnSaveAngioFrames)
             { 
                 angioSaveBuffer.Add(new byte[angioImageSize]);
+                angioSaveTimes.Add(DateTimeOffset.UtcNow);
                 Marshal.Copy(image.Data, angioSaveBuffer.Last(), 0, angioImageSize);
             }
             if (!ViewModelBase._deviceStatus.IsAngioConnected)return;

@@ -198,6 +198,9 @@ for FFR</value>
   <data name="$MSG023" xml:space="preserve">
     <value>[K]The angiography device is not connected.</value>
   </data>
+  <data name="$MSG024" xml:space="preserve">
+    <value>[K]Not enough storage space. Please free up space and try again.</value>
+  </data>
   <data name="$Terms and Conditions" xml:space="preserve">
     <value>[K]Product Intended Use: Clearly define the intended use of the OCT device, including any limitations or specific conditions for use.
 Product Warranty: Outline the warranty coverage provided for the OCT device, including the duration, scope, and process for claiming warranty services.
@@ -393,6 +396,9 @@ Acceptance of Terms: Require users to explicitly accept the terms and conditions
   <data name="Confirm import of selected file" xml:space="preserve">
     <value>[K]Confirm import of selected file</value>
   </data>
+  <data name="Confirm reversion to original calibration" xml:space="preserve">
+    <value>[K]Confirm reversion to original calibration</value>
+  </data>
   <data name="Contrast" xml:space="preserve">
     <value>[K]Contrast</value>
   </data>
@@ -421,9 +427,6 @@ Acceptance of Terms: Require users to explicitly accept the terms and conditions
     <value>[K]Data already exists.
 Overwrite existing data?</value>
   </data>
-  <data name="Database" xml:space="preserve">
-    <value>[K]Database</value>
-  </data>
   <data name="Delete" xml:space="preserve">
     <value>[K]Delete</value>
   </data>
@@ -441,6 +444,9 @@ Overwrite existing data?</value>
   </data>
   <data name="DICOM" xml:space="preserve">
     <value>[K]DICOM</value>
+  </data>
+  <data name="Disable Cleaning" xml:space="preserve">
+    <value>[K]Disable Cleaning</value>
   </data>
   <data name="Display Modes" xml:space="preserve">
     <value>[K]Display Modes</value>
@@ -468,6 +474,9 @@ Overwrite existing data?</value>
   </data>
   <data name="en-US" xml:space="preserve">
     <value>[K]English</value>
+  </data>
+  <data name="Enable Cleaning" xml:space="preserve">
+    <value>[K]Enable Cleaning</value>
   </data>
   <data name="End Review" xml:space="preserve">
     <value>[K]End Review</value>
@@ -955,6 +964,9 @@ Overwrite existing data?</value>
   <data name="Reset" xml:space="preserve">
     <value>[K]Reset</value>
   </data>
+  <data name="Revert Changes" xml:space="preserve">
+    <value>[K]Revert Changes</value>
+  </data>
   <data name="Review" xml:space="preserve">
     <value>[K]Review</value>
   </data>
@@ -963,6 +975,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Review Settings" xml:space="preserve">
     <value>[K]Review Settings</value>
+  </data>
+  <data name="Rotary Junction" xml:space="preserve">
+    <value>[K]Rotary Junction</value>
   </data>
   <data name="Save" xml:space="preserve">
     <value>[K]Save</value>
@@ -1068,6 +1083,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Step 5." xml:space="preserve">
     <value>[K]Step 5.</value>
+  </data>
+  <data name="Storage" xml:space="preserve">
+    <value>[K]Storage</value>
   </data>
   <data name="Survey (100㎜)" xml:space="preserve">
     <value>[K]Survey (100㎜)</value>

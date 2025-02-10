@@ -133,6 +133,12 @@ namespace RaywattApp.ViewModels
             get { return this._cmdMoveIndicator ?? (this._cmdMoveIndicator = new RelayCommand<object>(MoveIndicator)); }
         }
 
+        private ICommand _cmdTouchMoveIndicator;
+        public ICommand CmdTouchMoveIndicator
+        {
+            get { return this._cmdTouchMoveIndicator ?? (this._cmdTouchMoveIndicator = new RelayCommand<object>(TouchMoveIndicator)); }
+        }
+
         private ICommand _cmdViewSizeChanged;
         public ICommand CmdViewSizeChanged
         {
@@ -159,6 +165,17 @@ namespace RaywattApp.ViewModels
         public ICommand CmdExpandLeftPatientMenu
         { 
             get { return this._cmdExpandLeftPatientMenu ?? (this._cmdExpandLeftPatientMenu = new RelayCommand(ExpandLeftPatientMenu)); }
+        }
+        private ICommand _zoomIn3DCommand;
+        public ICommand ZoomIn3DCommand
+        {
+            get { return this._zoomIn3DCommand ?? (this._zoomIn3DCommand = new RelayCommand(ZoomIn3D)); }
+        }
+
+        private ICommand _zoomOut3DCommand;
+        public ICommand ZoomOut3DCommand
+        {
+            get { return this._zoomOut3DCommand ?? (this._zoomOut3DCommand = new RelayCommand(ZoomOut3D)); }
         }
 
         private Thread threadInitialize;
@@ -251,8 +268,6 @@ namespace RaywattApp.ViewModels
             sqlParameters["vessel"] = PatientCase.Vessel;
             sqlParameters["location"] = PatientCase.Location;
             sqlParameters["procedure"] = PatientCase.Procedure;
-            sqlParameters["angio_yn"] = PatientCase.AngioYn;
-            sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
             PatientCase.IndicatorDegree = Degree;
             sqlParameters["indicator_degree"] = PatientCase.IndicatorDegree;
             sqlParameters["colormap"] = PatientCase.Colormap;
@@ -265,6 +280,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["field_of_view"] = PatientCase.FieldOfView;
             sqlParameters["section_proximal"] = PatientCase.SectionProximal;
             sqlParameters["section_distal"] = PatientCase.SectionDistal;
+            sqlParameters["z_offset"] = PatientCase.ZOffset;
 
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
             if (nRows == 0)
@@ -299,7 +315,6 @@ namespace RaywattApp.ViewModels
                 int depth = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total;
                 double zVal = zValueForPullbackType();
                 IntPtr buffer = Marshal.AllocHGlobal(diameter * diameter * depth);
-
                 CommonUtil.ContoursToMemory(PatientCase.LumenContours,
                     new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize),
                     buffer,
@@ -308,10 +323,21 @@ namespace RaywattApp.ViewModels
                 if (CommonUtil.IsPostCase(PatientCase.Procedure))
                 {
                     ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(System.IntPtr.Zero), diameter, diameter, depth, 1, 1, zVal);
+
+                    if (CommonUtil.isVTIFileSave)
+                    {
+                        _log.Debug("VTIFileSave");
+                        ODSOCT_Export3DVTIFile(RayGetVolumeData(System.IntPtr.Zero), "test");
+                    }
                 }
                 else
                 {
                     ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(buffer), diameter, diameter, depth, 1, 1, zVal);
+                    if (CommonUtil.isVTIFileSave)
+                    {
+                        _log.Debug("VTIFileSave");
+                        ODSOCT_Export3DVTIFile(RayGetVolumeData(buffer), "test");
+                    }
                 }
 
                 ODSOCT_InputSurfaceParameter(Ray3DObject.Lumen, 10, 50, ".\\data\\lumen_tex.jpg");
@@ -329,15 +355,11 @@ namespace RaywattApp.ViewModels
                 }
 
                 ODSOCT_ProcessingDatas();
-                ODSOCT_UpdateColorTable((int)RayGetProperty(Property.Colormap));
-
                 if (isFirstRendering)
                 {
                     bugTestFunc();
                     ray3DStatus.IsFirstRendering = false;
                 }
-
-
                 //CommonUtil.GuideWireToMemory(PatientCase.LumenGuidewires,
                 //new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize),
                 //buffer,
@@ -348,7 +370,9 @@ namespace RaywattApp.ViewModels
                 Marshal.FreeHGlobal(buffer);
                 ReviewStatus.IsLumenEdited = false;
             }
-            
+
+            ODSOCT_UpdateColorTable((int)RayGetProperty(Property.Colormap));
+
             timerShowData.Interval = TimeSpan.FromMilliseconds(MinWaitingDelay);
             timerShowData.Tick += new EventHandler(timerFuncShowData);
             timerShowData.Start();
@@ -458,13 +482,7 @@ namespace RaywattApp.ViewModels
                     return;
                 }
 
-                if (indicator.IsLongitudeMove)
-                {
-                    indicator.IndicatorDiff = indicator.PointLongitudeX - indicator.Coordinate.X - indicator.X;
-                    indicator.IsLongitudeMove = false;
-                }
-
-                double indicatorX = indicator.PointLongitudeX - indicator.Coordinate.X - indicator.IndicatorDiff;
+                double indicatorX = indicator.PointLongitudeX - indicator.Coordinate.X - Constants.LongitudeIndicatorWidth / 2;
                 double indicatorCenterX = indicatorX + Constants.LongitudeIndicatorWidth / 2;
 
                 if (indicatorCenterX < 0)
@@ -486,6 +504,16 @@ namespace RaywattApp.ViewModels
                     setCurrentFrame(indicatorCenterX);
                 }
             }
+        }
+
+        private void TouchMoveIndicator(object param)
+        {
+            MouseEventArgs e = (MouseEventArgs)param;
+            var position = e.GetPosition((IInputElement)e.Source);
+
+            IndicatorLongitude.X = position.X - Constants.LongitudeIndicatorWidth / 2;
+            IndicatorLongitude.CenterX = IndicatorLongitude.X + Constants.LongitudeIndicatorWidth / 2;
+            setCurrentFrame(IndicatorLongitude.CenterX);
         }
 
         private void ViewSizeChanged(object param)
@@ -531,6 +559,30 @@ namespace RaywattApp.ViewModels
             patientMenuWindow = _dialogService.OpenChildWindow(new Review3dPatientMenuControl(), this, parameter, Constants.SideBarExpandSize, Constants.LeftSideBarExpand3dSize, 0, Constants.PatientMenu3dY);
         }
 
+        private void ZoomIn3D()
+        {
+            if (!IsRendering) return;
+            _log.Debug("zoomFactor = " + ray3DStatus.ZoomFactor);
+            if (ray3DStatus.ZoomFactor < Constants.Zoom3DScaleMax)
+            {
+                ODSOCT_CutViewZoom(1);
+                ray3DStatus.ZoomFactor += 1;
+                ODSOCT_Render();
+            }
+        }
+
+        private void ZoomOut3D() {
+            if (!IsRendering) return;
+            _log.Debug("zoomFactor = " + ray3DStatus.ZoomFactor);
+            if (ray3DStatus.ZoomFactor > - Constants.Zoom3DScaleMax)
+            {
+                ODSOCT_CutViewZoom(-1);
+                ray3DStatus.ZoomFactor -= 1;
+                ODSOCT_Render();
+            }
+        }
+
+
         public void SetResult(object result)
         {
             Dictionary<string, Object> data = (Dictionary<string, Object>)result;
@@ -548,6 +600,7 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
             }
         }
+
 
         private void setCurrentFrame(double navigatorPosition)
         {
@@ -594,23 +647,6 @@ namespace RaywattApp.ViewModels
             {
                 ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(buffer), diameter, diameter, depth, 1, 1, zVal);
             }
-
-            ODSOCT_InputSurfaceParameter(Ray3DObject.Lumen, 10, 50, ".\\data\\lumen_tex.jpg");
-            ODSOCT_InputData(Ray3DObject.Lumen, buffer, diameter, diameter, depth, 1, 1, zVal);
-
-            if (CommonUtil.IsPostCase(PatientCase.Procedure))
-            {
-                buffer = Marshal.AllocHGlobal(diameter * diameter * depth);
-                CommonUtil.StentsToMemory(PatientCase.LumenStents,
-                    new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize),
-                    buffer,
-                    new OpenCvSharp.Size(diameter, diameter));
-                ODSOCT_InputSurfaceParameter(Ray3DObject.Stent, 10, 15, ".\\data\\stent_tex.jpg");
-                ODSOCT_InputData(Ray3DObject.Stent, buffer, diameter, diameter, depth, 1, 1, zVal);
-            }
-
-            ODSOCT_ProcessingDatas();
-            ODSOCT_UpdateColorTable((int)RayGetProperty(Property.Colormap));
         }
     }
 }

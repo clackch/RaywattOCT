@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
 using System.Windows.Navigation;
+using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels
 {
@@ -144,6 +145,7 @@ namespace RaywattApp.ViewModels
                     PatientCase.AppositionThreshold = physicians[0].AppositionThreshold;
                     PatientCase.AccessionNumber = "";
                     PatientCase.Comment = "";
+                    PatientCase.ImageResolution = RayGetProperty(Property.ImageResolution);
 
                     sqlParameters.Clear();
                     sqlParameters["classification"] = "Present";
@@ -225,6 +227,12 @@ namespace RaywattApp.ViewModels
             PatientCase.Procedure = CurrentProcedure.Key;
             PatientCase.Vessel = CurrentVessel.Key;
             PatientCase.Location = CurrentLocation.Key;
+
+            double sheathType = 1;
+            if (PatientCase.AccessionNumber.Equals("0"))
+                sheathType = 0;
+            RaySetProperty(Property.SheathDiameter, sheathType);
+            PatientCase.SheathDiameter = RayGetProperty(Property.SheathDiameter);
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;

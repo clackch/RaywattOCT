@@ -34,9 +34,10 @@
             </StackPanel>
 
             <StackPanel Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left">
-                <Button Style="{Binding CurrentMenu, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingDatabasePage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingDatabasePage}" Content="{Binding [Database], Source={StaticResource L10N}}"/>
+                <Button Style="{Binding CurrentMenu, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingDatabasePage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingDatabasePage}" Content="{Binding [Storage], Source={StaticResource L10N}}"/>
                 <Button Style="{Binding CurrentMenu, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingLogPage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingLogPage}" Content="{Binding [Log], Source={StaticResource L10N}}"/>
                 <Button Style="{Binding CurrentMenu, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingTermsConditionsPage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingTermsConditionsPage}" Content="{Binding [Terms and Conditions], Source={StaticResource L10N}}"/>
+                <Button Style="{Binding CurrentMenu, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingMaintenancePage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingMaintenancePage}" Content="{Binding [Maintenance], Source={StaticResource L10N}}"/>
                 <Button Style="{Binding CurrentMenu, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingAboutPage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingAboutPage}" Content="{Binding [About], Source={StaticResource L10N}}"/>
                 <!--
                 <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingLocalizationPage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingLocalizationPage}" Content="{Binding [Localization], Source={StaticResource L10N}}"/>
@@ -63,6 +64,11 @@
                 <Frame NavigationUIVisibility="Hidden" Visibility="{Binding Visibility4}">
                     <b:Interaction.Behaviors>
                         <behaviors:FrameBehavior Navigation="{Binding PopupNavigationSource4, Mode=TwoWay}" />
+                    </b:Interaction.Behaviors>
+                </Frame>
+                <Frame NavigationUIVisibility="Hidden" Visibility="{Binding Visibility5}">
+                    <b:Interaction.Behaviors>
+                        <behaviors:FrameBehavior Navigation="{Binding PopupNavigationSource5, Mode=TwoWay}" />
                     </b:Interaction.Behaviors>
                 </Frame>
             </StackPanel>

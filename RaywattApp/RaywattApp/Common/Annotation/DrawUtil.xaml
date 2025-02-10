@@ -163,11 +163,14 @@
                 </RectangleGeometry.Rect>
             </RectangleGeometry>
         </Grid.Clip>
-        <Canvas Name="canvasBackground" Width="{x:Static const:Constants.OCTImageSize}" Height="{x:Static const:Constants.OCTImageSize}"/>
-        <Canvas Name="canvas" IsManipulationEnabled="true">
+        <Label Name="prevFrameNumber" Content="-1" Visibility="Collapsed"/>
+        <Label Name="prevFrameNumberForInit" Content="-1" Visibility="Collapsed"/>
+        <Canvas Name="canvasBackground" Width="{x:Static const:Constants.OCTImageSize}" Height="{x:Static const:Constants.OCTImageSize}">
             <UserControl x:Name="screenSize" Tag="{Binding ScreenSize, ElementName=UserControl}"/>
             <UserControl x:Name="zoomTranslateX" Tag="{Binding Zoom.TranslateX, ElementName=UserControl}"/>
             <UserControl x:Name="zoomTranslateY" Tag="{Binding Zoom.TranslateY, ElementName=UserControl}"/>
+        </Canvas>
+        <Canvas Name="canvas" IsManipulationEnabled="true">
             <Canvas.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform ScaleX="{Binding Zoom.ScaleX, ElementName=UserControl}" ScaleY="{Binding Zoom.ScaleY, ElementName=UserControl}"/>

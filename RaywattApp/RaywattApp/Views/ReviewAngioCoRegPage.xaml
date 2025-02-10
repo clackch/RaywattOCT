@@ -59,11 +59,10 @@
                                 </Grid.Clip>
                                 <Image x:Name="crossSectionAngioImage" Source="{Binding CurrentAngioImage}"  Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}" Stretch="Uniform"></Image>
                                 <CoRegistration:DrawAngioPathUtil Grid.Column="0" Width="{Binding ElementName=crossSectionAngioImage, Path=ActualWidth}" Height ="{Binding ElementName=crossSectionAngioImage, Path=ActualHeight}"
-                            						      DijkstraHeap="{Binding DijkstraHeap}" AngioImages ="{Binding CrossSectionAngioImages}" AngioFrameNumber ="{Binding AngioFrameNumber}" 
-                                                          MousePosition ="{Binding CrossSectionMousePosition, Mode=TwoWay}" AngioTrackPoints ="{Binding AngioTrackPoints, Mode=TwoWay}"
+                            						      DijkstraHeap="{Binding DijkstraHeap}" AngioImages ="{Binding CrossSectionAngioImages}" AngioFrameNumber ="{Binding AngioFrameNumber, Mode=TwoWay}" 
+                                                          MousePosition ="{Binding CrossSectionMousePosition, Mode=TwoWay}" CoRegistrations ="{Binding CoRegistrations, Mode=TwoWay}"
                                                           IsAngioTrackCompleted ="{Binding IsAngioTrackCompleted, Mode=TwoWay}" IsReset ="{Binding IsReset, Mode=TwoWay}"
-                                                          IsResetOn ="{Binding IsResetOn, Mode=TwoWay}" IsRendering ="{Binding IsRendering, Mode=TwoWay}"
-                                                          IsOk ="{Binding IsOk}" IsEditOn = "True"/>
+                                                          IsResetOn ="{Binding IsResetOn, Mode=TwoWay}" IsRendering ="{Binding IsRendering, Mode=TwoWay}" PullbackType="{Binding PatientCase.PullbackType}"/>
                                 <Border>
                                     <!-- Loading -->
                                     <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding IsRendering, Converter={StaticResource BoolToVisibilityConverter}}"/>

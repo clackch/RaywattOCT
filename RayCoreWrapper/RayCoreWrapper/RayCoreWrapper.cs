@@ -41,6 +41,8 @@ namespace RaywattOCT
             ImageResolution,
             ImageThreshold,
             ImageRoi,
+            ImageCompensation,
+            ImageCompensationControlWindow,
             FieldOfView,
             LongitudeImageWidth,
             LongitudeImageHeight,
@@ -49,7 +51,9 @@ namespace RaywattOCT
             PullbackDistance,
             PullbackSpeed,
             SheathDiameter,
-            TestMode
+            TestMode,
+            ZOffset,
+            PullbackStartTime
         }
 
         public enum RayCallbackRequest : int
@@ -91,7 +95,9 @@ namespace RaywattOCT
             Pullback,
             LoadCatheter,
             UnloadCatheter,
-            ValidateCatheter
+            ValidateCatheter,
+            InitializeRotaryJunction,
+            CleanRotaryJunction
         };
 
         public enum RaySession : int
@@ -153,17 +159,23 @@ namespace RaywattOCT
         [DllImport("RayCore.dll")]
         public static extern int RayUnloadCatheter();
         [DllImport("RayCore.dll")]
-        public static extern int RayStartReview(string filePath, double imageResolution);
+        public static extern int RayStartReview(string filePath, double imageResolution, double zOffset);
         [DllImport("RayCore.dll")]
-        public static extern int RayStartCompare(string filePath, double imageResolution);
+        public static extern int RayStartCompare(string filePath, double imageResolution, double zOffset);
         [DllImport("RayCore.dll")]
         public static extern int RayEndReview();
+        [DllImport("RayCore.dll")]
+        public static extern int RayEndCompare();
+        [DllImport("RayCore.dll")]
+        public static extern int RayRestartReview();
         [DllImport("RayCore.dll")]
         public static extern int RayStartLiveView();
         [DllImport("RayCore.dll")]
         public static extern int RayStopLiveView();
         [DllImport("RayCore.dll")]
         public static extern int RayLaserOnOff(bool isOn);
+        [DllImport("RayCore.dll")]
+        public static extern int RayRJCleanModeOnOff(bool isOn);
         [DllImport("RayCore.dll")]
         public static extern int RaySetSession(RaySession session);
         [DllImport("RayCore.dll")]
@@ -183,7 +195,7 @@ namespace RaywattOCT
         [DllImport("RayCore.dll")]
         public static extern int RayStartLumenDetection();
         [DllImport("RayCore.dll")]
-        public static extern int RayOpenImage(string filePath, double imageResolution);
+        public static extern int RayOpenImage(string filePath, double imageResolution, double zOffset);
         [DllImport("RayCore.dll")]
         public static extern int RayCloseImage();
         [DllImport("RayCore.dll")]

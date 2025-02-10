@@ -6,6 +6,7 @@ class CVideoWriter
 {
 private:
 	CThread* m_pThread;
+	CRITICAL_SECTION m_csQueue;
 
 	cv::VideoWriter m_videoWriter;
 	int m_nVideoWidth;

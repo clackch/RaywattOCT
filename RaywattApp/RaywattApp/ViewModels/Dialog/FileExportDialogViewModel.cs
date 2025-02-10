@@ -116,6 +116,9 @@ namespace RaywattApp.ViewModels.Dialog
         private double _imagePartWidth;
 
         [ObservableProperty]
+        private double _imagePartHeight;
+
+        [ObservableProperty]
         private double _crossSectionPartWidth;
 
         [ObservableProperty]
@@ -178,6 +181,9 @@ namespace RaywattApp.ViewModels.Dialog
         [ObservableProperty]
         private Point _crossSectionClipCenter;
 
+        [ObservableProperty]
+        private BitmapSource _sheathIndicator;
+
         public FileExportDialogViewModel(SqlManager sqlManager)
         {
             _sqlManager = sqlManager;
@@ -187,6 +193,7 @@ namespace RaywattApp.ViewModels.Dialog
             IndicatorLongitude.IsVisible = Visibility.Visible;
 
             ImagePartWidth = Constants.ExportLongitudeWidth;
+            ImagePartHeight = Constants.ExportHeight;
             TextPartWidth = 0;
             MeasureSeparator = Visibility.Collapsed;
 
@@ -197,7 +204,7 @@ namespace RaywattApp.ViewModels.Dialog
             Section.Distal.IsVisible = Visibility.Visible;
         }
 
-        public void SetInitialize(PatientCase patientCase, List<Mat> crossSections, Mat lMode, FileExport fileExport)
+        public double SetInitialize(PatientCase patientCase, List<Mat> crossSections, Mat lMode, FileExport fileExport)
         {
             PatientCase = patientCase;
             Degree = PatientCase.IndicatorDegree;            
@@ -227,6 +234,8 @@ namespace RaywattApp.ViewModels.Dialog
 
                 if (fileExport.Longitude)
                 {
+                    ImagePartHeight = Constants.ExportHeight - Constants.ExportLongitudeHeight;
+
                     Section.Proximal.X = CommonUtil.GetPositionFromFrame(patientCase.SectionProximal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, Constants.SectionIndicatorCenterWidth);
                     Section.Distal.X = CommonUtil.GetPositionFromFrame(patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
 
@@ -319,6 +328,11 @@ namespace RaywattApp.ViewModels.Dialog
             LongitudeZoom.ScaleY = Constants.ExportLongitudeImageHeight / Constants.LongitudeHeight;
             CrossSectionClipRadius = CrossSectionImageSize / 2;
             CrossSectionClipCenter = new Point(CrossSectionClipRadius, CrossSectionClipRadius);
+
+            double sheathDiameter = RayGetProperty(Property.SheathDiameter);
+            SheathIndicator = CommonUtil.DrawSheathIndicator((int)CrossSectionImageSize, sheathDiameter);
+
+            return ImagePartWidth + TextPartWidth;
         }
 
         public void SetFinalize()
@@ -462,6 +476,12 @@ namespace RaywattApp.ViewModels.Dialog
                 {
                     LumenGuidewires = JsonConvert.DeserializeObject<List<LumenGuidewire>>(patientCaseAnnotations[0].LumenGuidewire);
                 }
+
+                if (!string.IsNullOrEmpty(patientCaseAnnotations[0].CoRegistration))
+                {
+                    PatientCase.StrCoRegistration = patientCaseAnnotations[0].CoRegistration;
+                }
+
             }
 
             for (int i = 0; i < this.crossSections.Count; i++)

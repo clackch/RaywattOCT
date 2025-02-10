@@ -26,6 +26,8 @@ namespace RaywattApp.Common.Annotation
 
         private bool isErasing;
 
+        private bool init = false;
+
         public string InCommand
         {
             get { return (string)GetValue(InCommandProperty); }
@@ -43,6 +45,15 @@ namespace RaywattApp.Common.Annotation
 
         public static readonly DependencyProperty MeasurementsProperty =
             DependencyProperty.Register("Measurements", typeof(List<Measurement>), typeof(DrawUtil), new PropertyMetadata(null));
+
+        public int FrameNumberForInit
+        {
+            get { return (int)GetValue(FrameNumberForInitProperty); }
+            set { this.SetValue(FrameNumberForInitProperty, value); }
+        }
+
+        private static readonly DependencyProperty FrameNumberForInitProperty =
+            DependencyProperty.Register("FrameNumberForInit", typeof(int), typeof(DrawUtil), new PropertyMetadata(-1, InitPropertyChanged));
 
         public int FrameNumber
         {
@@ -134,6 +145,24 @@ namespace RaywattApp.Common.Annotation
         public static readonly DependencyProperty ScreenSizeProperty =
             DependencyProperty.Register("ScreenSize", typeof(double), typeof(DrawUtil), new PropertyMetadata(null));
 
+        public List<List<UIElement>> MeasureUIElements
+        {
+            get { return (List<List<UIElement>>)GetValue(MeasureUIElementsProperty); }
+            set { SetValue(MeasureUIElementsProperty, value); }
+        }
+
+        public static readonly DependencyProperty MeasureUIElementsProperty =
+            DependencyProperty.Register("MeasureUIElements", typeof(List<List<UIElement>>), typeof(DrawUtil), new PropertyMetadata(null));
+
+        public bool IsMeasureInit
+        {
+            get { return (bool)GetValue(IsMeasureInitProperty); }
+            set { this.SetValue(IsMeasureInitProperty, value); }
+        }
+
+        private static readonly DependencyProperty IsMeasureInitProperty =
+            DependencyProperty.Register("IsMeasureInit", typeof(bool), typeof(DrawUtil), new PropertyMetadata(default(bool)));
+
         //---------------------------------------------------------------------------------------------------- Constructor
         public DrawUtil()
         {
@@ -203,6 +232,47 @@ namespace RaywattApp.Common.Annotation
             drawUtil.InCommand = null;
         }
 
+        private static void InitPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
+        {
+            int frameNumber = (int)dependencyPropertyChangedEventArgs.NewValue;
+            _log.Debug("frameNumber for Init : " + frameNumber);
+
+            if (frameNumber < 0)
+                return;
+
+            var drawUtil = dependencyObject as DrawUtil;
+
+            if (drawUtil == null || drawUtil.IsMeasureInit || drawUtil.Measurements == null || drawUtil.Measurements.Count <= frameNumber)
+                return;
+
+            if (!drawUtil.init)
+            {
+                for(int i = 0; i < frameNumber; i++)
+                {
+                    if (i > 0)
+                        drawUtil.SaveUIElement(i-1);
+
+                    drawUtil.areaGeometrys = drawUtil.Measurements[i].AreaGeometries;
+                    drawUtil.lengthGeometries = drawUtil.Measurements[i].LengthGeometries;
+                    drawUtil.textGeometries = drawUtil.Measurements[i].TextGeometries;
+                    drawUtil.Draw(frameNumber);
+                }
+                drawUtil.prevFrameNumberForInit.Content = (frameNumber - 1).ToString();
+                drawUtil.init = true;
+            }
+
+            int prevFrameNumber = int.Parse((string)drawUtil.prevFrameNumberForInit.Content);
+            if (prevFrameNumber >= 0)
+                drawUtil.SaveUIElement(prevFrameNumber);
+
+            drawUtil.areaGeometrys = drawUtil.Measurements[frameNumber].AreaGeometries;
+            drawUtil.lengthGeometries = drawUtil.Measurements[frameNumber].LengthGeometries;
+            drawUtil.textGeometries = drawUtil.Measurements[frameNumber].TextGeometries;
+            drawUtil.Draw(frameNumber);
+
+            drawUtil.prevFrameNumberForInit.Content = frameNumber.ToString();
+        }
+
         private static void OnPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
             int frameNumber = (int)dependencyPropertyChangedEventArgs.NewValue;
@@ -213,7 +283,7 @@ namespace RaywattApp.Common.Annotation
 
             var drawUtil = dependencyObject as DrawUtil;
 
-            if(drawUtil == null || drawUtil.Measurements == null || drawUtil.Measurements.Count <= frameNumber)
+            if (drawUtil == null || drawUtil.Measurements == null || drawUtil.Measurements.Count <= frameNumber)
                 return;
 
             drawUtil.areaGeometrys = drawUtil.Measurements[frameNumber].AreaGeometries;
@@ -221,7 +291,17 @@ namespace RaywattApp.Common.Annotation
             drawUtil.textGeometries = drawUtil.Measurements[frameNumber].TextGeometries;
 
             if (drawUtil.IsDrawOn)
-                drawUtil.DrawAll();
+            {
+                drawUtil.Visibility = Visibility.Visible;
+
+                int prevFrameNumber = int.Parse((string)drawUtil.prevFrameNumber.Content);
+                if (prevFrameNumber >= 0)
+                    drawUtil.SaveUIElement(prevFrameNumber);
+
+                drawUtil.Draw(frameNumber);
+            }
+
+            drawUtil.prevFrameNumber.Content = frameNumber.ToString();
         }
 
         private static void DrawPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
@@ -235,12 +315,50 @@ namespace RaywattApp.Common.Annotation
 
             if (isDrawOn)
             {
-                drawUtil.DrawAll();
+                drawUtil.Visibility = Visibility.Visible;
+
+                drawUtil.Draw(drawUtil.FrameNumber);
             }
             else
             {
-                drawUtil.canvas.Children.Clear();
+                drawUtil.SaveUIElement(drawUtil.FrameNumber);
             }
+        }
+
+        private void Draw(int frameNumber)
+        {
+            if (!this.IsFfr && this.MeasureUIElements != null && this.MeasureUIElements[frameNumber] != null && this.MeasureUIElements[frameNumber].Count > 0)
+            {
+                this.canvas.Children.Clear();
+
+                foreach (UIElement element in this.MeasureUIElements[frameNumber])
+                {
+                    var parent = VisualTreeHelper.GetParent(element) as Panel;
+                    if (parent != null)
+                        parent.Children.Remove(element);
+
+                    this.canvas.Children.Add(element);
+                }
+            }
+            else
+            {
+                this.DrawAll();
+            }
+        }
+
+        private void SaveUIElement(int frameNumber)
+        {
+            if (this.MeasureUIElements == null)
+                return;
+
+            this.MeasureUIElements[frameNumber].Clear();
+
+            foreach (UIElement element in this.canvas.Children)
+            {
+                this.MeasureUIElements[frameNumber].Add(element);
+            }
+
+            this.canvas.Children.Clear();
         }
 
         private void erase_canvas_MouseRightButtonDown(object sender, MouseEventArgs e)
@@ -270,9 +388,12 @@ namespace RaywattApp.Common.Annotation
                     return;
 
                 this.canvas.Children.Clear();
-                DrawAreaAll();
-                DrawLengthAll();
-                DrawTextAll();
+                if(this.areaGeometrys.Count > 0)
+                    DrawAreaAll();
+                if(this.lengthGeometries.Count > 0)
+                    DrawLengthAll();
+                if(this.textGeometries.Count > 0)
+                    DrawTextAll();
             }
         }
 

@@ -71,6 +71,26 @@ Download & Install OCT Host
 ## [DAQ]
 * ATS9371_Driver_V7.11.1.exe(https://www.alazartech.com/en/product/ats9371/4/) 파일 설치
 
+## [Python]
+
+1. Python Download & Install
+   - https://www.python.org/downloads/
+
+    ※ 설치 시, 환경변수 추가 (Add Python 3.XX to PATH 선택)
+2. Python Package Install
+   - cmd에서 pip install numpy pillow scipy imageio pywin32 실행
+     
+     ※ 인터넷 연결이 안되어 있을 경우 처리방안
+     
+     [인터넷 없는 환경 package 설치.docx](https://github.com/user-attachments/files/18434123/package.docx)
+
+3. 환경 변수 추가
+   - 시스템 변수에 PYTHON_DLL - C:\Users\Raywatt\AppData\Local\Programs\Python\Python312\python312.dll 추가
+
+     ※ 경로 및 Python dll은 해당 PC에 맞춰서 적용
+4. 코드 복사
+   - RaywattExt\Python\ImageProcess.py 파일을 runtime에 복사
+
 ## [Font]
 
 Download & Install Font
@@ -84,7 +104,7 @@ Download & Install Font
 
 ## [Cursor]
 Download & Create Folder, Copy/Paste
-1. [cursor.zip](https://github.com/Raywatt/RaywattOCT/files/11419744/cursor.zip) 다운로드 후 압축 해제
+1. [cursor.zip](https://github.com/user-attachments/files/18683414/cursor.zip) 다운로드 후 압축 해제
 2. C:\Raywatt\system\image\cursor 폴더 생성 및 복사/붙여넣기
 
 Windows Default Mouse Cursor Setting (※ 필요 시 진행)
@@ -189,3 +209,9 @@ Download & Copy/Paste
   
   ![image](https://github.com/Raywatt/RaywattOCT/assets/110812182/03acbcd1-8f77-40fa-a29d-cfaac5860787)
 
+
+## 설정 후, 꼭 확인해야 하는 항목 (App Test)
+
+- Manual Calibration 실행해서 ML 기능 확인
+  - 첫 실행이면 C:\Raywatt\system\3rdparty\model\yolo에서 engine 파일이 실행일자로 생성되었는지 확인
+- Tiff 저장 기능 확인
