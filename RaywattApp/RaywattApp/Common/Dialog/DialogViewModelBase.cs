@@ -12,7 +12,6 @@ namespace RaywattApp.Common.Dialog
         private static readonly ILog _log = LogManager.GetLogger(typeof(DialogViewModelBase));
 
         protected readonly DynamicResource _l10n;
-
         public string? Title { get; set; }
 
         public string? Message { get; set; }
@@ -56,16 +55,13 @@ namespace RaywattApp.Common.Dialog
             _l10n = (DynamicResource)App.Current.Resources["L10N"];
             Title = "";
         }
-
         public virtual void SetParameter(object parameter) { }
 
         protected virtual void AnswerYes(IDialogWindow dialog)
         {
             _log.Debug("AnswerYes");
-
             DialogResults dialogResults = new();
             dialogResults.DialogAnswer = DialogResults.Answer.Yes;
-
             CloseDialogWithResult(dialog, dialogResults);
         }
 
@@ -85,7 +81,6 @@ namespace RaywattApp.Common.Dialog
 
             DialogResults dialogResults = new();
             dialogResults.DialogAnswer = DialogResults.Answer.Undefined;
-
             CloseDialogWithResult(dialog, dialogResults);
         }
 

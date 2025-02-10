@@ -2,35 +2,46 @@
 
 TCPSocket::TCPSocket() {
 
-	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-	{
-		PLOGI.printf("Failed to initialize winsock. Error code: %d", WSAGetLastError());
-		WSACleanup();
-		exit(0);
+	try {
+		if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+		{
+			PLOGI.printf("Failed to initialize winsock. Error code: %d", WSAGetLastError());
+			WSACleanup();
+			//exit(0);
+			throw std::runtime_error("WSAStartup failed");
+		}
+
+		serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+		if (serverSocket == INVALID_SOCKET)
+		{
+			PLOGI.printf("Failed to create socket. Error code: %d", WSAGetLastError());
+			closesocket(serverSocket);
+			WSACleanup();
+			//exit(0);
+			throw std::runtime_error("Failed to create socket");
+		}
+
+		serverAddress.sin_family = AF_INET;
+		serverAddress.sin_port = htons(8888); // host to network short
+		serverAddress.sin_addr.s_addr = INADDR_ANY;
+
+		if (::bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR)
+		{
+			PLOGI.printf("Failed to bind socket. Error code: %d", WSAGetLastError());
+			closesocket(serverSocket);
+			WSACleanup();
+			//exit(0);
+			throw std::runtime_error("Failed to bind socket");
+		}
+
+		listen(serverSocket, 1);
 	}
-
-	serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-	if (serverSocket == INVALID_SOCKET)
-	{
-		PLOGI.printf("Failed to create socket. Error code: %d", WSAGetLastError());
-		closesocket(serverSocket);
-		WSACleanup();
-		exit(0);
+	catch (const std::exception& ex) {
+		PLOGI.printf("Exception occurred: %s", ex.what());
+		if (serverSocket != INVALID_SOCKET)
+			closesocket(serverSocket);  
+		throw;
 	}
-
-	serverAddress.sin_family = AF_INET;
-	serverAddress.sin_port = htons(8888); // host to network short
-	serverAddress.sin_addr.s_addr = INADDR_ANY;
-
-	if (::bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR)
-	{
-		PLOGI.printf("Failed to bind socket. Error code: %d", WSAGetLastError());
-		closesocket(serverSocket);
-		WSACleanup();
-		exit(0);
-	}
-
-	listen(serverSocket, 1);
 }
 
 TCPSocket::~TCPSocket()
@@ -104,7 +115,7 @@ void TCPSocket::ConnectClient(FrameGrabber& fg, int arg) {
 		portEventThreadRunning = false;
 		checkClientThreadRunning = false;
 
-		StopSnapFrameThread();
+		StopLiveFrameThread(fg);
 	}
 	while (!isConnected) {
 		clientSocket = accept(serverSocket, NULL, NULL);
@@ -125,38 +136,13 @@ void TCPSocket::ConnectClient(FrameGrabber& fg, int arg) {
 	}
 }
 
-void TCPSocket::SnapFrame(FrameGrabber& fg) {
-
-	int offset = IMAGE_HEADER_SIZE;
-
-	ERRTYPE e = eHD_SnapToBuffer(fg.m_ImageHandle, &fg.sc);
-	if (e) {
-		PLOGI.printf("Failed to snap frame");
-		exit(0);
-	}
-
-	memcpy(sendBuffer + offset, fg.sc.pRecvBuf, fg.lHeight * fg.lWidth * fg.wBitsPerPixel / 8 * sizeof(uchar));
-	offset += fg.lHeight * fg.lWidth * fg.wBitsPerPixel / 8 * sizeof(uchar);
-	checkSum = CalcCheckSum(sendBuffer, offset);
-	memcpy(sendBuffer + offset, &checkSum, sizeof(checkSum));
-	offset += sizeof(checkSum);
-	memcpy(sendBuffer + offset, &eof, sizeof(eof));
-	offset += sizeof(eof);
-
-	int sendResult = send(clientSocket, sendBuffer, imagePacketSize, 0);
-	if (sendResult == SOCKET_ERROR)
-	{
-		PLOGI.printf("Failed to send data to client. Error code: %d", WSAGetLastError());
-		exit(0);
-	}
-}
-
 void TCPSocket::ReceivePacket(FrameGrabber& fg) {
 	int bytesReceived = recv(clientSocket, recvBuffer, 100, 0);
 	if (bytesReceived == SOCKET_ERROR)
 	{
-		PLOGI.printf("Failed to receive data from client. Error code : %d", WSAGetLastError());
+		PLOGI.printf("Failed to receive data from client. Error code : %d, %d", WSAGetLastError(), bytesReceived); //
 		exit(1);
+		return;
 	}
 	else if (bytesReceived > 0)
 	{
@@ -169,12 +155,14 @@ void TCPSocket::ReceivePacket(FrameGrabber& fg) {
 			int sendResult;
 			switch (commandType) {
 			case CommandType::FGStarted:
+				
 				PLOGI.printf("FGStarted");
 				tmpRecvBufferLen -= 5;
 				memmove(tmpRecvBuffer, tmpRecvBuffer + 5, tmpRecvBufferLen);
 				tmpRecvBuffer[tmpRecvBufferLen] = '\0';
 				isStarted = true;
-				StartSnapFrameThread(fg);
+				//StartSnapFrameThread(fg);
+				StartLiveFrameThread(fg);
 				break;
 			case CommandType::FGStopped:
 				PLOGI.printf("FGStopped");
@@ -182,7 +170,7 @@ void TCPSocket::ReceivePacket(FrameGrabber& fg) {
 				memmove(tmpRecvBuffer, tmpRecvBuffer + 5, tmpRecvBufferLen);
 				tmpRecvBuffer[tmpRecvBufferLen] = '\0';
 				isStarted = false;
-				StopSnapFrameThread();
+				StopLiveFrameThread(fg);
 				break;
 			case CommandType::FGAskPort:
 				PLOGI.printf("FGAskPort");
@@ -228,10 +216,11 @@ void TCPSocket::ReceivePacket(FrameGrabber& fg) {
 				SetDeviceInfoPacket(fg, deviceInfoBuffer);
 
 				sendResult = send(clientSocket, deviceInfoBuffer, 10, 0);
-				PLOGI.printf("Send Device Info: " + sendResult);
+				PLOGI.printf("Send Device Info: %d" + sendResult);
 				break;
 			case CommandType::FGChpFile:
 				PLOGI.printf("FGChpFile");
+				StopLiveFrameThread(fg);
 				ChpFilePacketProcess(fg);
 				break;
 			case CommandType::FGNothing:
@@ -309,11 +298,11 @@ void TCPSocket::ChpFilePacketProcess(FrameGrabber& fg) {
 		SetImagePacketHeader(fg);
 		SetCommandPacket(CommandType::FGSuccessChangeChp);
 		sendResult = send(clientSocket, commandBuffer, 5, 0);
-		PLOGI.printf("Send SuccessChangeChp Info: " + sendResult);
+		PLOGI.printf("Send SuccessChangeChp Info: %d " + sendResult);
 		SetDeviceInfoPacket(fg, deviceInfoBuffer);
-		PLOGI.printf("Send SuccessChangeChp Info: " + sendResult);
 		sendResult = send(clientSocket, deviceInfoBuffer, 10, 0);
-		PLOGI.printf("Send Device Info: " + sendResult);
+		PLOGI.printf("Send Device Info: %d", sendResult);
+		Chp_selected = true;
 	}
 
 	tmpRecvBufferLen -= packetLen;
@@ -322,105 +311,58 @@ void TCPSocket::ChpFilePacketProcess(FrameGrabber& fg) {
 
 }
 
-void TCPSocket::StartSnapFrameThread(FrameGrabber& fg) {
-	if (!snapFrameThreadRunning) {
-		snapFrameThreadRunning = true;
-		snapFrameThreadHandle = thread(&TCPSocket::SnapFrameThread, this, ref(fg));
-		PLOGI.printf("SnapFrameThread started.");
-	}
-}
-
-
-void TCPSocket::StopSnapFrameThread() {
-	if (snapFrameThreadRunning) {
-		snapFrameThreadRunning = false;
-		if (snapFrameThreadHandle.joinable()) {
-			snapFrameThreadHandle.join();
-		}
-		PLOGI.printf("SnapFrameThread stopped.");
-	}
-}
-
 void TCPSocket::PortEventThread(FrameGrabber& fg) {
 	while (portEventThreadRunning)
 	{
-		switch (WaitForSingleObject(fg.pIdeaInfo->hInfoEvent, 100))
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		DWORD status = WaitForSingleObject(fg.pIdeaInfo->hInfoEvent, 100);
+		
+		switch (status)
 		{
-		case WAIT_TIMEOUT:
-		{
-			continue;
-		}
+			PLOGI.printf("PortEventThread called");
 
-		case WAIT_OBJECT_0:
-		{
-			ResetEvent(fg.pIdeaInfo->hInfoEvent);
-
-			switch (fg.pIdeaInfo->dwInfoCode)
+			case WAIT_TIMEOUT:
 			{
-			case IDEA_INFO_SYNC:
-			{
-				fg.m_bSyncValid = fg.pIdeaInfo->dwInfoExtra;
 
-				if (fg.m_bSyncValid)
-				{
-					fg.portConnection = 1;
-					if (fg.oldPortConnection != fg.portConnection) {
-						SetCommandPacket(CommandType::FGAngioConnected);
-						int sendResult = send(clientSocket, commandBuffer, 5, 0);
-						PLOGI.printf("Send Port Connected");
-					}
-				}
-				else
-				{
-					fg.portConnection = 0;
-					if (fg.oldPortConnection != fg.portConnection) {
-						SetCommandPacket(CommandType::FGAngioDisconnected);
-						int sendResult = send(clientSocket, commandBuffer, 5, 0);
-						PLOGI.printf("Send Port Disconnected");
-					}
-				}
-				fg.oldPortConnection = fg.portConnection;
+				PLOGI.printf("WAIT_TIMEOUT called");
 				break;
 			}
-			case IDEA_INFO_CONNECTION:
-			{
-				SYNC_INFO* pSyncInfo = (SYNC_INFO*)fg.pIdeaInfo->pInfoObject;
-				if (pSyncInfo->bDVIClockActive || pSyncInfo->bHDMIClockActive) {
-					if (fg.portConnection == -1) {
-						fg.portConnection = 1;
-						break;
-					}
 
-					fg.portConnection = 1;
-					if (fg.oldPortConnection != fg.portConnection) {
-						SetCommandPacket(CommandType::FGAngioConnected);
-						int sendResult = send(clientSocket, commandBuffer, 5, 0);
-						PLOGI.printf("Send Port Connected");
-					}
-				}
-				else {
-					if (fg.portConnection == -1) {
-						fg.portConnection = 0;
-						break;
-					}
-
-					fg.portConnection = 0;
-					if (fg.oldPortConnection != fg.portConnection) {
-						SetCommandPacket(CommandType::FGAngioDisconnected);
-						int sendResult = send(clientSocket, commandBuffer, 5, 0);
-						PLOGI.printf("Send Port Disconnected");
-					}
-				}
-				fg.oldPortConnection = fg.portConnection;
-				break;
-			}
 			default:
+			{
+				ResetEvent(fg.pIdeaInfo->hInfoEvent);
+				fg.pIdeaInfo->bNewInfo = FALSE;
+				fg.m_bSyncValid = bHP_CSyncDetect(fg.m_BoardHandle);
+				//PLOGI.printf("Port Event...");
+				if (fg.m_bSyncValid && fg.portConnection != 1)
+				{
+					fg.portConnection = 1;
+					SetCommandPacket(CommandType::FGAngioConnected);
+					int sendResult = send(clientSocket, commandBuffer, 5, 0);
+					PLOGI.printf("Send Port Connected");
+				}
+				else if (!fg.m_bSyncValid && fg.portConnection != 0)
+				{
+					fg.portConnection = 0;
+					SetCommandPacket(CommandType::FGAngioDisconnected);
+					int sendResult = send(clientSocket, commandBuffer, 5, 0);
+					PLOGI.printf("Send Port Disconnected");
+				}
+
+				if (fg.pIdeaInfo)
+				{
+					//PLOGI.printf("fg.pIdealInfo true called");
+					HANDLE	hInfoEvent = fg.pIdeaInfo->hInfoEvent;
+					if (hInfoEvent)
+					{
+						// Must be done in this order to prevent a problem in the DLL thread.
+						fg.pIdeaInfo->hInfoEvent = 0;
+						CloseHandle(hInfoEvent);
+					}
+
+				}
 				break;
 			}
-
-		default:
-			break;
-		}
 		}
 	}
 }
@@ -435,12 +377,6 @@ void TCPSocket::ReceiveCmdThread(FrameGrabber& fg) {
 	}
 }
 
-void TCPSocket::SnapFrameThread(FrameGrabber& fg) {
-	while (snapFrameThreadRunning && isStarted && fg.portConnection) {
-		SnapFrame(fg);
-	}
-}
-
 void TCPSocket::CheckClientThread() {
 	while (checkClientThreadRunning) {
 		const char* empty = "";
@@ -448,7 +384,10 @@ void TCPSocket::CheckClientThread() {
 		int sendResult = send(clientSocket, empty, emptySize, 0);
 		if (sendResult == SOCKET_ERROR)
 		{
-			exit(0);
+			int errorCode = WSAGetLastError();
+			PLOGI.printf("Failed to send data to client. Error code: %d", errorCode);
+			//exit(0);
+			return;
 		}
 		Sleep(1000);
 	}
@@ -484,72 +423,140 @@ byte TCPSocket::CalcCheckSum(char* sendBuffer, int size) {
 	return (byte)~csum;
 }
 
-/////////////////////////////////////////////
-/*
-SnapToBuffer -> LiveStream으로의 리팩토링을 목적으로 만든 함수 모음
-정상 동작하지 않는 상태의 코드
-*/
-/////////////////////////////////////////////
+long long TCPSocket::timeSelect() {
+	auto now = std::chrono::system_clock::now();
+	auto epochDuration = now.time_since_epoch();
+	auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(epochDuration).count();
+	return milliseconds;
+}
 
 void TCPSocket::LiveFrame(FrameGrabber& fg) {
-
-	int offset = IMAGE_HEADER_SIZE;
-
-	HDVID_HEADER* pBufferHeader;
-	while (eHD_GetStreamBuffer(fg.m_ImageHandle, &pBufferHeader) == 0)
-	{
-		PLOGI.printf("Success GetStreamBuffer.");
-		memcpy(sendBuffer + offset, pBufferHeader->pBuffer, fg.lHeight * fg.lWidth * fg.wBitsPerPixel / 8 * sizeof(uchar));
-		offset += fg.lHeight * fg.lWidth * fg.wBitsPerPixel / 8 * sizeof(uchar);
-
-		// checkSum
-		checkSum = CalcCheckSum(sendBuffer, offset);
-		memcpy(sendBuffer + offset, &checkSum, sizeof(checkSum));
-		offset += sizeof(checkSum);
-
-		// eof
-		memcpy(sendBuffer + offset, &eof, sizeof(eof));
-		offset += sizeof(eof);
-
-		int sendResult = send(clientSocket, sendBuffer, imagePacketSize, 0);
-		if (sendResult == SOCKET_ERROR)
-		{
-			PLOGI.printf("Failed to send data to client. Error code: %d", WSAGetLastError());
-			exit(0);
+	HDVID_HEADER* pVidHeader = nullptr; 
+	ERRTYPE bufferResult = eHD_GetStreamBuffer(fg.m_ImageHandle, &pVidHeader); // 이미지 버퍼헤더 가져오는 함수
+	long long livetime = timeSelect();
+	if (bufferResult != 0 || pVidHeader == nullptr) {
+		retryCount++; 
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		if (retryCount > 100) { // 이미지를 0.1초 이상 받아오지 못하는 경우 새로고침
+			RefreshLiveStream(fg);
+			retryCount = 0;
 		}
-
-		eHD_ReleaseStreamBuffer(fg.m_ImageHandle, pBufferHeader);
-
-		offset = IMAGE_HEADER_SIZE;
-		PLOGI.printf("Success Catching LiveFrame.");
+		return;
 	}
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	int offset = 7; 
+	memcpy(sendBuffer + offset, &livetime, sizeof(livetime));
+	offset += sizeof(livetime);
+	memcpy(sendBuffer + offset, pVidHeader->pBuffer, fg.m_LiveStreamInfo.nDestinationWidth * fg.m_LiveStreamInfo.nDestinationHeight * fg.wBitsPerPixel / 8);
+	offset += fg.m_LiveStreamInfo.nDestinationWidth * fg.m_LiveStreamInfo.nDestinationHeight * fg.wBitsPerPixel / 8;
+	checkSum = CalcCheckSum(sendBuffer, offset); 
+	memcpy(sendBuffer + offset, &checkSum, sizeof(checkSum)); 
+	offset += sizeof(checkSum); 
+	memcpy(sendBuffer + offset, &eof, sizeof(eof)); 
+	offset += sizeof(eof); 
+	int sendResult = send(clientSocket, sendBuffer, imagePacketSize, 0);
+	if (sendResult == SOCKET_ERROR) { 
+		PLOGI.printf("Failed to send data to client. Error code: %d", WSAGetLastError()); 
+	}
+	eHD_ReleaseStreamBuffer(fg.m_ImageHandle, pVidHeader); //버퍼 할당 해제
+	retryCount = 0; 
 }
 
 void TCPSocket::StartLiveFrameThread(FrameGrabber& fg) {
 	if (!liveFrameThreadRunning) {
-		m_ErrorCode = eHD_LiveStreamInit(fg.m_ImageHandle, &fg.m_LiveStreamInfo);
-
+		 
+		ERRTYPE result = eHD_LiveStreamMode(fg.m_ImageHandle, LVM_RUN); // LiveMode_RUN
+		if (result != 0)
+		{
+			PLOGI.printf("Failed to set live stream mode. Error code: %d", result);
+			return;
+		}
 		liveFrameThreadRunning = true;
 		liveFrameThreadHandle = thread(&TCPSocket::LiveFrameThread, this, ref(fg));
-		PLOGI.printf("LiveFrameThread started.");
 	}
-
 }
 
 void TCPSocket::StopLiveFrameThread(FrameGrabber& fg) {
-	if (liveFrameThreadRunning) {
-		m_ErrorCode = eHD_LiveStreamClose(fg.m_ImageHandle, &fg.m_LiveStreamInfo);
-
+	if (liveFrameThreadRunning) { 
 		liveFrameThreadRunning = false;
-		if (liveFrameThreadHandle.joinable()) {
-			liveFrameThreadHandle.join();
+		ERRTYPE result = eHD_LiveStreamMode(fg.m_ImageHandle, LVM_STOP); // LiveMode_STOP
+		eHD_LiveStreamClose(fg.m_ImageHandle, &fg.m_LiveStreamInfo); 
+		if (liveFrameThreadHandle.joinable()) { 
+			liveFrameThreadHandle.join(); 
 		}
 		PLOGI.printf("LiveFrameThread stopped.");
 	}
 }
 
-void TCPSocket::LiveFrameThread(FrameGrabber& fg) {
+void TCPSocket::LiveFrameThread(FrameGrabber& fg) {	
 	while (liveFrameThreadRunning && isStarted && fg.portConnection) {
 		LiveFrame(fg);
+	}
+}
+
+void TCPSocket::RefreshLiveStream(FrameGrabber& fg) { 
+	ERRTYPE result = eHD_LiveStreamMode(fg.m_ImageHandle, LVM_STOP);
+	if (result != 0)return;
+	eHD_LiveStreamClose(fg.m_ImageHandle, &fg.m_LiveStreamInfo);
+	eHD_ReleaseStreamBuffer(fg.m_ImageHandle, fg.m_LiveStreamInfo.pVidHeaders);
+	fg.InitializeLiveStreamInfo();
+	result = eHD_LiveStreamInit(fg.m_ImageHandle, &fg.m_LiveStreamInfo);
+	if (result != 0)return;
+	result = eHD_LiveStreamMode(fg.m_ImageHandle, LVM_RUN);
+	if (result != 0)return;
+	PLOGI.printf("RefreshLiveStream");
+}
+
+// --------------------------------Snap 관련 함수--------------------------------------//
+
+void TCPSocket::StartSnapFrameThread(FrameGrabber& fg) {
+	if (!snapFrameThreadRunning) {
+		snapFrameThreadRunning = true;
+		snapFrameThreadHandle = thread(&TCPSocket::SnapFrameThread, this, ref(fg));
+		PLOGI.printf("SnapFrameThread started.");
+	}
+}
+
+
+void TCPSocket::StopSnapFrameThread() {
+	if (snapFrameThreadRunning) {
+		snapFrameThreadRunning = false;
+		if (snapFrameThreadHandle.joinable()) {
+			snapFrameThreadHandle.join();
+		}
+		PLOGI.printf("SnapFrameThread stopped.");
+	}
+}
+
+void TCPSocket::SnapFrameThread(FrameGrabber& fg) { 
+	while (snapFrameThreadRunning && isStarted && fg.portConnection) { 
+		SnapFrame(fg); 
+	}
+}
+
+void TCPSocket::SnapFrame(FrameGrabber& fg) {
+
+	int offset = IMAGE_HEADER_SIZE;
+	ERRTYPE e = eHD_SnapToBuffer(fg.m_ImageHandle, &fg.sc);
+	if (e) {
+		PLOGI.printf("Failed to snap frame");
+		//exit(0);
+		isStarted = false;
+		return;
+	}
+	memcpy(sendBuffer + offset, fg.sc.pRecvBuf, fg.lHeight * fg.lWidth * fg.wBitsPerPixel / 8 * sizeof(uchar));
+	offset += fg.lHeight * fg.lWidth * fg.wBitsPerPixel / 8 * sizeof(uchar);
+	checkSum = CalcCheckSum(sendBuffer, offset);
+	memcpy(sendBuffer + offset, &checkSum, sizeof(checkSum));
+	offset += sizeof(checkSum);
+	memcpy(sendBuffer + offset, &eof, sizeof(eof));
+	offset += sizeof(eof);
+
+	int sendResult = send(clientSocket, sendBuffer, imagePacketSize, 0);
+	if (sendResult == SOCKET_ERROR)
+	{
+		PLOGI.printf("Failed to send data to client. Error code: %d", WSAGetLastError());
+		//exit(0);
+		return;
 	}
 }

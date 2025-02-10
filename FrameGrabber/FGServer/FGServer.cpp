@@ -28,9 +28,7 @@ int main(int argc, char** argv)
 	if (error) {
 		PLOGI.printf("Failed to init board");
 		fg.boardConnection = false;
-
-
-	}
+		}
 	else {
 
 		PLOGI.printf("Success to init board");
@@ -45,11 +43,12 @@ int main(int argc, char** argv)
 		}
 		else {
 			PLOGI.printf("Success to read .chp file");
-			fg.CreateFromFG();
+			//fg.CreateFromFG();
+			memset(&fg.sc, 0, sizeof(SNAP_CONTROL));
+			fg.sc.stSize = sizeof(SNAP_CONTROL);
 		}
 	}
 
 	fg.CheckPortConnection();
-
 	ts->StartInitThreads(fg);
 }

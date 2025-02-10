@@ -83,7 +83,6 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private ReviewImageInfo[] _reviewImageInfos = new ReviewImageInfo[2];
-
         public DeviceStatus()
         {
             ReviewImageInfos[(int)RaySession.Review] = new ReviewImageInfo();

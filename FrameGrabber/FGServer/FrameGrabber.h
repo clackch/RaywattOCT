@@ -42,18 +42,20 @@ public:
 	void CreateFromFG();
 	void CheckPortConnection();
 	void InitializeLiveStreamInfo();
+	void DecodeError(char* szErrMsg, ERRTYPE e);
 
 	IDEA_INFO* pIdeaInfo;
 	BOOL m_bSyncValid;
 	SNAP_CONTROL sc;
 	ImageHandle m_ImageHandle;
 	LIVESTREAM_INFO m_LiveStreamInfo;
+	BoardHandle m_BoardHandle;
 
 	short lWidth;
 	short lHeight;
 	char wBitsPerPixel = 0;
 
-	int portConnection;
+	int portConnection; // init : -1, Connected : 1, Disconnected : 0
 	int oldPortConnection;
 	bool boardConnection = 0;
 
@@ -65,7 +67,6 @@ private:
 	HD_sReport m_BoardReport;
 	DWORD m_dwCaptureFormatSelect;
 	RSET m_RSet;
-	BoardHandle m_BoardHandle;
 	UpdateVideoSettingLong UV;
 	HD_LUTHandle m_hVPLUT;
 };
