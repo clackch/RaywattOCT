@@ -356,7 +356,8 @@ namespace RaywattApp.ViewModels
                 {
                     DeviceStatus.PowerOffMsg = _l10n["Switching user"];
                 }
-                CommonUtil.Exit(DeviceStatus, _angioManager, result.DialogAnswer == DialogResults.Answer.Yes ? true : false);
+                CommonUtil.Exit(DeviceStatus, _angioManager, result.DialogAnswer == DialogResults.Answer.Yes ? true : false); // 여기다
+                _angioManager.StopSoketCheck();
             }
         }
 

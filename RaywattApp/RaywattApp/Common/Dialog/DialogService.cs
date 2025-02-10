@@ -41,7 +41,7 @@ namespace RaywattApp.Common.Dialog
 
             if (parameter != null)
                 dialogDataContext.SetParameter(parameter);
-
+            
             window.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
             window.ShowDialog();
 
