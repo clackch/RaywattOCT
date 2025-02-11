@@ -470,13 +470,20 @@ namespace RaywattApp.Common.Bases
         public const int DeviceInfoPacketSize = 10;
 
         //AngioCoRegistration
-        public const double ellipsePathWidth = 1;
-        public const double ellipsePathHeight = 1;
-        public const double ellipseTrackWidth = 5;
-        public const double ellipseTrackHeight = 5;
+        public const double ellipsePathWidth = 4;
+        public const double ellipsePathHeight = 4;
+        public const double ellipseTrackWidth = 6;
+        public const double ellipseTrackHeight = 6;
+        public const double ellipseOuterTrackWidth = 16;
+        public const double ellipseOuterTrackHeight = 16;
         public const double coregistrationCursorSize = 113;
         public const string objectSeedPath = "..\\bin\\Data\\Object.png";
         public const string backgroundSeedPath = "..\\bin\\Data\\Background.png";
-
+        public const double pathInterval = 7.6;
+        public const int pathIntervalPowerHISH = 1;
+        public const int pathIntervalPowerHILO = 2;
+        public const int pathIntervalPowerSTSH = 3;
+        public const int pathIntervalPowerSTLO = 5;
+        public const int pathIntervalPowerFAST = 12;
     }
 }

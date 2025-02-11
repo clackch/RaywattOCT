@@ -54,8 +54,8 @@ enum class RayProperty {
 	PullbackSpeed,
 	SheathDiameter,
 	TestMode,
-  ZOffset,
-  PullbackStartTime
+	ZOffset,
+	PullbackStartTime
 };
 
 enum class RayCallbackRequest {
