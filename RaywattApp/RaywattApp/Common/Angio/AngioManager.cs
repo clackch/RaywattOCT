@@ -221,8 +221,8 @@ namespace RaywattApp.Common.Angio
         {
             while (isSocketAlive)
             {
-                Thread.Sleep(500);
-                if(GetServerConnection() == false)
+                Thread.Sleep(1000);
+                if(GetServerConnection() == false && !ViewModelBase._deviceStatus.IsPowerOff)
                 {
                     _log.Debug("server down");
                     //CommonUtil.Exit(ViewModelBase._deviceStatus, this, true);
@@ -454,7 +454,6 @@ namespace RaywattApp.Common.Angio
                     {
                         SendCommandPacket(CommandType.FGStopped);
                     }
-                    ViewModelBase._deviceStatus.IsAngioInitialized = false;
 
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
@@ -589,20 +588,6 @@ namespace RaywattApp.Common.Angio
             _log.Debug("No signal");
             Mat image = new Mat(1080, 1920, MatType.CV_8UC3);
             image.SetTo(new Scalar(0, 0, 0));
-
-            Scalar textColor = new Scalar(0, 0, 255);
-            HersheyFonts fontFace = HersheyFonts.HersheyPlain;
-            double fontScale = 20;
-            int thickness = 10;
-
-            OpenCvSharp.Size textSize = Cv2.GetTextSize("No Signal", fontFace, fontScale, thickness, out int baseline);
-
-            OpenCvSharp.Point textPosition = new OpenCvSharp.Point(
-                (image.Width - textSize.Width) / 2,
-                (image.Height + textSize.Height) / 2
-            );
-            Cv2.PutText(image, "No Signal", textPosition, fontFace, fontScale, textColor, thickness);
-
             return image;
         }
 

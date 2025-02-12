@@ -1073,9 +1073,6 @@ namespace RaywattApp.Common.Util
 
         public static void Exit(DeviceStatus? deviceStatus = null, AngioManager? angioManager = null, bool isShutdown = false)
         {
-            if (angioManager != null)
-                angioManager.CloseAngioManager();
-
             if (deviceStatus != null)
             {
                 deviceStatus.IsPowerOff = true;
@@ -1086,6 +1083,9 @@ namespace RaywattApp.Common.Util
                     Thread.Sleep(50);
                 }
             }
+
+            if (angioManager != null)
+                angioManager.CloseAngioManager();
 
             Thread threadReadyPullback = new Thread(() => ThreadExit(deviceStatus, isShutdown));
             threadReadyPullback.Start();
