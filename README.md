@@ -182,7 +182,7 @@ Download & Copy/Paste
    
        $taskAction = New-ScheduledTaskAction -Execute "C:\Raywatt\system\runtime\RaywattApp.exe"
    
-       $taskPrincipal = New-ScheduledTaskPrincipal -UserId "Administrator" -LogonType Interactive -RunLevel Highest
+       $taskPrincipal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
    
        $taskSettings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -DontStopOnIdleEnd
    
@@ -196,7 +196,7 @@ Download & Copy/Paste
    
        오른쪽 창에서 "RaywattAppAdmin" 작업이 있는지 확인
 
-7. Shell Launcher (고정 프로그램)
+8. Shell Launcher (고정 프로그램)
    
    (a) 제어판 > 프로그램 > 프로그램 및 기능 > Windows 기능 켜기/끄기 > Device Lockdown(디바이스 잠금) > Shell Launcher(셸 시작 관리자) 체크
    
@@ -210,7 +210,7 @@ Download & Copy/Paste
    
    (d) 스크립트 실행 (경고 발생)
 
-8. 부팅 로고 변경
+9. 부팅 로고 변경
 
     (a) [HackBGRT-1.5.1_Raywatt.zip](https://github.com/Raywatt/RaywattOCT/files/12582646/HackBGRT-1.5.1_Raywatt.zip) 다운로드 후 setup.exe 실행
 
