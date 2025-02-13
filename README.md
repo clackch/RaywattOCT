@@ -174,21 +174,43 @@ Download & Copy/Paste
    
    (b) 컴퓨터 구성 > 관리 템플릿 > 시스템 -> 로그온 > 네트워크 선택 UI 표시 안 함 > 사용   
 
-6. Shell Launcher (고정 프로그램)
+6. Raywatt App 관리자 권한으로 작업 스케줄러 등록
+
+   (a) PowerShell 관리자 권한으로 실행
+
+   (b) 아래 내용 실행
+   
+       $taskAction = New-ScheduledTaskAction -Execute "C:\Raywatt\system\runtime\RaywattApp.exe"
+   
+       $taskPrincipal = New-ScheduledTaskPrincipal -UserId "Administrator" -LogonType Interactive -RunLevel Highest
+   
+       $taskSettings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -DontStopOnIdleEnd
+   
+       Register-ScheduledTask -TaskName "RaywattAppAdmin" -Action $taskAction -Principal $taskPrincipal -Settings $taskSettings
+   
+   (c) 적용 확인 방법
+   
+       Win + R → taskschd.msc 입력 후 Enter
+   
+       "작업 스케줄러 라이브러리" 클릭
+   
+       오른쪽 창에서 "RaywattAppAdmin" 작업이 있는지 확인
+
+7. Shell Launcher (고정 프로그램)
    
    (a) 제어판 > 프로그램 > 프로그램 및 기능 > Windows 기능 켜기/끄기 > Device Lockdown(디바이스 잠금) > Shell Launcher(셸 시작 관리자) 체크
    
    (b) 관리자 권한 PowerShell 실행 > `Set-ExecutionPolicy Unrestricted` 입력 후 `Y`
 
-   (c) [ShellLauncher.zip](https://github.com/Raywatt/RaywattOCT/files/12583810/ShellLauncher.zip) 다운로드 및 `ShellLauncher_enable.ps1` 실행
+   (c) [ShellLauncher.zip](https://github.com/user-attachments/files/18777482/ShellLauncher.zip) 다운로드 및 `ShellLauncher_enable.ps1` 실행
    
-       ※ ShellLauncher_enable.ps1에서 C:\Raywatt\system\runtime\RaywattApp.exe를 실행하게 설정
+       ※ ShellLauncher_enable.ps1에서 스케줄러에 등록된 RaywattApp을 실행하게 설정
    
        ※ 설정이 잘 못되었을 경우, ShellLauncher_disable.ps1 실행해서 설정 내용 해제 가능
    
    (d) 스크립트 실행 (경고 발생)
 
-7. 부팅 로고 변경
+8. 부팅 로고 변경
 
     (a) [HackBGRT-1.5.1_Raywatt.zip](https://github.com/Raywatt/RaywattOCT/files/12582646/HackBGRT-1.5.1_Raywatt.zip) 다운로드 후 setup.exe 실행
 
