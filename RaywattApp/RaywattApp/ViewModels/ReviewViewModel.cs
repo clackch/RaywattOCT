@@ -1919,6 +1919,7 @@ namespace RaywattApp.ViewModels
             List<List<byte>> statusList = new List<List<byte>>(imageCount);
             List<List<Point>> nextPoints = new List<List<Point>>(imageCount);
             List<List<Point>> pastPoints = new List<List<Point>>(imageCount);
+
             for (int i = 0; i < imageCount; i++)
             {
                 statusList.Add(new List<byte>());
@@ -1930,19 +1931,19 @@ namespace RaywattApp.ViewModels
 
             for (int i = 0; i < imageCount; i++)
             {
-                Cv2.EqualizeHist(frames[i], frames[i]); // 히스토그램 평활화
+                Cv2.EqualizeHist(frames[i], frames[i]); // Histogram Equalization
             }
 
-            // 후처리용 파라미터들
             int mask_r = 40;
             int thresholdOfNow = 30;
             int thresholdOfOther = 30;
             int thresholdCut = 30;
 
-            // 각 프레임별로 후처리 수행
             for (int i = 0; i < imageCount; i++)
             {
-                Mat nowimage = frames[i].Clone();
+                Mat nowimage = new Mat();
+                nowimage.Create(frames[i].Rows, frames[i].Cols, frames[i].Depth(), frames[i].Type());
+                frames[i].CopyTo(nowimage);
 
                 if (i == 0)
                 {
@@ -1971,14 +1972,8 @@ namespace RaywattApp.ViewModels
                             byte pixVal = nowimage.At<byte>(y, x);
                             if (pixVal < thresholdOfNow)
                             {
-                                /*if (!(x + final_x < 0 || x + final_x >= nowimage.Cols ||
-                                      y + final_y < 0 || y + final_y >= nowimage.Rows) &&
-                                    frames[i + 1].At<byte>(y + final_y, x + final_x) > thresholdCut)
-                                {
-                                    nowimage.At<byte>(y, x) = 50;
-                                }
-                                else*/
                                 nowimage.At<byte>(y, x) = 255;
+                                // 다음 프레임에 맞춰서 0으로 만드는 부분은 오류가 많아지는 경향이 있음.
                             }
                             else
                             {
