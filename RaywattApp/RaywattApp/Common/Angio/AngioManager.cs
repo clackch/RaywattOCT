@@ -225,7 +225,7 @@ namespace RaywattApp.Common.Angio
                 if(GetServerConnection() == false && !ViewModelBase._deviceStatus.IsPowerOff)
                 {
                     _log.Debug("server down");
-                    CommonUtil.Exit(ViewModelBase._deviceStatus, this, true);
+                    //CommonUtil.Exit(ViewModelBase._deviceStatus, this, true);
                     isSocketAlive = false;
                 }
             }
