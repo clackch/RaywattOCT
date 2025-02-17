@@ -1935,9 +1935,9 @@ namespace RaywattApp.ViewModels
             }
 
             int mask_r = 40;
-            int thresholdOfNow = 30;
-            int thresholdOfOther = 30;
-            int thresholdCut = 30;
+            int thresholdOfNow = 30;    // 현재 프레임이 해당 값보다 작으면 혈관, 크면 혈관이 아닌 걸로 판정
+            int thresholdOfOther = 20;  // 앞, 뒤 프레임이 해당 값보다 작으면 현재 프레임이 혈관이 아니라고 판정된 상태에도 혈관으로 판정
+            int thresholdCut = 40;      // 앞, 뒤 프레임이 해당 값보다 크면 현재 프레임이 혈관이라고 판정된 상태에도 혈관이 아니라고 판정
 
             for (int i = 0; i < imageCount; i++)
             {
