@@ -430,12 +430,16 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 
 void COCTImaging::findSheath(cv::Mat img) {
 	m_nSheathSearchRange = 300; /*1mm 오차 범위 설정*/
+	double maxMinusEdge = 0.3;
+	double pointStandard = 0.1;
+	int closeness = 10;
+	int maxDiffIndex = 44, minDiffIndex = 33;
 	cv::Mat image;
 
 	img.convertTo(img, CV_32F, 1 / 255.f);
 	cv::rotate(img, image, cv::ROTATE_90_COUNTERCLOCKWISE);
 	image = image(cv::Range(0, m_nSheathSearchRange), cv::Range::all());
-	cv::resize(image, image, cv::Size(1080, image.rows));
+	cv::resize(image, image, cv::Size(image.cols, image.rows));
 
 	//horizontal line formed 노이즈 제거
 	cv::Mat edge_image;
@@ -443,7 +447,7 @@ void COCTImaging::findSheath(cv::Mat img) {
 
 	cv::Mat temp = image.clone();
 	for (int i = 0; i < m_nSheathSearchRange; i++) for (int j = 0; j < temp.cols; j++) {
-		temp.at<float>(i, j) -= (0.5 - edge_image.at<float>(i, j));
+		temp.at<float>(i, j) -= (maxMinusEdge - edge_image.at<float>(i, j));
 	}
 
 	// 행마다의 일정 밝기 이상의 픽셀 계수, 가장 많은 행 2개 저장
@@ -452,8 +456,8 @@ void COCTImaging::findSheath(cv::Mat img) {
 
 	for (int i = 0; i < m_nSheathSearchRange; i++) {
 		int tmp = 0;
-		for (int j = 0; j < 1080; j++) {
-			if (temp.at<float>(i, j) >= 0.67)
+		for (int j = 0; j < image.cols; j++) {
+			if (temp.at<float>(i, j) >= pointStandard)
 				tmp++;
 		}
 		pixelNum[i] = tmp;
@@ -464,7 +468,7 @@ void COCTImaging::findSheath(cv::Mat img) {
 	}
 
 	for (int i = 0; i < m_nSheathSearchRange; i++) {
-		if (i == 0 || std::abs(maxIndex[0] - i) <= 10) continue;
+		if (i == 0 || std::abs(maxIndex[0] - i) <= closeness) continue;
 		else if (pixelNum[maxIndex[1]] < pixelNum[i]) {
 			maxIndex[1] = i;
 		}
@@ -472,7 +476,7 @@ void COCTImaging::findSheath(cv::Mat img) {
 
 	// outer line 행 위치를 return
 	int diff = abs(maxIndex[0] - maxIndex[1]);
-	if (diff < 30 || diff > 55) {
+	if (diff < minDiffIndex || diff > maxDiffIndex) {
 		m_nSheathPosition = 0;
 	}
 	else {
