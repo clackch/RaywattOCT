@@ -6,7 +6,31 @@ CLaserController* CLaserController::pInstance = NULL;
 CLaserController::CLaserController() {
 	PLOGI.printf("CLaserController Start (getInstance)");
 
-	HRESULT hr = CoInitialize(NULL);
+	APTTYPE aptType;
+	APTTYPEQUALIFIER aptQualifier;
+
+	HRESULT hr = CoGetApartmentType(&aptType, &aptQualifier);
+	if (SUCCEEDED(hr)) {
+		switch (aptType) {
+		case APTTYPE_STA:
+			PLOGI.printf("현재 스레드는 STA 모드입니다.\n");
+			break;
+		case APTTYPE_MTA:
+			PLOGI.printf("현재 스레드는 MTA 모드입니다.\n");
+			break;
+		case APTTYPE_NA:
+			PLOGI.printf("현재 스레드는 Neutral Apartment 모드입니다.\n");
+			break;
+		case APTTYPE_MAINSTA:
+			PLOGI.printf("현재 스레드는 Main STA 모드입니다.\n");
+			break;
+		default:
+			PLOGI.printf("알 수 없는 APT 타입\n");
+			break;
+		}
+	}
+	
+	hr = CoInitialize(NULL);
 	PLOGI.printf("Hr = %x", hr);
 	if (hr == RPC_E_CHANGED_MODE) {
 		hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
