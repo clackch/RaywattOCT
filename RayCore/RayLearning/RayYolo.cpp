@@ -19,7 +19,6 @@ void CRayYolo::Initialize(bool useGPU){
 
 		m_yoloSegment = InitializeSegment();
 		m_yoloDetect = InitializeDetect();
-		PLOGI.printf("ML Initialize done");
 	}
 }
 

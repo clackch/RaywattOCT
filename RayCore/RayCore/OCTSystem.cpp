@@ -111,7 +111,7 @@ RayError COCTSystem::Start() {
 	PLOGI.printf("Pullback setting: LaserSpeed=%ld, Velocity=%ldrpm, NumOfAlines=%ld", config.acquisition.nLaserSpeed, config.bldcMotor.velocityPullback, settingPullback.nBScan);
 	m_pImagingPullback = CImagingSession::CreateColorImaging(this, settingPullback, nullptr, ImagingType::Default);
 	m_pImagingPullback->SetSession(SESSION_REALTIME);
-	m_pImagingPullback->Start();
+	//m_pImagingPullback->Start();
 
 	IImaging::Setting settingLiveView = config.imaging;
 	settingLiveView.Set(settingLiveView.nAScan, floor((double)config.acquisition.nLaserSpeed / ((double)config.bldcMotor.velocityLiveView / 60.f)));
@@ -212,12 +212,12 @@ RayError COCTSystem::ConnectDevices() {
 
 		// Connect to COM Interface first time
 		CLaserController* pLaser = CLaserController::GetInstance();
-		// pLaser->LaserOnOff(true);
+		pLaser->LaserOnOff(true);
 
 		result |= connectAcqDevice();
 		PLOGI.printf("connect DAQ - %s", ((result == NOERROR) ? "Succeed" : "Failed"));
 
-		// pLaser->LaserOnOff(false);
+		pLaser->LaserOnOff(false);
 
 		if (m_isTestMode) {
 			if (m_pRJController->IsConnected() == false)
@@ -1222,14 +1222,14 @@ UINT COCTSystem::threadService(LPVOID param) {
 	PLOGI.printf("Service Start");
 
 	// Initialize
-	IRayLearning* learning = IRayLearning::GetInstance();
-	learning->Initialize(true);
+	//IRayLearning* learning = IRayLearning::GetInstance();
+	//learning->Initialize(true);
 
-	// LUT Load
-	CLookUpTable& lut = CLookUpTable::GetInstance();
-	lut.Load("LUT_green.csv");
-	lut.Load("LUT_gray.csv");
-	lut.Load("LUT_abbott.csv");
+	//// LUT Load
+	//CLookUpTable& lut = CLookUpTable::GetInstance();
+	//lut.Load("LUT_green.csv");
+	//lut.Load("LUT_gray.csv");
+	//lut.Load("LUT_abbott.csv");
 	//lut.Load("LUT_enhanced.csv");
 	//lut.Load("LUT_ML.csv");
 

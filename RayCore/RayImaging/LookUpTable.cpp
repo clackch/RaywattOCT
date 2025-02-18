@@ -51,9 +51,6 @@ int CLookUpTable::Load(const char* strLUTPath, bool isTest) {
 			return m_vLUT.size();
 		}
 	}
-	else {
-		PLOGI.printf("LUG File Missing %s", strLUTPath);
-	}
 	
 	return 0;
 }
