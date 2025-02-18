@@ -4,7 +4,20 @@
 CLaserController* CLaserController::pInstance = NULL;
 
 CLaserController::CLaserController() {
-	CoInitialize(NULL);
+	PLOGI.printf("CLaserController Start (getInstance)");
+
+	HRESULT hr = CoInitialize(NULL);
+	PLOGI.printf("Hr = %x", hr);
+
+	CLSID myCLSID;
+	LPOLESTR clsidString = nullptr;
+	hr = StringFromCLSID(myCLSID, &clsidString);
+	wprintf(L"CLSID: %s\n", clsidString);
+	PLOGI.printf("Hr = %x", hr);
+
+	Sleep(2000);
+
+	PLOGI.printf("m_pAxsunOCTControl call");
 	m_pAxsunOCTControl = IAxsunOCTControlPtr(__uuidof(struct AxsunOCTControl));
 
 	// open network interface and wait 2 seconds (time for connection to be established)

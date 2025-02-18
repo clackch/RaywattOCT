@@ -52,6 +52,7 @@ bool CRJController::Connect(void *param) {
 		BOOL result = CUtility::StartThread(threadReadPacket, m_pThread, (LPVOID)this);
 
 		if (result == FALSE) {
+			PLOGI.printf("RjController Error, now Disconnection is processing");
 			Disconnect();
 			m_initMotor = false;
 		}
@@ -287,6 +288,8 @@ UINT CRJController::threadReadPacket(LPVOID param) {
 
 		Sleep(1);
 	}
+
+	PLOGI.printf("thread read Packet error occured");
 
 	return NOERROR;
 }

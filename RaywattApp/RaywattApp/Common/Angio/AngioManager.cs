@@ -652,9 +652,12 @@ namespace RaywattApp.Common.Angio
         }
         private void StopLiveView()
         {
-            imageList.Clear();
-            liveView = false;
-            get_image.Join();
+            if (imageList != null)
+            {
+                imageList.Clear();
+                liveView = false;
+                get_image.Join();
+            }
         }
         private void StartSoketCheck()
         {
@@ -664,7 +667,10 @@ namespace RaywattApp.Common.Angio
         public void StopSoketCheck()
         {
             isSocketAlive = false;
-            isSocketConnected.Join();
+            if (isSocketConnected != null)
+            {
+                isSocketConnected.Join();
+            }
         }
         public void StartSaveAngioThread(PatientCase patientCase)
         {
