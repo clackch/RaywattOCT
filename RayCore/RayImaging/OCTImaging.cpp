@@ -548,7 +548,6 @@ UINT COCTImaging::threadRender(LPVOID param) {
 			}
 		}
 
-		PLOGI.printf("repeat thread Render");
 		Sleep(1000);
 	}
 
