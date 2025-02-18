@@ -104,7 +104,7 @@ RayError COCTSystem::Start() {
 
 	SetLogger(config.logRootPath);
 
-	CUtility::StartThread(threadService, m_pThreadService, this);
+	//CUtility::StartThread(threadService, m_pThreadService, this);
 
 	IImaging::Setting settingPullback = config.imaging;
 	settingPullback.Set(settingPullback.nAScan, floor((double)config.acquisition.nLaserSpeed / ((double)config.bldcMotor.velocityPullback / 60.f)));
@@ -118,7 +118,7 @@ RayError COCTSystem::Start() {
 	PLOGI.printf("Pullback setting: LaserSpeed=%ld, Velocity=%ldrpm, NumOfAlines=%ld", config.acquisition.nLaserSpeed, config.bldcMotor.velocityLiveView, settingLiveView.nBScan);
 	m_pImagingLiveView = CImagingSession::CreateColorImaging(this, settingLiveView, nullptr, ImagingType::Default);
 	m_pImagingLiveView->SetSession(SESSION_REALTIME);
-	m_pImagingLiveView->Start();
+	//m_pImagingLiveView->Start();
 
 	m_pAcqDevice = new CATSDevice(config.acquisition);
 
