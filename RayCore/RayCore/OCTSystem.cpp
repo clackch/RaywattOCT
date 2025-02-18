@@ -104,21 +104,21 @@ RayError COCTSystem::Start() {
 
 	SetLogger(config.logRootPath);
 
-	//CUtility::StartThread(threadService, m_pThreadService, this);
+	CUtility::StartThread(threadService, m_pThreadService, this);
 
 	IImaging::Setting settingPullback = config.imaging;
 	settingPullback.Set(settingPullback.nAScan, floor((double)config.acquisition.nLaserSpeed / ((double)config.bldcMotor.velocityPullback / 60.f)));
 	PLOGI.printf("Pullback setting: LaserSpeed=%ld, Velocity=%ldrpm, NumOfAlines=%ld", config.acquisition.nLaserSpeed, config.bldcMotor.velocityPullback, settingPullback.nBScan);
 	m_pImagingPullback = CImagingSession::CreateColorImaging(this, settingPullback, nullptr, ImagingType::Default);
 	m_pImagingPullback->SetSession(SESSION_REALTIME);
-	//m_pImagingPullback->Start();
+	m_pImagingPullback->Start();
 
 	IImaging::Setting settingLiveView = config.imaging;
 	settingLiveView.Set(settingLiveView.nAScan, floor((double)config.acquisition.nLaserSpeed / ((double)config.bldcMotor.velocityLiveView / 60.f)));
 	PLOGI.printf("Pullback setting: LaserSpeed=%ld, Velocity=%ldrpm, NumOfAlines=%ld", config.acquisition.nLaserSpeed, config.bldcMotor.velocityLiveView, settingLiveView.nBScan);
 	m_pImagingLiveView = CImagingSession::CreateColorImaging(this, settingLiveView, nullptr, ImagingType::Default);
 	m_pImagingLiveView->SetSession(SESSION_REALTIME);
-	//m_pImagingLiveView->Start();
+	m_pImagingLiveView->Start();
 
 	m_pAcqDevice = new CATSDevice(config.acquisition);
 
@@ -1221,16 +1221,16 @@ UINT COCTSystem::threadService(LPVOID param) {
 
 	PLOGI.printf("Service Start");
 
-	// Initialize
-	//IRayLearning* learning = IRayLearning::GetInstance();
-	//learning->Initialize(true);
+	//Initialize
+	IRayLearning* learning = IRayLearning::GetInstance();
+	learning->Initialize(true);
 
-	//// LUT Load
-	//CLookUpTable& lut = CLookUpTable::GetInstance();
-	//lut.Load("LUT_green.csv");
-	//lut.Load("LUT_gray.csv");
-	//lut.Load("LUT_abbott.csv");
-	//lut.Load("LUT_enhanced.csv");
+	// LUT Load
+	CLookUpTable& lut = CLookUpTable::GetInstance();
+	lut.Load("LUT_green.csv");
+	lut.Load("LUT_gray.csv");
+	lut.Load("LUT_abbott.csv");
+	lut.Load("LUT_enhanced.csv");
 	//lut.Load("LUT_ML.csv");
 
 #ifdef DEBUG
@@ -1282,16 +1282,25 @@ UINT COCTSystem::threadService(LPVOID param) {
 	PLOGI.printf("sample lumen detection done.");
 #endif	
 
+	PLOGI.printf("test1");
+
 	if (pSystem->m_callback != nullptr)
 	{
+		PLOGI.printf("test2");
 		pSystem->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::StartService);
 	}
 
+	PLOGI.printf("test3");
+
 	while (pThread->isRun) {
+		PLOGI.printf("test4");
 		std::tuple<int, WPARAM, LPARAM> popMsgThread = pSystem->popMessage();
+		PLOGI.printf("test5");
 		int popMsg = std::get<0>(popMsgThread);
 		WPARAM wParam = std::get<1>(popMsgThread);
 		LPARAM lParam = std::get<2>(popMsgThread);
+
+		PLOGI.printf("popMsg = %d", popMsg);
 
 		if (ignoreMsg)
 		{

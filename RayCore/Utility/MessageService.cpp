@@ -8,10 +8,11 @@ void CMessageService::postPriorMessage(int msg, WPARAM wParam, LPARAM lParam) {
 	m_mutexQueue.unlock();
 }
 void CMessageService::postMessage(int msg, WPARAM wParam, LPARAM lParam) {
+	PLOGI.printf("TT1");
 	m_mutexQueue.lock();
-
+	PLOGI.printf("TT2");
 	m_vMessageQueue.push_back(std::make_tuple(msg, wParam, lParam));
-
+	PLOGI.printf("TT3");
 	m_mutexQueue.unlock();
 }
 
