@@ -31,6 +31,7 @@ CLaserController::CLaserController() {
 	PLOGI.printf("enumerateDevices - %ld", m_numDevices);
 }
 CLaserController* CLaserController::GetInstance() {
+	PLOGI.printf("CLaserController::GetInstance() called");
 	if (pInstance == NULL) {
 		pInstance = new CLaserController();
 	}
