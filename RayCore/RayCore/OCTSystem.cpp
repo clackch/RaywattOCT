@@ -212,12 +212,12 @@ RayError COCTSystem::ConnectDevices() {
 
 		// Connect to COM Interface first time
 		CLaserController* pLaser = CLaserController::GetInstance();
-		pLaser->LaserOnOff(true);
+		// pLaser->LaserOnOff(true);
 
 		result |= connectAcqDevice();
 		PLOGI.printf("connect DAQ - %s", ((result == NOERROR) ? "Succeed" : "Failed"));
 
-		pLaser->LaserOnOff(false);
+		// pLaser->LaserOnOff(false);
 
 		if (m_isTestMode) {
 			if (m_pRJController->IsConnected() == false)
@@ -1230,7 +1230,7 @@ UINT COCTSystem::threadService(LPVOID param) {
 	lut.Load("LUT_green.csv");
 	lut.Load("LUT_gray.csv");
 	lut.Load("LUT_abbott.csv");
-	lut.Load("LUT_enhanced.csv");
+	//lut.Load("LUT_enhanced.csv");
 	//lut.Load("LUT_ML.csv");
 
 #ifdef DEBUG
