@@ -8,7 +8,10 @@ CLaserController::CLaserController() {
 
 	HRESULT hr = CoInitialize(NULL);
 	PLOGI.printf("Hr = %x", hr);
-
+	if (hr == RPC_E_CHANGED_MODE) {
+		hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+	}
+	PLOGI.printf("Hr = %x", hr);
 	CLSID myCLSID;
 	LPOLESTR clsidString = nullptr;
 	hr = StringFromCLSID(myCLSID, &clsidString);
@@ -31,8 +34,8 @@ CLaserController::CLaserController() {
 	PLOGI.printf("enumerateDevices - %ld", m_numDevices);
 }
 CLaserController* CLaserController::GetInstance() {
-	PLOGI.printf("CLaserController::GetInstance() called");
 	if (pInstance == NULL) {
+		PLOGI.printf("CLaserController::GetInstance() called");
 		pInstance = new CLaserController();
 	}
 	return pInstance;
