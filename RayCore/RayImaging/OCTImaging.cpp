@@ -547,8 +547,6 @@ UINT COCTImaging::threadRender(LPVOID param) {
 				pMsg->postMessage(WM_PROCESS_CROSSSECTION, pImaging->GetSession(), nFrameInfo);
 			}
 		}
-
-		Sleep(1000);
 	}
 
 	return NOERROR;
