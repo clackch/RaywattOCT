@@ -1914,7 +1914,7 @@ namespace RaywattApp.ViewModels
 
         private void ImageProcessing(List<Mat> frames)
         {
-            int frameNum = 0;
+            //int frameNum = 0;
             int imageCount = frames.Count;
             List<List<byte>> statusList = new List<List<byte>>(imageCount);
             List<List<Point>> nextPoints = new List<List<Point>>(imageCount);
@@ -2116,9 +2116,9 @@ namespace RaywattApp.ViewModels
                 byte[] imageData = new byte[frames[i].Rows * frames[i].Cols * frames[i].ElemSize()];
                 Marshal.Copy(skeleton.Data, imageData, 0, imageData.Length);
                 PatientCase.AngioFrame.DijkstraHeap.Add(new DijkstraHeap(imageData, frames[i].Rows, frames[i].Cols));
-                frameNum++;
+                //frameNum++;
 
-                Cv2.ImWrite("check" + frameNum.ToString() + ".png", skeleton);
+                //Cv2.ImWrite("check" + frameNum.ToString() + ".png", skeleton);
             }
         }
 
