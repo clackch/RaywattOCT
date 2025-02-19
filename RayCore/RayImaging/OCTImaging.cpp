@@ -78,15 +78,19 @@ COCTImaging::~COCTImaging() {
 }
 
 void COCTImaging::Initialize(CCalibration* calibration) {
+	PLOGI.printf("initialize1");
 	releaseMemory();
+	LOGI.printf("initialize2");
 	allocateMemory();
-
+	LOGI.printf("initialize3");
 	this->calibration = calibration;
-
+	LOGI.printf("initialize4");
 	releaseCircularizeMap();
+	LOGI.printf("initialize5");
 	initCircularizeMap(m_setting.nOutputLength, m_setting.nBScan, m_setting.nOutputLength, m_setting.nCircleSize, m_setting.nCircleSize, 2.0f);
-
+	LOGI.printf("initialize6");
 	m_nWidth = m_setting.nCircleSize;
+
 	m_nHeight = m_setting.nCircleSize;
 	m_nChannels = 3;	// RGB
 }

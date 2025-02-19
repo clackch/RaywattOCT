@@ -29,8 +29,9 @@ CLabImaging::~CLabImaging() {
 }
 
 void CLabImaging::Initialize(CCalibration* calibration, USHORT* backgroundData) {
+	LOGI.printf("origin_initialize1");
 	COCTImaging::Initialize(calibration);
-
+	LOGI.printf("origin_initialize2");
 	const int nAScan = m_setting.nAScan;
 	const int nBScan = m_setting.nBScan;
 	const int nBufferSize = m_setting.nBufferSize;
@@ -40,16 +41,21 @@ void CLabImaging::Initialize(CCalibration* calibration, USHORT* backgroundData) 
 	this->backgroundFFT = new float[nOutputLength * nBScan];
 	this->backgroundSubtracted = new float[nOutputLength * nBScan];
 	this->logData = new float[nOutputLength * nBScan];
-
+	LOGI.printf("origin_initialize3");
 	generateBackground((Ipp16u*)backgroundData);
+	LOGI.printf("origin_initialize4");
 	fftProcessing(fringes32f);
+	LOGI.printf("origin_initialize5");
 
 	ippsCopy_32f(fFFTResult, backgroundFFT, nOutputLength * nBScan);
+	LOGI.printf("origin_initialize6");
 
 	scopeData = new USHORT[nAScan * 2];
 	scopeFFTData = new USHORT[nOutputLength * 2];
+	LOGI.printf("origin_initialize71");
 
 	imageRectangle.create(nOutputLength, nBScan, CV_8UC3);
+	LOGI.printf("origin_initialize8");
 
 	goodClockStart = 0;
 	goodClockEnd = nAScan;

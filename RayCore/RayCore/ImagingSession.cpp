@@ -134,12 +134,17 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 	{
 	case ImagingType::OCTImaging:
 		pImaging = new COCTImaging(setting, msg);
+		
 		pImaging->Initialize(calibration);
+		
 		break;
 	case ImagingType::LabImaging:
 		pImaging = new CLabImaging(setting, msg);
+		PLOGI.printf("start");
 		((CLabImaging *)pImaging)->Initialize(calibration, background);
+		PLOGI.printf("middle");
 		((CLabImaging *)pImaging)->SetBackgroundSubtract(false);
+		PLOGI.printf("end");
 		break;
 	case ImagingType::TIFFImaging:
 		pImaging = new CTIFFImaging(setting, msg);
