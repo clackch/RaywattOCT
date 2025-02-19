@@ -136,8 +136,11 @@ void COCTImaging::ApplyZOffset(const cv::Mat& src, cv::Mat& dst, int zOffset) {
 	cv::warpAffine(img, dst, translation_matrix, img.size());
 }
 int COCTImaging::Start() {
+	PLOGI.printf("007 or 010 -1");
 	BOOL result = FALSE;
+	PLOGI.printf("007 or 010 -2");
 	result = CUtility::StartThread(threadRender, m_pThread, (LPVOID)this);
+	PLOGI.printf("007 or 010 -3");
 
 	if (result) return NOERROR;
 	else return -1;

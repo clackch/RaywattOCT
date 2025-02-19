@@ -47,30 +47,38 @@ _declspec(dllexport) RayError RayUnloadCatheter() {
     return octSystem.UnloadCatheter();
 }
 _declspec(dllexport) int RayStartReview(char* strFilePath, double imageResolution, double zOffset) {
+    PLOGI.printf("startR1");
     return octSystem.StartReview(strFilePath, imageResolution, zOffset);
 }
 _declspec(dllexport) RayError RayStartCompare(char* strFilePath, double imageResolution, double zOffset) {
     return octSystem.StartCompare(strFilePath, imageResolution, zOffset);
 }
 _declspec(dllexport) RayError RayEndReview() {
+    PLOGI.printf("endR1");
     return octSystem.EndReview();
 }
 _declspec(dllexport) RayError RayEndCompare() {
+    PLOGI.printf("endC1");
     return octSystem.EndCompare();
 }
 _declspec(dllexport) RayError RayRestartReview() {
+    PLOGI.printf("restartR");
     return octSystem.RestartReview();
 }
 _declspec(dllexport) RayError RayStartLiveView() {
+    PLOGI.printf("startLV");
     return octSystem.StartLiveView();
 }
 _declspec(dllexport) RayError RayStopLiveView() {
+    PLOGI.printf("stopLV");
     return octSystem.StopLiveView();
 }
 _declspec(dllexport) RayError RayLaserOnOff(bool isOn) {
+    PLOGI.printf("laseronoff");
     return octSystem.LaserOnOff(isOn);
 }
 _declspec(dllexport) RayError RayRJCleanModeOnOff(bool isOn) {
+    PLOGI.printf("RJonoff");
     return octSystem.RJCleanModeOnOff(isOn);
 }
 _declspec(dllexport) RayError RaySetSession(int session) {
@@ -80,16 +88,21 @@ _declspec(dllexport) RayError RayRegisterImageCallback(FunctionImgPtr cbCrossSec
     return octSystem.RegisterImageCallback(cbCrossSection, cbLongitude);
 }
 _declspec(dllexport) RayError RayUnregisterImageCallback() {
+    PLOGI.printf("unIcb1");
     return octSystem.UnregisterImageCallback();
 }
 _declspec(dllexport) RayError RayRegisterDetectionCallback(FunctionObjPtr cbObjectDetection) {
+    PLOGI.printf("rdcb");
     return octSystem.RegisterDetectionCallback(cbObjectDetection);
 }
 _declspec(dllexport) RayError RayUnregisterDetectionCallback() {
+    PLOGI.printf("udcb");
     return octSystem.UnregisterDetectionCallback();
 }
 _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
+    PLOGI.printf("SP1");
     CConfiguration& config = CConfiguration::GetInstance();
+    PLOGI.printf("SP2");
 
     switch (prop) {
     case RayProperty::Brightness:
@@ -141,11 +154,13 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
     default:
         return RayError::InvalidArgument;
     }
+    PLOGI.printf("SP3");
     return RayError::OK;
 }
 _declspec(dllexport) double RayGetProperty(RayProperty prop) {
+    PLOGI.printf("GP1");
     CConfiguration& config = CConfiguration::GetInstance();
-
+    PLOGI.printf("GP2, Property Number = %d", prop);
     switch (prop) {
     case RayProperty::CurrentState:
         return (double) octSystem.GetCurrentState();
@@ -208,52 +223,68 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
     default:
         return (int)RayError::InvalidArgument;
     }
+    PLOGI.printf("GP3");
 }
 
 _declspec(dllexport) void* RayGetVolumeData(void* pLumenContours) {
+    PLOGI.printf("getVD");
     return octSystem.GetVolumeData(pLumenContours);
 }
 _declspec(dllexport) RayError RayStartLumenDetection() {
+    PLOGI.printf("startLD");
     return octSystem.StartLumenDetection();
 }
 
 _declspec(dllexport) RayError RayOpenImage(char* strFilePath, double imageResolution, double zOffset) {
+    PLOGI.printf("openImage");
     return octSystem.OpenImage(strFilePath, imageResolution, zOffset);
 }
 _declspec(dllexport) RayError RayCloseImage() {
+    PLOGI.printf("closeImage");
     return octSystem.CloseImage();
 }
 _declspec(dllexport) void* RayGetImageData(int nFrame) {
+    PLOGI.printf("getID");
     return octSystem.GetImageData(nFrame);
 }
 _declspec(dllexport) void* RayGetLongitudeData(double fDegree) {
+    PLOGI.printf("getLD");
     return octSystem.GetLongitudeData(fDegree);
 }
 _declspec(dllexport) void* RayGetLumenContour(int nFrame) {
+    PLOGI.printf("getLC");
     return octSystem.GetLumenContour(nFrame);
 }
 _declspec(dllexport) int RayGetNumOfLumenContourPoints(int nFrame) {
+    PLOGI.printf("getNLCP");
     return octSystem.GetNumOfLumenContourPoints(nFrame);
 }
 _declspec(dllexport) int RayGetNumOfSidebranchContourSize(int nFrame){
+    PLOGI.printf("getNSCS");
     return octSystem.GetNumOfSidebranchContourSize(nFrame);
 }
 _declspec(dllexport) void* RayGetSidebranchContour(int nFrame, int nSb){
+    PLOGI.printf("getSC");
     return octSystem.GetSidebranchContour(nFrame, nSb);
 }
 _declspec(dllexport) int RayGetNumOfSidebranchContourPoints(int nFrame, int nSb){
+    PLOGI.printf("getNSCP");
     return octSystem.GetNumOfSidebranchContourPoints(nFrame, nSb);
 }
 _declspec(dllexport) void* RayGetStentPoints(int nFrame) {
+    PLOGI.printf("getStentP");
     return octSystem.GetStentPoints(nFrame);
 }
 _declspec(dllexport) int RayGetNumOfStentPoints(int nFrame) {
+    PLOGI.printf("getNstrentP");
     return octSystem.GetNumOfStentPoints(nFrame);
 }
 _declspec(dllexport) void* RayGetGuidewirePoints(int nFrame) {
+    PLOGI.printf("getGWP");
     return octSystem.GetGuidewirePoints(nFrame);
 }
 _declspec(dllexport) int RayGetNumOfGuidewirePoints(int nFrame) {
+    PLOGI.printf("getNGWP");
     return octSystem.GetNumOfGuidewirePoints(nFrame);
 }
 

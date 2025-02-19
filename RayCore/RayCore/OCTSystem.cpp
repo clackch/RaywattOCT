@@ -104,23 +104,34 @@ RayError COCTSystem::Start() {
 
 	SetLogger(config.logRootPath);
 
+	PLOGI.printf("000");
 	CUtility::StartThread(threadService, m_pThreadService, this);
+	PLOGI.printf("004");
 
 	IImaging::Setting settingPullback = config.imaging;
+	PLOGI.printf("005");
 	settingPullback.Set(settingPullback.nAScan, floor((double)config.acquisition.nLaserSpeed / ((double)config.bldcMotor.velocityPullback / 60.f)));
 	PLOGI.printf("Pullback setting: LaserSpeed=%ld, Velocity=%ldrpm, NumOfAlines=%ld", config.acquisition.nLaserSpeed, config.bldcMotor.velocityPullback, settingPullback.nBScan);
 	m_pImagingPullback = CImagingSession::CreateColorImaging(this, settingPullback, nullptr, ImagingType::Default);
+	PLOGI.printf("006");
 	m_pImagingPullback->SetSession(SESSION_REALTIME);
+	PLOGI.printf("007");
 	m_pImagingPullback->Start();
+	PLOGI.printf("008");
 
 	IImaging::Setting settingLiveView = config.imaging;
+	PLOGI.printf("009");
 	settingLiveView.Set(settingLiveView.nAScan, floor((double)config.acquisition.nLaserSpeed / ((double)config.bldcMotor.velocityLiveView / 60.f)));
 	PLOGI.printf("Pullback setting: LaserSpeed=%ld, Velocity=%ldrpm, NumOfAlines=%ld", config.acquisition.nLaserSpeed, config.bldcMotor.velocityLiveView, settingLiveView.nBScan);
 	m_pImagingLiveView = CImagingSession::CreateColorImaging(this, settingLiveView, nullptr, ImagingType::Default);
+	PLOGI.printf("010");
 	m_pImagingLiveView->SetSession(SESSION_REALTIME);
+	PLOGI.printf("011");
 	m_pImagingLiveView->Start();
+	PLOGI.printf("012");
 
 	m_pAcqDevice = new CATSDevice(config.acquisition);
+	PLOGI.printf("013");
 
 	return RayError::OK;
 }
@@ -186,8 +197,9 @@ RayError COCTSystem::Stop() {
 * RegisterCallback
 */
 RayError COCTSystem::RegisterCallback(FunctionPtr cb) {
+	PLOGI.printf("rcb1");
 	m_callback = cb;
-
+	PLOGI.printf("rcb2");
 	return RayError::OK;
 }
 
@@ -195,8 +207,9 @@ RayError COCTSystem::RegisterCallback(FunctionPtr cb) {
 * UnregisterCallback
 */
 RayError COCTSystem::UnregisterCallback() {
+	PLOGI.printf("ucb1");
 	m_callback = nullptr;
-
+	PLOGI.printf("ucb2");
 	return RayError::OK;
 }
 
@@ -204,18 +217,25 @@ RayError COCTSystem::UnregisterCallback() {
 * ConnectDevices
 */
 RayError COCTSystem::ConnectDevices() {
+	PLOGI.printf("connectDevices1");
 	int result = NOERROR;
+	PLOGI.printf("connectDevices2");
 
 	if (m_curState == RayScannerState::Initial) {
 		result |= connectRotaryJunction();
 		PLOGI.printf("connect Rotary Junction and Laser Module - %s", ((result == NOERROR) ? "Succeed" : "Failed"));
 
+		PLOGI.printf("1");
 		// Connect to COM Interface first time
 		CLaserController* pLaser = CLaserController::GetInstance();
+		PLOGI.printf("2");
 		pLaser->LaserOnOff(true);
+		PLOGI.printf("3");
 
 		result |= connectAcqDevice();
+		PLOGI.printf("4");
 		PLOGI.printf("connect DAQ - %s", ((result == NOERROR) ? "Succeed" : "Failed"));
+		PLOGI.printf("5");
 
 		pLaser->LaserOnOff(false);
 
@@ -246,13 +266,18 @@ RayError COCTSystem::ConnectDevices() {
 * DisconnectDevices
 */
 RayError COCTSystem::DisconnectDevices() {
+	PLOGI.printf("disconnectDevices1");
 	int result = NOERROR;
+	PLOGI.printf("disconnectDevices2");
 
 	// To-Do: stop all threads
 	disconnectAcqDevice();
+	PLOGI.printf("disconnectDevices3");
 	disconnectRotaryJunction();
+	PLOGI.printf("disconnectDevices4");
 
 	postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Initial);
+	PLOGI.printf("disconnectDevices5");
 
 	return RayError::OK;
 }
@@ -262,13 +287,14 @@ RayError COCTSystem::DisconnectDevices() {
 * AutoCalibration
 */
 RayError COCTSystem::AutoCalibration() {
+	PLOGI.printf("AC1");
 	if (m_curState == RayScannerState::Default || m_curState == RayScannerState::Review) {
 		//To-Do: check Catheter
-
+		PLOGI.printf("AC2");
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
-
+		PLOGI.printf("AC3");
 		CUtility::StartThread(threadAutoCalibration, m_pThreadRotaryJunction, this);
-
+		PLOGI.printf("AC4");
 		return RayError::OK;
 	}
 
@@ -279,13 +305,18 @@ RayError COCTSystem::AutoCalibration() {
 * ManualCalibration
 */
 RayError COCTSystem::ManualCalibration(bool forward) {
+	PLOGI.printf("MC1");
 	if (m_curState == RayScannerState::Default) {
+		PLOGI.printf("MC2");
 		if (m_pLaserModule->IsConnected() == false) return RayError::DeviceNotConnected;
+		PLOGI.printf("MC3");
 		if (m_pLaserModule->IsMoving(eStepMotorIndex::DelayLine)) return RayError::DeviceBusy;
+		PLOGI.printf("MC4");
 
 		m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_DEFAULT);
+		PLOGI.printf("MC5");
 		m_pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, (forward ? DELAYLINE_FORWARD_POSITION : DELAYLINE_BACKWARD_POSITION));
-
+		PLOGI.printf("MC6");
 		return RayError::OK;
 	}
 
@@ -296,10 +327,12 @@ RayError COCTSystem::ManualCalibration(bool forward) {
 * ShowCalibrationGuide
 */
 RayError COCTSystem::ShowCalibrationGuide(bool show) {
+	PLOGI.printf("SC1");
 	if (m_pThreadService == nullptr) return RayError::SystemNotRunning;
-
+	PLOGI.printf("SC2");
 	m_pImagingPullback->ShowCalibGuide(show);
 	m_pImagingLiveView->ShowCalibGuide(show);
+	PLOGI.printf("SC3");
 
 	return RayError::OK;
 }
@@ -310,18 +343,23 @@ RayError COCTSystem::ShowCalibrationGuide(bool show) {
 RayError COCTSystem::ReadyPullback()
 {
 	if (m_curState == RayScannerState::Default) {
+		PLOGI.printf("Readypb1");
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
-
+		PLOGI.printf("Readypb2");
 		CConfiguration& config = CConfiguration::GetInstance();
+		PLOGI.printf("Readypb3");
 
 		laserOnOff(true);
+		PLOGI.printf("Readypb4");
 		restartAcqDevice(m_pImagingPullback);
+		PLOGI.printf("Readypb5");
 
 		m_pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_PULLBACK);
 		m_pRJController->PerformRun(config.bldcMotor.velocityPullback);
 		m_pRJController->Current(eStepMotorIndex::Pullback, 0);
 		m_pRJController->Current(eStepMotorIndex::Hub, 0);
 		m_pRJController->Set(eStepMotorIndex::Both, m_pRJController->ConvertMMtoStep(config.stepMotor.pullbackSpeed));
+		PLOGI.printf("Readypb6");
 
 		return RayError::OK;
 	}
@@ -331,11 +369,15 @@ RayError COCTSystem::ReadyPullback()
 * PullbackScan
 */
 RayError COCTSystem::PullbackScan(char *strFilePath) {
+	PLOGI.printf("pbScan1");
 	if (m_curState == RayScannerState::Default) {
+		PLOGI.printf("pbScan2");
 		m_strFilePath = CUtility::StringToWstring(strFilePath);
+		PLOGI.printf("pbScan3");
 
 		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Scanning);
 
+		PLOGI.printf("pbScan4");
 		return RayError::OK;
 		
 	}
@@ -347,15 +389,21 @@ RayError COCTSystem::PullbackScan(char *strFilePath) {
 * LoadCatheter
 */
 RayError COCTSystem::LoadCatheter() {
+	PLOGI.printf("loadC1");
 	if (m_curState == RayScannerState::Default || m_curState == RayScannerState::Review) {
+		PLOGI.printf("loadC2");
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
-
+		PLOGI.printf("loadC3");
 		if (controlRotaryJunction(eRJState::Loading) == NOERROR) {
+			PLOGI.printf("loadC4");
 			return RayError::OK;
 		}
 		else {
+			PLOGI.printf("loadC5");
 			if (m_isTestMode) {
+				PLOGI.printf("loadC6");
 				postMessage(WM_UPDATE_RJ_STATE, (WPARAM) eRJState::Loading);
+				PLOGI.printf("loadC7");
 			}
 			return RayError::DeviceNotConnected;
 		}
@@ -368,16 +416,20 @@ RayError COCTSystem::LoadCatheter() {
 * UnloadCatheter
 */
 RayError COCTSystem::UnloadCatheter() {
+	PLOGI.printf("unloadC1");
 	if (m_curState == RayScannerState::Default || m_curState == RayScannerState::Review) {
+		PLOGI.printf("unloadC2");
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
-
+		PLOGI.printf("unloadC3");
 		if (controlRotaryJunction(eRJState::Unloading) == NOERROR) {
+			PLOGI.printf("unloadC4");
 			return RayError::OK;
 		}
 		else {
+			PLOGI.printf("unloadC5");
 			return RayError::DeviceNotConnected;
 		}
-
+		PLOGI.printf("unloadC6");
 		return RayError::OK;
 	}
 
@@ -415,21 +467,27 @@ int COCTSystem::StartReview(char* strFilePath, double imageResolution, double zO
 * StartCompare
 */
 RayError COCTSystem::StartCompare(char* strFilePath, double imageResolution, double zOffset) {
+	PLOGI.printf("SC1");
 	if (m_curState != RayScannerState::Review) return RayError::WrongState;
+	PLOGI.printf("SC2");
 
 	CImagingSession* pSession = CImagingSession::CreateSession(this, SESSION_COMPARE, strFilePath, imageResolution);
+	PLOGI.printf("SC3");
 	if (pSession == nullptr) {
 		return RayError::InvalidArgument;
 	}
+	PLOGI.printf("SC4");
 	pSession->LoadZOffset(strFilePath);
+	PLOGI.printf("SC5");
 	pSession->SetZOffset((int)zOffset);
+	PLOGI.printf("SC6");
 
 	if (m_reviewSession[SESSION_COMPARE] != nullptr) {
 		m_reviewSession[SESSION_COMPARE]->Stop();
 	}
-
+	PLOGI.printf("SC7");
 	postPriorMessage(WM_START_REVIEW_SESSION, SESSION_COMPARE, (LPARAM)pSession);
-
+	PLOGI.printf("SC8");
 	return RayError::OK;
 }
 
@@ -575,6 +633,7 @@ RayError COCTSystem::RJCleanModeOnOff(bool isOn)
 */
 RayError COCTSystem::SetSession(int session) 
 {
+	PLOGI.printf("SS1");
 	if (session <= SessionType::SESSION_UNKNOWN || session >= SessionType::MAX_SESSION_NUM) return RayError::WrongSession;
 	if (m_reviewSession[session] == nullptr)
 	{
@@ -582,7 +641,9 @@ RayError COCTSystem::SetSession(int session)
 		return RayError::WrongSession;
 	}
 
+	PLOGI.printf("SS2");
 	m_curSession = (SessionType) session;
+	PLOGI.printf("SS1");
 
 	return RayError::OK;
 }
@@ -591,9 +652,10 @@ RayError COCTSystem::SetSession(int session)
 * RegisterImageCallback
 */
 RayError COCTSystem::RegisterImageCallback(FunctionImgPtr cbCrossSection, FunctionImgPtr cbLongitude) {
+	PLOGI.printf("OnNavigated1");
 	m_cbCrossSection = cbCrossSection;
 	m_cbLongitude = cbLongitude;
-
+	PLOGI.printf("OnNavigated2");
 	return RayError::OK;
 }
 
@@ -611,8 +673,9 @@ RayError COCTSystem::UnregisterImageCallback() {
 * RegisterDetectionCallback
 */
 RayError COCTSystem::RegisterDetectionCallback(FunctionObjPtr cbObjectDetection) {
+	PLOGI.printf("DC1");
 	m_cbObjectDetection = cbObjectDetection;
-
+	PLOGI.printf("DC2");
 	return RayError::OK;
 }
 
@@ -1221,16 +1284,24 @@ UINT COCTSystem::threadService(LPVOID param) {
 
 	PLOGI.printf("Service Start");
 
+	PLOGI.printf("01");
 	//Initialize
 	IRayLearning* learning = IRayLearning::GetInstance();
-	learning->Initialize(true);
+	PLOGI.printf("02");
+	//learning->Initialize(true);
+	PLOGI.printf("03");
 
 	// LUT Load
 	CLookUpTable& lut = CLookUpTable::GetInstance();
+	PLOGI.printf("04");
 	lut.Load("LUT_green.csv");
+	PLOGI.printf("05");
 	lut.Load("LUT_gray.csv");
+	PLOGI.printf("06");
 	lut.Load("LUT_abbott.csv");
+	PLOGI.printf("07");
 	lut.Load("LUT_enhanced.csv");
+	PLOGI.printf("08");
 	//lut.Load("LUT_ML.csv");
 
 #ifdef DEBUG
@@ -1293,14 +1364,13 @@ UINT COCTSystem::threadService(LPVOID param) {
 	PLOGI.printf("test3");
 
 	while (pThread->isRun) {
-		PLOGI.printf("test4");
 		std::tuple<int, WPARAM, LPARAM> popMsgThread = pSystem->popMessage();
-		PLOGI.printf("test5");
 		int popMsg = std::get<0>(popMsgThread);
 		WPARAM wParam = std::get<1>(popMsgThread);
 		LPARAM lParam = std::get<2>(popMsgThread);
 
-		PLOGI.printf("popMsg = %d", popMsg);
+		if(popMsg != 0)
+			PLOGI.printf("popMsg = %d", popMsg);
 
 		if (ignoreMsg)
 		{

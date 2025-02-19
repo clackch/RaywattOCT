@@ -96,10 +96,14 @@ CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSess
 }
 
 COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging::Setting setting, IDataManager* pData, ImagingType type) {
+	PLOGI.printf("CC1");
+
 	CConfiguration& config = CConfiguration::GetInstance();
 	COCTImaging* pImaging = nullptr;
+	PLOGI.printf("CC2");
 
 	CCalibration* calibration = new CCalibration(setting.nAScan, setting.nFFTLength);
+	PLOGI.printf("CC3");
 	if (pData != nullptr && pData->GetExtraData(OCTHeader::ExtraData::Dispersion) != nullptr)
 	{
 		PLOGI.printf("Read dispersion from .oct file.");
@@ -144,9 +148,11 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 	default:
 		return nullptr;
 	}
-
+	PLOGI.printf("CC4");
 	pImaging->SetColor(true);
+	PLOGI.printf("CC5");
 	pImaging->SetMeasurementSetting(config.measurement);
+	PLOGI.printf("CC6");
 
 	return pImaging;
 }

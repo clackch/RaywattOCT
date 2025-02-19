@@ -3,10 +3,14 @@
 #include <time.h>
 
 BOOL CUtility::StartThread(THREADPROC threadFunc, CThread*& pThread, LPVOID param) {
+
+	PLOGI.printf("001");
 	if (pThread != nullptr)
 		return FALSE;
 
+	PLOGI.printf("002");
 	pThread = new CThread(threadFunc, param);
+	PLOGI.printf("003");
 
 	if (pThread) {
 		return TRUE;
