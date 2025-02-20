@@ -242,6 +242,34 @@ bool CRJController::ReadRFID() {
 
 	return (written == packetLength);
 }
+bool CRJController::IncreaseRFIDUsage() {
+	if (!m_initMotor) return false;
+
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	getSerialPacket(eFID::FID_RFID_USAGE_INCREMENT, 0, serialPacket, packetLength);
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	return (written == packetLength);
+}
+bool CRJController::ResetRFIDUsage() {
+	if (!m_initMotor) return false;
+
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	getSerialPacket(eFID::FID_RFID_USAGE_RESET, 0, serialPacket, packetLength);
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	return (written == packetLength);
+}
 UINT CRJController::GetRFIDInfo(BYTE* pRFIDInfo) {
 	if (pRFIDInfo == nullptr) return 0;
 	if (m_nRFIDLength == 0) return 0;
@@ -504,6 +532,8 @@ void CRJController::parseSMPacket(BYTE* packet, int size) {
 void CRJController::parseRFIDPacket(BYTE* packet, int size) {
 	m_nRFIDLength = packet[1];
 	memcpy(m_RFID, packet + 2, m_nRFIDLength);
+	memcpy(m_byManufacturerId, packet + 6, 7);
+	m_nRFIDUsageCount = packet[13];
 }
 void CRJController::handlePacket() {
 	BYTE length = m_vPacket[LENGTH_IDX];
@@ -533,6 +563,8 @@ void CRJController::handlePacket() {
 		parsePacket(&m_vPacket[DATA_IDX], dataLength);
 		break;
 	case eFID::FID_RFID_GET_STATE:
+	case eFID::FID_RFID_USAGE_INCREMENT:
+	case eFID::FID_RFID_USAGE_RESET:
 		parseRFIDPacket(&m_vPacket[DATA_IDX], dataLength);
 		break;
 	default:

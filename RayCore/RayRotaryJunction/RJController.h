@@ -55,8 +55,11 @@ private:
 	bool m_bPhotoSensor[6];
 	bool m_bButton[2];	// 0: UNLOCK, 1: STOP
 	bool m_bLimitSwitch;
+
+	uint8_t m_nRFIDLength;
+	uint8_t m_nRFIDUsageCount;
 	BYTE m_RFID[MAX_PATH];
-	int m_nRFIDLength;
+	BYTE m_byManufacturerId[MAX_PATH];
 
 	bool m_bManualMode;	// Manual Load Catheter
 
@@ -84,6 +87,8 @@ public:
 	bool StopStepMotors();
 	bool DisplayLCD(eLCDImage image);
 	bool ReadRFID();
+	bool IncreaseRFIDUsage();
+	bool ResetRFIDUsage();
 	UINT GetRFIDInfo(BYTE* pRFIDInfo);
 	bool GetPhotoSensorOnOff(int index) { return m_bPhotoSensor[index]; }
 
