@@ -9,6 +9,16 @@ void CMessageService::postPriorMessage(int msg, WPARAM wParam, LPARAM lParam) {
 }
 void CMessageService::postMessage(int msg, WPARAM wParam, LPARAM lParam) {
 	PLOGI.printf("TT1");
+	PLOGI.printf("CMessageService object address: %p\n", (void*)this);
+	PLOGI.printf("m_mutexQueue address: %p\n", static_cast<void*>(&m_mutexQueue));
+	if (m_mutexQueue.try_lock()) {
+		PLOGI.printf("m_mutexQueue is currently unlocked.\n");
+		m_mutexQueue.unlock();  // 상태 확인 후 다시 unlock
+	}
+	else {
+		PLOGI.printf("m_mutexQueue is currently locked by another thread.\n");
+	}
+
 	m_mutexQueue.lock();
 	PLOGI.printf("TT2");
 	m_vMessageQueue.push_back(std::make_tuple(msg, wParam, lParam));

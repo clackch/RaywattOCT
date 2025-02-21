@@ -536,20 +536,26 @@ cv::Mat COCTImaging::getFoVImage(cv::Mat image, double fov) {
 UINT COCTImaging::threadRender(LPVOID param) {
 	COCTImaging* pImaging = (COCTImaging*)param;
 	CMessageService* pMsg = pImaging->m_msg;
-
+	PLOGI.printf("threadRender01");
 	while(pImaging->m_pThread->isRun) {
+		PLOGI.printf("threadRender02");
 		pImaging->m_waitForFringes = true;
+		PLOGI.printf("threadRender03");
 		CUtility::SuspendThread(pImaging->m_pThread);
+		PLOGI.printf("threadRender04");
 		pImaging->m_waitForFringes = false;
 
 		if (pImaging->m_pThread->isRun) {
+			PLOGI.printf("threadRender05");
 			pImaging->Process((char *)pImaging->m_pFringesBuffer);
 			pImaging->PostProcess(pImaging->GetProcessedImage());
+			PLOGI.printf("threadRender06");
 			// To-Do
 			// double buffering 필요?
 			// Invert, coloring 을 View (Dialog) 쪽으로 뺄 수 없을까?
 
 			if (pMsg != nullptr) {
+				PLOGI.printf("threadRender07");
 				int nFrameInfo = (pImaging->m_nCurFrame << 16) | (pImaging->m_nTotalFrame);
 				pMsg->postMessage(WM_PROCESS_CROSSSECTION, pImaging->GetSession(), nFrameInfo);
 			}

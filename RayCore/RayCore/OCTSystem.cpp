@@ -1303,6 +1303,7 @@ UINT COCTSystem::threadService(LPVOID param) {
 	lut.Load("LUT_enhanced.csv");
 	PLOGI.printf("08");
 	//lut.Load("LUT_ML.csv");
+	//
 
 #ifdef DEBUG
 	cv::Mat imgSample = cv::imread(".\\oct_sample.png");
@@ -1354,7 +1355,7 @@ UINT COCTSystem::threadService(LPVOID param) {
 #endif	
 
 	PLOGI.printf("test1");
-
+	//return (UINT)RayError::OK;
 	if (pSystem->m_callback != nullptr)
 	{
 		PLOGI.printf("test2");
@@ -1362,7 +1363,7 @@ UINT COCTSystem::threadService(LPVOID param) {
 	}
 
 	PLOGI.printf("test3");
-
+	//return (UINT)RayError::OK;
 	while (pThread->isRun) {
 		std::tuple<int, WPARAM, LPARAM> popMsgThread = pSystem->popMessage();
 		int popMsg = std::get<0>(popMsgThread);
@@ -2579,6 +2580,7 @@ LRESULT COCTSystem::OnMsgStartReviewSession(WPARAM wParam, LPARAM lParam) {
 */
 LRESULT COCTSystem::OnMsgNotifyProcessDone(WPARAM wParam, LPARAM lParam) {
 	RayWorkItem workItem = (RayWorkItem)wParam;
+	PLOGI.printf("stop? %d", workItem);
 
 	switch (workItem) {
 	case RayWorkItem::SaveRawData:
