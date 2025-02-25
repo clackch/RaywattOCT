@@ -1954,7 +1954,7 @@ namespace RaywattApp.ViewModels
                         for (int x = 0; x < frames[i].Cols; x++)
                         {
                             int validCount = 0;
-                            double totalX = 0.0, totalY = 0.0, total = 0.0;
+                            double total = 0.0;
                             // 다음 프레임(i+1)의 포인트 이용
                             for (int j = 0; j < pastPoints[i + 1].Count; j++)
                             {
@@ -1962,13 +1962,13 @@ namespace RaywattApp.ViewModels
                                     Math.Abs(nextPoints[i + 1][j].X - x) <= mask_r &&
                                     Math.Abs(nextPoints[i + 1][j].Y - y) <= mask_r)
                                 {
-                                    totalX += nextPoints[i + 1][j].X - pastPoints[i + 1][j].X;
-                                    totalY += nextPoints[i + 1][j].Y - pastPoints[i + 1][j].Y;
+                                    double tempX = nextPoints[i + 1][j].X - pastPoints[i + 1][j].X;
+                                    double tempY = nextPoints[i + 1][j].Y - pastPoints[i + 1][j].Y;
+                                    total += 1.0 / Math.Max(Math.Sqrt(Math.Pow(tempX, 2) + Math.Pow(tempY, 2)), 0.05); // overflow 방지
                                     validCount++;
                                 }
                             }
 
-                            total = Math.Sqrt(Math.Pow(totalX, 2) + Math.Pow(totalY, 2));
                             int final_x = 0, final_y = 0;
 
                             if(validCount > 0)
@@ -1982,13 +1982,13 @@ namespace RaywattApp.ViewModels
                                     {
                                         double dist_x = nextPoints[i + 1][j].X - pastPoints[i + 1][j].X;
                                         double dist_y = nextPoints[i + 1][j].Y - pastPoints[i + 1][j].Y;
-                                        double dist = Math.Sqrt(Math.Pow(dist_x, 2) + Math.Pow(dist_y, 2));
+                                        double dist = 1.0 / Math.Max(Math.Sqrt(Math.Pow(dist_x, 2) + Math.Pow(dist_y, 2)), 0.05);
                                         temp_x += (dist / total) * dist_x;
                                         temp_y += (dist / total) * dist_y;
                                     }
                                 }
-                                final_x = (int)Math.Round((double)temp_x / validCount);
-                                final_y = (int)Math.Round((double)temp_y / validCount);
+                                final_x = (int)Math.Round(temp_x);
+                                final_y = (int)Math.Round(temp_y);
                             }
 
                             byte pixVal = nowimage.At<byte>(y, x);
@@ -2018,7 +2018,7 @@ namespace RaywattApp.ViewModels
                         for (int x = 0; x < frames[i].Cols; x++)
                         {
                             int validCount = 0;
-                            double totalX = 0.0, totalY = 0.0, total = 0.0;
+                            double total = 0.0;
                             // 이전 프레임(i)의 포인트 이용
                             for (int j = 0; j < pastPoints[i].Count; j++)
                             {
@@ -2026,13 +2026,13 @@ namespace RaywattApp.ViewModels
                                     Math.Abs(nextPoints[i][j].X - x) <= mask_r &&
                                     Math.Abs(nextPoints[i][j].Y - y) <= mask_r)
                                 {
-                                    totalX += nextPoints[i][j].X - pastPoints[i][j].X;
-                                    totalY += nextPoints[i][j].Y - pastPoints[i][j].Y;
+                                    double tempX = nextPoints[i][j].X - pastPoints[i][j].X;
+                                    double tempY = nextPoints[i][j].Y - pastPoints[i][j].Y;
+                                    total += 1.0 / Math.Max(Math.Sqrt(Math.Pow(tempX, 2) + Math.Pow(tempY, 2)), 0.05);
                                     validCount++;
                                 }
                             }
 
-                            total = Math.Sqrt(Math.Pow(totalX, 2) + Math.Pow(totalY, 2));
                             int final_x = 0, final_y = 0;
 
                             if (validCount > 0)
@@ -2046,13 +2046,13 @@ namespace RaywattApp.ViewModels
                                     {
                                         double dist_x = nextPoints[i][j].X - pastPoints[i][j].X;
                                         double dist_y = nextPoints[i][j].Y - pastPoints[i][j].Y;
-                                        double dist = Math.Sqrt(Math.Pow(dist_x, 2) + Math.Pow(dist_y, 2));
+                                        double dist = 1.0 / Math.Max(Math.Sqrt(Math.Pow(dist_x, 2) + Math.Pow(dist_y, 2)), 0.05);
                                         temp_x += (dist / total) * dist_x;
                                         temp_y += (dist / total) * dist_y;
                                     }
                                 }
-                                final_x = (int)Math.Round((double)temp_x / validCount);
-                                final_y = (int)Math.Round((double)temp_y / validCount);
+                                final_x = (int)Math.Round(temp_x);
+                                final_y = (int)Math.Round(temp_y);
                             }
 
                             byte pixVal = nowimage.At<byte>(y, x);
@@ -2088,8 +2088,6 @@ namespace RaywattApp.ViewModels
                         for (int x = 0; x < frames[i].Cols; x++)
                         {
                             int[] validCount = new int[2] { 0, 0 };
-                            double[] totalX = new double[2] { 0.0, 0.0 };
-                            double[] totalY = new double[2] { 0.0, 0.0 };
                             double[] total = new double[2] { 0.0, 0.0 };
 
                             for (int j = 0; j < pastPoints[i].Count; j++)
@@ -2098,13 +2096,12 @@ namespace RaywattApp.ViewModels
                                     Math.Abs(nextPoints[i][j].X - x) <= mask_r &&
                                     Math.Abs(nextPoints[i][j].Y - y) <= mask_r)
                                 {
-                                    totalX[0] += nextPoints[i][j].X - pastPoints[i][j].X;
-                                    totalY[0] += nextPoints[i][j].Y - pastPoints[i][j].Y;
+                                    double tempX = nextPoints[i][j].X - pastPoints[i][j].X;
+                                    double tempY = nextPoints[i][j].Y - pastPoints[i][j].Y;
+                                    total[0] += 1.0 / Math.Max(Math.Sqrt(Math.Pow(tempX, 2) + Math.Pow(tempY, 2)), 0.05);
                                     validCount[0]++;
                                 }
                             }
-
-                            total[0] = Math.Sqrt(Math.Pow(totalX[0], 2) + Math.Pow(totalY[0], 2));
 
                             for (int j = 0; j < pastPoints[i + 1].Count; j++)
                             {
@@ -2112,13 +2109,12 @@ namespace RaywattApp.ViewModels
                                     Math.Abs(nextPoints[i + 1][j].X - x) <= mask_r &&
                                     Math.Abs(nextPoints[i + 1][j].Y - y) <= mask_r)
                                 {
-                                    totalX[1] += nextPoints[i + 1][j].X - pastPoints[i + 1][j].X;
-                                    totalY[1] += nextPoints[i + 1][j].Y - pastPoints[i + 1][j].Y;
+                                    double tempX = nextPoints[i + 1][j].X - pastPoints[i + 1][j].X;
+                                    double tempY = nextPoints[i + 1][j].Y - pastPoints[i + 1][j].Y;
+                                    total[1] += 1.0 / Math.Max(Math.Sqrt(Math.Pow(tempX, 2) + Math.Pow(tempY, 2)), 0.05);
                                     validCount[1]++;
                                 }
                             }
-
-                            total[1] = Math.Sqrt(Math.Pow(totalX[1], 2) + Math.Pow(totalY[1], 2));
 
                             int final_x0 = 0, final_y0 = 0, final_x1 = 0, final_y1 = 0;
 
@@ -2133,13 +2129,13 @@ namespace RaywattApp.ViewModels
                                     {
                                         double dist_x = nextPoints[i][j].X - pastPoints[i][j].X;
                                         double dist_y = nextPoints[i][j].Y - pastPoints[i][j].Y;
-                                        double dist = Math.Sqrt(Math.Pow(dist_x, 2) + Math.Pow(dist_y, 2));
+                                        double dist = 1.0 / Math.Max(Math.Sqrt(Math.Pow(dist_x, 2) + Math.Pow(dist_y, 2)), 0.05); ;
                                         temp_x += (dist / total[0]) * dist_x;
                                         temp_y += (dist / total[0]) * dist_y;
                                     }
                                 }
-                                final_x0 = (int)Math.Round((double)temp_x / validCount[0]);
-                                final_y0 = (int)Math.Round((double)temp_y / validCount[0]);
+                                final_x0 = (int)Math.Round(temp_x);
+                                final_y0 = (int)Math.Round(temp_y);
                             }
 
                             if (validCount[1] > 0)
@@ -2153,13 +2149,13 @@ namespace RaywattApp.ViewModels
                                     {
                                         double dist_x = nextPoints[i + 1][j].X - pastPoints[i + 1][j].X;
                                         double dist_y = nextPoints[i + 1][j].Y - pastPoints[i + 1][j].Y;
-                                        double dist = Math.Sqrt(Math.Pow(dist_x, 2) + Math.Pow(dist_y, 2));
+                                        double dist = 1.0 / Math.Max(Math.Sqrt(Math.Pow(dist_x, 2) + Math.Pow(dist_y, 2)), 0.05); ;
                                         temp_x += (dist / total[1]) * dist_x;
                                         temp_y += (dist / total[1]) * dist_y;
                                     }
                                 }
-                                final_x1 = (int)Math.Round((double)temp_x / validCount[1]);
-                                final_y1 = (int)Math.Round((double)temp_y / validCount[1]);
+                                final_x1 = (int)Math.Round(temp_x);
+                                final_y1 = (int)Math.Round(temp_y);
                             }
 
                             byte pixVal = nowimage.At<byte>(y, x);
