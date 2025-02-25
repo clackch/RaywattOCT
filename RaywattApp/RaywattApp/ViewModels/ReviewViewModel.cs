@@ -2205,6 +2205,7 @@ namespace RaywattApp.ViewModels
                 Mat morphedImage = new Mat();
                 var kernel = Cv2.GetStructuringElement(MorphShapes.Ellipse, new OpenCvSharp.Size(3, 3));
                 Cv2.MorphologyEx(nowimage, morphedImage, MorphTypes.Close, kernel, iterations: 4);
+                Cv2.ImWrite("nowimage" + frameNum.ToString() + ".png", morphedImage);
 
                 Mat skeleton = Skeletonize(morphedImage);
 
