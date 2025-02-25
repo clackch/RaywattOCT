@@ -1931,14 +1931,27 @@ namespace RaywattApp.ViewModels
 
             for (int i = 0; i < imageCount; i++)
             {
+                Mat gradX = new Mat();
+                Mat gradY = new Mat();
+                Cv2.Sobel(frames[i], gradX, MatType.CV_64F, 1, 0, ksize: 3);
+                Cv2.Sobel(frames[i], gradY, MatType.CV_64F, 0, 1, ksize: 3);
+                Mat grad = new Mat();
+                Cv2.Magnitude(gradX, gradY, grad);
+                Mat edge = new Mat();
+                grad.ConvertTo(edge, frames[i].Type());
+                Cv2.ImWrite("edge" + (i + 1).ToString() + ".png", edge);
+
                 Cv2.EqualizeHist(frames[i], frames[i]);
                 Cv2.ImWrite("HE" + (i + 1).ToString() + ".png", frames[i]);// Histogram Equalization
+
+                frames[i] = frames[i] - edge/2;
+                Cv2.ImWrite("real" + (i + 1).ToString() + ".png", frames[i]);
             }
 
             int mask_r = 40;
-            int thresholdOfNow = 30;    // 현재 프레임이 해당 값보다 작으면 혈관, 크면 혈관이 아닌 걸로 판정
-            int thresholdOfOther = 20;  // 앞, 뒤 프레임이 해당 값보다 작으면 현재 프레임이 혈관이 아니라고 판정된 상태에도 혈관으로 판정
-            int thresholdCut = 40;      // 앞, 뒤 프레임이 해당 값보다 크면 현재 프레임이 혈관이라고 판정된 상태에도 혈관이 아니라고 판정
+            int thresholdOfNow = 10;    // 현재 프레임이 해당 값보다 작으면 혈관, 크면 혈관이 아닌 걸로 판정
+            int thresholdOfOther = 0;  // 앞, 뒤 프레임이 해당 값보다 작으면 현재 프레임이 혈관이 아니라고 판정된 상태에도 혈관으로 판정
+            int thresholdCut = 30;      // 앞, 뒤 프레임이 해당 값보다 크면 현재 프레임이 혈관이라고 판정된 상태에도 혈관이 아니라고 판정
 
             for (int i = 0; i < imageCount; i++)
             {
@@ -2191,7 +2204,7 @@ namespace RaywattApp.ViewModels
                 }
                 Mat morphedImage = new Mat();
                 var kernel = Cv2.GetStructuringElement(MorphShapes.Ellipse, new OpenCvSharp.Size(3, 3));
-                Cv2.MorphologyEx(nowimage, morphedImage, MorphTypes.Close, kernel, iterations: 2);
+                Cv2.MorphologyEx(nowimage, morphedImage, MorphTypes.Close, kernel, iterations: 4);
 
                 Mat skeleton = Skeletonize(morphedImage);
 
