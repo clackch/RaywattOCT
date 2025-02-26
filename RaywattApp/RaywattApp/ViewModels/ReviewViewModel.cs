@@ -2192,7 +2192,7 @@ namespace RaywattApp.ViewModels
                                       y - final_y0 < 0 || y - final_y0 >= nowimage.Rows) &&
                                     !(x + final_x1 < 0 || x + final_x1 >= nowimage.Cols ||
                                       y + final_y1 < 0 || y + final_y1 >= nowimage.Rows) &&
-                                    (frames[i - 1].At<byte>(y - final_y0, x - final_x0) < thresholdOfOther ||
+                                    (frames[i - 1].At<byte>(y - final_y0, x - final_x0) < thresholdOfOther &&
                                      frames[i + 1].At<byte>(y + final_y1, x + final_x1) < thresholdOfOther))
                                 {
                                     nowimage.At<byte>(y, x) = 255;
@@ -2204,6 +2204,7 @@ namespace RaywattApp.ViewModels
                 }
                 Mat morphedImage = new Mat();
                 var kernel = Cv2.GetStructuringElement(MorphShapes.Ellipse, new OpenCvSharp.Size(3, 3));
+
                 Cv2.MorphologyEx(nowimage, morphedImage, MorphTypes.Close, kernel, iterations: 4);
                 Cv2.ImWrite("nowimage" + frameNum.ToString() + ".png", morphedImage);
 
