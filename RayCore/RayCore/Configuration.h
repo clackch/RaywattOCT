@@ -22,6 +22,7 @@ public:
 		TCHAR port[MAX_PATH];
 		int pullbackDistance;
 		int pullbackSpeed;
+		int noPullbackTime;
 	};
 
 	class BLDCMotorSetting {
