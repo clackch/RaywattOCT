@@ -1939,16 +1939,15 @@ namespace RaywattApp.ViewModels
                 Cv2.Magnitude(gradX, gradY, grad);
                 Mat edge = new Mat();
                 grad.ConvertTo(edge, frames[i].Type());
-                Cv2.ImWrite("edge" + (i + 1).ToString() + ".png", edge);
+                //Cv2.ImWrite("edge" + (i + 1).ToString() + ".png", edge);
 
                 Cv2.EqualizeHist(frames[i], frames[i]);
-                Cv2.ImWrite("HE" + (i + 1).ToString() + ".png", frames[i]);// Histogram Equalization
+                //Cv2.ImWrite("HE" + (i + 1).ToString() + ".png", frames[i]);// Histogram Equalization
 
                 frames[i] = frames[i] - edge/2;
-                Cv2.ImWrite("real" + (i + 1).ToString() + ".png", frames[i]);
+                //Cv2.ImWrite("real" + (i + 1).ToString() + ".png", frames[i]);
             }
 
-            int mask_r = 40;
             int thresholdOfNow = 10;    // 현재 프레임이 해당 값보다 작으면 혈관, 크면 혈관이 아닌 걸로 판정
             int thresholdOfOther = 0;  // 앞, 뒤 프레임이 해당 값보다 작으면 현재 프레임이 혈관이 아니라고 판정된 상태에도 혈관으로 판정
             int thresholdCut = 30;      // 앞, 뒤 프레임이 해당 값보다 크면 현재 프레임이 혈관이라고 판정된 상태에도 혈관이 아니라고 판정
@@ -1966,43 +1965,8 @@ namespace RaywattApp.ViewModels
                     {
                         for (int x = 0; x < frames[i].Cols; x++)
                         {
-                            int validCount = 0;
-                            double total = 0.0;
-                            // 다음 프레임(i+1)의 포인트 이용
-                            for (int j = 0; j < pastPoints[i + 1].Count; j++)
-                            {
-                                if (statusList[i + 1][j] != 0 &&
-                                    Math.Abs(nextPoints[i + 1][j].X - x) <= mask_r &&
-                                    Math.Abs(nextPoints[i + 1][j].Y - y) <= mask_r)
-                                {
-                                    double tempX = nextPoints[i + 1][j].X - pastPoints[i + 1][j].X;
-                                    double tempY = nextPoints[i + 1][j].Y - pastPoints[i + 1][j].Y;
-                                    total += 1.0 / Math.Max(Math.Sqrt(Math.Pow(tempX, 2) + Math.Pow(tempY, 2)), 0.05); // overflow 방지
-                                    validCount++;
-                                }
-                            }
-
-                            int final_x = 0, final_y = 0;
-
-                            if(validCount > 0)
-                            {
-                                double temp_x = 0.0, temp_y = 0.0;
-                                for (int j = 0; j < pastPoints[i + 1].Count; j++)
-                                {
-                                    if (statusList[i + 1][j] != 0 &&
-                                        Math.Abs(nextPoints[i + 1][j].X - x) <= mask_r &&
-                                        Math.Abs(nextPoints[i + 1][j].Y - y) <= mask_r)
-                                    {
-                                        double dist_x = nextPoints[i + 1][j].X - pastPoints[i + 1][j].X;
-                                        double dist_y = nextPoints[i + 1][j].Y - pastPoints[i + 1][j].Y;
-                                        double dist = 1.0 / Math.Max(Math.Sqrt(Math.Pow(dist_x, 2) + Math.Pow(dist_y, 2)), 0.05);
-                                        temp_x += (dist / total) * dist_x;
-                                        temp_y += (dist / total) * dist_y;
-                                    }
-                                }
-                                final_x = (int)Math.Round(temp_x);
-                                final_y = (int)Math.Round(temp_y);
-                            }
+                            int final_x, final_y;
+                            ThisPixelGoesWhere(x, y, i + 1, statusList, nextPoints, pastPoints, out final_x, out final_y);
 
                             byte pixVal = nowimage.At<byte>(y, x);
                             if (pixVal < thresholdOfNow)
@@ -2030,43 +1994,8 @@ namespace RaywattApp.ViewModels
                     {
                         for (int x = 0; x < frames[i].Cols; x++)
                         {
-                            int validCount = 0;
-                            double total = 0.0;
-                            // 이전 프레임(i)의 포인트 이용
-                            for (int j = 0; j < pastPoints[i].Count; j++)
-                            {
-                                if (statusList[i][j] != 0 &&
-                                    Math.Abs(nextPoints[i][j].X - x) <= mask_r &&
-                                    Math.Abs(nextPoints[i][j].Y - y) <= mask_r)
-                                {
-                                    double tempX = nextPoints[i][j].X - pastPoints[i][j].X;
-                                    double tempY = nextPoints[i][j].Y - pastPoints[i][j].Y;
-                                    total += 1.0 / Math.Max(Math.Sqrt(Math.Pow(tempX, 2) + Math.Pow(tempY, 2)), 0.05);
-                                    validCount++;
-                                }
-                            }
-
-                            int final_x = 0, final_y = 0;
-
-                            if (validCount > 0)
-                            {
-                                double temp_x = 0.0, temp_y = 0.0;
-                                for (int j = 0; j < pastPoints[i].Count; j++)
-                                {
-                                    if (statusList[i][j] != 0 &&
-                                        Math.Abs(nextPoints[i][j].X - x) <= mask_r &&
-                                        Math.Abs(nextPoints[i][j].Y - y) <= mask_r)
-                                    {
-                                        double dist_x = nextPoints[i][j].X - pastPoints[i][j].X;
-                                        double dist_y = nextPoints[i][j].Y - pastPoints[i][j].Y;
-                                        double dist = 1.0 / Math.Max(Math.Sqrt(Math.Pow(dist_x, 2) + Math.Pow(dist_y, 2)), 0.05);
-                                        temp_x += (dist / total) * dist_x;
-                                        temp_y += (dist / total) * dist_y;
-                                    }
-                                }
-                                final_x = (int)Math.Round(temp_x);
-                                final_y = (int)Math.Round(temp_y);
-                            }
+                            int final_x, final_y;
+                            ThisPixelGoesWhere(x, y, i, statusList, nextPoints, pastPoints, out final_x, out final_y);
 
                             byte pixVal = nowimage.At<byte>(y, x);
                             if (pixVal < thresholdOfNow)
@@ -2100,76 +2029,9 @@ namespace RaywattApp.ViewModels
                     {
                         for (int x = 0; x < frames[i].Cols; x++)
                         {
-                            int[] validCount = new int[2] { 0, 0 };
-                            double[] total = new double[2] { 0.0, 0.0 };
-
-                            for (int j = 0; j < pastPoints[i].Count; j++)
-                            {
-                                if (statusList[i][j] != 0 &&
-                                    Math.Abs(nextPoints[i][j].X - x) <= mask_r &&
-                                    Math.Abs(nextPoints[i][j].Y - y) <= mask_r)
-                                {
-                                    double tempX = nextPoints[i][j].X - pastPoints[i][j].X;
-                                    double tempY = nextPoints[i][j].Y - pastPoints[i][j].Y;
-                                    total[0] += 1.0 / Math.Max(Math.Sqrt(Math.Pow(tempX, 2) + Math.Pow(tempY, 2)), 0.05);
-                                    validCount[0]++;
-                                }
-                            }
-
-                            for (int j = 0; j < pastPoints[i + 1].Count; j++)
-                            {
-                                if (statusList[i + 1][j] != 0 &&
-                                    Math.Abs(nextPoints[i + 1][j].X - x) <= mask_r &&
-                                    Math.Abs(nextPoints[i + 1][j].Y - y) <= mask_r)
-                                {
-                                    double tempX = nextPoints[i + 1][j].X - pastPoints[i + 1][j].X;
-                                    double tempY = nextPoints[i + 1][j].Y - pastPoints[i + 1][j].Y;
-                                    total[1] += 1.0 / Math.Max(Math.Sqrt(Math.Pow(tempX, 2) + Math.Pow(tempY, 2)), 0.05);
-                                    validCount[1]++;
-                                }
-                            }
-
-                            int final_x0 = 0, final_y0 = 0, final_x1 = 0, final_y1 = 0;
-
-                            if (validCount[0] > 0)
-                            {
-                                double temp_x = 0.0, temp_y = 0.0;
-                                for (int j = 0; j < pastPoints[i].Count; j++)
-                                {
-                                    if (statusList[i][j] != 0 &&
-                                        Math.Abs(nextPoints[i][j].X - x) <= mask_r &&
-                                        Math.Abs(nextPoints[i][j].Y - y) <= mask_r)
-                                    {
-                                        double dist_x = nextPoints[i][j].X - pastPoints[i][j].X;
-                                        double dist_y = nextPoints[i][j].Y - pastPoints[i][j].Y;
-                                        double dist = 1.0 / Math.Max(Math.Sqrt(Math.Pow(dist_x, 2) + Math.Pow(dist_y, 2)), 0.05); ;
-                                        temp_x += (dist / total[0]) * dist_x;
-                                        temp_y += (dist / total[0]) * dist_y;
-                                    }
-                                }
-                                final_x0 = (int)Math.Round(temp_x);
-                                final_y0 = (int)Math.Round(temp_y);
-                            }
-
-                            if (validCount[1] > 0)
-                            {
-                                double temp_x = 0.0, temp_y = 0.0;
-                                for (int j = 0; j < pastPoints[i + 1].Count; j++)
-                                {
-                                    if (statusList[i + 1][j] != 0 &&
-                                        Math.Abs(nextPoints[i + 1][j].X - x) <= mask_r &&
-                                        Math.Abs(nextPoints[i + 1][j].Y - y) <= mask_r)
-                                    {
-                                        double dist_x = nextPoints[i + 1][j].X - pastPoints[i + 1][j].X;
-                                        double dist_y = nextPoints[i + 1][j].Y - pastPoints[i + 1][j].Y;
-                                        double dist = 1.0 / Math.Max(Math.Sqrt(Math.Pow(dist_x, 2) + Math.Pow(dist_y, 2)), 0.05); ;
-                                        temp_x += (dist / total[1]) * dist_x;
-                                        temp_y += (dist / total[1]) * dist_y;
-                                    }
-                                }
-                                final_x1 = (int)Math.Round(temp_x);
-                                final_y1 = (int)Math.Round(temp_y);
-                            }
+                            int final_x0, final_y0, final_x1, final_y1;
+                            ThisPixelGoesWhere(x, y, i, statusList, nextPoints, pastPoints, out final_x0, out final_y0);
+                            ThisPixelGoesWhere(x, y, i + 1, statusList, nextPoints, pastPoints, out final_x1, out final_y1);
 
                             byte pixVal = nowimage.At<byte>(y, x);
                             if (pixVal < thresholdOfNow)
@@ -2206,7 +2068,7 @@ namespace RaywattApp.ViewModels
                 var kernel = Cv2.GetStructuringElement(MorphShapes.Ellipse, new OpenCvSharp.Size(3, 3));
 
                 Cv2.MorphologyEx(nowimage, morphedImage, MorphTypes.Close, kernel, iterations: 4);
-                Cv2.ImWrite("nowimage" + frameNum.ToString() + ".png", morphedImage);
+                //Cv2.ImWrite("nowimage" + frameNum.ToString() + ".png", morphedImage);
 
                 Mat skeleton = Skeletonize(morphedImage);
 
@@ -2215,7 +2077,53 @@ namespace RaywattApp.ViewModels
                 PatientCase.AngioFrame.DijkstraHeap.Add(new DijkstraHeap(imageData, frames[i].Rows, frames[i].Cols));
                 frameNum++;
 
-                Cv2.ImWrite("check" + frameNum.ToString() + ".png", skeleton);
+                //Cv2.ImWrite("check" + frameNum.ToString() + ".png", skeleton);
+            }
+        }
+
+        private void ThisPixelGoesWhere(int x, int y, int index, 
+            List<List<byte>> statusList, List<List<Point>> nextPoints, List<List<Point>> pastPoints, 
+            out int nextX, out int nextY)
+        {
+            int mask_r = 40;
+            int validCount = 0;                                 
+            double total = 0.0;
+
+            for (int j = 0; j < pastPoints[index].Count; j++)
+            {
+                if (statusList[index][j] != 0 &&
+                    Math.Abs(nextPoints[index][j].X - x) <= mask_r &&
+                    Math.Abs(nextPoints[index][j].Y - y) <= mask_r)
+                {
+                    double tempX = nextPoints[index][j].X - pastPoints[index][j].X;
+                    double tempY = nextPoints[index][j].Y - pastPoints[index][j].Y;
+                    total += 1.0 / Math.Max(Math.Sqrt(Math.Pow(tempX, 2) + Math.Pow(tempY, 2)), 0.05);
+                    validCount++;
+                }
+            }
+
+            if (validCount > 0)
+            {
+                double temp_x = 0.0, temp_y = 0.0;
+                for (int j = 0; j < pastPoints[index].Count; j++)
+                {
+                    if (statusList[index][j] != 0 &&
+                        Math.Abs(nextPoints[index][j].X - x) <= mask_r &&
+                        Math.Abs(nextPoints[index][j].Y - y) <= mask_r)
+                    {
+                        double dist_x = nextPoints[index][j].X - pastPoints[index][j].X;
+                        double dist_y = nextPoints[index][j].Y - pastPoints[index][j].Y;
+                        double dist = 1.0 / Math.Max(Math.Sqrt(Math.Pow(dist_x, 2) + Math.Pow(dist_y, 2)), 0.05);
+                        temp_x += (dist / total) * dist_x;
+                        temp_y += (dist / total) * dist_y;
+                    }
+                }
+                nextX = (int)Math.Round(temp_x);
+                nextY = (int)Math.Round(temp_y);
+            }
+            else
+            {
+                nextX = 0; nextY = 0;
             }
         }
 
