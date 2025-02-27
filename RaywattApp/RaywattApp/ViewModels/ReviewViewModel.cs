@@ -2250,11 +2250,10 @@ namespace RaywattApp.ViewModels
 
                 // 매칭된 특징점 위치를 points 리스트에 저장
                 List<Point> points1 = new List<Point>();
-                List<Point> points2 = new List<Point>();
+
                 foreach (var m in matchList)
                 {
                     points1.Add(new Point((int)keypoints1[m.QueryIdx].Pt.X, (int)keypoints1[m.QueryIdx].Pt.Y));
-                    points2.Add(new Point((int)keypoints2[m.TrainIdx].Pt.X, (int)keypoints2[m.TrainIdx].Pt.Y));
                 }
 
                 // Lucas–Kanade 방식으로 옵티컬 플로우 계산
