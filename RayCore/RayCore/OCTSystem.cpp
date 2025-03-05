@@ -830,6 +830,18 @@ int COCTSystem::GetNumOfGuidewirePoints(int nFrame){
 	return m_reviewSession[SESSION_REVIEW]->GetNumOfGuidewirePoints(nFrame);
 }
 
+void* COCTSystem::GetCalciumAngles(int nFrame) {
+	if (m_reviewSession[SESSION_REVIEW] == nullptr) return nullptr;
+
+	return m_reviewSession[SESSION_REVIEW]->GetCalciumAngles(nFrame);
+}
+
+int COCTSystem::GetCalciumLength(int nFrame) {
+	if (m_reviewSession[SESSION_REVIEW] == nullptr) return 0;
+
+	return m_reviewSession[SESSION_REVIEW]->GetCalciumLength(nFrame);
+}
+
 /*
 * GetBrightness
 */

@@ -1837,8 +1837,8 @@ namespace RaywattApp.Common.Util
                 imgCalcium.Ellipse(center,
                     new OpenCvSharp.Size(imgCalcium.Width / 2, imgCalcium.Height / 2),
                     0,
-                    calciumArea.Item1,
-                    calciumArea.Item1 + calciumArea.Item2,
+                    calciumArea.Item1-90, // 반시계 방향으로 90도만큼 이동)
+                    (calciumArea.Item1 + calciumArea.Item2)-90,
                     new Scalar(0x00, 0x00, 0x00, 0x00),
                     -1);
             }

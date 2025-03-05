@@ -1,5 +1,6 @@
 #pragma once
 #include "OCTImaging.h"
+#include <cmath>
 
 class CTIFFImaging : public COCTImaging
 {
@@ -20,6 +21,7 @@ public:
 	virtual void Process(char* fringes);
 	virtual void PostProcess(cv::Mat image);
 	virtual cv::Mat GetProcessedImage() { return imageConvert; }
+	virtual void SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int& angleNum, std::vector<int>& startAngle, std::vector<int>& endAngle);
 	virtual void initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale);
 	virtual void InverseCircularizeImage(cv::Mat& src, cv::Mat& dst);
 	virtual void EraseStentOutLier(cv::Mat& stent);
@@ -27,5 +29,7 @@ public:
 
 protected:
 	void GetLumenOffsetPoints(std::vector<cv::Point>& lumenOffsetBoundary);
+	double GetTheta(cv::Point vector1, cv::Point vector2);
+	cv::Point2f RotatePoint(const cv::Point2f& point, const cv::Point2f& center);
 };
 

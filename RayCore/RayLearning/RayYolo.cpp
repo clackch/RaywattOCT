@@ -14,11 +14,14 @@ void CRayYolo::Initialize(bool useGPU){
 	if (m_hDll) {
 		InitializeSegment = (pInitializeSegment)GetProcAddress(m_hDll, "InitializeSegment");
 		InitializeDetect = (pInitializeDetect)GetProcAddress(m_hDll, "InitializeDetect");
+		InitializeCalciumSegment = (pInitializeCalciumSegment)GetProcAddress(m_hDll, "InitializeCalciumSegment");
 		GetSegmentObjects = (pGetSegmentObjects)GetProcAddress(m_hDll, "GetSegmentObjects");
 		GetDetectObjects = (pGetDetectObjects)GetProcAddress(m_hDll, "GetDetectObjects");
+		GetCalciumSegmentObjects = (pGetCalciumSegmentObjects)GetProcAddress(m_hDll, "GetCalciumSegmentObjects");
 
 		m_yoloSegment = InitializeSegment();
 		m_yoloDetect = InitializeDetect();
+		m_yoloCalciumSegment = InitializeCalciumSegment();
 	}
 }
 
@@ -33,6 +36,14 @@ cv::Mat CRayYolo::FindSidebranch(){
 
 	return m_mapSidebranch;
 }
+
+cv::Mat CRayYolo::FindCalcium(cv::Mat image) {
+
+	CalciumSegmentObjects(image);
+
+	return m_mapCalcium;
+}
+
 
 std::vector<cv::Rect2f> CRayYolo::FindStent(cv::Mat image)
 {
@@ -81,5 +92,17 @@ void CRayYolo::DetectObjects(cv::Mat image)
 		else if (iterDetect->first == 1) {
 			m_vGuidewire = iterDetect->second;
 		}
+	}
+}
+
+void CRayYolo::CalciumSegmentObjects(cv::Mat image)
+{
+	std::map<int, cv::Mat>* mapCalciumSegment = static_cast<std::map<int, cv::Mat>*>(GetCalciumSegmentObjects(m_yoloCalciumSegment, image));
+
+	m_mapCalcium.release();
+
+	std::map<int, cv::Mat>::iterator iterCalciumSegment;
+	for (iterCalciumSegment = mapCalciumSegment->begin(); iterCalciumSegment != mapCalciumSegment->end(); iterCalciumSegment++) {
+		m_mapCalcium = iterCalciumSegment->second;
 	}
 }

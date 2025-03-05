@@ -144,6 +144,8 @@ public:
 	int GetNumOfStentPoints(int nFrame);
 	void* GetGuidewirePoints(int nFrame);
 	int GetNumOfGuidewirePoints(int nFrame);
+	void* GetCalciumAngles(int nFrame);
+	int GetCalciumLength(int nFrame);
 	
 	//Property
 	RayScannerState GetCurrentState() { return m_curState; }

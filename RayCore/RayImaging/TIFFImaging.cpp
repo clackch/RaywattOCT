@@ -1,5 +1,6 @@
 #include "TIFFImaging.h"
 #include "LookUpTable.h"
+#include <cmath>
 
 CTIFFImaging::CTIFFImaging(Setting setting, CMessageService* pMsg)
 	: COCTImaging(setting, pMsg) 
@@ -21,7 +22,6 @@ void CTIFFImaging::Initialize()
 	imageMask.create(m_setting.nBScan, m_setting.nAScan, CV_8UC1);
 	memset(imageMask.data, 0x00, m_setting.nBScan * m_setting.nAScan);
 	cv::circle(imageMask, cv::Point(imageMask.cols / 2, imageMask.rows / 2), imageMask.cols / 2, cv::Scalar(0xff, 0xff, 0xff), -1);
-
 	initCircularizeMap(m_setting.nAScan, m_setting.nBScan, m_setting.nAScan, m_setting.nBScan, m_setting.nAScan, 2.0f);
 }
 
@@ -63,7 +63,6 @@ void CTIFFImaging::PostProcess(cv::Mat image)
 
 void CTIFFImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale) {
 	COCTImaging::initCircularizeMap(diameter, srcHeight, srcWidth, dstHeight, dstWidth, scale);
-	PLOGI.printf("TIFFImageing initCircularize Map Start");
 
 	double radius = (diameter / 2) - 0.5f;
 	inverseMatXMap.create(dstHeight, dstWidth, CV_32FC1);
@@ -86,8 +85,6 @@ void CTIFFImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth,
 			inverseMatYMap.at<float>(y, x) = fy;
 		}
 	}
-
-	PLOGI.printf("TIFFImageing initCircularize Map Done");
 }
 
 void CTIFFImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst) {
@@ -101,7 +98,7 @@ void CTIFFImaging::EraseStentOutLier(cv::Mat& stent) {
 	int width = m_nWidth;
 	int height = m_nHeight;
 
-	// Lumen Offset º≥¡§
+	// Lumen Offset ÏÑ§Ï†ï
 	std::vector<cv::Point> LumenOffsetPoints;
 	for (int i = 0; i < height; i++) {
 		LumenOffsetPoints.push_back(cv::Point(0, 0));
@@ -129,7 +126,7 @@ void CTIFFImaging::EraseStentOutLier(cv::Mat& stent) {
 		stent.pop_back();
 	}
 
-	// Stent Outlier∏¶ ¡¶ø‹«— Stent Point∏∏ Push
+	// Stent OutlierÎ•º Ï†úÏô∏Ìïú Stent PointÎßå Push
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
 			if (remappedImage.at<uchar>(y, x) == 255 && LumenOffsetPoints[y].x < x) {
@@ -154,7 +151,7 @@ void CTIFFImaging::EraseStentOutLier(cv::Mat& stent) {
 		stent.pop_back();
 	}
 
-	// ±ÿ¡¬«• ∫Ø»Øµ» Stent Push
+	// Í∑πÏ¢åÌëú Î≥ÄÌôòÎêú Stent Push
 	for (int y = 0; y < remappedImage.rows; y++) {
 		for (int x = 0; x < remappedImage.cols; x++) {
 			if (remappedImage.at<uchar>(y, x) == 255) {
@@ -186,7 +183,7 @@ void CTIFFImaging::SetLumenContourOffset(std::vector<cv::Point> lumenContour) {
 
 	cv::rotate(blackImage, blackImage, cv::ROTATE_90_COUNTERCLOCKWISE);
 
-	//Rectangle Contour¿« ∞¢ Rowø° «ÿ¥Á«œ¥¬ X¡¬«• º≥¡§ (∆Ú±’∞™)
+	//Rectangle ContourÏùò Í∞Å RowÏóê Ìï¥ÎãπÌïòÎäî XÏ¢åÌëú ÏÑ§Ï†ï (ÌèâÍ∑†Í∞í)
 	inversedContourYPoints.clear();
 	for (int y = 0; y < height; y++) {
 		double sumOfx= 0;
@@ -213,9 +210,139 @@ void CTIFFImaging::GetLumenOffsetPoints(std::vector<cv::Point>& lumenOffsetBound
 	for (int i = 0; i < inversedContourYPoints.size(); i++) {
 		cv::Point point = inversedContourYPoints[i];
 		int x, y;
-		x = point.x - 50;  //TODO - offset ∞™¿ª OCT Lumen ∞™ ∆Ú±’¿ª »∞øÎ«œø© ±◊∏≤¿⁄ øµø™ ∆«∫∞«“ ºˆ ¿÷¥¬ Offset ∏∏µÈ±‚
+		x = point.x - 50;  //TODO - offset Í∞íÏùÑ OCT Lumen Í∞í ÌèâÍ∑†ÏùÑ ÌôúÏö©ÌïòÏó¨ Í∑∏Î¶ºÏûê ÏòÅÏó≠ ÌåêÎ≥ÑÌï† Ïàò ÏûàÎäî Offset ÎßåÎì§Í∏∞
 		y = point.y;
 
 		lumenOffsetBoundary[i] = cv::Point(x, y);
 	}
+}
+
+void CTIFFImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int& angleNum, std::vector<int>& startAngle, std::vector<int>& endAngle) {
+	if (calciumContours.empty()) {
+		return;
+	}
+
+	// Ïª®Ìà¨Ïñ¥ Í∑∏Î¶¨Í∏∞
+	cv::Mat contourImage = cv::Mat::zeros(imageCircle.size(), CV_8UC1);
+	cv::drawContours(contourImage, calciumContours, -1, cv::Scalar(255), cv::FILLED);
+
+	cv::Mat inverseContourImg;
+	cv::remap(contourImage, inverseContourImg, inverseMatXMap, inverseMatYMap, cv::INTER_LINEAR);
+
+	cv::Mat rectImg;
+	cv::remap(imageCircle, rectImg, inverseMatXMap, inverseMatYMap, cv::INTER_LINEAR);
+
+	cv::Mat recircleImg;
+	cv::remap(rectImg, recircleImg, matXMap, matYMap, cv::INTER_LINEAR);
+
+	cv::imwrite("rectImg" + std::to_string(m_nCurFrame) + ".png", rectImg);
+	cv::imwrite("remappedImg" + std::to_string(m_nCurFrame) + ".png", inverseContourImg);
+	cv::imwrite("recircleImg" + std::to_string(m_nCurFrame) + ".png", recircleImg);
+
+	std::vector<std::vector<cv::Point>> inverseContours;
+	cv::findContours(inverseContourImg, inverseContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	
+	cv::Mat alineImg = cv::Mat::zeros(imageCircle.size(), CV_8UC1);
+	for (const auto& contour : inverseContours) {
+		cv::Rect rect = cv::boundingRect(contour);
+		
+		for (int i = rect.y; i < rect.y + rect.height; i++) {
+			if (i >= m_nHeight)
+				break;
+			alineImg.at<uchar>(i, m_nWidth) = 255;
+		}
+	}
+
+	cv::imwrite("alineImg" + std::to_string(m_nCurFrame) + ".png", alineImg);
+
+	bool findStart = false;
+	int series = 0;
+	std::vector<cv::Point> startAnglePoint;
+	std::vector<cv::Point> endAnglePoint;
+	for (int i = 0; i < m_nHeight; i++) {
+		int pixelValue = alineImg.at<uchar>(i, m_nWidth / 2);
+		if (pixelValue != 0 && series == 0) {
+			series++;
+			findStart = true;
+			startAnglePoint.push_back(cv::Point(m_nWidth / 2, i));
+		}
+		else if (pixelValue != 0 && series != 0) {
+			series++;
+		}
+		else if (pixelValue == 0 && series != 0) {
+			endAnglePoint.push_back(cv::Point(m_nWidth / 2, i-1));
+			series = 0;
+		}
+	}
+
+	if (findStart == true && series != 0) {
+		endAnglePoint.push_back(cv::Point(m_nHeight/2 , m_nHeight - 1));
+	}
+
+	cv::Point center(m_nWidth / 2, m_nHeight / 2);
+	cv::Point standard(m_nWidth / 2, 0);
+
+	cv::Mat tissue = imageCircle.clone();
+
+	if (tissue.channels() == 1) {
+		cv::cvtColor(tissue, tissue, cv::COLOR_GRAY2BGR);
+	}
+
+	PLOGI.printf("startAnglePoint.size() = %d", startAnglePoint.size());
+
+	for (int i = 0; i < startAnglePoint.size(); i++) {
+		float tempX = matXMap.at<float>(startAnglePoint[i].y, startAnglePoint[i].x);
+		float tempY = matYMap.at<float>(startAnglePoint[i].y, startAnglePoint[i].x);
+		PLOGI.printf("tempX = %d, tmpY = %d", tempX, tempY);
+		startAnglePoint[i].x = (int)tempX;
+		startAnglePoint[i].y = (int)tempY;
+		startAnglePoint[i] = RotatePoint(startAnglePoint[i], center);
+
+		if (tempY >= 0 && tempY < tissue.rows && tempX >= 0 && tempX < tissue.cols) {
+			tissue.at<cv::Vec3b>(static_cast<int>(tempY), static_cast<int>(tempX)) = cv::Vec3b(0, 0, 255);
+		}
+
+		tempX = matXMap.at<float>(endAnglePoint[i].y, endAnglePoint[i].x);
+		tempY = matYMap.at<float>(endAnglePoint[i].y, endAnglePoint[i].x);
+		PLOGI.printf("tempX = %d, tmpY = %d", tempX, tempY);
+		endAnglePoint[i].x = (int)tempX;
+		endAnglePoint[i].y = (int)tempY;
+		endAnglePoint[i] = RotatePoint(endAnglePoint[i], center);
+
+		if (tempY >= 0 && tempY < tissue.rows && tempX >= 0 && tempX < tissue.cols) {
+			tissue.at<cv::Vec3b>(static_cast<int>(tempY), static_cast<int>(tempX)) = cv::Vec3b(0, 0, 255);
+		}
+	}
+
+	for (int i = 0; i < startAnglePoint.size(); i++) {
+		double sAngle = GetTheta(standard, startAnglePoint[i]);
+		double eAngle = GetTheta(standard, endAnglePoint[i]);
+
+		startAngle.push_back(sAngle);
+		endAngle.push_back(eAngle);
+	}
+
+	angleNum = startAnglePoint.size();
+}
+
+double CTIFFImaging::GetTheta(cv::Point vector1, cv::Point vector2) {
+
+	double cos_theta = (vector1.x * vector2.x + vector1.y * vector2.y) /
+		(sqrt(vector1.x * vector1.x + vector1.y * vector1.y) + sqrt(vector2.x * vector2.x + vector2.y * vector2.y));
+
+	return acos(cos_theta) * 180.0 / CV_PI;
+}
+
+// Ï£ºÏñ¥ÏßÑ Ï†êÏùÑ Î∞òÏãúÍ≥Ñ Î∞©Ìñ•ÏúºÎ°ú 90ÎèÑ ÌöåÏ†ÑÏãúÌÇ§Îäî Ìï®Ïàò
+cv::Point2f  CTIFFImaging::RotatePoint(const cv::Point2f& point, const cv::Point2f& center) {
+	// Ï†êÏùÑ Ï§ëÏã¨Ï†ê Í∏∞Ï§ÄÏúºÎ°ú Ïù¥Îèô
+	float translatedX = point.x - center.x;
+	float translatedY = point.y - center.y;
+
+	// ÏãúÍ≥Ñ Î∞©Ìñ•ÏúºÎ°ú 90ÎèÑ ÌöåÏ†Ñ Î≥ÄÌôò Ï†ÅÏö©
+	float rotatedX = translatedY;
+	float rotatedY = -translatedX;
+
+	// ÌöåÏ†ÑÎêú Ï†êÏùÑ ÏõêÎûò ÏúÑÏπòÎ°ú Ïù¥Îèô
+	return cv::Point2f(rotatedX + center.x, rotatedY + center.y);
 }

@@ -49,6 +49,14 @@ private:
 	std::vector<std::vector<cv::Mat>> m_vSidebranch;
 	std::vector<cv::Mat> m_vStent;
 	std::vector<cv::Mat> m_vGuidewire;
+
+	struct Calcium {
+		int angleNum = 0;
+		std::vector<int> startAngle;
+		std::vector<int> endAngle;
+	};
+	std::vector<Calcium> m_vCalcium;
+
 	char* m_pVolumeData;
 
 	int m_zOffset;
@@ -99,6 +107,8 @@ public:
 	int GetNumOfStentPoints(int nFrame);
 	void* GetGuidewirePoints(int nFrame);
 	int GetNumOfGuidewirePoints(int nFrame);
+	void* GetCalciumAngles(int nFrame);
+	int GetCalciumLength(int nFrame);
 
 	bool LoadZOffset(const char* strDataFilePath);
 	void SetZOffset(int zOffset) { m_zOffset = zOffset; }
