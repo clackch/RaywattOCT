@@ -5,7 +5,7 @@
 #define DELAY_FOR_STOP_THREAD			50
 
 typedef void (*FunctionPtr)(int, int, int);
-typedef void (*FunctionImgPtr)(int, void*, int, int, int, int);
+typedef void (*FunctionImgPtr)(int, void*, int, int, int, int, double);
 typedef void (*FunctionObjPtr)(int);
 
 enum class RayError {
@@ -28,6 +28,7 @@ enum class RayProperty {
 	CurrentState = 1,
 	Brightness,
 	Contrast,
+	Colormap,
 	LongitudeBackgroundColor,
 	LongitudeDegree,
 	MotorOnOff,
@@ -40,6 +41,11 @@ enum class RayProperty {
 	ImageChannels,
 	ImageDepth,
 	ImageResolution,
+	ImageThreshold,
+	ImageRoi,
+	ImageCompensation,
+	ImageCompensationControlWindow,
+	FieldOfView,
 	LongitudeImageWidth,
 	LongitudeImageHeight,
 	LongitudeImageChannels,
@@ -47,7 +53,9 @@ enum class RayProperty {
 	PullbackDistance,
 	PullbackSpeed,
 	SheathDiameter,
-	TestMode
+	TestMode,
+  ZOffset,
+  PullbackStartTime
 };
 
 enum class RayCallbackRequest {
@@ -86,7 +94,9 @@ enum class RayWorkItem {
 	Pullback,
 	LoadCatheter,
 	UnloadCatheter,
-	ValidateCatheter
+	ValidateCatheter,
+	InitializeRotaryJunction,
+	CleanRotaryJunction
 };
 
 enum class RaySession {

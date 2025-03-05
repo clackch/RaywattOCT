@@ -25,14 +25,14 @@
         <Grid Grid.Row="1" Margin="60,40,60,40">
             <Grid.RowDefinitions>
                 <RowDefinition Height="769"/>
-                <RowDefinition Height="75"/>
+                <RowDefinition Height="1"/>
+                <RowDefinition Height="74"/>
             </Grid.RowDefinitions>
             <Border Grid.Row="0" CornerRadius="10,10,0,0" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray7Brush}">
                 <Grid Margin="49,54,49,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="70"/>
-                        <RowDefinition Height="580"/>
-                        <RowDefinition Height="63"/>
+                        <RowDefinition Height="636"/>
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0">
                         <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Co-Registration], Source={StaticResource L10N}}"/>
@@ -44,32 +44,54 @@
                             <ColumnDefinition Width="448"/>
                         </Grid.ColumnDefinitions>
                         <Grid Grid.Column="0">
-                            <Grid.Clip>
-                                <RectangleGeometry RadiusX="10" RadiusY="10">
-                                    <RectangleGeometry.Rect>
-                                        <Rect X="0" Y="0" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}"/>
-                                    </RectangleGeometry.Rect>
-                                </RectangleGeometry>
-                            </Grid.Clip>
-                            <Image x:Name="crossSectionAngioImage" Source="{Binding CurrentAngioImage}"  Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}" Stretch="Uniform"></Image>
-                            <CoRegistration:DrawAngioPathUtil Grid.Column="0" Width="{Binding ElementName=crossSectionAngioImage, Path=ActualWidth}" Height ="{Binding ElementName=crossSectionAngioImage, Path=ActualHeight}"
-                            						  DijkstraHeap="{Binding DijkstraHeap}" MotionVector="{Binding MotionVector}"
-                                                      AngioImages ="{Binding CrossSectionAngioImages}" AngioFrameNumber ="{Binding AngioFrameNumber}" 
-                                                      MousePosition ="{Binding CrossSectionMousePosition, Mode=TwoWay}" AngioTrackPoints ="{Binding AngioTrackPoints, Mode=TwoWay}"
-                                                      IsAngioTrackCompleted ="{Binding IsAngioTrackCompleted, Mode=TwoWay}" IsReset ="{Binding IsReset, Mode=TwoWay}"
-                                                      IsResetOn ="{Binding IsResetOn, Mode=TwoWay}" IsCancel ="{Binding IsCancel}" IsRendering ="{Binding IsRendering, Mode=TwoWay}"
-                                                      IsOk ="{Binding IsOk}" IsEditOn = "True" Cursor="Cross"/>
-                            <Border>
-                                <!-- Loading -->
-                                <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding IsRendering, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="580"/>
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="46"/>
+                            </Grid.RowDefinitions>
+                            <Grid Grid.Row="0">
+                                <Grid.Clip>
+                                    <RectangleGeometry RadiusX="10" RadiusY="10">
+                                        <RectangleGeometry.Rect>
+                                            <Rect X="0" Y="0" Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}"/>
+                                        </RectangleGeometry.Rect>
+                                    </RectangleGeometry>
+                                </Grid.Clip>
+                                <Image x:Name="crossSectionAngioImage" Source="{Binding CurrentAngioImage}"  Width="{x:Static const:Constants.AngioSize}" Height="{x:Static const:Constants.AngioSize}" Stretch="Uniform"></Image>
+                                <CoRegistration:DrawAngioPathUtil Grid.Column="0" Width="{Binding ElementName=crossSectionAngioImage, Path=ActualWidth}" Height ="{Binding ElementName=crossSectionAngioImage, Path=ActualHeight}"
+                            						      DijkstraHeap="{Binding DijkstraHeap}" AngioImages ="{Binding CrossSectionAngioImages}" AngioFrameNumber ="{Binding AngioFrameNumber, Mode=TwoWay}" 
+                                                          MousePosition ="{Binding CrossSectionMousePosition, Mode=TwoWay}" CoRegistrations ="{Binding CoRegistrations, Mode=TwoWay}"
+                                                          IsAngioTrackCompleted ="{Binding IsAngioTrackCompleted, Mode=TwoWay}" IsReset ="{Binding IsReset, Mode=TwoWay}"
+                                                          IsResetOn ="{Binding IsResetOn, Mode=TwoWay}" IsRendering ="{Binding IsRendering, Mode=TwoWay}" PullbackType="{Binding PatientCase.PullbackType}"/>
+                                <Border>
+                                    <!-- Loading -->
+                                    <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding IsRendering, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                </Border>
+                            </Grid>
+                            <Border Grid.Row="2" CornerRadius="8" Background="{DynamicResource GrayscaleGray6Brush}" HorizontalAlignment="Left" Width="580">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="40"/>
+                                        <ColumnDefinition Width="45"/>
+                                        <ColumnDefinition Width="480"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Height="16" Content="{Binding [F], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-ExtraBold-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" Margin="32,0,0,0"/>
+                                    <Label Grid.Column="1" Height="16" Content="{Binding AngioDisplayNumber}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource ValueInfoLabelBrush}" Margin="10,0"/>
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="5,0,0,0">
+                                        <Slider Minimum="0" Maximum="{Binding AngioFrameLength}" Value="{Binding AngioFrameNumber, Mode=TwoWay}"/>
+                                    </StackPanel>
+                                </Grid>
                             </Border>
                         </Grid>
                         <Border Grid.Column="2" CornerRadius="8" Background="{DynamicResource GrayscaleGray6Brush}">
-                            <Grid Margin="30,36,30,30" >
+                            <Grid Margin="30,36,30,0" >
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="54"/>
                                     <RowDefinition Height="72"/>
                                     <RowDefinition Height="388"/>
+                                    <RowDefinition Height="20"/>
+                                    <RowDefinition Height="42"/>
+                                    <RowDefinition Height="30"/>
                                 </Grid.RowDefinitions>
                                 <Grid Grid.Row="0">
                                     <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Clarify a lesion], Source={StaticResource L10N}}"/>
@@ -110,6 +132,9 @@
                                         <Image Source="{svgc:SvgImage Source=/res/icon/angioZoomCenter.svg}" Width="39" Height="39"/>
                                     </Grid>
                                 </Border>
+                                <Grid Grid.Row="4">
+                                    <Button HorizontalAlignment="Left" Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding ResetCommand}" Content="{Binding [Reset], Source={StaticResource L10N}}" IsEnabled="{Binding IsResetOn}" Width="200" Height="42"/>
+                                </Grid>
                             </Grid>
                         </Border>
                     </Grid>
@@ -118,11 +143,11 @@
                             <ColumnDefinition Width="580"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Slider Grid.Column="0" Width="570" Minimum="0" Maximum="{Binding AngioFrameLength}" Value="{Binding AngioFrameNumber, Mode=TwoWay}" Height="30" Margin="9,16,1,17"/>
                     </Grid>
                 </Grid>
             </Border>
-            <Border Grid.Row="1" CornerRadius="0,0,10,10" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray6Brush}">
+            <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
+            <Border Grid.Row="2" CornerRadius="0,0,10,10" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray6Brush}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
@@ -131,8 +156,6 @@
                     <StackPanel Grid.Column="0" HorizontalAlignment="Left" Margin="16,16,0,0">
                         <Grid>
                             <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
-                            <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding ResetCommand}" Content="{Binding [Reset], Source={StaticResource L10N}}"
-                                    IsEnabled="{Binding IsResetOn}" Margin="210,0,-210,0"/>
                         </Grid>
                     </StackPanel>
                     <Grid Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,16,0">

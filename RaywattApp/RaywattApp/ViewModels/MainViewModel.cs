@@ -17,6 +17,8 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
 using RaywattApp.Common.Angio;
+using System.Threading;
+using OpenCvSharp;
 
 namespace RaywattApp.ViewModels
 {
@@ -58,6 +60,46 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private double _catheterProgress;
+
+        [ObservableProperty]
+        private bool _isImageAnalysisTest = false;
+
+        [ObservableProperty]
+        private bool _isImageAnalysisToggle = false;
+
+        private string _imageThreshold;
+        public string ImageThreshold
+        {
+            get { return _imageThreshold; }
+            set
+            {
+                if(value.Length <= 6)
+                {
+                    if (!CommonUtil.ValidateRealNumber(value))
+                        return;
+
+                    _imageThreshold = value;
+                    OnPropertyChanged(nameof(ImageThreshold));
+                }
+            }
+        }
+
+        private string _imageRoi;
+        public string ImageRoi
+        {
+            get { return _imageRoi; }
+            set
+            {
+                if (value.Length <= 6)
+                {
+                    if (!CommonUtil.ValidateRealNumber(value))
+                        return;
+
+                    _imageRoi = value;
+                    OnPropertyChanged(nameof(ImageRoi));
+                }
+            }
+        }
 
         private ICommand _homeCommand;
         public ICommand HomeCommand
@@ -110,6 +152,57 @@ namespace RaywattApp.ViewModels
             get { return this._catheterConnectTest ?? (this._catheterConnectTest = new RelayCommand(CatheterConnectReceiver)); }
         }
 
+        //Test
+        private ICommand _imageAnalysisTest;
+        public ICommand ImageAnalysisTestCommmand
+        {
+            get { return this._imageAnalysisTest ?? (this._imageAnalysisTest = new RelayCommand(ImageAnalysisTest)); }
+        }
+
+        //Test
+        private ICommand _compensationTest;
+        public ICommand CompensationTestCommand
+        {
+            get { return this._compensationTest ?? (this._compensationTest = new RelayCommand(CompensationTest)); }
+        }
+
+        //Test
+        private ICommand _compensationWindowTest;
+        public ICommand CompensationWindowTestCommand
+        {
+            get { return this._compensationWindowTest ?? (this._compensationWindowTest = new RelayCommand(CompensationControlWindowTest)); }
+        }
+
+        private Thread threadCompensationWindow = null;
+        private bool showCompensationWindow = false;
+
+        private ICommand _SaveVTIFileTest;
+        public ICommand SaveVTIFileTestCommand
+        {
+            get { return this._SaveVTIFileTest ?? (this._SaveVTIFileTest = new RelayCommand(SaveVTIFileTest)); }
+        }
+
+        //Test
+        private ICommand _imageAnalysisToggle;
+        public ICommand ImageAnalysisToggleCommmand
+        {
+            get { return this._imageAnalysisToggle ?? (this._imageAnalysisToggle = new RelayCommand(ImageAnalysisToggle)); }
+        }
+
+        //Test
+        private ICommand _imageAnalysisReload;
+        public ICommand ImageAnalysisReloadCommmand
+        {
+            get { return this._imageAnalysisReload ?? (this._imageAnalysisReload = new RelayCommand(ImageAnalysisReload)); }
+        }
+
+        //Test
+        private ICommand _imageAnalysisApply;
+        public ICommand ImageAnalysisApplyCommmand
+        {
+            get { return this._imageAnalysisApply ?? (this._imageAnalysisApply = new RelayCommand(ImageAnalysisApply)); }
+        }
+
         // to avoid garbage collection
         private CallbackFunction cbFunction;
         public CallbackFunction CBFunction => (this.cbFunction) ?? (this.cbFunction = new CallbackFunction(OnMsgCallback));
@@ -143,6 +236,7 @@ namespace RaywattApp.ViewModels
             reviewPages.Add(Constants.ReviewPage);
             reviewPages.Add(Constants.Review3dPage);
             reviewPages.Add(Constants.ReviewComparePage);
+            reviewPages.Add(Constants.ReviewFfrSettingPage);
             reviewPages.Add(Constants.ReviewFfrPage);
             reviewPages.Add(Constants.ReviewPresetPage);
             reviewPages.Add(Constants.ReviewAngioCoRegPage);
@@ -167,6 +261,11 @@ namespace RaywattApp.ViewModels
 
                     if ("RJ".Equals(config.Key))
                         RaySetProperty(Property.TestMode, "Y".Equals(config.Value) ? 1.0f : 0.0f);
+
+                    if ("Image".Equals(config.Key))
+                    {
+                        ImageAnalysisReload();
+                    }
                 }
             }
 
@@ -199,16 +298,16 @@ namespace RaywattApp.ViewModels
                     PatientCase = null;
             }
 
-            //Review 화면에서 나가는 경우, RayEndReivew 호출
+            //Review 화면에서 나가는 경우, RayEndReview 호출
             if (reviewPages.Contains(Constants.CurrentPage))
             {
                 if (!reviewPages.Contains(pageUri))
                     RayEndReview();
             }
-            //Recording(Confirm) 화면에서 나가는 경우, RayEndReivew 호출
+            //Recording(Confirm) 화면에서 나가는 경우, RayEndReview 호출
             if (Constants.CurrentPage == Constants.RecordingConfirmPage)
             {
-                if (!pageUri.Equals(Constants.ReviewPresetPage))
+                if (!pageUri.Equals(Constants.ReviewPage))
                     RayEndReview();
             }
 
@@ -223,6 +322,8 @@ namespace RaywattApp.ViewModels
         private void Home()
         {
             _log.Debug("Home");
+
+            DeviceStatus.IsOCTImagingDone = true;
 
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
         }
@@ -245,11 +346,18 @@ namespace RaywattApp.ViewModels
 
             if (result != null && result.DialogAnswer != DialogResults.Answer.No)
             {
+                if (threadCompensationWindow != null)
+                {
+                    showCompensationWindow = false;
+                    threadCompensationWindow.Join();
+                }
+
                 if (result.DialogAnswer == DialogResults.Answer.Extra)
                 {
                     DeviceStatus.PowerOffMsg = _l10n["Switching user"];
                 }
-                CommonUtil.Exit(DeviceStatus, _angioManager, result.DialogAnswer == DialogResults.Answer.Yes ? true : false);
+                CommonUtil.Exit(DeviceStatus, _angioManager, result.DialogAnswer == DialogResults.Answer.Yes ? true : false); // 여기다
+                _angioManager.StopSoketCheck();
             }
         }
 
@@ -348,6 +456,91 @@ namespace RaywattApp.ViewModels
             RayLoadCatheter();
         }
 
+        private void ImageAnalysisTest()
+        {
+            _log.Debug("ImageAnalysisTest");
+
+            IsImageAnalysisTest = !IsImageAnalysisTest;
+        }
+
+        private void CompensationTest()
+        {
+            _log.Debug("CompensationTest");
+
+            bool bImageCompensation = (bool)(RayGetProperty(Property.ImageCompensation) != 0);
+
+            RaySetProperty(Property.ImageCompensation, bImageCompensation ? 0 : 1);
+        }
+
+        private void CompensationControlWindowTest()
+        {
+            _log.Debug("CompensationControlWindowTest");
+
+            if (threadCompensationWindow == null)
+            {
+                threadCompensationWindow = new Thread(() => ThreadCompensationWindow(this));
+                threadCompensationWindow.Start();
+            }
+            else {
+                showCompensationWindow = false;
+                threadCompensationWindow.Join();
+                threadCompensationWindow = null;
+            }
+        }
+
+        private static void ThreadCompensationWindow(MainViewModel model)
+        {
+            _log.Debug("ThreadCompensationWindow");
+
+            model.showCompensationWindow = true;
+            RaySetProperty(Property.ImageCompensationControlWindow, 1);
+
+            while (model.showCompensationWindow) 
+            {
+                Cv2.WaitKey(1);
+            }
+
+            RaySetProperty(Property.ImageCompensationControlWindow, 0);
+
+            _log.Debug("ThreadCompensationWindow done.");
+        }
+
+        private void SaveVTIFileTest()
+        {
+            _log.Debug("SaveVTIFileTest");
+
+            CommonUtil.isVTIFileSave = !CommonUtil.isVTIFileSave;
+            if(CommonUtil.isVTIFileSave)
+                _log.Debug("SaveVTIFileTest True");
+            else
+            {
+                _log.Debug("SaveVTIFileTest False");
+            }
+        }
+
+        private void ImageAnalysisToggle()
+        {
+            _log.Debug("ImageAnalysisToggle");
+
+            IsImageAnalysisToggle = !IsImageAnalysisToggle;
+        }
+
+        private void ImageAnalysisReload()
+        {
+            _log.Debug("ImageAnalysisReload");
+
+            ImageThreshold = RayGetProperty(Property.ImageThreshold).ToString();
+            ImageRoi = RayGetProperty(Property.ImageRoi).ToString();
+        }
+        
+        private void ImageAnalysisApply()
+        {
+            _log.Debug("ImageAnalysisApply");
+
+            RaySetProperty(Property.ImageThreshold, Double.Parse(ImageThreshold));
+            RaySetProperty(Property.ImageRoi, Double.Parse(ImageRoi));
+        }
+
         //Test
         private double catheterProgressStep = 10;
         private DispatcherTimer timer = new DispatcherTimer();
@@ -387,12 +580,15 @@ namespace RaywattApp.ViewModels
 
         private void handleState(RayCallbackRequest request, RayScannerState state, int param)
         {
+            _log.Debug("state: " + state.ToString());
             RayScannerState curState = (RayScannerState)RayGetProperty(Property.CurrentState);
             DeviceStatus.IsLiveView = (bool)(RayGetProperty(Property.MotorOnOff) != 0);
         }
         protected void handleProgress(RayCallbackRequest request, int progress, int param) { }
         protected void handleError(RayCallbackRequest request, RayError error, int param) { }
-        protected void handleEvent(RayCallbackRequest request, RayEvent e, int param) {
+        protected void handleEvent(RayCallbackRequest request, RayEvent e, int param)
+        {
+            _log.Debug("event: " + e.ToString());
             switch (e)
             {
                 case RayEvent.CatheterConnected:
@@ -400,15 +596,18 @@ namespace RaywattApp.ViewModels
                     break;
                 case RayEvent.CatheterLoading:
                     //Test
+                    DeviceStatus.CatheterStatus = Constants.CatheterStatusLoading;
                     CatheterProgress = 0;
                     if(!timer.IsEnabled)
                         timer.Start();
                     break;
                 case RayEvent.CatheterUnloading:
                     //Test
+                    DeviceStatus.CatheterStatus = Constants.CatheterStatusUnloading;
                     CatheterProgress = 100;
                     if(!timerUnload.IsEnabled)
                         timerUnload.Start();
+                    LeaveFromRecording();
                     break;
                 default:
                     break;
@@ -416,6 +615,7 @@ namespace RaywattApp.ViewModels
         }
         protected void handleWorkDone(RayCallbackRequest request, RayWorkItem work, int param)
         {
+            _log.Debug("workItem - " + work.ToString());
             switch (work)
             {
                 case RayWorkItem.StartService:
@@ -432,16 +632,13 @@ namespace RaywattApp.ViewModels
                     DeviceStatus.CatheterStatus = Constants.CatheterStatusConnected;
                     break;
                 case RayWorkItem.Recording:
-                    _angioManager.StopSaveAngioThread();
-                    break;
-                case RayWorkItem.Pullback:
-                    DeviceStatus.IsPullbackDone = true;
-                    
                     if (DeviceStatus.IsAngioConnected)
                     {
                         _angioManager.StopSaveAngioThread();
                     }
-                    
+                    break;
+                case RayWorkItem.Pullback:
+                    DeviceStatus.IsPullbackDone = true;                                        
                     break;
                 case RayWorkItem.OCTImaging:
                     if(param == (int)RaySession.Review)
@@ -458,6 +655,9 @@ namespace RaywattApp.ViewModels
                     break;
                 case RayWorkItem.SaveRawData:
                     DeviceStatus.IsSaveRawDataDone = true;
+                    break;
+                case RayWorkItem.CleanRotaryJunction:
+                    DeviceStatus.IsCleaningDone = true;
                     break;
                 default:
                     break;

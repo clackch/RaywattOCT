@@ -49,6 +49,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private int _startTime;
 
+        [ObservableProperty]
+        private Zoom _zoom = new Zoom();
+
         private Thread threadWaitPullbackDone;
         private bool runWaitPullbackDone;
 
@@ -117,6 +120,8 @@ namespace RaywattApp.ViewModels
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 PatientCase = (PatientCase)data["patientCase"];
 
+                Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
+
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
                 timerUpdateImage.Start();
@@ -143,7 +148,7 @@ namespace RaywattApp.ViewModels
             _log.Debug("Cancel");
 
             RayStopLiveView();
-            leaveToPage(Constants.RecordingLiveViewPage, _cancelCommand);
+            leaveToPage(Constants.RecordingLiveViewPage);
         }
 
         private void Ready()
@@ -214,8 +219,7 @@ namespace RaywattApp.ViewModels
             IsStart = false;
             IsCancel = false;
 
-            PatientCase.Image = generateFileName("oct");
-            PatientCase.ImageResolution = RayGetProperty(Property.ImageResolution);
+            PatientCase.Image = generateFileName("oct");            
             DeviceStatus.IsSaveRawDataDone = false;
             DeviceStatus.IsLumenSaved = false;
             DeviceStatus.IsOCTImagingDone = false;
@@ -243,21 +247,23 @@ namespace RaywattApp.ViewModels
             }
             runWaitPullbackDone = false;
 
-            leaveToPage(Constants.RecordingConfirmPage, null);
+            leaveToPage(Constants.RecordingConfirmPage);
         }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {
             DrawCrossSectionImage();
+
+            if (DeviceStatus.IsAngioConnected)
+                DrawAngioImage();
         }
 
-        private void leaveToPage(string viewPage, ICommand command)
+        private void leaveToPage(string viewPage)
         {
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
             parameter["patientCase"] = PatientCase;
-            parameter["command"] = command;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(viewPage) { Parameter = parameter });
         }
 
@@ -274,6 +280,13 @@ namespace RaywattApp.ViewModels
             _log.Debug("generateFileName : " + filename);
 
             return filename;
+        }
+
+        private bool DrawAngioImage()
+        {
+            AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(_angioManager.ImgAngio);
+
+            return true;
         }
     }
 }

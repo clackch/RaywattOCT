@@ -1,4 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using RaywattApp.Common.Annotation.Models;
+using System.Collections.Generic;
 
 namespace RaywattApp.Models
 {
@@ -8,10 +10,13 @@ namespace RaywattApp.Models
         private string _model;
 
         [ObservableProperty]
-        private double _percentAreaStenosis;
+        private string _vesselType;
 
         [ObservableProperty]
-        private double _minimalLumenArea;
+        private string _actualVesselType;
+
+        [ObservableProperty]
+        private double _proximalLumenArea;
 
         [ObservableProperty]
         private double _distalLumenArea;
@@ -20,12 +25,21 @@ namespace RaywattApp.Models
         private double _lesionLength;
 
         [ObservableProperty]
+        private int _minimalLumenFrameNumber;
+
+        [ObservableProperty]
+        private double _minimalLumenArea;
+
+        [ObservableProperty]
         private double _plaqueArea;
 
         [ObservableProperty]
-        private double _proximalLumenArea;
+        private double _percentAreaStenosis;
 
         [ObservableProperty]
-        public int _minimalLumenFrameNumber;
+        private bool _isPlaqueAreaValid;
+
+        [ObservableProperty]
+        private List<Measurement> _plaqueAreaList;
     }
 }

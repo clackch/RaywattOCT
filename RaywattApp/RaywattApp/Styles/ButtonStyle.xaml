@@ -263,6 +263,56 @@
         <Setter Property="Height" Value="26"/>
     </Style>
 
+    <!-- OutlinedBtnType4 -->
+    <Style TargetType="Button" x:Key="OutlinedBtnType4" BasedOn="{StaticResource Pretendard-Medium-14}">
+        <Setter Property="Foreground" Value="{DynamicResource MainPrimaryColorBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="border" CornerRadius="6" BorderThickness="1" BorderBrush="{DynamicResource MainPrimaryColorBrush}" Background="Transparent"/>
+                        <ContentPresenter x:Name="content" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Height" Value="26">
+                            <Setter TargetName="border" Property="CornerRadius" Value="4"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource MainThemeBrush}"/>
+                            <Setter TargetName="border" Property="Opacity" Value="0.3"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="Transparent"/>
+                            <Setter TargetName="border" Property="Opacity" Value="1.0"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MainThemePressedBrush}"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource MainThemePressedBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource GrayscaleGray7Brush}"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource GrayscaleGray7Brush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType4-Large" BasedOn="{StaticResource OutlinedBtnType4}">
+        <Setter Property="Width" Value="200"/>
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="FontSize" Value="18"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType4-Medium" BasedOn="{StaticResource OutlinedBtnType4}">
+        <Setter Property="Width" Value="192"/>
+        <Setter Property="Height" Value="32"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType4-Small" BasedOn="{StaticResource OutlinedBtnType4}">
+        <Setter Property="Width" Value="120"/>
+        <Setter Property="Height" Value="26"/>
+    </Style>
+
     <!-- ContainedBtnType1 -->
     <Style TargetType="Button" x:Key="ContainedBtnType1" BasedOn="{StaticResource Pretendard-Medium-14}">
         <Setter Property="Foreground" Value="{DynamicResource GrayscaleGray7Brush}"/>
@@ -412,9 +462,38 @@
         </Setter>
     </Style>
 
+    <!-- BtnForTest2 -->
+    <Style TargetType="Button" x:Key="BtnForTest2" BasedOn="{StaticResource Pretendard-Medium-14}">
+        <Setter Property="Foreground" Value="{DynamicResource MainBackgroundColorBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="border" CornerRadius="6" BorderThickness="1" Background="{DynamicResource AdditionalColor1Brush}"/>
+                        <ContentPresenter x:Name="content" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Height" Value="26">
+                            <Setter TargetName="border" Property="CornerRadius" Value="4"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource AdditionalColor2Brush}"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource MainTertiaryColorBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MainThemeBrush}"/>
+                            <Setter TargetName="border" Property="Background" Value="Transparent"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource MainThemeBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- FfrPredictBtn -->
     <Style TargetType="Button" x:Key="FfrPredictBtn" BasedOn="{StaticResource Pretendard-Medium-18}">
-        <Setter Property="Width" Value="200"/>
+        <Setter Property="Width" Value="250"/>
         <Setter Property="Height" Value="54"/>
         <Setter Property="FontSize" Value="18"/>
         <Setter Property="Foreground" Value="{DynamicResource MainPrimaryColorBrush}"/>
@@ -423,8 +502,8 @@
                 <ControlTemplate TargetType="Button">
                     <Grid>
                         <Border x:Name="border" CornerRadius="6" BorderThickness="1" BorderBrush="{DynamicResource MainPrimaryColorBrush}" Background="Transparent"/>
-                        <Image x:Name="icon" Source="{svgc:SvgImage Source=/res/icon/ffrPredict.svg}" Width="26" Height="27" HorizontalAlignment="Left" Margin="32,0,0,0"/>
-                        <ContentPresenter x:Name="content" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="70,0,0,0"/>
+                        <Image x:Name="icon" Source="{svgc:SvgImage Source=/res/icon/ffrPredict.svg}" Width="26" Height="27" HorizontalAlignment="Left" Margin="56,0,0,0"/>
+                        <ContentPresenter x:Name="content" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="95,0,0,0"/>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">

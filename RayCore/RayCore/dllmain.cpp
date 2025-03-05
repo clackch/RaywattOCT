@@ -46,14 +46,20 @@ _declspec(dllexport) RayError RayLoadCatheter() {
 _declspec(dllexport) RayError RayUnloadCatheter() {
     return octSystem.UnloadCatheter();
 }
-_declspec(dllexport) int RayStartReview(char* strFilePath) {
-    return octSystem.StartReview(strFilePath);
+_declspec(dllexport) int RayStartReview(char* strFilePath, double imageResolution, double zOffset) {
+    return octSystem.StartReview(strFilePath, imageResolution, zOffset);
 }
-_declspec(dllexport) RayError RayStartCompare(char* strFilePath) {
-    return octSystem.StartCompare(strFilePath);
+_declspec(dllexport) RayError RayStartCompare(char* strFilePath, double imageResolution, double zOffset) {
+    return octSystem.StartCompare(strFilePath, imageResolution, zOffset);
 }
 _declspec(dllexport) RayError RayEndReview() {
     return octSystem.EndReview();
+}
+_declspec(dllexport) RayError RayEndCompare() {
+    return octSystem.EndCompare();
+}
+_declspec(dllexport) RayError RayRestartReview() {
+    return octSystem.RestartReview();
 }
 _declspec(dllexport) RayError RayStartLiveView() {
     return octSystem.StartLiveView();
@@ -63,6 +69,9 @@ _declspec(dllexport) RayError RayStopLiveView() {
 }
 _declspec(dllexport) RayError RayLaserOnOff(bool isOn) {
     return octSystem.LaserOnOff(isOn);
+}
+_declspec(dllexport) RayError RayRJCleanModeOnOff(bool isOn) {
+    return octSystem.RJCleanModeOnOff(isOn);
 }
 _declspec(dllexport) RayError RaySetSession(int session) {
     return octSystem.SetSession(session);
@@ -87,6 +96,8 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
         return octSystem.SetBrightness(value);
     case RayProperty::Contrast:
         return octSystem.SetContrast(value);
+    case RayProperty::Colormap:
+        return octSystem.SetColormap(value);
     case RayProperty::LongitudeBackgroundColor:
         return octSystem.SetLongitudeBackgroundColor(value);
     case RayProperty::LongitudeDegree:
@@ -95,13 +106,37 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
         config.bldcMotor.velocityPullback = value;
         break;
     case RayProperty::PullbackDistance:
-        config.stepMotor.pullbackDistance = value;
+        config.stepMotor.pullbackDistance = (value >= 95) ? 95 : value;
         break;
     case RayProperty::PullbackSpeed:
         config.stepMotor.pullbackSpeed = value;
         break;
+    case RayProperty::SheathDiameter:
+        octSystem.SetSheathDiameter(value);
+        break;
+    case RayProperty::ImageThreshold:
+        octSystem.SetImageThreshold(value);
+        break;
+    case RayProperty::ImageRoi:
+        octSystem.SetImageRoi(value);
+        break;
+    case RayProperty::ImageCompensation:
+        octSystem.SetImageCompensation(value);
+        break;
+    case RayProperty::ImageCompensationControlWindow:
+        octSystem.SetImageCompensationControlWindow(value);
+        break;
+    case RayProperty::FieldOfView:
+        octSystem.SetFieldOfView(value);
+        break;
+    case RayProperty::ZOffset:
+        octSystem.SetZOffset(value);
+        break;
     case RayProperty::TestMode:
         octSystem.SetTestMode((bool) value);
+        break;
+    case RayProperty::PullbackStartTime:
+        octSystem.SetPullbackStartTime(value);
         break;
     default:
         return RayError::InvalidArgument;
@@ -118,6 +153,8 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return octSystem.GetBrightness();
     case RayProperty::Contrast:
         return octSystem.GetContrast();
+    case RayProperty::Colormap:
+        return octSystem.GetColormap();
     case RayProperty::LongitudeBackgroundColor:
         return octSystem.GetLongitudeBackgroundColor();
     case RayProperty::LongitudeDegree:
@@ -156,8 +193,18 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return config.stepMotor.pullbackSpeed;
     case RayProperty::SheathDiameter:
         return config.measurement.fSheathRadius * 2;
+    case RayProperty::ImageThreshold:
+        return octSystem.GetImageThreshold();
+    case RayProperty::ImageRoi:
+        return octSystem.GetImageRoi();
+    case RayProperty::ImageCompensation:
+        return octSystem.GetImageCompensation();
+    case RayProperty::FieldOfView:
+        return octSystem.GetFieldOfView();
     case RayProperty::TestMode:
         return (double) octSystem.IsTestMode();
+    case RayProperty::PullbackStartTime:
+        return octSystem.GetPullbackStartTime();
     default:
         return (int)RayError::InvalidArgument;
     }
@@ -170,8 +217,8 @@ _declspec(dllexport) RayError RayStartLumenDetection() {
     return octSystem.StartLumenDetection();
 }
 
-_declspec(dllexport) RayError RayOpenImage(char* strFilePath) {
-    return octSystem.OpenImage(strFilePath);
+_declspec(dllexport) RayError RayOpenImage(char* strFilePath, double imageResolution, double zOffset) {
+    return octSystem.OpenImage(strFilePath, imageResolution, zOffset);
 }
 _declspec(dllexport) RayError RayCloseImage() {
     return octSystem.CloseImage();

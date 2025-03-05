@@ -5,6 +5,7 @@ using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
+using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.Services;
 using System;
@@ -151,6 +152,7 @@ namespace RaywattApp.ViewModels
             _log.Debug("Ok");
 
             PatientCase.Colormap = SelectedColormap;
+            CommonUtil.SetColormap(PatientCase.Colormap);
 
             GoToReview();
         }

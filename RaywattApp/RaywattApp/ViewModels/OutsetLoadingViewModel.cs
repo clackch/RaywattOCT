@@ -71,12 +71,13 @@ namespace RaywattApp.ViewModels
                     {
                         DeviceStatus.PowerOffMsg = _l10n["Switching user"];
                         CommonUtil.Exit(DeviceStatus);
+                        _angioManager.StopSoketCheck();
                     }
                 }
             }
 
             Thread threadCoreAndDeviceInit = new Thread(() => ThreadCoreAndDeviceInit());
-            threadCoreAndDeviceInit.Start();
+                threadCoreAndDeviceInit.Start();
 
             timer.Interval = TimeSpan.FromMilliseconds(25);
             timer.Tick += new EventHandler(ProgressTest);
@@ -123,6 +124,7 @@ namespace RaywattApp.ViewModels
                 if (resultDialog != null && resultDialog.DialogAnswer == DialogResults.Answer.Undefined)
                 {
                     CommonUtil.Exit(DeviceStatus, _angioManager, true);
+                    _angioManager.StopSoketCheck();
                 }
             }
 
@@ -147,14 +149,9 @@ namespace RaywattApp.ViewModels
                         case ConnectionStatus.Success:
                             DeviceStatus.IsDeviceConnected = true;
                             break;
-
-                        case ConnectionStatus.OpenServerFailure:
+                        case ConnectionStatus.BoardFailure:
+                            DeviceStatus.IsDeviceConnected = false;
                             errorMsg = "$MSG014";
-                            isError = true;
-                            break;
-
-                        case ConnectionStatus.TcpSocketFailure:
-                            errorMsg = "$MSG015";
                             isError = true;
                             break;
                     }

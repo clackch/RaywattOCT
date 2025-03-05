@@ -34,6 +34,12 @@ namespace RaywattApp.Common.Bases
         protected double _crossSectionAngioScale;
 
         [ObservableProperty]
+        protected double _crossSectionScaleIndicator;
+
+        [ObservableProperty]
+        protected double _crossSectionAngioScaleIndicator;
+
+        [ObservableProperty]
         private double _crossSection3dScale = 28;
 
         [ObservableProperty]
@@ -66,6 +72,9 @@ namespace RaywattApp.Common.Bases
 
         [ObservableProperty]
         private bool _isPaused = true;
+
+        [ObservableProperty]
+        private int _frameNumberForInit;
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
@@ -109,17 +118,20 @@ namespace RaywattApp.Common.Bases
                 Marshal.GetFunctionPointerForDelegate(CBLongitude));
         }
 
-        private void OnRecvCrossSection(int session, IntPtr data, int width, int height, int ch, int frameInfo)
+        private void OnRecvCrossSection(int session, IntPtr data, int width, int height, int ch, int frameInfo, double intensity)
         {
             Mat imgRecv = CommonUtil.ByteMemoryToCvMat(data, width, height, ch);
             imgCrossSection[session] = imgRecv;
+            DeviceStatus.ImageIntensity = intensity;
         }
 
-        private void OnRecvLongitude(int session, IntPtr data, int width, int height, int ch, int frameInfo)
+        private void OnRecvLongitude(int session, IntPtr data, int width, int height, int ch, int frameInfo, double intensity)
         {
             Mat imgRecv = CommonUtil.ByteMemoryToCvMat(data, width, height, ch);
             imgLongitude = imgRecv;
             longitudeFrameInfo = new FrameInfo(frameInfo);
+
+            FrameNumberForInit = longitudeFrameInfo.curFrame - 1;
 
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -181,13 +193,12 @@ namespace RaywattApp.Common.Bases
 
             return bitmap;
         }
+
         protected void DrawSheathIndicator()
         {
-            if (Constants.ImageResolution == 0.0f) return;
-
             double sheathDiameter = RayGetProperty(Property.SheathDiameter);
-            SheathIndicator = CommonUtil.DrawSheathIndicator(Constants.ImageResolution, (int)Constants.CrossSectionSize, sheathDiameter);
-            SheathIndicatorAngio = CommonUtil.DrawSheathIndicator(Constants.ImageResolution, (int)Constants.CrossSectionAngio, sheathDiameter);
+            SheathIndicator = CommonUtil.DrawSheathIndicator((int)Constants.CrossSectionSize, sheathDiameter);
+            SheathIndicatorAngio = CommonUtil.DrawSheathIndicator((int)Constants.CrossSectionAngio, sheathDiameter);
         }
 
         private Mat GenerateMask(Mat image)

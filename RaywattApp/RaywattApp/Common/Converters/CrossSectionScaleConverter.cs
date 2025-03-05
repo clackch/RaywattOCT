@@ -12,8 +12,13 @@ namespace RaywattApp.Common.Converters
             if (value == null)
                 return Binding.DoNothing;
 
+            double size = Constants.CrossSectionSize;
+
+            if (parameter != null)
+                size = (double)parameter;
+
             double originValue = (double)value;
-            double scale = Constants.OCTImageSize / Constants.CrossSectionSize;
+            double scale = Constants.OCTImageSize / size;
 
             return (originValue * scale);
         }

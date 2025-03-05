@@ -37,6 +37,9 @@ namespace RaywattApp.Models
         private bool _isAngioConnected = false;
 
         [ObservableProperty]
+        private bool _isAngioInitialized = false;
+
+        [ObservableProperty]
         private bool _isPullbackDone = false;
 
         [ObservableProperty]
@@ -58,6 +61,9 @@ namespace RaywattApp.Models
         private bool _isOCTImagingCompareDone = true;
 
         [ObservableProperty]
+        private bool _isFfrCalculated = true;
+
+        [ObservableProperty]
         private bool _isPaused = true;
 
         [ObservableProperty]
@@ -70,11 +76,19 @@ namespace RaywattApp.Models
         private CathRoom _selectedCathRoom;
 
         [ObservableProperty]
+        private double _imageIntensity;
+
+        [ObservableProperty]
+        private bool _enhancedLUT;
+
+        [ObservableProperty]
+        private bool _isCleaningDone = true;
+
+        [ObservableProperty]
         private Dictionary<string, bool> _testMode = new Dictionary<string, bool>();
 
         [ObservableProperty]
         private ReviewImageInfo[] _reviewImageInfos = new ReviewImageInfo[2];
-
         public DeviceStatus()
         {
             ReviewImageInfos[(int)RaySession.Review] = new ReviewImageInfo();

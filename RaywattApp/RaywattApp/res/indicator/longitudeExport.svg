@@ -9,7 +9,7 @@
         </filter>
     </defs>
     <g data-name="그룹 10371">
-        <path data-name="선 100" transform="translate(15 12.5)" style="fill:none;stroke:#1ed760" d="M0 0v280"/>
+        <path data-name="선 100" transform="translate(15 12.5)" style="fill:none;stroke:#1ed760;stroke-width:2" d="M0 0v280"/>
         <g style="filter:url(#0q4906vdka)">
             <g data-name="패스 1967" style="fill:#0d0d0d">
                 <path d="M6 13.187 1 8.196V3.6h10v4.596l-5 4.99z" style="stroke:none" transform="translate(9 3.4)"/>

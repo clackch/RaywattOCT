@@ -3,9 +3,11 @@
 #include <vector>
 
 class CLookUpTable
-{	
+{
 private:
 	std::vector<std::vector<cv::Vec3b>> m_vLUT;
+	int m_fCurrentColorMapIndex = 0;
+	bool m_enhancedLUTApplied = false;
 
 private:
 	CLookUpTable();
@@ -15,7 +17,12 @@ private:
 
 public:
 	static CLookUpTable& GetInstance();
-	int Load(const char* strLUTPath);
+	int Load(const char* strLUTPath, bool isTest = false);
 	void Apply(cv::Mat& image, uint nIdxLUT);
+	void Revert(cv::Mat image, uint nIdxLUT, cv::Mat& image1ch);
+	void SetCurrentColormap(int colomapIndex);
+	int GetCurrentColormap();
+	void SetEnhancedLUT(bool applyOrNot);
+	bool GetEnhancedLUT();
 };
 

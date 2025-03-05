@@ -4,7 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:const="clr-namespace:RaywattApp.Common.Bases"
-             xmlns:inter="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"                
+             xmlns:behaviors="clr-namespace:RaywattApp.Common.Behaviors"
              xmlns:local="clr-namespace:RaywattApp.Views.Dialog"
              mc:Ignorable="d" 
              Width="{Binding DialogWidth}" Height="{Binding DialogHeight}">
@@ -41,11 +42,14 @@
             </Grid>
 
             <DataGrid Grid.Row="4" Grid.Column="1" Name="physicianList" ItemsSource="{Binding PhysicianList}" SelectedItem="{Binding SelectedPhysician}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" Height="409">
-                <inter:Interaction.Triggers>
-                    <inter:EventTrigger EventName="SelectionChanged">
-                        <inter:InvokeCommandAction Command="{Binding SelectionChangedCommand}" CommandParameter="{Binding ElementName=physicianList, Path=SelectedItem}"/>
-                    </inter:EventTrigger>
-                </inter:Interaction.Triggers>
+                <i:Interaction.Behaviors>
+                    <behaviors:DataGridLoadedBehavior />
+                </i:Interaction.Behaviors>
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="SelectionChanged">
+                        <i:InvokeCommandAction Command="{Binding SelectionChangedCommand}" CommandParameter="{Binding ElementName=physicianList, Path=SelectedItem}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
                 <DataGrid.Columns>
                     <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Name}" Header="{Binding [Name], Source={StaticResource L10N}}"/>
                 </DataGrid.Columns>

@@ -4,14 +4,15 @@ using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Messages;
+using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.Services;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Windows.Input;
 using System.Windows.Navigation;
+using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels
 {
@@ -142,6 +143,9 @@ namespace RaywattApp.ViewModels
                     PatientCase.CalciumThreshold = physicians[0].CalciumThreshold;
                     PatientCase.ExpansionThreshold = physicians[0].ExpansionThreshold;
                     PatientCase.AppositionThreshold = physicians[0].AppositionThreshold;
+                    PatientCase.AccessionNumber = "";
+                    PatientCase.Comment = "";
+                    PatientCase.ImageResolution = RayGetProperty(Property.ImageResolution);
 
                     sqlParameters.Clear();
                     sqlParameters["classification"] = "Present";
@@ -150,7 +154,9 @@ namespace RaywattApp.ViewModels
                     {
                         PatientCase.Brightness = int.Parse(presents.FirstOrDefault(x => x.Key == "brightness").Value);
                         PatientCase.Contrast = int.Parse(presents.FirstOrDefault(x => x.Key == "contrast").Value);
+                        PatientCase.FieldOfView = double.Parse(presents.FirstOrDefault(x => x.Key == "FoV").Value);
                     }
+                    CommonUtil.SetColormap(PatientCase.Colormap);
 
                     CurrentProcedure = new KeyValuePair<string, string>("$001", CodeDefinition.Codes["PROC"]["$001"]);
                     CurrentVessel = new KeyValuePair<string, string>("$000", CodeDefinition.Codes["VESS"]["$000"]);
@@ -221,6 +227,12 @@ namespace RaywattApp.ViewModels
             PatientCase.Procedure = CurrentProcedure.Key;
             PatientCase.Vessel = CurrentVessel.Key;
             PatientCase.Location = CurrentLocation.Key;
+
+            double sheathType = 1;
+            if (PatientCase.AccessionNumber.Equals("0"))
+                sheathType = 0;
+            RaySetProperty(Property.SheathDiameter, sheathType);
+            PatientCase.SheathDiameter = RayGetProperty(Property.SheathDiameter);
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;

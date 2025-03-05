@@ -116,8 +116,11 @@ namespace RaywattApp.Common.Annotation
                 }
                 else//Point 없을 경우, Disable Command 처리
                 {
-                    DisableCommand();
-                    CommandOff = true;
+                    if (!IsFfr)
+                    {
+                        DisableCommand();
+                        CommandOff = true;
+                    }
                 }
             }
         }
@@ -232,9 +235,8 @@ namespace RaywattApp.Common.Annotation
                 if (point.Y > this.canvas.ActualHeight - rectangle.Height / 2 || point.Y < rectangle.Height / 2)
                     point.Y = rectPoint.Y;
 
-                Canvas.SetLeft(rectangle, point.X - rectangle.Width / 2);
-                Canvas.SetTop(rectangle, point.Y - rectangle.Height / 2);
-
+                Canvas.SetLeft(rectangle, point.X);
+                Canvas.SetTop(rectangle, point.Y);
 
                 rectPoint.X = point.X;
                 rectPoint.Y = point.Y;
@@ -313,6 +315,11 @@ namespace RaywattApp.Common.Annotation
                 this.areaGeometrys.RemoveAt(group);
 
                 DrawAreaAll();
+
+                if (IsFfr)
+                {
+                    AddArea("True");
+                }
             }
         }
 
@@ -388,7 +395,8 @@ namespace RaywattApp.Common.Annotation
             foreach (var areaGeometry in this.areaGeometrys)
             {
                 DrawCurve(areaGeometry, false);
-                if(IsEditOn)
+
+                if (IsEditOn)
                     DrawRectangle(areaGeometry);
                 else
                     DrawLabel(areaGeometry);
@@ -396,9 +404,9 @@ namespace RaywattApp.Common.Annotation
         }
 
         private void DrawCurve(AreaGeometry areaGeometry, bool isCurrentEditOn = true) {
-            areaGeometry.Path = DrawCurve(areaGeometry.Points, areaGeometry.IsClosed, areaGeometry.Group);
+            areaGeometry.Path = DrawCurve(areaGeometry.Points, areaGeometry.IsClosed, areaGeometry.Group, isCurrentEditOn);
 
-            if (IsEditOn && isCurrentEditOn)
+            if (IsFfr)
             {
                 if (areaGeometry.IsClosed)
                 {
@@ -409,19 +417,45 @@ namespace RaywattApp.Common.Annotation
                     ContourMeasurement measurement = new ContourMeasurement();
                     measurement.Measure(areaGeometry, imageContour);
 
-                    measurement.CalculateDiameter(areaGeometry);
-                    DrawDiameter(areaGeometry.MinDiameter.point1, areaGeometry.MinDiameter.point2, areaGeometry.Group, constMinDiameter);
-                    DrawDiameter(areaGeometry.MaxDiameter.point1, areaGeometry.MaxDiameter.point2, areaGeometry.Group, constMaxDiameter);
+                    FfrFeature.IsPlaqueAreaValid = false;
+
+                    if (areaGeometry.Valid)
+                    {
+                        FfrFeature.PlaqueArea = areaGeometry.Area;
+                        FfrFeature.PercentAreaStenosis = (FfrFeature.PlaqueArea - FfrFeature.MinimalLumenArea) / FfrFeature.PlaqueArea * 100;
+                        if(FfrFeature.PercentAreaStenosis > 0)
+                            FfrFeature.IsPlaqueAreaValid = true;
+                    }
                 }
             }
             else
             {
-                DrawDiameter(areaGeometry.MinDiameter.point1, areaGeometry.MinDiameter.point2, areaGeometry.Group, constMinDiameter);
-                DrawDiameter(areaGeometry.MaxDiameter.point1, areaGeometry.MaxDiameter.point2, areaGeometry.Group, constMaxDiameter);
+                if (IsEditOn && isCurrentEditOn)
+                {
+                    if (areaGeometry.IsClosed)
+                    {
+                        areaGeometry.MaxDiameter = new DiameterInfo();
+                        areaGeometry.MinDiameter = new DiameterInfo();
+                        areaGeometry.MeanDiameter = 0.0f;
+
+                        ContourMeasurement measurement = new ContourMeasurement();
+                        measurement.Measure(areaGeometry, imageContour);
+
+                        measurement.CalculateDiameter(areaGeometry);
+
+                        DrawDiameter(areaGeometry.MinDiameter.point1, areaGeometry.MinDiameter.point2, areaGeometry.Group, constMinDiameter);
+                        DrawDiameter(areaGeometry.MaxDiameter.point1, areaGeometry.MaxDiameter.point2, areaGeometry.Group, constMaxDiameter);
+                    }
+                }
+                else
+                {
+                    DrawDiameter(areaGeometry.MinDiameter.point1, areaGeometry.MinDiameter.point2, areaGeometry.Group, constMinDiameter);
+                    DrawDiameter(areaGeometry.MaxDiameter.point1, areaGeometry.MaxDiameter.point2, areaGeometry.Group, constMaxDiameter);
+                }
             }
         }
 
-        private Path DrawCurve(List<Point> pointList, bool isClosed, int group)
+        private Path DrawCurve(List<Point> pointList, bool isClosed, int group, bool isCurrentEditOn = false)
         {
             Path path = null;
             DeleteCurve(group);
@@ -448,7 +482,10 @@ namespace RaywattApp.Common.Annotation
                     if (IsEditOn)
                     {
                         path.MouseLeftButtonDown += path_MouseLeftButtonDown;
-                        DrawContourToBackBuffer(path);
+                        if (isCurrentEditOn)
+                        {
+                            DrawContourToBackBuffer(path);
+                        }
                     }
                 }
 
@@ -480,8 +517,8 @@ namespace RaywattApp.Common.Annotation
                 rectangle.Style = (Style)this.Resources["StyleRectangle"];
                 rectangle.Stroke = Constants.AnnotationBrushes[group % Constants.AnnotationBrushes.Length];
                 rectangle.Name = constRectangle + "_" + group + "_" + i;
-                Canvas.SetLeft(rectangle, pointList[i].X - (Constants.AnnotationRectWidth / Zoom.ScaleX) / 2);
-                Canvas.SetTop(rectangle, pointList[i].Y - (Constants.AnnotationRectHeight / Zoom.ScaleY) / 2);
+                Canvas.SetLeft(rectangle, pointList[i].X);
+                Canvas.SetTop(rectangle, pointList[i].Y);
 
                 if (i == 0 && !isClosed)
                 {
@@ -507,13 +544,16 @@ namespace RaywattApp.Common.Annotation
 
         private void DrawLabel(AreaGeometry areaGeometry)
         {
+            if (IsFfr)
+                return;
+
             //Label 삭제
             DeleteLabel(constArea, areaGeometry.Group);
 
             Label label = new Label();
             label.Style = (Style)this.Resources["StyleLabel"];
             label.Name = constArea + "_" + areaGeometry.Group;
-            label.Content = DrawAnnotation.GetLabelText(areaGeometry.Group, areaGeometry.Area * ImageResolution * ImageResolution);
+            label.Content = DrawAnnotation.GetLabelText(areaGeometry.Group, areaGeometry.Area * Constants.ImageResolution * Constants.ImageResolution);
 
             Point centerdPoint = areaGeometry.CenterOfMass;
 
@@ -546,6 +586,13 @@ namespace RaywattApp.Common.Annotation
                 DeleteLabel(constArea, areaGeometry.Group);
             }
             this.canvasBackground.Children.Clear();
+
+            if (IsFfr)
+            {
+                FfrFeature.PlaqueArea = 0;
+                FfrFeature.PercentAreaStenosis = 0;
+                FfrFeature.IsPlaqueAreaValid = false;
+            }
         }
 
         private void DeleteCurve(int group)

@@ -5,6 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
       xmlns:behaviors="clr-namespace:RaywattApp.Common.Behaviors"
+      xmlns:trigger="clr-namespace:RaywattApp.Common.TriggerAction"
       xmlns:local="clr-namespace:RaywattApp.Views"
       xmlns:const="clr-namespace:RaywattApp.Common.Bases"
       xmlns:System="clr-namespace:System;assembly=mscorlib"
@@ -38,7 +39,7 @@
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [2D], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewPage}"/>
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [3D], Source={StaticResource L10N}}" IsChecked="True" IsEnabled="False"/>
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [Compare], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewComparePage}" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$002|$003}"/>
-                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [AI FFR], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrPage}"/>
+                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [AI FFR], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrSettingPage}"/>
                 </StackPanel>
             </Grid>
 
@@ -80,10 +81,14 @@
                                     <!-- Loading -->
                                     <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding IsRendering, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
                                 </Border>
-                                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                                    <component:IconToggleButton Style="{DynamicResource ToggleButtonWithText}" Icon="cutView" Content="{Binding [Cut-View], Source={StaticResource L10N}}" IsChecked="{Binding IsCutViewOn}" IsEnabled="{Binding IsRendering}"/>
+                                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0" Width="734">
+                                    <component:IconToggleButton Style="{DynamicResource ToggleButtonWithText}" Icon="cutView" Content="{Binding [Cut-View], Source={StaticResource L10N}}" IsChecked="{Binding IsCutViewOn, Mode=TwoWay}" IsEnabled="{Binding IsRendering}"/>
                                     <StackPanel Width="6"/>
                                     <component:IconToggleButton Style="{DynamicResource ToggleButtonWithText}" Icon="currentFrameIndicator3D" Content="{Binding [Current Frame Indicator], Source={StaticResource L10N}}" IsChecked="{Binding IsIndicatorOn}" IsEnabled="{Binding IsRendering}"/>
+                                    <StackPanel Width="6"/>
+                                    <component:IconButton Style="{StaticResource IconButton}" Icon="zoomIn" Command="{Binding ZoomIn3DCommand}" Height="42" Width="42"/>
+                                    <StackPanel Width="6"/>
+                                    <component:IconButton Style="{StaticResource IconButton}" Icon="zoomOut" Command="{Binding ZoomOut3DCommand}" Height="42" Width="42"/>
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
@@ -208,40 +213,59 @@
                                 <StackPanel Width="5"/>
                                 <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" VerticalAlignment="Center" Opacity="0.5"/>
                             </StackPanel>
-                            <Grid Grid.Row="0" Grid.Column="1" >
-                                <Image x:Name="lMode" Source="{Binding LongitudeImage}" Width="{x:Static const:Constants.Longitude3dWidth}" Height="{x:Static const:Constants.Longitude3dHeight}" Stretch="Fill">
+                            <Grid Grid.Row="0" Grid.Column="1">
+                                <Grid>
                                     <i:Interaction.Triggers>
-                                        <i:EventTrigger EventName="Loaded">
-                                            <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
+                                        <i:EventTrigger EventName="MouseDown">
+                                            <i:InvokeCommandAction Command="{Binding CmdTouchMoveIndicator}" PassEventArgsToCommand="True" IsEnabled="{Binding IndicatorLongitude.IsEnabled}"/>
                                         </i:EventTrigger>
-                                        <i:EventTrigger EventName="SizeChanged">
-                                            <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
+                                        <i:EventTrigger EventName="MouseDown">
+                                            <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}" IsEnabled="{Binding IndicatorLongitude.IsEnabled}"/>
+                                        </i:EventTrigger>
+                                        <i:EventTrigger EventName="MouseUp">
+                                            <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}" IsEnabled="{Binding IndicatorLongitude.IsEnabled}"/>
                                         </i:EventTrigger>
                                     </i:Interaction.Triggers>
-                                    <Image.Clip>
+                                    <Grid.Clip>
                                         <RectangleGeometry RadiusX="8" RadiusY="8">
                                             <RectangleGeometry.Rect>
                                                 <Rect X="0" Y="0" Width="{x:Static const:Constants.Longitude3dWidth}" Height="{x:Static const:Constants.Longitude3dImageClipHeight}"/>
                                             </RectangleGeometry.Rect>
                                         </RectangleGeometry>
-                                    </Image.Clip>
-                                </Image>
+                                    </Grid.Clip>
+                                    <Image x:Name="lMode" Source="{Binding LongitudeImage}" Width="{x:Static const:Constants.Longitude3dWidth}" Height="{x:Static const:Constants.Longitude3dHeight}" Stretch="Fill">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="Loaded">
+                                                <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
+                                            </i:EventTrigger>
+                                            <i:EventTrigger EventName="SizeChanged">
+                                                <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                        <Image.RenderTransform>
+                                            <TransformGroup>
+                                                <ScaleTransform ScaleY="{Binding PatientCase.FieldOfView, Converter={StaticResource LongitudeScaleConverter}}"/>
+                                                <TranslateTransform Y="{Binding PatientCase.FieldOfView, Converter={StaticResource LongitudeTranslateConverter}, ConverterParameter={x:Static const:Constants.Longitude3dHeight}}"/>
+                                            </TransformGroup>
+                                        </Image.RenderTransform>
+                                    </Image>
+                                </Grid>
 
                                 <!-- L-Mode Indicator -->
                                 <Canvas>
                                     <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitude3d" IsCaptured="{Binding IndicatorLongitude.IsCaptured}" IsEnabled="{Binding IndicatorLongitude.IsEnabled}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="{x:Static const:Constants.LongitudeIndicator3dHeight}" Stretch="None" Canvas.Left="{Binding IndicatorLongitude.X}" Margin="0,-11,0,0" Visibility="{Binding IndicatorLongitude.IsVisible}">
                                         <!-- Trigger -->
                                         <i:Interaction.Triggers>
-                                            <!--PreviewMouseDown : Image 영역에서 MouseDown 할 경우, Indicator 동작 가능 상태로 변경 -->
-                                            <i:EventTrigger EventName="PreviewMouseDown" >
-                                                <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
+                                            <!--MouseDown : Image 영역에서 MouseDown 할 경우, Indicator 동작 가능 상태로 변경 -->
+                                            <i:EventTrigger EventName="MouseDown" >
+                                                <trigger:CustomInvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
                                             </i:EventTrigger>
-                                            <!--PreviewMouseUp : Image 영역에서 MouseUp 할 경우, Indicator 멈춤 -->
-                                            <i:EventTrigger EventName="PreviewMouseUp" >
+                                            <!--MouseUp : Image 영역에서 MouseUp 할 경우, Indicator 멈춤 -->
+                                            <i:EventTrigger EventName="MouseUp" >
                                                 <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
                                             </i:EventTrigger>
-                                            <!--PreviewMouseMove : Image 영역에서 MouseMove 할 경우, Indicator 동작(단, Indicator가 동작 가능 상태 일때) -->
-                                            <i:EventTrigger EventName="PreviewMouseMove" >
+                                            <!--MouseMove : Image 영역에서 MouseMove 할 경우, Indicator 동작(단, Indicator가 동작 가능 상태 일때) -->
+                                            <i:EventTrigger EventName="MouseMove" >
                                                 <i:InvokeCommandAction Command="{Binding CmdMoveIndicator}" CommandParameter="{Binding IndicatorLongitude}"/>
                                             </i:EventTrigger>
                                         </i:Interaction.Triggers>
@@ -251,17 +275,28 @@
                             <ContentControl Grid.Row="1" Grid.Column="1" Template="{DynamicResource LongitudeScaleBar}" Width="{x:Static const:Constants.Longitude3dWidth}" Tag="{Binding PatientCase.PullbackLength}"/>
                         </Grid>
                     </Grid>
-                    <Grid Grid.Column="1" Background="{DynamicResource GrayscaleGray8Brush}">
-                        <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSection3dSize}" Height="{x:Static const:Constants.CrossSection3dSize}">
+                    <Grid Grid.Column="1">
+                        <Grid x:Name="crossSectionImage" Width="{x:Static const:Constants.CrossSection3dSize}" Height="{x:Static const:Constants.CrossSection3dSize}">
                             <i:Interaction.Triggers>
                                 <i:EventTrigger EventName="Loaded">
-                                    <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
+                                    <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Grid}}"/>
                                 </i:EventTrigger>
                                 <i:EventTrigger EventName="SizeChanged">
-                                    <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Image}}"/>
+                                    <i:InvokeCommandAction Command="{Binding CmdViewSizeChanged}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Grid}}"/>
                                 </i:EventTrigger>
                             </i:Interaction.Triggers>
-                        </Image>
+                            <Grid.Clip>
+                                <EllipseGeometry Center="90,90" RadiusX="90" RadiusY="90"/>
+                            </Grid.Clip>
+                            <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSection3dSize}" Height="{x:Static const:Constants.CrossSection3dSize}">
+                                <Image.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSection3dSize}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSection3dSize}}"/>
+                                        <TranslateTransform X="{Binding Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSection3dSize}}" Y="{Binding Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSection3dSize}}"/>
+                                    </TransformGroup>
+                                </Image.RenderTransform>
+                            </Image>
+                        </Grid>
                         <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="42,0,0,5">
                             <StackPanel Orientation="Horizontal" Width="50">
                                 <Label Content="F" Style="{DynamicResource Pretendard-ExtraBold-14}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
@@ -285,6 +320,18 @@
                             <Grid.RenderTransform>
                                 <RotateTransform CenterX="107" CenterY="107" Angle="{Binding CameraDegree}"/>
                             </Grid.RenderTransform>
+
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="PreviewMouseDown" >
+                                    <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="PreviewMouseUp" >
+                                    <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="PreviewMouseMove" >
+                                    <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
                         </Grid>
 
                         <!-- camera View Part -->
@@ -293,6 +340,18 @@
                             <Grid.RenderTransform>
                                 <RotateTransform CenterX="91" CenterY="91" Angle="{Binding CameraDegree}"/>
                             </Grid.RenderTransform>
+
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="PreviewMouseDown" >
+                                    <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="PreviewMouseUp" >
+                                    <i:InvokeCommandAction Command="{Binding IndicatorCrossSection.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="PreviewMouseMove" >
+                                    <i:InvokeCommandAction Command="{Binding CmdRotateIndicator}" CommandParameter="{Binding IndicatorCrossSection}"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
                         </Grid>
 
                         <!-- Indicator  -->
@@ -316,11 +375,8 @@
                             </component:IndicatorImage>
                         </Grid>
                     </Grid>
-
                 </Grid>
-
             </Grid>
-
 
             <Grid Grid.Row="2" Height="40" Background="{DynamicResource GrayscaleBlackBrush}">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" >
@@ -367,5 +423,5 @@
             </i:Interaction.Triggers>
         </component:IndicatorAreaGrid>
     </Grid>
-    
+
 </Page>

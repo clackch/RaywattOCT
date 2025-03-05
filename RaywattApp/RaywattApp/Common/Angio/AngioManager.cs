@@ -10,20 +10,15 @@ using log4net;
 using System.Text;
 using System.Collections.Generic;
 using RaywattApp.Models;
-using RaywattApp.Services;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Views.Dialog;
 using System.Xml;
 using System.Threading.Tasks;
 using RaywattApp.Common.Localization;
 using RaywattApp.Common.Util;
-using CommunityToolkit.Mvvm.ComponentModel;
-using System.Windows.Media.Imaging;
-using System.Windows.Media;
-using System.Reflection.Metadata;
 using System.Linq;
-using System.Windows.Documents;
-using System.Data;
+using System.Collections.Concurrent;
+using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.Common.Angio
 {
@@ -57,8 +52,6 @@ namespace RaywattApp.Common.Angio
     {
         Default,
         Success,
-        OpenServerFailure,
-        TcpSocketFailure,
         BoardFailure,
     }
 
@@ -73,15 +66,16 @@ namespace RaywattApp.Common.Angio
         private TcpClient _tcpClient;
 
         private Mat imgAngio;
-        public Mat ImgAngio { get { return imgAngio; } set { imgAngio = value; }  }
+        public Mat ImgAngio { get { return imgAngio; } set { imgAngio = value; } }
 
+        private bool isBoardInited = false;
         private bool boardConnection = false;
 
         private byte[] buffer;
         private byte[] tmpBuffer;
         private List<byte[]> angioSaveBuffer;
         public List<byte[]> AngioSaveBuffer { get { return angioSaveBuffer; } set { angioSaveBuffer = value; } }
-
+        public List<DateTimeOffset> angioSaveTimes;
         private int bytesRead;
         private int tmpBufferLen;
         private int angioSaveFrameNum;
@@ -92,8 +86,15 @@ namespace RaywattApp.Common.Angio
         private Thread threadFuncLiveAngioImage;
         private bool threadOnLiveAngioImage;
 
+        private Thread isSocketConnected;
+        private bool isSocketAlive;
+
         private Thread threadFuncSaveAngioFrames;
         private bool threadOnSaveAngioFrames;
+
+        private Thread get_image;
+        private bool liveView;
+        private static ConcurrentQueue<Mat> imageList;
 
         private short angioFrameWidth;
         public short AngioFrameWidth { get { return angioFrameWidth; } set { angioFrameWidth = value; } }
@@ -109,7 +110,8 @@ namespace RaywattApp.Common.Angio
         private short isChpFileChangeSuccess = 0;
         public short IsChpFileChangeSuccess { get { return isChpFileChangeSuccess; } set { isChpFileChangeSuccess = value; } }
 
-        private bool isAngioInit = false;
+        private bool isCathRoomDialogOpen = false;
+        private long live_time;
 
         public AngioManager(IDialogService dialogService)
         {
@@ -119,10 +121,10 @@ namespace RaywattApp.Common.Angio
             _dialogService = dialogService;
 
             imgAngio = ShowNoSignal();
-
             buffer = new byte[256];
-            tmpBuffer = new byte[256];
+            tmpBuffer = new byte[512];
             angioSaveBuffer = new List<byte[]>();
+            angioSaveTimes = new List<DateTimeOffset>();
 
             Array.Fill<byte>(buffer, 0);
             Array.Fill<byte>(tmpBuffer, 0);
@@ -144,49 +146,24 @@ namespace RaywattApp.Common.Angio
 
         public ConnectionStatus ConnectToServer()
         {
-            try
-            {
-                Process[] processes;
-                ProcessStartInfo psi = new ProcessStartInfo();
-                string processName = CommonUtil.IsTestMode(ViewModelBase._deviceStatus.TestMode, "FG") ? "FGServerTestStub" : "FGServer";
-                processes = Process.GetProcessesByName(processName);
-                psi.FileName = Constants.FGFolderPath + "\\" + processName + ".exe";
+            Process[] processes;
+            ProcessStartInfo psi = new ProcessStartInfo();
+            string processName = CommonUtil.IsTestMode(ViewModelBase._deviceStatus.TestMode, "FG") ? "FGServerTestStub" : "FGServer";
+            processes = Process.GetProcessesByName("FGServer");
+            processes = processes.Concat(Process.GetProcessesByName("FGServerTestStub")).ToArray();
+            psi.FileName = Constants.FGFolderPath + "\\" + processName + ".exe";
 
-                if (processes.Length == 0)
-                {
-                    StartFGServerProc(psi);
-                }
-                else
-                {
-                    foreach (Process process in Process.GetProcessesByName(processName))
-                    {
-                        process.Kill();
-                    }
-                    StartFGServerProc(psi);
-                }
-            }
-            catch (System.ComponentModel.Win32Exception ex)
+            foreach (Process process in processes)
             {
-                return ConnectionStatus.OpenServerFailure;
+                process.Kill();
             }
+            StartFGServerProc(psi);
 
-            try
-            {
-                _tcpClient = new TcpClient(Constants.ServerIP, Constants.ServerPort);
-            }
-            catch (Exception ex)
-            {
-                return ConnectionStatus.TcpSocketFailure;
-            }
-
-            int read = 0;
-            while (read != 0)
-            {
-                read = _tcpClient.GetStream().Read(buffer, 0, buffer.Length);
-            }
-            Array.Fill<byte>(buffer, 0);
+            _tcpClient = new TcpClient(Constants.ServerIP, Constants.ServerPort);
 
             ActivateClientThreads();
+            LiveViewThreads();
+            SoketCheckThreads();
             bool init = InitAngioBoard();
             if (init)
             {
@@ -194,19 +171,11 @@ namespace RaywattApp.Common.Angio
             }
             else
             {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["title"] = _l10n["FG Failure"];
-                parameter["message"] = _l10n["FG Board is not exist."];
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                {
-                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-                });
                 if (!CommonUtil.IsTestMode(ViewModelBase._deviceStatus.TestMode, "FG"))
                 {
-                    CommonUtil.Exit(ViewModelBase._deviceStatus, this, true);
                     return ConnectionStatus.BoardFailure;
                 }
-                return ConnectionStatus.Success;
+                return ConnectionStatus.BoardFailure;
             }
         }
 
@@ -214,7 +183,7 @@ namespace RaywattApp.Common.Angio
         {
             AskBoardConnection();
 
-            while (!isAngioInit)
+            while (!isBoardInited)
             {
                 Thread.Sleep(500);
             }
@@ -248,22 +217,78 @@ namespace RaywattApp.Common.Angio
                 ReadPacket();
             }
         }
+        private void IsSocketConnected()
+        {
+            while (isSocketAlive)
+            {
+                Thread.Sleep(1000);
+                if(GetServerConnection() == false && !ViewModelBase._deviceStatus.IsPowerOff)
+                {
+                    _log.Debug("server down");
+                    CommonUtil.Exit(ViewModelBase._deviceStatus, this, true);
+                    isSocketAlive = false;
+                }
+            }
+        }
+        private void LiveViewThread()
+        {
+            while (liveView)
+            {
+                if (!readyToRecv) Thread.Sleep(500);
+                if (imageList.TryDequeue(out var mat))
+                {
+                    imgAngio = mat;
+                    Thread.Sleep(10);
+                }
+            }
+        }
 
         private void ThreadFuncSaveAngioFrames(PatientCase patientCase)
         {
             string angioFilePath = patientCase.ImageFullPath.Substring(0, patientCase.ImageFullPath.Length - 3);
+            _log.Debug(angioFilePath);
             try
             {
                 while (threadOnSaveAngioFrames)
                 {
                     Thread.Sleep(500);
                 }
+                 
+                FileStream fs = new FileStream(angioFilePath + Constants.AngioImageExtension, FileMode.Create, FileAccess.Write);
 
-                FileStream fs = new FileStream(angioFilePath + "angioframes", FileMode.Create, FileAccess.Write);
-                while (angioSaveBuffer.Count > angioSaveFrameNum)
+                angioSaveFrameNum = angioSaveBuffer.Count - 1;
+                int closestIndex = angioSaveFrameNum;
+                int searchRange = angioSaveFrameNum / 3;
+                double OCTStartTime = RayGetProperty(Property.PullbackStartTime);
+                double minGap = double.MaxValue;
+                double angioTime = double.MaxValue;
+                for (int i = angioSaveFrameNum; i > angioSaveFrameNum - searchRange; i--)
                 {
-                    fs.Write(angioSaveBuffer[angioSaveFrameNum], 0, angioImageSize);
-                    angioSaveFrameNum++;
+                    DateTimeOffset time = angioSaveTimes[i];
+                    angioTime = time.ToUnixTimeMilliseconds() / 1000.0;
+                    double gap = Math.Abs(angioTime - OCTStartTime);
+
+                    if(gap <= minGap)
+                    {
+                        minGap = gap;
+                        closestIndex = i;
+                    }
+                }
+                _log.Debug($"gap = {minGap} Angio Time = {angioTime}, OCT Time = {OCTStartTime} closestIndex = {closestIndex}" +
+                    $"maxIndex = {angioSaveFrameNum}");
+
+                while (closestIndex >= 0)
+                {
+                    if (!ViewModelBase._deviceStatus.IsAngioConnected)
+                    {
+                        fs.Close();
+                        if (System.IO.File.Exists(angioFilePath + Constants.AngioImageExtension))
+                        {
+                            System.IO.File.Delete(angioFilePath + Constants.AngioImageExtension);
+                        }
+                        return;
+                    }
+                    fs.Write(angioSaveBuffer[angioSaveFrameNum--], 0, angioImageSize);
                 }
                 fs.Close();
 
@@ -274,7 +299,7 @@ namespace RaywattApp.Common.Angio
 
                     xw.WriteElementString("AngioFrameHeight", angioFrameHeight.ToString());
                     xw.WriteElementString("AngioFrameWidth", angioFrameWidth.ToString());
-                    xw.WriteElementString("AngioFrameNumber", angioSaveFrameNum.ToString());
+                    xw.WriteElementString("AngioFrameNumber", angioSaveBuffer.Count.ToString());
                     xw.WriteElementString("BitsPerPixel", ((int)angioBitsPerPixel).ToString());
                     xw.WriteElementString("Frequency", "60"); // 임시값
 
@@ -287,19 +312,33 @@ namespace RaywattApp.Common.Angio
                 Debug.WriteLine("File Creation Error: " + ex.Message);
             }
         }
-        
+
         private void ActivateClientThreads()
         {
             threadFuncLiveAngioImage = new Thread(() => ThreadFuncLiveAngioImage());
             StartLiveAngioThread();
         }
 
+        private void SoketCheckThreads()
+        {
+            isSocketConnected = new Thread(() => IsSocketConnected());
+            StartSoketCheck();
+        }
+        private void LiveViewThreads()
+        {
+            get_image = new Thread(() => LiveViewThread());
+            StartLiveView();
+        }
+
         public void CloseAngioManager()
         {
-            _tcpClient.GetStream().Close();
-
+            if (GetServerConnection())
+            {
+                _tcpClient.GetStream().Close();
+            }
             if (threadFuncLiveAngioImage != null && threadFuncLiveAngioImage.IsAlive)
                 StopLiveAngioThread();
+                StopLiveView();
             if (threadFuncSaveAngioFrames != null && threadFuncSaveAngioFrames.IsAlive)
                 StopSaveAngioThread();
 
@@ -315,16 +354,21 @@ namespace RaywattApp.Common.Angio
         {
             try
             {
-                bytesRead = _tcpClient.GetStream().Read(buffer, 0, buffer.Length);
-
-                Array.Copy(buffer, 0, tmpBuffer, tmpBufferLen, bytesRead);
-                tmpBufferLen += bytesRead;
+                if (tmpBuffer.Length >= tmpBufferLen + buffer.Length)
+                {
+                    bytesRead = _tcpClient.GetStream().Read(buffer, 0, buffer.Length);
+                    Array.Copy(buffer, 0, tmpBuffer, tmpBufferLen, bytesRead);
+                    tmpBufferLen += bytesRead;
+                }
 
                 while (true)
                 {
                     PacketType type = CheckPacketType(tmpBuffer);
-                    if (type == PacketType.Command)
+                    if (type == PacketType.Command) {
                         CommandPacketProcess();
+                        _log.Debug("packet end");
+                    }
+                        
                     else if (type == PacketType.Image)
                         ImagePacketProcess();
                     else if (type == PacketType.Nothing)
@@ -334,9 +378,16 @@ namespace RaywattApp.Common.Angio
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
+                if (ex.InnerException is System.Net.Sockets.SocketException socketException)
+                {
+                    int errorCode = socketException.ErrorCode;
+                    if (GetServerConnection() == false) // 서버 연결이 끊어졌을 때의 에러 코드
+                    {
+                        threadOnLiveAngioImage = false;
+                    }
+                }
                 return false;
             }
-
             return true;
         }
 
@@ -348,6 +399,8 @@ namespace RaywattApp.Common.Angio
             angioFrameWidth = BitConverter.ToInt16(tmpBuffer, offset);
             offset += sizeof(short);
             angioBitsPerPixel = (char)tmpBuffer[offset++];
+            live_time = BitConverter.ToInt64(tmpBuffer, offset); // Time Stamp
+            offset += sizeof(long);
             angioImageSize = angioFrameHeight * angioFrameWidth * angioBitsPerPixel / 8;
 
             Mat image = new Mat(angioFrameHeight, angioFrameWidth, MatType.CV_8UC(angioBitsPerPixel / 8));
@@ -360,18 +413,20 @@ namespace RaywattApp.Common.Angio
             Cv2.Flip(image, image, 0);
 
             if (threadOnSaveAngioFrames)
-            {
+            { 
                 angioSaveBuffer.Add(new byte[angioImageSize]);
+                angioSaveTimes.Add(DateTimeOffset.UtcNow);
                 Marshal.Copy(image.Data, angioSaveBuffer.Last(), 0, angioImageSize);
             }
+            if (!ViewModelBase._deviceStatus.IsAngioConnected)return;
 
-            imgAngio = image;
+            imageList.Enqueue(image);
         }
 
         private void CommandPacketProcess()
         {
             byte command = tmpBuffer[2];
-
+            _log.Debug(command);
             if (command == (byte)CommandType.FGDeviceInfo)
             {
                 DeviceInfoPacketProcess();
@@ -381,8 +436,21 @@ namespace RaywattApp.Common.Angio
                 if (command == (byte)CommandType.FGAngioDisconnected)
                 {
                     imgAngio = ShowNoSignal();
+                    _log.Debug("FGAngio Disconnected command");
+                    if (isCathRoomDialogOpen)
+                    {
+                        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            ViewModelBase._deviceStatus.IsAngioConnected = false;
+                            Dictionary<string, object> parameter = new Dictionary<string, object>();
+                            parameter["title"] = _l10n["Error"];
+                            parameter["message"] = _l10n["$MSG023"];
+                            _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                        });
+                        isCathRoomDialogOpen = false;
+                    }
 
-                    if (readyToRecv)
+                    if (readyToRecv) 
                     {
                         SendCommandPacket(CommandType.FGStopped);
                     }
@@ -392,7 +460,6 @@ namespace RaywattApp.Common.Angio
                         ViewModelBase._deviceStatus.IsAngioConnected = false;
                     });
 
-                    isAngioInit = isAngioInit == false ? true : isAngioInit;
                 }
                 else if (command == (byte)CommandType.FGAngioConnected)
                 {
@@ -401,12 +468,7 @@ namespace RaywattApp.Common.Angio
                         SendCommandPacket(CommandType.FGStarted);
                     }
 
-                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        ViewModelBase._deviceStatus.IsAngioConnected = true;
-                    });
-
-                    if (isAngioInit)
+                    if (!ViewModelBase._deviceStatus.IsAngioInitialized && !ViewModelBase._deviceStatus.IsAngioConnected && readyToRecv)
                     {
                         Task.Run(() =>
                         {
@@ -416,24 +478,29 @@ namespace RaywattApp.Common.Angio
                             });
                         });
                     }
-                    isAngioInit = isAngioInit == false ? true : isAngioInit;
+
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        ViewModelBase._deviceStatus.IsAngioConnected = true; 
+                    });
                 }
                 else if (command == (byte)CommandType.FGBoardExist)
                 {
+                    isBoardInited = true;
                     boardConnection = true;
                     threadOnLiveAngioImage = true;
-                    AskAngioConnection();
-                    AskDeviceInfo();
+                    AskAngioConnection();  
                 }
                 else if (command == (byte)CommandType.FGBoardNotExist)
                 {
-                    boardConnection = false;
+                    isBoardInited = true;
                     threadOnLiveAngioImage = false;
-                    isAngioInit = true;
                 }
                 else if (command == (byte)CommandType.FGSuccessChangeChp)
                 {
+                    AskDeviceInfo();
                     isChpFileChangeSuccess = 1;
+                    ViewModelBase._deviceStatus.IsAngioInitialized = true;
                 }
                 else if (command == (byte)CommandType.FGFailChangeChp)
                 {
@@ -441,6 +508,7 @@ namespace RaywattApp.Common.Angio
                 }
                 Array.Copy(tmpBuffer, Constants.CommandPacketSize, tmpBuffer, 0, tmpBuffer.Length - Constants.CommandPacketSize);
                 tmpBufferLen -= Constants.CommandPacketSize;
+                
             }
         }
 
@@ -497,7 +565,8 @@ namespace RaywattApp.Common.Angio
                         offset += sizeof(short);
                         char BitsPerPixel = (char)tmpBuffer[offset++];
                         int imageSize = height * width * BitsPerPixel / 8;
-
+                        live_time = BitConverter.ToInt64(tmpBuffer, offset);
+                        offset += sizeof(long);
                         if (tmpBufferLen >= imageSize)
                         {
                             if (tmpBuffer[Constants.ImageHeaderSize + imageSize + Constants.ImageTailSize - 1] == Constants.EOF)
@@ -516,22 +585,9 @@ namespace RaywattApp.Common.Angio
 
         public Mat ShowNoSignal()
         {
+            _log.Debug("No signal");
             Mat image = new Mat(1080, 1920, MatType.CV_8UC3);
             image.SetTo(new Scalar(0, 0, 0));
-
-            Scalar textColor = new Scalar(0, 0, 255);
-            HersheyFonts fontFace = HersheyFonts.HersheyPlain;
-            double fontScale = 20;
-            int thickness = 10;
-
-            Size textSize = Cv2.GetTextSize("No Signal", fontFace, fontScale, thickness, out int baseline);
-
-            Point textPosition = new Point(
-                (image.Width - textSize.Width) / 2,
-                (image.Height + textSize.Height) / 2
-            );
-            Cv2.PutText(image, "No Signal", textPosition, fontFace, fontScale, textColor, thickness);
-
             return image;
         }
 
@@ -583,29 +639,55 @@ namespace RaywattApp.Common.Angio
             threadOnLiveAngioImage = true;
             threadFuncLiveAngioImage.Start();
         }
-        private void StopLiveAngioThread()
+        private void StopLiveAngioThread() 
         {
             threadOnLiveAngioImage = false;
             threadFuncLiveAngioImage.Join();
+        }
+        private void StartLiveView()
+        {
+            liveView = true;
+            imageList = new ConcurrentQueue<Mat>();
+            get_image.Start();
+        }
+        private void StopLiveView()
+        {
+            imageList.Clear();
+            liveView = false;
+            get_image.Join();
+        }
+        private void StartSoketCheck()
+        {
+            isSocketAlive = true;
+            isSocketConnected.Start();
+        }
+        public void StopSoketCheck()
+        {
+            isSocketAlive = false;
+            isSocketConnected.Join();
         }
         public void StartSaveAngioThread(PatientCase patientCase)
         {
             threadFuncSaveAngioFrames = new Thread(() => ThreadFuncSaveAngioFrames(patientCase));
             threadOnSaveAngioFrames = true;
             threadFuncSaveAngioFrames.Start();
+            //SendCommandPacket(CommandType.FGRecordingStart);
         }
         public void StopSaveAngioThread()
         {
             threadOnSaveAngioFrames = false;
-            threadFuncSaveAngioFrames.Join();
-
+            if (threadFuncSaveAngioFrames != null) threadFuncSaveAngioFrames.Join();
             SendCommandPacket(CommandType.FGStopped);
         }
 
         public void SelectCathRoom()
         {
             _log.Debug("SelectCathRoom");
+            
+            if (isCathRoomDialogOpen)
+                return;
 
+            isCathRoomDialogOpen = true;
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["selectedCathRoomId"] = ViewModelBase._deviceStatus.SelectedCathRoom == null ? 0 : ViewModelBase._deviceStatus.SelectedCathRoom.Id;
 
@@ -616,6 +698,8 @@ namespace RaywattApp.Common.Angio
                 Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
                 ViewModelBase._deviceStatus.SelectedCathRoom = (CathRoom)data["selectedCathRoom"];
             }
+
+            isCathRoomDialogOpen = false;
         }
 
         public bool GetServerConnection()

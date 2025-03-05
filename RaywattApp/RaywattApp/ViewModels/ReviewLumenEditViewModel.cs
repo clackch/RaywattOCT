@@ -42,7 +42,7 @@ namespace RaywattApp.ViewModels
         private PatientCase _patientCase;
 
         [ObservableProperty]
-        private Zoom _zoom;
+        private Zoom _zoom = new Zoom();
 
         private int frameNumber = -1;
         public int FrameNumber
@@ -130,8 +130,6 @@ namespace RaywattApp.ViewModels
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;
-
-            Zoom = new Zoom();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -149,10 +147,12 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
 
-                LumenContours = PatientCase.LumenContours;
-                CrossSectionScale = (1 / PatientCase.ImageResolution) * (Constants.CrossSectionSize / Constants.OCTImageSize);
+                Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
 
-                SetCrossSectionBackground(RaySession.Review, Constants.LumenEditBackgroundColor);
+                LumenContours = PatientCase.LumenContours;
+                CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.CrossSectionSize / Constants.OCTImageSize);
+
+                SetCrossSectionBackground(RaySession.Review, Constants.CardBackgroundColor);
 
                 GetImageInfo(RaySession.Review);
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
@@ -176,7 +176,7 @@ namespace RaywattApp.ViewModels
         private void Ok()
         {
             _log.Debug("Ok");
-
+            
             GoToPreviousPage(true);
         }
 
@@ -207,6 +207,9 @@ namespace RaywattApp.ViewModels
             parameter["patientCase"] = PatientCase;
             parameter["prevStatus"] = PrevStatus;
             parameter["reviewStatus"] = ReviewStatus;
+
+            ReviewStatus.IsLumenEdited = isSave;
+
             WeakReferenceMessenger.Default.Send(new NavigationMessage(ReviewStatus.CurrentPage) { Parameter = parameter });
         }
 

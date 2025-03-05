@@ -3,6 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:behaviors="clr-namespace:RaywattApp.Common.Behaviors"  
              xmlns:local="clr-namespace:RaywattApp.Views.Dialog"
              xmlns:const="clr-namespace:RaywattApp.Common.Bases"
              mc:Ignorable="d"
@@ -16,18 +18,27 @@
             <StackPanel Height="20"/>
             <StackPanel Width="800" Height="414" Orientation="Horizontal">
                 <DataGrid Width="260" ItemsSource="{Binding ProcedureList}" SelectedItem="{Binding CurrentProcedure}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" FontSize="16">
+                    <b:Interaction.Behaviors>
+                        <behaviors:DataGridLoadedBehavior />
+                    </b:Interaction.Behaviors>
                     <DataGrid.Columns>
                         <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Value}" Header="{Binding [Procedure], Source={StaticResource L10N}}"/>
                     </DataGrid.Columns>
                 </DataGrid>
                 <StackPanel Width="10"/>
                 <DataGrid Width="260" ItemsSource="{Binding VesselList}" SelectedItem="{Binding CurrentVessel}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" FontSize="16">
+                    <b:Interaction.Behaviors>
+                        <behaviors:DataGridLoadedBehavior />
+                    </b:Interaction.Behaviors>
                     <DataGrid.Columns>
                         <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Value}" Header="{Binding [Vessel], Source={StaticResource L10N}}"/>
                     </DataGrid.Columns>
                 </DataGrid>
                 <StackPanel Width="10"/>
                 <DataGrid Width="260" ItemsSource="{Binding LocationList}" SelectedItem="{Binding CurrentLocation}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" FontSize="16">
+                    <b:Interaction.Behaviors>
+                        <behaviors:DataGridLoadedBehavior />
+                    </b:Interaction.Behaviors>
                     <DataGrid.Columns>
                         <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Value}" Header="{Binding [Location], Source={StaticResource L10N}}"/>
                     </DataGrid.Columns>

@@ -66,6 +66,9 @@ namespace RaywattApp.Common.Annotation
 
             bool isExist = false;
 
+            if (bookmarkUtil.Bookmarks == null)
+                return;
+
             foreach (Bookmark bookmark in bookmarkUtil.Bookmarks)
             {
                 if (bookmark.FrameNumber == bookmarkUtil.BookmarkFrameNumber)

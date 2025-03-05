@@ -24,17 +24,65 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <Grid Width="{Binding ImagePartWidth}">
+            <Grid Width="{Binding ImagePartWidth}" Height="{Binding ImagePartHeight}">
                 <!-- Angio -->
-                <Grid Width="{x:Static const:Constants.ExportAngioSize}" Height="{x:Static const:Constants.ExportAngioSize}" Visibility="{Binding FileExport.AngioView, Converter={StaticResource BoolToVisibilityConverter}}" HorizontalAlignment="Left">
-                    <Image Source="/res/png/angioImage.png" Stretch="Fill"/>
+                <Grid Visibility="{Binding FileExport.AngioView, Converter={StaticResource BoolToVisibilityConverter}}" HorizontalAlignment="Left">
+                    <Image x:Name="angioImage" Source="{Binding AngioImage}" Width="{Binding CrossSectionImageSize}"/>
                 </Grid>
                 <!-- Cross-Section -->
                 <Grid Width="{Binding CrossSectionPartWidth}" HorizontalAlignment="Right">
                     <Grid Width="{Binding CrossSectionSize}" Height="{Binding CrossSectionSize}">
                         <Grid Width="{Binding CrossSectionImageSize}" Height="{Binding CrossSectionImageSize}">
-                            <!-- Cross Seciton Image -->
-                            <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{Binding CrossSectionImageSize}" Height="{Binding CrossSectionImageSize}"/>
+                            <Grid Width="{Binding CrossSectionImageSize}" Height="{Binding CrossSectionImageSize}">
+                                <Grid.Clip>
+                                    <EllipseGeometry Center="{Binding CrossSectionClipCenter}" RadiusX="{Binding CrossSectionClipRadius}" RadiusY="{Binding CrossSectionClipRadius}"/>
+                                </Grid.Clip>
+                                <Grid>
+                                    <Grid>
+                                        <!-- Cross Seciton Image -->
+                                        <Image x:Name="crossSectionImage" Source="{Binding CrossSectionImage}" Width="{Binding CrossSectionImageSize}" Height="{Binding CrossSectionImageSize}"/>
+                                        <!-- Sheath Indicator -->
+                                        <Image x:Name="SheathIndicator" Source="{Binding SheathIndicator}" Width="{Binding CrossSectionImageSize}" Height="{Binding CrossSectionImageSize}"/>
+                                        <Grid.RenderTransform>
+                                            <TransformGroup>
+                                                <ScaleTransform>
+                                                    <ScaleTransform.ScaleX>
+                                                        <MultiBinding Converter="{StaticResource CrossSectionScaleMultiConverter}">
+                                                            <Binding Path="Zoom.ScaleX"/>
+                                                            <Binding Path="CrossSectionImageSize"/>
+                                                        </MultiBinding>
+                                                    </ScaleTransform.ScaleX>
+                                                    <ScaleTransform.ScaleY>
+                                                        <MultiBinding Converter="{StaticResource CrossSectionScaleMultiConverter}">
+                                                            <Binding Path="Zoom.ScaleY"/>
+                                                            <Binding Path="CrossSectionImageSize"/>
+                                                        </MultiBinding>
+                                                    </ScaleTransform.ScaleY>
+                                                </ScaleTransform>
+                                                <TranslateTransform>
+                                                    <TranslateTransform.X>
+                                                        <MultiBinding Converter="{StaticResource CrossSectionScaleMultiConverter}">
+                                                            <Binding Path="Zoom.TranslateX"/>
+                                                            <Binding Path="CrossSectionImageSize"/>
+                                                        </MultiBinding>
+                                                    </TranslateTransform.X>
+                                                    <TranslateTransform.Y>
+                                                        <MultiBinding Converter="{StaticResource CrossSectionScaleMultiConverter}">
+                                                            <Binding Path="Zoom.TranslateY"/>
+                                                            <Binding Path="CrossSectionImageSize"/>
+                                                        </MultiBinding>
+                                                    </TranslateTransform.Y>
+                                                </TranslateTransform>
+                                            </TransformGroup>
+                                        </Grid.RenderTransform>
+                                    </Grid>
+                                    <!-- Lumen Contour-->
+                                    <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" LumenStents="{Binding LumenStents}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}"  FrameNumber="{Binding MeasureAutoFrameNumber}" IsEditOn="False" IsDrawOn="{Binding FileExport.MeasureAuto}" Zoom="{Binding Zoom}" ScreenSize="{Binding CrossSectionImageSize}"/>
+                                    <!-- Measurement -->
+                                    <annotation:DrawUtil Measurements="{Binding Measurements}" FrameNumber="{Binding MeasureManualFrameNumber}" Zoom="{Binding Zoom}" IsEditOn="False" IsDrawOn="{Binding FileExport.MeasureManual}" ScreenSize="{Binding CrossSectionImageSize}"/>
+                                </Grid>
+
+                            </Grid>
                             <!-- Cross Section Info. -->
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left">
                                 <Label Content="F" Style="{DynamicResource Pretendard-ExtraBold-20}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
@@ -45,20 +93,50 @@
                                 <Label Content="1 ㎜" Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
                                 <StackPanel Height="4"/>
                                 <Grid>
-                                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="5" Width="1" Margin="0" HorizontalAlignment="Left"/>
-                                    <Separator Width="{Binding CrossSectionScale}" Height="1" Margin="0"/>
+                                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="5" Width="1" Margin="0" HorizontalAlignment="Left">
+                                        <Separator.RenderTransform>
+                                            <TransformGroup>
+                                                <TranslateTransform>
+                                                    <TranslateTransform.X>
+                                                        <MultiBinding Converter="{StaticResource ScaleBarScaleMultiConverter}">
+                                                            <Binding Path="Zoom.ScaleX"/>
+                                                            <Binding Path="CrossSectionImageSize"/>
+                                                        </MultiBinding>
+                                                    </TranslateTransform.X>
+                                                </TranslateTransform>
+                                            </TransformGroup>
+                                        </Separator.RenderTransform>
+                                    </Separator>
+                                    <Separator Width="{Binding CrossSectionScale}" Height="1" Margin="0">
+                                        <Separator.RenderTransform>
+                                            <TransformGroup>
+                                                <ScaleTransform>
+                                                    <ScaleTransform.ScaleX>
+                                                        <MultiBinding Converter="{StaticResource CrossSectionScaleMultiConverter}">
+                                                            <Binding Path="Zoom.ScaleX"/>
+                                                            <Binding Path="CrossSectionImageSize"/>
+                                                        </MultiBinding>
+                                                    </ScaleTransform.ScaleX>
+                                                </ScaleTransform>
+                                                <TranslateTransform>
+                                                    <TranslateTransform.X>
+                                                        <MultiBinding Converter="{StaticResource ScaleBarScaleMultiConverter}">
+                                                            <Binding Path="Zoom.ScaleX"/>
+                                                            <Binding Path="CrossSectionImageSize"/>
+                                                        </MultiBinding>
+                                                    </TranslateTransform.X>
+                                                </TranslateTransform>
+                                            </TransformGroup>
+                                        </Separator.RenderTransform>
+                                    </Separator>
                                     <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="5" Width="1" Margin="0" HorizontalAlignment="Right"/>
                                 </Grid>
                             </StackPanel>
-                            <!-- Lumen Contour-->
-                            <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}"  FrameNumber="{Binding MeasureAutoFrameNumber}" IsEditOn="False" IsDrawOn="{Binding FileExport.MeasureAuto}" Zoom="{Binding Zoom}"/>
-                            <!-- Measurement -->
-                            <annotation:DrawUtil Measurements="{Binding Measurements}" FrameNumber="{Binding MeasureManualFrameNumber}" Zoom="{Binding Zoom}" IsEditOn="False" IsDrawOn="{Binding FileExport.MeasureManual}" ImageResolution="{Binding PatientCase.ImageResolution}"/>
                         </Grid>
                         <!-- Calcium Indicator -->
                         <Grid Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$001}">
                             <Image x:Name="CalciumIndicatorAngio" Width="{Binding CalciumIndicatorSize}" Height="{Binding CalciumIndicatorSize}" Source="{Binding CalciumIndicator}"/>
-                            <Grid Width="{Binding CalciumThicknessIndicatorSize}" Height="{Binding CalciumThicknessIndicatorSize}" Background="Transparent" Visibility="{Binding MaxCalciumDegree, Converter={StaticResource MaxThicknessVisibilityConverter}}">
+                            <!--<Grid Width="{Binding CalciumThicknessIndicatorSize}" Height="{Binding CalciumThicknessIndicatorSize}" Background="Transparent" Visibility="{Binding MaxCalciumDegree, Converter={StaticResource MaxThicknessVisibilityConverter}}">
                                 <Grid.Clip>
                                     <EllipseGeometry Center="{Binding CalciumThicknessIndicatorPointCenter}" RadiusX="{Binding CalciumThicknessIndicatorCenter}" RadiusY="{Binding CalciumThicknessIndicatorCenter}"/>
                                 </Grid.Clip>
@@ -66,7 +144,7 @@
                                 <Grid.RenderTransform>
                                     <RotateTransform CenterX="{Binding CalciumThicknessIndicatorCenter}" CenterY="{Binding CalciumThicknessIndicatorCenter}" Angle="{Binding MaxCalciumDegree}"/>
                                 </Grid.RenderTransform>
-                            </Grid>
+                            </Grid>-->
                         </Grid>
                         <!-- Indicator -->
                         <Image Source="{svgc:SvgImage Source=/res/indicator/crossSectionExport.svg}" Width="619" Height="16" Visibility="{Binding FileExport.Longitude, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -169,7 +247,21 @@
                         </Grid>
                         <!-- L-Mode -->
                         <Grid Grid.Row="1" Width="{x:Static const:Constants.ExportLongitudeImageWidth}" Height="{x:Static const:Constants.ExportLongitudeImageHeight}">
-                            <Image Source="{Binding LongitudeImage}" Stretch="Fill"/>
+                            <Grid.Clip>
+                                <RectangleGeometry RadiusX="0" RadiusY="0">
+                                    <RectangleGeometry.Rect>
+                                        <Rect X="0" Y="0" Width="{x:Static const:Constants.ExportLongitudeImageWidth}" Height="{x:Static const:Constants.ExportLongitudeImageHeight}"/>
+                                    </RectangleGeometry.Rect>
+                                </RectangleGeometry>
+                            </Grid.Clip>
+                            <Image Source="{Binding LongitudeImage}" Stretch="Fill">
+                                <Image.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleY="{Binding PatientCase.FieldOfView, Converter={StaticResource LongitudeScaleConverter}}"/>
+                                        <TranslateTransform Y="{Binding PatientCase.FieldOfView, Converter={StaticResource LongitudeTranslateConverter}, ConverterParameter={x:Static const:Constants.ExportLongitudeImageHeight}}"/>
+                                    </TransformGroup>
+                                </Image.RenderTransform>
+                            </Image>
                             <!-- Measurement -->
                             <annotation:DrawLmodeUtil Zoom="{Binding LongitudeZoom}" LModeLengthGeometries="{Binding LModeLengthGeometries}" LModeTextGeometries="{Binding LModeTextGeometries}" PullbackLength="{Binding PatientCase.PullbackLength}" InCommand="{Binding MeasurementCommand}" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" VerticalAlignment="Top" HorizontalAlignment="Left"/>
                         </Grid>
@@ -335,14 +427,14 @@
                                     <Label Content="{Binding [º], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Bold-64}" Foreground="{DynamicResource SubPointColor1Brush}"/>
                                 </StackPanel>
                             </StackPanel>
-                            <StackPanel Grid.Column="1">
+                            <!--<StackPanel Grid.Column="1">
                                 <Label Content="{Binding [Max Thickness], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Semibold-28}" Foreground="{DynamicResource ValueInfoLabelBrush}" HorizontalAlignment="Left"/>
                                 <StackPanel Height="10"/>
                                 <StackPanel Height="88" Orientation="Horizontal">
                                     <TextBlock Text="{Binding MaxThickness}" Style="{DynamicResource TextBlock_Pretendard-Bold-64}" Foreground="{DynamicResource ValueInfoValueBrush}" MinWidth="140"/>
                                     <Label Content="{Binding [㎜], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-28}" Foreground="{DynamicResource ValueInfoLabelBrush}" VerticalAlignment="Bottom" Margin="0,0,0,20"/>
                                 </StackPanel>
-                            </StackPanel>
+                            </StackPanel>-->
                         </Grid>
                     </StackPanel>
                     <StackPanel Grid.Row="2" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$002|$003}">

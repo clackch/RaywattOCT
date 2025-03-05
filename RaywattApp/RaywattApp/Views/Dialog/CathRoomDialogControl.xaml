@@ -4,6 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RaywattApp.Views.Dialog"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"                
+             xmlns:behaviors="clr-namespace:RaywattApp.Common.Behaviors"
              xmlns:const="clr-namespace:RaywattApp.Common.Bases"
              mc:Ignorable="d" 
              Width="{Binding DialogWidth}" Height="{Binding DialogHeight}">
@@ -28,6 +30,9 @@
             </StackPanel>
 
             <DataGrid Grid.Row="2" Grid.Column="1" Name="cathRoomList" ItemsSource="{Binding CathRoomList}" SelectedItem="{Binding SelectedCathRoom}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" Height="274">
+                <i:Interaction.Behaviors>
+                    <behaviors:DataGridLoadedBehavior />
+                </i:Interaction.Behaviors>
                 <DataGrid.Columns>
                     <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Name}" Header="{Binding [Name], Source={StaticResource L10N}}"/>
                 </DataGrid.Columns>
@@ -36,7 +41,7 @@
             <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
                 <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
                 <StackPanel Width="8"/>
-                <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
+                <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}" IsEnabled="{Binding SelectedCathRoom, Converter={StaticResource NotNullToEnableConverter}}"/>
             </StackPanel>
         </Grid>
     </Border>

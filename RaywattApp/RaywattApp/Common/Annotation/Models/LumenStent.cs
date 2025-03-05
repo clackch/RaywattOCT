@@ -7,9 +7,12 @@ namespace RaywattApp.Common.Annotation.Models
     public partial class LumenStent : ObservableObject
     {
         [ObservableProperty]
-        protected List<Point>? points;
+        private List<Point>? points;
 
         [ObservableProperty]
-        protected List<double>? appositionLength;
+        private List<double>? appositionLength;
+
+        [ObservableProperty]
+        private bool isStent;
     }
 }

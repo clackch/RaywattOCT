@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
+using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
@@ -33,20 +34,8 @@ namespace RaywattApp.Common.Bases
         [ObservableProperty]
         private Patient _patient;
 
+        [ObservableProperty]
         private PatientCase _patientCase;
-        public PatientCase PatientCase
-        { 
-            get { return _patientCase; }
-            set 
-            {
-                _patientCase = value; 
-                OnPropertyChanged(nameof(PatientCase));
-                if (_patientCase != null)
-                {
-                    Constants.ImageResolution = _patientCase.ImageResolution;
-                }
-            }
-        }
 
         [ObservableProperty]
         private bool _expandLeftUpMenu;
@@ -126,6 +115,13 @@ namespace RaywattApp.Common.Bases
         public ReviewViewModelBase()
         {
             _log.Debug("ReviewViewModelBase");
+        }
+
+        public ReviewViewModelBase(IDialogService dialogService)
+        {
+            _log.Debug("ReviewViewModelBase");
+
+            _dialogService = dialogService;
         }
 
         public ReviewViewModelBase(SqlManager sqlManager, IDialogService dialogService)
@@ -231,6 +227,8 @@ namespace RaywattApp.Common.Bases
         {
             _log.Debug("EndReview");
 
+            DeviceStatus.IsOCTImagingDone = true;
+
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
@@ -242,6 +240,26 @@ namespace RaywattApp.Common.Bases
             _log.Debug("NewRecording");
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
+
+            if (!CommonUtil.IsStorageAvailable())
+            {
+                parameter["title"] = _l10n["Information"];
+                parameter["message"] = _l10n["$MSG024"];
+                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+                return;
+            }
+
+            if (Patient.PhysicianId == 0)
+            {
+                parameter["title"] = _l10n["Information"];
+                parameter["message"] = _l10n["$MSG016"];
+                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+                return;
+            }
+
+            parameter.Clear();
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingPresetPage) { Parameter = parameter });

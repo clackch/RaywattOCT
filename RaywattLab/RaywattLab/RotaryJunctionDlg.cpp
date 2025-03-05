@@ -5,10 +5,11 @@
 #include "RotaryJunctionDlg.h"
 #include "afxdialogex.h"
 #include "Utility.h"
-#include "ZaberController.h"
 #include "MotorController.h"
 #include "Configuration.h"
 #include "PiUsb.h"
+#include "RJController.h"
+#include "LaserModule.h"
 
 
 // CRotaryJunctionDlg dialog
@@ -31,14 +32,14 @@ CRotaryJunctionDlg::~CRotaryJunctionDlg()
 
 UINT CRotaryJunctionDlg::threadInterferometer(LPVOID param) {
 	CRotaryJunctionDlg* pDlg = (CRotaryJunctionDlg*)param;
-	CZaberController* pDelayLine = pDlg->m_pDelayLine;
+	CLaserModule* pDelayLine = pDlg->m_pDelayLine;
 
 	while (pDlg->m_pThreadInterferometer->isRun) {
 		if (pDlg->m_isClickedBackward) {
-			pDelayLine->RotateRelative(DELAYLINE_BACKWARD_POSITION);
+			pDelayLine->MoveRelative(eStepMotorIndex::DelayLine, DELAYLINE_BACKWARD_POSITION);
 		}
 		else if (pDlg->m_isClickedForward) {
-			pDelayLine->RotateRelative(DELAYLINE_FORWARD_POSITION);
+			pDelayLine->MoveRelative(eStepMotorIndex::DelayLine, DELAYLINE_FORWARD_POSITION);
 		}
 		Sleep(30);
 	}
@@ -111,24 +112,23 @@ void CRotaryJunctionDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 	__super::OnShowWindow(bShow, nStatus);
 
 	if (bShow) {
-		CZaberController* pPullback = m_pPullback;
-		CZaberController* pDelayLine = m_pDelayLine;
-		CMotorController* pMotorCtrl = CMotorController::GetInstance();
+		CRJController* pPullback = m_pPullback;
+		CLaserModule* pDelayLine = m_pDelayLine;
 
-		bool zaberConnected = (pPullback != nullptr && pPullback->IsOpen());
+		bool zaberConnected = (pPullback != nullptr && pPullback->IsConnected());
 		if (zaberConnected) {
 			GetDlgItem(IDC_BUTTON_ZABER_IDLE)->EnableWindow(TRUE);
 			GetDlgItem(IDC_BUTTON_ZABER_MOVE)->EnableWindow(TRUE);
 			GetDlgItem(IDC_BUTTON_ZABER_PULLBACK)->EnableWindow(TRUE);
 		}
 
-		bool motorConnected = (pMotorCtrl != nullptr && pMotorCtrl->IsConnected());
+		bool motorConnected = false;
 		if (motorConnected) {
 			GetDlgItem(IDC_BUTTON_MOTOR_PERFORM_RUN)->EnableWindow(TRUE);
 			GetDlgItem(IDC_BUTTON_MOTOR_STOP)->EnableWindow(TRUE);
 		}
 
-		bool interferometerConnected = (pDelayLine != nullptr && pDelayLine->IsOpen());
+		bool interferometerConnected = (pDelayLine != nullptr && pDelayLine->IsConnected());
 		if (interferometerConnected) {
 			GetDlgItem(IDC_BUTTON_MOVE_ZABER_BACKWARD)->EnableWindow(TRUE);
 			GetDlgItem(IDC_BUTTON_MOVE_ZABER_FORWARD)->EnableWindow(TRUE);
@@ -169,7 +169,7 @@ void CRotaryJunctionDlg::OnDestroy()
 
 void CRotaryJunctionDlg::OnBnClickedButtonZaberIdle()
 {
-	m_pPullback->Idle();	
+	//m_pPullback->Idle();	
 }
 
 
@@ -181,7 +181,7 @@ void CRotaryJunctionDlg::OnBnClickedButtonZaberMove()
 	GetDlgItem(IDC_EDIT_ZABER_POSITION)->GetWindowText(strPosition);
 	nPosition = _ttoi(strPosition);
 
-	m_pPullback->MoveAbsolute(nPosition);
+	//m_pPullback->MoveAbsolute(nPosition);
 }
 
 
@@ -197,20 +197,19 @@ void CRotaryJunctionDlg::OnBnClickedButtonZaberPullback()
 	GetDlgItem(IDC_EDIT_ZABER_DISTANCE)->GetWindowText(strDistance);
 	nDistance = _ttoi(strDistance);
 
-	m_pPullback->Pull(nVelocity, nDistance);
+	//m_pPullback->Pull(nVelocity, nDistance);
 }
 
 
 void CRotaryJunctionDlg::OnBnClickedButtonMotorPerformRun()
 {
-	CMotorController* pMotorCtrl = CMotorController::GetInstance();
 	CString strVelocity = _T("");
 	int nVelocity = 0;
 
 	GetDlgItem(IDC_EDIT_MOTOR_VELOCITY)->GetWindowText(strVelocity);
 	nVelocity = _ttoi(strVelocity);
 
-	pMotorCtrl->PerformRun(nVelocity);
+	// Perform Run
 
 	strVelocity.Format(_T("%d"), nVelocity);
 	GetDlgItem(IDC_EDIT_MOTOR_VELOCITY)->SetWindowText(strVelocity);
@@ -219,9 +218,7 @@ void CRotaryJunctionDlg::OnBnClickedButtonMotorPerformRun()
 
 void CRotaryJunctionDlg::OnBnClickedButtonMotorStop()
 {
-	CMotorController* pMotorCtrl = CMotorController::GetInstance();
-
-	pMotorCtrl->StopMotor();
+	// Stop Motor
 }
 
 void CRotaryJunctionDlg::OnBnClickedButtonSaveSettings()

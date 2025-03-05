@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Point = System.Windows.Point;
 using log4net;
+using System.Reflection.Metadata;
 
 namespace RaywattApp.Common.Angio
 {
@@ -29,7 +30,7 @@ namespace RaywattApp.Common.Angio
         double[][] pCosts;// for debugging reasons
 
         public List<List<Point>> line;
-        public List<Point> trackPoint;
+        public List<Point> trackPoints;
         private double sqrt2 = 1.41421356237;
         // converts x, y coordinates to vector index
         private int toIndex(int x, int y)
@@ -46,7 +47,7 @@ namespace RaywattApp.Common.Angio
             {
                 line.Add(new List<Point>());
             }
-            trackPoint = new List<Point>();
+            trackPoints = new List<Point>();
 
             // 최단 경로 계산에 사용되는 가중치 값
             gradientMagnitude = 0.43; // 경로 weight(거리) 가중치
@@ -133,6 +134,11 @@ namespace RaywattApp.Common.Angio
         // 경로 길이 : mylength
         public void ReturnPath(int endX, int endY, int[] vx, int[] vy, out int length, int[] pixelValue)
         {
+            endX = endX > width ? width - 1 : endX;
+            endX = endX < 0 ? 0 : endX;
+            endY = endY > height ? height - 1 : endY;
+            endY = endY < 0 ? 0 : endY;
+
             if (visited[toIndex(endX, endY)] == false)
             {
                 length = 0;

@@ -34,6 +34,20 @@ namespace RaywattOCT
                 set { _isPtoD = value; }
             }
 
+            private bool _isFirstRendering = true;
+            public bool IsFirstRendering
+            {
+                get { return _isFirstRendering; }
+                set { _isFirstRendering = value; }
+            }
+
+            private int _zoomFactor = 0;
+            public int ZoomFactor
+            {
+                get { return _zoomFactor; }
+                set { _zoomFactor = value; }
+            }
+
             public Ray3DStatus()
             {
                 for (Ray3DObject obj = Ray3DObject.Tissue; obj < Ray3DObject.Count; obj++) 
@@ -105,7 +119,7 @@ namespace RaywattOCT
             CutView = 0,
             FlyThrough
         };
-
+        
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_CreateDll(IntPtr hWnd);
         [DllImport("OCT3d.dll")]
@@ -158,5 +172,12 @@ namespace RaywattOCT
         public static extern int ODSOCT_SetRenderMode(bool isRaywattApp);
         [DllImport("OCT3d.dll")]
         public static extern int ODSOCT_CutViewOn(bool isRaywattApp);
+        [DllImport("OCT3d.dll")]
+        public static extern int ODSOCT_UpdateColorTable(int mode);
+        [DllImport("OCT3d.dll")]
+        public static extern int ODSOCT_Export3DVTIFile(IntPtr raw, string fileName); // the file will be saved in bin folder
+
+        [DllImport("OCT3d.dll")]
+        public static extern int ODSOCT_ShowTFWindow(int isShow);
     }
 }

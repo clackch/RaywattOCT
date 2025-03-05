@@ -923,7 +923,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <Border Grid.Row="1" x:Name="TrackBackground" VerticalAlignment="Center" Margin="0,0,6,0" CornerRadius="3" BorderThickness="0" Background="{DynamicResource GrayscaleGray6Brush}" Height="6"/>
+            <Border Grid.Row="1" x:Name="TrackBackground" VerticalAlignment="Center" Margin="0,0,6,0" CornerRadius="3" BorderThickness="0" Background="{DynamicResource GrayscaleGray5Brush}" Height="6"/>
             <Track Grid.Row="1" x:Name="PART_Track">
                 <Track.DecreaseRepeatButton>
                     <RepeatButton Style="{StaticResource SliderRepeatButton1}" Command="Slider.DecreaseLarge"/>

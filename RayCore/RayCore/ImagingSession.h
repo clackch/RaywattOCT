@@ -36,7 +36,7 @@ private:
 
 	CThread* m_pThreadImaging;
 	std::map<int, cv::Mat> m_mapImage;
-	std::map<int, int> m_mapSheathPosition;
+	std::map<int, cv::Mat> m_mapImageWithoutCompensation;
 
 	bool m_deleteData;
 
@@ -59,13 +59,16 @@ private:
 
 	char* m_pVolumeData;
 
+	int m_zOffset;
+	std::vector<int> m_vZOffset;
+
 private:
 	CImagingSession(CMessageService* pMsg, int nSession, bool deleteData = true);
 public:
 	virtual ~CImagingSession();
 
 	static CImagingSession* CreateSession(CMessageService* pMsg, int nSession, IImaging::Setting setting, IDataManager *pWriter);
-	static CImagingSession* CreateSession(CMessageService* pMsg, int nSession, const char* strFilePath);
+	static CImagingSession* CreateSession(CMessageService* pMsg, int nSession, const char* strFilePath, double imageResolution);
 	static COCTImaging* CreateColorImaging(CMessageService* msg, IImaging::Setting setting, IDataManager* pData, ImagingType type);
 
 	ImagingType GetImagingType() { return m_imagingType; }
@@ -77,6 +80,7 @@ public:
 	// Asynchronous functions
 	RayError Start();
 	RayError Stop();
+	void StopThreadForRestart();
 	void StartCutViewUpdate(cv::Scalar backgroundColor);
 	void StartObjectDetection();
 	void StartVolumeGeneration();
@@ -105,6 +109,11 @@ public:
 	int GetNumOfGuidewirePoints(int nFrame);
 	void* GetCalciumAngles(int nFrame);
 	int GetCalciumLength(int nFrame);
+
+	bool LoadZOffset(const char* strDataFilePath);
+	void SetZOffset(int zOffset) { m_zOffset = zOffset; }
+	int GetZOffset() { return m_zOffset; }
+	int GetZOffset(int nFrame);
 
 private:
 	static CImagingSession* createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type);

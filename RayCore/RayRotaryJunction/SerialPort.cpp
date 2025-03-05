@@ -92,8 +92,10 @@ bool CSerialPort::WriteByte(BYTE *pBuff) {
 
 bool CSerialPort::WriteByte(BYTE *pBuff, UINT nByte) {
 	m_iBytesWritten = 0;
-	if (WriteFile(m_hComm, pBuff, nByte, &m_iBytesWritten, NULL) == 0)
+	if (WriteFile(m_hComm, pBuff, nByte, &m_iBytesWritten, NULL) == 0) {
+		PLOGI.printf("WriteFile Failed - 0x%x", GetLastError());
 		return false;
+	}
 	else
 		return true;
 }
@@ -110,6 +112,7 @@ bool CSerialPort::ReadByte(BYTE &resp) {
 			return true;  
 		}    
 	}   
+	PLOGI.printf("ReadFile Failed - 0x%x", GetLastError());
 	return false; 
 } 
 

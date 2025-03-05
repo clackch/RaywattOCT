@@ -1,7 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="7.5" height="105" viewBox="0 0 7.5 105">
-    <g data-name="그룹 11291">
-        <path data-name="선 24" transform="rotate(180 3.25 52.5)" style="fill:none;stroke:#fff;opacity:0.8;stroke-width:2px" d="M0 0v105"/>
-        <path data-name="사각형 2505" transform="rotate(-90 1 1)" style="fill:#fff;opacity:0.8;" d="M0 0h2v6H0z"/>
-        <path data-name="사각형 2506" transform="rotate(-90 52.5 52.5)" style="fill:#fff;opacity:0.8;" d="M0 0h2v6H0z"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="28" height="105" viewBox="0 0 28 105">
+    <g data-name="그룹 11855">
+        <path data-name="사각형 3321" transform="rotate(90 -44 59)" style="fill:#fff" d="M0 0h2v7.5H0z"/>
+        <g data-name="그룹 11854">
+            <path data-name="사각형 2506" transform="rotate(90 7.5 7.5)" style="fill:#fff" d="M0 0h2v7.5H0z"/>
+            <path data-name="사각형 3320" transform="translate(13)" style="fill:#fff" d="M0 0h2v105H0z"/>
+            <path data-name="사각형 3415" style="opacity:0" d="M0 0h28v105H0z"/>
+        </g>
     </g>
 </svg>
