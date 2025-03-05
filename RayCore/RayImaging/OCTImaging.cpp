@@ -212,8 +212,8 @@ void COCTImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth, 
 
 			float rvalue = (float)(srcWidth - scale * sqrt(pow(fy, 2) + pow(fx, 2))) + (float)circOffset;
 
-			matXMap.at<float>(x * dstHeight + y) = rvalue;
-			matYMap.at<float>(x * dstHeight + y) = (float)(((atan2(fy, fx) / M_PI) + 1.0) * 0.5 * (srcHeight - 1));
+			matXMap.at<float>(y, x) = rvalue;
+			matYMap.at<float>(y, x) = (float)(((atan2(fy, fx) / M_PI) + 1.0) * 0.5 * (srcHeight - 1));
 		}
 	}
 }

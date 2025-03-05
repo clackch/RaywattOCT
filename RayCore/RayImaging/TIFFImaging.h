@@ -30,7 +30,7 @@ public:
 
 protected:
 	void GetLumenOffsetPoints(std::vector<cv::Point>& lumenOffsetBoundary);
-	cv::Point2f AngleToPoint(float angle, float length, cv::Point2f center);
-	std::vector<std::pair<int, bool>> FindIntersections(cv::Point2f center, float length, cv::Mat binary);
+	double GetTheta(cv::Point vector1, cv::Point vector2);
+	cv::Point2f RotatePoint(const cv::Point2f& point, const cv::Point2f& center);
 };
 
