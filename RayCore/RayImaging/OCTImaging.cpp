@@ -187,6 +187,10 @@ void COCTImaging::SetImageCompensation(bool ImageCompensated) {
 	bCompensated = ImageCompensated;
 }
 
+void COCTImaging::SetImageLumenVignetting(bool ImageLumenVignetted) {
+	bVignetted = ImageLumenVignetted;
+}
+
 void COCTImaging::SetImageCompensationControlWindow(bool ImageCompensationControlWindowOn) {
 	const char* strWindowName = "Compensation";
 	try {
