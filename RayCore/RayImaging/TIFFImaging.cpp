@@ -243,7 +243,7 @@ void CTIFFImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumCo
 	std::vector<std::vector<cv::Point>> rectangleCalciumContours;
 	cv::findContours(inverseContourImg, rectangleCalciumContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 	
-	cv::Mat alineImg = cv::Mat::zeros(imageCircle.size(), CV_8UC1);
+	cv::Mat alineImg = cv::Mat::zeros(imageResult.size(), CV_8UC1);
 	for (const auto& contour : rectangleCalciumContours) {
 		cv::Rect rect = cv::boundingRect(contour);
 		
