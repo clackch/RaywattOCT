@@ -365,6 +365,7 @@ int CImagingSession::GetCalciumLength(int nFrame) {
 
 	int length = m_vCalcium.at(nFrame).angleNum;
 	return length;
+}
 
 bool CImagingSession::LoadZOffset(const char* strDataFilePath) {
 	std::string strPath(strDataFilePath);
@@ -671,7 +672,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		cv::findContours(contourCalcium, vCalciumContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
 		Calcium calcium;
-		pImaging->SetCalciumAngle(vCalciumContours, calcium.angleNum, calcium.startAngle, calcium.endAngle);
+		pImaging->SetCalciumAngle(vCalciumContours, calcium.angleNum, calcium.startAngle, calcium.endAngle, nFrame);
 		vCalcium.push_back(calcium);
 
 		pSession->m_pMsg->postMessage(WM_PROCESS_DETECTION, nSession, nFrame);

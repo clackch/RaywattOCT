@@ -168,7 +168,7 @@ void COCTImaging::CircularizeImage(cv::Mat& src, cv::Mat& dst)
 	memcpy(dst.data, imgFoV.data, sizeof(char) * dst.cols * dst.rows * imgFoV.channels());
 }
 
-void COCTImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int& angleNum, std::vector<int>& startAngle, std::vector<int>& endAngle) {}
+void COCTImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int& angleNum, std::vector<int>& startAngle, std::vector<int>& endAngle, int frameNum = 0) {}
 
 void COCTImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst) {}
 
@@ -289,8 +289,8 @@ void COCTImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth, 
 
 			float rvalue = (float)(srcWidth - scale * sqrt(pow(fy, 2) + pow(fx, 2))) + (float)circOffset;
 
-			matXMap.at<float>(y, x) = rvalue;
-			matYMap.at<float>(y, x) = (float)(((atan2(fy, fx) / M_PI) + 1.0) * 0.5 * (srcHeight - 1));
+			matXMap.at<float>(x * dstHeight + y) = rvalue;
+			matYMap.at<float>(x * dstHeight + y) = (float)(((atan2(fy, fx) / M_PI) + 1.0) * 0.5 * (srcHeight - 1));
 		}
 	}
 }

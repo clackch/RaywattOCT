@@ -100,7 +100,7 @@ public:
 	virtual void EraseStentOutLier(cv::Mat& stent);
 	virtual void SetLumenContourOffset(std::vector<cv::Point> lumenContour);
 
-	virtual void SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int& angleNum, std::vector<int>& startAngle, std::vector<int>& endAngle);
+	virtual void SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int& angleNum, std::vector<int>& startAngle, std::vector<int>& endAngle, int frameNum);
 
 	int GetSheathPosition() { return m_nSheathPosition; }
 	void SetZOffset(int nOffset) { m_nZOffset = nOffset; }

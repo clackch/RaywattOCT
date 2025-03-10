@@ -217,7 +217,7 @@ void CTIFFImaging::GetLumenOffsetPoints(std::vector<cv::Point>& lumenOffsetBound
 	}
 }
 
-void CTIFFImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int& angleNum, std::vector<int>& startAngle, std::vector<int>& endAngle) {
+void CTIFFImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int& angleNum, std::vector<int>& startAngle, std::vector<int>& endAngle, int frameNum) {
 	if (calciumContours.empty()) {
 		return;
 	}
@@ -230,20 +230,21 @@ void CTIFFImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumCo
 	cv::remap(contourImage, inverseContourImg, inverseMatXMap, inverseMatYMap, cv::INTER_LINEAR);
 
 	cv::Mat rectImg;
-	cv::remap(imageCircle, rectImg, inverseMatXMap, inverseMatYMap, cv::INTER_LINEAR);
+	cv::remap(imageResult.clone(), rectImg, inverseMatXMap, inverseMatYMap, cv::INTER_LINEAR);
 
 	cv::Mat recircleImg;
 	cv::remap(rectImg, recircleImg, matXMap, matYMap, cv::INTER_LINEAR);
 
-	cv::imwrite("rectImg" + std::to_string(m_nCurFrame) + ".png", rectImg);
-	cv::imwrite("remappedImg" + std::to_string(m_nCurFrame) + ".png", inverseContourImg);
-	cv::imwrite("recircleImg" + std::to_string(m_nCurFrame) + ".png", recircleImg);
+	cv::imwrite("contourImage" + std::to_string(frameNum) + ".png", contourImage);
+	cv::imwrite("rectImg" + std::to_string(frameNum) + ".png", rectImg);
+	cv::imwrite("remappedImg" + std::to_string(frameNum) + ".png", inverseContourImg);
+	cv::imwrite("recircleImg" + std::to_string(frameNum) + ".png", recircleImg);
 
-	std::vector<std::vector<cv::Point>> inverseContours;
-	cv::findContours(inverseContourImg, inverseContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	std::vector<std::vector<cv::Point>> rectangleCalciumContours;
+	cv::findContours(inverseContourImg, rectangleCalciumContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 	
 	cv::Mat alineImg = cv::Mat::zeros(imageCircle.size(), CV_8UC1);
-	for (const auto& contour : inverseContours) {
+	for (const auto& contour : rectangleCalciumContours) {
 		cv::Rect rect = cv::boundingRect(contour);
 		
 		for (int i = rect.y; i < rect.y + rect.height; i++) {
@@ -253,7 +254,7 @@ void CTIFFImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumCo
 		}
 	}
 
-	cv::imwrite("alineImg" + std::to_string(m_nCurFrame) + ".png", alineImg);
+	cv::imwrite("alineImg" + std::to_string(frameNum) + ".png", alineImg);
 
 	bool findStart = false;
 	int series = 0;
