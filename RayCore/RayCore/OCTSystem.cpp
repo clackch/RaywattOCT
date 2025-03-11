@@ -1162,35 +1162,17 @@ RayError COCTSystem::SetImageCompensation(bool value)
 }
 
 /*
-* SetImageCompensation
+* SetImageCompensationControlWindow
 */
 RayError COCTSystem::SetImageCompensationControlWindow(bool value)
 {
 	m_bImageCompensationControlWindow = value;
 
-	COCTImaging::SetImageCompensationControlWindow(m_bImageCompensationControlWindow);
+	CConfiguration& config = CConfiguration::GetInstance();
+
+	COCTImaging::SetImageCompensationControlWindow(m_bImageCompensationControlWindow, config.imaging);
 
 	m_bImageCompensationControlWindow = 0;
-
-	return RayError::OK;
-}
-
-/*
-* GetImageLumenVignetting
-*/
-bool COCTSystem::GetImageLumenVignetting()
-{
-	return m_bImageLumenVignetting;
-}
-
-/*
-* SetImageLumenVignetting
-*/
-RayError COCTSystem::SetImageLumenVignetting(bool value)
-{
-	m_bImageLumenVignetting = value;
-
-	COCTImaging::SetImageLumenVignetting(m_bImageLumenVignetting);
 
 	return RayError::OK;
 }
@@ -1615,6 +1597,13 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	// 2. Pullback Linear Stage
 	if (pRJController->IsConnected() && config.stepMotor.pullbackDistance > 0) {
 		pRJController->Move(eStepMotorIndex::Both, pRJController->ConvertMMtoStep(config.stepMotor.pullbackDistance), false);
+
+		auto now = std::chrono::system_clock::now();
+		auto duration = now.time_since_epoch();
+		double seconds_since_epoch = std::chrono::duration_cast<std::chrono::seconds>(duration).count() + 
+			std::chrono::duration_cast<std::chrono::microseconds>(duration).count() / 1'000'000.0;
+		pSystem->SetPullbackStartTime(seconds_since_epoch);
+
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 	}
 	else {

@@ -34,7 +34,7 @@ namespace RaywattApp.Models
         private bool _canExecuteCalibration = true;
 
         [ObservableProperty]
-        private bool _isAngioConnected = true;
+        private bool _isAngioConnected = false;
 
         [ObservableProperty]
         private bool _isAngioInitialized = false;
@@ -89,7 +89,6 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private ReviewImageInfo[] _reviewImageInfos = new ReviewImageInfo[2];
-
         public DeviceStatus()
         {
             ReviewImageInfos[(int)RaySession.Review] = new ReviewImageInfo();

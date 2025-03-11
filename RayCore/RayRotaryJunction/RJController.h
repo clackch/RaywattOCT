@@ -8,14 +8,13 @@
 
 // position: step, speed: step/s
 #define PULLBACK_MAX_DISTANCE			100		/* mm */	
-#define DISTANCE_BETWEEN_MOTORS			1950
-#define PULLBACK_MOTOR_POS_INITIAL		19300
-#define PULLBACK_MOTOR_POS_LOAD			4000
+#define DISTANCE_BETWEEN_MOTORS			975
+#define PULLBACK_MOTOR_POS_INITIAL		9650
 #define HUB_MOTOR_POS_INITIAL			0
-#define STEP_MOTOR_SPEED_DEFAULT		9448
-#define STEP_MOTOR_SPEED_LOAD			863
+#define STEP_MOTOR_SPEED_DEFAULT		4724
+#define STEP_MOTOR_SPEED_LOAD			432
 #define PULLBACK_MOTOR_RESOLUTION		0.0254f	/* mm/step */
-#define MOTOR_CONTROL_RESOLUTION		8
+#define MOTOR_CONTROL_RESOLUTION		4
 
 enum class eRJState {
 	None = 0,
@@ -90,6 +89,7 @@ public:
 	int ConvertMMtoStep(UINT mm);
 	void SetManualMode(bool on) { m_bManualMode = on; }
 protected:
+	void initSetting();
 	static UINT threadRJState(LPVOID param);
 	static UINT threadReadPacket(LPVOID param);
 	void updateState();

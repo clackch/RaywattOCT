@@ -159,10 +159,10 @@ Remove the catheter from patient before proceeding.</value>
     <value>[K]Failed to change Cath Room.</value>
   </data>
   <data name="$MSG014" xml:space="preserve">
-    <value>[K]Failed to open server.</value>
+    <value>[K]Failed to init board.</value>
   </data>
   <data name="$MSG015" xml:space="preserve">
-    <value>[K]Failed to open socket.</value>
+    <value>[K]Failed to open server.</value>
   </data>
   <data name="$MSG016" xml:space="preserve">
     <value>[K]Add physician information on the edit patient screen.</value>

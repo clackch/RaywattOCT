@@ -43,7 +43,6 @@ namespace RaywattOCT
             ImageRoi,
             ImageCompensation,
             ImageCompensationControlWindow,
-            ImageLumenVignetting,
             FieldOfView,
             LongitudeImageWidth,
             LongitudeImageHeight,
@@ -53,7 +52,8 @@ namespace RaywattOCT
             PullbackSpeed,
             SheathDiameter,
             TestMode,
-            ZOffset
+            ZOffset,
+            PullbackStartTime
         }
 
         public enum RayCallbackRequest : int

@@ -65,9 +65,6 @@
                 <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" Margin="420,5,0,0" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=Compensate}">
                     <Button Style="{DynamicResource BtnForTest}" Command="{Binding CompensationTestCommand}" Width="100" Height="15" FontSize="9" Content="Compensation"/>
                 </StackPanel>
-                <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="420,0,0,5" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=Compensate}">
-                    <Button Style="{DynamicResource BtnForTest}" Command="{Binding VignettingTestCommand}" Width="100" Height="15" FontSize="9" Content="Vignetting"/>
-                </StackPanel>
                 <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" Margin="870,5,0,0" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=Compensate}">
                     <Button Style="{DynamicResource BtnForTest}" Command="{Binding CompensationWindowTestCommand}" Width="100" Height="15" FontSize="9" Content="CompensationWindow"/>
                 </StackPanel>

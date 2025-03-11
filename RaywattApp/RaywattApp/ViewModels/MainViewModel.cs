@@ -176,13 +176,6 @@ namespace RaywattApp.ViewModels
         private Thread threadCompensationWindow = null;
         private bool showCompensationWindow = false;
 
-        //Test
-        private ICommand _vignettingTest;
-        public ICommand VignettingTestCommand
-        {
-            get { return this._vignettingTest ?? (this._vignettingTest = new RelayCommand(VignettingTest)); }
-        }
-
         private ICommand _SaveVTIFileTest;
         public ICommand SaveVTIFileTestCommand
         {
@@ -363,7 +356,8 @@ namespace RaywattApp.ViewModels
                 {
                     DeviceStatus.PowerOffMsg = _l10n["Switching user"];
                 }
-                CommonUtil.Exit(DeviceStatus, _angioManager, result.DialogAnswer == DialogResults.Answer.Yes ? true : false);
+                CommonUtil.Exit(DeviceStatus, _angioManager, result.DialogAnswer == DialogResults.Answer.Yes ? true : false); // 여기다
+                _angioManager.StopSoketCheck();
             }
         }
 
@@ -509,15 +503,6 @@ namespace RaywattApp.ViewModels
             RaySetProperty(Property.ImageCompensationControlWindow, 0);
 
             _log.Debug("ThreadCompensationWindow done.");
-        }
-
-        private void VignettingTest()
-        {
-            _log.Debug("VignettingTest");
-
-            bool bImageLumenVignetting = (bool)(RayGetProperty(Property.ImageLumenVignetting) != 0);
-
-            RaySetProperty(Property.ImageLumenVignetting, bImageLumenVignetting ? 0 : 1);
         }
 
         private void SaveVTIFileTest()

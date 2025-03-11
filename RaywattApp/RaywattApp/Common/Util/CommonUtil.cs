@@ -1205,10 +1205,6 @@ namespace RaywattApp.Common.Util
 
         public static void Exit(DeviceStatus? deviceStatus = null, AngioManager? angioManager = null, bool isShutdown = false)
         {
-
-            if (angioManager != null && angioManager.GetServerConnection())
-                angioManager.CloseAngioManager();
-
             if (deviceStatus != null)
             {
                 deviceStatus.IsPowerOff = true;
@@ -1219,6 +1215,9 @@ namespace RaywattApp.Common.Util
                     Thread.Sleep(50);
                 }
             }
+
+            if (angioManager != null)
+                angioManager.CloseAngioManager();
 
             Thread threadReadyPullback = new Thread(() => ThreadExit(deviceStatus, isShutdown));
             threadReadyPullback.Start();
@@ -1557,10 +1556,10 @@ namespace RaywattApp.Common.Util
                 {
                     //Tracking Points (Proximal, Distal and additional connetion Points)
                     writer.WriteStartObject();
-                    writer.WritePropertyName(nameof(coRegistration.TrackPoint));
+                    writer.WritePropertyName(nameof(coRegistration.TrackPoints));
                     writer.WriteStartArray();
-
-                    foreach (System.Windows.Point point in coRegistration.TrackPoint)
+                  
+                    foreach(System.Windows.Point point in  coRegistration.TrackPoints)
                     {
                         string strPoint = (int)point.X + "," + (int)point.Y;
                         writer.WriteValue(strPoint);
@@ -1568,6 +1567,7 @@ namespace RaywattApp.Common.Util
 
                     writer.WriteEndArray();
 
+                    //Path Points
                     writer.WritePropertyName(nameof(coRegistration.Line));
                     writer.WriteStartArray();
 
@@ -1586,6 +1586,12 @@ namespace RaywattApp.Common.Util
                     }
 
                     writer.WriteEndArray();
+
+                    //Marker Point
+                    writer.WritePropertyName(nameof(coRegistration.MarkerPoint));
+                    string strMarkerPoint = (int)coRegistration.MarkerPoint.X + "," + (int)coRegistration.MarkerPoint.Y;
+                    writer.WriteValue(strMarkerPoint);
+
                     writer.WriteEndObject();
                 }
                 writer.WriteEndArray();
@@ -1623,15 +1629,27 @@ namespace RaywattApp.Common.Util
 
                         if (reader.Depth > 1 /*이유는 모르겠으나, Array 첫번째 요소가 depth 2로 출력됨. 같은 Array의 나머지 요소는 depth 3*/)
                         {
-                            if (nameof(coRegistration.TrackPoint).Equals(currentProperty))
+                            if (nameof(coRegistration.TrackPoints).Equals(currentProperty))
                             {
-                                coRegistration.TrackPoint = new List<System.Windows.Point>();
+                                coRegistration.TrackPoints = new List<System.Windows.Point>();
                                 SetContour(reader, currentProperty, null, coRegistration);
                             }
                             else if (nameof(coRegistration.Line).Equals(currentProperty))
                             {
                                 coRegistration.Line = new List<List<System.Windows.Point>>();
                                 SetContour(reader, currentProperty, null, coRegistration);
+                            }
+                            else if (nameof(coRegistration.MarkerPoint).Equals(currentProperty))
+                            {
+                                coRegistration.MarkerPoint = new System.Windows.Point();
+                                while (reader.Read())
+                                {
+                                    if (reader.Value != null)
+                                    {
+                                        coRegistration.MarkerPoint = StrToPoint(reader.Value.ToString());
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }
@@ -1788,8 +1806,8 @@ namespace RaywattApp.Common.Util
                     if (reader.Value != null && reader.TokenType == JsonToken.Boolean)
                         lumenContour.Valid = (bool)reader.Value;
                     break;
-                case nameof(coRegistration.TrackPoint):
-                    SetPoints(reader, coRegistration.TrackPoint);
+                case nameof(coRegistration.TrackPoints):
+                    SetPoints(reader, coRegistration.TrackPoints);
                     break;
                 case nameof(coRegistration.Line):
                     SetMultiDimensionalPoints(reader, coRegistration.Line);
