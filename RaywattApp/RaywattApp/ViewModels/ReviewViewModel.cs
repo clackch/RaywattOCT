@@ -156,6 +156,9 @@ namespace RaywattApp.ViewModels
         private List<LumenSidebranch> _lumenSidebranches;
 
         [ObservableProperty]
+        private bool _isDrawLumenSideBranch = false;
+
+        [ObservableProperty]
         private List<LumenStent> _lumenStents;
 
         [ObservableProperty]
@@ -379,6 +382,9 @@ namespace RaywattApp.ViewModels
             CurrentCoRegistration = new CoRegistration();
 
             UpdateCrossSectionImage();
+
+            if(CommonUtil.IsTestMode(DeviceStatus.TestMode, "Sidebranch"))
+                IsDrawLumenSideBranch = true;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -583,16 +589,6 @@ namespace RaywattApp.ViewModels
                             LumenGuidewire lumenGuidewire = new LumenGuidewire();
                             LumenGuidewires.Add(lumenGuidewire);
                         }
-                    }
-
-                    //Test - Lumen Detection
-                    if(CommonUtil.IsTestMode(DeviceStatus.TestMode, "ML"))
-                    {
-                        threadMakeLumenProfile.Join();
-                        InitializeLumenData();
-                        DeviceStatus.IsLumenSaved = false;
-                        RayStartLumenDetection();
-                        this.isLumenContourSave = true;
                     }
                 }
                 else//From Recording

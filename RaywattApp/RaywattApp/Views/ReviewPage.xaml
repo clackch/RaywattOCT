@@ -529,7 +529,7 @@
                         </RectangleGeometry>
                     </Grid.Clip>
                     <Grid>
-                        <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" LumenStents="{Binding LumenStents}" CurrentLumenStent="{Binding CurrentLumenStent, Mode=TwoWay}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" Zoom="{Binding ReviewStatus.Zoom}" FrameNumber="{Binding FrameNumber}" IsDrawOn="{Binding ReviewStatus.IsContourStentOn}" IsEditOn="False" InCommand="{Binding LumenContourCommand, Mode=TwoWay}">
+                        <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" LumenStents="{Binding LumenStents}" CurrentLumenStent="{Binding CurrentLumenStent, Mode=TwoWay}" LumenSidebranches="{Binding LumenSidebranches}" IsDrawLumenSideBranch="{Binding IsDrawLumenSideBranch}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" Zoom="{Binding ReviewStatus.Zoom}" FrameNumber="{Binding FrameNumber}" IsDrawOn="{Binding ReviewStatus.IsContourStentOn}" IsEditOn="False" InCommand="{Binding LumenContourCommand, Mode=TwoWay}">
                             <annotation:DrawLumenContourUtil.RenderTransform>
                                 <TransformGroup>
                                     <TranslateTransform X="{Binding ReviewStatus.Zoom.ZoomTranslateX, Converter={StaticResource CrossSectionTranslateReverseConverter}}" Y="{Binding ReviewStatus.Zoom.ZoomTranslateY, Converter={StaticResource CrossSectionTranslateReverseConverter}}"/>

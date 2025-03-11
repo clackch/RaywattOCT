@@ -10,7 +10,7 @@ INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES (
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'RJ', 'Y', 'Raywatt;');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'FG', 'Y', 'Raywatt;');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'Image', 'Y', 'Raywatt;');
-INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'ML', 'N', 'Raywatt;');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'Sidebranch', 'Y', 'Raywatt;');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'Compensate', 'Y', 'Raywatt;');
 
 -- rv_schema.code
