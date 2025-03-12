@@ -75,7 +75,7 @@ namespace RaywattApp.Common.Angio
         private byte[] tmpBuffer;
         private List<byte[]> angioSaveBuffer;
         public List<byte[]> AngioSaveBuffer { get { return angioSaveBuffer; } set { angioSaveBuffer = value; } }
-        public List<DateTimeOffset> angioSaveTimes;
+        public List<double> angioSaveTimes;
         private int bytesRead;
         private int tmpBufferLen;
         private int angioSaveFrameNum;
@@ -111,7 +111,7 @@ namespace RaywattApp.Common.Angio
         public short IsChpFileChangeSuccess { get { return isChpFileChangeSuccess; } set { isChpFileChangeSuccess = value; } }
 
         private bool isCathRoomDialogOpen = false;
-        private long live_time;
+        private double live_time;
 
         public AngioManager(IDialogService dialogService)
         {
@@ -124,7 +124,7 @@ namespace RaywattApp.Common.Angio
             buffer = new byte[256];
             tmpBuffer = new byte[512];
             angioSaveBuffer = new List<byte[]>();
-            angioSaveTimes = new List<DateTimeOffset>();
+            angioSaveTimes = new List<double>();
 
             Array.Fill<byte>(buffer, 0);
             Array.Fill<byte>(tmpBuffer, 0);
@@ -258,14 +258,12 @@ namespace RaywattApp.Common.Angio
 
                 angioSaveFrameNum = angioSaveBuffer.Count - 1;
                 int closestIndex = angioSaveFrameNum;
-                int searchRange = angioSaveFrameNum / 3;
                 double OCTStartTime = RayGetProperty(Property.PullbackStartTime);
                 double minGap = double.MaxValue;
                 double angioTime = double.MaxValue;
-                for (int i = angioSaveFrameNum; i > angioSaveFrameNum - searchRange; i--)
+                for (int i = angioSaveFrameNum; i >= 0; i--)
                 {
-                    DateTimeOffset time = angioSaveTimes[i];
-                    angioTime = time.ToUnixTimeMilliseconds() / 1000.0;
+                    angioTime = angioSaveTimes[i];
                     double gap = Math.Abs(angioTime - OCTStartTime);
 
                     if(gap <= minGap)
@@ -277,7 +275,7 @@ namespace RaywattApp.Common.Angio
                 _log.Debug($"gap = {minGap} Angio Time = {angioTime}, OCT Time = {OCTStartTime} closestIndex = {closestIndex}" +
                     $"maxIndex = {angioSaveFrameNum}");
 
-                while (closestIndex >= 0)
+                while (angioSaveFrameNum >= closestIndex)
                 {
                     if (!ViewModelBase._deviceStatus.IsAngioConnected)
                     {
@@ -291,7 +289,10 @@ namespace RaywattApp.Common.Angio
                     fs.Write(angioSaveBuffer[angioSaveFrameNum--], 0, angioImageSize);
                 }
                 fs.Close();
-
+                _log.Debug("done1"); 
+                AngioSaveBuffer.Clear();
+                _log.Debug(AngioSaveBuffer.Count());
+                if (closestIndex >= 0) return;
                 using (XmlWriter xw = XmlWriter.Create(angioFilePath + Constants.AngioParmasExtension, new XmlWriterSettings { Indent = true }))
                 {
                     xw.WriteStartDocument();
@@ -399,7 +400,7 @@ namespace RaywattApp.Common.Angio
             angioFrameWidth = BitConverter.ToInt16(tmpBuffer, offset);
             offset += sizeof(short);
             angioBitsPerPixel = (char)tmpBuffer[offset++];
-            live_time = BitConverter.ToInt64(tmpBuffer, offset); // Time Stamp
+            live_time = (double)(BitConverter.ToInt64(tmpBuffer, offset) / 1000.0); // Time Stamp
             offset += sizeof(long);
             angioImageSize = angioFrameHeight * angioFrameWidth * angioBitsPerPixel / 8;
 
@@ -415,7 +416,7 @@ namespace RaywattApp.Common.Angio
             if (threadOnSaveAngioFrames)
             { 
                 angioSaveBuffer.Add(new byte[angioImageSize]);
-                angioSaveTimes.Add(DateTimeOffset.UtcNow);
+                angioSaveTimes.Add(live_time);
                 Marshal.Copy(image.Data, angioSaveBuffer.Last(), 0, angioImageSize);
             }
             if (!ViewModelBase._deviceStatus.IsAngioConnected)return;
@@ -565,7 +566,6 @@ namespace RaywattApp.Common.Angio
                         offset += sizeof(short);
                         char BitsPerPixel = (char)tmpBuffer[offset++];
                         int imageSize = height * width * BitsPerPixel / 8;
-                        live_time = BitConverter.ToInt64(tmpBuffer, offset);
                         offset += sizeof(long);
                         if (tmpBufferLen >= imageSize)
                         {
