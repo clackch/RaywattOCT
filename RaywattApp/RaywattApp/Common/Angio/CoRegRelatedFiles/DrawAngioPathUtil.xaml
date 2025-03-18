@@ -30,16 +30,26 @@
             </Style.Triggers>
         </Style>
 
+        <!--Coregistration Path Style-->
         <Style TargetType="Ellipse" x:Key="StylePathEllipse">
             <Setter Property="Width" Value="{x:Static const:Constants.ellipsePathWidth}"/>
             <Setter Property="Height" Value="{x:Static const:Constants.ellipsePathHeight}"/>
-            <Setter Property="Fill" Value="White"/>
+            <Setter Property="Fill" Value="#FF1ED760"/>
+            <Setter Property="Opacity" Value="0.1"/>
         </Style>
-        
+
+        <!--Review Angio Marker Style-->
         <Style TargetType="Ellipse" x:Key="StyleTrackEllipse">
             <Setter Property="Width" Value="{x:Static const:Constants.ellipseTrackWidth}"/>
             <Setter Property="Height" Value="{x:Static const:Constants.ellipseTrackHeight}"/>
             <Setter Property="Fill" Value="#FF1ED760"/>
+        </Style>
+
+        <Style TargetType="Ellipse" x:Key="StyleOuterTrackEllipse">
+            <Setter Property="Width" Value="{x:Static const:Constants.ellipseOuterTrackWidth}"/>
+            <Setter Property="Height" Value="{x:Static const:Constants.ellipseOuterTrackHeight}"/>
+            <Setter Property="Fill" Value="#FF1ED760"/>
+            <Setter Property="Opacity" Value="0.5"/>
         </Style>
 
         <Style TargetType="Image" x:Key="AngioProximalIcon">

@@ -12,7 +12,6 @@ using RaywattApp.Common.Bases;
 using OpenCvSharp;
 using log4net;
 using System.Diagnostics;
-using OpenCvSharp.LineDescriptor;
 
 namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 {
@@ -25,7 +24,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
         /* AngioFrameNumber = ImageIndex */
         public int AngioFrameNumber 
-        {
+        { 
             get { return (int)GetValue(AngioFrameNumberProperty); }
             set { this.SetValue(AngioFrameNumberProperty, value); }
         }
@@ -174,9 +173,9 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
         private Image coregiCursor_no_cross;
         private List<Superpixel> superpixelList;
         private double markerDrawInterval = 0;
-        private Point distalPoint = new Point();
         private int prevOCTFrameNum = 0;
-        private int playDirection = 0;
+        private int prevAngioFrameNum = 0;
+        private int angioPlayDirection = 1;
         
         public DrawAngioPathUtil()
         {
@@ -229,6 +228,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             }
         }
 
+        // for use in Coregistration Page
         private void PathChange(int index)
         {
             Application.Current.Dispatcher.Invoke(() =>
@@ -240,12 +240,14 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             });
         }
 
+        // for use in Review Page
         private void MarkerChange()
         {
             InitializePath();
             DrawTrackPoint();
         }
 
+        // for use in Coregistration Page
         private void DrawPDICon(DijkstraHeap dh)
         {
             if(dh.trackPoints.Count < 1)
@@ -277,6 +279,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             this.canvas.Children.Add(proximalImage);
         }
 
+        // for use in Coregistration Page
         private void InitializePath(bool isPathOnly = false)
         {
             if (isPathOnly)
@@ -295,6 +298,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             }
         }
 
+        // for use in Coregistration Page
         public void DrawPath(DijkstraHeap dh)
         {
             canvas.Children.Clear();
@@ -328,6 +332,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             }
         }
 
+        // for use in Review Page
         public void DrawTrackPoint()
         {
             canvas.Children.Clear();
@@ -335,24 +340,36 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             List<Point> path = new List<Point>();
             foreach (var list in CurrentCoRegistration.Line)
             {
+                // P to D
                 path.AddRange(list);
             }
 
-            //Superpixel의 Index수로 Ratio 다시 설정
             if (path.Count == 0 || (CurrentCoRegistration.MarkerPoint.X == 0 && CurrentCoRegistration.MarkerPoint.Y == 0))
             {
                 return;
             }
+            
+            string pullbackType = "";
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                pullbackType = PullbackType;
+            });
 
             int markerIndex = path.IndexOf(CurrentCoRegistration.MarkerPoint);
-
-            if(markerIndex == -1)
+            
+            if (markerIndex == -1)
             {
-                path.Reverse();
+                _log.Debug("-------------------marker is not detected #" + CurrentAngioFrameNumber);
+                List<CoRegistration> coregistrations = null;
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    coregistrations = CoRegistrations;
+                });
+
                 double minDistance = double.MaxValue;
                 for (int i = 0; i < path.Count; i++)
                 {
-                    double tmp = GetDistance(path[i], CurrentCoRegistration.MarkerPoint);
+                    double tmp = GetDistance(path[i], coregistrations[CurrentAngioFrameNumber].MarkerPoint);
                     if (minDistance > tmp)
                     {
                         minDistance = tmp;
@@ -362,6 +379,15 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                 }
             }
 
+            if (angioPlayDirection > 0 /* P to D */ && CurrentAngioFrameNumber > 0)
+            {
+                markerIndex = markerIndex - GetPathInterval(PullbackType) < 0 ? 0 : markerIndex - GetPathInterval(PullbackType);
+            }
+            else if(angioPlayDirection < 0 /* D to P */ && CurrentAngioFrameNumber == 0)
+            {
+                markerIndex = markerIndex + GetPathInterval(PullbackType) < 0 ? 0 : markerIndex + GetPathInterval(PullbackType);
+            }
+
             //마커 그리기
             Ellipse marker = new Ellipse();
             marker.Style = (Style)this.Resources["StyleTrackEllipse"];
@@ -369,10 +395,46 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             int pathIndex = markerIndex + (int)markerDrawInterval >= path.Count ? path.Count - 1 : 
                 markerIndex + (int)markerDrawInterval < 0 ? 0 : markerIndex + (int)markerDrawInterval;
 
+            _log.Debug("pathIndex = " + pathIndex);
+            _log.Debug("markerDrawInterval = " + markerDrawInterval);
+
             Canvas.SetLeft(marker, path[pathIndex].X - marker.Width / 2);
             Canvas.SetTop(marker, path[pathIndex].Y - marker.Height / 2);
 
             this.canvas.Children.Add(marker);
+
+            Ellipse outerMarker = new Ellipse();
+            outerMarker.Style = (Style)this.Resources["StyleOuterTrackEllipse"];
+
+            Canvas.SetLeft(outerMarker, path[pathIndex].X - outerMarker.Width / 2);
+            Canvas.SetTop(outerMarker, path[pathIndex].Y - outerMarker.Height / 2);
+
+            this.canvas.Children.Add(outerMarker);
+        }
+
+        private int GetPathInterval(string pullbackType)
+        {
+            double pathInterval = Constants.pathInterval;
+            switch (pullbackType)
+            {
+                case "HISH":
+                    pathInterval = pathInterval * Constants.pathIntervalPowerHISH;
+                    break;
+                case "HILO":
+                    pathInterval = pathInterval * Constants.pathIntervalPowerHILO;
+                    break;
+                case "STSH":
+                    pathInterval = pathInterval * Constants.pathIntervalPowerSTSH;
+                    break;
+                case "STLO":
+                    pathInterval = pathInterval * Constants.pathIntervalPowerSTLO;
+                    break;
+                case "FAST":
+                    pathInterval = pathInterval * Constants.pathIntervalPowerFAST;
+                    break;
+            }
+
+            return (int)pathInterval;
         }
 
         private void PointTracking(double x, double y, int currFrameNum)
@@ -1025,35 +1087,21 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                     return;
                 }
 
-                double pathInterval = 8;
+                double pathInterval = Constants.pathInterval;
                 string pullbackType = "";
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     pullbackType = PullbackType;
                 });
 
-                switch (pullbackType)
-                {
-                    case "HISH":
-                        pathInterval = pathInterval;
-                        break;
-                    case "HILO":
-                        pathInterval = pathInterval * 2;
-                        break;
-                    case "STSH":
-                        pathInterval = pathInterval * 3;
-                        break;
-                    case "STLO":
-                        pathInterval = pathInterval * 5;
-                        break;
-                    case "FAST":
-                        pathInterval = pathInterval * 12;
-                        break;
-                }
+                pathInterval = GetPathInterval(pullbackType);
 
-                coRegistrations[coRegistrations.Count - 1].MarkerPoint = distalPoint;
+                int angioFrameNum = coRegistrations.Count;
 
-                for (int i = coRegistrations.Count - 1; i > 0; i--)
+                coRegistrations[angioFrameNum - 1].MarkerPoint = coRegistrations[angioFrameNum - 1].Line.Last().Last();
+                coRegistrations[0].MarkerPoint = coRegistrations[0].Line[0][0];
+
+                for (int i = angioFrameNum - 1; i > 1; i--)
                 {
                     Point prevMarkerPoint = coRegistrations[i].MarkerPoint;
 
@@ -1062,7 +1110,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                     {
                         currPath.AddRange(line);
                     }
-                    currPath.Reverse();
+                    currPath.Reverse(); // Distal 쪽이 0번 인덱스로
 
                     Point nextMarkerPoint = currPath[Math.Min(currPath.Count - 1, currPath.IndexOf(prevMarkerPoint) + (int)pathInterval)];
 
@@ -1244,7 +1292,6 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             if (newImages.Count > 0) control.angioImageTotalNum = newImages.Count;
 
             control.ActivateEvent();
-
             control.localDijkstraHeap = new List<DijkstraHeap>(control.DijkstraHeap);
             control.localCoRegistrations = new List<CoRegistration>();
         }
@@ -1264,21 +1311,39 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
             if (AngioFrameNumber < 0 || drawUtil == null || drawUtil.CoRegistrations == null || drawUtil.CoRegistrations.Count == 0 || drawUtil.CoRegistrations.Count < AngioFrameNumber) return;
 
+            if (drawUtil.angioImageTotalNum == 0)
+            {
+                drawUtil.angioImageTotalNum = drawUtil.CoRegistrations.Count;
+            }
+
             drawUtil.CurrentCoRegistration = drawUtil.CoRegistrations[AngioFrameNumber];
             drawUtil.markerDrawInterval = 0;
+
+            int direction = AngioFrameNumber - drawUtil.prevAngioFrameNum;
+
+            drawUtil.angioPlayDirection = direction > 0 ? 1 : -1;
+
+            if (drawUtil.AngioFrameNumber == 0 && drawUtil.prevAngioFrameNum > 1 /*Angio Last Frame*/)
+            {
+                drawUtil.angioPlayDirection = 1;
+            }
+            else if (drawUtil.prevAngioFrameNum == 0 && drawUtil.AngioFrameNumber > 1 /*Angio Last Frame*/)
+            {
+                drawUtil.angioPlayDirection = -1;
+            }
+
+            drawUtil.prevAngioFrameNum = AngioFrameNumber;
+            drawUtil.MarkerChange();
         }
-         
+        
         private static void OnFrameNumberPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
-            var control = (DrawAngioPathUtil)dependencyObject;
             var drawUtil = dependencyObject as DrawAngioPathUtil;
 
             if (drawUtil.CoRegistrations == null || drawUtil.CoRegistrations.Count == 0)
                 return;
 
-            int direction = drawUtil.FrameNumber - control.prevOCTFrameNum;
-
-            drawUtil.playDirection = direction > 0 ? 1 : -1;
+            int direction = drawUtil.FrameNumber - drawUtil.prevOCTFrameNum;
 
             if(drawUtil.FrameNumber == 0 && drawUtil.NumberOfFrames - 1 == drawUtil.prevOCTFrameNum)
             {
@@ -1295,7 +1360,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
             drawUtil.markerDrawInterval += drawUtil.GetMarkerInterval() * direction;
             drawUtil.MarkerChange();
-            control.prevOCTFrameNum = drawUtil.FrameNumber;
+            drawUtil.prevOCTFrameNum = drawUtil.FrameNumber;
         }
 
         private static void OnResetPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
@@ -1363,7 +1428,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
         public double GetMarkerInterval()
         {
             string pullbacktype = "";
-            double pathInterval = 0.4;
+            double pathInterval = (Constants.pathInterval) / angioImageTotalNum; // angio frame number : oct frame number
             Application.Current.Dispatcher.Invoke(() =>
             {
                 pullbacktype = PullbackType;
@@ -1372,17 +1437,23 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             switch (pullbacktype)
             {
                 case "HISH":
-                    return pathInterval;
+                    pathInterval = pathInterval * Constants.pathIntervalPowerHISH;
+                    break;
                 case "HILO":
-                    return pathInterval * 2;
+                    pathInterval = pathInterval * Constants.pathIntervalPowerHILO;
+                    break;
                 case "STSH":
-                    return pathInterval * 3;
+                    pathInterval = pathInterval * Constants.pathIntervalPowerSTSH;
+                    break;
                 case "STLO":
-                    return pathInterval * 5;
+                    pathInterval = pathInterval * Constants.pathIntervalPowerSTLO;
+                    break;
                 case "FAST":
-                    return pathInterval * 12;
+                    pathInterval = pathInterval * Constants.pathIntervalPowerFAST;
+                    break;
             }
-            return 1.0;
+
+            return pathInterval;
         }
 
         #endregion
@@ -1424,7 +1495,6 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             {
                 trackPointNum = localDijkstraHeap[currAngioFrameNumber].trackPoints.Count;
                 localDijkstraHeap[currAngioFrameNumber].trackPoints.Add(clickPosition);
-                distalPoint = new Point(clickPosition.X, clickPosition.Y);
                 PointTracking(clickPosition.X, clickPosition.Y, currAngioFrameNumber);
                 ProcessFrameCorrection(currAngioFrameNumber, AngioImages);
                 PathChange(currAngioFrameNumber);
