@@ -222,7 +222,7 @@ void CTIFFImaging::GetLumenOffsetPoints(std::vector<cv::Point>& lumenOffsetBound
 	}
 }
 
-int whatNumberYouAre = 0;
+static int whatNumberYouAre = 0;
 void CTIFFImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& centerPoints, std::vector<double>& radius) {
 	whatNumberYouAre++;
 	if (GuideWires.empty()) {
@@ -394,18 +394,22 @@ void CTIFFImaging::GetGuideWireShadowPointAngles(cv::Mat grayImage, std::vector<
 		}
 
 	GetOut:
+		PLOGI.printf("start_Guidewire_Shadow_calc, frameNum = %d", whatNumberYouAre);
+
 		int startY, startX, endX, direction;
 		direction = inversededgePoint.y - 100 < 0 ? 1 : -1;// 100: GuideWire가 벽면에 붙어 있는 경우 탐색 방향 설정.
 
 		startY = inversededgePoint.y;
 		startX = 0;
 		endX = inversededgePoint.x - 100 < 0 ? inversededgePoint.x / 2 : inversededgePoint.x - 100; // 100 : Shadow 탐색 시,  Guidewire로부터 혈관벽 쪽으로 offset(100) 이동
-
+		
 		//GuideWire 중심점 row에 대한 pixel Value 합
-		double sumOfStandardValue = 0;
+		int sumOfStandardValue = 0;
 		for (int x = startX; x <= endX; x++) {
 			sumOfStandardValue += inversedImage.at<uchar>(inversededgePoint.y, x);
 		}
+
+		PLOGI.printf("sumOfStandardValue = %d, row = %d", sumOfStandardValue, inversededgePoint.y);
 
 		double gap = 0;
 		int series = 0;
@@ -415,12 +419,24 @@ void CTIFFImaging::GetGuideWireShadowPointAngles(cv::Mat grayImage, std::vector<
 				sumOfPixelValues += inversedImage.at<uchar>(y, x);
 			}
 
+			PLOGI.printf("sumOfPixelValues = %d, row = %d", sumOfPixelValues, y);
+
 			if (sumOfPixelValues >= sumOfStandardValue * 2.5) {
 				series++;
 			}
 
 			if (series == 3) {
-				theta.push_back((360.0 / m_nHeight * gap) * CV_PI / 180);
+				double tmp_theta = (360.0 / m_nHeight * gap) * CV_PI / 180;
+				theta.push_back(tmp_theta);
+
+				if (tmp_theta > 1) {
+					/*char* fileName = new char[CHAR_MAX];
+					sprintf(fileName, "%s", "inversedImage");
+					sprintf(fileName, "%s", whatNumberYouAre);
+					sprintf(fileName, "%s", ".png");*/
+					std::string fileName = "inversedImage" + std::to_string(whatNumberYouAre) + ".png";
+					cv::imwrite(fileName, inversedImage);
+				}
 				return;
 			}
 		}
