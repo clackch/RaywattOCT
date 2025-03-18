@@ -29,6 +29,7 @@ using System.IO;
 using System.Windows.Media;
 using RaywattApp.Common.Angio;
 using System.Xml;
+using OpenCvSharp.WpfExtensions;
 
 namespace RaywattApp.ViewModels
 {
@@ -70,6 +71,7 @@ namespace RaywattApp.ViewModels
         }
 
         private List<Mat> AngioFrames;
+        private List<Mat> Frames = new List<Mat>();
 
         [ObservableProperty]
         private BitmapSource _calciumIndicator;
@@ -570,6 +572,7 @@ namespace RaywattApp.ViewModels
                     if(!String.IsNullOrEmpty(patientCaseAnnotations[0].LumenGuidewire))
                     {
                         LumenGuidewires = JsonConvert.DeserializeObject<List<LumenGuidewire>>(patientCaseAnnotations[0].LumenGuidewire);
+                        
                     }
                     else
                     {
@@ -590,6 +593,23 @@ namespace RaywattApp.ViewModels
                         RayStartLumenDetection();
                         this.isLumenContourSave = true;
                     }
+
+                    // review 이미지 mat 형식으로 저장 
+                    for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)
+                    {
+                        byte[] imageData;
+                        var encoder = new PngBitmapEncoder();
+                        encoder.Frames.Add(BitmapFrame.Create(CrossSectionImage));
+                        using (var stream = new MemoryStream())
+                        {
+                            encoder.Save(stream);
+                            imageData = stream.ToArray();
+                        }
+                        Mat nowImage = Cv2.ImDecode(imageData, ImreadModes.Color);
+
+                        Frames.Add(nowImage);
+                    }
+
                 }
                 else//From Recording
                 {
@@ -597,6 +617,7 @@ namespace RaywattApp.ViewModels
                     InitializeLumenData();
                     Thread threadLumenDetectionDone = new Thread(() => ThreadLumenDetectionDone());
                     threadLumenDetectionDone.Start();
+
                 }
             }
 
@@ -736,6 +757,26 @@ namespace RaywattApp.ViewModels
 
                 DeviceStatus.IsLumenSaved = true;
                 SetLumenProfileInit();
+
+
+                // review 이미지에 guidewire 위치를 표시하여 파일로 저장
+                for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)
+                {
+                    if (LumenGuidewires[i].Points != null)
+                    {
+                        foreach (var point in LumenGuidewires[i].Points)
+                        {
+                            int x = (int)System.Math.Round(point.X);
+                            int y = (int)System.Math.Round(point.Y);
+                            if (x < 0 || y < 0 || x >= Frames[i].Cols || y >= Frames[i].Rows) { continue; }
+                            Cv2.Circle(Frames[i], new OpenCvSharp.Point(x, y), 5, new Scalar(0, 0, 255), -1);
+                        }
+                    }
+                    else _log.Debug("Guidewire is NULL");
+                    string fN = $"check{i}.png";
+                    Cv2.ImWrite(fN, Frames[i]);
+                }
+
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -925,7 +966,7 @@ namespace RaywattApp.ViewModels
         private double GetGuidewireAverageRadius()
         {
             // 0보다 작은 값들을 제거
-            List<double> validRadiusList = GuideWireRadiusList.Where(v => v >= 0).ToList();
+            List<double> validRadiusList = GuideWireRadiusList.Where(v => v >= 0 && double.IsFinite(v) && v <= 90).ToList();
 
             if (validRadiusList.Count == 0)
             {
@@ -945,7 +986,6 @@ namespace RaywattApp.ViewModels
                 double normalizedValue = normalizedValues[index];
                 return normalizedValue >= -2 && normalizedValue <= 2;
             }).ToList();
-
 
             double filteredAverage = filteredValues.Average();
 

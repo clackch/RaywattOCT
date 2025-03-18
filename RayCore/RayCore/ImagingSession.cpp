@@ -645,11 +645,17 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		
 		pImaging->GetGuideWireCenterPoint(circleImage, vGuidewires, centerPoints, Radius);
 
-		for (size_t row = 0; row < vGuidewires.size(); row++) {
-			mGuidewire.at<cv::Point>(row, 0) = cv::Point(centerPoints[row].x, centerPoints[row].y);
+		if (vGuidewires.size() > 0)
+		{
+			for (size_t row = 0; row < vGuidewires.size(); row++) {
+				mGuidewire.at<cv::Point>(row, 0) = cv::Point(centerPoints[row].x, centerPoints[row].y);
+			}
+			vGuidewire.push_back(mGuidewire);
+			vGuidewireRadius.push_back(Radius);
 		}
-		vGuidewire.push_back(mGuidewire);
-		vGuidewireRadius.push_back(Radius);
+		else {
+			PLOGI.printf("GuideWire num : %d", vGuidewire.size());
+		}
 
 		pSession->m_pMsg->postMessage(WM_PROCESS_DETECTION, nSession, nFrame);
 	}
