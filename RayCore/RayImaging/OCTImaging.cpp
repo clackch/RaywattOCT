@@ -424,51 +424,69 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 }
 
 void COCTImaging::findSheath(cv::Mat img) {
+	m_nSheathSearchRange = 300; /*1mm 오차 범위 설정*/
+	double maxMinusEdge = 0.3;
+	double pointStandard = 0.1;
+	int closeness = 10;
+	int maxDiffIndex = 44, minDiffIndex = 33;
 	cv::Mat image;
+
+	img.convertTo(img, CV_32F, 1 / 255.f);
 	cv::rotate(img, image, cv::ROTATE_90_COUNTERCLOCKWISE);
+	image = image(cv::Range(0, m_nSheathSearchRange), cv::Range::all());
+	cv::resize(image, image, cv::Size(image.cols, image.rows));
 
-	// 행의 평균과 분산 계산
-	std::vector<double> mean_values;
-	std::vector<double> variance_values;
+	//horizontal line formed 노이즈 제거
+	cv::Mat edge_image;
+	cv::Sobel(image, edge_image, CV_64F, 1 /*dx*/, 0 /*dy*/, 3 /*kernel size*/, 1, 0, cv::BORDER_CONSTANT);
 
-	for (int i = 0; i < image.rows; ++i) {
-		cv::Mat row = image.row(i);
-		cv::Scalar mean, stddev;
-		cv::meanStdDev(row, mean, stddev);
-		mean_values.push_back(mean[0]);
-		variance_values.push_back(stddev[0] * stddev[0]);  // 분산은 표준편차의 제곱
+	cv::Mat temp = image.clone();
+	for (int i = 0; i < m_nSheathSearchRange; i++) for (int j = 0; j < temp.cols; j++) {
+		temp.at<float>(i, j) -= (maxMinusEdge - edge_image.at<float>(i, j));
 	}
 
-	// 평균 값을 0~1로 정규화
-	std::vector<double> mean_values_norm = normalize(mean_values);
+	// 행마다의 일정 밝기 이상의 픽셀 계수, 가장 많은 행 2개 저장
+	std::vector<int> pixelNum(m_nSheathSearchRange);
+	int maxIndex[2] = { 0, 0 };
 
-	// 정규화된 평균이 0.9 이상인 행 필터링
-	std::vector<std::tuple<int, double, double>> valid_rows;
-	for (int i = 0; i < mean_values_norm.size(); ++i) {
-		if (mean_values_norm[i] >= 0.9) {
-			valid_rows.emplace_back(i, mean_values[i], variance_values[i]);
+	for (int i = 0; i < m_nSheathSearchRange; i++) {
+		int tmp = 0;
+		for (int j = 0; j < image.cols; j++) {
+			if (temp.at<float>(i, j) >= pointStandard)
+				tmp++;
+		}
+		pixelNum[i] = tmp;
+		if (i == 0) continue;
+		else if (pixelNum[maxIndex[0]] < pixelNum[i]) {
+			maxIndex[0] = i;
 		}
 	}
 
-	if (!valid_rows.empty()) {
-		// 분산이 가장 작은 행 찾기
-		auto min_variance_row = *std::min_element(valid_rows.begin(), valid_rows.end(),
-			[](const auto& a, const auto& b) { return std::get<2>(a) < std::get<2>(b); });
-		m_nSheathPosition = std::get<0>(min_variance_row) + m_measureSetting.nSheathThickness;
+	for (int i = 0; i < m_nSheathSearchRange; i++) {
+		if (i == 0 || std::abs(maxIndex[0] - i) <= closeness) continue;
+		else if (pixelNum[maxIndex[1]] < pixelNum[i]) {
+			maxIndex[1] = i;
+		}
+	}
+
+	// outer line 행 위치를 return
+	int diff = abs(maxIndex[0] - maxIndex[1]);
+	if (diff < minDiffIndex || diff > maxDiffIndex) {
+		m_nSheathPosition = 0;
 	}
 	else {
-		m_nSheathPosition = 0;
+		m_nSheathPosition = std::max(maxIndex[0], maxIndex[1]);
 	}
 }
 
 // 정규화를 위한 함수
-std::vector<double> COCTImaging::normalize(const std::vector<double>& values) {
+std::vector<double> COCTImaging::normalize(const std::vector<double>& values, double scale) {
 	double min_val = *std::min_element(values.begin(), values.end());
 	double max_val = *std::max_element(values.begin(), values.end());
 	std::vector<double> normalized;
 
 	for (double val : values) {
-		normalized.push_back((val - min_val) / (max_val - min_val));
+		normalized.push_back((val - min_val) / (max_val - min_val) * scale);
 	}
 	return normalized;
 }
