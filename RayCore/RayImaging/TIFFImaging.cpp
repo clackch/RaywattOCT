@@ -1,5 +1,6 @@
 #include "TIFFImaging.h"
 #include "LookUpTable.h"
+#include <string>
 
 CTIFFImaging::CTIFFImaging(Setting setting, CMessageService* pMsg)
 	: COCTImaging(setting, pMsg) 
@@ -221,7 +222,9 @@ void CTIFFImaging::GetLumenOffsetPoints(std::vector<cv::Point>& lumenOffsetBound
 	}
 }
 
+int whatNumberYouAre = 0;
 void CTIFFImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& centerPoints, std::vector<double>& radius) {
+	whatNumberYouAre++;
 	if (GuideWires.empty()) {
 		return;
 	}
@@ -244,6 +247,14 @@ void CTIFFImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f
 	}
 
 	GetGuideWireCircleEdgePoints(grayImage, GuideWires, edgePoints);
+
+	/*cv::Mat midCheck = image.clone();
+	for (cv::Point edgepoint : edgePoints) {
+		cv::circle(midCheck, edgepoint, 1, cv::Scalar(0, 0, 255), -1);
+	}
+	std::string name = "edgePoint" + std::to_string(whatNumberYouAre) + ".png";
+	cv::imwrite(name, midCheck);*/
+
 	GetGuideWireShadowPointAngles(grayImage, edgePoints, theta);
 
 	if (theta[0] == 0) {
@@ -251,6 +262,7 @@ void CTIFFImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f
 		radius.push_back(-1);
 		return;
 	}
+	PLOGI.printf("theta : %lf", theta[0]);
 
 	// edgePoints와 theta는 같은 인덱스끼리 매칭
 	int centerX = image.cols / 2;
@@ -376,16 +388,18 @@ void CTIFFImaging::GetGuideWireShadowPointAngles(cv::Mat grayImage, std::vector<
 			for (int x = 0; x < width; x++) {
 				if (inversedImage.at<uchar>(y, x) == 255) {
 					inversededgePoint = cv::Point(x, y);
-					break;
+					goto GetOut;
 				}
 			}
 		}
+
+	GetOut:
 		int startY, startX, endX, direction;
-		direction = inversededgePoint.y - 100 < 0 ? 1 : -1;
+		direction = inversededgePoint.y - 100 < 0 ? 1 : -1;// 100: GuideWire가 벽면에 붙어 있는 경우 탐색 방향 설정.
 
 		startY = inversededgePoint.y;
 		startX = 0;
-		endX = inversededgePoint.x - 100 < 0 ? inversededgePoint.x / 2 : inversededgePoint.x - 100;
+		endX = inversededgePoint.x - 100 < 0 ? inversededgePoint.x / 2 : inversededgePoint.x - 100; // 100 : Shadow 탐색 시,  Guidewire로부터 혈관벽 쪽으로 offset(100) 이동
 
 		//GuideWire 중심점 row에 대한 pixel Value 합
 		double sumOfStandardValue = 0;
