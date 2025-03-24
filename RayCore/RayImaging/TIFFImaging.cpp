@@ -26,7 +26,7 @@ void CTIFFImaging::Initialize()
 }
 
 void CTIFFImaging::Process(char* fringes)
-{
+{ // 여기 Process로 들어온다.
 	m_end = std::chrono::system_clock::now();
 	CLookUpTable& lut = CLookUpTable::GetInstance();
 	cv::Mat imgTIFF(cv::Size(m_setting.nBScan, m_setting.nAScan), CV_8UC1, fringes);
@@ -218,66 +218,25 @@ void CTIFFImaging::GetLumenOffsetPoints(std::vector<cv::Point>& lumenOffsetBound
 }
 
 void CTIFFImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int& angleNum, std::vector<int>& startAngle, std::vector<int>& endAngle, int frameNum) {
-	if (calciumContours.empty()) {
-		return;
-	}
+	
+	if (calciumContours.empty())return;
 
 	// 컨투어 그리기
 	cv::Mat contourImage = cv::Mat::zeros(imageCircle.size(), CV_8UC1);
 	cv::drawContours(contourImage, calciumContours, -1, cv::Scalar(255), cv::FILLED);
-
-	cv::Mat inverseContourImg;
-	cv::remap(contourImage, inverseContourImg, inverseMatXMap, inverseMatYMap, cv::INTER_LINEAR);
-
-	cv::Mat rectImg;
-	cv::remap(imageResult.clone(), rectImg, inverseMatXMap, inverseMatYMap, cv::INTER_LINEAR);
-
-	cv::Mat recircleImg;
-	cv::remap(rectImg, recircleImg, matXMap, matYMap, cv::INTER_LINEAR);
-
-	cv::imwrite("contourImage" + std::to_string(frameNum) + ".png", contourImage);
-	cv::imwrite("rectImg" + std::to_string(frameNum) + ".png", rectImg);
-	cv::imwrite("remappedImg" + std::to_string(frameNum) + ".png", inverseContourImg);
-	cv::imwrite("recircleImg" + std::to_string(frameNum) + ".png", recircleImg);
+	
+	cv::Mat contourRectImg;
+	InverseCircularizeImage(contourImage, contourRectImg); 
 
 	std::vector<std::vector<cv::Point>> rectangleCalciumContours;
-	cv::findContours(inverseContourImg, rectangleCalciumContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-	
-	cv::Mat alineImg = cv::Mat::zeros(imageResult.size(), CV_8UC1);
+	cv::findContours(contourRectImg, rectangleCalciumContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	std::vector<cv::Point> startAnglePoint; 
+	std::vector<cv::Point> endAnglePoint;   
 	for (const auto& contour : rectangleCalciumContours) {
 		cv::Rect rect = cv::boundingRect(contour);
-		
-		for (int i = rect.y; i < rect.y + rect.height; i++) {
-			if (i >= m_nHeight)
-				break;
-			alineImg.at<uchar>(i, m_nWidth) = 255;
-		}
-	}
-
-	cv::imwrite("alineImg" + std::to_string(frameNum) + ".png", alineImg);
-
-	bool findStart = false;
-	int series = 0;
-	std::vector<cv::Point> startAnglePoint;
-	std::vector<cv::Point> endAnglePoint;
-	for (int i = 0; i < m_nHeight; i++) {
-		int pixelValue = alineImg.at<uchar>(i, m_nWidth / 2);
-		if (pixelValue != 0 && series == 0) {
-			series++;
-			findStart = true;
-			startAnglePoint.push_back(cv::Point(m_nWidth / 2, i));
-		}
-		else if (pixelValue != 0 && series != 0) {
-			series++;
-		}
-		else if (pixelValue == 0 && series != 0) {
-			endAnglePoint.push_back(cv::Point(m_nWidth / 2, i-1));
-			series = 0;
-		}
-	}
-
-	if (findStart == true && series != 0) {
-		endAnglePoint.push_back(cv::Point(m_nHeight/2 , m_nHeight - 1));
+		if (rect.height * rect.width <= 500)continue;
+		startAnglePoint.push_back(cv::Point(rect.x + rect.width / 2, rect.y + rect.height));
+		endAnglePoint.push_back(cv::Point(rect.x + rect.width / 2, rect.y));  
 	}
 
 	cv::Point center(m_nWidth / 2, m_nHeight / 2);
@@ -288,37 +247,20 @@ void CTIFFImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumCo
 	if (tissue.channels() == 1) {
 		cv::cvtColor(tissue, tissue, cv::COLOR_GRAY2BGR);
 	}
-
+	cv::Point test;
 	PLOGI.printf("startAnglePoint.size() = %d", startAnglePoint.size());
-
 	for (int i = 0; i < startAnglePoint.size(); i++) {
-		float tempX = matXMap.at<float>(startAnglePoint[i].y, startAnglePoint[i].x);
-		float tempY = matYMap.at<float>(startAnglePoint[i].y, startAnglePoint[i].x);
-		PLOGI.printf("tempX = %d, tmpY = %d", tempX, tempY);
-		startAnglePoint[i].x = (int)tempX;
-		startAnglePoint[i].y = (int)tempY;
-		startAnglePoint[i] = RotatePoint(startAnglePoint[i], center);
-
-		if (tempY >= 0 && tempY < tissue.rows && tempX >= 0 && tempX < tissue.cols) {
-			tissue.at<cv::Vec3b>(static_cast<int>(tempY), static_cast<int>(tempX)) = cv::Vec3b(0, 0, 255);
-		}
-
-		tempX = matXMap.at<float>(endAnglePoint[i].y, endAnglePoint[i].x);
-		tempY = matYMap.at<float>(endAnglePoint[i].y, endAnglePoint[i].x);
-		PLOGI.printf("tempX = %d, tmpY = %d", tempX, tempY);
-		endAnglePoint[i].x = (int)tempX;
-		endAnglePoint[i].y = (int)tempY;
-		endAnglePoint[i] = RotatePoint(endAnglePoint[i], center);
-
-		if (tempY >= 0 && tempY < tissue.rows && tempX >= 0 && tempX < tissue.cols) {
-			tissue.at<cv::Vec3b>(static_cast<int>(tempY), static_cast<int>(tempX)) = cv::Vec3b(0, 0, 255);
-		}
+		PLOGI.printf("startAnglePointX = %d, startAnglePointY = %d", startAnglePoint[i].x, startAnglePoint[i].y);  
+		startAnglePoint[i] = matXY(startAnglePoint[i], m_nWidth, m_nHeight);
+		test = startAnglePoint[i];
+		endAnglePoint[i] = matXY(endAnglePoint[i], m_nWidth, m_nHeight);
+		PLOGI.printf("tempX = %d, tmpY = %d", startAnglePoint[i].x, startAnglePoint[i].y); 
+		
 	}
-
 	for (int i = 0; i < startAnglePoint.size(); i++) {
-		double sAngle = GetTheta(standard, startAnglePoint[i]);
-		double eAngle = GetTheta(standard, endAnglePoint[i]);
-
+		double sAngle = GetTheta(startAnglePoint[i], center);
+		double eAngle = GetTheta(endAnglePoint[i], center);
+		PLOGI.printf("Start_Angle = %lf, end_Angle = %lf", sAngle, eAngle);
 		startAngle.push_back(sAngle);
 		endAngle.push_back(eAngle);
 	}
@@ -326,12 +268,15 @@ void CTIFFImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumCo
 	angleNum = startAnglePoint.size();
 }
 
-double CTIFFImaging::GetTheta(cv::Point vector1, cv::Point vector2) {
+double CTIFFImaging::GetTheta(cv::Point point, cv::Point center) {
 
-	double cos_theta = (vector1.x * vector2.x + vector1.y * vector2.y) /
-		(sqrt(vector1.x * vector1.x + vector1.y * vector1.y) + sqrt(vector2.x * vector2.x + vector2.y * vector2.y));
-
-	return acos(cos_theta) * 180.0 / CV_PI;
+	int dx = point.x - center.x;
+	int dy = point.y - center.y;
+	double angle = std::atan2(dx, -dy) * 180.0 / CV_PI;
+	if (angle < 0) {
+		angle += 360.0;
+	}
+	return angle;
 }
 
 // 주어진 점을 반시계 방향으로 90도 회전시키는 함수
@@ -346,4 +291,54 @@ cv::Point2f  CTIFFImaging::RotatePoint(const cv::Point2f& point, const cv::Point
 
 	// 회전된 점을 원래 위치로 이동
 	return cv::Point2f(rotatedX + center.x, rotatedY + center.y);
+}
+
+cv::Point2f CTIFFImaging::matXY(const cv::Point2f& srcPt, int m_nWidth, int m_nHeight)
+{
+	float bestDist = std::numeric_limits<float>::max();
+	cv::Point2f bestXY(0.f, 0.f);
+	for (int y = 0; y < m_nHeight; y++)
+	{
+		const float* xMapRow = matXMap.ptr<float>(y);
+		const float* yMapRow = matYMap.ptr<float>(y);
+
+		for (int x = 0; x < m_nWidth; x++)
+		{
+			float dx = xMapRow[x] - srcPt.x;
+			float dy = yMapRow[x] - srcPt.y;
+			float distSq = dx * dx + dy * dy;
+
+			if (distSq < bestDist)
+			{
+				bestDist = distSq;
+				bestXY = cv::Point2f((float)x, (float)y);
+			}
+		}
+	}
+	float cx = 0.5f * m_nWidth;
+	float cy = 0.5f * m_nHeight;
+	float xShift = bestXY.x - cx;
+	float yShift = bestXY.y - cy;
+	float rx = yShift;
+	float ry = -xShift;
+	rx += cx;
+	ry += cy;
+	cv::Point test;
+	test.x = rx; test.y = ry;
+	cv::Point center(m_nWidth / 2, m_nHeight / 2);
+	test = rotatePoint_CCW90(test, center); 
+	test = rotatePoint_CCW90(test, center); 
+	return cv::Point2f(test.x, test.y); 
+}
+
+// 시계방향 회전
+cv::Point2f CTIFFImaging::rotatePoint_CCW90(const cv::Point2f& point, const cv::Point2f& center) 
+{
+	float translatedX = static_cast<float>(point.x) - center.x;
+	float translatedY = static_cast<float>(point.y) - center.y;
+	float rotatedX = -translatedY;
+	float rotatedY = translatedX;
+	int finalX = static_cast<int>(std::round(rotatedX + center.x));
+	int finalY = static_cast<int>(std::round(rotatedY + center.y));
+	return cv::Point(finalX, finalY);
 }

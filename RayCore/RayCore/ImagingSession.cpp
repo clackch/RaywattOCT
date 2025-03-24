@@ -225,7 +225,6 @@ void* CImagingSession::GetImageData(int nFrame) {
 	if (nFrame < 0 || nFrame >= m_pDataManager->GetNumOfSamples()) return nullptr;
 
 	char* pBuffer = m_pDataManager->GetSample(nFrame);
-
 	m_pImaging->Process(pBuffer);
 	cv::Mat imgResult = m_pImaging->GetProcessedImage().clone();
 
@@ -354,8 +353,9 @@ void* CImagingSession::GetCalciumAngles(int nFrame) {
 	for (int i = 0; i < calcium.angleNum; i++) {
 		calciumAngles[i * 2] = calcium.startAngle[i];
 		calciumAngles[i * 2 + 1] = calcium.endAngle[i];
-
-		PLOGI.printf("nFrame %d-%d : AngleSize %d = endAngle %d - starAngle %d", nFrame, i, calcium.endAngle[i]- calcium.startAngle[i], calcium.endAngle[i], calcium.startAngle[i]);
+		int angle_size = calcium.endAngle[i] - calcium.startAngle[i];
+		if (angle_size < 0)angle_size += 360;
+		PLOGI.printf("nFrame %d-%d : AngleSize %d = endAngle %d - starAngle %d", nFrame, i, angle_size, calcium.endAngle[i], calcium.startAngle[i]);
 	}
 	return calciumAngles;
 }
@@ -664,7 +664,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 			mGuidewire.at<cv::Point>(row, 0) = cv::Point(vGuidewires[row].x + vGuidewires[row].width / 2, vGuidewires[row].y + vGuidewires[row].height / 2);
 		}
 		vGuidewire.push_back(mGuidewire);
-
+		
 		//calcium
 		cv::Mat contourCalcium = learning->FindCalcium(circleImage);
 

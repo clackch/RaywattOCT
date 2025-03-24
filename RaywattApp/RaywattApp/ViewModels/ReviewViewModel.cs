@@ -864,6 +864,7 @@ namespace RaywattApp.ViewModels
                     int startAngle = angleArr[i * 2];
                     int endAngle = angleArr[i * 2 + 1];
                     double angleSize = endAngle - startAngle;
+                    if (angleSize < 0) angleSize += 360;
                     LumenContours[frameInfo].Calcium.List.Add(new Tuple<double, double>(startAngle, angleSize));
                     LumenContours[frameInfo].Calcium.TotalAngle += (int)angleSize;
 

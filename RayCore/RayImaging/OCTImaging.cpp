@@ -168,7 +168,7 @@ void COCTImaging::CircularizeImage(cv::Mat& src, cv::Mat& dst)
 	memcpy(dst.data, imgFoV.data, sizeof(char) * dst.cols * dst.rows * imgFoV.channels());
 }
 
-void COCTImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int& angleNum, std::vector<int>& startAngle, std::vector<int>& endAngle, int frameNum = 0) {}
+void COCTImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int& angleNum, std::vector<int>& startAngle, std::vector<int>& endAngle, int frameNum) {}
 
 void COCTImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst) {}
 

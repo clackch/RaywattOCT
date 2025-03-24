@@ -1787,6 +1787,7 @@ namespace RaywattApp.Common.Util
 
         public static BitmapSource DrawCalciumIndicator(List<Tuple<double, double>> calciumAngleList, int rgbCode, int calciumIndicatorSize)
         {
+
             int r = (rgbCode >> 16) & 0xFF;
             int g = (rgbCode >> 8) & 0xFF;
             int b = (rgbCode >> 0) & 0xFF;
@@ -1813,6 +1814,56 @@ namespace RaywattApp.Common.Util
                     Tuple<double, double> nonCalciumArea = nonCalciumAngleList[i];
                     double nonCalciumStart = nonCalciumArea.Item1;
                     double nonCalciumEnd = nonCalciumArea.Item1 + nonCalciumArea.Item2;
+                    if (calciumEnd > 360)
+                    {
+                        double segmentStart =  calciumStart;
+                        double segmentEnd = 360;
+                        for (int j = nonCalciumAngleList.Count - 1; j >= 0; j--)
+                        {
+                            nonCalciumArea = nonCalciumAngleList[i];
+                            nonCalciumStart = nonCalciumArea.Item1;
+                            nonCalciumEnd = nonCalciumArea.Item1 + nonCalciumArea.Item2;
+                            if (segmentStart >= nonCalciumStart && segmentEnd <= nonCalciumEnd)
+                            {
+                                nonCalciumAngleList.RemoveAt(i);
+                                if (segmentStart > nonCalciumStart)
+                                {
+                                    Tuple<double, double> splitArea = new Tuple<double, double>(nonCalciumStart, segmentStart - nonCalciumStart);
+                                    nonCalciumAngleList.Add(splitArea);
+                                }
+                                if (segmentEnd < nonCalciumEnd)
+                                {
+                                    Tuple<double, double> splitArea = new Tuple<double, double>(segmentEnd, nonCalciumEnd - segmentEnd);
+                                    nonCalciumAngleList.Add(splitArea);
+                                }
+                                break;
+                            }
+                        }
+                        segmentStart = 0;
+                        segmentEnd = calciumEnd - 360;
+                        for (int j = nonCalciumAngleList.Count - 1; j >= 0; j--)
+                        {
+                            nonCalciumArea = nonCalciumAngleList[i];
+                            nonCalciumStart = nonCalciumArea.Item1;
+                            nonCalciumEnd = nonCalciumArea.Item1 + nonCalciumArea.Item2;
+                            if (segmentStart >= nonCalciumStart && segmentEnd <= nonCalciumEnd)
+                            {
+                                nonCalciumAngleList.RemoveAt(i);
+                                if (segmentStart > nonCalciumStart)
+                                {
+                                    Tuple<double, double> splitArea = new Tuple<double, double>(nonCalciumStart, segmentStart - nonCalciumStart);
+                                    nonCalciumAngleList.Add(splitArea);
+                                }
+                                if (segmentEnd < nonCalciumEnd)
+                                {
+                                    Tuple<double, double> splitArea = new Tuple<double, double>(segmentEnd, nonCalciumEnd - segmentEnd);
+                                    nonCalciumAngleList.Add(splitArea);
+                                }
+                                break;
+                            }
+                        }
+                        continue;
+                    }
                     if (calciumStart >= nonCalciumStart && calciumEnd <= nonCalciumEnd)
                     {
                         nonCalciumAngleList.RemoveAt(i);
