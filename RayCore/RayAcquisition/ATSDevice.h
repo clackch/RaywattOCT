@@ -10,6 +10,8 @@ private:
 
 	HANDLE	m_hATSBoard;
 	double	m_dSamplePerSec;
+
+	U32		m_admaFlags;
 	U32		m_nBufferIndex;
 	U16 **	m_pAcqBuffers;
 
