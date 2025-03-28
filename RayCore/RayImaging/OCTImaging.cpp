@@ -462,7 +462,7 @@ void COCTImaging::findSheath(cv::Mat img) {
 	int closeness = 10;
 	int maxDiffIndex = 44, minDiffIndex = 20;
 
-	cv::Mat imgt, image;
+	cv::Mat image;
 	cv::Mat imgRe = ReCircularize(img);
 	imgRe.convertTo(image, CV_32F);
 	cv::rotate(image, image, cv::ROTATE_90_COUNTERCLOCKWISE);
@@ -476,7 +476,7 @@ void COCTImaging::findSheath(cv::Mat img) {
 
 	cv::Mat temp = image.clone();
 	for (int i = 0; i < m_nSheathSearchRange; i++) for (int j = 0; j < temp.cols; j++) {
-		temp.at<float>(i, j) *= 0.15 + edge_image.at<float>(i, j);
+		temp.at<float>(i, j) *= edgeWeight + edge_image.at<float>(i, j);
 	}
 
 	// 행마다의 일정 밝기 이상의 픽셀 계수, 가장 많은 행 2개 저장
