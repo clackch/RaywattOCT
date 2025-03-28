@@ -61,42 +61,6 @@ void CTIFFImaging::PostProcess(cv::Mat image)
 }
 
 
-void CTIFFImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale) {
-	COCTImaging::initCircularizeMap(diameter, srcHeight, srcWidth, dstHeight, dstWidth, scale);
-	PLOGI.printf("TIFFImageing initCircularize Map Start");
-
-	double radius = (diameter / 2) - 0.5f;
-	inverseMatXMap.create(dstHeight, dstWidth, CV_32FC1);
-	inverseMatYMap.create(dstHeight, dstWidth, CV_32FC1);
-
-	inverseMatXMap.setTo(cv::Scalar::all(0));
-	inverseMatYMap.setTo(cv::Scalar::all(0));
-
-	for (int y = 0; y < dstHeight; y++)
-	{
-		for (int x = 0; x < dstWidth; x++)
-		{
-			float r = (float)(srcWidth - y) / scale;
-			float theta = ((float)x / srcHeight) * 2 * CV_PI;
-
-			float fx = r * cos(theta) + radius;
-			float fy = r * sin(theta) + radius;
-
-			inverseMatXMap.at<float>(y, x) = fx;
-			inverseMatYMap.at<float>(y, x) = fy;
-		}
-	}
-
-	PLOGI.printf("TIFFImageing initCircularize Map Done");
-}
-
-void CTIFFImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst) {
-	dst = src.clone();
-	cv::remap(dst, dst, inverseMatXMap, inverseMatYMap, cv::INTER_LINEAR);
-
-	cv::rotate(dst, dst, cv::ROTATE_90_COUNTERCLOCKWISE);
-}
-
 void CTIFFImaging::EraseStentOutLier(cv::Mat& stent) {
 	int width = m_nWidth;
 	int height = m_nHeight;
@@ -122,7 +86,7 @@ void CTIFFImaging::EraseStentOutLier(cv::Mat& stent) {
 	}
 	
 	cv::Mat remappedImage;
-	cv::remap(blackImage, remappedImage, inverseMatXMap, inverseMatYMap, cv::INTER_NEAREST);
+	cv::remap(blackImage, remappedImage, imatXMap, imatYMap, cv::INTER_NEAREST);
 	cv::rotate(remappedImage, remappedImage, cv::ROTATE_90_COUNTERCLOCKWISE);
 
 	while (!stent.empty()) {
@@ -182,7 +146,7 @@ void CTIFFImaging::SetLumenContourOffset(std::vector<cv::Point> lumenContour) {
 
 	cv::drawContours(blackImage, lumenContours, -1, cv::Scalar(255), 1);
 
-	cv::remap(blackImage, blackImage, inverseMatXMap, inverseMatYMap, cv::INTER_LINEAR);
+	cv::remap(blackImage, blackImage, imatXMap, imatYMap, cv::INTER_LINEAR);
 
 	cv::rotate(blackImage, blackImage, cv::ROTATE_90_COUNTERCLOCKWISE);
 

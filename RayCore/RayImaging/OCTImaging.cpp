@@ -85,6 +85,7 @@ void COCTImaging::Initialize(CCalibration* calibration) {
 
 	releaseCircularizeMap();
 	initCircularizeMap(m_setting.nOutputLength, m_setting.nBScan, m_setting.nOutputLength, m_setting.nCircleSize, m_setting.nCircleSize, 2.0f);
+	releaseInversedCircularizeMap();
 
 	m_nWidth = m_setting.nCircleSize;
 	m_nHeight = m_setting.nCircleSize;
@@ -168,7 +169,12 @@ void COCTImaging::CircularizeImage(cv::Mat& src, cv::Mat& dst)
 	memcpy(dst.data, imgFoV.data, sizeof(char) * dst.cols * dst.rows * imgFoV.channels());
 }
 
-void COCTImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst) {}
+void COCTImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst) {
+	dst = src.clone();
+	cv::remap(dst, dst, imatXMap, imatYMap, cv::INTER_LINEAR);
+
+	cv::rotate(dst, dst, cv::ROTATE_90_COUNTERCLOCKWISE);
+}
 
 void COCTImaging::EraseStentOutLier(cv::Mat& stent) {}
 
@@ -295,6 +301,31 @@ void COCTImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth, 
 void COCTImaging::releaseCircularizeMap() {
 	matXMap.release();
 	matYMap.release();
+}
+void COCTImaging::initInversedCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale) {
+	double radius = (diameter / 2) - 0.5f;
+
+	imatXMap.create(dstHeight, dstWidth, CV_32FC1);
+	imatYMap.create(dstHeight, dstWidth, CV_32FC1);
+
+	imatXMap.setTo(cv::Scalar::all(0));
+	imatYMap.setTo(cv::Scalar::all(0));
+
+	for (int y = 0; y < dstHeight; y++)
+	{
+		for (int x = 0; x < dstWidth; x++)
+		{
+			double r = (srcHeight - y) / scale;
+			double theta = (x / float(dstWidth)) * 2.0 * M_PI;
+
+			imatXMap.at<float>(x * dstHeight + y) = r * cos(theta) + radius;
+			imatYMap.at<float>(x * dstHeight + y) = r * sin(theta) + radius;
+		}
+	}
+}
+void COCTImaging::releaseInversedCircularizeMap() {
+	imatXMap.release();
+	imatYMap.release();
 }
 
 void COCTImaging::generateBackground(Ipp16u* fringes) {
@@ -430,9 +461,11 @@ void COCTImaging::findSheath(cv::Mat img) {
 	int closeness = 10;
 	int maxDiffIndex = 44, minDiffIndex = 33;
 	cv::Mat image;
+	cv::Mat imgt, image;
+	cv::Mat imgRe = ReCircularize(img);
+	imgRe.convertTo(image, CV_32F);
+	cv::rotate(image, image, cv::ROTATE_90_COUNTERCLOCKWISE);
 
-	img.convertTo(img, CV_32F, 1 / 255.f);
-	cv::rotate(img, image, cv::ROTATE_90_COUNTERCLOCKWISE);
 	image = image(cv::Range(0, m_nSheathSearchRange), cv::Range::all());
 	cv::resize(image, image, cv::Size(image.cols, image.rows));
 
@@ -477,6 +510,29 @@ void COCTImaging::findSheath(cv::Mat img) {
 	else {
 		m_nSheathPosition = std::max(maxIndex[0], maxIndex[1]);
 	}
+}
+
+cv::Mat COCTImaging::ReCircularize(const cv::Mat& img) {
+	float scale = 2.0f;
+
+	cv::Mat circularized;
+	remap(img, circularized, matXMap, matYMap, cv::INTER_LINEAR);
+	cv::imwrite("cimg"+std::to_string(imageNum) + ".png", circularized);
+	//cv::rotate(circularized, circularized, cv::ROTATE_90_CLOCKWISE);
+
+	if (imatXMap.empty() && imatYMap.empty()) {
+		int diameter = circularized.cols;
+		int srcWidth = circularized.cols;
+		int srcHeight = circularized.rows;
+		int dstWidth = diameter;
+		int dstHeight = diameter;
+
+		initInversedCircularizeMap(diameter, srcHeight, srcWidth, dstHeight, dstWidth, scale);
+	}
+	cv::Mat result;
+	remap(circularized, result, imatXMap, imatYMap, cv::INTER_NEAREST);
+
+	return result;
 }
 
 // 정규화를 위한 함수

@@ -29,6 +29,8 @@ protected:
 	CCalibration* calibration;
 	cv::Mat matXMap;
 	cv::Mat matYMap;
+	cv::Mat imatXMap;
+	cv::Mat imatYMap;
 
 	cv::Mat imageResult;
 	cv::Mat imageResultColor;
@@ -111,6 +113,8 @@ protected:
 	void releaseMemory();
 	void initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale);
 	void releaseCircularizeMap();
+	void initInversedCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale);
+	void releaseInversedCircularizeMap();
 
 	void generateBackground(Ipp16u* fringes);
 	void fftProcessing(const Ipp32f* fringes32f);
@@ -121,6 +125,7 @@ protected:
 	std::vector<double> normalize(const std::vector<double>& values, double scale = 1.0);
 	void drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color);
 	cv::Mat getFoVImage(cv::Mat image, double fov);
+	cv::Mat ReCircularize(const cv::Mat& img);
 
 	void adaptive_compensation();
 	void min_max_normalization(const cv::Mat& img, cv::Mat& normalized_img, double& min_val, double& max_val);
