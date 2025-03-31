@@ -41,13 +41,14 @@ bool ICommonProtocol::parseSerialPacket() {
 					BYTE checksum = calcChecksum(&m_vPacket[0], length - 2);
 					if (checksum == m_vPacket[length - 2]) {
 						handlePacket();
-						sliceUntilSTX(idxETX);
+						findSTX = sliceUntilSTX(idxETX);
 					}
 					else {
 						sliceUntilSTX(1);
 					}
 
-					break;
+					if(!findSTX)
+						break;
 				}
 			}
 		}

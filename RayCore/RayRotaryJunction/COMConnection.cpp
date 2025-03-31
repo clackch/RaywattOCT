@@ -33,16 +33,14 @@ int CCOMConnection::Write(unsigned char* buffer, int size)
 {
 	if (m_pPort == nullptr || !m_pPort->IsOpen()) return 0;
 	if (buffer == nullptr) return 0;
-
 	bool result = m_pPort->WriteByte(buffer, size);
 	
 	return (result) ? size : 0;
 }
-int CCOMConnection::Read(unsigned char* buffer) 
+int CCOMConnection::Read(unsigned char* buffer, int size)
 {
 	if (m_pPort == nullptr || !m_pPort->IsOpen()) return 0;
 	if (buffer == nullptr) return 0;
-
-	int nRead = m_pPort->ReadByte(buffer, sizeof(buffer));
+	int nRead = m_pPort->ReadByte(buffer, size);
 	return nRead;
 }

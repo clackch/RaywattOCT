@@ -50,7 +50,7 @@ bool CRJController::Connect(void *param) {
 	m_initMotor = m_pConnection->Connect(param);
 	if (m_initMotor) {
 		BOOL result = CUtility::StartThread(threadReadPacket, m_pThread, (LPVOID)this);
-
+		
 		if (result == FALSE) {
 			Disconnect();
 			m_initMotor = false;
@@ -239,12 +239,10 @@ bool CRJController::ReadRFID() {
 	serialPacket[packetLength - 2] = checksum;
 
 	int written = m_pConnection->Write(serialPacket, packetLength);
-
 	return (written == packetLength);
 }
 bool CRJController::IncreaseRFIDUsage() {
 	if (!m_initMotor) return false;
-
 	BYTE serialPacket[MAX_PATH];
 	int packetLength;
 	getSerialPacket(eFID::FID_RFID_USAGE_INCREMENT, 0, serialPacket, packetLength);
@@ -253,7 +251,6 @@ bool CRJController::IncreaseRFIDUsage() {
 	serialPacket[packetLength - 2] = checksum;
 
 	int written = m_pConnection->Write(serialPacket, packetLength);
-
 	return (written == packetLength);
 }
 bool CRJController::ResetRFIDUsage() {
@@ -273,7 +270,6 @@ bool CRJController::ResetRFIDUsage() {
 UINT CRJController::GetRFIDInfo(BYTE* pRFIDInfo) {
 	if (pRFIDInfo == nullptr) return 0;
 	if (m_nRFIDLength == 0) return 0;
-
 	memcpy(pRFIDInfo, m_RFID, m_nRFIDLength);
 	return m_nRFIDLength;
 }
@@ -307,7 +303,7 @@ UINT CRJController::threadReadPacket(LPVOID param) {
 	int offset = 0;
 
 	while (pRJController->m_pThread->isRun) {
-		int readSize = pRJController->m_pConnection->Read(recvBuf + offset);
+		int readSize = pRJController->m_pConnection->Read(recvBuf + offset, sizeof(recvBuf) / sizeof(*recvBuf) - offset);
 		if (readSize > 0) {
 			pRJController->addPacket(recvBuf, readSize);
 			pRJController->parseSerialPacket();
@@ -539,7 +535,6 @@ void CRJController::handlePacket() {
 	BYTE length = m_vPacket[LENGTH_IDX];
 	int dataLength = length - HEADER_LEN;
 	eFID fid = (eFID) m_vPacket[FID_IDX];
-
 	char strTime[MAX_PATH];
 	CUtility::GetCurTime(strTime);
 
