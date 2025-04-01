@@ -22,6 +22,9 @@ void CTIFFImaging::Initialize()
 	memset(imageMask.data, 0x00, m_setting.nBScan * m_setting.nAScan);
 	cv::circle(imageMask, cv::Point(imageMask.cols / 2, imageMask.rows / 2), imageMask.cols / 2, cv::Scalar(0xff, 0xff, 0xff), -1);
 
+	releaseInversedCircularizeMap();
+	initInversedCircularizeMap(m_setting.nAScan, m_setting.nBScan, m_setting.nAScan, m_setting.nBScan, m_setting.nAScan, 2.0f);
+	releaseCircularizeMap();
 	initCircularizeMap(m_setting.nAScan, m_setting.nBScan, m_setting.nAScan, m_setting.nBScan, m_setting.nAScan, 2.0f);
 }
 
@@ -84,7 +87,7 @@ void CTIFFImaging::EraseStentOutLier(cv::Mat& stent) {
 			blackImage.at<uchar>(point.y, point.x) = 255;
 		}
 	}
-	
+
 	cv::Mat remappedImage;
 	cv::remap(blackImage, remappedImage, imatXMap, imatYMap, cv::INTER_NEAREST);
 	cv::rotate(remappedImage, remappedImage, cv::ROTATE_90_COUNTERCLOCKWISE);
