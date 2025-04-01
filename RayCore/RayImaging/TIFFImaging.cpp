@@ -45,7 +45,7 @@ void CTIFFImaging::Process(char* fringes)
 void CTIFFImaging::PostProcess(cv::Mat image)
 {
 	const bool bColor = m_bColor;
-
+	findSheath(image);
 	cv::cvtColor(image, imageCircle, cv::COLOR_GRAY2RGB);
 	if (bColor) {
 		CLookUpTable& lut = CLookUpTable::GetInstance();
