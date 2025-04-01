@@ -293,8 +293,8 @@ void COCTImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth, 
 
 			float rvalue = (float)(srcWidth - scale * sqrt(pow(fy, 2) + pow(fx, 2))) + (float)circOffset;
 
-			matXMap.at<float>(x * dstHeight + y) = rvalue;
-			matYMap.at<float>(x * dstHeight + y) = (float)(((atan2(fy, fx) / M_PI) + 1.0) * 0.5 * (srcHeight - 1));
+			matXMap.at<float>(y, x) = rvalue;
+			matYMap.at<float>(y, x) = (float)(((atan2(fy, fx) / M_PI) + 1.0) * 0.5 * (srcHeight - 1));
 		}
 	}
 }
@@ -318,8 +318,8 @@ void COCTImaging::initInversedCircularizeMap(int diameter, int srcHeight, int sr
 			double r = (srcHeight - y) / scale;
 			double theta = (x / float(dstWidth)) * 2.0 * M_PI;
 
-			imatXMap.at<float>(x * dstHeight + y) = r * cos(theta) + radius;
-			imatYMap.at<float>(x * dstHeight + y) = r * sin(theta) + radius;
+			imatXMap.at<float>(y, x) = r * cos(theta) + radius;
+			imatYMap.at<float>(y, x) = r * sin(theta) + radius;
 		}
 	}
 }
@@ -459,6 +459,7 @@ void COCTImaging::findSheath(cv::Mat img) {
 	imageNum++;
 	m_nSheathSearchRange = 150; /*1mm 오차 범위 설정*/
 	double pointStandard = 0.1;
+	double edgeWeight = 1.5;
 	int closeness = 10;
 	int maxDiffIndex = 44, minDiffIndex = 20;
 
@@ -518,8 +519,7 @@ cv::Mat COCTImaging::ReCircularize(const cv::Mat& img) {
 
 	cv::Mat circularized;
 	remap(img, circularized, matXMap, matYMap, cv::INTER_LINEAR);
-	cv::imwrite("cimg"+std::to_string(imageNum) + ".png", circularized);
-	//cv::rotate(circularized, circularized, cv::ROTATE_90_CLOCKWISE);
+	cv::imwrite("cimg" + std::to_string(imageNum) + ".png", circularized);
 
 	if (imatXMap.empty() && imatYMap.empty()) {
 		int diameter = circularized.cols;
