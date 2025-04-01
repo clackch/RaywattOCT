@@ -86,6 +86,7 @@ void COCTImaging::Initialize(CCalibration* calibration) {
 	releaseCircularizeMap();
 	initCircularizeMap(m_setting.nOutputLength, m_setting.nBScan, m_setting.nOutputLength, m_setting.nCircleSize, m_setting.nCircleSize, 2.0f);
 	releaseInversedCircularizeMap();
+	initInversedCircularizeMap(m_setting.nCircleSize, m_setting.nCircleSize, m_setting.nCircleSize, m_setting.nCircleSize, m_setting.nCircleSize, 2.0f);
 
 	m_nWidth = m_setting.nCircleSize;
 	m_nHeight = m_setting.nCircleSize;
@@ -521,17 +522,9 @@ cv::Mat COCTImaging::ReCircularize(const cv::Mat& img) {
 	remap(img, circularized, matXMap, matYMap, cv::INTER_LINEAR);
 	cv::imwrite("cimg" + std::to_string(imageNum) + ".png", circularized);
 
-	if (imatXMap.empty() && imatYMap.empty()) {
-		int diameter = circularized.cols;
-		int srcWidth = circularized.cols;
-		int srcHeight = circularized.rows;
-		int dstWidth = diameter;
-		int dstHeight = diameter;
-
-		initInversedCircularizeMap(diameter, srcHeight, srcWidth, dstHeight, dstWidth, scale);
-	}
 	cv::Mat result;
 	remap(circularized, result, imatXMap, imatYMap, cv::INTER_NEAREST);
+	cv::rotate(result, result, cv::ROTATE_90_COUNTERCLOCKWISE);
 
 	return result;
 }
