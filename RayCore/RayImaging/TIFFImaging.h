@@ -19,9 +19,6 @@ public:
 	virtual void Process(char* fringes);
 	virtual void PostProcess(cv::Mat image);
 	virtual cv::Mat GetProcessedImage() { return imageConvert; }
-	virtual void SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int& angleNum, std::vector<int>& startAngle, std::vector<int>& endAngle, int frameNum);
-	virtual void initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale);
-	virtual void InverseCircularizeImage(cv::Mat& src, cv::Mat& dst);
 	virtual void EraseStentOutLier(cv::Mat& stent);
 	virtual void SetLumenContourOffset(std::vector<cv::Point> lumenContour);
 

@@ -60,40 +60,6 @@ void CTIFFImaging::PostProcess(cv::Mat image)
 	CircularizeImage(imageCircle, imageCircle);
 }
 
-
-void CTIFFImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale) {
-	COCTImaging::initCircularizeMap(diameter, srcHeight, srcWidth, dstHeight, dstWidth, scale);
-
-	double radius = (diameter / 2) - 0.5f;
-	inverseMatXMap.create(dstHeight, dstWidth, CV_32FC1);
-	inverseMatYMap.create(dstHeight, dstWidth, CV_32FC1);
-
-	inverseMatXMap.setTo(cv::Scalar::all(0));
-	inverseMatYMap.setTo(cv::Scalar::all(0));
-
-	for (int y = 0; y < dstHeight; y++)
-	{
-		for (int x = 0; x < dstWidth; x++)
-		{
-			float r = (float)(srcWidth - y) / scale;
-			float theta = ((float)x / srcHeight) * 2 * CV_PI;
-
-			float fx = r * cos(theta) + radius;
-			float fy = r * sin(theta) + radius;
-
-			inverseMatXMap.at<float>(y, x) = fx;
-			inverseMatYMap.at<float>(y, x) = fy;
-		}
-	}
-}
-
-void CTIFFImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst) {
-	dst = src.clone();
-	cv::remap(dst, dst, inverseMatXMap, inverseMatYMap, cv::INTER_LINEAR);
-
-	cv::rotate(dst, dst, cv::ROTATE_90_COUNTERCLOCKWISE);
-}
-
 void CTIFFImaging::EraseStentOutLier(cv::Mat& stent) {
 	int width = m_nWidth;
 	int height = m_nHeight;
@@ -215,55 +181,6 @@ void CTIFFImaging::GetLumenOffsetPoints(std::vector<cv::Point>& lumenOffsetBound
 
 		lumenOffsetBoundary[i] = cv::Point(x, y);
 	}
-}
-
-void CTIFFImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int& angleNum, std::vector<int>& startAngle, std::vector<int>& endAngle, int frameNum) {
-	
-	if (calciumContours.empty())return;
-
-	// 컨투어 그리기
-	cv::Mat contourImage = cv::Mat::zeros(imageCircle.size(), CV_8UC1);
-	cv::drawContours(contourImage, calciumContours, -1, cv::Scalar(255), cv::FILLED);
-	
-	cv::Mat contourRectImg;
-	InverseCircularizeImage(contourImage, contourRectImg); 
-
-	std::vector<std::vector<cv::Point>> rectangleCalciumContours;
-	cv::findContours(contourRectImg, rectangleCalciumContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-	std::vector<cv::Point> startAnglePoint; 
-	std::vector<cv::Point> endAnglePoint;   
-	for (const auto& contour : rectangleCalciumContours) {
-		cv::Rect rect = cv::boundingRect(contour);
-		if (rect.height * rect.width <= 500)continue;
-		startAnglePoint.push_back(cv::Point(rect.x + rect.width / 2, rect.y + rect.height));
-		endAnglePoint.push_back(cv::Point(rect.x + rect.width / 2, rect.y));  
-	}
-
-	cv::Point center(m_nWidth / 2, m_nHeight / 2);
-	cv::Point standard(m_nWidth / 2, 0);
-
-	cv::Mat tissue = imageCircle.clone();
-
-	if (tissue.channels() == 1) {
-		cv::cvtColor(tissue, tissue, cv::COLOR_GRAY2BGR);
-	}
-	PLOGI.printf("startAnglePoint.size() = %d", startAnglePoint.size());
-	for (int i = 0; i < startAnglePoint.size(); i++) {
-		PLOGI.printf("startAnglePointX = %d, startAnglePointY = %d", startAnglePoint[i].x, startAnglePoint[i].y);  
-		startAnglePoint[i] = matXY(startAnglePoint[i], m_nWidth, m_nHeight);
-		endAnglePoint[i] = matXY(endAnglePoint[i], m_nWidth, m_nHeight);
-		PLOGI.printf("tempX = %d, tmpY = %d", startAnglePoint[i].x, startAnglePoint[i].y); 
-		
-	}
-	for (int i = 0; i < startAnglePoint.size(); i++) {
-		double sAngle = GetTheta(startAnglePoint[i], center);
-		double eAngle = GetTheta(endAnglePoint[i], center);
-		PLOGI.printf("Start_Angle = %lf, end_Angle = %lf", sAngle, eAngle);
-		startAngle.push_back(sAngle);
-		endAngle.push_back(eAngle);
-	}
-
-	angleNum = startAnglePoint.size();
 }
 
 // 주어진 점을 반시계 방향으로 90도 회전시키는 함수
