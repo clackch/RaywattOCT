@@ -258,7 +258,7 @@ namespace RaywattApp.Common.Angio
 
                 angioSaveFrameNum = angioSaveBuffer.Count - 1;
                 int closestIndex = angioSaveFrameNum;
-                double OCTStartTime = RayGetProperty(Property.PullbackStartTime);
+                double OCTStartTime = RayGetProperty(Property.PullbackStartTime) / 2.0;
                 double minGap = double.MaxValue;
                 double angioTime = double.MaxValue;
                 for (int i = angioSaveFrameNum; i >= 0; i--)
@@ -286,13 +286,14 @@ namespace RaywattApp.Common.Angio
                         }
                         return;
                     }
+                    if (angioSaveFrameNum % 2 != 0)
+                    {
+                        angioSaveFrameNum--;
+                        continue;
+                    }
                     fs.Write(angioSaveBuffer[angioSaveFrameNum--], 0, angioImageSize);
                 }
                 fs.Close();
-                _log.Debug("done1"); 
-                AngioSaveBuffer.Clear();
-                _log.Debug(AngioSaveBuffer.Count());
-                if (closestIndex >= 0) return;
                 using (XmlWriter xw = XmlWriter.Create(angioFilePath + Constants.AngioParmasExtension, new XmlWriterSettings { Indent = true }))
                 {
                     xw.WriteStartDocument();
