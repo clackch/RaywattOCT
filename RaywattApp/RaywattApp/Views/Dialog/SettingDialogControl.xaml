@@ -39,6 +39,7 @@
                 <Button Style="{Binding CurrentMenu, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingTermsConditionsPage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingTermsConditionsPage}" Content="{Binding [Terms and Conditions], Source={StaticResource L10N}}"/>
                 <Button Style="{Binding CurrentMenu, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingMaintenancePage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingMaintenancePage}" Content="{Binding [Maintenance], Source={StaticResource L10N}}"/>
                 <Button Style="{Binding CurrentMenu, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingAboutPage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingAboutPage}" Content="{Binding [About], Source={StaticResource L10N}}"/>
+                <Button Style="{Binding CurrentMenu, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingDicomPage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingDicomPage}" Content="{Binding [DICOM], Source={StaticResource L10N}}"/>
                 <!--
                 <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingLocalizationPage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingLocalizationPage}" Content="{Binding [Localization], Source={StaticResource L10N}}"/>
                 <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingAcquisitionPage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingAcquisitionPage}" Content="{Binding [Acquisition], Source={StaticResource L10N}}"/>
@@ -46,29 +47,34 @@
             </StackPanel>
 
             <StackPanel Grid.Row="2" Grid.Column="2" Grid.RowSpan="2">
-                <Frame NavigationUIVisibility="Hidden" Visibility="{Binding Visibility}">
+                <Frame NavigationUIVisibility="Hidden" Visibility="{Binding VisibilitySettingDatabasePage}">
                     <b:Interaction.Behaviors>
-                        <behaviors:FrameBehavior Navigation="{Binding PopupNavigationSource, Mode=TwoWay}" />
+                        <behaviors:FrameBehavior Navigation="{Binding PopupNavigationSourceSettingDatabasePage, Mode=TwoWay}" />
                     </b:Interaction.Behaviors>
                 </Frame>
-                <Frame NavigationUIVisibility="Hidden" Visibility="{Binding Visibility2}">
+                <Frame NavigationUIVisibility="Hidden" Visibility="{Binding VisibilitySettingLogPage}">
                     <b:Interaction.Behaviors>
-                        <behaviors:FrameBehavior Navigation="{Binding PopupNavigationSource2, Mode=TwoWay}" />
+                        <behaviors:FrameBehavior Navigation="{Binding PopupNavigationSourceSettingLogPage, Mode=TwoWay}" />
                     </b:Interaction.Behaviors>
                 </Frame>
-                <Frame NavigationUIVisibility="Hidden" Visibility="{Binding Visibility3}">
+                <Frame NavigationUIVisibility="Hidden" Visibility="{Binding VisibilitySettingTermsConditionsPage}">
                     <b:Interaction.Behaviors>
-                        <behaviors:FrameBehavior Navigation="{Binding PopupNavigationSource3, Mode=TwoWay}" />
+                        <behaviors:FrameBehavior Navigation="{Binding PopupNavigationSourceSettingTermsConditionsPage, Mode=TwoWay}" />
                     </b:Interaction.Behaviors>
                 </Frame>
-                <Frame NavigationUIVisibility="Hidden" Visibility="{Binding Visibility4}">
+                <Frame NavigationUIVisibility="Hidden" Visibility="{Binding VisibilitySettingMaintenancePage}">
                     <b:Interaction.Behaviors>
-                        <behaviors:FrameBehavior Navigation="{Binding PopupNavigationSource4, Mode=TwoWay}" />
+                        <behaviors:FrameBehavior Navigation="{Binding PopupNavigationSourceSettingMaintenancePage, Mode=TwoWay}" />
                     </b:Interaction.Behaviors>
                 </Frame>
-                <Frame NavigationUIVisibility="Hidden" Visibility="{Binding Visibility5}">
+                <Frame NavigationUIVisibility="Hidden" Visibility="{Binding VisibilitySettingAboutPage}">
                     <b:Interaction.Behaviors>
-                        <behaviors:FrameBehavior Navigation="{Binding PopupNavigationSource5, Mode=TwoWay}" />
+                        <behaviors:FrameBehavior Navigation="{Binding PopupNavigationSourceSettingAboutPage, Mode=TwoWay}" />
+                    </b:Interaction.Behaviors>
+                </Frame>
+                <Frame NavigationUIVisibility="Hidden" Visibility="{Binding VisibilitySettingDicomPage}">
+                    <b:Interaction.Behaviors>
+                        <behaviors:FrameBehavior Navigation="{Binding PopupNavigationSourceSettingDicomPage, Mode=TwoWay}" />
                     </b:Interaction.Behaviors>
                 </Frame>
             </StackPanel>

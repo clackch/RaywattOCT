@@ -47,13 +47,14 @@ namespace RaywattApp.ViewModels.Dialog
         {
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["classification"] = "Terms&Cond";
+            sqlParameters["key"] = "AgreeYN";
             sqlParameters["value"] = "Y(" + DateTime.Now.ToString("yyyyMMddHHmmss") + ")";
             sqlParameters["buffer"] = TermsConditions.Buffer.Trim();
 
             int res = _sqlManager.UpdateConfiguration(sqlParameters);
             if (res != 1)
             {
-                _log.Error("Insert Error");
+                _log.Error("Update Error");
             }
 
             base.AnswerYes(dialog);

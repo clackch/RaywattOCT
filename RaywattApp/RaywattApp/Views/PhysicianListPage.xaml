@@ -50,7 +50,7 @@
                             <Border Grid.Row="1" Grid.Column="0" Height="542" CornerRadius="10" BorderThickness="0" Background="{DynamicResource GrayscaleGray8Brush}" Margin="0,16,0,0">
                                 <StackPanel>
                                     <StackPanel>
-                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="30,12,0,10" Content="{Binding [Name], Source={StaticResource L10N}}"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="0,12,0,10" Content="{Binding [Name], Source={StaticResource L10N}}" HorizontalAlignment="Center"/>
                                     </StackPanel>
                                     <Separator Background="{DynamicResource GrayscaleGray6Brush}"/>
                                     <StackPanel Height="495">
@@ -61,7 +61,7 @@
                                                 </i:EventTrigger>
                                             </i:Interaction.Triggers>
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipLeft}" Width="*" Binding="{Binding Name}"/>
+                                                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Name}"/>
                                             </DataGrid.Columns>
                                         </DataGrid>
                                     </StackPanel>

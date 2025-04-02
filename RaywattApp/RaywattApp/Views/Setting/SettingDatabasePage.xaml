@@ -14,33 +14,43 @@
         <Border Grid.Row="0" CornerRadius="10" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Background="{DynamicResource GrayscaleGray8Brush}">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
+                    <RowDefinition Height="55"/>
+                    <RowDefinition Height="64"/>
                 </Grid.RowDefinitions>
-                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="28,0,28,0">
-                    <Image Source="{svgc:SvgImage Source=/res/icon/drive_fold.svg}" Width="100"/>
-                    <StackPanel Width="50"/>
-                    <ProgressBar Value="{Binding StorageProgress}" Width="376" Height="70"/>
-                </StackPanel>
-                <Grid Grid.Row="1" Margin="178,0,28,0">
+                <Label Content="{Binding [Storage], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="28,24,0,0"/>
+                <Grid Grid.Row="1" Margin="28,0,28,0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
+                        <ColumnDefinition Width="64"/>
+                        <ColumnDefinition Width="24"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Orientation="Horizontal">
-                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Total], Source={StaticResource L10N}}"/>
-                        <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
-                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding StorageTotalSize}"/>
-                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [GB], Source={StaticResource L10N}}" Margin="5,0,0,0"/>
-                        </StackPanel>
-                    </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Free], Source={StaticResource L10N}}"/>
-                        <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
-                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding StorageFreeSize}"/>
-                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [GB], Source={StaticResource L10N}}" Margin="5,0,0,0"/>
-                        </StackPanel>
+                    <Border Grid.Column="0" Width="64" Height="64" Background="{StaticResource GrayscaleGray7Brush}" CornerRadius="4">
+                        <Image Source="{svgc:SvgImage Source=/res/icon/storage.svg}" Width="40"/>
+                    </Border>
+                    <StackPanel Grid.Column="2">
+                        <StackPanel Height="17"/>
+                        <ProgressBar Value="{Binding StorageProgress}" Width="440" Height="24"/>
+                        <StackPanel Height="8"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Total], Source={StaticResource L10N}}"/>
+                                <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding StorageTotalSize}"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [GB], Source={StaticResource L10N}}" Margin="5,0,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Free], Source={StaticResource L10N}}"/>
+                                <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding StorageFreeSize}"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [GB], Source={StaticResource L10N}}" Margin="5,0,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
                     </StackPanel>
                 </Grid>
             </Grid>
