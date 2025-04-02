@@ -29,6 +29,9 @@ using RaywattApp.Common.Angio;
 using System.Xml;
 using Python.Runtime;
 using FFMpegCore;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using RayCoreWrapper;
 
 namespace RaywattApp.Common.Util
 {
@@ -50,7 +53,7 @@ namespace RaywattApp.Common.Util
 
         public static bool ValidateId(string input)
         {
-            var regex = new Regex(@"^[a-zA-Z0-9]+$");
+            var regex = new Regex(@"^[a-zA-Z0-9_\-\.]+$");
 
             if (input.Length == 0)
                 return true;
@@ -296,7 +299,10 @@ namespace RaywattApp.Common.Util
 
         public static void DeleteFolder(string path)
         {
-            Directory.Delete(path, true);
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(path, true);
+            }            
         }
 
         public static async Task CopyFiles(Dictionary<string, string> files, Action<double> progressCallback, double progressSize, Action<string> progressTextCallback)
@@ -2543,5 +2549,121 @@ namespace RaywattApp.Common.Util
 
             return true;
         }
+
+        public static LocalHost GetNetworkInfo()
+        {
+            LocalHost localHost = new LocalHost();
+            localHost.Hostname = Environment.MachineName;
+
+            foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                if (nic.OperationalStatus == OperationalStatus.Up && nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+                {
+                    _log.Debug($"Network Adapter: {nic.Description}");
+                    localHost.AdapterName = nic.Description;
+                    _log.Debug($"MAC Address: {nic.GetPhysicalAddress()}");
+
+                    IPInterfaceProperties ipProperties = nic.GetIPProperties();
+
+                    //DHCP 여부 확인
+                    bool isDhcpEnabled = ipProperties.GetIPv4Properties().IsDhcpEnabled;
+                    _log.Debug($"DHCP?: {(isDhcpEnabled ? "DHCP" : "Static IP")}");
+                    localHost.IsManual = !isDhcpEnabled;
+
+                    foreach (UnicastIPAddressInformation ip in ipProperties.UnicastAddresses)
+                    {
+                        if (ip.Address.AddressFamily == AddressFamily.InterNetwork) // IPv4만 가져오기
+                        {
+                            _log.Debug($"IP Address: {ip.Address}");
+                            localHost.IpAddress = ip.Address.ToString();
+                            _log.Debug($"Subnet Mask: {ip.IPv4Mask}");
+                            localHost.SubnetMask = ip.IPv4Mask.ToString();
+                        }
+                    }
+
+                    foreach (GatewayIPAddressInformation gateway in ipProperties.GatewayAddresses)
+                    {
+                        _log.Debug($"Default Gateway: {gateway.Address}");
+                        localHost.DefaultGateway = gateway.Address.ToString();
+                    }
+
+                    if (ipProperties.DnsAddresses.Count > 0)
+                    {
+                        _log.Debug($"Preferred Dns Server: {ipProperties.DnsAddresses[0]}");
+                        localHost.PreferredDnsServer = ipProperties.DnsAddresses[0].ToString();
+                    }
+
+                    if (ipProperties.DnsAddresses.Count > 1)
+                    {
+                        _log.Debug($"Alternate Dns Server: {ipProperties.DnsAddresses[1]}");
+                        localHost.AlternateDnsServer = ipProperties.DnsAddresses[1].ToString();
+                    }
+                    else
+                    {
+                        _log.Debug($"Alternate Dns Server: (Not set)");
+                    }
+
+                    break;
+                }
+            }
+
+            return localHost;
+        }
+
+        public static void ParseDicomName(string dicomName, out string lastname, out string firstname)
+        {
+            lastname = string.Empty;
+            firstname = string.Empty;
+
+            if (string.IsNullOrWhiteSpace(dicomName))
+                return;
+
+            string[] nameParts = dicomName.Split('^');
+
+            if (nameParts.Length > 0)
+                lastname = nameParts[0];
+
+            if (nameParts.Length > 1)
+                firstname = nameParts[1];
+        }
+
+        public static string GetDicomResultMessage(RayExportWrapper.DicomNetRWError resultCode)
+        {
+            switch (resultCode)
+            {
+                case RayExportWrapper.DicomNetRWError.Normal:
+                    return "Operation completed successfully.";
+                case RayExportWrapper.DicomNetRWError.InitializeFail:
+                    return "Initialization failed. Please check the configuration.";
+                case RayExportWrapper.DicomNetRWError.NetworkInitFail:
+                    return "Failed to initialize network. Please check your network connection.";
+                case RayExportWrapper.DicomNetRWError.AssociationFail:
+                    return "Failed to establish DICOM association with the server.";
+                case RayExportWrapper.DicomNetRWError.EchoFail:
+                    return "DICOM Echo test failed. Please verify the server status.";
+                case RayExportWrapper.DicomNetRWError.FindFail:
+                    return "Failed to perform query (Find).";
+                case RayExportWrapper.DicomNetRWError.StoreFail:
+                    return "Failed to store/send image (Store).";
+                case RayExportWrapper.DicomNetRWError.NoPresentationConterxt:
+                    return "No supported Presentation Contexts found.";
+                case RayExportWrapper.DicomNetRWError.NoUncompressedPC:
+                    return "No uncompressed Presentation Contexts available.";
+                case RayExportWrapper.DicomNetRWError.NoSOPClass:
+                    return "Unsupported SOP Class.";
+                case RayExportWrapper.DicomNetRWError.FileLoadFail:
+                    return "Failed to load the file.";
+                case RayExportWrapper.DicomNetRWError.TLSProfileFail:
+                    return "TLS security profile error.";
+                case RayExportWrapper.DicomNetRWError.NoConnection:
+                    return "No connection to the server.";
+                case RayExportWrapper.DicomNetRWError.NoSCU:
+                    return "No SCU (Service Class User) is configured.";
+                case RayExportWrapper.DicomNetRWError.UnknownError:
+                default:
+                    return "An unknown error has occurred.";
+            }
+        }
+
     }
 }

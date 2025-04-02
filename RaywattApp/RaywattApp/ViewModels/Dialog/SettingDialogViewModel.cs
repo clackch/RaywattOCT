@@ -18,34 +18,40 @@ namespace RaywattApp.ViewModels.Dialog
         private string _currentMenu;
 
         [ObservableProperty]
-        private string _popupNavigationSource;
+        private string _popupNavigationSourceSettingDatabasePage;
 
         [ObservableProperty]
-        private Visibility _visibility = Visibility.Collapsed;
+        private Visibility _visibilitySettingDatabasePage = Visibility.Collapsed;
 
         [ObservableProperty]
-        private string _popupNavigationSource2;
+        private string _popupNavigationSourceSettingLogPage;
 
         [ObservableProperty]
-        private Visibility _visibility2 = Visibility.Collapsed;
+        private Visibility _visibilitySettingLogPage = Visibility.Collapsed;
 
         [ObservableProperty]
-        private string _popupNavigationSource3;
+        private string _popupNavigationSourceSettingTermsConditionsPage;
 
         [ObservableProperty]
-        private Visibility _visibility3 = Visibility.Collapsed;
+        private Visibility _visibilitySettingTermsConditionsPage = Visibility.Collapsed;
 
         [ObservableProperty]
-        private string _popupNavigationSource4;
+        private string _popupNavigationSourceSettingMaintenancePage;
 
         [ObservableProperty]
-        private Visibility _visibility4 = Visibility.Collapsed;
+        private Visibility _visibilitySettingMaintenancePage = Visibility.Collapsed;
 
         [ObservableProperty]
-        private string _popupNavigationSource5;
+        private string _popupNavigationSourceSettingAboutPage;
 
         [ObservableProperty]
-        private Visibility _visibility5 = Visibility.Collapsed;
+        private Visibility _visibilitySettingAboutPage = Visibility.Collapsed;
+
+        [ObservableProperty]
+        private string _popupNavigationSourceSettingDicomPage;
+
+        [ObservableProperty]
+        private Visibility _visibilitySettingDicomPage = Visibility.Collapsed;
 
         private ICommand _popupNavigateCommand;
 
@@ -74,17 +80,18 @@ namespace RaywattApp.ViewModels.Dialog
 
         public SettingDialogViewModel()
         {
-            PopupNavigationSource = Constants.SettingDatabasePage;
+            PopupNavigationSourceSettingDatabasePage = Constants.SettingDatabasePage;
 
             WeakReferenceMessenger.Default.Register<PopupNavigationMessage>(this, OnPopupNavigationMessage);
 
-            PopupNavigationSource = Constants.SettingDatabasePage;
-            PopupNavigationSource2 = Constants.SettingLogPage;
-            PopupNavigationSource3 = Constants.SettingTermsConditionsPage;
-            PopupNavigationSource4 = Constants.SettingMaintenancePage;
-            PopupNavigationSource5 = Constants.SettingAboutPage;
+            PopupNavigationSourceSettingDatabasePage = Constants.SettingDatabasePage;
+            PopupNavigationSourceSettingLogPage = Constants.SettingLogPage;
+            PopupNavigationSourceSettingTermsConditionsPage = Constants.SettingTermsConditionsPage;
+            PopupNavigationSourceSettingMaintenancePage = Constants.SettingMaintenancePage;
+            PopupNavigationSourceSettingAboutPage = Constants.SettingAboutPage;
+            PopupNavigationSourceSettingDicomPage = Constants.SettingDicomPage;
 
-            Visibility = Visibility.Visible;
+            VisibilitySettingDatabasePage = Visibility.Visible;
             CurrentMenu = Constants.SettingDatabasePage;
         }
 
@@ -94,35 +101,39 @@ namespace RaywattApp.ViewModels.Dialog
 
             //Apply/Save 시, 페이지에 저장할 기능(or 내용)이 있으면 아래 추가
             string pageUri = message.Value;
-            PopupNavigationSource3 = pageUri;//[SettingTermsConditionsPage]
+            PopupNavigationSourceSettingTermsConditionsPage = pageUri;
         }
 
         private void OnPopupNavigate(string pageUri)
         {
             _log.Debug("OnPopupNavigate : " + pageUri);
 
-            Visibility = Visibility.Collapsed;
-            Visibility2 = Visibility.Collapsed;
-            Visibility3 = Visibility.Collapsed;
-            Visibility4 = Visibility.Collapsed;
-            Visibility5 = Visibility.Collapsed;
+            VisibilitySettingDatabasePage = Visibility.Collapsed;
+            VisibilitySettingLogPage = Visibility.Collapsed;
+            VisibilitySettingTermsConditionsPage = Visibility.Collapsed;
+            VisibilitySettingMaintenancePage = Visibility.Collapsed;
+            VisibilitySettingAboutPage = Visibility.Collapsed;
+            VisibilitySettingDicomPage = Visibility.Collapsed;
 
             switch (pageUri)
             {
                 case Constants.SettingDatabasePage:
-                    Visibility = Visibility.Visible;
+                    VisibilitySettingDatabasePage = Visibility.Visible;
                     break;
                 case Constants.SettingLogPage:
-                    Visibility2 = Visibility.Visible;
+                    VisibilitySettingLogPage = Visibility.Visible;
                     break;
                 case Constants.SettingTermsConditionsPage:
-                    Visibility3 = Visibility.Visible;
+                    VisibilitySettingTermsConditionsPage = Visibility.Visible;
                     break;
                 case Constants.SettingMaintenancePage:
-                    Visibility4 = Visibility.Visible;
+                    VisibilitySettingMaintenancePage = Visibility.Visible;
                     break;
                 case Constants.SettingAboutPage:
-                    Visibility5 = Visibility.Visible;
+                    VisibilitySettingAboutPage = Visibility.Visible;
+                    break;
+                case Constants.SettingDicomPage:
+                    VisibilitySettingDicomPage = Visibility.Visible;
                     break;
                 default:
                     break;
@@ -155,10 +166,10 @@ namespace RaywattApp.ViewModels.Dialog
             {
                 dialog.DialogResult = true;
             }
-            
+
             //OnNavigating 호출을 위해, 다른 페이지 입력 - Popup이 닫힐 때, 각 페이지별로 처리해야하는 부분이 있는 경우 아래 추가
-            PopupNavigationSource2 = Constants.SettingAboutPage;//[SettingLogPage] FileExportStep2Base의 Timer 종료를 위해 추가
-            PopupNavigationSource4 = Constants.SettingAboutPage;//[SettingMaintenancePage] RJ의 BLDC Step Motor 원위치를 위해 추가
+            PopupNavigationSourceSettingLogPage = Constants.SettingAboutPage;//[SettingLogPage] FileExportStep2Base의 Timer 종료를 위해 추가
+            PopupNavigationSourceSettingMaintenancePage = Constants.SettingAboutPage;//[SettingMaintenancePage] RJ의 BLDC Step Motor 원위치를 위해 추가
 
             WeakReferenceMessenger.Default.Unregister<PopupNavigationMessage>(this);
         }
