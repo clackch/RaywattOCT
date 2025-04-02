@@ -29,6 +29,8 @@ protected:
 	CCalibration* calibration;
 	cv::Mat matXMap;
 	cv::Mat matYMap;
+	cv::Mat inverseMatXMap;
+	cv::Mat inverseMatYMap;
 
 	cv::Mat imageResult;
 	cv::Mat imageResultColor;
@@ -134,7 +136,9 @@ protected:
 	void adaptive_gamma_correction(cv::Mat& img, int maxIntensity);
 	void get_PDF_array(cv::Mat& img, std::vector<double>& pdf_i, bool& AGCWD_apply);
 	void get_CDF_array(std::vector<double> pdf_i, std::vector<double>& cdf_i);
-
+	cv::Point2f matXY(const cv::Point2f& point, int m_nWidth, int m_nHeight);
+	cv::Point2f rotatePoint_CCW90(const cv::Point2f& point, const cv::Point2f& center);
+	double GetTheta(cv::Point vector1, cv::Point vector2);
 	static UINT threadRender(LPVOID param);
 
 };

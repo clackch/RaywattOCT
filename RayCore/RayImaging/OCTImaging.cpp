@@ -168,9 +168,99 @@ void COCTImaging::CircularizeImage(cv::Mat& src, cv::Mat& dst)
 	memcpy(dst.data, imgFoV.data, sizeof(char) * dst.cols * dst.rows * imgFoV.channels());
 }
 
-void COCTImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int& angleNum, std::vector<int>& startAngle, std::vector<int>& endAngle, int frameNum) {}
+void COCTImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int& angleNum, std::vector<int>& startAngle, std::vector<int>& endAngle, int frameNum) {
+	if (calciumContours.empty())return;
+	cv::Mat contourImage = cv::Mat::zeros(imageCircle.size(), CV_8UC1);
+	cv::drawContours(contourImage, calciumContours, -1, cv::Scalar(255), cv::FILLED);
+	cv::Mat contourRectImg;
+	InverseCircularizeImage(contourImage, contourRectImg);
+	std::vector<std::vector<cv::Point>> rectangleCalciumContours;
+	cv::findContours(contourRectImg, rectangleCalciumContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	std::vector<cv::Point> startAnglePoint;
+	std::vector<cv::Point> endAnglePoint;
+	for (const auto& contour : rectangleCalciumContours) {
+		cv::Rect rect = cv::boundingRect(contour);
+		if (rect.height * rect.width <= 500)continue;
+		startAnglePoint.push_back(cv::Point(rect.x + rect.width / 2, rect.y + rect.height));
+		endAnglePoint.push_back(cv::Point(rect.x + rect.width / 2, rect.y));
+	}
+	cv::Point center(m_nWidth / 2, m_nHeight / 2);
+	cv::Point standard(m_nWidth / 2, 0);
+	for (int i = 0; i < startAnglePoint.size(); i++) {
+		startAnglePoint[i] = matXY(startAnglePoint[i], m_nWidth, m_nHeight);
+		endAnglePoint[i] = matXY(endAnglePoint[i], m_nWidth, m_nHeight);
+	}
+	for (int i = 0; i < startAnglePoint.size(); i++) {
+		double sAngle = GetTheta(startAnglePoint[i], center);
+		double eAngle = GetTheta(endAnglePoint[i], center);
+		startAngle.push_back(sAngle);
+		endAngle.push_back(eAngle);
+	}
+	angleNum = startAnglePoint.size();
+}
 
-void COCTImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst) {}
+void COCTImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst) {
+	dst = src.clone();
+	cv::remap(dst, dst, inverseMatXMap, inverseMatYMap, cv::INTER_LINEAR);
+	cv::rotate(dst, dst, cv::ROTATE_90_COUNTERCLOCKWISE);
+}
+
+cv::Point2f COCTImaging::matXY(const cv::Point2f& srcPt, int m_nWidth, int m_nHeight)
+{
+	float bestDist = std::numeric_limits<float>::max();
+	cv::Point2f bestXY(0.f, 0.f);
+	for (int y = 0; y < m_nHeight; y++)
+	{
+		const float* xMapRow = matXMap.ptr<float>(y);
+		const float* yMapRow = matYMap.ptr<float>(y);
+
+		for (int x = 0; x < m_nWidth; x++)
+		{
+			float dx = xMapRow[x] - srcPt.x;
+			float dy = yMapRow[x] - srcPt.y;
+			float distSq = dx * dx + dy * dy;
+
+			if (distSq < bestDist)
+			{
+				bestDist = distSq;
+				bestXY = cv::Point2f((float)x, (float)y);
+			}
+		}
+	}
+	float cx = 0.5f * m_nWidth;
+	float cy = 0.5f * m_nHeight;
+	float xShift = bestXY.x - cx;
+	float yShift = bestXY.y - cy;
+	float rx = yShift;
+	float ry = -xShift;
+	rx += cx;
+	ry += cy;
+	cv::Point test;
+	test.x = rx; test.y = ry;
+	cv::Point center(m_nWidth / 2, m_nHeight / 2);
+	test = rotatePoint_CCW90(test, center);
+	test = rotatePoint_CCW90(test, center);
+	return cv::Point2f(test.x, test.y);
+}
+
+cv::Point2f COCTImaging::rotatePoint_CCW90(const cv::Point2f& point, const cv::Point2f& center)
+{
+	float translatedX = static_cast<float>(point.x) - center.x;
+	float translatedY = static_cast<float>(point.y) - center.y;
+	float rotatedX = -translatedY;
+	float rotatedY = translatedX;
+	int finalX = static_cast<int>(std::round(rotatedX + center.x));
+	int finalY = static_cast<int>(std::round(rotatedY + center.y));
+	return cv::Point(finalX, finalY);
+}
+
+double COCTImaging::GetTheta(cv::Point point, cv::Point center) {
+	int dx = point.x - center.x;
+	int dy = point.y - center.y;
+	double angle = std::atan2(dx, -dy) * 180.0 / CV_PI;
+	if (angle < 0)angle += 360.0;
+	return angle;
+}
 
 void COCTImaging::EraseStentOutLier(cv::Mat& stent) {}
 
@@ -291,6 +381,27 @@ void COCTImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth, 
 
 			matXMap.at<float>(x * dstHeight + y) = rvalue;
 			matYMap.at<float>(x * dstHeight + y) = (float)(((atan2(fy, fx) / M_PI) + 1.0) * 0.5 * (srcHeight - 1));
+		}
+	}
+
+	inverseMatXMap.create(dstHeight, dstWidth, CV_32FC1); 
+	inverseMatYMap.create(dstHeight, dstWidth, CV_32FC1); 
+
+	inverseMatXMap.setTo(cv::Scalar::all(0)); 
+	inverseMatYMap.setTo(cv::Scalar::all(0)); 
+
+	for (int y = 0; y < dstHeight; y++)
+	{
+		for (int x = 0; x < dstWidth; x++)
+		{
+			float r = (float)(srcWidth - y) / scale;
+			float theta = ((float)x / srcHeight) * 2 * CV_PI;
+
+			float fx = r * cos(theta) + radius;
+			float fy = r * sin(theta) + radius;
+
+			inverseMatXMap.at<float>(y, x) = fx;
+			inverseMatYMap.at<float>(y, x) = fy;
 		}
 	}
 }

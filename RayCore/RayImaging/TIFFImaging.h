@@ -9,8 +9,6 @@ private:
 	std::chrono::system_clock::time_point m_start, m_end;
 	cv::Mat imageOrigin;
 	cv::Mat imageMask;
-	cv::Mat inverseMatXMap;
-	cv::Mat inverseMatYMap;
 	std::vector<cv::Point> inversedContourYPoints;
 
 public:
@@ -29,9 +27,6 @@ public:
 
 protected:
 	void GetLumenOffsetPoints(std::vector<cv::Point>& lumenOffsetBoundary);
-	double GetTheta(cv::Point vector1, cv::Point vector2);
 	cv::Point2f RotatePoint(const cv::Point2f& point, const cv::Point2f& center);
-	cv::Point2f matXY(const cv::Point2f& point, int m_nWidth, int m_nHeight);
-	cv::Point2f rotatePoint_CCW90(const cv::Point2f& point, const cv::Point2f& center);
 };
 

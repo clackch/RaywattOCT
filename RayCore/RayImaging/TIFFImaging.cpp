@@ -247,12 +247,10 @@ void CTIFFImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumCo
 	if (tissue.channels() == 1) {
 		cv::cvtColor(tissue, tissue, cv::COLOR_GRAY2BGR);
 	}
-	cv::Point test;
 	PLOGI.printf("startAnglePoint.size() = %d", startAnglePoint.size());
 	for (int i = 0; i < startAnglePoint.size(); i++) {
 		PLOGI.printf("startAnglePointX = %d, startAnglePointY = %d", startAnglePoint[i].x, startAnglePoint[i].y);  
 		startAnglePoint[i] = matXY(startAnglePoint[i], m_nWidth, m_nHeight);
-		test = startAnglePoint[i];
 		endAnglePoint[i] = matXY(endAnglePoint[i], m_nWidth, m_nHeight);
 		PLOGI.printf("tempX = %d, tmpY = %d", startAnglePoint[i].x, startAnglePoint[i].y); 
 		
@@ -268,17 +266,6 @@ void CTIFFImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumCo
 	angleNum = startAnglePoint.size();
 }
 
-double CTIFFImaging::GetTheta(cv::Point point, cv::Point center) {
-
-	int dx = point.x - center.x;
-	int dy = point.y - center.y;
-	double angle = std::atan2(dx, -dy) * 180.0 / CV_PI;
-	if (angle < 0) {
-		angle += 360.0;
-	}
-	return angle;
-}
-
 // 주어진 점을 반시계 방향으로 90도 회전시키는 함수
 cv::Point2f  CTIFFImaging::RotatePoint(const cv::Point2f& point, const cv::Point2f& center) {
 	// 점을 중심점 기준으로 이동
@@ -291,54 +278,4 @@ cv::Point2f  CTIFFImaging::RotatePoint(const cv::Point2f& point, const cv::Point
 
 	// 회전된 점을 원래 위치로 이동
 	return cv::Point2f(rotatedX + center.x, rotatedY + center.y);
-}
-
-cv::Point2f CTIFFImaging::matXY(const cv::Point2f& srcPt, int m_nWidth, int m_nHeight)
-{
-	float bestDist = std::numeric_limits<float>::max();
-	cv::Point2f bestXY(0.f, 0.f);
-	for (int y = 0; y < m_nHeight; y++)
-	{
-		const float* xMapRow = matXMap.ptr<float>(y);
-		const float* yMapRow = matYMap.ptr<float>(y);
-
-		for (int x = 0; x < m_nWidth; x++)
-		{
-			float dx = xMapRow[x] - srcPt.x;
-			float dy = yMapRow[x] - srcPt.y;
-			float distSq = dx * dx + dy * dy;
-
-			if (distSq < bestDist)
-			{
-				bestDist = distSq;
-				bestXY = cv::Point2f((float)x, (float)y);
-			}
-		}
-	}
-	float cx = 0.5f * m_nWidth;
-	float cy = 0.5f * m_nHeight;
-	float xShift = bestXY.x - cx;
-	float yShift = bestXY.y - cy;
-	float rx = yShift;
-	float ry = -xShift;
-	rx += cx;
-	ry += cy;
-	cv::Point test;
-	test.x = rx; test.y = ry;
-	cv::Point center(m_nWidth / 2, m_nHeight / 2);
-	test = rotatePoint_CCW90(test, center); 
-	test = rotatePoint_CCW90(test, center); 
-	return cv::Point2f(test.x, test.y); 
-}
-
-// 시계방향 회전
-cv::Point2f CTIFFImaging::rotatePoint_CCW90(const cv::Point2f& point, const cv::Point2f& center) 
-{
-	float translatedX = static_cast<float>(point.x) - center.x;
-	float translatedY = static_cast<float>(point.y) - center.y;
-	float rotatedX = -translatedY;
-	float rotatedY = translatedX;
-	int finalX = static_cast<int>(std::round(rotatedX + center.x));
-	int finalY = static_cast<int>(std::round(rotatedY + center.y));
-	return cv::Point(finalX, finalY);
 }
