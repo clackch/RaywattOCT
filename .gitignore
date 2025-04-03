@@ -62,3 +62,8 @@ obj
 x64
 RayCore/lib
 bin
+
+# CodeSonar
+.sonarlint
+.scannerwork
+.sonarqube

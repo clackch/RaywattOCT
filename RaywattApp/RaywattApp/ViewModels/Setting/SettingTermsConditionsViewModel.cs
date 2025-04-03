@@ -105,13 +105,14 @@ namespace RaywattApp.ViewModels.Setting
 
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["classification"] = "Terms&Cond";
+            sqlParameters["key"] = "AgreeYN";
             sqlParameters["value"] = TermsConditions.Value;
             sqlParameters["buffer"] = TermsConditions.Buffer;
 
             int res = _sqlManager.UpdateConfiguration(sqlParameters);
             if(res != 1)
             {
-                _log.Error("Insert Error");
+                _log.Error("Update Error");
             }
         }
     }

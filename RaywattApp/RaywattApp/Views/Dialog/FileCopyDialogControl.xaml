@@ -12,8 +12,8 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="21"/>
-                <RowDefinition Height="42"/>
-                <RowDefinition Height="42"/>
+                <RowDefinition Height="22"/>
+                <RowDefinition Height="62"/>
                 <RowDefinition Height="24"/>
                 <RowDefinition Height="24"/>
                 <RowDefinition Height="66"/>
@@ -22,8 +22,13 @@
             <StackPanel Grid.Row="1" HorizontalAlignment="Center">
                 <Label Style="{DynamicResource Pretendard-Medium-12}" Content="{Binding Title}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
             </StackPanel>
-            <StackPanel Grid.Row="2" HorizontalAlignment="Center">
-                <Label Style="{DynamicResource Pretendard-Medium-22}" Content="{Binding ProgressText}" Foreground="{DynamicResource GrayscaleWhiteBrush}"/>
+
+            <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Label Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="20,0,20,0">
+                    <Label.Content>
+                        <AccessText TextWrapping="Wrap" Text="{Binding ProgressText}"/>
+                    </Label.Content>
+                </Label>
             </StackPanel>
 
             <StackPanel Grid.Row="3" VerticalAlignment="Center">
