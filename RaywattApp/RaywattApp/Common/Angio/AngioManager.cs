@@ -249,7 +249,6 @@ namespace RaywattApp.Common.Angio
         private void ThreadFuncSaveAngioFrames(PatientCase patientCase)
         {
             string angioFilePath = patientCase.ImageFullPath.Substring(0, patientCase.ImageFullPath.Length - 3);
-            _log.Debug(angioFilePath);
             try
             {
                 while (!threadOnSaveAsFile)
@@ -298,8 +297,6 @@ namespace RaywattApp.Common.Angio
                         break;
                 }
 
-                _log.Debug("Line1");
-
                 angioBuffer = new ConcurrentQueue<byte[]>();
                 int availableFrames = angioSaveFrameNum - 1 - closestIndex;
                 int desiredFrameCount = angioTargetFrameNum;
@@ -330,8 +327,6 @@ namespace RaywattApp.Common.Angio
                     angioSaveFrameNum = end - start;
                 }
 
-                _log.Debug("Line2");
-
                 angioSaveBuffer.Clear();
 
                 // 버퍼 저장 (.angioFrames, .params)
@@ -341,8 +336,6 @@ namespace RaywattApp.Common.Angio
                 }
                 angioSaveBuffer.Reverse();
 
-                string savePath = angioFilePath + Constants.AngioImageExtension;
-
                 List<byte[]> bufferCopy = new List<byte[]>();
 
                 foreach(var buffer in angioSaveBuffer)
@@ -350,11 +343,9 @@ namespace RaywattApp.Common.Angio
                     bufferCopy.Add(buffer);
                 }
 
-                _log.Debug("Line3");
-
                 Thread saveThread = new Thread(() =>
                 {
-                    SaveAngioBufferToFile(savePath, bufferCopy, angioImageSize);
+                    SaveAngioBufferToFile(angioFilePath, bufferCopy, angioImageSize);
                 });
                 saveThread.Start();
             }
@@ -368,8 +359,7 @@ namespace RaywattApp.Common.Angio
         {
             try
             {
-                _log.Debug("Start Save .params file.");
-                using (XmlWriter xw = XmlWriter.Create(filePath, new XmlWriterSettings { Indent = true }))
+                using (XmlWriter xw = XmlWriter.Create(filePath + Constants.AngioParmasExtension, new XmlWriterSettings { Indent = true }))
                 { 
                     xw.WriteStartDocument();
                     xw.WriteStartElement("config");
@@ -381,7 +371,8 @@ namespace RaywattApp.Common.Angio
                     xw.WriteEndElement();
                     xw.WriteEndDocument();
                 }
-                FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+
+                FileStream fs = new FileStream(filePath + Constants.AngioImageExtension, FileMode.Create, FileAccess.Write);
                 for (int i = 0; i < bufferToSave.Count; i++)
                 {
                     fs.Write(bufferToSave[i], 0, imageSize);
@@ -762,14 +753,12 @@ namespace RaywattApp.Common.Angio
         }
         public void StopGettingAngioImageThread()
         {
-            _log.Debug("threadOnSaveAngioFrames = false;");
             threadOnSaveAngioFrames = false;
             SendCommandPacket(CommandType.FGStopped);
         }
 
         public void StartSaveAngioFrames()
         {
-            _log.Debug("threadOnSaveAsFile = true;");
             threadOnSaveAsFile = true;
         }
 
