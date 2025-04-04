@@ -537,7 +537,6 @@ namespace RaywattApp.Common.Angio
                     {
                         ViewModelBase._deviceStatus.IsAngioConnected = false;
                     });
-
                 }
                 else if (command == (byte)CommandType.FGAngioConnected)
                 {
