@@ -173,8 +173,10 @@ namespace RaywattApp.ViewModels
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
                 timerUpdateImage.Start();
-                
+
+                _log.Debug($"Before DeviceStatus.IsLiveView = (RayGetProperty(Property.MotorOnOff) != 0) :{DeviceStatus.IsLiveView}");
                 DeviceStatus.IsLiveView = (RayGetProperty(Property.MotorOnOff) != 0);
+                _log.Debug($"After DeviceStatus.IsLiveView = (RayGetProperty(Property.MotorOnOff) != 0) :{DeviceStatus.IsLiveView}");
 
                 Code pullback = pullbackTypes.FirstOrDefault(x => x.Key == PatientCase.PullbackType);
                 if (pullback != null)
@@ -192,7 +194,8 @@ namespace RaywattApp.ViewModels
                     _angioManager.SelectCathRoom();
                 }
             }
-            
+
+
             if (ViewModelBase._deviceStatus.IsAngioInitialized && !_angioManager.ReadyToRecv)
             {
                 _angioManager.SendCommandPacket(CommandType.FGStarted);
