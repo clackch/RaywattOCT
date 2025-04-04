@@ -105,7 +105,7 @@ namespace RaywattApp.ViewModels
             DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total = 0;
 
             // Instant start 방지
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
             IsStart = true;
         }
 
