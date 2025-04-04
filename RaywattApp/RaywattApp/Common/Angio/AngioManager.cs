@@ -74,6 +74,7 @@ namespace RaywattApp.Common.Angio
         private byte[] buffer;
         private byte[] tmpBuffer;
         private List<byte[]> angioSaveBuffer;
+        public ConcurrentQueue<byte[]> angioBuffer;
         public List<byte[]> AngioSaveBuffer { get { return angioSaveBuffer; } set { angioSaveBuffer = value; } }
         public List<double> angioSaveTimes;
         private int bytesRead;
@@ -91,6 +92,7 @@ namespace RaywattApp.Common.Angio
 
         private Thread threadFuncSaveAngioFrames;
         private bool threadOnSaveAngioFrames;
+        private bool threadOnSaveAsFile;
 
         private Thread get_image;
         private bool liveView;
@@ -249,21 +251,21 @@ namespace RaywattApp.Common.Angio
             _log.Debug(angioFilePath);
             try
             {
-                while (threadOnSaveAngioFrames)
+                while (!threadOnSaveAsFile)
                 {
                     Thread.Sleep(500);
                 }
-                 
-                FileStream fs = new FileStream(angioFilePath + Constants.AngioImageExtension, FileMode.Create, FileAccess.Write);
 
-                angioSaveFrameNum = angioSaveBuffer.Count - 1;
+                angioSaveFrameNum = angioSaveBuffer.Count;
                 int closestIndex = angioSaveFrameNum;
                 double OCTStartTime = RayGetProperty(Property.PullbackStartTime) / 2.0;
                 double minGap = double.MaxValue;
                 double angioTime = double.MaxValue;
-                for (int i = angioSaveFrameNum; i >= 0; i--)
+
+                // Buffer 전달
+                for (int i = 0; i < angioSaveFrameNum; i++)
                 {
-                    angioTime = angioSaveTimes[i];
+                    angioTime = angioSaveTimes[i] / 1000.0;
                     double gap = Math.Abs(angioTime - OCTStartTime);
 
                     if(gap <= minGap)
@@ -275,45 +277,109 @@ namespace RaywattApp.Common.Angio
                 _log.Debug($"gap = {minGap} Angio Time = {angioTime}, OCT Time = {OCTStartTime} closestIndex = {closestIndex}" +
                     $"maxIndex = {angioSaveFrameNum}");
 
-                while (angioSaveFrameNum >= closestIndex)
+                int angioTargetFrameNum = 20;
+                switch (patientCase.PullbackType)
                 {
-                    if (!ViewModelBase._deviceStatus.IsAngioConnected)
-                    {
-                        fs.Close();
-                        if (System.IO.File.Exists(angioFilePath + Constants.AngioImageExtension))
-                        {
-                            System.IO.File.Delete(angioFilePath + Constants.AngioImageExtension);
-                        }
-                        return;
-                    }
-                    if (angioSaveFrameNum % 2 != 0)
-                    {
-                        angioSaveFrameNum--;
-                        continue;
-                    }
-                    fs.Write(angioSaveBuffer[angioSaveFrameNum--], 0, angioImageSize);
+                    case "HISH": // 1초
+                        angioTargetFrameNum = (int)(angioTargetFrameNum * 3.0); ;
+                        break;
+                    case "HILO": // 2.5초
+                        angioTargetFrameNum = (int)(angioTargetFrameNum * 2.5);
+                        break;
+                    case "STSH": // 1초
+                        angioTargetFrameNum = angioTargetFrameNum;
+                        break; 
+                    case "STLO": // 1초
+                        angioTargetFrameNum = angioTargetFrameNum;
+                        break;
+                    case "FAST": // 0.5초
+                        angioTargetFrameNum = (int)(angioTargetFrameNum * 0.5);
+                        break;
                 }
-                fs.Close();
-                using (XmlWriter xw = XmlWriter.Create(angioFilePath + Constants.AngioParmasExtension, new XmlWriterSettings { Indent = true }))
+
+                angioBuffer = new ConcurrentQueue<byte[]>();
+                int availableFrames = angioSaveFrameNum - 1 - closestIndex;
+                int desiredFrameCount = angioTargetFrameNum;
+
+                // 충분한 프레임이 있는 경우, 일정 간격으로 샘플링
+                if (availableFrames >= desiredFrameCount)
                 {
+                    angioSaveFrameNum = desiredFrameCount;
+                    double step = (double)availableFrames / desiredFrameCount;
+
+                    for (int i = 0; i < desiredFrameCount; i++)
+                    {
+                        int index = closestIndex + (int)Math.Round(i * step);
+                        if (index >= angioSaveBuffer.Count) break;
+                        angioBuffer.Enqueue(angioSaveBuffer[index]);
+                    }
+                }
+                else
+                {
+                    // 부족한 경우, 전부 사용
+                    int start = closestIndex;
+                    int end = angioSaveFrameNum;
+
+                    for (int i = start; i < end; i++)
+                    {
+                        angioBuffer.Enqueue(angioSaveBuffer[i]);
+                    }
+                    angioSaveFrameNum = end - start;
+                }
+
+                angioSaveBuffer.Clear();
+
+                // 버퍼 저장 (.angioFrames, .params)
+                foreach (byte[] tmpBuffer in angioBuffer)
+                {
+                    angioSaveBuffer.Add(tmpBuffer);
+                }
+                angioSaveBuffer.Reverse();
+
+                string savePath = angioFilePath + Constants.AngioImageExtension;
+                List<byte[]> bufferCopy = new List<byte[]>(angioSaveBuffer);
+
+                Thread saveThread = new Thread(() =>
+                {
+                    SaveAngioBufferToFile(savePath, bufferCopy, angioImageSize);
+                });
+            }
+            catch (Exception ex)
+            {
+                _log.Debug("Error :" + ex.Message);
+            }
+        }
+
+        private void SaveAngioBufferToFile(string filePath, List<byte[]> bufferToSave, int imageSize)
+        {
+            try
+            {
+                using (XmlWriter xw = XmlWriter.Create(filePath, new XmlWriterSettings { Indent = true }))
+                { 
                     xw.WriteStartDocument();
                     xw.WriteStartElement("config");
-
                     xw.WriteElementString("AngioFrameHeight", angioFrameHeight.ToString());
                     xw.WriteElementString("AngioFrameWidth", angioFrameWidth.ToString());
                     xw.WriteElementString("AngioFrameNumber", angioSaveBuffer.Count.ToString());
                     xw.WriteElementString("BitsPerPixel", ((int)angioBitsPerPixel).ToString());
                     xw.WriteElementString("Frequency", "60"); // 임시값
-
                     xw.WriteEndElement();
                     xw.WriteEndDocument();
                 }
+                FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+                for (int i = 0; i < bufferToSave.Count; i++)
+                {
+                    fs.Write(bufferToSave[i], 0, imageSize);
+                }
+                fs.Close();
+                _log.Debug("Angio buffer successfully saved.");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("File Creation Error: " + ex.Message);
+                _log.Debug("Error while saving angio buffer: " + ex.Message);
             }
         }
+
 
         private void ActivateClientThreads()
         {
@@ -342,7 +408,7 @@ namespace RaywattApp.Common.Angio
                 StopLiveAngioThread();
                 StopLiveView();
             if (threadFuncSaveAngioFrames != null && threadFuncSaveAngioFrames.IsAlive)
-                StopSaveAngioThread();
+                StopGettingAngioImageThread();
 
             string processName = CommonUtil.IsTestMode(ViewModelBase._deviceStatus.TestMode, "FG") ? "FGServerTestStub" : "FGServer";
             foreach (Process process in Process.GetProcessesByName(processName))
@@ -398,13 +464,16 @@ namespace RaywattApp.Common.Angio
             int offset = 2;
             angioFrameHeight = BitConverter.ToInt16(tmpBuffer, offset);
             offset += sizeof(short);
+
             angioFrameWidth = BitConverter.ToInt16(tmpBuffer, offset);
             offset += sizeof(short);
-            angioBitsPerPixel = (char)tmpBuffer[offset++];
-            live_time = (double)(BitConverter.ToInt64(tmpBuffer, offset) / 1000.0); // Time Stamp
-            offset += sizeof(long);
-            angioImageSize = angioFrameHeight * angioFrameWidth * angioBitsPerPixel / 8;
 
+            angioBitsPerPixel = (char)tmpBuffer[offset++];
+            live_time = BitConverter.ToInt64(tmpBuffer, offset); // Time Stamp
+
+            offset += sizeof(long);
+
+            angioImageSize = angioFrameHeight * angioFrameWidth * angioBitsPerPixel / 8;
             Mat image = new Mat(angioFrameHeight, angioFrameWidth, MatType.CV_8UC(angioBitsPerPixel / 8));
             Marshal.Copy(tmpBuffer, offset, image.Data, angioImageSize);
 
@@ -667,18 +736,24 @@ namespace RaywattApp.Common.Angio
             isSocketAlive = false;
             isSocketConnected.Join();
         }
-        public void StartSaveAngioThread(PatientCase patientCase)
+        public void ReadyToSaveAngioThread(PatientCase patientCase)
         {
             threadFuncSaveAngioFrames = new Thread(() => ThreadFuncSaveAngioFrames(patientCase));
             threadOnSaveAngioFrames = true;
+            threadOnSaveAsFile = false;
             threadFuncSaveAngioFrames.Start();
-            //SendCommandPacket(CommandType.FGRecordingStart);
         }
-        public void StopSaveAngioThread()
+        public void StopGettingAngioImageThread()
         {
+            _log.Debug("threadOnSaveAngioFrames = false;");
             threadOnSaveAngioFrames = false;
-            if (threadFuncSaveAngioFrames != null) threadFuncSaveAngioFrames.Join();
             SendCommandPacket(CommandType.FGStopped);
+        }
+
+        public void StartSaveAngioFrames()
+        {
+            _log.Debug("threadOnSaveAsFile = true;");
+            threadOnSaveAsFile = true;
         }
 
         public void SelectCathRoom()

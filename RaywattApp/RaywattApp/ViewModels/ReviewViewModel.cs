@@ -1768,15 +1768,28 @@ namespace RaywattApp.ViewModels
             string angioPath = Path.Combine(directory, angioFile);
             string paramsPath = Path.Combine(directory, paramsFile);
 
+            int angioFrameHeight = 0;
+            int angioFrameWidth = 0;
+            int channels = 3;
             //Read .params
             XmlDocument xmlDoc = new XmlDocument();
-            xmlDoc.Load(paramsPath);
-
-            XmlNode configNode = xmlDoc.SelectSingleNode("/config");
-            int angioFrameHeight = int.Parse(configNode.SelectSingleNode("AngioFrameHeight").InnerText);
-            int angioFrameWidth = int.Parse(configNode.SelectSingleNode("AngioFrameWidth").InnerText);
-            PatientCase.AngioFrame.AngioFrameNum = int.Parse(configNode.SelectSingleNode("AngioFrameNumber").InnerText);
-            int channels = int.Parse(configNode.SelectSingleNode("BitsPerPixel").InnerText) / 8;
+            try
+            {
+                xmlDoc.Load(paramsPath);
+                XmlNode configNode = xmlDoc.SelectSingleNode("/config");
+                angioFrameHeight = int.Parse(configNode.SelectSingleNode("AngioFrameHeight").InnerText);
+                angioFrameWidth = int.Parse(configNode.SelectSingleNode("AngioFrameWidth").InnerText);
+                PatientCase.AngioFrame.AngioFrameNum = int.Parse(configNode.SelectSingleNode("AngioFrameNumber").InnerText);
+                channels = int.Parse(configNode.SelectSingleNode("BitsPerPixel").InnerText) / 8;
+            }
+            catch (FileNotFoundException ex)
+            {
+                _log.Debug($"Params file not found: {ex.Message}");
+                angioFrameHeight = _angioManager.AngioFrameHeight;
+                angioFrameWidth = _angioManager.AngioFrameWidth;
+                PatientCase.AngioFrame.AngioFrameNum = _angioManager.AngioSaveFrameNum;
+                channels = _angioManager.AngioBitsPerPixel/8;
+            }
 
             float Scale = angioFrameHeight > angioFrameWidth ? (float)Constants.AngioSize / angioFrameHeight : (float)Constants.AngioSize / angioFrameWidth;
 
@@ -1793,10 +1806,15 @@ namespace RaywattApp.ViewModels
             }
 
             //Recording -> Review
-            if (_angioManager.AngioSaveBuffer.Count != 0)
+            if (_angioManager.angioBuffer.Count != 0)
             {
-                foreach (byte[] data in _angioManager.AngioSaveBuffer)
+                for(int i = 0; i<_angioManager.AngioSaveFrameNum; i++)
                 {
+                    if (!_angioManager.angioBuffer.TryDequeue(out byte[] data))
+                    {
+                        _log.Debug("Buffer underrun while reading angioBuffer, currIndex = " + i.ToString());
+                        break;
+                    }
                     Mat frame = new Mat(angioFrameHeight, angioFrameWidth, MatType.CV_8UC(channels), data);
                     Cv2.Resize(frame, frame, new OpenCvSharp.Size(newWidth, newHeight));
 
@@ -1826,7 +1844,6 @@ namespace RaywattApp.ViewModels
                 AngioFrames.Reverse();
                 PatientCase.AngioFrame.AngioImage.Reverse();
 
-                _angioManager.AngioSaveBuffer.Clear();
                 _angioManager.angioSaveTimes.Clear();
                 return;
             }

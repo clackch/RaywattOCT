@@ -91,7 +91,6 @@ namespace RaywattApp.ViewModels
 
             IsStep1 = true;
             IsReady = true;
-            IsStart = true;
             IsCancel = true;
 
             timer.Interval = TimeSpan.FromMilliseconds(1000);
@@ -104,6 +103,10 @@ namespace RaywattApp.ViewModels
 
             DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current = 0;
             DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total = 0;
+
+            // Instant start 방지
+            Thread.Sleep(500);
+            IsStart = true;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -231,7 +234,7 @@ namespace RaywattApp.ViewModels
             if (DeviceStatus.IsAngioConnected)
             {
                 _angioManager.ReadyToRecv = true;
-                _angioManager.StartSaveAngioThread(PatientCase);
+                _angioManager.ReadyToSaveAngioThread(PatientCase);
             }
 
             threadWaitPullbackDone.Start();            

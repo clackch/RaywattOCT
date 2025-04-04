@@ -125,6 +125,8 @@ namespace RaywattApp.ViewModels
 
             RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
 
+            _angioManager.StartSaveAngioFrames();
+
             //초기값 설정
             PatientCase.Id = Patient.Id + "_" + DateTime.Now.ToString("yyyyMMddHHmmss");
             PatientCase.PatientId = Patient.Id;
