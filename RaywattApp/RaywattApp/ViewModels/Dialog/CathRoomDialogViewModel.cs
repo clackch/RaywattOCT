@@ -80,9 +80,10 @@ namespace RaywattApp.ViewModels.Dialog
             dialogResults.DialogAnswer = DialogResults.Answer.Yes;
             dialogResults.DialogReturn = parameter;
 
-            if (SelectedCathRoom.Id == -1)
+            if (SelectedCathRoom.Id == -1) // CHP not Selected
             {
                 ViewModelBase._deviceStatus.IsAngioInitialized = false;
+                _angioManager.IsChpFileChangeSuccess = -1;
             }
             else
             {

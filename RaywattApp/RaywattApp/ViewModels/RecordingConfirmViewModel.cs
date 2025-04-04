@@ -100,6 +100,9 @@ namespace RaywattApp.ViewModels
             DeviceStatus.IsOCTImagingDone = true;
             DeviceStatus.IsPullbackDone = false;
 
+            _angioManager.threadOnRedoPullback = true;
+            _angioManager.threadFuncSaveAngioFrames.Join();
+
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;

@@ -90,9 +90,10 @@ namespace RaywattApp.Common.Angio
         private Thread isSocketConnected;
         private bool isSocketAlive;
 
-        private Thread threadFuncSaveAngioFrames;
+        public Thread threadFuncSaveAngioFrames;
         private bool threadOnSaveAngioFrames;
         private bool threadOnSaveAsFile;
+        public bool threadOnRedoPullback;
         public bool threadOnSaveFinished;
 
         private Thread get_image;
@@ -253,6 +254,10 @@ namespace RaywattApp.Common.Angio
             {
                 while (!threadOnSaveAsFile)
                 {
+                    if(threadOnRedoPullback)
+                    {
+                        return;
+                    }
                     Thread.Sleep(500);
                 }
 
@@ -744,6 +749,7 @@ namespace RaywattApp.Common.Angio
         }
         public void ReadyToSaveAngioThread(PatientCase patientCase)
         {
+            threadOnRedoPullback = false;
             threadFuncSaveAngioFrames = new Thread(() => ThreadFuncSaveAngioFrames(patientCase));
             threadOnSaveAngioFrames = true;
             threadOnSaveFinished = false;
