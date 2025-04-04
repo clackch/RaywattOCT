@@ -142,6 +142,8 @@ namespace RaywattApp.Common.Angio
 
         private void StartFGServerProc(ProcessStartInfo startInfo)
         {
+            _log.Debug("StartFGServerProc");
+
             Process p = new Process();
             startInfo.CreateNoWindow = true;
             p.StartInfo = startInfo;
@@ -150,6 +152,8 @@ namespace RaywattApp.Common.Angio
 
         public ConnectionStatus ConnectToServer()
         {
+            _log.Debug("ConnectToServer");
+
             Process[] processes;
             ProcessStartInfo psi = new ProcessStartInfo();
             string processName = CommonUtil.IsTestMode(ViewModelBase._deviceStatus.TestMode, "FG") ? "FGServerTestStub" : "FGServer";
@@ -185,6 +189,8 @@ namespace RaywattApp.Common.Angio
 
         private bool InitAngioBoard()
         {
+            _log.Debug("InitAngioBoard");
+
             AskBoardConnection();
 
             while (!isBoardInited)
@@ -216,13 +222,19 @@ namespace RaywattApp.Common.Angio
 
         private void ThreadFuncLiveAngioImage()
         {
+            _log.Debug("ThreadFuncLiveAngioImage");
+
             while (threadOnLiveAngioImage)
             {
                 ReadPacket();
             }
+
+            _log.Debug("[Done]ThreadFuncLiveAngioImage");
         }
         private void IsSocketConnected()
         {
+            _log.Debug("IsSocketConnected");
+
             while (isSocketAlive)
             {
                 Thread.Sleep(1000);
@@ -233,9 +245,13 @@ namespace RaywattApp.Common.Angio
                     isSocketAlive = false;
                 }
             }
+
+            _log.Debug("[Done]IsSocketConnected");
         }
         private void LiveViewThread()
         {
+            _log.Debug("LiveViewThread");
+
             while (liveView)
             {
                 if (!readyToRecv) Thread.Sleep(500);
@@ -245,10 +261,14 @@ namespace RaywattApp.Common.Angio
                     Thread.Sleep(10);
                 }
             }
+
+            _log.Debug("[Done]LiveViewThread");
         }
 
         private void ThreadFuncSaveAngioFrames(PatientCase patientCase)
         {
+            _log.Debug("ThreadFuncSaveAngioFrames");
+
             string angioFilePath = patientCase.ImageFullPath.Substring(0, patientCase.ImageFullPath.Length - 3);
             try
             {
@@ -256,6 +276,7 @@ namespace RaywattApp.Common.Angio
                 {
                     if(threadOnRedoPullback)
                     {
+                        _log.Debug("threadOnRedoPullback");
                         return;
                     }
                     Thread.Sleep(500);
@@ -358,6 +379,10 @@ namespace RaywattApp.Common.Angio
             {
                 _log.Debug("Error :" + ex.Message);
             }
+            finally
+            {
+                _log.Debug("[Done]ThreadFuncSaveAngioFrames");
+            }
         }
 
         private void SaveAngioBufferToFile(string filePath, List<byte[]> bufferToSave, int imageSize)
@@ -392,26 +417,33 @@ namespace RaywattApp.Common.Angio
             }
         }
 
-
         private void ActivateClientThreads()
         {
+            _log.Debug("ActivateClientThreads");
+
             threadFuncLiveAngioImage = new Thread(() => ThreadFuncLiveAngioImage());
             StartLiveAngioThread();
         }
 
         private void SoketCheckThreads()
         {
+            _log.Debug("SoketCheckThreads");
+
             isSocketConnected = new Thread(() => IsSocketConnected());
             StartSoketCheck();
         }
         private void LiveViewThreads()
         {
+            _log.Debug("LiveViewThreads");
+
             get_image = new Thread(() => LiveViewThread());
             StartLiveView();
         }
 
         public void CloseAngioManager()
         {
+            _log.Debug("CloseAngioManager");
+
             if (GetServerConnection())
             {
                 _tcpClient.GetStream().Close();
@@ -717,38 +749,52 @@ namespace RaywattApp.Common.Angio
 
         private void StartLiveAngioThread()
         {
+            _log.Debug("StartLiveAngioThread");
+
             threadOnLiveAngioImage = true;
             threadFuncLiveAngioImage.Start();
         }
         private void StopLiveAngioThread() 
         {
+            _log.Debug("StopLiveAngioThread");
+
             threadOnLiveAngioImage = false;
             threadFuncLiveAngioImage.Join();
         }
         private void StartLiveView()
         {
+            _log.Debug("StartLiveView");
+
             liveView = true;
             imageList = new ConcurrentQueue<Mat>();
             get_image.Start();
         }
         private void StopLiveView()
         {
+            _log.Debug("StopLiveView");
+
             imageList.Clear();
             liveView = false;
             get_image.Join();
         }
         private void StartSoketCheck()
         {
+            _log.Debug("StartSoketCheck");
+
             isSocketAlive = true;
             isSocketConnected.Start();
         }
         public void StopSoketCheck()
         {
+            _log.Debug("StopSoketCheck");
+
             isSocketAlive = false;
             isSocketConnected.Join();
         }
         public void ReadyToSaveAngioThread(PatientCase patientCase)
         {
+            _log.Debug("ReadyToSaveAngioThread");
+
             threadOnRedoPullback = false;
             threadFuncSaveAngioFrames = new Thread(() => ThreadFuncSaveAngioFrames(patientCase));
             threadOnSaveAngioFrames = true;
@@ -758,12 +804,16 @@ namespace RaywattApp.Common.Angio
         }
         public void StopGettingAngioImageThread()
         {
+            _log.Debug("StopGettingAngioImageThread");
+
             threadOnSaveAngioFrames = false;
             SendCommandPacket(CommandType.FGStopped);
         }
 
         public void StartSaveAngioFrames()
         {
+            _log.Debug("StartSaveAngioFrames");
+
             threadOnSaveAsFile = true;
         }
 
