@@ -1757,114 +1757,145 @@ namespace RaywattApp.ViewModels
 
         private void ThreadReadAngioFrames()
         {
-            string file = PatientCase.Image;
-            string angioFile = file.Substring(0, file.Length - 3) + "angioframes";
-            string paramsFile = file.Substring(0, file.Length - 3) + "params";
-            
-            string directory = Path.Combine(Constants.DataRootPath, PatientCase.PatientId);
-            string angioPath = Path.Combine(directory, angioFile);
-            string paramsPath = Path.Combine(directory, paramsFile);
-
-            //Read .params
-            XmlDocument xmlDoc = new XmlDocument();
-            xmlDoc.Load(paramsPath);
-
-            XmlNode configNode = xmlDoc.SelectSingleNode("/config");
-            int angioFrameHeight = int.Parse(configNode.SelectSingleNode("AngioFrameHeight").InnerText);
-            int angioFrameWidth = int.Parse(configNode.SelectSingleNode("AngioFrameWidth").InnerText);
-            PatientCase.AngioFrame.AngioFrameNum = int.Parse(configNode.SelectSingleNode("AngioFrameNumber").InnerText);
-            int channels = int.Parse(configNode.SelectSingleNode("BitsPerPixel").InnerText) / 8;
-
-            float Scale = angioFrameHeight > angioFrameWidth ? (float)Constants.AngioSize / angioFrameHeight : (float)Constants.AngioSize / angioFrameWidth;
-
-            int newHeight, newWidth;
-            if (Scale >= 1.0)
+            try
             {
-                newHeight = (int)(angioFrameHeight / Scale);
-                newWidth = (int)(angioFrameWidth / Scale);
-            }
-            else
-            {
-                newHeight = (int)(angioFrameHeight * Scale);
-                newWidth = (int)(angioFrameWidth * Scale);
-            }
-
-            //Recording -> Review
-            if (_angioManager.AngioSaveBuffer.Count != 0)
-            {
-                foreach (byte[] data in _angioManager.AngioSaveBuffer)
+                while (!_angioManager.threadOnSaveFinished)
                 {
-                    Mat frame = new Mat(angioFrameHeight, angioFrameWidth, MatType.CV_8UC(channels), data);
-                    Cv2.Resize(frame, frame, new OpenCvSharp.Size(newWidth, newHeight));
-
-                    switch (channels)
-                    {
-                        case 3:
-                            Cv2.CvtColor(frame, frame, ColorConversionCodes.BGR2GRAY);
-                            break;
-
-                        case 4:
-                            Cv2.CvtColor(frame, frame, ColorConversionCodes.RGBA2GRAY);
-                            break;
-                    }
-
-                    Mat paddedFrame = new Mat((int)Constants.AngioSize, (int)Constants.AngioSize, MatType.CV_8UC1, Scalar.Black);
-
-                    int top = ((int)Constants.AngioSize - newHeight) / 2;
-                    int left = ((int)Constants.AngioSize - newWidth) / 2;
-                    OpenCvSharp.Rect roi = new OpenCvSharp.Rect(left, top, newWidth, newHeight);
-                    Mat destinationROI = new Mat(paddedFrame, roi);
-                    frame.CopyTo(destinationROI);
-
-                    AngioFrames.Add(paddedFrame);
-                    PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(paddedFrame));
+                    Thread.Sleep(300);
                 }
 
-                AngioFrames.Reverse();
-                PatientCase.AngioFrame.AngioImage.Reverse();
+                string file = PatientCase.Image;
+                string angioFile = file.Substring(0, file.Length - 3) + "angioframes";
+                string paramsFile = file.Substring(0, file.Length - 3) + "params";
 
-                _angioManager.AngioSaveBuffer.Clear();
-                _angioManager.angioSaveTimes.Clear();
-                return;
-            }
+                string directory = Path.Combine(Constants.DataRootPath, PatientCase.PatientId);
+                string angioPath = Path.Combine(directory, angioFile);
+                string paramsPath = Path.Combine(directory, paramsFile);
 
-            //PatientCaseList -> Review
-            using (BinaryReader reader = new BinaryReader(System.IO.File.Open(angioPath, FileMode.Open)))
-            {
-                while (reader.BaseStream.Position != reader.BaseStream.Length)
+                int angioFrameHeight = 0;
+                int angioFrameWidth = 0;
+                int channels = 3;
+                //Read .params
+                XmlDocument xmlDoc = new XmlDocument();
+                try
                 {
-                    byte[] data = reader.ReadBytes(angioFrameWidth * angioFrameHeight * channels);
-
-                    Mat frame = new Mat(angioFrameHeight, angioFrameWidth, MatType.CV_8UC(channels), data);
-                    Cv2.Resize(frame, frame, new OpenCvSharp.Size(newWidth, newHeight));
-
-                    switch (channels)
-                    {
-                        case 3:
-                            Cv2.CvtColor(frame, frame, ColorConversionCodes.BGR2GRAY);
-                            break;
-
-                        case 4:
-                            Cv2.CvtColor(frame, frame, ColorConversionCodes.RGBA2GRAY);
-                            break;
-                    }
-
-                    Mat paddedFrame = new Mat((int)Constants.AngioSize, (int)Constants.AngioSize, MatType.CV_8UC1, Scalar.Black);
-
-                    int top = ((int)Constants.AngioSize - newHeight) / 2;
-                    int left = ((int)Constants.AngioSize - newWidth) / 2;
-                    OpenCvSharp.Rect roi = new OpenCvSharp.Rect(left, top, newWidth, newHeight);
-                    Mat destinationROI = new Mat(paddedFrame, roi);
-                    frame.CopyTo(destinationROI);
-
-                    AngioFrames.Add(paddedFrame);
-                    PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(paddedFrame));
+                    xmlDoc.Load(paramsPath);
+                    XmlNode configNode = xmlDoc.SelectSingleNode("/config");
+                    angioFrameHeight = int.Parse(configNode.SelectSingleNode("AngioFrameHeight").InnerText);
+                    angioFrameWidth = int.Parse(configNode.SelectSingleNode("AngioFrameWidth").InnerText);
+                    PatientCase.AngioFrame.AngioFrameNum = int.Parse(configNode.SelectSingleNode("AngioFrameNumber").InnerText);
+                    channels = int.Parse(configNode.SelectSingleNode("BitsPerPixel").InnerText) / 8;
+                }
+                catch (FileNotFoundException ex)
+                {
+                    _log.Debug($"Params file not found: {ex.Message}");
+                    angioFrameHeight = _angioManager.AngioFrameHeight;
+                    angioFrameWidth = _angioManager.AngioFrameWidth;
+                    PatientCase.AngioFrame.AngioFrameNum = _angioManager.AngioSaveFrameNum;
+                    channels = _angioManager.AngioBitsPerPixel / 8;
                 }
 
-                reader.Close();
-            }
+                _log.Debug($"angio : Height = {angioFrameHeight}, Width = {angioFrameWidth}, Channel = {channels}");
 
-            AngioImageProcessing();
+                float Scale = angioFrameHeight > angioFrameWidth ? (float)Constants.AngioSize / angioFrameHeight : (float)Constants.AngioSize / angioFrameWidth;
+
+                int newHeight, newWidth;
+                if (Scale >= 1.0)
+                {
+                    newHeight = (int)(angioFrameHeight / Scale);
+                    newWidth = (int)(angioFrameWidth / Scale);
+                }
+                else
+                {
+                    newHeight = (int)(angioFrameHeight * Scale);
+                    newWidth = (int)(angioFrameWidth * Scale);
+                }
+
+                //Recording -> Review
+                if (_angioManager.angioBuffer.Count != 0)
+                {
+                    for (int i = 0; i < _angioManager.AngioSaveFrameNum; i++)
+                    {
+                        if (!_angioManager.angioBuffer.TryDequeue(out byte[] data))
+                        {
+                            _log.Debug("Buffer underrun while reading angioBuffer, currIndex = " + i.ToString());
+                            break;
+                        }
+                        Mat frame = new Mat(angioFrameHeight, angioFrameWidth, MatType.CV_8UC(channels), data);
+                        Cv2.Resize(frame, frame, new OpenCvSharp.Size(newWidth, newHeight));
+
+                        switch (channels)
+                        {
+                            case 3:
+                                Cv2.CvtColor(frame, frame, ColorConversionCodes.BGR2GRAY);
+                                break;
+
+                            case 4:
+                                Cv2.CvtColor(frame, frame, ColorConversionCodes.RGBA2GRAY);
+                                break;
+                        }
+
+                        Mat paddedFrame = new Mat((int)Constants.AngioSize, (int)Constants.AngioSize, MatType.CV_8UC1, Scalar.Black);
+
+                        int top = ((int)Constants.AngioSize - newHeight) / 2;
+                        int left = ((int)Constants.AngioSize - newWidth) / 2;
+                        OpenCvSharp.Rect roi = new OpenCvSharp.Rect(left, top, newWidth, newHeight);
+                        Mat destinationROI = new Mat(paddedFrame, roi);
+                        frame.CopyTo(destinationROI);
+
+                        AngioFrames.Add(paddedFrame);
+                        PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(paddedFrame));
+                    }
+
+                    AngioFrames.Reverse();
+                    PatientCase.AngioFrame.AngioImage.Reverse();
+
+                    _angioManager.angioSaveTimes.Clear();
+                    return;
+                }
+
+                //PatientCaseList -> Review
+                using (BinaryReader reader = new BinaryReader(System.IO.File.Open(angioPath, FileMode.Open)))
+                {
+                    while (reader.BaseStream.Position != reader.BaseStream.Length)
+                    {
+                        byte[] data = reader.ReadBytes(angioFrameWidth * angioFrameHeight * channels);
+
+                        Mat frame = new Mat(angioFrameHeight, angioFrameWidth, MatType.CV_8UC(channels), data);
+                        Cv2.Resize(frame, frame, new OpenCvSharp.Size(newWidth, newHeight));
+
+                        switch (channels)
+                        {
+                            case 3:
+                                Cv2.CvtColor(frame, frame, ColorConversionCodes.BGR2GRAY);
+                                break;
+
+                            case 4:
+                                Cv2.CvtColor(frame, frame, ColorConversionCodes.RGBA2GRAY);
+                                break;
+                        }
+
+                        Mat paddedFrame = new Mat((int)Constants.AngioSize, (int)Constants.AngioSize, MatType.CV_8UC1, Scalar.Black);
+
+                        int top = ((int)Constants.AngioSize - newHeight) / 2;
+                        int left = ((int)Constants.AngioSize - newWidth) / 2;
+                        OpenCvSharp.Rect roi = new OpenCvSharp.Rect(left, top, newWidth, newHeight);
+                        Mat destinationROI = new Mat(paddedFrame, roi);
+                        frame.CopyTo(destinationROI);
+
+                        AngioFrames.Add(paddedFrame);
+                        PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(paddedFrame));
+                    }
+
+                    reader.Close();
+                }
+
+                AngioImageProcessing();
+            }
+            catch(Exception ex)
+            {
+                _log.Error($"[ThreadReadAngioFrames] Exception: {ex.Message}\n{ex.StackTrace}");
+            }
         }
 
         private ImageSource ConvertMatsToImageSource(Mat mat)
