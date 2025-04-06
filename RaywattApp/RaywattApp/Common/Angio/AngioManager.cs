@@ -619,7 +619,8 @@ namespace RaywattApp.Common.Angio
                 }
                 else if (command == (byte)CommandType.FGFailChangeChp)
                 {
-                    isChpFileChangeSuccess = -1;
+                    if(isChpFileChangeSuccess == 0)
+                        isChpFileChangeSuccess = -1;
                 }
                 Array.Copy(tmpBuffer, Constants.CommandPacketSize, tmpBuffer, 0, tmpBuffer.Length - Constants.CommandPacketSize);
                 tmpBufferLen -= Constants.CommandPacketSize;
@@ -774,7 +775,10 @@ namespace RaywattApp.Common.Angio
         {
             _log.Debug("StopLiveView");
 
-            imageList.Clear();
+            if (imageList != null)
+            {
+                imageList.Clear();
+            }
             liveView = false;
             get_image.Join();
         }
