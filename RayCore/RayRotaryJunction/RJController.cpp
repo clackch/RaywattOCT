@@ -335,6 +335,9 @@ void CRJController::updateState() {
 		if (m_bLimitSwitch) {
 			m_nextState = eRJState::Connected;
 		}
+		else if (!m_bPhotoSensor[0]) {
+			m_nextState = eRJState::Error;
+		}
 		break;
 	case eRJState::Cleaning:
 		if (m_bLimitSwitch || m_bButton[1]) {

@@ -1734,6 +1734,20 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 			pRJController->StopMotor();
 			Sleep(2000);
 		}
+		// in case of homing failed
+		if (!pRJController->GetPhotoSensorOnOff(0))
+		{
+			PLOGI.printf("photoSensor %d %d %d %d %d %d", pRJController->GetPhotoSensorOnOff(0), pRJController->GetPhotoSensorOnOff(1), pRJController->GetPhotoSensorOnOff(2)
+				, pRJController->GetPhotoSensorOnOff(3), pRJController->GetPhotoSensorOnOff(4), pRJController->GetPhotoSensorOnOff(5));
+			// SM (Hub) > Sensor #1
+			if (pSystem->m_pThreadRotaryJunction->isRun && !pRJController->GetPhotoSensorOnOff(0)) {
+				pRJController->Current(eStepMotorIndex::Hub, pRJController->ConvertMMtoStep(PULLBACK_MAX_DISTANCE));
+				pRJController->Move(eStepMotorIndex::Hub, HUB_MOTOR_POS_INITIAL, false, 0x1 /* photo-sensor #1 */);
+				pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+			}
+			pRJController->Current(eStepMotorIndex::Hub, HUB_MOTOR_POS_INITIAL);		
+		}
+
 		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
 		pRJController->Move(eStepMotorIndex::Pullback, 20000, false, 0x08 /* photo-sensor #4 */);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
