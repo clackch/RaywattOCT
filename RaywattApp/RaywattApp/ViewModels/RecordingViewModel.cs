@@ -144,6 +144,8 @@ namespace RaywattApp.ViewModels
 
             if(readyTimer.IsEnabled)
                 readyTimer.Stop();
+
+            _angioManager.ReadyToRecv = true;
         }
 
         private void Cancel()
@@ -231,9 +233,9 @@ namespace RaywattApp.ViewModels
 
             RayPullbackScan(PatientCase.ImageFullPath);
 
-            if (DeviceStatus.IsAngioConnected && _angioManager.IsChpFileChangeSuccess == 1)
+            if (DeviceStatus.IsAngioConnected)
             {
-                _angioManager.ReadyToRecv = true;
+                _angioManager.ReadyToRecv = false;
                 _angioManager.ReadyToSaveAngioThread(PatientCase);
             }
 

@@ -535,7 +535,8 @@ namespace RaywattApp.Common.Angio
             }
             if (!ViewModelBase._deviceStatus.IsAngioConnected)return;
 
-            imageList.Enqueue(image);
+            if(readyToRecv)
+                imageList.Enqueue(image);
         }
 
         private void CommandPacketProcess()
