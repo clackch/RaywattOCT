@@ -1642,6 +1642,11 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 
 	pSession->StartObjectDetection();
 
+	// In case of Homing failed
+	if (pRJController->GetPhotoSensorOnOff(0) == false) {
+		pRJController->UpdateState(eRJState::Error);
+	}
+
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
 	}
