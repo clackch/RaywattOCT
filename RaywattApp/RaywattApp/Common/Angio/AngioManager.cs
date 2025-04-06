@@ -780,7 +780,11 @@ namespace RaywattApp.Common.Angio
                 imageList.Clear();
             }
             liveView = false;
-            get_image.Join();
+
+            if (get_image != null)
+            {
+                get_image.Join();
+            }
         }
         private void StartSoketCheck()
         {
