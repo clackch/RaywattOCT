@@ -1579,7 +1579,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	IImaging::Setting settingPullback = pSystem->m_pImagingPullback->GetSetting();
 	int pullbackTime = ((double)config.stepMotor.pullbackDistance / (double)config.stepMotor.pullbackSpeed) * 1000;
 
-	pullbackTime = (pullbackTime <= 0) ? 3000 : pullbackTime;
+	pullbackTime = (pullbackTime <= 0) ? config.stepMotor.noPullbackTime * 1000 : pullbackTime;
 	PLOGI.printf("Pullback start - %dmm, %dmm/s - %dmsec", config.stepMotor.pullbackDistance, config.stepMotor.pullbackSpeed, pullbackTime);
 
 	// 1. Start Recording OCT

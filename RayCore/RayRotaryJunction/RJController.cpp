@@ -185,6 +185,7 @@ bool CRJController::StartControl() {
 	if (m_pThreadState != nullptr) return true;
 
 	AutoStatePeriod(50);
+	initSetting();
 	bool result = CUtility::StartThread(threadRJState, m_pThreadState, (LPVOID)this);
 
 	return result;
@@ -275,6 +276,39 @@ UINT CRJController::GetRFIDInfo(BYTE* pRFIDInfo) {
 }
 int CRJController::ConvertMMtoStep(UINT mm) {
 	return floor((float)mm / (float)PULLBACK_MOTOR_RESOLUTION * (float)MOTOR_CONTROL_RESOLUTION);
+}
+void CRJController::initSetting() {
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	getSerialPacket(eFID::FID_SM_SET_CONFIG, (sizeof(int) * 7) * 2, serialPacket, packetLength);
+
+	const int minSpeed = 315;
+	const int maxSpeed = 157480;
+	const int accTime = 1;
+	const int accStep = 100;
+	const int decTime = 2;
+	const int decStep = 0;
+	const int minStep = 100;
+
+	int offset = 0;
+	for (int i = 0; i < 2; i++) {
+		memcpy(serialPacket + DATA_IDX + offset, &minSpeed, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &maxSpeed, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &accTime, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &accStep, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &decTime, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &decStep, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &minStep, sizeof(int)); offset += sizeof(int);
+	}
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+	if (written != packetLength)
+	{
+		PLOGI.printf("Written size is not matched. (%d / %d bytes)", written, packetLength);
+	}
 }
 UINT CRJController::threadRJState(LPVOID param) {
 	CRJController* pRJController = (CRJController*)param;

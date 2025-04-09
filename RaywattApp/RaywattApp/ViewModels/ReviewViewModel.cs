@@ -29,6 +29,7 @@ using System.IO;
 using System.Windows.Media;
 using RaywattApp.Common.Angio;
 using System.Xml;
+using System.Windows.Controls;
 
 namespace RaywattApp.ViewModels
 {
@@ -154,6 +155,9 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private List<LumenSidebranch> _lumenSidebranches;
+
+        [ObservableProperty]
+        private bool _isDrawLumenSideBranch = false;
 
         [ObservableProperty]
         private List<LumenStent> _lumenStents;
@@ -379,6 +383,9 @@ namespace RaywattApp.ViewModels
             CurrentCoRegistration = new CoRegistration();
 
             UpdateCrossSectionImage();
+
+            if(CommonUtil.IsTestMode(DeviceStatus.TestMode, "Sidebranch"))
+                IsDrawLumenSideBranch = true;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -583,16 +590,6 @@ namespace RaywattApp.ViewModels
                             LumenGuidewire lumenGuidewire = new LumenGuidewire();
                             LumenGuidewires.Add(lumenGuidewire);
                         }
-                    }
-
-                    //Test - Lumen Detection
-                    if(CommonUtil.IsTestMode(DeviceStatus.TestMode, "ML"))
-                    {
-                        threadMakeLumenProfile.Join();
-                        InitializeLumenData();
-                        DeviceStatus.IsLumenSaved = false;
-                        RayStartLumenDetection();
-                        this.isLumenContourSave = true;
                     }
                 }
                 else//From Recording
@@ -1913,40 +1910,304 @@ namespace RaywattApp.ViewModels
 
         private void ImageProcessing(List<Mat> frames)
         {
-            foreach (var frame in frames)
+            int frameNum = 0;
+            int imageCount = frames.Count;
+            List<List<byte>> statusList = new List<List<byte>>(imageCount);
+            List<List<Point>> nextPoints = new List<List<Point>>(imageCount);
+            List<List<Point>> pastPoints = new List<List<Point>>(imageCount);
+
+            for (int i = 0; i < imageCount; i++)
             {
-                Mat blurredImage = new Mat();
-                Cv2.Blur(frame, blurredImage, new OpenCvSharp.Size(7, 7));
+                statusList.Add(new List<byte>());
+                nextPoints.Add(new List<Point>());
+                pastPoints.Add(new List<Point>());
+            }
 
-                // HE 영역 분할 처리
-                Mat equalizedImage = new Mat();
-                var clahe = Cv2.CreateCLAHE(clipLimit: 10, new OpenCvSharp.Size(9, 9));
-                clahe.Apply(frame, equalizedImage);
+            OpticalFlow(frames, ref statusList, ref nextPoints, ref pastPoints);
 
-                Mat thresholdImage = new Mat(equalizedImage.Size(), equalizedImage.Type(), Scalar.All(255));
+            for (int i = 0; i < imageCount; i++)
+            {
+                Mat gradX = new Mat();
+                Mat gradY = new Mat();
+                Cv2.Sobel(frames[i], gradX, MatType.CV_64F, 1, 0, ksize: 3);
+                Cv2.Sobel(frames[i], gradY, MatType.CV_64F, 0, 1, ksize: 3);
+                Mat grad = new Mat();
+                Cv2.Magnitude(gradX, gradY, grad);
+                Mat edge = new Mat();
+                grad.ConvertTo(edge, frames[i].Type());
+                //Cv2.ImWrite("edge" + (i + 1).ToString() + ".png", edge);
 
-                // 이진화 (픽셀 값이 100 미만인 경우 -> 255, 그 외에는 그대로 둠)
-                for (int y = 0; y < equalizedImage.Rows; y++)
+                Cv2.EqualizeHist(frames[i], frames[i]);
+                //Cv2.ImWrite("HE" + (i + 1).ToString() + ".png", frames[i]);// Histogram Equalization
+
+                frames[i] = frames[i] - edge/2;
+                //Cv2.ImWrite("real" + (i + 1).ToString() + ".png", frames[i]);
+            }
+
+            int thresholdOfNow = 10;    // 현재 프레임이 해당 값보다 작으면 혈관, 크면 혈관이 아닌 걸로 판정
+            int thresholdOfOther = 0;  // 앞, 뒤 프레임이 해당 값보다 작으면 현재 프레임이 혈관이 아니라고 판정된 상태에도 혈관으로 판정
+            int thresholdCut = 30;      // 앞, 뒤 프레임이 해당 값보다 크면 현재 프레임이 혈관이라고 판정된 상태에도 혈관이 아니라고 판정
+
+            for (int i = 0; i < imageCount; i++)
+            {
+                Mat nowimage = new Mat();
+                nowimage.Create(frames[i].Rows, frames[i].Cols, frames[i].Depth(), frames[i].Type());
+                frames[i].CopyTo(nowimage);
+
+                if (i == 0)
                 {
-                    for (int x = 0; x < equalizedImage.Cols; x++)
+                    // 첫 번째 프레임: 다음 프레임과만 비교
+                    for (int y = 0; y < frames[i].Rows; y++)
                     {
-                        byte pixelValue = equalizedImage.At<byte>(y, x);
-                        if (pixelValue > 0)
+                        for (int x = 0; x < frames[i].Cols; x++)
                         {
-                            thresholdImage.Set<byte>(y, x, pixelValue < 100 ? (byte)255 : (byte)0);
+                            int final_x, final_y;
+                            ThisPixelGoesWhere(x, y, i + 1, statusList, nextPoints, pastPoints, out final_x, out final_y);
+
+                            byte pixVal = nowimage.At<byte>(y, x);
+                            if (pixVal < thresholdOfNow)
+                            {
+                                nowimage.At<byte>(y, x) = 255;
+                                // 다음 프레임에 맞춰서 0으로 만드는 부분은 오류가 많아지는 경향이 있음.
+                            }
+                            else
+                            {
+                                if (!(x + final_x < 0 || x + final_x >= nowimage.Cols ||
+                                      y + final_y < 0 || y + final_y >= nowimage.Rows) &&
+                                    frames[i + 1].At<byte>(y + final_y, x + final_x) < thresholdOfOther)
+                                {
+                                    nowimage.At<byte>(y, x) = 255;
+                                }
+                                nowimage.At<byte>(y, x) = 0;
+                            }
+                        }
+                    }
+                }
+                else if (i == imageCount - 1)
+                {
+                    // 마지막 프레임: 이전 프레임과만 비교
+                    for (int y = 0; y < frames[i].Rows; y++)
+                    {
+                        for (int x = 0; x < frames[i].Cols; x++)
+                        {
+                            int final_x, final_y;
+                            ThisPixelGoesWhere(x, y, i, statusList, nextPoints, pastPoints, out final_x, out final_y);
+
+                            byte pixVal = nowimage.At<byte>(y, x);
+                            if (pixVal < thresholdOfNow)
+                            {
+                                if (!(x - final_x < 0 || x - final_x >= nowimage.Cols ||
+                                      y - final_y < 0 || y - final_y >= nowimage.Rows) &&
+                                    frames[i - 1].At<byte>(y - final_y, x - final_x) > thresholdCut)
+                                {
+                                    nowimage.At<byte>(y, x) = 0;
+                                }
+                                else
+                                    nowimage.At<byte>(y, x) = 255;
+                            }
+                            else
+                            {
+                                if (!(x - final_x < 0 || x - final_x >= nowimage.Cols ||
+                                      y - final_y < 0 || y - final_y >= nowimage.Rows) &&
+                                    frames[i - 1].At<byte>(y - final_y, x - final_x) < thresholdOfOther)
+                                {
+                                    nowimage.At<byte>(y, x) = 255;
+                                }
+                                nowimage.At<byte>(y, x) = 0;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // 중간 프레임: 이전 프레임과 다음 프레임 모두와 비교
+                    for (int y = 0; y < frames[i].Rows; y++)
+                    {
+                        for (int x = 0; x < frames[i].Cols; x++)
+                        {
+                            int final_x0, final_y0, final_x1, final_y1;
+                            ThisPixelGoesWhere(x, y, i, statusList, nextPoints, pastPoints, out final_x0, out final_y0);
+                            ThisPixelGoesWhere(x, y, i + 1, statusList, nextPoints, pastPoints, out final_x1, out final_y1);
+
+                            byte pixVal = nowimage.At<byte>(y, x);
+                            if (pixVal < thresholdOfNow)
+                            {
+                                if (!(x - final_x0 < 0 || x - final_x0 >= nowimage.Cols ||
+                                      y - final_y0 < 0 || y - final_y0 >= nowimage.Rows) &&
+                                    !(x + final_x1 < 0 || x + final_x1 >= nowimage.Cols ||
+                                      y + final_y1 < 0 || y + final_y1 >= nowimage.Rows) &&
+                                    (frames[i - 1].At<byte>(y - final_y0, x - final_x0) > thresholdCut &&
+                                     frames[i + 1].At<byte>(y + final_y1, x + final_x1) > thresholdCut))
+                                {
+                                    nowimage.At<byte>(y, x) = 0;
+                                }
+                                else
+                                    nowimage.At<byte>(y, x) = 255;
+                            }
+                            else
+                            {
+                                if (!(x - final_x0 < 0 || x - final_x0 >= nowimage.Cols ||
+                                      y - final_y0 < 0 || y - final_y0 >= nowimage.Rows) &&
+                                    !(x + final_x1 < 0 || x + final_x1 >= nowimage.Cols ||
+                                      y + final_y1 < 0 || y + final_y1 >= nowimage.Rows) &&
+                                    (frames[i - 1].At<byte>(y - final_y0, x - final_x0) < thresholdOfOther &&
+                                     frames[i + 1].At<byte>(y + final_y1, x + final_x1) < thresholdOfOther))
+                                {
+                                    nowimage.At<byte>(y, x) = 255;
+                                }
+                                nowimage.At<byte>(y, x) = 0;
+                            }
+                        }
+                    }
+                }
+                Mat morphedImage = new Mat();
+                var kernel = Cv2.GetStructuringElement(MorphShapes.Ellipse, new OpenCvSharp.Size(3, 3));
+
+                Cv2.MorphologyEx(nowimage, morphedImage, MorphTypes.Close, kernel, iterations: 4);
+                //Cv2.ImWrite("nowimage" + frameNum.ToString() + ".png", morphedImage);
+
+                Mat skeleton = Skeletonize(morphedImage);
+
+                byte[] imageData = new byte[frames[i].Rows * frames[i].Cols * frames[i].ElemSize()];
+                Marshal.Copy(skeleton.Data, imageData, 0, imageData.Length);
+                PatientCase.AngioFrame.DijkstraHeap.Add(new DijkstraHeap(imageData, frames[i].Rows, frames[i].Cols));
+                frameNum++;
+
+                //Cv2.ImWrite("check" + frameNum.ToString() + ".png", skeleton);
+            }
+        }
+
+        private void ThisPixelGoesWhere(int x, int y, int index, 
+            List<List<byte>> statusList, List<List<Point>> nextPoints, List<List<Point>> pastPoints, 
+            out int nextX, out int nextY)
+        {
+            int mask_r = 40;
+            int validCount = 0;                                 
+            double total = 0.0;
+
+            for (int j = 0; j < pastPoints[index].Count; j++)
+            {
+                if (statusList[index][j] != 0 &&
+                    Math.Abs(nextPoints[index][j].X - x) <= mask_r &&
+                    Math.Abs(nextPoints[index][j].Y - y) <= mask_r)
+                {
+                    double tempX = nextPoints[index][j].X - pastPoints[index][j].X;
+                    double tempY = nextPoints[index][j].Y - pastPoints[index][j].Y;
+                    total += 1.0 / Math.Max(Math.Sqrt(Math.Pow(tempX, 2) + Math.Pow(tempY, 2)), 0.05);
+                    validCount++;
+                }
+            }
+
+            if (validCount > 0)
+            {
+                double temp_x = 0.0, temp_y = 0.0;
+                for (int j = 0; j < pastPoints[index].Count; j++)
+                {
+                    if (statusList[index][j] != 0 &&
+                        Math.Abs(nextPoints[index][j].X - x) <= mask_r &&
+                        Math.Abs(nextPoints[index][j].Y - y) <= mask_r)
+                    {
+                        double dist_x = nextPoints[index][j].X - pastPoints[index][j].X;
+                        double dist_y = nextPoints[index][j].Y - pastPoints[index][j].Y;
+                        double dist = 1.0 / Math.Max(Math.Sqrt(Math.Pow(dist_x, 2) + Math.Pow(dist_y, 2)), 0.05);
+                        temp_x += (dist / total) * dist_x;
+                        temp_y += (dist / total) * dist_y;
+                    }
+                }
+                nextX = (int)Math.Round(temp_x);
+                nextY = (int)Math.Round(temp_y);
+            }
+            else
+            {
+                nextX = 0; nextY = 0;
+            }
+        }
+
+        private void OpticalFlow(List<Mat> frames, ref List<List<Byte>> statusList, ref List<List<Point>> nextPoints, ref List<List<Point>> pastPoints)
+        {
+            int checkTooFast = 400;
+
+            // 프레임 간 optical flow 계산
+            for (int i = 1; i < frames.Count; i++)
+            {
+                Mat img1 = frames[i - 1].Clone();
+                Mat img2 = frames[i].Clone();
+
+                // ORB 특징점 검출 및 기술자 생성
+                var detector = ORB.Create();
+                KeyPoint[] keypoints1, keypoints2;
+                Mat descriptors1 = new Mat(), descriptors2 = new Mat();
+                detector.DetectAndCompute(img1, null, out keypoints1, descriptors1);
+                detector.DetectAndCompute(img2, null, out keypoints2, descriptors2);
+
+                // BFMatcher (Hamming norm)로 매칭 수행
+                BFMatcher matcher = new BFMatcher(NormTypes.Hamming);
+                DMatch[] matches = matcher.Match(descriptors1, descriptors2);
+
+                // 매칭 결과를 거리 기준으로 정렬 (거리가 짧을수록 좋은 매칭)
+                List<DMatch> matchList = matches.ToList();
+                matchList.Sort((a, b) => a.Distance.CompareTo(b.Distance));
+
+                // 상위 20%만 사용
+                int numGoodMatches = (int)(matchList.Count * 0.2);
+                matchList = matchList.Take(numGoodMatches).ToList();
+
+                // 매칭된 특징점 위치를 points 리스트에 저장
+                List<Point> points1 = new List<Point>();
+
+                foreach (var m in matchList)
+                {
+                    points1.Add(new Point((int)keypoints1[m.QueryIdx].Pt.X, (int)keypoints1[m.QueryIdx].Pt.Y));
+                }
+
+                // Lucas–Kanade 방식으로 옵티컬 플로우 계산
+                Mat points1Mat = new Mat(points1.Count, 1, MatType.CV_32FC2, points1.ToArray());
+                Mat flowPointsMat = new Mat();
+                Mat statusMat = new Mat();
+                Mat errMat = new Mat();
+                Cv2.CalcOpticalFlowPyrLK(img1, img2, points1Mat, flowPointsMat, statusMat, errMat);
+
+                Point[] flowPoints = new Point[flowPointsMat.Rows];
+                for (int j = 0; j < flowPointsMat.Rows; j++)
+                {
+                    flowPoints[j] = new Point(flowPointsMat.At<Vec2f>(j)[0], flowPointsMat.At<Vec2f>(j)[1]);
+                }
+
+                byte[] status = new byte[statusMat.Rows];
+                for (int j = 0; j < statusMat.Rows; j++)
+                {
+                    status[j] = statusMat.At<byte>(j, 0);
+                }
+
+                float[] err = new float[errMat.Rows];
+                for (int j = 0; j < errMat.Rows; j++)
+                {
+                    err[j] = errMat.At<float>(j, 0);
+                }
+
+                List<Point> flowPointsList = new List<Point>(flowPoints);
+                List<byte> statusListForFrame = new List<byte>(status);
+
+                // 너무 빠른 이동(체크 값 초과)한 포인트 제거
+                for (int j = 0; j < points1.Count; j++)
+                {
+                    if (status[j] != 0)
+                    {
+                        double dx = flowPointsList[j].X - points1[j].X;
+                        double dy = flowPointsList[j].Y - points1[j].Y;
+                        if (dx * dx + dy * dy > checkTooFast)
+                        {
+                            flowPointsList.RemoveAt(j);
+                            points1.RemoveAt(j);
+                            statusListForFrame.RemoveAt(j);
+                            j--;
                         }
                     }
                 }
 
-                Mat morphedImage = new Mat();
-                var kernel = Cv2.GetStructuringElement(MorphShapes.Ellipse, new OpenCvSharp.Size(3, 3));
-                Cv2.MorphologyEx(thresholdImage, morphedImage, MorphTypes.Open, kernel, iterations: 2);
-
-                Mat skeleton = Skeletonize(morphedImage);
-
-                byte[] imageData = new byte[frame.Rows * frame.Cols * frame.ElemSize()];
-                Marshal.Copy(skeleton.Data, imageData, 0, imageData.Length);
-                PatientCase.AngioFrame.DijkstraHeap.Add(new DijkstraHeap(imageData, frame.Rows, frame.Cols));
+                statusList[i] = statusListForFrame;
+                nextPoints[i] = flowPointsList;
+                pastPoints[i] = points1;
             }
         }
 
