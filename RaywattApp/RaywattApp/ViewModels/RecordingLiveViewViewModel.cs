@@ -201,6 +201,7 @@ namespace RaywattApp.ViewModels
                 _angioManager.SendCommandPacket(CommandType.FGStarted);
             }
             _angioManager.ReadyToRecv = true;
+            _angioManager.SendCommandPacket(CommandType.FGStarted);
             _angioManager.ImgAngio = _angioManager.ShowNoSignal();
         }
 

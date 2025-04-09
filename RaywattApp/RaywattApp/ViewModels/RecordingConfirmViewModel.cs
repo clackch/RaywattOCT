@@ -83,6 +83,7 @@ namespace RaywattApp.ViewModels
             }
 
             _angioManager.ReadyToRecv = false;
+            _angioManager.SendCommandPacket(CommandType.FGStopped);
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)

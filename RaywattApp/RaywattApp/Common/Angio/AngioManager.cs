@@ -441,7 +441,6 @@ namespace RaywattApp.Common.Angio
                     PacketType type = CheckPacketType(tmpBuffer);
                     if (type == PacketType.Command) {
                         CommandPacketProcess();
-                        _log.Debug("packet end");
                     }
                         
                     else if (type == PacketType.Image)

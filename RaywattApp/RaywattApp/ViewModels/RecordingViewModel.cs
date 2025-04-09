@@ -233,6 +233,7 @@ namespace RaywattApp.ViewModels
 
             if (DeviceStatus.IsAngioConnected)
             {
+                _angioManager.SendCommandPacket(CommandType.FGStarted);
                 _angioManager.ReadyToRecv = true;
                 _angioManager.ReadyToSaveAngioThread(PatientCase);
             }
