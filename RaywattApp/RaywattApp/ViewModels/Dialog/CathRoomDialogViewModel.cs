@@ -85,6 +85,7 @@ namespace RaywattApp.ViewModels.Dialog
                 _log.Debug("CathRoom not Selected");
                 ViewModelBase._deviceStatus.IsAngioInitialized = false;
                 _angioManager.IsChpFileChangeSuccess = 0;
+                _angioManager.isChpFileConnected = 0;
             }
             else
             {

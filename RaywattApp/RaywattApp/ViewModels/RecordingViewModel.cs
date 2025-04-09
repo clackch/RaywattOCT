@@ -234,7 +234,7 @@ namespace RaywattApp.ViewModels
 
             RayPullbackScan(PatientCase.ImageFullPath);
 
-            if (DeviceStatus.IsAngioConnected && _angioManager.IsChpFileChangeSuccess == 1)
+            if (DeviceStatus.IsAngioConnected && _angioManager.isChpFileConnected == 1)
             {
                 _angioManager.ReadyToRecv = false;
                 _angioManager.ReadyToSaveAngioThread(PatientCase);

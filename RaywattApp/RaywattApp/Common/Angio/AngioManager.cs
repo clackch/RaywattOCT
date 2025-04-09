@@ -95,6 +95,7 @@ namespace RaywattApp.Common.Angio
         private bool threadOnSaveAsFile;
         public bool threadOnRedoPullback;
         public bool threadOnSaveFinished;
+        public bool fromRecording = false;
 
         private Thread get_image;
         private bool liveView;
@@ -113,6 +114,8 @@ namespace RaywattApp.Common.Angio
 
         private short isChpFileChangeSuccess = 0;
         public short IsChpFileChangeSuccess { get { return isChpFileChangeSuccess; } set { isChpFileChangeSuccess = value; } }
+
+        public short isChpFileConnected = 0;
 
         private bool isCathRoomDialogOpen = false;
         private double live_time;
@@ -323,34 +326,23 @@ namespace RaywattApp.Common.Angio
                         break;
                 }
 
+                if(angioBuffer != null)
+                {
+                    angioBuffer.Clear();
+                }
+
                 angioBuffer = new ConcurrentQueue<byte[]>();
-                int availableFrames = angioSaveFrameNum - 1 - closestIndex;
+                int availableFrames = angioSaveFrameNum;
                 int desiredFrameCount = angioTargetFrameNum;
 
-                // 충분한 프레임이 있는 경우, 일정 간격으로 샘플링
-                if (availableFrames >= desiredFrameCount)
-                {
-                    angioSaveFrameNum = desiredFrameCount;
-                    double step = (double)availableFrames / desiredFrameCount;
+                angioSaveFrameNum = desiredFrameCount;
+                double step = (double)availableFrames / desiredFrameCount;
 
-                    for (int i = 0; i < desiredFrameCount; i++)
-                    {
-                        int index = closestIndex + (int)Math.Round(i * step);
-                        if (index >= angioSaveBuffer.Count) break;
-                        angioBuffer.Enqueue(angioSaveBuffer[index]);
-                    }
-                }
-                else
+                for (int i = 0; i < desiredFrameCount; i++)
                 {
-                    // 부족한 경우, 전부 사용
-                    int start = closestIndex;
-                    int end = angioSaveFrameNum;
-
-                    for (int i = start; i < end; i++)
-                    {
-                        angioBuffer.Enqueue(angioSaveBuffer[i]);
-                    }
-                    angioSaveFrameNum = end - start;
+                    int index = (int)Math.Round(i * step);
+                    if (index >= angioSaveBuffer.Count) break;
+                    angioBuffer.Enqueue(angioSaveBuffer[index]);
                 }
 
                 angioSaveBuffer.Clear();
@@ -596,7 +588,8 @@ namespace RaywattApp.Common.Angio
 
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
-                        ViewModelBase._deviceStatus.IsAngioConnected = true; 
+                        ViewModelBase._deviceStatus.IsAngioConnected = true;
+                        _log.Debug("Now angio is connected");
                     });
                 }
                 else if (command == (byte)CommandType.FGBoardExist)
@@ -614,13 +607,17 @@ namespace RaywattApp.Common.Angio
                 else if (command == (byte)CommandType.FGSuccessChangeChp)
                 {
                     AskDeviceInfo();
+                    _log.Debug("IsChpFileChangeSuccess = 1");
+                    if(isChpFileConnected == 0)
+                    {
+                        isChpFileConnected = 1;
+                    }
                     isChpFileChangeSuccess = 1;
                     ViewModelBase._deviceStatus.IsAngioInitialized = true;
                 }
                 else if (command == (byte)CommandType.FGFailChangeChp)
                 {
-                    if(isChpFileChangeSuccess == 0)
-                        isChpFileChangeSuccess = -1;
+                    isChpFileChangeSuccess = -1;
                 }
                 Array.Copy(tmpBuffer, Constants.CommandPacketSize, tmpBuffer, 0, tmpBuffer.Length - Constants.CommandPacketSize);
                 tmpBufferLen -= Constants.CommandPacketSize;
@@ -804,11 +801,12 @@ namespace RaywattApp.Common.Angio
         {
             _log.Debug("ReadyToSaveAngioThread");
 
-            threadOnRedoPullback = false;
             threadFuncSaveAngioFrames = new Thread(() => ThreadFuncSaveAngioFrames(patientCase));
+            threadOnRedoPullback = false;
+            threadOnSaveAsFile = false;
             threadOnSaveAngioFrames = true;
             threadOnSaveFinished = false;
-            threadOnSaveAsFile = false;
+            fromRecording = false;
             threadFuncSaveAngioFrames.Start();
         }
         public void StopGettingAngioImageThread()
