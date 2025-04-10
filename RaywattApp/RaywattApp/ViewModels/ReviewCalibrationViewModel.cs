@@ -99,7 +99,7 @@ namespace RaywattApp.ViewModels
                 GetImageInfo(RaySession.Review);
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
 
-                DrawSheathIndicator();
+                DrawSheathIndicator(PatientCase.SheathDiameter);
             }
         }
 

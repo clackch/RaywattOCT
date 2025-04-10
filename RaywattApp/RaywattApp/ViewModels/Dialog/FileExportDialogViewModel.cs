@@ -335,8 +335,7 @@ namespace RaywattApp.ViewModels.Dialog
             CrossSectionClipRadius = CrossSectionImageSize / 2;
             CrossSectionClipCenter = new Point(CrossSectionClipRadius, CrossSectionClipRadius);
 
-            double sheathDiameter = RayGetProperty(Property.SheathDiameter);
-            SheathIndicator = CommonUtil.DrawSheathIndicator((int)CrossSectionImageSize, sheathDiameter);
+            SheathIndicator = CommonUtil.DrawSheathIndicator((int)CrossSectionImageSize, patientCase.SheathDiameter);
 
             return ImagePartWidth + TextPartWidth;
         }
