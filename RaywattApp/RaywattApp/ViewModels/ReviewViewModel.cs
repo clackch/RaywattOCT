@@ -442,7 +442,7 @@ namespace RaywattApp.ViewModels
                 if (ReviewStatus.IsPlay)
                     Playback();
 
-                DrawSheathIndicator();
+                DrawSheathIndicator(PatientCase.SheathDiameter);
             }
         }
 
