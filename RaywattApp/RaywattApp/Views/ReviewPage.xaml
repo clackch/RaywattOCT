@@ -810,17 +810,18 @@
                                 <Grid Grid.Row="1">
                                     <Grid Width="192" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                                         <Grid.RowDefinitions>
-                                            <RowDefinition Height="24"/>
+                                            <RowDefinition Height="16"/>
                                             <RowDefinition Height="26"/>
-                                            <RowDefinition Height="22"/>
+                                            <RowDefinition Height="30"/>
                                             <RowDefinition/>
                                         </Grid.RowDefinitions>
                                         <Grid Grid.Row="1">
                                             <Label Style="{DynamicResource ProcedureLabel}" Content="{Binding PatientCase.Procedure, Converter={StaticResource CodeConverter}, ConverterParameter='PROC'}" Tag="{Binding PatientCase.Procedure}" HorizontalAlignment="Left"/>
                                             <component:IconButton Style="{DynamicResource IconButton}" Icon="editSimple" Command="{Binding EditCaseCommand}" Content="{Binding [Edit], Source={StaticResource L10N}}" HorizontalAlignment="Right"/>
                                         </Grid>
+                                        <Label Grid.Row="2" Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding PatientCase.CreateDate, StringFormat=t, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" HorizontalAlignment="Left" Margin="0,5,0,0"/>
                                         <StackPanel Grid.Row="3">
-                                            <Label Content="{Binding Patient.Name}" Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
+                                            <Label Content="{Binding Patient.Name}" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
                                             <StackPanel Height="9"/>
                                             <!-- design guide : 12px -->
                                             <Separator Height="1" Background="{DynamicResource SeparatorBrush}"/>
