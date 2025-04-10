@@ -1225,6 +1225,8 @@ namespace RaywattApp.Common.Util
             if (angioManager != null)
                 angioManager.CloseAngioManager();
 
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
+
             Thread threadReadyPullback = new Thread(() => ThreadExit(deviceStatus, isShutdown));
             threadReadyPullback.Start();
         }
@@ -1232,9 +1234,7 @@ namespace RaywattApp.Common.Util
         private static void ThreadExit(DeviceStatus? deviceStatus, bool isShutdown)
         {
             RayDisconnectDevices();
-            RayStopSystem();
-
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
+            RayStopSystem();            
 
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
