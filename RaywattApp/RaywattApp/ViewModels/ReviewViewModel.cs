@@ -1838,8 +1838,6 @@ namespace RaywattApp.ViewModels
 
                     AngioFrames.Reverse();
                     PatientCase.AngioFrame.AngioImage.Reverse();
-
-                    _angioManager.angioSaveTimes.Clear();
                     return;
                 }
                 else // PatientCaseList -> Review

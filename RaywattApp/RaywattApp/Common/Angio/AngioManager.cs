@@ -286,13 +286,13 @@ namespace RaywattApp.Common.Angio
                 }
 
                 angioSaveFrameNum = angioSaveBuffer.Count;
-                int closestIndex = angioSaveFrameNum;
+                int closestIndex = 0;
                 double OCTStartTime = RayGetProperty(Property.PullbackStartTime) / 2.0;
                 double minGap = double.MaxValue;
                 double angioTime = double.MaxValue;
 
                 // Buffer 전달
-                for (int i = 0; i < angioSaveFrameNum; i++)
+                for (int i = 0; i < angioSaveTimes.Count; i++)
                 {
                     angioTime = angioSaveTimes[i] / 1000.0;
                     double gap = Math.Abs(angioTime - OCTStartTime);
@@ -303,6 +303,7 @@ namespace RaywattApp.Common.Angio
                         closestIndex = i;
                     }
                 }
+                angioSaveTimes.Clear();
                 _log.Debug($"gap = {minGap} Angio Time = {angioTime}, OCT Time = {OCTStartTime} closestIndex = {closestIndex}" +
                     $"maxIndex = {angioSaveFrameNum}");
 
