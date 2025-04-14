@@ -118,7 +118,6 @@ namespace RaywattApp.Common.Angio
         public short isChpFileConnected = 0;
 
         private bool isCathRoomDialogOpen = false;
-        private double live_time;
 
         public AngioManager(IDialogService dialogService)
         {
@@ -285,25 +284,26 @@ namespace RaywattApp.Common.Angio
                     Thread.Sleep(500);
                 }
 
-                angioSaveFrameNum = angioSaveBuffer.Count;
+                angioSaveFrameNum = angioSaveBuffer.Count > angioSaveTimes.Count ? angioSaveTimes.Count : angioSaveBuffer.Count;
                 int closestIndex = 0;
                 double OCTStartTime = RayGetProperty(Property.PullbackStartTime) / 2.0;
                 double minGap = double.MaxValue;
                 double angioTime = double.MaxValue;
 
-                // Buffer 전달
-                for (int i = 0; i < angioSaveTimes.Count; i++)
+                if (angioSaveTimes.Count != 0)
                 {
-                    angioTime = angioSaveTimes[i] / 1000.0;
-                    double gap = Math.Abs(angioTime - OCTStartTime);
-
-                    if(gap <= minGap)
+                    for (int i = 0; i < angioSaveFrameNum; i++)
                     {
-                        minGap = gap;
-                        closestIndex = i;
+                        angioTime = angioSaveTimes[i] / 1000.0;
+                        double gap = Math.Abs(angioTime - OCTStartTime);
+
+                        if (gap <= minGap)
+                        {
+                            closestIndex = i;
+                        }
                     }
+                    angioSaveTimes.Clear();
                 }
-                angioSaveTimes.Clear();
                 _log.Debug($"gap = {minGap} Angio Time = {angioTime}, OCT Time = {OCTStartTime} closestIndex = {closestIndex}" +
                     $"maxIndex = {angioSaveFrameNum}");
 
@@ -333,7 +333,7 @@ namespace RaywattApp.Common.Angio
                 }
 
                 angioBuffer = new ConcurrentQueue<byte[]>();
-                int availableFrames = angioSaveFrameNum;
+                int availableFrames = angioSaveFrameNum - (closestIndex + 1);
                 int desiredFrameCount = angioTargetFrameNum;
 
                 angioSaveFrameNum = desiredFrameCount;
@@ -341,7 +341,7 @@ namespace RaywattApp.Common.Angio
 
                 for (int i = 0; i < desiredFrameCount; i++)
                 {
-                    int index = (int)Math.Round(i * step);
+                    int index = closestIndex + (int)Math.Round(i * step);
                     if (index >= angioSaveBuffer.Count) break;
                     angioBuffer.Enqueue(angioSaveBuffer[index]);
                 }
@@ -506,7 +506,7 @@ namespace RaywattApp.Common.Angio
             offset += sizeof(short);
 
             angioBitsPerPixel = (char)tmpBuffer[offset++];
-            live_time = BitConverter.ToInt64(tmpBuffer, offset); // Time Stamp
+            double live_time = BitConverter.ToInt64(tmpBuffer, offset); // Time Stamp
 
             offset += sizeof(long);
 
