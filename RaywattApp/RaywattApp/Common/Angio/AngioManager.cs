@@ -299,6 +299,7 @@ namespace RaywattApp.Common.Angio
 
                         if (gap <= minGap)
                         {
+                            minGap = gap;
                             closestIndex = i;
                         }
                     }
