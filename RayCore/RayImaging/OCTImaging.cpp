@@ -227,20 +227,9 @@ cv::Point2f COCTImaging::matXY(const cv::Point2f& srcPt, int m_nWidth, int m_nHe
 			}
 		}
 	}
-	float cx = 0.5f * m_nWidth;
-	float cy = 0.5f * m_nHeight;
-	float xShift = bestXY.x - cx;
-	float yShift = bestXY.y - cy;
-	float rx = yShift;
-	float ry = -xShift;
-	rx += cx;
-	ry += cy;
-	cv::Point test;
-	test.x = rx; test.y = ry;
 	cv::Point center(m_nWidth / 2, m_nHeight / 2);
-	test = rotatePoint_CCW90(test, center);
-	test = rotatePoint_CCW90(test, center);
-	return cv::Point2f(test.x, test.y);
+	bestXY = rotatePoint_CCW90(bestXY, center);
+	return cv::Point2f(bestXY.x, bestXY.y);
 }
 
 cv::Point2f COCTImaging::rotatePoint_CCW90(const cv::Point2f& point, const cv::Point2f& center)
