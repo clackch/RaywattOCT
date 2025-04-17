@@ -33,7 +33,9 @@ namespace RaywattApp.ViewModels
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
-        private bool isStartRecording;
+        private bool isStartRecording = false;
+
+        private bool isMoveCalibration = false;
 
         [ObservableProperty]
         private Patient _patient;
@@ -132,8 +134,6 @@ namespace RaywattApp.ViewModels
 
             _angioManager = angioManager;
 
-            isStartRecording = false;
-
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["classification"] = "PBTY";
             pullbackTypes = _sqlManager.SelectCode(sqlParameters);
@@ -212,21 +212,20 @@ namespace RaywattApp.ViewModels
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
 
-            if (!isStartRecording && _angioManager.ReadyToRecv && DeviceStatus.IsAngioConnected)
+            if (!this.isStartRecording && _angioManager.ReadyToRecv && DeviceStatus.IsAngioConnected)
             {
                 _angioManager.SendCommandPacket(CommandType.FGStopped);
                 _angioManager.ReadyToRecv = false;
             }
+
+            if(!this.isStartRecording && !this.isMoveCalibration)
+                RayStopLiveView();
         }
 
         private void Back()
         {
             _log.Debug("Back");
             
-            _angioManager.SendCommandPacket(CommandType.FGStopped);
-            _angioManager.ReadyToRecv = false;
-
-            RayStopLiveView();
             leaveToPage(Constants.RecordingPresetPage);
         }
 
@@ -248,6 +247,8 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Calibration");
 
+            this.isMoveCalibration = true;
+
             DeviceStatus.IsLiveView = true;
             ChangeViewMode();
 
@@ -258,7 +259,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("StartRecording");
 
-            isStartRecording = true;
+            this.isStartRecording = true;
             
             if (!DeviceStatus.IsLiveView)
             {

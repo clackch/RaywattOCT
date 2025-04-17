@@ -61,6 +61,7 @@ namespace RaywattApp.ViewModels
 
         private bool isReadyOn = true;
 
+        private bool isMoveConfirm = false;
 
         private ICommand _cancelCommand;
         public ICommand CancelCommand
@@ -147,13 +148,15 @@ namespace RaywattApp.ViewModels
                 readyTimer.Stop();
 
             _angioManager.ReadyToRecv = true;
+
+            if(!this.isMoveConfirm)
+                RayStopLiveView();
         }
 
         private void Cancel()
         {
             _log.Debug("Cancel");
-
-            RayStopLiveView();
+            
             leaveToPage(Constants.RecordingLiveViewPage);
         }
 
@@ -252,6 +255,8 @@ namespace RaywattApp.ViewModels
                 Thread.Sleep((int)Constants.WaitForEventInterval);
             }
             runWaitPullbackDone = false;
+
+            this.isMoveConfirm = true;
 
             leaveToPage(Constants.RecordingConfirmPage);
         }
