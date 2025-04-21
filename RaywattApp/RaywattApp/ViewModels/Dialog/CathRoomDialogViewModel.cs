@@ -87,6 +87,7 @@ namespace RaywattApp.ViewModels.Dialog
                 _angioManager.IsChpFileChangeSuccess = 0;
                 _angioManager.isChpFileConnected = 0;
                 _angioManager.SendCommandPacket(CommandType.FGStopped);
+                _angioManager.ToggleLive(false);
             }
             else
             {
@@ -104,6 +105,7 @@ namespace RaywattApp.ViewModels.Dialog
                     if (_angioManager.ReadyToRecv)
                     {
                         _angioManager.SendCommandPacket(CommandType.FGStarted);
+                        _angioManager.ToggleLive(true);
                     }
 
                     _dialogService.OpenDialog(new AlertDialogControl(), parameter, Common.Bases.Constants.ApplicationWidth, Common.Bases.Constants.ApplicationHeight);

@@ -199,6 +199,7 @@ namespace RaywattApp.ViewModels
             if (ViewModelBase._deviceStatus.IsAngioInitialized && !_angioManager.ReadyToRecv)
             {
                 _angioManager.SendCommandPacket(CommandType.FGStarted);
+                _angioManager.ToggleLive(true);
             }
             _angioManager.ReadyToRecv = true;
             _angioManager.ImgAngio = _angioManager.ShowNoSignal();
@@ -216,6 +217,7 @@ namespace RaywattApp.ViewModels
             {
                 _angioManager.SendCommandPacket(CommandType.FGStopped);
                 _angioManager.ReadyToRecv = false;
+                _angioManager.ToggleLive(false);
             }
 
             if(!this.isStartRecording && !this.isMoveCalibration)

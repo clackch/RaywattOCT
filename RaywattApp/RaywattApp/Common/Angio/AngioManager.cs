@@ -563,6 +563,7 @@ namespace RaywattApp.Common.Angio
                     if (readyToRecv) 
                     {
                         SendCommandPacket(CommandType.FGStopped);
+                        ToggleLive(false);
                     }
 
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
@@ -575,6 +576,7 @@ namespace RaywattApp.Common.Angio
                     if (readyToRecv)
                     {
                         SendCommandPacket(CommandType.FGStarted);
+                        ToggleLive(true);
                     }
 
                     if (!ViewModelBase._deviceStatus.IsAngioInitialized && !ViewModelBase._deviceStatus.IsAngioConnected && readyToRecv)
@@ -817,6 +819,7 @@ namespace RaywattApp.Common.Angio
 
             threadOnSaveAngioFrames = false;
             SendCommandPacket(CommandType.FGStopped);
+            ToggleLive(false); 
         }
 
         public void StartSaveAngioFrames()
@@ -854,6 +857,14 @@ namespace RaywattApp.Common.Angio
                 return false;
 
             return _tcpClient.Connected;
+        }
+        public void ToggleLive(bool toggle)
+        {
+            if (toggle)
+                LiveViewThreads();
+            else
+                StopLiveView();
+
         }
     }
 }
