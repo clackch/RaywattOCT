@@ -86,6 +86,7 @@ namespace RaywattApp.ViewModels.Dialog
                 ViewModelBase._deviceStatus.IsAngioInitialized = false;
                 _angioManager.IsChpFileChangeSuccess = 0;
                 _angioManager.isChpFileConnected = 0;
+                _angioManager.SendCommandPacket(CommandType.FGStopped);
             }
             else
             {
