@@ -9,9 +9,9 @@ public:
 		double fAxialResolutionScale;	// um per pixel
 		int nNoiseSkip;
 		int nNoiseAverage;
-		double fSheathRadiusOnePointSeven;	// mm
+		double fSheathRadiusOnePointSix;	// mm
 		double fSheathRadiusTwoPointSix;	// mm
-		double fSheathThicknessOnePointSeven;	// mm
+		double fSheathThicknessOnePointSix;	// mm
 		double fSheathThicknessTwoPointSix;	// mm
 		double fSheathRadius;	// mm
 		double fSheathThickness;	// mm

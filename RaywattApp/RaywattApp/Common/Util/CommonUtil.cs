@@ -881,7 +881,7 @@ namespace RaywattApp.Common.Util
                     _log.Debug($"sys.path: {sys.path}");
 
                     // Python 모듈 가져오기
-                    dynamic script = Py.Import("SaveTIFFAsGray");
+                    dynamic script = Py.Import("ImageProcess");
 
                     // Mat 리스트를 Python으로 전달
                     int width, height;
@@ -1225,8 +1225,6 @@ namespace RaywattApp.Common.Util
             if (angioManager != null)
                 angioManager.CloseAngioManager();
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
-
             Thread threadReadyPullback = new Thread(() => ThreadExit(deviceStatus, isShutdown));
             threadReadyPullback.Start();
         }
@@ -1234,7 +1232,9 @@ namespace RaywattApp.Common.Util
         private static void ThreadExit(DeviceStatus? deviceStatus, bool isShutdown)
         {
             RayDisconnectDevices();
-            RayStopSystem();            
+            RayStopSystem();
+
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
 
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {

@@ -194,8 +194,9 @@ namespace RaywattApp.Common.Bases
             return bitmap;
         }
 
-        protected void DrawSheathIndicator(double sheathDiameter)
+        protected void DrawSheathIndicator()
         {
+            double sheathDiameter = RayGetProperty(Property.SheathDiameter);
             SheathIndicator = CommonUtil.DrawSheathIndicator((int)Constants.CrossSectionSize, sheathDiameter);
             SheathIndicatorAngio = CommonUtil.DrawSheathIndicator((int)Constants.CrossSectionAngio, sheathDiameter);
         }

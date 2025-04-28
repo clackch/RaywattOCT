@@ -30,8 +30,6 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private Zoom _zoom = new Zoom();
 
-        private bool isMoveLiveView = false;
-
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
         private ICommand _cmdBack;
@@ -88,16 +86,12 @@ namespace RaywattApp.ViewModels
 
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
-
-            if(!this.isMoveLiveView)
-                RayStopLiveView();
         }
+
 
         private void Back()
         {
             _log.Debug("Back");
-
-            this.isMoveLiveView = true;
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = this.Patient;

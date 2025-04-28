@@ -647,13 +647,8 @@ void COCTImaging::adaptive_compensation()
 	logarithmic_contrast_stretching(result_img);
 	result_img.convertTo(result_img, CV_8U, INTENSITY_THRESHOLD);
 
-	if (m_setting.applyGammaCorrection) {
+	if(m_setting.applyGammaCorrection)
 		adaptive_gamma_correction(result_img, INTENSITY_THRESHOLD);
-	}
-
-	if (m_setting.applySharpness) {
-		sharpening(result_img);
-	}
 
 	// Rotate back to original angle
 	cv::rotate(result_img, imageResult, cv::ROTATE_90_CLOCKWISE);
@@ -791,31 +786,6 @@ void COCTImaging::adaptive_gamma_correction(cv::Mat& img, int maxIntensity) {
 	img = output_image;
 }
 
-void COCTImaging::sharpening(cv::Mat& img) {
-	cv::Mat origin = img.clone();
-	origin.convertTo(origin, CV_32F);
-
-	cv::Mat blur;
-	GaussianBlur(origin, blur, cv::Size(9, 9), 0);
-
-	cv::Mat originFFT = computeFFT(origin);
-	cv::Mat blurFFT = computeFFT(blur);
-
-	// 고주파 추출: originFFT - blurFFT
-	cv::Mat highFreq;
-	subtract(originFFT, blurFFT, highFreq);
-
-	// Sharpened :originFFT + highFreq
-	cv::Mat sharpenedFFT;
-	add(originFFT, highFreq, sharpenedFFT);
-
-	// DeFFT
-	origin = inverseFFT(sharpenedFFT);
-
-	cv::normalize(origin, origin, 0, 255, cv::NORM_MINMAX);
-	origin.convertTo(img, CV_8U);
-}
-
 void COCTImaging::get_PDF_array(cv::Mat& img, std::vector<double>& pdf_i, bool& AGCWD_apply) {
 	int number_of_pixels = img.rows * img.cols;
 	pdf_i.assign(256, 0);
@@ -892,20 +862,4 @@ void COCTImaging::on_trackbar(int, void*) {
 	catch (...) {
 		PLOGI.printf("Unknown error occurred in on_trackbar");  // 예기치 않은 에러 처리
 	}
-}
-
-cv::Mat COCTImaging::computeFFT(cv::Mat& img) {
-	cv::Mat planes[] = { img.clone(), cv::Mat::zeros(img.size(), CV_32F) };
-	cv::Mat complexImg;
-	merge(planes, 2, complexImg);
-	dft(complexImg, complexImg);
-	return complexImg;
-}
-
-cv::Mat COCTImaging::inverseFFT(cv::Mat& complexImg) {
-	cv::Mat invDFT, planes[2];
-	idft(complexImg, invDFT);
-	split(invDFT, planes);
-	magnitude(planes[0], planes[1], invDFT);
-	return invDFT;
 }

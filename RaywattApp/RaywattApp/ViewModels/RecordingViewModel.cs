@@ -61,7 +61,6 @@ namespace RaywattApp.ViewModels
 
         private bool isReadyOn = true;
 
-        private bool isMoveConfirm = false;
 
         private ICommand _cancelCommand;
         public ICommand CancelCommand
@@ -92,7 +91,6 @@ namespace RaywattApp.ViewModels
 
             IsStep1 = true;
             IsReady = true;
-            IsStart = true;
             IsCancel = true;
 
             timer.Interval = TimeSpan.FromMilliseconds(1000);
@@ -107,8 +105,8 @@ namespace RaywattApp.ViewModels
             DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total = 0;
 
             // Instant start 방지
-            //Thread.Sleep(1000);
-            
+            Thread.Sleep(1000);
+            IsStart = true;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -146,17 +144,13 @@ namespace RaywattApp.ViewModels
 
             if(readyTimer.IsEnabled)
                 readyTimer.Stop();
-
-            _angioManager.ReadyToRecv = true;
-
-            if(!this.isMoveConfirm)
-                RayStopLiveView();
         }
 
         private void Cancel()
         {
             _log.Debug("Cancel");
-            
+
+            RayStopLiveView();
             leaveToPage(Constants.RecordingLiveViewPage);
         }
 
@@ -237,9 +231,9 @@ namespace RaywattApp.ViewModels
 
             RayPullbackScan(PatientCase.ImageFullPath);
 
-            if (DeviceStatus.IsAngioConnected && _angioManager.isChpFileConnected == 1)
+            if (DeviceStatus.IsAngioConnected)
             {
-                _angioManager.ReadyToRecv = false;
+                _angioManager.ReadyToRecv = true;
                 _angioManager.ReadyToSaveAngioThread(PatientCase);
             }
 
@@ -255,8 +249,6 @@ namespace RaywattApp.ViewModels
                 Thread.Sleep((int)Constants.WaitForEventInterval);
             }
             runWaitPullbackDone = false;
-
-            this.isMoveConfirm = true;
 
             leaveToPage(Constants.RecordingConfirmPage);
         }

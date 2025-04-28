@@ -228,9 +228,9 @@ namespace RaywattApp.ViewModels
             PatientCase.Vessel = CurrentVessel.Key;
             PatientCase.Location = CurrentLocation.Key;
 
-            double sheathType = 2.6;
-            if (PatientCase.AccessionNumber.Equals("1.7"))
-                sheathType = 1.7;
+            double sheathType = 1;
+            if (PatientCase.AccessionNumber.Equals("0"))
+                sheathType = 0;
             RaySetProperty(Property.SheathDiameter, sheathType);
             PatientCase.SheathDiameter = RayGetProperty(Property.SheathDiameter);
 

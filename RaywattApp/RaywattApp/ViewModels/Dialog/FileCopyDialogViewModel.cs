@@ -418,9 +418,7 @@ namespace RaywattApp.ViewModels.Dialog
                     Thread threadTiffProcessByPython = new Thread(() => CommonUtil.TiffProcessByPython(convertedImages, SaveFolder, fileName, format, _cancellationTokenSource));
                     threadTiffProcessByPython.Start();
 
-                    double progressBase = Progress;
                     await Task.Run(() => ProgressPipeWithPython(_cancellationTokenSource.Token, convertedImages.Count, progressSave));
-                    Progress = progressBase + progressSave;
                 }
                 else
                 {

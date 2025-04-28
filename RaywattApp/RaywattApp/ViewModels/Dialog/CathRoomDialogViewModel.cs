@@ -80,14 +80,9 @@ namespace RaywattApp.ViewModels.Dialog
             dialogResults.DialogAnswer = DialogResults.Answer.Yes;
             dialogResults.DialogReturn = parameter;
 
-            if (SelectedCathRoom.Id == -1) // CHP not Selected
+            if (SelectedCathRoom.Id == -1)
             {
-                _log.Debug("CathRoom not Selected");
                 ViewModelBase._deviceStatus.IsAngioInitialized = false;
-                _angioManager.IsChpFileChangeSuccess = 0;
-                _angioManager.isChpFileConnected = 0;
-                _angioManager.SendCommandPacket(CommandType.FGStopped);
-                _angioManager.ToggleLive(false);
             }
             else
             {
@@ -105,7 +100,6 @@ namespace RaywattApp.ViewModels.Dialog
                     if (_angioManager.ReadyToRecv)
                     {
                         _angioManager.SendCommandPacket(CommandType.FGStarted);
-                        _angioManager.ToggleLive(true);
                     }
 
                     _dialogService.OpenDialog(new AlertDialogControl(), parameter, Common.Bases.Constants.ApplicationWidth, Common.Bases.Constants.ApplicationHeight);
