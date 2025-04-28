@@ -101,6 +101,10 @@ void CConfiguration::Initialize(tstring configFile)
 	this->imaging.GCAlpha = getPrivateProfileFloat(_T("Compensation"), _T("GCAlpha"), 0.4f, configFilePath.c_str());
 	this->imaging.intensityThreshold = ::GetPrivateProfileInt(_T("Compensation"), _T("IntensityThreshold"), 255, configFilePath.c_str());
 
+	// [Sharpness]
+	this->imaging.applySharpness = ::GetPrivateProfileInt(_T("Sharpness"), _T("ApplySharpness"), 0, configFilePath.c_str());
+
+
 	isInit = true;
 }
 

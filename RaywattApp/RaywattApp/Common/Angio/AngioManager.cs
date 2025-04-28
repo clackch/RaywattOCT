@@ -776,11 +776,12 @@ namespace RaywattApp.Common.Angio
         {
             _log.Debug("StopLiveView");
 
+            liveView = false;
+
             if (imageList != null)
             {
                 imageList.Clear();
             }
-            liveView = false;
 
             if (get_image != null)
             {
