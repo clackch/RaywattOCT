@@ -1078,29 +1078,32 @@ RayError COCTSystem::SetSheathDiameter(double value)
 {
 	CConfiguration& config = CConfiguration::GetInstance();
 
-	PLOGI.printf("Set catheter size as %.1f (%d)", (value == 0.0f ? 1.7f : 2.6f), m_bFirstLoad);
-
-	if (!m_bFirstLoad) return RayError::OK;
-	m_bFirstLoad = false;
-
+	PLOGI.printf("Set catheter size as %.1f (%d)", (value == 1.7f ? 1.7f : 2.6f), m_bFirstLoad);
+		
 	m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX);	
-	if (value == 0.0) {
-		config.measurement.fSheathRadius = config.measurement.fSheathRadiusOnePointSix;
-		config.measurement.fSheathThickness = config.measurement.fSheathThicknessOnePointSix;
-
-		m_pLaserModule->Move(eStepMotorIndex::DelayLine, config.catheter.length);
+	if (value == 1.7) {
+		config.measurement.fSheathRadius = config.measurement.fSheathRadiusOnePointSeven;
+		config.measurement.fSheathThickness = config.measurement.fSheathThicknessOnePointSeven;
 	}
 	else {
 		config.measurement.fSheathRadius = config.measurement.fSheathRadiusTwoPointSix;
 		config.measurement.fSheathThickness = config.measurement.fSheathThicknessTwoPointSix;
-
-		m_pLaserModule->Move(eStepMotorIndex::DelayLine, 0);
 	}
 	config.measurement.nSheathPosition = config.measurement.fSheathRadius * 1000.f / config.measurement.fAxialResolutionScale;
 	config.measurement.nSheathThickness = config.measurement.fSheathThickness * 1000.f / config.measurement.fAxialResolutionScale;
 
 	m_pImagingPullback->SetMeasurementSetting(config.measurement);
 	m_pImagingLiveView->SetMeasurementSetting(config.measurement);
+
+	if (!m_bFirstLoad) return RayError::OK;
+	m_bFirstLoad = false;
+
+	if (value == 1.7) {
+		m_pLaserModule->Move(eStepMotorIndex::DelayLine, config.catheter.length);
+	}
+	else {
+		m_pLaserModule->Move(eStepMotorIndex::DelayLine, 0);
+	}
 
 	return RayError::OK;
 }
@@ -1639,6 +1642,11 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 
 	pSession->StartObjectDetection();
 
+	// In case of Homing failed
+	if (pRJController->GetPhotoSensorOnOff(0) == false) {
+		pRJController->UpdateState(eRJState::Error);
+	}
+
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
 	}
@@ -1734,6 +1742,20 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 			pRJController->StopMotor();
 			Sleep(2000);
 		}
+		// in case of homing failed
+		if (!pRJController->GetPhotoSensorOnOff(0))
+		{
+			PLOGI.printf("photoSensor %d %d %d %d %d %d", pRJController->GetPhotoSensorOnOff(0), pRJController->GetPhotoSensorOnOff(1), pRJController->GetPhotoSensorOnOff(2)
+				, pRJController->GetPhotoSensorOnOff(3), pRJController->GetPhotoSensorOnOff(4), pRJController->GetPhotoSensorOnOff(5));
+			// SM (Hub) > Sensor #1
+			if (pSystem->m_pThreadRotaryJunction->isRun && !pRJController->GetPhotoSensorOnOff(0)) {
+				pRJController->Current(eStepMotorIndex::Hub, pRJController->ConvertMMtoStep(PULLBACK_MAX_DISTANCE));
+				pRJController->Move(eStepMotorIndex::Hub, HUB_MOTOR_POS_INITIAL, false, 0x1 /* photo-sensor #1 */);
+				pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+			}
+			pRJController->Current(eStepMotorIndex::Hub, HUB_MOTOR_POS_INITIAL);		
+		}
+
 		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
 		pRJController->Move(eStepMotorIndex::Pullback, 20000, false, 0x08 /* photo-sensor #4 */);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);

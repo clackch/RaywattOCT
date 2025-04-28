@@ -134,6 +134,10 @@ protected:
 	void get_PDF_array(cv::Mat& img, std::vector<double>& pdf_i, bool& AGCWD_apply);
 	void get_CDF_array(std::vector<double> pdf_i, std::vector<double>& cdf_i);
 
+	void sharpening(cv::Mat& img);
+	cv::Mat inverseFFT(cv::Mat& complexImg);
+	cv::Mat computeFFT(cv::Mat& img);
+
 	static UINT threadRender(LPVOID param);
 
 };
