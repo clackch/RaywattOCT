@@ -110,6 +110,8 @@ private:
 	BOOL m_chkCompensation;
 	CThread* m_pThreadCompParamWin;
 
+	int m_nCropFrom, m_nCropWidth;
+
 // 생성입니다.
 public:
 	CRaywattLabDlg(CWnd* pParent = nullptr);	// 표준 생성자입니다.
@@ -208,4 +210,5 @@ public:
 	afx_msg void OnBnClickedRadioGray();
 	afx_msg void OnBnClickedRadioGreen();
 	afx_msg void OnBnClickedRadioOrange();
+	afx_msg void OnBnClickedButtonSetCrop();
 };

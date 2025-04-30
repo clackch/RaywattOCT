@@ -492,13 +492,15 @@ UINT CRaywattLabDlg::threadPullback(LPVOID param) {
 UINT CRaywattLabDlg::threadCompensationParamWindow(LPVOID param) {
 	CRaywattLabDlg* pDlg = (CRaywattLabDlg*)param;
 
-	pDlg->m_pImagingSimulate->SetImageCompensationControlWindow(true);
+	CConfiguration& config = CConfiguration::GetInstance();
+
+	COCTImaging::SetImageCompensationControlWindow(true, config.imaging);
 
 	while (pDlg->m_pThreadCompParamWin->isRun) {
 		cv::waitKey(1);
 	}
 
-	pDlg->m_pImagingSimulate->SetImageCompensationControlWindow(false);
+	COCTImaging::SetImageCompensationControlWindow(false, config.imaging);
 	
 	return NOERROR;
 }
@@ -553,6 +555,7 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_RADIO_GRAY, &CRaywattLabDlg::OnBnClickedRadioGray)
 	ON_BN_CLICKED(IDC_RADIO_GREEN, &CRaywattLabDlg::OnBnClickedRadioGreen)
 	ON_BN_CLICKED(IDC_RADIO_ORANGE, &CRaywattLabDlg::OnBnClickedRadioOrange)
+	ON_BN_CLICKED(IDC_BUTTON_SET_CROP, &CRaywattLabDlg::OnBnClickedButtonSetCrop)
 END_MESSAGE_MAP()
 
 LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
@@ -586,7 +589,20 @@ LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 		drawGuideLine(image);
 	}
 
-	drawToPictureBox(m_pictOCTImage, image.cols, image.rows, (char*)image.data);
+	cv::Mat imageCrop;
+	if (m_radioImageShape != 0 && m_nCropFrom < m_nCropWidth) {
+		cv::Rect rect;
+		rect.x = m_nCropFrom;
+		rect.y = 0;
+		rect.width = m_nCropWidth;
+		rect.height = image.rows;
+		imageCrop = image(rect).clone();
+	}
+	else {
+		imageCrop = image.clone();
+	}
+
+	drawToPictureBox(m_pictOCTImage, imageCrop.cols, imageCrop.rows, (char*)imageCrop.data);
 	GetDlgItem(IDC_EDIT_FRAME_RATE)->SetWindowText(strFrameRate);
 
 	m_scopeView.SetChannelBuffer(0, scopeData, nScopeLength);
@@ -1750,4 +1766,16 @@ void CRaywattLabDlg::OnBnClickedRadioOrange()
 
 	if (m_pImagingRealtime != nullptr) m_pImagingRealtime->SetColor(true);
 	if (m_pImagingSimulate != nullptr) m_pImagingSimulate->SetColor(true);
+}
+
+
+void CRaywattLabDlg::OnBnClickedButtonSetCrop()
+{
+	CString strValue = _T("");
+
+	GetDlgItemText(IDC_EDIT_CROP_FROM, strValue);
+	m_nCropFrom = _ttoi64(strValue);
+
+	GetDlgItemText(IDC_EDIT_CROP_WIDTH, strValue);
+	m_nCropWidth = _ttoi64(strValue);
 }

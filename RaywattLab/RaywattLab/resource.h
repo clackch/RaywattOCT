@@ -106,6 +106,10 @@
 #define IDC_RADIO_GRAY                  1106
 #define IDC_RADIO_GREEN                 1107
 #define IDC_RADIO_ORANGE                1108
+#define IDC_EDIT_CROP_FROM              1109
+#define IDC_EDIT_CROP_TO                1110
+#define IDC_EDIT_CROP_WIDTH             1110
+#define IDC_BUTTON_SET_CROP             1111
 
 // Next default values for new objects
 // 
@@ -113,7 +117,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        107
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1109
+#define _APS_NEXT_CONTROL_VALUE         1112
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
