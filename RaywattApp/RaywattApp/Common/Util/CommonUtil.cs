@@ -881,7 +881,7 @@ namespace RaywattApp.Common.Util
                     _log.Debug($"sys.path: {sys.path}");
 
                     // Python 모듈 가져오기
-                    dynamic script = Py.Import("SaveTIFFAsGray");
+                    dynamic script = Py.Import("ImageProcess");
 
                     // Mat 리스트를 Python으로 전달
                     int width, height;
