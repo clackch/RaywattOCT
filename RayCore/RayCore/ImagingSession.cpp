@@ -667,6 +667,7 @@ UINT CImagingSession::threadGenerateVolume(LPVOID param) {
 	pSession->m_pVolumeData = new char[nImageSize * nNumOfSamples];
 
 	PLOGI.printf("Session #%d volume generation start - %d frames", pSession->m_nSession, nNumOfSamples);
+	pImaging->initSaveImageNum();
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadVolumeGeneration->isRun; nFrame++) {
 		std::map<int, cv::Mat>::iterator it = pSession->m_mapImage.find(nFrame);
 		if (it == pSession->m_mapImage.end()) {

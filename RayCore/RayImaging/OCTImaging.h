@@ -60,6 +60,7 @@ protected:
 	int m_nSheathPosition;
 	int m_nSheathSearchRange;
 	int m_nZOffset;
+	int imageNum;
 
 	cv::Ptr<cv::CLAHE> clahe;
 public:
@@ -108,6 +109,8 @@ public:
 
 	static void SetImageCompensation(bool ImageCompensated);
 	static void SetImageCompensationControlWindow(bool ImageCompensationControlWindowOn, Setting setting);
+
+	virtual void initSaveImageNum();
 protected:
 	void allocateMemory();
 	void releaseMemory();

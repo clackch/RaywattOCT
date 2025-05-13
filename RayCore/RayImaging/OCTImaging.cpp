@@ -455,7 +455,11 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 	}
 }
 
-int imageNum = 0;
+void COCTImaging::initSaveImageNum() {
+	imageNum = 0;
+}
+
+//int imageNum = 0;
 void COCTImaging::findSheath(cv::Mat img) {
 	imageNum++;
 	m_nSheathSearchRange = 150; /*1mm 오차 범위 설정*/
@@ -463,14 +467,26 @@ void COCTImaging::findSheath(cv::Mat img) {
 	double edgeWeight = 1.5;
 	int closeness = 10;
 	int maxDiffIndex = 44, minDiffIndex = 20;
+	int kernelSize = 5, halfKernel = (kernelSize - 1) / 2;
 
 	cv::Mat image;
+	cv::imwrite("ori.png", img);
 	cv::Mat imgRe = ReCircularize(img);
 	imgRe.convertTo(image, CV_32F);
 	cv::rotate(image, image, cv::ROTATE_90_COUNTERCLOCKWISE);
+	cv::imwrite("sheath" + std::to_string(imageNum) + ".png", image);
+
+	/* recircularize 처리 안하는 코드
+	cv::Mat image;
+	img.convertTo(image, CV_32F);
+	cv::rotate(image, image, cv::ROTATE_90_COUNTERCLOCKWISE);
+	cv::imwrite("sheath" + std::to_string(imageNum) + ".png", image);
+	*/
 
 	image = image(cv::Range(0, m_nSheathSearchRange), cv::Range::all());
 	cv::resize(image, image, cv::Size(image.cols, image.rows));
+
+	//cv::imwrite("cut.png", image);
 
 	//horizontal line formed 노이즈 제거
 	cv::Mat edge_image;
@@ -478,8 +494,30 @@ void COCTImaging::findSheath(cv::Mat img) {
 
 	cv::Mat temp = image.clone();
 	for (int i = 0; i < m_nSheathSearchRange; i++) for (int j = 0; j < temp.cols; j++) {
-		temp.at<float>(i, j) *= edgeWeight + edge_image.at<float>(i, j);
+		temp.at<float>(i, j) *= edge_image.at<float>(i, j) * edge_image.at<float>(i, j);
 	}
+
+	cv::Mat temp1 = temp.clone();
+	for (int y = halfKernel; y < m_nSheathSearchRange - halfKernel; y += halfKernel - 1) {
+		for (int x = halfKernel; x < image.cols - halfKernel; x++) {
+			int checkDen = 0;
+			for (int i = -1 * halfKernel; i <= halfKernel; i++) {
+				for (int j = -1 * halfKernel; j <= halfKernel; j++) {
+					if (temp.at<float>(y + i, x + j) > pointStandard) checkDen++;
+				}
+			}
+			if (checkDen > kernelSize * kernelSize / 5) {
+				for (int i = -1 * halfKernel; i <= halfKernel; i++) {
+					for (int j = -1 * halfKernel; j <= halfKernel; j++) {
+						temp1.at<float>(y + i, x + j) = 0;
+					}
+				}
+				x += halfKernel - 1;
+			}
+		}
+	}
+
+	cv::imwrite("temp" + std::to_string(imageNum) + ".png", temp1);
 
 	// 행마다의 일정 밝기 이상의 픽셀 계수, 가장 많은 행 2개 저장
 	std::vector<int> pixelNum(m_nSheathSearchRange);
@@ -488,7 +526,7 @@ void COCTImaging::findSheath(cv::Mat img) {
 	for (int i = 0; i < m_nSheathSearchRange; i++) {
 		int tmp = 0;
 		for (int j = 0; j < image.cols; j++) {
-			if (temp.at<float>(i, j) >= pointStandard)
+			if (temp1.at<float>(i, j) >= pointStandard)
 				tmp++;
 		}
 		pixelNum[i] = tmp;
