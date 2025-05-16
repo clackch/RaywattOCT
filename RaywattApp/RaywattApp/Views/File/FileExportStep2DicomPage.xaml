@@ -89,7 +89,7 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Margin="20,28,0,8" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Export Size], Source={StaticResource L10N}}"/>
-                        <Label Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Margin="0,28,0,8" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Destination], Source={StaticResource L10N}}"/>
+                        <Separator Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray5Brush}" Width="760" Height="1" VerticalAlignment="Bottom"/>
                     </Grid>
                     <Grid Grid.Row="1" >
                         <Grid.ColumnDefinitions>
@@ -100,16 +100,7 @@
                             <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding ExportSize}"/>
                             <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding ExportSizeUnit}" Margin="5,0,0,0"/>
                         </StackPanel>
-                        <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <StackPanel>
-                                <RadioButton IsChecked="{Binding IsPacs, Converter={StaticResource BoolToEnableReverseConverter}}" Content="{Binding [External Drive], Source={StaticResource L10N}}"/>
-                            </StackPanel>
-                            <StackPanel Margin="39,0,0,0">
-                                <RadioButton IsChecked="{Binding IsPacs}" Content="{Binding [PACS], Source={StaticResource L10N}}"/>
-                            </StackPanel>
-                        </StackPanel>
                     </Grid>
-                    <Separator Grid.Row="2" Background="{DynamicResource GrayscaleGray5Brush}" Width="760" Height="1" VerticalAlignment="Top"/>
                     <Grid Grid.Row="3" Visibility="{Binding IsPacs, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="27"/>
@@ -150,41 +141,6 @@
                                 </StackPanel>
                             </StackPanel>
                         </Grid>
-                    </Grid>
-                    <Grid Grid.Row="3" Visibility="{Binding IsPacs, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="39"/>
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <StackPanel Grid.Row="0">
-                            <Label Style="{DynamicResource Pretendard-Medium-16}" Margin="20,0,0,8" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Select PACS Server], Source={StaticResource L10N}}"/>
-                        </StackPanel>
-                        <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Top" Margin="20,0,0,0">
-                            <Button Style="{StaticResource OutlinedBtnType4-Large}" Width="140" Command="{Binding SelectPacsCommand}" Content="{Binding [Select], Source={StaticResource L10N}}"/>
-                            <Grid Margin="32,0,0,0">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="120"/>
-                                    <ColumnDefinition Width="120"/>
-                                    <ColumnDefinition Width="120"/>
-                                    <ColumnDefinition Width="60"/>
-                                    <ColumnDefinition Width="150"/>
-                                </Grid.ColumnDefinitions>
-                                <Label Grid.Row="0" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [AE Title], Source={StaticResource L10N}}"/>
-                                <Label Grid.Row="1" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding SelectedDicomServer.AeTitle}" VerticalAlignment="Bottom" Margin="0,0,8,0"/>
-                                <Label Grid.Row="0" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Hostname], Source={StaticResource L10N}}"/>
-                                <Label Grid.Row="1" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding SelectedDicomServer.Hostname}" VerticalAlignment="Bottom" Margin="0,0,8,0"/>
-                                <Label Grid.Row="0" Grid.Column="2" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [IP], Source={StaticResource L10N}}"/>
-                                <Label Grid.Row="1" Grid.Column="2" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding SelectedDicomServer.IpAddress}" VerticalAlignment="Bottom" Margin="0,0,8,0"/>
-                                <Label Grid.Row="0" Grid.Column="3" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Port], Source={StaticResource L10N}}"/>
-                                <Label Grid.Row="1" Grid.Column="3" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding SelectedDicomServer.Port}" VerticalAlignment="Bottom" Margin="0,0,8,0"/>
-                                <Label Grid.Row="0" Grid.Column="4" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Comment], Source={StaticResource L10N}}"/>
-                                <Label Grid.Row="1" Grid.Column="4" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding SelectedDicomServer.Comment}" VerticalAlignment="Bottom"/>
-                            </Grid>
-                        </StackPanel>
                     </Grid>
                 </Grid>
             </Border>
