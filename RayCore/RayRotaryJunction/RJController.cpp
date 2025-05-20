@@ -596,8 +596,8 @@ void CRJController::changeSMProfileToPullback() {
 	int packetLength;
 	getSerialPacket(eFID::FID_SM_SET_CONFIG, (sizeof(int) * 7) * 2, serialPacket, packetLength);
 
-	const int minSpeed = 315;
-	const int maxSpeed = 157480;
+	const int minSpeed = 630;
+	const int maxSpeed = 314960;
 	const int accTime = 30;
 	const int accStep = 100;
 	const int decTime = 30;
@@ -630,8 +630,8 @@ void CRJController::changeSMProfileToLoadUnload() {
 	int packetLength;
 	getSerialPacket(eFID::FID_SM_SET_CONFIG, (sizeof(int) * 7) * 2, serialPacket, packetLength);
 
-	const int minSpeed = 315;
-	const int maxSpeed = 157480;
+	const int minSpeed = 630;
+	const int maxSpeed = 314960;
 	const int accTime = 1;
 	const int accStep = 100;
 	const int decTime = 1;
