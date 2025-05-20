@@ -262,7 +262,7 @@ void CRJController::initSetting() {
 	const int maxSpeed = 157480;
 	const int accTime = 1;
 	const int accStep = 100;
-	const int decTime = 2;
+	const int decTime = 1;
 	const int decStep = 0;
 	const int minStep = 100;
 
@@ -589,4 +589,72 @@ bool CRJController::writeMotor(BYTE* packet, int size) {
 	int written = m_pConnection->Write(serialPacket, packetLength);
 
 	return (written == packetLength);
+}
+
+void CRJController::changeSMProfileToPullback() {
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	getSerialPacket(eFID::FID_SM_SET_CONFIG, (sizeof(int) * 7) * 2, serialPacket, packetLength);
+
+	const int minSpeed = 315;
+	const int maxSpeed = 157480;
+	const int accTime = 30;
+	const int accStep = 100;
+	const int decTime = 30;
+	const int decStep = 0;
+	const int minStep = 100;
+
+	int offset = 0;
+	for (int i = 0; i < 2; i++) {
+		memcpy(serialPacket + DATA_IDX + offset, &minSpeed, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &maxSpeed, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &accTime, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &accStep, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &decTime, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &decStep, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &minStep, sizeof(int)); offset += sizeof(int);
+	}
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+	if (written != packetLength)
+	{
+		PLOGI.printf("Written size is not matched. (%d / %d bytes)", written, packetLength);
+	}
+}
+
+void CRJController::changeSMProfileToLoadUnload() {
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	getSerialPacket(eFID::FID_SM_SET_CONFIG, (sizeof(int) * 7) * 2, serialPacket, packetLength);
+
+	const int minSpeed = 315;
+	const int maxSpeed = 157480;
+	const int accTime = 1;
+	const int accStep = 100;
+	const int decTime = 1;
+	const int decStep = 0;
+	const int minStep = 100;
+
+	int offset = 0;
+	for (int i = 0; i < 2; i++) {
+		memcpy(serialPacket + DATA_IDX + offset, &minSpeed, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &maxSpeed, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &accTime, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &accStep, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &decTime, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &decStep, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &minStep, sizeof(int)); offset += sizeof(int);
+	}
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+	if (written != packetLength)
+	{
+		PLOGI.printf("Written size is not matched. (%d / %d bytes)", written, packetLength);
+	}
 }
