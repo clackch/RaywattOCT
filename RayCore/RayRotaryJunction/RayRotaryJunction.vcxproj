@@ -176,7 +176,9 @@ xcopy "$(ProjectDir)*Protocol.h" "$(TargetDir)include\" /y /d</Command>
     <ClInclude Include="MotorController.h" />
     <ClInclude Include="RJController.h" />
     <ClInclude Include="SerialPort.h" />
+    <ClInclude Include="StepMotorController.h" />
     <ClInclude Include="USBConnection.h" />
+    <ClInclude Include="ZaberController.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Utility\MessageService.cpp" />
@@ -188,7 +190,9 @@ xcopy "$(ProjectDir)*Protocol.h" "$(TargetDir)include\" /y /d</Command>
     <ClCompile Include="RJController.cpp" />
     <ClCompile Include="SerialPort.cpp" />
     <ClCompile Include="LaserModule.cpp" />
+    <ClCompile Include="StepMotorController.cpp" />
     <ClCompile Include="USBConnection.cpp" />
+    <ClCompile Include="ZaberController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
