@@ -462,94 +462,166 @@ void COCTImaging::initSaveImageNum() {
 //int imageNum = 0;
 void COCTImaging::findSheath(cv::Mat img) {
 	imageNum++;
-	m_nSheathSearchRange = 150; /*1mm 오차 범위 설정*/
-	double pointStandard = 0.1;
-	double edgeWeight = 1.5;
-	int closeness = 10;
-	int maxDiffIndex = 44, minDiffIndex = 20;
-	int kernelSize = 5, halfKernel = (kernelSize - 1) / 2;
 
 	cv::Mat image;
-	cv::imwrite("ori.png", img);
 	cv::Mat imgRe = ReCircularize(img);
-	imgRe.convertTo(image, CV_32F);
+	imgRe.convertTo(image, CV_32F, 1.0/255.0);
 	cv::rotate(image, image, cv::ROTATE_90_COUNTERCLOCKWISE);
-	cv::imwrite("sheath" + std::to_string(imageNum) + ".png", image);
 
-	/* recircularize 처리 안하는 코드
-	cv::Mat image;
-	img.convertTo(image, CV_32F);
-	cv::rotate(image, image, cv::ROTATE_90_COUNTERCLOCKWISE);
-	cv::imwrite("sheath" + std::to_string(imageNum) + ".png", image);
-	*/
+	m_nSheathSearchRange = image.rows / 2;
+	int sectionSize = 20, totalPixelCount = 0, totalEdgeY = 0;
+	int upperSheathRow = 0, lowerSheathRow = 150, betweenRow = 0, sheathDist = 30;
+	std::vector<int> pixelCount(m_nSheathSearchRange), chosenRows, sectionCheck(m_nSheathSearchRange, 0);
+	std::vector<float> rowSumEdgeY(m_nSheathSearchRange, 0);
+
+	//cv::imwrite("sheath" + std::to_string(imageNum) + ".png", image);
 
 	image = image(cv::Range(0, m_nSheathSearchRange), cv::Range::all());
-	cv::resize(image, image, cv::Size(image.cols, image.rows));
-
-	//cv::imwrite("cut.png", image);
 
 	//horizontal line formed 노이즈 제거
-	cv::Mat edge_image;
-	cv::Sobel(image, edge_image, CV_64F, 1 /*dx*/, 0 /*dy*/, 3 /*kernel size*/, 1, 0, cv::BORDER_CONSTANT);
+	cv::Mat edge_imageX, edge_imageY, temp(image.size(), image.type());
+	cv::Sobel(image, edge_imageX, CV_32F, 1 /*dx*/, 0 /*dy*/, 3 /*kernel size*/, 1, 0, cv::BORDER_CONSTANT);
+	cv::Sobel(image, edge_imageY, CV_32F, 0 /*dx*/, 1 /*dy*/, 3 /*kernel size*/, 1, 0, cv::BORDER_CONSTANT); 
 
-	cv::Mat temp = image.clone();
-	for (int i = 0; i < m_nSheathSearchRange; i++) for (int j = 0; j < temp.cols; j++) {
-		temp.at<float>(i, j) *= edge_image.at<float>(i, j) * edge_image.at<float>(i, j);
-	}
-
-	cv::Mat temp1 = temp.clone();
-	for (int y = halfKernel; y < m_nSheathSearchRange - halfKernel; y += halfKernel - 1) {
-		for (int x = halfKernel; x < image.cols - halfKernel; x++) {
-			int checkDen = 0;
-			for (int i = -1 * halfKernel; i <= halfKernel; i++) {
-				for (int j = -1 * halfKernel; j <= halfKernel; j++) {
-					if (temp.at<float>(y + i, x + j) > pointStandard) checkDen++;
-				}
-			}
-			if (checkDen > kernelSize * kernelSize / 5) {
-				for (int i = -1 * halfKernel; i <= halfKernel; i++) {
-					for (int j = -1 * halfKernel; j <= halfKernel; j++) {
-						temp1.at<float>(y + i, x + j) = 0;
-					}
-				}
-				x += halfKernel - 1;
-			}
+	float addEdgeX = 0.05f;
+	//PLOGI.printf("size = %d X %d", m_nSheathSearchRange, image.cols);
+	for (int i = 0; i < m_nSheathSearchRange; i++) {
+		float* temp_row = temp.ptr<float>(i);
+		const float* edgeX_row = edge_imageX.ptr<float>(i);
+		const float* input_row = image.ptr<float>(i);
+		for (int j = 0; j < temp.cols; j++) {
+			float edgeX = edgeX_row[j];
+			temp_row[j] = (addEdgeX + edgeX * edgeX) * input_row[j];
+			//PLOGI.printf("pixel (%d, %d) : %f", i, j, input_row[j]);
 		}
 	}
 
-	cv::imwrite("temp" + std::to_string(imageNum) + ".png", temp1);
+	//cv::imshow("tmp", temp);
+	/*cv::imwrite("tmp.png", temp);
+	cv::imwrite("edgeX.png", edge_imageX);
+	cv::imwrite("edgeY.png", edge_imageY);*/
 
-	// 행마다의 일정 밝기 이상의 픽셀 계수, 가장 많은 행 2개 저장
-	std::vector<int> pixelNum(m_nSheathSearchRange);
-	int maxIndex[2] = { 0, 0 };
-
+	// Sheath 사이 row 후보군 찾기
+	float thresholdPixel = 0.1f;
 	for (int i = 0; i < m_nSheathSearchRange; i++) {
+		bool isTherePixel = false;
 		int tmp = 0;
+		const float* edgeY_row = edge_imageY.ptr<float>(i);
+		const float* temp_row = temp.ptr<float>(i);
 		for (int j = 0; j < image.cols; j++) {
-			if (temp1.at<float>(i, j) >= pointStandard)
+			if (j % sectionSize == 0) {
+				isTherePixel = false;
+			}
+			else if (j % sectionSize == sectionSize - 1) {
+				if (isTherePixel) sectionCheck[i]++;
+			}
+			rowSumEdgeY[i] += edgeY_row[j];
+			if (temp_row[j] >= thresholdPixel) {
+				isTherePixel = true;
 				tmp++;
+			}
 		}
-		pixelNum[i] = tmp;
-		if (i == 0) continue;
-		else if (pixelNum[maxIndex[0]] < pixelNum[i]) {
-			maxIndex[0] = i;
+		pixelCount[i] = tmp;
+		totalPixelCount += tmp;
+		//PLOGI.printf("row #%d has %d pixels",i, tmp);
+
+		if (rowSumEdgeY[i] < 0)
+			rowSumEdgeY[i] = -1 * rowSumEdgeY[i];
+		totalEdgeY += rowSumEdgeY[i];
+	}
+	std::vector<int> pixCopy = pixelCount;
+	std::sort(pixCopy.begin(), pixCopy.end());
+	int threshold = std::abs(totalPixelCount / m_nSheathSearchRange - pixCopy[m_nSheathSearchRange * 0.5]);
+	bool isUpperDark = false;
+	int sizeOfDark = 0;
+	int tooThin = 0, tooThick = 50;
+	for (int i = 0; i < m_nSheathSearchRange; i++) {
+		if (pixelCount[i] <= threshold) {
+			sizeOfDark++;
+			isUpperDark = true;
+		}
+		else {
+			if (isUpperDark) {
+				isUpperDark = false;
+				if (sizeOfDark == tooThin || sizeOfDark > tooThick) {
+					sizeOfDark = 0;
+					continue;
+				}
+
+				chosenRows.push_back(i - (sizeOfDark / 2.0 + 0.5));
+				sizeOfDark = 0;
+			}
 		}
 	}
+	PLOGI.printf("We have rows : %d", chosenRows.size());
 
-	for (int i = 0; i < m_nSheathSearchRange; i++) {
-		if (i == 0 || std::abs(maxIndex[0] - i) <= closeness) continue;
-		else if (pixelNum[maxIndex[1]] < pixelNum[i]) {
-			maxIndex[1] = i;
+	double thresholdY = totalEdgeY / (double)m_nSheathSearchRange;
+	int rangeFromRow = 75;
+	for (int row : chosenRows) {
+		bool startUpperSheath = false, startLowerSheath = false, endUpper = false, endLower = false;
+		int upperSheathThickness = 0, lowerSheathThickness = 0;
+		int tmpUp = 0, tmpLow;
+		for (int i = 0; i < rangeFromRow; i++) {
+			// upper sheath는 두껍고 선이 선명하므로, 픽셀이 있는 구역 수가 가장 많은 행으로 결정 
+			if (row - i >= 0) {
+				if (sectionCheck[row - i] >= sectionCheck[tmpUp]) {
+					tmpUp = row - i;
+					endUpper = true;
+				}
+			}
+
+			// lower sheath는 EdgeY가 thresholdY보다 큰 행들의 중앙으로 결정
+			if (!endLower && row + i < m_nSheathSearchRange) {
+				if (rowSumEdgeY[row + i] > thresholdY / 5 * 4) {
+					if (!startLowerSheath)
+						startLowerSheath = true;
+					else
+						lowerSheathThickness++;
+				}
+				else if (startLowerSheath) {
+					endLower = true;
+					tmpLow = row + i - lowerSheathThickness / 2;
+				}
+			}
+		}
+
+		if (!endUpper || !endLower) {
+			continue;
+		}
+
+		int diffWithIdeal = 15;
+		bool isThisBetter = (
+			sectionCheck[tmpUp] > sectionCheck[upperSheathRow]
+			|| pixelCount[tmpUp] >= pixelCount[upperSheathRow]
+			&& abs(sheathDist - (lowerSheathRow - upperSheathRow)) >= abs(sheathDist - (tmpLow - tmpUp))
+			) 
+			&& abs(sheathDist - (tmpLow - tmpUp)) <= diffWithIdeal;
+
+		if (isThisBetter) {
+			upperSheathRow = tmpUp;
+			lowerSheathRow = tmpLow;
+			betweenRow = row;
 		}
 	}
 
 	// outer line 행 위치를 return
-	int diff = abs(maxIndex[0] - maxIndex[1]);
-	if (diff < minDiffIndex || diff > maxDiffIndex) {
+	tooThin = 20, tooThick = 40;
+	int tooLittle = 10;
+	PLOGI.printf("We are checking image number %d", imageNum);
+	if (lowerSheathRow - upperSheathRow > tooThick || lowerSheathRow - upperSheathRow < tooThin
+		|| pixelCount[upperSheathRow] < tooLittle
+		|| sectionCheck[upperSheathRow] < tooLittle) {
+		if(lowerSheathRow - upperSheathRow > tooThick || lowerSheathRow - upperSheathRow < tooThin)
+			PLOGI.printf("Failed because diff is too awful : %d pixel", lowerSheathRow - upperSheathRow);
+		if(pixelCount[upperSheathRow] < tooLittle)
+			PLOGI.printf("Failed because upper sheath doesn't have much pixels : %d pixel", pixelCount[upperSheathRow]);
+		if(sectionCheck[upperSheathRow] < tooLittle)
+			PLOGI.printf("Failed because upper sheath is not linear : section counts are %d", sectionCheck[upperSheathRow]);
 		m_nSheathPosition = 0;
 	}
 	else {
-		m_nSheathPosition = std::max(maxIndex[0], maxIndex[1]);
+		PLOGI.printf("We found the lowerSheath : %d", lowerSheathRow);
+		m_nSheathPosition = lowerSheathRow;
 	}
 }
 
@@ -558,7 +630,7 @@ cv::Mat COCTImaging::ReCircularize(const cv::Mat& img) {
 
 	cv::Mat circularized;
 	remap(img, circularized, matXMap, matYMap, cv::INTER_LINEAR);
-	cv::imwrite("cimg" + std::to_string(imageNum) + ".png", circularized);
+	//cv::imwrite("cimg" + std::to_string(imageNum) + ".png", circularized);
 
 	cv::Mat result;
 	remap(circularized, result, imatXMap, imatYMap, cv::INTER_NEAREST);
