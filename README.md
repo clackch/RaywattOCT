@@ -179,14 +179,14 @@ Download & Copy/Paste
    (a) PowerShell 관리자 권한으로 실행
 
    (b) 아래 내용 실행
-   
-       $taskAction = New-ScheduledTaskAction -Execute "C:\Raywatt\system\runtime\RaywattApp.exe"
-   
-       $taskPrincipal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
-   
-       $taskSettings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -DontStopOnIdleEnd
-   
-       Register-ScheduledTask -TaskName "RaywattAppAdmin" -Action $taskAction -Principal $taskPrincipal -Settings $taskSettings
+
+        $taskAction = New-ScheduledTaskAction -Execute "C:\Raywatt\system\runtime\RaywattApp.exe"
+    
+        $taskPrincipal = New-ScheduledTaskPrincipal -UserId "FASTER" -LogonType Interactive -RunLevel Highest
+        
+        $taskSettings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -DontStopOnIdleEnd
+        
+        Register-ScheduledTask -TaskName "RaywattAppAdmin" -Action $taskAction -Principal $taskPrincipal -Settings $taskSettings
    
    (c) 적용 확인 방법
    
