@@ -198,34 +198,12 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             this.canvas.Background = Brushes.Transparent;
         }
 
-        private void DeactivateEvent()
-        {
-            canvas.MouseLeftButtonDown -= Canvas_MouseLeftButtonDown;
-            canvas.MouseMove -= Canvas_MouseMove;
-            this.canvas.Background = null;
-        }
-
-
         private void ActivateRecEvents(Rectangle rectangle)
         {
             rectangle.Style = (Style)this.Resources["StyleRectangle"];
             rectangle.MouseLeftButtonDown += Rectangle_MouseLeftButtonDown;
             rectangle.MouseLeftButtonUp += Rectangle_MouseLeftButtonUp;
             rectangle.MouseMove += Rectangle_MouseMove;
-        }
-
-        private void DeactivateRecEvents()
-        {
-            for (int i = this.canvas.Children.Count - 1; i >= 0; i--)
-            {
-                if (this.canvas.Children[i] is Ellipse)
-                {
-                    Rectangle rectangle = (Rectangle)this.canvas.Children[i];
-                    rectangle.MouseLeftButtonDown -= Rectangle_MouseLeftButtonDown;
-                    rectangle.MouseLeftButtonUp -= Rectangle_MouseLeftButtonUp;
-                    rectangle.MouseMove -= Rectangle_MouseMove;
-                }
-            }
         }
 
         // for use in Coregistration Page
@@ -810,54 +788,6 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             return Math.Sqrt(Math.Pow(p1.X - p2.X, 2) + Math.Pow(p1.Y - p2.Y, 2));
         }
 
-        private async Task SPProcessingAsync(List<Mat> frames)
-        {
-            int numSuperpixels = 20 * 20;
-            float compactness = 2;
-            int maxIterations = 5;
-            float alpha = 50;
-
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            superpixelList = new List<Superpixel>();
-            for (int i = 0; i<frames.Count; i++)
-            {
-                superpixelList.Add(new Superpixel());
-            }
-
-            try
-            {
-                Parallel.For(0, frames.Count, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, frameNumber =>
-                {
-                    Mat frame = frames[frameNumber];
-                    Superpixel superpixel = new Superpixel();
-                    superpixel.Initialize(numSuperpixels, compactness, maxIterations);
-                    superpixel.Fit(frame);
-                    superpixelList[frameNumber] = superpixel;
-
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        CoRegistrations[frameNumber].MarkerPoint = FindMarkerPosition(frameNumber, CoRegistrations[frameNumber].Line);
-                    });
-                });
-            }
-            catch (Exception ex)
-            {
-                _log.Debug("outer Error message: " + ex.Message);
-                _log.Debug("outer Stack trace: " + ex.StackTrace);
-            }
-
-            stopwatch.Stop();
-            _log.Debug($"Total Running Time : {stopwatch.Elapsed.TotalSeconds} seconds");
-
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                IsRendering = false;
-                IsAngioTrackCompleted = IsResetOn = isDrawing = true;
-            });
-        }
-
         private Point FindMarkerPosition(int currentFrameIdx, List<List<Point>> coregPath)
         {
             try
@@ -1005,72 +935,6 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                 _log.Debug("Stack trace: " + ex.StackTrace);
                 return new Point(0, 0);
             }
-        }
-
-        private void MarkerRelocation()
-        {
-            List<CoRegistration> coregistrations = new List<CoRegistration>();
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                coregistrations = CoRegistrations;
-            });
-
-            Point prevMarkerPoint, currentMarkerPoint;
-            prevMarkerPoint = coregistrations[angioImageTotalNum - 1].MarkerPoint;
-            for (int i = coregistrations.Count - 1; i >= 0; i--)
-            {
-                currentMarkerPoint = coregistrations[i].MarkerPoint;
-                if (prevMarkerPoint == currentMarkerPoint) continue;
-
-                double distance = GetDistance(prevMarkerPoint, currentMarkerPoint);
-
-                int pointIndex = -1;
-                int lineIndex = -1;
-
-                for (int j = 0; j < coregistrations[i].Line.Count; j++)
-                {
-                    pointIndex = coregistrations[i].Line[j].IndexOf(currentMarkerPoint);
-                    if (pointIndex > 0)
-                    {
-                        lineIndex = j;
-                        break;
-                    }
-                }
-
-                if (distance > 45)
-                {
-                    double gap = double.MaxValue;
-                    while (gap > 30)
-                    {
-                        Point tmpPoint = coregistrations[i].Line[lineIndex][pointIndex++];
-                        gap = GetDistance(tmpPoint, prevMarkerPoint);
-                        if (gap <= 30 || pointIndex == coregistrations[i].Line[lineIndex].Count - 1)
-                        {
-                            coregistrations[i].MarkerPoint = prevMarkerPoint = tmpPoint;
-                            break;
-                        }
-                    }
-                }
-                else if(distance < 15)
-                {
-                    double gap = 0;
-                    while (gap < 20)
-                    {
-                        Point tmpPoint = coregistrations[i].Line[lineIndex][pointIndex--];
-                        gap = GetDistance(tmpPoint, prevMarkerPoint);
-                        if (gap >= 20 || pointIndex == 0)
-                        {
-                            coregistrations[i].MarkerPoint = prevMarkerPoint = tmpPoint;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                CoRegistrations = coregistrations;
-            });
         }
 
         private async Task PredictMarkers(List<CoRegistration> coRegistrations)
