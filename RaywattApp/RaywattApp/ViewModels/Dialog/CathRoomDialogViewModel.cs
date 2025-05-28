@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using log4net;
+using OpenCvSharp;
 using RaywattApp.Common.Angio;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
@@ -53,9 +54,9 @@ namespace RaywattApp.ViewModels.Dialog
         {
             App.Current.Dispatcher.Invoke(() =>
             {
-                if (!ViewModelBase._deviceStatus.IsAngioConnected && !Application.Current.Windows.OfType<Window>().Any(w => w.Content is AlertDialogControl))//ViewModelBase._deviceStatus.IsErrorDialogClosed)
+                if (!ViewModelBase._deviceStatus.IsAngioConnected && !Application.Current.Windows.OfType<System.Windows.Window>().Any(w => w.Content is AlertDialogControl))//ViewModelBase._deviceStatus.IsErrorDialogClosed)
                 {
-                    var targetWindow = Application.Current.Windows.OfType<Window>().SingleOrDefault(w => w.DataContext is CathRoomDialogViewModel) as IDialogWindow;
+                    var targetWindow = Application.Current.Windows.OfType<System.Windows.Window>().SingleOrDefault(w => w.DataContext is CathRoomDialogViewModel) as IDialogWindow;
                     AnswerNo(targetWindow);
                     _connectionCheckTimer.Stop();
                 }
@@ -88,6 +89,7 @@ namespace RaywattApp.ViewModels.Dialog
                 _angioManager.isChpFileConnected = 0;
                 _angioManager.SendCommandPacket(CommandType.FGStopped);
                 _angioManager.ToggleLive(false);
+                if(_angioManager.ImgAngio != null) _angioManager.ImgAngio = new Mat(_angioManager.AngioFrameHeight, _angioManager.AngioFrameWidth, MatType.CV_8UC3, Scalar.All(0));
             }
             else
             {
