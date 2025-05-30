@@ -540,7 +540,7 @@ void COCTImaging::findSheath(cv::Mat img) {
 	}
 
 	// 각 row당 upper sheath와 lower sheath 탐색, best case 선택
-	double thresholdY = totalEdgeY / (double)m_nSheathSearchRange;
+	double thresholdY = (totalEdgeY / (double)m_nSheathSearchRange) * 0.8;
 	int rangeFromRow = 75;
 	for (int row : chosenRows) {
 		bool startUpperSheath = false, startLowerSheath = false, endUpper = false, endLower = false;
@@ -555,7 +555,7 @@ void COCTImaging::findSheath(cv::Mat img) {
 			}
 
 			if (!endLower && row + i < m_nSheathSearchRange) {
-				if (rowSumEdgeY[row + i] > thresholdY / 5 * 4) {
+				if (rowSumEdgeY[row + i] > thresholdY) {
 					if (!startLowerSheath)
 						startLowerSheath = true;
 					else
