@@ -459,7 +459,7 @@
                                             <StackPanel Height="8"/>
                                             <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" TextBlock.TextAlignment="Center" Padding="5,0,5,0">
                                                 <Label.Content>
-                                                    <AccessText TextWrapping="Wrap" Text="{Binding [Select Pre-Case], Source={StaticResource L10N}}"/>
+                                                    <AccessText TextWrapping="Wrap" Text="{Binding [Select Pre-PCI Case], Source={StaticResource L10N}}"/>
                                                 </Label.Content>
                                             </Label>
                                         </StackPanel>
@@ -476,7 +476,7 @@
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
                             <StackPanel Grid.Row="0">
-                                <Button Style="{DynamicResource SideMenuTitleLeft}" Content="{Binding [Select Pre-Case], Source={StaticResource L10N}}" Command="{Binding CaseSelectCancelCommand}"/>
+                                <Button Style="{DynamicResource SideMenuTitleLeft}" Content="{Binding [Select Pre-PCI Case], Source={StaticResource L10N}}" Command="{Binding CaseSelectCancelCommand}"/>
                             </StackPanel>
                             <DataGrid Grid.Row="1" Margin="20,20,20,12" Name="patientCaseList" ItemsSource="{Binding PatientCases}" Style="{StaticResource DataGridSelectPreCase}" RowStyle="{StaticResource DataGridRowSelectPreCase}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderSelectPreCase}" SelectionMode="Single" SelectedItem="{Binding DisplayPatientCase}">
                                 <DataGrid.Columns>
