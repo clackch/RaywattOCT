@@ -299,10 +299,12 @@ void COCTImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth, 
 		}
 	}
 }
+
 void COCTImaging::releaseCircularizeMap() {
 	matXMap.release();
 	matYMap.release();
 }
+
 void COCTImaging::initInversedCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale) {
 	double radius = (diameter / 2) - 0.5f;
 
@@ -455,14 +457,7 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 	}
 }
 
-void COCTImaging::initSaveImageNum() {
-	imageNum = 0;
-}
-
-//int imageNum = 0;
 void COCTImaging::findSheath(cv::Mat img) {
-	imageNum++;
-
 	cv::Mat image;
 	cv::Mat imgRe = ReCircularize(img);
 	imgRe.convertTo(image, CV_32F, 1.0/255.0);
@@ -474,17 +469,14 @@ void COCTImaging::findSheath(cv::Mat img) {
 	std::vector<int> pixelCount(m_nSheathSearchRange), chosenRows, sectionCheck(m_nSheathSearchRange, 0);
 	std::vector<float> rowSumEdgeY(m_nSheathSearchRange, 0);
 
-	//cv::imwrite("sheath" + std::to_string(imageNum) + ".png", image);
-
 	image = image(cv::Range(0, m_nSheathSearchRange), cv::Range::all());
 
-	//horizontal line formed 노이즈 제거
+	//horizontal line formed 노이즈 배제
 	cv::Mat edge_imageX, edge_imageY, temp(image.size(), image.type());
 	cv::Sobel(image, edge_imageX, CV_32F, 1 /*dx*/, 0 /*dy*/, 3 /*kernel size*/, 1, 0, cv::BORDER_CONSTANT);
 	cv::Sobel(image, edge_imageY, CV_32F, 0 /*dx*/, 1 /*dy*/, 3 /*kernel size*/, 1, 0, cv::BORDER_CONSTANT); 
 
 	float addEdgeX = 0.05f;
-	//PLOGI.printf("size = %d X %d", m_nSheathSearchRange, image.cols);
 	for (int i = 0; i < m_nSheathSearchRange; i++) {
 		float* temp_row = temp.ptr<float>(i);
 		const float* edgeX_row = edge_imageX.ptr<float>(i);
@@ -492,14 +484,8 @@ void COCTImaging::findSheath(cv::Mat img) {
 		for (int j = 0; j < temp.cols; j++) {
 			float edgeX = edgeX_row[j];
 			temp_row[j] = (addEdgeX + edgeX * edgeX) * input_row[j];
-			//PLOGI.printf("pixel (%d, %d) : %f", i, j, input_row[j]);
 		}
 	}
-
-	//cv::imshow("tmp", temp);
-	/*cv::imwrite("tmp.png", temp);
-	cv::imwrite("edgeX.png", edge_imageX);
-	cv::imwrite("edgeY.png", edge_imageY);*/
 
 	// Sheath 사이 row 후보군 찾기
 	float thresholdPixel = 0.1f;
@@ -523,7 +509,6 @@ void COCTImaging::findSheath(cv::Mat img) {
 		}
 		pixelCount[i] = tmp;
 		totalPixelCount += tmp;
-		//PLOGI.printf("row #%d has %d pixels",i, tmp);
 
 		if (rowSumEdgeY[i] < 0)
 			rowSumEdgeY[i] = -1 * rowSumEdgeY[i];
@@ -553,8 +538,8 @@ void COCTImaging::findSheath(cv::Mat img) {
 			}
 		}
 	}
-	PLOGI.printf("We have rows : %d", chosenRows.size());
 
+	// 각 row당 upper sheath와 lower sheath 탐색, best case 선택
 	double thresholdY = totalEdgeY / (double)m_nSheathSearchRange;
 	int rangeFromRow = 75;
 	for (int row : chosenRows) {
@@ -562,7 +547,6 @@ void COCTImaging::findSheath(cv::Mat img) {
 		int upperSheathThickness = 0, lowerSheathThickness = 0;
 		int tmpUp = 0, tmpLow;
 		for (int i = 0; i < rangeFromRow; i++) {
-			// upper sheath는 두껍고 선이 선명하므로, 픽셀이 있는 구역 수가 가장 많은 행으로 결정 
 			if (row - i >= 0) {
 				if (sectionCheck[row - i] >= sectionCheck[tmpUp]) {
 					tmpUp = row - i;
@@ -570,7 +554,6 @@ void COCTImaging::findSheath(cv::Mat img) {
 				}
 			}
 
-			// lower sheath는 EdgeY가 thresholdY보다 큰 행들의 중앙으로 결정
 			if (!endLower && row + i < m_nSheathSearchRange) {
 				if (rowSumEdgeY[row + i] > thresholdY / 5 * 4) {
 					if (!startLowerSheath)
@@ -607,20 +590,12 @@ void COCTImaging::findSheath(cv::Mat img) {
 	// outer line 행 위치를 return
 	tooThin = 20, tooThick = 40;
 	int tooLittle = 10;
-	PLOGI.printf("We are checking image number %d", imageNum);
 	if (lowerSheathRow - upperSheathRow > tooThick || lowerSheathRow - upperSheathRow < tooThin
 		|| pixelCount[upperSheathRow] < tooLittle
 		|| sectionCheck[upperSheathRow] < tooLittle) {
-		if(lowerSheathRow - upperSheathRow > tooThick || lowerSheathRow - upperSheathRow < tooThin)
-			PLOGI.printf("Failed because diff is too awful : %d pixel", lowerSheathRow - upperSheathRow);
-		if(pixelCount[upperSheathRow] < tooLittle)
-			PLOGI.printf("Failed because upper sheath doesn't have much pixels : %d pixel", pixelCount[upperSheathRow]);
-		if(sectionCheck[upperSheathRow] < tooLittle)
-			PLOGI.printf("Failed because upper sheath is not linear : section counts are %d", sectionCheck[upperSheathRow]);
 		m_nSheathPosition = 0;
 	}
 	else {
-		PLOGI.printf("We found the lowerSheath : %d", lowerSheathRow);
 		m_nSheathPosition = lowerSheathRow;
 	}
 }
@@ -630,7 +605,6 @@ cv::Mat COCTImaging::ReCircularize(const cv::Mat& img) {
 
 	cv::Mat circularized;
 	remap(img, circularized, matXMap, matYMap, cv::INTER_LINEAR);
-	//cv::imwrite("cimg" + std::to_string(imageNum) + ".png", circularized);
 
 	cv::Mat result;
 	remap(circularized, result, imatXMap, imatYMap, cv::INTER_NEAREST);
