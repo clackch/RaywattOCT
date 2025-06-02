@@ -104,9 +104,9 @@ public:
 	bool ReadRFID();
 	bool IncreaseRFIDUsage(int uidSize, BYTE* UID);
 	bool ResetRFIDUsage(int uidSize, BYTE* UID);
-	bool ResetRFIDUID(int uidSize, BYTE* UID, BYTE* newUID);
-	bool SetRFIDUsage(int uidSize, BYTE* UID, BYTE* count);
-	bool SetRFIDManuf(int uidSize, BYTE* UID, BYTE* manuf);
+	bool ResetRFIDUID(int uidSize, BYTE* UID, int dataSize, BYTE* newUID);
+	bool SetRFIDUsage(int uidSize, BYTE* UID, int dataSize, BYTE* count);
+	bool SetRFIDManuf(int uidSize, BYTE* UID, int dataSize, BYTE* manuf);
 	UINT GetRFIDInfo(BYTE* pRFIDInfo);
 	bool GetPhotoSensorOnOff(int index) { return m_bPhotoSensor[index]; }
 

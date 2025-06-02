@@ -269,8 +269,9 @@ bool CRJController::ResetRFIDUsage(int uidSize, BYTE* UID) {
 	return (written == packetLength);
 }
 
-bool CRJController::ResetRFIDUID(int uidSize, BYTE* UID, BYTE* newUID) {
+bool CRJController::ResetRFIDUID(int uidSize, BYTE* UID, int dataSize, BYTE* newUID) {
 	if (!m_initMotor) return false;
+	if (dataSize < CUSTOM_UID_LENGTH) return false;
 
 	BYTE serialPacket[MAX_PATH];
 	int packetLength;
@@ -284,8 +285,9 @@ bool CRJController::ResetRFIDUID(int uidSize, BYTE* UID, BYTE* newUID) {
 	return (written == packetLength);
 }
 
-bool CRJController::SetRFIDUsage(int uidSize, BYTE* UID, BYTE* count) {
+bool CRJController::SetRFIDUsage(int uidSize, BYTE* UID, int dataSize, BYTE* count) {
 	if (!m_initMotor) return false;
+	if (dataSize < COUNT_LEN) return false;
 
 	BYTE serialPacket[MAX_PATH];
 	int packetLength;
@@ -299,8 +301,9 @@ bool CRJController::SetRFIDUsage(int uidSize, BYTE* UID, BYTE* count) {
 	return (written == packetLength);
 }
 
-bool CRJController::SetRFIDManuf(int uidSize, BYTE* UID, BYTE* manuf) {
+bool CRJController::SetRFIDManuf(int uidSize, BYTE* UID, int dataSize, BYTE* manuf) {
 	if (!m_initMotor) return false;
+	if (dataSize < MANUF_LEN) return false;
 
 	BYTE serialPacket[MAX_PATH];
 	int packetLength;
