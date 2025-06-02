@@ -7,6 +7,8 @@
 #define HARDWARE_UID_LENGTH				4
 #define CUSTOM_UID_LENGTH				4
 #define KEY_LEN							6
+#define COUNT_LEN						1
+#define STEP_LEN						3
 
 class RFIDProtocol
 {
