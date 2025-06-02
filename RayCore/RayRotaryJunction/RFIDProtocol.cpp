@@ -5,16 +5,17 @@ void RFIDProtocol::setPacketByFID(eFID fid, BYTE* packet, int& packetLength, int
 
 	int keyLen = 6;
 	int keyTypeLen = 1;
-	int uidLen = 8;
-	packetLength = dataSize + FIXED_HEADER_FRONT_LEN + FIXED_HEADER_BACK_LEN + uidSize + keyLen+ keyTypeLen;
+	int uidLenLen = 1;
+	
+	packetLength = dataSize + FIXED_HEADER_FRONT_LEN + FIXED_HEADER_BACK_LEN + keyLen + keyTypeLen + (uidSize == 0 ? 0 : uidSize + uidLenLen);
 
 	packet[0] = RJ_STX;
 	packet[LENGTH_IDX] = (BYTE)packetLength;
 	packet[FID_IDX] = (BYTE)fid;
 	packet[packetLength - 1] = RJ_ETX;
-	BYTE* key = new BYTE[keyLen]{ 0X00,0X00, 0X00, 0X00, 0X00, 0X00 };
+	BYTE* key = new BYTE[keyLen]{ 0X00, 0X00, 0X00, 0X00, 0X00, 0X00 };
 	BYTE* keyType = new BYTE[keyTypeLen]{ 0 };
-	BYTE* uid = new BYTE[uidLen]{ 0,0,0,0,0,0,0,0 };
+	BYTE* uidLen = new BYTE[uidLenLen]{ HARDWARE_UID_LENGTH };
 	int idx = FIXED_HEADER_FRONT_LEN;
 	switch (fid)
 	{
@@ -34,7 +35,8 @@ void RFIDProtocol::setPacketByFID(eFID fid, BYTE* packet, int& packetLength, int
 	case eFID::FID_RFID_SET_USAGE:
 	case eFID::FID_RFID_SET_UID:
 	case eFID::FID_RFID_SET_STEP:
-		idx += AddDataToPacket(packet + idx, UID, uidLen);
+		idx += AddDataToPacket(packet + idx, uidLen, uidLenLen);
+		idx += AddDataToPacket(packet + idx, UID, uidSize);
 		idx += AddDataToPacket(packet + idx, keyType, keyTypeLen);
 		idx += AddDataToPacket(packet+idx, key, keyLen);
 		if (data != NULL && dataSize > 0) {

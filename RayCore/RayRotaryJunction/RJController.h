@@ -102,7 +102,7 @@ public:
 	bool StopStepMotors();
 	bool DisplayLCD(eLCDImage image);
 	bool ReadRFID();
-	bool IncreaseRFIDUsage();
+	bool IncreaseRFIDUsage(int uidSize, BYTE* UID);
 	bool ResetRFIDUsage();
 	UINT GetRFIDInfo(BYTE* pRFIDInfo);
 	bool GetPhotoSensorOnOff(int index) { return m_bPhotoSensor[index]; }
