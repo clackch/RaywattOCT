@@ -103,7 +103,7 @@ public:
 	bool DisplayLCD(eLCDImage image);
 	bool ReadRFID();
 	bool IncreaseRFIDUsage(int uidSize, BYTE* UID);
-	bool ResetRFIDUsage();
+	bool ResetRFIDUsage(int uidSize, BYTE* UID);
 	UINT GetRFIDInfo(BYTE* pRFIDInfo);
 	bool GetPhotoSensorOnOff(int index) { return m_bPhotoSensor[index]; }
 

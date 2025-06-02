@@ -254,16 +254,16 @@ bool CRJController::IncreaseRFIDUsage(int uidSize, BYTE* UID) {
 	int written = m_pConnection->Write(serialPacket, packetLength);
 	return (written == packetLength);
 }
-bool CRJController::ResetRFIDUsage() {
+bool CRJController::ResetRFIDUsage(int uidSize, BYTE* UID) {
 	if (!m_initMotor) return false;
 
 	BYTE serialPacket[MAX_PATH];
 	int packetLength;
-	getSerialPacket(eFID::FID_RFID_USAGE_CLEAR, 0, serialPacket, packetLength);
+	RFIDProtocol::setPacketByFID(eFID::FID_RFID_USAGE_CLEAR, serialPacket, packetLength, uidSize, UID);
 
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
-
+	
 	int written = m_pConnection->Write(serialPacket, packetLength);
 
 	return (written == packetLength);
