@@ -106,6 +106,7 @@ public:
 	bool ResetRFIDUsage(int uidSize, BYTE* UID);
 	bool ResetRFIDUID(int uidSize, BYTE* UID, BYTE* newUID);
 	bool SetRFIDUsage(int uidSize, BYTE* UID, BYTE* count);
+	bool SetRFIDManuf(int uidSize, BYTE* UID, BYTE* manuf);
 	UINT GetRFIDInfo(BYTE* pRFIDInfo);
 	bool GetPhotoSensorOnOff(int index) { return m_bPhotoSensor[index]; }
 

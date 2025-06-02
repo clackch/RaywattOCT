@@ -9,6 +9,7 @@
 #define KEY_LEN							6
 #define COUNT_LEN						1
 #define STEP_LEN						3
+#define MANUF_LEN						7
 
 class RFIDProtocol
 {

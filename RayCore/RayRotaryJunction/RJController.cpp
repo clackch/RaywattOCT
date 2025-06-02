@@ -293,6 +293,22 @@ bool CRJController::SetRFIDUsage(int uidSize, BYTE* UID, BYTE* count) {
 
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	return (written == packetLength);
+}
+
+bool CRJController::SetRFIDManuf(int uidSize, BYTE* UID, BYTE* manuf) {
+	if (!m_initMotor) return false;
+
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	RFIDProtocol::setPacketByFID(eFID::FID_RFID_SET_MANUF, serialPacket, packetLength, uidSize, UID, MANUF_LEN, manuf);
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
 	int written = m_pConnection->Write(serialPacket, packetLength);
 
 	return (written == packetLength);
