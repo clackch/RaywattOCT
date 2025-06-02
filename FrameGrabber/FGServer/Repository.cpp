@@ -34,7 +34,6 @@ bool Repository::ApplyCrop(const HDVID_HEADER* pVidHeader, const FrameGrabber& f
         size_t fullSize = fg.lHeight * fg.lWidth * fg.wBitsPerPixel / 8;
         outBuffer.resize(fullSize);
         memcpy(outBuffer.data(), pVidHeader->pBuffer, fullSize);
-        PLOGI.printf("[Setup] Copy completed. outBuffer size: %zu bytes", outBuffer.size());
         return true;
     }
     const int origWidth = fg.m_LiveStreamInfo.nDestinationWidth;
