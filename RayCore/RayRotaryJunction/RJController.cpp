@@ -5,6 +5,7 @@
 
 CRJController::CRJController()
 	:ICommonProtocol(RJ_STX, RJ_ETX)
+	
 {
 	m_pMsg = nullptr;
 	m_pThreadState = nullptr;
@@ -234,12 +235,15 @@ bool CRJController::ReadRFID() {
 
 	BYTE serialPacket[MAX_PATH];
 	int packetLength;
-	getSerialPacket(eFID::FID_RFID_GET_STATE, 0, serialPacket, packetLength);
-
+	RFIDProtocol::setPacketByFID(eFID::FID_RFID_GET_STATE, serialPacket, packetLength);
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
+	for (int i = 0; i < packetLength; i++) {
+		printf("%02x ", serialPacket[i]);
+	}
 
 	int written = m_pConnection->Write(serialPacket, packetLength);
+	printf("\n written:%d\n", written);
 	return (written == packetLength);
 }
 bool CRJController::IncreaseRFIDUsage() {
@@ -259,7 +263,7 @@ bool CRJController::ResetRFIDUsage() {
 
 	BYTE serialPacket[MAX_PATH];
 	int packetLength;
-	getSerialPacket(eFID::FID_RFID_USAGE_RESET, 0, serialPacket, packetLength);
+	getSerialPacket(eFID::FID_RFID_USAGE_CLEAR, 0, serialPacket, packetLength);
 
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
@@ -564,7 +568,123 @@ void CRJController::parseRFIDPacket(BYTE* packet, int size) {
 	memcpy(m_RFID, packet + 2, m_nRFIDLength);
 	memcpy(m_byManufacturerId, packet + 6, 7);
 	m_nRFIDUsageCount = packet[13];
+	printf("inputRFID:\n");
+	for (int p = 0; p < m_nRFIDLength; p++) {
+		printf("%02x ", m_RFID[p]);
+	}
+	printf("\n");
 }
+
+void CRJController::RxPacketRFIDGetState(BYTE* buff, RFID_ReadType type)
+{
+	int idx = RFID_REPLY_DATA_IDX;
+	std::string limitKey = (buff[idx++] & 0x01) == 0x01 ? "On" : "Off";
+
+	int uidLength = buff[idx++];
+	if (uidLength >= buff[RFID_REPLY_LENGTH_IDX]) uidLength = HARDWARE_UID_LENGTH;
+	std::string sCardNo = "";
+	std::stringstream ss;
+	std::stringstream customCardNo;
+	std::stringstream hardWareCardNo;
+	for (int i = 0; i < uidLength + CUSTOM_UID_LENGTH; i++)
+	{
+		if (i != 0)
+		{
+			if (i < uidLength)
+			{
+				hardWareCardNo << " ";
+			}
+			else
+			{
+				customCardNo << " ";
+			}
+		}
+		if (i < uidLength)
+		{
+			hardWareCardNo << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(buff[idx++]);
+		}
+		else
+		{
+			customCardNo << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(buff[idx++]);
+		}
+	}
+
+	sCardNo = hardWareCardNo.str() + " " + customCardNo.str();
+	std::cout << "Hardware UID :" << hardWareCardNo.str() << std::endl;
+	std::cout << "Custom UID : "  << customCardNo.str() << std::endl;
+	std::cout << "TOTAL UID : "<< sCardNo << std::endl;
+
+	if (type == MANUF || type == MANUF_CNT)
+	{
+		ss.clear();
+		int ManuLength = 7;
+		std::string sManuNo2 = "";
+
+		for (int i = 0; i < ManuLength; i++)
+		{
+			if (i != 0) ss << " ";
+			ss << std::uppercase << std::setw(2) << std::setfill('0') << std::hex << (int)buff[idx++];
+		}
+		sManuNo2 = ss.str();
+		std::cout << "Manufacturer : " << sManuNo2 << std::endl;
+	}
+	if (type == CNT || type == MANUF_CNT)
+	{
+		int cntLength = 1;
+		int sCountNo3 = 0;
+
+		for (int i = 0; i < cntLength; i++)
+		{
+			sCountNo3 *= 256;
+			sCountNo3 += (int)buff[idx++];//cnt만 10진수로
+		}
+		std::cout << "count : " << sCountNo3 << std::endl;
+	}
+	if (type == KEYS)
+	{
+		ss.clear();
+		//KeyThread.authSuccess = true;
+		int keyLength_A = KEY_LEN;
+		std::string keyA = "";
+		BYTE* key = new BYTE[KEY_LEN];
+		for (int i = 0; i < keyLength_A; i++)
+		{
+			if (i != 0) keyA += " ";
+			key[i] = buff[idx]; 
+			ss << std::uppercase << std::setw(2) << std::setfill('0') << std::hex << (int)buff[idx++];
+			keyA += ss.str();
+		}
+		//KeyCache.Put(hardWareCardNo, key);
+		//LRUCache.defaultKey = key;
+		std::cout << "keyA : " << keyA << std::endl;
+
+		int keyLength_B = 6;
+		std::string keyB = "";
+
+		for (int i = 0; i < keyLength_B; i++)
+		{
+			if (i != 0) keyB += " ";
+			ss << std::uppercase << std::setw(2) << std::setfill('0') << std::hex << (int)buff[idx++];
+			keyB += ss.str();
+		}
+		std::cout << "keyB : " << keyB << std::endl;
+
+	}
+	if (type == STEP)
+	{
+		int stepLength = 3;
+		std::string step = "";
+		int value = 0;
+		for (int i = 0; i < stepLength; i++)
+		{
+			value *= 256;
+			value += (int)buff[idx++];
+		}
+		step = value;
+		std::cout << "step : " << step << std::endl;
+	}
+}
+
 void CRJController::handlePacket() {
 	BYTE length = m_vPacket[LENGTH_IDX];
 	int dataLength = length - HEADER_LEN;
@@ -591,10 +711,32 @@ void CRJController::handlePacket() {
 	case eFID::FID_BLDC_PASS:
 		parsePacket(&m_vPacket[DATA_IDX], dataLength);
 		break;
-	case eFID::FID_RFID_GET_STATE:
+	/*case eFID::FID_RFID_GET_STATE:
 	case eFID::FID_RFID_USAGE_INCREMENT:
 	case eFID::FID_RFID_USAGE_RESET:
 		parseRFIDPacket(&m_vPacket[DATA_IDX], dataLength);
+		break;*/
+	case eFID::FID_RFID_GET_STATE:
+		RxPacketRFIDGetState(&m_vPacket[0], MANUF_CNT);
+		break;
+	case eFID::FID_RFID_SET_UID:
+		RxPacketRFIDGetState(&m_vPacket[0]);
+		break;
+	case eFID::FID_RFID_USAGE_INCREMENT:
+	case eFID::FID_RFID_USAGE_CLEAR:
+	case eFID::FID_RFID_SET_USAGE:
+		RxPacketRFIDGetState(&m_vPacket[0], CNT);
+		break;
+	case eFID::FID_RFID_SET_MANUF:
+		RxPacketRFIDGetState(&m_vPacket[0], MANUF);
+		break;
+	case eFID::FID_RFID_SET_KEY:
+	case eFID::FID_RFID_GET_KEY:
+		RxPacketRFIDGetState(&m_vPacket[0], KEYS);
+		break;
+	case eFID::FID_RFID_SET_STEP:
+	case eFID::FID_RFID_GET_STEP:
+		RxPacketRFIDGetState(&m_vPacket[0], STEP);
 		break;
 	default:
 		break;

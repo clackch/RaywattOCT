@@ -1972,6 +1972,8 @@ int COCTSystem::connectRotaryJunction() {
 		result &= m_pRJController->Connect(config.bldcMotor.port);
 
 		if (result) {
+			m_pRJController->ReadRFID();
+
 			m_pRJController->StartControl();
 			m_pRJController->UpdateState(eRJState::Initializing);
 		}

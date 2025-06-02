@@ -44,7 +44,7 @@ bool CSerialPort::ConfigurePort(DWORD BaudRate, BYTE ByteSize, DWORD fParity,
 	m_dcb.fOutxDsrFlow = false;  
 	m_dcb.fDtrControl = DTR_CONTROL_ENABLE;  
 	m_dcb.fDsrSensitivity = false;  
-	m_dcb.fRtsControl = RTS_CONTROL_DISABLE;
+	m_dcb.fRtsControl = RTS_CONTROL_ENABLE;
 	m_bPortReady = SetCommState(m_hComm, &m_dcb);   
 	if (m_bPortReady == 0)   
 	{   

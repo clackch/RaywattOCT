@@ -1,8 +1,11 @@
 #pragma once
 #include "Config.h"
 #include "CommonProtocol.h"
+
+#include "RFIDProtocol.h"
 #include "MotorController.h"
 #include <vector>
+#include <iomanip>
 
 #define ENABLE_RFID		false
 
@@ -15,6 +18,9 @@
 #define STEP_MOTOR_SPEED_LOAD			432
 #define PULLBACK_MOTOR_RESOLUTION		0.0254f	/* mm/step */
 #define MOTOR_CONTROL_RESOLUTION		4
+
+#define RFID_REPLY_DATA_IDX				4
+#define RFID_REPLY_LENGTH_IDX			1
 
 enum class eRJState {
 	None = 0,
@@ -29,6 +35,16 @@ enum class eRJState {
 	Unloading,
 	Unloaded,
 	Error
+};
+
+enum RFID_ReadType
+{
+	DEFAULT,
+	KEYS,
+	STEP,
+	MANUF,
+	CNT,
+	MANUF_CNT
 };
 
 class CMessageService;
@@ -101,6 +117,7 @@ protected:
 	void updateStateManualMode();
 	void updateState(eRJState state);
 	bool displayLCD(eLCDImage image);
+	void RxPacketRFIDGetState(BYTE* buff, RFID_ReadType type = DEFAULT);
 	void parseSMPacket(BYTE*packet, int size);
 	void parseRFIDPacket(BYTE*packet, int size);
 	virtual void handlePacket();

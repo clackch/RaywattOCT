@@ -174,6 +174,7 @@ xcopy "$(ProjectDir)*Protocol.h" "$(TargetDir)include\" /y /d</Command>
     <ClInclude Include="LaserModule.h" />
     <ClInclude Include="LaserController.h" />
     <ClInclude Include="MotorController.h" />
+    <ClInclude Include="RFIDProtocol.h" />
     <ClInclude Include="RJController.h" />
     <ClInclude Include="SerialPort.h" />
     <ClInclude Include="USBConnection.h" />
@@ -185,6 +186,7 @@ xcopy "$(ProjectDir)*Protocol.h" "$(TargetDir)include\" /y /d</Command>
     <ClCompile Include="CommonProtocol.cpp" />
     <ClCompile Include="LaserController.cpp" />
     <ClCompile Include="MotorController.cpp" />
+    <ClCompile Include="RFIDProtocol.cpp" />
     <ClCompile Include="RJController.cpp" />
     <ClCompile Include="SerialPort.cpp" />
     <ClCompile Include="LaserModule.cpp" />
