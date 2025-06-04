@@ -370,6 +370,21 @@ bool CRJController::SetRFIDStep(int uidSize, BYTE* UID, int step) {
 	return (written == packetLength);
 }
 
+bool CRJController::GetRFIDStep() {
+	if (!m_initMotor) return false;
+
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+
+	RFIDProtocol::setPacketByFID(eFID::FID_RFID_GET_STEP, serialPacket, packetLength);
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	return (written == packetLength);
+}
+
 
 UINT CRJController::GetRFIDInfo(BYTE* pRFIDInfo) {
 	if (pRFIDInfo == nullptr) return 0;
