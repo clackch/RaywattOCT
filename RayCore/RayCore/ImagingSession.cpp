@@ -466,7 +466,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	std::vector<cv::Mat>& vStent = pSession->m_vStent;
 	std::vector<cv::Mat>& vGuidewire = pSession->m_vGuidewire;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
-	cv::Mat circleImage, imgZOffset;
+	cv::Mat circleImage, imgZOffset, enhancedImage;
 
 	int imgSize = 1024;
 	cv::Point center(imgSize / 2, imgSize / 2);
@@ -477,6 +477,8 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	//center point mask
 	cv::Mat centerMask = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
 	cv::circle(centerMask, center, 1, cv::Scalar(255), cv::FILLED);
+
+	cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(3.5, cv::Size(4, 4));
 	
 	CLookUpTable& lut = CLookUpTable::GetInstance();
 
@@ -498,7 +500,10 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		cv::cvtColor(circleImage, circleImage, cv::COLOR_GRAY2BGR);
 
 		//lumen
-		cv::Mat contourImage = learning->FindLumen(circleImage);		
+		clahe->apply(imgZOffset, enhancedImage);
+		pImaging->CircularizeImage(enhancedImage, enhancedImage);
+		cv::cvtColor(enhancedImage, enhancedImage, cv::COLOR_GRAY2BGR);
+		cv::Mat contourImage = learning->FindLumen(enhancedImage);
 		std::vector<std::vector<cv::Point>> vContours;
 		cv::findContours(contourImage, vContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
