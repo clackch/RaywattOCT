@@ -18,6 +18,7 @@
 #define COUNT_LEN						1
 #define STEP_LEN						3
 #define MANUF_LEN						7
+#define MAX_STEP_VALUE					0xFFFFFF
 
 class RFIDProtocol
 {

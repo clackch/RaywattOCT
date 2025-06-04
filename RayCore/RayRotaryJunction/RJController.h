@@ -109,6 +109,7 @@ public:
 	bool SetRFIDManuf(int uidSize, BYTE* UID, int dataSize, BYTE* manuf);
 	bool SetRFIDKey(int uidSize, BYTE* UID, int dataSize, BYTE* key);
 	bool GetRFIDKey();
+	bool SetRFIDStep(int uidSize, BYTE* UID, int step);
 	UINT GetRFIDInfo(BYTE* pRFIDInfo);
 	bool GetPhotoSensorOnOff(int index) { return m_bPhotoSensor[index]; }
 

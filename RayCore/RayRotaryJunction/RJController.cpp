@@ -350,6 +350,26 @@ bool CRJController::GetRFIDKey() {
 	return (written == packetLength);
 }
 
+bool CRJController::SetRFIDStep(int uidSize, BYTE* UID, int step) {
+	if (!m_initMotor) return false;
+	if (step > MAX_STEP_VALUE) return false;
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	BYTE stepByte[STEP_LEN];
+	for (int st = STEP_LEN-1; st >= 0; st--) {
+		stepByte[st] = step % 0xFF;
+		step /= 0xFF;
+	}
+
+	RFIDProtocol::setPacketByFID(eFID::FID_RFID_SET_STEP, serialPacket, packetLength, uidSize, UID, STEP_LEN, stepByte);
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	return (written == packetLength);
+}
+
 
 UINT CRJController::GetRFIDInfo(BYTE* pRFIDInfo) {
 	if (pRFIDInfo == nullptr) return 0;
@@ -753,14 +773,12 @@ void CRJController::RxPacketRFIDGetState(BYTE* buff, RFID_ReadType type)
 	if (type == STEP)
 	{
 		int stepLength = 3;
-		std::string step = "";
-		int value = 0;
+		int step = 0;
 		for (int i = 0; i < stepLength; i++)
 		{
-			value *= 256;
-			value += (int)buff[idx++];
+			step *= 256;
+			step += (int)buff[idx++];
 		}
-		step = value;
 		std::cout << "step : " << step << std::endl;
 	}
 }
