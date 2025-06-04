@@ -1,6 +1,14 @@
 #pragma once
 
-#include "CommonProtocol.h"
+#include "CommonProtocol.h">
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <chrono>
+#include <ctime>
+#include <iomanip>
 
 #define FIXED_HEADER_FRONT_LEN			3
 #define FIXED_HEADER_BACK_LEN			2	
@@ -20,4 +28,5 @@ public:
 	~RFIDProtocol() {}
 	
 	void static setPacketByFID(eFID fid, BYTE* packet, int& packetLength, int uidSize = 0, BYTE* UID = NULL, int dataSize = 0, BYTE* data = NULL);
+	void static writeKeyChangeLog(unsigned char* changedKey);
 };

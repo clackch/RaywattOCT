@@ -318,6 +318,29 @@ bool CRJController::SetRFIDManuf(int uidSize, BYTE* UID, int dataSize, BYTE* man
 }
 
 
+bool CRJController::SetRFIDKey(int uidSize, BYTE* UID, int dataSize, BYTE* key) {
+	if (!m_initMotor) return false;
+	if (dataSize < KEY_LEN*2) return false;
+
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+
+	RFIDProtocol::setPacketByFID(eFID::FID_RFID_SET_KEY, serialPacket, packetLength, uidSize, UID, KEY_LEN*2, key);
+	RFIDProtocol::writeKeyChangeLog(key);
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	for (int i = 0; i < packetLength; i++) {
+		printf("%02x ", serialPacket[i]);
+	}
+	printf("\n");
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	return (written == packetLength);
+}
+
+
 UINT CRJController::GetRFIDInfo(BYTE* pRFIDInfo) {
 	if (pRFIDInfo == nullptr) return 0;
 	if (m_nRFIDLength == 0) return 0;
@@ -695,24 +718,25 @@ void CRJController::RxPacketRFIDGetState(BYTE* buff, RFID_ReadType type)
 		BYTE* key = new BYTE[KEY_LEN];
 		for (int i = 0; i < keyLength_A; i++)
 		{
-			if (i != 0) keyA += " ";
+			if (i != 0) ss << " ";
 			key[i] = buff[idx]; 
 			ss << std::uppercase << std::setw(2) << std::setfill('0') << std::hex << (int)buff[idx++];
-			keyA += ss.str();
 		}
+		keyA = ss.str();
 		//KeyCache.Put(hardWareCardNo, key);
 		//LRUCache.defaultKey = key;
 		std::cout << "keyA : " << keyA << std::endl;
+		ss.clear();
+		ss.str("");
 
 		int keyLength_B = 6;
 		std::string keyB = "";
-
 		for (int i = 0; i < keyLength_B; i++)
 		{
-			if (i != 0) keyB += " ";
+			if (i != 0) ss << " ";
 			ss << std::uppercase << std::setw(2) << std::setfill('0') << std::hex << (int)buff[idx++];
-			keyB += ss.str();
 		}
+		keyB = ss.str();
 		std::cout << "keyB : " << keyB << std::endl;
 
 	}
