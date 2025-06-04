@@ -330,10 +330,20 @@ bool CRJController::SetRFIDKey(int uidSize, BYTE* UID, int dataSize, BYTE* key) 
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
 
-	for (int i = 0; i < packetLength; i++) {
-		printf("%02x ", serialPacket[i]);
-	}
-	printf("\n");
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	return (written == packetLength);
+}
+
+bool CRJController::GetRFIDKey() {
+	if (!m_initMotor) return false;
+
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+
+	RFIDProtocol::setPacketByFID(eFID::FID_RFID_GET_KEY, serialPacket, packetLength);
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
 
 	int written = m_pConnection->Write(serialPacket, packetLength);
 
