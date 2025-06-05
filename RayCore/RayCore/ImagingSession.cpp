@@ -13,7 +13,6 @@
 #include "IRayLearning.h"
 #include "LookUpTable.h"
 #include <string>
-#include <chrono>
 
 CImagingSession::CImagingSession(CMessageService* pMsg, int nSession, bool deleteData) :
 	m_pMsg(pMsg),
