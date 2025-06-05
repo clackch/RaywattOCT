@@ -256,6 +256,9 @@ _declspec(dllexport) void* RayGetGuidewirePoints(int nFrame) {
 _declspec(dllexport) int RayGetNumOfGuidewirePoints(int nFrame) {
     return octSystem.GetNumOfGuidewirePoints(nFrame);
 }
+_declspec(dllexport) void* RayGetGuidewireRadius(int nFrame) {
+    return octSystem.GetGuidewireRadius(nFrame);
+}
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,

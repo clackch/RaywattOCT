@@ -831,6 +831,16 @@ int COCTSystem::GetNumOfGuidewirePoints(int nFrame){
 }
 
 /*
+* GetNumOfGuidewirePoints
+*/
+
+void* COCTSystem::GetGuidewireRadius(int nFrame) {
+	if (m_reviewSession[SESSION_REVIEW] == nullptr) return nullptr;
+
+	return m_reviewSession[SESSION_REVIEW]->GetGuidewireRadius(nFrame);
+}
+
+/*
 * GetBrightness
 */
 double COCTSystem::GetBrightness() {

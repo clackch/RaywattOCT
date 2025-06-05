@@ -12,6 +12,7 @@
 #include "CutViewManager.h"
 #include "IRayLearning.h"
 #include "LookUpTable.h"
+#include <string>
 
 CImagingSession::CImagingSession(CMessageService* pMsg, int nSession, bool deleteData) :
 	m_pMsg(pMsg),
@@ -376,7 +377,16 @@ int CImagingSession::GetZOffset(int nFrame) {
 	if (m_vZOffset.size() != m_pDataManager->GetNumOfSamples()) return GetZOffset();
 
 	return m_vZOffset.at(nFrame);
+
 }
+
+ void* CImagingSession::GetGuidewireRadius(int nFrame) {
+	if (m_vGuidewireRadius.size() <= nFrame) return 0;
+
+	auto& vRadius = m_vGuidewireRadius.at(nFrame);
+
+	return static_cast<void*>(vRadius.data());
+ }
 
 CImagingSession* CImagingSession::createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type) {
 	CImagingSession* pSession = new CImagingSession(pMsg, nSession, deleteData);
@@ -465,6 +475,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	std::vector<std::vector<cv::Mat>>& vSidebranch = pSession->m_vSidebranch;
 	std::vector<cv::Mat>& vStent = pSession->m_vStent;
 	std::vector<cv::Mat>& vGuidewire = pSession->m_vGuidewire;
+	std::vector<std::vector<float>>& vGuidewireRadius = pSession->m_vGuidewireRadius;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 	cv::Mat circleImage, imgZOffset, enhancedImage;
 
@@ -522,6 +533,10 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 			for (int i = 0; i < vContours.size(); i++) {
 				cv::Mat curContour = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
 				cv::drawContours(curContour, vContours, i, cv::Scalar(255), cv::FILLED);
+				/*cv::Mat aa;
+				cv::cvtColor(curContour, aa, cv::COLOR_GRAY2BGR);
+				string check = "contour Image" + std::to_string(a) + ".png";
+				cv::imwrite(check, aa);*/
 
 				cv::bitwise_and(centerMask, curContour, andResult);
 				cv::bitwise_xor(centerMask, andResult, xorResult);
@@ -634,12 +649,41 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 
 		//guidewire
 		std::vector<cv::Rect2f> vGuidewires = learning->FindGuidewire();
+
+		std::vector<cv::Point> centerPoints;
+		std::vector<float> Radius;
 		cv::Mat mGuidewire(vGuidewires.size(), 1, CV_32SC2);
-		for (size_t row = 0; row < vGuidewires.size(); row++) {
-			//TODO - Rect 영역 내에서 GW 테두리 분석해서 중점 찾는 로직 필요
-			mGuidewire.at<cv::Point>(row, 0) = cv::Point(vGuidewires[row].x + vGuidewires[row].width / 2, vGuidewires[row].y + vGuidewires[row].height / 2);
+
+		/*cv::Mat mask3 = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+		for (int i = 0; i < vGuidewires.size(); i++) {
+			cv::rectangle(mask3, vGuidewires[i], cv::Scalar(255), -1);
 		}
-		vGuidewire.push_back(mGuidewire);
+		std::vector<std::vector<cv::Point>> realContours;
+		cv::Mat imgCheck = circleImage.clone();
+		cv::findContours(mask3, realContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+		cv::drawContours(imgCheck, realContours, -1, cv::Scalar(0, 255, 0), 2);
+
+		string check = "GW Center Image" + std::to_string(nFrame) + ".png";
+		cv::imwrite(check, imgCheck);*/
+
+		pImaging->GetGuideWireCenterPoint(circleImage, vGuidewires, centerPoints, Radius);
+
+		if (centerPoints.size() > 0)
+		{
+			for (size_t row = 0; row < vGuidewires.size(); row++) {
+				mGuidewire.at<cv::Point>(row, 0) = cv::Point(centerPoints[row].x, centerPoints[row].y);
+				if (Radius[row] < 0) continue;
+				cv::circle(circleImage, centerPoints[row], static_cast<int>(Radius[row]), cv::Scalar(0, 255, 0), 2);
+			}
+			vGuidewire.push_back(mGuidewire);
+
+			PLOGI.printf("vGuidewire.count = %d, %d, %d %d", vGuidewire.size(), mGuidewire.at<cv::Point>(0, 0).x, mGuidewire.at<cv::Point>(0, 0).y, nFrame);
+			vGuidewireRadius.push_back(Radius);
+		}
+		else {
+			vGuidewire.push_back(mGuidewire);
+			vGuidewireRadius.push_back(std::vector<float>(1));
+		}
 
 		pSession->m_pMsg->postMessage(WM_PROCESS_DETECTION, nSession, nFrame);
 	}

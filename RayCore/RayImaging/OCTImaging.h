@@ -29,6 +29,9 @@ protected:
 	CCalibration* calibration;
 	cv::Mat matXMap;
 	cv::Mat matYMap;
+	cv::Mat inverseMatXMap; // circle image -> inverse circular -> Rotate CounterClock 90 -> Circluar -> Rotate_ClockWise 90
+	cv::Mat inverseMatYMap;
+	std::vector<cv::Point> inversedContourYPoints;
 
 	cv::Mat imageResult;
 	cv::Mat imageResultColor;
@@ -97,19 +100,22 @@ public:
 	void GetFrameInfo(int& nCurFrame, int& nTotalFrame) { nCurFrame = m_nCurFrame; nTotalFrame = m_nTotalFrame; }
 	void* GetCalibrationData();
 	void CircularizeImage(cv::Mat& src, cv::Mat& dst);
-	virtual void InverseCircularizeImage(cv::Mat& src, cv::Mat& dst);
-	virtual void EraseStentOutLier(cv::Mat& stent);
-	virtual void SetLumenContourOffset(std::vector<cv::Point> lumenContour);
+	void InverseCircularizeImage(cv::Mat& src, cv::Mat& dst);
+	void EraseStentOutLier(cv::Mat& stent);
+	void SetLumenContourOffset(std::vector<cv::Point> lumenContour);
+	void GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& centerPoints, std::vector<float>& radius);
 
 	int GetSheathPosition() { return m_nSheathPosition; }
 	void SetZOffset(int nOffset) { m_nZOffset = nOffset; }
 
 	static void SetImageCompensation(bool ImageCompensated);
 	static void SetImageCompensationControlWindow(bool ImageCompensationControlWindowOn, Setting setting);
+
 protected:
 	void allocateMemory();
 	void releaseMemory();
 	void initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale);
+	void initInverseCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale);
 	void releaseCircularizeMap();
 
 	void generateBackground(Ipp16u* fringes);
@@ -129,6 +135,12 @@ protected:
 	double euclidean_distance(cv::Point2f pt1, cv::Point2f pt2);
 	std::vector<int> find_outliers(const std::vector<int>& y_values);
 	static void on_trackbar(int, void*);
+	void GetLumenOffsetPoints(std::vector<cv::Point>& lumenOffsetBoundary);
+	void GetGuideWireCircleEdgePoints(cv::Mat image, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& edgePoints);
+	void GetGuideWireShadowPointAngles(cv::Mat image, std::vector<cv::Point> edgePoints, std::vector<double>& theta);
+	void InterpolateEdgePoints(std::vector<cv::Point>& edgePoints);
+	void GetCircularizeTransformPoint(cv::Point src, cv::Point& dst);
+	void GetAcuteAngleToXAxis(cv::Vec2d vector1, cv::Vec2d vector2, double& angle);
 
 	void adaptive_gamma_correction(cv::Mat& img, int maxIntensity);
 	void get_PDF_array(cv::Mat& img, std::vector<double>& pdf_i, bool& AGCWD_apply);

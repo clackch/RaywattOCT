@@ -517,6 +517,7 @@ namespace RaywattApp.ViewModels.File
                             patientCase.StrCoRegistration = GetStrValue(caseObj, "StrCoRegistration");
                             patientCase.CreateDate = GetDateValue(caseObj, "CreateDate");
                             patientCase.UpdateDate = GetDateValue(caseObj, "UpdateDate");
+                            patientCase.GuidewireRadius = GetDoubleValue(caseObj, "GuidewireRadius");
 
                             patient.PatientCaseList.Add(patientCase);
                         }
