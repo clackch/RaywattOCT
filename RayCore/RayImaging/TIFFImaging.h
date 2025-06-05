@@ -8,6 +8,7 @@ private:
 	std::chrono::system_clock::time_point m_start, m_end;
 	cv::Mat imageOrigin;
 	cv::Mat imageMask;
+	std::vector<cv::Point> inversedContourYPoints;
 
 public:
 	CTIFFImaging(Setting, CMessageService*);
@@ -17,6 +18,8 @@ public:
 	virtual void Process(char* fringes);
 	virtual void PostProcess(cv::Mat image);
 	virtual cv::Mat GetProcessedImage() { return imageConvert; }
+
+protected:
 	virtual void initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale);
 	virtual void InverseCircularizeImage(cv::Mat& src, cv::Mat& dst);
 };
