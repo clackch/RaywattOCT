@@ -159,10 +159,10 @@ Remove the catheter from patient before proceeding.</value>
     <value>Failed to change Cath Room.</value>
   </data>
   <data name="$MSG014" xml:space="preserve">
-    <value>Failed to open server.</value>
+    <value>Failed to init board.</value>
   </data>
   <data name="$MSG015" xml:space="preserve">
-    <value>Failed to open socket.</value>
+    <value>Failed to open server.</value>
   </data>
   <data name="$MSG016" xml:space="preserve">
     <value>Add physician information on the edit patient screen.</value>
@@ -252,6 +252,9 @@ Acceptance of Terms: Require users to explicitly accept the terms and conditions
   </data>
   <data name="3D Option" xml:space="preserve">
     <value>3D Option</value>
+  </data>
+  <data name="About" xml:space="preserve">
+    <value>About</value>
   </data>
   <data name="Accept and Continue" xml:space="preserve">
     <value>Accept and Continue</value>
@@ -458,6 +461,9 @@ Overwrite existing data?</value>
   </data>
   <data name="DICOM" xml:space="preserve">
     <value>DICOM</value>
+  </data>
+  <data name="DICOM Servers" xml:space="preserve">
+    <value>DICOM Servers</value>
   </data>
   <data name="Disable Cleaning" xml:space="preserve">
     <value>Disable Cleaning</value>
@@ -702,6 +708,9 @@ Overwrite existing data?</value>
   <data name="Loading..." xml:space="preserve">
     <value>Loading...</value>
   </data>
+  <data name="Local Host Info." xml:space="preserve">
+    <value>Local Host Info.</value>
+  </data>
   <data name="Localization" xml:space="preserve">
     <value>Localization</value>
   </data>
@@ -722,6 +731,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Lumen Profile" xml:space="preserve">
     <value>Lumen Profile</value>
+  </data>
+  <data name="Maintenance" xml:space="preserve">
+    <value>Maintenance</value>
   </data>
   <data name="Male" xml:space="preserve">
     <value>Male</value>
@@ -1035,8 +1047,8 @@ Overwrite existing data?</value>
   <data name="Select Physician" xml:space="preserve">
     <value>Select Physician</value>
   </data>
-  <data name="Select Pre-Case" xml:space="preserve">
-    <value>Select Pre-Case</value>
+  <data name="Select Pre-PCI Case" xml:space="preserve">
+    <value>Select Pre-PCI Case</value>
   </data>
   <data name="Select Procedure" xml:space="preserve">
     <value>Select Procedure</value>
@@ -1115,6 +1127,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Tapered" xml:space="preserve">
     <value>Tapered</value>
+  </data>
+  <data name="Terms and Conditions" xml:space="preserve">
+    <value>Terms and Conditions</value>
   </data>
   <data name="TIFF" xml:space="preserve">
     <value>TIFF</value>

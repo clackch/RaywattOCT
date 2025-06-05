@@ -28,9 +28,9 @@ void CConfiguration::Initialize(tstring configFile)
 	this->measurement.nNoiseSkip = ::GetPrivateProfileInt(_T("Measurement"), _T("NoiseSkip"), 300, configFilePath.c_str());
 	this->measurement.nNoiseAverage = ::GetPrivateProfileInt(_T("Measurement"), _T("NoiseAverage"), 100, configFilePath.c_str());
 	
-	this->measurement.fSheathRadiusOnePointSix = getPrivateProfileFloat(_T("Measurement"), _T("SheathRadius1.6"), 0.28, configFilePath.c_str());
+	this->measurement.fSheathRadiusOnePointSeven = getPrivateProfileFloat(_T("Measurement"), _T("SheathRadius1.7"), 0.28, configFilePath.c_str());
 	this->measurement.fSheathRadiusTwoPointSix = getPrivateProfileFloat(_T("Measurement"), _T("SheathRadius2.6"), 0.43, configFilePath.c_str());	
-	this->measurement.fSheathThicknessOnePointSix = getPrivateProfileFloat(_T("Measurement"), _T("SheathThickness1.6"), 0.045, configFilePath.c_str());
+	this->measurement.fSheathThicknessOnePointSeven = getPrivateProfileFloat(_T("Measurement"), _T("SheathThickness1.7"), 0.045, configFilePath.c_str());
 	this->measurement.fSheathThicknessTwoPointSix = getPrivateProfileFloat(_T("Measurement"), _T("SheathThickness2.6"), 0.1, configFilePath.c_str());	
 	this->measurement.fSheathRadius = getPrivateProfileFloat(_T("Measurement"), _T("SheathRadius"), 0.43, configFilePath.c_str());
 	this->measurement.nSheathPosition = measurement.fSheathRadius * 1000.f / measurement.fAxialResolutionScale;
@@ -68,6 +68,7 @@ void CConfiguration::Initialize(tstring configFile)
 	::GetPrivateProfileString(_T("StepMotor"), _T("Port"), _T(""), this->stepMotor.port, sizeof(this->stepMotor.port), configFilePath.c_str());
 	this->stepMotor.pullbackDistance = ::GetPrivateProfileInt(_T("StepMotor"), _T("PullbackDistance"), 10, configFilePath.c_str());
 	this->stepMotor.pullbackSpeed = ::GetPrivateProfileInt(_T("StepMotor"), _T("PullbackSpeed"), 10, configFilePath.c_str());
+	this->stepMotor.noPullbackTime = ::GetPrivateProfileInt(_T("StepMotor"), _T("NoPullbackTime"), 3, configFilePath.c_str());
 	
 	// [BLDCMotor]
 	::GetPrivateProfileString(_T("BLDCMotor"), _T("Port"), _T(""), this->bldcMotor.port, sizeof(this->bldcMotor.port), configFilePath.c_str());
@@ -82,7 +83,7 @@ void CConfiguration::Initialize(tstring configFile)
 	// [Catheter]
 	this->catheter.rotationTime = ::GetPrivateProfileInt(_T("Catheter"), _T("RotationTime"), 10000, configFilePath.c_str());
 	this->catheter.manualLoad = ::GetPrivateProfileInt(_T("Catheter"), _T("ManualLoad"), 0, configFilePath.c_str());
-	this->catheter.length = ::GetPrivateProfileInt(_T("Catheter"), _T("Length1.6"), -45000, configFilePath.c_str());
+	this->catheter.length = ::GetPrivateProfileInt(_T("Catheter"), _T("Length1.7"), -45000, configFilePath.c_str());
 
 	// [Volume]
 	this->volume.size = ::GetPrivateProfileInt(_T("Volume"), _T("Size"), 500, configFilePath.c_str());
@@ -90,6 +91,19 @@ void CConfiguration::Initialize(tstring configFile)
 
 	// [Log]
 	::GetPrivateProfileString(_T("Log"), _T("LogRootPath"), _T(""), this->logRootPath, sizeof(this->logRootPath), configFilePath.c_str());
+
+	// [Compensation]
+	this->imaging.applyCompensation = ::GetPrivateProfileInt(_T("Compensation"), _T("ApplyCompensation"), 0, configFilePath.c_str());
+	this->imaging.exponentialFactor = getPrivateProfileFloat(_T("Compensation"), _T("ExponentialFactor"), 1.8f, configFilePath.c_str());
+	this->imaging.brightnessControl = getPrivateProfileFloat(_T("Compensation"), _T("BrightnessControl"), 0.7f, configFilePath.c_str());
+	this->imaging.energyThreshold = getPrivateProfileFloat(_T("Compensation"), _T("EnergyThreshold"), 0.7f, configFilePath.c_str());
+	this->imaging.applyGammaCorrection = ::GetPrivateProfileInt(_T("Compensation"), _T("ApplyGammaCorrection"), 0, configFilePath.c_str());
+	this->imaging.GCAlpha = getPrivateProfileFloat(_T("Compensation"), _T("GCAlpha"), 0.4f, configFilePath.c_str());
+	this->imaging.intensityThreshold = ::GetPrivateProfileInt(_T("Compensation"), _T("IntensityThreshold"), 255, configFilePath.c_str());
+
+	// [Sharpness]
+	this->imaging.applySharpness = ::GetPrivateProfileInt(_T("Sharpness"), _T("ApplySharpness"), 0, configFilePath.c_str());
+
 
 	isInit = true;
 }

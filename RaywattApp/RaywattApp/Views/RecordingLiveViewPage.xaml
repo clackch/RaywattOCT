@@ -134,8 +134,8 @@
                                 </Grid.RowDefinitions>
                                 <Label Grid.Row="0" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Flush Media], Source={StaticResource L10N}}"/>
                                 <Label Grid.Row="0" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FlushMedia, Converter={StaticResource CodeConverter}, ConverterParameter='FLMD'}"/>
-                                <Label Grid.Row="0" Grid.Column="2" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Trigger], Source={StaticResource L10N}}"/>
-                                <Label Grid.Row="0" Grid.Column="3" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.PullbackTrigger, Converter={StaticResource CodeConverter}, ConverterParameter='PBTG'}"/>
+                                <!--<Label Grid.Row="0" Grid.Column="2" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Trigger], Source={StaticResource L10N}}"/>-->
+                                <!--<Label Grid.Row="0" Grid.Column="3" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.PullbackTrigger, Converter={StaticResource CodeConverter}, ConverterParameter='PBTG'}"/>-->
                                 <Label Grid.Row="1" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Type], Source={StaticResource L10N}}"/>
                                 <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3">
                                     <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.PullbackType, Converter={StaticResource CodeConverter}, ConverterParameter='PBTY'}"/>
@@ -209,10 +209,8 @@
                             </Grid>
                             <Border Grid.Row="5" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
                                 <Grid>
-                                    <Grid Visibility="{Binding DeviceStatus.IsAngioInitialized, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG023], Source={StaticResource L10N}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                    </Grid>
-                                    <Grid Visibility="{Binding DeviceStatus.IsAngioInitialized, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    
+                                    <Grid>
                                         <Grid Width="{x:Static const:Constants.SmallCrossSectionSize}" Height="{x:Static const:Constants.SmallCrossSectionSize}" Visibility="{Binding IsOctExpanded, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                                             <Grid.Clip>
                                                 <EllipseGeometry Center="156,156" RadiusX="156" RadiusY="156"/>
@@ -226,8 +224,36 @@
                                                 </Image.RenderTransform>
                                             </Image>
                                         </Grid>
-                                        <Grid Visibility="{Binding IsOctExpanded, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <Grid>
+                                            <Grid.Visibility>
+                                                <MultiBinding Converter="{StaticResource BoolToVisibilityMultiConverter}">
+                                                    <Binding Path="IsOctExpanded" />
+                                                    <Binding Path="DeviceStatus.IsAngioConnected" />
+                                                </MultiBinding>
+                                            </Grid.Visibility>
                                             <Image Source="{Binding AngioImage}" Width="{x:Static const:Constants.SmallCrossSectionSize}" Height="{x:Static const:Constants.SmallCrossSectionSize}" Stretch="Uniform"/>
+                                        </Grid>
+                                        <Grid Visibility="{Binding IsOctExpanded, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                                            <Grid.Clip>
+                                                <EllipseGeometry Center="{x:Static const:Constants.CrossSectionPointCenter}" RadiusX="{x:Static const:Constants.CrossSectionRadius}" RadiusY="{x:Static const:Constants.CrossSectionRadius}"/>
+                                            </Grid.Clip>
+                                            <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.SmallCrossSectionSize}" Height="{x:Static const:Constants.SmallCrossSectionSize}" Stretch="Fill">
+                                                <Image.RenderTransform>
+                                                    <TransformGroup>
+                                                        <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                                        <TranslateTransform X="{Binding Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                                    </TransformGroup>
+                                                </Image.RenderTransform>
+                                            </Image>
+                                        </Grid>
+                                        <Grid>
+                                            <Grid.Visibility>
+                                                <MultiBinding Converter="{StaticResource BoolToVisibilityMultReverseConverter}">
+                                                    <Binding Path="IsOctExpanded" />
+                                                    <Binding Path="DeviceStatus.IsAngioConnected" />
+                                                </MultiBinding>
+                                            </Grid.Visibility>
+                                            <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG023], Source={StaticResource L10N}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                         </Grid>
                                         <component:IconButton Style="{StaticResource IconButton}" Icon="screenExpand" Width="42" Height="42" Command="{Binding ScreenExpandCommand}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="12"/>
                                     </Grid>

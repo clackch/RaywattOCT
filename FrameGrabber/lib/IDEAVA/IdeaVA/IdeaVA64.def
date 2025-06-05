@@ -1,0 +1,13 @@
+; IdeaVA64.def : Declares the module parameters for the DLL.
+
+LIBRARY      "IdeaVA64"
+
+EXPORTS
+    ; Explicit exports can go here
+  ShowDialog              @2
+  CloseDialog             @3
+  RestrictResizing        @4
+  UpdateRSET              @5
+  SaveSettings            @6
+  GetVAState              @7
+  WhiteBalance            @8

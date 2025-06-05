@@ -83,7 +83,7 @@ ALTER TABLE IF EXISTS rv_schema.physician
 
 CREATE TABLE IF NOT EXISTS rv_schema.patient
 (
-    id character varying(9) COLLATE pg_catalog."default" NOT NULL,
+    id character varying(16) COLLATE pg_catalog."default" NOT NULL,
     lastname character varying(20) COLLATE pg_catalog."default",
     firstname character varying(20) COLLATE pg_catalog."default",
     birthdate date,
@@ -111,9 +111,9 @@ ALTER TABLE IF EXISTS rv_schema.patient
 
 CREATE TABLE IF NOT EXISTS rv_schema.patient_case
 (
-    id character varying(24) COLLATE pg_catalog."default" NOT NULL,
-    patient_id character varying(9) COLLATE pg_catalog."default",
-    accession_number character varying(6) COLLATE pg_catalog."default",
+    id character varying(31) COLLATE pg_catalog."default" NOT NULL,
+    patient_id character varying(16) COLLATE pg_catalog."default",
+    accession_number character varying(16) COLLATE pg_catalog."default",
     comment character varying(200) COLLATE pg_catalog."default",
     procedure character varying(4) COLLATE pg_catalog."default",
     vessel character varying(4) COLLATE pg_catalog."default",
@@ -163,7 +163,7 @@ ALTER TABLE IF EXISTS rv_schema.patient_case
 
 CREATE TABLE IF NOT EXISTS rv_schema.patient_case_annotation
 (
-    id character varying(24) COLLATE pg_catalog."default" NOT NULL,
+    id character varying(31) COLLATE pg_catalog."default" NOT NULL,
     bookmark text COLLATE pg_catalog."default",
     longitude text COLLATE pg_catalog."default",
     cross_section text COLLATE pg_catalog."default",
@@ -233,6 +233,34 @@ TABLESPACE rv_tablespace;
 ALTER TABLE IF EXISTS rv_schema.cath_room
     OWNER to rv_user;
 	
+
+-- Table: rv_schema.dicom_server
+
+-- DROP TABLE IF EXISTS rv_schema.dicom_server;
+
+CREATE TABLE IF NOT EXISTS rv_schema.dicom_server
+(
+    id serial NOT NULL,
+    ae_title character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    hostname character varying(255) COLLATE pg_catalog."default",
+    specify_ip_address boolean,
+    ip_address character varying(15) COLLATE pg_catalog."default",
+    port character varying(10) COLLATE pg_catalog."default",
+    tls_yn boolean,
+    server_type character varying(4) COLLATE pg_catalog."default",
+    comment character varying(255) COLLATE pg_catalog."default",
+    ca_file_path character varying(255) COLLATE pg_catalog."default",
+    create_date timestamp without time zone,
+    update_date timestamp without time zone,
+    CONSTRAINT dicom_server_pkey PRIMARY KEY (id)
+        USING INDEX TABLESPACE rv_tablespace
+)
+
+TABLESPACE rv_tablespace;
+
+ALTER TABLE IF EXISTS rv_schema.dicom_server
+    OWNER to rv_user;
+
 
 -- FUNCTION: rv_schema.fn_code(character varying, character varying)
 

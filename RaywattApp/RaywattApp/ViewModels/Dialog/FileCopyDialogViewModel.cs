@@ -13,6 +13,11 @@ using System.Threading.Tasks;
 using RaywattApp.Services;
 using Newtonsoft.Json.Linq;
 using static RaywattOCT.RayCoreWrapper;
+using System.IO.Pipes;
+using System.IO;
+using System.Threading;
+using System.Configuration;
+using Configuration = RaywattApp.Models.Configuration;
 
 namespace RaywattApp.ViewModels.Dialog
 {
@@ -62,6 +67,18 @@ namespace RaywattApp.ViewModels.Dialog
         [ObservableProperty]
         private bool enableDone = false;
 
+        private bool isPacs = false;
+
+        private IntPtr dicomClient;
+
+        [ObservableProperty]
+        private DicomServer _selectedDicomServer;
+
+        [ObservableProperty]
+        private string _localHostAeTitle;
+
+        private bool usePeerVerification = true;
+
         public FileCopyDialogViewModel(SqlManager sqlManager)
         {
             _sqlManager = sqlManager;
@@ -85,9 +102,16 @@ namespace RaywattApp.ViewModels.Dialog
                     AnnotationFilePath = data["annotationFilePath"].ToString();
                     Annotations = data["annotations"].ToString();
                 }
-                else if(FileExport.Type == Constants.ExportTypeDicom)
+                else if (FileExport.Type == Constants.ExportTypeDicom)
                 {
                     dicomProperty = (Dictionary<string, string>)data["dicomProperty"];
+                    this.isPacs = (bool)data["isPacs"];
+                    if (this.isPacs)
+                    {
+                        LocalHostAeTitle = (string)data["localHostAeTitle"];
+                        SelectedDicomServer = (DicomServer)data["selectedDicomServer"];
+                        this.usePeerVerification = (bool)data["usePeerVerification"];
+                    }
                 }
 
                 if (FileExport != null)
@@ -113,8 +137,9 @@ namespace RaywattApp.ViewModels.Dialog
         }
 
         private async void FileExportAction()
-        {           
-            SaveFolder = FileExport.ExternalDrivePath;            
+        {
+            SaveFolder = FileExport.ExternalDrivePath;
+            bool isError = false;
 
             if (FileExport.Type == Constants.ExportTypeNative)
             {
@@ -122,14 +147,15 @@ namespace RaywattApp.ViewModels.Dialog
             }
             else if (FileExport.Type == Constants.ExportTypeDicom)
             {
-                await FileSaveDicom();
+                isError = await FileSaveDicom();
             }
             else if (FileExport.Type == Constants.ExportTypeStandard)
             {
                 await FileSaveStandard();
             }
 
-            ProgressText = Constants.ExportStatusCompleted;
+            if(!isError)
+                ProgressText = Constants.ExportStatusCompleted;
             EnableDone = true;
         }
 
@@ -169,7 +195,7 @@ namespace RaywattApp.ViewModels.Dialog
                     List<string> extensions = new List<string> { Constants.AngioImageExtension, Constants.AngioParmasExtension };
                     fileName = fileName.Substring(0, patientCase.Image.Length - 3);
                     string srcFilePath = patientCase.ImageFullPath.Substring(0, patientCase.ImageFullPath.Length - 3);
-                    foreach(string ext in extensions)
+                    foreach (string ext in extensions)
                     {
                         string tmpFileName = fileName + ext;
                         string tmpSrcFilePath = srcFilePath + ext;
@@ -186,14 +212,22 @@ namespace RaywattApp.ViewModels.Dialog
             await CommonUtil.Encryptor(SaveFolder + "\\" + DbFilePath, Contents, prog => Progress += prog, contentPs, progText => ProgressText = progText);
         }
 
-        private async Task FileSaveDicom()
-        {        
-            // test data
-            Mat lumenProfile = new Mat(100, 100, MatType.CV_8UC3);
-            lumenProfile.SetTo(new Scalar(0xfe, 0xfe, 0xfe));
-            
+        private async Task<bool> FileSaveDicom()
+        {
+            //AE Title
+            string aeTitle = "";
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "LocalHost";
+            IList<Configuration> localHost = _sqlManager.SelectConfiguration(sqlParameters);
+            if (localHost != null && localHost.Count > 0)
+            {
+                aeTitle = localHost.FirstOrDefault(x => x.Key == "AeTitle").Value;
+            }
+
             //DICOMDIR Input Folder
-            string dicomDirFolder = CommonUtil.CreateFolder(SaveFolder + "\\" + DateTime.Now.ToString("yyyyMMddHHmmss"));
+            string dicomDirFolder = this.isPacs ? Constants.DicomTempFolderPath : SaveFolder + "\\" + DateTime.Now.ToString("yyyyMMddHHmmss");
+            CommonUtil.DeleteFolder(dicomDirFolder);
+            dicomDirFolder = CommonUtil.CreateFolder(dicomDirFolder);
             RayExportWrapper.DICOMDIRInputFolder(dicomDirFolder);
 
             //Group by Patient
@@ -203,7 +237,7 @@ namespace RaywattApp.ViewModels.Dialog
                              select g;
 
             int index = 0, studyId, seriesNumber;
-            double progressConvert = 100.0 / 3 / PatientCases.Count;
+            double progressConvert = 100.0 / (this.isPacs ? 4 : 3) / PatientCases.Count;
 
             foreach (var patient in patientGrp)
             {
@@ -257,7 +291,7 @@ namespace RaywattApp.ViewModels.Dialog
                             RayExportWrapper.DicomImageFinish();
 
                             //Property
-                            SetProperty(patientCase, studyId, seriesNumber, FileExport.Material != Constants.ExportMaterialCurrent ? 0 : FileExport.CurrentFrame);
+                            SetProperty(patientCase, studyId, seriesNumber, FileExport.Material != Constants.ExportMaterialCurrent ? 0 : FileExport.CurrentFrame, aeTitle);
 
                             //Sequence Property
                             SetSequenceProperty();
@@ -290,6 +324,58 @@ namespace RaywattApp.ViewModels.Dialog
 
             //DICOMDIR Write
             RayExportWrapper.DICOMDIRWrite();
+
+            if (this.isPacs)
+            {
+                bool isDicomError = false;
+                ProgressText = Constants.ExportStatusTransferDicom;
+
+                dicomClient = RayExportWrapper.CreateDcmClient();               
+
+                RayExportWrapper.DicomNetRWError res = await Task.Run(() => (RayExportWrapper.DicomNetRWError)RayExportWrapper.Initialize(dicomClient, LocalHostAeTitle, SelectedDicomServer.IpAddress, int.Parse(SelectedDicomServer.Port), SelectedDicomServer.AeTitle, SelectedDicomServer.TlsYn, this.usePeerVerification, SelectedDicomServer.CaFilePath));
+                _log.DebugFormat("Initialize : {0}", res);
+
+                if (res == RayExportWrapper.DicomNetRWError.Normal)
+                {
+                    var files = Directory.GetFiles(Constants.DicomTempFolderPath)
+                        .Where(f => System.IO.Path.GetFileName(f).StartsWith(Constants.ExportDicomPrefix, StringComparison.OrdinalIgnoreCase)).ToList();
+
+                    int count = files.Count;
+
+                    foreach (var file in files)
+                    {
+                        _log.Debug(file);
+
+                        res = await Task.Run(() => (RayExportWrapper.DicomNetRWError)RayExportWrapper.StoreFile(dicomClient, file));
+                        _log.DebugFormat("StoreFile : {0}", res);
+
+                        if (res == RayExportWrapper.DicomNetRWError.Normal)
+                        {
+                            Progress = Progress + progressConvert / count;
+                        }
+                        else
+                        {
+                            isDicomError = true;
+                            ProgressText = CommonUtil.GetDicomResultMessage(res);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    isDicomError = true;
+                    ProgressText = CommonUtil.GetDicomResultMessage(res);
+                }
+
+                RayExportWrapper.DestroyDcmClient(dicomClient);
+
+                CommonUtil.DeleteFolder(Constants.DicomTempFolderPath);
+
+                if (isDicomError)
+                    return true;
+            }
+
+            return false;
         }
 
         private async Task FileSaveStandard()
@@ -327,7 +413,14 @@ namespace RaywattApp.ViewModels.Dialog
                 else if (format == Constants.ExportPullbackTIFF)
                 {
                     string fileName = CreateStandardUniqueName(patientCase);
-                    await CommonUtil.SaveMultipleFrames(convertedImages, SaveFolder, fileName, format, prog => Progress += prog, progressSave, progText => ProgressText = progText);
+                    CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+
+                    Thread threadTiffProcessByPython = new Thread(() => CommonUtil.TiffProcessByPython(convertedImages, SaveFolder, fileName, format, _cancellationTokenSource));
+                    threadTiffProcessByPython.Start();
+
+                    double progressBase = Progress;
+                    await Task.Run(() => ProgressPipeWithPython(_cancellationTokenSource.Token, convertedImages.Count, progressSave));
+                    Progress = progressBase + progressSave;
                 }
                 else
                 {
@@ -340,6 +433,79 @@ namespace RaywattApp.ViewModels.Dialog
                     }
                 }
             }
+        }
+
+        private void ProgressPipeWithPython(CancellationToken token, int totalNum, double progressLeft)
+        {
+            _log.Debug("[START]ThreadProgressPipe");
+
+            double progressBase = Progress;
+            double convertProgressCnt = 0;
+
+            while (!token.IsCancellationRequested)
+            {
+                using (var pipeServer = new NamedPipeServerStream("progress_pipe", PipeDirection.InOut, NamedPipeServerStream.MaxAllowedServerInstances))
+                {
+                    try
+                    {
+                        // WaitForConnection 호출 시 CancellationToken을 감안
+                        var waitTask = Task.Run(() => pipeServer.WaitForConnection(), token);
+
+                        // CancellationToken에 따라 대기
+                        waitTask.Wait(token);
+
+                        // 연결이 성공적으로 완료된 경우
+                        using (StreamReader reader = new StreamReader(pipeServer))
+                        {
+                            string message;
+                            while ((message = reader.ReadLine()) != null)
+                            {
+                                _log.Debug($"Progress update: {message}");
+
+                                if (message.StartsWith("_converting_"))
+                                {
+                                    Progress = progressBase + (progressLeft / 2) * (++convertProgressCnt / totalNum);                                    
+                                }
+                                else if (message.StartsWith("_save_"))
+                                {
+                                    ProgressText = Constants.ExportStatusSaveMultipleFrames;
+                                    Progress = progressBase + (progressLeft / 2);
+                                }
+                                else if (message.StartsWith("_move_"))
+                                {
+                                    Progress = progressBase + (progressLeft / 2) + (progressLeft / 4);
+                                }
+                                else if (message.StartsWith("_moving_"))
+                                {
+                                    double moveProgress = double.Parse(message.Substring(9));
+                                    Progress = progressBase + (progressLeft / 2) + (progressLeft / 4) + (progressLeft / 4) * moveProgress;
+                                }
+                                else if (message.StartsWith("_end_"))
+                                {
+                                    Progress = progressBase + progressLeft;
+                                    return;
+                                }
+                                else if (message.StartsWith("_error_"))
+                                {
+                                    _log.Error(message);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        _log.Debug("Cancellation requested. Exiting loop.");
+                        break;
+                    }
+                    catch (IOException ex)
+                    {
+                        _log.Debug($"Connection error: {ex.Message}");
+                    }
+                }
+            }
+
+            _log.Debug("[END]ThreadProgressPipe");
         }
 
         private async Task FileImport()
@@ -367,7 +533,7 @@ namespace RaywattApp.ViewModels.Dialog
                     if (!String.IsNullOrEmpty(json))
                     {
                         JArray arr = JArray.Parse(json);
-                        foreach(JObject obj in arr)
+                        foreach (JObject obj in arr)
                         {
                             PatientCaseAnnotation patientCaseAnnotation = new PatientCaseAnnotation();
                             patientCaseAnnotation.Id = obj["Id"]?.ToString() ?? "null";
@@ -482,10 +648,10 @@ namespace RaywattApp.ViewModels.Dialog
                             progressTextCallback(Constants.ExportStatusSaveFile);
                         });
                     }
-                }                          
+                }
             }
 
-            if(cnt == 0)
+            if (cnt == 0)
             {
                 await Task.Run(() => {
                     progressCallback(progress);
@@ -499,7 +665,7 @@ namespace RaywattApp.ViewModels.Dialog
             await CommonUtil.CopyFiles(copyfiles, prog => Progress = prog, 100.0, progText => ProgressText = progText);
         }
 
-        private void SetProperty(PatientCase patientCase, int studyId, int seriesNumber, int instanceNumber)
+        private void SetProperty(PatientCase patientCase, int studyId, int seriesNumber, int instanceNumber, string aeTitle)
         {
             string dateTimeNow = DateTime.Now.ToString("yyyyMMddHHmmss");
 
@@ -518,9 +684,9 @@ namespace RaywattApp.ViewModels.Dialog
             //(0002, 0012)	Implementation Class UID	-	M	UI
             RayExportWrapper.DicomAddProperty(0x00020012, implementationClassUID, 0);
             //(0002, 0013)	Implementation Version Name	-	C	SH
-            RayExportWrapper.DicomAddProperty(0x00020013, dicomProperty["00020013"], 0);
+            RayExportWrapper.DicomAddProperty(0x00020013, ConfigurationManager.AppSettings.Get("SoftwareName"), 0);
             //(0002, 0016)	Source Application Entity Title	-	M	AE
-            RayExportWrapper.DicomAddProperty(0x00020016, dicomProperty["00020016"], 0);
+            RayExportWrapper.DicomAddProperty(0x00020016, aeTitle, 0);
             //(0008, 0005)	Specific Character Set	-	C	CS
             //(0008, 0008)	Image Type	-	M	CS
             //(0008, 0012)	Instance Creation Date	-	M	DA
@@ -552,7 +718,7 @@ namespace RaywattApp.ViewModels.Dialog
             //(0008, 0064)	Conversion Type	-	U	CS
             RayExportWrapper.DicomAddProperty(0x00080064, dicomProperty["00080064"], 0);
             //(0008, 0070)	Manufacturer	-	M, C, U	LO
-            RayExportWrapper.DicomAddProperty(0x00080070, dicomProperty["00080070"], 0);
+            RayExportWrapper.DicomAddProperty(0x00080070, ConfigurationManager.AppSettings.Get("Manufacturer"), 0);
             //(0008, 0080)	Institution Name	-	M	LO
             RayExportWrapper.DicomAddProperty(0x00080080, dicomProperty["00080080"], 0);
             //(0008, 0090)	Referring Physician's Name	-	C	PN
@@ -562,10 +728,10 @@ namespace RaywattApp.ViewModels.Dialog
             //(0008, 1050)	Performing Physician's Name	-	C	PN
             RayExportWrapper.DicomAddProperty(0x00081050, patientCase.PhysicianName, 0);
             //(0008, 1090)	Manufacturer's Model Name	-	M	LO
-            RayExportWrapper.DicomAddProperty(0x00081090, dicomProperty["00081090"], 0);
+            RayExportWrapper.DicomAddProperty(0x00081090, ConfigurationManager.AppSettings.Get("ModelName"), 0);
             //(0008, 2144)	Recommended Display Frame Rate	-	U	IS
             //(0010, 0010)	Patient's Name	-	M	PN
-            RayExportWrapper.DicomAddProperty(0x00100010, patientCase.PatientName, 0);
+            RayExportWrapper.DicomAddProperty(0x00100010, patientCase.PatientName.Replace(", ", "^"), 0);//Convert to DICOM Format (Firstname + ^ + Lastname)
             //(0010, 0020)	Patient ID	-	M	LO
             RayExportWrapper.DicomAddProperty(0x00100020, patientCase.PatientId, 0);
             //(0010, 0030)	Patient's Birth Date	-	M	DA
@@ -581,13 +747,13 @@ namespace RaywattApp.ViewModels.Dialog
             //(0018, 0015)	Body Part Examined	-	M	CS
             RayExportWrapper.DicomAddProperty(0x00180015, dicomProperty["00180015"], 0);
             //(0018, 1016)	Secondary Capture Device Manufacturer	-	U	LO
-            RayExportWrapper.DicomAddProperty(0x00181016, dicomProperty["00181016"], 0);
+            RayExportWrapper.DicomAddProperty(0x00181016, ConfigurationManager.AppSettings.Get("Manufacturer"), 0);
             //(0018, 1018)	Secondary Capture Device Manufacturer's Model Name	-	U	LO
-            RayExportWrapper.DicomAddProperty(0x00181018, dicomProperty["00181018"], 0);
+            RayExportWrapper.DicomAddProperty(0x00181018, ConfigurationManager.AppSettings.Get("ModelName"), 0);
             //(0018, 1019)	Secondary Capture Device Software Versions	-	U	LO
-            RayExportWrapper.DicomAddProperty(0x00181019, dicomProperty["00181019"], 0);
+            RayExportWrapper.DicomAddProperty(0x00181019, ConfigurationManager.AppSettings.Get("SoftwareVersion"), 0);
             //(0018, 1020)	Software Version(s)	-	C	LO
-            RayExportWrapper.DicomAddProperty(0x00181020, dicomProperty["00181020"], 0);
+            RayExportWrapper.DicomAddProperty(0x00181020, ConfigurationManager.AppSettings.Get("SoftwareVersion"), 0);
             //(0018, 0025)  Angio Flag	-	?	CS
             RayExportWrapper.DicomAddProperty(0x00180025, FileExport.AngioView ? "Y" : "N", 0);
             //(0018, 1063)	Frame Time	-	U	DS

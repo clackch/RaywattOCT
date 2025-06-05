@@ -249,6 +249,21 @@ namespace RaywattApp.Services
                 FROM rv_schema.patient_case_annotation
                 WHERE id = @id
                 ";
+
+            //SelectDicomServer
+            _query["SelectDicomServer"] = @$"
+                SELECT id, ae_title, hostname, specify_ip_address, ip_address, port, tls_yn, server_type, comment, ca_file_path, create_date, update_date
+                FROM rv_schema.dicom_server
+                ORDER BY ae_title
+                ";
+
+            //SelectDicomServerByType
+            _query["SelectDicomServerByType"] = @$"
+                SELECT id, ae_title, hostname, specify_ip_address, ip_address, port, tls_yn, server_type, comment, ca_file_path, create_date, update_date
+                FROM rv_schema.dicom_server
+                WHERE server_type = @server_type
+                ORDER BY ae_title
+                ";
         }
 
         private static void SetInsertQuery()
@@ -296,6 +311,15 @@ namespace RaywattApp.Services
 	            , @calcium_threshold, @expansion_threshold, @apposition_threshold
 	            , now(), now())
                 ";
+
+            //InsertDicomServer
+            _query["InsertDicomServer"] = @$"
+                INSERT INTO rv_schema.dicom_server(ae_title, hostname, specify_ip_address
+                , ip_address, port, tls_yn, server_type, comment, ca_file_path, create_date, update_date)
+	            VALUES (@ae_title, @hostname, @specify_ip_address
+                , @ip_address, @port, @tls_yn, @server_type, @comment, @ca_file_path
+	            , now(), now())
+                ";
         }
 
         private static void SetUpdateQuery()
@@ -313,7 +337,7 @@ namespace RaywattApp.Services
             _query["UpdateConfiguration"] = @$"
                 UPDATE rv_schema.configuration
                 SET value = @value, buffer = @buffer
-                WHERE classification = @classification
+                WHERE classification = @classification and key = @key
                 ";
 
             //UpdatePatient
@@ -381,6 +405,14 @@ namespace RaywattApp.Services
                 SET angio_co_registration=@angio_co_registration
                 WHERE id=@id
                 ";
+
+            //UpdateDicomServer
+            _query["UpdateDicomServer"] = @$"
+                UPDATE rv_schema.dicom_server
+                SET ae_title=@ae_title, hostname=@hostname, specify_ip_address=@specify_ip_address
+                , ip_address=@ip_address, port=@port, tls_yn=@tls_yn, server_type=@server_type, comment=@comment, ca_file_path=@ca_file_path, update_date=now()
+                WHERE id=@id
+                ";
         }
 
         private static void SetDeleteQuery()
@@ -402,6 +434,12 @@ namespace RaywattApp.Services
             //DeletePhysician
             _query["DeletePhysician"] = @$"
                 DELETE FROM rv_schema.physician
+                WHERE id=@id
+                ";
+
+            //DeleteDicomServer
+            _query["DeleteDicomServer"] = @$"
+                DELETE FROM rv_schema.dicom_server
                 WHERE id=@id
                 ";
         }

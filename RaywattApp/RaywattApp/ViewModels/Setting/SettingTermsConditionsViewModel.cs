@@ -71,7 +71,7 @@ namespace RaywattApp.ViewModels.Setting
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["classification"] = "Terms&Cond";
             IList<Configuration> tnCs = _sqlManager.SelectConfiguration(sqlParameters);
-            if(tnCs != null || tnCs.Count == 1)
+            if (tnCs != null || tnCs.Count == 1)
             {
                 TermsConditions.Value = tnCs[0].Value;
                 TermsConditions.Buffer = tnCs[0].Buffer;
@@ -85,7 +85,7 @@ namespace RaywattApp.ViewModels.Setting
 
         private bool Validate()
         {
-            if(string.IsNullOrEmpty(TermsConditions.Buffer))
+            if (string.IsNullOrEmpty(TermsConditions.Buffer))
             {
                 ValidateInstituteName = _l10n["Enter Institute Name"];
                 return false;
@@ -105,11 +105,12 @@ namespace RaywattApp.ViewModels.Setting
 
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["classification"] = "Terms&Cond";
+            sqlParameters["key"] = "AgreeYN";
             sqlParameters["value"] = TermsConditions.Value;
             sqlParameters["buffer"] = TermsConditions.Buffer;
 
             int res = _sqlManager.UpdateConfiguration(sqlParameters);
-            if(res != 1)
+            if (res != 1)
             {
                 _log.Error("Insert Error");
             }

@@ -135,6 +135,9 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
     case RayProperty::TestMode:
         octSystem.SetTestMode((bool) value);
         break;
+    case RayProperty::PullbackStartTime:
+        octSystem.SetPullbackStartTime(value);
+        break;
     default:
         return RayError::InvalidArgument;
     }
@@ -200,6 +203,8 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return octSystem.GetFieldOfView();
     case RayProperty::TestMode:
         return (double) octSystem.IsTestMode();
+    case RayProperty::PullbackStartTime:
+        return octSystem.GetPullbackStartTime();
     default:
         return (int)RayError::InvalidArgument;
     }

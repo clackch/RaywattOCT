@@ -20,7 +20,17 @@ public:
 		float highLevel;
 
 		double distPerPixel; // um per pixel (1024 x bscan)
-		
+    
+		int applyCompensation;
+		int applyGammaCorrection;
+		int intensityThreshold;
+		float exponentialFactor;
+		float brightnessControl;
+		float energyThreshold;
+		float GCAlpha;
+
+		int applySharpness;
+    
 		void Set(int nAScan, int nBScan)
 		{
 			this->nAScan = nAScan;
@@ -28,7 +38,7 @@ public:
 			this->nBufferSize = (this->nBScan * this->nAScan);
 			this->nFFTOrder = 1;
 			this->nFFTLength = 1 << this->nFFTOrder;
-			while (this->nFFTLength < this->nAScan) { // AScan º¸´Ù Å« 2^n Áß¿¡¼­ Á¦ÀÏ ÀÛÀº ¼ö
+			while (this->nFFTLength < this->nAScan) { // AScan ë³´ë‹¤ í° 2^n ì¤‘ì—ì„œ ì œì¼ ìž‘ì€ ìˆ˜
 				this->nFFTOrder++;
 				this->nFFTLength = 1 << this->nFFTOrder;
 			}

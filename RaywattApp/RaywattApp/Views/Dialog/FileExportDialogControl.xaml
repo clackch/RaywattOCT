@@ -77,7 +77,7 @@
                                         </Grid.RenderTransform>
                                     </Grid>
                                     <!-- Lumen Contour-->
-                                    <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" LumenStents="{Binding LumenStents}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}"  FrameNumber="{Binding MeasureAutoFrameNumber}" IsEditOn="False" IsDrawOn="{Binding FileExport.MeasureAuto}" Zoom="{Binding Zoom}" ScreenSize="{Binding CrossSectionImageSize}"/>
+                                    <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" LumenStents="{Binding LumenStents}" LumenSidebranches="{Binding LumenSidebranches}" IsDrawLumenSideBranch="{Binding IsDrawLumenSideBranch}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}"  FrameNumber="{Binding MeasureAutoFrameNumber}" IsEditOn="False" IsDrawOn="{Binding FileExport.MeasureAuto}" Zoom="{Binding Zoom}" ScreenSize="{Binding CrossSectionImageSize}"/>
                                     <!-- Measurement -->
                                     <annotation:DrawUtil Measurements="{Binding Measurements}" FrameNumber="{Binding MeasureManualFrameNumber}" Zoom="{Binding Zoom}" IsEditOn="False" IsDrawOn="{Binding FileExport.MeasureManual}" ScreenSize="{Binding CrossSectionImageSize}"/>
                                 </Grid>

@@ -158,8 +158,8 @@ xcopy "$(ProjectDir)*Protocol.h" "$(TargetDir)include\" /y /d</Command>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(ProjectDir)..\Utility\*.h" "$(TargetDir)include\" /y /d
-xcopy "$(ProjectDir)*Connection.h" "$(TargetDir)include\"
-xcopy "$(ProjectDir)*Controller.h" "$(TargetDir)include\"
+xcopy "$(ProjectDir)*Connection.h" "$(TargetDir)include\" /y /d
+xcopy "$(ProjectDir)*Controller.h" "$(TargetDir)include\" /y /d
 xcopy "$(ProjectDir)*Module.h" "$(TargetDir)include\" /y /d
 xcopy "$(ProjectDir)*Protocol.h" "$(TargetDir)include\" /y /d</Command>
     </PostBuildEvent>

@@ -265,7 +265,7 @@ namespace RaywattApp.ViewModels
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["prevStatus"] = GetListStatus();
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientNewPage) {  Parameter = parameter });
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientNewPage) { Parameter = parameter });         
         }
 
         private PrevStatus GetListStatus()

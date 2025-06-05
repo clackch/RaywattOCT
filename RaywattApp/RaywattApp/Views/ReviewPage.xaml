@@ -40,7 +40,7 @@
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [2D], Source={StaticResource L10N}}" IsChecked="True" IsEnabled="False"/>
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [3D], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.Review3dPage}" IsEnabled="{Binding ReviewStatus.IsNoPullback, Converter={StaticResource BoolToEnableReverseConverter}}"/>
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [Compare], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewComparePage}" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$002|$003}"/>
-                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [AI FFR], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrSettingPage}"/>
+                    
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                     <component:IconButton Style="{StaticResource IconButton}" Icon="editLumenContourSimple" Width="42" Height="42" Command="{Binding EditLumenContourCommand}"/>
@@ -173,7 +173,8 @@
                                 </Image.RenderTransform>
                             </Image>
                             <CoRegistration:DrawAngioPathUtil Grid.Column="0" Width="{Binding ElementName=currentAngioImage, Path=ActualWidth}" Height ="{Binding ElementName=currentAngioImage, Path=ActualHeight}"
-                                                              AngioTrackPoints ="{Binding AngioTrackPoints, Mode=TwoWay}" CurrentTrackPoint="{Binding CurrentTrackPoint, Mode=TwoWay}" CurrentAngioFrameNumber="{Binding CurrentAngioFrameNumber}"/>
+                                                              PullbackType = "{Binding PatientCase.PullbackType}" NumberOfFrames ="{Binding ReviewStatus.NumberOfFrames}" CoRegistrations ="{Binding CoRegistrations, Mode=TwoWay}" 
+                                                              CurrentAngioFrameNumber="{Binding CurrentAngioFrameNumber}" FrameNumber="{Binding FrameNumber}" CurrentCoRegistration ="{Binding CurrentCoRegistration}"/>
                             <!--Touch-->
                             <Grid Name="TouchAngio" Background="Transparent" IsManipulationEnabled="true">
                                 <i:Interaction.Triggers>
@@ -528,7 +529,7 @@
                         </RectangleGeometry>
                     </Grid.Clip>
                     <Grid>
-                        <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" LumenStents="{Binding LumenStents}" CurrentLumenStent="{Binding CurrentLumenStent, Mode=TwoWay}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" Zoom="{Binding ReviewStatus.Zoom}" FrameNumber="{Binding FrameNumber}" IsDrawOn="{Binding ReviewStatus.IsContourStentOn}" IsEditOn="False" InCommand="{Binding LumenContourCommand, Mode=TwoWay}">
+                        <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" LumenStents="{Binding LumenStents}" CurrentLumenStent="{Binding CurrentLumenStent, Mode=TwoWay}" LumenSidebranches="{Binding LumenSidebranches}" IsDrawLumenSideBranch="{Binding IsDrawLumenSideBranch}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" Zoom="{Binding ReviewStatus.Zoom}" FrameNumber="{Binding FrameNumber}" IsDrawOn="{Binding ReviewStatus.IsContourStentOn}" IsEditOn="False" InCommand="{Binding LumenContourCommand, Mode=TwoWay}">
                             <annotation:DrawLumenContourUtil.RenderTransform>
                                 <TransformGroup>
                                     <TranslateTransform X="{Binding ReviewStatus.Zoom.ZoomTranslateX, Converter={StaticResource CrossSectionTranslateReverseConverter}}" Y="{Binding ReviewStatus.Zoom.ZoomTranslateY, Converter={StaticResource CrossSectionTranslateReverseConverter}}"/>
@@ -809,17 +810,18 @@
                                 <Grid Grid.Row="1">
                                     <Grid Width="192" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                                         <Grid.RowDefinitions>
-                                            <RowDefinition Height="24"/>
+                                            <RowDefinition Height="16"/>
                                             <RowDefinition Height="26"/>
-                                            <RowDefinition Height="22"/>
+                                            <RowDefinition Height="30"/>
                                             <RowDefinition/>
                                         </Grid.RowDefinitions>
                                         <Grid Grid.Row="1">
                                             <Label Style="{DynamicResource ProcedureLabel}" Content="{Binding PatientCase.Procedure, Converter={StaticResource CodeConverter}, ConverterParameter='PROC'}" Tag="{Binding PatientCase.Procedure}" HorizontalAlignment="Left"/>
                                             <component:IconButton Style="{DynamicResource IconButton}" Icon="editSimple" Command="{Binding EditCaseCommand}" Content="{Binding [Edit], Source={StaticResource L10N}}" HorizontalAlignment="Right"/>
                                         </Grid>
+                                        <Label Grid.Row="2" Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding PatientCase.CreateDate, StringFormat=t, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" HorizontalAlignment="Left" Margin="0,5,0,0"/>
                                         <StackPanel Grid.Row="3">
-                                            <Label Content="{Binding Patient.Name}" Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
+                                            <Label Content="{Binding Patient.Name}" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
                                             <StackPanel Height="9"/>
                                             <!-- design guide : 12px -->
                                             <Separator Height="1" Background="{DynamicResource SeparatorBrush}"/>

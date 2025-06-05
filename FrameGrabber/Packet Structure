@@ -1,0 +1,42 @@
+>> Image Packet Header
+index 0: sof
+index 1: PacketType
+index 2: Height
+index 3: Height
+index 4: Width
+index 5: Width
+index 6: BitsPerPixel
+
+>> Image Packet Tail
+index n-2: CheckSum
+index n-1: eof
+
+
+>> Command Packet
+index 0: sof
+index 1: PacketType
+index 2: CommandType
+index 3: CheckSum
+index 4: eof
+
+
+>> Device Info Packet
+index 0: sof
+index 1: PacketType(Command)
+index 2: CommandType(DeviceInfo)
+index 3: Height
+index 4: Height
+index 5: Width
+index 6: Width
+index 7: BitsPerPixel
+index 8: CheckSum
+index 9: eof
+
+>> Chp File Packet Header
+index 0: sof
+index 1: PacketType(Command)
+index 2: CommandType(CHPFile)
+
+>> CHP File Packet Tail
+index n-2: CheckSum
+index n-1: eof

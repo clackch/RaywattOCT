@@ -107,6 +107,9 @@ namespace RaywattApp.ViewModels.Dialog
         private List<LumenSidebranch> _lumenSidebranches = new List<LumenSidebranch>();
 
         [ObservableProperty]
+        private bool _isDrawLumenSideBranch = false;
+
+        [ObservableProperty]
         private List<LumenStent> _lumenStents = new List<LumenStent>();
 
         [ObservableProperty]
@@ -202,6 +205,9 @@ namespace RaywattApp.ViewModels.Dialog
             Section = new Section();
             Section.Proximal.IsVisible = Visibility.Visible;
             Section.Distal.IsVisible = Visibility.Visible;
+
+            if (CommonUtil.IsTestMode(DeviceStatus.TestMode, "Sidebranch"))
+                IsDrawLumenSideBranch = true;
         }
 
         public double SetInitialize(PatientCase patientCase, List<Mat> crossSections, Mat lMode, FileExport fileExport)
@@ -329,8 +335,7 @@ namespace RaywattApp.ViewModels.Dialog
             CrossSectionClipRadius = CrossSectionImageSize / 2;
             CrossSectionClipCenter = new Point(CrossSectionClipRadius, CrossSectionClipRadius);
 
-            double sheathDiameter = RayGetProperty(Property.SheathDiameter);
-            SheathIndicator = CommonUtil.DrawSheathIndicator((int)CrossSectionImageSize, sheathDiameter);
+            SheathIndicator = CommonUtil.DrawSheathIndicator((int)CrossSectionImageSize, patientCase.SheathDiameter);
 
             return ImagePartWidth + TextPartWidth;
         }

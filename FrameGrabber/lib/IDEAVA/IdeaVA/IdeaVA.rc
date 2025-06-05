@@ -1,0 +1,351 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\IdeaVA.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION 3,5,235,0
+PRODUCTVERSION 3,5,235,0
+ FILEFLAGSMASK 0x1fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "FileDescription", "Idea Video Adjust DLL"
+            VALUE "FileVersion", "3.5.235"
+            VALUE "InternalName", "IdeaVA"
+            VALUE "LegalCopyright", "Copyright © Foresight Imaging, LLC"
+            VALUE "OriginalFilename", "IdeaVA.DLL"
+            VALUE "ProductName", "IDEA"
+            VALUE "ProductVersion", "3.5.235"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ICOLOR_VIDEO_ADJUSTMENTS DIALOG  0, 0, 216, 143
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Video Adjustments"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "",IDC_BRIGHTNESS_VAL,6,6,32,14,SS_SUNKEN | WS_BORDER
+    LTEXT           "Brightness",IDC_STATIC,6,21,39,10
+    CONTROL         "Slider1",IDC_BRIGHTNESS_CTL,"msctls_trackbar32",TBS_VERT | TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,14,32,29,59
+    LTEXT           "",IDC_CONTRAST_VAL,47,6,31,14,SS_SUNKEN | WS_BORDER
+    LTEXT           "Contrast",IDC_STATIC,49,21,30,10
+    CONTROL         "Slider2",IDC_CONTRAST_CTL,"msctls_trackbar32",TBS_VERT | TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,55,32,30,59
+    LTEXT           "",IDC_HUE_VAL,85,6,32,14,SS_SUNKEN | WS_BORDER
+    LTEXT           "Hue",IDC_STATIC,94,21,15,10
+    CONTROL         "Slider3",IDC_HUE_CTL,"msctls_trackbar32",TBS_VERT | TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,94,32,29,59
+    LTEXT           "",IDC_SATURATION_VAL,127,6,31,14,SS_SUNKEN | WS_BORDER
+    LTEXT           "Saturation",IDC_STATIC,126,21,33,10
+    CONTROL         "Slider4",IDC_SATURATION_CTL,"msctls_trackbar32",TBS_VERT | TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,135,32,30,59
+    CONTROL         "Spin1",IDC_SPIN_WIDTH,"msctls_updown32",UDS_ARROWKEYS | UDS_HORZ | WS_GROUP,8,96,20,10
+    LTEXT           "",IDC_WIDTH_VAL,32,94,31,14,SS_SUNKEN | WS_BORDER
+    LTEXT           "Dimension",IDC_DIMENSION_TXT,31,108,34,8
+    CONTROL         "Spin1",IDC_SPIN_HEIGHT,"msctls_updown32",UDS_ARROWKEYS | WS_GROUP,13,118,11,16
+    LTEXT           "",IDC_HEIGHT_VAL,32,119,31,14,SS_SUNKEN | WS_BORDER
+    CONTROL         "Spin1",IDC_SPIN_X_POSITION,"msctls_updown32",UDS_ARROWKEYS | UDS_HORZ | WS_GROUP,74,96,20,10
+    LTEXT           "",IDC_X_POSITION_VAL,97,94,31,14,SS_SUNKEN | WS_BORDER
+    LTEXT           "Position",IDC_POSITION_TXT,100,109,26,8
+    CONTROL         "Spin1",IDC_SPIN_Y_POSITION,"msctls_updown32",UDS_ARROWKEYS | WS_GROUP,78,118,11,16
+    LTEXT           "",IDC_Y_POSITION_VAL,97,119,31,14,SS_SUNKEN | WS_BORDER
+    PUSHBUTTON      "Filters...",ID_FILTERS,150,110,38,14,WS_GROUP
+    PUSHBUTTON      "Save",IDC_SAVE_SETTINGS,171,7,38,14
+    DEFPUSHBUTTON   "OK",IDOK,171,30,38,14
+    PUSHBUTTON      "Cancel",IDCANCEL,171,53,38,14
+END
+
+IDD_ICOLOR_FILTERS DIALOG  0, 0, 168, 258
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "I-Color Filters"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Automatic",IDC_ICOL_CHECK_AUTOLCOMB,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,15,21,47,10
+    CONTROL         "Manual",IDC_ICOL_CHECK_MANLCOMB,"Button",BS_AUTORADIOBUTTON,15,38,39,10
+    CONTROL         "Disabled",IDC_ICOL_CHECK_NOLCOMB,"Button",BS_AUTORADIOBUTTON,15,55,43,10
+    EDITTEXT        IDC_ICOL_EDIT_MANLCOMB,98,27,20,14,ES_AUTOHSCROLL | ES_READONLY | ES_NUMBER | WS_GROUP
+    CONTROL         "Spin1",IDC_ICOL_SPIN_MANLCOMB,"msctls_updown32",UDS_WRAP | UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,120,27,10,14
+    CONTROL         "Automatic",IDC_ICOL_CHECK_AUTOCCOMB,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,15,95,47,10
+    CONTROL         "Manual",IDC_ICOL_CHECK_MANCCOMB,"Button",BS_AUTORADIOBUTTON,15,112,39,10
+    CONTROL         "Disabled",IDC_ICOL_CHECK_NOCCOMB,"Button",BS_AUTORADIOBUTTON,15,129,43,10
+    EDITTEXT        IDC_ICOL_EDIT_MANCCOMB,98,107,20,14,ES_AUTOHSCROLL | ES_READONLY | ES_NUMBER | WS_GROUP
+    CONTROL         "Spin1",IDC_ICOL_SPIN_MANCCOMB,"msctls_updown32",UDS_WRAP | UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,120,107,9,14
+    COMBOBOX        IDC_ICOL_COMBO_LUMAPEAK,79,152,81,60,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    CONTROL         "Low Pass Filter",IDC_ICOL_CHECK_LOWPASS,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,16,172,63,10
+    CONTROL         "Luma Decimation",IDC_ICOL_CHECK_LUMADEC,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,16,188,71,10
+    CONTROL         "Notch Filter",IDC_ICOL_CHECK_NOTCHFIL,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,98,172,52,10
+    CONTROL         "Luma Pedestal",IDC_ICOL_CHECK_LUMAPED,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,98,188,63,10
+    PUSHBUTTON      "Normal S-Video",IDC_ICOL_BTN_DEF_SVIDNORM,11,210,70,16,WS_GROUP
+    PUSHBUTTON      "Hi-Res S-Video",IDC_ICOL_BTN_DEF_SVIDHIRES,11,231,70,16,WS_GROUP
+    PUSHBUTTON      "Normal Composite",IDC_ICOL_BTN_DEF_COMPNORM,87,210,70,16,WS_GROUP
+    PUSHBUTTON      "Hi-Res Composite",IDC_ICOL_BTN_DEF_COMPHIRES,87,231,70,16,WS_GROUP
+    GROUPBOX        "Luma Comb Filter",IDC_STATIC,7,6,153,68,WS_GROUP
+    GROUPBOX        "Chroma Comb Filter",IDC_STATIC,7,79,153,67,WS_GROUP
+    LTEXT           "Filter Coefficients Index",IDC_STATIC,76,13,74,8
+    LTEXT           "Filter Coefficients Index",IDC_STATIC,76,93,74,8
+    LTEXT           "Luma Peaking:",IDC_STATIC,26,154,48,8
+    CTEXT           "Index 7 disables the filter.",IDC_STATIC,75,127,76,18
+    LTEXT           "Indices 3 && 4 disable the filter with a 1 or 2 line luma delay.",IDC_STATIC,68,47,89,27
+    GROUPBOX        "Defaults",IDC_STATIC,7,200,154,51
+END
+
+IDD_IMONO_VIDEO_ADJUSTMENTS DIALOG  0, 0, 200, 143
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Video Adjustments"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "",IDC_BRIGHTNESS_VAL,6,6,32,14,SS_SUNKEN | WS_BORDER
+    LTEXT           "Brightness",IDC_STATIC,6,21,39,10
+    CONTROL         "Slider1",IDC_BRIGHTNESS_CTL,"msctls_trackbar32",TBS_VERT | TBS_BOTH | TBS_NOTICKS | WS_GROUP | WS_TABSTOP,15,29,29,59
+    LTEXT           "",IDC_CONTRAST_VAL,47,6,31,14,SS_SUNKEN | WS_BORDER
+    LTEXT           "Contrast",IDC_STATIC,49,21,30,10
+    CONTROL         "Slider2",IDC_CONTRAST_CTL,"msctls_trackbar32",TBS_VERT | TBS_BOTH | TBS_NOTICKS | WS_GROUP | WS_TABSTOP,55,29,30,59
+    CONTROL         "Spin1",IDC_SPIN_PHASE,"msctls_updown32",UDS_ARROWKEYS | UDS_HORZ | WS_GROUP,91,54,20,10
+    LTEXT           "",IDC_PHASE_VAL,115,52,31,14,SS_SUNKEN | WS_BORDER
+    LTEXT           "Phase",IDC_STATIC,119,69,21,8
+    PUSHBUTTON      "Save",IDC_SAVE_SETTINGS,154,7,38,14,WS_GROUP
+    DEFPUSHBUTTON   "OK",IDOK,154,30,38,14,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,154,53,38,14,WS_GROUP
+    CONTROL         "Spin1",IDC_SPIN_WIDTH,"msctls_updown32",UDS_ARROWKEYS | UDS_HORZ | WS_GROUP,8,94,20,10
+    LTEXT           "",IDC_WIDTH_VAL,32,92,31,14,SS_SUNKEN | WS_BORDER
+    LTEXT           "Dimension",IDC_DIMENSION_TXT,31,107,34,8
+    CONTROL         "Spin1",IDC_SPIN_HEIGHT,"msctls_updown32",UDS_ARROWKEYS | WS_GROUP,13,116,11,16
+    LTEXT           "",IDC_HEIGHT_VAL,32,117,31,14,SS_SUNKEN | WS_BORDER
+    CONTROL         "Spin1",IDC_SPIN_X_POSITION,"msctls_updown32",UDS_ARROWKEYS | UDS_HORZ | WS_GROUP,74,94,20,10
+    LTEXT           "",IDC_X_POSITION_VAL,97,92,31,14,SS_SUNKEN | WS_BORDER
+    LTEXT           "Position",IDC_POSITION_TXT,100,107,26,8
+    CONTROL         "Spin1",IDC_SPIN_Y_POSITION,"msctls_updown32",UDS_ARROWKEYS | WS_GROUP,78,116,11,16
+    LTEXT           "",IDC_Y_POSITION_VAL,97,117,31,14,SS_SUNKEN | WS_BORDER
+END
+
+IDD_IRGB_VIDEO_ADJUSTMENTS DIALOGEX 0, 0, 306, 165
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Video Adjustments"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    LTEXT           "",IDC_BRIGHTNESS_VAL,6,6,32,14,SS_SUNKEN | WS_BORDER
+    LTEXT           "Brightness",IDC_STATIC,6,24,39,10
+    CONTROL         "Slider1",IDC_BRIGHTNESS_CTL,"msctls_trackbar32",TBS_VERT | TBS_BOTH | TBS_NOTICKS | WS_GROUP | WS_TABSTOP,15,42,19,59
+    LTEXT           "",IDC_CONTRAST_VAL,47,6,31,14,SS_SUNKEN | WS_BORDER
+    LTEXT           "Contrast",IDC_STATIC,49,24,30,10
+    CONTROL         "Slider2",IDC_CONTRAST_CTL,"msctls_trackbar32",TBS_VERT | TBS_BOTH | TBS_NOTICKS | WS_GROUP | WS_TABSTOP,55,42,21,59
+    CONTROL         "Spin1",IDC_SPIN_PHASE,"msctls_updown32",UDS_ARROWKEYS | UDS_HORZ | WS_GROUP,138,145,20,10
+    LTEXT           "",IDC_PHASE_VAL,161,144,31,14,SS_SUNKEN | WS_BORDER
+    LTEXT           "Phase",IDC_STATIC,150,134,21,8
+    PUSHBUTTON      "Save",IDC_SAVE_SETTINGS,261,20,38,14,WS_GROUP
+    DEFPUSHBUTTON   "OK",IDOK,261,58,38,14
+    PUSHBUTTON      "Cancel",IDCANCEL,261,80,38,14
+    CONTROL         "Spin1",IDC_SPIN_WIDTH,"msctls_updown32",UDS_ARROWKEYS | UDS_HORZ | WS_GROUP,8,120,20,10
+    LTEXT           "",IDC_WIDTH_VAL,32,118,31,14,SS_SUNKEN | WS_BORDER
+    LTEXT           "Dimension",IDC_DIMENSION_TXT,31,132,34,8
+    CONTROL         "Spin1",IDC_SPIN_HEIGHT,"msctls_updown32",UDS_ARROWKEYS | WS_GROUP,13,142,11,16
+    LTEXT           "",IDC_HEIGHT_VAL,32,144,31,14,SS_SUNKEN | WS_BORDER
+    CONTROL         "Spin1",IDC_SPIN_X_POSITION,"msctls_updown32",UDS_ARROWKEYS | UDS_HORZ | WS_GROUP,74,120,20,10
+    LTEXT           "",IDC_X_POSITION_VAL,97,118,31,14,SS_SUNKEN | WS_BORDER
+    LTEXT           "Position",IDC_POSITION_TXT,100,133,26,8
+    CONTROL         "Spin1",IDC_SPIN_Y_POSITION,"msctls_updown32",UDS_ARROWKEYS | WS_GROUP,78,142,11,16
+    LTEXT           "",IDC_Y_POSITION_VAL,97,144,31,14,SS_SUNKEN | WS_BORDER
+    PUSHBUTTON      "White Balance",IDC_WHITEBALANCE,223,126,57,14,WS_GROUP
+    LTEXT           "Fine Phase",IDC_STATIC,150,108,39,8
+    LTEXT           "",IDC_FINE_PHASE_VAL,161,118,31,14,SS_SUNKEN | WS_BORDER
+    CONTROL         "Spin1",IDC_SPIN_PHASE_FINE,"msctls_updown32",UDS_ARROWKEYS | UDS_HORZ | WS_GROUP,138,120,20,10
+    CONTROL         "Slider4",IDC_SATURATION_CTL,"msctls_trackbar32",TBS_VERT | TBS_BOTH | TBS_NOTICKS | WS_GROUP | WS_TABSTOP,131,42,19,59
+    CONTROL         "",IDC_CLAMP_PLACE_CTL,"msctls_trackbar32",TBS_VERT | TBS_BOTH | TBS_NOTICKS | WS_GROUP | WS_TABSTOP,172,42,16,59
+    LTEXT           "Saturation",IDC_STATIC_SAT,126,24,38,10
+    LTEXT           "Clamp Placement",IDC_CLAMP_PLACE,170,24,38,17
+    CONTROL         "",IDC_CLAMP_DUR_CTL,"msctls_trackbar32",TBS_VERT | TBS_BOTH | TBS_NOTICKS | WS_GROUP | WS_TABSTOP,213,42,16,59
+    LTEXT           "Clamp Duration",IDC_CLAMP_DURATION,211,24,38,17
+    LTEXT           "0",IDC_SATURATION_VAL,129,6,32,14,WS_BORDER
+    LTEXT           "0",IDC_CP_VAL,170,6,32,14,WS_BORDER
+    LTEXT           "0",IDC_CD_VAL,212,6,32,14,WS_BORDER
+    CONTROL         "Slider3",IDC_HUE_CTL,"msctls_trackbar32",TBS_VERT | TBS_BOTH | TBS_NOTICKS | WS_GROUP | WS_TABSTOP,90,42,19,59
+    LTEXT           "Hue",IDC_STATIC_HUE,85,24,38,10
+    LTEXT           "0",IDC_HUE_VAL,88,6,32,14,WS_BORDER
+END
+
+IDD_WHITE_BALANCE DIALOG  0, 0, 147, 66
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "White Balance Progress:",IDC_WBAL_LABEL,34,17,79,8
+    CONTROL         "Progress1",IDC_WHITEBAL_PROGRESS,"msctls_progress32",WS_BORDER | WS_GROUP,7,41,133,14
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ICOLOR_VIDEO_ADJUSTMENTS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 209
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 136
+    END
+
+    IDD_ICOLOR_FILTERS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 161
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 251
+    END
+
+    IDD_IMONO_VIDEO_ADJUSTMENTS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 192
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 136
+    END
+
+    IDD_IRGB_VIDEO_ADJUSTMENTS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 299
+        TOPMARGIN, 6
+        BOTTOMMARGIN, 158
+    END
+
+    IDD_WHITE_BALANCE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 140
+        TOPMARGIN, 9
+        BOTTOMMARGIN, 59
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_ICOLOR_FILTERS DLGINIT
+BEGIN
+    IDC_ICOL_COMBO_LUMAPEAK, 0x403, 18, 0
+0x654c, 0x7373, 0x7420, 0x6168, 0x206e, 0x6f6e, 0x696d, 0x616e, 0x006c, 
+
+    IDC_ICOL_COMBO_LUMAPEAK, 0x403, 8, 0
+0x6f4e, 0x696d, 0x616e, 0x006c, 
+    IDC_ICOL_COMBO_LUMAPEAK, 0x403, 10, 0
+0x6e49, 0x7263, 0x6165, 0x6573, 0x0064, 
+    IDC_ICOL_COMBO_LUMAPEAK, 0x403, 8, 0
+0x614d, 0x6978, 0x756d, 0x006d, 
+    0
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "res\IdeaVA.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

@@ -491,6 +491,53 @@ namespace RaywattApp.Services
         }
 
         /**
+         * Dicom Server
+         */
+        public IList<DicomServer> SelectDicomServer(Dictionary<string, Object> sqlParameters = null)
+        {
+            _log.Debug("SelectDicomServer");
+
+            string commandText;
+
+            if (sqlParameters == null)
+            {
+                commandText = SqlQuery.GetQuery("SelectDicomServer");
+            }
+            else
+            {
+                commandText = SqlQuery.GetQuery("SelectDicomServerByType");
+            }                
+
+            return _databaseService.GetDatas<DicomServer>(commandText, sqlParameters);
+        }
+
+        public int InsertDicomServer(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("InsertDicomServer");
+
+            string commandText = SqlQuery.GetQuery("InsertDicomServer");
+
+            return _databaseService.InsertData(commandText, sqlParameters);
+        }
+
+        public int UpdateDicomServer(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpdateDicomServer");
+
+            string commandText = SqlQuery.GetQuery("UpdateDicomServer");
+
+            return _databaseService.UpdateData(commandText, sqlParameters);
+        }
+
+        public int DeleteDicomServer(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("DeleteDicomServer");
+
+            string commandText = SqlQuery.GetQuery("DeleteDicomServer");
+
+            return _databaseService.DeleteData(commandText, sqlParameters);
+        }
+        /**
          * Extra
          */
         private string getAdditionalCondition(Dictionary<string, Object> sqlAdditionalCondition)

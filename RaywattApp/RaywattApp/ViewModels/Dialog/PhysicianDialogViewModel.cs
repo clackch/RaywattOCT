@@ -52,11 +52,6 @@ namespace RaywattApp.ViewModels.Dialog
             Search();
         }
 
-        private void SelectedPhysician_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
         public override void SetParameter(object parameter)
         {
             Dictionary<string, Object> data = (Dictionary<string, Object>)parameter;

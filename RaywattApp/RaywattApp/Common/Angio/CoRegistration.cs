@@ -7,15 +7,19 @@ namespace RaywattApp.Common.Angio
     public partial class CoRegistration : ObservableObject
     {
         [ObservableProperty]
-        private List<Point> _trackPoint;
+        private List<Point> _trackPoints;
 
         [ObservableProperty]
         private List<List<Point>> _line;
 
+        [ObservableProperty]
+        private Point _markerPoint;
+
         public CoRegistration()
         {
             Line = new List<List<Point>>();
-            TrackPoint = new List<Point>();
+            TrackPoints = new List<Point>();
+            MarkerPoint = new Point();
         }
     }
 }

@@ -18,6 +18,8 @@ namespace RaywattApp.Common.Bases
         public const string PatientDetailPage = "Views/PatientDetailPage.xaml";
         public const string PatientNewPage = "Views/PatientNewPage.xaml";
         public const string PatientEditPage = "Views/PatientEditPage.xaml";
+        public const string PatientNewDicomPage = "Views/PatientNewDicomPage.xaml";
+        public const string PatientNewDicomPacsPage = "Views/PatientNewDicomPacsPage.xaml";
         //Physician
         public const string PhysicianListPage = "Views/PhysicianListPage.xaml";
         public const string PhysicianEditPage = "Views/PhysicianEditPage.xaml";
@@ -53,6 +55,7 @@ namespace RaywattApp.Common.Bases
         public const string SettingLogPage = "Views/Setting/SettingLogPage.xaml";
         public const string SettingTermsConditionsPage = "Views/Setting/SettingTermsConditionsPage.xaml";
         public const string SettingMaintenancePage = "Views/Setting/SettingMaintenancePage.xaml";
+        public const string SettingDicomPage = "Views/Setting/SettingDicomPage.xaml";
 
         //Resolution
         public const double ApplicationWidth = 1280;
@@ -87,16 +90,24 @@ namespace RaywattApp.Common.Bases
         public const double TermsConditionsDialogHeight = 660;
         public const double PowerOffDialogWidth = 472;
         public const double PowerOffDialogHeight = 269;
-        public const double CathRoomDialogHeight = 472;
         public const double CathRoomDialogWidth = 472;
-        public const double PhysicianDialogHeight = 472;
-        public const double PhysicianDialogWidth = 659;
+        public const double CathRoomDialogHeight = 472;
+        public const double PhysicianDialogWidth = 472;
+        public const double PhysicianDialogHeight = 659;
+        public const double LocalHostDialogWidth = 860;
+        public const double LocalHostDialogHeight = 614;
+        public const double DicomServerDialogWidth = 860;
+        public const double DicomServerDialogHeight = 492;
+        public const double NewPatientDialogWidth = 360;
+        public const double NewPatientDialogHeight = 269;
+        public const double DicomPacsDialogWidth = 860;
+        public const double DicomPacsDialogHeight = 606;
 
         //Max Length
-        public const int MaxPatientId = 9;
+        public const int MaxPatientId = 16;
         public const int MaxLastname = 20;
         public const int MaxFirstname = 20;
-        public const int MaxPatientCaseAccessionNumber = 6;
+        public const int MaxPatientCaseAccessionNumber = 16;
         public const int MaxPatientCaseComment = 200;
         public const int MaxVolumeLabel = 15;
 
@@ -139,6 +150,7 @@ namespace RaywattApp.Common.Bases
         public const string ExportStatusSaveMultipleFiles = "Save Multiple Image Files";
         public const string ExportStatusSaveFile = "Save File";
         public const string ExportStatusCompleted = "Completed";
+        public const string ExportStatusTransferDicom = "Transfer DICOM File(s)";
 
         //Export(Standard) Pullback - AVI, TIFF
         public const string ExportPullbackAVI = "MP4";
@@ -251,6 +263,9 @@ namespace RaywattApp.Common.Bases
 
         //ML Model Folder
         public const string MlModelFolderPath = SystemRootPath + "\\Raywatt\\system\\3rdparty\\model";
+
+        //DICOM Temp Folder
+        public const string DicomTempFolderPath = ".\\dicomTempFolder";
 
         //Storage Limit (GB)
         public const int StorageLimit = 10;
@@ -464,16 +479,26 @@ namespace RaywattApp.Common.Bases
         public const int ServerPort = 8888;
         public const byte SOF = 0x3A;
         public const byte EOF = 0xA3;
-        public const int ImageHeaderSize = 7;
+        public const int ImageHeaderSize = 15;
         public const int ImageTailSize = 2;
         public const int CommandPacketSize = 5;
         public const int DeviceInfoPacketSize = 10;
 
         //AngioCoRegistration
-        public const double ellipsePathWidth = 2;
-        public const double ellipsePathHeight = 2;
+        public const double ellipsePathWidth = 4;
+        public const double ellipsePathHeight = 4;
         public const double ellipseTrackWidth = 6;
         public const double ellipseTrackHeight = 6;
+        public const double ellipseOuterTrackWidth = 16;
+        public const double ellipseOuterTrackHeight = 16;
         public const double coregistrationCursorSize = 113;
+        public const string objectSeedPath = "..\\bin\\Data\\Object.png";
+        public const string backgroundSeedPath = "..\\bin\\Data\\Background.png";
+        public const double pathInterval = 7.6;
+        public const int pathIntervalPowerHISH = 1;
+        public const int pathIntervalPowerHILO = 2;
+        public const int pathIntervalPowerSTSH = 3;
+        public const int pathIntervalPowerSTLO = 5;
+        public const int pathIntervalPowerFAST = 12;
     }
 }

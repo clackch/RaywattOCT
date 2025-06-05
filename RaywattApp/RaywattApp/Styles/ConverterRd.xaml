@@ -8,6 +8,12 @@
     <!--  true이면 안보이고, false이면 보임  -->
     <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityReverseConverter" FalseValue="Visible" TrueValue="Collapsed" />
 
+    <!--  true이면 보이고, false이면 안보임  -->
+    <converters:BoolToVisibilityMultiConverter x:Key="BoolToVisibilityMultiConverter" />
+
+    <!--  true이면 안보이고, false이면 보임  -->
+    <converters:BoolToVisibilityMultiConverter x:Key="BoolToVisibilityMultReverseConverter" FalseValue="Visible" TrueValue="Collapsed" OCTValue="Collapsed"/>
+
     <!--  Bool To Enable Converter  -->
     <converters:BoolToEnableConverter x:Key="BoolToEnableConverter" />
 

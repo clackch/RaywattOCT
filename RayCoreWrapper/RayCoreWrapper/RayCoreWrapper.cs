@@ -52,7 +52,8 @@ namespace RaywattOCT
             PullbackSpeed,
             SheathDiameter,
             TestMode,
-            ZOffset
+            ZOffset,
+            PullbackStartTime
         }
 
         public enum RayCallbackRequest : int
