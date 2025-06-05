@@ -28,6 +28,8 @@ public:
 		float brightnessControl;
 		float energyThreshold;
 		float GCAlpha;
+
+		int applySharpness;
     
 		void Set(int nAScan, int nBScan)
 		{

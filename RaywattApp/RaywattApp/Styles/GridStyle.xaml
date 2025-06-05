@@ -93,6 +93,15 @@
         <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource GrayscaleGray7Brush}"/>
     </Style>
 
+    <Style TargetType="DataGrid" x:Key="DataGridDialogSmall" BasedOn="{StaticResource DataGridBase}">
+        <Style.Resources>
+            <SolidColorBrush x:Key="GridBackground" Color="{DynamicResource GrayscaleGray8}" />
+        </Style.Resources>
+        <Setter Property="TextBlock.FontSize" Value="12"/>
+        <Setter Property="RowHeight" Value="32"/>
+        <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource GrayscaleGray7Brush}"/>
+    </Style>
+
     <Style TargetType="DataGrid" x:Key="DataGridSelectPreCase" BasedOn="{StaticResource DataGridDialog}">
         <Style.Resources>
             <CornerRadius x:Key="CornerRadius" TopLeft="4" TopRight="4" BottomLeft="4" BottomRight="4"/>
@@ -143,6 +152,18 @@
 
     <Style TargetType="DataGridColumnHeader" x:Key="DataGridColumnHeaderDialogLeft" BasedOn="{StaticResource DataGridColumnHeaderDialog}">
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
+    </Style>
+
+    <Style TargetType="DataGridColumnHeader" x:Key="DataGridColumnHeaderDialogLeftSmall" BasedOn="{StaticResource DataGridColumnHeaderDialog}">
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="TextBlock.FontSize" Value="12"/>
+    </Style>
+
+    <Style TargetType="DataGridColumnHeader" x:Key="DataGridColumnHeaderDialogSmall" BasedOn="{StaticResource DataGridColumnHeaderDialog}">
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="TextBlock.FontSize" Value="12"/>
     </Style>
 
     <Style TargetType="DataGridColumnHeader" x:Key="DataGridColumnHeaderSelectPreCase">

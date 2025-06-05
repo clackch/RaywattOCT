@@ -30,6 +30,8 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private Zoom _zoom = new Zoom();
 
+        private bool isMoveLiveView = false;
+
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
         private ICommand _cmdBack;
@@ -71,7 +73,7 @@ namespace RaywattApp.ViewModels
                 this.PrevStatus = (PrevStatus)data["prevStatus"];
                 PatientCase = (PatientCase)data["patientCase"];
 
-                Zoom.SetFieldOfView(Constants.DefaultFoV / 5);
+                Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
 
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
@@ -86,12 +88,16 @@ namespace RaywattApp.ViewModels
 
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
-        }
 
+            if(!this.isMoveLiveView)
+                RayStopLiveView();
+        }
 
         private void Back()
         {
             _log.Debug("Back");
+
+            this.isMoveLiveView = true;
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = this.Patient;

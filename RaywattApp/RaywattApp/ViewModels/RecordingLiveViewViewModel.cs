@@ -33,7 +33,9 @@ namespace RaywattApp.ViewModels
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
-        private bool isStartRecording;
+        private bool isStartRecording = false;
+
+        private bool isMoveCalibration = false;
 
         [ObservableProperty]
         private Patient _patient;
@@ -132,8 +134,6 @@ namespace RaywattApp.ViewModels
 
             _angioManager = angioManager;
 
-            isStartRecording = false;
-
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["classification"] = "PBTY";
             pullbackTypes = _sqlManager.SelectCode(sqlParameters);
@@ -173,8 +173,10 @@ namespace RaywattApp.ViewModels
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
                 timerUpdateImage.Start();
-                
+
+                _log.Debug($"Before DeviceStatus.IsLiveView = (RayGetProperty(Property.MotorOnOff) != 0) :{DeviceStatus.IsLiveView}");
                 DeviceStatus.IsLiveView = (RayGetProperty(Property.MotorOnOff) != 0);
+                _log.Debug($"After DeviceStatus.IsLiveView = (RayGetProperty(Property.MotorOnOff) != 0) :{DeviceStatus.IsLiveView}");
 
                 Code pullback = pullbackTypes.FirstOrDefault(x => x.Key == PatientCase.PullbackType);
                 if (pullback != null)
@@ -192,10 +194,12 @@ namespace RaywattApp.ViewModels
                     _angioManager.SelectCathRoom();
                 }
             }
-            
+
+
             if (ViewModelBase._deviceStatus.IsAngioInitialized && !_angioManager.ReadyToRecv)
             {
                 _angioManager.SendCommandPacket(CommandType.FGStarted);
+                _angioManager.ToggleLive(true);
             }
             _angioManager.ReadyToRecv = true;
             _angioManager.ImgAngio = _angioManager.ShowNoSignal();
@@ -209,21 +213,21 @@ namespace RaywattApp.ViewModels
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
 
-            if (!isStartRecording && _angioManager.ReadyToRecv && DeviceStatus.IsAngioConnected)
+            if (!this.isStartRecording && _angioManager.ReadyToRecv && DeviceStatus.IsAngioConnected)
             {
                 _angioManager.SendCommandPacket(CommandType.FGStopped);
                 _angioManager.ReadyToRecv = false;
+                _angioManager.ToggleLive(false);
             }
+
+            if(!this.isStartRecording && !this.isMoveCalibration)
+                RayStopLiveView();
         }
 
         private void Back()
         {
             _log.Debug("Back");
             
-            _angioManager.SendCommandPacket(CommandType.FGStopped);
-            _angioManager.ReadyToRecv = false;
-
-            RayStopLiveView();
             leaveToPage(Constants.RecordingPresetPage);
         }
 
@@ -245,6 +249,8 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Calibration");
 
+            this.isMoveCalibration = true;
+
             DeviceStatus.IsLiveView = true;
             ChangeViewMode();
 
@@ -255,7 +261,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("StartRecording");
 
-            isStartRecording = true;
+            this.isStartRecording = true;
             
             if (!DeviceStatus.IsLiveView)
             {

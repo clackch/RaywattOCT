@@ -134,8 +134,8 @@
                                 </Grid.RowDefinitions>
                                 <Label Grid.Row="0" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Flush Media], Source={StaticResource L10N}}"/>
                                 <Label Grid.Row="0" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FlushMedia, Converter={StaticResource CodeConverter}, ConverterParameter='FLMD'}"/>
-                                <Label Grid.Row="0" Grid.Column="2" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Trigger], Source={StaticResource L10N}}"/>
-                                <Label Grid.Row="0" Grid.Column="3" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.PullbackTrigger, Converter={StaticResource CodeConverter}, ConverterParameter='PBTG'}"/>
+                                <!--<Label Grid.Row="0" Grid.Column="2" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Trigger], Source={StaticResource L10N}}"/>-->
+                                <!--<Label Grid.Row="0" Grid.Column="3" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.PullbackTrigger, Converter={StaticResource CodeConverter}, ConverterParameter='PBTG'}"/>-->
                                 <Label Grid.Row="1" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Type], Source={StaticResource L10N}}"/>
                                 <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3">
                                     <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.PullbackType, Converter={StaticResource CodeConverter}, ConverterParameter='PBTY'}"/>
@@ -210,7 +210,7 @@
                             <Border Grid.Row="5" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
                                 <Grid>
                                     
-                                    <Grid Visibility="{Binding DeviceStatus.IsAngioInitialized, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <Grid>
                                         <Grid Width="{x:Static const:Constants.SmallCrossSectionSize}" Height="{x:Static const:Constants.SmallCrossSectionSize}" Visibility="{Binding IsOctExpanded, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                                             <Grid.Clip>
                                                 <EllipseGeometry Center="156,156" RadiusX="156" RadiusY="156"/>

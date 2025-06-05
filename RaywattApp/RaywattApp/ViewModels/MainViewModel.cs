@@ -634,7 +634,7 @@ namespace RaywattApp.ViewModels
                 case RayWorkItem.Recording:
                     if (DeviceStatus.IsAngioConnected)
                     {
-                        _angioManager.StopSaveAngioThread();
+                        _angioManager.StopGettingAngioImageThread();
                     }
                     break;
                 case RayWorkItem.Pullback:

@@ -92,14 +92,14 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
 
-                Zoom.SetFieldOfView(Constants.DefaultFoV / 5);
+                Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
 
                 SetCrossSectionBackground(RaySession.Review, Constants.CardBackgroundColor);
 
                 GetImageInfo(RaySession.Review);
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
 
-                DrawSheathIndicator();
+                DrawSheathIndicator(PatientCase.SheathDiameter);
             }
         }
 

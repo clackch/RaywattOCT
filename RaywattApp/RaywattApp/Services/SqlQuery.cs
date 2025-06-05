@@ -116,14 +116,14 @@ namespace RaywattApp.Services
                 GROUP BY key
                 ";
 
-            //SelectPatientCaseListByDate - create_data 기준
+            //SelectPatientCaseListByDate - create_data 기준  Radius
             _query["SelectPatientCaseListByDate"] = @$"
                 SELECT id, patient_id, rv_schema.fn_patient(patient_id) patient_name, physician_name
                 , accession_number, comment
                 , vessel, location, procedure
                 , num_of_frames, image, image_resolution, z_offset, field_of_view
                 , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
-                , flush_media, pullback_trigger, colormap
+                , flush_media, pullback_trigger, colormap, guidewire_radius
                 , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
                 , brightness, contrast, sheath_diameter, section_proximal, section_distal
                 , create_date, update_date
@@ -139,7 +139,7 @@ namespace RaywattApp.Services
                 , vessel, location, procedure
                 , num_of_frames, image, image_resolution, z_offset, field_of_view
                 , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
-                , flush_media, pullback_trigger, colormap
+                , flush_media, pullback_trigger, colormap, guidewire_radius
                 , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
                 , brightness, contrast, sheath_diameter, section_proximal, section_distal
                 , create_date, update_date
@@ -153,7 +153,7 @@ namespace RaywattApp.Services
                 , rv_schema.fn_patient(patient_id) patient_name
                 , rv_schema.fn_patient_gender(patient_id) gender, rv_schema.fn_patient_birth(patient_id) birthdate
                 , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
-                , flush_media, pullback_trigger, colormap
+                , flush_media, pullback_trigger, colormap, guidewire_radius
                 , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
                 , brightness, contrast, sheath_diameter, section_proximal, section_distal
                 , T1.create_date, T1.update_date
@@ -249,6 +249,21 @@ namespace RaywattApp.Services
                 FROM rv_schema.patient_case_annotation
                 WHERE id = @id
                 ";
+
+            //SelectDicomServer
+            _query["SelectDicomServer"] = @$"
+                SELECT id, ae_title, hostname, specify_ip_address, ip_address, port, tls_yn, server_type, comment, ca_file_path, create_date, update_date
+                FROM rv_schema.dicom_server
+                ORDER BY ae_title
+                ";
+
+            //SelectDicomServerByType
+            _query["SelectDicomServerByType"] = @$"
+                SELECT id, ae_title, hostname, specify_ip_address, ip_address, port, tls_yn, server_type, comment, ca_file_path, create_date, update_date
+                FROM rv_schema.dicom_server
+                WHERE server_type = @server_type
+                ORDER BY ae_title
+                ";
         }
 
         private static void SetInsertQuery()
@@ -272,14 +287,14 @@ namespace RaywattApp.Services
                 INSERT INTO rv_schema.patient_case(id, patient_id, physician_name, accession_number
                 , comment, vessel, location, procedure, num_of_frames, image, image_resolution, z_offset, field_of_view
                 , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
-                , flush_media, pullback_trigger, colormap
+                , flush_media, pullback_trigger, colormap, guidewire_radius
                 , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
                 , brightness, contrast, sheath_diameter, section_proximal, section_distal
                 , create_date, update_date)
                 VALUES (@id, @patient_id, @physician_name, @accession_number
                 , @comment, @vessel, @location, @procedure, @num_of_frames, @image, @image_resolution, @z_offset, @field_of_view
                 , @pullback_type, @pullback_length, @angio_yn, @angio_co_registration, @indicator_degree
-                , @flush_media, @pullback_trigger, @colormap
+                , @flush_media, @pullback_trigger, @colormap, @guidewire_radius
                 , @calcium_threshold, @expansion_calculation, @expansion_threshold, @apposition_threshold
                 , @brightness, @contrast, @sheath_diameter, @section_proximal, @section_distal
                 , now(), now())
@@ -294,6 +309,15 @@ namespace RaywattApp.Services
 	            VALUES (@lastname, @firstname
 	            , @flush_media, @pullback_trigger, @pullback_type, @colormap
 	            , @calcium_threshold, @expansion_threshold, @apposition_threshold
+	            , now(), now())
+                ";
+
+            //InsertDicomServer
+            _query["InsertDicomServer"] = @$"
+                INSERT INTO rv_schema.dicom_server(ae_title, hostname, specify_ip_address
+                , ip_address, port, tls_yn, server_type, comment, ca_file_path, create_date, update_date)
+	            VALUES (@ae_title, @hostname, @specify_ip_address
+                , @ip_address, @port, @tls_yn, @server_type, @comment, @ca_file_path
 	            , now(), now())
                 ";
         }
@@ -313,7 +337,7 @@ namespace RaywattApp.Services
             _query["UpdateConfiguration"] = @$"
                 UPDATE rv_schema.configuration
                 SET value = @value, buffer = @buffer
-                WHERE classification = @classification
+                WHERE classification = @classification and key = @key
                 ";
 
             //UpdatePatient
@@ -335,7 +359,7 @@ namespace RaywattApp.Services
                 UPDATE rv_schema.patient_case
                 SET physician_name=@physician_name, accession_number=@accession_number
                 , comment=@comment, vessel=@vessel, location=@location, procedure=@procedure
-                , indicator_degree=@indicator_degree
+                , indicator_degree=@indicator_degree, guidewire_radius=@guidewire_radius
                 , colormap=@colormap, z_offset=@z_offset, field_of_view=@field_of_view
                 , calcium_threshold=@calcium_threshold, expansion_calculation=@expansion_calculation
                 , expansion_threshold=@expansion_threshold, apposition_threshold=@apposition_threshold
@@ -381,6 +405,14 @@ namespace RaywattApp.Services
                 SET angio_co_registration=@angio_co_registration
                 WHERE id=@id
                 ";
+
+            //UpdateDicomServer
+            _query["UpdateDicomServer"] = @$"
+                UPDATE rv_schema.dicom_server
+                SET ae_title=@ae_title, hostname=@hostname, specify_ip_address=@specify_ip_address
+                , ip_address=@ip_address, port=@port, tls_yn=@tls_yn, server_type=@server_type, comment=@comment, ca_file_path=@ca_file_path, update_date=now()
+                WHERE id=@id
+                ";
         }
 
         private static void SetDeleteQuery()
@@ -404,6 +436,12 @@ namespace RaywattApp.Services
                 DELETE FROM rv_schema.physician
                 WHERE id=@id
                 ";
+
+            //DeleteDicomServer
+            _query["DeleteDicomServer"] = @$"
+                DELETE FROM rv_schema.dicom_server
+                WHERE id=@id
+                ";
         }
 
         private static void SetUpsertQuery()
@@ -423,12 +461,12 @@ namespace RaywattApp.Services
             _query["UpsertPatientCase"] = @$"
                 INSERT INTO rv_schema.patient_case(id, patient_id, physician_name, accession_number, comment, vessel, location, procedure
                 , num_of_frames, image, image_resolution, z_offset, field_of_view, pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
-                , flush_media, pullback_trigger, colormap
+                , flush_media, pullback_trigger, colormap, guidewire_radius
                 , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
                 , brightness, contrast, sheath_diameter, section_proximal, section_distal, create_date, update_date)
                 VALUES (@id, @patient_id, @physician_name, @accession_number, @comment, @vessel, @location, @procedure
                 , @num_of_frames, @image, @image_resolution, @z_offset, @field_of_view, @pullback_type, @pullback_length, @angio_yn, @angio_co_registration, @indicator_degree
-                , @flush_media, @pullback_trigger, @colormap
+                , @flush_media, @pullback_trigger, @colormap, @guidewire_radius
                 , @calcium_threshold, @expansion_calculation, @expansion_threshold, @apposition_threshold
                 , @brightness, @contrast, @sheath_diameter, @section_proximal, @section_distal, @create_date, @update_date)
                 ON CONFLICT (id)
@@ -436,7 +474,7 @@ namespace RaywattApp.Services
                 SET patient_id=@patient_id, physician_name=@physician_name, accession_number=@accession_number, comment=@comment
                 , vessel=@vessel, location=@location, procedure=@procedure, num_of_frames=@num_of_frames, image=@image, image_resolution=@image_resolution, z_offset=@z_offset, field_of_view=@field_of_view
                 , pullback_type=@pullback_type, pullback_length=@pullback_length, angio_yn=@angio_yn, angio_co_registration=@angio_co_registration
-                , indicator_degree=@indicator_degree
+                , indicator_degree=@indicator_degree, guidewire_radius=@guidewire_radius
                 , flush_media=@flush_media, pullback_trigger=@pullback_trigger, colormap=@colormap
                 , calcium_threshold=@calcium_threshold, expansion_calculation=@expansion_calculation, expansion_threshold=@expansion_threshold
                 , apposition_threshold=@apposition_threshold, brightness=@brightness, contrast=@contrast, sheath_diameter=@sheath_diameter

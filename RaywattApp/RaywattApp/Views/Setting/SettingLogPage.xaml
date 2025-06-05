@@ -38,10 +38,10 @@
             </StackPanel>
         </Grid>
         
-        <DataGrid Grid.Row="1" x:Name="logFileList" ItemsSource="{Binding LogFileList}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialogLeft}">
+        <DataGrid Grid.Row="1" x:Name="logFileList" ItemsSource="{Binding LogFileList}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}">
             <DataGrid.Columns>
-                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipLeft}" Width="3*" Binding="{Binding Name}" Header="{Binding [Name], Source={StaticResource L10N}}" />
-                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipLeft}" Width="*" Binding="{Binding DisplaySize}" Header="{Binding [Size], Source={StaticResource L10N}}" />
+                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="2*" Binding="{Binding Name}" Header="{Binding [Name], Source={StaticResource L10N}}" />
+                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding DisplaySize}" Header="{Binding [Size], Source={StaticResource L10N}}" />
             </DataGrid.Columns>
         </DataGrid>
 

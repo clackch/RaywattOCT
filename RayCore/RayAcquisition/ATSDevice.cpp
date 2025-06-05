@@ -23,12 +23,23 @@ int CATSDevice::InitDevice() {
 	U8 major, minor, revision;
 	AlazarGetSDKVersion(&major, &minor, &revision);
 	PLOGI.printf("[Alazar] SDK Ver.%d.%d.%d\n", major, minor, revision);
-	
+
 	m_hATSBoard = AlazarGetBoardBySystemID(systemId, boardId);
 	if (m_hATSBoard == NULL)
 	{
 		PLOGI.printf("Error: Unable to open board system Id %u board Id %u\n", systemId, boardId);
 		return E_FAIL;
+	}
+
+	BoardTypes type = (BoardTypes)AlazarGetBoardKind(m_hATSBoard);
+
+	if (type == 33 /*ATS9371*/) {
+		PLOGI.printf("AlazarGetBoardKind: %d (ATS9371)", type);
+		m_admaFlags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_NPT | ADMA_FIFO_ONLY_STREAMING;
+	}
+	else {	/*ATS9364*/
+		PLOGI.printf("AlazarGetBoardKind: %d (ATS9364)", type);
+		m_admaFlags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_NPT;
 	}
 
 	calibrateBoard(m_hATSBoard);
@@ -210,12 +221,10 @@ BOOL CATSDevice::calibrateBoard(HANDLE boardHandle)
 	retCode = AlazarConfigureAuxIO(boardHandle, AUX_OUT_TRIGGER, AUX_OUT_TRIGGER);
 	PLOGI.printf("AlazarConfigureAuxIO -- %s", AlazarErrorToText(retCode));
 
-	U32 admaFlags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_NPT | ADMA_FIFO_ONLY_STREAMING;
-
 	retCode = AlazarBeforeAsyncRead(boardHandle, CHANNEL_A, (long) -1 * preTriggerSamples,
 		samplesPerRecord, 1, 1,
-		admaFlags);
-	PLOGI.printf("AlazarBeforeAsyncRead(%d, %d, %d) -- %s", (-1 * preTriggerSamples), samplesPerRecord, admaFlags, AlazarErrorToText(retCode));
+		m_admaFlags);
+	PLOGI.printf("AlazarBeforeAsyncRead(%d, %d, %d) -- %s", (-1 * preTriggerSamples), samplesPerRecord, m_admaFlags, AlazarErrorToText(retCode));
 
 	OVERLAPPED overlapped;
 	AlazarAsyncRead(boardHandle, pAcqBuffer, samplesPerRecord, &overlapped);
@@ -460,11 +469,9 @@ BOOL CATSDevice::configureAcquisition(HANDLE boardHandle) {
 	{
 		U32 recordsPerAcquisition = 0x7FFFFFFF; // recordsPerBuffer * buffersPerAcquisition;
 
-		U32 admaFlags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_NPT | ADMA_FIFO_ONLY_STREAMING;
-
 		retCode = AlazarBeforeAsyncRead(boardHandle, channelMask, (long)preTriggerSamples,
 			samplesPerRecord, recordsPerBuffer, recordsPerAcquisition,
-			admaFlags);
+			m_admaFlags);
 
 		if (retCode != ApiSuccess)
 		{
