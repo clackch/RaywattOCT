@@ -1,4 +1,4 @@
-#include "Config.h"
+ï»¿#include "Config.h"
 #include "OCTSystem.h"
 #include "Utility.h"
 #include "Configuration.h"
@@ -1689,7 +1689,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 			std::transform(command.begin(), command.end(), command.begin(), ::toupper);
 
 			if (command == "SM") {
-				int position = std::stoi(commands[1]); // ¹®ÀÚ¿­À» Á¤¼ö·Î º¯È¯
+				int position = std::stoi(commands[1]); // ë¬¸ìžì—´ì„ ì •ìˆ˜ë¡œ ë³€í™˜
 				int speed = std::stoi(commands[2]);
 
 				pRJController->Set(eStepMotorIndex::Pullback, speed);
@@ -2020,13 +2020,37 @@ int COCTSystem::connectRotaryJunction() {
 			Sleep(500);
 			m_pLaserModule->SetVOA(config.laserModule.voaValue);
 #ifdef DELAY_LINE_HOMING_WORKS
+			m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX);
+			m_pLaserModule->Current(eStepMotorIndex::DelayLine, 90000);
+
 			Sleep(500);
-			m_pLaserModule->Move(MotorIndex::DelayLine, config.laserModule.delayPosition);
-			while (m_pLaserModule->IsMoving(MotorIndex::DelayLine)) {
-				Sleep(10);
+
+			// m_pLaserModule Move 0 OR sensor #1 ì´ë™
+			m_pLaserModule->Move(eStepMotorIndex::DelayLine, 0, false, static_cast<char>(3)); // 2ëŠ” ì•„ëž˜ìª½(ëª¨í„°ìª½) Photosensor
+
+			Sleep(500);
+
+			while (m_pLaserModule->IsMoving(eStepMotorIndex::DelayLine)) {
+				Sleep(50);
 			}
+
 			Sleep(500);
-			m_pLaserModule->Move(MotorIndex::Polarization, config.laserModule.polarPosition);
+
+			// m_pLaserModule Current 0
+			m_pLaserModule->Current(eStepMotorIndex::DelayLine, 0);
+
+			Sleep(500);
+
+			m_pLaserModule->Move(eStepMotorIndex::DelayLine, config.laserModule.delayPosition);
+
+			while (m_pLaserModule->IsMoving(eStepMotorIndex::DelayLine)) {
+				Sleep(50);
+			}
+
+			Sleep(500);
+
+			m_pLaserModule->Current(eStepMotorIndex::DelayLine, config.laserModule.delayPosition);
+			m_pLaserModule->Move(eStepMotorIndex::Polarization, config.laserModule.polarPosition);
 #endif
 		}
 		else
