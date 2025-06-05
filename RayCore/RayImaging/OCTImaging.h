@@ -29,10 +29,9 @@ protected:
 	CCalibration* calibration;
 	cv::Mat matXMap;
 	cv::Mat matYMap;
-
-	cv::Mat imatXMap;  // circle image -> inverse circular -> Rotate CounterClock 90 -> Circluar -> Rotate_ClockWise 90
-	cv::Mat imatYMap;
-  std::vector<cv::Point> inversedContourYPoints;
+	cv::Mat inverseMatXMap; // circle image -> inverse circular -> Rotate CounterClock 90 -> Circluar -> Rotate_ClockWise 90
+	cv::Mat inverseMatYMap;
+	std::vector<cv::Point> inversedContourYPoints;
 
 	cv::Mat imageResult;
 	cv::Mat imageResultColor;
@@ -118,7 +117,6 @@ protected:
 	void initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale);
 	void initInverseCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale);
 	void releaseCircularizeMap();
-	void initInversedCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale);
 	void releaseInversedCircularizeMap();
 
 	void generateBackground(Ipp16u* fringes);
@@ -130,7 +128,6 @@ protected:
 	std::vector<double> normalize(const std::vector<double>& values, double scale = 1.0);
 	void drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color);
 	cv::Mat getFoVImage(cv::Mat image, double fov);
-	cv::Mat ReCircularize(const cv::Mat& img);
 
 	void adaptive_compensation();
 	void min_max_normalization(const cv::Mat& img, cv::Mat& normalized_img, double& min_val, double& max_val);

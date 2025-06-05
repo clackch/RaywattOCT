@@ -86,7 +86,7 @@ void COCTImaging::Initialize(CCalibration* calibration) {
 	releaseCircularizeMap();
 	initCircularizeMap(m_setting.nOutputLength, m_setting.nBScan, m_setting.nOutputLength, m_setting.nCircleSize, m_setting.nCircleSize, 2.0f);
 	releaseInversedCircularizeMap();
-	initInversedCircularizeMap(m_setting.nCircleSize, m_setting.nCircleSize, m_setting.nCircleSize, m_setting.nCircleSize, m_setting.nCircleSize, 2.0f);
+	initInverseCircularizeMap(m_setting.nOutputLength, m_setting.nBScan, m_setting.nOutputLength, m_setting.nCircleSize, m_setting.nCircleSize, 2.0f);
 
 	m_nWidth = m_setting.nCircleSize;
 	m_nHeight = m_setting.nCircleSize;
@@ -170,12 +170,7 @@ void COCTImaging::CircularizeImage(cv::Mat& src, cv::Mat& dst)
 	memcpy(dst.data, imgFoV.data, sizeof(char) * dst.cols * dst.rows * imgFoV.channels());
 }
 
-void COCTImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst) {
-	dst = src.clone();
-	cv::remap(dst, dst, imatXMap, imatYMap, cv::INTER_LINEAR);
-
-	cv::rotate(dst, dst, cv::ROTATE_90_COUNTERCLOCKWISE);
-}
+void COCTImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst) {}
 
 cv::Mat COCTImaging::GetProcessedImage() {
 	return imageResult;
@@ -291,42 +286,46 @@ void COCTImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth, 
 
 			float rvalue = (float)(srcWidth - scale * sqrt(pow(fy, 2) + pow(fx, 2))) + (float)circOffset;
 
-			matXMap.at<float>(y, x) = rvalue;
-			matYMap.at<float>(y, x) = (float)(((atan2(fy, fx) / M_PI) + 1.0) * 0.5 * (srcHeight - 1));
+			matXMap.at<float>(x * dstHeight + y) = rvalue;
+			matYMap.at<float>(x * dstHeight + y) = (float)(((atan2(fy, fx) / M_PI) + 1.0) * 0.5 * (srcHeight - 1));
 		}
 	}
 }
+void COCTImaging::initInverseCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale) {
+	PLOGI.printf("TIFFImageing initCircularize Map Start");
 
-void COCTImaging::releaseCircularizeMap() {
-	matXMap.release();
-	matYMap.release();
-}
-
-void COCTImaging::initInversedCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale) {
 	double radius = (diameter / 2) - 0.5f;
+	inverseMatXMap.create(dstHeight, dstWidth, CV_32FC1);
+	inverseMatYMap.create(dstHeight, dstWidth, CV_32FC1);
 
-	imatXMap.create(dstHeight, dstWidth, CV_32FC1);
-	imatYMap.create(dstHeight, dstWidth, CV_32FC1);
-
-	imatXMap.setTo(cv::Scalar::all(0));
-	imatYMap.setTo(cv::Scalar::all(0));
+	inverseMatXMap.setTo(cv::Scalar::all(0));
+	inverseMatYMap.setTo(cv::Scalar::all(0));
 
 	for (int y = 0; y < dstHeight; y++)
 	{
 		for (int x = 0; x < dstWidth; x++)
 		{
-			double r = (srcHeight - y) / scale;
-			double theta = (x / float(dstWidth)) * 2.0 * M_PI;
+			float r = (float)(srcWidth - y) / scale;
+			float theta = ((float)x / srcHeight) * 2 * CV_PI;
 
-			imatXMap.at<float>(y, x) = r * cos(theta) + radius;
-			imatYMap.at<float>(y, x) = r * sin(theta) + radius;
+			float fx = r * cos(theta) + radius;
+			float fy = r * sin(theta) + radius;
+
+			inverseMatXMap.at<float>(y, x) = fx;
+			inverseMatYMap.at<float>(y, x) = fy;
 		}
 	}
+
+	PLOGI.printf("TIFFImageing initCircularize Map Done");
+}
+void COCTImaging::releaseCircularizeMap() {
+	matXMap.release();
+	matYMap.release();
 }
 
 void COCTImaging::releaseInversedCircularizeMap() {
-	imatXMap.release();
-	imatYMap.release();
+	inverseMatYMap.release();
+	inverseMatYMap.release();
 }
 
 void COCTImaging::generateBackground(Ipp16u* fringes) {
@@ -456,159 +455,59 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 }
 
 void COCTImaging::findSheath(cv::Mat img) {
+	m_nSheathSearchRange = 300; /*1mm 오차 범위 설정*/
+	double maxMinusEdge = 0.3;
+	double pointStandard = 0.1;
+	int closeness = 10;
+	int maxDiffIndex = 44, minDiffIndex = 33;
 	cv::Mat image;
-	cv::Mat imgRe = ReCircularize(img);
-	imgRe.convertTo(image, CV_32F, 1.0/255.0);
-	cv::rotate(image, image, cv::ROTATE_90_COUNTERCLOCKWISE);
 
-	m_nSheathSearchRange = image.rows / 2;
-	int sectionSize = 20, totalPixelCount = 0, totalEdgeY = 0;
-	int upperSheathRow = 0, lowerSheathRow = 150, betweenRow = 0, sheathDist = 30;
-	std::vector<int> pixelCount(m_nSheathSearchRange), chosenRows, sectionCheck(m_nSheathSearchRange, 0);
-	std::vector<float> rowSumEdgeY(m_nSheathSearchRange, 0);
-
+	img.convertTo(img, CV_32F, 1 / 255.f);
+	cv::rotate(img, image, cv::ROTATE_90_COUNTERCLOCKWISE);
 	image = image(cv::Range(0, m_nSheathSearchRange), cv::Range::all());
+	cv::resize(image, image, cv::Size(image.cols, image.rows));
 
-	//horizontal line formed 노이즈 배제
-	cv::Mat edge_imageX, edge_imageY, temp(image.size(), image.type());
-	cv::Sobel(image, edge_imageX, CV_32F, 1 /*dx*/, 0 /*dy*/, 3 /*kernel size*/, 1, 0, cv::BORDER_CONSTANT);
-	cv::Sobel(image, edge_imageY, CV_32F, 0 /*dx*/, 1 /*dy*/, 3 /*kernel size*/, 1, 0, cv::BORDER_CONSTANT); 
+	//horizontal line formed 노이즈 제거
+	cv::Mat edge_image;
+	cv::Sobel(image, edge_image, CV_64F, 1 /*dx*/, 0 /*dy*/, 3 /*kernel size*/, 1, 0, cv::BORDER_CONSTANT);
 
-	float addEdgeX = 0.05f;
-	for (int i = 0; i < m_nSheathSearchRange; i++) {
-		float* temp_row = temp.ptr<float>(i);
-		const float* edgeX_row = edge_imageX.ptr<float>(i);
-		const float* input_row = image.ptr<float>(i);
-		for (int j = 0; j < temp.cols; j++) {
-			float edgeX = edgeX_row[j];
-			temp_row[j] = (addEdgeX + edgeX * edgeX) * input_row[j];
-		}
+	cv::Mat temp = image.clone();
+	for (int i = 0; i < m_nSheathSearchRange; i++) for (int j = 0; j < temp.cols; j++) {
+		temp.at<float>(i, j) -= (maxMinusEdge - edge_image.at<float>(i, j));
 	}
 
-	// Sheath 사이 row 후보군 찾기
-	float thresholdPixel = 0.1f;
+	// 행마다의 일정 밝기 이상의 픽셀 계수, 가장 많은 행 2개 저장
+	std::vector<int> pixelNum(m_nSheathSearchRange);
+	int maxIndex[2] = { 0, 0 };
+
 	for (int i = 0; i < m_nSheathSearchRange; i++) {
-		bool isTherePixel = false;
 		int tmp = 0;
-		const float* edgeY_row = edge_imageY.ptr<float>(i);
-		const float* temp_row = temp.ptr<float>(i);
 		for (int j = 0; j < image.cols; j++) {
-			if (j % sectionSize == 0) {
-				isTherePixel = false;
-			}
-			else if (j % sectionSize == sectionSize - 1) {
-				if (isTherePixel) sectionCheck[i]++;
-			}
-			rowSumEdgeY[i] += edgeY_row[j];
-			if (temp_row[j] >= thresholdPixel) {
-				isTherePixel = true;
+			if (temp.at<float>(i, j) >= pointStandard)
 				tmp++;
-			}
 		}
-		pixelCount[i] = tmp;
-		totalPixelCount += tmp;
-
-		if (rowSumEdgeY[i] < 0)
-			rowSumEdgeY[i] = -1 * rowSumEdgeY[i];
-		totalEdgeY += rowSumEdgeY[i];
+		pixelNum[i] = tmp;
+		if (i == 0) continue;
+		else if (pixelNum[maxIndex[0]] < pixelNum[i]) {
+			maxIndex[0] = i;
+		}
 	}
-	std::vector<int> pixCopy = pixelCount;
-	std::sort(pixCopy.begin(), pixCopy.end());
-	int threshold = std::abs(totalPixelCount / m_nSheathSearchRange - pixCopy[m_nSheathSearchRange * 0.5]);
-	bool isUpperDark = false;
-	int sizeOfDark = 0;
-	int tooThin = 0, tooThick = 50;
+
 	for (int i = 0; i < m_nSheathSearchRange; i++) {
-		if (pixelCount[i] <= threshold) {
-			sizeOfDark++;
-			isUpperDark = true;
-		}
-		else {
-			if (isUpperDark) {
-				isUpperDark = false;
-				if (sizeOfDark == tooThin || sizeOfDark > tooThick) {
-					sizeOfDark = 0;
-					continue;
-				}
-
-				chosenRows.push_back(i - (sizeOfDark / 2.0 + 0.5));
-				sizeOfDark = 0;
-			}
-		}
-	}
-
-	// 각 row당 upper sheath와 lower sheath 탐색, best case 선택
-	double thresholdY = (totalEdgeY / (double)m_nSheathSearchRange) * 0.8;
-	int rangeFromRow = 75;
-	for (int row : chosenRows) {
-		bool startUpperSheath = false, startLowerSheath = false, endUpper = false, endLower = false;
-		int upperSheathThickness = 0, lowerSheathThickness = 0;
-		int tmpUp = 0, tmpLow;
-		for (int i = 0; i < rangeFromRow; i++) {
-			if (row - i >= 0) {
-				if (sectionCheck[row - i] >= sectionCheck[tmpUp]) {
-					tmpUp = row - i;
-					endUpper = true;
-				}
-			}
-
-			if (!endLower && row + i < m_nSheathSearchRange) {
-				if (rowSumEdgeY[row + i] > thresholdY) {
-					if (!startLowerSheath)
-						startLowerSheath = true;
-					else
-						lowerSheathThickness++;
-				}
-				else if (startLowerSheath) {
-					endLower = true;
-					tmpLow = row + i - lowerSheathThickness / 2;
-				}
-			}
-		}
-
-		if (!endUpper || !endLower) {
-			continue;
-		}
-
-		int diffWithIdeal = 15;
-		bool isThisBetter = (
-			sectionCheck[tmpUp] > sectionCheck[upperSheathRow]
-			|| pixelCount[tmpUp] >= pixelCount[upperSheathRow]
-			&& abs(sheathDist - (lowerSheathRow - upperSheathRow)) >= abs(sheathDist - (tmpLow - tmpUp))
-			) 
-			&& abs(sheathDist - (tmpLow - tmpUp)) <= diffWithIdeal;
-
-		if (isThisBetter) {
-			upperSheathRow = tmpUp;
-			lowerSheathRow = tmpLow;
-			betweenRow = row;
+		if (i == 0 || std::abs(maxIndex[0] - i) <= closeness) continue;
+		else if (pixelNum[maxIndex[1]] < pixelNum[i]) {
+			maxIndex[1] = i;
 		}
 	}
 
 	// outer line 행 위치를 return
-	tooThin = 20, tooThick = 40;
-	int tooLittle = 10;
-	if (lowerSheathRow - upperSheathRow > tooThick || lowerSheathRow - upperSheathRow < tooThin
-		|| pixelCount[upperSheathRow] < tooLittle
-		|| sectionCheck[upperSheathRow] < tooLittle) {
+	int diff = abs(maxIndex[0] - maxIndex[1]);
+	if (diff < minDiffIndex || diff > maxDiffIndex) {
 		m_nSheathPosition = 0;
 	}
 	else {
-		m_nSheathPosition = lowerSheathRow;
+		m_nSheathPosition = std::max(maxIndex[0], maxIndex[1]);
 	}
-}
-
-cv::Mat COCTImaging::ReCircularize(const cv::Mat& img) {
-	float scale = 2.0f;
-
-	cv::Mat circularized;
-	remap(img, circularized, matXMap, matYMap, cv::INTER_LINEAR);
-
-	cv::Mat result;
-	remap(circularized, result, imatXMap, imatYMap, cv::INTER_NEAREST);
-	cv::rotate(result, result, cv::ROTATE_90_COUNTERCLOCKWISE);
-
-	return result;
 }
 
 // 정규화를 위한 함수

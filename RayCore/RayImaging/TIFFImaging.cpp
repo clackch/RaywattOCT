@@ -23,9 +23,6 @@ void CTIFFImaging::Initialize()
 	memset(imageMask.data, 0x00, m_setting.nBScan * m_setting.nAScan);
 	cv::circle(imageMask, cv::Point(imageMask.cols / 2, imageMask.rows / 2), imageMask.cols / 2, cv::Scalar(0xff, 0xff, 0xff), -1);
 
-	releaseInversedCircularizeMap();
-	initInversedCircularizeMap(m_setting.nAScan, m_setting.nBScan, m_setting.nAScan, m_setting.nBScan, m_setting.nAScan, 2.0f);
-	releaseCircularizeMap();
 	initCircularizeMap(m_setting.nAScan, m_setting.nBScan, m_setting.nAScan, m_setting.nBScan, m_setting.nAScan, 2.0f);
 	initInverseCircularizeMap(m_setting.nAScan, m_setting.nBScan, m_setting.nAScan, m_setting.nBScan, m_setting.nAScan, 2.0f);
 }
@@ -47,7 +44,7 @@ void CTIFFImaging::Process(char* fringes)
 void CTIFFImaging::PostProcess(cv::Mat image)
 {
 	const bool bColor = m_bColor;
-	findSheath(image);
+
 	cv::cvtColor(image, imageCircle, cv::COLOR_GRAY2RGB);
 	if (bColor) {
 		CLookUpTable& lut = CLookUpTable::GetInstance();
@@ -65,13 +62,14 @@ void CTIFFImaging::PostProcess(cv::Mat image)
 	CircularizeImage(imageCircle, imageCircle);
 }
 
+
 void CTIFFImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale) {
 	COCTImaging::initCircularizeMap(diameter, srcHeight, srcWidth, dstHeight, dstWidth, scale);
 }
 
 void CTIFFImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst) {
 	dst = src.clone();
-	cv::remap(dst, dst, imatXMap, imatXMap, cv::INTER_LINEAR);
+	cv::remap(dst, dst, inverseMatXMap, inverseMatYMap, cv::INTER_LINEAR);
 
 	cv::rotate(dst, dst, cv::ROTATE_90_COUNTERCLOCKWISE);
 }
